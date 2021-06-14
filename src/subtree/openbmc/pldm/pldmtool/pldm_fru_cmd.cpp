@@ -109,7 +109,6 @@ class FRUTablePrint
             p += sizeof(pldm_fru_record_data_format) -
                  sizeof(pldm_fru_record_tlv);
 
-            auto isIPZ = false;
             std::map<uint8_t, std::string> FruFieldTypeMap;
             std::string fruFieldValue;
 
@@ -133,6 +132,14 @@ class FRUTablePrint
                         fruFieldValue =
                             fruFieldParserTimestamp(tlv->value, tlv->length);
                     }
+
+                    frudata["FRU Field Type"] =
+                        typeToString(FruFieldTypeMap, tlv->type);
+                    frudata["FRU Field Length"] = (int)(tlv->length);
+                    fruFieldValue =
+                        fruFieldValuestring(tlv->value, tlv->length);
+                    frudata["FRU Field Value"] = fruFieldValue;
+                    frufielddata.emplace_back(frudata);
                 }
                 else
                 {
@@ -145,7 +152,6 @@ class FRUTablePrint
                         if (populateMaps.find(oemIPZValue) !=
                             populateMaps.end())
                         {
-                            isIPZ = true;
                             const std::map<uint8_t, std::string> IPZTypes =
                                 populateMaps.at(oemIPZValue);
                             FruFieldTypeMap.insert(IPZTypes.begin(),
@@ -162,24 +168,24 @@ class FRUTablePrint
                         fruFieldValue =
                             fruFieldParserU32(tlv->value, tlv->length);
                     }
+                    else if (tlv->type != 2)
+                    {
+                        fruFieldValue =
+                            fruFieldIPZParser(tlv->value, tlv->length);
+                    }
+                    else
+                    {
+                        fruFieldValue =
+                            fruFieldValuestring(tlv->value, tlv->length);
+                    }
+                    frudata["FRU Field Type"] =
+                        typeToString(FruFieldTypeMap, tlv->type);
+                    frudata["FRU Field Length"] = (int)(tlv->length);
+                    frudata["FRU Field Value"] = fruFieldValue;
+                    frufielddata.emplace_back(frudata);
+
 #endif
                 }
-
-                if (isIPZ && (tlv->type != 2))
-                {
-                    fruFieldValue = fruFieldIPZParser(tlv->value, tlv->length);
-                }
-                else
-                {
-                    fruFieldValue =
-                        fruFieldValuestring(tlv->value, tlv->length);
-                }
-
-                frudata["FRU Field Type"] =
-                    typeToString(FruFieldTypeMap, tlv->type);
-                frudata["FRU Field Length"] = (int)(tlv->length);
-                frudata["FRU Field Value"] = fruFieldValue;
-                frufielddata.emplace_back(frudata);
                 p += sizeof(pldm_fru_record_tlv) - 1 + tlv->length;
             }
             frutable.emplace_back(frufielddata);

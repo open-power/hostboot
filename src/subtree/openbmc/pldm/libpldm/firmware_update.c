@@ -2,6 +2,156 @@
 #include <endian.h>
 #include <string.h>
 
+/** @brief Check whether string type value is valid
+ *
+ *  @return true if string type value is valid, false if not
+ */
+static bool is_string_type_valid(uint8_t string_type)
+{
+	switch (string_type) {
+	case PLDM_STR_TYPE_UNKNOWN:
+	case PLDM_STR_TYPE_ASCII:
+	case PLDM_STR_TYPE_UTF_8:
+	case PLDM_STR_TYPE_UTF_16:
+	case PLDM_STR_TYPE_UTF_16LE:
+	case PLDM_STR_TYPE_UTF_16BE:
+		return true;
+	default:
+		return false;
+	}
+}
+
+/** @brief Return the length of the descriptor type described in firmware update
+ *         specification
+ *
+ *  @return length of the descriptor type if descriptor type is valid else
+ *          return 0
+ */
+static uint16_t get_descriptor_type_length(uint16_t descriptor_type)
+{
+	switch (descriptor_type) {
+
+	case PLDM_FWUP_PCI_VENDOR_ID:
+		return PLDM_FWUP_PCI_VENDOR_ID_LENGTH;
+	case PLDM_FWUP_IANA_ENTERPRISE_ID:
+		return PLDM_FWUP_IANA_ENTERPRISE_ID_LENGTH;
+	case PLDM_FWUP_UUID:
+		return PLDM_FWUP_UUID_LENGTH;
+	case PLDM_FWUP_PNP_VENDOR_ID:
+		return PLDM_FWUP_PNP_VENDOR_ID_LENGTH;
+	case PLDM_FWUP_ACPI_VENDOR_ID:
+		return PLDM_FWUP_ACPI_VENDOR_ID_LENGTH;
+	case PLDM_FWUP_IEEE_ASSIGNED_COMPANY_ID:
+		return PLDM_FWUP_IEEE_ASSIGNED_COMPANY_ID_LENGTH;
+	case PLDM_FWUP_SCSI_VENDOR_ID:
+		return PLDM_FWUP_SCSI_VENDOR_ID_LENGTH;
+	case PLDM_FWUP_PCI_DEVICE_ID:
+		return PLDM_FWUP_PCI_DEVICE_ID_LENGTH;
+	case PLDM_FWUP_PCI_SUBSYSTEM_VENDOR_ID:
+		return PLDM_FWUP_PCI_SUBSYSTEM_VENDOR_ID_LENGTH;
+	case PLDM_FWUP_PCI_SUBSYSTEM_ID:
+		return PLDM_FWUP_PCI_SUBSYSTEM_ID_LENGTH;
+	case PLDM_FWUP_PCI_REVISION_ID:
+		return PLDM_FWUP_PCI_REVISION_ID_LENGTH;
+	case PLDM_FWUP_PNP_PRODUCT_IDENTIFIER:
+		return PLDM_FWUP_PNP_PRODUCT_IDENTIFIER_LENGTH;
+	case PLDM_FWUP_ACPI_PRODUCT_IDENTIFIER:
+		return PLDM_FWUP_ACPI_PRODUCT_IDENTIFIER_LENGTH;
+	case PLDM_FWUP_ASCII_MODEL_NUMBER_LONG_STRING:
+		return PLDM_FWUP_ASCII_MODEL_NUMBER_LONG_STRING_LENGTH;
+	case PLDM_FWUP_ASCII_MODEL_NUMBER_SHORT_STRING:
+		return PLDM_FWUP_ASCII_MODEL_NUMBER_SHORT_STRING_LENGTH;
+	case PLDM_FWUP_SCSI_PRODUCT_ID:
+		return PLDM_FWUP_SCSI_PRODUCT_ID_LENGTH;
+	case PLDM_FWUP_UBM_CONTROLLER_DEVICE_CODE:
+		return PLDM_FWUP_UBM_CONTROLLER_DEVICE_CODE_LENGTH;
+	default:
+		return 0;
+	}
+}
+
+int decode_descriptor_type_length_value(const uint8_t *data, size_t length,
+					uint16_t *descriptor_type,
+					struct variable_field *descriptor_data)
+{
+	uint16_t descriptor_length = 0;
+
+	if (data == NULL || descriptor_type == NULL ||
+	    descriptor_data == NULL) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	if (length < PLDM_FWUP_DEVICE_DESCRIPTOR_MIN_LEN) {
+		return PLDM_ERROR_INVALID_LENGTH;
+	}
+
+	struct pldm_descriptor_tlv *entry =
+	    (struct pldm_descriptor_tlv *)(data);
+
+	*descriptor_type = le16toh(entry->descriptor_type);
+	descriptor_length = le16toh(entry->descriptor_length);
+	if (*descriptor_type != PLDM_FWUP_VENDOR_DEFINED) {
+		if (descriptor_length !=
+		    get_descriptor_type_length(*descriptor_type)) {
+			return PLDM_ERROR_INVALID_LENGTH;
+		}
+	}
+
+	if (length < (sizeof(*descriptor_type) + sizeof(descriptor_length) +
+		      descriptor_length)) {
+		return PLDM_ERROR_INVALID_LENGTH;
+	}
+
+	descriptor_data->ptr = entry->descriptor_data;
+	descriptor_data->length = descriptor_length;
+
+	return PLDM_SUCCESS;
+}
+
+int decode_vendor_defined_descriptor_value(
+    const uint8_t *data, size_t length, uint8_t *descriptor_title_str_type,
+    struct variable_field *descriptor_title_str,
+    struct variable_field *descriptor_data)
+{
+	if (data == NULL || descriptor_title_str_type == NULL ||
+	    descriptor_title_str == NULL || descriptor_data == NULL) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	if (length < sizeof(struct pldm_vendor_defined_descriptor_title_data)) {
+		return PLDM_ERROR_INVALID_LENGTH;
+	}
+
+	struct pldm_vendor_defined_descriptor_title_data *entry =
+	    (struct pldm_vendor_defined_descriptor_title_data *)(data);
+	if (!is_string_type_valid(
+		entry->vendor_defined_descriptor_title_str_type) ||
+	    (entry->vendor_defined_descriptor_title_str_len == 0)) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	// Assuming atleast 1 byte of VendorDefinedDescriptorData
+	if (length < (sizeof(struct pldm_vendor_defined_descriptor_title_data) +
+		      entry->vendor_defined_descriptor_title_str_len)) {
+		return PLDM_ERROR_INVALID_LENGTH;
+	}
+
+	*descriptor_title_str_type =
+	    entry->vendor_defined_descriptor_title_str_type;
+	descriptor_title_str->ptr = entry->vendor_defined_descriptor_title_str;
+	descriptor_title_str->length =
+	    entry->vendor_defined_descriptor_title_str_len;
+
+	descriptor_data->ptr =
+	    descriptor_title_str->ptr + descriptor_title_str->length;
+	descriptor_data->length =
+	    length - sizeof(entry->vendor_defined_descriptor_title_str_type) -
+	    sizeof(entry->vendor_defined_descriptor_title_str_len) -
+	    descriptor_title_str->length;
+
+	return PLDM_SUCCESS;
+}
+
 int encode_query_device_identifiers_req(uint8_t instance_id,
 					size_t payload_length,
 					struct pldm_msg *msg)

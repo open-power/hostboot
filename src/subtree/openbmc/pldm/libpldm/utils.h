@@ -12,7 +12,7 @@ extern "C" {
 
 /** @struct variable_field
  *
- *  Structure representing variable filed in the pldm message
+ *  Structure representing variable field in the pldm message
  */
 struct variable_field {
 	const uint8_t *ptr;

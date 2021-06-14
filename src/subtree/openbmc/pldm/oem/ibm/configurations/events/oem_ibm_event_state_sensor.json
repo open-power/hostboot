@@ -7,7 +7,8 @@
             "sensorOffset": 1,
             "event_states": [
                 1,
-                2
+                2,
+                3
             ],
             "dbus": {
                 "object_path": "/xyz/openbmc_project/network/hypervisor/eth0/ipv4/addr0",
@@ -16,6 +17,7 @@
                 "property_type": "bool",
                 "property_values": [
                     true,
+                    false,
                     false
                 ]
             }
@@ -27,7 +29,8 @@
             "sensorOffset": 1,
             "event_states": [
                 1,
-                2
+                2,
+                3
             ],
             "dbus": {
                 "object_path": "/xyz/openbmc_project/network/hypervisor/eth1/ipv4/addr0",
@@ -36,6 +39,7 @@
                 "property_type": "bool",
                 "property_values": [
                     true,
+                    false,
                     false
                 ]
             }
