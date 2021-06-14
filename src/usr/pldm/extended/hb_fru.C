@@ -41,6 +41,7 @@
 #include <eeprom/eepromif.H>
 #include <eeprom/eeprom_const.H>
 #include <targeting/common/target.H>
+#include <targeting/common/targetservice.H>
 #include <util/align.H>
 #include <vpd/ipz_vpd_consts.H>
 
@@ -1197,9 +1198,14 @@ errlHndl_t cacheRemoteFruVpd()
                 }
             }
 
-            /* Cache VPD if necessary */
-
-            if (map_entry.cache_vpd == CACHE_VPD)
+            // If not in MPIPL then cache VPD if necessary.
+            // It is unnecessary to cache the VPD we get from the BMC during MPIPL. We will
+            // assume the copy we read on the previous boot is valid. Re-caching the data
+            // here will disrupt the logic that walks the existing eecache in the MPIPL
+            // path to build up some virtual address mappings that the EECACHE module uses.
+            TargetHandle_t sys = TARGETING::UTIL::assertGetToplevelTarget();
+            auto is_mpipl = sys->getAttr<ATTR_IS_MPIPL_HB>();
+            if ( !is_mpipl && (map_entry.cache_vpd == CACHE_VPD) )
             {
                 std::vector<uint8_t> ipz_record;
                 errl = PLDM::pldmFruRecordSetToIPZ(device_fru_records.data(),
