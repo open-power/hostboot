@@ -48,6 +48,9 @@
 #include <pnor/pnorif.H>
 #include <fapiwrap/fapiWrapif.H>
 
+#include <fapi2/plat_hwp_invoker.H>
+#include <p10_determine_eco_mode.H>
+
 #include <hwas/common/hwas_reasoncodes.H>
 #include <targeting/common/utilFilter.H>
 #include <fsi/fsiif.H>
@@ -825,6 +828,33 @@ errlHndl_t platReadPartialGood(const TargetHandle_t &i_target,
 
     return errl;
 } // platReadPartialGood
+
+errlHndl_t platDetermineEcoCores(const TARGETING::TargetHandleList &io_cores)
+{
+    errlHndl_t errl = nullptr;
+
+    do {
+        for (const auto core : io_cores)
+        {
+            fapi2::Target<fapi2::TARGET_TYPE_CORE> fapi_core(core);
+            FAPI_INVOKE_HWP(errl,
+                            p10_determine_eco_mode,
+                            fapi_core);
+            if (errl)
+            {
+                HWAS_ERR("discoverTargets: p10_determine_eco_mode failed for CORE HUID 0x%x",
+                         get_huid(core));
+                break;
+            }
+        }
+        if (errl)
+        {
+            break;
+        }
+    } while(0);
+
+    return errl;
+}
 
 //******************************************************************************
 // platReadPR function

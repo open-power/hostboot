@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -118,6 +118,16 @@ errlHndl_t platReadIDEC(const TARGETING::TargetHandle_t &i_target);
  */
 errlHndl_t platReadPartialGood(const TARGETING::TargetHandle_t &i_target,
                                 void *o_pgData);
+
+/*
+ * @brief Platform specific code to call the p10_determine_eco_mode hardware procedure which will determine which cores
+ *        from the list are to be used for ECO mode.
+ *
+ * @param[in,out] io_cores   The list of functional cores to determine which are to be used for ECO mode.
+ *
+ * @return      errlHndl_t   nullptr on success, otherwise an error log.
+ */
+errlHndl_t platDetermineEcoCores(const TARGETING::TargetHandleList &io_cores);
 
 /**
  * @brief Checks the PG keyword data to determine if the target chip is

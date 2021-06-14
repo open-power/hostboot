@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2019
+# Contributors Listed Below - COPYRIGHT 2011,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -37,9 +37,13 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/perv/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
 
 VPATH += ${ROOTPATH}/src/usr/hwas/plat
 VPATH += ${ROOTPATH}/src/usr/hwas/common
+VPATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/perv/
 
 MODULE = hwas
 
@@ -55,6 +59,9 @@ OBJS += hwasPlatError.o
 OBJS += hwasPlatCallout.o
 OBJS += hwasPlatDeconfigGard.o
 OBJS += errlud_pgData.o
+
+# hardware procedures called in hwasPlat functions
+OBJS += p10_determine_eco_mode.o
 
 SUBDIRS = test.d
 

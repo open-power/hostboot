@@ -806,17 +806,31 @@ errlHndl_t HWASDiscovery::discoverTargets()
                                       TargetService::ALL,
                                       &predProc);
 
-        for (TargetHandleList::const_iterator
-             l_procsIter = l_procs.begin();
-             l_procsIter != l_procs.end();
-             ++l_procsIter)
+        for (const auto proc : l_procs)
         {
-            if ( !(*l_procsIter)->getAttr<ATTR_HWAS_STATE>().present )
+            if ( !proc->getAttr<ATTR_HWAS_STATE>().present )
             {
                 HWAS_INF("discoverTargets: Proc %.8X not present",
-                    (*l_procsIter)->getAttr<ATTR_HUID>());
+                    proc->getAttr<ATTR_HUID>());
                 HWAS::theDeconfigGard().setXAOBusEndpointDeconfigured(true);
             }
+            else if (proc->getAttr<ATTR_HWAS_STATE>().functional)
+            {
+                // Determine if there are cores that can be used for Extended Cache-Only (ECO) mode.
+#ifdef  __HOSTBOOT_MODULE // @TODO RTC 282723 remove when hwsv defines plat function
+                TargetHandleList l_coreList;
+                getChildChiplets(l_coreList, proc, TYPE_CORE);
+                errl = platDetermineEcoCores(l_coreList);
+                if (errl)
+                {
+                    break;
+                }
+#endif
+            }
+        }
+        if (errl)
+        {
+            break;
         }
 
         //Check all of the secondary processor's EC levels to ensure they match master
