@@ -54,18 +54,8 @@ using namespace PlatServices;
 
 PllDomain::PllDomain(DOMAIN_ID i_domainId) :
     RuleChipDomain(i_domainId, PllDomain::CONTAINER_SIZE),
-    ExtensibleDomain("PllDomain"),
-    iv_thRcsClk0(  ThresholdResolution::cv_pllDefault),
-    iv_thRcsClk1(  ThresholdResolution::cv_pllDefault),
-    iv_thPllUnlock(ThresholdResolution::cv_pllDefault)
-{
-    if (mfgMode())
-    {
-        iv_thRcsClk0  = TimeBasedThreshold(ThresholdResolution::cv_mnfgDefault);
-        iv_thRcsClk1  = TimeBasedThreshold(ThresholdResolution::cv_mnfgDefault);
-        iv_thPllUnlock= TimeBasedThreshold(ThresholdResolution::cv_mnfgDefault);
-    }
-}
+    ExtensibleDomain("PllDomain")
+{}
 
 //------------------------------------------------------------------------------
 
@@ -129,118 +119,46 @@ bool PllDomain::Query(ATTENTION_TYPE i_attnType)
     return atAttn;
 }
 
-//------------------------------------------------------------------------------
-
-void PllDomain::addCallout(STEP_CODE_DATA_STRUCT& io_sc,
-                           std::map<PllErrTypes::Types,
-                                    std::vector<ExtensibleChip*>>& i_errList,
-                           PllErrTypes::Types i_errType,
-                           PllErrTypes& io_maskErrTypes,
-                           PRDpriority i_clockPri, PRDpriority i_procPri)
-{
-    // Get the clock callout type.
-    PRDcalloutData::MruType clockType = PRDcalloutData::TYPE_NONE;
-    switch (i_errType)
-    {
-        case PllErrTypes::PLL_UNLOCK_0:
-        case PllErrTypes::RCS_OSC_ERROR_0:
-        case PllErrTypes::RCS_UNLOCKDET_0:
-            clockType = PRDcalloutData::TYPE_PROCCLK0;
-            break;
-
-        case PllErrTypes::PLL_UNLOCK_1:
-        case PllErrTypes::RCS_OSC_ERROR_1:
-        case PllErrTypes::RCS_UNLOCKDET_1:
-            clockType = PRDcalloutData::TYPE_PROCCLK1;
-            break;
-
-        default:
-            PRDF_ASSERT(0);
-    }
-
-    // Add callouts for each chip in the list, if needed.
-    for (const auto& chip : i_errList[i_errType])
-    {
-        // Callout the clock.
-        PRDcallout clockCallout { chip->getTrgt(), clockType };
-        io_sc.service_data->SetCallout(clockCallout, i_clockPri);
-
-        // Callout the processor. Do not guard on any callout.
-        io_sc.service_data->SetCallout(chip->getTrgt(), i_procPri, NO_GARD);
-    }
-
-    // Increment the threshold counter, if needed.
-    if (!i_errList[i_errType].empty())
-    {
-        switch (i_errType)
-        {
-            case PllErrTypes::RCS_OSC_ERROR_0:
-            case PllErrTypes::RCS_UNLOCKDET_0:
-                if (iv_thRcsClk0.inc(io_sc))
-                {
-                    io_maskErrTypes.set(PllErrTypes::RCS_OSC_ERROR_0);
-                    io_maskErrTypes.set(PllErrTypes::RCS_UNLOCKDET_0);
-                    io_sc.service_data->setPredictive();
-                }
-                break;
-
-            case PllErrTypes::RCS_OSC_ERROR_1:
-            case PllErrTypes::RCS_UNLOCKDET_1:
-                if (iv_thRcsClk1.inc(io_sc))
-                {
-                    io_maskErrTypes.set(PllErrTypes::RCS_OSC_ERROR_1);
-                    io_maskErrTypes.set(PllErrTypes::RCS_UNLOCKDET_1);
-                    io_sc.service_data->setPredictive();
-                }
-                break;
-
-            case PllErrTypes::PLL_UNLOCK_0:
-            case PllErrTypes::PLL_UNLOCK_1:
-                if (iv_thPllUnlock.inc(io_sc))
-                {
-                    io_maskErrTypes.set(PllErrTypes::PLL_UNLOCK_0);
-                    io_maskErrTypes.set(PllErrTypes::PLL_UNLOCK_1);
-                    io_sc.service_data->setPredictive();
-                }
-                break;
-
-            default:
-                PRDF_ASSERT(0);
-        }
-    }
-}
-
 int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
                            ATTENTION_TYPE attentionType)
 {
+    ExtensibleChipFunction* func = nullptr;
+
+    #ifdef __HOSTBOOT_MODULE
     // Due to clock issues some chips may be moved to non-functional during
     // analysis. In this case, these chips will need to be removed from the
     // domains.
     std::vector<ExtensibleChip*> nfchips;
+    #endif
 
+    #ifdef __HOSTBOOT_MODULE
     // A summary of all error types that need to be masked and/or cleared. These
     // are two separate variables because we only want to mask attentions when
     // they have hit their respective thresholds.
-    PllErrTypes maskErrTypes;
-    PllErrTypes clearErrTypes;
+    std::map<ExtensibleChip*, PllErrTypes> maskErrTypes;
+    std::map<ExtensibleChip*, PllErrTypes> clearErrTypes;
+    #endif
 
-    // Keep track of all chips with attentions. They will be used for the
-    // primary signature and callouts later.
-    std::map<PllErrTypes::Types, std::vector<ExtensibleChip*>> errList;
+    // Keep track of all chips with PLL unlock attentions because callout
+    // priorities are dependend on number of chips at attention.
+    std::vector<ExtensibleChip*> pllUnlockClk0;
+    std::vector<ExtensibleChip*> pllUnlockClk1;
 
     // Examine each chip in the domain.
     for (unsigned int index = 0; index < GetSize(); ++index)
     {
-        ExtensibleChip*         chip = LookUp(index);
-        ExtensibleChipFunction* func = nullptr;
-        TargetHandle_t          trgt = chip->getTrgt();
+        ExtensibleChip* chip = LookUp(index);
+        TargetHandle_t  trgt = chip->getTrgt();
+        HUID            huid = chip->getHuid();
 
+        #ifdef __HOSTBOOT_MODULE
         // Skip this chip if it is non-functional.
         if (!PlatServices::isFunctional(trgt))
         {
             nfchips.push_back(chip);
             continue;
         }
+        #endif
 
         // Check if this chip has a clock error.
         PllErrTypes errTypes;
@@ -258,7 +176,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
         }
 
         // Keep a cumulative list of the error types that need to be cleared.
-        clearErrTypes = clearErrTypes | errTypes;
+        clearErrTypes[chip] = errTypes;
 
         // Capture any registers needed for PLL analysis, which would be
         // captured by default during normal analysis.
@@ -269,13 +187,15 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
         func = chip->getExtensibleFunction("capturePllFfdc");
         (*func)(chip, PluginDef::bindParm<STEP_CODE_DATA_STRUCT &>(io_sc));
 
+        // Set the primary signature to the generic error signature.
+        io_sc.service_data->setSignature(huid, PRDFSIG_RCS_PLL_ERROR);
+
         // Add each error type to the multi-signature list and keep track of
         // each chip which will be used later.
         #define TMP_FUNC(TYPE) \
         if (errTypes.query(PllErrTypes::TYPE)) \
         {\
             io_sc.service_data->AddSignatureList(trgt, PRDFSIG_##TYPE); \
-            errList[PllErrTypes::TYPE].push_back(chip); \
         }
 
         TMP_FUNC(PLL_UNLOCK_0   )
@@ -287,18 +207,105 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
 
         #undef TMP_FUNC
 
-        #ifdef __HOSTBOOT_MODULE
-        // For RCS OSC errors, we must immediately handle transient clock error
-        // recovery.
-        if (errTypes.query(PllErrTypes::RCS_OSC_ERROR_0))
+        // The RCS OSC error and RCS unlock detect attentions have a shared
+        // threshold counter per chip per clock.
+        if (errTypes.query(PllErrTypes::RCS_OSC_ERROR_0) ||
+            errTypes.query(PllErrTypes::RCS_UNLOCKDET_0))
         {
-            PlatServices::rcsTransientErrorRecovery(chip, 0);
+            // Callout the clock.
+            PRDcallout clockCallout {trgt, PRDcalloutData::TYPE_PROCCLK0};
+            io_sc.service_data->SetCallout(clockCallout, MRU_HIGH);
+
+            // Callout the processor. Do not guard on any callout.
+            io_sc.service_data->SetCallout(trgt, MRU_LOW, NO_GARD);
+
+            #ifdef __HOSTBOOT_MODULE
+
+            // Initiate recovery (if RCS OSC error).
+            bool recovFail = false;
+            if (errTypes.query(PllErrTypes::RCS_OSC_ERROR_0))
+            {
+                recovFail = rcsTransientErrorRecovery(chip, 0);
+            }
+
+            // Check threshold (still required even if recovery fails).
+            bool atTh = iv_thRcsClk0[chip].inc(io_sc);
+
+            if (recovFail || atTh)
+            {
+                // Make a predictive callout.
+                io_sc.service_data->setPredictive();
+
+                // Ensure these attentions are masked later.
+                maskErrTypes[chip].set(PllErrTypes::RCS_OSC_ERROR_0);
+                maskErrTypes[chip].set(PllErrTypes::RCS_UNLOCKDET_0);
+
+                // Set alternate ref clock mode on this chip.
+                SCAN_COMM_REGISTER_CLASS* reg = chip->getRegister("ROOT_CTRL3");
+                if (SUCCESS == reg->Read())
+                {
+                    reg->SetBit(3);
+                    reg->Write();
+                }
+            }
+
+            #endif // __HOSTBOOT_MODULE
         }
-        if (errTypes.query(PllErrTypes::RCS_OSC_ERROR_1))
+
+        // The RCS OSC error and RCS unlock detect attentions have a shared
+        // threshold counter per chip per clock.
+        if (errTypes.query(PllErrTypes::RCS_OSC_ERROR_1) ||
+            errTypes.query(PllErrTypes::RCS_UNLOCKDET_1))
         {
-            PlatServices::rcsTransientErrorRecovery(chip, 1);
+            // Callout the clock.
+            PRDcallout clockCallout {trgt, PRDcalloutData::TYPE_PROCCLK1};
+            io_sc.service_data->SetCallout(clockCallout, MRU_HIGH);
+
+            // Callout the processor. Do not guard on any callout.
+            io_sc.service_data->SetCallout(trgt, MRU_LOW, NO_GARD);
+
+            #ifdef __HOSTBOOT_MODULE
+
+            // Initiate recovery (if RCS OSC error).
+            bool recovFail = false;
+            if (errTypes.query(PllErrTypes::RCS_OSC_ERROR_1))
+            {
+                recovFail = rcsTransientErrorRecovery(chip, 1);
+            }
+
+            // Check threshold (still required even if recovery fails).
+            bool atTh = iv_thRcsClk1[chip].inc(io_sc);
+
+            if (recovFail || atTh)
+            {
+                // Make a predictive callout.
+                io_sc.service_data->setPredictive();
+
+                // Ensure these attentions are masked later.
+                maskErrTypes[chip].set(PllErrTypes::RCS_OSC_ERROR_1);
+                maskErrTypes[chip].set(PllErrTypes::RCS_UNLOCKDET_1);
+
+                // Set alternate ref clock mode on this chip.
+                SCAN_COMM_REGISTER_CLASS* reg = chip->getRegister("ROOT_CTRL3");
+                if (SUCCESS == reg->Read())
+                {
+                    reg->SetBit(7);
+                    reg->Write();
+                }
+            }
+
+            #endif // __HOSTBOOT_MODULE
         }
-        #endif
+
+        // Keep a running list of chips with PLL unlock attentions.
+        if (errTypes.query(PllErrTypes::PLL_UNLOCK_0))
+        {
+            pllUnlockClk0.push_back(chip);
+        }
+        if (errTypes.query(PllErrTypes::PLL_UNLOCK_1))
+        {
+            pllUnlockClk1.push_back(chip);
+        }
 
         // Special cases for types that could have downstream effects.
         if (errTypes.query(PllErrTypes::PLL_UNLOCK_0   ) ||
@@ -333,122 +340,123 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
         }
     }
 
+    #ifdef __HOSTBOOT_MODULE
     // Remove all non-functional chips.
-    if (CHECK_STOP != io_sc.service_data->getPrimaryAttnType())
+    for (const auto& i : nfchips)
     {
-        for (const auto& i : nfchips)
+        systemPtr->RemoveStoppedChips(i->getTrgt());
+    }
+    #endif
+
+    // Check PLL unlock attentions on OSC 0.
+    if (!pllUnlockClk0.empty())
+    {
+        PRDpriority clockPri = (1 == pllUnlockClk0.size()) ? MRU_MED : MRU_HIGH;
+
+        #ifdef __HOSTBOOT_MODULE
+        // Check threshold.
+        bool atTh = iv_thPllClk0.inc(io_sc);
+        #endif
+
+        // Add callouts for each chip.
+        for (const auto& chip : pllUnlockClk0)
         {
-            systemPtr->RemoveStoppedChips(i->getTrgt());
+            TargetHandle_t trgt = chip->getTrgt();
+
+            // Callout the clock.
+            PRDcallout clockCallout {trgt, PRDcalloutData::TYPE_PROCCLK0};
+            io_sc.service_data->SetCallout(clockCallout, clockPri);
+
+            // Callout the processor. Do not guard on any callout.
+            io_sc.service_data->SetCallout(trgt, MRU_MED, NO_GARD);
+
+            #ifdef __HOSTBOOT_MODULE
+            // Actions if at threshold.
+            if (atTh)
+            {
+                // Make a predictive callout.
+                io_sc.service_data->setPredictive();
+
+                // Ensure these attentions are masked later.
+                maskErrTypes[chip].set(PllErrTypes::PLL_UNLOCK_0);
+            }
+            #endif
         }
     }
 
-    // Set the primary signature to the highest priority attention type.
-    #define TMP_FUNC(TYPE) \
-    if (!errList[PllErrTypes::TYPE].empty()) \
-    {\
-        HUID huid = errList[PllErrTypes::TYPE].front()->getHuid(); \
-        io_sc.service_data->setSignature(huid, PRDFSIG_##TYPE); \
-    }
-
-    // This list needs to be from lowest to highest priority so that the last
-    // signature set is the highest priority.
-    TMP_FUNC(RCS_UNLOCKDET_0)
-    TMP_FUNC(RCS_UNLOCKDET_1)
-    TMP_FUNC(PLL_UNLOCK_0   )
-    TMP_FUNC(PLL_UNLOCK_1   )
-    TMP_FUNC(RCS_OSC_ERROR_0)
-    TMP_FUNC(RCS_OSC_ERROR_1)
-
-    #undef TMP_FUNC
-
-    // RCS OSC error attentions have the potential of generating PLL unlock
-    // attentions, but it is also possible the PLL unlock attentions could have
-    // asserted on their own. Unfortunately, there may have been one or more
-    // clock failovers due to the RCS OSC error attentions. Therefore, it would
-    // be impossible to tell which clock may have generated the PLL unlock
-    // attentions. So, if any RCS OSC error attentions are present, PRD must
-    // ignore all PLL unlock attentions
-
-    // Similarly, RCS unlock detect attentions only have meaning if found on
-    // the non-primary clock. Again, due to potential clock failovers, it would
-    // be impossible to tell which clock may have been the primary at the time
-    // of the RCS unlock attention. Therefore, PRD must also ignore all RCS
-    // unlock detect attentions if there are any RCS OSC error attentions
-    // present.
-
-    // Certain PLL unlock attentions have the potential of causing RCS unlock
-    // detect attentions, but it is also possible the two error types could
-    // have asserted on their own. Regardless, the callouts will be accurate,
-    // assuming there are no RCS OSC error attentions. So, the decision is to
-    // treat PLL unlock attentions and RCS unlock detect attentions as
-    // individual events to simplify PRD analysis.
-
-    // Slow frequency drifts will not be detected by the RCS checkers. However,
-    // they can cause cause PLL unlock attentions if the frequency deviates
-    // beyond the specified PLL frequency band. Jitter can cause PLL unlock
-    // attentions, but will most likely be caught by the RCS checkers. In
-    // addition, PLL unlock attentions may indicate there is a problem within
-    // the processor that reported the error.  Therefore, PRD must call out
-    // both the primary clock and the processor.
-
-    // If more than one processor in the clock domain is reporting PLL unlock
-    // attentions, then the primary clock is more likely at fault than the
-    // processors.
-
-    // Conversely, if all PLL unlock attentions are scoped to a single
-    // processor in the clock domain, we cannot definitively determine that a
-    // part is more at fault than the other, especially if a system only has
-    // one configured processor.  Therefore, we will call out both the primary
-    // clock and the processor at medium priority. In addition, the clock will
-    // be the first in the list as it is the easiest part to repair.
-
-    if (!errList[PllErrTypes::RCS_OSC_ERROR_0].empty() ||
-        !errList[PllErrTypes::RCS_OSC_ERROR_1].empty())
+    // Check PLL unlock attentions on OSC 1.
+    if (!pllUnlockClk1.empty())
     {
-        // Callout associated clocks/procs and threshold, if needed.
-        addCallout(io_sc, errList, PllErrTypes::RCS_OSC_ERROR_0, maskErrTypes);
-        addCallout(io_sc, errList, PllErrTypes::RCS_OSC_ERROR_1, maskErrTypes);
-    }
-    else
-    {
-        // Callout associated clocks/procs and threshold, if needed.
-        addCallout(io_sc, errList, PllErrTypes::RCS_UNLOCKDET_0, maskErrTypes);
-        addCallout(io_sc, errList, PllErrTypes::RCS_UNLOCKDET_1, maskErrTypes);
+        PRDpriority clockPri = (1 == pllUnlockClk1.size()) ? MRU_MED : MRU_HIGH;
 
-        // Get the total number of chips that reported PLL errors. Note that it
-        // should not be possible for a chip to report PLL errors from both
-        // clocks because they should only come from the primary clock.
-        unsigned int pllChips = errList[PllErrTypes::PLL_UNLOCK_0].size() +
-                                errList[PllErrTypes::PLL_UNLOCK_1].size();
-        if (0 < pllChips)
+        #ifdef __HOSTBOOT_MODULE
+        // Check threshold.
+        bool atTh = iv_thPllClk1.inc(io_sc);
+        #endif
+
+        // Add callouts for each chip.
+        for (const auto& chip : pllUnlockClk1)
         {
-            // If PLL unlock errors are present on more than one chip, the clock
-            // is more likely to be the problem. If PLL unlock errors are scoped
-            // to a single chip, either are equally at fault.
-            PRDpriority clockPri = (1 == pllChips) ? MRU_MED  : MRU_HIGH;
-            PRDpriority procPri  = MRU_MED;
+            TargetHandle_t trgt = chip->getTrgt();
 
-            // Callout associated clocks/procs and threshold, if needed.
-            addCallout(io_sc, errList, PllErrTypes::PLL_UNLOCK_0, maskErrTypes,
-                       clockPri, procPri);
-            addCallout(io_sc, errList, PllErrTypes::PLL_UNLOCK_1, maskErrTypes,
-                       clockPri, procPri);
+            // Callout the clock.
+            PRDcallout clockCallout {trgt, PRDcalloutData::TYPE_PROCCLK1};
+            io_sc.service_data->SetCallout(clockCallout, clockPri);
+
+            // Callout the processor. Do not guard on any callout.
+            io_sc.service_data->SetCallout(trgt, MRU_MED, NO_GARD);
+
+            #ifdef __HOSTBOOT_MODULE
+            // Actions if at threshold.
+            if (atTh)
+            {
+                // Make a predictive callout.
+                io_sc.service_data->setPredictive();
+
+                // Ensure these attentions are masked later.
+                maskErrTypes[chip].set(PllErrTypes::PLL_UNLOCK_1);
+            }
+            #endif
         }
     }
 
     #ifdef __HOSTBOOT_MODULE // only allowed to modify hardware from the host
 
-    // Mask/clear attentions on all chips in the domain.
-    for (unsigned int index = 0; index < GetSize(); ++index)
+    // The following plugins to mask/clear attentions follow all the rules for
+    // masking/clearing attentions on a single chip. However, if there were ANY
+    // active attentions we would want clear/mask PLL unlock attentions on all
+    // chips due to the rules specified in the design dococument.
+    if (!maskErrTypes.empty())
     {
-        ExtensibleChip*         c = LookUp(index);
-        ExtensibleChipFunction* f = nullptr;
+        for (unsigned int index = 0; index < GetSize(); ++index)
+        {
+            ExtensibleChip* chip = LookUp(index);
+            maskErrTypes[chip].set(PllErrTypes::PLL_UNLOCK_0);
+            maskErrTypes[chip].set(PllErrTypes::PLL_UNLOCK_1);
+        }
+    }
+    if (!clearErrTypes.empty())
+    {
+        for (unsigned int index = 0; index < GetSize(); ++index)
+        {
+            ExtensibleChip* chip = LookUp(index);
+            clearErrTypes[chip].set(PllErrTypes::PLL_UNLOCK_0);
+            clearErrTypes[chip].set(PllErrTypes::PLL_UNLOCK_1);
+        }
+    }
 
-        f = c->getExtensibleFunction("maskPllErrTypes");
-        (*f)(c, PluginDef::bindParm<const PllErrTypes&>(maskErrTypes));
+    // Mask attentions.
+    for (const auto& e : maskErrTypes)
+    {
+        func = e.first->getExtensibleFunction("maskPllErrTypes");
+        (*func)(e.first, PluginDef::bindParm<const PllErrTypes&>(e.second));
+    }
 
-        f = c->getExtensibleFunction("clearPllErrTypes");
-        (*f)(c, PluginDef::bindParm<const PllErrTypes&>(clearErrTypes));
+    // Clear attentions.
+    for (const auto& e : clearErrTypes)
+    {
+        func = e.first->getExtensibleFunction("clearPllErrTypes");
+        (*func)(e.first, PluginDef::bindParm<const PllErrTypes&>(e.second));
     }
 
     #endif // __HOSTBOOT_MODULE

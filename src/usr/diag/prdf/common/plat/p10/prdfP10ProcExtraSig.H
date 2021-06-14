@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,6 +29,7 @@
 #include <prdrSignatures.H>
 
 /* PLL extra signatures */
+PRDR_ERROR_SIGNATURE(RCS_PLL_ERROR,   0x00ed0000, "", "clock error detected");
 PRDR_ERROR_SIGNATURE(PLL_UNLOCK_0,    0x00ed0001, "", "PLL unlock on clk0");
 PRDR_ERROR_SIGNATURE(PLL_UNLOCK_1,    0x00ed0002, "", "PLL unlock on clk1");
 PRDR_ERROR_SIGNATURE(RCS_OSC_ERROR_0, 0x00ed0003, "", "RCS OSC error on clk0");

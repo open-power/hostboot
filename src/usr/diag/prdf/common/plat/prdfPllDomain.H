@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -147,37 +147,41 @@ protected:
    */
   virtual void Order(ATTENTION_TYPE attentionType);
 
-  private: // functions
-
-    /**
-     * @brief Adds clock and processor callouts to the service data collector
-     *        based on the given chip list and error type. Will also increment
-     *        the appropriate threshold counter for the given type. On
-     *        threshold, will set the appropriate service data collector flags
-     *        and update the given mask error types for masking the errors at
-     *        the end of analysis.
-     * @param io_sc           The service data collector.
-     * @param i_errList       A list of chips at attention for all error types.
-     * @param i_errType       The target error type.
-     * @param io_maskErrTypes A summary of all attentions types that need to be
-     *                        masked.
-     * @param i_clockPri      The callout priority for clock callouts.
-     * @param i_procPri       The callout priority for processor callouts.
-     */
-    void addCallout(STEP_CODE_DATA_STRUCT& io_sc,
-                    std::map<PllErrTypes::Types,
-                             std::vector<ExtensibleChip*>>& i_errList,
-                    PllErrTypes::Types i_errType, PllErrTypes& io_maskErrTypes,
-                    PRDpriority i_clockPri = MRU_HIGH,
-                    PRDpriority i_procPri = MRU_LOW);
-
 private:  // Data
 
   enum { CONTAINER_SIZE = 8 };
 
-    TimeBasedThreshold iv_thRcsClk0;   ///< RCS OSC error/unlock det on clock 0
-    TimeBasedThreshold iv_thRcsClk1;   ///< RCS OSC error/unlock det on clock 1
-    TimeBasedThreshold iv_thPllUnlock; ///< PLL unlock on either clock
+    #ifdef __HOSTBOOT_MODULE
+
+    /** A simple child class of TimeBasedThreshold designed specifically clock
+     *  errors. */
+    class ClockErrorTH : public TimeBasedThreshold
+    {
+      public:
+        /** @brief Default constructor. */
+        ClockErrorTH() : TimeBasedThreshold(PlatServices::mfgMode()
+                                        ? ThresholdResolution::cv_mnfgDefault
+                                        : ThresholdResolution::cv_pllDefault)
+        {}
+    };
+
+    /** Threshold counters for RCS OSC error and RCS unlock detect attentions
+     *  (from clock 0) on each chip in the domain. */
+    std::map<ExtensibleChip*, ClockErrorTH> iv_thRcsClk0;
+
+    /** Threshold counters for RCS OSC error and RCS unlock detect attentions
+     *  (from clock 1) on each chip in the domain. */
+    std::map<ExtensibleChip*, ClockErrorTH> iv_thRcsClk1;
+
+    /** Threshold counter for PLL unlock attentions (from clock 0) on any chip
+     *  in the domain. */
+    ClockErrorTH iv_thPllClk0;
+
+    /** Threshold counter for PLL unlock attentions (from clock 1) on any chip
+     *  in the domain. */
+    ClockErrorTH iv_thPllClk1;
+
+    #endif // __HOSTBOOT_MODULE
 };
 
 //------------------------------------------------------------------------------

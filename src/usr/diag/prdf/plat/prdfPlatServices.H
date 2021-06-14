@@ -242,11 +242,12 @@ int32_t restartTraceArray(TARGETING::TargetHandle_t i_tgt);
 //##############################################################################
 
 /**
- * @brief In the event of an RCS OSC error, transient error recovery.
- * @param i_chip   A proc chip
- * @param i_clkPos Clock position relative to the proc chip.
+ * @brief  In the event of an RCS OSC error, transient error recovery.
+ * @param  i_chip   A proc chip
+ * @param  i_clkPos Clock position relative to the proc chip.
+ * @return True if recovery failed (hard error). False otherwise.
  */
-void rcsTransientErrorRecovery(ExtensibleChip* i_chip, uint32_t i_clkPos);
+bool rcsTransientErrorRecovery(ExtensibleChip* i_chip, uint32_t i_clkPos);
 
 } // end namespace PlatServices
 
