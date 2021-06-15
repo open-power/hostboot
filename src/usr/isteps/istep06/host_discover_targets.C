@@ -38,6 +38,7 @@
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/mfgFlagAccessors.H>
 #include <targeting/common/entitypath.H>
+#include <targeting/common/targetservice.H>
 #include <initservice/taskargs.H>
 #include <initservice/isteps_trace.H>
 #include <initservice/initserviceif.H>
@@ -442,11 +443,6 @@ void* host_discover_targets( void *io_pArgs )
     errlHndl_t l_err(nullptr);
     ISTEP_ERROR::IStepError l_stepError;
 
-    // Check whether we're in MPIPL mode
-    TARGETING::Target* l_pTopLevel = nullptr;
-    TARGETING::targetService().getTopLevelTarget( l_pTopLevel );
-    assert(l_pTopLevel, "host_discover_targets: no TopLevelTarget");
-
 #ifdef CONFIG_PLDM
     // This flag guards later portions of the PDR exchange (we don't want to do
     // subsequent steps if earlier steps failed).
@@ -482,6 +478,8 @@ void* host_discover_targets( void *io_pArgs )
 
 #endif
 
+    // Check whether we're in MPIPL mode
+    TARGETING::Target* l_pTopLevel = TARGETING::UTIL::assertGetToplevelTarget();
     if (l_pTopLevel->getAttr<TARGETING::ATTR_IS_MPIPL_HB>())
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,

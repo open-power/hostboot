@@ -1536,9 +1536,9 @@ errlHndl_t restrictECunits(
                 {
                     TargetHandle_t pFC = *(pFC_it[i]);
 
-                    // get this FC's (CHILD) functional EC/core units
-                    getChildChiplets(pECList[i][j], pFC,
-                                     TYPE_CORE, true);
+                    // Get this FC's (CHILD) functional EC/core units except the "Extended Cache-Only"
+                    // cores since those are only used for their L3 cache.
+                    getNonEcoCores(pECList[i][j], pFC);
 
                     // keep a pointer into that list
                     pEC_it[i][j] = pECList[i][j].begin();

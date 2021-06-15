@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,10 +41,8 @@
 #include <runtime/interface.h>
 #endif // __HOSTBOOT_RUNTIME
 
-/* FIXME RTC: 210975
 #include <fapi2/plat_hwp_invoker.H>
-#include <p9_cpu_special_wakeup.H>
-*/
+#include <p10_core_special_wakeup.H>
 #include <scom/wakeup.H>
 
 // Trace definition
@@ -100,7 +98,7 @@ bool useHypWakeup( void )
 
 /**
  * @brief Use the Host/Hyp interface to control special wakeup
- * @param i_target  Input target core/ex/eq/etc
+ * @param     i_target   - Input target core
  * @param[in] i_enable   - set or clear or clear all of the wakeups
  */
 errlHndl_t callWakeupHyp(TARGETING::Target* i_target,
@@ -109,7 +107,6 @@ errlHndl_t callWakeupHyp(TARGETING::Target* i_target,
     errlHndl_t l_errl = NULL;
 
 #ifdef __HOSTBOOT_RUNTIME
-    TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
 
     // Check for valid interface function
     if( (g_hostInterfaces == NULL) ||
@@ -138,28 +135,10 @@ errlHndl_t callWakeupHyp(TARGETING::Target* i_target,
         return l_errl;
     }
 
-    TargetHandleList pCoreList;
-
-    // If the target is already a core just push it on the list
-    if(l_type == TARGETING::TYPE_CORE)
-    {
-        pCoreList.clear();
-        pCoreList.push_back(i_target);
-    }
-    else
-    {
-        getChildChiplets( pCoreList, i_target, TARGETING::TYPE_CORE );
-    }
-
-    // Call wakeup on all core targets
-    // Wakeup may be called twice for fused cores
-    for ( auto pCore_it = pCoreList.begin();
-          pCore_it != pCoreList.end();
-          ++pCore_it )
-    {
+    do {
         // Runtime target id
         TARGETING::rtChipId_t rtTargetId = 0;
-        l_errl = TARGETING::getRtTarget(*pCore_it, rtTargetId);
+        l_errl = TARGETING::getRtTarget(i_target, rtTargetId);
         if(l_errl)
         {
             break;
@@ -226,7 +205,7 @@ errlHndl_t callWakeupHyp(TARGETING::Target* i_target,
             TRACFCOMP( g_trac_scom,ERR_MRK
                 "callWakeupHyp> Hypervisor wakeup failed. "
                 "rc 0x%X target_huid 0x%llX rt_target_id 0x%llX mode %d",
-                l_rc, get_huid(*pCore_it), rtTargetId, mode );
+                l_rc, get_huid(i_target), rtTargetId, mode );
 
             // convert rc to error log
             /*@
@@ -253,7 +232,8 @@ errlHndl_t callWakeupHyp(TARGETING::Target* i_target,
 
             break;
         }
-    }
+    } while(0);
+
 #else
 
     assert( false, "Cannot use host wakeup in IPL code!!" );
@@ -273,29 +253,7 @@ errlHndl_t callWakeupHwp(TARGETING::Target* i_target,
                          HandleOptions_t i_enable)
 {
     errlHndl_t l_errl = NULL;
-    //fapi2::ReturnCode l_rc;
-
-    TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
-
-    if(l_type == TARGETING::TYPE_PROC)
-    {
-        // Call wakeup on all core targets
-        TargetHandleList pCoreList;
-        getChildChiplets( pCoreList, i_target, TARGETING::TYPE_CORE );
-
-        for ( auto pCore_it = pCoreList.begin();
-              pCore_it != pCoreList.end();
-              ++pCore_it )
-        {
-            // To simplify, just call recursively with the core target
-            l_errl = callWakeupHwp(*pCore_it, i_enable);
-            if(l_errl)
-            {
-                break;
-            }
-        }
-        return l_errl;
-    }
+//    fapi2::ReturnCode l_rc;
 
     // Need to handle multiple calls to enable special wakeup
     // Count attribute will keep track and disable when zero
@@ -362,82 +320,40 @@ errlHndl_t callWakeupHwp(TARGETING::Target* i_target,
         // There are 3 independent registers used to trigger a
         // special wakeup (FSP,HOST,OCC), we are using the FSP
         // bit because HOST/OCC are already in use.
-
 /* FIXME RTC: 210975
-        p9specialWakeup::PROC_SPCWKUP_OPS l_spcwkupType;
-        p9specialWakeup::PROC_SPCWKUP_ENTITY l_spcwkupSrc;
-        if(! INITSERVICE::spBaseServicesEnabled())
-        {
-            l_spcwkupSrc = p9specialWakeup::FSP;
-        }
-        else
-        {
-            l_spcwkupSrc = p9specialWakeup::HOST;
-        }
+        p10specialWakeup::PROC_SPCWKUP_OPS l_spcwkupType;
 
         if(i_enable==WAKEUP::ENABLE)
         {
-            l_spcwkupType = p9specialWakeup::SPCWKUP_ENABLE;
+            l_spcwkupType = p10specialWakeup::SPCWKUP_ENABLE;
         }
         else  // DISABLE or FORCE_DISABLE
         {
-            l_spcwkupType = p9specialWakeup::SPCWKUP_DISABLE;
-        }
-*/
-
-        if(l_type == TARGETING::TYPE_EQ)
-        {
-/* FIXME RTC: 210975
-            fapi2::Target<fapi2::TARGET_TYPE_EQ>
-                l_fapi_target(const_cast<TARGETING::Target*>(i_target));
-
-            FAPI_EXEC_HWP(l_rc,
-                          p9_cpu_special_wakeup_eq,
-                          l_fapi_target,
-                          l_spcwkupType,
-                          l_spcwkupSrc );
-            l_errl = rcToErrl(l_rc, ERRORLOG::ERRL_SEV_UNRECOVERABLE);
-*/
-        }
-        else if(l_type == TARGETING::TYPE_EX)
-        {
-/* FIXME RTC: 210975
-            fapi2::Target<fapi2::TARGET_TYPE_EX_CHIPLET>
-                l_fapi_target(const_cast<TARGETING::Target*>(i_target));
-
-            FAPI_EXEC_HWP(l_rc,
-                          p9_cpu_special_wakeup_ex,
-                          l_fapi_target,
-                          l_spcwkupType,
-                          l_spcwkupSrc );
-            l_errl = rcToErrl(l_rc, ERRORLOG::ERRL_SEV_UNRECOVERABLE);
-*/
-        }
-        else if(l_type == TARGETING::TYPE_CORE)
-        {
-/* FIXME RTC: 210975
-            fapi2::Target<fapi2::TARGET_TYPE_CORE>
-                l_fapi_target(const_cast<TARGETING::Target*>(i_target));
-
-            FAPI_EXEC_HWP(l_rc,
-                          p9_cpu_special_wakeup_core,
-                          l_fapi_target,
-                          l_spcwkupType,
-                          l_spcwkupSrc );
-            l_errl = rcToErrl(l_rc, ERRORLOG::ERRL_SEV_UNRECOVERABLE);
-*/
+            l_spcwkupType = p10specialWakeup::SPCWKUP_DISABLE;
         }
 
+        fapi2::Target<fapi2::TARGET_TYPE_CORE>
+            l_fapi_target(i_target);
+
+        // FYI p10_core_special_wakeup actually expects a proc target. So this is a bad call.
+        FAPI_EXEC_HWP(l_rc,
+                      p10_core_special_wakeup,
+                      l_fapi_target,
+                      l_spcwkupType,
+                      p10specialWakeup::HOST);
+
+        l_errl = rcToErrl(l_rc, ERRORLOG::ERRL_SEV_UNRECOVERABLE);
         if(l_errl)
         {
             TRACFCOMP( g_trac_scom,
-                    "callWakeupHwp> p9_cpu_special_wakeup ERROR :"
+                    "callWakeupHwp> p10_core_special_wakeup ERROR :"
                     " Returning errorlog, reason=0x%x",
                     l_errl->reasonCode() );
 
             // Capture the target data in the elog
             ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog( l_errl );
         }
+*/
     }
 
     // Update the counter
@@ -470,16 +386,93 @@ errlHndl_t handleSpecialWakeup(TARGETING::Target* i_target,
 {
     errlHndl_t l_errl = NULL;
 
+    // Determines in a general case which wakeup interface to call.
     static bool l_useHypWakeup = useHypWakeup();
 
-    if( l_useHypWakeup )
-    {
-        l_errl = callWakeupHyp( i_target, i_enable );
-    }
-    else
-    {
-        l_errl = callWakeupHwp( i_target, i_enable );
-    }
+    // Extended Cache-Only (ECO) cores and non-ECO cores must be handled individually.
+    TargetHandleList l_ecoCores, l_nonEcoCores;
+
+    do {
+        if (i_target->getAttr<ATTR_TYPE>() == TYPE_CORE)
+        {
+            if (i_target->getAttr<ATTR_ECO_MODE>() == ECO_MODE_ENABLED)
+            {
+                l_ecoCores.push_back(i_target);
+            }
+            else if (i_target->getAttr<ATTR_ECO_MODE>() == ECO_MODE_DISABLED)
+            {
+                l_nonEcoCores.push_back(i_target);
+            }
+            else
+            {
+                /*@
+                 * @errortype
+                 * @moduleid         SCOM_HANDLE_SPECIAL_WAKEUP
+                 * @reasoncode       SCOM_INVALID_ECO_TYPE
+                 * @userdata1        ECO mode
+                 * @userdata2[0:31]  Core huid
+                 * @devdesc          Supplied core chiplet had an invalid ECO mode setting.
+                 */
+                l_errl = new ERRORLOG::ErrlEntry(
+                                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            SCOM_CALL_WAKEUP_HYP,
+                                            SCOM_RUNTIME_WAKEUP_ERR,
+                                            i_target->getAttr<ATTR_ECO_MODE>(),
+                                            get_huid(i_target),
+                                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                break;
+            }
+        }
+        else
+        {
+            // Given target is not an CORE target. Need to gather up all its ECO and non-ECO CORE children for
+            // processing.
+            getNonEcoCores(l_nonEcoCores, i_target);
+            getEcoCores(l_ecoCores, i_target);
+            TRACFCOMP(g_trac_scom, "i_target HUID[0x%x]: ECO cores %d, NON-ECO cores %d",
+                      get_huid(i_target),
+                      l_ecoCores.size(),
+                      l_nonEcoCores.size());
+        }
+        TRACDCOMP( g_trac_scom, "l_useHypWakeup = %s", l_useHypWakeup ? "TRUE" : "FALSE");
+
+        // Always call the HWP for ECO cores since the hypervisor doesn't know about ECO COREs and asking it to wake
+        // them would result in an error.
+        for (auto l_core : l_ecoCores)
+        {
+            l_errl = callWakeupHwp(l_core, i_enable);
+            if (l_errl)
+            {
+                break;
+            }
+        }
+        if (l_errl)
+        {
+            break;
+        }
+
+        // Non-ECO cores can use the general case determination for which wakeup interface to call.
+        for (auto l_core : l_nonEcoCores)
+        {
+            if( l_useHypWakeup )
+            {
+                l_errl = callWakeupHyp(l_core, i_enable);
+            }
+            else
+            {
+                l_errl = callWakeupHwp(l_core, i_enable);
+            }
+            if (l_errl)
+            {
+                break;
+            }
+        }
+        if (l_errl)
+        {
+            break;
+        }
+
+    } while(0);
 
     return l_errl;
 }

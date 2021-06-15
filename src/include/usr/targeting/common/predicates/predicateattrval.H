@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,20 +71,20 @@ class PredicateAttrVal : public PredicateBase
 
         /**
          *  @brief Constructor which configures the predicate to filter targets
-         *      based on the existence of the attribute type given by the "A" 
+         *      based on the existence of the attribute type given by the "A"
          *      template parameter, and the input criteria
          *
          *  @param[in] i_value
          *      Assuming the target being filtered has the attribute given by
          *      the "A" template parameter, the value of that attribute
          *      that will cause the predicate to register a match.  If the
-         *      i_invertSearch parameter is the non-default value of true, 
-         *      the predicate registers a match when the value of the 
+         *      i_invertSearch parameter is the non-default value of true,
+         *      the predicate registers a match when the value of the
          *      attribute != i_value
          *  @param[in] i_invertSearch
-         *      Assuming the attribute is present, this determines what check 
+         *      Assuming the attribute is present, this determines what check
          *      needs to be performed on i_value.
-         *      If false (default), the predicate registers a match when the 
+         *      If false (default), the predicate registers a match when the
          *      attribute's value is i_value; If true, the predicate registers
          *      a match when the attribute's value is != i_value
          */
@@ -99,15 +99,15 @@ class PredicateAttrVal : public PredicateBase
         /**
          *  @brief Destroys the attribute value predicate
          */
-        virtual ~PredicateAttrVal() 
-        { 
+        virtual ~PredicateAttrVal()
+        {
         }
 
         /**
          *  @brief Returns whether target has an attribute, given by template
          *      parameter "A", whose value matches the filter's configured
          *      criteria
-         * 
+         *
          *  @par Detailed Description:
          *      Returns whether target has an attribute, given by template
          *      parameter "A", whose value matches the filter's configured
@@ -116,13 +116,13 @@ class PredicateAttrVal : public PredicateBase
          *      Assuming the target has the "A" attribute, if the attribute's
          *      value matches and the search is not inverted, the predicate
          *      returns true.  If the attribute's value does not match but the
-         *      search is inverted, the predicate also returns true.  
+         *      search is inverted, the predicate also returns true.
          *      Otherwise, the predicate returns false.  See
          *      PredicateBase class for parameter/return description.
          *
          *  @param[in] i_pTarget
-         *      Target handle pointing to the target to compare to.  Must 
-         *      not be NULL.  
+         *      Target handle pointing to the target to compare to.  Must
+         *      not be NULL.
          *
          *  @return bool indicating whether the target matches or not
          */
@@ -142,19 +142,32 @@ class PredicateAttrVal : public PredicateBase
             return l_match;
         }
 
+        /*
+         * @brief Sets the attribute value contained in this class to the one passed in.
+         *
+         * @param[in]  i_value      The desired attribute value for this class to have.
+         *
+         * @return                  Reference to this predicate for chaining with other predicates.
+         */
+        inline PredicateAttrVal& value(const typename AttributeTraits<A>::Type& i_value)
+        {
+            memcpy(&iv_value,&i_value,sizeof(iv_value));
+            return *this;
+        }
+
     private:
- 
+
         /**
          *  @brief Value of attribute to compare for each target filter is
-         *      applied to 
+         *      applied to
          */
         typename AttributeTraits<A>::Type iv_value;
 
         // Whether to look for attribute whose value matches iv_value (false) or
-        // an attribute whose value does not match iv_value (true) for target 
+        // an attribute whose value does not match iv_value (true) for target
         // being filtered
         bool iv_invertSearch;
- 
+
         /**
          *  @brief Disable copy/assignment operators
          */

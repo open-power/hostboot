@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2019
+# Contributors Listed Below - COPYRIGHT 2013,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -35,7 +35,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
-
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
 
 # Local Objects
 OBJS += scom.o

@@ -736,7 +736,7 @@ errlHndl_t enableCoreCheckstops()
     if(! is_sapphire_load() )
     {
         TARGETING::TargetHandleList l_coreTargetList;
-        getAllChiplets(l_coreTargetList, TYPE_CORE);
+        getNonEcoCores(l_coreTargetList);
 
         for( auto l_core_target : l_coreTargetList)
         {

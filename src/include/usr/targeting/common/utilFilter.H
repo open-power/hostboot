@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,6 +51,16 @@ namespace TARGETING
         UTIL_FILTER_NON_FUNCTIONAL           // All non-functional
     };
 
+/*
+ * Enum of "Extended Cache-Only" (ECO) core status for use with calls to getCoreChiplets. A core flagged with ECO Mode
+ * Enabled is only used for its L3 cache.
+ */
+enum CoreEcoState
+{
+    UTIL_FILTER_CORE_ALL,    // All core chiplets regardless of ECO status
+    UTIL_FILTER_CORE_ECO,    // Only core chiplets with ECO mode Enabled
+    UTIL_FILTER_CORE_NON_ECO // Only core chiplets with ECO mode Disabled
+};
 
 /**
  * @brief Populate the o_vector with target object pointers based on the
@@ -507,6 +517,54 @@ const Target * getExChiplet( const Target * i_pCoreChiplet );
  * @return Core target pointer or NULL if error
  */
 const Target * getCoreChiplet( const Target * i_pExChiplet );
+
+/*
+ * @brief Returns a list of core chiplet targets of the requested resource and "Extended Cache-Only" (ECO) state.
+ *
+ * @param[out]   o_coreList       A list of target handles matching the request.
+ *
+ * @param[in]    i_coreEcoState   The requested ECO state of the cores in the returned list. See CoreEcoState for valid
+ *                                options.
+ *
+ * @param[in]    i_state          The requested resource state of the cores in the returned list. See ResourceState for
+ *                                valid options.
+ *
+ * @param[in]    i_parent         The parent target to retrieve core chiplets from. Default nullptr; In that case all
+ *                                cores in the system matching given criteria will be returned.
+ */
+void getCoreChiplets(TARGETING::TargetHandleList & o_coreList,
+                     CoreEcoState                  i_coreEcoState,
+                     ResourceState                 i_state,
+                     Target *                      i_parent = nullptr);
+
+
+/*
+ * @brief Returns a list of non-ECO core chiplet targets of the requested functional state.
+ *
+ * @param[out]   o_coreList       A list of target handles matching the request.
+ *
+ * @param[in]    i_parent         The parent target to retrieve core chiplets from. Default nullptr; In that case all
+ *                                cores in the system matching given criteria will be returned.
+ *
+ * @param[in]    i_functional     The requested functional state. Default true.
+ */
+void getNonEcoCores(TARGETING::TargetHandleList & o_coreList,
+                    Target*                       i_parent = nullptr,
+                    bool                          i_functional = true);
+
+/*
+ * @brief Returns a list of ECO core chiplet targets of the requested functional state.
+ *
+ * @param[out]   o_coreList       A list of target handles matching the request.
+ *
+ * @param[in]    i_parent         The parent target to retrieve core chiplets from. Default nullptr; In that case all
+ *                                cores in the system matching given criteria will be returned.
+ *
+ * @param[in]    i_functional     The requested functional state. Default true.
+ */
+void getEcoCores(TARGETING::TargetHandleList & o_coreList,
+                 Target*                       i_parent = nullptr,
+                 bool                          i_functional = true);
 
 /**
  * @brief Return a list of all cards in a system

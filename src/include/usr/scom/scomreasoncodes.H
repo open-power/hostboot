@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -82,6 +82,7 @@ namespace SCOM
         SCOM_UNSUPPORTED_MULTICAST_OP  = SCOM_COMP_ID | 0x1F,
         SCOM_P10_TRANS_INVALID_TYPE    = SCOM_COMP_ID | 0x20,
         SCOM_MULTICAST_MISCOMPARE      = SCOM_COMP_ID | 0x21,
+        SCOM_INVALID_ECO_TYPE          = SCOM_COMP_ID | 0x22,
     };
 
     enum UserDetailsTypes

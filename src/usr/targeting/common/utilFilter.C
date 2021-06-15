@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -752,6 +752,120 @@ const Target * getCoreChiplet( const Target * i_pExChiplet )
     return l_pCoreChiplet;
 }
 
+void getCoreChiplets(TARGETING::TargetHandleList & o_coreList,
+                     const CoreEcoState i_coreEcoState,
+                     const ResourceState i_state,
+                     Target * const i_parent)
+{
+    Target* parent = i_parent;
+
+    if (i_parent == nullptr)
+    {
+        // No parent given, use system target;
+        parent = UTIL::assertGetToplevelTarget();
+    }
+
+    // Start with an empty list.
+    o_coreList.clear();
+
+    // Build up the filtering criteria for the core list
+    PredicateCTM corePredicate(TARGETING::CLASS_UNIT, TARGETING::TYPE_CORE);
+    PredicatePostfixExpr ecoCoreFilter;
+    ecoCoreFilter.push(&corePredicate);
+
+    // Predicates to store requested resource state.
+    PredicateHwas            predHwas;
+    PredicateIsFunctional    predFunctional;
+    PredicateIsNonFunctional presNonFunctional;
+    PredicateIsNonFunctional nonFunctional(false);
+
+    switch(i_state)
+    {
+        case UTIL_FILTER_ALL:
+        {
+            // Don't need to add anything to the predicate that's being built up.
+            break;
+        }
+        case UTIL_FILTER_PRESENT:
+        {
+            predHwas.present(true);
+            // Set up compound predicate
+            ecoCoreFilter.push(&predHwas).And();
+            break;
+        }
+        case UTIL_FILTER_FUNCTIONAL:
+        {
+            // Set up compound predicate
+            ecoCoreFilter.push(&predFunctional).And();
+            break;
+        }
+        case UTIL_FILTER_PRESENT_NON_FUNCTIONAL:
+        {
+            // Get all present and non-functional chips or chiplets
+            // Present and non-functional predicate
+            // Set up compound predicate
+            ecoCoreFilter.push(&presNonFunctional).And();
+            break;
+        }
+        case UTIL_FILTER_NON_FUNCTIONAL:
+        {
+            // Get all non-functional chips or chiplets
+            // Non-functional predicate
+            // Set up compound predicate
+            ecoCoreFilter.push(&nonFunctional).And();
+            break;
+        }
+    }
+
+    PredicateAttrVal<ATTR_ECO_MODE> coreEcoMode(ECO_MODE_INVALID);
+    switch (i_coreEcoState)
+    {
+        case UTIL_FILTER_CORE_ALL:
+        {
+            // Don't need to add anything to the predicate that's being built up.
+            break;
+        }
+        case UTIL_FILTER_CORE_NON_ECO:
+        {
+            coreEcoMode.value(ECO_MODE_DISABLED);
+            ecoCoreFilter.push(&coreEcoMode).And();
+            break;
+        }
+        case UTIL_FILTER_CORE_ECO:
+        {
+            coreEcoMode.value(ECO_MODE_ENABLED);
+            ecoCoreFilter.push(&coreEcoMode).And();
+            break;
+        }
+    }
+
+    TARGETING::targetService().getAssociated(o_coreList,
+                                             parent,
+                                             TARGETING::TargetService::CHILD,
+                                             TARGETING::TargetService::ALL,
+                                             &ecoCoreFilter);
+
+}
+
+void getNonEcoCores(TARGETING::TargetHandleList & o_coreList,
+                    Target* i_parent,
+                    const bool i_functional)
+{
+    getCoreChiplets(o_coreList,
+                    UTIL_FILTER_CORE_NON_ECO,
+                    i_functional ? UTIL_FILTER_FUNCTIONAL : UTIL_FILTER_ALL,
+                    i_parent);
+}
+
+void getEcoCores(TARGETING::TargetHandleList & o_coreList,
+                 Target* i_parent,
+                 const bool i_functional)
+{
+    getCoreChiplets(o_coreList,
+                    UTIL_FILTER_CORE_ECO,
+                    i_functional ? UTIL_FILTER_FUNCTIONAL : UTIL_FILTER_ALL,
+                    i_parent);
+}
 
 
 void getPeerTargets(

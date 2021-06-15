@@ -1074,7 +1074,7 @@ namespace HBPM
         {
             // Switching core checkstops from unit to system
             TARGETING::TargetHandleList l_coreTargetList;
-            getAllChips(l_coreTargetList, TYPE_CORE);
+            getNonEcoCores(l_coreTargetList);
 
             if(is_sapphire_load())
             {
@@ -1457,7 +1457,7 @@ errlHndl_t core_checkstop_helper_homer()
     do{
 
         TARGETING::TargetHandleList l_coreIds;
-        getAllChiplets( l_coreIds, TYPE_CORE, true );
+        getNonEcoCores(l_coreIds);
 
         for(TARGETING::Target* l_core : l_coreIds)
         {

@@ -83,7 +83,8 @@ void* call_host_activate_secondary_cores(void* const io_pArgs)
         (l_bootPIR & ~PIR_t::THREAD_MASK);
 
     TargetHandleList l_cores;
-    getAllChiplets(l_cores, TYPE_CORE);
+    // Don't want to attempt to wake COREs that have been marked for use as "Extended Cache-Only" cores.
+    getNonEcoCores(l_cores);
 
     TARGETING::Target* sys = nullptr;
     TARGETING::targetService().getTopLevelTarget(sys);
