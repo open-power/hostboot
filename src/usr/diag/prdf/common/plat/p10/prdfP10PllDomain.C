@@ -175,8 +175,10 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
             continue;
         }
 
+        #ifdef __HOSTBOOT_MODULE
         // Keep a cumulative list of the error types that need to be cleared.
         clearErrTypes[chip] = errTypes;
+        #endif
 
         // Capture any registers needed for PLL analysis, which would be
         // captured by default during normal analysis.
