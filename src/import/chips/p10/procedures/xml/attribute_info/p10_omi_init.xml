@@ -271,7 +271,7 @@
   <id>ATTR_MFG_SCREEN_OMI_CRC_ALLOWED</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
-      Threshold value of number of OMI CRC fails allowed in MFG screen per channel.
+      (DEPRECATED) Threshold value of number of OMI CRC fails allowed in MFG screen per channel.
       Checked against PMU value when MFG policy 'CRC/EDPL screening' enabled.
   </description>
   <valueType>uint16</valueType>
@@ -285,7 +285,7 @@
   <id>ATTR_MFG_SCREEN_OMI_EDPL_ALLOWED</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
-      Threshold value of number of OMI EDPL fails allowed in MFG screen per channel.
+      (DEPRECATED) Threshold value of number of OMI EDPL fails allowed in MFG screen per channel.
       Checked against PMU value when MFG policy 'CRC/EDPL screening' enabled.
   </description>
   <valueType>uint16</valueType>
@@ -293,6 +293,64 @@
   <overrideOnly/>
   <initToZero/>
   <mssAccessorName>mfg_screen_omi_edpl_allowed</mssAccessorName>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_MSS_MNFG_EDPL_TIME</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+      Time window value for OMI EDPL fails during MFG screen per channel.
+      This value will be set in DL0_CONFIG1[CFG_EDPL_TIME] when MFG_FLAG
+      'Activate CRC and EDPL counters' is set.
+  </description>
+  <valueType>uint8</valueType>
+  <platInit/>
+  <overrideOnly/>
+  <initToZero/>
+  <enum>
+    NONE = 0x00,
+    4US = 0x01,
+    32US = 0x02,
+    256US = 0x03,
+    2MS = 0x04,
+    16MS = 0x05,
+    128MS = 0x06,
+    1S = 0x07,
+    8S = 0x08,
+    64S = 0x09,
+    512S = 0x0A,
+    4KS = 0x0B,
+    32KS = 0x0C,
+    256KS = 0x0D,
+    2MGS = 0x0E,
+    16MGS = 0x0F
+  </enum>
+  <mssAccessorName>mnfg_edpl_time</mssAccessorName>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_MSS_MNFG_EDPL_THRESHOLD</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+      Threshold value for OMI EDPL fails during MFG screen per channel.
+      This value will be set in DL0_CONFIG1[CFG_EDPL_THRESHOLD] when MFG_FLAG
+      'Activate CRC and EDPL counters' is set.
+  </description>
+  <valueType>uint8</valueType>
+  <platInit/>
+  <overrideOnly/>
+  <initToZero/>
+  <enum>
+    NONE = 0x00,
+    2_ERRORS = 0x01,
+    4_ERRORS = 0x02,
+    8_ERRORS = 0x03,
+    16_ERRORS = 0x04,
+    32_ERRORS = 0x05,
+    64_ERRORS = 0x06,
+    128_ERRORS = 0x07
+  </enum>
+  <mssAccessorName>mnfg_edpl_threshold</mssAccessorName>
 </attribute>
 <!-- ********************************************************************** -->
 </attributes>

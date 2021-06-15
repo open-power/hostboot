@@ -177,6 +177,7 @@ template<>
 fapi2::ReturnCode after_mc_omi_init<mss::mc_type::EXPLORER>(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
     constexpr uint8_t EXPLR_TLXT_TLX_ERR1_REPORTQ_TLXT_INTRP_REQ_FAILED = 38;
+    constexpr uint32_t MNFG_OMI_CRC_EDPL_SCREEN = fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_POLICY_FLAG_AVAIL_05;
 
     fapi2::ATTR_CHIP_EC_FEATURE_OMI_CRC_FIRS_Type l_omi_crc_dd1_mask = false;
     fapi2::ATTR_CHIP_EC_FEATURE_OMI_EDPL_FIRS_Type l_omi_edpl_dd1_mask = false;
@@ -186,8 +187,7 @@ fapi2::ReturnCode after_mc_omi_init<mss::mc_type::EXPLORER>(const fapi2::Target<
     fapi2::ReturnCode l_rc3 = fapi2::FAPI2_RC_SUCCESS;
     fapi2::ReturnCode l_rc4 = fapi2::FAPI2_RC_SUCCESS;
     fapi2::buffer<uint64_t> l_reg_data;
-    bool l_mnfg_screen_test_crc = false;
-    bool l_mnfg_screen_test_edpl = false;
+    bool l_mnfg_screen_test = false;
 
     mss::fir::reg<EXPLR_MMIO_MFIR> l_exp_mmio_mfir_reg(i_target, l_rc1);
     mss::fir::reg<EXPLR_TLXT_TLXFIRQ> l_exp_tlxt_fir_reg(i_target, l_rc2);
@@ -215,9 +215,8 @@ fapi2::ReturnCode after_mc_omi_init<mss::mc_type::EXPLORER>(const fapi2::Target<
              "%s Failed to read ATTR_CHIP_EC_FEATURE_OMI_EDPL_FIRS",
              mss::c_str(i_target));
 
-    // check for mnfg OMI screen settings
-    FAPI_TRY(mss::exp::check_omi_mfg_screen_crc_setting(l_mnfg_screen_test_crc));
-    FAPI_TRY(mss::exp::check_omi_mfg_screen_edpl_setting(l_mnfg_screen_test_edpl));
+    // check for mnfg OMI screen setting
+    FAPI_TRY(mss::check_mfg_flag(MNFG_OMI_CRC_EDPL_SCREEN, l_mnfg_screen_test));
 
     FAPI_TRY(mss::attr::get_exp_intr_mask_disable(i_target, l_intr_mask_disable));
 
@@ -269,11 +268,11 @@ fapi2::ReturnCode after_mc_omi_init<mss::mc_type::EXPLORER>(const fapi2::Target<
     // Set up MNFG OMI screen or DD1 workaround settings for CRC and EDPL FIRs
     exp::workarounds::fir::omi_crc_after_omi_init(i_target,
             l_omi_crc_dd1_mask,
-            l_mnfg_screen_test_crc,
+            l_mnfg_screen_test,
             l_exp_dlx_omi_fir_reg);
     exp::workarounds::fir::omi_edpl_after_omi_init(i_target,
             l_omi_edpl_dd1_mask,
-            l_mnfg_screen_test_edpl,
+            l_mnfg_screen_test,
             l_exp_dlx_omi_fir_reg);
 
     // Setup MC OMI FIR unmasks per spec

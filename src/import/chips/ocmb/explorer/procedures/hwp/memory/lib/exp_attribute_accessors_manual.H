@@ -303,33 +303,6 @@ fapi2::ReturnCode is_mds( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target
 ///
 fapi2::ReturnCode is_mds( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target, bool& o_is_mds );
 
-namespace exp
-{
-
-///
-/// @brief Function to check if MNFG OMI screening test is set up, helper for unit testing
-/// @param[in] i_omi_screen_set true if ENUM_ATTR_MFG_FLAGS_MFG_OMI_CRC_EDPL_SCREEN is set
-/// @param[in] i_num_allowed number of CRC or EDPL errors allowed, from attribute values
-/// @return true if MNFG OMI screening test is set up
-///
-bool check_omi_mfg_screen_setting_helper(const bool i_omi_screen_set,
-        const uint16_t i_num_allowed);
-
-///
-/// @brief Function to check if MNFG OMI screening CRC test is set up
-/// @param[out] o_is_set will be set to true if MNFG OMI screening CRC test is set up
-/// @return FAPI2_RC_SUCCESS iff ok
-///
-fapi2::ReturnCode check_omi_mfg_screen_crc_setting(bool& o_is_set);
-
-///
-/// @brief Function to check if MNFG OMI screening EDPL test is set up
-/// @param[out] o_is_set will be set to true if MNFG OMI screening EDPL test is set up
-/// @return FAPI2_RC_SUCCESS iff ok
-///
-fapi2::ReturnCode check_omi_mfg_screen_edpl_setting(bool& o_is_set);
-
-} // ns exp
 } // ns mss
 
 #endif

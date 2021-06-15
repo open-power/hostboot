@@ -133,17 +133,36 @@ inline void set_edpl_enable_bit( fapi2::buffer<uint64_t>& io_data, const bool i_
 /// @param[in,out] io_data the register data
 /// @param[in] i_enable true if edpl is enabled
 /// @param[in] i_mnfg_screen_test true if OMI mfg screen is enabled
+/// @param[in] i_mnfg_edpl_time value of ATTR_MSS_MNFG_EDPL_TIME
 ///
 inline void setup_edpl_time_window( fapi2::buffer<uint64_t>& io_data,
                                     const bool i_enable,
-                                    const bool i_mnfg_screen_test )
+                                    const bool i_mnfg_screen_test,
+                                    const uint8_t i_mnfg_edpl_time )
 {
     if (i_enable && i_mnfg_screen_test)
     {
-        // set EDPL for 'no time window', so the counters will keep accumulating (until max 0xff)
-        // and can be compared to attribute at end of mnfg run
         io_data.insertFromRight<EXPLR_DLX_DL0_CONFIG1_CFG_EDPL_TIME,
-                                EXPLR_DLX_DL0_CONFIG1_CFG_EDPL_TIME_LEN>(mss::omi::edpl_time_win::EDPL_TIME_WIN_NO);
+                                EXPLR_DLX_DL0_CONFIG1_CFG_EDPL_TIME_LEN>(i_mnfg_edpl_time);
+    }
+}
+
+///
+/// @brief Setup edpl threshold for mnfg test
+/// @param[in,out] io_data the register data
+/// @param[in] i_enable true if edpl is enabled
+/// @param[in] i_mnfg_screen_test true if OMI mfg screen is enabled
+/// @param[in] i_mnfg_edpl_threshold value of ATTR_MSS_MNFG_EDPL_THRESHOLD
+///
+inline void setup_edpl_threshold( fapi2::buffer<uint64_t>& io_data,
+                                  const bool i_enable,
+                                  const bool i_mnfg_screen_test,
+                                  const uint8_t i_mnfg_edpl_threshold )
+{
+    if (i_enable && i_mnfg_screen_test)
+    {
+        io_data.insertFromRight<EXPLR_DLX_DL0_CONFIG1_CFG_EDPL_THRESHOLD,
+                                EXPLR_DLX_DL0_CONFIG1_CFG_EDPL_THRESHOLD_LEN>(i_mnfg_edpl_threshold);
     }
 }
 

@@ -30,6 +30,7 @@
 #include <p10_scom_mcc.H>
 #include <p10_scom_omi.H>
 #include <p10_scom_pauc.H>
+#include <lib/shared/p10_consts.H>
 #include <lib/fir/p10_fir_traits.H>
 #include <lib/mc/host_mc_traits.H>
 #include <lib/workarounds/p10_fir_workarounds.H>
@@ -39,7 +40,7 @@
 #include <generic/memory/lib/utils/find.H>
 #include <lib/mss_p10_attribute_getters.H>
 #include <generic/memory/lib/mss_generic_attribute_getters.H>
-#include <lib/p10_attribute_accessors_manual.H>
+#include <generic/memory/lib/generic_attribute_accessors_manual.H>
 
 namespace scomt
 {
@@ -696,8 +697,7 @@ inline fapi2::ReturnCode after_p10_omi_init_omi_fir_helper(const fapi2::Target<f
     fapi2::buffer<uint64_t> l_reg_data;
     bool l_subchannel_a_config = false;
     bool l_subchannel_b_config = false;
-    bool l_mnfg_screen_test_crc = false;
-    bool l_mnfg_screen_test_edpl = false;
+    bool l_mnfg_screen_test = false;
 
     // check chip EC attributes
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_OMI_CRC_FIRS,
@@ -712,8 +712,7 @@ inline fapi2::ReturnCode after_p10_omi_init_omi_fir_helper(const fapi2::Target<f
              mss::c_str(i_target));
 
     // check for mnfg OMI screen settings
-    FAPI_TRY(mss::check_omi_mfg_screen_crc_setting(l_mnfg_screen_test_crc));
-    FAPI_TRY(mss::check_omi_mfg_screen_edpl_setting(l_mnfg_screen_test_edpl));
+    FAPI_TRY(mss::check_mfg_flag(mss::p10::MNFG_OMI_CRC_EDPL_SCREEN, l_mnfg_screen_test));
 
     for (const auto& l_omic : mss::find_targets<fapi2::TARGET_TYPE_OMIC>(i_target))
     {
@@ -726,11 +725,11 @@ inline fapi2::ReturnCode after_p10_omi_init_omi_fir_helper(const fapi2::Target<f
         // Set up MNFG OMI screen or DD1 workaround settings for CRC and EDPL FIRs
         mss::workarounds::fir::omi_crc_after_omi_init(l_omic,
                 l_omi_crc_dd1_mask,
-                l_mnfg_screen_test_crc,
+                l_mnfg_screen_test,
                 l_mc_omi_fir_reg);
         mss::workarounds::fir::omi_edpl_after_omi_init(l_omic,
                 l_omi_edpl_dd1_mask,
-                l_mnfg_screen_test_edpl,
+                l_mnfg_screen_test,
                 l_mc_omi_fir_reg);
 
         // Re-mask any subchannel FIRs that are on non-configured OMI channels

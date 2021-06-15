@@ -100,25 +100,31 @@ fapi2::ReturnCode setup_mc_error_action(const fapi2::Target<fapi2::TARGET_TYPE_O
 /// @brief Function to setup CONFIG1_EDPL_TIME for MFG screen test
 /// @param[in] i_target the TARGET_TYPE_OMI to operate on
 /// @param[in] i_edpl_disable value from ATTR_MSS_OMI_EDPL_DISABLE
-/// @param[in] i_mnfg_screen_test value from check_omi_mfg_screen_edpl_setting
+/// @param[in] i_mnfg_screen_test true if OMI mfg screen is enabled
+/// @param[in] i_mnfg_edpl_time value of ATTR_MSS_MNFG_EDPL_TIME
 /// @param[in,out] io_data the register data to work on
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 void setup_mfg_test_edpl_time(const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_target,
                               const uint8_t i_edpl_disable,
                               const bool i_mnfg_screen_test,
+                              const uint8_t i_mnfg_edpl_time,
                               fapi2::buffer<uint64_t>& io_data);
 
 ///
-/// @brief Function to set up PMU CRC counters for MNFG OMI screening
-/// @param[in] i_target the TARGET_TYPE_OMIC to operate on
-/// @param[in] i_mnfg_screen_test value from check_omi_mfg_screen_edpl_setting
-/// @param[in,out] io_data CMN_CONFIG register data
+/// @brief Function to setup CONFIG1_EDPL_THRESHOLD for MFG screen test
+/// @param[in] i_target the TARGET_TYPE_OMI to operate on
+/// @param[in] i_edpl_disable value from ATTR_MSS_OMI_EDPL_DISABLE
+/// @param[in] i_mnfg_screen_test true if OMI mfg screen is enabled
+/// @param[in] i_mnfg_edpl_threshold value of ATTR_MSS_MNFG_EDPL_THRESHOLD
+/// @param[in,out] io_data the register data to work on
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
-void mfg_override_pmu_crc_counters(
-    const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target,
-    const bool i_mnfg_screen_test,
-    fapi2::buffer<uint64_t>& io_data);
+void setup_mfg_test_edpl_threshold(const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_target,
+                                   const uint8_t i_edpl_disable,
+                                   const bool i_mnfg_screen_test,
+                                   const uint8_t i_mnfg_edpl_threshold,
+                                   fapi2::buffer<uint64_t>& io_data);
 
 ///
 /// @brief P10 OMI setup helper function, to perform PRBS workarounds if needed
