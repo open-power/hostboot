@@ -222,6 +222,34 @@ uint32_t resumeBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 }
 
 //##############################################################################
+//##                       Core/cache functions
+//##############################################################################
+
+bool queryEcoMode(TARGETING::TargetHandle_t i_trgt)
+{
+    PRDF_ASSERT(nullptr != i_trgt);
+    PRDF_ASSERT(TYPE_CORE == getTargetType(i_trgt));
+
+    fapi2::Target<fapi2::TARGET_TYPE_CORE> fapiTrgt{i_trgt};
+
+    fapi2::ATTR_ECO_MODE_Type attr;
+
+    fapi2::ReturnCode rc = FAPI_ATTR_GET(fapi2::ATTR_ECO_MODE, fapiTrgt, attr);
+
+    errlHndl_t errl = fapi2::rcToErrl(rc);
+    if (nullptr != errl)
+    {
+        PRDF_ERR("[PlatServices::queryEcoMode] Failed to get ATTR_ECO_MODE: "
+                 "i_trgt=0x%08X", getHuid(i_trgt));
+        PRDF_COMMIT_ERRL(errl, ERRL_ACTION_REPORT);
+
+        return false; // assume ECO mode is not enabled.
+    }
+
+    return fapi2::ENUM_ATTR_ECO_MODE_ENABLED == attr;
+}
+
+//##############################################################################
 //##                       Line Delete Functions
 //##############################################################################
 
@@ -306,6 +334,10 @@ int32_t l3LineDelete(TargetHandle_t i_coreTgt,
         PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
         return FAIL;
     }
+
+    // Cannot write HCODE in ECO mode.
+    if (queryEcoMode(i_coreTgt))
+        return SUCCESS; // nothing more to do
 
     // Do HCODE update to preserve line delete
     BitStringBuffer ldData(64);
@@ -408,6 +440,10 @@ int32_t l2LineDelete(TargetHandle_t i_coreTgt,
         PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
         return FAIL;
     }
+
+    // Cannot write HCODE in ECO mode.
+    if (queryEcoMode(i_coreTgt))
+        return SUCCESS; // nothing more to do
 
     // Do HCODE update to preserve line delete
     BitStringBuffer ldData(64);

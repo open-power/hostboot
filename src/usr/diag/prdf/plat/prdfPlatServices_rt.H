@@ -98,6 +98,17 @@ uint32_t resumeBgScrub( ExtensibleChip * i_chip,
                         STEP_CODE_DATA_STRUCT & io_sc );
 
 //##############################################################################
+//##                       Core/cache functions
+//##############################################################################
+
+/**
+ * @brief  Queries if core is in ECO mode (i.e. L3 only mode)
+ * @param  i_trgt A CORE target.
+ * @return True if ECO mode is enabled. False, otherwise.
+ */
+bool queryEcoMode(TARGETING::TargetHandle_t i_trgt);
+
+//##############################################################################
 //##                       Line delete functions
 //##############################################################################
 

@@ -163,6 +163,10 @@ uint32_t ScomAccessor::Access(TargetHandle_t i_target,
                 {
                     if (registerId != mask.first) continue; // skip this reg
 
+                    // Cannot write HCODE in ECO mode.
+                    if (PlatServices::queryEcoMode(i_target))
+                        break; // nothing more to do
+
                     uint64_t scomVal =
                         (((uint64_t)bs.getFieldJustify(0, 32)) << 32) |
                          ((uint64_t)bs.getFieldJustify(32, 32));
