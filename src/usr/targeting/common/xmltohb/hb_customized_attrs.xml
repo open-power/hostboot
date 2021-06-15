@@ -176,6 +176,11 @@
           <global/>
     </attribute>
 
+    <attribute><!-- value needs to be chip-specific in MRW -->
+          <id>ATTR_IO_IOHS_CHANNEL_LOSS</id>
+          <global/>
+    </attribute>
+
     <attribute>
           <id>ATTR_MNFG_FLAGS</id>
           <default>0x0000000000000000</default>
