@@ -696,7 +696,7 @@ void gppb_print(
         for (auto j = 0; j < VPD_NUM_SLOPES_REGION; ++j)
         {
             sprintf(l_temp_buffer, "0x%04X%3s",
-                    revle16(i_gppb->poundw_slopes.ps_dds_slopes[dds_cnt][i][0][j])," ");
+                    i_gppb->poundw_slopes.ps_dds_slopes[dds_cnt][i][0][j]," ");
             strcat(l_buffer, l_temp_buffer);
         }
         FAPI_INF("%s", l_buffer);
@@ -966,25 +966,25 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
 
         io_globalppb->magic.value = revle64(PSTATE_PARMSBLOCK_MAGIC_V1);
 
-        io_globalppb->offsets[PGPE_FLAGS_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,pgpe_flags)); 
-        io_globalppb->offsets[BASE_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,base)); 
-        io_globalppb->offsets[AVSBUS_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,avs_bus_topology)); 
-        io_globalppb->offsets[SYSPARMS_VDD_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,vdd_sysparm)); 
-        io_globalppb->offsets[SYSPARMS_VCS_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,vcs_sysparm)); 
-        io_globalppb->offsets[SYSPARMS_VDN_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,vdn_sysparm)); 
-        io_globalppb->offsets[VRM_PARMS_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,ext_vrm_parms)); 
-        io_globalppb->offsets[VPD_OP_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,operating_points_set)); 
-        io_globalppb->offsets[POUNDV_BIAS_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,poundv_biases_0p05pct)); 
-        io_globalppb->offsets[POUNDV_SLOPES_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,poundv_slopes)); 
-        io_globalppb->offsets[POUNDW_SLOPES_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,poundw_slopes)); 
-        io_globalppb->offsets[RESCLK_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,resclk)); 
+        io_globalppb->offsets[PGPE_FLAGS_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,pgpe_flags));
+        io_globalppb->offsets[BASE_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,base));
+        io_globalppb->offsets[AVSBUS_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,avs_bus_topology));
+        io_globalppb->offsets[SYSPARMS_VDD_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,vdd_sysparm));
+        io_globalppb->offsets[SYSPARMS_VCS_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,vcs_sysparm));
+        io_globalppb->offsets[SYSPARMS_VDN_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,vdn_sysparm));
+        io_globalppb->offsets[VRM_PARMS_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,ext_vrm_parms));
+        io_globalppb->offsets[VPD_OP_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,operating_points_set));
+        io_globalppb->offsets[POUNDV_BIAS_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,poundv_biases_0p05pct));
+        io_globalppb->offsets[POUNDV_SLOPES_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,poundv_slopes));
+        io_globalppb->offsets[POUNDW_SLOPES_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,poundw_slopes));
+        io_globalppb->offsets[RESCLK_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,resclk));
 
-        io_globalppb->offsets[DDS_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,dds)); 
-        io_globalppb->offsets[DDS_ALT_CAL_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,dds_alt_cal)); 
-        io_globalppb->offsets[DDS_OTHER_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,dds_tgt_act_bin)); 
-        io_globalppb->offsets[DDS_VDD_CAL_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,vdd_cal)); 
-        io_globalppb->offsets[WOF_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,wof)); 
-        io_globalppb->offsets[WOV_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,wov)); 
+        io_globalppb->offsets[DDS_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,dds));
+        io_globalppb->offsets[DDS_ALT_CAL_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,dds_alt_cal));
+        io_globalppb->offsets[DDS_OTHER_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,dds_tgt_act_bin));
+        io_globalppb->offsets[DDS_VDD_CAL_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,vdd_cal));
+        io_globalppb->offsets[WOF_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,wof));
+        io_globalppb->offsets[WOV_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,wov));
 
         io_globalppb->base.reference_frequency_khz = revle32(iv_reference_frequency_khz);
 
@@ -3787,6 +3787,7 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundW (void)
                 {
                     iv_poundW_data.entry[i].entry[j].ddsc.value =
                         revle64(iv_poundW_data.entry[i].entry[j].ddsc.value);
+                    FAPI_INF("#W DDSC[CF %u][C %u] = 0x%16llX" , i, j, iv_poundW_data.entry[i].entry[j].ddsc.value );
 
                     iv_poundW_data.entry[i].entry_alt_cal[j].alt_cal.value =
                         revle16(iv_poundW_data.entry[i].entry_alt_cal[j].alt_cal.value);
@@ -5430,23 +5431,24 @@ void PlatPmPPB::compute_dds_slopes(
             for (auto cores = 0; cores < MAXIMUM_CORES; cores++)
             {
                 //Insertion delay slopes
-                    if(iv_poundW_data.entry[region+1].entry[cores].ddsc.fields.insrtn_dely >=
-                        iv_poundW_data.entry[region].entry[cores].ddsc.fields.insrtn_dely) {
+                if(iv_poundW_data.entry[region+1].entry[cores].ddsc.fields.insrtn_dely >=
+                    iv_poundW_data.entry[region].entry[cores].ddsc.fields.insrtn_dely)
+                {
 
-                        o_gppb->poundw_slopes.ps_dds_delay_slopes[pt_set][cores][region] =
-                                revle16(compute_slope_4_12(iv_poundW_data.entry[region+1].entry[cores].ddsc.fields.insrtn_dely,
-                                    iv_poundW_data.entry[region].entry[cores].ddsc.fields.insrtn_dely,
-                                    iv_operating_points[pt_set][region].pstate,
-                                    iv_operating_points[pt_set][region + 1].pstate)
-                               );
-                    } else {
-                        o_gppb->poundw_slopes.ps_dds_delay_slopes[pt_set][cores][region] =
-                               revle16(compute_slope_4_12(iv_poundW_data.entry[region].entry[cores].ddsc.fields.insrtn_dely,
-                                    iv_poundW_data.entry[region+1].entry[cores].ddsc.fields.insrtn_dely,
-                                    iv_operating_points[pt_set][region].pstate,
-                                    iv_operating_points[pt_set][region + 1].pstate)
-                               );
-                    }
+                    o_gppb->poundw_slopes.ps_dds_delay_slopes[pt_set][cores][region] =
+                            revle16(compute_slope_4_12(iv_poundW_data.entry[region+1].entry[cores].ddsc.fields.insrtn_dely,
+                                iv_poundW_data.entry[region].entry[cores].ddsc.fields.insrtn_dely,
+                                iv_operating_points[pt_set][region].pstate,
+                                iv_operating_points[pt_set][region + 1].pstate)
+                           );
+                } else {
+                    o_gppb->poundw_slopes.ps_dds_delay_slopes[pt_set][cores][region] =
+                           revle16(compute_slope_4_12(iv_poundW_data.entry[region].entry[cores].ddsc.fields.insrtn_dely,
+                                iv_poundW_data.entry[region+1].entry[cores].ddsc.fields.insrtn_dely,
+                                iv_operating_points[pt_set][region].pstate,
+                                iv_operating_points[pt_set][region + 1].pstate)
+                           );
+                }
 
                 FAPI_DBG("ps_dds_delay_slopes: [%s][%s][%u] 0x%04x %u 0x%04x %u delay[r]=%u delay[r+1]=%u",
                         vpdSetStr[pt_set], region_names[region],cores,
@@ -5515,22 +5517,33 @@ void PlatPmPPB::compute_dds_slopes(
                             break;
                     }
 
-                    o_gppb->poundw_slopes.ps_dds_slopes[dds_cnt][pt_set][cores][region] =
-                                compute_slope_2_6(l_max,
-                                    l_min,
-                                    iv_operating_points[pt_set][region].pstate,
-                                    iv_operating_points[pt_set][region + 1].pstate)
-                               ;
-                    FAPI_DBG("ps_dds_slopes [%s][%s][%s][%u] 0x%04x %d",
+                    if(l_max >= l_min)
+                    {
+                        o_gppb->poundw_slopes.ps_dds_slopes[dds_cnt][pt_set][cores][region] =
+                                    compute_slope_2_6(
+                                        l_max,
+                                        l_min,
+                                        iv_operating_points[pt_set][region].pstate,
+                                        iv_operating_points[pt_set][region + 1].pstate);
+                    }
+                    else
+                    {
+                        o_gppb->poundw_slopes.ps_dds_slopes[dds_cnt][pt_set][cores][region] =
+                                    compute_slope_2_6(
+                                        l_min,
+                                        l_max,
+                                        iv_operating_points[pt_set][region].pstate,
+                                        iv_operating_points[pt_set][region + 1].pstate);
+                    }
+                    FAPI_DBG("ps_dds_slopes [%s][%s][%s][%u] max 0x%x min 0x%x slope 0x%04x %d",
                             ddsFieldStr[dds_cnt],  vpdSetStr[pt_set], region_names[region],cores,
-                            revle16(o_gppb->poundw_slopes.ps_dds_slopes[dds_cnt][pt_set][cores][region]),
-                            revle16(o_gppb->poundw_slopes.ps_dds_slopes[dds_cnt][pt_set][cores][region]));
+                            l_max, l_min,
+                            o_gppb->poundw_slopes.ps_dds_slopes[dds_cnt][pt_set][cores][region],
+                            o_gppb->poundw_slopes.ps_dds_slopes[dds_cnt][pt_set][cores][region]);
                 }
-
             }//end of dds_cnt
         }//end of region
     } //end of pts
-
 }
 
 ///////////////////////////////////////////////////////////

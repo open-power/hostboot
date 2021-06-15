@@ -656,7 +656,7 @@ class PlatPmPPB
         /// @param[in]     x0
         /// @return computed slope (y1-y0)/(x1-x0) * (1 << 6)
         /// -----------------------------------------------------------------------
-        int16_t compute_slope_2_6(uint32_t y1, uint32_t y0, uint32_t x1, uint32_t x0)
+        int8_t compute_slope_2_6(uint32_t y1, uint32_t y0, uint32_t x1, uint32_t x0)
         {
             return (int8_t)
                    (
