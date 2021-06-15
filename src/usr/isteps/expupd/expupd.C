@@ -51,7 +51,7 @@
 #include <util/threadpool.H>
 #include <spdenums.H>
 #include <spd.H>
-
+#include <kernel/bltohbdatamgr.H>
 
 using namespace ISTEP_ERROR;
 using namespace ERRORLOG;
@@ -555,9 +555,18 @@ void performUpdate( IStepError& o_stepError,
         // Always reboot if we make an attempt
         l_rebootRequired = true;
 
+        // Up the number of threads we can support if we have more
+        //  cache to play in
+        auto l_cacheSize = g_BlToHbDataManager.getHbCacheSizeMb();
+        auto l_maxThreads = MAX_OCMB_THREADS;
+        if( l_cacheSize > 16 )
+        {
+            l_maxThreads = 128; //effectively no limit
+        }
+
         //Don't create more threads than we have targets
         size_t l_numTargets = i_explorerList.size();
-        uint32_t l_numThreads = std::min(MAX_OCMB_THREADS, l_numTargets);
+        uint32_t l_numThreads = std::min(l_maxThreads, l_numTargets);
 
         TRACFCOMP(g_trac_expupd,
                   INFO_MRK"Starting %llu thread(s) to handle %llu OCMB target(s) ",
