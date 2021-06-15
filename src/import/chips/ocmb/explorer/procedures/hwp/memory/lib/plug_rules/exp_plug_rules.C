@@ -335,8 +335,20 @@ fapi2::ReturnCode enforce_pre_eff_config_thermal(const fapi2::Target<fapi2::TARG
 {
     const auto& l_omic = mss::find_target<fapi2::TARGET_TYPE_OMIC>(mss::find_target<fapi2::TARGET_TYPE_OMI>(i_target));
 
+    uint8_t l_ignore_plug_rules = 0;
+
     // Get vector of l_kinds
     std::vector<mss::dimm::kind<mss::mc_type::EXPLORER>> l_kinds;
+
+    FAPI_TRY( mss::attr::get_ignore_mem_plug_rules(l_ignore_plug_rules) );
+
+    // Skip all plug rule checks if set to ignore (e.g. on Apollo)
+    if (l_ignore_plug_rules == fapi2::ENUM_ATTR_MEM_IGNORE_PLUG_RULES_YES)
+    {
+        FAPI_INF("%s Attribute set to ignore plug rule checking", mss::c_str(i_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
 
     // Get the vector of DIMMS to be checked for size
     for (const auto& l_omi : mss::find_targets<fapi2::TARGET_TYPE_OMI>(l_omic))
@@ -349,6 +361,7 @@ fapi2::ReturnCode enforce_pre_eff_config_thermal(const fapi2::Target<fapi2::TARG
             }
         }
     }
+
 
     // Checking the plug rule for dimm size mix
     FAPI_TRY( dimm_size_mixing( l_omic, l_kinds ) );
