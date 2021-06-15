@@ -111,12 +111,22 @@ Additionally, when `TP_LOCAL_FIR[28]` is asserted:
 
 Also, RCS unlock detect attentions are only valid if found on the non-primary
 clock. PRD will have to check `RCS_SENSE_1[12:13]` to determine which clock is
-primary. NOTE: It is possible on P10 DD1.0 to see an RCS unlock detect
-attention on the primary clock, which should be ignored. The hardware team is
-working on a possible fix for P10 DD2.0 to only report on non-primary clocks. In
-addition, there is a bug in P10 DD1.0 that will report false RCS unlock detect
-attentions. Therefore, the hardware team has recommended to mask these
-attentions for P10 DD1.0.
+primary.
+
+### Important notes regarding RCS unlock detect attentions in hardware
+
+- In P10 DD1.0, it is possible on to see an RCS unlock detect attention on the
+  primary clock, which should be ignored. The hardware team is working on a
+  possible fix for P10 DD2.0 to only report on non-primary clocks.
+
+- In P10 DD1.0, there is a bug in hardware that will report false RCS unlock
+  detect attentions. Therefore, the hardware team has recommended to mask these
+  attentions for P10 DD1.0.
+
+- In P10 DD2.0, the hardware team was unable to resolve the P10 DD1.0 issues
+  above, among other issues, and have determined that the RCS unlock detect
+  functionality will be **disabled for all P10 processors** and the attentions
+  will be masked.
 
 ## Clock Domain Error Analysis Priority and Justifications
 
