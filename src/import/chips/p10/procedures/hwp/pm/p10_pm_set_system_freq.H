@@ -32,7 +32,8 @@
 /// @typedef p10_pm_set_system_freq_FP_t
 /// function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p10_pm_set_system_freq_FP_t) (
-    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_sys_targ);
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_sys_targ,
+    const bool i_wof_state);
 
 
 extern "C"
@@ -44,7 +45,8 @@ extern "C"
     /// -------------------------------------------------------------------
     fapi2::ReturnCode
     p10_pm_set_system_freq(
-        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_sys_target);
+        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_sys_target,
+        const bool i_wof_state = false);
 
 } // extern C
 

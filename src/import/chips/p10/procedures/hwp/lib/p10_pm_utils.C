@@ -833,7 +833,8 @@ fapi_try_exit:
 ///////////////////////////////////////////////////////////
 fapi2::ReturnCode wof_apply_overrides(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_proc_target,
-    fapi2::voltageBucketData_t* o_poundV_data)
+    fapi2::voltageBucketData_t* o_poundV_data,
+    const bool i_wof_state)
 {
     FAPI_INF(">> wof_apply_overrides");
 
@@ -845,24 +846,11 @@ fapi2::ReturnCode wof_apply_overrides(
 
     do
     {
-        fapi2::ATTR_SYSTEM_WOF_DISABLE_Type l_wof_sys_disable;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_WOF_DISABLE, FAPI_SYSTEM, l_wof_sys_disable));
-
-        if (l_wof_sys_disable)
-        {
-            FAPI_INF("  WOF sys attr is disabled.");
-            break;
-        }
-
-        fapi2::ATTR_WOF_ENABLED_Type l_wof_enabled;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOF_ENABLED, i_proc_target, l_wof_enabled));
-
-        if (!l_wof_enabled)
+        if (!i_wof_state)
         {
             FAPI_INF("  WOF not enabled.  No overrides are applied.");
             break;
         }
-
 
         FAPI_TRY(wof_get_tables(i_proc_target, l_wof_table_data));
 

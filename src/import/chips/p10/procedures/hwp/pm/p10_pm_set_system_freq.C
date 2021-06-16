@@ -52,20 +52,22 @@
 #define CF7 7
 
 fapi2::ReturnCode pm_set_frequency(
-       const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_sys_target);
+       const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_sys_target,
+       const bool i_wof_state);
 
 
 ///////////////////////////////////////////////////////////
 ////////    p10_pm_set_system_freq
 ///////////////////////////////////////////////////////////
 fapi2::ReturnCode
-p10_pm_set_system_freq(const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_sys_target)
+p10_pm_set_system_freq(const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_sys_target,
+                       const bool i_wof_state)
 {
     FAPI_DBG("> p10_pm_set_system_freq");
 
     do
     {
-        FAPI_TRY(pm_set_frequency(i_sys_target));
+        FAPI_TRY(pm_set_frequency(i_sys_target, i_wof_state));
     }
     while(0);
 
@@ -76,7 +78,8 @@ fapi_try_exit:
 ////////  pm_set_frequency
 ///////////////////////////////////////////////////////////
 fapi2::ReturnCode pm_set_frequency(
-    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_sys_target)
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_sys_target,
+    const bool i_wof_state)
 {
     FAPI_INF("pm_set_frequency >>>>>");
 
@@ -228,7 +231,7 @@ fapi2::ReturnCode pm_set_frequency(
                             l_proc_target, l_wof_enabled));
             }
             fapi2::voltageBucketData_t* p_poundV_data = &l_poundV_data;
-            FAPI_TRY(wof_apply_overrides(l_proc_target, p_poundV_data));
+            FAPI_TRY(wof_apply_overrides(l_proc_target, p_poundV_data,i_wof_state));
 #endif
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_BIAS,
                         i_sys_target,

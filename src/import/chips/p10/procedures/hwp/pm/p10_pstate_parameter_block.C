@@ -2128,9 +2128,6 @@ fapi2::ReturnCode PlatPmPPB::compute_boot_safe(
         //inputed to the HWP tells us to
         if(i_action == COMPUTE_VOLTAGE_SETTINGS)
         {
-            //Disable wof when we are in setup_evid procedure
-            SET_ATTR(fapi2::ATTR_WOF_ENABLED, iv_procChip, iv_wof_enabled);
-
             // get VPD data (#V,#W)
             FAPI_TRY(vpd_init(),"vpd_init function failed")
 
@@ -2509,7 +2506,8 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
         // Apply WOF Table Overrides as applicable
         FAPI_INF("> Applying WOF Overrides");
 
-        FAPI_TRY(wof_apply_overrides(iv_procChip, p_poundV_data));
+        bool wof_state = is_wof_enabled();
+        FAPI_TRY(wof_apply_overrides(iv_procChip, p_poundV_data,wof_state));
         FAPI_INF("< Applying WOF Overrides");
 
         // Update the class variables
@@ -4375,10 +4373,14 @@ fapi_try_exit:
 fapi2::ReturnCode PlatPmPPB::safe_mode_init( void )
 {
     FAPI_INF(">>>>>>>>>> safe_mode_init");
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::ATTR_WOF_TABLE_OVERRIDE_PS_Type ps_ovrd;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOF_TABLE_OVERRIDE_PS, FAPI_SYSTEM, ps_ovrd));
 
     if (!iv_attrs.attr_pm_safe_voltage_mv[VDD] ||
         !iv_attrs.attr_pm_safe_voltage_mv[VCS] ||
-        !iv_attrs.attr_pm_safe_frequency_mhz)
+        !iv_attrs.attr_pm_safe_frequency_mhz || 
+        ps_ovrd)
     {
         //Compute safe mode values
         FAPI_TRY(safe_mode_computation (
@@ -4417,6 +4419,8 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PDV_VALIDATION_MODE,
             FAPI_SYSTEM, l_pdv_mode));
 
+    fapi2::ATTR_WOF_TABLE_OVERRIDE_PS_Type ps_ovrd;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOF_TABLE_OVERRIDE_PS, FAPI_SYSTEM, ps_ovrd));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_FLOOR_MHZ,
                            iv_procChip,
                            l_core_floor_mhz));
@@ -4492,7 +4496,16 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
 
     if ( iv_attrs.attr_pm_safe_frequency_mhz)
     {
-        l_op_pt_mhz = iv_attrs.attr_pm_safe_frequency_mhz;
+        //If WOF override is applied then we should consider
+        //updated core floor freq to compute safe mode freq
+        if (ps_ovrd)
+        {
+             l_op_pt_mhz = l_core_floor_mhz;
+        }
+        else
+        {
+             l_op_pt_mhz = iv_attrs.attr_pm_safe_frequency_mhz;
+        }
         FAPI_INF ("Setting safe operating point from the safe mode attribute 0%04x (%d)",
                 l_op_pt_mhz, l_op_pt_mhz);
     }
@@ -5559,6 +5572,7 @@ fapi2::ReturnCode PlatPmPPB::update_vrt(
     uint32_t          l_step_freq_khz;
     Pstate            l_ps;
     uint8_t           l_temp = 0;
+    uint32_t          l_core_floor_mhz = 0;
 
     l_step_freq_khz = iv_frequency_step_khz;
 //    FAPI_DBG("l_step_freq_khz = 0x%X (%d)", l_step_freq_khz, l_step_freq_khz);
@@ -5616,6 +5630,10 @@ fapi2::ReturnCode PlatPmPPB::update_vrt(
     // Get the frequency biases in place and check that they all match
     double f_freq_bias = 0;
     int freq_bias_value_hp = 0;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_FLOOR_MHZ,
+                            iv_procChip,
+                            l_core_floor_mhz));
     freq_bias_value_hp = iv_bias.frequency_0p5pct;
 
     f_freq_bias = calc_bias(freq_bias_value_hp);
@@ -5632,16 +5650,26 @@ fapi2::ReturnCode PlatPmPPB::update_vrt(
 
         // Offset MHz*1000 (khz) + step (khz) * (sysvalue - 60)
         // Note: the table generation already did rounding so simply translate
-        float l_freq_raw_khz;
-        float l_freq_biased_khz;
-        l_freq_raw_khz = (float)(1000 * 1000 + (l_step_freq_khz * ((*i_pBuffer) - 60)));
+        float l_freq_raw_khz = 0;
+        float l_freq_biased_khz = 0;
+        //THis condition to handle if sys vrt is less than 60
+        //CeffRatio overage
+        if (*i_pBuffer <= 60 )
+        {
+            FAPI_TRY(freq2pState(l_core_floor_mhz*1000, &l_ps, ROUND_NEAR));
+            l_ps = l_ps + *i_pBuffer;
+        }
+        else
+        {
+            l_freq_raw_khz = (float)(1000 * 1000 + (l_step_freq_khz * ((*i_pBuffer) - 60)));
 
-        l_freq_biased_khz = l_freq_raw_khz * f_freq_bias;
-        l_freq_khz = (uint32_t)(l_freq_biased_khz);
+            l_freq_biased_khz = l_freq_raw_khz * f_freq_bias;
+            l_freq_khz = (uint32_t)(l_freq_biased_khz);
 
-        // Translate to Pstate.  The called function will clip to the
-        // legal range.
-        FAPI_TRY(freq2pState(l_freq_khz, &l_ps, ROUND_NEAR));
+            // Translate to Pstate.  The called function will clip to the
+            // legal range.
+            FAPI_TRY(freq2pState(l_freq_khz, &l_ps, ROUND_NEAR));
+        }
         o_vrt_data->data[l_index_0] = l_ps;
 
         if (b_output_trace)
@@ -6082,8 +6110,9 @@ fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
     fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ_Type l_sys_pstate0_freq_mhz = 0;
 
     auto sys_target = iv_procChip.getParent<fapi2::TARGET_TYPE_SYSTEM>();
+    bool wof_state = is_wof_enabled();
 
-    FAPI_TRY(p10_pm_set_system_freq(sys_target), "p10_pm_set_system_freq failed.");
+    FAPI_TRY(p10_pm_set_system_freq(sys_target,wof_state), "p10_pm_set_system_freq failed.");
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ,
              sys_target, l_sys_pstate0_freq_mhz));

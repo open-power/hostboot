@@ -119,11 +119,13 @@ fapi2::ReturnCode wof_validate_header(
 /// @brief Apply the WOF Table Overrides to #V
 /// @param[in]    i_proc_target Chip Target
 /// @param[inout] o_wof_table_data points to WOF data tables
+/// @param[in]    i_wof_state enabled or disabled
 /// @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
 /// ----------------------------------------------------------------------------
 fapi2::ReturnCode wof_apply_overrides(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_proc_target,
-    fapi2::voltageBucketData_t* o_poundV_data);
+    fapi2::voltageBucketData_t* o_poundV_data,
+    const bool i_wof_state);
 
 /// ----------------------------------------------------------------------------
 /// @brief Print the raw #V bucket structure
