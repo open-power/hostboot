@@ -211,7 +211,7 @@ define def_RD_PREAMBLE       =  (MP.ATTR_MEM_SI_DRAM_PREAMBLE[0][0] & 0x10) >> 4
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_RRDM_DLY [when=S] {      # BL/2+rank_switch
   spyv;
-  10; # Update per performance and design teams. First pass
+  9; # Update per performance testing as of 16-JUN-21
 }
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_RRSMSR_DLY [when=S] {    # tccd_s
@@ -231,7 +231,7 @@ ispy  MB_SIM.SRQ.MBA_TMR0Q_RROP_DLY [when=S] {      # tccd_l
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_WWDM_DLY [when=S] {      # BL/2+rank_switch
   spyv;
-  10; # Update per performance and design teams. First pass
+  9; # Update per performance testing as of 16-JUN-21
 }
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_WWSMSR_DLY [when=S] {    # tccd_s
@@ -250,8 +250,10 @@ ispy  MB_SIM.SRQ.MBA_TMR0Q_WWOP_DLY [when=S] {      # tccd_l
 }
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_RWDM_DLY [when=S] {      # (RL+BL/2+turn_around)-WL
-  spyv;
-  MP.ATTR_MEM_EFF_DRAM_CL + 4 + def_BUS_TURNAROUND_TCK - MP.ATTR_MEM_DRAM_CWL;
+  spyv, expr;
+  12,                                 (def_MEM_EFF_FREQ_EQ_2666==1);
+  14,                                 (def_MEM_EFF_FREQ_EQ_2933==1);
+  14,                                 (def_MEM_EFF_FREQ_EQ_3200==1);
 }
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_RWSMSR_DLY [when=S] {    # (RL+BL/2+turn_around)-WL
@@ -265,8 +267,10 @@ ispy  MB_SIM.SRQ.MBA_TMR0Q_RWSMDR_DLY [when=S] {    # (RL+BL/2+turn_around)-WL
 }
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_WRDM_DLY [when=S] {      # (WL+BL/2+turn_around)-RL
-  spyv;
-  MP.ATTR_MEM_DRAM_CWL + 4 + def_BUS_TURNAROUND_TCK - MP.ATTR_MEM_EFF_DRAM_CL;
+  spyv, expr;
+  7,                                 (def_MEM_EFF_FREQ_EQ_2666==1);
+  7,                                 (def_MEM_EFF_FREQ_EQ_2933==1);
+  6,                                 (def_MEM_EFF_FREQ_EQ_3200==1);
 }
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_WRSMSR_DLY [when=S] {    # WL+BL/2+(Twtr_s/clock period)
@@ -335,7 +339,7 @@ ispy  MB_SIM.SRQ.MBA_TMR1Q_TRRD_SBG [when=S] {
 
 ispy  MB_SIM.SRQ.MBA_TMR1Q_CFG_ACT_TO_DIFF_RANK_DLY [when=S] {
   spyv;
-  0; # Updates per the performance and design teams. First pass
+  9; # Updates per the performance and design teams. First pass
 }
 
 
@@ -880,7 +884,7 @@ ispy MB_SIM.SRQ.MBA_FARB5Q_CFG_CCS_ADDR_MUX_SEL [when=S] {
 
 ispy MB_SIM.SRQ.MBA_RRQ0Q_CFG_RRQ_ACT_NUM_READS_PENDING [when=S] {
   spyv;
-  0b0000;  #decimal value is 0, Big endian format. Updates per peformance/design teams - first pass
+  0b1000;
 }
 
 ispy MB_SIM.SRQ.MBA_WRQ0Q_CFG_WRQ_ACT_NUM_WRITES_PENDING [when=S] {
