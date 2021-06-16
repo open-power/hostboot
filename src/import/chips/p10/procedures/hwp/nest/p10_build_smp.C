@@ -890,10 +890,6 @@ fapi2::ReturnCode p10_build_smp_topo_tables(
                         fapi2::ATTR_ECO_MODE_Type l_eco_mode = fapi2::ENUM_ATTR_ECO_MODE_DISABLED;
                         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ECO_MODE, c, l_eco_mode));
                         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, c, l_attr_chip_unit_pos));
-                        FAPI_ASSERT(l_eco_mode == fapi2::ENUM_ATTR_ECO_MODE_DISABLED,
-                                    fapi2::P10_BUILD_SMP_INVALID_ECO_TARGET()
-                                    .set_CORE_TARGET(c),
-                                    "ECO target found but not expected in set of active cores, backing caches");
                         {
                             // limit update to set of active cores/backing caches on primary chip, which
                             // should all be accessible... active/backing attributes do not currently get pushed
@@ -910,6 +906,10 @@ fapi2::ReturnCode p10_build_smp_topo_tables(
                             // value of 0b0 indicates clocks are running
                             if (!l_eq_clock_status.getBit(CLOCK_STAT_SL_UNIT5_SL + (l_attr_chip_unit_pos % 4)))
                             {
+                                FAPI_ASSERT(l_eco_mode == fapi2::ENUM_ATTR_ECO_MODE_DISABLED,
+                                            fapi2::P10_BUILD_SMP_INVALID_ECO_TARGET()
+                                            .set_CORE_TARGET(c),
+                                            "ECO target found but not expected in set of active cores, backing caches");
                                 FAPI_TRY(topo::set_topology_id_tables_cache(c),
                                          "Error from topo::set_topology_id_tables_cache");
                             }
