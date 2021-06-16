@@ -872,7 +872,9 @@ struct targeted_scrub_operation : public operation<MC>
         o_rc = this->single_port_init();
 
         // Targeted scrub needs to force a pause and the end boundary. So we make sure that happens here.
-        this->iv_program.change_forced_pause( i_const.iv_end_boundary );
+        // Note: the PAUSE_ON_ERROR_MODE setting should pause the test on errors, or at the end so we
+        // shouldn't need a forced pause
+        this->iv_program.change_forced_pause( end_boundary::NONE );
     }
 
     targeted_scrub_operation() = delete;
