@@ -61,20 +61,6 @@ namespace
 const bool PDR_IS_NOT_REMOTE = false;
 const int PDR_AUTO_CALCULATE_RECORD_HANDLE = 0;
 
-using mutex_lock_t = std::unique_ptr<mutex_t, void(*)(mutex_t*)>;
-
-/* @brief Locks a mutex and returns an object which owns the lock. The object
- *        will automatically unlock the mutex when it is destroyed.
- *
- * @param[in] i_mutex  Mutex to lock
- * @return mutex_lock_t  Lock object
- */
-mutex_lock_t scoped_mutex_lock(mutex_t& i_mutex)
-{
-    mutex_lock(&i_mutex);
-    return { &i_mutex, mutex_unlock };
-}
-
 /* @brief findPdr_impl
  *
  *        This function is the same as findPdr but doesn't lock the PdrManager

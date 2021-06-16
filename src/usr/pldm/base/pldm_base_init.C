@@ -36,16 +36,67 @@
 #include "pldm_msg_queues.H"
 #include <initservice/taskargs.H>
 #include <pldm/requests/pldm_tid_requests.H>
+#include <sys/sync.h>
+#include <vector>
+#include <pldm/pldmif.H>
+#include "../common/pldmtrace.H"
+#include <initservice/initserviceif.H>
 
-namespace PLDM
+using namespace PLDM;
+
+/* @brief Structure for recording a callback that will be invoked when the
+ * system is shutting down.
+ */
+struct shutdown_event
 {
+    shutdown_callback_t callback = nullptr;
+    void* context = nullptr; // Argument to the callback
+};
+
+namespace
+{
+
+// This lock protects access to g_shutdown_events.
+mutex_t g_shutdown_events_mutex = MUTEX_INITIALIZER;
+// A list of callbacks to be invoked when firmware begins shutting down.
+std::vector<shutdown_event> g_shutdown_events;
+
+#ifdef CONFIG_PLDM
+void* shutdown_listener(msg_q_t const i_msgQ)
+{
+    task_detach();
+
+    // Wait for Initservice to tell us that the host is shutting down
+    auto msg = msg_wait(i_msgQ);
+
+    // Lock access to g_shutdown_events while we iterate it
+    const auto lock = scoped_mutex_lock(g_shutdown_events_mutex);
+
+    PLDM_INF(ENTER_MRK"Invoking PLDM shutdown events");
+
+    for (const auto event : g_shutdown_events)
+    {
+        event.callback(event.context);
+    }
+
+    g_shutdown_events.clear();
+
+    PLDM_INF(EXIT_MRK"Finished invoking PLDM shutdown events");
+
+    // Respond to Initservice to let the shutdown continue
+    msg_respond(i_msgQ, msg);
+
+    return nullptr;
+}
+#endif
+
 /**
 * @brief This is the function that gets called when pldm_base is loaded by
 *        initservice. It handles registering the pldm msg queues, initializing
 *        the pldm requester task, and telling the mctp layer we are ready to
 *        register the lpc bus to start MCTP traffic.
 */
-static void base_init(errlHndl_t& o_errl)
+void base_init(errlHndl_t& o_errl)
 {
     // register g_outboundPldmReqMsgQ, g_inboundPldmRspMsgQ,
     // and g_inboundPldmReqMsgQ so external modules can resolve
@@ -66,9 +117,37 @@ static void base_init(errlHndl_t& o_errl)
     o_errl = getTID();
 #endif
 
-    return;
+// libpldm is loaded by standalone simics, but CONFIG_PLDM isn't set in a
+// standalone environment, so we use this to avoid trying to send PLDM
+// notifications when there's no BMC.
+#ifdef CONFIG_PLDM
+    // Create a message queue for our shutdown listener. Initservice will send a
+    // message to this queue when shutdown begins.
+    const auto msgQ = msg_q_create();
+
+    task_create(shutdown_listener, msgQ);
+
+    INITSERVICE::registerShutdownEvent(PLDM_COMP_ID,
+                                       msgQ,
+                                       0, // Message ID, don't care what this value is
+                                       // We want an early notification so we
+                                       // don't have to worry about other
+                                       // resources being shut down.
+                                       INITSERVICE::HIGHEST_PRIORITY);
+#endif
 }
 
+} // anonymous namespace
+
+namespace PLDM
+{
+
+void registerShutdownCallback(shutdown_callback_t i_handler, void* i_context)
+{
+    const auto lock = scoped_mutex_lock(g_shutdown_events_mutex);
+    g_shutdown_events.push_back({ i_handler, i_context });
 }
 
-TASK_ENTRY_MACRO( PLDM::base_init );
+} // namespace PLDM
+
+TASK_ENTRY_MACRO( base_init );

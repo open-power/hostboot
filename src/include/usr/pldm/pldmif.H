@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,6 +53,15 @@ namespace PLDM
     * @return errHndl_t   nullptr unless error occurs
     */
     errlHndl_t routeInboundMsg(const uint8_t * i_msg, size_t i_len);
+
+    // Callback type given to registerShutdownCallback
+    using shutdown_callback_t = void(*)(void*);
+
+    /* @brief Register a callback that will be invoked at the beginning of firmware shutdown.
+     * @param[in] i_handler  Callback function
+     * @param[in] i_context  Callback context, forwarded to the callback
+     */
+    void registerShutdownCallback(shutdown_callback_t i_handler, void* i_context);
 #else
     /**
     * @brief This function is intended to be used by the MCTP resource

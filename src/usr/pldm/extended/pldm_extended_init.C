@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,8 @@
 
 #include "pldm_responder.H"
 #include <initservice/taskargs.H>
+#include <pldm/pldmif.H>
+#include <pldm/extended/pdr_manager.H>
 
 namespace PLDM
 {
@@ -45,7 +47,9 @@ static void extended_init(errlHndl_t& o_errl)
 {
     // This will call the pldmResponder
     Singleton<pldmResponder>::instance().init();
-    return;
+
+    // Sync PLDM states on shutdown
+    PLDM::registerShutdownCallback([](void*) { thePdrManager().sendAllFruFunctionalStates(); }, nullptr);
 }
 
 }

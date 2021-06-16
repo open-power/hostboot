@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -28,6 +28,10 @@
 
 #include <stdint.h>
 #include <sys/task.h>
+
+#ifdef __cplusplus
+#include <memory>
+#endif
 
 /**
  * Mutex object type
@@ -165,6 +169,23 @@ void mutex_lock(mutex_t * i_mutex);
  * @post mutex lock released
  */
 void mutex_unlock(mutex_t * i_mutex);
+
+#ifdef __cplusplus
+using mutex_lock_t = std::unique_ptr<mutex_t, decltype(&mutex_unlock)>;
+
+/* @brief Locks a mutex and returns an object which owns the lock. The object
+ *        will automatically unlock the mutex when it is destroyed. The object
+ *        can be moved to transfer ownership of the lock.
+ *
+ * @param[in] i_mutex  Mutex to lock
+ * @return mutex_lock_t  Lock object
+ */
+inline mutex_lock_t scoped_mutex_lock(mutex_t& i_mutex)
+{
+    mutex_lock(&i_mutex);
+    return { &i_mutex, mutex_unlock };
+}
+#endif
 
 /**
  * @fn recursive_mutex_lock

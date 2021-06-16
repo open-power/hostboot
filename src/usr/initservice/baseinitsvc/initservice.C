@@ -907,10 +907,6 @@ void InitService::_doShutdown(uint64_t i_status,
 
     TRACFCOMP(g_trac_initsvc, "_doShutdown> status=%.16X",iv_worst_status);
 
-#ifdef CONFIG_PLDM
-    PLDM::thePdrManager().sendAllFruFunctionalStates();
-#endif
-
     // sort the queue by priority before sending..
     std::sort( iv_regMsgQ.begin(), iv_regMsgQ.end());
 
