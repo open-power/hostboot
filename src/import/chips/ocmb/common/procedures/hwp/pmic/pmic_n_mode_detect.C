@@ -83,9 +83,16 @@ void reg_read(pmic_info& io_pmic, const uint8_t i_reg, fapi2::buffer<uint8_t>& o
 ///
 bool is_4u(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target)
 {
+    // SBE is expected to provide 4 PMIC targets for a 4U redundant DDIMM
+    // We've seen a scenario where the SBE does not provide 4, and the procedure
+    // requires it (see SW526831) so we need to check this here.
+    const auto PMICS = get_pmics(i_ocmb_target);
+
     // SBE is expected to provide exactly 4 GI2C targets
     const auto GI2CS = i_ocmb_target.getChildren<fapi2::TARGET_TYPE_GENERICI2CSLAVE>(fapi2::TARGET_STATE_PRESENT);
-    return (GI2CS.size() == mss::generic_i2c_slave::NUM_TOTAL_DEVICES);
+
+    return (PMICS.size() == mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>::NUM_PMICS_4U) &&
+           (GI2CS.size() == mss::generic_i2c_slave::NUM_TOTAL_DEVICES);
 }
 
 ///
