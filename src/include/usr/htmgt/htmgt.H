@@ -29,6 +29,16 @@
 
 #include <targeting/common/commontargeting.H>
 
+// Each P10 procesor can have 16 DDIMMs (each attached via an OMI channel)
+// Each DDIMM has 1 EXPLORER OCMB chip
+// Each EXPLORER OCMB chip has 1 port
+// Each port has 2 slots for DDR4 DIMMs
+const uint8_t HTMGT_MAX_PORT_PER_OCMB_CHIP = 1;
+const uint8_t HTMGT_MAX_SLOT_PER_OCMB_PORT = 2;
+const uint8_t HTMGT_NUM_DTS_PER_OCMB = 2;
+const uint8_t HTMGT_MAX_DIMM_PER_OCMB_CHIP =
+HTMGT_MAX_SLOT_PER_OCMB_PORT * HTMGT_MAX_PORT_PER_OCMB_CHIP;
+
 
 namespace HTMGT
 {

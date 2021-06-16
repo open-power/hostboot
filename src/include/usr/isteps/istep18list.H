@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -119,6 +119,7 @@ const DepModInfo g_istep18Dependancies = {
             DEP_LIB(libistep18.so),
             DEP_LIB(libfab_iovalid.so),
 #endif
+            DEP_LIB(libisteps_mss.so),
             nullptr
         }
 };

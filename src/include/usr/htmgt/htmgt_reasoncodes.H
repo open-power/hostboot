@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,11 @@ namespace HTMGT
         HTMGT_MODID_PROCESS_ELOG        = 0x10,
         HTMGT_MOD_OCCMGR_SET_MODE       = 0x11,
         HTMGT_MOD_SET_MODE              = 0x12,
+        HTMGT_MOD_MEM_THROTTLE_OT       = 0x20,
+        HTMGT_MOD_MEM_THROTTLE_REDUN    = 0x21,
+        HTMGT_MOD_MEM_UTIL_TO_THROTTLE  = 0x22,
+        HTMGT_MOD_MEM_BULK_PWR_THROTTLE = 0x23,
+        HTMGT_MOD_APSS_DATA             = 0x24,
         HTMGT_MOD_OCC_POLL              = 0x76,
         HTMGT_MOD_READ_OCC_SRAM         = 0x85,
         HTMGT_MOD_OCMB_INIT             = 0x8B,
@@ -67,6 +72,7 @@ namespace HTMGT
         HTMGT_RC_OT_THROTTLE_INVALID_N = HTMGT_COMP_ID | 0x04,
         HTMGT_RC_OCC_NOT_READY         = HTMGT_COMP_ID | 0x05,
         HTMGT_RC_ATTRIBUTE_ERROR       = HTMGT_COMP_ID | 0x06,
+        HTMGT_RC_SAVE_TO_ATTRIBUTE_FAIL = HTMGT_COMP_ID | 0x07,
         HTMGT_RC_DUPLICATE_CHIP_ID     = HTMGT_COMP_ID | 0x0C,
         HTMGT_RC_OCC_EXCEPTION         = HTMGT_COMP_ID | 0x0E,
         HTMGT_RC_NO_SUPPORT            = HTMGT_COMP_ID | 0x0F,

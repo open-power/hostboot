@@ -76,6 +76,25 @@
   </targetTypeExtension>
 
   <targetTypeExtension>
+    <id>chip-ocmb</id>
+    <attribute>
+      <id>N_PLUS_ONE_MEM_POWER</id>
+    </attribute>
+    <attribute>
+      <id>N_PLUS_ONE_N_PER_PORT</id>
+    </attribute>
+    <attribute>
+      <id>N_PLUS_ONE_N_PER_SLOT</id>
+    </attribute>
+    <attribute>
+      <id>OT_MEM_POWER</id>
+    </attribute>
+    <attribute>
+      <id>OT_MIN_N_PER_SLOT</id>
+    </attribute>
+  </targetTypeExtension>
+
+  <targetTypeExtension>
     <id>chip-processor</id>
     <attribute>
       <id>GPU_SENSORS</id>
@@ -355,34 +374,6 @@
     <id>unit-core-power9</id>
     <attribute>
       <id>IPMI_SENSORS</id>
-    </attribute>
-  </targetTypeExtension>
-
-  <targetTypeExtension>
-    <id>unit-mcs-power9</id>
-    <attribute>
-      <id>N_PLUS_ONE_MEM_POWER</id>
-    </attribute>
-    <attribute>
-      <id>N_PLUS_ONE_N_PER_CHIP</id>
-    </attribute>
-    <attribute>
-      <id>N_PLUS_ONE_N_PER_MBA</id>
-    </attribute>
-    <attribute>
-      <id>OT_MEM_POWER</id>
-    </attribute>
-    <attribute>
-      <id>OT_MIN_N_PER_MBA</id>
-    </attribute>
-    <attribute>
-      <id>POWERCAP_MEM_POWER</id>
-    </attribute>
-    <attribute>
-      <id>POWERCAP_N_PER_CHIP</id>
-    </attribute>
-    <attribute>
-      <id>POWERCAP_N_PER_MBA</id>
     </attribute>
   </targetTypeExtension>
 

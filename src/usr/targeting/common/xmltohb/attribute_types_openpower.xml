@@ -1124,8 +1124,9 @@ ID for the sensor number returned with the elog. -->
   <attribute>
     <id>N_PLUS_ONE_MEM_POWER</id>
     <description>
-        Maximum memory power in centiWatts with throttle
-        set to nominal/turbo
+        Maximum memory power in centiWatts when not in
+        oversubscription.
+        Values populated during istep 18.
     </description>
     <simpleType>
       <uint32_t>
@@ -1139,9 +1140,12 @@ ID for the sensor number returned with the elog. -->
   </attribute>
 
   <attribute>
-    <id>N_PLUS_ONE_N_PER_CHIP</id>
+    <id>N_PLUS_ONE_N_PER_PORT</id>
     <description>
-        Static per chip numerator setting when not in oversubscription.
+        Static per port numerator setting when not in
+        oversubscription.  Calculated based on memory
+        power with redundant power.
+        Values populated during istep 18.
     </description>
     <simpleType>
       <uint16_t>
@@ -1155,12 +1159,12 @@ ID for the sensor number returned with the elog. -->
   </attribute>
 
   <attribute>
-    <id>N_PLUS_ONE_N_PER_MBA</id>
+    <id>N_PLUS_ONE_N_PER_SLOT</id>
     <description>
-        Static per MBA numerator setting when not in
-        oversubscription.  Calculated based on MRW memory
-        power with redundant power. Lowest per MBA numerator
-        ever allowed when OCC is throttling due to OT.
+        Static per slot numerator setting when not in
+        oversubscription.  Calculated based on memory
+        power with redundant power.
+        Values populated during istep 18.
     </description>
     <simpleType>
       <uint16_t>
@@ -1224,6 +1228,7 @@ ID for the sensor number returned with the elog. -->
     <description>
         Maximum memory power in centiWatts with throttle
         set to minimum.
+        Values populated during istep 18.
     </description>
     <simpleType>
       <uint32_t>
@@ -1237,10 +1242,11 @@ ID for the sensor number returned with the elog. -->
   </attribute>
 
   <attribute>
-    <id>OT_MIN_N_PER_MBA</id>
+    <id>OT_MIN_N_PER_SLOT</id>
     <description>
-        Lowest per MBA numerator ever allowed when OCC is
+        Lowest per slot numerator ever allowed when OCC is
         throttling due to OT.
+        Values populated during istep 18.
     </description>
     <simpleType>
       <uint16_t>
@@ -1390,54 +1396,6 @@ ID for the sensor number returned with the elog. -->
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-  </attribute>
-
-  <attribute>
-    <id>POWERCAP_MEM_POWER</id>
-    <description>
-        Maximum memory power in centiWatts with when power is being capped.
-    </description>
-    <simpleType>
-      <uint32_t>
-        <default>0,0</default>
-      </uint32_t>
-      <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-  </attribute>
-
-  <attribute>
-    <id>POWERCAP_N_PER_CHIP</id>
-    <description>
-        Static per chip numerator setting when power is being capped.
-    </description>
-    <simpleType>
-      <uint16_t>
-        <default>0,0</default>
-      </uint16_t>
-      <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-  </attribute>
-
-  <attribute>
-    <id>POWERCAP_N_PER_MBA</id>
-    <description>
-        Static per slot numerator setting when power is being capped.
-    </description>
-    <simpleType>
-      <uint16_t>
-        <default>0,0</default>
-      </uint16_t>
-      <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
   </attribute>
 
   <attribute>

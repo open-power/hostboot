@@ -34,7 +34,6 @@
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/util.H>
-#include "../htmgt_memthrottles.H"
 #include "../htmgt_cfgdata.H"
 #include "../htmgt_utility.H"
 
@@ -50,8 +49,6 @@ private:
     bool iv_htmgtLoaded;
 
 public:
-
-    // TODO: RTC 269380 - Add Mem Config Support
 
     void testOCCRoleConfigData()
     {

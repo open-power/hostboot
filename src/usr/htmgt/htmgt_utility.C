@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -87,6 +87,16 @@ namespace HTMGT
                             sizeof(additionalSrc),
                             1,  // version
                             SUBSEC_ADDITIONAL_SRC);
+        }
+
+        const uint16_t l_comp_id = i_rc & 0xFF00;
+        if ((OCCC_COMP_ID != l_comp_id) &&
+            (PGPE_COMP_ID != l_comp_id) &&
+            (XGPE_COMP_ID != l_comp_id))
+        {
+            // Add HB firmware callout
+            io_err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                        HWAS::SRCI_PRIORITY_MED);
         }
 
         // Add HTMGT/OCC state data

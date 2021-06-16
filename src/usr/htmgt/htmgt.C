@@ -28,7 +28,6 @@
 #include "htmgt_activate.H"
 #include "htmgt_cfgdata.H"
 #include "htmgt_utility.H"
-#include "htmgt_memthrottles.H"
 #include "htmgt_occmanager.H"
 #include "htmgt_poll.H"
 #include <devicefw/userif.H>
@@ -89,17 +88,7 @@ namespace HTMGT
                     {
                         do
                         {
-                            // TODO: RTC 269380
-#if 0
-#ifndef __HOSTBOOT_RUNTIME
-                            // Calc memory throttles (once per IPL)
-                            l_err = calcMemThrottles();
-                            if( l_err )
-                            {
-                                break;
-                            }
-#endif
-#endif
+                            // Memory throttles are calculated during istep 18
 
                             // Make sure OCCs are ready for communication
                             l_err = OccManager::waitForOccCheckpoint();
