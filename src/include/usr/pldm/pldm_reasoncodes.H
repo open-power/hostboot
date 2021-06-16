@@ -71,7 +71,7 @@ namespace PLDM
         MOD_GET_DEBUG_CONSOLE_ENABLED                = 0x1E, // getDebugConsoleEnabled
         MOD_LOOKUP_VALUE_IN_STRING_TABLE             = 0x1F, // lookupEnumAttrValuesInStringTable
         MOD_SYSTEM_ENUM_ATTR_LOOKUP                  = 0x20, // systemEnumAttrLookup
-        MOD_WRITE_LID_FILE                           = 0x21, // writeLidFileFromOffset
+        MOD_WRITE_FILE_BY_TYPE                       = 0x21, // writeFileByType
         MOD_GET_MFG_FLAGS                            = 0x22, // getMfgFlags
         MOD_GET_TID                                  = 0x23, // getTID
         MOD_ADD_INVENTORY_PDRS                       = 0x24, // addFruInventoryPdrs

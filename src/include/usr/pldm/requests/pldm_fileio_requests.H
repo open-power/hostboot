@@ -107,6 +107,23 @@ errlHndl_t writeLidFileFromOffset(const uint32_t i_fileHandle,
                                  uint32_t& io_writeSizeBytes,
                                  const uint8_t* const i_writeBuffer);
 
+/**
+ * @brief Requests to send an error log to the BMC.
+ *
+ * @param[in] i_eid  Error ID of log being sent
+ * @param[in] i_pelData Flattened error log data buffer
+ * @param[in/out] io_dataSize the number of i_pelData bytes to send
+ *                This number must be within a single PLDM transfer size
+ *                (io_dataSize <= MAX_TRANSFER_SIZE_BYTES).
+ *                When the function returns, this will contain the number of
+ *                bytes that were actually sent. If this number is less than
+ *                input size, it will also be returning an error log
+ * @return nullptr on success; non-nullptr on error
+ */
+errlHndl_t sendErrLog(const uint32_t i_eid,
+                      const uint8_t * const i_pelData,
+                      uint32_t & io_dataSize);
+
 } // namespace PLDM
 
 #endif // PLDM_FILEIO_REQUESTS_H

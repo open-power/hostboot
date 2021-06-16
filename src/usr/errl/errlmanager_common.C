@@ -46,6 +46,10 @@
 #include <errl/errlreasoncodes.H>
 #include <targeting/common/targetservice.H>
 
+#ifdef CONFIG_PLDM
+#include <pldm/requests/pldm_fileio_requests.H>
+#endif
+
 namespace ERRORLOG
 {
 
@@ -197,7 +201,6 @@ void ErrlManager::setupPnorInfo()
                         i, l_id);
 
 #ifdef CONFIG_BMC_IPMI
-
                     // for IPMI systems, unflatten to send down to the BMC
                     err = new ERRORLOG::ErrlEntry(
                             ERRORLOG::ERRL_SEV_UNRECOVERABLE, 0,0);
@@ -605,6 +608,120 @@ bool ErrlManager::allowCallHomeEselsToBmc(void)
     return l_allowed;
 }
 
+#ifdef CONFIG_PLDM
+
+bool ErrlManager::sendErrLogToBmcPLDM(errlHndl_t &io_err, bool i_isPrevBootErr)
+{
+    TRACFCOMP(g_trac_errl, ENTER_MRK "sendErrLogToBmcPLDM errlogId 0x%.8X, i_isPrevBootErr %d",
+                io_err->eid(), i_isPrevBootErr);
+
+    bool l_errlSentAndAckd = false;
+
+    uint32_t l_maxBmcErrLogSize = 0; // maximum allowable error log size
+    uint32_t l_totalErrlSize = 0;    // actual flattened error log size
+
+    bool l_callhome_type = false;        // Is this a callhome type errl?
+    if (io_err->getEselCallhomeInfoEvent() && allowCallHomeEselsToBmc())
+    {
+        TRACFCOMP( g_trac_errl, INFO_MRK
+            "sendErrLogToBmcPLDM: setting l_callhome_type" );
+        l_callhome_type = true;
+    }
+
+    do {
+        //Add additional user detail section to pel data to indicate errl is
+        //from a previous boot.
+        if(i_isPrevBootErr)
+        {
+            const char* l_prev_boot = "Error from a previous boot";
+            // Create a raw user-defined section.  It does a copy of the
+            // string constant, then once added to io_err, io_err owns mem
+            ErrlUD* l_ffdcSection = new ErrlUD(l_prev_boot, strlen(l_prev_boot),
+                                         ERRL_COMP_ID, 1, ERRL_UDT_STRING );
+            io_err->iv_SectionVector.insert(io_err->iv_SectionVector.begin(),
+                                            l_ffdcSection);
+
+            // If this is an error from the previous boot, pass it off as a
+            // call home applicable log to get the error propagated
+            l_callhome_type = true;
+
+            // we don't want any visible logs from this set of data because it is untrustworthy
+            io_err->setSev(ERRL_SEV_INFORMATIONAL);
+        }
+
+        // Decide whether we want to skip the error log
+        if( io_err->getSkipProcessingLog() && !l_callhome_type )
+        {
+            TRACFCOMP( g_trac_errl, INFO_MRK
+                "sendErrLogToBmc: EID 0x%.8X is being skipped",
+                io_err->eid() );
+            break;
+        }
+
+        // Get this current log size and max allowable
+        io_err->getErrlSize(l_totalErrlSize, l_maxBmcErrLogSize);
+
+        if (l_totalErrlSize > l_maxBmcErrLogSize)
+        {
+            // need to truncate to max size
+            l_totalErrlSize = l_maxBmcErrLogSize;
+        }
+
+        // flatten into buffer, truncate to max BMC errl transfer size
+        std::vector<uint8_t> vPelData(l_totalErrlSize);
+
+        uint32_t l_errSize = io_err->flatten(vPelData.data(),
+                                             l_totalErrlSize, true /* truncate */);
+        if (l_errSize == 0 )
+        {
+            // flatten didn't work
+            TRACFCOMP( g_trac_errl, ERR_MRK
+                "sendErrLogToBmcPLDM: could not flatten data - not sending");
+            break;
+        }
+        if (l_errSize > l_maxBmcErrLogSize)
+        {
+            TRACFCOMP( g_trac_errl, ERR_MRK
+                "sendErrLogToBmcPLDM: flatten truncated error size %d over max size %d",
+                l_errSize, l_maxBmcErrLogSize );
+            break;
+        }
+
+        vPelData.resize(l_errSize);
+        errlHndl_t l_errl = PLDM::sendErrLog(io_err->eid(), vPelData.data(), l_errSize);
+        if (l_errl)
+        {
+            // stop sending error logs down to PLDM
+            iv_isPldmErrEnabled = false;
+
+            // commit this error to local memory and PNOR if possible
+            commitErrLog(l_errl, ERRL_COMP_ID);
+        }
+        else
+        {
+            l_errlSentAndAckd = true;
+            ERRORLOG::ErrlManager::errlAckErrorlog(io_err->eid());
+        }
+
+    } while (0);
+
+    if (l_errlSentAndAckd)
+    {
+        TRACFCOMP(g_trac_errl,
+              EXIT_MRK "sendErrLogToBmcPLDM errlogId 0x%.8X successfully sent",
+              io_err->eid() );
+    }
+    else
+    {
+        TRACFCOMP(g_trac_errl,
+              EXIT_MRK "sendErrLogToBmcPLDM errlogId 0x%.8X not sent completely",
+              io_err->eid() );
+    }
+
+    return l_errlSentAndAckd;
+}
+#endif
+
 #ifndef __HOSTBOOT_RUNTIME
 // @TODO: RTC 244854: Enable when can
 //        Having linking issue with symbols IPMI::IpmiConfigLookup::getSensorType
@@ -934,6 +1051,8 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err, bool i_sendSels)
 
     TRACFCOMP(g_trac_errl, EXIT_MRK "sendErrLogToBmc");
 } // sendErrLogToBmc
+
+
 
 uint8_t getSensorInfo(HWAS::callout_ud_t *i_ud,
                 uint8_t* o_sensorNumber, uint8_t* o_eventOffset,

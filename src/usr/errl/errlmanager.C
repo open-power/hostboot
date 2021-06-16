@@ -145,6 +145,11 @@ ErrlManager::ErrlManager() :
     iv_isErrlDisplayEnabled(false),
     iv_isIpmiEnabled(false),    // assume ipmi isn't ready yet..
     iv_pldWaitEnable(true), // error on the side of caution and default to waitings
+#ifdef CONFIG_PLDM
+    iv_isPldmErrEnabled(true), // assume pldm is ready
+#else
+    iv_isPldmErrEnabled(false), // pldm isn't available to transfer errors
+#endif
     iv_versionPartitionCache(nullptr),
     iv_versionPartitionCacheSize(0)
 {

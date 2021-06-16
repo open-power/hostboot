@@ -629,6 +629,18 @@ private:
     void sendErrLogToBmc(errlHndl_t &io_err, bool i_sendSels = true);
 #endif
 
+#ifdef CONFIG_PLDM
+    /**
+     * @brief Create a PLDM message with the error log and send it to BMC
+     *
+     * @param[in,out] io_err Error log handle to be committed
+     * @param[in] i_isPrevBootErr Is error from previous boot
+     * @return true if error log successfully sent and acked
+     */
+    bool sendErrLogToBmcPLDM(errlHndl_t &io_err, bool i_isPrevBootErr = false);
+#endif
+
+
     /**
       * @brief errorlog-into-PNOR variables
       */
@@ -643,6 +655,7 @@ private:
 #endif //#ifndef __HOSTBOOT_RUNTIME
     bool iv_isIpmiEnabled;      // are we able to send to BMC via IPMI
     bool iv_pldWaitEnable; // should we wait for SP to check for PLD errors?
+    bool iv_isPldmErrEnabled;   // are we able to send to BMC via PLDM
 
     // Errl flags which represent processing needed by the errl
     // represented as a bit field (8 bits)
