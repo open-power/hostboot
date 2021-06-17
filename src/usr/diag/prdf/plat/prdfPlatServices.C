@@ -950,6 +950,81 @@ uint32_t resumeTdScrub<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
 
 }
 
+template<>
+uint32_t startTdScrubOnNextRow<TYPE_OCMB_CHIP>(
+        ExtensibleChip * i_chip, const MemRank & i_rank, const MemAddr & i_addr,
+        AddrRangeType i_rangeType,
+        mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> i_stopCond,
+        mss::mcbist::end_boundary i_endBound )
+{
+    #define PRDF_FUNC "[PlatServices::startTdScrubOnNextRow<TYPE_OCMB_CHIP>] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    // Note: This function should never be called if scrub has stopped on the
+    // last row of the rank. When checking if scrub stopped on the last address
+    // during VCM, VCM should account for row repair and only be comparing the
+    // rank and row to determine if scrub stopped on the last address.
+
+    // Set stop-on-AUE for all target scrubs. See explanation in startBgScrub()
+    // for the reasons why.
+    i_stopCond.set_pause_on_aue(mss::ON);
+
+    do
+    {
+        // Get the address range of the given rank.
+        mss::mcbist::address junk, eaddr;
+        o_rc = getMemAddrRange<TYPE_OCMB_CHIP>( i_chip, i_rank, junk, eaddr,
+                                                i_rangeType );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x) failed",
+                      i_chip->getHuid(), i_rank.getKey() );
+            break;
+        }
+
+        // TODO RTC 210072 - Support multiple ports -- the format for
+        //                   mss::mcbist::address includes port select.
+        // Get the starting address from the input address.
+        mss::mcbist::address saddr( i_addr.incRowAddr<TYPE_OCMB_CHIP>(i_chip) );
+
+        // Get the OCMB_CHIP fapi target.
+        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiTrgt(i_chip->getTrgt());
+
+        // Clear all of the counters and maintenance ECC attentions.
+        o_rc = prepareNextCmd<TYPE_OCMB_CHIP>( i_chip );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "prepareNextCmd(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        PRDF_TRAC(PRDF_FUNC "Starting new targeted_scrub on next row. "
+                  "saddr=0x%016llx", i_addr.incRowAddr<TYPE_OCMB_CHIP>(i_chip));
+
+        // Start targeted scrub command.
+        errlHndl_t errl = nullptr;
+        FAPI_INVOKE_HWP( errl, exp_targeted_scrub, fapiTrgt,
+                         i_stopCond, saddr, eaddr, i_endBound );
+        if ( nullptr != errl )
+        {
+            PRDF_ERR( PRDF_FUNC "exp_targeted_scrub(0x%08x) "
+                      "failed", i_chip->getHuid() );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL; break;
+        }
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
 //##############################################################################
 //##                  Core/cache trace array functions
 //##############################################################################

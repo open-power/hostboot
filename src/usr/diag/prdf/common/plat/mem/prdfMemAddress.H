@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -101,6 +101,15 @@ class MemAddr
      */
     template<TARGETING::TYPE T>
     uint64_t toMaintAddr() const;
+
+    /**
+     * @brief  Returns a right justified uint64_t version of the address that
+     *         has been incremented to the next row to be input to a scrub cmd.
+     * @param  i_chip OCMB chip.
+     * @return A right justified uint64_t version of the address.
+     */
+    template<TARGETING::TYPE T>
+    uint64_t incRowAddr( ExtensibleChip * i_chip ) const;
 
     /** @return This address's rank. */
     const MemRank& getRank() const { return iv_rnk; }

@@ -230,6 +230,21 @@ uint32_t startTdScrub(ExtensibleChip * i_chip, const MemRank & i_rank,
 template<TARGETING::TYPE TT, typename SCT>
 uint32_t resumeTdScrub( ExtensibleChip * i_chip, SCT i_stopCond );
 
+/**
+ * @brief  Starts a scrub command on the next row of the input address
+ * @param  i_chip      OCMB chip.
+ * @param  i_rank      Target rank.
+ * @param  i_addr      Target address.
+ * @param  i_rangeType See enum AddrRangeType.
+ * @param  i_stopCond  The stop conditions for the targeted scrub.
+ * @param  i_endBound  End bound to determine where scrub stops when hitting
+ *                     the specified stop conditions
+ * @return Non-SUCCESS if an internal function fails, otherwise SUCCESS.
+ */
+template<TARGETING::TYPE TT, typename SCT>
+uint32_t startTdScrubOnNextRow( ExtensibleChip * i_chip, const MemRank & i_rank,
+        const MemAddr & i_addr, AddrRangeType i_rangeType, SCT i_stopCond,
+        mss::mcbist::end_boundary i_endBound = mss::mcbist::NONE );
 
 //##############################################################################
 //##                  Core/cache trace array functions
