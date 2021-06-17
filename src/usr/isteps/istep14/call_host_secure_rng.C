@@ -164,73 +164,84 @@ void* call_host_secure_rng(void* const io_pArgs)
                                                          // to block OCMB I2C reads and writes
                                                          // SOL (Secure OCMB Lock) stage
 
-                fapi2::ATTR_CHIP_EC_FEATURE_OCMB_SECURITY_SUPPORTED_Type l_ec_ocmb_security_supported;
-                FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_OCMB_SECURITY_SUPPORTED,
-                                  l_fapi2_proc_target, l_ec_ocmb_security_supported);
+                I2C::ocmb_data_t l_ocmb_data = {};
+                // see I2C::calcOcmbPortMaskForEngine for details
+                I2C::calcOcmbPortMaskForEngine(l_cpu_target, l_ocmb_data);
+
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "host_secure_rng:: ATTR_CHIP_EC_FEATURE_OCMB_SECURITY_SUPPORTED=%d",
-                    l_ec_ocmb_security_supported);
+                    "p10_disable_ocmb_i2c HWP target HUID 0x%.8x",
+                    get_huid(l_cpu_target));
 
-                if (l_ec_ocmb_security_supported)
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "call_host_secure_rng: PIB_ENGINE DEVICE_PROTECTION_DEVADDR=0x%X "
+                    "portlist_B=0x%llx portlist_C=0x%llx portlist_E=0x%llx",
+                    l_ocmb_data.devAddr, l_ocmb_data.portlist_B,
+                    l_ocmb_data.portlist_C, l_ocmb_data.portlist_E);
+
+                FAPI_INVOKE_HWP(l_err, p10_disable_ocmb_i2c,
+                                l_fapi2_proc_target,
+                                l_ocmb_data.devAddr,       // devAddr ENGINE A
+                                l_ocmb_data.devAddr,       // devAddr ENGINE B
+                                l_ocmb_data.devAddr,       // devAddr ENGINE C
+                                l_ocmb_data.devAddr,       // devAddr ENGINE E
+                                l_ocmb_data.portlist_A,    // portlist for A
+                                l_ocmb_data.portlist_B,    // portlist for B
+                                l_ocmb_data.portlist_C,    // portlist for C
+                                l_ocmb_data.portlist_E,    // portlist for E
+                                overrideForceDisable,
+                                overrideSULsetup,
+                                overrideSOLsetup);
+
+                if (l_err)
                 {
-                    I2C::ocmb_data_t l_ocmb_data = {};
-                    // see I2C::calcOcmbPortMaskForEngine for details
-                    I2C::calcOcmbPortMaskForEngine(l_cpu_target, l_ocmb_data);
-
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                        "p10_disable_ocmb_i2c HWP target HUID 0x%.8x",
-                        get_huid(l_cpu_target));
-
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                        "call_host_secure_rng: PIB_ENGINE DEVICE_PROTECTION_DEVADDR=0x%X "
-                        "portlist_B=0x%llx portlist_C=0x%llx portlist_E=0x%llx",
-                        l_ocmb_data.devAddr, l_ocmb_data.portlist_B,
-                        l_ocmb_data.portlist_C, l_ocmb_data.portlist_E);
-
-                    FAPI_INVOKE_HWP(l_err, p10_disable_ocmb_i2c,
-                                    l_fapi2_proc_target,
-                                    l_ocmb_data.devAddr,       // devAddr ENGINE A
-                                    l_ocmb_data.devAddr,       // devAddr ENGINE B
-                                    l_ocmb_data.devAddr,       // devAddr ENGINE C
-                                    l_ocmb_data.devAddr,       // devAddr ENGINE E
-                                    l_ocmb_data.portlist_A,    // portlist for A
-                                    l_ocmb_data.portlist_B,    // portlist for B
-                                    l_ocmb_data.portlist_C,    // portlist for C
-                                    l_ocmb_data.portlist_E,    // portlist for E
-                                    overrideForceDisable,
-                                    overrideSULsetup,
-                                    overrideSOLsetup);
-
-                    if (l_err)
+                        "ERROR : call_host_secure_rng: p10_disable_ocmb_i2c "
+                        "failed for PROC HUID 0x%08X "
+                        TRACE_ERR_FMT,
+                        get_huid(l_cpu_target),
+                        TRACE_ERR_ARGS(l_err));
+                    // Knock out the OCMBs but allow to continue
+                    TARGETING::TargetHandleList l_ocmb_list;
+                    // get the functional OCMBs
+                    getChildAffinityTargets(l_ocmb_list, l_cpu_target,
+                                            TARGETING::CLASS_CHIP,
+                                            TARGETING::TYPE_OCMB_CHIP);
+                    for (const auto& l_ocmb : l_ocmb_list)
                     {
                         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                            "ERROR : call_host_secure_rng: p10_disable_ocmb_i2c "
-                            "failed for PROC HUID 0x%08X "
-                            TRACE_ERR_FMT,
-                            get_huid(l_cpu_target),
-                            TRACE_ERR_ARGS(l_err));
-                        // Knock out the OCMBs but allow to continue
-                        TARGETING::TargetHandleList l_ocmb_list;
-                        // get the functional OCMBs
-                        getChildAffinityTargets(l_ocmb_list, l_cpu_target,
-                                                TARGETING::CLASS_CHIP,
-                                                TARGETING::TYPE_OCMB_CHIP);
-                        for (const auto& l_ocmb : l_ocmb_list)
-                        {
-                            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                                "call_host_secure_rng: Deconfiguring OCMBs "
-                                "due to HWP p10_disable_ocmb_i2c failure: "
-                                "PROC HUID=0x%08X OCMB HUID=0x%08X ",
-                                 get_huid(l_cpu_target), get_huid(l_ocmb));
-                            l_err->addHwCallout(l_ocmb,
-                                                HWAS::SRCI_PRIORITY_MED,
-                                                HWAS::DECONFIG,
-                                                HWAS::GARD_NULL);
-                        }
-                        l_err->collectTrace(ISTEP_COMP_NAME);
-                        errlCommit(l_err, HWPF_COMP_ID);
+                            "call_host_secure_rng: Deconfiguring OCMBs "
+                            "due to HWP p10_disable_ocmb_i2c failure: "
+                            "PROC HUID=0x%08X OCMB HUID=0x%08X ",
+                             get_huid(l_cpu_target), get_huid(l_ocmb));
+                        l_err->addHwCallout(l_ocmb,
+                                            HWAS::SRCI_PRIORITY_MED,
+                                            HWAS::DECONFIG,
+                                            HWAS::GARD_NULL);
                     }
-                } // end l_ec_ocmb_security_supported
+                    l_err->collectTrace(ISTEP_COMP_NAME);
+                    errlCommit(l_err, HWPF_COMP_ID);
+                }
+                else // all good so set attribute to skip engine B/C diagnostic resets during MPIPL
+                {
+                    TARGETING::ATTR_I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_B_type l_engine_B_inhibit =
+                        l_cpu_target->getAttr<TARGETING::ATTR_I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_B>();
+                    // Log some informational traces for MPIPL flows if needed
+                    TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_host_secure_rng: DIAG MODE RESET "
+                        "GET Engine B=%d", l_engine_B_inhibit);
+                    l_cpu_target->setAttr<TARGETING::ATTR_I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_B>(0x1);
+                    l_engine_B_inhibit = l_cpu_target->getAttr<TARGETING::ATTR_I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_B>();
+                    TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_host_secure_rng: DIAG MODE RESET "
+                        "SET Engine B=%d", l_engine_B_inhibit);
+
+                    TARGETING::ATTR_I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_C_type l_engine_C_inhibit =
+                        l_cpu_target->getAttr<TARGETING::ATTR_I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_C>();
+                    TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_host_secure_rng: DIAG MODE RESET "
+                        "GET Engine C=%d", l_engine_C_inhibit);
+                    l_cpu_target->setAttr<TARGETING::ATTR_I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_C>(0x1);
+                    l_engine_C_inhibit = l_cpu_target->getAttr<TARGETING::ATTR_I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_C>();
+                    TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_host_secure_rng: DIAG MODE RESET "
+                        "SET Engine C=%d", l_engine_C_inhibit);
+                }
             } // end SECUREBOOT::enabled
 #endif
         }  // end else

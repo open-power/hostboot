@@ -840,23 +840,6 @@
   </attribute>
 
   <attribute>
-    <description>
-        Used to tell I2C code whether to run
-        I2C Engine 2 Port 0 in diag mode or not
-        0 = Use Diag Mode
-        1 = Disable Diag Mode
-    </description>
-    <id>DISABLE_I2C_ENGINE2_PORT0_DIAG_MODE</id>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <simpleType>
-      <uint8_t>
-        <default>1</default>
-      </uint8_t>
-    </simpleType>
-  </attribute>
-
-  <attribute>
     <description>Dummy attribute on the heap with zero initialization</description>
     <id>DUMMY_HEAP_ZERO_DEFAULT</id>
     <persistency>volatile-zeroed</persistency>
@@ -3000,6 +2983,113 @@
     </complexType>
     <persistency>non-volatile</persistency>
     <readable/>
+  </attribute>
+
+  <attribute>
+    <id>I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_A</id>
+    <description>
+      Disables the diagnostic reset for the engine
+
+      We always want Engine A (FSI) to skip
+      the diagnostic resets
+
+      0 = Allows diagnostic resets
+      1 = Disables diagnostic resets
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0x1</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_B</id>
+    <description>
+      Disables the diagnostic reset for the engine
+
+      Engine B diagnostic reset capabilities are
+      determined by the I2C security OCMB states
+
+      We need this value to persist during MPIPL
+      but reset back to zero on cold IPL
+
+      0 = Allows diagnostic resets
+      1 = Disables diagnostic resets
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_C</id>
+    <description>
+      Disables the diagnostic reset for the engine
+
+      Engine C diagnostic reset capabilities are
+      determined by the I2C security OCMB states
+
+      We need this value to persist during MPIPL
+      but reset back to zero on cold IPL
+
+      0 = Allows diagnostic resets
+      1 = Disables diagnostic resets
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_D</id>
+    <description>
+      Disables the diagnostic reset for the engine
+
+      Engine D is currently allowed to perform
+      diagnostic resets (nothing alters this value)
+
+      0 = Allows diagnostic resets
+      1 = Disables diagnostic resets
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0x0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_E</id>
+    <description>
+      Disables the diagnostic reset for the engine
+
+      We always want Engine E to skip
+      the diagnostic resets
+
+      0 = Allows diagnostic resets
+      1 = Disables diagnostic resets
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0x1</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
   </attribute>
 
   <attribute>

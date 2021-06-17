@@ -406,6 +406,20 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
                 l_err->collectTrace(ISTEP_COMP_NAME);
                 ERRORLOG::errlCommit(l_err, ISTEP_COMP_ID);
             }
+            else // all good so set attribute to skip engine A diagnostic reset during MPIPL
+            {
+                TARGETING::ATTR_I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_A_type l_engine_A_inhibit =
+                    l_proc->getAttr<TARGETING::ATTR_I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_A>();
+                // Log some informational traces for MPIPL flows if needed
+                TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_host_secureboot_lockdown: "
+                    "DIAG MODE RESET GET Engine A=%d", l_engine_A_inhibit);
+                // FSI Engine A persists as always being inhibited from doing diagnostic resets
+                // The setAttr for Engine A is to clearly identify the security lock down logic
+                l_proc->setAttr<TARGETING::ATTR_I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_A>(0x1);
+                l_engine_A_inhibit = l_proc->getAttr<TARGETING::ATTR_I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_A>();
+                TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_host_secureboot_lockdown: "
+                    "DIAG MODE RESET SET Engine A=%d", l_engine_A_inhibit);
+            }
 
             const bool DO_NOT_FORCE_SECURITY = false; // No need to force security
             const bool DO_NOT_LOCK_ABUS_MAILBOXES = false; // Do not lock abus mailboxes

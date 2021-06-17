@@ -516,9 +516,6 @@
       <id>DECONFIG_GARDABLE</id>
     </attribute>
     <attribute>
-      <id>DISABLE_I2C_ENGINE2_PORT0_DIAG_MODE</id>
-    </attribute>
-    <attribute>
       <id>EECACHE_VPD_STATE</id>
     </attribute>
     <attribute>
@@ -548,6 +545,21 @@
       <!-- GARD_APPLIED, RESRC_RECOV, GARD, DEVTREE_SYNC -->
       <default>0x00000071</default>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+    </attribute>
+    <attribute>
+      <id>I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_A</id>
+    </attribute>
+    <attribute>
+      <id>I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_B</id>
+    </attribute>
+    <attribute>
+      <id>I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_C</id>
+    </attribute>
+    <attribute>
+      <id>I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_D</id>
+    </attribute>
+    <attribute>
+      <id>I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_E</id>
     </attribute>
     <attribute>
       <default>

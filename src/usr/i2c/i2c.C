@@ -3787,12 +3787,21 @@ errlHndl_t i2cForceResetAndUnlock( TARGETING::Target * i_target,
             l_numPorts = FSI_MODE_MAX_PORT;
         }
 
+        TARGETING::ATTR_I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_A_type l_engine_A_inhibit =
+            i_target->getAttr<TARGETING::ATTR_I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_A>();
+        TARGETING::ATTR_I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_B_type l_engine_B_inhibit =
+            i_target->getAttr<TARGETING::ATTR_I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_B>();
+        TARGETING::ATTR_I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_C_type l_engine_C_inhibit =
+            i_target->getAttr<TARGETING::ATTR_I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_C>();
+        TARGETING::ATTR_I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_D_type l_engine_D_inhibit =
+            i_target->getAttr<TARGETING::ATTR_I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_D>();
+        TARGETING::ATTR_I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_E_type l_engine_E_inhibit =
+            i_target->getAttr<TARGETING::ATTR_I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_E>();
         // Need to send slave stop to all ports with a device on the engine
         for( uint32_t port = 0; port < l_numPorts; port++ )
         {
             //Check if diag mode should be skipped
             TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
-
             if (l_type == TARGETING::TYPE_PROC)
             {
                 // The FSI accessible I2C master on non-master P10 processors,
@@ -3803,8 +3812,18 @@ errlHndl_t i2cForceResetAndUnlock( TARGETING::Target * i_target,
                 // However, we are unable to assume that the processors' secure
                 // access bits (SABs) all match early in the IPL.  Therefore we
                 // are disabling diagnostic mode for all FSI-based or Engine E
-                // resets.
-                if(i_args.switches.useFsiI2C || i_args.engine == HOST_ENGINE_E)
+                // resets, which will be reflected in l_engine_A_inhibit and
+                // l_engine_E_inhibit.
+                //
+                // Engine 0 is ambiguous, could be either FSI Engine 0 or Engine B
+                // We always skip FSI Engine 0, but we also want to catch Engine B (0)
+                // if I2C security is set, so we will filter as the following
+                // If any of this changes in the future will need to revisit the logic
+                if ( (i_args.switches.useFsiI2C && (l_engine_A_inhibit) ) ||
+                   ((i_args.engine == HOST_ENGINE_B) && (l_engine_B_inhibit)) ||
+                   ((i_args.engine == HOST_ENGINE_C) && (l_engine_C_inhibit)) ||
+                   ((i_args.engine == HOST_ENGINE_D) && (l_engine_D_inhibit)) ||
+                   ((i_args.engine == HOST_ENGINE_E) && (l_engine_E_inhibit)) )
                 {
                     TRACFCOMP(g_trac_i2c,
                               INFO_MRK "Not doing i2cForceResetAndUnlock() for "
