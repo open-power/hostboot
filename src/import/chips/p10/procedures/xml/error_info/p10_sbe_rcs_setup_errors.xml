@@ -56,7 +56,10 @@
       <rc>RC_RCS_FPLL_DESKEW_ERR_A</rc>
       <description> Error in caliberating the deskew for RCS FPLL A-Side</description>
       <ffdc>READ_SNS1LTH</ffdc>
-      <ffdc>SHIFTED_ERR_VAL</ffdc>
+      <ffdc>DESKEW_A</ffdc>
+      <ffdc>DESKEW_B</ffdc>
+      <ffdc>SHIFTED_A_ERR_VAL</ffdc>
+      <ffdc>SHIFTED_B_ERR_VAL</ffdc>
    </hwpError>
   <!-- ******************************************************************** -->
    <hwpError>
@@ -64,7 +67,23 @@
       <rc>RC_RCS_FPLL_DESKEW_ERR_B</rc>
       <description> Error in caliberating the deskew for RCS FPLL B-Side</description>
       <ffdc>READ_SNS1LTH</ffdc>
+      <ffdc>DESKEW_A</ffdc>
+      <ffdc>DESKEW_B</ffdc>
+      <ffdc>SHIFTED_A_ERR_VAL</ffdc>
+      <ffdc>SHIFTED_B_ERR_VAL</ffdc>
+   </hwpError>
+  <!-- ******************************************************************** -->
+   <hwpError>
+      <sbeError/>
+      <rc>RC_RCS_FPLL_DESKEW_CAL_ERROR</rc>
+      <description> Error in caliberating the deskew for either A or B side</description>
       <ffdc>SHIFTED_ERR_VAL</ffdc>
+      <ffdc>SELECTED_DESKEW_VAL</ffdc>
+      <ffdc>STEP</ffdc>
+      <ffdc>FIRST_ERROR</ffdc>
+      <ffdc>LAST_ERROR</ffdc>
+      <ffdc>SIDE_A_NOT_B</ffdc>
+      <ffdc>LOOP</ffdc>
    </hwpError>
   <!-- ******************************************************************** -->
    <hwpError>
