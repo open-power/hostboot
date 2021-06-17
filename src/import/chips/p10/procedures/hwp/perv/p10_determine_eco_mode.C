@@ -71,7 +71,7 @@ p10_determine_eco_mode(const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target)
 
     fapi2::ATTR_CHIP_UNIT_POS_Type l_core_num = 0;
     fapi2::ATTR_ECO_MODE_Type l_eco_mode = fapi2::ENUM_ATTR_ECO_MODE_DISABLED;
-    fapi2::ATTR_PG_Type l_eq_pg;
+    fapi2::ATTR_PG_MVPD_Type l_eq_pg;
     fapi2::buffer<uint32_t> l_eq_pg_buf;
 
     // platforms should continue to treat all CORE targets are functional
@@ -95,8 +95,8 @@ p10_determine_eco_mode(const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target)
 
     // retreive partial good information for EQ containing this core, via
     // the associated pervasive target
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PG, l_perv, l_eq_pg),
-             "Error from FAPI_ATTR_GET (ATTR_PG)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PG_MVPD, l_perv, l_eq_pg),
+             "Error from FAPI_ATTR_GET (ATTR_PG_MVPD)");
 
     // confirm expected functionality from partial good record
     // for a functional core, its associated ECL2/L3/MMA PG bits should all be 0
