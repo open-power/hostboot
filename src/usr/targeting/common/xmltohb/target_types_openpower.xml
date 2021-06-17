@@ -410,6 +410,9 @@
       <id>REGULATOR_EFFICIENCY_FACTOR</id>
     </attribute>
     <attribute>
+      <id>SECURE_VERSION_NUM</id>
+    </attribute>
+    <attribute>
       <id>SOFT_MIN_POWER_CAP_WATTS</id>
     </attribute>
     <attribute>

@@ -69,12 +69,9 @@ void* host_gard( void *io_pArgs )
     errlHndl_t l_err;
     ISTEP_ERROR::IStepError l_stepError;
     using namespace TARGETING;
+    Target* l_pTopLevel = UTIL::assertGetToplevelTarget();
 
     do {
-        Target* l_pTopLevel = NULL;
-        targetService().getTopLevelTarget( l_pTopLevel );
-        assert(l_pTopLevel, "host_gard: no TopLevelTarget");
-
         // Check whether we're in MPIPL mode
         if (l_pTopLevel->getAttr<ATTR_IS_MPIPL_HB>())
         {
@@ -377,6 +374,8 @@ void* host_gard( void *io_pArgs )
     // -- NOTE: API asserts if there's any issues returning the node target
     Target* node_tgt = UTIL::getCurrentNodeTarget();
     node_tgt->setAttr<ATTR_SECURE_VERSION_SEEPROM>(SECUREBOOT::getMinimumSecureVersion());
+    // Set the same BMC-related attribute if it's present
+    l_pTopLevel->trySetAttr<ATTR_SECURE_VERSION_NUM>(SECUREBOOT::getMinimumSecureVersion());
 
 #ifdef CONFIG_TPMDD
     // Initialize the master TPM

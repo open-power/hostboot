@@ -7786,6 +7786,19 @@
   </attribute>
 
   <attribute>
+    <description>The number of minimum secure version currently installed on the system
+    </description>
+    <id>SECURE_VERSION_NUM</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <id>SECURE_VERSION_SEEPROM</id>
     <description>
         The value of the FW Secure Version found in the SBE Seeprom
