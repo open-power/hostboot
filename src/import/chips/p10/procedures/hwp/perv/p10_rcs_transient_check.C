@@ -115,10 +115,9 @@ fapi2::ReturnCode p10_rcs_transient_check(const
     l_rc = p10_perv_sbe_cmn_poll_pll_lock(l_tpchiplet, l_pll_expect, true, l_pll_status);
     o_status = (l_rc != fapi2::FAPI2_RC_FALSE);
 
-    if (l_rc != fapi2::FAPI2_RC_SUCCESS && l_rc == fapi2::FAPI2_RC_FALSE)
+    if (l_rc == fapi2::FAPI2_RC_FALSE)
     {
-        FAPI_ERR("Error from p10_perv_sbe_cmn_poll_pll_lock");
-        fapi2::current_err = l_rc;
+        FAPI_DBG("Error from p10_perv_sbe_cmn_poll_pll_lock... FPLL failed to lock");
         goto fapi_try_exit;
     }
     else if (l_rc != fapi2::FAPI2_RC_SUCCESS)
