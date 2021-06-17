@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -239,6 +239,12 @@ void platSetOpMode(const OpModes i_mode);
 /// @brief Gets the operational mode
 /// @return the operational mode
 OpModes platGetOpMode(void);
+
+/// @brief Verify target of a cfam access
+/// @param[in]  i_target    TARGETING::Target being verified
+/// @param[in]  i_address   cfam address
+errlHndl_t verifyCfamAccessTarget(const TARGETING::Target* i_target,
+                                  const uint32_t i_address);
 
 #ifndef PLAT_NO_THREAD_LOCAL_STORAGE
 extern thread_local OpModes opMode;
