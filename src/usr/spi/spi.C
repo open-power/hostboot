@@ -56,11 +56,13 @@
 
 // FAPI2
 #include <fapi2/plat_hwp_invoker.H> // FAPI_INVOKE_HWP
+#include <fapi2/plat_hw_access.H> // verifyCfamAccessTarget
 
 // SPI HWP
 #include <p10_spi_init_pib.H>
 #include <p10_spi_init_fsi.H>
 #include <p10_spi_clear_status_errors.H>
+#include <p10_sbe_spi_cmd.H>
 
 // Max node and proc constants from these headers
 #include <sys/internode.h>
@@ -70,10 +72,13 @@
 #include <conversions.H>
 
 // SCOM addresses/bitfields
-#include <p10_scom_perv_8.H>
+#include <p10_scom_perv.H>
 
 // HDAT SPI related structures
 #include "../hdat/hdatutil.H"
+
+// SBE constants
+#include <sbe/sbe_update.H>
 
 using namespace TARGETING;
 using namespace SPI;
@@ -688,6 +693,7 @@ errlHndl_t spiSetAccessMode(TARGETING::Target * i_spiMasterProc,
         {
             switches.usePibSPI  = 0;
             switches.useFsiSPI  = 1;
+            // Note that the main boot seeprom will not be swapped over to FSI
             l_scom_switch.useSpiFsiScom = 1;
         }
 
@@ -706,7 +712,51 @@ errlHndl_t spiSetAccessMode(TARGETING::Target * i_spiMasterProc,
         }
         else
         {
-            FAPI_INVOKE_HWP(l_err, p10_spi_init_fsi, masterProc);
+            // Determine the SBE boot seeprom that needs to skip being swapped
+            // to FSI mode. If SBE pulls in a new code page and the mux is on
+            // FSI then the access will fail
+            // NOTE: can't just call SBE::getSbeBootSeeprom(..) as it isn't loaded
+            uint32_t fsiData = 0x0;
+            // Read Selfboot Control/Status register
+            size_t op_size = sizeof(fsiData);
+
+            // Can't access cfam engine on master processor
+            l_err = fapi2::verifyCfamAccessTarget(i_spiMasterProc,
+                FSXCOMP_FSXLOG_SB_CS_FSI_BYTE);
+
+            if (!l_err)
+            {
+                l_err = deviceRead( i_spiMasterProc,
+                                    &fsiData,
+                                    op_size,
+                                    DEVICE_FSI_ADDRESS(FSXCOMP_FSXLOG_SB_CS_FSI_BYTE) );
+                if (l_err)
+                {
+                    TRACFCOMP(g_trac_spi, ERR_MRK"spiSetAcessMode(): "
+                              "Unable to find SBE boot side"
+                              TRACE_ERR_FMT,
+                            TRACE_ERR_ARGS(l_err));
+                }
+                else
+                {
+                    std::vector<SPI_ENGINE_PART> l_engines;
+                    // true = Boot Side 0, false = Boot Side 1
+                    bool l_primaryBootSeeprom = (fsiData == SBE::SBE_SEEPROM0);
+
+                    // MVPD PRIMARY and BACKUP SEEPROM will be swapped over
+                    // to FSI no matter what
+                    l_engines.push_back(SPI_ENGINE_PRIMARY_MVPD_SEEPROM);
+                    l_engines.push_back(SPI_ENGINE_BACKUP_MVPD_SEEPROM);
+
+                    // swap over the non main boot seeprom to FSI, keep the main
+                    // boot seeprom in PIB
+                    l_primaryBootSeeprom ?
+                        l_engines.push_back(SPI_ENGINE_BACKUP_BOOT_SEEPROM) :
+                        l_engines.push_back(SPI_ENGINE_PRIMARY_BOOT_SEEPROM);
+
+                    FAPI_INVOKE_HWP(l_err, p10_spi_init_fsi, masterProc, l_engines);
+                }
+            }
         }
 
         if (l_err != nullptr)

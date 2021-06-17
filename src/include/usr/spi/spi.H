@@ -287,6 +287,10 @@ errlHndl_t spiInitEngine(
  *        Subsequent SPI operations to this processor will use this
  *        new access method
  *
+ *        Note that this function will not switch the main boot seeprom
+ *        to FSI mode, but setting the method type to PIB will switch
+ *        all engines to PIB mode
+ *
  * @param[in] i_spiMasterProc   SPI master processor to associate access method
  * @param[in] i_type  Access method type (FSI or PIB)
  * @return  error if access change failed

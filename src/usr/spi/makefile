@@ -31,6 +31,7 @@ HWP_PATH += ${ROOTPATH}/src/import/chips/p10/procedures
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${HWP_PATH}/hwp/ffdc
 EXTRAINCDIR += ${HWP_PATH}/../common/include/
 EXTRAINCDIR += ${HWP_PATH}/hwp/spi/
