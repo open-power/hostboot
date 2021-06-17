@@ -1797,6 +1797,14 @@ errlHndl_t crosscheck_sp_presence_target(TARGETING::Target * i_target)
                      TARGETING::get_huid(i_target));
 
             HWAS::GARD_ErrorType gardType = HWAS::GARD_NULL;
+
+            HWAS::DeconfigGard::GardRecords_t guardRecords;
+            l_errhdl = HWAS::theDeconfigGard().platGetGardRecords(i_target,guardRecords);
+            if (l_errhdl)
+            {
+                break;
+            }
+
             if(i_target->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_TPM)
             {
                 // If target could have a deferred presence detect, fatally
@@ -1816,48 +1824,56 @@ errlHndl_t crosscheck_sp_presence_target(TARGETING::Target * i_target)
                 // where the cycle starts over.
                 //
                 // Guard records can only be placed on present targets, so
-                // force state to what SP believes and guard it. Force the TPM
-                // to be functional too so that the EID can be correctly
-                // displayed in the gard tool.
+                // force state to what SP believes and guard it.
                 auto state = i_target->getAttr<TARGETING::ATTR_HWAS_STATE>();
                 state.present = 0b1;
-                state.functional = 0b1;
+
+                // If the part is not already guarded, also force the TPM to be
+                // functional so that the EID can be correctly displayed in the
+                // guard tool.  If the part is already guarded, don't set back
+                // to functional, as the guard step will then deconfigure it and
+                // trigger an endless reconfig loop which we want to avoid.
+                state.functional = guardRecords.empty() ? 0b1 : 0b0;
                 i_target->setAttr<TARGETING::ATTR_HWAS_STATE>(state);
                 gardType = HWAS::GARD_Fatal;
             }
 
-            /*@
-             * @errortype
-             * @moduleid     MOD_CROSSCHECK_SP_PRESENCE
-             * @reasoncode   RC_PRESENCE_MISMATCH_HB
-             * @userdata1    HUID of missing target
-             * @devdesc      Hostboot did not detect a part that the service
-             *               processor found.
-             * @custdesc     A problem occurred during the IPL
-             *               of the system.
-             */
-            l_errhdl = new ERRORLOG::ErrlEntry(
-                             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                             MOD_CROSSCHECK_SP_PRESENCE,
-                             RC_PRESENCE_MISMATCH_HB,
-                             TARGETING::get_huid(i_target),
-                             0);
+            // Only create a new error if the part is not guarded
+            if(guardRecords.empty())
+            {
+                /*@
+                 * @errortype
+                 * @moduleid     MOD_CROSSCHECK_SP_PRESENCE
+                 * @reasoncode   RC_PRESENCE_MISMATCH_HB
+                 * @userdata1    HUID of missing target
+                 * @devdesc      Hostboot did not detect a part that the service
+                 *               processor found.
+                 * @custdesc     A problem occurred during the IPL
+                 *               of the system.
+                 */
+                l_errhdl = new ERRORLOG::ErrlEntry(
+                                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                 MOD_CROSSCHECK_SP_PRESENCE,
+                                 RC_PRESENCE_MISMATCH_HB,
+                                 TARGETING::get_huid(i_target),
+                                 0);
 
-            // Problem is most likely a hardware issue of some kind; knock
-            // it out so Hostboot agrees with the SP.
-            l_errhdl->addHwCallout( i_target,
-                                    HWAS::SRCI_PRIORITY_HIGH,
-                                    HWAS::DECONFIG,
-                                    gardType);
-            // could also be a code bug in HB
-            l_errhdl->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
-                                           HWAS::SRCI_PRIORITY_MED );
-            l_errhdl->collectTrace(ISTEP_COMP_NAME,256);
-            l_errhdl->collectTrace(HWAS_COMP_NAME,256);
-            l_errhdl->collectTrace(FSI_COMP_NAME,256);
-            l_errhdl->collectTrace(I2C_COMP_NAME,256);
-            l_errhdl->collectTrace(SPI_COMP_NAME,256);
-            l_errhdl->collectTrace(EEPROM_COMP_NAME,256);
+                // Problem is most likely a hardware issue of some kind; knock
+                // it out so Hostboot agrees with the SP.
+                l_errhdl->addHwCallout( i_target,
+                                        HWAS::SRCI_PRIORITY_HIGH,
+                                        HWAS::DECONFIG,
+                                        gardType);
+                // could also be a code bug in HB
+                l_errhdl->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
+                                               HWAS::SRCI_PRIORITY_MED );
+                l_errhdl->collectTrace(ISTEP_COMP_NAME,256);
+                l_errhdl->collectTrace(HWAS_COMP_NAME,256);
+                l_errhdl->collectTrace(FSI_COMP_NAME,256);
+                l_errhdl->collectTrace(I2C_COMP_NAME,256);
+                l_errhdl->collectTrace(SPI_COMP_NAME,256);
+                l_errhdl->collectTrace(EEPROM_COMP_NAME,256);
+            }
         }
         // otherwise we match so we're fine
 
