@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,6 +50,23 @@
 // (from the latency measure register) plus half the round-trip time
 // plus 5 cycles."
 const uint32_t P10_TOD_SETUP_LATENCY_FIXED_OPTIC_CYCLES = 5;
+
+// This is the TOD sync pulse latency when the Sync Pulse terminates at a
+// TOD node, in terms of PAU clocks.
+// This latency is measured from the transition of the Sync pulse at the
+// input of TOD block (xb_tp_xY_tod_sync(0:1)) to the transition of the
+// Sync pulse at the output of the Delay component of the I_PATH block configured
+// with zero delay (PIB.TOD.I_PATH.DELAY.SYNC_OUT_Q_INST.LATC.L2).
+// It does not include any Fabric latency.
+const uint32_t P10_TOD_SETUP_SYNC_RECEIVE_LATENCY = 9;
+
+// This is the TOD sync pulse latency when Forwarding the Sync Pulse through
+// a TOD node in a 2 or more hop network, in terms of PAU clocks.
+// This latency is measured from the transition of the Sync pulse at the
+// input of TOD block (xb_tp_xY_tod_sync(0:1)) to the transition of the
+// Sync pulse at the output of the TOD block (tp_xb_xY_tod_sync(0:1))
+// It does not include any Fabric latency.
+const uint32_t P10_TOD_SETUP_SYNC_FORWARDING_LATENCY = 8;
 
 // Minimum/Maximum allowable delay for any node
 const uint32_t MIN_TOD_DELAY = 0;

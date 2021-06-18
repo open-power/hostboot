@@ -1819,13 +1819,12 @@ fapi2::ReturnCode p10_tod_get_tod_latency_from_parent(
                  l_fbc_latency),
              "Error from p10_tod_get_fbc_latency");
 
-    // FIXME @RTC 213485 -- what to use for the following Sync pulse latencies described
-    //   in the P10 Pervasive Overview . pptx document ?
+    // @RTC 213485 -- Add in the following Sync pulse latencies described
+    //   in the P10 Pervasive Overview . pptx document
     //       1) TOD internal (Sync generation to SYNC output)
-    //       2) On-chip distribution (does this include synchronizers?)
-    // For now, just use the fabric latency and leave out the above two components
-    // of the total latency for Sync pulses.
-    o_tod_latency = l_fbc_latency;
+    //       2) On-chip distribution (includes synchronizers)
+    o_tod_latency = l_fbc_latency + ((i_tod_node->i_children.size() > 0) ?
+                                     P10_TOD_SETUP_SYNC_FORWARDING_LATENCY : P10_TOD_SETUP_SYNC_RECEIVE_LATENCY );
 
 fapi_try_exit:
     FAPI_DBG("End");
@@ -1954,7 +1953,7 @@ fapi2::ReturnCode set_topology_delays(
     i_tod_node->o_int_path_delay = i_longest_delay -
                                    (i_tod_node->o_int_path_delay);
 
-    // Verify the delay is between 0 and 255 inclusive.
+    // Verify the delay is between MIN_TOD_DELAY and MAX_TOD_DELAY inclusive.
     FAPI_ASSERT((i_tod_node->o_int_path_delay >= MIN_TOD_DELAY &&
                  i_tod_node->o_int_path_delay <= MAX_TOD_DELAY),
                 fapi2::P10_TOD_SETUP_INVALID_NODE_DELAY()
