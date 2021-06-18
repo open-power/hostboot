@@ -48,12 +48,23 @@
 #include <p10_rcs_transient_check.H>
 #include <p10_scom_iohs.H>
 #include "p10_perv_sbe_cmn.H"
+#include "p10_clock_test_cmn.H"
 
 enum P10_RCS_TRANSIENT_CHECK_Private_Constants
 {
-    RCS_NS_DELAY = 5000000,             // unit is nano seconds (5ms)
-    RCS_SIM_CYCLE_DELAY = 100    // unit is sim cycles
+    HW_NS_DELAY = 20,               // unit is nano seconds
+    SIM_CYCLE_DELAY = 100000,       // unit is sim cycles
+    POLL_COUNT = 10,                // number of loops for simple clock detector
+    RCS_NS_DELAY = 5000000,         // unit is nano seconds (5ms)
+    RCS_SIM_CYCLE_DELAY = 100       // unit is sim cycles
 };
+
+static fapi2::ReturnCode p10_sbe_rcs_setup_test_latches(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
+    uint8_t attr_cp_refclock_select,
+    bool set_rcs_clock_test_in,
+    bool& o_status);
+
 
 
 /// @brief Check error to see if it is transient or hard error
@@ -76,7 +87,6 @@ fapi2::ReturnCode p10_rcs_transient_check(const
 
     fapi2::Target<fapi2::TARGET_TYPE_PERV> l_tpchiplet =
         i_target_chip.getChildren<fapi2::TARGET_TYPE_PERV>(fapi2::TARGET_FILTER_TP, fapi2::TARGET_STATE_FUNCTIONAL)[0];
-
 
     // Just verify that the side passed in to check is valid
     FAPI_ASSERT(((i_side == 0) || (i_side == 1)),
@@ -127,6 +137,27 @@ fapi2::ReturnCode p10_rcs_transient_check(const
         goto fapi_try_exit;
     }
 
+
+    // Error Recovery Step 4:  Check the simple clock detector
+    for(int i = 0; i < POLL_COUNT; i++)
+    {
+        FAPI_DBG("Set input values to clock test latches - RCS_CLOCK_TEST_IN = 1");
+        FAPI_TRY(p10_sbe_rcs_setup_test_latches(i_target_chip, i_side, true, o_status));
+
+        if (!o_status)
+        {
+            goto fapi_try_exit;
+        }
+
+        FAPI_DBG("Set input values to clock test latches - RCS_CLOCK_TEST_IN = 0");
+        FAPI_TRY(p10_sbe_rcs_setup_test_latches(i_target_chip, i_side, false, o_status));
+
+        if (!o_status)
+        {
+            goto fapi_try_exit;
+        }
+    }
+
     // Error Recovery Step 5:  Clear RCS sticky errors
     FAPI_DBG("Clear RCS sticky errors");
     l_data64_rc5.flush<0>();
@@ -162,4 +193,46 @@ fapi2::ReturnCode p10_rcs_transient_check(const
 fapi_try_exit:
     FAPI_DBG("End RCS Transient Error Check");
     return fapi2::current_err;
+}
+
+
+/// @brief Verify that latches clocked by input clocks transported input value to output
+///
+/// @param[in]     i_target_chip   Reference to TARGET_TYPE_PROC_CHIP target
+/// @param[in]     bool        RCS_CLOCK_TEST_IN
+/// @return  FAPI2_RC_SUCCESS if success, else error code.
+static fapi2::ReturnCode p10_sbe_rcs_setup_test_latches(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
+    uint8_t i_cp_refclock_select,
+    bool set_rcs_clock_test_in,
+    bool& o_status)
+{
+    using namespace scomt;
+    using namespace scomt::perv;
+
+    fapi2::buffer<uint64_t> l_data64;
+    fapi2::ReturnCode l_rc;
+
+    l_data64.flush<0>().setBit<FSXCOMP_FSXLOG_ROOT_CTRL5_TPFSI_RCS_CLK_TEST_IN_DC>();
+    FAPI_TRY(fapi2::putScom(i_target_chip,
+                            set_rcs_clock_test_in ? FSXCOMP_FSXLOG_ROOT_CTRL5_SET_WO_OR :
+                            FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_WO_CLEAR,
+                            l_data64));
+
+    fapi2::delay(HW_NS_DELAY, SIM_CYCLE_DELAY);
+
+    FAPI_DBG("Reading Sense Reg");
+    FAPI_TRY(fapi2::getScom(i_target_chip, FSXCOMP_FSXLOG_SNS1LTH_RO, l_data64));
+
+    o_status = false;
+
+    if ((i_cp_refclock_select == 0 && l_data64.getBit<4>() == set_rcs_clock_test_in) ||
+        (i_cp_refclock_select == 1 && l_data64.getBit<5>() == set_rcs_clock_test_in))
+    {
+        o_status = true;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+
 }
