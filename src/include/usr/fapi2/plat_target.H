@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -223,6 +223,8 @@ namespace fapi2
         if (l_errl)
         {
             FAPI_ERR("getMulticastChildren: Error from deviceWrite");
+            l_errl->collectTrace(FAPI_TRACE_NAME, 256 );
+            l_errl->collectTrace(FAPI_IMP_TRACE_NAME, 384 );
             errlCommit(l_errl, SECURE_COMP_ID);
         }
         else

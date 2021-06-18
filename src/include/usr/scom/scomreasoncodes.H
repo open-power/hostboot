@@ -83,6 +83,7 @@ namespace SCOM
         SCOM_P10_TRANS_INVALID_TYPE    = SCOM_COMP_ID | 0x20,
         SCOM_MULTICAST_MISCOMPARE      = SCOM_COMP_ID | 0x21,
         SCOM_INVALID_ECO_TYPE          = SCOM_COMP_ID | 0x22,
+        SCOM_SPCWKUP_COUNT_INCONSISTENT = SCOM_COMP_ID | 0x23,
     };
 
     enum UserDetailsTypes

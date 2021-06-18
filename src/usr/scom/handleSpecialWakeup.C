@@ -47,6 +47,8 @@
 
 // Trace definition
 extern trace_desc_t* g_trac_scom;
+const char* HBRT_TRACE_NAME = "HBRT";
+const char* ISTEP_TRACE_NAME = "ISTEPS_TRACE";
 
 using namespace TARGETING;
 using namespace SCOM;
@@ -108,34 +110,34 @@ errlHndl_t callWakeupHyp(TARGETING::Target* i_target,
 
 #ifdef __HOSTBOOT_RUNTIME
 
-    // Check for valid interface function
-    if( (g_hostInterfaces == NULL) ||
-        (g_hostInterfaces->wakeup == NULL) )
-    {
-        TRACFCOMP( g_trac_scom,ERR_MRK
-                   "callWakeupHyp> Hypervisor wakeup interface not linked");
-
-        /*@
-         * @errortype
-         * @moduleid     SCOM_CALL_WAKEUP_HYP
-         * @reasoncode   SCOM_RUNTIME_INTERFACE_ERR
-         * @userdata1    Target HUID
-         * @userdata2    Wakeup Enable
-         * @devdesc      Wakeup runtime interface not linked.
-         */
-        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                         SCOM_CALL_WAKEUP_HYP,
-                                         SCOM_RUNTIME_INTERFACE_ERR,
-                                         get_huid(i_target),
-                                         i_enable);
-
-        l_errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                    HWAS::SRCI_PRIORITY_HIGH);
-
-        return l_errl;
-    }
-
     do {
+        // Check for valid interface function
+        if( (g_hostInterfaces == NULL) ||
+            (g_hostInterfaces->wakeup == NULL) )
+        {
+            TRACFCOMP( g_trac_scom,ERR_MRK
+                       "callWakeupHyp> Hypervisor wakeup interface not linked");
+
+            /*@
+             * @errortype
+             * @moduleid     SCOM_CALL_WAKEUP_HYP
+             * @reasoncode   SCOM_RUNTIME_INTERFACE_ERR
+             * @userdata1    Target HUID
+             * @userdata2    Wakeup Enable
+             * @devdesc      Wakeup runtime interface not linked.
+             * @custdesc         Internal firmware error.
+             */
+            l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                             SCOM_CALL_WAKEUP_HYP,
+                                             SCOM_RUNTIME_INTERFACE_ERR,
+                                             get_huid(i_target),
+                                             i_enable,
+                                             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+            l_errl->collectTrace(HBRT_TRACE_NAME,1024);
+            l_errl->collectTrace(ISTEP_TRACE_NAME,512);
+            break;
+        }
+
         // Runtime target id
         TARGETING::rtChipId_t rtTargetId = 0;
         l_errl = TARGETING::getRtTarget(i_target, rtTargetId);
@@ -166,6 +168,7 @@ errlHndl_t callWakeupHyp(TARGETING::Target* i_target,
              * @userdata1        Wakeup Argument
              * @userdata2        Input Target
              * @devdesc          Invalid mode parm for wakeup operation.
+             * @custdesc         Internal firmware error.
              */
             l_errl = new ERRORLOG::ErrlEntry(
                                         ERRORLOG::ERRL_SEV_INFORMATIONAL,
@@ -174,6 +177,8 @@ errlHndl_t callWakeupHyp(TARGETING::Target* i_target,
                                         i_enable,
                                         TARGETING::get_huid(i_target),
                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+            l_errl->collectTrace(HBRT_TRACE_NAME,1024);
+            l_errl->collectTrace(ISTEP_TRACE_NAME,512);
             break;
         }
 
@@ -216,6 +221,7 @@ errlHndl_t callWakeupHyp(TARGETING::Target* i_target,
              * @userdata2[0:31]  Runtime Target ID
              * @userdata2[32:63] Wakeup Mode
              * @devdesc          Hypervisor wakeup failed.
+             * @custdesc         Internal firmware error.
              */
             l_errl = new ERRORLOG::ErrlEntry(
                                         ERRORLOG::ERRL_SEV_INFORMATIONAL,
@@ -230,6 +236,8 @@ errlHndl_t callWakeupHyp(TARGETING::Target* i_target,
                                  HWAS::NO_DECONFIG,
                                  HWAS::GARD_NULL);
 
+            l_errl->collectTrace(HBRT_TRACE_NAME,1024);
+            l_errl->collectTrace(ISTEP_TRACE_NAME,512);
             break;
         }
     } while(0);
@@ -253,12 +261,71 @@ errlHndl_t callWakeupHwp(TARGETING::Target* i_target,
                          HandleOptions_t i_enable)
 {
     errlHndl_t l_errl = NULL;
-//    fapi2::ReturnCode l_rc;
+
+    auto l_targType = i_target->getAttr<TARGETING::ATTR_TYPE>();
 
     // Need to handle multiple calls to enable special wakeup
     // Count attribute will keep track and disable when zero
     // Assume HBRT is single-threaded, so no issues with concurrency
-    uint32_t l_count = (i_target)->getAttr<ATTR_SPCWKUP_COUNT>();
+    uint32_t l_count = 0xFFFF;
+
+    // Skip count updates in some error scenarios
+    bool l_skipCountModify = false;
+
+    // need to consolidate all cores
+    if( TARGETING::TYPE_PROC == l_targType )
+    {
+        TargetHandleList pCoreList;
+        getChildChiplets( pCoreList, i_target, TARGETING::TYPE_CORE );
+        for( auto core : pCoreList )
+        {
+            uint32_t tmp_count = core->getAttr<ATTR_SPCWKUP_COUNT>();
+            if( l_count == 0xFFFF )
+            {
+                l_count = tmp_count;
+            }
+            else if( tmp_count != l_count )
+            {
+                TRACFCOMP( g_trac_scom,ERR_MRK
+                           "callWakeupHwp> Inconsistent core wakeup counts on %.8X : exp=%d, act=%d",
+                           TARGETING::get_huid(core),
+                           l_count, tmp_count );
+                /*@
+                 * @errortype
+                 * @moduleid         SCOM_CALL_WAKEUP_HWP
+                 * @reasoncode       SCOM_SPCWKUP_COUNT_INCONSISTENT
+                 * @userdata1[00:31] Processor Target HUID
+                 * @userdata1[32:63] Core Target HUID
+                 * @userdata2[00:31] Wakeup Enable
+                 * @userdata2[32:47] Previous Wakeup Count (ATTR_SPCWKUP_COUNT)
+                 * @userdata2[48:63] Current Wakeup Count (ATTR_SPCWKUP_COUNT)
+                 * @devdesc          Unexpectedly forcing wakeup off when the counter
+                 *                   is non-zero, implies a bug in the code flow.
+                 * @custdesc         Internal firmware error.
+                 */
+                l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                                 SCOM_CALL_WAKEUP_HWP,
+                                                 SCOM_SPCWKUP_COUNT_INCONSISTENT,
+                                                 TWO_UINT32_TO_UINT64(
+                                                            get_huid(i_target),
+                                                            get_huid(core)),
+                                                 TWO_UINT32_TO_UINT64(
+                                                            i_enable,
+                                                            TWO_UINT16_TO_UINT32(
+                                                                 l_count,
+                                                                 tmp_count)),
+                                                 ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                l_errl->collectTrace(HBRT_TRACE_NAME,1024);
+                l_errl->collectTrace(FAPI2_COMP_NAME,512);
+                l_errl->collectTrace(ISTEP_TRACE_NAME,512);
+                errlCommit( l_errl, RUNTIME_COMP_ID );
+            }
+        }
+    }
+    else //single CORE
+    {
+        l_count = (i_target)->getAttr<ATTR_SPCWKUP_COUNT>();
+    }
 
     if((l_count==0) && (i_enable==WAKEUP::DISABLE))
     {
@@ -273,6 +340,7 @@ errlHndl_t callWakeupHwp(TARGETING::Target* i_target,
          * @userdata2[0:31]  Wakeup Enable
          * @userdata2[32:63] Wakeup Count (ATTR_SPCWKUP_COUNT)
          * @devdesc          Disabling special wakeup when not enabled.
+         * @custdesc         Internal firmware error.
          */
         l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
                                          SCOM_CALL_WAKEUP_HWP,
@@ -281,8 +349,12 @@ errlHndl_t callWakeupHwp(TARGETING::Target* i_target,
                                          TWO_UINT32_TO_UINT64(
                                                     i_enable, l_count),
                                          ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        l_errl->collectTrace(HBRT_TRACE_NAME,1024);
+        l_errl->collectTrace(FAPI2_COMP_NAME,512);
+        l_errl->collectTrace(ISTEP_TRACE_NAME,512);
 
         errlCommit( l_errl, RUNTIME_COMP_ID );
+        l_skipCountModify = true; // do not subtract from zero
     }
 
     if( (l_count>0) && (i_enable==WAKEUP::FORCE_DISABLE) )
@@ -299,6 +371,7 @@ errlHndl_t callWakeupHwp(TARGETING::Target* i_target,
          * @userdata2[32:63] Wakeup Count (ATTR_SPCWKUP_COUNT)
          * @devdesc          Unexpectedly forcing wakeup off when the counter
          *                   is non-zero, implies a bug in the code flow.
+         * @custdesc         Internal firmware error.
          */
         l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
                                          SCOM_CALL_WAKEUP_HWP,
@@ -307,6 +380,9 @@ errlHndl_t callWakeupHwp(TARGETING::Target* i_target,
                                          TWO_UINT32_TO_UINT64(
                                                     i_enable, l_count),
                                          ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+        l_errl->collectTrace(HBRT_TRACE_NAME,1024);
+        l_errl->collectTrace(FAPI2_COMP_NAME,512);
+        l_errl->collectTrace(ISTEP_TRACE_NAME,512);
 
         errlCommit( l_errl, RUNTIME_COMP_ID );
     }
@@ -314,13 +390,12 @@ errlHndl_t callWakeupHwp(TARGETING::Target* i_target,
     // Only call the HWP if 0-->1 or 1-->0 or if it is a force
     if( ((l_count==0) && (i_enable==WAKEUP::ENABLE)) ||
         ((l_count==1) && (i_enable==WAKEUP::DISABLE)) ||
-        ((l_count>1) && (i_enable==WAKEUP::FORCE_DISABLE)) )
+        (i_enable==WAKEUP::FORCE_DISABLE) )
     {
         // NOTE Regarding the entity type passed to the HWP:
         // There are 3 independent registers used to trigger a
         // special wakeup (FSP,HOST,OCC), we are using the FSP
         // bit because HOST/OCC are already in use.
-/* FIXME RTC: 210975
         p10specialWakeup::PROC_SPCWKUP_OPS l_spcwkupType;
 
         if(i_enable==WAKEUP::ENABLE)
@@ -332,32 +407,95 @@ errlHndl_t callWakeupHwp(TARGETING::Target* i_target,
             l_spcwkupType = p10specialWakeup::SPCWKUP_DISABLE;
         }
 
-        fapi2::Target<fapi2::TARGET_TYPE_CORE>
-            l_fapi_target(i_target);
+        // Different inputs require different fapi target handling
+        if( TARGETING::TYPE_PROC == l_targType )
+        {
+            // use a multicast target
+            fapi2::Target<fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST>
+              l_fapi_mc_core(i_target);
 
-        // FYI p10_core_special_wakeup actually expects a proc target. So this is a bad call.
-        FAPI_EXEC_HWP(l_rc,
-                      p10_core_special_wakeup,
-                      l_fapi_target,
-                      l_spcwkupType,
-                      p10specialWakeup::HOST);
+            FAPI_INVOKE_HWP(l_errl,
+                            p10_core_special_wakeup,
+                            l_fapi_mc_core,
+                            l_spcwkupType,
+                            p10specialWakeup::HOST);
+            if(l_errl)
+            {
+                TRACFCOMP( g_trac_scom,ERR_MRK
+                           "callWakeupHwp> p10_core_special_wakeup(multicast %.8X, op=%d)",
+                           TARGETING::get_huid(i_target),
+                           l_spcwkupType );
 
-        l_errl = rcToErrl(l_rc, ERRORLOG::ERRL_SEV_UNRECOVERABLE);
-        if(l_errl)
+                // Capture the target data in the elog
+                ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog( l_errl );
+
+                l_errl->collectTrace(SCOM_COMP_NAME,512);
+                l_errl->collectTrace(HBRT_TRACE_NAME,512);
+                l_errl->collectTrace(ISTEP_TRACE_NAME,512);
+            }
+        }
+        else if( TARGETING::TYPE_CORE == l_targType )
         {
             TRACFCOMP( g_trac_scom,
-                    "callWakeupHwp> p10_core_special_wakeup ERROR :"
-                    " Returning errorlog, reason=0x%x",
-                    l_errl->reasonCode() );
+                       "callWakeupHwp> p10_uc_core_special_wakeup(core %.8X)",
+                       TARGETING::get_huid(i_target) );
 
-            // Capture the target data in the elog
-            ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog( l_errl );
+            // use a regular core target
+            fapi2::Target<fapi2::TARGET_TYPE_CORE> l_fapi_core(i_target);
+
+            FAPI_INVOKE_HWP(l_errl,
+                            p10_uc_core_special_wakeup,
+                            l_fapi_core,
+                            l_spcwkupType,
+                            p10specialWakeup::HOST);
+            if(l_errl)
+            {
+                TRACFCOMP( g_trac_scom,ERR_MRK
+                           "callWakeupHwp> p10_uc_core_special_wakeup(core %.8X, op=%d)",
+                           TARGETING::get_huid(i_target),
+                           l_spcwkupType );
+
+                // Capture the target data in the elog
+                ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog( l_errl );
+
+                l_errl->collectTrace(SCOM_COMP_NAME,512);
+                l_errl->collectTrace(HBRT_TRACE_NAME,512);
+                l_errl->collectTrace(ISTEP_TRACE_NAME,512);
+            }
         }
-*/
+        else
+        {
+            TRACFCOMP( g_trac_scom,ERR_MRK
+                       "callWakeupHwp> Invalid target type (0x%X) for wakeup call : huid=%.8X",
+                       l_targType,
+                       TARGETING::get_huid(i_target));
+            /*@
+             * @errortype
+             * @moduleid         SCOM_CALL_WAKEUP_HWP
+             * @reasoncode       SCOM_BAD_TARGET
+             * @userdata1        Target HUID
+             * @userdata2        Target Type
+             * @devdesc          Invalid target type for wakeup call.
+             * @custdesc         Internal firmware error.
+             */
+             l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                              SCOM_CALL_WAKEUP_HWP,
+                                              SCOM_BAD_TARGET,
+                                              get_huid(i_target),
+                                              l_targType,
+                                              ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+             l_errl->collectTrace(SCOM_COMP_NAME,512);
+             l_errl->collectTrace(HBRT_TRACE_NAME,512);
+             l_errl->collectTrace(ISTEP_TRACE_NAME,512);
+             l_errl->collectTrace(FAPI2_COMP_NAME,512);
+
+             errlCommit( l_errl, RUNTIME_COMP_ID );
+        }
+
     }
 
     // Update the counter
-    if(!l_errl)
+    if(!l_errl && !l_skipCountModify)
     {
         if(i_enable == WAKEUP::ENABLE)
         {
@@ -371,7 +509,20 @@ errlHndl_t callWakeupHwp(TARGETING::Target* i_target,
         {
             l_count = 0;
         }
-        i_target->setAttr<ATTR_SPCWKUP_COUNT>(l_count);
+
+        if( TARGETING::TYPE_PROC == l_targType )
+        {
+            TargetHandleList pCoreList;
+            getChildChiplets( pCoreList, i_target, TARGETING::TYPE_CORE );
+            for( auto core : pCoreList )
+            {
+                core->setAttr<ATTR_SPCWKUP_COUNT>(l_count);
+            }
+        }
+        else //CORE
+        {
+            i_target->setAttr<ATTR_SPCWKUP_COUNT>(l_count);
+        }
     }
 
     return l_errl;
@@ -386,13 +537,23 @@ errlHndl_t handleSpecialWakeup(TARGETING::Target* i_target,
 {
     errlHndl_t l_errl = NULL;
 
-    // Determines in a general case which wakeup interface to call.
-    static bool l_useHypWakeup = useHypWakeup();
-
-    // Extended Cache-Only (ECO) cores and non-ECO cores must be handled individually.
-    TargetHandleList l_ecoCores, l_nonEcoCores;
-
     do {
+#ifndef __HOSTBOOT_RUNTIME //IPL context
+        // Always use the HWP inside the IPL context
+        l_errl = callWakeupHwp(i_target, i_enable);
+        if (l_errl)
+        {
+            break;
+        }
+
+#else //Runtime context
+        // Extended Cache-Only (ECO) cores and non-ECO cores must be handled individually.
+        TargetHandleList l_ecoCores, l_nonEcoCores;
+
+        // Determines in a general case which wakeup interface to call.
+        static bool l_useHypWakeup = useHypWakeup();
+
+        // Figure out all the right targets at runtime
         if (i_target->getAttr<ATTR_TYPE>() == TYPE_CORE)
         {
             if (i_target->getAttr<ATTR_ECO_MODE>() == ECO_MODE_ENABLED)
@@ -412,9 +573,10 @@ errlHndl_t handleSpecialWakeup(TARGETING::Target* i_target,
                  * @userdata1        ECO mode
                  * @userdata2[0:31]  Core huid
                  * @devdesc          Supplied core chiplet had an invalid ECO mode setting.
+                 * @custdesc         Internal firmware error.
                  */
                 l_errl = new ERRORLOG::ErrlEntry(
-                                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            ERRORLOG::ERRL_SEV_PREDICTIVE,
                                             SCOM_CALL_WAKEUP_HYP,
                                             SCOM_RUNTIME_WAKEUP_ERR,
                                             i_target->getAttr<ATTR_ECO_MODE>(),
@@ -429,7 +591,7 @@ errlHndl_t handleSpecialWakeup(TARGETING::Target* i_target,
             // processing.
             getNonEcoCores(l_nonEcoCores, i_target);
             getEcoCores(l_ecoCores, i_target);
-            TRACFCOMP(g_trac_scom, "i_target HUID[0x%x]: ECO cores %d, NON-ECO cores %d",
+            TRACDCOMP(g_trac_scom, "i_target HUID[0x%x]: ECO cores %d, NON-ECO cores %d",
                       get_huid(i_target),
                       l_ecoCores.size(),
                       l_nonEcoCores.size());
@@ -471,6 +633,7 @@ errlHndl_t handleSpecialWakeup(TARGETING::Target* i_target,
         {
             break;
         }
+#endif //__HOSTBOOT_RUNTIME
 
     } while(0);
 

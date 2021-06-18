@@ -54,6 +54,7 @@
 #include <p10_scom_addr.H>
 #include <p10_scominfo.H>
 #include <hw_access_def.H>
+#include <fapi2/fapiPlatTrace.H>
 
 #if __HOSTBOOT_RUNTIME
   #include <scom/wakeup.H>
@@ -510,6 +511,8 @@ errlHndl_t p10_translation (TARGETING::Target * &i_target,
                 .addToLog(l_err);
 
             l_err->collectTrace(SCOM_COMP_NAME);
+            l_err->collectTrace(FAPI_TRACE_NAME, 256 );
+            l_err->collectTrace(FAPI_IMP_TRACE_NAME, 384 );
             break;
         }
 
