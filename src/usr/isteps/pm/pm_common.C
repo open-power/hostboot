@@ -954,14 +954,7 @@ namespace HBPM
 
             // Explicitly call pm_callout before exiting to ensure we
             // gather all of the data before reloading the PM complex.
-            if( HB_INITIATED_PM_RESET_IN_PROGRESS != l_chipResetState )
-            {
-                // set ATTR_HB_INITIATED_PM_RESET to IN_PROGRESS to avoid recursion
-                i_target->setAttr<ATTR_HB_INITIATED_PM_RESET>
-                                (HB_INITIATED_PM_RESET_IN_PROGRESS);
-
-                callPmCallout( i_target, l_homerVAddr );
-            }
+            callPmCallout( i_target, l_homerVAddr );
 
         } while(0);
 
