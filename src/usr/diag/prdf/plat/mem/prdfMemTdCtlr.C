@@ -430,7 +430,10 @@ void MemTdCtlr<T>::collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
         bsb.setFieldJustify( pos, 3, itSrnk ); pos+=3;
         bsb.setFieldJustify( pos, 4, itType ); pos+=4;
 
-        bsb.setFieldJustify( pos, 2, itPort ); pos+=2;
+        if ( TD_CTLR_DATA::VERSION_2 == version )
+        {
+            bsb.setFieldJustify( pos, 2, itPort ); pos+=2;
+        }
     }
 
     //##########################################################################
