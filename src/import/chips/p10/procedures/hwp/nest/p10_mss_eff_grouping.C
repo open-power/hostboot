@@ -119,7 +119,7 @@ const uint8_t NO_CHANNEL_PER_GROUP = 0xFF;     // Init value of channel per grou
 // ---------------------------------------------------------------------
 ///
 /// @struct group_size_t
-/// @brief Table that determines MCFGP/MCFGPM bits 13:23 based on the group size.
+/// @brief Table that determines MCFGPx/MCFGPMx bits 25:39 based on the group size.
 ///
 static const struct groupSizeTable_t
 {
@@ -453,7 +453,7 @@ fapi2::ReturnCode EffGroupingMccAttrs::getAttrs(
                     if (l_min_size != l_ocmb_size)
                     {
                         l_min_size = (l_min_size > l_ocmb_size) ? l_ocmb_size : l_min_size;
-                        FAPI_DBG("Sub-channels for MCC %d have different size. Limiting to the smallest: %lld",
+                        FAPI_INF("WARNING: Sub-channels for MCC %d have different size. Limiting to the smallest: %lld",
                                  iv_unitPos, l_min_size)
                     }
                 }
@@ -1065,19 +1065,20 @@ fapi2::ReturnCode EffGroupingBaseSizeData::getRequestedBarList(
                     .set_SMF_CONFIG(i_sysAttrs.iv_smfConfig)
                     .set_SMF_TOTAL_BAR_SIZE(i_procAttrs.iv_smfBarSize),
                     "setSMFBaseSizeData: Requirements to enable a secure memory "
-                    "space not met: ATTR_PROC_SMF_BAR_SIZE size is set but "
-                    "ATTR_SMF_CONFIG is not enabled. smfConfig 0x%.8X, "
-                    "smfSize 0x%.16llX",
+                    "space not met: SMF bar size is > 0, but SMF config "
+                    "is not enabled. ATTR_SMF_CONFIG 0x%.8X, "
+                    "ATTR_PROC_SMF_BAR_SIZE 0x%.16llX",
                     i_sysAttrs.iv_smfConfig, i_procAttrs.iv_smfBarSize);
 
         // Ensure that requested secure memory size meets minimum design requirements
         FAPI_ASSERT((i_procAttrs.iv_smfBarSize & 0xFFFFFFFFF0000000) != 0,
                     fapi2::MSS_EFF_GROUPING_SMF_256MB_MINIMUM_ERROR()
+                    .set_SMF_CONFIG(i_sysAttrs.iv_smfConfig)
                     .set_SMF_TOTAL_BAR_SIZE(i_procAttrs.iv_smfBarSize),
                     "setSMFBaseSizeData: Requested size of secure memory must "
-                    "meet design minimum requirement of 256MB."
-                    "smfSize 0x%.16llX",
-                    i_procAttrs.iv_smfBarSize);
+                    "meet design minimum requirement of 256MB. "
+                    "ATTR_SMF_CONFIG 0x%.2X, ATTR_PROC_SMF_BAR_SIZE 0x%.16llX",
+                    i_sysAttrs.iv_smfConfig, i_procAttrs.iv_smfBarSize);
 
         iv_requestedBarsList.push_back(std::make_pair(SMF, i_procAttrs.iv_smfBarSize));
     }
@@ -1139,7 +1140,9 @@ fapi2::ReturnCode EffGroupingBaseSizeData::writeBaseAddr(BAR_type_t i_barType,
         FAPI_ASSERT(false,
                     fapi2::MSS_EFF_GROUPING_INVALID_BAR_TYPE()
                     .set_BAR_TYPE(i_barType),
-                    "writeBaseAddr: Invalid BAR type value %d", i_barType);
+                    "writeBaseAddr: Invalid BAR type value %d. "
+                    "BAR type must be: CHTM0-CHTM31, NHTM, SMF, or OCC.",
+                    i_barType);
     }
 
 fapi_try_exit:
@@ -1218,9 +1221,9 @@ fapi2::ReturnCode EffGroupingBaseSizeData::setBaseAddrAttributes(
                 .set_AVAIL_MEM_SIZE(l_availMem)
                 .set_REQUESTED_MEM_SIZE(l_requestedSize)
                 .set_MIRROR_PLACEMENT_POLICY(i_sysAttrs.iv_mirrorPlacement),
-                "setBaseAddrAttributes: Requested memory space is not available."
-                "Avail Mem 0x%.16llX, Requested Mem type %d, Size 0x%.16llX, "
-                "Placement policy %u",
+                "setBaseAddrAttributes: Requested memory space is not available "
+                "for current bar type. Avail Mem 0x%.16llX, Requested Mem type %d, "
+                "Size 0x%.16llX, Placement policy %u.",
                 l_availMem, i_requestedBar.first, l_requestedSize,
                 i_sysAttrs.iv_mirrorPlacement);
 
@@ -1251,7 +1254,8 @@ fapi2::ReturnCode EffGroupingBaseSizeData::setBaseAddrAttributes(
                     .set_REQ_MEMORY_TYPE(i_requestedBar.first)
                     .set_REQUESTED_MEM_SIZE(l_requestedSize)
                     .set_AVAIL_MEM_SIZE(l_availMem),
-                    "setBaseAddrAttributes: BAR not possible, "
+                    "setBaseAddrAttributes: Requested memory size is not available "
+                    "for current bar type because of memory hole. "
                     "Placement policy %u, MemorySizes[%d] 0x%.16llX, "
                     "Requested Mem type %d, Requested size 0x%.16llX, Avail mem 0x%.16llX",
                     i_sysAttrs.iv_mirrorPlacement, l_index, l_mem_sizes[l_index],
@@ -1682,9 +1686,12 @@ fapi2::ReturnCode grouping_validateAttributes(
                     fapi2::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED,
                     fapi2::MSS_EFF_CONFIG_MIRROR_DISABLED()
                     .set_MRW_HW_MIRRORING_ENABLE(i_sysAttrs.iv_hwMirrorEnabled)
-                    .set_MIRROR_PLACEMENT_POLICY(i_sysAttrs.iv_mirrorPlacement),
-                    "grouping_validateAttributes: Error: Mirroring disabled "
-                    "but ATTR_MEM_MIRROR_PLACEMENT_POLICY is in FLIPPED mode");
+                    .set_MIRROR_PLACEMENT_POLICY(i_sysAttrs.iv_mirrorPlacement)
+                    .set_CHIP(i_target),
+                    "Error: Can not have ATTR_MEM_MIRROR_PLACEMENT_POLICY in "
+                    "Flipped mode when ATTR_MRW_HW_MIRRORING_ENABLE is disabled. "
+                    "iv_mirrorPlacement = %u; iv_hwMirrorEnabled = %u.",
+                    "i_sysAttrs.iv_mirrorPlacement, i_sysAttrs.iv_hwMirrorEnabled");
     }
 
     // There must be at least one type of grouping allowed
@@ -1692,7 +1699,8 @@ fapi2::ReturnCode grouping_validateAttributes(
                  fapi2::MSS_EFF_GROUPING_NO_GROUP_ALLOWED()
                  .set_MSS_INTERLEAVE_ENABLE_VALUE(i_sysAttrs.iv_groupsAllowed)
                  .set_CHIP(i_target),
-                 "grouping_validateAttributes: No valid group allowed - Group allowed 0x%.2X",
+                 "Error: ATTR_MSS_INTERLEAVE_ENABLE must allow at least one "
+                 "type of group. iv_groupsAllowed = 0x%.2X.",
                  i_sysAttrs.iv_groupsAllowed);
 fapi_try_exit:
     FAPI_DBG("Exiting");
@@ -2759,12 +2767,13 @@ void grouping_group1MCCPerGroup(const EffGroupingMemInfo& i_memInfo,
 ///
 /// Ensure any ungrouped DIMMs are called out for deconfiguration
 ///
-/// @tparam    T               Template paramter, passed in port target type
-/// @param[in] i_dimm_target   Target identifying DIMM attached to ungrouped port
-/// @param[in] i_port_target   Target identifying with ungrouped port
-/// @param[in] i_portIndex     Port number associated with target
-/// @param[in] i_portSize      Size associated with this port
-/// @param[in] o_rc            Return code object to be appended
+/// @tparam    T                 Template paramter, passed in port target type
+/// @param[in] i_dimm_target     Target identifying DIMM attached to ungrouped port
+/// @param[in] i_port_target     Target identifying with ungrouped port
+/// @param[in] i_portIndex       Port number associated with target
+/// @param[in] i_portSize        Size associated with this port
+/// @param[in] i_portSubChansEn  Port's subchannels enabled
+/// @param[in] o_rc              Return code object to be appended
 ///
 /// @return void
 ///
@@ -2774,6 +2783,7 @@ void calloutDIMM(
     const fapi2::Target<T>& i_port_target,
     const uint8_t i_portIndex,
     const uint64_t i_portSize,
+    const uint8_t i_portSubChansEn,
     fapi2::ReturnCode& o_rc)
 {
     FAPI_DBG("Start");
@@ -2791,18 +2801,24 @@ void calloutDIMM(
     fapi2::ffdc_t MC_PORT;
     uint64_t l_portSize = i_portSize;
     fapi2::ffdc_t MC_PORT_SIZE;
+    uint8_t l_portSubChannelsEnabled = i_portSubChansEn;
+    fapi2::ffdc_t MC_PORT_SUBCHANNELS_ENABLED;
 
     DIMM_TARGET.ptr() = static_cast<void*>(&l_dimm_target);
-    DIMM_TARGET.size() = sizeof(l_dimm_target);
+    DIMM_TARGET.size() = fapi2::getErrorInfoFfdcSize(l_dimm_target);
     PORT_TARGET.ptr() = static_cast<void*>(&l_port_target);
-    PORT_TARGET.size() = sizeof(l_port_target);
+    PORT_TARGET.size() = fapi2::getErrorInfoFfdcSize(l_port_target);
     MC_PORT.ptr() = static_cast<void*>(&l_portIndex);
     MC_PORT.size() = sizeof(l_portIndex);
     MC_PORT_SIZE.ptr() = static_cast<void*>(&l_portSize);
     MC_PORT_SIZE.size() = sizeof(l_portSize);
+    MC_PORT_SUBCHANNELS_ENABLED.ptr() = static_cast<void*>(&l_portSubChannelsEnabled);
+    MC_PORT_SUBCHANNELS_ENABLED.size() = sizeof(l_portSubChannelsEnabled);
 
     FAPI_ERR("Unable to group port %s, calling out DIMM: %s",
              l_port_target_string, l_dimm_target_string);
+    FAPI_ERR(" Port's subchannels enabled 0x%.2X", l_portSubChannelsEnabled);
+
     FAPI_ADD_INFO_TO_HWP_ERROR(o_rc, RC_MSS_EFF_GROUPING_UNABLE_TO_GROUP_DIMM);
     FAPI_DBG("End");
     return;
@@ -2944,6 +2960,7 @@ fapi2::ReturnCode calloutDimmsForUngroupedPorts(
                     l_port_target,
                     l_port_index,
                     i_memInfo.iv_mccSize[l_port_index],
+                    i_memInfo.iv_SubChannelsEnabled[l_port_index],
                     o_rc);
     }
 
@@ -2954,15 +2971,27 @@ fapi_try_exit:
 
 /// @brief Utility function to generate base return code for ungrouped port
 ///        error reporting
+/// @param[in] i_chipTarget    Reference to proc chip target
 /// @param[in] i_maxRegionSize Maximum group/region size
+/// @param[in] i_mirrorPolicy  Mirroring policy (ATTR_MRW_HW_MIRRORING_ENABLE: off/required/request)
+/// @param[in] i_interleave    Group allowed bit vector (ATTR_MSS_INTERLEAVE_ENABLE)
 /// @return MSS_EFF_GROUPING_UNABLE_TO_GROUP
-fapi2::ReturnCode emitUnableToGroupError(const uint64_t& i_region_size)
+fapi2::ReturnCode emitUnableToGroupError(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+        const uint64_t& i_region_size,
+        const uint8_t i_mirrorPolicy,
+        const uint8_t i_interleave)
 {
     FAPI_DBG("Start");
     FAPI_ASSERT(false,
                 fapi2::MSS_EFF_GROUPING_UNABLE_TO_GROUP()
-                .set_MAX_REGION_SIZE(i_region_size),
-                "Unable to group all ports on this chip");
+                .set_CHIP_TARGET(i_target)
+                .set_MAX_REGION_SIZE(i_region_size)
+                .set_MIRROR_POLICY(i_mirrorPolicy)
+                .set_MSS_INTERLEAVE_ENABLE(i_interleave),
+                "Unable to group all ports on this chip: "
+                "Max region size %u GB, ATTR_MRW_HW_MIRRORING_ENABLE 0x%.2X,"
+                "ATTR_MSS_INTERLEAVE_ENABLE 0x%.2X.",
+                i_region_size,  i_mirrorPolicy, i_interleave);
 fapi_try_exit:
     FAPI_DBG("Exiting");
     return fapi2::current_err;
@@ -2978,15 +3007,16 @@ fapi_try_exit:
 /// @param[in] i_target           Reference to processor chip target
 /// @param[in] i_memInfo          Reference to Memory Info
 /// @param[in] i_groupData        Reference to Group data
-/// @param[in] i_hwMirrorEnabled  Mirroring policy
-///
+/// @param[in] i_hwMirrorEnabled  Mirroring policy (ATTR_MRW_HW_MIRRORING_ENABLE: off/required/request)
+/// @param[in] i_groupsAllowed    Group allowed bit vector (ATTR_MSS_INTERLEAVE_ENABLE)
 /// @return FAPI2_RC_SUCCESS if success, else error code.
 template<fapi2::TargetType T>
 fapi2::ReturnCode grouping_findUngroupedMCC(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const EffGroupingMemInfo& i_memInfo,
     const EffGroupingData& i_groupData,
-    const uint8_t i_hwMirrorEnabled)
+    const uint8_t i_hwMirrorEnabled,
+    const uint8_t i_groupsAllowed)
 {
     FAPI_DBG("Entering");
 
@@ -3049,7 +3079,10 @@ fapi2::ReturnCode grouping_findUngroupedMCC(
         std::vector<fapi2::Target<fapi2::TARGET_TYPE_DIMM>> l_dimm_targets;
 
         // create base HWP error
-        l_rc = emitUnableToGroupError(i_memInfo.iv_maxGroupMemSize);
+        l_rc = emitUnableToGroupError(i_target,
+                                      i_memInfo.iv_maxGroupMemSize,
+                                      i_hwMirrorEnabled,
+                                      i_groupsAllowed);
 
         // append all DIMM callouts
         calloutDimmsForUngroupedPorts(l_ports_functional,
@@ -3138,7 +3171,8 @@ fapi2::ReturnCode groupMCC(
     FAPI_TRY(grouping_findUngroupedMCC<fapi2::TARGET_TYPE_MCC>(i_target,
              i_memInfo,
              o_groupData,
-             i_sysAttrs.iv_hwMirrorEnabled),
+             i_sysAttrs.iv_hwMirrorEnabled,
+             i_sysAttrs.iv_groupsAllowed),
              "grouping_findUngroupedMCC() returns an error, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
 
@@ -3443,7 +3477,11 @@ fapi2::ReturnCode grouping_calcRegions(
                         .set_CURR_REGION_SIZE_LEFT(l_nm_region_size_left)
                         .set_MAX_REGION_IDX(l_max_nm_region_idx)
                         .set_MAX_REGION_SIZE(i_sysAttrs.iv_maxInterleaveGroupSize),
-                        "Unable to map non-mirrored group!");
+                        "Unable to map non-mirrored group: Pos %d, "
+                        "Current region index %d, Max nm region idx %d, "
+                        "nm region size left %d, group size %u",
+                        pos, l_cur_nm_region_idx, l_max_nm_region_idx,
+                        l_nm_region_size_left, io_groupData.iv_data[pos][GROUP_SIZE]);
 
             FAPI_ASSERT(!l_map_mirror ||
                         ((l_m_region_size_left >=
@@ -3455,7 +3493,10 @@ fapi2::ReturnCode grouping_calcRegions(
                         .set_CURR_GROUP_SIZE(io_groupData.iv_data[pos + MIRR_OFFSET][GROUP_SIZE])
                         .set_CURR_REGION_SIZE_LEFT(l_m_region_size_left)
                         .set_MAX_REGION_SIZE(i_sysAttrs.iv_maxInterleaveGroupSize / 2),
-                        "Unable to map mirrored group!");
+                        "Unable to map mirrored group: Pos %d, "
+                        "m region size left %d, group size %u",
+                        pos + MIRR_OFFSET, l_m_region_size_left,
+                        io_groupData.iv_data[pos + MIRR_OFFSET][GROUP_SIZE]);
 
             // assign non mirrored base address
             io_groupData.iv_data[pos][BASE_ADDR] =
@@ -3499,7 +3540,9 @@ fapi2::ReturnCode grouping_calcRegions(
                                 .set_CURR_GROUP_SIZE(io_groupData.iv_data[pos + MIRR_OFFSET][GROUP_SIZE])
                                 .set_CURR_REGION_SIZE_LEFT(l_m_region_size_left)
                                 .set_MAX_REGION_SIZE(i_sysAttrs.iv_maxInterleaveGroupSize / 2),
-                                "Unable to map mirrored group!");
+                                "Unable to map mirrored group: Pos %d, "
+                                "l_m_region_size_left %d, group size %u",
+                                pos, l_m_region_size_left, io_groupData.iv_data[pos + MIRR_OFFSET][GROUP_SIZE]);
 
                     io_groupData.iv_data[pos + MIRR_OFFSET][BASE_ADDR] = l_cur_m_base_addr >> 30;
                     getSizeString(l_cur_m_base_addr, displayBuf);
@@ -3529,7 +3572,11 @@ fapi2::ReturnCode grouping_calcRegions(
                             .set_CURR_REGION_SIZE_LEFT(l_nm_region_size_left)
                             .set_MAX_REGION_IDX(l_max_nm_region_idx)
                             .set_MAX_REGION_SIZE(i_sysAttrs.iv_maxInterleaveGroupSize),
-                            "Unable to map non-mirrored group!");
+                            "Unable to map non-mirrored group: Pos %d, "
+                            "Current region index %d, Max nm region idx %d, "
+                            "nm region size left %d, group size %u",
+                            pos, l_cur_nm_region_idx, l_max_nm_region_idx,
+                            l_nm_region_size_left, io_groupData.iv_data[pos][GROUP_SIZE]);
 
                 FAPI_ASSERT(!l_map_mirror ||
                             ((l_m_region_size_left >=
@@ -3541,7 +3588,10 @@ fapi2::ReturnCode grouping_calcRegions(
                             .set_CURR_GROUP_SIZE(io_groupData.iv_data[pos + MIRR_OFFSET][GROUP_SIZE])
                             .set_CURR_REGION_SIZE_LEFT(l_m_region_size_left)
                             .set_MAX_REGION_SIZE(i_sysAttrs.iv_maxInterleaveGroupSize / 2),
-                            "Unable to map mirrored group!");
+                            "Unable to map mirrored group: Pos %d, "
+                            "m region size left %d, group size %u",
+                            pos + MIRR_OFFSET, l_m_region_size_left,
+                            io_groupData.iv_data[pos + MIRR_OFFSET][GROUP_SIZE]);
 
                 // assign non mirrored base address
                 io_groupData.iv_data[pos][BASE_ADDR] =
@@ -3917,7 +3967,8 @@ fapi2::ReturnCode getGroupSizeEncodedValue(
                      .set_MC_TARGET(i_mccTarget)
                      .set_MC_POS(l_mccPos)
                      .set_GROUP_SIZE(i_groupSize),
-                     "Error: Can't locate Group size value in GROUP_SIZE_TABLE. "
+                     "Error: Can't locate the encoded group size in MCFGPx "
+                     "(bits 25:39) for given group size. "
                      "MC pos: %d, GroupSize %u GB.", l_mccPos, i_groupSize );
     }
 
@@ -4062,8 +4113,8 @@ fapi2::ReturnCode getNonMirrorBarData(
                     .set_MCC0_GROUP(i_mccInfo.myGroup)
                     .set_MCC1_MCC_NUM_IN_GROUP(0)
                     .set_MCC1_GROUP(0),
-                    "Error: Invalid number of MCC per group"
-                    "group %u, MCC in group %u",
+                    "Error: Invalid number of MCCs assigned to a group. "
+                    "Group %u, MCC in group %u",
                     i_mccInfo.myGroup, i_mccInfo.numMCCInGroup);
     }
 
@@ -4768,6 +4819,7 @@ fapi2::ReturnCode p10_mss_eff_grouping(
     EffGroupingMemInfo l_memInfo;
     EffGroupingBaseSizeData l_baseSizeData;
     EffGroupingData l_groupData;
+    char l_proc_target_string[fapi2::MAX_ECMD_STRING_LEN];
     bool l_mirrorIsOn = false;
     // BAR registers values for ATTR_MEMORY_BAR_REGS
     fapi2::ATTR_MEMORY_BAR_REGS_Type l_memoryBarRegs;
@@ -4790,9 +4842,13 @@ fapi2::ReturnCode p10_mss_eff_grouping(
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
+    // Working on proc target
+    fapi2::toString(i_target, l_proc_target_string, fapi2::MAX_ECMD_STRING_LEN);
+    FAPI_INF("p10_mss_eff_grouping: Grouping proc %s.", l_proc_target_string);
+
     // Only do memory grouping if there's at least 1 functional MCC.
     // Note: No functional MCC is a valid state, don't flag an error.
-    FAPI_DBG("Number of MCCs found: %d", l_mccChiplets.size());
+    FAPI_INF("Number of MCCs found: %d", l_mccChiplets.size());
 
     if (l_mccChiplets.size() == 0)
     {
@@ -4811,7 +4867,7 @@ fapi2::ReturnCode p10_mss_eff_grouping(
     // ----------------------------------------------
     // Get the attributes needed for memory grouping
     // ----------------------------------------------
-    FAPI_INF("Getting memory grouping attributes");
+    FAPI_DBG("Getting memory grouping attributes");
 
     // Get system attributes
     FAPI_TRY(l_sysAttrs.getAttrs(),

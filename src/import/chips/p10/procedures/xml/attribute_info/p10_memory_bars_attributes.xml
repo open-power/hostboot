@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -313,15 +313,17 @@
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
     Used in the setting of groups. It is a bit vector.
-    If the value BITWISE_AND 0x01 = 0x01 then groups of 1 are enabled,
-    if the value BITWISE_AND 0x02 = 0x02, then groups of 2 are possible,
-    if the value BITWISE_AND 0x04 = 0x04, then groups of 3 are possible,
-    if the value BITWISE_AND 0x08 = 0x08, then groups of 4 are possible,
-    if the value BITWISE_AND 0x20 = 0x20, then groups of 6 are possible,
-    if the value BITWISE_AND 0x80 = 0x80, then groups of 8 are possible.
-    If no groups can formed according to this input, then an error will
-    be thrown.
+    If the value BITWISE_AND 0x01 = 0x01 then groups  of 1 MCC is allowed,
+    if the value BITWISE_AND 0x02 = 0x02, then groups of 2 MCCs is allowed,
+    if the value BITWISE_AND 0x04 = 0x04, then groups of 3 MCCs is allowed,
+    if the value BITWISE_AND 0x08 = 0x08, then groups of 4 MCCs is allowed,
+    if the value BITWISE_AND 0x20 = 0x20, then groups of 6 MCCs is allowed,
+    if the value BITWISE_AND 0x80 = 0x80, then groups of 8 MCCs is allowed.
     Provided by the MRW.
+    The memory grouping is done at the MCC level and this attribute tells
+    the grouping process how many MCCs are allowed be grouped together. If
+    no groups can be formed according to the allowed groups then an error
+    will be thrown.
   </description>
   <valueType>uint8</valueType>
   <platInit/>
@@ -389,6 +391,9 @@
     OFF:
       HW mirroring is disabled.
     Provided by the MRW.
+    If mirroring is REQUIRED, all MCCs' subchannels must be enabled in
+    order for them to be all grouped.  Otherwise, there will be an error results
+    from the memory grouping process (RC_MSS_EFF_GROUPING_UNABLE_TO_GROUP).
   </description>
   <valueType>uint8</valueType>
   <platInit>mrw</platInit>

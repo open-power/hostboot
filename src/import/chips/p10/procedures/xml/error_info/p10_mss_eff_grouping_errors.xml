@@ -34,6 +34,7 @@
     </description>
     <ffdc>MRW_HW_MIRRORING_ENABLE</ffdc>
     <ffdc>MIRROR_PLACEMENT_POLICY</ffdc>
+    <ffdc>CHIP</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -58,11 +59,19 @@
     <rc>RC_MSS_EFF_GROUPING_UNABLE_TO_GROUP</rc>
     <description>
         p10_mss_eff_grouping is unable to group at least one MCC on this chip
-        based on the specified memory interleaving and mirroring rules.
-        This is a memory plugging error.
-        Refer to memory plugging rules.
+        based on the specified memory interleaving (ATTR_MSS_INTERLEAVE_ENABLE)
+        and mirroring rules (ATTR_MRW_HW_MIRRORING_ENABLE).
+        The most likely cause of this error:
+           - Limitation of group/region size (ATTR_MAX_INTERLEAVE_GROUP_SIZE)
+           - ATTR_MSS_INTERLEAVE_ENABLE doesn't allow a group of 1 MCC.
+           - ATTR_MRW_HW_MIRRORING_ENABLE is 'required' and the ungrouped
+             MCC's subchannels are not both enabled.
+        This is a memory plugging error. Refer to memory plugging rules.
     </description>
+    <ffdc>CHIP_TARGET</ffdc>
     <ffdc>MAX_REGION_SIZE</ffdc>
+    <ffdc>MSS_INTERLEAVE_ENABLE</ffdc>
+    <ffdc>MIRROR_POLICY</ffdc>
     <callout>
         <procedure>MEMORY_PLUGGING_ERROR</procedure>
         <priority>HIGH</priority>
@@ -82,6 +91,7 @@
     <ffdc>PORT_TARGET</ffdc>
     <ffdc>MC_PORT</ffdc>
     <ffdc>MC_PORT_SIZE</ffdc>
+    <ffdc>MC_PORT_SUBCHANNELS_ENABLED</ffdc>
     <callout>
         <procedure>MEMORY_PLUGGING_ERROR</procedure>
         <priority>HIGH</priority>
@@ -102,7 +112,13 @@
 <hwpError>
     <rc>RC_MSS_EFF_GROUPING_NOT_ENOUGH_MEMORY</rc>
     <description>
-        There is not enough memory available for reservations.
+        There is not enough memory available to fulfill the amount of
+        memory requested for the current bar. The amount of memory bars
+        requested are specified in these attributes:
+           ATTR_PROC_NHTM_BAR_SIZE
+           ATTR_PROC_CHTM_BAR_SIZES
+           ATTR_PROC_SMF_BAR_SIZE
+           etc...
     </description>
     <ffdc>REQ_MEMORY_TYPE</ffdc>
     <ffdc>AVAIL_MEM_SIZE</ffdc>
@@ -121,7 +137,8 @@
 <hwpError>
     <rc>RC_MSS_EFF_GROUPING_MEMORY_BAR_NOT_POSSIBLE</rc>
     <description>
-        Unable to assign BAR address for requested memory.
+        There is not enough memory available to fulfill the amount of
+        memory requested for the current bar type due to memory hole.
     </description>
     <ffdc>MIRROR_PLACEMENT_POLICY</ffdc>
     <ffdc>MEMSIZE_INDEX</ffdc>
@@ -142,7 +159,8 @@
 <hwpError>
     <rc>RC_MSS_EFF_GROUPING_ADDRESS_NOT_ALIGNED</rc>
     <description>
-        BAR address is not aligned with requested size.
+        Current BAR's base address calculated is not aligned with its
+        requested size.
     </description>
     <ffdc>REQ_MEMORY_TYPE</ffdc>
     <ffdc>BAR_BASE</ffdc>
@@ -156,8 +174,9 @@
 <hwpError>
     <rc>RC_MSS_EFF_GROUPING_SMF_NOT_ENABLED</rc>
     <description>
-        Requirements to enable a secure memory space not met:
-        ATTR_PROC_SMF_BAR_SIZE is set but ATTR_SMF_CONFIG is not enabled.
+       Requirements to enable a secure memory space not met:
+       ATTR_PROC_SMF_BAR_SIZE size is set (> 0) but
+       ATTR_SMF_CONFIG is not set to 'ENABLED'.
     </description>
     <ffdc>SMF_CONFIG</ffdc>
     <ffdc>SMF_TOTAL_BAR_SIZE</ffdc>
@@ -171,6 +190,7 @@
     <rc>RC_MSS_EFF_GROUPING_INVALID_BAR_TYPE</rc>
     <description>
         The specified BAR type value is invalid.
+        Bar type must be: CHTM0-CHTM31, NHTM, SMF, or OCC.
     </description>
     <ffdc>BAR_TYPE</ffdc>
     <callout>
@@ -183,7 +203,11 @@
     <rc>RC_MSS_EFF_GROUPING_SMF_256MB_MINIMUM_ERROR</rc>
     <description>
         Secure memory must be a minimum size of 256MB by design.
+        If ATTR_SMF_CONFIG is set to 'ENABLED' then the minimum
+        bar size ATTR_PROC_SMF_BAR_SIZE is required to be set
+        at least 256MB.
     </description>
+    <ffdc>SMF_CONFIG</ffdc>
     <ffdc>SMF_TOTAL_BAR_SIZE</ffdc>
     <callout>
       <procedure>CODE</procedure>
@@ -194,7 +218,8 @@
 <hwpError>
     <rc>RC_MSS_EFF_GROUPING_SMF_256MB_OFFSET_ERROR</rc>
     <description>
-        Secure memory must be allocated in offsets of 256MB by design.
+        Secure memory base address must be allocated in offsets
+        of 256MB by design.
     </description>
     <ffdc>SMF_BASE_ADDR</ffdc>
     <callout>
@@ -206,8 +231,10 @@
 <hwpError>
     <rc>RC_MSS_EFF_GROUPING_NM_REGION_MAP_ERROR</rc>
     <description>
-        p10_mss_eff_grouping did not find an available region
-        to map non-mirrored group
+        Memory grouping is not able to find a region to map current non-mirrored
+        group. This could be because the non-mirror region has exceeded the max
+        non-mirror regions allowed, or the non-mirror region size left does not
+        fit the size of the group.
     </description>
     <ffdc>PROC_CHIP</ffdc>
     <ffdc>MEM_BASE_ADDRS</ffdc>
@@ -230,8 +257,10 @@
 <hwpError>
     <rc>RC_MSS_EFF_GROUPING_M_REGION_MAP_ERROR</rc>
     <description>
-        p10_mss_eff_grouping did not find an available region
-        to map mirrored group
+        Memory grouping is not able to find a region to map current mirrored
+        group. This could be because the mirror region has exceeded the max
+        mirror regions allowed, or the mirror region size left does not
+        fit the size of the group.
     </description>
     <ffdc>PROC_CHIP</ffdc>
     <ffdc>MIRROR_BASE_ADDRS</ffdc>
@@ -247,8 +276,10 @@
 
 <hwpError>
   <rc>RC_MSS_EFF_GROUPING_INVALID_GROUP_SIZE</rc>
-  <description>Can't locate given Group size in the GROUP_SIZE_TABLE in order
-               to determine MCFGP/MCFGPM Group size value (bits 13:23).</description>
+  <description>
+      Unable to determine the encoded GROUP_SIZE value (bits 25:39 of
+      MCFGP/MCFGPM) for given group size.
+  </description>
   <ffdc>MC_TARGET</ffdc>
   <ffdc>MC_POS</ffdc>
   <ffdc>GROUP_SIZE</ffdc>
@@ -260,9 +291,11 @@
 
 <hwpError>
   <rc>RC_MSS_EFF_GROUPING_INVALID_MCC_CONFIG</rc>
-  <description>Invalid number in group for MCC 0/1 of the MC (MI).
-               The combination can not be found in the Channel Per Group
-               table.</description>
+  <description>
+     Invalid number of MCCs assigned to a group.
+     The valid number of MCCs allow in a group are
+     8,6,4,,3,2, or 1.
+  </description>
   <ffdc>MC_TARGET</ffdc>
   <ffdc>MCC0_NUM_MCC_IN_GROUP</ffdc>
   <ffdc>MCC0_GROUP</ffdc>
