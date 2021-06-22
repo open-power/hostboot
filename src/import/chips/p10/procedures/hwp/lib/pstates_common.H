@@ -236,6 +236,21 @@ typedef struct
     int8_t vcs_ext_0p5pct[NUM_PV_POINTS];
 } PoundVBias_t;
 
+
+/// #V VPD Biases
+///
+/// Percent bias applied to VPD operating points prior to interolation
+///
+/// All values on in .5 percent (0p5pct)
+typedef struct
+{
+    int8_t frequency_0p5pct;
+    int8_t vdd_ext_0p5pct[NUM_PV_POINTS];
+    int8_t vcs_ext_0p5pct[NUM_PV_POINTS];
+    int8_t pad[3];
+} PoundVBias_v1_t;
+
+
 ///
 /// #V Static Rail content
 ///

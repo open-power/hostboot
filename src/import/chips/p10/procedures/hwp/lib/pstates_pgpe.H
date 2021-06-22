@@ -416,6 +416,22 @@ typedef struct __attribute__((__packed__))
 }
 PoundWOtherPadded_t;
 
+typedef struct __attribute__((__packed__))
+{
+    uint8_t              dds_calibration_version;
+    uint8_t              padding[3];
+    PoundWDpllSettings_t dpll_settings;
+    uint16_t             droop_freq_resp_reference_mhz;
+    uint64_t             droop_count_control; //DCCR
+    uint64_t             ftc_large_droop_mode_reg_setting; //FLMR
+    uint64_t             ftc_misc_droop_mode_reg_setting; //FMMR
+    uint8_t              calibration_bin;
+    uint8_t              mode_setting;
+    uint8_t              spare[14];
+}
+PoundWOtherPadded_v1_t;
+
+
 /// #W VPD Structure
 ///
 /// Part specific data to manage the Digital Droop Sensor (DDS)
@@ -844,7 +860,7 @@ typedef struct
     /// degrees C.
     PoundVOpPoint_t     operating_points_set[NUM_VPD_PTS_SET_V1][NUM_PV_POINTS];
 
-    PoundVBias_t        poundv_biases_0p05pct;  // Values in 0.5%
+    PoundVBias_v1_t     poundv_biases_0p05pct;  // Values in 0.5%
 
     PoundVSlopes_t      poundv_slopes;
 
@@ -863,7 +879,7 @@ typedef struct
     PoundWEntry_TgtActBin_t dds_tgt_act_bin[NUM_PV_POINTS][MAXIMUM_CORES];
 
     /// #W Other (DDS Data)
-    PoundWOtherPadded_t dds_other;
+    PoundWOtherPadded_v1_t dds_other;
 
     /// #W VDD Calibration(DDS Data)
     vdd_calibration         vdd_cal[NUM_PV_POINTS];
