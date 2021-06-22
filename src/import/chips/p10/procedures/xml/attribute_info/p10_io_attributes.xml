@@ -59,6 +59,19 @@
     <default>DISABLED</default>
     <platInit/>
   </attribute>
+  
+  <attribute>
+    <id>ATTR_VIO_SET_POINT_MV</id>
+    <targetType>
+      TARGET_TYPE_PROC_CHIP
+    </targetType>
+    <description>
+       The VIO Setpoint in mv
+    </description>
+    <valueType>uint32</valueType>
+    <initToZero/>
+    <writeable/>
+  </attribute>
 
   <attribute>
     <id>ATTR_IOHS_MFG_BAD_LANE_VEC</id>
