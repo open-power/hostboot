@@ -357,7 +357,10 @@ fapi2::ReturnCode enforce_pre_eff_config_thermal(const fapi2::Target<fapi2::TARG
         {
             for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_ocmb))
             {
-                l_kinds.push_back(mss::dimm::kind<mss::mc_type::EXPLORER>(l_dimm));
+                fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+                mss::dimm::kind<mss::mc_type::EXPLORER> l_kind(l_dimm, l_rc);
+                FAPI_TRY(l_rc, "%s Failed to create dimm::kind instance", mss::c_str(l_dimm));
+                l_kinds.push_back(l_kind);
             }
         }
     }

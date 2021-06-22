@@ -268,6 +268,8 @@ fapi2::ReturnCode build_row_repair_table(const fapi2::Target<fapi2::TARGET_TYPE_
         const uint8_t i_row_repair_data[mss::exp::MAX_RANK_PER_DIMM][ROW_REPAIR_BYTES_PER_RANK],
         std::vector<mss::row_repair::repair_entry<mss::mc_type::EXPLORER>>& o_repairs_per_dimm)
 {
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+
     constexpr uint8_t MAX_BANK_GROUP = 4;
     constexpr uint8_t MAX_BANKS = 8;
 
@@ -275,7 +277,8 @@ fapi2::ReturnCode build_row_repair_table(const fapi2::Target<fapi2::TARGET_TYPE_
     uint8_t l_num_subrank = 0;
 
     // Determine repair data bounds
-    mss::dimm::kind<mss::mc_type::EXPLORER> l_kind(i_target);
+    mss::dimm::kind<mss::mc_type::EXPLORER> l_kind(i_target, l_rc);
+    FAPI_TRY(l_rc, "%s Failed to create dimm::kind instance", mss::c_str(i_target));
     // TODO: Move to helper function Zen#646
     l_num_dram = l_kind.iv_dram_width == fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X4 ?
                  mss::exp::generic_consts::EXP_NUM_DRAM_X4 : mss::exp::generic_consts::EXP_NUM_DRAM_X8;

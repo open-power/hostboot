@@ -214,8 +214,10 @@ fapi2::ReturnCode get_power_attrs (const mss::throttle_type i_throttle_type,
 
     for (const auto& l_dimm : find_targets <fapi2::TARGET_TYPE_DIMM> (i_port))
     {
+        fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
         const auto l_dimm_pos = mss::index (l_dimm);
-        mss::dimm::kind<mss::mc_type::EXPLORER> l_kind (l_dimm);
+        mss::dimm::kind<mss::mc_type::EXPLORER> l_kind(l_dimm, l_rc);
+        FAPI_TRY(l_rc, "%s Failed to create dimm::kind instance", mss::c_str(l_dimm));
         mss::power_thermal::decoder<mss::mc_type::EXPLORER> l_decoder(l_kind);
         fapi2::buffer<uint64_t> l_attr_value;
 

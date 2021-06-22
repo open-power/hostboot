@@ -85,17 +85,24 @@ class kind
         ///
         /// @brief Generate a vector of DIMM kind from a vector of DIMM
         /// @param[in] i_dimm a vector of DIMM
+        /// @param [out] io_rc a return code which determines function success
         /// @return std::vector of dimm::kind relating to the DIMM passed in
         ///
-        static std::vector<kind> vector(const std::vector<fapi2::Target<fapi2::TARGET_TYPE_DIMM>>& i_dimm)
+        static std::vector<kind> vector(const std::vector<fapi2::Target<fapi2::TARGET_TYPE_DIMM>>& i_dimm,
+                                        fapi2::ReturnCode& io_rc)
         {
             std::vector<kind> l_kinds;
 
             for (const auto& d : i_dimm)
             {
-                l_kinds.push_back( kind(d) );
+                l_kinds.push_back( kind(d, io_rc) );
+                FAPI_TRY(io_rc, "%s Failed to initialize dimm::kind instance", mss::c_str(d));
             }
 
+        fapi_try_exit:
+            // If we encountered an issue creating a dimm::kind instance,
+            // immediately exit out of loop and let the rc code propagate up
+            // Otherwise, we return a vector of valid instances
             return l_kinds;
         }
 
@@ -162,8 +169,9 @@ class kind
         ///
         /// @brief Construct a dimm::kind data structure - information about the kind of DIMM this is
         /// @param[in] i_target a DIMM target
+        /// @param[out] o_rc a return code which determines the success of the constructor
         ///
-        kind(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target):
+        kind(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc ):
             iv_target(i_target)
         {
             FAPI_TRY( mss::attr::get_dram_gen(i_target, iv_dram_generation) );
@@ -185,9 +193,9 @@ class kind
             return;
 
         fapi_try_exit:
-            // Not 100% sure what to do here ...
-            FAPI_ERR("error initializing DIMM structure: %s 0x%016lx", mss::c_str(i_target), uint64_t(fapi2::current_err));
-            fapi2::Assert(false);
+
+            o_rc = fapi2::current_err;
+            return;
         }
 
         ///

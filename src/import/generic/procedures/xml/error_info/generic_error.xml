@@ -1634,6 +1634,15 @@
     <ffdc>REQUESTED_INSTRUCTIONS</ffdc>
     <ffdc>MAX_INSTRUCTIONS</ffdc>
     <!-- No hardware callout due to being a runtime only error -->
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_PRIMARY_RANK_COUNT</rc>
+    <description>
+        Invalid number of primary ranks per port retrieved
+    </description>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>RANK_COUNT</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>

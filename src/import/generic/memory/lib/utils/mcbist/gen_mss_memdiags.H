@@ -90,7 +90,7 @@ namespace sim
 /// @tparam TT the mcbistTraits associated with T
 /// @param T a fapi2::TargetType
 /// @param[in] i_target
-/// @param[in] i_pattern an index representing a pattern to use to initize memory (defaults to 0)
+/// @param[in] i_pattern an index representing a pattern to use to initialize memory (defaults to 0)
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
@@ -123,7 +123,13 @@ fapi2::ReturnCode sf_init( const fapi2::Target<T>& i_target, const uint64_t i_pa
         // all using the 4 address range registers of tne MCBIST (broadcast currently not considered.)
         // So we can write 0's to those to get their ECC fixed up.
         FAPI_TRY( mss::rank::primary_ranks(p, l_pr) );
-        fapi2::Assert( l_pr.size() <= mss::MAX_RANK_PER_DIMM );
+
+        FAPI_ASSERT(l_pr.size() <= mss::MAX_RANK_PER_DIMM,
+                    fapi2::MSS_INVALID_PRIMARY_RANK_COUNT()
+                    .set_PORT_TARGET(p)
+                    .set_RANK_COUNT(l_pr),
+                    "Failed to get a valid number of primary ranks on %s, Max number of ranks: %d, Current rank count: %d",
+                    mss::c_str(p), mss::MAX_RANK_PER_DIMM, l_pr.size());
 
         for (auto r = l_pr.begin(); r != l_pr.end(); ++l_rank_address_pair, ++r)
         {

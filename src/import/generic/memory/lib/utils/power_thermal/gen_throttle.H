@@ -696,9 +696,11 @@ fapi2::ReturnCode throttle<MC, TT>::thermal_throttles ()
     //Let's calculate the N throttle for each DIMM
     for ( const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(iv_target) )
     {
+        fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
         uint16_t l_temp_n_slot = 0;
         const uint8_t l_pos = mss::index(l_dimm);
-        mss::dimm::kind<MC> l_kind (l_dimm);
+        mss::dimm::kind<MC> l_kind (l_dimm, l_rc);
+        FAPI_TRY(l_rc, "%s Failed to create dimm::kind instance", mss::c_str(l_dimm));
         l_found_ddimm = (l_kind.iv_dimm_type == fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_DDIMM) ? 1 : l_found_ddimm;
         //Calculate the power curve taking the thermal limit into account
         FAPI_TRY( calc_power_curve(l_dimm_power_idle[l_pos],
@@ -1022,11 +1024,13 @@ fapi2::ReturnCode throttle<MC, TT>::calc_databus (const double i_databus_port_ma
 
     for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(iv_target))
     {
+        fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
         //Left early if count_dimms == 0
         // For DDIMM, set each virtual DIMM to the same utilization value since mrw slope/intercept/limit attributes
         //   are equally divided by number of virtual dimms  (ie.  mrw values are for whole DDIMM, not individual virtual DIMMs)
         // For ISDIMM, divide utilization by number of DIMMs on the port
-        mss::dimm::kind<MC> l_kind (l_dimm);
+        mss::dimm::kind<MC> l_kind (l_dimm, l_rc);
+        FAPI_TRY(l_rc, "%s Failed to create dimm::kind instance", mss::c_str(l_dimm));
         o_databus_dimm_max[mss::index(l_dimm)] = (l_kind.iv_dimm_type == fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_DDIMM) ?
                 i_databus_port_max :
                 i_databus_port_max / l_count_dimms;
@@ -1069,7 +1073,6 @@ fapi2::ReturnCode throttle<MC, TT>::calc_split_util(
     const double i_util_port,
     double o_util_dimm_max [TT::DIMMS_PER_PORT]) const
 {
-    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     uint8_t l_found_ddimm = 0;
     const uint8_t l_count_dimms = count_dimm (iv_target);
     //The total utilization to be used is limited by either what the port can allow or what the dimms can use
@@ -1090,7 +1093,9 @@ fapi2::ReturnCode throttle<MC, TT>::calc_split_util(
 
     for ( const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(iv_target) )
     {
-        mss::dimm::kind<MC> l_kind (l_dimm);
+        fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+        mss::dimm::kind<MC> l_kind (l_dimm, l_rc);
+        FAPI_TRY(l_rc, "%s Failed to create dimm::kind instance", mss::c_str(l_dimm));
         l_found_ddimm = (l_kind.iv_dimm_type == fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_DDIMM) ? 1 : l_found_ddimm;
     }
 
