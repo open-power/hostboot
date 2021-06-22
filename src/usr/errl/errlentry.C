@@ -2198,6 +2198,27 @@ uint8_t ErrlEntry::queryCallouts(TARGETING::Target* const i_target)
     return criteria_matched;
 }
 
+bool ErrlEntry::hasMaintenanceCallout(void)
+{
+    bool maintenance_callout_found = false;
+    //Loop through each section of the errorlog
+    for(auto & section : iv_SectionVector)
+    {
+        if (section->compId() == ERRL_COMP_ID && section->subSect() == ERRORLOG::ERRL_UDT_CALLOUT)
+        {
+            const auto callout_ud = reinterpret_cast<HWAS::callout_ud_t*>(section->iv_pData);
+            // Looking at hwasCallout.H only the HW, CLOCK, and PART Callouts will have a target
+            // entry that follows the UDT callout entry
+            if (callout_ud->type != HWAS::PROCEDURE_CALLOUT)
+            {
+                maintenance_callout_found = true;
+            }
+        }
+    }
+    return maintenance_callout_found;
+}
+
+
 void ErrlEntry::setDeconfigState(TARGETING::Target* const i_target,
                                  DeconfigEnum i_deconfigState)
 {

@@ -258,6 +258,13 @@ public:
     void setModuleId( const uint8_t i_moduleId );
 
     /**
+     *  @brief Get the timebase value for when this log was created
+     *
+     *  @return timebase collected in error log's constructor
+     */
+    uint64_t timeCreated() const;
+
+    /**
      *  @brief Get the unique error log identifier (EID) of the error log.
      *
      *  @return The error log ID of the error log.
@@ -554,6 +561,17 @@ public:
      *                if TARGET_MATCH is true.
      */
     uint8_t queryCallouts(TARGETING::Target* i_target);
+
+    /**
+     *  @brief Check if this error log has any callouts which suggest
+     *         maintenance, such as part replacement, would help resolve
+     *         the issue being reported.
+     *
+     *  @return bool True if a ERRL_UDT_CALLOUT subsection that is not of type
+     *               HWAS::PROCEDURE_CALLOUT is found. False if no ERRL_UDT_CALLOUT
+     *               or only PROCEDURE_CALLOUT is found.
+     */
+    bool hasMaintenanceCallout(void);
 
     /**
     *  @brief Search through UD details sections for HW, clock, and part
@@ -1121,6 +1139,10 @@ private:
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 
+inline uint64_t ErrlEntry::timeCreated() const
+{
+    return iv_Private.iv_created;
+}
 inline uint32_t ErrlEntry::eid() const
 {
     return iv_Private.iv_eid;

@@ -854,6 +854,22 @@
   </attribute>
 
   <attribute>
+    <description>
+      Set to 1 to disable the delay that Hostboot does prior to sending
+      error logs to the BMC to allow time for the BMC to check for
+      power line disturbance errors. This attribute is intended
+      to be set via attribute override.
+    </description>
+    <id>DISABLE_PLD_WAIT</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <description>Dummy attribute on the heap with zero initialization</description>
     <id>DUMMY_HEAP_ZERO_DEFAULT</id>
     <persistency>volatile-zeroed</persistency>

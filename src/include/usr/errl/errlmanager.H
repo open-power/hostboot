@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -640,6 +640,7 @@ private:
     bool iv_isErrlDisplayEnabled; // are we able to use the errorDisplay
 #endif //#ifndef __HOSTBOOT_RUNTIME
     bool iv_isIpmiEnabled;      // are we able to send to BMC via IPMI
+    bool iv_pldWaitEnable; // should we wait for SP to check for PLD errors?
 
     // Errl flags which represent processing needed by the errl
     // represented as a bit field (8 bits)

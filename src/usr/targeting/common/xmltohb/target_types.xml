@@ -2074,6 +2074,9 @@
       <id>CLEAR_DIMM_SPD_ENABLE</id>
     </attribute>
     <attribute>
+      <id>DISABLE_PLD_WAIT</id>
+    </attribute>
+    <attribute>
       <id>EECACHE_DISABLE_AUTO_RESET</id>
     </attribute>
     <attribute>

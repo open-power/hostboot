@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -53,6 +53,8 @@
 #include <kernel/terminate.H>
 #include <debugpointers.H>
 #include <sys/sync.h>
+#include <sys/time.h>
+#include <time.h>
 
 namespace ERRORLOG
 {
@@ -142,6 +144,7 @@ ErrlManager::ErrlManager() :
     iv_nonInfoCommitted(false),
     iv_isErrlDisplayEnabled(false),
     iv_isIpmiEnabled(false),    // assume ipmi isn't ready yet..
+    iv_pldWaitEnable(true), // error on the side of caution and default to waitings
     iv_versionPartitionCache(nullptr),
     iv_versionPartitionCacheSize(0)
 {
@@ -400,6 +403,11 @@ void ErrlManager::errlogMsgHndlr ()
                         }
                     }
 
+                    // If this isn't an FSP system, and we do not have PLD wait
+                    // specifically disabled via the attribute ATTR_DISABLE_PLD_WAIT,
+                    // then PLD waits are enabled.
+                    iv_pldWaitEnable = !iv_isFSP && !sys->getAttr<TARGETING::ATTR_DISABLE_PLD_WAIT>();
+
                     //We are done with the msg
                     msg_free(theMsg);
 
@@ -571,6 +579,27 @@ void ErrlManager::errlogMsgHndlr ()
                     // Extract error log handle from the message. We need the
                     // error log handle to pass along
                     errlHndl_t l_err = (errlHndl_t) theMsg->extra_data;
+
+                    // If PLD waits are enabled and this log has a callout that
+                    // could trigger a maintenance request,we have to allow
+                    // time for the BMC to detect possible Power Line
+                    // Disturbances before we process the log
+                    if (iv_pldWaitEnable && l_err->hasMaintenanceCallout())
+                    {
+                        const uint64_t MIN_WAIT_TIME_SEC = 10;
+                        auto time_waited_ticks = getTB() - l_err->timeCreated();
+                        timespec_t time_waited_mono;
+                        TimeManager::convertTicksToSec(time_waited_ticks,
+                                                      time_waited_mono.tv_sec,
+                                                      time_waited_mono.tv_nsec);
+
+                        if(time_waited_mono.tv_sec < MIN_WAIT_TIME_SEC)
+                        {
+                            // Ensure we have waited at least 10 seconds since
+                            // the error log was created before we commit it.
+                            nanosleep(MIN_WAIT_TIME_SEC - time_waited_mono.tv_sec, 0);
+                        }
+                    }
 
                     // Ask the ErrlEntry to assign commit component, commit time
                     l_err->commit( (compId_t) theMsg->data[0] );
