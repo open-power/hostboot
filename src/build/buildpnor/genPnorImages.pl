@@ -385,6 +385,27 @@ my %sb_hdrs = (
     }
 );
 
+
+# This is the max number of parallel subprocesses we should use to sign the
+# PNOR images.
+# Allow the environment variable HB_PRIME_MAX_PARALLEL_PROCESSES
+# to override the max number of processes, default to the number
+# of processors on the machine.
+my $max_processes = $ENV{HB_GEN_PNOR_IMAGES_MAX_PARALLEL_PROCESSES} || `nproc`;
+
+if ($signMode{$PRODUCTION})
+{
+    # In production mode, allow at most 1 signing process to run
+    # at once. If we run more, it could cause file name collisions.
+    $max_processes = 1;
+}
+
+if ($max_processes < 1)
+{
+    # We can't do with anything less than one process.
+    $max_processes = 1;
+}
+
 ################################################################################
 # main
 ################################################################################
@@ -407,6 +428,7 @@ $SETTINGS .= $secureVersionStr ? "Secure Version = $secureVersionStr\n" : "Secur
 $SETTINGS .= $key_transition && $secureboot ? "Key Transition Mode = $key_transition\n" : "Key Transition Mode = NA\n";
 $SETTINGS .= "Lab security override (valid for SBE partition only) = ";
 $SETTINGS .= $labSecurityOverride ? "Yes\n" : "No\n";
+$SETTINGS .= "Max number of parallel subprocesses: $max_processes\n";
 $SETTINGS .= "//======================================================//\n\n";
 print $SETTINGS;
 
@@ -1079,6 +1101,11 @@ sub manipulateImages
             } else {
                 my @info = ($pid, $key);
                 push(@pids, \@info);
+            }
+
+            if (scalar(@pids) >= $max_processes)
+            {
+                last;
             }
         }
 
