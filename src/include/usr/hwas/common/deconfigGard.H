@@ -790,6 +790,21 @@ private:
     void _deconfigAffinityParent(TARGETING::Target & i_child,
                                  const uint32_t i_errlEid,
                                  const DeconfigureFlags i_deconfigRule);
+
+    /**
+     * @brief Deconfigure the Parent Pervasive target that is associated with
+     *        the given target (i_target) if that target has a Parent Pervasive,
+     *        else this method becomes a no-op.  This method only deconfigures the
+     *        Parent Pervasive target, it will not propagate the deconfig.
+     *
+     * @param[in] i_target   Reference to a target that is associated with a Parent Pervasive
+     * @param[in] i_errlEid Error log EID to store in Deconfigure Record.
+     * @param[in] i_deconfigRule Deconfigure Runtime options
+     */
+    void _deconfigParentPervasiveAssoc(      TARGETING::Target & i_target,
+                                       const uint32_t            i_errlEid,
+                                       const DeconfigureFlags    i_deconfigRule);
+
     /**
      * @brief Performs Deconfigure Actions.
      *

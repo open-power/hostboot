@@ -402,6 +402,18 @@ void DeconfigGard::_deconfigureByAssoc(
         }
         // NMMU0 will take out the entire proc chip in _deconfigParentAssoc
     }
+    // If the target is a Parent Pervasive, then deconfigure the targets associated
+    // with the Parent Pervasive target and it's children.
+    else if (l_targetType == TYPE_PERV)
+    {
+        TargetHandleList l_associatesOfPervTargetsList;
+        getPervasiveChildTargetsByState(l_associatesOfPervTargetsList, &i_target,
+                                        CLASS_NA, TYPE_NA, UTIL_FILTER_FUNCTIONAL);
+        for( auto l_parentPervChild : l_associatesOfPervTargetsList )
+        {
+            pTempList.push_back(l_parentPervChild);
+        }
+    }
 
     // Append the temporary list to the child list
     if (!pTempList.empty())
@@ -463,6 +475,11 @@ void DeconfigGard::_deconfigureByAssoc(
         HWAS_DBG("_deconfigureByAssoc %.8X _deconfigParentAssoc", l_targetHuid);
        _deconfigParentAssoc(i_target, i_errlEid, i_deconfigRule);
 
+        // Deconfigure the Parent Pervasive if the Target has a Parent Pervasive.
+        // This method will check if the Target has a Parent Pervasive, no need
+        // to check for that here.  This method will not propagate the deconfig,
+        // it only deconfigs the Parent Pervasive associated with target.
+        _deconfigParentPervasiveAssoc(i_target, i_errlEid, i_deconfigRule);
     } // !i_Runtime-ish
     else
     {
@@ -811,6 +828,70 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
     }
     HWAS_DBG("_deconfigureParentAssoc exiting: %.8X", get_huid(&i_target));
 } // _deconfigParentAssoc
+
+
+//******************************************************************************
+void DeconfigGard::_deconfigParentPervasiveAssoc(      TARGETING::Target & i_target,
+                                                 const uint32_t            i_errlEid,
+                                                 const DeconfigureFlags    i_deconfigRule)
+{
+    // Get a list of Parent Pervasive targets associated with this target.
+    TargetHandleList l_parentPervasiveList;
+    getParentPervasiveTargetsByState(l_parentPervasiveList, &i_target, CLASS_UNIT,
+                                    TYPE_PERV, UTIL_FILTER_FUNCTIONAL);
+
+    // Iterate thru the list of Parent Pervasive targets and only deconfigure it
+    // if all associated targets have been deconfigured or if i_deconfigRule is
+    // a speculative deconfig (SPEC_DECONFIG) and all functional, associated
+    // targets have been set to speculative deconfig or regular deconfig.
+    for (auto l_parentPervasive: l_parentPervasiveList)
+    {
+        // Will assume that the Parent Pervasive target will get deconfiged, unless
+        // determined otherwise.
+        bool l_deconfigParentPerv(true);
+
+        // Retrieve all the functional targets associated with this Parent Pervasive target
+        TargetHandleList l_associatesOfPervTargetsList;
+        getPervasiveChildTargetsByState(l_associatesOfPervTargetsList, l_parentPervasive,
+                                        CLASS_NA, TYPE_NA, UTIL_FILTER_FUNCTIONAL);
+        // If there are functional targets associated with this Parent Pervasive,
+        // then can't deconfig unless those functional targets match i_deconfigRule
+        if (l_associatesOfPervTargetsList.size())
+        {
+            if (SPEC_DECONFIG == i_deconfigRule)
+            {
+                // Determine if these functional targets are speculative deconfigs,
+                // and if all are so, then OK to deconfig Parent Pervasive target.
+                // If one target is functional and is not a speculative deconfig, then
+                // cannot deconfig this Parent Pervasive target.
+                for ( auto l_parentPervChild : l_associatesOfPervTargetsList )
+                {
+                    auto l_state = l_parentPervChild->getAttr<TARGETING::ATTR_HWAS_STATE>();
+                    if (!l_state.specdeconfig)
+                    {
+                        // Found a target that is not a speculative deconfig, therfore
+                        // can't deconfig the Parent Pervasive target. No need to inspect
+                        // the other targets.
+                        l_deconfigParentPerv = false;
+                        break;
+                    }
+                } // for ( auto l_parentPervChild : l_associatesOfPervTargetsList )
+            } // if (SPEC_DECONFIG == i_deconfigRule)
+            // There are functional targets, associated with this Parent Pervasive
+            // target, and this is not a speculative deconfig/regular deconfig
+            // ergo cannot deconfig the Parent Pervasive target.
+            else
+            {
+                l_deconfigParentPerv = false;
+            }
+        } // if (l_associatesOfPervTargetsList.size())
+
+        if (l_deconfigParentPerv)
+        {
+            _deconfigureTarget(*l_parentPervasive, i_errlEid, nullptr, i_deconfigRule);
+        }
+    } // for (auto l_parentPervasive: l_parentPervasiveList)
+} // DeconfigGard::_deconfigParentPervasiveAssoc
 
 //******************************************************************************
 bool DeconfigGard::anyChildFunctional(Target & i_parent,
