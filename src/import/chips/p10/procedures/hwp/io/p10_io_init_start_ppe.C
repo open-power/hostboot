@@ -520,6 +520,28 @@ fapi2::ReturnCode p10_io_init::init_regs(const fapi2::Target<fapi2::TARGET_TYPE_
                                                  3));
             }
 
+            if (l_loss == fapi2::ENUM_ATTR_IO_IOHS_CHANNEL_LOSS_MID_LOSS)
+            {
+                // Peaking
+                FAPI_TRY(p10_io_ppe_ppe_ctle_peak2_disable[l_thread].putData(l_pauc_target, 0x1));
+
+                // RX A CTLE_PEAK1
+                FAPI_TRY(p10_io_iohs_put_pl_regs(l_iohs_target,
+                                                 IOO_RX0_0_RD_RX_DAC_REGS_CNTL6_PL,
+                                                 IOO_RX0_0_RD_RX_DAC_REGS_CNTL6_PL_PEAK2,
+                                                 IOO_RX0_0_RD_RX_DAC_REGS_CNTL6_PL_PEAK2_LEN,
+                                                 l_num_lanes,
+                                                 0));
+
+                // RX B CTLE_PEAK1
+                FAPI_TRY(p10_io_iohs_put_pl_regs(l_iohs_target,
+                                                 IOO_RX0_0_RD_RX_DAC_REGS_CNTL13_PL,
+                                                 IOO_RX0_0_RD_RX_DAC_REGS_CNTL13_PL_PEAK2,
+                                                 IOO_RX0_0_RD_RX_DAC_REGS_CNTL13_PL_PEAK2_LEN,
+                                                 l_num_lanes,
+                                                 0));
+            }
+
             FAPI_TRY(p10_io_ppe_tx_ffe_pre1_coef[l_thread].putData(l_pauc_target, l_pre1));
             FAPI_TRY(p10_io_ppe_tx_ffe_pre2_coef[l_thread].putData(l_pauc_target, l_pre2));
 
