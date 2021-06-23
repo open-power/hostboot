@@ -107,7 +107,7 @@ aggregate_state gpio_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAV
                            pmic_info& io_pmic1,
                            pmic_info& io_pmic2)
 {
-    FAPI_INF(TARGTIDFORMAT "Performing GPIO N-Mode Detection", MSSTARGID(i_gpio));
+    FAPI_INF(TARGTIDFORMAT " Performing GPIO N-Mode Detection", MSSTARGID(i_gpio));
 
     aggregate_state l_state = aggregate_state::N_PLUS_1;
 
@@ -119,9 +119,12 @@ aggregate_state gpio_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAV
     if (mss::pmic::i2c::reg_read_reverse_buffer(i_gpio, mss::gpio::regs::INPUT_PORT_REG, l_reg)
         != fapi2::FAPI2_RC_SUCCESS)
     {
+        FAPI_INF(TARGTIDFORMAT " INPUT_PORT_REG register read failed", MSSTARGID(i_gpio));
         l_state = aggregate_state::GI2C_I2C_FAIL;
         return l_state;
     }
+
+    FAPI_DBG(TARGTIDFORMAT " GPIO INPUT_PORT_REG data: 0x%02X", MSSTARGID(i_gpio), l_reg);
 
     // If all are not 1, declare n-mode
     l_failed_pmics += !(l_reg.getBit<mss::gpio::fields::INPUT_PORT_REG_PMIC_PAIR0>());
@@ -129,16 +132,25 @@ aggregate_state gpio_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAV
 
     if (!l_reg.getBit<mss::gpio::fields::INPUT_PORT_REG_PMIC_PAIR0>())
     {
+        FAPI_INF(TARGTIDFORMAT " Primary PMIC PWR_NOT_GOOD", MSSTARGID(i_gpio));
         io_pmic1.iv_state |= PWR_NOT_GOOD;
     }
 
     if (!l_reg.getBit<mss::gpio::fields::INPUT_PORT_REG_PMIC_PAIR1>())
     {
+        FAPI_INF(TARGTIDFORMAT " Secondary PMIC PWR_NOT_GOOD", MSSTARGID(i_gpio));
         io_pmic2.iv_state |= PWR_NOT_GOOD;
     }
 
     // Cast that back to l_state, 1 part dead == N_MODE, 2 == LOST
     l_state = static_cast<aggregate_state>(l_failed_pmics);
+
+    // Check ADC_ALERT bit and declare n-mode if it is not set
+    if (!l_reg.getBit<mss::gpio::fields::INPUT_PORT_REG_FAULT_N>())
+    {
+        FAPI_INF(TARGTIDFORMAT " ADC_ALERT bit flagged. Declaring n-mode", MSSTARGID(i_gpio));
+        l_state = static_cast<aggregate_state>(std::max(l_state, aggregate_state::N_MODE));
+    }
 
     return l_state;
 }
@@ -150,7 +162,9 @@ aggregate_state gpio_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAV
 ///
 aggregate_state adc_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_adc)
 {
-    FAPI_INF(TARGTIDFORMAT "Checking ADC for EVENT_FLAG", MSSTARGID(i_adc));
+    FAPI_INF(TARGTIDFORMAT " Checking ADC for EVENT_FLAG", MSSTARGID(i_adc));
+
+    constexpr uint8_t EVENT_FLAG_GOOD = 0x00;
 
     // Start with the buffer polluted. If the reg read fails, we assume l_reg will
     // be left unchanged, so 0xFF will force an n-mode declaration
@@ -159,7 +173,15 @@ aggregate_state adc_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE
     // We don't care if this read fails. We would treat it the same as a bad EVENT_FLAG reg
     if (mss::pmic::i2c::reg_read(i_adc, mss::adc::regs::EVENT_FLAG, l_reg) != fapi2::FAPI2_RC_SUCCESS)
     {
+        FAPI_INF(TARGTIDFORMAT " EVENT_FLAG register read failed", MSSTARGID(i_adc));
         return aggregate_state::GI2C_I2C_FAIL;
+    }
+
+    // If the EVENT_FLAG register is not all zero, declare n-mode
+    if (l_reg != EVENT_FLAG_GOOD)
+    {
+        FAPI_INF(TARGTIDFORMAT " One or more EVENT_FLAG bits set. Declaring n-mode", MSSTARGID(i_adc));
+        return aggregate_state::N_MODE;
     }
 
     return aggregate_state::N_PLUS_1;
