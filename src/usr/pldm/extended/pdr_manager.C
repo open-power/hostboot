@@ -694,11 +694,12 @@ struct state_query_handler_t
 
 const state_query_handler_t handlers[] =
 {
-    { nullptr, nullptr },                               // STATE_QUERY_HANDLER_NONE
+    { nullptr, nullptr },                               // STATE_QUERY_HANDLER enumeration starts at 1
     { handleFunctionalStateSensorGetRequest, nullptr }, // STATE_QUERY_HANDLER_FUNCTIONAL_STATE_SENSOR
     { handleOccStateSensorGetRequest,                   // STATE_QUERY_HANDLER_OCC_STATE_QUERY
       handleOccSetStateEffecterRequest },
-    { nullptr, handleGracefulShutdownRequest }          // STATE_QUERY_HANDLER_GRACEFUL_SHUTDOWN
+    { handleGracefulShutdownSensorGetRequest,           // STATE_QUERY_HANDLER_GRACEFUL_SHUTDOWN
+      handleGracefulShutdownRequest }
 };
 
 state_query_handler_t get_state_handler(PdrManager::state_query_handler_id_t i_id)
@@ -716,15 +717,13 @@ errlHndl_t invoke_state_effecter_handler(const PdrManager::state_query_handler_i
                                          const size_t i_msgsize,
                                          const pldm_set_state_effecter_states_req& i_req)
 {
-    errlHndl_t errl = nullptr;
     const auto handler = get_state_handler(i_handler_id);
 
-    if (handler.effecter_handler)
-    {
-        errl = handler.effecter_handler(i_target, i_msgq, i_msg, i_msgsize, i_req);
-    }
+    assert(handler.effecter_handler,
+           "invoke_state_effecter_handler: Invalid effecter ID %d registered on target 0x%08x",
+           i_handler_id, get_huid(i_target));
 
-    return errl;
+    return handler.effecter_handler(i_target, i_msgq, i_msg, i_msgsize, i_req);
 }
 
 errlHndl_t invoke_state_sensor_handler(const PdrManager::state_query_handler_id_t i_handler_id,
@@ -734,15 +733,13 @@ errlHndl_t invoke_state_sensor_handler(const PdrManager::state_query_handler_id_
                                        const size_t i_msgsize,
                                        const pldm_get_state_sensor_readings_req& i_req)
 {
-    errlHndl_t errl = nullptr;
     const auto handler = get_state_handler(i_handler_id);
 
-    if (handler.sensor_handler)
-    {
-        errl = handler.sensor_handler(i_target, i_msgq, i_msg, i_msgsize, i_req);
-    }
+    assert(handler.sensor_handler,
+           "invoke_state_sensor_handler: Invalid sensor ID %d registered on target 0x%08x",
+           i_handler_id, get_huid(i_target));
 
-    return errl;
+    return handler.sensor_handler(i_target, i_msgq, i_msg, i_msgsize, i_req);
 }
 
 } // anonymous namespace
@@ -754,6 +751,8 @@ errlHndl_t PdrManager::handleStateQueryRequest(const state_query_type_t i_queryt
                                                const size_t i_payload_len,
                                                const void* const i_req)
 {
+    PLDM_INF(ENTER_MRK"handleStateQueryRequest: query type: %d, query ID: %d", i_querytype, i_query_id);
+
     errlHndl_t errl = nullptr;
     uint8_t response_code = PLDM_SUCCESS; // Only sent if we don't find an appropriate query handler
 
@@ -827,50 +826,18 @@ errlHndl_t PdrManager::handleStateQueryRequest(const state_query_type_t i_queryt
      * so we don't modify response_code here, and we won't send a response
      * below. */
 
-    if (i_querytype == STATE_QUERY_EFFECTER && handler_function_id != STATE_QUERY_HANDLER_NONE)
+    if (i_querytype == STATE_QUERY_EFFECTER)
     {
         errl = invoke_state_effecter_handler(static_cast<state_query_handler_id_t>(handler_function_id),
                                              handler_target, i_msgQ, i_msg, i_payload_len,
                                              *static_cast<const pldm_set_state_effecter_states_req*>(i_req));
         break;
     }
-    else if (i_querytype == STATE_QUERY_SENSOR && handler_function_id != STATE_QUERY_HANDLER_NONE)
+    else if (i_querytype == STATE_QUERY_SENSOR)
     {
         errl = invoke_state_sensor_handler(static_cast<state_query_handler_id_t>(handler_function_id),
                                            handler_target, i_msgQ, i_msg, i_payload_len,
                                            *static_cast<const pldm_get_state_sensor_readings_req*>(i_req));
-        break;
-    }
-    else
-    {
-        PLDM_INF("PdrManager::handleStateQueryRequest: No handler for %s ID 0x%08x",
-                 (i_querytype == STATE_QUERY_SENSOR
-                  ? "SENSOR"
-                  : "EFFECTER"),
-                 i_query_id);
-
-        /*@
-         * @errortype  ERRL_SEV_UNRECOVERABLE
-         * @moduleid   MOD_PDR_MANAGER
-         * @reasoncode RC_NO_STATE_QUERY_HANDLER
-         * @userdata1[0:31]  Sensor/effecter ID
-         * @userdata1[32:63] Query type (1 = sensor, 2 = effecter)
-         * @userdata2  Target HUID
-         * @devdesc    Software problem, invalid state sensor/effecter ID received from BMC
-         * @custdesc   A software error occurred during system boot
-         */
-        errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                             MOD_PDR_MANAGER,
-                             RC_NO_STATE_QUERY_HANDLER,
-                             TWO_UINT32_TO_UINT64(i_query_id, i_querytype),
-                             get_huid(handler_target),
-                             ErrlEntry::NO_SW_CALLOUT);
-
-        addBmcErrorCallouts(errl);
-        errlCommit(errl, PLDM_COMP_ID);
-        response_code = (i_querytype == STATE_QUERY_EFFECTER
-                         ? PLDM_PLATFORM_INVALID_EFFECTER_ID
-                         : PLDM_PLATFORM_INVALID_SENSOR_ID);
         break;
     }
 
@@ -884,6 +851,8 @@ errlHndl_t PdrManager::handleStateQueryRequest(const state_query_type_t i_queryt
     {
         PLDM::send_cc_only_response(i_msgQ, i_msg, response_code);
     }
+
+    PLDM_INF(EXIT_MRK"handleStateQueryRequest (errl = %p)", errl);
 
     return errl;
 }

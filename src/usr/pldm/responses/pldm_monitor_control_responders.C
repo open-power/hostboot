@@ -62,7 +62,6 @@
 #include <errl/errlmanager.H>
 #include <runtime/interface.h>
 #include <htmgt/htmgt.H>
-#include <initservice/istepdispatcherif.H>
 #include <arch/ppc.H>
 #include <sys/misc.h>
 
@@ -317,6 +316,38 @@ errlHndl_t handlePdrRepoChangeEventRequest(const msg_q_t i_msgQ,
     return errl;
 }
 
+/* @brief Send a response to a GetStateSensorStates request.
+ *
+ * @param[in] i_msgQ                      The outgoing PLDM message queue.
+ * @param[in] i_msg                       The PLDM request to respond to.
+ * @param[in] i_sensor_operational_state  The operational state of the sensor.
+ * @param[in] i_sensor_state              The state value of the sensor.
+ * @return errlHndl_t                     Error if any, otherwise nullptr.
+ */
+static errlHndl_t sendStateSensorGetRequestResponse(const msg_q_t i_msgQ,
+                                                    const pldm_msg* const i_msg,
+                                                    const pldm_sensor_present_state i_sensor_operational_state,
+                                                    const sensor_state_t i_sensor_state)
+{
+    get_sensor_state_field sensor_state =
+    {
+        .sensor_op_state = i_sensor_operational_state,
+        .present_state = i_sensor_state,
+        .previous_state = i_sensor_state,
+        .event_state = i_sensor_state
+    };
+
+    return
+        send_pldm_response<PLDM_GET_STATE_SENSOR_READINGS_MIN_RESP_BYTES>
+        (i_msgQ,
+         encode_get_state_sensor_readings_resp,
+         sizeof(sensor_state),
+         i_msg->hdr.instance_id,
+         PLDM_SUCCESS,
+         1, // sensor count of 1
+         &sensor_state);
+}
+
 errlHndl_t handleFunctionalStateSensorGetRequest(Target* const i_target,
                                                  const msg_q_t i_msgQ,
                                                  const pldm_msg* const i_msg,
@@ -327,38 +358,43 @@ errlHndl_t handleFunctionalStateSensorGetRequest(Target* const i_target,
              get_huid(i_target),
              i_req.sensor_id);
 
-    errlHndl_t errl = nullptr;
-
     /* Encode and send a PLDM response to the request. */
 
     const sensor_state_t current_state = (i_target->getAttr<ATTR_HWAS_STATE>().functional
                                           ? PLDM_STATE_SET_HEALTH_STATE_NORMAL
                                           : PLDM_STATE_SET_HEALTH_STATE_CRITICAL);
 
-    get_sensor_state_field sensor_state =
-    {
-        .sensor_op_state = PLDM_SENSOR_NORMAL,
-        .present_state = current_state,
-        .previous_state = current_state,
-        .event_state = current_state
-    };
+    const errlHndl_t errl = sendStateSensorGetRequestResponse(i_msgQ, i_msg, PLDM_SENSOR_NORMAL, current_state);
 
-    errl =
-        send_pldm_response<PLDM_GET_STATE_SENSOR_READINGS_MIN_RESP_BYTES>
-        (i_msgQ,
-         encode_get_state_sensor_readings_resp,
-         sizeof(sensor_state),
-         i_msg->hdr.instance_id,
-         PLDM_SUCCESS,
-         1, // sensor count of 1
-         &sensor_state);
-
-    PLDM_INF(EXIT_MRK"handleFunctionalStateSensorGetRequest");
+    PLDM_INF(EXIT_MRK"handleFunctionalStateSensorGetRequest (errl = %p)", errl);
 
     return errl;
 }
 
-errlHndl_t handleOccStateSensorGetRequest(TARGETING::Target* i_occ,
+errlHndl_t handleGracefulShutdownSensorGetRequest(Target* const,
+                                                  const msg_q_t i_msgQ,
+                                                  const pldm_msg* const i_msg,
+                                                  const size_t i_payload_len,
+                                                  const pldm_get_state_sensor_readings_req& i_req)
+{
+    PLDM_INF(ENTER_MRK"handleGracefulShutdownSensorGetRequest");
+
+#ifdef __HOSTBOOT_RUNTIME
+    const sensor_state_t current_state = PLDM_SW_TERM_NORMAL;
+#else
+    const sensor_state_t current_state = (INITSERVICE::isShutdownRequested()
+                                          ? PLDM_SW_TERM_GRACEFUL_SHUTDOWN_REQUESTED
+                                          : PLDM_SW_TERM_NORMAL);
+#endif
+
+    const errlHndl_t errl = sendStateSensorGetRequestResponse(i_msgQ, i_msg, PLDM_SENSOR_NORMAL, current_state);
+
+    PLDM_INF(EXIT_MRK"handleGracefulShutdownSensorGetRequest");
+
+    return errl;
+}
+
+errlHndl_t handleOccStateSensorGetRequest(Target* const i_occ,
                                           const msg_q_t i_msgQ,
                                           const pldm_msg* const i_msg,
                                           const size_t i_payload_len,
@@ -370,8 +406,6 @@ errlHndl_t handleOccStateSensorGetRequest(TARGETING::Target* i_occ,
              get_huid(i_occ_proc),
              i_req.sensor_id);
 
-    errlHndl_t errl = nullptr;
-
     /* Encode and send a PLDM response to the request. */
 
 #ifdef __HOSTBOOT_RUNTIME
@@ -379,45 +413,10 @@ errlHndl_t handleOccStateSensorGetRequest(TARGETING::Target* i_occ,
                                           ? PLDM_STATE_SET_OPERATIONAL_RUNNING_STATUS_IN_SERVICE
                                           : PLDM_STATE_SET_OPERATIONAL_RUNNING_STATUS_STOPPED);
 
-    get_sensor_state_field sensor_state =
-    {
-        .sensor_op_state = 0,
-        .present_state = current_state,
-        .previous_state = current_state,
-        .event_state = current_state
-    };
-
-    errl =
-        send_pldm_response<PLDM_GET_STATE_SENSOR_READINGS_MIN_RESP_BYTES>
-        (i_msgQ,
-         encode_get_state_sensor_readings_resp,
-         sizeof(sensor_state),
-         i_msg->hdr.instance_id,
-         PLDM_SUCCESS,
-         1, // sensor count of 1
-         &sensor_state);
+    const errlHndl_t errl = sendStateSensorGetRequestResponse(i_msgQ, i_msg, PLDM_SENSOR_NORMAL, current_state);
 #else
-    // there isn't a need to grab the sensor status during IPL time
-    PLDM_ERR("handleOccStateSensorGetRequest: Unsupported grabbing OCC state "
-        "on PROC HUID = 0x%08x at IPL time", get_huid(i_occ_proc));
-
-    /*@
-     * @errortype  ERRL_SEV_PREDICTIVE
-     * @moduleid   MOD_HANDLE_OCC_STATE_SENSOR_GET_REQUEST
-     * @reasoncode RC_OCC_STATUS_NOT_AVAILABLE
-     * @userdata1  HUID of the PROC with the OCC
-     * @devdesc    Software problem, BMC requested OCC status during IPL
-     * @custdesc   A software error occurred during system boot
-     */
-    errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
-                         MOD_HANDLE_OCC_STATE_SENSOR_GET_REQUEST,
-                         RC_OCC_STATUS_NOT_AVAILABLE,
-                         get_huid(i_occ_proc),
-                         0,
-                         ErrlEntry::NO_SW_CALLOUT);
-    addBmcErrorCallouts(errl);
-
-    PLDM::send_cc_only_response(i_msgQ, i_msg, PLDM_ERROR_NOT_READY);
+    // The OCC state cannot be read until runtime.
+    const errlHndl_t errl = sendStateSensorGetRequestResponse(i_msgQ, i_msg, PLDM_SENSOR_UNKNOWN, 0);
 #endif
 
     PLDM_INF(EXIT_MRK"handleOccStateSensorGetRequest");

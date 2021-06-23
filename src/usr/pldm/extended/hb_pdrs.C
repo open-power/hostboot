@@ -228,8 +228,10 @@ errlHndl_t addSystemStateControlPdrs(PdrManager& io_pdrman)
     io_pdrman.addStateSensorPdr(UTIL::assertGetToplevelTarget(),
                                 chassis,
                                 PLDM_STATE_SET_SW_TERMINATION_STATUS,
-                                enum_bit(PLDM_SW_TERM_GRACEFUL_SHUTDOWN),
-                                PdrManager::STATE_QUERY_HANDLER_NONE);
+                                (enum_bit(PLDM_SW_TERM_NORMAL)
+                                 | enum_bit(PLDM_SW_TERM_GRACEFUL_SHUTDOWN_REQUESTED)
+                                 | enum_bit(PLDM_SW_TERM_GRACEFUL_SHUTDOWN)),
+                                PdrManager::STATE_QUERY_HANDLER_GRACEFUL_SHUTDOWN);
 
     return nullptr;
 }
