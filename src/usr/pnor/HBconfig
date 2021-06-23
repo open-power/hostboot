@@ -1,5 +1,5 @@
 config PNORDD_IS_SFC
-    default n
+    default y
     depends on !PNORDD_IS_BMCMBOX && !PNORDD_IS_IPMI && !FILE_XFER_VIA_PLDM
     help
         The Serial Flash Controller is based on the SFC backends
@@ -11,7 +11,7 @@ config PNORDD_IS_BMCMBOX
         The Serial Flash Controller is using the MBOX BMC protocol
 
 config PNORDD_IS_IPMI
-    default y
+    default n
     depends on !PNORDD_IS_SFC && !PNORDD_IS_BMCMBOX && !FILE_XFER_VIA_PLDM
     help
         The Serial Flash Controller is managed via IPMI
@@ -30,7 +30,7 @@ config SFC_IS_IBM_DPSS
         The Serial Flash Controller is the IBM DPSS FPGA.
 
 config SFC_IS_AST2400
-    default n
+    default y
     depends on !SFC_IS_IBM_DPSS && !SFC_IS_FAKE && !SFC_IS_AST2500 && PNORDD_IS_SFC
     help
         The Serial Flash Controller is the AST2400 BMC.
