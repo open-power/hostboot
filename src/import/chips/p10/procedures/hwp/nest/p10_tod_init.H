@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,9 +60,11 @@ extern "C" {
     /// @brief Initialize the TOD to 'running' state
     /// @param[in] i_tod_node Pointer to TOD topology (including FAPI targets)
     /// @param[out] o_failingTodProc Pointer to the fapi target, will be populated
-    ///             with processor target unable to receive proper signals from OSC.
+    ///             with processor target unable to receive proper signals from OSC,
+    ///             or the processor target where the TOD secondary topology failed.
     ///             Caller needs to look at this parameter only when p10_tod_init
-    ///             fails and the reason code indicated OSC failure. Defaulted to NULL.
+    ///             fails and reason code indicated OSC or TOD secondary topology
+    ///             failure. Defaulted to NULL.
     /// @return FAPI2_RC_SUCCESS if TOD topology is successfully initialized else
     ///         error
     fapi2::ReturnCode p10_tod_init(

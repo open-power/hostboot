@@ -413,15 +413,19 @@ fapi_try_exit:
 /// @param[in] i_tod_node Pointer to TOD topology (including FAPI targets)
 /// @param[in] i_is_simulation True if simulation, else false
 /// @param[out] o_failingTodProc Pointer to the fapi target, will be populated
-///             with processor target unable to receive proper signals from OSC.
-//              Caller needs to look at this parameter only when p10_tod_init
-///             fails and reason code indicated OSC failure. Defaulted to NULL.
+///             with processor target unable to receive proper signals from OSC,
+///              or the processor target where the TOD secondary topology failed.
+///              Caller needs to look at this parameter only when p10_tod_init
+///             fails and reason code indicated OSC or TOD secondary topology
+///              failure. Defaulted to NULL.
+///  @param[out] o_secondary_topology_failed Secondary TOD topology failed initialization.
 /// @return FAPI2_RC_SUCCESS if TOD topology is successfully initialized
 ///         else error
 fapi2::ReturnCode init_tod_node(
     const tod_topology_node* i_tod_node,
     const bool i_is_simulation,
-    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>* o_failingTodProc)
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>* o_failingTodProc,
+    bool& o_secondary_topology_failed)
 {
     // Timeout counter for bits that are cleared by hardware
     uint32_t l_tod_init_pending_count = 0;
@@ -589,6 +593,36 @@ fapi2::ReturnCode init_tod_node(
                     .set_TARGET(l_target)
                     .set_TOD_ERROR_REG(l_tod_err_reg),
                     "M_PATH_1_STEP_CHECK_ERROR!");
+
+        // The Secondary topology is not required to successfully IPL.
+        // Add a new error code for Secondary topology failures to distinguish
+        // this failure from all other failures, but only if it is the only
+        // failure.  Any other failure will cause an assertion first before
+        // the end of the HWP.  Continue to the end of the HWP if only the
+        // secondary topology fails.
+
+        // NOTE: If the Secondary topology fails, the unmasked TOD error
+        // bit will remain set, and the TOD error will potentially propagate
+        // out to cause checkstops, if configured to do so.
+
+        if (GET_TOD_ERROR_REG_S_PATH_1_PARITY_ERROR(l_tod_err_reg))
+        {
+            o_secondary_topology_failed = true;
+            // Clear the error locally here, and assert on it later.
+            // Leave TOD error bit set.
+            l_tod_err_reg.clearBit<TOD_ERROR_REG_S_PATH_1_PARITY_ERROR>();
+            *o_failingTodProc = l_target;
+        }
+
+        if (GET_TOD_ERROR_REG_S_PATH_1_STEP_CHECK_ERROR(l_tod_err_reg))
+        {
+            o_secondary_topology_failed = true;
+            // Clear the error locally here, and assert on it later.
+            // Leave TOD error bit set.
+            l_tod_err_reg.clearBit<TOD_ERROR_REG_S_PATH_1_STEP_CHECK_ERROR>();
+            *o_failingTodProc = l_target;
+        }
+
         FAPI_ASSERT(!l_tod_err_reg(),
                     fapi2::P10_TOD_INIT_ERROR()
                     .set_TARGET(l_target)
@@ -606,7 +640,7 @@ fapi2::ReturnCode init_tod_node(
          l_child != (i_tod_node->i_children).end();
          ++l_child)
     {
-        FAPI_TRY(init_tod_node(*l_child, i_is_simulation, o_failingTodProc),
+        FAPI_TRY(init_tod_node(*l_child, i_is_simulation, o_failingTodProc, o_secondary_topology_failed),
                  "Failure configuring downstream node!");
     }
 
@@ -681,6 +715,7 @@ fapi2::ReturnCode p10_tod_init(
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>* o_failingTodProc)
 {
     FAPI_DBG("Start");
+    bool l_secondary_topology_failed = false;
     fapi2::ATTR_IS_SIMULATION_Type l_attr_is_simulation;
     fapi2::ATTR_DISABLE_TOD_SYNC_SPREAD_Type l_disable_tod_sync_spread;
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION,
@@ -708,7 +743,7 @@ fapi2::ReturnCode p10_tod_init(
              "Error from p10_tod_clear_error_reg!");
 
     // Start configuring each node; (init_tod_node will recurse on each child)
-    FAPI_TRY(init_tod_node(i_tod_node, l_attr_is_simulation, o_failingTodProc),
+    FAPI_TRY(init_tod_node(i_tod_node, l_attr_is_simulation, o_failingTodProc, l_secondary_topology_failed),
              "Error from init_tod_node!");
 
     // sync spread across chips in topology
@@ -723,6 +758,13 @@ fapi2::ReturnCode p10_tod_init(
     // This is necessary to enable timefac shadowing for STOP operations.
     FAPI_TRY(qme_tod_notify(i_tod_node),
              "Error from qme_tod_notify!");
+
+    // Always check for the secondary topology failure last so other steps
+    // are never skipped if this fails.
+    FAPI_ASSERT(!l_secondary_topology_failed,
+                fapi2::P10_TOD_INIT_SECONDARY_TOPOLOGY_ERROR()
+                .set_TARGET(*o_failingTodProc),
+                "TOD secondary topology failed!");
 
 fapi_try_exit:
     FAPI_DBG("End");

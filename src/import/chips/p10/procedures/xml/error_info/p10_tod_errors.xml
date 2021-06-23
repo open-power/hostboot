@@ -252,6 +252,28 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <rc>RC_P10_TOD_INIT_SECONDARY_TOPOLOGY_ERROR</rc>
+    <description>
+      Procedure: p10_tod_init
+      Unexpected error bit(s) set in TOD error register related to the secondary topology
+    </description>
+    <ffdc>TARGET</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_TOD_STATUS</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
     <rc>RC_P10_TOD_MOVE_TOD_TO_TB_INIT_TIMEOUT</rc>
     <description>
       Procedure: p10_tod_move_tod_to_tb
