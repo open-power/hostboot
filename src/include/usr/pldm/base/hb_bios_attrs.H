@@ -117,6 +117,7 @@ namespace PLDM
     * @param[out]    o_mirror_mem     If no error occurs will contain the value
     *                                 for hb_mirror_mem translated
     *                                 to terms of ATTR_PAYLOAD_IN_MIRROR_MEM_type.
+    * @return Error if any, otherwise nullptr.
     */
     errlHndl_t getMirrorMemory(std::vector<uint8_t>& io_string_table,
                                std::vector<uint8_t>& io_attr_table,
@@ -207,6 +208,23 @@ namespace PLDM
     errlHndl_t getMfgFlags(std::vector<uint8_t>& io_string_table,
                            std::vector<uint8_t>& io_attr_table,
                            TARGETING::ATTR_MFG_FLAGS_typeStdArr &o_mfgFlags);
+
+    /** @brief Retrieve the current value of the hb_key_clear_request
+    *          PLDM bios attribute from the BMC and return the value
+    *          converted to a ATTR_KEY_CLEAR_REQUEST_type attribute type.
+    *
+    * @param[in,out] io_string_table    See brief at the top of this file.
+    * @param[in,out] io_attr_table      See brief at the top of this file.
+    * @param[out]    o_KeyClearRequest  If no error occurred, will contain the value
+    *                                   found for hb_key_clear_request translated to
+    *                                   terms of ATTR_KEY_CLEAR_REQUEST_type.
+    *                                   Otherwise, if error, set to KEY_CLEAR_REQUEST_INVALID.
+    *
+    * @return Error if any, otherwise nullptr.
+    */
+    errlHndl_t getKeyClearRequest(std::vector<uint8_t>& io_string_table,
+                                  std::vector<uint8_t>& io_attr_table,
+                                  TARGETING::ATTR_KEY_CLEAR_REQUEST_type &o_key_clear_request);
 
     /** @brief Retrieve the current power limit PLDM bios attributes
     *          from the BMC and return to the caller.

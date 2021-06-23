@@ -203,6 +203,69 @@ errlHndl_t getAndSetMirrorMemoryFromBmcBios(std::vector<uint8_t>& io_string_tabl
                   "ATTR_PAYLOAD_IN_MIRROR_MEM",
                   l_mirrorMemory);
     }
+    return l_errl;
+}
+
+/*
+ * @brief Retrieve the Key Clear Request from the BMC BIOS and set the all the nodes under i_sys
+ *        attribute ATTR_KEY_CLEAR_REQUEST to the retrieved value, if no error occurred.
+ *        If an error occurs retrieving the BMC BIOS attribute, then the hostboot attribute
+ *        is set to KEY_CLEAR_REQUEST_NONE.
+ *
+ * @param[in,out] io_string_table   See brief in file hb_bios_attrs.H
+ * @param[in,out] io_attr_table     See brief in file hb_bios_attrs.H
+ * @param[in]     i_sys             System target handle
+ *
+ * @return Error if failed to retrieve the Key Clear Request, otherwise nullptr
+ */
+errlHndl_t getAndSetKeyClearRequestFromBmcBios(std::vector<uint8_t>& io_string_table,
+                                               std::vector<uint8_t>& io_attr_table,
+                                               TARGETING::TargetHandle_t i_sys)
+{
+    // Create a variable to hold the retrieved Key Clear Request value from the BMC BIOS
+    TARGETING::ATTR_KEY_CLEAR_REQUEST_type l_keyClearRequest = TARGETING::KEY_CLEAR_REQUEST_INVALID;
+
+    // Get the Key Clear Request from the BMC BIOS
+    errlHndl_t l_errl = PLDM::getKeyClearRequest(io_string_table, io_attr_table,
+                                                 l_keyClearRequest);
+
+    if (unlikely(l_errl != nullptr) || l_keyClearRequest == TARGETING::KEY_CLEAR_REQUEST_INVALID)
+    {
+        // if there was an error reading the BIOS attr or the KEY_CLEAR_REQUEST returned is
+        // INVALID, then default to seting all nodes to KEY_CLEAR_REQUEST_NONE
+        l_keyClearRequest = KEY_CLEAR_REQUEST_NONE;
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                  "getAndSetKeyClearRequestFromBmcBios(): An error occurred getting "
+                  "Key Clear Request from the BMC BIOS. Defaulting all node "
+                  "attributes to KEY_CLEAR_REQUEST_NONE (0x%X)",
+                  l_keyClearRequest);
+    }
+    else
+    {
+        // Set the node attribute ATTR_KEY_CLEAR_REQUEST to the retrieved value
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
+                  "getAndSetKeyClearRequestFromBmcBios(): Succeeded in getting the BMC "
+                  "BIOS Key Clear Request 0x%X",
+                  l_keyClearRequest);
+    }
+
+    // Iterate over all of the nodes, not just functional, and set ALL the node's
+    // attribute ATTR_KEY_CLEAR_REQUEST to l_keyClearRequest.
+    // Setting all of the nodes and not just functional nodes, because discover
+    // targets has not been run yet and therefore no functional targets have
+    // been established.
+    TargetHandleList l_nodeTargetList;
+    getEncResources(l_nodeTargetList, TARGETING::TYPE_NODE, TARGETING::UTIL_FILTER_ALL);
+
+    for(const auto& l_nodeTarget : l_nodeTargetList)
+    {
+        l_nodeTarget->setAttr<ATTR_KEY_CLEAR_REQUEST>(l_keyClearRequest);
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
+                   "getAndSetKeyClearRequestFromBmcBios(): setting the Hostboot attribute "
+                   "ATTR_KEY_CLEAR_REQUEST to 0x%X for NODE target 0x%0.8x",
+                    l_keyClearRequest,
+                    get_huid(l_nodeTarget) );
+    }
 
     return l_errl;
 }
@@ -213,226 +276,226 @@ errlHndl_t getAndSetPLDMBiosAttrs()
 
     do {
 
-        std::vector<uint8_t> bios_string_table;
-        std::vector<uint8_t> bios_attr_table;
-        const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
+    std::vector<uint8_t> bios_string_table;
+    std::vector<uint8_t> bios_attr_table;
+    const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
 
-        // Retrieve the Field Core Override value from the BMC bios and set all of
-        // the NODE target's attribute ATTR_FIELD_CORE_OVERRIDE to that value.
-        errl = getAndSetFieldCoreOverrideFromBmcBios(bios_string_table, bios_attr_table, sys);
-        if(errl)
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "getAndSetPLDMBiosAttrs: "
-                       "getAndSetFieldCoreOverrideFromBmcBios failed to get and then set the FCO" );
-            errlCommit( errl, ISTEP_COMP_ID );
-        }
+    // Retrieve the Field Core Override value from the BMC bios and set all of
+    // the NODE target's attribute ATTR_FIELD_CORE_OVERRIDE to that value.
+    errl = getAndSetFieldCoreOverrideFromBmcBios(bios_string_table, bios_attr_table, sys);
+    if(errl)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "getAndSetPLDMBiosAttrs: "
+                   "getAndSetFieldCoreOverrideFromBmcBios failed to get and then set the FCO" );
+        errlCommit( errl, ISTEP_COMP_ID );
+    }
 
-        // =================================================================
-        // HUGE_PAGE_COUNT
-        // =================================================================
-        ATTR_HUGE_PAGE_COUNT_type huge_page_count = 0;
-        const size_t DEFAULT_HUGE_PAGE_COUNT = 0;
+    // =================================================================
+    // HUGE_PAGE_COUNT
+    // =================================================================
+    ATTR_HUGE_PAGE_COUNT_type huge_page_count = 0;
+    const size_t DEFAULT_HUGE_PAGE_COUNT = 0;
 
-        errl = PLDM::getHugePageCount(bios_string_table,
-                                      bios_attr_table,
-                                      huge_page_count);
-        if(errl)
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "getAndSetPLDMBiosAttrs: "
-                    "An error occurred getting Huge Page Count from the BMC, using default 0x%X",
-                    DEFAULT_HUGE_PAGE_COUNT );
-
-            // Set count to default, commit the error and continue
-            huge_page_count = DEFAULT_HUGE_PAGE_COUNT;
-            errlCommit( errl, ISTEP_COMP_ID );
-        }
-
+    errl = PLDM::getHugePageCount(bios_string_table,
+                                  bios_attr_table,
+                                  huge_page_count);
+    if(errl)
+    {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "getAndSetPLDMBiosAttrs: Set ATTR_HUGE_PAGE_COUNT = 0x%X",
-                huge_page_count );
-        sys->setAttr<ATTR_HUGE_PAGE_COUNT>(huge_page_count);
+                "getAndSetPLDMBiosAttrs: "
+                "An error occurred getting Huge Page Count from the BMC, using default 0x%X",
+                DEFAULT_HUGE_PAGE_COUNT );
 
-        // =================================================================
-        // HUGE_PAGE_SIZE
-        // =================================================================
-        ATTR_HUGE_PAGE_SIZE_type huge_page_size = 0;
-        // HDAT spec: 0 = 16GB
-        const size_t DEFAULT_HUGE_PAGE_SIZE = 0;
+        // Set count to default, commit the error and continue
+        huge_page_count = DEFAULT_HUGE_PAGE_COUNT;
+        errlCommit( errl, ISTEP_COMP_ID );
+    }
 
-        errl = PLDM::getHugePageSize(bios_string_table,
-                bios_attr_table,
-                huge_page_size);
-        if(errl)
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "getAndSetPLDMBiosAttrs: An error occurred getting Huge Page Size from the BMC, using default 0x%X",
-                    DEFAULT_HUGE_PAGE_SIZE );
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "getAndSetPLDMBiosAttrs: Set ATTR_HUGE_PAGE_COUNT = 0x%X",
+            huge_page_count );
+    sys->setAttr<ATTR_HUGE_PAGE_COUNT>(huge_page_count);
 
-            // Set size to default, commit the error and continue
-            huge_page_size = DEFAULT_HUGE_PAGE_SIZE;
-            errlCommit( errl, ISTEP_COMP_ID );
-        }
+    // =================================================================
+    // HUGE_PAGE_SIZE
+    // =================================================================
+    ATTR_HUGE_PAGE_SIZE_type huge_page_size = 0;
+    // HDAT spec: 0 = 16GB
+    const size_t DEFAULT_HUGE_PAGE_SIZE = 0;
 
+    errl = PLDM::getHugePageSize(bios_string_table,
+            bios_attr_table,
+            huge_page_size);
+    if(errl)
+    {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "getAndSetPLDMBiosAttrs: Set ATTR_HUGE_PAGE_SIZE = 0x%X",
-                huge_page_size );
-        sys->setAttr<ATTR_HUGE_PAGE_SIZE>(huge_page_size);
+                "getAndSetPLDMBiosAttrs: An error occurred getting Huge Page Size from the BMC, using default 0x%X",
+                DEFAULT_HUGE_PAGE_SIZE );
+
+        // Set size to default, commit the error and continue
+        huge_page_size = DEFAULT_HUGE_PAGE_SIZE;
+        errlCommit( errl, ISTEP_COMP_ID );
+    }
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "getAndSetPLDMBiosAttrs: Set ATTR_HUGE_PAGE_SIZE = 0x%X",
+            huge_page_size );
+    sys->setAttr<ATTR_HUGE_PAGE_SIZE>(huge_page_size);
 
 
-        // =================================================================
-        // LMB_SIZE
-        // =================================================================
-        ATTR_LMB_SIZE_type lmb_size = 0;
+    // =================================================================
+    // LMB_SIZE
+    // =================================================================
+    ATTR_LMB_SIZE_type lmb_size = 0;
 
-        errl = PLDM::getLmbSize(bios_string_table,
-                bios_attr_table,
-                lmb_size);
-        if(errl)
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "getAndSetPLDMBiosAttrs: An error occurred getting LMB Size from the BMC, using default 0x%X",
-                       PLDM::LMB_SIZE_ENCODE_256MB );
-
-            // Set size to default, commit the error and continue
-            lmb_size = PLDM::LMB_SIZE_ENCODE_256MB;
-            errlCommit( errl, ISTEP_COMP_ID );
-        }
-
+    errl = PLDM::getLmbSize(bios_string_table,
+            bios_attr_table,
+            lmb_size);
+    if(errl)
+    {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "getAndSetPLDMBiosAttrs: Set ATTR_LMB_SIZE = 0x%X",
-                lmb_size );
-        sys->setAttr<ATTR_LMB_SIZE>(lmb_size);
+                   "getAndSetPLDMBiosAttrs: An error occurred getting LMB Size from the BMC, using default 0x%X",
+                   PLDM::LMB_SIZE_ENCODE_256MB );
 
-        // =================================================================
-        // ATTR_MFG_FLAGS
-        // =================================================================
-        ATTR_MFG_FLAGS_typeStdArr mfg_flags = {0};
-        const ATTR_MFG_FLAGS_typeStdArr DEFAULT_MFG_FLAGS = {0};
+        // Set size to default, commit the error and continue
+        lmb_size = PLDM::LMB_SIZE_ENCODE_256MB;
+        errlCommit( errl, ISTEP_COMP_ID );
+    }
 
-        errl = PLDM::getMfgFlags(bios_string_table,
-                bios_attr_table,
-                mfg_flags);
-        if(errl)
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "getAndSetPLDMBiosAttrs: An error occurred getting Mfg Flags from the BMC, using default 0" );
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "getAndSetPLDMBiosAttrs: Set ATTR_LMB_SIZE = 0x%X",
+            lmb_size );
+    sys->setAttr<ATTR_LMB_SIZE>(lmb_size);
 
-            // Set flags to default, commit the error and continue
-            mfg_flags = DEFAULT_MFG_FLAGS;
-            errlCommit( errl, ISTEP_COMP_ID );
-        }
+    // =================================================================
+    // ATTR_MFG_FLAGS
+    // =================================================================
+    ATTR_MFG_FLAGS_typeStdArr mfg_flags = {0};
+    const ATTR_MFG_FLAGS_typeStdArr DEFAULT_MFG_FLAGS = {0};
 
+    errl = PLDM::getMfgFlags(bios_string_table,
+            bios_attr_table,
+            mfg_flags);
+    if(errl)
+    {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "getAndSetPLDMBiosAttrs: Set ATTR_MFG_FLAGS = 0x%X 0x%X 0x%X 0x%X",
-                mfg_flags[0], mfg_flags[1], mfg_flags[2], mfg_flags[3] );
-        TARGETING::setAllMfgFlags(mfg_flags);
+                "getAndSetPLDMBiosAttrs: An error occurred getting Mfg Flags from the BMC, using default 0" );
+
+        // Set flags to default, commit the error and continue
+        mfg_flags = DEFAULT_MFG_FLAGS;
+        errlCommit( errl, ISTEP_COMP_ID );
+    }
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "getAndSetPLDMBiosAttrs: Set ATTR_MFG_FLAGS = 0x%X 0x%X 0x%X 0x%X",
+            mfg_flags[0], mfg_flags[1], mfg_flags[2], mfg_flags[3] );
+    TARGETING::setAllMfgFlags(mfg_flags);
 
 
-        // =================================================================
-        // PAYLOAD_KIND
-        // =================================================================
-        ATTR_PAYLOAD_KIND_type payload_kind = PAYLOAD_KIND_UNKNOWN;
+    // =================================================================
+    // PAYLOAD_KIND
+    // =================================================================
+    ATTR_PAYLOAD_KIND_type payload_kind = PAYLOAD_KIND_UNKNOWN;
 
-        errl = PLDM::getHypervisorMode(bios_string_table,
-                bios_attr_table,
-                payload_kind);
+    errl = PLDM::getHypervisorMode(bios_string_table,
+            bios_attr_table,
+            payload_kind);
 
-        // If we get an error, or are returned a payload_kind
-        // that is not PHYP or SAPPHIRE then we do not know
-        // what payload to pick. We cannot assume the payload
-        // kind as booting for the incorrect hypervisor could
-        // result in loss of data in NVRAM that was generated
-        // by the hypervisor on previous boots.
-        if(errl)
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "getAndSetPLDMBiosAttrs: An error occurred getting Hypervisor Mode from the BMC" );
-            break;
-        }
+    // If we get an error, or are returned a payload_kind
+    // that is not PHYP or SAPPHIRE then we do not know
+    // what payload to pick. We cannot assume the payload
+    // kind as booting for the incorrect hypervisor could
+    // result in loss of data in NVRAM that was generated
+    // by the hypervisor on previous boots.
+    if(errl)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "getAndSetPLDMBiosAttrs: An error occurred getting Hypervisor Mode from the BMC" );
+        break;
+    }
 
-        if(payload_kind != PAYLOAD_KIND_PHYP &&
-                payload_kind != PAYLOAD_KIND_SAPPHIRE)
-        {
-            /*@
-             * @errortype
-             * @severity   ERRL_SEV_UNRECOVERABLE
-             * @moduleid   MOD_SET_IPL_PARMS
-             * @reasoncode RC_INVALID_PAYLOAD_KIND
-             * @userdata1  Payload Kind that BMC returned
-             * @userdata2  unused
-             * @devdesc    Software problem, bad data from BMC
-             * @custdesc   A software error occurred during system boot
-             */
-            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                    MOD_SET_IPL_PARMS,
-                    RC_INVALID_PAYLOAD_KIND,
-                    payload_kind,
-                    0,
-                    ErrlEntry::NO_SW_CALLOUT);
-            PLDM::addBmcErrorCallouts(errl);
-            break;
-        }
+    if(payload_kind != PAYLOAD_KIND_PHYP &&
+            payload_kind != PAYLOAD_KIND_SAPPHIRE)
+    {
+        /*@
+         * @errortype
+         * @severity   ERRL_SEV_UNRECOVERABLE
+         * @moduleid   MOD_SET_IPL_PARMS
+         * @reasoncode RC_INVALID_PAYLOAD_KIND
+         * @userdata1  Payload Kind that BMC returned
+         * @userdata2  unused
+         * @devdesc    Software problem, bad data from BMC
+         * @custdesc   A software error occurred during system boot
+         */
+        errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                MOD_SET_IPL_PARMS,
+                RC_INVALID_PAYLOAD_KIND,
+                payload_kind,
+                0,
+                ErrlEntry::NO_SW_CALLOUT);
+        PLDM::addBmcErrorCallouts(errl);
+        break;
+    }
 
-        sys->setAttr<ATTR_PAYLOAD_KIND>(payload_kind);
+    sys->setAttr<ATTR_PAYLOAD_KIND>(payload_kind);
 
-        // =================================================================
-        // HYPERVISOR_IPL_SIDE
-        // =================================================================
-        TARGETING::ATTR_HYPERVISOR_IPL_SIDE_type bootside = HYPERVISOR_IPL_SIDE_UNKNOWN;
+    // =================================================================
+    // HYPERVISOR_IPL_SIDE
+    // =================================================================
+    TARGETING::ATTR_HYPERVISOR_IPL_SIDE_type bootside = HYPERVISOR_IPL_SIDE_UNKNOWN;
 
-        errl = PLDM::getBootside(bios_string_table, bios_attr_table, bootside);
+    errl = PLDM::getBootside(bios_string_table, bios_attr_table, bootside);
 
-        if (errl != nullptr)
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "getAndSetPLDMBiosAttrs: An error occurred getting bootside from the BMC" );
-            break;
-        }
+    if (errl != nullptr)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "getAndSetPLDMBiosAttrs: An error occurred getting bootside from the BMC" );
+        break;
+    }
 
-        if ((bootside != HYPERVISOR_IPL_SIDE_PERM) && (bootside != HYPERVISOR_IPL_SIDE_TEMP))
-        {
-            /*@
-             * @errortype
-             * @severity   ERRL_SEV_UNRECOVERABLE
-             * @moduleid   MOD_SET_IPL_PARMS
-             * @reasoncode RC_INVALID_BOOTSIDE
-             * @userdata1  Bootside that BMC returned
-             * @userdata2  unused
-             * @devdesc    Software problem, bad data from BMC
-             * @custdesc   A software error occurred during system boot
-             */
-            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                    MOD_SET_IPL_PARMS,
-                    RC_INVALID_BOOTSIDE,
-                    bootside,
-                    0,
-                    ErrlEntry::NO_SW_CALLOUT);
-            PLDM::addBmcErrorCallouts(errl);
-            break;
-        }
+    if ((bootside != HYPERVISOR_IPL_SIDE_PERM) && (bootside != HYPERVISOR_IPL_SIDE_TEMP))
+    {
+        /*@
+         * @errortype
+         * @severity   ERRL_SEV_UNRECOVERABLE
+         * @moduleid   MOD_SET_IPL_PARMS
+         * @reasoncode RC_INVALID_BOOTSIDE
+         * @userdata1  Bootside that BMC returned
+         * @userdata2  unused
+         * @devdesc    Software problem, bad data from BMC
+         * @custdesc   A software error occurred during system boot
+         */
+        errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                MOD_SET_IPL_PARMS,
+                RC_INVALID_BOOTSIDE,
+                bootside,
+                0,
+                ErrlEntry::NO_SW_CALLOUT);
+        PLDM::addBmcErrorCallouts(errl);
+        break;
+    }
 
-        sys->setAttr<TARGETING::ATTR_HYPERVISOR_IPL_SIDE>(bootside);
+    sys->setAttr<TARGETING::ATTR_HYPERVISOR_IPL_SIDE>(bootside);
 
-        // Retrieve the Usb Security value from the BMC bios and set the
-        // system attribute ATTR_USB_SECURITY to that value.
-        errl = getAndSetUsbSecurityFromBmcBios(bios_string_table, bios_attr_table, sys);
-        if (errl)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "getAndSetPLDMBiosAttrs: "
-                  "getAndSetUsbSecurityFromBmcBios failed to get and then set the security state");
-            errlCommit(errl, ISTEP_COMP_ID);
-        }
+    // Retrieve the Usb Security value from the BMC bios and set the
+    // system attribute ATTR_USB_SECURITY to that value.
+    errl = getAndSetUsbSecurityFromBmcBios(bios_string_table, bios_attr_table, sys);
+    if (errl)
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "getAndSetPLDMBiosAttrs: "
+              "getAndSetUsbSecurityFromBmcBios failed to get and then set the security state");
+        errlCommit(errl, ISTEP_COMP_ID);
+    }
 
-        // Retrieve the Mirror Memory value from the BMC bios and set the
-        // system attribute ATTR_PAYLOAD_IN_MIRROR_MEM to that value.
-        errl = getAndSetMirrorMemoryFromBmcBios(bios_string_table, bios_attr_table, sys);
-        if (errl)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "getAndSetPLDMBiosAttrs : "
-                  "getAndSetMirrorMemoryFromBmcBios failed to get and then set the memory mirror value");
-            errlCommit(errl, ISTEP_COMP_ID);
-        }
+    // Retrieve the Mirror Memory value from the BMC bios and set the
+    // system attribute ATTR_PAYLOAD_IN_MIRROR_MEM to that value.
+    errl = getAndSetMirrorMemoryFromBmcBios(bios_string_table, bios_attr_table, sys);
+    if (errl)
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "getAndSetPLDMBiosAttrs : "
+              "getAndSetMirrorMemoryFromBmcBios failed to get and then set the memory mirror value");
+        errlCommit(errl, ISTEP_COMP_ID);
+    }
 
     TARGETING::ATTR_SECURE_VERSION_LOCKIN_POLICY_type l_lockinPolicy = false;
     errl = PLDM::getSecVerLockinEnabled(bios_string_table, bios_attr_table, l_lockinPolicy);
@@ -443,6 +506,16 @@ errlHndl_t getAndSetPLDMBiosAttrs()
         l_lockinPolicy = false;
     }
     sys->setAttr<TARGETING::ATTR_SECURE_VERSION_LOCKIN_POLICY>(l_lockinPolicy);
+
+    // Retrieve the Key Clear Request value from the BMC bios and set all the
+    // node attributes ATTR_KEY_CLEAR_REQUEST to that value.
+    errl = getAndSetKeyClearRequestFromBmcBios(bios_string_table, bios_attr_table, sys);
+    if (errl)
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "getAndSetPLDMBiosAttrs: "
+                  "getAndSetKeyClearRequestFromBmcBios failed to get and then set the Key Clear Request");
+        errlCommit(errl, ISTEP_COMP_ID);
+    }
 
     }while(0);
 

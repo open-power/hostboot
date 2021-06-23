@@ -33,6 +33,8 @@
 #include <algorithm>
 #include <stdlib.h>
 
+#include <map>
+
 // pldm /include/ headers
 #include <pldm/requests/pldm_bios_attr_requests.H>
 #include <pldm/base/hb_bios_attrs.H>
@@ -58,31 +60,40 @@
 namespace PLDM {
 
 // Attributes
-const char PLDM_BIOS_HB_HYP_SWITCH_STRING[] = "hb_hyp_switch";
-const char PLDM_BIOS_HB_DEBUG_CONSOLE_STRING[] = "hb_debug_console";
-const char PLDM_BIOS_HB_HUGE_PAGE_COUNT_STRING[] = "hb_number_huge_pages_current";
-const char PLDM_BIOS_HB_HUGE_PAGE_SIZE_STRING[] = "hb_huge_page_size_current";
-const char PLDM_BIOS_HB_LMB_SIZE_STRING[] = "hb_memory_region_size_current";
-const char PLDM_BIOS_HB_MFG_FLAGS_STRING[] = "hb_mfg_flags_current";
-const char PLDM_BIOS_HB_FIELD_CORE_OVERRIDE_STRING[] = "hb_field_core_override_current";
-const char PLDM_BIOS_HB_USB_SECURITY_STRING[] = "hb_usb_security";
-const char PLDM_BIOS_HB_POWER_LIMIT_ENABLE_STRING[] = "hb_power_limit_enable_current";
-const char PLDM_BIOS_HB_POWER_LIMIT_IN_WATTS_STRING[] = "hb_power_limit_in_watts_current";
+const char PLDM_BIOS_HB_HYP_SWITCH_STRING[]               = "hb_hyp_switch";
+const char PLDM_BIOS_HB_DEBUG_CONSOLE_STRING[]            = "hb_debug_console";
+const char PLDM_BIOS_HB_HUGE_PAGE_COUNT_STRING[]          = "hb_number_huge_pages_current";
+const char PLDM_BIOS_HB_HUGE_PAGE_SIZE_STRING[]           = "hb_huge_page_size_current";
+const char PLDM_BIOS_HB_LMB_SIZE_STRING[]                 = "hb_memory_region_size_current";
+const char PLDM_BIOS_HB_MFG_FLAGS_STRING[]                = "hb_mfg_flags_current";
+const char PLDM_BIOS_HB_FIELD_CORE_OVERRIDE_STRING[]      = "hb_field_core_override_current";
+const char PLDM_BIOS_HB_USB_SECURITY_STRING[]             = "hb_usb_security";
+const char PLDM_BIOS_HB_POWER_LIMIT_ENABLE_STRING[]       = "hb_power_limit_enable_current";
+const char PLDM_BIOS_HB_POWER_LIMIT_IN_WATTS_STRING[]     = "hb_power_limit_in_watts_current";
 const char PLDM_BIOS_HB_SEC_VER_LOCKIN_SUPPORTED_STRING[] = "hb_secure_ver_lockin_enabled";
-const char PLDM_BIOS_HB_LID_IDS_STRING[] = "hb_lid_ids";
+const char PLDM_BIOS_HB_LID_IDS_STRING[]                  = "hb_lid_ids";
 
-const char PLDM_BIOS_PVM_FW_BOOT_SIDE_STRING[] = "pvm_fw_boot_side";
-const char PLDM_BIOS_HB_MIRROR_MEMORY_STRING[] = "hb_memory_mirror_mode_current";
+const char PLDM_BIOS_PVM_FW_BOOT_SIDE_STRING[]     = "pvm_fw_boot_side";
+const char PLDM_BIOS_HB_MIRROR_MEMORY_STRING[]     = "hb_mirror_memory_mode_current";
+const char PLDM_BIOS_HB_KEY_CLEAR_REQUEST_STRING[] = "hb_key_clear_request_current";
 
 // Possible Values
-const char PLDM_BIOS_HB_OPAL_STRING[] = "OPAL";
+const char PLDM_BIOS_HB_OPAL_STRING[]    = "OPAL";
 const char PLDM_BIOS_HB_POWERVM_STRING[] = "PowerVM";
-const char PLDM_BIOS_ENABLED_STRING[] = "Enabled";
-const char PLDM_BIOS_DISABLED_STRING[] = "Disabled";
-const char PLDM_BIOS_128_MB_STRING[] = "128MB";
-const char PLDM_BIOS_256_MB_STRING[] = "256MB";
-const char PLDM_BIOS_PERM_STRING[] = "Perm";
-const char PLDM_BIOS_TEMP_STRING[] = "Temp";
+const char PLDM_BIOS_ENABLED_STRING[]    = "Enabled";
+const char PLDM_BIOS_DISABLED_STRING[]   = "Disabled";
+const char PLDM_BIOS_128_MB_STRING[]     = "128MB";
+const char PLDM_BIOS_256_MB_STRING[]     = "256MB";
+const char PLDM_BIOS_PERM_STRING[]       = "Perm";
+const char PLDM_BIOS_TEMP_STRING[]       = "Temp";
+
+// Possible Key Clear Request Values
+const char PLDM_BIOS_KEY_CLEAR_NONE_STRING[]           = "NONE";
+const char PLDM_BIOS_KEY_CLEAR_ALL_STRING[]            = "ALL";
+const char PLDM_BIOS_KEY_CLEAR_OS_KEYS_STRING[]        = "OS_KEYS";
+const char PLDM_BIOS_KEY_CLEAR_POWERVM_SYSKEY_STRING[] = "POWERVM_SYSKEY";
+const char PLDM_BIOS_KEY_CLEAR_MFG_ALL_STRING[]        = "MFG_ALL";
+const char PLDM_BIOS_KEY_CLEAR_MFG_STRING[]            = "MFG";
 
 const std::vector<const char*> POSSIBLE_HYP_VALUE_STRINGS = {PLDM_BIOS_HB_OPAL_STRING,
                                                              PLDM_BIOS_HB_POWERVM_STRING};
@@ -96,14 +107,21 @@ const std::vector<const char*> POSSIBLE_HB_MIRROR_MEM_STRINGS = {PLDM_BIOS_ENABL
 const std::vector<const char*> POSSIBLE_HB_MEM_REGION_SIZE_STRINGS = {PLDM_BIOS_128_MB_STRING,
                                                                       PLDM_BIOS_256_MB_STRING};
 
-const std::vector<const char*> POSSIBLE_HB_POWER_LIMIT_STRINGS {PLDM_BIOS_ENABLED_STRING,
-                                                                PLDM_BIOS_DISABLED_STRING};
+const std::vector<const char*> POSSIBLE_HB_POWER_LIMIT_STRINGS = {PLDM_BIOS_ENABLED_STRING,
+                                                                  PLDM_BIOS_DISABLED_STRING};
 
 const std::vector<const char*> POSSIBLE_PVM_FW_BOOT_SIDE_STRINGS = {PLDM_BIOS_PERM_STRING,
                                                                     PLDM_BIOS_TEMP_STRING};
 
-const std::vector<const char*> POSSIBLE_SEC_VER_LOCKIN_STRINGS {PLDM_BIOS_ENABLED_STRING,
-                                                                PLDM_BIOS_DISABLED_STRING};
+const std::vector<const char*> POSSIBLE_SEC_VER_LOCKIN_STRINGS = {PLDM_BIOS_ENABLED_STRING,
+                                                                  PLDM_BIOS_DISABLED_STRING};
+
+const std::vector<const char*> POSSIBLE_HB_KEY_CLEAR_STRINGS = { PLDM_BIOS_KEY_CLEAR_NONE_STRING,
+                                                                 PLDM_BIOS_KEY_CLEAR_ALL_STRING,
+                                                                 PLDM_BIOS_KEY_CLEAR_OS_KEYS_STRING,
+                                                                 PLDM_BIOS_KEY_CLEAR_POWERVM_SYSKEY_STRING,
+                                                                 PLDM_BIOS_KEY_CLEAR_MFG_ALL_STRING,
+                                                                 PLDM_BIOS_KEY_CLEAR_MFG_STRING };
 
 constexpr uint8_t PLDM_BIOS_STRING_TYPE_ASCII = 0x1;
 constexpr uint8_t PLDM_BIOS_STRING_TYPE_HEX = 0x2;
@@ -1612,6 +1630,80 @@ errlHndl_t getMirrorMemory(
     }
 
     } while(0);
+
+    return errl;
+}
+
+errlHndl_t getKeyClearRequest(std::vector<uint8_t>& io_string_table,
+                              std::vector<uint8_t>& io_attr_table,
+                              TARGETING::ATTR_KEY_CLEAR_REQUEST_type &o_key_clear_request)
+{
+    errlHndl_t errl = nullptr;
+    o_key_clear_request = TARGETING::KEY_CLEAR_REQUEST_INVALID;
+
+    do{
+
+    std::vector<char>decoded_value;
+
+    errl = getDecodedEnumAttr(io_string_table,
+                              io_attr_table,
+                              PLDM_BIOS_HB_KEY_CLEAR_REQUEST_STRING,
+                              POSSIBLE_HB_KEY_CLEAR_STRINGS,
+                              decoded_value);
+    if(errl)
+    {
+        PLDM_ERR("Failed to lookup value for %s", PLDM_BIOS_HB_KEY_CLEAR_REQUEST_STRING);
+        break;
+    }
+
+    std::map<const char*, TARGETING::KEY_CLEAR_REQUEST> const bios_to_hb_key_clear_map = {
+                           {PLDM_BIOS_KEY_CLEAR_NONE_STRING, TARGETING::KEY_CLEAR_REQUEST_NONE},
+                           {PLDM_BIOS_KEY_CLEAR_ALL_STRING, TARGETING::KEY_CLEAR_REQUEST_ALL},
+                           {PLDM_BIOS_KEY_CLEAR_OS_KEYS_STRING, TARGETING::KEY_CLEAR_REQUEST_OS_KEYS},
+                           {PLDM_BIOS_KEY_CLEAR_POWERVM_SYSKEY_STRING, TARGETING::KEY_CLEAR_REQUEST_POWERVM_SYSKEY},
+                           {PLDM_BIOS_KEY_CLEAR_MFG_ALL_STRING, TARGETING::KEY_CLEAR_REQUEST_MFG_ALL},
+                           {PLDM_BIOS_KEY_CLEAR_MFG_STRING, TARGETING::KEY_CLEAR_REQUEST_MFG}
+                         };
+    // iterate over the map
+    for (const auto pair : bios_to_hb_key_clear_map)
+    {
+        if(strncmp(decoded_value.data(), pair.first, decoded_value.size()) == 0)
+        {
+            PLDM_INF("Found BMC PLDM BIOS attribute Key Clear Request: %s", decoded_value.data());
+            o_key_clear_request = pair.second;
+            break;
+        }
+    }
+
+    // if a valid BIOS val isn't found in the map, create an error
+    if (o_key_clear_request == TARGETING::KEY_CLEAR_REQUEST_INVALID)
+    {
+        // print the entire buffer
+        PLDM_INF_BIN("Unexpected string : ", decoded_value.data(), decoded_value.size());
+        /*@
+          * @errortype
+          * @severity   ERRL_SEV_UNRECOVERABLE
+          * @moduleid   MOD_GET_KEY_CLEAR_REQUEST
+          * @reasoncode RC_UNSUPPORTED_TYPE
+          * @userdata1  Unused
+          * @userdata2  Unused
+          * @devdesc    Software problem, incorrect data from BMC
+          * @custdesc   A software error occurred during system boot
+          */
+        errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                             MOD_GET_KEY_CLEAR_REQUEST,
+                             RC_UNSUPPORTED_TYPE,
+                             0,
+                             0,
+                             ErrlEntry::NO_SW_CALLOUT);
+        ErrlUserDetailsString(PLDM_BIOS_HB_KEY_CLEAR_REQUEST_STRING).addToLog(errl);
+        ErrlUserDetailsString(decoded_value.data()).addToLog(errl);
+        addBmcErrorCallouts(errl);
+        break;
+    }
+
+
+    }while(0);
 
     return errl;
 }
