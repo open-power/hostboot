@@ -1291,12 +1291,7 @@ print OFILE "\#\n";
 
 print OFILE "CFLAGS += -DPARSER \n\n";
 
-print OFILE "\#-------------------------------------------------------------\n";
-print OFILE "\# Cannot use C++11 with the ancient x86.nfp compiler...\n";
-print OFILE "\#-------------------------------------------------------------\n";
-print OFILE ".if ( \$(CONTEXT) != \"x86.nfp\" )\n";
 print OFILE "CFLAGS += -std=c++11 \n";
-print OFILE ".endif\n\n";
 
 
 print OFILE "EXPLIBS =\n\n";
