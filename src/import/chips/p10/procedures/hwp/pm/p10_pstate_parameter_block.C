@@ -173,7 +173,7 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
     FAPI_INF("> p10_pstate_parameter_block - %s", l_proc_str);
 
     PlatPmPPB *l_pmPPB = new PlatPmPPB(i_target);
-    GlobalPstateParmBlock_t *l_globalppb = new GlobalPstateParmBlock_t;
+    GlobalPstateParmBlock_v1_t *l_globalppb = new GlobalPstateParmBlock_v1_t;
     OCCPstateParmBlock_t l_occppb;;
 
     do
@@ -196,7 +196,7 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
 
         //Local variables for Global,local and OCC parameter blocks
         // PGPE content
-        memset (l_globalppb, 0, sizeof(GlobalPstateParmBlock_t));
+        memset (l_globalppb, 0, sizeof(GlobalPstateParmBlock_v1_t));
 
         // OCC content
         memset (&l_occppb , 0, sizeof (OCCPstateParmBlock_t));
@@ -290,7 +290,7 @@ fapi_try_exit:
 ///////////////////////////////////////////////////////////
 void gppb_print(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    GlobalPstateParmBlock_t* i_gppb)
+    GlobalPstateParmBlock_v1_t* i_gppb)
 {
     static const uint32_t   BUFFSIZE = 512;
     char                    l_buffer[BUFFSIZE];
@@ -315,22 +315,22 @@ void gppb_print(
 
     PRINT_LEAD1(l_buffer, "%-22s : ","Frequency Ref  (KHz)");
     HEX_DEC_STR(l_buffer,
-             revle32(i_gppb->reference_frequency_khz));
+             revle32(i_gppb->base.reference_frequency_khz));
     FAPI_INF("%s", l_buffer);
 
     PRINT_LEAD1(l_buffer, "%-22s : ","Frequency Step (KHz)");
     HEX_DEC_STR(l_buffer,
-             revle32(i_gppb->frequency_step_khz));
+             revle32(i_gppb->base.frequency_step_khz));
     FAPI_INF("%s", l_buffer);
 
     PRINT_LEAD1(l_buffer, "%-22s : ","Frequency Ceil (KHz)");
     HEX_DEC_STR(l_buffer,
-             revle32(i_gppb->frequency_ceiling_khz));
+             revle32(i_gppb->base.frequency_ceiling_khz));
     FAPI_INF("%s", l_buffer);
 
     PRINT_LEAD1(l_buffer, "%-22s : ","Frequency OCC  (MHz)");
     HEX_DEC_STR(l_buffer,
-             revle32(i_gppb->occ_complex_frequency_mhz));
+             revle32(i_gppb->base.occ_complex_frequency_mhz));
     FAPI_INF("%s", l_buffer);
 
     // -------------------
@@ -530,12 +530,12 @@ void gppb_print(
 
     PRINT_LEAD1(l_buffer, "  %-20s : ", "Frequency (KHz)");
     HEX_DEC_STR(l_buffer,
-             revle32(i_gppb->safe_frequency_khz));
+             revle32(i_gppb->base.safe_frequency_khz));
     FAPI_INF("%s", l_buffer);
              ;
     PRINT_LEAD1(l_buffer, "  %-20s : ", "Voltage (mV)");
     HEX_DEC_STR(l_buffer,
-             revle32(i_gppb->safe_voltage_mv[SAFE_VOLTAGE_VDD]));
+             revle32(i_gppb->base.safe_voltage_mv[SAFE_VOLTAGE_VDD]));
     FAPI_INF("%s", l_buffer);
 
     // -------------------
@@ -647,17 +647,17 @@ void gppb_print(
     }
     FAPI_INF("%s", l_buffer);
 
-    PRINT_GPPB_SLOPES(l_buffer, ps_voltage_slopes);
-    PRINT_GPPB_SLOPES(l_buffer, ps_voltage_slopes);
-    PRINT_GPPB_SLOPES(l_buffer, voltage_ps_slopes);
-    PRINT_GPPB_SLOPES(l_buffer, ps_ac_current_tdp);
-    PRINT_GPPB_SLOPES(l_buffer, ac_current_ps_tdp);
-    PRINT_GPPB_SLOPES(l_buffer, ps_dc_current_tdp);
-    PRINT_GPPB_SLOPES(l_buffer, dc_current_ps_tdp);
-    PRINT_GPPB_SLOPES(l_buffer, ps_ac_current_rdp);
-    PRINT_GPPB_SLOPES(l_buffer, ac_current_ps_rdp);
-    PRINT_GPPB_SLOPES(l_buffer, ps_dc_current_rdp);
-    PRINT_GPPB_SLOPES(l_buffer, dc_current_ps_rdp);
+    PRINT_GPPB_SLOPES(l_buffer, poundv_slopes.ps_voltage_slopes);
+    PRINT_GPPB_SLOPES(l_buffer, poundv_slopes.ps_voltage_slopes);
+    PRINT_GPPB_SLOPES(l_buffer, poundv_slopes.voltage_ps_slopes);
+    PRINT_GPPB_SLOPES(l_buffer, poundv_slopes.ps_ac_current_tdp);
+    PRINT_GPPB_SLOPES(l_buffer, poundv_slopes.ac_current_ps_tdp);
+    PRINT_GPPB_SLOPES(l_buffer, poundv_slopes.ps_dc_current_tdp);
+    PRINT_GPPB_SLOPES(l_buffer, poundv_slopes.dc_current_ps_tdp);
+    PRINT_GPPB_SLOPES(l_buffer, poundv_slopes.ps_ac_current_rdp);
+    PRINT_GPPB_SLOPES(l_buffer, poundv_slopes.ac_current_ps_rdp);
+    PRINT_GPPB_SLOPES(l_buffer, poundv_slopes.ps_dc_current_rdp);
+    PRINT_GPPB_SLOPES(l_buffer, poundv_slopes.dc_current_ps_rdp);
 
     int i = VPD_PT_SET_RAW;
 
@@ -675,7 +675,7 @@ void gppb_print(
     for (auto j = 0; j < VPD_NUM_SLOPES_REGION; ++j)
     {
         sprintf(l_temp_buffer, "0x%04X%3s",
-                revle16(i_gppb->ps_dds_delay_slopes[i][0][j])," ");
+                revle16(i_gppb->poundw_slopes.ps_dds_delay_slopes[i][0][j])," ");
         strcat(l_buffer, l_temp_buffer);
     }
     FAPI_INF("%s", l_buffer);
@@ -696,7 +696,7 @@ void gppb_print(
         for (auto j = 0; j < VPD_NUM_SLOPES_REGION; ++j)
         {
             sprintf(l_temp_buffer, "0x%04X%3s",
-                    i_gppb->ps_dds_slopes[dds_cnt][i][0][j]," ");
+                    i_gppb->poundw_slopes.ps_dds_slopes[dds_cnt][i][0][j]," ");
             strcat(l_buffer, l_temp_buffer);
         }
         FAPI_INF("%s", l_buffer);
@@ -868,8 +868,8 @@ void print_offsets()
         FAPI_INF("PSS %-30s : %05d (0x%04X) %05d (0x%04X)", #_member, \
                     offsetof(PstateSuperStructure,_member), \
                     offsetof(PstateSuperStructure,_member), \
-                    sizeof(GlobalPstateParmBlock_t), \
-                    sizeof(GlobalPstateParmBlock_t));
+                    sizeof(GlobalPstateParmBlock_v1_t), \
+                    sizeof(GlobalPstateParmBlock_v1_t));
     #define PRINT_PSS_OPPB(_member) \
         FAPI_INF("PSS %-30s : %05d (0x%04X) %05d (0x%04X)", #_member, \
                     offsetof(PstateSuperStructure,_member), \
@@ -887,26 +887,26 @@ void print_offsets()
 
     #define PRINT_GPPB_OFS(_member) \
         FAPI_INF("GPPB %-30s: %05d (0x%04X) %05d (0x%04X)", #_member, \
-                    offsetof(GlobalPstateParmBlock_t,_member) + offsetof(PstateSuperStructure,iv_globalppb), \
-                    offsetof(GlobalPstateParmBlock_t,_member) + offsetof(PstateSuperStructure,iv_globalppb), \
-                    offsetof(GlobalPstateParmBlock_t,_member), \
-                    offsetof(GlobalPstateParmBlock_t,_member));
+                    offsetof(GlobalPstateParmBlock_v1_t,_member) + offsetof(PstateSuperStructure,iv_globalppb), \
+                    offsetof(GlobalPstateParmBlock_v1_t,_member) + offsetof(PstateSuperStructure,iv_globalppb), \
+                    offsetof(GlobalPstateParmBlock_v1_t,_member), \
+                    offsetof(GlobalPstateParmBlock_v1_t,_member));
 
     FAPI_INF(" %-33s     %s    %s", " ", "PSS Offset", "GPPB Offset");
     PRINT_GPPB_OFS(magic);
-    PRINT_GPPB_OFS(attr);
-    PRINT_GPPB_OFS(reference_frequency_khz);
-    PRINT_GPPB_OFS(frequency_step_khz);
-    PRINT_GPPB_OFS(occ_complex_frequency_mhz);
-    PRINT_GPPB_OFS(dpll_pstate0_value);
+//    PRINT_GPPB_OFS(attr);
+    PRINT_GPPB_OFS(base.reference_frequency_khz);
+    PRINT_GPPB_OFS(base.frequency_step_khz);
+    PRINT_GPPB_OFS(base.occ_complex_frequency_mhz);
+    PRINT_GPPB_OFS(base.dpll_pstate0_value);
     PRINT_GPPB_OFS(operating_points_set);
     PRINT_GPPB_OFS(poundv_biases_0p05pct);
     PRINT_GPPB_OFS(vdd_sysparm);
     PRINT_GPPB_OFS(vcs_sysparm);
     PRINT_GPPB_OFS(vdn_sysparm);
     PRINT_GPPB_OFS(ext_vrm_parms);
-    PRINT_GPPB_OFS(safe_voltage_mv);
-    PRINT_GPPB_OFS(safe_frequency_khz);
+    PRINT_GPPB_OFS(base.safe_voltage_mv);
+    PRINT_GPPB_OFS(base.safe_frequency_khz);
     PRINT_GPPB_OFS(dds);
     PRINT_GPPB_OFS(dds_alt_cal);
     PRINT_GPPB_OFS(dds_tgt_act_bin);
@@ -952,7 +952,7 @@ void print_offsets()
 ////////   gppb_init
 ///////////////////////////////////////////////////////////
 fapi2::ReturnCode PlatPmPPB::gppb_init(
-                             GlobalPstateParmBlock_t *io_globalppb)
+                             GlobalPstateParmBlock_v1_t *io_globalppb)
 {
     FAPI_INF(">>>>>>>> gppb_init");
     do
@@ -964,19 +964,40 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
               "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW543384)");
         // Needs to be Endianness corrected going into the block
 
-        io_globalppb->magic.value = revle64(PSTATE_PARMSBLOCK_MAGIC);
+        io_globalppb->magic.value = revle64(PSTATE_PARMSBLOCK_MAGIC_V1);
 
-        io_globalppb->reference_frequency_khz = revle32(iv_reference_frequency_khz);
+        io_globalppb->offsets[PGPE_FLAGS_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,pgpe_flags));
+        io_globalppb->offsets[BASE_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,base));
+        io_globalppb->offsets[AVSBUS_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,avs_bus_topology));
+        io_globalppb->offsets[SYSPARMS_VDD_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,vdd_sysparm));
+        io_globalppb->offsets[SYSPARMS_VCS_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,vcs_sysparm));
+        io_globalppb->offsets[SYSPARMS_VDN_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,vdn_sysparm));
+        io_globalppb->offsets[VRM_PARMS_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,ext_vrm_parms));
+        io_globalppb->offsets[VPD_OP_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,operating_points_set));
+        io_globalppb->offsets[POUNDV_BIAS_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,poundv_biases_0p05pct));
+        io_globalppb->offsets[POUNDV_SLOPES_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,poundv_slopes));
+        io_globalppb->offsets[POUNDW_SLOPES_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,poundw_slopes));
+        io_globalppb->offsets[RESCLK_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,resclk));
 
-        io_globalppb->frequency_step_khz = revle32(iv_frequency_step_khz);
+        io_globalppb->offsets[DDS_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,dds));
+        io_globalppb->offsets[DDS_ALT_CAL_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,dds_alt_cal));
+        io_globalppb->offsets[DDS_TGT_ACT_BIN_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,dds_tgt_act_bin));
+        io_globalppb->offsets[DDS_OTHER_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,dds_other));
+        io_globalppb->offsets[DDS_VDD_CAL_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,vdd_cal));
+        io_globalppb->offsets[WOF_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,wof));
+        io_globalppb->offsets[WOV_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,wov));
 
-        io_globalppb->frequency_ceiling_khz = revle32(iv_attrs.attr_freq_core_ceiling_mhz * 1000);
+        io_globalppb->base.reference_frequency_khz = revle32(iv_reference_frequency_khz);
 
-        io_globalppb->occ_complex_frequency_mhz = revle32(iv_attrs.attr_pau_frequency_mhz/4);
+        io_globalppb->base.frequency_step_khz = revle32(iv_frequency_step_khz);
+
+        io_globalppb->base.frequency_ceiling_khz = revle32(iv_attrs.attr_freq_core_ceiling_mhz * 1000);
+
+        io_globalppb->base.occ_complex_frequency_mhz = revle32(iv_attrs.attr_pau_frequency_mhz/4);
 
         FAPI_INF("Pstate Base Frequency %X (%d)",
-                revle32(io_globalppb->reference_frequency_khz),
-                revle32(io_globalppb->reference_frequency_khz));
+                revle32(io_globalppb->base.reference_frequency_khz),
+                revle32(io_globalppb->base.reference_frequency_khz));
 
         io_globalppb->vdd_sysparm.loadline_uohm  = revle32(iv_vdd_sysparam.loadline_uohm);
         io_globalppb->vdd_sysparm.distloss_uohm  = revle32(iv_vdd_sysparam.distloss_uohm);
@@ -989,9 +1010,9 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         io_globalppb->vdn_sysparm.distoffset_uv  = revle32(iv_vdn_sysparam.distoffset_uv);
 
 
-        io_globalppb->array_write_vdn_mv = revle16(iv_array_vdn_mv);
-        io_globalppb->array_write_vdd_mv = revle16(iv_array_vdd_mv);
-        io_globalppb->rvrm_deadzone_mv   = iv_attrs.attr_rvrm_deadzone_mv;
+        io_globalppb->base.array_write_vdn_mv = revle16(iv_array_vdn_mv);
+        io_globalppb->base.array_write_vdd_mv = revle16(iv_array_vdd_mv);
+        io_globalppb->base.rvrm_deadzone_mv   = iv_attrs.attr_rvrm_deadzone_mv;
 
         //Avs bus topology
         io_globalppb->avs_bus_topology.vdd_avsbus_num  = iv_attrs.attr_avs_bus_num[VDD];
@@ -1021,19 +1042,19 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         //Bias values
         memcpy(&io_globalppb->poundv_biases_0p05pct,&iv_bias,sizeof(iv_bias));
 
-        // safe_voltage_mvL
-        io_globalppb->safe_voltage_mv[SAFE_VOLTAGE_VDD] = revle32(iv_attrs.attr_pm_safe_voltage_mv[VDD]);
-        io_globalppb->safe_voltage_mv[SAFE_VOLTAGE_VCS] = revle32(iv_attrs.attr_pm_safe_voltage_mv[VCS]);
+        // safe_voltage_mv
+        io_globalppb->base.safe_voltage_mv[SAFE_VOLTAGE_VDD] = revle32(iv_attrs.attr_pm_safe_voltage_mv[VDD]);
+        io_globalppb->base.safe_voltage_mv[SAFE_VOLTAGE_VCS] = revle32(iv_attrs.attr_pm_safe_voltage_mv[VCS]);
 
         // safe_frequency_khz
-        io_globalppb->safe_frequency_khz =
+        io_globalppb->base.safe_frequency_khz =
             iv_attrs.attr_pm_safe_frequency_mhz * 1000;
-        io_globalppb->safe_frequency_khz = revle32(io_globalppb->safe_frequency_khz);
+        io_globalppb->base.safe_frequency_khz = revle32(io_globalppb->base.safe_frequency_khz);
         FAPI_INF("Safe Mode Frequency %d (0x%X) kHz; VDD Voltage %d (0x%X) mV ",
-                revle32(io_globalppb->safe_frequency_khz),
-                revle32(io_globalppb->safe_frequency_khz),
-                revle32(io_globalppb->safe_voltage_mv[SAFE_VOLTAGE_VDD]),
-                revle32(io_globalppb->safe_voltage_mv[SAFE_VOLTAGE_VDD]));
+                revle32(io_globalppb->base.safe_frequency_khz),
+                revle32(io_globalppb->base.safe_frequency_khz),
+                revle32(io_globalppb->base.safe_voltage_mv[SAFE_VOLTAGE_VDD]),
+                revle32(io_globalppb->base.safe_voltage_mv[SAFE_VOLTAGE_VDD]));
 
         // Initialize res clk data
         memset(&io_globalppb->resclk,0,sizeof(ResClkSetup_t));
@@ -1129,13 +1150,12 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         //Compute dds slopes
         compute_dds_slopes(io_globalppb);
 
-
         float pstatef = (float)(iv_attrs.attr_pstate0_freq_mhz * 1000) /(float)(iv_frequency_step_khz);
-        io_globalppb->dpll_pstate0_value = revle32((Pstate)internal_round(pstatef));
+        io_globalppb->base.dpll_pstate0_value = revle32((Pstate)internal_round(pstatef));
 
         FAPI_INF("l_globalppb.dpll_pstate0_value %X (%d)",
-                revle32(io_globalppb->dpll_pstate0_value),
-                revle32(io_globalppb->dpll_pstate0_value));
+                revle32(io_globalppb->base.dpll_pstate0_value),
+                revle32(io_globalppb->base.dpll_pstate0_value));
 
         //Set PGPE Flags
         io_globalppb->pgpe_flags[PGPE_FLAG_RESCLK_ENABLE] = is_resclk_enabled();
@@ -1171,33 +1191,35 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         io_globalppb->pgpe_flags[PGPE_FLAG_PHANTOM_HALT_ENABLE] = iv_attrs.attr_phantom_halt_enable;
         io_globalppb->pgpe_flags[PGPE_FLAG_RVRM_ENABLE] = iv_rvrm_enabled;
         io_globalppb->pgpe_flags[PGPE_FLAG_WOF_THROTTLE_ENABLE] = is_wof_throttle_enabled();
-
-        io_globalppb->vcs_vdd_offset_mv= revle16(uint16_t(iv_attrs.attr_vcs_vdd_offset_mv & 0xFF));//Attribute is 1-byte only so truncate it
-        io_globalppb->vcs_floor_mv  = revle16(iv_attrs.attr_vcs_floor_mv);
+        io_globalppb->base.vcs_vdd_offset_mv= revle16(uint16_t(iv_attrs.attr_vcs_vdd_offset_mv & 0xFF));//Attribute is 1-byte only so truncate it
+        io_globalppb->base.vcs_floor_mv  = revle16(iv_attrs.attr_vcs_floor_mv);
 
         //WOV parameters
-        io_globalppb->wov_sample_125us                = revle32(iv_attrs.attr_wov_sample_125us);
-        io_globalppb->wov_underv_step_incr_pct        = iv_attrs.attr_wov_underv_step_incr_pct;
-        io_globalppb->wov_underv_step_decr_pct        = iv_attrs.attr_wov_underv_step_decr_pct;
-        io_globalppb->wov_underv_max_pct              = iv_attrs.attr_wov_underv_max_pct;
-        io_globalppb->wov_underv_vmin_mv              = revle16(iv_attrs.attr_wov_underv_vmin_mv);
-        io_globalppb->wov_overv_vmax_mv               = revle16(iv_attrs.attr_wov_overv_vmax_mv);
-        io_globalppb->wov_overv_step_incr_pct         = iv_attrs.attr_wov_overv_step_incr_pct;
-        io_globalppb->wov_overv_step_decr_pct         = iv_attrs.attr_wov_overv_step_decr_pct;
-        io_globalppb->wov_overv_max_pct               = iv_attrs.attr_wov_overv_max_pct;
-        if (io_globalppb->wov_underv_vmin_mv == 0)
+        io_globalppb->wov.wov_sample_125us                = revle32(iv_attrs.attr_wov_sample_125us);
+        io_globalppb->wov.wov_max_droop_pct               = revle32(iv_attrs.attr_wov_max_droop_pct);
+        io_globalppb->wov.wov_underv_perf_loss_thresh_pct = iv_attrs.attr_wov_underv_perf_loss_thresh_pct;
+        io_globalppb->wov.wov_underv_step_incr_pct        = iv_attrs.attr_wov_underv_step_incr_pct;
+        io_globalppb->wov.wov_underv_step_decr_pct        = iv_attrs.attr_wov_underv_step_decr_pct;
+        io_globalppb->wov.wov_underv_max_pct              = iv_attrs.attr_wov_underv_max_pct;
+        io_globalppb->wov.wov_underv_vmin_mv              = revle16(iv_attrs.attr_wov_underv_vmin_mv);
+        io_globalppb->wov.wov_overv_vmax_mv               = revle16(iv_attrs.attr_wov_overv_vmax_mv);
+        io_globalppb->wov.wov_overv_step_incr_pct         = iv_attrs.attr_wov_overv_step_incr_pct;
+        io_globalppb->wov.wov_overv_step_decr_pct         = iv_attrs.attr_wov_overv_step_decr_pct;
+        io_globalppb->wov.wov_overv_max_pct               = iv_attrs.attr_wov_overv_max_pct;
+        if (io_globalppb->wov.wov_underv_vmin_mv == 0)
         {
-            io_globalppb->wov_underv_vmin_mv = revle16(uint16_t(revle32(io_globalppb->safe_voltage_mv[SAFE_VOLTAGE_VDD])));
-            FAPI_INF("WOV_VMIN_MV=%u",revle16(io_globalppb->wov_underv_vmin_mv));
-            FAPI_INF("SafeVoltage=%u",revle32(io_globalppb->safe_voltage_mv[SAFE_VOLTAGE_VDD]));
+            io_globalppb->wov.wov_underv_vmin_mv = revle16(uint16_t(revle32(io_globalppb->base.safe_voltage_mv[SAFE_VOLTAGE_VDD])));
+            FAPI_INF("WOV_VMIN_MV=%u",revle16(io_globalppb->wov.wov_underv_vmin_mv));
+            FAPI_INF("SafeVoltage=%u",revle32(io_globalppb->base.safe_voltage_mv[SAFE_VOLTAGE_VDD]));
         }
 
         for(uint32_t i = 0; i < NUM_WOV_DIRTY_UC_CTRL; i++) {
-            io_globalppb->wov_dirty_undercurr_control[i] = iv_attrs.attr_wov_dirty_uncurrent_ctrl[i];
-            FAPI_INF("WOV_DIRTY_UNDERCURR_CTRL[%u]=%u",i,io_globalppb->wov_dirty_undercurr_control[i]);
+            io_globalppb->wov.wov_dirty_undercurr_control[i] = iv_attrs.attr_wov_dirty_uncurrent_ctrl[i];
+            FAPI_INF("WOV_DIRTY_UNDERCURR_CTRL[%u]=%u",i,io_globalppb->wov.wov_dirty_undercurr_control[i]);
         }
-        io_globalppb->wov_idd_thresh                  =  revle16(iv_attr_mvpd_poundV_other_info.idd_rdp_limit_0p1A);
+        io_globalppb->wov.wov_idd_thresh                  =  revle16(iv_attr_mvpd_poundV_other_info.idd_rdp_limit_0p1A);
 
+#if 0
         io_globalppb->attr.fields.pstates_enabled     = is_pstates_enabled();
         io_globalppb->attr.fields.resclk_enabled      = is_resclk_enabled();
         io_globalppb->attr.fields.wof_enabled         = is_wof_enabled();
@@ -1211,16 +1233,17 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         io_globalppb->attr.fields.wof_disable_io      = iv_attrs.attr_system_wof_disable_dimension[2];
         io_globalppb->attr.fields.wof_disable_amb     = iv_attrs.attr_system_wof_disable_dimension[3];
         io_globalppb->attr.fields.wof_disable_vratio  = iv_attrs.attr_system_wof_disable_dimension[4];
+#endif
 
         //Current Scaling Factor - only VDD, VCS and VDN are sent to PGPE
         for (auto i=0; i < 3; ++i)
         {
-            io_globalppb->current_scaling_factor[i] = iv_attrs.attr_current_scaling_factor[i];
-            FAPI_INF("Current_scaling_factor[%u]=%u, attr=%u",io_globalppb->current_scaling_factor[i],iv_attrs.attr_current_scaling_factor[i]);
+            io_globalppb->ext_vrm_parms.current_scaling_factor[i] = iv_attrs.attr_current_scaling_factor[i];
+            FAPI_INF("Current_scaling_factor[%u]=%u, attr=%u",io_globalppb->ext_vrm_parms.current_scaling_factor[i],iv_attrs.attr_current_scaling_factor[i]);
         }
         for (uint8_t i = 0; i < NUM_WOF_VRATIO_PCT; i++) {
-            io_globalppb->vratio_vdd_64ths[i] = uint16_t(internal_ceil(iv_attrs.attr_vratio_vdd_10th_pct[i] / 15.625));
-            io_globalppb->vratio_vcs_64ths[i] = uint16_t(internal_ceil(iv_attrs.attr_vratio_vcs_10th_pct[i] / 15.625));
+            io_globalppb->wof.vratio_vdd_64ths[i] = uint16_t(internal_ceil(iv_attrs.attr_vratio_vdd_10th_pct[i] / 15.625));
+            io_globalppb->wof.vratio_vcs_64ths[i] = uint16_t(internal_ceil(iv_attrs.attr_vratio_vcs_10th_pct[i] / 15.625));
         }
 
 
@@ -1790,6 +1813,10 @@ void PlatPmPPB::attr_init( void )
     PPB_GET_ATTR_2_8(ATTR_VOLTAGE_EXT_BIAS,                 iv_procChip,  attr_voltage_ext_bias);
     PPB_GET_ATTR(ATTR_VOLTAGE_EXT_VDN_BIAS,                 iv_procChip,  attr_voltage_ext_vdn_bias);
     PPB_GET_ATTR_4(ATTR_EXTERNAL_VRM_STEPSIZE,              iv_procChip,  attr_ext_vrm_step_size_mv);
+    iv_attrs.attr_ext_vrm_step_size_mv[0] = 0;
+    iv_attrs.attr_ext_vrm_step_size_mv[1] = 0;
+    iv_attrs.attr_ext_vrm_step_size_mv[2] = 0;
+    iv_attrs.attr_ext_vrm_step_size_mv[3] = 0;
 
     // Voltage Transition attributes
     PPB_GET_ATTR_4(ATTR_EXTERNAL_VRM_TRANSITION_RATE_DEC_UV_PER_US,
@@ -4353,7 +4380,7 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_init( void )
 
     if (!iv_attrs.attr_pm_safe_voltage_mv[VDD] ||
         !iv_attrs.attr_pm_safe_voltage_mv[VCS] ||
-        !iv_attrs.attr_pm_safe_frequency_mhz || 
+        !iv_attrs.attr_pm_safe_frequency_mhz ||
         ps_ovrd)
     {
         //Compute safe mode values
@@ -5162,7 +5189,7 @@ void PlatPmPPB::get_pstate_attrs(AttributeList &o_attr)
 ////////  compute_PStateV_I_slope
 ///////////////////////////////////////////////////////////
 void PlatPmPPB::compute_PStateV_I_slope(
-                GlobalPstateParmBlock_t * o_gppb)
+                GlobalPstateParmBlock_v1_t * o_gppb)
 {
     uint32_t l_voltage_mv_max = 0;
     uint32_t l_voltage_mv_min = 0;
@@ -5181,7 +5208,7 @@ void PlatPmPPB::compute_PStateV_I_slope(
     char vlt_str[][4] = {"VDD","VCS"};
     char cur_str[][4] = {"IDD","ICS"};
 
-    for(auto pt_set = 0; pt_set < NUM_VPD_PTS_SET; ++pt_set)
+    for(auto pt_set = 0; pt_set < NUM_VPD_PTS_SET_V1; ++pt_set)
     {
         if (!(iv_operating_points[pt_set][CF0].pstate) ||
                 !(iv_operating_points[pt_set][CF1].pstate) ||
@@ -5229,27 +5256,27 @@ void PlatPmPPB::compute_PStateV_I_slope(
                 // are swapped to result in a positive difference.
 
                 //VDD Voltage slopes
-                COMPUTE_V_I_SLOPES(o_gppb->ps_voltage_slopes[rails][pt_set][region],
+                COMPUTE_V_I_SLOPES(o_gppb->poundv_slopes.ps_voltage_slopes[rails][pt_set][region],
                                     NORMAL, l_voltage_mv_max,l_voltage_mv_min,
                                     l_pstate_max,l_pstate_min)
 
                 FAPI_DBG("%s ps_voltage_slopes   [%s][%s] 0x%04x %d",vlt_str[rails],
                         vpdSetStr[pt_set], region_names[region],
-                        revle16(o_gppb->ps_voltage_slopes[rails][pt_set][region]),
-                        revle16(o_gppb->ps_voltage_slopes[rails][pt_set][region]));
+                        revle16(o_gppb->poundv_slopes.ps_voltage_slopes[rails][pt_set][region]),
+                        revle16(o_gppb->poundv_slopes.ps_voltage_slopes[rails][pt_set][region]));
 
                 //Voltage inverted slopes
                 //Calculate inverted slopes
                 // Pstate value decreases with increasing region.  Thus the values
                 // are swapped to result in a positive difference.
-                COMPUTE_V_I_SLOPES(o_gppb->voltage_ps_slopes[rails][pt_set][region],
+                COMPUTE_V_I_SLOPES(o_gppb->poundv_slopes.voltage_ps_slopes[rails][pt_set][region],
                                     INVERTED, l_voltage_mv_max,l_voltage_mv_min,
                                     l_pstate_max,l_pstate_min)
 
                 FAPI_DBG("%s voltage_ps_slopes   [%s][%s] 0x%04x %d", vlt_str[rails],
                         vpdSetStr[pt_set], region_names[region],
-                        revle16(o_gppb->voltage_ps_slopes[rails][pt_set][region]),
-                        revle16(o_gppb->voltage_ps_slopes[rails][pt_set][region]));
+                        revle16(o_gppb->poundv_slopes.voltage_ps_slopes[rails][pt_set][region]),
+                        revle16(o_gppb->poundv_slopes.voltage_ps_slopes[rails][pt_set][region]));
 
                 //CURRENT pstate slopes
                 //Calculate slopes
@@ -5281,22 +5308,21 @@ void PlatPmPPB::compute_PStateV_I_slope(
                 // Pstate value decreases with increasing region.  Thus the values
                 // are swapped to result in a positive difference.
                 // AC
-                COMPUTE_V_I_SLOPES(o_gppb->ps_ac_current_tdp[rails][pt_set][region],
+                COMPUTE_V_I_SLOPES(o_gppb->poundv_slopes.ps_ac_current_tdp[rails][pt_set][region],
                                     NORMAL, l_current_10ma_ac_tdp_max,l_current_10ma_ac_tdp_min,
                                     l_pstate_max,l_pstate_min)
 
                 FAPI_DBG("%s AC ps_ac_current_tdp[%s][%s] 0x%04x %d", cur_str[rails], vpdSetStr[pt_set], region_names[region],
-                        revle16(o_gppb->ps_ac_current_tdp[rails][pt_set][region]),
-                        revle16(o_gppb->ps_ac_current_tdp[rails][pt_set][region]));
-
+                        revle16(o_gppb->poundv_slopes.ps_ac_current_tdp[rails][pt_set][region]),
+                        revle16(o_gppb->poundv_slopes.ps_ac_current_tdp[rails][pt_set][region]));
                 //DC
-                COMPUTE_V_I_SLOPES(o_gppb->ps_dc_current_tdp[rails][pt_set][region],
+                COMPUTE_V_I_SLOPES(o_gppb->poundv_slopes.ps_dc_current_tdp[rails][pt_set][region],
                                     NORMAL, l_current_10ma_dc_tdp_max,l_current_10ma_dc_tdp_min,
                                     l_pstate_max,l_pstate_min)
 
                 FAPI_DBG("%s DC ps_dc_current_tdp[%s][%s] 0x%04x %d",cur_str[rails], vpdSetStr[pt_set], region_names[region],
-                        revle16(o_gppb->ps_dc_current_tdp[rails][pt_set][region]),
-                        revle16(o_gppb->ps_dc_current_tdp[rails][pt_set][region]));
+                        revle16(o_gppb->poundv_slopes.ps_dc_current_tdp[rails][pt_set][region]),
+                        revle16(o_gppb->poundv_slopes.ps_dc_current_tdp[rails][pt_set][region]));
 
                 //Current inverted slopes
                 //Calculate inverted slopes
@@ -5304,38 +5330,38 @@ void PlatPmPPB::compute_PStateV_I_slope(
                 // Pstate value decreases with increasing region.  Thus the values
                 // are swapped to result in a positive difference.
                 // AC
-                COMPUTE_V_I_SLOPES(o_gppb->ac_current_ps_tdp[rails][pt_set][region],
+                COMPUTE_V_I_SLOPES(o_gppb->poundv_slopes.ac_current_ps_tdp[rails][pt_set][region],
                                     INVERTED, l_current_10ma_ac_tdp_max,l_current_10ma_ac_tdp_min,
                                     l_pstate_max,l_pstate_min)
                 FAPI_DBG("%s AC ac_current_ps_tdp[%s][%s] 0x%04x %d",cur_str[rails],vpdSetStr[pt_set], region_names[region],
-                        revle16(o_gppb->ac_current_ps_tdp[rails][pt_set][region]),
-                        revle16(o_gppb->ac_current_ps_tdp[rails][pt_set][region]));
+                        revle16(o_gppb->poundv_slopes.ac_current_ps_tdp[rails][pt_set][region]),
+                        revle16(o_gppb->poundv_slopes.ac_current_ps_tdp[rails][pt_set][region]));
 
                 //DC
-                COMPUTE_V_I_SLOPES(o_gppb->dc_current_ps_tdp[rails][pt_set][region],
+                COMPUTE_V_I_SLOPES(o_gppb->poundv_slopes.dc_current_ps_tdp[rails][pt_set][region],
                                     INVERTED, l_current_10ma_dc_tdp_max,l_current_10ma_dc_tdp_min,
                                     l_pstate_max,l_pstate_min)
                 FAPI_DBG("%s DC dc_current_ps_tdp[%s][%s] 0x%04x %d", cur_str[rails],vpdSetStr[pt_set], region_names[region],
-                        revle16(o_gppb->dc_current_ps_tdp[rails][pt_set][region]),
-                        revle16(o_gppb->dc_current_ps_tdp[rails][pt_set][region]));
+                        revle16(o_gppb->poundv_slopes.dc_current_ps_tdp[rails][pt_set][region]),
+                        revle16(o_gppb->poundv_slopes.dc_current_ps_tdp[rails][pt_set][region]));
 
                 // Pstate value decreases with increasing region.  Thus the values
                 // are swapped to result in a positive difference.
                 // AC
-                COMPUTE_V_I_SLOPES(o_gppb->ps_ac_current_rdp[rails][pt_set][region],
+                COMPUTE_V_I_SLOPES(o_gppb->poundv_slopes.ps_ac_current_rdp[rails][pt_set][region],
                                     NORMAL, l_current_10ma_ac_rdp_max,l_current_10ma_ac_rdp_min,
                                     l_pstate_max,l_pstate_min)
                 FAPI_DBG("%s AC ps_ac_current_rdp[%s][%s] 0x%04x %d", cur_str[rails], vpdSetStr[pt_set], region_names[region],
-                        revle16(o_gppb->ps_ac_current_rdp[rails][pt_set][region]),
-                        revle16(o_gppb->ps_ac_current_rdp[rails][pt_set][region]));
+                        revle16(o_gppb->poundv_slopes.ps_ac_current_rdp[rails][pt_set][region]),
+                        revle16(o_gppb->poundv_slopes.ps_ac_current_rdp[rails][pt_set][region]));
 
                 //DC
-                COMPUTE_V_I_SLOPES(o_gppb->ps_dc_current_rdp[rails][pt_set][region],
+                COMPUTE_V_I_SLOPES(o_gppb->poundv_slopes.ps_dc_current_rdp[rails][pt_set][region],
                                     NORMAL, l_current_10ma_dc_rdp_max,l_current_10ma_dc_rdp_min,
                                     l_pstate_max,l_pstate_min)
                 FAPI_DBG("%s DC ps_dc_current_rdp[%s][%s] 0x%04x %d",cur_str[rails], vpdSetStr[pt_set], region_names[region],
-                        revle16(o_gppb->ps_dc_current_rdp[rails][pt_set][region]),
-                        revle16(o_gppb->ps_dc_current_rdp[rails][pt_set][region]));
+                        revle16(o_gppb->poundv_slopes.ps_dc_current_rdp[rails][pt_set][region]),
+                        revle16(o_gppb->poundv_slopes.ps_dc_current_rdp[rails][pt_set][region]));
 
                 //Current inverted slopes
                 //Calculate inverted slopes
@@ -5343,20 +5369,20 @@ void PlatPmPPB::compute_PStateV_I_slope(
                 // Pstate value decreases with increasing region.  Thus the values
                 // are swapped to result in a positive difference.
                 // AC
-                COMPUTE_V_I_SLOPES(o_gppb->ac_current_ps_rdp[rails][pt_set][region],
+                COMPUTE_V_I_SLOPES(o_gppb->poundv_slopes.ac_current_ps_rdp[rails][pt_set][region],
                                     INVERTED, l_current_10ma_ac_rdp_max,l_current_10ma_ac_rdp_min,
                                     l_pstate_max,l_pstate_min)
                 FAPI_DBG("%s AC ac_current_ps_rdp[%s][%s] 0x%04x %d",cur_str[rails],vpdSetStr[pt_set], region_names[region],
-                        revle16(o_gppb->ac_current_ps_rdp[rails][pt_set][region]),
-                        revle16(o_gppb->ac_current_ps_rdp[rails][pt_set][region]));
+                        revle16(o_gppb->poundv_slopes.ac_current_ps_rdp[rails][pt_set][region]),
+                        revle16(o_gppb->poundv_slopes.ac_current_ps_rdp[rails][pt_set][region]));
 
                 //DC
-                COMPUTE_V_I_SLOPES(o_gppb->dc_current_ps_rdp[rails][pt_set][region],
+                COMPUTE_V_I_SLOPES(o_gppb->poundv_slopes.dc_current_ps_rdp[rails][pt_set][region],
                                     INVERTED, l_current_10ma_dc_rdp_max,l_current_10ma_dc_rdp_min,
                                     l_pstate_max,l_pstate_min)
                 FAPI_DBG("%s DC dc_current_ps_rdp[%s][%s] 0x%04x %d", cur_str[rails],vpdSetStr[pt_set], region_names[region],
-                        revle16(o_gppb->dc_current_ps_rdp[rails][pt_set][region]),
-                        revle16(o_gppb->dc_current_ps_rdp[rails][pt_set][region]));
+                        revle16(o_gppb->poundv_slopes.dc_current_ps_rdp[rails][pt_set][region]),
+                        revle16(o_gppb->poundv_slopes.dc_current_ps_rdp[rails][pt_set][region]));
             }//end of rails
         }//end of region
     } //end of pts
@@ -5368,14 +5394,14 @@ void PlatPmPPB::compute_PStateV_I_slope(
 ////////  compute_dds_slopes
 ///////////////////////////////////////////////////////////
 void PlatPmPPB::compute_dds_slopes(
-                GlobalPstateParmBlock_t * o_gppb)
+                GlobalPstateParmBlock_v1_t * o_gppb)
 {
     uint32_t l_max = 0;
     uint32_t l_min = 0;
 
 
 #ifndef __HOSTBOOT_MODULE
-    for(auto pt_set = 0; pt_set < NUM_VPD_PTS_SET; ++pt_set)
+    for(auto pt_set = 0; pt_set < NUM_VPD_PTS_SET_V1; ++pt_set)
     {
         for(auto region(REGION_CF0_CF1); region <= REGION_CF6_CF7; ++region)
         {
@@ -5393,7 +5419,7 @@ void PlatPmPPB::compute_dds_slopes(
         }
     }
 
-    for(auto pt_set = 0; pt_set < NUM_VPD_PTS_SET; ++pt_set)
+    for(auto pt_set = 0; pt_set < NUM_VPD_PTS_SET_V1; ++pt_set)
     {
         for(auto region(REGION_CF0_CF1); region <= REGION_CF6_CF7; ++region)
         {
@@ -5412,7 +5438,7 @@ void PlatPmPPB::compute_dds_slopes(
     }
 #endif
 
-    for(auto pt_set = 0; pt_set < NUM_VPD_PTS_SET; ++pt_set)
+    for(auto pt_set = 0; pt_set < NUM_VPD_PTS_SET_V1; ++pt_set)
     {
         for(auto region(REGION_CF0_CF1); region <= REGION_CF6_CF7; ++region)
         {
@@ -5420,16 +5446,17 @@ void PlatPmPPB::compute_dds_slopes(
             {
                 //Insertion delay slopes
                 if(iv_poundW_data.entry[region+1].entry[cores].ddsc.fields.insrtn_dely >=
-                    iv_poundW_data.entry[region].entry[cores].ddsc.fields.insrtn_dely) {
+                    iv_poundW_data.entry[region].entry[cores].ddsc.fields.insrtn_dely)
+                {
 
-                    o_gppb->ps_dds_delay_slopes[pt_set][cores][region] =
+                    o_gppb->poundw_slopes.ps_dds_delay_slopes[pt_set][cores][region] =
                             revle16(compute_slope_4_12(iv_poundW_data.entry[region+1].entry[cores].ddsc.fields.insrtn_dely,
                                 iv_poundW_data.entry[region].entry[cores].ddsc.fields.insrtn_dely,
                                 iv_operating_points[pt_set][region].pstate,
                                 iv_operating_points[pt_set][region + 1].pstate)
                            );
                 } else {
-                    o_gppb->ps_dds_delay_slopes[pt_set][cores][region] =
+                    o_gppb->poundw_slopes.ps_dds_delay_slopes[pt_set][cores][region] =
                            revle16(compute_slope_4_12(iv_poundW_data.entry[region].entry[cores].ddsc.fields.insrtn_dely,
                                 iv_poundW_data.entry[region+1].entry[cores].ddsc.fields.insrtn_dely,
                                 iv_operating_points[pt_set][region].pstate,
@@ -5439,10 +5466,10 @@ void PlatPmPPB::compute_dds_slopes(
 
                 FAPI_DBG("ps_dds_delay_slopes: [%s][%s][%u] 0x%04x %u 0x%04x %u delay[r]=%u delay[r+1]=%u",
                         vpdSetStr[pt_set], region_names[region],cores,
-                        revle16(o_gppb->ps_dds_delay_slopes[pt_set][cores][region]),
-                        revle16(o_gppb->ps_dds_delay_slopes[pt_set][cores][region]),
-                        o_gppb->ps_dds_delay_slopes[pt_set][cores][region],
-                        o_gppb->ps_dds_delay_slopes[pt_set][cores][region],
+                        revle16(o_gppb->poundw_slopes.ps_dds_delay_slopes[pt_set][cores][region]),
+                        revle16(o_gppb->poundw_slopes.ps_dds_delay_slopes[pt_set][cores][region]),
+                        o_gppb->poundw_slopes.ps_dds_delay_slopes[pt_set][cores][region],
+                        o_gppb->poundw_slopes.ps_dds_delay_slopes[pt_set][cores][region],
                         iv_poundW_data.entry[region].entry[cores].ddsc.fields.insrtn_dely,
                         iv_poundW_data.entry[region+1].entry[cores].ddsc.fields.insrtn_dely
                         );
@@ -5506,7 +5533,7 @@ void PlatPmPPB::compute_dds_slopes(
 
                     if(l_max >= l_min)
                     {
-                        o_gppb->ps_dds_slopes[dds_cnt][pt_set][cores][region] =
+                        o_gppb->poundw_slopes.ps_dds_slopes[dds_cnt][pt_set][cores][region] =
                                     compute_slope_2_6(
                                         l_max,
                                         l_min,
@@ -5515,7 +5542,7 @@ void PlatPmPPB::compute_dds_slopes(
                     }
                     else
                     {
-                        o_gppb->ps_dds_slopes[dds_cnt][pt_set][cores][region] =
+                        o_gppb->poundw_slopes.ps_dds_slopes[dds_cnt][pt_set][cores][region] =
                                     compute_slope_2_6(
                                         l_min,
                                         l_max,
@@ -5525,8 +5552,8 @@ void PlatPmPPB::compute_dds_slopes(
                     FAPI_DBG("ps_dds_slopes [%s][%s][%s][%u] max 0x%x min 0x%x slope 0x%04x %d",
                             ddsFieldStr[dds_cnt],  vpdSetStr[pt_set], region_names[region],cores,
                             l_max, l_min,
-                            o_gppb->ps_dds_slopes[dds_cnt][pt_set][cores][region],
-                            o_gppb->ps_dds_slopes[dds_cnt][pt_set][cores][region]);
+                            o_gppb->poundw_slopes.ps_dds_slopes[dds_cnt][pt_set][cores][region],
+                            o_gppb->poundw_slopes.ps_dds_slopes[dds_cnt][pt_set][cores][region]);
                 }
             }//end of dds_cnt
         }//end of region

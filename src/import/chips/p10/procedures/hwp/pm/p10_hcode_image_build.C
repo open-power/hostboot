@@ -2300,9 +2300,9 @@ fapi2::ReturnCode buildParameterBlock( CONST_FAPI2_PROC& i_procTgt, Homerlayout_
                 l_sectn.iv_sectnOffset, l_sectn.iv_sectnLength, l_wofSize);
 
     memcpy( &i_pChipHomer->iv_ppmrRegion.iv_pgpeSramRegion[l_sectn.iv_sectnLength],
-            &l_pstateParamBlock->iv_globalppb, sizeof(GlobalPstateParmBlock_t) );
+            &l_pstateParamBlock->iv_globalppb, sizeof(GlobalPstateParmBlock_v1_t) );
 
-    i_ppmrBuildRecord.setSection( "GPSPB", l_tempOffset, sizeof(GlobalPstateParmBlock_t) );
+    i_ppmrBuildRecord.setSection( "GPSPB", l_tempOffset, sizeof(GlobalPstateParmBlock_v1_t) );
 
     memcpy( i_pChipHomer->iv_ppmrRegion.iv_occPstateParamBlock, &l_pstateParamBlock->iv_occppb,
             sizeof( OCCPstateParmBlock_t ) );
