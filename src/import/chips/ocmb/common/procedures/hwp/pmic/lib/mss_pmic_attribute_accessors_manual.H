@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -337,7 +337,7 @@ fapi2::ReturnCode set_n_mode_helper(
     const uint8_t i_pmic_id,
     const mss::pmic::n_mode i_n_mode);
 
-} // nss attr
+} // ns attr
 } // ns mss
 
 #endif

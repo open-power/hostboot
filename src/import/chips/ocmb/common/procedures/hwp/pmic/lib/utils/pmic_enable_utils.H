@@ -358,6 +358,8 @@ struct target_info_redundancy
 
     fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> iv_ocmb;
 
+    bool iv_pmic_redundancy[CONSTS::NUM_PRIMARY_PMICS];
+
     target_info_redundancy() = delete;
 
     ///
@@ -371,6 +373,8 @@ struct target_info_redundancy
     {
         o_rc = fapi2::FAPI2_RC_SUCCESS;
 
+        uint8_t l_attr = 0;
+
         const auto I2C_DEVICES =
             mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_GENERICI2CSLAVE>(i_ocmb);
 
@@ -380,6 +384,7 @@ struct target_info_redundancy
         {
             // mss::index grabs ATTR_REL_POS, returning 0-3 for these PMIC targets
             iv_pmic_map.insert(std::make_pair(mss::index(l_pmic), l_pmic));
+            FAPI_DBG("Found present PMIC: %s", mss::c_str(l_pmic));
         }
 
         const uint8_t NUM_PMICS = iv_pmic_map.size();
@@ -410,6 +415,11 @@ struct target_info_redundancy
         iv_gpio2 = I2C_DEVICES[mss::generic_i2c_slave::GPIO2];
 
         iv_ocmb = i_ocmb;
+
+        FAPI_TRY(mss::attr::get_pmic0_redundancy(i_ocmb, l_attr));
+        iv_pmic_redundancy[0] = (l_attr == fapi2::ENUM_ATTR_MEM_EFF_PMIC0_REDUNDANCY_ENABLED);
+        FAPI_TRY(mss::attr::get_pmic1_redundancy(i_ocmb, l_attr));
+        iv_pmic_redundancy[1] = (l_attr == fapi2::ENUM_ATTR_MEM_EFF_PMIC1_REDUNDANCY_ENABLED);
 
         return;
 
@@ -1018,6 +1028,14 @@ bool bad_pair(const std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U>& i_n_mod
 /// @return true/false at least one pmic is bad
 ///
 bool bad_any(const std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U>& i_n_mode_pmic);
+
+///
+/// @brief Check if at least one primary PMIC has declared N mode
+///
+/// @param[in] i_n_mode_pmic n-mode states of the 4 PMICs
+/// @return true/false either primary pmic is bad
+///
+bool bad_primary(const std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U>& i_n_mode_pmic);
 
 ///
 /// @brief Reset N Mode attributes

@@ -109,10 +109,9 @@ static constexpr uint32_t const VOLT_RANGE_MAXES[][CONSTS::NUM_RANGES] =
 ///
 /// @brief Get the valid pmics for id object
 ///
-/// @param[in] i_pmic_target
-/// @param[in] i_id
-/// @param[out] o_pmics vector of PMICS matching
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+/// @param[in] i_ocmb_target OCMB target to get PMIC(s) for
+/// @param[in] i_id index of PMIC requested
+/// @return vector of PMICs that match the id
 ///
 inline std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>> get_valid_pmics_for_id(
             const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,

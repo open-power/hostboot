@@ -1381,21 +1381,25 @@ void log_n_modes_as_recoverable_errors(
 {
     for (uint8_t l_idx = PMIC0; l_idx < CONSTS::NUM_PMICS_4U; ++l_idx)
     {
-        // FAPI_ASSERT_NOEXIT's behavior differs from FAPI_ASSERT:
-        // NOEXIT commits the error log as soon as the FFDC execute function is called,
-        // so we do not need to manually log the error, like with FAPI_ASSERT,
-        // so long as we pass in the right severity as an argument
-        FAPI_ASSERT_NOEXIT((i_n_mode_pmic[l_idx] == mss::pmic::n_mode::N_PLUS_1_MODE),
-                           fapi2::PMIC_DROPPED_INTO_N_MODE(fapi2::FAPI2_ERRL_SEV_RECOVERED)
-                           .set_OCMB_TARGET(i_target_info.iv_ocmb)
-                           .set_PMIC_ID(l_idx),
-                           "%s PMIC%u had errors which caused a drop into N-Mode",
-                           mss::c_str(i_target_info.iv_ocmb), l_idx);
-
-        // Set back to success
-        if (fapi2::current_err != fapi2::FAPI2_RC_SUCCESS)
+        // Only log N-mode if we have a redundant PMIC
+        if (i_target_info.iv_pmic_redundancy[l_idx % CONSTS::NUM_PRIMARY_PMICS])
         {
-            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            // FAPI_ASSERT_NOEXIT's behavior differs from FAPI_ASSERT:
+            // NOEXIT commits the error log as soon as the FFDC execute function is called,
+            // so we do not need to manually log the error, like with FAPI_ASSERT,
+            // so long as we pass in the right severity as an argument
+            FAPI_ASSERT_NOEXIT((i_n_mode_pmic[l_idx] == mss::pmic::n_mode::N_PLUS_1_MODE),
+                               fapi2::PMIC_DROPPED_INTO_N_MODE(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                               .set_OCMB_TARGET(i_target_info.iv_ocmb)
+                               .set_PMIC_ID(l_idx),
+                               "%s PMIC%u had errors which caused a drop into N-Mode",
+                               mss::c_str(i_target_info.iv_ocmb), l_idx);
+
+            // Set back to success
+            if (fapi2::current_err != fapi2::FAPI2_RC_SUCCESS)
+            {
+                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            }
         }
     }
 }
@@ -1413,37 +1417,57 @@ fapi2::ReturnCode assert_n_mode_states(
     const std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U>& i_n_mode_pmic,
     const bool i_mnfg_thresholds)
 {
+    // Checks for a 4U with redundant PMICs
+    if (i_target_info.iv_pmic_redundancy[0] && i_target_info.iv_pmic_redundancy[1])
+    {
+        // Check if we have lost a redundant pair :(
+        FAPI_ASSERT(!(mss::pmic::check::bad_pair(i_n_mode_pmic)),
+                    fapi2::PMIC_REDUNDANCY_FAIL()
+                    .set_OCMB_TARGET(i_target_info.iv_ocmb)
+                    .set_N_MODE_PMIC0(i_n_mode_pmic[PMIC0])
+                    .set_N_MODE_PMIC1(i_n_mode_pmic[PMIC1])
+                    .set_N_MODE_PMIC2(i_n_mode_pmic[PMIC2])
+                    .set_N_MODE_PMIC3(i_n_mode_pmic[PMIC3]),
+                    "A pair of redundant PMICs have both declared N-Mode. Procedure will not be able "
+                    "to turn either on and provide power to the OCMB %s N-Mode States:"
+                    "PMIC0: %u PMIC1: %u PMIC2: %u PMIC3: %u",
+                    mss::c_str(i_target_info.iv_ocmb),
+                    i_n_mode_pmic[PMIC0], i_n_mode_pmic[PMIC1], i_n_mode_pmic[PMIC2], i_n_mode_pmic[PMIC3]);
 
-    // Check if we have lost a redundant pair :(
-    FAPI_ASSERT(!(mss::pmic::check::bad_pair(i_n_mode_pmic)),
-                fapi2::PMIC_REDUNDANCY_FAIL()
-                .set_OCMB_TARGET(i_target_info.iv_ocmb)
-                .set_N_MODE_PMIC0(i_n_mode_pmic[PMIC0])
-                .set_N_MODE_PMIC1(i_n_mode_pmic[PMIC1])
-                .set_N_MODE_PMIC2(i_n_mode_pmic[PMIC2])
-                .set_N_MODE_PMIC3(i_n_mode_pmic[PMIC3]),
-                "A pair of redundant PMICs have both declared N-Mode. Procedure will not be able "
-                "to turn either on and provide power to the OCMB %s N-Mode States:"
-                "PMIC0: %u PMIC1: %u PMIC2: %u PMIC3: %u",
-                mss::c_str(i_target_info.iv_ocmb),
-                i_n_mode_pmic[PMIC0], i_n_mode_pmic[PMIC1], i_n_mode_pmic[PMIC2], i_n_mode_pmic[PMIC3]);
-
-    // Now in the other case, if at least one is down, assert this error. However, depending on the
-    // thresholds policy setting, in most cases this error will be logged as recoverable in the
-    // fapi_try_exit of process_n_mode_results(...)
-    FAPI_ASSERT(!(mss::pmic::check::bad_any(i_n_mode_pmic)),
-                fapi2::DIMM_RUNNING_IN_N_MODE()
-                .set_OCMB_TARGET(i_target_info.iv_ocmb)
-                .set_N_MODE_PMIC0(i_n_mode_pmic[PMIC0])
-                .set_N_MODE_PMIC1(i_n_mode_pmic[PMIC1])
-                .set_N_MODE_PMIC2(i_n_mode_pmic[PMIC2])
-                .set_N_MODE_PMIC3(i_n_mode_pmic[PMIC3]),
-                "%s Warning: At least one of the 4 PMICs had errors which caused a drop into N-Mode. "
-                "MNFG_THRESHOLDS has asserted that we %s. N-Mode States:"
-                "PMIC0: %u PMIC1: %u PMIC2: %u PMIC3: %u",
-                mss::c_str(i_target_info.iv_ocmb),
-                (i_mnfg_thresholds) ? "EXIT." : "DO NOT EXIT. Continuing boot normally with redundant parts.",
-                i_n_mode_pmic[PMIC0], i_n_mode_pmic[PMIC1], i_n_mode_pmic[PMIC2], i_n_mode_pmic[PMIC3]);
+        // Now in the other case, if at least one is down, assert this error. However, depending on the
+        // thresholds policy setting, in most cases this error will be logged as recoverable in the
+        // fapi_try_exit of process_n_mode_results(...)
+        FAPI_ASSERT(!(mss::pmic::check::bad_any(i_n_mode_pmic)),
+                    fapi2::DIMM_RUNNING_IN_N_MODE()
+                    .set_OCMB_TARGET(i_target_info.iv_ocmb)
+                    .set_N_MODE_PMIC0(i_n_mode_pmic[PMIC0])
+                    .set_N_MODE_PMIC1(i_n_mode_pmic[PMIC1])
+                    .set_N_MODE_PMIC2(i_n_mode_pmic[PMIC2])
+                    .set_N_MODE_PMIC3(i_n_mode_pmic[PMIC3]),
+                    "%s Warning: At least one of the 4 PMICs had errors which caused a drop into N-Mode. "
+                    "MNFG_THRESHOLDS has asserted that we %s. N-Mode States:"
+                    "PMIC0: %u PMIC1: %u PMIC2: %u PMIC3: %u",
+                    mss::c_str(i_target_info.iv_ocmb),
+                    (i_mnfg_thresholds) ? "EXIT." : "DO NOT EXIT. Continuing boot normally with redundant parts.",
+                    i_n_mode_pmic[PMIC0], i_n_mode_pmic[PMIC1], i_n_mode_pmic[PMIC2], i_n_mode_pmic[PMIC3]);
+    }
+    // Checks for a 4U without redundant PMICs
+    else
+    {
+        // Note that we can confidently use iv_pmic_map[0] and [1] here since we know
+        // that we have no redundancy and prior checks told us we have at least two
+        // present PMIC targets
+        const auto& l_failing_pmic = i_n_mode_pmic[PMIC0] ?
+                                     i_target_info.iv_pmic_map.find(PMIC0)->second :
+                                     i_target_info.iv_pmic_map.find(PMIC1)->second;
+        FAPI_ASSERT(!(mss::pmic::check::bad_primary(i_n_mode_pmic)),
+                    fapi2::PMIC_NON_REDUNDANT_FAIL()
+                    .set_OCMB_TARGET(i_target_info.iv_ocmb)
+                    .set_PMIC_TARGET(l_failing_pmic),
+                    "PMIC %s failed to enable, and has no redundant back-up. "
+                    "See previous errors for details.",
+                    mss::c_str(l_failing_pmic));
+    }
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -1610,6 +1634,22 @@ bool bad_any(const std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U>& i_n_mode
            i_n_mode_pmic[1] == N_MODE ||
            i_n_mode_pmic[2] == N_MODE ||
            i_n_mode_pmic[3] == N_MODE;
+}
+
+///
+/// @brief Check if at least one primary PMIC has declared N mode
+///
+/// @param[in] i_n_mode_pmic n-mode states of the 4 PMICs
+/// @return true/false at least one primary pmic is bad
+///
+bool bad_primary(const std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U>& i_n_mode_pmic)
+{
+    // For readability
+    static constexpr mss::pmic::n_mode N_MODE = mss::pmic::n_mode::N_MODE;
+
+    // True if either primary PMIC is N_MODE
+    return i_n_mode_pmic[0] == N_MODE ||
+           i_n_mode_pmic[1] == N_MODE;
 }
 
 
