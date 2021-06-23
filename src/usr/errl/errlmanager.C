@@ -586,18 +586,17 @@ void ErrlManager::errlogMsgHndlr ()
                     // Disturbances before we process the log
                     if (iv_pldWaitEnable && l_err->hasMaintenanceCallout())
                     {
-                        const uint64_t MIN_WAIT_TIME_SEC = 10;
                         auto time_waited_ticks = getTB() - l_err->timeCreated();
                         timespec_t time_waited_mono;
                         TimeManager::convertTicksToSec(time_waited_ticks,
                                                       time_waited_mono.tv_sec,
                                                       time_waited_mono.tv_nsec);
 
-                        if(time_waited_mono.tv_sec < MIN_WAIT_TIME_SEC)
+                        if(time_waited_mono.tv_sec < MIN_PLD_WAIT_TIME_SEC)
                         {
                             // Ensure we have waited at least 10 seconds since
                             // the error log was created before we commit it.
-                            nanosleep(MIN_WAIT_TIME_SEC - time_waited_mono.tv_sec, 0);
+                            nanosleep(MIN_PLD_WAIT_TIME_SEC - time_waited_mono.tv_sec, 0);
                         }
                     }
 

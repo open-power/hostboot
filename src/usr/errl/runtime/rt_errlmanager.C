@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,6 +29,7 @@
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <sys/task.h>
+#include <sys/time.h>
 #include <stdlib.h>
 #include <string.h>
 #include <runtime/interface.h>   // g_hostInterfaces
@@ -77,6 +78,11 @@ ErrlManager::ErrlManager() :
         iv_pnorAddr(NULL),
         iv_maxErrlInPnor(0),
         iv_pnorOpenSlot(0),
+#ifdef CONFIG_FSP_BUILD
+        iv_isFSP(true),
+#else
+        iv_isFSP(false),
+#endif
 #ifdef CONFIG_BMC_IPMI
         iv_isIpmiEnabled(true)
 #else
@@ -98,6 +104,7 @@ ErrlManager::ErrlManager() :
     {
         TRACFCOMP( g_trac_errl, "Error log being created before "
                                 "TARGETING is ready..." );
+
     }
     if(sys)
     {
@@ -110,12 +117,22 @@ ErrlManager::ErrlManager() :
 
         TRACFCOMP( g_trac_errl,"iv_hiddenErrorLogsEnable = 0x%x",
                 iv_hiddenErrLogsEnable );
+        
+        // If this isn't an FSP system, and we do not have PLD wait
+        // specifically disabled via the attribute ATTR_DISABLE_PLD_WAIT,
+        // then PLD waits are enabled.
+        iv_pldWaitEnable = !iv_isFSP && !sys->getAttr<TARGETING::ATTR_DISABLE_PLD_WAIT>();
 
     }
     else
     {
         iv_currLogId = 0x89bad000;
         TRACFCOMP( g_trac_errl, ERR_MRK"HOSTSVC_PLID not available" );
+
+        // If this isn't an FSP system, and targeting isn't ready when
+        // the first error log comes in, ignore the DISABLE_PLD_WAIT
+        // override and just enable the wait.
+        iv_pldWaitEnable = !iv_isFSP;
     }
 
     TRACFCOMP( g_trac_errl, EXIT_MRK "ErrlManager::ErrlManager constructor." );
@@ -303,7 +320,6 @@ void ErrlManager::sendMboxMsg ( errlHndl_t& io_err )
 ///////////////////////////////////////////////////////////////////////////////
 void ErrlManager::commitErrLog(errlHndl_t& io_err, compId_t i_committerComp )
 {
-
     TRACDCOMP( g_trac_errl, ENTER_MRK"ErrlManager::commitErrLog" );
     do
     {
@@ -321,10 +337,24 @@ void ErrlManager::commitErrLog(errlHndl_t& io_err, compId_t i_committerComp )
         {
             TARGETING::targetService().getTopLevelTarget( sys );
             sys->setAttr<TARGETING::ATTR_HOSTSVC_PLID>(io_err->eid()+1);
+            // update instance variable in case target service was not
+            // avaible when errlmanager's constructor was called.
+            iv_pldWaitEnable &= !sys->getAttr<TARGETING::ATTR_DISABLE_PLD_WAIT>();
         }
 
-        TRACFCOMP(g_trac_errl, "commitErrLog() called by %.4X for eid=%.8x, Reasoncode=%.4X, Sev=%s",
-                  i_committerComp, io_err->eid(), io_err->reasonCode(), errl_sev_str_map.at(io_err->sev()) );
+        // If this is not an FSP and this log has a callout that
+        // could trigger a maintenance request,we have to allow
+        // time for the BMC to detect possible Power Line
+        // Disturbances before we process the log
+        auto do_pld_wait = iv_pldWaitEnable && io_err->hasMaintenanceCallout();
+        TRACFCOMP(g_trac_errl,
+                  "commitErrLog() called by %.4X for eid=%.8x, Reasoncode=%.4X, Sev=%s %s waiting for BMC to determine if Power Line Disturbance (PLD) occurred",
+                  i_committerComp, io_err->eid(), io_err->reasonCode(), errl_sev_str_map.at(io_err->sev()), do_pld_wait ? "" : "not"  );
+
+        if(do_pld_wait)
+        {
+            nanosleep(MIN_PLD_WAIT_TIME_SEC, 0);
+        }
 
         // Deferred callouts not allowed at runtime - this call will check,
         // flag and change any that are found.

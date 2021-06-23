@@ -133,6 +133,8 @@ enum errlManagerNeeds
     UPDATE_ATTRIB_VARS,  // Force the refresh/update of attribute variables
 } ;
 
+const uint64_t MIN_PLD_WAIT_TIME_SEC = 10;
+
 
 /*****************************************************************************/
 // Forward class declarations
@@ -633,8 +635,8 @@ private:
     char *iv_pnorAddr;          // HBEL section in PNOR
     uint32_t iv_maxErrlInPnor;  // max number of errorlogs that will fit
     uint32_t iv_pnorOpenSlot;   // current open slot available for an errorlog
-#ifndef __HOSTBOOT_RUNTIME
     bool iv_isFSP;              // do we need to send to FSP
+#ifndef __HOSTBOOT_RUNTIME
     bool iv_isMboxEnabled;      // are we able to send to FSP
     bool iv_nonInfoCommitted;   // Keeps track of any non-informational logs.
     bool iv_isErrlDisplayEnabled; // are we able to use the errorDisplay

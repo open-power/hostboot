@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -643,6 +643,11 @@ void cmd_errorlog( char*& o_output,
                              i_deconfig,
                              i_gard );
     }
+    else
+    {
+        l_err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
+                             HWAS::SRCI_PRIORITY_HIGH);
+    }
 
     if (i_ffdcLength > 0)
     {
@@ -682,8 +687,8 @@ void cmd_errorlog( char*& o_output,
     }
 
     l_err->collectTrace("UTIL", 1024);
-
     uint32_t l_plid = l_err->plid();
+    sprintf( o_output, "Going to commit plid 0x%.8X", l_plid );
     errlCommit(l_err, UTIL_COMP_ID);
     sprintf( o_output, "Committed plid 0x%.8X", l_plid );
 }
