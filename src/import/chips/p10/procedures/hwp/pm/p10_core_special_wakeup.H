@@ -100,15 +100,24 @@ enum RecursionOp
 extern "C"
 {
     typedef fapi2::ReturnCode (*p10_core_special_wakeup_FP_t)
-    ( const fapi2::Target < fapi2::TARGET_TYPE_CORE  | fapi2::TARGET_TYPE_MULTICAST > &,
-      const p10specialWakeup::PROC_SPCWKUP_OPS,
-      const p10specialWakeup::PROC_SPCWKUP_ENTITY);
+    (   const fapi2::Target < fapi2::TARGET_TYPE_CORE  | fapi2::TARGET_TYPE_MULTICAST > &,
+        const p10specialWakeup::PROC_SPCWKUP_OPS,
+        const p10specialWakeup::PROC_SPCWKUP_ENTITY);
 
     fapi2::ReturnCode p10_core_special_wakeup(
         const fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST > & i_target,
         const p10specialWakeup::PROC_SPCWKUP_OPS i_operation,
         const p10specialWakeup::PROC_SPCWKUP_ENTITY i_entity );
 
+    typedef fapi2::ReturnCode (*p10_uc_core_special_wakeup_FP_t)
+    (   const fapi2::Target < fapi2::TARGET_TYPE_CORE  >&,
+        const p10specialWakeup::PROC_SPCWKUP_OPS,
+        const p10specialWakeup::PROC_SPCWKUP_ENTITY);
+
+    fapi2::ReturnCode p10_uc_core_special_wakeup(
+        const fapi2::Target < fapi2::TARGET_TYPE_CORE >& i_target,
+        const p10specialWakeup::PROC_SPCWKUP_OPS i_operation,
+        const p10specialWakeup::PROC_SPCWKUP_ENTITY i_entity );
 } //extern "C"
 
 #endif // _P10_CORE_SPECIAL_WAKEUP_H_
