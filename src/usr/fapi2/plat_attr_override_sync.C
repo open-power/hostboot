@@ -173,6 +173,12 @@ void AttrOverrideSync::monitorForFspMessages()
     {
         msg_t * l_pMsg = msg_wait(l_pMsgQ);
 
+        // Check the message in case it got deleted from the time we received it
+        if(!l_pMsg)
+        {
+            continue;
+        }
+
         if (l_pMsg->type == MSG_SET_OVERRIDES)
         {
             // FSP is setting attribute override(s).
