@@ -2023,13 +2023,9 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
         {
             // we have a Master Proc and it's functional
             // check for at least 1 functional ec/core on Master Proc
+            // Ignore ECO cores as those don't support instruction execution.
             TargetHandleList l_cores;
-            PredicateCTM l_core(CLASS_UNIT, TYPE_CORE);
-            PredicatePostfixExpr l_coresFunctional;
-            l_coresFunctional.push(&l_core).push(&l_functional).And();
-            targetService().getAssociated(l_cores, l_pMasterProc,
-                    TargetService::CHILD, TargetService::ALL,
-                    &l_coresFunctional);
+            getNonEcoCores(l_cores, l_pMasterProc);
 
             HWAS_DBG( "checkMinimumHardware: %d functional cores",
                       l_cores.size() );
