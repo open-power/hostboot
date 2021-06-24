@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020
+# Contributors Listed Below - COPYRIGHT 2020,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -100,7 +100,7 @@ if __name__ == "__main__":
     try:
         nfsDir = validateNfsPath(os.environ['HB_NFS_DIR'])
         if nfsDir == None:
-            print "WARNING: Final dir in path" + os.environ['HB_NFS_DIR'] + " was not nfs. Path validation failed, continue at your own discretion."
+            print ("WARNING: Final dir in path" + os.environ['HB_NFS_DIR'] + " was not nfs. Path validation failed, continue at your own discretion.")
             # Restore the old path
             nfsDir = os.environ['HB_NFS_DIR']
 
@@ -108,4 +108,4 @@ if __name__ == "__main__":
         os.environ['HB_NFS_DIR'] = nfsDir
     except KeyError:
         # Script was called with environment variable undefined.
-        print "Path to nfs directory with hostboot patches doesn't exist. Skipping auto-patch and auto-boot."
+        print ("Path to nfs directory with hostboot patches doesn't exist. Skipping auto-patch and auto-boot.")

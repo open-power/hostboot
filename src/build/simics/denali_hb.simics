@@ -3,11 +3,14 @@
 # Check if the hostboot nfs directory has been set indicating that we want to trigger an autoboot
 @if 'HB_NFS_DIR' in os.environ: simenv.hb_nfsdir = os.environ['HB_NFS_DIR']
 if defined hb_nfsdir {
-    try {
+    try{
         # If HB_NFS_DIR was found then we want to make sure it ends with nfs and not anything else since the
         # autoboot script expects the path to end with nfs.
         run-python-file (lookup-file -query ($hb_script_location + "/validate-hb-nfs-dir.py"))
-
+    } except {
+        echo "Failed to execute validate-hb_nfs-dir.py. Manually check /nfs/test/pnor/ points to patches after FSP standby"
+    }
+    try {
         # Check if the nfs dir was set correctly. It being "Invalid" indicates the HB_NFS_DIR wasn't something
         # trivially correctable and as a result the autoboot/patch script will not run.
         $hb_nfsdir = (python "os.environ['HB_NFS_DIR']")
