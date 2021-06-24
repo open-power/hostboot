@@ -393,10 +393,11 @@ my %sb_hdrs = (
 # of processors on the machine.
 my $max_processes = $ENV{HB_GEN_PNOR_IMAGES_MAX_PARALLEL_PROCESSES} || `nproc`;
 
-if ($signMode{$PRODUCTION})
+if ($signMode{$PRODUCTION} || $keyTransition{$PRODUCTION})
 {
     # In production mode, allow at most 1 signing process to run
     # at once. If we run more, it could cause file name collisions.
+    # This also applies for dev-to-prod key transition drivers
     $max_processes = 1;
 }
 
