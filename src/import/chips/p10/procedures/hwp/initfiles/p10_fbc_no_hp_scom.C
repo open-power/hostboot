@@ -70,12 +70,13 @@ constexpr uint64_t literal_0x43 = 0x43;
 constexpr uint64_t literal_0x56 = 0x56;
 constexpr uint64_t literal_0x2B = 0x2B;
 constexpr uint64_t literal_0x9 = 0x9;
-constexpr uint64_t literal_0x0F = 0x0F;
-constexpr uint64_t literal_0x2D = 0x2D;
+constexpr uint64_t literal_0x09 = 0x09;
+constexpr uint64_t literal_0x0D = 0x0D;
 constexpr uint64_t literal_0x11 = 0x11;
+constexpr uint64_t literal_0x2D = 0x2D;
 constexpr uint64_t literal_0x18 = 0x18;
+constexpr uint64_t literal_0x17 = 0x17;
 constexpr uint64_t literal_0x1E = 0x1E;
-constexpr uint64_t literal_0x24 = 0x24;
 constexpr uint64_t literal_0x30 = 0x30;
 constexpr uint64_t literal_6 = 6;
 constexpr uint64_t literal_7 = 7;
@@ -88,11 +89,11 @@ constexpr uint64_t literal_5 = 5;
 constexpr uint64_t literal_0xFFF = 0xFFF;
 constexpr uint64_t literal_0b001 = 0b001;
 constexpr uint64_t literal_0x400 = 0x400;
+constexpr uint64_t literal_0x800 = 0x800;
 constexpr uint64_t literal_0b101 = 0b101;
 constexpr uint64_t literal_0b111 = 0b111;
 constexpr uint64_t literal_0b000 = 0b000;
 constexpr uint64_t literal_0b010 = 0b010;
-constexpr uint64_t literal_0x17 = 0x17;
 constexpr uint64_t literal_0b00000 = 0b00000;
 constexpr uint64_t literal_0b00101 = 0b00101;
 constexpr uint64_t literal_0b00110 = 0b00110;
@@ -491,7 +492,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<8, 8, 56, uint64_t>(literal_0x0F );
+                l_scom_buffer.insert<8, 8, 56, uint64_t>(literal_0x09 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -523,7 +524,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<16, 8, 56, uint64_t>(literal_0x14 );
+                l_scom_buffer.insert<16, 8, 56, uint64_t>(literal_0x0D );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -555,7 +556,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_0x16 );
+                l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_0x11 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -587,7 +588,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x1C );
+                l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x14 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -619,7 +620,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<40, 8, 56, uint64_t>(literal_0x20 );
+                l_scom_buffer.insert<40, 8, 56, uint64_t>(literal_0x17 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -651,7 +652,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0x24 );
+                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0x1C );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -1019,7 +1020,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<8, 8, 56, uint64_t>(literal_0x0F );
+                l_scom_buffer.insert<8, 8, 56, uint64_t>(literal_0x09 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -1051,7 +1052,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<16, 8, 56, uint64_t>(literal_0x14 );
+                l_scom_buffer.insert<16, 8, 56, uint64_t>(literal_0x0D );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -1083,7 +1084,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_0x16 );
+                l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_0x11 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -1115,7 +1116,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x1C );
+                l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x14 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -1147,7 +1148,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<40, 8, 56, uint64_t>(literal_0x20 );
+                l_scom_buffer.insert<40, 8, 56, uint64_t>(literal_0x17 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -1179,7 +1180,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0x24 );
+                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0x1C );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -1547,7 +1548,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<8, 8, 56, uint64_t>(literal_0x0F );
+                l_scom_buffer.insert<8, 8, 56, uint64_t>(literal_0x09 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -1579,7 +1580,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<16, 8, 56, uint64_t>(literal_0x14 );
+                l_scom_buffer.insert<16, 8, 56, uint64_t>(literal_0x0D );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -1611,7 +1612,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_0x16 );
+                l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_0x11 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -1643,7 +1644,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x1C );
+                l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x14 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -1675,7 +1676,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<40, 8, 56, uint64_t>(literal_0x20 );
+                l_scom_buffer.insert<40, 8, 56, uint64_t>(literal_0x17 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -1707,7 +1708,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0x24 );
+                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0x1C );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -2075,7 +2076,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<8, 8, 56, uint64_t>(literal_0x0F );
+                l_scom_buffer.insert<8, 8, 56, uint64_t>(literal_0x09 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -2107,7 +2108,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<16, 8, 56, uint64_t>(literal_0x14 );
+                l_scom_buffer.insert<16, 8, 56, uint64_t>(literal_0x0D );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -2139,7 +2140,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_0x16 );
+                l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_0x11 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -2171,7 +2172,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x1C );
+                l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x14 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -2203,7 +2204,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<40, 8, 56, uint64_t>(literal_0x20 );
+                l_scom_buffer.insert<40, 8, 56, uint64_t>(literal_0x17 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -2235,7 +2236,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0x24 );
+                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0x1C );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -2603,7 +2604,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<8, 8, 56, uint64_t>(literal_0x0F );
+                l_scom_buffer.insert<8, 8, 56, uint64_t>(literal_0x09 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -2635,7 +2636,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<16, 8, 56, uint64_t>(literal_0x14 );
+                l_scom_buffer.insert<16, 8, 56, uint64_t>(literal_0x0D );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -2667,7 +2668,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_0x16 );
+                l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_0x11 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -2699,7 +2700,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x1C );
+                l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x14 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -2731,7 +2732,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<40, 8, 56, uint64_t>(literal_0x20 );
+                l_scom_buffer.insert<40, 8, 56, uint64_t>(literal_0x17 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -2763,7 +2764,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0x24 );
+                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0x1C );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -3131,7 +3132,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<8, 8, 56, uint64_t>(literal_0x0F );
+                l_scom_buffer.insert<8, 8, 56, uint64_t>(literal_0x09 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -3163,7 +3164,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<16, 8, 56, uint64_t>(literal_0x14 );
+                l_scom_buffer.insert<16, 8, 56, uint64_t>(literal_0x0D );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -3195,7 +3196,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_0x16 );
+                l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_0x11 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -3227,7 +3228,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x1C );
+                l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x14 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -3259,7 +3260,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<40, 8, 56, uint64_t>(literal_0x20 );
+                l_scom_buffer.insert<40, 8, 56, uint64_t>(literal_0x17 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -3291,7 +3292,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0x24 );
+                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0x1C );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -3659,7 +3660,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<8, 8, 56, uint64_t>(literal_0x0F );
+                l_scom_buffer.insert<8, 8, 56, uint64_t>(literal_0x09 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -3691,7 +3692,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<16, 8, 56, uint64_t>(literal_0x14 );
+                l_scom_buffer.insert<16, 8, 56, uint64_t>(literal_0x0D );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -3723,7 +3724,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_0x16 );
+                l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_0x11 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -3755,7 +3756,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x1C );
+                l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x14 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -3787,7 +3788,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<40, 8, 56, uint64_t>(literal_0x20 );
+                l_scom_buffer.insert<40, 8, 56, uint64_t>(literal_0x17 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -3819,7 +3820,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0x24 );
+                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0x1C );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -4187,7 +4188,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<8, 8, 56, uint64_t>(literal_0x0F );
+                l_scom_buffer.insert<8, 8, 56, uint64_t>(literal_0x09 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -4219,7 +4220,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<16, 8, 56, uint64_t>(literal_0x14 );
+                l_scom_buffer.insert<16, 8, 56, uint64_t>(literal_0x0D );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -4251,7 +4252,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_0x16 );
+                l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_0x11 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -4283,7 +4284,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x1C );
+                l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x14 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -4315,7 +4316,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<40, 8, 56, uint64_t>(literal_0x20 );
+                l_scom_buffer.insert<40, 8, 56, uint64_t>(literal_0x17 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -4347,7 +4348,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0x24 );
+                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0x1C );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -4808,7 +4809,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<8, 8, 56, uint64_t>(literal_0x0F );
+                l_scom_buffer.insert<8, 8, 56, uint64_t>(literal_0x09 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -4840,7 +4841,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<16, 8, 56, uint64_t>(literal_0x14 );
+                l_scom_buffer.insert<16, 8, 56, uint64_t>(literal_0x0D );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -4872,7 +4873,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_0x16 );
+                l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_0x11 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -4904,7 +4905,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x1C );
+                l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x14 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -4936,7 +4937,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<40, 8, 56, uint64_t>(literal_0x20 );
+                l_scom_buffer.insert<40, 8, 56, uint64_t>(literal_0x17 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -4968,7 +4969,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0x24 );
+                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0x1C );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -5336,7 +5337,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<8, 8, 56, uint64_t>(literal_0x0F );
+                l_scom_buffer.insert<8, 8, 56, uint64_t>(literal_0x09 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -5368,7 +5369,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<16, 8, 56, uint64_t>(literal_0x14 );
+                l_scom_buffer.insert<16, 8, 56, uint64_t>(literal_0x0D );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -5400,7 +5401,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_0x16 );
+                l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_0x11 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -5432,7 +5433,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x1C );
+                l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x14 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -5464,7 +5465,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<40, 8, 56, uint64_t>(literal_0x20 );
+                l_scom_buffer.insert<40, 8, 56, uint64_t>(literal_0x17 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -5496,7 +5497,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0x24 );
+                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0x1C );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -5864,7 +5865,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<8, 8, 56, uint64_t>(literal_0x0F );
+                l_scom_buffer.insert<8, 8, 56, uint64_t>(literal_0x09 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -5896,7 +5897,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<16, 8, 56, uint64_t>(literal_0x14 );
+                l_scom_buffer.insert<16, 8, 56, uint64_t>(literal_0x0D );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -5928,7 +5929,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_0x16 );
+                l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_0x11 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -5960,7 +5961,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x1C );
+                l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x14 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -5992,7 +5993,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<40, 8, 56, uint64_t>(literal_0x20 );
+                l_scom_buffer.insert<40, 8, 56, uint64_t>(literal_0x17 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -6024,7 +6025,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0x24 );
+                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0x1C );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -6485,7 +6486,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<8, 8, 56, uint64_t>(literal_0x0F );
+                l_scom_buffer.insert<8, 8, 56, uint64_t>(literal_0x09 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -6517,7 +6518,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<16, 8, 56, uint64_t>(literal_0x14 );
+                l_scom_buffer.insert<16, 8, 56, uint64_t>(literal_0x0D );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -6549,7 +6550,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_0x16 );
+                l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_0x11 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -6581,7 +6582,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x1C );
+                l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x14 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -6613,7 +6614,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<40, 8, 56, uint64_t>(literal_0x20 );
+                l_scom_buffer.insert<40, 8, 56, uint64_t>(literal_0x17 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -6645,7 +6646,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0x24 );
+                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0x1C );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -7106,7 +7107,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<8, 8, 56, uint64_t>(literal_0x0F );
+                l_scom_buffer.insert<8, 8, 56, uint64_t>(literal_0x09 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -7138,7 +7139,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<16, 8, 56, uint64_t>(literal_0x14 );
+                l_scom_buffer.insert<16, 8, 56, uint64_t>(literal_0x0D );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -7170,7 +7171,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_0x16 );
+                l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_0x11 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -7202,7 +7203,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x1C );
+                l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x14 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -7234,7 +7235,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<40, 8, 56, uint64_t>(literal_0x20 );
+                l_scom_buffer.insert<40, 8, 56, uint64_t>(literal_0x17 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -7266,7 +7267,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0x24 );
+                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0x1C );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -7634,7 +7635,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<8, 8, 56, uint64_t>(literal_0x0F );
+                l_scom_buffer.insert<8, 8, 56, uint64_t>(literal_0x09 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -7666,7 +7667,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<16, 8, 56, uint64_t>(literal_0x14 );
+                l_scom_buffer.insert<16, 8, 56, uint64_t>(literal_0x0D );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -7698,7 +7699,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_0x16 );
+                l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_0x11 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -7730,7 +7731,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x1C );
+                l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x14 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -7762,7 +7763,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<40, 8, 56, uint64_t>(literal_0x20 );
+                l_scom_buffer.insert<40, 8, 56, uint64_t>(literal_0x17 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -7794,7 +7795,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0x24 );
+                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0x1C );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -7915,7 +7916,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             l_scom_buffer.insert<0, 12, 52, uint64_t>(literal_0xFFF );
             l_scom_buffer.insert<48, 3, 61, uint64_t>(literal_0b001 );
             l_scom_buffer.insert<24, 12, 52, uint64_t>(literal_0x400 );
-            l_scom_buffer.insert<12, 12, 52, uint64_t>(literal_0xFFF );
+            l_scom_buffer.insert<12, 12, 52, uint64_t>(literal_0x800 );
             l_scom_buffer.insert<51, 3, 61, uint64_t>(literal_0b001 );
             l_scom_buffer.insert<36, 12, 52, uint64_t>(literal_0x400 );
 
@@ -8245,7 +8246,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<8, 8, 56, uint64_t>(literal_0x0F );
+                l_scom_buffer.insert<8, 8, 56, uint64_t>(literal_0x09 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -8277,7 +8278,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<16, 8, 56, uint64_t>(literal_0x14 );
+                l_scom_buffer.insert<16, 8, 56, uint64_t>(literal_0x0D );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -8309,7 +8310,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_0x16 );
+                l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_0x11 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -8341,7 +8342,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x1C );
+                l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x14 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -8373,7 +8374,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<40, 8, 56, uint64_t>(literal_0x20 );
+                l_scom_buffer.insert<40, 8, 56, uint64_t>(literal_0x17 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -8405,7 +8406,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0x24 );
+                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0x1C );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -8866,7 +8867,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<8, 8, 56, uint64_t>(literal_0x0F );
+                l_scom_buffer.insert<8, 8, 56, uint64_t>(literal_0x09 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -8898,7 +8899,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<16, 8, 56, uint64_t>(literal_0x14 );
+                l_scom_buffer.insert<16, 8, 56, uint64_t>(literal_0x0D );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -8930,7 +8931,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_0x16 );
+                l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_0x11 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -8962,7 +8963,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x1C );
+                l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x14 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -8994,7 +8995,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<40, 8, 56, uint64_t>(literal_0x20 );
+                l_scom_buffer.insert<40, 8, 56, uint64_t>(literal_0x17 );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -9026,7 +9027,7 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else if (((l_def_CHIP_IS_GROUP != literal_1) && (l_def_NUM_X_LINKS_CFG > literal_2)))
             {
-                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0x24 );
+                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0x1C );
             }
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG == literal_0)))
