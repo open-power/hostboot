@@ -2473,6 +2473,7 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
                         iv_procChip, l_powr_nom));
         }
 
+
         FAPI_INF("Raw #V pre-overrides");
         FAPI_TRY(print_voltage_bucket(iv_procChip, p_poundV_data));
 
@@ -2480,6 +2481,7 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
         FAPI_INF("> Applying WOF Overrides");
 
         bool wof_state = is_wof_enabled();
+
         FAPI_TRY(wof_apply_overrides(iv_procChip, p_poundV_data,wof_state));
         FAPI_INF("< Applying WOF Overrides");
 
@@ -6082,8 +6084,23 @@ fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
     FAPI_INF("PlatPmPPB::pm_set_frequency >>>>>");
     fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ_Type l_sys_pstate0_freq_mhz = 0;
 
+    fapi2::ATTR_WOF_ENABLED_Type l_wof_enabled;
     auto sys_target = iv_procChip.getParent<fapi2::TARGET_TYPE_SYSTEM>();
-    bool wof_state = is_wof_enabled();
+    bool wof_state = false;
+
+    //We need to check this , for the specific enum
+    //value to check FORCE_DISABLED, because for non sorted parts
+    //we set this value to disable the wof
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOF_ENABLED, iv_procChip, l_wof_enabled));
+    if (l_wof_enabled == fapi2::ENUM_ATTR_WOF_ENABLED_FORCE_DISABLED)
+    {
+        iv_wof_enabled = false;
+        wof_state = iv_wof_enabled;
+    }
+    else
+    {
+        wof_state = is_wof_enabled();
+    }
 
     FAPI_TRY(p10_pm_set_system_freq(sys_target,wof_state), "p10_pm_set_system_freq failed.");
 

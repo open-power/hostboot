@@ -348,7 +348,8 @@
     <valueType>uint8</valueType>
     <enum>
           FALSE=0,
-          TRUE=1
+          TRUE=1,
+          FORCE_DISABLED=2
     </enum>
     <initToZero/>
     <writeable/>

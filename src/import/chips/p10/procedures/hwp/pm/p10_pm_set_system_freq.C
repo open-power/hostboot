@@ -225,8 +225,10 @@ fapi2::ReturnCode pm_set_frequency(
 #ifndef FIPSODE
             if ((l_poundV_data.static_rails.modelDataFlag & 0x1) == 0x1)
             {
+                //we detected non sorted part
                 fapi2::ATTR_WOF_ENABLED_Type l_wof_enabled =
-                    (fapi2::ATTR_WOF_ENABLED_Type)fapi2::ENUM_ATTR_WOF_ENABLED_FALSE;
+                    (fapi2::ATTR_WOF_ENABLED_Type)fapi2::ENUM_ATTR_WOF_ENABLED_FORCE_DISABLED;
+
                 FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_WOF_ENABLED,
                             l_proc_target, l_wof_enabled));
             }
