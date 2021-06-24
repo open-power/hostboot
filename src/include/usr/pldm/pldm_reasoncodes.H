@@ -85,6 +85,7 @@ namespace PLDM
         MOD_PLDM_SHUTDOWN                            = 0x2C, // requestSoftPowerOff
         MOD_HANDLE_GRACEFUL_SHUTDOWN_REQUEST         = 0x2D, // handleGracefulShutdownRequest
         MOD_GET_SEC_VER_LOCKIN_ENABLED               = 0x2E, // getSecVerLockinEnabled
+        MOD_SET_BIOS_ATTR_BY_HANDLE                  = 0x2F, // setBiosAttrByHandle
     };
 
     enum PLDMReasonCode

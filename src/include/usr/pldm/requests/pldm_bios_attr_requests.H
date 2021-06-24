@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,6 +65,21 @@ errlHndl_t getBiosTable(const pldm_bios_table_types i_type,
  */
 errlHndl_t getBiosAttrFromHandle(const bios_handle_t i_bios_attr_handle,
                                  std::vector<uint8_t>& o_attrVal);
+
+
+/** @brief Given a pldm bios attribute handle, sets the BIOS Attribute
+ *         Table Entry associated with it on the BMC.
+ *
+ * @param[in] i_attribute_handle  Attribute handle.
+ * @param[in] i_attribute_type    Attribute type.
+ * @param[in] i_attribute_value   Attribute value.
+ * @param[in] i_attribute_size    Size of attribute value.
+ * @return    errlHndl_t          Error if any, otherwise nullptr.
+ */
+errlHndl_t setBiosAttrByHandle(bios_handle_t i_attribute_handle,
+                               pldm_bios_attribute_type i_attribute_type,
+                               const void* i_attribute_value,
+                               size_t i_attribute_size);
 
 }
 

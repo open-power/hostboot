@@ -44,6 +44,7 @@
 #include <pldm/pldm_errl.H>
 #include <pldm/pldm_reasoncodes.H>
 #include <pldm/pldm_request.H>
+#include <pldm/pldm_util.H>
 #include <pldm/requests/pldm_bios_attr_requests.H>
 
 // pldm /src/ headers
@@ -57,13 +58,7 @@ errlHndl_t getBiosTable(const pldm_bios_table_types i_type,
 {
     PLDM_ENTER("getBiosTable type = 0x%08x", i_type);
 
-#ifndef __HOSTBOOT_RUNTIME
-    msg_q_t msgQ = msg_q_resolve(VFS_ROOT_MSG_PLDM_REQ_OUT);
-    assert(msgQ != nullptr,
-            "Bug! PLDM Req Out Message queue did not resolve properly!");
-#else
-    msg_q_t msgQ = nullptr;
-#endif
+    const msg_q_t msgQ = MSG_Q_RESOLVE("PLDM::getBiosTable", VFS_ROOT_MSG_PLDM_REQ_OUT);
 
     pldm_get_bios_table_req  bios_table_req
     {
@@ -184,14 +179,7 @@ errlHndl_t getBiosAttrFromHandle(const bios_handle_t i_bios_attr_handle,
     PLDM_ENTER("getBiosAttrFromHandle");
     PLDM_DBG("Making request for Bios Attr 0x%08x from the BMC", i_bios_attr_handle);
 
-#ifndef __HOSTBOOT_RUNTIME
-    msg_q_t msgQ = msg_q_resolve(VFS_ROOT_MSG_PLDM_REQ_OUT);
-    assert(msgQ != nullptr,
-            "Bug! PLDM Req Out Message queue did not resolve properly!");
-#else
-    msg_q_t msgQ = nullptr;
-#endif
-
+    const msg_q_t msgQ = MSG_Q_RESOLVE("PLDM::getBiosAttrFromHandle", VFS_ROOT_MSG_PLDM_REQ_OUT);
     variable_field attribute_data { };
     errlHndl_t errl = nullptr;
 
@@ -318,4 +306,107 @@ errlHndl_t getBiosAttrFromHandle(const bios_handle_t i_bios_attr_handle,
 
     return errl;
 }
+
+errlHndl_t setBiosAttrByHandle(const bios_handle_t i_attribute_handle,
+                               const pldm_bios_attribute_type i_attribute_type,
+                               const void* const i_attribute_value,
+                               const size_t i_attribute_size)
+{
+    PLDM_ENTER("setBiosAttrByHandle(handle=0x%08x)", i_attribute_handle);
+
+    const msg_q_t msgQ = MSG_Q_RESOLVE("PLDM::setBiosAttrByHandle", VFS_ROOT_MSG_PLDM_REQ_OUT);
+    errlHndl_t errl = nullptr;
+
+    do
+    {
+
+    /* Make the initial request */
+
+    const pldm_set_bios_attribute_current_value_req req_header
+    {
+        .transfer_handle = 0, // (0 if transfer op is START_AND_END)
+        .transfer_flag = PLDM_START_AND_END
+    };
+
+    std::vector<uint8_t> attribute_description(sizeof(pldm_bios_attr_val_table_entry)
+                                               - sizeof(pldm_bios_attr_val_table_entry::value)
+                                               + i_attribute_size);
+
+    const auto table_entry = reinterpret_cast<pldm_bios_attr_val_table_entry*>(attribute_description.data());
+
+    table_entry->attr_handle = htole16(i_attribute_handle);
+    table_entry->attr_type = i_attribute_type;
+    memcpy(table_entry->value, i_attribute_value, i_attribute_size);
+
+    std::vector<uint8_t> response_bytes;
+
+    errl =
+        sendrecv_pldm_request<PLDM_SET_BIOS_ATTR_CURR_VAL_MIN_REQ_BYTES>(
+            response_bytes,
+            attribute_description,
+            msgQ,
+            encode_set_bios_attribute_current_value_req,
+            DEFAULT_INSTANCE_ID,
+            req_header.transfer_handle,
+            req_header.transfer_flag,
+            attribute_description.data(),
+            attribute_description.size());
+
+    if (errl)
+    {
+        PLDM_ERR("setBiosAttrByHandle: Error occurred sending request");
+        break;
+    }
+
+    /* Decode and check the response */
+
+    pldm_set_bios_attribute_current_value_resp response { };
+
+    errl = decode_pldm_response(decode_set_bios_attribute_current_value_resp,
+                                response_bytes,
+                                &response.completion_code,
+                                &response.next_transfer_handle);
+
+    if (errl)
+    {
+        PLDM_ERR("getBiosAttrFromHandle: Error occurred decoding pldm response");
+        break;
+    }
+
+    if (response.completion_code != PLDM_SUCCESS)
+    {
+        PLDM_ERR("getBiosAttrFromHandle: Expected completion code PLDM_SUCCESS, got %d", response.completion_code);
+        pldm_msg* const pldm_response = reinterpret_cast<pldm_msg*>(response_bytes.data());
+        const uint64_t response_hdr_data = pldmHdrToUint64(*pldm_response);
+
+        /*@
+         * @errortype  ERRL_SEV_UNRECOVERABLE
+         * @moduleid   MOD_SET_BIOS_ATTR_BY_HANDLE
+         * @reasoncode RC_BAD_COMPLETION_CODE
+         * @userdata1  Completion code
+         * @userdata2  Response Header Data
+         * @devdesc    Software problem, PLDM transaction failed
+         * @custdesc   A software error occurred during system boot
+         */
+        errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                             MOD_SET_BIOS_ATTR_BY_HANDLE,
+                             RC_BAD_COMPLETION_CODE,
+                             response.completion_code,
+                             response_hdr_data,
+                             ErrlEntry::NO_SW_CALLOUT);
+        addBmcErrorCallouts(errl);
+        break;
+    }
+
+    assert(response.next_transfer_handle == 0,
+           "setBiosAttrByHandle: Expected PLDM next data transfer handle to be 0, got %d",
+           response.next_transfer_handle);
+
+    } while (false);
+
+    PLDM_EXIT("setBiosAttrByHandle (errl = %p)", errl);
+
+    return errl;
+}
+
 }
