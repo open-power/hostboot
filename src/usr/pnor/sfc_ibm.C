@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -1255,6 +1255,7 @@ errlHndl_t SfcIBM::hwReset( ResetLevels i_resetLevel )
                          * @userdata2    <unused>
                          * @devdesc      SfcIBM::hwReset> Unsupported Reset
                          *               Level requested
+                         * @custdesc     An internal firmware error occurred.
                          */
                         l_err = new ERRORLOG::ErrlEntry(
                                             ERRORLOG::ERRL_SEV_UNRECOVERABLE,

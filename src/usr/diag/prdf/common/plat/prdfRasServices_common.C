@@ -1024,7 +1024,8 @@ errlHndl_t RasServices::getErrl() const
       * @userdata1  PRD Chip Signature
       * @userdata2  PRD Attention Type and Cause Attention Type
       * @userdata3  PRD Signature
-      * @devdesc CEC hardware failure detected.
+      * @devdesc  CEC hardware failure detected.
+      * @custdesc CEC hardware failure detected.
       * @procedure  EPUB_PRC_ALL_PROCS
       * @procedure  EPUB_PRC_REBOOT
       * @procedure  EPUB_PRC_TOD_CLOCK_ERR
@@ -1059,10 +1060,13 @@ errlHndl_t RasServices::getErrl() const
       * @userdata1  PRD Chip Signature
       * @userdata2  PRD Attention Type and Cause Attention Type
       * @userdata3  PRD Signature
-      * @devdesc CEC hardware failure detected. Cause is most likely hardware,
-      *          but there are other callouts including Software or Next Level
-      *          Support.
-      * @procedure EPUB_PRC_SP_CODE
+      * @devdesc  CEC hardware failure detected. Cause is most likely hardware,
+      *           but there are other callouts including Software or Next Level
+      *           Support.
+      * @custdesc CEC hardware failure detected. Cause is most likely hardware,
+      *           but there are other callouts including Software or Next Level
+      *           Support.
+      * @procedure  EPUB_PRC_SP_CODE
       * @procedure  EPUB_PRC_PHYP_CODE
       * @procedure  EPUB_PRC_LVL_SUPP
       * @procedure  EPUB_PRC_ALL_PROCS
@@ -1099,9 +1103,11 @@ errlHndl_t RasServices::getErrl() const
       * @userdata1  PRD Chip Signature
       * @userdata2  PRD Attention Type and Cause Attention Type
       * @userdata3  PRD Signature
-      * @devdesc CEC hardware failure detected. Cause is most likley Software,
-      *          but there are also Hardware callouts.
-      * @procedure EPUB_PRC_SP_CODE
+      * @devdesc  CEC hardware failure detected. Cause is most likley Software,
+      *           but there are also Hardware callouts.
+      * @custdesc CEC hardware failure detected. Cause is most likley Software,
+      *           but there are also Hardware callouts.
+      * @procedure  EPUB_PRC_SP_CODE
       * @procedure  EPUB_PRC_PHYP_CODE
       * @procedure  EPUB_PRC_LVL_SUPP
       * @procedure  EPUB_PRC_ALL_PROCS
@@ -1122,8 +1128,9 @@ errlHndl_t RasServices::getErrl() const
       * @userdata1  PRD Chip Signature
       * @userdata2  PRD Attention Type and Cause Attention Type
       * @userdata3  PRD Signature
-      * @devdesc CEC hardware failure detected. Cause is most likely Software.
-      * @procedure EPUB_PRC_SP_CODE
+      * @devdesc  CEC hardware failure detected. Cause is most likely Software.
+      * @custdesc CEC hardware failure detected. Cause is most likely Software.
+      * @procedure  EPUB_PRC_SP_CODE
       * @procedure  EPUB_PRC_PHYP_CODE
       * @procedure  EPUB_PRC_LVL_SUPP
       * @procedure  EPUB_PRC_ALL_PROCS

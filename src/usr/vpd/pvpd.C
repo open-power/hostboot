@@ -231,6 +231,7 @@ errlHndl_t nodePresenceDetect(DeviceFW::OperationType i_opType,
          * @reasoncode   VPD::VPD_INVALID_LENGTH
          * @userdata1    Data Length
          * @devdesc      presenceDetect> Invalid data length (!= 1 bytes)
+         * @custdesc     An internal firmware error occurred.
          */
         l_errl =
                 new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,

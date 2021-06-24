@@ -715,12 +715,13 @@ foreach my $file (@filesToParse)
                 exit(1);
             }
 
-            # if no customer desc is provided, then use $desc
+            # if no customer desc is provided, then use generic message
             if ($cdesc eq "")
             {
-                $cdesc =
-                "During processor/memory subsystem initialization,"
-                . " an error was encountered: $desc";
+                $cdesc = "An internal firmware error occurred.";
+                print ("$0: customer description missing from error log tag in '$file'\n");
+                print ("$0: moduleid is '$modId', reasoncode is '$rc'\n");
+                print ("$0: using \"$cdesc\" as customer description\n");
             }
 
             # SRC list - Don't add testcase SRCs
