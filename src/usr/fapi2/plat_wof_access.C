@@ -391,7 +391,7 @@ errlHndl_t getSeepromWofTable(TARGETING::Target* i_procTarg, uint8_t* o_wofData)
                             fapi2::RC_WOF_MRW_IDX_NOT_INCLUDED,
                             l_idxSelect,
                             l_imgHeader.entryCount);
-            l_errl->addHwCallout(i_procTarg, HWAS::SRCI_PRIORITY_HIGH, HWAS::DELAYED_DECONFIG, HWAS::GARD_NULL);
+            l_errl->addHwCallout(i_procTarg, HWAS::SRCI_PRIORITY_HIGH, HWAS::NO_DECONFIG, HWAS::GARD_NULL);
             break;
         }
 
@@ -440,7 +440,7 @@ errlHndl_t getSeepromWofTable(TARGETING::Target* i_procTarg, uint8_t* o_wofData)
                             fapi2::RC_WOF_HEADER_ENTRY_BEYOND_IMG,
                             TWO_UINT32_TO_UINT64(l_tableEntry.offset, l_tableEntry.size),
                             TWO_UINT32_TO_UINT64(l_idxSelect, l_wofImgSize));
-            l_errl->addHwCallout(i_procTarg, HWAS::SRCI_PRIORITY_HIGH, HWAS::DELAYED_DECONFIG, HWAS::GARD_NULL);
+            l_errl->addHwCallout(i_procTarg, HWAS::SRCI_PRIORITY_HIGH, HWAS::NO_DECONFIG, HWAS::GARD_NULL);
             break;
         }
 
@@ -646,7 +646,7 @@ errlHndl_t getSeepromEccLessWofData(TARGETING::Target* i_procTarg, size_t i_bufl
                             fapi2::RC_WOF_READ_UNCORRECTABLE_ECC,
                             l_eccOffset,
                             l_eccBuflen);
-            l_errl->addHwCallout(i_procTarg, HWAS::SRCI_PRIORITY_HIGH, HWAS::DELAYED_DECONFIG, HWAS::GARD_NULL);
+            l_errl->addHwCallout(i_procTarg, HWAS::SRCI_PRIORITY_HIGH, HWAS::NO_DECONFIG, HWAS::GARD_NULL);
             // If this error is seen, then with the l_eccOffset and l_eccBuflen you can find the
             // area of the WOF image that was read
             break;
@@ -1153,7 +1153,7 @@ errlHndl_t checkWofImgHeaderForCorrectness(TARGETING::Target* i_procTarg,
                                 fapi2::RC_WOF_IMAGE_MAGIC_MISMATCH,
                                 l_userData1,
                                 l_userData2);
-                l_errl->addHwCallout(i_procTarg, HWAS::SRCI_PRIORITY_HIGH, HWAS::DELAYED_DECONFIG, HWAS::GARD_NULL);
+                l_errl->addHwCallout(i_procTarg, HWAS::SRCI_PRIORITY_HIGH, HWAS::NO_DECONFIG, HWAS::GARD_NULL);
                 break;
             }
         }
@@ -1212,7 +1212,7 @@ errlHndl_t checkWofImgHeaderForCorrectness(TARGETING::Target* i_procTarg,
                                  l_userData1,
                                  0,
                                  ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-                l_errl->addHwCallout(i_procTarg, HWAS::SRCI_PRIORITY_LOW, HWAS::DELAYED_DECONFIG, HWAS::GARD_NULL);
+                l_errl->addHwCallout(i_procTarg, HWAS::SRCI_PRIORITY_LOW, HWAS::NO_DECONFIG, HWAS::GARD_NULL);
                 break;
             }
         }
@@ -1286,7 +1286,7 @@ errlHndl_t checkWofTableHeaderForCorrectness(TARGETING::Target* i_procTarg,
                                 fapi2::RC_WOF_TABLES_MAGIC_MISMATCH,
                                 l_userData1,
                                 l_userData2);
-                l_errl->addHwCallout(i_procTarg, HWAS::SRCI_PRIORITY_HIGH, HWAS::DELAYED_DECONFIG, HWAS::GARD_NULL);
+                l_errl->addHwCallout(i_procTarg, HWAS::SRCI_PRIORITY_HIGH, HWAS::NO_DECONFIG, HWAS::GARD_NULL);
                 break;
             }
         }
@@ -1345,7 +1345,7 @@ errlHndl_t checkWofTableHeaderForCorrectness(TARGETING::Target* i_procTarg,
                                 l_userData1,
                                 l_userData2,
                                 ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-                l_errl->addHwCallout(i_procTarg, HWAS::SRCI_PRIORITY_LOW, HWAS::DELAYED_DECONFIG, HWAS::GARD_NULL);
+                l_errl->addHwCallout(i_procTarg, HWAS::SRCI_PRIORITY_LOW, HWAS::NO_DECONFIG, HWAS::GARD_NULL);
 
                 break;
             }
