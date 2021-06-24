@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -603,8 +603,6 @@ void IpmiSEL::errlEnable(errlHndl_t& o_errl)
     // handler.
     Singleton<IpmiSEL>::instance();
 
-    // call ErrlManager function - tell him that IPMI is ready!
-    ERRORLOG::ErrlManager::errlResourceReady(ERRORLOG::IPMI);
 }
 
 TASK_ENTRY_MACRO( IpmiSEL::errlEnable );

@@ -1112,6 +1112,13 @@ private:
     void checkForDeconfigAndGard( void );
 
 
+    /**
+     * @brief Adds trace of log entry to ERRL trace data
+     *        Traces plid, eid, all 9 SRC words, and log size
+     */
+    void traceLogEntry(void);
+
+
 
 private:
     // Data Members
@@ -1151,6 +1158,9 @@ private:
     // range to guarantee uniqueness among errorTypes and to avoid
     // confusion with any reasoncodes
     uint32_t iv_errorType;
+
+    // maximum possible size of error log to send
+    static uint32_t iv_maxSize;
 };
 
 

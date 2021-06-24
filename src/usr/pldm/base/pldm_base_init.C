@@ -151,6 +151,9 @@ void base_init(errlHndl_t& o_errl)
                                        // don't have to worry about other
                                        // resources being shut down.
                                        INITSERVICE::HIGHEST_PRIORITY);
+
+    // call ErrlManager function - tell him that BMC interface is ready!
+    ERRORLOG::ErrlManager::errlResourceReady(ERRORLOG::BMC);
 #endif
     }while(0);
 }

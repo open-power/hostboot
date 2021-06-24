@@ -83,10 +83,10 @@ ErrlManager::ErrlManager() :
 #else
         iv_isFSP(false),
 #endif
-#ifdef CONFIG_BMC_IPMI
-        iv_isIpmiEnabled(true)
+#ifdef CONFIG_PLDM
+        iv_isBmcInterfaceEnabled(true)
 #else
-        iv_isIpmiEnabled(false)
+        iv_isBmcInterfaceEnabled(false)
 #endif
 {
     TRACFCOMP( g_trac_errl, ENTER_MRK "ErrlManager::ErrlManager constructor." );
@@ -117,7 +117,7 @@ ErrlManager::ErrlManager() :
 
         TRACFCOMP( g_trac_errl,"iv_hiddenErrorLogsEnable = 0x%x",
                 iv_hiddenErrLogsEnable );
-        
+
         // If this isn't an FSP system, and we do not have PLD wait
         // specifically disabled via the attribute ATTR_DISABLE_PLD_WAIT,
         // then PLD waits are enabled.
@@ -157,18 +157,28 @@ void ErrlManager::sendMboxMsg ( errlHndl_t& io_err )
     do
     {
 #ifdef CONFIG_PLDM
-        //@TODO-RTC:249470-Send PLDM message with PEL
-        TRACFCOMP( g_trac_errl, INFO_MRK"Skipping ErrlManager::sendMboxMsg until PLDM is in place" );
-        break;
-#endif
+        if (iv_isBmcInterfaceEnabled)
+        {
+            TRACFCOMP(g_trac_errl,INFO_MRK"Send msg to BMC for errlogId [0x%08x]",
+                      io_err->eid());
 
-#ifdef CONFIG_BMC_IPMI
-
-        TRACFCOMP(g_trac_errl,INFO_MRK"Send msg to BMC for errlogId [0x%08x]",
-                  io_err->plid() );
-
-        // convert to SEL/eSEL and send to BMC over IPMI
-        sendErrLogToBmc(io_err);
+            // send to BMC
+            bool l_passed = sendErrLogToBmcPLDM(io_err);
+            if (!l_passed)
+            {
+                TRACFCOMP( g_trac_errl,
+                    ERR_MRK"BMC interface failed sending EID[0x%08x] SEV[0%02x]",
+                    io_err->eid(), io_err->sev() );
+                io_err->traceLogEntry();
+            }
+        }
+        else
+        {
+            TRACFCOMP( g_trac_errl,
+                ERR_MRK"BMC interface down, cannot send EID[0x%08x] SEV[0x%02x]",
+                io_err->eid(), io_err->sev() );
+            io_err->traceLogEntry();
+        }
 
 #else
 
@@ -311,7 +321,7 @@ void ErrlManager::sendMboxMsg ( errlHndl_t& io_err )
     free(l_req_fw_msg);
     l_req_fw_msg = nullptr;
 
-    TRACFCOMP( g_trac_errl, EXIT_MRK"sendToHypervisor()" );
+    TRACFCOMP( g_trac_errl, EXIT_MRK"sendMboxMsg()" );
     return;
 }
 

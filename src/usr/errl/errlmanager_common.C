@@ -200,8 +200,8 @@ void ErrlManager::setupPnorInfo()
                         INFO_MRK"setupPnorInfo slot %d eid %.8X was not ACKed.",
                         i, l_id);
 
-#ifdef CONFIG_BMC_IPMI
-                    // for IPMI systems, unflatten to send down to the BMC
+#ifdef CONFIG_PLDM
+                    // for BMC systems, unflatten to send down to the BMC
                     err = new ERRORLOG::ErrlEntry(
                             ERRORLOG::ERRL_SEV_UNRECOVERABLE, 0,0);
                     char *l_errlAddr = iv_pnorAddr + (PNOR_ERROR_LENGTH * i);
@@ -223,11 +223,10 @@ void ErrlManager::setupPnorInfo()
                             // skip it, go to the next one
                             continue;
                         }
-                        if (iv_isIpmiEnabled)
+                        if (iv_isBmcInterfaceEnabled)
                         {
-                            // convert to SEL/eSEL and send to BMC over IPMI
-                            sendErrLogToBmc(err,
-                                            false /* do not resend SELs */);
+                            // send log to BMC and mark as previous boot error
+                            sendErrLogToBmcPLDM(err, true);
                             delete err;
                             err = nullptr;
                         }
@@ -236,9 +235,9 @@ void ErrlManager::setupPnorInfo()
                             TRACFCOMP( g_trac_errl,
                                 INFO_MRK"setupPnorInfo pushing slot %d eid %.8X to iv_errList.",
                                 i, l_id);
-                            // Pair with IPMI_NOSEL flag to add to the errlList
-                            // so that it'll get sent down when IPMI is up
-                            ErrlFlagPair_t l_pair(err, IPMI_NOSEL_FLAG
+                            // Pair with BMC_PREV_ERR_FLAG to add to the errlList
+                            // so that it'll get sent down when BMC interface is up
+                            ErrlFlagPair_t l_pair(err, BMC_PREV_ERR_FLAG
 #ifdef CONFIG_CONSOLE_OUTPUT_ERRORDISPLAY
                                                          | ERRLDISP_FLAG
 #endif  // #ifdef CONFIG_CONSOLE_OUTPUT_ERRORDISPLAY
@@ -246,10 +245,10 @@ void ErrlManager::setupPnorInfo()
                             iv_errlList.push_back(l_pair);
                         }
                     }
-#else  // #ifdef CONFIG_BMC_IPMI
+#else  // #ifdef CONFIG_PLDM
                     // for FSP system, this shouldn't ever happen.
                     setACKInFlattened(i);
-#endif // #else ... #ifdef CONFIG_BMC_IPMI
+#endif // #else ... #ifdef CONFIG_PLDM
                 } // not ACKed
             } // not empty
         } // for
@@ -687,12 +686,15 @@ bool ErrlManager::sendErrLogToBmcPLDM(errlHndl_t &io_err, bool i_isPrevBootErr)
             break;
         }
 
-        vPelData.resize(l_errSize);
         errlHndl_t l_errl = PLDM::sendErrLog(io_err->eid(), vPelData.data(), l_errSize);
         if (l_errl)
         {
+            TRACFCOMP( g_trac_errl, ERR_MRK
+                "PLDM::sendErrLog() failed with eid=0x%.8x rc=0x%04x so stopping BMC PLDM error logging",
+                l_errl->eid(), l_errl->reasonCode() );
+
             // stop sending error logs down to PLDM
-            iv_isPldmErrEnabled = false;
+            iv_isBmcInterfaceEnabled = false;
 
             // commit this error to local memory and PNOR if possible
             commitErrLog(l_errl, ERRL_COMP_ID);
@@ -700,7 +702,10 @@ bool ErrlManager::sendErrLogToBmcPLDM(errlHndl_t &io_err, bool i_isPrevBootErr)
         else
         {
             l_errlSentAndAckd = true;
-            ERRORLOG::ErrlManager::errlAckErrorlog(io_err->eid());
+#ifndef __HOSTBOOT_RUNTIME
+            // Set ACK bit in PNOR to identify this log as having been sent to BMC
+            l_errlSentAndAckd = ackErrLogInPnor(io_err->eid());
+#endif
         }
 
     } while (0);

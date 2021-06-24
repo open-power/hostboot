@@ -143,13 +143,8 @@ ErrlManager::ErrlManager() :
     iv_isMboxEnabled(false),    // assume mbox isn't ready yet..
     iv_nonInfoCommitted(false),
     iv_isErrlDisplayEnabled(false),
-    iv_isIpmiEnabled(false),    // assume ipmi isn't ready yet..
     iv_pldWaitEnable(true), // error on the side of caution and default to waitings
-#ifdef CONFIG_PLDM
-    iv_isPldmErrEnabled(true), // assume pldm is ready
-#else
-    iv_isPldmErrEnabled(false), // pldm isn't available to transfer errors
-#endif
+    iv_isBmcInterfaceEnabled(false),    // assume bmc interface isn't ready yet..
     iv_versionPartitionCache(nullptr),
     iv_versionPartitionCacheSize(0)
 {
@@ -512,32 +507,32 @@ void ErrlManager::errlogMsgHndlr ()
                     // go back and wait for a next msg
                     break;
                 }
-            case ERRLOG_ACCESS_IPMI_TYPE:
+            case ERRLOG_ACCESS_BMC_TYPE:
                 {
-#ifdef CONFIG_BMC_IPMI
-                    // IPMI is up and running now.
-                    iv_isIpmiEnabled = true;
+#ifdef CONFIG_PLDM
+                    // BMC interface is up and running now.
+                    iv_isBmcInterfaceEnabled = true;
 
                     // if we can now send msgs, do it.
-                    // if errors came in before IPMI was ready,
+                    // if errors came in before BMC interface was ready,
                     // the errors would be on this list. send them now.
                     ErrlListItr_t it = iv_errlList.begin();
                     while(it != iv_errlList.end())
                     {
-                        // Check if IPMI processing is needed
-                        if (_isFlagSet(*it, IPMI_FLAG))
+                        // Check if BMC error log processing is needed
+                        if (_isFlagSet(*it, BMC_FLAG))
                         {
                             // send errorlog
-                            sendErrLogToBmc(it->first);
+                            sendErrLogToBmcPLDM(it->first);
                             // Mark IPMI processing complete
-                            _clearFlag(*it, IPMI_FLAG);
+                            _clearFlag(*it, BMC_FLAG);
                         }
-                        else if (_isFlagSet(*it, IPMI_NOSEL_FLAG))
+                        else if (_isFlagSet(*it, BMC_PREV_ERR_FLAG))
                         {
-                            // send errorlog
-                            sendErrLogToBmc(it->first, false);
-                            // Mark IPMI processing complete
-                            _clearFlag(*it, IPMI_NOSEL_FLAG);
+                            // send previous boot errorlog
+                            sendErrLogToBmcPLDM(it->first, true);
+                            // Mark BMC processing complete
+                            _clearFlag(*it, BMC_PREV_ERR_FLAG);
                         }
                         _updateErrlListIter(it);
                     }
@@ -650,14 +645,21 @@ void ErrlManager::errlogMsgHndlr ()
                         _clearFlag(l_pair, MBOX_FLAG);
                     }
 
-#ifdef CONFIG_BMC_IPMI
-                    if (iv_isIpmiEnabled)
+#ifdef CONFIG_PLDM
+                    if (iv_isBmcInterfaceEnabled)
                     {
-                        // convert to SEL/eSEL and send to BMC over IPMI
-                        sendErrLogToBmc(l_err);
+                        // send to BMC
+                        sendErrLogToBmcPLDM(l_err);
 
-                        // Mark IPMI processing complete on this error
-                        _clearFlag(l_pair, IPMI_FLAG);
+                        // Mark BMC processing complete on this error
+                        _clearFlag(l_pair, BMC_FLAG);
+                    }
+                    else
+                    {
+                        TRACFCOMP( g_trac_errl,
+                            ERR_MRK"BMC interface down, cannot send EID[0x%08x] SEV[0x%02x]",
+                            l_err->eid(), l_err->sev() );
+                        l_err->traceLogEntry();
                     }
 #endif
 
@@ -1005,8 +1007,8 @@ void ErrlManager::sendResourcesMsg(errlManagerNeeds i_needs)
         case MBOX:
             msg->type = ERRORLOG::ErrlManager::ERRLOG_ACCESS_MBOX_TYPE;
             break;
-        case IPMI:
-            msg->type = ERRORLOG::ErrlManager::ERRLOG_ACCESS_IPMI_TYPE;
+        case BMC:
+            msg->type = ERRORLOG::ErrlManager::ERRLOG_ACCESS_BMC_TYPE;
             break;
         case ERRLDISP:
             msg->type = ERRORLOG::ErrlManager::ERRLOG_ACCESS_ERRLDISP_TYPE;

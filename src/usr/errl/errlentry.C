@@ -64,6 +64,7 @@
 #include <attributeenums.H>
 #include "errlentry_consts.H"
 #include <util/misc.H>
+#include <limits.h>
 
 #include <util/utillidmgr.H>
 
@@ -75,6 +76,16 @@ using namespace HWAS;
 
 namespace ERRORLOG
 {
+// Initialize static variable
+uint32_t ErrlEntry::iv_maxSize = 0;
+
+#ifdef CONFIG_PLDM
+// 16K for PLDM supported error logging
+constexpr uint32_t DEFAULT_MAX_LOG_SIZE = 16*KILOBYTE;
+#else
+// 4K for all other types
+constexpr uint32_t DEFAULT_MAX_LOG_SIZE = 4*KILOBYTE;
+#endif
 
 // Trace definition
 trace_desc_t* g_trac_errl = NULL;
@@ -1084,6 +1095,21 @@ void ErrlEntry::checkForDeconfigAndGard()
             }
         }
     }
+}
+
+void ErrlEntry::traceLogEntry()
+{
+    // Flatten the SRC section so that we can get the SRC words
+    // (discarding the flattened result afterwards)
+    std::vector<uint8_t> flatsrc(iv_Src.flatSize());
+    iv_Src.flatten(flatsrc.data(), flatsrc.size());
+
+    const auto pelsrchdr = reinterpret_cast<const pelSRCSection_t*>(flatsrc.data());
+    const uint32_t * wordptr =  reinterpret_cast<const uint32_t*>(&(pelsrchdr->reserved1));
+
+    TRACFCOMP(g_trac_errl, "PLID 0x%.8X EID 0x%.8X - Reference Code %.4X, log size 0x%llX", plid(), eid(), pelsrchdr->reserved1, flattenedSize());
+    TRACFCOMP(g_trac_errl, "EID %.8X Hex Words 2 -5  : %08X %08X %08X %08X", eid(), wordptr[1], wordptr[2], wordptr[3], wordptr[4]);
+    TRACFCOMP(g_trac_errl, "EID %.8X Hex Words 6 -9  : %08X %08X %08X %08X", eid(), wordptr[5], wordptr[6], wordptr[7], wordptr[8]);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2508,16 +2534,37 @@ void ErrlEntry::removeGardAndDeconfigure()
 void ErrlEntry::getErrlSize(uint32_t& o_flatSize,
                             uint32_t& o_maxSize)
 {
-    TARGETING::Target * sys = nullptr;
-    TARGETING::targetService().getTopLevelTarget( sys );
+    // iv_maxSize is a static class variable used so attribute does not
+    // need to be constantly checked
+    if (0 == iv_maxSize)
+    {
+#ifdef CONFIG_PLDM
+        if(Util::isTargetingLoaded() && TARGETING::targetService().isInitialized())
+        {
+            TARGETING::TargetHandle_t l_sys = TARGETING::UTIL::assertGetToplevelTarget();
+            iv_maxSize = l_sys->getAttr<TARGETING::ATTR_BMC_MAX_ERROR_LOG_SIZE>();
+            TRACFCOMP(g_trac_errl, "getErrlSize() - ATTR_BMC_MAX_ERROR_LOG_SIZE is 0x%08X", iv_maxSize);
+        }
+        else
+        {
+            TRACFCOMP(g_trac_errl, "getErrlSize() - targeting unavailable, default max to 0x%08X", DEFAULT_MAX_LOG_SIZE);
+            o_maxSize = DEFAULT_MAX_LOG_SIZE;
+        }
+#else
+        // Default to 4KB for all others
+        iv_maxSize = DEFAULT_MAX_LOG_SIZE;
+#endif
+    }
 
-    // Default to 4K
-    o_maxSize = 4096;
+    // only use iv_maxSize if it was determined from targeting or non-PLDM
+    if (iv_maxSize > 0)
+    {
+        o_maxSize = iv_maxSize;
+    }
 
     // Remove any duplicate traces
     removeDuplicateTraces();
     o_flatSize = flattenedSize();
-
 }
 
 

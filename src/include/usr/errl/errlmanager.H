@@ -128,7 +128,7 @@ enum errlManagerNeeds
     PNOR,
     TARG,
     MBOX,
-    IPMI,
+    BMC,
     ERRLDISP,
     UPDATE_ATTRIB_VARS,  // Force the refresh/update of attribute variables
 } ;
@@ -340,7 +340,7 @@ private:
         ERRLOG_ACCESS_MBOX_TYPE            = 0x00000035 | MBOX::FIRST_SECURE_MSG,
         ERRLOG_ACCESS_TARG_TYPE            = 0x00000036 | MBOX::FIRST_SECURE_MSG,
         ERRLOG_ACCESS_ERRLDISP_TYPE        = 0x00000037 | MBOX::FIRST_SECURE_MSG,
-        ERRLOG_ACCESS_IPMI_TYPE            = 0x00000038 | MBOX::FIRST_SECURE_MSG,
+        ERRLOG_ACCESS_BMC_TYPE             = 0x00000038 | MBOX::FIRST_SECURE_MSG,
         ERRLOG_FLUSH_TYPE                  = 0x00000039 | MBOX::FIRST_SECURE_MSG,
         ERRLOG_UPDATE_ATTRIB_VARS_TYPE     = 0x00000040 | MBOX::FIRST_SECURE_MSG,
     };
@@ -653,23 +653,22 @@ private:
     bool iv_nonInfoCommitted;   // Keeps track of any non-informational logs.
     bool iv_isErrlDisplayEnabled; // are we able to use the errorDisplay
 #endif //#ifndef __HOSTBOOT_RUNTIME
-    bool iv_isIpmiEnabled;      // are we able to send to BMC via IPMI
     bool iv_pldWaitEnable; // should we wait for SP to check for PLD errors?
-    bool iv_isPldmErrEnabled;   // are we able to send to BMC via PLDM
+    bool iv_isBmcInterfaceEnabled;  // are we able to send to BMC
 
     // Errl flags which represent processing needed by the errl
     // represented as a bit field (8 bits)
     // Note: When adding a new flag, add to the trace in errlogShutdown()
     enum ERRLOG_FLAGS
     {
-        PNOR_FLAG       = 0x01,
-        MBOX_FLAG       = 0x02,
-        ERRLDISP_FLAG   = 0x04,
-        IPMI_FLAG       = 0x08,
-        IPMI_NOSEL_FLAG = 0x10,
+        PNOR_FLAG         = 0x01,
+        MBOX_FLAG         = 0x02,
+        ERRLDISP_FLAG     = 0x04,
+        BMC_FLAG          = 0x08,
+        BMC_PREV_ERR_FLAG = 0x10,
         ALL_FLAGS       = PNOR_FLAG | MBOX_FLAG
-    #ifdef CONFIG_BMC_IPMI
-                                    | IPMI_FLAG
+    #ifdef CONFIG_PLDM
+                                    | BMC_FLAG
     #endif
     #ifdef CONFIG_CONSOLE_OUTPUT_ERRORDISPLAY
                                     | ERRLDISP_FLAG
