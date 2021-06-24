@@ -121,7 +121,7 @@ inline std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>> get_valid_pmics_for_i
     using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>> l_output_pmics;
 
-    const auto l_pmics = mss::find_targets<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target);
+    const auto l_pmics = mss::find_targets<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target, fapi2::TARGET_STATE_PRESENT);
 
     for (const auto& l_pmic : l_pmics)
     {

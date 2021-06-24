@@ -60,7 +60,7 @@ extern "C"
         FAPI_TRY(mss::pmic::disable_and_reset_pmics(i_ocmb_target));
 
         // Check that we have functional pmics to enable, otherwise, we can just exit now
-        if (mss::find_targets<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target).empty())
+        if (mss::find_targets<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target, fapi2::TARGET_STATE_PRESENT).empty())
         {
             FAPI_INF("No PMICs to enable on %s, exiting.", mss::c_str(i_ocmb_target));
             return fapi2::FAPI2_RC_SUCCESS;

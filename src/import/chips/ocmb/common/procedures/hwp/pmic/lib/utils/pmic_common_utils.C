@@ -598,7 +598,7 @@ fapi2::ReturnCode check_all_pmics(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
     fapi2::ReturnCode l_rc_return = fapi2::FAPI2_RC_SUCCESS;
 
     // Check that the PMICs are enabled and without errors
-    for (const auto& l_pmic : mss::find_targets<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target))
+    for (const auto& l_pmic : mss::find_targets<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target, fapi2::TARGET_STATE_PRESENT))
     {
         // Redundant set of current_err as this is set automatically by the
         // return of the function in a case where there was a failure

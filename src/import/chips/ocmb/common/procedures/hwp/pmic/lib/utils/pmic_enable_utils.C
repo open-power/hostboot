@@ -915,7 +915,7 @@ fapi2::ReturnCode enable_1u_2u(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
     const mss::pmic::enable_mode i_mode)
 {
-    auto l_pmics = mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target);
+    auto l_pmics = mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target, fapi2::TARGET_STATE_PRESENT);
 
     // We're guaranteed to have at least one PMIC here due to the check in pmic_enable
     auto l_current_pmic = l_pmics[0];

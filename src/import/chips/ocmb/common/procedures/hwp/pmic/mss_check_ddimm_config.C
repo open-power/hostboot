@@ -74,7 +74,7 @@ extern "C"
         else
         {
             // 1U/2U case - we expect 2 PMICs
-            const auto l_pmics = mss::find_targets<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target);
+            const auto l_pmics = mss::find_targets<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target, fapi2::TARGET_STATE_PRESENT);
             const auto NUM_PMICS = l_pmics.size();
             const auto NUM_PRIMARY_PMICS = CONSTS::NUM_PRIMARY_PMICS;
 

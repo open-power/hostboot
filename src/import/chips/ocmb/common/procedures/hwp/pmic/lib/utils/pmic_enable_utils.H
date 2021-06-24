@@ -376,7 +376,7 @@ struct target_info_redundancy
 
         // The ATTR_REL_POS (mss::index) numbering is how PMIC HWP's have numbered the PMICs and how platform
         // provides them. This varies from the "Redundant Power on DIMM – Functional Specification" numbering
-        for (const auto& l_pmic : mss::find_targets<fapi2::TARGET_TYPE_PMIC>(i_ocmb))
+        for (const auto& l_pmic : mss::find_targets<fapi2::TARGET_TYPE_PMIC>(i_ocmb, fapi2::TARGET_STATE_PRESENT))
         {
             // mss::index grabs ATTR_REL_POS, returning 0-3 for these PMIC targets
             iv_pmic_map.insert(std::make_pair(mss::index(l_pmic), l_pmic));
