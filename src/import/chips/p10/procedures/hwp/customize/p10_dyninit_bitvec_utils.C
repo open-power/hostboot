@@ -296,7 +296,8 @@ p10_dyninit_bitvec_utils::save_bitvec_to_plat(
                 (i_bvec.iv_source == PLAT),
                 fapi2::P10_DYNINIT_BITVEC_SAVE_ERROR()
                 .set_TYPE(i_bvec.iv_type)
-                .set_SOURCE(i_bvec.iv_source),
+                .set_SOURCE(i_bvec.iv_source)
+                .set_PROC_CHIP(i_target),
                 "Requested bit vector type can't be saved to platform attribute!");
 
     // prep write to attribute
