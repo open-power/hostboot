@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -153,8 +153,7 @@ fapi2::ReturnCode p10_qme_customize(
                 .set_API_RC(rc)
                 .set_TOR_MAGIC(torMagic)
                 .set_TOR_VER(torVersion)
-                .set_RP_INDEX(UNDEFINED_RING_ID)
-                .set_RING_ID(UNDEFINED_RING_ID)
+                .set_CHIPLET_TYPE(UNDEFINED_CHIPLET_TYPE)
                 .set_CHIP_ID(chipId)
                 .set_OCCURRENCE(1),
                 "ERROR: ringid_get_ringProps() failed w/rc=0x%08x\n for",
@@ -177,8 +176,7 @@ fapi2::ReturnCode p10_qme_customize(
                 .set_API_RC(rc)
                 .set_TOR_MAGIC(torMagic)
                 .set_TOR_VER(torVersion)
-                .set_RP_INDEX(UNDEFINED_RING_ID)
-                .set_RING_ID(UNDEFINED_RING_ID)
+                .set_CHIPLET_TYPE(EQ_TYPE)
                 .set_CHIP_ID(chipId)
                 .set_OCCURRENCE(2),
                 "ERROR: ringid_get_chipletProps() failed w/rc=0x%08x for chipletType=EQ_TYPE,"
