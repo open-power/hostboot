@@ -82,7 +82,7 @@ enum
     QME_SRAM_MAGIC_WORD =   0x514d455f5f312e30ull,
     QME_VER_BASE_ASCII  =   0x514d455f5f312e30ull,
     XGPE_RELOC_BASE     =   0xfff34000,
-    XGPE_MAGIC_NUM_48K  =   0x584750455f312e31ull,  //XGPE__1.1
+    XGPE_48K_VER        =   0x11,
 };
 
 /**
@@ -2130,7 +2130,7 @@ fapi2::ReturnCode populateMagicWord( Homerlayout_t   *i_pChipHomer )
     l_pXpmrHdr->iv_xpmrMagicWord    =   htobe64(XPMR_MAGIC_NUMBER);
     pXgpeHeader->g_xgpe_magicWord   =   htobe64(XGPE_MAGIC_NUMBER);
 
-    if( pXgpeHeader->g_xgpe_magicWord == htobe64(XGPE_MAGIC_NUM_48K) )
+    if( pXgpeHeader->g_xgpe_buildVer == htobe32(XGPE_48K_VER) )
     {
         //If magic word has been changed through an HCODE commit, move 
         //to new OCC SRAM sharing scheme of PGPE and XGPE.
