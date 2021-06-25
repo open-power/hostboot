@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -34,9 +34,14 @@
   <hwpError>
     <rc>RC_ILLEGAL_EXPECTED_STOP_LEVEL</rc>
     <description>
-      Indicates the expected stop level was invalid..
+      Indicates the expected stop level was invalid.
     </description>
+    <ffdc>CORE_TARGET</ffdc>
     <ffdc>EXPECTED_STOP_LEVEL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
  <!-- ******************************************************************** -->
   <hwpError>
@@ -47,6 +52,14 @@
     </description>
     <ffdc>ACTUAL_STOP_LEVEL</ffdc>
     <ffdc>EXPECTED_STOP_LEVEL</ffdc>
+    <ffdc>CORE_TARGET</ffdc>
+    <callout>
+      <target>CORE_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CORE_TARGET</target>
+    </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
