@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -29,7 +29,11 @@
     <rc>RC_QME_SRAM_ACCESS_ERROR</rc>
     <description>Incorrect Address passed to QME SRAM Display routine
     </description>
+    <ffdc>EQ_TARGET</ffdc>
     <ffdc>ADDRESS</ffdc>
+    <ffdc>LENGTH</ffdc>
+    <ffdc>OPERATION</ffdc>
+    <ffdc>USE_BYTE_BUFFER</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -43,10 +47,13 @@
     <ffdc>EQ_TARGET</ffdc>
     <ffdc>QME_FLAG</ffdc>
     <ffdc>QSCR</ffdc>
+    <ffdc>ADDRESS</ffdc>
+    <ffdc>LENGTH</ffdc>
+    <ffdc>OPERATION</ffdc>
+    <ffdc>USE_BYTE_BUFFER</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
-
 </hwpErrors>

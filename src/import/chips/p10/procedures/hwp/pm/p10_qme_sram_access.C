@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -133,7 +133,12 @@ fapi2::ReturnCode p10_qme_sram_access_internal(
         // Return Error - invalid start address
         FAPI_DBG("Invalid Start Address 0x%.8X", i_start_address);
         FAPI_ASSERT(false,
-                    fapi2::QME_SRAM_ACCESS_ERROR().set_ADDRESS(i_start_address),
+                    fapi2::QME_SRAM_ACCESS_ERROR()
+                    .set_ADDRESS(i_start_address)
+                    .set_LENGTH(i_length)
+                    .set_OPERATION(i_operation)
+                    .set_USE_BYTE_BUFFER(i_useByteBuf)
+                    .set_EQ_TARGET(i_qme_target),
                     "Invalid QME Start address");
     }
 
@@ -174,9 +179,14 @@ fapi2::ReturnCode p10_qme_sram_access_internal(
         FAPI_TRY(fapi2::putScom(i_qme_target, QME_QSCR_WO_CLEAR, l_data64));
 
         FAPI_ASSERT(false,
-                    fapi2::QME_SRAM_ACCESS_DENIED().
-                    set_EQ_TARGET(i_qme_target).set_QME_FLAG(l_data64).
-                    set_QSCR(l_qscr),
+                    fapi2::QME_SRAM_ACCESS_DENIED()
+                    .set_EQ_TARGET(i_qme_target)
+                    .set_QME_FLAG(l_data64)
+                    .set_QSCR(l_qscr)
+                    .set_ADDRESS(i_start_address)
+                    .set_LENGTH(i_length)
+                    .set_OPERATION(i_operation)
+                    .set_USE_BYTE_BUFFER(i_useByteBuf),
                     "Invalid QME access denied");
     }
 
