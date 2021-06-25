@@ -50,6 +50,9 @@
 // pldm /src/ headers
 #include "../common/pldmtrace.H"
 
+// miscellaneous
+#include <errl/errludstring.H>
+
 namespace PLDM
 {
 
@@ -369,13 +372,13 @@ errlHndl_t setBiosAttrByHandle(const bios_handle_t i_attribute_handle,
 
     if (errl)
     {
-        PLDM_ERR("getBiosAttrFromHandle: Error occurred decoding pldm response");
+        PLDM_ERR("setBiosAttrByHandle: Error occurred decoding pldm response");
         break;
     }
 
     if (response.completion_code != PLDM_SUCCESS)
     {
-        PLDM_ERR("getBiosAttrFromHandle: Expected completion code PLDM_SUCCESS, got %d", response.completion_code);
+        PLDM_ERR("setBiosAttrByHandle: Expected completion code PLDM_SUCCESS, got %d", response.completion_code);
         pldm_msg* const pldm_response = reinterpret_cast<pldm_msg*>(response_bytes.data());
         const uint64_t response_hdr_data = pldmHdrToUint64(*pldm_response);
 
@@ -394,6 +397,10 @@ errlHndl_t setBiosAttrByHandle(const bios_handle_t i_attribute_handle,
                              response.completion_code,
                              response_hdr_data,
                              ErrlEntry::NO_SW_CALLOUT);
+        char message[128] = { };
+        snprintf(message, sizeof(message), "Attribute handle: %d; attribute type: %d; value size: %d",
+                 i_attribute_handle, i_attribute_type, i_attribute_size);
+        ErrlUserDetailsString(message).addToLog(errl);
         addBmcErrorCallouts(errl);
         break;
     }

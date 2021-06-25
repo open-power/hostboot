@@ -89,7 +89,7 @@ namespace PLDM
     errlHndl_t getHugePageCount(std::vector<uint8_t>& io_string_table,
                                 std::vector<uint8_t>& io_attr_table,
                                 TARGETING::ATTR_HUGE_PAGE_COUNT_type &o_hugePageCount);
- 
+
    /** @brief Retrieve the current value of the hb_usb_security
     *          PLDM bios attribute and return the value converted
     *          to a ATTR_USB_SECURITY_type.
@@ -230,6 +230,14 @@ namespace PLDM
     errlHndl_t getSecVerLockinEnabled(std::vector<uint8_t>& io_string_table,
                                       std::vector<uint8_t>& io_attr_table,
                                       TARGETING::ATTR_SECURE_VERSION_LOCKIN_POLICY_type& o_lockinEnabled);
+
+    /** @brief Latch all pending HB BIOS attributes into their "current" forms.
+     *
+     * @param[in,out] io_string_table  See brief at the top of this file.
+     * @param[in,out] io_attr_table    See brief at the top of this file.
+     */
+    errlHndl_t latchBiosAttrs(std::vector<uint8_t>& io_string_table,
+                              std::vector<uint8_t>& io_attr_table);
 }
 
 #endif

@@ -1448,4 +1448,110 @@ errlHndl_t getSecVerLockinEnabled(std::vector<uint8_t>& io_string_table,
     return l_errl;
 }
 
+/* @brief Look up a string handle in the string table and decode it.
+ *
+ * @param[in] i_string_table   The string table. Must be populated before calling this function.
+ * @param[in] i_string_handle  The string handle to look up and decode.
+ * @return                     The string, if any. Empty when the string handle is not present in the table.
+ */
+static std::vector<char> decode_string_handle(const std::vector<uint8_t>& i_string_table, const uint16_t i_string_handle)
+{
+    std::vector<char> string_contents;
+
+    const auto string_entry =
+        pldm_bios_table_string_find_by_handle(i_string_table.data(), i_string_table.size(), i_string_handle);
+
+    if (string_entry)
+    {
+        const uint16_t string_length = pldm_bios_table_string_entry_decode_string_length(string_entry);
+        string_contents.resize(string_length + 1);
+        pldm_bios_table_string_entry_decode_string(string_entry, string_contents.data(), string_contents.size());
+    }
+
+    return string_contents;
+}
+
+errlHndl_t latchBiosAttrs(std::vector<uint8_t>& io_string_table,
+                          std::vector<uint8_t>& io_attr_table)
+{
+    PLDM_ENTER("latchBiosAttrs");
+
+    errlHndl_t errl = nullptr;
+
+    do
+    {
+
+    errl = ensureTablesAreSet(io_string_table, io_attr_table);
+    if (errl)
+    {
+        break;
+    }
+
+    /* Iterate all attribute names looking for ones matching the pattern "hb_*_current". */
+
+    const std::unique_ptr<pldm_bios_table_iter, decltype(&pldm_bios_table_iter_free)>
+        it { pldm_bios_table_iter_create(io_attr_table.data(), io_attr_table.size(), PLDM_BIOS_ATTR_TABLE),
+            pldm_bios_table_iter_free };
+
+    for (; !pldm_bios_table_iter_is_end(it.get()); pldm_bios_table_iter_next(it.get()))
+    {
+        const auto current_attr_entry = pldm_bios_table_iter_attr_entry_value(it.get());
+        const auto current_attr_handle = pldm_bios_table_attr_entry_decode_attribute_handle(current_attr_entry);
+        const auto current_attr_name_string_handle = pldm_bios_table_attr_entry_decode_string_handle(current_attr_entry);
+        const auto& current_attr_name = decode_string_handle(io_string_table, current_attr_name_string_handle);
+
+        if (strncmp(current_attr_name.data(), "hb_", 3) == 0)
+        {
+            /* If we find an hb_*_current "latched" attribute, then try to read an
+             * attribute named hb_* (which contains the "pending" value). If that
+             * succeeds, then we will copy it into the hb_*_current attribute. */
+
+            const char* const suffix = "_current";
+            if (strcmp(current_attr_name.data() + current_attr_name.size() - 1 - strlen(suffix), suffix) == 0)
+            {
+                // Strip off the _current suffix from current_attr_name to get the name of the "pending" attribute
+                std::vector<char> pending_attr_name(current_attr_name.data(),
+                                                    current_attr_name.data() + current_attr_name.size() - 1 - strlen(suffix));
+                pending_attr_name.push_back('\0');
+
+                const auto current_attr_type
+                    = static_cast<pldm_bios_attribute_type>(pldm_bios_table_attr_entry_decode_attribute_type(current_attr_entry));
+
+                const pldm_bios_attr_table_entry* pending_attr_entry = nullptr;
+                std::vector<uint8_t> pending_attr_value;
+
+                errlHndl_t attr_errl =
+                    getCurrentAttrValue(pending_attr_name.data(), current_attr_type,
+                                        io_string_table, io_attr_table, pending_attr_entry, pending_attr_value);
+
+                if (attr_errl)
+                {
+                    PLDM_ERR("Cannot get pending value for attribute %s", pending_attr_name.data());
+                    // We want these logs to be visible, but not halt the IPL.
+                    attr_errl->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+                    errlCommit(attr_errl, PLDM_COMP_ID);
+                    continue;
+                }
+
+                attr_errl = setBiosAttrByHandle(current_attr_handle, current_attr_type,
+                                                pending_attr_value.data(), pending_attr_value.size());
+
+                if (attr_errl)
+                {
+                    PLDM_ERR("Cannot set current value for attribute %s", current_attr_name.data());
+                    // We want these logs to be visible, but not halt the IPL.
+                    attr_errl->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+                    errlCommit(attr_errl, PLDM_COMP_ID);
+                }
+            }
+        }
+    }
+
+    } while (false);
+
+    PLDM_EXIT("latchBiosAttrs");
+
+    return errl;
+}
+
 } // end namespace PLDM
