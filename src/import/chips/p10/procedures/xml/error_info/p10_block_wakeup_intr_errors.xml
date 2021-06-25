@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -34,7 +34,7 @@
     <ffdc>CORE_POSITION</ffdc>
     <callout>
       <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
+      <priority>HIGH</priority>
     </callout>
   </hwpError>
   <!-- ********************************************************************* -->
@@ -55,9 +55,12 @@
       <priority>MEDIUM</priority>
     </callout>
     <callout>
-      <target>CHIP_TARGET</target>
+      <target>CORE_TARGET</target>
        <priority>HIGH</priority>
     </callout>
+    <deconfigure>
+      <target>CORE_TARGET</target>
+    </deconfigure>
   </hwpError>
   <!-- ********************************************************************* -->
 </hwpErrors>
