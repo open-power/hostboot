@@ -1129,9 +1129,9 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         //Compute dds slopes
         compute_dds_slopes(io_globalppb);
 
-        io_globalppb->dpll_pstate0_value =
-            revle32(((iv_attrs.attr_pstate0_freq_mhz) * 1000)  /
-                    revle32(io_globalppb->frequency_step_khz));
+
+        float pstatef = (float)iv_attrs.attr_pstate0_freq_mhz * 1000 /(float)(revle32(iv_frequency_step_khz));
+        io_globalppb->dpll_pstate0_value = revle32((Pstate)internal_round(pstatef));
 
         FAPI_INF("l_globalppb.dpll_pstate0_value %X (%d)",
                 revle32(io_globalppb->dpll_pstate0_value),
@@ -1339,8 +1339,7 @@ fapi2::ReturnCode PlatPmPPB::oppb_init(
         }
 
         //Compute real frequency
-        i_occppb->frequency_min_khz = iv_reference_frequency_khz -
-                                     (l_ps * iv_frequency_step_khz);
+        i_occppb->frequency_min_khz = iv_attrs.attr_pm_safe_frequency_mhz * 1000;
 
         i_occppb->frequency_min_khz = revle32(i_occppb->frequency_min_khz);
 
@@ -4510,7 +4509,7 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
 
     // Calculate safe operational pstate.  This must be rounded to create
     // a faster Pstate than the floor
-    l_rc = freq2pState(l_safe_op_freq_mhz*1000, &l_safe_op_ps, ROUND_FAST, PPB_WARN);
+    l_rc = freq2pState(l_safe_op_freq_mhz*1000, &l_safe_op_ps, ROUND_NEAR, PPB_WARN);
     if (l_rc)
     {
         disable_pstates();
@@ -5139,7 +5138,7 @@ void PlatPmPPB::pState2freq (const Pstate i_pstate,
     // ----------------------------------
     // compute the frequency for a given Pstate
     // ----------------------------------
-    *o_freq_khz = iv_reference_frequency_khz - i_pstate * iv_frequency_step_khz;
+    *o_freq_khz = (iv_reference_frequency_khz - (i_pstate * iv_frequency_step_khz)) + 1000;
 
     FAPI_DBG("pState2freq: pstate = %d; o_freq_khz = %u (0x%X)",
                 i_pstate,  *o_freq_khz, *o_freq_khz);
