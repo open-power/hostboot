@@ -1925,6 +1925,23 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW507934</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Set PEC dials for HW507934 on DD2
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_P10</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_SW525387</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
