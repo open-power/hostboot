@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -26,13 +26,12 @@
   <!-- ******************************************************************** -->
   <registerFfdc>
     <id>REG_FFDC_RNG_SELF_TEST_FAIL</id>
-  <!-- RTC: 202078
-    <scomRegister>PU_NX_RNG_ST0</scomRegister>
-    <scomRegister>PU_NX_RNG_ST1</scomRegister>
-    <scomRegister>PU_NX_RNG_ST2</scomRegister>
-    <scomRegister>PU_NX_RNG_ST3</scomRegister>
-    <scomRegister>PU_NX_RNG_RDELAY</scomRegister>
-    <scomRegister>PU_NX_RNG_CFG</scomRegister>-->
+    <scomRegister>scomt::proc::NX_PBI_RNG_ST0</scomRegister>
+    <scomRegister>scomt::proc::NX_PBI_RNG_ST1</scomRegister>
+    <scomRegister>scomt::proc::NX_PBI_RNG_ST2</scomRegister>
+    <scomRegister>scomt::proc::NX_PBI_RNG_ST3</scomRegister>
+    <scomRegister>scomt::proc::NX_PBI_RNG_RDELAY</scomRegister>
+    <scomRegister>scomt::proc::NX_PBI_RNG_CFG</scomRegister>
   </registerFfdc>
   <!-- ******************************************************************** -->
   <hwpError>
