@@ -60,7 +60,7 @@ use Getopt::Long;
 
 my $sbeTarget                 = undef;
 my @eiObjects                 = ();
-my $target_ffdc_type          = "fapi2::Target<T>";
+my $target_ffdc_type          = "fapi2::Target<T, M>";
 my $buffer_ffdc_type          = "fapi2::buffer";
 my $variable_buffer_ffdc_type = "fapi2::variable_buffer";
 my $ffdc_type                 = "fapi2::ffdc_t";
@@ -358,7 +358,7 @@ sub addFfdcMethod
 
     elsif ( $type eq $target_ffdc_type )
     {
-        $method = "\n    template< TargetType T >\n";
+        $method = "\n    template< TargetType T , MulticastType M>\n";
         $method .= "    inline $class_name& set_$ffdc_uc(const $type& $param)\n";
 
         if ( $sbeTarget == 1 )
