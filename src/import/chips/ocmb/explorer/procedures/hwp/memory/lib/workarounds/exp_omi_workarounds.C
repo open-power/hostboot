@@ -200,6 +200,46 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Get value for explorer cdr bw value
+/// @param[in] i_target OCMB chip
+/// @param[in] i_omi_freq OMI operating frequency
+/// @param[in,out] io_cdr_bw_override CDR BW setting, originally from ATTR_OMI_CDR_BW_OVERRIDE
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode cdr_bw_override(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                  const uint32_t i_omi_freq,
+                                  uint8_t& io_cdr_bw_override)
+{
+    // These are the default for OMI CDR BW for each frequency
+    // This will be set after BOOT_CONFIG_0 unless ATTR_MSS_EXP_OMI_CDR_OFFSET
+    // has a non-zero value
+    // NOTE: Using value of 0x00 for all frequencies for P9, versus 0x20 for P10
+    static const std::vector<std::pair<uint32_t, uint8_t>> CDR_BW_MAP =
+    {
+        {fapi2::ENUM_ATTR_FREQ_OMI_MHZ_21330, 0x00},
+        {fapi2::ENUM_ATTR_FREQ_OMI_MHZ_23460, 0x00},
+        {fapi2::ENUM_ATTR_FREQ_OMI_MHZ_25600, 0x00},
+    };
+
+    // Use the default for the current OMI freq if the override is zero and we're not on Apollo
+    if (io_cdr_bw_override == 0)
+    {
+        // Get default override from our freq map
+        FAPI_ASSERT( mss::find_value_from_key(CDR_BW_MAP, i_omi_freq, io_cdr_bw_override),
+                     fapi2::OMI_CDR_BW_UNKNOWN_FREQ()
+                     .set_OCMB_TARGET(i_target)
+                     .set_OMI_FREQ(i_omi_freq),
+                     "%s Got unsupported OMI freq (%d) when fetching OMI CDR BW override",
+                     mss::c_str(i_target), i_omi_freq );
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Override CDR bandwidth setting via I2C command
 ///
 /// @param[in] i_cdr_bw_override setting from ATTR_OMI_CDR_BW_OVERRIDE
@@ -228,7 +268,7 @@ void setup_cdr_bw_i2c(const uint8_t i_cdr_bw_override,
 /// @brief Override CDR bandwidth setting via I2C command
 ///
 /// @param[in] i_target OCMB_CHIP target
-/// @param[in] i_cdr_bw_override setting from ATTR_OMI_CDR_BW_OVERRIDE
+/// @param[in] i_cdr_bw_override setting from cdr_bw_override function
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 ///
 fapi2::ReturnCode override_cdr_bw_i2c(
@@ -239,7 +279,7 @@ fapi2::ReturnCode override_cdr_bw_i2c(
     std::vector<uint8_t> l_i2c_data;
     std::vector<uint8_t> l_fw_status_data;
 
-    if (i_cdr_bw_override == fapi2::ENUM_ATTR_MSS_EXP_OMI_CDR_BW_OVERRIDE_NONE)
+    if (i_cdr_bw_override == 0)
     {
         FAPI_DBG("%s No CDR bandwidth override requested", mss::c_str(i_target));
         return fapi2::FAPI2_RC_SUCCESS;

@@ -66,6 +66,7 @@ extern "C"
         fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
         uint8_t l_gem_menterp_workaround = 0;
         uint8_t l_enable_ffe_settings = 0;
+        uint32_t l_omi_freq = 0;
         uint8_t l_is_apollo = 0;
         fapi2::ATTR_MSS_EXP_OMI_CDR_BW_OVERRIDE_Type l_cdr_bw_override = 0;
         fapi2::ATTR_MSS_EXP_OMI_CDR_OFFSET_Type l_cdr_offset = 0;
@@ -76,7 +77,10 @@ extern "C"
         std::vector<uint8_t> l_ffe_setup_data;
         std::vector<uint8_t> l_fw_status_data;
 
+        const auto& l_proc = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target);
+
         FAPI_TRY(mss::attr::get_is_apollo(l_is_apollo));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_OMI_MHZ, l_proc, l_omi_freq) );
 
         // Send downstream PRBS pattern from host
         if (l_is_apollo == fapi2::ENUM_ATTR_MSS_IS_APOLLO_FALSE)
@@ -99,6 +103,15 @@ extern "C"
 
         // Apply override for CDR bandwidth
         FAPI_TRY(mss::attr::get_exp_omi_cdr_bw_override(i_target, l_cdr_bw_override));
+
+        // Use the default for the given freq if override is zero, unless we're on Apollo
+        if (l_is_apollo == fapi2::ENUM_ATTR_MSS_IS_APOLLO_FALSE)
+        {
+            FAPI_TRY(mss::exp::workarounds::omi::cdr_bw_override(i_target,
+                     l_omi_freq,
+                     l_cdr_bw_override));
+        }
+
         FAPI_TRY(mss::exp::workarounds::omi::override_cdr_bw_i2c(i_target, l_cdr_bw_override));
 
         // Gets the data setup
@@ -180,12 +193,12 @@ extern "C"
         {
             FAPI_TRY(p9a_io_omi_prbs(mss::find_target<fapi2::TARGET_TYPE_OMIC>(mss::find_target<fapi2::TARGET_TYPE_OMI>(i_target)),
                                      false));
-        }
 
-        // Apply override for CDR offset
-        FAPI_TRY(mss::attr::get_exp_omi_cdr_offset(i_target, l_cdr_offset));
-        FAPI_TRY(mss::attr::get_exp_omi_cdr_offset_lane_mask(i_target, l_cdr_offset_lane_mask));
-        FAPI_TRY(mss::exp::workarounds::omi::override_cdr_offset(i_target, l_cdr_offset, l_cdr_offset_lane_mask));
+            // Apply override for CDR offset (but skip for Apollo since CDR offset needs PRBS training)
+            FAPI_TRY(mss::attr::get_exp_omi_cdr_offset(i_target, l_cdr_offset));
+            FAPI_TRY(mss::attr::get_exp_omi_cdr_offset_lane_mask(i_target, l_cdr_offset_lane_mask));
+            FAPI_TRY(mss::exp::workarounds::omi::override_cdr_offset(i_target, l_cdr_offset, l_cdr_offset_lane_mask));
+        }
 
         // Start P9a PHY training by sending upstream PRBS pattern
         // Train mode 6 (state 3)

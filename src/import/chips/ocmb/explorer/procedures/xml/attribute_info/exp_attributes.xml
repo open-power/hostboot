@@ -1374,7 +1374,7 @@
       </description>
       <valueType>uint8</valueType>
       <initToZero></initToZero>
-      <enum>NONE = 0</enum>
+      <enum>DEFAULT = 0</enum>
       <writeable/>
       <mssAccessorName>exp_omi_cdr_bw_override</mssAccessorName>
     </attribute>
