@@ -95,5 +95,18 @@
     </deconfigure>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_OMI_CDR_BW_UNKNOWN_FREQ</rc>
+    <description>
+      Got unsupported OMI frequency when fetching OMI CDR BW override
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>OMI_FREQ</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
   <!-- ******************************************************************** -->
 </hwpErrors>

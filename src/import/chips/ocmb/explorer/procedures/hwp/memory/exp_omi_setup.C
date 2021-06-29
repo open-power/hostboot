@@ -104,6 +104,7 @@ extern "C"
         FAPI_TRY(mss::check_mfg_flag(MNFG_OMI_CRC_EDPL_SCREEN, l_mnfg_screen_test));
         FAPI_TRY(mss::attr::get_mnfg_edpl_time(l_mnfg_edpl_time));
         FAPI_TRY(mss::attr::get_mnfg_edpl_threshold(l_mnfg_edpl_threshold));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_OMI_MHZ, l_proc, l_omi_freq) );
 
         // Send downstream PRBS pattern from host
         if (l_is_apollo == fapi2::ENUM_ATTR_MSS_IS_APOLLO_FALSE)
@@ -125,6 +126,15 @@ extern "C"
 
         // Apply override for CDR bandwidth
         FAPI_TRY(mss::attr::get_exp_omi_cdr_bw_override(i_target, l_cdr_bw_override));
+
+        // Use the default for the given freq if override is zero, unless we're on Apollo
+        if (l_is_apollo == fapi2::ENUM_ATTR_MSS_IS_APOLLO_FALSE)
+        {
+            FAPI_TRY(mss::exp::workarounds::omi::cdr_bw_override(i_target,
+                     l_omi_freq,
+                     l_cdr_bw_override));
+        }
+
         FAPI_TRY(mss::exp::workarounds::omi::override_cdr_bw_i2c(i_target, l_cdr_bw_override));
 
         // Gets the data setup
@@ -246,11 +256,6 @@ extern "C"
             FAPI_TRY(mss::exp::omi::write_dlx_config1(i_target, l_dlx_config1_data));
             FAPI_INF("%s EDPL enable: %s", mss::c_str(i_target), l_edpl_disable ? "false" : "true");
         }
-
-        // TODO Zen-1002: See if we can remove this
-        // Update explorer CDR BW value to 0x2F based on Chris Steffen's testing
-        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_FREQ_OMI_MHZ, l_proc, l_omi_freq) );
-        FAPI_TRY(mss::exp::workarounds::omi::cdr_bw_override(i_target, l_omi_freq));
 
         // Skip the CDR offset command for Apollo
         // CDR offset needs PRBS training to succeed

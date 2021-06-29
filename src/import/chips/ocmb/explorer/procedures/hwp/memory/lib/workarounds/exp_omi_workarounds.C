@@ -200,81 +200,39 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Workaround for exp_omi-setup to set explorer cdr bw value
+/// @brief Get value for explorer cdr bw value
 /// @param[in] i_target OCMB chip
 /// @param[in] i_omi_freq OMI operating frequency
+/// @param[in,out] io_cdr_bw_override CDR BW setting, originally from ATTR_OMI_CDR_BW_OVERRIDE
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 ///
 fapi2::ReturnCode cdr_bw_override(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                                  const uint32_t i_omi_freq)
+                                  const uint32_t i_omi_freq,
+                                  uint8_t& io_cdr_bw_override)
 {
-    fapi2::buffer<uint64_t> l_exp_mdsp_pcib_tr_config_0;
-    fapi2::buffer<uint64_t> l_exp_mdsp_pcib_tr_config_1;
-    constexpr uint32_t EXPLR_MDSP_PCIB_TR_CONFIG_0_BASE = 0x200A00;
-    constexpr uint32_t EXPLR_MDSP_PCIB_TR_CONFIG_1_BASE = 0x200A04;
-    uint32_t l_addr_explr_mdsp_pcib_tr_config_0 = EXPLR_MDSP_PCIB_TR_CONFIG_0_BASE;
-    uint32_t l_addr_explr_mdsp_pcib_tr_config_1 = EXPLR_MDSP_PCIB_TR_CONFIG_1_BASE;
-    constexpr uint8_t EXP_NUM_LANES = 8;
-    constexpr uint8_t CDR_BW_OVERRIDE_START = 57;
-    constexpr uint8_t CDR_BW_OVERRIDE_LEN = 7;
-    constexpr uint8_t CONFIG_UPDATE_START = 54;
-    constexpr uint8_t CONFIG_UPDATE_LEN = 1;
-    uint8_t ENABLE_WORKAROUND = fapi2::ENUM_ATTR_MSS_EXP_CDR_BW_OVERRIDE_ENABLE_ENABLE;
-    uint8_t l_cdr_bw_enable = 0;
-    uint8_t l_cdr_bw_val = 47;   //ideal default value found by Chris Steffen experiments
-    uint8_t lane = 0;
-
-
-    //only perform workaround if OMI Freq is less than 25600
-    if ( i_omi_freq < fapi2::ENUM_ATTR_FREQ_OMI_MHZ_25600 )
+    // These are the default for OMI CDR BW for each frequency
+    // This will be set after BOOT_CONFIG_0 unless ATTR_MSS_EXP_OMI_CDR_OFFSET
+    // has a non-zero value
+    static const std::vector<std::pair<uint32_t, uint8_t>> CDR_BW_MAP =
     {
-        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EXP_CDR_BW_OVERRIDE_ENABLE, i_target, ENABLE_WORKAROUND),
-                  "Error setting ATTR_MSS_EXP_CDR_BW_OVERRIDE_ENABLE");
+        {fapi2::ENUM_ATTR_FREQ_OMI_MHZ_21330, 0x20},
+        {fapi2::ENUM_ATTR_FREQ_OMI_MHZ_23460, 0x20},
+        {fapi2::ENUM_ATTR_FREQ_OMI_MHZ_25600, 0x20},
+    };
+
+    // Use the default for the current OMI freq if the override is zero and we're not on Apollo
+    if (io_cdr_bw_override == 0)
+    {
+        // Get default override from our freq map
+        FAPI_ASSERT( mss::find_value_from_key(CDR_BW_MAP, i_omi_freq, io_cdr_bw_override),
+                     fapi2::OMI_CDR_BW_UNKNOWN_FREQ()
+                     .set_OCMB_TARGET(i_target)
+                     .set_OMI_FREQ(i_omi_freq),
+                     "%s Got unsupported OMI freq (%d) when fetching OMI CDR BW override",
+                     mss::c_str(i_target), i_omi_freq );
     }
 
-    // get cdr bw override enable from attribute
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_CDR_BW_OVERRIDE_ENABLE, i_target, l_cdr_bw_enable),
-              "Error getting ATTR_MSS_EXP_CDR_BW_OVERRIDE_ENABLE");
-    // get cdr bw override value from attribute
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_CDR_BW_OVERRIDE_VALUE, i_target, l_cdr_bw_val),
-              "Error getting ATTR_MSS_EXP_CDR_BW_OVERRIDE");
-
-
-    if ( l_cdr_bw_enable )
-    {
-        // Set configurable exp CDR BW value
-        lane = 0;
-
-        while (lane < EXP_NUM_LANES)
-        {
-            // set local config addresses based on lane value
-            l_addr_explr_mdsp_pcib_tr_config_0 = EXPLR_MDSP_PCIB_TR_CONFIG_0_BASE + (lane << 12);
-            l_addr_explr_mdsp_pcib_tr_config_1 = EXPLR_MDSP_PCIB_TR_CONFIG_1_BASE + (lane << 12);
-
-            // Update the CDR Values:
-            FAPI_TRY(fapi2::getScom(i_target, l_addr_explr_mdsp_pcib_tr_config_1, l_exp_mdsp_pcib_tr_config_1),
-                     "Error reading EXPLR_DLX_DL0_CONFIG1 on %s", mss::c_str(i_target));
-            l_exp_mdsp_pcib_tr_config_1.insertFromRight<CDR_BW_OVERRIDE_START,
-                                                        CDR_BW_OVERRIDE_LEN>(l_cdr_bw_val);
-            FAPI_TRY(fapi2::putScom(i_target, l_addr_explr_mdsp_pcib_tr_config_1, l_exp_mdsp_pcib_tr_config_1),
-                     "Error writing EXPLR_DLX_DL0_CONFIG1 on %s", mss::c_str(i_target));
-
-
-            // Toggle the config update bit:
-            FAPI_TRY(fapi2::getScom(i_target, l_addr_explr_mdsp_pcib_tr_config_0, l_exp_mdsp_pcib_tr_config_0),
-                     "Error reading EXPLR_DLX_DL0_CONFIG0 on %s", mss::c_str(i_target));
-            l_exp_mdsp_pcib_tr_config_0.insertFromRight<CONFIG_UPDATE_START,
-                                                        CONFIG_UPDATE_LEN>(1);
-            FAPI_TRY(fapi2::putScom(i_target, l_addr_explr_mdsp_pcib_tr_config_0, l_exp_mdsp_pcib_tr_config_0),
-                     "Error writing EXPLR_DLX_DL0_CONFIG0 on %s", mss::c_str(i_target));
-            l_exp_mdsp_pcib_tr_config_0.insertFromRight<CONFIG_UPDATE_START,
-                                                        CONFIG_UPDATE_LEN>(0);
-            FAPI_TRY(fapi2::putScom(i_target, l_addr_explr_mdsp_pcib_tr_config_0, l_exp_mdsp_pcib_tr_config_0),
-                     "Error writing EXPLR_DLX_DL0_CONFIG0 on %s", mss::c_str(i_target));
-
-            lane++;
-        }
-    }
+    return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -309,7 +267,7 @@ void setup_cdr_bw_i2c(const uint8_t i_cdr_bw_override,
 /// @brief Override CDR bandwidth setting via I2C command
 ///
 /// @param[in] i_target OCMB_CHIP target
-/// @param[in] i_cdr_bw_override setting from ATTR_OMI_CDR_BW_OVERRIDE
+/// @param[in] i_cdr_bw_override setting from cdr_bw_override function
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 ///
 fapi2::ReturnCode override_cdr_bw_i2c(
@@ -320,7 +278,7 @@ fapi2::ReturnCode override_cdr_bw_i2c(
     std::vector<uint8_t> l_i2c_data;
     std::vector<uint8_t> l_fw_status_data;
 
-    if (i_cdr_bw_override == fapi2::ENUM_ATTR_MSS_EXP_OMI_CDR_BW_OVERRIDE_NONE)
+    if (i_cdr_bw_override == 0)
     {
         FAPI_DBG("%s No CDR bandwidth override requested", mss::c_str(i_target));
         return fapi2::FAPI2_RC_SUCCESS;
