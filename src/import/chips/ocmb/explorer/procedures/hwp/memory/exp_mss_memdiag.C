@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,6 +48,7 @@ extern "C"
     /// @brief Initializes memory and sets firs
     /// @param[in] i_target OCMB Chip
     /// @return FAPI2_RC_SUCCESS iff ok
+    /// @note This is a cronus only procedure. PRD handles memdiags in hostboot
     ///
     fapi2::ReturnCode exp_mss_memdiag( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target )
     {
@@ -62,6 +63,9 @@ extern "C"
         if (l_post_memdiags_subtest == fapi2::ENUM_ATTR_MSS_POST_MEMDIAGS_READ_SUBTEST_ENABLE)
         {
             FAPI_TRY(mss::exp::memdiags::perform_read_only_subtest(i_target));
+
+            // Polls for completion here to avoid issues in future isteps
+            FAPI_TRY(mss::memdiags::mss_async_polling_loop(i_target));
 
             // Turn off FIFO mode again
             // Note this is normally done in mss_initialize_memory but

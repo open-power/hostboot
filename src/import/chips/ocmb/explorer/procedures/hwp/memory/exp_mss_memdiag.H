@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,7 @@ extern "C"
 /// @brief Pattern test the DRAM
 /// @param[in] i_target the memory controller of the dram you're training
 /// @return FAPI2_RC_SUCCESS iff ok
+/// @note This is a cronus only procedure. PRD handles memdiags in hostboot
 ///
     fapi2::ReturnCode exp_mss_memdiag( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target );
 }
