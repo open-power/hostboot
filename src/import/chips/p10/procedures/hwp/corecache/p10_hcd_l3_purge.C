@@ -106,12 +106,13 @@ p10_hcd_l3_purge(
     }
     while( (--l_timeout) != 0 );
 
-    HCD_ASSERT((l_timeout != 0),
-               L3_PURGE_DONE_TIMEOUT,
-               set_L3_PURGE_DONE_POLL_TIMEOUT_HW_NS, HCD_L3_PURGE_DONE_POLL_TIMEOUT_HW_NS,
-               set_PM_PURGE_REG, l_scomData,
-               set_CORE_TARGET, i_target,
-               "ERROR: L3 Purge Done Timeout");
+    HCD_ASSERT4((l_timeout != 0),
+                L3_PURGE_DONE_TIMEOUT,
+                set_L3_PURGE_DONE_POLL_TIMEOUT_HW_NS, HCD_L3_PURGE_DONE_POLL_TIMEOUT_HW_NS,
+                set_PM_PURGE_REG, l_scomData,
+                set_MC_CORE_TARGET, i_target,
+                set_CORE_SELECT, i_target.getCoreSelect(),
+                "ERROR: L3 Purge Done Timeout");
 
 fapi_try_exit:
 

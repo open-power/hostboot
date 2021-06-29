@@ -158,12 +158,13 @@ p10_hcd_l2_purge(
         }
     #endif
     */
-    HCD_ASSERT((l_timeout != 0),
-               L2_PURGE_DONE_TIMEOUT,
-               set_L2_PURGE_DONE_POLL_TIMEOUT_HW_NS, HCD_L2_PURGE_DONE_POLL_TIMEOUT_HW_NS,
-               set_QME_SCSR, l_mmioData,
-               set_CORE_TARGET, i_target,
-               "ERROR: L2 Purge Done Timeout");
+    HCD_ASSERT4((l_timeout != 0),
+                L2_PURGE_DONE_TIMEOUT,
+                set_L2_PURGE_DONE_POLL_TIMEOUT_HW_NS, HCD_L2_PURGE_DONE_POLL_TIMEOUT_HW_NS,
+                set_QME_SCSR, l_mmioData,
+                set_MC_CORE_TARGET, i_target,
+                set_CORE_SELECT, i_target.getCoreSelect(),
+                "ERROR: L2 Purge Done Timeout");
 
     FAPI_DBG("Wait for PMSR_SHIFT_INACTIVE to assert via PCR_SCSR[56]");
     l_timeout = HCD_PMSR_SHIFT_INACTIVE_POLL_TIMEOUT_HW_NS /
@@ -184,12 +185,13 @@ p10_hcd_l2_purge(
     }
     while( (--l_timeout) != 0 );
 
-    HCD_ASSERT((l_timeout != 0),
-               PMSR_SHIFT_INACTIVE_TIMEOUT,
-               set_PMSR_SHIFT_INACTIVE_POLL_TIMEOUT_HW_NS, HCD_PMSR_SHIFT_INACTIVE_POLL_TIMEOUT_HW_NS,
-               set_QME_SCSR, l_mmioData,
-               set_CORE_TARGET, i_target,
-               "ERROR: PMSR_SHIFT_INACTIVE Timeout");
+    HCD_ASSERT4((l_timeout != 0),
+                PMSR_SHIFT_INACTIVE_TIMEOUT,
+                set_PMSR_SHIFT_INACTIVE_POLL_TIMEOUT_HW_NS, HCD_PMSR_SHIFT_INACTIVE_POLL_TIMEOUT_HW_NS,
+                set_QME_SCSR, l_mmioData,
+                set_MC_CORE_TARGET, i_target,
+                set_CORE_SELECT, i_target.getCoreSelect(),
+                "ERROR: PMSR_SHIFT_INACTIVE Timeout");
 
     FAPI_DBG("Drop L2_PURGE_REQ/ABORT via PCR_SCSR[5, 6]");
     FAPI_TRY( HCD_PUTMMIO_C( l_target, QME_SCSR_WO_CLEAR, MMIO_LOAD32H( BITS32(5, 2) ) ) );

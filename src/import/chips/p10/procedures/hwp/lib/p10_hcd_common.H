@@ -38,11 +38,41 @@
 
 #include <stdint.h>
 
+/*
+  ************************* HCD RC Rules  ***********************************
+  In an effort to use common RCs between standard fapi code and QME code,
+  specific rules are in place for RC defined in p10_hcd_*.xml files that
+  want to utilize the HCD_ASSERT* macros.
+
+  1. The 1st FFDC is dropped by QME errorlogs so it should be lower priority
+        - RCs MUST define this 1st FFDC field
+        - Suggestions : Timeout Limit
+  2. The 2nd FFDC always gets captured so it should be the most important
+        - RCs MUST define a 2nd FFDC field
+        - Suggestions : Register Data
+  3. The 3rd FFDC always needs to be a CORE target
+        - RCs MUST define a 3rd FFDC field
+        - Can be multicast or unicast
+  4. The 4th FFDC is dropped by QME errorlogs so it should be lower priority
+        - RCs do not have to define a 4th FFDC field, if they do not
+          the the macro HCD_ASSERT3 is used instead of HCD_ASSERT4
+        - Suggestions : CORE_SELECT, Timeout Limit, etc
+
+  If an RC with more than 4 FFDC fields is required a new HCD_ASSERT* macro
+  must be defined this file and this comment must be updated here as well as
+  all of the p10_hcd_*.xml files.
+  */
+
 #ifndef __PPE_QME
 
-#define HCD_ASSERT(__conditional__, RCODE, NAME0, DATA0, NAME1, DATA1, NAME2, DATA2, ...) \
+#define HCD_ASSERT3(__conditional__, RCODE, NAME0, DATA0, NAME1, DATA1, NAME2, DATA2, ...) \
     FAPI_ASSERT(__conditional__,                                                          \
                 fapi2::RCODE().NAME0(DATA0).NAME1(DATA1).NAME2(DATA2),                    \
+                __VA_ARGS__)
+
+#define HCD_ASSERT4(__conditional__, RCODE, NAME0, DATA0, NAME1, DATA1, NAME2, DATA2, NAME3, DATA3, ...) \
+    FAPI_ASSERT(__conditional__,                                                          \
+                fapi2::RCODE().NAME0(DATA0).NAME1(DATA1).NAME2(DATA2).NAME3(DATA3),       \
                 __VA_ARGS__)
 
 #else
@@ -61,11 +91,12 @@ void qme_errlog();
 }
 #endif
 
-// not taking DATA0, but use the slot for the fapi rc code
-// so FW knows which error in xml this is after qme errlog
-// DATA0 will be not critical data on purpose for this reason
+// Do not use NAME0, DATA0, NAME3, DATA3, fill in QmeRecord.data0 member with
+// the fapi rc code so FW knows which error in xml this is after qme errlog
+// DATA0, and DATA3 will be non-critical data from QME code's perspective
+// for this reason.
 
-#define HCD_ASSERT(__conditional__, RCODE, NAME0, DATA0, NAME1, DATA1, NAME2, DATA2, ...) \
+#define HCD_ASSERT3(__conditional__, RCODE, NAME0, DATA0, NAME1, DATA1, NAME2, DATA2, ...) \
     if (! (__conditional__))                                                              \
     {                                                                                     \
         G_qme_record.errl_panic = RCODE;                                                  \
@@ -75,6 +106,10 @@ void qme_errlog();
         FAPI_ERR(__VA_ARGS__);                                                            \
         qme_errlog();                                                                     \
     }
+
+#define HCD_ASSERT4(__conditional__, RCODE, NAME0, DATA0, NAME1, DATA1, NAME2, DATA2, NAME3, DATA3, ...) \
+    HCD_ASSERT3(__conditional__, RCODE, NAME0, DATA0, NAME1, DATA1, NAME2, DATA2, __VA_ARGS__)
+
 #endif
 
 

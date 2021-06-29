@@ -174,12 +174,13 @@ p10_hcd_corecache_power_control(
         FAPI_TRY( HCD_GETMMIO_S(l_mc_or, HCD_CPMS_PFETCNTL[l_isL3], l_scomData ) ); // use Multicast_OR to check 0s
 
         SCOM_EXTRACT(0, 4, l_pfet_seq_states);
-        HCD_ASSERT((l_pfet_seq_states == 0),
-                   CORECACHE_PFET_SEQ_STATE_ERROR,
-                   set_POW_COMMAND, i_command,
-                   set_PFET_SEQ_STATES, l_pfet_seq_states,
-                   set_CORE_TARGET, i_target,
-                   "PFET_SEQ_STATE not 0");
+        HCD_ASSERT4((l_pfet_seq_states == 0),
+                    CORECACHE_PFET_SEQ_STATE_ERROR,
+                    set_POW_COMMAND, i_command,
+                    set_PFET_SEQ_STATES, l_pfet_seq_states,
+                    set_MC_CORE_TARGET, i_target,
+                    set_CORE_SELECT, i_target.getCoreSelect(),
+                    "PFET_SEQ_STATE not 0");
 
         FAPI_DBG("Clear L3/CL2[%x] PFET stage select and value override bits via PFETCNTL[4,5/6,7]", l_isL3);
         FAPI_TRY( HCD_PUTMMIO_S( i_target, HCD_CPMS_PFETCNTL_CLR[l_isL3], SCOM_LOAD32H( HCD_PFET_OVERRIDES[l_isVCS] ) ) );
@@ -256,21 +257,22 @@ p10_hcd_corecache_power_control(
         {
 #endif
 
-            HCD_ASSERT( (
+            HCD_ASSERT4( (
 #ifdef USE_RUNN
-                            l_attr_runn_mode ?
+                             l_attr_runn_mode ?
 #if defined(POWER10_DD_LEVEL) && POWER10_DD_LEVEL != 10
-                            ( ( l_pfet_stat & HCD_PFET_FINGER0_SENSE_BITS[l_isL3][l_isVCS] ) == l_expected_mask ) :
+                             ( ( l_pfet_stat & HCD_PFET_FINGER0_SENSE_BITS[l_isL3][l_isVCS] ) == l_expected_mask ) :
 #else
-                            ( ( l_pfet_stat & HCD_PFET_ACTUAL_MASKS[l_isVCS] ) == l_expected_mask ) :
+                             ( ( l_pfet_stat & HCD_PFET_ACTUAL_MASKS[l_isVCS] ) == l_expected_mask ) :
 #endif
 #endif
-                            (l_timeout != 0) ),
-                        CORECACHE_POW_CTRL_TIMEOUT,
-                        set_POW_COMMAND, i_command,
-                        set_PFET_SENSES, l_pfet_stat,
-                        set_CORE_TARGET, i_target,
-                        "ERROR: Core/Cache PFET Control Timeout");
+                             (l_timeout != 0) ),
+                         CORECACHE_POW_CTRL_TIMEOUT,
+                         set_POW_COMMAND, i_command,
+                         set_PFET_SENSES, l_pfet_stat,
+                         set_MC_CORE_TARGET, i_target,
+                         set_CORE_SELECT, i_target.getCoreSelect(),
+                         "ERROR: Core/Cache PFET Control Timeout");
 
 #if defined(POWER10_DD_LEVEL) && POWER10_DD_LEVEL == 10
         }

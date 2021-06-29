@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -22,39 +22,60 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- Error definitions for p9_hcd_cache_startclocks procedures -->
+<!-- Error definitions for p10_hcd_corecache_clock_control procedures -->
 <hwpErrors>
-  <!-- ********************************************************************* -->
+  <!--
+    ************************* HCD RC Rules  ***********************************
+    In an effort to use common RCs between standard fapi code and QME code,
+    specific rules are in place for RC defined in p10_hcd_*.xml files that
+    want to utilize the HCD_ASSERT* macros.
+
+    1. The 1st FFDC is dropped by QME errorlogs so it should be lower priority
+          - RCs MUST define this 1st FFDC field
+          - Suggestions : Timeout Limit
+    2. The 2nd FFDC always gets captured so it should be the most important
+          - RCs MUST define a 2nd FFDC field
+          - Suggestions : Register Data
+    3. The 3rd FFDC always needs to be a CORE target
+          - RCs MUST define a 3rd FFDC field
+          - Can be multicast or unicast
+    4. The 4th FFDC is dropped by QME errorlogs so it should be lower priority
+          - RCs do not have to define a 4th FFDC field, if they do not
+            the the macro HCD_ASSERT3 is used instead of HCD_ASSERT4
+          - Suggestions : CORE_SELECT, Timeout Limit, etc
+
+    If an RC with more than 4 FFDC fields is required a new HCD_ASSERT* macro
+    must be defined in p10_hcd_common.H and this comment must be updated in
+    that header file as well as all of the p10_hcd_*.xml files.
+    -->
   <hwpError>
     <sbeError/>
     <rc>RC_CORECACHE_CLK_CTRL_SL_FAILED</rc>
+    <!-- Cannot use HCD_ASSERT* macros -->
     <description>
         core/cache clock start/stop failed in SL thold.
     </description>
     <ffdc>CLK_STAT_SL</ffdc>
     <ffdc>CLK_COMMAND</ffdc>
     <ffdc>CLK_REGIONS</ffdc>
-    <ffdc>QUAD_TARGET</ffdc>
+    <ffdc>MC_QUAD_TARGET</ffdc>
     <callout>
       <childTargets>
-        <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_CORE</childType>
-        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+        <parent>MC_QUAD_TARGET</parent>
+        <childType>TARGET_TYPE_EQ</childType>
       </childTargets>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
       <childTargets>
-        <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_CORE</childType>
-        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+        <parent>MC_QUAD_TARGET</parent>
+        <childType>TARGET_TYPE_EQ</childType>
       </childTargets>
     </deconfigure>
     <gard>
       <childTargets>
-        <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_CORE</childType>
-        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+        <parent>MC_QUAD_TARGET</parent>
+        <childType>TARGET_TYPE_EQ</childType>
       </childTargets>
     </gard>
   </hwpError>
@@ -62,33 +83,31 @@
   <hwpError>
     <sbeError/>
     <rc>RC_CORECACHE_CLK_CTRL_NSL_FAILED</rc>
+    <!-- Cannot use HCD_ASSERT* macros -->
     <description>
         core/cache clock start/stop failed in NSL thold.
     </description>
     <ffdc>CLK_STAT_NSL</ffdc>
     <ffdc>CLK_COMMAND</ffdc>
     <ffdc>CLK_REGIONS</ffdc>
-    <ffdc>QUAD_TARGET</ffdc>
+    <ffdc>MC_QUAD_TARGET</ffdc>
     <callout>
       <childTargets>
-        <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_CORE</childType>
-        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+        <parent>MC_QUAD_TARGET</parent>
+        <childType>TARGET_TYPE_EQ</childType>
       </childTargets>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
       <childTargets>
-        <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_CORE</childType>
-        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+        <parent>MC_QUAD_TARGET</parent>
+        <childType>TARGET_TYPE_EQ</childType>
       </childTargets>
     </deconfigure>
     <gard>
       <childTargets>
-        <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_CORE</childType>
-        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+        <parent>MC_QUAD_TARGET</parent>
+        <childType>TARGET_TYPE_EQ</childType>
       </childTargets>
     </gard>
   </hwpError>
@@ -96,40 +115,39 @@
   <hwpError>
     <sbeError/>
     <rc>RC_CORECACHE_CLK_CTRL_ARY_FAILED</rc>
+    <!-- Cannot use HCD_ASSERT* macros -->
     <description>
         core/cache clock start/stop failed in ARY thold.
     </description>
     <ffdc>CLK_STAT_ARY</ffdc>
     <ffdc>CLK_COMMAND</ffdc>
     <ffdc>CLK_REGIONS</ffdc>
-    <ffdc>QUAD_TARGET</ffdc>
+    <ffdc>MC_QUAD_TARGET</ffdc>
     <callout>
       <childTargets>
-        <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_CORE</childType>
-        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+        <parent>MC_QUAD_TARGET</parent>
+        <childType>TARGET_TYPE_EQ</childType>
       </childTargets>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
       <childTargets>
-        <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_CORE</childType>
-        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+        <parent>MC_QUAD_TARGET</parent>
+        <childType>TARGET_TYPE_EQ</childType>
       </childTargets>
     </deconfigure>
     <gard>
       <childTargets>
-        <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_CORE</childType>
-        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+        <parent>MC_QUAD_TARGET</parent>
+        <childType>TARGET_TYPE_EQ</childType>
       </childTargets>
     </gard>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <sbeError/>
-    <rc>RC_CORECACHE_CLK_CTRL_TIMEOUT</rc>
+    <rc>RC_CORECACHE_CLK_CTRL_TIMEOUT_EQ</rc>
+    <!-- Cannot use HCD_ASSERT* macros -->
     <description>
         core/cache clock start/stop timed out.
     </description>
@@ -137,27 +155,55 @@
     <ffdc>CPLT_STAT0</ffdc>
     <ffdc>CLK_COMMAND</ffdc>
     <ffdc>CLK_REGIONS</ffdc>
-    <ffdc>QUAD_TARGET</ffdc>
+    <ffdc>MC_QUAD_TARGET</ffdc>
     <callout>
       <childTargets>
-        <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_CORE</childType>
-        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+        <parent>MC_QUAD_TARGET</parent>
+        <childType>TARGET_TYPE_EQ</childType>
       </childTargets>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
       <childTargets>
-        <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_CORE</childType>
-        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+        <parent>MC_QUAD_TARGET</parent>
+        <childType>TARGET_TYPE_EQ</childType>
       </childTargets>
     </deconfigure>
     <gard>
       <childTargets>
-        <parent>PROC_CHIP_IN_ERROR</parent>
+        <parent>MC_QUAD_TARGET</parent>
+        <childType>TARGET_TYPE_EQ</childType>
+      </childTargets>
+    </gard>
+  </hwpError>
+
+  <hwpError>
+    <sbeError/>
+    <rc>RC_CORECACHE_CLK_CTRL_TIMEOUT_CORE</rc>
+    <!-- only used in __PPE_QME path -->
+    <description>
+        core/cache clock start/stop timed out.
+    </description>
+    <ffdc>CLK_COMMAND</ffdc>
+    <ffdc>CPLT_STAT0</ffdc>
+    <ffdc>MC_CORE_TARGET</ffdc>
+    <callout>
+      <childTargets>
+        <parent>MC_CORE_TARGET</parent>
         <childType>TARGET_TYPE_CORE</childType>
-        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <childTargets>
+        <parent>MC_CORE_TARGET</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+      </childTargets>
+    </deconfigure>
+    <gard>
+      <childTargets>
+        <parent>MC_CORE_TARGET</parent>
+        <childType>TARGET_TYPE_CORE</childType>
       </childTargets>
     </gard>
   </hwpError>

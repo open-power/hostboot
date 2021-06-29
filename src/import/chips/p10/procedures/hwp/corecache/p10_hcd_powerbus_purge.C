@@ -110,12 +110,13 @@ p10_hcd_powerbus_purge(
     }
     while( (--l_timeout) != 0 );
 
-    HCD_ASSERT((l_timeout != 0),
-               POWERBUS_PURGE_DONE_TIMEOUT,
-               set_POWERBUS_PURGE_DONE_POLL_TIMEOUT_HW_NS, HCD_POWERBUS_PURGE_DONE_POLL_TIMEOUT_HW_NS,
-               set_QME_SCSR, l_mmioData,
-               set_CORE_TARGET, i_target,
-               "ERROR: PowerBus Purge Done Timeout");
+    HCD_ASSERT4((l_timeout != 0),
+                POWERBUS_PURGE_DONE_TIMEOUT,
+                set_POWERBUS_PURGE_DONE_POLL_TIMEOUT_HW_NS, HCD_POWERBUS_PURGE_DONE_POLL_TIMEOUT_HW_NS,
+                set_QME_SCSR, l_mmioData,
+                set_MC_CORE_TARGET, i_target,
+                set_CORE_SELECT, i_target.getCoreSelect(),
+                "ERROR: PowerBus Purge Done Timeout");
 
     // Note: Do not drop Powerbus Purge until L3 becomes available again.
 

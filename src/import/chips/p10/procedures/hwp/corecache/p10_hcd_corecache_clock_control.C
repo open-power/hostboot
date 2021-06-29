@@ -124,20 +124,20 @@ p10_hcd_corecache_clock_control(
     fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST >
     l_target = l_chip.getMulticast<fapi2::MULTICAST_AND>(fapi2::MCGROUP_GOOD_EQ,
                static_cast<fapi2::MulticastCoreSelect>(i_regions));
-    HCD_ASSERT((l_timeout != 0),
-               CORECACHE_CLK_CTRL_TIMEOUT,
-               set_CLK_COMMAND, i_command,
-               set_CPLT_STAT0, l_scomData,
-               set_CORE_TARGET, l_target,
-               "ERROR: Core/Cache Clock Control Timeout");
+    HCD_ASSERT3((l_timeout != 0),
+                CORECACHE_CLK_CTRL_TIMEOUT_CORE,
+                set_CLK_COMMAND, i_command, // will not show up in QME errorlog
+                set_CPLT_STAT0, l_scomData,
+                set_MC_CORE_TARGET, l_target,
+                "ERROR: Core/Cache Clock Control Timeout");
 #else
     FAPI_ASSERT((l_timeout != 0),
-                fapi2::CORECACHE_CLK_CTRL_TIMEOUT()
+                fapi2::CORECACHE_CLK_CTRL_TIMEOUT_EQ()
                 .set_CLK_CTRL_POLL_TIMEOUT_HW_NS(HCD_CORECACHE_CLK_CTRL_POLL_TIMEOUT_HW_NS)
                 .set_CLK_COMMAND(i_command)
                 .set_CPLT_STAT0(l_scomData)
                 .set_CLK_REGIONS(i_regions)
-                .set_QUAD_TARGET(i_target),
+                .set_MC_QUAD_TARGET(i_target),
                 "ERROR: Core/Cache Clock Control Timeout");
 #endif
 
@@ -176,7 +176,7 @@ p10_hcd_corecache_clock_control(
                  .set_CLK_STAT_SL(l_clk_stat)
                  .set_CLK_COMMAND(i_command)
                  .set_CLK_REGIONS(i_regions)
-                 .set_QUAD_TARGET(i_target),
+                 .set_MC_QUAD_TARGET(i_target),
                  "Core/Cache Clock Control Failed in SL thold");
 
     FAPI_DBG("Check CLOCK_STAT_NSL[bit OFF for clock Started]");
@@ -196,7 +196,7 @@ p10_hcd_corecache_clock_control(
                  .set_CLK_STAT_NSL(l_clk_stat)
                  .set_CLK_COMMAND(i_command)
                  .set_CLK_REGIONS(i_regions)
-                 .set_QUAD_TARGET(i_target),
+                 .set_MC_QUAD_TARGET(i_target),
                  "Core/Cache Clock Control Failed in NSL thold");
 
     FAPI_DBG("Check CLOCK_STAT_ARY[bit OFF for clock Started]");
@@ -214,8 +214,9 @@ p10_hcd_corecache_clock_control(
     FAPI_ASSERT( ( ( l_clk_stat & i_regions ) == l_clk_stat_expected ),
                  fapi2::CORECACHE_CLK_CTRL_ARY_FAILED()
                  .set_CLK_STAT_ARY(l_clk_stat)
+                 .set_CLK_COMMAND(i_command)
                  .set_CLK_REGIONS(i_regions)
-                 .set_QUAD_TARGET(i_target),
+                 .set_MC_QUAD_TARGET(i_target),
                  "Core/Cache Clock Control Failed in ARY thold");
 #endif
 
