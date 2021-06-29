@@ -249,6 +249,8 @@ namespace PLDM
      *
      * @param[in,out] io_string_table  See brief at the top of this file.
      * @param[in,out] io_attr_table    See brief at the top of this file.
+     *
+     * @return nullptr on success; non-nullptr on error.
      */
     errlHndl_t latchBiosAttrs(std::vector<uint8_t>& io_string_table,
                               std::vector<uint8_t>& io_attr_table);

@@ -57,14 +57,14 @@ namespace PLDM {
 // Attributes
 const char PLDM_BIOS_HB_HYP_SWITCH_STRING[] = "hb_hyp_switch";
 const char PLDM_BIOS_HB_DEBUG_CONSOLE_STRING[] = "hb_debug_console";
-const char PLDM_BIOS_HB_HUGE_PAGE_COUNT_STRING[] = "hb_number_huge_pages";
-const char PLDM_BIOS_HB_HUGE_PAGE_SIZE_STRING[] = "hb_huge_page_size";
-const char PLDM_BIOS_HB_LMB_SIZE_STRING[] = "hb_memory_region_size";
-const char PLDM_BIOS_HB_MFG_FLAGS_STRING[] = "hb_mfg_flags";
-const char PLDM_BIOS_HB_FIELD_CORE_OVERRIDE_STRING[] = "hb_field_core_override";
+const char PLDM_BIOS_HB_HUGE_PAGE_COUNT_STRING[] = "hb_number_huge_pages_current";
+const char PLDM_BIOS_HB_HUGE_PAGE_SIZE_STRING[] = "hb_huge_page_size_current";
+const char PLDM_BIOS_HB_LMB_SIZE_STRING[] = "hb_memory_region_size_current";
+const char PLDM_BIOS_HB_MFG_FLAGS_STRING[] = "hb_mfg_flags_current";
+const char PLDM_BIOS_HB_FIELD_CORE_OVERRIDE_STRING[] = "hb_field_core_override_current";
 const char PLDM_BIOS_HB_USB_SECURITY_STRING[] = "hb_usb_security";
-const char PLDM_BIOS_HB_POWER_LIMIT_ENABLE_STRING[] = "hb_power_limit_enable";
-const char PLDM_BIOS_HB_POWER_LIMIT_IN_WATTS_STRING[] = "hb_power_limit_in_watts";
+const char PLDM_BIOS_HB_POWER_LIMIT_ENABLE_STRING[] = "hb_power_limit_enable_current";
+const char PLDM_BIOS_HB_POWER_LIMIT_IN_WATTS_STRING[] = "hb_power_limit_in_watts_current";
 const char PLDM_BIOS_HB_SEC_VER_LOCKIN_SUPPORTED_STRING[] = "hb_secure_ver_lockin_enabled";
 
 const char PLDM_BIOS_PVM_FW_BOOT_SIDE_STRING[] = "pvm_fw_boot_side";
@@ -1580,7 +1580,8 @@ errlHndl_t latchBiosAttrs(std::vector<uint8_t>& io_string_table,
 
                 if (attr_errl)
                 {
-                    PLDM_ERR("Cannot set current value for attribute %s", current_attr_name.data());
+                    PLDM_ERR("Cannot set current value for attribute %s (size %d)",
+                             current_attr_name.data(), pending_attr_value.size());
                     // We want these logs to be visible, but not halt the IPL.
                     attr_errl->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
                     errlCommit(attr_errl, PLDM_COMP_ID);
