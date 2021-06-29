@@ -176,6 +176,7 @@ void AttrOverrideSync::monitorForFspMessages()
         // Check the message in case it got deleted from the time we received it
         if(!l_pMsg)
         {
+            FAPI_INF("monitorForFspMessages: Bad message (nullptr) was received from FSP. Dropping the message and continuing");
             continue;
         }
 
