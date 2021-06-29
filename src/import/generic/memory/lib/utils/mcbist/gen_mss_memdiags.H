@@ -1177,6 +1177,57 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Polls MCBIST for completion after an async test
+/// @tparam MC the mc type of the T
+/// @tparam T fapi2::TargetType of the MC engine
+/// @tparam TT the mcbistTraits associated with T
+/// @param[in] i_target MC
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+fapi2::ReturnCode mss_async_polling_loop(const fapi2::Target<T>& i_target )
+{
+    using ET = mss::mcbistMCTraits<MC>;
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+
+    // A small vector of addresses to poll during the polling loop
+    const std::vector<mss::poll_probe<T>> l_probes =
+    {
+        {i_target, "mcbist current address", TT::LAST_ADDR_REG},
+    };
+
+    // Poll for completion.
+    fapi2::buffer<uint64_t> l_status;
+    bool l_poll_results = false;
+
+    // We'll fill in the initial delay below
+    mss::poll_parameters l_poll_parameters(0, 200, 100 * mss::DELAY_1MS, 200, 10000);
+    uint64_t l_memory_size = 0;
+
+    FAPI_TRY( mss::eff_memory_size<MC>(i_target, l_memory_size) );
+    l_poll_parameters.iv_initial_delay = mss::calculate_initial_delay<MC>(i_target,
+                                         (l_memory_size * mss::BYTES_PER_GB), l_rc);
+    FAPI_TRY(l_rc, "%s time to clock or clock to time conversion failed", mss::c_str(i_target));
+
+    l_poll_results = mss::poll(i_target, TT::FIRQ_REG, l_poll_parameters,
+                               [&l_status](const size_t poll_remaining,
+                                           const fapi2::buffer<uint64_t>& stat_reg) -> bool
+    {
+        FAPI_DBG("mcbist firq 0x%llx, remaining: %d", stat_reg, poll_remaining);
+        l_status = stat_reg;
+        return l_status.getBit<TT::MCB_PROGRAM_COMPLETE>();
+    },
+    l_probes);
+
+    FAPI_ASSERT( l_poll_results == true,
+                 ET::memdiags_sf_init_failed_init().set_MC_TARGET(i_target),
+                 "sf init for scrub/memdiags timedout %s", mss::c_str(i_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Begin initialize memory
 /// @tparam MC the mc type of the T
 /// @tparam T fapi2::TargetType of the MC engine
@@ -1187,8 +1238,6 @@ fapi_try_exit:
 template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 fapi2::ReturnCode mss_initialize_memory(const fapi2::Target<T>& i_target )
 {
-    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
-    using ET = mss::mcbistMCTraits<MC>;
     FAPI_INF("Start mss_initialize_memory for %s", mss::c_str(i_target));
 
     // If there are no DIMM we don't need to bother. In fact, we can't as we didn't setup
@@ -1201,23 +1250,6 @@ fapi2::ReturnCode mss_initialize_memory(const fapi2::Target<T>& i_target )
 
     // If we're running in the simulator, we want to only touch the addresses which training touched
     uint8_t l_sim = 0;
-    bool l_poll_results = false;
-    fapi2::buffer<uint64_t> l_status;
-
-    // A small vector of addresses to poll during the polling loop
-    const std::vector<mss::poll_probe<T>> l_probes =
-    {
-        {i_target, "mcbist current address", TT::LAST_ADDR_REG},
-    };
-
-    // We'll fill in the initial delay below
-    mss::poll_parameters l_poll_parameters(0, 200, 100 * mss::DELAY_1MS, 200, 10000);
-    uint64_t l_memory_size = 0;
-
-    FAPI_TRY( mss::eff_memory_size<MC>(i_target, l_memory_size) );
-    l_poll_parameters.iv_initial_delay = mss::calculate_initial_delay<MC>(i_target,
-                                         (l_memory_size * mss::BYTES_PER_GB), l_rc);
-    FAPI_TRY(l_rc, "%s time to clock or clock to time conversion failed", mss::c_str(i_target));
 
     FAPI_TRY( mss::attr::get_is_simulation( l_sim) );
 
@@ -1243,20 +1275,8 @@ fapi2::ReturnCode mss_initialize_memory(const fapi2::Target<T>& i_target )
     // conditions when we learn more about what we want to find in the lab
     FAPI_TRY( mss::memdiags::sf_init<MC>(i_target, mss::mcbist::PATTERN_0) );
 
-    // Poll for completion.
-    l_poll_results = mss::poll(i_target, TT::FIRQ_REG, l_poll_parameters,
-                               [&l_status](const size_t poll_remaining,
-                                           const fapi2::buffer<uint64_t>& stat_reg) -> bool
-    {
-        FAPI_DBG("mcbist firq 0x%llx, remaining: %d", stat_reg, poll_remaining);
-        l_status = stat_reg;
-        return l_status.getBit<TT::MCB_PROGRAM_COMPLETE>() == true;
-    },
-    l_probes);
-
-    FAPI_ASSERT( l_poll_results == true,
-                 ET::memdiags_sf_init_failed_init().set_MC_TARGET(i_target),
-                 "sf init for scrub/memdiags timedout %s", mss::c_str(i_target) );
+    // Polls for completion
+    FAPI_TRY(mss_async_polling_loop(i_target));
 
     // Unmask firs after memdiags and turn off FIFO mode
     FAPI_TRY ( mss::unmask::after_memdiags<MC>( i_target ) );
