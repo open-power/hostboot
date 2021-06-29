@@ -1676,12 +1676,16 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
                     // mark Bus[out-group] peer proc
                     if (!(l_inGroupBusPeerProcDeconfigured))
                     {
-                        HWAS_INF("deconfigureAssocProc marked "
-                             "remote proc: %.8X for deconfiguration "
-                             "due to functional Bus[in-group] peer proc.",
-                             (*l_procInfoIter).iv_pOutGroupProcInfos[i]->procHUID);
-                        (*l_procInfoIter).iv_pOutGroupProcInfos[i]->
-                                          iv_deconfigured = true;
+                        // Don't deconfigure master proc
+                        if((*l_procInfoIter).iv_pOutGroupProcInfos[i]->iv_masterCapable == false)
+                        {
+                            HWAS_INF("deconfigureAssocProc marked "
+                                 "remote proc: %.8X for deconfiguration "
+                                "due to functional Bus[in-group] peer proc.",
+                                (*l_procInfoIter).iv_pOutGroupProcInfos[i]->procHUID);
+                            (*l_procInfoIter).iv_pOutGroupProcInfos[i]->
+                                              iv_deconfigured = true;
+                        }
                     }
                 }
             }
