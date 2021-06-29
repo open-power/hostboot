@@ -1422,8 +1422,8 @@
           BOOT_CONFIG0 command.
       </description>
       <valueType>uint8</valueType>
-      <enum>NONE = 0</enum>
-      <default>0x20</default>
+      <enum>DEFAULT = 0</enum>
+      <default>0x00</default>
       <platInit/>
       <overrideOnly/>
       <mssAccessorName>exp_omi_cdr_bw_override</mssAccessorName>
