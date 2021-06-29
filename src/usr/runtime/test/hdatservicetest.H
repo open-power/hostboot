@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -111,20 +111,10 @@ class HdatServiceTest: public CxxTest::TestSuite
                 TARGETING::ATTR_MODEL_type model =
                   procmaster->getAttr<TARGETING::ATTR_MODEL>();
 
-                if( (model == TARGETING::MODEL_MURANO)
-                    && !((pvr & 0x00FF0000) == 0x004B0000) )
+                if( (model == TARGETING::MODEL_POWER10)
+                    && !((pvr & 0x00FF0000) == 0x00800000) )
                 {
-                    TS_FAIL("testHdat> PVR model != 4B for Murano");
-                }
-                else if( (model == TARGETING::MODEL_VENICE)
-                         && !((pvr & 0x00FF0000) == 0x004D0000) )
-                {
-                    TS_FAIL("testHdat> PVR model != 4D for Venice");
-                }
-                else if( (model == TARGETING::MODEL_NAPLES)
-                         && !((pvr & 0x00FF0000) == 0x004C0000) )
-                {
-                    TS_FAIL("testHdat> PVR model != 4C for Naples");
+                    TS_FAIL("testHdat> PVR model %.8X != 80 for P10",pvr);
                 }
             }
         }
@@ -141,81 +131,6 @@ class HdatServiceTest: public CxxTest::TestSuite
         }
 
 
-
-        // Verify the HostServices Node Data
-        uint64_t node_data_addr = 0;
-        size_t node_data_size = 0;
-        errhdl = RUNTIME::get_host_data_section(
-                                    RUNTIME::HSVC_NODE_DATA,
-                                    0,
-                                    node_data_addr,
-                                    node_data_size );
-        if( errhdl
-            && ((payload_kind == TARGETING::PAYLOAD_KIND_PHYP) 
-                || (payload_kind == TARGETING::PAYLOAD_KIND_NONE)) )
-        {
-            TS_FAIL("testHdat> Error trying to locate HSVC_NODE_DATA");
-            errlCommit(errhdl,RUNTIME_COMP_ID);
-        }
-        else if( !errhdl
-                 && (payload_kind != TARGETING::PAYLOAD_KIND_PHYP) 
-                 && (payload_kind != TARGETING::PAYLOAD_KIND_NONE) )
-        {
-            TS_FAIL("testHdat> Did not get expected error trying to locate HSVC_NODE_DATA for non-PHYP/Standalone Payload");
-        }
-        else if( (node_data_addr == 0)
-                 && (payload_kind != TARGETING::PAYLOAD_KIND_PHYP) 
-                 && (payload_kind != TARGETING::PAYLOAD_KIND_NONE) )
-        {
-            TS_FAIL("testHdat> NULL or zero size returned for get_host_data_section(HSVC_NODE_DATA)");
-        }
-        else if( (node_data_size == 0)
-                 || (node_data_size == RUNTIME::DATA_SIZE_UNKNOWN) )
-        {
-            TS_FAIL("testHdat> Size of HSVC_NODE_DATA is unexpected");
-        }
-        if( errhdl )
-        {
-            delete errhdl;
-        }
-
-
-        // Verify the HostServices System Data
-        uint64_t sys_data_addr = 0;
-        size_t sys_data_size = 0;
-        errhdl = RUNTIME::get_host_data_section(
-                                    RUNTIME::HSVC_SYSTEM_DATA,
-                                    0,
-                                    sys_data_addr,
-                                    sys_data_size );
-        if( errhdl
-            && ((payload_kind == TARGETING::PAYLOAD_KIND_PHYP) 
-                || (payload_kind == TARGETING::PAYLOAD_KIND_NONE)) )
-        {
-            TS_FAIL("testHdat> Error trying to locate HSVC_SYSTEM_DATA");
-            errlCommit(errhdl,RUNTIME_COMP_ID);
-        }
-        else if( !errhdl
-                 && (payload_kind != TARGETING::PAYLOAD_KIND_PHYP) 
-                 && (payload_kind != TARGETING::PAYLOAD_KIND_NONE) )
-        {
-            TS_FAIL("testHdat> Did not get expected error trying to locate HSVC_SYSTEM_DATA for non-PHYP/Standalone Payload");
-        }
-        else if( ((sys_data_addr == 0) || (sys_data_size == 0))
-                 && (payload_kind != TARGETING::PAYLOAD_KIND_PHYP) 
-                 && (payload_kind != TARGETING::PAYLOAD_KIND_NONE) )
-        {
-            TS_FAIL("testHdat> NULL or zero size returned for get_host_data_section(HSVC_SYSTEM_DATA)");
-        }
-        else if( (sys_data_size == 0)
-                 || (sys_data_size == RUNTIME::DATA_SIZE_UNKNOWN) )
-        {
-            TS_FAIL("testHdat> Size of HSVC_SYSTEM_DATA is unexpected");
-        }
-        if( errhdl )
-        {
-            delete errhdl;
-        }
 
         // Verify the Dump Tables
         uint64_t dump_addr = 0;

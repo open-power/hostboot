@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,6 +34,11 @@
 #include <vmmconst.h>
 #include <vfs/vfs.H>
 
+// Hardcode address limits to match our known setup in standalone simics
+const uint64_t HB_BASE_ADDR = 4*GIGABYTE - 512*MEGABYTE;
+const uint64_t HB_RES_MEM_LOWER_LIMIT = HB_BASE_ADDR + RESERVED_MEM_START_OFFSET;
+const uint64_t HB_RES_MEM_UPPER_LIMIT = HB_BASE_ADDR + RESERVED_MEM_END_OFFSET;
+
 extern trace_desc_t* g_trac_runtime;
 
 class CheckHbResMemLimitTest : public CxxTest::TestSuite
@@ -44,7 +49,7 @@ public:
     {
         TRACFCOMP(g_trac_runtime, "testAddressWithinHbResMemRange running");
         errlHndl_t l_errl = nullptr;
-        l_errl = RUNTIME::checkHbResMemLimit(RUNTIME::HB_RES_MEM_LOWER_LIMIT, //i_addr
+        l_errl = RUNTIME::checkHbResMemLimit(HB_RES_MEM_LOWER_LIMIT, //i_addr
                                              1); //i_size
         if(l_errl)
         {
@@ -64,7 +69,7 @@ public:
     {
         TRACFCOMP(g_trac_runtime, "testAddressAboveHbResMemRange running");
         errlHndl_t l_errl = nullptr;
-        l_errl = RUNTIME::checkHbResMemLimit(RUNTIME::HB_RES_MEM_UPPER_LIMIT, //i_addr
+        l_errl = RUNTIME::checkHbResMemLimit(HB_RES_MEM_UPPER_LIMIT, //i_addr
                                              10); //i_size
         do{
 
@@ -111,7 +116,7 @@ public:
         TRACFCOMP(g_trac_runtime, "testAddressBelowHbResMemRange running");
 
         errlHndl_t l_errl = nullptr;
-        l_errl = RUNTIME::checkHbResMemLimit(RUNTIME::HB_RES_MEM_LOWER_LIMIT
+        l_errl = RUNTIME::checkHbResMemLimit(HB_RES_MEM_LOWER_LIMIT
                                              - 11, //i_addr
                                                10); //i_size
         do{

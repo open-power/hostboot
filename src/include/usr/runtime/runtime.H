@@ -212,8 +212,8 @@ errlHndl_t sendSBESystemConfig();
 enum SectionId
 {
     FIRST_SECTION,        //< Placeholder for arrays
-    HSVC_NODE_DATA = FIRST_SECTION, //< HostServices Node Attributes
-    HSVC_SYSTEM_DATA,     //< HostServices System Attributes
+    DEPRECATED_1 = FIRST_SECTION, //< deprecated
+    DEPRECATED_2,         //< deprecated
     IPLPARMS_SYSTEM,      //< IPL Parms
     MS_DUMP_SRC_TBL,      //< MDST: Memory Dump Source Table
     MS_DUMP_DST_TBL,      //< MDDT: Memory Dump Destination Table

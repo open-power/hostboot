@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2020
+# Contributors Listed Below - COPYRIGHT 2012,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -26,7 +26,6 @@ ROOTPATH = ../../../..
 MODULE = testruntime
 TESTS += testpreverifiedlidmgr.H
 TESTS += test_checkHbResMemLimit.H
-#@TODO RTC 132750
-#TESTS += hdatservicetest.H
+TESTS += hdatservicetest.H
 
 include ${ROOTPATH}/config.mk

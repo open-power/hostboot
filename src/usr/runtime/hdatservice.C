@@ -44,8 +44,7 @@
 
 //#define REAL_HDAT_TEST
 
-trace_desc_t *g_trac_runtime = NULL;
-TRAC_INIT(&g_trac_runtime, RUNTIME_COMP_NAME, KILOBYTE);
+extern trace_desc_t* g_trac_runtime;
 
 #define TRACUCOMP TRACDCOMP
 
@@ -1486,27 +1485,6 @@ void hdatService::addFFDC( SectionId i_section,
         }
         return;
     }
-    else if( RUNTIME::HSVC_SYSTEM_DATA == i_section ||
-             RUNTIME::HSVC_NODE_DATA == i_section )
-    {
-        // grab the SPIRA data
-        if( iv_spiraL) { addFFDC( SPIRA_L, io_errlog ); }
-        if( iv_spiraH) { addFFDC( SPIRA_H, io_errlog ); }
-        if( iv_spiraS) { addFFDC( SPIRA_S, io_errlog ); }
-
-        // grab the Tuple it is part of
-        hdat5Tuple_t* tuple = nullptr;
-        errlog = getAndCheckTuple(i_section, tuple);
-        if( errlog )
-        {
-            delete errlog;
-            errlog = nullptr;
-        }
-        else if( tuple )
-        {
-            UdTuple(tuple).addToLog(io_errlog);
-        }
-    }
 }
 
 /*
@@ -1651,11 +1629,6 @@ errlHndl_t hdatService::getAndCheckTuple(const SectionId i_section,
         case RUNTIME::HW_DUMP_AREA_TBL:
             l_spiraH = SPIRAH_HW_DUMP_TBL;
             l_spiraL = SPIRAL_INVALID;
-            break;
-        case RUNTIME::HSVC_SYSTEM_DATA:
-        case RUNTIME::HSVC_NODE_DATA:
-            l_spiraS = SPIRAS_HSVC_DATA;
-            l_spiraL = SPIRAL_HSVC_DATA;
             break;
         case RUNTIME::HRMOR_STASH:
             l_spiraS = SPIRAS_MDT;

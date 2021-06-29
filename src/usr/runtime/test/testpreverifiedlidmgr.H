@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -84,6 +84,7 @@ class PreVerifiedLidMgrTest : public CxxTest::TestSuite
         // Handle all Pre verified PNOR sections
         for (const auto & secIdPair : RUNTIME::preVerifiedPnorSections)
         {
+            TRACFCOMP( g_trac_runtime, "section=%d", secIdPair.first  );
 
             // VERSION is not in standalone so ignore it here.
             if (secIdPair.first == PNOR::VERSION)
@@ -115,9 +116,13 @@ class PreVerifiedLidMgrTest : public CxxTest::TestSuite
         size_t l_expectedLids = (2 * l_numSections);
         if (SECUREBOOT::enabled())
         {
-            // RINGOVD not permitted in secure mode. Meaning the Header and
-            // Content lid will be missing.
-            l_expectedLids -= 2;
+            // RINGOVD not permitted in secure mode, unless we are allowing
+            // attribute overrides.. Meaning the Header and Content lid will
+            // be missing.
+            if (!SECUREBOOT::allowAttrOverrides())
+            {
+                l_expectedLids -= 2;
+            }
 
             // VERSION is only an OpenPOWER partition so we need to adjust for
             // it here since it doesn't exist for standalone.

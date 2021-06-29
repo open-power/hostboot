@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,9 +32,6 @@
 
 namespace RUNTIME
 {
-
-extern const uint64_t HB_RES_MEM_UPPER_LIMIT;
-extern const uint64_t HB_RES_MEM_LOWER_LIMIT;
 
 /**
  *  @brief Get the next Reserved HB memory range and set all member variables

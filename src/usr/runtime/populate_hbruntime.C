@@ -87,6 +87,10 @@
 #include <isteps/istep_reasoncodes.H>
 #include <dump/dumpif.H>
 #include <hdatpcrd.H>
+
+trace_desc_t *g_trac_runtime = nullptr;
+TRAC_INIT(&g_trac_runtime, RUNTIME_COMP_NAME, KILOBYTE);
+
 namespace RUNTIME
 {
 
@@ -101,8 +105,6 @@ const uint8_t HDAT_INVALID_NODE = 0xFF;
 
 
 
-trace_desc_t *g_trac_runtime = nullptr;
-TRAC_INIT(&g_trac_runtime, RUNTIME_COMP_NAME, KILOBYTE);
 
 //
 uint16_t calculateNodeInstance(const uint8_t i_node,
