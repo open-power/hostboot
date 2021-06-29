@@ -267,7 +267,10 @@ fapi2::ReturnCode pgpe_start(
             {
                 FAPI_ASSERT_NOEXIT(false,
                                    fapi2::PGPE_INIT_PSTATE_AUTOSTART_TIMEOUT()
-                                   .set_CHIP(i_target),
+                                   .set_CHIP(i_target)
+                                   .set_XSR_IAR(l_xsr_iar)
+                                   .set_TIMEOUT_COUNTER(l_timeout_counter)
+                                   .set_OCCFLAG2(l_occ_flag2),
                                    "Pstate GPE Protocol Auto Start timeout");
             }
         }

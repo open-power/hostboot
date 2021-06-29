@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -29,6 +29,7 @@
     <description>Unknown mode passed to p10_pm_occ_firinit.
     </description>
     <ffdc>BADMODE</ffdc>
+    <ffdc>CURPROC</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -84,14 +84,26 @@
     used in lab test modes.
     </description>
     <ffdc>CHIP</ffdc>
+    <ffdc>XSR_IAR</ffdc>
+    <ffdc>TIMEOUT_COUNTER</ffdc>
+    <ffdc>OCCFLAG2</ffdc>
     <collectRegisterFfdc>
       <id>PGPE_FFDC_REGISTERS</id>
+      <target>CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
+    <collectRegisterFfdc>
+      <id>PGPE_STATE_REGISTERS</id>
       <target>CHIP</target>
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>CHIP</target>
+      <priority>LOW</priority>
     </callout>
   </hwpError>
   <!-- ******************************************************************** -->

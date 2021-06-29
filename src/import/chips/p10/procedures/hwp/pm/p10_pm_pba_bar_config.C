@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -145,7 +145,8 @@ fapi2::ReturnCode p10_pm_pba_bar_config (
                 .set_BAR_ADDR(i_pba_bar_addr)
                 .set_BAR_SIZE(i_pba_bar_size)
                 .set_CMD_SCOPE(i_pba_cmd_scope)
-                .set_EXP_BAR_ADDR_RANGECHECK_HIGH(BAR_ADDR_RANGECHECK_HIGH),
+                .set_EXP_BAR_ADDR_RANGECHECK_HIGH(BAR_ADDR_RANGECHECK_HIGH)
+                .set_CURPROC(i_target),
                 "ERROR: Address out of Range : i_pba_bar_addr = 0x%016llX & "
                 "Upper permissible limit = 0x%016llX", i_pba_bar_addr,
                 BAR_ADDR_RANGECHECK_HIGH);
@@ -157,7 +158,8 @@ fapi2::ReturnCode p10_pm_pba_bar_config (
                 .set_BAR_ADDR(i_pba_bar_addr)
                 .set_BAR_SIZE(i_pba_bar_size)
                 .set_CMD_SCOPE(i_pba_cmd_scope)
-                .set_EXP_BAR_ADDR_RANGECHECK_LOW(BAR_ADDR_RANGECHECK_LOW),
+                .set_EXP_BAR_ADDR_RANGECHECK_LOW(BAR_ADDR_RANGECHECK_LOW)
+                .set_CURPROC(i_target),
                 "ERROR: Address must be on a 1MB boundary : i_pba_bar_addr="
                 "0x%016llX & Alignment limit=0x%016llX", i_pba_bar_addr,
                 BAR_ADDR_RANGECHECK_LOW);
@@ -168,7 +170,8 @@ fapi2::ReturnCode p10_pm_pba_bar_config (
                 fapi2::PM_PBA_BAR_SIZE_INVALID()
                 .set_INDEX(i_index)
                 .set_BAR_ADDR(i_pba_bar_addr)
-                .set_BAR_SIZE(i_pba_bar_size),
+                .set_BAR_SIZE(i_pba_bar_size)
+                .set_CURPROC(i_target),
                 "ERROR: Bar size must be >=1MB for PBABAR 0x%llX, but "
                 "i_pba_bar_size=0x%016llx", i_index, i_pba_bar_size);
 

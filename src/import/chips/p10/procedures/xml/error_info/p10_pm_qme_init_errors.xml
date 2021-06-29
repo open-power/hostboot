@@ -38,6 +38,7 @@
     <description>Unknown mode passed to p10_pm_qme_init.
     </description>
     <ffdc>BADMODE</ffdc>
+    <ffdc>CURPROC</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -56,6 +57,14 @@
       <target>CHIP</target>
       <priority>HIGH</priority>
     </callout>
+    <callout>
+       <!-- Call out the processor VRM -->
+       <hw>
+         <hwid>SPIVID_SLAVE_PART</hwid>
+          <refTarget>CHIP</refTarget>
+        </hw>
+        <priority>MEDIUM</priority>
+   </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -67,6 +76,7 @@
     <ffdc>PPE_STATE_MODE</ffdc>
     <ffdc>OCC_FLAG_REG_VAL</ffdc>
     <ffdc>XSR_REG_VAL</ffdc>
+    <ffdc>IR_REG_VAL</ffdc>
 
     <!-- <collectFfdc>p10_collect_ppe_state, CHIP, PPE_STATE_MODE, PPE_BASE_ADDRESS_LIST</collectFfdc>
 
@@ -199,6 +209,15 @@
      hcode could not be initiated.
     </description>
     <ffdc>CHIP</ffdc>
+    <ffdc>QME_BCEBAR0</ffdc>
+    <ffdc>QME_BCEBAR1</ffdc>
+    <ffdc>QME_BCECSR</ffdc>
+    <ffdc>QME_HCODE_BLOCK_COUNT</ffdc>
+    <ffdc>QME_RUNNING_COUNT</ffdc>
+    <ffdc>TOPOSCOMS0</ffdc>
+    <ffdc>TOPOSCOMS1</ffdc>
+    <ffdc>TOPOSCOMS2</ffdc>
+    <ffdc>TOPOSCOMS3</ffdc>
     <callout>
       <target>CHIP</target>
       <priority>HIGH</priority>
@@ -211,6 +230,9 @@
     of QME's hcode could not be initiated.
     </description>
     <ffdc>CHIP</ffdc>
+    <ffdc>QME_BCEBAR0</ffdc>
+    <ffdc>QME_BCEBAR1</ffdc>
+    <ffdc>QME_BCECSR</ffdc>
     <callout>
       <target>CHIP</target>
       <priority>HIGH</priority>
@@ -223,6 +245,15 @@
     within a specified amount of time.
     </description>
     <ffdc>CHIP</ffdc>
+    <ffdc>QME_BCEBAR0</ffdc>
+    <ffdc>QME_BCEBAR1</ffdc>
+    <ffdc>QME_BCECSR</ffdc>
+    <ffdc>QME_HCODE_BLOCK_COUNT</ffdc>
+    <ffdc>QME_RUNNING_COUNT</ffdc>
+    <ffdc>TOPOSCOMS0</ffdc>
+    <ffdc>TOPOSCOMS1</ffdc>
+    <ffdc>TOPOSCOMS2</ffdc>
+    <ffdc>TOPOSCOMS3</ffdc>
     <callout>
       <target>CHIP</target>
       <priority>LOW</priority>

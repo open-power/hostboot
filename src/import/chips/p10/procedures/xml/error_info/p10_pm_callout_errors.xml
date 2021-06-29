@@ -28,6 +28,7 @@
     <rc>RC_BAD_HOMER_PTR</rc>
     <description>Pointer to HOMER base is bad</description>
     <ffdc>HOMER_PTR</ffdc>
+    <ffdc>CHIP</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -39,6 +40,7 @@
     <description>PM Complex has been reset for a reason other than malfunction</description>
     <ffdc>OCC_FLAG2_REG</ffdc>
     <ffdc>CHIP</ffdc>
+    <!-- This RC should never be committed as a visible log -->
   </hwpError>
   <!-- ******************************************************************** -->
  <!-- The platform is expected to add a callout to all of the CORE targets specified by the -->

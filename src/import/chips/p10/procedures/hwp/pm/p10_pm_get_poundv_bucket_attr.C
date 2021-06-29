@@ -130,6 +130,7 @@ fapi2::ReturnCode p10_pm_get_poundv_bucket_attr(
     FAPI_ASSERT( (l_bucketId <= NUM_BUCKETS) && (l_bucketId != 0),
                  fapi2::INVALID_BUCKET_ID()
                  .set_CHIP_TARGET(i_target)
+                 .set_NUM_BUCKETS(NUM_BUCKETS)
                  .set_BUCKET_ID(l_bucketId),
                  "Invalid Bucket Id = %d",
                  l_bucketId );

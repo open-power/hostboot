@@ -369,6 +369,7 @@ fapi2::ReturnCode pm_pss_halt(
             FAPI_ASSERT(!l_data64.getBit<TP_TPCHIP_OCC_OCI_OCB_ADC_STAT_HWCTRL_FSM_ERR>(),
                         fapi2::PM_PSS_ADC_ERROR()
                         .set_CHIP(i_target)
+                        .set_TP_TPCHIP_OCC_OCI_OCB_ADC_STAT(l_data64)
                         .set_POLLCOUNT(l_pollcount),
                         "Error while sending the frames from ADC to APSS device");
 
@@ -412,6 +413,7 @@ fapi2::ReturnCode pm_pss_halt(
             FAPI_ASSERT(!l_data64.getBit<TP_TPCHIP_OCC_OCI_OCB_P2S_STAT_P2S_FSM_ERR>(),
                         fapi2::PM_PSS_P2S_ERROR()
                         .set_CHIP(i_target)
+                        .set_TP_TPCHIP_OCC_OCI_OCB_P2S_STAT(l_data64)
                         .set_POLLCOUNT(l_pollcount),
                         "Error while sending the frames from P2S to APSS device");
 
@@ -422,12 +424,14 @@ fapi2::ReturnCode pm_pss_halt(
         FAPI_ASSERT_NOEXIT(!l_data64.getBit<TP_TPCHIP_OCC_OCI_OCB_P2S_STAT_P2S_WRITE_WHILE_BRIDGE_BUSY_ERR>(),
                            fapi2::PM_PSS_ADC_WRITE_WHILE_BUSY()
                            .set_CHIP(i_target)
+                           .set_TP_TPCHIP_OCC_OCI_OCB_P2S_STAT(l_data64)
                            .set_POLLCOUNT(l_pollcount),
                            "SPIP2S Write While Bridge Busy bit asserted. Will be cleared with coming reset");
 
         FAPI_ASSERT_NOEXIT(l_pollcount < l_max_polls,
                            fapi2::PM_PSS_ADC_TIMEOUT()
                            .set_CHIP(i_target)
+                           .set_TP_TPCHIP_OCC_OCI_OCB_P2S_STAT(l_data64)
                            .set_POLLCOUNT(l_pollcount)
                            .set_MAXPOLLS(l_max_polls)
                            .set_TIMEOUTUS(l_pss_timeout_us),

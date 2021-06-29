@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -118,7 +118,9 @@ fapi2::ReturnCode p10_pm_occ_gpe_init(
     else
     {
         FAPI_ASSERT(false,
-                    fapi2::PM_OCC_GPE_BAD_MODE().set_BADMODE(i_mode),
+                    fapi2::PM_OCC_GPE_BAD_MODE()
+                    .set_BADMODE(i_mode)
+                    .set_CURPROC(i_target),
                     "Unknown mode 0x%X passed to p10_pm_occ_gpe_init", i_mode);
     }
 

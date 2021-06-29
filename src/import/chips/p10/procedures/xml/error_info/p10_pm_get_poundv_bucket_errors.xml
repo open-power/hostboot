@@ -43,6 +43,13 @@
       <procedure>CODE</procedure>
       <priority>LOW</priority>
     </callout>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP_TARGET</target>
+    </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -67,48 +74,13 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_INVALID_MATCHING_FREQ_NUMBER</rc>
-    <description>
-       Found either zero or multiple buckets for the desired powerbus frequency
-    </description>
-    <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>MATCHES_FOUND</ffdc>
-    <ffdc>DESIRED_FREQPB</ffdc>
-    <ffdc>LRPREC</ffdc>
-    <ffdc>BUCKETA_FREQPB</ffdc>
-    <ffdc>BUCKETB_FREQPB</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-    <callout>
-      <hw>
-        <hwid>VPD_PART</hwid>
-        <refTarget>CHIP_TARGET</refTarget>
-      </hw>
-      <priority>LOW</priority>
-    </callout>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_INVALID_EQ_CHIP_POS</rc>
-    <description>
-       Encountered an invalid value for EQ chip position
-    </description>
-    <ffdc>EQ_POSITION</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
     <rc>RC_INVALID_BUCKET_ID</rc>
     <description>
        Encountered an invalid Bucket Id. Valid values are 1-6 inclusive.
     </description>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>BUCKET_ID</ffdc>
+    <ffdc>NUM_BUCKETS</ffdc>
     <callout>
       <hw>
         <hwid>VPD_PART</hwid>
@@ -116,6 +88,13 @@
       </hw>
       <priority>HIGH</priority>
     </callout>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP_TARGET</target>
+    </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
