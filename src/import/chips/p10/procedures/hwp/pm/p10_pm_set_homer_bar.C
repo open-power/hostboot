@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -183,7 +183,8 @@ fapi2::ReturnCode pm_qme_bar_config (
                 fapi2::PM_QME_ADDR_OUT_OF_RANGE()
                 .set_BAR_ADDR(i_qme_bar_addr)
                 .set_BAR_SIZE(i_qme_bar_size)
-                .set_EXP_BAR_ADDR_RANGECHECK_HIGH(BAR_ADDR_RANGECHECK_HIGH),
+                .set_EXP_BAR_ADDR_RANGECHECK_HIGH(BAR_ADDR_RANGECHECK_HIGH)
+                .set_CURPROC(i_target),
                 "ERROR: Address out of Range : i_qme_bar_addr = 0x%016llX & "
                 "Upper permissible limit = 0x%016llX", i_qme_bar_addr,
                 BAR_ADDR_RANGECHECK_HIGH);
@@ -193,7 +194,8 @@ fapi2::ReturnCode pm_qme_bar_config (
                 fapi2::PM_QME_ADDR_ALIGNMENT_ERROR()
                 .set_BAR_ADDR(i_qme_bar_addr)
                 .set_BAR_SIZE(i_qme_bar_size)
-                .set_EXP_BAR_ADDR_RANGECHECK_LOW(BAR_ADDR_RANGECHECK_LOW),
+                .set_EXP_BAR_ADDR_RANGECHECK_LOW(BAR_ADDR_RANGECHECK_LOW)
+                .set_CURPROC(i_target),
                 "ERROR: Address must be on a 1MB boundary : i_qme_bar_addr="
                 "0x%016llX & Alignment limit=0x%016llX", i_qme_bar_addr,
                 BAR_ADDR_RANGECHECK_LOW);
@@ -203,7 +205,8 @@ fapi2::ReturnCode pm_qme_bar_config (
     FAPI_ASSERT(!((i_qme_bar_size == 0) && (i_qme_bar_addr != 0)),
                 fapi2::PM_QME_BAR_SIZE_INVALID()
                 .set_BAR_ADDR(i_qme_bar_addr)
-                .set_BAR_SIZE(i_qme_bar_size),
+                .set_BAR_SIZE(i_qme_bar_size)
+                .set_CURPROC(i_target),
                 "ERROR: Bar size of 0 but non-zero i_qme_bar_size=0x%016llx",
                 i_qme_bar_size);
 
@@ -272,13 +275,16 @@ p10_pm_set_homer_bar(  const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targ
     // Check to make sure mem_bar is also 0 when mem_size is 0.
     FAPI_ASSERT(!((i_mem_size == 0) && (i_mem_bar != 0)),
                 fapi2::PM_SET_HOMER_BAR_SIZE_INVALID().set_MEM_BAR(i_mem_bar)
-                .set_MEM_SIZE(i_mem_size),
+                .set_MEM_SIZE(i_mem_size)
+                .set_CURPROC(i_target),
                 "ERROR:HOMER Size is 0 but BAR is non-zero:0x%16llx", i_mem_bar);
     // check that bar address passed in 4MB aligned(eg bits 44:63 are zero)
 
     region_masked_address = i_mem_bar & BAR_MASK_4MB_ALIGN;
     FAPI_ASSERT((region_masked_address == 0),
-                fapi2::PM_SET_HOMER_BAR_NOT_4MB_ALIGNED().set_MEM_BAR(i_mem_bar),
+                fapi2::PM_SET_HOMER_BAR_NOT_4MB_ALIGNED()
+                .set_MEM_BAR(i_mem_bar)
+                .set_CURPROC(i_target),
                 "ERROR: i_mem_bar:0x%16llx is not 4MB aligned ", i_mem_bar);
 
     FAPI_DBG("Calling pba_bar_config with BAR %x Addr: 0x%16llX  Size: 0x%16llX",

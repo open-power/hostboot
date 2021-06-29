@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -90,6 +90,7 @@
     <ffdc>POLLCOUNT</ffdc>
     <ffdc>POLLVALUE</ffdc>
     <ffdc>CHIP</ffdc>
+    <ffdc>TP_TPBR_PBA_PBAO_BCDE_STAT</ffdc>
     <collectRegisterFfdc>
       <id>PBA_FFDC_REGISTERS</id>
       <target>CHIP</target>
@@ -109,6 +110,7 @@
     <ffdc>POLLCOUNT</ffdc>
     <ffdc>POLLVALUE</ffdc>
     <ffdc>CHIP</ffdc>
+    <ffdc>TP_TPBR_PBA_PBAO_BCUE_STAT</ffdc>
     <collectRegisterFfdc>
       <id>PBA_FFDC_REGISTERS</id>
       <target>CHIP</target>

@@ -334,7 +334,8 @@ extern "C"
 
         FAPI_ASSERT( ( i_pHomerBase != NULL ),
                      fapi2::BAD_HOMER_PTR( )
-                     .set_HOMER_PTR( i_pHomerBase ),
+                     .set_HOMER_PTR( i_pHomerBase )
+                     .set_CHIP( i_procTgt ),
                      "Pointer To Homer Base is Bad" );
 
         //Ensure we got an empty vector. It is HWP which must fill it in.

@@ -174,7 +174,9 @@ fapi2::ReturnCode p10_pm_occ_firinit(
     }
     else
     {
-        FAPI_ASSERT(false, fapi2::PM_OCC_FIRINIT_BAD_MODE().set_BADMODE(i_mode),
+        FAPI_ASSERT(false, fapi2::PM_OCC_FIRINIT_BAD_MODE()
+                    .set_BADMODE(i_mode)
+                    .set_CURPROC(i_target),
                     "ERROR; Unknown mode passed to p10_pm_occ_firinit. Mode %x",
                     i_mode);
     }

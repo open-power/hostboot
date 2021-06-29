@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -581,20 +581,24 @@ fapi2::ReturnCode pba_bc_stop(
     // Assert, if BCDE did not stop
     if (!l_bcde_stop_complete)
     {
+        FAPI_TRY(fapi2::getScom(i_target, TP_TPBR_PBA_PBAO_BCDE_STAT, l_data64));
         FAPI_ASSERT(false, fapi2::PM_PBA_BCDE_STOP_TIMEOUT()
                     .set_POLLCOUNT( p10pba::MAX_PBA_BC_STOP_POLLS)
                     .set_POLLVALUE(p10pba::MAX_PBA_BC_STOP_POLLS)
-                    .set_CHIP(i_target),
+                    .set_CHIP(i_target)
+                    .set_TP_TPBR_PBA_PBAO_BCDE_STAT(l_data64),
                     "PBA BCDE Stop Timeout");
     }
 
     // Assert, if BCUE did not stop
     if (!l_bcue_stop_complete)
     {
+        FAPI_TRY(fapi2::getScom(i_target, TP_TPBR_PBA_PBAO_BCUE_STAT, l_data64));
         FAPI_ASSERT(false, fapi2::PM_PBA_BCUE_STOP_TIMEOUT()
                     .set_POLLCOUNT( p10pba::MAX_PBA_BC_STOP_POLLS)
                     .set_POLLVALUE( p10pba::MAX_PBA_BC_STOP_POLLS)
-                    .set_CHIP(i_target),
+                    .set_CHIP(i_target)
+                    .set_TP_TPBR_PBA_PBAO_BCUE_STAT(l_data64),
                     "PBA BCUE Stop Timeout");
     }
 

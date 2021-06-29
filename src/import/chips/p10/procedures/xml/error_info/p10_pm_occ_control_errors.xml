@@ -33,25 +33,6 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_OCC_CONTROL_NONSTART_DUE_TO_RISCWATCH</rc>
-    <description>
-    The OCC PPC405 cannot be started due to a conflicting RISCWatch operation
-    that keeps it in the halt state.
-    </description>
-    <ffdc>JTAGCFG</ffdc>
-    <ffdc>TARGET</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
-    </callout>
-    <collectRegisterFfdc>
-      <id>OCC_JTAG_FFDC_REGISTERS</id>
-      <target>TARGET</target>
-      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    </collectRegisterFfdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
     <rc>RC_OCC_CONTROL_MEM_BOOT_LENGTH_MISMATCH</rc>
     <description>
     The OCC PPC405 memory boot launcher length written did not match the expected
@@ -74,6 +55,10 @@
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>LOW</priority>
     </callout>
     <collectRegisterFfdc>
       <id>OCC_HB_FFDC_REGISTERS</id>

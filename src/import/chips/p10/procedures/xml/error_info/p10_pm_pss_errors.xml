@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -38,6 +38,7 @@
     <description>SPIADC error bit asserted waiting for operation to complete.
     </description>
     <ffdc>CHIP</ffdc>
+    <ffdc>TP_TPCHIP_OCC_OCI_OCB_ADC_STAT</ffdc>
     <ffdc>POLLCOUNT</ffdc>
     <collectRegisterFfdc>
       <id>PSS_FFDC_REGISTERS</id>
@@ -60,6 +61,7 @@
     coming reset.
     </description>
     <ffdc>CHIP</ffdc>
+    <ffdc>TP_TPCHIP_OCC_OCI_OCB_P2S_STAT</ffdc>
     <ffdc>POLLCOUNT</ffdc>
     <collectRegisterFfdc>
       <id>PSS_FFDC_REGISTERS</id>
@@ -78,6 +80,7 @@
     anyway so as to attempt to recover the interface.
     </description>
     <ffdc>CHIP</ffdc>
+    <ffdc>TP_TPCHIP_OCC_OCI_OCB_P2S_STAT</ffdc>
     <ffdc>POLLCOUNT</ffdc>
     <ffdc>MAXPOLLS</ffdc>
     <ffdc>TIMEOUTUS</ffdc>
@@ -97,6 +100,7 @@
     <description>SPIP2S error bit asserted waiting for operation to complete.
     </description>
     <ffdc>CHIP</ffdc>
+    <ffdc>TP_TPCHIP_OCC_OCI_OCB_P2S_STAT</ffdc>
     <ffdc>POLLCOUNT</ffdc>
     <collectRegisterFfdc>
       <id>PSS_FFDC_REGISTERS</id>

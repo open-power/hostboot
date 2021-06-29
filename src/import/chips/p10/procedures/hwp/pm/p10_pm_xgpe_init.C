@@ -367,6 +367,7 @@ fapi2::ReturnCode xgpe_start(
                         l_xsr_halt_condition == XSR_DBCR_HALT)   )),
                     fapi2::XGPE_INIT_DEBUG_HALT()
                     .set_CHIP(i_target)
+                    .set_TIMEOUT_COUNTER(l_timeout_counter)
                     .set_XGPE_BASE_ADDRESS(l_xgpe_base_addr)
                     .set_XGPE_STATE_MODE(HALT),
                     "Auxillary GPE Debug Halt detected");
@@ -377,6 +378,8 @@ fapi2::ReturnCode xgpe_start(
                      l_xsr_iar.getBit<XSR_HALTED_STATE>() != 1),
                     fapi2::XGPE_INIT_TIMEOUT()
                     .set_CHIP(i_target)
+                    .set_XSR_IAR(l_xsr_iar)
+                    .set_TIMEOUT_COUNTER(l_timeout_counter)
                     .set_XGPE_BASE_ADDRESS(l_xgpe_base_addr)
                     .set_XGPE_STATE_MODE(HALT),
                     "Auxillary GPE Init timeout");
@@ -445,6 +448,7 @@ fapi2::ReturnCode xgpe_halt(
     FAPI_ASSERT((l_timeout_in_MS != 0),
                 fapi2::XGPE_RESET_TIMEOUT()
                 .set_CHIP(i_target)
+                .set_XSR_IAR(l_data64)
                 .set_XGPE_BASE_ADDRESS(l_xgpe_base_addr)
                 .set_XGPE_STATE_MODE(HALT),
                 "XGPE Reset timeout");
@@ -511,7 +515,8 @@ fapi2::ReturnCode p10_pm_xgpe_init(
     {
         FAPI_ASSERT(false,
                     fapi2::XGPE_BAD_MODE()
-                    .set_BADMODE(i_mode),
+                    .set_BADMODE(i_mode)
+                    .set_CURPROC(i_target),
                     "ERROR; Unknown mode passed to p10_pm_xgpe_init . Mode %x",
                     i_mode);
     }

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -42,6 +42,7 @@
       <priority>HIGH</priority>
     </callout>
      <ffdc>MEM_BAR</ffdc>
+     <ffdc>CURPROC</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -54,6 +55,7 @@
     </callout>
      <ffdc>MEM_BAR</ffdc>
      <ffdc>MEM_SIZE</ffdc>
+     <ffdc>CURPROC</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
 </hwpErrors>

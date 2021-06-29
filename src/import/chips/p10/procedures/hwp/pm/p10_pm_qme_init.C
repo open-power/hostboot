@@ -197,7 +197,8 @@ fapi2::ReturnCode p10_pm_qme_init(
         FAPI_ERR("Unknown Mode Passed To p10_pm_qme_init. Mode %x ....", i_mode);
         FAPI_ASSERT(false,
                     fapi2::QME_BAD_MODE()
-                    .set_BADMODE(i_mode),
+                    .set_BADMODE(i_mode)
+                    .set_CURPROC(i_target),
                     "ERROR; Unknown Mode Passed To qme_init. Mode %x",
                     i_mode);
     }
@@ -450,6 +451,7 @@ fapi2::ReturnCode qme_init(
                  .set_CHIP(i_target)
                  .set_OCC_FLAG_REG_VAL( l_qme_flag )
                  .set_XSR_REG_VAL( l_xsr )
+                 .set_IR_REG_VAL( l_ir )
                  .set_PPE_STATE_MODE(XCR_RESUME),
                  "QME start timed out");
 
@@ -736,9 +738,17 @@ fapi2::ReturnCode initQmeBoot(
 
         if (l_bceCsrReg.getBit( BCE_ERROR ))
         {
+            fapi2::buffer<uint64_t> l_qmebcebar0;
+            FAPI_TRY( getScom( l_eq_mc_or, QME_BCEBAR0, l_qmebcebar0 ) );
+            fapi2::buffer<uint64_t> l_qmebcebar1;
+            FAPI_TRY( getScom( l_eq_mc_or, QME_BCEBAR1, l_qmebcebar1 ) );
+
             FAPI_ASSERT( false,
                          fapi2::QME_BCE_HW_ERR()
-                         .set_CHIP(i_target),
+                         .set_CHIP(i_target)
+                         .set_QME_BCEBAR0(l_qmebcebar0)
+                         .set_QME_BCEBAR1(l_qmebcebar1)
+                         .set_QME_BCECSR(l_bceCsrReg),
                          "Block Copy Engine Found In Error State Before Initiating QME Hcode Transfer");
         }
 
@@ -746,7 +756,10 @@ fapi2::ReturnCode initQmeBoot(
         {
             FAPI_ASSERT( false,
                          fapi2::QME_BCE_BUSY_ERR()
-                         .set_CHIP(i_target),
+                         .set_CHIP(i_target)
+                         .set_QME_BCEBAR0(QME_BCEBAR0)
+                         .set_QME_BCEBAR1(QME_BCEBAR1)
+                         .set_QME_BCECSR(l_bceCsrReg),
                          "Block Copy Engine Found In Busy State Before Initiating QME Hcode Transfer");
         }
 
@@ -788,7 +801,16 @@ fapi2::ReturnCode initQmeBoot(
 
         FAPI_ASSERT( l_bceTimeOut,
                      fapi2::QME_HCODE_TRANSFER_FAILED()
-                     .set_CHIP(i_target),
+                     .set_CHIP(i_target)
+                     .set_QME_BCEBAR0(QME_BCEBAR0)
+                     .set_QME_BCEBAR1(QME_BCEBAR1)
+                     .set_QME_BCECSR(l_bceCsrReg)
+                     .set_QME_HCODE_BLOCK_COUNT(l_qmeHcodeBlock)
+                     .set_QME_RUNNING_COUNT(l_qmeRunningCount)
+                     .set_TOPOSCOMS0(l_topo_scoms[0])
+                     .set_TOPOSCOMS1(l_topo_scoms[1])
+                     .set_TOPOSCOMS2(l_topo_scoms[2])
+                     .set_TOPOSCOMS3(l_topo_scoms[3]),
                      "Block Copy Engine Failed To Complete Transfer of QME Hcode and Timed Out");
 
         FAPI_INF( "QME Hcode Transfer Completed" );
