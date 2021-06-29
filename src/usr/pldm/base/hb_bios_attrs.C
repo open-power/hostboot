@@ -1134,7 +1134,7 @@ getFieldCoreOverride( std::vector<uint8_t>& io_string_table,
 
     return l_errl;
 } // getFieldCoreOverride
-
+#ifdef CONFIG_INCLUDE_XML_OPPOWERVM
 errlHndl_t getBootside(std::vector<uint8_t>                     & io_string_table,
                        std::vector<uint8_t>                     & io_attr_table,
                        TARGETING::ATTR_HYPERVISOR_IPL_SIDE_type & o_bootside)
@@ -1172,6 +1172,48 @@ errlHndl_t getBootside(std::vector<uint8_t>                     & io_string_tabl
         // print the entire buffer
         PLDM_INF_BIN("Unexpected string: ",decoded_value.data(), decoded_value.size());
         o_bootside = TARGETING::HYPERVISOR_IPL_SIDE_INVALID;
+    }
+
+    }while(0);
+
+    return errl;
+}
+#endif
+errlHndl_t getBootside(std::vector<uint8_t>   & io_string_table,
+                       std::vector<uint8_t>   & io_attr_table,
+                       pldm_fileio_file_type  & o_bootside)
+{
+    errlHndl_t errl = nullptr;
+    do{
+
+    std::vector<char>decoded_value;
+
+    errl = getDecodedEnumAttr(io_string_table,
+                              io_attr_table,
+                              PLDM_BIOS_PVM_FW_BOOT_SIDE_STRING,
+                              POSSIBLE_PVM_FW_BOOT_SIDE_STRINGS,
+                              decoded_value);
+    if(errl)
+    {
+        PLDM_ERR("Failed to lookup value for %s", PLDM_BIOS_PVM_FW_BOOT_SIDE_STRING);
+        break;
+    }
+
+    if(strncmp(decoded_value.data(), PLDM_BIOS_PERM_STRING, decoded_value.size()) == 0)
+    {
+        o_bootside = PLDM_FILE_TYPE_LID_PERM;
+    }
+    else if(strncmp(decoded_value.data(), PLDM_BIOS_TEMP_STRING, decoded_value.size()) == 0)
+    {
+        o_bootside = PLDM_FILE_TYPE_LID_TEMP;
+    }
+    else
+    {
+        // print the entire buffer
+        PLDM_INF_BIN("Unexpected string: ",decoded_value.data(), decoded_value.size());
+        // Set to an invalid value, PLDM_FILE_TYPE_PEL = 0 and is
+        // invalid for hostboot's use case.
+        o_bootside = PLDM_FILE_TYPE_PEL;
     }
 
     }while(0);

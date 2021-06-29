@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2020
+# Contributors Listed Below - COPYRIGHT 2011,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -35,6 +35,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps
 EXTRAINCDIR += ${ROOTPATH}/src/usr/mbox/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc
+EXTRAINCDIR += ${ROOTPATH}/src/subtree/openbmc/pldm/libpldm
 
 VPATH = ${ROOTPATH}/src/usr/initservice/bootconfig/
 

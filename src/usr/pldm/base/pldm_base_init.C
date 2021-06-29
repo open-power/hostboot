@@ -39,6 +39,7 @@
 #include <sys/sync.h>
 #include <vector>
 #include <pldm/pldmif.H>
+#include <pldm/base/hb_bios_attrs.H>
 #include "../common/pldmtrace.H"
 #include <initservice/initserviceif.H>
 
@@ -98,6 +99,7 @@ void* shutdown_listener(msg_q_t const i_msgQ)
 */
 void base_init(errlHndl_t& o_errl)
 {
+    do{
     // register g_outboundPldmReqMsgQ, g_inboundPldmRspMsgQ,
     // and g_inboundPldmReqMsgQ so external modules can resolve
     // them easily
@@ -112,15 +114,30 @@ void base_init(errlHndl_t& o_errl)
     // and start MCTP traffic
     MCTP::register_mctp_bus();
 
+    // libpldm is loaded by standalone simics, but CONFIG_PLDM isn't set in a
+    // standalone environment, so we use this to avoid trying to send PLDM
+    // notifications when there's no BMC.
 #ifdef CONFIG_PLDM
     // Get BMC TID (terminus ID)
     o_errl = getTID();
-#endif
+    if(o_errl)
+    {
+        break;
+    }
 
-// libpldm is loaded by standalone simics, but CONFIG_PLDM isn't set in a
-// standalone environment, so we use this to avoid trying to send PLDM
-// notifications when there's no BMC.
-#ifdef CONFIG_PLDM
+    // We don't want to keep these vectors around any longer than we have
+    // to so put them in their own scope along with the call that needs them
+    {
+        std::vector<uint8_t> bios_string_table;
+        std::vector<uint8_t> bios_attr_table;
+        // Copy all the pending "hb_*" attributes into the "hb_*_current" attributes
+        o_errl = PLDM::latchBiosAttrs(bios_string_table, bios_attr_table);
+        if(o_errl)
+        {
+            break;
+        }
+    }
+
     // Create a message queue for our shutdown listener. Initservice will send a
     // message to this queue when shutdown begins.
     const auto msgQ = msg_q_create();
@@ -135,6 +152,7 @@ void base_init(errlHndl_t& o_errl)
                                        // resources being shut down.
                                        INITSERVICE::HIGHEST_PRIORITY);
 #endif
+    }while(0);
 }
 
 } // anonymous namespace

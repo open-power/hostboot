@@ -173,9 +173,6 @@ errlHndl_t getAndSetPLDMBiosAttrs()
         std::vector<uint8_t> bios_attr_table;
         const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
 
-        // Copy all the pending "hb_*" attributes into the "hb_*_current" attributes
-        PLDM::latchBiosAttrs(bios_string_table, bios_attr_table);
-
         // Retrieve the Field Core Override value from the BMC bios and set all of
         // the NODE target's attribute ATTR_FIELD_CORE_OVERRIDE to that value.
         errl = getAndSetFieldCoreOverrideFromBmcBios(bios_string_table, bios_attr_table, sys);

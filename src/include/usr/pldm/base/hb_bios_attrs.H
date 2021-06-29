@@ -50,6 +50,7 @@
  **/
 
 #include <openbmc/pldm/libpldm/bios_table.h>
+#include <openbmc/pldm/oem/ibm/libpldm/file_io.h>
 #include <attributetraits.H>
 #include <attributeenums.H>
 
@@ -217,6 +218,19 @@ namespace PLDM
                            std::vector<uint8_t>                     & io_attr_table,
                            TARGETING::ATTR_HYPERVISOR_IPL_SIDE_type & o_bootside);
 #endif
+    /** @brief Retrieve the current value of the pvm_fw_boot_side PLDM bios attribute and convert to hostboot
+     *         pldm_fileio_file_type enum.
+     *
+     * @param[in,out] io_string_table  See brief at the top of this file.
+     * @param[in,out] io_attr_table    See brief at the top of this file.
+     * @param[out]    o_bootside       If no error, then value for pvm_fw_boot_side translated to
+     *                                 pldm_fileio_file_type.
+     *
+     * @return        errlHndl_t       errl if an error occurs. Otherwise, nullptr.
+     */
+    errlHndl_t getBootside(std::vector<uint8_t>  & io_string_table,
+                           std::vector<uint8_t>  & io_attr_table,
+                           pldm_fileio_file_type   & o_bootside);
 
     /** @brief Retrieve the value of the secure version lockin enabled attribute
      *         from the BMC.

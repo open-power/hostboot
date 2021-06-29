@@ -38,6 +38,7 @@
 #include <openbmc/pldm/libpldm/base.h>
 #include <pldm/pldm_request.H>
 #include "../common/pldmtrace.H"
+#include "../common/pldm_utils.H"
 #include <pldm/pldmif.H>
 #include <hbotcompid.H>
 #include <hwas/common/hwasCallout.H>
@@ -202,6 +203,7 @@ errlHndl_t getLidFile(const uint32_t i_fileHandle,
     return l_errl;
 }
 
+
 errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
                                 const uint32_t i_offset,
                                 uint32_t& io_numBytesToRead,
@@ -214,22 +216,19 @@ errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
     size_t l_numTransfers = 1;
     uint32_t l_totalRead = 0;
     uint8_t* l_currPtr = o_file;
-
-    const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
-    auto attr_bootside = sys->getAttr<TARGETING::ATTR_HYPERVISOR_IPL_SIDE>();
-
-    // Assume we're attempting to boot from the temp side.
-    auto bootside = PLDM_FILE_TYPE_LID_TEMP;
-
-    // Check which side we're actually booting from
-    if (attr_bootside == TARGETING::HYPERVISOR_IPL_SIDE_PERM)
+    do {
+    pldm_fileio_file_type pldm_bootside = PLDM_BOOT_SIDE_INVALID;
+    l_errl = get_pldm_bootside(pldm_bootside);
+    if(l_errl)
     {
-        bootside = PLDM_FILE_TYPE_LID_PERM;
+        break;
     }
+    assert(pldm_bootside != PLDM_BOOT_SIDE_INVALID,
+           "pldm_bootside was not set correctly");
 
     struct pldm_read_write_file_by_type_req l_req
     {
-        .file_type = bootside,
+        .file_type = pldm_bootside,
         .file_handle = i_fileHandle,
         .offset = i_offset,
         .length = 0, // calculated later
@@ -267,7 +266,6 @@ errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
     const msg_q_t l_msgQ = nullptr;
 #endif
 
-    do {
     for(size_t i = 0; i < l_numTransfers; ++i)
     {
         l_req.offset = i_offset + (i * MAX_TRANSFER_SIZE_BYTES);
@@ -411,10 +409,22 @@ errlHndl_t writeLidFileFromOffset(const uint32_t i_fileHandle,
     uint32_t bytes_written = 0;
     auto current_ptr = const_cast<uint8_t* const >(i_writeBuffer);
 
+    do {
+    // There is not 'invalid' file type for this enum so pick
+    // a value that is invalid in this context for to init this var
+    pldm_fileio_file_type pldm_bootside = PLDM_FILE_TYPE_PEL;
+    errl = get_pldm_bootside(pldm_bootside);
+    if(errl)
+    {
+        break;
+    }
+    assert(pldm_bootside != PLDM_FILE_TYPE_PEL,
+           "pldm_bootside was not set correctly");
+
     struct pldm_read_write_file_by_type_req request
     {
         // Currently BMC is hardcoded to use the TEMP side
-        .file_type = PLDM_FILE_TYPE_LID_TEMP,
+        .file_type = pldm_bootside,
         .file_handle = i_fileHandle,
         .offset = i_offset,
         .length = 0, // calculated later
@@ -443,7 +453,6 @@ errlHndl_t writeLidFileFromOffset(const uint32_t i_fileHandle,
     const msg_q_t msgQ = nullptr;
 #endif
 
-    do {
     for(size_t i = 0; i < num_transfers; ++i)
     {
         request.offset = i_offset + (i * MAX_TRANSFER_SIZE_BYTES);

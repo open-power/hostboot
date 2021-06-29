@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,10 +30,16 @@
 */
 
 #include <pldm/pldmif.H>
+#include <pldm/base/hb_bios_attrs.H>
+#include <pldm/pldm_errl.H>
+#include <pldm/pldm_reasoncodes.H>
+#include "pldm_utils.H"
+#include "pldmtrace.H"
 #include <cstring>
 
 namespace PLDM
 {
+
 uint64_t pldmHdrToUint64(const pldm_msg& i_pldmMsg)
 {
     uint64_t request_hdr_data = 0;
@@ -45,4 +51,45 @@ uint64_t pldmHdrToUint64(const pldm_msg& i_pldmMsg)
     memcpy(&request_hdr_data, request_hdr, sizeof(pldm_msg_hdr));
     return request_hdr_data;
 }
+
+errlHndl_t get_pldm_bootside(pldm_fileio_file_type &o_boot_side)
+{
+    errlHndl_t errl = nullptr;
+    static pldm_fileio_file_type pldm_bootside = PLDM_BOOT_SIDE_INVALID;
+    do {
+    if(pldm_bootside == PLDM_BOOT_SIDE_INVALID)
+    {
+        std::vector<uint8_t> string_table, attr_table;
+        errl = getBootside(string_table, attr_table, pldm_bootside);
+        if(errl)
+        {
+            break;
+        }
+        if(!(pldm_bootside  == PLDM_FILE_TYPE_LID_PERM ||
+             pldm_bootside  == PLDM_FILE_TYPE_LID_TEMP))
+        {
+            PLDM_ERR("checkBootside: getBootside set pldm_bootside to an invalid value");
+            /*@
+            * @errortype
+            * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
+            * @moduleid   MOD_GET_BIOS_SIDE
+            * @reasoncode RC_UNSUPPORTED_TYPE
+            * @userdata1  pldm_bootside  value
+            * @userdata2  unused
+            * @devdesc    Unable to find a valid bootside
+            * @custdesc   A host failure occurred
+            */
+            errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           MOD_GET_BIOS_SIDE,
+                                           RC_UNSUPPORTED_TYPE,
+                                           pldm_bootside,
+                                           0);
+            addBmcErrorCallouts(errl);
+        }
+    }
+    o_boot_side = pldm_bootside;
+    } while(0);
+    return errl;
+}
+
 }
