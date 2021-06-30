@@ -1130,7 +1130,7 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         compute_dds_slopes(io_globalppb);
 
 
-        float pstatef = (float)iv_attrs.attr_pstate0_freq_mhz * 1000 /(float)(revle32(iv_frequency_step_khz));
+        float pstatef = (float)(iv_attrs.attr_pstate0_freq_mhz * 1000) /(float)(iv_frequency_step_khz);
         io_globalppb->dpll_pstate0_value = revle32((Pstate)internal_round(pstatef));
 
         FAPI_INF("l_globalppb.dpll_pstate0_value %X (%d)",
