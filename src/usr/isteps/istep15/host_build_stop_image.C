@@ -39,6 +39,7 @@
 
 //Utilities
 #include    <util/utilxipimage.H>
+#include    <scom/wakeup.H>
 
 //Error handling and tracing
 #include    <errl/errlentry.H>
@@ -358,6 +359,10 @@ void* host_build_stop_image (void *io_pArgs)
 
         if (l_sys->getAttr<TARGETING::ATTR_IS_MPIPL_HB>())
         {
+            // We need to avoid any special wakeup calls as we bring
+            //  the PM complex back alive inside the MPIPL path
+            WAKEUP::controlWakeupLogic(WAKEUP::DISABLE_SPECIAL_WAKEUP);
+
             l_errl = HBPM::resetPMAll(HBPM::RESET_AND_CLEAR_ATTRIBUTES);
             if(l_errl)
             {

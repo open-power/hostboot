@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,5 +52,19 @@ errlHndl_t handleSpecialWakeup(TARGETING::Target* i_target,
                                HandleOptions_t i_enable);
 
 
+/**
+ * Parameters for wakeup logic control
+ */
+enum WakeupControl_t
+{
+    DISABLE_SPECIAL_WAKEUP, //skip calls to wakeup HWP
+    ENABLE_SPECIAL_WAKEUP,  //enable calls to wakeup HWP, clear counters
+};
+
+/**
+ * @brief Disable special wakeup logic
+ * @param[in] i_op  - Specify enable/disable option
+ */
+void controlWakeupLogic( WakeupControl_t i_op );
 
 }
