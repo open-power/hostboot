@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -99,7 +99,7 @@ struct p10_mc_pll_bucket_descriptor_t
 const p10_mc_pll_bucket_descriptor_t P10_MC_PLL_BUCKETS[P10_NUM_MC_PLL_BUCKETS] =
 {
     { REFCLOCK_FREQ_133, 1600, 25600 }, // bucket 0 DDR4-3200
-    { REFCLOCK_FREQ_133, 1467, 23460 }, // bucket 1 DDR4-2933
+    { REFCLOCK_FREQ_133, 1466, 23460 }, // bucket 1 DDR4-2933
     { REFCLOCK_FREQ_133, 1333, 21330 }, // bucket 2 DDR4-2667
     { REFCLOCK_FREQ_133, 2000, 32000 }  // bucket 3 DDR5
 };
