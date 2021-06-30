@@ -103,7 +103,8 @@ fapi_try_exit:
 
 fapi2::ReturnCode p10_sbe_lpc_init_any(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
-    bool i_hasPnor)
+    const bool i_hasPnor,
+    const bool i_resetLpcBus)
 {
     fapi2::buffer<uint32_t> l_data32;
     FAPI_DBG("p10_sbe_lpc_init: Entering ...");
@@ -117,9 +118,16 @@ fapi2::ReturnCode p10_sbe_lpc_init_any(
     FAPI_TRY(reset_lpc_master(i_target_chip));
 
     //------------------------------------------------------------------------------------------
-    //--- STEP 2: Issue an LPC bus reset
+    //--- STEP 2: Issue an LPC bus reset, if desired
     //------------------------------------------------------------------------------------------
-    FAPI_TRY(reset_lpc_bus_via_master(i_target_chip, !i_hasPnor));
+    if(i_resetLpcBus)
+    {
+        FAPI_TRY(reset_lpc_bus_via_master(i_target_chip, !i_hasPnor));
+    }
+    else
+    {
+        FAPI_INF("p10_sbe_lpc_init: Skipping LPC bus reset");
+    }
 
     /* We can flip the LPC clock back to the external clock input now */
     FAPI_TRY(switch_lpc_clock_mux(i_target_chip, false));

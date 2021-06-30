@@ -67,13 +67,16 @@ extern "C"
 
 /// @brief LPC init to enable connection to PNOR
 ///
-/// @param[in]     i_target_chip   Reference to TARGET_TYPE_PROC_CHIP target
-/// @param[in]     i_hasPnor       true=this chip has PNOR attached, do full init
-///                                false=this chip has no PNOR attached, only reset controller and hold LRESET asserted
+/// @param[in]     i_target_chip     Reference to TARGET_TYPE_PROC_CHIP target
+/// @param[in]     i_hasPnor         true=this chip has PNOR attached, do full init
+///                                  false=this chip has no PNOR attached, only reset controller and hold LRESET asserted
+/// @param[in]     i_resetLpcBus     true=Also reset LPC bus (default)
+///                                  false=Do not reset LPC bus
 /// @return  FAPI2_RC_SUCCESS if success, else error code.
     fapi2::ReturnCode p10_sbe_lpc_init_any(
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
-        bool i_hasPnor);
+        bool i_hasPnor,
+        bool i_resetLpcBus = true);
 }
 
 #endif
