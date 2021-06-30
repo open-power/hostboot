@@ -432,7 +432,7 @@ p10_sbe_scratch_regs_set_pau_freq(
     }
     else
     {
-        l_attr_freq_pau_mhz = 2050;
+        l_attr_freq_pau_mhz = 2167;
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_PAU_MHZ, FAPI_SYSTEM, l_attr_freq_pau_mhz),
                  "Error from FAPI_ATTR_SET (ATTR_FREQ_PAU_MHZ)");
     }
