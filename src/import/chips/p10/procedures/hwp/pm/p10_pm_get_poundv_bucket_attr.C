@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,6 +55,7 @@ fapi2::ReturnCode p10_pm_get_poundv_bucket_attr(
     uint8_t l_bucketId = 1;
     uint16_t l_bucketSize = 0;
     *o_data = 0;
+    uint8_t l_vpdVersion = 0;
 
     //check if bucket num has been overriden
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_POUNDV_BUCKET_NUM_OVERRIDE,
@@ -97,9 +98,22 @@ fapi2::ReturnCode p10_pm_get_poundv_bucket_attr(
     //Name:     0x2 byte
     //Length:   0x2 byte
     //Version:  0x1 byte **buffer starts here
-    //PNP:      0x3 byte
     //bucket 1: 0x15E byte
     //bucket 2: 0x15E byte
+
+    // Make sure we are using the supported version or barely newer
+    //   The assumption we are making here is that the next
+    //   version will always be backward compatible in order
+    //   to allow a line-breakin of new parts.  If it is not
+    //   compatible we will require an increment of 2 versions.
+    l_vpdVersion = l_fullVpdData[POUNDV_VERSION_OFFSET];
+    FAPI_ASSERT(((l_vpdVersion == POUNDV_VERSION_2)
+                 || (l_vpdVersion == POUNDV_VERSION_3)),
+                fapi2::INVALID_POUNDV_VERSION()
+                .set_CHIP_TARGET(i_target)
+                .set_POUNDV_VERSION(l_vpdVersion)
+                .set_SUPPORTED_VERSION(POUNDV_VERSION_2),
+                "#V has unsupported version!" );
 
     l_vpdSize = l_vpdSize - POUNDV_BUCKET_OFFSET - ((l_bucketId - 1) *
                 l_bucketSize);
@@ -109,7 +123,7 @@ fapi2::ReturnCode p10_pm_get_poundv_bucket_attr(
                 .set_CHIP_TARGET(i_target)
                 .set_EXPECTED_SIZE(sizeof(l_bucketSize))
                 .set_ACTUAL_SIZE(l_vpdSize),
-                "#V data read was too small!" );
+                "data read was too small!" );
 
     // Ensure we got a valid bucket id
     // NOTE: Bucket IDs range from 1-6

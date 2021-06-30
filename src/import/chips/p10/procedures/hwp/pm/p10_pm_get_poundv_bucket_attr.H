@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,8 @@ enum bucketParms
 {
     POUNDV_VERSION_1      = 0x1,
     POUNDV_VERSION_2      = 0x2,
+    POUNDV_VERSION_3      = 0x3,//theoretical backward-compatible new version
+    POUNDV_VERSION_OFFSET = 0x0,
     POUNDV_BUCKET_OFFSET  = 0x1,
     NUM_BUCKETS           = 0x2,
     VERSION_2_BUCKET_SIZE = 350,
