@@ -410,9 +410,13 @@ errlHndl_t callWakeupHwp(TARGETING::Target* i_target,
         // Different inputs require different fapi target handling
         if( TARGETING::TYPE_PROC == l_targType )
         {
-            // use a multicast target
-            fapi2::Target<fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST>
-              l_fapi_mc_core(i_target);
+            // first get the fapi proc target to use below
+            fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapiProc(i_target);
+
+            // generate a multicast target that covers the cores
+            fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST >
+              l_fapi_mc_core = l_fapiProc.getMulticast< fapi2::MULTICAST_OR >
+              (fapi2::MCGROUP_GOOD_EQ, fapi2::MCCORE_ALL);
 
             FAPI_INVOKE_HWP(l_errl,
                             p10_core_special_wakeup,
@@ -638,6 +642,35 @@ errlHndl_t handleSpecialWakeup(TARGETING::Target* i_target,
     } while(0);
 
     return l_errl;
+}
+
+/**
+ * @brief Enable or disable special wakeup logic
+ */
+void controlWakeupLogic( WakeupControl_t i_op )
+{
+    // We will control the calls to the HWP by playing with the
+    //  wakeup counter that we already use to handle recursion.
+
+    // Grab all the cores in the system (even not present/functional)
+    TARGETING::TargetHandleList l_cores;
+    TARGETING::getAllChiplets( l_cores, TARGETING::TYPE_CORE, false );
+
+    // Loop through all the cores and set the counter value as needed
+    for( auto c : l_cores )
+    {
+        TARGETING::ATTR_SPCWKUP_COUNT_type l_count = 0;
+        switch(i_op)
+        {
+            case( DISABLE_SPECIAL_WAKEUP ):
+                l_count = 0xFF;//arbitrary non-zero value
+                break;
+            case( ENABLE_SPECIAL_WAKEUP ):
+                l_count = 0x00;//start fresh with no wakeups pending
+                break;
+        }
+        c->setAttr<ATTR_SPCWKUP_COUNT>(l_count);
+    }
 }
 
 }

@@ -55,6 +55,7 @@
 #include <util/misc.H>
 #include <sys/misc.h>
 #include <algorithm>
+#include <scom/wakeup.H>
 
 using namespace ERRORLOG;
 using namespace TARGETING;
@@ -104,6 +105,13 @@ void* call_host_activate_secondary_cores(void* const io_pArgs)
     {
         if (sys->getAttr<TARGETING::ATTR_IS_MPIPL_HB>())
         {
+            // Restore the ability to do special wakeups now that the
+            //  PM complex is alive again
+            // Note that this doesn't affect the HWP execution, but
+            //  it will allow wakeups due to other scoms, and enable
+            //  things at runtime later on
+            WAKEUP::controlWakeupLogic(WAKEUP::ENABLE_SPECIAL_WAKEUP);
+
             //In an MPIPL we need to issue a special wakeup to all functional cores
             // prior to sending the doorbell messages
             TargetHandleList l_procTargetList;
