@@ -52,13 +52,16 @@
 #include <secureboot/phys_presence_if.H>
 
 // Misc
-#include <pldm/extended/pdr_manager.H>
 #include <config.h>
 #include <errl/errludtarget.H>
 #include <console/consoleif.H>
 #include <isteps/hwpisteperror.H>
 #include <errl/errlmanager.H>
 #include <arch/pirformat.H>
+
+#ifdef CONFIG_PLDM
+#include <pldm/extended/pdr_manager.H>
+#endif
 
 namespace ISTEP_06
 {
