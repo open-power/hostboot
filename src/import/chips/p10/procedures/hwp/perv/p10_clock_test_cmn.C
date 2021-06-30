@@ -59,8 +59,8 @@ fapi2::ReturnCode p10_clock_test_check_error(
     const bool clockA_ok = clockA_functional || !clockA_required;
     const bool clockB_ok = clockB_functional || !clockB_required;
 
-    const int callout_clock = clockA_ok ? fapi2::ENUM_ATTR_CP_REFCLOCK_SELECT_OSC1 :
-                              fapi2::ENUM_ATTR_CP_REFCLOCK_SELECT_OSC0;
+    uint8_t callout_clock = clockA_ok ? fapi2::ENUM_ATTR_CP_REFCLOCK_SELECT_OSC1 :
+                            fapi2::ENUM_ATTR_CP_REFCLOCK_SELECT_OSC0;
     FAPI_ASSERT(clockA_ok && clockB_ok,
                 fapi2::RCS_CLOCK_TEST_OUT_ERR()
                 .set_MASTER_CHIP(i_target_chip)
