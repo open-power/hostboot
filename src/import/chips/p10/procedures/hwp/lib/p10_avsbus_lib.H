@@ -140,7 +140,19 @@ enum avslibconstants
     O2S_FRAME_SIZE = 0x20,
     O2S_IN_DELAY1 = 0x3F,
     AVSBUS_FREQUENCY = 0x2710,
-    AVSBUS_MAX_VOLTAGE_MV = 1200
+    AVSBUS_MAX_VOLTAGE_MV   = 1200,
+    // bit positions of the status response
+    AVSBUS_STATRSP_VGOOD    = 3,
+    AVSBUS_STATRSP_STATALRT = 4,
+    AVSBUS_STATRSP_AVSCTRL  = 5,
+    AVSBUS_STATRSP_MFG1     = 6,
+    AVSBUS_STATRSP_MFG2     = 7,
+    // bit positions of indicators in a status frame
+    AVSBUS_STATUS_VDN       = 8,
+    AVSBUS_STATUS_OCW       = 9,
+    AVSBUS_STATUS_UVW       = 10,
+    AVSBUS_STATUS_OTW       = 11,
+    AVSBUS_STATUS_OPW       = 12
 };
 
 // OIMR Mask Values
@@ -155,8 +167,11 @@ const uint32_t OCB_OIMR1_MASK_VALUES[2][2] =
 enum avsBusOpType
 {
     NO_OP,
-    VLTG_READ_TYPE,
-    VLTG_WTITE_TYPE,
+    VLTG_READ_VLTG,
+    VLTG_READ_CURR,
+    VLTG_READ_STAT,
+    VLTG_WRITE_VLTG,
+    VLTG_RESYNC,
 };
 
 } //end of p10avslib namespace
@@ -238,6 +253,20 @@ avsVoltageWrite(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                 const uint32_t i_RailSelect,
                 const uint32_t o_Voltage);
 
+///@brief Perform an AVS status read transaction
+///@param[i] i_target       Chip target
+///@param[i] i_avsBusNum    AVSBus Number (0 or 1)
+///@param[i] i_o2sBridgeNum O2S Bridge Number (0 or 1)
+///@param[i] i_RailSelect   Rail Select (value depends on the system implementation)
+///@param[o] o_StatusData   Defined by AVSBus spec
+///@return FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode
+avsStatusRead(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+              const uint8_t  i_avsBusNum,
+              const uint8_t  i_o2sBridgeNum,
+              const uint32_t i_RailSelect,
+              uint32_t&       o_StatusData);
+
 ///@brief Drive an Idle Frame on an AVSBus
 ///@param[i] i_target       Chip target
 ///@param[i] i_avsBusNum    AVSBus Number (0 or 1)
@@ -259,7 +288,9 @@ fapi2::ReturnCode
 avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                     const uint8_t i_avsBusNum,
                     const uint8_t i_o2sBridgeNum,
-                    const uint8_t i_throwAssert,
-                    uint8_t& o_goodResponse);
+                    const uint8_t       i_RailSelect,
+                    const uint8_t i_throw_assert,
+                    uint8_t& o_goodResponse,
+                    enum avsBusOpType i_opType);
 
 #endif  // __P10_AVSBUS_LIB_H__

@@ -29,7 +29,7 @@
       <description>
       A timeout occured while polling OCB status register O2SST for o2s_ongoing=0
       </description>
-      <ffdc>CHIP_TARGET</ffdc>
+      <ffdc>PROC_TARGET</ffdc>
       <ffdc>AVSBUS_NUM</ffdc>
       <ffdc>AVSBUS_BRIDGE_NUM</ffdc>
       <ffdc>AVSBUS_MAX_POLL_CNT</ffdc>
@@ -54,9 +54,10 @@
       <description>
         AVS command failed. All 0 response data received possibly due to AVSBus IO RI/DIs disabled.
       </description>
-      <ffdc>TARGET</ffdc>
+      <ffdc>PROC_TARGET</ffdc>
       <ffdc>BUS</ffdc>
       <ffdc>BRIDGE</ffdc>
+      <ffdc>RAIL</ffdc>
       <ffdc>ROOT_CTRL1</ffdc>
      <callout>
       <target>SPIVID_SLAVE_PART</target>
@@ -83,6 +84,7 @@
       <ffdc>PROC_TARGET</ffdc>
       <ffdc>BUS</ffdc>
       <ffdc>BRIDGE</ffdc>
+      <ffdc>RAIL</ffdc>
       <ffdc>ROOT_CTRL1</ffdc>
      <callout>
       <target>SPIVID_SLAVE_PART</target>
@@ -109,6 +111,7 @@
       <ffdc>PROC_TARGET</ffdc>
       <ffdc>BUS</ffdc>
       <ffdc>BRIDGE</ffdc>
+      <ffdc>RAIL</ffdc>
      <callout>
       <target>SPIVID_SLAVE_PART</target>
       <priority>HIGH</priority>
@@ -134,21 +137,22 @@
       <ffdc>TARGET</ffdc>
       <ffdc>BUS</ffdc>
       <ffdc>BRIDGE</ffdc>
-     <callout>
-      <target>SPIVID_SLAVE_PART</target>
-      <priority>HIGH</priority>
-    </callout>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
-    </callout>
-    <callout>
-      <target>PROC_TARGET</target>
-      <priority>LOW</priority>
-    </callout>
-     <deconfigure>
-      <target>PROC_TARGET</target>
-    </deconfigure>
+      <ffdc>RAIL</ffdc>
+      <callout>
+        <target>SPIVID_SLAVE_PART</target>
+        <priority>HIGH</priority>
+      </callout>
+      <callout>
+        <procedure>CODE</procedure>
+        <priority>MEDIUM</priority>
+      </callout>
+      <callout>
+        <target>PROC_TARGET</target>
+        <priority>LOW</priority>
+      </callout>
+       <deconfigure>
+        <target>PROC_TARGET</target>
+      </deconfigure>
     </hwpError>
     <!-- ******************************************************************** -->
     <hwpError>
@@ -156,24 +160,27 @@
       <description>
         AVS command failed. Valid data sent but no action is taken due to unavailable resource.
       </description>
-      <ffdc>TARGET</ffdc>
+      <ffdc>PROC_TARGET</ffdc>
       <ffdc>BUS</ffdc>
       <ffdc>BRIDGE</ffdc>
-     <callout>
-      <target>SPIVID_SLAVE_PART</target>
-      <priority>HIGH</priority>
-    </callout>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
-    </callout>
-    <callout>
-      <target>PROC_TARGET</target>
-      <priority>LOW</priority>
-    </callout>
-     <deconfigure>
-      <target>PROC_TARGET</target>
-    </deconfigure>
+      <ffdc>RAIL</ffdc>
+      <ffdc>COMMAND</ffdc>
+      <ffdc>RESP_DATA</ffdc>
+      <callout>
+        <target>SPIVID_SLAVE_PART</target>
+        <priority>HIGH</priority>
+      </callout>
+      <callout>
+        <procedure>CODE</procedure>
+        <priority>MEDIUM</priority>
+      </callout>
+      <callout>
+        <target>PROC_TARGET</target>
+        <priority>LOW</priority>
+      </callout>
+       <deconfigure>
+        <target>PROC_TARGET</target>
+      </deconfigure>
     </hwpError>
     <!-- ******************************************************************** -->
     <hwpError>
@@ -184,21 +191,24 @@
       <ffdc>PROC_TARGET</ffdc>
       <ffdc>BUS</ffdc>
       <ffdc>BRIDGE</ffdc>
-     <callout>
-      <target>SPIVID_SLAVE_PART</target>
-      <priority>HIGH</priority>
-    </callout>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
-    </callout>
-    <callout>
-      <target>PROC_TARGET</target>
-      <priority>LOW</priority>
-    </callout>
-     <deconfigure>
-      <target>PROC_TARGET</target>
-    </deconfigure>
+      <ffdc>RAIL</ffdc>
+      <ffdc>COMMAND</ffdc>
+      <ffdc>RESP_DATA</ffdc>
+      <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+      </callout>
+      <callout>
+       <target>SPIVID_SLAVE_PART</target>
+       <priority>MEDIUM</priority>
+      </callout>
+      <callout>
+        <target>PROC_TARGET</target>
+        <priority>LOW</priority>
+      </callout>
+       <deconfigure>
+        <target>PROC_TARGET</target>
+      </deconfigure>
     </hwpError>
     <!-- ******************************************************************** -->
     <hwpError>
@@ -206,7 +216,7 @@
       <description>
         A voltage higher than the VRM maximum was to be attempted.
       </description>
-      <ffdc>CHIP_TARGET</ffdc>
+      <ffdc>PROC_TARGET</ffdc>
       <ffdc>BUS</ffdc>
       <ffdc>RAIL</ffdc>
       <ffdc>BRIDGE</ffdc>
@@ -215,6 +225,54 @@
         <procedure>CODE</procedure>
         <priority>HIGH</priority>
       </callout>
-    </hwpError>    
+    </hwpError>
+    <!-- ******************************************************************** -->
+    <hwpError>
+      <rc>RC_PM_AVSBUS_WRITE_VOLTAGE_ERROR</rc>
+      <description>
+        An AVSBus Voltage Write command returned bad status.
+      </description>
+      <ffdc>PROC_TARGET</ffdc>
+      <ffdc>BUS</ffdc>
+      <ffdc>RAIL</ffdc>
+      <ffdc>COMMAND</ffdc>
+      <ffdc>RESP_DATA</ffdc>
+      <ffdc>STATUS</ffdc>
+      <ffdc>AVSCTRL</ffdc>
+      <ffdc>STATUS_ALERT</ffdc>
+      <ffdc>OVERCURRENT</ffdc>
+      <ffdc>UNDERVOLT</ffdc>
+      <ffdc>OVERTEMP</ffdc>
+      <ffdc>OVERPOWER</ffdc>
+      <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+      </callout>
+      <callout>
+        <target>SPIVID_SLAVE_PART</target>
+        <priority>MEDIUM</priority>
+      </callout>
+    </hwpError>
+   <!-- ******************************************************************** -->
+    <hwpError>
+      <rc>RC_PM_AVSBUS_STATUS_READ_ERROR</rc>
+      <description>
+        An AVSBus Voltage Write command returned bad status.
+      </description>
+      <ffdc>PROC_TARGET</ffdc>
+      <ffdc>BUS</ffdc>
+      <ffdc>BRIDGE</ffdc>
+      <ffdc>RAIL</ffdc>
+      <ffdc>COMMAND</ffdc>
+      <ffdc>RESP_DATA</ffdc>
+      <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+      </callout>
+      <callout>
+        <target>SPIVID_SLAVE_PART</target>
+        <priority>MEDIUM</priority>
+      </callout>
+    </hwpError>
     <!-- ******************************************************************** -->
 </hwpErrors>

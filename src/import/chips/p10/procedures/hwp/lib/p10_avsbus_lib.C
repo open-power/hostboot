@@ -31,13 +31,21 @@
 /// *HWP HWP Backup Owner : Brian Vanderpool <vanderp@us.ibm.com>
 /// *HWP FW Owner         : Prasad BG Ranganath <prasadbgr@in.ibm.com>
 /// *Team                 : PM
-/// *Consumed by          : SBE:SGPE
+/// *Consumed by          : SBE:CRO
 /// *Level                : 3
 ///
 
 #include <p10_avsbus_lib.H>
 #include <p10_avsbus_scom.H>
 #include <ocb_firmware_registers.h>
+
+const static char* g_rail_str[]
+{
+    "VDD",
+    "VCS",
+    "VDN",
+    "VIO"
+};
 
 //##############################################################################
 // Function which generates a 3 bit CRC value for 29 bit data
@@ -249,7 +257,7 @@ avsPollVoltageTransDone(
     // checked by the caller.
     FAPI_ASSERT((l_count < p10avslib::MAX_POLL_COUNT_AVS),
                 fapi2::PROCPM_AVSBUS_POLL_TIMEOUT()
-                .set_CHIP_TARGET(i_target)
+                .set_PROC_TARGET(i_target)
                 .set_AVSBUS_NUM(i_avsBusNum)
                 .set_AVSBUS_BRIDGE_NUM(i_o2sBridgeNum)
                 .set_AVSBUS_MAX_POLL_CNT(p10avslib::MAX_POLL_COUNT_AVS)
@@ -386,25 +394,26 @@ avsVoltageWrite(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     uint32_t l_CmdGroup    = 0;
     uint32_t l_CmdDataType = 0;
 
+    FAPI_INF("Voltage %4d (0x%X)  Limit %4d (0x%X)",
+             i_Voltage, i_Voltage,
+             p10avslib::AVSBUS_MAX_VOLTAGE_MV, p10avslib::AVSBUS_MAX_VOLTAGE_MV);
 
     if (i_Voltage > p10avslib::AVSBUS_MAX_VOLTAGE_MV)
     {
-        FAPI_ERR("ERROR: A voltage greater than the AVSBUS VRM allow maximum of %4d \
-                  mV was to be attempted to bus %d, rail %d",
+        FAPI_ERR("ERROR: Voltage %4d is greater than the AVSBUS VRM allow maximum of %4d  mV was to be attempted to bus %d, rail %d",
+                 i_Voltage,
                  p10avslib::AVSBUS_MAX_VOLTAGE_MV,
-                 i_avsBusNum, i_RailSelect);
+                 i_avsBusNum,
+                 i_RailSelect);
 
-
-        FAPI_ASSERT(i_Voltage <= p10avslib::AVSBUS_MAX_VOLTAGE_MV,
+        FAPI_ASSERT(false,
                     fapi2::PM_AVSBUS_EXCESSIVE_VOLTAGE_ERROR()
-                    .set_CHIP_TARGET(i_target)
+                    .set_PROC_TARGET(i_target)
                     .set_BUS(i_avsBusNum)
                     .set_RAIL(i_RailSelect)
-                    .set_BRIDGE(i_o2sBridgeNum)
                     .set_VOLTAGE(i_Voltage),
-                    "A voltage greater than the AVSBUS VRM allow maximum was to be attempted");
+                    "A voltage greater than the AVSBUS VRM allowable maximum was to be attempted");
     }
-
 
     // Drive a Write Command
     FAPI_TRY(avsDriveCommand(i_target,
@@ -419,6 +428,50 @@ avsVoltageWrite(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+//##############################################################################
+// Function to read the AVSBus VRM Status
+//##############################################################################
+fapi2::ReturnCode
+avsStatusRead(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+              const uint8_t  i_avsBusNum,
+              const uint8_t  i_o2sBridgeNum,
+              const uint32_t i_RailSelect,
+              uint32_t&      o_StatusData)
+{
+
+    fapi2::buffer<uint64_t> l_data64;
+
+    // Values as per VRM spec
+    // Cmd 0b11, cmd group 0, cmd data type - 0b1110 for AVSBus Status,
+    // outbound data = 0xFFFf
+    uint32_t l_CmdType     = 3;  // read
+    uint32_t l_CmdGroup    = 0;
+    uint32_t l_CmdDataType = 0xE;
+    uint32_t l_outboundCmdData = 0xFFFF;
+
+    // Drive a Read Command
+    FAPI_TRY(avsDriveCommand(i_target,
+                             i_avsBusNum,
+                             i_o2sBridgeNum,
+                             i_RailSelect,
+                             l_CmdType,
+                             l_CmdGroup,
+                             l_CmdDataType,
+                             l_outboundCmdData));
+
+    // Read returned voltage value from Read frame
+    FAPI_TRY(getScom(i_target,
+                     p10avslib::OCB_O2SRD[i_avsBusNum][i_o2sBridgeNum], l_data64));
+    // Extracting bits 8:23 , which contains the status data
+    o_StatusData = (l_data64 & 0x00FFFF0000000000) >> 40;
+
+    FAPI_INF("AVSBus status value read is %d mV", o_StatusData);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 
 //##############################################################################
 // Function which writes to OCB registers to initialize the AVS Slave with an
@@ -464,123 +517,254 @@ fapi_try_exit:
 //##############################################################################
 fapi2::ReturnCode
 avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                    const uint8_t i_avsBusNum,
-                    const uint8_t i_o2sBridgeNum,
-                    const uint8_t i_throw_assert,
-                    uint8_t& o_goodResponse
+                    const uint8_t       i_avsBusNum,
+                    const uint8_t       i_o2sBridgeNum,
+                    const uint8_t       i_RailSelect,
+                    const uint8_t       i_throw_assert,
+                    uint8_t&            o_goodResponse,
+                    enum avsBusOpType   i_opType = p10avslib::VLTG_READ_VLTG
                    )
+
 {
+    fapi2::ReturnCode l_rc;
     fapi2::buffer<uint64_t> l_data64;
     fapi2::buffer<uint32_t> l_rsp_rcvd_crc;
-    fapi2::buffer<uint8_t>  l_data_status_code;
-    fapi2::buffer<uint32_t> l_rsp_data;
+
+    fapi2::buffer<uint32_t> l_rsp_data;                 // Response frame read from the hardware
+    fapi2::buffer<uint8_t>  l_rsp_ack_code;
+    fapi2::buffer<uint8_t>  l_rsp_status;               // 3 bit code Acknowledgement Response Frame
+    fapi2::buffer<uint32_t> l_status_data = 0;          // Buffer for Read Status command that might be used
+    fapi2::buffer<uint8_t>  l_status_frame_resp = 0;    // 5 bit code from Status Response Frame
+    fapi2::buffer<uint32_t> l_command        ;          // Command sent
+    uint8_t                 l_goodResponse;             // Internal use
+    uint32_t                l_buffer = 0;
+
+    bool                    b_avs_in_control = true;
+    bool                    b_status_alert   = false;
+    bool                    b_over_current   = false;
+    bool                    b_under_volt     = false;
+    bool                    b_over_temp      = false;
+    bool                    b_over_power     = false;
 
     uint32_t l_rsp_computed_crc;
     o_goodResponse = false;
 
+    // Read the command register
+    FAPI_DBG("Reading the OS2SRD register to check status");
+    FAPI_TRY(getScom(i_target, p10avslib::OCB_O2SWD[i_avsBusNum][i_o2sBridgeNum],
+    l_data64));
+    l_data64.extractToRight(l_command, 0, 32);
+
     // Read the data response register
     FAPI_DBG("Reading the OS2SRD register to check status");
     FAPI_TRY(getScom(i_target, p10avslib::OCB_O2SRD[i_avsBusNum][i_o2sBridgeNum],
-                     l_data64));
+    l_data64));
 
     // Status Return Code and Received CRC
-    l_data64.extractToRight(l_data_status_code, 0, 2);
+    l_data64.extractToRight(l_rsp_ack_code, 0, 2);
+    l_data64.extractToRight(l_rsp_status, 3, 5);
     l_data64.extractToRight(l_rsp_rcvd_crc, 29, 3);
     l_data64.extractToRight(l_rsp_data, 0, 32);
 
     // Compute CRC on Response frame
     l_rsp_computed_crc = avsCRCcalc(l_rsp_data);
 
-    if ((l_data_status_code == 0) &&                           // no error code
-        (l_rsp_rcvd_crc == l_rsp_computed_crc) &&              // good crc
-        (l_rsp_data != 0) && (l_rsp_data != 0xFFFFFFFF))       // valid response
+    if ((l_rsp_ack_code == 0) &&                               // no error code
+    (l_rsp_rcvd_crc == l_rsp_computed_crc) &&              // good crc
+    (l_rsp_data != 0) && (l_rsp_data != 0xFFFFFFFF))       // valid response
     {
         o_goodResponse = true;
     }
     else
     {
 
-        FAPI_INF("Non-clean response received: Computed CRC vs %X Received CRC %X;  Full Response %08X",
-                 l_rsp_computed_crc, l_rsp_rcvd_crc, l_rsp_data);
+        FAPI_INF("Non-clean response received for %s: Computed CRC vs %X Received CRC %X;  Full Response %08X",
+        g_rail_str[i_RailSelect], l_rsp_computed_crc, l_rsp_rcvd_crc, l_rsp_data);
 
 
         FAPI_TRY(getScom(i_target, scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL1_RW, l_data64));
 
         if (!l_data64.getBit<scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL1_TP_RI_DC_B>())
         {
-            FAPI_ERR("ERROR: AVS command failed. Receiver Inhibit in Root Control 1 is not set!!!");
+            FAPI_ERR("ERROR: AVS command failed for %s. Receiver Inhibit in Root Control 1 is not set!!!",
+            g_rail_str[i_RailSelect]);
         }
 
         if (!l_data64.getBit<scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL1_TP_DI1_DC_B>())
         {
-            FAPI_ERR("ERROR: AVS command failed. Driver Inhibit 1 in Root Control 1 is not set!!!");
+            FAPI_ERR("ERROR: AVS command failed for %s. Driver Inhibit 1 in Root Control 1 is not set!!!",
+            g_rail_str[i_RailSelect]);
         }
 
         if (!l_data64.getBit<scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL1_TP_DI2_DC_B>())
         {
-            FAPI_ERR("ERROR: AVS command failed. Driver Inhibit 2 in Root Control 1 is not set!!!");
+            FAPI_ERR("ERROR: AVS command failed. Driver Inhibit 2 in Root Control 1 is not set!!!",
+            g_rail_str[i_RailSelect]);
         }
 
         if(l_rsp_data == 0x00000000)
         {
-            FAPI_DBG("ERROR: AVS command failed. All 0 response data received possibly due to AVSBus IO RI/DIs disabled.");
+            FAPI_DBG("ERROR: AVS command failed for %s. All 0 response data received possibly due to AVSBus IO RI/DIs disabled.",
+            g_rail_str[i_RailSelect]);
             FAPI_ASSERT((i_throw_assert != true),
-                        fapi2::PM_AVSBUS_ZERO_RESP_ERROR()
-                        .set_PROC_TARGET(i_target)
-                        .set_BUS(i_avsBusNum)
-                        .set_BRIDGE(i_o2sBridgeNum)
-                        .set_ROOT_CTRL1(l_data64),
-                        "ERROR: AVS command failed. All 0 response data received possibly due to AVSBus IO RI/DIs disabled.");
+            fapi2::PM_AVSBUS_ZERO_RESP_ERROR()
+            .set_PROC_TARGET(i_target)
+            .set_BUS(i_avsBusNum)
+            .set_BRIDGE(i_o2sBridgeNum)
+            .set_ROOT_CTRL1(l_data64),
+            "ERROR: AVS command failed. All 0 response data received possibly due to AVSBus IO RI/DIs disabled.");
         }
         else if(l_rsp_data == 0xFFFFFFFF)
         {
-            FAPI_DBG("ERROR: AVS command failed failed. No response from VRM device, Check AVSBus interface connectivity to VRM in system.");
+            FAPI_DBG("ERROR: AVS command failed failed for %s. No response from VRM device, Check AVSBus interface connectivity to VRM in system.",
+            g_rail_str[i_RailSelect]);
             FAPI_ASSERT((i_throw_assert != true),
-                        fapi2::PM_AVSBUS_NO_RESP_ERROR()
-                        .set_PROC_TARGET(i_target)
-                        .set_BUS(i_avsBusNum)
-                        .set_BRIDGE(i_o2sBridgeNum)
-                        .set_ROOT_CTRL1(l_data64),
-                        "ERROR: AVS command failed. No response from VRM device, Check AVSBus interface connectivity to VRM in system.");
+            fapi2::PM_AVSBUS_NO_RESP_ERROR()
+            .set_PROC_TARGET(i_target)
+            .set_BUS(i_avsBusNum)
+            .set_BRIDGE(i_o2sBridgeNum)
+            .set_ROOT_CTRL1(l_data64),
+            "ERROR: AVS command failed. No response from VRM device, Check AVSBus interface connectivity to VRM in system.");
         }
         else if(l_rsp_rcvd_crc != l_rsp_computed_crc)
         {
-            FAPI_DBG("ERROR: AVS command failed. Bad CRC detected by P10 on AVSBus Slave Segement.");
+            FAPI_DBG("ERROR: AVS command failed for %s. Bad CRC detected by P10 on AVSBus Slave Segement.",
+            g_rail_str[i_RailSelect]);
             FAPI_ASSERT((i_throw_assert != true),
-                        fapi2::PM_AVSBUS_MASTER_BAD_CRC_ERROR()
+            fapi2::PM_AVSBUS_MASTER_BAD_CRC_ERROR()
+            .set_PROC_TARGET(i_target)
+            .set_BUS(i_avsBusNum)
+            .set_BRIDGE(i_o2sBridgeNum),
+            "ERROR: AVS command failed. Bad CRC detected by P10 on AVSBus Slave Segement.");
+        }
+        else if(l_rsp_ack_code == 0x02)
+        {
+            FAPI_DBG("ERROR: AVS command failed for %s. Bad CRC indicated by Slave VRM on AVSBus Master Segement.",
+            g_rail_str[i_RailSelect]);
+            FAPI_ASSERT((i_throw_assert != true),
+            fapi2::PM_AVSBUS_SLAVE_BAD_CRC_ERROR()
+            .set_PROC_TARGET(i_target)
+            .set_BUS(i_avsBusNum)
+            .set_BRIDGE(i_o2sBridgeNum),
+            "ERROR: AVS command failed. Bad CRC indicated by Slave VRM on AVSBus Master Segement.");
+        }
+        else if(l_rsp_ack_code == 0x01)
+        {
+            if (i_opType == p10avslib::VLTG_WRITE_VLTG)
+            {
+
+                FAPI_ERR("ERROR: AVS Write Voltage command problem for rail %s.  Valid data sent but no action is taken due to unavailable resource.",
+                g_rail_str[i_RailSelect]);
+
+                // Parse the Status Response for the reason.
+
+                if (l_rsp_status.getBit<p10avslib::AVSBUS_STATRSP_STATALRT>())
+                {
+                    FAPI_INF("  Status indicator detected");
+
+                    // Read the status register to find out what happened.
+                    FAPI_TRY(avsStatusRead(i_target, i_avsBusNum, i_o2sBridgeNum, i_RailSelect, l_buffer));
+                    l_status_data.insertFromRight<0, 32>(l_buffer);
+
+                    // Yes, this is recursive but with a different OpType
+                    FAPI_TRY(avsValidateResponse(i_target,
+                    i_avsBusNum,
+                    i_o2sBridgeNum,
+                    i_RailSelect,
+                    i_throw_assert,
+                    l_goodResponse,
+                    p10avslib::VLTG_READ_STAT));
+
+                    if (!l_goodResponse)
+                    {
+                        FAPI_ASSERT((i_throw_assert != true),
+                        fapi2::PM_AVSBUS_STATUS_READ_ERROR()
                         .set_PROC_TARGET(i_target)
                         .set_BUS(i_avsBusNum)
-                        .set_BRIDGE(i_o2sBridgeNum),
-                        "ERROR: AVS command failed. Bad CRC detected by P10 on AVSBus Slave Segement.");
+                        .set_BRIDGE(i_o2sBridgeNum)
+                        .set_RAIL(i_RailSelect)
+                        .set_COMMAND(l_command)
+                        .set_RESP_DATA(l_status_data),
+                        "ERROR: AVS Read Status command validation failed.");
+                        FAPI_TRY(avsIdleFrame(i_target, i_avsBusNum, i_o2sBridgeNum));
+                    }
+
+                    // Parse the status for the reason.  The actual status is bits 8:12
+                    if (l_status_data.getBit<p10avslib::AVSBUS_STATUS_OCW>())
+                    {
+                        FAPI_ERR("  Over Current Warning status detected");
+                        b_over_current = true;
+                    }
+
+                    if (l_status_data.getBit<p10avslib::AVSBUS_STATUS_UVW>())
+                    {
+                        FAPI_ERR("  Under Voltage Warning status detected");
+                        b_under_volt = true;
+                    }
+
+                    if (l_status_data.getBit<p10avslib::AVSBUS_STATUS_OTW>())
+                    {
+
+                        FAPI_ERR("  Over Temperature Warning status detected");
+                        b_over_temp = true;
+                    }
+
+                    if (l_status_data.getBit<p10avslib::AVSBUS_STATUS_OPW>() )
+                    {
+                        FAPI_ERR("  Over Power Warning status detected");
+                        b_over_power = true;
+                    }
+                }
+
+                if (!(l_rsp_status.getBit<p10avslib::AVSBUS_STATRSP_AVSCTRL>()))
+                {
+
+                    FAPI_ERR("  VRM NOT controlled by AVSBus");
+                    b_avs_in_control = false;
+                }
+
+                FAPI_ASSERT((i_throw_assert != true),
+                            fapi2::PM_AVSBUS_WRITE_VOLTAGE_ERROR()
+                            .set_PROC_TARGET(i_target)
+                            .set_BUS(i_avsBusNum)
+                            .set_RAIL(i_RailSelect)
+                            .set_COMMAND(l_command)
+                            .set_RESP_DATA(l_rsp_data)
+                            .set_STATUS(l_status_data)
+                            .set_AVSCTRL(b_avs_in_control)
+                            .set_STATUS_ALERT(b_status_alert)
+                            .set_OVERCURRENT(b_over_current)
+                            .set_UNDERVOLT(b_under_volt)
+                            .set_OVERTEMP(b_over_temp)
+                            .set_OVERPOWER(b_over_power),
+                            "ERROR: AVS Write voltage command failed due to unavailable resource. No VRM action was taken.");
+            }
+            else
+            {
+                FAPI_ASSERT((i_throw_assert != true),
+                            fapi2::PM_AVSBUS_UNAVAILABLE_RESOURCE_ERROR()
+                            .set_PROC_TARGET(i_target)
+                            .set_BUS(i_avsBusNum)
+                            .set_BRIDGE(i_o2sBridgeNum)
+                            .set_RAIL(i_RailSelect)
+                            .set_COMMAND(l_command)
+                            .set_RESP_DATA(l_rsp_data),
+                            "ERROR: AVS command failed. Valid data sent but no action is taken due to unavailable resource.");
+            }
+
         }
-        else if(l_data_status_code == 0x02)
+        else if(l_rsp_ack_code == 0x03)
         {
-            FAPI_DBG("ERROR: AVS command failed. Bad CRC indicated by Slave VRM on AVSBus Master Segement.");
-            FAPI_ASSERT((i_throw_assert != true),
-                        fapi2::PM_AVSBUS_SLAVE_BAD_CRC_ERROR()
-                        .set_PROC_TARGET(i_target)
-                        .set_BUS(i_avsBusNum)
-                        .set_BRIDGE(i_o2sBridgeNum),
-                        "ERROR: AVS command failed. Bad CRC indicated by Slave VRM on AVSBus Master Segement.");
-        }
-        else if(l_data_status_code == 0x01)
-        {
-            FAPI_DBG("WARNING: AVS command no action.  Valid data sent but no action is taken due to unavailable resource.");
-            FAPI_ASSERT((i_throw_assert != true),
-                        fapi2::PM_AVSBUS_UNAVAILABLE_RESOURCE_ERROR()
-                        .set_PROC_TARGET(i_target)
-                        .set_BUS(i_avsBusNum)
-                        .set_BRIDGE(i_o2sBridgeNum),
-                        "ERROR: AVS command failed. Valid data sent but no action is taken due to unavailable resource.");
-        }
-        else if(l_data_status_code == 0x03)
-        {
-            FAPI_DBG("ERROR: AVS command failed. Unknown resource, invalid data, incorrect data or incorrect action.");
+            FAPI_DBG("ERROR: AVS command failed for rail %s. Unknown resource, invalid data, incorrect data or incorrect action.",
+                     g_rail_str[i_RailSelect]);
             FAPI_ASSERT((i_throw_assert != true),
                         fapi2::PM_AVSBUS_INVALID_DATA_ERROR()
                         .set_PROC_TARGET(i_target)
                         .set_BUS(i_avsBusNum)
-                        .set_BRIDGE(i_o2sBridgeNum),
+                        .set_BRIDGE(i_o2sBridgeNum)
+                        .set_RAIL(i_RailSelect)
+                        .set_COMMAND(l_command)
+                        .set_RESP_DATA(l_rsp_data),
                         "ERROR: AVS command failed. Unknown resource, invalid data, incorrect data or incorrect action.");
         }
     }

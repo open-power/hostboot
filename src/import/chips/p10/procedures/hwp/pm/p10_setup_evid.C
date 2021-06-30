@@ -354,7 +354,8 @@ p10_setup_evid_voltageRead(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
             // Throw an assertion if we don't get a good response.
             l_throwAssert =  (l_count >= AVSBUS_RETRY_COUNT);
             FAPI_TRY(avsValidateResponse(i_target,  i_bus_num[i_evid_value], BRIDGE_NUMBER,
-                                         l_throwAssert, l_goodResponse));
+                                         i_rail_select[i_evid_value], l_throwAssert, l_goodResponse,
+                                         p10avslib::VLTG_READ_VLTG));
 
             if (!l_goodResponse)
             {
@@ -569,8 +570,10 @@ p10_setup_evid_voltageWrite(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
             FAPI_TRY(avsValidateResponse(i_target,
                                          i_bus_num,
                                          BRIDGE_NUMBER,
+                                         i_rail_select,
                                          l_throwAssert,
-                                         l_goodResponse));
+                                         l_goodResponse,
+                                         p10avslib::VLTG_WRITE_VLTG));
 
             if (!l_goodResponse)
             {
