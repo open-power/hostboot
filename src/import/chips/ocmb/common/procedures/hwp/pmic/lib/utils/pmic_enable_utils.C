@@ -130,6 +130,65 @@ namespace pmic
 {
 
 ///
+/// @brief Set PWR_GOOD pin to I/O
+///
+/// @param[in] i_pmic_target PMIC target
+/// @return fapi2::FAPI2_RC_SUCCESS iff success
+/// @note This is intended for use on 1U/2U DDIMMs
+///
+fapi2::ReturnCode set_pwr_good_pin_io(
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target)
+{
+    static constexpr auto J = mss::pmic::product::JEDEC_COMPLIANT;
+    using REGS = pmicRegs<J>;
+    using FIELDS = pmicFields<J>;
+    using CONSTS = mss::pmic::consts<J>;
+
+    fapi2::buffer<uint8_t> l_vr_enable_buffer;
+
+    FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(i_pmic_target, REGS::R32, l_vr_enable_buffer));
+
+    // Enable I/O PWR_GOOD pin (1 --> Bit 5)
+    l_vr_enable_buffer.writeBit<FIELDS::R32_PWR_GOOD_IO_TYPE>(CONSTS::PWR_GOOD_IO_TYPE_IO);
+    FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(i_pmic_target, REGS::R32, l_vr_enable_buffer));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Toggle the VR enable bit (0->1)
+///
+/// @param[in] i_pmic_target PMIC target
+/// @return fapi2::FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode toggle_vr_enable(
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target)
+{
+    static constexpr auto J = mss::pmic::product::JEDEC_COMPLIANT;
+    using REGS = pmicRegs<J>;
+    using FIELDS = pmicFields<J>;
+
+    fapi2::buffer<uint8_t> l_vr_enable_buffer;
+
+    // Toggle VR enable bit (0->1)
+    // VR disable
+    FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(i_pmic_target, REGS::R32, l_vr_enable_buffer));
+    l_vr_enable_buffer.clearBit<FIELDS::R32_VR_ENABLE>();
+    FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(i_pmic_target, REGS::R32, l_vr_enable_buffer));
+    // VR enable
+    l_vr_enable_buffer.setBit<FIELDS::R32_VR_ENABLE>();
+    FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(i_pmic_target, REGS::R32, l_vr_enable_buffer));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief set VR enable bit for system startup via R32 (not broadcast)
 ///
 /// @param[in] i_pmic_target PMIC target
@@ -241,6 +300,8 @@ fapi2::ReturnCode set_soft_start_time(const fapi2::Target<fapi2::TargetType::TAR
     using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
 
     // Just a direct write
+    // If this ever increases from 4ms, need to consider changing delay used for 1U/2U DDIMMs
+    //   before the function call set_pwr_good_pin_io for TI PMICs.  See enable_1u_2u for more details.
     fapi2::buffer<uint8_t> l_reg_contents(CONSTS::R2C_R2D_4MS_ALL);
     FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, REGS::R2C, l_reg_contents));
     FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, REGS::R2D, l_reg_contents));
@@ -766,10 +827,36 @@ fapi2::ReturnCode disable_and_reset_pmics(const fapi2::Target<fapi2::TARGET_TYPE
     // First, grab the PMIC targets in REL_POS order
     // Make sure to grab all pmics - functional or not, in case the parent OCMB
     // was deconfigured. That may have marked the PMICs as non-functional
+    bool l_pmic_is_ti = false;
     auto l_pmics = mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target, fapi2::TARGET_STATE_PRESENT);
 
     // Next, sort them by the sequence attributes
     FAPI_TRY(mss::pmic::order_pmics_by_sequence(i_ocmb_target, l_pmics));
+
+    // First, we have to clear the PWR_GOOD IO Mode for all TI PMICs, then we will VR Disable for
+    // all PMICs. These have to be done in separate loops, as once a PMIC is disabled, it may drive
+    // PWR_GOOD low which would cause the other PMIC to immediately turn off (if it was still
+    // configured in I/O mode)
+
+    // Iterate in the reverse order of the sequence attributes, so we disable in the reverse sequence
+    for (int16_t l_i = (l_pmics.size() - 1); l_i >= 0; --l_i)
+    {
+        const auto& PMIC = l_pmics[l_i];
+
+        // TI PMICS, we need to reset the PWR_GOOD_IO_TYPE to OUTPUT (instead of I/O) before we VR_DISABLE
+        // For 4U this is essentially a no-op since we'll always be in Output mode, but is required for 2U
+        FAPI_TRY(pmic_is_ti(PMIC, l_pmic_is_ti));
+
+        if (l_pmic_is_ti)
+        {
+            fapi2::buffer<uint8_t> l_reg_contents;
+
+            FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(PMIC, REGS::R32, l_reg_contents));
+            l_reg_contents.writeBit<FIELDS::R32_PWR_GOOD_IO_TYPE>(CONSTS::PWR_GOOD_IO_TYPE_OUTPUT);
+            FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(PMIC, REGS::R32, l_reg_contents));
+
+        }
+    }
 
     // Reverse loop
     for (int16_t l_i = (l_pmics.size() - 1); l_i >= 0; --l_i)
@@ -781,6 +868,7 @@ fapi2::ReturnCode disable_and_reset_pmics(const fapi2::Target<fapi2::TARGET_TYPE
             fapi2::buffer<uint8_t> l_reg_contents;
 
             // Redundant clearBit, but just so it's clear what we're doing
+            FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(PMIC, REGS::R32, l_reg_contents));
             l_reg_contents.clearBit<FIELDS::R32_VR_ENABLE>();
 
             // Due to long soft stop time in 4U (~8ms), let's delay for 10ms to be safe
@@ -835,6 +923,41 @@ fapi2::ReturnCode enable_1u_2u(
     // Now the PMICs are in the right order of DIMM and the right order by their defined SPD sequence within each dimm
     // Let's kick off the enables
 
+    // We must consider the PWR_GOOD mode. The enable sequence must be in this order:
+    // PMIC0,1:  pgood=input+output  (IDT ONLY)
+    // PMIC0,1:  VR enable
+    // PMIC0,1:  pgood=input+output  (TI ONLY)
+
+    // We should never have PMICs from both vendors on a dimm, so we shouldn't have to worry about any
+    // interleaving. However, we do check the vendor on each PMIC anyway.
+
+    // Ensure the PMICs are in sorted order
+    FAPI_TRY(mss::pmic::order_pmics_by_sequence(i_ocmb_target, l_pmics));
+
+    // Before VR enable is done, enable PWR_GOOD on IDT PMICs
+    // Configure PWR_GOOD for IDT PMIC
+    for (const auto& l_pmic : l_pmics)
+    {
+        l_current_pmic = l_pmic;
+        uint16_t l_vendor_id = 0;
+
+        // Get vendor ID
+        FAPI_TRY(mss::attr::get_mfg_id[get_relative_pmic_id(l_pmic)](i_ocmb_target, l_vendor_id));
+
+        // Call the procedure to configure power good pin to I/O for last PMIC in power on sequence in
+        // order to have DDR4 SDRAM VPP/VDDR power sequencing spec met (VPP >= VDDR) when a PMIC fails
+        // TI PMICs violate this power sequencing spec if both PMICs have PWR_GOOD=I/O when system
+        //   does a power off/on.  IDT does not, but will set both up the same way.
+        // TI PMICs PWR_GOOD I/O mode must be enabled after VR Enable
+        // IDT PMICs PWR_GOOD I/O mode must be enabled before VR Enable
+
+        if ((l_vendor_id == mss::pmic::vendor::IDT) && (l_pmic != l_pmics[0]))
+        {
+            FAPI_TRY(set_pwr_good_pin_io(l_pmic));
+        }
+    }
+
+    // So we will need a few loops, VR will be enabled here (in the if or else block here)
     if (i_mode == mss::pmic::enable_mode::MANUAL)
     {
         for (const auto& l_pmic : l_pmics)
@@ -849,9 +972,6 @@ fapi2::ReturnCode enable_1u_2u(
     }
     else
     {
-        // Ensure the PMICs are in sorted order
-        FAPI_TRY(mss::pmic::order_pmics_by_sequence(i_ocmb_target, l_pmics));
-
         // 1U/2U enable process
         for (const auto& l_pmic : l_pmics)
         {
@@ -866,8 +986,63 @@ fapi2::ReturnCode enable_1u_2u(
                      "pmic_enable: Error enabling PMIC %s", mss::c_str(l_pmic));
         }
 
-        fapi2::delay(10 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
     }
+
+    // After VR has been enabled, enable PWR_GOOD on TI PMICs
+    // Toggle VR enable for TI PMIC
+    // Configure PWR_GOOD for TI PMIC
+    for (const auto& l_pmic : l_pmics)
+    {
+        l_current_pmic = l_pmic;
+        uint16_t l_vendor_id = 0;
+
+        // Get vendor ID
+        FAPI_TRY(mss::attr::get_mfg_id[get_relative_pmic_id(l_pmic)](i_ocmb_target, l_vendor_id));
+
+        // Only do for last TI PMIC in power on sequence as that is the one that will have PWR_GOOD set to I/O
+        if ((l_vendor_id == mss::pmic::vendor::TI) && (l_pmic != l_pmics[0]))
+        {
+
+            // Don't think that a delay is needed before toggling VR enable
+            // 4U DDIMMs have a VR enable toggle (0->1->0) toggle with no delay
+            // Have not seen fails on 2U DDIMMs with no delay here, so not adding it at this time
+
+            // Toggle VR enable for TI PMIC for last TI PMIC in power on sequence
+            // Needed for TI PMIC when PWR_GOOD=Input/output, otherwise PMICs may not power on after system power off/on
+            FAPI_TRY(toggle_vr_enable(l_pmic));
+
+            // Setting PWR_GOOD to I/O too soon after VR enable causes PMIC to fail to power on successfully
+            // Seen failure to power on rails with delay of 3ms with soft start time 4ms in a system with 2U DDIMMs
+            // Seen failure to power on rails with delay of 29ms with soft start time 14ms in a system with 2U DDIMMs
+            //   These are lower than calculated, but in sytems there will be delay time in sending commands
+            // This delay needs to account for the time for all rails to power up per the power on sequence
+            //   config 0-3 registers because after all PMIC output regulators are on it will release PWR_GOOD
+            //   Want to configure PWR_GOOD to I/O after PMIC has released PWR_GOOD (ie.  after it goes high)
+            //   When choosing a delay value, make sure it also accounts for the PMIC soft start times
+            // 1U/2U DDIMM settings use 4ms soft start time and two power on sequence config registers with 2ms idle delay
+            //    Power on sequence config0 (soft start time + delay time) = 4 + 2 = 6 ms
+            //    Power on sequence config1 (soft start time + delay time) = 4 + 0 = 4 ms (delay time shouldn't apply)
+            //    Total time = 10 ms, but soft start time depends on voltage level so need to account for that
+            //      If we double this to 20 ms, that should be more than enough for 1U/2U DDIMMs settings in use today
+            //    Worst case time would account for 14ms soft start time, 24ms delay time, and 4 power seq config regs
+            //      [4 * (14 + 24)] = 152  (last delay time may not be needed, but we need margin for soft start times
+            // Let's use 50ms to account for some (not worst case) increases in soft start time and idle delay time
+            // If we wanted to really play it safe, we'd have to read registers/attributes and base this delay on that
+            fapi2::delay(50 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
+
+            // Call the procedure to configure power good pin to I/O for last PMIC in power on sequence in
+            // order to have DDR4 SDRAM VPP/VDDR power sequencing spec met (VPP >= VDDR) when a PMIC fails
+            // TI PMICs violate this power sequencing spec if both PMICs have PWR_GOOD=I/O when system
+            //   does a power off/on.  IDT does not, but will set both up the same way.
+            // TI PMICs PWR_GOOD I/O mode must be enabled after VR Enable
+            // IDT PMICs PWR_GOOD I/O mode must be enabled before VR Enable
+
+            FAPI_TRY(set_pwr_good_pin_io(l_pmic));
+        }
+    }
+
+    // delay after final VR enable and before checking status
+    fapi2::delay(10 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
 
     // Check that all the PMIC statuses are good post-enable
     FAPI_TRY(mss::pmic::status::check_all_pmics(i_ocmb_target),
