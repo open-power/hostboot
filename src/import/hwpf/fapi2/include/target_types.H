@@ -85,6 +85,7 @@ enum TargetType : uint64_t
     TARGET_TYPE_PAUC            = 0x0000001000000000, ///< PAUC type
     TARGET_TYPE_GENERICI2CSLAVE = 0x0000002000000000, ///< GENERICI2CSLAVE type
     TARGET_TYPE_IOLINK          = 0x0000004000000000, ///< IOLINK type
+    TARGET_TYPE_MDS_CTLR        = 0x0000008000000000, ///< MDS Media Controller type
     TARGET_TYPE_MULTICAST       = 0x8000000000000000, ///< MULTICAST type
     TARGET_TYPE_ALL             = 0x7FFFFFFFFFFFFFFF, ///< Any/All types
     TARGET_TYPE_ALL_MC          = 0xFFFFFFFFFFFFFFFF, ///< Any/All types + Multicast

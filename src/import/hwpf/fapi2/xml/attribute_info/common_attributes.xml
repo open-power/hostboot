@@ -47,7 +47,8 @@
       TARGET_TYPE_IOHS,
       TARGET_TYPE_PAUC,
       TARGET_TYPE_GENERICI2CSLAVE,
-      TARGET_TYPE_IOLINK
+      TARGET_TYPE_IOLINK,
+      TARGET_TYPE_MDS_CTLR
     </targetType>
     <description>
       1 if the target is functional, else 0.  Set by the platform.
@@ -65,7 +66,7 @@
     <targetType>
       TARGET_TYPE_PROC_CHIP, TARGET_TYPE_MEMBUF_CHIP,
       TARGET_TYPE_DIMM, TARGET_TYPE_OCMB_CHIP, TARGET_TYPE_PMIC,
-      TARGET_TYPE_GENERICI2CSLAVE
+      TARGET_TYPE_GENERICI2CSLAVE, TARGET_TYPE_MDS_CTLR
     </targetType>
     <description>
       Physical position of chip/dimm within drawer
@@ -95,7 +96,8 @@
       TARGET_TYPE_FC,
       TARGET_TYPE_PAUC,
       TARGET_TYPE_GENERICI2CSLAVE,
-      TARGET_TYPE_IOLINK
+      TARGET_TYPE_IOLINK,
+      TARGET_TYPE_MDS_CTLR
     </targetType>
     <description>
       Logical position of target within a system. This is derived from the SMP location
@@ -132,7 +134,8 @@
       TARGET_TYPE_IOHS,
       TARGET_TYPE_PAUC,
       TARGET_TYPE_GENERICI2CSLAVE,
-      TARGET_TYPE_IOLINK
+      TARGET_TYPE_IOLINK,
+      TARGET_TYPE_MDS_CTLR
     </targetType>
     <description>
       A target's position relative to its immediate parent target.
@@ -158,6 +161,7 @@
       MEMBUF - MBA - DIMM
       MEMBUF - L4
       OCMB - MEM_PORT - DIMM
+      OCMB - MDS_CTLR
 
     </description>
     <valueType>uint8</valueType>
