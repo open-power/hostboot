@@ -595,8 +595,8 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                         // Make the error log predictive.
                         io_sc.service_data->setServiceCall();
 
-                        // Permanently mask mainline NCEs and TCEs.
-                        __maskMainlineNceTces<T>( iv_chip );
+                        // Permanently mask mainline NCEs and TCEs and ban TPS.
+                        MemDbUtils::banTps<T>( iv_chip, iv_rank );
                     }
                 }
                 else
@@ -631,8 +631,8 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
             // Else we can't place a spare
             else
             {
-                // Permanently mask mainline NCEs and TCEs.
-                __maskMainlineNceTces<T>( iv_chip );
+                // Permanently mask mainline NCEs and TCEs and ban TPS.
+                MemDbUtils::banTps<T>( iv_chip, iv_rank );
 
                 // If the symbol mark is available.
                 if ( !symMark.isValid() )
@@ -776,7 +776,7 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                     io_sc.service_data->setServiceCall();
 
                     // Permanently mask mainline NCEs and TCEs
-                    __maskMainlineNceTces<T>( iv_chip );
+                    MemDbUtils::banTps<T>( iv_chip, iv_rank );
                 }
             }
             else
@@ -803,7 +803,7 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                 io_sc.service_data->setServiceCall();
 
                 // Permanently mask mainline NCEs and TCEs
-                __maskMainlineNceTces<T>( iv_chip );
+                MemDbUtils::banTps<T>( iv_chip, iv_rank );
             }
             // If the chip mark is available.
             if ( !chipMark.isValid() )
@@ -882,7 +882,7 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                     io_sc.service_data->setServiceCall();
 
                     // Permanently mask mainline NCEs and TCEs.
-                    __maskMainlineNceTces<T>( iv_chip );
+                    MemDbUtils::banTps<T>( iv_chip, iv_rank );
                 }
             }
             // If the symbol mark is available.
@@ -951,7 +951,7 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                     io_sc.service_data->setServiceCall();
 
                     // Permanently mask mainline NCEs and TCEs.
-                    __maskMainlineNceTces<T>( iv_chip );
+                    MemDbUtils::banTps<T>( iv_chip, iv_rank );
                 }
             }
 
@@ -974,7 +974,7 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
             io_sc.service_data->setServiceCall();
 
             // Permanently mask mainline NCEs and TCEs.
-            __maskMainlineNceTces<T>( iv_chip );
+            MemDbUtils::banTps<T>( iv_chip, iv_rank );
         }
 
         // If analysis resulted in a false alarm.
