@@ -255,7 +255,7 @@ actionclass threshold_and_mask_self_th1
     threshold_and_mask_th1;
 };
 
-actionclass omiRunningInDegradedMode
+actionclass omi_degraded_mode
 {
     omi_bus_th_1;
     funccall("OmiDegradeDD1Workaround"); # Must be called after threshold
@@ -271,21 +271,21 @@ actionclass self_th_1_noClearFirBits
 {
     calloutSelfMed;
     threshold1;
-    funccall("returnNoClearFirBits");
+    funccall("returnNoClearFirBits"); # must be called last
 };
 
 actionclass mem_port_th_1_noClearFirBits
 {
     mem_port;
     threshold1;
-    funccall("returnNoClearFirBits");
+    funccall("returnNoClearFirBits"); # must be called last
 };
 
 actionclass omi_bus_th_1_noClearFirBits
 {
     omi_bus;
     threshold1;
-    funccall("returnNoClearFirBits");
+    funccall("returnNoClearFirBits"); # must be called last
 };
 
 ################################################################################
@@ -295,6 +295,24 @@ actionclass omi_bus_th_1_noClearFirBits
 actionclass self_th_1_UERE     { self_th_1;     SueSource; };
 actionclass level2_th_1_UERE   { level2_th_1;   SueSource; };
 actionclass mem_port_th_1_UERE { mem_port_th_1; SueSource; };
+
+actionclass self_th_1_noClearFirBits_UERE
+{
+    SueSource;
+    self_th_1_noClearFirBits; # must be called last
+};
+
+actionclass mem_port_th_1_noClearFirBits_UERE
+{
+    SueSource;
+    mem_port_th_1_noClearFirBits; # must be called last
+};
+
+actionclass omi_bus_th_1_noClearFirBits_UERE
+{
+    SueSource;
+    omi_bus_th_1_noClearFirBits; # must be called last
+};
 
 ################################################################################
 #                               Default callouts                               #
@@ -326,8 +344,9 @@ actionclass foxhound_fatal
 };
 
 /** OMI-DL Fatal Error */
-actionclass dl_fatal_error
+actionclass dl_fatal_error_UERE
 {
+    SueSource;
     try( funccall("DlFatalError"), omi_bus );
     threshold1;
     funccall("returnNoClearFirBits");
@@ -356,8 +375,9 @@ actionclass mainline_nce_tce_handling
 };
 
 /** Handle Mainline AUEs/IAUEs */
-actionclass mainline_aue_iaue_handling
+actionclass mainline_aue_iaue_handling_UERE
 {
+    SueSource;
     funccall("AnalyzeFetchAueIaue");
     mem_port_L;
     threshold1;
@@ -410,8 +430,9 @@ actionclass memory_impe_handling
 };
 
 /** Handle Maintenance AUEs */
-actionclass maintenance_aue_handling
+actionclass maintenance_aue_handling_UERE
 {
+    SueSource;
     funccall("AnalyzeMaintAue");
     mem_port_L;
     threshold1;
@@ -419,8 +440,9 @@ actionclass maintenance_aue_handling
 };
 
 /** Handle Maintenance IAUEs */
-actionclass maintenance_iaue_handling
+actionclass maintenance_iaue_handling_UERE
 {
+    SueSource;
     all_dimm_H_memport_L;
     threshold1;
     funccall("returnNoClearFirBits");
@@ -452,11 +474,63 @@ actionclass srq_rcd_parity_error_UERE
     SueSource;
 };
 
-actionclass mem_port_failure
+actionclass mem_port_failure_UERE
 {
     all_dimm_H_memport_L;
     threshold1;                                # Threshold 1
+    SueSource;
     funccall("returnNoClearFirBits");
+};
+
+# During analysis of another attention. PRD is required to manually trigger a
+# channel failure. In which, cases we want to suppress this the extra log,
+# unless it resulted in a system checkstop.
+actionclass fwInitChnlFail_UERE
+{
+    calloutSelfMed;
+    threshold_and_mask_mnfgInfo_th1;
+    SueSource;
+};
+
+################################################################################
+# TLX_ERR1_REPORT register
+################################################################################
+
+actionclass tlxt_recov_error
+{
+    analyze(gTLX_ERR1_REPORT);
+    funccall("clearAndMaskTlxtRe");
+};
+
+rule rTLX_ERR1_REPORT
+{
+  RECOVERABLE:
+    TLX_ERR1_REPORT & ~TLX_ERR1_REPORT_MASK;
+};
+
+group gTLX_ERR1_REPORT
+    filter singlebit,
+           cs_root_cause
+{
+    /** TLX_ERR1_REPORT[37]
+     *  TLXT FIFO CE
+     */
+    (rTLX_ERR1_REPORT, bit(37)) ? self_th_32perDay;
+
+    /** TLX_ERR1_REPORT[39]
+     *  Unexpected Interrupt Response
+     */
+    (rTLX_ERR1_REPORT, bit(39)) ? parent_proc_th_32perDay;
+
+    /** TLX_ERR1_REPORT[40]
+     *  BDI Poisoned
+     */
+    (rTLX_ERR1_REPORT, bit(40)) ? self_th_1;
+
+    /** TLX_ERR1_REPORT[41]
+     *  TLXT Metadata UE
+     */
+    (rTLX_ERR1_REPORT, bit(41)) ? self_th_1;
 };
 
 ################################################################################
@@ -469,11 +543,6 @@ actionclass analyzeSRQFIR    { analyze(gSRQFIR);    };
 actionclass analyzeMCBISTFIR { analyze(gMCBISTFIR); };
 actionclass analyzeRDFFIR    { analyze(gRDFFIR);    };
 actionclass analyzeTLXFIR    { analyze(gTLXFIR);    };
-actionclass analyzeTLXERR1
-{
-    analyze(gTLX_ERR1_REPORT);
-    funccall("clearAndMaskTlxtRe");
-};
 actionclass analyzeOMIDLFIR
 {
     capture(omi_ocmb_ffdc);

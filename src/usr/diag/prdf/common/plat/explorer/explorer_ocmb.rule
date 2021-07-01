@@ -658,17 +658,17 @@ group gMMIOFIR
     /** MMIOFIR[3]
      *  FSM perr
      */
-    (rMMIOFIR, bit(3)) ? self_th_1_noClearFirBits;
+    (rMMIOFIR, bit(3)) ? self_th_1_noClearFirBits_UERE;
 
     /** MMIOFIR[4]
      *  FIFO overflow
      */
-    (rMMIOFIR, bit(4)) ? self_th_1_noClearFirBits;
+    (rMMIOFIR, bit(4)) ? self_th_1_noClearFirBits_UERE;
 
     /** MMIOFIR[5]
      *  Ctl reg parity err
      */
-    (rMMIOFIR, bit(5)) ? self_th_1_noClearFirBits;
+    (rMMIOFIR, bit(5)) ? self_th_1_noClearFirBits_UERE;
 
     /** MMIOFIR[6]
      *  Info reg parity error
@@ -720,7 +720,7 @@ rule rSRQFIR
 
 group gSRQFIR
     filter singlebit,
-           cs_root_cause(1,7,10,11,12,13,16,17,18,19,20,22,24,26,27)
+           cs_root_cause(1,7,10,11,12,13,16,17,18,19,20,22,24,25,26,27)
 {
     /** SRQFIR[0]
      *  SRQ recoverable error
@@ -730,7 +730,7 @@ group gSRQFIR
     /** SRQFIR[1]
      *  SRQ nonrecoverable error
      */
-    (rSRQFIR, bit(1)) ? mem_port_th_1_noClearFirBits;
+    (rSRQFIR, bit(1)) ? mem_port_th_1_noClearFirBits_UERE;
 
     /** SRQFIR[2]
      *  Refresh overrun
@@ -760,7 +760,7 @@ group gSRQFIR
     /** SRQFIR[7]
      *  NCF MCB parity error
      */
-    (rSRQFIR, bit(7)) ? mem_port_th_1_noClearFirBits;
+    (rSRQFIR, bit(7)) ? mem_port_th_1_noClearFirBits_UERE;
 
     /** SRQFIR[8]
      *  DDR MBA event n
@@ -775,22 +775,22 @@ group gSRQFIR
     /** SRQFIR[10]
      *  SM one hot error
      */
-    (rSRQFIR, bit(10)) ? mem_port_th_1_noClearFirBits;
+    (rSRQFIR, bit(10)) ? mem_port_th_1_noClearFirBits_UERE;
 
     /** SRQFIR[11]
      *  Reg parity error
      */
-    (rSRQFIR, bit(11)) ? mem_port_th_1_noClearFirBits;
+    (rSRQFIR, bit(11)) ? mem_port_th_1_noClearFirBits_UERE;
 
     /** SRQFIR[12]
      *  Cmd parity error
      */
-    (rSRQFIR, bit(12)) ? mem_port_th_1_noClearFirBits;
+    (rSRQFIR, bit(12)) ? mem_port_th_1_noClearFirBits_UERE;
 
     /** SRQFIR[13]
      *  Port fail
      */
-    (rSRQFIR, bit(13)) ? mem_port_failure;
+    (rSRQFIR, bit(13)) ? mem_port_failure_UERE;
 
     /** SRQFIR[14]
      *  informational register parity error bit
@@ -805,27 +805,27 @@ group gSRQFIR
     /** SRQFIR[16]
      *  WDF unrecoverable mainline error
      */
-    (rSRQFIR, bit(16)) ? mem_port_th_1_noClearFirBits;
+    (rSRQFIR, bit(16)) ? mem_port_th_1_noClearFirBits_UERE;
 
     /** SRQFIR[17]
      *  WDF mmio error
      */
-    (rSRQFIR, bit(17)) ? mem_port_th_1_noClearFirBits;
+    (rSRQFIR, bit(17)) ? mem_port_th_1_noClearFirBits_UERE;
 
     /** SRQFIR[18]
      *  WDF array UE on mainline operations (SUE put in mem)
      */
-    (rSRQFIR, bit(18)) ? mem_port_th_1_noClearFirBits;
+    (rSRQFIR, bit(18)) ? mem_port_th_1_noClearFirBits_UERE;
 
     /** SRQFIR[19]
      *  WDF mainline dataflow error (SUE not reliably put in mem)
      */
-    (rSRQFIR, bit(19)) ? mem_port_th_1_noClearFirBits;
+    (rSRQFIR, bit(19)) ? mem_port_th_1_noClearFirBits_UERE;
 
     /** SRQFIR[20]
      *  WDF scom register parity err, affecting mainline config
      */
-    (rSRQFIR, bit(20)) ? mem_port_th_1_noClearFirBits;
+    (rSRQFIR, bit(20)) ? mem_port_th_1_noClearFirBits_UERE;
 
     /** SRQFIR[21]
      *  WDF scom register parity err, affecting scom ops only
@@ -835,7 +835,7 @@ group gSRQFIR
     /** SRQFIR[22]
      *  WDF SCOM fsm parity error
      */
-    (rSRQFIR, bit(22)) ? mem_port_th_1_noClearFirBits;
+    (rSRQFIR, bit(22)) ? mem_port_th_1_noClearFirBits_UERE;
 
     /** SRQFIR[23]
      *  WDF write buffer array CE
@@ -845,22 +845,22 @@ group gSRQFIR
     /** SRQFIR[24]
      *  NCF UE
      */
-    (rSRQFIR, bit(24)) ? mem_port_th_1_noClearFirBits;
+    (rSRQFIR, bit(24)) ? mem_port_th_1_noClearFirBits_UERE;
 
     /** SRQFIR[25]
      *  Firmware initiated channel fail
      */
-    (rSRQFIR, bit(25)) ? threshold_and_mask_mnfgInfo_th1;
+    (rSRQFIR, bit(25)) ? fwInitChnlFail_UERE;
 
     /** SRQFIR[26]
      *  NCF logic error
      */
-    (rSRQFIR, bit(26)) ? mem_port_th_1_noClearFirBits;
+    (rSRQFIR, bit(26)) ? mem_port_th_1_noClearFirBits_UERE;
 
     /** SRQFIR[27]
      *  NCF parity error
      */
-    (rSRQFIR, bit(27)) ? mem_port_th_1_noClearFirBits;
+    (rSRQFIR, bit(27)) ? mem_port_th_1_noClearFirBits_UERE;
 
     /** SRQFIR[28]
      *  NCF correctable error
@@ -912,12 +912,12 @@ group gMCBISTFIR
     /** MCBISTFIR[2]
      *  Internal FSM error
      */
-    (rMCBISTFIR, bit(2)) ? self_th_1_noClearFirBits;
+    (rMCBISTFIR, bit(2)) ? self_th_1_noClearFirBits_UERE;
 
     /** MCBISTFIR[3]
      *  MCBIST broadcast out of sync
      */
-    (rMCBISTFIR, bit(3)) ? self_th_1_noClearFirBits;
+    (rMCBISTFIR, bit(3)) ? self_th_1_noClearFirBits_UERE;
 
     /** MCBISTFIR[4]
      *  MCBIST data error
@@ -972,7 +972,7 @@ group gMCBISTFIR
     /** MCBISTFIR[14]
      *  SCOM fatal reg parity error
      */
-    (rMCBISTFIR, bit(14)) ? self_th_1_noClearFirBits;
+    (rMCBISTFIR, bit(14)) ? self_th_1_noClearFirBits_UERE;
 
     /** MCBISTFIR[15]
      *  SCOM WAT and debug reg parity error
@@ -1089,7 +1089,7 @@ group gRDFFIR
     /** RDFFIR[13]
      *  Mainline read AUE
      */
-    (rRDFFIR, bit(13)) ? mainline_aue_iaue_handling;
+    (rRDFFIR, bit(13)) ? mainline_aue_iaue_handling_UERE;
 
     /** RDFFIR[14]
      *  Mainline read UE
@@ -1104,7 +1104,7 @@ group gRDFFIR
     /** RDFFIR[16]
      *  Mainline read IAUE
      */
-    (rRDFFIR, bit(16)) ? mainline_aue_iaue_handling;
+    (rRDFFIR, bit(16)) ? mainline_aue_iaue_handling_UERE;
 
     /** RDFFIR[17]
      *  Mainline read IUE
@@ -1154,7 +1154,7 @@ group gRDFFIR
     /** RDFFIR[33]
      *  Maintenance AUE
      */
-    (rRDFFIR, bit(33)) ? maintenance_aue_handling;
+    (rRDFFIR, bit(33)) ? maintenance_aue_handling_UERE;
 
     /** RDFFIR[34]
      *  Maintenance UE
@@ -1169,7 +1169,7 @@ group gRDFFIR
     /** RDFFIR[36]
      *  Maintenance IAUE
      */
-    (rRDFFIR, bit(36)) ? maintenance_iaue_handling;
+    (rRDFFIR, bit(36)) ? maintenance_iaue_handling_UERE;
 
     /** RDFFIR[37]
      *  Maintenance IUE
@@ -1177,7 +1177,7 @@ group gRDFFIR
     (rRDFFIR, bit(37)) ? maintenance_iue_handling;
 
     /** RDFFIR[38]
-     *  Maintenance  IRCD
+     *  Maintenance IRCD
      */
     (rRDFFIR, bit(38)) ? mem_port_th_32perDay;
 
@@ -1204,12 +1204,12 @@ group gRDFFIR
     /** RDFFIR[43]
      *  SCOM unrecoverable register parity error
      */
-    (rRDFFIR, bit(43)) ? mem_port_th_1_noClearFirBits;
+    (rRDFFIR, bit(43)) ? mem_port_th_1_noClearFirBits_UERE;
 
     /** RDFFIR[44]
      *  ECC corrector internal parity error
      */
-    (rRDFFIR, bit(44)) ? mem_port_th_1_noClearFirBits;
+    (rRDFFIR, bit(44)) ? mem_port_th_1_noClearFirBits_UERE;
 
     /** RDFFIR[45]
      *  Rd Buff ECC CHK Cor CE DW0 Detected
@@ -1224,12 +1224,12 @@ group gRDFFIR
     /** RDFFIR[47]
      *  Rd Buff ECC CHK Cor UE DW0 Detected
      */
-    (rRDFFIR, bit(47)) ? mem_port_th_1_noClearFirBits;
+    (rRDFFIR, bit(47)) ? mem_port_th_1_noClearFirBits_UERE;
 
     /** RDFFIR[48]
      *  Rd Buff ECC CHK Cor UE DW1 Detected
      */
-    (rRDFFIR, bit(48)) ? mem_port_th_1_noClearFirBits;
+    (rRDFFIR, bit(48)) ? mem_port_th_1_noClearFirBits_UERE;
 
     /** RDFFIR[49:59]
      *  Reserved
@@ -1286,47 +1286,47 @@ group gTLXFIR
     /** TLXFIR[1]
      *  Ctrl reg parity error
      */
-    (rTLXFIR, bit(1)) ? self_th_1_noClearFirBits;
+    (rTLXFIR, bit(1)) ? self_th_1_noClearFirBits_UERE;
 
     /** TLXFIR[2]
      *  TLX VC0 return credit counter overflow
      */
-    (rTLXFIR, bit(2)) ? omi_bus_th_1_noClearFirBits;
+    (rTLXFIR, bit(2)) ? omi_bus_th_1_noClearFirBits_UERE;
 
     /** TLXFIR[3]
      *  TLX VC1 return credit counter overflow
      */
-    (rTLXFIR, bit(3)) ? omi_bus_th_1_noClearFirBits;
+    (rTLXFIR, bit(3)) ? omi_bus_th_1_noClearFirBits_UERE;
 
     /** TLXFIR[4]
      *  TLX dcp0 return credit counter overflow
      */
-    (rTLXFIR, bit(4)) ? omi_bus_th_1_noClearFirBits;
+    (rTLXFIR, bit(4)) ? omi_bus_th_1_noClearFirBits_UERE;
 
     /** TLXFIR[5]
      *  TLX dcp1 return credit counter overflow
      */
-    (rTLXFIR, bit(5)) ? omi_bus_th_1_noClearFirBits;
+    (rTLXFIR, bit(5)) ? omi_bus_th_1_noClearFirBits_UERE;
 
     /** TLXFIR[6]
      *  TLX credit management block error
      */
-    (rTLXFIR, bit(6)) ? self_th_1_noClearFirBits;
+    (rTLXFIR, bit(6)) ? self_th_1_noClearFirBits_UERE;
 
     /** TLXFIR[7]
      *  TLX credit management block parity error
      */
-    (rTLXFIR, bit(7)) ? self_th_1_noClearFirBits;
+    (rTLXFIR, bit(7)) ? self_th_1_noClearFirBits_UERE;
 
     /** TLXFIR[8]
      *  TLXT fatal parity error
      */
-    (rTLXFIR, bit(8)) ? self_th_1_noClearFirBits;
+    (rTLXFIR, bit(8)) ? self_th_1_noClearFirBits_UERE;
 
     /** TLXFIR[9]
      *  TLXT recoverable error
      */
-    (rTLXFIR, bit(9)) ? analyzeTLXERR1;
+    (rTLXFIR, bit(9)) ? tlxt_recov_error;
 
     /** TLXFIR[10]
      *  TLXT configuration error
@@ -1336,7 +1336,7 @@ group gTLXFIR
     /** TLXFIR[11]
      *  TLXT informational parity error
      */
-    (rTLXFIR, bit(11)) ? self_th_1_noClearFirBits;
+    (rTLXFIR, bit(11)) ? self_th_1_noClearFirBits_UERE;
 
     /** TLXFIR[12]
      *  TLXT hard error
@@ -1361,7 +1361,7 @@ group gTLXFIR
     /** TLXFIR[18]
      *  OC malformed
      */
-    (rTLXFIR, bit(18)) ? omi_bus_th_1_noClearFirBits;
+    (rTLXFIR, bit(18)) ? omi_bus_th_1_noClearFirBits_UERE;
 
     /** TLXFIR[19]
      *  OC protocol error
@@ -1371,32 +1371,32 @@ group gTLXFIR
     /** TLXFIR[20]
      *  Address translate error
      */
-    (rTLXFIR, bit(20)) ? self_th_1_noClearFirBits;
+    (rTLXFIR, bit(20)) ? self_th_1_noClearFirBits_UERE;
 
     /** TLXFIR[21]
      *  Metadata unc or data parity error
      */
-    (rTLXFIR, bit(21)) ? self_th_1_noClearFirBits;
+    (rTLXFIR, bit(21)) ? self_th_1_noClearFirBits_UERE;
 
     /** TLXFIR[22]
      *  OC unsupported group 2
      */
-    (rTLXFIR, bit(22)) ? omi_bus_th_1_noClearFirBits;
+    (rTLXFIR, bit(22)) ? omi_bus_th_1_noClearFirBits_UERE;
 
     /** TLXFIR[23]
      *  OC unsupported group 1
      */
-    (rTLXFIR, bit(23)) ? omi_bus_th_1_noClearFirBits;
+    (rTLXFIR, bit(23)) ? omi_bus_th_1_noClearFirBits_UERE;
 
     /** TLXFIR[24]
      *  Bit flip control error
      */
-    (rTLXFIR, bit(24)) ? self_th_1_noClearFirBits;
+    (rTLXFIR, bit(24)) ? self_th_1_noClearFirBits_UERE;
 
     /** TLXFIR[25]
      *  Control HW error
      */
-    (rTLXFIR, bit(25)) ? self_th_1_noClearFirBits;
+    (rTLXFIR, bit(25)) ? self_th_1_noClearFirBits_UERE;
 
     /** TLXFIR[26]
      *  ECC corrected and others
@@ -1418,37 +1418,6 @@ group gTLXFIR
      */
     (rTLXFIR, bit(29)) ? defaultMaskedError;
 
-};
-
-rule rTLX_ERR1_REPORT
-{
-  RECOVERABLE:
-    TLX_ERR1_REPORT & ~TLX_ERR1_REPORT_MASK;
-};
-
-group gTLX_ERR1_REPORT
-    filter singlebit,
-           cs_root_cause
-{
-    /** TLX_ERR1_REPORT[37]
-     *  TLXT FIFO CE
-     */
-    (rTLX_ERR1_REPORT, bit(37)) ? self_th_32perDay;
-
-    /** TLX_ERR1_REPORT[39]
-     *  Unexpected Interrupt Response
-     */
-    (rTLX_ERR1_REPORT, bit(39)) ? parent_proc_th_32perDay;
-
-    /** TLX_ERR1_REPORT[40]
-     *  BDI Poisoned
-     */
-    (rTLX_ERR1_REPORT, bit(40)) ? self_th_1;
-
-    /** TLX_ERR1_REPORT[41]
-     *  TLXT Metadata UE
-     */
-    (rTLX_ERR1_REPORT, bit(41)) ? self_th_1;
 };
 
 ################################################################################
@@ -1474,12 +1443,12 @@ group gOMIDLFIR
     /** OMIDLFIR[0]
      *  OMI-DL0 fatal error
      */
-    (rOMIDLFIR, bit(0)) ? dl_fatal_error;
+    (rOMIDLFIR, bit(0)) ? dl_fatal_error_UERE;
 
     /** OMIDLFIR[1]
      *  OMI-DL0 UE on data flit
      */
-    (rOMIDLFIR, bit(1)) ? self_th_1_noClearFirBits;
+    (rOMIDLFIR, bit(1)) ? self_th_1_noClearFirBits_UERE;
 
     /** OMIDLFIR[2]
      *  OMI-DL0 CE on TL flit
@@ -1499,7 +1468,7 @@ group gOMIDLFIR
     /** OMIDLFIR[5]
      *  OMI-DL0 running in degraded mode
      */
-    (rOMIDLFIR, bit(5)) ? omiRunningInDegradedMode;
+    (rOMIDLFIR, bit(5)) ? omi_degraded_mode;
 
     /** OMIDLFIR[6]
      *  OMI-DL0 parity error detection on a lane
@@ -1517,7 +1486,7 @@ group gOMIDLFIR
     (rOMIDLFIR, bit(8)) ? defaultMaskedError;
 
     /** OMIDLFIR[9]
-     *  OMI-DL0 retrain due to internal error or software initiated
+     *  OMI-DL0 retrain due to internal error or software
      */
     (rOMIDLFIR, bit(9)) ? omi_bus_th_32perDay;
 
