@@ -82,7 +82,7 @@
         <note>
             See DL0_ERROR_HOLD[44:45]
         </note>
-        <action id="predefined" name="omi_bus_th_1" />
+        <action id="predefined" name="omi_degraded_mode" />
     </bit>
 
     <bit pos="6" attn_type="RE"
