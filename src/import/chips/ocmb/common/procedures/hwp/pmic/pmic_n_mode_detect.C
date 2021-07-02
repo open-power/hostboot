@@ -53,9 +53,12 @@
 ///
 void reg_write(pmic_info& io_pmic, const uint8_t i_reg, const fapi2::buffer<uint8_t>& i_data)
 {
-    if (mss::pmic::i2c::reg_write(io_pmic.iv_pmic, i_reg, i_data) != fapi2::FAPI2_RC_SUCCESS)
+    if (!(io_pmic.iv_state & pmic_state::NOT_PRESENT))
     {
-        io_pmic.iv_state |= I2C_FAIL;
+        if (mss::pmic::i2c::reg_write(io_pmic.iv_pmic, i_reg, i_data) != fapi2::FAPI2_RC_SUCCESS)
+        {
+            io_pmic.iv_state |= pmic_state::I2C_FAIL;
+        }
     }
 }
 
@@ -69,10 +72,13 @@ void reg_write(pmic_info& io_pmic, const uint8_t i_reg, const fapi2::buffer<uint
 ///
 void reg_read(pmic_info& io_pmic, const uint8_t i_reg, fapi2::buffer<uint8_t>& o_output)
 {
-    if (mss::pmic::i2c::reg_read(io_pmic.iv_pmic, i_reg, o_output) != fapi2::FAPI2_RC_SUCCESS)
+    if (!(io_pmic.iv_state & pmic_state::NOT_PRESENT))
     {
-        io_pmic.iv_state |= I2C_FAIL;
-        o_output = 0x00;
+        if (mss::pmic::i2c::reg_read(io_pmic.iv_pmic, i_reg, o_output) != fapi2::FAPI2_RC_SUCCESS)
+        {
+            io_pmic.iv_state |= pmic_state::I2C_FAIL;
+            o_output = 0x00;
+        }
     }
 }
 ///
@@ -83,16 +89,11 @@ void reg_read(pmic_info& io_pmic, const uint8_t i_reg, fapi2::buffer<uint8_t>& o
 ///
 bool is_4u(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target)
 {
-    // SBE is expected to provide 4 PMIC targets for a 4U redundant DDIMM
-    // We've seen a scenario where the SBE does not provide 4, and the procedure
-    // requires it (see SW526831) so we need to check this here.
-    const auto PMICS = get_pmics(i_ocmb_target);
-
     // SBE is expected to provide exactly 4 GI2C targets
+    // All 4U DDIMMs have 4 GI2C targets, and all 1U/2U DDIMMs have zero, so checking those is sufficient to say if we have a 4U
     const auto GI2CS = i_ocmb_target.getChildren<fapi2::TARGET_TYPE_GENERICI2CSLAVE>(fapi2::TARGET_STATE_PRESENT);
 
-    return (PMICS.size() == mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>::NUM_PMICS_4U) &&
-           (GI2CS.size() == mss::generic_i2c_slave::NUM_TOTAL_DEVICES);
+    return (GI2CS.size() == mss::generic_i2c_slave::NUM_TOTAL_DEVICES);
 }
 
 ///
@@ -203,6 +204,12 @@ void phase_comparison(
     const uint32_t i_phase1,
     aggregate_state& o_aggregate_state)
 {
+    if ((io_first_pmic.iv_state & pmic_state::NOT_PRESENT) || (io_second_pmic.iv_state & pmic_state::NOT_PRESENT))
+    {
+        o_aggregate_state = aggregate_state::N_MODE;
+        return;
+    }
+
     if (((i_phase0 < PHASE_MIN) && i_phase1 > PHASE_MAX) || ((i_phase1 < PHASE_MIN) && (i_phase0 > PHASE_MAX)))
     {
         o_aggregate_state = aggregate_state::N_MODE;
@@ -348,7 +355,18 @@ std::vector<pmic_info> get_pmics(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
     // Not a const reference as the pmic_info ctor discards qualifiers
     for (auto& l_pmic : i_ocmb_target.getChildren<fapi2::TARGET_TYPE_PMIC>(fapi2::TARGET_STATE_PRESENT))
     {
-        l_pmics.push_back(pmic_info(l_pmic));
+        l_pmics.push_back(pmic_info(l_pmic, pmic_state::ALL_GOOD));
+    }
+
+    // If less then 4 PMICs then padd the vector with NOT_PRESENT pmics
+    if (l_pmics.size() >= 1)
+    {
+        while (l_pmics.size() < mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>::NUM_PMICS_4U)
+        {
+            pmic_info l_pmic_info(l_pmics[0]);
+            l_pmic_info.iv_state = pmic_state::NOT_PRESENT;
+            l_pmics.push_back(l_pmic_info);
+        }
     }
 
     return l_pmics;
@@ -395,99 +413,102 @@ void populate_pmic_data(
     pmic_info& io_pmic,
     pmic_telemetry& o_pmic_data)
 {
-    FAPI_INF(TARGTIDFORMAT " Populating PMIC data", MSSTARGID(io_pmic.iv_pmic));
-
-    // Required regs
-    static constexpr uint8_t R08 = 0x08;
-    static constexpr uint8_t R09 = 0x09;
-    static constexpr uint8_t R0A = 0x0A;
-    static constexpr uint8_t R0B = 0x0B;
-    static constexpr uint8_t R33 = 0x33;
-    static constexpr uint8_t R0C = 0x0C;
-    static constexpr uint8_t R0D = 0x0D;
-    static constexpr uint8_t R0E = 0x0E;
-    static constexpr uint8_t R0F = 0x0F;
-    static constexpr uint8_t R30 = 0x30;
-    static constexpr uint8_t R31 = 0x31;
-
-    // 125mA * bitmap = Current value
-    static constexpr uint16_t CURRENT_BITMAP_MULTIPLIER = 125;
-
-    // PMIC's internal ADC: Measure VIN_BULK
-    static constexpr uint8_t ADC_READ_VIN_BULK = 0xA8;
-    static constexpr uint8_t ADC_READ_TEMP = 0xD0;
-
-    static constexpr uint16_t ADC_VIN_BULK_STEP = 70;
-    static constexpr uint16_t ADC_TEMP_STEP = 2;
-
-    static constexpr uint32_t ADC_CNFG_DELAY = mss::DELAY_1MS * 25;
-
-    fapi2::buffer<uint8_t> l_reg_contents;
-
-    // First, the status registers, R08 to R0B, and R33
+    if (!(io_pmic.iv_state & pmic_state::NOT_PRESENT))
     {
-        reg_read(io_pmic, R08, l_reg_contents);
-        o_pmic_data.iv_r08 = l_reg_contents;
+        FAPI_INF(TARGTIDFORMAT " Populating PMIC data", MSSTARGID(io_pmic.iv_pmic));
 
-        reg_read(io_pmic, R09, l_reg_contents);
-        o_pmic_data.iv_r09 = l_reg_contents;
+        // Required regs
+        static constexpr uint8_t R08 = 0x08;
+        static constexpr uint8_t R09 = 0x09;
+        static constexpr uint8_t R0A = 0x0A;
+        static constexpr uint8_t R0B = 0x0B;
+        static constexpr uint8_t R33 = 0x33;
+        static constexpr uint8_t R0C = 0x0C;
+        static constexpr uint8_t R0D = 0x0D;
+        static constexpr uint8_t R0E = 0x0E;
+        static constexpr uint8_t R0F = 0x0F;
+        static constexpr uint8_t R30 = 0x30;
+        static constexpr uint8_t R31 = 0x31;
 
-        reg_read(io_pmic, R0A, l_reg_contents);
-        o_pmic_data.iv_r0a = l_reg_contents;
+        // 125mA * bitmap = Current value
+        static constexpr uint16_t CURRENT_BITMAP_MULTIPLIER = 125;
 
-        reg_read(io_pmic, R0B, l_reg_contents);
-        o_pmic_data.iv_r0b = l_reg_contents;
+        // PMIC's internal ADC: Measure VIN_BULK
+        static constexpr uint8_t ADC_READ_VIN_BULK = 0xA8;
+        static constexpr uint8_t ADC_READ_TEMP = 0xD0;
 
-        reg_read(io_pmic, R33, l_reg_contents);
-        o_pmic_data.iv_r33 = l_reg_contents;
-    }
+        static constexpr uint16_t ADC_VIN_BULK_STEP = 70;
+        static constexpr uint16_t ADC_TEMP_STEP = 2;
 
-    // Next, the current registers
-    {
-        // Overflow is not possible here as CURRENT_BITMAP_MULTIPLIER of 125 results in a max of
-        // 125 * 0xFF = 0x7C83 which is within the uint16_t bounds
+        static constexpr uint32_t ADC_CNFG_DELAY = mss::DELAY_1MS * 25;
 
-        // SWA
-        reg_read(io_pmic, R0C, l_reg_contents);
-        o_pmic_data.iv_swa_current_mA = static_cast<uint16_t>(l_reg_contents()) * CURRENT_BITMAP_MULTIPLIER;
+        fapi2::buffer<uint8_t> l_reg_contents;
 
-        // SWB
-        reg_read(io_pmic, R0D, l_reg_contents);
-        o_pmic_data.iv_swb_current_mA = static_cast<uint16_t>(l_reg_contents()) * CURRENT_BITMAP_MULTIPLIER;
+        // First, the status registers, R08 to R0B, and R33
+        {
+            reg_read(io_pmic, R08, l_reg_contents);
+            o_pmic_data.iv_r08 = l_reg_contents;
 
-        // SWC
-        reg_read(io_pmic, R0E, l_reg_contents);
-        o_pmic_data.iv_swc_current_mA = static_cast<uint16_t>(l_reg_contents()) * CURRENT_BITMAP_MULTIPLIER;
+            reg_read(io_pmic, R09, l_reg_contents);
+            o_pmic_data.iv_r09 = l_reg_contents;
 
-        // SWD
-        reg_read(io_pmic, R0F, l_reg_contents);
-        o_pmic_data.iv_swd_current_mA = static_cast<uint16_t>(l_reg_contents()) * CURRENT_BITMAP_MULTIPLIER;
-    }
+            reg_read(io_pmic, R0A, l_reg_contents);
+            o_pmic_data.iv_r0a = l_reg_contents;
 
-    // Next, measure VIN Bulk by setting up the PMIC's internal ADC
-    {
-        l_reg_contents = ADC_READ_VIN_BULK;
-        reg_write(io_pmic, R30, l_reg_contents);
+            reg_read(io_pmic, R0B, l_reg_contents);
+            o_pmic_data.iv_r0b = l_reg_contents;
 
-        // Delay to let the ADC configure itself
-        fapi2::delay(ADC_CNFG_DELAY, mss::DELAY_1MS);
+            reg_read(io_pmic, R33, l_reg_contents);
+            o_pmic_data.iv_r33 = l_reg_contents;
+        }
 
-        // Now read out the VIN_BULK value in mV
-        reg_read(io_pmic, R31, l_reg_contents);
-        o_pmic_data.iv_vin_bulk_mV = static_cast<uint16_t>(l_reg_contents()) * ADC_VIN_BULK_STEP;
-    }
+        // Next, the current registers
+        {
+            // Overflow is not possible here as CURRENT_BITMAP_MULTIPLIER of 125 results in a max of
+            // 125 * 0xFF = 0x7C83 which is within the uint16_t bounds
 
-    // Next, temperature
-    {
-        l_reg_contents = ADC_READ_TEMP;
-        reg_write(io_pmic, R30, l_reg_contents);
+            // SWA
+            reg_read(io_pmic, R0C, l_reg_contents);
+            o_pmic_data.iv_swa_current_mA = static_cast<uint16_t>(l_reg_contents()) * CURRENT_BITMAP_MULTIPLIER;
 
-        // Delay to let the ADC configure itself
-        fapi2::delay(ADC_CNFG_DELAY, mss::DELAY_1MS);
+            // SWB
+            reg_read(io_pmic, R0D, l_reg_contents);
+            o_pmic_data.iv_swb_current_mA = static_cast<uint16_t>(l_reg_contents()) * CURRENT_BITMAP_MULTIPLIER;
 
-        // Now read out the TEMP value in mV
-        reg_read(io_pmic, R31, l_reg_contents);
-        o_pmic_data.iv_temp_c = static_cast<uint16_t>(l_reg_contents()) * ADC_TEMP_STEP;
+            // SWC
+            reg_read(io_pmic, R0E, l_reg_contents);
+            o_pmic_data.iv_swc_current_mA = static_cast<uint16_t>(l_reg_contents()) * CURRENT_BITMAP_MULTIPLIER;
+
+            // SWD
+            reg_read(io_pmic, R0F, l_reg_contents);
+            o_pmic_data.iv_swd_current_mA = static_cast<uint16_t>(l_reg_contents()) * CURRENT_BITMAP_MULTIPLIER;
+        }
+
+        // Next, measure VIN Bulk by setting up the PMIC's internal ADC
+        {
+            l_reg_contents = ADC_READ_VIN_BULK;
+            reg_write(io_pmic, R30, l_reg_contents);
+
+            // Delay to let the ADC configure itself
+            fapi2::delay(ADC_CNFG_DELAY, mss::DELAY_1MS);
+
+            // Now read out the VIN_BULK value in mV
+            reg_read(io_pmic, R31, l_reg_contents);
+            o_pmic_data.iv_vin_bulk_mV = static_cast<uint16_t>(l_reg_contents()) * ADC_VIN_BULK_STEP;
+        }
+
+        // Next, temperature
+        {
+            l_reg_contents = ADC_READ_TEMP;
+            reg_write(io_pmic, R30, l_reg_contents);
+
+            // Delay to let the ADC configure itself
+            fapi2::delay(ADC_CNFG_DELAY, mss::DELAY_1MS);
+
+            // Now read out the TEMP value in mV
+            reg_read(io_pmic, R31, l_reg_contents);
+            o_pmic_data.iv_temp_c = static_cast<uint16_t>(l_reg_contents()) * ADC_TEMP_STEP;
+        }
     }
 }
 
@@ -653,8 +674,14 @@ fapi2::ReturnCode pmic_n_mode_detect(
     const auto GI2C_DEVICES = i_ocmb_target.getChildren<fapi2::TARGET_TYPE_GENERICI2CSLAVE>(fapi2::TARGET_STATE_PRESENT);
     auto PMICS = get_pmics(i_ocmb_target);
 
-    // Platform (SBE) has asserted we will receive exactly 4 GI2C targets iff 4U, and
-    // Platform (SBE) has asserted we will receive exactly 4 PMIC targets iff 4U
+    if (PMICS.empty())
+    {
+        l_info.iv_aggregate_error = aggregate_state::LOST;
+        send_struct(l_info, o_data);
+        return fapi2::FAPI2_RC_FALSE;
+    }
+
+    // Platform (SBE) has asserted we will receive exactly 4 GI2C targets iff 4U
     // Do a check to see if we are 4U by checking for 4 GI2C targets
     if (!is_4u(i_ocmb_target))
     {

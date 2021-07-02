@@ -64,9 +64,11 @@ enum aggregate_state : uint8_t
 enum pmic_state : uint8_t
 {
     DECONFIGURED       = 0b10000000,
+    NOT_PRESENT        = 0b00001000,
     I2C_FAIL           = 0b00000100,
     CURRENT_IMBALANCE  = 0b00000010,
     PWR_NOT_GOOD       = 0b00000001,
+    ALL_GOOD           = 0b00000000,
 };
 
 typedef fapi2::ReturnCode (*pmic_n_mode_detect_FP_t) (
@@ -80,7 +82,7 @@ struct __attribute__((__packed__)) adc_telemetry
 {
     uint8_t iv_event_low_flag = 0;
 
-    uint8_t PADDING = 0;
+    uint8_t reserved0 = 0;
 
     // These are the MSB and LSB,
     // two combined 8 bit registers
@@ -111,6 +113,8 @@ struct __attribute__((__packed__)) adc_telemetry
     uint16_t iv_min_ch6_mV = 0;
     uint16_t iv_min_ch7_mV = 0;
 
+    uint16_t reserved1 = 0;
+    uint32_t reserved2 = 0;
 };
 
 ///
@@ -141,7 +145,9 @@ struct __attribute__((__packed__)) pmic_telemetry
     // Direct read from 8 bit register
     uint8_t iv_r33 = 0;
 
-    uint8_t PADDING = 0;
+    uint8_t reserved = 0;
+    uint16_t reserved1 = 0;
+    uint32_t reserved2 = 0;
 };
 
 ///
@@ -151,6 +157,9 @@ struct __attribute__((__packed__)) telemetry_data
 {
     uint8_t iv_gpio1_port_state = 0;
     uint8_t iv_gpio2_port_state = 0;
+
+    uint16_t reserved = 0;
+    uint32_t reserved1 = 0;
 
     pmic_telemetry iv_pmic1;
     pmic_telemetry iv_pmic2;
@@ -168,13 +177,16 @@ struct __attribute__((__packed__)) runtime_n_mode_telem_info
 {
     // Revision of this struct formatting, to be updated
     // when the structure changes
-    uint8_t iv_revision = 0x01;
+    uint8_t iv_revision = 0x02;
 
     aggregate_state iv_aggregate_error = aggregate_state::N_PLUS_1;
     uint8_t iv_pmic1_errors = 0;
     uint8_t iv_pmic2_errors = 0;
     uint8_t iv_pmic3_errors = 0;
     uint8_t iv_pmic4_errors = 0;
+
+    uint16_t reserved = 0;
+
     telemetry_data iv_telemetry_data;
 };
 
@@ -191,20 +203,27 @@ struct pmic_info
     ///
     /// @brief Construct a new pmic state object
     /// @param[in] i_pmic present PMIC target
+    /// @param[in] i_state default ALL_GOOD else present PMIC state
     ///
-    pmic_info(fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic)
-    {
-        iv_pmic = i_pmic;
-        iv_state = 0;
-    }
+    pmic_info(fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic, const uint8_t i_state = pmic_state::ALL_GOOD) :
+        iv_pmic(i_pmic),
+        iv_state(i_state)
+    {}
+
+    ///
+    /// @brief Copy constructor
+    /// @param[in] pmic_info struct
+    ///
+    pmic_info(const pmic_info& i_pmic_info) :
+        iv_pmic(i_pmic_info.iv_pmic),
+        iv_state(i_pmic_info.iv_state)
+    {}
 
     fapi2::Target<fapi2::TARGET_TYPE_PMIC> iv_pmic;
     uint8_t iv_state = pmic_state::DECONFIGURED;
 
-    // This padding is needed for the iv_telemetry_data to start out aligned
-    uint8_t PADDING = 0;
-
-    telemetry_data iv_telemetry_data;
+    uint8_t reserved = 0;
+    uint16_t reserved1 = 0;
 };
 
 ///
