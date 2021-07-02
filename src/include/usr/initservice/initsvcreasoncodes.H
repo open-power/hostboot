@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -86,11 +86,13 @@ enum    InitServiceReasonCode
     SHUTDOWN_KEY_TRANSITION      =   INITSVC_COMP_ID | 0x15,
 
     ISTEP_ATTN_MONITOR_MSG_FAILED =  INITSVC_COMP_ID | 0x16,
+    ISTEP_IPL_STATS               =  INITSVC_COMP_ID | 0x17,
 };
 
 enum InitServiceUserDetailDataSubSection
 {
-    INIT_SVC_UDT_ISTEP = 0x01,
+    INIT_SVC_UDT_ISTEP       = 0x01,
+    INIT_SVC_UDT_ISTEP_STATS = 0x02,
 };
 
 };  // namespace    INITSERVICE

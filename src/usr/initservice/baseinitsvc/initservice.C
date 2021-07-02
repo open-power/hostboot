@@ -33,7 +33,7 @@
 #define __HIDDEN_SYSCALL_SHUTDOWN
 
 #include    <kernel/console.H>                  // printk status
-#include    <kernel/terminate.H>                // termWriteSRC
+#include    <kernel/terminate.H>                // termWriteStatus
 #include    <kernel/hbterminatetypes.H>         // TI_SHUTDOWN
 #include    <builtins.h>                        // linkRegister
 
@@ -48,6 +48,7 @@
 #include    <sys/mm.h>
 #include    <vmmconst.h>
 #include    <sys/time.h>
+#include    <time.h>
 #include    <hwas/common/hwas_reasoncodes.H>
 #include    <console/consoleif.H>
 #include    <sbe/sbereasoncodes.H>
@@ -56,11 +57,17 @@
 
 #include    <errl/errludstring.H>
 #include    <errl/errludprintk.H>
+#include    <errl/errludtarget.H>
 
 #include    <initservice/taskargs.H>        // TASK_ENTRY_MACRO
 
 #include    "initservice.H"
 #include    "initsvctasks.H"
+#include    <isteps/istepmasterlist.H>
+#include    <initservice/initsvcstructs.H>
+#include    <initservice/initsvcudistep.H>  //  InitSvcUserDetailsIstepStats
+
+#include    <kernel/bltohbdatamgr.H>
 
 #ifdef CONFIG_PLDM
 #include    <pldm/extended/pdr_manager.H>
@@ -80,6 +87,7 @@ namespace   SPLESS
 namespace   INITSERVICE
 {
 trace_desc_t *g_trac_initsvc = nullptr;
+std::array<iplInfo, MaxISteps> g_ipl_stats = {0};
 
 /**
  *  @brief  Instantiates trace object for INITSVC traces (if necessary)
@@ -535,6 +543,266 @@ errlHndl_t  InitService::dispatchTask( const TaskInfo   *i_ptask,
     return  l_errl;
 }
 
+void  buildSummary( errlHndl_t& io_stats, const uint64_t i_total_istep_nsecs )
+{
+    // Build the inventory summations to log to errl
+    TARGETING::TargetHandleList l_procList_functional;
+    TARGETING::TargetHandleList l_ocmbList_functional;
+    TARGETING::TargetHandleList l_procList_present;
+    TARGETING::TargetHandleList l_ocmbList_present;
+    TARGETING::TargetHandleList l_coreList;
+    TARGETING::getAllChips(l_procList_functional, TARGETING::TYPE_PROC, true);
+    TARGETING::getAllChips(l_ocmbList_functional, TARGETING::TYPE_OCMB_CHIP, true);
+    TARGETING::getAllChips(l_procList_present, TARGETING::TYPE_PROC, false);
+    TARGETING::getAllChips(l_ocmbList_present, TARGETING::TYPE_OCMB_CHIP, false);
+    TARGETING::getNonEcoCores(l_coreList);
+
+    // get current node
+    TARGETING::TargetHandleList l_nodelist;
+    getEncResources(l_nodelist, TARGETING::TYPE_NODE, TARGETING::UTIL_FILTER_FUNCTIONAL);
+    assert(l_nodelist.size() == 1, "ERROR, only looking for one node.");
+    TARGETING::Target *l_currentNodeTarget(l_nodelist[0]);
+
+    io_stats->addHwCallout(l_currentNodeTarget,
+                          HWAS::SRCI_PRIORITY_NONE,
+                          HWAS::NO_DECONFIG,
+                          HWAS::GARD_NULL);
+
+    TARGETING::ATTR_PROC_MEM_SIZES_type l_memSizes = {0};
+    size_t l_numGroups = std::size(l_memSizes);
+
+    uint64_t l_total_memory = 0;
+    for (auto l_proc : l_procList_functional)
+    {
+        assert(l_proc->tryGetAttr<TARGETING::ATTR_PROC_MEM_SIZES>(l_memSizes),
+            "Unable to get ATTR_PROC_MEM_SIZES attribute");
+        for (size_t l_grp = 0; l_grp < l_numGroups; l_grp++)
+        {
+            // calculation in bytes
+            l_total_memory += l_memSizes[l_grp];
+        }
+    }
+
+    struct stat_data
+    {
+        const char* stat_string;
+        uint64_t arg1, arg2;
+    };
+
+    std::array<stat_data, 6> stat_table {
+    { { "Total IPL msecs = %llu",          i_total_istep_nsecs/NS_PER_MSEC },
+      { "PROCs: Functional=%d Present=%d", l_procList_functional.size(), l_procList_present.size() },
+      { "COREs: %d",                       l_coreList.size() },
+      { "OCMBs: Functional=%d Present=%d", l_ocmbList_functional.size(), l_ocmbList_present.size() },
+      { "Initial Cache Size: %d MB",       g_BlToHbDataManager.getHbCacheSizeMb() },
+      { "Total Memory Size: %d MB",        (l_total_memory/MEGABYTE) }
+    }
+    };
+
+    // dynamically calculate the output strings
+    for (const auto& i : stat_table)
+    {
+        const auto total_data_length =
+            snprintf(NULL, 0, i.stat_string, i.arg1, i.arg2);
+        char output_buffer[total_data_length + 1];
+        snprintf(output_buffer, (total_data_length + 1), i.stat_string, i.arg1, i.arg2);
+        // update the Errl with the data
+        ERRORLOG::ErrlUserDetailsString stringUD1(output_buffer);
+        stringUD1.addToLog(io_stats);
+    }
+}
+
+void  calcStartStop( const uint16_t i_istep, const uint16_t i_substep, const bool i_istep_only )
+{
+    // This function will take the previously recorded start and stop times and do some
+    // common calculations and store the result back in the global data structure.
+    //
+    // The i_istep_only flag is used to determine which part of the global data structure
+    // needs to be filled out, e.g. only the istep level or the substep level which resides
+    // in the istep level.
+
+    uint64_t started_time = 0;
+    uint64_t stopped_time = 0;
+
+    if (i_istep_only)
+    {
+        started_time =
+            (NS_PER_SEC * g_ipl_stats[i_istep].ipl_istep_started.tv_sec) +
+            g_ipl_stats[i_istep].ipl_istep_started.tv_nsec;
+        stopped_time =
+            (NS_PER_SEC * g_ipl_stats[i_istep].ipl_istep_stopped.tv_sec) +
+            g_ipl_stats[i_istep].ipl_istep_stopped.tv_nsec;
+    }
+    else
+    {
+        started_time =
+            (NS_PER_SEC * g_ipl_stats[i_istep].substeps[i_substep].started.tv_sec) +
+            g_ipl_stats[i_istep].substeps[i_substep].started.tv_nsec;
+        stopped_time =
+            (NS_PER_SEC * g_ipl_stats[i_istep].substeps[i_substep].stopped.tv_sec) +
+            g_ipl_stats[i_istep].substeps[i_substep].stopped.tv_nsec;
+    }
+
+    if (started_time > stopped_time)
+    {
+        TRACFCOMP(g_trac_initsvc, "SUBSTEP TIME calculation problem, "
+            "started time should be BEFORE stopped time istep=%d substep=%d",
+            i_istep, i_substep);
+        // flag this to at least let it show up as an indicator of
+        // a non-realistic value for the trained observer
+        if (i_istep_only)
+        {
+            g_ipl_stats[i_istep].ipl_istep_nsecs = UD_DEFAULT_NS;
+        }
+        else
+        {
+            g_ipl_stats[i_istep].substeps[i_substep].nsecs = UD_DEFAULT_NS;
+        }
+    }
+    else
+    {
+        if (i_istep_only)
+        {
+            g_ipl_stats[i_istep].ipl_istep_nsecs =
+                (stopped_time - started_time);
+        }
+        else
+        {
+            g_ipl_stats[i_istep].substeps[i_substep].nsecs =
+                (stopped_time - started_time);
+        }
+    }
+}
+
+void  processSubSteps( const uint16_t i_istep, uint64_t & io_total_istep_nsecs,
+                       uint8_t & io_check_last_istep)
+{
+    // This will populate the g_ipl_stats with the istep total nsecs
+    //
+    // if we have iterated thru the major/minor isteps then the ipl_istep_stopped
+    // timers are populated, so when we encounter the first appearance of tv_nsec being
+    // zero is the indicator that we have reached the point in time where we have kicked
+    // out of the doIStep processing without having recorded a stopped tv_nsec timing,
+    // which signals that we are done
+
+    if ((g_ipl_stats[i_istep].ipl_istep_stopped.tv_nsec == 0) && (io_check_last_istep))
+    {
+        io_check_last_istep = 0;
+        // We started the isteps/substeps over in istepdispatcher.C
+        // The very last substep never hits the end of the loop over in
+        // istepdispatcher.C, we catch it here, so update the meta data with
+        // appropriate indicators and timings
+        timespec_t l_istep_CurTime;
+        clock_gettime(CLOCK_MONOTONIC, &l_istep_CurTime);
+        // capture when we stopped this substep to now, HB IPL done, ready to shutdown
+        g_ipl_stats[i_istep].ipl_istep_stopped = l_istep_CurTime;
+        for (uint16_t substep = 0; substep < MAX_SUBSTEPS; substep++)
+        {
+            // find the substep we last started and fill in the stop times
+            if (g_ipl_stats[i_istep].substeps[substep].in_progress == 1)
+            {
+                g_ipl_stats[i_istep].substeps[substep].stopped = l_istep_CurTime;
+                g_ipl_stats[i_istep].substeps[substep].in_progress = 0;
+                g_ipl_stats[i_istep].substeps[substep].valid = UD_VALID;
+                g_ipl_stats[i_istep].numitems++;
+                break;
+            }
+        }
+    }
+
+    // We need only the istep calculation stored
+    // so use the true flag to calcStartStop
+    // we are not using substep so pass zero as second parameter
+    calcStartStop(i_istep, 0, true);
+
+    // running total of the isteps nsecs
+    io_total_istep_nsecs += g_ipl_stats[i_istep].ipl_istep_nsecs;
+}
+
+void  sumSubSteps( const uint16_t i_istep )
+{
+    // Sum up the isteps which had executed some substeps
+    // (numitems how many substeps actually ran)
+    // This will populate the g_ipl_stats with the substep nsecs
+    if (g_ipl_stats[i_istep].numitems != 0)
+    {
+        for (uint16_t substep = 0; substep < MAX_SUBSTEPS; substep++)
+        {
+            if (g_ipl_stats[i_istep].substeps[substep].valid)
+            {
+                // We need both the istep and substep calculation stored
+                // so use the false flag to calcStartStop
+                calcStartStop(i_istep, substep, false);
+            }
+        }
+    }
+}
+
+void  logStats()
+{
+    errlHndl_t l_stats = nullptr;
+    /*@
+     * @errortype  ERRORLOG::ERRL_SEV_INFORMATIONAL
+     * @moduleid   INITSERVICE::BASE_INITSVC_MOD_ID
+     * @reasoncode INITSERVICE::ISTEP_IPL_STATS
+     * @severity   ERRORLOG::ERRL_SEV_INFORMATIONAL
+     * @userdata1  unused
+     * @userdata2  unused
+     * @devdesc    Timing information from the boot sequence
+     * @custdesc   Timing information from the boot sequence
+     */
+    l_stats = new ERRORLOG::ErrlEntry(
+                   ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                   INITSERVICE::BASE_INITSVC_MOD_ID,
+                   INITSERVICE::ISTEP_IPL_STATS,
+                   0,
+                   0,
+                   ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
+
+    uint64_t l_total_istep_nsecs = 0;
+    uint8_t l_check_last_istep = 1; // Flag set for each invocation of logStats to track computation times.
+                                    // processSubSteps will reset the flag so that once we HIT the first istep
+                                    // without timings we stop collecting the metrics, just an algorithm chosen
+                                    // for implementation.
+                                    //
+                                    // For the PRIMARY node which reaches the full IPL the first empty istep
+                                    // timings indicates full ipl termination.  On non-PRIMARY nodes every
+                                    // istep after the host_ipl_complete will have empty timings which skews
+                                    // the time collection triggers.  (The loop entering the table data timings
+                                    // will populate a start and stop time if the istep/substep is performed).
+                                    // The unique characteristic here is that we have to capture an end stop time
+                                    // on the last valid istep/substep which does -NOT- occur in the same context
+                                    // (e.g. we are performing istep 21.4 host_start_payload and never get back).
+                                    //
+                                    // The tables used to track this data are initially all zeroes.  Once a set
+                                    // of istep and their substeps are actually performed (valid) the timing data
+                                    // is entered into the table for later summation.
+                                    // At the time of logStats for host_ipl_complete timeframe we dynamically
+                                    // determine what the last valid istep executed is by the next istep in the table
+                                    // being still zeroes (therefore we don't always output empty istep/substeps since
+                                    // the code doesn't know or care how many steps/substeps are performed, we are
+                                    // customizing the output and only outputting valid istep/substeps).
+
+    for (uint16_t istep = 0; istep < MaxISteps; istep++)
+    {
+        // Do some bookkeeping with the istep stats
+        processSubSteps(istep, l_total_istep_nsecs, l_check_last_istep);
+        // Do the summation of the istep and substeps data
+        sumSubSteps(istep);
+    }
+
+    // Send the summary metrics to the ERRL User Details
+    uint32_t l_ud_current_size = 0;
+    uint32_t l_ud_size_max = 0;
+    l_stats->getErrlSize(l_ud_current_size, l_ud_size_max);
+    InitSvcUserDetailsIstepStats UDistepStats(l_ud_size_max, g_ipl_stats);
+    UDistepStats.addToLog(l_stats);
+
+    // Send the summation inventory data to the ERRL User Details
+    buildSummary( l_stats, l_total_istep_nsecs );
+
+    errlCommit( l_stats, INITSVC_COMP_ID );
+}
 
 void InitService::init( void *io_ptr )
 {
@@ -738,6 +1006,56 @@ void InitService::stopIpl()
     iv_stopIPL = true;
 }
 
+void start_istep_timer( uint16_t i_istep)
+{
+    timespec_t l_istep_StartTime;
+    clock_gettime(CLOCK_MONOTONIC, &l_istep_StartTime);
+    g_ipl_stats[i_istep].ipl_istep_started = l_istep_StartTime;
+}
+
+void stop_istep_timer( uint16_t i_istep)
+{
+    timespec_t l_istep_CurTime;
+    clock_gettime(CLOCK_MONOTONIC, &l_istep_CurTime);
+    g_ipl_stats[i_istep].ipl_istep_stopped = l_istep_CurTime;
+}
+
+void start_substep_timer( uint16_t i_istep, uint16_t i_substep)
+{
+    timespec_t l_substep_StartTime;
+    clock_gettime(CLOCK_MONOTONIC, &l_substep_StartTime);
+    g_ipl_stats[i_istep].substeps[i_substep].started = l_substep_StartTime;
+    // put stopped times to sync with start time in case
+    // this is a skipped substep and we need to calculate the substep duration later
+    g_ipl_stats[i_istep].substeps[i_substep].stopped = l_substep_StartTime;
+}
+
+void stop_substep_timer( uint16_t i_istep, uint16_t i_substep)
+{
+    timespec_t l_substep_CurTime;
+    clock_gettime(CLOCK_MONOTONIC, &l_substep_CurTime);
+    g_ipl_stats[i_istep].substeps[i_substep].stopped = l_substep_CurTime;
+}
+
+void set_substep_valid( uint16_t i_istep, uint16_t i_substep, const char* taskname)
+{
+    g_ipl_stats[i_istep].substeps[i_substep].valid = UD_VALID;
+    g_ipl_stats[i_istep].numitems += 1;
+    g_ipl_stats[i_istep].substeps[i_substep].taskname = taskname;
+    strncpy( g_ipl_stats[i_istep].substeps[i_substep].stepname,
+        taskname, sizeof(g_ipl_stats[i_istep].substeps[i_substep].stepname) - 1);
+}
+
+void start_substep_inprogress( uint16_t i_istep, uint16_t i_substep)
+{
+    g_ipl_stats[i_istep].substeps[i_substep].in_progress = 1;
+}
+
+void stop_substep_inprogress( uint16_t i_istep, uint16_t i_substep)
+{
+    g_ipl_stats[i_istep].substeps[i_substep].in_progress = 0;
+}
+
 // External call to grab the stopIpl status
 bool isIplStopped()
 {
@@ -886,9 +1204,9 @@ void InitService::_doShutdown(uint64_t i_status,
                               uint32_t i_error_info)
 {
     int l_rc = 0;
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
 
-    TRACFCOMP(g_trac_initsvc, "_doShutdown(i_status=%.16X)",i_status);
+    TRACFCOMP(g_trac_initsvc, "_doShutdown(i_status=%.16X)", i_status);
 #ifdef CONFIG_CONSOLE
     // check if console msg not needed or already displayed by caller
     if ((SHUTDOWN_STATUS_GOOD != i_status) &&
@@ -905,7 +1223,7 @@ void InitService::_doShutdown(uint64_t i_status,
     }
 #endif
 
-    TRACFCOMP(g_trac_initsvc, "_doShutdown> status=%.16X",iv_worst_status);
+    TRACFCOMP(g_trac_initsvc, "_doShutdown> status=%.16X", iv_worst_status);
 
     // sort the queue by priority before sending..
     std::sort( iv_regMsgQ.begin(), iv_regMsgQ.end());

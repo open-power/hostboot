@@ -308,6 +308,21 @@ void* call_host_start_payload (void *io_pArgs)
             break;
         }
 #endif
+        // We trigger a logStats call here to capture the PRIMARY node total IPL timings.
+        //
+        // There has already been a logStats capture done at host_ipl_complete so on a multi-node system
+        // each node in the topology captures its IPL timings thru host_ipl_complete.
+        // Only the PRIMARY node reaches this checkpoint here in call_host_start_payload.
+        //
+        // STATS_COMPLETE_STEP STATS_COMPLETE_SUBSTEP, see istepdispatcher.C host_ipl_complete
+        //
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK"logStats host_start_payload");
+        INITSERVICE::logStats();
+
+        // Flush the error logs to assure that the DMA buffers in secure mode are still open
+        // (not blocked by the enforcement of the SBE) to allow the error logs to be propagated
+        // via the DMA buffers
+        ERRORLOG::ErrlManager::callFlushErrorLogs();
 
         // broadcast shutdown to other HB instances.
         l_errl = broadcastShutdown(this_node);

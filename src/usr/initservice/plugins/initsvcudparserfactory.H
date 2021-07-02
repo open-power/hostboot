@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -50,6 +52,7 @@ public:
     InitSvcUserDetailsParserFactory()
     {
         registerParser<InitSvcUserDetailsParserIstep>(INIT_SVC_UDT_ISTEP);
+        registerParser<InitSvcUserDetailsParserIstepStats>(INIT_SVC_UDT_ISTEP_STATS);
     }
 
 private:

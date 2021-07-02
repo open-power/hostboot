@@ -125,6 +125,19 @@ const uint8_t SW_RECONFIG_START_STEP = 7;
 const uint8_t SW_RECONFIG_START_SUBSTEP = 1;
 const uint8_t HB_START_ISTEP = 6;
 
+// STEP and SUBSTEP must -NOT- be defined within the same FINAL
+// STEP (e.g. today is STEP 21, since STEP 21.4 is the final istep),
+// due to the current algorithm design.
+// As designed (review the related logic on logStats for details)
+// STEP and SUBSTEP should also avoid being moved to -ANY- STEP/SUBSTEP
+// that may not complete within the doIstep loop (i.e. caution on STEP/SUBSTEP
+// being a hostboot termination point (where hostboot gets shutdown).
+// Any STEP/SUBSTEP which disrupts the normal doIstep loop logic from fully
+// executing should be avoided if accurate times are desired.
+
+const uint8_t STATS_COMPLETE_STEP = 16;   // host_ipl_complete 16.5
+const uint8_t STATS_COMPLETE_SUBSTEP = 5; // host_ipl_complete 16.5
+
 // @todo RTC 124679 - Remove Once BMC Monitors Shutdown Attention
 // Set Watchdog Timer To 15 seconds before calling doShutdown()
 const uint16_t SET_WD_TIMER_IN_SECS = 15;
@@ -514,11 +527,19 @@ errlHndl_t IStepDispatcher::executeAllISteps()
         l_manufacturingMode = true;
     }
 
+    // Set the collection point across the various platforms in order
+    // to collect per Node statistics
+    // If we collect any later we cannot gather across all the Nodes
+    // since only the Primary Node will handle the final RUNTIME setup steps
+    g_ipl_stats[STATS_COMPLETE_STEP].substeps[STATS_COMPLETE_SUBSTEP].exit = 1;
+
     while (istep < MaxISteps)
     {
+        INITSERVICE::start_istep_timer(istep);
         substep = 0;
         while (substep < g_isteps[istep].numitems)
         {
+            INITSERVICE::start_substep_timer(istep, substep);
             if( INITSERVICE::isIplStopped() == true )
             {
                 // if we came in here and we are connected to a BMC, then
@@ -529,7 +550,11 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                 stop();
             }
 
+            // Keep track of each call since the last one will not return here
+            // and we need to know this at completion time in initservice.C
+            INITSERVICE::start_substep_inprogress(istep, substep);
             err = doIstep(istep, substep, l_doReconfig);
+            INITSERVICE::stop_substep_inprogress(istep, substep);
 
             if (l_doReconfig)
             {
@@ -793,6 +818,19 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                           "IStep Error on %d:%d", istep, substep);
                 break;
             }
+
+            INITSERVICE::stop_substep_timer(istep, substep);
+
+            // Call logStats after the stop_substep timer
+            // We do it here versus after the istep timer stop to capture
+            // the substep we are triggering from (STATS_COMPLETE_SUBSTEP)
+            // this does add the computation time of logStats within
+            // the STATS_COMPLETE_SUBSTEP
+            if (g_ipl_stats[istep].substeps[substep].exit == 1)
+            {
+                TRACFCOMP(g_trac_initsvc, INFO_MRK"logStats host_ipl_complete");
+                INITSERVICE::logStats();
+            }
             substep++;
         }
 
@@ -810,7 +848,12 @@ errlHndl_t IStepDispatcher::executeAllISteps()
             }
             break;
         }
+
+        INITSERVICE::stop_istep_timer( istep );
         istep++;
+
+        // the very last istep stop time is captured in initservice.C in _doShutdown
+
     }
 
     TRACFCOMP(g_trac_initsvc, EXIT_MRK"IStepDispatcher::executeAllISteps()");
@@ -865,6 +908,7 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
     // If the step has valid work to be done, then execute it.
     if(NULL != theStep)
     {
+        INITSERVICE::set_substep_valid(i_istep, i_substep, theStep->taskname);
 #ifdef CONFIG_P9_VPO_COMPILE //extra traces to printk for vpo debug
         printk("doIstep: step %d, substep %d, "
                   "task %s\n", i_istep, i_substep, theStep->taskname);

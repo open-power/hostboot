@@ -678,6 +678,10 @@ void ErrlManager::setErrlSkipFlag(errlHndl_t io_err)
 
 void ErrlManager::commitErrAllowExtraLogs(errlHndl_t& io_err, compId_t i_committerComp, bool i_keepTraces )
 {
+    // To exploit this function the ErrlUD MUST be within the l_maxErrLogSize
+    // e.g. if the l_maxErrLogSize is 4K, then the ErrlUD should already be no
+    // greater than the 4K per addToLog, etc.
+    //
     // Additional sections are added to error log during commit time
     // like backtrace, code level, etc...
     // (varies between 740 and 800 bytes)
@@ -689,11 +693,22 @@ void ErrlManager::commitErrAllowExtraLogs(errlHndl_t& io_err, compId_t i_committ
     uint32_t l_maxErrLogSize;
     uint32_t l_totalErrlSize;
 
+    do {
+    if (!io_err)
+    {
+        TRACFCOMP( g_trac_errl, ERR_MRK"commitErrAllowExtraLogs: NULL Errl Object, "
+            "unable to proceed, this is probably a code bug, see if someone committed logs "
+            "and using a nullptr for the ERRL object");
+        break;
+    }
     // Get the current log size and max log size
     io_err->getErrlSize(l_totalErrlSize, l_maxErrLogSize);
 
     if (l_totalErrlSize > l_maxErrLogSize)
     {
+        TRACFCOMP( g_trac_errl, INFO_MRK"commitErrAllowExtraLogs: PROCESSING LARGE ERRL "
+            "l_totalErrlSize=%d l_maxErrLogSize=%d",
+            l_totalErrlSize, l_maxErrLogSize);
         // Account for the sections added at commit time for each log
         if (l_maxErrLogSize > COMMIT_ADDITIONAL_SECTIONS_SIZE)
         {
@@ -703,7 +718,8 @@ void ErrlManager::commitErrAllowExtraLogs(errlHndl_t& io_err, compId_t i_committ
                 "commitErrAllowExtraLogs: size %d bytes > max size %d bytes",
                 l_totalErrlSize, l_maxErrLogSize );
 
-        std::vector<ErrlUD*> l_errlUDEntries = io_err->removeExcessiveUDsections(l_maxErrLogSize, i_keepTraces);
+        std::vector<ErrlUD*> l_errlUDEntries =
+            io_err->removeExcessiveUDsections(l_maxErrLogSize, i_keepTraces);
 
         uint16_t l_reasonCode = io_err->reasonCode();
         uint32_t l_plid = io_err->plid();
@@ -746,8 +762,9 @@ void ErrlManager::commitErrAllowExtraLogs(errlHndl_t& io_err, compId_t i_committ
                 uint64_t l_udSize = (*sectionVectorIt)->flatSize();
 
                 TRACDCOMP( g_trac_errl, INFO_MRK
-                      "commitErrAllowExtraLogs: Current section size 0x%llX, size left in error 0x%llX",
-                      l_udSize, l_sizeLeft);
+                    "commitErrAllowExtraLogs: Current section size 0x%llX, "
+                    "size left in error 0x%llX",
+                    l_udSize, l_sizeLeft);
 
                 if ( l_sizeLeft >= l_udSize )
                 {
@@ -761,6 +778,10 @@ void ErrlManager::commitErrAllowExtraLogs(errlHndl_t& io_err, compId_t i_committ
                 }
                 else
                 {
+                    TRACFCOMP( g_trac_errl, INFO_MRK"commitErrAllowExtraLogs: "
+                        "Current section l_udSize=%llu "
+                        "does NOT fit in the remaining space l_sizeLeft=%llu",
+                        l_udSize, l_sizeLeft);
                     // Section doesn't fit in error log
                     break;
                 }
@@ -782,6 +803,10 @@ void ErrlManager::commitErrAllowExtraLogs(errlHndl_t& io_err, compId_t i_committ
         // Delete the non-committed UD sections left after extra logs
         while(sectionVectorIt != l_errlUDEntries.end())
         {
+            TRACFCOMP( g_trac_errl, INFO_MRK"commitErrAllowExtraLogs: "
+                "DELETING non-committed UD sections, "
+                "this MAY or MAY NOT be a PROBLEM, CHECK logs "
+                "for indication of NO EXTRA LOGS produced");
             // Remove the ErrlUD* at this position
             delete (*sectionVectorIt);
 
@@ -811,8 +836,12 @@ void ErrlManager::commitErrAllowExtraLogs(errlHndl_t& io_err, compId_t i_committ
     else
     {
         // just commit this error log (no need for extra logs)
+        TRACFCOMP( g_trac_errl, INFO_MRK"commitErrAllowExtraLogs: No Extra Logs committed, "
+                "the l_maxErrLogSize allowed is %d but the log requested is l_totalErrlSize=%d",
+                l_totalErrlSize, l_maxErrLogSize );
         commitErrLog(io_err, i_committerComp);
     }
+    } while (0);
 }
 
 } // end namespace

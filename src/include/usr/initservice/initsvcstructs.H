@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,13 +36,22 @@
 /******************************************************************************/
 #include <stdint.h>
 #include <sys/vfs.h>            // VFS_MODULE_NAME_MAX
+#include <time.h>
 
 #include <initservice/initsvcreasoncodes.H>
 #include <initservice/initsvcstructs.H>
 
 // This constant has a corresponding entry in src/build/tools/listdeps.pl.
 #define MAX_DEPENDENT_MODULES   12
-
+// MAX_SUBSTEPS is also used elsewhere, i.e. build/vpo/hb-istep, build/debug/Hostboot/Istep.pm
+#define MAX_SUBSTEPS 25
+// UD is for the Error Log User Details tracking
+// MAX_UD_ENTRIES also used in parser plugins/initsvcudistep.H
+// Value based on max number of valid major/minor steps expected
+// Currently 83 major/minor steps, so padded up for some flexibility
+#define MAX_UD_ENTRIES 100
+#define UD_VALID 1
+#define UD_DEFAULT_NS 1
 
 namespace   INITSERVICE
 {
@@ -207,6 +216,43 @@ struct  ExtTaskInfo
     const uint64_t      numitems;
     const DepModInfo    *const depModules;
 };
+
+// UdSubStepInfo is shared with the parsers
+struct UdSubStepInfo
+{
+    uint16_t  step;
+    uint16_t  substep;
+    uint64_t  msecs;
+    // See initsvcudistep.C for future usage of stepname
+    // Similar change needed in initsvcudistep.H
+    // Limitation today is size of the UD object produced needs to fit in PNOR,
+    // l_maxErrlogSize if 4K then the ErrlUD should be no greater than the 4K
+    // per addToLog, see commitErrAllowExtraLogs from errlmanager_common.C
+    // char      stepname[64];
+} __attribute__ ((packed));
+
+struct iplSubStepInfo
+{
+    uint64_t            nsecs;
+    char                stepname[64];
+    timespec_t          started;
+    timespec_t          stopped;
+    uint16_t            valid;
+    uint16_t            in_progress;
+    uint16_t            exit;
+    const char *        taskname;
+} __attribute__ ((packed));
+
+struct iplInfo
+{
+    uint64_t            ipl_istep_nsecs;
+    timespec_t          ipl_istep_started;
+    timespec_t          ipl_istep_stopped;
+    iplSubStepInfo      substeps[MAX_SUBSTEPS];
+    uint16_t            numitems;
+    uint16_t            istep;
+    uint16_t            substep;
+} __attribute__ ((packed));
 
 } // namespace
 

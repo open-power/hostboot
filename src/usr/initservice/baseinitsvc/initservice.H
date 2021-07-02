@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,6 +51,7 @@
 #include <initservice/initsvcstructs.H>
 #include <vmmconst.h>
 #include <initservice/initserviceif.H>
+#include <isteps/istepmasterlist.H>
 
 namespace   INITSERVICE
 {
@@ -58,10 +59,12 @@ namespace   INITSERVICE
 /******************************************************************************/
 // Globals/Constants
 /******************************************************************************/
+extern std::array<iplInfo, MaxISteps> g_ipl_stats;
 
 /******************************************************************************/
 // Typedef/Enumerations
 /******************************************************************************/
+
 
 /******************************************************************************/
 // InitService Class
@@ -182,6 +185,46 @@ public:
                               void              *io_pargs ) const;
 
     /**
+     * @brief   build the User Detail Summary
+     *
+     * @param[in,out]   io_stats  -  Errl to add summary
+     * @param[in]       i_total_istep_nsecs - Total nsecs for the IPL
+     *
+     * @return  Nothing
+     */
+    void  buildSummary(errlHndl_t& io_stats,
+                       const uint64_t i_total_istep_nsecs );
+
+    /**
+     * @brief  Process the istep metrics
+     *
+     * @param[in]       i_istep - which istep to process
+     * @param[in,out]   io_total_istep_nsecs - Total nsecs for the IPL
+     * @param[in,out]   io_check_last_istep - Flag to trigger calculation
+     *                    which is done per logStats invocation
+     * @return  Nothing
+     */
+    void  processSubSteps(const uint16_t i_istep,
+                       uint64_t & io_total_istep_nsecs,
+                       uint8_t & io_check_last_istep);
+
+    /**
+     * @brief  Sum the substep metrics into global structure
+     *
+     * @param[in]       i_istep - which istep to process
+     *
+     * @return  Nothing
+     */
+    void  sumSubSteps(const uint16_t i_istep);
+
+    /**
+     * @brief  Log informational of the IPL stats
+     *
+     * @return  Nothing
+     */
+    void  logStats();
+
+    /**
      * @brief Registry a block/range of vitual memory to be handled during a
      *        shutdown.
      *
@@ -268,6 +311,76 @@ public:
      *      src/include/usr/initservice/initserviceif.H
      */
     bool isIplStopped();
+
+
+    /**
+     * @brief  Start the istep timings in the global data structure
+     *
+     * @param[in]       istep - which istep to process
+     *
+     * @return  Nothing
+     */
+    void start_istep_timer( uint16_t istep);
+
+    /**
+     * @brief  Stop the istep timings in the global data structure
+     *
+     * @param[in]       istep - which istep to process
+     *
+     * @return  Nothing
+     */
+    void stop_istep_timer( uint16_t istep);
+
+    /**
+     * @brief  Start the substep timings in the global data structure
+     *
+     * @param[in]       istep - which istep to process
+     * @param[in]       substep - which substep to process
+     *
+     * @return  Nothing
+     */
+    void start_substep_timer( uint16_t istep, uint16_t substep);
+
+    /**
+     * @brief  Stop the substep timings in the global data structure
+     *
+     * @param[in]       istep - which istep to process
+     * @param[in]       substep - which substep to process
+     *
+     * @return  Nothing
+     */
+    void stop_substep_timer( uint16_t istep, uint16_t substep);
+
+    /**
+     * @brief  Set substep as a valid substep based on isteplist taskinfo
+     *
+     * @param[in]       istep - which istep to process
+     * @param[in]       substep - which substep to process
+     * @param[in]       taskname - taskname to record
+     *
+     * @return  Nothing
+     */
+    void set_substep_valid( uint16_t istep, uint16_t substep, const char* taskname);
+
+    /**
+     * @brief  Start the substep in progress marker in the global data structure
+     *
+     * @param[in]       istep - which istep to process
+     * @param[in]       substep - which substep to process
+     *
+     * @return  Nothing
+     */
+    void start_substep_inprogress( uint16_t istep, uint16_t substep);
+
+    /**
+     * @brief  Stop the substep in progress marker in the global data structure
+     *
+     * @param[in]       istep - which istep to process
+     * @param[in]       substep - which substep to process
+     *
+     * @return  Nothing
+     */
+    void stop_substep_inprogresss( uint16_t istep, uint16_t substep);
 
 protected:
 

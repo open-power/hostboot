@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -124,7 +124,7 @@ const  ExtTaskInfo  g_isteps[]    =   {
 #endif  //CONFIG_VPO_COMPILE
 };
 
-const   uint64_t    MAX_SUBSTEPS =  25;
+// See src/include/usr/initservice/initsvcstructs.H for MAX_SUBSTEPS
 
 // publish the size of the g_isteps array
 const   uint64_t    MaxISteps   =  sizeof(g_isteps)/sizeof(ExtTaskInfo) ;

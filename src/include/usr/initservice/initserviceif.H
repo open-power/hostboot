@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -214,6 +214,79 @@ void stopIpl( void );
  * @return true if IPL stopped
  */
 bool isIplStopped();
+
+/**
+ * @brief Start the istep timings in the global data structure
+ * @param[in] istep
+ * @return none
+ */
+void start_istep_timer( uint16_t istep);
+
+/**
+ * @brief Stop the istep timings in the global data structure
+ * @param[in] istep
+ * @return none
+ */
+void stop_istep_timer( uint16_t istep);
+
+/**
+ * @brief Start the substep timings in the global data structure
+ * @param[in] istep
+ * @param[in] substep
+ * @return none
+ */
+void start_substep_timer( uint16_t istep, uint16_t substep);
+
+/**
+ * @brief Stop the substep timings in the global data structure
+ * @param[in] istep
+ * @param[in] substep
+ * @return none
+ */
+void stop_substep_timer( uint16_t istep, uint16_t substep);
+
+/**
+ * @brief Start the substep in progress marker in the global data structure
+ * The usage of the start substep in progress marker is used to put a mark
+ * on the wall that the substep has been initiated.  The importance of this
+ * marker is that during the execution of the substep (for instance host_start_payload)
+ * the substep does -NOT- return to the doIstep logic loop, therefore we use
+ * the in progress marker in another code location to see if this substep is the one that
+ * is being handled as a special case that ends the IPL.
+ *
+ * Only the substeps are tracked in this manner (that is why there is not an equivalent
+ * start_istep_inprogress or stop_istep_inprogress).
+ *
+ * @param[in] istep
+ * @param[in] substep
+ * @return none
+ */
+void start_substep_inprogress( uint16_t istep, uint16_t substep);
+
+/**
+ * @brief Stop the substep in progress marker in the global data structure
+ * See start_substep_inprogress for more detail on the usage of this marker.
+ *
+ * @param[in] istep
+ * @param[in] substep
+ * @return none
+ */
+void stop_substep_inprogress( uint16_t istep, uint16_t substep);
+
+/**
+ * @brief Set substep as a valid substep based on isteplist taskinfo
+ * @param[in] istep
+ * @param[in] substep
+ * @param[in] taskname - taskname to record
+ * @return none
+ */
+void set_substep_valid( uint16_t istep, uint16_t substep, const char* taskname);
+
+/**
+ * @brief Log the IPL stats for this Node
+ * @return none
+ */
+void logStats();
 
 }
 

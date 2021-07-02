@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -31,6 +33,8 @@
  */
 
 #include <errl/errluserdetails.H>
+#include <initservice/initsvcstructs.H>
+#include <isteps/istepmasterlist.H>
 
 namespace   INITSERVICE
 {
@@ -46,6 +50,17 @@ struct InitSvcUserDetailsIstepData
     uint16_t iv_substep;
     char iv_pIstepname[0];
 };
+
+/**
+ * @struct UdEntryStats
+ *
+ * Defines the user detail data for IPL Stats
+ */
+struct UdEntryStats
+{
+    uint16_t iv_count;
+    UdSubStepInfo substeps[MAX_UD_ENTRIES];
+} __attribute__ ((packed));
 
 /**
  * @class InitSvcUserDetailsIstep
@@ -77,6 +92,36 @@ private:
     // Disabled
     InitSvcUserDetailsIstep(const InitSvcUserDetailsIstep &);
     InitSvcUserDetailsIstep & operator=(const InitSvcUserDetailsIstep &);
+};
+
+/**
+ * @class InitSvcUserDetailsIstepStats
+ *
+ * Adds IStep Stats to an error log as user detail data
+ */
+class InitSvcUserDetailsIstepStats : public ERRORLOG::ErrlUserDetails
+{
+public:
+    /**
+     *  @brief Constructor
+     *
+     *  Captures the supplied IStep Stats data internally
+     *
+     *  @param i_ud_size_max Maximum size of UD data
+     *  @param i_ipl_stats   IPL stats to compute
+     */
+    InitSvcUserDetailsIstepStats(const uint32_t i_ud_size_max,
+        const std::array<iplInfo, MaxISteps>& i_ipl_stats);
+
+    /**
+     *  @brief Destructor
+     */
+    virtual ~InitSvcUserDetailsIstepStats();
+
+private:
+    // Disabled
+    InitSvcUserDetailsIstepStats(const InitSvcUserDetailsIstepStats &);
+    InitSvcUserDetailsIstepStats & operator=(const InitSvcUserDetailsIstepStats &);
 };
 
 }

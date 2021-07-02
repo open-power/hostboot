@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020
+# Contributors Listed Below - COPYRIGHT 2020,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -32,26 +32,53 @@ class errludP_initservice:
         # 1 byte   : Substep
         # N bytes  : IStep Name
 
-        d = dict()
-        i = 0
+        if ver == 1:
 
-        ivStep, i=memConcat(data, i, i+2)
-        ivSubStep, i=memConcat(data, i, i+2)
+            d = dict()
+            i = 0
 
-        # find index of null character
-        indx = findNull(data, i, len(data))
+            ivStep, i=memConcat(data, i, i+2)
+            ivSubStep, i=memConcat(data, i, i+2)
 
-        d['IStep Name'], i=strConcat(data, i, indx)
-        d['Step']=ivStep
-        d['Sub-step']=ivSubStep
+            # find index of null character
+            indx = findNull(data, i, len(data))
 
-        jsonStr = json.dumps(d)
-        return jsonStr
+            d['IStep Name'], i=strConcat(data, i, indx)
+            d['Step']=ivStep
+            d['Sub-step']=ivSubStep
+
+            jsonStr = json.dumps(d)
+            return jsonStr
+
+    def InitSvcUserDetailsParserIstepStats(ver, data):
+        # ***** Memory Layout *****
+        # 2 bytes  : ivCount (how many items do we have)
+        # Next is ivCount number of entries
+        # 2 bytes  : Step
+        # 2 bytes  : Substep
+        # 8 bytes  : MSecs
+
+        if ver == 1:
+            d = dict()
+            i = 0
+
+            ivCount, i=memConcat(data, i, i+2)
+            for x in range (0, int(ivCount, 16)):
+                ivStep, i=memConcat(data, i, i+2)
+                ivSubStep, i=memConcat(data, i, i+2)
+                ivMSecs, i=memConcat(data, i, i+8)
+                istep_label = "IStep " + str( int(ivStep, 16)) + "." + str( int(ivSubStep, 16))
+                istep_msecs = "msecs=" + str( int(ivMSecs, 16))
+                d[istep_label] = istep_msecs
+
+            jsonStr = json.dumps(d)
+            return jsonStr
 
 #Dictionary with parser functions for each subtype
 #Values are from InitServiceUserDetailDataSubSection enum
 #in src/include/usr/initservice/initsvcreasoncodes.H
-InitServiceUserDetailDataSubSection = { 1: "InitSvcUserDetailsParserIstep" }
+InitServiceUserDetailDataSubSection = { 1: "InitSvcUserDetailsParserIstep",
+                                        2: "InitSvcUserDetailsParserIstepStats" }
 
 def parseUDToJson(subType, ver, data):
     args = (ver, data)
