@@ -782,6 +782,100 @@ typedef struct __attribute__((packed)) user_response_rc_msdg_t
 } user_response_rc_msdg_t;
 
 ///
+/// @class user_response_mds_rc_msdg_t
+/// @brief MDS explorer response structure
+///
+typedef struct __attribute__((packed)) user_response_mds_rc_msdg
+{
+    uint8_t  F0RC00;
+    uint8_t  F0RC01;
+    uint8_t  F0RC02;
+    uint8_t  F0RC03;
+    uint8_t  F0RC04;
+    uint8_t  F0RC05;
+    uint8_t  F0RC06;
+    uint8_t  F0RC07;
+    uint8_t  F0RC08;
+    uint8_t  F0RC09;
+    uint8_t  F0RC0A;
+    uint8_t  F0RC0B;
+    uint8_t  F0RC0C;
+    uint8_t  F0RC0D;
+    uint8_t  F0RC0E;
+    uint8_t  F0RC0F;
+    uint8_t  F0RC1x;
+    uint8_t  F0RC2x;
+    uint8_t  F0RC3x;
+    uint8_t  F0RC4x;
+    uint8_t  F0RC5x;
+    uint8_t  F0RC6x;
+    uint8_t  F0RC7x;
+    uint8_t  F0RC8x;
+    uint8_t  F0RC9x;
+    uint8_t  F0RCAx;
+    uint8_t  F0RCBx;
+    uint8_t  F1RC00;
+    uint8_t  F1RC01;
+    uint8_t  F1RC02;
+    uint8_t  F1RC03;
+    uint8_t  F1RC04;
+    uint8_t  F1RC05;
+    uint8_t  F1RC06;
+    uint8_t  F1RC07;
+    uint8_t  F1RC08;
+    uint8_t  F1RC09;
+    uint8_t  F1RC0A;
+    uint8_t  F1RC0B;
+    uint8_t  F1RC0C;
+    uint8_t  F1RC0D;
+    uint8_t  F1RC0E;
+    uint8_t  F1RC0F;
+    uint8_t  F1RC1x;
+    uint8_t  F1RC2x;
+    uint8_t  F1RC3x;
+    uint8_t  F1RC4x;
+    uint8_t  F1RC5x;
+    uint8_t  F1RC6x;
+    uint8_t  F1RC7x;
+    uint8_t  F1RC8x;
+    uint8_t  F1RC9x;
+    uint8_t  F1RCAx;
+    uint8_t  F1RCBx;
+    uint8_t  F2RC00;
+    uint8_t  F2RC01;
+    uint8_t  F2RC02;
+    uint8_t  F2RC03;
+    uint8_t  F3RC00;
+    uint8_t  F3RC01;
+    uint8_t  F3RC09;
+    uint8_t  F3RC0A;
+    uint8_t  F3RC0B;
+    uint8_t  F3RC0C;
+    uint8_t  F3RC0D;
+    uint8_t  F3RC0F;
+    uint8_t  F3RC1x;
+    uint8_t  F3RC2x;
+    uint8_t  F3RC3x;
+    uint8_t  F3RC4x;
+    uint8_t  F3RC5x;
+    uint8_t  F3RC6x;
+    uint8_t  F3RC7x;
+    uint8_t  F3RC8x;
+    uint8_t  F3RC9x;
+    uint8_t  F3RCAx;
+    uint8_t  F3RCBx;
+    uint8_t  F3RCCx;
+    uint8_t  F3RCDx;
+    uint8_t  F3RCEx;
+    uint8_t  F3RCFx;
+    uint8_t  FCRCDx;
+    uint8_t  RESERVED0;
+    uint8_t  RESERVED1;
+    uint8_t  RESERVED2;
+    uint8_t  RESERVED3;
+} user_response_mds_rc_msdg;
+
+///
 /// @class train_2d_eye_min_max_msdg_t
 /// @brief Microchip response structure
 ///
@@ -906,6 +1000,19 @@ typedef struct __attribute__((packed)) user_2d_eye_response_2_msdg
     user_response_rc_msdg_t rc_resp;
 
 } user_2d_eye_response_2_msdg_t;
+
+///
+/// @class user_response_mds_msdg_t
+/// @brief MDS Explorer command response structure
+///
+typedef struct __attribute__((packed)) user_response_mds_msdg
+{
+    uint32_t                        version_number;
+    user_response_error_msdg        err_resp;
+    user_response_mrs_msdg_t        mrs_resp;
+    user_response_mds_rc_msdg       mds_resp;
+
+} user_response_mds_msdg;
 
 ///
 /// @class fw_adapter_properties_struct

@@ -81,6 +81,10 @@ fapi2::ReturnCode check_rsp_data_size(
             l_expected_size = sizeof(user_2d_eye_response_2_msdg_t);
             break;
 
+        case phy_init_mode::MDS:
+            l_expected_size = sizeof(user_response_mds_msdg);
+            break;
+
         default:
             // This really can't occur since we asserted phy_init_mode was valid in exp_draminit.C
             // We have bigger problems if we get here, implying somehow this bad value was passed to explorer
@@ -159,10 +163,10 @@ fapi2::ReturnCode host_fw_phy_normal_init(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
     const phy_param_info& i_phy_info)
 {
-    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
     host_fw_command_struct l_cmd;
     host_fw_response_struct l_rsp;
     std::vector<uint8_t> l_rsp_data;
+    bool l_is_mds = false;
 
     // Issue full boot mode cmd though EXP-FW REQ buffer
     FAPI_TRY(send_host_phy_init_cmd(i_target, i_phy_info, phy_init_mode::NORMAL, l_cmd));
@@ -171,11 +175,33 @@ fapi2::ReturnCode host_fw_phy_normal_init(
     // which we do want to exit for
     FAPI_TRY(mss::exp::ib::getRSP(i_target, l_cmd.cmd_id, l_rsp, l_rsp_data),
              "Failed getRSP() for  %s", mss::c_str(i_target));
-    FAPI_TRY(check_rsp_data_size(i_target, l_rsp_data.size(), phy_init_mode::NORMAL));
+
+    // Check if it is an MDS dimm to handle the correct response
+    FAPI_TRY(mss::dimm::is_mds<mss::mc_type::EXPLORER>(i_target, l_is_mds));
+    FAPI_MFG("%s MDS Dimms found for normal phy init", mss::c_str(i_target));
 
     // Because this is the last function before we handle the training errors, FAPI_TRY'ing here
     // is ok. We wouldn't be skipping anything by exiting here.
-    FAPI_TRY(mss::exp::read_and_display_normal_training_response(i_target, l_cmd, l_rsp, l_rsp_data, l_rc));
+    if (l_is_mds)
+    {
+        FAPI_MFG("%s Running MDS training response handling", mss::c_str(i_target));
+
+        // Check the response size based on mds phy init rsp
+        FAPI_TRY(check_rsp_data_size(i_target, l_rsp_data.size(), phy_init_mode::MDS));
+
+        // Run special handling for mds training response
+        FAPI_TRY(mss::exp::read_and_display_mds_training_response(i_target, l_cmd, l_rsp, l_rsp_data));
+    }
+    else
+    {
+        FAPI_MFG("%s Running normal training response handling", mss::c_str(i_target));
+
+        // Check the response size based on normal phy init
+        FAPI_TRY(check_rsp_data_size(i_target, l_rsp_data.size(), phy_init_mode::NORMAL));
+
+        /// Run normal training reponse handling
+        FAPI_TRY(mss::exp::read_and_display_normal_training_response(i_target, l_cmd, l_rsp, l_rsp_data));
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -270,6 +296,25 @@ fapi2::ReturnCode set_rc_resp_attrs(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_
             mss::exp::rc_resp_adaptor l_rcws(d, i_rc_resp);
             FAPI_TRY(mss::exp::rc_resp_engine(l_rcws));
         }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Helper function to set mds response attrs
+/// @param[in] i_target the fapi2 OCMB target
+/// @param[in] i_mds_resp the MDS rc response
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode set_rc_resp_attrs(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                    const user_response_mds_rc_msdg& i_mds_resp)
+{
+    for (const auto& d : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
+    {
+        mss::exp::mds_resp_adaptor l_rcws(d, i_mds_resp);
+        FAPI_TRY(mss::exp::mds_rc_resp_engine(l_rcws));
     }
 
 fapi_try_exit:
@@ -464,7 +509,6 @@ fapi_try_exit:
 /// @param[in] i_cmd host_fw_command_struct
 /// @param[in] i_rsp host_fw_response_struct
 /// @param[in] i_resp_data RESP data
-/// @param[in,out] io_rc return code from checking response
 /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff success
 /// @note processes the bad bits based upon the passed in ReturnCode
 ///
@@ -472,8 +516,7 @@ fapi2::ReturnCode read_and_display_normal_training_response(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
     const host_fw_command_struct& i_cmd,
     const host_fw_response_struct& i_rsp,
-    const std::vector<uint8_t>& i_resp_data,
-    fapi2::ReturnCode& io_rc)
+    const std::vector<uint8_t>& i_resp_data)
 {
     user_response_msdg l_train_response;
 
@@ -487,6 +530,43 @@ fapi2::ReturnCode read_and_display_normal_training_response(
 
     // Set RC response attributes
     FAPI_TRY(set_rc_resp_attrs(i_target, l_train_response.rc_resp));
+
+    FAPI_TRY(mss::exp::check::fw_ddr_phy_init_response_code(i_target, i_cmd, l_train_response, i_rsp.response_argument),
+             "Encountered error from host fw ddr_phy_init for %s", mss::c_str(i_target));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Reads and displays the mds draminit training response
+///
+/// @param[in] i_target OCMB target
+/// @param[in] i_cmd host_fw_command_struct
+/// @param[in] i_rsp host_fw_response_struct
+/// @param[in] i_resp_data RESP data
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode read_and_display_mds_training_response(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const host_fw_command_struct& i_cmd,
+    const host_fw_response_struct& i_rsp,
+    const std::vector<uint8_t>& i_resp_data)
+{
+    user_response_mds_msdg l_train_response;
+
+    FAPI_MFG("Reading and displaying results on %s", mss::c_str(i_target));
+
+    // Proccesses the response data
+    FAPI_TRY( mss::exp::read_mds_training_response(i_target, i_resp_data, l_train_response),
+              "Failed read_mds_training_response for %s", mss::c_str(i_target));
+
+    // Displays the training response
+    FAPI_INF("%s displaying mds user response data version %u", mss::c_str(i_target), l_train_response.version_number)
+    FAPI_TRY( mss::exp::train::display_mds_info(i_target, l_train_response));
+
+    // Set RC response attributes
+    FAPI_TRY(set_rc_resp_attrs(i_target, l_train_response.mds_resp));
 
     FAPI_TRY(mss::exp::check::fw_ddr_phy_init_response_code(i_target, i_cmd, l_train_response, i_rsp.response_argument),
              "Encountered error from host fw ddr_phy_init for %s", mss::c_str(i_target));

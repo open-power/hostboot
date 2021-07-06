@@ -66,6 +66,7 @@ enum phy_init_mode
     EYE_CAPTURE_STEP_1 = 1,
     EYE_CAPTURE_STEP_2 = 2,
     RESET = 3,
+    MDS = 4,
 };
 
 ///
@@ -493,7 +494,6 @@ fapi_try_exit:
 /// @param[in] i_cmd host_fw_command_struct
 /// @param[in] i_rsp host_fw_response_struct
 /// @param[in] i_resp_data RESP data
-/// @param[in,out] io_rc return code from checking response
 /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff success
 /// @note processes the bad bits based upon the passed in ReturnCode
 ///
@@ -501,8 +501,24 @@ fapi2::ReturnCode read_and_display_normal_training_response(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
     const host_fw_command_struct& i_cmd,
     const host_fw_response_struct& i_rsp,
-    const std::vector<uint8_t>& i_resp_data,
-    fapi2::ReturnCode& io_rc);
+    const std::vector<uint8_t>& i_resp_data);
+
+///
+/// @brief Reads and displays the mds draminit training response
+///
+/// @param[in] i_target OCMB target
+/// @param[in] i_cmd host_fw_command_struct
+/// @param[in] i_rsp host_fw_response_struct
+/// @param[in] i_resp_data RESP data
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff success
+/// @note processes the bad bits based upon the passed in ReturnCode
+///
+fapi2::ReturnCode read_and_display_mds_training_response(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const host_fw_command_struct& i_cmd,
+    const host_fw_response_struct& i_rsp,
+    const std::vector<uint8_t>& i_resp_data);
+
 
 ///
 /// @brief Reads and displays the user 2d eye response 1
@@ -538,6 +554,15 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode set_rc_resp_attrs(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                     const user_response_rc_msdg_t& i_rc_resp);
+
+///
+/// @brief Helper function to set mds response attrs
+/// @param[in] i_target the fapi2 OCMB target
+/// @param[in] i_mds_resp the MDS rc response
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode set_rc_resp_attrs(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                    const user_response_mds_rc_msdg& i_mds_resp);
 
 ///
 /// @brief Helper function to set rc response attrs

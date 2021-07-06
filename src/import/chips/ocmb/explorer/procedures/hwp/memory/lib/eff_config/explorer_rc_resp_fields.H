@@ -92,6 +92,54 @@ struct rc_resp_adaptor
 };
 
 ///
+/// @class mds_resp_adaptor
+/// @brief Adaptor to plug into mss::gen::attr_engine::set(...) algorithm
+///
+struct mds_resp_adaptor
+{
+    fapi2::Target<fapi2::TARGET_TYPE_DIMM> iv_target;
+    user_response_mds_rc_msdg iv_mds_resp;
+
+    ///
+    /// @brief Construct a new mds resp adaptor object - default
+    ///
+    mds_resp_adaptor() = default;
+
+    ///
+    /// @brief Construct a new rc resp adaptor object
+    /// @param[in] i_target the OCMB target associated with this rc response
+    /// @param[in] i_rc_resp the explorer rc resp structure
+    ///
+    mds_resp_adaptor(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                     const user_response_mds_rc_msdg& i_mds_resp) : iv_target(i_target), iv_mds_resp(i_mds_resp) {}
+
+    ///
+    /// @brief default copy constructor
+    ///
+    mds_resp_adaptor(const mds_resp_adaptor&) = default;
+
+    ///
+    /// @brief default assignment constructor
+    /// @return mds_resp_adaptor&
+    ///
+    mds_resp_adaptor& operator=(const mds_resp_adaptor&) = default;
+
+    ///
+    /// @brief Destroy the rc resp adaptor object
+    ///
+    ~mds_resp_adaptor() = default;
+
+    ///
+    /// @brief target getter
+    /// @return fapi2::Target<fapi2::TARGET_TYPE_DIMM> by value
+    ///
+    fapi2::Target<fapi2::TARGET_TYPE_DIMM> get_target() const
+    {
+        return iv_target;
+    }
+};
+
+///
 /// @class rc_rsp_fields
 /// @brief Explorer rc response fields
 ///
@@ -197,12 +245,15 @@ using attr_setter = fapi2::ReturnCode (*)(const fapi2::Target<fapi2::TARGET_TYPE
 
 ///
 /// @brief Helper function to retrieve the F0RC_D0 data
+///
+/// @tparam T response struct
 /// @param[in] i_rc_resp explorer RC response adapter
 /// @param[out] o_output copy of response in vector form
 /// @note DIMM0 data
 ///
-inline void get_data_F0RC_D0(const rc_resp_adaptor& i_rc_resp,
-                             std::vector<uint8_t>& o_output)
+template <typename T>
+void get_data_F0RC_D0(const T& i_rc_resp,
+                      std::vector<uint8_t>& o_output)
 {
     o_output.assign(MAX_RCW_RESP_ARRAY_SIZE, 0);
     std::copy(std::begin(i_rc_resp.iv_rc_resp.F0RC_D0), std::end(i_rc_resp.iv_rc_resp.F0RC_D0), std::begin(o_output));
@@ -210,12 +261,15 @@ inline void get_data_F0RC_D0(const rc_resp_adaptor& i_rc_resp,
 
 ///
 /// @brief Helper function to retrieve the F0RC_D1 data
+///
+/// @tparam T response struct
 /// @param[in] i_rc_resp explorer RC response adapter
 /// @param[out] o_output copy of response in vector form
 /// @note DIMM1 data
 ///
-inline void get_data_F0RC_D1(const rc_resp_adaptor& i_rc_resp,
-                             std::vector<uint8_t>& o_output)
+template <typename T>
+void get_data_F0RC_D1(const T& i_rc_resp,
+                      std::vector<uint8_t>& o_output)
 {
     o_output.assign(MAX_RCW_RESP_ARRAY_SIZE, 0);
     std::copy(std::begin(i_rc_resp.iv_rc_resp.F0RC_D1), std::end(i_rc_resp.iv_rc_resp.F0RC_D1), std::begin(o_output));
@@ -223,12 +277,15 @@ inline void get_data_F0RC_D1(const rc_resp_adaptor& i_rc_resp,
 
 ///
 /// @brief Helper function to retrieve the F1RC_D0 data
+///
+/// @tparam T response struct
 /// @param[in] i_rc_resp explorer RC response adapter
 /// @param[out] o_output copy of response in vector form
 /// @note DIMM0 data
 ///
-inline void get_data_F1RC_D0(const rc_resp_adaptor& i_rc_resp,
-                             std::vector<uint8_t>& o_output)
+template <typename T>
+void get_data_F1RC_D0(const T& i_rc_resp,
+                      std::vector<uint8_t>& o_output)
 {
     o_output.assign(MAX_RCW_RESP_ARRAY_SIZE, 0);
     std::copy(std::begin(i_rc_resp.iv_rc_resp.F1RC_D0), std::end(i_rc_resp.iv_rc_resp.F1RC_D0), std::begin(o_output));
@@ -236,12 +293,15 @@ inline void get_data_F1RC_D0(const rc_resp_adaptor& i_rc_resp,
 
 ///
 /// @brief Helper function to retrieve the F1RC_D1 data
+///
+/// @tparam T response struct
 /// @param[in] i_rc_resp explorer RC response adapter
 /// @param[out] o_output copy of response in vector form
 /// @note DIMM1 data
 ///
-inline void get_data_F1RC_D1(const rc_resp_adaptor& i_rc_resp,
-                             std::vector<uint8_t>& o_output)
+template <typename T>
+void get_data_F1RC_D1(const T& i_rc_resp,
+                      std::vector<uint8_t>& o_output)
 {
     o_output.assign(MAX_RCW_RESP_ARRAY_SIZE, 0);
     std::copy(std::begin(i_rc_resp.iv_rc_resp.F1RC_D1), std::end(i_rc_resp.iv_rc_resp.F1RC_D1), std::begin(o_output));
@@ -278,6 +338,7 @@ fapi_try_exit:
 
 ///
 /// @brief Set the rc resp attrs
+///
 /// @param[in] i_rc_resp explorer RC response adapter
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
@@ -341,6 +402,41 @@ inline fapi2::ReturnCode rc_resp_engine(const rc_resp_adaptor& i_rc_resp)
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+///
+/// @brief Set the rc resp attrs
+///
+/// @param[in] i_rc_resp explorer RC response adapter
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+inline fapi2::ReturnCode mds_rc_resp_engine(const mds_resp_adaptor& i_rc_resp)
+{
+    // Grab dimm target
+    const auto& l_dimm = i_rc_resp.get_target();
+
+    // F0RCXX fields
+    FAPI_TRY(mss::attr::set_exp_resp_ddr4_f0rc00(l_dimm, i_rc_resp.iv_mds_resp.F0RC00));
+    FAPI_TRY(mss::attr::set_exp_resp_ddr4_f0rc01(l_dimm, i_rc_resp.iv_mds_resp.F0RC01));
+    FAPI_TRY(mss::attr::set_exp_resp_ddr4_f0rc03(l_dimm, i_rc_resp.iv_mds_resp.F0RC03));
+    FAPI_TRY(mss::attr::set_exp_resp_ddr4_f0rc04(l_dimm, i_rc_resp.iv_mds_resp.F0RC04));
+    FAPI_TRY(mss::attr::set_exp_resp_ddr4_f0rc05(l_dimm, i_rc_resp.iv_mds_resp.F0RC05));
+    FAPI_TRY(mss::attr::set_exp_resp_ddr4_f0rc0b(l_dimm, i_rc_resp.iv_mds_resp.F0RC0B));
+    FAPI_TRY(mss::attr::set_exp_resp_ddr4_f0rc0e(l_dimm, i_rc_resp.iv_mds_resp.F0RC0E));
+    FAPI_TRY(mss::attr::set_exp_resp_ddr4_f0rc0f(l_dimm, i_rc_resp.iv_mds_resp.F0RC0F));
+    FAPI_TRY(mss::attr::set_exp_resp_ddr4_f0rc1x(l_dimm, i_rc_resp.iv_mds_resp.F0RC1x));
+    FAPI_TRY(mss::attr::set_exp_resp_ddr4_f0rc7x(l_dimm, i_rc_resp.iv_mds_resp.F0RC7x));
+
+    // F1RCXX fields
+    FAPI_TRY(mss::attr::set_exp_resp_ddr4_f1rc00(l_dimm, i_rc_resp.iv_mds_resp.F1RC00));
+    FAPI_TRY(mss::attr::set_exp_resp_ddr4_f1rc02(l_dimm, i_rc_resp.iv_mds_resp.F1RC02));
+    FAPI_TRY(mss::attr::set_exp_resp_ddr4_f1rc03(l_dimm, i_rc_resp.iv_mds_resp.F1RC03));
+    FAPI_TRY(mss::attr::set_exp_resp_ddr4_f1rc04(l_dimm, i_rc_resp.iv_mds_resp.F1RC04));
+    FAPI_TRY(mss::attr::set_exp_resp_ddr4_f1rc05(l_dimm, i_rc_resp.iv_mds_resp.F1RC05));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 
 } // namespace exp
 } // namespace mss

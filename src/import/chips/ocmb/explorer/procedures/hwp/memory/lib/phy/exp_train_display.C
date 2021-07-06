@@ -238,6 +238,25 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Displays all training information for mds command response
+/// @param[in] i_target the OCMB target
+/// @param[in] i_training_info the training information to display
+/// @return fapi2::FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode display_mds_info(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const user_response_mds_msdg& i_training_info)
+{
+    // Target trace & FAPI_INF moved to the caller(s) such that we can call this from the eye capture functions
+    FAPI_TRY(display_mrs_info(i_target, i_training_info));
+    display_lane_info(i_target, i_training_info);
+    display_mds_response(i_target, i_training_info);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 } // ns train
 } // ns exp
 } // ns mss

@@ -111,6 +111,30 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Reads the mds training response structure
+/// @param[in] i_target the target associated with the response data
+/// @param[in] i_data the response data to read
+/// @param[out] o_resp the processed training response class
+/// @return FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode read_mds_training_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const std::vector<uint8_t>& i_data,
+        user_response_mds_msdg& o_resp)
+{
+    // We assert at the end to avoid LOTS of fapi asserts
+    uint32_t l_idx = 0;
+    uint32_t l_version_number = 0;
+    bool l_pass = readLE(i_data, l_idx, l_version_number);
+    o_resp.version_number = l_version_number;
+
+    FAPI_TRY(read_mrs_err_mds_response<user_response_mds_msdg>(i_target, i_data, l_idx, l_pass, o_resp));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+///
 /// @brief Parse the MRS data from the response to correct attributes
 /// @param[in] i_target OCMB chip
 /// @param[in] i_resp MRS response struct

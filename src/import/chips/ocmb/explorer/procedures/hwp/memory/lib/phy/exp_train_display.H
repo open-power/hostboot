@@ -322,6 +322,121 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Displays command to command response timing
+/// @param[in] i_target the OCMB target
+/// @param[in] i_training_info the training information to display
+/// @return returns FAPI2_RC_SUCCESS iff the procedure executes successfully
+///
+inline void display_mds_response(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const user_response_mds_msdg& i_training_info)
+{
+    // Print all mds response registers
+    // Print function space 0
+    FAPI_MFG("%s MDS Function Space 0: RCD", mss::c_str(i_target));
+    FAPI_MFG("%s F0RC00: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F0RC00);
+    FAPI_MFG("%s F0RC01: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F0RC01);
+    FAPI_MFG("%s F0RC02: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F0RC02);
+    FAPI_MFG("%s F0RC03: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F0RC03);
+    FAPI_MFG("%s F0RC04: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F0RC04);
+    FAPI_MFG("%s F0RC05: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F0RC05);
+    FAPI_MFG("%s F0RC06: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F0RC06);
+    FAPI_MFG("%s F0RC07: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F0RC07);
+    FAPI_MFG("%s F0RC08: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F0RC08);
+    FAPI_MFG("%s F0RC09: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F0RC09);
+    FAPI_MFG("%s F0RC0A: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F0RC0A);
+    FAPI_MFG("%s F0RC0B: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F0RC0B);
+    FAPI_MFG("%s F0RC0C: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F0RC0C);
+    FAPI_MFG("%s F0RC0D: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F0RC0D);
+    FAPI_MFG("%s F0RC0E: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F0RC0E);
+    FAPI_MFG("%s F0RC0F: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F0RC0F);
+    FAPI_MFG("%s F0RC1x: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F0RC1x);
+    FAPI_MFG("%s F0RC2x: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F0RC2x);
+    FAPI_MFG("%s F0RC3x: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F0RC3x);
+    FAPI_MFG("%s F0RC4x: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F0RC4x);
+    FAPI_MFG("%s F0RC5x: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F0RC5x);
+    FAPI_MFG("%s F0RC6x: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F0RC6x);
+    FAPI_MFG("%s F0RC7x: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F0RC7x);
+    FAPI_MFG("%s F0RC8x: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F0RC8x);
+    FAPI_MFG("%s F0RC9x: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F0RC9x);
+    FAPI_MFG("%s F0RCAx: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F0RCAx);
+    FAPI_MFG("%s F0RCBx: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F0RCBx);
+
+    // Print function space 1
+    FAPI_MFG("%s MDS Function Space 1: RCD", mss::c_str(i_target));
+    FAPI_MFG("%s F1RC00: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F1RC00);
+    FAPI_MFG("%s F1RC01: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F1RC01);
+    FAPI_MFG("%s F1RC02: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F1RC02);
+    FAPI_MFG("%s F1RC03: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F1RC03);
+    FAPI_MFG("%s F1RC04: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F1RC04);
+    FAPI_MFG("%s F1RC05: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F1RC05);
+    FAPI_MFG("%s F1RC06: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F1RC06);
+    FAPI_MFG("%s F1RC07: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F1RC07);
+    FAPI_MFG("%s F1RC08: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F1RC08);
+    FAPI_MFG("%s F1RC09: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F1RC09);
+    FAPI_MFG("%s F1RC0A: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F1RC0A);
+    FAPI_MFG("%s F1RC0B: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F1RC0B);
+    FAPI_MFG("%s F1RC0C: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F1RC0C);
+    FAPI_MFG("%s F1RC0D: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F1RC0D);
+    FAPI_MFG("%s F1RC0E: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F1RC0E);
+    FAPI_MFG("%s F1RC0F: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F1RC0F);
+    FAPI_MFG("%s F1RC1x: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F1RC1x);
+    FAPI_MFG("%s F1RC2x: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F1RC2x);
+    FAPI_MFG("%s F1RC3x: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F1RC3x);
+    FAPI_MFG("%s F1RC4x: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F1RC4x);
+    FAPI_MFG("%s F1RC5x: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F1RC5x);
+    FAPI_MFG("%s F1RC6x: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F1RC6x);
+    FAPI_MFG("%s F1RC7x: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F1RC7x);
+    FAPI_MFG("%s F1RC8x: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F1RC8x);
+    FAPI_MFG("%s F1RC9x: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F1RC9x);
+    FAPI_MFG("%s F1RCAx: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F1RCAx);
+    FAPI_MFG("%s F1RCBx: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F1RCBx);
+
+    // Print function space 2
+    FAPI_MFG("%s MDS Function Space 2: Training and Error Logs", mss::c_str(i_target));
+    FAPI_MFG("%s F2RC00: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F2RC00);
+    FAPI_MFG("%s F2RC01: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F2RC01);
+    FAPI_MFG("%s F2RC02: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F2RC02);
+    FAPI_MFG("%s F2RC03: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F2RC03);
+
+    // Print function space 3
+    FAPI_MFG("%s MDS Function Space 3: DQ Training", mss::c_str(i_target));
+    FAPI_MFG("%s F3RC00: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F3RC00);
+    FAPI_MFG("%s F3RC01: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F3RC01);
+    FAPI_MFG("%s F3RC09: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F3RC09);
+    FAPI_MFG("%s F3RC0A: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F3RC0A);
+    FAPI_MFG("%s F3RC0B: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F3RC0B);
+    FAPI_MFG("%s F3RC0C: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F3RC0C);
+    FAPI_MFG("%s F3RC0D: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F3RC0D);
+    FAPI_MFG("%s F3RC0F: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F3RC0F);
+    FAPI_MFG("%s F3RC1x: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F3RC1x);
+    FAPI_MFG("%s F3RC2x: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F3RC2x);
+    FAPI_MFG("%s F3RC3x: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F3RC3x);
+    FAPI_MFG("%s F3RC4x: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F3RC4x);
+    FAPI_MFG("%s F3RC5x: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F3RC5x);
+    FAPI_MFG("%s F3RC6x: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F3RC6x);
+    FAPI_MFG("%s F3RC7x: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F3RC7x);
+    FAPI_MFG("%s F3RC8x: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F3RC8x);
+    FAPI_MFG("%s F3RC9x: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F3RC9x);
+    FAPI_MFG("%s F3RCAx: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F3RCAx);
+    FAPI_MFG("%s F3RCBx: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F3RCBx);
+    FAPI_MFG("%s F3RCCx: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F3RCCx);
+    FAPI_MFG("%s F3RCDx: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F3RCDx);
+    FAPI_MFG("%s F3RCEx: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F3RCEx);
+    FAPI_MFG("%s F3RCFx: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.F3RCFx);
+
+    // Print function space C
+    FAPI_MFG("%s MDS Function Space C", mss::c_str(i_target));
+    FAPI_MFG("%s FCRCDx: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.FCRCDx);
+
+    // Print MDS Reserved Bytes
+    FAPI_MFG("%s RESERVED0: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.RESERVED0);
+    FAPI_MFG("%s RESERVED1: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.RESERVED1);
+    FAPI_MFG("%s RESERVED2: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.RESERVED2);
+    FAPI_MFG("%s RESERVED3: 0x%04x", mss::c_str(i_target), i_training_info.mds_resp.RESERVED3);
+}
+
 
 ///
 /// @brief Display train_2d_read_eye_msdg_t response struct
@@ -396,6 +511,16 @@ template <>
 fapi2::ReturnCode display_user_2d_eye_info<user_2d_eye_response_2_msdg_t>(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
     const user_2d_eye_response_2_msdg_t& i_training_info);
+
+///
+/// @brief Displays all training information for mds command response
+/// @param[in] i_target the OCMB target
+/// @param[in] i_training_info the training information to display
+/// @return fapi2::FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode display_mds_info(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const user_response_mds_msdg& i_training_info);
 
 } // ns train
 } // ns exp

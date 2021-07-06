@@ -281,7 +281,7 @@ fapi2::ReturnCode read_tm_err_mrs_rc_response(const fapi2::Target<fapi2::TARGET_
     io_resp.tm_resp.DFIMRL_DDRCLK_trained = l_DFIMRL_DDRCLK_trained;
 
     // Error response
-    l_pass &= readLEArray(i_data, 80, l_idx, io_resp.err_resp.Failure_Lane);
+    l_pass &= readLEArray(i_data, TRAINING_RESPONSE_NUM_LANES, l_idx, io_resp.err_resp.Failure_Lane);
 
     uint16_t l_MR0 = 0;
     uint16_t l_MR3 = 0;
@@ -325,6 +325,162 @@ fapi2::ReturnCode read_tm_err_mrs_rc_response(const fapi2::Target<fapi2::TARGET_
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+///
+/// @brief Read the common block of fields from the mds training response structs
+///
+/// @tparam T training repsonse struct type
+/// @param[in] i_target OCMB chip
+/// @param[in] i_data response data
+/// @param[in] i_current_idx last index left off
+/// @param[in] i_pass response parsing success thus far
+/// @param[in,out] io_resp response struct
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+template <typename T>
+fapi2::ReturnCode read_mrs_err_mds_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const std::vector<uint8_t>& i_data,
+        const uint32_t i_current_idx,
+        const bool i_pass,
+        T& io_resp)
+{
+    uint32_t l_idx = i_current_idx;
+    bool l_pass = i_pass;
+
+    // Error response
+    l_pass &= readLEArray(i_data, TRAINING_RESPONSE_NUM_LANES, l_idx, io_resp.err_resp.Failure_Lane);
+
+    uint16_t l_MR0 = 0;
+    uint16_t l_MR3 = 0;
+    uint16_t l_MR4 = 0;
+
+    // MRS response
+    l_pass &= readLE(i_data, l_idx, l_MR0);
+    l_pass &= readLEArray(i_data, TRAINING_RESPONSE_NUM_RANKS, l_idx, io_resp.mrs_resp.MR1);
+    l_pass &= readLEArray(i_data, TRAINING_RESPONSE_NUM_RANKS, l_idx, io_resp.mrs_resp.MR2);
+    l_pass &= readLE(i_data, l_idx, l_MR3);
+    l_pass &= readLE(i_data, l_idx, l_MR4);
+    l_pass &= readLEArray(i_data, TRAINING_RESPONSE_NUM_RANKS, l_idx, io_resp.mrs_resp.MR5);
+    l_pass &= readLEArray(i_data, TRAINING_RESPONSE_MR6_SIZE, l_idx, &io_resp.mrs_resp.MR6[0][0]);
+
+    io_resp.mrs_resp.MR0 = l_MR0;
+    io_resp.mrs_resp.MR3 = l_MR3;
+    io_resp.mrs_resp.MR4 = l_MR4;
+
+    // MDS Register Control Word (RCW) response
+    // Function Space 0
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F0RC00);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F0RC01);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F0RC02);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F0RC03);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F0RC04);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F0RC05);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F0RC06);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F0RC07);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F0RC08);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F0RC09);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F0RC0A);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F0RC0B);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F0RC0C);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F0RC0D);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F0RC0E);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F0RC0F);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F0RC1x);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F0RC2x);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F0RC3x);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F0RC4x);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F0RC5x);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F0RC6x);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F0RC7x);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F0RC8x);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F0RC9x);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F0RCAx);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F0RCBx);
+    // Function Space 1
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F1RC00);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F1RC01);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F1RC02);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F1RC03);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F1RC04);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F1RC05);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F1RC06);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F1RC07);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F1RC08);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F1RC09);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F1RC0A);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F1RC0B);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F1RC0C);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F1RC0D);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F1RC0E);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F1RC0F);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F1RC1x);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F1RC2x);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F1RC3x);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F1RC4x);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F1RC5x);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F1RC6x);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F1RC7x);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F1RC8x);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F1RC9x);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F1RCAx);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F1RCBx);
+    // Function Space 2
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F2RC00);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F2RC01);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F2RC02);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F2RC03);
+    // Function Space 3
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F3RC00);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F3RC01);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F3RC09);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F3RC0A);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F3RC0B);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F3RC0C);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F3RC0D);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F3RC0F);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F3RC1x);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F3RC2x);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F3RC3x);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F3RC4x);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F3RC5x);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F3RC6x);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F3RC7x);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F3RC8x);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F3RC9x);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F3RCAx);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F3RCBx);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F3RCCx);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F3RCDx);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F3RCEx);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.F3RCFx);
+    // Function Space C
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.FCRCDx);
+    // Reserved Bytes
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.RESERVED0);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.RESERVED1);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.RESERVED2);
+    l_pass &= readLE(i_data, l_idx, io_resp.mds_resp.RESERVED3);
+
+    // Check if we have errors
+    FAPI_ASSERT( l_pass,
+                 fapi2::EXP_INBAND_LE_DATA_RANGE()
+                 .set_TARGET(i_target)
+                 .set_FUNCTION(mss::exp::READ_MDS_TRAINING_RESPONSE_STRUCT)
+                 .set_DATA_SIZE(i_data.size())
+                 .set_CURRENT_INDEX(i_current_idx)
+                 .set_MAX_INDEX(sizeof(T)),
+                 "%s Failed to convert from data to host_fw_response_struct data size %u expected size %u",
+                 mss::c_str(i_target), i_data.size(), sizeof(T));
+
+    // Set MR attributes based on settings
+    FAPI_TRY( parse_mrs_data_attributes(i_target, io_resp.mrs_resp));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 
 ///
 /// @brief Explorer's bad bit interface class
@@ -454,6 +610,17 @@ class bad_bit_interface
 fapi2::ReturnCode read_normal_training_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         const std::vector<uint8_t>& i_data,
         user_response_msdg& o_resp);
+
+///
+/// @brief Reads the mds training response structure
+/// @param[in] i_target the target associated with the response data
+/// @param[in] i_data the response data to read
+/// @param[out] o_resp the processed training response class
+/// @return FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode read_mds_training_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const std::vector<uint8_t>& i_data,
+        user_response_mds_msdg& o_resp);
 
 ///
 /// @brief Reads user 2d eye response 1
