@@ -3353,7 +3353,7 @@ group gN0_CHIPLET_RE_FIR
     filter singlebit
 {
     /** N0_CHIPLET_RE_FIR[2]
-     *  Attention UNIT_CS attention on the N0 chiplet
+     *  Active UNIT_CS attention on the N0 chiplet
      */
     (rN0_CHIPLET_RE_FIR, bit(2)) ? analyzeUcs;
 

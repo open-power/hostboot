@@ -337,7 +337,7 @@ group gMC_CHIPLET_RE_FIR attntype RECOVERABLE
     filter singlebit
 {
     /** MC_CHIPLET_RE_FIR[2]
-     *  Active UNIT_CS attention on this MC
+     *  Active UNIT_CS attention on the MC chiplet
      */
     (rMC_CHIPLET_RE_FIR, bit(2)) ? analyzeUcs;
 

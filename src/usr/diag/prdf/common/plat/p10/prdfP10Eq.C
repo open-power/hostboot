@@ -44,8 +44,7 @@ namespace p10_eq
  * @param  io_sc     The step code data struct.
  * @return Return code from analysis of the UCS. SUCCESS if no UCS found.
  */
-int32_t coreUcsSummary( ExtensibleChip * i_chip,
-                        STEP_CODE_DATA_STRUCT & io_sc )
+int32_t analyzeUcs( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 {
     // Check the EQ_CHIPLET_UCS_FIR for which core has a UCS
     auto fir = i_chip->getRegister("EQ_CHIPLET_UCS_FIR");
@@ -90,7 +89,7 @@ int32_t coreUcsSummary( ExtensibleChip * i_chip,
 
     return PRD_SCAN_COMM_REGISTER_ZERO; // default if nothing found
 }
-PRDF_PLUGIN_DEFINE( p10_eq, coreUcsSummary );
+PRDF_PLUGIN_DEFINE( p10_eq, analyzeUcs );
 
 /**
  * @brief  Plugin function for recoverable analysis to the core and then to

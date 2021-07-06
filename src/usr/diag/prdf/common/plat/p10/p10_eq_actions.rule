@@ -23,12 +23,6 @@
 #
 # IBM_PROLOG_END_TAG
 
-/** EQ_CHIPLET_RE_FIR[2] - Core Unit Checkstop support */
-actionclass coreUnitCheckstop
-{
-    funccall("coreUcsSummary");
-};
-
 # The bits characterized by these actions should be routed to other components
 # and should never be seen by PRD.
 actionclass qmeInterrupt { level2_th_1; };

@@ -204,7 +204,6 @@ int32_t analyzeUcs( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
     return i_chip->Analyze( io_sc, UNIT_CS );
 }
 PRDF_PLUGIN_DEFINE_NS(p10_proc, CommonPlugins, analyzeUcs);
-PRDF_PLUGIN_DEFINE_NS(p10_eq,   CommonPlugins, analyzeUcs);
 PRDF_PLUGIN_DEFINE_NS(p10_core, CommonPlugins, analyzeUcs);
 PRDF_PLUGIN_DEFINE_NS(p10_pec,  CommonPlugins, analyzeUcs);
 PRDF_PLUGIN_DEFINE_NS(p10_phb,  CommonPlugins, analyzeUcs);
