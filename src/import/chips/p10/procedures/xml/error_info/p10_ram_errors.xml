@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -70,6 +70,8 @@
     <description>
       Illegal SPR name or read/write mode access
     </description>
+    <ffdc>CORE_TARGET</ffdc>
+    <ffdc>THREAD</ffdc>
     <ffdc>REGNAME</ffdc>
     <callout>
       <procedure>CODE</procedure>
@@ -79,13 +81,44 @@
   <!-- ******************************************************************** -->
   <hwpError>
     <sbeError/>
-    <rc>RC_P10_RAM_NOT_SETUP_ERR</rc>
+    <rc>RC_P10_RAM_NOT_SETUP_CLEANUP_ERR</rc>
     <description>
-      RAM is not setup as active before doing ram or cleanup
+      RAM is not setup as active before cleanup
     </description>
     <ffdc>CORE_TARGET</ffdc>
+    <ffdc>THREAD</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+    <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P10_RAM_NOT_SETUP_IO_ERR</rc>
+    <description>
+      RAM is not setup as active before doing put_reg or get_reg operation
+    </description>
+    <ffdc>CORE_TARGET</ffdc>
+    <ffdc>THREAD</ffdc>
     <ffdc>REG_TYPE</ffdc>
     <ffdc>REG_NUM</ffdc>
+    <ffdc>ALLOW_MULT</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+    <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P10_RAM_NOT_SETUP_OPCODE_ERR</rc>
+    <description>
+      RAM is not setup as active before doing opcode operation
+    </description>
+    <ffdc>CORE_TARGET</ffdc>
+    <ffdc>THREAD</ffdc>
+    <ffdc>OPCODE</ffdc>
     <ffdc>ALLOW_MULT</ffdc>
     <callout>
       <procedure>CODE</procedure>
@@ -95,13 +128,30 @@
   <!-- ******************************************************************** -->
   <hwpError>
     <sbeError/>
-    <rc>RC_P10_RAM_INACTIVE_THREAD_HW542214</rc>
+    <rc>RC_P10_PUT_REG_RAM_INACTIVE_THREAD_HW542214</rc>
     <description>
       RAM to inactive thread (put_reg) and HW542214 is present
     </description>
     <ffdc>CORE_TARGET</ffdc>
+    <ffdc>THREAD</ffdc>
     <ffdc>REG_TYPE</ffdc>
     <ffdc>REG_NUM</ffdc>
+    <ffdc>ALLOW_MULT</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+<!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P10_OPCODE_RAM_INACTIVE_THREAD_HW542214</rc>
+    <description>
+      RAM to inactive thread (ram_opcode) and HW542214 is present
+    </description>
+    <ffdc>CORE_TARGET</ffdc>
+    <ffdc>THREAD</ffdc>
+    <ffdc>OPCODE</ffdc>
     <ffdc>ALLOW_MULT</ffdc>
     <callout>
       <procedure>CODE</procedure>
@@ -154,6 +204,9 @@
       Attempt to perform ramming during recovery
     </description>
     <ffdc>CORE_TARGET</ffdc>
+    <ffdc>THREAD</ffdc>
+    <ffdc>OPCODE</ffdc>
+    <ffdc>ALLOW_MULT</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_RAM_CORE_REGISTERS</id>
       <targetType>TARGET_TYPE_CORE</targetType>
@@ -172,6 +225,9 @@
       Exception or interrupt happened during ramming
     </description>
     <ffdc>CORE_TARGET</ffdc>
+    <ffdc>THREAD</ffdc>
+    <ffdc>OPCODE</ffdc>
+    <ffdc>ALLOW_MULT</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_RAM_CORE_REGISTERS</id>
       <targetType>TARGET_TYPE_CORE</targetType>
@@ -185,6 +241,9 @@
       <procedure>CODE</procedure>
       <priority>LOW</priority>
     </callout>
+    <deconfigure>
+        <target>CORE_TARGET</target>
+    </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -194,6 +253,9 @@
       Polling for ram done reached threshold
     </description>
     <ffdc>CORE_TARGET</ffdc>
+    <ffdc>THREAD</ffdc>
+    <ffdc>OPCODE</ffdc>
+    <ffdc>ALLOW_MULT</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_RAM_CORE_REGISTERS</id>
       <targetType>TARGET_TYPE_CORE</targetType>
@@ -207,6 +269,9 @@
       <procedure>CODE</procedure>
       <priority>LOW</priority>
     </callout>
+    <deconfigure>
+        <target>CORE_TARGET</target>
+    </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -229,15 +294,22 @@
       <procedure>CODE</procedure>
       <priority>LOW</priority>
     </callout>
+    <deconfigure>
+        <target>CORE_TARGET</target>
+    </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <sbeError/>
     <rc>RC_P10_RAM_INVALID_REG_TYPE_ACCESS_ERR</rc>
     <description>
-      Illegal reg type access
+      Illegal reg type access, if REG_NUM = 0xff then ignore the REG_NUM ffdc
     </description>
-    <ffdc>REGTYPE</ffdc>
+    <ffdc>CORE_TARGET</ffdc>
+    <ffdc>THREAD</ffdc>
+    <ffdc>REG_TYPE</ffdc>
+    <ffdc>REG_NUM</ffdc>
+    <ffdc>ALLOW_MULT</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -264,6 +336,18 @@
       General error during RAM test
     </description>
     <ffdc>LINE_NUMBER</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P10_RAM_RANDOM_SPR_NAME_ERROR</rc>
+    <description>
+      An error occurred while attempting to generate a random SPR name
+    </description>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -317,6 +401,9 @@
       <procedure>CODE</procedure>
       <priority>LOW</priority>
     </callout>
+    <deconfigure>
+        <target>CORE_TARGET</target>
+    </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
