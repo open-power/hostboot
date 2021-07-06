@@ -529,7 +529,7 @@ group gEQ_LOCAL_FIR
     /** EQ_LOCAL_FIR[4]
      *  PSC - PSCOM access error
      */
-    (rEQ_LOCAL_FIR, bit(4)) ? parent_proc_th_32perDay;
+    (rEQ_LOCAL_FIR, bit(4)) ? defaultMaskedError;
 
     /** EQ_LOCAL_FIR[5]
      *  PSC - internal or ring interface error
@@ -937,7 +937,7 @@ group gEQ_QME_FIR
     /** EQ_QME_FIR[18]
      *  A new special wakeup right after previous cleared
      */
-    (rEQ_QME_FIR, bit(18)) ? qmeInterrupt;
+    (rEQ_QME_FIR, bit(18)) ? defaultMaskedError;
 
     /** EQ_QME_FIR[19]
      *  Core External Interrupt wakeup sources present but

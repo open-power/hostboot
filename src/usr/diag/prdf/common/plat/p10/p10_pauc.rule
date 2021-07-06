@@ -2075,7 +2075,7 @@ group gPAU_PHY_FIR
     /** PAU_PHY_FIR[20]
      *  A PPE Code Warning has occurred.
      */
-    (rPAU_PHY_FIR, bit(20)) ? threshold_and_mask_parent_proc;
+    (rPAU_PHY_FIR, bit(20)) ? defaultMaskedError;
 
     /** PAU_PHY_FIR[21]
      *  A PPE Code DFT Error has occurred.

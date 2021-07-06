@@ -2729,12 +2729,12 @@ group gTP_LOCAL_FIR
     /** TP_LOCAL_FIR[44]
      *  RCS - Up/down counter A unlock
      */
-    (rTP_LOCAL_FIR, bit(44)) ? rcs_error_handling;
+    (rTP_LOCAL_FIR, bit(44)) ? defaultMaskedError;
 
     /** TP_LOCAL_FIR[45]
      *  RCS - Up/down counter B unlock
      */
-    (rTP_LOCAL_FIR, bit(45)) ? rcs_error_handling;
+    (rTP_LOCAL_FIR, bit(45)) ? defaultMaskedError;
 
     /** TP_LOCAL_FIR[46]
      *  PIBMEM
@@ -2860,7 +2860,7 @@ group gOCC_FIR
     (rOCC_FIR, bit(2)) ? defaultMaskedError;
 
     /** OCC_FIR[3]
-     *  Stop recovery, notify PRD
+     *  Reserve
      */
     (rOCC_FIR, bit(3)) ? defaultMaskedError;
 
@@ -5797,32 +5797,32 @@ group gPB_STATION_FIR_EQ_0
     /** PB_STATION_FIR_EQ_0[16]
      *  link0 protocol error
      */
-    (rPB_STATION_FIR_EQ_0, bit(16)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_0, bit(16)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_0[17]
      *  link0 overflow error
      */
-    (rPB_STATION_FIR_EQ_0, bit(17)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_0, bit(17)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_0[18]
      *  link0 hw parity error
      */
-    (rPB_STATION_FIR_EQ_0, bit(18)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_0, bit(18)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_0[19]
      *  link1 protocol error
      */
-    (rPB_STATION_FIR_EQ_0, bit(19)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_0, bit(19)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_0[20]
      *  link1 overflow error
      */
-    (rPB_STATION_FIR_EQ_0, bit(20)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_0, bit(20)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_0[21]
      *  link1 hw parity error
      */
-    (rPB_STATION_FIR_EQ_0, bit(21)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_0, bit(21)) ? defaultMaskedError;
 
 };
 
@@ -5925,32 +5925,32 @@ group gPB_STATION_FIR_EQ_1
     /** PB_STATION_FIR_EQ_1[16]
      *  link0 protocol error
      */
-    (rPB_STATION_FIR_EQ_1, bit(16)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_1, bit(16)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_1[17]
      *  link0 overflow error
      */
-    (rPB_STATION_FIR_EQ_1, bit(17)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_1, bit(17)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_1[18]
      *  link0 hw parity error
      */
-    (rPB_STATION_FIR_EQ_1, bit(18)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_1, bit(18)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_1[19]
      *  link1 protocol error
      */
-    (rPB_STATION_FIR_EQ_1, bit(19)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_1, bit(19)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_1[20]
      *  link1 overflow error
      */
-    (rPB_STATION_FIR_EQ_1, bit(20)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_1, bit(20)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_1[21]
      *  link1 hw parity error
      */
-    (rPB_STATION_FIR_EQ_1, bit(21)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_1, bit(21)) ? defaultMaskedError;
 
 };
 
@@ -6053,32 +6053,32 @@ group gPB_STATION_FIR_EQ_2
     /** PB_STATION_FIR_EQ_2[16]
      *  link0 protocol error
      */
-    (rPB_STATION_FIR_EQ_2, bit(16)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_2, bit(16)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_2[17]
      *  link0 overflow error
      */
-    (rPB_STATION_FIR_EQ_2, bit(17)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_2, bit(17)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_2[18]
      *  link0 hw parity error
      */
-    (rPB_STATION_FIR_EQ_2, bit(18)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_2, bit(18)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_2[19]
      *  link1 protocol error
      */
-    (rPB_STATION_FIR_EQ_2, bit(19)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_2, bit(19)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_2[20]
      *  link1 overflow error
      */
-    (rPB_STATION_FIR_EQ_2, bit(20)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_2, bit(20)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_2[21]
      *  link1 hw parity error
      */
-    (rPB_STATION_FIR_EQ_2, bit(21)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_2, bit(21)) ? defaultMaskedError;
 
 };
 
@@ -6181,32 +6181,32 @@ group gPB_STATION_FIR_EQ_3
     /** PB_STATION_FIR_EQ_3[16]
      *  link0 protocol error
      */
-    (rPB_STATION_FIR_EQ_3, bit(16)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_3, bit(16)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_3[17]
      *  link0 overflow error
      */
-    (rPB_STATION_FIR_EQ_3, bit(17)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_3, bit(17)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_3[18]
      *  link0 hw parity error
      */
-    (rPB_STATION_FIR_EQ_3, bit(18)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_3, bit(18)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_3[19]
      *  link1 protocol error
      */
-    (rPB_STATION_FIR_EQ_3, bit(19)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_3, bit(19)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_3[20]
      *  link1 overflow error
      */
-    (rPB_STATION_FIR_EQ_3, bit(20)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_3, bit(20)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_3[21]
      *  link1 hw parity error
      */
-    (rPB_STATION_FIR_EQ_3, bit(21)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_3, bit(21)) ? defaultMaskedError;
 
 };
 
@@ -6309,32 +6309,32 @@ group gPB_STATION_FIR_EQ_4
     /** PB_STATION_FIR_EQ_4[16]
      *  link0 protocol error
      */
-    (rPB_STATION_FIR_EQ_4, bit(16)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_4, bit(16)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_4[17]
      *  link0 overflow error
      */
-    (rPB_STATION_FIR_EQ_4, bit(17)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_4, bit(17)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_4[18]
      *  link0 hw parity error
      */
-    (rPB_STATION_FIR_EQ_4, bit(18)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_4, bit(18)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_4[19]
      *  link1 protocol error
      */
-    (rPB_STATION_FIR_EQ_4, bit(19)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_4, bit(19)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_4[20]
      *  link1 overflow error
      */
-    (rPB_STATION_FIR_EQ_4, bit(20)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_4, bit(20)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_4[21]
      *  link1 hw parity error
      */
-    (rPB_STATION_FIR_EQ_4, bit(21)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_4, bit(21)) ? defaultMaskedError;
 
 };
 
@@ -6437,32 +6437,32 @@ group gPB_STATION_FIR_EQ_5
     /** PB_STATION_FIR_EQ_5[16]
      *  link0 protocol error
      */
-    (rPB_STATION_FIR_EQ_5, bit(16)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_5, bit(16)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_5[17]
      *  link0 overflow error
      */
-    (rPB_STATION_FIR_EQ_5, bit(17)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_5, bit(17)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_5[18]
      *  link0 hw parity error
      */
-    (rPB_STATION_FIR_EQ_5, bit(18)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_5, bit(18)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_5[19]
      *  link1 protocol error
      */
-    (rPB_STATION_FIR_EQ_5, bit(19)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_5, bit(19)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_5[20]
      *  link1 overflow error
      */
-    (rPB_STATION_FIR_EQ_5, bit(20)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_5, bit(20)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_5[21]
      *  link1 hw parity error
      */
-    (rPB_STATION_FIR_EQ_5, bit(21)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_5, bit(21)) ? defaultMaskedError;
 
 };
 
@@ -6565,32 +6565,32 @@ group gPB_STATION_FIR_EQ_6
     /** PB_STATION_FIR_EQ_6[16]
      *  link0 protocol error
      */
-    (rPB_STATION_FIR_EQ_6, bit(16)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_6, bit(16)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_6[17]
      *  link0 overflow error
      */
-    (rPB_STATION_FIR_EQ_6, bit(17)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_6, bit(17)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_6[18]
      *  link0 hw parity error
      */
-    (rPB_STATION_FIR_EQ_6, bit(18)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_6, bit(18)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_6[19]
      *  link1 protocol error
      */
-    (rPB_STATION_FIR_EQ_6, bit(19)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_6, bit(19)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_6[20]
      *  link1 overflow error
      */
-    (rPB_STATION_FIR_EQ_6, bit(20)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_6, bit(20)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_6[21]
      *  link1 hw parity error
      */
-    (rPB_STATION_FIR_EQ_6, bit(21)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_6, bit(21)) ? defaultMaskedError;
 
 };
 
@@ -6693,32 +6693,32 @@ group gPB_STATION_FIR_EQ_7
     /** PB_STATION_FIR_EQ_7[16]
      *  link0 protocol error
      */
-    (rPB_STATION_FIR_EQ_7, bit(16)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_7, bit(16)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_7[17]
      *  link0 overflow error
      */
-    (rPB_STATION_FIR_EQ_7, bit(17)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_7, bit(17)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_7[18]
      *  link0 hw parity error
      */
-    (rPB_STATION_FIR_EQ_7, bit(18)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_7, bit(18)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_7[19]
      *  link1 protocol error
      */
-    (rPB_STATION_FIR_EQ_7, bit(19)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_7, bit(19)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_7[20]
      *  link1 overflow error
      */
-    (rPB_STATION_FIR_EQ_7, bit(20)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_7, bit(20)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_7[21]
      *  link1 hw parity error
      */
-    (rPB_STATION_FIR_EQ_7, bit(21)) ? self_th_1;
+    (rPB_STATION_FIR_EQ_7, bit(21)) ? defaultMaskedError;
 
 };
 
@@ -6949,32 +6949,32 @@ group gPB_STATION_FIR_EN2
     /** PB_STATION_FIR_EN2[16]
      *  link0 protocol error
      */
-    (rPB_STATION_FIR_EN2, bit(16)) ? self_th_1;
+    (rPB_STATION_FIR_EN2, bit(16)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EN2[17]
      *  link0 overflow error
      */
-    (rPB_STATION_FIR_EN2, bit(17)) ? self_th_1;
+    (rPB_STATION_FIR_EN2, bit(17)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EN2[18]
      *  link0 hw parity error
      */
-    (rPB_STATION_FIR_EN2, bit(18)) ? self_th_1;
+    (rPB_STATION_FIR_EN2, bit(18)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EN2[19]
      *  link1 protocol error
      */
-    (rPB_STATION_FIR_EN2, bit(19)) ? self_th_1;
+    (rPB_STATION_FIR_EN2, bit(19)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EN2[20]
      *  link1 overflow error
      */
-    (rPB_STATION_FIR_EN2, bit(20)) ? self_th_1;
+    (rPB_STATION_FIR_EN2, bit(20)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EN2[21]
      *  link1 hw parity error
      */
-    (rPB_STATION_FIR_EN2, bit(21)) ? self_th_1;
+    (rPB_STATION_FIR_EN2, bit(21)) ? defaultMaskedError;
 
 };
 
@@ -7077,32 +7077,32 @@ group gPB_STATION_FIR_EN3
     /** PB_STATION_FIR_EN3[16]
      *  link0 protocol error
      */
-    (rPB_STATION_FIR_EN3, bit(16)) ? self_th_1;
+    (rPB_STATION_FIR_EN3, bit(16)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EN3[17]
      *  link0 overflow error
      */
-    (rPB_STATION_FIR_EN3, bit(17)) ? self_th_1;
+    (rPB_STATION_FIR_EN3, bit(17)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EN3[18]
      *  link0 hw parity error
      */
-    (rPB_STATION_FIR_EN3, bit(18)) ? self_th_1;
+    (rPB_STATION_FIR_EN3, bit(18)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EN3[19]
      *  link1 protocol error
      */
-    (rPB_STATION_FIR_EN3, bit(19)) ? self_th_1;
+    (rPB_STATION_FIR_EN3, bit(19)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EN3[20]
      *  link1 overflow error
      */
-    (rPB_STATION_FIR_EN3, bit(20)) ? self_th_1;
+    (rPB_STATION_FIR_EN3, bit(20)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EN3[21]
      *  link1 hw parity error
      */
-    (rPB_STATION_FIR_EN3, bit(21)) ? self_th_1;
+    (rPB_STATION_FIR_EN3, bit(21)) ? defaultMaskedError;
 
 };
 
@@ -7461,32 +7461,32 @@ group gPB_STATION_FIR_ES2
     /** PB_STATION_FIR_ES2[16]
      *  link0 protocol error
      */
-    (rPB_STATION_FIR_ES2, bit(16)) ? self_th_1;
+    (rPB_STATION_FIR_ES2, bit(16)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_ES2[17]
      *  link0 overflow error
      */
-    (rPB_STATION_FIR_ES2, bit(17)) ? self_th_1;
+    (rPB_STATION_FIR_ES2, bit(17)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_ES2[18]
      *  link0 hw parity error
      */
-    (rPB_STATION_FIR_ES2, bit(18)) ? self_th_1;
+    (rPB_STATION_FIR_ES2, bit(18)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_ES2[19]
      *  link1 protocol error
      */
-    (rPB_STATION_FIR_ES2, bit(19)) ? self_th_1;
+    (rPB_STATION_FIR_ES2, bit(19)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_ES2[20]
      *  link1 overflow error
      */
-    (rPB_STATION_FIR_ES2, bit(20)) ? self_th_1;
+    (rPB_STATION_FIR_ES2, bit(20)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_ES2[21]
      *  link1 hw parity error
      */
-    (rPB_STATION_FIR_ES2, bit(21)) ? self_th_1;
+    (rPB_STATION_FIR_ES2, bit(21)) ? defaultMaskedError;
 
 };
 
@@ -7524,7 +7524,7 @@ group gPB_STATION_FIR_ES3
     /** PB_STATION_FIR_ES3[3]
      *  inactive_link_error
      */
-    (rPB_STATION_FIR_ES3, bit(3)) ? defaultMaskedError;
+    (rPB_STATION_FIR_ES3, bit(3)) ? self_th_1;
 
     /** PB_STATION_FIR_ES3[4]
      *  coherency error
@@ -7549,7 +7549,7 @@ group gPB_STATION_FIR_ES3
     /** PB_STATION_FIR_ES3[8]
      *  active_link_error
      */
-    (rPB_STATION_FIR_ES3, bit(8)) ? defaultMaskedError;
+    (rPB_STATION_FIR_ES3, bit(8)) ? self_th_1;
 
     /** PB_STATION_FIR_ES3[9]
      *  hang recovery gte level1
@@ -7589,32 +7589,32 @@ group gPB_STATION_FIR_ES3
     /** PB_STATION_FIR_ES3[16]
      *  link0 protocol error
      */
-    (rPB_STATION_FIR_ES3, bit(16)) ? self_th_1;
+    (rPB_STATION_FIR_ES3, bit(16)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_ES3[17]
      *  link0 overflow error
      */
-    (rPB_STATION_FIR_ES3, bit(17)) ? self_th_1;
+    (rPB_STATION_FIR_ES3, bit(17)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_ES3[18]
      *  link0 hw parity error
      */
-    (rPB_STATION_FIR_ES3, bit(18)) ? self_th_1;
+    (rPB_STATION_FIR_ES3, bit(18)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_ES3[19]
      *  link1 protocol error
      */
-    (rPB_STATION_FIR_ES3, bit(19)) ? self_th_1;
+    (rPB_STATION_FIR_ES3, bit(19)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_ES3[20]
      *  link1 overflow error
      */
-    (rPB_STATION_FIR_ES3, bit(20)) ? self_th_1;
+    (rPB_STATION_FIR_ES3, bit(20)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_ES3[21]
      *  link1 hw parity error
      */
-    (rPB_STATION_FIR_ES3, bit(21)) ? self_th_1;
+    (rPB_STATION_FIR_ES3, bit(21)) ? defaultMaskedError;
 
 };
 

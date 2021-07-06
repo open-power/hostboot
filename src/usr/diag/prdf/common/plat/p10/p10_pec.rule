@@ -470,10 +470,10 @@ group gPCI_LOCAL_FIR
     /** PCI_LOCAL_FIR[5]
      *  PSC - internal or ring interface error
      */
-    (rPCI_LOCAL_FIR, bit(5)) ? self_th_32perDay;
+    (rPCI_LOCAL_FIR, bit(5)) ? defaultMaskedError;
 
     /** PCI_LOCAL_FIR[6]
-     *  THEM - internal err
+     *  THERM - internal err
      */
     (rPCI_LOCAL_FIR, bit(6)) ? threshold_and_mask_self;
 

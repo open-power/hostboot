@@ -217,37 +217,37 @@ group gPCI_NEST_FIR
     /** PCI_NEST_FIR[1]
      *  Non-BAR Parity Error
      */
-    (rPCI_NEST_FIR, bit(1)) ? defaultMaskedError;
+    (rPCI_NEST_FIR, bit(1)) ? externalAttention;
 
     /** PCI_NEST_FIR[2]
      *  Power Bus to PEC CE
      */
-    (rPCI_NEST_FIR, bit(2)) ? self_th_32perDay;
+    (rPCI_NEST_FIR, bit(2)) ? parent_proc_th_32perDay;
 
     /** PCI_NEST_FIR[3]
      *  Power Bus to PEC UE
      */
-    (rPCI_NEST_FIR, bit(3)) ? defaultMaskedError;
+    (rPCI_NEST_FIR, bit(3)) ? externalAttention;
 
     /** PCI_NEST_FIR[4]
      *  Power Bus to PEC SUE
      */
-    (rPCI_NEST_FIR, bit(4)) ? defaultMaskedError;
+    (rPCI_NEST_FIR, bit(4)) ? externalAttention;
 
     /** PCI_NEST_FIR[5]
      *  Array CE
      */
-    (rPCI_NEST_FIR, bit(5)) ? self_th_32perDay;
+    (rPCI_NEST_FIR, bit(5)) ? parent_proc_th_32perDay;
 
     /** PCI_NEST_FIR[6]
      *  Array UE
      */
-    (rPCI_NEST_FIR, bit(6)) ? defaultMaskedError;
+    (rPCI_NEST_FIR, bit(6)) ? externalAttention;
 
     /** PCI_NEST_FIR[7]
      *  Array SUE
      */
-    (rPCI_NEST_FIR, bit(7)) ? defaultMaskedError;
+    (rPCI_NEST_FIR, bit(7)) ? externalAttention;
 
     /** PCI_NEST_FIR[8]
      *  Register Array Parity Error
@@ -272,27 +272,27 @@ group gPCI_NEST_FIR
     /** PCI_NEST_FIR[12]
      *  RD ARE Error
      */
-    (rPCI_NEST_FIR, bit(12)) ? defaultMaskedError;
+    (rPCI_NEST_FIR, bit(12)) ? externalAttention;
 
     /** PCI_NEST_FIR[13]
      *  Non-Rd ARE Error
      */
-    (rPCI_NEST_FIR, bit(13)) ? defaultMaskedError;
+    (rPCI_NEST_FIR, bit(13)) ? externalAttention;
 
     /** PCI_NEST_FIR[14]
      *  PCI Hang Error
      */
-    (rPCI_NEST_FIR, bit(14)) ? defaultMaskedError;
+    (rPCI_NEST_FIR, bit(14)) ? externalAttention;
 
     /** PCI_NEST_FIR[15]
      *  PCI Clock Error
      */
-    (rPCI_NEST_FIR, bit(15)) ? defaultMaskedError;
+    (rPCI_NEST_FIR, bit(15)) ? externalAttention;
 
     /** PCI_NEST_FIR[16]
      *  AIB Fence
      */
-    (rPCI_NEST_FIR, bit(16)) ? defaultMaskedError;
+    (rPCI_NEST_FIR, bit(16)) ? externalAttention;
 
     /** PCI_NEST_FIR[17]
      *  Hardware Error
@@ -342,7 +342,7 @@ group gPCI_NEST_FIR
     /** PCI_NEST_FIR[26]
      *  Software Defined
      */
-    (rPCI_NEST_FIR, bit(26)) ? defaultMaskedError;
+    (rPCI_NEST_FIR, bit(26)) ? externalAttention;
 
     /** PCI_NEST_FIR[27]
      *  PEC SCOM Engine Error
@@ -370,22 +370,22 @@ group gPCI_FIR
     /** PCI_FIR[0]
      *  register parity error
      */
-    (rPCI_FIR, bit(0)) ? defaultMaskedError;
+    (rPCI_FIR, bit(0)) ? externalAttention;
 
     /** PCI_FIR[1]
      *  hardware error
      */
-    (rPCI_FIR, bit(1)) ? defaultMaskedError;
+    (rPCI_FIR, bit(1)) ? parent_proc_th_1;
 
     /** PCI_FIR[2]
      *  AIB interface error
      */
-    (rPCI_FIR, bit(2)) ? defaultMaskedError;
+    (rPCI_FIR, bit(2)) ? externalAttention;
 
     /** PCI_FIR[3]
      *  ETU reset error
      */
-    (rPCI_FIR, bit(3)) ? defaultMaskedError;
+    (rPCI_FIR, bit(3)) ? externalAttention;
 
     /** PCI_FIR[4]
      *  PEC SCOM error
