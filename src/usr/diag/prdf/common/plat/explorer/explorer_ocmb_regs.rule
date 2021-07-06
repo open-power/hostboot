@@ -27,7 +27,7 @@
 ###############################################################################
 
     ###########################################################################
-    # P9 OCMB Modal Symbol Counter Registers
+    # Explorer OCMB Modal Symbol Counter Registers
     ###########################################################################
 
     register OCMB_MBSSYMEC0
@@ -94,7 +94,7 @@
     };
 
     ###########################################################################
-    # P9 OCMB Error Vector Trap registers
+    # Explorer OCMB Error Vector Trap registers
     ###########################################################################
 
     register MBSEVR0
@@ -105,7 +105,7 @@
     };
 
     ############################################################################
-    # MBS Memory Scrub/Read Error Count Registers
+    # Explorer MBS Memory Scrub/Read Error Count Registers
     ############################################################################
 
     register MBSEC0
@@ -130,7 +130,7 @@
     };
 
     ###########################################################################
-    # P9 MCBIST command registers
+    # Explorer MCBIST command registers
     ###########################################################################
 
     register MBSTR
@@ -169,7 +169,27 @@
     };
 
     ############################################################################
-    # P9 OCMB target RDFFIR
+    # Explorer OCMB target OCMB_LFIR
+    ############################################################################
+
+    register OCMB_LFIR_AND
+    {
+        name        "Explorer chip OCMB_LFIR AND";
+        scomaddr    0x0804000b;
+        capture     group never;
+        access      write_only;
+    };
+
+    register OCMB_LFIR_MASK_OR
+    {
+        name        "Explorer chip OCMB_LFIR MASK OR";
+        scomaddr    0x0804000f;
+        capture     group never;
+        access      write_only;
+    };
+
+    ############################################################################
+    # Explorer OCMB target RDFFIR
     ############################################################################
 
     register RDFFIR_AND
@@ -197,7 +217,7 @@
     };
 
     ###########################################################################
-    # P9 OCMB target SRQFIR
+    # Explorer OCMB target SRQFIR
     ###########################################################################
 
     register SRQFIR_OR
@@ -225,7 +245,7 @@
     };
 
     ###########################################################################
-    # P9 OCMB target MCBISTFIR
+    # Explorer OCMB target MCBISTFIR
     ###########################################################################
 
     register MCBISTFIR_AND
@@ -253,7 +273,7 @@
     };
 
     ############################################################################
-    # P9 Hardware Mark Stores
+    # Explorer Hardware Mark Stores
     ############################################################################
 
     register HW_MS0
@@ -313,7 +333,7 @@
     };
 
     ############################################################################
-    # P9 Firmware Mark Stores
+    # Explorer Firmware Mark Stores
     ############################################################################
 
     register FW_MS0
@@ -373,7 +393,7 @@
     };
 
     ###########################################################################
-    # P9 OCMB target OMIDLFIR
+    # Explorer OCMB target OMIDLFIR
     ###########################################################################
 
     register DL0_ERROR_HOLD
@@ -384,7 +404,7 @@
     };
 
     ###########################################################################
-    # P9 OCMB target TLXFIR
+    # Explorer OCMB target TLXFIR
     ###########################################################################
 
     register TLXFIR_AND
@@ -620,3 +640,139 @@
         capture     group default;
     };
 
+    ############################################################################
+    # MicroChip FFDC registers
+    ############################################################################
+
+    register SCRATCH_PAD_0
+    {
+        name        "MicroChip scratchpad reg 0";
+        scomaddr    0x0300009C;
+        capture     group local_scratchpad;
+    };
+
+    register SCRATCH_PAD_1
+    {
+        name        "MicroChip scratchpad reg 1";
+        scomaddr    0x030000A0;
+        capture     group local_scratchpad;
+    };
+
+    register SCRATCH_PAD_2
+    {
+        name        "MicroChip scratchpad reg 2";
+        scomaddr    0x030000A4;
+        capture     group local_scratchpad;
+    };
+
+    register ADSP_PCBI_LANE0
+    {
+        name        "ADSP PCBI Lane 0 reg";
+        scomaddr    0x00200860;
+        capture     group foxhound_lane0;
+    };
+
+    register CSU_PCBI_LANE0
+    {
+        name        "CSU PCBI Lane 0 reg";
+        scomaddr    0x002000B0;
+        capture     group foxhound_lane0;
+    };
+
+    register ADSP_PCBI_LANE1
+    {
+        name        "ADSP PCBI Lane 1 reg";
+        scomaddr    0x00201860;
+        capture     group foxhound_lane1;
+    };
+
+    register CSU_PCBI_LANE1
+    {
+        name        "CSU PCBI Lane 1 reg";
+        scomaddr    0x002010B0;
+        capture     group foxhound_lane1;
+    };
+
+    register ADSP_PCBI_LANE2
+    {
+        name        "ADSP PCBI Lane 2 reg";
+        scomaddr    0x00202860;
+        capture     group foxhound_lane2;
+    };
+
+    register CSU_PCBI_LANE2
+    {
+        name        "CSU PCBI Lane 2 reg";
+        scomaddr    0x002020B0;
+        capture     group foxhound_lane2;
+    };
+
+    register ADSP_PCBI_LANE3
+    {
+        name        "ADSP PCBI Lane 3 reg";
+        scomaddr    0x00203860;
+        capture     group foxhound_lane3;
+    };
+
+    register CSU_PCBI_LANE3
+    {
+        name        "CSU PCBI Lane 3 reg";
+        scomaddr    0x002030B0;
+        capture     group foxhound_lane3;
+    };
+
+    register ADSP_PCBI_LANE4
+    {
+        name        "ADSP PCBI Lane 4 reg";
+        scomaddr    0x00204860;
+        capture     group foxhound_lane4;
+    };
+
+    register CSU_PCBI_LANE4
+    {
+        name        "CSU PCBI Lane 4 reg";
+        scomaddr    0x002040B0;
+        capture     group foxhound_lane4;
+    };
+
+    register ADSP_PCBI_LANE5
+    {
+        name        "ADSP PCBI Lane 5 reg";
+        scomaddr    0x00205860;
+        capture     group foxhound_lane5;
+    };
+
+    register CSU_PCBI_LANE5
+    {
+        name        "CSU PCBI Lane 5 reg";
+        scomaddr    0x002050B0;
+        capture     group foxhound_lane5;
+    };
+
+    register ADSP_PCBI_LANE6
+    {
+        name        "ADSP PCBI Lane 6 reg";
+        scomaddr    0x00206860;
+        capture     group foxhound_lane6;
+    };
+
+    register CSU_PCBI_LANE6
+    {
+        name        "CSU PCBI Lane 6 reg";
+        scomaddr    0x002060B0;
+        capture     group foxhound_lane6;
+    };
+
+    register ADSP_PCBI_LANE7
+    {
+        name        "ADSP PCBI Lane 7 reg";
+        scomaddr    0x00207860;
+        capture     group foxhound_lane7;
+    };
+
+    register CSU_PCBI_LANE7
+    {
+        name        "CSU PCBI Lane 7 reg";
+        scomaddr    0x002070B0;
+        capture     group foxhound_lane7;
+    };

@@ -100,6 +100,11 @@ actionclass omi
     callout(connected(TYPE_OMI), MRU_MED);
 };
 
+actionclass omi_L
+{
+    callout(connected(TYPE_OMI), MRU_LOW);
+};
+
 actionclass omi_bus
 {
     funccall("calloutBusInterface");
@@ -201,6 +206,13 @@ actionclass mem_port_th_32perDay
     threshold32pday;
 };
 
+actionclass self_H_omi_L_th_1
+{
+    calloutSelfHigh;
+    omi_L;
+    threshold1;
+};
+
 ################################################################################
 #                                   Special                                    #
 ################################################################################
@@ -239,6 +251,12 @@ actionclass threshold_and_mask_omi
     threshold_and_mask_th32;
 };
 
+actionclass threshold_and_mask_omi_bus
+{
+    omi_bus;
+    threshold_and_mask_th32;
+};
+
 /**
  * Threshold on first occurence. Do not predictively callout on threshold in the
  * field, instead just mask.
@@ -257,7 +275,9 @@ actionclass threshold_and_mask_self_th1
 
 actionclass omi_degraded_mode
 {
-    omi_bus_th_1;
+    try( funccall("OmiRunningInDegradedMode"),
+         try(funccall("CrcSideEffect_Ocmb"), omi_bus) );
+    threshold1;
     funccall("OmiDegradeDD1Workaround"); # Must be called after threshold
 };
 
@@ -286,6 +306,21 @@ actionclass omi_bus_th_1_noClearFirBits
     omi_bus;
     threshold1;
     funccall("returnNoClearFirBits"); # must be called last
+};
+
+actionclass self_th_1_x4Root
+{
+    self_th_1;
+    funccall("x4RootCause"); # must be called after threshold
+};
+
+# Bits using these actions are CRC-related errors that are potential
+# side-effects of bits in the PAU_PHY_FIR. There is additional handling
+# to determine the callout if a root cause bit is found on as well.
+actionclass omi_bus_th_32perDay_CRC
+{
+    try ( funccall("CrcSideEffect_Ocmb"), omi_bus );
+    threshold32pday;
 };
 
 ################################################################################
@@ -337,10 +372,52 @@ actionclass TBDDefaultCallout
 ################################################################################
 
 /** Foxhound Fatal */
-actionclass foxhound_fatal
+actionclass foxhound_fatal_0
 {
-    funccall("FoxhoundFatal");
-    threshold1;
+    funccall("FoxhoundFatal_0");
+    self_H_omi_L_th_1;
+};
+
+actionclass foxhound_fatal_1
+{
+    funccall("FoxhoundFatal_1");
+    self_H_omi_L_th_1;
+};
+
+actionclass foxhound_fatal_2
+{
+    funccall("FoxhoundFatal_2");
+    self_H_omi_L_th_1;
+};
+
+actionclass foxhound_fatal_3
+{
+    funccall("FoxhoundFatal_3");
+    self_H_omi_L_th_1;
+};
+
+actionclass foxhound_fatal_4
+{
+    funccall("FoxhoundFatal_4");
+    self_H_omi_L_th_1;
+};
+
+actionclass foxhound_fatal_5
+{
+    funccall("FoxhoundFatal_5");
+    self_H_omi_L_th_1;
+};
+
+actionclass foxhound_fatal_6
+{
+    funccall("FoxhoundFatal_6");
+    self_H_omi_L_th_1;
+};
+
+actionclass foxhound_fatal_7
+{
+    funccall("FoxhoundFatal_7");
+    self_H_omi_L_th_1;
 };
 
 /** OMI-DL Fatal Error */
@@ -537,7 +614,12 @@ group gTLX_ERR1_REPORT
 # Analyze groups
 ################################################################################
 
-actionclass analyzeOCMB_LFIR { analyze(gOCMB_LFIR); };
+actionclass analyzeOCMB_LFIR
+{
+    funccall("CollectScratchpad");
+    analyze(gOCMB_LFIR);
+};
+
 actionclass analyzeMMIOFIR   { analyze(gMMIOFIR);   };
 actionclass analyzeSRQFIR    { analyze(gSRQFIR);    };
 actionclass analyzeMCBISTFIR { analyze(gMCBISTFIR); };

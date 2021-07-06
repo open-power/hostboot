@@ -556,7 +556,7 @@ group gOCMB_LFIR
     /** OCMB_LFIR[23]
      *  GPBC_NON_FATAL_ERROR
      */
-    (rOCMB_LFIR, bit(23)) ? self_th_1;
+    (rOCMB_LFIR, bit(23)) ? threshold_and_mask_self;
 
     /** OCMB_LFIR[24]
      *  early power off warning
@@ -573,10 +573,30 @@ group gOCMB_LFIR
      */
     (rOCMB_LFIR, bit(26)) ? level2_M_self_L_th_1;
 
-    /** OCMB_LFIR[27:34]
+    /** OCMB_LFIR[27:30]
      *  Interrupt from OPSe to OCMB
      */
-    (rOCMB_LFIR, bit(27|28|29|30|31|32|33|34)) ? defaultMaskedError;
+    (rOCMB_LFIR, bit(27|28|29|30)) ? defaultMaskedError;
+
+    /** OCMB_LFIR[31]
+     *  SerDes continuous calibration failure
+     */
+    (rOCMB_LFIR, bit(31)) ? self_th_1_x4Root;
+
+    /** OCMB_LFIR[32]
+     *  Firmware Assert or CPU Exception
+     */
+    (rOCMB_LFIR, bit(32)) ? self_th_1;
+
+    /** OCMB_LFIR[33]
+     *  Extended error information ready
+     */
+    (rOCMB_LFIR, bit(33)) ? defaultMaskedError;
+
+    /** OCMB_LFIR[34]
+     *  Interrupt from OPSe to OCMB
+     */
+    (rOCMB_LFIR, bit(34)) ? defaultMaskedError;
 
     /** OCMB_LFIR[35]
      *  DDR thermal event
@@ -591,17 +611,52 @@ group gOCMB_LFIR
     /** OCMB_LFIR[37]
      *  DDR4 PHY non fatal
      */
-    (rOCMB_LFIR, bit(37)) ? self_th_32perDay;
+    (rOCMB_LFIR, bit(37)) ? threshold_and_mask_self_th1;
 
     /** OCMB_LFIR[38]
      *  DDR4 PHY interrupt
      */
     (rOCMB_LFIR, bit(38)) ? defaultMaskedError;
 
-    /** OCMB_LFIR[39:46]
-     *  foxhound fatal
+    /** OCMB_LFIR[39]
+     *  foxhound fatal lane 7
      */
-    (rOCMB_LFIR, bit(39|40|41|42|43|44|45|46)) ? foxhound_fatal;
+    (rOCMB_LFIR, bit(39)) ? foxhound_fatal_7;
+
+    /** OCMB_LFIR[40]
+     *  foxhound fatal lane 6
+     */
+    (rOCMB_LFIR, bit(40)) ? foxhound_fatal_6;
+
+    /** OCMB_LFIR[41]
+     *  foxhound fatal lane 5
+     */
+    (rOCMB_LFIR, bit(41)) ? foxhound_fatal_5;
+
+    /** OCMB_LFIR[42]
+     *  foxhound fatal lane 4
+     */
+    (rOCMB_LFIR, bit(42)) ? foxhound_fatal_4;
+
+    /** OCMB_LFIR[43]
+     *  foxhound fatal lane 3
+     */
+    (rOCMB_LFIR, bit(43)) ? foxhound_fatal_3;
+
+    /** OCMB_LFIR[44]
+     *  foxhound fatal lane 2
+     */
+    (rOCMB_LFIR, bit(44)) ? foxhound_fatal_2;
+
+    /** OCMB_LFIR[45]
+     *  foxhound fatal lane 1
+     */
+    (rOCMB_LFIR, bit(45)) ? foxhound_fatal_1;
+
+    /** OCMB_LFIR[46]
+     *  foxhound fatal lane 0
+     */
+    (rOCMB_LFIR, bit(46)) ? foxhound_fatal_0;
 
     /** OCMB_LFIR[47:54]
      *  foxhound non fatal
@@ -1458,7 +1513,7 @@ group gOMIDLFIR
     /** OMIDLFIR[3]
      *  OMI-DL0 detected a CRC error
      */
-    (rOMIDLFIR, bit(3)) ? threshold_and_mask_omi;
+    (rOMIDLFIR, bit(3)) ? threshold_and_mask_omi_bus;
 
     /** OMIDLFIR[4]
      *  OMI-DL0 received a nack
@@ -1473,12 +1528,12 @@ group gOMIDLFIR
     /** OMIDLFIR[6]
      *  OMI-DL0 parity error detection on a lane
      */
-    (rOMIDLFIR, bit(6)) ? threshold_and_mask_omi;
+    (rOMIDLFIR, bit(6)) ? threshold_and_mask_omi_bus;
 
     /** OMIDLFIR[7]
      *  OMI-DL0 retrained due to no forward progress
      */
-    (rOMIDLFIR, bit(7)) ? omi_bus_th_32perDay;
+    (rOMIDLFIR, bit(7)) ? omi_bus_th_32perDay_CRC;
 
     /** OMIDLFIR[8]
      *  OMI-DL0 remote side initiated a retrain
@@ -1493,7 +1548,7 @@ group gOMIDLFIR
     /** OMIDLFIR[10]
      *  OMI-DL0 threshold reached
      */
-    (rOMIDLFIR, bit(10)) ? omi_bus_th_32perDay;
+    (rOMIDLFIR, bit(10)) ? omi_bus_th_32perDay_CRC;
 
     /** OMIDLFIR[11]
      *  OMI-DL0 trained

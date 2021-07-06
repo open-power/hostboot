@@ -222,6 +222,46 @@ int32_t CollectOmiFfdc( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 PRDF_PLUGIN_DEFINE( explorer_ocmb, CollectOmiFfdc );
 
 /**
+ * @brief  Plugin that queries OCMB_LFIR[33] and collects MicroChips local
+ *         scratchpad registers for FFDC if it's on. OCMB_LFIR[33] will then
+ *         be cleared.
+ * @param  i_chip An OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t CollectScratchpad( ExtensibleChip * i_chip,
+                           STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[explorer_ocmb::CollectScratchpad] "
+
+    SCAN_COMM_REGISTER_CLASS * ocmb_lfir = i_chip->getRegister("OCMB_LFIR");
+
+    if ( SUCCESS == ocmb_lfir->Read() && ocmb_lfir->IsBitSet(33) )
+    {
+        // Collect the scratchpad registers and then clear OCMB_LFIR[33]
+        i_chip->CaptureErrorData( io_sc.service_data->GetCaptureData(),
+                                  Util::hashString("local_scratchpad") );
+
+        #ifdef __HOSTBOOT_MODULE
+        SCAN_COMM_REGISTER_CLASS * ocmb_lfir_and =
+            i_chip->getRegister("OCMB_LFIR_AND");
+        ocmb_lfir_and->setAllBits();
+        ocmb_lfir_and->ClearBit(33);
+        if ( SUCCESS != ocmb_lfir_and->Write() )
+        {
+            PRDF_ERR( PRDF_FUNC "Write() failed for OCMB_LFIR_AND on "
+                      "0x%08x", i_chip->getHuid() );
+        }
+        #endif
+    }
+
+    return SUCCESS;
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( explorer_ocmb, CollectScratchpad );
+
+/**
  * @brief  Returns PRD_NO_CLEAR_FIR_BITS
  * @param  i_chip An OCMB chip.
  * @param  io_sc  The step code data struct.
@@ -269,19 +309,80 @@ PRDF_PLUGIN_DEFINE(explorer_ocmb, calloutBusInterface);
  * @brief  OCMB_LFIR[39:46] - Foxhound Fatal
  * @param  i_chip An OCMB chip.
  * @param  io_sc  The step code data struct.
+ * @param  i_lane The lane pos (0:7)
  * @return SUCCESS
  */
-int32_t FoxhoundFatal( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
+int32_t __foxhoundFatal( ExtensibleChip * i_chip,
+                         STEP_CODE_DATA_STRUCT & io_sc,
+                         uint8_t i_lane )
 {
-    #define PRDF_FUNC "[explorer_ocmb::FoxhoundFatal] "
+    #define PRDF_FUNC "[explorer_ocmb::__foxhoundFatal] "
 
-    //TODO RTC 200583
+    char ffdcName[64];
+    sprintf( ffdcName, "foxhound_lane%x", i_lane );
+
+    i_chip->CaptureErrorData( io_sc.service_data->GetCaptureData(),
+                              Util::hashString(ffdcName) );
 
     return SUCCESS;
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( explorer_ocmb, FoxhoundFatal );
+
+#define PLUGIN_FOXHOUND_FATAL(POS) \
+int32_t FoxhoundFatal_##POS( ExtensibleChip * i_chip, \
+                              STEP_CODE_DATA_STRUCT & io_sc ) \
+{ \
+    return __foxhoundFatal( i_chip, io_sc, POS ); \
+} \
+PRDF_PLUGIN_DEFINE( explorer_ocmb, FoxhoundFatal_##POS );
+
+PLUGIN_FOXHOUND_FATAL(0);
+PLUGIN_FOXHOUND_FATAL(1);
+PLUGIN_FOXHOUND_FATAL(2);
+PLUGIN_FOXHOUND_FATAL(3);
+PLUGIN_FOXHOUND_FATAL(4);
+PLUGIN_FOXHOUND_FATAL(5);
+PLUGIN_FOXHOUND_FATAL(6);
+PLUGIN_FOXHOUND_FATAL(7);
+
+/**
+ * @brief  OCMB_LFIR[31] - Can be a root cause triggering downstream x4 mode.
+ *         This will mask the bit but not clear it at threshold so that
+ *         OMIDLFIR[5] can blame it as a root cause later.
+ * @param  i_chip An OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return PRD_NO_CLEAR_FIR_BITS if at threshold, SUCCESS otherwise.
+ */
+int32_t x4RootCause( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[explorer_ocmb::x4RootCause] "
+
+    #ifdef __HOSTBOOT_MODULE
+    // Mask the bit in the OCMB_LFIR manually if we're at threshold
+    if ( io_sc.service_data->IsAtThreshold() )
+    {
+        SCAN_COMM_REGISTER_CLASS * mask_or =
+            i_chip->getRegister( "OCMB_LFIR_MASK_OR" );
+
+        mask_or->SetBit(31);
+        if ( SUCCESS != mask_or->Write() )
+        {
+            PRDF_ERR( PRDF_FUNC "Write() failed for OCMB_LFIR_MASK_OR on "
+                      "0x%08x", i_chip->getHuid() );
+        }
+
+        // Return PRD_NO_CLEAR_FIR_BITS so the rule code doesn't clear the bit
+        return PRD_NO_CLEAR_FIR_BITS;
+    }
+    #endif
+
+    return SUCCESS;
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( explorer_ocmb, x4RootCause );
+
 
 //##############################################################################
 //
@@ -343,6 +444,36 @@ int32_t DlFatalError( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
     #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE( explorer_ocmb, DlFatalError );
+
+/**
+ * @brief  OMIDLFIR[5] - OMI-DL0 running in degraded mode
+ * @param  i_chip An OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS if OCMB_LFIR[31] or a CRC root cause bit are found.
+ *         PRD_SCAN_COMM_REGISTER_ZERO otherwise.
+ */
+int32_t OmiRunningInDegradedMode( ExtensibleChip * i_chip,
+                                  STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[explorer_ocmb::OmiRunningInDegradedMode] "
+
+    // Return PRD_SCAN_COMM_REGISTER_ZERO to let the rule code handle the
+    // callout if no different root cause found.
+    int32_t o_rc = PRD_SCAN_COMM_REGISTER_ZERO;
+
+    // Check OCMB_LFIR[31] on, callout the explorer
+    SCAN_COMM_REGISTER_CLASS * ocmb_lfir = i_chip->getRegister( "OCMB_LFIR" );
+    if ( SUCCESS == ocmb_lfir->Read() && ocmb_lfir->IsBitSet(31) )
+    {
+        io_sc.service_data->SetCallout( i_chip->getTrgt() );
+        o_rc = SUCCESS;
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( explorer_ocmb, OmiRunningInDegradedMode );
 
 //##############################################################################
 //

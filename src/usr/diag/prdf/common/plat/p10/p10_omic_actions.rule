@@ -100,6 +100,12 @@ actionclass threshold_and_mask_dl0_omi
     threshold_and_mask_th32;
 };
 
+actionclass threshold_and_mask_dl0_omi_bus
+{
+    dl0_omi_bus;
+    threshold_and_mask_th32;
+};
+
 actionclass dl1_omi_th_32perDay
 {
     dl1_omi;
@@ -133,6 +139,12 @@ actionclass dl1_omi_bus_th_32perDay
 actionclass threshold_and_mask_dl1_omi
 {
     dl1_omi;
+    threshold_and_mask_th32;
+};
+
+actionclass threshold_and_mask_dl1_omi_bus
+{
+    dl1_omi_bus;
     threshold_and_mask_th32;
 };
 

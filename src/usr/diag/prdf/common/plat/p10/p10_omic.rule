@@ -152,7 +152,7 @@ group gMC_OMI_DL_FIR
     /** MC_OMI_DL_FIR[3]
      *  OMI-DL0 detected a CRC error
      */
-    (rMC_OMI_DL_FIR, bit(3)) ? threshold_and_mask_dl0_omi;
+    (rMC_OMI_DL_FIR, bit(3)) ? threshold_and_mask_dl0_omi_bus;
 
     /** MC_OMI_DL_FIR[4]
      *  OMI-DL0 received a nack
@@ -162,12 +162,12 @@ group gMC_OMI_DL_FIR
     /** MC_OMI_DL_FIR[5]
      *  OMI-DL0 running in degraded mode
      */
-    (rMC_OMI_DL_FIR, bit(5)) ? dl0_omi_bus_th_1_CRC; # TBD for DD2
+    (rMC_OMI_DL_FIR, bit(5)) ? dl0_omi_bus_th_1_CRC;
 
     /** MC_OMI_DL_FIR[6]
      *  OMI-DL0 parity error detection on a lane
      */
-    (rMC_OMI_DL_FIR, bit(6)) ? threshold_and_mask_dl0_omi;
+    (rMC_OMI_DL_FIR, bit(6)) ? threshold_and_mask_dl0_omi_bus;
 
     /** MC_OMI_DL_FIR[7]
      *  OMI-DL0 retrained due to no forward progress
@@ -253,7 +253,7 @@ group gMC_OMI_DL_FIR
     /** MC_OMI_DL_FIR[23]
      *  OMI-DL1 detected a CRC error
      */
-    (rMC_OMI_DL_FIR, bit(23)) ? threshold_and_mask_dl1_omi;
+    (rMC_OMI_DL_FIR, bit(23)) ? threshold_and_mask_dl1_omi_bus;
 
     /** MC_OMI_DL_FIR[24]
      *  OMI-DL1 received a nack
@@ -263,12 +263,12 @@ group gMC_OMI_DL_FIR
     /** MC_OMI_DL_FIR[25]
      *  OMI-DL1 running in degraded mode
      */
-    (rMC_OMI_DL_FIR, bit(25)) ? dl1_omi_bus_th_1_CRC; # TBD for DD2
+    (rMC_OMI_DL_FIR, bit(25)) ? dl1_omi_bus_th_1_CRC;
 
     /** MC_OMI_DL_FIR[26]
      *  OMI-DL1 parity error detection on a lane
      */
-    (rMC_OMI_DL_FIR, bit(26)) ? threshold_and_mask_dl1_omi;
+    (rMC_OMI_DL_FIR, bit(26)) ? threshold_and_mask_dl1_omi_bus;
 
     /** MC_OMI_DL_FIR[27]
      *  OMI-DL1 retrained due to no forward progress
