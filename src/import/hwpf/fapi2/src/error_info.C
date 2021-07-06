@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -179,6 +179,13 @@ ErrorInfoCollectTrace::ErrorInfoCollectTrace(
     iv_eiTraceId(i_traceId)
 {}
 
+static void handleNullObjectPointer(const char* const i_function_name,
+                                    const int i_object_index)
+{
+    FAPI_ERR("%s: NULL FFDC object pointer at index %d! This is indicative of a code bug in a HWP.",
+             i_function_name,
+             i_object_index);
+}
 
 ///
 /// @brief Collect target, buffer or generic FFDC information to this ffdc
@@ -190,6 +197,12 @@ ErrorInfoCollectTrace::ErrorInfoCollectTrace(
 void ErrorInfoEntryFfdc::addErrorInfo(std::shared_ptr<ErrorInfo> i_info,
                                       const void* const* i_objects) const
 {
+    if (!i_objects[iv_ffdcObjIndex])
+    {
+        handleNullObjectPointer("ErrorInfoEntryFfdc::addErrorInfo", iv_ffdcObjIndex);
+        return;
+    }
+
     switch(iv_ffdcSize)
     {
 
@@ -241,6 +254,12 @@ void ErrorInfoEntryHwCallout::addErrorInfo(std::shared_ptr<ErrorInfo> i_info,
 {
     // If the index is 0xFF, we use an empty target. Otherwise the
     // target is taken from the object arrary with the given index.
+    if (iv_refObjIndex != 0xFF && !i_object[iv_refObjIndex])
+    {
+        handleNullObjectPointer("ErrorInfoEntryHwCallout::addErrorInfo", iv_refObjIndex);
+        return;
+    }
+
     const fapi2::Target<TARGET_TYPE_ALL> target =
         iv_refObjIndex == 0xFF ?
         fapi2::Target<TARGET_TYPE_ALL>() :
@@ -293,6 +312,18 @@ void ErrorInfoEntryBusCallout::addErrorInfo(
     std::shared_ptr<ErrorInfo> i_info,
     const void* const* i_object) const
 {
+    if (!i_object[iv_endpoint1ObjIndex])
+    {
+        handleNullObjectPointer("ErrorInfoEntryBusCallout::addErrorInfo", iv_endpoint1ObjIndex);
+        return;
+    }
+
+    if (!i_object[iv_endpoint2ObjIndex])
+    {
+        handleNullObjectPointer("ErrorInfoEntryBusCallout::addErrorInfo", iv_endpoint2ObjIndex);
+        return;
+    }
+
     // We need to add a procedure callout as well as a bus callout
     ErrorInfoEntryProcCallout(ProcedureCallouts::BUS_CALLOUT,
                               iv_calloutPriority).addErrorInfo(i_info,
@@ -329,6 +360,12 @@ void ErrorInfoEntryTargetCDG::addErrorInfo(
     std::shared_ptr<ErrorInfo> i_info,
     const void* const* i_object) const
 {
+    if (!i_object[iv_targetObjIndex])
+    {
+        handleNullObjectPointer("ErrorInfoEntryTargetCDG::addErrorInfo", iv_targetObjIndex);
+        return;
+    }
+
     ErrorInfoCDG* ei = new
     ErrorInfoCDG(
         *(static_cast<const fapi2::Target<TARGET_TYPE_ALL>*>
@@ -361,6 +398,12 @@ void ErrorInfoEntryChildrenCDG::addErrorInfo(
     std::shared_ptr<ErrorInfo> i_info,
     const void* const* i_object) const
 {
+    if (!i_object[iv_parentObjIndex])
+    {
+        handleNullObjectPointer("ErrorInfoEntryChildrenCDG::addErrorInfo", iv_parentObjIndex);
+        return;
+    }
+
     ErrorInfoChildrenCDG* ei = new ErrorInfoChildrenCDG(
         *(static_cast<const fapi2::Target<TARGET_TYPE_ALL>*>
           (i_object[iv_parentObjIndex])),
