@@ -593,9 +593,14 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_parent, TYPE i_childType,
 
     if ( nullptr == o_child )
     {
-        PRDF_ERR( PRDF_FUNC "Failed to get connected child of type 0x%x at "
-                  "pos %d from target 0x%08x", i_childType, i_childPos,
-                  getHuid(i_parent) );
+        PRDF_ERR("getConnectedChild(0x%08x,0x%x,%d) target child not found: "
+                 "listSize=%d parentPos=%d", getHuid(i_parent), i_childType,
+                 i_childPos, list.size(), getTargetPosition(i_parent));
+        for (const auto& child : list)
+        {
+            PRDF_ERR("  child=0x%08x childPos=%d", getHuid(child),
+                     getTargetPosition(child));
+        }
     }
 
     return o_child;
