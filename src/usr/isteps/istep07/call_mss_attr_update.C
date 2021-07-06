@@ -560,6 +560,14 @@ void check_scratch_regs_vs_attrs( IStepError & io_StepError )
     l_scratch = l_scratch9.pauMcFreq.pauPllFreqMhz;
     const auto l_attr_pau_freq =
                         l_sys->getAttr<ATTR_FREQ_PAU_MHZ>();
+
+    //@fixme-workaround CI coreq issues by forcing HB's copy to match
+    //  what the SP set into the SBE
+    l_sys->setAttr<ATTR_FREQ_PAU_MHZ>(l_scratch);
+    TRACFCOMP( g_trac_isteps_trace,
+               "Forcing FREQ_PAU to match SBE: scratch9 pauPllFreqMhz 0x%.4X ATTR_FREQ_PAU_MHZ 0x%.4X",
+               l_scratch, l_attr_pau_freq);
+#if 0
     if (l_scratch != l_attr_pau_freq)
     {
         l_reconfigLoop = true;
@@ -568,6 +576,7 @@ void check_scratch_regs_vs_attrs( IStepError & io_StepError )
             "scratch9 pauPllFreqMhz 0x%.4X ATTR_FREQ_PAU_MHZ 0x%.4X",
             l_scratch, l_attr_pau_freq);
     }
+#endif
 
     // Create scratch bucket array to enable loop
     const uint32_t l_s9_mc_pll_bkt[] =
