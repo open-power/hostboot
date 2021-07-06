@@ -70,7 +70,7 @@
 
     <bit pos="3" attn_type="RE"
          desc="OMI-DL0 detected a CRC error">
-        <action id="predefined" name="threshold_and_mask_omi" />
+        <action id="predefined" name="threshold_and_mask_omi_bus" />
     </bit>
 
     <bit pos="4" attn_type="MASKED"
@@ -90,12 +90,12 @@
         <note>
             See DL0_ERROR_HOLD[36:43]
         </note>
-        <action id="predefined" name="threshold_and_mask_omi" />
+        <action id="predefined" name="threshold_and_mask_omi_bus" />
     </bit>
 
     <bit pos="7" attn_type="RE"
          desc="OMI-DL0 retrained due to no forward progress">
-        <action id="predefined" name="omi_bus_th_32perDay" />
+        <action id="predefined" name="omi_bus_th_32perDay_CRC" />
     </bit>
 
     <bit pos="8" attn_type="MASKED"
@@ -115,7 +115,7 @@
         <note>
             See DL0_ERROR_HOLD[36:38]
         </note>
-        <action id="predefined" name="omi_bus_th_32perDay" />
+        <action id="predefined" name="omi_bus_th_32perDay_CRC" />
     </bit>
 
     <bit pos="11" attn_type="MASKED"

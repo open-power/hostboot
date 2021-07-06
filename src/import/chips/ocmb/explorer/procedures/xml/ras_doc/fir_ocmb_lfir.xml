@@ -7,7 +7,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -109,7 +109,7 @@
 
     <bit pos="23" attn_type="RE"
          desc="GPBC_NON_FATAL_ERROR">
-        <action id="predefined" name="self_th_1" />
+        <action id="predefined" name="threshold_and_mask_self" />
     </bit>
 
     <bit pos="24" attn_type="MASKED"
@@ -126,7 +126,29 @@
         <action id="predefined" name="level2_M_self_L_th_1" />
     </bit>
 
-    <bit pos="27:34" attn_type="MASKED"
+    <bit pos="27:30" attn_type="MASKED"
+         desc="Interrupt from OPSe to OCMB">
+    </bit>
+
+    <bit pos="31" attn_type="RE"
+         desc="SerDes continuous calibration failure">
+        <note>
+            Can trigger downstream x4 mode (OMIDLFIR[5]) as a side effect.
+            Will mask but not clear on threshold.
+        </note>
+        <action id="predefined" name="self_th_1_x4Root" />
+    </bit>
+
+    <bit pos="32" attn_type="RE"
+         desc="Firmware Assert or CPU Exception">
+        <action id="predefined" name="self_th_1" />
+    </bit>
+
+    <bit pos="33" attn_type="MASKED"
+         desc="Extended error information ready">
+    </bit>
+
+    <bit pos="34" attn_type="MASKED"
          desc="Interrupt from OPSe to OCMB">
     </bit>
 
@@ -141,16 +163,51 @@
 
     <bit pos="37" attn_type="RE"
          desc="DDR4 PHY non fatal">
-        <action id="predefined" name="self_th_32perDay" />
+        <action id="predefined" name="threshold_and_mask_self_th1" />
     </bit>
 
     <bit pos="38" attn_type="MASKED"
          desc="DDR4 PHY interrupt">
     </bit>
 
-    <bit pos="39:46" attn_type="RE"
-         desc="foxhound fatal">
-        <action id="predefined" name="foxhound_fatal" />
+    <bit pos="39" attn_type="RE"
+         desc="foxhound fatal lane 7">
+        <action id="predefined" name="foxhound_fatal_7" />
+    </bit>
+
+    <bit pos="40" attn_type="RE"
+         desc="foxhound fatal lane 6">
+        <action id="predefined" name="foxhound_fatal_6" />
+    </bit>
+
+    <bit pos="41" attn_type="RE"
+         desc="foxhound fatal lane 5">
+        <action id="predefined" name="foxhound_fatal_5" />
+    </bit>
+
+    <bit pos="42" attn_type="RE"
+         desc="foxhound fatal lane 4">
+        <action id="predefined" name="foxhound_fatal_4" />
+    </bit>
+
+    <bit pos="43" attn_type="RE"
+         desc="foxhound fatal lane 3">
+        <action id="predefined" name="foxhound_fatal_3" />
+    </bit>
+
+    <bit pos="44" attn_type="RE"
+         desc="foxhound fatal lane 2">
+        <action id="predefined" name="foxhound_fatal_2" />
+    </bit>
+
+    <bit pos="45" attn_type="RE"
+         desc="foxhound fatal lane 1">
+        <action id="predefined" name="foxhound_fatal_1" />
+    </bit>
+
+    <bit pos="46" attn_type="RE"
+         desc="foxhound fatal lane 0">
+        <action id="predefined" name="foxhound_fatal_0" />
     </bit>
 
     <bit pos="47:54" attn_type="MASKED"
