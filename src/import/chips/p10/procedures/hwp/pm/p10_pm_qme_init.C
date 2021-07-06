@@ -513,6 +513,7 @@ fapi2::ReturnCode qme_halt(
     fapi2::buffer<uint64_t> l_data64;
     uint32_t                l_timeout_in_MS = 100;
     uint8_t CL2_START_POS = 5;
+    uint8_t L3_START_POS = 9;
 
     FAPI_IMP(">> qme_halt...");
 
@@ -541,22 +542,36 @@ fapi2::ReturnCode qme_halt(
 
         l_core_unit_pos = l_core_unit_pos % 4;
 
+        fapi2::ATTR_ECO_MODE_Type l_eco_mode;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ECO_MODE,
+                               l_core_target,
+                               l_eco_mode));
+
         fapi2::Target<fapi2::TARGET_TYPE_EQ> l_eq_target = l_core_target.getParent<fapi2::TARGET_TYPE_EQ>();
 
         FAPI_TRY( fapi2::getScom( l_eq_target, CPLT_CTRL3_RW, l_data64 ) );
 
-        if (!l_data64.getBit(l_core_unit_pos + CL2_START_POS))
+        if (!l_data64.getBit(l_core_unit_pos + CL2_START_POS) &&
+            !l_data64.getBit(l_core_unit_pos + L3_START_POS))
         {
             continue;
         }
 
         FAPI_TRY( fapi2::getScom( l_core_target, scomt::c::QME_SSH_SRC, l_data64 ) );
 
-        if( l_data64.getBit<0>() != 1)
+        if( l_data64.getBit<0>() != 1 &&
+            (l_eco_mode == fapi2::ENUM_ATTR_ECO_MODE_DISABLED))
         {
             l_data64.flush<0>().setBit< QME_SCSR_ASSERT_PM_EXIT >();
-            FAPI_TRY( putScom( l_core_target, QME_SCSR_WO_OR, l_data64 ) );
         }
+
+        if (l_eco_mode == fapi2::ENUM_ATTR_ECO_MODE_ENABLED)
+        {
+            l_data64.flush<0>().setBit< QME_SCSR_BLOCK_INTR_OUTPUTS>().
+            setBit<QME_SCSR_ASSERT_PM_BLOCK_INTR>();
+        }
+
+        FAPI_TRY( putScom( l_core_target, QME_SCSR_WO_OR, l_data64 ) );
     }
 
     //Set STOP_OVERRIDE_MODE and ACTIVE_MASK , so that QME won't be involved in
