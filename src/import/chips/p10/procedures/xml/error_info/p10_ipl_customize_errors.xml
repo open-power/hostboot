@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -137,41 +137,6 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
-    <rc>RC_XIPC_MVPD_INVALID_RECORD_DATA</rc>
-    <description>VPD ring's record data is invalid</description>
-    <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>RING_ID</ffdc>
-    <ffdc>CHIPLET_ID</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <rc>RC_XIPC_MVPD_FIELD_SIZE_MESS</rc>
-    <description>MVPD field size mess</description>
-    <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>MVPD_FIELD_SIZE</ffdc>
-    <ffdc>EXPECTED_SIZE</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <rc>RC_XIPC_MVPD_AW_FIELD_VALUE_ERR</rc>
-    <description>Out of range value observed in MVPD AW keyword</description>
-    <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>MVPD_VALUE</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
     <rc>RC_XIPC_RING_IS_REDUNDANT</rc>
       <description>Ring has redundant data (Not a bug. Info to caller.)</description>
   </hwpError>
@@ -220,20 +185,6 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
-    <rc>RC_XIPC_RINGID_CHECK_RINGID_ERROR</rc>
-    <description>ringid_check_ringId() failed</description>
-    <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>LOCAL_RC</ffdc>
-    <ffdc>RING_ID</ffdc>
-    <ffdc>CHIP_ID</ffdc>
-    <ffdc>OCCURRENCE</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
     <rc>RC_XIPC_TOR_APPEND_RING_FAILED</rc>
     <description>tor_append_ring() failed</description>
     <ffdc>CHIP_TARGET</ffdc>
@@ -251,6 +202,7 @@
     <description>p9_xip_delete_section() failed to remove an XIP section</description>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>XIP_SECTION</ffdc>
+    <ffdc>LOCAL_RC</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -314,7 +266,7 @@
   <hwpError>
     <rc>RC_XIPC_IMAGE_WOULD_OVERFLOW</rc>
     <description>
-      Ran out of image buffer space trying to append a ring to the .rings section
+      Would run out of ring section buffer space trying to append more rings
     </description>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>CURRENT_RING_SECTION_SIZE</ffdc>
@@ -347,6 +299,8 @@
     <rc>RC_XIPC_IMAGE_WOULD_OVERFLOW_BEFORE_REACHING_MIN_ECS</rc>
     <description>
       Image buffer would overflow before reaching minimum number of boot cores
+
+      Note if ACTUAL_EC_COUNT == 0xFFFFFFFF then the actual EC count is unknown.
     </description>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>REQUESTED_BOOT_CORE_MASK</ffdc>
@@ -400,17 +354,6 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
-    <rc>RC_XIPC_FAPI_ATTR_SVC_FAIL</rc>
-    <description>FAPI attribute service failed</description>
-    <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>OCCURRENCE</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
     <rc>RC_XIPC_TOR_GET_SINGLE_RING_ERROR</rc>
     <description>tor_get_single_ring() failed to fetch a ring</description>
     <ffdc>CHIP_TARGET</ffdc>
@@ -452,18 +395,6 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
-    <rc>RC_XIPC_TARGET_OVLY_RAW_RING_LENGTH_MISMATCH</rc>
-    <description>Target ring and overlay raw ring lengths do not match</description>
-    <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>TARGET_RAW_RING_LENGTH</ffdc>
-    <ffdc>OVLY_RAW_RING_LENGTH</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
     <rc>RC_XIPC_MVPD_OVLY_RING_HEADER_MISMATCH</rc>
     <description>Mvpd and Ovly ring header mismatch</description>
     <ffdc>CHIP_TARGET</ffdc>
@@ -473,20 +404,6 @@
     <ffdc>OVLY_SCAN_ADDR</ffdc>
     <ffdc>MVPD_TYPE</ffdc>
     <ffdc>OVLY_TYPE</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <rc>RC_XIPC_RS4_COMPRESS_ERROR</rc>
-    <description>_rs4_compress() failed</description>
-    <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>RING_ID</ffdc>
-    <ffdc>SCAN_ADDR</ffdc>
-    <ffdc>LOCAL_RC</ffdc>
-    <ffdc>OCCURRENCE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -557,7 +474,10 @@
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_XIPC_OVERLAYS_RING_IS_EMPTY</rc>
-    <description>Specified Overlays ring is empty</description>
+    <description>
+        Specified Overlays ring is empty. Note this is just used as a CONST and
+        is not expected to be FAPI_ASSERT'ed on so we do not need ffdc or callouts
+    </description>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -573,12 +493,10 @@
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_XIPC_DYNAMIC_NO_RINGS_FOUND</rc>
-    <description>No Dynamic and no Base rings found</description>
-    <ffdc>CHIP_TARGET</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
+    <description>
+        No Dynamic and no Base rings found. Note this is just used as a CONST and
+        is not expected to be FAPI_ASSERT'ed on so we do not need ffdc or callouts.
+    </description>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>

@@ -47,6 +47,9 @@ char SplWkupMsg[p10specialWakeup::MAX_OPERATION][10] =
     "ASSERT",
     "DE-ASSERT"
 };
+
+constexpr uint32_t NOT_MULTICAST = 0;
+
 /**
  * @brief   evaluates core and quad/qme states,if qme is in quiesce and
  *          core is eco enabled then we should skip assert/de-assert
@@ -100,13 +103,14 @@ fapi2::ReturnCode checkForUcSplWkupPreReq(
     auto l_eq   =   i_target.getParent< fapi2::TARGET_TYPE_EQ >( );
     FAPI_TRY( fapi2::getScom( l_eq, scomt::eq::QME_EISR_RW, l_data ) );
 
-    if( l_data.getBit( scomt::eq::QME_EISR_SYSTEM_CHECKSTOP ) )
-    {
-        FAPI_ASSERT( false,
-                     fapi2::SYSTEM_IN_CHECKSTOP_STATE().
-                     set_QME_EISR_REG( l_data ),
-                     "System In CheckStop State. Spl Wakeup Not Attempted On Core" );
-    }
+    FAPI_ASSERT( !l_data.getBit( scomt::eq::QME_EISR_SYSTEM_CHECKSTOP ),
+                 fapi2::SYSTEM_IN_CHECKSTOP_STATE().
+                 set_QME_EISR_REG( l_data ).
+                 set_CORE_TARGET( i_target ).
+                 set_CORE_SELECT( NOT_MULTICAST ).
+                 set_EQ_TARGET( i_target ).
+                 set_EQ_MC_GROUP( fapi2::MCGROUP_COUNT ),
+                 "System In CheckStop State. Spl Wakeup Not Attempted On Core" );
 
     //Need to assure ourselves that we have infrastructure in place to support
     //Special wakeup. Special wakeup at an early stage of IPL ( in failure path )
@@ -127,7 +131,11 @@ fapi2::ReturnCode checkForUcSplWkupPreReq(
     {
         FAPI_ASSERT( false,
                      fapi2::CORE_SPECIAL_WAKEUP_NOT_FEASIBLE().
-                     set_QME_FLAG( l_data ),
+                     set_QME_FLAG( l_data ).
+                     set_CORE_TARGET( i_target ).
+                     set_CORE_SELECT( NOT_MULTICAST ).
+                     set_EQ_TARGET( i_target ).
+                     set_EQ_MC_GROUP( fapi2::MCGROUP_COUNT ),
                      "QME Not Booted. Spl Wakeup Request Cannot Be Serviced QME Flag 0x%016lx", l_data );
     }
 
@@ -319,13 +327,14 @@ fapi2::ReturnCode checkForSplWkupPreReq(
     auto l_eq_mc_and = l_proc.getMulticast<fapi2::TARGET_TYPE_EQ, fapi2::MULTICAST_AND >(fapi2::MCGROUP_GOOD_EQ);
     FAPI_TRY( fapi2::getScom( l_eq_mc_and, scomt::eq::QME_EISR_RW, l_data ) );
 
-    if( l_data.getBit( scomt::eq::QME_EISR_SYSTEM_CHECKSTOP ) )
-    {
-        FAPI_ASSERT( false,
-                     fapi2::SYSTEM_IN_CHECKSTOP_STATE().
-                     set_QME_EISR_REG( l_data ),
-                     "System In CheckStop State. Spl Wakeup Not Attempted" );
-    }
+    FAPI_ASSERT( !l_data.getBit( scomt::eq::QME_EISR_SYSTEM_CHECKSTOP ),
+                 fapi2::SYSTEM_IN_CHECKSTOP_STATE().
+                 set_QME_EISR_REG( l_data ).
+                 set_CORE_TARGET( i_target ).
+                 set_CORE_SELECT( i_target.getCoreSelect() ).
+                 set_EQ_TARGET( i_target ).
+                 set_EQ_MC_GROUP( fapi2::MCGROUP_GOOD_EQ ),
+                 "System In CheckStop State. Spl Wakeup Not Attempted on Multicast Core" );
 
     //Need to assure ourselves that we have infrastructure in place to support
     //Special wakeup. Special wakeup at an early stage of IPL ( in failure path )
@@ -346,7 +355,11 @@ fapi2::ReturnCode checkForSplWkupPreReq(
     {
         FAPI_ASSERT( false,
                      fapi2::CORE_SPECIAL_WAKEUP_NOT_FEASIBLE().
-                     set_QME_FLAG( l_data ),
+                     set_QME_FLAG( l_data ).
+                     set_CORE_TARGET( i_target ).
+                     set_CORE_SELECT( i_target.getCoreSelect() ).
+                     set_EQ_TARGET( i_target ).
+                     set_EQ_MC_GROUP( fapi2::MCGROUP_GOOD_EQ ),
                      "QME Not Booted. Spl Wakeup Request Cannot Be Serviced QME MC Flag 0x%016lx", l_data );
     }
 
@@ -488,12 +501,13 @@ fapi2::ReturnCode initiateSplWkup(
             while( ( l_pollCount > 0 ) && ( !l_data.getBit< p10specialWakeup::SPWKUP_REQ_DONE_BIT >() ));
 
             FAPI_ASSERT( ( true == l_data.getBit< p10specialWakeup::SPWKUP_REQ_DONE_BIT >() ),
-                         fapi2::SPCWKUP_CORE_HW529794_TIMEOUT().
+                         fapi2::SPCWKUP_CORE_HW529794_TIMEOUT_MC().
                          set_POLLCOUNT( l_pollCount ).
                          set_SP_WKUP_REG_VALUE( l_data ).
                          set_ENTITY( i_entity ).
-                         set_CORE_TARGET( i_target ).
-                         set_CORE_SSHSRC( l_coreSshsrc ),
+                         set_MC_CORE_TARGET( i_target ).
+                         set_CORE_SSHSRC( l_coreSshsrc ).
+                         set_CORE_SELECT( i_target.getCoreSelect() ),
                          "Core Special Wakeup Request Timed Out" );
 
             FAPI_INF( "HW529794: Spl Wakeup Success !!!" );
@@ -510,12 +524,13 @@ fapi2::ReturnCode initiateSplWkup(
     FAPI_TRY( fapi2::getScom( l_ecMcAndTgt, scomt::c::QME_SSH_SRC, l_coreSshsrc ) );
 
     FAPI_ASSERT( ( true == l_data.getBit< p10specialWakeup::SPWKUP_REQ_DONE_BIT >() ),
-                 fapi2::SPCWKUP_CORE_TIMEOUT().
+                 fapi2::SPCWKUP_CORE_TIMEOUT_MC().
                  set_POLLCOUNT( l_pollCount ).
                  set_SP_WKUP_REG_VALUE( l_data ).
                  set_ENTITY( i_entity ).
-                 set_CORE_TARGET( i_target ).
-                 set_CORE_SSHSRC( l_coreSshsrc ),
+                 set_MC_CORE_TARGET( i_target ).
+                 set_CORE_SSHSRC( l_coreSshsrc ).
+                 set_CORE_SELECT(i_target.getCoreSelect()),
                  "Core Special Wakeup Request Timed Out" );
 
     FAPI_INF( "Special Wakeup %s Done On Targeted Core",

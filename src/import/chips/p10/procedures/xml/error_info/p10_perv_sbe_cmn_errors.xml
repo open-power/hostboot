@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -31,6 +31,14 @@
       <ffdc>PERV_CPLT_STAT0</ffdc>
       <ffdc>LOOP_COUNT</ffdc>
       <ffdc>HW_DELAY</ffdc>
+      <ffdc>PROC_TARGET</ffdc>
+      <callout>
+          <target>PROC_TARGET</target>
+          <priority>HIGH</priority>
+      </callout>
+      <deconfigure>
+          <target>PROC_TARGET</target>
+      </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -39,6 +47,14 @@
       <ffdc>PERV_CPLT_STAT0</ffdc>
       <ffdc>LOOP_COUNT</ffdc>
       <ffdc>HW_DELAY</ffdc>
+      <ffdc>PROC_TARGET</ffdc>
+      <callout>
+          <target>PROC_TARGET</target>
+          <priority>HIGH</priority>
+      </callout>
+      <deconfigure>
+          <target>PROC_TARGET</target>
+      </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -46,7 +62,14 @@
       <description>SRAM abist done bit is not set</description>
       <ffdc>PERV_CPLT_STAT</ffdc>
       <ffdc>SELECT_SRAM</ffdc>
-      <ffdc>READ_ABIST_DONE</ffdc> 
+      <ffdc>PROC_TARGET</ffdc>
+      <callout>
+          <target>PROC_TARGET</target>
+          <priority>HIGH</priority>
+      </callout>
+      <deconfigure>
+          <target>PROC_TARGET</target>
+      </deconfigure>
   </hwpError>
   <!-- ******************************************************************** --> 
   <hwpError>
@@ -55,6 +78,14 @@
       <ffdc>PERV_CPLT_STAT0</ffdc>
       <ffdc>LOOP_COUNT</ffdc>
       <ffdc>HW_DELAY</ffdc>
+      <ffdc>PROC_TARGET</ffdc>
+      <callout>
+          <target>PROC_TARGET</target>
+          <priority>HIGH</priority>
+      </callout>
+      <deconfigure>
+          <target>PROC_TARGET</target>
+      </deconfigure>
     </hwpError>
    <!-- ******************************************************************** -->
    <hwpError>
@@ -65,12 +96,25 @@
       <ffdc>CLOCK_TYPE</ffdc>
       <ffdc>REGIONS</ffdc>
       <ffdc>READ_CLK</ffdc>
+      <ffdc>PROC_TARGET</ffdc>
+      <callout>
+          <target>PROC_TARGET</target>
+          <priority>HIGH</priority>
+      </callout>
+      <deconfigure>
+          <target>PROC_TARGET</target>
+      </deconfigure>
     </hwpError>
     <!-- ******************************************************************** -->
     <hwpError>
       <rc>RC_MC_GROUP_SETUP_ERR</rc>
       <description>Chiplet is being added into more 4 groups</description>
       <ffdc>CHIPLET_ID</ffdc>
+      <ffdc>PROC_TARGET</ffdc>
+      <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+      </callout>
     </hwpError>
     <!-- ******************************************************************** -->
      <hwpError>
@@ -80,6 +124,14 @@
       <ffdc>PERV_CPLT_STAT0</ffdc>
       <ffdc>LOOP_COUNT</ffdc>
       <ffdc>HW_DELAY</ffdc>
+      <ffdc>PROC_TARGET</ffdc>
+      <callout>
+          <target>PROC_TARGET</target>
+          <priority>HIGH</priority>
+      </callout>
+      <deconfigure>
+          <target>PROC_TARGET</target>
+      </deconfigure>
     </hwpError>
     <!-- ******************************************************************** -->
 </hwpErrors>
