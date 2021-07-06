@@ -207,7 +207,7 @@ fapi2::ReturnCode p10_io_tdr(
         o_length_ui = 0;
 
         // loop through each of the 2 phases
-        for(uint32_t l_phase = 0; l_phase < 2; l_phase++)
+        for(int32_t l_phase = 1; l_phase >= 0; l_phase--)
         {
             FAPI_DBG("Looping on Lane(%d) and Phase(%d)", l_xlate_lane, l_phase);
             FAPI_TRY(p10_io_tdr_initialize(l_iohs_target, l_xlate_lane, c_pulse_width, l_phase));
@@ -387,7 +387,11 @@ fapi2::ReturnCode p10_io_tdr(
             }
         }
 
-        if (o_status[l_index] != TdrResult::Good)
+        if (o_status[l_index] == TdrResult::Good)
+        {
+            o_length_ps[l_index] = 0;
+        }
+        else
         {
             // convert UI to fs
             o_length_ps[l_index] = (o_length_ui % 2) ?
