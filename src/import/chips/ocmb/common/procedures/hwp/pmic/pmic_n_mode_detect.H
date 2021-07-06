@@ -27,10 +27,10 @@
 /// @file pmic_n_mode_detect.H
 /// @brief To be run periodically at runtime to determine n-mode states of 4U parts
 ///
-// *HWP HWP Owner: Mark Pizzutillo <mark.pizzutillo@ibm.com>
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: SBE
 // EKB-Mirror-To: hw/ppe
 
