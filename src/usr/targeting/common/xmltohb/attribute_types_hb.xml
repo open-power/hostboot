@@ -1309,68 +1309,6 @@
   </attribute>
 
   <attribute>
-    <description>Information about the PLDM state effecter related to this target, if any</description>
-    <id>PLDM_EFFECTER_INFO</id>
-    <persistency>volatile</persistency>
-    <readable/>
-    <writeable/>
-    <complexType>
-      <description>Structure describing a PLDM effecter ID and callback function ID</description>
-      <field>
-        <name>effecter_id</name>
-        <description>PLDM effecter ID</description>
-        <type>uint16_t</type>
-        <default>0</default>
-      </field>
-      <field>
-        <name>state_set_id</name>
-        <description>PLDM state set for this sensor</description>
-        <type>uint16_t</type>
-        <default>0</default>
-      </field>
-      <field>
-        <name>function_id</name>
-        <description>PLDM effecter function callback ID; value corresponds to the
-	             state_query_handler_id_t enumeration</description>
-        <type>uint8_t</type>
-        <default>0</default>
-      </field>
-    </complexType>
-    <no_export/>
-  </attribute>
-
-  <attribute>
-    <description>Information about the PLDM state sensor related to this target, if any</description>
-    <id>PLDM_SENSOR_INFO</id>
-    <persistency>volatile</persistency>
-    <readable/>
-    <writeable/>
-    <complexType>
-      <description>Structure describing a PLDM sensor ID and callback function ID</description>
-      <field>
-        <name>sensor_id</name>
-        <description>PLDM sensor ID</description>
-        <type>uint16_t</type>
-        <default>0</default>
-      </field>
-      <field>
-        <name>state_set_id</name>
-        <description>PLDM state set for this sensor</description>
-        <type>uint16_t</type>
-        <default>0</default>
-      </field>
-      <field>
-        <name>function_id</name>
-        <description>PLDM sensor function callback ID; value corresponds to the
-	             state_query_handler_id_t enumeration</description>
-        <type>uint8_t</type>
-        <default>0</default>
-      </field>
-    </complexType>
-    <no_export/>
-  </attribute>
-
-  <attribute>
     <id>SBE_ARCH_DUMP_ADDR</id>
     <description>
         Physical address where SBE Architectued Dump Area is located (per

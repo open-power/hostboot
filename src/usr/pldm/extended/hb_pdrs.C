@@ -325,16 +325,8 @@ errlHndl_t addHostbootPdrs(PdrManager& io_pdrman)
 {
     PLDM_ENTER("addHostbootPdrs");
 
-    { // Reset all sensor/effecter attributes.
-        const ATTR_PLDM_EFFECTER_INFO_type default_effecter_info { };
-        const ATTR_PLDM_SENSOR_INFO_type default_sensor_info { };
-
-        for (const auto target : targetService())
-        {
-            target->trySetAttr<ATTR_PLDM_EFFECTER_INFO>(default_effecter_info);
-            target->trySetAttr<ATTR_PLDM_SENSOR_INFO>(default_sensor_info);
-        }
-    }
+    // Reset all sensor/effecter attributes.
+    UTIL::assertGetToplevelTarget()->setAttr<ATTR_NUM_PLDM_STATE_QUERY_RECORDS>(0);
 
     errlHndl_t errl = nullptr;
 

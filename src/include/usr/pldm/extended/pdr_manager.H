@@ -204,6 +204,25 @@ public:
         STATE_QUERY_HANDLER_INVALID = 0xFF
     };
 
+    /* Enumeration for handleStateQueryRequest. A state query is either an
+     * effecter set-request or a sensor get-request. */
+    enum state_query_type_t : uint8_t
+    {
+        STATE_QUERY_SENSOR = 1,
+        STATE_QUERY_EFFECTER = 2
+    };
+
+    /* @brief Records stored in the system's PLDM_STATE_QUERY_RECORDS attribute.
+     */
+    struct pldm_state_query_record_t
+    {
+        uint32_t target_huid = 0;
+        uint16_t query_id = 0;
+        uint16_t state_set_id = 0;
+        uint16_t function_id = 0;
+        state_query_type_t query_type = { };
+    } PACKED;
+
     /* @brief  Add a state effecter PDR to the PDR repository.
      *
      * @param[in] i_target           target that this effecter pertains to. Will be passed to the callback.
@@ -238,11 +257,33 @@ public:
      *                               GetStateSensorReadings PLDM command for this effecter will respond with
      *                               an error.
      */
-    void addStateSensorPdr(TARGETING::Target* const i_target,
+    void addStateSensorPdr(TARGETING::Target* i_target,
                            const pldm_entity& i_entity,
                            uint16_t i_state_set_id,
                            uint8_t i_possible_states,
                            state_query_handler_id_t i_qhandler);
+
+    /* @brief Get the set of state query records (possibly related to a
+     *        particular target).
+     *
+     * @param[in] i_target  If non-NULL, only return state query records related
+     *                      to this target. If NULL, return all records.
+     * @return vector       List of PLDM state query records.
+     */
+    std::vector<pldm_state_query_record_t> getStateQueryRecords(const TARGETING::Target* i_target = nullptr);
+
+    /* @brief Look up a state query ID by state set ID in the list of registered state query records.
+     *
+     * @param[in] i_state_query_type  The type of state query record to look for.
+     * @param[in] i_state_set_id      State set ID of the state query handler to look up.
+     * @param[in] i_target            Target to restrict the search for (NULL to search all targets).
+     * @return                        The sensor or effecter ID of the registered handler if any, 0 if none.
+     * @note                          If there are multiple query handlers registered for the same state set
+     *                                on the relevant target(s), an arbitrary one will be returned.
+     */
+    state_query_id_t getStateQueryIdForStateSet(state_query_type_t i_state_query_type,
+                                                uint16_t i_state_set_id,
+                                                const TARGETING::Target* i_target = nullptr);
 
     /* @brief  Handle a SetStateEffecterStates command and send a response.
      *
@@ -345,14 +386,6 @@ private:
      * attributes, along with a state_query_handler_id_t value, to record how to handle PLDM sensor/effecter
      * queries. */
     state_query_id_t iv_next_state_query_id = 1;
-
-    /* Enumeration for handleStateQueryRequest. A state query is either an
-     * effecter set-request or a sensor get-request. */
-    enum state_query_type_t
-    {
-        STATE_QUERY_SENSOR = 1,
-        STATE_QUERY_EFFECTER = 2
-    };
 
     /* @brief  Handle a PLDM state sensor or effecter command.
      *

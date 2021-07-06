@@ -597,7 +597,13 @@ errlHndl_t sendOccStateChangedEvent(const TARGETING::Target* const i_occ_target,
            i_occ_target->getAttr<ATTR_TYPE>(),
            get_huid(i_occ_target));
 
-    assert(i_occ_target->getAttr<TARGETING::ATTR_PLDM_SENSOR_INFO>().sensor_id != 0,
+    // Search for the OCC state sensor ID
+    const sensor_id_t sensor_id
+        = thePdrManager().getStateQueryIdForStateSet(PdrManager::STATE_QUERY_SENSOR,
+                                                     PLDM_STATE_SET_OPERATIONAL_RUNNING_STATUS,
+                                                     i_occ_target);
+
+    assert(sensor_id != 0,
            "Sensor ID for OCC target HUID=0x%08x has not been assigned",
            get_huid(i_occ_target));
 
@@ -620,9 +626,7 @@ errlHndl_t sendOccStateChangedEvent(const TARGETING::Target* const i_occ_target,
                i_new_state);
     }
 
-    return sendSensorStateChangedEvent(i_occ_target->getAttr<TARGETING::ATTR_PLDM_SENSOR_INFO>().sensor_id,
-                                       OCC_STATE_SENSOR_INDEX,
-                                       new_occ_state);
+    return sendSensorStateChangedEvent(sensor_id, OCC_STATE_SENSOR_INDEX, new_occ_state);
 }
 
 errlHndl_t sendFruFunctionalStateChangedEvent(const TARGETING::Target* const i_target,

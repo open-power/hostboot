@@ -287,6 +287,9 @@
       <id>MIN_POWER_CAP_WATTS</id>
     </attribute>
     <attribute>
+      <id>NUM_PLDM_STATE_QUERY_RECORDS</id>
+    </attribute>
+    <attribute>
       <id>N_BULK_POWER_LIMIT_WATTS</id>
     </attribute>
     <attribute>
@@ -387,6 +390,9 @@
     </attribute>
     <attribute>
       <id>PLDM_BIOS_ERROR_INFORMATIONAL</id>
+    </attribute>
+    <attribute>
+      <id>PLDM_STATE_QUERY_RECORDS</id>
     </attribute>
     <attribute>
       <id>PMIC_ERROR_TEMP_DEG_C</id>

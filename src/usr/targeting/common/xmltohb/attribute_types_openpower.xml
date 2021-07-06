@@ -1037,6 +1037,22 @@ ID for the sensor number returned with the elog. -->
   </attribute>
 
   <attribute>
+    <id>NUM_PLDM_STATE_QUERY_RECORDS</id>
+    <description>
+      The number of records currently populated in PLDM_STATE_QUERY_RECORDS.
+    </description>
+    <simpleType>
+      <uint32_t>
+        <default>0</default>
+      </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <id>N_BULK_POWER_LIMIT_WATTS</id>
     <description>
         System maximum power cap in output watts when Quick Power Drop line
@@ -1703,6 +1719,27 @@ ID for the sensor number returned with the elog. -->
       attribute when building the SLCA on said platforms.
     </description>
     <id>PLDM_ENTITY_ID_INFO</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
+    <id>PLDM_STATE_QUERY_RECORDS</id>
+    <description>
+        Information about the currently registered PLDM sensors and
+        effecters. This attribute is an array of structures of type
+        pldm_state_query_record_t.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+      <array>
+	8192
+      </array>
+    </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>

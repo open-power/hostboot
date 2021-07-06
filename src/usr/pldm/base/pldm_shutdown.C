@@ -135,7 +135,9 @@ void PLDM::requestSoftPowerOff()
     PLDM_INF(ENTER_MRK"requestSoftPowerOff");
 
     const sensor_id_t shutdown_sensor_id
-        = UTIL::assertGetToplevelTarget()->getAttr<ATTR_PLDM_SENSOR_INFO>().sensor_id;
+        = thePdrManager().getStateQueryIdForStateSet(PdrManager::STATE_QUERY_SENSOR,
+                                                     PLDM_STATE_SET_SW_TERMINATION_STATUS,
+                                                     UTIL::assertGetToplevelTarget());
 
     // If we can find the shutdown sensor ID, then we start a task that will
     // send a completion notification to the BMC using that sensor ID.

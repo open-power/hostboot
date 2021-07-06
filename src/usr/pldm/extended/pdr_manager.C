@@ -333,7 +333,6 @@ std::vector<pdr_handle_t> PdrManager::getAllPdrHandles() const
     return pdrs;
 }
 
-
 std::vector<fru_record_set_id> PdrManager::findFruRecordSetIdsByType(const entity_type i_ent_type) const
 {
     const auto lock = scoped_mutex_lock(iv_access_mutex);
@@ -448,6 +447,65 @@ bool PdrManager::findEntityByTypeAndId(pldm_entity& io_entity) const
     return found;
 }
 
+/* @brief The number of pldm_state_query_record_t we need to allocate to hold an
+ *        instance of ATTR_PLDM_STATE_QUERY_RECORDS_type.
+ */
+constexpr size_t NUM_STATE_QUERY_RECORDS
+    = (sizeof(ATTR_PLDM_STATE_QUERY_RECORDS_type) / sizeof(PdrManager::pldm_state_query_record_t)) + 1;
+
+using pldm_state_query_records = std::array<PdrManager::pldm_state_query_record_t, NUM_STATE_QUERY_RECORDS>;
+
+/* @brief Read the array of pldm state query records from the system's
+ *        PLDM_STATE_QUERY_RECORDS attribute.
+ *
+ * @param[in] i_sys  System target
+ * @return array     Array of records.
+ */
+static pldm_state_query_records readPldmStateQueryRecords(Target* const i_sys)
+{
+    pldm_state_query_records records = { };
+    const bool read
+        = i_sys->tryGetAttr<ATTR_PLDM_STATE_QUERY_RECORDS>(*reinterpret_cast<ATTR_PLDM_STATE_QUERY_RECORDS_type*>(&records));
+    assert(read, "Can't read ATTR_PLDM_STATE_QUERY_RECORDS from system target");
+    return records;
+}
+
+/* @brief Write an array of pldm state query records to the system's
+ *        PLDM_STATE_QUERY_RECORDS attribute.
+ *
+ * @param[in] i_sys      System target
+ * @param[in] i_records  Array of PLDM state query records
+ */
+static void writePldmStateQueryRecords(Target* const i_sys, const pldm_state_query_records& i_records)
+{
+    const bool read =
+        i_sys->trySetAttr<ATTR_PLDM_STATE_QUERY_RECORDS>(*reinterpret_cast<const ATTR_PLDM_STATE_QUERY_RECORDS_type*>(&i_records));
+    assert(read, "Can't set ATTR_PLDM_STATE_QUERY_RECORDS on system target");
+}
+
+/* @brief Add a PLDM state query record to the system's PLDM_STATE_QUERY_RECORDS
+ *        attribute.
+ *
+ * @param[in] i_record  The record to add.
+ */
+static void appendStateQueryInfo(const PdrManager::pldm_state_query_record_t i_record)
+{
+    const auto sys = UTIL::assertGetToplevelTarget();
+    const auto num_records = sys->getAttr<ATTR_NUM_PLDM_STATE_QUERY_RECORDS>();
+    constexpr auto max_possible_records = sizeof(ATTR_PLDM_STATE_QUERY_RECORDS_type) / sizeof(PdrManager::pldm_state_query_record_t);
+
+    assert(num_records + 1 < max_possible_records,
+           "Too many PLDM state query handlers registered (max %d)",
+           max_possible_records);
+
+    /* Read the existing records, add one, then write them back */
+
+    auto records = readPldmStateQueryRecords(sys);
+    records[num_records] = i_record;
+    writePldmStateQueryRecords(sys, records);
+    sys->setAttr<ATTR_NUM_PLDM_STATE_QUERY_RECORDS>(num_records + 1);
+}
+
 void PdrManager::addStateSensorPdr(Target* const i_target,
                                    const pldm_entity& i_entity,
                                    const uint16_t i_state_set_id,
@@ -465,9 +523,9 @@ void PdrManager::addStateSensorPdr(Target* const i_target,
 
     /* Create and encode the PDR. */
 
-    std::vector<uint8_t> encoded_pdr(sizeof(pldm_state_sensor_pdr) + sizeof(states));
+    uint8_t encoded_pdr[sizeof(pldm_state_sensor_pdr) + sizeof(states)] = { };
 
-    const auto pdr = reinterpret_cast<pldm_state_sensor_pdr*>(encoded_pdr.data());
+    const auto pdr = reinterpret_cast<pldm_state_sensor_pdr*>(encoded_pdr);
 
     *pdr =
     {
@@ -497,18 +555,14 @@ void PdrManager::addStateSensorPdr(Target* const i_target,
 
     size_t actual_pdr_size = 0;
 
-    const int rc = encode_state_sensor_pdr(pdr,
-                                           encoded_pdr.size(),
-                                           &states,
-                                           sizeof(states),
-                                           &actual_pdr_size);
+    const int rc = encode_state_sensor_pdr(pdr, sizeof(encoded_pdr), &states, sizeof(states), &actual_pdr_size);
 
     assert(rc == PLDM_SUCCESS,
            "Failed to encode state sensor PDR");
 
     /* Add the PDR to the PDR repository. */
 
-    pldm_pdr_add(iv_pdr_repo.get(), encoded_pdr.data(), actual_pdr_size,
+    pldm_pdr_add(iv_pdr_repo.get(), encoded_pdr, actual_pdr_size,
                  PDR_AUTO_CALCULATE_RECORD_HANDLE,
                  PDR_IS_NOT_REMOTE);
 
@@ -516,24 +570,18 @@ void PdrManager::addStateSensorPdr(Target* const i_target,
              get_huid(i_target),
              iv_next_state_query_id);
 
-    /* Update record-keeping state (save the callback and the sensor info if
-     * this is a functional state sensor). */
+    /* Update record-keeping state */
 
-    auto target_sensor_info = i_target->getAttr<ATTR_PLDM_SENSOR_INFO>();
+    const pldm_state_query_record_t query_record
+    {
+        .target_huid = get_huid(i_target),
+        .query_id = iv_next_state_query_id,
+        .state_set_id = i_state_set_id,
+        .function_id = i_qhandler,
+        .query_type = STATE_QUERY_SENSOR
+    };
 
-    assert(target_sensor_info.sensor_id == 0,
-           "Target 0x%08x is already registered with a PLDM state sensor "
-           "(id=%d, function=%d, state set=%d)",
-           get_huid(i_target),
-           target_sensor_info.sensor_id,
-           target_sensor_info.function_id,
-           target_sensor_info.state_set_id);
-
-    target_sensor_info.sensor_id = iv_next_state_query_id;
-    target_sensor_info.state_set_id = i_state_set_id;
-    target_sensor_info.function_id = i_qhandler;
-
-    i_target->setAttr<ATTR_PLDM_SENSOR_INFO>(target_sensor_info);
+    appendStateQueryInfo(query_record);
 
     ++iv_next_state_query_id;
 }
@@ -553,9 +601,9 @@ void PdrManager::addStateEffecterPdr(Target* const i_target,
         .states = { i_possible_states } // possible_states (only support 1 byte of states right now)
     };
 
-    std::vector<uint8_t> encoded_pdr(sizeof(pldm_state_effecter_pdr) + sizeof(states));
+    uint8_t encoded_pdr[sizeof(pldm_state_effecter_pdr) + sizeof(states)];
 
-    const auto pdr = reinterpret_cast<pldm_state_effecter_pdr*>(encoded_pdr.data());
+    const auto pdr = reinterpret_cast<pldm_state_effecter_pdr*>(encoded_pdr);
 
     *pdr =
     {
@@ -586,31 +634,25 @@ void PdrManager::addStateEffecterPdr(Target* const i_target,
 
     size_t actual_pdr_size = 0;
 
-    const int rc = encode_state_effecter_pdr(pdr, encoded_pdr.size(), &states, sizeof(states), &actual_pdr_size);
+    const int rc = encode_state_effecter_pdr(pdr, sizeof(encoded_pdr), &states, sizeof(states), &actual_pdr_size);
 
     assert(rc == PLDM_SUCCESS,
            "Failed to encode state effecter PDR");
 
-    pldm_pdr_add(iv_pdr_repo.get(), encoded_pdr.data(), actual_pdr_size,
+    pldm_pdr_add(iv_pdr_repo.get(), encoded_pdr, actual_pdr_size,
                  PDR_AUTO_CALCULATE_RECORD_HANDLE,
                  PDR_IS_NOT_REMOTE);
 
+    const pldm_state_query_record_t query_record
+    {
+        .target_huid = get_huid(i_target),
+        .query_id = iv_next_state_query_id,
+        .state_set_id = i_state_set_id,
+        .function_id = i_qhandler,
+        .query_type = STATE_QUERY_EFFECTER
+    };
 
-    auto target_effecter_info = i_target->getAttr<ATTR_PLDM_EFFECTER_INFO>();
-
-    assert(target_effecter_info.effecter_id == 0,
-           "Target 0x%08x is already registered with a PLDM state effecter "
-           "(id=%d, function=%d, state set=%d)",
-           get_huid(i_target),
-           target_effecter_info.effecter_id,
-           target_effecter_info.function_id,
-           target_effecter_info.state_set_id);
-
-    target_effecter_info.effecter_id = iv_next_state_query_id;
-    target_effecter_info.state_set_id = i_state_set_id;
-    target_effecter_info.function_id = i_qhandler;
-
-    i_target->setAttr<ATTR_PLDM_EFFECTER_INFO>(target_effecter_info);
+    appendStateQueryInfo(query_record);
 
     ++iv_next_state_query_id;
 }
@@ -765,27 +807,19 @@ errlHndl_t PdrManager::handleStateQueryRequest(const state_query_type_t i_queryt
     uint8_t handler_function_id = STATE_QUERY_HANDLER_INVALID;
 
     {
+        const auto sys = UTIL::assertGetToplevelTarget();
         const auto lock = scoped_mutex_lock(iv_access_mutex);
+        const auto num_records = sys->getAttr<ATTR_NUM_PLDM_STATE_QUERY_RECORDS>();
+        const auto records = readPldmStateQueryRecords(sys);
 
-        for (const auto target : targetService())
+        for (uint32_t i = 0; i < num_records; ++i)
         {
-            ATTR_PLDM_EFFECTER_INFO_type effecter_info { };
-            ATTR_PLDM_SENSOR_INFO_type sensor_info { };
-
-            // A sensor and effecter will not both have the same ID, so only one
-            // of these branches can be taken.
-            if (target->tryGetAttr<ATTR_PLDM_EFFECTER_INFO>(effecter_info)
-                && effecter_info.effecter_id == i_query_id)
+            // A sensor and effecter will not both have the same ID, so we don't
+            // need to check that.
+            if (records[i].query_id == i_query_id)
             {
-                handler_target = target;
-                handler_function_id = effecter_info.function_id;
-                break;
-            }
-            if (target->tryGetAttr<ATTR_PLDM_SENSOR_INFO>(sensor_info)
-                && sensor_info.sensor_id == i_query_id)
-            {
-                handler_target = target;
-                handler_function_id = sensor_info.function_id;
+                handler_target = Target::getTargetFromHuid(records[i].target_huid);
+                handler_function_id = records[i].function_id;
                 break;
             }
         }
@@ -820,8 +854,7 @@ errlHndl_t PdrManager::handleStateQueryRequest(const state_query_type_t i_queryt
         }
     }
 
-    /* Ensure that the types match on the callback and the request (whether
-     * effecter or sensor) and if so, invoke the callback.
+    /* Invoke the appropriate callback.
      * If we actually invoke a handler, then we don't need to send a response,
      * so we don't modify response_code here, and we won't send a response
      * below. */
@@ -857,6 +890,45 @@ errlHndl_t PdrManager::handleStateQueryRequest(const state_query_type_t i_queryt
     return errl;
 }
 
+std::vector<PdrManager::pldm_state_query_record_t> PdrManager::getStateQueryRecords(const Target* const i_target)
+{
+    const auto lock = scoped_mutex_lock(iv_access_mutex);
+    std::vector<pldm_state_query_record_t> query_ids;
+
+    const auto sys = UTIL::assertGetToplevelTarget();
+    const auto num_records = sys->getAttr<ATTR_NUM_PLDM_STATE_QUERY_RECORDS>();
+    const auto huid = get_huid(i_target);
+    const auto records = readPldmStateQueryRecords(sys);
+
+    for (uint32_t i = 0; i < num_records; ++i)
+    {
+        if (!i_target || records[i].target_huid == huid)
+        {
+            query_ids.push_back(records[i]);
+        }
+    }
+
+    return query_ids;
+}
+
+state_query_id_t PdrManager::getStateQueryIdForStateSet(const state_query_type_t i_state_query_type,
+                                                        const uint16_t i_state_set_id,
+                                                        const TARGETING::Target* const i_target)
+{
+    state_query_id_t query_id = 0;
+
+    for (const auto& record : thePdrManager().getStateQueryRecords(i_target))
+    {
+        if (record.state_set_id == i_state_set_id && record.query_type == i_state_query_type)
+        {
+            query_id = record.query_id;
+            break;
+        }
+    }
+
+    return query_id;
+}
+
 void PdrManager::sendAllFruFunctionalStates() const
 {
     do
@@ -870,38 +942,43 @@ void PdrManager::sendAllFruFunctionalStates() const
 
     const auto lock = scoped_mutex_lock(iv_access_mutex);
 
+    /* Read the query handler records from the system target */
+
+    const auto sys = UTIL::assertGetToplevelTarget();
+    const auto num_records = sys->getAttr<ATTR_NUM_PLDM_STATE_QUERY_RECORDS>();
+    const auto records = readPldmStateQueryRecords(sys);
+
     /* Iterate each registered target state sensor and send an event about its
      * status to the BMC. */
 
-    for (const auto target : targetService())
+    for (uint32_t i = 0; i < num_records; ++i)
     {
-        ATTR_PLDM_SENSOR_INFO_type sensor_info { };
+        const auto record = records[i];
 
-        if (!target->tryGetAttr<ATTR_PLDM_SENSOR_INFO>(sensor_info))
+        if (record.state_set_id == PLDM_STATE_SET_HEALTH_STATE
+            && record.query_type == STATE_QUERY_SENSOR)
         {
-            continue;
-        }
+            Target* const target = Target::getTargetFromHuid(record.target_huid);
 
-        if (sensor_info.state_set_id != PLDM_STATE_SET_HEALTH_STATE)
-        {
-            continue;
-        }
+            assert(target, "NULL target in sendAllFruFunctionalStates (sensor ID = %d)",
+                   record.query_id);
 
-        const bool functional = target->getAttr<ATTR_HWAS_STATE>().functional;
+            const bool functional = target->getAttr<ATTR_HWAS_STATE>().functional;
 
-        errlHndl_t errl
-            = sendFruFunctionalStateChangedEvent(target, // target
-                                                 sensor_info.sensor_id, // sensor ID
-                                                 functional);
+            errlHndl_t errl
+                = sendFruFunctionalStateChangedEvent(target, // target
+                                                     record.query_id, // sensor ID
+                                                     functional);
 
-        PLDM_DBG("Sending FRU functional state changed event for target 0x%08x/sensor ID %d, err = %p",
-                 get_huid(target),
-                 sensor_info.sensor_id,
-                 errl);
+            PLDM_DBG("Sending FRU functional state changed event for target 0x%08x/sensor ID %d, err = %p",
+                     record.target_huid,
+                     record.query_id,
+                     errl);
 
-        if (errl)
-        {
-            errlCommit(errl, PLDM_COMP_ID);
+            if (errl)
+            {
+                errlCommit(errl, PLDM_COMP_ID);
+            }
         }
     }
 
