@@ -32,6 +32,12 @@
       <rc>RC_RCS_CLOCK_TEST_OUT_ERR</rc>
       <description>
         One or more processor reference clocks not toggling
+
+        The clock is either more likely the root cause or it is indeterminate which of the two parts
+        is at fault. Guarding the processor has the potential (based on resources) to prevent the
+        system from IPLing, which would be undesirable when there could be a perfectly good
+        redundant clock available. Therefore, we will not guard or deconfigure the processor on any
+        of these errors.
       </description>
       <ffdc>MASTER_CHIP</ffdc>
       <!-- Duplicate of the callout's CLOCK_POS parameter for platforms that don't infer the CLOCK_POS parameter -->
