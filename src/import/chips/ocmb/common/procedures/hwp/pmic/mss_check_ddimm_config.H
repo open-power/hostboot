@@ -27,10 +27,10 @@
 /// @file mss_check_ddimm_config.H
 /// @brief Procedure to assert valid PMIC/GI2C target config
 ///
-// *HWP HWP Owner: Mark Pizzutillo <mark.pizzutillo@ibm.com>
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 // EKB-Mirror-To: hostboot

@@ -28,10 +28,10 @@
 /// @file pmic_common_utils.H
 /// @brief Utility functions common for several PMIC procedures
 ///
-// *HWP HWP Owner: Mark Pizzutillo <mark.pizzutillo@ibm.com>
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 ///

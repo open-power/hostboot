@@ -27,10 +27,10 @@
 /// @file p10_omi_workarounds.H
 /// @brief Workarounds for p10_omi_* procedures
 ///
-// *HWP HWP Owner: Mark Pizzutillo <Mark.Pizzutillo@ibm.com>
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: Memory
 
 #ifndef _P10_OMI_WORKAROUNDS_H_

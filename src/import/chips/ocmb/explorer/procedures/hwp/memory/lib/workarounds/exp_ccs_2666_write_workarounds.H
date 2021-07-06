@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,9 +28,9 @@
 /// @brief Workarounds for explorer CCS write issue at 2666
 ///
 // *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
-// *HWP HWP Backup:  Mark Pizzutillo <Mark.Pizzutillo@ibm.com>
+// *HWP HWP Backup:  Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: Memory
 
 #ifndef _EXP_CCS_2666_WRITE_WORKAROUNDS_H_

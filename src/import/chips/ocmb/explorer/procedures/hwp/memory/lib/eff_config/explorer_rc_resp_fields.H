@@ -23,6 +23,17 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
+///
+/// @file explorer_rc_resp_fields.H
+/// @brief Explorer training response RC Field accessors
+///
+
+// *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: HB
+
 #include <fapi2.H>
 #include <exp_data_structs.H>
 #include <generic/memory/lib/utils/mss_field.H>

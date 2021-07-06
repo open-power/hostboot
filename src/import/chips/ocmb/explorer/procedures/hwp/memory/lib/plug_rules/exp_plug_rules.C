@@ -27,10 +27,10 @@
 /// @file exp_plug_rules.C
 /// @brief Plug rules enforcement for explorer
 ///
-// *HWP HWP Owner: Mark Pizzutillo <Mark.Pizzutillo@ibm.com>
-// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>

@@ -27,10 +27,10 @@
 /// @file pmic_consts.H
 /// @brief Constants for PMIC procedures / i2C
 ///
-// *HWP HWP Owner: Mark Pizzutillo <Mark.Pizzutillo@ibm.com>
-// *HWP HWP Backup: Andre A. Marin <aamarin@us.ibm.com>
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 3
 // *HWP Consumed by: CI
 // EKB-Mirror-To: hw/ppe
 

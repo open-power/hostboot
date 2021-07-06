@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,9 +28,9 @@
 /// @brief Command and Control for the memory subsystem - populate attributes
 ///
 // *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
-// *HWP HWP Backup: Mark Pizzutillo <mark.pizzutillo@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #ifndef P10_MSS_EFF_CONFIG_H_

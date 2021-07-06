@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,7 +30,7 @@
 /// *HWP HWP Owner: Christian Geddes <crgeddes@us.ibm.com>
 /// *HWP HWP Backup: <none>
 /// *HWP Team: Hostboot
-/// *HWP Level: 2
+/// *HWP Level: 3
 /// *HWP Consumed by: Hostboot / Cronus
 
 #include <fapi2.H>

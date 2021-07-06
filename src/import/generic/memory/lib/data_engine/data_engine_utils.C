@@ -27,8 +27,8 @@
 /// @file data_engine_utils.C
 /// @brief Data engine to set memory driven data
 ///
-// *HWP HWP Owner: Mark Pizzutillo <Mark.Pizzutillo@ibm.com>
-// *HWP FW Owner: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP FW Owner: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: CI

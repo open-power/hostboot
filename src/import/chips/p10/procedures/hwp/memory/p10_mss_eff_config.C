@@ -27,10 +27,10 @@
 /// @file p10_mss_eff_config.C
 /// @brief Command and Control for the memory subsystem - populate attributes
 ///
-// *HWP HWP Owner: Mark Pizzutillo <mark.pizzutillo@us.ibm.com>
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>

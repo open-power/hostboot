@@ -23,6 +23,17 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
+///
+/// @file p10_fir.H
+/// @brief P10 FIR unmasking functions
+///
+
+// *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: HB
+
 #ifndef _P10_FIR_H_
 #define _P10_FIR_H_
 

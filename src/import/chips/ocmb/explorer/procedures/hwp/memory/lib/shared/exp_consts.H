@@ -27,10 +27,10 @@
 /// @file explorer_check_for_ready.H
 /// @brief explorer_check_for_ready HWP declaration
 ///
-// *HWP HWP Owner: Mark Pizzutillo <mark.pizzutillo@us.ibm.com>
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: CI
 
 #ifndef MSS_EXP_CONSTS_H

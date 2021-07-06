@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,10 +26,10 @@
 /// @file exp_omi_train_check.C
 /// @brief Check that omi training was successful from explorer side
 ///
-/// *HWP HWP Owner: Mark Pizzutillo <Mark.Pizzutillo@ibm.com>
+/// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 /// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 /// *HWP Team: Memory
-/// *HWP Level: 2
+/// *HWP Level: 3
 /// *HWP Consumed by: HB
 
 #ifndef _EXP_OMI_TRAIN_CHECK_H_

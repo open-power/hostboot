@@ -26,8 +26,8 @@
 /// @file p10_factory.C
 /// @brief P10 eff_config decoder factory
 ///
-// *HWP HWP Owner: Mark Pizzutillo <Mark.Pizzutillo@ibm.com>
-// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: HB:FSP

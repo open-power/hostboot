@@ -28,7 +28,7 @@
 /// @brief throttle_sync function implementations for P10
 ///
 // *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
-// *HWP HWP Backup: Mark Pizzutillo <Mark.Pizzutillo@ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: HB

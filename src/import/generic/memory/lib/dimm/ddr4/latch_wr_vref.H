@@ -28,7 +28,7 @@
 /// @brief Latches WR VREF according to JEDEC spec
 ///
 // *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
-// *HWP HWP Backup: Mark Pizzutillo <Mark.Pizzutillo@ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB Memory

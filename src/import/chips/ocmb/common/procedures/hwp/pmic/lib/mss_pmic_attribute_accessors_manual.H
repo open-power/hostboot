@@ -27,7 +27,7 @@
 /// @file mss_pmic_attribute_accessors_manual.H
 /// @brief Manual PMIC attribute accessors
 ///
-// *HWP HWP Owner: Mark Pizzutillo <mark.pizzutillo@ibm.com>
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3

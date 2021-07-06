@@ -30,7 +30,7 @@
 // *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
 // *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: CI
 
 #ifndef _MSS_DATA_ENGINE_TRAITS_DEF_H_

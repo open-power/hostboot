@@ -28,9 +28,9 @@
 /// @brief Functions that access the Bad DQ Bitmap.
 ///
 /// *HWP HWP Owner: Matt Hickman <Matthew.Hickman@ibm.com>
-/// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+/// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 /// *HWP Team: Memory
-/// *HWP Level: 2
+/// *HWP Level: 3
 /// *HWP Consumed by: HB:CI
 /// EKB-Mirror-To: hostboot
 ///
