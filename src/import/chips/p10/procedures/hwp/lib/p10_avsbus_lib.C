@@ -245,19 +245,17 @@ avsPollVoltageTransDone(
     }
 
     // Check for timeout condition
-    if (l_count >= p10avslib::MAX_POLL_COUNT_AVS)
-    {
-        // This will set current_err to a non success value that can be
-        // checked by the caller.
-        FAPI_ASSERT(false,
-                    fapi2::PROCPM_AVSBUS_POLL_TIMEOUT()
-                    .set_CHIP_TARGET(i_target)
-                    .set_AVSBUS_NUM(i_avsBusNum)
-                    .set_AVSBUS_BRIDGE_NUM(i_o2sBridgeNum)
-                    .set_AVSBUS_MAX_POLL_CNT(p10avslib::MAX_POLL_COUNT_AVS),
-                    "avsPollVoltageTransDone poll timeout");
-
-    }
+    // This will set current_err to a non success value that can be
+    // checked by the caller.
+    FAPI_ASSERT((l_count < p10avslib::MAX_POLL_COUNT_AVS),
+                fapi2::PROCPM_AVSBUS_POLL_TIMEOUT()
+                .set_CHIP_TARGET(i_target)
+                .set_AVSBUS_NUM(i_avsBusNum)
+                .set_AVSBUS_BRIDGE_NUM(i_o2sBridgeNum)
+                .set_AVSBUS_MAX_POLL_CNT(p10avslib::MAX_POLL_COUNT_AVS)
+                .set_SCOMREG_ADDR(p10avslib::OCB_O2SST[i_avsBusNum][i_o2sBridgeNum])
+                .set_SCOMREG_DATA(l_data64),
+                "avsPollVoltageTransDone poll timeout");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -325,19 +323,7 @@ fapi_try_exit:
 
     if (fapi2::current_err)
     {
-        FAPI_ASSERT(false,
-                    fapi2::PROCPM_AVSBUS_VOLTAGE_TIMEOUT()
-                    .set_CHIP_TARGET(i_target)
-                    .set_AVSBUS_NUM(i_avsBusNum)
-                    .set_AVSBUS_BRIDGE_NUM(i_o2sBridgeNum)
-                    .set_AVSBUS_CMD_TYPE(i_CmdType)
-                    .set_AVSBUS_CMD_GROUP(i_CmdGroup)
-                    .set_AVSBUS_CMD_DATATYPE(i_CmdDataType)
-                    .set_AVSBUS_RAILSELECT(i_RailSelect)
-                    .set_AVSBUS_CMD_DATA(i_CmdData)
-                    .set_CRC(l_crc)
-                    .set_AVSBUS_OP_TYPE(i_opType),
-                    "AVS bus driver command funciton fail");
+        FAPI_ERR("AVS bus driver command function fail");
     }
 
     return fapi2::current_err;
@@ -467,12 +453,7 @@ fapi_try_exit:
 
     if (fapi2::current_err)
     {
-        FAPI_ASSERT(false,
-                    fapi2::PROCPM_AVSBUS_IDLEFRAME_TIMEOUT()
-                    .set_CHIP_TARGET(i_target)
-                    .set_AVSBUS_NUM(i_avsBusNum)
-                    .set_AVSBUS_BRIDGE_NUM(i_o2sBridgeNum),
-                    "AVS Idle frame function fails");
+        FAPI_ERR("AVS Idle frame function fails");
     }
 
     return fapi2::current_err;
@@ -496,7 +477,6 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
 
     uint32_t l_rsp_computed_crc;
     o_goodResponse = false;
-    auto sys_target = i_target.getParent<fapi2::TARGET_TYPE_SYSTEM>();
 
     // Read the data response register
     FAPI_DBG("Reading the OS2SRD register to check status");
@@ -546,8 +526,7 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             FAPI_DBG("ERROR: AVS command failed. All 0 response data received possibly due to AVSBus IO RI/DIs disabled.");
             FAPI_ASSERT((i_throw_assert != true),
                         fapi2::PM_AVSBUS_ZERO_RESP_ERROR()
-                        .set_TARGET(i_target)
-                        .set_BACKPLANE(sys_target)
+                        .set_PROC_TARGET(i_target)
                         .set_BUS(i_avsBusNum)
                         .set_BRIDGE(i_o2sBridgeNum)
                         .set_ROOT_CTRL1(l_data64),
@@ -558,8 +537,7 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             FAPI_DBG("ERROR: AVS command failed failed. No response from VRM device, Check AVSBus interface connectivity to VRM in system.");
             FAPI_ASSERT((i_throw_assert != true),
                         fapi2::PM_AVSBUS_NO_RESP_ERROR()
-                        .set_TARGET(i_target)
-                        .set_BACKPLANE(sys_target)
+                        .set_PROC_TARGET(i_target)
                         .set_BUS(i_avsBusNum)
                         .set_BRIDGE(i_o2sBridgeNum)
                         .set_ROOT_CTRL1(l_data64),
@@ -570,8 +548,7 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             FAPI_DBG("ERROR: AVS command failed. Bad CRC detected by P10 on AVSBus Slave Segement.");
             FAPI_ASSERT((i_throw_assert != true),
                         fapi2::PM_AVSBUS_MASTER_BAD_CRC_ERROR()
-                        .set_TARGET(i_target)
-                        .set_BACKPLANE(sys_target)
+                        .set_PROC_TARGET(i_target)
                         .set_BUS(i_avsBusNum)
                         .set_BRIDGE(i_o2sBridgeNum),
                         "ERROR: AVS command failed. Bad CRC detected by P10 on AVSBus Slave Segement.");
@@ -581,8 +558,7 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             FAPI_DBG("ERROR: AVS command failed. Bad CRC indicated by Slave VRM on AVSBus Master Segement.");
             FAPI_ASSERT((i_throw_assert != true),
                         fapi2::PM_AVSBUS_SLAVE_BAD_CRC_ERROR()
-                        .set_TARGET(i_target)
-                        .set_BACKPLANE(sys_target)
+                        .set_PROC_TARGET(i_target)
                         .set_BUS(i_avsBusNum)
                         .set_BRIDGE(i_o2sBridgeNum),
                         "ERROR: AVS command failed. Bad CRC indicated by Slave VRM on AVSBus Master Segement.");
@@ -592,8 +568,7 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             FAPI_DBG("WARNING: AVS command no action.  Valid data sent but no action is taken due to unavailable resource.");
             FAPI_ASSERT((i_throw_assert != true),
                         fapi2::PM_AVSBUS_UNAVAILABLE_RESOURCE_ERROR()
-                        .set_TARGET(i_target)
-                        .set_BACKPLANE(sys_target)
+                        .set_PROC_TARGET(i_target)
                         .set_BUS(i_avsBusNum)
                         .set_BRIDGE(i_o2sBridgeNum),
                         "ERROR: AVS command failed. Valid data sent but no action is taken due to unavailable resource.");
@@ -603,7 +578,7 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             FAPI_DBG("ERROR: AVS command failed. Unknown resource, invalid data, incorrect data or incorrect action.");
             FAPI_ASSERT((i_throw_assert != true),
                         fapi2::PM_AVSBUS_INVALID_DATA_ERROR()
-                        .set_TARGET(i_target)
+                        .set_PROC_TARGET(i_target)
                         .set_BUS(i_avsBusNum)
                         .set_BRIDGE(i_o2sBridgeNum),
                         "ERROR: AVS command failed. Unknown resource, invalid data, incorrect data or incorrect action.");

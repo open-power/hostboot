@@ -33,6 +33,8 @@
       <ffdc>AVSBUS_NUM</ffdc>
       <ffdc>AVSBUS_BRIDGE_NUM</ffdc>
       <ffdc>AVSBUS_MAX_POLL_CNT</ffdc>
+      <ffdc>SCOMREG_ADDR</ffdc>
+      <ffdc>SCOMREG_DATA</ffdc>
     <callout>
       <target>VRM</target>
       <priority>HIGH</priority>
@@ -44,58 +46,6 @@
     <callout>
       <procedure>CODE</procedure>
       <priority>LOW</priority>
-    </callout>
-    </hwpError>
-    <!-- ******************************************************************** -->
-    <hwpError>
-      <rc>RC_PROCPM_AVSBUS_VOLTAGE_TIMEOUT</rc>
-      <description>
-      A timeout occured reading/writing voltage from an AVSBus
-      interface
-      </description>
-      <ffdc>CHIP_TARGET</ffdc>
-      <ffdc>AVSBUS_NUM</ffdc>
-      <ffdc>AVSBUS_BRIDGE_NUM</ffdc>
-      <ffdc>AVSBUS_CMD_TYPE</ffdc>
-      <ffdc>AVSBUS_CMD_GROUP</ffdc>
-      <ffdc>AVSBUS_CMD_DATATYPE</ffdc>
-      <ffdc>AVSBUS_RAILSELECT</ffdc>
-      <ffdc>AVSBUS_CMD_DATA</ffdc>
-      <ffdc>CRC</ffdc>
-      <ffdc>AVSBUS_OP_TYPE</ffdc>
-    <callout>
-      <target>VRM</target>
-      <priority>HIGH</priority>
-    </callout>
-    <callout>
-      <target>CHIP_TARGET</target>
-      <priority>LOW</priority>
-    </callout>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
-    </callout>
-    </hwpError>
-    <!-- ********************************************************************-->
-    <hwpError>
-      <rc>RC_PROCPM_AVSBUS_IDLEFRAME_TIMEOUT</rc>
-      <description>
-        A timeout occured writing an idle from to an AVSBus interface
-      </description>
-      <ffdc>CHIP_TARGET</ffdc>
-      <ffdc>AVSBUS_NUM</ffdc>
-      <ffdc>AVSBUS_BRIDGE_NUM</ffdc>
-    <callout>
-      <target>VRM</target>
-      <priority>HIGH</priority>
-    </callout>
-    <callout>
-      <target>CHIP_TARGET</target>
-      <priority>LOW</priority>
-    </callout>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
     </callout>
     </hwpError>
     <!-- ******************************************************************** -->
@@ -105,7 +55,6 @@
         AVS command failed. All 0 response data received possibly due to AVSBus IO RI/DIs disabled.
       </description>
       <ffdc>TARGET</ffdc>
-      <ffdc>BACKPLANE</ffdc>
       <ffdc>BUS</ffdc>
       <ffdc>BRIDGE</ffdc>
       <ffdc>ROOT_CTRL1</ffdc>
@@ -114,13 +63,16 @@
       <priority>HIGH</priority>
     </callout>
     <callout>
-      <target>BACKPLANE</target>
-      <priority>LOW</priority>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
     </callout>
     <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
+      <target>PROC_TARGET</target>
+      <priority>LOW</priority>
     </callout>
+     <deconfigure>
+      <target>PROC_TARGET</target>
+    </deconfigure>
     </hwpError>
     <!-- ******************************************************************** -->
     <hwpError>
@@ -128,8 +80,7 @@
       <description>
         AVS command failed. No response from VRM device, Check AVSBus interface connectivity to VRM in system.
       </description>
-      <ffdc>TARGET</ffdc>
-      <ffdc>BACKPLANE</ffdc>
+      <ffdc>PROC_TARGET</ffdc>
       <ffdc>BUS</ffdc>
       <ffdc>BRIDGE</ffdc>
       <ffdc>ROOT_CTRL1</ffdc>
@@ -138,13 +89,16 @@
       <priority>HIGH</priority>
     </callout>
     <callout>
-      <target>BACKPLANE</target>
-      <priority>LOW</priority>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
     </callout>
     <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
+      <target>PROC_TARGET</target>
+      <priority>LOW</priority>
     </callout>
+     <deconfigure>
+      <target>PROC_TARGET</target>
+    </deconfigure>
     </hwpError>
     <!-- ******************************************************************** -->
     <hwpError>
@@ -152,8 +106,7 @@
       <description>
         AVS command failed. Bad CRC detected by P10 on AVSBus Slave Segement.
       </description>
-      <ffdc>TARGET</ffdc>
-      <ffdc>BACKPLANE</ffdc>
+      <ffdc>PROC_TARGET</ffdc>
       <ffdc>BUS</ffdc>
       <ffdc>BRIDGE</ffdc>
      <callout>
@@ -161,17 +114,16 @@
       <priority>HIGH</priority>
     </callout>
     <callout>
-      <target>BACKPLANE</target>
-      <priority>LOW</priority>
-    </callout>
-    <callout>
       <procedure>CODE</procedure>
-      <priority>LOW</priority>
-    </callout>
-    <callout>
-      <target>TARGET</target>
       <priority>MEDIUM</priority>
     </callout>
+    <callout>
+      <target>PROC_TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+     <deconfigure>
+      <target>PROC_TARGET</target>
+    </deconfigure>
     </hwpError>
     <!-- ******************************************************************** -->
     <hwpError>
@@ -180,7 +132,6 @@
         AVS command failed failed. Bad CRC indicated by Slave VRM on AVSBus Master Segement.
       </description>
       <ffdc>TARGET</ffdc>
-      <ffdc>BACKPLANE</ffdc>
       <ffdc>BUS</ffdc>
       <ffdc>BRIDGE</ffdc>
      <callout>
@@ -188,17 +139,16 @@
       <priority>HIGH</priority>
     </callout>
     <callout>
-      <target>BACKPLANE</target>
-      <priority>LOW</priority>
-    </callout>
-    <callout>
       <procedure>CODE</procedure>
-      <priority>LOW</priority>
-    </callout>
-    <callout>
-      <target>TARGET</target>
       <priority>MEDIUM</priority>
     </callout>
+    <callout>
+      <target>PROC_TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+     <deconfigure>
+      <target>PROC_TARGET</target>
+    </deconfigure>
     </hwpError>
     <!-- ******************************************************************** -->
     <hwpError>
@@ -207,7 +157,6 @@
         AVS command failed. Valid data sent but no action is taken due to unavailable resource.
       </description>
       <ffdc>TARGET</ffdc>
-      <ffdc>BACKPLANE</ffdc>
       <ffdc>BUS</ffdc>
       <ffdc>BRIDGE</ffdc>
      <callout>
@@ -215,17 +164,16 @@
       <priority>HIGH</priority>
     </callout>
     <callout>
-      <target>BACKPLANE</target>
-      <priority>LOW</priority>
-    </callout>
-    <callout>
       <procedure>CODE</procedure>
-      <priority>LOW</priority>
-    </callout>
-    <callout>
-      <target>TARGET</target>
       <priority>MEDIUM</priority>
     </callout>
+    <callout>
+      <target>PROC_TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+     <deconfigure>
+      <target>PROC_TARGET</target>
+    </deconfigure>
     </hwpError>
     <!-- ******************************************************************** -->
     <hwpError>
@@ -233,21 +181,24 @@
       <description>
         AVS command failed. Unknown resource, invalid data, incorrect data or incorrect action.
       </description>
-      <ffdc>TARGET</ffdc>
+      <ffdc>PROC_TARGET</ffdc>
       <ffdc>BUS</ffdc>
       <ffdc>BRIDGE</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-    <callout>
-      <target>TARGET</target>
-      <priority>LOW</priority>
-    </callout>
      <callout>
       <target>SPIVID_SLAVE_PART</target>
       <priority>HIGH</priority>
     </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>PROC_TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+     <deconfigure>
+      <target>PROC_TARGET</target>
+    </deconfigure>
     </hwpError>
     <!-- ******************************************************************** -->
     <hwpError>
