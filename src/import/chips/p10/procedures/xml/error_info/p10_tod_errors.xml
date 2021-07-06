@@ -187,8 +187,15 @@
       <priority>HIGH</priority>
     </callout>
     <callout>
-      <target>TARGET</target>
+      <hw>
+         <hwid>TOD_CLOCK</hwid>
+         <refTarget>TARGET</refTarget>
+      </hw>
       <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>LOW</priority>
     </callout>
     <deconfigure>
       <target>TARGET</target>
@@ -208,6 +215,20 @@
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
       <target>TARGET</target>
     </collectRegisterFfdc>
+    <callout>
+      <hw>
+         <hwid>TOD_CLOCK</hwid>
+         <refTarget>TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -223,6 +244,20 @@
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
       <target>TARGET</target>
     </collectRegisterFfdc>
+    <callout>
+      <hw>
+         <hwid>TOD_CLOCK</hwid>
+         <refTarget>TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -264,13 +299,21 @@
       <target>TARGET</target>
     </collectRegisterFfdc>
     <callout>
-      <procedure>CODE</procedure>
+      <hw>
+         <hwid>TOD_CLOCK</hwid>
+         <refTarget>TARGET</refTarget>
+      </hw>
       <priority>HIGH</priority>
     </callout>
     <callout>
-      <target>TARGET</target>
+      <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
     </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+    <!-- Note: No need to deconfig because this is the backup topology -->
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -313,7 +356,7 @@
     </collectRegisterFfdc>
     <callout>
       <hw>
-         <hwid>PCI_REF_CLOCK</hwid>
+         <hwid>TOD_CLOCK</hwid>
          <refTarget>TARGET</refTarget>
       </hw>
       <priority>HIGH</priority>
@@ -341,8 +384,15 @@
       <priority>HIGH</priority>
     </callout>
     <callout>
-      <target>TARGET</target>
+      <hw>
+         <hwid>TOD_CLOCK</hwid>
+         <refTarget>TARGET</refTarget>
+      </hw>
       <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>LOW</priority>
     </callout>
     <deconfigure>
       <target>TARGET</target>
@@ -359,6 +409,10 @@
     <description>
       Error translating chip unit relative SCOM address
     </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -367,6 +421,7 @@
     <description>
       Error checking TOD Status
     </description>
+    <!-- Note: Never consumed by firmware -->
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -385,7 +440,10 @@
     <ffdc>TOD_VALUE</ffdc>
     <ffdc>TOD_VALUE_INITIAL</ffdc>
     <callout>
-      <procedure>CODE</procedure>
+      <hw>
+         <hwid>TOD_CLOCK</hwid>
+         <refTarget>TARGET</refTarget>
+      </hw>
       <priority>HIGH</priority>
     </callout>
     <callout>
