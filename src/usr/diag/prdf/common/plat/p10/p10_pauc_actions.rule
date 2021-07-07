@@ -195,3 +195,1189 @@ actionclass level2_th_1_CrcRoot23
     level2_th_1;
     funccall("CrcRootCause_23"); # must be called after threshold
 };
+
+################################################################################
+# P10 chip PB_FM0123_ERR
+################################################################################
+
+rule rPB_FM0123_ERR
+{
+    CHECK_STOP:
+      PB_FM0123_ERR;
+};
+
+group gPB_FM0123_ERR
+    filter singlebit,
+        cs_root_cause
+{
+    /** PB_FM0123_ERR[0]
+     *  fmr0_control_error
+     */
+    (rPB_FM0123_ERR, bit(0)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[1]
+     *  fmr0_addr_perr
+     */
+    (rPB_FM0123_ERR, bit(1)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[2]
+     *  fmr0_cc0_crediterr
+     */
+    (rPB_FM0123_ERR, bit(2)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[3]
+     *  fmr0_cc1_crediterr
+     */
+    (rPB_FM0123_ERR, bit(3)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[4]
+     *  fmr0_cc2_crediterr
+     */
+    (rPB_FM0123_ERR, bit(4)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[5]
+     *  fmr0_cc3_crediterr
+     */
+    (rPB_FM0123_ERR, bit(5)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[6]
+     *  fmr0_dat_hi_perr
+     */
+    (rPB_FM0123_ERR, bit(6)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[7]
+     *  fmr0_dat_lo_perr
+     */
+    (rPB_FM0123_ERR, bit(7)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[8]
+     *  fmr0_frame_crediterr
+     */
+    (rPB_FM0123_ERR, bit(8)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[9]
+     *  fmr0_internal_err
+     */
+    (rPB_FM0123_ERR, bit(9)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[10]
+     *  fmr0_prsp_ptyerr
+     */
+    (rPB_FM0123_ERR, bit(10)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[11]
+     *  fmr0_ttag_perr
+     */
+    (rPB_FM0123_ERR, bit(11)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[12]
+     *  fmr0_vc0_crediterr
+     */
+    (rPB_FM0123_ERR, bit(12)) ? parent_and_peer_proc_smp_0_th_1;
+
+    /** PB_FM0123_ERR[13]
+     *  fmr0_vc1_crediterr
+     */
+    (rPB_FM0123_ERR, bit(13)) ? parent_and_peer_proc_smp_0_th_1;
+
+    /** PB_FM0123_ERR[14]
+     *  fmr0_rtag_ptyerr
+     */
+    (rPB_FM0123_ERR, bit(14)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[15]
+     *  fmr0_rtag_misc_pty
+     */
+    (rPB_FM0123_ERR, bit(15)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[16]
+     *  fmr1_control_error
+     */
+    (rPB_FM0123_ERR, bit(16)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[17]
+     *  fmr1_addr_perr
+     */
+    (rPB_FM0123_ERR, bit(17)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[18]
+     *  fmr1_cc0_crediterr
+     */
+    (rPB_FM0123_ERR, bit(18)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[19]
+     *  fmr1_cc1_crediterr
+     */
+    (rPB_FM0123_ERR, bit(19)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[20]
+     *  fmr1_cc2_crediterr
+     */
+    (rPB_FM0123_ERR, bit(20)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[21]
+     *  fmr1_cc3_crediterr
+     */
+    (rPB_FM0123_ERR, bit(21)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[22]
+     *  fmr1_dat_hi_perr
+     */
+    (rPB_FM0123_ERR, bit(22)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[23]
+     *  fmr1_dat_lo_perr
+     */
+    (rPB_FM0123_ERR, bit(23)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[24]
+     *  fmr1_frame_crediterr
+     */
+    (rPB_FM0123_ERR, bit(24)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[25]
+     *  fmr1_internal_err
+     */
+    (rPB_FM0123_ERR, bit(25)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[26]
+     *  fmr1_prsp_ptyerr
+     */
+    (rPB_FM0123_ERR, bit(26)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[27]
+     *  fmr1_ttag_perr
+     */
+    (rPB_FM0123_ERR, bit(27)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[28]
+     *  fmr1_vc0_crediterr
+     */
+    (rPB_FM0123_ERR, bit(28)) ? parent_and_peer_proc_smp_1_th_1;
+
+    /** PB_FM0123_ERR[29]
+     *  fmr1_vc1_crediterr
+     */
+    (rPB_FM0123_ERR, bit(29)) ? parent_and_peer_proc_smp_1_th_1;
+
+    /** PB_FM0123_ERR[30]
+     *  fmr1_rtag_ptyerr
+     */
+    (rPB_FM0123_ERR, bit(30)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[31]
+     *  fmr1_rtag_misc_pty
+     */
+    (rPB_FM0123_ERR, bit(31)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[32]
+     *  fmr2_control_error
+     */
+    (rPB_FM0123_ERR, bit(32)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[33]
+     *  fmr2_addr_perr
+     */
+    (rPB_FM0123_ERR, bit(33)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[34]
+     *  fmr2_cc0_crediterr
+     */
+    (rPB_FM0123_ERR, bit(34)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[35]
+     *  fmr2_cc1_crediterr
+     */
+    (rPB_FM0123_ERR, bit(35)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[36]
+     *  fmr2_cc2_crediterr
+     */
+    (rPB_FM0123_ERR, bit(36)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[37]
+     *  fmr2_cc3_crediterr
+     */
+    (rPB_FM0123_ERR, bit(37)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[38]
+     *  fmr2_dat_hi_perr
+     */
+    (rPB_FM0123_ERR, bit(38)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[39]
+     *  fmr2_dat_lo_perr
+     */
+    (rPB_FM0123_ERR, bit(39)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[40]
+     *  fmr2_frame_crediterr
+     */
+    (rPB_FM0123_ERR, bit(40)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[41]
+     *  fmr2_internal_err
+     */
+    (rPB_FM0123_ERR, bit(41)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[42]
+     *  fmr2_prsp_ptyerr
+     */
+    (rPB_FM0123_ERR, bit(42)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[43]
+     *  fmr2_ttag_perr
+     */
+    (rPB_FM0123_ERR, bit(43)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[44]
+     *  fmr2_vc0_crediterr
+     */
+    (rPB_FM0123_ERR, bit(44)) ? parent_and_peer_proc_smp_2_th_1;
+
+    /** PB_FM0123_ERR[45]
+     *  fmr2_vc1_crediterr
+     */
+    (rPB_FM0123_ERR, bit(45)) ? parent_and_peer_proc_smp_2_th_1;
+
+    /** PB_FM0123_ERR[46]
+     *  fmr2_rtag_ptyerr
+     */
+    (rPB_FM0123_ERR, bit(46)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[47]
+     *  fmr2_rtag_misc_pty
+     */
+    (rPB_FM0123_ERR, bit(47)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[48]
+     *  fmr3_control_error
+     */
+    (rPB_FM0123_ERR, bit(48)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[49]
+     *  fmr3_addr_perr
+     */
+    (rPB_FM0123_ERR, bit(49)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[50]
+     *  fmr3_cc0_crediterr
+     */
+    (rPB_FM0123_ERR, bit(50)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[51]
+     *  fmr3_cc1_crediterr
+     */
+    (rPB_FM0123_ERR, bit(51)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[52]
+     *  fmr3_cc2_crediterr
+     */
+    (rPB_FM0123_ERR, bit(52)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[53]
+     *  fmr3_cc3_crediterr
+     */
+    (rPB_FM0123_ERR, bit(53)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[54]
+     *  fmr3_dat_hi_perr
+     */
+    (rPB_FM0123_ERR, bit(54)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[55]
+     *  fmr3_dat_lo_perr
+     */
+    (rPB_FM0123_ERR, bit(55)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[56]
+     *  fmr3_frame_crediterr
+     */
+    (rPB_FM0123_ERR, bit(56)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[57]
+     *  fmr3_internal_err
+     */
+    (rPB_FM0123_ERR, bit(57)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[58]
+     *  fmr3_prsp_ptyerr
+     */
+    (rPB_FM0123_ERR, bit(58)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[59]
+     *  fmr3_ttag_perr
+     */
+    (rPB_FM0123_ERR, bit(59)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[60]
+     *  fmr3_vc0_crediterr
+     */
+    (rPB_FM0123_ERR, bit(60)) ? parent_and_peer_proc_smp_3_th_1;
+
+    /** PB_FM0123_ERR[61]
+     *  fmr3_vc1_crediterr
+     */
+    (rPB_FM0123_ERR, bit(61)) ? parent_and_peer_proc_smp_3_th_1;
+
+    /** PB_FM0123_ERR[62]
+     *  fmr3_rtag_ptyerr
+     */
+    (rPB_FM0123_ERR, bit(62)) ? parent_proc_th_1;
+
+    /** PB_FM0123_ERR[63]
+     *  fmr3_rtag_misc_pty
+     */
+    (rPB_FM0123_ERR, bit(63)) ? parent_proc_th_1;
+
+};
+
+################################################################################
+# P10 chip PB_PR0123_ERR
+################################################################################
+
+rule rPB_PR0123_ERR
+{
+    CHECK_STOP:
+      PB_PR0123_ERR;
+};
+
+group gPB_PR0123_ERR
+    filter singlebit,
+        cs_root_cause
+{
+    /** PB_PR0123_ERR[0]
+     *  prs0_address_pty
+     */
+    (rPB_PR0123_ERR, bit(0)) ? check_fmr_err_peer_0;
+
+    /** PB_PR0123_ERR[1]
+     *  prs0_atag_pty
+     */
+    (rPB_PR0123_ERR, bit(1)) ? check_fmr_err_peer_0;
+
+    /** PB_PR0123_ERR[2]
+     *  prs0_cc0_crediterr
+     */
+    (rPB_PR0123_ERR, bit(2)) ? parent_and_peer_proc_smp_0_th_1;
+
+    /** PB_PR0123_ERR[3]
+     *  prs0_cc1_crediterr
+     */
+    (rPB_PR0123_ERR, bit(3)) ? parent_and_peer_proc_smp_0_th_1;
+
+    /** PB_PR0123_ERR[4]
+     *  prs0_cc2_crediterr
+     */
+    (rPB_PR0123_ERR, bit(4)) ? parent_and_peer_proc_smp_0_th_1;
+
+    /** PB_PR0123_ERR[5]
+     *  prs0_cc3_crediterr
+     */
+    (rPB_PR0123_ERR, bit(5)) ? parent_and_peer_proc_smp_0_th_1;
+
+    /** PB_PR0123_ERR[6]
+     *  prs0_control_error
+     */
+    (rPB_PR0123_ERR, bit(6)) ? parent_proc_th_1;
+
+    /** PB_PR0123_ERR[7]
+     *  prs0_data_pty_err
+     */
+    (rPB_PR0123_ERR, bit(7)) ? parent_proc_th_1;
+
+    /** PB_PR0123_ERR[8]
+     *  prs0_rtag_misc_pty
+     */
+    (rPB_PR0123_ERR, bit(8)) ? check_fmr_err_peer_0;
+
+    /** PB_PR0123_ERR[9]
+     *  prs0_rtag_pty
+     */
+    (rPB_PR0123_ERR, bit(9)) ? check_fmr_err_peer_0;
+
+    /** PB_PR0123_ERR[10]
+     *  prs0_ttag_pty
+     */
+    (rPB_PR0123_ERR, bit(10)) ? check_fmr_err_peer_0;
+
+    /** PB_PR0123_ERR[11]
+     *  prs0_vc0_crediterr
+     */
+    (rPB_PR0123_ERR, bit(11)) ? parent_and_peer_proc_smp_0_th_1;
+
+    /** PB_PR0123_ERR[12]
+     *  prs0_vc1_crediterr
+     */
+    (rPB_PR0123_ERR, bit(12)) ? parent_and_peer_proc_smp_0_th_1;
+
+    /** PB_PR0123_ERR[13]
+     *  prs0_link_down
+     */
+    (rPB_PR0123_ERR, bit(13)) ? parent_and_peer_proc_smp_0_th_1;
+
+    /** PB_PR0123_ERR[16]
+     *  prs1_address_pty
+     */
+    (rPB_PR0123_ERR, bit(16)) ? check_fmr_err_peer_1;
+
+    /** PB_PR0123_ERR[17]
+     *  prs1_atag_pty
+     */
+    (rPB_PR0123_ERR, bit(17)) ? check_fmr_err_peer_1;
+
+    /** PB_PR0123_ERR[18]
+     *  prs1_cc0_crediterr
+     */
+    (rPB_PR0123_ERR, bit(18)) ? parent_and_peer_proc_smp_1_th_1;
+
+    /** PB_PR0123_ERR[19]
+     *  prs1_cc1_crediterr
+     */
+    (rPB_PR0123_ERR, bit(19)) ? parent_and_peer_proc_smp_1_th_1;
+
+    /** PB_PR0123_ERR[20]
+     *  prs1_cc2_crediterr
+     */
+    (rPB_PR0123_ERR, bit(20)) ? parent_and_peer_proc_smp_1_th_1;
+
+    /** PB_PR0123_ERR[21]
+     *  prs1_cc3_crediterr
+     */
+    (rPB_PR0123_ERR, bit(21)) ? parent_and_peer_proc_smp_1_th_1;
+
+    /** PB_PR0123_ERR[22]
+     *  prs1_control_error
+     */
+    (rPB_PR0123_ERR, bit(22)) ? parent_proc_th_1;
+
+    /** PB_PR0123_ERR[23]
+     *  prs1_data_pty_err
+     */
+    (rPB_PR0123_ERR, bit(23)) ? parent_proc_th_1;
+
+    /** PB_PR0123_ERR[24]
+     *  prs1_rtag_misc_pty
+     */
+    (rPB_PR0123_ERR, bit(24)) ? check_fmr_err_peer_1;
+
+    /** PB_PR0123_ERR[25]
+     *  prs1_rtag_pty
+     */
+    (rPB_PR0123_ERR, bit(25)) ? check_fmr_err_peer_1;
+
+    /** PB_PR0123_ERR[26]
+     *  prs1_ttag_pty
+     */
+    (rPB_PR0123_ERR, bit(26)) ? check_fmr_err_peer_1;
+
+    /** PB_PR0123_ERR[27]
+     *  prs1_vc0_crediterr
+     */
+    (rPB_PR0123_ERR, bit(27)) ? parent_and_peer_proc_smp_1_th_1;
+
+    /** PB_PR0123_ERR[28]
+     *  prs1_vc1_crediterr
+     */
+    (rPB_PR0123_ERR, bit(28)) ? parent_and_peer_proc_smp_1_th_1;
+
+    /** PB_PR0123_ERR[29]
+     *  prs1_link_down
+     */
+    (rPB_PR0123_ERR, bit(29)) ? parent_and_peer_proc_smp_1_th_1;
+
+    /** PB_PR0123_ERR[32]
+     *  prs2_address_pty
+     */
+    (rPB_PR0123_ERR, bit(32)) ? check_fmr_err_peer_2;
+
+    /** PB_PR0123_ERR[33]
+     *  prs2_atag_pty
+     */
+    (rPB_PR0123_ERR, bit(33)) ? check_fmr_err_peer_2;
+
+    /** PB_PR0123_ERR[34]
+     *  prs2_cc0_crediterr
+     */
+    (rPB_PR0123_ERR, bit(34)) ? parent_and_peer_proc_smp_2_th_1;
+
+    /** PB_PR0123_ERR[35]
+     *  prs2_cc1_crediterr
+     */
+    (rPB_PR0123_ERR, bit(35)) ? parent_and_peer_proc_smp_2_th_1;
+
+    /** PB_PR0123_ERR[36]
+     *  prs2_cc2_crediterr
+     */
+    (rPB_PR0123_ERR, bit(36)) ? parent_and_peer_proc_smp_2_th_1;
+
+    /** PB_PR0123_ERR[37]
+     *  prs2_cc3_crediterr
+     */
+    (rPB_PR0123_ERR, bit(37)) ? parent_and_peer_proc_smp_2_th_1;
+
+    /** PB_PR0123_ERR[38]
+     *  prs2_control_error
+     */
+    (rPB_PR0123_ERR, bit(38)) ? parent_proc_th_1;
+
+    /** PB_PR0123_ERR[39]
+     *  prs2_data_pty_err
+     */
+    (rPB_PR0123_ERR, bit(39)) ? parent_proc_th_1;
+
+    /** PB_PR0123_ERR[40]
+     *  prs2_rtag_misc_pty
+     */
+    (rPB_PR0123_ERR, bit(40)) ? check_fmr_err_peer_2;
+
+    /** PB_PR0123_ERR[41]
+     *  prs2_rtag_pty
+     */
+    (rPB_PR0123_ERR, bit(41)) ? check_fmr_err_peer_2;
+
+    /** PB_PR0123_ERR[42]
+     *  prs2_ttag_pty
+     */
+    (rPB_PR0123_ERR, bit(42)) ? check_fmr_err_peer_2;
+
+    /** PB_PR0123_ERR[43]
+     *  prs2_vc0_crediterr
+     */
+    (rPB_PR0123_ERR, bit(43)) ? parent_and_peer_proc_smp_2_th_1;
+
+    /** PB_PR0123_ERR[44]
+     *  prs2_vc1_crediterr
+     */
+    (rPB_PR0123_ERR, bit(44)) ? parent_and_peer_proc_smp_2_th_1;
+
+    /** PB_PR0123_ERR[45]
+     *  prs2_link_down
+     */
+    (rPB_PR0123_ERR, bit(45)) ? parent_and_peer_proc_smp_2_th_1;
+
+    /** PB_PR0123_ERR[48]
+     *  prs3_address_pty
+     */
+    (rPB_PR0123_ERR, bit(48)) ? check_fmr_err_peer_3;
+
+    /** PB_PR0123_ERR[49]
+     *  prs3_atag_pty
+     */
+    (rPB_PR0123_ERR, bit(49)) ? check_fmr_err_peer_3;
+
+    /** PB_PR0123_ERR[50]
+     *  prs3_cc0_crediterr
+     */
+    (rPB_PR0123_ERR, bit(50)) ? parent_and_peer_proc_smp_3_th_1;
+
+    /** PB_PR0123_ERR[51]
+     *  prs3_cc1_crediterr
+     */
+    (rPB_PR0123_ERR, bit(51)) ? parent_and_peer_proc_smp_3_th_1;
+
+    /** PB_PR0123_ERR[52]
+     *  prs3_cc2_crediterr
+     */
+    (rPB_PR0123_ERR, bit(52)) ? parent_and_peer_proc_smp_3_th_1;
+
+    /** PB_PR0123_ERR[53]
+     *  prs3_cc3_crediterr
+     */
+    (rPB_PR0123_ERR, bit(53)) ? parent_and_peer_proc_smp_3_th_1;
+
+    /** PB_PR0123_ERR[54]
+     *  prs3_control_error
+     */
+    (rPB_PR0123_ERR, bit(54)) ? parent_proc_th_1;
+
+    /** PB_PR0123_ERR[55]
+     *  prs3_data_pty_err
+     */
+    (rPB_PR0123_ERR, bit(55)) ? parent_proc_th_1;
+
+    /** PB_PR0123_ERR[56]
+     *  prs3_rtag_misc_pty
+     */
+    (rPB_PR0123_ERR, bit(56)) ? check_fmr_err_peer_3;
+
+    /** PB_PR0123_ERR[57]
+     *  prs3_rtag_pty
+     */
+    (rPB_PR0123_ERR, bit(57)) ? check_fmr_err_peer_3;
+
+    /** PB_PR0123_ERR[58]
+     *  prs3_ttag_pty
+     */
+    (rPB_PR0123_ERR, bit(58)) ? check_fmr_err_peer_3;
+
+    /** PB_PR0123_ERR[59]
+     *  prs3_vc0_crediterr
+     */
+    (rPB_PR0123_ERR, bit(59)) ? parent_and_peer_proc_smp_3_th_1;
+
+    /** PB_PR0123_ERR[60]
+     *  prs3_vc1_crediterr
+     */
+    (rPB_PR0123_ERR, bit(60)) ? parent_and_peer_proc_smp_3_th_1;
+
+    /** PB_PR0123_ERR[61]
+     *  prs3_link_down
+     */
+    (rPB_PR0123_ERR, bit(61)) ? parent_and_peer_proc_smp_3_th_1;
+
+};
+
+################################################################################
+# P10 chip PB_DOB01_DIB01_INT_ERR_REG
+################################################################################
+
+rule rPB_DOB01_DIB01_INT_ERR_REG
+{
+    CHECK_STOP:
+      PB_DOB01_DIB01_INT_ERR_REG;
+};
+
+group gPB_DOB01_DIB01_INT_ERR_REG
+    filter singlebit,
+        cs_root_cause
+{
+    /** PB_DOB01_DIB01_INT_ERR_REG[0]
+     *  dob01_rtag_pbiterr
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(0)) ? parent_proc_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[1]
+     *  dob01_rtag_perr
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(1)) ? parent_proc_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[2]
+     *  dob01_misc_perr
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(2)) ? parent_proc_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[3]
+     *  dob01_f0vc0_evenperr
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(3)) ? parent_proc_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[4]
+     *  dob01_f0vc0_oddperr
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(4)) ? parent_proc_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[5]
+     *  dob01_f0vc1_evenperr
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(5)) ? parent_proc_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[6]
+     *  dob01_f0vc1_oddperr
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(6)) ? parent_proc_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[7]
+     *  dob01_f1vc0_evenperr
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(7)) ? parent_proc_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[8]
+     *  dob01_f1vc0_oddperr
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(8)) ? parent_proc_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[9]
+     *  dob01_f1vc1_evenperr
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(9)) ? parent_proc_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[10]
+     *  dob01_f1vc1_oddperr
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(10)) ? parent_proc_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[11]
+     *  dob01_f0_underflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(11)) ? parent_and_peer_proc_smp_0_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[12]
+     *  dob01_f0_overflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(12)) ? parent_proc_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[13]
+     *  dob01_f1_underflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(13)) ? parent_and_peer_proc_smp_1_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[14]
+     *  dob01_f1_overflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(14)) ? parent_proc_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[15]
+     *  dob01_vc0_underflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(15)) ? parent_and_peer_proc_iohs_0_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[16]
+     *  dob01_vc0_overflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(16)) ? parent_proc_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[17]
+     *  dob01_vc1_underflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(17)) ? parent_and_peer_proc_iohs_0_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[18]
+     *  dob01_vc1_overflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(18)) ? parent_proc_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[19]
+     *  dob01_f0vc0_underflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(19)) ? parent_and_peer_proc_smp_0_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[20]
+     *  dob01_f0vc0_overflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(20)) ? parent_and_peer_proc_smp_0_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[21]
+     *  dob01_f0vc1_underflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(21)) ? parent_and_peer_proc_smp_0_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[22]
+     *  dob01_f0vc1_overflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(22)) ? parent_and_peer_proc_smp_0_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[23]
+     *  dob01_f1vc0_underflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(23)) ? parent_and_peer_proc_smp_1_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[24]
+     *  dob01_f1vc0_overflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(24)) ? parent_and_peer_proc_smp_1_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[25]
+     *  dob01_f1vc1_underflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(25)) ? parent_and_peer_proc_smp_1_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[26]
+     *  dob01_f1vc1_overflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(26)) ? parent_and_peer_proc_smp_1_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[27]
+     *  dob01_vc0_prefetch_overflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(27)) ? parent_proc_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[28]
+     *  dob01_vc1_prefetch_overflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(28)) ? parent_proc_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[29]
+     *  dib01_evn0_underflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(29)) ? parent_and_peer_proc_smp_0_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[30]
+     *  dib01_evn0_overflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(30)) ? parent_and_peer_proc_smp_0_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[31]
+     *  dib01_evn1_underflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(31)) ? parent_and_peer_proc_smp_0_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[32]
+     *  dib01_evn1_overflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(32)) ? parent_and_peer_proc_smp_0_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[33]
+     *  dib01_rtag_pbiterr
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(33)) ? parent_and_peer_proc_iohs_0_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[34]
+     *  dib01_rtag_perr
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(34)) ? parent_and_peer_proc_iohs_0_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[35]
+     *  dib01_misc_perr
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(35)) ? parent_proc_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[36]
+     *  dib01_odd0_underflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(36)) ? parent_and_peer_proc_smp_1_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[37]
+     *  dib01_odd0_overflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(37)) ? parent_and_peer_proc_smp_1_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[38]
+     *  dib01_odd1_underflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(38)) ? parent_and_peer_proc_smp_1_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[39]
+     *  dib01_odd1_overflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(39)) ? parent_and_peer_proc_smp_1_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[40]
+     *  dib01_rtag_underflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(40)) ? parent_and_peer_proc_iohs_0_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[41]
+     *  dib01_rtag_overflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(41)) ? parent_proc_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[42]
+     *  dib01_data_underflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(42)) ? parent_proc_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[43]
+     *  dib01_data_overflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(43)) ? parent_proc_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[44]
+     *  dib01_vc0_underflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(44)) ? parent_proc_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[45]
+     *  dib01_vc0_overflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(45)) ? parent_proc_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[46]
+     *  dib01_vc1_underflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(46)) ? parent_proc_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[47]
+     *  dib01_vc1_overflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(47)) ? parent_proc_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[48]
+     *  dib01_f0vc0_over_underflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(48)) ? parent_and_peer_proc_smp_0_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[49]
+     *  dib01_f0vc1_over_underflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(49)) ? parent_and_peer_proc_smp_0_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[50]
+     *  dib01_f1vc0_over_underflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(50)) ? parent_and_peer_proc_smp_1_th_1;
+
+    /** PB_DOB01_DIB01_INT_ERR_REG[51]
+     *  dib01_f1vc1_over_underflow
+     */
+    (rPB_DOB01_DIB01_INT_ERR_REG, bit(51)) ? parent_and_peer_proc_smp_1_th_1;
+
+};
+
+################################################################################
+# P10 chip PB_DOB23_DIB23_INT_ERR_REG
+################################################################################
+
+rule rPB_DOB23_DIB23_INT_ERR_REG
+{
+    CHECK_STOP:
+      PB_DOB23_DIB23_INT_ERR_REG;
+};
+
+group gPB_DOB23_DIB23_INT_ERR_REG
+    filter singlebit,
+        cs_root_cause
+{
+    /** PB_DOB23_DIB23_INT_ERR_REG[0]
+     *  dob23_rtag_pbiterr
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(0)) ? parent_proc_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[1]
+     *  dob23_rtag_perr
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(1)) ? parent_proc_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[2]
+     *  dob23_misc_perr
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(2)) ? parent_proc_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[3]
+     *  dob23_f0vc0_evenperr
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(3)) ? parent_proc_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[4]
+     *  dob23_f0vc0_oddperr
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(4)) ? parent_proc_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[5]
+     *  dob23_f0vc1_evenperr
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(5)) ? parent_proc_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[6]
+     *  dob23_f0vc1_oddperr
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(6)) ? parent_proc_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[7]
+     *  dob23_f1vc0_evenperr
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(7)) ? parent_proc_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[8]
+     *  dob23_f1vc0_oddperr
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(8)) ? parent_proc_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[9]
+     *  dob23_f1vc1_evenperr
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(9)) ? parent_proc_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[10]
+     *  dob23_f1vc1_oddperr
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(10)) ? parent_proc_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[11]
+     *  dob23_f0_underflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(11)) ? parent_and_peer_proc_smp_2_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[12]
+     *  dob23_f0_overflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(12)) ? parent_proc_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[13]
+     *  dob23_f1_underflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(13)) ? parent_and_peer_proc_smp_3_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[14]
+     *  dob23_f1_overflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(14)) ? parent_proc_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[15]
+     *  dob23_vc0_underflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(15)) ? parent_and_peer_proc_iohs_1_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[16]
+     *  dob23_vc0_overflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(16)) ? parent_proc_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[17]
+     *  dob23_vc1_underflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(17)) ? parent_and_peer_proc_iohs_1_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[18]
+     *  dob23_vc1_overflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(18)) ? parent_proc_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[19]
+     *  dob23_f0vc0_underflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(19)) ? parent_and_peer_proc_smp_2_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[20]
+     *  dob23_f0vc0_overflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(20)) ? parent_and_peer_proc_smp_2_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[21]
+     *  dob23_f0vc1_underflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(21)) ? parent_and_peer_proc_smp_2_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[22]
+     *  dob23_f0vc1_overflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(22)) ? parent_and_peer_proc_smp_2_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[23]
+     *  dob23_f1vc0_underflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(23)) ? parent_and_peer_proc_smp_3_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[24]
+     *  dob23_f1vc0_overflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(24)) ? parent_and_peer_proc_smp_3_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[25]
+     *  dob23_f1vc1_underflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(25)) ? parent_and_peer_proc_smp_3_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[26]
+     *  dob23_f1vc1_overflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(26)) ? parent_and_peer_proc_smp_3_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[27]
+     *  dob23_vc0_prefetch_overflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(27)) ? parent_proc_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[28]
+     *  dob23_vc1_prefetch_overflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(28)) ? parent_proc_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[29]
+     *  dib23_evn0_underflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(29)) ? parent_and_peer_proc_smp_2_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[30]
+     *  dib23_evn0_overflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(30)) ? parent_and_peer_proc_smp_2_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[31]
+     *  dib23_evn1_underflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(31)) ? parent_and_peer_proc_smp_2_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[32]
+     *  dib23_evn1_overflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(32)) ? parent_and_peer_proc_smp_2_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[33]
+     *  dib23_rtag_pbiterr
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(33)) ? parent_and_peer_proc_iohs_1_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[34]
+     *  dib23_rtag_perr
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(34)) ? parent_and_peer_proc_iohs_1_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[35]
+     *  dib23_misc_perr
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(35)) ? parent_proc_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[36]
+     *  dib23_odd0_underflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(36)) ? parent_and_peer_proc_smp_3_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[37]
+     *  dib23_odd0_overflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(37)) ? parent_and_peer_proc_smp_3_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[38]
+     *  dib23_odd1_underflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(38)) ? parent_and_peer_proc_smp_3_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[39]
+     *  dib23_odd1_overflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(39)) ? parent_and_peer_proc_smp_3_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[40]
+     *  dib23_rtag_underflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(40)) ? parent_and_peer_proc_iohs_1_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[41]
+     *  dib23_rtag_overflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(41)) ? parent_proc_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[42]
+     *  dib23_data_underflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(42)) ? parent_proc_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[43]
+     *  dib23_data_overflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(43)) ? parent_proc_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[44]
+     *  dib23_vc0_underflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(44)) ? parent_proc_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[45]
+     *  dib23_vc0_overflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(45)) ? parent_proc_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[46]
+     *  dib23_vc1_underflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(46)) ? parent_proc_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[47]
+     *  dib23_vc1_overflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(47)) ? parent_proc_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[48]
+     *  dib23_f0vc0_over_underflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(48)) ? parent_and_peer_proc_smp_2_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[49]
+     *  dib23_f0vc1_over_underflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(49)) ? parent_and_peer_proc_smp_2_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[50]
+     *  dib23_f1vc0_over_underflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(50)) ? parent_and_peer_proc_smp_3_th_1;
+
+    /** PB_DOB23_DIB23_INT_ERR_REG[51]
+     *  dib23_f1vc1_over_underflow
+     */
+    (rPB_DOB23_DIB23_INT_ERR_REG, bit(51)) ? parent_and_peer_proc_smp_3_th_1;
+
+};
+
+
