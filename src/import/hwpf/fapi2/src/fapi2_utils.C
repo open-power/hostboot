@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -187,6 +187,36 @@ uint16_t convertSbeTargInstanceToFapiPos(fapi2::TargetType i_targType,
             case  TARGET_TYPE_OCMB_CHIP:
                 {
                     max_targets = MAX_OCMB_CHIP_PER_PROC;
+                    break;
+                }
+
+            case  TARGET_TYPE_PAU:
+                {
+                    max_targets = MAX_PAU_PER_PROC;
+                    break;
+                }
+
+            case  TARGET_TYPE_IOHS:
+                {
+                    max_targets = MAX_IOHS_PER_PROC;
+                    break;
+                }
+
+            case  TARGET_TYPE_PMIC:
+                {
+                    max_targets = MAX_PMIC_PER_PROC;
+                    break;
+                }
+
+            case  TARGET_TYPE_PAUC:
+                {
+                    max_targets = MAX_PAUC_PER_PROC;
+                    break;
+                }
+
+            case  TARGET_TYPE_GENERICI2CSLAVE:
+                {
+                    max_targets = MAX_GI2C_PER_PROC;
                     break;
                 }
 

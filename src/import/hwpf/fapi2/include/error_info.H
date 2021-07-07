@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,11 +58,24 @@ inline uint64_t convertType( const fapi2::Target<T, M>& i_value)
 {
     // send the target type and instance as ffdc they will be used
     // to instantiate a target before logging the ffdc data
-    return static_cast<uint64_t>(
-               (static_cast<uint64_t>(
-                    (i_value.get().getFapiTargetType() |
-                     (i_value.get().fields.is_multicast << 31))
-                ) << 32) | i_value.get().getTargetInstance());
+    // 0:47     = Target Type
+    // 48:63    = instance
+
+    uint64_t ret_value = static_cast<uint64_t>(i_value.get().getFapiTargetType());
+
+    //TODO: Check if sending the multicast bit is actually required. I do not
+    //see any HWP attempting to callect the FFDC on the multicasted target. HWSV
+    //is not even expecting the multicast bit to be present.
+
+    //setting multicast bit at MSB of target type
+    ret_value = (ret_value | static_cast<uint64_t>(i_value.get().fields.is_multicast) << 47);
+
+    ret_value = ret_value << 16;
+
+    //Add the target instance value.
+    ret_value = ret_value | (i_value.get().getTargetInstance() & 0xFFFF);
+
+    return ret_value;
 };
 #endif
 
