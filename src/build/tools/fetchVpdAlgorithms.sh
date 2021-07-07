@@ -36,50 +36,54 @@
 # Assume any commnds that run, passed (0)
 RET_VAL=0
 
-echo "Fetching and applying the VPD ECC algorithm files:"
+# Make sure this is not an OP-Build repo but a HB repo build.
+# If an HB repo then do the following to get the VPD ECC algorithm files.
+if [ -z ${BR2_EXTERNAL_OP_BUILD_PATH} ]; then
+    echo "Fetching and applying the VPD ECC algorithm files:"
 
-while :
-do
-    # Get the absolute path to the HB repo
-    REPO_ABSOLUTE_PATH=$(git rev-parse --show-toplevel)
-    RET_VAL=$?
+    while :
+    do
+        # Get the absolute path to the HB repo
+        REPO_ABSOLUTE_PATH=$(git rev-parse --show-toplevel)
+        RET_VAL=$?
 
-    # If an issue getting the absolute path to the project, then exit while loop
-    if [[ $RET_VAL -ne 0 ]]; then
-        break
-    fi
+        # If an issue getting the absolute path to the project, then exit while loop
+        if [[ $RET_VAL -ne 0 ]]; then
+            break
+        fi
 
-    # Confirm existence of the VPD directory within the project via an absolute path
-    VPD_ABSOLUTE_PATH="${PROJECT_ROOT}/src/usr/vpd"
-    if [[ ! -d  "$VPD_ABSOLUTE_PATH" ]]; then
-        echo "VPD directory '$VPD_ABSOLUTE_PATH' does not exist"
+        # Confirm existence of the VPD directory within the project via an absolute path
+        VPD_ABSOLUTE_PATH="${PROJECT_ROOT}/src/usr/vpd"
+        if [[ ! -d  "$VPD_ABSOLUTE_PATH" ]]; then
+            echo "VPD directory '$VPD_ABSOLUTE_PATH' does not exist"
 
-        # OS error code 2 `perror 2`: No such file or directory
-        RET_VAL=2
-        break
-    fi
+            # OS error code 2 `perror 2`: No such file or directory
+            RET_VAL=2
+            break
+        fi
 
-    ## Attempt to apply files
-    #  Fetch the changes
-    `git fetch ssh://hostboot.gerrit/hostboot refs/changes/54/112054/1`
-    RET_VAL=$?
-    # If an error occurred while fetching the commit, then exit while loop
-    if [[ $RET_VAL -ne 0 ]]; then
-        break
-    fi
+        ## Attempt to apply files
+        #  Fetch the changes
+        `git fetch ssh://hostboot.gerrit/hostboot refs/changes/54/112054/1`
+        RET_VAL=$?
+        # If an error occurred while fetching the commit, then exit while loop
+        if [[ $RET_VAL -ne 0 ]]; then
+            break
+        fi
 
-    # Create a patch from the FETCH_HEAD reference and apply the patch
-    `git format-patch -1 --stdout FETCH_HEAD -p | git apply --verbose`
-    RET_VAL=$?
-    # If an error occurred while applying the patch, then exit while loop
-    if [[ $RET_VAL -ne 0 ]]; then
-        break
-    fi
+        # Create a patch from the FETCH_HEAD reference and apply the patch
+        `git format-patch -1 --stdout FETCH_HEAD -p | git apply --verbose`
+        RET_VAL=$?
+        # If an error occurred while applying the patch, then exit while loop
+        if [[ $RET_VAL -ne 0 ]]; then
+            break
+        fi
 
-    # If made it this far, then files have been patched
-    RET_VAL=0
-    break;
-done
+        # If made it this far, then files have been patched
+        RET_VAL=0
+        break;
+    done
+fi  # if [ -z ${BR2_EXTERNAL_OP_BUILD_PATH} ]; then
 
 if [[ $RET_VAL -ne  0 ]]; then
     echo "Unexpected error retrieving the VPD ECC algorithm files:"
