@@ -26,14 +26,33 @@
   <!-- ******************************************************************** -->
   <hwpError>
     <sbeError/>
-    <rc>RC_P10_IOHS_RESET_TIMEOUT_ERROR</rc>
+    <rc>RC_P10_IOHS_INIT_TIMEOUT_ERROR</rc>
     <description>
       Timed out waiting for PHY PPE to complete io init
+    </description>
+    <ffdc>HALF</ffdc>
+    <callout>
+        <target>TARGET</target>
+        <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+        <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P10_IOHS_RESET_TIMEOUT_ERROR</rc>
+    <description>
+      Timed out waiting for PHY PPE to complete io reset
     </description>
     <callout>
         <target>TARGET</target>
         <priority>HIGH</priority>
     </callout>
+    <deconfigure>
+        <target>TARGET</target>
+    </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>

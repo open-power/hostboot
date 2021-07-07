@@ -24,7 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 ///
 /// @file p10_iohs_reset.C
-/// @brief Reset the omi phy
+/// @brief Reset the iohs phy
 ///-----------------------------------------------------------------------------
 /// *HW HW Maintainer: Chris Steffen <cwsteffen@us.ibm.com>
 /// *HW FW Maintainer: Ilya Smirnov <ismirno@us.ibm.com>
@@ -468,8 +468,10 @@ fapi2::ReturnCode p10_iohs_init(
     }
 
     FAPI_ASSERT(l_done,
-                fapi2::P10_IOHS_RESET_TIMEOUT_ERROR(),
-                "Timeout waiting on omi_reset to complete");
+                fapi2::P10_IOHS_INIT_TIMEOUT_ERROR()
+                .set_TARGET(i_target)
+                .set_HALF(i_half),
+                "Timeout waiting on iohs_init to complete");
 
 fapi_try_exit:
     FAPI_DBG("End");
@@ -515,8 +517,9 @@ fapi2::ReturnCode p10_iolink_reset( const fapi2::Target<fapi2::TARGET_TYPE_IOLIN
     }
 
     FAPI_ASSERT(l_done,
-                fapi2::P10_IOHS_RESET_TIMEOUT_ERROR(),
-                "Timeout waiting on omi_reset to complete");
+                fapi2::P10_IOHS_RESET_TIMEOUT_ERROR()
+                .set_TARGET(i_iolink),
+                "Timeout waiting on iolink_reset to complete");
 
 fapi_try_exit:
     FAPI_DBG("End");
@@ -566,8 +569,9 @@ fapi2::ReturnCode p10_iohs_reset( const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& 
         }
 
         FAPI_ASSERT(l_done,
-                    fapi2::P10_IOHS_RESET_TIMEOUT_ERROR(),
-                    "Timeout waiting on omi_reset to complete");
+                    fapi2::P10_IOHS_RESET_TIMEOUT_ERROR()
+                    .set_TARGET(i_iohs),
+                    "Timeout waiting on iohs_reset to complete");
     }
 
 fapi_try_exit:
