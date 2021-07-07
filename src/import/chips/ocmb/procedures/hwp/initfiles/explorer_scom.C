@@ -40,6 +40,7 @@ constexpr uint64_t literal_7 = 7;
 constexpr uint64_t literal_2 = 2;
 constexpr uint64_t literal_24 = 24;
 constexpr uint64_t literal_5 = 5;
+constexpr uint64_t literal_8 = 8;
 constexpr uint64_t literal_2668 = 2668;
 constexpr uint64_t literal_12 = 12;
 constexpr uint64_t literal_2934 = 2934;
@@ -49,7 +50,6 @@ constexpr uint64_t literal_6 = 6;
 constexpr uint64_t literal_0b1000 = 0b1000;
 constexpr uint64_t literal_511 = 511;
 constexpr uint64_t literal_132 = 132;
-constexpr uint64_t literal_8 = 8;
 constexpr uint64_t literal_100 = 100;
 constexpr uint64_t literal_0x0 = 0x0;
 constexpr uint64_t literal_0x02 = 0x02;
@@ -353,7 +353,7 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x801140dull, l_scom_buffer ));
 
-            l_scom_buffer.insert<0, 4, 60, uint64_t>(literal_9 );
+            l_scom_buffer.insert<0, 4, 60, uint64_t>(literal_8 );
             l_scom_buffer.insert<4, 4, 60, uint64_t>(literal_4 );
             l_scom_buffer.insert<8, 4, 60, uint64_t>(literal_4 );
             l_scom_buffer.insert<12, 4, 60, uint64_t>(l_TGT1_ATTR_MEM_EFF_DRAM_TCCD_L );
@@ -410,7 +410,7 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
             l_scom_buffer.insert<48, 4, 60, uint64_t>(l_TGT1_ATTR_MEM_EFF_DRAM_TRTP );
             l_scom_buffer.insert<52, 4, 60, uint64_t>(l_TGT1_ATTR_MEM_EFF_DRAM_TRRD_S );
             l_scom_buffer.insert<56, 4, 60, uint64_t>(l_TGT1_ATTR_MEM_EFF_DRAM_TRRD_L );
-            l_scom_buffer.insert<60, 4, 60, uint64_t>(literal_9 );
+            l_scom_buffer.insert<60, 4, 60, uint64_t>(literal_8 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x801140eull, l_scom_buffer));
         }
         {
