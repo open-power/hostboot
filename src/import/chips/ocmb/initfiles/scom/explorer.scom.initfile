@@ -211,7 +211,7 @@ define def_RD_PREAMBLE       =  (MP.ATTR_MEM_SI_DRAM_PREAMBLE[0][0] & 0x10) >> 4
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_RRDM_DLY [when=S] {      # BL/2+rank_switch
   spyv;
-  9; # Update per performance testing as of 16-JUN-21
+  8; # Update per performance testing as of 07-JUL-21
 }
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_RRSMSR_DLY [when=S] {    # tccd_s
@@ -339,7 +339,7 @@ ispy  MB_SIM.SRQ.MBA_TMR1Q_TRRD_SBG [when=S] {
 
 ispy  MB_SIM.SRQ.MBA_TMR1Q_CFG_ACT_TO_DIFF_RANK_DLY [when=S] {
   spyv;
-  9; # Updates per the performance and design teams. First pass
+  8;  # Update per performance testing as of 07-JUL-21
 }
 
 
