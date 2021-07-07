@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -83,19 +83,26 @@ extern "C"
      */
     struct ImageType_t
     {
-        uint32_t selfRestoreBuild: 1;           // for self restore code inclusion
-        uint32_t qmeHcodeBuild: 1;              // for qme hcode inclusion
-        uint32_t qmeCommonRingBuild: 1;         // for core ring inclusion
-        uint32_t qmeCoreSpecificRingBuild: 1;   // for core specific scan ring inclusion
-        uint32_t xgpeImageBuild: 1;             // for xgpe inclusion
-        uint32_t xgpeCommonRingBuild: 1;        // for xgpe common scan ring inclusion
-        uint32_t xgpeCacheSpecificRingBuild: 1; // for cache specific ring inclusion
-        uint32_t pgpeImageBuild: 1;             // pgpe platform inclusion in image build
-        uint32_t pgpePstateParmBlockBuild: 1;   // pgpe P-State Parameter Block Build
-        uint32_t coreSprBuild: 1;               // SPR restore region inclusion in HOMER Build
-        uint32_t coreScomBuild: 1;              // Core SCOM restore region inclusion in HOMER Build
-        uint32_t cacheScomBuild: 1;             // Cache SCOM restore region inclusion in HOMER Build
-        uint32_t reserved: 20;
+        union
+        {
+            struct
+            {
+                uint32_t selfRestoreBuild: 1;           // for self restore code inclusion
+                uint32_t qmeHcodeBuild: 1;              // for qme hcode inclusion
+                uint32_t qmeCommonRingBuild: 1;         // for core ring inclusion
+                uint32_t qmeCoreSpecificRingBuild: 1;   // for core specific scan ring inclusion
+                uint32_t xgpeImageBuild: 1;             // for xgpe inclusion
+                uint32_t xgpeCommonRingBuild: 1;        // for xgpe common scan ring inclusion
+                uint32_t xgpeCacheSpecificRingBuild: 1; // for cache specific ring inclusion
+                uint32_t pgpeImageBuild: 1;             // pgpe platform inclusion in image build
+                uint32_t pgpePstateParmBlockBuild: 1;   // pgpe P-State Parameter Block Build
+                uint32_t coreSprBuild: 1;               // SPR restore region inclusion in HOMER Build
+                uint32_t coreScomBuild: 1;              // Core SCOM restore region inclusion in HOMER Build
+                uint32_t cacheScomBuild: 1;             // Cache SCOM restore region inclusion in HOMER Build
+                uint32_t reserved: 20;
+            };
+            uint32_t value_32;
+        };
 
         ImageType_t( )
         {

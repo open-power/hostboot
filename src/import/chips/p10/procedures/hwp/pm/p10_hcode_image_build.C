@@ -461,12 +461,16 @@ fapi2::ReturnCode validateInputArguments( void* const i_pImageIn, void* i_pImage
                   ( i_pImageIn != i_pImageOut )),
                  fapi2::HW_IMG_PTR_ERROR()
                  .set_HW_IMG_BUF_PTR( i_pImageIn )
-                 .set_HOMER_IMG_BUF_PTR( i_pImageOut ),
+                 .set_HOMER_IMG_BUF_PTR( i_pImageOut )
+                 .set_SYS_PHASE(i_phase)
+                 .set_IMAGE_TYPE(i_imgType.value_32),
                  "Bad pointer to HW Image" );
 
     FAPI_ASSERT( ( i_pImageOut != NULL ),
                  fapi2::HOMER_IMG_PTR_ERROR()
-                 .set_HOMER_IMG_BUF_PTR( i_pImageOut ),
+                 .set_HOMER_IMG_BUF_PTR( i_pImageOut )
+                 .set_SYS_PHASE(i_phase)
+                 .set_IMAGE_TYPE(i_imgType.value_32),
                  "Bad pointer to HOMER Image" );
 
     l_rc = p9_xip_image_size( i_pImageIn, &hwImagSize );
@@ -478,56 +482,77 @@ fapi2::ReturnCode validateInputArguments( void* const i_pImageIn, void* i_pImage
                   ( HARDWARE_IMG_SIZE >= hwImagSize )),
                  fapi2::HW_IMAGE_INVALID_SIZE()
                  .set_HW_IMG_SIZE( hwImagSize )
-                 .set_MAX_HW_IMG_SIZE( HARDWARE_IMG_SIZE ),
+                 .set_MAX_HW_IMG_SIZE( HARDWARE_IMG_SIZE )
+                 .set_SYS_PHASE(i_phase)
+                 .set_IMAGE_TYPE(i_imgType.value_32),
                  "Hardware image size found out of range" );
 
     FAPI_ASSERT( (( i_phase  > PHASE_NA ) && ( i_phase < PHASE_END )),
                  fapi2::HCODE_INVALID_PHASE()
-                 .set_SYS_PHASE( i_phase ),
+                 .set_SYS_PHASE(i_phase)
+                 .set_IMAGE_TYPE(i_imgType.value_32),
                  "Invalid value passed as build phase" );
 
     FAPI_ASSERT( ( i_pBuf1 != NULL ),
                  fapi2::HCODE_INVALID_TEMP1_BUF()
-                 .set_TEMP1_BUF_SIZE( i_bufSize1 ),
+                 .set_TEMP1_BUF_SIZE( i_bufSize1 )
+                 .set_SYS_PHASE(i_phase)
+                 .set_IMAGE_TYPE(i_imgType.value_32),
                  "Invalid temp buffer1 passed for hcode image build" );
 
     FAPI_ASSERT( ( i_pBuf2 != NULL ),
                  fapi2::HCODE_INVALID_TEMP2_BUF()
-                 .set_TEMP2_BUF_SIZE( i_bufSize2 ),
+                 .set_TEMP2_BUF_SIZE( i_bufSize2 )
+                 .set_SYS_PHASE(i_phase)
+                 .set_IMAGE_TYPE(i_imgType.value_32),
                  "Invalid temp buffer2 passed for hcode image build" );
 
     FAPI_ASSERT( ( i_pBuf3 != NULL ),
                  fapi2::HCODE_INVALID_TEMP3_BUF()
-                 .set_TEMP3_BUF_SIZE( i_bufSize3 ),
+                 .set_TEMP3_BUF_SIZE( i_bufSize3 )
+                 .set_SYS_PHASE(i_phase)
+                 .set_IMAGE_TYPE(i_imgType.value_32),
                  "Invalid temp buffer3 passed for hcode image build" );
 
     FAPI_ASSERT( ( i_pBuf4 != NULL ),
                  fapi2::HCODE_INVALID_TEMP4_BUF()
-                 .set_TEMP4_BUF_SIZE( i_bufSize4 ),
+                 .set_TEMP4_BUF_SIZE( i_bufSize4 )
+                 .set_SYS_PHASE(i_phase)
+                 .set_IMAGE_TYPE(i_imgType.value_32),
                  "Invalid temp buffer4 passed for hcode image build" );
 
     FAPI_ASSERT( ( i_bufSize1 != 0  ) ,
                  fapi2::HCODE_INVALID_TEMP1_BUF_SIZE()
-                 .set_TEMP1_BUF_SIZE( i_bufSize1 ),
+                 .set_TEMP1_BUF_SIZE( i_bufSize1 )
+                 .set_SYS_PHASE(i_phase)
+                 .set_IMAGE_TYPE(i_imgType.value_32),
                  "Invalid size for temp buf1 passed for hcode image build" );
 
     FAPI_ASSERT( ( i_bufSize2 != 0 ),
                  fapi2::HCODE_INVALID_TEMP2_BUF_SIZE()
-                 .set_TEMP2_BUF_SIZE( i_bufSize2 ),
+                 .set_TEMP2_BUF_SIZE( i_bufSize2 )
+                 .set_SYS_PHASE(i_phase)
+                 .set_IMAGE_TYPE(i_imgType.value_32),
                  "Invalid size for temp buf2 passed for hcode image build" );
 
     FAPI_ASSERT( ( i_bufSize3 != 0 ),
                  fapi2::HCODE_INVALID_TEMP3_BUF_SIZE()
-                 .set_TEMP3_BUF_SIZE( i_bufSize3 ),
+                 .set_TEMP3_BUF_SIZE( i_bufSize3 )
+                 .set_SYS_PHASE(i_phase)
+                 .set_IMAGE_TYPE(i_imgType.value_32),
                  "Invalid size for temp buf3 passed for hcode image build" );
 
     FAPI_ASSERT( ( i_bufSize4 != 0 ),
                  fapi2::HCODE_INVALID_TEMP4_BUF_SIZE()
-                 .set_TEMP4_BUF_SIZE( i_bufSize4 ),
+                 .set_TEMP4_BUF_SIZE( i_bufSize4 )
+                 .set_SYS_PHASE(i_phase)
+                 .set_IMAGE_TYPE(i_imgType.value_32),
                  "Invalid size for temp buf4 passed for hcode image build" );
 
     FAPI_ASSERT( ( i_imgType.isBuildValid() ),
-                 fapi2::HCODE_INVALID_IMG_TYPE(),
+                 fapi2::HCODE_INVALID_IMG_TYPE()
+                 .set_SYS_PHASE(i_phase)
+                 .set_IMAGE_TYPE(i_imgType.value_32),
                  "Invalid image type passed for hcode image build" );
     FAPI_INF("<< validateInputArguments ...");
 
@@ -1004,7 +1029,10 @@ fapi2::ReturnCode buildXpmrImage( CONST_FAPI2_PROC& i_procTgt,
         FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rcTemp ),
                      fapi2::XGPE_IMG_NOT_FOUND_IN_HW_IMG()
                      .set_XIP_FAILURE_CODE( rcTemp )
-                     .set_EC_LEVEL( i_chipFuncModel.getChipLevel() ),
+                     .set_EC_LEVEL( i_chipFuncModel.getChipLevel() )
+                     .set_SYS_PHASE(i_phase)
+                     .set_IMAGE_TYPE(i_imgType.value_32)
+                     .set_PROC_TARGET(i_procTgt),
                      "Failed To Find XGPE Sub-Image In HW Image" );
 
         pXgpeImg = ppeSection.iv_offset + (uint8_t*) (i_pImageIn );
@@ -1022,7 +1050,10 @@ fapi2::ReturnCode buildXpmrImage( CONST_FAPI2_PROC& i_procTgt,
                      fapi2::XPMR_HDR_BUILD_FAIL()
                      .set_EC_LEVEL( i_chipFuncModel.getChipLevel() )
                      .set_MAX_ALLOWED_SIZE( rcTemp )
-                     .set_ACTUAL_SIZE( ppeSection.iv_size ),
+                     .set_ACTUAL_SIZE( ppeSection.iv_size )
+                     .set_SYS_PHASE(i_phase)
+                     .set_IMAGE_TYPE(i_imgType.value_32)
+                     .set_PROC_TARGET(i_procTgt),
                      "Failed To Update XPMR Region Of HOMER" );
 
         l_xgpeBuildRecord.setSection( "XPMR Header", 0, XPMR_HEADER_SIZE );
@@ -1038,7 +1069,10 @@ fapi2::ReturnCode buildXpmrImage( CONST_FAPI2_PROC& i_procTgt,
                      fapi2::XGPE_BOOT_COPIER_BUILD_FAIL()
                      .set_EC_LEVEL( i_chipFuncModel.getChipLevel() )
                      .set_MAX_ALLOWED_SIZE( rcTemp )
-                     .set_ACTUAL_SIZE( ppeSection.iv_size ),
+                     .set_ACTUAL_SIZE( ppeSection.iv_size )
+                     .set_SYS_PHASE(i_phase)
+                     .set_IMAGE_TYPE(i_imgType.value_32)
+                     .set_PROC_TARGET(i_procTgt),
                      "Failed To Update XGPE Boot Copier Region Of HOMER" );
 
         l_xgpeBuildRecord.setSection( "XGPE Boot Copier", XGPE_BOOT_COPIER_OFFSET, ppeSection.iv_size );
@@ -1054,7 +1088,10 @@ fapi2::ReturnCode buildXpmrImage( CONST_FAPI2_PROC& i_procTgt,
                      fapi2::XGPE_BOOT_LOADER_BUILD_FAIL()
                      .set_EC_LEVEL( i_chipFuncModel.getChipLevel() )
                      .set_MAX_ALLOWED_SIZE( rcTemp )
-                     .set_ACTUAL_SIZE( ppeSection.iv_size ),
+                     .set_ACTUAL_SIZE( ppeSection.iv_size )
+                     .set_SYS_PHASE(i_phase)
+                     .set_IMAGE_TYPE(i_imgType.value_32)
+                     .set_PROC_TARGET(i_procTgt),
                      "Failed To Update XGPE Boot Loader Region Of HOMER" );
 
         l_xgpeBuildRecord.setSection( "XGPE Boot Loader", XGPE_BOOT_LOADER_OFFSET, ppeSection.iv_size );
@@ -1069,7 +1106,10 @@ fapi2::ReturnCode buildXpmrImage( CONST_FAPI2_PROC& i_procTgt,
                      fapi2::XGPE_HCODE_BUILD_FAIL()
                      .set_EC_LEVEL( i_chipFuncModel.getChipLevel() )
                      .set_MAX_ALLOWED_SIZE( rcTemp )
-                     .set_ACTUAL_SIZE( ppeSection.iv_size ),
+                     .set_ACTUAL_SIZE( ppeSection.iv_size )
+                     .set_SYS_PHASE(i_phase)
+                     .set_IMAGE_TYPE(i_imgType.value_32)
+                     .set_PROC_TARGET(i_procTgt),
                      "Failed To Update XGPE Hcode Region Of HOMER" );
 
         l_xgpeBuildRecord.setSection( "XGPE Hcode", XGPE_IMAGE_XPMR_OFFSET, ppeSection.iv_size );
@@ -1253,7 +1293,8 @@ fapi2::ReturnCode buildCoreRestoreImage( void* const i_pImageIn,
     FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rcTemp ),
                  fapi2::SELF_REST_IMG_NOT_FOUND_IN_HW_IMG()
                  .set_XIP_FAILURE_CODE( rcTemp )
-                 .set_EC_LEVEL( i_procFuncModel.getChipLevel() ),
+                 .set_EC_LEVEL( i_procFuncModel.getChipLevel() )
+                 .set_IMAGE_TYPE(i_imgType.value_32),
                  "Failed to find Self Restore sub-image in HW Image" );
 
     pSelfRestImg = ppeSection.iv_offset + (uint8_t*) (i_pImageIn );
@@ -1277,7 +1318,8 @@ fapi2::ReturnCode buildCoreRestoreImage( void* const i_pImageIn,
                      fapi2::SELF_REST_IMG_BUILD_FAIL()
                      .set_EC_LEVEL( i_procFuncModel.getChipLevel() )
                      .set_MAX_ALLOWED_SIZE( rcTemp  )
-                     .set_ACTUAL_SIZE( ppeSection.iv_size ),
+                     .set_ACTUAL_SIZE( ppeSection.iv_size )
+                     .set_IMAGE_TYPE(i_imgType.value_32),
                      "Failed to update self restore image in HOMER" );
 
     }
@@ -1296,7 +1338,8 @@ fapi2::ReturnCode buildCoreRestoreImage( void* const i_pImageIn,
                  fapi2::CPMR_HDR_BUILD_FAIL()
                  .set_EC_LEVEL( i_procFuncModel.getChipLevel() )
                  .set_MAX_ALLOWED_SIZE( rcTemp  )
-                 .set_ACTUAL_SIZE( ppeSection.iv_size ),
+                 .set_ACTUAL_SIZE( ppeSection.iv_size )
+                 .set_IMAGE_TYPE(i_imgType.value_32),
                  "Failed to update CPMR Header in HOMER" );
 
     i_qmeBuildRecord.setSection( "SELF", SELF_RESTORE_CPMR_OFFSET, SELF_SAVE_RESTORE_REGION_SIZE );
@@ -1456,7 +1499,7 @@ fapi2::ReturnCode buildQmeImage( void* const i_pImageIn, Homerlayout_t* i_pChipH
                      fapi2::QME_IMG_NOT_FOUND_IN_HW_IMG()
                      .set_XIP_FAILURE_CODE( rcTemp )
                      .set_EC_LEVEL( i_procFuncModel.getChipLevel() ),
-                     "Failed to find QME sub-image in HW Image" );
+                     "buildQmeImage: Failed to find QME sub-image in HW Image" );
 
         pQmeImg = ppeSection.iv_offset + (uint8_t*) (i_pImageIn );
         FAPI_DBG("ppeSection.iv_offset = 0x%08X, ppeSection.iv_size = 0x%08X",
@@ -1476,7 +1519,8 @@ fapi2::ReturnCode buildQmeImage( void* const i_pImageIn, Homerlayout_t* i_pChipH
                      fapi2::QME_HCODE_BUILD_FAIL()
                      .set_EC_LEVEL( i_procFuncModel.getChipLevel() )
                      .set_MAX_ALLOWED_SIZE( rcTemp )
-                     .set_ACTUAL_SIZE( ppeSection.iv_size ),
+                     .set_ACTUAL_SIZE( ppeSection.iv_size )
+                     .set_IMAGE_TYPE(i_imgType.value_32),
                      "Failed to find QME Hcode in QME XIP Image" );
 
         //Rounding QME hcode size to a multiple of 32B
@@ -1808,7 +1852,7 @@ fapi2::ReturnCode buildQmeAttributes( void* const i_pImageIn,
                  fapi2::QME_IMG_NOT_FOUND_IN_HW_IMG()
                  .set_XIP_FAILURE_CODE( rcTemp )
                  .set_EC_LEVEL( i_procFuncModel.getChipLevel() ),
-                 "Failed to find QME sub-image in HW Image" );
+                 "buildQmeAttributes: Failed to find QME sub-image in HW Image" );
 
     pQmeImg = ppeSection.iv_offset + (uint8_t*) (i_pImageIn );
 
@@ -2061,7 +2105,8 @@ fapi2::ReturnCode createAutoWakeupVector( void * const i_pHomerImage,
             FAPI_ASSERT( ( !l_rc ),
                          fapi2::AUTO_WAKEUP_VECTOR_CREATION_FAILED()
                          .set_PIR( l_pir )
-                         .set_STOP_API_RC( l_rc ),
+                         .set_STOP_API_RC( l_rc )
+                         .set_FUSE_MODE(i_fuseMode),
                          "Failed To Create Auto Wakeup Vector For Core %d RC: %d", l_corePos, (uint32_t)l_rc  );
         }
     }
@@ -2560,7 +2605,10 @@ fapi2::ReturnCode buildPpmrImage( CONST_FAPI2_PROC& i_procTgt,
         FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rcTemp ),
                      fapi2::PGPE_IMG_NOT_FOUND_IN_HW_IMG()
                      .set_XIP_FAILURE_CODE( rcTemp )
-                     .set_EC_LEVEL( i_chipFuncModel.getChipLevel() ),
+                     .set_EC_LEVEL( i_chipFuncModel.getChipLevel() )
+                     .set_SYS_PHASE(i_phase)
+                     .set_IMAGE_TYPE(i_imgType.value_32)
+                     .set_PROC_TARGET(i_procTgt),
                      "Failed To Find PGPE Sub-Image In HW Image" );
 
         pPgpeImg = ppeSection.iv_offset + (uint8_t*) (i_pImageIn );
@@ -2577,7 +2625,10 @@ fapi2::ReturnCode buildPpmrImage( CONST_FAPI2_PROC& i_procTgt,
                      fapi2::P10_XIP_SECTION_PGPE_PPMR()
                      .set_EC_LEVEL( i_chipFuncModel.getChipLevel() )
                      .set_MAX_ALLOWED_SIZE( rcTemp )
-                     .set_ACTUAL_SIZE( ppeSection.iv_size ),
+                     .set_ACTUAL_SIZE( ppeSection.iv_size )
+                     .set_SYS_PHASE(i_phase)
+                     .set_IMAGE_TYPE(i_imgType.value_32)
+                     .set_PROC_TARGET(i_procTgt),
                      "Failed To Update PPMR Region Of HOMER" );
 
         l_pgpeBuildRecord.setSection( "PPMR Header", 0, PPMR_HEADER_SIZE );
@@ -2593,7 +2644,10 @@ fapi2::ReturnCode buildPpmrImage( CONST_FAPI2_PROC& i_procTgt,
                      fapi2::P10_PGPE_BOOT_COPIER_BUILD_FAIL()
                      .set_EC_LEVEL( i_chipFuncModel.getChipLevel() )
                      .set_MAX_ALLOWED_SIZE( rcTemp )
-                     .set_ACTUAL_SIZE( ppeSection.iv_size ),
+                     .set_ACTUAL_SIZE( ppeSection.iv_size )
+                     .set_SYS_PHASE(i_phase)
+                     .set_IMAGE_TYPE(i_imgType.value_32)
+                     .set_PROC_TARGET(i_procTgt),
                      "Failed To Update PGPE Boot Copier Region Of HOMER" );
 
         l_pgpeBuildRecord.setSection( "PGPE Boot Copier", PGPE_BOOT_COPIER_PPMR_OFFSET, ppeSection.iv_size );
@@ -2609,7 +2663,10 @@ fapi2::ReturnCode buildPpmrImage( CONST_FAPI2_PROC& i_procTgt,
                      fapi2::P10_PGPE_BOOT_LOADER_BUILD_FAIL()
                      .set_EC_LEVEL( i_chipFuncModel.getChipLevel() )
                      .set_MAX_ALLOWED_SIZE( rcTemp )
-                     .set_ACTUAL_SIZE( ppeSection.iv_size ),
+                     .set_ACTUAL_SIZE( ppeSection.iv_size )
+                     .set_SYS_PHASE(i_phase)
+                     .set_IMAGE_TYPE(i_imgType.value_32)
+                     .set_PROC_TARGET(i_procTgt),
                      "Failed To Update PGPE Boot Loader Region Of HOMER" );
 
         l_pgpeBuildRecord.setSection( "PGPE Boot Loader", PGPE_BOOT_LOADER_PPMR_OFFSET, ppeSection.iv_size );
@@ -2625,7 +2682,10 @@ fapi2::ReturnCode buildPpmrImage( CONST_FAPI2_PROC& i_procTgt,
                      fapi2::P10_PGPE_HCODE_BUILD_FAIL()
                      .set_EC_LEVEL( i_chipFuncModel.getChipLevel() )
                      .set_MAX_ALLOWED_SIZE( rcTemp )
-                     .set_ACTUAL_SIZE( ppeSection.iv_size ),
+                     .set_ACTUAL_SIZE( ppeSection.iv_size )
+                     .set_SYS_PHASE(i_phase)
+                     .set_IMAGE_TYPE(i_imgType.value_32)
+                     .set_PROC_TARGET(i_procTgt),
                      "Failed To Update PGPE Hcode Region Of HOMER" );
 
         l_pgpeBuildRecord.setSection( "PGPE Hcode", PGPE_IMAGE_PPMR_OFFSET, ppeSection.iv_size );
