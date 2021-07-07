@@ -996,19 +996,6 @@
      End of customizations definitions
      ================================================================= -->
 
-    <!-- Temporary hacks to get around a CI coreq issue -->
-    <attribute>
-        <id>ATTR_MSS_EXP_OMI_CDR_BW_OVERRIDE</id>
-        <writeable/>
-    </attribute>
-    <attribute>
-        <id>ATTR_MSS_EXP_OMI_CDR_OFFSET</id>
-        <writeable/>
-    </attribute>
-    <attribute>
-        <id>ATTR_MSS_EXP_OMI_CDR_OFFSET_LANE_MASK</id>
-        <writeable/>
-    </attribute>
 
 
 </attributes>
