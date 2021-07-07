@@ -440,6 +440,25 @@ using enable_loop_fields_t = std::array<mss::pmic::enable_fields_4u, CONSTS::NUM
 //-----------------------------------
 
 ///
+/// @brief Set PWR_GOOD pin to I/O
+///
+/// @param[in] i_pmic_target PMIC target
+/// @return fapi2::FAPI2_RC_SUCCESS iff success
+/// @note This is intended for use on 1U/2U DDIMMs
+///
+fapi2::ReturnCode set_pwr_good_pin_io(
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target);
+
+///
+/// @brief Toggle the VR enable bit (0->1->0)
+///
+/// @param[in] i_pmic_target PMIC target
+/// @return fapi2::FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode toggle_vr_enable(
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target);
+
+///
 /// @brief set VR enable bit for system startup via R32 (not broadcast)
 ///
 /// @param[in] i_pmic_target PMIC target
