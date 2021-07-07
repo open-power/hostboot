@@ -31,6 +31,8 @@
     <description>HW Image pointer is either NULL or points to same location as HOMER base</description>
     <ffdc>HW_IMG_BUF_PTR</ffdc>
     <ffdc>HOMER_IMG_BUF_PTR</ffdc>
+    <ffdc>SYS_PHASE</ffdc>
+    <ffdc>IMAGE_TYPE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -41,6 +43,8 @@
     <rc>RC_HOMER_IMG_PTR_ERROR</rc>
     <description>HOMER Image pointer is NULL</description>
     <ffdc>HOMER_IMG_BUF_PTR</ffdc>
+    <ffdc>SYS_PHASE</ffdc>
+    <ffdc>IMAGE_TYPE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -52,6 +56,8 @@
     <description>Hardware Image size is not in expected range </description>
     <ffdc>HW_IMG_SIZE</ffdc>
     <ffdc>MAX_HW_IMG_SIZE</ffdc>
+    <ffdc>SYS_PHASE</ffdc>
+    <ffdc>IMAGE_TYPE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -62,6 +68,7 @@
     <rc>RC_HCODE_INVALID_PHASE</rc>
     <description>Invalid or unsupported build phase passed to the HOMER build procedure</description>
     <ffdc>SYS_PHASE</ffdc>
+    <ffdc>IMAGE_TYPE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -72,6 +79,8 @@
     <rc>RC_HCODE_INVALID_TEMP1_BUF</rc>
     <description>Temporary buffer1 is invalid</description>
     <ffdc>TEMP1_BUF_SIZE</ffdc>
+    <ffdc>SYS_PHASE</ffdc>
+    <ffdc>IMAGE_TYPE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -82,6 +91,8 @@
     <rc>RC_HCODE_INVALID_TEMP1_BUF_SIZE</rc>
     <description>Invalid size for temp buf1</description>
     <ffdc>TEMP1_BUF_SIZE</ffdc>
+    <ffdc>SYS_PHASE</ffdc>
+    <ffdc>IMAGE_TYPE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -92,6 +103,8 @@
     <rc>RC_HCODE_INVALID_TEMP2_BUF</rc>
     <description>Temporary buffer2 is invalid</description>
     <ffdc>TEMP2_BUF_SIZE</ffdc>
+    <ffdc>SYS_PHASE</ffdc>
+    <ffdc>IMAGE_TYPE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -102,6 +115,8 @@
     <rc>RC_HCODE_INVALID_TEMP2_BUF_SIZE</rc>
     <description>Invalid size for temp buf2</description>
     <ffdc>TEMP2_BUF_SIZE</ffdc>
+    <ffdc>SYS_PHASE</ffdc>
+    <ffdc>IMAGE_TYPE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -112,6 +127,8 @@
     <rc>RC_HCODE_INVALID_TEMP3_BUF</rc>
     <description>Temporary buffer3 is invalid.</description>
     <ffdc>TEMP3_BUF_SIZE</ffdc>
+    <ffdc>SYS_PHASE</ffdc>
+    <ffdc>IMAGE_TYPE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -122,6 +139,8 @@
     <rc>RC_HCODE_INVALID_TEMP3_BUF_SIZE</rc>
     <description>Invalid size for temp buf3</description>
     <ffdc>TEMP3_BUF_SIZE</ffdc>
+    <ffdc>SYS_PHASE</ffdc>
+    <ffdc>IMAGE_TYPE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -132,6 +151,8 @@
     <rc>RC_HCODE_INVALID_TEMP4_BUF</rc>
     <description>Temporary buffer4 is invalid.</description>
     <ffdc>TEMP4_BUF_SIZE</ffdc>
+    <ffdc>SYS_PHASE</ffdc>
+    <ffdc>IMAGE_TYPE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -142,6 +163,8 @@
     <rc>RC_HCODE_INVALID_TEMP4_BUF_SIZE</rc>
     <description>Invalid size for temp buf4</description>
     <ffdc>TEMP4_BUF_SIZE</ffdc>
+    <ffdc>SYS_PHASE</ffdc>
+    <ffdc>IMAGE_TYPE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -151,6 +174,8 @@
   <hwpError>
     <rc>RC_HCODE_INVALID_IMG_TYPE</rc>
     <description>Invalid image type passed for hcode image build.</description>
+    <ffdc>SYS_PHASE</ffdc>
+    <ffdc>IMAGE_TYPE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -162,7 +187,9 @@
     <description>XGPE Image not found in hardware image</description>
     <ffdc>XIP_FAILURE_CODE</ffdc>
     <ffdc>EC_LEVEL</ffdc>
-    <ffdc>CHIP_TYPE</ffdc>
+    <ffdc>SYS_PHASE</ffdc>
+    <ffdc>IMAGE_TYPE</ffdc>
+    <ffdc>PROC_TARGET</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -175,9 +202,11 @@
     Note: 0xFFFFFFFF in field MAX_ALLOWED_SIZE is an invalid size suggesting that image
     section is not found</description>
     <ffdc>EC_LEVEL</ffdc>
-    <ffdc>CHIP_TYPE</ffdc>
     <ffdc>MAX_ALLOWED_SIZE</ffdc>
     <ffdc>ACTUAL_SIZE</ffdc>
+    <ffdc>SYS_PHASE</ffdc>
+    <ffdc>IMAGE_TYPE</ffdc>
+    <ffdc>PROC_TARGET</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -190,9 +219,11 @@
     Note: 0xFFFFFFFF in field MAX_ALLOWED_SIZE is an invalid size suggesting that image
     section is not found</description>
     <ffdc>EC_LEVEL</ffdc>
-    <ffdc>CHIP_TYPE</ffdc>
     <ffdc>MAX_ALLOWED_SIZE</ffdc>
     <ffdc>ACTUAL_SIZE</ffdc>
+    <ffdc>SYS_PHASE</ffdc>
+    <ffdc>IMAGE_TYPE</ffdc>
+    <ffdc>PROC_TARGET</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -205,9 +236,11 @@
     Note: 0xFFFFFFFF in field MAX_ALLOWED_SIZE is an invalid size suggesting that image
     section is not found</description>
     <ffdc>EC_LEVEL</ffdc>
-    <ffdc>CHIP_TYPE</ffdc>
     <ffdc>MAX_ALLOWED_SIZE</ffdc>
     <ffdc>ACTUAL_SIZE</ffdc>
+    <ffdc>SYS_PHASE</ffdc>
+    <ffdc>IMAGE_TYPE</ffdc>
+    <ffdc>PROC_TARGET</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -220,9 +253,11 @@
     Note: 0xFFFFFFFF in field MAX_ALLOWED_SIZE is an invalid size suggesting that image
     section is not found</description>
     <ffdc>EC_LEVEL</ffdc>
-    <ffdc>CHIP_TYPE</ffdc>
     <ffdc>MAX_ALLOWED_SIZE</ffdc>
     <ffdc>ACTUAL_SIZE</ffdc>
+    <ffdc>SYS_PHASE</ffdc>
+    <ffdc>IMAGE_TYPE</ffdc>
+    <ffdc>PROC_TARGET</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -234,7 +269,7 @@
     <description>Self Restore Image not found in hardware image</description>
     <ffdc>XIP_FAILURE_CODE</ffdc>
     <ffdc>EC_LEVEL</ffdc>
-    <ffdc>CHIP_TYPE</ffdc>
+    <ffdc>IMAGE_TYPE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -247,9 +282,9 @@
     Note: 0xFFFFFFFF in field MAX_ALLOWED_SIZE is an invalid size suggesting that image
     section is not found</description>
     <ffdc>EC_LEVEL</ffdc>
-    <ffdc>CHIP_TYPE</ffdc>
     <ffdc>MAX_ALLOWED_SIZE</ffdc>
     <ffdc>ACTUAL_SIZE</ffdc>
+    <ffdc>IMAGE_TYPE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -262,9 +297,9 @@
     Note: 0xFFFFFFFF in field MAX_ALLOWED_SIZE is an invalid size suggesting that image
     section is not found</description>
     <ffdc>EC_LEVEL</ffdc>
-    <ffdc>CHIP_TYPE</ffdc>
     <ffdc>MAX_ALLOWED_SIZE</ffdc>
     <ffdc>ACTUAL_SIZE</ffdc>
+    <ffdc>IMAGE_TYPE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -274,13 +309,9 @@
   <hwpError>
     <rc>RC_QME_IMG_NOT_FOUND_IN_HW_IMG</rc>
     <description>QME Image not found in hardware image.
-    Note: 0xFFFFFFFF in field MAX_ALLOWED_SIZE is an invalid size suggesting that image
-    section is not found</description>
+    </description>
     <ffdc>XIP_FAILURE_CODE</ffdc>
-    <ffdc>CHIP_TYPE</ffdc>
     <ffdc>EC_LEVEL</ffdc>
-    <ffdc>MAX_ALLOWED_SIZE</ffdc>
-    <ffdc>ACTUAL_SIZE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -293,9 +324,9 @@
     Note: 0xFFFFFFFF in field MAX_ALLOWED_SIZE is an invalid size suggesting that image
     section is not found</description>
     <ffdc>EC_LEVEL</ffdc>
-    <ffdc>CHIP_TYPE</ffdc>
     <ffdc>MAX_ALLOWED_SIZE</ffdc>
     <ffdc>ACTUAL_SIZE</ffdc>
+    <ffdc>IMAGE_TYPE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -308,10 +339,7 @@
     Note: 0xFFFFFFFF in field MAX_ALLOWED_SIZE is an invalid size suggesting that image
     section is not found</description>
     <ffdc>XIP_FAILURE_CODE</ffdc>
-    <ffdc>CHIP_TYPE</ffdc>
     <ffdc>EC_LEVEL</ffdc>
-    <ffdc>MAX_ALLOWED_SIZE</ffdc>
-    <ffdc>ACTUAL_SIZE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -336,7 +364,9 @@
     <description>PGPE Image not found in hardware image</description>
     <ffdc>XIP_FAILURE_CODE</ffdc>
     <ffdc>EC_LEVEL</ffdc>
-    <ffdc>CHIP_TYPE</ffdc>
+    <ffdc>SYS_PHASE</ffdc>
+    <ffdc>IMAGE_TYPE</ffdc>
+    <ffdc>PROC_TARGET</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -349,9 +379,11 @@
     Note: 0xFFFFFFFF in field MAX_ALLOWED_SIZE is an invalid size suggesting that image
     section is not found</description>
     <ffdc>EC_LEVEL</ffdc>
-    <ffdc>CHIP_TYPE</ffdc>
     <ffdc>MAX_ALLOWED_SIZE</ffdc>
     <ffdc>ACTUAL_SIZE</ffdc>
+    <ffdc>SYS_PHASE</ffdc>
+    <ffdc>IMAGE_TYPE</ffdc>
+    <ffdc>PROC_TARGET</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -367,6 +399,9 @@
     <ffdc>CHIP_TYPE</ffdc>
     <ffdc>MAX_ALLOWED_SIZE</ffdc>
     <ffdc>ACTUAL_SIZE</ffdc>
+    <ffdc>SYS_PHASE</ffdc>
+    <ffdc>IMAGE_TYPE</ffdc>
+    <ffdc>PROC_TARGET</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -382,6 +417,9 @@
     <ffdc>CHIP_TYPE</ffdc>
     <ffdc>MAX_ALLOWED_SIZE</ffdc>
     <ffdc>ACTUAL_SIZE</ffdc>
+    <ffdc>SYS_PHASE</ffdc>
+    <ffdc>IMAGE_TYPE</ffdc>
+    <ffdc>PROC_TARGET</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -397,20 +435,9 @@
     <ffdc>CHIP_TYPE</ffdc>
     <ffdc>MAX_ALLOWED_SIZE</ffdc>
     <ffdc>ACTUAL_SIZE</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_P10_PGPE_AUX_TASK_BUILD_FAIL</rc>
-    <description>hcode image build procedure failed to update PGPE Aux Task region of HOMER.
-    Note: 0xFFFFFFFF in field MAX_ALLOWED_SIZE is an invalid size suggesting that image
-    section is not found</description>
-    <ffdc>EC_LEVEL</ffdc>
-    <ffdc>MAX_ALLOWED_SIZE</ffdc>
-    <ffdc>ACTUAL_SIZE</ffdc>
+    <ffdc>SYS_PHASE</ffdc>
+    <ffdc>IMAGE_TYPE</ffdc>
+    <ffdc>PROC_TARGET</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -461,32 +488,6 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PSTATE_SUP_STRUCT_SIZE_ERR</rc>
-    <description>hcode image build procedure failed due to P-State parameter block super 
-    struct size error</description>
-    <ffdc>SUPER_STRUCT_SIZE</ffdc>
-    <ffdc>MAX_SIZE_ALLOCATED</ffdc>
-    <ffdc>ACTUAL_SIZE</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_P10_PGPE_AUX_TASK_BIN_SIZE_ERROR</rc>
-    <description>hcode image build procedure failed to build PPMR region due to a bad
-    size of auxiliary task binary </description>
-    <ffdc>EC_LEVEL</ffdc>
-    <ffdc>MAX_ALLOWED_SIZE</ffdc>
-    <ffdc>ACTUAL_SIZE</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
     <rc>RC_SELF_RESTORE_INIT_FAILED</rc>
     <description>hcode image build procedure failed to initialize self-restore region.</description>
     <ffdc>HOMER_PTR</ffdc>
@@ -517,17 +518,7 @@
     <description>hcode image build failed to create auto wakeup vector in CPMR header</description>
     <ffdc>PIR</ffdc>
     <ffdc>STOP_API_RC</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_BAD_UNSECURE_HOMER_VALUE</rc>
-    <description>Attribute ATTR_UNSECURE_HOMER_ADDRESS is initialized with bad value. Address
-    is either not aligned with 2MB boundary or b15 of of address value is not 0</description>
-    <ffdc>UNSECURE_HOMER_ADDRESS</ffdc>
+    <ffdc>FUSE_MODE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
