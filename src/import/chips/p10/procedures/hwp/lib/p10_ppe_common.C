@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -235,7 +235,8 @@ fapi2::ReturnCode pollHaltStateDone(
 #ifdef __READY_FOR_P10__
     FAPI_ASSERT(l_data64.getBit<0>(),
                 fapi2::P10_PPE_STATE_HALT_TIMEOUT_ERR()
-                .set_TARGET(i_target),
+                .set_TARGET(i_target)
+                .set_SBE_BASE_ADDRESS(i_sbe_base_address),
                 "PPE Halt Timeout");
 #endif
 
