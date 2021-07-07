@@ -86,12 +86,38 @@ set_total_dump_size()
     fi
 }
 
+CHIP_POS=0;
+get_boot_proc_chip_pos()
+{
+    # Determine boot proc chip position
+    # - Depends on which FSP is Primary (this script always runs on Primary FSP)
+    # - Default set to 0 above for when runninig on FSP-A or eBMC
+    # - Only set to 1 when running on FSP-B
+
+    # If rmgrcmd does not exist, assume running on eBMC
+    if ! command -v rmgrcmd &> /dev/null ; then
+      echo "'rmgrcmd' not found.  Assuming running on eBMC System. Boot Proc CHIP_POS=${CHIP_POS}"
+    else
+      # Use rmgrcmd to determine current FSP's role
+      FSP_POS=`rmgrcmd -i pos | awk '{print $2}'`
+      if [[ ${FSP_POS} = "B" ]]; then
+        CHIP_POS=1;
+        echo "Running on FSP-B. Boot Proc CHIP_POS=${CHIP_POS}"
+      else
+        echo "Running on FSP-A. Boot Proc CHIP_POS=${CHIP_POS}"
+      fi
+    fi
+}
+
 set_hrmor()
 {
-    # HRMOR is stored in bits 4:51 of core scratch 1
+    # Get boot proc chip position
+    get_boot_proc_chip_pos
+
+    # HRMOR is stored in bits 4:51 of core scratch 1 of boot proc
     # See memstate.H for details.
     # Multicast to all good cores.
-    HRMOR=`getscom pu 4602F487 4 48 -p0 -n${NODE} | grep 0x | sed 's/.*0x/0x/'`
+    HRMOR=`getscom pu 4602F487 4 48 -p${CHIP_POS} -n${NODE} | grep 0x | sed 's/.*0x/0x/'`
 
     # if there was an error reading the hrmor it will
     # have multi-line output, set it to a default
@@ -175,8 +201,8 @@ dump()
     seekcount=$((addr / blocksize))
 
     rm /tmp/memdumpoutput.tmp 2> /dev/null && touch /tmp/memdump.part
-    printf "${GETMEM_COMMAND}  ${memaddr_h} ${size} -n${NODE} -fb /tmp/memdump.part \n\n" > ${LOG_LOCATION}
-    `${GETMEM_COMMAND} ${memaddr_h} ${size} -n ${NODE} -fb /tmp/memdump.part >> ${LOG_LOCATION} 2>&1`
+    printf "${GETMEM_COMMAND}  ${memaddr_h} ${size} -p${CHIP_POS} -n${NODE} -fb /tmp/memdump.part \n\n" > ${LOG_LOCATION}
+    `${GETMEM_COMMAND} ${memaddr_h} ${size} -p${CHIP_POS} -n ${NODE} -fb /tmp/memdump.part >> ${LOG_LOCATION} 2>&1`
     fs_mempba=`filesize "/tmp/memdump.part"`
 
     if [ ${fs_mempba} -eq 0 ]; then
@@ -251,7 +277,7 @@ discover()
     descriptor_h=`printf "%08x" ${descriptor_addr}`
 
     # Extract descriptor base address.
-    state_base_h=`${GETMEM_COMMAND} ${descriptor_h} 8 -ox -quiet -n${NODE}  | tail -n1`
+    state_base_h=`${GETMEM_COMMAND} ${descriptor_h} 8 -ox -quiet -p${CHIP_POS} -n${NODE}  | tail -n1`
     state_base=`printf "%d" ${state_base_h}`
 
     # Calculate offset for the state variable within the descriptor.
@@ -261,7 +287,7 @@ discover()
 
     # Read state.
     #echo "READ STATE: getmempba ${state_addr_h} 1 -ox -quiet | tail -n1 | sed \"s/0x//\""
-    STATE=`${GETMEM_COMMAND} ${state_addr_h} 1 -ox -quiet -n${NODE} | tail -n1 | sed "s/0x//"`
+    STATE=`${GETMEM_COMMAND} ${state_addr_h} 1 -ox -quiet -p${CHIP_POS} -n${NODE} | tail -n1 | sed "s/0x//"`
 
 }
 
