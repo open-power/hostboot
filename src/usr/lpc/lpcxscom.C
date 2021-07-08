@@ -414,7 +414,7 @@ errlHndl_t XscomLpc::_rwLPC(
 
     // This computation determines the starting bit in the 8 byte data register
     // to start reading data from or writing data to, taking into account the
-    // alignment of the input starting address.  For example, if the staring
+    // alignment of the input starting address.  For example, if the starting
     // address is 7 and the length of transfer is one, then the write of that
     // one byte will start 56 bits into the data register.
     const int bitOffset = (xscomLpcAddr & 7 & ~(io_buflen - 1)) << 3;

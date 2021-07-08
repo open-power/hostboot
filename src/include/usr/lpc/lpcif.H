@@ -34,6 +34,11 @@ namespace LPC
 /**
  * @enum LPC::TransType
  * @brief LPC Transaction Types
+ *
+ * @note Any changes to this enum should be reflected in lpcxscom.C's
+ *     cv_lpcTypeDecoder table which maps each of these enumerators into a
+ *     corresponding string.
+ *
  */
 enum TransType {
     TRANS_IO,  // LPC IO Space

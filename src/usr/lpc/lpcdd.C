@@ -51,17 +51,6 @@
 #include <arch/memorymap.H>
 #include <util/misc.H>
 #include <errl/errlreasoncodes.H>
-#include <fapiPlatTrace.H>
-#include <fapi2/plat_target.H>
-#include <fapi2/target.H>
-#include <p10_scom_proc.H>
-#include <p10_lpc_utils.H>
-#include <algorithm>
-#include <fapi2/plat_hwp_invoker.H>
-#include <p10_sbe_lpc_init.H>
-#include <errl/errludtarget.H>
-
-namespace S=scomt::proc;
 
 trace_desc_t* g_trac_lpc;
 TRAC_INIT( & g_trac_lpc, LPC_COMP_NAME, 2*KILOBYTE, TRACE::BUFFER_SLOW);
