@@ -4404,10 +4404,8 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
     fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ_Type l_safe_mode_freq_mhz;
     fapi2::ATTR_SAFE_MODE_VOLTAGE_MV_Type    l_safe_mode_mv;
     fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ_Type l_sys_pstate0_freq_mhz = 0;
-    uint32_t                                 l_safe_mode_op_ps2freq_mhz;
     uint32_t                                 l_safe_mode_op_ps2freq_khz;
     uint32_t                                 l_safe_op_freq_mhz;
-    uint32_t                                 l_safe_dpll_jump_value;
     uint8_t                                  l_safe_op_ps;;
     uint32_t                                 l_core_floor_mhz;
     uint32_t                                 l_op_pt_mhz;
@@ -4494,6 +4492,8 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
                 iv_reference_frequency_khz, iv_reference_frequency_khz);
     FAPI_INF ("step_frequency_khz 0x%08x (%d)",
                 iv_frequency_step_khz, iv_frequency_step_khz);
+    FAPI_INF ("iv_attrs.attr_pm_safe_frequency_mhz 0x%08x (%d)",
+                iv_attrs.attr_pm_safe_frequency_mhz, iv_attrs.attr_pm_safe_frequency_mhz);
 
     if ( iv_attrs.attr_pm_safe_frequency_mhz)
     {
@@ -4507,22 +4507,22 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
         {
              l_op_pt_mhz = iv_attrs.attr_pm_safe_frequency_mhz;
         }
-        FAPI_INF ("Setting safe operating point from the safe mode attribute 0%04x (%d)",
+        FAPI_INF ("Using safe operating point from the safe mode attribute 0%04x (%d)",
                 l_op_pt_mhz, l_op_pt_mhz);
     }
     else
     {
         l_op_pt_mhz = iv_vddPsavFreq;
-        FAPI_INF ("Setting safe operating point from PowerSave 0%04x (%d)",
+        FAPI_INF ("Seeding safe operating point from PowerSave 0%04x (%d)",
                 l_op_pt_mhz, l_op_pt_mhz);
     }
 
     // Safe operational frequency is the MAX(core floor, VPD Powersave).
     // PowerSave is the lowest operational frequency that the part was tested at
-    if ((iv_attrs.attr_system_dds_disable) &&
-        (l_core_floor_mhz > l_op_pt_mhz))
+    if (l_core_floor_mhz > l_op_pt_mhz)
     {
-        FAPI_INF("Core floor greater than safe operating point");
+        FAPI_INF("Moving safe operating to Core floor 0%04x (%d)",
+                l_core_floor_mhz, l_core_floor_mhz);
         l_safe_op_freq_mhz = l_core_floor_mhz;
     }
     else
@@ -4547,31 +4547,7 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
 
     // Given the Pstate might round the frequency, get that frequency
     pState2freq(l_safe_op_ps, &l_safe_mode_op_ps2freq_khz);
-    l_safe_mode_op_ps2freq_mhz = l_safe_mode_op_ps2freq_khz / 1000;
-
-    if (!iv_attrs.attr_system_dds_disable &&
-         iv_attrs.attr_dds_dpll_slew_mode == fapi2::ENUM_ATTR_DDS_DPLL_SLEW_MODE_JUMP_PROTECT)
-    {
-        // Calculate safe jump value for large frequency
-        l_safe_dpll_jump_value =
-            iv_poundW_data.other.dpll_settings.fields.N_L_drop_3p125pct;
-
-        FAPI_INF ("l_safe_dpll_jump_value 0x%x -> %5.2f %%",
-                l_safe_dpll_jump_value,
-                ((float)l_safe_dpll_jump_value/32)*100);
-
-        // Calculate safe mode frequency - Round up to nearest MHz
-        // The uplifted frequency is based on the fact that the DPLL percentage is a
-        // "down" value. Hence:
-        //     X (uplifted safe) = Y (safe operating) / (1 - droop percentage)
-        l_safe_mode_freq_mhz = (uint32_t)
-            (((float)l_safe_mode_op_ps2freq_khz /
-              (1 - (float)l_safe_dpll_jump_value/32) + 500) / 1000);
-    }
-    else
-    {
-        l_safe_mode_freq_mhz = l_safe_mode_op_ps2freq_mhz;
-    }
+    l_safe_mode_freq_mhz = l_safe_mode_op_ps2freq_khz / 1000;
 
     FAPI_INF("Setting safe mode frequency MHz:  0x%04x (%4d)",
               l_safe_mode_freq_mhz,
