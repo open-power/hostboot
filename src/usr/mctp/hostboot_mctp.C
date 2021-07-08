@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,8 @@
 #include <lpc/lpcif.H>
 #include <sys/time.h>
 #include <trace/interface.H>
+#include <initservice/initserviceif.H>
+#include <console/consoleif.H>
 
 extern trace_desc_t* g_trac_mctp;
 
@@ -146,3 +148,14 @@ void __mctp_hostlpc_hostboot_nanosleep(uint64_t i_sec,
 
     return;
 }
+
+void __mctp_hostlpc_hostboot_do_shutdown(uint64_t i_status)
+{
+    INITSERVICE::doShutdown(i_status);
+}
+
+void __mctp_hostlpc_hostboot_console_print(const char* i_message)
+{
+    CONSOLE::displayf(CONSOLE::DEFAULT, nullptr, i_message);
+}
+

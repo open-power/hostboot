@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,6 +29,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
+#include <hbotcompid.H>
 // Headers from local directory
 #include "libmctp-hostlpc.h"
 #include "extern/libmctp-alloc.h"
@@ -51,6 +53,10 @@ extern int __mctp_hostlpc_hostboot_lpc_write(void *arg, void * buf,
 
 extern void __mctp_hostlpc_hostboot_nanosleep(uint64_t i_sec,
                                               uint64_t i_nsec);
+
+extern void __mctp_hostlpc_hostboot_do_shutdown(uint64_t i_status);
+
+extern void __mctp_hostlpc_hostboot_console_print(const char* i_message);
 
 // Perform write on KCS Data register
 static int mctp_hostlpc_kcs_send(struct mctp_binding_hostlpc *hostlpc,
@@ -89,6 +95,61 @@ static int mctp_hostlpc_kcs_send(struct mctp_binding_hostlpc *hostlpc,
     return 0;
 }
 
+// Basic CRC formula
+static uint32_t crc32(const void *buf, size_t len)
+{
+    const uint8_t *buf8 = buf;
+    uint32_t rem = 0xffffffff;
+
+    for (; len; len--) {
+        int i;
+
+        rem = rem ^ *buf8;
+        for (i = 0; i < CHAR_BIT; i++)
+            rem = (rem >> 1) ^ ((rem & 1) * 0xEDB88320);
+
+        buf8++;
+    }
+
+    return rem ^ 0xffffffff;
+}
+
+// Add four-byte CRC at the end of the package
+static bool mctp_hostlpc_add_crc(struct mctp_pktbuf* pkt)
+{
+    uint32_t crc_code = htobe32(crc32(mctp_pktbuf_hdr(pkt),
+                                      mctp_pktbuf_size(pkt)));
+
+    return mctp_pktbuf_push(pkt, &crc_code, sizeof(crc_code));
+}
+
+// Validate the packet CRC and discard it for ease of processing
+static bool mctp_hostlpc_validate_crc(struct mctp_pktbuf* pkt)
+{
+    uint32_t crc_code = 0;
+    void* crc_ptr = NULL;
+
+    crc_code = htobe32(crc32(mctp_pktbuf_hdr(pkt),
+                             // skip the actual CRC code
+                             mctp_pktbuf_size(pkt) - MCTP_CRC_SIZE));
+    // Grab the CRC out of the MCTP packet
+    crc_ptr = pkt->data + (pkt->end - MCTP_CRC_SIZE);
+
+    bool valid = crc_ptr && (!memcmp(&crc_code, crc_ptr, MCTP_CRC_SIZE));
+
+    // Pop the crc off of the packet to simplify further processing
+    pkt->end -= sizeof(crc_code);
+
+    if(!valid)
+    {
+        mctp_prwarn("CRC check failed. Expected: 0x%08x; actual: 0x%08x",
+                    crc_code,
+                    *((uint32_t*)crc_ptr));
+    }
+
+    return valid;
+}
+
 // Notify the bmc that we (the host) have started a tx across the bus
 static int mctp_binding_hostlpc_tx(struct mctp_binding *b,
                                    struct mctp_pktbuf *pkt)
@@ -108,6 +169,13 @@ static int mctp_binding_hostlpc_tx(struct mctp_binding *b,
     uint32_t tmp = htobe32(len);
     hostlpc->ops.lpc_write(hostlpc->ops_data, &tmp,
                            hostlpc->lpc_hdr->tx_offset, sizeof(tmp));
+
+    // Insert the CRC at the end of the buffer; re-compute the length
+    if(mctp_hostlpc_add_crc(pkt))
+    {
+        mctp_prwarn("Could not add CRC to MCTP packet!");
+    }
+    len = mctp_pktbuf_size(pkt);
 
     // then write the buffer to the tx space for len bytes
     hostlpc->ops.lpc_write(hostlpc->ops_data, mctp_pktbuf_hdr(pkt),
@@ -148,6 +216,9 @@ void mctp_hostlpc_rx_start(struct mctp_binding_hostlpc *hostlpc)
         return;
     }
 
+    // Make space for the CRC at the end of the buffer
+    len += MCTP_CRC_SIZE;
+
     // now that we know the length allocate a pkt buffer
     // which will get filled in on the next read
     pkt = mctp_pktbuf_alloc(&hostlpc->binding, len);
@@ -162,7 +233,18 @@ void mctp_hostlpc_rx_start(struct mctp_binding_hostlpc *hostlpc)
     hostlpc->ops.lpc_read(hostlpc->ops_data, mctp_pktbuf_hdr(pkt),
                           hostlpc->lpc_hdr->rx_offset + sizeof(len), len);
 
-    mctp_bus_rx(&hostlpc->binding, pkt);
+    if(mctp_hostlpc_validate_crc(pkt))
+    {
+        mctp_bus_rx(&hostlpc->binding, pkt);
+    }
+    else
+    {
+        mctp_pktbuf_free(pkt);
+        pkt = NULL;
+        mctp_prwarn("Dropping corrupted packet");
+        hostlpc->ops.console_print("Received invalid MCTP packet from BMC. Shutting down.");
+        hostlpc->ops.do_shutdown(MCTP_COMP_ID | RC_CRC_MISMATCH);
+    }
 
 out_complete:
     mctp_hostlpc_kcs_send(hostlpc, KCS_RX_COMPLETE);
@@ -258,11 +340,13 @@ struct mctp_binding_hostlpc *mctp_hostlpc_init_hostboot(uint64_t i_mctpVaddr)
     return NULL;
 
   /* Set internal operations for kcs and lpc */
-  hostlpc->ops.kcs_read  = __mctp_hostlpc_hostboot_kcs_read;
-  hostlpc->ops.kcs_write = __mctp_hostlpc_hostboot_kcs_write;
-  hostlpc->ops.lpc_read  = __mctp_hostlpc_hostboot_lpc_read;
-  hostlpc->ops.lpc_write = __mctp_hostlpc_hostboot_lpc_write;
-  hostlpc->ops.nanosleep = __mctp_hostlpc_hostboot_nanosleep;
+  hostlpc->ops.kcs_read      = __mctp_hostlpc_hostboot_kcs_read;
+  hostlpc->ops.kcs_write     = __mctp_hostlpc_hostboot_kcs_write;
+  hostlpc->ops.lpc_read      = __mctp_hostlpc_hostboot_lpc_read;
+  hostlpc->ops.lpc_write     = __mctp_hostlpc_hostboot_lpc_write;
+  hostlpc->ops.nanosleep     = __mctp_hostlpc_hostboot_nanosleep;
+  hostlpc->ops.do_shutdown   = __mctp_hostlpc_hostboot_do_shutdown;
+  hostlpc->ops.console_print = __mctp_hostlpc_hostboot_console_print;
   hostlpc->ops_data = hostlpc;
 
   // Set LPC map pointer to Hostboot's Virtual Address of

@@ -60,6 +60,9 @@ struct mctp_hdr {
 #define MCTP_HDR_TAG_SHIFT  (0)
 #define MCTP_HDR_TAG_MASK  (0x7)
 
+/* The size of the CRC (in bytes) attached to the end of the packet */
+#define MCTP_CRC_SIZE  sizeof(uint32_t)
+
 /* Baseline maximum size of a MCTP packet */
 #define MCTP_BMTU_PAYLOAD  248
 #define MCTP_BMTU    (MCTP_BMTU_PAYLOAD + sizeof(struct mctp_hdr))

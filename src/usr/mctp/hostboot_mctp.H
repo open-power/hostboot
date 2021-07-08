@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,10 +46,18 @@ extern "C"
 int __mctp_hostlpc_hostboot_lpc_write(void *arg,
     void * buf, uint64_t offset, size_t len);
 
-// Provide a function that will print strings so the MCTP
-// core code has a way to print messages in host boot traces
+// Provide a function that will sleep for a given amount
+// of seconds or nanoseconds
 extern "C"
 void __mctp_hostlpc_hostboot_nanosleep(uint64_t i_sec,
                                        uint64_t i_nsec);
+
+// Perform a shutdown with the provided error code
+extern "C"
+void __mctp_hostlpc_hostboot_do_shutdown(uint64_t i_status);
+
+// Print the provided string to the console
+extern "C"
+void __mctp_hostlpc_hostboot_console_print(const char* i_message);
 
 #endif

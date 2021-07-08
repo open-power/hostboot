@@ -36,7 +36,7 @@ extern "C" {
   container_of(b, struct mctp_binding_hostlpc, binding)
 
 #define HOST_VER_MIN 1
-#define HOST_VER_CUR 2
+#define HOST_VER_CUR 3
 // EID is the MCTP endpoint ID, which aids in routing MCTP packets
 // theorectically we could assign these dynamically but for now
 // we are saying that BMC is EID 8 and hostboot IPL time is HOST_EID 9
@@ -56,6 +56,9 @@ extern "C" {
 // See extern/core.c mctp_msg_ctx_add_pkt for more info.
 #define HOST_MAX_INCOMING_MESSAGE_ALLOCATION 131072
 
+// CRC mismatch error code. Defined here because mctp_reasoncodes.H uses
+// C++ terminology.
+#define RC_CRC_MISMATCH 0x05
 
 struct mctp_binding_hostlpc {
   struct mctp_binding  binding;

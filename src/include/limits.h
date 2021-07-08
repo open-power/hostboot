@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -36,5 +36,7 @@
 
 #define INT_MAX   __INT_MAX__
 #define SHRT_MAX  __SHRT_MAX__
+
+#define CHAR_BIT 8 // Number of bits in a char
 
 #endif

@@ -120,7 +120,8 @@ struct mctp_pktbuf *mctp_pktbuf_alloc(struct mctp_binding *binding, size_t len)
   // is a feature that Hostboot does not currently use.
   // It is not clear if this change can be upstreamed and
   // this issue may be revisted in the future.
-  size = len + binding->pkt_pad;
+  size = len + binding->pkt_pad
+             + MCTP_CRC_SIZE; // CRC attached to the packet
 
   /* todo: pools */
   buf = __mctp_alloc(sizeof(*buf) + size);

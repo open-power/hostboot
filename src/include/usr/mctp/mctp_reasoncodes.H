@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,6 +43,7 @@ namespace MCTP
         RC_SEND_PLDM_FAIL     = MCTP_COMP_ID | 0x02,
         RC_INVALID_MSG_TYPE   = MCTP_COMP_ID | 0x03,
         RC_ERROR_CACHING_MSG  = MCTP_COMP_ID | 0x04,
+      //RC_CRC_MISMATCH       = MCTP_COMP_ID | 0x05 <= defined in libmctp-hostlbc.h
     };
 };
 #endif

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,6 +76,8 @@ struct mctp_binding_lpc_ops {
   int (*lpc_read)(void *data, void *buf, uint64_t offset, size_t len);
   int (*lpc_write)(void *data, void *buf, uint64_t offset, size_t len);
   void (*nanosleep)(uint64_t i_sec, uint64_t nsec);
+  void (*do_shutdown)(uint64_t i_status);
+  void (*console_print)(const char* i_message);
 };
 
 #endif
