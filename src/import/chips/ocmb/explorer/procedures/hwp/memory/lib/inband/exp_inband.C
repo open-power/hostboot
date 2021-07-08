@@ -1039,18 +1039,22 @@ fapi_try_exit:
 
 ///
 /// @brief Converts little endian data array to big endian data and saves into app_fw_ddr_calibration_data_struct
+/// @param[in] i_target the controller
 /// @param[in,out] io_data little endian data to process
 /// @param[out] o_calib_params app_fw_ddr_calibration_data_struct structure
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-/// TODO:ZEN-MST909: Fix SPI flash reader once microchip re-adds support and correct endiannes of the data received before
-///                  saving it to the struct
+/// TODO:ZEN-MST909: Fix SPI flash reader once microchip re-adds support and do the following before saving the struct:
+///                  1. Correct endianness of the data received
+///                  2. Exit out if calculated crc not equal to received crc
 ///
 fapi2::ReturnCode app_fw_ddr_calibration_data_struct_from_little_endian(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
     std::vector<uint8_t>& io_data,
     app_fw_ddr_calibration_data_struct& o_calib_params)
 {
     uint32_t l_idx = 0;
     uint32_t l_temp_var_for_conversion = 0;
+    uint32_t l_crc = 0;
 
     FAPI_TRY(correctMMIOEndianForStruct(io_data));
     FAPI_TRY(correctMMIOword_order(io_data));
@@ -1127,8 +1131,18 @@ fapi2::ReturnCode app_fw_ddr_calibration_data_struct_from_little_endian(
     FAPI_TRY(readCrctEndianArray(io_data, (MSDG_MAX_PSTATE * MAX_NUM_RANKS * NUM_DRAM), l_idx,
                                  &o_calib_params.vref_data.vrefdqDramVoltageSetting.VrefDQ[0][0][0]));
 
+    l_crc = crc32_gen(io_data, l_idx);
+
     FAPI_TRY(readCrctEndian(io_data, l_idx, l_temp_var_for_conversion));
     o_calib_params.crc = l_temp_var_for_conversion;
+
+    FAPI_ASSERT(l_crc == o_calib_params.crc,
+                fapi2::EXP_INBAND_RSP_CRC_ERR()
+                .set_COMPUTED(l_crc)
+                .set_RECEIVED(o_calib_params.crc)
+                .set_OCMB_TARGET(i_target),
+                "%s Response CRC failed to validate computed: 0x%08x got: 0x%08x",
+                mss::c_str(i_target), l_crc, o_calib_params.crc);
 
 fapi_try_exit:
     return fapi2::current_err;
