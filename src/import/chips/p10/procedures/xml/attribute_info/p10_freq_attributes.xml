@@ -108,6 +108,19 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_MRW_FREQ_SYSTEM_CORE_FLOOR_MHZ</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    The system defined floor frequency input to MAX(VPD or WOF Override PowerSave,
+    ATTR_MRW_FREQ_SYSTEM_CORE_FLOOR_MHZ) from which ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ
+    and ATTR_FREQ_CORE_FLOOR_MHZ values are derived.
+  </description>
+  <valueType>uint32</valueType>
+  <platInit>mrw</platInit>
+  <default>3250</default>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
