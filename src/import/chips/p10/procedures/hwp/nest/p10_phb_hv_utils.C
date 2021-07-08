@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -105,7 +105,8 @@ fapi2::ReturnCode p10_phb_hv_check_args(
                 fapi2::P10_PHB_HV_UTILS_INVALID_ARGS()
                 .set_TARGET(i_target)
                 .set_ADDRESS(i_address)
-                .set_SIZE(l_actualTransSize),
+                .set_SIZE(l_actualTransSize)
+                .set_PHB_HV_MAX_ADDR(PHB_HV_MAX_ADDR),
                 "Input address (0x%04llX) is not aligned", i_address);
 
     //Make sure the address is within the PHB HV bounds
@@ -113,7 +114,8 @@ fapi2::ReturnCode p10_phb_hv_check_args(
                 fapi2::P10_PHB_HV_UTILS_INVALID_ARGS()
                 .set_TARGET(i_target)
                 .set_ADDRESS(i_address)
-                .set_SIZE(l_actualTransSize),
+                .set_SIZE(l_actualTransSize)
+                .set_PHB_HV_MAX_ADDR(PHB_HV_MAX_ADDR),
                 "Input addr (0x%04llX) exceeds supported PHB HV address of "
                 "0x%04llX", i_address, PHB_HV_MAX_ADDR);
 

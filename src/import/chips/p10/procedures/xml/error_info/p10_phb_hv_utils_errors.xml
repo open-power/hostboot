@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2020                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2020,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -49,6 +49,7 @@
     <ffdc>TARGET</ffdc>
     <ffdc>ADDRESS</ffdc>
     <ffdc>SIZE</ffdc>
+    <ffdc>PHB_HV_MAX_ADDR</ffdc>
     <!-- Add procedure callout -->
     <callout>
       <procedure>CODE</procedure>
