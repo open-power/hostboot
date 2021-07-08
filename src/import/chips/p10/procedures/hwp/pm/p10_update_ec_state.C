@@ -478,7 +478,7 @@ fapi2::ReturnCode set_atomic_lock(
             FAPI_ASSERT(false,
                         fapi2::SET_ATOMIC_LOCK_BUSY()
                         .set_CORE_TARGET(i_core_target)
-                        .set_DATA(l_data),
+                        .set_CTRL_ATOMIC_LOCK_REG(l_data),
                         "Update ec: atomic lock access error");
         }
     }
@@ -493,7 +493,7 @@ fapi2::ReturnCode set_atomic_lock(
             FAPI_ASSERT(false,
                         fapi2::SET_ATOMIC_LOCK_FAIL()
                         .set_CORE_TARGET(i_core_target)
-                        .set_DATA(l_data),
+                        .set_CTRL_ATOMIC_LOCK_REG(l_data),
                         "Update ec: couldn't grab atomic lock");
         }
     }

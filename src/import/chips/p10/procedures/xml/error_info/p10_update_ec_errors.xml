@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -29,7 +29,7 @@
     <description>Couldn't grab the lock due to resource busy
     </description>
     <ffdc>CORE_TARGET</ffdc>
-    <ffdc>DATA</ffdc>
+    <ffdc>CTRL_ATOMIC_LOCK_REG</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -41,7 +41,7 @@
     <description>Couldn't grab the lock from he hardware
     </description>
     <ffdc>CORE_TARGET</ffdc>
-    <ffdc>DATA</ffdc>
+    <ffdc>CTRL_ATOMIC_LOCK_REG</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
