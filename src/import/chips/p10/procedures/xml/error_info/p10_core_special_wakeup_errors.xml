@@ -33,44 +33,79 @@
     <ffdc>ENTITY</ffdc>
     <ffdc>CORE_TARGET</ffdc>
     <ffdc>CORE_SSHSRC</ffdc>
+    <!-- Add hw callout -->
+    <callout>
+      <target>CORE_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <!-- Add procedure callout -->
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <!-- No deconfig/gaurd required -->
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_SPCWKUP_CODE_BAD_ENTITY</rc>
-    <description>An invalid entity (eg besides FSP, OCC, or PHYP ENUM) was passed
-    to p9_cpu_special_wakeup
-    </description>
-     <ffdc>ENTITY</ffdc>
-     <callout>
-      <procedure>CODE</procedure>
+    <rc>RC_SPCWKUP_CORE_TIMEOUT_MC</rc>
+    <description>Special wakeup to multi-cast core chiplet timed out.</description>
+    <ffdc>POLLCOUNT</ffdc>
+    <ffdc>SP_WKUP_REG_VALUE</ffdc>
+    <ffdc>ENTITY</ffdc>
+    <ffdc>MC_CORE_TARGET</ffdc>
+    <ffdc>CORE_SSHSRC</ffdc>
+    <ffdc>CORE_SELECT</ffdc>
+    <!-- Add hw callout for each core under the multicast core target -->
+    <callout>
+      <childTargets>
+        <parent>MC_CORE_TARGET</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+      </childTargets>
       <priority>HIGH</priority>
     </callout>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_SPCWKUP_CODE_BAD_OP</rc>
-    <description>An invalid operation (eg besides Set or Clear ENUM) was passed to
-    p9_cpu_special_wakeup
-    </description>
-   <ffdc>OPERATION</ffdc>
-   <callout>
+    <!-- Add procedure callout -->
+    <callout>
       <procedure>CODE</procedure>
-      <priority>HIGH</priority>
+      <priority>MEDIUM</priority>
     </callout>
+    <!-- No deconfig/gaurd required -->
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_SYSTEM_IN_CHECKSTOP_STATE</rc>
-    <description>System is in Checkstop state. Attempt to special wakeup a core
-     will not succeed. Hence, HWP will not even attempt for core special wakeup.
+    <description>
+      System is in Checkstop state. Attempt to special wakeup a core
+      will not succeed. Hence, HWP will not even attempt for core special wakeup.
+
+      CORE_TARGET/EQ_TARGET ffdc tags could be both multicast targets, if not 
+      the CORE_SELECT/EQ_MC_GROUP ffdc tags will be set to 0 and MCGROUP_COUNT
+      respectively.
     </description>
     <ffdc>QME_EISR_REG</ffdc>
+    <ffdc>CORE_TARGET</ffdc>
+    <ffdc>CORE_SELECT</ffdc>
+    <ffdc>EQ_TARGET</ffdc>
+    <ffdc>EQ_MC_GROUP</ffdc>
+    <!-- Add procedure callout -->
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_INTERNAL_SPCWKUP_IN_PROGRESS</rc>
-    <description>Special wakeup is already in progress. Ignoring current request.
+    <description>
+      Special wakeup is already in progress. Ignoring current request.
+
+      NOTE: The intention of defining this RC is to generate the constant value
+      fapi2::RC_INTERNAL_SPCWKUP_IN_PROGRESS. No ffdc nor callouts are required
     </description>
+    <!-- Add procedure callout -->
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -79,19 +114,24 @@
     the cores of the quad is not booted yet.
     </description>
     <ffdc>QME_FLAG</ffdc>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_INTERNAL_SPLWKUP_IS_POSSIBLE</rc>
-    <description>An internal RC suggesting that special wakeup request can be serviced.
-    It is based on the fact that the QME servicing the core is active.
-    </description>
-    <ffdc>QME_EISR</ffdc>
+    <ffdc>CORE_TARGET</ffdc>
+    <ffdc>CORE_SELECT</ffdc>
+    <ffdc>EQ_TARGET</ffdc>
+    <ffdc>EQ_MC_GROUP</ffdc>
+    <!-- Add procedure callout -->
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_INTERNAL_NO_TIMEOUT_DUETO_STOP0_BUG</rc>
-    <description>An internal RC suggesting that spl wakeup timeout did not occur due to HW529794
+    <description>
+      An internal RC suggesting that spl wakeup timeout did not occur due to HW529794
+
+      NOTE: The intention of defining this RC is to generate the constant value
+      fapi2::RC_INTERNAL_SPCWKUP_IN_PROGRESS. No ffdc nor callouts are required
     </description>
   </hwpError>
   <!-- *********************************************************************** -->
@@ -103,6 +143,42 @@
     <ffdc>ENTITY</ffdc>
     <ffdc>CORE_TARGET</ffdc>
     <ffdc>CORE_SSHSRC</ffdc>
+    <!-- Add hw callout -->
+    <callout>
+      <target>CORE_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <!-- Add procedure callout -->
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <!-- No deconfig/gaurd required -->
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_SPCWKUP_CORE_HW529794_TIMEOUT_MC</rc>
+    <description>Special wakeup request to multicast core chiplet timed out due to HW529794</description>
+    <ffdc>POLLCOUNT</ffdc>
+    <ffdc>SP_WKUP_REG_VALUE</ffdc>
+    <ffdc>ENTITY</ffdc>
+    <ffdc>MC_CORE_TARGET</ffdc>
+    <ffdc>CORE_SSHSRC</ffdc>
+    <ffdc>CORE_SELECT</ffdc>
+    <!-- Add hw callout for each core under the multicast core target -->
+    <callout>
+      <childTargets>
+        <parent>MC_CORE_TARGET</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+      </childTargets>
+      <priority>HIGH</priority>
+    </callout>
+    <!-- Add procedure callout -->
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <!-- No deconfig/gaurd required for special wakeup timeouts -->
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
