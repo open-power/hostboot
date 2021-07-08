@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -53,6 +53,26 @@ $(1) : $(addprefix $$(BINFILE_CACHE_LOCALDIR),$(2))
 	$$(C1)echo "$(2) $$<" | sha1sum --check > /dev/null
 	$$(C1)cp $$< $$@
 else
+# This rule will only get invoked when GSA is down (hopefully
+# temporarily) and as a result Make won't see the binary cache
+# file. It will then run this rule to try to "create" the file, and
+# the recipe will simply poll for a time until the file comes back. If
+# the file doesn't come back in a certain amount of time, the build
+# will fail.
+$(addprefix $$(BINFILE_CACHE_REMOTEDIR),$(2)):
+	@echo GSA Redundancy: Checking existence of $$@ ; \
+	CTR=1; \
+	while [ ! -f $$@ ] ; do \
+	  echo GSA redundancy: waiting on filesystem for file $$@ ... ; \
+	  if [ $$$$CTR -gt $$$$((10*60)) ] ; then \
+	    echo Timeout waiting for binary cache file $$@ to exist ; \
+	    exit 1 ; \
+	  fi ; \
+	  (( CTR += 1 )) ; \
+	  sleep 1 ; \
+	done ; \
+	echo GSA redundancy: File $$@ became accessible
+
 $(1) : $(addprefix $$(BINFILE_CACHE_REMOTEDIR),$(2))
 	$$(C2) "    BINFILE    $$(notdir $$@)"
 	$$(C1)echo "$(2) $$<" | sha1sum --check > /dev/null
