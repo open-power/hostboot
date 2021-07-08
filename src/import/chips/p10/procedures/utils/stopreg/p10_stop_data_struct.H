@@ -41,8 +41,23 @@
     #include <skiboot.h>
 #endif
 
+// #ifdef __FAPI_2_
+//     #include <fapi2.H>
+// #endif
+
 #ifdef __FAPI_2_
     #include <fapi2.H>
+    #define MY_INF(_fmt_, _args_...) FAPI_INF(_fmt_, ##_args_)
+    #define MY_ERR(_fmt_, _args_...) FAPI_ERR(_fmt_, ##_args_)
+    #define MY_DBG(_fmt_, _args_...) FAPI_DBG(_fmt_, ##_args_)
+#else
+    #ifdef __DEBUG_
+        #define MY_ERR( _fmt_, _args_...) printf( "\n"); printf( _fmt_, ##_args_)
+        #define MY_INF(_fmt_, _args_...)  printf( "\n"); printf( _fmt_, ##_args_)
+    #else
+        #define MY_ERR( _fmt_, _args_...)
+        #define MY_INF(_fmt_, _args_...)
+    #endif
 #endif
 
 #ifdef PPC_HYP
@@ -150,14 +165,6 @@ enum
     MAX_SECTN_ENTRY_SHIFT   =   20,
 
 };
-
-#ifdef __DEBUG_
-    #define MY_ERR( _fmt_, _args_...) printf( "\n"); printf( _fmt_, ##_args_)
-    #define MY_INF(_fmt_, _args_...)  printf( "\n"); printf( _fmt_, ##_args_)
-#else
-    #define MY_ERR( _fmt_, _args_...)
-    #define MY_INF(_fmt_, _args_...)
-#endif
 
 #ifdef __cplusplus
 }  // extern "C"
