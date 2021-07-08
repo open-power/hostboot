@@ -77,6 +77,8 @@ fapi2::ReturnCode p10_spi_clock_init (
     const SpiControlHandle& i_spiHandle)
 {
     fapi2::buffer<uint64_t> data64 = 0;
+    fapi2::buffer<uint16_t> attr_tpm_spi_bus_div = 0;
+
     const uint32_t clockRegAddr = i_spiHandle.base_addr + SPIM_CLOCKCONFIGREG;
     FAPI_TRY(getScom(i_spiHandle.target_chip,
                      clockRegAddr, data64));
@@ -104,6 +106,7 @@ fapi2::ReturnCode p10_spi_clock_init (
         // known to work.
         if (i_spiHandle.engine == SPI_ENGINE_TPM)
         {
+            // Default Value
             // SCK_CLOCK_DIVIDER: 0x015
             //      PAU_freq = 0x0855 MHz in Denali MRW
             //      spi_clock_freq = 12 MHz
@@ -112,7 +115,34 @@ fapi2::ReturnCode p10_spi_clock_init (
             // SCK_RECEIVE_DELAY: 0x01 (7 clock cycles delay)
             // SCK_ECC_SPIMM_ADDR_CORR_DIS: 0x1  no_ecc_address_correction
             // SCK_ECC_CONTROL: 0x01  transparent_read
-            data64 = 0x0150100A00000000ULL;
+            auto default_data64 = 0x0150100A00000000ULL;
+
+            // But also grab the attribute that might have updated values
+            fapi2::buffer<uint16_t> attr_tpm_spi_bus_div = 0;
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_TPM_SPI_BUS_DIV,
+                                   i_spiHandle.target_chip,
+                                   attr_tpm_spi_bus_div),
+                     "Error from FAPI_ATTR_GET (ATTR_TPM_SPI_BUS_DIV");
+
+            // Start with default_data64 and then map in ATTR_TPM_SPI_BUS_DIV values:
+            // - SCK_CLOCK_DIVIDER is bits 0:11 in attribute and config reg
+            // - SCK_RECEIVE_DELAY is bits 12:15 in attribute, but gets
+            //   translated to bits 12:19 in the config reg
+            data64 = default_data64;
+
+            // Set SCK_CLOCK_DIVIDER
+            data64.insertFromRight< 0, 12 >(attr_tpm_spi_bus_div.getBits< 0, 12>());
+
+            // Set SCK_RECEIVE_DELAY
+            data64.insertFromRight< 12, 8 >(0x80 >> attr_tpm_spi_bus_div.getBits< 12, 4>());
+
+#ifndef BOOTLOADER
+            FAPI_INF("Applied attr_tpm_spi_bus_div 0x%.4X to default_data="
+                     "0x%.16llX to get data64=0x%.16llX ",
+                     attr_tpm_spi_bus_div, default_data64, data64);
+#endif
+
+            // Write the config reg
             FAPI_TRY(putScom(i_spiHandle.target_chip, clockRegAddr, data64));
         }
     }
