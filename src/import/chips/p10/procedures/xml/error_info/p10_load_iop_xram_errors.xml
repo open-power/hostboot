@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -50,52 +50,7 @@
   <ffdc>XRAM_IMAGE_PTR</ffdc>
   <ffdc>XRAM_FW_DATA_PTR</ffdc>
   <ffdc>XRAM_FW_SIZE</ffdc>
-  <callout>
-    <procedure>CODE</procedure>
-    <priority>HIGH</priority>
-  </callout>
-</hwpError>
-<!-- ******************************************************************** -->
-<hwpError>
-  <rc>RC_P10_IOP_XRAM_INIT_TIMEOUT_ERROR</rc>
-  <description>
-    SRAM init done bit is not asserted after PHY reset.
-  </description>
-  <ffdc>TARGET</ffdc>
-  <ffdc>TOP</ffdc>
-  <ffdc>ARRAY_MODE_REG</ffdc>
-  <callout>
-    <target>TARGET</target>
-    <priority>HIGH</priority>
-  </callout>
-  <deconfigure>
-    <target>TARGET</target>
-  </deconfigure>
-  <callout>
-    <procedure>CODE</procedure>
-    <priority>LOW</priority>
-  </callout>
-</hwpError>
-<!-- ******************************************************************** -->
-<hwpError>
-  <rc>RC_P10_IOP_XRAM_FW_VER_ERROR</rc>
-  <description>
-    IOP FW version values read from HW reference image
-    and physical hardware are not equivalent
-  </description>
-  <ffdc>TARGET</ffdc>
-  <ffdc>INST</ffdc>
-  <ffdc>FW_VER_0_ATTR</ffdc>
-  <ffdc>FW_VER_0_HW</ffdc>
-  <ffdc>FW_VER_1_ATTR</ffdc>
-  <ffdc>FW_VER_1_HW</ffdc>
-  <callout>
-    <target>TARGET</target>
-    <priority>LOW</priority>
-  </callout>
-  <deconfigure>
-    <target>TARGET</target>
-  </deconfigure>
+  <ffdc>XIP_SECTION</ffdc>
   <callout>
     <procedure>CODE</procedure>
     <priority>HIGH</priority>

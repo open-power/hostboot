@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -81,7 +81,10 @@ fapi2::ReturnCode validateXramAccessParms(
     // Validate offset is within range and 8-byte aligned
     FAPI_ASSERT( (i_offset < MAX_XRAM_IMAGE_SIZE) &&
                  (!(i_offset & 0x7)),
-                 fapi2::P10_IOP_XRAM_OFFSET_ERROR().set_OFFSET(i_offset),
+                 fapi2::P10_IOP_XRAM_OFFSET_ERROR()
+                 .set_OFFSET(i_offset)
+                 .set_PROC_TARGET(l_proc)
+                 .set_PEC_TARGET(i_target),
                  "validateXramAccessParms: XRAM offset must be < 32K and 8-byte aligned: Offset 0x%.16llX.",
                  i_offset);
 
@@ -89,7 +92,9 @@ fapi2::ReturnCode validateXramAccessParms(
     FAPI_ASSERT( (i_top <= 1) && (i_phy <= 1),
                  fapi2::P10_IOP_TOP_PHY_ERROR()
                  .set_IOP_TOP(i_top)
-                 .set_XRAM_PHY(i_phy),
+                 .set_XRAM_PHY(i_phy)
+                 .set_PROC_TARGET(l_proc)
+                 .set_PEC_TARGET(i_target),
                  "validateXramAccessParms: XRAM Iop_top and/or Phy values are invalid. i_top %d, i_phy %d.",
                  i_top, i_phy);
 
@@ -100,7 +105,10 @@ fapi2::ReturnCode validateXramAccessParms(
     FAPI_ASSERT( (l_partialAllowed && i_bytes <= MAX_XRAM_IMAGE_SIZE) ||
                  (i_bytes == MAX_XRAM_IMAGE_SIZE),
                  fapi2::P10_IOP_XRAM_ACCESS_SIZE_ERROR()
-                 .set_ACCESS_SIZE(i_bytes),
+                 .set_ACCESS_SIZE(i_bytes)
+                 .set_PARTIAL_ALLOWED(l_partialAllowed)
+                 .set_PROC_TARGET(l_proc)
+                 .set_PEC_TARGET(i_target),
                  "validateXramAccessParms: Access size (%u) is invalid.", i_bytes);
 
 fapi_try_exit:
@@ -176,7 +184,8 @@ fapi2::ReturnCode doPhyReset(
                          fapi2::P10_IOP_XRAM_INIT_TIMEOUT_ERROR()
                          .set_TARGET(l_pec)
                          .set_TOP(l_top)
-                         .set_ARRAY_MODE_REG(l_arrayModeReg),
+                         .set_ARRAY_MODE_REG(l_arrayModeReg)
+                         .set_PEC_MC_TARGET(i_target),
                          "doPhyReset: SRAM init_done timeout error , top %d.", l_top);
 
         }

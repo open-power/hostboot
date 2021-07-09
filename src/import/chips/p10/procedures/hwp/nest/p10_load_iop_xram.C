@@ -114,7 +114,8 @@ fapi2::ReturnCode p10_load_iop_xram(
                 .set_HW_IMAGE(i_hw_image)
                 .set_XRAM_IMAGE_PTR(l_xramImgPtr)
                 .set_XRAM_FW_DATA_PTR(l_xramFwDataPtr)
-                .set_XRAM_FW_SIZE(l_xramFwSize),
+                .set_XRAM_FW_SIZE(l_xramFwSize)
+                .set_XIP_SECTION(l_section),
                 "p10_load_iop_xram: Invalid XRAM image: l_xramFwDataPtr %p, Size %u",
                 l_xramFwDataPtr, l_xramFwSize);
 

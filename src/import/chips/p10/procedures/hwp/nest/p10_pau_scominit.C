@@ -79,6 +79,10 @@ fapi2::ReturnCode p10_pau_scominit_tl(const fapi2::Target<fapi2::TARGET_TYPE_PRO
     bool l_pau_good[P10_FBC_UTILS_MAX_LINKS] = { false };
     bool l_ocapi_en[P10_FBC_UTILS_MAX_LINKS] = { false };
 
+    uint8_t l_pau_good_flat = 0; //used for FFDC
+    uint8_t l_ocapi_en_flat = 0; //used for FFDC
+    static_assert( P10_FBC_UTILS_MAX_LINKS <= 8 ); //make sure it fits in a byte
+
     // populate array of pau partial goods
     for(auto l_pau_target : i_target.getChildren<fapi2::TARGET_TYPE_PAU>())
     {
@@ -87,6 +91,7 @@ fapi2::ReturnCode p10_pau_scominit_tl(const fapi2::Target<fapi2::TARGET_TYPE_PRO
                  "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
 
         l_pau_good[l_pau_id] = true;
+        l_pau_good_flat |= (0x80 >> l_pau_id);
     }
 
     // populate array of opt links configured for ocapi
@@ -104,6 +109,7 @@ fapi2::ReturnCode p10_pau_scominit_tl(const fapi2::Target<fapi2::TARGET_TYPE_PRO
                      "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
 
             l_ocapi_en[l_iohs_id] = true;
+            l_ocapi_en_flat |= (0x80 >> l_iohs_id);
 
             FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_IOHS_LINK_TRAIN, l_iohs_target, l_link_train),
                      "Error from FAPI_ATTR_SET (ATTR_IOHS_LINK_TRAIN)");
@@ -145,14 +151,18 @@ fapi2::ReturnCode p10_pau_scominit_tl(const fapi2::Target<fapi2::TARGET_TYPE_PRO
             // Throw error if OPT1/2 is configured for OCAPI
             FAPI_ASSERT((l_iohs_id != 1) && (l_iohs_id != 2),
                         fapi2::P10_PAU_SCOMINIT_IOHS_OCAPI_CONFIG_ERR()
-                        .set_IOHS_TARGET(l_iohs_target),
+                        .set_IOHS_TARGET(l_iohs_target)
+                        .set_IOHS_ID(l_iohs_id)
+                        .set_OCAPI_EN(l_ocapi_en_flat),
                         "IOHS1/IOHS2 cannot be configured for OCAPI operations");
 
             // Throw error if OPT0/3 does not have a direct PAU to use
             FAPI_ASSERT((((l_iohs_id == 0) || (l_iohs_id == 3)) && l_tlx_pg == true)
                         || ((l_iohs_id != 0) && (l_iohs_id != 3)),
-                        fapi2::P10_PAU_SCOMINIT_IOHS_OCAPI_CONFIG_ERR()
-                        .set_IOHS_TARGET(l_iohs_target),
+                        fapi2::P10_PAU_SCOMINIT_IOHS_OCAPI_NO_PAU()
+                        .set_IOHS_TARGET(l_iohs_target)
+                        .set_IOHS_ID(l_iohs_id)
+                        .set_PAU_GOOD(l_pau_good_flat),
                         "Unable to map IOHS0/IOHS3 to a valid PAU for OCAPI operations");
 
             // Throw error if OPT4/5/6/7 in west corners do not meet PAU criteria:
@@ -160,8 +170,11 @@ fapi2::ReturnCode p10_pau_scominit_tl(const fapi2::Target<fapi2::TARGET_TYPE_PRO
             // If one link in corner is configured for ocapi, atleast one pau needs to be good
             FAPI_ASSERT(((l_tlx_oc && l_tly_oc) && (l_tlx_pg && l_tly_pg))
                         || ((l_tlx_oc && !l_tly_oc) && (l_tlx_pg || l_tly_pg)),
-                        fapi2::P10_PAU_SCOMINIT_IOHS_OCAPI_CONFIG_ERR()
-                        .set_IOHS_TARGET(l_iohs_target),
+                        fapi2::P10_PAU_SCOMINIT_IOHS_OCAPI_NOT_ENOUGH_PAUS()
+                        .set_IOHS_TARGET(l_iohs_target)
+                        .set_IOHS_ID(l_iohs_id)
+                        .set_PAU_GOOD(l_pau_good_flat)
+                        .set_OCAPI_EN(l_ocapi_en_flat),
                         "Not enough PAU chiplets for IOHS OCAPI link(s) within corner");
 
             // Use direct OPT->PAU mapping for OpenCAPI operations if possible

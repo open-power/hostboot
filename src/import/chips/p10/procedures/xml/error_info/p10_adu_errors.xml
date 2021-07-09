@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -51,6 +51,8 @@
     Procedure: p10_adu_utils
   </description>
   <ffdc>FLAGS</ffdc>
+  <ffdc>ADDRESS</ffdc>
+  <ffdc>PROC_TARGET</ffdc>
   <callout>
     <procedure>CODE</procedure>
     <priority>HIGH</priority>
@@ -59,10 +61,29 @@
 <!-- ******************************************************************** -->
 <hwpError>
   <sbeError/>
-  <rc>RC_P10_ADU_UTILS_INVALID_ARGS</rc>
+  <rc>RC_P10_ADU_UTILS_MISALIGNED_ADDR</rc>
   <description>
-    There is an invalid argument (misaligned address or address out of the
-    fabric address range) passed to the adu access or adu setup procedure
+    There is an invalid argument (misaligned address) passed to the adu
+    access or adu setup procedure
+    Procedure: p10_adu_utils
+  </description>
+  <ffdc>TARGET</ffdc>
+  <ffdc>ADDRESS</ffdc>
+  <ffdc>MAXADDRESS</ffdc>
+  <ffdc>TSIZE</ffdc>
+  <ffdc>FLAGS</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <sbeError/>
+  <rc>RC_P10_ADU_UTILS_INVALID_ADDR</rc>
+  <description>
+    There is an invalid argument (address out of the fabric address range)
+    passed to the adu access or adu setup procedure
     Procedure: p10_adu_utils
   </description>
   <ffdc>TARGET</ffdc>
@@ -84,6 +105,8 @@
     Procedure: p10_adu_utils
   </description>
   <ffdc>TARGET</ffdc>
+  <ffdc>FBC_INITIALIZED</ffdc>
+  <ffdc>FBC_RUNNING</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_ADU_FBC_NOT_INITIALIZED</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -96,9 +119,6 @@
   <deconfigure>
     <target>TARGET</target>
   </deconfigure>
-  <gard>
-    <target>TARGET</target>
-  </gard>
 </hwpError>
 <!-- ******************************************************************** -->
 <hwpError>
@@ -138,36 +158,7 @@
     Procedure: p10_adu_utils
   </description>
   <ffdc>TARGET</ffdc>
-  <ffdc>ADDRESS</ffdc>
   <ffdc>STATUSREG</ffdc>
-  <collectRegisterFfdc>
-    <id>REG_FFDC_ADU_STATUS_REGISTER</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <target>TARGET</target>
-  </collectRegisterFfdc>
-  <callout>
-    <procedure>CODE</procedure>
-    <priority>HIGH</priority>
-  </callout>
-  <callout>
-    <target>TARGET</target>
-    <priority>MEDIUM</priority>
-  </callout>
-</hwpError>
-<!-- ******************************************************************** -->
-<hwpError>
-  <sbeError/>
-  <rc>RC_P10_ADU_STATUS_REG_BAD_BUSY_STATE</rc>
-  <description>
-    The ALTD_STATUS_REGISTER contains an unexpected busy state after waiting
-    a sufficient amount of time; either the busy bit is still set when the
-    handler expects it to be clear, or the busy bit remained clear when the
-    handler expects it to be set.
-    Procedure: p10_adu_utils
-  </description>
-  <ffdc>TARGET</ffdc>
-  <ffdc>EXPBUSYBIT</ffdc>
-  <ffdc>ACTBUSYBIT</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_ADU_STATUS_REGISTER</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -203,6 +194,13 @@
   <callout>
     <target>TARGET</target>
     <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>TARGET</target>
+  </deconfigure>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>LOW</priority>
   </callout>
 </hwpError>
 <!-- ******************************************************************** -->

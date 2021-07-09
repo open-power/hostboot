@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -111,7 +111,9 @@ fapi2::ReturnCode p10_adu_utils_check_args(
     // Verify flag is valid
     FAPI_ASSERT(o_flags.isFlagValid(),
                 fapi2::P10_ADU_UTILS_INVALID_FLAG()
-                .set_FLAGS(i_flags),
+                .set_FLAGS(i_flags)
+                .set_ADDRESS(i_address)
+                .set_PROC_TARGET(i_target),
                 "p10_adu_setup: there was an invalid argument passed in when building flag.  Check error trace!");
 
     // validate transaction size/address and input flag requests
@@ -145,7 +147,7 @@ fapi2::ReturnCode p10_adu_utils_check_args(
 
         // Check the address alignment
         FAPI_ASSERT(!(i_address & (l_actualTransSize - 1)),
-                    fapi2::P10_ADU_UTILS_INVALID_ARGS()
+                    fapi2::P10_ADU_UTILS_MISALIGNED_ADDR()
                     .set_TARGET(i_target)
                     .set_ADDRESS(i_address)
                     .set_MAXADDRESS(P10_FBC_UTILS_FBC_MAX_ADDRESS)
@@ -155,7 +157,7 @@ fapi2::ReturnCode p10_adu_utils_check_args(
 
         // Make sure the address is within the ADU bounds
         FAPI_ASSERT(i_address <= P10_FBC_UTILS_FBC_MAX_ADDRESS,
-                    fapi2::P10_ADU_UTILS_INVALID_ARGS()
+                    fapi2::P10_ADU_UTILS_INVALID_ADDR()
                     .set_TARGET(i_target)
                     .set_ADDRESS(i_address)
                     .set_MAXADDRESS(P10_FBC_UTILS_FBC_MAX_ADDRESS)
@@ -208,7 +210,9 @@ fapi2::ReturnCode p10_adu_utils_check_fbc_state(
     // Make sure the fabric is initialized and running, otherwise set an error
     FAPI_ASSERT(fbc_initialized && fbc_running,
                 fapi2::P10_ADU_FBC_NOT_INITIALIZED()
-                .set_TARGET(i_target),
+                .set_TARGET(i_target)
+                .set_FBC_INITIALIZED(fbc_initialized)
+                .set_FBC_RUNNING(fbc_running),
                 "Fabric is not initialized or running");
 
 fapi_try_exit:
@@ -1079,14 +1083,7 @@ void p10_adu_utils_append_input_data(
     FLAGS.ptr() = static_cast<void*>(&l_flags);
     FLAGS.size() = sizeof(l_flags);
 
-    if ((o_rc == (fapi2::ReturnCode) fapi2::RC_P10_ADU_UTILS_INVALID_ARGS)
-        || (o_rc == (fapi2::ReturnCode) fapi2::RC_P10_ADU_FBC_NOT_INITIALIZED)
-        || (o_rc == (fapi2::ReturnCode) fapi2::RC_P10_ADU_STATUS_REG_ADDRESS_ERR)
-        || (o_rc == (fapi2::ReturnCode) fapi2::RC_P10_ADU_STATUS_REG_UNEXPECTED_ERR)
-        || (o_rc == (fapi2::ReturnCode) fapi2::RC_P10_ADU_UTILS_LOCK_ERR))
-    {
-        FAPI_ADD_INFO_TO_HWP_ERROR(o_rc, RC_P10_ADU_UTILS_EXTRA_INPUT_DATA);
-    }
+    FAPI_ADD_INFO_TO_HWP_ERROR(o_rc, RC_P10_ADU_UTILS_EXTRA_INPUT_DATA);
 
 #endif
 }

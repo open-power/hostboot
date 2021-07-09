@@ -24,16 +24,4 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
 <!-- ******************************************************************** -->
-<hwpError>
-  <rc>RC_P10_CHIPLET_FABRIC_SCOMINIT_INVALID_IOHS_LINK</rc>
-  <description>
-    Unable to map iohs link when configuring fabric station registers.
-  </description>
-  <ffdc>IOHS_LINK_NUM</ffdc>
-  <callout>
-    <procedure>CODE</procedure>
-    <priority>HIGH</priority>
-  </callout>
-</hwpError>
-<!-- ******************************************************************** -->
 </hwpErrors>

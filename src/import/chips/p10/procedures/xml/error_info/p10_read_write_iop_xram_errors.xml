@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -31,6 +31,8 @@
     XRAM offset must be less than 32K and 8-byte aligned.
   </description>
   <ffdc>OFFSET</ffdc>
+  <ffdc>PROC_TARGET</ffdc>
+  <ffdc>PEC_TARGET</ffdc>
   <callout>
     <procedure>CODE</procedure>
     <priority>HIGH</priority>
@@ -45,6 +47,8 @@
   </description>
   <ffdc>IOP_TOP</ffdc>
   <ffdc>XRAM_PHY</ffdc>
+  <ffdc>PROC_TARGET</ffdc>
+  <ffdc>PEC_TARGET</ffdc>
   <callout>
     <procedure>CODE</procedure>
     <priority>HIGH</priority>
@@ -58,9 +62,34 @@
    Invalid IOP XRAM access size. Must access full 32K bytes.
   </description>
   <ffdc>ACCESS_SIZE</ffdc>
+  <ffdc>PARTIAL_ALLOWED</ffdc>
+  <ffdc>PROC_TARGET</ffdc>
+  <ffdc>PEC_TARGET</ffdc>
   <callout>
     <procedure>CODE</procedure>
     <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_IOP_XRAM_INIT_TIMEOUT_ERROR</rc>
+  <description>
+    SRAM init done bit is not asserted after PHY reset.
+  </description>
+  <ffdc>TARGET</ffdc>
+  <ffdc>TOP</ffdc>
+  <ffdc>ARRAY_MODE_REG</ffdc>
+  <ffdc>PEC_MC_TARGET</ffdc>
+  <callout>
+    <target>TARGET</target>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>TARGET</target>
+  </deconfigure>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>LOW</priority>
   </callout>
 </hwpError>
 <!-- ******************************************************************** -->

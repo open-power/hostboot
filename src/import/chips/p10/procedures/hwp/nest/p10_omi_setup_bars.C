@@ -157,19 +157,20 @@ fapi2::ReturnCode p10_omi_setup_bars(
                 FAPI_ASSERT( ((l_pos % 2) == 1) ==  // Is this B channel?
                              ((l_bar_offset & mss::exp::ib::EXPLR_IB_BAR_B_BIT) == mss::exp::ib::EXPLR_IB_BAR_B_BIT),
 
-                             fapi2::P10_OMI_SETUP_BARS_INVALID_BAR()
+                             fapi2::P10_OMI_SETUP_BARS_INVALID_BAR_1()
                              .set_TARGET(l_omi)
-                             .set_BAR_VALUE(l_bar_offset),
+                             .set_BAR_VALUE(l_bar_offset)
+                             .set_POS(l_pos),
                              "B Channel requires BAR size bit set");
 
                 FAPI_ASSERT(((l_bar_offset & mss::exp::ib::EXPLR_IB_BAR_MASK_ZERO) == 0),
-                            fapi2::P10_OMI_SETUP_BARS_INVALID_BAR()
+                            fapi2::P10_OMI_SETUP_BARS_INVALID_BAR_2()
                             .set_TARGET(l_omi)
                             .set_BAR_VALUE(l_bar_offset),
                             "Bar size not honored");
 
                 FAPI_ASSERT(((l_bar_offset & mss::exp::ib::EXPLR_IB_MMIO_OFFSET) == 0),
-                            fapi2::P10_OMI_SETUP_BARS_INVALID_BAR()
+                            fapi2::P10_OMI_SETUP_BARS_INVALID_BAR_3()
                             .set_TARGET(l_omi)
                             .set_BAR_VALUE(l_bar_offset),
                             "MMIO bit must not be set");

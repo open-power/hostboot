@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2020                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2020,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -30,10 +30,68 @@
     The IOHS link cannot be configured for OpenCAPI operations.
   </description>
   <ffdc>IOHS_TARGET</ffdc>
+  <ffdc>IOHS_ID</ffdc>
+  <ffdc>OCAPI_EN</ffdc>
+  <!-- Probably a MRW bug -->
   <callout>
     <procedure>CODE</procedure>
     <priority>HIGH</priority>
   </callout>
+  <!-- Knock out the link in question to see if we can boot without it -->
+  <callout>
+    <target>IOHS_TARGET</target>
+    <priority>LOW</priority>
+  </callout>
+  <deconfigure>
+    <target>IOHS_TARGET</target>
+  </deconfigure>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_PAU_SCOMINIT_IOHS_OCAPI_NO_PAU</rc>
+  <description>
+    Unable to map IOHS0/IOHS3 to a valid PAU for OCAPI operations.
+  </description>
+  <ffdc>IOHS_TARGET</ffdc>
+  <ffdc>IOHS_ID</ffdc>
+  <ffdc>PAU_GOOD</ffdc>
+  <!-- Probably a MRW bug -->
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+  <!-- Knock out the link in question to see if we can boot without it -->
+  <callout>
+    <target>IOHS_TARGET</target>
+    <priority>LOW</priority>
+  </callout>
+  <deconfigure>
+    <target>IOHS_TARGET</target>
+  </deconfigure>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_PAU_SCOMINIT_IOHS_OCAPI_NOT_ENOUGH_PAUS</rc>
+  <description>
+    Not enough PAU chiplets for IOHS OCAPI link(s) within corner.
+  </description>
+  <ffdc>IOHS_TARGET</ffdc>
+  <ffdc>IOHS_ID</ffdc>
+  <ffdc>OCAPI_EN</ffdc>
+  <ffdc>PAU_GOOD</ffdc>
+  <!-- Probably a MRW bug -->
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+  <!-- Knock out the link in question to see if we can boot without it -->
+  <callout>
+    <target>IOHS_TARGET</target>
+    <priority>LOW</priority>
+  </callout>
+  <deconfigure>
+    <target>IOHS_TARGET</target>
+  </deconfigure>
 </hwpError>
 <!-- ******************************************************************** -->
 </hwpErrors>

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2017,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2017,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -26,10 +26,35 @@
 <hwpErrors>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_P10_OMI_SETUP_BARS_INVALID_BAR</rc>
+    <rc>RC_P10_OMI_SETUP_BARS_INVALID_BAR_1</rc>
     <description>ATTR_OMI_INBAND_BAR_BASE_ADDR_OFFSET had an invalid value</description>
     <ffdc>TARGET</ffdc>
     <ffdc>BAR_VALUE</ffdc>
+    <ffdc>POS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_P10_OMI_SETUP_BARS_INVALID_BAR_2</rc>
+    <description>ATTR_OMI_INBAND_BAR_BASE_ADDR_OFFSET had an invalid value</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>BAR_VALUE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_P10_OMI_SETUP_BARS_INVALID_BAR_3</rc>
+    <description>ATTR_OMI_INBAND_BAR_BASE_ADDR_OFFSET had an invalid value</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>BAR_VALUE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
 </hwpErrors>
