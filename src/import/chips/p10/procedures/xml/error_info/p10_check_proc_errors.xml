@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2020                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2020,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -34,8 +34,12 @@
     <ffdc>TARGET</ffdc>
     <ffdc>INPUT_BUF</ffdc>
     <callout>
-      <target>TARGET</target>
+      <procedure>CODE</procedure>
       <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>MEDIUM</priority>
     </callout>
   </hwpError>
   <!-- ******************************************************************** -->
