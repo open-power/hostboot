@@ -74,6 +74,7 @@
     Provided by the #V bucket of module VPD.
   </description>
   <valueType>uint32</valueType>
+  <!-- platinit included for Cronus use only *-->
   <platInit/>
   <writeable/>
 </attribute>
@@ -89,8 +90,10 @@
     Provided by the #V bucket of module VPD.
   </description>
   <valueType>uint32</valueType>
+  <!-- platinit included for Cronus use only *-->
   <platInit/>
   <writeable/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -102,6 +105,7 @@
     Used for fabric epsilon calculations.
   </description>
   <valueType>uint32</valueType>
+  <!-- platinit included for Cronus use only *-->
   <platInit/>
   <writeable/>
   <initToZero/>
@@ -129,6 +133,7 @@
     Used for fabric epsilon calculations.
   </description>
   <valueType>uint32</valueType>
+  <!-- platinit included for Cronus use only *-->
   <platInit/>
   <writeable/>
   <initToZero/>

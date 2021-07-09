@@ -100,14 +100,15 @@ fapi2::ReturnCode pm_set_frequency(
     uint16_t l_tmp_wofbase_freq = 0;
     uint16_t l_part_running_freq = 0;
 
-    fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ_Type l_sys_freq_core_floor_mhz = 0;
     fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ_OVERRIDE_Type l_sys_freq_core_floor_mhz_ovr;
+    fapi2::ATTR_MRW_FREQ_SYSTEM_CORE_FLOOR_MHZ_Type l_mrw_freq_core_floor_mhz;
+    fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ_Type l_sys_freq_core_floor_mhz = 0;
+    fapi2::ATTR_FREQ_CORE_FLOOR_MHZ_Type l_floor_freq_mhz = 0;
     fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ_Type l_sys_pstate0_freq_mhz = 0;
     fapi2::ATTR_SYSTEM_COMPAT_FREQ_MHZ_Type l_sys_compat_freq_mhz = 0;
     fapi2::ATTR_NOMINAL_FREQ_MHZ_Type l_sys_nominal_freq_mhz = 0;
     fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ_Type l_sys_freq_core_ceil_mhz = 0;
     fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ_OVERRIDE_Type l_sys_freq_core_ceil_mhz_ovr;
-    fapi2::ATTR_FREQ_CORE_FLOOR_MHZ_Type l_floor_freq_mhz = 0;
     fapi2::ATTR_FREQ_CORE_CEILING_MHZ_Type l_ceil_freq_mhz = 0;
     fapi2::ATTR_CHIP_EC_FEATURE_STATIC_POUND_V_Type l_chip_static_pound_v = 0;
     fapi2::ATTR_POUND_V_STATIC_DATA_ENABLE_Type l_poundv_static_data = 0;
@@ -135,6 +136,9 @@ fapi2::ReturnCode pm_set_frequency(
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ_OVERRIDE,
                 i_sys_target, l_sys_freq_core_floor_mhz_ovr));
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MRW_FREQ_SYSTEM_CORE_FLOOR_MHZ,
+                i_sys_target, l_mrw_freq_core_floor_mhz));
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ_OVERRIDE,
                 i_sys_target, l_sys_freq_core_ceil_mhz_ovr));
@@ -451,7 +455,7 @@ fapi2::ReturnCode pm_set_frequency(
 
 
         // Now clip things with system overrides
-        // ATTR_FREQ_SYSTEM_CORE_CEIL_MHZ_OVERRIDE --> MRW
+        // ATTR_FREQ_SYSTEM_CORE_CEIL_MHZ_OVERRIDE --> Lab
         //  -->l_sys_freq_core_ceil_mhz_ovr
         //
         // ATTR_FREQ_SYSTEM_CORE_CEIL_MHZ  -->calculated ceiling, can be
@@ -459,36 +463,27 @@ fapi2::ReturnCode pm_set_frequency(
         //  -->l_sys_freq_core_ceil_mhz
         //
 
-        // Determine the minimum of the following to set the maximum frequency
-        //    - EC dependent limits if l_sys_freq_core_ceil_mhz_ovr is non-zero.
-        //    - l_sys_freq_core_ceil_mhz,
-        //    - l_sys_freq_core_ceil_mhz_ovr,
-        //    - the computed Pstate 0.
-
-        if (l_sys_freq_core_ceil_mhz_ovr &&
-            l_sys_freq_core_ceil_mhz_ovr < l_sys_freq_core_ceil_mhz)
+       // The ceiling override trumps everything
+        if (l_sys_freq_core_ceil_mhz_ovr)
         {
             l_sys_freq_core_ceil_mhz = l_sys_freq_core_ceil_mhz_ovr;
-            FAPI_INF("Lowering Pstate0 based on ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ_OVERRIDE:  %04d ",
+            FAPI_INF("Changing Pstate0 based on ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ_OVERRIDE:  %04d ",
                     l_sys_freq_core_ceil_mhz_ovr);
+
+            if (l_sys_freq_core_ceil_mhz_ovr > l_sys_freq_core_ceil_mhz)
+            {
+                FAPI_IMP("WARNING: ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ_OVERRIDE of %04d is raising PSTATE 0 beyond "
+                         "the VPD based frequency of %04d .  Pstate operations may lead to suspicious outcomes",
+                    l_sys_freq_core_ceil_mhz_ovr, l_sys_freq_core_ceil_mhz);
+            }
         }
 
-        // Determine the maximum of the following to set the minimum frequency
-        //    - l_sys_freq_core_floor_mhz,
-        //    - l_sys_freq_core_floor_mhz_ovr
-        //    - the computed floor.
+        // Raise the floor if the computed attribute is overrided for some reason
         if (l_sys_freq_core_floor_mhz > l_floor_freq_mhz)
         {
             l_floor_freq_mhz = l_sys_freq_core_floor_mhz;
             FAPI_INF("Raising the floor based on ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ:  %04d ",
                     l_sys_freq_core_floor_mhz);
-        }
-
-        if (l_sys_freq_core_floor_mhz_ovr > l_floor_freq_mhz)
-        {
-            l_floor_freq_mhz = l_sys_freq_core_floor_mhz_ovr;
-            FAPI_INF("Raising floor based on ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ_OVERRIDE:  %04d ",
-                    l_sys_freq_core_floor_mhz_ovr);
         }
 
         // Adjust the nominal to be between the ceiling and the floor
@@ -515,6 +510,21 @@ fapi2::ReturnCode pm_set_frequency(
             l_floor_freq_mhz = l_computed_freq_mhz;
         }
 
+        // Adjust with MRW defined floor
+        if (l_mrw_freq_core_floor_mhz > l_floor_freq_mhz)
+        {
+            l_floor_freq_mhz = l_mrw_freq_core_floor_mhz;
+            FAPI_INF("Setting the floor based on ATTR_MRW_FREQ_SYSTEM_CORE_FLOOR_MHZ:  %04d ",
+                    l_mrw_freq_core_floor_mhz);
+        }
+
+        // The floor override trumps everything
+        if (l_sys_freq_core_floor_mhz_ovr)
+        {
+            l_floor_freq_mhz = l_sys_freq_core_floor_mhz_ovr;
+            FAPI_INF("Setting the floor based on ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ_OVERRIDE:  %04d ",
+                    l_sys_freq_core_floor_mhz_ovr);
+        }
         // Write out attributes with the results
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ,     i_sys_target, l_sys_pstate0_freq_mhz));
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_COMPAT_FREQ_MHZ,      i_sys_target, l_sys_compat_freq_mhz));
