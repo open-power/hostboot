@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -26,18 +26,22 @@
     <hwpError>
         <rc>RC_XIP_SECTION_APPEND_INVALID_PARAMETERS</rc>
         <description>
-            Error calling p9_xip_section_append when checking input parameters 
+            Error calling p10_xip_section_append when checking input parameters
         </description>
         <ffdc>SECTION</ffdc>
         <ffdc>SECTION_SIZE</ffdc>
         <ffdc>SECTION_ID</ffdc>
         <ffdc>IMAGE</ffdc>
         <ffdc>IMAGE_SIZE</ffdc>
+        <callout>
+          <procedure>CODE</procedure>
+          <priority>HIGH</priority>
+        </callout>
     </hwpError>
     <hwpError>
         <rc>RC_XIP_SECTION_APPEND_APPEND_RC</rc>
         <description>
-            Error calling p9_xip_section_append when running p9_xip_append
+            Error calling p10_xip_section_append when running p9_xip_append
         </description>
         <ffdc>APPEND_RC</ffdc>
         <ffdc>SECTION</ffdc>
@@ -45,11 +49,15 @@
         <ffdc>SECTION_ID</ffdc>
         <ffdc>IMAGE</ffdc>
         <ffdc>IMAGE_SIZE</ffdc>
+        <callout>
+          <procedure>CODE</procedure>
+          <priority>HIGH</priority>
+        </callout>
     </hwpError>
     <hwpError>
         <rc>RC_XIP_SECTION_APPEND_SIZE_RC</rc>
         <description>
-            Error calling p9_xip_section_append when running p9_xip_image_size
+            Error calling p10_xip_section_append when running p9_xip_image_size
         </description>
         <ffdc>SIZE_RC</ffdc>
         <ffdc>SECTION</ffdc>
@@ -57,5 +65,9 @@
         <ffdc>SECTION_ID</ffdc>
         <ffdc>IMAGE</ffdc>
         <ffdc>IMAGE_SIZE</ffdc>
+        <callout>
+          <procedure>CODE</procedure>
+          <priority>HIGH</priority>
+        </callout>
     </hwpError>
 </hwpErrors>
