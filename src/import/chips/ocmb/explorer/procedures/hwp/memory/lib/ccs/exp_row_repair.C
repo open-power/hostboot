@@ -599,7 +599,6 @@ fapi2::ReturnCode dynamic_row_repair( const mss::rank::info<>& i_rank_info,
     fapi2::buffer<uint64_t> l_modeq_reg;
     fapi2::buffer<uint64_t> l_mcbist_status;
     fapi2::buffer<uint64_t> l_ccs_status;
-    poll_parameters l_poll_parameters;
     bool l_poll_result = false;
 
     // Get port rank and target
@@ -619,39 +618,45 @@ fapi2::ReturnCode dynamic_row_repair( const mss::rank::info<>& i_rank_info,
               "Failed sppr program setup for dynamic_row_repair on %s",
               mss::c_str(l_port_target)  );
 
-    // Poll MCBIST and CCS STATQ to ensure both are free
-    // Verify that the in-progress bit has not been set for MCBIST, meaning the MCBIST is free
-    l_poll_result = mss::poll(l_ocmb_target, MCB::STATQ_REG, l_poll_parameters,
-                              [&l_mcbist_status, &l_ocmb_target](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
-    {
-        FAPI_DBG("%s looking for mcbist to clear, mcbist statq 0x%llx, remaining: %d", mss::c_str(l_ocmb_target), stat_reg, poll_remaining);
-        l_mcbist_status = stat_reg;
-        // We're done polling when we see mcbist is not in progress.
-        return (l_mcbist_status.getBit<MCB::MCBIST_IN_PROGRESS>() == false);
-    });
-
-    // Check that mcbist is not being used after poll
-    FAPI_ASSERT(l_poll_result,
-                fapi2::EXP_ROW_REPAIR_MCBIST_STUCK_IN_PROGRESS().
-                set_OCMB_TARGET(l_ocmb_target),
-                "%s MCBIST failed to exit previous command and is not available for repair",
-                mss::c_str(l_ocmb_target));
+    // Stop the CCS engine just for giggles - it might be running ...
+    FAPI_TRY( mss::ccs::start_stop(l_ocmb_target, mss::states::STOP),
+              "Error stopping CCS engine before ccs::execution on %s",
+              mss::c_str(l_ocmb_target) );
 
     // Verify that the in-progress bit has not been set for CCS, meaning no other CCS is running
-    l_poll_result = mss::poll(l_ocmb_target, CCS::STATQ_REG, l_poll_parameters,
-                              [&l_ccs_status, &l_ocmb_target](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
+    l_poll_result = mss::poll(l_ocmb_target, CCS::STATQ_REG, poll_parameters(),
+                              [](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
     {
-        FAPI_DBG("%s looking for ccs to clear, ccs statq 0x%llx, remaining: %d", mss::c_str(l_ocmb_target), stat_reg, poll_remaining);
-        l_ccs_status = stat_reg;
+        FAPI_INF("ccs statq (stop) 0x%llx, remaining: %d", stat_reg, poll_remaining);
         // We're done polling when we see ccs is not in progress.
-        return (l_ccs_status.getBit<CCS::CCS_IN_PROGRESS>() == false);
+        return stat_reg.getBit<CCS::CCS_IN_PROGRESS>() != 1;
     });
 
     // Check that ccs is not being used after poll
-    FAPI_ASSERT(l_poll_result,
+    FAPI_ASSERT(l_poll_result == true,
                 fapi2::EXP_ROW_REPAIR_CCS_STUCK_IN_PROGRESS().
                 set_OCMB_TARGET(l_ocmb_target),
                 "%s CCS engine is in use and is not available for repair",
+                mss::c_str(l_ocmb_target));
+
+    // Stop any ongoing MCBIST command
+    FAPI_TRY( mss::memdiags::stop(l_ocmb_target), "MCBIST engine failed to stop current command in progress on %s",
+              mss::c_str(l_ocmb_target) );
+
+    // Verify that the in-progress bit has not been set for MCBIST, meaning the MCBIST is free
+    l_poll_result = mss::poll(l_ocmb_target, MCB::STATQ_REG, poll_parameters(),
+                              [](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
+    {
+        FAPI_INF("mcbist statq (stop) 0x%llx, remaining: %d", stat_reg, poll_remaining);
+        // We're done polling when we see mcbist is not in progress.
+        return stat_reg.getBit<MCB::MCBIST_IN_PROGRESS>() != 1;
+    });
+
+    // Check that mcbist is not being used after poll
+    FAPI_ASSERT(l_poll_result == true,
+                fapi2::EXP_ROW_REPAIR_MCBIST_STUCK_IN_PROGRESS().
+                set_OCMB_TARGET(l_ocmb_target),
+                "%s MCBIST failed to exit previous command and is not available for repair",
                 mss::c_str(l_ocmb_target));
 
     FAPI_INF("%s Deploying dynamic row repair", mss::c_str(l_ocmb_target));
