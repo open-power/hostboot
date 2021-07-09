@@ -142,7 +142,8 @@ fapi2::ReturnCode p10_getsram(
                      fapi2::P10_INVALID_OCC_ACCESS_MODE_ERROR()
                      .set_PROC_TARGET(i_target)
                      .set_PERV_CHIPLET_ID(i_pervChipletId)
-                     .set_OCC_MODE(l_occMode),
+                     .set_OCC_MODE(l_occMode)
+                     .set_OFFSET(i_offset),
                      "Invalid OCC SRAM access mode (%d)", l_occMode);
 
         // Get OCB channel (bits 2:4 of i_mode)
