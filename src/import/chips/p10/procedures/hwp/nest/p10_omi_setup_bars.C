@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,11 +63,17 @@ fapi2::ReturnCode p10_omi_setup_bars(
     uint64_t l_base_addr_mmio;
     uint8_t l_mcc_pos;
     fapi2::ATTR_CHIP_EC_FEATURE_HW550549_Type l_hw550549;
+    fapi2::ATTR_CHIP_EC_FEATURE_SW528598_Type l_sw528598;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW550549,
                            i_target,
                            l_hw550549),
              "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW550549)");
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_SW528598,
+                           i_target,
+                           l_sw528598),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_SW528598)");
 
     // determine base address of chip MMIO range
     FAPI_TRY(p10_fbc_utils_get_chip_base_address(i_target,
@@ -240,6 +246,12 @@ fapi2::ReturnCode p10_omi_setup_bars(
 
         // Setup MC Fault Isolation Action1 register buffer
         l_mcfiraction.setBit<SCOMFIR_MCFIR_MC_INTERNAL_RECOVERABLE_ERROR>();
+
+        if(l_sw528598)
+        {
+            l_mcfiraction.setBit<P10_20_SCOMFIR_MCFIR_COMMAND_LIST_EARLY_HANG>();
+        }
+
         l_mcfiraction.setBit<SCOMFIR_MCFIR_INBAND_BAR_HIT_WITH_INCORRECT_TTYPE>();
         l_mcfiraction.setBit<SCOMFIR_MCFIR_COMMAND_LIST_TIMEOUT>();
         l_mcfiraction.setBit<SCOMFIR_MCFIR_POP_RCMD_NOHIT>();
@@ -256,6 +268,12 @@ fapi2::ReturnCode p10_omi_setup_bars(
         l_mcfirmask_and.clearBit<SCOMFIR_MCFIR_MC_INTERNAL_NONRECOVERABLE_ERROR>();
         l_mcfirmask_and.clearBit<SCOMFIR_MCFIR_POWERBUS_PROTOCOL_ERROR>();
         l_mcfirmask_and.clearBit<SCOMFIR_MCFIR_INBAND_BAR_HIT_WITH_INCORRECT_TTYPE>();
+
+        if(l_sw528598)
+        {
+            l_mcfirmask_and.clearBit<P10_20_SCOMFIR_MCFIR_COMMAND_LIST_EARLY_HANG>();
+        }
+
         l_mcfirmask_and.clearBit<SCOMFIR_MCFIR_MULTIPLE_BAR_HIT>();
         l_mcfirmask_and.clearBit<SCOMFIR_MCFIR_COMMAND_LIST_TIMEOUT>();
         l_mcfirmask_and.clearBit<SCOMFIR_MCFIR_POP_RCMD_NOHIT>();

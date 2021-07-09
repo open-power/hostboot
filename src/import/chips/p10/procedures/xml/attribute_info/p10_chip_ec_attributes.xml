@@ -1872,6 +1872,23 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_SW528598</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Determine if chip supports MC Command List Early Hang FIR  
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_P10</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_IMA_DISABLE_BIT</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
