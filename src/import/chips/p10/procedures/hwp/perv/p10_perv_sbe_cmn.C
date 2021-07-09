@@ -105,6 +105,9 @@ fapi2::ReturnCode p10_perv_sbe_cmn_array_init_module(
     fapi2::buffer<uint64_t> l_read_reg;
     fapi2::buffer<uint64_t> l_data64;
     int l_timeout = 0;
+    auto l_parent_proc = i_mcast_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+    (void)l_parent_proc; // touch variable to get around unused variable warning
+    // for configs that do not execute ffdc paths
 
     FAPI_INF("p10_perv_sbe_cmn_array_init_module: Entering ...");
 
@@ -190,7 +193,8 @@ fapi2::ReturnCode p10_perv_sbe_cmn_array_init_module(
                 fapi2::SBE_ARRAYINIT_POLL_THRESHOLD_ERR()
                 .set_PERV_CPLT_STAT0(l_data64)
                 .set_LOOP_COUNT(l_timeout)
-                .set_HW_DELAY(P10_OPCG_DONE_ARRAYINIT_HW_NS_DELAY),
+                .set_HW_DELAY(P10_OPCG_DONE_ARRAYINIT_HW_NS_DELAY)
+                .set_PROC_TARGET(l_parent_proc),
                 "ERROR:OPCG DONE BIT NOT SET");
 
     //Getting CPLT_STAT0 register value
@@ -200,7 +204,8 @@ fapi2::ReturnCode p10_perv_sbe_cmn_array_init_module(
     FAPI_ASSERT(l_read_reg.getBit<CPLT_STAT0_ABIST_DONE_DC>() == 1,
                 fapi2::SRAM_ABIST_DONE_BIT_ERR()
                 .set_PERV_CPLT_STAT(l_read_reg)
-                .set_SELECT_SRAM(true),
+                .set_SELECT_SRAM(true)
+                .set_PROC_TARGET(l_parent_proc),
                 "ERROR:SRAM_ABIST_DONE_BIT_NOT_SET");
 
     FAPI_DBG("Clear OPCG Reg0");
@@ -255,6 +260,9 @@ fapi2::ReturnCode p10_perv_sbe_cmn_scan0_module(const
     fapi2::buffer<uint16_t> l_scan_types;
     fapi2::buffer<uint64_t> l_data64;
     int l_timeout = 0;
+    auto l_parent_proc = i_mcast_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+    (void)l_parent_proc; // touch variable to get around unused variable warning
+    // for configs that do not execute ffdc paths
 
     FAPI_INF("p10_perv_sbe_cmn_scan0_module: Entering ...");
 
@@ -316,7 +324,8 @@ fapi2::ReturnCode p10_perv_sbe_cmn_scan0_module(const
                 fapi2::SBE_SCAN0_DONE_POLL_THRESHOLD_ERR()
                 .set_PERV_CPLT_STAT0(l_data64)
                 .set_LOOP_COUNT(l_timeout)
-                .set_HW_DELAY(P10_OPCG_DONE_SCAN0_HW_NS_DELAY),
+                .set_HW_DELAY(P10_OPCG_DONE_SCAN0_HW_NS_DELAY)
+                .set_PROC_TARGET(l_parent_proc),
                 "ERROR:OPCG DONE BIT NOT SET");
 
 
@@ -372,6 +381,9 @@ fapi2::ReturnCode p10_perv_sbe_cmn_clock_start_stop(const
     bool l_reg_ary = false;
     fapi2::buffer<uint64_t> l_data64;
     int l_timeout = 0;
+    auto l_parent_proc = i_mcast_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+    (void)l_parent_proc; // touch variable to get around unused variable warning
+    // for configs that do not execute ffdc paths
 
     FAPI_INF("p10_perv_sbe_cmn_clock_start_stop: Entering ...");
 
@@ -432,7 +444,8 @@ fapi2::ReturnCode p10_perv_sbe_cmn_clock_start_stop(const
                 fapi2::CPLT_OPCG_DONE_NOT_SET_ERR()
                 .set_PERV_CPLT_STAT0(l_data64)
                 .set_LOOP_COUNT(l_timeout)
-                .set_HW_DELAY(NS_DELAY),
+                .set_HW_DELAY(NS_DELAY)
+                .set_PROC_TARGET(l_parent_proc),
                 "ERROR:CHIPLET OPCG DONE NOT SET AFTER CLOCK START STOP CMD");
 
     // check clock status SL, NSL, ARY
@@ -452,7 +465,8 @@ fapi2::ReturnCode p10_perv_sbe_cmn_clock_start_stop(const
                         .set_CLOCK_CMD(i_clock_cmd)
                         .set_CLOCK_TYPE(CLOCK_STAT_SL)
                         .set_REGIONS(l_data64)
-                        .set_READ_CLK(l_sl_clock_status),
+                        .set_READ_CLK(l_sl_clock_status)
+                        .set_PROC_TARGET(l_parent_proc),
                         "CLOCK RUNNING STATUS FOR SL TYPE NOT MATCHING WITH EXPECTED REGIONS VALUE");
         }
 
@@ -468,7 +482,8 @@ fapi2::ReturnCode p10_perv_sbe_cmn_clock_start_stop(const
                         .set_CLOCK_CMD(i_clock_cmd)
                         .set_CLOCK_TYPE(CLOCK_STAT_NSL)
                         .set_REGIONS(l_data64)
-                        .set_READ_CLK(l_nsl_clock_status),
+                        .set_READ_CLK(l_nsl_clock_status)
+                        .set_PROC_TARGET(l_parent_proc),
                         "CLOCK RUNNING STATUS FOR NSL TYPE NOT MATCHING WITH EXPECTED REGIONS VALUE");
         }
 
@@ -484,7 +499,8 @@ fapi2::ReturnCode p10_perv_sbe_cmn_clock_start_stop(const
                         .set_CLOCK_CMD(i_clock_cmd)
                         .set_CLOCK_TYPE(CLOCK_STAT_ARY)
                         .set_REGIONS(l_data64)
-                        .set_READ_CLK(l_ary_clock_status),
+                        .set_READ_CLK(l_ary_clock_status)
+                        .set_PROC_TARGET(l_parent_proc),
                         "CLOCK RUNNING STATUS FOR ARY TYPE NOT MATCHING WITH EXPECTED REGIONS VALUE");
         }
 
@@ -500,7 +516,8 @@ fapi2::ReturnCode p10_perv_sbe_cmn_clock_start_stop(const
                         .set_CLOCK_CMD(i_clock_cmd)
                         .set_CLOCK_TYPE(CLOCK_STAT_SL)
                         .set_REGIONS(l_data64)
-                        .set_READ_CLK(l_sl_clock_status),
+                        .set_READ_CLK(l_sl_clock_status)
+                        .set_PROC_TARGET(l_parent_proc),
                         "CLOCK STOP STATUS FOR SL TYPE NOT MATCHING WITH EXPECTED REGIONS VALUE");
         }
 
@@ -516,7 +533,8 @@ fapi2::ReturnCode p10_perv_sbe_cmn_clock_start_stop(const
                         .set_CLOCK_CMD(i_clock_cmd)
                         .set_CLOCK_TYPE(CLOCK_STAT_NSL)
                         .set_REGIONS(l_data64)
-                        .set_READ_CLK(l_nsl_clock_status),
+                        .set_READ_CLK(l_nsl_clock_status)
+                        .set_PROC_TARGET(l_parent_proc),
                         "CLOCK STOP STATUS FOR NSL TYPE NOT MATCHING WITH EXPECTED REGIONS VALUE");
         }
 
@@ -532,7 +550,8 @@ fapi2::ReturnCode p10_perv_sbe_cmn_clock_start_stop(const
                         .set_CLOCK_CMD(i_clock_cmd)
                         .set_CLOCK_TYPE(CLOCK_STAT_ARY)
                         .set_REGIONS(l_data64)
-                        .set_READ_CLK(l_ary_clock_status),
+                        .set_READ_CLK(l_ary_clock_status)
+                        .set_PROC_TARGET(l_parent_proc),
                         "CLOCK STOP STATUS FOR ARY TYPE NOT MATCHING WITH EXPECTED REGIONS VALUE");
         }
 
@@ -698,7 +717,8 @@ fapi2::ReturnCode p10_perv_sbe_cmn_setup_multicast_groups(
                 mc_count[chiplet_id]++;
                 FAPI_ASSERT(!(offset > 3),
                             fapi2::MC_GROUP_SETUP_ERR()
-                            .set_CHIPLET_ID(chiplet_id),
+                            .set_CHIPLET_ID(chiplet_id)
+                            .set_PROC_TARGET(i_target_chip),
                             "Error: Chiplet is being added into more than 4 groups");
 
                 // Setting chiplet multicast group registers
@@ -851,6 +871,10 @@ fapi2::ReturnCode p10_perv_sbe_cmn_align_chiplets(const
     fapi2::buffer<uint64_t> l_data64;
     fapi2::buffer<uint64_t> l_data64_sync_cnfg;
     int l_timeout = 0;
+    auto l_parent_proc = i_mcast_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+    (void)l_parent_proc; // touch variable to get around unused variable warning
+    // for configs that do not execute ffdc paths
+
     FAPI_INF("p10_perv_sbe_cmn_align_chiplets: Entering ...");
 
     fapi2::Target < fapi2::TARGET_TYPE_PERV | fapi2::TARGET_TYPE_MULTICAST,
@@ -902,7 +926,8 @@ fapi2::ReturnCode p10_perv_sbe_cmn_align_chiplets(const
                 fapi2::CPLT_NOT_ALIGNED_ERR()
                 .set_PERV_CPLT_STAT0(l_data64)
                 .set_LOOP_COUNT(l_timeout)
-                .set_HW_DELAY(NS_DELAY),
+                .set_HW_DELAY(NS_DELAY)
+                .set_PROC_TARGET(l_parent_proc),
                 "ERROR:CHIPLET NOT ALIGNED");
 
     FAPI_DBG("For all chiplets: disable alignement");
