@@ -72,6 +72,18 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_PROC_FABRIC_TSNOOP</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Processor specific tsnoop value based on core frequency envelope as
+    well as chip memory and pau frequency setpoints
+  </description>
+  <valueType>uint32</valueType>
+  <writeable/>
+  <default>25</default>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_PROC_FABRIC_BROADCAST_MODE</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>

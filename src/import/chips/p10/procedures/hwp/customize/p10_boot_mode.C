@@ -40,6 +40,7 @@
 #include <p10_dyninit_bitvec_utils.H>
 #include <p10_dynamic.H>
 #include <p10_ipl_customize.H>
+#include <p10_fbc_async_utils.H>
 
 //------------------------------------------------------------------------------
 // Constant Definitions
@@ -398,194 +399,99 @@ add_plat_features_sbe(
 
     FAPI_DBG("Start");
 
-    fapi2::ATTR_FREQ_MC_MHZ_Type l_fmc;
-    bool l_fmc_valid = false;
-    fapi2::ATTR_CHIP_UNIT_POS_Type l_mc_pos;
-
     // apply baseline Hostboot dynamic inits
     FAPI_TRY(set_bit(i_bvec, HOSTBOOT, "HOSTBOOT"));
 
-    // current ring infrastructure only supports only one common MC frequency
-    // across the chip, confirm attribute state reflects this
+    // apply fabric async settings
     {
-        fapi2::ATTR_FREQ_MC_MHZ_Type l_fmc_common;
-        fapi2::ATTR_CHIP_UNIT_POS_Type l_mc_pos_common;
+        rt2pa_ratio l_rt2pa;
+        pa2rt_ratio l_pa2rt;
+        uint32_t    l_freq_mc_mhz;
+        rt2mc_ratio l_rt2mc;
+        mc2rt_ratio l_mc2rt;
 
-        for (auto& l_mc_target : i_target_proc.getChildren<fapi2::TARGET_TYPE_MC>())
+        // PAU
+        FAPI_TRY(p10_fbc_async_utils_calc_pau_ratios(i_target_sys,
+                 l_rt2pa,
+                 l_pa2rt),
+                 "Error from p10_fbc_async_utils_calc_pau_ratios");
+
+        // racetrack-to-PAU
+        if (l_rt2pa == RT2PA_RATIO_NOMINAL)
         {
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_mc_target, l_mc_pos),
-                     "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS_Type)");
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_MC_MHZ, l_mc_target, l_fmc),
-                     "Error from FAPI_ATTR_GET (ATTR_FREQ_MC_MHZ)");
-
-            if (!l_fmc_valid)
-            {
-                l_fmc_common = l_fmc;
-                l_mc_pos_common = l_mc_pos;
-                l_fmc_valid = true;
-            }
-
-            FAPI_ASSERT(l_fmc_common == l_fmc,
-                        fapi2::P10_BOOT_MODE_UNEQUAL_MC_FREQS()
-                        .set_CHIP_TARGET(i_target_proc)
-                        .set_MC_UNIT1(l_mc_pos_common)
-                        .set_MC_FREQ1(l_fmc_common)
-                        .set_MC_UNIT2(l_mc_pos)
-                        .set_MC_FREQ2(l_fmc),
-                        "Chip has unequal MC chiplet frequencies");
+            FAPI_TRY(set_bit(i_bvec, RT2PA_NOMINAL, "RT2PA_NOMINAL"));
+        }
+        else
+        {
+            FAPI_TRY(set_bit(i_bvec, RT2PA_SAFE, "RT2PA_SAFE"));
         }
 
-        // MC Fast Settings
-        if (l_fmc_valid && (l_fmc > 1610))
+        // PAU-to-racetrack
+        if (l_pa2rt == PA2RT_RATIO_TURBO)
+        {
+            FAPI_TRY(set_bit(i_bvec, PA2RT_TURBO, "PA2RT_TURBO"));
+        }
+        else if (l_pa2rt == PA2RT_RATIO_NOMINAL)
+        {
+            FAPI_TRY(set_bit(i_bvec, PA2RT_NOMINAL, "PA2RT_NOMINAL"));
+        }
+        else
+        {
+            FAPI_TRY(set_bit(i_bvec, PA2RT_SAFE, "PA2RT_SAFE"));
+        }
+
+        // MC
+        FAPI_TRY(p10_fbc_async_utils_calc_mc_ratios(i_target_proc,
+                 i_target_sys,
+                 l_freq_mc_mhz,
+                 l_rt2mc,
+                 l_mc2rt),
+                 "Error from p10_fbc_async_utils_calc_mc_ratios");
+
+        // racetrack-to-MC
+        if (l_rt2mc == RT2MC_RATIO_ULTRATURBO)
+        {
+            FAPI_TRY(set_bit(i_bvec, RT2MC_ULTRATURBO, "RT2MC_ULTATURBO"));
+        }
+        else if (l_rt2mc == RT2MC_RATIO_TURBO)
+        {
+            FAPI_TRY(set_bit(i_bvec, RT2MC_TURBO, "RT2MC_TURBO"));
+        }
+        else if (l_rt2mc == RT2MC_RATIO_NOMINAL)
+        {
+            FAPI_TRY(set_bit(i_bvec, RT2MC_NOMINAL, "RT2MC_NOMINAL"));
+        }
+        else
+        {
+            FAPI_TRY(set_bit(i_bvec, RT2MC_SAFE, "RT2MC_SAFE"));
+        }
+
+        // MC-to-racetrack
+        if (l_mc2rt == MC2RT_RATIO_ULTRATURBO)
+        {
+            FAPI_TRY(set_bit(i_bvec, MC2RT_ULTRATURBO, "MC2RT_ULTRATURBO"));
+        }
+        else if (l_mc2rt == MC2RT_RATIO_TURBO)
+        {
+            FAPI_TRY(set_bit(i_bvec, MC2RT_TURBO, "MC2RT_TURBO"));
+        }
+        else if (l_mc2rt == MC2RT_RATIO_NOMINAL)
+        {
+            FAPI_TRY(set_bit(i_bvec, MC2RT_NOMINAL, "MC2RT_NOMINAL"));
+        }
+        else
+        {
+            FAPI_TRY(set_bit(i_bvec, MC2RT_SAFE, "MC2RT_SAFE"));
+        }
+
+        // MC fast
+        if (l_freq_mc_mhz > 1610)
         {
             FAPI_TRY(set_bit(i_bvec, MC_FAST, "MC_FAST"));
         }
     }
 
-    // PBI Async Settings
-    // Frequency Ratio Definitions
-    //
-    // RT2PA
-    // RT->PAU NOMINAL when Nest Fmin >= 1/2 * Fpau
-    // RT->PAU SAFE    when Nest Fmin <  1/2 * Fpau
-    //
-    // PA2RT
-    // PAU->RF TURBO   when Fpau >= 4/2 * Nest Fmax
-    // PAU->RF NOMINAL when Fpau >= 3/2 * Nest Fmax and Fpau < 4/2 * Nest Fmax
-    // PAU->RF SAFE    when                             Fpau < 3/2 * Nest Fmax
-    //
-    // RT2MC
-    // RT->MC ULTRA_TURBO when Nest Fmin >= 3/2 * Fmc
-    // RT->MC TURBO       when Nest Fmin >= 2/2 * Fmc and Nest Fmin < 3/2 * Fmc
-    // RT->MC NOMINAL     when Nest Fmin >= 1/2 * Fmc and Nest Fmin < 2/2 * Fmc
-    // RT->MC SAFE        when                            Nest Fmin < 1/2 * Fmc
-    //
-    // MC2RT
-    // MC->RT ULTRA_TURBO when Fmc >= 4/2 * Nest Fmax
-    // MC->RT TURBO when       Fmc >= 3/2 * Nest Fmax and Fmc < 4/2 * Nest Fmax
-    // MC->RT NOMINAL when     Fmc >= 2/2 * Nest Fmax and Fmc < 3/2 * Nest Fmax
-    // MC->RT SAFE when                                   Fmc < 2/2 * Nest Fmax
-    {
-        fapi2::ATTR_FREQ_CORE_FLOOR_MHZ_Type l_core_fmin;
-        fapi2::ATTR_FREQ_CORE_CEILING_MHZ_Type l_core_fmax;
-        fapi2::ATTR_FREQ_PAU_MHZ_Type l_fpau;
-
-        bool l_rt2pa_nominal    = false;
-        bool l_rt2pa_safe       = false;
-        bool l_pa2rt_turbo      = false;
-        bool l_pa2rt_nominal    = false;
-        bool l_pa2rt_safe       = false;
-        bool l_rt2mc_ultraturbo = false;
-        bool l_rt2mc_turbo      = false;
-        bool l_rt2mc_nominal    = false;
-        bool l_rt2mc_safe       = false;
-        bool l_mc2rt_ultraturbo = false;
-        bool l_mc2rt_turbo      = false;
-        bool l_mc2rt_nominal    = false;
-        bool l_mc2rt_safe       = false;
-
-        // read platform frequency attributes
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PAU_MHZ,
-                               i_target_sys,
-                               l_fpau));
-
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_FLOOR_MHZ,
-                               i_target_proc,
-                               l_core_fmin));
-
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_CEILING_MHZ,
-                               i_target_proc,
-                               l_core_fmax));
-
-        // calculate modes
-        l_rt2pa_nominal    = ((l_core_fmin) >= (l_fpau)) ? (true) : (false);
-        l_rt2pa_safe       = ((l_core_fmin)  < (l_fpau)) ? (true) : (false);
-
-        l_pa2rt_turbo      = ((     l_fpau) >= (    l_core_fmax))                                ? (true) : (false);
-        l_pa2rt_nominal    = (((4 * l_fpau) >= (3 * l_core_fmax)) && ((l_fpau) < (l_core_fmax))) ? (true) : (false);
-        l_pa2rt_safe       = (( 4 * l_fpau)  < (3 * l_core_fmax))                                ? (true) : (false);
-
-        if (l_fmc_valid)
-        {
-            l_rt2mc_ultraturbo = ( (l_core_fmin) >= (3 * l_fmc))                                   ? (true) : (false);
-            l_rt2mc_turbo      = (((l_core_fmin) >= (2 * l_fmc)) && ((l_core_fmin) < (3 * l_fmc))) ? (true) : (false);
-            l_rt2mc_nominal    = (((l_core_fmin) >= (    l_fmc)) && ((l_core_fmin) < (2 * l_fmc))) ? (true) : (false);
-            l_rt2mc_safe       = ( (l_core_fmin)  < (    l_fmc))                                   ? (true) : (false);
-
-            l_mc2rt_ultraturbo = ((     l_fmc) >= (    l_core_fmax))                                       ? (true) : (false);
-            l_mc2rt_turbo      = (((4 * l_fmc) >= (3 * l_core_fmax)) && ((    l_fmc) < (    l_core_fmax))) ? (true) : (false);
-            l_mc2rt_nominal    = (((2 * l_fmc) >= (    l_core_fmax)) && ((4 * l_fmc) < (3 * l_core_fmax))) ? (true) : (false);
-            l_mc2rt_safe       = (( 2 * l_fmc)  < (    l_core_fmax))                                       ? (true) : (false);
-        }
-
-        // apply
-        if (l_rt2pa_nominal)
-        {
-            FAPI_TRY(set_bit(i_bvec, RT2PA_NOMINAL, "RT2PA_NOMINAL"));
-        }
-
-        if (l_rt2pa_safe)
-        {
-            FAPI_TRY(set_bit(i_bvec, RT2PA_SAFE, "RT2PA_SAFE"));
-        }
-
-        if (l_pa2rt_turbo)
-        {
-            FAPI_TRY(set_bit(i_bvec, PA2RT_TURBO, "PA2RT_TURBO"));
-        }
-
-        if (l_pa2rt_nominal)
-        {
-            FAPI_TRY(set_bit(i_bvec, PA2RT_NOMINAL, "PA2RT_NOMINAL"));
-        }
-
-        if (l_pa2rt_safe)
-        {
-            FAPI_TRY(set_bit(i_bvec, PA2RT_SAFE, "PA2RT_SAFE"));
-        }
-
-        if (l_rt2mc_ultraturbo)
-        {
-            FAPI_TRY(set_bit(i_bvec, RT2MC_ULTRATURBO, "RT2MC_ULTATURBO"));
-        }
-
-        if (l_rt2mc_turbo)
-        {
-            FAPI_TRY(set_bit(i_bvec, RT2MC_TURBO, "RT2MC_TURBO"));
-        }
-
-        if (l_rt2mc_nominal)
-        {
-            FAPI_TRY(set_bit(i_bvec, RT2MC_NOMINAL, "RT2MC_NOMINAL"));
-        }
-
-        if (l_rt2mc_safe)
-        {
-            FAPI_TRY(set_bit(i_bvec, RT2MC_SAFE, "RT2MC_SAFE"));
-        }
-
-        if (l_mc2rt_ultraturbo)
-        {
-            FAPI_TRY(set_bit(i_bvec, MC2RT_ULTRATURBO, "MC2RT_ULTRATURBO"));
-        }
-
-        if (l_mc2rt_turbo)
-        {
-            FAPI_TRY(set_bit(i_bvec, MC2RT_TURBO, "MC2RT_TURBO"));
-        }
-
-        if (l_mc2rt_nominal)
-        {
-            FAPI_TRY(set_bit(i_bvec, MC2RT_NOMINAL, "MC2RT_NOMINAL"));
-        }
-
-        if (l_mc2rt_safe)
-        {
-            FAPI_TRY(set_bit(i_bvec, MC2RT_SAFE, "MC2RT_SAFE"));
-        }
-    }
-
-    // fabric configuration
+    // fabric broadcast configuration
     {
         fapi2::ATTR_PROC_FABRIC_BROADCAST_MODE_Type l_fbc_broadcast_mode;
 
@@ -606,6 +512,7 @@ add_plat_features_sbe(
         }
     }
 
+    // contained mode
     {
         fapi2::ATTR_CONTAINED_IPL_TYPE_Type l_attr_contained_ipl_type;
 

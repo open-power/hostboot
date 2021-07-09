@@ -36,6 +36,7 @@
 //------------------------------------------------------------------------------
 #include <p10_fbc_eff_config.H>
 #include <p10_fbc_utils.H>
+#include <p10_fbc_async_utils.H>
 
 //------------------------------------------------------------------------------
 // Constant definitions
@@ -750,6 +751,216 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Calculate MC tsnoop requirement for this chip, based on
+///        core/memory frequency relationships
+/// @param[in] o_snoop       Resolved tsnoop programming
+/// @return fapi2::ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode p10_fbc_eff_config_mc_tsnoop(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_proc,
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_target_sys,
+    uint32_t& o_tsnoop)
+{
+    FAPI_DBG("Start");
+
+    uint32_t l_freq_nest_max_mhz;
+    uint32_t l_freq_mc_mhz;
+    rt2mc_ratio l_rt2mc;
+    mc2rt_ratio l_mc2rt;
+
+    uint32_t l_rcmd_async = 4;
+    uint32_t l_prsp_async = 2;
+
+    uint32_t l_mc_tsnoop_n = 0;
+    uint32_t l_mc_tsnoop_d = 0;
+
+    // core/nest
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_CEILING_MHZ,
+                           i_target_proc,
+                           l_freq_nest_max_mhz));
+    l_freq_nest_max_mhz /= 2;
+
+    // MC
+    FAPI_TRY(p10_fbc_async_utils_calc_mc_ratios(i_target_proc,
+             i_target_sys,
+             l_freq_mc_mhz,
+             l_rt2mc,
+             l_mc2rt),
+             "Error from p10_fbc_async_utils_calc_mc_ratios");
+
+    // set RCMD_ASYNC factor
+    if (l_rt2mc == RT2MC_RATIO_ULTRATURBO)
+    {
+        l_rcmd_async = 1;
+    }
+    else if (l_rt2mc == RT2MC_RATIO_TURBO)
+    {
+        l_rcmd_async = 2;
+    }
+    else if (l_rt2mc == RT2MC_RATIO_NOMINAL)
+    {
+        l_rcmd_async = 3;
+    }
+
+    // set PRSP_ASYNC factor
+    if (l_mc2rt == MC2RT_RATIO_ULTRATURBO)
+    {
+        l_prsp_async = 0;
+    }
+    else if ((l_mc2rt == MC2RT_RATIO_TURBO) ||
+             (l_mc2rt == MC2RT_RATIO_NOMINAL))
+    {
+        l_prsp_async = 1;
+    }
+
+    // rcmd_delay    = rcmd_async + (2 * (nest_max/mc_freq))
+    //                 --- B.1 --   --------- B.2 ----------
+    // presp_delay   = 2          + (presp_async * (nest_max/mc_freq)) + 4
+    //                 --- C.1 --   -------------- C.2 ---------------   C.3
+    // tsnoop_margin = 2
+    //                 D
+    //
+    // mca_tsnoop = (6 * (nest_max/mc_freq)) + rcmd_delay + presp_delay + tsnoop_margin
+    //              --------- A ------------   --- B ----   ---- C ----   ---- D ------
+
+    l_mc_tsnoop_n = (6 * l_freq_nest_max_mhz) +   // A
+                    (l_rcmd_async * l_freq_mc_mhz) +          // B.1
+                    (2 * l_freq_nest_max_mhz) +               // B.2
+                    (6 * l_freq_mc_mhz) +                     // C.1/C.3
+                    (l_prsp_async * l_freq_nest_max_mhz) +    // C.2
+                    (2 * l_freq_mc_mhz);                      // D.1
+
+    l_mc_tsnoop_d = l_freq_mc_mhz;
+
+    // roundup
+    o_tsnoop = l_mc_tsnoop_n / l_mc_tsnoop_d;
+
+    if (l_mc_tsnoop_n % l_mc_tsnoop_d)
+    {
+        o_tsnoop += 1;
+    }
+
+    FAPI_DBG("tsnoop: %d (nest max: %d MHz, MC: %d MHz, rcmd_async: %d, prsp_async: %d)",
+             o_tsnoop, l_freq_nest_max_mhz, l_freq_mc_mhz, l_rcmd_async, l_prsp_async);
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+///
+/// @brief Calculate PAU tsnoop requirement for this chip, based on
+///        core/PAU frequency relationships
+/// @param[in] o_snoop       Resolved tsnoop programming
+/// @return fapi2::ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode p10_fbc_eff_config_pau_tsnoop(
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_target_sys,
+    uint32_t& o_tsnoop)
+{
+    FAPI_DBG("Start");
+
+    uint32_t l_freq_nest_max_mhz;
+    uint32_t l_freq_pau_mhz;
+
+    uint32_t l_rcmd_async = 3;
+    uint32_t l_prsp_async = 2;
+
+    uint32_t l_pau_tsnoop_n = 0;
+    uint32_t l_pau_tsnoop_d = 0;
+
+    // core/nest
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ,
+                           i_target_sys,
+                           l_freq_nest_max_mhz));
+    l_freq_nest_max_mhz /= 2;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PAU_MHZ,
+                           i_target_sys,
+                           l_freq_pau_mhz));
+
+    // pau_rcmd_delay    = r + (2 * (nest_max/pau_freq))
+    // pau_presp_delay   = 2 + (p * (nest_max/pau_freq))
+    // pau_tsnoop_margin = 2
+    //
+    // pau_tsnoop = (14 * (nest_max/pau_freq)) + pau_rcmd_delay + pau_presp_delay + pau_tsnoop_margin
+
+    l_pau_tsnoop_n = (14 * l_freq_nest_max_mhz) +
+                     (l_rcmd_async * l_freq_pau_mhz) +
+                     (2 * l_freq_nest_max_mhz) +
+                     (2 * l_freq_pau_mhz) +
+                     (l_prsp_async * l_freq_nest_max_mhz) +
+                     (2 * l_freq_pau_mhz);
+
+    l_pau_tsnoop_d = l_freq_pau_mhz;
+
+    // roundup
+    o_tsnoop = l_pau_tsnoop_n / l_pau_tsnoop_d;
+
+    if (l_pau_tsnoop_n % l_pau_tsnoop_d)
+    {
+        o_tsnoop += 1;
+    }
+
+    FAPI_DBG("tsnoop: %d (nest max: %d MHz, pau: %d MHz)",
+             o_tsnoop, l_freq_nest_max_mhz, l_freq_pau_mhz);
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+///
+/// @brief Initialize tsnoop attributes based on core/nest, MC, PAU frequencies
+/// @return fapi2::ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode p10_fbc_eff_config_tsnoop(void)
+{
+    FAPI_DBG("Start");
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+
+    const auto TSNOOP_MIN = 25;
+    const auto TSNOOP_MAX = 27;
+
+    for (auto l_proc_target : FAPI_SYSTEM.getChildren<fapi2::TARGET_TYPE_PROC_CHIP>())
+    {
+        uint32_t l_tsnoop = TSNOOP_MIN;
+        uint32_t l_tsnoop_mc = 0;
+        uint32_t l_tsnoop_pau = 0;
+
+        FAPI_TRY(p10_fbc_eff_config_mc_tsnoop(l_proc_target,
+                                              FAPI_SYSTEM,
+                                              l_tsnoop_mc));
+
+        if (l_tsnoop_mc >= l_tsnoop)
+        {
+            l_tsnoop = l_tsnoop_mc;
+        }
+
+        FAPI_TRY(p10_fbc_eff_config_pau_tsnoop(FAPI_SYSTEM,
+                                               l_tsnoop_pau));
+
+        if (l_tsnoop_pau >= l_tsnoop)
+        {
+            l_tsnoop = l_tsnoop_pau;
+        }
+
+        if (l_tsnoop > TSNOOP_MAX)
+        {
+            FAPI_INF("Restricting calculated tsnoop (%d) to TSNOOP_MAX (%d)!",
+                     l_tsnoop, TSNOOP_MAX);
+            l_tsnoop = TSNOOP_MAX;
+        }
+
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_TSNOOP, l_proc_target, l_tsnoop));
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+///
 /// @brief Initialize attributes related to link usage
 /// @return fapi2::ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
 ///
@@ -919,7 +1130,9 @@ fapi2::ReturnCode p10_fbc_eff_config(void)
     FAPI_DBG("Start");
 
     FAPI_TRY(p10_fbc_eff_config_freq_attrs(),
-             "Error from p10_fbc_eff_config_freq_attrs");
+             "Error from p10_fbc_eff_config_core_attrs");
+    FAPI_TRY(p10_fbc_eff_config_tsnoop(),
+             "Error from p10_fbc_eff_config_tsnoop");
     FAPI_TRY(p10_fbc_eff_config_calc_epsilons(),
              "Error from p10_fbc_eff_config_calc_epsilons");
     FAPI_TRY(p10_fbc_eff_config_link_attrs(),

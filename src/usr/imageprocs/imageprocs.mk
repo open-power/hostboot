@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2020
+# Contributors Listed Below - COPYRIGHT 2018,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -42,6 +42,10 @@ VPATH += ${HWP_IPL_PATH} ${HWP_IMAGEPROCS_PATH} \
 		 ${HWP_COMMON_IMAGEPROCS_PATH} ${HWP_STOPUTIL_PATH}
 VPATH += ${IPL_CUSTOMIZE_PATH} ${HWP_ACC_PATH}
 
+# p10_fbc_async_utils
+VPATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/nest
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/nest
+
 EXTRAINCDIR += ${HWP_IPL_PATH} ${HWP_IMAGEPROCS_PATH}
 EXTRAINCDIR += ${HWP_COMMON_IMAGEPROCS_PATH}
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
@@ -65,3 +69,4 @@ OBJS += p10_mvpd_ring_funcs.o
 OBJS += p10_boot_mode.o
 OBJS += p10_dynamic.o
 OBJS += p10_dyninit_bitvec_utils.o
+OBJS += p10_fbc_async_utils.o
