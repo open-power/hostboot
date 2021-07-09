@@ -529,68 +529,6 @@ PRDF_PLUGIN_DEFINE( explorer_ocmb, ClearMainlineIue );
 //------------------------------------------------------------------------------
 
 /**
- * @brief  RDF RCD Parity Error
- * @param  i_chip An OCMB chip.
- * @param  io_sc  The step code data struct.
- * @return SUCCESS
- */
-int32_t RdfRcdParityError( ExtensibleChip * i_chip,
-                           STEP_CODE_DATA_STRUCT & io_sc )
-{
-    #define PRDF_FUNC "[explorer_ocmb::RdfRcdParityError] "
-
-    do
-    {
-        SCAN_COMM_REGISTER_CLASS * rdffir = i_chip->getRegister( "RDFFIR" );
-        if ( SUCCESS != rdffir->Read() )
-        {
-            PRDF_ERR( PRDF_FUNC "Read() Failed on RDFFIR: "
-                      "i_chip=0x%08x", i_chip->getHuid() );
-            break;
-        }
-
-        // If RDFFIR[40] on at the same time, this is 'missing rddata valid'
-        // case, which returns SUE
-        if ( rdffir->IsBitSet(40) )
-        {
-            // callout MEM_PORT on 1st occurrence
-            TargetHandle_t memPort =
-                getConnectedChild( i_chip->getTrgt(), TYPE_MEM_PORT, 0 );
-            io_sc.service_data->SetCallout( memPort );
-        }
-        // Else this is 'confirmed RCD parity error' case
-        else
-        {
-            // callout DIMM high priority, MEM_PORT low on 1st occurrence
-            CalloutAttachedDimmsHigh( i_chip, io_sc );
-            TargetHandle_t memPort =
-                getConnectedChild( i_chip->getTrgt(), TYPE_MEM_PORT, 0 );
-            io_sc.service_data->SetCallout( memPort, MRU_LOW );
-        }
-
-        // Mask bit 40 as well
-        SCAN_COMM_REGISTER_CLASS * rdffir_mask_or =
-            i_chip->getRegister( "RDFFIR_MASK_OR" );
-
-        rdffir_mask_or->SetBit(40);
-        if ( SUCCESS != rdffir_mask_or->Write() )
-        {
-            PRDF_ERR( PRDF_FUNC "Write() Failed on RDFFIR_MASK_OR: "
-                      "i_chip=0x%08x", i_chip->getHuid() );
-            break;
-        }
-
-    }while(0);
-
-    return SUCCESS;
-
-    #undef PRDF_FUNC
-}
-PRDF_PLUGIN_DEFINE( explorer_ocmb, RdfRcdParityError );
-
-//------------------------------------------------------------------------------
-
-/**
  * @brief  RDFFIR[0:7] - Mainline MPE.
  * @param  i_chip OCMB chip.
  * @param  io_sc  The step code data struct.
