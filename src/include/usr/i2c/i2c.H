@@ -215,6 +215,9 @@ enum i2c_reg_offset_t
     I2C_REG_SET_SDA         = 0xC, //PIB=10
     I2C_REG_RESET_SDA       = 0xD, //PIB=11
 
+    // Engine Lock Registers
+    I2C_REG_CC_PROTECT_MODE = 0x3FA, // PIB=0x3FE
+    I2C_REG_ATOMIC_LOCK     = 0x3FB, // PIB=0x3FF
 };
 
 struct ocmb_data_t

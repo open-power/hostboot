@@ -296,7 +296,8 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
 
 /**
  * @brief This function forcefully releases the I2C Atomic Lock
- *        from its current owner.
+ *        from its current owner.  It only operates on engines
+ *        that are in Host (aka PIB) I2C mode.
  *
  * @param[in] i_target - I2C Master Target device
  * @param[in] i_engine - I2C Engine to unlock

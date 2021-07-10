@@ -1202,8 +1202,6 @@ void SbeRetryHandler::sbe_run_extract_rc(TARGETING::Target * i_target)
                      p10_extract_sbe_rc, l_fapi2ProcTarget,
                      l_ret, iv_useSDB, iv_secureModeDisabled);
 
-    // Convert the returnCode into an UNRECOVERABLE error log which we will
-    // associate w/ the caller's errlog via plid
     this->iv_currentAction = l_ret;
     SBE_TRACF("sbe_run_extract_rc p10_extract_sbe_rc returned iv_currentAction=%d", this->iv_currentAction);
 

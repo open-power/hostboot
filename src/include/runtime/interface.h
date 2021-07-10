@@ -93,8 +93,6 @@ enum MemoryError_t
 /*** Return codes for scom_write(), scom_read() */
 /* RC for a piberr is equal to 0x1000 plus the pib error value,
    made into a negative */
-#define HBRT_RC_PIBERR_MASK            ((int)(0x0u - 0x1007u))  /* 0xFFFF_EFF9 = -4096 */
-
 #define HBRT_RC_PIBERR_001_BUSY        ((int)(0x0u - 0x1001u))  /* 0xFFFF_EFFF = -4097 */
 #define HBRT_RC_PIBERR_010_OFFLINE     ((int)(0x0u - 0x1002u))  /* 0xFFFF_EFFE = -4098 */
 #define HBRT_RC_PIBERR_011_PGOOD       ((int)(0x0u - 0x1003u))  /* 0xFFFF_EFFD = -4099 */

@@ -57,6 +57,8 @@
 #include <eeprom/eepromif.H>
 #include <hwas/common/hwas.H>  // HwasState
 #include <algorithm>
+#include <xscom/xscomreasoncodes.H>
+#include <errl/errludlogregister.H>
 
 // ----------------------------------------------
 // Globals
@@ -4853,6 +4855,26 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
                     {
                         case I2C_OP_RESET:
                         {
+                            // Before reseting the engine, clear any atomic locks
+                            err = forceClearAtomicLock( tgt,
+                                                        i2cEngineToEngineSelect(engine));
+                            if( err )
+                            {
+                                TRACFCOMP( g_trac_i2c,ERR_MRK
+                                   "i2cProcessActiveMasters: Error back from forceClearAtomicLock "
+                                   TRACE_ERR_FMT
+                                   "tgt=0x%X, engine=%d",
+                                   TRACE_ERR_ARGS(err),
+                                   TARGETING::get_huid(tgt), engine);
+
+                                // If we get errors on the call, we still need
+                                // to reset the other I2C engines
+                                err->collectTrace( I2C_COMP_NAME, 256);
+                                errlCommit( err,
+                                    I2C_COMP_ID );
+
+                                // Don't continue or break - need mutex unlock
+                            }
 
                             const i2c_reset_level reset_level = FORCE_UNLOCK_RESET;
 
@@ -4872,15 +4894,14 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
 
                                 // If we get errors on the reset, we still need
                                 // to reset the other I2C engines
+                                err->collectTrace( I2C_COMP_NAME, 256);
                                 errlCommit( err,
                                     I2C_COMP_ID );
 
                                 // Don't continue or break - need mutex unlock
                             }
                             break;
-                        }
-
-
+                        } // end of case I2C_OP_RESET
 
                         case I2C_OP_SETUP:
                         {
@@ -4920,6 +4941,9 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
                                         "with plid 0x%X",
                                         err->eid(), err_reset->eid(),
                                         err->plid());
+
+                                    err_reset->collectTrace( I2C_COMP_NAME, 256);
+                                    err->collectTrace( I2C_COMP_NAME, 256);
 
                                     errlCommit( err_reset,
                                         I2C_COMP_ID );
@@ -4969,16 +4993,19 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
                                 // If we get errors on these reads,
                                 // we still need to continue
                                 // to program the I2C Bus Divisor for the rest
+                                err->collectTrace( I2C_COMP_NAME, 256);
                                 errlCommit( err,
                                         I2C_COMP_ID );
                             }
                             break;
-                        }
+                        } // end of case I2C_OP_SETUP
+
                         default:
                             assert (0,"i2cProcessActiveMasters: "
                                       "invalid operation");
-                     }
-                }
+
+                     } // end of i_processOperation switch statement
+                } // end of reset or setup the engine/bus
 
                 // Check if we need to unlock the mutex
                 if ( mutex_needs_unlock == true )
@@ -5255,13 +5282,47 @@ errlHndl_t i2cRegisterOp ( DeviceFW::OperationType i_opType,
 
         if ( err )
         {
-            TRACFCOMP(g_trac_i2c,"i2cRegisterOp %s FAIL!: plid=0X%X, rc=0x%X "
-                      "tgt=0x%X, reg=%d, addr=0x%.8X, "
-                      "data=0x%.16X",
+            TRACFCOMP(g_trac_i2c,"i2cRegisterOp %s FAIL!: plid=0X%X, "
+                      "i2cm_tgt=0x%.8X, reg=%d, "
+                      TRACE_I2C_ADDR_FMT
+                      "addr=0x%.8X, data=0x%.16X",
                       ( i_opType == DeviceFW::READ ) ? "read" : "write",
-                      err->plid(),  err->reasonCode(),
-                      TARGETING::get_huid(i_target),
-                      i_reg, op_addr, (*io_data_64) );
+                      err->plid(),
+                      TARGETING::get_huid(i_target), i_reg,
+                      TRACE_I2C_ADDR_ARGS(i_args),
+                      op_addr, (*io_data_64) );
+
+            // Grab extra FFDC if it's a specfic xscom error
+            if ( ( err->reasonCode() == XSCOM::XSCOM_STATUS_ERR) &&
+                 ( i_args.switches.useHostI2C == 1 ) )
+            {
+                TRACFCOMP(g_trac_i2c,"i2cRegisterOp: Found specific rc=0x%.4X, "
+                          "Adding I2C Lock Registers to FFDC",
+                          err->reasonCode());
+
+                // Possibly caused by an atomic lock so grab registers that might show that
+                ERRORLOG::ErrlUserDetailsLogRegister l_scom_data(i_target);
+
+                // I2C Status Register
+                l_scom_data.addData(DEVICE_SCOM_ADDRESS(I2C_HOST_MASTER_BASE_ADDR +
+                                                        I2C_REG_STATUS +
+                                                        (i_args.engine * P10_ENGINE_SCOM_OFFSET)));
+
+                // I2C CC Protect Mode Register
+                l_scom_data.addData(DEVICE_SCOM_ADDRESS(I2C_HOST_MASTER_BASE_ADDR +
+                                                        I2C_REG_CC_PROTECT_MODE +
+                                                        (i_args.engine * P10_ENGINE_SCOM_OFFSET)));
+
+                // I2C Atomic Lock Register
+                l_scom_data.addData(DEVICE_SCOM_ADDRESS(I2C_HOST_MASTER_BASE_ADDR +
+                                                        I2C_REG_ATOMIC_LOCK +
+                                                        (i_args.engine * P10_ENGINE_SCOM_OFFSET)));
+
+                // Add the above registers to the error log
+                l_scom_data.addToLog(err);
+
+                err->collectTrace( I2C_COMP_NAME, 256);
+            }
         }
 
     } while( 0 );

@@ -77,6 +77,18 @@ errlHndl_t forceClearAtomicLock( TARGETING::Target * i_target,
     errlHndl_t l_errhdl = nullptr;
 
     do {
+
+        // Only do this if the I2C master target is in I2C Host (aka PIB) mode
+        TARGETING::I2cSwitches i2c_switches;
+        if ( ( i_target->tryGetAttr<TARGETING::ATTR_I2C_SWITCHES>(i2c_switches) )
+             && ( i2c_switches.useHostI2C != 1 ) )
+        {
+            TRACFCOMP( g_trac_i2c,INFO_MRK
+                       "forceClearAtomicLock> Skipping on %.8X because not in HOST/PIB mode",
+                       TARGETING::get_huid(i_target) );
+            break;
+        }
+
         for( uint8_t l_engine = 0;
              l_engine < I2C_BUS_ATTR_MAX_ENGINE;
              l_engine++ )
@@ -84,14 +96,19 @@ errlHndl_t forceClearAtomicLock( TARGETING::Target * i_target,
             // Only operate on selected engines
             if ( ! ( i2cEngineToEngineSelect(l_engine) & i_engine ) )
             {
+                TRACDCOMP( g_trac_i2c,INFO_MRK
+                           "forceClearAtomicLock> Skipping engine %d on %.8X "
+                           "(i_engine=0x%X)",
+                           l_engine, TARGETING::get_huid(i_target), i_engine );
                 continue;
             }
 
             TRACFCOMP( g_trac_i2c,INFO_MRK
                        "forceClearAtomicLock> Forcing engine %d on %.8X",
                        l_engine, TARGETING::get_huid(i_target) );
-            uint64_t l_lockaddr = 0x000A03FF
-                                 + (l_engine * P10_ENGINE_SCOM_OFFSET);
+
+            uint64_t l_lockaddr = I2C_HOST_MASTER_BASE_ADDR + I2C_REG_ATOMIC_LOCK + // 0xA03FF
+                                  + (l_engine * P10_ENGINE_SCOM_OFFSET);
 
             size_t l_opsize=8;
             uint64_t l_lockdata = 0;
@@ -115,6 +132,7 @@ errlHndl_t forceClearAtomicLock( TARGETING::Target * i_target,
                 TRACFCOMP( g_trac_i2c,INFO_MRK
                            "forceClearAtomicLock> Error writing scom %.8X on %.8X",
                            l_lockaddr, TARGETING::get_huid(i_target) );
+                break;
             }
 
             // Leave the lock cleared out before we leave
