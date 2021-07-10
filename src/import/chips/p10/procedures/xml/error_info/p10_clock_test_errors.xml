@@ -28,13 +28,14 @@
 <hwpErrors>
  <!-- ******************************************************************** -->
    <hwpError>
+      <sbeError/>
       <rc>RC_RCS_CLOCK_TEST_OUT_ERR</rc>
       <description>
         One or more processor reference clocks not toggling
       </description>
       <ffdc>MASTER_CHIP</ffdc>
       <!-- Duplicate of the callout's CLOCK_POS parameter for platforms that don't infer the CLOCK_POS parameter -->
-      <ffdc>CLOCK_POS_FFDC</ffdc>
+      <ffdc>CLOCK_POS</ffdc>
       <ffdc>READ_SNS1LTH</ffdc>
       <ffdc>ATTR_CP_REFCLOCK_SELECT_VALUE</ffdc>
       <ffdc>RCS_CLOCK_TEST_IN</ffdc>

@@ -1088,14 +1088,8 @@ foreach my $argnum ( 0 .. $#ARGV )
                     # HW Callout - Clock position
                     if ( exists $callout->{hw}->{clkPos} )
                     {
-                        # Add the Targets to the objectlist if they don't already exist
-                        my $objNum1 = addEntryToArray( \@eiObjects, $callout->{hw}->{clkPos} );
-
                         $eiEntryStr .=
                             "    l_entries[$eiEntryCount].hw_callout.iv_clkPos = $callout->{hw}->{clkPos}; \\\n";
-
-                        # Add a method to the ffdc-gathering class
-                        addFfdcMethod( \%methods, $callout->{hw}->{clkPos}, $err->{rc}, $clock_ffdc_type, $objNum1 );
                     }
                     else
                     {

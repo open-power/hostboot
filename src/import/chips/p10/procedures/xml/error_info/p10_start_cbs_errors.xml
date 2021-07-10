@@ -34,6 +34,7 @@
       <ffdc>CBS_CS_IDLE_VALUE</ffdc>
       <ffdc>LOOP_COUNT</ffdc>
       <ffdc>HW_DELAY</ffdc>
+      <ffdc>CLOCK_POS</ffdc>
       <callout>
         <target>MASTER_CHIP</target>
         <priority>HIGH</priority>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,6 +59,8 @@ fapi2::ReturnCode p10_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
     bool l_read_vdn_pgood_status = false;
     fapi2::buffer<uint32_t> l_data32;
     fapi2::buffer<uint32_t> l_data32_cbs_cs;
+    fapi2::ATTR_CP_REFCLOCK_SELECT_Type l_cp_refclck_select;
+    uint8_t l_callout_clock = fapi2::ENUM_ATTR_CP_REFCLOCK_SELECT_OSC1;
     int l_timeout = 0;
 
     FAPI_INF("p10_start_cbs: Entering ...");
@@ -123,13 +125,24 @@ fapi2::ReturnCode p10_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
 
     FAPI_DBG("Loop Count :%d", l_timeout);
 
+    // Finding the clock used for starting CBS.
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CP_REFCLOCK_SELECT, i_target_chip, l_cp_refclck_select));
+
+    if((l_cp_refclck_select == fapi2::ENUM_ATTR_CP_REFCLOCK_SELECT_OSC0) ||
+       (l_cp_refclck_select == fapi2::ENUM_ATTR_CP_REFCLOCK_SELECT_BOTH_OSC0_NORED) ||
+       (l_cp_refclck_select == fapi2::ENUM_ATTR_CP_REFCLOCK_SELECT_BOTH_OSC0))
+    {
+        l_callout_clock = fapi2::ENUM_ATTR_CP_REFCLOCK_SELECT_OSC0;
+    }
+
     FAPI_ASSERT(l_timeout > 0,
                 fapi2::CBS_NOT_IN_IDLE_STATE()
                 .set_CBS_CS_READ(l_data32_cbs_cs)
                 .set_CBS_CS_IDLE_VALUE(CBS_IDLE_VALUE)
                 .set_LOOP_COUNT(P10_CFAM_CBS_POLL_COUNT)
                 .set_HW_DELAY(P10_CBS_IDLE_HW_NS_DELAY)
-                .set_MASTER_CHIP(i_target_chip),
+                .set_MASTER_CHIP(i_target_chip)
+                .set_CLOCK_POS(l_callout_clock),
                 "ERROR: CBS HAS NOT REACHED IDLE STATE VALUE 0x002 ");
 
     FAPI_INF("p10_start_cbs: Exiting ...");
