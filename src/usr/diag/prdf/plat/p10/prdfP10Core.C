@@ -119,6 +119,24 @@ int32_t PostAnalysis(ExtensibleChip* i_chip, STEP_CODE_DATA_STRUCT& io_sc)
 }
 PRDF_PLUGIN_DEFINE( p10_core, PostAnalysis );
 
+/**
+ * @brief  Plugin function for handling the LPC workaround to check if we should
+ *         blame the LPC bus for the NCU hang.
+ * @param  i_chip    CORE chip.
+ * @param  io_sc     The step code data struct.
+ * @return PRD_SCAN_COMM_REGISTER_ZERO.
+ */
+int32_t lpcWorkaround( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[p10_core::lpcWorkaround] "
+
+    // No-op in Hostboot.
+    return PRD_SCAN_COMM_REGISTER_ZERO;
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( p10_core, lpcWorkaround );
+
 } // end namespace p10_core
 
 } // end namespace PRDF

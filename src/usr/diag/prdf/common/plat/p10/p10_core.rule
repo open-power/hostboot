@@ -646,7 +646,7 @@ group gEQ_L2_FIR
     /** EQ_L2_FIR[13]
      *  NCU timed out waiting for powerbus to return data.
      */
-    (rEQ_L2_FIR, bit(13)) ? level2_th_1;
+    (rEQ_L2_FIR, bit(13)) ? ncuTimeout;
 
     /** EQ_L2_FIR[14]
      *  Internal h/w control error
