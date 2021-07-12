@@ -817,7 +817,6 @@ errlHndl_t HWASDiscovery::discoverTargets()
             else if (proc->getAttr<ATTR_HWAS_STATE>().functional)
             {
                 // Determine if there are cores that can be used for Extended Cache-Only (ECO) mode.
-#ifdef  __HOSTBOOT_MODULE // @TODO RTC 282723 remove when hwsv defines plat function
                 TargetHandleList l_coreList;
                 getChildChiplets(l_coreList, proc, TYPE_CORE);
                 errl = platDetermineEcoCores(l_coreList);
@@ -825,7 +824,6 @@ errlHndl_t HWASDiscovery::discoverTargets()
                 {
                     break;
                 }
-#endif
             }
         }
         if (errl)
