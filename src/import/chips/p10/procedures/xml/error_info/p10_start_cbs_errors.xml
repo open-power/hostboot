@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -36,6 +36,14 @@
       <ffdc>HW_DELAY</ffdc>
       <callout>
         <target>MASTER_CHIP</target>
+        <priority>HIGH</priority>
+      </callout>
+      <callout>
+        <hw>
+            <hwid>PROC_REF_CLOCK</hwid>
+            <refTarget>MASTER_CHIP</refTarget>
+            <clkPos>CLOCK_POS</clkPos>
+        </hw>
         <priority>HIGH</priority>
       </callout>
       <deconfigure>
