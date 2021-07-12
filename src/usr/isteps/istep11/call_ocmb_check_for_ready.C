@@ -76,6 +76,14 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
     errlHndl_t  l_errl = nullptr;
     IStepError l_StepError;
 
+
+    // We need to do an explicit delay before our first i2c operation
+    //  to Explorer to ensure we don't catch it too early in the boot
+    //  and lock it up.
+    const auto ocmb_delay = UTIL::assertGetToplevelTarget()
+      ->getAttr<ATTR_OCMB_RESET_DELAY_SEC>();
+    nanosleep(ocmb_delay,0);
+
     TargetHandleList functionalProcChipList;
 
     getAllChips(functionalProcChipList, TYPE_PROC, true);

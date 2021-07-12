@@ -5641,6 +5641,21 @@
 
   <attribute>
     <description>
+       Required delay (in seconds) between deasserting the OCMB reset before
+       we attempt the first i2c operation out to the OCMB chip.
+    </description>
+    <id>OCMB_RESET_DELAY_SEC</id>
+    <persistency>volatile</persistency>
+    <readable/>
+    <simpleType>
+      <uint8_t/>
+      <default>10</default>
+    </simpleType>
+    <no_export/>
+  </attribute>
+
+  <attribute>
+    <description>
         Physical entity path an OMI's associated OMIC parent target
     </description>
     <id>OMIC_PARENT</id>

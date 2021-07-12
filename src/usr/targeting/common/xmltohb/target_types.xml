@@ -2244,6 +2244,9 @@
       <id>OCMB_FW_UPDATE_OVERRIDE</id>
     </attribute>
     <attribute>
+      <id>OCMB_RESET_DELAY_SEC</id>
+    </attribute>
+    <attribute>
       <default>
         <field>
           <id>childRollupAllowed</id>
