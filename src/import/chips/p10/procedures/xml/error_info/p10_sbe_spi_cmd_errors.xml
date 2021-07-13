@@ -33,6 +33,7 @@
             on SPI cmd status register. 
         </description>
         <ffdc>CHIP_TARGET</ffdc>
+        <ffdc>SPI_ENGINE</ffdc>
         <ffdc>BASE_ADDRESS</ffdc>
         <ffdc>STATUS_REGISTER</ffdc>
         <callout>
@@ -48,6 +49,7 @@
             The SPI status register state bits check validation failed.
         </description>
         <ffdc>CHIP_TARGET</ffdc>
+        <ffdc>SPI_ENGINE</ffdc>
         <ffdc>BASE_ADDRESS</ffdc>
         <ffdc>STATUS_REGISTER</ffdc>
         <ffdc>CHECK_FLAGS</ffdc>
@@ -66,6 +68,7 @@
             Error due to detected hang while waiting for SPI cmd completion.
         </description>
         <ffdc>CHIP_TARGET</ffdc>
+        <ffdc>SPI_ENGINE</ffdc>
         <ffdc>BASE_ADDRESS</ffdc>
         <ffdc>STATUS_REGISTER</ffdc>
         <ffdc>TIMEOUT_MSEC</ffdc>

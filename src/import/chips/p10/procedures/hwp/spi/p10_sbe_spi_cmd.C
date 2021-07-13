@@ -260,6 +260,7 @@ spi_wait_for_tdr_empty(SpiControlHandle& i_handle)
 #ifndef BOOTLOADER
                      fapi2::SBE_SPI_INVALID_PORT_MULTIPLEX_SET()
                      .set_CHIP_TARGET(i_handle.target_chip)
+                     .set_SPI_ENGINE(i_handle.engine)
                      .set_BASE_ADDRESS(i_handle.base_addr + SPIM_STATUSREG)
                      .set_STATUS_REGISTER(data64),
                      "Port multiplexer setting error set in spi_wait_for_tdr_empty");
@@ -282,6 +283,7 @@ spi_wait_for_tdr_empty(SpiControlHandle& i_handle)
 #ifndef BOOTLOADER
                  fapi2::SBE_SPI_HANG_TIMEOUT()
                  .set_CHIP_TARGET(i_handle.target_chip)
+                 .set_SPI_ENGINE(i_handle.engine)
                  .set_BASE_ADDRESS(i_handle.base_addr + SPIM_STATUSREG)
                  .set_STATUS_REGISTER(data64)
                  .set_TIMEOUT_MSEC(SPI_TIMEOUT_MAX_WAIT_COUNT),
@@ -312,6 +314,7 @@ spi_wait_for_rdr_full(SpiControlHandle& i_handle)
 #ifndef BOOTLOADER
                      fapi2::SBE_SPI_INVALID_PORT_MULTIPLEX_SET()
                      .set_CHIP_TARGET(i_handle.target_chip)
+                     .set_SPI_ENGINE(i_handle.engine)
                      .set_BASE_ADDRESS(i_handle.base_addr + SPIM_STATUSREG)
                      .set_STATUS_REGISTER(status_reg),
                      "Port multiplexer setting error set in spi_wait_for_rdr_full");
@@ -334,6 +337,7 @@ spi_wait_for_rdr_full(SpiControlHandle& i_handle)
 #ifndef BOOTLOADER
                  fapi2::SBE_SPI_HANG_TIMEOUT()
                  .set_CHIP_TARGET(i_handle.target_chip)
+                 .set_SPI_ENGINE(i_handle.engine)
                  .set_BASE_ADDRESS(i_handle.base_addr + SPIM_STATUSREG)
                  .set_STATUS_REGISTER(status_reg)
                  .set_TIMEOUT_MSEC(SPI_TIMEOUT_MAX_WAIT_COUNT),
@@ -364,6 +368,7 @@ spi_wait_for_idle(SpiControlHandle& i_handle)
 #ifndef BOOTLOADER
                      fapi2::SBE_SPI_INVALID_PORT_MULTIPLEX_SET()
                      .set_CHIP_TARGET(i_handle.target_chip)
+                     .set_SPI_ENGINE(i_handle.engine)
                      .set_BASE_ADDRESS(i_handle.base_addr + SPIM_STATUSREG)
                      .set_STATUS_REGISTER(data64),
                      "Port multiplexer setting error set in spi_wait_for_idle");
@@ -386,6 +391,7 @@ spi_wait_for_idle(SpiControlHandle& i_handle)
 #ifndef BOOTLOADER
                  fapi2::SBE_SPI_HANG_TIMEOUT()
                  .set_CHIP_TARGET(i_handle.target_chip)
+                 .set_SPI_ENGINE(i_handle.engine)
                  .set_BASE_ADDRESS(i_handle.base_addr + SPIM_STATUSREG)
                  .set_STATUS_REGISTER(data64)
                  .set_TIMEOUT_MSEC(SPI_TIMEOUT_MAX_WAIT_COUNT),
@@ -588,6 +594,7 @@ spi_precheck(SpiControlHandle& i_handle)
 #ifndef BOOTLOADER
                  fapi2::SBE_SPI_CMD_STATUS_REG_UNSUPPORTED_STATE()
                  .set_CHIP_TARGET(i_handle.target_chip)
+                 .set_SPI_ENGINE(i_handle.engine)
                  .set_BASE_ADDRESS(i_handle.base_addr + SPIM_STATUSREG)
                  .set_STATUS_REGISTER(temp)
                  .set_CHECK_FLAGS(flags),
@@ -625,6 +632,7 @@ spi_wait_for_seq_index_pass(SpiControlHandle& i_handle, const uint32_t i_index)
 #ifndef BOOTLOADER
                      fapi2::SBE_SPI_INVALID_PORT_MULTIPLEX_SET()
                      .set_CHIP_TARGET(i_handle.target_chip)
+                     .set_SPI_ENGINE(i_handle.engine)
                      .set_BASE_ADDRESS(i_handle.base_addr + SPIM_STATUSREG)
                      .set_STATUS_REGISTER(status_reg),
                      "Port multiplexer setting error set in wait_for_seq_index_pass");
@@ -650,6 +658,7 @@ spi_wait_for_seq_index_pass(SpiControlHandle& i_handle, const uint32_t i_index)
 #ifndef BOOTLOADER
                  fapi2::SBE_SPI_HANG_TIMEOUT()
                  .set_CHIP_TARGET(i_handle.target_chip)
+                 .set_SPI_ENGINE(i_handle.engine)
                  .set_BASE_ADDRESS(i_handle.base_addr + SPIM_STATUSREG)
                  .set_STATUS_REGISTER(status_reg)
                  .set_TIMEOUT_MSEC(SPI_TIMEOUT_MAX_WAIT_COUNT),
