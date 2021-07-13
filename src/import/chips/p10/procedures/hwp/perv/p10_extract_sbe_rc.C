@@ -888,17 +888,22 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                                                  scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_MIB_XISIB_RSP_INFO_LEN);
             sib_rsp_info = l_data32;
             o_return_action = P10_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
-            FAPI_ASSERT((!(sib_rsp_info == 0x6)), fapi2::EXTRACT_SBE_RC_OTP_ECC_ERR(),
+            FAPI_ASSERT((!(sib_rsp_info == 0x6)),
+                        fapi2::EXTRACT_SBE_RC_OTP_ECC_ERR()
+                        .set_TARGET_CHIP(i_target_chip)
+                        .set_OCCURRENCE(1),
                         "Parity/ECC error detected in OTPROM memory, Check if OTPROM programmed correctly by dumping content");
 
             o_return_action = P10_EXTRACT_SBE_RC::RESTART_CBS;
             FAPI_ASSERT((!(sib_rsp_info == 0x7)), fapi2::EXTRACT_SBE_RC_OTP_TIMEOUT()
-                        .set_TARGET_CHIP(i_target_chip),
+                        .set_TARGET_CHIP(i_target_chip)
+                        .set_OCCURRENCE(1),
                         "PIB Timeout error detected during access to OTPROM");
 
             o_return_action = P10_EXTRACT_SBE_RC::RESTART_CBS;
             FAPI_ASSERT((!(sib_rsp_info != 0x0)), fapi2::EXTRACT_SBE_RC_OTP_PIB_ERR()
-                        .set_TARGET_CHIP(i_target_chip),
+                        .set_TARGET_CHIP(i_target_chip)
+                        .set_OCCURRENCE(1),
                         "Scom error detected");
             //When no any error detected and still halted in some OTPROM location
             o_return_action = P10_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
@@ -998,13 +1003,15 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             o_return_action = P10_EXTRACT_SBE_RC::RESTART_SBE;
             FAPI_ASSERT(l_data64.getBit<3>() != 1,
                         fapi2::EXTRACT_SBE_RC_PIBMEM_ECC_ERR()
-                        .set_TARGET_CHIP(i_target_chip),
+                        .set_TARGET_CHIP(i_target_chip)
+                        .set_OCCURRENCE(1),
                         "ERROR:Uncorrectable error occurred while accessing memory via PIB side");
 
             o_return_action = P10_EXTRACT_SBE_RC::RESTART_SBE;
             FAPI_ASSERT(l_data64.getBit<22>() != 1,
                         fapi2::EXTRACT_SBE_RC_PIBMEM_ECC_ERR()
-                        .set_TARGET_CHIP(i_target_chip),
+                        .set_TARGET_CHIP(i_target_chip)
+                        .set_OCCURRENCE(2),
                         "ERROR:Uncorrectable error occurred while accessing memory via fast access side");
         }
 
@@ -1218,30 +1225,35 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 o_return_action = P10_EXTRACT_SBE_RC::REIPL_UPD_SPI_CLK_DIV;
                 FAPI_ASSERT((!(spi_clk_div_lfr < 0x4)), fapi2::EXTRACT_SBE_RC_SPI_CLK_ERR()
-                            .set_TARGET_CHIP(i_target_chip),
+                            .set_TARGET_CHIP(i_target_chip)
+                            .set_OCCURRENCE(1),
                             "SBE LFR configured with invalid spi clock divider");
 
                 if(l_pibmem_saveoff || i_unsecure_mode)
                 {
                     o_return_action = P10_EXTRACT_SBE_RC::RESTART_CBS;
                     FAPI_ASSERT((!(spi_clk_div_lfr != spi_clk_div)), fapi2::EXTRACT_SBE_RC_SPI_CLK_ERR()
-                                .set_TARGET_CHIP(i_target_chip),
+                                .set_TARGET_CHIP(i_target_chip)
+                                .set_OCCURRENCE(2),
                                 "Boot SEEPROM configured with invalid clock divider");
                 }
 
                 o_return_action = P10_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM;
                 FAPI_ASSERT((!(sib_rsp_info == 0x6)), fapi2::EXTRACT_SBE_RC_SPI_ECC_ERR()
-                            .set_TARGET_CHIP(i_target_chip),
+                            .set_TARGET_CHIP(i_target_chip)
+                            .set_OCCURRENCE(1),
                             "Boot SEEPROM uncorrectable ECC error detected");
 
                 o_return_action = P10_EXTRACT_SBE_RC::RESTART_SBE;
                 FAPI_ASSERT((!(sib_rsp_info == 0x4)), fapi2::EXTRACT_SBE_RC_SPI_SPRM_CFG_ERR()
-                            .set_TARGET_CHIP(i_target_chip),
+                            .set_TARGET_CHIP(i_target_chip)
+                            .set_OCCURRENCE(1),
                             "Boot SEEPROM config/addr error detected");
 
                 o_return_action = P10_EXTRACT_SBE_RC::RESTART_SBE;
                 FAPI_ASSERT((!(sib_rsp_info == 0x1)), fapi2::EXTRACT_SBE_RC_SPI_RSC_ERR()
-                            .set_TARGET_CHIP(i_target_chip),
+                            .set_TARGET_CHIP(i_target_chip)
+                            .set_OCCURRENCE(1),
                             "Boot SEEPROM is not available. Could be lock or port multiplexer settings");
                 //TODO: Include RC for SPI parity errors captured
             }
@@ -1250,30 +1262,35 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 o_return_action = P10_EXTRACT_SBE_RC::REIPL_UPD_SPI_CLK_DIV;
                 FAPI_ASSERT((!(spi_clk_div_lfr < 0x4)), fapi2::EXTRACT_SBE_RC_SPI_CLK_ERR()
-                            .set_TARGET_CHIP(i_target_chip),
+                            .set_TARGET_CHIP(i_target_chip)
+                            .set_OCCURRENCE(3),
                             "SBE LFR configured with invalid spi clock divider");
 
                 if(l_pibmem_saveoff || i_unsecure_mode)
                 {
                     o_return_action = P10_EXTRACT_SBE_RC::RESTART_CBS;
                     FAPI_ASSERT((!(spi_clk_div_lfr != spi_clk_div)), fapi2::EXTRACT_SBE_RC_SPI_CLK_ERR()
-                                .set_TARGET_CHIP(i_target_chip),
+                                .set_TARGET_CHIP(i_target_chip)
+                                .set_OCCURRENCE(4),
                                 "Measurement SEEPROM configured with invalid clock divider");
                 }
 
                 o_return_action = P10_EXTRACT_SBE_RC::REIPL_BKP_MSEEPROM;
                 FAPI_ASSERT((!(sib_rsp_info == 0x6)), fapi2::EXTRACT_SBE_RC_SPI_ECC_ERR()
-                            .set_TARGET_CHIP(i_target_chip),
+                            .set_TARGET_CHIP(i_target_chip)
+                            .set_OCCURRENCE(2),
                             "Measurement SEEPROM uncorrectable ECC error detected");
 
                 o_return_action = P10_EXTRACT_SBE_RC::RESTART_CBS;
                 FAPI_ASSERT((!(sib_rsp_info == 0x4)), fapi2::EXTRACT_SBE_RC_SPI_SPRM_CFG_ERR()
-                            .set_TARGET_CHIP(i_target_chip),
+                            .set_TARGET_CHIP(i_target_chip)
+                            .set_OCCURRENCE(2),
                             "Measurement SEEPROM config/addr error detected");
 
                 o_return_action = P10_EXTRACT_SBE_RC::RESTART_CBS;
                 FAPI_ASSERT((!(sib_rsp_info == 0x1)), fapi2::EXTRACT_SBE_RC_SPI_RSC_ERR()
-                            .set_TARGET_CHIP(i_target_chip),
+                            .set_TARGET_CHIP(i_target_chip)
+                            .set_OCCURRENCE(2),
                             "Measurement SEEPROM is not available. Could be lock or port multiplexer settings ");
                 //TODO: Include RC for SPI parity errors captured
             }
@@ -1333,17 +1350,22 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             if(otprom_data_range)
             {
                 o_return_action = P10_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
-                FAPI_ASSERT((!(sib_rsp_info == 0x6)), fapi2::EXTRACT_SBE_RC_OTP_ECC_ERR(),
+                FAPI_ASSERT((!(sib_rsp_info == 0x6)),
+                            fapi2::EXTRACT_SBE_RC_OTP_ECC_ERR()
+                            .set_TARGET_CHIP(i_target_chip)
+                            .set_OCCURRENCE(2),
                             "Parity/ECC error detected in OTPROM memory, Check if OTPROM programmed correctly by dumping content");
 
                 o_return_action = P10_EXTRACT_SBE_RC::RESTART_CBS;
                 FAPI_ASSERT((!(sib_rsp_info == 0x7)), fapi2::EXTRACT_SBE_RC_OTP_TIMEOUT()
-                            .set_TARGET_CHIP(i_target_chip),
+                            .set_TARGET_CHIP(i_target_chip)
+                            .set_OCCURRENCE(2),
                             "PIB Timeout error detected during access to OTPROM");
 
                 o_return_action = P10_EXTRACT_SBE_RC::RESTART_CBS;
                 FAPI_ASSERT((!(sib_rsp_info != 0x0)), fapi2::EXTRACT_SBE_RC_OTP_PIB_ERR()
-                            .set_TARGET_CHIP(i_target_chip),
+                            .set_TARGET_CHIP(i_target_chip)
+                            .set_OCCURRENCE(2),
                             "Scom error detected");
             }
 
@@ -1437,13 +1459,15 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 o_return_action = P10_EXTRACT_SBE_RC::RESTART_SBE;
                 FAPI_ASSERT(l_data64.getBit<3>() != 1,
                             fapi2::EXTRACT_SBE_RC_PIBMEM_ECC_ERR()
-                            .set_TARGET_CHIP(i_target_chip),
+                            .set_TARGET_CHIP(i_target_chip)
+                            .set_OCCURRENCE(3),
                             "ERROR:Uncorrectable error occurred while accessing memory via PIB side");
 
                 o_return_action = P10_EXTRACT_SBE_RC::RESTART_SBE;
                 FAPI_ASSERT(l_data64.getBit<22>() != 1,
                             fapi2::EXTRACT_SBE_RC_PIBMEM_ECC_ERR()
-                            .set_TARGET_CHIP(i_target_chip),
+                            .set_TARGET_CHIP(i_target_chip)
+                            .set_OCCURRENCE(4),
                             "ERROR:Uncorrectable error occurred while accessing memory via fast access side");
             }
 
@@ -1465,7 +1489,10 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 }
 
                 o_return_action = P10_EXTRACT_SBE_RC::RESTART_SBE;
-                FAPI_ASSERT((!(mem_error == 0x6)), fapi2::EXTRACT_SBE_RC_PIBMEM_ECC_ERR(),
+                FAPI_ASSERT((!(mem_error == 0x6)),
+                            fapi2::EXTRACT_SBE_RC_PIBMEM_ECC_ERR()
+                            .set_TARGET_CHIP(i_target_chip)
+                            .set_OCCURRENCE(5),
                             "ECC error detected during pibmem access, Run PIBMEM REPAIR test..");
 
                 o_return_action = P10_EXTRACT_SBE_RC::RESTART_CBS;
@@ -1671,30 +1698,35 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
 
                 o_return_action = P10_EXTRACT_SBE_RC::REIPL_UPD_SPI_CLK_DIV;
                 FAPI_ASSERT((!(spi_clk_div_lfr < 0x4)), fapi2::EXTRACT_SBE_RC_SPI_CLK_ERR()
-                            .set_TARGET_CHIP(i_target_chip),
+                            .set_TARGET_CHIP(i_target_chip)
+                            .set_OCCURRENCE(5),
                             "SBE LFR configured with invalid spi clock divider");
 
                 if(l_pibmem_saveoff || i_unsecure_mode)
                 {
                     o_return_action = P10_EXTRACT_SBE_RC::RESTART_CBS;
                     FAPI_ASSERT((!(spi_clk_div_lfr != spi_clk_div)), fapi2::EXTRACT_SBE_RC_SPI_CLK_ERR()
-                                .set_TARGET_CHIP(i_target_chip),
+                                .set_TARGET_CHIP(i_target_chip)
+                                .set_OCCURRENCE(6),
                                 "Boot SEEPROM configured with invalid clock divider");
                 }
 
                 o_return_action = P10_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM;
                 FAPI_ASSERT((!(sib_rsp_info == 0x6)), fapi2::EXTRACT_SBE_RC_SPI_ECC_ERR()
-                            .set_TARGET_CHIP(i_target_chip),
+                            .set_TARGET_CHIP(i_target_chip)
+                            .set_OCCURRENCE(3),
                             "Boot SEEPROM uncorrectable ECC error detected");
 
                 o_return_action = P10_EXTRACT_SBE_RC::RESTART_CBS;
                 FAPI_ASSERT((!(sib_rsp_info == 0x4)), fapi2::EXTRACT_SBE_RC_SPI_SPRM_CFG_ERR()
-                            .set_TARGET_CHIP(i_target_chip),
+                            .set_TARGET_CHIP(i_target_chip)
+                            .set_OCCURRENCE(3),
                             "Boot SEEPROM config/addr error detected");
 
                 o_return_action = P10_EXTRACT_SBE_RC::RESTART_CBS;
                 FAPI_ASSERT((!(sib_rsp_info == 0x1)), fapi2::EXTRACT_SBE_RC_SPI_RSC_ERR()
-                            .set_TARGET_CHIP(i_target_chip),
+                            .set_TARGET_CHIP(i_target_chip)
+                            .set_OCCURRENCE(3),
                             "Boot SEEPROM is not available");
             }
 
@@ -1702,30 +1734,35 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 o_return_action = P10_EXTRACT_SBE_RC::REIPL_UPD_SPI_CLK_DIV;
                 FAPI_ASSERT((!(spi_clk_div_lfr < 0x4)), fapi2::EXTRACT_SBE_RC_SPI_CLK_ERR()
-                            .set_TARGET_CHIP(i_target_chip),
+                            .set_TARGET_CHIP(i_target_chip)
+                            .set_OCCURRENCE(7),
                             "SBE LFR configured with invalid spi clock divider");
 
                 if(l_pibmem_saveoff || i_unsecure_mode)
                 {
                     o_return_action = P10_EXTRACT_SBE_RC::RESTART_CBS;
                     FAPI_ASSERT((!(spi_clk_div_lfr != spi_clk_div)), fapi2::EXTRACT_SBE_RC_SPI_CLK_ERR()
-                                .set_TARGET_CHIP(i_target_chip),
+                                .set_TARGET_CHIP(i_target_chip)
+                                .set_OCCURRENCE(8),
                                 "Measurement SEEPROM configured with invalid clock divider");
                 }
 
                 o_return_action = P10_EXTRACT_SBE_RC::REIPL_BKP_MSEEPROM;
                 FAPI_ASSERT((!(sib_rsp_info == 0x6)), fapi2::EXTRACT_SBE_RC_SPI_ECC_ERR()
-                            .set_TARGET_CHIP(i_target_chip),
+                            .set_TARGET_CHIP(i_target_chip)
+                            .set_OCCURRENCE(4),
                             "Measurement SEEPROM uncorrectable ECC error detected");
 
                 o_return_action = P10_EXTRACT_SBE_RC::RESTART_CBS;
                 FAPI_ASSERT((!(sib_rsp_info == 0x4)), fapi2::EXTRACT_SBE_RC_SPI_SPRM_CFG_ERR()
-                            .set_TARGET_CHIP(i_target_chip),
+                            .set_TARGET_CHIP(i_target_chip)
+                            .set_OCCURRENCE(4),
                             "Measurement SEEPROM config/addr error detected");
 
                 o_return_action = P10_EXTRACT_SBE_RC::RESTART_CBS;
                 FAPI_ASSERT((!(sib_rsp_info == 0x1)), fapi2::EXTRACT_SBE_RC_SPI_RSC_ERR()
-                            .set_TARGET_CHIP(i_target_chip),
+                            .set_TARGET_CHIP(i_target_chip)
+                            .set_OCCURRENCE(4),
                             "Measurement SEEPROM is not available");
             }
         }
