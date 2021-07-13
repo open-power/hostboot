@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -462,7 +462,7 @@ extern "C"
                     set_CHIPLET_SEL(i_chipletSel).
                     set_BUFFER_SIZE(*io_pBufLenLeft).
                     set_RING_SIZE(be16toh(l_pScanData->iv_size)).
-                    set_OCCURRENCE(2),
+                    set_OCCURRENCE(1),
                     "mvpdRingFuncFindHdr: Not enough ring buffer space to contain ring: "
                     "ringId=0x%x, chipletSel=0x%08x, ",
                     "pBufLenLeft=%d, ring->iv_size=%d",
