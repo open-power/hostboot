@@ -2213,6 +2213,41 @@
 
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_WOF_IO_BASE_POWER_0P01W</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    The base TDP power (in 0.01W units) of AVDD, VPCI, and VDN rails that don't
+    vary with I/O configuration.
+
+    The value comes from the maximum power assumed for the system during WOF
+    table generation minus the computed link power based on the VIO voltage
+    for the system TDP configuration.
+
+    The value represented is the per socket configuration that supports 4 node
+    operation.
+
+    Each dimension assumes a different value for the VIO rail.
+
+    [index] ->2 entries-:
+        0: 1.0V;
+        1: 0.9V;
+        2: Reserved;
+        3: Reserved;
+
+    Producer: Machine Readable Workbook
+
+    Consumers: p10_hcode_image_build -> XGPE Hcode
+
+    </description>
+    <valueType>uint16</valueType>
+    <array>4</array>
+    <platInit>mrw</platInit>
+    <default>1721,2482,0,0</default>
+    <group>wof</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_WOV_MAX_DROOP_10THPCT</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
