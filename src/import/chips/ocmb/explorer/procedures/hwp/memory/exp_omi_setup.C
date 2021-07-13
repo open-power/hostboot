@@ -252,10 +252,16 @@ extern "C"
         FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_FREQ_OMI_MHZ, l_proc, l_omi_freq) );
         FAPI_TRY(mss::exp::workarounds::omi::cdr_bw_override(i_target, l_omi_freq));
 
-        // Apply override for CDR offset
-        FAPI_TRY(mss::attr::get_exp_omi_cdr_offset(i_target, l_cdr_offset));
-        FAPI_TRY(mss::attr::get_exp_omi_cdr_offset_lane_mask(i_target, l_cdr_offset_lane_mask));
-        FAPI_TRY(mss::exp::workarounds::omi::override_cdr_offset(i_target, l_cdr_offset, l_cdr_offset_lane_mask));
+        // Skip the CDR offset command for Apollo
+        // CDR offset needs PRBS training to succeed
+        // Apollo does not support PRBS training, so CDR offset will fail and therefore is not supported
+        if (l_is_apollo == fapi2::ENUM_ATTR_MSS_IS_APOLLO_FALSE)
+        {
+            // Apply override for CDR offset
+            FAPI_TRY(mss::attr::get_exp_omi_cdr_offset(i_target, l_cdr_offset));
+            FAPI_TRY(mss::attr::get_exp_omi_cdr_offset_lane_mask(i_target, l_cdr_offset_lane_mask));
+            FAPI_TRY(mss::exp::workarounds::omi::override_cdr_offset(i_target, l_cdr_offset, l_cdr_offset_lane_mask));
+        }
 
         // Start P10 PHY training by sending upstream PRBS pattern
         // Train mode 6 (state 3)
