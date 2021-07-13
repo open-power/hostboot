@@ -439,6 +439,13 @@
         capture     group default;
     };
 
+    register TLX_ERR2_REPORT
+    {
+        name        "TLX Error report register 2 (TLXR)";
+        scomaddr    0x0801241E;
+        capture     group default;
+    };
+
     register TLX_ERR0_REPORT_MASK
     {
         name        "TLX Error Report Mask Register 0";
@@ -593,6 +600,56 @@
         scomaddr    0x0801281F;
         capture     group omi_ocmb_ffdc;
     };
+
+    register MMIO_ERR_RPT_0
+    {
+        name        "Explorer MMIO Error Report Register 0";
+        scomaddr    0x0801087C;
+        capture     group default;
+    };
+
+    register MMIO_ERR_RPT_1
+    {
+        name        "Explorer MMIO Error Report Register 1";
+        scomaddr    0x0801087E;
+        capture     group default;
+    };
+
+    register SRQ_ERR_RPT
+    {
+        name        "Explorer SRQ Error Report Register";
+        scomaddr    0x0801141C;
+        capture     group default;
+    };
+
+    register MCB_ERR_RPT_0
+    {
+        name        "Explorer MCB Error Report Register 0";
+        scomaddr    0x080118E7;
+        capture     group default;
+    };
+
+    register MCB_ERR_RPT_1
+    {
+        name        "Explorer MCB Error Report Register 1";
+        scomaddr    0x080118EC;
+        capture     group default;
+    };
+
+    register RDF_ERR_RPT_0
+    {
+        name        "Explorer RDF Error Report Register 0";
+        scomaddr    0x08011C0E;
+        capture     group default;
+    };
+
+    register RDF_ERR_RPT_1
+    {
+        name        "Explorer RDF Error Report Register 1";
+        scomaddr    0x08011C0F;
+        capture     group default;
+    };
+
 
     ############################################################################
     # Misc

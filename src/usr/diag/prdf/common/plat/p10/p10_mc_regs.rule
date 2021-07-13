@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020
+# Contributors Listed Below - COPYRIGHT 2020,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -103,3 +103,15 @@
         scomaddr    0x0C010C30;
         capture     group default;
     };
+
+    ############################################################################
+    # Additional FFDC Registers
+    ############################################################################
+
+    register MISC_ERR_RPT
+    {
+        name        "MISC Error Report Register";
+        scomaddr    0x0C010FE7;
+        capture     group default;
+    };
+

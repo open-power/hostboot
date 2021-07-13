@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019,2020
+# Contributors Listed Below - COPYRIGHT 2019,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -93,9 +93,9 @@
         access      write_only;
     };
 
-    register MC_USTL_ERR_RPT
+    register MC_USTL_ERR_RPT_0
     {
-        name        "MC USTL Error Report";
+        name        "MC USTL Error Report 0";
         scomaddr    0x0C010E0E;
         capture     group mc_ustl_fir_ffdc;
     };
@@ -114,3 +114,9 @@
         capture     group mc_ustl_fir_ffdc;
     };
 
+    register MC_USTL_ERR_RPT_1
+    {
+        name        "MC USTL Error Report 1";
+        scomaddr    0x0C010E16;
+        capture     group mc_ustl_fir_ffdc;
+    };
