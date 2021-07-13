@@ -250,8 +250,8 @@ init_bitvec_from_hw_image(
                 .set_CHIP_TARGET(i_target)
                 .set_XIP_RC(l_xip_rc)
                 .set_SECTION_ID(i_type)
-                .set_DDLEVEL(0)
-                .set_OCCURRENCE(l_section.iv_size),
+                .set_DDLEVEL(UNDEFINED_DD_LEVEL)
+                .set_OCCURRENCE(1),
                 "init_bitvec_from_hw_image -- p9_xip_get_section() failed w/rc=0x%08X for section"
                 " section 0x%x",
                 (uint32_t)l_xip_rc, i_type);

@@ -557,8 +557,8 @@ fapi2::ReturnCode get_overlays_ring(
                      set_RING_ID(i_ringId).
                      set_MAX_RING_BUF_SIZE(RS4_RING_BUF_SIZE).
                      set_LOCAL_RC(rc).
-                     set_OCCURRENCE(4),
-                     "rs4_get_raw_bit_length() failed w/rc=0x%08x for ringId=0x%x, occurrence=4",
+                     set_OCCURRENCE(5),
+                     "rs4_get_raw_bit_length() failed w/rc=0x%08x for ringId=0x%x, occurrence=5",
                      rc, i_ringId );
 
         FAPI_DBG("Ring found in origination section, Overlays: "
@@ -1185,8 +1185,8 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
     FAPI_ASSERT( l_rc == TOR_SUCCESS,
                  fapi2::XIPC_CODE_BUG().
                  set_CHIP_TARGET(i_procTarget).
-                 set_OCCURRENCE(4),
-                 "CODE BUG(4): ringid_check_ringId() failed w/rc=0x%08x. Calling code must make"
+                 set_OCCURRENCE(1),
+                 "CODE BUG(1): ringid_check_ringId() failed w/rc=0x%08x. Calling code must make"
                  " sure it passes valid ringId(=0x%x) to _fetch(). Fix calling code.\n",
                  l_rc, i_ringId);
 
@@ -2086,8 +2086,8 @@ fapi_try_exit:
                             FAPI_ASSERT( false,
                                          fapi2::XIPC_CODE_BUG().
                                          set_CHIP_TARGET(i_procTarget).
-                                         set_OCCURRENCE(1),
-                                         "CODE BUG(1): Incorrect EC mask. Should never get here. Fix code!" );
+                                         set_OCCURRENCE(2),
+                                         "CODE BUG(2): Incorrect EC mask. Should never get here. Fix code!" );
                             break;
                     }
                 }
@@ -2301,24 +2301,11 @@ ReturnCode p10_ipl_customize (
     //-------------------------------------------
 
     // Get platform DD level
-    l_fapiRc = FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, i_procTarget, attrDdLevel);
-
-    FAPI_ASSERT( l_fapiRc == fapi2::FAPI2_RC_SUCCESS,
-                 fapi2::XIPC_FAPI_ATTR_SVC_FAIL().
-                 set_CHIP_TARGET(i_procTarget).
-                 set_OCCURRENCE(1),
-                 "FAPI_ATTR_GET(ATTR_EC) failed." );
-
+    FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, i_procTarget, attrDdLevel));
     FAPI_DBG("Platform DD level = 0x%x", attrDdLevel);
 
     // Get platform chip name
-    l_fapiRc = FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, i_procTarget, chipName);
-
-    FAPI_ASSERT( l_fapiRc == fapi2::FAPI2_RC_SUCCESS,
-                 fapi2::XIPC_FAPI_ATTR_SVC_FAIL().
-                 set_CHIP_TARGET(i_procTarget).
-                 set_OCCURRENCE(2),
-                 "FAPI_ATTR_GET(ATTR_NAME) failed." );
+    FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, i_procTarget, chipName));
 
     FAPI_DBG("Platform chip name = 0x%x", chipName);
 
@@ -2496,7 +2483,7 @@ ReturnCode p10_ipl_customize (
                      set_RING_ID(perv_pib_repr).
                      set_MAX_RING_BUF_SIZE(RS4_RING_BUF_SIZE).
                      set_LOCAL_RC(l_rc).
-                     set_OCCURRENCE(1),
+                     set_OCCURRENCE(4),
                      "rs4_decompress() for pibmem repair: Failed w/rc=%i "
                      "for perv_pib_repr=ringId=0x%03x, chipletId=0x%02x",
                      l_rc, perv_pib_repr, chipletId );
@@ -2682,7 +2669,8 @@ ReturnCode p10_ipl_customize (
         FAPI_ASSERT( l_rc == 0,
                      fapi2::XIPC_SECTION_REMOVAL_ERROR().
                      set_CHIP_TARGET(i_procTarget).
-                     set_XIP_SECTION(P9_XIP_SECTION_TOC),
+                     set_XIP_SECTION(P9_XIP_SECTION_TOC).
+                     set_LOCAL_RC(l_rc),
                      "p9_xip_delete_section() failed to remove .toc section w/rc=0x%08X",
                      (uint32_t)l_rc );
 
@@ -2692,7 +2680,8 @@ ReturnCode p10_ipl_customize (
         FAPI_ASSERT( l_rc == 0,
                      fapi2::XIPC_SECTION_REMOVAL_ERROR().
                      set_CHIP_TARGET(i_procTarget).
-                     set_XIP_SECTION(P9_XIP_SECTION_FIXED_TOC),
+                     set_XIP_SECTION(P9_XIP_SECTION_FIXED_TOC).
+                     set_LOCAL_RC(l_rc),
                      "p9_xip_delete_section() failed to remove .fixedtoc section w/rc=0x%08X",
                      (uint32_t)l_rc );
 
@@ -2706,7 +2695,8 @@ ReturnCode p10_ipl_customize (
         FAPI_ASSERT( l_rc == 0,
                      fapi2::XIPC_SECTION_REMOVAL_ERROR().
                      set_CHIP_TARGET(i_procTarget).
-                     set_XIP_SECTION(P9_XIP_SECTION_STRINGS),
+                     set_XIP_SECTION(P9_XIP_SECTION_STRINGS).
+                     set_LOCAL_RC(l_rc),
                      "p9_xip_delete_section() failed to remove .fixedtoc section w/rc=0x%08X",
                      (uint32_t)l_rc );
 
@@ -2730,15 +2720,7 @@ ReturnCode p10_ipl_customize (
         if (i_sysPhase == SYSPHASE_HB_SBE)
         {
             // Adjust the local size of MAX_SEEPROM_IMAGE_SIZE to accommodate enlarged image for Cronus
-            l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_MAX_SBE_SEEPROM_SIZE, FAPI_SYSTEM, attrMaxSbeSeepromSize);
-
-            FAPI_ASSERT( l_fapiRc2 == fapi2::FAPI2_RC_SUCCESS,
-                         fapi2::XIPC_FAPI_ATTR_SVC_FAIL().
-                         set_CHIP_TARGET(i_procTarget).
-                         set_OCCURRENCE(3),
-                         "FAPI_ATTR_GET(ATTR_MAX_SBE_SEEPROM_SIZE) failed."
-                         " Unable to determine ATTR_MAX_SBE_SEEPROM_SIZE,"
-                         " so don't know what what max image size." );
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MAX_SBE_SEEPROM_SIZE, FAPI_SYSTEM, attrMaxSbeSeepromSize));
 
             if (attrMaxSbeSeepromSize == MAX_SBE_SEEPROM_SIZE)
             {
@@ -2777,11 +2759,13 @@ ReturnCode p10_ipl_customize (
             FAPI_ASSERT( io_imageSize >= l_maxImageSize,
                          fapi2::XIPC_INVALID_INPUT_BUFFER_SIZE_PARM().
                          set_CHIP_TARGET(i_procTarget).
+                         set_SYSPHASE(i_sysPhase).
                          set_INPUT_IMAGE_SIZE(l_inputImageSize).
                          set_IMAGE_BUF_SIZE(io_imageSize).
                          set_RING_SECTION_BUF_SIZE(l_ringSectionBufSize).
                          set_RING_BUF_SIZE1(i_ringBufSize1).
                          set_RING_BUF_SIZE2(i_ringBufSize2).
+                         set_RING_BUF_SIZE3(i_ringBufSize3).
                          set_OCCURRENCE(2),
                          "One or more invalid input buffer sizes for HB_SBE phase:\n"
                          "  l_maxImageSize=0x%016llx\n"
@@ -2801,7 +2785,7 @@ ReturnCode p10_ipl_customize (
                          set_CHIP_TARGET(i_procTarget).
                          set_IMAGE_SIZE(l_currentImageSize).
                          set_MAX_IMAGE_SIZE(l_maxImageSize).
-                         set_OCCURRENCE(1),
+                         set_OCCURRENCE(2),
                          "Image size before VPD updates (=%d) already exceeds max image size (=%d)",
                          l_currentImageSize, l_maxImageSize );
 
@@ -2942,7 +2926,7 @@ ReturnCode p10_ipl_customize (
                          set_XIP_RC(l_rc).
                          set_SECTION_ID(subSectionID).
                          set_MAX_IMAGE_SIZE(l_maxImageSize).
-                         set_OCCURRENCE(1),
+                         set_OCCURRENCE(2),
                          "ERROR: p9_xip_append() failed w/rc=0x%08x for section = %u"
                          " ddLevel=0x%x",
                          (uint32_t)l_rc, subSectionID, attrDdLevel);
@@ -3274,7 +3258,7 @@ ReturnCode p10_ipl_customize (
                          set_CHIP_TARGET(i_procTarget).
                          set_TOR_RC(l_rc).
                          set_RING_ID(ringId).
-                         set_OCCURRENCE(1),
+                         set_OCCURRENCE(2),
                          "tor_append_ring() failed in process_base_and_dynamic_rings w/rc=0x%08x"
                          " for ringId=0x%x",
                          l_rc, ringId );
@@ -3305,8 +3289,8 @@ ReturnCode p10_ipl_customize (
                     FAPI_ASSERT( false,
                                  fapi2::XIPC_CODE_BUG().
                                  set_CHIP_TARGET(i_procTarget).
-                                 set_OCCURRENCE(2),
-                                 "CODE BUG(2): Messed up RC handling in assoc code. Fix code!" );
+                                 set_OCCURRENCE(3),
+                                 "CODE BUG(3): Messed up RC handling in assoc code. Fix code!" );
                     break;
             }
         }
@@ -3440,14 +3424,16 @@ ReturnCode p10_ipl_customize (
 
                 if ((uint32_t)l_fapiRc == RC_XIPC_IMAGE_WOULD_OVERFLOW)
                 {
-                    FAPI_DBG("p10_ipl_customize(): SBE image is full. Ran out of space appending"
-                             " VPD rings to the .rings section");
+                    FAPI_IMP("WARNING: SBE image is running out of space"
+                             " appending VPD rings to the .rings section");
 
                     // Check the bootCoreMask to determine if enough cores have been configured.
                     uint8_t attrMinReqdEcs = 0;
-                    uint8_t  l_actualEcCount = 0;
+                    uint8_t l_actualEcCount = 0;
 
-                    l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_SBE_IMAGE_MINIMUM_VALID_ECS, FAPI_SYSTEM, attrMinReqdEcs);
+                    l_fapiRc2 = FAPI_ATTR_GET( fapi2::ATTR_SBE_IMAGE_MINIMUM_VALID_ECS,
+                                               FAPI_SYSTEM,
+                                               attrMinReqdEcs );
 
                     FAPI_ASSERT( l_fapiRc2 == fapi2::FAPI2_RC_SUCCESS,
                                  fapi2::XIPC_IMAGE_WOULD_OVERFLOW_ADDL_INFO().
@@ -3478,7 +3464,7 @@ ReturnCode p10_ipl_customize (
                                  set_CURRENT_BOOT_CORE_MASK(io_bootCoreMask).
                                  set_MIN_REQD_ECS(attrMinReqdEcs).
                                  set_ACTUAL_EC_COUNT(l_actualEcCount),
-                                 "SBE image buffer would overflow before reaching the minimum required"
+                                 "SBE image buffer would overflow before reaching minimum required"
                                  " number of EC boot cores" );
 
                     fapi2::current_err = FAPI2_RC_SUCCESS;
@@ -3534,8 +3520,8 @@ ReturnCode p10_ipl_customize (
                          set_XIP_RC(l_rc).
                          set_SECTION_ID(P9_XIP_SECTION_SBE_RINGS).
                          set_MAX_IMAGE_SIZE(l_maxImageSize).
-                         set_OCCURRENCE(2),
-                         "ERROR(2): p9_xip_append() failed w/rc=0x%08x",
+                         set_OCCURRENCE(3),
+                         "ERROR(3): p9_xip_append() failed w/rc=0x%08x",
                          (uint32_t)l_rc );
 
             l_rc = p9_xip_image_size(io_image, &l_currentImageSize);
@@ -3555,7 +3541,7 @@ ReturnCode p10_ipl_customize (
                          set_CHIP_TARGET(i_procTarget).
                          set_IMAGE_SIZE(l_currentImageSize).
                          set_MAX_IMAGE_SIZE(l_maxImageSize).
-                         set_OCCURRENCE(2),
+                         set_OCCURRENCE(3),
                          "SBE image size after VPD updates (=%d) exceeds max image size (=%d)",
                          l_currentImageSize, l_maxImageSize );
 
@@ -3598,17 +3584,19 @@ ReturnCode p10_ipl_customize (
 
             if (l_fapiRc)
             {
-
-                FAPI_ASSERT( (uint32_t)l_fapiRc != RC_XIPC_IMAGE_WOULD_OVERFLOW,
-                             fapi2::XIPC_IMAGE_WOULD_OVERFLOW_BEFORE_REACHING_MIN_ECS().
-                             set_CHIP_TARGET(i_procTarget).
-                             set_REQUESTED_BOOT_CORE_MASK(l_requestedBootCoreMask).
-                             set_CURRENT_BOOT_CORE_MASK(io_bootCoreMask),
-                             "Ran out of space appending VPD rings to QME .rings section" );
+                if ( (uint32_t)l_fapiRc == RC_XIPC_IMAGE_WOULD_OVERFLOW )
+                {
+                    FAPI_ERR("fetch_and_insert_vpd_rings() failed in sysPhase=RT_QME"
+                             " w/rc=XIPC_IMAGE_WOULD_OVERFLOW");
+                }
+                else
+                {
+                    FAPI_ERR("fetch_and_insert_vpd_rings() failed in sysPhase=RT_QME w/rc=0x%08x",
+                             (uint32_t)l_fapiRc);
+                }
 
                 fapi2::current_err = l_fapiRc;
                 goto fapi_try_exit;
-
             }
 
             // More size code sanity checks of section and image sizes.
@@ -3677,8 +3665,8 @@ ReturnCode p10_ipl_customize (
     FAPI_ASSERT( listPos == ringIdFeatListSize,
                  fapi2::XIPC_CODE_BUG().
                  set_CHIP_TARGET(i_procTarget).
-                 set_OCCURRENCE(5),
-                 "CODE BUG(5): Accummulated feature list size(=%u) does not match"
+                 set_OCCURRENCE(4),
+                 "CODE BUG(4): Accummulated feature list size(=%u) does not match"
                  " allocated list size(=%u)",
                  listPos, ringIdFeatListSize );
 
@@ -3700,8 +3688,8 @@ ReturnCode p10_ipl_customize (
                      set_XIP_RC(l_rc).
                      set_SECTION_ID(P9_XIP_SECTION_SBE_RINGIDFEATLIST).
                      set_MAX_IMAGE_SIZE(l_maxImageSize).
-                     set_OCCURRENCE(3),
-                     "ERROR(3): p9_xip_append() failed w/rc=0x%08x",
+                     set_OCCURRENCE(4),
+                     "ERROR(4): p9_xip_append() failed w/rc=0x%08x",
                      (uint32_t)l_rc );
     }
 
