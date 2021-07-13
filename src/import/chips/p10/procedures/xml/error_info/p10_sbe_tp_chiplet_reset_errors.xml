@@ -36,6 +36,7 @@
     <ffdc>MISC_PFET_REG</ffdc>
     <ffdc>CHIPLET_ID</ffdc>
     <ffdc>TARGET</ffdc>
+    <ffdc>EC_FEATURE</ffdc>
     <callout>
       <target>TARGET</target>
       <priority>HIGH</priority>
