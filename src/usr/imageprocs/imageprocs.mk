@@ -49,6 +49,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/nest
 EXTRAINCDIR += ${HWP_IPL_PATH} ${HWP_IMAGEPROCS_PATH}
 EXTRAINCDIR += ${HWP_COMMON_IMAGEPROCS_PATH}
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${IPL_CUSTOMIZE_PATH}
 EXTRAINCDIR += ${HWP_ACC_PATH}

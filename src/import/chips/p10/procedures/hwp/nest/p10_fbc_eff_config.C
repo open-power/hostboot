@@ -775,8 +775,8 @@ fapi2::ReturnCode p10_fbc_eff_config_mc_tsnoop(
     uint32_t l_mc_tsnoop_d = 0;
 
     // core/nest
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_CEILING_MHZ,
-                           i_target_proc,
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ,
+                           i_target_sys,
                            l_freq_nest_max_mhz));
     l_freq_nest_max_mhz /= 2;
 
