@@ -77,6 +77,7 @@
 #include <sys/misc.h>
 
 #include "call_proc_build_smp.H"
+#include "monitor_sbe_halt.H"
 
 using   namespace   ISTEP_ERROR;
 using   namespace   ISTEP;
@@ -629,10 +630,10 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
                  * @custdesc   Platform security problem detected
                  */
                 l_err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                                MOD_CALL_HOST_SECUREBOOT_LOCKDOWN,
-                                                RC_SBE_COMPROMISED,
-                                                get_huid(l_proc),
-                                                l_sbe_compromised_eid);
+                                      MOD_CALL_HOST_SECUREBOOT_LOCKDOWN,
+                                      RC_SBE_COMPROMISED,
+                                      get_huid(l_proc),
+                                      l_sbe_compromised_eid);
 
                 // Note: secureboot is enabled, so deconfig
                 l_err->addHwCallout( l_proc,
@@ -983,6 +984,9 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
                     continue;
                 }
 
+                // remove from halt monitoring thread
+                MONITOR_SBE_HALT::removeSbeProc(l_proc);
+
                 // Clear FIFO and perform hreset to secondary SBE
                 recoverSBE(l_proc, l_istepError);
 
@@ -1092,6 +1096,9 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
     }while(0);
 
 #endif // CONFIG_VPO_COMPILE
+
+    // stop this thread if it is still running
+    MONITOR_SBE_HALT::stopSbeHaltMonitor();
 
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                 EXIT_MRK"call_host_secureboot_lockdown");

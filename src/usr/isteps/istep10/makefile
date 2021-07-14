@@ -60,6 +60,7 @@ OBJS += call_proc_pcie_scominit.o
 OBJS += host_proc_pcie_scominit.o
 OBJS += call_proc_scomoverride_chiplets.o
 OBJS += call_host_rng_bist.o
+OBJS += monitor_sbe_halt.o
 
 #Sensor Based Bifurcation implementation
 #OBJS += $(if $(CONFIG_SENSOR_BASED_BIFURCATION),sensor_based_bifurcation.o)

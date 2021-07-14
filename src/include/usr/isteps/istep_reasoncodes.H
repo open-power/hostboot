@@ -89,6 +89,7 @@ namespace ISTEP
         MOD_CALL_HOST_SECUREBOOT_LOCKDOWN                 = 0x3A,
         MOD_WAIT_FOR_SBE_ATTN                             = 0x3B,
         MOD_CHECK_FOR_SECURITY_ACCESS_MISMATCH            = 0x3C,
+        MOD_MONITOR_SBE_HALT                              = 0x3D,
     };
 
     /**
@@ -190,6 +191,7 @@ namespace ISTEP
         RC_ERROR_READING_HUGE_PAGE_COUNT         = ISTEP_COMP_ID | 0x69,
         RC_ERROR_READING_LMB_SIZE                = ISTEP_COMP_ID | 0x6A,
         RC_INVALID_BOOTSIDE                      = ISTEP_COMP_ID | 0x6B,
+        RC_UNHALTED_SBE                          = ISTEP_COMP_ID | 0x6C,
     };
 
 };

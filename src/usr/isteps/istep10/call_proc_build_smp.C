@@ -59,6 +59,7 @@
 #include <sbeio/sbe_utils.H>
 
 #include "call_proc_build_smp.H"
+#include "monitor_sbe_halt.H"
 
 using   namespace   ISTEP_ERROR;
 using   namespace   ISTEP;
@@ -547,6 +548,15 @@ void* call_proc_build_smp (void *io_pArgs)
                        "ERROR : call_proc_build_smp: waitForSBEAttn returned error" );
                     forceProcDelayDeconfigCallout(l_proc, l_errl);
                     captureError(l_errl, l_StepError, ISTEP_COMP_ID, l_proc);
+
+                    // NOTE: Adding error to l_StepError will cause this SBE
+                    //       to not setup its SMP fabric so it is safe to not
+                    //       add to the halt state monitor
+                }
+                else
+                {
+                    // Start monitoring SBE's halt state
+                    MONITOR_SBE_HALT::addSbeProc(l_proc);
                 }
 
                 // reset the started attribute
