@@ -116,7 +116,7 @@ enum
     QME_PIG_REQ_INT_TYPE_LEN  = 4,
     QME_PIG_REG             =   0x200e0030,
     QME_QUIESCE_TIMEOUT_MS  =   250,
-
+    OCC_FLAG7_RW            =   0x6c0c1,
 };
 
 // -----------------------------------------------------------------------------
@@ -959,31 +959,33 @@ fapi2::ReturnCode protectCoreIncaseQmeHaltOrQuiesce(
     using namespace eq;
     using namespace c;
     fapi2::buffer<uint64_t> l_data64;
+    fapi2::buffer<uint32_t> l_hypDeadCores;
     uint8_t CL2_START_POS = 5;
     uint8_t L3_START_POS  = 9;
 
     // mc_or target will be used for putscom too
     auto l_eq_mc_or  =
         i_target.getMulticast<fapi2::TARGET_TYPE_EQ, fapi2::MULTICAST_OR >(fapi2::MCGROUP_GOOD_EQ);
-    fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > core_mc_target_and =
-        i_target.getMulticast< fapi2::MULTICAST_AND >(fapi2::MCGROUP_GOOD_EQ, fapi2::MCCORE_ALL);
 
-    FAPI_INF("Clear AUTO_SPECIAL_WAKEUP_DISABLE, Assert PM_EXIT if not STOP_GATED");
-    l_data64.flush<0>().setBit < QME_SCSR_AUTO_SPECIAL_WAKEUP_DISABLE > ();
-    FAPI_TRY( putScom( core_mc_target_and, QME_SCSR_WO_CLEAR, l_data64 ) );
+    // Read the HYP deadcore vector
+    FAPI_TRY( getScom (i_target, OCC_FLAG7_RW, l_data64),
+              "Failed To Read OCC Flag7 Register" );
+    l_data64.extract<0, 32>(l_hypDeadCores);
 
     for ( auto l_core_target : i_target.getChildren<fapi2::TARGET_TYPE_CORE>( fapi2::TARGET_STATE_FUNCTIONAL ) )
     {
         uint8_t l_scsr_update = 0;
         fapi2::ATTR_CHIP_UNIT_POS_Type l_core_unit_pos;
+        uint8_t l_rel_core_pos = 0;
 
         FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS,
                                 l_core_target,
                                 l_core_unit_pos));
 
-        l_core_unit_pos = l_core_unit_pos % 4;
+        l_rel_core_pos = l_core_unit_pos % 4;
 
         fapi2::ATTR_ECO_MODE_Type l_eco_mode;
+        bool l_dead_core = false;
 
         FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_ECO_MODE,
                                  l_core_target,
@@ -993,22 +995,41 @@ fapi2::ReturnCode protectCoreIncaseQmeHaltOrQuiesce(
 
         FAPI_TRY( fapi2::getScom( l_eq_target, CPLT_CTRL3_RW, l_data64 ) );
 
-        if ( !l_data64.getBit( l_core_unit_pos + CL2_START_POS ) &&
-             !l_data64.getBit( l_core_unit_pos + L3_START_POS ) )
+        if ( !l_data64.getBit( l_rel_core_pos + CL2_START_POS ) &&
+             !l_data64.getBit( l_rel_core_pos + L3_START_POS ) )
         {
             continue;
         }
 
+        // Read deadcores from prev malfunctions
+        FAPI_TRY( fapi2::getScom( l_eq_target, scomt::eq::QME_SCRA_RW, l_data64 ) );
+
+        // Clear AUTO_SPECIAL_WAKEUP_DISABLE, only if not a dead core,
+        // so that cores marked dead do not wake up spuriously for HYP.
+        // Dead core can be from prev PM Malf (from SCRA) or an in-flight PM Malf (from OCC_FLAG7)
+        if ( l_data64.getBit(l_rel_core_pos) || l_hypDeadCores.getBit(l_core_unit_pos) )
+        {
+            l_dead_core = true;
+            FAPI_INF ("Skip Clear AUTO_SPECIAL_WAKEUP_DISABLE on dead core %d", l_core_unit_pos);
+        }
+        else
+        {
+            l_data64.flush<0>().setBit < QME_SCSR_AUTO_SPECIAL_WAKEUP_DISABLE > ();
+            FAPI_TRY ( fapi2::putScom( l_core_target, QME_SCSR_WO_CLEAR, l_data64 ) );
+        }
+
         FAPI_TRY( fapi2::getScom( l_core_target, scomt::c::QME_SSH_SRC, l_data64 ) );
 
-        if( l_data64.getBit<0>() != 1 &&
-            (l_eco_mode == fapi2::ENUM_ATTR_ECO_MODE_DISABLED))
+        if( (l_data64.getBit<0>() != 1) &&
+            (l_eco_mode == fapi2::ENUM_ATTR_ECO_MODE_DISABLED) &&
+            (l_dead_core == false) )
         {
             l_scsr_update = 1;
             l_data64.flush<0>().setBit< QME_SCSR_ASSERT_PM_EXIT >();
         }
 
-        if (l_eco_mode == fapi2::ENUM_ATTR_ECO_MODE_ENABLED)
+        if ((l_eco_mode == fapi2::ENUM_ATTR_ECO_MODE_ENABLED) ||
+            (l_dead_core == true))
         {
             l_scsr_update = 1;
             l_data64.flush<0>().setBit< QME_SCSR_BLOCK_INTR_OUTPUTS>().

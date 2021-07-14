@@ -225,7 +225,7 @@ fapi2::ReturnCode CoreAction::configDeadCoresForQmeAndDump( )
         FAPI_TRY( fapi2::putScom( l_eq, scomt::eq::CPLT_CTRL1_WO_CLEAR, l_chipletCtrl1 ));
         FAPI_TRY( fapi2::putScom( l_eq, scomt::eq::CPLT_CTRL3_WO_OR, l_chipletCtrl3 ));
         FAPI_TRY( fapi2::putScom( l_eq, scomt::eq::QME_SCRA_WO_OR, l_qmeScratchRegA ) );
-        FAPI_INF( "Chiplet Ctrl1 0x%016lx Chiplet Ctrl3 0x%016lx\n Scratch Reg A 0x%016lx",
+        FAPI_INF( "Chiplet Ctrl1 0x%016lx Chiplet Ctrl3 0x%016lx Scratch Reg A 0x%016lx",
                   l_chipletCtrl1, l_chipletCtrl3, l_qmeScratchRegA );
 
     } //for ( l_eq
@@ -272,7 +272,7 @@ fapi2::ReturnCode CoreAction :: init( )
 {
     fapi2::buffer <uint64_t> l_scomData;
     FAPI_TRY( getScom( iv_procChipTgt, OCC_FLAG7_RW, l_scomData ),
-              "Failed To Read OCC Flag2 Register" );
+              "Failed To Read OCC Flag7 Register" );
     l_scomData.extract<0, 32>( iv_deadCoreVect );
 
 fapi_try_exit:
