@@ -1208,7 +1208,7 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         io_globalppb->wov.wov_overv_max_pct               = iv_attrs.attr_wov_overv_max_pct;
         if (io_globalppb->wov.wov_underv_vmin_mv == 0)
         {
-            io_globalppb->wov.wov_underv_vmin_mv = revle16(uint16_t(revle32(io_globalppb->base.safe_voltage_mv[SAFE_VOLTAGE_VDD])));
+            io_globalppb->wov.wov_underv_vmin_mv = revle16(iv_vdd_vpd_vmin);
             FAPI_INF("WOV_VMIN_MV=%u",revle16(io_globalppb->wov.wov_underv_vmin_mv));
             FAPI_INF("SafeVoltage=%u",revle32(io_globalppb->base.safe_voltage_mv[SAFE_VOLTAGE_VDD]));
         }
@@ -4425,7 +4425,8 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
     fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ_Type l_sys_pstate0_freq_mhz = 0;
     uint32_t                                 l_safe_mode_op_ps2freq_khz;
     uint32_t                                 l_safe_op_freq_mhz;
-    uint8_t                                  l_safe_op_ps;;
+    uint8_t                                  l_safe_op_ps;
+    uint8_t                                  l_psave_ps;   
     uint32_t                                 l_core_floor_mhz;
     uint32_t                                 l_op_pt_mhz;
     Pstate                                   l_safe_mode_ps;
@@ -4639,8 +4640,10 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
                         &l_safe_mode_ps, ROUND_FAST, PPB_WARN);
     if (l_rc)
     {
+        disable_pstates();
         // TODO: put in notification controls
         fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+        goto fapi_try_exit;
     }
 
     FAPI_INF ("l_safe_mode_ps 0x%x (%d)",l_safe_mode_ps, l_safe_mode_ps);
@@ -4720,6 +4723,24 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
     {
         FAPI_INF ("Attribute override safe mode VCS voltage being used");
     }
+
+    // The wov_underv_vmin_mv member of the GPPB is needed to set the floor
+    // voltage as seen at the circuits (but still with biases).  The safe mode
+    // voltage above may have system parameter (load line, distribution loss)
+    // uplifts as well core floor uplifts so it can't be used. Thus, fill in
+    // wov_underv_vmin_mv with the biased VPD voltage associated with PowerSave.
+    // Save the value into the PPB class for use in filling in the GPPB later.
+
+    l_rc = freq2pState(iv_vddPsavFreq*1000,
+                        &l_psave_ps, ROUND_FAST, PPB_WARN);
+    if (l_rc)
+    {
+        disable_pstates();
+        // TODO: put in notification controls
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+        goto fapi_try_exit;
+    }
+    iv_vdd_vpd_vmin = ps2v_mv(l_psave_ps, VDD, VPD_PT_SET_BIASED);
 
     // Calculate boot mode voltages
     if (!iv_attrs.attr_boot_voltage_mv[VDD])

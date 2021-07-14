@@ -813,12 +813,14 @@ class PlatPmPPB
         uint32_t                  iv_vddPsavFreq;
         uint32_t                  iv_vddWofBaseFreq;
         uint32_t                  iv_vddUTFreq;
+        uint32_t                  iv_vddFixedFreq;
+
+        uint16_t                  iv_vdd_vpd_vmin;
 
         uint64_t                  iv_dccr_value;
         uint64_t                  iv_flmr_value;
         uint64_t                  iv_fmmr_value;
 
-        uint32_t                  iv_vddFixedFreq;
         uint32_t                  iv_sortPower;
 
         uint32_t                  iv_wts_vddPsavFreq;
