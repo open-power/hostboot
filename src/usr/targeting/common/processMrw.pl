@@ -30,7 +30,6 @@
 use strict;
 use XML::Simple;
 use Data::Dumper;
-use Targets;
 use Math::BigInt;
 use Getopt::Long;
 use File::Basename;
@@ -38,6 +37,12 @@ use feature "state";
 use Carp qw( croak confess );
 use List::Util "max";
 
+# Use local modules
+use FindBin qw($RealBin);
+use FindBin qw($RealScript);
+use lib "$RealBin";
+
+use Targets;
 
 ################################################################################
 # Define some global constants/variables
@@ -211,8 +216,8 @@ my %MAX_INST_PER_PROC =
 ################################################################################
 sub printUsage
 {
-    print "
-processMrwl.pl -x [XML filename] [OPTIONS]
+    print <<EOF;
+$RealScript -x [XML filename] [OPTIONS]
 Options:
         -build <hb | fsp> = hb  - process HB targets only (the default)
                             fsp - process FSP targets in addition to HB targets
@@ -228,7 +233,7 @@ Options:
         -s = run in silent mode, suppress warnings but not errors,
              use judiciously
         -t = run self test
-";
+EOF
     exit(1);
 } # end sub printUsage
 
