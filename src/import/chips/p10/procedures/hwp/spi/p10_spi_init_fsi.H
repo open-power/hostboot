@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,24 +37,36 @@
 //------------------------------------------------------------------------------
 
 #include <fapi2.H>
+#include "p10_sbe_spi_cmd.H"
 
 //------------------------------------------------------------------------------
 // Function Prototypes
 //------------------------------------------------------------------------------
 
 typedef fapi2::ReturnCode (*p10_spi_init_fsi_FP_t)(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const std::vector<SPI_ENGINE_PART>& i_engines);
 
 extern "C"
 {
     /*
      * @brief This hardware procedure will accept a given processor target and
      *        set the root control register's muxes to use FSI instead of PIB.
+     *        Note that if no engines are passed in, then all 4 engines will
+     *        be switched to FSI mode
+     *
+     *        valid enum values passed in to i_engines:
+     *        SPI_ENGINE_PRIMARY_BOOT_SEEPROM = 0
+     *        SPI_ENGINE_BACKUP_BOOT_SEEPROM = 1
+     *        SPI_ENGINE_PRIMARY_MVPD_SEEPROM = 2
+     *        SPI_ENGINE_BACKUP_MVPD_SEEPROM = 3
      *
      * @param[in]   i_target    The processor target to operate on.
+     * @param[in]   i_engines   List of engines to swap over to FSI.
      */
     fapi2::ReturnCode p10_spi_init_fsi(
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+        const std::vector<SPI_ENGINE_PART>& i_engines = {});
 
 } // extern C
 

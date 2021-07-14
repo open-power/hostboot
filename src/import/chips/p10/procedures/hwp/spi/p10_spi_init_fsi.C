@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,7 +34,8 @@
 #include <p10_scom_perv.H>
 
 fapi2::ReturnCode p10_spi_init_fsi(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const std::vector<SPI_ENGINE_PART>& i_engines)
 {
     // Give these constants more managable names.
     // Use this atomic set register to set bits in ROOT_CTRL_8 register
@@ -42,33 +43,37 @@ fapi2::ReturnCode p10_spi_init_fsi(
     const uint32_t ROOT_CTRL_8_SET =
         scomt::perv::FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI;
 
-    // Select SPIM_0 for BOOT0 SEEPROM
-    const uint32_t SPIM0_PORT_MUX_SELECT =
-        scomt::perv::FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_SPIMST0_PORT_MUX_SEL_DC;
-
-    // Select SPIM_1 for BOOT1 SEEPROM
-    const uint32_t SPIM1_PORT_MUX_SELECT =
-        scomt::perv::FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_SPIMST1_PORT_MUX_SEL_DC;
-
-    // Select SPIM_2 for MVPD/KEYSTORE SEEPROM
-    const uint32_t SPIM2_PORT_MUX_SELECT =
-        scomt::perv::FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_SPIMST2_PORT_MUX_SEL_DC;
-
-    // Select SPIM_3 for MEASUREMENT ROM
-    const uint32_t SPIM3_PORT_MUX_SELECT =
-        scomt::perv::FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_SPIMST3_PORT_MUX_SEL_DC;
-
-
     fapi2::buffer<uint32_t> root_ctrl_set_buffer;
 
-    // Force root control reg 8 to use FSI for SPI Master for all 4 SPI engines
+    // Force root control reg 8 to use FSI for SPI Master for all engines
+    // in the vector i_engines
     // SET function: for setting individual bits to logical '1' value, take
     // corresponding SET address of the given register and write a '1' into
     // that bit positions that needs to be set. ('1' setting = FSI CFAM mode)
-    root_ctrl_set_buffer.setBit<SPIM0_PORT_MUX_SELECT>();
-    root_ctrl_set_buffer.setBit<SPIM1_PORT_MUX_SELECT>();
-    root_ctrl_set_buffer.setBit<SPIM2_PORT_MUX_SELECT>();
-    root_ctrl_set_buffer.setBit<SPIM3_PORT_MUX_SELECT>();
+    // bit 0 = PRIMARY BOOT SEEPROM
+    // bit 1 = BACKUP BOOT SEEPROM
+    // bit 2 = PRIMARY MVPD SEEPROM
+    // bit 3 = BACKUP MVPD SEEPROM
+    if (i_engines.empty()) // empty vector means swap every engine to FSI
+    {
+        for (size_t i = SPI_ENGINE_PRIMARY_BOOT_SEEPROM; i < SPI_ENGINE_TPM; i++)
+        {
+            root_ctrl_set_buffer.setBit(i);
+        }
+    }
+    else
+    {
+        for (size_t i : i_engines)
+        {
+            // No associated SPI engine
+            FAPI_ASSERT(i < SPI_ENGINE_TPM, fapi2::INVALID_SPI_ENGINE()
+                        .set_CHIP_TARGET(i_target),
+                        "Error trying to switch SPI mux to FSI");
+
+
+            root_ctrl_set_buffer.setBit(i);
+        }
+    }
 
     // Update ROOT_CTRL_8 register via its atomic set register
     FAPI_TRY(fapi2::putCfamRegister(
