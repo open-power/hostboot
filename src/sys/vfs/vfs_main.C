@@ -5,8 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2021                        */
 /* [+] International Business Machines Corp.                              */
+/* [+] dongshijiang                                                       */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -43,7 +44,7 @@ const char* VFS_ROOT_MSG_MCTP_IN = "/msg/mctpin";
 const char* VFS_ROOT_MSG_MCTP_OUT = "/msg/mctpout";
 const char* VFS_ROOT_MSG_PLDM_REQ_IN = "/msg/pldmreqin";
 const char* VFS_ROOT_MSG_PLDM_RSP_IN = "/msg/pldmrspin";
-const char* VFS_ROOT_MSG_PLDM_REQ_OUT= "/msg/pldrreqout";
+const char* VFS_ROOT_MSG_PLDM_REQ_OUT= "/msg/pldmreqout";
 
 void vfs_module_init();
 
