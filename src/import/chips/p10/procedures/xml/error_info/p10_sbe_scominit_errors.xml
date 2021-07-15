@@ -46,6 +46,24 @@
   <!-- ******************************************************************** -->
   <hwpError>
     <sbeError/>
+    <rc>RC_P10_SBE_SCOMINIT_UNEQUAL_MC_FREQS</rc>
+    <description>
+      Procedure: p10_sbe_scominit
+      Chip has unequal MC chiplet frequencies
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>MC_UNIT1</ffdc>
+    <ffdc>MC_FREQ1</ffdc>
+    <ffdc>MC_UNIT2</ffdc>
+    <ffdc>MC_FREQ2</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
     <rc>RC_P10_SBE_SCOMINIT_LPC_BAR_ATTR_ERR</rc>
     <description>
       Procedure: p10_sbe_scominit
