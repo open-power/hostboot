@@ -39,6 +39,10 @@
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>LOW</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -55,6 +59,10 @@
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>LOW</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -68,6 +76,10 @@
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>LOW</priority>
     </callout>
   </hwpError>
   <!-- ******************************************************************** -->
@@ -84,6 +96,10 @@
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>LOW</priority>
     </callout>
   </hwpError>
   <!-- ******************************************************************** -->
