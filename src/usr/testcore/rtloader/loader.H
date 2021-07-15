@@ -49,6 +49,8 @@
 #include <errno.h>
 #include <isteps/mem_utils.H>
 #include <targeting/translateTarget.H>
+#include <sbeio/runtime/sbe_msg_passing.H>
+#include <sbeio/sbe_psudd.H>
 
 trace_desc_t* g_trac_hbrt = NULL;
 TRAC_INIT(&g_trac_hbrt, "HBRT_TEST", 12*KILOBYTE);
@@ -124,6 +126,14 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
 
             do
             {
+#ifdef CONFIG_COMPILE_CXXTEST_HOOKS
+                // In order to test the runtime PSU operations, we need to
+                //  short-circuit the interrupt handling of the IPL code
+                //  that is still resident.
+                SBEIO::SbePsu::getTheInstance().ignoreInterrupts(true);
+#endif //#ifdef CONFIG_COMPILE_CXXTEST_HOOKS
+
+
                 hostInterfaces_t* intf = new hostInterfaces_t();
                 intf->interfaceVersion = HOSTBOOT_RUNTIME_INTERFACE_VERSION;
                 intf->puts = rt_puts;
@@ -199,6 +209,11 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             }
 #endif
 
+#ifdef CONFIG_COMPILE_CXXTEST_HOOKS
+            // Re-enable SBE PSU interrupts
+            SBEIO::SbePsu::getTheInstance().ignoreInterrupts(false);
+#endif //#ifdef CONFIG_COMPILE_CXXTEST_HOOKS
+
         }
 
     private:
@@ -271,6 +286,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                     return l_procChip;
                 }
             }
+            TRACFCOMP( g_trac_hbrt, "No target found for id=%.8X", i_hbrtid );
             return nullptr;
         }
 
@@ -330,6 +346,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
 
         static void rt_assert()
         {
+            TRACFCOMP(g_trac_hbrt, "rt_assert");
             assert(false);
         }
 
@@ -519,7 +536,26 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
 
             if (0 == strcmp(i_region, HBRT_RSVD_MEM__SBE_COMM))
             {
-                addr = rt_get_comm(i_instance);
+                static std::vector<uint64_t> s_virt_SBE_COMM_ADDR(10);
+                auto l_procChip = get_target_for_hbrt_id(i_instance);
+                if( l_procChip != nullptr )
+                {
+                    auto l_physAddr = l_procChip->getAttr<TARGETING::ATTR_SBE_COMM_ADDR>();
+                    if( s_virt_SBE_COMM_ADDR[i_instance] == 0 )
+                    {
+                        addr = reinterpret_cast<uint64_t>(
+                                  mm_block_map(reinterpret_cast<void*>(l_physAddr),
+                                               SBE_MSG::SBE_COMM_BUFFER_SIZE) );
+                        if( addr == 0 )
+                        {
+                            TS_FAIL("mm_block_map failed to map physical address 0x%016llX for SBE_COMM_ADDR",  l_physAddr);
+                        }
+                    }
+                    TRACFCOMP(g_trac_hbrt,"ATTR_SBE_COMM_ADDR for %.8X = %X @ %X",
+                              TARGETING::get_huid(l_procChip),
+                              l_physAddr,
+                              addr);
+                }
             }
             else if (0 == strcmp(i_region, HBRT_RSVD_MEM__DATA))
             {
@@ -528,6 +564,54 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             else if (0 == strcmp(i_region,HBRT_RSVD_MEM__HOMER))
             {
                 addr = rt_get_homer_addr(i_instance);
+            }
+            else if (0 == strcmp(i_region,HBRT_RSVD_MEM__SBE_FFDC))
+            {
+                static std::vector<uint64_t> s_virt_SBE_FFDC_ADDR(10);
+                auto l_procChip = get_target_for_hbrt_id(i_instance);
+                if( l_procChip != nullptr )
+                {
+                    auto l_physAddr = l_procChip->getAttr<TARGETING::ATTR_SBE_FFDC_ADDR>();
+                    if( s_virt_SBE_FFDC_ADDR[i_instance] == 0 )
+                    {
+                        addr = reinterpret_cast<uint64_t>(
+                                  mm_block_map(reinterpret_cast<void*>(l_physAddr),
+                                               SBEIO::SbePsu::getTheInstance().getSbeFFDCBufferSize()) );
+                        if( addr == 0 )
+                        {
+                            TS_FAIL("mm_block_map failed to map physical address 0x%016llX for SBE_FFDC_ADDR",  l_physAddr);
+                        }
+                    }
+                    TRACFCOMP(g_trac_hbrt,"ATTR_SBE_COMM_ADDR for %.8X = %X @ %X",
+                              TARGETING::get_huid(l_procChip),
+                              l_physAddr,
+                              addr);
+                }
+            }
+            else if (0 == strcmp(i_region,HBRT_RSVD_MEM__SBE_PSU))
+            {
+                static void* s_virt_SBE_PSU = nullptr;
+                if( s_virt_SBE_PSU == nullptr )
+                {
+                    auto l_physAddr = TARGETING::UTIL::assertGetToplevelTarget()
+                      ->getAttr<ATTR_SBE_HBRT_PSU_PHYS_ADDR>();
+                    addr = reinterpret_cast<uint64_t>(
+                             mm_block_map(reinterpret_cast<void*>(l_physAddr),
+                                          SBEIO::SbePsu::MAX_HBRT_PSU_OP_SIZE_BYTES) );
+                    if( addr == 0 )
+                    {
+                        TS_FAIL("mm_block_map failed to map physical address 0x%016llX for SBE_HBRT_PSU_PHYS_ADDR",
+                                l_physAddr);
+                    }
+                    TRACFCOMP(g_trac_hbrt,"ATTR_SBE_HBRT_PSU_PHYS_ADDR = %X @ %X",
+                              l_physAddr,
+                              addr);
+                }
+            }
+            else
+            {
+                TS_FAIL("rt_get_reserved_mem> Unsupported reserved memory: %s",
+                        i_region);
             }
 
             TRACFCOMP(g_trac_hbrt,
@@ -814,59 +898,6 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             }
             TRACFCOMP(g_trac_hbrt, EXIT_MRK"rt_pnor_write");
             return rc;
-        }
-
-        //--------------------------------------------------------------------
-        static uint64_t rt_get_comm(uint32_t i_instance)
-        {
-            if (cv_comm_addr != 0)
-            {
-                TRACFCOMP(g_trac_hbrt, EXIT_MRK"rt_get_comm: "
-                          "stored cv_comm_addr:%lld",
-                          cv_comm_addr);
-                return cv_comm_addr;
-            }
-
-            TARGETING::TargetHandleList procChips;
-            getAllChips(procChips, TARGETING::TYPE_PROC, true);
-            for (const auto & l_procChip: procChips)
-            {
-                uint64_t l_instance =
-                    l_procChip->getAttr<TARGETING::ATTR_HBRT_HYP_ID>();
-                if(l_instance == i_instance)
-                {
-                    cv_comm_addr =
-                        l_procChip->getAttr<TARGETING::ATTR_SBE_COMM_ADDR>();
-                    if (cv_comm_addr != 0)
-                    {
-                        TRACFCOMP(g_trac_hbrt, EXIT_MRK"rt_get_comm: "
-                                  "retrieved attribute cv_comm_addr:%lld",
-                                  cv_comm_addr);
-                        return cv_comm_addr;
-                    }
-                }
-            }
-
-            cv_comm_phys_addr = ISTEP::get_top_mem_addr();
-
-            assert (cv_comm_phys_addr != 0,
-                    "rt_get_comm: Top of memory was 0!");
-
-            // Just picking 64K inside VMM_ATTR_DATA as it is available for HDAT
-            cv_comm_phys_addr -= (VMM_ALL_HOMER_OCC_MEMORY_SIZE + 64*KILOBYTE);
-
-            uint8_t *comm_ptr = reinterpret_cast<uint8_t *>(cv_comm_phys_addr);
-
-            void *cptr = mm_block_map(comm_ptr, PAGESIZE);
-
-            assert(cptr != NULL,"rt_get_comm. Could not map SBE Comm memory");
-
-            cv_comm_addr = reinterpret_cast<uint64_t>(cptr);
-
-            TRACFCOMP(g_trac_hbrt, EXIT_MRK"rt_get_comm: "
-                      "calculated cv_comm_addr:%lld",
-                      cv_comm_addr);
-            return cv_comm_addr;
         }
 
         //--------------------------------------------------------------------
@@ -1350,8 +1381,6 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
         //--------------------------------------------------------------------
         //--------------------------------------------------------------------
         static uint64_t cv_hb_data_addr;
-        static uint64_t cv_comm_addr;
-        static uint64_t cv_comm_phys_addr;
 
         // Map which looks up a proc's HOMER address using a proc's ordinal ID
         static std::map<uint32_t,uint64_t> cv_homerAddr;
@@ -1363,7 +1392,5 @@ std::map<void*, UtilLidMgr*> RuntimeLoaderTest::cv_loadedLids;
 std::map<uint32_t,uint64_t> RuntimeLoaderTest::cv_homerAddr;
 
 uint64_t RuntimeLoaderTest::cv_hb_data_addr = 0;
-uint64_t RuntimeLoaderTest::cv_comm_addr = 0;
-uint64_t RuntimeLoaderTest::cv_comm_phys_addr = 0;
 
 #endif

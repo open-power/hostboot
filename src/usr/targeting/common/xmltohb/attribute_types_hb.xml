@@ -1397,6 +1397,23 @@
   </attribute>
 
   <attribute>
+    <id>SBE_HBRT_PSU_PHYS_ADDR</id>
+    <description>
+        Physical address of data area that will be used for SBE PSU operations
+        within HBRT.  This space will be part of the Hostboot reserved memory
+        that gets allocated during IPL.  Note this is shared among all procs
+        since we do everything serially at runtime.
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
     <id>SBE_SUPPORTS_HALT_STATUS</id>
     <description>
         Boolean indicating whether SBE can accurately report when Hostboot

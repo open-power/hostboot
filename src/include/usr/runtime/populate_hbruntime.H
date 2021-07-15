@@ -44,17 +44,19 @@ namespace RUNTIME
  * @param[in] i_permission, HDAT permission type [default read/write]
  * @param[in] i_checkMemoryLimit, check if we overflow the limit for hb reserved
  *            memory. False for PHYP component
+ * @param[in] i_skipHDAT  true: Do not actually modify HDAT structures
  *
  * @return errlHndl_t, nullptr on success; otherwise errlog
  */
-errlHndl_t setNextHbRsvMemEntry(HDAT::hdatMsVpdRhbAddrRangeType i_type,
-                                uint16_t i_rangeId,
-                                uint64_t i_startAddr,
-                                uint64_t i_size,
+errlHndl_t setNextHbRsvMemEntry(const HDAT::hdatMsVpdRhbAddrRangeType i_type,
+                                const uint16_t i_rangeId,
+                                const uint64_t i_startAddr,
+                                const uint64_t i_size,
                                 const char* i_label,
-                                HDAT::hdatRhbPermType i_permission =
+                                const HDAT::hdatRhbPermType i_permission =
                                                            HDAT::RHB_READ_WRITE,
-                                bool i_checkMemoryLimit = true
+                                const bool i_checkMemoryLimit = true,
+                                const bool i_skipHDAT = false
                                 );
 
 /**

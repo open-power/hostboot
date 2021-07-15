@@ -105,13 +105,7 @@ namespace SBEIO
      *
      * @param[in] i_handle The handle to deallocate
      */
-    inline void sbeFree(sbeAllocationHandle_t& i_handle)
-    {
-        free(i_handle.bufPtr);
-        i_handle.bufPtr = nullptr;
-        i_handle.aligned = 0;
-        i_handle.physAddr = 0;
-    }
+    void sbeFree(sbeAllocationHandle_t& i_handle);
 
     /**
      * @brief Start Deadman loop
@@ -335,6 +329,8 @@ namespace SBEIO
     errlHndl_t getFifoSBEFFDC(TARGETING::Target *i_procChip,
                               uint32_t *o_pFifoResponse,
                               uint32_t &i_responseSize);
+
+#ifndef __HOSTBOOT_RUNTIME
     /**
     * @brief Set the FFDC address for the SBE so it is aware of the FFDC buffer
     *        and its size and it is aware of the SBE Communication buffer and
@@ -354,6 +350,7 @@ namespace SBEIO
                                const uint64_t i_sbeffdcAddr,
                                const uint64_t i_sbeCommAddr,
                                TARGETING::Target * i_procChip);
+#endif //__HOSTBOOT_RUNTIME
 
     /**
      * @brief Open Unsecure Memory Region via the SBE

@@ -41,6 +41,10 @@ OBJS += sbe_retry_handler.o
 OBJS += p10_sbe_hreset.o
 OBJS += p10_start_cbs.o
 OBJS += p10_get_sbe_msg_register.o
+OBJS += sbe_psudd_common.o
+OBJS += sbe_ffdc_parser.o
+OBJS += sbe_ffdc_package_parser.o
+OBJS += sbe_getCapabilities.o
 
 #Common VPATHs
 VPATH += ${ROOTPATH}/src/usr/sbeio/common

@@ -113,13 +113,10 @@ errlHndl_t getPsuSbeCapabilities(TargetHandle_t i_target)
     // Cache the SBE Capabilities' size for future uses
     size_t l_sbeCapabilitiesSize = sizeof(sbeCapabilities_t);
 
-    void* l_sbeCapabilitiesReadBufferAligned = nullptr;
-
-    auto l_alignedMemHandle = sbeMalloc(l_sbeCapabilitiesSize,
-                                        l_sbeCapabilitiesReadBufferAligned);
+    auto l_alignedMemHandle = sbeMalloc(l_sbeCapabilitiesSize);
 
     // Clear buffer up to the size of the capabilities
-    memset(l_sbeCapabilitiesReadBufferAligned, 0, l_sbeCapabilitiesSize);
+    memset(l_alignedMemHandle.dataPtr, 0, l_sbeCapabilitiesSize);
 
     // Create a PSU request message and initialize it
     SbePsu::psuCommand l_psuCommand(
@@ -131,7 +128,7 @@ errlHndl_t getPsuSbeCapabilities(TargetHandle_t i_target)
                 ALIGN_X(l_sbeCapabilitiesSize,
                         SbePsu::SBE_ALIGNMENT_SIZE_IN_BYTES);
     l_psuCommand.cd7_getSbeCapabilities_CapabilitiesAddr =
-                 mm_virt_to_phys(l_sbeCapabilitiesReadBufferAligned);
+                l_alignedMemHandle.physAddr;
 
     // Create a PSU response message
     SbePsu::psuResponse l_psuResponse;
@@ -167,7 +164,7 @@ errlHndl_t getPsuSbeCapabilities(TargetHandle_t i_target)
 
             TRACDBIN(g_trac_sbeio,
               "getPsuSbeCapabilities: capabilities data",
-              l_sbeCapabilitiesReadBufferAligned,
+              l_alignedMemHandle.dataPtr,
               l_sbeCapabilitiesSize);
 
             break;
@@ -241,7 +238,7 @@ errlHndl_t getPsuSbeCapabilities(TargetHandle_t i_target)
         if (l_psuResponse.sbe_capabilities_size >= l_sbeCapabilitiesSize)
         {
             memcpy (&l_sbeCapabilities,
-                   l_sbeCapabilitiesReadBufferAligned,
+                   l_alignedMemHandle.dataPtr,
                    l_sbeCapabilitiesSize);
         }
         // If the returned size is less than the needed size and is not zero
@@ -249,7 +246,7 @@ errlHndl_t getPsuSbeCapabilities(TargetHandle_t i_target)
         else if (l_psuResponse.sbe_capabilities_size)
         {
             memcpy (&l_sbeCapabilities,
-                   l_sbeCapabilitiesReadBufferAligned,
+                   l_alignedMemHandle.dataPtr,
                    l_psuResponse.sbe_capabilities_size);
         }
 
@@ -262,7 +259,6 @@ errlHndl_t getPsuSbeCapabilities(TargetHandle_t i_target)
 
     // Free the buffer
     sbeFree(l_alignedMemHandle);
-    l_sbeCapabilitiesReadBufferAligned = nullptr;
 
     TRACFCOMP(g_trac_sbeio, EXIT_MRK "getPsuSbeCapabilities");
 
@@ -270,6 +266,7 @@ errlHndl_t getPsuSbeCapabilities(TargetHandle_t i_target)
 };
 
 
+#ifndef __HOSTBOOT_RUNTIME  //no FIFO at runtime
 /**
  *  getFifoSbeCapabilities
  */
@@ -412,5 +409,6 @@ errlHndl_t getFifoSbeCapabilities(TargetHandle_t i_target)
 
     return l_errl;
 };
+#endif //#ifdef __HOSTBOOT_RUNTIME
 
 } //end namespace SBEIO

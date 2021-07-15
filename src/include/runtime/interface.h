@@ -185,6 +185,7 @@ enum MemoryError_t
 #define HBRT_RSVD_MEM__OCC_COMMON         "occ-common-area"
 #define HBRT_RSVD_MEM__SBE_COMM           "sbe-comm"
 #define HBRT_RSVD_MEM__SBE_FFDC           "sbe-ffdc"
+#define HBRT_RSVD_MEM__SBE_PSU            "sbe-psu"
 #define HBRT_RSVD_MEM__SECUREBOOT         "secure-crypt-algo-code"
 #define HBRT_RSVD_MEM__DATA               "hbrt-data"
 #define HBRT_RSVD_MEM__ARCH_REG           "arch-reg-data"

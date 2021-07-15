@@ -44,6 +44,7 @@ OBJS += p10_extract_sbe_rc.o
 OBJS += p10_clock_test_cmn.o
 OBJS += p10_ppe_utils.o
 OBJS += p10_ppe_common.o
+OBJS += rt_sbe_psudd.o
 
 # for PRDF channel failure cache registers
 EXTRAINCDIR += ${ROOTPATH}/src/usr/diag/prdf

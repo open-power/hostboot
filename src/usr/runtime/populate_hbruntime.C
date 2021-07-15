@@ -399,12 +399,12 @@ errlHndl_t setNextHbRsvMemEntry(const HDAT::hdatMsVpdRhbAddrRangeType i_type,
                                 const uint64_t i_size,
                                 const char* i_label,
                                 const HDAT::hdatRhbPermType i_permission,
-                                const bool i_checkMemoryLimit)
+                                const bool i_checkMemoryLimit,
+                                const bool i_skipHDAT)
 {
     errlHndl_t l_elog = nullptr;
 
     do {
-
     // Check whether hostboot is trying to access memory outside of its allowed
     // range.
     if(i_checkMemoryLimit)
@@ -414,6 +414,21 @@ errlHndl_t setNextHbRsvMemEntry(const HDAT::hdatMsVpdRhbAddrRangeType i_type,
         {
             break;
         }
+    }
+
+    // Skip HDAT lookup and manipulation
+    if( i_skipHDAT )
+    {
+        TRACFCOMP(g_trac_runtime,
+                  "Defining HB Reserved Memory Range: %s"
+                  "RangeType 0x%X RangeId 0x%X "
+                  "StartAddress 0x%16llX Size 0x%16llX",
+                  i_label,
+                  i_type,
+                  i_rangeId,
+                  i_startAddr,
+                  i_size);
+        break;
     }
 
     // Get a pointer to the next available HDAT HB Rsv Mem entry
@@ -714,7 +729,7 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
                     if(l_elog)
                     {
                         TRACFCOMP( g_trac_runtime,
-                                   "populate_HbRsvMem fail ATTR save call" );
+                                   "fill_RsvMem_hbData fail ATTR save call" );
                         break;
                     }
                     TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData> TARGETING::AttrRP::save(0x%.16llX) done", l_prevDataAddr);
@@ -1008,13 +1023,13 @@ errlHndl_t hbResvLoadSecureSection (const PNOR::SectionId i_sec,
 /**
  *  @brief Load the HDAT HB Reserved Memory
  *         address range structures on given node
- *  @param[in]  i_nodeId Node ID
- *  @param[in]  i_master_node = true if we are the master hb instance
- *  @return Error handle if error
  */
-errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
+errlHndl_t populate_HbRsvMem(uint64_t i_nodeId,
+                             bool i_master_node,
+                             bool i_skipHDAT)
 {
-    TRACFCOMP( g_trac_runtime, ENTER_MRK"populate_HbRsvMem> i_nodeId=%d", i_nodeId );
+    TRACFCOMP( g_trac_runtime, ENTER_MRK"populate_HbRsvMem> i_nodeId=%d, i_master_node=%d, i_skipHDAT=%d",
+               i_nodeId, i_master_node, i_skipHDAT );
     errlHndl_t l_elog = nullptr;
 
     bool l_preVerLidMgrLock = false;
@@ -1033,7 +1048,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
         // Wipe out our cache of the NACA/SPIRA pointers
         RUNTIME::rediscover_hdat();
 
-        if(i_master_node == true )
+        if( (i_master_node == true) && !i_skipHDAT )
         {
             // Wipe out all HB reserved memory sections
             l_elog = RUNTIME::clear_host_data_section(RUNTIME::RESERVED_MEM);
@@ -1078,12 +1093,16 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
                                       VMM_HB_RSV_MEM_SIZE,
                                       HBRT_RSVD_MEM__PRIMARY,
                                       HDAT::RHB_READ_WRITE,
-                                      false);
+                                      false,
+                                      i_skipHDAT);
 
         if(l_elog != nullptr)
         {
             break;
         }
+        TRACFCOMP(g_trac_runtime,
+                  "RHB_TYPE_PRIMARY @ %.8X for %.8X",
+                  l_hbAddr,VMM_HB_RSV_MEM_SIZE )
 
         if(TARGETING::is_sapphire_load())
         {
@@ -1144,24 +1163,21 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
             ///////////////////////////////////////////////////
             // OCC Common entry
             ///////////////////////////////////////////////////
-            if( !(TARGETING::is_phyp_load()) )
+            TARGETING::Target * l_sys = nullptr;
+            TARGETING::targetService().getTopLevelTarget( l_sys );
+            assert( l_sys != nullptr,
+                    "populate_HbRsvMem:CONFIG_START_OCC_DURING_BOOT - "
+                    "top level target nullptr" );
+            uint64_t l_occCommonAddr = l_sys->getAttr
+              <TARGETING::ATTR_OCC_COMMON_AREA_PHYS_ADDR>();
+            l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_HOMER_OCC,
+                                          i_nodeId,
+                                          l_occCommonAddr,
+                                          VMM_OCC_COMMON_SIZE,
+                                          HBRT_RSVD_MEM__OCC_COMMON);
+            if(l_elog)
             {
-                TARGETING::Target * l_sys = nullptr;
-                TARGETING::targetService().getTopLevelTarget( l_sys );
-                assert( l_sys != nullptr,
-                  "populate_HbRsvMem:CONFIG_START_OCC_DURING_BOOT - "
-                  "top level target nullptr" );
-                uint64_t l_occCommonAddr = l_sys->getAttr
-                    <TARGETING::ATTR_OCC_COMMON_AREA_PHYS_ADDR>();
-                l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_HOMER_OCC,
-                        i_nodeId,
-                        l_occCommonAddr,
-                        VMM_OCC_COMMON_SIZE,
-                        HBRT_RSVD_MEM__OCC_COMMON);
-                if(l_elog)
-                {
-                    break;
-                }
+                break;
             }
 #endif
         }
@@ -1196,6 +1212,8 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
         // SBE Architected Dump area is a single chunk of data
         // to OPAL/PHYP -- so reserve once, but need to inform
         // individual SBEs of their location
+        if( !i_skipHDAT )
+        {
         l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_HBRT,
                                       i_nodeId,
                                       l_archAddr,
@@ -1319,6 +1337,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
         {
             break;
         }
+        } //!i_skipHDAT
 
         ////////////////////////////////////////////////////
         // HB Data area
@@ -1334,7 +1353,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
         uint64_t l_totalSizeAligned = 0;
         bool startAddressValid = true;
 
-        if(TARGETING::is_phyp_load())
+        if(TARGETING::is_phyp_load() || TARGETING::is_no_load())
         {
             l_startAddr = RUNTIME::getHbBaseAddrWithNodeOffset() +
                           VMM_HB_DATA_TOC_START_OFFSET;
@@ -1357,6 +1376,9 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
         {
             break;
         }
+
+        // NOTE : Any attribute changes after this point will NOT be
+        //        available to HBRT.
 
         // Loop through all functional Procs
         for (const auto & l_procChip: l_procChips)
@@ -1382,7 +1404,10 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
                 i_nodeId,
                 l_startAddr,
                 l_totalSizeAligned,
-                HBRT_RSVD_MEM__DATA);
+                HBRT_RSVD_MEM__DATA,
+                HDAT::RHB_READ_WRITE,
+                true,
+                i_skipHDAT);
         if(l_elog)
         {
             break;
@@ -1498,7 +1523,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
             uint32_t l_id = l_procChip->getAttr<TARGETING::ATTR_HBRT_HYP_ID>();
 
             // -- SBE Communications buffer entry
-            if(TARGETING::is_phyp_load())
+            if(TARGETING::is_phyp_load() ||  TARGETING::is_no_load())
             {
                 l_sbeCommAddr = l_prevDataAddr + l_prevDataSize;
             }
@@ -1511,7 +1536,10 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
                     l_id,
                     l_sbeCommAddr,
                     l_sbeCommSizeAligned,
-                    HBRT_RSVD_MEM__SBE_COMM);
+                    HBRT_RSVD_MEM__SBE_COMM,
+                    HDAT::RHB_READ_WRITE,
+                    true,
+                    i_skipHDAT);
             if(l_elog)
             {
                 break;
@@ -1525,7 +1553,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
 
             // -- SBE FFDC entry
 
-            if(TARGETING::is_phyp_load())
+            if(TARGETING::is_phyp_load() || TARGETING::is_no_load())
             {
                 l_sbeffdcAddr = l_prevDataAddr + l_prevDataSize;
             }
@@ -1538,7 +1566,10 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
                     l_id,
                     l_sbeffdcAddr,
                     l_sbeffdcSizeAligned,
-                    HBRT_RSVD_MEM__SBE_FFDC);
+                    HBRT_RSVD_MEM__SBE_FFDC,
+                    HDAT::RHB_READ_WRITE,
+                    true,
+                    i_skipHDAT);
             if(l_elog)
             {
                 break;
@@ -1581,8 +1612,44 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
             }
         }
 
-        // just load this stuff once
+        // Allocate physical storage for HBRT to use for SBE PSU operations
+        //  We are only going to allocate a single buffer for all chips to
+        //  share since we will never have multiple outstanding messages.
         if( i_master_node == true )
+        {
+            uint64_t l_hbrtPsuAddr = 0x0;
+            if(TARGETING::is_phyp_load() || TARGETING::is_no_load())
+            {
+                l_hbrtPsuAddr = l_prevDataAddr + l_prevDataSize;
+            }
+            else if(TARGETING::is_sapphire_load())
+            {
+                l_hbrtPsuAddr = l_prevDataAddr
+                                - SBEIO::SbePsu::MAX_HBRT_PSU_OP_SIZE_BYTES;
+            }
+
+            l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_HBRT,
+                                          0,
+                                          l_hbrtPsuAddr,
+                                          SBEIO::SbePsu::MAX_HBRT_PSU_OP_SIZE_BYTES,
+                                          HBRT_RSVD_MEM__SBE_FFDC,
+                                          HDAT::RHB_READ_WRITE,
+                                          true,
+                                          i_skipHDAT);
+            if(l_elog)
+            {
+                break;
+            }
+
+            TARGETING::UTIL::assertGetToplevelTarget()
+              ->setAttr<ATTR_SBE_HBRT_PSU_PHYS_ADDR>(l_hbrtPsuAddr);
+
+            l_prevDataAddr = l_hbrtPsuAddr;
+            l_prevDataSize = SBEIO::SbePsu::MAX_HBRT_PSU_OP_SIZE_BYTES;
+        }
+
+        // just load this stuff once
+        if( i_master_node == true && !i_skipHDAT )
         {
             ///////////////////////////////////////////////////
             // -- Secureboot cryptographic algorithms code
@@ -1599,7 +1666,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
                 size_t l_hdatEntrySize = l_secRomSizeAligned;
 
                 uint64_t l_secureRomAddr = 0x0;
-                if(TARGETING::is_phyp_load())
+                if(TARGETING::is_phyp_load() || TARGETING::is_no_load())
                 {
                     l_secureRomAddr = l_prevDataAddr + l_prevDataSize;
                     // Specify actual size in HDAT entry for POWERVM
@@ -1753,7 +1820,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
                     break;
                 }
             }
-        }
+        } //if( i_master_node == true && !i_skipHDAT )
     } while(0);
 
 #ifdef CONFIG_SECUREBOOT
@@ -3925,42 +3992,14 @@ errlHndl_t populate_hbRuntimeData( void )
             }
             else
             {
-                // still fill in HB DATA for testing
-                uint64_t l_startAddr = cpu_spr_value(CPU_SPR_HRMOR) +
-                            VMM_HB_DATA_TOC_START_OFFSET;
-
-                uint64_t l_endAddr = 0;
-                uint64_t l_totalSizeAligned = 0;
-                bool startAddressValid = true;
-
-                l_elog = fill_RsvMem_hbData(l_startAddr, l_endAddr,
-                                startAddressValid, l_totalSizeAligned,true);
+                // still fill in all of the reserved memory that we need for
+                //  runtime testcases using the same space we reserve in
+                //  PHYP mode, but skip all of the HDAT manipulation
+                l_elog = populate_HbRsvMem(l_masterNodeId,true,true);
                 if(l_elog != nullptr)
                 {
-                    TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData failed" );
+                    TRACFCOMP( g_trac_runtime, "populate_HbRsvMem failed" );
                     break;
-                }
-
-                // Get list of processor chips
-                TARGETING::TargetHandleList l_procChips;
-                getAllChips( l_procChips,
-                            TARGETING::TYPE_PROC,
-                            true);
-
-                //Pass start address down to SBE via chipop
-                // Loop through all functional Procs
-                for (const auto & l_procChip: l_procChips)
-                {
-                    //Pass start address down to SBE via chip-op
-                    l_elog = SBEIO::sendPsuStashKeyAddrRequest(SBEIO::RSV_MEM_ATTR_ADDR,
-                                                               l_startAddr,
-                                                               l_procChip);
-                    if (l_elog)
-                    {
-                        TRACFCOMP( g_trac_runtime, "sendPsuStashKeyAddrRequest failed for target: %x",
-                                   TARGETING::get_huid(l_procChip) );
-                        break;
-                    }
                 }
             }
         }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -145,8 +145,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                 o_sbeCommAddr = proc->getAttr<TARGETING::ATTR_SBE_COMM_ADDR>();
                 if(NULL == o_sbeCommAddr)
                 {
-                    TS_INFO("SBE Communication area not available from "
-                            "SBE_COMM_ADDR attribute");
+                    TS_INFO("SBE Communication area not available from SBE_COMM_ADDR attribute");
                     uint64_t l_instance = proc->getAttr<ATTR_POSITION>();
                     o_sbeCommAddr = g_hostInterfaces->get_reserved_mem(
                                     HBRT_RSVD_MEM__SBE_COMM,
@@ -465,6 +464,12 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                                            chipId,
                                            l_sbeCommAddr,
                                            &rt_intf);
+                if( 0 != rc )
+                {
+                    TS_FAIL("testSbeMessagePassingVersions> Error from initSbeMessagePassing - rc=%d",
+                            rc);
+                    break;
+                }
 
                 // Change SBE Header version
                 l_request.sbeHdr.version += 1;
@@ -564,6 +569,12 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                                            chipId,
                                            l_sbeCommAddr,
                                            &rt_intf);
+                if( 0 != rc )
+                {
+                    TS_FAIL("testSbeMessagePassingMsgSize> Error from initSbeMessagePassing - rc=%d",
+                            rc);
+                    break;
+                }
 
                 // Save size of message to copy
                 uint32_t l_sbeMsgSize = l_request.sbeHdr.msgSize;
@@ -630,6 +641,12 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                                            chipId,
                                            l_sbeCommAddr,
                                            &rt_intf);
+                if( 0 != rc )
+                {
+                    TS_FAIL("testSbeMessagePassingDataOffset> Error from initSbeMessagePassing - rc=%d",
+                            rc);
+                    break;
+                }
 
                 // Change Command Header data offset to be too small
                 l_request.cmdHdr.dataOffset = sizeof(cmdHeader_t) -
@@ -804,6 +821,12 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                                            chipId,
                                            l_sbeCommAddr,
                                            &rt_intf);
+                if( 0 != rc )
+                {
+                    TS_FAIL("testSbeMessagePassingDefaultPath> Error from initSbeMessagePassing - rc=%d",
+                            rc);
+                    break;
+                }
 
                 // Get the response address in the SBE Communication area
                 sbeMessage_t *l_sbeCommAddr_rsp =
@@ -906,6 +929,12 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                                            chipId,
                                            l_sbeCommAddr,
                                            &rt_intf);
+                if( 0 != rc )
+                {
+                    TS_FAIL("testSbeMessagePassingFunction> Error from initSbeMessagePassing - rc=%d",
+                            rc);
+                    break;
+                }
 
                 // Copy test request into SBE Communication area
                 memcpy(reinterpret_cast<void*>(l_sbeCommAddr),
@@ -954,6 +983,12 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                                            chipId,
                                            l_sbeCommAddr,
                                            &rt_intf);
+                if( 0 != rc )
+                {
+                    TS_FAIL("testSbeMessagePassingFunction> Error from initSbeMessagePassing - rc=%d",
+                            rc);
+                    break;
+                }
 
                 // Copy test request into SBE Communication area
                 memcpy(reinterpret_cast<void*>(l_sbeCommAddr),
@@ -1046,6 +1081,12 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                                            chipId,
                                            l_sbeCommAddr,
                                            &rt_intf);
+                if( 0 != rc )
+                {
+                    TS_FAIL("testSbeMessagePassingGoodPath> Error from initSbeMessagePassing - rc=%d",
+                            rc);
+                    break;
+                }
 
                 // Get the response address in the SBE Communication area
                 sbeMessage_t *l_sbeCommAddr_rsp =
@@ -1202,6 +1243,12 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                                            chipId,
                                            l_sbeCommAddr,
                                            &rt_intf);
+                if( 0 != rc )
+                {
+                    TS_FAIL("testSbeMessagePassingErrorPaths> Error from initSbeMessagePassing - rc=%d",
+                            rc);
+                    break;
+                }
 
                 // Get the response address in the SBE Communication area
                 sbeMessage_t *l_sbeCommAddr_rsp =

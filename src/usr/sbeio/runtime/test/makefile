@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017,2020
+# Contributors Listed Below - COPYRIGHT 2017,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -28,7 +28,12 @@ ROOTPATH = ../../../../..
 MODULE = testsbeio_rt
 
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/usr/sbeio/
+EXTRAINCDIR += ${ROOTPATH}/src/usr/sbeio/test/
 
 TESTS = *.H
+
+# Common tests with ipl code
+include ${ROOTPATH}/src/usr/sbeio/test/sbe_common_tests.mk
 
 include ${ROOTPATH}/config.mk

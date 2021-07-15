@@ -49,6 +49,7 @@ extern trace_desc_t* g_trac_sbeio;
 const char SBE_LIBRARY_NAME[16]    = "libsbe.so";
 
 using namespace SBE;
+using namespace SBEIO;
 
 errlHndl_t loadSbeModule(bool& o_loaded)
 {

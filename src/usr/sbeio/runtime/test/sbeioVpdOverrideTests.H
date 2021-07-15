@@ -64,8 +64,8 @@
 
 extern trace_desc_t* g_trac_sbeio;
 
-#define SBE_PASSTHROUGH_TRACF(printf_string,args...) \
-    TRACFCOMP(g_trac_sbeio,"SbePassThroughTests: " printf_string,##args)
+#define SBE_VPDOVER_TRACF(printf_string,args...) \
+    TRACFCOMP(g_trac_sbeio,"SbePassThroughApplyVpdOverrides: " printf_string,##args)
 
 
 const uint8_t testGoodMVPDRecKeyPath[] = {
@@ -255,11 +255,11 @@ public:
     //------------------------------------------------------
     void testApplyVpdRecKeyGoodPath()
     {
-        SBE_PASSTHROUGH_TRACF("Starting testApplyVpdGoodPath");
+        SBE_VPDOVER_TRACF("Starting testApplyVpdGoodPath");
 
         if(sendTestData(testGoodMVPDRecKeyPath) == 0)
         {
-            SBE_PASSTHROUGH_TRACF("testApplyVpdGoodPath passed!");
+            SBE_VPDOVER_TRACF("testApplyVpdGoodPath passed!");
         }
         else
         {
@@ -270,11 +270,11 @@ public:
     //------------------------------------------------------
     void testApplyVpdOffsetGoodPath()
     {
-        SBE_PASSTHROUGH_TRACF("Starting testApplyVpdOffsetGoodPath");
+        SBE_VPDOVER_TRACF("Starting testApplyVpdOffsetGoodPath");
 
         if(sendTestData(testGoodMVPDOffsetPath) == 0)
         {
-            SBE_PASSTHROUGH_TRACF("testApplyVpdOffsetGoodPath passed!");
+            SBE_VPDOVER_TRACF("testApplyVpdOffsetGoodPath passed!");
         }
         else
         {
@@ -285,11 +285,11 @@ public:
     //------------------------------------------------------
     void testBadMethod()
     {
-        SBE_PASSTHROUGH_TRACF("Starting testBadMethod");
+        SBE_VPDOVER_TRACF("Starting testBadMethod");
 
         if(sendTestData(testBadMethodData) == VPD_INVALID_METHOD_OR_DATA_SECTION)
         {
-            SBE_PASSTHROUGH_TRACF("testBadMethod passed!");
+            SBE_VPDOVER_TRACF("testBadMethod passed!");
         }
         else
         {
@@ -300,11 +300,11 @@ public:
     //------------------------------------------------------
     void testBadRecordString()
     {
-        SBE_PASSTHROUGH_TRACF("Starting testBadRecordString");
+        SBE_VPDOVER_TRACF("Starting testBadRecordString");
 
         if(sendTestData(testBadRecordStringData) == VPD_RECORD_NOT_FOUND)
         {
-            SBE_PASSTHROUGH_TRACF("testBadRecordString passed!");
+            SBE_VPDOVER_TRACF("testBadRecordString passed!");
         }
         else
         {
@@ -315,11 +315,11 @@ public:
     //------------------------------------------------------
     void testBadKeywordString()
     {
-        SBE_PASSTHROUGH_TRACF("Starting testBadKeywordString");
+        SBE_VPDOVER_TRACF("Starting testBadKeywordString");
 
         if(sendTestData(testBadKeywordStringData) == VPD_KEYWORD_NOT_FOUND)
         {
-            SBE_PASSTHROUGH_TRACF("testBadKeywordString passed!");
+            SBE_VPDOVER_TRACF("testBadKeywordString passed!");
         }
         else
         {
@@ -330,11 +330,11 @@ public:
     //------------------------------------------------------
     void testShortMessage()
     {
-        SBE_PASSTHROUGH_TRACF("Starting testShortMessage");
+        SBE_VPDOVER_TRACF("Starting testShortMessage");
 
         if(sendTestData(testShortMessageData) == VPD_SHORT_REQUEST)
         {
-            SBE_PASSTHROUGH_TRACF("testShortMessage passed!");
+            SBE_VPDOVER_TRACF("testShortMessage passed!");
         }
         else
         {
@@ -345,11 +345,11 @@ public:
     //------------------------------------------------------
     void testOffsetWriteShortData()
     {
-        SBE_PASSTHROUGH_TRACF("Starting testOffsetWriteShortData");
+        SBE_VPDOVER_TRACF("Starting testOffsetWriteShortData");
 
         if(sendTestData(testOffsetShortData) == VPD_BYTES_TO_WRITE_MISMATCH)
         {
-            SBE_PASSTHROUGH_TRACF("testOffsetWriteShortData passed!");
+            SBE_VPDOVER_TRACF("testOffsetWriteShortData passed!");
         }
         else
         {
@@ -360,11 +360,11 @@ public:
     //------------------------------------------------------
     void testOffsetWriteLongData()
     {
-        SBE_PASSTHROUGH_TRACF("Starting testOffsetWriteLongData");
+        SBE_VPDOVER_TRACF("Starting testOffsetWriteLongData");
 
         if(sendTestData(testOffsetLongData) == VPD_BYTES_TO_WRITE_MISMATCH)
         {
-            SBE_PASSTHROUGH_TRACF("testOffsetWriteLongData passed!");
+            SBE_VPDOVER_TRACF("testOffsetWriteLongData passed!");
         }
         else
         {
@@ -400,7 +400,7 @@ private:
         TARGETING::TargetHandle_t l_proc{};
         int result = 0;
 
-        SBE_PASSTHROUGH_TRACF("SBE_MSG_DATA_OFFSET: 0x%08X",
+        SBE_VPDOVER_TRACF("SBE_MSG_DATA_OFFSET: 0x%08X",
                               SBE_MSG_DATA_OFFSET);
 
         uint8_t * readCmd = new uint8_t[N];
@@ -578,7 +578,7 @@ private:
         {
             if(not i_proc)
             {
-                SBE_PASSTHROUGH_TRACF("ensureClearToSend, i_proc is NULL!");
+                SBE_VPDOVER_TRACF("ensureClearToSend, i_proc is NULL!");
 
                 TS_FAIL("ensureClearToSend, i_proc is NULL!");
 
@@ -600,7 +600,7 @@ private:
                 errlCommit (errl, SBE_COMP_ID);
                 errl = nullptr;
 
-                SBE_PASSTHROUGH_TRACF("ensureClearToSend, "
+                SBE_VPDOVER_TRACF("ensureClearToSend, "
                                       "Failed to read scom register.");
                 TS_FAIL("Failed to read scom register.");
 
@@ -632,7 +632,7 @@ private:
         {
             if(not i_proc)
             {
-                SBE_PASSTHROUGH_TRACF("ensureClearToSend, "
+                SBE_VPDOVER_TRACF("ensureClearToSend, "
                                       "i_proc is NULL!");
 
                 TS_FAIL("ensureClearToSend, i_proc is NULL!");
@@ -655,7 +655,7 @@ private:
                 errlCommit (errl, SBE_COMP_ID);
                 errl = nullptr;
 
-                SBE_PASSTHROUGH_TRACF("ensureClearToSend, "
+                SBE_VPDOVER_TRACF("ensureClearToSend, "
                                       "Failed to read scom register.");
                 TS_FAIL("Failed to read scom register.");
 
@@ -676,7 +676,7 @@ private:
                 errlCommit (errl, SBE_COMP_ID);
                 errl = nullptr;
 
-                SBE_PASSTHROUGH_TRACF("ensureClearToSend, "
+                SBE_VPDOVER_TRACF("ensureClearToSend, "
                                       "Failed to write to scom register.");
                 TS_FAIL("Failed to read scom register.");
 
@@ -832,7 +832,7 @@ private:
             // Step C - Get pointer to SBE COMMS AREA
             //########################################
 
-            SBE_PASSTHROUGH_TRACF("ChipId: 0x%016llX", i_chipId);
+            SBE_VPDOVER_TRACF("ChipId: 0x%016llX", i_chipId);
 
             sbeCommAddr_t l_sbeCommAddr{};
             uint64_t address = 0;
@@ -859,7 +859,7 @@ private:
             }
 
             l_sbeCommAddr = reinterpret_cast<void*>(address);
-            SBE_PASSTHROUGH_TRACF("SBE Area Address: "
+            SBE_VPDOVER_TRACF("SBE Area Address: "
                                   "0x%016llX. ",
                                    address);
 
@@ -924,7 +924,7 @@ private:
                                 "Pre Call SBE Area Dump",
                                 *(reinterpret_cast<SBE_MSG::sbeMessage_t*>
                                                               (l_sbeCommAddr)));
-                SBE_PASSTHROUGH_TRACF("SbePassThroughApplyVpdOverrides: %s", msgBuffer);
+                SBE_VPDOVER_TRACF("SbePassThroughApplyVpdOverrides: %s", msgBuffer);
             }
 
             //#############################################
@@ -948,7 +948,7 @@ private:
                                 "Post Call SBE Area Dump",
                                 *(reinterpret_cast<SBE_MSG::sbeMessage_t*>
                                                               (l_sbeCommAddr)));
-                SBE_PASSTHROUGH_TRACF("SbePassThroughApplyVpdOverrides: %s", msgBuffer);
+                SBE_VPDOVER_TRACF("SbePassThroughApplyVpdOverrides: %s", msgBuffer);
             }
 
             //#############################################
@@ -975,13 +975,13 @@ private:
             {
                 char msgBuffer[256] = {0};
                 printSbeMessage(msgBuffer, "Actual Response", l_response);
-                SBE_PASSTHROUGH_TRACF("actual response "
+                SBE_VPDOVER_TRACF("actual response "
                                       "differs from expected response.");
-                SBE_PASSTHROUGH_TRACF("SbePassThroughApplyVpdOverrides: %s", msgBuffer);
+                SBE_VPDOVER_TRACF("SbePassThroughApplyVpdOverrides: %s", msgBuffer);
                 printSbeMessage(msgBuffer,
                                 "Expected Response", l_expectedResponse);
 
-                SBE_PASSTHROUGH_TRACF("SbePassThroughApplyVpdOverrides: %s", msgBuffer);
+                SBE_VPDOVER_TRACF("SbePassThroughApplyVpdOverrides: %s", msgBuffer);
 
                 TS_FAIL("SbePassThroughApplyVpdOverrides: The actual response differs "
                         "from the expected response.");

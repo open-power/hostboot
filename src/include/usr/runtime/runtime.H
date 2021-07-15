@@ -87,9 +87,15 @@ errlHndl_t populate_hbRuntimeData( void );
 /**
  * @brief Populate node attributes in mainstore for HostServices
  *
+ * @param[in] i_nodeNum  Node instance number
+ * @param[in] i_master_node  true: This is the master node
+ * @param[in] i_skipHDAT  true: Do not modify HDAT structures
+ *
  * @return errlHndl_t NULL on Success
  */
-errlHndl_t populate_HbRsvMem( uint64_t i_nodeNum, bool i_master_node = false );
+errlHndl_t populate_HbRsvMem( uint64_t i_nodeNum,
+                              bool i_master_node = false,
+                              bool i_skipHDAT = false );
 
 /**
  * @brief persistent read/write Attribute validity runtime check

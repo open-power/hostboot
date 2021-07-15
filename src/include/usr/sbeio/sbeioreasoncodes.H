@@ -63,6 +63,7 @@ enum sbeioModuleId
     SBEIO_GET_FIFO_SBE_CAPABILITIES     = 0x12,
     SBEIO_PSUSYNCFABTOPOIDTABLE         = 0x13,
     SBEIO_FIFO_HALT                     = 0x14,
+    SBEIO_RT_PSU                        = 0x15,
 };
 
 /**
@@ -153,6 +154,8 @@ enum sbeioReasonCode
     SBEIO_COMMAND_NOT_SUPPORTED        = SBEIO_COMP_ID | 0x65,
     SBEIO_MVPD_READ_FAILURE            = SBEIO_COMP_ID | 0x66,
     SBEIO_MVPD_WRITE_FAILURE           = SBEIO_COMP_ID | 0x67,
+    SBEIO_NO_RUNTIME_BUFFER            = SBEIO_COMP_ID | 0x68,
+    SBEIO_EARLY_ERROR                  = SBEIO_COMP_ID | 0x69,
 
     // Remove once we collect the FFDC ourselves - @todo-RTC:144313
     //termination_rc

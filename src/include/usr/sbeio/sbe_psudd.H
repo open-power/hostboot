@@ -66,6 +66,11 @@ class SbePsu
         static constexpr uint32_t SBE_ALIGNMENT_SIZE_IN_BYTES = 128;
 
         /**
+         * @brief The maximum data size for a runtime PSU operation.
+         */
+        static constexpr size_t MAX_HBRT_PSU_OP_SIZE_BYTES = 1*PAGESIZE;
+
+        /**
          * @brief get the instance of this class
          *
          * @return the (one and only) instance of SbePsu
@@ -986,10 +991,10 @@ class SbePsu
          * function will record the error state so it can be reported later.
          *
          *
-         * @param[in]  i_plid   Platform log id for the error
+         * @param[in]  i_eid   Error log id for the error
          * @param[in]  i_target Proc target for PSU Request that caused an error
          */
-        void saveEarlyError(uint32_t i_plid,TARGETING::TargetHandle_t i_target);
+        void saveEarlyError(uint32_t i_eid,TARGETING::TargetHandle_t i_target);
 
         /**
          * @brief Did an error occur before the fapi2 library was loaded?
@@ -1001,20 +1006,33 @@ class SbePsu
          */
         errlHndl_t processEarlyError();
 
+#ifdef CONFIG_COMPILE_CXXTEST_HOOKS
+        /**
+         * @brief Ignore interrupts for testcase usage
+         * @param[in] true: ignore interrupts;
+         *            false: normal interrupt processing
+         */
+        void ignoreInterrupts(bool i_ignore);
+#endif //#ifdef CONFIG_COMPILE_CXXTEST_HOOKS
+
     protected:
 
         /**
          * @Brief Constructor
          */
-
         SbePsu();
 
         /**
          * @Brief Destructor
          */
-
         ~SbePsu();
 
+        /**
+         * @Brief Shared code for destructor
+         */
+        void commonDestructor( void );
+
+#ifndef __HOSTBOOT_RUNTIME
         /**
          * Start message handler
          *
@@ -1022,6 +1040,15 @@ class SbePsu
          *       The args and return value are not used.
          */
         static void* msg_handler(void * unused);
+
+        /**
+         * @brief Helper function to update the SBE and trigger reboot
+         * @param[in] i_target  Processor target whose SBE needs an update
+         * @return Error Log Handle
+         */
+        static errlHndl_t forceSbeUpdate(Target* const i_target);
+
+#endif // __HOSTBOOT_RUNTIME
 
     private:
     //---------------------------------------------------------------------
@@ -1041,7 +1068,7 @@ class SbePsu
          * use these variables to record the error for later reporting.
          */
         bool                      iv_earlyErrorOccurred;
-        uint32_t                  iv_earlyErrorPlid;
+        uint32_t                  iv_earlyErrorEid;
         TARGETING::TargetHandle_t iv_earlyErrorTarget;
 
         /**
@@ -1060,19 +1087,29 @@ class SbePsu
         bool iv_responseReady;
 
         /**
+         * @brief Indicator if HB is shutting down
+         */
+        bool iv_shutdownInProgress;
+
+#ifndef __HOSTBOOT_RUNTIME
+
+#ifdef CONFIG_COMPILE_CXXTEST_HOOKS
+        /**
+         * @brief Indicator to ignore interrupts for testcase usage
+         */
+        bool iv_ignoreInterrupts;
+#endif //#ifdef CONFIG_COMPILE_CXXTEST_HOOKS
+
+        /**
          * @brief SBE PSU Message Queue
          */
         msg_q_t iv_msgQ;
 
         /**
-         * @brief Indicator if HB is shutting down
-         */
-        bool iv_shutdownInProgress;
-
-        /**
          * The sbe psu message handler.
          */
         void msgHandler();
+#endif // __HOSTBOOT_RUNTIME
 
         /**
          * @brief allocate an ffdc buffer for the proc target
@@ -1156,6 +1193,7 @@ class SbePsu
                               uint64_t   i_addr,
                               uint64_t * i_pData);
 
+#ifndef __HOSTBOOT_RUNTIME
         /**
          * @brief Handle PSU Interrupt
          *
@@ -1165,6 +1203,17 @@ class SbePsu
          *  @return errlHndl_t Error log handle on failure
          */
         errlHndl_t handleInterrupt(PIR_t i_pir);
+#endif // __HOSTBOOT_RUNTIME
+
+        /**
+         * @brief Handle PSU message
+         *
+         * @param[in] i_proc  The Processor target that contains
+         *                    the SBE we are communicating with.
+         *
+         *  @return errlHndl_t Error log handle on failure
+         */
+        errlHndl_t handleMessage(TARGETING::Target* i_proc);
 
         /**
          * @brief SBE PSU register addresses
@@ -1206,6 +1255,9 @@ class SbePsu
             HOST_CLEAR_RESPONSE_WAITING = 0x7FFFFFFFFFFFFFFF,
         };
 
+        //wrappers for page allocator diffs for IPL vs Runtime
+        void* allocatePage( size_t i_pageCount );
+        void freePage(void*  i_page);
 
 }; // End of Class SbePsu
 
