@@ -2661,6 +2661,25 @@
 
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_VDN_UPLIFT_MV</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Voltage (in mV) to uplift the VDN rail if the #V PAU frequency is 205OMHz.
+    This value is present in early sorted parts where extra voltage margin is
+    needed.
+
+    Consumer: p10_setup_evid.C
+
+    Producer: Machine Readable Workbook
+    </description>
+    <valueType>uint32</valueType>
+    <platInit>mrw</platInit>
+    <default>25</default>
+    <group>mrw</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_PMCR_MOST_RECENT_MODE</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
