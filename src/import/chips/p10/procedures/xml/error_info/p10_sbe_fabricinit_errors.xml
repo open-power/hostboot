@@ -39,6 +39,8 @@
     commands from being broadcast, so fabric init will fail.
   </description>
   <ffdc>TARGET</ffdc>
+  <ffdc>CONTAINED_IPL_TYPE</ffdc>
+  <ffdc>CONTAINED_LOAD_PATH</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_SBE_FABRICINIT</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -54,6 +56,10 @@
   <gard>
     <target>TARGET</target>
   </gard>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>LOW</priority>
+  </callout>
 </hwpError>
 <!-- ******************************************************************** -->
 </hwpErrors>
