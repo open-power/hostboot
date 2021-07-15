@@ -42,6 +42,12 @@
       <target>CHIP</target>
       <priority>HIGH</priority>
     </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
     <callout>
       <procedure>CODE</procedure>
       <priority>LOW</priority>
