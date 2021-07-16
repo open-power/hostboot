@@ -2138,9 +2138,19 @@ std::vector<void*> ErrlEntry::getUDSections(compId_t i_compId,
     return copy_vector;
 }
 
-uint8_t ErrlEntry::queryCallouts(TARGETING::Target* const i_target)
+uint8_t ErrlEntry::queryCallouts(TARGETING::Target         * const i_target,
+                                 deconfig_and_gard_records * const o_accumulatedRecords)
 {
     uint8_t criteria_matched = NO_MATCH;
+    bool accumulateRecords = (o_accumulatedRecords != nullptr);
+
+    if (accumulateRecords)
+    {
+        // Make sure the lists are empty
+        o_accumulatedRecords->deconfigs.clear();
+        o_accumulatedRecords->gards.clear();
+    }
+
     //Loop through each section of the errorlog
     for(auto & section : iv_SectionVector)
     {
@@ -2163,21 +2173,32 @@ uint8_t ErrlEntry::queryCallouts(TARGETING::Target* const i_target)
 
                     bool deconfig_exists = false;
                     bool gard_exists = false;
+                    DeconfigEnum deconfigState = NO_DECONFIG;
+                    GARD_ErrorType gardErrorType = GARD_NULL;
 
                     if(callout_ud->type == HWAS::HW_CALLOUT)
                     {
                         deconfig_exists = callout_ud->deconfigState != HWAS::NO_DECONFIG;
+                        deconfigState = callout_ud->deconfigState;
+
                         gard_exists = callout_ud->gardErrorType != HWAS::GARD_NULL;
+                        gardErrorType = callout_ud->gardErrorType;
                     }
                     else if(callout_ud->type == HWAS::CLOCK_CALLOUT)
                     {
                         deconfig_exists = callout_ud->clkDeconfigState != HWAS::NO_DECONFIG;
+                        deconfigState = callout_ud->clkDeconfigState;
+
                         gard_exists = callout_ud->clkGardErrorType != HWAS::GARD_NULL;
+                        gardErrorType = callout_ud->clkGardErrorType;
                     }
                     else if(callout_ud->type == HWAS::PART_CALLOUT)
                     {
                         deconfig_exists = callout_ud->partDeconfigState != HWAS::NO_DECONFIG;
+                        deconfigState = callout_ud->partDeconfigState;
+
                         gard_exists = callout_ud->partGardErrorType != HWAS::GARD_NULL;
+                        gardErrorType = callout_ud->partGardErrorType;
                     }
 
                     if(deconfig_exists)
@@ -2188,6 +2209,14 @@ uint8_t ErrlEntry::queryCallouts(TARGETING::Target* const i_target)
                     {
                         criteria_matched |= GARD_FOUND;
                     }
+
+                    if (accumulateRecords)
+                    {
+                        // Caller wishes to have a list of the deconfigs and gards. Add these to their respective lists.
+                        o_accumulatedRecords->deconfigs.push_back(deconfigState);
+                        o_accumulatedRecords->gards.push_back(gardErrorType);
+                    }
+
                     // Do not exit loop in case there are multiple callouts
                     // for the same target type.
                 }
@@ -2289,15 +2318,15 @@ void ErrlEntry::setGardType(TARGETING::Target* const i_target,
                               get_huid(i_target), i_gardType, eid());
                     // Depending on the user details' type set the appropriate
                     // gard field.
-                    if (callout_ud->type == HWAS::GARD_NULL)
+                    if (callout_ud->type == HWAS::HW_CALLOUT)
                     {
                         callout_ud->gardErrorType = i_gardType;
                     }
-                    else if (callout_ud->type == HWAS::GARD_NULL)
+                    else if (callout_ud->type == HWAS::CLOCK_CALLOUT)
                     {
                         callout_ud->clkGardErrorType = i_gardType;
                     }
-                    else if (callout_ud->type == HWAS::GARD_NULL)
+                    else if (callout_ud->type == HWAS::PART_CALLOUT)
                     {
                         callout_ud->partGardErrorType = i_gardType;
                     }
