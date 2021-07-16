@@ -544,10 +544,19 @@ public:
      */
     enum callout_search_criteria : uint8_t
     {
-        NO_MATCH     = 0x00,   // no target match found ( exclusive, cannot be OR'ed)
-        TARGET_MATCH = 0x01,   // found at least 1 callout matching target passed to queryCallouts
+        NO_MATCH       = 0x00, // no target match found ( exclusive, cannot be OR'ed)
+        TARGET_MATCH   = 0x01, // found at least 1 callout matching target passed to queryCallouts
         DECONFIG_FOUND = 0x02, // found at least 1 callout with a target match with deconfig set
-        GARD_FOUND = 0x03,     // found at least 1 callout with a target match with gard set
+        GARD_FOUND     = 0x04, // found at least 1 callout with a target match with gard set
+    };
+
+    /* @brief A structure to hold lists of deconfig or gard records. Useful to accumulate all the deconfigs and gard
+     *        records for a given target passed to queryCallouts.
+     */
+    struct deconfig_and_gard_records
+    {
+        std::vector<HWAS::DeconfigEnum> deconfigs;
+        std::vector<HWAS::GARD_ErrorType> gards;
     };
 
     /**
@@ -556,11 +565,16 @@ public:
      *
      *  @param[in]  i_target        The hardware target we want to look for
      *
+     *  @param[out] o_accumulatedRecords A pointer to a struct which holds lists of the different deconfigs and gards of
+     *                                   the given target that the caller would like filled.
+     *                                   Default nullptr to not accumulate.
+     *
      *  @return bit-wise mask of matched callout_search_criteria
      *          Note: DECONFIG_FOUND and GARD_FOUND will only be true
      *                if TARGET_MATCH is true.
      */
-    uint8_t queryCallouts(TARGETING::Target* i_target);
+    uint8_t queryCallouts(TARGETING::Target* i_target,
+                          deconfig_and_gard_records * o_accumulatedRecords = nullptr);
 
     /**
      *  @brief Check if this error log has any callouts which suggest
