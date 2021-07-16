@@ -446,13 +446,23 @@ errlHndl_t callWakeupHwp(TARGETING::Target* i_target,
 
             // use a regular core target
             fapi2::Target<fapi2::TARGET_TYPE_CORE> l_fapi_core(i_target);
+            fapi2::ReturnCode l_rc = 0;
 
-            FAPI_INVOKE_HWP(l_errl,
-                            p10_uc_core_special_wakeup,
-                            l_fapi_core,
-                            l_spcwkupType,
-                            p10specialWakeup::HOST);
-            if(l_errl)
+            FAPI_INVOKE_HWP_RC(l_errl,
+                               l_rc,
+                               p10_uc_core_special_wakeup,
+                               l_fapi_core,
+                               l_spcwkupType,
+                               p10specialWakeup::HOST);
+            if (l_rc == (fapi2::ReturnCode)fapi2::RC_ECO_CORE_SPWU_SKIPPED)
+            {
+                TRACFCOMP(g_trac_scom,INFO_MRK
+                          "callWakeupHwp> p10_uc_core_special_wakeup (ECO core %.8x op=%dis skipped from hwp)",
+                          TARGETING::get_huid(i_target),
+                          l_spcwkupType );
+                delete l_errl;
+            }
+            else if(l_errl)
             {
                 TRACFCOMP( g_trac_scom,ERR_MRK
                            "callWakeupHwp> p10_uc_core_special_wakeup(core %.8X, op=%d)",

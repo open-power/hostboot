@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -105,4 +105,8 @@
     <ffdc>CORE_SSHSRC</ffdc>
   </hwpError>
   <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_ECO_CORE_SPWU_SKIPPED</rc>
+    <description>special wakeup is skipped for ECO core when QME is quiesced</description>
+  </hwpError>
 </hwpErrors>

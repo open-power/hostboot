@@ -37,6 +37,7 @@
 #include <p10_scom_eq_1.H>
 #include <p10_core_special_wakeup.H>
 #include <multicast_group_defs.H>
+#include <p10_pm_hcd_flags.h>
 
 /**
  * @brief Special wakeup operation message.
@@ -46,7 +47,38 @@ char SplWkupMsg[p10specialWakeup::MAX_OPERATION][10] =
     "ASSERT",
     "DE-ASSERT"
 };
+/**
+ * @brief   evaluates core and quad/qme states,if qme is in quiesce and
+ *          core is eco enabled then we should skip assert/de-assert
+ *          spwu.
+ * @param   i_target            P10 unicast core target.
+ * @param   o_coreSpwuSkipState True if core is eco and qme is in quiesce
+ * @return  FAPI2_RC_SUCCESS in case of SUCCESS else fapi2 return code.
+ */
+fapi2::ReturnCode verifyQMECoreState(
+    const fapi2::Target < fapi2::TARGET_TYPE_CORE >& i_target,
+    uint8_t& o_coreSpwuSkipState)
+{
+    fapi2::buffer <uint64_t> l_data;
+    auto l_eq   =   i_target.getParent< fapi2::TARGET_TYPE_EQ >( );
 
+    fapi2::ATTR_ECO_MODE_Type l_eco_mode;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ECO_MODE,
+                           i_target,
+                           l_eco_mode));
+
+    FAPI_TRY( fapi2::getScom( l_eq, scomt::eq::QME_FLAGS_RW, l_data ) );
+
+    if(l_data.getBit<p10hcd::QME_FLAGS_QUIESCE_MODE>()  &&
+       l_eco_mode == fapi2::ENUM_ATTR_ECO_MODE_ENABLED)
+    {
+        o_coreSpwuSkipState = 1;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 /**
  * @brief   evaluates core and quad status before special wakeup of a core.
@@ -561,9 +593,26 @@ fapi2::ReturnCode p10_uc_core_special_wakeup(
     uint8_t l_fuseModeState     =   0;
     uint8_t l_corePos   =   0;
     uint8_t l_siblngPos =   0;
+    uint8_t l_coreInStopOrECO_QMEHalt = 0;
+
     std::vector < fapi2::Target <fapi2::TARGET_TYPE_CORE >> l_modCoreList;
     fapi2::Target <fapi2::TARGET_TYPE_CORE> l_siblingCore;
     l_modCoreList.push_back( i_target );
+
+    //Verify if cores are in ECO mode and QME is in quiesce, if yes, then
+    //we shouldn't assert the spwu for that cores
+    FAPI_TRY(verifyQMECoreState(i_target, l_coreInStopOrECO_QMEHalt));
+
+    FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS,
+                   i_target,
+                   l_corePos);
+
+    if ( l_coreInStopOrECO_QMEHalt )
+    {
+        FAPI_INF("As QME halted and core is ECO enabled");
+        FAPI_INF("Specialwakeup is skipped for this core %d ", l_corePos);
+        return fapi2::RC_ECO_CORE_SPWU_SKIPPED;
+    }
 
     FAPI_ATTR_GET( fapi2::ATTR_FUSED_CORE_MODE,
                    FAPI_SYSTEM,

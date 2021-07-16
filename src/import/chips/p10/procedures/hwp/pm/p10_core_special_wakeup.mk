@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019,2020
+# Contributors Listed Below - COPYRIGHT 2019,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -24,6 +24,7 @@
 # IBM_PROLOG_END_TAG
 PROCEDURE=p10_core_special_wakeup
 SPWKUP_UTIL=$(ROOTPATH)/chips/p10/common/include/eq/
-SPWKUP_UTIL=$(ROOTPATH)/chips/p10/common/include/
+SPWKUP_UTIL+=$(ROOTPATH)/chips/p10/common/include/
+SPWKUP_UTIL+=$(ROOTPATH)/chips/p10/procedures/hwp/lib/
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(SPWKUP_UTIL)) 
 $(call BUILD_PROCEDURE)
