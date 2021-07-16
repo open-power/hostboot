@@ -2984,7 +2984,7 @@
     </description>
     <valueType>uint8</valueType>
     <platInit/>
-    <default>12</default>
+    <default>0</default>
     <overrideOnly/>
     <group>bias</group>
   </attribute>

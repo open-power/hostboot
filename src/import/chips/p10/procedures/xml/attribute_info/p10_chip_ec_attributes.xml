@@ -1875,7 +1875,7 @@
     <id>ATTR_CHIP_EC_FEATURE_SW528598</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Determine if chip supports MC Command List Early Hang FIR  
+      Determine if chip supports MC Command List Early Hang FIR
     </description>
     <chipEcFeature>
       <chip>
@@ -1918,6 +1918,23 @@
         <ec>
           <value>0x10</value>
           <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_PAU_VDN_UPLIFT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Allow for PAU frequency based VDN uplift on DD20+ parts
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_P10</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>

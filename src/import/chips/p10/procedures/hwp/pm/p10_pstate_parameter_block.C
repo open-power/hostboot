@@ -2109,9 +2109,11 @@ fapi2::ReturnCode PlatPmPPB::compute_boot_safe(
 {
     fapi2::ReturnCode l_rc;
 
-    const uint32_t  VDN_SORT_ADJUST_MV = 0;   // work-around for early sorted parts;
+    static const uint32_t PAU_UPLIFT_FREQ_MHZ = 2050;   // PAU frequency for VDN adjustments
     uint32_t        l_vdn_adjust_mv = 0;
     bool            b_vdn_allow_uplift = true;
+
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
     iv_boot_mode       = true;
     iv_pstates_enabled = true;
@@ -2166,8 +2168,24 @@ fapi2::ReturnCode PlatPmPPB::compute_boot_safe(
 
                 if (((iv_pdv_model_data & 0x01) != 0x01) && b_vdn_allow_uplift)
                 {
-                    FAPI_INF("VDN #V adjust suppression flag not set.  Uplifting by %d mV", VDN_SORT_ADJUST_MV);
-                    l_vdn_adjust_mv = VDN_SORT_ADJUST_MV;
+                    fapi2::ATTR_CHIP_EC_FEATURE_PAU_VDN_UPLIFT_Type b_pau_vdn_uplift;
+                    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_PAU_VDN_UPLIFT,
+                                           iv_procChip, b_pau_vdn_uplift),
+                            "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_PAU_VDN_UPLIFT)");
+
+                    FAPI_INF("PAU freq: %d (0x%X)",
+                        iv_attr_mvpd_poundV_other_info.pau_frequency_mhz,
+                        iv_attr_mvpd_poundV_other_info.pau_frequency_mhz);
+                    if (b_pau_vdn_uplift && (iv_attr_mvpd_poundV_other_info.pau_frequency_mhz == PAU_UPLIFT_FREQ_MHZ))
+                    {
+                        fapi2::ATTR_VDN_UPLIFT_MV_Type l_pau_vdn_uplift_mv;
+                        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDN_UPLIFT_MV,
+                                           FAPI_SYSTEM, l_pau_vdn_uplift_mv),
+                            "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_PAU_VDN_UPLIFT)");
+                        FAPI_INF("VDN #V adjust for parts having PAU frequency = %d.  Uplifting by %d mV",
+                            PAU_UPLIFT_FREQ_MHZ, l_pau_vdn_uplift_mv);
+                        l_vdn_adjust_mv = l_pau_vdn_uplift_mv;
+                    }
                 }
 
                 uint32_t l_int_vdn_mv = (uint32_t)(iv_attr_mvpd_poundV_static_rails.vdn_mv) + l_vdn_adjust_mv;
@@ -2185,8 +2203,9 @@ fapi2::ReturnCode PlatPmPPB::compute_boot_safe(
                         iv_vdn_sysparam.distoffset_uv);
                 }
 
-                FAPI_INF("VDN values: VPD %d mV; Adjusted %d mV; Set point: %d mV; IDN: %d mA; LoadLine: %d uOhm; DistLoss: %d uOhm;  Offst: %d uOhm",
+                FAPI_INF("VDN values: VPD %d (0x%X) mV; Adjusted %d mV; Set point: %d mV; IDN: %d mA; LoadLine: %d uOhm; DistLoss: %d uOhm;  Offst: %d uOhm",
                         iv_attr_mvpd_poundV_static_rails.vdn_mv,
+                        revle16(iv_attr_mvpd_poundV_static_rails.vdn_mv),
                         l_int_vdn_mv,
                         l_ext_vdn_mv,
                         l_idn_ma,
