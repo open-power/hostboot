@@ -32,8 +32,8 @@
 // *HWP Consumed by   : Hostboot
 //------------------------------------------------------------------------------
 // EKB-Mirror-To: hostboot
-#ifndef _P10_SBE_LPC_INIT_H_
-#define _P10_SBE_LPC_INIT_H_
+#ifndef _P10_LPC_TEST_H_
+#define _P10_LPC_TEST_H_
 
 #include <fapi2.H>
 
@@ -51,7 +51,7 @@ extern "C"
     /// @return  FAPI2_RC_SUCCESS      if LPC is alive
     ///          RC_LPC_ACCESS_TIMEOUT if LPC is stuck
     fapi2::ReturnCode p10_lpc_test(
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip)
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip);
 }
 
 #endif
