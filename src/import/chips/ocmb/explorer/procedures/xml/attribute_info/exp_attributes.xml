@@ -1437,7 +1437,7 @@
           BOOT_CONFIG0 command. This is a signed two's complement value.
       </description>
       <valueType>uint8</valueType>
-      <default>0x02</default>
+      <default>0x00</default>
       <platInit/>
       <overrideOnly/>
       <mssAccessorName>exp_omi_cdr_offset</mssAccessorName>
