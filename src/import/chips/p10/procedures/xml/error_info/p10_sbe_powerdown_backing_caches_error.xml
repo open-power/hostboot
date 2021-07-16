@@ -34,6 +34,7 @@
     <ffdc>SSH_OTR_DATA</ffdc>
     <ffdc>CORE_TARGET</ffdc>
     <ffdc>CORE_POSITION</ffdc>
+    <ffdc>REL_CORE_POS</ffdc>
     <ffdc>EQ_TARGET</ffdc>
     <ffdc>EQ_POSITION</ffdc>
     <callout>
@@ -44,6 +45,20 @@
       <target>CHIP_TARGET</target>
        <priority>HIGH</priority>
     </callout>
+    <deconfigure>
+      <childTargets>
+        <parent>CHIP_TARGET</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_POSITION</childNumber>
+      </childTargets>
+    </deconfigure>
+    <gard>
+      <childTargets>
+        <parent>CHIP_TARGET</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_POSITION</childNumber>
+      </childTargets>
+    </gard>
   </hwpError>
   <!-- ********************************************************************* -->
    <hwpError>
@@ -53,6 +68,8 @@
     </description>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>CORE_TARGET</ffdc>
+    <ffdc>UNIT_CORE_POS</ffdc>
+    <ffdc>REL_CORE_POS</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
