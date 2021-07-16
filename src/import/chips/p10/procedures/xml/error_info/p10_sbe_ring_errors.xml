@@ -26,21 +26,11 @@
   <!-- ********************************************************************* -->
   <hwpError>
     <sbeError/>
-    <rc>RC_RS4_BAD_RING_TYPE</rc>
-    <description>RS4 container is populated with incorrect ring type</description>
-    <ffdc>RING_TYPE</ffdc>
-    <ffdc>RING_ID</ffdc>
-    <ffdc>INPUT_OVERRIDE</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <sbeError/>
     <rc>RC_INVALID_RING_SECTION</rc>
     <description>Invalid offset to ring section in image header</description>
+    <ffdc>RING_MODE</ffdc>
+    <ffdc>SECTION_NAME</ffdc>
+    <ffdc>IMG_POINTER</ffdc>
     <ffdc>RING_OFFSET</ffdc>
     <callout>
       <procedure>CODE</procedure>
@@ -52,6 +42,10 @@
     <sbeError/>
     <rc>RC_INVALID_RING_CHIPLET_SECTION</rc>
     <description>Invalid offset to chiplet level TOR in ring section</description>
+    <ffdc>RING_MODE</ffdc>
+    <ffdc>SECTION_NAME</ffdc>
+    <ffdc>IMG_POINTER</ffdc>
+    <ffdc>RING_OFFSET</ffdc>
     <ffdc>TOR_MAGIC_WORD</ffdc>
     <callout>
       <procedure>CODE</procedure>
@@ -63,7 +57,9 @@
     <sbeError/>
     <rc>RC_INVALID_TOR_VERSION</rc>
     <description>Invalid value of TOR version in TOR header</description>
+    <ffdc>RING_SECTION</ffdc>
     <ffdc>TOR_VER</ffdc>
+    <ffdc>TOR_MAGIC_WORD</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -108,6 +104,7 @@
     <sbeError/>
     <rc>RC_P10_PUTRING_OPCG_DONE_TIMEOUT</rc>
     <description>putring failed due to opcg done timeout</description>
+    <ffdc>TARGET</ffdc>
     <ffdc>SCOM_ADDRESS</ffdc>
     <ffdc>SCOM_DATA</ffdc>
     <ffdc>ROTATE_COUNT</ffdc>
@@ -132,67 +129,92 @@
     <ffdc>TARGET</ffdc>
     <ffdc>RING_ID</ffdc>
     <ffdc>CPLT_STAT0</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-  <sbeError/>
-  <rc>RC_PUTRING_INVALID_PARAMETER</rc>
-  <description>Invalid parameter passed for scanning</description>
+    <sbeError/>
+    <rc>RC_PUTRING_INVALID_PARAMETER</rc>
+    <description>Invalid parameter passed for scanning</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-  <sbeError/>
-  <rc>RC_TOR_TRAVERSAL_ERROR</rc>
-  <description>TOR Traversal led to incorrect ring</description>
-   <ffdc>ACTUAL_RING_ID</ffdc>
-   <ffdc>EXPECTED_RING_ID</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
-
-  <hwpError>
-  <sbeError/>
-  <rc>RC_ROTATE_OP_FAILED</rc>
-  <description>Rotate operation timed out during scanning</description>
-  </hwpError>
-  <!-- ******************************************************************** -->
-
-  <hwpError>
-  <sbeError/>
-  <rc>RC_QME_PUTRING_PARALLEL_SCAN_ERR</rc>
-  <description> Parallel scanning failed for QME</description>
+    <sbeError/>
+    <rc>RC_TOR_TRAVERSAL_ERROR</rc>
+    <description>TOR Traversal led to incorrect ring</description>
+    <ffdc>RING_SECTION</ffdc>
+    <ffdc>SECTION_OFFSET</ffdc>
+    <ffdc>RING_TYPE</ffdc>
+    <ffdc>ACTUAL_RING_ID</ffdc>
+    <ffdc>EXPECTED_RING_ID</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-  <sbeError/>
-  <rc>RC_QME_PUTRING_HEADER_ERR</rc>
-  <description> Erroneous content found in RS4 ring header</description>
+    <sbeError/>
+    <rc>RC_ROTATE_OP_FAILED</rc>
+    <description>Rotate operation timed out during scanning</description>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-  <sbeError/>
-  <rc>RC_QME_PUTRING_BAD_STRING</rc>
-  <description> RS4 ring payload found invalid. Nibble index do
+    <sbeError/>
+    <rc>RC_QME_PUTRING_PARALLEL_SCAN_ERR</rc>
+    <description> Parallel scanning failed for QME</description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_QME_PUTRING_HEADER_ERR</rc>
+    <description> Erroneous content found in RS4 ring header</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_QME_PUTRING_BAD_STRING</rc>
+    <description> RS4 ring payload found invalid. Nibble index do
     not agree with length specified in the ring header</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-  <sbeError/>
-  <rc>RC_QME_PUTRING_HEADER_MISMATCH</rc>
-  <description>Checkword read back did not match what was written at the beginning of scanning. 
+    <sbeError/>
+    <rc>RC_QME_PUTRING_HEADER_MISMATCH</rc>
+    <description>Checkword read back did not match what was written at the beginning of scanning. 
    It indicates either bad ring, bad scan routine or bad hardware. </description>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-  <sbeError/>
-  <rc>RC_QME_PUTRING_BAD_NIBBLE_INDEX</rc>
-  <description>Current nibble index within RS4 string exceeds ring length as 
+    <sbeError/>
+    <rc>RC_QME_PUTRING_BAD_NIBBLE_INDEX</rc>
+    <description>Current nibble index within RS4 string exceeds ring length as 
    specified in RS4 ring header. </description>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-  <sbeError/>
-  <rc>RC_QME_PUTRING_UNKNOWN_ERR</rc>
-  <description>An unknown error was encountered by QME hcode during scanning </description>
+    <sbeError/>
+    <rc>RC_QME_PUTRING_UNKNOWN_ERR</rc>
+    <description>An unknown error was encountered by QME hcode during scanning </description>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
