@@ -222,6 +222,22 @@
 </hwpError>
 <!-- ******************************************************************** -->
 <hwpError>
+  <rc>RC_P10_BUILD_SMP_NON_HOTPLUG_CONSISTENCY_ERR</rc>
+  <description>
+    Fabric hotplug racetrack register contents are not consistent.
+  </description>
+  <ffdc>TARGET</ffdc>
+  <ffdc>ADDRESS0</ffdc>
+  <ffdc>ADDRESS1</ffdc>
+  <ffdc>DATA0</ffdc>
+  <ffdc>DATA1</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
   <rc>RC_P10_BUILD_SMP_BAD_OPERATION_ERR</rc>
   <description>
     Invalid SMP operation specified.
