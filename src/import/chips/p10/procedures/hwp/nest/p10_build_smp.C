@@ -1045,6 +1045,169 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+
+///
+/// @brief Read and consistency check racetrack register set
+///
+/// @param[in] i_target       Processor chip target
+/// @param[in] i_addr         Address for EQ0 instance of racetrack regs
+/// @param[out] o_data        Register data
+///
+/// @return fapi2:ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode p10_build_smp_get_racetrack_reg(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> i_target,
+    const uint64_t i_scom_addr,
+    fapi2::buffer<uint64_t>& o_data)
+{
+    FAPI_DBG("Start");
+    fapi2::buffer<uint64_t> l_scom_data;
+
+    // check consistency of racetrack register copies
+    for (uint8_t l_station = 0; l_station < FABRIC_NUM_STATIONS; l_station++)
+    {
+        FAPI_TRY(fapi2::getScom(i_target, i_scom_addr + (l_station << 6), l_scom_data),
+                 "Error from getScom (0x%016llX)", i_scom_addr + (l_station << 6));
+
+        // raise error if racetrack copies are not equal
+        FAPI_ASSERT((l_station == 0) || (l_scom_data == o_data),
+                    fapi2::P10_BUILD_SMP_NON_HOTPLUG_CONSISTENCY_ERR()
+                    .set_TARGET(i_target)
+                    .set_ADDRESS0(i_scom_addr + ((l_station - 1) << 6))
+                    .set_ADDRESS1(i_scom_addr + (l_station << 6))
+                    .set_DATA0(o_data)
+                    .set_DATA1(l_scom_data),
+                    "Fabric racetrack registers are not consistent");
+
+        // set output (will be used to compare with next HW read)
+        o_data = l_scom_data;
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+
+///
+/// @brief Configure phase specific fabric non-hotplug SCOM overrides
+///
+/// @param[in] i_smp            Fully specified structure encapsulating SMP
+/// @param[in] i_op             Enumerated type representing SMP build phase (HB or FSP)
+///
+/// @return fapi2::ReturnCode   FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode p10_build_smp_non_hp_customize(
+    p10_build_smp_system& i_smp,
+    const p10_build_smp_operation i_op)
+{
+    using namespace scomt::proc;
+
+    FAPI_DBG("Start");
+    fapi2::ATTR_PROC_FABRIC_BROADCAST_MODE_Type l_fbc_broadcast_mode;
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_BROADCAST_MODE, FAPI_SYSTEM, l_fbc_broadcast_mode));
+
+    // only customize in Denali FSP build phase
+    if ((i_op == SMP_ACTIVATE_PHASE2) &&
+        (l_fbc_broadcast_mode == fapi2::ENUM_ATTR_PROC_FABRIC_BROADCAST_MODE_2HOP_CHIP_IS_NODE))
+    {
+        // walk all chips in SMP, determine if MC frequency is:
+        // 1. homogeneous (all MCs on all sockets match)
+        // 2. DDR2667 (1333 MHz grid) OR DDR2933 (1466 MHz grid)
+        // if so, and each chip has at least one MC, lower SP cmd rate LVL registers
+        bool l_mc_freq_homogeneous = true;
+        fapi2::ATTR_FREQ_MC_MHZ_Type l_mc_freq = 0;
+
+        {
+            for (auto g_iter = i_smp.groups.begin(); g_iter != i_smp.groups.end() && l_mc_freq_homogeneous; ++g_iter)
+                for (auto p_iter = g_iter->second.chips.begin(); p_iter != g_iter->second.chips.end()
+                     && l_mc_freq_homogeneous; ++p_iter)
+                {
+                    // process all memory controllers on this chip
+                    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_target = *(p_iter->second.target);
+                    bool l_mc_found = false;
+
+                    for (const auto& l_mc_target : l_target.getChildren<fapi2::TARGET_TYPE_MC>(fapi2::TARGET_STATE_FUNCTIONAL))
+                    {
+                        fapi2::ATTR_FREQ_MC_MHZ_Type l_mc_freq_curr;
+                        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_MC_MHZ, l_mc_target, l_mc_freq_curr));
+                        l_mc_found = true;
+
+                        // establish basis for check based on first MC processed
+                        if (!l_mc_freq)
+                        {
+                            l_mc_freq = l_mc_freq_curr;
+                        }
+                        // flag if we see a frequency different than what we started with
+                        else
+                        {
+                            l_mc_freq_homogeneous = (l_mc_freq == l_mc_freq_curr);
+
+                            if (!l_mc_freq_homogeneous)
+                            {
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!l_mc_found)
+                    {
+                        l_mc_freq_homogeneous = false;
+                    }
+                }
+        }
+
+        // all chips processed
+        if (l_mc_freq_homogeneous &&
+            ((l_mc_freq == 1333) || (l_mc_freq == 1466)))
+        {
+            for (auto g_iter = i_smp.groups.begin(); g_iter != i_smp.groups.end(); ++g_iter)
+            {
+                for (auto p_iter = g_iter->second.chips.begin(); p_iter != g_iter->second.chips.end(); ++p_iter)
+                {
+                    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_target = *(p_iter->second.target);
+                    fapi2::buffer<uint64_t> l_sp_cmd_rate;
+
+                    // read and consistency check all stations
+                    FAPI_TRY(p10_build_smp_get_racetrack_reg(l_target, PB_COM_SCOM_EQ0_STATION_SP_CMD_RATE, l_sp_cmd_rate),
+                             "Error from p10_build_smp_get_racetrack_reg (SP_CMD_RATE)");
+
+                    // apply adjustments
+                    // #Lower level by 0.83 for 2667/2933 0.83
+                    // Version 4 of SP dials (83% chgrate)
+                    // LV0 -> 0x5 = 1 / 6 * 0.83 = 1/5
+                    // LV1 -> 0x9 = 1 / 10 * 0.83 = 1/8
+                    // LV2 -> 0xD = 1 / 14 * 0.83 = 1/12
+                    // LV3 -> 0x11 = 1 / 18 * 0.83 = 1/15
+                    // LV4 -> 0x14 = 1 / 21 * 0.83 = 1/18
+                    // LV5 -> 0x17 = 1 / 24 * 0.83 = 1/20
+                    // LV6 -> 0x1C =  1 / 29 * 0.83 = 1/24
+                    // LV7 -> 0x3A =  1 / 59 <= original LVL7
+                    PREP_PB_COM_SCOM_EQ0_STATION_SP_CMD_RATE(l_target);
+                    SET_PB_COM_SCOM_EQ0_STATION_SP_CMD_RATE_0_EQ0(0x04, l_sp_cmd_rate); // LVL0
+                    SET_PB_COM_SCOM_EQ0_STATION_SP_CMD_RATE_1_EQ0(0x07, l_sp_cmd_rate); // LVL1
+                    SET_PB_COM_SCOM_EQ0_STATION_SP_CMD_RATE_2_EQ0(0x0B, l_sp_cmd_rate); // LVL2
+                    SET_PB_COM_SCOM_EQ0_STATION_SP_CMD_RATE_3_EQ0(0x0E, l_sp_cmd_rate); // LVL3
+                    SET_PB_COM_SCOM_EQ0_STATION_SP_CMD_RATE_4_EQ0(0x11, l_sp_cmd_rate); // LVL4
+                    SET_PB_COM_SCOM_EQ0_STATION_SP_CMD_RATE_5_EQ0(0x13, l_sp_cmd_rate); // LVL5
+                    SET_PB_COM_SCOM_EQ0_STATION_SP_CMD_RATE_6_EQ0(0x17, l_sp_cmd_rate); // LVL6
+                    SET_PB_COM_SCOM_EQ0_STATION_SP_CMD_RATE_7_EQ0(0x3A, l_sp_cmd_rate); // LVL7
+
+                    // write back to all stations
+                    FAPI_TRY(p10_fbc_utils_set_racetrack_regs(l_target, PB_COM_SCOM_EQ0_STATION_SP_CMD_RATE, l_sp_cmd_rate),
+                             "Error from p10_fbc_utils_set_racetrack_regs (SP_CMD_RATE)");
+                }
+            }
+        }
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+
 ///
 /// @brief Disable dynamic lane reduction (dlr) on all links
 ///
@@ -1400,6 +1563,10 @@ fapi2::ReturnCode p10_build_smp(
             // disable dlr prior to activating new config
             FAPI_TRY(p10_build_smp_dlr_disable(l_smp),
                      "Error from p10_build_smp_dlr_disable");
+
+            // configure phase specific fabric non-hotplug SCOM overrides
+            FAPI_TRY(p10_build_smp_non_hp_customize(l_smp, i_op),
+                     "Error from p10_build_smp_non_hp_customize");
 
             // set fabric hotplug configuration registers before switch
             FAPI_TRY(p10_build_smp_pre_fbc_ab(l_smp, i_op),
