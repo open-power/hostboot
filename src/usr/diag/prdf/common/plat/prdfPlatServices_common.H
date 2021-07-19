@@ -114,6 +114,7 @@ bool isSpConfigFsp();
  * @param i_flags      Extra flag for callout structure.
  * @param i_rxPriority Priority to callout i_rxTrgt
  * @param i_txPriority Priority to callout i_txTrgt
+ * @param i_applyGuard True, guard. False, no guard.
  */
 void calloutBus(STEP_CODE_DATA_STRUCT& io_sc,
                 TARGETING::TargetHandle_t i_rxTrgt,
@@ -121,7 +122,8 @@ void calloutBus(STEP_CODE_DATA_STRUCT& io_sc,
                 HWAS::busTypeEnum i_busType,
                 HWAS::CalloutFlag_t i_flags = HWAS::FLAG_NONE,
                 PRDpriority i_rxPriority = MRU_MEDA,
-                PRDpriority i_txPriority = MRU_MEDA);
+                PRDpriority i_txPriority = MRU_MEDA,
+                bool i_applyGuard = true);
 
 /**
  * @brief  Calls out an entire SMPGROUP bus with the given link.

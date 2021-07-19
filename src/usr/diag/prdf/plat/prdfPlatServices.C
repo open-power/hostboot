@@ -279,14 +279,16 @@ int32_t getCfam( ExtensibleChip * i_chip,
 void calloutBus(STEP_CODE_DATA_STRUCT& io_sc,
                 TargetHandle_t i_rxTrgt, TargetHandle_t i_txTrgt,
                 HWAS::busTypeEnum i_busType, HWAS::CalloutFlag_t i_flags,
-                PRDpriority i_rxPriority, PRDpriority i_txPriority)
+                PRDpriority i_rxPriority, PRDpriority i_txPriority,
+                bool i_applyGuard)
 {
     PRDF_ASSERT(nullptr != i_rxTrgt);
     PRDF_ASSERT(nullptr != i_txTrgt);
 
     // Add both endpoints to the callout list, priority medium group A.
-    io_sc.service_data->SetCallout(i_rxTrgt, i_rxPriority);
-    io_sc.service_data->SetCallout(i_txTrgt, i_txPriority);
+    GARD_POLICY guardPolicy = i_applyGuard ? GARD : NO_GARD;
+    io_sc.service_data->SetCallout(i_rxTrgt, i_rxPriority, guardPolicy);
+    io_sc.service_data->SetCallout(i_txTrgt, i_txPriority, guardPolicy);
 
     // Callout the rest of the bus, priority low.
     errlHndl_t errl = ServiceGeneratorClass::ThisServiceGenerator().getErrl();
@@ -337,7 +339,7 @@ int32_t smp_callout( ExtensibleChip* i_chip, STEP_CODE_DATA_STRUCT& io_sc,
     if ( nullptr == txTrgt )
     {
         PRDF_TRAC( "p10_iohs::__smp_callout: No peer SMPGROUP found" );
-        io_sc.service_data->SetCallout( rxTrgt, MRU_MED );
+        io_sc.service_data->SetCallout( rxTrgt, MRU_MED, NO_GARD );
         return SUCCESS;
     }
 
@@ -362,8 +364,9 @@ int32_t smp_callout( ExtensibleChip* i_chip, STEP_CODE_DATA_STRUCT& io_sc,
 
     if ( HWAS::X_BUS_TYPE == busType || HWAS::A_BUS_TYPE == busType )
     {
-        // Callout the entire bus interface.
-        calloutBus(io_sc, rxTrgt, txTrgt, busType, calloutFlag);
+        // Callout the entire bus interface. Do not guard SMP bus endpoints.
+        calloutBus(io_sc, rxTrgt, txTrgt, busType, calloutFlag,
+                   MRU_MEDA, MRU_MEDA, false);
     }
 
     return SUCCESS;
