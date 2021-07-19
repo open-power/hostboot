@@ -5648,8 +5648,9 @@
     <persistency>volatile</persistency>
     <readable/>
     <simpleType>
-      <uint8_t/>
-      <default>10</default>
+      <uint8_t>
+        <default>10</default>
+      </uint8_t>
     </simpleType>
     <no_export/>
   </attribute>
