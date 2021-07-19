@@ -33,8 +33,22 @@
       <description> RCS clock error </description>
       <ffdc>READ_SNS1LTH</ffdc>
       <ffdc>ATTR_CP_REFCLOCK_SELECT_VALUE</ffdc>
+      <ffdc>CLOCK_POS</ffdc>
+      <ffdc>MASTER_CHIP</ffdc>
+      <callout>
+        <hw>
+            <hwid>PROC_REF_CLOCK</hwid>
+            <refTarget>MASTER_CHIP</refTarget>
+            <clkPos>CLOCK_POS</clkPos>
+        </hw>
+        <priority>HIGH</priority>
+      </callout>
+      <callout>
+        <target>MASTER_CHIP</target>
+        <priority>MEDIUM</priority>
+      </callout>
    </hwpError>
- <!-- ******************************************************************** -->
+   <!-- ******************************************************************** -->
    <hwpError>
       <sbeError/>
       <rc>RC_RCS_PLL_LOCK_ERR</rc>
@@ -42,35 +56,30 @@
       <ffdc>TP_PLL_LOCK_REG</ffdc>
       <ffdc>ATTR_CP_REFCLOCK_SELECT_VALUE</ffdc>
    </hwpError>
- <!-- ******************************************************************** -->
+   <!-- ******************************************************************** -->
    <hwpError>
       <sbeError/>
       <rc>RC_RCS_FPLL_DESKEW_ERR</rc>
-      <description> Error in caliberating the deskew for RCS FPLL </description>
-      <ffdc>READ_SNS1LTH</ffdc>
-      <ffdc>SHIFTED_ERR_VAL</ffdc>
-   </hwpError>
-  <!-- ******************************************************************** -->
-   <hwpError>
-      <sbeError/>
-      <rc>RC_RCS_FPLL_DESKEW_ERR_A</rc>
-      <description> Error in caliberating the deskew for RCS FPLL A-Side</description>
+      <description> Error in caliberating the deskew for RCS FPLL</description>
       <ffdc>READ_SNS1LTH</ffdc>
       <ffdc>DESKEW_A</ffdc>
       <ffdc>DESKEW_B</ffdc>
       <ffdc>SHIFTED_A_ERR_VAL</ffdc>
       <ffdc>SHIFTED_B_ERR_VAL</ffdc>
-   </hwpError>
-  <!-- ******************************************************************** -->
-   <hwpError>
-      <sbeError/>
-      <rc>RC_RCS_FPLL_DESKEW_ERR_B</rc>
-      <description> Error in caliberating the deskew for RCS FPLL B-Side</description>
-      <ffdc>READ_SNS1LTH</ffdc>
-      <ffdc>DESKEW_A</ffdc>
-      <ffdc>DESKEW_B</ffdc>
-      <ffdc>SHIFTED_A_ERR_VAL</ffdc>
-      <ffdc>SHIFTED_B_ERR_VAL</ffdc>
+      <ffdc>CLOCK_POS</ffdc>
+      <ffdc>MASTER_CHIP</ffdc>
+      <callout>
+        <hw>
+            <hwid>PROC_REF_CLOCK</hwid>
+            <refTarget>MASTER_CHIP</refTarget>
+            <clkPos>CLOCK_POS</clkPos>
+        </hw>
+        <priority>HIGH</priority>
+      </callout>
+      <callout>
+        <target>MASTER_CHIP</target>
+        <priority>MEDIUM</priority>
+      </callout>
    </hwpError>
   <!-- ******************************************************************** -->
    <hwpError>
@@ -84,6 +93,24 @@
       <ffdc>LAST_ERROR</ffdc>
       <ffdc>SIDE_A_NOT_B</ffdc>
       <ffdc>LOOP</ffdc>
+      <ffdc>CLOCK_POS</ffdc>
+      <ffdc>MASTER_CHIP</ffdc>
+      <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+      </callout>
+      <callout>
+        <hw>
+            <hwid>PROC_REF_CLOCK</hwid>
+            <refTarget>MASTER_CHIP</refTarget>
+            <clkPos>CLOCK_POS</clkPos>
+        </hw>
+        <priority>HIGH</priority>
+      </callout>
+      <callout>
+        <target>MASTER_CHIP</target>
+        <priority>MEDIUM</priority>
+      </callout>
    </hwpError>
   <!-- ******************************************************************** -->
    <hwpError>
