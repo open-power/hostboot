@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -346,6 +346,9 @@ case HWAS::_type: i_parser.PrintString( "Sensor Type", #_type); break;
                 break;
             }
             default:
+                // Assert at compile time if there is a new unhandled callout type added to the enum in Hostboot.
+                static_assert(HWAS::LAST_CALLOUT == HWAS::I2C_DEVICE_CALLOUT,
+                              "New callout type needs to be handled in errludcallout");
                 // The 'type' is a byte so use ".2X" to just print out a single byte.
                 // Also 'type' is a byte, no need to do ntohl or ntohs ... it is a byte
                 i_parser.PrintNumber( "Callout type", "UNKNOWN: 0x%.2X", pData->type);

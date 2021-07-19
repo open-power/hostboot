@@ -274,10 +274,17 @@ void processCallout(errlHndl_t &io_errl,
             }
             break;
         } // I2C_DEVICE_CALLOUT
-
+        case (SENSOR_CALLOUT):
+        {
+            HWAS_ERR("Unsupported Callout UD, SENSOR_CALLOUT 0x%x", pCalloutUD->type);
+            break;
+        }
         default:
         {
-            HWAS_ERR("bad data in Callout UD %x", pCalloutUD->type);
+            // Assert at compile time if there is a new unhandled callout type added to the enum
+            static_assert(LAST_CALLOUT == I2C_DEVICE_CALLOUT, "New callout type needs to be handled in processCallout");
+            // Emit an error trace and move on at runtime in case another component did some bad casting.
+            HWAS_ERR("bad data in Callout UD 0x%x", pCalloutUD->type);
             break;
         }
     } // switch

@@ -409,6 +409,9 @@ case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Sensor Type      
                 break;
 
             default:
+                // Assert at compile time if there is a new unhandled callout type added to the enum in hostboot
+                static_assert(HWAS::LAST_CALLOUT == HWAS::I2C_DEVICE_CALLOUT,
+                              "New callout type needs to be handled in processCallout");
                 CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Callout type             : UNKNOWN: 0x%X",
                                   callout->type);
                 break;

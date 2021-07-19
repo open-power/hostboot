@@ -115,14 +115,14 @@ class hwasCalloutTest: public CxxTest::TestSuite
                 l_err = l_originalErr;
             }
 
-            //Unknown
-            l_calloutData->type = 0x8;
+            // Unsupported Type
+            l_calloutData->type = SENSOR_CALLOUT;
             //reset pointer
             l_pData = reinterpret_cast<uint8_t*>(&l_buffer);
-            TS_INFO("test_processCallout - Unknown type");
+            TS_INFO("test_processCallout - Unsupported type");
             processCallout(l_err, l_pData, l_size, false);
             if(l_err != l_originalErr) {
-                TS_FAIL("test_processCallout - processCallout() with Unknown callout type "
+                TS_FAIL("test_processCallout - processCallout() with Unsupported callout type "
                         "should not change l_err");
                 errlCommit( l_err, CXXTEST_COMP_ID );
                 l_err = l_originalErr;

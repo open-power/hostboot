@@ -253,14 +253,18 @@ const uint8_t FLAG_NONE             = 0;
 const uint8_t FLAG_LINK_DOWN        = 1;
 
 //-- Callout types
-typedef uint8_t CalloutType_t;
-const uint8_t HW_CALLOUT         = 0x01;
-const uint8_t PROCEDURE_CALLOUT  = 0x02;
-const uint8_t BUS_CALLOUT        = 0x03;
-const uint8_t CLOCK_CALLOUT      = 0x04;
-const uint8_t PART_CALLOUT       = 0x05;
-const uint8_t SENSOR_CALLOUT     = 0x06;
-const uint8_t I2C_DEVICE_CALLOUT = 0x07;
+enum calloutType : uint8_t
+{
+    HW_CALLOUT         = 0x01,
+    PROCEDURE_CALLOUT  = 0x02,
+    BUS_CALLOUT        = 0x03,
+    CLOCK_CALLOUT      = 0x04,
+    PART_CALLOUT       = 0x05,
+    SENSOR_CALLOUT     = 0x06,
+    I2C_DEVICE_CALLOUT = 0x07,
+    LAST_CALLOUT = I2C_DEVICE_CALLOUT,
+};
+typedef calloutType CalloutType_t;
 
 const uint8_t TARGET_IS_SENTINEL = 0xF0;
 
