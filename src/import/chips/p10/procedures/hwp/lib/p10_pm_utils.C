@@ -382,11 +382,11 @@ fapi2::ReturnCode wof_get_tables(
             FAPI_DBG("ATTR_SYS_VRT_STATIC_DATA_ENABLE is not SET");
 
             // Read System VRT data
-            fapi2::current_err = FAPI_ATTR_GET(fapi2::ATTR_WOF_TABLE_DATA,
-                                               i_proc_target,
-                                               (*i_wof_table_data));
+            l_rc = FAPI_ATTR_GET(fapi2::ATTR_WOF_TABLE_DATA,
+                                 i_proc_target,
+                                 (*i_wof_table_data));
 
-            if (fapi2::current_err)
+            if (l_rc)
             {
 
                 FAPI_INF("ATTR_WOF_TABLE_DATA attribute failed.  Disabling WOF");
@@ -396,7 +396,7 @@ fapi2::ReturnCode wof_get_tables(
                                        l_wof_disabled));
 
                 // Write the returned error content to the error log
-                fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE);
+                fapi2::logError(l_rc, fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE);
                 break;
             }
         }
