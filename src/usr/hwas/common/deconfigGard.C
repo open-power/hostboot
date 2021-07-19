@@ -2742,6 +2742,16 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
                 continue;
             }
 
+            // clock design requires the predictively garded clocks to be
+            // functional to use it as secondary so skipping the deconfigure
+            if ((l_gardRecord.iv_errorType == GARD_Predictive) &&
+                 (l_pTarget->getAttr<ATTR_TYPE>() == TYPE_OSCREFCLK))
+            {
+                HWAS_INF("skipping applying gard record for clock  %.8X",
+                    get_huid(l_pTarget));
+                continue;
+            }
+
             //Apply the gard record.
             l_pErr = applyGardRecord(l_pTarget, l_gardRecord, SPEC_DECONFIG);
             if (l_pErr)
