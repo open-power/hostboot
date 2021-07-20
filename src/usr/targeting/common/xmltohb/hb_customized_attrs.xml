@@ -884,6 +884,7 @@
     </attribute>
     <attribute>
         <id>ATTR_MRW_HW_MIRRORING_ENABLE</id>
+        <no_export/>
         <writeable/>
     </attribute>
     <attribute>
