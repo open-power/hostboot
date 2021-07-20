@@ -144,6 +144,12 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
     std::vector<ExtensibleChip*> pllUnlockClk0;
     std::vector<ExtensibleChip*> pllUnlockClk1;
 
+    #ifndef __HOSTBOOT_MODULE
+    // Will need to set the dump content if there are any active attentions.
+    // This only needs to be done once.
+    bool dumpContentSet = false;
+    #endif
+
     // Examine each chip in the domain.
     for (unsigned int index = 0; index < GetSize(); ++index)
     {
@@ -340,6 +346,15 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
                 io_sc.service_data->SetUERE();
             }
         }
+
+        #ifndef __HOSTBOOT_MODULE
+        // Set the dump content. This only needs to be done once.
+        if (!dumpContentSet)
+        {
+            io_sc.service_data->SetDump(CONTENT_HW, trgt);
+            dumpContentSet = true;
+        }
+        #endif
     }
 
     #ifdef __HOSTBOOT_MODULE
