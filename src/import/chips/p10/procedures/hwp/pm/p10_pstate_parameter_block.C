@@ -2530,9 +2530,41 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
                         iv_procChip, l_powr_nom));
         }
 
-
         FAPI_INF("Raw #V pre-overrides");
         FAPI_TRY(print_voltage_bucket(iv_procChip, p_poundV_data));
+
+        // Deal with parts having erroneous CF0-CF2 VPD frequencies.  If the CF0-CF3
+        // frequencies match, replace the CF0-CF2 with 2000, 2400 and 2800 respectively.
+        // The voltages and currents will still have the CF3 values but these will at
+        // least be legal.
+        if (p_poundV_data->operating_pts[CF0].core_frequency == p_poundV_data->operating_pts[CF3].core_frequency &&
+            p_poundV_data->operating_pts[CF1].core_frequency == p_poundV_data->operating_pts[CF3].core_frequency &&
+            p_poundV_data->operating_pts[CF2].core_frequency == p_poundV_data->operating_pts[CF3].core_frequency )
+        {
+            if (p_poundV_data->operating_pts[CF3].core_frequency != 0)
+            {
+                FAPI_IMP("VPD CORRECTION: Parts with replicated CF3 data in CF0-CF2 detected.");
+                FAPI_INF("VPD CORRECTION: CF0 %04d CF1 %04d CF2 %04d CF3 %04d",
+                            p_poundV_data->operating_pts[CF0].core_frequency,
+                            p_poundV_data->operating_pts[CF1].core_frequency,
+                            p_poundV_data->operating_pts[CF2].core_frequency,
+                            p_poundV_data->operating_pts[CF3].core_frequency);
+                FAPI_IMP("VPD CORRECTION: Changing internal structures for CF0-CF2 to 2000, 2400 and 2800 respectively");
+                p_poundV_data->operating_pts[CF0].core_frequency = revle16(2000);
+                p_poundV_data->operating_pts[CF1].core_frequency = revle16(2400);
+                p_poundV_data->operating_pts[CF2].core_frequency = revle16(2800);
+
+                FAPI_INF("VPD CORRECTION: post #V update");
+                FAPI_TRY(print_voltage_bucket(iv_procChip, p_poundV_data));
+            }
+            else
+            {
+                FAPI_INF("VPD CORRECTION: Zero CF3 detected");
+                disable_pstates();
+                break;
+            }
+
+        }
 
         // Apply WOF Table Overrides as applicable
         FAPI_INF("> Applying WOF Overrides");
