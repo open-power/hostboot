@@ -60,6 +60,14 @@ fapi2::ReturnCode bad_fir_bits_helper_with_mask(const fapi2::Target<fapi2::TARGE
         fapi2::ReturnCode& io_rc,
         bool& o_fir_error);
 
+///
+/// @brief Checks for consistency in acTAG/PASID config
+/// @param[in] i_target - the target on which to operate
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode check_mfir_actag_pasid_cfg(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+
 } // end check ns
 } // end mss ns
 #endif

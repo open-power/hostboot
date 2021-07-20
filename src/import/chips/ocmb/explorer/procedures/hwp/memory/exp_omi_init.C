@@ -37,6 +37,8 @@
 #include <exp_oc_regs.H>
 #include <lib/inband/exp_inband.H>
 #include <lib/omi/exp_omi_utils.H>
+#include <lib/fir/exp_fir_traits.H>
+#include <lib/fir/exp_fir.H>
 #include <chips/common/utils/chipids.H>
 #include <mss_explorer_attribute_getters.H>
 #include <mss_explorer_attribute_setters.H>
@@ -623,6 +625,9 @@ fapi2::ReturnCode omiSetACTagPASIDMetaData(const fapi2::Target<fapi2::TARGET_TYP
                             EXPLR_OC_O1ACTAG_O1FNID_MSB_ACTAG_BASE_LEN>
                             (l_actag_base);
     FAPI_TRY(mss::exp::ib::putOCCfg(i_target, EXPLR_OC_O1ACTAG_O1FNID_MSB, l_value));
+
+    // Check that acTAG and PASID config is valid
+    FAPI_TRY(mss::check::check_mfir_actag_pasid_cfg(i_target));
 
 fapi_try_exit:
 

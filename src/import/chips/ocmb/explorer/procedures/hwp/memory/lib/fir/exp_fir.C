@@ -342,5 +342,29 @@ fapi2::ReturnCode bad_fir_bits<mss::mc_type::EXPLORER, firChecklist::GENERIC>( c
     return bad_fir_bits<mss::mc_type::EXPLORER, firChecklist::DRAMINIT>(i_target, io_rc, o_fir_error);
 }
 
+///
+/// @brief Check the MFIR_ACTAG_PASID_CFG_ERR field
+/// @param[in] i_target OCMB target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode check_mfir_actag_pasid_cfg(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+{
+    fapi2::buffer<uint64_t> l_reg_data = 0;
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+
+    // Reading from the register into l_reg_data
+    FAPI_TRY(mss::getScom(i_target, EXPLR_MMIO_MFIR, l_reg_data));
+
+    FAPI_ASSERT(!l_reg_data.getBit<EXPLR_MMIO_MFIR_ACTAG_PASID_CFG_ERR>(),
+                fapi2::ACTAG_PASID_CONFIG_INVALID()
+                .set_OCMB_TARGET(i_target),
+                "MFIR_ACTAG_PASID_CFG_ERR has been lit due to unsupported configuration in number of acTAGs and PASIDs");
+    return l_rc;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 } // end check ns
 } // end mss ns

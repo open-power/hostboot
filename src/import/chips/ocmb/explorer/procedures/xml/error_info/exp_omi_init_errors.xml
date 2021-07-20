@@ -125,4 +125,16 @@
     </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_ACTAG_PASID_CONFIG_INVALID</rc>
+    <description>
+      MFIR_ACTAG_PASID_CFG_ERR has been lit due to unsupported configuration in number of acTAGs and PASIDs
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>
