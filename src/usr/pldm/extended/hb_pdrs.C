@@ -77,8 +77,9 @@ void addEntityAssociationAndFruRecordSetPdrs(PdrManager& io_pdrman, const termin
     const enttree_ptr enttree { pldm_entity_association_tree_init(),
                                 pldm_entity_association_tree_destroy };
 
-    /* Add the backplane (root node) to the tree. */
+    std::map<fru_record_set_id_t, pldm_entity> fru_record_set_map;
 
+    /* Add the backplane (root node) to the tree. */
     pldm_entity backplane_entity
     {
         .entity_type = ENTITY_TYPE_BACKPLANE
@@ -92,7 +93,6 @@ void addEntityAssociationAndFruRecordSetPdrs(PdrManager& io_pdrman, const termin
                                            PLDM_ENTITY_ASSOCIAION_PHYSICAL);
 
     /* Now we add all the children of the backplane to the tree. */
-
     for (const auto entity : fru_inventory_classes)
     {
         TargetHandleList targets;
@@ -133,14 +133,20 @@ void addEntityAssociationAndFruRecordSetPdrs(PdrManager& io_pdrman, const termin
             // instance.
             const fru_record_set_id_t rsid = getTargetFruRecordSetID(targets[i]);
 
-            // Add the FRU record set PDR to the repo
-            io_pdrman.addFruRecordSetPdr(rsid, pldmEntity);
+            // Send FRU record set entries after entity association records
+            fru_record_set_map[rsid] = pldmEntity;
         }
     }
 
     /* Serialize the tree into the PDR repository. */
-
     io_pdrman.addEntityAssociationPdrs(*enttree.get(), false /* is_remote */);
+
+    /* now add all the FRU record set PDRs */
+    for (auto const& fru_record : fru_record_set_map)
+    {
+        // Add the FRU record set PDR to the repo
+        io_pdrman.addFruRecordSetPdr(fru_record.first, fru_record.second);
+    }
 }
 
 /* @brief Add the state effecter and sensor PDRs for OCC FRUs.
