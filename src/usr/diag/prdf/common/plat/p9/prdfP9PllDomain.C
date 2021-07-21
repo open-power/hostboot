@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -205,6 +205,12 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
     // domains.
     std::vector<ExtensibleChip *>  nfchips;
 
+    #ifndef __HOSTBOOT_MODULE
+    // Will need to set the dump content if there are any active attentions.
+    // This only needs to be done once.
+    bool dumpContentSet = false;
+    #endif
+
     // Examine each chip in domain
     for(unsigned int index = 0; index < GetSize(); ++index)
     {
@@ -263,6 +269,16 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
         {
             PlatServices::hwpErrorIsolation( l_chip, serviceData );
         }
+
+        #ifndef __HOSTBOOT_MODULE
+        // Set the dump content. This only needs to be done once.
+        if (!dumpContentSet)
+        {
+            serviceData.service_data->SetDump(iv_dumpContent, l_chip->getTrgt());
+            dumpContentSet = true;
+        }
+        #endif
+
     } // end for each chip in domain
 
     // Remove all non-functional chips.
