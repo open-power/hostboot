@@ -560,9 +560,10 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
                 const auto original_eid  = pError->eid();
                 const auto original_plid = pError->plid();
                 pError->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
-                // We never want to gard a TPM for failing presence detection
-                // so remove any gard elemets of the error log associated with
-                // this TPM prior to commiting
+                // We never want to gard a TPM for failing presence detection at this point in the code so remove any
+                // gard elements of the error log associated with this TPM prior to commiting. GARDing the TPM will be
+                // handled in crosscheck_sp_presense_target which will precisely set the GARD to avoid triggering
+                // endless failovers. See that function in hwasPlat.C for a much more detailed explanation.
                 pError->setGardType(i_pTpm, HWAS::GARD_NULL);
                 errlCommit(pError,TPMDD_COMP_ID);
 
