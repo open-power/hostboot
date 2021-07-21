@@ -900,7 +900,7 @@ group gPAU_PHY_FIR
     /** PAU_PHY_FIR[22]
      *  A PPE Code Recal Not Run has occurred.
      */
-    (rPAU_PHY_FIR, bit(22)) ? level2_th_32perDay_CrcRoot22;
+    (rPAU_PHY_FIR, bit(22)) ? defaultMaskedError;
 
     /** PAU_PHY_FIR[23]
      *  A PPE Code Thread Locked has occurred.
