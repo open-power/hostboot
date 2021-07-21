@@ -295,7 +295,7 @@ int32_t CrcSideEffect( ExtensibleChip * i_chip,
         }
 
         TargetHandle_t proc = getConnectedParent( pauc->getTrgt(), TYPE_PROC );
-        // Bits relevant to both OMI PHYs: 9,10,11,12,13,14,19,22,23
+        // Bits relevant to both OMI PHYs: 9,10,11,12,13,14,19,23
         if ( pau_phy->IsBitSet(9) || pau_phy->IsBitSet(10) ||
              pau_phy->IsBitSet(19) )
         {
@@ -313,8 +313,7 @@ int32_t CrcSideEffect( ExtensibleChip * i_chip,
             calloutBus( io_sc, omiTrgt, ocmbTrgt, HWAS::OMI_BUS_TYPE );
             o_rc = SUCCESS;
         }
-        else if ( pau_phy->IsBitSet(12) || pau_phy->IsBitSet(22) ||
-                  pau_phy->IsBitSet(23))
+        else if ( pau_phy->IsBitSet(12) || pau_phy->IsBitSet(23))
         {
             // switch callout to level2 high, OMI plus OCMB
             io_sc.service_data->SetCallout( LEVEL2_SUPPORT, MRU_HIGH );
