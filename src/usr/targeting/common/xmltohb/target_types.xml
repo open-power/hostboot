@@ -1866,6 +1866,37 @@
   </targetType>
 
   <targetType>
+    <id>mds_ctlr</id>
+    <parent>asic</parent>
+    <attribute>
+      <default>MEM</default>
+      <id>CDM_DOMAIN</id>
+    </attribute>
+    <attribute>
+      <default>1</default>
+      <id>DECONFIG_GARDABLE</id>
+    </attribute>
+    <attribute>
+      <id>FAPI_I2C_CONTROL_INFO</id>
+    </attribute>
+    <attribute>
+      <id>FAPI_POS</id>
+    </attribute>
+    <attribute>
+      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+      <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
+      <default>0x00000033</default>
+    </attribute>
+    <attribute>
+      <id>POSITION</id>
+    </attribute>
+    <attribute>
+      <id>TYPE</id>
+      <default>MDS_CTLR</default>
+    </attribute>
+  </targetType>
+
+  <targetType>
     <!-- OnChip Controller that manages thermal/performance -->
     <id>occ</id>
     <parent>powerxx-chipunit</parent>

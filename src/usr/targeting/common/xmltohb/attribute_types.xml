@@ -9625,8 +9625,12 @@
       <value>85</value>
     </enumerator>
     <enumerator>
-      <name>LAST_IN_RANGE</name>
+      <name>MDS_CTLR</name>
       <value>86</value>
+    </enumerator>
+    <enumerator>
+      <name>LAST_IN_RANGE</name>
+      <value>87</value>
     </enumerator>
     <id>TYPE</id>
   </enumerationType>

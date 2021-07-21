@@ -137,6 +137,7 @@ TargStrToType CHIP_UNIT_TYPE_TARG_STR_TO_TYPE [] =
     {"mp"       , fapi2::TARGET_TYPE_MEM_PORT   , TARGETING::TYPE_MEM_PORT},
     {"iohs"     , fapi2::TARGET_TYPE_IOHS       , TARGETING::TYPE_IOHS},
     {"iolink"   , fapi2::TARGET_TYPE_IOLINK     , TARGETING::TYPE_SMPGROUP},
+    {"mds"      , fapi2::TARGET_TYPE_MDS_CTLR   , TARGETING::TYPE_MDS_CTLR},
     {"LAST"     , 0                             , 0}
 };
 

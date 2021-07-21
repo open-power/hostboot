@@ -276,6 +276,7 @@ sub createTargetExtensionFromFapi(\%,\%)
     TARGET_TYPE_PAU           => "unit-pau",
     TARGET_TYPE_GENERICI2CSLAVE => "generic_i2c_device",
     TARGET_TYPE_IOLINK        => "unit-smpgroup",
+    TARGET_TYPE_MDS_CTLR      => "unit-mds-ctlr",
     };
 
     # Loop through all of the targets that this attribute

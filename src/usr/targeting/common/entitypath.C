@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -505,6 +505,8 @@ const char* EntityPath::pathElementTypeAsString(
             return "LPCREFCLKENDPT";
         case TYPE_GENERIC_I2C_DEVICE:
             return "GENERIC_I2C_DEVICE";
+        case TYPE_MDS_CTLR:
+            return "MDS_CTLR";
         default:
             return "Unknown path type";
     }
