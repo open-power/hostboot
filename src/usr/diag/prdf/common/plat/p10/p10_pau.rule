@@ -564,7 +564,7 @@ group gPAU_FIR_1
     /** PAU_FIR_1[12]
      *  MISC Register ring error
      */
-    (rPAU_FIR_1, bit(12)) ? self_th_32perDay;
+    (rPAU_FIR_1, bit(12)) ? defaultMaskedError;
 
     /** PAU_FIR_1[13]
      *  MISC Parity error from interrupt base real address
@@ -574,7 +574,7 @@ group gPAU_FIR_1
     /** PAU_FIR_1[14]
      *  MISC Parity error on Indirect SCOM Address registe
      */
-    (rPAU_FIR_1, bit(14)) ? defaultMaskedError;
+    (rPAU_FIR_1, bit(14)) ? self_th_1;
 
     /** PAU_FIR_1[15]
      *  MISC Parity error on MISC Control register
@@ -599,92 +599,92 @@ group gPAU_FIR_1
     /** PAU_FIR_1[19]
      *  ATS TCE Page access error during TCE cache lookup
      */
-    (rPAU_FIR_1, bit(19)) ? self_th_1;
+    (rPAU_FIR_1, bit(19)) ? defaultMaskedError;
 
     /** PAU_FIR_1[20]
      *  ATS Effective Address hit multiple TCE cache entri
      */
-    (rPAU_FIR_1, bit(20)) ? self_th_1;
+    (rPAU_FIR_1, bit(20)) ? defaultMaskedError;
 
     /** PAU_FIR_1[21]
      *  ATS TCE Page access error during TCE table-walk
      */
-    (rPAU_FIR_1, bit(21)) ? self_th_1;
+    (rPAU_FIR_1, bit(21)) ? defaultMaskedError;
 
     /** PAU_FIR_1[22]
      *  ATS Timeout on TCE tree walk
      */
-    (rPAU_FIR_1, bit(22)) ? self_th_1;
+    (rPAU_FIR_1, bit(22)) ? defaultMaskedError;
 
     /** PAU_FIR_1[23]
      *  ATS Parity error on TCE cache directory array
      */
-    (rPAU_FIR_1, bit(23)) ? self_th_1;
+    (rPAU_FIR_1, bit(23)) ? defaultMaskedError;
 
     /** PAU_FIR_1[24]
      *  ATS Parity error on TCE cache data array
      */
-    (rPAU_FIR_1, bit(24)) ? self_th_1;
+    (rPAU_FIR_1, bit(24)) ? defaultMaskedError;
 
     /** PAU_FIR_1[25]
      *  ATS ECC UE on Effective Address array
      */
-    (rPAU_FIR_1, bit(25)) ? self_th_1;
+    (rPAU_FIR_1, bit(25)) ? defaultMaskedError;
 
     /** PAU_FIR_1[26]
      *  ATS ECC CE on Effective Address array
      */
-    (rPAU_FIR_1, bit(26)) ? self_th_1;
+    (rPAU_FIR_1, bit(26)) ? defaultMaskedError;
 
     /** PAU_FIR_1[27]
      *  ATS ECC UE on TDRmem array (table-walk state machi
      */
-    (rPAU_FIR_1, bit(27)) ? self_th_1;
+    (rPAU_FIR_1, bit(27)) ? defaultMaskedError;
 
     /** PAU_FIR_1[28]
      *  ATS ECC CE on TDRmem array
      */
-    (rPAU_FIR_1, bit(28)) ? self_th_1;
+    (rPAU_FIR_1, bit(28)) ? defaultMaskedError;
 
     /** PAU_FIR_1[29]
      *  ATS ECC UE on CQ CTL DMA Read data to TDR_mem arra
      */
-    (rPAU_FIR_1, bit(29)) ? self_th_1;
+    (rPAU_FIR_1, bit(29)) ? defaultMaskedError;
 
     /** PAU_FIR_1[30]
      *  ATS ECC CE on CQ CTL DMA Read data to TDR_mem arra
      */
-    (rPAU_FIR_1, bit(30)) ? self_th_1;
+    (rPAU_FIR_1, bit(30)) ? defaultMaskedError;
 
     /** PAU_FIR_1[31]
      *  ATS Parity error on TVT entry
      */
-    (rPAU_FIR_1, bit(31)) ? self_th_1;
+    (rPAU_FIR_1, bit(31)) ? defaultMaskedError;
 
     /** PAU_FIR_1[32]
      *  ATS Parity error on IODA Address Register
      */
-    (rPAU_FIR_1, bit(32)) ? self_th_1;
+    (rPAU_FIR_1, bit(32)) ? defaultMaskedError;
 
     /** PAU_FIR_1[33]
      *  ATS Parity error on ATS Control Register
      */
-    (rPAU_FIR_1, bit(33)) ? self_th_1;
+    (rPAU_FIR_1, bit(33)) ? defaultMaskedError;
 
     /** PAU_FIR_1[34]
      *  ATS Parity error on ATS Timeout Control register
      */
-    (rPAU_FIR_1, bit(34)) ? self_th_1;
+    (rPAU_FIR_1, bit(34)) ? defaultMaskedError;
 
     /** PAU_FIR_1[35]
      *  ATS Invalid IODA Table Address Register Table Sele
      */
-    (rPAU_FIR_1, bit(35)) ? self_th_1;
+    (rPAU_FIR_1, bit(35)) ? defaultMaskedError;
 
     /** PAU_FIR_1[36]
-     *  Reserved
+     *  BAR secure SMS not secure
      */
-    (rPAU_FIR_1, bit(36)) ? defaultMaskedError;
+    (rPAU_FIR_1, bit(36)) ? level2_th_1;
 
     /** PAU_FIR_1[37]
      *  Kill xlate epoch timeout
@@ -694,7 +694,7 @@ group gPAU_FIR_1
     /** PAU_FIR_1[38]
      *  PEE secure SMF not secure
      */
-    (rPAU_FIR_1, bit(38)) ? defaultMaskedError;
+    (rPAU_FIR_1, bit(38)) ? level2_th_1;
 
     /** PAU_FIR_1[39]
      *  XSL in suspend mode when OTL sends cmd
@@ -704,7 +704,7 @@ group gPAU_FIR_1
     /** PAU_FIR_1[40]
      *  Unsupported page size
      */
-    (rPAU_FIR_1, bit(40)) ? self_th_1;
+    (rPAU_FIR_1, bit(40)) ? defaultMaskedError;
 
     /** PAU_FIR_1[41]
      *  Unexpected XLATE release
@@ -724,12 +724,12 @@ group gPAU_FIR_1
     /** PAU_FIR_1[44]
      *  XSL wrap parity error
      */
-    (rPAU_FIR_1, bit(44)) ? self_th_1;
+    (rPAU_FIR_1, bit(44)) ? defaultMaskedError;
 
     /** PAU_FIR_1[45]
      *  XSL invalid PE handled from AME
      */
-    (rPAU_FIR_1, bit(45)) ? self_th_1;
+    (rPAU_FIR_1, bit(45)) ? defaultMaskedError;
 
     /** PAU_FIR_1[46]
      *  Reserved
