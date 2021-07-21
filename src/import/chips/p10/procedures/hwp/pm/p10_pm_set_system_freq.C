@@ -100,6 +100,8 @@ fapi2::ReturnCode pm_set_frequency(
     uint16_t l_tmp_wofbase_freq = 0;
     uint16_t l_part_running_freq = 0;
 
+    bool     b_dd1_floor = false;
+
     fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ_OVERRIDE_Type l_sys_freq_core_floor_mhz_ovr;
     fapi2::ATTR_MRW_FREQ_SYSTEM_CORE_FLOOR_MHZ_Type l_mrw_freq_core_floor_mhz;
     fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ_Type l_sys_freq_core_floor_mhz = 0;
@@ -354,6 +356,10 @@ fapi2::ReturnCode pm_set_frequency(
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_CEILING_MHZ,
                         l_proc_target, l_ceil_freq_mhz));
 
+
+
+
+
             //Compute floor freq
             if (!l_tmp_psav_freq)
             {
@@ -381,7 +387,7 @@ fapi2::ReturnCode pm_set_frequency(
 
             // Limit to DD specific values only if all the CEIL overrides are non-zero
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_DD1_LIMITED_FREQUENCY,
-                        l_proc_target, l_limited_freq_mhz));
+                    l_proc_target, l_limited_freq_mhz));
             if (l_limited_freq_mhz &&
                     !l_sys_freq_core_ceil_mhz_ovr && !l_sys_freq_core_ceil_mhz && !l_ceil_freq_mhz)
             {
@@ -398,6 +404,11 @@ fapi2::ReturnCode pm_set_frequency(
             if (l_limited_freq_mhz && l_sys_freq_core_ceil_mhz < 2400)
             {
                 l_sys_freq_core_ceil_mhz = l_forced_ceil_freq_mhz;
+            }
+
+            if (l_limited_freq_mhz)
+            {
+                b_dd1_floor = true;
             }
 
 
@@ -510,12 +521,19 @@ fapi2::ReturnCode pm_set_frequency(
             l_floor_freq_mhz = l_computed_freq_mhz;
         }
 
-        // Adjust with MRW defined floor
+        // Adjust with MRW defined floor if not DD1
         if (l_mrw_freq_core_floor_mhz > l_floor_freq_mhz)
         {
-            l_floor_freq_mhz = l_mrw_freq_core_floor_mhz;
-            FAPI_INF("Setting the floor based on ATTR_MRW_FREQ_SYSTEM_CORE_FLOOR_MHZ:  %04d ",
-                    l_mrw_freq_core_floor_mhz);
+            if (b_dd1_floor)
+            {
+                FAPI_INF("Skipping use of ATTR_MRW_FREQ_SYSTEM_CORE_FLOOR_MHZ on DD1 systems");
+            }
+            else
+            {
+                l_floor_freq_mhz = l_mrw_freq_core_floor_mhz;
+                FAPI_INF("Setting the floor based on ATTR_MRW_FREQ_SYSTEM_CORE_FLOOR_MHZ:  %04d ",
+                        l_mrw_freq_core_floor_mhz);
+            }
         }
 
         // The floor override trumps everything
