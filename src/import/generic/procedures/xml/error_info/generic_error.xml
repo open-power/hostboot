@@ -747,26 +747,6 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_NO_VPD_FREQ_SUPPORT</rc>
-    <description>
-      VPD or SPD/EFD lookup did not return any supported frequencies.
-    </description>
-    <callout>
-      <childTargets>
-          <parent>PORT_TARGET</parent>
-          <childType>TARGET_TYPE_DIMM</childType>
-      </childTargets>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <childTargets>
-          <parent>PORT_TARGET</parent>
-          <childType>TARGET_TYPE_DIMM</childType>
-      </childTargets>
-    </deconfigure>
-  </hwpError>
-
-  <hwpError>
     <rc>RC_MSS_VOLT_WRONG_NUMBER_OF_VOLTAGES</rc>
     <description>Incorrect number of voltages supplied to set_voltage_attributes function</description>
     <ffdc>VOLT_TARGET</ffdc>
@@ -1242,13 +1222,6 @@
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-    <deconfigure>
-      <target>DIMM_TARGET</target>
-    </deconfigure>
-    <callout>
-      <target>DIMM_TARGET</target>
-      <priority>MEDIUM</priority>
-    </callout>
   </hwpError>
 
   <hwpError>
@@ -1290,6 +1263,13 @@
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>MEDIUM</priority>
     </callout>
   </hwpError>
 
