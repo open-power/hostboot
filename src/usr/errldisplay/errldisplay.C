@@ -196,7 +196,7 @@ void displayCalloutTarget (uint8_t * epRaw, size_t& o_size)
         }
     }
 
-    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Target                   : %s", ep_str);
+    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Target                     : %s", ep_str);
     free(tmp_str);
 }
 
@@ -268,13 +268,17 @@ void ErrLogDisplay::displayCallout (void *data, size_t size)
                 switch (callout->clockType)
                 {
 #define case_CLOCK_TYPE(_type) \
-case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Clock Type               : %s", #_type); break;
+case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Clock Type                 : %s", #_type); break;
                     case_CLOCK_TYPE(TODCLK_TYPE)
                     case_CLOCK_TYPE(MEMCLK_TYPE)
                     case_CLOCK_TYPE(OSCREFCLK_TYPE)
                     case_CLOCK_TYPE(OSCPCICLK_TYPE)
+                    case_CLOCK_TYPE(OSCREFCLK0_TYPE)
+                    case_CLOCK_TYPE(OSCREFCLK1_TYPE)
+                    case_CLOCK_TYPE(OSCPCICLK0_TYPE)
+                    case_CLOCK_TYPE(OSCPCICLK1_TYPE)
                     default:
-                        CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Clock Type               : UNKNOWN 0x%X",
+                        CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Clock Type                 : UNKNOWN 0x%X",
                                           callout->clockType);
                 } // switch clockType
 #undef case_CLOCK_TYPE
@@ -290,7 +294,8 @@ case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Clock Type       
                 switch (callout->partType)
                 {
 #define case_PART_TYPE(_type) \
-case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Part Type                : %s", #_type); break;
+case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Part Type                  : %s", #_type); break;
+                    case_PART_TYPE(NO_PART_TYPE)
                     case_PART_TYPE(FLASH_CONTROLLER_PART_TYPE)
                     case_PART_TYPE(PNOR_PART_TYPE)
                     case_PART_TYPE(SBE_SEEPROM_PART_TYPE)
@@ -298,11 +303,17 @@ case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Part Type        
                     case_PART_TYPE(LPC_SLAVE_PART_TYPE)
                     case_PART_TYPE(GPIO_EXPANDER_PART_TYPE)
                     case_PART_TYPE(SPIVID_SLAVE_PART_TYPE)
+                    case_PART_TYPE(TOD_CLOCK)
+                    case_PART_TYPE(MEM_REF_CLOCK)
+                    case_PART_TYPE(PROC_REF_CLOCK)
+                    case_PART_TYPE(PCI_REF_CLOCK)
+                    case_PART_TYPE(SMP_CABLE)
                     case_PART_TYPE(BPM_CABLE_PART_TYPE)
                     case_PART_TYPE(NV_CONTROLLER_PART_TYPE)
                     case_PART_TYPE(BPM_PART_TYPE)
+                    case_PART_TYPE(SPI_DUMP_PART_TYPE)
                     default:
-                        CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Part Type                : UNKNOWN 0x%X",
+                        CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Part Type                 : UNKNOWN 0x%X",
                                           callout->partType);
                 } // switch partType
 #undef case_PART_TYPE
@@ -318,7 +329,7 @@ case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Part Type        
                 switch (callout->busType)
                 {
 #define case_BUS_TYPE(_type) \
-case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Bus Type                 : %s", #_type); break;
+case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Bus Type                   : %s", #_type); break;
                     case_BUS_TYPE(FSI_BUS_TYPE)
                     case_BUS_TYPE(A_BUS_TYPE)
                     case_BUS_TYPE(X_BUS_TYPE)
@@ -327,7 +338,7 @@ case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Bus Type         
                     case_BUS_TYPE(O_BUS_TYPE)
                     case_BUS_TYPE(OMI_BUS_TYPE)
                     default:
-                        CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Bus Type                 : UNKNOWN 0x%X",
+                        CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Bus Type                   : UNKNOWN 0x%X",
                                           callout->busType);
                 } // switch partType
 #undef case_BUS_TYPE
@@ -338,8 +349,7 @@ case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Bus Type         
                 break;
 
             case HWAS::HW_CALLOUT:
-                CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Callout type             : Hardware Callout");
-
+                CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Callout type               : Hardware Callout");
                 displayGard = true;
                 l_gard = callout->gardErrorType;
                 displayDeconfig = true;
@@ -348,11 +358,11 @@ case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Bus Type         
                 break;
 
             case HWAS::PROCEDURE_CALLOUT:
-                CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Callout type             : Procedure Callout");
+                CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Callout type               : Procedure Callout");
                 switch (callout->procedure)
                 {
 #define case_PROCEDURE(_type) \
-case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Procedure                : %s", #_type); break;
+case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Procedure                  : %s", #_type); break;
                     case_PROCEDURE(EPUB_PRC_NONE)
                     case_PROCEDURE(EPUB_PRC_FIND_DECONFIGURED_PART)
                     case_PROCEDURE(EPUB_PRC_SP_CODE)
@@ -361,6 +371,7 @@ case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Procedure        
                     case_PROCEDURE(EPUB_PRC_ALL_MEMCRDS)
                     case_PROCEDURE(EPUB_PRC_INVALID_PART)
                     case_PROCEDURE(EPUB_PRC_LVL_SUPP)
+                    case_PROCEDURE(EPUB_PRC_SUE_PREVERROR)
                     case_PROCEDURE(EPUB_PRC_PROCPATH)
                     case_PROCEDURE(EPUB_PRC_NO_VPD_FOR_FRU)
                     case_PROCEDURE(EPUB_PRC_MEMORY_PLUGGING_ERROR)
@@ -377,8 +388,10 @@ case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Procedure        
                     case_PROCEDURE(EPUB_PRC_COOLING_SYSTEM_ERR)
                     case_PROCEDURE(EPUB_PRC_FW_VERIFICATION_ERR)
                     case_PROCEDURE(EPUB_PRC_GPU_ISOLATION_PROCEDURE)
+                    case_PROCEDURE(EPUB_PRC_NVDIMM_ERR)
+                    case_PROCEDURE(EPUB_PRC_SBE_CODE)
                     default:
-                        CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Procedure                : UNKNOWN: 0x%X",
+                        CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Procedure                  : UNKNOWN: 0x%X",
                                           callout->procedure);
                         break;
                 } // switch procedure
@@ -386,7 +399,8 @@ case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Procedure        
                 break;
 
               case HWAS::SENSOR_CALLOUT:
-                CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Sensor ID                   : 0x%x", callout->sensorId);
+                CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Callout type               : Sensor Callout");
+                CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Sensor ID                  : 0x%x", callout->sensorId);
 
                 switch (callout->sensorType)
                 {
@@ -404,7 +418,10 @@ case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Sensor Type      
                 break;
 
               case HWAS::I2C_DEVICE_CALLOUT:
-                CONSOLE::displayf(CONSOLE::DEFAULT, nullptr, "  Callout type             : I2C Device Callout");
+                CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Callout type               : I2C Device Callout");
+                CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Engine                     : 0x%.2x", callout->engine);
+                CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Port                       : 0x%.2x", callout->port );
+                CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  DevAddr                    : 0x%.2x", callout->address );
 
                 break;
 
@@ -412,7 +429,7 @@ case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Sensor Type      
                 // Assert at compile time if there is a new unhandled callout type added to the enum in hostboot
                 static_assert(HWAS::LAST_CALLOUT == HWAS::I2C_DEVICE_CALLOUT,
                               "New callout type needs to be handled in processCallout");
-                CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Callout type             : UNKNOWN: 0x%X",
+                CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Callout type               : UNKNOWN: 0x%X",
                                   callout->type);
                 break;
         }
@@ -438,12 +455,12 @@ case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Sensor Type      
             switch (l_deconfig)
             {
 #define case_DECONFIG_STATE(_type) \
-case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Deconfig State           : %s", #_type); break;
+case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Deconfig State             : %s", #_type); break;
                 case_DECONFIG_STATE(NO_DECONFIG)
                 case_DECONFIG_STATE(DECONFIG)
                 case_DECONFIG_STATE(DELAYED_DECONFIG)
                 default:
-                    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Deconfig State           : UNKNOWN: 0x%X",
+                    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Deconfig State             : UNKNOWN: 0x%X",
                                       l_deconfig);
                     break;
             } // switch deconfigState
@@ -455,7 +472,7 @@ case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Deconfig State   
             switch (l_gard)
             {
 #define case_GARD_ERROR_TYPE(_type) \
-case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  GARD Error Type          : %s", #_type); break;
+case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  GARD Error Type            : %s", #_type); break;
                 case_GARD_ERROR_TYPE(GARD_NULL)
                 case_GARD_ERROR_TYPE(GARD_User_Manual)
                 case_GARD_ERROR_TYPE(GARD_Unrecoverable)
@@ -466,7 +483,7 @@ case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  GARD Error Type  
                 case_GARD_ERROR_TYPE(GARD_Reconfig)
                 case_GARD_ERROR_TYPE(GARD_Void)
                 default:
-                    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  GARD Error Type          : UNKNOWN: 0x%X",
+                    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  GARD Error Type            : UNKNOWN: 0x%X",
                                       l_gard);
                     break;
             } // switch gardState
@@ -476,7 +493,7 @@ case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  GARD Error Type  
         switch (callout->priority)
         {
 #define case_PRIORITY(_type) \
-case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Priority                 : %s", #_type); break;
+case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Priority                   : %s", #_type); break;
             case_PRIORITY(SRCI_PRIORITY_NONE)
             case_PRIORITY(SRCI_PRIORITY_LOW)
             case_PRIORITY(SRCI_PRIORITY_MEDC)
@@ -485,7 +502,7 @@ case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Priority         
             case_PRIORITY(SRCI_PRIORITY_MED)
             case_PRIORITY(SRCI_PRIORITY_HIGH)
             default:
-                CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Priority                 : UNKNOWN: 0x%X",
+                CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Priority                   : UNKNOWN: 0x%X",
                                   callout->priority);
                 break;
         } // switch priority
