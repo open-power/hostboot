@@ -43,6 +43,11 @@
 #include <lib/omi/crc32.H>
 #include <mmio_access.H>
 
+#ifndef __HOSTBOOT_MODULE
+    // Included for progress / time left reporting (Cronus only)
+    #include <ctime>
+#endif
+
 namespace mss
 {
 namespace exp
@@ -358,6 +363,15 @@ extern "C"
         FAPI_INF("Entering exp_fw_update(%s). imageSize[0x%08x]",
                  mss::c_str(i_target), i_image_sz);
 
+#ifndef __HOSTBOOT_MODULE
+        constexpr uint64_t SECONDS_PER_MINUTE = 60;
+        constexpr uint64_t MINUTES_PER_HOUR   = 60;
+
+        uint32_t l_progress_pct = 0;
+        // Passing in a nullptr gets us the current time
+        const auto l_start_time = time(nullptr);
+#endif
+
         //Check that i_image_sz value is not larger than 3 bytes, which
         //is the actual field size for this value in the packet.
         FAPI_ASSERT(((i_image_sz & 0xff000000) == 0),
@@ -459,6 +473,28 @@ extern "C"
 
             //increment sequence number after each 256 byte block is written
             seq_num++;
+
+#ifndef __HOSTBOOT_MODULE
+            {
+                // Report progress at 1% intervals (only in Cronus)
+                uint32_t l_new_progress_pct = 100 * (i_image_sz - bytes_left) / i_image_sz;
+
+                const auto l_current_time = time(nullptr);
+                const auto l_elapsed_time = difftime(l_current_time, l_start_time);
+                const uint32_t l_predicted_total_time = 100 * l_elapsed_time /
+                                                        ((l_new_progress_pct < 1) ? 1 : l_new_progress_pct);
+                const auto l_remaining_time = static_cast<uint64_t>(l_predicted_total_time - l_elapsed_time);
+                const auto l_remaining_minutes = (l_remaining_time / SECONDS_PER_MINUTE) % MINUTES_PER_HOUR;
+
+                if (l_progress_pct != l_new_progress_pct)
+                {
+                    FAPI_INF("%s FW upload progress: %d%% (about %d minutes remaining)",
+                             mss::c_str(i_target), l_new_progress_pct, l_remaining_minutes);
+                }
+
+                l_progress_pct = l_new_progress_pct;
+            }
+#endif
         }
 
         host_fw_command_struct flash_commit_cmd;
