@@ -14842,6 +14842,1065 @@
     </attribute>
 </targetInstance>
 
+<!-- ===================================================================== -->
+<!-- MDS Units -->
+<!-- One per OCMB; 16 per P10 -->
+<!-- ===================================================================== -->
+<targetInstance>
+    <id>sys0node0mds0</id>
+    <type>mds_ctlr</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/mds_ctlr-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>mds:k0:n0:s0:p0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00560000</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/mds_ctlr-0</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0mds1</id>
+    <type>mds_ctlr</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/mds_ctlr-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>mds:k0:n0:s0:p01</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00560001</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/mds_ctlr-1</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0mds2</id>
+    <type>mds_ctlr</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/mds_ctlr-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>mds:k0:n0:s0:p02</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00560002</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/mds_ctlr-2</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>2</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0mds3</id>
+    <type>mds_ctlr</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/mds_ctlr-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>mds:k0:n0:s0:p03</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00560003</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/mds_ctlr-3</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>3</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0mds4</id>
+    <type>mds_ctlr</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/mds_ctlr-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>mds:k0:n0:s0:p04</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>4</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00560004</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>4</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/mds_ctlr-4</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>4</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0mds5</id>
+    <type>mds_ctlr</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/mds_ctlr-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>mds:k0:n0:s0:p05</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>5</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00560005</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>5</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/mds_ctlr-5</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>5</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0mds6</id>
+    <type>mds_ctlr</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/mds_ctlr-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>mds:k0:n0:s0:p06</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>6</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00560006</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>6</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/mds_ctlr-6</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>6</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0mds7</id>
+    <type>mds_ctlr</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/mds_ctlr-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>mds:k0:n0:s0:p07</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>7</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00560007</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>7</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/mds_ctlr-7</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>7</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0mds8</id>
+    <type>mds_ctlr</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/mds_ctlr-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>mds:k0:n0:s0:p08</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>8</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00560008</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>8</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/mds_ctlr-8</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>8</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0mds9</id>
+    <type>mds_ctlr</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-2/mi-0/mcc-0/omi-1/ocmb_chip-0/mds_ctlr-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>mds:k0:n0:s0:p09</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>9</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00560009</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>9</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/mds_ctlr-9</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>9</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0mds10</id>
+    <type>mds_ctlr</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-2/mi-0/mcc-1/omi-0/ocmb_chip-0/mds_ctlr-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>mds:k0:n0:s0:p10</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>10</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0056000a</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>10</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/mds_ctlr-10</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>10</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0mds11</id>
+    <type>mds_ctlr</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-2/mi-0/mcc-1/omi-1/ocmb_chip-0/mds_ctlr-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>mds:k0:n0:s0:p11</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>11</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0056000b</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>11</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/mds_ctlr-11</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>11</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0mds12</id>
+    <type>mds_ctlr</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-3/mi-0/mcc-0/omi-0/ocmb_chip-0/mds_ctlr-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>mds:k0:n0:s0:p12</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>12</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0056000c</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>12</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/mds_ctlr-12</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>12</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0mds13</id>
+    <type>mds_ctlr</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-3/mi-0/mcc-0/omi-1/ocmb_chip-0/mds_ctlr-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>mds:k0:n0:s0:p13</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>13</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0056000d</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>13</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/mds_ctlr-13</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>13</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0mds14</id>
+    <type>mds_ctlr</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-3/mi-0/mcc-1/omi-0/ocmb_chip-0/mds_ctlr-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>mds:k0:n0:s0:p14</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>14</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0056000e</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>14</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/mds_ctlr-14</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>14</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0mds15</id>
+    <type>mds_ctlr</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-3/mi-0/mcc-1/omi-1/ocmb_chip-0/mds_ctlr-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>mds:k0:n0:s0:p15</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>15</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0056000f</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>15</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/mds_ctlr-15</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>15</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0mds16</id>
+    <type>mds_ctlr</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/mds_ctlr-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>mds:k0:n0:s0:p16</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>16</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00560010</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>16</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/mds_ctlr-16</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>16</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0mds17</id>
+    <type>mds_ctlr</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/mds_ctlr-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>mds:k0:n0:s0:p17</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>17</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00560011</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>17</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/mds_ctlr-17</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>17</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0mds18</id>
+    <type>mds_ctlr</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/mds_ctlr-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>mds:k0:n0:s0:p18</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>18</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00560012</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>18</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/mds_ctlr-18</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>18</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0mds19</id>
+    <type>mds_ctlr</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/mds_ctlr-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>mds:k0:n0:s0:p19</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>19</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00560013</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>19</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/mds_ctlr-19</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>19</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0mds20</id>
+    <type>mds_ctlr</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/mds_ctlr-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>mds:k0:n0:s0:p20</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>20</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00560014</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>20</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/mds_ctlr-20</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>20</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0mds21</id>
+    <type>mds_ctlr</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/mds_ctlr-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>mds:k0:n0:s0:p21</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>21</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00560015</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>21</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/mds_ctlr-21</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>21</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0mds22</id>
+    <type>mds_ctlr</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/mds_ctlr-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>mds:k0:n0:s0:p22</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>22</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00560016</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>22</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/mds_ctlr-22</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>22</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0mds23</id>
+    <type>mds_ctlr</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/mds_ctlr-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>mds:k0:n0:s0:p23</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>23</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00560017</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>23</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/mds_ctlr-23</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>23</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0mds24</id>
+    <type>mds_ctlr</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/mds_ctlr-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>mds:k0:n0:s0:p24</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>24</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00560018</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>24</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/mds_ctlr-24</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>24</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0mds25</id>
+    <type>mds_ctlr</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-0/omi-1/ocmb_chip-0/mds_ctlr-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>mds:k0:n0:s0:p25</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>25</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00560019</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>25</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/mds_ctlr-25</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>25</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0mds26</id>
+    <type>mds_ctlr</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-1/omi-0/ocmb_chip-0/mds_ctlr-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>mds:k0:n0:s0:p26</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>26</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0056001a</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>26</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/mds_ctlr-26</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>26</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0mds27</id>
+    <type>mds_ctlr</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-1/omi-1/ocmb_chip-0/mds_ctlr-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>mds:k0:n0:s0:p27</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>27</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0056001b</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>27</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/mds_ctlr-27</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>27</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0mds28</id>
+    <type>mds_ctlr</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-3/mi-0/mcc-0/omi-0/ocmb_chip-0/mds_ctlr-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>mds:k0:n0:s0:p28</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>28</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0056001c</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>28</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/mds_ctlr-28</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>28</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0mds29</id>
+    <type>mds_ctlr</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-3/mi-0/mcc-0/omi-1/ocmb_chip-0/mds_ctlr-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>mds:k0:n0:s0:p29</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>29</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0056001d</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>29</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/mds_ctlr-29</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>29</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0mds30</id>
+    <type>mds_ctlr</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-3/mi-0/mcc-1/omi-0/ocmb_chip-0/mds_ctlr-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>mds:k0:n0:s0:p30</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>30</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0056001e</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>30</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/mds_ctlr-30</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>30</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0mds31</id>
+    <type>mds_ctlr</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-3/mi-0/mcc-1/omi-1/ocmb_chip-0/mds_ctlr-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>mds:k0:n0:s0:p31</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>31</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0056001f</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>31</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/mds_ctlr-31</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>31</default>
+    </attribute>
+</targetInstance>
 
 <!-- ===================================================================== -->
 <!-- PMIC Units -->

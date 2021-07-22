@@ -1888,6 +1888,23 @@
       <default>0x00000033</default>
     </attribute>
     <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
+    </attribute>
+    <attribute>
       <id>POSITION</id>
     </attribute>
     <attribute>
