@@ -3168,12 +3168,30 @@ void DeconfigGard::processDeferredDeconfig()
     // get all deconfigure records, process them, and delete them.
     HWAS_MUTEX_LOCK(iv_mutex);
 
+#if (defined(__HOSTBOOT_MODULE) && defined(CONFIG_FSP_BUILD))
+    // grab the bootproc target to use below
+    TARGETING::Target* l_masterProc = nullptr;
+    TARGETING::targetService().masterProcChipTargetHandle(l_masterProc);
+#endif
+
     for (DeconfigureRecordsItr_t l_itr = iv_deconfigureRecords.begin();
             l_itr != iv_deconfigureRecords.end();
             ++l_itr)
     {
-        // do the deconfigure
         DeconfigureRecord l_record = *l_itr;
+
+#if (defined(__HOSTBOOT_MODULE) && defined(CONFIG_FSP_BUILD))
+        // On FSP boxes we need to avoid deconfiguring the boot
+        // processor because it will break the FSP's ability to
+        // analyze our TI.
+        if( (l_record.iv_target) == l_masterProc )
+        {
+            continue;
+            //Note - shutdown was already triggered in platHandleHWCallout
+        }
+#endif
+
+        // do the deconfigure
         _deconfigureTarget(const_cast<Target &> (*(l_record.iv_target)),
                 l_record.iv_errlogEid);
         _deconfigureByAssoc(const_cast<Target &> (*(l_record.iv_target)),

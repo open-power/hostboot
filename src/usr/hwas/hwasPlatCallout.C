@@ -79,6 +79,21 @@ errlHndl_t platHandleHWCallout(
     HWAS_INF("HW callout; pTarget %p gardErrorType %x deconfigState %x",
             i_pTarget, i_gardErrorType, i_deconfigState);
 
+    // grab the bootproc target to use below
+    TARGETING::Target* l_masterProc = nullptr;
+    TARGETING::targetService().masterProcChipTargetHandle(l_masterProc);
+
+    // On FSP boxes we need to avoid deconfiguring the boot
+    // processor because it will break the FSP's ability to
+    // analyze our TI.
+    bool l_skipDeconfig = false;
+#ifdef CONFIG_FSP_BUILD
+    if( i_pTarget == l_masterProc )
+    {
+        l_skipDeconfig = true;
+    }
+#endif //#ifdef CONFIG_FSP_BUILD
+
     if (hwasPLDDetection())
     {
         HWAS_INF("hwasPLDDetection return true - skipping callouts");
@@ -121,9 +136,17 @@ errlHndl_t platHandleHWCallout(
             }
             case (DECONFIG):
             {
-                // call HWAS common function
-                errl = HWAS::theDeconfigGard().deconfigureTarget(*i_pTarget,
+                if( l_skipDeconfig )
+                {
+                    HWAS_ERR("Skipping boot proc deconfig - Shutdown due to plid 0x%X",
+                             io_errl->eid());
+                }
+                else
+                {
+                    // call HWAS common function
+                    errl = HWAS::theDeconfigGard().deconfigureTarget(*i_pTarget,
                             io_errl->eid());
+                }
 
 #ifdef CONFIG_RECALL_DECONFIG_ON_RECONFIG
                 //Always force a gard record on deconfig.  If already
@@ -155,14 +178,15 @@ errlHndl_t platHandleHWCallout(
         // check to see if this target is the master processor
         //  and if it's being deconfigured.
         //  NOTE: will be non-functional early in IPL before discovery complete.
-        TARGETING::Target *l_masterProc;
-        TARGETING::targetService().masterProcChipTargetHandle(l_masterProc);
         if ( (i_pTarget == l_masterProc) &&
              (NO_DECONFIG != i_deconfigState) )
         {
             const TARGETING::HwasState hwasState =
                     l_masterProc->getAttr<TARGETING::ATTR_HWAS_STATE>();
-            if (!hwasState.functional)
+            // we either deconfigured the proc or we should have but
+            // explicitly decided not too, either way we need to kill
+            // the boot
+            if (!hwasState.functional || l_skipDeconfig)
             {
                 HWAS_ERR("master proc deconfigured - Shutdown due to plid 0x%X",
                         io_errl->eid());
