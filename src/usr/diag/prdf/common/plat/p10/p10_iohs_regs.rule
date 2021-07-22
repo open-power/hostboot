@@ -39,48 +39,20 @@
     {
         name        "P10 IOHS DLP PHY Config Register";
         scomaddr    0x1801100C;
-        capture     group default;
+        capture     group smp_ffdc;
+    };
+
+    register IOHS_DLP_OPTICAL_CONFIG
+    {
+        name        "P10 IOHS DLP Optical Config Register";
+        scomaddr    0x1801100F;
+        capture     group smp_ffdc;
     };
 
     register IOHS_DLP_LINK0_TX_LANE_CONTROL
     {
         name        "P10 IOHS DLP LINK0 TRANSMIT LANE CONTROL";
         scomaddr    0x18011010;
-        capture     group smp_ffdc_l0;
-    };
-
-    register IOHS_DLP_LINK0_RX_LANE_CONTROL
-    {
-        name        "P10 IOHS DLP LINK0 RECEIVE LANE CONTROL";
-        scomaddr    0x18011012;
-        capture     group smp_ffdc_l0;
-    };
-
-    register IOHS_DLP_LINK0_INFO_REG
-    {
-        name        "P10 IOHS DLP LINK0 INFORMATION REG";
-        scomaddr    0x18011014;
-        capture     group smp_ffdc_l0;
-    };
-
-    register IOHS_DLP_LINK0_ERROR_STATUS
-    {
-        name        "P10 IOHS DLP LINK0 ERROR STATUS";
-        scomaddr    0x18011016;
-        capture     group smp_ffdc_l0;
-    };
-
-    register IOHS_DLP_LINK0_SYN_CAPTURE
-    {
-        name        "P10 IOHS DLP LINK0 SYNDROME CAPTURE";
-        scomaddr    0x18011022;
-        capture     group smp_ffdc_l0;
-    };
-
-    register IOHS_DLP_LINK0_QUALITY
-    {
-        name        "P10 IOHS DLP LINK0 Quality Status Register";
-        scomaddr    0x18011026;
         capture     group smp_ffdc_l0;
     };
 
@@ -91,11 +63,25 @@
         capture     group smp_ffdc_l1;
     };
 
+    register IOHS_DLP_LINK0_RX_LANE_CONTROL
+    {
+        name        "P10 IOHS DLP LINK0 RECEIVE LANE CONTROL";
+        scomaddr    0x18011012;
+        capture     group smp_ffdc_l0;
+    };
+
     register IOHS_DLP_LINK1_RX_LANE_CONTROL
     {
         name        "P10 IOHS DLP LINK1 RECEIVE LANE CONTROL";
         scomaddr    0x18011013;
         capture     group smp_ffdc_l1;
+    };
+
+    register IOHS_DLP_LINK0_INFO_REG
+    {
+        name        "P10 IOHS DLP LINK0 INFORMATION REG";
+        scomaddr    0x18011014;
+        capture     group smp_ffdc_l0;
     };
 
     register IOHS_DLP_LINK1_INFO
@@ -105,24 +91,17 @@
         capture     group smp_ffdc_l1;
     };
 
+    register IOHS_DLP_LINK0_ERROR_STATUS
+    {
+        name        "P10 IOHS DLP LINK0 ERROR STATUS";
+        scomaddr    0x18011016;
+        capture     group smp_ffdc_l0;
+    };
+
     register IOHS_DLP_LINK1_ERROR_STATUS
     {
         name        "P10 IOHS DLP LINK1 ERROR STATUS";
         scomaddr    0x18011017;
-        capture     group smp_ffdc_l1;
-    };
-
-    register IOHS_DLP_LINK1_SYN_CAPTURE
-    {
-        name        "P10 IOHS DLP LINK1 SYNDROME CAPTURE";
-        scomaddr    0x18011023;
-        capture     group smp_ffdc_l1;
-    };
-
-    register IOHS_DLP_LINK1_QUALITY
-    {
-        name        "P10 IOHS DLP LINK1 Quality Status Register";
-        scomaddr    0x18011026;
         capture     group smp_ffdc_l1;
     };
 
@@ -137,6 +116,55 @@
     {
         name        "P10 IOHS DLP SL ECC THRESHOLD";
         scomaddr    0x18011019;
+        capture     group smp_ffdc;
+    };
+
+    register IOHS_DLP_LINK0_SYN_CAPTURE
+    {
+        name        "P10 IOHS DLP LINK0 SYNDROME CAPTURE";
+        scomaddr    0x18011022;
+        capture     group smp_ffdc_l0;
+    };
+
+    register IOHS_DLP_LINK1_SYN_CAPTURE
+    {
+        name        "P10 IOHS DLP LINK1 SYNDROME CAPTURE";
+        scomaddr    0x18011023;
+        capture     group smp_ffdc_l1;
+    };
+
+    register IOHS_DLP_LINK0_EDPL_STATUS
+    {
+        name        "P10 IOHS DLP LINK0 EDPL Status Register";
+        scomaddr    0x18011024;
+        capture     group smp_ffdc_l0;
+    };
+
+    register IOHS_DLP_LINK1_EDPL_STATUS
+    {
+        name        "P10 IOHS DLP LINK1 EDPL Status Register";
+        scomaddr    0x18011025;
+        capture     group smp_ffdc_l1;
+    };
+
+    register IOHS_DLP_LINK0_QUALITY
+    {
+        name        "P10 IOHS DLP LINK0 Quality Status Register";
+        scomaddr    0x18011026;
+        capture     group smp_ffdc_l0;
+    };
+
+    register IOHS_DLP_LINK1_QUALITY
+    {
+        name        "P10 IOHS DLP LINK1 Quality Status Register";
+        scomaddr    0x18011027;
+        capture     group smp_ffdc_l1;
+    };
+
+    register IOHS_DLP_DLL_STATUS
+    {
+        name        "P10 IOHS DLP PLL Status Register";
+        scomaddr    0x18011028;
         capture     group smp_ffdc;
     };
 
