@@ -57,6 +57,8 @@ using namespace TARGETING;
 using namespace PLDM;
 using namespace ERRORLOG;
 
+#define DEFAULT_ENITTY_ID 0xFFFF
+
 namespace
 {
 
@@ -85,6 +87,7 @@ void addEntityAssociationAndFruRecordSetPdrs(PdrManager& io_pdrman, const termin
     const auto backplane_node
         = pldm_entity_association_tree_add(enttree.get(),
                                            &backplane_entity,
+					   DEFAULT_ENITTY_ID,
                                            nullptr, // means "no parent" i.e. root
                                            PLDM_ENTITY_ASSOCIAION_PHYSICAL);
 
@@ -122,6 +125,7 @@ void addEntityAssociationAndFruRecordSetPdrs(PdrManager& io_pdrman, const termin
             // to PDRs and stored in the repo at the end of this function)
             pldm_entity_association_tree_add(enttree.get(),
                                              &pldmEntity,
+					     DEFAULT_ENITTY_ID,
                                              backplane_node,
                                              PLDM_ENTITY_ASSOCIAION_PHYSICAL);
 

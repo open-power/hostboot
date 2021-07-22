@@ -50,9 +50,30 @@ static void add_record(pldm_pdr *repo, pldm_pdr_record *record)
 
 static inline uint32_t get_new_record_handle(const pldm_pdr *repo)
 {
+	static const uint32_t HB_PDR_OFFSET = 0x01000000;
+	static uint32_t current_hb_handle = HB_PDR_OFFSET;
 	assert(repo != NULL);
-	uint32_t last_used_hdl =
-	    repo->last != NULL ? repo->last->record_handle : 0;
+	uint32_t last_used_hdl = 0;
+	if(repo->last != NULL)
+	{
+		if(repo->last->record_handle >= HB_PDR_OFFSET) // It's an HB PDR
+		{
+			last_used_hdl = repo->last->record_handle;
+			current_hb_handle = last_used_hdl + 1;
+		}
+		else // It's a BMC PDR
+		{
+			// We don't want to continue counting from the BMC PDR's
+			// handle, nor do we want to restart, so continue where
+			// we left off.
+			last_used_hdl = current_hb_handle++;
+		}
+	}
+	else
+	{
+		last_used_hdl = HB_PDR_OFFSET;
+		current_hb_handle = last_used_hdl + 1;
+	}
 	assert(last_used_hdl != UINT32_MAX);
 
 	return last_used_hdl + 1;
