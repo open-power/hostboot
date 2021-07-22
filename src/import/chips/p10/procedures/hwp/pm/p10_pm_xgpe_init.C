@@ -535,6 +535,8 @@ fapi2::ReturnCode p10_pm_iodlr_static_config(
 #ifndef __PPE__
     fapi2::ReturnCode l_rc;
     FAPI_IMP(">>> p10_pm_iodlr_static_config");
+    fapi2::ATTR_IS_MPIPL_Type l_mpipl;
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>      FAPI_SYSTEM;
 
     do
     {
@@ -549,15 +551,17 @@ fapi2::ReturnCode p10_pm_iodlr_static_config(
         }
 
 #endif
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_MPIPL, FAPI_SYSTEM, l_mpipl));
         fapi2::ATTR_CHIP_EC_FEATURE_WOF_STATIC_IO_POWER_Type l_wof_io_state;
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_WOF_STATIC_IO_POWER,
                                i_target, l_wof_io_state),
                  "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_WOF_STATIC_IO_POWER)");
 
-        if (!l_wof_io_state)
+        if (!l_wof_io_state ||
+            l_mpipl)
         {
-            FAPI_INF("We skip io powr computation for DD1");
+            FAPI_INF("We skip io powr computation for DD1/MPIPL");
             break;
         }
 
@@ -631,7 +635,7 @@ fapi2::ReturnCode pec_iodlr_static_config(
                       "Error getting fapi2::ATTR_CHIP_UNIT_POS");
 
 
-            for (const auto l_phb_target : l_pec_target.getChildren<fapi2::TARGET_TYPE_PHB>(fapi2::TARGET_STATE_PRESENT))
+            for (const auto l_phb_target : l_pec_target.getChildren<fapi2::TARGET_TYPE_PHB>(fapi2::TARGET_STATE_FUNCTIONAL))
             {
                 FAPI_TRY(getScom(l_phb_target, g_pcie_pasr_reg[0], l_data64));
 
