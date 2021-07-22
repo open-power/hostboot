@@ -6,6 +6,7 @@
 #include "libpldmresponder/oem_handler.hpp"
 #include "libpldmresponder/pdr_utils.hpp"
 #include "libpldmresponder/platform.hpp"
+#include "requester/handler.hpp"
 
 namespace pldm
 {
@@ -51,10 +52,11 @@ class Handler : public oem_platform::Handler
   public:
     Handler(const pldm::utils::DBusHandler* dBusIntf,
             pldm::responder::CodeUpdate* codeUpdate, int mctp_fd,
-            uint8_t mctp_eid, Requester& requester, sdeventplus::Event& event) :
+            uint8_t mctp_eid, Requester& requester, sdeventplus::Event& event,
+            pldm::requester::Handler<pldm::requester::Request>* handler) :
         oem_platform::Handler(dBusIntf),
         codeUpdate(codeUpdate), platformHandler(nullptr), mctp_fd(mctp_fd),
-        mctp_eid(mctp_eid), requester(requester), event(event)
+        mctp_eid(mctp_eid), requester(requester), event(event), handler(handler)
     {
         codeUpdate->setVersions();
     }
@@ -116,9 +118,10 @@ class Handler : public oem_platform::Handler
 
     /** @brief Method to send encoded request msg of code update event to host
      *  @param[in] requestMsg - encoded request msg
+     *  @param[in] instanceId - instance id of the message
      *  @return PLDM status code
      */
-    int sendEventToHost(std::vector<uint8_t>& requestMsg);
+    int sendEventToHost(std::vector<uint8_t>& requestMsg, uint8_t instanceId);
 
     /** @brief _processEndUpdate processes the actual work that needs
      *  to be carried out after EndUpdate effecter is set. This is done async
@@ -170,6 +173,9 @@ class Handler : public oem_platform::Handler
   private:
     /** @brief D-Bus property changed signal match for CurrentPowerState*/
     std::unique_ptr<sdbusplus::bus::match::match> chassisOffMatch;
+
+    /** @brief PLDM request handler */
+    pldm::requester::Handler<pldm::requester::Request>* handler;
 };
 
 /** @brief Method to encode code update event msg

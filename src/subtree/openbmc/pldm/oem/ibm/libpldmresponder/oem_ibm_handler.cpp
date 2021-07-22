@@ -291,10 +291,8 @@ void pldm::responder::oem_ibm_platform::Handler::setPlatformHandler(
 }
 
 int pldm::responder::oem_ibm_platform::Handler::sendEventToHost(
-    std::vector<uint8_t>& requestMsg)
+    std::vector<uint8_t>& requestMsg, uint8_t instanceId)
 {
-    uint8_t* responseMsg = nullptr;
-    size_t responseMsgSize{};
     if (requestMsg.size())
     {
         std::ostringstream tempStream;
@@ -305,33 +303,29 @@ int pldm::responder::oem_ibm_platform::Handler::sendEventToHost(
         }
         std::cout << tempStream.str() << std::endl;
     }
-
-    auto requesterRc =
-        pldm_send_recv(mctp_eid, mctp_fd, requestMsg.data(), requestMsg.size(),
-                       &responseMsg, &responseMsgSize);
-    std::unique_ptr<uint8_t, decltype(std::free)*> responseMsgPtr{responseMsg,
-                                                                  std::free};
-    if (requesterRc != PLDM_REQUESTER_SUCCESS)
+    auto oemPlatformEventMessageResponseHandler =
+        [](mctp_eid_t /*eid*/, const pldm_msg* response, size_t respMsgLen) {
+            uint8_t completionCode{};
+            uint8_t status{};
+            auto rc = decode_platform_event_message_resp(
+                response, respMsgLen, &completionCode, &status);
+            if (rc || completionCode)
+            {
+                std::cerr << "Failed to decode_platform_event_message_resp: "
+                          << " for code update event rc=" << rc
+                          << ", cc=" << static_cast<unsigned>(completionCode)
+                          << std::endl;
+            }
+        };
+    auto rc = handler->registerRequest(
+        mctp_eid, instanceId, PLDM_PLATFORM, PLDM_PLATFORM_EVENT_MESSAGE,
+        std::move(requestMsg),
+        std::move(oemPlatformEventMessageResponseHandler));
+    if (rc)
     {
-        std::cerr << "Failed to send message/receive response. RC = "
-                  << requesterRc << ", errno = " << errno
-                  << "for sending event to host \n";
-        return requesterRc;
+        std::cerr << "Failed to send BIOS attribute change event message \n";
     }
-    uint8_t completionCode{};
-    uint8_t status{};
-    auto responsePtr = reinterpret_cast<struct pldm_msg*>(responseMsgPtr.get());
-    auto rc = decode_platform_event_message_resp(
-        responsePtr, responseMsgSize - sizeof(pldm_msg_hdr), &completionCode,
-        &status);
 
-    if (rc != PLDM_SUCCESS || completionCode != PLDM_SUCCESS)
-    {
-        std::cerr << "Failure in decode platform event message response, rc= "
-                  << rc << " cc=" << static_cast<unsigned>(completionCode)
-                  << "\n";
-        return rc;
-    }
     return rc;
 }
 
@@ -376,15 +370,15 @@ void pldm::responder::oem_ibm_platform::Handler::sendStateSensorEvent(
     {
         std::cerr << "Failed to encode state sensor event, rc = " << rc
                   << std::endl;
+        requester.markFree(mctp_eid, instanceId);
         return;
     }
-    rc = sendEventToHost(requestMsg);
+    rc = sendEventToHost(requestMsg, instanceId);
     if (rc != PLDM_SUCCESS)
     {
         std::cerr << "Failed to send event to host: "
                   << "rc=" << rc << std::endl;
     }
-    requester.markFree(mctp_eid, instanceId);
     return;
 }
 

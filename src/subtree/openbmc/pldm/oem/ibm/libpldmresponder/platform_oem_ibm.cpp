@@ -15,9 +15,10 @@ namespace responder
 namespace platform
 {
 
-int sendBiosAttributeUpdateEvent(int fd, uint8_t eid,
-                                 dbus_api::Requester* requester,
-                                 const std::vector<uint16_t>& handles)
+int sendBiosAttributeUpdateEvent(
+    uint8_t eid, dbus_api::Requester* requester,
+    const std::vector<uint16_t>& handles,
+    pldm::requester::Handler<pldm::requester::Request>* handler)
 {
     constexpr auto hostStatePath = "/xyz/openbmc_project/state/host0";
     constexpr auto hostStateInterface =
@@ -77,46 +78,36 @@ int sendBiosAttributeUpdateEvent(int fd, uint8_t eid,
         std::cout << tempStream.str() << std::endl;
     }
 
-    uint8_t* responseMsg = nullptr;
-    size_t responseMsgSize{};
-
-    rc = pldm_send_recv(eid, fd, requestMsg.data(), requestMsg.size(),
-                        &responseMsg, &responseMsgSize);
-    std::unique_ptr<uint8_t, decltype(std::free)*> responseMsgPtr{responseMsg,
-                                                                  std::free};
-    requester->markFree(eid, instanceId);
-
-    if (rc != PLDM_REQUESTER_SUCCESS)
+    auto platformEventMessageResponseHandler = [](mctp_eid_t /*eid*/,
+                                                  const pldm_msg* response,
+                                                  size_t respMsgLen) {
+        if (response == nullptr || !respMsgLen)
+        {
+            std::cerr
+                << "Failed to receive response for platform event message \n";
+            return;
+        }
+        uint8_t completionCode{};
+        uint8_t status{};
+        auto rc = decode_platform_event_message_resp(response, respMsgLen,
+                                                     &completionCode, &status);
+        if (rc || completionCode)
+        {
+            std::cerr << "Failed to decode_platform_event_message_resp: "
+                      << "rc=" << rc
+                      << ", cc=" << static_cast<unsigned>(completionCode)
+                      << std::endl;
+        }
+    };
+    rc = handler->registerRequest(
+        eid, instanceId, PLDM_PLATFORM, PLDM_PLATFORM_EVENT_MESSAGE,
+        std::move(requestMsg), std::move(platformEventMessageResponseHandler));
+    if (rc)
     {
-        std::cerr << "Failed to send BIOS attribute update event. RC = " << rc
-                  << ", errno = " << errno << "\n";
-        pldm::utils::reportError(
-            "xyz.openbmc_project.bmc.pldm.InternalFailure");
-        return rc;
+        std::cerr << "Failed to send the platform event message \n";
     }
 
-    auto responsePtr = reinterpret_cast<struct pldm_msg*>(responseMsgPtr.get());
-    uint8_t completionCode{};
-    uint8_t status{};
-    rc = decode_platform_event_message_resp(
-        responsePtr, responseMsgSize - sizeof(pldm_msg_hdr), &completionCode,
-        &status);
-    if (rc != PLDM_SUCCESS)
-    {
-        std::cerr << "Failed to decode PlatformEventMessage response, rc = "
-                  << rc << "\n";
-        return rc;
-    }
-
-    if (completionCode != PLDM_SUCCESS)
-    {
-        std::cerr << "Failed to send the BIOS attribute update event, rc = "
-                  << (uint32_t)completionCode << "\n";
-        pldm::utils::reportError(
-            "xyz.openbmc_project.bmc.pldm.InternalFailure");
-    }
-
-    return completionCode;
+    return rc;
 }
 
 } // namespace platform

@@ -5,7 +5,9 @@
 
 #include <xyz/openbmc_project/Common/error.hpp>
 
+#include <algorithm>
 #include <array>
+#include <cctype>
 #include <ctime>
 #include <fstream>
 #include <iostream>
@@ -501,6 +503,19 @@ void printBuffer(const std::vector<uint8_t>& buffer, bool pldmVerbose)
         }
         std::cout << tempStream.str() << std::endl;
     }
+}
+
+std::string toString(const struct variable_field& var)
+{
+    if (var.ptr == nullptr || !var.length)
+    {
+        return "";
+    }
+
+    std::string str(reinterpret_cast<const char*>(var.ptr), var.length);
+    std::replace_if(
+        str.begin(), str.end(), [](const char& c) { return !isprint(c); }, ' ');
+    return str;
 }
 
 } // namespace utils

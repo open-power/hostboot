@@ -10,6 +10,9 @@
 namespace pldm
 {
 
+using Request = std::vector<uint8_t>;
+using Response = std::vector<uint8_t>;
+
 namespace dbus
 {
 

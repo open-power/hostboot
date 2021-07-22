@@ -40,7 +40,8 @@ enum pldm_completion_codes {
 	PLDM_ERROR_INVALID_LENGTH = 0x03,
 	PLDM_ERROR_NOT_READY = 0x04,
 	PLDM_ERROR_UNSUPPORTED_PLDM_CMD = 0x05,
-	PLDM_ERROR_INVALID_PLDM_TYPE = 0x20
+	PLDM_ERROR_INVALID_PLDM_TYPE = 0x20,
+	PLDM_INVALID_TRANSFER_OPERATION_FLAG = 0x21
 };
 
 enum transfer_op_flag {
@@ -90,6 +91,8 @@ typedef enum {
 
 #define PLDM_VERSION_0 0
 #define PLDM_CURRENT_VERSION PLDM_VERSION_0
+
+#define PLDM_TIMESTAMP104_SIZE 13
 
 /** @struct pldm_msg_hdr
  *
@@ -223,8 +226,8 @@ struct pldm_get_tid_resp {
  * @note   Caller is responsible for alloc and dealloc of msg
  *         and hdr params
  */
-int pack_pldm_header(const struct pldm_header_info *hdr,
-		     struct pldm_msg_hdr *msg);
+uint8_t pack_pldm_header(const struct pldm_header_info *hdr,
+			 struct pldm_msg_hdr *msg);
 
 /**
  * @brief Unpack the PLDM header from the PLDM message.
@@ -236,8 +239,8 @@ int pack_pldm_header(const struct pldm_header_info *hdr,
  * @note   Caller is responsible for alloc and dealloc of msg
  *         and hdr params
  */
-int unpack_pldm_header(const struct pldm_msg_hdr *msg,
-		       struct pldm_header_info *hdr);
+uint8_t unpack_pldm_header(const struct pldm_msg_hdr *msg,
+			   struct pldm_header_info *hdr);
 
 /* Requester */
 

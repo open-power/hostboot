@@ -531,32 +531,32 @@ TEST(EntityAssociationPDR, testBuild)
 
     auto tree = pldm_entity_association_tree_init();
 
-    auto l1 = pldm_entity_association_tree_add(tree, &entities[0], nullptr,
-                                               PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+    auto l1 = pldm_entity_association_tree_add(
+        tree, &entities[0], 0xFFFF, nullptr, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(l1, nullptr);
     auto l2a = pldm_entity_association_tree_add(
-        tree, &entities[1], l1, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+        tree, &entities[1], 0xFFFF, l1, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(l2a, nullptr);
     auto l2b = pldm_entity_association_tree_add(
-        tree, &entities[2], l1, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+        tree, &entities[2], 0xFFFF, l1, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(l2b, nullptr);
     auto l2c = pldm_entity_association_tree_add(
-        tree, &entities[3], l1, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+        tree, &entities[3], 0xFFFF, l1, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(l2c, nullptr);
     auto l3a = pldm_entity_association_tree_add(
-        tree, &entities[4], l2a, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+        tree, &entities[4], 0xFFFF, l2a, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(l3a, nullptr);
     auto l3b = pldm_entity_association_tree_add(
-        tree, &entities[5], l2a, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+        tree, &entities[5], 0xFFFF, l2a, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(l3b, nullptr);
     auto l3c = pldm_entity_association_tree_add(
-        tree, &entities[6], l2a, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+        tree, &entities[6], 0xFFFF, l2a, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(l3b, nullptr);
     auto l4a = pldm_entity_association_tree_add(
-        tree, &entities[7], l3a, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+        tree, &entities[7], 0xFFFF, l3a, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(l4a, nullptr);
     auto l4b = pldm_entity_association_tree_add(
-        tree, &entities[8], l3b, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+        tree, &entities[8], 0xFFFF, l3b, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(l4b, nullptr);
 
     EXPECT_EQ(pldm_entity_is_node_parent(l1), true);
@@ -676,7 +676,7 @@ TEST(EntityAssociationPDR, testSpecialTrees)
     // A
     auto tree = pldm_entity_association_tree_init();
     auto node = pldm_entity_association_tree_add(
-        tree, &entities[0], nullptr, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+        tree, &entities[0], 0xFFFF, nullptr, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(node, nullptr);
     size_t num{};
     pldm_entity* out = nullptr;
@@ -690,13 +690,13 @@ TEST(EntityAssociationPDR, testSpecialTrees)
 
     // A-A-A
     tree = pldm_entity_association_tree_init();
-    node = pldm_entity_association_tree_add(tree, &entities[0], nullptr,
+    node = pldm_entity_association_tree_add(tree, &entities[0], 0xFFFF, nullptr,
                                             PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(node, nullptr);
-    node = pldm_entity_association_tree_add(tree, &entities[1], nullptr,
+    node = pldm_entity_association_tree_add(tree, &entities[1], 0xFFFF, nullptr,
                                             PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(node, nullptr);
-    node = pldm_entity_association_tree_add(tree, &entities[2], nullptr,
+    node = pldm_entity_association_tree_add(tree, &entities[2], 0xFFFF, nullptr,
                                             PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(node, nullptr);
     pldm_entity_association_tree_visit(tree, &out, &num);
@@ -719,14 +719,14 @@ TEST(EntityAssociationPDR, testSpecialTrees)
     // |
     // A
     tree = pldm_entity_association_tree_init();
-    node = pldm_entity_association_tree_add(tree, &entities[0], nullptr,
+    node = pldm_entity_association_tree_add(tree, &entities[0], 0xFFFF, nullptr,
                                             PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(node, nullptr);
     auto node1 = pldm_entity_association_tree_add(
-        tree, &entities[1], node, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+        tree, &entities[1], 0xFFFF, node, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(node1, nullptr);
     auto node2 = pldm_entity_association_tree_add(
-        tree, &entities[2], node1, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+        tree, &entities[2], 0xFFFF, node1, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(node2, nullptr);
     pldm_entity_association_tree_visit(tree, &out, &num);
     EXPECT_EQ(num, 3u);
@@ -746,16 +746,16 @@ TEST(EntityAssociationPDR, testSpecialTrees)
     //   |
     //   A-A
     tree = pldm_entity_association_tree_init();
-    node = pldm_entity_association_tree_add(tree, &entities[0], nullptr,
+    node = pldm_entity_association_tree_add(tree, &entities[0], 0xFFFF, nullptr,
                                             PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(node, nullptr);
-    node = pldm_entity_association_tree_add(tree, &entities[0], nullptr,
+    node = pldm_entity_association_tree_add(tree, &entities[0], 0xFFFF, nullptr,
                                             PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(node, nullptr);
-    node1 = pldm_entity_association_tree_add(tree, &entities[1], node,
+    node1 = pldm_entity_association_tree_add(tree, &entities[1], 0xFFFF, node,
                                              PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(node1, nullptr);
-    node2 = pldm_entity_association_tree_add(tree, &entities[2], node,
+    node2 = pldm_entity_association_tree_add(tree, &entities[2], 0xFFFF, node,
                                              PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(node2, nullptr);
     pldm_entity_association_tree_visit(tree, &out, &num);
@@ -813,44 +813,44 @@ TEST(EntityAssociationPDR, testPDR)
 
     auto tree = pldm_entity_association_tree_init();
 
-    auto l1 = pldm_entity_association_tree_add(tree, &entities[0], nullptr,
-                                               PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+    auto l1 = pldm_entity_association_tree_add(
+        tree, &entities[0], 0xFFFF, nullptr, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(l1, nullptr);
     auto l1a = pldm_entity_association_tree_add(
-        tree, &entities[1], nullptr, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+        tree, &entities[1], 0xFFFF, nullptr, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(l1a, nullptr);
 
     auto l2a = pldm_entity_association_tree_add(
-        tree, &entities[1], l1, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+        tree, &entities[1], 0xFFFF, l1, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(l2a, nullptr);
-    auto l2b = pldm_entity_association_tree_add(tree, &entities[2], l1,
+    auto l2b = pldm_entity_association_tree_add(tree, &entities[2], 0xFFFF, l1,
                                                 PLDM_ENTITY_ASSOCIAION_LOGICAL);
     EXPECT_NE(l2b, nullptr);
     auto l2c = pldm_entity_association_tree_add(
-        tree, &entities[3], l1, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+        tree, &entities[3], 0xFFFF, l1, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(l2c, nullptr);
-    auto l2d = pldm_entity_association_tree_add(tree, &entities[4], l1,
+    auto l2d = pldm_entity_association_tree_add(tree, &entities[4], 0xFFFF, l1,
                                                 PLDM_ENTITY_ASSOCIAION_LOGICAL);
     EXPECT_NE(l2d, nullptr);
 
     auto l3a = pldm_entity_association_tree_add(
-        tree, &entities[5], l2a, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+        tree, &entities[5], 0xFFFF, l2a, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(l3a, nullptr);
     auto l3b = pldm_entity_association_tree_add(
-        tree, &entities[6], l2a, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+        tree, &entities[6], 0xFFFF, l2a, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(l3b, nullptr);
-    auto l3c = pldm_entity_association_tree_add(tree, &entities[7], l2a,
+    auto l3c = pldm_entity_association_tree_add(tree, &entities[7], 0xFFFF, l2a,
                                                 PLDM_ENTITY_ASSOCIAION_LOGICAL);
     EXPECT_NE(l3c, nullptr);
-    auto l3d = pldm_entity_association_tree_add(tree, &entities[8], l2a,
+    auto l3d = pldm_entity_association_tree_add(tree, &entities[8], 0xFFFF, l2a,
                                                 PLDM_ENTITY_ASSOCIAION_LOGICAL);
     EXPECT_NE(l3d, nullptr);
 
     auto l4a = pldm_entity_association_tree_add(
-        tree, &entities[9], l3a, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+        tree, &entities[9], 0xFFFF, l3a, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(l4a, nullptr);
-    auto l4b = pldm_entity_association_tree_add(tree, &entities[10], l3b,
-                                                PLDM_ENTITY_ASSOCIAION_LOGICAL);
+    auto l4b = pldm_entity_association_tree_add(
+        tree, &entities[10], 0xFFFF, l3b, PLDM_ENTITY_ASSOCIAION_LOGICAL);
     EXPECT_NE(l4b, nullptr);
 
     EXPECT_EQ(pldm_entity_get_num_children(l1, PLDM_ENTITY_ASSOCIAION_PHYSICAL),
@@ -1110,32 +1110,32 @@ TEST(EntityAssociationPDR, testFind)
 
     auto tree = pldm_entity_association_tree_init();
 
-    auto l1 = pldm_entity_association_tree_add(tree, &entities[0], nullptr,
-                                               PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+    auto l1 = pldm_entity_association_tree_add(
+        tree, &entities[0], 0xFFFF, nullptr, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(l1, nullptr);
     auto l2a = pldm_entity_association_tree_add(
-        tree, &entities[1], l1, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+        tree, &entities[1], 0xFFFF, l1, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(l2a, nullptr);
     auto l2b = pldm_entity_association_tree_add(
-        tree, &entities[2], l1, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+        tree, &entities[2], 0xFFFF, l1, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(l2b, nullptr);
     auto l2c = pldm_entity_association_tree_add(
-        tree, &entities[3], l1, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+        tree, &entities[3], 0xFFFF, l1, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(l2c, nullptr);
     auto l3a = pldm_entity_association_tree_add(
-        tree, &entities[4], l2a, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+        tree, &entities[4], 0xFFFF, l2a, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(l3a, nullptr);
     auto l3b = pldm_entity_association_tree_add(
-        tree, &entities[5], l2a, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+        tree, &entities[5], 0xFFFF, l2a, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(l3b, nullptr);
     auto l3c = pldm_entity_association_tree_add(
-        tree, &entities[6], l2a, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+        tree, &entities[6], 0xFFFF, l2a, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(l3c, nullptr);
     auto l4a = pldm_entity_association_tree_add(
-        tree, &entities[7], l3a, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+        tree, &entities[7], 0xFFFF, l3a, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(l4a, nullptr);
     auto l4b = pldm_entity_association_tree_add(
-        tree, &entities[8], l3b, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+        tree, &entities[8], 0xFFFF, l3b, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(l4b, nullptr);
 
     pldm_entity entity{};
@@ -1181,17 +1181,18 @@ TEST(EntityAssociationPDR, testCopyTree)
 
     auto orgTree = pldm_entity_association_tree_init();
     auto newTree = pldm_entity_association_tree_init();
-    auto l1 = pldm_entity_association_tree_add(orgTree, &entities[0], nullptr,
-                                               PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+    auto l1 =
+        pldm_entity_association_tree_add(orgTree, &entities[0], 0xFFFF, nullptr,
+                                         PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(l1, nullptr);
     auto l2a = pldm_entity_association_tree_add(
-        orgTree, &entities[1], l1, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+        orgTree, &entities[1], 0xFFFF, l1, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(l2a, nullptr);
     auto l2b = pldm_entity_association_tree_add(
-        orgTree, &entities[2], l1, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+        orgTree, &entities[2], 0xFFFF, l1, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(l2b, nullptr);
     auto l2c = pldm_entity_association_tree_add(
-        orgTree, &entities[3], l1, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+        orgTree, &entities[3], 0xFFFF, l1, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     EXPECT_NE(l2c, nullptr);
     size_t orgNum{};
     pldm_entity* orgOut = nullptr;
@@ -1276,4 +1277,176 @@ TEST(EntityAssociationPDR, testExtract)
     EXPECT_EQ(out[5].entity_container_id, 1u);
 
     free(out);
+}
+
+TEST(EntityAssociationPDR, testGetChildren)
+{
+    pldm_entity entities[4]{};
+    entities[0].entity_type = 1;
+    entities[1].entity_type = 2;
+    entities[2].entity_type = 2;
+    entities[3].entity_type = 3;
+
+    auto tree = pldm_entity_association_tree_init();
+    auto l1 = pldm_entity_association_tree_add(
+        tree, &entities[0], 0xFFFF, nullptr, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+    EXPECT_NE(l1, nullptr);
+    auto l2a = pldm_entity_association_tree_add(
+        tree, &entities[1], 0xFFFF, l1, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+    EXPECT_NE(l2a, nullptr);
+    auto l2b = pldm_entity_association_tree_add(
+        tree, &entities[2], 0xFFFF, l1, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+    EXPECT_NE(l2b, nullptr);
+    auto l2c = pldm_entity_association_tree_add(
+        tree, &entities[3], 0xFFFF, l1, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+    EXPECT_NE(l2c, nullptr);
+
+    pldm_entity et1;
+    et1.entity_type = 2;
+    et1.entity_instance_num = 1;
+    EXPECT_EQ(true, pldm_is_current_parent_child(l1, &et1));
+
+    pldm_entity et2;
+    et2.entity_type = 2;
+    et2.entity_instance_num = 2;
+    EXPECT_EQ(true, pldm_is_current_parent_child(l1, &et2));
+
+    pldm_entity et3;
+    et3.entity_type = 2;
+    et3.entity_instance_num = 3;
+    EXPECT_EQ(false, pldm_is_current_parent_child(l1, &et3));
+
+    pldm_entity_association_tree_destroy(tree);
+}
+
+TEST(EntityAssociationPDR, testEntityInstanceNumber)
+{
+    pldm_entity entities[9]{};
+
+    entities[0].entity_type = 1;
+    entities[1].entity_type = 2;
+    entities[2].entity_type = 2;
+    entities[3].entity_type = 2;
+    entities[4].entity_type = 2;
+    entities[5].entity_type = 2;
+    entities[6].entity_type = 2;
+    entities[7].entity_type = 3;
+    entities[8].entity_type = 3;
+
+    auto tree = pldm_entity_association_tree_init();
+    auto repo = pldm_pdr_init();
+
+    uint16_t terminusHdl{};
+    uint16_t entityType{};
+    uint16_t entityInstanceNum{};
+    uint16_t containerId{};
+
+    auto node = pldm_entity_association_tree_add(
+        tree, &entities[0], 0xFFFF, nullptr, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+    EXPECT_NE(node, nullptr);
+
+    auto l1 = pldm_entity_association_tree_add(tree, &entities[1], 63, node,
+                                               PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+    auto first = pldm_pdr_add_fru_record_set(
+        repo, 1, 1, entities[1].entity_type, entities[1].entity_instance_num,
+        entities[1].entity_container_id);
+    EXPECT_NE(l1, nullptr);
+    EXPECT_EQ(entities[1].entity_instance_num, 63);
+    EXPECT_EQ(first, pldm_pdr_get_record_handle(
+                         repo, pldm_pdr_fru_record_set_find_by_rsi(
+                                   repo, 1, &terminusHdl, &entityType,
+                                   &entityInstanceNum, &containerId)));
+    EXPECT_EQ(entityType, 2);
+    EXPECT_EQ(entityInstanceNum, 63);
+
+    auto l2 = pldm_entity_association_tree_add(tree, &entities[2], 37, node,
+                                               PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+    auto second = pldm_pdr_add_fru_record_set(
+        repo, 1, 2, entities[2].entity_type, entities[2].entity_instance_num,
+        entities[2].entity_container_id);
+    EXPECT_NE(l2, nullptr);
+    EXPECT_EQ(entities[2].entity_instance_num, 37);
+    EXPECT_EQ(second, pldm_pdr_get_record_handle(
+                          repo, pldm_pdr_fru_record_set_find_by_rsi(
+                                    repo, 2, &terminusHdl, &entityType,
+                                    &entityInstanceNum, &containerId)));
+    EXPECT_EQ(entityType, 2);
+    EXPECT_EQ(entityInstanceNum, 37);
+
+    auto l3 = pldm_entity_association_tree_add(tree, &entities[3], 44, node,
+                                               PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+    auto third = pldm_pdr_add_fru_record_set(
+        repo, 1, 3, entities[3].entity_type, entities[3].entity_instance_num,
+        entities[3].entity_container_id);
+    EXPECT_NE(l3, nullptr);
+    EXPECT_EQ(entities[3].entity_instance_num, 44);
+    EXPECT_EQ(third, pldm_pdr_get_record_handle(
+                         repo, pldm_pdr_fru_record_set_find_by_rsi(
+                                   repo, 3, &terminusHdl, &entityType,
+                                   &entityInstanceNum, &containerId)));
+    EXPECT_EQ(entityType, 2);
+    EXPECT_EQ(entityInstanceNum, 44);
+
+    auto l4 = pldm_entity_association_tree_add(tree, &entities[4], 89, node,
+                                               PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+    auto fourth = pldm_pdr_add_fru_record_set(
+        repo, 1, 4, entities[4].entity_type, entities[4].entity_instance_num,
+        entities[4].entity_container_id);
+    EXPECT_NE(l4, nullptr);
+    EXPECT_EQ(entities[4].entity_instance_num, 89);
+    EXPECT_EQ(fourth, pldm_pdr_get_record_handle(
+                          repo, pldm_pdr_fru_record_set_find_by_rsi(
+                                    repo, 4, &terminusHdl, &entityType,
+                                    &entityInstanceNum, &containerId)));
+    EXPECT_EQ(entityType, 2);
+    EXPECT_EQ(entityInstanceNum, 89);
+
+    auto l5 = pldm_entity_association_tree_add(tree, &entities[5], 0xFFFF, node,
+                                               PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+    auto fifth = pldm_pdr_add_fru_record_set(
+        repo, 1, 5, entities[5].entity_type, entities[5].entity_instance_num,
+        entities[5].entity_container_id);
+    EXPECT_NE(l5, nullptr);
+    EXPECT_EQ(entities[5].entity_instance_num, 90);
+    EXPECT_EQ(fifth, pldm_pdr_get_record_handle(
+                         repo, pldm_pdr_fru_record_set_find_by_rsi(
+                                   repo, 5, &terminusHdl, &entityType,
+                                   &entityInstanceNum, &containerId)));
+    EXPECT_EQ(entityType, 2);
+    EXPECT_EQ(entityInstanceNum, 90);
+
+    auto l6 = pldm_entity_association_tree_add(tree, &entities[6], 90, node,
+                                               PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+    EXPECT_EQ(l6, nullptr);
+
+    auto l7 = pldm_entity_association_tree_add(tree, &entities[7], 100, l1,
+                                               PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+    auto seventh = pldm_pdr_add_fru_record_set(
+        repo, 1, 7, entities[7].entity_type, entities[7].entity_instance_num,
+        entities[7].entity_container_id);
+    EXPECT_NE(l7, nullptr);
+    EXPECT_EQ(entities[7].entity_instance_num, 100);
+    EXPECT_EQ(seventh, pldm_pdr_get_record_handle(
+                           repo, pldm_pdr_fru_record_set_find_by_rsi(
+                                     repo, 7, &terminusHdl, &entityType,
+                                     &entityInstanceNum, &containerId)));
+    EXPECT_EQ(entityType, 3);
+    EXPECT_EQ(entityInstanceNum, 100);
+
+    auto l8 = pldm_entity_association_tree_add(tree, &entities[8], 100, l2,
+                                               PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+    auto eighth = pldm_pdr_add_fru_record_set(
+        repo, 1, 8, entities[8].entity_type, entities[8].entity_instance_num,
+        entities[8].entity_container_id);
+    EXPECT_NE(l8, nullptr);
+    EXPECT_EQ(entities[8].entity_instance_num, 100);
+    EXPECT_EQ(eighth, pldm_pdr_get_record_handle(
+                          repo, pldm_pdr_fru_record_set_find_by_rsi(
+                                    repo, 8, &terminusHdl, &entityType,
+                                    &entityInstanceNum, &containerId)));
+    EXPECT_EQ(entityType, 3);
+    EXPECT_EQ(entityInstanceNum, 100);
+
+    pldm_pdr_destroy(repo);
+    pldm_entity_association_tree_destroy(tree);
 }

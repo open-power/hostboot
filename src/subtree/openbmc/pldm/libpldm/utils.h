@@ -93,6 +93,14 @@ uint32_t dec2bcd32(uint32_t dec);
 bool is_time_legal(uint8_t seconds, uint8_t minutes, uint8_t hours, uint8_t day,
 		   uint8_t month, uint16_t year);
 
+/** @brief Check whether transfer flag is valid
+ *
+ *  @param[in] transfer_flag - TransferFlag
+ *
+ *  @return true if transfer flag is valid, false if not
+ */
+bool is_transfer_flag_valid(uint8_t transfer_flag);
+
 #ifdef __cplusplus
 }
 #endif

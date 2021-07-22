@@ -10,3 +10,9 @@ option('libpldm-only', type: 'feature', description: 'Only build libpldm', value
 option('oem-ibm-dma-maxsize', type: 'integer', min:4096, max: 16773120, description: 'OEM-IBM: max DMA size', value: 8384512) #16MB - 4K
 option('softoff', type: 'feature', description: 'Build soft power off application', value: 'enabled')
 option('softoff-timeout-seconds', type: 'integer', description: 'softoff: Time to wait for host to gracefully shutdown', value: 7200)
+
+# Timing specifications for PLDM messages
+option('number-of-request-retries', type: 'integer', min: 2, max: 30, description: 'The number of times a requester is obligated to retry a request', value: 2)
+option('instance-id-expiration-interval', type: 'integer', min: 5, max: 6, description: 'Instance ID expiration interval in seconds', value: 5)
+# Default response-time-out set to 2 seconds to facilitate a minimum retry of the request of 2.
+option('response-time-out', type: 'integer', min: 300, max: 4800, description: 'The amount of time a requester has to wait for a response message in milliseconds', value: 2000)

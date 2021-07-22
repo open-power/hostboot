@@ -10,6 +10,7 @@
 #include "oem/ibm/requester/dbus_to_file_handler.hpp"
 #include "oem_ibm_handler.hpp"
 #include "pldmd/handler.hpp"
+#include "requester/handler.hpp"
 
 #include <fcntl.h>
 #include <stdint.h>
@@ -166,10 +167,11 @@ class Handler : public CmdHandler
 {
   public:
     Handler(oem_platform::Handler* oemPlatformHandler, int hostSockFd,
-            uint8_t hostEid, dbus_api::Requester* dbusImplReqester) :
+            uint8_t hostEid, dbus_api::Requester* dbusImplReqester,
+            pldm::requester::Handler<pldm::requester::Request>* handler) :
         oemPlatformHandler(oemPlatformHandler),
         hostSockFd(hostSockFd), hostEid(hostEid),
-        dbusImplReqester(dbusImplReqester)
+        dbusImplReqester(dbusImplReqester), handler(handler)
     {
         handlers.emplace(PLDM_READ_FILE_INTO_MEMORY,
                          [this](const pldm_msg* request, size_t payloadLength) {
@@ -231,8 +233,8 @@ class Handler : public CmdHandler
             pldm::utils::DBusHandler::getBus(),
             sdbusplus::bus::match::rules::interfacesAdded() +
                 sdbusplus::bus::match::rules::argNpath(0, dumpObjPath),
-            [hostSockFd, hostEid,
-             dbusImplReqester](sdbusplus::message::message& msg) {
+            [this, hostSockFd, hostEid, dbusImplReqester,
+             &handler](sdbusplus::message::message& msg) {
                 std::map<
                     std::string,
                     std::map<std::string, std::variant<std::string, uint32_t>>>
@@ -259,11 +261,13 @@ class Handler : public CmdHandler
                                     std::get<std::string>(property.second);
                             }
                         }
-                        auto dbusToFileHandler = std::make_unique<
-                            pldm::requester::oem_ibm::DbusToFileHandler>(
-                            hostSockFd, hostEid, dbusImplReqester, path);
-                        dbusToFileHandler->processNewResourceDump(vspstring,
-                                                                  password);
+                        dbusToFileHandlers
+                            .emplace_back(
+                                std::make_unique<pldm::requester::oem_ibm::
+                                                     DbusToFileHandler>(
+                                    hostSockFd, hostEid, dbusImplReqester, path,
+                                    handler))
+                            ->processNewResourceDump(vspstring, password);
                         break;
                     }
                 }
@@ -272,8 +276,8 @@ class Handler : public CmdHandler
             pldm::utils::DBusHandler::getBus(),
             sdbusplus::bus::match::rules::interfacesAdded() +
                 sdbusplus::bus::match::rules::argNpath(0, certObjPath),
-            [hostSockFd, hostEid,
-             dbusImplReqester](sdbusplus::message::message& msg) {
+            [this, hostSockFd, hostEid, dbusImplReqester,
+             &handler](sdbusplus::message::message& msg) {
                 std::map<
                     std::string,
                     std::map<std::string, std::variant<std::string, uint32_t>>>
@@ -295,13 +299,13 @@ class Handler : public CmdHandler
                                     sdbusplus::message::object_path(path)
                                         .filename();
 
-                                auto dbusToFileHandler =
-                                    std::make_unique<pldm::requester::oem_ibm::
-                                                         DbusToFileHandler>(
+                                dbusToFileHandlers
+                                    .emplace_back(std::make_unique<
+                                                  pldm::requester::oem_ibm::
+                                                      DbusToFileHandler>(
                                         hostSockFd, hostEid, dbusImplReqester,
-                                        path);
-                                dbusToFileHandler->newCsrFileAvailable(
-                                    csr, fileHandle);
+                                        path, handler))
+                                    ->newCsrFileAvailable(csr, fileHandle);
                                 break;
                             }
                         }
@@ -416,12 +420,18 @@ class Handler : public CmdHandler
     using DBusInterfaceAdded = std::vector<std::pair<
         std::string,
         std::vector<std::pair<std::string, std::variant<std::string>>>>>;
+    std::unique_ptr<pldm::requester::oem_ibm::DbusToFileHandler>
+        dbusToFileHandler; //!< pointer to send request to Host
     std::unique_ptr<sdbusplus::bus::match::match>
         resDumpMatcher; //!< Pointer to capture the interface added signal
                         //!< for new resource dump
     std::unique_ptr<sdbusplus::bus::match::match>
         vmiCertMatcher; //!< Pointer to capture the interface added signal
                         //!< for new csr string
+    /** @brief PLDM request handler */
+    pldm::requester::Handler<pldm::requester::Request>* handler;
+    std::vector<std::unique_ptr<pldm::requester::oem_ibm::DbusToFileHandler>>
+        dbusToFileHandlers;
 };
 
 } // namespace oem_ibm

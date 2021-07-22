@@ -24,9 +24,13 @@ const Json emptyJson{};
 const std::vector<Json> emptyJsonList{};
 const std::vector<std::string> emptyStringVec{};
 
-FruParser::FruParser(const std::string& dirPath)
+FruParser::FruParser(const std::string& dirPath,
+                     const fs::path& fruMasterJsonPath)
 {
-    setupDefaultDBusLookup();
+    if (fs::exists(fruMasterJsonPath))
+    {
+        setupDefaultDBusLookup(fruMasterJsonPath);
+    }
     setupDefaultFruRecordMap();
 
     fs::path dir(dirPath);
@@ -36,25 +40,35 @@ FruParser::FruParser(const std::string& dirPath)
     }
 }
 
-void FruParser::setupDefaultDBusLookup()
+void FruParser::setupDefaultDBusLookup(const fs::path& masterJsonPath)
 {
     constexpr auto service = "xyz.openbmc_project.Inventory.Manager";
     constexpr auto rootPath = "/xyz/openbmc_project/inventory";
+    std::ifstream jsonFile(masterJsonPath);
+    auto data = Json::parse(jsonFile, nullptr, false);
+    if (data.is_discarded())
+    {
 
-    // DSP0249 1.0.0    Table 15 Entity ID Codes
-    const std::map<Interface, EntityType> defIntfToEntityType = {
-        {"xyz.openbmc_project.Inventory.Item.Chassis", 45},
-        {"xyz.openbmc_project.Inventory.Item.Board", 60},
-        {"xyz.openbmc_project.Inventory.Item.Board.Motherboard", 64},
-        {"xyz.openbmc_project.Inventory.Item.Panel", 69},
-        {"xyz.openbmc_project.Inventory.Item.PowerSupply", 120},
-        {"xyz.openbmc_project.Inventory.Item.Vrm", 123},
-        {"xyz.openbmc_project.Inventory.Item.Cpu", 135},
-        {"xyz.openbmc_project.Inventory.Item.Bmc", 137},
-        {"xyz.openbmc_project.Inventory.Item.Dimm", 66},
-        {"xyz.openbmc_project.Inventory.Item.Tpm", 24576},
-        {"xyz.openbmc_project.Inventory.Item.System", 11521},
-    };
+        std::cerr << "Parsing FRU Dbus Lookup Map config file failed, FILE="
+                  << masterJsonPath;
+        std::abort();
+    }
+    std::map<Interface, EntityType> defIntfToEntityType;
+    auto dbusMap = data.value("FruDBusLookupMap", emptyJson);
+    for (const auto& element : dbusMap.items())
+
+    {
+        try
+        {
+            defIntfToEntityType[static_cast<Interface>(element.key())] =
+                static_cast<EntityType>(element.value());
+        }
+        catch (const std::exception& e)
+        {
+            std::cerr << "FRU DBus lookup map format error\n";
+            throw InternalFailure();
+        }
+    }
 
     Interfaces interfaces{};
     for (auto [intf, entityType] : defIntfToEntityType)

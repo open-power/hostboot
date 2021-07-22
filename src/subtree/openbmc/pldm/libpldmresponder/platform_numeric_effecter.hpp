@@ -28,7 +28,8 @@ namespace platform_numeric_effecter
 
 /** @brief Function to get the effecter value by PDR factor coefficient, etc.
  *  @param[in] pdr - The structure of pldm_numeric_effecter_value_pdr.
- *  @tparam[in] effecterValue - effecter value.
+ *  @param[in] effecterValue - effecter value.
+ *  @param[in] propertyType - type of the D-Bus property.
  *
  *  @return - std::pair<int, std::optional<PropertyValue>> - rc:Success or
  *          failure, PropertyValue: The value to be set
@@ -36,7 +37,7 @@ namespace platform_numeric_effecter
 template <typename T>
 std::pair<int, std::optional<PropertyValue>>
     getEffecterRawValue(const pldm_numeric_effecter_value_pdr* pdr,
-                        T& effecterValue)
+                        T& effecterValue, std::string propertyType)
 {
     // X = Round [ (Y - B) / m ]
     // refer to DSP0248_1.2.0 27.8
@@ -55,6 +56,13 @@ std::pair<int, std::optional<PropertyValue>>
                 rc = PLDM_ERROR_INVALID_DATA;
             }
             value = rawValue;
+            if (propertyType == "uint64_t")
+            {
+                std::cerr << " Inside if when propertytype is uint64_t"
+                          << std::endl;
+                auto tempValue = std::get<uint8_t>(value);
+                value = static_cast<uint64_t>(tempValue);
+            }
             break;
         }
         case PLDM_EFFECTER_DATA_SIZE_SINT8:
@@ -81,6 +89,11 @@ std::pair<int, std::optional<PropertyValue>>
                 rc = PLDM_ERROR_INVALID_DATA;
             }
             value = rawValue;
+            if (propertyType == "uint64_t")
+            {
+                auto tempValue = std::get<uint16_t>(value);
+                value = static_cast<uint64_t>(tempValue);
+            }
             break;
         }
         case PLDM_EFFECTER_DATA_SIZE_SINT16:
@@ -94,6 +107,11 @@ std::pair<int, std::optional<PropertyValue>>
                 rc = PLDM_ERROR_INVALID_DATA;
             }
             value = rawValue;
+            if (propertyType == "uint64_t")
+            {
+                auto tempValue = std::get<int16_t>(value);
+                value = static_cast<uint64_t>(tempValue);
+            }
             break;
         }
         case PLDM_EFFECTER_DATA_SIZE_UINT32:
@@ -107,6 +125,11 @@ std::pair<int, std::optional<PropertyValue>>
                 rc = PLDM_ERROR_INVALID_DATA;
             }
             value = rawValue;
+            if (propertyType == "uint64_t")
+            {
+                auto tempValue = std::get<uint32_t>(value);
+                value = static_cast<uint64_t>(tempValue);
+            }
             break;
         }
         case PLDM_EFFECTER_DATA_SIZE_SINT32:
@@ -120,6 +143,11 @@ std::pair<int, std::optional<PropertyValue>>
                 rc = PLDM_ERROR_INVALID_DATA;
             }
             value = rawValue;
+            if (propertyType == "uint64_t")
+            {
+                auto tempValue = std::get<int32_t>(value);
+                value = static_cast<uint64_t>(tempValue);
+            }
             break;
         }
     }
@@ -131,45 +159,47 @@ std::pair<int, std::optional<PropertyValue>>
  *  @param[in] pdr - The structure of pldm_numeric_effecter_value_pdr.
  *  @param[in] effecterDataSize - effecter value size.
  *  @param[in,out] effecterValue - effecter value.
+ *  @param[in] propertyType - type of the D-Bus property.
  *
  *  @return std::pair<int, std::optional<PropertyValue>> - rc:Success or
  *          failure, PropertyValue: The value to be set
  */
 std::pair<int, std::optional<PropertyValue>>
     convertToDbusValue(const pldm_numeric_effecter_value_pdr* pdr,
-                       uint8_t effecterDataSize, uint8_t* effecterValue)
+                       uint8_t effecterDataSize, uint8_t* effecterValue,
+                       std::string propertyType)
 {
     if (effecterDataSize == PLDM_EFFECTER_DATA_SIZE_UINT8)
     {
         uint8_t currentValue = *(reinterpret_cast<uint8_t*>(&effecterValue[0]));
-        return getEffecterRawValue<uint8_t>(pdr, currentValue);
+        return getEffecterRawValue<uint8_t>(pdr, currentValue, propertyType);
     }
     else if (effecterDataSize == PLDM_EFFECTER_DATA_SIZE_SINT8)
     {
         int8_t currentValue = *(reinterpret_cast<int8_t*>(&effecterValue[0]));
-        return getEffecterRawValue<int8_t>(pdr, currentValue);
+        return getEffecterRawValue<int8_t>(pdr, currentValue, propertyType);
     }
     else if (effecterDataSize == PLDM_EFFECTER_DATA_SIZE_UINT16)
     {
         uint16_t currentValue =
             *(reinterpret_cast<uint16_t*>(&effecterValue[0]));
-        return getEffecterRawValue<uint16_t>(pdr, currentValue);
+        return getEffecterRawValue<uint16_t>(pdr, currentValue, propertyType);
     }
     else if (effecterDataSize == PLDM_EFFECTER_DATA_SIZE_SINT16)
     {
         int16_t currentValue = *(reinterpret_cast<int16_t*>(&effecterValue[0]));
-        return getEffecterRawValue<int16_t>(pdr, currentValue);
+        return getEffecterRawValue<int16_t>(pdr, currentValue, propertyType);
     }
     else if (effecterDataSize == PLDM_EFFECTER_DATA_SIZE_UINT32)
     {
         uint32_t currentValue =
             *(reinterpret_cast<uint32_t*>(&effecterValue[0]));
-        return getEffecterRawValue<uint32_t>(pdr, currentValue);
+        return getEffecterRawValue<uint32_t>(pdr, currentValue, propertyType);
     }
     else if (effecterDataSize == PLDM_EFFECTER_DATA_SIZE_SINT32)
     {
         int32_t currentValue = *(reinterpret_cast<int32_t*>(&effecterValue[0]));
-        return getEffecterRawValue<int32_t>(pdr, currentValue);
+        return getEffecterRawValue<int32_t>(pdr, currentValue, propertyType);
     }
     else
     {
@@ -243,14 +273,6 @@ int setNumericEffecterValueHandler(const DBusInterface& dBusIntf,
         return PLDM_ERROR_INVALID_DATA;
     }
 
-    // convert to dbus effectervalue according to the factor
-    auto [rc, dbusValue] =
-        convertToDbusValue(pdr, effecterDataSize, effecterValue);
-    if (rc != PLDM_SUCCESS)
-    {
-        return rc;
-    }
-
     try
     {
         const auto& [dbusMappings, dbusValMaps] =
@@ -258,6 +280,14 @@ int setNumericEffecterValueHandler(const DBusInterface& dBusIntf,
         DBusMapping dbusMapping{
             dbusMappings[0].objectPath, dbusMappings[0].interface,
             dbusMappings[0].propertyName, dbusMappings[0].propertyType};
+
+        // convert to dbus effectervalue according to the factor
+        auto [rc, dbusValue] = convertToDbusValue(
+            pdr, effecterDataSize, effecterValue, dbusMappings[0].propertyType);
+        if (rc != PLDM_SUCCESS)
+        {
+            return rc;
+        }
         try
         {
 

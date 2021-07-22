@@ -1,0 +1,83 @@
+{
+    "PackageHeaderInformation": {
+        "PackageHeaderIdentifier": "1244D2648D7D4718A030FC8A56587D5A",
+        "PackageHeaderFormatVersion": 2,
+        "PackageReleaseDateTime": "25/12/2021 00:00:00",
+        "PackageVersionString": "VersionString1"
+    },
+    "FirmwareDeviceIdentificationArea": [
+        {
+            "DeviceUpdateOptionFlags": [
+                0
+            ],
+            "ComponentImageSetVersionString": "VersionString2",
+            "ApplicableComponents": [
+                100,
+                200
+            ],
+            "InitialDescriptor": {
+                "InitialDescriptorType": 2,
+                "InitialDescriptorData": "1244D2648D7D4718A030FC8A56587D5B"
+            }
+        },
+        {
+            "DeviceUpdateOptionFlags": [
+            ],
+            "ComponentImageSetVersionString": "VersionString3",
+            "ApplicableComponents": [
+                100,
+                200,
+                300
+            ],
+            "InitialDescriptor": {
+                "InitialDescriptorType": 2,
+                "InitialDescriptorData": "1244D2648D7D4718A030FC8A56587D5C"
+            }
+        },
+        {
+            "DeviceUpdateOptionFlags": [
+            ],
+            "ComponentImageSetVersionString": "VersionString4",
+            "ApplicableComponents": [
+                100
+            ],
+            "InitialDescriptor": {
+                "InitialDescriptorType": 2,
+                "InitialDescriptorData": "1244D2648D7D4718A030FC8A56587D5D"
+            }
+        }
+    ],
+    "ComponentImageInformationArea": [
+        {
+            "ComponentClassification": 10,
+            "ComponentIdentifier": 100,
+            "ComponentOptions": [
+            ],
+            "RequestedComponentActivationMethod": [
+            ],
+            "ComponentVersionString": "VersionString5"
+        },
+        {
+            "ComponentClassification": 10,
+            "ComponentIdentifier": 200,
+            "ComponentOptions": [
+            ],
+            "RequestedComponentActivationMethod": [
+                0
+             ],
+            "ComponentVersionString": "VersionString6"
+        },
+        {
+            "ComponentClassification": 16,
+            "ComponentIdentifier": 300,
+            "ComponentOptions": [
+                0
+            ],
+            "RequestedComponentActivationMethod": [
+                2,
+                3
+            ],
+            "ComponentVersionString": "VersionString7"
+        }
+    ]
+}

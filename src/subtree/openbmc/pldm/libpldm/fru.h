@@ -17,10 +17,15 @@ extern "C" {
 #define PLDM_GET_FRU_RECORD_TABLE_REQ_BYTES 5
 #define PLDM_GET_FRU_RECORD_TABLE_MIN_RESP_BYTES 6
 #define PLDM_GET_FRU_RECORD_BY_OPTION_MIN_RESP_BYTES 6
+#define PLDM_SET_FRU_RECORD_TABLE_MIN_REQ_BYTES 5
+#define PLDM_SET_FRU_RECORD_TABLE_RESP_BYTES 5
 
 #define FRU_TABLE_CHECKSUM_SIZE 4
 
 enum pldm_fru_completion_codes {
+	PLDM_FRU_INVALID_DATA_TRANSFER_HANDLE = 0x80,
+	PLDM_FRU_INVALID_TRANSFER_FLAG = 0x82,
+	PLDM_FRU_DATA_INVALID_DATA_INTEGRITY_CHECK = 0x84,
 	PLDM_FRU_DATA_STRUCTURE_TABLE_UNAVAILABLE = 0x85,
 };
 
@@ -124,6 +129,17 @@ struct pldm_get_fru_record_by_option_resp {
 	uint32_t next_data_transfer_handle;
 	uint8_t transfer_flag;
 	uint8_t fru_structure_data[1];
+} __attribute__((packed));
+
+struct pldm_set_fru_record_table_req {
+	uint32_t data_transfer_handle;
+	uint8_t transfer_flag;
+	uint8_t fru_record_table_data[1];
+} __attribute__((packed));
+
+struct pldm_set_fru_record_table_resp {
+	uint8_t completion_code;
+	uint32_t next_data_transfer_handle;
 } __attribute__((packed));
 
 /** @struct pldm_fru_record_tlv
@@ -423,6 +439,41 @@ int decode_get_fru_record_by_option_resp(
 void get_fru_record_by_option(const uint8_t *table, size_t table_size,
 			      uint8_t *record_table, size_t *record_size,
 			      uint16_t rsi, uint8_t rt, uint8_t ft);
+/* SetFruRecordTable */
+
+/** @brief Decode SetFruRecordTable request data
+ *
+ *  @param[in] msg - PLDM request message payload
+ *  @param[in] payload_length - Length of request payload
+ *  @param[out] data_transfer_handle - A handle used to identify a FRU Record
+ *                                     table data transfer
+ *  @param[out] transfer_flag - Flag to indicate what part of the transfer
+ *                              this request represents
+ *  @param[out] fru_table_data - Struct variable_field, contains data specific
+ *                               to the fru record table and the length of table
+ *                               data
+ *  @return pldm_completion_codes
+ */
+int decode_set_fru_record_table_req(const struct pldm_msg *msg,
+				    size_t payload_length,
+				    uint32_t *data_transfer_handle,
+				    uint8_t *transfer_flag,
+				    struct variable_field *fru_table_data);
+
+/** @brief Create a PLDM response message for SetFruRecordTable
+ *
+ *  @param[in] instance_id - Message's instance id
+ *  @param[in] completion_code - PLDM completion code
+ *  @param[in] next_transfer_handle - handle to identify the next portion of the
+ *                                    transfer
+ *  @param[in] payload_length - Length of payload message
+ *  @param[out] msg - Argument to capture the Message
+ */
+int encode_set_fru_record_table_resp(uint8_t instance_id,
+				     uint8_t completion_code,
+				     uint32_t next_data_transfer_handle,
+				     size_t payload_length,
+				     struct pldm_msg *msg);
 
 #ifdef __cplusplus
 }

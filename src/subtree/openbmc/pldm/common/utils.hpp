@@ -3,6 +3,7 @@
 #include "libpldm/base.h"
 #include "libpldm/bios.h"
 #include "libpldm/platform.h"
+#include "libpldm/utils.h"
 
 #include "types.hpp"
 
@@ -349,6 +350,17 @@ int emitStateSensorEventSignal(uint8_t tid, uint16_t sensorId,
  *  @return - None
  */
 void printBuffer(const std::vector<uint8_t>& buffer, bool pldmVerbose);
+
+/** @brief Convert the buffer to std::string
+ *
+ *  If there are characters that are not printable characters, it is replaced
+ *  with space(0x20).
+ *
+ *  @param[in] var - pointer to data and length of the data
+ *
+ *  @return std::string equivalent of variable field
+ */
+std::string toString(const struct variable_field& var);
 
 } // namespace utils
 } // namespace pldm

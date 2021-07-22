@@ -3,8 +3,8 @@
 
 #include "base.h"
 
-int pack_pldm_header(const struct pldm_header_info *hdr,
-		     struct pldm_msg_hdr *msg)
+uint8_t pack_pldm_header(const struct pldm_header_info *hdr,
+			 struct pldm_msg_hdr *msg)
 {
 	if (msg == NULL || hdr == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
@@ -41,8 +41,8 @@ int pack_pldm_header(const struct pldm_header_info *hdr,
 	return PLDM_SUCCESS;
 }
 
-int unpack_pldm_header(const struct pldm_msg_hdr *msg,
-		       struct pldm_header_info *hdr)
+uint8_t unpack_pldm_header(const struct pldm_msg_hdr *msg,
+			   struct pldm_header_info *hdr)
 {
 	if (msg == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
@@ -72,9 +72,8 @@ int encode_get_types_req(uint8_t instance_id, struct pldm_msg *msg)
 	header.instance = instance_id;
 	header.msg_type = PLDM_REQUEST;
 	header.command = PLDM_GET_PLDM_TYPES;
-	pack_pldm_header(&header, &(msg->hdr));
 
-	return PLDM_SUCCESS;
+	return pack_pldm_header(&header, &(msg->hdr));
 }
 
 int encode_get_commands_req(uint8_t instance_id, uint8_t type, ver32_t version,
@@ -88,7 +87,11 @@ int encode_get_commands_req(uint8_t instance_id, uint8_t type, ver32_t version,
 	header.instance = instance_id;
 	header.msg_type = PLDM_REQUEST;
 	header.command = PLDM_GET_PLDM_COMMANDS;
-	pack_pldm_header(&header, &(msg->hdr));
+
+	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
+	if (rc != PLDM_SUCCESS) {
+		return rc;
+	}
 
 	struct pldm_get_commands_req *request =
 	    (struct pldm_get_commands_req *)msg->payload;
@@ -106,16 +109,19 @@ int encode_get_types_resp(uint8_t instance_id, uint8_t completion_code,
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_get_types_resp *response =
-	    (struct pldm_get_types_resp *)msg->payload;
-
-	response->completion_code = completion_code;
 	struct pldm_header_info header = {0};
 	header.instance = instance_id;
 	header.msg_type = PLDM_RESPONSE;
 	header.command = PLDM_GET_PLDM_TYPES;
-	pack_pldm_header(&header, &(msg->hdr));
 
+	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
+	if (rc != PLDM_SUCCESS) {
+		return rc;
+	}
+
+	struct pldm_get_types_resp *response =
+	    (struct pldm_get_types_resp *)msg->payload;
+	response->completion_code = completion_code;
 	if (response->completion_code == PLDM_SUCCESS) {
 		if (types == NULL) {
 			return PLDM_ERROR_INVALID_DATA;
@@ -151,16 +157,18 @@ int encode_get_commands_resp(uint8_t instance_id, uint8_t completion_code,
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_get_commands_resp *response =
-	    (struct pldm_get_commands_resp *)msg->payload;
-	response->completion_code = completion_code;
-
 	struct pldm_header_info header = {0};
 	header.instance = instance_id;
 	header.msg_type = PLDM_RESPONSE;
 	header.command = PLDM_GET_PLDM_COMMANDS;
-	pack_pldm_header(&header, &(msg->hdr));
+	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
+	if (rc != PLDM_SUCCESS) {
+		return rc;
+	}
 
+	struct pldm_get_commands_resp *response =
+	    (struct pldm_get_commands_resp *)msg->payload;
+	response->completion_code = completion_code;
 	if (response->completion_code == PLDM_SUCCESS) {
 		if (commands == NULL) {
 			return PLDM_ERROR_INVALID_DATA;
@@ -225,19 +233,18 @@ int encode_get_version_req(uint8_t instance_id, uint32_t transfer_handle,
 			   uint8_t transfer_opflag, uint8_t type,
 			   struct pldm_msg *msg)
 {
-	struct pldm_header_info header = {0};
-	int rc = PLDM_SUCCESS;
-
 	if (NULL == msg) {
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
+	struct pldm_header_info header = {0};
 	header.msg_type = PLDM_REQUEST;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_BASE;
 	header.command = PLDM_GET_PLDM_VERSION;
 
-	if ((rc = pack_pldm_header(&header, &(msg->hdr))) > PLDM_SUCCESS) {
+	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
+	if (rc != PLDM_SUCCESS) {
 		return rc;
 	}
 
@@ -256,22 +263,25 @@ int encode_get_version_resp(uint8_t instance_id, uint8_t completion_code,
 			    uint8_t transfer_flag, const ver32_t *version_data,
 			    size_t version_size, struct pldm_msg *msg)
 {
+	if (NULL == msg) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
 	struct pldm_header_info header = {0};
-	int rc = PLDM_SUCCESS;
+	header.msg_type = PLDM_RESPONSE;
+	header.instance = instance_id;
+	header.pldm_type = PLDM_BASE;
+	header.command = PLDM_GET_PLDM_VERSION;
+
+	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
+	if (rc != PLDM_SUCCESS) {
+		return rc;
+	}
+
 	struct pldm_get_version_resp *response =
 	    (struct pldm_get_version_resp *)msg->payload;
 	response->completion_code = completion_code;
 	if (response->completion_code == PLDM_SUCCESS) {
-
-		header.msg_type = PLDM_RESPONSE;
-		header.instance = instance_id;
-		header.pldm_type = PLDM_BASE;
-		header.command = PLDM_GET_PLDM_VERSION;
-
-		if ((rc = pack_pldm_header(&header, &(msg->hdr))) >
-		    PLDM_SUCCESS) {
-			return rc;
-		}
 		response->next_transfer_handle = htole32(next_transfer_handle);
 		response->transfer_flag = transfer_flag;
 		memcpy(response->version_data, (uint8_t *)version_data,
@@ -336,9 +346,8 @@ int encode_get_tid_req(uint8_t instance_id, struct pldm_msg *msg)
 	header.instance = instance_id;
 	header.msg_type = PLDM_REQUEST;
 	header.command = PLDM_GET_TID;
-	pack_pldm_header(&header, &(msg->hdr));
 
-	return PLDM_SUCCESS;
+	return pack_pldm_header(&header, &(msg->hdr));
 }
 int encode_get_tid_resp(uint8_t instance_id, uint8_t completion_code,
 			uint8_t tid, struct pldm_msg *msg)
@@ -347,16 +356,19 @@ int encode_get_tid_resp(uint8_t instance_id, uint8_t completion_code,
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_get_tid_resp *response =
-	    (struct pldm_get_tid_resp *)msg->payload;
-
-	response->completion_code = completion_code;
 	struct pldm_header_info header = {0};
 	header.instance = instance_id;
 	header.msg_type = PLDM_RESPONSE;
 	header.command = PLDM_GET_TID;
-	pack_pldm_header(&header, &(msg->hdr));
 
+	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
+	if (rc != PLDM_SUCCESS) {
+		return rc;
+	}
+
+	struct pldm_get_tid_resp *response =
+	    (struct pldm_get_tid_resp *)msg->payload;
+	response->completion_code = completion_code;
 	response->tid = tid;
 
 	return PLDM_SUCCESS;
@@ -389,17 +401,17 @@ int decode_get_tid_resp(const struct pldm_msg *msg, size_t payload_length,
 int encode_cc_only_resp(uint8_t instance_id, uint8_t type, uint8_t command,
 			uint8_t cc, struct pldm_msg *msg)
 {
-	struct pldm_header_info header = {0};
-
 	if (msg == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
+	struct pldm_header_info header = {0};
 	header.instance = instance_id;
 	header.msg_type = PLDM_RESPONSE;
 	header.pldm_type = type;
 	header.command = command;
-	int rc = pack_pldm_header(&header, &msg->hdr);
+
+	uint8_t rc = pack_pldm_header(&header, &msg->hdr);
 	if (rc != PLDM_SUCCESS) {
 		return rc;
 	}
@@ -413,13 +425,14 @@ int encode_pldm_header_only(uint8_t msg_type, uint8_t instance_id,
 			    uint8_t pldm_type, uint8_t command,
 			    struct pldm_msg *msg)
 {
-	struct pldm_header_info header = {0};
 	if (msg == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
 	}
+
+	struct pldm_header_info header = {0};
 	header.msg_type = msg_type;
 	header.instance = instance_id;
 	header.pldm_type = pldm_type;
 	header.command = command;
-	return (pack_pldm_header(&header, &(msg->hdr)));
+	return pack_pldm_header(&header, &(msg->hdr));
 }

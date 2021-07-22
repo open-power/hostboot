@@ -6,6 +6,8 @@
 #include "common/utils.hpp"
 #include "dbus_impl_requester.hpp"
 #include "invoker.hpp"
+#include "requester/handler.hpp"
+#include "requester/request.hpp"
 
 #include <err.h>
 #include <getopt.h>
@@ -26,6 +28,7 @@
 #include <iostream>
 #include <iterator>
 #include <memory>
+#include <optional>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -57,11 +60,10 @@ using namespace sdeventplus::source;
 using namespace pldm::responder;
 using namespace pldm::utils;
 
-static Response processRxMsg(const std::vector<uint8_t>& requestMsg,
-                             Invoker& invoker, dbus_api::Requester& requester)
+static std::optional<Response>
+    processRxMsg(const std::vector<uint8_t>& requestMsg, Invoker& invoker,
+                 requester::Handler<requester::Request>& handler)
 {
-
-    Response response;
     uint8_t eid = requestMsg[0];
     uint8_t type = requestMsg[1];
     pldm_header_info hdrFields{};
@@ -70,9 +72,12 @@ static Response processRxMsg(const std::vector<uint8_t>& requestMsg,
     if (PLDM_SUCCESS != unpack_pldm_header(hdr, &hdrFields))
     {
         std::cerr << "Empty PLDM request header \n";
+        return std::nullopt;
     }
-    else if (PLDM_RESPONSE != hdrFields.msg_type)
+
+    if (PLDM_RESPONSE != hdrFields.msg_type)
     {
+        Response response;
         auto request = reinterpret_cast<const pldm_msg*>(hdr);
         size_t requestLen = requestMsg.size() - sizeof(struct pldm_msg_hdr) -
                             sizeof(eid) - sizeof(type);
@@ -91,19 +96,24 @@ static Response processRxMsg(const std::vector<uint8_t>& requestMsg,
             header.instance = hdrFields.instance;
             header.pldm_type = hdrFields.pldm_type;
             header.command = hdrFields.command;
-            auto result = pack_pldm_header(&header, responseHdr);
-            if (PLDM_SUCCESS != result)
+            if (PLDM_SUCCESS != pack_pldm_header(&header, responseHdr))
             {
                 std::cerr << "Failed adding response header \n";
+                return std::nullopt;
             }
             response.insert(response.end(), completion_code);
         }
+        return response;
     }
-    else
+    else if (PLDM_RESPONSE == hdrFields.msg_type)
     {
-        requester.markFree(eid, hdr->instance_id);
+        auto response = reinterpret_cast<const pldm_msg*>(hdr);
+        size_t responseLen = requestMsg.size() - sizeof(struct pldm_msg_hdr) -
+                             sizeof(eid) - sizeof(type);
+        handler.handleResponse(eid, hdrFields.instance, hdrFields.pldm_type,
+                               hdrFields.command, response, responseLen);
     }
-    return response;
+    return std::nullopt;
 }
 
 void optionUsage(void)
@@ -158,6 +168,8 @@ int main(int argc, char** argv)
     auto& bus = pldm::utils::DBusHandler::getBus();
     dbus_api::Requester dbusImplReq(bus, "/xyz/openbmc_project/pldm");
     Invoker invoker{};
+    requester::Handler<requester::Request> reqHandler(sockfd, event,
+                                                      dbusImplReq);
 
 #ifdef LIBPLDMRESPONDER
     using namespace pldm::state_sensor;
@@ -181,13 +193,14 @@ int main(int argc, char** argv)
     {
         hostPDRHandler = std::make_unique<HostPDRHandler>(
             sockfd, hostEID, event, pdrRepo.get(), EVENTS_JSONS_DIR,
-            entityTree.get(), bmcEntityTree.get(), dbusImplReq, verbose);
+            entityTree.get(), bmcEntityTree.get(), dbusImplReq, &reqHandler,
+            verbose);
         hostEffecterParser =
             std::make_unique<pldm::host_effecters::HostEffecterParser>(
                 &dbusImplReq, sockfd, pdrRepo.get(), dbusHandler.get(),
-                HOST_JSONS_DIR, verbose);
-        dbusToPLDMEventHandler =
-            std::make_unique<DbusToPLDMEvent>(sockfd, hostEID, dbusImplReq);
+                HOST_JSONS_DIR, &reqHandler, verbose);
+        dbusToPLDMEventHandler = std::make_unique<DbusToPLDMEvent>(
+            sockfd, hostEID, dbusImplReq, &reqHandler);
     }
     std::unique_ptr<oem_platform::Handler> oemPlatformHandler{};
 
@@ -197,17 +210,19 @@ int main(int argc, char** argv)
     codeUpdate->clearDirPath(LID_STAGING_DIR);
     oemPlatformHandler = std::make_unique<oem_ibm_platform::Handler>(
         dbusHandler.get(), codeUpdate.get(), sockfd, hostEID, dbusImplReq,
-        event);
+        event, &reqHandler);
     codeUpdate->setOemPlatformHandler(oemPlatformHandler.get());
-    invoker.registerHandler(
-        PLDM_OEM, std::make_unique<oem_ibm::Handler>(
-                      oemPlatformHandler.get(), sockfd, hostEID, &dbusImplReq));
+    invoker.registerHandler(PLDM_OEM, std::make_unique<oem_ibm::Handler>(
+                                          oemPlatformHandler.get(), sockfd,
+                                          hostEID, &dbusImplReq, &reqHandler));
 #endif
     invoker.registerHandler(PLDM_BASE, std::make_unique<base::Handler>());
-    invoker.registerHandler(PLDM_BIOS, std::make_unique<bios::Handler>(
-                                           sockfd, hostEID, &dbusImplReq));
+    invoker.registerHandler(
+        PLDM_BIOS, std::make_unique<bios::Handler>(sockfd, hostEID,
+                                                   &dbusImplReq, &reqHandler));
     auto fruHandler = std::make_unique<fru::Handler>(
-        FRU_JSONS_DIR, pdrRepo.get(), entityTree.get(), bmcEntityTree.get());
+        FRU_JSONS_DIR, FRU_MASTER_JSON, pdrRepo.get(), entityTree.get(),
+        bmcEntityTree.get());
     // FRU table is built lazily when a FRU command or Get PDR command is
     // handled. To enable building FRU table, the FRU handler is passed to the
     // Platform handler.
@@ -255,8 +270,8 @@ int main(int argc, char** argv)
         exit(EXIT_FAILURE);
     }
 
-    auto callback = [verbose, &invoker, &dbusImplReq](IO& io, int fd,
-                                                      uint32_t revents) {
+    auto callback = [verbose, &invoker, &reqHandler](IO& io, int fd,
+                                                     uint32_t revents) {
         if (!(revents & EPOLLIN))
         {
             return;
@@ -308,20 +323,20 @@ int main(int argc, char** argv)
                 {
                     // process message and send response
                     auto response =
-                        processRxMsg(requestMsg, invoker, dbusImplReq);
-                    if (!response.empty())
+                        processRxMsg(requestMsg, invoker, reqHandler);
+                    if (response.has_value())
                     {
                         if (verbose)
                         {
                             std::cout << "Sending Msg" << std::endl;
-                            printBuffer(response, verbose);
+                            printBuffer(*response, verbose);
                         }
 
                         iov[0].iov_base = &requestMsg[0];
                         iov[0].iov_len =
                             sizeof(requestMsg[0]) + sizeof(requestMsg[1]);
-                        iov[1].iov_base = response.data();
-                        iov[1].iov_len = response.size();
+                        iov[1].iov_base = (*response).data();
+                        iov[1].iov_len = (*response).size();
 
                         msg.msg_iov = iov;
                         msg.msg_iovlen = sizeof(iov) / sizeof(iov[0]);

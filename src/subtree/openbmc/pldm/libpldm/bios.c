@@ -6,12 +6,11 @@
 
 int encode_get_date_time_req(uint8_t instance_id, struct pldm_msg *msg)
 {
-	struct pldm_header_info header = {0};
-
 	if (msg == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
+	struct pldm_header_info header = {0};
 	header.msg_type = PLDM_REQUEST;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_BIOS;
@@ -24,25 +23,23 @@ int encode_get_date_time_resp(uint8_t instance_id, uint8_t completion_code,
 			      uint8_t day, uint8_t month, uint16_t year,
 			      struct pldm_msg *msg)
 {
-	struct pldm_header_info header = {0};
-	int rc = PLDM_SUCCESS;
-
 	if (msg == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
+	struct pldm_header_info header = {0};
 	header.msg_type = PLDM_RESPONSE;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_BIOS;
 	header.command = PLDM_GET_DATE_TIME;
 
-	struct pldm_get_date_time_resp *response =
-	    (struct pldm_get_date_time_resp *)msg->payload;
-
-	if ((rc = pack_pldm_header(&header, &(msg->hdr))) > PLDM_SUCCESS) {
+	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
+	if (rc != PLDM_SUCCESS) {
 		return rc;
 	}
 
+	struct pldm_get_date_time_resp *response =
+	    (struct pldm_get_date_time_resp *)msg->payload;
 	response->completion_code = completion_code;
 	if (response->completion_code == PLDM_SUCCESS) {
 		response->completion_code = completion_code;
@@ -94,8 +91,6 @@ int encode_set_date_time_req(uint8_t instance_id, uint8_t seconds,
 			     uint8_t month, uint16_t year, struct pldm_msg *msg,
 			     size_t payload_length)
 {
-	struct pldm_header_info header = {0};
-
 	if (msg == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
 	}
@@ -106,11 +101,17 @@ int encode_set_date_time_req(uint8_t instance_id, uint8_t seconds,
 	if (!is_time_legal(seconds, minutes, hours, day, month, year)) {
 		return PLDM_ERROR_INVALID_DATA;
 	}
+
+	struct pldm_header_info header = {0};
 	header.instance = instance_id;
 	header.msg_type = PLDM_REQUEST;
 	header.pldm_type = PLDM_BIOS;
 	header.command = PLDM_SET_DATE_TIME;
-	pack_pldm_header(&header, &msg->hdr);
+
+	uint8_t rc = pack_pldm_header(&header, &msg->hdr);
+	if (rc != PLDM_SUCCESS) {
+		return rc;
+	}
 
 	struct pldm_set_date_time_req *request =
 	    (struct pldm_set_date_time_req *)msg->payload;
@@ -156,8 +157,6 @@ int decode_set_date_time_req(const struct pldm_msg *msg, size_t payload_length,
 int encode_set_date_time_resp(uint8_t instance_id, uint8_t completion_code,
 			      struct pldm_msg *msg, size_t payload_length)
 {
-	struct pldm_header_info header = {0};
-
 	if (msg == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
 	}
@@ -165,11 +164,13 @@ int encode_set_date_time_resp(uint8_t instance_id, uint8_t completion_code,
 		return PLDM_ERROR_INVALID_LENGTH;
 	}
 
+	struct pldm_header_info header = {0};
 	header.instance = instance_id;
 	header.msg_type = PLDM_RESPONSE;
 	header.pldm_type = PLDM_BIOS;
 	header.command = PLDM_SET_DATE_TIME;
-	int rc = pack_pldm_header(&header, &msg->hdr);
+
+	uint8_t rc = pack_pldm_header(&header, &msg->hdr);
 	if (rc != PLDM_SUCCESS) {
 		return rc;
 	}
@@ -205,25 +206,24 @@ int encode_get_bios_table_resp(uint8_t instance_id, uint8_t completion_code,
 			       uint8_t transfer_flag, uint8_t *table_data,
 			       size_t payload_length, struct pldm_msg *msg)
 {
-	struct pldm_header_info header = {0};
-	int rc = PLDM_SUCCESS;
-
 	if (msg == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_get_bios_table_resp *response =
-	    (struct pldm_get_bios_table_resp *)msg->payload;
-
-	response->completion_code = completion_code;
+	struct pldm_header_info header = {0};
 	header.msg_type = PLDM_RESPONSE;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_BIOS;
 	header.command = PLDM_GET_BIOS_TABLE;
-	if ((rc = pack_pldm_header(&header, &(msg->hdr))) > PLDM_SUCCESS) {
+
+	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
+	if (rc != PLDM_SUCCESS) {
 		return rc;
 	}
 
+	struct pldm_get_bios_table_resp *response =
+	    (struct pldm_get_bios_table_resp *)msg->payload;
+	response->completion_code = completion_code;
 	if (response->completion_code == PLDM_SUCCESS) {
 
 		response->next_transfer_handle = htole32(next_transfer_handle);
@@ -242,23 +242,22 @@ int encode_get_bios_table_resp(uint8_t instance_id, uint8_t completion_code,
 
 int encode_get_bios_table_req(uint8_t instance_id, uint32_t transfer_handle,
 			      uint8_t transfer_op_flag, uint8_t table_type,
-			      struct pldm_msg *msg, size_t payload_length)
+			      struct pldm_msg *msg)
 {
-	struct pldm_header_info header = {0};
-
 	if (msg == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-        if(payload_length != PLDM_GET_BIOS_TABLE_REQ_BYTES) {
-            return PLDM_ERROR_INVALID_LENGTH;
-        }
-
+	struct pldm_header_info header = {0};
 	header.msg_type = PLDM_REQUEST;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_BIOS;
 	header.command = PLDM_GET_BIOS_TABLE;
-	pack_pldm_header(&header, &(msg->hdr));
+
+	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
+	if (rc != PLDM_SUCCESS) {
+		return rc;
+	}
 
 	struct pldm_get_bios_table_req *request =
 	    (struct pldm_get_bios_table_req *)msg->payload;
@@ -327,23 +326,22 @@ int decode_get_bios_table_resp(const struct pldm_msg *msg,
 
 int encode_get_bios_attribute_current_value_by_handle_req(
     uint8_t instance_id, uint32_t transfer_handle, uint8_t transfer_op_flag,
-    uint16_t attribute_handle, struct pldm_msg *msg, size_t payload_length)
+    uint16_t attribute_handle, struct pldm_msg *msg)
 {
-	struct pldm_header_info header = {0};
-
 	if (msg == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	if(payload_length != PLDM_GET_BIOS_ATTR_CURR_VAL_BY_HANDLE_REQ_BYTES) {
-            return PLDM_ERROR_INVALID_LENGTH;
-        }
-
+	struct pldm_header_info header = {0};
 	header.msg_type = PLDM_REQUEST;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_BIOS;
 	header.command = PLDM_GET_BIOS_ATTRIBUTE_CURRENT_VALUE_BY_HANDLE;
-	pack_pldm_header(&header, &(msg->hdr));
+
+	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
+	if (rc != PLDM_SUCCESS) {
+		return rc;
+	}
 
 	struct pldm_get_bios_attribute_current_value_by_handle_req *request =
 	    (struct pldm_get_bios_attribute_current_value_by_handle_req *)
@@ -418,25 +416,25 @@ int encode_get_bios_current_value_by_handle_resp(
     uint8_t transfer_flag, const uint8_t *attribute_data,
     size_t attribute_length, struct pldm_msg *msg)
 {
-	struct pldm_header_info header = {0};
-	int rc = PLDM_SUCCESS;
-
 	if (msg == NULL || attribute_data == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	struct pldm_header_info header = {0};
+	header.msg_type = PLDM_RESPONSE;
+	header.instance = instance_id;
+	header.pldm_type = PLDM_BIOS;
+	header.command = PLDM_GET_BIOS_ATTRIBUTE_CURRENT_VALUE_BY_HANDLE;
+
+	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
+	if (rc != PLDM_SUCCESS) {
+		return rc;
 	}
 
 	struct pldm_get_bios_attribute_current_value_by_handle_resp *response =
 	    (struct pldm_get_bios_attribute_current_value_by_handle_resp *)
 		msg->payload;
-
 	response->completion_code = completion_code;
-	header.msg_type = PLDM_RESPONSE;
-	header.instance = instance_id;
-	header.pldm_type = PLDM_BIOS;
-	header.command = PLDM_GET_BIOS_ATTRIBUTE_CURRENT_VALUE_BY_HANDLE;
-	if ((rc = pack_pldm_header(&header, &(msg->hdr))) > PLDM_SUCCESS) {
-		return rc;
-	}
 	if (response->completion_code == PLDM_SUCCESS) {
 
 		response->next_transfer_handle = htole32(next_transfer_handle);
@@ -465,7 +463,11 @@ int encode_set_bios_attribute_current_value_req(
 	header.msg_type = PLDM_REQUEST;
 	header.pldm_type = PLDM_BIOS;
 	header.command = PLDM_SET_BIOS_ATTRIBUTE_CURRENT_VALUE;
-	pack_pldm_header(&header, &msg->hdr);
+
+	uint8_t rc = pack_pldm_header(&header, &msg->hdr);
+	if (rc != PLDM_SUCCESS) {
+		return rc;
+	}
 
 	struct pldm_set_bios_attribute_current_value_req *request =
 	    (struct pldm_set_bios_attribute_current_value_req *)msg->payload;
@@ -540,7 +542,7 @@ int encode_set_bios_attribute_current_value_resp(uint8_t instance_id,
 	header.pldm_type = PLDM_BIOS;
 	header.command = PLDM_SET_BIOS_ATTRIBUTE_CURRENT_VALUE;
 
-	int rc = pack_pldm_header(&header, &msg->hdr);
+	uint8_t rc = pack_pldm_header(&header, &msg->hdr);
 	if (rc != PLDM_SUCCESS) {
 		return rc;
 	}
@@ -558,8 +560,6 @@ int encode_set_bios_table_req(uint8_t instance_id, uint32_t transfer_handle,
 			      const uint8_t *table_data, size_t table_length,
 			      struct pldm_msg *msg, size_t payload_length)
 {
-	int rc = PLDM_SUCCESS;
-
 	if (msg == NULL || table_data == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
 	}
@@ -575,7 +575,8 @@ int encode_set_bios_table_req(uint8_t instance_id, uint32_t transfer_handle,
 	header.pldm_type = PLDM_BIOS;
 	header.command = PLDM_SET_BIOS_TABLE;
 
-	if ((rc = pack_pldm_header(&header, &(msg->hdr))) > PLDM_SUCCESS) {
+	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
+	if (rc != PLDM_SUCCESS) {
 		return rc;
 	}
 
@@ -619,8 +620,6 @@ int encode_set_bios_table_resp(uint8_t instance_id, uint8_t completion_code,
 			       uint32_t next_transfer_handle,
 			       struct pldm_msg *msg)
 {
-	int rc = PLDM_SUCCESS;
-
 	if (msg == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
 	}
@@ -631,7 +630,8 @@ int encode_set_bios_table_resp(uint8_t instance_id, uint8_t completion_code,
 	header.pldm_type = PLDM_BIOS;
 	header.command = PLDM_SET_BIOS_TABLE;
 
-	if ((rc = pack_pldm_header(&header, &(msg->hdr))) > PLDM_SUCCESS) {
+	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
+	if (rc != PLDM_SUCCESS) {
 		return rc;
 	}
 

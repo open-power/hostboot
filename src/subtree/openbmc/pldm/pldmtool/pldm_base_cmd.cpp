@@ -39,6 +39,7 @@ const std::map<const char*, pldm_supported_commands> pldmBaseCmds{
 
 const std::map<const char*, pldm_bios_commands> pldmBiosCmds{
     {"GetBIOSTable", PLDM_GET_BIOS_TABLE},
+    {"SetBIOSTable", PLDM_SET_BIOS_TABLE},
     {"SetBIOSAttributeCurrentValue", PLDM_SET_BIOS_ATTRIBUTE_CURRENT_VALUE},
     {"GetBIOSAttributeCurrentValueByHandle",
      PLDM_GET_BIOS_ATTRIBUTE_CURRENT_VALUE_BY_HANDLE},
@@ -48,7 +49,12 @@ const std::map<const char*, pldm_bios_commands> pldmBiosCmds{
 const std::map<const char*, pldm_platform_commands> pldmPlatformCmds{
     {"SetNumericEffecterValue", PLDM_SET_NUMERIC_EFFECTER_VALUE},
     {"SetStateEffecterStates", PLDM_SET_STATE_EFFECTER_STATES},
-    {"GetPDR", PLDM_GET_PDR}};
+    {"GetPDR", PLDM_GET_PDR},
+    {"GetNumericEffecterValue", PLDM_GET_NUMERIC_EFFECTER_VALUE},
+    {"SetEventReceiver", PLDM_SET_EVENT_RECEIVER},
+    {"GetSensorReading", PLDM_GET_SENSOR_READING},
+    {"GetStateSensorReadings", PLDM_GET_STATE_SENSOR_READINGS},
+    {"PlatformEventMessage", PLDM_PLATFORM_EVENT_MESSAGE}};
 
 const std::map<const char*, pldm_fru_commands> pldmFruCmds{
     {"GetFRURecordTableMetadata", PLDM_GET_FRU_RECORD_TABLE_METADATA},

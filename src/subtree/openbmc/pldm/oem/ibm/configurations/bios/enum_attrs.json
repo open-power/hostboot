@@ -13,30 +13,6 @@
          "displayName" : "pvm_fw_boot_side"
       },
       {
-         "attribute_name":"pvm_inband_code_update",
-         "possible_values":[
-            "Allowed",
-            "Not Allowed"
-         ],
-         "default_values":[
-            "Allowed"
-         ],
-         "helpText" : "pvm_inband_code_update",
-         "displayName" : "pvm_inband_code_update"
-      },
-      {
-         "attribute_name":"pvm_surveillance",
-         "possible_values":[
-            "Disabled",
-            "Enabled"
-         ],
-         "default_values":[
-            "Enabled"
-         ],
-         "helpText" : "pvm_surveillance",
-         "displayName" : "pvm_surveillance"
-      },
-      {
          "attribute_name":"pvm_pcie_error_inject",
          "possible_values":[
             "Disabled",
@@ -96,12 +72,13 @@
          "attribute_name":"pvm_stop_at_standby",
          "possible_values":[
             "Disabled",
-            "Enabled"
+            "Enabled",
+            "ManualOnly"
          ],
          "default_values":[
             "Enabled"
          ],
-         "helpText" : "pvm_stop_at_standby",
+         "helpText" : "Select hypervisor boot policy, requires a reboot for a change to be applied. Disabled: Instructs server not to activate server firmware and partitions for either a user-initated power on or a recovery power on, Enabled: Instructs the server to automatically activate certain partitions for either a user-initated power on or a recovery power on, ManualOnly: Instructs the server to activate server firmware and partitions automatically only in case of a recovery power on after an abnormal termination."
          "displayName" : "pvm_stop_at_standby",
          "dbus":
             {
@@ -109,7 +86,7 @@
                "interface" : "xyz.openbmc_project.Control.Boot.Mode",
                "property_name" : "BootMode",
                "property_type" : "string",
-               "property_values" : ["xyz.openbmc_project.Control.Boot.Mode.Modes.Regular", "xyz.openbmc_project.Control.Boot.Mode.Modes.Setup"]
+               "property_values" : ["xyz.openbmc_project.Control.Boot.Mode.Modes.Regular", "xyz.openbmc_project.Control.Boot.Mode.Modes.Setup", "xyz.openbmc_project.Control.Boot.Mode.Modes.Safe"]
             }
       },
       {
@@ -238,7 +215,19 @@
             "256MB"
          ],
          "helpText" : "Specifies the size of the logical memory block the system uses to read memory, requires a reboot for a change to be applied.",
-         "displayName" : "Memory Region Size"
+         "displayName" : "Memory Region Size (pending)"
+      },
+      {
+         "attribute_name":"hb_memory_region_size_current",
+         "possible_values":[
+            "128MB",
+            "256MB"
+         ],
+         "default_values":[
+            "256MB"
+         ],
+         "helpText" : "Specifies the size of the logical memory block the system uses to read memory for the current IPL. Do not set this attribute directly; set hb_memory_region_size instead.",
+         "displayName" : "Memory Region Size (current)"
       },
       {
          "attribute_name":"hb_power_limit_enable",
@@ -249,9 +238,56 @@
          "default_values":[
             "Disabled"
          ],
-         "helpText" : "Specifies if the power limit is enabled.",
-         "displayName" : "Power Limit Enable"
+         "helpText" : "Specifies if the power limit is enabled, requires a reboot for a change to be applied.",
+         "displayName" : "Power Limit Enable (pending)"
+      },
+      {
+         "attribute_name":"hb_power_limit_enable_current",
+         "possible_values":[
+            "Enabled",
+            "Disabled"
+         ],
+         "default_values":[
+            "Disabled"
+         ],
+         "helpText" : "Specifies if the power limit is enabled for the current IPL. Do not set this attribute directly; set hb_power_limit_enable instead.",
+         "displayName" : "Power Limit Enable (current)"
+      },
+      {
+         "attribute_name":"hb_secure_ver_lockin_enabled",
+         "possible_values":[
+            "Enabled",
+            "Disabled"
+         ],
+         "default_values":[
+            "Disabled"
+         ],
+         "helpText" : "Specifies whether the secure version lockin functionality is enabled.",
+         "displayName" : "Secure Version Lockin Enabled"
+      },
+      {
+         "attribute_name":"hb_mirror_memory_mode",
+         "possible_values":[
+            "Disabled",
+            "Enabled"
+         ],
+         "default_values":[
+            "Enabled"
+         ],
+         "helpText" : "Specifies if the memory mirroring is enabled, requires a reboot for a change to be applied.",
+         "displayName" : "Mirror Memory Mode (pending)"
+      },
+      {
+         "attribute_name":"hb_mirror_memory_mode_current",
+         "possible_values":[
+            "Disabled",
+            "Enabled"
+         ],
+         "default_values":[
+            "Enabled"
+         },
+         "helpText" : "Specifies if the memory mirroring is enabled for the current IPL. Do not set this attribute directly; set hb_mirror_memory_mode instead.",
+         "displayName" : "Mirror Memory Mode (current)"
       }
    ]
 }
-

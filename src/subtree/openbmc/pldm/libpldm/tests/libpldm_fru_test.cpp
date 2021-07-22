@@ -612,7 +612,7 @@ TEST(GetFRURecordByOption, testGoodDecodeRequest)
 TEST(GetFRURecordByOption, testBadDecodeRequest)
 {
     constexpr auto payLoadLength = sizeof(pldm_get_fru_record_by_option_req);
-    std::array<uint8_t, sizeof(pldm_msg_hdr) + payLoadLength> request;
+    std::array<uint8_t, sizeof(pldm_msg_hdr) + payLoadLength> request{};
     auto reqMsg = reinterpret_cast<pldm_msg*>(request.data());
 
     uint32_t retDataTransferHandle{};
@@ -770,5 +770,118 @@ TEST(GetFruRecordByOption, testBadDecodeResponse)
         &retCompletionCode, &retDataTransferHandle, &retTransferFlag,
         &retFruData);
 
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_LENGTH);
+}
+
+TEST(SetFRURecordTable, testGoodEncodeResponse)
+{
+    uint8_t instanceId = 2;
+    uint8_t completionCode = PLDM_SUCCESS;
+    uint32_t nextDataTransferHandle = 32;
+
+    std::array<uint8_t,
+               sizeof(pldm_msg_hdr) + PLDM_SET_FRU_RECORD_TABLE_RESP_BYTES>
+        responseMsg{};
+    struct pldm_msg* response =
+        reinterpret_cast<struct pldm_msg*>(responseMsg.data());
+    auto rc = encode_set_fru_record_table_resp(
+        instanceId, completionCode, nextDataTransferHandle,
+        responseMsg.size() - sizeof(pldm_msg_hdr), response);
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+
+    struct pldm_set_fru_record_table_resp* resp =
+        reinterpret_cast<struct pldm_set_fru_record_table_resp*>(
+            response->payload);
+    EXPECT_EQ(completionCode, resp->completion_code);
+    EXPECT_EQ(htole32(nextDataTransferHandle), resp->next_data_transfer_handle);
+}
+
+TEST(SetFRURecordTable, testBadEncodeResponse)
+{
+    uint8_t instanceId = 0;
+    uint8_t completionCode = PLDM_SUCCESS;
+    uint32_t nextDataTransferHandle = 1;
+
+    std::array<uint8_t,
+               sizeof(pldm_msg_hdr) + PLDM_SET_FRU_RECORD_TABLE_RESP_BYTES>
+        responseMsg{};
+    struct pldm_msg* response =
+        reinterpret_cast<struct pldm_msg*>(responseMsg.data());
+
+    auto rc = encode_set_fru_record_table_resp(
+        instanceId, completionCode, nextDataTransferHandle,
+        responseMsg.size() - sizeof(pldm_msg_hdr), NULL);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = encode_set_fru_record_table_resp(
+        instanceId, completionCode, nextDataTransferHandle,
+        responseMsg.size() - sizeof(pldm_msg_hdr) - 1, response);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_LENGTH);
+}
+
+TEST(SetFRURecordTable, testGoodDecodeRequest)
+{
+    uint32_t transferHandle = 1;
+    uint8_t transferFlag = PLDM_GET_FIRSTPART;
+    uint32_t tableData = 44;
+
+    std::array<uint8_t, sizeof(pldm_msg_hdr) +
+                            PLDM_SET_FRU_RECORD_TABLE_MIN_REQ_BYTES +
+                            sizeof(tableData)>
+        requestMsg{};
+    auto request = reinterpret_cast<struct pldm_msg*>(requestMsg.data());
+    struct pldm_set_fru_record_table_req* req =
+        reinterpret_cast<struct pldm_set_fru_record_table_req*>(
+            request->payload);
+    req->data_transfer_handle = htole32(transferHandle);
+    req->transfer_flag = transferFlag;
+    memcpy(req->fru_record_table_data, &tableData, sizeof(tableData));
+
+    uint32_t retTransferHandle;
+    uint8_t retTransferFlag;
+    struct variable_field table;
+
+    auto rc = decode_set_fru_record_table_req(
+        request, requestMsg.size() - sizeof(pldm_msg_hdr), &retTransferHandle,
+        &retTransferFlag, &table);
+
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+    EXPECT_EQ(retTransferHandle, transferHandle);
+    EXPECT_EQ(retTransferFlag, transferFlag);
+    EXPECT_EQ(table.length, sizeof(tableData));
+    EXPECT_EQ(0, memcmp(table.ptr, &tableData, sizeof(tableData)));
+}
+
+TEST(SetFRURecordTable, testBadDecodeRequest)
+{
+    uint32_t transferHandle = 1;
+    uint8_t transferFlag = PLDM_GET_FIRSTPART;
+    uint32_t tableData = 44;
+
+    std::array<uint8_t, sizeof(pldm_msg_hdr) +
+                            PLDM_SET_FRU_RECORD_TABLE_MIN_REQ_BYTES +
+                            sizeof(tableData)>
+        requestMsg{};
+    auto request = reinterpret_cast<struct pldm_msg*>(requestMsg.data());
+    struct pldm_set_fru_record_table_req* req =
+        reinterpret_cast<struct pldm_set_fru_record_table_req*>(
+            request->payload);
+    req->data_transfer_handle = htole32(transferHandle);
+    req->transfer_flag = transferFlag;
+    memcpy(req->fru_record_table_data, &tableData, sizeof(tableData));
+
+    uint32_t retTransferHandle;
+    uint8_t retTransferFlag;
+
+    auto rc = decode_set_fru_record_table_req(
+        request, requestMsg.size() - sizeof(pldm_msg_hdr), &retTransferHandle,
+        &retTransferFlag, NULL);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    struct variable_field table;
+    rc = decode_set_fru_record_table_req(
+        request,
+        requestMsg.size() - sizeof(pldm_msg_hdr) - sizeof(tableData) - 1,
+        &retTransferHandle, &retTransferFlag, &table);
     EXPECT_EQ(rc, PLDM_ERROR_INVALID_LENGTH);
 }

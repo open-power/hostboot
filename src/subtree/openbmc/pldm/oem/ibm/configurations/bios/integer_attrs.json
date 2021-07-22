@@ -34,7 +34,16 @@
          "scalar_increment" : 1,
          "default_value" : 0,
          "helpText" : "Specifies the number of huge pages available for memory management, requires a reboot for a change to be applied.",
-         "displayName" : "Number Huge Pages"
+         "displayName" : "Number Huge Pages (pending)"
+      },
+      {
+         "attribute_name" : "hb_number_huge_pages_current",
+         "lower_bound" : 0,
+         "upper_bound" : 65535,
+         "scalar_increment" : 1,
+         "default_value" : 0,
+         "helpText" : "Specifies the number of huge pages available for memory management for the current IPL. Do not set this attribute directly; set hb_number_huge_pages instead.",
+         "displayName" : "Number Huge Pages (current)"
       },
       {
          "attribute_name" : "hb_huge_page_size",
@@ -43,7 +52,16 @@
          "scalar_increment" : 1,
          "default_value" : 0,
          "helpText" : "Specifies the size of huge pages, 0 = 16GB, requires a reboot for a change to be applied.",
-         "displayName" : "Huge Page Size"
+         "displayName" : "Huge Page Size (pending)"
+      },
+      {
+         "attribute_name" : "hb_huge_page_size_current",
+         "lower_bound" : 0,
+         "upper_bound" : 255,
+         "scalar_increment" : 1,
+         "default_value" : 0,
+         "helpText" : "Specifies the size of huge pages, 0 = 16GB, for the current IPL. Do not set this attribute directly; set hb_huge_page_size instead.",
+         "displayName" : "Huge Page Size (current)"
       },
       {
          "attribute_name" : "hb_field_core_override",
@@ -51,8 +69,17 @@
          "upper_bound" : 255,
          "scalar_increment" : 1,
          "default_value" : 0,
-         "helpText" : "The number of cores to activate where 0 being to activate all available cores. Where N, for fused cores, is to activate 2N cores. Where N, for non-fused cores, is to activate N cores.",
-         "displayName" : "Field Core Override"
+         "helpText" : "The number of cores to activate where 0 being to activate all available cores. Where N, for fused cores, is to activate 2N cores. Where N, for non-fused cores, is to activate N cores. Requires a reboot for a change to be applied.",
+         "displayName" : "Field Core Override (pending)"
+      },
+      {
+         "attribute_name" : "hb_field_core_override_current",
+         "lower_bound" : 0,
+         "upper_bound" : 255,
+         "scalar_increment" : 1,
+         "default_value" : 0,
+         "helpText" : "The number of cores to activate where 0 being to activate all available cores. Where N, for fused cores, is to activate 2N cores. Where N, for non-fused cores, is to activate N cores. Value applicable for the current IPL. Do not set this attribute directly; set hb_field_core_override instead.",
+         "displayName" : "Field Core Override (current)"
       },
       {
          "attribute_name" : "hb_power_limit_in_watts",
@@ -60,8 +87,17 @@
          "upper_bound" : 65535,
          "scalar_increment" : 1,
          "default_value" : 0,
-         "helpText" : "Specifies the power limit in watts.",
-         "displayName" : "Power Limit In Watts"
+         "helpText" : "Specifies the power limit in watts, requires a reboot for a change to be applied.",
+         "displayName" : "Power Limit In Watts (pending)"
+      },
+      {
+         "attribute_name" : "hb_power_limit_in_watts_current",
+         "lower_bound" : 0,
+         "upper_bound" : 65535,
+         "scalar_increment" : 1,
+         "default_value" : 0,
+         "helpText" : "Specifies the power limit in watts for the current IPL. Do not set this attribute directly; set hb_power_limit_in_watts instead.",
+         "displayName" : "Power Limit In Watts (current)"
       }
    ]
 }

@@ -50,30 +50,9 @@ static void add_record(pldm_pdr *repo, pldm_pdr_record *record)
 
 static inline uint32_t get_new_record_handle(const pldm_pdr *repo)
 {
-	static const uint32_t HB_PDR_OFFSET = 0x01000000;
-	static uint32_t current_hb_handle = HB_PDR_OFFSET;
 	assert(repo != NULL);
-	uint32_t last_used_hdl = 0;
-	if(repo->last != NULL)
-	{
-		if(repo->last->record_handle >= HB_PDR_OFFSET) // It's an HB PDR
-		{
-			last_used_hdl = repo->last->record_handle;
-			current_hb_handle = last_used_hdl + 1;
-		}
-		else // It's a BMC PDR
-		{
-			// We don't want to continue counting from the BMC PDR's
-			// handle, nor do we want to restart, so continue where
-			// we left off.
-			last_used_hdl = current_hb_handle++;
-		}
-	}
-	else
-	{
-		last_used_hdl = HB_PDR_OFFSET;
-		current_hb_handle = last_used_hdl + 1;
-	}
+	uint32_t last_used_hdl =
+	    repo->last != NULL ? repo->last->record_handle : 0;
 	assert(last_used_hdl != UINT32_MAX);
 
 	return last_used_hdl + 1;
@@ -394,12 +373,23 @@ static pldm_entity_node *find_insertion_at(pldm_entity_node *start,
 	return start;
 }
 
-pldm_entity_node *
-pldm_entity_association_tree_add(pldm_entity_association_tree *tree,
-				 pldm_entity *entity, pldm_entity_node *parent,
-				 uint8_t association_type)
+pldm_entity_node *pldm_entity_association_tree_add(
+    pldm_entity_association_tree *tree, pldm_entity *entity,
+    uint16_t entity_instance_number, pldm_entity_node *parent,
+    uint8_t association_type)
 {
 	assert(tree != NULL);
+	assert(entity != NULL);
+
+	if (entity_instance_number != 0xFFFF && parent != NULL) {
+		pldm_entity node;
+		node.entity_type = entity->entity_type;
+		node.entity_instance_num = entity_instance_number;
+		if (pldm_is_current_parent_child(parent, &node)) {
+			return NULL;
+		}
+	}
+
 	assert(association_type == PLDM_ENTITY_ASSOCIAION_PHYSICAL ||
 	       association_type == PLDM_ENTITY_ASSOCIAION_LOGICAL);
 	pldm_entity_node *node = malloc(sizeof(pldm_entity_node));
@@ -408,7 +398,8 @@ pldm_entity_association_tree_add(pldm_entity_association_tree *tree,
 	node->first_child = NULL;
 	node->next_sibling = NULL;
 	node->entity.entity_type = entity->entity_type;
-	node->entity.entity_instance_num = 1;
+	node->entity.entity_instance_num =
+	    entity_instance_number != 0xFFFF ? entity_instance_number : 1;
 	node->association_type = association_type;
 
 	if (tree->root == NULL) {
@@ -430,7 +421,9 @@ pldm_entity_association_tree_add(pldm_entity_association_tree *tree,
 		if (prev->entity.entity_type == entity->entity_type) {
 			assert(prev->entity.entity_instance_num != UINT16_MAX);
 			node->entity.entity_instance_num =
-			    prev->entity.entity_instance_num + 1;
+			    entity_instance_number != 0xFFFF
+				? entity_instance_number
+				: prev->entity.entity_instance_num + 1;
 		}
 		prev->next_sibling = node;
 		node->parent = prev->parent;
@@ -539,6 +532,25 @@ uint8_t pldm_entity_get_num_children(pldm_entity_node *node,
 
 	assert(count < UINT8_MAX);
 	return count;
+}
+
+bool pldm_is_current_parent_child(pldm_entity_node *parent, pldm_entity *node)
+{
+	assert(parent != NULL);
+	assert(node != NULL);
+
+	pldm_entity_node *curr = parent->first_child;
+	while (curr != NULL) {
+		if (node->entity_type == curr->entity.entity_type &&
+		    node->entity_instance_num ==
+			curr->entity.entity_instance_num) {
+
+			return true;
+		}
+		curr = curr->next_sibling;
+	}
+
+	return false;
 }
 
 static void _entity_association_pdr_add_entry(pldm_entity_node *curr,

@@ -10,7 +10,7 @@
          "fru_field_type" : 254,
          "dbus":
             {
-               "interface" : "com.ibm.ipzvpd.Location",
+               "interface" : "xyz.openbmc_project.Inventory.Decorator.LocationCode",
                "property_name" : "LocationCode",
                "property_type" : "string"
             }

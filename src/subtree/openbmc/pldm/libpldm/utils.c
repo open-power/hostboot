@@ -1,5 +1,5 @@
 #include "utils.h"
-
+#include "base.h"
 #include <stdio.h>
 
 /** CRC32 code derived from work by Gary S. Brown.
@@ -194,4 +194,18 @@ bool is_time_legal(uint8_t seconds, uint8_t minutes, uint8_t hours, uint8_t day,
 		return false;
 	}
 	return true;
+}
+
+bool is_transfer_flag_valid(uint8_t transfer_flag)
+{
+	switch (transfer_flag) {
+	case PLDM_START:
+	case PLDM_MIDDLE:
+	case PLDM_END:
+	case PLDM_START_AND_END:
+		return true;
+
+	default:
+		return false;
+	}
 }

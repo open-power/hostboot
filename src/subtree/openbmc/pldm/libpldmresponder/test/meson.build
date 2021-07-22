@@ -24,7 +24,7 @@ endif
   '../../pldmd/instance_id.cpp',
   '../../pldmd/dbus_impl_requester.cpp'
   ]
-dep_src = declare_dependency(sources: dep_src_files)
+dep_src = declare_dependency(sources: dep_src_files,include_directories: '../../requester')
 
 foreach t : tests
   test(t, executable(t.underscorify(), t + '.cpp',

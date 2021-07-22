@@ -15,10 +15,11 @@ namespace state_sensor
 {
 const std::vector<uint8_t> pdrTypes{PLDM_STATE_SENSOR_PDR};
 
-DbusToPLDMEvent::DbusToPLDMEvent(int mctp_fd, uint8_t mctp_eid,
-                                 Requester& requester) :
+DbusToPLDMEvent::DbusToPLDMEvent(
+    int mctp_fd, uint8_t mctp_eid, Requester& requester,
+    pldm::requester::Handler<pldm::requester::Request>* handler) :
     mctp_fd(mctp_fd),
-    mctp_eid(mctp_eid), requester(requester)
+    mctp_eid(mctp_eid), requester(requester), handler(handler)
 {}
 
 void DbusToPLDMEvent::sendEventMsg(uint8_t eventType,
@@ -42,36 +43,34 @@ void DbusToPLDMEvent::sendEventMsg(uint8_t eventType,
         return;
     }
 
-    uint8_t* responseMsg = nullptr;
-    size_t responseMsgSize{};
+    auto platformEventMessageResponseHandler = [](mctp_eid_t /*eid*/,
+                                                  const pldm_msg* response,
+                                                  size_t respMsgLen) {
+        if (response == nullptr || !respMsgLen)
+        {
+            std::cerr
+                << "Failed to receive response for platform event message \n";
+            return;
+        }
+        uint8_t completionCode{};
+        uint8_t status{};
+        auto rc = decode_platform_event_message_resp(response, respMsgLen,
+                                                     &completionCode, &status);
+        if (rc || completionCode)
+        {
+            std::cerr << "Failed to decode_platform_event_message_resp: "
+                      << "rc=" << rc
+                      << ", cc=" << static_cast<unsigned>(completionCode)
+                      << std::endl;
+        }
+    };
 
-    auto requesterRc =
-        pldm_send_recv(mctp_eid, mctp_fd, requestMsg.data(), requestMsg.size(),
-                       &responseMsg, &responseMsgSize);
-    std::unique_ptr<uint8_t, decltype(std::free)*> responseMsgPtr{responseMsg,
-                                                                  std::free};
-
-    requester.markFree(mctp_eid, instanceId);
-    if (requesterRc != PLDM_REQUESTER_SUCCESS)
+    rc = handler->registerRequest(
+        mctp_eid, instanceId, PLDM_PLATFORM, PLDM_PLATFORM_EVENT_MESSAGE,
+        std::move(requestMsg), std::move(platformEventMessageResponseHandler));
+    if (rc)
     {
-        std::cerr
-            << "Failed to send msg to report state sensor event changes, rc = "
-            << requesterRc << std::endl;
-        return;
-    }
-    uint8_t completionCode{};
-    uint8_t status{};
-    auto responsePtr = reinterpret_cast<struct pldm_msg*>(responseMsgPtr.get());
-    rc = decode_platform_event_message_resp(
-        responsePtr, responseMsgSize - sizeof(pldm_msg_hdr), &completionCode,
-        &status);
-
-    if (rc != PLDM_SUCCESS || completionCode != PLDM_SUCCESS)
-    {
-        std::cerr << "Failed to decode_platform_event_message_resp: "
-                  << "rc=" << rc
-                  << ", cc=" << static_cast<unsigned>(completionCode)
-                  << std::endl;
+        std::cerr << "Failed to send the platform event message \n";
     }
 }
 

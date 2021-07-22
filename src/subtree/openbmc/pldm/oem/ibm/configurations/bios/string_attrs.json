@@ -68,7 +68,17 @@
          "default_string_length" : 32,
          "default_string" : "00000000000000000000000000000000",
          "helpText" : "Specifies the configuration flags used by manufacturing, requires a reboot for a change to be applied.",
-         "displayName" : "Manufacturing Flags"
+         "displayName" : "Manufacturing Flags (pending)"
+      },
+      {
+         "attribute_name" : "hb_mfg_flags_current",
+         "string_type" : "Hex",
+         "minimum_string_length" : 32,
+         "maximum_string_length" : 32,
+         "default_string_length" : 32,
+         "default_string" : "00000000000000000000000000000000",
+         "helpText" : "Specifies the configuration flags used by manufacturing for the current IPL. Do not set this attribute directly; set hb_mfg_flags instead.",
+         "displayName" : "Manufacturing Flags (current)"
       },
       {
          "attribute_name" : "hb_lid_ids",

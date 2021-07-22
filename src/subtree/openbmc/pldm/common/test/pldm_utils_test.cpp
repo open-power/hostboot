@@ -906,3 +906,28 @@ TEST(FindStateSensorPDR, testNoMatchCompositeSensor)
 
     pldm_pdr_destroy(repo);
 }
+
+TEST(toString, allTestCases)
+{
+    variable_field buffer{};
+    constexpr std::string_view str1{};
+    auto returnStr1 = toString(buffer);
+    EXPECT_EQ(returnStr1, str1);
+
+    constexpr std::string_view str2{"0penBmc"};
+    constexpr std::array<uint8_t, 7> bufferArr1{0x30, 0x70, 0x65, 0x6e,
+                                                0x42, 0x6d, 0x63};
+    buffer.ptr = bufferArr1.data();
+    buffer.length = bufferArr1.size();
+    auto returnStr2 = toString(buffer);
+    EXPECT_EQ(returnStr2, str2);
+
+    constexpr std::string_view str3{"0pen mc"};
+    // \xa0 - the non-breaking space in ISO-8859-1
+    constexpr std::array<uint8_t, 7> bufferArr2{0x30, 0x70, 0x65, 0x6e,
+                                                0xa0, 0x6d, 0x63};
+    buffer.ptr = bufferArr2.data();
+    buffer.length = bufferArr2.size();
+    auto returnStr3 = toString(buffer);
+    EXPECT_EQ(returnStr3, str3);
+}

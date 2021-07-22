@@ -344,7 +344,7 @@ TEST(setNumericEffecterValueHandler, testGoodRequest)
 
     uint16_t effecterId = 3;
     uint32_t effecterValue = 2100000000; // 2036-07-18 21:20:00
-    PropertyValue propertyValue = static_cast<uint32_t>(effecterValue);
+    PropertyValue propertyValue = static_cast<uint64_t>(effecterValue);
 
     DBusMapping dbusMapping{"/foo/bar", "xyz.openbmc_project.Foo.Bar",
                             "propertyName", "uint64_t"};

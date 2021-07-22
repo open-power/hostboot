@@ -9,14 +9,6 @@ int encode_bios_attribute_update_event_req(uint8_t instance_id,
 					   size_t payload_length,
 					   struct pldm_msg *msg)
 {
-	struct pldm_header_info header = {0};
-	int rc = PLDM_SUCCESS;
-
-	header.msg_type = PLDM_REQUEST;
-	header.instance = instance_id;
-	header.pldm_type = PLDM_PLATFORM;
-	header.command = PLDM_PLATFORM_EVENT_MESSAGE;
-
 	if (format_version != 1) {
 		return PLDM_ERROR_INVALID_DATA;
 	}
@@ -35,7 +27,13 @@ int encode_bios_attribute_update_event_req(uint8_t instance_id,
 		return PLDM_ERROR_INVALID_LENGTH;
 	}
 
-	if ((rc = pack_pldm_header(&header, &(msg->hdr))) > PLDM_SUCCESS) {
+	struct pldm_header_info header = {0};
+	header.msg_type = PLDM_REQUEST;
+	header.instance = instance_id;
+	header.pldm_type = PLDM_PLATFORM;
+	header.command = PLDM_PLATFORM_EVENT_MESSAGE;
+	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
+	if (rc != PLDM_SUCCESS) {
 		return rc;
 	}
 

@@ -3,6 +3,7 @@
 #include "libpldm/platform.h"
 
 #include "pldmd/dbus_impl_requester.hpp"
+#include "requester/handler.hpp"
 
 #include <filesystem>
 #include <fstream>
@@ -36,10 +37,12 @@ class DbusToFileHandler
      *  @param[in] mctp_eid - MCTP EID of host firmware
      *  @param[in] requester - pointer to a Requester object
      *  @param[in] resDumpCurrentObjPath - resource dump current object path
+     *  @param[in] handler - PLDM request handler
      */
-    DbusToFileHandler(int mctp_fd, uint8_t mctp_eid,
-                      dbus_api::Requester* requester,
-                      sdbusplus::message::object_path resDumpCurrentObjPath);
+    DbusToFileHandler(
+        int mctp_fd, uint8_t mctp_eid, dbus_api::Requester* requester,
+        sdbusplus::message::object_path resDumpCurrentObjPath,
+        pldm::requester::Handler<pldm::requester::Request>* handler);
 
     /** @brief Process the new resource dump request
      *  @param[in] vspString - vsp string
@@ -70,6 +73,10 @@ class DbusToFileHandler
                                     const uint32_t fileHandle,
                                     const uint16_t type);
 
+    /** @brief report failure that a resource dump has failed
+     */
+    void reportResourceDumpFailure();
+
     /** @brief fd of MCTP communications socket */
     int mctp_fd;
 
@@ -83,6 +90,9 @@ class DbusToFileHandler
 
     /** @brief Hold the current resource dump object path */
     sdbusplus::message::object_path resDumpCurrentObjPath;
+
+    /** @brief PLDM request handler */
+    pldm::requester::Handler<pldm::requester::Request>* handler;
 };
 
 } // namespace oem_ibm

@@ -2,7 +2,8 @@ host_bmc_test_src = declare_dependency(
           sources: [
             '../dbus_to_host_effecters.cpp',
             '../../pldmd/dbus_impl_requester.cpp',
-            '../../pldmd/instance_id.cpp'])
+            '../../pldmd/instance_id.cpp'],
+            include_directories: '../../requester')
 
 tests = [
   'dbus_to_host_effecter_test',
@@ -20,6 +21,7 @@ foreach t : tests
                          libpldm_dep,
                          libpldmutils,
                          phosphor_dbus_interfaces,
-                         sdbusplus]),
+                         sdbusplus,
+                         sdeventplus]),
        workdir: meson.current_source_dir())
 endforeach

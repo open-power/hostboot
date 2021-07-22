@@ -6,20 +6,22 @@
 int encode_get_alert_status_req(uint8_t instance_id, uint8_t version_id,
 				struct pldm_msg *msg, size_t payload_length)
 {
-	struct pldm_header_info header = {0};
-	int rc = PLDM_SUCCESS;
-
-	header.msg_type = PLDM_REQUEST;
-	header.instance = instance_id;
-	header.pldm_type = PLDM_OEM;
-	header.command = PLDM_HOST_GET_ALERT_STATUS;
-
-	if ((rc = pack_pldm_header(&header, &(msg->hdr))) > PLDM_SUCCESS) {
-		return rc;
+	if (msg == NULL) {
+		return PLDM_ERROR_INVALID_LENGTH;
 	}
 
 	if (payload_length != PLDM_GET_ALERT_STATUS_REQ_BYTES) {
 		return PLDM_ERROR_INVALID_LENGTH;
+	}
+
+	struct pldm_header_info header = {0};
+	header.msg_type = PLDM_REQUEST;
+	header.instance = instance_id;
+	header.pldm_type = PLDM_OEM;
+	header.command = PLDM_HOST_GET_ALERT_STATUS;
+	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
+	if (rc != PLDM_SUCCESS) {
+		return rc;
 	}
 
 	msg->payload[0] = version_id;
@@ -75,20 +77,22 @@ int encode_get_alert_status_resp(uint8_t instance_id, uint8_t completion_code,
 				 uint32_t rack_entry, uint32_t pri_cec_node,
 				 struct pldm_msg *msg, size_t payload_length)
 {
-	struct pldm_header_info header = {0};
-	int rc = PLDM_SUCCESS;
-
-	header.msg_type = PLDM_RESPONSE;
-	header.instance = instance_id;
-	header.pldm_type = PLDM_OEM;
-	header.command = PLDM_HOST_GET_ALERT_STATUS;
-
-	if ((rc = pack_pldm_header(&header, &(msg->hdr))) > PLDM_SUCCESS) {
-		return rc;
+	if (msg == NULL) {
+		return PLDM_ERROR_INVALID_LENGTH;
 	}
 
 	if (payload_length != PLDM_GET_ALERT_STATUS_RESP_BYTES) {
 		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	struct pldm_header_info header = {0};
+	header.msg_type = PLDM_RESPONSE;
+	header.instance = instance_id;
+	header.pldm_type = PLDM_OEM;
+	header.command = PLDM_HOST_GET_ALERT_STATUS;
+	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
+	if (rc != PLDM_SUCCESS) {
+		return rc;
 	}
 
 	struct pldm_get_alert_status_resp *response =
