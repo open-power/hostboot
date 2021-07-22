@@ -5810,8 +5810,9 @@ uint64_t  PlatPmPPB::dccr_value()
         }
         else
         {
-          iv_dccr_value = 0x0F3EF3E9C0000000ull;
-          FAPI_INF("Setting DCCR to internal default of 0x%016llX as #W value is 0.",
+            // This value effectively disables the heavy droop condition
+            iv_dccr_value = 0x0F3E03E9C0000000ull;
+            FAPI_INF("Setting DCCR to internal default of 0x%016llX as #W value is 0.",
                     iv_dccr_value);
         }
     }
