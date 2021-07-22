@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -420,18 +420,6 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
                 break;
             }
         }  // end if( l_coreMode == TARGETING::FUSED_CORE_MODE_HB_SMT8_ONLY )
-
-
-        //Check if we are in MPIPL
-        uint8_t is_mpipl = 0;
-        sys->tryGetAttr<TARGETING::ATTR_IS_MPIPL_HB>(is_mpipl);
-
-        if(is_mpipl)
-        {
-            TRACFCOMP( g_fapiTd,
-                    "activate_threads: We are in MPIPL, extending cache to be real memory" );
-            mm_extend(MM_EXTEND_REAL_MEMORY);
-        }
     } while(0);
 
     //make sure we always unload the module if we loaded it

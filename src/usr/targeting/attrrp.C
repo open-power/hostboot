@@ -1410,6 +1410,10 @@ namespace TARGETING
     {
         do
         {
+            TRACFCOMP(g_trac_targeting, "AttrRP::populateAttrsForMpipl: "
+                      "In MPIPL, extending cache to be real memory" );
+            mm_extend(MM_EXTEND_REAL_MEMORY);
+
             // Copy RW, Heap Zero Init sections because we are not
             // running the isteps that set these attrs during MPIPL
             for (size_t i = 0; i < iv_sectionCount; ++i)
