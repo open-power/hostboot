@@ -295,8 +295,37 @@ fapi2::ReturnCode platParseWOFTables(TARGETING::Target* i_procTarg, uint8_t* o_w
         // from SEEPROM if not found in override
         if (l_errl)
         {
-            l_errl->collectTrace(FAPI_TRACE_NAME, 256);
-            errlCommit(l_errl, FAPI2_COMP_ID);
+            // Check to see if HB has logged this error before
+            auto fail_logged = i_procTarg->getAttr<ATTR_LOGGED_FAIL_GETTING_OVERRIDE_WOF_TABLE>();
+
+            // Only log the error if it hasn't been logged before
+            if (fail_logged == 0)
+            {
+                FAPI_INF("platParseWOFTables: Override WOF table was not found (fail_logged=%d) "
+                         "Commiting Log: "
+                         TRACE_ERR_FMT,
+                         fail_logged,
+                         TRACE_ERR_ARGS(l_errl));
+
+                l_errl->collectTrace(FAPI_TRACE_NAME, 256);
+                errlCommit(l_errl, FAPI2_COMP_ID);
+
+                // Update attribute to 1 so that it is not logged again
+                fail_logged = 1;
+                i_procTarg->setAttr<ATTR_LOGGED_FAIL_GETTING_OVERRIDE_WOF_TABLE>(fail_logged);
+
+            }
+            else
+            {
+                FAPI_INF("platParseWOFTables: Override WOF table was not found (fail_logged=%d) "
+                         "Previously logged, so deleting this error: "
+                         TRACE_ERR_FMT,
+                         fail_logged,
+                         TRACE_ERR_ARGS(l_errl));
+
+                delete l_errl;
+                l_errl = nullptr;
+            }
         }
 
         // Get from SEEPROM
