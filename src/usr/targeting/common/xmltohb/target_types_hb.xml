@@ -89,6 +89,9 @@
       <id>HOMER_VIRT_ADDR</id>
     </attribute>
     <attribute>
+      <id>LOGGED_FAIL_GETTING_OVERRIDE_WOF_TABLE</id>
+    </attribute>
+    <attribute>
       <id>PART_NUMBER</id>
     </attribute>
     <attribute>

@@ -925,6 +925,30 @@
   </attribute>
 
   <attribute>
+    <id>LOGGED_FAIL_GETTING_OVERRIDE_WOF_TABLE</id>
+    <description>
+      This attribute keeps track if an error log has been committed for when
+      Hostboot fails to retrieve the override WOF table for a specific
+      processor target.
+
+      0x00 = An error log has NOT been committed for this fail
+      0x01 = An error log has been committed for this fail
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <no_export/>
+    <range>
+      <min>0</min>
+      <max>1</max>
+    </range>
+    <hbOnly/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
     <id>MASTER_MBOX_SCRATCH</id>
     <description>
       Value of the master mailbox scratch regs

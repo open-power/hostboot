@@ -662,6 +662,9 @@ namespace HBPM
 
         do
         {
+            // Clear this attribute so hostboot logs an error if a specific
+            // situation happens
+            i_target->setAttr<ATTR_LOGGED_FAIL_GETTING_OVERRIDE_WOF_TABLE>(0);
 
             // Update the physical addresses prior to mapping to make sure
             // they are current.
