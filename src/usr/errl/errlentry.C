@@ -2799,43 +2799,94 @@ void ErrlEntry::addFruCalloutDataToSrc(TARGETING::Target* i_target,
     using namespace TARGETING;
 
     // FRU callout
-    fruCallOutEntry_t l_fruco;
+    fruCallOutEntry_t l_fruco {0};
 
     // Priority
     l_fruco.priority = i_priority;
 
-    // Location Code
-    ATTR_LOCATION_CODE_type l_locationcode;
-    UTIL::tryGetAttributeInHierarchy<ATTR_LOCATION_CODE>(i_target, l_locationcode);
-    set_errl_string(l_fruco.locationCode, l_locationcode);
-    // Spec requires this size to be a multiple of 4 (padded with zeroes).
-    l_fruco.locCodeLen = ALIGN_4(strlen(l_locationcode));
+    // The full location code is composed of the CHASSIS_LOCATION_CODE (C) concatenated with the
+    // STATIC_ABS_LOCATION_CODE (S) separated by a hyphen. Ex. U78D8.ND0.FGD002D-P0-C16
+    //                                                         CCCCCCCCCCCCCCCCC SSSSSS
+    std::vector<char> full_location_code;
+
+    {
+        Target* const sys = UTIL::assertGetToplevelTarget();
+
+        ATTR_CHASSIS_LOCATION_CODE_type chassis_code { };
+
+        // ATTR_CHASSIS_LOCATION_CODE is a null terminated string and the max number of chars is defined by
+        // ATTR_CHASSIS_LOCATION_CODE_max_chars. The maximum size for the location code according to the PEL
+        // spec is PEL_LOC_CODE_SIZE which is also a null terminated string. So, ATTR_CHASSIS_LOCATION_CODE_max_chars
+        // must be less than PEL_LOC_CODE_SIZE to account for the null terminator.
+        static_assert(ATTR_CHASSIS_LOCATION_CODE_max_chars < PEL_LOC_CODE_SIZE,
+                     "ATTR_CHASSIS_LOCATION_CODE is too large to fit inside FRU callout location code section.");
+
+        sys->tryGetAttr<ATTR_CHASSIS_LOCATION_CODE>(chassis_code);
+
+        full_location_code.insert(end(full_location_code), chassis_code, chassis_code + strlen(chassis_code));
+
+    }
+
+    // Add the seperator
+    full_location_code.push_back('-');
+
+    {
+        ATTR_STATIC_ABS_LOCATION_CODE_type static_abs_location_code { };
+
+        // ATTR_STATIC_ABS_LOCATION_CODE is a null terminated string and the max number of chars is defined by
+        // ATTR_STATIC_ABS_LOCATION_CODE_max_chars. The maximum size for the location code according to the PEL
+        // spec is PEL_LOC_CODE_SIZE which is also a null terminated string. So, ATTR_STATIC_ABS_LOCATION_CODE_max_chars
+        // must be less than PEL_LOC_CODE_SIZE to account for the null terminator.
+        static_assert(ATTR_STATIC_ABS_LOCATION_CODE_max_chars < PEL_LOC_CODE_SIZE,
+                     "ATTR_STATIC_ABS_LOCATION_CODE is too large to fit inside FRU callout location code section.");
+
+        UTIL::tryGetAttributeInHierarchy<ATTR_STATIC_ABS_LOCATION_CODE>(i_target, static_abs_location_code);
+
+        full_location_code.insert(end(full_location_code),
+                                  static_abs_location_code,
+                                  static_abs_location_code + strlen(static_abs_location_code));
+    }
+
+    // Add the null terminator
+    full_location_code.push_back('\0');
+
+    // By setting the location code, part number, serial number, and CCIN using set_errl_string it ensures that the size
+    // constraints given by the PEL spec are respected. That means that if any of those strings go over the size then
+    // the remaining right half of characters are truncated and will not appear in the error log.
+    set_errl_string(l_fruco.locationCode, full_location_code.data());
+
+    // Spec requires the location code and size to be a multiple of 4 bytes (padded with NULLs). The location code
+    // member was zero intialized so all that's necessary to follow spec is to allign the size by 4.
+    l_fruco.locCodeLen = ALIGN_4(full_location_code.size());
 
     // Type
     l_fruco.fruCompType = i_compType;
 
     // Part Number
-    ATTR_PART_NUMBER_type l_partnum;
+    ATTR_PART_NUMBER_type l_partnum { };
     UTIL::tryGetAttributeInHierarchy<ATTR_PART_NUMBER>(i_target, l_partnum);
+    // Set part number truncating as necessary.
     set_errl_string(l_fruco.partNumber,
                     reinterpret_cast<const char*>(l_partnum));
 
     // CCIN
-    ATTR_PCIE_NVME_CCIN_type l_ccin;
+    ATTR_PCIE_NVME_CCIN_type l_ccin { };
     UTIL::tryGetAttributeInHierarchy<ATTR_PCIE_NVME_CCIN>(i_target, l_ccin);
+    // Set CCIN truncating as necessary.
     set_errl_string(l_fruco.ccin,
                     reinterpret_cast<const char*>(&l_ccin),
                     false);
 
     // Serial Number
-    ATTR_SERIAL_NUMBER_type l_serialnumber;
+    ATTR_SERIAL_NUMBER_type l_serialnumber { };
     UTIL::tryGetAttributeInHierarchy<ATTR_SERIAL_NUMBER>(i_target, l_serialnumber);
+    // Set serial number truncating as necessary.
     set_errl_string(l_fruco.serialNumber,
                     reinterpret_cast<const char*>(l_serialnumber),
                     false);
 
     // MRU ID
-    ATTR_MRU_ID_type l_mruid;
+    ATTR_MRU_ID_type l_mruid { };
     UTIL::tryGetAttributeInHierarchy<ATTR_MRU_ID>(i_target, l_mruid);
     l_fruco.mruPriVec.push_back(i_priority); // MRU gets same priority as callout
     l_fruco.mruIdVec.push_back(l_mruid);

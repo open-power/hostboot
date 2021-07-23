@@ -695,13 +695,13 @@ typedef struct pelmruidsubstruct
  */
 typedef struct frucoentry
 {
-    uint32_t        priority;
-    size_t          locCodeLen;
-    char            locationCode[PEL_LOC_CODE_SIZE];
-    uint8_t         fruCompType;
-    char            partNumber[PEL_PART_NUM_SIZE];
-    char            ccin[PEL_CCIN_SIZE];
-    char            serialNumber[PEL_SERIAL_NUM_SIZE];
+    uint32_t        priority = 0;
+    size_t          locCodeLen = 0;
+    char            locationCode[PEL_LOC_CODE_SIZE] = {0};
+    uint8_t         fruCompType = 0;
+    char            partNumber[PEL_PART_NUM_SIZE] = {0};
+    char            ccin[PEL_CCIN_SIZE] = {0};
+    char            serialNumber[PEL_SERIAL_NUM_SIZE] = {0};
     std::vector<uint32_t> mruPriVec;
     std::vector<uint32_t> mruIdVec;
 } fruCallOutEntry_t;
