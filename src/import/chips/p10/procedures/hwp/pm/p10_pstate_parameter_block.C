@@ -252,6 +252,11 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
                  "WOF initialization failure");
 
         // ----------------
+        // Set this part's fmax value based on VPD and attributes
+        // ----------------
+        FAPI_TRY(l_pmPPB->part_fmax());
+
+        // ----------------
         // Initialize GPPB structure
         // ----------------
         FAPI_TRY(l_pmPPB->gppb_init(l_globalppb));
@@ -991,7 +996,11 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
 
         io_globalppb->base.frequency_step_khz = revle32(iv_frequency_step_khz);
 
-        io_globalppb->base.frequency_ceiling_khz = revle32(iv_attrs.attr_freq_core_ceiling_mhz * 1000);
+        io_globalppb->base.frequency_ceiling_khz = revle32(iv_part_ceiling_freq_mhz * 1000);
+
+        FAPI_INF("io_globalppb->base.frequency_ceiling_khz = %X (%d)",
+                        revle32(io_globalppb->base.frequency_ceiling_khz),
+                        revle32(io_globalppb->base.frequency_ceiling_khz));
 
         io_globalppb->base.occ_complex_frequency_mhz = revle32(iv_attrs.attr_pau_frequency_mhz/4);
 
@@ -1372,8 +1381,11 @@ fapi2::ReturnCode PlatPmPPB::oppb_init(
         FAPI_INF("frequency_max_khz %08x",i_occppb->frequency_max_khz);
 
         // frequency_ceiling_khz - Maximum operational frquency
-        i_occppb->frequency_ceiling_khz = iv_attrs.attr_freq_core_ceiling_mhz * 1000;
-        i_occppb->frequency_ceiling_khz = revle32(i_occppb->frequency_ceiling_khz);
+        i_occppb->frequency_ceiling_khz = revle32(iv_part_ceiling_freq_mhz * 1000);
+
+        FAPI_INF("i_occppb->frequency_ceiling_khz = %X (%d)",
+                        revle32(i_occppb->frequency_ceiling_khz),
+                        revle32(i_occppb->frequency_ceiling_khz));
 
         // frequency_step_khz
         i_occppb->frequency_step_khz = revle32(iv_frequency_step_khz);
@@ -1431,7 +1443,7 @@ fapi2::ReturnCode PlatPmPPB::oppb_init(
         i_occppb->ultraturbo_freq_mhz =
             revle32(iv_attr_mvpd_poundV_other_info.ultraturbo_freq_mhz);
 
-        //fixed_freq_mode_frequency_mhz
+        //fmax_frequency_mhz
         i_occppb->fmax_freq_mhz =
             revle32(iv_attr_mvpd_poundV_other_info.fmax_freq_mhz);
 
@@ -2682,6 +2694,7 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
         iv_vddWofBaseFreq = (uint32_t)(revle16(iv_poundV_raw_data.other_info.VddTdpWofCoreFreq));
         iv_vddUTFreq = (uint32_t)(revle16(iv_poundV_raw_data.other_info.VddUTCoreFreq));
         iv_vddFmaxFreq = (uint32_t)(revle16(iv_poundV_raw_data.other_info.VddFmxCoreFreq));
+
         FAPI_INF("Pointer Frequencies:  PSAV  0x%04x (%04d) WOF  0x%04x (%04d) UT  0x%04x (%04d) Fmax  0x%04x (%04d)",
                         iv_vddPsavFreq, iv_vddPsavFreq,
                         iv_vddWofBaseFreq, iv_vddWofBaseFreq,
@@ -3779,6 +3792,32 @@ fapi_try_exit:
 }
 
 ///////////////////////////////////////////////////////////
+////////   part_fmax
+///////////////////////////////////////////////////////////
+fapi2::ReturnCode PlatPmPPB::part_fmax()
+{
+    FAPI_INF(">>>>>>>>>>>>> part_fmax");
+
+    fapi2::ReturnCode   l_rc;
+    if (iv_vddFmaxFreq < iv_attrs.attr_freq_core_ceiling_mhz)
+    {
+        FAPI_INF("Part ceiling limit to fmax of %X (%d)",
+                    iv_vddFmaxFreq,  iv_vddFmaxFreq);
+        iv_part_ceiling_freq_mhz = iv_vddFmaxFreq;
+    }
+    else
+    {
+        FAPI_INF("Part ceiling set to system ceiling of %X (%d)",
+                    iv_attrs.attr_freq_core_ceiling_mhz, iv_attrs.attr_freq_core_ceiling_mhz);
+        iv_part_ceiling_freq_mhz = iv_attrs.attr_freq_core_ceiling_mhz;
+    }
+
+    FAPI_INF("<<<<<<<<<< part_fmax");
+    return fapi2::current_err;
+}
+
+
+///////////////////////////////////////////////////////////
 ////////  get_mvpd_poundW
 ///////////////////////////////////////////////////////////
 fapi2::ReturnCode PlatPmPPB::get_mvpd_poundW (void)
@@ -4458,7 +4497,7 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
     uint32_t                                 l_safe_mode_op_ps2freq_khz;
     uint32_t                                 l_safe_op_freq_mhz;
     uint8_t                                  l_safe_op_ps;
-    uint8_t                                  l_psave_ps;   
+    uint8_t                                  l_psave_ps;
     uint32_t                                 l_core_floor_mhz;
     uint32_t                                 l_op_pt_mhz;
     Pstate                                   l_safe_mode_ps;
@@ -4773,6 +4812,7 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
         goto fapi_try_exit;
     }
     iv_vdd_vpd_vmin = ps2v_mv(l_psave_ps, VDD, VPD_PT_SET_BIASED);
+
 
     // Calculate boot mode voltages
     if (!iv_attrs.attr_boot_voltage_mv[VDD])
