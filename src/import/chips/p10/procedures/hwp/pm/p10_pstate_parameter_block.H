@@ -490,6 +490,12 @@ class PlatPmPPB
         fapi2::ReturnCode get_mvpd_iddq( void );
 
         /// -----------------------------------------------------------------------
+        /// @brief Set the class variable that reflects this parts maximum frequency
+        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// -----------------------------------------------------------------------
+        fapi2::ReturnCode part_fmax( void );
+
+        /// -----------------------------------------------------------------------
         /// @brief Disable Pstates and any dependent functions
         /// -----------------------------------------------------------------------
         void disable_pstates();
@@ -780,6 +786,7 @@ class PlatPmPPB
         uint32_t                  iv_frequency_step_khz;  // System step frequency
         uint32_t                  iv_proc_dpll_divider;   // proc dpll divider value
         uint32_t                  iv_occ_freq_mhz;        // OCC frequency
+        uint32_t                  iv_part_ceiling_freq_mhz;  // This part's ceiling frequency from VPD
         uint8_t                   iv_wov_underv_enabled;
         uint8_t                   iv_wov_overv_enabled;
         uint8_t                   iv_ocs_enabled;
