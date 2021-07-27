@@ -30,6 +30,14 @@
       <description>PLL Lock Not set</description>
       <ffdc>TARGET_CHIPLET</ffdc>
       <ffdc>PLL_READ</ffdc>
+      <callout>
+       <procedure>CODE</procedure>
+       <priority>HIGH</priority>
+      </callout>
+      <callout>
+        <target>TARGET_CHIPLET</target>
+        <priority>MEDIUM</priority>
+      </callout>
    </hwpError>
    <!-- ******************************************************************** -->
    <hwpError>
@@ -41,6 +49,14 @@
       <ffdc>TARGET</ffdc>
       <ffdc>CHIPLET</ffdc>
       <ffdc>UNCALIBRATED</ffdc>
+      <callout>
+       <procedure>CODE</procedure>
+       <priority>HIGH</priority>
+      </callout>
+      <callout>
+        <target>TARGET_CHIPLET</target>
+        <priority>LOW</priority>
+      </callout>
    </hwpError>
    <!-- ******************************************************************** -->
    <hwpError>
@@ -52,6 +68,14 @@
       </description>
       <ffdc>TARGET</ffdc>
       <ffdc>LOCK_ERR</ffdc>
+      <callout>
+       <procedure>CODE</procedure>
+       <priority>HIGH</priority>
+      </callout>
+      <callout>
+       <target>TARGET</target>
+       <priority>LOW</priority>
+      </callout>
    </hwpError>
    <!-- ******************************************************************** -->
    <hwpError>
@@ -63,6 +87,14 @@
       </description>
       <ffdc>TARGET</ffdc>
       <ffdc>LOCK_ERR</ffdc>
+      <callout>
+       <procedure>CODE</procedure>
+       <priority>HIGH</priority>
+      </callout>
+      <callout>
+       <target>TARGET</target>
+       <priority>LOW</priority>
+      </callout>
    </hwpError>
    <!-- ******************************************************************** -->
    <hwpError>
@@ -78,6 +110,14 @@
       <ffdc>INTERMEDIATE_STEP</ffdc>
       <ffdc>LAST_ATTEMPT</ffdc>
       <ffdc>WA_TYPE</ffdc>
+      <callout>
+       <procedure>CODE</procedure>
+       <priority>HIGH</priority>
+      </callout>
+      <callout>
+       <target>TARGET</target>
+       <priority>LOW</priority>
+      </callout>
    </hwpError>
    <!-- ******************************************************************** -->
    <hwpError>
@@ -93,6 +133,14 @@
       <ffdc>INTERMEDIATE_STEP</ffdc>
       <ffdc>LAST_ATTEMPT</ffdc>
       <ffdc>WA_TYPE</ffdc>
+      <callout>
+       <procedure>CODE</procedure>
+       <priority>HIGH</priority>
+      </callout>
+      <callout>
+       <target>TARGET</target>
+       <priority>LOW</priority>
+      </callout>
    </hwpError>
    <!-- ******************************************************************** -->
    <hwpError>
@@ -104,6 +152,14 @@
       </description>
       <ffdc>TARGET</ffdc>
       <ffdc>LOCK_ERR</ffdc>
+      <callout>
+       <procedure>CODE</procedure>
+       <priority>HIGH</priority>
+      </callout>
+      <callout>
+       <target>TARGET</target>
+       <priority>LOW</priority>
+      </callout>
    </hwpError>
    <!-- ******************************************************************** -->
    <hwpError>
@@ -114,6 +170,10 @@
       </description>
       <ffdc>TARGET</ffdc>
       <ffdc>WORKAROUND_TYPE</ffdc>
+      <callout>
+       <procedure>CODE</procedure>
+       <priority>HIGH</priority>
+      </callout>
    </hwpError>
    <!-- ******************************************************************** -->
 </hwpErrors>
