@@ -28,8 +28,13 @@
     <sbeError/>
     <rc>RC_P10_SBE_PLL_INITF_UNSUPPORTED_PLL_BUCKET</rc>
     <description>Unsupported PLL bucket select</description>
+    <ffdc>PROC_TARGET</ffdc>
     <ffdc>BUCKET_INDEX</ffdc>
     <ffdc>CHIPLET_ID</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>

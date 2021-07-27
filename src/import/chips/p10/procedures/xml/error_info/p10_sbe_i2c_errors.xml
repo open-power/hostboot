@@ -28,6 +28,8 @@
         <rc>RC_I2C_STATUS_ERROR</rc>
         <description>I2C status error - one of the error bits set</description>
         <ffdc>VALUE</ffdc>
+        <ffdc>PORT</ffdc>
+        <ffdc>ENGINE</ffdc>
     </hwpError>
     <hwpError>
         <sbeError/>
@@ -35,6 +37,8 @@
         <description>I2C status error - one of the i2c interrupt hit</description>
         <ffdc>STATUS</ffdc>
         <ffdc>VALUE</ffdc>
+        <ffdc>PORT</ffdc>
+        <ffdc>ENGINE</ffdc>
     </hwpError>
     <hwpError>
         <sbeError/>

@@ -42,6 +42,10 @@
     <ffdc>STATUS_ADDR</ffdc>
     <ffdc>STATUS_DATA</ffdc>
     <ffdc>MISC_CONFIG2_DATA</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -53,6 +57,10 @@
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>NX_PB_ERR_RPT_0</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -64,6 +72,10 @@
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>NX_DMA_SU_CRB_KILL_REQ</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -75,6 +87,10 @@
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>NX_PBI_UMAC_STATUS_CONTROL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -86,6 +102,10 @@
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>NX_PBI_UMAC_STATUS_CONTROL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -97,6 +117,10 @@
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>NX_DMA_SU_STATUS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -108,6 +132,10 @@
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>NX_PBI_SHIM_ERAT_STATUS_CONTROL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -119,6 +147,10 @@
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>NX_DMA_SU_STATUS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -130,6 +162,10 @@
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>NX_PBI_UMAC_STATUS_CONTROL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -141,6 +177,10 @@
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>TPBR_PSIHB_STATUS_CTL_REG</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
    <hwpError>
@@ -153,6 +193,10 @@
     <ffdc>TARGET</ffdc>
     <ffdc>NORTHDATA</ffdc>
     <ffdc>SOUTHDATA</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -164,6 +208,10 @@
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>RST_CTL_DATA</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -176,6 +224,10 @@
     <ffdc>TARGET</ffdc>
     <ffdc>FLUSH_CTRL_ADDRESS</ffdc>
     <ffdc>FLUSH_CTRL_DATA</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
