@@ -29,6 +29,7 @@ import os
 import re
 
 import pel.prd.sigdata
+import pel.prd.regdata
 
 class SignatureData:
     """
@@ -65,6 +66,45 @@ class SignatureData:
         if chipType in self._data:
             if hexSig in self._data[chipType]["signatures"]:
                 signature = self._data[chipType]["signatures"][hexSig]
+
+        return signature
+
+class RegisterData:
+    """
+    The human readable output for signature descriptions are stored in JSON data
+    files. This class is simply a wrapper to access the data files and provide
+    functions for data needed by Hostboot/HBRT PRD.
+    """
+
+    def __init__(self):
+        """
+        Reads and stores all the JSON data files from `pel.prd.regdata`.
+        """
+        self._data = {}
+
+        data_path = os.path.dirname(pel.prd.regdata.__file__)
+
+        for data_file in glob.glob(os.path.join(data_path, '*.json')):
+            with open(data_file, 'r') as fp:
+                data = json.load(fp)
+
+            self._data[data["target_type"]] = data
+
+
+    def parseRegister(self, chipId: str, regId: str) -> dict:
+
+        # The input chip ID and chip signature will be hex strings but without
+        # the preceding '0x' so add them here. Also, we will ensure we have
+        # lower case hex strings
+        chipType = '0x' + chipId.lower()
+        hashReg = '0x' + regId.lower()
+
+        signature = { 'name': 'Undefined Register Hash',
+                      'address': hashReg }
+
+        if chipType in self._data:
+            if hashReg in self._data[chipType]:
+                signature = self._data[chipType][hashReg]
 
         return signature
 
