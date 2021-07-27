@@ -131,12 +131,13 @@ void updateProcessorSbeSeeproms(TargetHandle_t                    io_sysTarget,
     // in the future we want to set/trigger in other logic
     // and avoids conflicting signals in later isteps
     //
-    // In updateProcessorSbeSeeproms sbeDoReboot is called,
-    // so we should be IPL'ing at this point causing hostboot
-    // to restart, thus returning from the reboot request
-    // is an error, either the request for reboot explicitly
-    // failed (error) -or- hostboot unexpectedly returned
-    // from the call without a reboot happening (also an error).
+    // In updateProcessorSbeSeeproms sbeDoReboot is called when
+    // we detect that the customized SBE image is different from
+    // the current SBE image running, so we should be IPL'ing at
+    // this point causing hostboot to restart if the update did
+    // occur. It is possible that we detected no mismatch in SBE levels
+    // and returned from the function. In that case an informational
+    // error is produced.
     //
     // If a developer overrides with SBE_UPDATE_DISABLE or
     // NO_SBE_UPDATES this needs to be managed outside the
@@ -148,11 +149,11 @@ void updateProcessorSbeSeeproms(TargetHandle_t                    io_sysTarget,
     {
         TRACFCOMP(g_trac_isteps_trace, ERR_MRK"ERROR: updateProcessorSbeSeeproms");
         l_err->collectTrace("ISTEPS_TRACE");
+        captureError(l_err, io_istepErr, i_componentId);
     }
     else
     {
-        TRACFCOMP(g_trac_isteps_trace, ERR_MRK"ERROR: updateProcessorSbeSeeproms"
-                                               " unexpectedly returned");
+        TRACFCOMP(g_trac_isteps_trace, WARN_MRK"WARNING: updateProcessorSbeSeeproms returned");
         /*@
          * @errortype
          * @moduleid     MOD_CALL_MSS_ATTR_UPDATE
@@ -160,10 +161,10 @@ void updateProcessorSbeSeeproms(TargetHandle_t                    io_sysTarget,
          * @userdata1    ATTR_FORCE_SBE_UPDATE, bit mask of reasons
          *               See SBE_UPDATE_TYPE from attribute_types_hb.xml
          * @userdata2    0
-         * @devdesc      Return from updateProcessorSbeSeeproms unexpectedly
-         * @custdesc     An IPL failure occurred
+         * @devdesc      Return from updateProcessorSbeSeeproms occurred
+         * @custdesc     A non-fatal IPL issue occurred
          */
-        l_err = new ErrlEntry( ERRL_SEV_UNRECOVERABLE,
+        l_err = new ErrlEntry( ERRL_SEV_INFORMATIONAL,
                                MOD_CALL_MSS_ATTR_UPDATE,
                                RC_SBE_UPDATE_UNEXPECTEDLY_FAILED,
                                i_sbe_update,
@@ -171,14 +172,14 @@ void updateProcessorSbeSeeproms(TargetHandle_t                    io_sysTarget,
         TargetHandle_t l_pMasterProcChip(nullptr);
         targetService().masterProcChipTargetHandle(l_pMasterProcChip);
         l_err->addHwCallout( l_pMasterProcChip,
-                             HWAS::SRCI_PRIORITY_HIGH,
+                             HWAS::SRCI_PRIORITY_LOW,
                              HWAS::NO_DECONFIG,
                              HWAS::GARD_NULL);
         l_err->collectTrace(TARG_COMP_NAME);
         l_err->collectTrace(SBE_COMP_NAME);
         l_err->collectTrace(ISTEP_COMP_NAME);
+        errlCommit(l_err, i_componentId);
     }
-    captureError(l_err, io_istepErr, i_componentId);
 }
 
 /**
