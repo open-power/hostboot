@@ -31,24 +31,49 @@
       <description>Magic number not matching from Seeprom
          read with Fused number in OTPROM
       </description>
+      <ffdc>CHIP_TARGET</ffdc>
       <ffdc>SEEPROM_START_ADDR</ffdc>
       <ffdc>MAGIC_NUMBER_VALUE</ffdc>
+      <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+      </callout>
    </hwpError>
    <!-- ******************************************************************** -->
    <hwpError>
      <sbeError/>
      <rc>RC_FILT_PLL_LOCK_ERR</rc>
      <description>Filter pll not locked</description>
+     <ffdc>TARGET_CHIPLET</ffdc>
+     <ffdc>CHIP_TARGET</ffdc>
      <ffdc>PLL_EXPECT</ffdc>
      <ffdc>PLL_READ</ffdc>
+     <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+     </callout>
+     <callout>
+        <target>CHIP_TARGET</target>
+        <priority>MEDIUM</priority>
+      </callout>
    </hwpError>
    <!-- ******************************************************************** -->
    <hwpError>
      <sbeError/>
      <rc>RC_DPLL_LOCK_ERR</rc>
      <description>NEST/PAU DPLL not locked</description>
+     <ffdc>TARGET_CHIPLET</ffdc>
+     <ffdc>CHIP_TARGET</ffdc>
      <ffdc>PLL_EXPECT</ffdc>
      <ffdc>PLL_READ</ffdc>
+     <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+     </callout>
+     <callout>
+        <target>CHIP_TARGET</target>
+        <priority>MEDIUM</priority>
+     </callout>
    </hwpError>
    <!-- ******************************************************************** -->
 </hwpErrors>
