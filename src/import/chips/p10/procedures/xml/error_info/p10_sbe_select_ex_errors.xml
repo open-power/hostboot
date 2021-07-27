@@ -57,7 +57,7 @@
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
-    </callout>_BACKING_CACHE
+    </callout>
     <callout>
       <target>CHIP</target>
       <priority>LOW</priority>
@@ -185,12 +185,6 @@
       <target>CHIP</target>
       <priority>HIGH</priority>
     </callout>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <sbeError/>
-    <rc>RC_SBE_SELECT_EX_FORCE_FUSED_CORES_DISABLED</rc>
-    <description>Forcing fused core mode has been disabled via eFuses</description>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
