@@ -32,6 +32,10 @@
      <ffdc>PERV_TP_KVREF_AND_VMEAS_MODE_STATUS_REG</ffdc>
      <ffdc>LOOP_COUNT</ffdc>
      <ffdc>HW_DELAY</ffdc>
-   </hwpError>
+     <callout>
+       <procedure>CODE</procedure>
+       <priority>HIGH</priority>
+     </callout>
+     </hwpError>
    <!-- ******************************************************************** -->
 </hwpErrors>
