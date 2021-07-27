@@ -2132,7 +2132,7 @@ fapi2::ReturnCode PlatPmPPB::compute_boot_safe(
     iv_resclk_enabled  = true;
     iv_dds_enabled     = true;
     iv_rvrm_enabled    = true;
-    iv_wof_enabled     = false;
+    iv_wof_enabled     = true;
 
     do
     {
