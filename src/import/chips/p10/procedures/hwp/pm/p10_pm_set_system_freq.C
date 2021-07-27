@@ -48,6 +48,9 @@
 #include "p10_pm_utils.H"
 #include <endian.h>
 
+#define __INTERNAL_POUNDV__
+#include "p10_pstate_parameter_block_int_vpd.H"
+
 // Defined here so as not have to shadow pstates_common.H to HWSV
 #define CF7 7
 
@@ -55,6 +58,8 @@ fapi2::ReturnCode pm_set_frequency(
        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_sys_target,
        const bool i_wof_state);
 
+fapi2::ReturnCode pm_set_wofbase_frequency(
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_sys_target);
 
 ///////////////////////////////////////////////////////////
 ////////    p10_pm_set_system_freq
@@ -84,8 +89,6 @@ fapi2::ReturnCode pm_set_frequency(
     FAPI_INF("pm_set_frequency >>>>>");
 
     // Bring in data for local testing
-    #define __INTERNAL_POUNDV__
-    #include "p10_pstate_parameter_block_int_vpd.H"
 
     fapi2::voltageBucketData_t l_poundV_data;
     uint32_t l_fmax_freq = 0;
@@ -99,6 +102,7 @@ fapi2::ReturnCode pm_set_frequency(
     uint16_t l_tmp_psav_freq = 0;
     uint16_t l_tmp_wofbase_freq = 0;
     uint16_t l_part_running_freq = 0;
+    bool l_wof_state = i_wof_state;
 
     bool     b_dd1_floor = false;
 
@@ -171,6 +175,7 @@ fapi2::ReturnCode pm_set_frequency(
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PDV_VALIDATION_MODE,
                 i_sys_target, l_pdv_mode));
 #endif
+        FAPI_TRY(pm_set_wofbase_frequency(i_sys_target));
 
         // Find Pstate 0 across the processor chips depending on the mode (FMax or UT)
         for (auto l_proc_target : i_sys_target.getChildren<fapi2::TARGET_TYPE_PROC_CHIP>())
@@ -237,9 +242,10 @@ fapi2::ReturnCode pm_set_frequency(
 
                 FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_WOF_ENABLED,
                             l_proc_target, l_wof_enabled));
+                l_wof_state = false;
             }
             fapi2::voltageBucketData_t* p_poundV_data = &l_poundV_data;
-            FAPI_TRY(wof_apply_overrides(l_proc_target, p_poundV_data,i_wof_state));
+            FAPI_TRY(wof_apply_overrides(l_proc_target, p_poundV_data,l_wof_state));
 #endif
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_BIAS,
                         i_sys_target,
@@ -267,7 +273,7 @@ fapi2::ReturnCode pm_set_frequency(
             l_part_freq    = bias_adjust_mhz(htobe16(l_poundV_data.other_info.FxdFreqMdeCoreFreq),
                                               attr_freq_bias_0p5pct);
 
-            FAPI_INF("VPD CF[7]=%04d, fmax_freq=%04d, ut_freq=%04d  psav_freq=%04d, psav_freq=%04d ",
+            FAPI_INF("VPD CF[7]=%04d, fmax_freq=%04d, ut_freq=%04d  wofbase_freq=%04d, psav_freq=%04d ",
                    l_pstate0_freq, l_fmax_freq, l_ut_freq, l_wofbase_freq, l_psav_freq);
 
             if (l_vpd_ut_freq > l_sys_compat_freq_mhz)
@@ -566,6 +572,139 @@ fapi2::ReturnCode pm_set_frequency(
     while(0);
 fapi_try_exit:
     FAPI_INF("pm_set_frequency <<<<<<<");
+    return fapi2::current_err;
+}
+
+////////////////////////////////////////////////////////////
+////////  pm_set_wofbase_frequency
+///////////////////////////////////////////////////////////
+fapi2::ReturnCode pm_set_wofbase_frequency(
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_sys_target)
+{
+    FAPI_INF("pm_set_wofbase_frequency >>>>>");
+
+    // Bring in data for local testing
+    //#define __INTERNAL_POUNDV__
+   // #include "p10_pstate_parameter_block_int_vpd.H"
+
+    fapi2::voltageBucketData_t l_poundV_data;
+    uint32_t l_wofbase_freq = 0;
+    uint16_t l_tmp_wofbase_freq = 0;
+
+    fapi2::ATTR_CHIP_EC_FEATURE_STATIC_POUND_V_Type l_chip_static_pound_v = 0;
+    fapi2::ATTR_POUND_V_STATIC_DATA_ENABLE_Type l_poundv_static_data = 0;
+    fapi2::ATTR_SOCKET_POWER_NOMINAL_Type l_powr_nom;
+
+    do
+    {
+
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOFBASE_FREQ_MHZ,
+                        i_sys_target, l_wofbase_freq));
+
+        if ( l_wofbase_freq )
+        {
+            FAPI_INF("WOFBASE %x, is already set",l_wofbase_freq);
+            break;
+        }
+        // Find Pstate 0 across the processor chips depending on the mode (FMax or UT)
+        for (auto l_proc_target : i_sys_target.getChildren<fapi2::TARGET_TYPE_PROC_CHIP>())
+        {
+            static const uint32_t TGT_STRING_SIZE = 64;
+            char l_tgt_string[TGT_STRING_SIZE];
+            fapi2::toString(l_proc_target, l_tgt_string, TGT_STRING_SIZE);
+            FAPI_INF("Processing %s", l_tgt_string);
+
+            fapi2::ATTR_FREQ_BIAS_Type attr_freq_bias_0p5pct = 0;
+
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_STATIC_POUND_V,
+                        l_proc_target, l_chip_static_pound_v));
+
+            // if static data is needed, set the enable
+            if (l_chip_static_pound_v)
+            {
+                l_poundv_static_data = 0x1;
+                FAPI_INF("EC level requiring static #V data detected.  Setting ATTR_POUND_V_STATIC_DATA_ENABLE");
+            }
+
+            // Write the enable out
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_POUND_V_STATIC_DATA_ENABLE,
+                        i_sys_target,
+                        l_poundv_static_data),
+                    "Error from FAPI_ATTR_SET for attribute ATTR_POUND_V_STATIC_DATA_ENABLE");
+
+            // Read back to pick up any override
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_POUND_V_STATIC_DATA_ENABLE,
+                        i_sys_target,
+                        l_poundv_static_data));
+
+            if (l_poundv_static_data)
+            {
+                FAPI_INF("attribute ATTR_POUND_V_STATIC_DATA_ENABLE is set");
+                FAPI_INF("&l_poundV_data %p;   &g_vpd_PVData %p sizeof(g_vpd_PVData) %d sizeof(l_poundV_data) %d",
+                        &l_poundV_data,&g_vpd_PVData,sizeof(g_vpd_PVData),sizeof(l_poundV_data));
+
+                memset(&l_poundV_data, 0, sizeof(g_vpd_PVData));
+                memcpy(&l_poundV_data, &g_vpd_PVData, sizeof(g_vpd_PVData));
+            }
+            else
+            {
+                FAPI_INF("attribute ATTR_POUND_V_STATIC_DATA_ENABLE is NOT set");
+                //Read #V data from each proc
+                FAPI_TRY(p10_pm_get_poundv_bucket(l_proc_target, l_poundV_data));
+            }
+
+            //Update power nominal target
+            if (!l_powr_nom)
+            {
+                l_powr_nom = l_poundV_data.other_info.TSrtSocPowTgt;
+                FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SOCKET_POWER_NOMINAL,
+                            l_proc_target, l_powr_nom));
+            }
+
+
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_BIAS,
+                        i_sys_target,
+                        attr_freq_bias_0p5pct),
+                    "Error from FAPI_ATTR_GET for attribute ATTR_FREQ_BIAS");
+
+
+            l_wofbase_freq  = bias_adjust_mhz(htobe16(l_poundV_data.other_info.VddTdpWofCoreFreq),
+                    attr_freq_bias_0p5pct);
+
+
+            FAPI_INF("wofbase_freq=%04d",l_wofbase_freq);
+
+            // Compute WOFBase (minumim across chips)
+            if (l_wofbase_freq > l_tmp_wofbase_freq &&
+                    l_tmp_wofbase_freq == 0)
+            {
+                l_tmp_wofbase_freq = l_wofbase_freq;
+            }
+            else
+            {
+                if (l_wofbase_freq != l_tmp_wofbase_freq)
+                {
+                    FAPI_INF("Present System WOF Base freq %04d is not equal to this chip's WOF Base Freq %04d",
+                            l_tmp_wofbase_freq, l_wofbase_freq);
+                    // This does not produce an error log as the system will operate ok
+                    // for this case.
+                }
+
+                if ( l_wofbase_freq < l_tmp_wofbase_freq)
+                {
+                    l_tmp_wofbase_freq = l_wofbase_freq;
+                }
+            }
+            FAPI_INF("Running Computed wofbase frequency:   %04d (0x%04x)", l_tmp_wofbase_freq, l_tmp_wofbase_freq);
+        } //end of proc list
+        l_wofbase_freq = l_tmp_wofbase_freq;
+
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_WOFBASE_FREQ_MHZ,i_sys_target, l_wofbase_freq));
+    }
+    while(0);
+fapi_try_exit:
+    FAPI_INF("pm_set_wofbase_frequency <<<<<<<");
     return fapi2::current_err;
 }
 // *INDENT-ON*

@@ -839,10 +839,15 @@ fapi2::ReturnCode wof_apply_overrides(
     // Use new to avoid over-running the stack
     fapi2::ATTR_WOF_TABLE_DATA_Type* l_wof_table_data =
         (fapi2::ATTR_WOF_TABLE_DATA_Type*)new fapi2::ATTR_WOF_TABLE_DATA_Type;
+    fapi2::ATTR_WOF_ENABLED_Type l_wof_enabled;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOF_ENABLED,
+                           i_proc_target, l_wof_enabled));
 
     do
     {
-        if (!i_wof_state)
+        if (!i_wof_state ||
+            l_wof_enabled == (fapi2::ATTR_WOF_ENABLED_Type)fapi2::ENUM_ATTR_WOF_ENABLED_FORCE_DISABLED)
         {
             FAPI_INF("  WOF not enabled.  No overrides are applied.");
             break;
