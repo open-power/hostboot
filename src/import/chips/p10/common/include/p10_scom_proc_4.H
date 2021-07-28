@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -595,6 +595,26 @@ static const uint32_t TP_TPVSB_FSI_W_SHIFT_COMMAND_REGISTER_SCAN_TYPE = 28;
 static const uint32_t TP_TPVSB_FSI_W_SHIFT_COMMAND_REGISTER_SCAN_TYPE_LEN = 4;
 //<< [TP_TPVSB_FSI_W_SHIFT_COMMAND_REGISTER]
 // proc/reg00025.H
+
+//>> [PB_COM_SCOM_ES4_STATION_CFG3]
+static const uint64_t PB_COM_SCOM_ES4_STATION_CFG3 = 0x030113d5ull;
+
+static const uint32_t PB_COM_SCOM_ES4_STATION_CFG3_PB_CFG_CHIP_TSNOOP_DELAY_ES4 = 0;
+static const uint32_t PB_COM_SCOM_ES4_STATION_CFG3_PB_CFG_CHIP_TSNOOP_DELAY_ES4_LEN = 4;
+static const uint32_t PB_COM_SCOM_ES4_STATION_CFG3_PB_CFG_SPARE1 = 4;
+static const uint32_t PB_COM_SCOM_ES4_STATION_CFG3_PB_CFG_SPARE1_LEN = 12;
+static const uint32_t PB_COM_SCOM_ES4_STATION_CFG3_PB_CFG_PBIASY_PA0_DISABLE = 16;
+static const uint32_t PB_COM_SCOM_ES4_STATION_CFG3_PB_CFG_PBIASY_UNIT1_DISABLE = 17;
+static const uint32_t PB_COM_SCOM_ES4_STATION_CFG3_PB_CFG_PBIASY_PTL0_DISABLE = 18;
+static const uint32_t PB_COM_SCOM_ES4_STATION_CFG3_PB_CFG_PBIASY_PTL1_DISABLE = 19;
+static const uint32_t PB_COM_SCOM_ES4_STATION_CFG3_PB_CFG_PBIASY_PA0_SELCD = 20;
+static const uint32_t PB_COM_SCOM_ES4_STATION_CFG3_PB_CFG_PBIASY_UNIT1_SELCD = 21;
+static const uint32_t PB_COM_SCOM_ES4_STATION_CFG3_PB_CFG_PBIASY_PTL0_SELCD = 22;
+static const uint32_t PB_COM_SCOM_ES4_STATION_CFG3_PB_CFG_PBIASY_PTL1_SELCD = 23;
+static const uint32_t PB_COM_SCOM_ES4_STATION_CFG3_PB_CFG_SPARE2 = 24;
+static const uint32_t PB_COM_SCOM_ES4_STATION_CFG3_PB_CFG_SPARE2_LEN = 40;
+//<< [PB_COM_SCOM_ES4_STATION_CFG3]
+// proc/reg00021.H
 
 //>>THE END<<
 
