@@ -1798,6 +1798,9 @@ sub processBmc
     my $nodeParentAffinity = $targetObj->getAttribute($nodeParent, "AFFINITY_PATH");
     my $nodeParentPhysical = $targetObj->getAttribute($nodeParent, "PHYS_PATH");
 
+    my $staticAbsoluteLocationCode = getStaticAbsLocationCode($targetObj, $target);
+    $targetObj->setAttribute($target, "STATIC_ABS_LOCATION_CODE", $staticAbsoluteLocationCode);
+
     # Get the BMC's position for further use below
     my $bmcPosPerSystem = $targetObj->getTargetPosition($target);
 
