@@ -51,7 +51,7 @@ constexpr uint64_t literal_0x0fffefff0fe5b8f8 = 0x0fffefff0fe5b8f8;
 constexpr uint64_t literal_0x0000000000000300 = 0x0000000000000300;
 constexpr uint64_t literal_0xfffb00000f03ffff = 0xfffb00000f03ffff;
 constexpr uint64_t literal_0xfffff85f0fffffff = 0xfffff85f0fffffff;
-constexpr uint64_t literal_0xfff8fffff09fffef = 0xfff8fffff09fffef;
+constexpr uint64_t literal_0xfff8fffff09fffff = 0xfff8fffff09fffff;
 constexpr uint64_t literal_0xf0000000f0180707 = 0xf0000000f0180707;
 
 fapi2::ReturnCode p10_pau_scom(const fapi2::Target<fapi2::TARGET_TYPE_PAU>& TGT0,
@@ -241,7 +241,7 @@ fapi2::ReturnCode p10_pau_scom(const fapi2::Target<fapi2::TARGET_TYPE_PAU>& TGT0
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x10010c43ull, l_scom_buffer ));
 
-            l_scom_buffer.insert<0, 64, 0, uint64_t>(literal_0xfff8fffff09fffef );
+            l_scom_buffer.insert<0, 64, 0, uint64_t>(literal_0xfff8fffff09fffff );
             FAPI_TRY(fapi2::putScom(TGT0, 0x10010c43ull, l_scom_buffer));
         }
         {
