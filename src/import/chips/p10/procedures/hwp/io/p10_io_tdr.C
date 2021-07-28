@@ -90,7 +90,7 @@ fapi2::ReturnCode p10_io_tdr(
 {
     using namespace scomt::iohs;
 
-    FAPI_DBG("Begin TDR Isolation");
+    FAPI_DBG("Begin TDR Isolation (Version 0.0)");
 
     const uint32_t c_pulse_width = 100;
 
@@ -103,6 +103,9 @@ fapi2::ReturnCode p10_io_tdr(
     float c_fs_per_ui         = 0;
     int32_t base_point_y1     = 0;
     int32_t base_point_y2     = 0;
+    // uint32_t min_length_ui    = 0;
+    std::vector<uint32_t> l_status(2, TdrResult::None);
+    std::vector<uint32_t> l_length_ui(2, 0);
 
     bool loopExit = false;
     fapi2::ATTR_CHIP_EC_FEATURE_DD2_TDR_Type l_tdr_dd2;
@@ -186,8 +189,8 @@ fapi2::ReturnCode p10_io_tdr(
 
     FAPI_DBG("***TDR Offset width: %d", tdr_offset_width);
 
-    min_offset = tdr_offset_width / 4;
-    max_offset = (tdr_offset_width * 3) / 4;
+    min_offset = (tdr_offset_width * 3) / 8;
+    max_offset = (tdr_offset_width * 7) / 8;
 
     if(l_iolink_num % 2)
     {
@@ -225,9 +228,17 @@ fapi2::ReturnCode p10_io_tdr(
         // reset the length to 0 for each lane
         o_length_ui = 0;
 
-        // loop through each of the 2 phases
-        for(int32_t l_phase = 1; l_phase >= 0; l_phase--)
+        //initialize the local results
+        for(int32_t l_phase = 0; l_phase <= 1; l_phase++)
         {
+            l_status[l_phase] = TdrResult::None;
+            l_length_ui[l_phase] = 0;
+        }
+
+        // loop through each of the 2 phases
+        for(int32_t l_phase = 0; l_phase <= 1; l_phase++)
+        {
+
             FAPI_DBG("Looping on Lane(%d) and Phase(%d)", l_xlate_lane, l_phase);
             FAPI_TRY(p10_io_tdr_initialize(l_iohs_target, l_xlate_lane, c_pulse_width, l_phase));
 
@@ -254,10 +265,15 @@ fapi2::ReturnCode p10_io_tdr(
             FAPI_DBG( "Base Point 1 (X,Y): %3d,%3d", min_offset, base_point_y1 );
             FAPI_DBG( "Base Point 2 (X,Y): %3d,%3d", max_offset, base_point_y2 );
 
-            FAPI_TRY(p10_io_tdr_diagnose(base_point_y1, base_point_y2, o_status[l_index]));
+            FAPI_TRY(p10_io_tdr_diagnose(base_point_y1, base_point_y2, l_status[l_phase]));
 
-            switch( o_status[l_index] )
+            switch( l_status[l_phase] )
             {
+                case TdrResult::UnableToDetermine:
+                    {
+                        break;
+                    }
+
                 case TdrResult::Open:
                     {
                         FAPI_DBG("TDR Open found");
@@ -291,19 +307,20 @@ fapi2::ReturnCode p10_io_tdr(
 
                         if(l_tdr_dd2)       // if true, this is dd2
                         {
-                            o_length_ui = (x1_crossing > x2_crossing)
-                                          ? ((x1_crossing - x2_crossing + 1) / 2)
-                                          : ((x2_crossing - x1_crossing + 1) / 2);
+                            l_length_ui[l_phase] = (x1_crossing > x2_crossing)
+                                                   ? ((x1_crossing - x2_crossing + 1) / 2)
+                                                   : ((x2_crossing - x1_crossing + 1) / 2);
                         }
                         else
                         {
-                            o_length_ui = (x1_crossing > x2_crossing)
-                                          ? ((x1_crossing - x2_crossing + 2) / 4)
-                                          : ((x2_crossing - x1_crossing + 2) / 4);
+                            l_length_ui[l_phase] = (x1_crossing > x2_crossing)
+                                                   ? ((x1_crossing - x2_crossing + 2) / 4)
+                                                   : ((x2_crossing - x1_crossing + 2) / 4);
                         }
 
-                        FAPI_DBG( "TDR Result:: Open Fault: %d / 2 UI from Driver x1(%d) x2(%d).", o_length_ui, x1_crossing, x2_crossing );
-                        loopExit = true;    // if we find an open, no need to run the next phase
+                        FAPI_DBG( "TDR Result:: Open Fault: %d / 2 UI from Driver x1(%d) x2(%d).", l_length_ui[l_phase], x1_crossing,
+                                  x2_crossing );
+                        // loopExit = true;    // if we find an open, no need to run the next phase
                         break;
 
                     }
@@ -320,12 +337,12 @@ fapi2::ReturnCode p10_io_tdr(
                         int32_t l_dacmax = 0;
                         int32_t l_middac = 0;
 
-                        if (o_status[l_index] == TdrResult::ShortToGnd)
+                        if (l_status[l_phase] == TdrResult::ShortToGnd)
                         {
                             FAPI_TRY(p10_io_tdr_find_limit(l_iohs_target, min_offset, max_offset, l_xlate_lane, true, l_dacmax));
                             l_middac = (l_base + l_dacmax) / 2;
                         }
-                        else if (o_status[l_index] == TdrResult::ShortToVdd)
+                        else if (l_status[l_phase] == TdrResult::ShortToVdd)
                         {
                             FAPI_TRY(p10_io_tdr_find_limit(l_iohs_target, min_offset, max_offset, l_xlate_lane, false, l_dacmin));
                             l_middac = (l_base + l_dacmin) / 2;
@@ -339,7 +356,7 @@ fapi2::ReturnCode p10_io_tdr(
 
                         if (abs(l_base - l_middac) < 2)
                         {
-                            o_length_ui = 0;
+                            l_length_ui[l_phase] = 0;
                             break;
                         }
 
@@ -354,10 +371,12 @@ fapi2::ReturnCode p10_io_tdr(
                                       true,
                                       x1_crossing ) );
 
+                        FAPI_DBG("x1 crossing: %d", x1_crossing);
+
                         if (x1_crossing == -1)
                         {
-                            o_length_ui = 0;
-                            o_status[l_index] |= TdrResult::UnableToDetermine;
+                            l_length_ui[l_phase] = 0;
+                            l_status[l_phase] |= TdrResult::UnableToDetermine;
                             break;
                         }
 
@@ -372,23 +391,27 @@ fapi2::ReturnCode p10_io_tdr(
                                       false,
                                       x2_crossing ) );
 
+                        FAPI_DBG("x1 crossing: %d", x1_crossing);
+
                         if (x2_crossing == -1)
                         {
-                            o_length_ui = 0;
-                            o_status[l_index] |= TdrResult::UnableToDetermine;
+                            l_length_ui[l_phase] = 0;
+                            l_status[l_phase] |= TdrResult::UnableToDetermine;
                             break;
                         }
 
                         if(l_tdr_dd2)       // if true, this is dd2
                         {
-                            o_length_ui = (x1_crossing > x2_crossing) ? ((x1_crossing - x2_crossing) / 2) : ((x2_crossing - x1_crossing) / 2);
+                            l_length_ui[l_phase] = (x1_crossing > x2_crossing) ? ((x1_crossing - x2_crossing) / 2) : ((
+                                                       x2_crossing - x1_crossing) / 2);
                         }
                         else
                         {
-                            o_length_ui = (x1_crossing > x2_crossing) ? ((x1_crossing - x2_crossing) / 4) : ((x2_crossing - x1_crossing) / 4);
+                            l_length_ui[l_phase] = (x1_crossing > x2_crossing) ? ((x1_crossing - x2_crossing) / 4) : ((
+                                                       x2_crossing - x1_crossing) / 4);
                         }
 
-                        FAPI_DBG( "TDR Result:: Short Fault: %d UI from Driver.", o_length_ui );
+                        FAPI_DBG( "TDR Result:: Short Fault: %d UI from Driver.", l_length_ui[l_phase] );
                         loopExit = true;    // if we find an short, no need to run the next phase
                         break;
                     }
@@ -400,13 +423,73 @@ fapi2::ReturnCode p10_io_tdr(
                     }
             }
 
+            // we need to take the shortest length between the two legs, in case only 1 of the legs is Open
+            // if (( o_status[l_index] == TdrResult::Open ) && (( o_length_ui < min_length_ui ) || ( min_length_ui == 0 )))
+            // {
+            //     min_length_ui = o_length_ui;
+            // }
+
             if (loopExit)
             {
                 break;
             }
         }
 
-        if (o_status[l_index] == TdrResult::Good)
+
+        FAPI_DBG("N-leg status: %d     P-leg status: %d", l_status[0], l_status[1]);
+        FAPI_DBG("N-leg length: %d     P-leg length: %d", l_length_ui[0], l_length_ui[1]);
+
+        // Set length and status based on both phases
+        if ((l_status[0] == TdrResult::Good)  && (l_status[1] == TdrResult::Good))
+        {
+            o_status[l_index] = TdrResult::Good;
+            o_length_ui = 0;
+        }
+        else if (l_status[0] == TdrResult::Open)
+        {
+            o_status[l_index] = TdrResult::Open;
+
+            if (l_status[1] == TdrResult::Open)
+            {
+                // if Open, set o_length_ui to shorter of the open lengths
+                // o_length_ui = (l_length_ui[0] > l_length_ui[1]) ? l_length_ui[1] : l_length_ui[0];
+                if (l_length_ui[0] > l_length_ui[1])
+                {
+                    o_length_ui = l_length_ui[1];
+                }
+                else
+                {
+                    o_length_ui = l_length_ui[0];
+                }
+            }
+            else
+            {
+                o_length_ui = l_length_ui[0];
+            }
+        }
+        else if (l_status[1] == TdrResult::Open)
+        {
+            o_status[l_index] = TdrResult::Open;
+            o_length_ui = l_length_ui[1];
+        }
+        else if (l_status[0] & TdrResult::Short)
+        {
+            o_status[l_index] = l_status[0];
+            o_length_ui = l_length_ui[0];
+        }
+        else if (l_status[1] & TdrResult::Short)
+        {
+            o_status[l_index] = l_status[1];
+            o_length_ui = l_length_ui[1];
+        }
+        else
+        {
+            o_status[l_index] = TdrResult::UnableToDetermine;
+            o_length_ui = 0;
+        }
+
+
+        if ((o_status[l_index] == TdrResult::Good) || (o_status[l_index] == TdrResult::UnableToDetermine))
         {
             o_length_ps[l_index] = 0;
         }
@@ -737,19 +820,19 @@ fapi2::ReturnCode p10_io_tdr_diagnose(const uint32_t i_bp1,
     {
         o_result = TdrResult::Good;
     }
+    else if (i_bp1 < C_EXPECTED_LOWER)
+    {
+        o_result = TdrResult::ShortToGnd;
+    }
+    else if (i_bp1 > C_EXPECTED_UPPER)
+    {
+        o_result = TdrResult::ShortToVdd;
+    }
     else
     {
-        o_result = TdrResult::Short;
-
-        if (i_bp1 < C_EXPECTED_LOWER)
-        {
-            o_result = TdrResult::ShortToGnd;
-        }
-        else if (i_bp1 > C_EXPECTED_UPPER)
-        {
-            o_result = TdrResult::ShortToVdd;
-        }
+        o_result = TdrResult::UnableToDetermine;
     }
+
 
     FAPI_DBG("o_result = 0x%04x", o_result);
 
