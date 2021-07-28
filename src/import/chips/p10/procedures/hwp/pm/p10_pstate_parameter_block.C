@@ -5114,7 +5114,7 @@ fapi2::ReturnCode PlatPmPPB::freq2pState (
 
     if (i_error_mode != PPB_OFF)
     {
-        FAPI_INF("iv_reference_frequency_khz %d;  i_freq_khz: %d; deltaf %f",
+        FAPI_DBG("iv_reference_frequency_khz %d;  i_freq_khz: %d; deltaf %f",
                     iv_reference_frequency_khz, i_freq_khz, deltaf);
 
         if (i_error_mode == PPB_INFO)
