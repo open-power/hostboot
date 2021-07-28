@@ -1405,7 +1405,43 @@ errlHndl_t tpmCmdReadAKCertificate(TpmTarget* i_target, TPM2B_MAX_NV_BUFFER* o_d
         break;
     }
 
-    if(TPM_SUCCESS != l_resp->responseCode)
+    // Look for Specific TPM_RC_HANDLE return code as it indicates that the
+    // NV index isn't valied.  This means that the TPM is unprovisioned.
+    if (TPM_RC_HANDLE == l_resp->responseCode )
+    {
+        TRACFCOMP(g_trac_trustedboot, ERR_MRK"tpmCmdReadAKCertificate: TPM (HUID 0x%x) returned TPM_RC_HANDLE (0x%x), indicating an unprovisioned TPM.", TARGETING::get_huid(i_target), l_resp->responseCode);
+        /*@
+         * @errortype         ERRL_SEV_UNRECOVERABLE
+         * @reasoncode        RC_AK_CERT_NOT_AVAIL
+         * @moduleid          MOD_TPM_CMD_READ_AK_CERT
+         * @userdata1         TPM HUID
+         * @userdata2[0..31]  TPM_RC_HANDLE response RC
+         * @userdata2[32..63] Actual response RC
+         * @devdesc           TPM_RC_HANDLE response from TPM_CC_NV_Read
+         *                    indicates unprovisioned TPM (see logs for TPM HUID)
+         * @custdesc          Trusted boot failure
+         */
+        l_errl = tpmCreateErrorLog(MOD_TPM_CMD_READ_AK_CERT,
+                                   RC_AK_CERT_NOT_AVAIL,
+                                   TARGETING::get_huid(i_target),
+                                   TWO_UINT32_TO_UINT64(
+                                        TPM_RC_HANDLE,
+                                        l_resp->responseCode),
+                                   ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
+
+        // If TPM is Required, guard and deconfigure this part out as the user will not be able
+        // to recover from this on their own
+        if(TRUSTEDBOOT::isTpmRequired())
+        {
+            l_errl->addHwCallout(i_target,
+                                 HWAS::SRCI_PRIORITY_HIGH,
+                                 HWAS::DECONFIG,
+                                 HWAS::GARD_Fatal);
+        }
+
+        break;
+    }
+    else if(TPM_SUCCESS != l_resp->responseCode)
     {
         TRACFCOMP(g_trac_trustedboot, ERR_MRK"tpmCmdReadAKCertificate: TPM (HUID 0x%x) returned a nonzero return code. Expected RC 0x%x, actual RC 0x%x", TARGETING::get_huid(i_target), TPM_SUCCESS, l_resp->responseCode);
         /*@
