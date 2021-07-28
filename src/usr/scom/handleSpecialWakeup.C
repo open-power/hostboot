@@ -542,9 +542,58 @@ errlHndl_t callWakeupHwp(TARGETING::Target* i_target,
     return l_errl;
 }
 
+/**
+ * @brief Check if a given core is alive or not
+ * @param[in]  Core Target
+ * @param[out]  True: Core is dead, False: Core is active
+ * @return  Error log handle
+ */
+errlHndl_t checkForDeadCore( TARGETING::Target* i_core,
+                             bool& o_coreIsDead )
+{
+    errlHndl_t l_errhdl = nullptr;
+    o_coreIsDead = false; //assume things are okay
+
+    // Read QME Scratch Register A (200E0124)
+    // if bit[0:3] is 1, that core is marked dead by HYP due to a PM Malfunction
+
+    // Register is EQ-scoped, so need to find the core's parent EQ
+    // Get the connected parent, should be one and only one parent
+    TargetHandleList l_eqlist;
+    TARGETING::getParentAffinityTargetsByState( l_eqlist,
+                                                i_core,
+                                                TARGETING::CLASS_UNIT,
+                                                TARGETING::TYPE_EQ,
+                                                TARGETING::UTIL_FILTER_ALL );
+    assert( (1 == l_eqlist.size()) && (nullptr != l_eqlist[0]),
+            "No EQ parent for Core %.8X", TARGETING::get_huid(i_core) );
+
+    uint64_t l_qmeScratchA = 0;
+    auto l_reqSize = sizeof(l_qmeScratchA);
+    l_errhdl = DeviceFW::deviceRead( l_eqlist[0],
+                                     &l_qmeScratchA,
+                                     l_reqSize,
+                                     DEVICE_SCOM_ADDRESS(0x200E0124));
+    if( !l_errhdl )
+    {
+        // Figure out which core this is relative to the EQ
+        //  Cannot use ATTR_REL_POS because that is relative
+        //  to the FC parent, not the EQ.  Instead use the
+        //  knowleve that a quad has 4 cores.
+        auto l_corenum = i_core->getAttr<ATTR_CHIP_UNIT>();
+        uint64_t l_mask = 0x800000000000 >> (l_corenum%4);
+        if( l_qmeScratchA & l_mask )
+        {
+            o_coreIsDead = true;
+        }
+    }
+
+    return l_errhdl;
+}
+
 
 /**
- * @brief Enable and disable special wakeup for SCOM operations
+ * @brief Enable and disable special wakeup for SCOM and FAPI operations
  */
 errlHndl_t handleSpecialWakeup(TARGETING::Target* i_target,
                                HandleOptions_t i_enable)
@@ -616,6 +665,20 @@ errlHndl_t handleSpecialWakeup(TARGETING::Target* i_target,
         // them would result in an error.
         for (auto l_core : l_ecoCores)
         {
+            // We need to skip the wakeup call if the core has already died.
+            bool l_coreIsDead = false;
+            l_errl = checkForDeadCore(l_core,l_coreIsDead);
+            if( l_errl )
+            {
+                break;
+            }
+            else if( l_coreIsDead )
+            {
+                TRACFCOMP( g_trac_scom, "Skipping wakeup for dead core %.8X",
+                           TARGETING::get_huid(l_core) );
+                continue;
+            }
+
             l_errl = callWakeupHwp(l_core, i_enable);
             if (l_errl)
             {
@@ -630,6 +693,20 @@ errlHndl_t handleSpecialWakeup(TARGETING::Target* i_target,
         // Non-ECO cores can use the general case determination for which wakeup interface to call.
         for (auto l_core : l_nonEcoCores)
         {
+            // We need to skip the wakeup call if the core has already died.
+            bool l_coreIsDead = false;
+            l_errl = checkForDeadCore(l_core,l_coreIsDead);
+            if( l_errl )
+            {
+                break;
+            }
+            else if( l_coreIsDead )
+            {
+                TRACFCOMP( g_trac_scom, "Skipping wakeup for dead core %.8X",
+                           TARGETING::get_huid(l_core) );
+                continue;
+            }
+
             if( l_useHypWakeup )
             {
                 l_errl = callWakeupHyp(l_core, i_enable);
