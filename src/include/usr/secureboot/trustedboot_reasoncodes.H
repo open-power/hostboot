@@ -127,6 +127,7 @@ namespace TRUSTEDBOOT
         RC_TPM_TDP_BIT_IS_SET            = TRBOOT_COMP_ID | 0xC0,
         RC_VIRT_TO_PHYS_FAIL             = TRBOOT_COMP_ID | 0xC1,
         RC_MBOX_QUEUE_MISMATCH           = TRBOOT_COMP_ID | 0xC2,
+        RC_AK_CERT_NOT_AVAIL             = TRBOOT_COMP_ID | 0xC3,
     };
 #ifdef __cplusplus
 }
