@@ -26,7 +26,7 @@ import json
 import socket
 import struct
 from udparsers.helpers.symbols import hbSymbolTable
-import udparsers.helpers.hwasCallout
+import udparsers.helpers.hwasCallout as hwasCallout
 from udparsers.helpers.errludtarget import errlud_parse_entity_path
 from udparsers.helpers.errludP_Helpers import (
     hexDump, memConcat, hexConcat, intConcat, findNull, strConcat, unknownStr )
