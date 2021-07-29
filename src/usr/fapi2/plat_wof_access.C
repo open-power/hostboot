@@ -741,13 +741,9 @@ errlHndl_t getOverrideWofTable(TARGETING::Target* i_procTarg, uint8_t* o_wofData
 
     /* Set Search Criteria: l_coreCount, l_nominalPowerWatts and l_wofbaseFreqMhz */
 
-    // Core count
+    // Core count (only active, non-eco, cores used in WOF tables)
     TARGETING::TargetHandleList l_coreTargetList;
-    TARGETING::getChildAffinityTargetsByState( l_coreTargetList,
-                                               i_procTarg,
-                                               TARGETING::CLASS_UNIT,
-                                               TARGETING::TYPE_CORE,
-                                               TARGETING::UTIL_FILTER_PRESENT);
+    getNonEcoCores(l_coreTargetList, i_procTarg);
     const uint8_t l_coreCount = l_coreTargetList.size();
 
     // Nominal power in Watts for Proc and WofBase Freq in Mhz for System
