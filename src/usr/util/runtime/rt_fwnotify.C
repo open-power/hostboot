@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -141,7 +141,7 @@ void sbeAttemptRecovery(uint64_t i_data)
                                    RC_SBE_RT_INVALID_HUID,
                                    l_sbeRetryData->huid,
                                    l_sbeRetryData->plid,
-                                   true);
+                                   ErrlEntry::ADD_SW_CALLOUT);
             break;
         }
 
@@ -152,32 +152,6 @@ void sbeAttemptRecovery(uint64_t i_data)
 
         //Attempt to recover the SBE
         l_SBEobj.main_sbe_handler(l_target);
-
-
-        if (nullptr == g_hostInterfaces ||
-            nullptr == g_hostInterfaces->firmware_request)
-        {
-             TRACFCOMP(g_trac_runtime, ERR_MRK"sbeAttemptRecovery: "
-                       "Hypervisor firmware_request interface not linked");
-
-            /*@
-             * @errortype
-             * @severity     ERRL_SEV_PREDICTIVE
-             * @moduleid     MOD_RT_FIRMWARE_NOTIFY
-             * @reasoncode   RC_FW_REQUEST_RT_NULL_PTR
-             * @userdata1    HUID of target
-             * @userdata2    HWSV error log id (plid)
-             * @devdesc      SBE error recovery attempt failed
-             */
-            l_err = new ErrlEntry( ERRL_SEV_PREDICTIVE,
-                                   MOD_RT_FIRMWARE_NOTIFY,
-                                   RC_FW_REQUEST_RT_NULL_PTR,
-                                   l_sbeRetryData->huid,
-                                   l_sbeRetryData->plid,
-                                   true);
-
-           break;
-        }
 
         // Create the firmware_request request struct to send data
         hostInterfaces::hbrt_fw_msg l_req_fw_msg;
@@ -204,6 +178,35 @@ void sbeAttemptRecovery(uint64_t i_data)
             TRACFCOMP(g_trac_runtime, "sbeAttemptRecovery: RECOVERY_FAILED");
             l_req_fw_msg.generic_msg.msgType =
                               GenericFspMboxMessage_t::MSG_SBE_RECOVERY_FAILED;
+
+            // Make an info log to capture some state information
+            /*@
+             * @errortype
+             * @moduleid     MOD_RT_FIRMWARE_NOTIFY
+             * @reasoncode   RC_SBE_RT_RECOVERY_ERR
+             * @userdata1[00:31]  Target HUID
+             * @userdata1[32:63]  HWSV error log id (plid)
+             * @userdata2[00:31]  SBE Message Register
+             * @userdata2[32:63]  Unused
+             * @devdesc      SBE did not recover after hreset attempt
+             * @custdec      Informational log for internal usage
+             */
+            l_err = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+                                  MOD_RT_FIRMWARE_NOTIFY,
+                                  RC_SBE_RT_RECOVERY_ERR,
+                                  TWO_UINT32_TO_UINT64(
+                                      l_sbeRetryData->huid,
+                                      l_sbeRetryData->plid),
+                                  TWO_UINT32_TO_UINT64(
+                                      l_SBEobj.getSbeRegister().reg,
+                                      0),
+                                  ErrlEntry::NO_SW_CALLOUT);
+            l_err->addHwCallout( l_target, HWAS::SRCI_PRIORITY_HIGH,
+                                 HWAS::NO_DECONFIG, HWAS::GARD_NULL );
+            l_err->collectTrace(RUNTIME_COMP_NAME, 256);
+            l_err->collectTrace(FAPI2_COMP_NAME, 256);
+            l_err->collectTrace(SBEIO_COMP_NAME, 256);
+            errlCommit( l_err, RUNTIME_COMP_ID );
         }
 
         // Create the firmware_request response struct to receive data
@@ -219,6 +222,32 @@ void sbeAttemptRecovery(uint64_t i_data)
         TRACFBIN( g_trac_runtime, INFO_MRK"Sending firmware_request",
                   &l_req_fw_msg,
                   l_req_fw_msg_size);
+
+        if (nullptr == g_hostInterfaces ||
+            nullptr == g_hostInterfaces->firmware_request)
+        {
+             TRACFCOMP(g_trac_runtime, ERR_MRK"sbeAttemptRecovery: "
+                       "Hypervisor firmware_request interface not linked");
+
+            /*@
+             * @errortype
+             * @severity     ERRL_SEV_PREDICTIVE
+             * @moduleid     MOD_RT_FIRMWARE_NOTIFY
+             * @reasoncode   RC_FW_REQUEST_RT_NULL_PTR
+             * @userdata1    HUID of target
+             * @userdata2    HWSV error log id (plid)
+             * @devdesc      SBE error recovery attempt failed
+             * @custdec      Internal firmware error
+             */
+            l_err = new ErrlEntry( ERRL_SEV_PREDICTIVE,
+                                   MOD_RT_FIRMWARE_NOTIFY,
+                                   RC_FW_REQUEST_RT_NULL_PTR,
+                                   l_sbeRetryData->huid,
+                                   l_sbeRetryData->plid,
+                                   ErrlEntry::ADD_SW_CALLOUT);
+
+           break;
+        }
 
         // Make the firmware_request call
         l_err = firmware_request_helper(l_req_fw_msg_size,
@@ -320,7 +349,7 @@ void attrSyncRequest( void * i_data)
                                         TWO_UINT32_TO_UINT64(
                                             l_hbrtAttrData->sizeOfAttrData,
                                             l_attrData),
-                                        true);
+                                        ErrlEntry::ADD_SW_CALLOUT);
 
        l_err->collectTrace(RUNTIME_COMP_NAME, 256);
 
@@ -709,7 +738,7 @@ void firmware_notify( uint64_t i_len, void *i_data )
                               RC_FW_NOTIFY_RT_INVALID_MSG,
                               l_userData1,
                               l_userData2,
-                              true);
+                              ErrlEntry::ADD_SW_CALLOUT);
 
         if (i_len > 0)
         {
