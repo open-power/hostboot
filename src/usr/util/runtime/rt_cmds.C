@@ -1239,6 +1239,8 @@ int hbrtCommand( int argc,
                      "ERROR: readvpd <huid> <keyword> [<record>]\n" );
         }
     }
+// Access to this method is prohibited, for security reasons
+#if 0
     else if( !strcmp( argv[0], "writevpd" ) )
     {
         // writevpd <vpd> <huid> <keyword> [<record>] <data>
@@ -1267,6 +1269,7 @@ int hbrtCommand( int argc,
                      "ERROR: writevpd <huid> <keyword> [<record>] <data>\n" );
         }
     }
+#endif
     else if( !strcmp( argv[0], "getattr" ) )
     {
         // getattr <huid> <attribute id> <size>
@@ -1284,6 +1287,8 @@ int hbrtCommand( int argc,
                      "ERROR: getattr <huid> <attribute id> <size>\n" );
         }
     }
+// Access to these methods are prohibited, for security reasons
+#if 0
     else if( !strcmp( argv[0], "getscom" ) )
     {
         // getscom <huid> <address>
@@ -1315,6 +1320,7 @@ int hbrtCommand( int argc,
             sprintf( *l_output, "ERROR: putscom <huid> <address> <data>\n" );
         }
     }
+#endif
     else if( !strcmp( argv[0], "errorlog" ) )
     {
         // errorlog <word1> <word2> <huid to callout> <size> <deconfig> <gard>
@@ -1554,18 +1560,22 @@ int hbrtCommand( int argc,
         strcat( *l_output, l_tmpstr );
         sprintf( l_tmpstr, "getattr <huid> <attribute id> <size>\n" );
         strcat( *l_output, l_tmpstr );
+// Access to these methods are prohibited, for security reasons
+#if 0
         sprintf( l_tmpstr, "getscom <huid> <address>\n" );
         strcat( *l_output, l_tmpstr );
         sprintf( l_tmpstr, "putscom <huid> <address> <data>\n" );
         strcat( *l_output, l_tmpstr );
+#endif
         sprintf( l_tmpstr, "errorlog <word1> <word2> [<huid to callout>] [size] [deconfig] [gard]\n" );
         strcat( *l_output, l_tmpstr );
         sprintf( l_tmpstr, "sbemsg <chipid>\n" );
         strcat( *l_output, l_tmpstr );
         sprintf( l_tmpstr, "readvpd <huid> <keyword> [record]\n" );
         strcat( *l_output, l_tmpstr );
-        sprintf( l_tmpstr, "writevpd <huid> <keyword> [<record>] <data>\n" );
-        strcat( *l_output, l_tmpstr );
+// Access to this method is prohibited, for security reasons
+//        sprintf( l_tmpstr, "writevpd <huid> <keyword> [<record>] <data>\n" );
+//        strcat( *l_output, l_tmpstr );
         sprintf( l_tmpstr, "reload_pm_complex [<breakPoint>]\n");
         strcat( *l_output, l_tmpstr );
         sprintf( l_tmpstr, "readHBRTversion\n");
