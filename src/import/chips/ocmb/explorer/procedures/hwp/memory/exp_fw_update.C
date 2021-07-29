@@ -85,7 +85,7 @@ fapi2::ReturnCode check_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
             case bupg::fw_binary_upgrade_rc::DEV_INF_ERR:
                 FAPI_ASSERT(false,
                             fapi2::EXP_UPDATE_DEV_INF_ERR().
-                            set_TARGET(i_target).
+                            set_OCMB_TARGET(i_target).
                             set_RSP_ID(i_rsp.response_id).
                             set_REQ_ID(i_rsp.request_identifier).
                             set_MCHP_STATUS_CODE(i_rsp.response_argument[MCHP_STATUS_CODE]).
@@ -104,7 +104,7 @@ fapi2::ReturnCode check_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
             case bupg::fw_binary_upgrade_rc::DEV_SECTOR_INF_ERR:
                 FAPI_ASSERT(false,
                             fapi2::EXP_UPDATE_DEV_SECTOR_INF_ERR().
-                            set_TARGET(i_target).
+                            set_OCMB_TARGET(i_target).
                             set_RSP_ID(i_rsp.response_id).
                             set_REQ_ID(i_rsp.request_identifier).
                             set_MCHP_STATUS_CODE(i_rsp.response_argument[MCHP_STATUS_CODE]).
@@ -123,7 +123,7 @@ fapi2::ReturnCode check_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
             case bupg::fw_binary_upgrade_rc::DEV_ERASE_ERR:
                 FAPI_ASSERT(false,
                             fapi2::EXP_UPDATE_DEV_ERASE_ERR().
-                            set_TARGET(i_target).
+                            set_OCMB_TARGET(i_target).
                             set_RSP_ID(i_rsp.response_id).
                             set_REQ_ID(i_rsp.request_identifier).
                             set_MCHP_STATUS_CODE(i_rsp.response_argument[MCHP_STATUS_CODE]).
@@ -142,7 +142,7 @@ fapi2::ReturnCode check_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
             case bupg::fw_binary_upgrade_rc::WRITE_FAIL:
                 FAPI_ASSERT(false,
                             fapi2::EXP_UPDATE_WRITE_FAIL().
-                            set_TARGET(i_target).
+                            set_OCMB_TARGET(i_target).
                             set_RSP_ID(i_rsp.response_id).
                             set_REQ_ID(i_rsp.request_identifier).
                             set_MCHP_STATUS_CODE(i_rsp.response_argument[MCHP_STATUS_CODE]).
@@ -161,7 +161,7 @@ fapi2::ReturnCode check_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
             case bupg::fw_binary_upgrade_rc::INV_IMAGE_LEN:
                 FAPI_ASSERT(false,
                             fapi2::EXP_UPDATE_INV_IMAGE_LEN().
-                            set_TARGET(i_target).
+                            set_OCMB_TARGET(i_target).
                             set_RSP_ID(i_rsp.response_id).
                             set_REQ_ID(i_rsp.request_identifier).
                             set_IMAGE_LEN(i_image_sz).
@@ -181,7 +181,7 @@ fapi2::ReturnCode check_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
             case bupg::fw_binary_upgrade_rc::AUTH_FAIL:
                 FAPI_ASSERT(false,
                             fapi2::EXP_UPDATE_AUTH_FAIL().
-                            set_TARGET(i_target).
+                            set_OCMB_TARGET(i_target).
                             set_RSP_ID(i_rsp.response_id).
                             set_REQ_ID(i_rsp.request_identifier).
                             set_MCHP_STATUS_CODE(i_rsp.response_argument[MCHP_STATUS_CODE]).
@@ -200,7 +200,7 @@ fapi2::ReturnCode check_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
             default:
                 FAPI_ASSERT(false,
                             fapi2::EXP_UPDATE_CMD_FAILED().
-                            set_TARGET(i_target).
+                            set_OCMB_TARGET(i_target).
                             set_RSP_ID(i_rsp.response_id).
                             set_REQ_ID(i_rsp.request_identifier).
                             set_MCHP_STATUS_CODE(i_rsp.response_argument[MCHP_STATUS_CODE]).
@@ -338,6 +338,64 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+/// @brief Callouts out a specific error if the FW write command does not receive a doorbell
+/// @param[in] i_target OCMB target that will be acted upon with this command
+/// @param[in] i_seq_num the number of sequences ran in the FW burn process
+/// @param[out] io_rc the ReturnCode to check and log
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode callout_fw_write_no_doorbell(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const uint64_t i_seq_num,
+        fapi2::ReturnCode& io_rc)
+{
+    // If we have the no-doorbell RC, log it and then assert out with our specific error
+    if(uint64_t(io_rc) == uint64_t(fapi2::RC_EXP_INBAND_RSP_NO_DOORBELL))
+    {
+        fapi2::logError(io_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+        io_rc = fapi2::FAPI2_RC_SUCCESS;
+
+        // Now log the specific error for the FW write command
+        FAPI_ASSERT(false,
+                    fapi2::EXP_FW_UPDATE_WRITE_NO_DOORBELL()
+                    .set_OCMB_TARGET(i_target)
+                    .set_SEQUENCE_NUMBER(i_seq_num)
+                    .set_EXP_ACTIVE_LOG_SIZE(4096),
+                    "%s FW write failed by not finding a doorbell", mss::c_str(i_target));
+    }
+
+    return io_rc;
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Callouts out a specific error if the FW commit command does not receive a doorbell
+/// @param[in] i_target OCMB target that will be acted upon with this command
+/// @param[out] io_rc the ReturnCode to check and log
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode callout_fw_commit_no_doorbell(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        fapi2::ReturnCode& io_rc)
+{
+    // If we have the no-doorbell RC, log it and then assert out with our specific error
+    if(uint64_t(io_rc) == uint64_t(fapi2::RC_EXP_INBAND_RSP_NO_DOORBELL))
+    {
+        fapi2::logError(io_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+        io_rc = fapi2::FAPI2_RC_SUCCESS;
+
+        // Now log the specific error for the FW write command
+        FAPI_ASSERT(false,
+                    fapi2::EXP_FW_UPDATE_COMMIT_NO_DOORBELL()
+                    .set_OCMB_TARGET(i_target)
+                    .set_EXP_ACTIVE_LOG_SIZE(4096),
+                    "%s FW commit failed by not finding a doorbell", mss::c_str(i_target));
+    }
+
+    return io_rc;
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 }//exp
 }//mss
 
@@ -376,7 +434,7 @@ extern "C"
         //is the actual field size for this value in the packet.
         FAPI_ASSERT(((i_image_sz & 0xff000000) == 0),
                     fapi2::EXP_UPDATE_INVALID_IMAGE_SIZE()
-                    .set_TARGET(i_target)
+                    .set_OCMB_TARGET(i_target)
                     .set_IMAGE_SIZE(i_image_sz),
                     "%s exp_fw_update: image size[0x%08x] must be less than 16MB!",
                     mss::c_str(i_target), i_image_sz);
@@ -446,8 +504,11 @@ extern "C"
                 // We still have to poll the doorbell to make sure the command completed
                 if ((seq_num % 16) == 0)
                 {
+                    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
                     // Read response from buffer
-                    FAPI_TRY(mss::exp::ib::getRSP(i_target, flash_write_cmd, response, rsp_data),
+                    l_rc = mss::exp::ib::getRSP(i_target, flash_write_cmd, response, rsp_data);
+
+                    FAPI_TRY(mss::exp::callout_fw_write_no_doorbell(i_target, seq_num, l_rc),
                              "exp_fw_update: getRSP() failed for flash_write "
                              "on %s! seq_num[%u]",
                              mss::c_str(i_target), seq_num);
@@ -460,9 +521,13 @@ extern "C"
                 }
                 else
                 {
+                    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+
                     // Poll response doorbell only
-                    FAPI_TRY(mss::exp::ib::poll_for_response_ready(i_target, mss::exp::omi::cmd_and_response_id::EXP_FW_BINARY_UPGRADE),
-                             "exp_fw_update: error polling response for flash_write "
+                    l_rc = mss::exp::ib::poll_for_response_ready(i_target, mss::exp::omi::cmd_and_response_id::EXP_FW_BINARY_UPGRADE);
+
+                    FAPI_TRY(mss::exp::callout_fw_write_no_doorbell(i_target, seq_num, l_rc),
+                             "exp_fw_update: getRSP() failed for flash_write "
                              "on %s! seq_num[%u]",
                              mss::c_str(i_target), seq_num);
 
@@ -511,6 +576,7 @@ extern "C"
         {
             host_fw_response_struct response;
             std::vector<uint8_t> rsp_data;
+            fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
 
             // Wait a little while first (value based on MCHP estimations):
             // 2 sec for image authentication
@@ -524,7 +590,8 @@ extern "C"
                 FAPI_TRY(fapi2::delay(mss::DELAY_1S, 200));
             }
 
-            FAPI_TRY(mss::exp::ib::getRSP(i_target, flash_commit_cmd, response, rsp_data),
+            l_rc = mss::exp::ib::getRSP(i_target, flash_commit_cmd, response, rsp_data);
+            FAPI_TRY(mss::exp::callout_fw_commit_no_doorbell( i_target, l_rc),
                      "exp_fw_update: getRSP() failed for flash_commit on %s!",
                      mss::c_str(i_target) );
 

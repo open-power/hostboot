@@ -62,6 +62,7 @@ extern "C"
         uint8_t l_sim = 0;
         bool l_has_rcd = false;
         bool l_is_mds = false;
+        bool l_mfg_thresholds = false;
 
         if (mss::count_dimm(i_target) == 0)
         {
@@ -79,6 +80,9 @@ extern "C"
                            .getParent<fapi2::TARGET_TYPE_MC>();
 
         FAPI_TRY( mss::attr::get_is_simulation( l_sim) );
+
+        // Check MNFG THRESHOLDS Policy flag
+        FAPI_TRY(mss::check_mfg_flag(fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_THRESHOLDS, l_mfg_thresholds));
 
         // Check if DIMM has an RCD
         FAPI_TRY(mss::dimm::has_rcd<mss::mc_type::EXPLORER>(i_target, l_has_rcd));
@@ -116,9 +120,45 @@ extern "C"
 
         if (!l_sim)
         {
+            bool l_image_a_good = true;
+            bool l_image_b_good = true;
+
             FAPI_INF("mss::exp::ib::run_fw_adapter_properties_get %s", mss::c_str(i_target));
             // Print and record Explorer FW version info
-            FAPI_TRY( mss::exp::ib::run_fw_adapter_properties_get(i_target) );
+            FAPI_TRY( mss::exp::ib::run_fw_adapter_properties_get(i_target, l_image_a_good, l_image_b_good) );
+
+            // Assert MNFG_SPI_FLASH_AUTHENTICATION_FAIL if fw_adapter_properties says one of the images is bad
+            if (!l_image_a_good || !l_image_b_good)
+            {
+                // Note: there is no way we could see both images bad here, because then we would not have booted this far
+                const uint8_t l_image_num = !l_image_a_good ? 0 : 1;
+
+                if (l_mfg_thresholds)
+                {
+                    // In MFG test, this fail should call out and deconfigure the DIMM, and fail the procedure
+                    FAPI_ASSERT(false,
+                                fapi2::EXP_SPI_FLASH_AUTH_FAIL().
+                                set_OCMB_TARGET(i_target).
+                                set_IMAGE(l_image_num).
+                                set_EXP_ACTIVE_LOG_SIZE(4096),
+                                "%s Explorer SPI flash authentication failed for image %s in MFG test",
+                                mss::c_str(i_target), (!l_image_a_good ? "A" : "B"));
+                }
+                else
+                {
+                    // In normal IPL, this fail should produce a recovered log and pass the procedure
+                    FAPI_ASSERT_NOEXIT(false,
+                                       fapi2::EXP_SPI_FLASH_AUTH_FAIL(fapi2::FAPI2_ERRL_SEV_RECOVERED).
+                                       set_OCMB_TARGET(i_target).
+                                       set_IMAGE(l_image_num).
+                                       set_EXP_ACTIVE_LOG_SIZE(4096),
+                                       "%s Explorer SPI flash authentication failed for image %s",
+                                       mss::c_str(i_target), (!l_image_a_good ? "A" : "B"));
+
+                    // Set current_err back to success
+                    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+                }
+            }
         }
 
         // Resets the explorer PHY if needed
