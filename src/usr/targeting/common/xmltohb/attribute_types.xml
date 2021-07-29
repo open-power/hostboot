@@ -1767,6 +1767,7 @@
         <default>0xFF</default>
       </uint8_t>
     </simpleType>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -1783,6 +1784,7 @@
         <default>0xFFFFFFFF</default>
       </uint32_t>
     </simpleType>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -1799,6 +1801,7 @@
         <default>0xFF</default>
       </uint8_t>
     </simpleType>
+    <no_export/>
   </attribute>
 
   <attribute>
