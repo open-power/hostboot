@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,6 +28,7 @@
 #include <kernel/terminate.H>
 #include <sys/sync.h>
 #include <sys/mmio.h>
+#include <sys/misc.h>
 #include <arch/ppc.H>
 #include <arch/magic.H>
 #ifndef BOOTLOADER
@@ -75,6 +76,35 @@ void initKernelTIMutex()
     mutex_init(&g_kernelMutex);
 #endif
 }
+
+#ifndef BOOTLOADER
+void termWriteStatus(hb_terminate_source i_source,
+                     uint64_t i_status,
+                     uint64_t i_failAddr,
+                     uint32_t i_error_info,
+                     bool i_forceWrite)
+{
+
+    // If the shutdown was not called with a Good shutdown status
+    // then we know we are shutting down due to error.  We need to
+    // figure out if the error provided is an EID or reasoncode
+    // and write it appropriately.
+    // Hostboot EIDs always start with 0x9 (32-bit)
+    static const uint64_t EID_MASK = 0x0000000090000000;
+
+    if (i_status != SHUTDOWN_STATUS_GOOD)
+    {
+        if ((i_status & 0x00000000F0000000) == EID_MASK)
+        {
+            termWriteEid(i_source, i_status);
+        }
+        else
+        {
+            termWriteSRC(i_source, i_status, i_failAddr, i_error_info, i_forceWrite);
+        }
+    }
+}
+#endif
 
 #ifndef BOOTLOADER
 void termWriteEid(hb_terminate_source i_source, uint32_t i_eid)

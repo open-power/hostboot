@@ -698,10 +698,10 @@ bool InitService::_setShutdownStatus(
 
     // This already takes care of accepting only the first TI code, so
     // just always call this
-    termWriteSRC(TI_SHUTDOWN,
-                 i_status,
-                 reinterpret_cast<uint64_t>(linkRegister()),
-                 i_error_info);
+    termWriteStatus(TI_SHUTDOWN,
+                    i_status,
+                    reinterpret_cast<uint64_t>(linkRegister()),
+                    i_error_info);
 
     if (iv_shutdownInProgress)
     {
@@ -994,11 +994,11 @@ void InitService::_doShutdown(uint64_t i_status,
     }
 
     // Update the HB TI area with the worst status.
-    termWriteSRC(TI_SHUTDOWN,
-                 iv_worst_status,
-                 reinterpret_cast<uint64_t>(linkRegister()),
-                 i_error_info,
-                 true); // Force write
+    termWriteStatus(TI_SHUTDOWN,
+                    iv_worst_status,
+                    reinterpret_cast<uint64_t>(linkRegister()),
+                    i_error_info,
+                    true); // Force write
 
     shutdown(iv_worst_status,
              i_payload_base,

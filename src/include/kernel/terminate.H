@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,6 +65,25 @@ void termWriteSRC(hb_terminate_source i_source,
                   uint64_t i_failAddr = 0,
                   uint32_t i_error_info = 0,
                   bool i_forceWrite = false);
+
+/** @fn termWriteStatus
+ *  A generic function that writes the given status to the HB TI area.
+ *  The function checks whether the given status is an EID (in which case
+ *  it will execute termWriteEid) or SRC (calls termWriteSRC) by looking
+ *  at the EID mask of the status.
+ *  @param[in] i_source: indicates what type of fail forced the TI
+ *  @param[in] i_status: the status with which we want to TI (could be EID
+ *                       of SRC)
+ *  @param[in] i_failAddr: i_linkRegister() value (address of failure)
+ *  @param[in] i_error_info: addt'l error info to add to TI data
+ *  @param[in] i_forceWrite: force the HB TI area to be overwritten with
+ *             the passed parameters.
+ */
+void termWriteStatus(hb_terminate_source i_source,
+                     uint64_t i_status,
+                     uint64_t i_failAddr = 0,
+                     uint32_t i_error_info = 0,
+                     bool i_forceWrite = false);
 
 /** @fn termModifySRC
  *  Modify an SRC and the TI data area for Bootloader

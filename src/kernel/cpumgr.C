@@ -109,23 +109,9 @@ void CpuManager::requestShutdown(uint64_t i_status, uint32_t i_error_data)
     __sync_synchronize();
     cv_shutdown_requested = true;
 
-    // If the shutdown was not called with a Good shutdown status
-    // then we know we are shutting down due to error.  We need to
-    // figure out if the error provided is an EID or reasoncode
-    // and write it appropriately.
-    // Hostboot EIDs always start with 0x9 (32-bit)
-    static const uint64_t EID_MASK = 0x0000000090000000;
     if (i_status != SHUTDOWN_STATUS_GOOD)
     {
-        if ((i_status & 0x00000000F0000000) == EID_MASK)
-        {
-            termWriteEid(TI_SHUTDOWN, i_status);
-        }
-        else
-        {
-            termWriteSRC(TI_SHUTDOWN,i_status, 0, i_error_data);
-        }
-
+        termWriteStatus(TI_SHUTDOWN, i_status, 0, i_error_data);
         printk("TI initiated on all threads (shutdown)\n");
     }
 
