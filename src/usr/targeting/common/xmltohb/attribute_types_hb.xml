@@ -251,6 +251,7 @@
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
+    <writeable/>
     <range>
       <min>0</min>
       <max>1</max>

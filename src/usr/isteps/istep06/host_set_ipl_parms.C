@@ -508,6 +508,15 @@ void* host_set_ipl_parms( void *io_pArgs )
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                           "host_set_ipl_parms: MPIPL detected, using PLDM bios attrs values from previous boot");
         }
+
+        // Force the update of the VPD ECC data if there is a mismatch, for BMC only
+        bool l_forceEccUpdateFlag = true;
+        sys->setAttr<TARGETING::ATTR_FORCE_ECC_UPDATE_ON_VALIDATION_ERROR>(l_forceEccUpdateFlag);
+
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "host_set_ipl_parms: "
+            "setting ATTR_FORCE_ECC_UPDATE_ON_VALIDATION_ERROR to %d, to force the "
+            "update of the VPD ECC data for MVPDs if any VPD ECC data has a mismatch. ",
+            sys->getAttr<TARGETING::ATTR_FORCE_ECC_UPDATE_ON_VALIDATION_ERROR>() );
 #endif
     }
 

@@ -66,6 +66,17 @@ class vpdEccApiTest: public CxxTest::TestSuite
                     break;
                 }
 
+                // If ECC data are being forcibly corrected then exit test
+                const auto l_sys = TARGETING::UTIL::assertGetToplevelTarget();
+                const ATTR_FORCE_ECC_UPDATE_ON_VALIDATION_ERROR_type l_forceEccUpdate =
+                    l_sys->getAttr<TARGETING::ATTR_FORCE_ECC_UPDATE_ON_VALIDATION_ERROR>();
+                if (l_forceEccUpdate)
+                {
+                    TRACFCOMP( g_trac_vpd, INFO_MRK"testVpdEccApi(): ECC data is being "
+                               "forcibly corrected, therefore skipping tests" );
+                    break;
+                }
+
                 // Initialize class member variables
                 if (false == mySetUp())
                 {
