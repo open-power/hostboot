@@ -24,11 +24,18 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
 
+    <registerFfdc>
+        <id>REG_FFDC_EXP_SPI_FLASH_ERR_INFO</id>
+        <scomRegister>EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR</scomRegister>
+    </registerFfdc>
+
+
     <hwpError>
         <rc>RC_EXP_UPDATE_INVALID_IMAGE_SIZE</rc>
         <description>
             Explorer firmware image must be less than 16MB
         </description>
+        <ffdc>OCMB_TARGET</ffdc>
         <ffdc>IMAGE_SIZE</ffdc>
         <callout>
             <procedure>CODE</procedure>
@@ -46,17 +53,48 @@
         <ffdc>MCHP_ERROR_CODE_1</ffdc>
         <ffdc>MCHP_ERROR_CODE_2</ffdc>
         <ffdc>MCHP_ERROR_CODE_3</ffdc>
+        <collectRegisterFfdc>
+            <id>REG_FFDC_EXP_SPI_FLASH_ERR_INFO</id>
+            <target>OCMB_TARGET</target>
+            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        </collectRegisterFfdc>
         <callout>
             <procedure>CODE</procedure>
             <priority>MEDIUM</priority>
         </callout>
         <callout>
-            <target>TARGET</target>
+            <target>OCMB_TARGET</target>
             <priority>HIGH</priority>
         </callout>
         <deconfigure>
-            <target>TARGET</target>
+            <target>OCMB_TARGET</target>
         </deconfigure>
+        <gard>
+            <target>OCMB_TARGET</target>
+        </gard>
+    </hwpError>
+
+    <hwpError>
+        <rc>RC_EXP_SPI_FLASH_AUTH_FAIL</rc>
+        <description>
+            Explorer SPI flash authentication failed for one FW image during IPL.
+        </description>
+        <ffdc>IMAGE</ffdc>
+        <collectRegisterFfdc>
+            <id>REG_FFDC_EXP_SPI_FLASH_ERR_INFO</id>
+            <target>OCMB_TARGET</target>
+            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        </collectRegisterFfdc>
+        <callout>
+            <target>OCMB_TARGET</target>
+            <priority>HIGH</priority>
+        </callout>
+        <deconfigure>
+            <target>OCMB_TARGET</target>
+        </deconfigure>
+        <gard>
+            <target>OCMB_TARGET</target>
+        </gard>
     </hwpError>
 
     <hwpError>
@@ -150,6 +188,59 @@
             <procedure>CODE</procedure>
             <priority>MEDIUM</priority>
         </callout>
+    </hwpError>
+
+    <hwpError>
+        <rc>RC_EXP_FW_UPDATE_WRITE_NO_DOORBELL</rc>
+        <description>
+            Explorer firmware update write command did not receive the doorbell
+        </description>
+        <ffdc>SEQUENCE_NUMBER</ffdc>
+        <collectRegisterFfdc>
+            <id>REG_FFDC_EXP_SPI_FLASH_ERR_INFO</id>
+            <target>OCMB_TARGET</target>
+            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        </collectRegisterFfdc>
+        <callout>
+            <procedure>CODE</procedure>
+            <priority>LOW</priority>
+        </callout>
+        <callout>
+            <target>OCMB_TARGET</target>
+            <priority>HIGH</priority>
+        </callout>
+        <deconfigure>
+            <target>OCMB_TARGET</target>
+        </deconfigure>
+        <gard>
+            <target>OCMB_TARGET</target>
+        </gard>
+    </hwpError>
+
+    <hwpError>
+        <rc>RC_EXP_FW_UPDATE_COMMIT_NO_DOORBELL</rc>
+        <description>
+            Explorer firmware update write command did not receive the doorbell
+        </description>
+        <collectRegisterFfdc>
+            <id>REG_FFDC_EXP_SPI_FLASH_ERR_INFO</id>
+            <target>OCMB_TARGET</target>
+            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        </collectRegisterFfdc>
+        <callout>
+            <procedure>CODE</procedure>
+            <priority>LOW</priority>
+        </callout>
+        <callout>
+            <target>OCMB_TARGET</target>
+            <priority>HIGH</priority>
+        </callout>
+        <deconfigure>
+            <target>OCMB_TARGET</target>
+        </deconfigure>
+        <gard>
+            <target>OCMB_TARGET</target>
+        </gard>
     </hwpError>
 
 </hwpErrors>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,10 +66,12 @@ fapi2::ReturnCode process_fw_adapter_properties_image_version(const fapi2::Targe
 /// @brief Helper function to print fw_adapter_properties_struct data and write to attributes
 /// @param[in] i_target The OCMB Target
 /// @param[in] i_fw_adapter_data The response struct from OCMB
-/// @return Success iff successful
+/// @param[in] i_flash_auth_info SPI flash authorization response
+/// @return FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode process_fw_adapter_properties(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-        const fw_adapter_properties_struct& i_fw_adapter_data);
+        const fw_adapter_properties_struct& i_fw_adapter_data,
+        const spi_flash_plat_auth_info_struct& i_flash_auth_info);
 
 ///
 /// @brief Create a FW_ADAPTER_PROPERTIES_GET command
@@ -84,29 +86,44 @@ fapi2::ReturnCode setup_fw_adapter_properties_cmd(const fapi2::Target<fapi2::TAR
 /// @brief Convert fw_adapter_properties response structure to a fw_adapter_properties_struct
 /// @param[in,out] io_data vector of little endian data
 /// @param[out] o_response response structure
-/// @return Success iff successful
+/// @param[out] o_flash_auth_info SPI flash authorization response (will populate if available)
+/// @return FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode fw_adapter_properties_struct_from_little_endian(
     std::vector<uint8_t>& io_data,
-    fw_adapter_properties_struct& o_response);
+    fw_adapter_properties_struct& o_response,
+    spi_flash_plat_auth_info_struct& o_flash_auth_info);
 
 ///
 /// @brief Convert fw_adapter_properties response structure to a fw_adapter_properties_struct
 /// @param[in] i_target OCMB target on which to operate
 /// @param[in,out] io_data little endian data to process
 /// @param[out] o_response response structure
+/// @param[out] o_flash_auth_info SPI flash authorization response (will populate if available)
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 /// @note helper function to allow for checking FFDC
 ///
 fapi2::ReturnCode fw_adapter_properties_struct_from_little_endian(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
     std::vector<uint8_t>& io_data,
-    fw_adapter_properties_struct& o_response);
+    fw_adapter_properties_struct& o_response,
+    spi_flash_plat_auth_info_struct& o_flash_auth_info);
 
 ///
 /// @brief Run the FW_ADAPTER_PROPERTIES_GET command and store the results in attributes
 /// @param[in] i_target The OCMB Target
-/// @return Success iff successful
+/// @param[out] o_image_a_good will be set to false if authentication failed for image A
+/// @param[out] o_image_b_good will be set to false if authentication failed for image B
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode run_fw_adapter_properties_get(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        bool& o_image_a_good,
+        bool& o_image_b_good);
+
+///
+/// @brief Run the FW_ADAPTER_PROPERTIES_GET command and store the results in attributes
+/// @param[in] i_target The OCMB Target
+/// @return FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode run_fw_adapter_properties_get(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
 

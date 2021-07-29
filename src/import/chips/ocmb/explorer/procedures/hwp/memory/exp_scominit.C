@@ -60,6 +60,7 @@ extern "C"
     {
         mss::display_git_commit_info("exp_scominit");
         bool l_is_mds = false;
+        uint8_t l_sim = 0;
 
         if (mss::count_dimm(i_target) == 0)
         {
@@ -75,6 +76,8 @@ extern "C"
                            .getParent<fapi2::TARGET_TYPE_MCC>()
                            .getParent<fapi2::TARGET_TYPE_MI>()
                            .getParent<fapi2::TARGET_TYPE_MC>();
+
+        FAPI_TRY( mss::attr::get_is_simulation( l_sim) );
 
         for(const auto& l_port : l_port_targets)
         {
@@ -104,8 +107,33 @@ extern "C"
         // Run required unmasks for LOCAL_FIR, FABR0, SRQFIR after scominit
         FAPI_TRY(mss::unmask::after_scominit<mss::mc_type::EXPLORER>(i_target));
 
-        // Print and record Explorer FW version info
-        FAPI_TRY( mss::exp::ib::run_fw_adapter_properties_get(i_target) );
+        if (!l_sim)
+        {
+            bool l_image_a_good = true;
+            bool l_image_b_good = true;
+
+            FAPI_INF("mss::exp::ib::run_fw_adapter_properties_get %s", mss::c_str(i_target));
+            // Print and record Explorer FW version info
+            FAPI_TRY( mss::exp::ib::run_fw_adapter_properties_get(i_target, l_image_a_good, l_image_b_good) );
+
+            // Assert MNFG_SPI_FLASH_AUTHENTICATION_FAIL if fw_adapter_properties says one of the images is bad
+            if (!l_image_a_good || !l_image_b_good)
+            {
+                // Note: there is no way we could see both images bad here, because then we would not have booted this far
+                const uint8_t l_image_num = !l_image_a_good ? 0 : 1;
+
+                // In normal IPL, this fail should produce a recovered log and pass the procedure
+                FAPI_ASSERT_NOEXIT(false,
+                                   fapi2::EXP_SPI_FLASH_AUTH_FAIL(fapi2::FAPI2_ERRL_SEV_RECOVERED).
+                                   set_OCMB_TARGET(i_target).
+                                   set_IMAGE(l_image_num),
+                                   "%s Explorer SPI flash authentication failed for image %s",
+                                   mss::c_str(i_target), (!l_image_a_good ? "A" : "B"));
+
+                // Set current_err back to success
+                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            }
+        }
 
         // Resets the explorer PHY if needed
         FAPI_TRY(mss::exp::phy::reset(i_target));

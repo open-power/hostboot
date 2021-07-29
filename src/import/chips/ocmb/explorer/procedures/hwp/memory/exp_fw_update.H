@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -119,6 +119,26 @@ fapi2::ReturnCode setup_flash_write_cmd(const fapi2::Target<fapi2::TARGET_TYPE_O
 ///
 fapi2::ReturnCode setup_flash_commit_cmd(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         host_fw_command_struct& o_cmd);
+
+///
+/// @brief Callouts out a specific error if the FW write command does not receive a doorbell
+/// @param[in] i_target OCMB target that will be acted upon with this command
+/// @param[in] i_seq_num the number of sequences ran in the FW burn process
+/// @param[out] io_rc the ReturnCode to check and log
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode callout_fw_write_no_doorbell(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const uint64_t i_seq_num,
+        fapi2::ReturnCode& io_rc);
+
+///
+/// @brief Callouts out a specific error if the FW commit command does not receive a doorbell
+/// @param[in] i_target OCMB target that will be acted upon with this command
+/// @param[out] io_rc the ReturnCode to check and log
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode callout_fw_commit_no_doorbell(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        fapi2::ReturnCode& io_rc);
 
 }// ns exp
 }// ns mss

@@ -934,6 +934,22 @@ typedef struct __attribute__((packed))
 fw_adapter_properties_struct;
 
 ///
+/// @class spi_flash_plat_auth_info_struct
+/// @brief SPI flash platform authentication info struct
+/// @note this will be appended onto fw_adapter_properties_struct after FW version 432894
+///
+typedef struct __attribute__((packed))
+{
+    uint8_t active_image_index;        // The active image
+    uint8_t red_image_index;           // The redundant image
+    uint8_t failed_authentication[FW_ADAPTER_MAX_FW_IMAGE]; // 1 if the image failed authentication
+    uint8_t uecc_detected[FW_ADAPTER_MAX_FW_IMAGE]; // 1 if UECC detected when authenticating or copying image
+    uint8_t uecc_compare; // 1 if UECC detected when comparing active and redundant images
+    uint8_t image_updated; // 1 if FW successfully overwrote an image that failed authentication or was out of date
+}
+spi_flash_plat_auth_info_struct;
+
+///
 /// @class train_delay_msdg
 /// @brief MCHP delay data structure
 ///
