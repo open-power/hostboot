@@ -71,6 +71,7 @@ enum TdrResult
     Short             = 0x0030,
     ShortToGnd        = 0x0001 | Short,
     ShortToVdd        = 0x0002 | Short,
+    DidNotRun         = 0x2000,
     NotSupported      = 0x4000,
     UnableToDetermine = 0x8000
 };
@@ -87,6 +88,8 @@ fapi2::ReturnCode p10_io_tdr(
     std::vector<uint32_t>& o_status,
     std::vector<uint32_t>& o_length_ps)
 {
+    using namespace scomt::iohs;
+
     FAPI_DBG("Begin TDR Isolation");
 
     const uint32_t c_pulse_width = 100;
@@ -105,6 +108,7 @@ fapi2::ReturnCode p10_io_tdr(
     fapi2::ATTR_CHIP_EC_FEATURE_DD2_TDR_Type l_tdr_dd2;
     fapi2::ATTR_CHIP_UNIT_POS_Type l_iolink_num;
     fapi2::ATTR_FREQ_IOHS_LINK_MHZ_Type l_iohs_freq;
+    fapi2::buffer<uint64_t> l_dl_status;
 
     char l_tgt_str[fapi2::MAX_ECMD_STRING_LEN];
     auto l_iohs_target = i_iolink_target.getParent<fapi2::TARGET_TYPE_IOHS>();
@@ -114,11 +118,26 @@ fapi2::ReturnCode p10_io_tdr(
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_DD2_TDR,
                            l_chip_target, l_tdr_dd2));
 
-
     fapi2::toString(i_iolink_target, l_tgt_str, sizeof(l_tgt_str));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_iolink_target, l_iolink_num),
              "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
     FAPI_DBG("IOLINK Target: %s   (unit): %d", l_tgt_str, l_iolink_num);
+
+    // only support HWP execution when DL layer is down -- if link is up, skip
+    // execution and return DidNotRun status on all lanes
+    FAPI_TRY(GET_DLP_DLL_STATUS(l_iohs_target, l_dl_status));
+
+    if ((((l_iolink_num % 2) == 0) && (l_dl_status.getBit<DLP_DLL_STATUS_0_LINK_UP>())) || // even link
+        (((l_iolink_num % 2) == 1) && (l_dl_status.getBit<DLP_DLL_STATUS_1_LINK_UP>())))   // odd link
+    {
+        for (uint32_t l_index = 0; l_index < i_lanes.size(); l_index++)
+        {
+            o_status[l_index] = TdrResult::DidNotRun;
+        }
+
+        FAPI_DBG("Analysis skipped, link is up");
+        goto fapi_try_exit;
+    }
 
     // check the IOHS frequency
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_IOHS_LINK_MHZ, l_iohs_target, l_iohs_freq),
