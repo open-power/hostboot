@@ -65,12 +65,6 @@
 #include "errlentry_consts.H"
 #include <util/misc.H>
 
-#ifdef CONFIG_BMC_IPMI
-#include <ipmi/ipmisel.H>
-#include <ipmi/ipmisensor.H>
-#include <errl/errludsensor.H>
-#endif
-
 #include <util/utillidmgr.H>
 
 // Hostboot Image ID string
@@ -97,6 +91,79 @@ std::map<uint8_t, const char *> errl_sev_str_map {
     {ERRL_SEV_UNKNOWN,           "UNKNOWN"},
 };
 
+#ifdef CONFIG_BUILD_FULL_PEL
+// This list creates a mapping from epubProcedureID to the hostboot isolation procedure number HBxxxxx. Due to character
+// limitations the isolation procedure must be 7 characters plus null terminator. The isolation procedure codes are hex
+// characters to allow the maximum possible number of codes. These codes have meaning to customers where the customer
+// can lookup the code and see a set of instructions to manually recover their system.
+//
+// Historically, this mapping between epubProcedureID and isolation procedure code was handled by FSP/HWSV. Hence the
+// comments showing how the HBxxxxx codes map to FSPSPxx. For P10 FSP based systems, FSPSPxx codes will continue to be
+// used but for eBMC systems these codes will be used instead. If an existing epubProcedureID needs to be added to this
+// list then it should be inserted in the correct sorted order with respect to epubProcedureID and be assigned its
+// corresponding hex value as its HBxxxxx code. This way, for all P10 systems, we can continue to leverage the existing
+// documentation for those epubProcedureIDs which was already established by its corresponding FSPSPxx code.
+// For example, EPUB_PRC_TOD_PROB is 0x07. If hostboot wanted to start using that, then it would just be inserted after
+// EPUB_PRC_PHYP_CODE and assigned HB00007.
+
+// Should a new epubProcedureID be added then it should be placed in sorted order in the list below with its
+// corresponding HBxxxxx code. FSPSPxx codes range up to 99 (decimal) so any new code would need to be after that.
+// This list is to remain in sorted order so that it can be binary searched when looking up the HBxxxxx
+// code for a given epubProcedureID.
+
+struct epubProcedureToIsolationProcedure_t
+{
+    epubProcedureID epub_procedure_id;
+    char isolationProcedure[PEL_PART_NUM_SIZE];
+};
+static constexpr std::array<epubProcedureToIsolationProcedure_t, 27> EPUB_TO_ISOLATION_PROCEDURE =
+{
+    epubProcedureToIsolationProcedure_t
+    { EPUB_PRC_NONE                   , "       "},
+    { EPUB_PRC_FIND_DECONFIGURED_PART , "HB00001"}, // FSPSP01
+    { EPUB_PRC_SP_CODE                , "HB00004"}, // FSPSP04
+    { EPUB_PRC_PHYP_CODE              , "HB00005"}, // FSPSP05
+    { EPUB_PRC_ALL_PROCS              , "HB00008"}, // FSPSP08
+    { EPUB_PRC_ALL_MEMCRDS            , "HB00009"}, // FSPSP09
+    { EPUB_PRC_INVALID_PART           , "HB0000A"}, // FSPSP10
+    { EPUB_PRC_LVL_SUPP               , "HB00010"}, // FSPSP16
+    { EPUB_PRC_SUE_PREVERROR          , "HB00011"}, // FSPSP17
+    { EPUB_PRC_PROCPATH               , "HB00016"}, // FSPSP22
+    { EPUB_PRC_NO_VPD_FOR_FRU         , "HB0001C"}, // FSPSP28
+    { EPUB_PRC_MEMORY_PLUGGING_ERROR  , "HB00022"}, // FSPSP34
+    { EPUB_PRC_FSI_PATH               , "HB0002D"}, // FSPSP45
+    { EPUB_PRC_PROC_AB_BUS            , "HB00030"}, // FSPSP48
+    { EPUB_PRC_PROC_XYZ_BUS           , "HB00031"}, // FSPSP49
+    { EPUB_PRC_MEMBUS_ERROR           , "HB00034"}, // FSPSP52
+    { EPUB_PRC_EIBUS_ERROR            , "HB00037"}, // FSPSP55
+    { EPUB_PRC_POWER_ERROR            , "HB0003F"}, // FSPSP63
+    { EPUB_PRC_PERFORMANCE_DEGRADED   , "HB0004D"}, // FSPSP77
+    { EPUB_PRC_MEMORY_UE              , "HB0004F"}, // FSPSP79
+    { EPUB_PRC_HB_CODE                , "HB00055"}, // FSPSP85
+    { EPUB_PRC_TOD_CLOCK_ERR          , "HB00056"}, // FSPSP86
+    { EPUB_PRC_COOLING_SYSTEM_ERR     , "HB0005C"}, // FSPSP92
+    { EPUB_PRC_FW_VERIFICATION_ERR    , "HB0005D"}, // FSPSP93
+    { EPUB_PRC_GPU_ISOLATION_PROCEDURE, "HB0005E"}, // FSPSP94
+    { EPUB_PRC_NVDIMM_ERR             , "HB00061"}, // FSPSP97
+    { EPUB_PRC_SBE_CODE               , "HB00062"}, // FSPSP98
+};
+
+template<typename Iterator>
+static constexpr bool is_sorted(const Iterator begin, const Iterator end)
+{
+    if ((begin == end) || (begin + 1 == end))
+    {
+        return true;
+    }
+    else if (begin->epub_procedure_id > (begin+1)->epub_procedure_id)
+    {
+        return false;
+    }
+    return is_sorted(begin+1, end);
+}
+static_assert(is_sorted(EPUB_TO_ISOLATION_PROCEDURE.cbegin(), EPUB_TO_ISOLATION_PROCEDURE.cend()),
+              "EPUB_TO_ISOLATION_PROCEDURE must be in sorted order with respect to epubProcedureID");
+#endif
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 ErrlEntry::ErrlEntry(const errlSeverity_t i_sev,
@@ -972,87 +1039,6 @@ void ErrlEntry::addPartIdInfoToErrLog
     TRACDCOMP(g_trac_errl, EXIT_MRK"ErrlEntry::addPartIdInfoToErrLog()");
 }
 
-#ifdef CONFIG_BMC_IPMI
-
-TARGETING::ATTR_FRU_ID_type getFRU_ID(TARGETING::Target * i_target)
-{
-    TARGETING::ATTR_FRU_ID_type l_fruid = 0;  // set to invalid FRU ID
-    TARGETING::TargetHandleList l_parentList;
-    TARGETING::Target * l_target = i_target;
-
-    uint16_t level = 0; // just a basic parent level counter
-
-    TRACDCOMP(g_trac_errl,"Looking for FRU ID starting at HUID 0x%X target",
-        TARGETING::get_huid(i_target));
-
-    bool foundFru = i_target->tryGetAttr<TARGETING::ATTR_FRU_ID>(l_fruid);
-    while (!foundFru)
-    {
-        level++;
-
-        // Get immediate parent
-        TARGETING::targetService().getAssociated(
-                                        l_parentList,
-                                        l_target,
-                                        TARGETING::TargetService::PARENT,
-                                        TARGETING::TargetService::IMMEDIATE);
-
-        if (l_parentList.size() != 1)
-        {
-            TRACDCOMP(g_trac_errl,"%d No Parent for HUID 0x%X target",
-                level, TARGETING::get_huid(l_target));
-            break;
-        }
-
-        l_target = l_parentList[0];
-
-        if (l_target->tryGetAttr<TARGETING::ATTR_FRU_ID>(l_fruid))
-        {
-            // Found 1st parent with a FRU ID
-            foundFru = true;
-        }
-
-        l_parentList.clear();  // clear out old entry
-
-    } // end while
-
-    if (foundFru)
-    {
-        TRACDCOMP(g_trac_errl,"level %d FRU ID 0x%X found for target HUID 0x%X",
-                    level, l_fruid, TARGETING::get_huid(l_target));
-    }
-    else
-    {
-        TRACFCOMP(g_trac_errl,"Failed to find a FRU ID for target HUID 0x%X. Looked at %d levels.",
-            TARGETING::get_huid(i_target), level);
-    }
-
-    return l_fruid;
-}
-
-#ifndef __HOSTBOOT_RUNTIME
-// @TODO: RTC 244854: Enable when can
-//        Having linking issue with symbol getFaultSensorNumber for Jenkins OP-BUILD
-void ErrlEntry::addSensorDataToErrLog(TARGETING::Target * i_target,
-                                      HWAS::callOutPriority i_priority )
-{
-    TRACDCOMP(g_trac_errl,
-        ENTER_MRK"ErrlEntry::addSensorDataToErrLog(HUID 0x%X, priority %d)",
-        TARGETING::get_huid(i_target), i_priority);
-
-    uint8_t l_sensorNum = SENSOR::getFaultSensorNumber(i_target);
-    TARGETING::ATTR_FRU_ID_type l_fru_id = getFRU_ID(i_target);
-
-    // Add the sensor details to the error log
-    ErrlUserDetailsSensor(l_fru_id, l_sensorNum, i_priority).addToLog(this);
-
-    TRACDCOMP(g_trac_errl, EXIT_MRK"ErrlEntry::addSensorDataToErrLog()");
-}
-
-#endif // #ifndef __HOSTBOOT_RUNTIME
-
-#endif
-
 void ErrlEntry::checkForDeconfigAndGard()
 {
     //Loop through each section of the errorlog
@@ -1099,6 +1085,7 @@ void ErrlEntry::checkForDeconfigAndGard()
         }
     }
 }
+
 ///////////////////////////////////////////////////////////////////////////////
 // for use by ErrlManager
 void ErrlEntry::commit( compId_t  i_committerComponent )
@@ -1136,10 +1123,10 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
 
     // These will go into the EH section. The real information will be gathered
     // from attributes on called-out targets, if targeting is loaded.
-    ATTR_SERIAL_NUMBER_type serial_number = { }; // first 4 bytes used as serial
-    ATTR_RAW_MTM_type mtm = "UNKNOWN";
-    ATTR_FW_RELEASE_VERSION_type release_version = "UNKNOWN";
-    ATTR_FW_SUBSYS_VERSION_type subsys_version = "UNKNOWN";
+    TARGETING::ATTR_SERIAL_NUMBER_type serial_number = { }; // first 4 bytes used as serial
+    TARGETING::ATTR_RAW_MTM_type mtm = "UNKNOWN";
+    TARGETING::ATTR_FW_RELEASE_VERSION_type release_version = "UNKNOWN";
+    TARGETING::ATTR_FW_SUBSYS_VERSION_type subsys_version = "UNKNOWN";
 
     // Check to make sure targeting is initialized. If so, collect part and
     // serial numbers
@@ -1169,60 +1156,11 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
         // Add the version info to the error log for OpenPOWER systems
         addVersionInfo();
 
-        // If this error was a hardware callout, add the serial and part numbers
-        // to the log. FSP provides this data so if there is no FSP, get them here.
-        if(!INITSERVICE::spBaseServicesEnabled())
-        {
-            for(size_t i = 0; i < iv_SectionVector.size(); i++)
-            {
-                ErrlUD * l_udSection = iv_SectionVector[i];
-                HWAS::callout_ud_t * l_ud =
-                    reinterpret_cast<HWAS::callout_ud_t*>(l_udSection->iv_pData);
-
-                if((ERRL_COMP_ID     == (l_udSection)->iv_header.iv_compId) &&
-                   (1                == (l_udSection)->iv_header.iv_ver) &&
-                   (ERRL_UDT_CALLOUT == (l_udSection)->iv_header.iv_sst) &&
-                   (HWAS::HW_CALLOUT == l_ud->type))
-                {
-                    uint8_t * l_uData = (uint8_t *)(l_ud + 1);
-                    Target * l_target = NULL;
-                    bool l_err = HWAS::retrieveTarget(l_uData,
-                                                      l_target,
-                                                      this);
-                    if(!l_err)
-                    {
-                        addPartIdInfoToErrLog( l_target );
-#ifdef CONFIG_BMC_IPMI
-
-// @TODO: RTC 244854: Enable when can
-//        Having linking issue with symbol addSensorDataToErrLog for Jenkins OP-BUILD
-#ifndef __HOSTBOOT_RUNTIME
-                        addSensorDataToErrLog( l_target, l_ud->priority);
-#endif
-
-#endif
-
-                        // Let the called-out targets override these values
-                        UTIL::tryGetAttributeInHierarchy<ATTR_SERIAL_NUMBER>(l_target, serial_number);
-                        UTIL::tryGetAttributeInHierarchy<ATTR_RAW_MTM>(l_target, mtm);
-                        UTIL::tryGetAttributeInHierarchy<ATTR_FW_RELEASE_VERSION>(l_target, release_version);
-                        UTIL::tryGetAttributeInHierarchy<ATTR_FW_SUBSYS_VERSION>(l_target, subsys_version);
-
 #ifdef CONFIG_BUILD_FULL_PEL
-                        // Add a FRU callout for this target to the Primary SRC
-                        const uint8_t FRU_COMPONENT_TYPE_NORMAL_HW = 0x01;
-                        addFruCalloutDataToSrc(l_target,
-                                               l_ud->priority,
-                                               FRU_COMPONENT_TYPE_NORMAL_HW);
+        // Collect various data for the callouts present in this error for BMC since FSP historically handled that for
+        // Hostboot.
+        collectCalloutDataForBMC( node);
 #endif
-                    }
-                    else
-                    {
-                        TRACFCOMP(g_trac_errl, "ErrlEntry::commit() - Error retrieving target");
-                    }
-                }
-            }
-        }
     }
     else
     {
@@ -1257,6 +1195,192 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
         iv_Extended.setSymptomId(pelsrchdr->srcString, &pelsrchdr->word2, pelsrchdr->wordcount - 1);
     }
 }
+
+#ifdef CONFIG_BUILD_FULL_PEL
+void ErrlEntry::collectCalloutDataForBMC(TARGETING::Target* const i_node)
+{
+    using namespace TARGETING;
+    const uint8_t FRU_COMPONENT_TYPE_NORMAL_HW = 0x01;
+
+    for(size_t i = 0; i < iv_SectionVector.size(); i++)
+    {
+        ErrlUD * l_udSection = iv_SectionVector[i];
+        HWAS::callout_ud_t * l_ud =
+            reinterpret_cast<HWAS::callout_ud_t*>(l_udSection->iv_pData);
+
+        if((ERRL_COMP_ID     == (l_udSection)->iv_header.iv_compId) &&
+           (1                == (l_udSection)->iv_header.iv_ver) &&
+           (ERRL_UDT_CALLOUT == (l_udSection)->iv_header.iv_sst))
+        {
+
+            switch(l_ud->type)
+            {
+                case(HWAS::PROCEDURE_CALLOUT):
+                    //@TODO RTC-268840: Handle Procedure callouts
+                    // FRU_COMPONENT_TYPE_CODE 0x2
+                    break;
+                case(HWAS::HW_CALLOUT):
+                {
+                    // Try to get the target associated with this user detail section.
+                    uint8_t * l_uData = (uint8_t *)(l_ud + 1);
+                    Target * l_target = NULL;
+                    bool l_err = HWAS::retrieveTarget(l_uData,
+                                                      l_target,
+                                                      this);
+
+                    if (!l_err)
+                    {
+                        addPartIdInfoToErrLog( l_target );
+
+                        // Add a FRU callout for this target to the Primary SRC
+                        addFruCalloutDataToSrc(l_target,
+                                               l_ud->priority,
+                                               FRU_COMPONENT_TYPE_NORMAL_HW);
+                    }
+                    else
+                    {
+                        TRACFCOMP(g_trac_errl, "ErrlEntry::collectCalloutDataForBMC() - Error retrieving target");
+                    }
+                    break;
+                }
+                case(HWAS::BUS_CALLOUT):
+                {
+                    //@TODO RTC-122928: Handle Bus Callouts
+                    break;
+                }
+                case(HWAS::CLOCK_CALLOUT):
+                {
+                    // All current BMC-based systems don't have a FRU for the clock card, it is a part of the backplane.
+                    // Hostboot doesn't have a target for the backplane, so callout the node.
+                    addFruCalloutDataToSrc(i_node,
+                                           l_ud->priority,
+                                           FRU_COMPONENT_TYPE_NORMAL_HW);
+                    break;
+                }
+                case(HWAS::PART_CALLOUT):
+                {
+                    // Try to get the target associated with this user detail section.
+                    uint8_t * l_uData = (uint8_t *)(l_ud + 1);
+                    Target * l_target = NULL;
+                    bool l_err = HWAS::retrieveTarget(l_uData,
+                                                      l_target,
+                                                      this);
+                    switch (l_ud->partType)
+                    {
+                        case(HWAS::PNOR_PART_TYPE):
+                        {
+                            // Since the PNOR is virtual this should be a callout of the BMC code.
+                            addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                                HWAS::SRCI_PRIORITY_HIGH);
+                            break;
+                        }
+                        case(HWAS::SBE_SEEPROM_PART_TYPE):
+                        {
+                            if (!l_err)
+                            {
+                                // FRU callout of the processor, the MRU should be the SEEPROM so pass in its MRU
+                                //@TODO RTC-268840: Pass in MRU, waiting to see if MRW will generate or if hostboot
+                                //                  needs to create it.
+                                addFruCalloutDataToSrc(l_target,
+                                                       l_ud->priority,
+                                                       FRU_COMPONENT_TYPE_NORMAL_HW);
+                            }
+                            else
+                            {
+                                TRACFCOMP(g_trac_errl,
+                                          "ErrlEntry::collectCalloutDataForBMC() - Error retrieving target");
+                            }
+                            break;
+                        }
+                        case(HWAS::VPD_PART_TYPE):
+                        {
+                            if (!l_err)
+                            {
+                                // The FRU will be the associated target that contains the EEPROM being called out.
+                                // PROC, DIMM, etc. However, the MRU will be for the EEPROM so pass in its MRU
+                                //@TODO RTC-268840: Pass in MRU, waiting to see if MRW will generate or if hostboot
+                                //                  needs to create it.
+                                addFruCalloutDataToSrc(l_target,
+                                                       l_ud->priority,
+                                                       FRU_COMPONENT_TYPE_NORMAL_HW);
+                            }
+                            else
+                            {
+                                TRACFCOMP(g_trac_errl,
+                                          "ErrlEntry::collectCalloutDataForBMC() - Error retrieving target");
+                            }
+                            break;
+                        }
+                        case(HWAS::LPC_SLAVE_PART_TYPE):
+                        {
+                            //@TODO RTC-268840: Handle
+                            break;
+                        }
+                        case(HWAS::GPIO_EXPANDER_PART_TYPE):
+                        {
+                            //@TODO RTC-268840: Handle
+                            break;
+                        }
+                        case(HWAS::SPIVID_SLAVE_PART_TYPE):
+                        {
+                            //@TODO RTC-268840: Handle
+                            break;
+                        }
+                        case(HWAS::TOD_CLOCK):
+                        case(HWAS::MEM_REF_CLOCK):
+                        case(HWAS::PROC_REF_CLOCK):
+                        case(HWAS::PCI_REF_CLOCK):
+                        {
+                            // All current BMC-based systems don't have a FRU for the clock card, it is a part of the
+                            // backplane. Hostboot doesn't have a target for the backplane, so callout the node.
+                            addFruCalloutDataToSrc(i_node,
+                                                   l_ud->priority,
+                                                   FRU_COMPONENT_TYPE_NORMAL_HW);
+                            break;
+                        }
+                        case(HWAS::NO_PART_TYPE):
+                        case(HWAS::FLASH_CONTROLLER_PART_TYPE):
+                        case(HWAS::SMP_CABLE):
+                        case(HWAS::BPM_CABLE_PART_TYPE):
+                        case(HWAS::NV_CONTROLLER_PART_TYPE):
+                        case(HWAS::BPM_PART_TYPE):
+                        case(HWAS::SPI_DUMP_PART_TYPE):
+                        {
+                            // Not supported, assert if Simics. So that they can be updated by error creators.
+                            TRACFCOMP(g_trac_errl, "ErrlEntry::collectCalloutDataForBMC(): "
+                                      "Unsupported part type 0x%X for PART_CALLOUT",
+                                      l_ud->partType);
+                            if (Util::isSimicsRunning())
+                            {
+                                assert(false, "Part Type 0x%X for PART_CALLOUT not supported.",
+                                       l_ud->partType);
+                            }
+                            break;
+                        }
+                    } // switch partTypeEnum
+                    break;
+                }
+                case(HWAS::I2C_DEVICE_CALLOUT):
+                {
+                    // Taken care of by handleI2cDeviceCalloutWithinHostboot. Nothing to do here.
+                    break;
+                }
+                case(HWAS::SENSOR_CALLOUT):
+                {
+                    // Not supported, assert if Simics. So that they can be updated by error creators.
+                    TRACFCOMP(g_trac_errl, "ErrlEntry::collectCalloutDataForBMC(): Unsupported callout type");
+                    if (Util::isSimicsRunning())
+                    {
+                        assert(false, "Sensor Callouts are not supported.");
+                    }
+
+                    break;
+                }
+            }
+        }
+    }
+}
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 // Function to set the correct subsystem ID based on callout priorities
@@ -2376,19 +2500,8 @@ void ErrlEntry::getErrlSize(uint32_t& o_flatSize,
     TARGETING::Target * sys = nullptr;
     TARGETING::targetService().getTopLevelTarget( sys );
 
-#ifdef CONFIG_BMC_IPMI
-    if ( !(sys &&
-           sys->tryGetAttr
-                <TARGETING::ATTR_BMC_MAX_ERROR_LOG_SIZE>( o_maxSize )) )
-    {
-        // Can't get value from attribute, so
-        // use default IPMI value for max log size
-        o_maxSize =  IPMISEL::ESEL_MAX_SIZE_DEFAULT;
-    }
-#else
-    // Default to 4K for all others
+    // Default to 4K
     o_maxSize = 4096;
-#endif
 
     // Remove any duplicate traces
     removeDuplicateTraces();
@@ -2792,9 +2905,10 @@ void ErrlEntry::addUDSection( ErrlUD* i_section)
 }
 
 #ifdef CONFIG_BUILD_FULL_PEL
-void ErrlEntry::addFruCalloutDataToSrc(TARGETING::Target* i_target,
-                                       callOutPriority i_priority,
-                                       uint8_t i_compType)
+void ErrlEntry::addFruCalloutDataToSrc(TARGETING::Target * const i_target,
+                                       callOutPriority     const i_priority,
+                                       uint8_t             const i_compType,
+                                       TARGETING::ATTR_MRU_ID_type    const i_mru_id)
 {
     using namespace TARGETING;
 
@@ -2887,7 +3001,15 @@ void ErrlEntry::addFruCalloutDataToSrc(TARGETING::Target* i_target,
 
     // MRU ID
     ATTR_MRU_ID_type l_mruid { };
-    UTIL::tryGetAttributeInHierarchy<ATTR_MRU_ID>(i_target, l_mruid);
+    // Use the given MRU ID if one was given, otherwise look it up.
+    if (i_mru_id != UINT32_MAX)
+    {
+        l_mruid = i_mru_id;
+    }
+    else
+    {
+        UTIL::tryGetAttributeInHierarchy<ATTR_MRU_ID>(i_target, l_mruid);
+    }
     l_fruco.mruPriVec.push_back(i_priority); // MRU gets same priority as callout
     l_fruco.mruIdVec.push_back(l_mruid);
 

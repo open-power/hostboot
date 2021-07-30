@@ -1014,16 +1014,28 @@ private:
 #endif
 
 #ifdef CONFIG_BUILD_FULL_PEL
+    /*
+     * @brief Collects the various data necessary to build the full PEL depending on callout type for the BMC.
+     *
+     * @param[in]    i_node       The node target. Used to fill in some of the callout types if they are present.
+     */
+    void collectCalloutDataForBMC(TARGETING::Target* const i_node);
+
     /**
      * @brief Save FRU callout data to vector
      *
      * @param[in]   i_target    The target of the callout
      * @param[in]   i_priority  The priority of the callout
      * @param[in]   i_compType  The component type of the callout
+     * @param[in]   i_mru_id    The MRU ID to use if supplied.
+     *                          Default 0xFFFFFFFF and this function looks it up.
      */
+    static_assert(sizeof(TARGETING::ATTR_MRU_ID_type) == sizeof(uint32_t),
+                  "Default parameter size changed, needs default invalid value updated.");
     void addFruCalloutDataToSrc(TARGETING::Target* i_target,
                                 HWAS::callOutPriority i_priority,
-                                uint8_t i_compType );
+                                uint8_t i_compType,
+                                TARGETING::ATTR_MRU_ID_type i_mru_id = UINT32_MAX);
 #endif
 
     /**

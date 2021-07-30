@@ -78,6 +78,52 @@ class ErrlTest: public CxxTest::TestSuite
 public:
 
 
+    void testEpubProcedureMapping(void)
+    {
+        // This test is a compile time check to ensure that if a new epubProcedureID is added in hostboot
+        // that the EPUB_TO_ISOLATION_PROCEDURE map is updated with a corresponding HBxxxxx string. Since there isn't
+        // a good way to iterate through an enum we simply have to rely on a switch statement with no default
+        // to fail the compile once a new unhandled enum is created.
+
+        // Create a bogus value to pass into the switch
+        epubProcedureID procId = EPUB_PRC_HB_CODE;
+        switch(procId)
+        {
+            case(EPUB_PRC_NONE                   ):
+            case(EPUB_PRC_FIND_DECONFIGURED_PART ):
+            case(EPUB_PRC_SP_CODE                ):
+            case(EPUB_PRC_PHYP_CODE              ):
+            case(EPUB_PRC_ALL_PROCS              ):
+            case(EPUB_PRC_ALL_MEMCRDS            ):
+            case(EPUB_PRC_INVALID_PART           ):
+            case(EPUB_PRC_LVL_SUPP               ):
+            case(EPUB_PRC_SUE_PREVERROR          ):
+            case(EPUB_PRC_PROCPATH               ):
+            case(EPUB_PRC_NO_VPD_FOR_FRU         ):
+            case(EPUB_PRC_MEMORY_PLUGGING_ERROR  ):
+            case(EPUB_PRC_FSI_PATH               ):
+            case(EPUB_PRC_PROC_AB_BUS            ):
+            case(EPUB_PRC_PROC_XYZ_BUS           ):
+            case(EPUB_PRC_MEMBUS_ERROR           ):
+            case(EPUB_PRC_EIBUS_ERROR            ):
+            case(EPUB_PRC_POWER_ERROR            ):
+            case(EPUB_PRC_PERFORMANCE_DEGRADED   ):
+            case(EPUB_PRC_MEMORY_UE              ):
+            case(EPUB_PRC_HB_CODE                ):
+            case(EPUB_PRC_TOD_CLOCK_ERR          ):
+            case(EPUB_PRC_COOLING_SYSTEM_ERR     ):
+            case(EPUB_PRC_FW_VERIFICATION_ERR    ):
+            case(EPUB_PRC_GPU_ISOLATION_PROCEDURE):
+            case(EPUB_PRC_NVDIMM_ERR             ):
+            case(EPUB_PRC_SBE_CODE               ):
+            {
+                // If a new enum is added to the above list to overcome a compile failure then a corresponding HBxxxxx
+                // needs to be created for EPUB_TO_ISOLATION_PROCEDURE. See errlentry.C for that map.
+                break;
+            }
+
+        }
+    }
     /**
      * @brief Test error log creation
      *  - Create an error log
