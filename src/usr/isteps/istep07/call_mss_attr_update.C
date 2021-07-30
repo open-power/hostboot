@@ -560,22 +560,22 @@ void check_scratch_regs_vs_attrs( IStepError & io_StepError )
     const auto l_attr_pau_freq =
                         l_sys->getAttr<ATTR_FREQ_PAU_MHZ>();
 
-    //@fixme-workaround CI coreq issues by forcing HB's copy to match
-    //  what the SP set into the SBE
-    l_sys->setAttr<ATTR_FREQ_PAU_MHZ>(l_scratch);
-    TRACFCOMP( g_trac_isteps_trace,
-               "Forcing FREQ_PAU to match SBE: scratch9 pauPllFreqMhz 0x%.4X ATTR_FREQ_PAU_MHZ 0x%.4X",
-               l_scratch, l_attr_pau_freq);
-#if 0
+    // The value of ATTR_FREQ_PAU_MHZ is set by code that runs on
+    //  both the Service Processor (FSP/BMC) and inside Hostboot.
+    //  That means that the value in the scratch reg is not affected
+    //  by what HB pushes down in our sync.  At a steady-state both
+    //  sides will be running the same level of code, but there are
+    //  windows when we could be running different logic that produces
+    //  different values.  To handle that case, we will always let
+    //  the SP's value win by forcing HB's copy to match what the SP
+    //  set into the SBE.
     if (l_scratch != l_attr_pau_freq)
     {
-        l_reconfigLoop = true;
-        l_reconfigReg |= SCRATCH9_MASK;
+        l_sys->setAttr<ATTR_FREQ_PAU_MHZ>(l_scratch);
         TRACFCOMP( g_trac_isteps_trace,
-            "scratch9 pauPllFreqMhz 0x%.4X ATTR_FREQ_PAU_MHZ 0x%.4X",
-            l_scratch, l_attr_pau_freq);
+                   "Forcing FREQ_PAU to match SBE: scratch9 pauPllFreqMhz 0x%.4X ATTR_FREQ_PAU_MHZ 0x%.4X",
+                   l_scratch, l_attr_pau_freq);
     }
-#endif
 
     // Create scratch bucket array to enable loop
     const uint32_t l_s9_mc_pll_bkt[] =
