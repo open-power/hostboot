@@ -280,7 +280,7 @@ struct consts<mss::pmic::product::JEDEC_COMPLIANT>
     static constexpr uint8_t R30_SAMPLE_VIN_BULK_ENABLE_ADC = 0xA8;
 
     // R31
-    static constexpr uint8_t R31_VIN_BULK_EFUSE_OFF_HIGH  = 0x04;
+    static constexpr uint8_t R31_VIN_BULK_EFUSE_OFF_HIGH  = 0x08;
     static constexpr uint8_t R31_VIN_BULK_EFUSE_ON_HIGH   = 0xBF;
     static constexpr uint8_t R31_VIN_BULK_EFUSE_ON_LOW    = 0x9D;
 
@@ -459,6 +459,7 @@ enum fields
     GPIO_CFG_CH0_DIGITAL_GP0                            = 0x01,
     PIN_CFG_CH0_GPIO                                    = 0x01,
     GENERAL_CFG_EN_DIGITAL_WINDOW_COMPARATOR_AND_STATS  = 0x30,
+    GENERAL_CFG_CLEAR_STATS_EN                          = 0x10,
     SEQUENCE_CFG_CHANNEL_SEQUENCING                     = 0x11,
     SEQUENCE_CFG_AUTO_SEQUENCE                          = 0x01,
     AUTO_SEQ_CH_SEL_ALL_AUTO_SEQUENCING                 = 0xFF,

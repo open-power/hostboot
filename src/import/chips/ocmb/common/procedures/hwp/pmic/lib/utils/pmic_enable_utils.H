@@ -861,6 +861,37 @@ fapi2::ReturnCode enable_spd(
     const uint16_t i_vendor_id);
 
 ///
+/// @brief PMIC power down sequence for 1U/2U parts
+///
+/// @param[in] i_target OCMB target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode power_down_sequence_1u_2u(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+
+///
+/// @brief PMIC power down sequence for 4U parts for pmic
+///
+/// @param[in,out] io_target_info Target info struct
+/// @return fapi2::ReturnCode
+///
+fapi2::ReturnCode pmic_clear_vr_swa_swc_en(target_info_redundancy& io_target_info);
+
+///
+/// @brief PMIC power down sequence for 4U parts
+///
+/// @param[in] i_target OCMB target
+/// @return fapi2::ReturnCode
+///
+fapi2::ReturnCode power_down_sequence_4u(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+
+///
+/// @brief Power down function for 4U pmics
+/// @param[in] i_target ocmb target
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode pmic_power_down(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+
+///
 /// @brief Disable PMICs and clear status bits in preparation for enable
 ///
 /// @param[in] i_ocmb_target OCMB parent target

@@ -882,6 +882,247 @@ fapi_try_exit:
 }
 
 ///
+/// @brief PMIC power down sequence for 1U/2U parts
+///
+/// @param[in] i_target OCMB target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode power_down_sequence_1u_2u(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+{
+    using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
+    using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
+
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+
+    auto l_pmics = mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_PMIC>(i_target);
+
+    // Next, sort them by the sequence attributes
+    FAPI_TRY(mss::pmic::order_pmics_by_sequence(i_target, l_pmics));
+
+    // Reverse loop, so we disable in the opposite order as the enable
+    for (int16_t l_i = (l_pmics.size() - 1); l_i >= 0; --l_i)
+    {
+        const auto& PMIC = l_pmics[l_i];
+        fapi2::buffer<uint8_t> l_reg_contents;
+
+        // Redundant clearBit, but just so it's clear what we're doing
+        FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(PMIC, REGS::R32, l_reg_contents));
+        l_reg_contents.clearBit<FIELDS::R32_VR_ENABLE>();
+
+        // Due to long soft stop time in 4U (~8ms), let's delay for 10ms to be safe
+        fapi2::delay(10 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
+
+        // We are opting here to log RC's here as recovered. If this register write fails,
+        // the ones later in the procedure will fail as well.
+        l_rc = mss::pmic::i2c::reg_write_reverse_buffer(PMIC, REGS::R32, l_reg_contents);
+
+        if (l_rc != fapi2::FAPI2_RC_SUCCESS)
+        {
+            fapi2::logError(l_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+        }
+
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief PMIC power down sequence for 4U parts for pmic
+///
+/// @param[in,out] io_target_info Target info struct
+/// @return fapi2::ReturnCode
+///
+fapi2::ReturnCode pmic_clear_vr_swa_swc_en(target_info_redundancy& io_target_info)
+{
+    using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
+    using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
+
+    // Regardless of the N-Mode states, we want to try to do a full disable of all parts
+    // so if we do hit a failure on a PMIC write, we will just continue. enable_with_redundancy
+    // on the next run of pmic_enable should catch read/write failures and handle them correctly
+    // with the correct N-Mode declaration logic
+
+    // These PMIC writes have the potential to fail in N-Mode configs. We will not do any
+    // N-mode declarations here as the runtime detection or next enable will catch all of these.
+    FAPI_TRY_NO_TRACE(run_if_present(io_target_info.iv_pmic_map, mss::pmic::id::PMIC3, []
+                                     (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic) -> fapi2::ReturnCode
+    {
+        fapi2::buffer<uint8_t> l_reg_contents;
+
+        // VR Disable PMIC3
+        mss::pmic::i2c::reg_read_reverse_buffer(i_pmic, REGS::R32, l_reg_contents);
+        l_reg_contents.clearBit<FIELDS::R32_VR_ENABLE>();
+
+        mss::pmic::i2c::reg_write_reverse_buffer(i_pmic, REGS::R32, l_reg_contents);
+
+        return fapi2::FAPI2_RC_SUCCESS;
+    }));
+
+    FAPI_TRY_NO_TRACE(run_if_present(io_target_info.iv_pmic_map, mss::pmic::id::PMIC1, []
+                                     (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic) -> fapi2::ReturnCode
+    {
+        fapi2::buffer<uint8_t> l_reg_contents;
+
+        // VR Disable PMIC1
+        mss::pmic::i2c::reg_read_reverse_buffer(i_pmic, REGS::R32, l_reg_contents);
+        l_reg_contents.clearBit<FIELDS::R32_VR_ENABLE>();
+
+        mss::pmic::i2c::reg_write_reverse_buffer(i_pmic, REGS::R32, l_reg_contents);
+
+        return fapi2::FAPI2_RC_SUCCESS;
+    }));
+
+    FAPI_TRY_NO_TRACE(run_if_present(io_target_info.iv_pmic_map, mss::pmic::id::PMIC2, []
+                                     (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic) -> fapi2::ReturnCode
+    {
+        fapi2::buffer<uint8_t> l_reg_contents;
+
+        // Disable SWA and SWC of PMIC2
+        mss::pmic::i2c::reg_read_reverse_buffer(i_pmic, REGS::R2F, l_reg_contents);
+
+        l_reg_contents.clearBit<FIELDS::R2F_SWA_REGULATOR_CONTROL>();
+        l_reg_contents.clearBit<FIELDS::R2F_SWC_REGULATOR_CONTROL>();
+
+        mss::pmic::i2c::reg_write_reverse_buffer(i_pmic, REGS::R2F, l_reg_contents);
+
+        return fapi2::FAPI2_RC_SUCCESS;
+    }));
+
+    FAPI_TRY_NO_TRACE(run_if_present(io_target_info.iv_pmic_map, mss::pmic::id::PMIC0, []
+                                     (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic) -> fapi2::ReturnCode
+    {
+        fapi2::buffer<uint8_t> l_reg_contents;
+
+        // Disable SWA and SWC of PMIC0
+        mss::pmic::i2c::reg_read_reverse_buffer(i_pmic, REGS::R2F, l_reg_contents);
+
+        l_reg_contents.clearBit<FIELDS::R2F_SWA_REGULATOR_CONTROL>();
+        l_reg_contents.clearBit<FIELDS::R2F_SWC_REGULATOR_CONTROL>();
+
+        mss::pmic::i2c::reg_write_reverse_buffer(i_pmic, REGS::R2F, l_reg_contents);
+
+        return fapi2::FAPI2_RC_SUCCESS;
+    }));
+
+    // Delay 700ms to allow more time for VDDR to ramp down before VPP ramps down.
+    fapi2::delay(700 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
+
+    FAPI_TRY_NO_TRACE(run_if_present(io_target_info.iv_pmic_map, mss::pmic::id::PMIC0, []
+                                     (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic) -> fapi2::ReturnCode
+    {
+        fapi2::buffer<uint8_t> l_reg_contents;
+
+        // VR Disable
+        mss::pmic::i2c::reg_read_reverse_buffer(i_pmic, REGS::R32, l_reg_contents);
+        l_reg_contents.clearBit<FIELDS::R32_VR_ENABLE>();
+
+        mss::pmic::i2c::reg_write_reverse_buffer(i_pmic, REGS::R32, l_reg_contents);
+
+        return fapi2::FAPI2_RC_SUCCESS;
+    }));
+
+    FAPI_TRY_NO_TRACE(run_if_present(io_target_info.iv_pmic_map, mss::pmic::id::PMIC2, []
+                                     (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic) -> fapi2::ReturnCode
+    {
+        fapi2::buffer<uint8_t> l_reg_contents;
+
+        // VR Disable
+        mss::pmic::i2c::reg_read_reverse_buffer(i_pmic, REGS::R32, l_reg_contents);
+        l_reg_contents.clearBit<FIELDS::R32_VR_ENABLE>();
+
+        mss::pmic::i2c::reg_write_reverse_buffer(i_pmic, REGS::R32, l_reg_contents);
+
+        return fapi2::FAPI2_RC_SUCCESS;
+    }));
+
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief PMIC power down sequence for 4U parts
+///
+/// @param[in] i_target OCMB target
+/// @return fapi2::ReturnCode
+///
+fapi2::ReturnCode power_down_sequence_4u(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+{
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+
+    const auto I2C_DEVICES =
+        mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_GENERICI2CSLAVE>(i_target);
+
+    // Grab the targets as a struct, if they exist
+    target_info_redundancy l_target_info(i_target, l_rc);
+    // If platform did not provide a usable set of targets (4 GENERICI2CSLAVE, at least 2 PMICs),
+    // Then we can't properly disable, the part is as good as dead, since re-enable would fail
+    FAPI_TRY(l_rc, "Unusable PMIC/GENERICI2CSLAVE child target configuration found from %s",
+             mss::c_str(i_target));
+
+    // ADC or GPIO fails are hard fails.
+    // ADCs and GPIOs are guaranted to exist as asserted by l_rc above
+    FAPI_TRY(mss::pmic::i2c::reg_write(l_target_info.iv_adc1, mss::adc::regs::GENERAL_CFG,
+                                       mss::adc::fields::GENERAL_CFG_CLEAR_STATS_EN));
+    FAPI_TRY(mss::pmic::i2c::reg_write(l_target_info.iv_adc1, mss::adc::regs::SEQUENCE_CFG,
+                                       mss::adc::fields::SEQUENCE_CFG_AUTO_SEQUENCE));
+
+    FAPI_TRY(mss::pmic::i2c::reg_write(l_target_info.iv_adc2, mss::adc::regs::GENERAL_CFG,
+                                       mss::adc::fields::GENERAL_CFG_CLEAR_STATS_EN));
+    FAPI_TRY(mss::pmic::i2c::reg_write(l_target_info.iv_adc2, mss::adc::regs::SEQUENCE_CFG,
+                                       mss::adc::fields::SEQUENCE_CFG_AUTO_SEQUENCE));
+
+    FAPI_TRY(pmic_clear_vr_swa_swc_en(l_target_info));
+
+    // Finally, disable the GPIOs, and delay
+    FAPI_TRY(mss::pmic::i2c::reg_write(I2C_DEVICES[mss::GPIO1], mss::gpio::regs::EFUSE_OUTPUT,
+                                       mss::gpio::fields::EFUSE_OUTPUT_OFF));
+    FAPI_TRY(mss::pmic::i2c::reg_write(I2C_DEVICES[mss::GPIO2], mss::gpio::regs::EFUSE_OUTPUT,
+                                       mss::gpio::fields::EFUSE_OUTPUT_OFF));
+
+    // Delay 2 seconds. FW and cronus run pmic_enable in parallel. So the overall delay will only be 2 secs
+    // across all the targets during IPL
+    fapi2::delay(2000 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
+
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Power down function for 4U pmics
+/// @param[in] i_target ocmb target
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode pmic_power_down(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+{
+    uint8_t l_module_height = 0;
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+
+    FAPI_TRY(mss::attr::get_dram_module_height(i_target, l_module_height));
+
+    // For non 4U configs, let's just VR disable down the line
+    if (l_module_height == fapi2::ENUM_ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_4U)
+    {
+        // For 4U, do our defined disable sequence
+        FAPI_TRY(mss::pmic::power_down_sequence_4u(i_target));
+    }
+    else
+    {
+        FAPI_TRY(mss::pmic::power_down_sequence_1u_2u(i_target));
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Disable PMICs and clear status bits in preparation for enable
 ///
 /// @param[in] i_ocmb_target OCMB parent target
@@ -928,45 +1169,22 @@ fapi2::ReturnCode disable_and_reset_pmics(const fapi2::Target<fapi2::TARGET_TYPE
         }
     }
 
+    // Call the new PMIC power down sequence
+    FAPI_TRY(pmic_power_down(i_ocmb_target));
+
     // Reverse loop
     for (int16_t l_i = (l_pmics.size() - 1); l_i >= 0; --l_i)
     {
         const auto& PMIC = l_pmics[l_i];
 
-        // First, disable
-        {
-            fapi2::buffer<uint8_t> l_reg_contents;
-
-            // Redundant clearBit, but just so it's clear what we're doing
-            FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(PMIC, REGS::R32, l_reg_contents));
-            l_reg_contents.clearBit<FIELDS::R32_VR_ENABLE>();
-
-            // Due to long soft stop time in 4U (~8ms), let's delay for 10ms to be safe
-            fapi2::delay(10 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
-
-            // We are opting here to log RC's here as recovered. If this register write fails,
-            // the ones later in the procedure will fail as well. The action to perform in
-            // such a case is dependent on whether we do or do not have redundancy, which we
-            // will know later in the procedure. As a result, we will not worry about failures here.
-            l_rc = mss::pmic::i2c::reg_write_reverse_buffer(PMIC, REGS::R32, l_reg_contents);
-
-            if (l_rc != fapi2::FAPI2_RC_SUCCESS)
-            {
-                fapi2::logError(l_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
-                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-            }
-        }
-
         // Now that it's disabled, let's clear the status bits so errors don't hang over into the next enable
-        {
-            // Similarly, we will log bad ReturnCodes here as recoverable for the reasons mentioned above
-            l_rc = mss::pmic::status::clear(PMIC);
+        // Similarly, we will log bad ReturnCodes here as recoverable for the reasons mentioned above
+        l_rc = mss::pmic::status::clear(PMIC);
 
-            if (l_rc != fapi2::FAPI2_RC_SUCCESS)
-            {
-                fapi2::logError(l_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
-                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-            }
+        if (l_rc != fapi2::FAPI2_RC_SUCCESS)
+        {
+            fapi2::logError(l_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
         }
     }
 
@@ -1256,9 +1474,39 @@ fapi2::ReturnCode validate_efuse_off(const fapi2::Target<fapi2::TARGET_TYPE_PMIC
     // Prior to turning on the efuse via the GPIO expander, we expect to see VIN below the
     // EFUSE_OFF_HIGH threshold, as power will not be applied.
     // Otherwise the efuse must be blown, and we should declare N-mode.
-    if (l_reg_contents > CONSTS::R31_VIN_BULK_EFUSE_OFF_HIGH)
+    // Will poll for 2.5 seconds for the VIN to go below 560mV. If not then will declare N-mode.
+    // 25ms * 100 = 2.5 Seconds
+    constexpr uint8_t POLL_2_5_SECS = 100;
+    constexpr uint8_t THRESHOLD_HIGH = CONSTS::R31_VIN_BULK_EFUSE_OFF_HIGH;
+    auto l_vin_below_efuse_off_high = false;
+
+    for (auto count = 0; count < POLL_2_5_SECS; count++)
     {
-        constexpr uint8_t THRESHOLD_HIGH = CONSTS::R31_VIN_BULK_EFUSE_OFF_HIGH;
+        if (l_reg_contents > THRESHOLD_HIGH)
+        {
+            // Delay 25ms and read R31 for VIN value again
+            fapi2::delay(25 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
+            fapi2::current_err = mss::pmic::i2c::reg_read(i_pmic_target, REGS::R31, l_reg_contents);
+
+            // Check the error on the reg_read
+            if (fapi2::current_err != fapi2::FAPI2_RC_SUCCESS)
+            {
+                return mss::pmic::declare_n_mode(
+                           mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_pmic_target),
+                           mss::index(i_pmic_target));
+            }
+
+            FAPI_DBG("%s EFUSE OFF VIN_BULK Reading: 0x%02X", mss::c_str(i_pmic_target), l_reg_contents);
+        }
+        else
+        {
+            l_vin_below_efuse_off_high = true;
+            break;
+        }
+    }
+
+    if (!l_vin_below_efuse_off_high)
+    {
         FAPI_ASSERT_NOEXIT(false,
                            fapi2::PMIC_EFUSE_BLOWN(fapi2::FAPI2_ERRL_SEV_RECOVERED)
                            .set_PMIC_TARGET(i_pmic_target)
@@ -1423,7 +1671,7 @@ fapi2::ReturnCode setup_pmic_pair_and_gpio(
     if (!l_already_enabled)
     {
         // Now, sampling VIN_BULK, which is protected by a fuse, we check that VIN_BULK does not read
-        // more than 0.28V. If it does, then the fuse must be bad/blown, and we will declare N-mode.
+        // more than 0.56V. If it does, then the fuse must be bad/blown, and we will declare N-mode.
 
         // Validate the EFUSE readings for both PMICs
         FAPI_TRY(run_if_present(i_pmic_map, i_pmic_id_0, [&i_pmic_map, i_pmic_id_0]
