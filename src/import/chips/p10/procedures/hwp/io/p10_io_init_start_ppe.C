@@ -367,6 +367,7 @@ fapi2::ReturnCode p10_io_init::init_regs(const fapi2::Target<fapi2::TARGET_TYPE_
     using namespace scomt::iohs;
     using namespace scomt::omi;
     auto l_pauc_targets = i_target.getChildren<fapi2::TARGET_TYPE_PAUC>();
+    fapi2::buffer<uint64_t> l_data;
 
     fapi2::ATTR_FREQ_OMI_MHZ_Type l_omi_freq;
     fapi2::ATTR_FREQ_IOHS_LINK_MHZ_Type l_iohs_freq;
@@ -555,6 +556,46 @@ fapi2::ReturnCode p10_io_init::init_regs(const fapi2::Target<fapi2::TARGET_TYPE_
             }
 
             FAPI_TRY(disable_bad_lanes(l_iohs_target));
+
+            // HW573551 :: Allow recal to run with powered down lanes
+            l_data.flush<0>();
+            FAPI_TRY(PREP_IOO_RX0_RXCTL_DATASM_REGS_RX_CNT11_PG(l_iohs_target)); // rx_psave_force_sts_0_15
+            FAPI_TRY(PUT_IOO_RX0_RXCTL_DATASM_REGS_RX_CNT11_PG(l_iohs_target, l_data)); // rx_psave_force_sts_0_15
+            FAPI_TRY(PREP_IOO_RX0_RXCTL_DATASM_REGS_RX_CNT12_PG(l_iohs_target)); // rx_psave_force_sts_16_32
+            FAPI_TRY(PUT_IOO_RX0_RXCTL_DATASM_REGS_RX_CNT12_PG(l_iohs_target, l_data)); // rx_psave_force_sts_16_32
+
+            FAPI_TRY(PREP_IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL7_PG(l_iohs_target)); // tx_psave_force_sts_0_15
+            FAPI_TRY(PUT_IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL7_PG(l_iohs_target, l_data)); // tx_psave_force_sts_0_15
+            FAPI_TRY(PREP_IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL8_PG(l_iohs_target)); // tx_psave_force_sts_16_32
+            FAPI_TRY(PUT_IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL8_PG(l_iohs_target, l_data)); // tx_psave_force_sts_16_32
+
+            l_data.flush<0>();
+            l_data.insertFromRight(0xFFFF,
+                                   IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL7_PG_RX_PSAVE_FENCE_STS_IO_DL_0_15,
+                                   IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL7_PG_RX_PSAVE_FENCE_STS_IO_DL_0_15_LEN);
+            FAPI_TRY(PREP_IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL7_PG(l_iohs_target));
+            FAPI_TRY(PUT_IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL7_PG(l_iohs_target, l_data));
+
+            l_data.flush<0>();
+            l_data.insertFromRight(0xFF,
+                                   IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL8_PG_RX_PSAVE_FENCE_STS_IO_DL_16_23,
+                                   IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL8_PG_RX_PSAVE_FENCE_STS_IO_DL_16_23_LEN);
+            FAPI_TRY(PREP_IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL8_PG(l_iohs_target));
+            FAPI_TRY(PUT_IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL8_PG(l_iohs_target, l_data));
+
+            l_data.flush<0>();
+            l_data.insertFromRight(0xFFFF,
+                                   IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL3_PG_TX_PSAVE_FENCE_STS_IO_DL_0_15,
+                                   IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL3_PG_TX_PSAVE_FENCE_STS_IO_DL_0_15_LEN);
+            FAPI_TRY(PREP_IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL3_PG(l_iohs_target));
+            FAPI_TRY(PUT_IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL3_PG(l_iohs_target, l_data));
+
+            l_data.flush<0>();
+            l_data.insertFromRight(0xFF,
+                                   IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL4_PG_TX_PSAVE_FENCE_STS_IO_DL_16_23,
+                                   IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL4_PG_TX_PSAVE_FENCE_STS_IO_DL_16_23_LEN);
+            FAPI_TRY(PREP_IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL4_PG(l_iohs_target));
+            FAPI_TRY(PUT_IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL4_PG(l_iohs_target, l_data));
         }
 
         for (auto l_omic_target : l_omic_targets)

@@ -87,6 +87,14 @@ static const uint32_t CTL_REGS_RX_MODE17_PG_THRESH4_LEN = 5;
 //<< [CTL_REGS_RX_MODE17_PG]
 // omic/reg00003.H
 
+//>> [TX_CTL_SM_REGS_CTLSM_CNTL4_PG]
+static const uint64_t TX_CTL_SM_REGS_CTLSM_CNTL4_PG = 0x800cdc4010012c3full;
+
+static const uint32_t TX_CTL_SM_REGS_CTLSM_CNTL4_PG_TX_PSAVE_FENCE_STS_IO_DL_16_23 = 48;
+static const uint32_t TX_CTL_SM_REGS_CTLSM_CNTL4_PG_TX_PSAVE_FENCE_STS_IO_DL_16_23_LEN = 8;
+//<< [TX_CTL_SM_REGS_CTLSM_CNTL4_PG]
+// omic/reg00003.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__
