@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,6 +54,22 @@ static const uint32_t DLP_LINK1_QUALITY_SPARE_COUNTER_2 = 57;
 static const uint32_t DLP_LINK1_QUALITY_SPARE_COUNTER_2_LEN = 7;
 //<< [DLP_LINK1_QUALITY]
 // iohs/reg00058.H
+
+//>> [IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL8_PG]
+static const uint64_t IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL8_PG = 0x8009c00010012c3full;
+
+static const uint32_t IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL8_PG_RX_PSAVE_FENCE_STS_IO_DL_16_23 = 48;
+static const uint32_t IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL8_PG_RX_PSAVE_FENCE_STS_IO_DL_16_23_LEN = 8;
+//<< [IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL8_PG]
+// iohs/reg00060.H
+
+//>> [IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL4_PG]
+static const uint64_t IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL4_PG = 0x800cdc0010012c3full;
+
+static const uint32_t IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL4_PG_TX_PSAVE_FENCE_STS_IO_DL_16_23 = 48;
+static const uint32_t IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL4_PG_TX_PSAVE_FENCE_STS_IO_DL_16_23_LEN = 8;
+//<< [IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL4_PG]
+// iohs/reg00061.H
 
 //>>THE END<<
 

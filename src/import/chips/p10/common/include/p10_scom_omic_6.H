@@ -63,6 +63,14 @@ static const uint32_t CTL_REGS_RX_MODE16_PG_THRESH2_LEN = 5;
 //<< [CTL_REGS_RX_MODE16_PG]
 // omic/reg00006.H
 
+//>> [DATASM_REGS_RX_CNTL7_PG]
+static const uint64_t DATASM_REGS_RX_CNTL7_PG = 0x8009b84010012c3full;
+
+static const uint32_t DATASM_REGS_RX_CNTL7_PG_RX_PSAVE_FENCE_STS_IO_DL_0_15 = 48;
+static const uint32_t DATASM_REGS_RX_CNTL7_PG_RX_PSAVE_FENCE_STS_IO_DL_0_15_LEN = 16;
+//<< [DATASM_REGS_RX_CNTL7_PG]
+// omic/reg00006.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

@@ -57,6 +57,14 @@ static const uint32_t CTL_REGS_TX_MODE1_PG_IREF_PDWN_B = 63;
 //<< [CTL_REGS_TX_MODE1_PG]
 // omic/reg00008.H
 
+//>> [CTL_REGS_TX_CNTL7_PG]
+static const uint64_t CTL_REGS_TX_CNTL7_PG = 0x800c744010012c3full;
+
+static const uint32_t CTL_REGS_TX_CNTL7_PG_TX_PATTERN_0_15 = 48;
+static const uint32_t CTL_REGS_TX_CNTL7_PG_TX_PATTERN_0_15_LEN = 16;
+//<< [CTL_REGS_TX_CNTL7_PG]
+// omic/reg00008.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

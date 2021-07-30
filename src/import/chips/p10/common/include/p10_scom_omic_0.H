@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,14 @@ namespace omic
 {
 #endif
 
+
+//>> [DATASM_REGS_RX_CNTL8_PG]
+static const uint64_t DATASM_REGS_RX_CNTL8_PG = 0x8009c04010012c3full;
+
+static const uint32_t DATASM_REGS_RX_CNTL8_PG_RX_PSAVE_FENCE_STS_IO_DL_16_23 = 48;
+static const uint32_t DATASM_REGS_RX_CNTL8_PG_RX_PSAVE_FENCE_STS_IO_DL_16_23_LEN = 8;
+//<< [DATASM_REGS_RX_CNTL8_PG]
+// omic/reg00000.H
 
 //>>THE END<<
 

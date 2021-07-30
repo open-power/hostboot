@@ -99,6 +99,18 @@ static const uint32_t DATASM_REGS_RX_CNT33_PG_RX_PSAVE_FORCE_REQ_16_23_1_LEN = 8
 //<< [DATASM_REGS_RX_CNT33_PG]
 // omic/reg00015.H
 
+//>> [CTL_REGS_TX_CNTL3_PG]
+static const uint64_t CTL_REGS_TX_CNTL3_PG = 0x800c544010012c3full;
+
+static const uint32_t CTL_REGS_TX_CNTL3_PG_FINE_SEL = 48;
+static const uint32_t CTL_REGS_TX_CNTL3_PG_FINE_SEL_LEN = 3;
+static const uint32_t CTL_REGS_TX_CNTL3_PG_COARSE_SEL = 51;
+static const uint32_t CTL_REGS_TX_CNTL3_PG_COARSE_SEL_LEN = 4;
+static const uint32_t CTL_REGS_TX_CNTL3_PG_BER_SEL = 55;
+static const uint32_t CTL_REGS_TX_CNTL3_PG_BER_SEL_LEN = 6;
+//<< [CTL_REGS_TX_CNTL3_PG]
+// omic/reg00015.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__
