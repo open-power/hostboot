@@ -537,6 +537,7 @@ fapi2::ReturnCode qme_halt(
 
     for ( auto l_core_target : i_target.getChildren<fapi2::TARGET_TYPE_CORE>( fapi2::TARGET_STATE_FUNCTIONAL ) )
     {
+        uint8_t l_scsr_update = 0;
         fapi2::ATTR_CHIP_UNIT_POS_Type l_core_unit_pos;
         FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS,
                                 l_core_target,
@@ -564,16 +565,21 @@ fapi2::ReturnCode qme_halt(
         if( l_data64.getBit<0>() != 1 &&
             (l_eco_mode == fapi2::ENUM_ATTR_ECO_MODE_DISABLED))
         {
+            l_scsr_update = 1;
             l_data64.flush<0>().setBit< QME_SCSR_ASSERT_PM_EXIT >();
         }
 
         if (l_eco_mode == fapi2::ENUM_ATTR_ECO_MODE_ENABLED)
         {
+            l_scsr_update = 1;
             l_data64.flush<0>().setBit< QME_SCSR_BLOCK_INTR_OUTPUTS>().
             setBit<QME_SCSR_ASSERT_PM_BLOCK_INTR>();
         }
 
-        FAPI_TRY( putScom( l_core_target, QME_SCSR_WO_OR, l_data64 ) );
+        if ( l_scsr_update )
+        {
+            FAPI_TRY( putScom( l_core_target, QME_SCSR_WO_OR, l_data64 ) );
+        }
     }
 
     //Set STOP_OVERRIDE_MODE and ACTIVE_MASK , so that QME won't be involved in
