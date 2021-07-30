@@ -1773,6 +1773,20 @@ fapi2::ReturnCode buildQmeHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t   *
 
     i_qmeBuildRecord.setSection( "QME SCOM Restore", pImgHdr->g_qme_scom_offset, pImgHdr->g_qme_scom_length );
 
+    //Populating SPURR reference frequency
+    {    // cross initialization block
+
+        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+        fapi2::ATTR_NOMINAL_FREQ_MHZ_Type l_nom_freq;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_NOMINAL_FREQ_MHZ,
+                    FAPI_SYSTEM,
+                    l_nom_freq),
+                "Error from FAPI_ATTR_GET for ATTR_NOMINAL_FREQ_MHZ" );
+
+        pImgHdr->g_qme_spurr_ref_freq_mhz  =  htobe16(l_nom_freq);
+        FAPI_DBG( "SPURR Ref Frequency (MHz)  0x%08X", htobe16(pImgHdr->g_qme_spurr_ref_freq_mhz));
+    }
+
 #ifndef __HOSTBOOT_MODULE
    pImgHdr->g_qme_common_ring_offset    =   htobe32(pImgHdr->g_qme_common_ring_offset);
    pImgHdr->g_qme_common_ring_length    =   htobe32(pImgHdr->g_qme_common_ring_length);
@@ -2203,7 +2217,7 @@ fapi2::ReturnCode populateMagicWord( Homerlayout_t   *i_pChipHomer )
 
     if( pXgpeHeader->g_xgpe_buildVer == htobe32(XGPE_48K_VER) )
     {
-        //If magic word has been changed through an HCODE commit, move 
+        //If magic word has been changed through an HCODE commit, move
         //to new OCC SRAM sharing scheme of PGPE and XGPE.
         l_pXpmrHdr->iv_xgpeBaseAddress  =   htobe32(XGPE_RELOC_BASE);
     }

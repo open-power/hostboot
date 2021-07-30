@@ -141,7 +141,7 @@ HCD_HDR_UINT32( g_qme_scom_offset,           0 );
 HCD_HDR_UINT32( g_qme_scom_length,           0 );
 HCD_HDR_UINT32( g_qme_attr_tank_address,     0 );
 HCD_HDR_UINT16( g_qme_location_id,           0 );
-HCD_HDR_UINT16( g_qme_reserved ,             0 );
+HCD_HDR_UINT16( g_qme_spurr_ref_freq_mhz ,   0 );
 HCD_HDR_UINT32( g_qme_timebase_hz,           0 ); //Retain next field at 8B boundary
 HCD_HDR_UINT64( g_qme_cpmr_PhyAddr,          0 );
 HCD_HDR_UINT64( g_qme_unsec_cpmr_PhyAddr,    0 );
