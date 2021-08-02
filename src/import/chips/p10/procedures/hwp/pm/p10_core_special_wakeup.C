@@ -327,7 +327,7 @@ fapi2::ReturnCode checkForSplWkupPreReq(
     auto l_eq_mc_and = l_proc.getMulticast<fapi2::TARGET_TYPE_EQ, fapi2::MULTICAST_AND >(fapi2::MCGROUP_GOOD_EQ);
     FAPI_TRY( fapi2::getScom( l_eq_mc_and, scomt::eq::QME_EISR_RW, l_data ) );
 
-    FAPI_ASSERT( l_data.getBit( scomt::eq::QME_EISR_SYSTEM_CHECKSTOP ),
+    FAPI_ASSERT( !l_data.getBit( scomt::eq::QME_EISR_SYSTEM_CHECKSTOP ),
                  fapi2::SYSTEM_IN_CHECKSTOP_STATE().
                  set_QME_EISR_REG( l_data ).
                  set_CORE_TARGET( i_target ).
