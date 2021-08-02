@@ -48,6 +48,10 @@
 #endif
 #include <util/utillidmgr.H>
 
+// A flag, that when defined, will include interfaces: writevpd, getscom and putscom
+// Comment out to exclude said interfaces
+#define INCLUDE_LAB_ONLY_INTERFACES 1
+
 extern char hbi_ImageId;
 
 // need this here so compile works, linker will later find this
@@ -1239,6 +1243,7 @@ int hbrtCommand( int argc,
                      "ERROR: readvpd <huid> <keyword> [<record>]\n" );
         }
     }
+#ifdef INCLUDE_LAB_ONLY_INTERFACES
     else if( !strcmp( argv[0], "writevpd" ) )
     {
         // writevpd <vpd> <huid> <keyword> [<record>] <data>
@@ -1267,6 +1272,7 @@ int hbrtCommand( int argc,
                      "ERROR: writevpd <huid> <keyword> [<record>] <data>\n" );
         }
     }
+#endif // #ifdef INCLUDE_LAB_ONLY_INTERFACES
     else if( !strcmp( argv[0], "getattr" ) )
     {
         // getattr <huid> <attribute id> <size>
@@ -1284,6 +1290,7 @@ int hbrtCommand( int argc,
                      "ERROR: getattr <huid> <attribute id> <size>\n" );
         }
     }
+#ifdef INCLUDE_LAB_ONLY_INTERFACES
     else if( !strcmp( argv[0], "getscom" ) )
     {
         // getscom <huid> <address>
@@ -1315,6 +1322,7 @@ int hbrtCommand( int argc,
             sprintf( *l_output, "ERROR: putscom <huid> <address> <data>\n" );
         }
     }
+#endif  // #ifdef INCLUDE_LAB_ONLY_INTERFACES
     else if( !strcmp( argv[0], "errorlog" ) )
     {
         // errorlog <word1> <word2> <huid to callout> <size> <deconfig> <gard>
@@ -1554,18 +1562,22 @@ int hbrtCommand( int argc,
         strcat( *l_output, l_tmpstr );
         sprintf( l_tmpstr, "getattr <huid> <attribute id> <size>\n" );
         strcat( *l_output, l_tmpstr );
+#ifdef INCLUDE_LAB_ONLY_INTERFACES
         sprintf( l_tmpstr, "getscom <huid> <address>\n" );
         strcat( *l_output, l_tmpstr );
         sprintf( l_tmpstr, "putscom <huid> <address> <data>\n" );
         strcat( *l_output, l_tmpstr );
+#endif
         sprintf( l_tmpstr, "errorlog <word1> <word2> [<huid to callout>] [size] [deconfig] [gard]\n" );
         strcat( *l_output, l_tmpstr );
         sprintf( l_tmpstr, "sbemsg <chipid>\n" );
         strcat( *l_output, l_tmpstr );
         sprintf( l_tmpstr, "readvpd <huid> <keyword> [record]\n" );
         strcat( *l_output, l_tmpstr );
+#ifdef INCLUDE_LAB_ONLY_INTERFACES
         sprintf( l_tmpstr, "writevpd <huid> <keyword> [<record>] <data>\n" );
         strcat( *l_output, l_tmpstr );
+#endif
         sprintf( l_tmpstr, "reload_pm_complex [<breakPoint>]\n");
         strcat( *l_output, l_tmpstr );
         sprintf( l_tmpstr, "readHBRTversion\n");
