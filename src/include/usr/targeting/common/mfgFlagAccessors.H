@@ -161,6 +161,7 @@ bool isUpdateSbeImage();
 bool isSMPWrapConfig();
 bool isNoGardSet();
 bool isSeepromSecurityChecksSet();
+bool isDimmSpiFlashScreenSet();
 
 /**
  * @brief Check if a particular manufacturing flag is set
@@ -202,6 +203,7 @@ bool isUpdateSbeImage(ATTR_MFG_FLAGS_typeStdArr &i_mfgFlags);
 bool isSMPWrapConfig(ATTR_MFG_FLAGS_typeStdArr &i_mfgFlags);
 bool isNoGardSet(ATTR_MFG_FLAGS_typeStdArr &i_mfgFlags);
 bool isSeepromSecurityChecksSet(ATTR_MFG_FLAGS_typeStdArr &i_mfgFlags);
+bool isDimmSpiFlashScreenSet(ATTR_MFG_FLAGS_typeStdArr &i_mfgFlags);
 
 
 //##############################################################################
