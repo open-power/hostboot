@@ -25,6 +25,7 @@
 EXTRAINCDIR += ${ROOTPATH}/src/import
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include

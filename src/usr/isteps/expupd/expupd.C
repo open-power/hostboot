@@ -53,6 +53,10 @@
 #include <spd.H>
 #include <kernel/bltohbdatamgr.H>
 #include <targeting/common/mfgFlagAccessors.H>
+#include <lib/inband/exp_fw_adapter_properties.H> // explorer properties
+#include <lib/inband/exp_flash_utils.H> // exp_flash_read_test
+#include <errl/errlreasoncodes.H>   // ERRL_UDT_NOFORMAT
+#include <errl/errludstring.H>
 
 using namespace ISTEP_ERROR;
 using namespace ERRORLOG;
@@ -239,7 +243,6 @@ class OcmbWorkItem: public IStepWorkItem
         IStepError* iv_pStepError;
         const Target* iv_ocmb;
         rawImageInfo_t* iv_imageInfo;
-        bool iv_rebootRequired;
 
     public:
         /**
@@ -259,9 +262,7 @@ class OcmbWorkItem: public IStepWorkItem
                      rawImageInfo_t& i_imageInfo):
             iv_pStepError(&i_stepError),
             iv_ocmb(&i_Ocmb),
-            iv_imageInfo(&i_imageInfo),
-            iv_rebootRequired(false)
-        {}
+            iv_imageInfo(&i_imageInfo)        {}
 
         // delete default copy/move constructors and operators
         OcmbWorkItem() = delete;
@@ -287,7 +288,30 @@ void OcmbWorkItem::operator()()
     fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
       l_fapi2Target(const_cast<TARGETING::TargetHandle_t>(iv_ocmb));
 
-    // Invoke procedure
+    // Invoke procedure to get good/bad image indicators
+    bool l_image_a_good = false;
+    bool l_image_b_good = false;
+    FAPI_INVOKE_HWP(l_err, mss::exp::ib::run_fw_adapter_properties_get,
+                    l_fapi2Target, l_image_a_good, l_image_b_good);
+    if (l_err)
+    {
+        TRACFCOMP(g_trac_expupd,
+              ERR_MRK"Error from run_fw_adapter_properties_get for OCMB 0x%08x",
+              TARGETING::get_huid(iv_ocmb));
+
+        l_err->collectTrace(EXPUPD_COMP_NAME);
+
+        // addErrorDetails may not be thread-safe.  Protect with mutex.
+        mutex_lock(&g_stepErrorMutex);
+
+        // Create IStep error log and cross reference to error
+        // that occurred (will commit l_err)
+        captureError(l_err, *iv_pStepError, EXPUPD_COMP_ID);
+
+        mutex_unlock(&g_stepErrorMutex);
+    }
+
+    // Invoke update procedure
     FAPI_INVOKE_HWP(l_err, exp_fw_update, l_fapi2Target,
                     iv_imageInfo->imagePtr, iv_imageInfo->imageSize);
     if (l_err)
@@ -304,6 +328,24 @@ void OcmbWorkItem::operator()()
                              HWAS::SRCI_PRIORITY_MED,
                              HWAS::DELAYED_DECONFIG,
                              HWAS::GARD_NULL );
+
+        // add the good/bad image indicators to FFDC
+        if (l_image_a_good)
+        {
+            ErrlUserDetailsString("IMAGE_A_GOOD").addToLog(l_err);
+        }
+        else
+        {
+            ErrlUserDetailsString("IMAGE_A_BAD").addToLog(l_err);
+        }
+        if (l_image_b_good)
+        {
+            ErrlUserDetailsString("IMAGE_B_GOOD").addToLog(l_err);
+        }
+        else
+        {
+            ErrlUserDetailsString("IMAGE_B_BAD").addToLog(l_err);
+        }
 
         // addErrorDetails may not be thread-safe.  Protect with mutex.
         mutex_lock(&g_stepErrorMutex);
@@ -327,8 +369,30 @@ void OcmbWorkItem::operator()()
                 iv_imageInfo->fwVersionStrSize);
         }
 
-        // Request reboot for new firmware to be used
-        iv_rebootRequired = true;
+        // Invoke flash read test procedure
+        if (TARGETING::isDimmSpiFlashScreenSet())
+        {
+            FAPI_INVOKE_HWP(l_err,
+                            mss::exp::ib::exp_flash_read_test,
+                            l_fapi2Target);
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_expupd,
+                        ERR_MRK"Error from exp_flash_read_test for OCMB 0x%08x",
+                        TARGETING::get_huid(iv_ocmb));
+
+                l_err->collectTrace(EXPUPD_COMP_NAME);
+
+                // addErrorDetails may not be thread-safe.  Protect with mutex.
+                mutex_lock(&g_stepErrorMutex);
+
+                // Create IStep error log and cross reference to error
+                // that occurred (will commit l_err)
+                captureError(l_err, *iv_pStepError, EXPUPD_COMP_ID);
+
+                mutex_unlock(&g_stepErrorMutex);
+            }
+        }
     }
 }
 
@@ -337,7 +401,9 @@ void OcmbWorkItem::operator()()
 bool explorerUpdateCheck(IStepError& o_stepError,
                         TargetHandleList& o_flashUpdateList,
                         rawImageInfo_t & o_imageInfo,
-                        bool & o_imageLoaded )
+                        bool & o_imageLoaded,
+                        bool & o_rebootRequired,
+                        bool i_checkMfgFlag )
 {
     errlHndl_t l_err = nullptr;
     o_imageLoaded = false;
@@ -493,6 +559,7 @@ bool explorerUpdateCheck(IStepError& o_stepError,
 
                 //add target to our list of targets needing an update
                 o_flashUpdateList.push_back(l_ocmbTarget);
+                o_rebootRequired = true;
             }
             else
             {
@@ -508,6 +575,16 @@ bool explorerUpdateCheck(IStepError& o_stepError,
                     TRACFCOMP(g_trac_expupd, INFO_MRK "explorerUpdateCheck: "
                               "Forcing ocmb[0x%08X] update due to override"
                               " (FORCE_UPDATE)", get_huid(l_ocmbTarget) );
+                    o_flashUpdateList.push_back(l_ocmbTarget);
+                    o_rebootRequired = true;
+                }
+                // Or if we are using the MFG flag and the flag is set
+                else if (i_checkMfgFlag && TARGETING::isDimmSpiFlashScreenSet())
+                {
+                    TRACFCOMP(g_trac_expupd, INFO_MRK "explorerUpdateCheck: "
+                              "Forcing ocmb[0x%08X] update due to mfg flag"
+                              " (MNFG_DIMM_SPI_FLASH_SCREEN)",
+                              get_huid(l_ocmbTarget) );
                     o_flashUpdateList.push_back(l_ocmbTarget);
                 }
             }
@@ -536,10 +613,10 @@ bool explorerUpdateCheck(IStepError& o_stepError,
 
 void performUpdate( IStepError& o_stepError,
                     TargetHandleList& i_explorerList,
-                    rawImageInfo_t& i_imageInfo )
+                    rawImageInfo_t& i_imageInfo,
+                    bool i_rebootRequired )
 {
     errlHndl_t l_err = nullptr;
-    bool l_rebootRequired = false;
     Util::ThreadPool<IStepWorkItem> threadpool;
     constexpr size_t MAX_OCMB_THREADS = 8;
     Target* l_pTopLevel = UTIL::assertGetToplevelTarget();
@@ -552,9 +629,6 @@ void performUpdate( IStepError& o_stepError,
             TRACFCOMP(g_trac_expupd, INFO_MRK "performUpdate: Nothing to update");
             break;
         }
-
-        // Always reboot if we make an attempt
-        l_rebootRequired = true;
 
         // Up the number of threads we can support if we have more
         //  cache to play in
@@ -605,8 +679,9 @@ void performUpdate( IStepError& o_stepError,
 
     } while(0);
 
-    // force reboot if any updates were attempted
-    if(l_rebootRequired)
+    // force reboot if any update was triggered by a FW mismatch or
+    // forced by attribute
+    if(i_rebootRequired)
     {
         TRACFCOMP(g_trac_expupd,
                   "performUpdate: %d OCMB chip(s) %s update.  Requesting reboot...",
@@ -615,10 +690,6 @@ void performUpdate( IStepError& o_stepError,
             l_pTopLevel->getAttr<ATTR_RECONFIGURE_LOOP>();
         l_reconfigAttr |= RECONFIGURE_LOOP_OCMB_FW_UPDATE;
         l_pTopLevel->setAttr<ATTR_RECONFIGURE_LOOP>(l_reconfigAttr);
-    }
-    else
-    {
-        TRACFCOMP(g_trac_expupd, "performUpdate: No updates were attempted");
     }
 }
 
@@ -633,18 +704,30 @@ void performUpdate( IStepError& o_stepError,
 void updateAll(IStepError& o_stepError)
 {
     bool l_imageLoaded = false;
+    bool l_rebootRequired = false;
+    bool l_checkMfgFlag = true;
     TargetHandleList l_flashUpdateList;
     rawImageInfo_t l_imageInfo;
 
-    // check to see if any OCMBs need to update
-    bool attemptUpdate = explorerUpdateCheck(o_stepError, l_flashUpdateList, l_imageInfo, l_imageLoaded);
+
+    // Check to see if any OCMBs need to update
+    // Use the MFG flag in this path
+    bool attemptUpdate = explorerUpdateCheck(o_stepError,
+                                             l_flashUpdateList,
+                                             l_imageInfo,
+                                             l_imageLoaded,
+                                             l_rebootRequired,
+                                             l_checkMfgFlag );
 
     // Verify update should be attempted,
     // attr overrides and major errors can prevent update
     if (attemptUpdate)
     {
         // try to perform the update now with list
-        performUpdate(o_stepError, l_flashUpdateList, l_imageInfo);
+        performUpdate(o_stepError,
+                      l_flashUpdateList,
+                      l_imageInfo,
+                      l_rebootRequired);
     }
 
     // unload explorer fw image
@@ -706,6 +789,8 @@ void ocmbFwI2cUpdateStatusCheck( IStepError & io_StepError)
     TargetHandleList l_ocmbUpdateList;
     rawImageInfo_t l_imageInfo;
     bool l_imageLoaded = false;
+    bool l_rebootRequired = false;
+    bool l_checkMfgFlag = false;
 
     // Get a handle to the current node target
     TargetHandle_t l_nodeTarget = UTIL::getCurrentNodeTarget();
@@ -725,8 +810,13 @@ void ocmbFwI2cUpdateStatusCheck( IStepError & io_StepError)
               mfgMode);
 
     // Get list of OCMBs that need updating + update image
-    bool doUpdate = explorerUpdateCheck(io_StepError, l_ocmbUpdateList,
-                                        l_imageInfo, l_imageLoaded);
+    // Do not use the MFG flag in this path
+    bool doUpdate = explorerUpdateCheck(io_StepError,
+                                        l_ocmbUpdateList,
+                                        l_imageInfo,
+                                        l_imageLoaded,
+                                        l_rebootRequired,
+                                        l_checkMfgFlag );
 
     // check that at least one ocmb needs an update
     if (l_ocmbUpdateList.size() && !mfgMode)
@@ -748,7 +838,10 @@ void ocmbFwI2cUpdateStatusCheck( IStepError & io_StepError)
                 disableInbandScomsOCMB(l_ocmbUpdateList);
 
                 // do the i2c update of the Explorer(s)
-                performUpdate(io_StepError, l_ocmbUpdateList, l_imageInfo);
+                performUpdate(io_StepError,
+                              l_ocmbUpdateList,
+                              l_imageInfo,
+                              l_rebootRequired);
             }
             l_updStatus.i2cUpdateAttempted = 1;
         }

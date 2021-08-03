@@ -57,13 +57,18 @@ typedef struct rawImageInfo
  * @param[out] o_flashUpdateList List of Explorer OCMB's that mismatch
  * @param[out] o_imageInfo PNOR image information for update
  * @param[out] o_imageLoaded true if PNOR::OCMBFW secure section loaded
+ * @param[out] o_rebootRequired true if any OCMB FW upate is triggered by a FW
+ *                  mismatch or forced by attribute, but not the mfg flag
+ * @param[in]  i_checkMfgFlag Use the mfg flag in update decision
  *
  * @return true if an update is needed, else false
  */
 bool explorerUpdateCheck(ISTEP_ERROR::IStepError& o_stepError,
                          TARGETING::TargetHandleList& o_flashUpdateList,
                          rawImageInfo_t & o_imageInfo,
-                         bool & o_imageLoaded );
+                         bool & o_imageLoaded,
+                         bool & o_rebootRequired,
+                         bool i_checkMfgFlag  );
 
 /**
  * @brief Call the HWP to perform update on list of Ocmb chips.
@@ -72,10 +77,13 @@ bool explorerUpdateCheck(ISTEP_ERROR::IStepError& o_stepError,
  * @param[out] o_stepError Error handle for logging istep failures
  * @param[in]  i_explorerList List of Explorer OCMB's that need to update
  * @param[in]  i_imageInfo PNOR OCMBFW image information for update
+ * @param[in]  i_rebootRequired true if any OCMB FW upate is triggered by a FW
+ *                  mismatch or forced by attribute, but not the mfg flag
  */
 void performUpdate(ISTEP_ERROR::IStepError& o_stepError,
                    TARGETING::TargetHandleList& i_explorerList,
-                   rawImageInfo_t& i_imageInfo );
+                   rawImageInfo_t& i_imageInfo,
+                   bool i_rebootRequired );
 
 
 /**
