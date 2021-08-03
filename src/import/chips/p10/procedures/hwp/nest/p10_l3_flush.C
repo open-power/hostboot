@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,7 +42,7 @@
 //--------------------------------------------------------------------------
 
 // L3 purge operation delay times for HW/sim
-const uint32_t P10_L3_FLUSH_HW_NS_DELAY     = 50000;
+const uint32_t P10_L3_FLUSH_HW_NS_DELAY     = 1000000;
 const uint32_t P10_L3_FLUSH_SIM_CYCLE_DELAY = 1000000;
 
 // If the L3 purge is not completed in P10_L3_FLUSH_TIMEOUT delays, fail with error
