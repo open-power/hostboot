@@ -731,6 +731,23 @@ private:
     typedef std::vector<ProcInfo> ProcInfoVector;
 
     /**
+     * @brief Collects a list of processors that are not connected by any bus to
+     *        the given processor.
+     *
+     * @param[in] i_proc                   The root processor.
+     * @param[in] i_buses                  A list of bus information.
+     * @param[in] i_deconfiguredInfo       A list of bools, each bool i indicating whether i_buses[i] is deconfigured.
+     * @param[in] i_num_buses              The size of i_buses (and i_deconfiguredInfo).
+     * @param[in/out] o_disconnectedProcs  A list of processors NOT connected by ANY bus to i_proc. The existing
+     *                                     contents of this list are left as-is.
+     */
+    static void _collectDisconnectedProcs(const ProcInfo* i_proc,
+                                          ProcInfo* const i_buses[],
+                                          const bool* i_deconfiguredInfo,
+                                          uint8_t i_num_buses,
+                                          std::vector<ProcInfo*>& io_disconnectedProcs);
+
+    /**
      * @brief Deconfigures Targets by association.
      *
      * @param[in] i_target   Reference to base Target.
