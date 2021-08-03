@@ -2335,7 +2335,7 @@
     Maximum regulator voltage allowed without exceeding the technology Vmax at
     pins.
 
-    If, 0, then default value of 1150(1.15V)
+    If, 0, then default value of 1275 (1.275V) is used
     </description>
     <valueType>uint16</valueType>
     <platInit/>
@@ -2458,7 +2458,7 @@
     Minimum regulator voltage allowed without violating the chip Vmin at the
     pins.
 
-    If, 0, then default value of 1150(1.15V)
+    If, 0, then the value of the #V PowerSave voltage is used.
     </description>
     <valueType>uint16</valueType>
     <platInit/>
