@@ -127,8 +127,10 @@ public:
      * @param[in] i_target, the target of the default processing.
      * @param[in] i_errl, the ErrlEntry to be used for default processing.
      *
+     * @return True if parsing was successful and addFruCallouts was called
+     *         False otherwise
      */
-    static void doDefaultProcessing(const ffdc_package& i_ffdc_package,
+    static bool doDefaultProcessing(const ffdc_package& i_ffdc_package,
                                     TARGETING::Target* i_target,
                                     errlHndl_t i_errl
                                     );

@@ -61,12 +61,13 @@ FfdcParsedPackage::rcToParsedType(uint32_t fapiRc)
 }
 
 //---------------------------------------------------------------------------
-void FfdcParsedPackage::doDefaultProcessing(
-                                        const ffdc_package& i_ffdc_package,
-                                        TARGETING::Target* i_target,
-                                        errlHndl_t i_errl
+bool FfdcParsedPackage::doDefaultProcessing(
+                                            const ffdc_package& i_ffdc_package,
+                                            TARGETING::Target* i_target,
+                                            errlHndl_t i_errl
                                            )
 {
+    bool calledAddFruCallouts = false;
     ParsedType l_type = rcToParsedType(i_ffdc_package.rc);
     switch(l_type)
     {
@@ -74,6 +75,7 @@ void FfdcParsedPackage::doDefaultProcessing(
             {
                 FfdcScomPibErrorPackage ffdcPackage{i_ffdc_package};
                 ffdcPackage(i_target, i_errl);
+                calledAddFruCallouts = true;
                 break;
             }
         case ParsedType::NONE:
@@ -93,6 +95,7 @@ void FfdcParsedPackage::doDefaultProcessing(
                                                             true
                                                            };
                         ffdcPackage(i_target, i_errl);
+                        calledAddFruCallouts = true;
                     }
                 }
                 break;
@@ -106,6 +109,8 @@ void FfdcParsedPackage::doDefaultProcessing(
                 break;
             }
     }
+
+    return calledAddFruCallouts;
 }
 
 //---------------------------------------------------------------------------

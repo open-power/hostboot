@@ -512,7 +512,8 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target * i_target,
 
             // Go through the buffer, get the RC
             uint8_t l_pkgs = l_ffdc_parser->getTotalPackages();
-
+            // bool to track if addFruCallouts() was called on any of the FFDC packages
+            bool l_didDefaultProcessing{false};
             for(uint8_t i = 0; i < l_pkgs; i++)
             {
                  ffdc_package l_package = {nullptr, 0, 0};
@@ -552,33 +553,40 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target * i_target,
                      errlHndl_t sbe_errl = fapi2::rcToErrl(l_fapiRC);
                      if( sbe_errl )
                      {
+                         sbe_errl->plid(errl->plid());
                          ERRORLOG::errlCommit( sbe_errl, SBEIO_COMP_ID );
                      }
                  }
 
                  //If FFDC schema is known and a processing routine
                  //is defined then perform the processing.
-                 //For scom PIB errors, addFruCallputs is invoked.
+                 //For scom PIB errors, addFruCallouts is invoked.
                  //Only processing known FFDC schemas protects us
                  //from trying to process FFDC formats we do not
                  //anticipate. For example, the SBE can send
                  //user and attribute FFDC information after the
                  //Scom Error FFDC. We do not want to process that
                  //type of data here.
-                 FfdcParsedPackage::doDefaultProcessing(l_package,
-                                                        i_target,
-                                                        errl);
+                 l_didDefaultProcessing |= FfdcParsedPackage::doDefaultProcessing(l_package,
+                                                                                  i_target,
+                                                                                  errl);
             }
 
-            errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                      HWAS::SRCI_PRIORITY_HIGH);
-            errl->addHwCallout(  i_target,
-                                 HWAS::SRCI_PRIORITY_LOW,
-                                 HWAS::NO_DECONFIG,
-                                 HWAS::GARD_NULL );
+            // only add automatic callouts if doDefaultProcessing() did not
+            // call addFruCallouts() on the current errl
+            if (!l_didDefaultProcessing)
+            {
+                errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                          HWAS::SRCI_PRIORITY_HIGH);
+                errl->addHwCallout(i_target,
+                                   HWAS::SRCI_PRIORITY_LOW,
+                                   HWAS::NO_DECONFIG,
+                                   HWAS::GARD_NULL);
+            }
+
             errl->collectTrace(SBEIO_COMP_NAME);
 
-            delete  l_ffdc_parser;
+            delete l_ffdc_parser;
             break;
         }
     }
