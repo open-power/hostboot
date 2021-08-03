@@ -1219,6 +1219,9 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         {
             io_globalppb->wov.wov_underv_vmin_mv = revle16(iv_vdd_vpd_vmin);
             FAPI_INF("WOV_VMIN_MV=%u",revle16(io_globalppb->wov.wov_underv_vmin_mv));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_WOV_UNDERV_VMIN_MV,
+                                     iv_procChip,
+                                     iv_vdd_vpd_vmin));
             FAPI_INF("SafeVoltage=%u",revle32(io_globalppb->base.safe_voltage_mv[SAFE_VOLTAGE_VDD]));
         }
 
@@ -1973,7 +1976,7 @@ void PlatPmPPB::attr_init( void )
     SET_DEFAULT(attr_wov_overv_step_incr_pct, 5);
     SET_DEFAULT(attr_wov_overv_step_decr_pct, 5);
     SET_DEFAULT(attr_wov_overv_max_pct, 30);
-    SET_DEFAULT(attr_wov_overv_vmax_mv, 1150);
+    SET_DEFAULT(attr_wov_overv_vmax_mv, 1275);
     SET_DEFAULT(attr_wov_underv_step_incr_pct, 5);
     SET_DEFAULT(attr_wov_underv_step_decr_pct, 5);
     SET_DEFAULT(attr_wov_underv_max_pct, 100);
@@ -4812,7 +4815,6 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
         goto fapi_try_exit;
     }
     iv_vdd_vpd_vmin = ps2v_mv(l_psave_ps, VDD, VPD_PT_SET_BIASED);
-
 
     // Calculate boot mode voltages
     if (!iv_attrs.attr_boot_voltage_mv[VDD])
