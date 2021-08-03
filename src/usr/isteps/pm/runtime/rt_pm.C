@@ -601,7 +601,11 @@ namespace RTPM
             runtimeInterfaces_t * rt_intf = getRuntimeInterfaces();
             rt_intf->load_pm_complex = &load_pm_complex;
             rt_intf->start_pm_complex = &start_pm_complex;
+
+#ifdef CONFIG_FSP_BUILD
+            // reset_pm_complex interface only used on FSP systems
             rt_intf->reset_pm_complex = &reset_pm_complex;
+#endif
 
             postInitCalls_t* rt_postInits = getPostInitCalls();
             rt_postInits->callLoadAndStartPMComplex =
