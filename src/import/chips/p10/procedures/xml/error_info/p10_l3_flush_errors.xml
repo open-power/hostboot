@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -25,6 +25,7 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P10_L3_FLUSH_INVALID_ARGS_ERR</rc>
     <description>
       Procedure: p10_l3_flush
@@ -40,6 +41,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P10_L3_FLUSH_PREVIOUS_PURGE_ACTIVE_ERR</rc>
     <description>
       Procedure: p10_l3_flush
@@ -58,6 +60,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P10_L3_FLUSH_PURGE_REQ_TIMEOUT_ERR</rc>
     <description>
       Procedure: p10_l3_flush
