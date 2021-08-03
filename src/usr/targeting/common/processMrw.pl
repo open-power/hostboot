@@ -1671,6 +1671,9 @@ sub processOcmbChipAndChildren
     $targetObj->setAttribute($target, "AFFINITY_PATH", $ocmbAffinity);
     $targetObj->setAttribute($target, "PHYS_PATH",     $ocmbPhysical);
 
+    my $staticAbsoluteLocationCode = getStaticAbsLocationCode($targetObj, $target);
+    $targetObj->setAttribute($target, "STATIC_ABS_LOCATION_CODE", $staticAbsoluteLocationCode);
+
     # Set the EEPROM_VPD_PRIMARY_INFO and FAPI_I2C_CONTROL_INFO attributes
     setEepromAndFapi2AttributesForOcmb($targetObj, $target);
 
