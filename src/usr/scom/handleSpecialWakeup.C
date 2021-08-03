@@ -461,6 +461,7 @@ errlHndl_t callWakeupHwp(TARGETING::Target* i_target,
                           TARGETING::get_huid(i_target),
                           l_spcwkupType );
                 delete l_errl;
+                l_errl = NULL;
             }
             else if(l_errl)
             {
