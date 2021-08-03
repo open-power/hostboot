@@ -47,6 +47,7 @@
 #include <p10_getecid.H>
 #include <util/utilmbox_scratch.H>
 #include <hwas/hwasPlat.H>
+#include <errl/errludlogregister.H>
 
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
@@ -228,6 +229,27 @@ void* call_proc_check_secondary_sbe_seeprom_complete( void *io_pArgs )
                                             RC_FAILED_TO_BOOT_SBE,
                                             get_huid(l_cpu_target),
                                             0);
+            // Add all the scratch regs that we set as FFDC
+            //  (read as FSI since these are non-boot procs)
+            ERRORLOG::ErrlUserDetailsLogRegister l_scratchregs(l_cpu_target);
+            l_scratchregs.addData(DEVICE_FSI_ADDRESS(0x28E0));//scratch1
+            l_scratchregs.addData(DEVICE_FSI_ADDRESS(0x28E4));//scratch2
+            l_scratchregs.addData(DEVICE_FSI_ADDRESS(0x28E8));//scratch3
+            l_scratchregs.addData(DEVICE_FSI_ADDRESS(0x28EC));//scratch4
+            l_scratchregs.addData(DEVICE_FSI_ADDRESS(0x28F0));//scratch5
+            l_scratchregs.addData(DEVICE_FSI_ADDRESS(0x28F4));//scratch6
+            l_scratchregs.addData(DEVICE_FSI_ADDRESS(0x28F8));//scratch7
+            l_scratchregs.addData(DEVICE_FSI_ADDRESS(0x28FC));//scratch8
+            l_scratchregs.addData(DEVICE_FSI_ADDRESS(0x2E00));//scratch9
+            l_scratchregs.addData(DEVICE_FSI_ADDRESS(0x2E04));//scratch10
+            l_scratchregs.addData(DEVICE_FSI_ADDRESS(0x2E08));//scratch11
+            l_scratchregs.addData(DEVICE_FSI_ADDRESS(0x2E0C));//scratch12
+            l_scratchregs.addData(DEVICE_FSI_ADDRESS(0x2E10));//scratch13
+            l_scratchregs.addData(DEVICE_FSI_ADDRESS(0x2E14));//scratch14
+            l_scratchregs.addData(DEVICE_FSI_ADDRESS(0x2E18));//scratch15
+            l_scratchregs.addData(DEVICE_FSI_ADDRESS(0x2E1C));//scratch16
+            l_scratchregs.addToLog(l_errl);
+
             captureError(l_errl, l_stepError, HWPF_COMP_ID, l_cpu_target);
 
 
