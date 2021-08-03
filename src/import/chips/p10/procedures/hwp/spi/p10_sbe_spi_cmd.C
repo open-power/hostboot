@@ -51,9 +51,16 @@
 #define SPI_SLAVE_ID_CMD  0x9F00000000000000ULL
 
 // Timeout values so not stuck in wait loops forever
-constexpr uint64_t SPI_TIMEOUT_MAX_WAIT_COUNT      = 10000;   // 10 seconds
-constexpr uint64_t SPI_TIMEOUT_DELAY_NS            = 1000000; // 1 msec
-constexpr uint64_t SPI_TIMEOUT_DELAY_NS_SIM_CYCLES = 1000000; // 1 msec
+#ifdef __PPE__
+    //SBE will use below delay. This is to reduce the SBE boot time.
+    constexpr uint64_t SPI_TIMEOUT_DELAY_NS            = 1000;       // 1 micro sec
+    constexpr uint64_t SPI_TIMEOUT_DELAY_NS_SIM_CYCLES = 1000;       // 1 micro sec
+    constexpr uint64_t SPI_TIMEOUT_MAX_WAIT_COUNT      = 10000000;   // Max wait count = 10 seconds
+#else
+    constexpr uint64_t SPI_TIMEOUT_DELAY_NS            = 1000000; // 1 msec
+    constexpr uint64_t SPI_TIMEOUT_DELAY_NS_SIM_CYCLES = 1000000; // 1 msec
+    constexpr uint64_t SPI_TIMEOUT_MAX_WAIT_COUNT      = 10000;   // Max wait count = 10 seconds
+#endif
 
 using namespace fapi2;
 
@@ -276,9 +283,7 @@ spi_wait_for_tdr_empty(SpiControlHandle& i_handle)
             break; //Wait until TX Buffer is empty
         }
 
-#ifndef __PPE__
         fapi2::delay(SPI_TIMEOUT_DELAY_NS, SPI_TIMEOUT_DELAY_NS_SIM_CYCLES);
-#endif
         --timeout;
     }
 
@@ -330,9 +335,7 @@ spi_wait_for_rdr_full(SpiControlHandle& i_handle)
             break;
         }
 
-#ifndef __PPE__
         fapi2::delay(SPI_TIMEOUT_DELAY_NS, SPI_TIMEOUT_DELAY_NS_SIM_CYCLES);
-#endif
         --timeout;
     }
 
@@ -384,9 +387,7 @@ spi_wait_for_idle(SpiControlHandle& i_handle)
             break;
         }
 
-#ifndef __PPE__
         fapi2::delay(SPI_TIMEOUT_DELAY_NS, SPI_TIMEOUT_DELAY_NS_SIM_CYCLES);
-#endif
         --timeout;
     }
 
@@ -651,9 +652,7 @@ spi_wait_for_seq_index_pass(SpiControlHandle& i_handle, const uint32_t i_index)
             break;
         }
 
-#ifndef __PPE__
         fapi2::delay(SPI_TIMEOUT_DELAY_NS, SPI_TIMEOUT_DELAY_NS_SIM_CYCLES);
-#endif
     }
 
     FAPI_DBG("wait_for_seq_index_pass(%d) timeout %lld msec", i_index, timeout);
