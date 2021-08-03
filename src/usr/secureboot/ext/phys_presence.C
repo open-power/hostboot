@@ -266,7 +266,7 @@ errlHndl_t detectPhysPresence(void)
                  * @moduleid         MOD_DETECT_PHYS_PRES
                  * @userdata1        HUID of Master Processor Target
                  * @userdata2[0:31]  LED Data from PCA9551
-                 * @userdata[32:63]  LED Windoow Open LED (aka PIN)
+                 * @userdata2[32:63] LED Windoow Open LED (aka PIN)
                  * @devdesc          Attempt to close physical presence window
                  *                   did not close the window
                  * @custdesc         A problem occurred during the IPL

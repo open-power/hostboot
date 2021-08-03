@@ -182,7 +182,6 @@ errlHndl_t clearKeyClearSensor(void)
 
 #endif // (#ifdef CONFIG_BMC_IPMI)
 
-#ifndef CONFIG_BMC_IPMI
 void getKeyClearRequestAttr(TARGETING::KEY_CLEAR_REQUEST & o_keyClearRequests)
 {
     SB_ENTER("getKeyClearRequestAttr");
@@ -197,7 +196,6 @@ void getKeyClearRequestAttr(TARGETING::KEY_CLEAR_REQUEST & o_keyClearRequests)
 
     return;
 }
-#endif // (#ifndef CONFIG_BMC_IPMI)
 
 void getKeyClearRequest(bool & o_requestPhysPres,
                         TARGETING::KEY_CLEAR_REQUEST & o_keyClearRequests)
@@ -212,13 +210,8 @@ void getKeyClearRequest(bool & o_requestPhysPres,
     {
 
     // Get Key Clear Request information
-#ifndef CONFIG_BMC_IPMI
     SB_DBG("getKeyClearRequest: calling getKeyClearRequestAttr");
     getKeyClearRequestAttr(l_keyClearRequests);
-#else
-    SB_DBG("getKeyClearRequest: calling getKeyClearRequestSensor");
-    getKeyClearRequestSensor(l_keyClearRequests);
-#endif
 
     // First check if either the KEY_CLEAR_REQUEST_MFG bit or the
     // KEY_CLEAR_REQUEST_MFG_ALL bit are set.
