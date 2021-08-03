@@ -45,9 +45,9 @@
 // polling constants
 enum
 {
-    P10_L2_FLUSH_HW_NS_DELAY     = 10000, // unit is nano seconds
-    P10_L2_FLUSH_SIM_CYCLE_DELAY = 12000, // unit is cycles
-    P10_L2_FLUSH_MAX_POLLS       = 200    // unit is polls
+    P10_L2_FLUSH_HW_NS_DELAY     = 1000000, // unit is nano seconds
+    P10_L2_FLUSH_SIM_CYCLE_DELAY = 12000,   // unit is cycles
+    P10_L2_FLUSH_MAX_POLLS       = 200      // unit is polls
 };
 
 //------------------------------------------------------------------------------
