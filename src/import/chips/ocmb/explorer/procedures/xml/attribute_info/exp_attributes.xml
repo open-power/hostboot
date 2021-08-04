@@ -480,10 +480,10 @@
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
             Timeout (in msec) for polling for FW_STATUS reply during
-            exp_check_for_ready. Default is 6000msec, from lab experimentation
+            exp_check_for_ready. Default is 20000msec, from lab experimentation
         </description>
         <valueType>uint16</valueType>
-        <default>6000</default>
+        <default>20000</default>
         <platInit/>
         <mrwHide/>
         <mssAccessorName>check_for_ready_timeout</mssAccessorName>
