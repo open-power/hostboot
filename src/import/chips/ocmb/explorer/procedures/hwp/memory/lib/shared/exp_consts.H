@@ -363,6 +363,8 @@ enum cmd_id : uint8_t
     FW_CONT_SERDES_CAL_DISABLE               = 0x28,
     FW_READ_ACTIVE_LOGS                      = 0x29,
     FW_READ_SAVED_DDR_PARAMS                 = 0x2A,
+    MDS_REG_READ                             = 0x2B,
+    MDS_REG_WRITE                            = 0x2C,
 };
 
 ///
@@ -586,6 +588,27 @@ enum fw_api_version
 };
 
 } // namespace exp
+
+namespace mds
+{
+
+///
+/// @brief MDS I2C handling
+///
+enum i2c_handling
+{
+    // MDS I2C commands
+    MDS_I2C_REG_WRITE = 0xC6,
+    MDS_I2C_REG_READ = 0xC2,
+    MDS_WRITE_REG_DATA_SIZE = 0x05,
+    MDS_READ_REG_DATA_SIZE = 6,
+    MDS_READ_RSP_SIZE = 6,
+    // TODO: Awaiting confirmation on success and more codes
+    MDS_I2C_SUCCESS      = 0x01,
+};
+
+} // namespace mds
+
 } // namespace mss
 
 #endif

@@ -54,6 +54,13 @@ namespace i2c
 {
 
 ///
+/// @brief convert data from vector of bytes into single uint64_t variable
+/// @param[in] i_data data in vector of bytes
+/// @return uint64_t variable
+///
+uint64_t convert_to_long(const std::vector<uint8_t>& i_data);
+
+///
 /// @brief Poll settings for when a FW_STATUS response shows a non-SUCCESS status
 /// @note Allows the caller of poll_fw_status to continue polling if we expect a command to fail
 ///

@@ -136,9 +136,6 @@ fapi_try_exit:
 
 }
 
-
-
-
 ///
 /// @brief Perform a get scom operation over i2c to OCMB explorer chip
 ///        @note OCMB chip is little-endian and Host is likely running big-endian

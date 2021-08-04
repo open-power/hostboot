@@ -40,8 +40,10 @@
 #include <generic/memory/lib/utils/count_dimm.H>
 
 #include <lib/mc/exp_port.H>
+#include <lib/exp_draminit_utils.H>
 #include <generic/memory/mss_git_data_helper.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
+#include <lib/workarounds/exp_mds_workarounds.H>
 #include <exp_deploy_row_repairs.H>
 
 extern "C"
@@ -54,6 +56,7 @@ extern "C"
     fapi2::ReturnCode exp_draminit_mc( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target )
     {
         mss::display_git_commit_info("exp_draminit_mc");
+        bool l_is_mds = false;
 
         FAPI_INF("%s Start exp_draminit MC", mss::c_str(i_target));
 
@@ -63,6 +66,9 @@ extern "C"
             FAPI_INF("No DIMM's configured on %s. Skipping this OCMB_CHIP.", mss::c_str(i_target));
             return fapi2::FAPI2_RC_SUCCESS;
         }
+
+        // Check if it is an MDS dimm to handle the correct response
+        FAPI_TRY(mss::dimm::is_mds<mss::mc_type::EXPLORER>(i_target, l_is_mds));
 
         // Enable Power management based off of mrw_power_control_requested
         FAPI_TRY( mss::enable_power_management(i_target), "%s Failed to enable power management",
@@ -101,6 +107,13 @@ extern "C"
 
         // Unmask registers after draminit_mc
         FAPI_TRY(mss::unmask::after_draminit_mc(i_target), "%s Failed after_draminit_mc", mss::c_str(i_target));
+
+        // Check if the dimms are MDS
+        if (l_is_mds)
+        {
+            // Run media enablement I2C workaround
+            FAPI_TRY(mss::exp::workarounds::mds_i2c_media_enable(i_target));
+        }
 
         FAPI_INF("%s End exp_draminit MC", mss::c_str(i_target));
         return fapi2::FAPI2_RC_SUCCESS;

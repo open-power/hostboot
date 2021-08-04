@@ -482,6 +482,36 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_MDS_I2C_WRONG_RSP_SIZE</rc>
+    <description>
+      Received an incorrect response size for MDS I2C scoms.
+    </description>
+    <ffdc>MDS_MDIA_CTL_TARGET</ffdc>
+    <ffdc>RSP_SIZE</ffdc>
+    <ffdc>COMMAND</ffdc>
+    <ffdc>RESPONSE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MDS_I2C_CMD_FAIL</rc>
+    <description>
+      Received non-SUCCESS status for MDS I2C scoms.
+    </description>
+    <ffdc>MDS_MDIA_CTL_TARGET</ffdc>
+    <ffdc>STATUS</ffdc>
+    <ffdc>COMMAND</ffdc>
+    <ffdc>RESPONSE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_EXP_I2C_WRONG_BOOT_STAGE</rc>
     <description>
       Received incorrect boot stage from command ID EXP_FW_STATUS
