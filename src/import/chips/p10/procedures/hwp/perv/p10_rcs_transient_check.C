@@ -97,6 +97,12 @@ fapi2::ReturnCode p10_rcs_transient_check(const
 
     FAPI_DBG("Begin RCS Transient Error Check");
 
+    // SW526040
+    FAPI_DBG("RCS Transient Code is Disabled. Returning Hard Fail...");
+    o_status = false; // Return Hard Fail
+    goto fapi_try_exit;
+
+
     // Error Recovery Step 2:  Disable ALTREFCLK on selected side
     FAPI_DBG("Disable RCS filter PLL altrefclk selects");
     FAPI_TRY(fapi2::getScom(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL3_RW, l_data64_rc3));
