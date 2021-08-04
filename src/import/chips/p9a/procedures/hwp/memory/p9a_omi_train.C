@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,6 +49,7 @@
 #include <lib/mc/omi.H>
 #include <lib/workarounds/p9a_omi_workarounds.H>
 #include <generic/memory/mss_git_data_helper.H>
+#include <exp_omi_train.H>
 
 
 ///
@@ -101,6 +102,11 @@ fapi2::ReturnCode p9a_omi_train( const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_
 
             // 2 second delay for gemini
             FAPI_TRY(fapi2::delay(2 * mss::common_timings::DELAY_1S, mss::common_timings::DELAY_1MS));
+        }
+
+        for (const auto& l_ocmb : mss::find_targets<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target))
+        {
+            FAPI_TRY(exp_omi_train_internal(l_ocmb));
         }
 
         // Enable auto training

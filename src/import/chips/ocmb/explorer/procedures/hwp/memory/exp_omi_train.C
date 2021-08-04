@@ -54,7 +54,7 @@ extern "C"
     /// @param[in] i_target the OCMB target to operate on
     /// @return FAPI2_RC_SUCCESS iff ok
     ///
-    fapi2::ReturnCode exp_omi_train(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+    fapi2::ReturnCode exp_omi_train_internal(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
     {
         mss::display_git_commit_info("exp_omi_train");
         fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
@@ -91,6 +91,32 @@ extern "C"
             }
 
         }
+
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+
+    ///
+    /// @brief Trains the OCMB link
+    /// @param[in] i_target the OCMB target to operate on
+    /// @return FAPI2_RC_SUCCESS iff ok
+    ///
+    fapi2::ReturnCode exp_omi_train(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+    {
+        // Check if we running on Apollo
+        uint8_t l_is_apollo;
+        mss::attr::get_is_apollo(l_is_apollo);
+
+        if (l_is_apollo)
+        {
+            FAPI_TRY(exp_omi_train_internal(i_target));
+        }
+        else
+        {
+            FAPI_DBG("Called exp_omi_train::Skipping...");
+        }
+
+        return fapi2::FAPI2_RC_SUCCESS;
 
     fapi_try_exit:
         return fapi2::current_err;

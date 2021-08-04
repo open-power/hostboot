@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2020
+# Contributors Listed Below - COPYRIGHT 2015,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -28,4 +28,6 @@
 
 PROCEDURE=p9a_omi_train
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(MSS_P9A_INCLUDES))
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/ocmb/explorer/procedures/hwp/memory)
+lib$(PROCEDURE)_DEPLIBS += exp_omi_train
 $(call BUILD_PROCEDURE)
