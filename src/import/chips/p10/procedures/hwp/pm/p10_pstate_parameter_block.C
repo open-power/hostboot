@@ -1218,6 +1218,12 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         if (io_globalppb->wov.wov_underv_vmin_mv == 0)
         {
             io_globalppb->wov.wov_underv_vmin_mv = revle16(iv_vdd_vpd_vmin);
+
+            fapi2::ATTR_WOV_UNDERV_VMIN_MV_Type l_wov_uv_vmin = revle16(io_globalppb->wov.wov_underv_vmin_mv);
+            FAPI_TRY(FAPI_ATTR_SET( fapi2::ATTR_WOV_UNDERV_VMIN_MV,
+                                    iv_procChip,
+                                    l_wov_uv_vmin));
+
             FAPI_INF("WOV_VMIN_MV=%u",revle16(io_globalppb->wov.wov_underv_vmin_mv));
             FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_WOV_UNDERV_VMIN_MV,
                                      iv_procChip,
@@ -2003,7 +2009,7 @@ void PlatPmPPB::attr_init( void )
     SET_CEIL (attr_wov_overv_max_pct,               100 );
     SET_CEIL (attr_wov_underv_step_incr_pct,        20  );
     SET_CEIL (attr_wov_underv_step_decr_pct,        20  );
-    SET_FLOOR(attr_wov_underv_max_pct,              2   );
+    SET_FLOOR(attr_wov_underv_max_pct,              200 );
 
 #define PPB_SET_ATTR(attr_name, target, attr_assign) \
     FAPI_TRY(FAPI_ATTR_SET(fapi2::attr_name, target, iv_attrs.attr_assign),"Attribute write failed"); \
@@ -4500,7 +4506,6 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
     uint32_t                                 l_safe_mode_op_ps2freq_khz;
     uint32_t                                 l_safe_op_freq_mhz;
     uint8_t                                  l_safe_op_ps;
-    uint8_t                                  l_psave_ps;
     uint32_t                                 l_core_floor_mhz;
     uint32_t                                 l_op_pt_mhz;
     Pstate                                   l_safe_mode_ps;
@@ -4798,24 +4803,6 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
         FAPI_INF ("Attribute override safe mode VCS voltage being used");
     }
 
-    // The wov_underv_vmin_mv member of the GPPB is needed to set the floor
-    // voltage as seen at the circuits (but still with biases).  The safe mode
-    // voltage above may have system parameter (load line, distribution loss)
-    // uplifts as well core floor uplifts so it can't be used. Thus, fill in
-    // wov_underv_vmin_mv with the biased VPD voltage associated with PowerSave.
-    // Save the value into the PPB class for use in filling in the GPPB later.
-
-    l_rc = freq2pState(iv_vddPsavFreq*1000,
-                        &l_psave_ps, ROUND_FAST, PPB_WARN);
-    if (l_rc)
-    {
-        disable_pstates();
-        // TODO: put in notification controls
-        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-        goto fapi_try_exit;
-    }
-    iv_vdd_vpd_vmin = ps2v_mv(l_psave_ps, VDD, VPD_PT_SET_BIASED);
-
     // Calculate boot mode voltages
     if (!iv_attrs.attr_boot_voltage_mv[VDD])
     {
@@ -4879,6 +4866,16 @@ fapi2::ReturnCode PlatPmPPB::compute_retention_vid()
     l_psave_mv = ps2v_mv(l_psave_ps, VDD, VPD_PT_SET_RAW);
 
     FAPI_DBG("PowerSave vdd_mv 0x%08x (%d)", l_psave_mv, l_psave_mv);
+
+    // The wov_underv_vmin_mv member of the GPPB is needed to set the floor
+    // voltage as seen at the circuits (but still with biases).  The safe mode
+    // voltage above may have system parameter (load line, distribution loss)
+    // uplifts as well core floor uplifts so it can't be used. Thus, fill in
+    // wov_underv_vmin_mv with the biased VPD voltage associated with PowerSave.
+    // Save the value into the PPB class for use in filling in the GPPB later.
+
+    iv_vdd_vpd_vmin = ps2v_mv(l_psave_ps, VDD, VPD_PT_SET_BIASED);
+    FAPI_INF("VDD VMIN %u mV", iv_vdd_vpd_vmin);
 
     l_ret_mv = l_psave_mv;
     if (l_psave_mv < RVRM_MIN_MV)
@@ -5812,11 +5809,11 @@ uint64_t  PlatPmPPB::dccr_value()
         }
         else
         {
-            // This value effectively disables the heavy droop condition
-            iv_dccr_value = 0x0F3E03E9C0000000ull;
-            FAPI_INF("Setting DCCR to internal default of 0x%016llX as #W value is 0.",
+          iv_dccr_value = 0x283E93E9C0000000ull;
+          FAPI_INF("Setting DCCR to internal default of 0x%016llX as #W value is 0.",
                     iv_dccr_value);
         }
+        FAPI_ATTR_SET(fapi2::ATTR_WOF_DCCR_VALUE, iv_procChip, iv_dccr_value);
     }
     return iv_dccr_value;
 }
@@ -5849,6 +5846,7 @@ uint64_t  PlatPmPPB::flmr_value()
           FAPI_INF("Setting FLMR to internal default of 0x%016llX as #W value is 0.",
                     iv_flmr_value);
         }
+        FAPI_ATTR_SET(fapi2::ATTR_WOF_FLMR_VALUE, iv_procChip, iv_flmr_value);
     }
     return iv_flmr_value;
 }
@@ -5881,6 +5879,7 @@ uint64_t  PlatPmPPB::fmmr_value()
             FAPI_INF("Setting FMMR to internal default of 0x%016llX as #W value is 0.",
                     iv_fmmr_value);
         }
+        FAPI_ATTR_SET(fapi2::ATTR_WOF_FMMR_VALUE, iv_procChip, iv_fmmr_value);
     }
     return iv_fmmr_value;
 }

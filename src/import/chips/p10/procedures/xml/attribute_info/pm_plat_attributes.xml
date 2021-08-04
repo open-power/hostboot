@@ -192,8 +192,9 @@
     </description>
     <valueType>uint64</valueType>
     <platInit/>
-    <initToZero/>
+    <default>0x283E93E9C0000000</default>
     <overrideOnly/>
+    <writeable/>
     <group>dds</group>
   </attribute>
 
@@ -349,6 +350,7 @@
     <platInit/>
     <initToZero/>
     <overrideOnly/>
+    <writeable/>
     <group>dds</group>
   </attribute>
 
@@ -533,6 +535,7 @@
     <platInit/>
     <initToZero/>
     <overrideOnly/>
+    <writeable/>
     <group>dds</group>
   </attribute>
 
@@ -1035,7 +1038,6 @@
     <overrideOnly/>
     <group>enablement</group>
   </attribute>
-
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_SYSTEM_PSTATES_MODE</id>
@@ -2251,12 +2253,7 @@
     <id>ATTR_WOV_MAX_DROOP_10THPCT</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-    If WOV undervolting and/or WOF overvolting is enabled, then this is used to
-    a check for maximum frequency loss. If frequency in tenths of is below
-    value, then an error is logged and WOV is disabled.
-
-    Values can range from 0 to 200(20%). Values greater than 200 are to
-    clipped to 200 (20%).
+    Not supported in P10.
     </description>
     <valueType>uint32</valueType>
     <platInit/>
@@ -2273,14 +2270,14 @@
     If WOV overvolting is enabled, then this specifies the maximum amount of
     The value is specified in tenths of percentage(0.1%).
 
-    If, 0, then default value of 10(1%) is used.
+    If, 0, then default value of 30(3%) is used.
 
     Values can range from 1(0.1%) to 100(10%). Values greater than 100 are to
     clipped to 100 (10%).
     </description>
     <valueType>uint8</valueType>
     <platInit/>
-    <initToZero/>
+    <default>50</default>  <!-- 5.0% -->
     <overrideOnly/>
     <writeable/>
     <group>wov</group>
@@ -2291,8 +2288,9 @@
     <id>ATTR_WOV_OVERV_STEP_DECR_10THPCT</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-    If WOV overvolting is enabled, then this specifies the amount by which to
-    of overvolt amount. The value is specified in tenths of
+    If WOV undervolting is enabled, this specifies the amount to decrease
+    from the present voltage to expand the overvolt effect. The value is specified
+    in tenths of 1%.
 
     If 0, then default value of 0.5%(5) is used.
 
@@ -2301,7 +2299,7 @@
     </description>
     <valueType>uint8</valueType>
     <platInit/>
-    <initToZero/>
+    <default>1</default>  <!-- 0.1% -->
     <overrideOnly/>
     <writeable/>
     <group>wov</group>
@@ -2312,8 +2310,9 @@
     <id>ATTR_WOV_OVERV_STEP_INCR_10THPCT</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-    If WOV overvolting is enabled, then this specifies the amount by which to
-    of overvolt amount. The value is specified in tenths of
+    If WOV undervolting is enabled, this specifies the amount to increase
+    from the present voltage to expand the overvolt effect. The value is specified
+    in tenths of 1%.
 
     If 0, then default value of 0.5%(5) is used.
 
@@ -2321,7 +2320,7 @@
     </description>
     <valueType>uint8</valueType>
     <platInit/>
-    <initToZero/>
+    <default>10</default>  <!-- 1.0% -->
     <overrideOnly/>
     <writeable/>
     <group>wov</group>
@@ -2336,6 +2335,7 @@
     pins.
 
     If, 0, then default value of 1275 (1.275V) is used
+
     </description>
     <valueType>uint16</valueType>
     <platInit/>
@@ -2350,17 +2350,17 @@
     <id>ATTR_WOV_UNDERV_MAX_10THPCT</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-    If WOV undervolting is enabled, then this specifies the maximum amount of
-    The value is specified in tenths of percentage(0.1%).
+    If WOV undervolting is enabled, then this specifies the maximum percentage
+    that the voltage can move from the base voltage. The value is specified in
+    tenths of percentage(0.1%).
 
     If, 0, then default value of 10%(100) is used.
 
-    Value can range from 10(1%) to 255(25.5%). For values between 1(0.1%) and
-    of 10(1%) will be used.
+    Value can range from 10(1%) to 255(25.5%).
     </description>
     <valueType>uint8</valueType>
     <platInit/>
-    <initToZero/>
+    <default>200</default>  <!-- 20.0% -->
     <overrideOnly/>
     <writeable/>
     <group>wov</group>
@@ -2371,14 +2371,7 @@
     <id>ATTR_WOV_LIGHT_PERF_LOSS_THRESH_10THPCT</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-    If WOV undervolting is enabled, then this specifies the amount of performance
-    loss that is consider a "light" amount at which undervolting increments are
-    stopped(and may be reduced). The value is specified in tenths of percentage
-    (0.1%).
-
-    If, 0, then default value of 0.5%(5) is used.
-
-    Value can range from 1(0.1%) to 20(2%). All other values will be clipped to
+    Not supported on P10
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -2393,14 +2386,7 @@
     <id>ATTR_WOV_HEAVY_PERF_LOSS_THRESH_10THPCT</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-    If WOV undervolting is enabled, then this specifies the amount of performance
-    loss that is consider a "heavy" amount at which undervolting increments are
-    stopped and reduced pointedly. The value is specified in tenths of percentage
-    (0.1%).
-
-    If, 0, then default value of 0.5%(5) is used.
-
-    Value can range from 1(0.1%) to 20(2%). All other values will be clipped to
+    Not supported on P10
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -2415,16 +2401,17 @@
     <id>ATTR_WOV_UNDERV_STEP_DECR_10THPCT</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-    If WOV undervolting is enabled, then this specifies the amount by which to
-    of overvolt amount. The value is specified in tenths of
+    If WOV undervolting is enabled, this specifies the amount to decrease from
+    the present voltage to expand the undervolt effect. The value is specified
+    in tenths of 1%.
 
     If 0, then default value of 0.5%(5) is used.
 
-    Value can range from 1(0.1%) to 20(2%). Values greater than 20 are clipped
+    Value can range from 1(0.1%) to 20(2%). Values greater than 20 are clipped.
     </description>
     <valueType>uint8</valueType>
     <platInit/>
-    <initToZero/>
+    <default>1</default>  <!-- 0.1% -->
     <overrideOnly/>
     <writeable/>
     <group>wov</group>
@@ -2435,8 +2422,9 @@
     <id>ATTR_WOV_UNDERV_STEP_INCR_10THPCT</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-    If WOV undervolting is enabled, then this specifies the amount by which to
-    of overvolt amount. The value is specified in tenths of
+    If WOV undervolting is enabled, this specifies the amount to increase from
+    the present voltage to reduce the undervolt effect. The value is specified
+    in tenths of 1%.
 
     If 0, then default value of 0.5%(5) is used.
 
@@ -2444,7 +2432,7 @@
     </description>
     <valueType>uint8</valueType>
     <platInit/>
-    <initToZero/>
+    <default>10</default>  <!-- 1.0% -->
     <overrideOnly/>
     <writeable/>
     <group>wov</group>
@@ -3459,7 +3447,7 @@
      specification.
     </description>
     <valueType>uint64</valueType>
-    <platInit/>
+    <platInit/>l
     <initToZero/>
     <overrideOnly/>
   </attribute>
