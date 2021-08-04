@@ -40,6 +40,7 @@
 #include <generic/memory/mss_git_data_helper.H>
 #include <p10_io_lib.H>
 #include <mss_generic_system_attribute_getters.H>
+#include <exp_omi_train.H>
 
 ///
 /// @brief Start DL link training on the selected OMIC
@@ -87,8 +88,14 @@ fapi2::ReturnCode p10_omi_train(const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_
             // the below step
             for (const auto& l_ocmb : mss::find_targets<fapi2::TARGET_TYPE_OCMB_CHIP>(l_omi))
             {
-                // Helper to perform upstream PRBS sequence if needed, and kick off ENABLE_AUTO_TRAINING
-                FAPI_TRY(mss::omi::p10_omi_train_prbs_helper(l_omi, l_ocmb));
+
+                // Helper to perform upstream PRBS sequence if needed
+                FAPI_TRY(mss::omi::p10_omi_train_prbs_helper1(l_omi, l_ocmb));
+
+                FAPI_TRY(exp_omi_train_internal(l_ocmb));
+
+                // kick off ENABLE_AUTO_TRAINING
+                FAPI_TRY(mss::omi::p10_omi_train_prbs_helper2(l_omi, l_ocmb));
             }
         }
     }

@@ -144,7 +144,17 @@ fapi2::ReturnCode p10_omi_setup_prbs_helper(
 /// @param[in] i_ocmb OCMB target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
-fapi2::ReturnCode p10_omi_train_prbs_helper(
+fapi2::ReturnCode p10_omi_train_prbs_helper1(
+    const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_omi,
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb);
+
+///
+/// @brief P10 OMI train helper function, kicks off auto train
+/// @param[in] i_omi OMI target
+/// @param[in] i_ocmb OCMB target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode p10_omi_train_prbs_helper2(
     const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_omi,
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb);
 
