@@ -593,7 +593,7 @@ fapi2::ReturnCode pm_set_wofbase_frequency(
 
     fapi2::ATTR_CHIP_EC_FEATURE_STATIC_POUND_V_Type l_chip_static_pound_v = 0;
     fapi2::ATTR_POUND_V_STATIC_DATA_ENABLE_Type l_poundv_static_data = 0;
-    fapi2::ATTR_SOCKET_POWER_NOMINAL_Type l_powr_nom;
+    fapi2::ATTR_SOCKET_POWER_NOMINAL_Type l_powr_nom = 0;
 
     do
     {
@@ -654,6 +654,8 @@ fapi2::ReturnCode pm_set_wofbase_frequency(
                 FAPI_TRY(p10_pm_get_poundv_bucket(l_proc_target, l_poundV_data));
             }
 
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SOCKET_POWER_NOMINAL,
+                            l_proc_target, l_powr_nom));
             //Update power nominal target
             if (!l_powr_nom)
             {
