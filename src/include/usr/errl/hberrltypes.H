@@ -656,25 +656,78 @@ typedef struct pelfruidsubstruct
 /**
  * @brief SRC MRU field entry
  *        PEL spec 4.2.2.2.6
+ * Placeholder, not currently used
  */
-typedef struct mruidfield
-{
-  uint32_t       mrufieldreserved:24;
-  char           mrureppri;
-  uint32_t       mruid;
-} __attribute__((packed))  pelMRUIDField_t; // 8 bytes
+//typedef struct mruidfield
+//{
+//  uint32_t       mrufieldreserved:24;
+//  char           mrureppri;
+//  uint32_t       mruid;
+//} __attribute__((packed))  pelMRUIDField_t; // 8 bytes
 
 
 /**
  * @brief SRC MRU ID substruct
  *        PEL spec 4.2.2.2.5
+ * Placeholder, not currently used
  */
-typedef struct pelmruidsubstruct
-{
-  pelFRUSubstructHeader_t frusshead; // 4 bytes
-  uint32_t   mrussreserved;
-} __attribute__((packed))  pelMRUIDSubstruct_t; // 8 bytes
+//typedef struct pelmruidsubstruct
+//{
+//  pelFRUSubstructHeader_t frusshead; // 4 bytes
+//  uint32_t   mrussreserved;
+//} __attribute__((packed))  pelMRUIDSubstruct_t; // 8 bytes
 
+// Flags for FRU Identity Substructure 4.2.2.2.3
+// Used to identify the type of FRU callout and what info is contained. Missing values below are
+// considered reserved for future expansion. Explicitly reserved values are represented below.
+//
+// Bits 0-3 are the failing component type. Only one can be selected.
+// Bits 4-7 are which information was supplied with the callout and can be bitwised together to
+//          indicate multiple things were supplied.
+//
+// For more verbose descriptions, refer to PEL spec section 4.2.2.2.3.
+enum fruIdentitySubstructFlags : uint8_t
+{
+    // Failing Component Type bits
+    // Reserved
+    FAILING_COMP_TYPE_RESERVED_MIN_VAL = 0x00,
+    // Hardware FRU in platform
+    FAILING_COMP_TYPE_NORMAL_HW        = 0x10,
+    // Some layer of platform firmware or OS code
+    FAILING_COMP_TYPE_CODE             = 0x20,
+    // Configuration error, could be related to how hardware or code is configured.
+    FAILING_COMP_TYPE_CNFG_ERR         = 0x30,
+    // Maintenance procedure required. Further isolation required by performing procedure as IDed by Procedure ID field.
+    FAILING_COMP_TYPE_MAINT            = 0x40,
+    // Failing part is not within system, e.g. attached storage, external drives, etc.
+    FAILING_COMP_TYPE_EXTERN_FRU       = 0x90,
+    // Failing code is not running in the platform. Could be something like storage subsystem code, etc.
+    FAILING_COMP_TYPE_EXTERN_CODE      = 0xA0,
+    // A special tool required by one of the FRUs in the list contained within an error log.
+    FAILING_COMP_TYPE_TOOL_FRU         = 0xB0,
+    // Analysis code knows exactly which part is failing but there is no part number for various reasons.
+    FAILING_COMP_TYPE_SYMBOLIC_FRU     = 0xC0,
+    // Similar to symbolic fru type except a trusted location code is provided. Can only be used when symbolic FRUs
+    // represent hardware and when part number can not be determined.
+    FAILING_COMP_TYPE_SYMBOLIC_FRU_LOC = 0xE0,
+    // Reserved
+    FAILING_COMP_TYPE_RESERVED_MAX_VAL = 0xF0,
+
+};
+
+// Information supplied bits 4-7. See fruIdentitySubstructFlags for more info.
+enum fruIdentitySubstructInfo : uint8_t
+{
+
+    // FRU stocking part number supplied, mutually exclusive with bit 6 FAILING_COMP_TYPE_FRU_PRC.
+    FAILING_COMP_TYPE_FRU_PN   = 0x08,
+    // FRU CCIN supplied. Only valid if bit 4 FAILING_COMP_TYPE_FRU_PN is set.
+    FAILING_COMP_TYPE_FRU_CCIN = 0x04,
+    // Maintenance procedure callout supplied, mutually exclusive with bit 4 FAILING_COMP_TYPE_FRU_PN.
+    FAILING_COMP_TYPE_FRU_PRC  = 0x02,
+    // FRU Serial Number supplied. Only valid if bit 4 FAILING_COMP_TYPE_FRU_PN is set.
+    FAILING_COMP_TYPE_FRU_SN   = 0x01,
+};
 
 /**
  * @brief PEL SRC subsection
@@ -702,10 +755,7 @@ typedef struct frucoentry
     char            partNumber[PEL_PART_NUM_SIZE] = {0};
     char            ccin[PEL_CCIN_SIZE] = {0};
     char            serialNumber[PEL_SERIAL_NUM_SIZE] = {0};
-    std::vector<uint32_t> mruPriVec;
-    std::vector<uint32_t> mruIdVec;
 } fruCallOutEntry_t;
-
 
 #endif
 

@@ -157,6 +157,17 @@ private:
 #ifdef CONFIG_BUILD_FULL_PEL
 
     /**
+     *  @brief This is the amount of flat storage (in bytes) required to store the FRU Identity Substructure.
+     *         There are several optional fields in the struct that need to be accounted for.
+     *
+     *  @param  i_fruSubstruct  The FRU identity substructure which needs to have its size determined.
+     *
+     *  @return  Size in bytes.
+     *
+     */
+    size_t fruIdSubstructSize(const fruCallOutEntry_t& i_fruSubstruct) const;
+
+    /**
      *  @brief Added to the flatSize(), this is the
      *  amount of flat storage (in bytes) required to
      *  store the FRU callouts.
@@ -230,8 +241,29 @@ private:
 #endif
 };
 
-
 #ifdef CONFIG_BUILD_FULL_PEL
+
+inline size_t ErrlSrc::fruIdSubstructSize(const fruCallOutEntry_t& i_fruSubstruct) const
+{
+    // FRU ID substructure length is variable depending on callout type.
+    // Part Number, Serial Number, and CCIN are optional fields.
+    size_t fruSubstructLength = sizeof(pelFRUIDSubstruct_t);
+    // Check if a procedure id or part number was given. bits 4-7 have that info.
+    if (i_fruSubstruct.fruCompType & FAILING_COMP_TYPE_FRU_PRC)
+    {
+        // CCIN and Serial Number are not present.
+        fruSubstructLength -= PEL_CCIN_SIZE - PEL_SERIAL_NUM_SIZE;
+    }
+    // If neither the Part Number nor the Procedure ID were supplied then this FRU callout
+    // doesn't have any of the optional fields.
+    else if (!(i_fruSubstruct.fruCompType & FAILING_COMP_TYPE_FRU_PN))
+    {
+        // Part Number, CCIN and Serial Number are not present.
+        fruSubstructLength -= PEL_PART_NUM_SIZE - PEL_CCIN_SIZE - PEL_SERIAL_NUM_SIZE;
+    }
+    return fruSubstructLength;
+}
+
 inline uint64_t ErrlSrc::fruCalloutFlatSize() const
 {
     uint64_t l_size = 0;
@@ -243,9 +275,7 @@ inline uint64_t ErrlSrc::fruCalloutFlatSize() const
     {
         l_size += sizeof(pelFRUCalloutHeader_t);
         l_size += entry.locCodeLen;
-        l_size += sizeof(pelFRUIDSubstruct_t);
-        l_size += sizeof(pelMRUIDSubstruct_t);
-        l_size += sizeof(mruidfield) * entry.mruIdVec.size();
+        l_size += fruIdSubstructSize(entry);
     }
 
     return l_size;

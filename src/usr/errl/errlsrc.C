@@ -247,7 +247,6 @@ bool ErrlSrc::checkForDuplicateCallout(fruCallOutEntry_t& io_co)
 {
     // By default, add new callout to the vector
     bool retDup = false;
-    const uint32_t MAX_MRU_ID_FIELDS = 15;
 
     // Compare new callout partNumber/locationCode to all in the vector
     for( auto it = iv_coVec.begin();
@@ -260,39 +259,10 @@ bool ErrlSrc::checkForDuplicateCallout(fruCallOutEntry_t& io_co)
             // Found a match, check the priority
             if (io_co.priority > (*it).priority)
             {
-                // New priority is higher, keep it but save all the
-                // old mru priority and id data to the new entry
-                io_co.mruPriVec.insert(io_co.mruPriVec.end(),
-                                      (*it).mruPriVec.begin(),
-                                      (*it).mruPriVec.end());
-                io_co.mruIdVec.insert(io_co.mruIdVec.end(),
-                                     (*it).mruIdVec.begin(),
-                                     (*it).mruIdVec.end());
-
-                // Limited number of MRU ID fields allowed
-                if (io_co.mruIdVec.size() > MAX_MRU_ID_FIELDS)
-                {
-                    io_co.mruIdVec.resize(MAX_MRU_ID_FIELDS);
-                }
-
+                // New priority is higher, keep it.
                 // Erase the old callout entry
                 it = iv_coVec.erase(it);
                 break;
-            }
-
-            // New priority is <= old, keep the original but add the
-            // new mru priority and id data to the old entry
-            (*it).mruPriVec.insert((*it).mruPriVec.end(),
-                                   io_co.mruPriVec.begin(),
-                                   io_co.mruPriVec.end());
-            (*it).mruIdVec.insert((*it).mruIdVec.end(),
-                                  io_co.mruIdVec.begin(),
-                                  io_co.mruIdVec.end());
-
-            // Limited number of MRU ID fields allowed
-            if ((*it).mruIdVec.size() > MAX_MRU_ID_FIELDS)
-            {
-                (*it).mruIdVec.resize(MAX_MRU_ID_FIELDS);
             }
 
             // New entry is a duplicate, don't add the new callout to the vector
@@ -398,15 +368,8 @@ void ErrlSrc::flattenFruCallouts(pelSRCSection_t* i_psrc)
     const uint8_t FRU_CALLOUT_TYPE_FLAG = 0x20;
     // PEL spec 4.2.2.2 - Mask for FRUID substructure included
     const uint8_t FRU_CALLOUT_FRUID_FLAG = 0x8;
-    // PEL spec 4.2.2.2 - Mask for MRUID substructure included
-    const uint8_t FRU_CALLOUT_MRUID_FLAG = 0x4;
     // PEL spec 4.2.2.2.2 - Substructure type = 'ID' for FRUID
     const uint16_t FRU_SUBSTRUCT_TYPE_FRUID = 0x4944;
-    // PEL spec 4.2.2.2.2 - Substructure type = 'MR' for MRUID
-    const uint16_t FRU_SUBSTRUCT_TYPE_MRUID = 0x4D52;
-    // PEL spec 4.2.2.2.3 - FRUID substructure flags mask
-    //    PN = bit4, CCIN = bit5, SN = bit7
-    const uint8_t FRU_SUBSTRUCT_FLAGS = 0x0D;
 
     // Flatten FRU callouts
     uint8_t* l_tmpsrcptr = nullptr;
@@ -435,17 +398,15 @@ void ErrlSrc::flattenFruCallouts(pelSRCSection_t* i_psrc)
     for (const auto& entry : iv_coVec)
     {
         // Pre calculate sizes
-        // MRU ID substructure length
-        size_t l_mrusslen = sizeof(pelMRUIDSubstruct_t)
-                          + (sizeof(mruidfield)
-                          * entry.mruIdVec.size());
-        // FRU ID substructure length
-        size_t l_frusslen = sizeof(pelFRUIDSubstruct_t);
+
+        // FRU ID substructure length is variable depending on callout type.
+        // Part Number, Serial Number, and CCIN are optional fields.
+        size_t l_frusslen = fruIdSubstructSize(entry);
+
         // Total FRU callout length
         size_t l_frucolen = sizeof(pelFRUCalloutHeader_t)
                           + entry.locCodeLen
-                          + l_frusslen
-                          + l_mrusslen;
+                          + l_frusslen;
 
         // Creaate a temp fru callout blob
         uint8_t l_tmpfruco[l_frucolen] = {};
@@ -454,12 +415,11 @@ void ErrlSrc::flattenFruCallouts(pelSRCSection_t* i_psrc)
         uint8_t* l_tmpfruptr = l_tmpfruco;
 
         // Fru Callout header
-        // Always included the FRU ID and MRU ID  sections
+        // Always included the FRU ID.
         pelFRUCalloutHeader_t l_frucoheader;
         l_frucoheader.fclen = l_frucolen;
         l_frucoheader.fcflags = FRU_CALLOUT_TYPE_FLAG;
         l_frucoheader.fcflags |= FRU_CALLOUT_FRUID_FLAG;
-        l_frucoheader.fcflags |= FRU_CALLOUT_MRUID_FLAG;
         l_frucoheader.fcpri = hwasPriToFruPri(entry.priority);
         l_frucoheader.fclclen = entry.locCodeLen;
 
@@ -479,58 +439,35 @@ void ErrlSrc::flattenFruCallouts(pelSRCSection_t* i_psrc)
         // FRU ID substructure
         pelFRUIDSubstruct_t l_fruss;
         l_fruss.frusshead.fsstype = FRU_SUBSTRUCT_TYPE_FRUID; // type 'ID'
-        l_fruss.frusshead.fsslen = l_frusslen; // 28
-        l_fruss.frusshead.fssflags = entry.fruCompType << 4; // bits 0-3
-        l_fruss.frusshead.fssflags |= FRU_SUBSTRUCT_FLAGS; // bits 4-7
+        l_fruss.frusshead.fsslen = l_frusslen; // variable, several optional fields
+        l_fruss.frusshead.fssflags = entry.fruCompType;
+
         // Flat PN/CCIN/SN are a fixed size, regardless of source string size
         // Source string is already truncated and null terminated if required
-        strncpy(l_fruss.fruidpnString,
-                entry.partNumber,
-                sizeof(l_fruss.fruidpnString));
-        strncpy(l_fruss.fruidccinString,
-                entry.ccin,
-                sizeof(l_fruss.fruidccinString));
-        strncpy(l_fruss.fruidsnString,
-                entry.serialNumber,
-                sizeof(l_fruss.fruidsnString));
+        if (entry.fruCompType & FAILING_COMP_TYPE_FRU_PN)
+        {
+            strncpy(l_fruss.fruidpnString,
+                    entry.partNumber,
+                    sizeof(l_fruss.fruidpnString));
+        }
+        if (entry.fruCompType & FAILING_COMP_TYPE_FRU_CCIN)
+        {
+            strncpy(l_fruss.fruidccinString,
+                    entry.ccin,
+                    sizeof(l_fruss.fruidccinString));
+        }
+        if (entry.fruCompType & FAILING_COMP_TYPE_FRU_SN)
+        {
+            strncpy(l_fruss.fruidsnString,
+                    entry.serialNumber,
+                    sizeof(l_fruss.fruidsnString));
+        }
 
         // Copy the data and shift the fru data ptr
         memcpy(l_tmpfruptr,
                &l_fruss,
-               sizeof(pelFRUIDSubstruct_t));
-        l_tmpfruptr += sizeof(pelFRUIDSubstruct_t);
-
-        // MRU ID substructure header
-        pelMRUIDSubstruct_t l_mruss;
-        l_mruss.frusshead.fsstype = FRU_SUBSTRUCT_TYPE_MRUID; // 'MR'
-        l_mruss.frusshead.fsslen = l_mrusslen;
-        // Flag bits 0-3 reserved, bits 4-7 number of mru id entries
-        l_mruss.frusshead.fssflags = entry.mruIdVec.size();
-        l_mruss.mrussreserved = 0x0;
-
-        // Copy the data and shift the fru data ptr
-        memcpy(l_tmpfruptr,
-               &l_mruss,
-               sizeof(pelMRUIDSubstruct_t));
-        l_tmpfruptr += sizeof(pelMRUIDSubstruct_t);
-
-        // Loop thru all the mru id field entries
-        for (uint32_t mruidx = 0;
-             mruidx < entry.mruIdVec.size();
-             mruidx++)
-        {
-            pelMRUIDField_t l_mrufield;
-            l_mrufield.mrufieldreserved = 0x0;
-            l_mrufield.mrureppri =
-                hwasPriToFruPri(entry.mruPriVec[mruidx]);
-            l_mrufield.mruid = entry.mruIdVec[mruidx];
-
-            // Copy the data and shift the fru data ptr
-            memcpy(l_tmpfruptr,
-                   &l_mrufield,
-                   sizeof(pelMRUIDField_t));
-            l_tmpfruptr += sizeof(pelMRUIDField_t);
-        }
+               l_frusslen);
+        l_tmpfruptr += l_frusslen;
 
         // Copy the flat fru callout into the o_buffer at the
         // src data entry location and shift the src data ptr

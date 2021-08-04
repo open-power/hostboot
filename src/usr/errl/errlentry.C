@@ -1200,7 +1200,6 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
 void ErrlEntry::collectCalloutDataForBMC(TARGETING::Target* const i_node)
 {
     using namespace TARGETING;
-    const uint8_t FRU_COMPONENT_TYPE_NORMAL_HW = 0x01;
 
     for(size_t i = 0; i < iv_SectionVector.size(); i++)
     {
@@ -1216,8 +1215,10 @@ void ErrlEntry::collectCalloutDataForBMC(TARGETING::Target* const i_node)
             switch(l_ud->type)
             {
                 case(HWAS::PROCEDURE_CALLOUT):
-                    //@TODO RTC-268840: Handle Procedure callouts
-                    // FRU_COMPONENT_TYPE_CODE 0x2
+                    addFruCalloutDataToSrc(nullptr, // No target associated with this callout.
+                                           l_ud->priority,
+                                           FAILING_COMP_TYPE_MAINT,
+                                           l_ud->procedure);
                     break;
                 case(HWAS::HW_CALLOUT):
                 {
@@ -1235,7 +1236,7 @@ void ErrlEntry::collectCalloutDataForBMC(TARGETING::Target* const i_node)
                         // Add a FRU callout for this target to the Primary SRC
                         addFruCalloutDataToSrc(l_target,
                                                l_ud->priority,
-                                               FRU_COMPONENT_TYPE_NORMAL_HW);
+                                               FAILING_COMP_TYPE_NORMAL_HW);
                     }
                     else
                     {
@@ -1254,7 +1255,7 @@ void ErrlEntry::collectCalloutDataForBMC(TARGETING::Target* const i_node)
                     // Hostboot doesn't have a target for the backplane, so callout the node.
                     addFruCalloutDataToSrc(i_node,
                                            l_ud->priority,
-                                           FRU_COMPONENT_TYPE_NORMAL_HW);
+                                           FAILING_COMP_TYPE_NORMAL_HW);
                     break;
                 }
                 case(HWAS::PART_CALLOUT):
@@ -1278,12 +1279,10 @@ void ErrlEntry::collectCalloutDataForBMC(TARGETING::Target* const i_node)
                         {
                             if (!l_err)
                             {
-                                // FRU callout of the processor, the MRU should be the SEEPROM so pass in its MRU
-                                //@TODO RTC-268840: Pass in MRU, waiting to see if MRW will generate or if hostboot
-                                //                  needs to create it.
+                                // FRU callout of the processor.
                                 addFruCalloutDataToSrc(l_target,
                                                        l_ud->priority,
-                                                       FRU_COMPONENT_TYPE_NORMAL_HW);
+                                                       FAILING_COMP_TYPE_NORMAL_HW);
                             }
                             else
                             {
@@ -1297,12 +1296,10 @@ void ErrlEntry::collectCalloutDataForBMC(TARGETING::Target* const i_node)
                             if (!l_err)
                             {
                                 // The FRU will be the associated target that contains the EEPROM being called out.
-                                // PROC, DIMM, etc. However, the MRU will be for the EEPROM so pass in its MRU
-                                //@TODO RTC-268840: Pass in MRU, waiting to see if MRW will generate or if hostboot
-                                //                  needs to create it.
+                                // PROC, DIMM, etc.
                                 addFruCalloutDataToSrc(l_target,
                                                        l_ud->priority,
-                                                       FRU_COMPONENT_TYPE_NORMAL_HW);
+                                                       FAILING_COMP_TYPE_NORMAL_HW);
                             }
                             else
                             {
@@ -1335,7 +1332,7 @@ void ErrlEntry::collectCalloutDataForBMC(TARGETING::Target* const i_node)
                             // backplane. Hostboot doesn't have a target for the backplane, so callout the node.
                             addFruCalloutDataToSrc(i_node,
                                                    l_ud->priority,
-                                                   FRU_COMPONENT_TYPE_NORMAL_HW);
+                                                   FAILING_COMP_TYPE_NORMAL_HW);
                             break;
                         }
                         case(HWAS::NO_PART_TYPE):
@@ -2905,10 +2902,10 @@ void ErrlEntry::addUDSection( ErrlUD* i_section)
 }
 
 #ifdef CONFIG_BUILD_FULL_PEL
-void ErrlEntry::addFruCalloutDataToSrc(TARGETING::Target * const i_target,
-                                       callOutPriority     const i_priority,
-                                       uint8_t             const i_compType,
-                                       TARGETING::ATTR_MRU_ID_type    const i_mru_id)
+void ErrlEntry::addFruCalloutDataToSrc(TARGETING::Target *            const i_target,
+                                       callOutPriority                const i_priority,
+                                       fruIdentitySubstructFlags      const i_compType,
+                                       epubProcedureID                const i_procedure_id)
 {
     using namespace TARGETING;
 
@@ -2918,103 +2915,159 @@ void ErrlEntry::addFruCalloutDataToSrc(TARGETING::Target * const i_target,
     // Priority
     l_fruco.priority = i_priority;
 
-    // The full location code is composed of the CHASSIS_LOCATION_CODE (C) concatenated with the
-    // STATIC_ABS_LOCATION_CODE (S) separated by a hyphen. Ex. U78D8.ND0.FGD002D-P0-C16
-    //                                                         CCCCCCCCCCCCCCCCC SSSSSS
-    std::vector<char> full_location_code;
-
+    // Depending on the FRU component type passed in there may not be a target associated with the callout.
+    switch(i_compType)
     {
-        Target* const sys = UTIL::assertGetToplevelTarget();
-
-        ATTR_CHASSIS_LOCATION_CODE_type chassis_code { };
-
-        // ATTR_CHASSIS_LOCATION_CODE is a null terminated string and the max number of chars is defined by
-        // ATTR_CHASSIS_LOCATION_CODE_max_chars. The maximum size for the location code according to the PEL
-        // spec is PEL_LOC_CODE_SIZE which is also a null terminated string. So, ATTR_CHASSIS_LOCATION_CODE_max_chars
-        // must be less than PEL_LOC_CODE_SIZE to account for the null terminator.
-        static_assert(ATTR_CHASSIS_LOCATION_CODE_max_chars < PEL_LOC_CODE_SIZE,
-                     "ATTR_CHASSIS_LOCATION_CODE is too large to fit inside FRU callout location code section.");
-
-        sys->tryGetAttr<ATTR_CHASSIS_LOCATION_CODE>(chassis_code);
-
-        full_location_code.insert(end(full_location_code), chassis_code, chassis_code + strlen(chassis_code));
-
-    }
-
-    // Add the seperator
-    full_location_code.push_back('-');
-
+    case(FAILING_COMP_TYPE_NORMAL_HW):
     {
-        ATTR_STATIC_ABS_LOCATION_CODE_type static_abs_location_code { };
+        // The full location code is composed of the CHASSIS_LOCATION_CODE (C) concatenated with the
+        // STATIC_ABS_LOCATION_CODE (S) separated by a hyphen. Ex. U78D8.ND0.FGD002D-P0-C16
+        //                                                         CCCCCCCCCCCCCCCCC SSSSSS
+        std::vector<char> full_location_code;
 
-        // ATTR_STATIC_ABS_LOCATION_CODE is a null terminated string and the max number of chars is defined by
-        // ATTR_STATIC_ABS_LOCATION_CODE_max_chars. The maximum size for the location code according to the PEL
-        // spec is PEL_LOC_CODE_SIZE which is also a null terminated string. So, ATTR_STATIC_ABS_LOCATION_CODE_max_chars
-        // must be less than PEL_LOC_CODE_SIZE to account for the null terminator.
-        static_assert(ATTR_STATIC_ABS_LOCATION_CODE_max_chars < PEL_LOC_CODE_SIZE,
-                     "ATTR_STATIC_ABS_LOCATION_CODE is too large to fit inside FRU callout location code section.");
+        {
+            Target* const sys = UTIL::assertGetToplevelTarget();
 
-        UTIL::tryGetAttributeInHierarchy<ATTR_STATIC_ABS_LOCATION_CODE>(i_target, static_abs_location_code);
+            ATTR_CHASSIS_LOCATION_CODE_type chassis_code { };
 
-        full_location_code.insert(end(full_location_code),
-                                  static_abs_location_code,
-                                  static_abs_location_code + strlen(static_abs_location_code));
+            // ATTR_CHASSIS_LOCATION_CODE is a null terminated string and the max number of chars is defined by
+            // ATTR_CHASSIS_LOCATION_CODE_max_chars. The maximum size for the location code according to the PEL
+            // spec is PEL_LOC_CODE_SIZE which is also a null terminated string. So,
+            // ATTR_CHASSIS_LOCATION_CODE_max_chars must be less than PEL_LOC_CODE_SIZE to account for the null
+            // terminator.
+            static_assert(ATTR_CHASSIS_LOCATION_CODE_max_chars < PEL_LOC_CODE_SIZE,
+                         "ATTR_CHASSIS_LOCATION_CODE is too large to fit inside FRU callout location code section.");
+
+            sys->tryGetAttr<ATTR_CHASSIS_LOCATION_CODE>(chassis_code);
+
+            full_location_code.insert(end(full_location_code), chassis_code, chassis_code + strlen(chassis_code));
+
+        }
+
+        // Add the seperator
+        full_location_code.push_back('-');
+
+        {
+            ATTR_STATIC_ABS_LOCATION_CODE_type static_abs_location_code { };
+
+            // ATTR_STATIC_ABS_LOCATION_CODE is a null terminated string and the max number of chars is defined by
+            // ATTR_STATIC_ABS_LOCATION_CODE_max_chars. The maximum size for the location code according to the PEL
+            // spec is PEL_LOC_CODE_SIZE which is also a null terminated string. So,
+            // ATTR_STATIC_ABS_LOCATION_CODE_max_chars must be less than PEL_LOC_CODE_SIZE to account for the null
+            // terminator.
+            static_assert(ATTR_STATIC_ABS_LOCATION_CODE_max_chars < PEL_LOC_CODE_SIZE,
+                         "ATTR_STATIC_ABS_LOCATION_CODE is too large to fit inside FRU callout location code section.");
+
+            UTIL::tryGetAttributeInHierarchy<ATTR_STATIC_ABS_LOCATION_CODE>(i_target, static_abs_location_code);
+
+            full_location_code.insert(end(full_location_code),
+                                      static_abs_location_code,
+                                      static_abs_location_code + strlen(static_abs_location_code));
+        }
+
+        // Add the null terminator
+        full_location_code.push_back('\0');
+
+        // By setting the location code, part number, serial number, and CCIN using set_errl_string it ensures that the
+        // size constraints given by the PEL spec are respected. That means that if any of those strings go over the
+        // size then the remaining right half of characters are truncated and will not appear in the error log.
+        set_errl_string(l_fruco.locationCode, full_location_code.data());
+
+        // Spec requires the location code and size to be a multiple of 4 bytes (padded with NULLs). The location code
+        // member was zero intialized so all that's necessary to follow spec is to allign the size by 4.
+        l_fruco.locCodeLen = ALIGN_4(full_location_code.size());
+
+        // Part Number
+        ATTR_PART_NUMBER_type l_partnum { };
+        UTIL::tryGetAttributeInHierarchy<ATTR_PART_NUMBER>(i_target, l_partnum);
+        // Set part number truncating as necessary.
+        set_errl_string(l_fruco.partNumber,
+                        reinterpret_cast<const char*>(l_partnum));
+
+        // CCIN
+        ATTR_PCIE_NVME_CCIN_type l_ccin { };
+        UTIL::tryGetAttributeInHierarchy<ATTR_PCIE_NVME_CCIN>(i_target, l_ccin);
+        // Set CCIN truncating as necessary.
+        set_errl_string(l_fruco.ccin,
+                        reinterpret_cast<const char*>(&l_ccin),
+                        false);
+
+        // Serial Number
+        ATTR_SERIAL_NUMBER_type l_serialnumber { };
+        UTIL::tryGetAttributeInHierarchy<ATTR_SERIAL_NUMBER>(i_target, l_serialnumber);
+        // Set serial number truncating as necessary.
+        set_errl_string(l_fruco.serialNumber,
+                        reinterpret_cast<const char*>(l_serialnumber),
+                        false);
+
+        // Type
+        l_fruco.fruCompType = static_cast<uint8_t>(i_compType)
+                            | static_cast<uint8_t>(FAILING_COMP_TYPE_FRU_PN)
+                            | static_cast<uint8_t>(FAILING_COMP_TYPE_FRU_CCIN)
+                            | static_cast<uint8_t>(FAILING_COMP_TYPE_FRU_SN);
+
+        // Add fruco to the src vector
+        iv_Src.addFruCallout(l_fruco);
+        break;
     }
-
-    // Add the null terminator
-    full_location_code.push_back('\0');
-
-    // By setting the location code, part number, serial number, and CCIN using set_errl_string it ensures that the size
-    // constraints given by the PEL spec are respected. That means that if any of those strings go over the size then
-    // the remaining right half of characters are truncated and will not appear in the error log.
-    set_errl_string(l_fruco.locationCode, full_location_code.data());
-
-    // Spec requires the location code and size to be a multiple of 4 bytes (padded with NULLs). The location code
-    // member was zero intialized so all that's necessary to follow spec is to allign the size by 4.
-    l_fruco.locCodeLen = ALIGN_4(full_location_code.size());
-
-    // Type
-    l_fruco.fruCompType = i_compType;
-
-    // Part Number
-    ATTR_PART_NUMBER_type l_partnum { };
-    UTIL::tryGetAttributeInHierarchy<ATTR_PART_NUMBER>(i_target, l_partnum);
-    // Set part number truncating as necessary.
-    set_errl_string(l_fruco.partNumber,
-                    reinterpret_cast<const char*>(l_partnum));
-
-    // CCIN
-    ATTR_PCIE_NVME_CCIN_type l_ccin { };
-    UTIL::tryGetAttributeInHierarchy<ATTR_PCIE_NVME_CCIN>(i_target, l_ccin);
-    // Set CCIN truncating as necessary.
-    set_errl_string(l_fruco.ccin,
-                    reinterpret_cast<const char*>(&l_ccin),
-                    false);
-
-    // Serial Number
-    ATTR_SERIAL_NUMBER_type l_serialnumber { };
-    UTIL::tryGetAttributeInHierarchy<ATTR_SERIAL_NUMBER>(i_target, l_serialnumber);
-    // Set serial number truncating as necessary.
-    set_errl_string(l_fruco.serialNumber,
-                    reinterpret_cast<const char*>(l_serialnumber),
-                    false);
-
-    // MRU ID
-    ATTR_MRU_ID_type l_mruid { };
-    // Use the given MRU ID if one was given, otherwise look it up.
-    if (i_mru_id != UINT32_MAX)
+    case(FAILING_COMP_TYPE_MAINT):
     {
-        l_mruid = i_mru_id;
-    }
-    else
-    {
-        UTIL::tryGetAttributeInHierarchy<ATTR_MRU_ID>(i_target, l_mruid);
-    }
-    l_fruco.mruPriVec.push_back(i_priority); // MRU gets same priority as callout
-    l_fruco.mruIdVec.push_back(l_mruid);
+        // Type
+        l_fruco.fruCompType = static_cast<uint8_t>(i_compType)
+                            | static_cast<uint8_t>(FAILING_COMP_TYPE_FRU_PRC);
 
-    // Add fruco to the src vector
-    iv_Src.addFruCallout(l_fruco);
+        // No location code supplied for this callout.
+        l_fruco.locCodeLen = 0;
+
+        // Get the corresponding HBxxxxx isolation procedure code from the map of epubProcedureIDs.
+        auto procedureIdMapIterator = std::lower_bound(EPUB_TO_ISOLATION_PROCEDURE.cbegin(),
+                                                       EPUB_TO_ISOLATION_PROCEDURE.cend(),
+                                                       i_procedure_id,
+                                                       [](const epubProcedureToIsolationProcedure_t& procedureEntry,
+                                                          const epubProcedureID id)
+                                                       {
+                                                          return procedureEntry.epub_procedure_id < id;
+                                                       });
+        // lower_bound can return a match greater than the desired procedure id we're looking for, double check that
+        // didn't happen.
+        if ((procedureIdMapIterator != EPUB_TO_ISOLATION_PROCEDURE.cend())
+                && (procedureIdMapIterator->epub_procedure_id == i_procedure_id))
+        {
+            // Set the part number for this fru callout to be the HBxxxxx code. This is a shared field for part numbers
+            // and procedure ids.
+            set_errl_string(l_fruco.partNumber,
+                            procedureIdMapIterator->isolationProcedure);
+
+            // Add fruco to the src vector
+            iv_Src.addFruCallout(l_fruco);
+        }
+        else
+        {
+            // This shouldn't happen as long as the epub procedure id map is sorted, and remains up-to-date with the
+            // epubProcedureID enum in hwasCallout.H. If for an unforeseen reason this path is hit, emit a trace and
+            // move on.
+            TRACFCOMP(g_trac_errl, ERR_MRK"addFruCalloutDataToSrc(): Couldn't find epubProcedureId 0x%X in "
+                      "EPUB_TO_ISOLATION_PROCEDURE map. Unable to add callout to SRC",
+                      i_procedure_id);
+        }
+
+
+        break;
+    }
+    case(FAILING_COMP_TYPE_CODE):
+    case(FAILING_COMP_TYPE_CNFG_ERR):
+    case(FAILING_COMP_TYPE_EXTERN_FRU):
+    case(FAILING_COMP_TYPE_EXTERN_CODE):
+    case(FAILING_COMP_TYPE_TOOL_FRU):
+    case(FAILING_COMP_TYPE_SYMBOLIC_FRU):
+    case(FAILING_COMP_TYPE_SYMBOLIC_FRU_LOC):
+    case(FAILING_COMP_TYPE_RESERVED_MIN_VAL):
+    case(FAILING_COMP_TYPE_RESERVED_MAX_VAL):
+    {
+        // Unused
+        break;
+    }
+    } // switch(i_compType)
 }
 #endif
 

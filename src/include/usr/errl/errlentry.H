@@ -1027,15 +1027,14 @@ private:
      * @param[in]   i_target    The target of the callout
      * @param[in]   i_priority  The priority of the callout
      * @param[in]   i_compType  The component type of the callout
-     * @param[in]   i_mru_id    The MRU ID to use if supplied.
-     *                          Default 0xFFFFFFFF and this function looks it up.
+     * @param[in]   i_procedure_id The procedure id to use if needed. Default EPUB_PRC_NONE
      */
     static_assert(sizeof(TARGETING::ATTR_MRU_ID_type) == sizeof(uint32_t),
                   "Default parameter size changed, needs default invalid value updated.");
-    void addFruCalloutDataToSrc(TARGETING::Target* i_target,
-                                HWAS::callOutPriority i_priority,
-                                uint8_t i_compType,
-                                TARGETING::ATTR_MRU_ID_type i_mru_id = UINT32_MAX);
+    void addFruCalloutDataToSrc(TARGETING::Target*          i_target,
+                                HWAS::callOutPriority       i_priority,
+                                fruIdentitySubstructFlags   i_compType,
+                                HWAS::epubProcedureID       i_procedure_id = HWAS::EPUB_PRC_NONE);
 #endif
 
     /**
