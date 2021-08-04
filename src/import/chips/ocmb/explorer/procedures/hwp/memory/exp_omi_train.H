@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,11 +43,18 @@ extern "C"
 {
 
     ///
-    /// @brief Trains the OCMB link
+    /// @brief Trains the OCMB link -- Currently a NOP
     /// @param[in] i_target the OCMB target to operate on
     /// @return FAPI2_RC_SUCCESS iff ok
     ///
     fapi2::ReturnCode exp_omi_train(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+
+    ///
+    /// @brief Trains the OCMB link
+    /// @param[in] i_target the OCMB target to operate on
+    /// @return FAPI2_RC_SUCCESS iff ok
+    ///
+    fapi2::ReturnCode exp_omi_train_internal(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
 }
 
 #endif

@@ -508,7 +508,7 @@ fapi_try_exit:
 /// @param[in] i_ocmb OCMB target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
-fapi2::ReturnCode p10_omi_train_prbs_helper(
+fapi2::ReturnCode p10_omi_train_prbs_helper1(
     const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_omi,
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb)
 {
@@ -542,6 +542,26 @@ fapi2::ReturnCode p10_omi_train_prbs_helper(
         // 2 second delay for gemini
         FAPI_TRY(fapi2::delay(2 * mss::common_timings::DELAY_1S, mss::common_timings::DELAY_1MS));
     }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief P10 OMI train helper function, to perform PRBS workarounds if needed
+/// @param[in] i_omi OMI target
+/// @param[in] i_ocmb OCMB target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode p10_omi_train_prbs_helper2(
+    const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_omi,
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb)
+{
+    uint8_t l_dl_x4_backoff_en = 0;
+
+    // Get BACKOFF_ENABLE CHIP_EC attribute
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_OMI_DL_X4_BACKOFF_ENABLE, i_ocmb, l_dl_x4_backoff_en),
+             "Error getting ATTR_CHIP_EC_FEATURE_OMI_DL_X4_BACKOFF_ENABLE");
 
     // Enable auto training
     FAPI_TRY(mss::omi::setup_mc_config0(i_omi, mss::omi::train_mode::ENABLE_AUTO_TRAINING, l_dl_x4_backoff_en));
