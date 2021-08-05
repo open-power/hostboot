@@ -486,6 +486,8 @@ fapi2::ReturnCode p10_fabric_iovalid_link_validate(
     fapi2::Target<fapi2::TARGET_TYPE_PAUC> l_rem_odd_pauc_target;
     fapi2::Target<fapi2::TARGET_TYPE_IOHS> l_rem_evn_endp_target;
     fapi2::Target<fapi2::TARGET_TYPE_IOHS> l_rem_odd_endp_target;
+    bool l_rem_odd_targets_valid = false; // indicates whether l_rem_odd_pauc_target and l_rem_odd_endp_target are valid
+    bool l_rem_evn_targets_valid = false; // indicates whether l_rem_evn_pauc_target and l_rem_evn_endp_target are valid
     fapi2::Target<fapi2::TARGET_TYPE_IOLINK> l_loc_evn_iolink_target;
     fapi2::Target<fapi2::TARGET_TYPE_IOLINK> l_loc_odd_iolink_target;
     fapi2::Target<fapi2::TARGET_TYPE_IOLINK> l_rem_evn_iolink_target;
@@ -552,12 +554,14 @@ fapi2::ReturnCode p10_fabric_iovalid_link_validate(
             l_rem_evn_iolink_target = l_rem_iolink_target;
             l_rem_evn_endp_target = l_rem_evn_iolink_target.getParent<fapi2::TARGET_TYPE_IOHS>();
             l_rem_evn_pauc_target = l_rem_evn_endp_target.getParent<fapi2::TARGET_TYPE_PAUC>();
+            l_rem_evn_targets_valid = true;
         }
         else
         {
             l_rem_odd_iolink_target = l_rem_iolink_target;
             l_rem_odd_endp_target = l_rem_odd_iolink_target.getParent<fapi2::TARGET_TYPE_IOHS>();
             l_rem_odd_pauc_target = l_rem_odd_endp_target.getParent<fapi2::TARGET_TYPE_PAUC>();
+            l_rem_odd_targets_valid = true;
         }
     }
 
@@ -936,16 +940,32 @@ fapi_try_exit:
         (fapi2::current_err == (fapi2::ReturnCode) fapi2::RC_P10_FAB_IOVALID_DL_FULL_NOT_TRAINED_RETRAIN_HALF_ERR))
     {
         p10_fabric_iovalid_append_dl_ffdc(i_loc_endp_target, fapi2::current_err);
-        p10_fabric_iovalid_append_dl_ffdc(l_rem_evn_endp_target, fapi2::current_err);
-        p10_fabric_iovalid_append_dl_ffdc(l_rem_odd_endp_target, fapi2::current_err);
+
+        if (l_rem_evn_targets_valid)
+        {
+            p10_fabric_iovalid_append_dl_ffdc(l_rem_evn_endp_target, fapi2::current_err);
+        }
+
+        if (l_rem_odd_targets_valid)
+        {
+            p10_fabric_iovalid_append_dl_ffdc(l_rem_odd_endp_target, fapi2::current_err);
+        }
     }
     else if ((fapi2::current_err == (fapi2::ReturnCode) fapi2::RC_P10_FAB_IOVALID_TL_FULL_NOT_TRAINED_RETRAIN_NONE_ERR) ||
              (fapi2::current_err == (fapi2::ReturnCode) fapi2::RC_P10_FAB_IOVALID_TL_HALF_NOT_TRAINED_RETRAIN_NONE_ERR) ||
              (fapi2::current_err == (fapi2::ReturnCode) fapi2::RC_P10_FAB_IOVALID_TL_FULL_NOT_TRAINED_RETRAIN_HALF_ERR))
     {
         p10_fabric_iovalid_append_tl_ffdc(l_loc_pauc_target, fapi2::current_err);
-        p10_fabric_iovalid_append_tl_ffdc(l_rem_evn_pauc_target, fapi2::current_err);
-        p10_fabric_iovalid_append_tl_ffdc(l_rem_odd_pauc_target, fapi2::current_err);
+
+        if (l_rem_evn_targets_valid)
+        {
+            p10_fabric_iovalid_append_tl_ffdc(l_rem_evn_pauc_target, fapi2::current_err);
+        }
+
+        if (l_rem_odd_targets_valid)
+        {
+            p10_fabric_iovalid_append_tl_ffdc(l_rem_odd_pauc_target, fapi2::current_err);
+        }
     }
 
     FAPI_DBG("End");
