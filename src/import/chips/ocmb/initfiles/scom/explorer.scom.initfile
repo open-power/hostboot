@@ -252,18 +252,22 @@ ispy  MB_SIM.SRQ.MBA_TMR0Q_WWOP_DLY [when=S] {      # tccd_l
 ispy  MB_SIM.SRQ.MBA_TMR0Q_RWDM_DLY [when=S] {      # (RL+BL/2+turn_around)-WL
   spyv, expr;
   12,                                 (def_MEM_EFF_FREQ_EQ_2666==1);
-  14,                                 (def_MEM_EFF_FREQ_EQ_2933==1);
+  15,                                 (def_MEM_EFF_FREQ_EQ_2933==1);
   14,                                 (def_MEM_EFF_FREQ_EQ_3200==1);
 }
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_RWSMSR_DLY [when=S] {    # (RL+BL/2+turn_around)-WL
-  spyv;
-  MP.ATTR_MEM_EFF_DRAM_CL + 4 + def_BUS_TURNAROUND_TCK - MP.ATTR_MEM_DRAM_CWL;
+  spyv, expr;
+  MP.ATTR_MEM_EFF_DRAM_CL + 4 + def_BUS_TURNAROUND_TCK - MP.ATTR_MEM_DRAM_CWL, (def_MEM_EFF_FREQ_EQ_2666==1);
+  MP.ATTR_MEM_EFF_DRAM_CL + 5 + def_BUS_TURNAROUND_TCK - MP.ATTR_MEM_DRAM_CWL, (def_MEM_EFF_FREQ_EQ_2933==1);
+  MP.ATTR_MEM_EFF_DRAM_CL + 4 + def_BUS_TURNAROUND_TCK - MP.ATTR_MEM_DRAM_CWL, (def_MEM_EFF_FREQ_EQ_3200==1);
 }
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_RWSMDR_DLY [when=S] {    # (RL+BL/2+turn_around)-WL
-  spyv;
-  MP.ATTR_MEM_EFF_DRAM_CL + 4 + def_BUS_TURNAROUND_TCK - MP.ATTR_MEM_DRAM_CWL;
+  spyv, expr;
+  MP.ATTR_MEM_EFF_DRAM_CL + 4 + def_BUS_TURNAROUND_TCK - MP.ATTR_MEM_DRAM_CWL, (def_MEM_EFF_FREQ_EQ_2666==1);
+  MP.ATTR_MEM_EFF_DRAM_CL + 5 + def_BUS_TURNAROUND_TCK - MP.ATTR_MEM_DRAM_CWL, (def_MEM_EFF_FREQ_EQ_2933==1);
+  MP.ATTR_MEM_EFF_DRAM_CL + 4 + def_BUS_TURNAROUND_TCK - MP.ATTR_MEM_DRAM_CWL, (def_MEM_EFF_FREQ_EQ_3200==1);
 }
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_WRDM_DLY [when=S] {      # (WL+BL/2+turn_around)-RL

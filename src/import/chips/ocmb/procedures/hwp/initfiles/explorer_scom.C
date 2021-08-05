@@ -43,6 +43,7 @@ constexpr uint64_t literal_4 = 4;
 constexpr uint64_t literal_2668 = 2668;
 constexpr uint64_t literal_12 = 12;
 constexpr uint64_t literal_2934 = 2934;
+constexpr uint64_t literal_15 = 15;
 constexpr uint64_t literal_266 = 266;
 constexpr uint64_t literal_1866 = 1866;
 constexpr uint64_t literal_6 = 6;
@@ -73,7 +74,6 @@ constexpr uint64_t literal_0x4 = 0x4;
 constexpr uint64_t literal_0x0100 = 0x0100;
 constexpr uint64_t literal_10 = 10;
 constexpr uint64_t literal_13 = 13;
-constexpr uint64_t literal_15 = 15;
 constexpr uint64_t literal_1024 = 1024;
 constexpr uint64_t literal_0b01011 = 0b01011;
 constexpr uint64_t literal_0b01100 = 0b01100;
@@ -372,17 +372,44 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
             }
             else if ((l_def_MEM_EFF_FREQ_EQ_2933 == literal_1))
             {
-                l_scom_buffer.insert<32, 5, 59, uint64_t>(literal_14 );
+                l_scom_buffer.insert<32, 5, 59, uint64_t>(literal_15 );
             }
             else if ((l_def_MEM_EFF_FREQ_EQ_3200 == literal_1))
             {
                 l_scom_buffer.insert<32, 5, 59, uint64_t>(literal_14 );
             }
 
-            l_scom_buffer.insert<37, 5, 59, uint64_t>((((l_TGT1_ATTR_MEM_EFF_DRAM_CL + literal_4) + l_def_BUS_TURNAROUND_TCK) -
-                    l_TGT1_ATTR_MEM_DRAM_CWL) );
-            l_scom_buffer.insert<42, 5, 59, uint64_t>((((l_TGT1_ATTR_MEM_EFF_DRAM_CL + literal_4) + l_def_BUS_TURNAROUND_TCK) -
-                    l_TGT1_ATTR_MEM_DRAM_CWL) );
+            if ((l_def_MEM_EFF_FREQ_EQ_2666 == literal_1))
+            {
+                l_scom_buffer.insert<37, 5, 59, uint64_t>((((l_TGT1_ATTR_MEM_EFF_DRAM_CL + literal_4) + l_def_BUS_TURNAROUND_TCK) -
+                        l_TGT1_ATTR_MEM_DRAM_CWL) );
+            }
+            else if ((l_def_MEM_EFF_FREQ_EQ_2933 == literal_1))
+            {
+                l_scom_buffer.insert<37, 5, 59, uint64_t>((((l_TGT1_ATTR_MEM_EFF_DRAM_CL + literal_5) + l_def_BUS_TURNAROUND_TCK) -
+                        l_TGT1_ATTR_MEM_DRAM_CWL) );
+            }
+            else if ((l_def_MEM_EFF_FREQ_EQ_3200 == literal_1))
+            {
+                l_scom_buffer.insert<37, 5, 59, uint64_t>((((l_TGT1_ATTR_MEM_EFF_DRAM_CL + literal_4) + l_def_BUS_TURNAROUND_TCK) -
+                        l_TGT1_ATTR_MEM_DRAM_CWL) );
+            }
+
+            if ((l_def_MEM_EFF_FREQ_EQ_2666 == literal_1))
+            {
+                l_scom_buffer.insert<42, 5, 59, uint64_t>((((l_TGT1_ATTR_MEM_EFF_DRAM_CL + literal_4) + l_def_BUS_TURNAROUND_TCK) -
+                        l_TGT1_ATTR_MEM_DRAM_CWL) );
+            }
+            else if ((l_def_MEM_EFF_FREQ_EQ_2933 == literal_1))
+            {
+                l_scom_buffer.insert<42, 5, 59, uint64_t>((((l_TGT1_ATTR_MEM_EFF_DRAM_CL + literal_5) + l_def_BUS_TURNAROUND_TCK) -
+                        l_TGT1_ATTR_MEM_DRAM_CWL) );
+            }
+            else if ((l_def_MEM_EFF_FREQ_EQ_3200 == literal_1))
+            {
+                l_scom_buffer.insert<42, 5, 59, uint64_t>((((l_TGT1_ATTR_MEM_EFF_DRAM_CL + literal_4) + l_def_BUS_TURNAROUND_TCK) -
+                        l_TGT1_ATTR_MEM_DRAM_CWL) );
+            }
 
             if ((l_def_MEM_EFF_FREQ_EQ_2666 == literal_1))
             {
