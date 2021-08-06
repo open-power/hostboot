@@ -1240,7 +1240,8 @@ void ErrlEntry::collectCalloutDataForBMC(TARGETING::Target* const i_node)
                     }
                     else
                     {
-                        TRACFCOMP(g_trac_errl, "ErrlEntry::collectCalloutDataForBMC() - Error retrieving target");
+                        TRACFCOMP(g_trac_errl, ERR_MRK
+                                  "ErrlEntry::collectCalloutDataForBMC() - HW_CALLOUT Error retrieving target");
                     }
                     break;
                 }
@@ -1286,8 +1287,9 @@ void ErrlEntry::collectCalloutDataForBMC(TARGETING::Target* const i_node)
                             }
                             else
                             {
-                                TRACFCOMP(g_trac_errl,
-                                          "ErrlEntry::collectCalloutDataForBMC() - Error retrieving target");
+                                TRACFCOMP(g_trac_errl, ERR_MRK
+                                          "ErrlEntry::collectCalloutDataForBMC() - "
+                                          "SBE_SEEPROM_PART_TYPE Error retrieving target");
                             }
                             break;
                         }
@@ -1303,24 +1305,35 @@ void ErrlEntry::collectCalloutDataForBMC(TARGETING::Target* const i_node)
                             }
                             else
                             {
-                                TRACFCOMP(g_trac_errl,
-                                          "ErrlEntry::collectCalloutDataForBMC() - Error retrieving target");
+                                TRACFCOMP(g_trac_errl, ERR_MRK
+                                          "ErrlEntry::collectCalloutDataForBMC() - "
+                                          "VPD_PART_TYPE Error retrieving target");
                             }
                             break;
                         }
                         case(HWAS::LPC_SLAVE_PART_TYPE):
                         {
-                            //@TODO RTC-268840: Handle
-                            break;
-                        }
-                        case(HWAS::GPIO_EXPANDER_PART_TYPE):
-                        {
-                            //@TODO RTC-268840: Handle
+                            // A callout of the LPC receiver is going to be for the BMC but the target supplied will be
+                            // the PROC which is the LPC controller. Find the BMC target and add a FRU callout for that.
+                            TARGETING::TargetHandleList bmc;
+                            getAllChips(bmc, TARGETING::TYPE_BMC, false);
+                            if (bmc.size() != 0)
+                            {
+                                addFruCalloutDataToSrc(bmc[0],
+                                                       l_ud->priority,
+                                                       FAILING_COMP_TYPE_NORMAL_HW);
+                            }
+                            else
+                            {
+                                TRACFCOMP(g_trac_errl, ERR_MRK
+                                          "ErrlEntry::collectCalloutDataForBMC() - "
+                                          "LPC_SLAVE_PART_TYPE Error retrieving BMC target");
+                            }
                             break;
                         }
                         case(HWAS::SPIVID_SLAVE_PART_TYPE):
                         {
-                            //@TODO RTC-268840: Handle
+                            //@TODO RTC-288617: Handle
                             break;
                         }
                         case(HWAS::TOD_CLOCK):
@@ -1342,9 +1355,10 @@ void ErrlEntry::collectCalloutDataForBMC(TARGETING::Target* const i_node)
                         case(HWAS::NV_CONTROLLER_PART_TYPE):
                         case(HWAS::BPM_PART_TYPE):
                         case(HWAS::SPI_DUMP_PART_TYPE):
+                        case(HWAS::GPIO_EXPANDER_PART_TYPE):
                         {
                             // Not supported, assert if Simics. So that they can be updated by error creators.
-                            TRACFCOMP(g_trac_errl, "ErrlEntry::collectCalloutDataForBMC(): "
+                            TRACFCOMP(g_trac_errl, ERR_MRK"ErrlEntry::collectCalloutDataForBMC(): "
                                       "Unsupported part type 0x%X for PART_CALLOUT",
                                       l_ud->partType);
                             if (Util::isSimicsRunning())
@@ -1365,7 +1379,7 @@ void ErrlEntry::collectCalloutDataForBMC(TARGETING::Target* const i_node)
                 case(HWAS::SENSOR_CALLOUT):
                 {
                     // Not supported, assert if Simics. So that they can be updated by error creators.
-                    TRACFCOMP(g_trac_errl, "ErrlEntry::collectCalloutDataForBMC(): Unsupported callout type");
+                    TRACFCOMP(g_trac_errl, ERR_MRK"ErrlEntry::collectCalloutDataForBMC(): Unsupported callout type");
                     if (Util::isSimicsRunning())
                     {
                         assert(false, "Sensor Callouts are not supported.");
