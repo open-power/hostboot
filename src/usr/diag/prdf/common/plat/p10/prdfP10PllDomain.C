@@ -249,11 +249,19 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
                 maskErrTypes[chip].set(PllErrTypes::RCS_UNLOCKDET_0);
 
                 // Set alternate ref clock mode on this chip.
-                SCAN_COMM_REGISTER_CLASS* reg = chip->getRegister("ROOT_CTRL3");
-                if (SUCCESS == reg->Read())
+                SCAN_COMM_REGISTER_CLASS* r3 = chip->getRegister("ROOT_CTRL3");
+                if (SUCCESS == r3->Read())
                 {
-                    reg->SetBit(3);
-                    reg->Write();
+                    r3->SetBit(3);
+                    r3->Write();
+                }
+
+                // Prevent failing over to the bad clock.
+                SCAN_COMM_REGISTER_CLASS* r5 = chip->getRegister("ROOT_CTRL5");
+                if (SUCCESS == r5->Read())
+                {
+                    r5->SetBit(5);
+                    r5->Write();
                 }
             }
 
@@ -294,11 +302,19 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
                 maskErrTypes[chip].set(PllErrTypes::RCS_UNLOCKDET_1);
 
                 // Set alternate ref clock mode on this chip.
-                SCAN_COMM_REGISTER_CLASS* reg = chip->getRegister("ROOT_CTRL3");
-                if (SUCCESS == reg->Read())
+                SCAN_COMM_REGISTER_CLASS* r3 = chip->getRegister("ROOT_CTRL3");
+                if (SUCCESS == r3->Read())
                 {
-                    reg->SetBit(7);
-                    reg->Write();
+                    r3->SetBit(7);
+                    r3->Write();
+                }
+
+                // Prevent failing over to the bad clock.
+                SCAN_COMM_REGISTER_CLASS* r5 = chip->getRegister("ROOT_CTRL5");
+                if (SUCCESS == r5->Read())
+                {
+                    r5->SetBit(5);
+                    r5->Write();
                 }
             }
 
