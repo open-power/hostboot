@@ -59,6 +59,32 @@
     <default>DISABLED</default>
     <platInit/>
   </attribute>
+
+  <attribute>
+    <id>ATTR_IOHS_MNFG_BAD_LANE_MAX</id>
+    <targetType>
+      TARGET_TYPE_PROC_CHIP
+    </targetType>
+    <description>
+       Specifies the number of errors (0 through 127) before marking a lane as bad for the iohs links
+    </description>
+    <valueType>uint8</valueType>
+    <default>46</default>
+    <platInit/>
+  </attribute>
+  
+  <attribute>
+    <id>ATTR_IOHS_MNFG_BAD_LANE_DURATION</id>
+    <targetType>
+      TARGET_TYPE_PROC_CHIP
+    </targetType>
+    <description>
+       Specifies time to reset bad lane counter for the iohs links
+    </description>
+    <valueType>uint8</valueType>
+    <default>15</default>
+    <platInit/>
+  </attribute>
   
   <attribute>
     <id>ATTR_VIO_SET_POINT_MV</id>

@@ -34,8 +34,9 @@ constexpr uint64_t literal_0xF = 0xF;
 constexpr uint64_t literal_0x0 = 0x0;
 constexpr uint64_t literal_1 = 1;
 constexpr uint64_t literal_0x001A = 0x001A;
+constexpr uint64_t literal_0x8 = 0x8;
+constexpr uint64_t literal_0b1111000 = 0b1111000;
 constexpr uint64_t literal_0x5 = 0x5;
-constexpr uint64_t literal_0b0001111 = 0b0001111;
 constexpr uint64_t literal_0b1111111 = 0b1111111;
 constexpr uint64_t literal_0b0111111 = 0b0111111;
 constexpr uint64_t literal_0b111 = 0b111;
@@ -105,8 +106,8 @@ fapi2::ReturnCode p10_fbc_dlp_scom(const fapi2::Target<fapi2::TARGET_TYPE_IOHS>&
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x1801100full, l_scom_buffer ));
 
-            l_scom_buffer.insert<4, 4, 60, uint64_t>(literal_0x5 );
-            l_scom_buffer.insert<9, 7, 57, uint64_t>(literal_0b0001111 );
+            l_scom_buffer.insert<4, 4, 60, uint64_t>(literal_0x8 );
+            l_scom_buffer.insert<9, 7, 57, uint64_t>(literal_0b1111000 );
             constexpr auto l_DLP0_DLP_CONFIG_FAST_ASYNC_CROSS_ON = 0x1;
             l_scom_buffer.insert<59, 1, 63, uint64_t>(l_DLP0_DLP_CONFIG_FAST_ASYNC_CROSS_ON );
             constexpr auto l_DLP0_DLP_CONFIG_LINK_FAIL_CRC_ERROR_ON = 0x1;

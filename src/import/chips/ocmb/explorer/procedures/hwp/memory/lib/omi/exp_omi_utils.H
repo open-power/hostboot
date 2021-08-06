@@ -142,6 +142,7 @@ inline void setup_edpl_time_window( fapi2::buffer<uint64_t>& io_data,
 {
     if (i_enable && i_mnfg_screen_test)
     {
+        FAPI_DBG("Setting EXPLR_DLX_DL0_CONFIG1_CFG_EDPL_TIME to 0x%02X for MFG test", i_mnfg_edpl_time);
         io_data.insertFromRight<EXPLR_DLX_DL0_CONFIG1_CFG_EDPL_TIME,
                                 EXPLR_DLX_DL0_CONFIG1_CFG_EDPL_TIME_LEN>(i_mnfg_edpl_time);
     }
@@ -161,6 +162,7 @@ inline void setup_edpl_threshold( fapi2::buffer<uint64_t>& io_data,
 {
     if (i_enable && i_mnfg_screen_test)
     {
+        FAPI_DBG("Setting EXPLR_DLX_DL0_CONFIG1_CFG_EDPL_THRESHOLD to 0x%02X for MFG test", i_mnfg_edpl_threshold);
         io_data.insertFromRight<EXPLR_DLX_DL0_CONFIG1_CFG_EDPL_THRESHOLD,
                                 EXPLR_DLX_DL0_CONFIG1_CFG_EDPL_THRESHOLD_LEN>(i_mnfg_edpl_threshold);
     }

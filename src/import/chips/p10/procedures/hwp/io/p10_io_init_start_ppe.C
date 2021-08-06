@@ -43,6 +43,7 @@ class p10_io_init : public p10_io_ppe_cache_proc
 {
     public:
         fapi2::ReturnCode lane_reversal(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+        fapi2::ReturnCode lane_bad_threshold(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
         fapi2::ReturnCode flush_mem_regs();
         fapi2::ReturnCode flush_fw_regs();
         fapi2::ReturnCode disable_bad_lanes(const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_iohs_target);
@@ -81,6 +82,51 @@ fapi2::ReturnCode p10_io_init::lane_reversal(const fapi2::Target<fapi2::TARGET_T
         SET_DLP_OPTICAL_CONFIG_LINK1_RX_LANE_SWAP((l_lane_reversal & 0x10) >> 4, l_data);
         SET_DLP_OPTICAL_CONFIG_LINK1_TX_LANE_SWAP((l_lane_reversal & 0x08) >> 3, l_data);
         FAPI_TRY(PUT_DLP_OPTICAL_CONFIG(l_iohs_target, l_data));
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+///
+/// @brief Setup lane bad threshold as needed prior to init.
+///
+/// @param[in] i_target Chip target to setup
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p10_io_init::lane_bad_threshold(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    FAPI_DBG("Begin");
+    fapi2::buffer<uint64_t> l_data;
+    using namespace scomt::iohs;
+    auto l_iohs_targets = i_target.getChildren<fapi2::TARGET_TYPE_IOHS>();
+
+    fapi2::ATTR_MFG_FLAGS_Type l_mfg_flags = {0};
+
+    fapi2::ATTR_IOHS_MNFG_BAD_LANE_MAX_Type l_mnfg_bad_lane_max = 0;
+    fapi2::ATTR_IOHS_MNFG_BAD_LANE_DURATION_Type l_mnfg_bad_lane_duration = 0;
+
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MFG_FLAGS, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_mfg_flags) );
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_MNFG_BAD_LANE_MAX, i_target, l_mnfg_bad_lane_max),
+             "Error from FAPI_ATTR_GET (ATTR_IOHS_MNFG_BAD_LANE_MAX)");
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_MNFG_BAD_LANE_DURATION, i_target, l_mnfg_bad_lane_duration),
+             "Error from FAPI_ATTR_GET (ATTR_IOHS_MNFG_BAD_LANE_DURATION)");
+
+    for (auto l_iohs_target : l_iohs_targets)
+    {
+        if (l_mfg_flags[fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_THRESHOLDS / 32] & (1 << (31 -
+                (fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_THRESHOLDS % 32))))
+        {
+            FAPI_DBG("Setting IOHS bad_lane_max to %d", l_mnfg_bad_lane_max);
+            FAPI_DBG("Setting IOHS bad_lane_duration to %d", l_mnfg_bad_lane_duration);
+            FAPI_TRY(GET_DLP_OPTICAL_CONFIG(l_iohs_target, l_data));
+            SET_DLP_OPTICAL_CONFIG_CONFIG_BAD_LANE_MAX(l_mnfg_bad_lane_max, l_data);
+            SET_DLP_OPTICAL_CONFIG_CONFIG_BAD_LANE_DURATION(l_mnfg_bad_lane_duration, l_data);
+            FAPI_TRY(PUT_DLP_OPTICAL_CONFIG(l_iohs_target, l_data));
+        }
     }
 
 fapi_try_exit:
@@ -1062,6 +1108,8 @@ fapi2::ReturnCode p10_io_init_start_ppe(const fapi2::Target<fapi2::TARGET_TYPE_P
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, l_sys, l_sim));
 
     FAPI_TRY(l_proc.lane_reversal(i_target));
+
+    FAPI_TRY(l_proc.lane_bad_threshold(i_target));
 
     FAPI_TRY(l_proc.img_regs(i_target));
 

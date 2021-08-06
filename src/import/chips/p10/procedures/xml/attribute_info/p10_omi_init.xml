@@ -306,7 +306,6 @@
   <valueType>uint8</valueType>
   <platInit/>
   <overrideOnly/>
-  <initToZero/>
   <enum>
     NONE = 0x00,
     4US = 0x01,
@@ -325,6 +324,7 @@
     2MGS = 0x0E,
     16MGS = 0x0F
   </enum>
+  <default>512S</default>
   <mssAccessorName>mnfg_edpl_time</mssAccessorName>
 </attribute>
 <!-- ********************************************************************** -->
@@ -339,7 +339,6 @@
   <valueType>uint8</valueType>
   <platInit/>
   <overrideOnly/>
-  <initToZero/>
   <enum>
     NONE = 0x00,
     2_ERRORS = 0x01,
@@ -350,6 +349,7 @@
     64_ERRORS = 0x06,
     128_ERRORS = 0x07
   </enum>
+  <default>8_ERRORS</default>
   <mssAccessorName>mnfg_edpl_threshold</mssAccessorName>
 </attribute>
 <!-- ********************************************************************** -->

@@ -458,6 +458,7 @@ fapi2::ReturnCode p10_smp_link_firs_dl(
     using namespace scomt;
     using namespace scomt::iohs;
 
+    fapi2::ATTR_MFG_FLAGS_Type l_mfg_flags = {0};
     fapi2::buffer<uint64_t> l_mask_value(0x0);
 
     if(!i_iohs_target.isFunctional())
@@ -482,6 +483,20 @@ fapi2::ReturnCode p10_smp_link_firs_dl(
 
     l_mask_value &= i_data.DLP_FIR_MASK_CLR;
     l_mask_value |= i_data.DLP_FIR_MASK_SET;
+
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MFG_FLAGS, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_mfg_flags) );
+
+    if (l_mfg_flags[fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_THRESHOLDS / 32] & (1 << (31 -
+            (fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_THRESHOLDS % 32))))
+    {
+        FAPI_DBG("Setting DLP CRC Error FIR to masked for MFG test");
+        SET_DLP_FIR_MASK_REG_0_CRC_ERROR_MASK(1, l_mask_value);
+        SET_DLP_FIR_MASK_REG_1_CRC_ERROR_MASK(1, l_mask_value);
+
+        FAPI_DBG("Setting DLP ECC Correctable FIR to masked for MFG test");
+        SET_DLP_FIR_MASK_REG_0_SL_ECC_CORRECTABLE_MASK(1, l_mask_value);
+        SET_DLP_FIR_MASK_REG_1_SL_ECC_CORRECTABLE_MASK(1, l_mask_value);
+    }
 
     FAPI_TRY(PUT_DLP_FIR_MASK_REG_RW(i_iohs_target, l_mask_value),
              "Error from putScom (DLP_FIR_MASK_REG_RW)");

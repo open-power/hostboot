@@ -368,15 +368,16 @@ fapi2::ReturnCode setup_mc_config1(const fapi2::Target<fapi2::TARGET_TYPE_OMI>& 
     scomt::omi::SET_CONFIG1_INJECT_CRC_ERROR(mss::states::OFF, l_val);
 
     // CFG_DL0_EDPL_TIME: dl0 edpl time window
-    scomt::omi::SET_CONFIG1_EDPL_TIME(mss::omi::edpl_time_win::EDPL_TIME_WIN_16MS, l_val);
+    scomt::omi::SET_CONFIG1_EDPL_TIME(mss::omi::edpl_time_win::EDPL_TIME_WIN_128MS, l_val);
     setup_mfg_test_edpl_time(i_target, l_edpl_disable, l_mnfg_screen_test, l_mnfg_edpl_time, l_val);
 
-    scomt::omi::SET_CONFIG1_EDPL_THRESHOLD(mss::omi::edpl_err_thres::EDPL_ERR_THRES_16, l_val);
+    scomt::omi::SET_CONFIG1_EDPL_THRESHOLD(mss::omi::edpl_err_thres::EDPL_ERR_THRES_128, l_val);
     setup_mfg_test_edpl_threshold(i_target, l_edpl_disable, l_mnfg_screen_test, l_mnfg_edpl_threshold, l_val);
 
     // CFG_DL0_EDPL_ENA: dl0 error detection per lane "edpl" enable
     scomt::omi::SET_CONFIG1_EDPL_ENA(!l_edpl_disable, l_val);
 
+    FAPI_DBG("Writing CONFIG1 0x%016llx", l_val());
     FAPI_TRY(scomt::omi::PUT_CONFIG1(i_target, l_val));
 
 fapi_try_exit:
