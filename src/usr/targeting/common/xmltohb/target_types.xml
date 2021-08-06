@@ -3282,8 +3282,8 @@
     </attribute>
     <attribute>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-      <!-- GARD -->
-      <default>0x00000001</default>
+      <!-- GARD_APPLIED, RESRC_RECOV, GARD -->
+      <default>0x00000031</default>
     </attribute>
     <attribute>
       <default>
