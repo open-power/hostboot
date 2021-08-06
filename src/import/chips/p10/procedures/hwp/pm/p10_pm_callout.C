@@ -342,11 +342,11 @@ extern "C"
         l_coreActn.init();
         l_coreActn.isPmMalfunction( l_pmMalfFunc, l_occFlag2Value );
 
-        FAPI_ASSERT( ( l_pmMalfFunc == true ),
-                     fapi2::NO_MALF_PM_RESET()
-                     .set_OCC_FLAG2_REG( l_occFlag2Value )
-                     .set_CHIP( i_procTgt ),
-                     "PM Callout Has Been Called For A Reason Other Than Malfunction" );
+        if( l_pmMalfFunc == false )
+        {
+            FAPI_INF("PM Callout Has Been Called For A Reason Other Than Malfunction");
+            goto fapi_try_exit;
+        }
 
         FAPI_TRY( l_coreActn.updateCoreConfigState(),
                   "Failed To Update Core Configuration" );
