@@ -617,6 +617,14 @@ bool AttrTextToBinaryBlob::attrFileTargetLineToData(
         size_t l_nPosn = l_line.find(TARGET_NODE_HEADER_STR);
         if (0 == l_nPosn)
         {
+            // If ":n" is present, then the target is not at the system level anymore.
+            // It is at least at the node level, so set this accordingly.
+            // NOTE:  FAPI targets do not suport node level
+            if (i_tankLayer != AttributeTank::TANK_LAYER_FAPI)
+            {
+                o_targetType = TARGETING::TYPE_NODE;
+            }
+
             l_line = l_line.substr(strlen(TARGET_NODE_HEADER_STR));
 
             if (0 == l_line.find(TARGET_NODE_ALL_STR))
@@ -1104,6 +1112,7 @@ bool AttrTextToBinaryBlob::convertTargLine( const std::string & i_line,
         size_t l_kPosn = l_line.find( "k", 0);
         size_t l_kColonPosn = l_line.find( ":k", 0);
         size_t l_sPosn = l_line.find( ":s", 0);
+        size_t l_nPosn = l_line.find( ":n", 0);
 
         if (l_line.find_first_not_of(" \t", 6) == std::string::npos)
         {
@@ -1260,7 +1269,7 @@ bool AttrTextToBinaryBlob::convertTargLine( const std::string & i_line,
 
         else
         {
-            // (old format)
+            // (old format, or possibly k0:s0:nX format)
         }
 
         // (old format, convert to new format.  see header file)
@@ -1305,11 +1314,25 @@ bool AttrTextToBinaryBlob::convertTargLine( const std::string & i_line,
         {
             // add postamble when not a legacy system target
             o_convertedLine = o_convertedLine + l_postAmble;
-        }
 
-        printf("convertTargLine : Warning : "
-               "Obsolete Target Line converted to : %s \n",
-               o_convertedLine.c_str() );
+            printf("convertTargLine : Warning : "
+                   "Obsolete Target Line converted to : %s \n",
+                   o_convertedLine.c_str() );
+        }
+        else
+        {
+            // re-order to kX:sX:nX, and strip ":" if it's at the end
+            // (this simplifies processing later in this file)
+            if (l_postAmble.back() == ':')
+            {
+                l_postAmble.pop_back();
+            }
+
+            o_convertedLine = o_convertedLine + l_postAmble;
+            printf("convertTargLine : Re-ordered to other acceptable format : "
+                   "Target Line converted to : %s \n",
+                   o_convertedLine.c_str() );
+        }
 
     } while ( 0 );
 
@@ -1418,7 +1441,9 @@ bool AttrTextToBinaryBlob::validateTargLine( const std::string & i_line )
         int curColonPosn = l_line.find_first_of(":", 0);
 
         for ( int nextColonPosn = 0;
-                curColonPosn != std::string::npos;
+                (curColonPosn != std::string::npos &&
+                 (curColonPosn+1) != (std::string::npos)
+                );
                 curColonPosn = nextColonPosn )
         {
             nextColonPosn = l_line.find_first_of(":", curColonPosn+1);
@@ -1429,13 +1454,12 @@ bool AttrTextToBinaryBlob::validateTargLine( const std::string & i_line )
                 if // last term was missing a value
                   ( (l_line.size() - curColonPosn) < 3 )
                 {
-                    // bad encoding
+                    // bad encoding - need more than just a ":X"
                     isValidLine = false;
                     printf("validateTargLine : Error : "
                             "Parameter is missing a Value \n" );
                     break;
                 }
-
                 else if // blank follows the colon
                   (l_line.substr(curColonPosn+1,1) == " ")
                 {
@@ -1648,10 +1672,10 @@ AttrTextToBinaryBlob::TargetTypeRc
 
         else
         {
-            // (potential chip target)
+            // (potential node or chip target)
         }
 
-        //  Only Potential Chip Targets get to this point
+        //  Only Potential Node or Chip Targets get to this point
 
         if // system string is not correct
           ( i_line.substr(0, 5) != "k0:s0" )
@@ -1677,13 +1701,11 @@ AttrTextToBinaryBlob::TargetTypeRc
         size_t l_nValStartPosn = 7;
         size_t l_nValOverflowPosn = l_line.find( ":", l_nValStartPosn );
 
-        if // chip string does not follow optional n term
+        if // chip string does not follow optional n term - must be a node target
           ( l_nValOverflowPosn == std::string::npos )
         {
-            // bad encoding
-            rc = TargetTypeRcError;
-            printf("validateSysSubstr : Error : "
-                    "Missing chip string\n" );
+            // valid node target
+            rc = TargetTypeRcNode;
             break;
         }
 
@@ -1732,8 +1754,7 @@ AttrTextToBinaryBlob::TargetTypeRc
         }
 
         // n value is a comma separated list
-        // assume a valid chip encoding
-        rc = TargetTypeRcChip;
+        rc = TargetTypeRcNode;
 
         // (check for comma separated list)
         size_t l_nValCurPosn = 0;

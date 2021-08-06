@@ -1,0 +1,44 @@
+# attr_override_examples.txt - Sample Attribute Override File
+
+CLEAR
+
+# System Level Attribute
+# - TYPE_SYSTEM = 0x1; attr id = 0C774921; uint32_t
+# - Expected Console Output:
+#  5.47353|TARG|- Sys:nall:pall:call
+#  5.47354|TARG|  ATTR 0C774921 [4] = 15000000
+target = k0:s0:
+ATTR_BOOT_FLAGS 0x15000000 CONST
+
+# Node Level Attribute
+# - TYPE_NODE = 0x2; attr id = 06DBD352; uint8_t
+# - Expected Console Output:
+#  5.47354|TARG|- Node:n0:pall:call
+#  5.47354|TARG|  ATTR 06DBD352 [1] = 00
+target = k0:n0:s0
+ATTR_PHYS_PRES_FAKE_ASSERT 0x00 CONST
+
+# TPM Target
+# - TYPE_TPM = 0x31; attr id = 021D1A50; uint8_t
+# - Expected Console Output:
+#  5.47355|TARG|- TPM:n0:p0:call
+#  5.47355|TARG|  ATTR 021D1A50 [1] = 00
+target = k0:n0:s0:tpm:p00
+ATTR_FORCE_TPM_NOT_PRESENT 0x0 CONST
+
+# PHB resource is critical
+# - TYPE_PHB = 0x2E; attr id = 0BFCCF0C; uint8_t
+# - Expected Console Output:
+#  5.47355|TARG|- PHB:n0:p0:c2
+#  5.47356|TARG|  ATTR 0BFCCF0C [1] = 01
+target = k0:n0:s0:p10.phb:p0:c2
+ATTR_RESOURCE_IS_CRITICAL 0x01 CONST
+
+# All Processor Targets
+# - TYPE_PROC = 0x5; attr id = 049B1D2E; uint32_t
+# - Expected Console Output:
+#  5.47356|TARG|- Proc:nall:pall:call
+#  5.47357|TARG|  ATTR 049B1D2E [4] = 00000000
+target = pu:k0:s0:nall:pall
+ATTR_FREQ_CORE_FLOOR_MHZ 0x0
+

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -288,6 +288,7 @@ namespace AttrTextToBinaryBlob
     enum TargetTypeRc
     {
         TargetTypeRcSystem,
+        TargetTypeRcNode,
         TargetTypeRcChip,
         TargetTypeRcError
     };
