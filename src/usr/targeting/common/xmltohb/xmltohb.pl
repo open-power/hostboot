@@ -3282,7 +3282,6 @@ sub writeAttrErrlHFile {
 
         # things we'll skip:
         if(!(exists $attribute->{readable}) ||  # write-only attributes
-           !(exists $attribute->{writeable}) || # read-only attributes
            (exists $attribute->{simpleType} && (
            (exists $attribute->{simpleType}->{hbmutex}) ||
            (exists $attribute->{simpleType}->{hbrecursivemutex}) ||

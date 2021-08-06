@@ -57,7 +57,11 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x13cd0a9:
-            pass #not readable
+            #simpleType:uint
+            label = "RUNN_CYCLE_COUNT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0xeb223ec:
             #simpleType:uint
             label = "RUNN_CHIP_CYCLE_OFFSET"
@@ -77,15 +81,35 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0xaf0dc82:
-            pass #not readable
+            #simpleType:uint
+            label = "RUNN_DO_CONFIG_CHECKS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xf9f4fcc:
-            pass #not readable
+            #simpleType:uint
+            label = "RUNN_USE_QME_TIMEBASE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x12b0629:
-            pass #not readable
+            #simpleType:uint
+            label = "RUNN_STOP_ON_XSTOP"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x4222d51:
-            pass #not readable
+            #simpleType:uint
+            label = "RUNN_MASTER_SEED"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0xad742c1:
-            pass #not readable
+            #simpleType:uint
+            label = "RUNN_CORE_SEED_SELECT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x484fa88:
             #simpleType:uint
             label = "RUNN_THREAD_SEEDS"
@@ -93,38 +117,117 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(4):
                 traceEntry.append(hexConcat(data, i, i+8)[0])
                 i += 8
+        elif attrEnum == 0x87e3ed0:
+            #simpleType:uint
+            label = "RUNN_STAGGER_DELAY"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0xe2457f8:
-            pass #not readable
+            #simpleType:uint
+            label = "OMI_INBAND_BAR_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xf0baf47:
-            pass #not readable
+            #simpleType:uint
+            label = "OMI_INBAND_BAR_BASE_ADDR_OFFSET"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x467a7c6:
-            pass #not readable
+            #simpleType:uint
+            label = "AUX_FUNC_INVOCATION_TIME_MS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xe72dc05:
-            pass #not readable
+            #simpleType:uint
+            label = "FREQ_BIAS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x98fab6d:
-            pass #not readable
+            #simpleType:uint
+            label = "VOLTAGE_EXT_BIAS"
+            traceEntry.append("[2][8]:")
+            for x in range(16):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x9fc8b45:
-            pass #not readable
-        elif attrEnum == 0xf51289d:
-            pass #not readable
+            #simpleType:uint
+            label = "VOLTAGE_EXT_VDN_BIAS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x3917523:
+            #simpleType:uint
+            label = "WOF_DCCR_VALUE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
+        elif attrEnum == 0x48c79e0:
+            #simpleType:uint
+            label = "WOF_FLMR_VALUE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
+        elif attrEnum == 0xeda0efc:
+            #simpleType:uint
+            label = "WOF_FMMR_VALUE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x2412f59:
-            pass #not readable
+            #simpleType:uint
+            label = "DDS_DROOP_EXTREME_OVERRIDE"
+            traceEntry.append("[9]:")
+            for x in range(9):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xf90f4e2:
-            pass #not readable
+            #simpleType:uint
+            label = "SAVE_MODE_NODDS_UPLIFT_MV"
+            traceEntry.append("[2]:")
+            for x in range(2):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x05b494e:
-            pass #not readable
+            #simpleType:uint
+            label = "DDS_DPLL_SLEW_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x724bc5c:
-            pass #not readable
+            #simpleType:uint
+            label = "DDS_TRIP_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x3310305:
-            pass #not readable
+            #simpleType:uint
+            label = "DDS_TRIP_INTERPOLATION_CONTROL"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x4221eb9:
-            pass #not readable
+            #simpleType:uint
+            label = "DUMP_STOP_INFO_ENABLE_ERRORLOG"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xc96a9e2:
-            pass #not readable
+            #simpleType:uint
+            label = "DUMP_STOP_INFO_SUPPRESS_ERROR_TRACE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xbb90f0a:
-            pass #not readable
-        elif attrEnum == 0x0f00f18:
-            pass #not readable
+            #simpleType:uint
+            label = "PGPE_HCODE_FUNCTION_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xc315c52:
             #simpleType:uint
             label = "PM_GLOBAL_FIR_TRACE_EN"
@@ -132,13 +235,35 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0xa24c56a:
-            pass #not readable
+            #simpleType:uint
+            label = "POUND_W_STATIC_DATA_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x7959bae:
-            pass #not readable
+            #simpleType:uint
+            label = "POUND_V_STATIC_DATA_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x8fe7d97:
+            #simpleType:uint
+            label = "AW_STATIC_DATA_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x8d7f254:
-            pass #not readable
+            #simpleType:uint
+            label = "POUNDV_BUCKET_NUM"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x59b35d5:
-            pass #not readable
+            #simpleType:uint
+            label = "POUNDV_BUCKET_NUM_OVERRIDE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x6381afd:
             #simpleType:uint
             label = "SKIP_WAKEUP"
@@ -146,11 +271,23 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0xfceb067:
-            pass #not readable
+            #simpleType:uint
+            label = "SYS_VRT_STATIC_DATA_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x5dd7e45:
-            pass #not readable
+            #simpleType:uint
+            label = "SYSTEM_POUNDV_VALIDITY_HALT_DISABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x4028d5e:
-            pass #not readable
+            #simpleType:uint
+            label = "SYSTEM_RING_DBG_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xa3a830c:
             #simpleType:uint
             label = "PM_MALF_ALERT_ENABLE"
@@ -164,15 +301,35 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x4871927:
-            pass #not readable
+            #simpleType:uint
+            label = "SYSTEM_DDS_DISABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x2f4ac23:
-            pass #not readable
+            #simpleType:uint
+            label = "SYSTEM_DDS_FREQ_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x7cfd099:
-            pass #not readable
+            #simpleType:uint
+            label = "SYSTEM_AUXILLARY_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x8a7db83:
-            pass #not readable
+            #simpleType:uint
+            label = "SYSTEM_PSTATES_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x75576dc:
-            pass #not readable
+            #simpleType:uint
+            label = "SYSTEM_SUSPEND_OCC_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x1bc94b8:
             #simpleType:uint
             label = "SYSTEM_RESCLK_DISABLE"
@@ -180,121 +337,382 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x1ca5b41:
-            pass #not readable
+            #simpleType:uint
+            label = "SYSTEM_RESCLK_ISTEP4_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xf949e3a:
-            pass #not readable
+            #simpleType:uint
+            label = "SYSTEM_RVRM_DISABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xd7e2c04:
-            pass #not readable
+            #simpleType:uint
+            label = "SYSTEM_WOF_DISABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xb93929e:
-            pass #not readable
+            #simpleType:uint
+            label = "SYSTEM_WOV_OVERV_DISABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x4d911fa:
-            pass #not readable
+            #simpleType:uint
+            label = "SYSTEM_WOV_UNDERV_DISABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xa95efea:
-            pass #not readable
+            #simpleType:uint
+            label = "WOF_INDEX_SELECT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x56efb21:
+            #simpleType:uint
+            label = "SYSTEM_WOF_DISABLE_DIMENSION"
+            traceEntry.append("[5]:")
+            for x in range(5):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x72f4865:
-            pass #not readable
+            #simpleType:uint
+            label = "WOF_THROTTLE_CONTROL_LOOP_DISABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xd7c305f:
-            pass #not readable
+            #simpleType:uint
+            label = "WOF_PITCH_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x5e6c304:
-            pass #not readable
+            #simpleType:uint
+            label = "WOF_THROTTLE_CONTROL_LOOP_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x2efe391:
-            pass #not readable
+            #simpleType:uint
+            label = "SYSTEM_OCS_DISABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xf091dbc:
-            pass #not readable
+            #simpleType:uint
+            label = "SYSTEM_PGPE_CURRENT_READ_DISABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x75ef2a9:
-            pass #not readable
+            #simpleType:uint
+            label = "WOF_DCM_TRACKING_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x0f373ad:
-            pass #not readable
+            #simpleType:uint
+            label = "SYSTEM_WOF_VALIDATION_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xb2bacb2:
+            #simpleType:uint
+            label = "SYSTEM_WOF_LAB_VALIDATION_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x4820f8b:
-            pass #not readable
+            #simpleType:uint
+            label = "SYSTEM_PDV_VALIDATION_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x977494c:
+            #simpleType:uint
+            label = "SYSTEM_PDV_LAB_VALIDATION_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xd099bb4:
-            pass #not readable
+            #simpleType:uint
+            label = "SYSTEM_PDW_VALIDATION_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x8997fc6:
-            pass #not readable
+            #simpleType:uint
+            label = "SYSTEM_IQ_VALIDATION_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x2dc6458:
+            #simpleType:uint
+            label = "SYSTEM_PDV_TDP_CURRENT_VALIDATION_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x2e92774:
+            #simpleType:uint
+            label = "SYSTEM_PDV_TDP_CURRENT_LAB_VALIDATION_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x15c7694:
-            pass #not readable
+            #simpleType:uint
+            label = "PBAX_BRDCST_ID_VECTOR"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x7f199a1:
-            pass #not readable
+            #simpleType:uint
+            label = "PBAX_CHIPID"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x955e6b7:
-            pass #not readable
+            #simpleType:uint
+            label = "PBAX_GROUPID"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x9493ec3:
-            pass #not readable
+            #simpleType:uint
+            label = "SPIPSS_FREQUENCY"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x588aed6:
-            pass #not readable
+            #simpleType:uint
+            label = "SPIPSS_SELECT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x4c51a2e:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_R_DISTLOSS_UOHM"
+            traceEntry.append("[4]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x9cb426e:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_R_LOADLINE_UOHM"
+            traceEntry.append("[4]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xdbfb744:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_VRM_VOFFSET_UV"
+            traceEntry.append("[4]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x211648c:
-            pass #not readable
+            #simpleType:uint
+            label = "CORE_THROTTLE_ASSERT_COUNT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x6167a77:
-            pass #not readable
+            #simpleType:uint
+            label = "CORE_THROTTLE_DEASSERT_COUNT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x2914dff:
-            pass #not readable
+            #simpleType:uint
+            label = "AVSBUS_BUSNUM"
+            traceEntry.append("[4]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xcc07b62:
-            pass #not readable
+            #simpleType:uint
+            label = "AVSBUS_FREQUENCY"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xcc8bf2b:
-            pass #not readable
+            #simpleType:uint
+            label = "AVSBUS_RAIL"
+            traceEntry.append("[4]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x1a091ba:
-            pass #not readable
+            #simpleType:uint
+            label = "EXTERNAL_VRM_STEPSIZE"
+            traceEntry.append("[4]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x055981e:
-            pass #not readable
+            #simpleType:uint
+            label = "EXTERNAL_VRM_TRANSITION_RATE_DEC_UV_PER_US"
+            traceEntry.append("[4]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x9dfa8e3:
-            pass #not readable
+            #simpleType:uint
+            label = "EXTERNAL_VRM_TRANSITION_RATE_INC_UV_PER_US"
+            traceEntry.append("[4]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x920e9b8:
-            pass #not readable
+            #simpleType:uint
+            label = "EXTERNAL_VRM_TRANSITION_STABILIZATION_TIME_NS"
+            traceEntry.append("[4]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xc8ab5a1:
-            pass #not readable
-        elif attrEnum == 0x66d0c18:
-            pass #not readable
-        elif attrEnum == 0x89a9520:
-            pass #not readable
-        elif attrEnum == 0xb7220e1:
-            pass #not readable
-        elif attrEnum == 0x1898f12:
-            pass #not readable
-        elif attrEnum == 0x7382399:
-            pass #not readable
+            #simpleType:uint
+            label = "EXTERNAL_VRM_TRANSITION_START_NS"
+            traceEntry.append("[4]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x79c2dd2:
-            pass #not readable
+            #simpleType:uint
+            label = "WOF_VRATIO_VDD_10THPCT"
+            traceEntry.append("[8]:")
+            for x in range(8):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x3519971:
-            pass #not readable
+            #simpleType:uint
+            label = "WOF_VRATIO_VCS_10THPCT"
+            traceEntry.append("[8]:")
+            for x in range(8):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0xef89eb6:
+            #simpleType:uint
+            label = "WOF_IO_BASE_POWER_0P01W"
+            traceEntry.append("[4]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x58d355a:
-            pass #not readable
+            #simpleType:uint
+            label = "WOV_MAX_DROOP_10THPCT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x8be06f8:
-            pass #not readable
+            #simpleType:uint
+            label = "WOV_OVERV_MAX_10THPCT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xa85a352:
-            pass #not readable
+            #simpleType:uint
+            label = "WOV_OVERV_STEP_DECR_10THPCT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x1a4dca3:
-            pass #not readable
+            #simpleType:uint
+            label = "WOV_OVERV_STEP_INCR_10THPCT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x3b1ed0d:
-            pass #not readable
-        elif attrEnum == 0x4ade9d9:
-            pass #not readable
+            #simpleType:uint
+            label = "WOV_OVERV_VMAX_SETPOINT_MV"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x668db70:
-            pass #not readable
-        elif attrEnum == 0xe8f5aa7:
-            pass #not readable
+            #simpleType:uint
+            label = "WOV_UNDERV_MAX_10THPCT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xed124b9:
-            pass #not readable
+            #simpleType:uint
+            label = "WOV_LIGHT_PERF_LOSS_THRESH_10THPCT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xe3b1a88:
-            pass #not readable
+            #simpleType:uint
+            label = "WOV_HEAVY_PERF_LOSS_THRESH_10THPCT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xabb5e9c:
-            pass #not readable
+            #simpleType:uint
+            label = "WOV_UNDERV_STEP_DECR_10THPCT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x95c569b:
-            pass #not readable
+            #simpleType:uint
+            label = "WOV_UNDERV_STEP_INCR_10THPCT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xa78eaae:
-            pass #not readable
+            #simpleType:uint
+            label = "WOV_UNDERV_VMIN_MV"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0xe4e2b19:
+            #simpleType:uint
+            label = "WOV_DIRTY_UNCURRENT_CONTROL"
+            traceEntry.append("[2]:")
+            for x in range(2):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x2fc08c0:
+            #simpleType:uint
+            label = "OCS_WITH_DDS_DISABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xd56672f:
+            #simpleType:uint
+            label = "WOV_OVERV_WITH_DDS_DISABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x33a20f8:
-            pass #not readable
+            #simpleType:uint
+            label = "DDS_DPLL_FMAX_FAST_DISABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xd5741a4:
-            pass #not readable
+            #simpleType:uint
+            label = "DDS_DPLL_FMIN_FAST_DISABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x987bc15:
-            pass #not readable
+            #simpleType:uint
+            label = "DDS_FMAX_OVERRIDE_KHZ"
+            traceEntry.append("[9]:")
+            for x in range(9):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x2412cf9:
-            pass #not readable
+            #simpleType:uint
+            label = "DDS_FMIN_OVERRIDE_KHZ"
+            traceEntry.append("[5]:")
+            for x in range(5):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0xaa1d410:
             #simpleType:uint
             label = "FREQ_PB_MHZ_POUNDV_FALLBACK"
@@ -312,6 +730,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             label = "SAFE_MODE_VOLTAGE_MV"
             traceEntry.append("[2]:")
             for x in range(2):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
+        elif attrEnum == 0x0d8a911:
+            #simpleType:uint
+            label = "VDN_UPLIFT_MV"
+            for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
         elif attrEnum == 0x55bf804:
@@ -339,11 +763,23 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x90885f2:
-            pass #not readable
+            #simpleType:uint
+            label = "SYSTEM_MMA_POWEROFF_DISABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x219583a:
-            pass #not readable
+            #simpleType:uint
+            label = "SYSTEM_MMA_POWERON_DISABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xc687d1e:
-            pass #not readable
+            #simpleType:uint
+            label = "SYSTEM_MMA_POWEROFF_DELAY_POWEROF2_MS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x68b9d58:
             #simpleType:uint
             label = "RVRM_VID"
@@ -351,25 +787,65 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x5e154c1:
-            pass #not readable
+            #simpleType:uint
+            label = "RVRM_DEADZONE_MV"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xfd41e04:
-            pass #not readable
+            #simpleType:uint
+            label = "STOP_LEVELS_SUPPORTED"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0xd463c27:
-            pass #not readable
+            #simpleType:uint
+            label = "STOP_LEVELS_DISABLED"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x4ec2278:
-            pass #not readable
+            #simpleType:uint
+            label = "BOOT_VOLTAGE_BIAS_0P5PCT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x2ef58ce:
-            pass #not readable
+            #simpleType:uint
+            label = "WOF_OMI_FORCE_FREQ_MHZ"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x577af13:
-            pass #not readable
+            #simpleType:uint
+            label = "SRAM_WRITE_ASSIST_MV"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x9ad35b5:
-            pass #not readable
+            #simpleType:uint
+            label = "DDS_THRESHOLD_PSTATE_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xa1f54ec:
-            pass #not readable
+            #simpleType:uint
+            label = "DDS_COARSE_THROTTLE_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x7aabf03:
-            pass #not readable
+            #simpleType:uint
+            label = "DDS_FREQ_JUMP_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xd2942c8:
-            pass #not readable
+            #simpleType:uint
+            label = "DDS_BIAS_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x37796c6:
             #simpleType:uint
             label = "SAFE_MODE_THROTTLE_IDX"
@@ -377,13 +853,24 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x777f418:
-            pass #not readable
+            #simpleType:uint
+            label = "SYSTEM_THROTTLE_PSTATE_NUMBER_LIMIT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x9ddd63b:
-            pass #not readable
+            #simpleType:uint
+            label = "THROTTLE_TABLE_OVERRIDE"
+            traceEntry.append("[64]:")
+            for x in range(64):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xbc5137d:
-            pass #not readable
-        elif attrEnum == 0x3917523:
-            pass #not readable
+            #simpleType:uint
+            label = "THROTTLE_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x0041f25:
             #simpleType:uint
             label = "DLR_LINKS_ENABLED"
@@ -392,23 +879,73 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+2)[0])
                 i += 2
         elif attrEnum == 0x63546d5:
-            pass #not readable
+            #simpleType:uint
+            label = "DLR_SAMPLE_TIME_MS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0xf3c3e44:
-            pass #not readable
+            #simpleType:uint
+            label = "DLR_AVERAGE_HISTORY_DEPTH_OVERRIDE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x2716b4f:
-            pass #not readable
+            #simpleType:uint
+            label = "DLR_PLSF_OVERRIDE"
+            traceEntry.append("[32]:")
+            for x in range(32):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xf796610:
-            pass #not readable
-        elif attrEnum == 0xc248489:
-            pass #not readable
-        elif attrEnum == 0xb3994be:
-            pass #not readable
+            #simpleType:uint
+            label = "SAFE_MODE_XSTOP"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xbfae9a6:
-            pass #not readable
+            #simpleType:uint
+            label = "WOF_ALTITUDE_TEMP_ADJUSTMENT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x667e81e:
-            pass #not readable
+            #simpleType:uint
+            label = "WOF_TDP_ALTITUDE_REFERENCE_M"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0xf811b59:
-            pass #not readable
+            #simpleType:uint
+            label = "SYSTEM_FMAX_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x5f1a686:
+            #simpleType:uint
+            label = "CURRENT_SCALING_FACTOR"
+            traceEntry.append("[8]:")
+            for x in range(8):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xbca8078:
+            #simpleType:uint
+            label = "IO_GROUNDED_CONTROLLERS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0xb697f6d:
+            #simpleType:uint
+            label = "IO_GROUNDED_LINKS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
+        elif attrEnum == 0x44a66ec:
+            #simpleType:uint
+            label = "WOF_IO_POWER_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xf4f230f:
             #simpleType:uint
             label = "MEMORY_BAR_REGS"
@@ -494,7 +1031,11 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x1c0d755:
-            pass #not readable
+            #simpleType:uint
+            label = "MEM_MIRROR_PLACEMENT_POLICY"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xe595eec:
             #simpleType:uint
             label = "MAX_INTERLEAVE_GROUP_SIZE"
@@ -508,7 +1049,11 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x41ed7c4:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_INTERLEAVE_GRANULARITY"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x647f6d0:
             #simpleType:uint
             label = "MSS_MEM_IPL_COMPLETE"
@@ -556,6 +1101,30 @@ def ErrlUserDetailsParserAttribute(ver, data):
             label = "CHTM_TRACE_TYPE"
             traceEntry.append("[32]:")
             for x in range(32):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x117c575:
+            #simpleType:uint
+            label = "NHTM_HTMSC_MODE_CONTENT_SEL"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x464bfaf:
+            #simpleType:uint
+            label = "NHTM_HTMSC_MODE_CAPTURE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0x3ad5ca0:
+            #simpleType:uint
+            label = "NHTM_HTMSC_MODE_SYNC_STAMP_FORCE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xdb283e0:
+            #simpleType:uint
+            label = "NHTM_HTMSC_MODE_WRITETOIO"
+            for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0xd484fd1:
@@ -648,6 +1217,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0xa235b8b:
+            #simpleType:uint
+            label = "HTMSC_FILT_PORT1_PAT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x47de4ea:
             #simpleType:uint
             label = "HTMSC_TTAGFILT_INVERT"
@@ -690,90 +1265,18 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0x2dae314:
+            #simpleType:uint
+            label = "HTMSC_FILT_PORT1_MASK"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xe356be6:
             #simpleType:uint
             label = "HTMSC_FILT_CRESP_MASK"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
-        elif attrEnum == 0x117c575:
-            #simpleType:uint
-            label = "NHTM_HTMSC_MODE_CONTENT_SEL"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x464bfaf:
-            #simpleType:uint
-            label = "NHTM_HTMSC_MODE_CAPTURE"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+2)[0])
-                i += 2
-        elif attrEnum == 0x3ad5ca0:
-            #simpleType:uint
-            label = "NHTM_HTMSC_MODE_SYNC_STAMP_FORCE"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0xdb283e0:
-            #simpleType:uint
-            label = "NHTM_HTMSC_MODE_WRITETOIO"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x092d705:
-            #simpleType:uint
-            label = "CHTM_HTMSC_MODE_CONTENT_SEL"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x0e2fb21:
-            #simpleType:uint
-            label = "CHTM_HTMSC_MODE_CAPTURE"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+4)[0])
-                i += 4
-        elif attrEnum == 0x6e2352a:
-            #simpleType:uint
-            label = "CHTM_HTMSC_MODE_CORE_INSTR_STALL"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x5390d2b:
-            #simpleType:uint
-            label = "HTMSC_MODE_WRAP"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x90059b3:
-            #simpleType:uint
-            label = "HTMSC_MODE_DIS_TSTAMP"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x3d84c2e:
-            #simpleType:uint
-            label = "HTMSC_MODE_SINGLE_TSTAMP"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x5fa7892:
-            #simpleType:uint
-            label = "HTMSC_MODE_MARKERS_ONLY"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0xe3950d2:
-            #simpleType:uint
-            label = "HTMSC_MODE_DIS_FORCE_GROUP_SCOPE"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x46a1caf:
-            #simpleType:uint
-            label = "HTMSC_MODE_VGTARGET"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+4)[0])
-                i += 4
         elif attrEnum == 0xfdbc8b2:
             #simpleType:uint
             label = "HTMSC_MEM_SCOPE"
@@ -855,17 +1358,213 @@ def ErrlUserDetailsParserAttribute(ver, data):
         elif attrEnum == 0xe2556ce:
             #simpleType:uint
             label = "HTMSC_IMA_PDBAR_SCOPE"
-            for x in range(1):
+            traceEntry.append("[32]:")
+            for x in range(32):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x833d2c7:
             #simpleType:uint
             label = "HTMSC_IMA_PDBAR_ADDR"
-            for x in range(1):
+            traceEntry.append("[32]:")
+            for x in range(32):
                 traceEntry.append(hexConcat(data, i, i+8)[0])
                 i += 8
+        elif attrEnum == 0x5390d2b:
+            #simpleType:uint
+            label = "HTMSC_MODE_WRAP"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x90059b3:
+            #simpleType:uint
+            label = "HTMSC_MODE_DIS_TSTAMP"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x3d84c2e:
+            #simpleType:uint
+            label = "HTMSC_MODE_SINGLE_TSTAMP"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x5fa7892:
+            #simpleType:uint
+            label = "HTMSC_MODE_MARKERS_ONLY"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xe3950d2:
+            #simpleType:uint
+            label = "HTMSC_MODE_DIS_FORCE_GROUP_SCOPE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x46a1caf:
+            #simpleType:uint
+            label = "HTMSC_MODE_VGTARGET"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
+        elif attrEnum == 0x60af368:
+            #simpleType:uint
+            label = "CHTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS"
+            traceEntry.append("[32]:")
+            for x in range(32):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x66c4d30:
+            #simpleType:uint
+            label = "CHTM_MODE_LLAT_CAPTURE_STORE_DIS"
+            traceEntry.append("[32]:")
+            for x in range(32):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x9cedf5f:
+            #simpleType:uint
+            label = "CHTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS"
+            traceEntry.append("[32]:")
+            for x in range(32):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x25ef505:
+            #simpleType:uint
+            label = "CHTM_MODE_LLAT_IMBEDDED_TS"
+            traceEntry.append("[32]:")
+            for x in range(32):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x2e0dedf:
+            #simpleType:uint
+            label = "CHTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR"
+            traceEntry.append("[32]:")
+            for x in range(32):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x1e5007b:
+            #simpleType:uint
+            label = "CHTM_MODE_LLAT_PAUSE_ON_PURGE"
+            traceEntry.append("[32]:")
+            for x in range(32):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xcf85c28:
+            #simpleType:uint
+            label = "CHTM_MODE_CORE_WRAP"
+            traceEntry.append("[32]:")
+            for x in range(32):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x5223195:
+            #simpleType:uint
+            label = "CHTM_MODE_DIS_TSTAMP"
+            traceEntry.append("[32]:")
+            for x in range(32):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xe9cec48:
+            #simpleType:uint
+            label = "CHTM_MODE_SINGLE_TIME_STAMP"
+            traceEntry.append("[32]:")
+            for x in range(32):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xf5ac814:
+            #simpleType:uint
+            label = "CHTM_MODE_DIS_STALL"
+            traceEntry.append("[32]:")
+            for x in range(32):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x7ec5eb9:
+            #simpleType:uint
+            label = "CHTM_MODE_MARKERS_ONLY"
+            traceEntry.append("[32]:")
+            for x in range(32):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x748298e:
+            #simpleType:uint
+            label = "CHTM_MODE_DIS_GROUP"
+            traceEntry.append("[32]:")
+            for x in range(32):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x0202831:
+            #simpleType:uint
+            label = "CHTM_MODE_VGTARGET"
+            traceEntry.append("[32]:")
+            for x in range(32):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x6e2352a:
+            #simpleType:uint
+            label = "CHTM_HTMSC_MODE_CORE_INSTR_STALL"
+            traceEntry.append("[32]:")
+            for x in range(32):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x7584c35:
+            #simpleType:uint
+            label = "CHTM_HTMSC_IMA_EVENT_MASK_IC_TAP"
+            traceEntry.append("[32]:")
+            for x in range(32):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xa22aac4:
+            #simpleType:uint
+            label = "CHTM_HTMSC_IMA_EVENT_MASK_DIS_WRAP"
+            traceEntry.append("[32]:")
+            for x in range(32):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x2fcf5a5:
+            #simpleType:uint
+            label = "CHTM_HTMSC_IMA_EVENT_MASK_FREEZE"
+            traceEntry.append("[32]:")
+            for x in range(32):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xa9e7355:
+            #simpleType:uint
+            label = "CHTM_HTMSC_IMA_EVENT_MASK_EN_D_PRE"
+            traceEntry.append("[32]:")
+            for x in range(32):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xa4d2323:
+            #simpleType:uint
+            label = "CHTM_HTMSC_IMA_EVENT_MASK_EN_I_PRE"
+            traceEntry.append("[32]:")
+            for x in range(32):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x5b7c99d:
+            #simpleType:uint
+            label = "CHTM_HTMSC_IMA_EVENT_MASK_ONE_EVENT"
+            traceEntry.append("[32]:")
+            for x in range(32):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x86695d0:
+            #simpleType:uint
+            label = "CHTM_HTMSC_IMA_EVENT_MASK_EVENT_VTID"
+            traceEntry.append("[32]:")
+            for x in range(32):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x36b5355:
+            #simpleType:uint
+            label = "CHTM_HTMSC_IMA_EVENT_MASK_EVENT_SELECT"
+            traceEntry.append("[32]:")
+            for x in range(32):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xe96da20:
-            pass #not readable
+            #simpleType:uint
+            label = "OMI_REFCLOCK_SWIZZLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xd6af0b6:
             #simpleType:uint
             label = "PROC_FABRIC_TOPOLOGY_ID_TABLE"
@@ -874,7 +1573,17 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x91b6902:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_FABRIC_SL_DOMAIN"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x9e66e24:
+            #simpleType:uint
+            label = "PROC_FABRIC_TSNOOP"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xa5a748f:
             #simpleType:uint
             label = "PROC_FABRIC_BROADCAST_MODE"
@@ -918,11 +1627,24 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x4950959:
-            pass #not readable
+            #simpleType:uint
+            label = "IOHS_CONFIG_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x17f1548:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_FABRIC_IOHS_BUS_WIDTH"
+            traceEntry.append("[8]:")
+            for x in range(8):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xf9a81a2:
-            pass #not readable
+            #simpleType:uint
+            label = "IOHS_DRAWER_INTERCONNECT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x5401234:
             #simpleType:uint
             label = "IOHS_FABRIC_TOD_CROSS_CONFIG"
@@ -930,7 +1652,11 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x9640d61:
-            pass #not readable
+            #simpleType:uint
+            label = "IOHS_FABRIC_LANE_REVERSAL"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x00116c3:
             #simpleType:uint
             label = "PROC_FABRIC_LINK_ACTIVE"
@@ -940,6 +1666,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
         elif attrEnum == 0x94f0f3c:
             #simpleType:uint
             label = "IOHS_LINK_TRAIN"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xaa04632:
+            #simpleType:uint
+            label = "IOHS_LINK_SPLIT"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
@@ -982,6 +1714,13 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(8):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0xf033211:
+            #simpleType:uint
+            label = "PROC_FABRIC_X_ATTACHED_TOPOLOGY_ID"
+            traceEntry.append("[8]:")
+            for x in range(8):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x56be955:
             #simpleType:uint
             label = "PROC_FABRIC_X_ATTACHED_LINK_ID"
@@ -992,6 +1731,13 @@ def ErrlUserDetailsParserAttribute(ver, data):
         elif attrEnum == 0x5f943d0:
             #simpleType:uint
             label = "PROC_FABRIC_A_ATTACHED_CHIP_ID"
+            traceEntry.append("[8]:")
+            for x in range(8):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x76d2e17:
+            #simpleType:uint
+            label = "PROC_FABRIC_A_ATTACHED_TOPOLOGY_ID"
             traceEntry.append("[8]:")
             for x in range(8):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
@@ -1063,7 +1809,11 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x2eccc49:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_FABRIC_DLR_PSAVE_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xd84795a:
             #simpleType:uint
             label = "PROC_FABRIC_CORE_FREQ_RATIO"
@@ -1077,7 +1827,11 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x23c87d8:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_EPS_TABLE_TYPE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x21049e0:
             #simpleType:uint
             label = "PROC_EPS_READ_CYCLES_T0"
@@ -1109,7 +1863,17 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
         elif attrEnum == 0xb9dc486:
-            pass #not readable
+            #simpleType:uint
+            label = "MRW_L2_INCREASE_JITTER"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xe911abb:
+            #simpleType:uint
+            label = "MRW_CONVERT_DCBZ_TO_RWITM"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xf88f412:
             #simpleType:uint
             label = "PROC_LCO_TARGETS_COUNT"
@@ -1157,7 +1921,11 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+8)[0])
                 i += 8
         elif attrEnum == 0xdee8fd0:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_MEMORY_ENCRYPTION_ENABLED"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x6c26bcb:
             #simpleType:uint
             label = "PROC_SBE_MCS_SETUP_SELECTED_MC"
@@ -1165,7 +1933,11 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0xa450ad9:
-            pass #not readable
+            #simpleType:uint
+            label = "HW543384_WAR_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x0a96a60:
             #simpleType:uint
             label = "SYSTEM_FUSED_CORE_PAIRED_DISABLE"
@@ -1283,6 +2055,24 @@ def ErrlUserDetailsParserAttribute(ver, data):
         elif attrEnum == 0xca00099:
             #simpleType:uint
             label = "WOF_ENABLED"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xb22f067:
+            #simpleType:uint
+            label = "OCS_ENABLED"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x244f3e1:
+            #simpleType:uint
+            label = "WOV_UNDERV_ENABLED"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x931031c:
+            #simpleType:uint
+            label = "WOV_OVERV_ENABLED"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
@@ -1407,30 +2197,186 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0xe2ab0d2:
+            #simpleType:uint
+            label = "SOCKET_POWER_NOMINAL"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0x3a9b8a6:
+            #simpleType:uint
+            label = "SYSTEM_COMPAT_FREQ_MHZ"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0x8f2e0ff:
+            #simpleType:uint
+            label = "WOF_TABLE_OVERRIDE_UT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0xaa89323:
+            #simpleType:uint
+            label = "WOF_TABLE_OVERRIDE_WB"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0x3d086ed:
+            #simpleType:uint
+            label = "WOF_TABLE_OVERRIDE_PS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0xd53c70b:
+            #simpleType:uint
+            label = "WOF_TABLE_OVERRIDE_FF"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0x9133f91:
+            #simpleType:uint
+            label = "WOF_TABLE_OVERRIDE_SP"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0x3be1427:
+            #simpleType:uint
+            label = "WOF_TABLE_OVERRIDE_RC"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0x63c5ad2:
+            #simpleType:uint
+            label = "WOF_IO_START"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0x07e49ed:
+            #simpleType:uint
+            label = "WOF_IO_STEP"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0xf995f8c:
+            #simpleType:uint
+            label = "WOF_IO_COUNT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0x219028e:
+            #simpleType:uint
+            label = "VDN_VOLTAGE_MV"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0x6efcd46:
+            #simpleType:uint
+            label = "WOF_TDP_IO_INDEX"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xbdb2023:
-            pass #not readable
+            #simpleType:uint
+            label = "OMI_SPREAD_SPECTRUM"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xf4e4164:
-            pass #not readable
+            #simpleType:uint
+            label = "IOHS_SPREAD_SPECTRUM"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xd7d9779:
+            #simpleType:uint
+            label = "VIO_SET_POINT_MV"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
+        elif attrEnum == 0xf0ccd74:
+            #simpleType:uint
+            label = "IOHS_MFG_BAD_LANE_VEC"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
+        elif attrEnum == 0x978723d:
+            #simpleType:uint
+            label = "IOHS_MFG_BAD_LANE_VEC_VALID"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xbf1b8d3:
-            pass #not readable
+            #simpleType:uint
+            label = "IO_IOHS_CHANNEL_LOSS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xb4bc1d3:
-            pass #not readable
+            #simpleType:uint
+            label = "IO_OMI_CHANNEL_LOSS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x76d448e:
-            pass #not readable
+            #simpleType:uint
+            label = "IO_OMI_PRE1"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x16ca47a:
-            pass #not readable
+            #simpleType:uint
+            label = "IO_OMI_PRE2"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x8ab374a:
-            pass #not readable
+            #simpleType:uint
+            label = "IO_IOHS_PRE1"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x461601a:
-            pass #not readable
+            #simpleType:uint
+            label = "IO_IOHS_PRE2"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xa59d641:
-            pass #not readable
+            #simpleType:uint
+            label = "OMI_DL_GROUP_POS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x38da24e:
-            pass #not readable
+            #simpleType:uint
+            label = "OMI_DL_NUM"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x6c8bf3d:
-            pass #not readable
+            #simpleType:uint
+            label = "OCMB_COUNTER"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x9166bde:
-            pass #not readable
+            #simpleType:uint
+            label = "VIO_RAILS_NOT_POWERED"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x93e688d:
+            #simpleType:uint
+            label = "SAVED_PB_PTL_FIR_MASK"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
+        elif attrEnum == 0x32cec3d:
+            #simpleType:uint
+            label = "SAVED_DLP_FIR_MASK"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x763e8c5:
             #simpleType:uint
             label = "PROC_PCIE_PHB_ACTIVE"
@@ -1446,23 +2392,88 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0xc03d18e:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_PCIE_BAR_ENABLE"
+            traceEntry.append("[3]:")
+            for x in range(3):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x998757c:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_PCIE_MMIO_BAR0_BASE_ADDR_OFFSET"
+            traceEntry.append("[6]:")
+            for x in range(6):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x637e6da:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_PCIE_MMIO_BAR1_BASE_ADDR_OFFSET"
+            traceEntry.append("[6]:")
+            for x in range(6):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0xc2fdc31:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_PCIE_PHB_REGISTER_BASE_ADDR_OFFSET"
+            traceEntry.append("[6]:")
+            for x in range(6):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x6a37320:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_PCIE_BAR_SIZE"
+            traceEntry.append("[3]:")
+            for x in range(3):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
+        elif attrEnum == 0x84bd9ba:
+            #simpleType:uint
+            label = "PROC_PCIE_FW_VERSION_0"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0xb397e66:
+            #simpleType:uint
+            label = "PROC_PCIE_FW_VERSION_1"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x4b2ea2d:
-            pass #not readable
+            #simpleType:uint
+            label = "SYS0_REFCLOCK_RCVR_TERM"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x7172b53:
-            pass #not readable
+            #simpleType:uint
+            label = "SYS1_REFCLOCK_RCVR_TERM"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x4da870d:
-            pass #not readable
+            #simpleType:uint
+            label = "PCI0_REFCLOCK_RCVR_TERM"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x0602310:
-            pass #not readable
+            #simpleType:uint
+            label = "PCI1_REFCLOCK_RCVR_TERM"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x8467756:
+            #simpleType:uint
+            label = "SYS_CLK_NE_TERMINATION_SITE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x68de0ff:
+            #simpleType:uint
+            label = "SYS_CLK_NE_TERMINATION_STRENGTH"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x8e2c3d7:
             #simpleType:uint
             label = "CP_REFCLOCK_SELECT"
@@ -1470,31 +2481,83 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x18658a8:
-            pass #not readable
+            #simpleType:uint
+            label = "CLOCK_MUX0A_RCS_PLL_INPUT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x55f05dc:
-            pass #not readable
+            #simpleType:uint
+            label = "CLOCK_MUX0B_RCS_PLL_INPUT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xd94832a:
-            pass #not readable
+            #simpleType:uint
+            label = "CLOCK_MUX0C_RCS_PLL_INPUT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x597acd8:
-            pass #not readable
+            #simpleType:uint
+            label = "CLOCK_MUX0D_RCS_PLL_INPUT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xf1dc314:
-            pass #not readable
+            #simpleType:uint
+            label = "CLOCK_MUX1_INPUT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x69014fc:
-            pass #not readable
+            #simpleType:uint
+            label = "CLOCK_MUX2A_INPUT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x4313fe7:
-            pass #not readable
+            #simpleType:uint
+            label = "CLOCK_MUX2B_INPUT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x010fb1f:
-            pass #not readable
+            #simpleType:uint
+            label = "CLOCK_MUX3_INPUT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xa45db0f:
-            pass #not readable
+            #simpleType:uint
+            label = "CLOCK_MUX10_PAU_DPLL_INPUT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xac2958b:
-            pass #not readable
+            #simpleType:uint
+            label = "CLOCK_MUX11_NEST_DPLL_INPUT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x06065ab:
-            pass #not readable
+            #simpleType:uint
+            label = "CLOCK_MUX12_OMI_LCPLL_INPUT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x133d3ca:
-            pass #not readable
+            #simpleType:uint
+            label = "CLOCK_MUX13_OPT_133_SOURCE_INPUT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xed6a4b4:
-            pass #not readable
+            #simpleType:uint
+            label = "CLOCK_MUX14_OPT_156_SOURCE_INPUT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x4b21c2c:
             #simpleType:uint
             label = "CLOCK_MUX_IOHS_LCPLL_INPUT"
@@ -1503,7 +2566,11 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0xf1e3ebe:
-            pass #not readable
+            #simpleType:uint
+            label = "CLOCK_MUX23_PCI_INPUT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x280b074:
             #simpleType:uint
             label = "CLOCK_MUX_PCI_LCPLL_INPUT"
@@ -1512,14 +2579,45 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0xc13aa28:
-            pass #not readable
+            #simpleType:uint
+            label = "CLOCK_PLL_MUX_TOD"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xb6ad76f:
-            pass #not readable
+            #simpleType:uint
+            label = "HW543822_WAR_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x8f5a12c:
-            pass #not readable
+            #simpleType:uint
+            label = "DISABLE_TOD_SYNC_SPREAD"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xaa74969:
+            #simpleType:uint
+            label = "PROC_FORCE_MC_PLL_BANDSEL"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xd7aa47b:
+            #simpleType:uint
+            label = "PROC_MC_PLL_BANDSEL_OVERRIDE"
+            traceEntry.append("[8]:")
+            for x in range(8):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x6a47337:
             #simpleType:uint
             label = "SYSTEM_IPL_PHASE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x84844ff:
+            #simpleType:uint
+            label = "PROC_CHIP_IPL_PHASE"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
@@ -1536,9 +2634,17 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0xbeb4dd6:
-            pass #not readable
+            #simpleType:uint
+            label = "SBE_RUNTIME_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x738ed86:
-            pass #not readable
+            #simpleType:uint
+            label = "IS_SP_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xb1c3653:
             #simpleType:uint
             label = "DISABLE_HBBL_VECTORS"
@@ -1552,13 +2658,29 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0xad366df:
-            pass #not readable
+            #simpleType:uint
+            label = "BACKUP_MEASUREMENT_SEEPROM_SELECT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xc774921:
             #simpleType:uint
             label = "BOOT_FLAGS"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
+        elif attrEnum == 0xf13ce5f:
+            #simpleType:uint
+            label = "ALLOW_ATTR_OVERRIDES"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x2eda5ab:
+            #simpleType:uint
+            label = "NO_XSCOM_ENFORCEMENT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x92913ca:
             #simpleType:uint
             label = "SECURITY_ENABLE"
@@ -1614,10 +2736,20 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x3da9467:
-            pass #not readable
+            #simpleType:uint
+            label = "CORE_LPAR_MODE_POLICY"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xd990683:
             #simpleType:uint
             label = "CORE_LPAR_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x2afc21f:
+            #simpleType:uint
+            label = "ZERO_CORE_CHIP"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
@@ -1627,6 +2759,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
+        elif attrEnum == 0x4916096:
+            #simpleType:uint
+            label = "ECO_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x4c42b9b:
             #simpleType:uint
             label = "PROC_SBE_MASTER_CHIP"
@@ -1634,7 +2772,11 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x9761e43:
-            pass #not readable
+            #simpleType:uint
+            label = "SECTOR_BUFFER_STRENGTH"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x8ad2e2a:
             #simpleType:uint
             label = "NDL_MESHCTRL_SETUP"
@@ -1759,7 +2901,11 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0xf64aeb7:
-            pass #not readable
+            #simpleType:uint
+            label = "SBE_SYS_CONFIG"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x837f7ab:
             #simpleType:uint
             label = "EC_GARD"
@@ -1809,11 +2955,23 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
         elif attrEnum == 0xcab73ca:
-            pass #not readable
+            #simpleType:uint
+            label = "FREQ_CP_REFCLOCK_KHZ"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x47b7017:
-            pass #not readable
+            #simpleType:uint
+            label = "FREQ_DPLL_REFCLOCK_KHZ"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xbd6da05:
-            pass #not readable
+            #simpleType:uint
+            label = "FREQ_IO_REFCLOCK_KHZ"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x49b1d2e:
             #simpleType:uint
             label = "FREQ_CORE_FLOOR_MHZ"
@@ -1826,9 +2984,27 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
+        elif attrEnum == 0x2c34124:
+            #simpleType:uint
+            label = "MRW_FREQ_SYSTEM_CORE_FLOOR_MHZ"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x221fcbe:
             #simpleType:uint
             label = "FREQ_SYSTEM_CORE_CEILING_MHZ"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
+        elif attrEnum == 0x0166494:
+            #simpleType:uint
+            label = "FREQ_SYSTEM_CORE_FLOOR_MHZ_OVERRIDE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
+        elif attrEnum == 0xcc3d988:
+            #simpleType:uint
+            label = "FREQ_SYSTEM_CORE_CEILING_MHZ_OVERRIDE"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
@@ -1857,9 +3033,17 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
         elif attrEnum == 0xdafb56e:
-            pass #not readable
+            #simpleType:uint
+            label = "FREQ_IOHS_MHZ"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xc37b3da:
-            pass #not readable
+            #simpleType:uint
+            label = "FREQ_IOHS_LINK_MHZ"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xd6007fa:
             #simpleType:uint
             label = "FREQ_PROC_IOHS_MHZ"
@@ -1874,25 +3058,54 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
         elif attrEnum == 0x82f58e6:
-            pass #not readable
+            #simpleType:uint
+            label = "FREQ_PCIE_MHZ"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x3df05de:
             #simpleType:uint
             label = "SPI_BUS_DIV_REF"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+2)[0])
                 i += 2
+        elif attrEnum == 0x9d0a4a8:
+            #simpleType:uint
+            label = "TPM_SPI_BUS_DIV"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x01e31e8:
-            pass #not readable
+            #simpleType:uint
+            label = "MAX_ALLOWED_DIMM_FREQ"
+            traceEntry.append("[5]:")
+            for x in range(5):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x83fe364:
-            pass #not readable
+            #simpleType:uint
+            label = "REQUIRED_SYNCH_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x4e64981:
             #simpleType:uint
             label = "NOMINAL_FREQ_MHZ"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
+        elif attrEnum == 0x7ce5ba8:
+            #simpleType:uint
+            label = "WOFBASE_FREQ_MHZ"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x260fed1:
-            pass #not readable
+            #simpleType:uint
+            label = "SBE_BOOTLOADER_OFFSET"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x56cd34f:
             #simpleType:uint
             label = "SBE_MASTER_HRMOR_ADDRESS"
@@ -1900,11 +3113,23 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+8)[0])
                 i += 8
         elif attrEnum == 0x347eff6:
-            pass #not readable
+            #simpleType:uint
+            label = "HOSTBOOT_HRMOR_OFFSET"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0xcd1457b:
-            pass #not readable
+            #simpleType:uint
+            label = "SBE_BOOT_SIDE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x649a489:
-            pass #not readable
+            #simpleType:uint
+            label = "LPC_CONSOLE_INITIALIZED"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x0dfd293:
             #simpleType:uint
             label = "SECURE_SETTINGS"
@@ -1912,17 +3137,65 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0xaa3176d:
-            pass #not readable
+            #simpleType:uint
+            label = "SBE_HBBL_EXCEPTION_INSTRUCT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x8fc28b1:
-            pass #not readable
+            #simpleType:uint
+            label = "SBE_ADDR_KEY_STASH_ADDR"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x29bcc00:
-            pass #not readable
+            #simpleType:uint
+            label = "NUM_KEY_ADDR_PAIR"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x2dc6337:
+            #simpleType:uint
+            label = "SBE_MEASUREMENT_SEEPROM_VERSION"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
+        elif attrEnum == 0x806e2cd:
+            #simpleType:uint
+            label = "SBE_HW_KEY_HASH_ADDR"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
+        elif attrEnum == 0xff6c8c6:
+            #simpleType:uint
+            label = "SBE_MINIMUM_SECURE_VERSION"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xba8abbe:
-            pass #not readable
+            #simpleType:uint
+            label = "SBE_IMAGE_MINIMUM_VALID_ECS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x97c0210:
-            pass #not readable
+            #simpleType:uint
+            label = "MAX_SBE_SEEPROM_SIZE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
+        elif attrEnum == 0xf991bc4:
+            #simpleType:uint
+            label = "SBE_CUST_FORCE_MVPD_ONLY"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x5665717:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_DSTLCFG_MMIO_ADDRBIT_POS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x0dddcbc:
             #simpleType:uint
             label = "PROC_ENABLE_DL_TMPL_1"
@@ -1978,11 +3251,23 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x6f26f00:
-            pass #not readable
+            #simpleType:uint
+            label = "SYS_DISABLE_MCU_TIMEOUTS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x7bbb645:
-            pass #not readable
+            #simpleType:uint
+            label = "SYS_DISABLE_HWFM"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x309917b:
-            pass #not readable
+            #simpleType:uint
+            label = "SYS_ENABLE_MC_HW520600_X4CTR"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xf77c444:
             #simpleType:uint
             label = "PROC_OMI_OC_MAJOR_VER"
@@ -2001,34 +3286,115 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0x650fda1:
+            #simpleType:uint
+            label = "MFG_SCREEN_OMI_CRC_ALLOWED"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0x2d47f25:
+            #simpleType:uint
+            label = "MFG_SCREEN_OMI_EDPL_ALLOWED"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0x6a4f7bc:
+            #simpleType:uint
+            label = "MSS_MNFG_EDPL_TIME"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x2b21694:
+            #simpleType:uint
+            label = "MSS_MNFG_EDPL_THRESHOLD"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x3fe9f90:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_XSCOM_BAR_BASE_ADDR_OFFSET"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x57ab3c7:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_LPC_BAR_BASE_ADDR_OFFSET"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x8f1af9c:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_FSP_BAR_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xe3352f1:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_FSP_BAR_BASE_ADDR_OFFSET"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0xf8dd85b:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_FSP_BAR_SIZE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0xbcf856d:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_FSP_MMIO_MASK_SIZE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x8188de0:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_PAU_MMIO_BAR_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x3351ea6:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_PAU_MMIO_BAR_BASE_ADDR_OFFSET"
+            traceEntry.append("[8]:")
+            for x in range(8):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x8883a11:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_PSI_BRIDGE_BAR_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x206be4b:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_PSI_BRIDGE_BAR_BASE_ADDR_OFFSET"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x928d6c3:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_NX_RNG_BAR_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x037feec:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_NX_RNG_BAR_BASE_ADDR_OFFSET"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x6234fc5:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_NX_RNG_FAILED_INT_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xeb5a690:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_NX_RNG_FAILED_INT_ADDR"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0xb65b981:
             #simpleType:uint
             label = "PROC_NHTM_BAR_BASE_ADDR"
@@ -2086,37 +3452,101 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+8)[0])
                 i += 8
         elif attrEnum == 0x8cc8333:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_INT_IC_BAR_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xe6a19c7:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_INT_IC_BAR_BASE_ADDR_OFFSET"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x06716dc:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_INT_IC_BAR_PAGE_SIZE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x6ba66f8:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_INT_TM_BAR_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xa543693:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_INT_TM_BAR_BASE_ADDR_OFFSET"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x59d033d:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_INT_TM_BAR_PAGE_SIZE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x617e775:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_INT_NVPG_BAR_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xeb1a81f:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_INT_NVPG_BAR_PAGE_SIZE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xb9270af:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_INT_NVPG_BAR_BASE_ADDR_OFFSET"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0xbbb7d6f:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_INT_NVPG_BAR_SET_DIVISION_SELECTOR"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x343de3b:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_INT_NVPG_BAR_RANGE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x0f7ac8a:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_INT_NVC_BAR_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xc658f74:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_INT_NVC_BAR_PAGE_SIZE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x18ba600:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_INT_NVC_BAR_BASE_ADDR_OFFSET"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0xb25cde0:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_INT_NVC_BAR_SET_DIVISION_SELECTOR"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x570ac35:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_INT_NVC_BAR_RANGE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x0d33633:
             #simpleType:uint
             label = "EFF_DRAM_GEN"
@@ -2356,221 +3786,29 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x6809efd:
-            pass #not readable
-        elif attrEnum == 0xc7bc372:
             #simpleType:uint
-            label = "SCRATCH_UINT8_1"
+            label = "ROW_REPAIR_SUPPORTED_MRW"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
-        elif attrEnum == 0xe93419a:
-            #simpleType:uint
-            label = "SCRATCH_UINT8_2"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x656ee0f:
-            #simpleType:uint
-            label = "SCRATCH_UINT16_1"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+2)[0])
-                i += 2
-        elif attrEnum == 0xcb3bded:
-            #simpleType:uint
-            label = "SCRATCH_UINT16_2"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+2)[0])
-                i += 2
-        elif attrEnum == 0x782c053:
-            #simpleType:uint
-            label = "SCRATCH_UINT32_1"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+4)[0])
-                i += 4
-        elif attrEnum == 0x002156b:
-            #simpleType:uint
-            label = "SCRATCH_UINT32_2"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+4)[0])
-                i += 4
-        elif attrEnum == 0xeee9926:
-            #simpleType:uint
-            label = "SCRATCH_UINT64_1"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+8)[0])
-                i += 8
-        elif attrEnum == 0x18a17a2:
-            #simpleType:uint
-            label = "SCRATCH_UINT64_2"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+8)[0])
-                i += 8
-        elif attrEnum == 0xae204e8:
-            #simpleType:uint
-            label = "SCRATCH_UINT8_ARRAY_1"
-            traceEntry.append("[32]:")
-            for x in range(32):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0xdaba3f6:
-            #simpleType:uint
-            label = "SCRATCH_UINT8_ARRAY_2"
-            traceEntry.append("[2][3][4]:")
-            for x in range(24):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0xe9713da:
-            #simpleType:uint
-            label = "SCRATCH_UINT16_ARRAY_1"
-            traceEntry.append("[16]:")
-            for x in range(16):
-                traceEntry.append(hexConcat(data, i, i+2)[0])
-                i += 2
-        elif attrEnum == 0xc0571d2:
-            #simpleType:uint
-            label = "SCRATCH_UINT16_ARRAY_2"
-            traceEntry.append("[2][3][2]:")
-            for x in range(12):
-                traceEntry.append(hexConcat(data, i, i+2)[0])
-                i += 2
-        elif attrEnum == 0xe572010:
-            #simpleType:uint
-            label = "SCRATCH_UINT32_ARRAY_1"
-            traceEntry.append("[8]:")
-            for x in range(8):
-                traceEntry.append(hexConcat(data, i, i+4)[0])
-                i += 4
-        elif attrEnum == 0xf014872:
-            #simpleType:uint
-            label = "SCRATCH_UINT32_ARRAY_2"
-            traceEntry.append("[2][3]:")
-            for x in range(6):
-                traceEntry.append(hexConcat(data, i, i+4)[0])
-                i += 4
-        elif attrEnum == 0x4403d2c:
-            #simpleType:uint
-            label = "SCRATCH_UINT64_ARRAY_1"
-            traceEntry.append("[4]:")
-            for x in range(4):
-                traceEntry.append(hexConcat(data, i, i+8)[0])
-                i += 8
-        elif attrEnum == 0x24d2ff8:
-            #simpleType:uint
-            label = "SCRATCH_UINT64_ARRAY_2"
-            traceEntry.append("[2][2]:")
-            for x in range(4):
-                traceEntry.append(hexConcat(data, i, i+8)[0])
-                i += 8
-        elif attrEnum == 0xdf566d7:
-            #simpleType:uint
-            label = "SCRATCH_INT8_1"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x5d3127f:
-            #simpleType:uint
-            label = "SCRATCH_INT8_2"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0xe9d2ef4:
-            #simpleType:uint
-            label = "SCRATCH_INT16_1"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i+x, i+2)[0])
-                i += 2
-        elif attrEnum == 0xd1894f0:
-            #simpleType:uint
-            label = "SCRATCH_INT16_2"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i+x, i+2)[0])
-                i += 2
-        elif attrEnum == 0x738e066:
-            #simpleType:uint
-            label = "SCRATCH_INT32_1"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+4)[0])
-                i += 4
-        elif attrEnum == 0x14868e6:
-            #simpleType:uint
-            label = "SCRATCH_INT32_2"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+4)[0])
-                i += 4
-        elif attrEnum == 0xad61d85:
-            #simpleType:uint
-            label = "SCRATCH_INT64_1"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+8)[0])
-                i += 8
-        elif attrEnum == 0x10e4b80:
-            #simpleType:uint
-            label = "SCRATCH_INT64_2"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+8)[0])
-                i += 8
-        elif attrEnum == 0x03f242e:
-            #simpleType:uint
-            label = "SCRATCH_INT8_ARRAY_1"
-            traceEntry.append("[32]:")
-            for x in range(32):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x4082afe:
-            #simpleType:uint
-            label = "SCRATCH_INT8_ARRAY_2"
-            traceEntry.append("[2][3][4]:")
-            for x in range(24):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x04c90e8:
-            #simpleType:uint
-            label = "SCRATCH_INT16_ARRAY_1"
-            traceEntry.append("[16]:")
-            for x in range(16):
-                traceEntry.append(hexConcat(data, i+x, i+2)[0])
-                i += 2
-        elif attrEnum == 0x04dc667:
-            #simpleType:uint
-            label = "SCRATCH_INT16_ARRAY_2"
-            traceEntry.append("[2][3][2]:")
-            for x in range(12):
-                traceEntry.append(hexConcat(data, i+x, i+2)[0])
-                i += 2
-        elif attrEnum == 0xf5c9611:
-            #simpleType:uint
-            label = "SCRATCH_INT32_ARRAY_1"
-            traceEntry.append("[8]:")
-            for x in range(8):
-                traceEntry.append(hexConcat(data, i, i+4)[0])
-                i += 4
-        elif attrEnum == 0x408451a:
-            #simpleType:uint
-            label = "SCRATCH_INT32_ARRAY_2"
-            traceEntry.append("[2][3]:")
-            for x in range(6):
-                traceEntry.append(hexConcat(data, i, i+4)[0])
-                i += 4
-        elif attrEnum == 0x66c62f7:
-            #simpleType:uint
-            label = "SCRATCH_INT64_ARRAY_1"
-            traceEntry.append("[4]:")
-            for x in range(4):
-                traceEntry.append(hexConcat(data, i, i+8)[0])
-                i += 8
-        elif attrEnum == 0x0e62699:
-            #simpleType:uint
-            label = "SCRATCH_INT64_ARRAY_2"
-            traceEntry.append("[2][2]:")
-            for x in range(4):
-                traceEntry.append(hexConcat(data, i, i+8)[0])
-                i += 8
         elif attrEnum == 0x177f39f:
-            pass #not readable
+            #simpleType:uint
+            label = "I2C_DEV_TYPE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x77c5cd3:
-            pass #not readable
+            #simpleType:uint
+            label = "I2C_SUB_POS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x80817dc:
-            pass #not readable
+            #simpleType:uint
+            label = "FAPI_POS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x4367508:
             #simpleType:uint
             label = "IS_SIMULATION"
@@ -2578,7 +3816,11 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x6134e50:
-            pass #not readable
+            #simpleType:uint
+            label = "EXECUTION_PLATFORM"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x2f0f359:
             #simpleType:uint
             label = "MFG_FLAGS"
@@ -2635,7 +3877,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x552f904:
-            pass #not readable
+            #simpleType:uint
+            label = "MEM_VPD_DQ_MAP"
+            traceEntry.append("[72]:")
+            for x in range(72):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x32c01e3:
             #simpleType:uint
             label = "MEM_DIMM_DDR4_F0RC0F"
@@ -2760,24 +4007,56 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x8990bb0:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_OMI_EDPL_DISABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x4a72e5b:
             #simpleType:uint
             label = "MEM_IGNORE_PLUG_RULES"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0x8ec531c:
+            #simpleType:uint
+            label = "MEM_IGNORE_PLUG_RULES_DIMM_SIZE_MIX"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xe756f73:
+            #simpleType:uint
+            label = "MEM_IGNORE_PLUG_RULES_DIMM_HEIGHT_MIX"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x42af08e:
-            pass #not readable
+            #simpleType:uint
+            label = "OMI_DL_PREIPL_PRBS_TIME"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x6992256:
             #simpleType:uint
             label = "OMI_X4_DEGRADE_ACTION"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0x6c0c2a9:
+            #simpleType:uint
+            label = "OMI_CRC_DEBUG"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x39e6bbf:
             #simpleType:uint
             label = "ENABLE_FIR_UNMASKING"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x3c26b28:
+            #simpleType:uint
+            label = "MSS_IS_APOLLO"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
@@ -2874,6 +4153,13 @@ def ErrlUserDetailsParserAttribute(ver, data):
         elif attrEnum == 0x486d205:
             #simpleType:uint
             label = "MEM_SI_MC_DRV_EQ_DQ_DQS"
+            traceEntry.append("[2][4]:")
+            for x in range(8):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xf908b6e:
+            #simpleType:uint
+            label = "MEM_SI_PHY_EQUALIZATION"
             traceEntry.append("[2][4]:")
             for x in range(8):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
@@ -3008,6 +4294,13 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(2):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0xbea907f:
+            #simpleType:uint
+            label = "MEM_DIMM_DDR4_F1RC2X"
+            traceEntry.append("[2]:")
+            for x in range(2):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xaa68a22:
             #simpleType:uint
             label = "MEM_DIMM_DDR4_F1RC3X"
@@ -3043,88 +4336,246 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(2):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
-        elif attrEnum == 0x23d66fa:
-            pass #not readable
         elif attrEnum == 0x8fe48a2:
-            pass #not readable
+            #simpleType:uint
+            label = "MEM_MRW_IS_PLANAR"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x5fd9713:
-            pass #not readable
-        elif attrEnum == 0xbe06c50:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0xc0f9335:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MRW_PWR_INTERCEPT"
+            traceEntry.append("[100]:")
+            for x in range(100):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0xb3e8ad9:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MRW_PWR_SLOPE"
+            traceEntry.append("[100]:")
+            for x in range(100):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0xbd13798:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MRW_REFRESH_RATE_REQUEST"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xd4bbddc:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x07bf802:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT_IDLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x0fb9e1f:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MRW_MEM_M_DRAM_CLOCKS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x61d3421:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MRW_MAX_DRAM_DATABUS_UTIL"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x6d05234:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MRW_POWER_CONTROL_REQUESTED"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x7f51090:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MRW_IDLE_POWER_CONTROL_REQUESTED"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xe5e91b7:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x1949903:
-            pass #not readable
+            #simpleType:uint
+            label = "MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR3"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x414abdc:
-            pass #not readable
+            #simpleType:uint
+            label = "MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR4"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x3e06dcd:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MRW_MAX_NUMBER_DIMMS_POSSIBLE_PER_VMEM_REGULATOR"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xfc9bdd9:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MRW_AVDD_OFFSET_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xc62f1ae:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MRW_VDD_OFFSET_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xa15fc01:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MRW_VCS_OFFSET_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xf844545:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MRW_VPP_OFFSET_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xd7f8bcd:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MRW_VDDR_OFFSET_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x87bdfb9:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MRW_FINE_REFRESH_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x99f7795:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MRW_TEMP_REFRESH_RANGE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x4f60a5e:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MRW_RESET_DELAY_BEFORE_CAL"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x9c3a3d6:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MRW_PERIODIC_MEMCAL_MODE_OPTIONS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x1fddb6b:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MRW_PERIODIC_ZQCAL_MODE_OPTIONS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x2997eae:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MRW_DRAM_2N_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x7b7fc78:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MRW_DRAM_WRITE_CRC"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x4c3dbf1:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MRW_TEMP_REFRESH_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x86bad95:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MRW_FORCE_BCMODE_OFF"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x424be69:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MRW_NVDIMM_PLUG_RULES"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x40bfda4:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MRW_ALLOW_UNSUPPORTED_RCW"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x72e61a8:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MRW_SUPPORTED_DRAM_WIDTH"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x948b8b8:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MRW_OCMB_THERMAL_MEMORY_POWER_LIMIT"
+            traceEntry.append("[25]:")
+            for x in range(25):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0xbc51273:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MRW_OCMB_PWR_SLOPE"
+            traceEntry.append("[50]:")
+            for x in range(50):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x5c0af49:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MRW_OCMB_PWR_INTERCEPT"
+            traceEntry.append("[50]:")
+            for x in range(50):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0xafeb5ce:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MRW_OCMB_CURRENT_CURVE_WITH_LIMIT"
+            traceEntry.append("[25]:")
+            for x in range(25):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x2b5f6b7:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MRW_SAFEMODE_DRAM_DATABUS_UTIL"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x2b742a3:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MRW_THERMAL_SENSOR_POLLING_PERIOD"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x939f9be:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MRW_DIMM_SLOT_AIRFLOW"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x6b341e3:
             #simpleType:uint
             label = "MEM_PORT_POS_OF_FAIL_THROTTLE"
@@ -3132,7 +4583,31 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+8)[0])
                 i += 8
         elif attrEnum == 0x464339e:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MRW_OCMB_RESET_GROUP"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x9f5b11a:
+            #simpleType:uint
+            label = "MSS_MRW_DIMM_HEIGHT_MIXING_POLICY"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x23d66fa:
+            #simpleType:uint
+            label = "MSS_MRW_SUPPORTED_FREQ"
+            traceEntry.append("[4]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
+        elif attrEnum == 0xbe06c50:
+            #simpleType:uint
+            label = "MSS_MRW_THERMAL_MEMORY_POWER_LIMIT"
+            traceEntry.append("[10]:")
+            for x in range(10):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x9cf4fc4:
             #simpleType:uint
             label = "MEM_EFF_DRAM_GEN"
@@ -3487,37 +4962,101 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x73cc90f:
-            pass #not readable
+            #simpleType:uint
+            label = "EXPLR_ENABLE_US_TMPL_1"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x1865b64:
-            pass #not readable
+            #simpleType:uint
+            label = "EXPLR_ENABLE_US_TMPL_5"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x50892df:
-            pass #not readable
+            #simpleType:uint
+            label = "EXPLR_ENABLE_US_TMPL_9"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x8063772:
-            pass #not readable
+            #simpleType:uint
+            label = "EXPLR_ENABLE_US_TMPL_A"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x0025f83:
-            pass #not readable
+            #simpleType:uint
+            label = "EXPLR_ENABLE_US_TMPL_B"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x69ce066:
-            pass #not readable
+            #simpleType:uint
+            label = "EXPLR_TMPL_0_PACING"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xde60dc4:
-            pass #not readable
+            #simpleType:uint
+            label = "EXPLR_TMPL_1_PACING"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x0fd5c68:
-            pass #not readable
+            #simpleType:uint
+            label = "EXPLR_TMPL_5_PACING"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x69fbe43:
-            pass #not readable
+            #simpleType:uint
+            label = "EXPLR_TMPL_9_PACING"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x19bf475:
-            pass #not readable
+            #simpleType:uint
+            label = "EXPLR_TMPL_B_PACING"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x1d2e7e8:
-            pass #not readable
+            #simpleType:uint
+            label = "EXPLR_SHRT_BACKOFF_TIMER"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x47688d7:
-            pass #not readable
+            #simpleType:uint
+            label = "EXPLR_METADATA_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x515fe7b:
-            pass #not readable
+            #simpleType:uint
+            label = "EXPLR_PASID_BASE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x9a283f7:
-            pass #not readable
+            #simpleType:uint
+            label = "EXPLR_ACTAG_BASE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xe6f5561:
-            pass #not readable
+            #simpleType:uint
+            label = "EXPLR_AFU_ACTAG_LEN"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xd3a4b37:
-            pass #not readable
+            #simpleType:uint
+            label = "EXPLR_PASID_LEN"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x365d06b:
             #simpleType:uint
             label = "MEM_EFF_PSTATES"
@@ -3713,7 +5252,11 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x82cf1be:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_OCMB_ENTERPRISE_POLICY"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x4d84e76:
             #simpleType:uint
             label = "MSS_OCMB_NONENTERPRISE_MODE_OVERRIDE"
@@ -3721,20 +5264,17 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x1a9b1f1:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_OCMB_HALF_DIMM_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x5a56a24:
             #simpleType:uint
             label = "MSS_OCMB_HALF_DIMM_MODE_OVERRIDE"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
-        elif attrEnum == 0x7fa6c11:
-            #simpleType:uint
-            label = "MSS_MEM_MVPD_FWMS"
-            traceEntry.append("[8]:")
-            for x in range(8):
-                traceEntry.append(hexConcat(data, i, i+4)[0])
-                i += 4
         elif attrEnum == 0xba62227:
             #simpleType:uint
             label = "MEM_EXP_INIT_VREF_DQ"
@@ -3802,13 +5342,29 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x2851ca1:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_OCMB_EXP_STRUCT_MMIO_ENDIAN_CTRL"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xb88d1cf:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_OCMB_EXP_STRUCT_ENDIAN"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x00ea92e:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_OCMB_EXP_STRUCT_MMIO_WORD_SWAP"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xb36fcfa:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_OCMB_EXP_OMI_CFG_ENDIAN_CTRL"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x96b7c4b:
             #simpleType:uint
             label = "MSS_OCMB_ECID"
@@ -3843,13 +5399,29 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x203d77f:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_OCMB_CHECKSTOP_OBJ_HANDLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0xa432982:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_OCMB_RECOV_OBJ_HANDLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x09d1306:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_OCMB_SPECATTN_OBJ_HANDLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x448c629:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_OCMB_APPINTR_OBJ_HANDLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0xc470648:
             #simpleType:uint
             label = "MSS_CHECK_FOR_READY_TIMEOUT"
@@ -3857,11 +5429,29 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+2)[0])
                 i += 2
         elif attrEnum == 0x5d966f9:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_POST_MEMDIAGS_READ_SUBTEST"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x5ed4258:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_POST_MEMDIAGS_READ_SUBTEST_FAIL_BEHAVIOR"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xc87684a:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_OCMB_DISABLE_THERM_INIT_READ"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x08765f3:
+            #simpleType:uint
+            label = "MSS_EXP_FW_API_VERSION"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x38a9ed0:
             #simpleType:uint
             label = "MSS_EXP_FW_VERSION_A"
@@ -3880,6 +5470,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
+        elif attrEnum == 0xc4be98e:
+            #simpleType:uint
+            label = "MSS_EXP_COMM_STATE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x53e9209:
             #simpleType:uint
             label = "MSS_EXP_RESP_DDR4_F0RC00"
@@ -4226,6 +5822,43 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0x501dc5e:
+            #simpleType:uint
+            label = "MSS_EXP_OMI_CDR_BW_OVERRIDE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xebc1836:
+            #simpleType:uint
+            label = "MSS_EXP_OMI_CDR_OFFSET"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x0adf7aa:
+            #simpleType:uint
+            label = "MSS_EXP_OMI_CDR_OFFSET_LANE_MASK"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xb33ecf6:
+            #simpleType:uint
+            label = "MSS_EXP_INTR_MASK_DISABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x3cedd73:
+            #simpleType:uint
+            label = "MSS_EXP_I2C_FW_LOG_DUMP_DISABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x73ade63:
+            #simpleType:uint
+            label = "MSS_EXP_SERIAL_NUMBER"
+            traceEntry.append("[26]:")
+            for x in range(26):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x97d528f:
             #simpleType:uint
             label = "EXP_MEM_THROTTLED_N_COMMANDS_PER_PORT"
@@ -4251,7 +5884,11 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+2)[0])
                 i += 2
         elif attrEnum == 0x2dd7524:
-            pass #not readable
+            #simpleType:uint
+            label = "EXP_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x2ab46d8:
             #simpleType:uint
             label = "EXP_RUNTIME_MEM_M_DRAM_CLOCKS"
@@ -4305,23 +5942,59 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
         elif attrEnum == 0x4a69bbd:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_OCMB_EXP_BOOT_CONFIG_FW_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x4c3ccba:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_OCMB_EXP_BOOT_CONFIG_OPENCAPI_LOOPBACK_TEST"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xd4a3c59:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_OCMB_EXP_BOOT_CONFIG_TRANSPORT_LAYER"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x45764b5:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_OCMB_EXP_BOOT_CONFIG_DL_LAYER_BOOT_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xa31ec38:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_OCMB_EXP_BOOT_CONFIG_DFE_DISABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x725d3a6:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_OCMB_EXP_BOOT_CONFIG_LANE_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x134e3f0:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_OCMB_EXP_BOOT_CONFIG_SERDES_FREQUENCY"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x7e23d04:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_OCMB_EXP_BOOT_CONFIG_ADAPTATION_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xcb9c4fa:
-            pass #not readable
+            #simpleType:uint
+            label = "OMI_FFE_SETTINGS_COMMAND"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xaa4803f:
             #simpleType:uint
             label = "OMI_FFE_PRE_CURSOR"
@@ -4761,9 +6434,17 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0xc1598bd:
-            pass #not readable
+            #simpleType:uint
+            label = "FREQ_CORE_NOMINAL_MHZ"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x61f8882:
-            pass #not readable
+            #simpleType:uint
+            label = "BOOT_FREQ_MHZ"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xb3adef2:
             #simpleType:uint
             label = "RISK_LEVEL"
@@ -4802,7 +6483,11 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
         elif attrEnum == 0xc0f898a:
-            pass #not readable
+            #simpleType:uint
+            label = "OPTICS_CONFIG_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x7ce66ef:
             #simpleType:uint
             label = "MSS_RDVREF_CAL_ENABLE"
@@ -4830,11 +6515,23 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0xe226c94:
-            pass #not readable
+            #simpleType:uint
+            label = "PERF_24x7_INVOCATION_TIME_MS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xbe90420:
-            pass #not readable
+            #simpleType:uint
+            label = "CME_INSTRUCTION_TRACE_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xa41ce38:
-            pass #not readable
+            #simpleType:uint
+            label = "SYS_VFRT_STATIC_DATA_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xaa3902b:
             #simpleType:uint
             label = "IO_OBUS_DCCAL_FLAGS"
@@ -4842,13 +6539,29 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x9ef1783:
-            pass #not readable
+            #simpleType:uint
+            label = "IO_O_DEBUG"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xd54b4ac:
-            pass #not readable
+            #simpleType:uint
+            label = "IO_OBUS_TX_MARGIN_RATIO"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xd0b5036:
-            pass #not readable
+            #simpleType:uint
+            label = "IO_OBUS_TX_FFE_PRECURSOR"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x1952ef4:
-            pass #not readable
+            #simpleType:uint
+            label = "IO_OBUS_TX_FFE_POSTCURSOR"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x18d405f:
             #simpleType:uint
             label = "EFF_RANK_GROUP_OVERRIDE"
@@ -4857,19 +6570,47 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+2)[0])
                 i += 2
         elif attrEnum == 0x213ac30:
-            pass #not readable
+            #simpleType:uint
+            label = "IO_X_MFG_CHK"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xbbf242e:
-            pass #not readable
+            #simpleType:uint
+            label = "IO_X_MFG_MIN_EYE_WIDTH"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x5121315:
-            pass #not readable
+            #simpleType:uint
+            label = "IO_O_MFG_STRESS_PR_OFFSET_EVEN"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x1ca612d:
-            pass #not readable
+            #simpleType:uint
+            label = "IO_O_MFG_STRESS_PR_OFFSET_ODD"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x2bfa1f9:
-            pass #not readable
+            #simpleType:uint
+            label = "CME_CHTM_TRACE_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xa030cff:
-            pass #not readable
+            #simpleType:uint
+            label = "CME_CHTM_TRACE_MEMORY_CONFIG"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x36ea053:
-            pass #not readable
+            #simpleType:uint
+            label = "SYSTEM_VDM_DISABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xd2ee0c7:
             #simpleType:uint
             label = "VDM_ENABLED"
@@ -4889,7 +6630,11 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
         elif attrEnum == 0x2996256:
-            pass #not readable
+            #simpleType:uint
+            label = "SYSTEM_IVRM_DISABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x49b21cc:
             #simpleType:uint
             label = "IVRM_ENABLED"
@@ -4897,13 +6642,29 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0xa7a6601:
-            pass #not readable
+            #simpleType:uint
+            label = "WOF_ENABLE_FRATIO"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x58a7917:
-            pass #not readable
+            #simpleType:uint
+            label = "WOF_ENABLE_VRATIO"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x93b8597:
-            pass #not readable
+            #simpleType:uint
+            label = "WOF_VRATIO_SELECT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x787d424:
-            pass #not readable
+            #simpleType:uint
+            label = "NEST_LEAKAGE_PERCENT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x775e116:
             #simpleType:uint
             label = "MSS_RUN_DCD_CALIBRATION"
@@ -4918,9 +6679,17 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x5c4a180:
-            pass #not readable
+            #simpleType:uint
+            label = "IO_O_MFG_CHK"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xd9db2d5:
-            pass #not readable
+            #simpleType:uint
+            label = "IO_O_MFG_MIN_EYE_WIDTH"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x655aa2b:
             #simpleType:uint
             label = "SYSTEM_CORECACHE_SKEWADJ_DISABLE"
@@ -4953,9 +6722,17 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0xa607f58:
-            pass #not readable
+            #simpleType:uint
+            label = "IO_XBUS_CHAN_EQ"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x0d1a22c:
-            pass #not readable
+            #simpleType:uint
+            label = "IO_O_CHANNEL_TYPE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x02190b7:
             #simpleType:uint
             label = "NEST_PLL_BUCKET"
@@ -4963,7 +6740,118 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0xb5afcd7:
-            pass #not readable
+            #nativeType:EntityPath
+            label = "AFFINITY_PATH"
+            pathType = { 0x01: "Logical:",
+                         0x02: "Physical:",
+                         0x03: "Device:",
+                         0x04: "Power:" }
+
+            elementInstance = {
+                              0x00: "/NA",
+                              0x01: "/Sys",
+                              0x02: "/Node",
+                              0x03: "/DIMM",
+                              0x04: "/Membuf",
+                              0x05: "/Proc",
+                              0x06: "/EX",
+                              0x07: "/Core",
+                              0x08: "/L2",
+                              0x09: "/L3",
+                              0x0A: "/L4",
+                              0x0B: "/MCS",
+                              0x0D: "/MBA",
+                              0x0E: "/XBUS",
+                              0x0F: "/ABUS",
+                              0x10: "/PCI",
+                              0x11: "/DPSS",
+                              0x12: "/APSS",
+                              0x13: "/OCC",
+                              0x14: "/PSI",
+                              0x15: "/FSP",
+                              0x16: "/PNOR",
+                              0x17: "/OSC",
+                              0x18: "/TODCLK",
+                              0x19: "/CONTROL_NODE",
+                              0x1A: "/OSCREFCLK",
+                              0x1B: "/OSCPCICLK",
+                              0x1C: "/REFCLKENDPT",
+                              0x1D: "/PCICLKENDPT",
+                              0x1E: "/NX",
+                              0x1F: "/PORE",
+                              0x20: "/PCIESWITCH",
+                              0x21: "/CAPP",
+                              0x22: "/FSI",
+                              0x23: "/EQ",
+                              0x24: "/MCA",
+                              0x25: "/MCBIST",
+                              0x26: "/MI",
+                              0x27: "/DMI",
+                              0x28: "/OBUS",
+                              0x2A: "/SBE",
+                              0x2B: "/PPE",
+                              0x2C: "/PERV",
+                              0x2D: "/PEC",
+                              0x2E: "/PHB",
+                              0x2F: "/SYSREFCLKENDPT",
+                              0x30: "/MFREFCLKENDPT",
+                              0x31: "/TPM",
+                              0x32: "/SP",
+                              0x33: "/UART",
+                              0x34: "/PS",
+                              0x35: "/FAN",
+                              0x36: "/VRM",
+                              0x37: "/USB",
+                              0x38: "/ETH",
+                              0x39: "/PANEL",
+                              0x3A: "/BMC",
+                              0x3B: "/FLASH",
+                              0x3C: "/SEEPROM",
+                              0x3D: "/TMP",
+                              0x3E: "/GPIO_EXPANDER",
+                              0x3F: "/POWER_SEQUENCER",
+                              0x40: "/RTC",
+                              0x41: "/FANCTLR",
+                              0x42: "/OBUS_BRICK",
+                              0x43: "/NPU",
+                              0x44: "/MC",
+                              0x45: "/TEST_FAIL",
+                              0x46: "/MFREFCLK",
+                              0x47: "/SMPGROUP",
+                              0x48: "/OMI",
+                              0x49: "/MCC",
+                              0x4A: "/OMIC",
+                              0x4B: "/OCMB_CHIP",
+                              0x4C: "/MEM_PORT",
+                              0x4D: "/I2C_MUX",
+                              0x4E: "/PMIC",
+                              0x4F: "/NMMU",
+                              0x50: "/PAU",
+                              0x51: "/IOHS",
+                              0x52: "/PAUC",
+                              0x53: "/FC",
+                              0x54: "/LPCREFCLKENDPT",
+                              0x55: "/GENERIC_I2C_DEVICE",
+                              0x56: "/LAST_IN_RANGE",
+                              }
+            pType = data[i]
+            i += 1
+            start+=1
+            pathString = pathType.get(pType, "Unknown:")
+            pathSize = data[i]
+            i += 1
+            for x in range(0, pathSize, 2):
+                pathString += elementInstance.get(data[start], "/UNKNOWN")
+                pathString += str(data[start+1])
+                start+=2
+
+            return pathString, start+1
+        elif attrEnum == 0x59c3ee2:
+            #simpleType:uint
+            label = "ALLOW_EEPROM_WRITES"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x06e992f:
             #simpleType:uint
             label = "ALL_MCS_IN_INTERLEAVING_GROUP"
@@ -4971,11 +6859,124 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x9008e43:
-            pass #not readable
+            #nativeType:EntityPath
+            label = "ALTFSI_MASTER_CHIP"
+            pathType = { 0x01: "Logical:",
+                         0x02: "Physical:",
+                         0x03: "Device:",
+                         0x04: "Power:" }
+
+            elementInstance = {
+                              0x00: "/NA",
+                              0x01: "/Sys",
+                              0x02: "/Node",
+                              0x03: "/DIMM",
+                              0x04: "/Membuf",
+                              0x05: "/Proc",
+                              0x06: "/EX",
+                              0x07: "/Core",
+                              0x08: "/L2",
+                              0x09: "/L3",
+                              0x0A: "/L4",
+                              0x0B: "/MCS",
+                              0x0D: "/MBA",
+                              0x0E: "/XBUS",
+                              0x0F: "/ABUS",
+                              0x10: "/PCI",
+                              0x11: "/DPSS",
+                              0x12: "/APSS",
+                              0x13: "/OCC",
+                              0x14: "/PSI",
+                              0x15: "/FSP",
+                              0x16: "/PNOR",
+                              0x17: "/OSC",
+                              0x18: "/TODCLK",
+                              0x19: "/CONTROL_NODE",
+                              0x1A: "/OSCREFCLK",
+                              0x1B: "/OSCPCICLK",
+                              0x1C: "/REFCLKENDPT",
+                              0x1D: "/PCICLKENDPT",
+                              0x1E: "/NX",
+                              0x1F: "/PORE",
+                              0x20: "/PCIESWITCH",
+                              0x21: "/CAPP",
+                              0x22: "/FSI",
+                              0x23: "/EQ",
+                              0x24: "/MCA",
+                              0x25: "/MCBIST",
+                              0x26: "/MI",
+                              0x27: "/DMI",
+                              0x28: "/OBUS",
+                              0x2A: "/SBE",
+                              0x2B: "/PPE",
+                              0x2C: "/PERV",
+                              0x2D: "/PEC",
+                              0x2E: "/PHB",
+                              0x2F: "/SYSREFCLKENDPT",
+                              0x30: "/MFREFCLKENDPT",
+                              0x31: "/TPM",
+                              0x32: "/SP",
+                              0x33: "/UART",
+                              0x34: "/PS",
+                              0x35: "/FAN",
+                              0x36: "/VRM",
+                              0x37: "/USB",
+                              0x38: "/ETH",
+                              0x39: "/PANEL",
+                              0x3A: "/BMC",
+                              0x3B: "/FLASH",
+                              0x3C: "/SEEPROM",
+                              0x3D: "/TMP",
+                              0x3E: "/GPIO_EXPANDER",
+                              0x3F: "/POWER_SEQUENCER",
+                              0x40: "/RTC",
+                              0x41: "/FANCTLR",
+                              0x42: "/OBUS_BRICK",
+                              0x43: "/NPU",
+                              0x44: "/MC",
+                              0x45: "/TEST_FAIL",
+                              0x46: "/MFREFCLK",
+                              0x47: "/SMPGROUP",
+                              0x48: "/OMI",
+                              0x49: "/MCC",
+                              0x4A: "/OMIC",
+                              0x4B: "/OCMB_CHIP",
+                              0x4C: "/MEM_PORT",
+                              0x4D: "/I2C_MUX",
+                              0x4E: "/PMIC",
+                              0x4F: "/NMMU",
+                              0x50: "/PAU",
+                              0x51: "/IOHS",
+                              0x52: "/PAUC",
+                              0x53: "/FC",
+                              0x54: "/LPCREFCLKENDPT",
+                              0x55: "/GENERIC_I2C_DEVICE",
+                              0x56: "/LAST_IN_RANGE",
+                              }
+            pType = data[i]
+            i += 1
+            start+=1
+            pathString = pathType.get(pType, "Unknown:")
+            pathSize = data[i]
+            i += 1
+            for x in range(0, pathSize, 2):
+                pathString += elementInstance.get(data[start], "/UNKNOWN")
+                pathString += str(data[start+1])
+                start+=2
+
+            return pathString, start+1
         elif attrEnum == 0x3d7757a:
-            pass #not readable
+            #simpleType:uint
+            label = "ALTFSI_MASTER_PORT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xc794239:
-            pass #not readable
+            #simpleType:uint
+            label = "ASYNC_NEST_FREQ_MHZ"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x2b044eb:
             #simpleType:uint
             label = "ATTN_AREA_1_ADDR"
@@ -4989,7 +6990,11 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+8)[0])
                 i += 8
         elif attrEnum == 0xc710685:
-            pass #not readable
+            #simpleType:uint
+            label = "AVDD_ID"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0xf873da7:
             #simpleType:uint
             label = "BLOCK_SPEC_DECONFIG"
@@ -4997,9 +7002,39 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0xe3947ec:
-            pass #not readable
+            #simpleType:uint
+            label = "BMC_FRU_ID"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xb728b91:
-            pass #not readable
+            #simpleType:enum
+            label = "CDM_DOMAIN"
+            attr, i=intConcat(data, i, i+4)
+            if attr == 0x00000000:
+                 traceEntry.append("CDM_DOMAIN_NONE")
+            elif attr == 0x00000001:
+                 traceEntry.append("CDM_DOMAIN_CPU")
+            elif attr == 0x00000002:
+                 traceEntry.append("CDM_DOMAIN_DIMM")
+            elif attr == 0x00000003:
+                 traceEntry.append("CDM_DOMAIN_FABRIC")
+            elif attr == 0x00000004:
+                 traceEntry.append("CDM_DOMAIN_MEM")
+            elif attr == 0x00000005:
+                 traceEntry.append("CDM_DOMAIN_IO")
+            elif attr == 0x00000006:
+                 traceEntry.append("CDM_DOMAIN_NODE")
+            elif attr == 0x00000007:
+                 traceEntry.append("CDM_DOMAIN_CLOCK")
+            elif attr == 0x00000008:
+                 traceEntry.append("CDM_DOMAIN_PSI")
+            elif attr == 0x00000009:
+                 traceEntry.append("CDM_DOMAIN_FSP")
+            elif attr == 0x0000000A:
+                 traceEntry.append("CDM_DOMAIN_SECURITY")
+            elif attr == 0x0000000B:
+                 traceEntry.append("CDM_DOMAIN_ALL")
         elif attrEnum == 0x6f11c24:
             #simpleType:uint
             label = "CDM_POLICIES"
@@ -5009,7 +7044,11 @@ def ErrlUserDetailsParserAttribute(ver, data):
         elif attrEnum == 0x1e1c64d:
             pass #complexType - skipping
         elif attrEnum == 0x957176b:
-            pass #not readable
+            #simpleType:uint
+            label = "CENTAUR_ECID_FRU_ID"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xad171df:
             #simpleType:uint
             label = "CEN_MSS_VOLT_AVDD_MILLIVOLTS"
@@ -5072,8 +7111,18 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 i += 4
         elif attrEnum == 0x4b12a86:
             pass
+        elif attrEnum == 0xad706f2:
+            #simpleType:uint
+            label = "CHECK_ATTN_AFTER_ISTEP_FAIL"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x2e5f49c:
-            pass #not readable
+            #simpleType:uint
+            label = "CHIPLET_ID"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x6d3696b:
             #simpleType:uint
             label = "CHIP_ID"
@@ -5081,35 +7130,97 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
         elif attrEnum == 0x9615865:
-            pass #not readable
-        elif attrEnum == 0xc18e8f1:
-            pass #not readable
-        elif attrEnum == 0xd301294:
-            pass #not readable
-        elif attrEnum == 0xf4e0097:
-            pass #not readable
-        elif attrEnum == 0xd75007e:
-            pass #not readable
-        elif attrEnum == 0x0bce06b:
-            pass #not readable
-        elif attrEnum == 0x9cb467b:
-            pass #not readable
-        elif attrEnum == 0x59253de:
-            pass #not readable
-        elif attrEnum == 0xf9e2621:
-            pass #not readable
-        elif attrEnum == 0x33b0757:
-            pass #not readable
-        elif attrEnum == 0x6d7bbc9:
             #simpleType:uint
-            label = "DPO_MIN_FREQ_PERCENT"
+            label = "CHIP_UNIT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xc18e8f1:
+            #simpleType:enum
+            label = "CLASS"
+            attr, i=intConcat(data, i, i+4)
+            if attr == 0x00000000:
+                 traceEntry.append("CLASS_NA")
+            elif attr == 0x00000001:
+                 traceEntry.append("CLASS_CARD")
+            elif attr == 0x00000002:
+                 traceEntry.append("CLASS_ENC")
+            elif attr == 0x00000003:
+                 traceEntry.append("CLASS_CHIP")
+            elif attr == 0x00000004:
+                 traceEntry.append("CLASS_UNIT")
+            elif attr == 0x00000005:
+                 traceEntry.append("CLASS_DEV")
+            elif attr == 0x00000006:
+                 traceEntry.append("CLASS_SYS")
+            elif attr == 0x00000007:
+                 traceEntry.append("CLASS_LOGICAL_CARD")
+            elif attr == 0x00000008:
+                 traceEntry.append("CLASS_BATTERY")
+            elif attr == 0x00000009:
+                 traceEntry.append("CLASS_LED")
+            elif attr == 0x0000000A:
+                 traceEntry.append("CLASS_SP")
+            elif attr == 0x0000000B:
+                 traceEntry.append("CLASS_ASIC")
+            elif attr == 0x0000000C:
+                 traceEntry.append("CLASS_MAX")
+        elif attrEnum == 0xd301294:
+            #simpleType:uint
+            label = "CPU_ATTR"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
+        elif attrEnum == 0xf4e0097:
+            #simpleType:uint
+            label = "DATA_CACHE_LINE_SIZE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
+        elif attrEnum == 0xd75007e:
+            #simpleType:uint
+            label = "DATA_CACHE_SIZE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
+        elif attrEnum == 0x0bce06b:
+            #simpleType:uint
+            label = "DCACHE_ASSOC_SETS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
+        elif attrEnum == 0x9cb467b:
+            #simpleType:uint
+            label = "DCACHE_LINE_SIZE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
+        elif attrEnum == 0xcfadec6:
+            pass #complexType - skipping
+        elif attrEnum == 0x59253de:
+            #simpleType:uint
+            label = "DECONFIG_GARDABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x829cc6b:
+            #simpleType:uint
+            label = "DISABLE_PLD_WAIT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x9184d62:
-            pass #not readable
+            #simpleType:uint
+            label = "DUMMY_HEAP_ZERO_DEFAULT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x7f95302:
-            pass #not readable
+            #simpleType:uint
+            label = "DUMMY_RO"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x6b5b079:
             #simpleType:uint
             label = "DUMMY_RW"
@@ -5125,18 +7236,66 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0x4a3e94f:
+            #simpleType:uint
+            label = "EECACHE_DISABLE_AUTO_RESET"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xd60cfd7:
+            #simpleType:enum
+            label = "EECACHE_VPD_STATE"
+            attr, i=intConcat(data, i, i+4)
+            if attr == 0x00000000:
+                 traceEntry.append("EECACHE_VPD_STATE_VPD_GOOD")
+            elif attr == 0x00000001:
+                 traceEntry.append("EECACHE_VPD_STATE_VPD_NEEDS_REFRESH")
         elif attrEnum == 0x4cb9215:
-            pass #not readable
+            #simpleType:enum
+            label = "EEPROM_CONTENT_TYPE"
+            attr, i=intConcat(data, i, i+4)
+            if attr == 0x00000000:
+                 traceEntry.append("EEPROM_CONTENT_TYPE_RAW")
+            elif attr == 0x00000001:
+                 traceEntry.append("EEPROM_CONTENT_TYPE_ISDIMM")
+            elif attr == 0x00000002:
+                 traceEntry.append("EEPROM_CONTENT_TYPE_IBM_FRUVPD")
+            elif attr == 0x00000003:
+                 traceEntry.append("EEPROM_CONTENT_TYPE_IBM_MVPD")
+            elif attr == 0x00000004:
+                 traceEntry.append("EEPROM_CONTENT_TYPE_DDIMM")
+            elif attr == 0x00000005:
+                 traceEntry.append("EEPROM_CONTENT_TYPE_SBE_BOOT_CODE")
+            elif attr == 0x00000006:
+                 traceEntry.append("EEPROM_CONTENT_TYPE_SBE_MEASUREMENT_CODE")
+            elif attr == 0x00000007:
+                 traceEntry.append("EEPROM_CONTENT_TYPE_WOF_DATA")
+            elif attr == 0x00000008:
+                 traceEntry.append("EEPROM_CONTENT_TYPE_KEYSTORE")
         elif attrEnum == 0x428de15:
-            pass #not readable
+            pass #complexType - skipping
         elif attrEnum == 0xcba1600:
-            pass #not readable
+            pass #complexType - skipping
         elif attrEnum == 0x9e4aac2:
-            pass #not readable
+            pass #complexType - skipping
+        elif attrEnum == 0xc538c17:
+            #simpleType:enum
+            label = "EEPROM_VPD_ACCESSIBILITY"
+            attr, i=intConcat(data, i, i+4)
+            if attr == 0x00000000:
+                 traceEntry.append("EEPROM_VPD_ACCESSIBILITY_NONE_DISABLED")
+            elif attr == 0x00000001:
+                 traceEntry.append("EEPROM_VPD_ACCESSIBILITY_CACHE_DISABLED")
+            elif attr == 0x00000002:
+                 traceEntry.append("EEPROM_VPD_ACCESSIBILITY_PRIMARY_DISABLED")
+            elif attr == 0x00000004:
+                 traceEntry.append("EEPROM_VPD_ACCESSIBILITY_SECONDARY_DISABLED")
+            elif attr == 0x00000008:
+                 traceEntry.append("EEPROM_VPD_ACCESSIBILITY_LAST_DISABLED")
         elif attrEnum == 0x1fbf757:
-            pass #not readable
+            pass #complexType - skipping
         elif attrEnum == 0xcdbfb30:
-            pass #not readable
+            pass #complexType - skipping
         elif attrEnum == 0x8ff8d9c:
             #simpleType:uint
             label = "EFFECTIVE_EC"
@@ -5150,11 +7309,27 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+8)[0])
                 i += 8
         elif attrEnum == 0xa9d881f:
-            pass #not readable
+            #simpleType:enum
+            label = "ENGINE_TYPE"
+            attr, i=intConcat(data, i, i+4)
+            if attr == 0x00000000:
+                 traceEntry.append("ENGINE_TYPE_NA")
+            elif attr == 0x00000001:
+                 traceEntry.append("ENGINE_TYPE_ENGINE_IIC")
+            elif attr == 0x00000002:
+                 traceEntry.append("ENGINE_TYPE_ENGINE_SCOM")
         elif attrEnum == 0x34eeb58:
-            pass #not readable
+            #simpleType:uint
+            label = "FABRIC_CHIP_ID"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xdb4e40c:
-            pass #not readable
+            #simpleType:uint
+            label = "FABRIC_GROUP_ID"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x1871395:
             pass #not readable
         elif attrEnum == 0x2d207b6:
@@ -5164,10 +7339,28 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(8):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0x5c3de20:
+            #simpleType:uint
+            label = "FAPINAME_NODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x192b80e:
+            #simpleType:uint
+            label = "FAPINAME_POS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
+        elif attrEnum == 0xafd5e02:
+            #simpleType:uint
+            label = "FAPINAME_UNIT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x57cb1d1:
-            pass #not readable
+            pass #complexType - skipping
         elif attrEnum == 0x9dc28f2:
-            pass #not readable
+            pass
         elif attrEnum == 0xaff2273:
             #simpleType:uint
             label = "FIELD_CORE_OVERRIDE"
@@ -5175,9 +7368,23 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
         elif attrEnum == 0x7469e45:
-            pass #not readable
+            #simpleType:uint
+            label = "FIELD_TH_L2_LINE_DELETES"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xe5e057a:
-            pass #not readable
+            #simpleType:uint
+            label = "FIELD_TH_L3_LINE_DELETES"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x9d169d9:
+            #simpleType:uint
+            label = "FORCE_SERIAL_ISTEPS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xeb2b814:
             #simpleType:uint
             label = "FORCE_SRAM_MMIO_OVER_I2C"
@@ -5202,30 +7409,161 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
-        elif attrEnum == 0x9b7245b:
+        elif attrEnum == 0xaac24d5:
             #simpleType:uint
-            label = "FREQ_CORE_MAX"
+            label = "FREQ_PROC_REFCLOCK"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
-        elif attrEnum == 0xaac24d5:
-            pass #not readable
         elif attrEnum == 0x278bc56:
-            pass #not readable
+            #simpleType:uint
+            label = "FRU_ID"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x25b0084:
-            pass #not readable
+            #nativeType:EntityPath
+            label = "FSI_MASTER_CHIP"
+            pathType = { 0x01: "Logical:",
+                         0x02: "Physical:",
+                         0x03: "Device:",
+                         0x04: "Power:" }
+
+            elementInstance = {
+                              0x00: "/NA",
+                              0x01: "/Sys",
+                              0x02: "/Node",
+                              0x03: "/DIMM",
+                              0x04: "/Membuf",
+                              0x05: "/Proc",
+                              0x06: "/EX",
+                              0x07: "/Core",
+                              0x08: "/L2",
+                              0x09: "/L3",
+                              0x0A: "/L4",
+                              0x0B: "/MCS",
+                              0x0D: "/MBA",
+                              0x0E: "/XBUS",
+                              0x0F: "/ABUS",
+                              0x10: "/PCI",
+                              0x11: "/DPSS",
+                              0x12: "/APSS",
+                              0x13: "/OCC",
+                              0x14: "/PSI",
+                              0x15: "/FSP",
+                              0x16: "/PNOR",
+                              0x17: "/OSC",
+                              0x18: "/TODCLK",
+                              0x19: "/CONTROL_NODE",
+                              0x1A: "/OSCREFCLK",
+                              0x1B: "/OSCPCICLK",
+                              0x1C: "/REFCLKENDPT",
+                              0x1D: "/PCICLKENDPT",
+                              0x1E: "/NX",
+                              0x1F: "/PORE",
+                              0x20: "/PCIESWITCH",
+                              0x21: "/CAPP",
+                              0x22: "/FSI",
+                              0x23: "/EQ",
+                              0x24: "/MCA",
+                              0x25: "/MCBIST",
+                              0x26: "/MI",
+                              0x27: "/DMI",
+                              0x28: "/OBUS",
+                              0x2A: "/SBE",
+                              0x2B: "/PPE",
+                              0x2C: "/PERV",
+                              0x2D: "/PEC",
+                              0x2E: "/PHB",
+                              0x2F: "/SYSREFCLKENDPT",
+                              0x30: "/MFREFCLKENDPT",
+                              0x31: "/TPM",
+                              0x32: "/SP",
+                              0x33: "/UART",
+                              0x34: "/PS",
+                              0x35: "/FAN",
+                              0x36: "/VRM",
+                              0x37: "/USB",
+                              0x38: "/ETH",
+                              0x39: "/PANEL",
+                              0x3A: "/BMC",
+                              0x3B: "/FLASH",
+                              0x3C: "/SEEPROM",
+                              0x3D: "/TMP",
+                              0x3E: "/GPIO_EXPANDER",
+                              0x3F: "/POWER_SEQUENCER",
+                              0x40: "/RTC",
+                              0x41: "/FANCTLR",
+                              0x42: "/OBUS_BRICK",
+                              0x43: "/NPU",
+                              0x44: "/MC",
+                              0x45: "/TEST_FAIL",
+                              0x46: "/MFREFCLK",
+                              0x47: "/SMPGROUP",
+                              0x48: "/OMI",
+                              0x49: "/MCC",
+                              0x4A: "/OMIC",
+                              0x4B: "/OCMB_CHIP",
+                              0x4C: "/MEM_PORT",
+                              0x4D: "/I2C_MUX",
+                              0x4E: "/PMIC",
+                              0x4F: "/NMMU",
+                              0x50: "/PAU",
+                              0x51: "/IOHS",
+                              0x52: "/PAUC",
+                              0x53: "/FC",
+                              0x54: "/LPCREFCLKENDPT",
+                              0x55: "/GENERIC_I2C_DEVICE",
+                              0x56: "/LAST_IN_RANGE",
+                              }
+            pType = data[i]
+            i += 1
+            start+=1
+            pathString = pathType.get(pType, "Unknown:")
+            pathSize = data[i]
+            i += 1
+            for x in range(0, pathSize, 2):
+                pathString += elementInstance.get(data[start], "/UNKNOWN")
+                pathString += str(data[start+1])
+                start+=2
+
+            return pathString, start+1
         elif attrEnum == 0xf4637bc:
-            pass #not readable
+            #simpleType:uint
+            label = "FSI_MASTER_PORT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x116670c:
-            pass #not readable
+            #simpleType:enum
+            label = "FSI_MASTER_TYPE"
+            attr, i=intConcat(data, i, i+4)
+            if attr == 0x00000000:
+                 traceEntry.append("FSI_MASTER_TYPE_MFSI")
+            elif attr == 0x00000001:
+                 traceEntry.append("FSI_MASTER_TYPE_CMFSI")
+            elif attr == 0x00000002:
+                 traceEntry.append("FSI_MASTER_TYPE_NO_MASTER")
         elif attrEnum == 0x3b6e39f:
-            pass #not readable
+            pass #complexType - skipping
         elif attrEnum == 0x21c70fd:
-            pass #not readable
+            #simpleType:uint
+            label = "FSI_SLAVE_CASCADE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xd8dde00:
-            pass #not readable
+            #simpleType:uint
+            label = "FSP_BAR_SIZE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0xfcfe1a6:
-            pass #not readable
+            #simpleType:uint
+            label = "FSP_BASE_ADDR"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0xc7d9261:
             #simpleType:uint
             label = "FUSED_CORE_MODE_HB"
@@ -5251,7 +7589,11 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+8)[0])
                 i += 8
         elif attrEnum == 0xbf11ec0:
-            pass #not readable
+            #simpleType:uint
+            label = "HB_RSV_MEM_SIZE_MB"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x19d1b7e:
             pass #complexType - skipping
         elif attrEnum == 0x9f10191:
@@ -5280,7 +7622,11 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
         elif attrEnum == 0x6a00c9c:
-            pass #not readable
+            #simpleType:uint
+            label = "HDDW_ORDER"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xcac816f:
             #simpleType:uint
             label = "HOMER_PHYS_ADDR"
@@ -5294,9 +7640,18 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
         elif attrEnum == 0x837b78a:
-            pass #not readable
+            #simpleType:uint
+            label = "HOT_PLUG_POWER_CONTROLLER_INFO"
+            traceEntry.append("[8][8]:")
+            for x in range(64):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xf9fde6a:
-            pass #not readable
+            #simpleType:uint
+            label = "HUID"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x16fbd51:
             pass #complexType - skipping
         elif attrEnum == 0x1c5c585:
@@ -5306,27 +7661,96 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+8)[0])
                 i += 8
         elif attrEnum == 0x4a76d45:
-            pass #not readable
+            #simpleType:uint
+            label = "HWAS_STATE_CHANGED_SUBSCRIPTION_MASK"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
+        elif attrEnum == 0xd1e26f4:
+            pass #complexType - skipping
         elif attrEnum == 0x5c75b22:
-            pass #not readable
+            #simpleType:uint
+            label = "I2C_BUS_SPEED_ARRAY"
+            traceEntry.append("[4][16]:")
+            for x in range(64):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x44f4167:
-            pass #not readable
+            pass #complexType - skipping
+        elif attrEnum == 0xb973ab4:
+            #simpleType:uint
+            label = "I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_A"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x15da8c9:
+            #simpleType:uint
+            label = "I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_B"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xc667245:
+            #simpleType:uint
+            label = "I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_C"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x22428b6:
+            #simpleType:uint
+            label = "I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_D"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x5d36cba:
+            #simpleType:uint
+            label = "I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_E"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x442b881:
             pass #complexType - skipping
         elif attrEnum == 0x1983e2d:
-            pass #not readable
+            #simpleType:uint
+            label = "IBSCOM_MCS_BASE_ADDR"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x06d3ba7:
-            pass #not readable
+            #simpleType:uint
+            label = "IBSCOM_PROC_BASE_ADDR"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0xacc8025:
-            pass #not readable
+            #simpleType:uint
+            label = "ICACHE_ASSOC_SETS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x2c13580:
-            pass #not readable
+            #simpleType:uint
+            label = "ICACHE_BLOCK_SIZE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x934de01:
-            pass #not readable
+            #simpleType:uint
+            label = "ICACHE_LINE_SIZE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x7d275f0:
-            pass #not readable
+            #simpleType:uint
+            label = "ICACHE_SIZE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xed1d603:
-            pass #not readable
+            #simpleType:uint
+            label = "INIT_TO_AVAILABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x85ef6e9:
             #simpleType:uint
             label = "INT_CQ_TM_BAR_ADDR"
@@ -5390,17 +7814,37 @@ def ErrlUserDetailsParserAttribute(ver, data):
             elif attr == 0x00000003:
                  traceEntry.append("KEY_TRANSITION_STATE_KEY_TRANSITION_SUCCEEDED")
         elif attrEnum == 0x8845c5b:
-            pass #not readable
+            #simpleType:uint
+            label = "L2_CACHE_ASSOC_SETS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xfc7c1e8:
-            pass #not readable
+            #simpleType:uint
+            label = "L2_CACHE_LINE_SIZE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x07a2758:
-            pass #not readable
+            #simpleType:uint
+            label = "L2_CACHE_SIZE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xfc574bf:
-            pass #not readable
+            #simpleType:uint
+            label = "L3_CACHE_LINE_SIZE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xdbffc50:
-            pass #not readable
+            #simpleType:uint
+            label = "L3_CACHE_SIZE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xdeda910:
-            pass #not readable
+            pass
         elif attrEnum == 0x1ffe3ce:
             #simpleType:uint
             label = "LPC_BUS_ADDR"
@@ -5408,29 +7852,77 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+8)[0])
                 i += 8
         elif attrEnum == 0xfa1c9e6:
-            pass #not readable
+            #simpleType:uint
+            label = "MAX_CHIPLETS_PER_PROC"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x8105e72:
-            pass #not readable
+            #simpleType:uint
+            label = "MAX_COMPUTE_NODES_PER_SYSTEM"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x9130cb8:
-            pass #not readable
+            #simpleType:uint
+            label = "MAX_DIMMS_PER_MBA_PORT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xa71e033:
-            pass #not readable
+            #simpleType:uint
+            label = "MAX_DMI_PER_PROC"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xa59a4fa:
-            pass #not readable
+            #simpleType:uint
+            label = "MAX_EXS_PER_PROC_CHIP"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x90ddd8e:
-            pass #not readable
+            #simpleType:uint
+            label = "MAX_MBAS_PER_MEMBUF_CHIP"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xeb1d539:
-            pass #not readable
+            #simpleType:uint
+            label = "MAX_MBA_PORTS_PER_MBA"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x86e21ac:
-            pass #not readable
+            #simpleType:uint
+            label = "MAX_MCS_PER_SYSTEM"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x935d008:
-            pass #not readable
+            #simpleType:uint
+            label = "MAX_POWER"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x8dc78ef:
-            pass #not readable
+            #simpleType:uint
+            label = "MAX_PROC_CHIPS_PER_NODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x80b9cd7:
-            pass #not readable
+            #simpleType:uint
+            label = "MBA_DIMM"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x5207f78:
-            pass #not readable
+            #simpleType:uint
+            label = "MBA_PORT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x80161a9:
             #simpleType:uint
             label = "MEM_AVDD_OFFSET_MILLIVOLTS"
@@ -5444,7 +7936,11 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+8)[0])
                 i += 8
         elif attrEnum == 0x929775e:
-            pass #not readable
+            #simpleType:uint
+            label = "MEM_PORT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xb7b1ac5:
             #simpleType:uint
             label = "MEM_VCS_OFFSET_MILLIVOLTS"
@@ -5470,9 +7966,17 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
         elif attrEnum == 0xb257082:
-            pass #not readable
+            #simpleType:uint
+            label = "MFG_TRACE_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xce01813:
-            pass #not readable
+            #simpleType:uint
+            label = "MGC_LOAD_SOURCE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x6f08f4b:
             #simpleType:uint
             label = "MIN_FREQ_MHZ"
@@ -5480,7 +7984,11 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
         elif attrEnum == 0x6a258b6:
-            pass #not readable
+            #simpleType:uint
+            label = "MIRROR_BASE_ADDRESS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x0505dad:
             #simpleType:uint
             label = "MMIO_PHYS_ADDR"
@@ -5488,45 +7996,169 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+8)[0])
                 i += 8
         elif attrEnum == 0xeaa3fa0:
-            pass #not readable
+            #simpleType:uint
+            label = "MNFG_ABUS_MIN_EYE_HEIGHT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x0f9d926:
-            pass #not readable
+            #simpleType:uint
+            label = "MNFG_ABUS_MIN_EYE_WIDTH"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xccc15e8:
-            pass #not readable
+            #simpleType:uint
+            label = "MNFG_DMI_MIN_EYE_HEIGHT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x72b7486:
-            pass #not readable
+            #simpleType:uint
+            label = "MNFG_DMI_MIN_EYE_WIDTH"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x882b99c:
-            pass #not readable
+            #simpleType:uint
+            label = "MNFG_TH_L2_CACHE_CES"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x10ae5b3:
-            pass #not readable
+            #simpleType:uint
+            label = "MNFG_TH_L2_DIR_CES"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x16cbbfb:
-            pass #not readable
+            #simpleType:uint
+            label = "MNFG_TH_L2_LINE_DELETES"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x70e6a22:
-            pass #not readable
+            #simpleType:uint
+            label = "MNFG_TH_L3_CACHE_CES"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xa0dd16a:
-            pass #not readable
+            #simpleType:uint
+            label = "MNFG_TH_L3_DIR_CES"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x1788780:
-            pass #not readable
+            #simpleType:uint
+            label = "MNFG_TH_L3_LINE_DELETES"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x1049d17:
-            pass #not readable
+            #simpleType:uint
+            label = "MNFG_TH_MEMORY_IMPES"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x1e8208b:
-            pass #not readable
+            #simpleType:uint
+            label = "MNFG_TH_MEMORY_IPL_SOFT_CE_TH_ALGO"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x723f825:
-            pass #not readable
+            #simpleType:uint
+            label = "MNFG_TH_MEMORY_IUES"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x96069bd:
-            pass #not readable
+            #simpleType:uint
+            label = "MNFG_TH_MEMORY_RCD_PARITY_ERRORS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xf907441:
-            pass #not readable
+            #simpleType:uint
+            label = "MNFG_TH_MEMORY_RT_RCE_PER_RANK"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xdb89c57:
-            pass #not readable
+            #simpleType:uint
+            label = "MNFG_TH_MEMORY_RT_SOFT_CE_TH_ALGO"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xcbd7ed0:
-            pass #not readable
+            #simpleType:uint
+            label = "MNFG_XBUS_MIN_EYE_WIDTH"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x7a03bac:
-            pass #not readable
+            #simpleType:enum
+            label = "MODEL"
+            attr, i=intConcat(data, i, i+4)
+            if attr == 0x00000000:
+                 traceEntry.append("MODEL_NA")
+            elif attr == 0x00000010:
+                 traceEntry.append("MODEL_RESERVED")
+            elif attr == 0x00000011:
+                 traceEntry.append("MODEL_VENICE")
+            elif attr == 0x00000012:
+                 traceEntry.append("MODEL_MURANO")
+            elif attr == 0x00000013:
+                 traceEntry.append("MODEL_NAPLES")
+            elif attr == 0x00000014:
+                 traceEntry.append("MODEL_NIMBUS")
+            elif attr == 0x00000015:
+                 traceEntry.append("MODEL_CUMULUS")
+            elif attr == 0x00000016:
+                 traceEntry.append("MODEL_AXONE")
+            elif attr == 0x00000030:
+                 traceEntry.append("MODEL_CENTAUR")
+            elif attr == 0x00000031:
+                 traceEntry.append("MODEL_OCMB")
+            elif attr == 0x00000050:
+                 traceEntry.append("MODEL_JEDEC")
+            elif attr == 0x00000051:
+                 traceEntry.append("MODEL_CDIMM")
+            elif attr == 0x00000070:
+                 traceEntry.append("MODEL_POWER8")
+            elif attr == 0x00000090:
+                 traceEntry.append("MODEL_POWER9")
+            elif attr == 0x00000091:
+                 traceEntry.append("MODEL_POWER10")
+            elif attr == 0x00000092:
+                 traceEntry.append("MODEL_CECTPM")
+            elif attr == 0x00000093:
+                 traceEntry.append("MODEL_BMC")
+            elif attr == 0x00000094:
+                 traceEntry.append("MODEL_AST2500")
+            elif attr == 0x00000095:
+                 traceEntry.append("MODEL_AST2600")
+            elif attr == 0x00000096:
+                 traceEntry.append("MODEL_PCA9847")
+            elif attr == 0x00000097:
+                 traceEntry.append("MODEL_UCD9090")
+            elif attr == 0x00000098:
+                 traceEntry.append("MODEL_UCD90120A")
+            elif attr == 0x00000099:
+                 traceEntry.append("MODEL_UCD90320")
         elif attrEnum == 0x639dd88:
-            pass #not readable
+            #simpleType:uint
+            label = "MRU_ID"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x6ac0905:
-            pass #not readable
+            #simpleType:uint
+            label = "MRW_DDR3_VDDR_MAX_LIMIT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xdde9311:
             #simpleType:uint
             label = "MRW_DDR3_VDDR_MAX_LIMIT_POST_DRAM_INIT"
@@ -5534,7 +8166,11 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
         elif attrEnum == 0x69b9e21:
-            pass #not readable
+            #simpleType:uint
+            label = "MRW_DDR4_VDDR_MAX_LIMIT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x7b5c147:
             #simpleType:uint
             label = "MRW_DDR4_VDDR_MAX_LIMIT_POST_DRAM_INIT"
@@ -5542,17 +8178,41 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
         elif attrEnum == 0x3884378:
-            pass #not readable
+            #simpleType:uint
+            label = "MRW_DEFAULT_RISK_LEVEL"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x8218c38:
-            pass #not readable
+            #simpleType:uint
+            label = "MRW_MEM_THROTTLE_DENOMINATOR"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xefb544c:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_AVDD_PROGRAM"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xbb0ac42:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_CENT_AVDD_INTERCEPT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x0b207b3:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_CENT_AVDD_SLOPE_ACTIVE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xbaa5d46:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_CENT_AVDD_SLOPE_INACTIVE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x42b4fae:
             #simpleType:uint
             label = "MSS_CENT_VCS_INTERCEPT"
@@ -5596,9 +8256,17 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x8ee2d89:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MBA_ADDR_INTERLEAVE_BIT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x771b18e:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_MBA_CACHELINE_INTERLEAVE_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x13326ac:
             #simpleType:uint
             label = "MSS_PHY_SEQ_REFRESH"
@@ -5607,11 +8275,23 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0xb4f1718:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_VCS_PROGRAM"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x51289c7:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_VDDR_PROGRAM"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x17228f8:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_VDD_PROGRAM"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x6f09c49:
             #simpleType:uint
             label = "MSS_VOLT_AVDD_MILLIVOLTS"
@@ -5625,7 +8305,11 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
         elif attrEnum == 0xbdf333e:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_VOLT_DDR3_VDDR_INTERCEPT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x829fde2:
             #simpleType:uint
             label = "MSS_VOLT_DDR3_VDDR_INTERCEPT_POST_DRAM_INIT"
@@ -5633,7 +8317,11 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
         elif attrEnum == 0x10d2a3d:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_VOLT_DDR3_VDDR_SLOPE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x420d32d:
             #simpleType:uint
             label = "MSS_VOLT_DDR3_VDDR_SLOPE_POST_DRAM_INIT"
@@ -5641,7 +8329,11 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
         elif attrEnum == 0x56b3514:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_VOLT_DDR4_VDDR_INTERCEPT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x6129fe7:
             #simpleType:uint
             label = "MSS_VOLT_DDR4_VDDR_INTERCEPT_POST_DRAM_INIT"
@@ -5649,7 +8341,11 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
         elif attrEnum == 0x5d56393:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_VOLT_DDR4_VDDR_SLOPE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xb11a217:
             #simpleType:uint
             label = "MSS_VOLT_DDR4_VDDR_SLOPE_POST_DRAM_INIT"
@@ -5693,7 +8389,11 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
         elif attrEnum == 0x3aa234f:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_VOLT_VPP_INTERCEPT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xd513657:
             #simpleType:uint
             label = "MSS_VOLT_VPP_INTERCEPT_POST_DRAM_INIT"
@@ -5713,7 +8413,11 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
         elif attrEnum == 0x72f49a4:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_VOLT_VPP_SLOPE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xe2c64ec:
             #simpleType:uint
             label = "MSS_VOLT_VPP_SLOPE_POST_DRAM_INIT"
@@ -5721,29 +8425,77 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
         elif attrEnum == 0x2280840:
-            pass #not readable
+            #simpleType:uint
+            label = "MSS_VPP_PROGRAM"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xad3e4fe:
-            pass #not readable
+            #simpleType:uint
+            label = "NEST_PLL_FREQ_BUCKETS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x78c64c6:
-            pass #not readable
+            #simpleType:uint
+            label = "NEST_PLL_FREQ_I2CDIV_LIST"
+            traceEntry.append("[5]:")
+            for x in range(5):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x9b7099c:
-            pass #not readable
+            #simpleType:uint
+            label = "NEST_PLL_FREQ_LIST"
+            traceEntry.append("[5]:")
+            for x in range(5):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xc498800:
-            pass #not readable
+            #simpleType:uint
+            label = "NEST_VCS_ID"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x6a22222:
-            pass #not readable
+            #simpleType:uint
+            label = "NEST_VDDR_ID"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x89224bc:
-            pass #not readable
+            #simpleType:uint
+            label = "NEST_VDD_ID"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x61356e1:
-            pass #not readable
+            #simpleType:uint
+            label = "NEST_VDN_ID"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0xec8827a:
-            pass #not readable
+            #simpleType:uint
+            label = "NEST_VIO_ID"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0xff18a73:
-            pass #not readable
+            #simpleType:uint
+            label = "NPU_MMIO_BAR_BASE_ADDR"
+            traceEntry.append("[4][2]:")
+            for x in range(8):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x77da343:
-            pass #not readable
+            #simpleType:uint
+            label = "NPU_MMIO_BAR_SIZE"
+            traceEntry.append("[4][2]:")
+            for x in range(8):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0xdbe5186:
-            pass #not readable
+            pass #complexType - skipping
         elif attrEnum == 0x3df34de:
             pass #complexType - skipping
         elif attrEnum == 0x19f4158:
@@ -5760,13 +8512,37 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x2d9433b:
-            pass #not readable
+            #simpleType:uint
+            label = "OBUS_BRICK_LANE_MASK"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xc610fe3:
-            pass #not readable
+            #simpleType:uint
+            label = "OBUS_SLOT_INDEX"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xe7e15a5:
-            pass #not readable
+            #simpleType:uint
+            label = "OCC_MASTER_CAPABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xab4c632:
-            pass #not readable
+            #simpleType:uint
+            label = "OCMB_FW_UPDATE_OVERRIDE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x9717572:
+            pass #complexType - skipping
+        elif attrEnum == 0x829c075:
+            #simpleType:uint
+            label = "OCMB_RESET_DELAY_SEC"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xe2df671:
             #simpleType:uint
             label = "ORDINAL_ID"
@@ -5774,7 +8550,7 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
         elif attrEnum == 0x0df4605:
-            pass #not readable
+            pass #complexType - skipping
         elif attrEnum == 0x020a135:
             #simpleType:uint
             label = "PAYLOAD_BASE"
@@ -5806,15 +8582,35 @@ def ErrlUserDetailsParserAttribute(ver, data):
             elif attr == 0x00000003:
                  traceEntry.append("PAYLOAD_KIND_NONE")
         elif attrEnum == 0xe242d68:
-            pass #not readable
+            #simpleType:uint
+            label = "PCIE_32BIT_DMA_SIZE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xb312257:
-            pass #not readable
+            #simpleType:uint
+            label = "PCIE_32BIT_MMIO_SIZE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x7e1fa3b:
-            pass #not readable
+            #simpleType:uint
+            label = "PCIE_64BIT_DMA_SIZE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x9487ddb:
-            pass #not readable
+            #simpleType:uint
+            label = "PCIE_64BIT_MMIO_SIZE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x7f829da:
-            pass #not readable
+            #simpleType:uint
+            label = "PCIE_CAPABILITES"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xd4805eb:
             #simpleType:uint
             label = "PCIE_NVME_CCIN"
@@ -5822,9 +8618,18 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+8)[0])
                 i += 8
         elif attrEnum == 0x90e81d5:
-            pass #not readable
+            #simpleType:uint
+            label = "PCIE_NVME_PHB_CONFIG"
+            traceEntry.append("[2][2]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x64e7e70:
-            pass #not readable
+            #simpleType:uint
+            label = "PCI_REFCLOCK_RCVR_TERM"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xab70ca8:
             #simpleType:uint
             label = "PEC_IS_BIFURCATABLE"
@@ -5846,21 +8651,154 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x3322938:
-            pass #not readable
+            #simpleType:uint
+            label = "PEC_PCIE_IOP_REVERSAL_BIFURCATED"
+            traceEntry.append("[4]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xebbaf50:
-            pass #not readable
+            #simpleType:uint
+            label = "PEC_PCIE_IOP_REVERSAL_NON_BIFURCATED"
+            traceEntry.append("[4]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x1d55f3f:
-            pass #not readable
+            #simpleType:uint
+            label = "PEC_PCIE_IOP_SWAP_BIFURCATED"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x70406e6:
-            pass #not readable
+            #simpleType:uint
+            label = "PEC_PCIE_IOP_SWAP_NON_BIFURCATED"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xa258a52:
-            pass #not readable
+            #simpleType:uint
+            label = "PEC_PCIE_LANE_MASK_BIFURCATED"
+            traceEntry.append("[4]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x65a6fb3:
-            pass #not readable
+            #simpleType:uint
+            label = "PEC_PCIE_LANE_MASK_NON_BIFURCATED"
+            traceEntry.append("[4]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0xae3bc8f:
-            pass #not readable
+            #nativeType:EntityPath
+            label = "PEER_PATH"
+            pathType = { 0x01: "Logical:",
+                         0x02: "Physical:",
+                         0x03: "Device:",
+                         0x04: "Power:" }
+
+            elementInstance = {
+                              0x00: "/NA",
+                              0x01: "/Sys",
+                              0x02: "/Node",
+                              0x03: "/DIMM",
+                              0x04: "/Membuf",
+                              0x05: "/Proc",
+                              0x06: "/EX",
+                              0x07: "/Core",
+                              0x08: "/L2",
+                              0x09: "/L3",
+                              0x0A: "/L4",
+                              0x0B: "/MCS",
+                              0x0D: "/MBA",
+                              0x0E: "/XBUS",
+                              0x0F: "/ABUS",
+                              0x10: "/PCI",
+                              0x11: "/DPSS",
+                              0x12: "/APSS",
+                              0x13: "/OCC",
+                              0x14: "/PSI",
+                              0x15: "/FSP",
+                              0x16: "/PNOR",
+                              0x17: "/OSC",
+                              0x18: "/TODCLK",
+                              0x19: "/CONTROL_NODE",
+                              0x1A: "/OSCREFCLK",
+                              0x1B: "/OSCPCICLK",
+                              0x1C: "/REFCLKENDPT",
+                              0x1D: "/PCICLKENDPT",
+                              0x1E: "/NX",
+                              0x1F: "/PORE",
+                              0x20: "/PCIESWITCH",
+                              0x21: "/CAPP",
+                              0x22: "/FSI",
+                              0x23: "/EQ",
+                              0x24: "/MCA",
+                              0x25: "/MCBIST",
+                              0x26: "/MI",
+                              0x27: "/DMI",
+                              0x28: "/OBUS",
+                              0x2A: "/SBE",
+                              0x2B: "/PPE",
+                              0x2C: "/PERV",
+                              0x2D: "/PEC",
+                              0x2E: "/PHB",
+                              0x2F: "/SYSREFCLKENDPT",
+                              0x30: "/MFREFCLKENDPT",
+                              0x31: "/TPM",
+                              0x32: "/SP",
+                              0x33: "/UART",
+                              0x34: "/PS",
+                              0x35: "/FAN",
+                              0x36: "/VRM",
+                              0x37: "/USB",
+                              0x38: "/ETH",
+                              0x39: "/PANEL",
+                              0x3A: "/BMC",
+                              0x3B: "/FLASH",
+                              0x3C: "/SEEPROM",
+                              0x3D: "/TMP",
+                              0x3E: "/GPIO_EXPANDER",
+                              0x3F: "/POWER_SEQUENCER",
+                              0x40: "/RTC",
+                              0x41: "/FANCTLR",
+                              0x42: "/OBUS_BRICK",
+                              0x43: "/NPU",
+                              0x44: "/MC",
+                              0x45: "/TEST_FAIL",
+                              0x46: "/MFREFCLK",
+                              0x47: "/SMPGROUP",
+                              0x48: "/OMI",
+                              0x49: "/MCC",
+                              0x4A: "/OMIC",
+                              0x4B: "/OCMB_CHIP",
+                              0x4C: "/MEM_PORT",
+                              0x4D: "/I2C_MUX",
+                              0x4E: "/PMIC",
+                              0x4F: "/NMMU",
+                              0x50: "/PAU",
+                              0x51: "/IOHS",
+                              0x52: "/PAUC",
+                              0x53: "/FC",
+                              0x54: "/LPCREFCLKENDPT",
+                              0x55: "/GENERIC_I2C_DEVICE",
+                              0x56: "/LAST_IN_RANGE",
+                              }
+            pType = data[i]
+            i += 1
+            start+=1
+            pathString = pathType.get(pType, "Unknown:")
+            pathSize = data[i]
+            i += 1
+            for x in range(0, pathSize, 2):
+                pathString += elementInstance.get(data[start], "/UNKNOWN")
+                pathString += str(data[start+1])
+                start+=2
+
+            return pathString, start+1
         elif attrEnum == 0x6f76a92:
-            pass #not readable
+            pass
         elif attrEnum == 0x49f38fe:
             #simpleType:uint
             label = "PG"
@@ -5874,9 +8812,119 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
         elif attrEnum == 0xb6f0cd7:
-            pass #not readable
+            #simpleType:uint
+            label = "PHB_BASE_ADDRS"
+            traceEntry.append("[4]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0xf7abb7c:
-            pass #not readable
+            #nativeType:EntityPath
+            label = "PHYS_PATH"
+            pathType = { 0x01: "Logical:",
+                         0x02: "Physical:",
+                         0x03: "Device:",
+                         0x04: "Power:" }
+
+            elementInstance = {
+                              0x00: "/NA",
+                              0x01: "/Sys",
+                              0x02: "/Node",
+                              0x03: "/DIMM",
+                              0x04: "/Membuf",
+                              0x05: "/Proc",
+                              0x06: "/EX",
+                              0x07: "/Core",
+                              0x08: "/L2",
+                              0x09: "/L3",
+                              0x0A: "/L4",
+                              0x0B: "/MCS",
+                              0x0D: "/MBA",
+                              0x0E: "/XBUS",
+                              0x0F: "/ABUS",
+                              0x10: "/PCI",
+                              0x11: "/DPSS",
+                              0x12: "/APSS",
+                              0x13: "/OCC",
+                              0x14: "/PSI",
+                              0x15: "/FSP",
+                              0x16: "/PNOR",
+                              0x17: "/OSC",
+                              0x18: "/TODCLK",
+                              0x19: "/CONTROL_NODE",
+                              0x1A: "/OSCREFCLK",
+                              0x1B: "/OSCPCICLK",
+                              0x1C: "/REFCLKENDPT",
+                              0x1D: "/PCICLKENDPT",
+                              0x1E: "/NX",
+                              0x1F: "/PORE",
+                              0x20: "/PCIESWITCH",
+                              0x21: "/CAPP",
+                              0x22: "/FSI",
+                              0x23: "/EQ",
+                              0x24: "/MCA",
+                              0x25: "/MCBIST",
+                              0x26: "/MI",
+                              0x27: "/DMI",
+                              0x28: "/OBUS",
+                              0x2A: "/SBE",
+                              0x2B: "/PPE",
+                              0x2C: "/PERV",
+                              0x2D: "/PEC",
+                              0x2E: "/PHB",
+                              0x2F: "/SYSREFCLKENDPT",
+                              0x30: "/MFREFCLKENDPT",
+                              0x31: "/TPM",
+                              0x32: "/SP",
+                              0x33: "/UART",
+                              0x34: "/PS",
+                              0x35: "/FAN",
+                              0x36: "/VRM",
+                              0x37: "/USB",
+                              0x38: "/ETH",
+                              0x39: "/PANEL",
+                              0x3A: "/BMC",
+                              0x3B: "/FLASH",
+                              0x3C: "/SEEPROM",
+                              0x3D: "/TMP",
+                              0x3E: "/GPIO_EXPANDER",
+                              0x3F: "/POWER_SEQUENCER",
+                              0x40: "/RTC",
+                              0x41: "/FANCTLR",
+                              0x42: "/OBUS_BRICK",
+                              0x43: "/NPU",
+                              0x44: "/MC",
+                              0x45: "/TEST_FAIL",
+                              0x46: "/MFREFCLK",
+                              0x47: "/SMPGROUP",
+                              0x48: "/OMI",
+                              0x49: "/MCC",
+                              0x4A: "/OMIC",
+                              0x4B: "/OCMB_CHIP",
+                              0x4C: "/MEM_PORT",
+                              0x4D: "/I2C_MUX",
+                              0x4E: "/PMIC",
+                              0x4F: "/NMMU",
+                              0x50: "/PAU",
+                              0x51: "/IOHS",
+                              0x52: "/PAUC",
+                              0x53: "/FC",
+                              0x54: "/LPCREFCLKENDPT",
+                              0x55: "/GENERIC_I2C_DEVICE",
+                              0x56: "/LAST_IN_RANGE",
+                              }
+            pType = data[i]
+            i += 1
+            start+=1
+            pathString = pathType.get(pType, "Unknown:")
+            pathSize = data[i]
+            i += 1
+            for x in range(0, pathSize, 2):
+                pathString += elementInstance.get(data[start], "/UNKNOWN")
+                pathString += str(data[start+1])
+                start+=2
+
+            return pathString, start+1
         elif attrEnum == 0x19a4504:
             #simpleType:uint
             label = "PIB_I2C_NEST_PLL"
@@ -5902,11 +8950,130 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
         elif attrEnum == 0x90b4ba7:
-            pass #not readable
+            #simpleType:uint
+            label = "POSITION"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0xf0961f9:
-            pass #not readable
+            #simpleType:uint
+            label = "POS_ON_MEM_PORT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xd43ef5c:
-            pass #not readable
+            #nativeType:EntityPath
+            label = "POWER_PATH"
+            pathType = { 0x01: "Logical:",
+                         0x02: "Physical:",
+                         0x03: "Device:",
+                         0x04: "Power:" }
+
+            elementInstance = {
+                              0x00: "/NA",
+                              0x01: "/Sys",
+                              0x02: "/Node",
+                              0x03: "/DIMM",
+                              0x04: "/Membuf",
+                              0x05: "/Proc",
+                              0x06: "/EX",
+                              0x07: "/Core",
+                              0x08: "/L2",
+                              0x09: "/L3",
+                              0x0A: "/L4",
+                              0x0B: "/MCS",
+                              0x0D: "/MBA",
+                              0x0E: "/XBUS",
+                              0x0F: "/ABUS",
+                              0x10: "/PCI",
+                              0x11: "/DPSS",
+                              0x12: "/APSS",
+                              0x13: "/OCC",
+                              0x14: "/PSI",
+                              0x15: "/FSP",
+                              0x16: "/PNOR",
+                              0x17: "/OSC",
+                              0x18: "/TODCLK",
+                              0x19: "/CONTROL_NODE",
+                              0x1A: "/OSCREFCLK",
+                              0x1B: "/OSCPCICLK",
+                              0x1C: "/REFCLKENDPT",
+                              0x1D: "/PCICLKENDPT",
+                              0x1E: "/NX",
+                              0x1F: "/PORE",
+                              0x20: "/PCIESWITCH",
+                              0x21: "/CAPP",
+                              0x22: "/FSI",
+                              0x23: "/EQ",
+                              0x24: "/MCA",
+                              0x25: "/MCBIST",
+                              0x26: "/MI",
+                              0x27: "/DMI",
+                              0x28: "/OBUS",
+                              0x2A: "/SBE",
+                              0x2B: "/PPE",
+                              0x2C: "/PERV",
+                              0x2D: "/PEC",
+                              0x2E: "/PHB",
+                              0x2F: "/SYSREFCLKENDPT",
+                              0x30: "/MFREFCLKENDPT",
+                              0x31: "/TPM",
+                              0x32: "/SP",
+                              0x33: "/UART",
+                              0x34: "/PS",
+                              0x35: "/FAN",
+                              0x36: "/VRM",
+                              0x37: "/USB",
+                              0x38: "/ETH",
+                              0x39: "/PANEL",
+                              0x3A: "/BMC",
+                              0x3B: "/FLASH",
+                              0x3C: "/SEEPROM",
+                              0x3D: "/TMP",
+                              0x3E: "/GPIO_EXPANDER",
+                              0x3F: "/POWER_SEQUENCER",
+                              0x40: "/RTC",
+                              0x41: "/FANCTLR",
+                              0x42: "/OBUS_BRICK",
+                              0x43: "/NPU",
+                              0x44: "/MC",
+                              0x45: "/TEST_FAIL",
+                              0x46: "/MFREFCLK",
+                              0x47: "/SMPGROUP",
+                              0x48: "/OMI",
+                              0x49: "/MCC",
+                              0x4A: "/OMIC",
+                              0x4B: "/OCMB_CHIP",
+                              0x4C: "/MEM_PORT",
+                              0x4D: "/I2C_MUX",
+                              0x4E: "/PMIC",
+                              0x4F: "/NMMU",
+                              0x50: "/PAU",
+                              0x51: "/IOHS",
+                              0x52: "/PAUC",
+                              0x53: "/FC",
+                              0x54: "/LPCREFCLKENDPT",
+                              0x55: "/GENERIC_I2C_DEVICE",
+                              0x56: "/LAST_IN_RANGE",
+                              }
+            pType = data[i]
+            i += 1
+            start+=1
+            pathString = pathType.get(pType, "Unknown:")
+            pathSize = data[i]
+            i += 1
+            for x in range(0, pathSize, 2):
+                pathString += elementInstance.get(data[start], "/UNKNOWN")
+                pathString += str(data[start+1])
+                start+=2
+
+            return pathString, start+1
+        elif attrEnum == 0x214b9d8:
+            #simpleType:uint
+            label = "PRD_DD1_OMI_DEGRADE_PREDICTIVE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x38a7b13:
             #simpleType:uint
             label = "PRD_HWP_PLID"
@@ -5914,11 +9081,23 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
         elif attrEnum == 0xd84c572:
-            pass #not readable
+            pass #complexType - skipping
         elif attrEnum == 0x71d7b85:
-            pass #not readable
+            #simpleType:enum
+            label = "PROC_COMPATIBILITY_REQ"
+            attr, i=intConcat(data, i, i+4)
+            if attr == 0x00000000:
+                 traceEntry.append("PROC_COMPATIBILITY_REQ_ALLOW_COMPATIBILITY")
+            elif attr == 0x00000001:
+                 traceEntry.append("PROC_COMPATIBILITY_REQ_FORCED_COMPATIBILITY")
+            elif attr == 0x00000002:
+                 traceEntry.append("PROC_COMPATIBILITY_REQ_FORCED_NATIVE")
         elif attrEnum == 0x2b8d151:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_DCM_INSTALLED"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x68e1db7:
             #simpleType:uint
             label = "PROC_MASTER_TYPE"
@@ -5926,7 +9105,13 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x83cc1e9:
-            pass #not readable
+            #simpleType:enum
+            label = "PROC_MODULE_TYPE"
+            attr, i=intConcat(data, i, i+4)
+            if attr == 0x00000050:
+                 traceEntry.append("PROC_MODULE_TYPE_GODEL")
+            elif attr == 0x00000051:
+                 traceEntry.append("PROC_MODULE_TYPE_BLAISE")
         elif attrEnum == 0xeb604df:
             #simpleType:uint
             label = "PROC_PCIE_IOP_CONFIG"
@@ -5940,13 +9125,33 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x69653af:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_PCIE_IS_SLOT"
+            traceEntry.append("[4]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x4b839c0:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_PCIE_LANE_EQUALIZATION_GEN3"
+            traceEntry.append("[16]:")
+            for x in range(16):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0xdab5f58:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_PCIE_LANE_EQUALIZATION_GEN4"
+            traceEntry.append("[16]:")
+            for x in range(16):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x1c05310:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_PCIE_LANE_EQUALIZATION_GEN5"
+            traceEntry.append("[16]:")
+            for x in range(16):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x1439e9f:
             #simpleType:uint
             label = "PROC_PCIE_LANE_MASK"
@@ -5955,27 +9160,51 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+2)[0])
                 i += 2
         elif attrEnum == 0xcc9dffd:
-            pass #not readable
-        elif attrEnum == 0xd837641:
-            pass #not readable
-        elif attrEnum == 0xa10bfc8:
-            pass #not readable
-        elif attrEnum == 0xc4fcb9a:
-            pass #not readable
-        elif attrEnum == 0xf2039e4:
-            pass #not readable
-        elif attrEnum == 0xae3040d:
-            pass #not readable
-        elif attrEnum == 0x4d8df8d:
             #simpleType:uint
-            label = "PROC_PCIE_PCS_SYSTEM_CNTL"
+            label = "PROC_PCIE_LANE_REVERSAL_BASE"
+            traceEntry.append("[3]:")
+            for x in range(3):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xd837641:
+            #simpleType:uint
+            label = "PROC_PCIE_NUM_PEC"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xa10bfc8:
+            #simpleType:uint
+            label = "PROC_PCIE_PCS_RX_LOFF_CONTROL"
+            traceEntry.append("[4]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0xc4fcb9a:
+            #simpleType:uint
+            label = "PROC_PCIE_PCS_RX_PHASE_ROTATOR_CNTL"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+2)[0])
                 i += 2
-        elif attrEnum == 0xb67f259:
-            pass #not readable
+        elif attrEnum == 0xf2039e4:
+            #simpleType:uint
+            label = "PROC_PCIE_PCS_RX_SIGDET_CNTL"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0xae3040d:
+            #simpleType:uint
+            label = "PROC_PCIE_PCS_RX_VGA_CONTRL_REGISTER3"
+            traceEntry.append("[4]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x5d3796a:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_PCIE_PHB_ACTIVE_BASE"
+            traceEntry.append("[3]:")
+            for x in range(3):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xe2cfa5e:
             #simpleType:uint
             label = "PROC_PCIE_REFCLOCK_ENABLE"
@@ -5983,7 +9212,11 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x5f9ce72:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_REFCLOCK_RCVR_TERM"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xdba3bba:
             #simpleType:uint
             label = "PROC_SELECT_BOOT_SEEPROM_IMAGE"
@@ -6024,11 +9257,23 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x706e27b:
-            pass #not readable
+            #simpleType:uint
+            label = "REDUNDANT_CLOCKS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x30c46b3:
-            pass #not readable
+            #simpleType:uint
+            label = "REL_POS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xbfccf0c:
-            pass #not readable
+            #simpleType:uint
+            label = "RESOURCE_IS_CRITICAL"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x45b1c68:
             #simpleType:enum
             label = "RISK_LEVEL_ORIGIN"
@@ -6038,9 +9283,17 @@ def ErrlUserDetailsParserAttribute(ver, data):
             elif attr == 0x00000001:
                  traceEntry.append("RISK_LEVEL_ORIGIN_MRW")
         elif attrEnum == 0xe2bf285:
-            pass #not readable
+            #simpleType:uint
+            label = "RNG_BAR_SIZE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0xafef4d7:
-            pass #not readable
+            #simpleType:uint
+            label = "RNG_BASE_ADDR"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x778bcbb:
             #simpleType:uint
             label = "RUN_MAX_MEM_PATTERNS"
@@ -6059,6 +9312,13 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
+        elif attrEnum == 0x63a4fd4:
+            #simpleType:uint
+            label = "SBE_FIFO_CAPABILITIES"
+            traceEntry.append("[40]:")
+            for x in range(40):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xe926ea8:
             #simpleType:uint
             label = "SBE_IS_STARTED"
@@ -6068,7 +9328,11 @@ def ErrlUserDetailsParserAttribute(ver, data):
         elif attrEnum == 0x3baf9ca:
             pass
         elif attrEnum == 0x2b23c7c:
-            pass #not readable
+            #simpleType:uint
+            label = "SBE_UPDATE_DISABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xe20c541:
             #simpleType:uint
             label = "SBE_VERSION_INFO"
@@ -6077,6 +9341,42 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 i += 4
         elif attrEnum == 0xbc8d08b:
             pass #complexType - skipping
+        elif attrEnum == 0x782c053:
+            #simpleType:uint
+            label = "SCRATCH_UINT32_1"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
+        elif attrEnum == 0x002156b:
+            #simpleType:uint
+            label = "SCRATCH_UINT32_2"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
+        elif attrEnum == 0xeee9926:
+            #simpleType:uint
+            label = "SCRATCH_UINT64_1"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
+        elif attrEnum == 0x18a17a2:
+            #simpleType:uint
+            label = "SCRATCH_UINT64_2"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
+        elif attrEnum == 0xc7bc372:
+            #simpleType:uint
+            label = "SCRATCH_UINT8_1"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xe93419a:
+            #simpleType:uint
+            label = "SCRATCH_UINT8_2"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x96f8bd3:
             #simpleType:uint
             label = "SECUREBOOT_PROTECT_DECONFIGURED_TPM"
@@ -6089,6 +9389,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0x85a4a4b:
+            #simpleType:uint
+            label = "SECURE_VERSION_NUM"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xf9eeb51:
             #simpleType:uint
             label = "SECURE_VERSION_SEEPROM"
@@ -6096,21 +9402,23 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x51cc341:
-            pass #not readable
+            #simpleType:uint
+            label = "SLOT_INDEX"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x5ef37d7:
-            pass #not readable
+            #simpleType:uint
+            label = "SLOT_NAME"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x58f9cb3:
             #simpleType:uint
             label = "SMF_MEM_AMT_REQUESTED"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+8)[0])
                 i += 8
-        elif attrEnum == 0xe2ab0d2:
-            #simpleType:uint
-            label = "SOCKET_POWER_NOMINAL"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+4)[0])
-                i += 4
         elif attrEnum == 0x8949e92:
             #simpleType:uint
             label = "SOCKET_POWER_TURBO"
@@ -6118,41 +9426,41 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
         elif attrEnum == 0x33afdd0:
-            pass #not readable
+            pass #complexType - skipping
         elif attrEnum == 0xba6f1c6:
-            pass #not readable
+            pass #complexType - skipping
         elif attrEnum == 0x1cfc587:
-            pass #not readable
+            pass #complexType - skipping
         elif attrEnum == 0x1a946e7:
-            pass #not readable
+            pass #complexType - skipping
         elif attrEnum == 0xa90a6fa:
-            pass #not readable
+            pass #complexType - skipping
         elif attrEnum == 0xf883c12:
-            pass #not readable
+            pass #complexType - skipping
         elif attrEnum == 0x9eda982:
-            pass #not readable
+            pass #complexType - skipping
         elif attrEnum == 0x5c61990:
-            pass #not readable
+            pass #complexType - skipping
         elif attrEnum == 0x006e0bd:
-            pass #not readable
+            pass #complexType - skipping
         elif attrEnum == 0xe9af745:
-            pass #not readable
+            pass #complexType - skipping
         elif attrEnum == 0xa914ec9:
-            pass #not readable
+            pass #complexType - skipping
         elif attrEnum == 0x3a1816c:
-            pass #not readable
+            pass #complexType - skipping
         elif attrEnum == 0x4269836:
-            pass #not readable
+            pass #complexType - skipping
         elif attrEnum == 0x32adc69:
-            pass #not readable
+            pass #complexType - skipping
         elif attrEnum == 0x3b039dc:
             pass #complexType - skipping
         elif attrEnum == 0x5c63b38:
-            pass #not readable
+            pass #complexType - skipping
         elif attrEnum == 0xf337a7a:
-            pass #not readable
+            pass #complexType - skipping
         elif attrEnum == 0xa82e8ff:
-            pass #not readable
+            pass #complexType - skipping
         elif attrEnum == 0x8dfa6d6:
             #simpleType:uint
             label = "START_MEM_ADDRESS_FOR_PAYLOAD_TCE_TOKEN"
@@ -6160,11 +9468,23 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+8)[0])
                 i += 8
         elif attrEnum == 0x0ddfd25:
-            pass #not readable
+            #simpleType:uint
+            label = "STOP5_DISABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xbc55176:
-            pass #not readable
+            #simpleType:uint
+            label = "SUPPORTED_STOP_STATES"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xf70279f:
-            pass #not readable
+            #simpleType:uint
+            label = "SUPPORTS_DYNAMIC_MEM_VOLT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x3761a65:
             #simpleType:uint
             label = "SYNC_BETWEEN_STEPS"
@@ -6172,9 +9492,9 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0xc8c49e7:
-            pass #not readable
+            pass
         elif attrEnum == 0xa40efa1:
-            pass #not readable
+            pass
         elif attrEnum == 0x6c5ec9f:
             pass
         elif attrEnum == 0x4194918:
@@ -6190,7 +9510,7 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
         elif attrEnum == 0xb1fab71:
-            pass #not readable
+            pass #complexType - skipping
         elif attrEnum == 0x428e6a8:
             pass
         elif attrEnum == 0xd2401e6:
@@ -6206,19 +9526,47 @@ def ErrlUserDetailsParserAttribute(ver, data):
         elif attrEnum == 0x6fd2aa7:
             pass
         elif attrEnum == 0x8ce790d:
-            pass #not readable
+            #simpleType:uint
+            label = "THREAD_COUNT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x1192453:
-            pass #not readable
+            #simpleType:uint
+            label = "TIME_BASE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xfca622c:
-            pass #not readable
+            #simpleType:uint
+            label = "TLB_DATA_ASSOC_SETS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xfb5ce79:
-            pass #not readable
+            #simpleType:uint
+            label = "TLB_DATA_ENTRIES"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x134fdb0:
-            pass #not readable
+            #simpleType:uint
+            label = "TLB_INSTR_ASSOC_SETS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x436dd94:
-            pass #not readable
+            #simpleType:uint
+            label = "TLB_INSTR_ENTRIES"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xeb0420c:
-            pass #not readable
+            #simpleType:uint
+            label = "TLB_RESERVE_SIZE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xfaa68ab:
             #simpleType:uint
             label = "TOD_CPU_DATA"
@@ -6233,7 +9581,11 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0xcb749b3:
-            pass #not readable
+            #simpleType:uint
+            label = "TPM_ENABLED"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xa74c8da:
             #simpleType:uint
             label = "TPM_POISONED"
@@ -6253,29 +9605,239 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x9484951:
-            pass #not readable
+            #simpleType:enum
+            label = "TYPE"
+            attr, i=intConcat(data, i, i+4)
+            if attr == 0x00000000:
+                 traceEntry.append("TYPE_NA")
+            elif attr == 0x00000001:
+                 traceEntry.append("TYPE_SYS")
+            elif attr == 0x00000002:
+                 traceEntry.append("TYPE_NODE")
+            elif attr == 0x00000003:
+                 traceEntry.append("TYPE_DIMM")
+            elif attr == 0x00000004:
+                 traceEntry.append("TYPE_MEMBUF")
+            elif attr == 0x00000005:
+                 traceEntry.append("TYPE_PROC")
+            elif attr == 0x00000006:
+                 traceEntry.append("TYPE_EX")
+            elif attr == 0x00000007:
+                 traceEntry.append("TYPE_CORE")
+            elif attr == 0x00000008:
+                 traceEntry.append("TYPE_L2")
+            elif attr == 0x00000009:
+                 traceEntry.append("TYPE_L3")
+            elif attr == 0x0000000A:
+                 traceEntry.append("TYPE_L4")
+            elif attr == 0x0000000B:
+                 traceEntry.append("TYPE_MCS")
+            elif attr == 0x0000000D:
+                 traceEntry.append("TYPE_MBA")
+            elif attr == 0x0000000E:
+                 traceEntry.append("TYPE_XBUS")
+            elif attr == 0x0000000F:
+                 traceEntry.append("TYPE_ABUS")
+            elif attr == 0x00000010:
+                 traceEntry.append("TYPE_PCI")
+            elif attr == 0x00000011:
+                 traceEntry.append("TYPE_DPSS")
+            elif attr == 0x00000012:
+                 traceEntry.append("TYPE_APSS")
+            elif attr == 0x00000013:
+                 traceEntry.append("TYPE_OCC")
+            elif attr == 0x00000014:
+                 traceEntry.append("TYPE_PSI")
+            elif attr == 0x00000015:
+                 traceEntry.append("TYPE_FSP")
+            elif attr == 0x00000016:
+                 traceEntry.append("TYPE_PNOR")
+            elif attr == 0x00000017:
+                 traceEntry.append("TYPE_OSC")
+            elif attr == 0x00000018:
+                 traceEntry.append("TYPE_TODCLK")
+            elif attr == 0x00000019:
+                 traceEntry.append("TYPE_CONTROL_NODE")
+            elif attr == 0x0000001A:
+                 traceEntry.append("TYPE_OSCREFCLK")
+            elif attr == 0x0000001B:
+                 traceEntry.append("TYPE_OSCPCICLK")
+            elif attr == 0x0000001C:
+                 traceEntry.append("TYPE_REFCLKENDPT")
+            elif attr == 0x0000001D:
+                 traceEntry.append("TYPE_PCICLKENDPT")
+            elif attr == 0x0000001E:
+                 traceEntry.append("TYPE_NX")
+            elif attr == 0x0000001F:
+                 traceEntry.append("TYPE_PORE")
+            elif attr == 0x00000020:
+                 traceEntry.append("TYPE_PCIESWITCH")
+            elif attr == 0x00000021:
+                 traceEntry.append("TYPE_CAPP")
+            elif attr == 0x00000022:
+                 traceEntry.append("TYPE_FSI")
+            elif attr == 0x00000023:
+                 traceEntry.append("TYPE_EQ")
+            elif attr == 0x00000024:
+                 traceEntry.append("TYPE_MCA")
+            elif attr == 0x00000025:
+                 traceEntry.append("TYPE_MCBIST")
+            elif attr == 0x00000026:
+                 traceEntry.append("TYPE_MI")
+            elif attr == 0x00000027:
+                 traceEntry.append("TYPE_DMI")
+            elif attr == 0x00000028:
+                 traceEntry.append("TYPE_OBUS")
+            elif attr == 0x0000002A:
+                 traceEntry.append("TYPE_SBE")
+            elif attr == 0x0000002B:
+                 traceEntry.append("TYPE_PPE")
+            elif attr == 0x0000002C:
+                 traceEntry.append("TYPE_PERV")
+            elif attr == 0x0000002D:
+                 traceEntry.append("TYPE_PEC")
+            elif attr == 0x0000002E:
+                 traceEntry.append("TYPE_PHB")
+            elif attr == 0x0000002F:
+                 traceEntry.append("TYPE_SYSREFCLKENDPT")
+            elif attr == 0x00000030:
+                 traceEntry.append("TYPE_MFREFCLKENDPT")
+            elif attr == 0x00000031:
+                 traceEntry.append("TYPE_TPM")
+            elif attr == 0x00000032:
+                 traceEntry.append("TYPE_SP")
+            elif attr == 0x00000033:
+                 traceEntry.append("TYPE_UART")
+            elif attr == 0x00000034:
+                 traceEntry.append("TYPE_PS")
+            elif attr == 0x00000035:
+                 traceEntry.append("TYPE_FAN")
+            elif attr == 0x00000036:
+                 traceEntry.append("TYPE_VRM")
+            elif attr == 0x00000037:
+                 traceEntry.append("TYPE_USB")
+            elif attr == 0x00000038:
+                 traceEntry.append("TYPE_ETH")
+            elif attr == 0x00000039:
+                 traceEntry.append("TYPE_PANEL")
+            elif attr == 0x0000003A:
+                 traceEntry.append("TYPE_BMC")
+            elif attr == 0x0000003B:
+                 traceEntry.append("TYPE_FLASH")
+            elif attr == 0x0000003C:
+                 traceEntry.append("TYPE_SEEPROM")
+            elif attr == 0x0000003D:
+                 traceEntry.append("TYPE_TMP")
+            elif attr == 0x0000003E:
+                 traceEntry.append("TYPE_GPIO_EXPANDER")
+            elif attr == 0x0000003F:
+                 traceEntry.append("TYPE_POWER_SEQUENCER")
+            elif attr == 0x00000040:
+                 traceEntry.append("TYPE_RTC")
+            elif attr == 0x00000041:
+                 traceEntry.append("TYPE_FANCTLR")
+            elif attr == 0x00000042:
+                 traceEntry.append("TYPE_OBUS_BRICK")
+            elif attr == 0x00000043:
+                 traceEntry.append("TYPE_NPU")
+            elif attr == 0x00000044:
+                 traceEntry.append("TYPE_MC")
+            elif attr == 0x00000045:
+                 traceEntry.append("TYPE_TEST_FAIL")
+            elif attr == 0x00000046:
+                 traceEntry.append("TYPE_MFREFCLK")
+            elif attr == 0x00000047:
+                 traceEntry.append("TYPE_SMPGROUP")
+            elif attr == 0x00000048:
+                 traceEntry.append("TYPE_OMI")
+            elif attr == 0x00000049:
+                 traceEntry.append("TYPE_MCC")
+            elif attr == 0x0000004A:
+                 traceEntry.append("TYPE_OMIC")
+            elif attr == 0x0000004B:
+                 traceEntry.append("TYPE_OCMB_CHIP")
+            elif attr == 0x0000004C:
+                 traceEntry.append("TYPE_MEM_PORT")
+            elif attr == 0x0000004D:
+                 traceEntry.append("TYPE_I2C_MUX")
+            elif attr == 0x0000004E:
+                 traceEntry.append("TYPE_PMIC")
+            elif attr == 0x0000004F:
+                 traceEntry.append("TYPE_NMMU")
+            elif attr == 0x00000050:
+                 traceEntry.append("TYPE_PAU")
+            elif attr == 0x00000051:
+                 traceEntry.append("TYPE_IOHS")
+            elif attr == 0x00000052:
+                 traceEntry.append("TYPE_PAUC")
+            elif attr == 0x00000053:
+                 traceEntry.append("TYPE_FC")
+            elif attr == 0x00000054:
+                 traceEntry.append("TYPE_LPCREFCLKENDPT")
+            elif attr == 0x00000055:
+                 traceEntry.append("TYPE_GENERIC_I2C_DEVICE")
+            elif attr == 0x00000056:
+                 traceEntry.append("TYPE_LAST_IN_RANGE")
         elif attrEnum == 0x62ad824:
-            pass #not readable
+            #simpleType:uint
+            label = "UCD_MFR_REVISION_OVERRIDE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0xca2de0a:
             #simpleType:uint
             label = "ULTRA_TURBO_FREQ_MHZ"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
+        elif attrEnum == 0x2165e1d:
+            #simpleType:uint
+            label = "USE_11S_SPD"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xbde3ab9:
-            pass #not readable
+            #simpleType:uint
+            label = "USE_TCES_FOR_DMAS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x780a573:
-            pass #not readable
+            #simpleType:uint
+            label = "VCS_ID"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x3dbc21a:
-            pass #not readable
+            #simpleType:uint
+            label = "VDDR_ID"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x2a9cfd3:
-            pass #not readable
+            #simpleType:uint
+            label = "VDD_ID"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x22d9035:
-            pass #not readable
+            #simpleType:uint
+            label = "VENDOR_ID"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x03a8b72:
-            pass #not readable
+            #simpleType:uint
+            label = "VPD_REC_NUM"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0xa5ccc9a:
-            pass #not readable
+            #simpleType:uint
+            label = "VPP_ID"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x4baf80d:
             #simpleType:uint
             label = "WOF_POWER_LIMIT"
@@ -6349,12 +9911,28 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x38d7407:
-            pass #not readable
+            #simpleType:uint
+            label = "EARLY_TESTCASES_ISTEP"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x0691853:
             #simpleType:uint
             label = "EEPROM_PAGE_ARRAY"
             traceEntry.append("[4][16]:")
             for x in range(64):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xc4ced6c:
+            #simpleType:uint
+            label = "EXTEND_TPM_MEAS_TO_OTHER_NODES"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x6f82a91:
+            #simpleType:uint
+            label = "FORCE_ECC_UPDATE_ON_VALIDATION_ERROR"
+            for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x45c45e3:
@@ -6363,6 +9941,18 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+2)[0])
                 i += 2
+        elif attrEnum == 0x21d1a50:
+            #simpleType:uint
+            label = "FORCE_TPM_NOT_PRESENT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x990b7c8:
+            #simpleType:uint
+            label = "FRU_CCIN"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x24bd83c:
             pass #not readable
         elif attrEnum == 0x1fa93ae:
@@ -6372,7 +9962,13 @@ def ErrlUserDetailsParserAttribute(ver, data):
         elif attrEnum == 0xd81fd99:
             pass
         elif attrEnum == 0x957b9c0:
-            pass #not readable
+            pass #complexType - skipping
+        elif attrEnum == 0x26068b8:
+            #simpleType:uint
+            label = "HBRT_EID"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xad8243a:
             #simpleType:uint
             label = "HB_EXISTING_IMAGE"
@@ -6389,9 +9985,7 @@ def ErrlUserDetailsParserAttribute(ver, data):
             pass #not readable
         elif attrEnum == 0x62c7ef8:
             pass #not readable
-        elif attrEnum == 0x103a4d1:
-            pass #not readable
-        elif attrEnum == 0xcec54c0:
+        elif attrEnum == 0x5acf81a:
             pass #not readable
         elif attrEnum == 0x529511a:
             pass #not readable
@@ -6422,7 +10016,11 @@ def ErrlUserDetailsParserAttribute(ver, data):
         elif attrEnum == 0xeaece7d:
             pass #not readable
         elif attrEnum == 0x6adbf88:
-            pass #not readable
+            #simpleType:uint
+            label = "HIDDEN_ERRLOGS_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xf888d7a:
             #simpleType:uint
             label = "HOMER_HCODE_LOADED"
@@ -6452,9 +10050,11 @@ def ErrlUserDetailsParserAttribute(ver, data):
         elif attrEnum == 0x7329dbe:
             pass #not readable
         elif attrEnum == 0xc88c82f:
-            pass #not readable
-        elif attrEnum == 0x10dd067:
-            pass #not readable
+            #simpleType:uint
+            label = "IBSCOM_ENABLE_OVERRIDE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x8516c9c:
             #simpleType:uint
             label = "IBSCOM_VIRTUAL_ADDR"
@@ -6486,6 +10086,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+2)[0])
                 i += 2
+        elif attrEnum == 0x0526f80:
+            #simpleType:uint
+            label = "LOGGED_FAIL_GETTING_OVERRIDE_WOF_TABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x73b59bc:
             #simpleType:uint
             label = "MASTER_MBOX_SCRATCH"
@@ -6620,6 +10226,10 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0xd3fc06e:
+            pass #complexType - skipping
+        elif attrEnum == 0xfcc8494:
+            pass #complexType - skipping
         elif attrEnum == 0x510e938:
             #simpleType:uint
             label = "SBE_ARCH_DUMP_ADDR"
@@ -6632,6 +10242,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+8)[0])
                 i += 8
+        elif attrEnum == 0x1dc43a0:
+            #simpleType:uint
+            label = "SBE_COMPROMISED_EID"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xe5c8589:
             #simpleType:uint
             label = "SBE_FFDC_ADDR"
@@ -6639,6 +10255,8 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+8)[0])
                 i += 8
         elif attrEnum == 0xde81674:
+            pass #not readable
+        elif attrEnum == 0xcf74a58:
             pass #not readable
         elif attrEnum == 0x474550f:
             pass #not readable
@@ -6650,7 +10268,11 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x986b127:
-            pass #not readable
+            #simpleType:uint
+            label = "SKIP_PG_ENFORCEMENT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x09d23f6:
             #simpleType:uint
             label = "SPCWKUP_COUNT"
@@ -6670,9 +10292,13 @@ def ErrlUserDetailsParserAttribute(ver, data):
         elif attrEnum == 0x7547b77:
             pass #not readable
         elif attrEnum == 0x8ae42e8:
-            pass #not readable
+            pass
         elif attrEnum == 0x1cc65c9:
-            pass #not readable
+            #simpleType:uint
+            label = "TPM_MODEL"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xb8fa011:
             #simpleType:uint
             label = "TPM_ROLE"
@@ -6701,7 +10327,17 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+8)[0])
                 i += 8
         elif attrEnum == 0xbfe70e7:
-            pass #not readable
+            #simpleType:enum
+            label = "CHIP_VER"
+            attr, i=intConcat(data, i, i+4)
+            if attr == 0x00000010:
+                 traceEntry.append("CHIP_VER_DD10")
+            elif attr == 0x00000011:
+                 traceEntry.append("CHIP_VER_DD11")
+            elif attr == 0x00000020:
+                 traceEntry.append("CHIP_VER_DD20")
+            elif attr == 0x00000021:
+                 traceEntry.append("CHIP_VER_DD21")
         elif attrEnum == 0x86599be:
             #simpleType:uint
             label = "CREATE_DEF_PARTITION"
@@ -6727,7 +10363,13 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0xa007572:
-            pass #not readable
+            #simpleType:enum
+            label = "HW_VER"
+            attr, i=intConcat(data, i, i+4)
+            if attr == 0x00000002:
+                 traceEntry.append("HW_VER_FSP_HW_VER")
+            elif attr == 0x00000003:
+                 traceEntry.append("HW_VER_BMC_HW_VER")
         elif attrEnum == 0x7fc67fc:
             #simpleType:uint
             label = "HYPERVISOR_IPL_DESTINATION"
@@ -6749,15 +10391,35 @@ def ErrlUserDetailsParserAttribute(ver, data):
         elif attrEnum == 0xe7d3a90:
             pass #complexType - skipping
         elif attrEnum == 0x7c9a836:
-            pass #not readable
+            #simpleType:uint
+            label = "IPS_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x1848b5a:
-            pass #not readable
+            #simpleType:uint
+            label = "IPS_ENTER_TIME_SECONDS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0xfc7152f:
-            pass #not readable
+            #simpleType:uint
+            label = "IPS_ENTER_UTILIZATION_PERCENT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x8442c0a:
-            pass #not readable
+            #simpleType:uint
+            label = "IPS_EXIT_TIME_SECONDS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x73786d2:
-            pass #not readable
+            #simpleType:uint
+            label = "IPS_EXIT_UTILIZATION_PERCENT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xc44c3e5:
             #simpleType:uint
             label = "LMB_SIZE"
@@ -6771,9 +10433,17 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x43c995a:
-            pass #not readable
+            #simpleType:uint
+            label = "OPEN_POWER_PM_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x0b9576e:
-            pass #not readable
+            #simpleType:uint
+            label = "OPEN_POWER_PM_MODE_FREQ_PERCENT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0xfca1112:
             #simpleType:uint
             label = "OS_IPL_MODE"
@@ -6781,7 +10451,11 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x02878db:
-            pass #not readable
+            #simpleType:uint
+            label = "PHYP_SYSTEM_TYPE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xce0acef:
             #simpleType:uint
             label = "PRESERVE_MDC_PARTITION_VPD"
@@ -6789,9 +10463,19 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0xa0bf6f9:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_HW_TOPOLOGY"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x612f998:
-            pass #not readable
+            #simpleType:enum
+            label = "ROLE"
+            attr, i=intConcat(data, i, i+4)
+            if attr == 0x00000001:
+                 traceEntry.append("ROLE_PRIMARY")
+            elif attr == 0x00000000:
+                 traceEntry.append("ROLE_BACKUP")
         elif attrEnum == 0x208270e:
             #simpleType:uint
             label = "SLCA_INDEX"
@@ -6805,9 +10489,21 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
         elif attrEnum == 0x23b10ad:
-            pass #not readable
+            #simpleType:enum
+            label = "SW_VER"
+            attr, i=intConcat(data, i, i+4)
+            if attr == 0x00000001:
+                 traceEntry.append("SW_VER_FSP_SW_VER")
+            elif attr == 0x00000002:
+                 traceEntry.append("SW_VER_BMC_SW_VER")
         elif attrEnum == 0xfbc25fd:
             pass
+        elif attrEnum == 0x9b23c48:
+            #simpleType:uint
+            label = "USB_SECURITY"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x0869a14:
             #simpleType:uint
             label = "VLAN_SWITCHES"
@@ -6821,29 +10517,72 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0xba49a18:
-            pass #not readable
+            #simpleType:uint
+            label = "ADC_CHANNEL_FUNC_IDS"
+            traceEntry.append("[16]:")
+            for x in range(16):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x0fc9882:
-            pass #not readable
+            #simpleType:uint
+            label = "ADC_CHANNEL_GAINS"
+            traceEntry.append("[16]:")
+            for x in range(16):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x33234bf:
-            pass #not readable
+            #simpleType:uint
+            label = "ADC_CHANNEL_GNDS"
+            traceEntry.append("[16]:")
+            for x in range(16):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xc789762:
-            pass #not readable
+            #simpleType:uint
+            label = "ADC_CHANNEL_OFFSETS"
+            traceEntry.append("[16]:")
+            for x in range(16):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xab26dbf:
-            pass #not readable
+            #simpleType:uint
+            label = "ADC_CHANNEL_SENSOR_NUMBERS"
+            traceEntry.append("[16]:")
+            for x in range(16):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xe34624e:
-            pass #not readable
+            #simpleType:uint
+            label = "ALLOW_CALLHOME_ESELS_TO_BMC"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x227fe0f:
-            pass #not readable
+            #simpleType:uint
+            label = "APSS_GPIO_PORT_MODES"
+            traceEntry.append("[2]:")
+            for x in range(2):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x414575c:
-            pass #not readable
+            #simpleType:uint
+            label = "APSS_GPIO_PORT_PINS"
+            traceEntry.append("[16]:")
+            for x in range(16):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x47f127d:
-            pass #not readable
+            pass
         elif attrEnum == 0x4724ab2:
-            pass #not readable
+            pass
         elif attrEnum == 0x76918c6:
-            pass #not readable
+            #simpleType:uint
+            label = "BMC_MAX_ERROR_LOG_SIZE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x7cc5a7f:
-            pass #not readable
+            pass
         elif attrEnum == 0xbe4ab2c:
             #simpleType:uint
             label = "CALCULATED_MAX_SYS_POWER_EXCLUDING_GPUS"
@@ -6858,34 +10597,102 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 i += 2
         elif attrEnum == 0x4185ea4:
             pass #complexType - skipping
+        elif attrEnum == 0x433cfe9:
+            #simpleType:uint
+            label = "CORE_WEIGHT_TENTHS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x59bb2b4:
             #simpleType:uint
             label = "CUMULATIVE_PMCOMPLEX_RESET_COUNT"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0xe326e79:
+            #simpleType:uint
+            label = "DIMM_ERROR_TEMP_DEG_C"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x325ae61:
+            #simpleType:uint
+            label = "DIMM_READ_TIMEOUT_SEC"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x025ae26:
+            #simpleType:uint
+            label = "DIMM_THROTTLE_TEMP_DEG_C"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x1d74d8f:
-            pass #not readable
+            pass #complexType - skipping
         elif attrEnum == 0xa9da15c:
-            pass #not readable
+            #simpleType:uint
+            label = "GPU_SENSORS"
+            traceEntry.append("[3][7]:")
+            for x in range(21):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x96086e6:
-            pass #not readable
+            #simpleType:uint
+            label = "HDAT_I2C_ADDR"
+            traceEntry.append("[192]:")
+            for x in range(192):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xf503383:
-            pass #not readable
+            #simpleType:uint
+            label = "HDAT_I2C_BUS_FREQ"
+            traceEntry.append("[192]:")
+            for x in range(192):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x0c075a9:
-            pass #not readable
+            pass
         elif attrEnum == 0x89bd966:
-            pass #not readable
+            #simpleType:uint
+            label = "HDAT_I2C_DEVICE_PURPOSE"
+            traceEntry.append("[192]:")
+            for x in range(192):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x7b92047:
-            pass #not readable
+            #simpleType:uint
+            label = "HDAT_I2C_DEVICE_TYPE"
+            traceEntry.append("[192]:")
+            for x in range(192):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x950f081:
-            pass #not readable
+            #simpleType:uint
+            label = "HDAT_I2C_ELEMENTS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xc9759f9:
-            pass #not readable
+            #simpleType:uint
+            label = "HDAT_I2C_ENGINE"
+            traceEntry.append("[192]:")
+            for x in range(192):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xff9735d:
-            pass #not readable
+            #simpleType:uint
+            label = "HDAT_I2C_MASTER_PORT"
+            traceEntry.append("[192]:")
+            for x in range(192):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x7f9e3fe:
-            pass #not readable
+            #simpleType:uint
+            label = "HDAT_I2C_SLAVE_PORT"
+            traceEntry.append("[192]:")
+            for x in range(192):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x35e1cdc:
             #simpleType:uint
             label = "HTMGT_INTERNAL_FLAGS"
@@ -6911,7 +10718,11 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
         elif attrEnum == 0x18dd55a:
-            pass #not readable
+            #simpleType:uint
+            label = "IPMI_INSTANCE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x330c475:
             #simpleType:uint
             label = "IPMI_MAX_BUFFER_SIZE"
@@ -6919,15 +10730,108 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
         elif attrEnum == 0x00bf09b:
-            pass #not readable
+            #simpleType:uint
+            label = "IPMI_SENSORS"
+            traceEntry.append("[16][2]:")
+            for x in range(32):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x44d4c9e:
-            pass #not readable
+            #simpleType:uint
+            label = "IS_MPIPL_SUPPORTED"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x60f38f8:
+            #simpleType:uint
+            label = "L3_WEIGHT_TENTHS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x4c7382b:
-            pass #not readable
+            #simpleType:uint
+            label = "MAX_VDD_CURRENT_READING"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0x59c4587:
+            #simpleType:uint
+            label = "MC_DRAM_ERROR_TEMP_DEG_C"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xcaa7f91:
+            #simpleType:uint
+            label = "MC_DRAM_READ_TIMEOUT_SEC"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x298abc7:
+            #simpleType:uint
+            label = "MC_DRAM_THROTTLE_TEMP_DEG_C"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xc84f972:
+            #simpleType:uint
+            label = "MC_EXT_ERROR_TEMP_DEG_C"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xa0ad007:
+            #simpleType:uint
+            label = "MC_EXT_READ_TIMEOUT_SEC"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xe0f5735:
+            #simpleType:uint
+            label = "MC_EXT_THROTTLE_TEMP_DEG_C"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x1cffbc3:
+            #simpleType:uint
+            label = "MEMCTRL_ERROR_TEMP_DEG_C"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xafb2cd2:
+            #simpleType:uint
+            label = "MEMCTRL_READ_TIMEOUT_SEC"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xac0b556:
+            #simpleType:uint
+            label = "MEMCTRL_THROTTLE_TEMP_DEG_C"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xab9b916:
+            #simpleType:uint
+            label = "MIN_MEM_UTILIZATION_THROTTLING"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xa56dc61:
+            #simpleType:uint
+            label = "MIN_POWER_CAP_WATTS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0xe1ec481:
-            pass #not readable
+            #simpleType:uint
+            label = "MISC_SYSTEM_COMPONENTS_MAX_POWER_WATTS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x5cf8e48:
-            pass #not readable
+            #simpleType:uint
+            label = "MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xb2ffe8c:
             #simpleType:uint
             label = "MSS_UTIL_N_PER_MBA"
@@ -6935,7 +10839,35 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
         elif attrEnum == 0x8e94b95:
-            pass #not readable
+            #simpleType:uint
+            label = "NO_APSS_PROC_POWER_VCS_VIO_WATTS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0x77f6219:
+            #simpleType:uint
+            label = "N_BULK_POWER_LIMIT_WATTS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0xe63c268:
+            #simpleType:uint
+            label = "N_MAX_MEM_POWER_WATTS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0x301ecfd:
+            #simpleType:uint
+            label = "N_PLUS_ONE_BULK_POWER_LIMIT_WATTS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0xf738734:
+            #simpleType:uint
+            label = "N_PLUS_ONE_MAX_MEM_POWER_WATTS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x1e51d61:
             #simpleType:uint
             label = "N_PLUS_ONE_MEM_POWER"
@@ -6965,69 +10897,193 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0x0294b5a:
-            pass #not readable
+            pass
         elif attrEnum == 0x0a5db3f:
-            pass #not readable
+            #simpleType:uint
+            label = "OPEN_POWER_DIMM_ERROR_TEMP_DEG_C"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x67b8922:
-            pass #not readable
+            #simpleType:uint
+            label = "OPEN_POWER_DIMM_READ_TIMEOUT_SEC"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0xf807c26:
-            pass #not readable
+            #simpleType:uint
+            label = "OPEN_POWER_DIMM_THROTTLE_TEMP_DEG_C"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0xec9f6e2:
-            pass #not readable
+            #simpleType:uint
+            label = "OPEN_POWER_GPU_ERROR_TEMP_DEG_C"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xb081544:
-            pass #not readable
+            #simpleType:uint
+            label = "OPEN_POWER_GPU_MEM_ERROR_TEMP_DEG_C"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x31f54e9:
-            pass #not readable
+            #simpleType:uint
+            label = "OPEN_POWER_GPU_MEM_READ_TIMEOUT_SEC"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x8bd632f:
-            pass #not readable
+            #simpleType:uint
+            label = "OPEN_POWER_GPU_READ_TIMEOUT_SEC"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x24a5cfc:
-            pass #not readable
+            #simpleType:uint
+            label = "OPEN_POWER_L3_WEIGHT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xf3cfe74:
-            pass #not readable
+            #simpleType:uint
+            label = "OPEN_POWER_MEMCTRL_ERROR_TEMP_DEG_C"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x274740e:
-            pass #not readable
+            #simpleType:uint
+            label = "OPEN_POWER_MEMCTRL_READ_TIMEOUT_SEC"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0xf6c06bc:
-            pass #not readable
+            #simpleType:uint
+            label = "OPEN_POWER_MEMCTRL_THROTTLE_TEMP_DEG_C"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x8520d57:
-            pass #not readable
+            #simpleType:uint
+            label = "OPEN_POWER_MIN_MEM_UTILIZATION_POWER_CAP"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xdb523f2:
-            pass #not readable
+            #simpleType:uint
+            label = "OPEN_POWER_MIN_MEM_UTILIZATION_THROTTLING"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xaa6708b:
-            pass #not readable
+            #simpleType:uint
+            label = "OPEN_POWER_MIN_POWER_CAP_WATTS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0xfc2cace:
-            pass #not readable
+            #simpleType:uint
+            label = "OPEN_POWER_N_BULK_POWER_LIMIT_WATTS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x0516ed5:
-            pass #not readable
+            #simpleType:uint
+            label = "OPEN_POWER_N_MAX_MEM_POWER_WATTS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0xafb435e:
-            pass #not readable
+            #simpleType:uint
+            label = "OPEN_POWER_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x10e7fdc:
-            pass #not readable
+            #simpleType:uint
+            label = "OPEN_POWER_N_PLUS_ONE_HPC_BULK_POWER_LIMIT_WATTS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x6255aa9:
-            pass #not readable
+            #simpleType:uint
+            label = "OPEN_POWER_N_PLUS_ONE_MAX_MEM_POWER_WATTS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x7bfa790:
-            pass #not readable
+            #simpleType:uint
+            label = "OPEN_POWER_PROC_DVFS_TEMP_DEG_C"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x2e2c7e3:
-            pass #not readable
+            #simpleType:uint
+            label = "OPEN_POWER_PROC_ERROR_TEMP_DEG_C"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0xe974923:
-            pass #not readable
+            #simpleType:uint
+            label = "OPEN_POWER_PROC_READ_TIMEOUT_SEC"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x7f74e9a:
-            pass #not readable
+            #simpleType:uint
+            label = "OPEN_POWER_PROC_WEIGHT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x68dc009:
-            pass #not readable
+            #simpleType:uint
+            label = "OPEN_POWER_QUAD_WEIGHT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x78f38ad:
-            pass #not readable
+            #simpleType:uint
+            label = "OPEN_POWER_REGULATOR_EFFICIENCY_FACTOR"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x50ee64a:
-            pass #not readable
+            #simpleType:uint
+            label = "OPEN_POWER_SOFT_MIN_PCAP_WATTS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0x54a5bff:
-            pass #not readable
+            #simpleType:uint
+            label = "OPEN_POWER_TURBO_MODE_SUPPORTED"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x1dd9c8c:
-            pass #not readable
+            #simpleType:uint
+            label = "OPEN_POWER_VRM_READ_TIMEOUT_SEC"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x0b5a8e8:
-            pass #not readable
+            #simpleType:uint
+            label = "OPEN_POWER_VRM_VDD_DVFS_TEMP_DEG_C"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x08f0911:
-            pass #not readable
+            #simpleType:uint
+            label = "OPEN_POWER_VRM_VDD_ERROR_TEMP_DEG_C"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xf38d800:
-            pass #not readable
+            #simpleType:uint
+            label = "OPEN_POWER_VRM_VDD_READ_TIMEOUT_SEC"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xdf0d4d9:
             #simpleType:uint
             label = "OP_TRACE_LITE"
@@ -7048,8 +11104,32 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(2):
                 traceEntry.append(hexConcat(data, i, i+2)[0])
                 i += 2
+        elif attrEnum == 0x2044655:
+            #simpleType:uint
+            label = "PLDM_BIOS_ERROR_INFORMATIONAL"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xb2c6bc3:
             pass #complexType - skipping
+        elif attrEnum == 0x5047752:
+            #simpleType:uint
+            label = "PMIC_ERROR_TEMP_DEG_C"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xefeedde:
+            #simpleType:uint
+            label = "PMIC_READ_TIMEOUT_SEC"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xf65896c:
+            #simpleType:uint
+            label = "PMIC_THROTTLE_TEMP_DEG_C"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x97e3c37:
             #simpleType:uint
             label = "POWERCAP_MEM_POWER"
@@ -7071,16 +11151,104 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(2):
                 traceEntry.append(hexConcat(data, i, i+2)[0])
                 i += 2
+        elif attrEnum == 0x105b4c6:
+            #simpleType:uint
+            label = "PROC_DVFS_TEMP_DELTA_C"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x44fac3b:
+            #simpleType:uint
+            label = "PROC_ERROR_TEMP_DELTA_C"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xde94642:
+            #simpleType:uint
+            label = "PROC_IO_DVFS_TEMP_DELTA_C"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xe1e81d1:
+            #simpleType:uint
+            label = "PROC_IO_ERROR_TEMP_DELTA_C"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xe92b569:
+            #simpleType:uint
+            label = "PROC_IO_READ_TIMEOUT_SEC"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x9ed1ea7:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_MHZ_PER_WATT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0xc001363:
+            #simpleType:uint
+            label = "PROC_READ_TIMEOUT_SEC"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xb96ce6b:
-            pass #not readable
+            #simpleType:uint
+            label = "PROC_SOCKET_POWER_WATTS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0x987d38a:
+            #simpleType:uint
+            label = "QUAD_WEIGHT_TENTHS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xf48e707:
+            #simpleType:uint
+            label = "REGULATOR_EFFICIENCY_FACTOR"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xf39d257:
-            pass #not readable
+            #simpleType:uint
+            label = "REPORT_THROTTLE_BELOW_NOMINAL"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x83d7d98:
+            #simpleType:uint
+            label = "SOFT_MIN_POWER_CAP_WATTS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0xd2bd910:
             pass #complexType - skipping
         elif attrEnum == 0x5c34507:
-            pass #not readable
+            #simpleType:uint
+            label = "VDD_CURRENT_OVERFLOW_WORKAROUND_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x866211d:
+            #simpleType:uint
+            label = "VRM_VDD_DVFS_TEMP_DEG_C"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x31ac5c6:
+            #simpleType:uint
+            label = "VRM_VDD_ERROR_TEMP_DEG_C"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x469e5f6:
+            #simpleType:uint
+            label = "VRM_VDD_READ_TIMEOUT_SEC"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         else:
             label="Unknown"
             traceEntry.append(hex(attrEnum))

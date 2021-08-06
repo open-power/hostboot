@@ -312,7 +312,7 @@ class errludP_errl:
             d['Target'], i=errludP_errl.entityPath(data, i)
 
         # HWAS::SENSOR_CALLOUT
-        elif calloutType == hwasCallout.calloutType.get("SENSOR_CALLOUT"):
+        elif cType == hwasCallout.calloutType.get("SENSOR_CALLOUT"):
             # Data layout following callout_ud data
             # 4 bytes  : sensorId;
             # 4 bytes  : sensorTypeEnum
