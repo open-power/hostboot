@@ -1066,7 +1066,24 @@ fapi2::ReturnCode p10_io_init::ext_req_lanes(const fapi2::Target<fapi2::TARGET_T
             FAPI_TRY(p10_io_get_iohs_thread(l_iohs_target, l_thread));
             FAPI_DBG("Starting DCCAL for IOHS thread %d", l_thread);
 
-            FAPI_TRY(p10_io_get_iohs_lanes(l_iohs_target, l_lanes));
+            fapi2::ATTR_IOHS_FABRIC_LANE_REVERSAL_Type l_lane_reversal;
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_FABRIC_LANE_REVERSAL, l_iohs_target, l_lane_reversal),
+                     "Error from FAPI_ATTR_GET (ATTR_IOHS_FABRIC_LANE_REVERSAL)");
+
+            if (l_lane_reversal & 0x80)
+            {
+                // SW531947 :: If there is a x18 swizzle, we want to train all lanes
+                //             as tx / rx are controlled with different x9s
+                for (int l_lane = 0; l_lane < P10_IO_LIB_NUMBER_OF_IOHS_LANES; l_lane++)
+                {
+                    l_lanes.push_back(l_lane);
+                }
+            }
+            else
+            {
+                FAPI_TRY(p10_io_get_iohs_lanes(l_iohs_target, l_lanes));
+            }
+
 
             FAPI_TRY(ext_req_set_lane_bits(l_pauc_target, l_lanes, l_thread));
         }

@@ -1198,42 +1198,51 @@ fapi2::ReturnCode p10_psav_bad_lanes(const fapi2::Target<fapi2::TARGET_TYPE_IOHS
         if (l_bad_vec != 0)
         {
             fapi2::buffer<uint64_t> l_data;
+            fapi2::buffer<uint64_t> l_newdata;
 
             FAPI_TRY(GET_IOO_RX0_RXCTL_DATASM_REGS_RX_CNT32_PG(i_iohs_target, l_data));
 
-            l_data.insert(l_bad_vec,
-                          IOO_RX0_RXCTL_DATASM_REGS_RX_CNT32_PG_RX_PSAVE_FORCE_REQ_0_15_1,
-                          IOO_RX0_RXCTL_DATASM_REGS_RX_CNT32_PG_RX_PSAVE_FORCE_REQ_0_15_1_LEN,
-                          0);
+            l_newdata.flush<0>();
+            l_newdata.insert(l_bad_vec,
+                             IOO_RX0_RXCTL_DATASM_REGS_RX_CNT32_PG_RX_PSAVE_FORCE_REQ_0_15_1,
+                             IOO_RX0_RXCTL_DATASM_REGS_RX_CNT32_PG_RX_PSAVE_FORCE_REQ_0_15_1_LEN,
+                             0);
+            l_data |= l_newdata;
 
             FAPI_TRY(PUT_IOO_RX0_RXCTL_DATASM_REGS_RX_CNT32_PG(i_iohs_target, l_data));
 
 
             FAPI_TRY(GET_IOO_RX0_RXCTL_DATASM_REGS_RX_CNT33_PG(i_iohs_target, l_data));
 
-            l_data.insert(l_bad_vec,
-                          IOO_RX0_RXCTL_DATASM_REGS_RX_CNT33_PG_RX_PSAVE_FORCE_REQ_16_23_1,
-                          IOO_RX0_RXCTL_DATASM_REGS_RX_CNT33_PG_RX_PSAVE_FORCE_REQ_16_23_1_LEN,
-                          IOO_RX0_RXCTL_DATASM_REGS_RX_CNT32_PG_RX_PSAVE_FORCE_REQ_0_15_1_LEN);
+            l_newdata.flush<0>();
+            l_newdata.insert(l_bad_vec,
+                             IOO_RX0_RXCTL_DATASM_REGS_RX_CNT33_PG_RX_PSAVE_FORCE_REQ_16_23_1,
+                             IOO_RX0_RXCTL_DATASM_REGS_RX_CNT33_PG_RX_PSAVE_FORCE_REQ_16_23_1_LEN,
+                             IOO_RX0_RXCTL_DATASM_REGS_RX_CNT32_PG_RX_PSAVE_FORCE_REQ_0_15_1_LEN);
+            l_data |= l_newdata;
 
             FAPI_TRY(PUT_IOO_RX0_RXCTL_DATASM_REGS_RX_CNT33_PG(i_iohs_target, l_data));
 
 
             FAPI_TRY(GET_IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL5_PG(i_iohs_target, l_data));
 
-            l_data.insert(l_bad_vec,
-                          IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL5_PG_RX_PSAVE_FENCE_REQ_DL_IO_0_15,
-                          IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL5_PG_RX_PSAVE_FENCE_REQ_DL_IO_0_15_LEN,
-                          0);
+            l_newdata.flush<0>();
+            l_newdata.insert(l_bad_vec,
+                             IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL5_PG_RX_PSAVE_FENCE_REQ_DL_IO_0_15,
+                             IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL5_PG_RX_PSAVE_FENCE_REQ_DL_IO_0_15_LEN,
+                             0);
+            l_data |= l_newdata;
 
             FAPI_TRY(PUT_IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL5_PG(i_iohs_target, l_data));
 
             FAPI_TRY(GET_IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL6_PG(i_iohs_target, l_data));
 
-            l_data.insert(l_bad_vec,
-                          IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL6_PG_RX_PSAVE_FENCE_REQ_DL_IO_16_23,
-                          IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL6_PG_RX_PSAVE_FENCE_REQ_DL_IO_16_23_LEN,
-                          IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL5_PG_RX_PSAVE_FENCE_REQ_DL_IO_0_15_LEN);
+            l_newdata.flush<0>();
+            l_newdata.insert(l_bad_vec,
+                             IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL6_PG_RX_PSAVE_FENCE_REQ_DL_IO_16_23,
+                             IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL6_PG_RX_PSAVE_FENCE_REQ_DL_IO_16_23_LEN,
+                             IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL5_PG_RX_PSAVE_FENCE_REQ_DL_IO_0_15_LEN);
+            l_data |= l_newdata;
 
             FAPI_TRY(PUT_IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL6_PG(i_iohs_target, l_data));
         }

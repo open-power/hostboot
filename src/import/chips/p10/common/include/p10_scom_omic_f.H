@@ -111,6 +111,14 @@ static const uint32_t CTL_REGS_TX_CNTL3_PG_BER_SEL_LEN = 6;
 //<< [CTL_REGS_TX_CNTL3_PG]
 // omic/reg00015.H
 
+//>> [TX_CTL_SM_REGS_CTLSM_CNTL2_PG]
+static const uint64_t TX_CTL_SM_REGS_CTLSM_CNTL2_PG = 0x800ccc4010012c3full;
+
+static const uint32_t TX_CTL_SM_REGS_CTLSM_CNTL2_PG_TX_PSAVE_FENCE_REQ_DL_IO_16_23 = 48;
+static const uint32_t TX_CTL_SM_REGS_CTLSM_CNTL2_PG_TX_PSAVE_FENCE_REQ_DL_IO_16_23_LEN = 8;
+//<< [TX_CTL_SM_REGS_CTLSM_CNTL2_PG]
+// omic/reg00015.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

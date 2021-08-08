@@ -58,18 +58,23 @@ p10_fabric_dl_setup_linktrain_start(
     FAPI_DBG("Start");
     using namespace scomt::iohs;
     fapi2::buffer<uint64_t> l_data = 0;
+    fapi2::ATTR_IOHS_FABRIC_LANE_REVERSAL_Type l_lane_reversal;
 
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_FABRIC_LANE_REVERSAL,
+                           i_target,
+                           l_lane_reversal),
+             "Error from FAPI_ATTR_GET (ATTR_IOHS_FABRIC_LANE_REVERSAL)");
     //## PHY_CONFIG Register: Enable link 0, Config_dl_select = DLP
     //putscom pu.iohs 1801100c 0000000000000081 -all
     //FAPI_TRY(PREP_DLP_PHY_CONFIG(i_target));
     FAPI_TRY(GET_DLP_PHY_CONFIG(i_target, l_data));
 
-    if (l_do_even)
+    if (l_do_even || (l_lane_reversal & 0x80))
     {
         SET_DLP_PHY_CONFIG_LINK0_SELECT(l_data);
     }
 
-    if (l_do_odd)
+    if (l_do_odd || (l_lane_reversal & 0x80))
     {
         SET_DLP_PHY_CONFIG_LINK1_SELECT(l_data);
     }

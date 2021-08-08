@@ -35,6 +35,7 @@
 #include <p10_io_ppe_lib.H>
 #include <p10_io_ppe_regs.H>
 #include <p10_scom_pauc.H>
+#include <p10_scom_iohs.H>
 #include <p10_io_init_start_ppe.H>
 #include <p10_io_lib.H>
 
@@ -54,7 +55,125 @@ class p10_io_done : public p10_io_ppe_cache_proc
         fapi2::ReturnCode p10_io_init_done_check_fails(
             const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
+        fapi2::ReturnCode p10_io_init_done_sw531947_check_x18_swizzle(
+            const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_iohs_target);
+
 };
+
+///
+/// @brief SW531947:: If there is a x18 swizzle, we need to power down the unused slices
+///
+/// @param[in] i_iohs_target IOHS Target
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p10_io_init_done_sw531947_check_x18_swizzle(
+    const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_iohs_target)
+{
+    using namespace scomt::iohs;
+
+    fapi2::ATTR_IOHS_FABRIC_LANE_REVERSAL_Type l_lane_reversal;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_FABRIC_LANE_REVERSAL, i_iohs_target, l_lane_reversal),
+             "Error from FAPI_ATTR_GET (ATTR_IOHS_FABRIC_LANE_REVERSAL)");
+
+    // Check for x18 Tx Lane Swap
+    if (l_lane_reversal & 0x80)
+    {
+        auto l_iolink_targets = i_iohs_target.getChildren<fapi2::TARGET_TYPE_IOLINK>();
+
+        // handle Cronus platform implementation of IOLINK targets -- both
+        // children are always returned as functional, even if no valid remote endpoint
+        // connection exists
+        if (fapi2::is_platform<fapi2::PLAT_CRONUS>())
+        {
+            std::vector<fapi2::Target<fapi2::TARGET_TYPE_IOLINK>> l_iolink_targets_filtered;
+
+            for (auto l_loc_iolink_target : l_iolink_targets)
+            {
+                fapi2::ReturnCode l_rc;
+                fapi2::Target<fapi2::TARGET_TYPE_IOLINK> l_rem_iolink_target;
+                l_rc = l_loc_iolink_target.getOtherEnd(l_rem_iolink_target);
+
+                if (l_rc == fapi2::FAPI2_RC_SUCCESS)
+                {
+                    l_iolink_targets_filtered.push_back(l_loc_iolink_target);
+                }
+            }
+
+            l_iolink_targets = l_iolink_targets_filtered;
+        }
+
+        // Check if we are in half width mode
+        if(l_iolink_targets.size() == 1)
+        {
+            fapi2::buffer<uint64_t> l_rx_psave_00_15;
+            fapi2::buffer<uint64_t> l_rx_psave_16_23;
+            fapi2::buffer<uint64_t> l_tx_psave_00_15;
+            fapi2::buffer<uint64_t> l_tx_psave_16_23;
+
+            for (const auto l_iolink_target : l_iolink_targets)
+            {
+                fapi2::ATTR_CHIP_UNIT_POS_Type l_iolink_pos;
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_iolink_target, l_iolink_pos),
+                         "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+
+                if (l_iolink_pos % 2)
+                {
+                    // Link0[00:08]: Tx(ON) Rx(OFF), Link1[09:17]: Tx(OFF) Rx(ON)
+                    l_rx_psave_00_15.insertFromRight(0xFF80,
+                                                     IOO_RX0_RXCTL_DATASM_REGS_RX_CNT32_PG_RX_PSAVE_FORCE_REQ_0_15_1,
+                                                     IOO_RX0_RXCTL_DATASM_REGS_RX_CNT32_PG_RX_PSAVE_FORCE_REQ_0_15_1_LEN);
+
+                    l_tx_psave_00_15.insertFromRight(0x007F,
+                                                     IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL13_PG_TX_PSAVE_FORCE_REQ_0_15_1,
+                                                     IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL13_PG_TX_PSAVE_FORCE_REQ_0_15_1_LEN);
+                    l_tx_psave_16_23.insertFromRight(0xC0,
+                                                     IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL14_PG_TX_PSAVE_FORCE_REQ_16_23_1,
+                                                     IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL14_PG_TX_PSAVE_FORCE_REQ_16_23_1_LEN);
+                }
+                else
+                {
+                    // Link0[00:08]: Tx(OFF) Rx(ON), Link1[09:17]: Tx(ON) Rx(OFF)
+                    l_rx_psave_00_15.insertFromRight(0x007F,
+                                                     IOO_RX0_RXCTL_DATASM_REGS_RX_CNT32_PG_RX_PSAVE_FORCE_REQ_0_15_1,
+                                                     IOO_RX0_RXCTL_DATASM_REGS_RX_CNT32_PG_RX_PSAVE_FORCE_REQ_0_15_1_LEN);
+                    l_rx_psave_16_23.insertFromRight(0xC0,
+                                                     IOO_RX0_RXCTL_DATASM_REGS_RX_CNT33_PG_RX_PSAVE_FORCE_REQ_16_23_1,
+                                                     IOO_RX0_RXCTL_DATASM_REGS_RX_CNT33_PG_RX_PSAVE_FORCE_REQ_16_23_1_LEN);
+
+                    l_tx_psave_00_15.insertFromRight(0xFF80,
+                                                     IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL13_PG_TX_PSAVE_FORCE_REQ_0_15_1,
+                                                     IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL13_PG_TX_PSAVE_FORCE_REQ_0_15_1_LEN);
+                }
+            }
+
+            // TODO Write Force
+            FAPI_TRY(PREP_IOO_RX0_RXCTL_DATASM_REGS_RX_CNT32_PG(i_iohs_target));
+            FAPI_TRY(PUT_IOO_RX0_RXCTL_DATASM_REGS_RX_CNT32_PG(i_iohs_target, l_rx_psave_00_15));
+            FAPI_TRY(PREP_IOO_RX0_RXCTL_DATASM_REGS_RX_CNT33_PG(i_iohs_target));
+            FAPI_TRY(PUT_IOO_RX0_RXCTL_DATASM_REGS_RX_CNT33_PG(i_iohs_target, l_rx_psave_16_23));
+
+            FAPI_TRY(PREP_IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL13_PG(i_iohs_target));
+            FAPI_TRY(PUT_IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL13_PG(i_iohs_target, l_tx_psave_00_15));
+            FAPI_TRY(PREP_IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL14_PG(i_iohs_target));
+            FAPI_TRY(PUT_IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL14_PG(i_iohs_target, l_tx_psave_16_23));
+
+            // TODO Write Fence
+            FAPI_TRY(PREP_IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL5_PG(i_iohs_target));
+            FAPI_TRY(PUT_IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL5_PG(i_iohs_target, l_rx_psave_00_15));
+            FAPI_TRY(PREP_IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL6_PG(i_iohs_target));
+            FAPI_TRY(PUT_IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL6_PG(i_iohs_target, l_rx_psave_16_23));
+
+            FAPI_TRY(PREP_IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL1_PG(i_iohs_target));
+            FAPI_TRY(PUT_IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL1_PG(i_iohs_target, l_tx_psave_00_15));
+            FAPI_TRY(PREP_IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL2_PG(i_iohs_target));
+            FAPI_TRY(PUT_IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL2_PG(i_iohs_target, l_tx_psave_16_23));
+        }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 ///
 /// @brief Check done status for reg_init, dccal, lane power on, and fifo init for a thread
 ///
@@ -395,6 +514,11 @@ fapi2::ReturnCode p10_io_init_done(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
                 if (l_config_mode == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPX)
                 {
                     FAPI_TRY(l_proc.p10_io_init_done_pon_check_thread_done(l_pauc_target, l_thread, l_done));
+
+                    if (l_done)
+                    {
+                        FAPI_TRY(p10_io_init_done_sw531947_check_x18_swizzle(l_iohs_target));
+                    }
                 }
                 else if (l_config_mode == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPA)
                 {
