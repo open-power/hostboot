@@ -159,8 +159,10 @@ runtimeInterfaces_t* rt_start(hostInterfaces_t* intf)
 #ifdef CONFIG_PLDM
     // initialize PLDM
     rtPost->callInitPldm();
+#endif
 
-    // We only support PNOR access if PLDM is available
+#ifdef CONFIG_FILE_XFER_VIA_PLDM
+    // We only support PNOR access if PLDM PNOR IO is available
     rtPost->callInitPnor();
 #endif
 
