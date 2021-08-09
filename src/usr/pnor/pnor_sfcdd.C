@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -356,6 +356,7 @@ PnorSfcDD::PnorSfcDD( TARGETING::Target* i_target )
 : iv_eraseSizeBytes(ERASESIZE_BYTES_DEFAULT)
 , iv_norChipId(0)
 , iv_sfc(NULL)
+, iv_constructorLog(nullptr)
 {
     TRACFCOMP(g_trac_pnor, ENTER_MRK "PnorSfcDD::PnorSfcDD()" );
     errlHndl_t l_err = NULL;
@@ -411,6 +412,34 @@ PnorSfcDD::PnorSfcDD( TARGETING::Target* i_target )
         l_err = iv_sfc->getNORChipId(iv_norChipId);
         if( l_err ) { break; }
 
+        //The LPC logic in the processor can return all zeroes with no
+        // errors in the case where the SFC isn't physically installed.
+        // If we ever hit an all-zero NOR we should fail out.
+        if( iv_norChipId == 0 )
+        {
+            /*@
+             * @errortype
+             * @moduleid     PNOR::MOD_PNORDD_SFC_CONSTRUCTOR
+             * @reasoncode   PNOR::RC_ZERO_NOR_CHIPID
+             * @userdata1    Processor HUID
+             * @userdata2    <unused>
+             * @devdesc      PnorSfcDD::PnorSfcDD> Read zero for PNOR
+             *               chipid, assuming SFC is bad or missing.
+             * @custdesc     Error caused by missing hardware
+             */
+            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            PNOR::MOD_PNORDD_SFC_CONSTRUCTOR,
+                                            PNOR::RC_ZERO_NOR_CHIPID,
+                                            TARGETING::get_huid(iv_target),
+                                            0 );
+            l_err->collectTrace(PNOR_COMP_NAME);
+            l_err->collectTrace(LPC_COMP_NAME);
+            l_err->addPartCallout( iv_target,
+                                   HWAS::PNOR_PART_TYPE,
+                                   HWAS::SRCI_PRIORITY_HIGH );
+            break;
+        }
+
         //Keep track of the size of the erase block
         iv_eraseSizeBytes = iv_sfc->eraseSizeBytes();
         //We only support 4K erase blocks for now
@@ -421,7 +450,8 @@ PnorSfcDD::PnorSfcDD( TARGETING::Target* i_target )
     {
         TRACFCOMP( g_trac_pnor, "Failure to initialize the PNOR logic :: RC=%.4X", ERRL_GETRC_SAFE(l_err) );
         l_err->collectTrace(PNOR_COMP_NAME);
-        ERRORLOG::errlCommit(l_err,PNOR_COMP_ID);
+        iv_constructorLog = l_err; //remember for later
+        l_err = nullptr;
 
         //Only shutdown if this error occurs on the master proc
         if (TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL == iv_target)
@@ -442,6 +472,14 @@ PnorSfcDD::~PnorSfcDD()
     if( iv_sfc )
     {
         delete iv_sfc;
+    }
+
+    // if we still have an unclaimed log, commit it as informational
+    if( iv_constructorLog )
+    {
+        iv_constructorLog->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+        iv_constructorLog->collectTrace(PNOR_COMP_NAME);
+        errlCommit(iv_constructorLog, PNOR_COMP_ID);
     }
 }
 

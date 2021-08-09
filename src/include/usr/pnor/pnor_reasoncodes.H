@@ -60,6 +60,9 @@ namespace PNOR
         MOD_PNORDD_ERASEFLASH           = 0x15, /**< PnorDD::eraseFlash */
         MOD_PNORDD_CHECKFORERRORS       = 0x16, /**< PnorDD::checkForErrors */
 
+        // pnor_sfcdd.C
+        MOD_PNORDD_SFC_CONSTRUCTOR      = 0x20, /**< PnorSfcDD::PnorSfcDD */
+
         // sfc_ibm.C
         MOD_SFCIBM_VERIFYADDRESSRANGE   = 0x40, /**< SfcIBM::verifyAddressRange */
         MOD_SFCIBM_READFLASH            = 0x41, /**< SfcIBM::readFlash */
@@ -202,8 +205,9 @@ namespace PNOR
         RC_SECURE_PRO_SIZE_MISMATCH  = PNOR_COMP_ID | 0x3C,
         RC_READ_ONLY_PERM_FAIL       = PNOR_COMP_ID | 0x3D,
         RC_VERIFY_PAGE_FAILED        = PNOR_COMP_ID | 0x3E,
-        RC_NO_LID_MAPPING            = PNOR_COMP_ID | 0x3F,
+        RC_ZERO_NOR_CHIPID           = PNOR_COMP_ID | 0x3F,
         RC_WRONG_SIZE_FROM_WRITE     = PNOR_COMP_ID | 0x40,
+        RC_NO_LID_MAPPING            = PNOR_COMP_ID | 0x41,
         //@fixme-RTC:131607-Temporary value to allow HWSV compile
         //termination_rc
         RC_PNOR_CORRUPTION           = PNOR_COMP_ID | 0x99,

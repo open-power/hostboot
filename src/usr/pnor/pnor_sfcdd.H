@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -94,6 +94,20 @@ class PnorSfcDD
      * @return Size of PNOR in bytes
      */
     uint32_t getNorSize( void );
+
+    /**
+     * @brief Retrieve error log from constructor and forget
+     *        about it
+     * @return nullptr if no error occurred in constructor,
+     *         else contains error log that occurred in constructor
+     */
+    errlHndl_t getConstructorLog( void )
+    {
+        // give the stored log to the caller
+        errlHndl_t errhdl = iv_constructorLog;
+        iv_constructorLog = nullptr;
+        return errhdl;
+    };
 
     /**
      * @brief Constructor
@@ -389,6 +403,12 @@ class PnorSfcDD
      *
      */
     TARGETING::Target* iv_target;
+
+    /**
+     * @brief Remember any log that we hit during the constructor
+     *
+     */
+    errlHndl_t iv_constructorLog;
 
     // Needed for testcases
     friend class PnorDdTest;

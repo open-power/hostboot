@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,6 +26,7 @@
 #define __PNORIF_H
 
 #include <errl/errlentry.H>
+#include <errl/errlmanager.H>
 
 class PnorIf
 {
@@ -71,11 +72,40 @@ class PnorIf
         virtual uint32_t getNorWorkarounds(void) = 0;
 
         /**
+         * @brief Retrieve error log from constructor and forget
+         *        about it
+         * @return nullptr if no error occurred in constructor,
+         *         else contains error log that occurred in constructor
+         */
+        errlHndl_t getConstructorLog( void )
+        {
+            // give the stored log to the caller
+            errlHndl_t errhdl = iv_constructorLog;
+            iv_constructorLog = nullptr;
+            return errhdl;
+        };
+
+        /**
          * @brief Destructor
          */
         virtual ~PnorIf(void)
         {
+            // if we still have an unclaimed log, commit it as informational
+            if( iv_constructorLog )
+            {
+                iv_constructorLog->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                iv_constructorLog->collectTrace(PNOR_COMP_NAME);
+                errlCommit(iv_constructorLog, PNOR_COMP_ID);
+            }
         }
+
+
+      protected:
+        /**
+         * @brief Remember any log that we hit during the constructor
+         *
+         */
+        errlHndl_t iv_constructorLog;
 };
 
 #endif

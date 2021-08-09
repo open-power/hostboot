@@ -157,15 +157,10 @@ errlHndl_t validateAltMaster( void )
                 l_err = LPC::create_altmaster_objects( false, NULL );
                 if ( l_err )
                 {
-                    // Commit Error Log, but continue the test
-                    TRACFCOMP( g_trac_pnor, INFO_MRK"PNOR::validateAltMaster> Could not delete LPC objects. eid=0x%X, rc=0x%X. Committing log and Continuing", l_err->eid(), l_err->reasonCode());
+                    TRACFCOMP( g_trac_pnor, INFO_MRK"PNOR::validateAltMaster> Could not delete LPC objects. eid=0x%X, rc=0x%X.", l_err->eid(), l_err->reasonCode());
 
                     l_err->collectTrace(PNOR_COMP_NAME);
-
-                    // if there was an error, commit here and then proceed to
-                    // the next processor
-                    errlCommit(l_err,PNOR_COMP_ID);
-                    continue;
+                    break;
                 }
             }
 
@@ -173,25 +168,29 @@ errlHndl_t validateAltMaster( void )
             l_err = LPC::create_altmaster_objects( true, procList[i] );
             if ( l_err )
             {
-                // Commit Error Log, but continue the test
-                TRACFCOMP( g_trac_pnor, INFO_MRK"PNOR::validateAltMaster> Could not create LPC objects for %.8X. eid=0x%X, rc=0x%X. Committing log and Continuing", TARGETING::get_huid(procList[i]), l_err->eid(), l_err->reasonCode());
+                TRACFCOMP( g_trac_pnor, INFO_MRK"PNOR::validateAltMaster> Could not create LPC objects for %.8X. eid=0x%X, rc=0x%X.", TARGETING::get_huid(procList[i]), l_err->eid(), l_err->reasonCode());
 
                 l_err->collectTrace(PNOR_COMP_NAME);
-
-                // if there was an error, commit here and then proceed to
-                // the next processor
-                errlCommit(l_err,PNOR_COMP_ID);
-                continue;
+                break;
             }
 
+            // Create the PNOR driver interface and look for errors
             pnordd = new PnorDD(procList[i]);
+            l_err = pnordd->getConstructorLog();
+            if ( l_err )
+            {
+                TRACFCOMP( g_trac_pnor, INFO_MRK"PNOR::validateAltMaster> Error initializing PnorDD for 0x%X. eid=0x%X, rc=0x%X.",
+                           TARGETING::get_huid(procList[i]),
+                           l_err->eid(),
+                           l_err->reasonCode());
+                break;
+            }
 
             // Read Flash
             l_err = pnordd->readFlash(tocBuffer, read_size, toc0_offset);
             if ( l_err )
             {
-                // Commit Error Log, but continue the test
-                TRACFCOMP( g_trac_pnor, INFO_MRK"PNOR::validateAltMaster> readFlash fail for 0x%X. eid=0x%X, rc=0x%X. Committing log and Continuing",
+                TRACFCOMP( g_trac_pnor, INFO_MRK"PNOR::validateAltMaster> readFlash fail for 0x%X. eid=0x%X, rc=0x%X.",
                            TARGETING::get_huid(procList[i]), l_err->eid(),
                            l_err->reasonCode());
 
@@ -204,10 +203,7 @@ errlHndl_t validateAltMaster( void )
 
                 l_err->collectTrace(PNOR_COMP_NAME);
 
-                // if there was an error, commit here and then proceed to
-                // the next processor
-                errlCommit(l_err,PNOR_COMP_ID);
-                continue;
+                break;
             }
 
             // Set the header pointer
@@ -222,8 +218,7 @@ errlHndl_t validateAltMaster( void )
 
             if ( l_err )
             {
-                // Commit Error Log, but continue the test
-                TRACFCOMP( g_trac_pnor, INFO_MRK"PNOR::validateAltMaster> validateMagic fail for 0x%X. eid=0x%X, rc=0x%X. Committing log and Continuing",
+                TRACFCOMP( g_trac_pnor, INFO_MRK"PNOR::validateAltMaster> validateMagic fail for 0x%X. eid=0x%X, rc=0x%X.",
                            TARGETING::get_huid(procList[i]), l_err->eid(),
                            l_err->reasonCode());
 
@@ -236,10 +231,7 @@ errlHndl_t validateAltMaster( void )
 
                 l_err->collectTrace(PNOR_COMP_NAME);
 
-                // if there was an error, commit here and then proceed to
-                // the next processor
-                errlCommit(l_err,PNOR_COMP_ID);
-                continue;
+                break;
             }
 
 
@@ -248,7 +240,7 @@ errlHndl_t validateAltMaster( void )
             {
                 //@TODO - RTC:90780 - May need to handle this differently in
                 //                    SP-less config
-                TRACFCOMP(g_trac_pnor, "PNOR::validateAltMaster> pnor_ffs_checksum header checksums do not match on target 0x%X. Create and commit error log then continue the test",
+                TRACFCOMP(g_trac_pnor, "PNOR::validateAltMaster> pnor_ffs_checksum header checksums do not match on target 0x%X.",
                           TARGETING::get_huid(procList[i]));
 
                 /*@
@@ -280,8 +272,7 @@ errlHndl_t validateAltMaster( void )
                 TRACFBIN(g_trac_pnor, "tocBuffer", tocBuffer, 0x20);
 
                 l_err->collectTrace(PNOR_COMP_NAME);
-                errlCommit(l_err,PNOR_COMP_ID);
-                continue;
+                break;
             }
             else
             {
@@ -290,7 +281,7 @@ errlHndl_t validateAltMaster( void )
             }
 
         } // end of processor 'for' loop
-
+        if( l_err ) { break; }
 
     }while(0);
 
@@ -301,17 +292,13 @@ errlHndl_t validateAltMaster( void )
         pnordd = NULL;
 
         // Delete the LPC objects we used
-        l_err = LPC::create_altmaster_objects( false, NULL );
-        if ( l_err )
+        errlHndl_t tmp_err = LPC::create_altmaster_objects( false, NULL );
+        if ( tmp_err )
         {
-            // Commit Error Log, but continue the test
-            TRACFCOMP( g_trac_pnor, INFO_MRK"PNOR::validateAltMaster> Could not delete LPC objects. eid=0x%X, rc=0x%X. Committing log and Continuing", l_err->eid(), l_err->reasonCode());
-
-            l_err->collectTrace(PNOR_COMP_NAME);
-
-            // if there was an error, commit here and then proceed to
-            // the next processor
-            errlCommit(l_err,PNOR_COMP_ID);
+            // Commit Error Log, and return the original
+            TRACFCOMP( g_trac_pnor, INFO_MRK"PNOR::validateAltMaster> Could not delete LPC objects. eid=0x%X, rc=0x%X. Committing log and Continuing", tmp_err->eid(), tmp_err->reasonCode());
+            tmp_err->collectTrace(PNOR_COMP_NAME);
+            errlCommit(tmp_err,PNOR_COMP_ID);
         }
     }
 
