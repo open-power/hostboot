@@ -72,7 +72,7 @@ const char PLDM_BIOS_HB_SEC_VER_LOCKIN_SUPPORTED_STRING[] = "hb_secure_ver_locki
 const char PLDM_BIOS_HB_LID_IDS_STRING[] = "hb_lid_ids";
 
 const char PLDM_BIOS_PVM_FW_BOOT_SIDE_STRING[] = "pvm_fw_boot_side";
-const char PLDM_BIOS_HB_MIRROR_MEMORY_STRING[] = "hb_mirror_memory_mode_current";
+const char PLDM_BIOS_HB_MIRROR_MEMORY_STRING[] = "hb_memory_mirror_mode_current";
 
 // Possible Values
 const char PLDM_BIOS_HB_OPAL_STRING[] = "OPAL";

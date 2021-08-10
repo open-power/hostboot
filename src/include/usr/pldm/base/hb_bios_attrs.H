@@ -108,7 +108,7 @@ namespace PLDM
                               std::vector<uint8_t>& io_attr_table,
                               TARGETING::ATTR_USB_SECURITY_type &o_usb_security);
 
-   /** @brief Retrieve the current value of the hb_mirror_mem
+   /** @brief Retrieve the current value of the hb_memory_mirror_mode
     *         PLDM bios attribute and return the value converted
     *         to a ATTR_PAYLOAD_IN_MIRROR_MEM_type.
     *
