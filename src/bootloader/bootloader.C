@@ -534,6 +534,7 @@ namespace Bootloader{
         KernelMemState::MemState_t l_memstate;
         l_memstate.location = KernelMemState::MEM_CONTAINED_L3;
         l_memstate.hrmor = (HBB_RUNNING_ADDR);
+        l_memstate.size = 0;
 
         // Copy SBE BL shared data into BL HB shared data
         const auto l_blConfigData = reinterpret_cast<BootloaderConfigData_t *>(
@@ -548,9 +549,19 @@ namespace Bootloader{
 
 #ifndef CONFIG_VPO_COMPILE
         g_blData->blToHbData.cacheSizeMb = l_blConfigData->cacheSizeMB;
+        // minimum size of 8MB (MPIPL will return 0 size)
+        // leave g_blData value as hostboot code will account for 0 size
+        if (l_blConfigData->cacheSizeMB < 8)
+        {
+            l_memstate.size = 8;
+        }
 #else  //The cache size is fixed to 4MB in VPO
         g_blData->blToHbData.cacheSizeMb = 4;
 #endif
+        if (0 == l_memstate.size)
+        {
+            l_memstate.size = g_blData->blToHbData.cacheSizeMb;
+        }
 
         writeScratchReg(MMIO_SCRATCH_MEMORY_STATE, l_memstate.fullData);
 
