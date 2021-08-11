@@ -1066,7 +1066,7 @@ errlHndl_t IpVpdFacade::keywordStringtoEnum ( const char * i_keyword,
     {
 
         uint64_t i = 0;
-        for(; i < iv_recSize; i++)
+        for(; i < iv_keySize; i++)
         {
             if(compareKeywordNames(iv_vpdKeywords[i].keywordName, i_keyword))
             {
@@ -1074,7 +1074,7 @@ errlHndl_t IpVpdFacade::keywordStringtoEnum ( const char * i_keyword,
             }
         }
 
-        if(i >= iv_recSize)
+        if(i >= iv_keySize)
         {
             TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::keywordStringtoEnum: "
                        "No matching Keyword enum found for %s!",
