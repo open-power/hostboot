@@ -1225,8 +1225,9 @@ class phy_params
         ///
         fapi2::ReturnCode set_Frequency(user_input_msdg& io_phy_params) const
         {
-            // Divide by 2 to convert from DRAM freq to MEMCLK freq
-            io_phy_params.iv_user_msdg_upto_ver397559.Frequency[0] = static_cast<uint16_t>(iv_attrs_params.iv_frequency / 2);
+            // Divide by 2, then round up to convert from DRAM freq to MEMCLK freq
+            io_phy_params.iv_user_msdg_upto_ver397559.Frequency[0] =
+                static_cast<uint16_t>((iv_attrs_params.iv_frequency / 2) + (iv_attrs_params.iv_frequency % 2));
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
