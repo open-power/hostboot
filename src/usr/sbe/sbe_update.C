@@ -1502,11 +1502,9 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
 
             // find all CORE chiplets of the proc
             TARGETING::TargetHandleList l_coreTargetList;
-            TARGETING::getChildAffinityTargetsByState( l_coreTargetList,
-                                                       i_target,
-                                                       CLASS_UNIT,
-                                                       TYPE_CORE,
-                                                       UTIL_FILTER_PRESENT);
+            TARGETING::getNonEcoCores( l_coreTargetList,
+                                       i_target,
+                                       false );
 
             //Sort through cores
             for( const auto & l_core_target: l_coreTargetList )

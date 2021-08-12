@@ -212,15 +212,13 @@ void* host_gard( void *io_pArgs )
             TargetHandleList l_coresPresent;
             if( l_bootproc )
             {
-                getChildChiplets( l_coresFunc,
-                                  l_bootproc,
-                                  TYPE_CORE,
-                                  true );
+                getNonEcoCores( l_coresFunc,
+                                l_bootproc,
+                                true );
 
-                getChildChiplets( l_coresPresent,
-                                  l_bootproc,
-                                  TYPE_CORE,
-                                  false );
+                getNonEcoCores( l_coresPresent,
+                                l_bootproc,
+                                false );
             }
 
             PIR_t l_pir = PIR_t(task_getcpuid());
