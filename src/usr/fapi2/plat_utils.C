@@ -142,12 +142,14 @@ HWAS::callOutPriority xlateCalloutPriority(
 ///
 /// * @brief Translates a FAPI Clock HW callout to an HWAS clock callout
 ///
-/// * @param[i] i_fapiClock FAPI Clock HW callout
+/// * @param[in] i_fapiClock FAPI Clock HW callout
+/// * @param[in] i_clockPos  Clock position
 ///
 /// * @return HWAS Clock HW callout
 ///
 HWAS::clockTypeEnum xlateClockHwCallout(
-        const fapi2::HwCallouts::HwCallout i_fapiClock)
+        const fapi2::HwCallouts::HwCallout i_fapiClock,
+        const uint8_t i_clockPos )
 {
     // Use the HwCallout enum value as an index
     HWAS::clockTypeEnum l_clock = HWAS::TODCLK_TYPE;
@@ -167,6 +169,34 @@ HWAS::clockTypeEnum xlateClockHwCallout(
     {
         FAPI_ERR("fapi::xlateClockHwCallout: Unknown clock 0x%x, assuming TOD",
                 i_fapiClock);
+    }
+
+    // Specify specific clock source for the case where which redundant source
+    // can be determined as at fault
+    FAPI_DBG("xlateClockHwCallout() - clockPos = %d", i_clockPos);
+    if (l_clock == HWAS::OSCREFCLK_TYPE)
+    {
+        if ( 0 == i_clockPos )
+        {
+            l_clock = HWAS::OSCREFCLK0_TYPE;
+        }
+        else if ( 1 == i_clockPos )
+        {
+            l_clock = HWAS::OSCREFCLK1_TYPE;
+        }
+        //else can't determine which redundant source
+    }
+    else if (l_clock == HWAS::OSCPCICLK_TYPE)
+    {
+        if ( 0 == i_clockPos )
+        {
+            l_clock = HWAS::OSCPCICLK0_TYPE;
+        }
+        else if ( 1 == i_clockPos )
+        {
+            l_clock = HWAS::OSCPCICLK1_TYPE;
+        }
+        //else can't determine which redundant source
     }
 
     return l_clock;
@@ -447,7 +477,7 @@ void processEIHwCallouts(const ErrorInfo & i_errInfo,
              l_pRefTarget != NULL)
         {
             HWAS::clockTypeEnum l_clock =
-                xlateClockHwCallout((*itr)->iv_hw);
+                xlateClockHwCallout((*itr)->iv_hw, (*itr)->iv_clkPos);
 
             FAPI_ERR("processEIHwCallouts: Adding clock-callout"
                      " (clock:%d, pri:%d)",
@@ -464,7 +494,42 @@ void processEIHwCallouts(const ErrorInfo & i_errInfo,
             }
             else
             {
-                io_pError->addClockCallout(l_pRefTarget, l_clock, l_priority);
+                // Base deconfig/gard records on priority
+                switch (l_priority)
+                {
+                    // High Priority callout
+                    // => FATAL gard, Deconfig
+                    case HWAS::SRCI_PRIORITY_HIGH:
+                        io_pError->addClockCallout(l_pRefTarget,
+                                                   l_clock,
+                                                   l_priority,
+                                                   HWAS::DECONFIG,
+                                                   HWAS::GARD_Fatal);
+
+                        break;
+
+                    // Medium Priority
+                    // => Predictive, No deconfig (as per latest clock RAS behaviour).
+                    case HWAS::SRCI_PRIORITY_MEDC:
+                    case HWAS::SRCI_PRIORITY_MEDB:
+                    case HWAS::SRCI_PRIORITY_MEDA:
+                    case HWAS::SRCI_PRIORITY_MED:
+                        io_pError->addClockCallout(l_pRefTarget,
+                                                   l_clock,
+                                                   l_priority,
+                                                   HWAS::NO_DECONFIG,
+                                                   HWAS::GARD_Predictive);
+                        break;
+
+                    // Low Priority
+                    // => No Gard / Deconfig
+                    case HWAS::SRCI_PRIORITY_LOW:
+                    default:
+                        io_pError->addClockCallout(l_pRefTarget,
+                                                   l_clock,
+                                                   l_priority);
+                        break;
+                }
             }
         }
         else if ( (l_hw == HwCallouts::FLASH_CONTROLLER_PART) ||
