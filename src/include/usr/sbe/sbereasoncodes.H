@@ -113,6 +113,7 @@ enum sbeReasonCode
     ERROR_FROM_XIP_FIND_RINGS           = SBE_COMP_ID | 0x20,
     SBE_MISMATCHED_SECURE_VERSION       = SBE_COMP_ID | 0x21,
     SBE_SECUREBOOT_ESCAPE               = SBE_COMP_ID | 0x22,
+    SBE_IMG_MISCOMPARE                  = SBE_COMP_ID | 0x23,
 };
 
 };  // end SBE

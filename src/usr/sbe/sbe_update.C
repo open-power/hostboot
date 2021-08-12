@@ -3311,9 +3311,10 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
 
 #ifdef CONFIG_CONSOLE
         CONSOLE::displayf(CONSOLE::DEFAULT, SBE_COMP_NAME,
-                          "System Performing SBE Update for PROC %d, side %d",
+                          "System Performing SBE Update for PROC %d, side %d. New SBE CRC: 0x%x",
                         io_sbeState.target->getAttr<TARGETING::ATTR_POSITION>(),
-                        io_sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY ? SBE_SEEPROM0 : SBE_SEEPROM1);
+                        io_sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY ? SBE_SEEPROM0 : SBE_SEEPROM1,
+                        io_sbeState.new_seeprom_ver.data_crc);
 #endif
 
         errlHndl_t err = nullptr;
@@ -3668,6 +3669,101 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                            ERRL_GETRC_SAFE(err), ERRL_GETEID_SAFE(err));
                 break;
             }
+
+            // Perform read-back verification of the SBE image on non-FSP systems
+            if(!INITSERVICE::spBaseServicesEnabled())
+            {
+
+                size_t l_offset = 0;
+                const size_t PAGE_WITH_ECC = ((PAGESIZE * 9) / 8);
+
+                // Read back the SBE image
+                while(l_offset < sbeEccImgSize)
+                {
+                    // Read back a PAGE + ECC amount of data (or however much is left)
+                    size_t l_readSize = (sbeEccImgSize - l_offset) > PAGE_WITH_ECC ?
+                                         PAGE_WITH_ECC : (sbeEccImgSize - l_offset);
+                    // Read size without ECC
+                    size_t l_readSizeNoEcc = (l_readSize > PAGESIZE) ? PAGESIZE : ((l_readSize * 8) / 9);
+                    std::vector<uint8_t>l_sbeImgCheck(l_readSize);
+                    std::vector<uint8_t>l_sbeImgCheckNoEcc(l_readSizeNoEcc);
+
+                    // Read out the data out of the SEEPROM at the right offset
+                    err = deviceRead(io_sbeState.target,
+                                     l_sbeImgCheck.data(),
+                                     l_readSize,
+                                     DEVICE_EEPROM_ADDRESS(
+                                        io_sbeState.seeprom_side_to_update,
+                                        SBE_IMAGE_SEEPROM_ADDRESS + l_offset,
+                                        EEPROM::HARDWARE));
+                    if(err)
+                    {
+                        TRACFCOMP(g_trac_sbe, ERR_MRK"updateSeepromSize() - Error reading updated SBE image from SEEPROM from HUID 0x%.8x side %d offset 0x%x",
+                                  TARGETING::get_huid(io_sbeState.target),
+                                  io_sbeState.seeprom_side_to_update,
+                                  l_offset);
+                        break;
+                    }
+
+                    // Compare it to the written image
+                    uint8_t l_imageCmpRc = memcmp(reinterpret_cast<void*>(SBE_ECC_IMG_VADDR + l_offset),
+                                                  l_sbeImgCheck.data(),
+                                                  l_readSize);
+
+                    // Strip ECC
+                    PNOR::ECC::eccStatus eccStatus = removeECC(l_sbeImgCheck.data(),
+                                                               l_sbeImgCheckNoEcc.data(),
+                                                               l_readSizeNoEcc,
+                                                               SBE_IMAGE_SEEPROM_ADDRESS,
+                                                               SBE_SEEPROM_SIZE);
+
+                    // Check that the image is the same and that ECC RC is good
+                    if((eccStatus == PNOR::ECC::UNCORRECTABLE) ||
+                       (l_imageCmpRc != 0))
+                    {
+                        CONSOLE::displayf(CONSOLE::DEFAULT, SBE_COMP_NAME, "SBE side %d of PROC %d failed read-back verification on page %ld; size of SBE image with ECC: 0x%x",
+                                          io_sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY ? SBE_SEEPROM0 : SBE_SEEPROM1,
+                                          io_sbeState.target->getAttr<TARGETING::ATTR_POSITION>(),
+                                          (l_offset / PAGE_WITH_ECC),
+                                          sbeEccImgSize);
+                        TRACFCOMP(g_trac_sbe, ERR_MRK"updateSeepromSide() - SBE ECC error or data miscompare. Page=%ld eccStatus=%d, Image compare RC=%d, ECC size=0x%x, Size without ECC=0x%x, HUID=0x%.8x",
+                                  (l_offset/PAGE_WITH_ECC), eccStatus,
+                                  l_imageCmpRc, sbeEccImgSize, sbeImgSize,
+                                  TARGETING::get_huid(io_sbeState.target));
+                        TRACFBIN(g_trac_sbe, "Page that failed verification", l_sbeImgCheck.data(), l_readSize);
+                        TRACFBIN(g_trac_sbe, "ECC-less page", l_sbeImgCheckNoEcc.data(), l_readSizeNoEcc);
+
+                        /*@
+                         * @errortype
+                         * @moduleid   SBE_UPDATE_SEEPROMS
+                         * @reasoncode SBE_IMG_MISCOMPARE
+                         * @userdata1  ECC compare status
+                         * @userdata2  Image compare status
+                         * @devdesc    SBE image Hostboot read back after SBE update has integrity issues
+                         * @custdesc   Failure during system boot
+                         */
+                        err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                            SBE_UPDATE_SEEPROMS,
+                                            SBE_IMG_MISCOMPARE,
+                                            eccStatus,
+                                            l_imageCmpRc);
+                        err->collectTrace(SBE_COMP_NAME);
+                        ErrlUserDetailsTarget(io_sbeState.target).addToLog(err);
+                        break;
+                    }
+                    l_offset += l_readSize;
+                }
+                if(err)
+                {
+                    break;
+                }
+                else
+                {
+                    CONSOLE::displayf(CONSOLE::DEFAULT, SBE_COMP_NAME, "SBE side %d of PROC %d passed read-back verification",
+                                      io_sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY ? SBE_SEEPROM0 : SBE_SEEPROM1,
+                                      io_sbeState.target->getAttr<TARGETING::ATTR_POSITION>());
+                }
+            } // if spBaseServicesEnabled
 
             /*******************************************/
             /*  Update SBE Version Information         */
