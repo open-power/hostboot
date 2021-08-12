@@ -79,6 +79,8 @@ namespace fapi2
         MOD_FAPI2_GET_SEEPROM_ECC_LESS_WOF_DATA     = 0x25,
         MOD_FAPI2_GET_OVERRIDE_WOF_TABLE            = 0x26,
         MOD_TRIGGER_ATTR_SYNC                       = 0x27,
+        MOD_FAPI2_PLAT_GET_SCOM                     = 0x28,
+        MOD_FAPI2_PLAT_PUT_SCOM                     = 0x29,
     };
 
     /**

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -121,6 +121,32 @@ ReturnCode platGetScom(const Target<TARGET_TYPE_ALL>& i_target,
     // Extract the component pointer
     TARGETING::Target* l_target = i_target.get();
 
+    do
+    {
+
+    if (l_target == nullptr)
+    {
+        o_data = 0;
+
+        /*@
+         * @errortype
+         * @moduleid     fapi2::MOD_FAPI2_PLAT_GET_SCOM
+         * @reasoncode   fapi2::RC_INVALID_TARG_TARGET
+         * @userdata1    SCOM address being read
+         * @devdesc      NULL target pointer given to platGetScom
+         * @custdesc     Internal firmware error
+         */
+        l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                        fapi2::MOD_FAPI2_PLAT_GET_SCOM,
+                                        fapi2::RC_INVALID_TARG_TARGET,
+                                        i_address,
+                                        0,
+                                        ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        addErrlPtrToReturnCode(l_rc, l_err);
+        l_rc.setRC(fapi2::FAPI2_RC_INVALID_PARAMETER);
+        break;
+    }
+
     // Grab the name of the target
     TARGETING::ATTR_FAPI_NAME_type l_targName = {0};
     fapi2::toString(i_target, l_targName, sizeof(l_targName));
@@ -180,6 +206,8 @@ ReturnCode platGetScom(const Target<TARGET_TYPE_ALL>& i_target,
                   l_data);
     }
 
+    } while (false);
+
     FAPI_DBG(EXIT_MRK "platGetScom");
     return l_rc;
 }
@@ -199,6 +227,30 @@ ReturnCode platPutScom(const Target<TARGET_TYPE_ALL>& i_target,
 
     // Extract the component pointer
     TARGETING::Target* l_target = i_target.get();
+
+    do
+    {
+
+    if (l_target == nullptr)
+    {
+        /*@
+         * @errortype
+         * @moduleid     fapi2::MOD_FAPI2_PLAT_PUT_SCOM
+         * @reasoncode   fapi2::RC_INVALID_TARG_TARGET
+         * @userdata1    SCOM address being written
+         * @devdesc      NULL target pointer given to platPutScom
+         * @custdesc     Internal firmware error
+         */
+        l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                        fapi2::MOD_FAPI2_PLAT_PUT_SCOM,
+                                        fapi2::RC_INVALID_TARG_TARGET,
+                                        i_address,
+                                        0,
+                                        ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        addErrlPtrToReturnCode(l_rc, l_err);
+        l_rc.setRC(fapi2::FAPI2_RC_INVALID_PARAMETER);
+        break;
+    }
 
     // Grab the name of the target
     TARGETING::ATTR_FAPI_NAME_type l_targName = {0};
@@ -255,6 +307,8 @@ ReturnCode platPutScom(const Target<TARGET_TYPE_ALL>& i_target,
                   l_scomAddr,
                   l_data);
     }
+
+    } while (false);
 
     FAPI_DBG(EXIT_MRK "platPutScom");
     return l_rc;
@@ -394,7 +448,7 @@ errlHndl_t verifyCfamAccessTarget(const TARGETING::Target* i_target,
                                    fapi2::RC_INVALID_TARG_TARGET,
                                    i_address,
                                    TARGETING::get_huid(i_target),
-                                   true /*SW error*/);
+                                   ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
         l_err->collectTrace(FAPI_TRACE_NAME);
     }
 
@@ -468,7 +522,7 @@ errlHndl_t getCfamChipTarget(const TARGETING::Target* i_target,
                                             fapi2::RC_INVALID_PARENT_TARGET_FOUND,
                                             l_list.size(),
                                             TARGETING::get_huid(i_target),
-                                            true /*SW error*/);
+                                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
             l_err->collectTrace(FAPI_TRACE_NAME);
         }
     }
