@@ -299,7 +299,7 @@ namespace PLDM
      */
     errlHndl_t getBootside(std::vector<uint8_t>  & io_string_table,
                            std::vector<uint8_t>  & io_attr_table,
-                           pldm_fileio_file_type   & o_bootside);
+                           pldm_fileio_file_type & o_bootside);
 
     /** @brief Retrieve the value of the secure version lockin enabled attribute
      *         from the BMC.
@@ -323,6 +323,33 @@ namespace PLDM
      */
     errlHndl_t latchBiosAttrs(std::vector<uint8_t>& io_string_table,
                               std::vector<uint8_t>& io_attr_table);
+
+    /** @brief Set the value of a BMC BIOS enum attr
+     *
+     * @param[in,out] io_string_table  See brief at the top of this file.
+     * @param[in,out] io_attr_table    See brief at the top of this file.
+     * @param[in] i_attr_string            String name of BIOS enum attr to set
+     * @param[in] i_attr_enum_value_string String representing the enum value
+     *                                     to set i_attr_string to
+     *
+     * @return nullptr on success; non-nullptr on error.
+     */
+    errlHndl_t setBiosEnumAttrValue(std::vector<uint8_t>& io_string_table,
+                                    std::vector<uint8_t>& io_attr_table,
+                                    const char *i_attr_string,
+                                    const char *i_attr_enum_value_string);
+
+    /** @brief Wrapper for setCurrentAttrValue() to set the BIOS
+     *         key clear attr to it's default value 'NONE'
+     *
+     * @param[in,out] io_string_table  See brief at the top of this file.
+     * @param[in,out] io_attr_table    See brief at the top of this file.
+     *
+     * @return nullptr on success; non-nullptr on error.
+     */
+    errlHndl_t clearKeyClearRequest(std::vector<uint8_t>& io_string_table,
+                                    std::vector<uint8_t>& io_attr_table);
+
 }
 
 #endif

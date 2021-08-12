@@ -57,6 +57,7 @@
 #include <secureboot/trustedbootif.H>
 #include <secureboot/service.H>
 #include <secureboot/key_clear_if.H>
+#include <pldm/base/hb_bios_attrs_if.H>
 #include <hdat/hdat.H>
 #include "../hdat/hdattpmdata.H"
 #include "../hdat/hdatpcrd.H"
@@ -1961,13 +1962,13 @@ errlHndl_t populate_hbSecurebootData ( void )
         // Clear the Key Clear Requests
         key_clear_request = KEY_CLEAR_REQUEST_NONE;
         nodeTgt->setAttr<TARGETING::ATTR_KEY_CLEAR_REQUEST_HB>(key_clear_request);
-#ifdef CONFIG_BMC_IPMI
-        l_elog = SECUREBOOT::clearKeyClearSensor();
+#ifdef CONFIG_PLDM
+        l_elog = PLDM::clearKeyClearRequest();
         if(l_elog != nullptr)
         {
             l_elog->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
             TRACFCOMP(g_trac_runtime, ERR_MRK "populate_hbSecurebootData: "
-                      "SECUREBOOT::clearKeyClearSensor() failed. "
+                      "PLDM::clearKeyClearRequest() failed. "
                       "Setting ERR to informational and committing here. "
                       "Don't want this fail to halt the IPL: "
                       TRACE_ERR_FMT,
@@ -1978,7 +1979,7 @@ errlHndl_t populate_hbSecurebootData ( void )
             l_elog = nullptr;
             // no "break;" - just continue
         }
-#endif // CONFIG_BMC_IPMI
+#endif
 
 #else // CONFIG_KEY_CLEAR is NOT defined
         key_clear_request = KEY_CLEAR_REQUEST_NONE;

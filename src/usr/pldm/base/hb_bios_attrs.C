@@ -38,6 +38,7 @@
 // pldm /include/ headers
 #include <pldm/requests/pldm_bios_attr_requests.H>
 #include <pldm/base/hb_bios_attrs.H>
+#include <pldm/base/hb_bios_attrs_if.H>
 #include <pldm/pldm_errl.H>
 #include <pldm/pldm_reasoncodes.H>
 
@@ -60,38 +61,40 @@
 namespace PLDM {
 
 // Attributes
-const char PLDM_BIOS_HB_HYP_SWITCH_STRING[]               = "hb_hyp_switch";
-const char PLDM_BIOS_HB_DEBUG_CONSOLE_STRING[]            = "hb_debug_console";
-const char PLDM_BIOS_HB_HUGE_PAGE_COUNT_STRING[]          = "hb_number_huge_pages_current";
-const char PLDM_BIOS_HB_HUGE_PAGE_SIZE_STRING[]           = "hb_huge_page_size_current";
-const char PLDM_BIOS_HB_LMB_SIZE_STRING[]                 = "hb_memory_region_size_current";
-const char PLDM_BIOS_HB_MFG_FLAGS_STRING[]                = "hb_mfg_flags_current";
-const char PLDM_BIOS_HB_FIELD_CORE_OVERRIDE_STRING[]      = "hb_field_core_override_current";
-const char PLDM_BIOS_HB_USB_SECURITY_STRING[]             = "hb_usb_security";
+const char PLDM_BIOS_HB_HYP_SWITCH_STRING[]                = "hb_hyp_switch";
+const char PLDM_BIOS_HB_DEBUG_CONSOLE_STRING[]             = "hb_debug_console";
+const char PLDM_BIOS_HB_HUGE_PAGE_COUNT_STRING[]           = "hb_number_huge_pages_current";
+const char PLDM_BIOS_HB_HUGE_PAGE_SIZE_STRING[]            = "hb_huge_page_size_current";
+const char PLDM_BIOS_HB_LMB_SIZE_STRING[]                  = "hb_memory_region_size_current";
+const char PLDM_BIOS_HB_MFG_FLAGS_STRING[]                 = "hb_mfg_flags_current";
+const char PLDM_BIOS_HB_FIELD_CORE_OVERRIDE_STRING[]       = "hb_field_core_override_current";
+const char PLDM_BIOS_HB_USB_SECURITY_STRING[]              = "hb_usb_security";
 
 // When power limit values change, the effect on the OCCs is immediate, so we
 // always want the most recent values here.
-const char PLDM_BIOS_HB_POWER_LIMIT_ENABLE_STRING[]       = "hb_power_limit_enable";
-const char PLDM_BIOS_HB_POWER_LIMIT_IN_WATTS_STRING[]     = "hb_power_limit_in_watts";
+const char PLDM_BIOS_HB_POWER_LIMIT_ENABLE_STRING[]        = "hb_power_limit_enable";
+const char PLDM_BIOS_HB_POWER_LIMIT_IN_WATTS_STRING[]      = "hb_power_limit_in_watts";
 
-const char PLDM_BIOS_HB_SEC_VER_LOCKIN_SUPPORTED_STRING[] = "hb_secure_ver_lockin_enabled";
-const char PLDM_BIOS_HB_LID_IDS_STRING[]                  = "hb_lid_ids";
-const char PLDM_BIOS_HB_TPM_REQUIRED_POLICY_STRING[]      = "hb_tpm_required_current";
+const char PLDM_BIOS_HB_SEC_VER_LOCKIN_SUPPORTED_STRING[]  = "hb_secure_ver_lockin_enabled";
+const char PLDM_BIOS_HB_LID_IDS_STRING[]                   = "hb_lid_ids";
+const char PLDM_BIOS_HB_TPM_REQUIRED_POLICY_STRING[]       = "hb_tpm_required_current";
 
-const char PLDM_BIOS_PVM_FW_BOOT_SIDE_STRING[]     = "pvm_fw_boot_side";
-const char PLDM_BIOS_HB_MIRROR_MEMORY_STRING[]     = "hb_mirror_memory_mode_current";
-const char PLDM_BIOS_HB_KEY_CLEAR_REQUEST_STRING[] = "hb_key_clear_request_current";
+const char PLDM_BIOS_PVM_FW_BOOT_SIDE_STRING[]             = "pvm_fw_boot_side";
+const char PLDM_BIOS_HB_MIRROR_MEMORY_STRING[]             = "hb_mirror_memory_mode_current";
+
+const char PLDM_BIOS_HB_KEY_CLEAR_REQUEST_STRING[]         = "hb_key_clear_request_current";
+const char PLDM_BIOS_HB_KEY_CLEAR_REQUEST_STRING_PENDING[] = "hb_key_clear_request";
 
 // Possible Values
-const char PLDM_BIOS_HB_OPAL_STRING[]    = "OPAL";
-const char PLDM_BIOS_HB_POWERVM_STRING[] = "PowerVM";
-const char PLDM_BIOS_ENABLED_STRING[]    = "Enabled";
-const char PLDM_BIOS_DISABLED_STRING[]   = "Disabled";
-const char PLDM_BIOS_128_MB_STRING[]     = "128MB";
-const char PLDM_BIOS_256_MB_STRING[]     = "256MB";
-const char PLDM_BIOS_PERM_STRING[]       = "Perm";
-const char PLDM_BIOS_TEMP_STRING[]       = "Temp";
-const char PLDM_BIOS_TPM_REQUIRED_STRING[]      = "Required";
+const char PLDM_BIOS_HB_OPAL_STRING[]          = "OPAL";
+const char PLDM_BIOS_HB_POWERVM_STRING[]       = "PowerVM";
+const char PLDM_BIOS_ENABLED_STRING[]          = "Enabled";
+const char PLDM_BIOS_DISABLED_STRING[]         = "Disabled";
+const char PLDM_BIOS_128_MB_STRING[]           = "128MB";
+const char PLDM_BIOS_256_MB_STRING[]           = "256MB";
+const char PLDM_BIOS_PERM_STRING[]             = "Perm";
+const char PLDM_BIOS_TEMP_STRING[]             = "Temp";
+const char PLDM_BIOS_TPM_REQUIRED_STRING[]     = "Required";
 const char PLDM_BIOS_TPM_NOT_REQUIRED_STRING[] = "Not Required";
 
 // Possible Key Clear Request Values
@@ -202,6 +205,29 @@ errlHndl_t ensureTablesAreSet(std::vector<uint8_t>& io_string_table,
   }while(0);
 
   return errl;
+}
+
+/* @brief Look up a string handle in the string table and decode it.
+ *
+ * @param[in] i_string_table   The string table. Must be populated before calling this function.
+ * @param[in] i_string_handle  The string handle to look up and decode.
+ * @return                     The string, if any. Empty when the string handle is not present in the table.
+ */
+static std::vector<char> decode_string_handle(const std::vector<uint8_t>& i_string_table, const uint16_t i_string_handle)
+{
+    std::vector<char> string_contents;
+
+    const auto string_entry =
+        pldm_bios_table_string_find_by_handle(i_string_table.data(), i_string_table.size(), i_string_handle);
+
+    if (string_entry)
+    {
+        const uint16_t string_length = pldm_bios_table_string_entry_decode_string_length(string_entry);
+        string_contents.resize(string_length + 1);
+        pldm_bios_table_string_entry_decode_string(string_entry, string_contents.data(), string_contents.size());
+    }
+
+    return string_contents;
 }
 
 /** @brief Given a string describing the name of a PLDM bios attribute
@@ -1718,6 +1744,145 @@ errlHndl_t getKeyClearRequest(std::vector<uint8_t>& io_string_table,
     return errl;
 }
 
+errlHndl_t setBiosEnumAttrValue(std::vector<uint8_t>& io_string_table,
+                                std::vector<uint8_t>& io_attr_table,
+                                const char *i_attr_string,
+                                const char *i_attr_enum_value_string)
+{
+
+    PLDM_ENTER("setBiosEnumAttrValue");
+    errlHndl_t errl = nullptr;
+
+    do {
+
+    errl = ensureTablesAreSet(io_string_table, io_attr_table);
+    if (errl)
+    {
+        PLDM_ERR("An error occured when attempting to populate the bios tables");
+        break;
+    }
+
+    const pldm_bios_attribute_type expected_type = PLDM_BIOS_ENUMERATION;
+    const pldm_bios_attr_table_entry * attr_entry_ptr = nullptr;
+    std::vector<uint8_t> attr_value;
+
+    // get attr_entry_ptr for the passed i_attr_string
+    errl = getCurrentAttrValue(i_attr_string,
+                               expected_type,
+                               io_string_table,
+                               io_attr_table,
+                               attr_entry_ptr,
+                               attr_value);
+
+    if(errl)
+    {
+        PLDM_ERR("An error occurred while requesting the value of %s from the BMC",
+                 i_attr_string)
+        break;
+    }
+
+    // get all the possible values for the attr enum
+    // This possible_values[] is an array of the bios table handles for the enum values.
+    // The values for the enums are the indicies of this possible_values[] array for the
+    // coresponding table handles
+    auto num_possible_values = pldm_bios_table_attr_entry_enum_decode_pv_num(attr_entry_ptr);
+    uint16_t possible_values[num_possible_values] = {0};
+    pldm_bios_table_attr_entry_enum_decode_pv_hdls(attr_entry_ptr,
+                                                   possible_values,
+                                                   num_possible_values);
+
+    PLDM_DBG("num_possible_values for %s: %d", i_attr_string, num_possible_values);
+
+    uint8_t possible_value_index = 0;
+    for(; possible_value_index < num_possible_values; possible_value_index++)
+    {
+         // get the string representation of the BIOS attr value
+         const auto& enum_value_string =
+                     decode_string_handle(io_string_table, possible_values[possible_value_index]);
+
+         PLDM_DBG("BMC PLDM BIOS attribute enum %s has a value of (0x%X)",
+                  enum_value_string.data(), possible_value_index);
+
+         if(strcmp(enum_value_string.data(), i_attr_enum_value_string) == 0)
+         {
+             // BIOS enum attr values are stored as 2 bytes. The first byte, attr_value[0],
+             // indicates the number of following bytes to read as the enum value. Possible
+             // BIOS enum values are of uint8_t size, see pldm_bios_enum_attr in
+             // src/subtree/openbmc/pldm/libpldm/bios.h. This means attr_value[0] = 1,
+             // which is already set after the call to getCurrentAttrValue(). This just
+             // leaves us to set attr_value[1] to values in range of num_possible_values
+             //
+             // To see how other BIOS attr types are validated on PLDM's side, see
+             // checkAttrValueToUpdate() in src/subtree/openbmc/pldm/libpldmresponder/bios_config.cpp
+             attr_value[1] = possible_value_index;
+             PLDM_DBG("Found matching BMC PLDM BIOS attribute enum value: %s (0x%X)",
+                      enum_value_string.data(), possible_value_index);
+             break;
+         }
+    }
+
+    if (possible_value_index >= num_possible_values)
+    {
+        PLDM_ERR("No match found in BMC PLDM BIOS attribute values for attr: %s, and string value: %s",
+                 i_attr_string, i_attr_enum_value_string);
+        /*@
+         * @errortype  ERRL_SEV_UNRECOVERABLE
+         * @moduleid   MOD_SET_BIOS_ATTR_ENUM_VALUE
+         * @reasoncode RC_NO_MATCHING_VALUE
+         * @userdata1  Ascii representation of the bios attr to set
+         * @userdata2  Ascii representation of the unmatched enum
+         *             value string
+         * @devdesc    BIOS attr does not have a matching possible
+         *             value for the given enum string.
+         * @custdesc   A software error occurred during system boot.
+         */
+        errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                             MOD_SET_BIOS_ATTR_ENUM_VALUE,
+                             RC_NO_MATCHING_VALUE,
+                             *reinterpret_cast<const uint64_t *>(i_attr_string),
+                             *reinterpret_cast<const uint64_t *>(i_attr_enum_value_string),
+                             ErrlEntry::NO_SW_CALLOUT);
+        addBmcErrorCallouts(errl);
+        break;
+    }
+
+    // set the BIOS attr to the new value
+    const auto attr_handle = pldm_bios_table_attr_entry_decode_attribute_handle(attr_entry_ptr);
+    errl = setBiosAttrByHandle(attr_handle, expected_type,
+                               attr_value.data(), attr_value.size());
+    if (errl)
+    {
+        PLDM_ERR("Cannot set current value for attribute %s", i_attr_string);
+        break;
+    }
+
+
+    } while (0);
+
+    PLDM_EXIT("setBiosEnumAttrValue");
+
+    return errl;
+}
+
+errlHndl_t clearKeyClearRequest(std::vector<uint8_t>& io_string_table,
+                                std::vector<uint8_t>& io_attr_table)
+{
+    return setBiosEnumAttrValue(io_string_table,
+                                io_attr_table,
+                                PLDM_BIOS_HB_KEY_CLEAR_REQUEST_STRING_PENDING,
+                                PLDM_BIOS_KEY_CLEAR_NONE_STRING);
+}
+
+errlHndl_t clearKeyClearRequest(void)
+{
+    std::vector<uint8_t> bios_string_table;
+    std::vector<uint8_t> bios_attr_table;
+
+    return clearKeyClearRequest(bios_string_table,
+                                bios_attr_table);
+}
+
+
 errlHndl_t getPowerLimit(bool &o_powerLimitEnable,
                          uint16_t &o_powerLimitWatts)
 {
@@ -1924,29 +2089,6 @@ errlHndl_t getSecVerLockinEnabled(std::vector<uint8_t>& io_string_table,
     return l_errl;
 }
 
-/* @brief Look up a string handle in the string table and decode it.
- *
- * @param[in] i_string_table   The string table. Must be populated before calling this function.
- * @param[in] i_string_handle  The string handle to look up and decode.
- * @return                     The string, if any. Empty when the string handle is not present in the table.
- */
-static std::vector<char> decode_string_handle(const std::vector<uint8_t>& i_string_table, const uint16_t i_string_handle)
-{
-    std::vector<char> string_contents;
-
-    const auto string_entry =
-        pldm_bios_table_string_find_by_handle(i_string_table.data(), i_string_table.size(), i_string_handle);
-
-    if (string_entry)
-    {
-        const uint16_t string_length = pldm_bios_table_string_entry_decode_string_length(string_entry);
-        string_contents.resize(string_length + 1);
-        pldm_bios_table_string_entry_decode_string(string_entry, string_contents.data(), string_contents.size());
-    }
-
-    return string_contents;
-}
-
 errlHndl_t latchBiosAttrs(std::vector<uint8_t>& io_string_table,
                           std::vector<uint8_t>& io_attr_table)
 {
@@ -1981,7 +2123,6 @@ errlHndl_t latchBiosAttrs(std::vector<uint8_t>& io_string_table,
             /* If we find an hb_*_current "latched" attribute, then try to read an
              * attribute named hb_* (which contains the "pending" value). If that
              * succeeds, then we will copy it into the hb_*_current attribute. */
-
             const char* const suffix = "_current";
             if (strcmp(current_attr_name.data() + current_attr_name.size() - 1 - strlen(suffix), suffix) == 0)
             {

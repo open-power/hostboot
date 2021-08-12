@@ -253,20 +253,18 @@ errlHndl_t getAndSetMirrorMemoryFromBmcBios(std::vector<uint8_t>& io_string_tabl
 }
 
 /*
- * @brief Retrieve the Key Clear Request from the BMC BIOS and set the all the nodes under i_sys
+ * @brief Retrieve the Key Clear Request from the BMC BIOS and set the all the nodes'
  *        attribute ATTR_KEY_CLEAR_REQUEST to the retrieved value, if no error occurred.
  *        If an error occurs retrieving the BMC BIOS attribute, then the hostboot attribute
  *        is set to KEY_CLEAR_REQUEST_NONE.
  *
  * @param[in,out] io_string_table   See brief in file hb_bios_attrs.H
  * @param[in,out] io_attr_table     See brief in file hb_bios_attrs.H
- * @param[in]     i_sys             System target handle
  *
  * @return Error if failed to retrieve the Key Clear Request, otherwise nullptr
  */
 errlHndl_t getAndSetKeyClearRequestFromBmcBios(std::vector<uint8_t>& io_string_table,
-                                               std::vector<uint8_t>& io_attr_table,
-                                               TARGETING::TargetHandle_t i_sys)
+                                               std::vector<uint8_t>& io_attr_table)
 {
     // Create a variable to hold the retrieved Key Clear Request value from the BMC BIOS
     TARGETING::ATTR_KEY_CLEAR_REQUEST_type l_keyClearRequest = TARGETING::KEY_CLEAR_REQUEST_INVALID;
@@ -566,7 +564,7 @@ errlHndl_t getAndSetPLDMBiosAttrs()
 
     // Retrieve the Key Clear Request value from the BMC bios and set all the
     // node attributes ATTR_KEY_CLEAR_REQUEST to that value.
-    errl = getAndSetKeyClearRequestFromBmcBios(bios_string_table, bios_attr_table, sys);
+    errl = getAndSetKeyClearRequestFromBmcBios(bios_string_table, bios_attr_table);
     if (errl)
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "getAndSetPLDMBiosAttrs: "

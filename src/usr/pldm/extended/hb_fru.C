@@ -1289,7 +1289,7 @@ errlHndl_t cacheRemoteFruVpd()
         if(errl)
         {
             PLDM_ERR("cacheRemoteFruVpd: An error while caching remote eeprom w/"
-                     "entity type 0x%.02x target type 0x%.04x device role 0x.02x",
+                     "entity type 0x%.02x target type 0x%.04x device role 0x%.02x",
                      map_entry.pldm_entity_type,
                      map_entry.targeting_type,
                      map_entry.device_role);

@@ -91,6 +91,7 @@ namespace PLDM
         MOD_GET_LID_IDS                              = 0x32, // getLidIds
         MOD_GET_KEY_CLEAR_REQUEST                    = 0x33, // getKeyClearRequest
         MOD_GET_TPM_REQUIRED_POLICY                  = 0x34, // getTpmRequiredPolicy
+        MOD_SET_BIOS_ATTR_ENUM_VALUE                 = 0x35, // setBiosAttrEnumValue
     };
 
     enum PLDMReasonCode
@@ -141,6 +142,7 @@ namespace PLDM
         RC_BAD_GLOBAL_ENABLE        = PLDM_COMP_ID | 0x2C,
         RC_BAD_WATCHDOG_VALUE       = PLDM_COMP_ID | 0x2D,
         RC_INVALID_LID_ID           = PLDM_COMP_ID | 0x2E,
+        RC_NO_MATCHING_VALUE        = PLDM_COMP_ID | 0x2F,
     };
 }
 #endif
