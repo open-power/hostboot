@@ -54,6 +54,52 @@ namespace ISTEP_06
 {
 #ifdef CONFIG_PLDM
 
+
+/**
+ * @brief Retrieve the TPM Required Policy from the BMC BIOS and set the system
+ *        attribute ATTR_TPM_REQUIRED to the retrieved value, if no error occurred.
+ *        If an error occurs retrieving the BMC BIOS, then the attribute is left as is.
+ *
+ * @param[in,out] io_string_table   See brief in file hb_bios_attrs.H.
+ * @param[in,out] io_attr_table     See brief in file hb_bios_attrs.H.
+ * @param[in]     i_systemTarget    The system target handle.
+ *
+ * @return Error if failed to retrieve the TPM Required Policy, otherwise nullptr on success
+*/
+errlHndl_t getAndSetTpmRequiredPolicyFromBmcBios( std::vector<uint8_t>& io_string_table,
+                                                  std::vector<uint8_t>& io_attr_table,
+                                                  TARGETING::TargetHandle_t i_systemTarget)
+{
+    // Create a variable to hold the retrieved TPM Required Policy value from the BMC BIOS
+    // Default to TPM is required
+    TARGETING::ATTR_TPM_REQUIRED_type l_tpmRequiredPolicy(1);
+
+    // Get the TPM Required Policy from the BMC BIOS
+    errlHndl_t l_errl = PLDM::getTpmRequiredPolicy(io_string_table, io_attr_table,
+                                                   l_tpmRequiredPolicy);
+    if ( unlikely(l_errl != nullptr) )
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                   "getAndSetTpmRequiredPolicyFromBmcBios(): An error occurred getting "
+                   "the TPM Required Policy from the BMC BIOS. Leaving the system "
+                   "attribute ATTR_TPM_REQUIRED at its current value %d.",
+                   static_cast<uint16_t>(i_systemTarget->getAttr<ATTR_TPM_REQUIRED>()) );
+    }
+    else
+    {
+        // Set the system attribute ATTR_TPM_REQUIRED to the retrieved value
+        i_systemTarget->setAttr<TARGETING::ATTR_TPM_REQUIRED>(l_tpmRequiredPolicy);
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
+                   "getAndSetTpmRequiredPolicyFromBmcBios(): Succeeded in getting the BMC "
+                   "BIOS TPM Required Policy value %d, and setting the attribute "
+                   "ATTR_TPM_REQUIRED to %d for the system",
+                    l_tpmRequiredPolicy,
+                    static_cast<uint16_t>(i_systemTarget->getAttr<ATTR_TPM_REQUIRED>()) );
+    }
+    return l_errl;
+}
+
+
 /**
  * @brief Retrieve the Field Core Override (FCO) from the BMC BIOS and set the system's
  *        nodes attribute ATTR_FIELD_CORE_OVERRIDE to the retrieved value,
@@ -496,6 +542,17 @@ errlHndl_t getAndSetPLDMBiosAttrs()
               "getAndSetMirrorMemoryFromBmcBios failed to get and then set the memory mirror value");
         errlCommit(errl, ISTEP_COMP_ID);
     }
+
+        // Retrieve the TPM Required Policy value from the BMC BIOS and set the
+        // system attribute ATTR_TPM_REQUIRED to that value.
+        errl = getAndSetTpmRequiredPolicyFromBmcBios(bios_string_table, bios_attr_table, sys);
+        if (errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "getAndSetPLDMBiosAttrs : "
+                  "getAndSetTpmRequiredPolicyFromBmcBios failed to get and then set "
+                  "the TPM Required policy value");
+            errlCommit(errl, ISTEP_COMP_ID);
+        }
 
     TARGETING::ATTR_SECURE_VERSION_LOCKIN_POLICY_type l_lockinPolicy = false;
     errl = PLDM::getSecVerLockinEnabled(bios_string_table, bios_attr_table, l_lockinPolicy);

@@ -175,6 +175,25 @@ namespace PLDM
                                      std::vector<uint8_t>& io_attr_table,
                                      TARGETING::ATTR_FIELD_CORE_OVERRIDE_type &o_fieldCoreOverride);
 
+    /** @brief Retrieve the TPM Required Policy from the BMC BIOS
+    *
+    * @details This method retrieves the TPM Required Policy from the BMC BIOS
+    *          via the PLDM interface.
+    *          * A value of 0 means the TPM is *not* required
+    *          * A value of 1 (or any other value than 0) means the TPM *is* required
+    *
+    * @param[in,out] io_string_table   See brief at the top of this file.
+    * @param[in,out] io_attr_table     See brief at the top of this file.
+    * @param[out] o_tpmRequiredPolicy  If no error occurred then will contain the value
+    *                                  of the TPM Required Policy from the BMC BIOS.
+    *                                  If error, then the parameter is left as is.
+    *
+    * @return Error if failed to retrieve the TPM Required Policy, otherwise nullptr on success
+    */
+    errlHndl_t getTpmRequiredPolicy( std::vector<uint8_t>& io_string_table,
+                                     std::vector<uint8_t>& io_attr_table,
+                                     TARGETING::ATTR_TPM_REQUIRED_type &o_tpmRequiredPolicy);
+
     /** @brief Retrieve and parse the hb_lid_ids attribute from the BMC.
     *
     * @details This method retrieves the mapping of traditional PNOR eyecatch

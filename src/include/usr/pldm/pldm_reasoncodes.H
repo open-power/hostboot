@@ -90,6 +90,7 @@ namespace PLDM
         MOD_GET_MIRROR_MEMORY                        = 0x31, // getMirrorMemory
         MOD_GET_LID_IDS                              = 0x32, // getLidIds
         MOD_GET_KEY_CLEAR_REQUEST                    = 0x33, // getKeyClearRequest
+        MOD_GET_TPM_REQUIRED_POLICY                  = 0x34, // getTpmRequiredPolicy
     };
 
     enum PLDMReasonCode

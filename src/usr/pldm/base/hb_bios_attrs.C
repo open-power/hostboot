@@ -72,6 +72,7 @@ const char PLDM_BIOS_HB_POWER_LIMIT_ENABLE_STRING[]       = "hb_power_limit_enab
 const char PLDM_BIOS_HB_POWER_LIMIT_IN_WATTS_STRING[]     = "hb_power_limit_in_watts_current";
 const char PLDM_BIOS_HB_SEC_VER_LOCKIN_SUPPORTED_STRING[] = "hb_secure_ver_lockin_enabled";
 const char PLDM_BIOS_HB_LID_IDS_STRING[]                  = "hb_lid_ids";
+const char PLDM_BIOS_HB_TPM_REQUIRED_POLICY_STRING[]      = "hb_tpm_required_current";
 
 const char PLDM_BIOS_PVM_FW_BOOT_SIDE_STRING[]     = "pvm_fw_boot_side";
 const char PLDM_BIOS_HB_MIRROR_MEMORY_STRING[]     = "hb_mirror_memory_mode_current";
@@ -86,6 +87,8 @@ const char PLDM_BIOS_128_MB_STRING[]     = "128MB";
 const char PLDM_BIOS_256_MB_STRING[]     = "256MB";
 const char PLDM_BIOS_PERM_STRING[]       = "Perm";
 const char PLDM_BIOS_TEMP_STRING[]       = "Temp";
+const char PLDM_BIOS_TPM_REQUIRED_STRING[]      = "Required";
+const char PLDM_BIOS_TPM_NOT_REQUIRED_STRING[] = "Not Required";
 
 // Possible Key Clear Request Values
 const char PLDM_BIOS_KEY_CLEAR_NONE_STRING[]           = "NONE";
@@ -122,6 +125,9 @@ const std::vector<const char*> POSSIBLE_HB_KEY_CLEAR_STRINGS = { PLDM_BIOS_KEY_C
                                                                  PLDM_BIOS_KEY_CLEAR_POWERVM_SYSKEY_STRING,
                                                                  PLDM_BIOS_KEY_CLEAR_MFG_ALL_STRING,
                                                                  PLDM_BIOS_KEY_CLEAR_MFG_STRING };
+
+const std::vector<const char*> POSSIBLE_TPM_REQUIRED_STRINGS = {PLDM_BIOS_TPM_REQUIRED_STRING,
+                                                                PLDM_BIOS_TPM_NOT_REQUIRED_STRING};
 
 constexpr uint8_t PLDM_BIOS_STRING_TYPE_ASCII = 0x1;
 constexpr uint8_t PLDM_BIOS_STRING_TYPE_HEX = 0x2;
@@ -1788,6 +1794,76 @@ errlHndl_t getPowerLimit(bool &o_powerLimitEnable,
 
     return errl;
 }
+
+// getTpmRequiredPolicy
+errlHndl_t getTpmRequiredPolicy(
+        std::vector<uint8_t>& io_string_table,
+        std::vector<uint8_t>& io_attr_table,
+        TARGETING::ATTR_TPM_REQUIRED_type &o_tpmRequiredPolicy)
+{
+    errlHndl_t errl = nullptr;
+
+    do {
+
+    // Enable Attribute
+    std::vector<char> decoded_value;
+
+    errl = getDecodedEnumAttr(io_string_table,
+                              io_attr_table,
+                              PLDM_BIOS_HB_TPM_REQUIRED_POLICY_STRING,
+                              POSSIBLE_TPM_REQUIRED_STRINGS,
+                              decoded_value);
+
+    if (errl)
+    {
+        PLDM_ERR("PLDM::getTpmRequiredPolicy: Failed to lookup value for %s",
+                 PLDM_BIOS_HB_TPM_REQUIRED_POLICY_STRING);
+        break;
+    }
+
+    if (strncmp(decoded_value.data(), PLDM_BIOS_TPM_REQUIRED_STRING, decoded_value.size()) == 0)
+    {
+        o_tpmRequiredPolicy = static_cast<TARGETING::ATTR_TPM_REQUIRED_type>(1);
+        PLDM_INF("PLDM::getTpmRequiredPolicy: TPM Required Policy set to required by BMC PLDM BIOS attribute %s",
+                  PLDM_BIOS_HB_TPM_REQUIRED_POLICY_STRING);
+    }
+    else if (strncmp(decoded_value.data(), PLDM_BIOS_TPM_NOT_REQUIRED_STRING, decoded_value.size()) == 0)
+    {
+        o_tpmRequiredPolicy = static_cast<TARGETING::ATTR_TPM_REQUIRED_type>(0);
+        PLDM_INF("PLDM::getTpmRequiredPolicy: TPM Required Policy set to *not* required by BMC PLDM BIOS attribute %s",
+                  PLDM_BIOS_HB_TPM_REQUIRED_POLICY_STRING);
+    }
+    else
+    {
+        // print the entire buffer
+        PLDM_INF_BIN("PLDM::getTpmRequiredPolicy: Unexpected string : ",decoded_value.data(), decoded_value.size());
+        /*@
+          * @errortype
+          * @severity   ERRL_SEV_UNRECOVERABLE
+          * @moduleid   MOD_GET_TPM_REQUIRED_POLICY
+          * @reasoncode RC_UNSUPPORTED_TYPE
+          * @userdata1  Unused
+          * @userdata2  Unused
+          * @devdesc    Software problem, incorrect data from BMC
+          * @custdesc   A software error occurred during system boot
+          */
+        errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                             MOD_GET_TPM_REQUIRED_POLICY,
+                             RC_UNSUPPORTED_TYPE,
+                             0,
+                             0,
+                             ErrlEntry::NO_SW_CALLOUT);
+        ErrlUserDetailsString(PLDM_BIOS_HB_TPM_REQUIRED_POLICY_STRING).addToLog(errl);
+        ErrlUserDetailsString(decoded_value.data()).addToLog(errl);
+        addBmcErrorCallouts(errl);
+        break;
+    }
+
+    } while(0);
+
+    return errl;
+}
+
 
 errlHndl_t getSecVerLockinEnabled(std::vector<uint8_t>& io_string_table,
                                   std::vector<uint8_t>& io_attr_table,
