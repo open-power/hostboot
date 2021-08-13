@@ -92,6 +92,7 @@ namespace PLDM
         MOD_GET_KEY_CLEAR_REQUEST                    = 0x33, // getKeyClearRequest
         MOD_GET_TPM_REQUIRED_POLICY                  = 0x34, // getTpmRequiredPolicy
         MOD_SET_BIOS_ATTR_ENUM_VALUE                 = 0x35, // setBiosAttrEnumValue
+        MOD_SEND_SET_NUMERIC_EFFECTER_VALUE_REQUEST  = 0x36, // sendSetNumericEffecterValueRequest
     };
 
     enum PLDMReasonCode

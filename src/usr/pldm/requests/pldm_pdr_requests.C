@@ -646,8 +646,114 @@ errlHndl_t sendFruFunctionalStateChangedEvent(const TARGETING::Target* const i_t
                                        functional_state);
 }
 
+errlHndl_t sendSetNumericEffecterValueRequest(const effecter_id_t i_effecter_id,
+                                              const uint32_t i_effecter_value,
+                                              const uint8_t i_value_size)
+{
+    PLDM_ENTER("sendSetNumericEffecterValueRequest");
+
+    errlHndl_t errl = nullptr;
+
+    do
+    {
+
+    const msg_q_t msgQ = MSG_Q_RESOLVE("sendSetNumericEffecterValueRequest",
+                                       VFS_ROOT_MSG_PLDM_REQ_OUT);
+
+    void* effecter_value_ptr = nullptr;
+
+    uint8_t effecter_value_8 = i_effecter_value;
+    uint16_t effecter_value_16 = i_effecter_value;
+    uint32_t effecter_value_32 = i_effecter_value;
+
+    if (i_value_size == 1)
+    {
+        effecter_value_ptr = &effecter_value_8;
+    }
+    else if (i_value_size == 2)
+    {
+        effecter_value_ptr = &effecter_value_16;
+    }
+    else if (i_value_size == 4)
+    {
+        effecter_value_ptr = &effecter_value_32;
+    }
+    else
+    {
+        assert(false, "sendSetNumericEffecterValueRequest: Invalid effecter size %d; expected 1, 2 or 4",
+               i_value_size);
+    }
+
+    std::vector<uint8_t> response_bytes;
+
+    errl = sendrecv_pldm_request<PLDM_SET_NUMERIC_EFFECTER_VALUE_MIN_REQ_BYTES>
+        (response_bytes,
+         i_value_size - 1, // PLDM_SET_NUMERIC_EFFECTER_VALUE_MIN_REQ_BYTES already includes space for 1 byte, so subtract 1 here
+         msgQ,
+         encode_set_numeric_effecter_value_req,
+         DEFAULT_INSTANCE_ID, // let the PLDM service fill this in
+         i_effecter_id,
+         i_value_size,
+         static_cast<uint8_t*>(effecter_value_ptr));
+
+    if (errl)
+    {
+        PLDM_ERR("sendSetNumericEffecterValueRequest: failed to send/recv PLDM request; "
+                 TRACE_ERR_FMT,
+                 TRACE_ERR_ARGS(errl));
+        break;
+    }
+
+    uint8_t response_code = 0xFF;
+
+    errl = decode_pldm_response(decode_set_numeric_effecter_value_resp,
+                                response_bytes,
+                                &response_code);
+
+    if (errl)
+    {
+        PLDM_ERR("sendSetNumericEffecterValueRequest: failed to decode PLDM response; "
+                 TRACE_ERR_FMT,
+                 TRACE_ERR_ARGS(errl));
+        break;
+    }
+
+    if (response_code)
+    {
+        PLDM_ERR("decode_set_numeric_effecter_value_resp failed with rc 0x%.02x",
+                 response_code);
+
+        const uint64_t response_hdr_data =
+            pldmHdrToUint64(*reinterpret_cast<pldm_msg*>(response_bytes.data()));
+
+        /*@
+         * @errortype  ERRL_SEV_UNRECOVERABLE
+         * @moduleid   MOD_SEND_SET_NUMERIC_EFFECTER_VALUE_REQUEST
+         * @reasoncode RC_BAD_COMPLETION_CODE
+         * @userdata1  Complete code returned
+         * @userdata2  Response header data (see pldm_msg_hdr struct)
+         * @devdesc    Software problem, BMC returned bad PLDM response code
+         * @custdesc   A software error occurred during system boot
+         */
+        errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                             PLDM::MOD_SEND_SET_NUMERIC_EFFECTER_VALUE_REQUEST,
+                             PLDM::RC_BAD_COMPLETION_CODE,
+                             response_code,
+                             response_hdr_data,
+                             ErrlEntry::NO_SW_CALLOUT);
+        addBmcErrorCallouts(errl);
+        break;
+    }
+
+    } while (false);
+
+    PLDM_EXIT("sendSetNumericEffecterValueRequest");
+
+    return errl;
+}
+
 errlHndl_t sendSetStateEffecterStatesRequest(
-                                    const effector_id_t i_effecter_id,
+                                    const effecter_id_t i_effecter_id,
                                     const std::vector<set_effecter_state_field>& i_state_fields)
 {
     PLDM_ENTER("sendSetStateEffecterStatesRequest");
@@ -725,7 +831,6 @@ errlHndl_t sendSetStateEffecterStatesRequest(
 
         if (response.completion_code != PLDM_SUCCESS)
         {
-
             PLDM_ERR("decode_set_state_effecter_states_resp failed with rc 0x%.02x",
                     response.completion_code);
 
@@ -739,7 +844,7 @@ errlHndl_t sendSetStateEffecterStatesRequest(
             * @custdesc   A software error occurred during system boot
             */
             errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                   PLDM::MOD_SEND_SET_STATE_EFFECTER_STATES_REQUEST ,
+                                   PLDM::MOD_SEND_SET_STATE_EFFECTER_STATES_REQUEST,
                                    PLDM::RC_BAD_COMPLETION_CODE,
                                    response.completion_code,
                                    response_hdr_data,

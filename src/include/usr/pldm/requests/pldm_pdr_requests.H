@@ -71,7 +71,7 @@ errlHndl_t sendRepositoryChangedEvent(const pldm_pdr* i_repo,
 
 using sensor_state_t = uint8_t;
 using sensor_id_t = uint16_t;
-using effector_id_t = uint16_t;
+using effecter_id_t = uint16_t;
 using state_query_id_t = uint16_t; // Either a state sensor or effecter ID
 using state_set_id_t = uint16_t;
 
@@ -128,6 +128,18 @@ errlHndl_t sendOccStateChangedEvent(const TARGETING::Target* i_proc_target,
 errlHndl_t sendFruFunctionalStateChangedEvent(const TARGETING::Target* i_target,
                                               state_query_id_t i_sensor_id,
                                               bool i_functional);
+
+/* @brief Send a PLDM request to set the value of a numeric effecter.
+ *
+ * @param[in] i_effecter_id     The ID of the effecter.
+ * @param[in] i_effecter_value  The value to set the effecter to.
+ * @param[in] i_value_size      The number of bytes used to represent the effecter value.
+ *                              Must be 1, 2, or 4; otherwise the function will assert.
+ * @return                      Error if any, otherwise nullptr.
+ */
+errlHndl_t sendSetNumericEffecterValueRequest(effecter_id_t i_effecter_id,
+                                              uint32_t i_effecter_value,
+                                              uint8_t i_value_size);
 
 /* @brief Send a PLDM command notifying the BMC that Hostboot wants to be restarted
  *
