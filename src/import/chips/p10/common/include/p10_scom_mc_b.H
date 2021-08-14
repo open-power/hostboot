@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -305,6 +305,14 @@ static const uint32_t XSTOP4_REGION_UNIT14 = 18;
 static const uint32_t XSTOP4_WAIT_CYCLES = 48;
 static const uint32_t XSTOP4_WAIT_CYCLES_LEN = 12;
 //<< [XSTOP4]
+// mc/reg00011.H
+
+//>> [MBA_SCOMFIR_WATCTL]
+static const uint64_t MBA_SCOMFIR_WATCTL = 0x0c010f91ull;
+
+static const uint32_t MBA_SCOMFIR_WATCTL_WAT_CONTROL = 0;
+static const uint32_t MBA_SCOMFIR_WATCTL_WAT_CONTROL_LEN = 26;
+//<< [MBA_SCOMFIR_WATCTL]
 // mc/reg00011.H
 
 //>>THE END<<

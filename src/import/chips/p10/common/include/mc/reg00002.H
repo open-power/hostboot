@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -6474,6 +6474,107 @@ fapi_try_exit:
 #endif
 }
 //<< GET_[SPATTN_IN35]
+
+//>> PREP_[MBA_SCOMFIR_WATMSKA0]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_MBA_SCOMFIR_WATMSKA0(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = MBA_SCOMFIR_WATMSKA0;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[MBA_SCOMFIR_WATMSKA0]
+
+//>> GET_[MBA_SCOMFIR_WATMSKA0]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_MBA_SCOMFIR_WATMSKA0(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = MBA_SCOMFIR_WATMSKA0;
+#endif
+    return fapi2::getScom(i_target, MBA_SCOMFIR_WATMSKA0, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[MBA_SCOMFIR_WATMSKA0]
+
+//>> PUT_[MBA_SCOMFIR_WATMSKA0]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_MBA_SCOMFIR_WATMSKA0(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_WATMSKA0));
+#endif
+    return fapi2::putScom(i_target, MBA_SCOMFIR_WATMSKA0, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[MBA_SCOMFIR_WATMSKA0]
+
+
+//>> SET_[MBA_SCOMFIR_WATMSKA0_WAT_MASK_A0]
+static inline fapi2::buffer<uint64_t>& SET_MBA_SCOMFIR_WATMSKA0_WAT_MASK_A0(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_WATMSKA0));
+#endif
+    return o_data.insertFromRight<MBA_SCOMFIR_WATMSKA0_WAT_MASK_A0,
+           MBA_SCOMFIR_WATMSKA0_WAT_MASK_A0_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_mc Invalid dial access MBA_SCOMFIR_WATMSKA0_WAT_MASK_A0 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[MBA_SCOMFIR_WATMSKA0_WAT_MASK_A0]
+
+//>> SET_[MBA_SCOMFIR_WATMSKA0_WAT_MASK_A0]
+static inline fapi2::buffer<uint64_t>& SET_MBA_SCOMFIR_WATMSKA0_WAT_MASK_A0(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_WATMSKA0));
+#endif
+    return o_data.insertFromRight<MBA_SCOMFIR_WATMSKA0_WAT_MASK_A0,
+           MBA_SCOMFIR_WATMSKA0_WAT_MASK_A0_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_mc Invalid dial access MBA_SCOMFIR_WATMSKA0_WAT_MASK_A0 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[MBA_SCOMFIR_WATMSKA0_WAT_MASK_A0]
+
+//>> GET_[MBA_SCOMFIR_WATMSKA0_WAT_MASK_A0]
+static inline fapi2::buffer<uint64_t>& GET_MBA_SCOMFIR_WATMSKA0_WAT_MASK_A0(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_WATMSKA0));
+#endif
+    return i_data.extractToRight<MBA_SCOMFIR_WATMSKA0_WAT_MASK_A0,
+           MBA_SCOMFIR_WATMSKA0_WAT_MASK_A0_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_mc Invalid dial access MBA_SCOMFIR_WATMSKA0_WAT_MASK_A0 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[MBA_SCOMFIR_WATMSKA0_WAT_MASK_A0]
 
 //>>THE END<<
 

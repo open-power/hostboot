@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -155,6 +155,14 @@ static const uint32_t SCOMFIR_MCSYNC_EN_SYNC_IN = 17;
 static const uint32_t SCOMFIR_MCSYNC_RESERVED_18_24 = 18;
 static const uint32_t SCOMFIR_MCSYNC_RESERVED_18_24_LEN = 7;
 //<< [SCOMFIR_MCSYNC]
+// mc/reg00005.H
+
+//>> [MBA_SCOMFIR_WATCFG0]
+static const uint64_t MBA_SCOMFIR_WATCFG0 = 0x0c010f88ull;
+
+static const uint32_t MBA_SCOMFIR_WATCFG0_WAT_0_CFG = 0;
+static const uint32_t MBA_SCOMFIR_WATCFG0_WAT_0_CFG_LEN = 60;
+//<< [MBA_SCOMFIR_WATCFG0]
 // mc/reg00005.H
 
 //>>THE END<<

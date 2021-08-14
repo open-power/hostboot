@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -156,6 +156,14 @@ static const uint32_t SCOMFIR_MCMODE1_DISABLE_FP_COMMAND_BYPASS = 61;
 static const uint32_t SCOMFIR_MCMODE1_DISABLE_BYPASS_IN_READ_DATAFLOW = 62;
 static const uint32_t SCOMFIR_MCMODE1_RESERVED_63 = 63;
 //<< [SCOMFIR_MCMODE1]
+// mc/reg00010.H
+
+//>> [MBA_SCOMFIR_WATFNSEL]
+static const uint64_t MBA_SCOMFIR_WATFNSEL = 0x0c010f90ull;
+
+static const uint32_t MBA_SCOMFIR_WATFNSEL_WAT_FN_SELECT = 0;
+static const uint32_t MBA_SCOMFIR_WATFNSEL_WAT_FN_SELECT_LEN = 55;
+//<< [MBA_SCOMFIR_WATFNSEL]
 // mc/reg00010.H
 
 //>>THE END<<

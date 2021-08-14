@@ -550,6 +550,7 @@ p10_exit_cache_contained_run_mcc_initfile_xscom(
     fapi2::ATTR_CHIP_EC_FEATURE_HW548941_Type l_TGT2_ATTR_CHIP_EC_FEATURE_HW548941;
     fapi2::ATTR_CHIP_EC_FEATURE_HW555009_Type l_TGT2_ATTR_CHIP_EC_FEATURE_HW555009;
     fapi2::ATTR_CHIP_EC_FEATURE_HW555479_Type l_TGT2_ATTR_CHIP_EC_FEATURE_HW555479;
+    fapi2::ATTR_CHIP_EC_FEATURE_HW573834_Type l_TGT2_ATTR_CHIP_EC_FEATURE_HW573834;
     uint64_t l_def_MC_EPSILON_CFG_T0;
     uint64_t l_def_MC_EPSILON_CFG_T1;
     uint64_t l_def_MC_EPSILON_CFG_T2;
@@ -566,6 +567,7 @@ p10_exit_cache_contained_run_mcc_initfile_xscom(
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW548941, i_target, l_TGT2_ATTR_CHIP_EC_FEATURE_HW548941));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW555009, i_target, l_TGT2_ATTR_CHIP_EC_FEATURE_HW555009));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW555479, i_target, l_TGT2_ATTR_CHIP_EC_FEATURE_HW555479));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW573834, i_target, l_TGT2_ATTR_CHIP_EC_FEATURE_HW573834));
 
     l_def_MC_EPSILON_CFG_T0 = ((l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T0 + 0x6) / 0x4);
     l_def_MC_EPSILON_CFG_T1 = ((l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T1 + 0x6) / 0x4);
@@ -974,6 +976,32 @@ p10_exit_cache_contained_run_mcc_initfile_xscom(
                  o_xscom_inits),
              "Error from p10_gen_xscom_init");
 
+    if(l_TGT2_ATTR_CHIP_EC_FEATURE_HW573834)
+    {
+        //ATCL_CL_CLSCOM_MCWAT
+        l_scom_data = 0;
+        l_scom_mask = 0;
+        //data
+        l_scom_data |= (uint64_t)       0x8 << (64 - ( 0 +  4)); //MCWAT_CHARB_WAT_CMD_STALL_SEL = 0x8
+        l_scom_data |= (uint64_t)       0x8 << (64 - (12 +  4)); //MCWAT_CHARB_WAT_RRQ_STALL_SEL = 0x8
+        l_scom_data |= (uint64_t)  0x3FFFFF << (64 - (36 + 22)); //MCWAT_CLX_DEBUG_SUM_MASK      = 0x3FFFFF
+        //mask
+        l_scom_mask |= (uint64_t)       0xF << (64 - ( 0 +  4)); //MCWAT_CHARB_WAT_CMD_STALL_SEL
+        l_scom_mask |= (uint64_t)       0xF << (64 - (12 +  4)); //MCWAT_CHARB_WAT_RRQ_STALL_SEL
+        l_scom_mask |= (uint64_t)  0x3FFFFF << (64 - (36 + 22)); //MCWAT_CLX_DEBUG_SUM_MASK
+
+        FAPI_TRY(p10_gen_xscom_init(
+                     i_target,
+                     p10_chipUnitPairing_t(PU_MCC_CHIPUNIT, l_unit_num),
+                     scomt::mcc::ATCL_CL_CLSCOM_MCWAT,
+                     l_scom_data,
+                     l_scom_mask,
+                     o_xscom_inits),
+                 "Error from p10_gen_xscom_init");
+    }
+
+
+
 fapi_try_exit:
     FAPI_DBG("End");
     return fapi2::current_err;
@@ -999,6 +1027,7 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
     fapi2::ATTR_MSS_INTERLEAVE_GRANULARITY_Type l_interleave_granule_size;
     fapi2::ATTR_CHIP_EC_FEATURE_HW550549_Type l_hw550549;
     fapi2::ATTR_CHIP_EC_FEATURE_HW555479_Type l_TGT1_ATTR_CHIP_EC_FEATURE_HW555479;
+    fapi2::ATTR_CHIP_EC_FEATURE_HW573834_Type l_TGT1_ATTR_CHIP_EC_FEATURE_HW573834;
 
 
     uint64_t l_scom_data = 0;
@@ -1013,6 +1042,7 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW550549, i_target, l_hw550549),
              "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW550549)");
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW555479, i_target, l_TGT1_ATTR_CHIP_EC_FEATURE_HW555479));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW573834, i_target, l_TGT1_ATTR_CHIP_EC_FEATURE_HW573834));
 
 
     //MCPERF1
@@ -1218,6 +1248,128 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
                  l_scom_mask,
                  o_xscom_inits),
              "Error from p10_gen_xscom_init");
+
+    if(l_TGT1_ATTR_CHIP_EC_FEATURE_HW573834)
+    {
+        //MBA_SCOMFIR_DBGSRC
+        l_scom_data = 0;
+        l_scom_mask = 0;
+        //data
+        l_scom_data |= (uint64_t) 0x1A801A801A801A80 << (64 - ( 0 + 64)); //DBGSRC_CFG_DBG_INDEX[0-3] = 0x1A80
+        //mask
+        l_scom_mask |= (uint64_t) 0xFFFFFFFFFFFFFFFF << (64 - ( 0 + 64)); //DBGSRC_CFG_DBG_INDEX[0-3]
+
+        FAPI_TRY(p10_gen_xscom_init(
+                     i_target,
+                     p10_chipUnitPairing_t(PU_MI_CHIPUNIT, l_unit_num),
+                     scomt::mc::MBA_SCOMFIR_DBGSRC,
+                     l_scom_data,
+                     l_scom_mask,
+                     o_xscom_inits),
+                 "Error from p10_gen_xscom_init");
+
+        //MBA_SCOMFIR_WATMSKA0
+        l_scom_data = 0;
+        l_scom_mask = 0;
+        //data
+        l_scom_data |= (uint64_t) 0xEFFFFFFFFFF << (64 - ( 0 + 44)); //WATMSKA0_WAT_MASK_A0 = 0xEFFFFFFFFFF
+        //mask
+        l_scom_mask |= (uint64_t) 0xFFFFFFFFFFF << (64 - ( 0 + 44)); //WATMSKA0_WAT_MASK_A0
+
+        FAPI_TRY(p10_gen_xscom_init(
+                     i_target,
+                     p10_chipUnitPairing_t(PU_MI_CHIPUNIT, l_unit_num),
+                     scomt::mc::MBA_SCOMFIR_WATMSKA0,
+                     l_scom_data,
+                     l_scom_mask,
+                     o_xscom_inits),
+                 "Error from p10_gen_xscom_init");
+
+        //MBA_SCOMFIR_WATPATA0
+        l_scom_data = 0;
+        l_scom_mask = 0;
+        //data
+        l_scom_data |= (uint64_t) 0x10000000000 << (64 - ( 0 + 44)); //WATPATA0_WAT_PATTERN_A0 = 0x10000000000
+        //mask
+        l_scom_mask |= (uint64_t) 0xFFFFFFFFFFF << (64 - ( 0 + 44)); //WATPATA0_WAT_PATTERN_A0
+
+        FAPI_TRY(p10_gen_xscom_init(
+                     i_target,
+                     p10_chipUnitPairing_t(PU_MI_CHIPUNIT, l_unit_num),
+                     scomt::mc::MBA_SCOMFIR_WATPATA0,
+                     l_scom_data,
+                     l_scom_mask,
+                     o_xscom_inits),
+                 "Error from p10_gen_xscom_init");
+
+        //MBA_SCOMFIR_WATCFG0
+        l_scom_data = 0;
+        l_scom_mask = 0;
+        //data
+        l_scom_data |= (uint64_t) 0x000100000000000 << (64 - ( 0 + 60)); //WATCFG0_WAT_SLICE_0_CFG = 0x000100000000000
+        //mask
+        l_scom_mask |= (uint64_t) 0xFFFFFFFFFFFFFFF << (64 - ( 0 + 60)); //WATCFG0_WAT_SLICE_0_CFG
+
+        FAPI_TRY(p10_gen_xscom_init(
+                     i_target,
+                     p10_chipUnitPairing_t(PU_MI_CHIPUNIT, l_unit_num),
+                     scomt::mc::MBA_SCOMFIR_WATCFG0,
+                     l_scom_data,
+                     l_scom_mask,
+                     o_xscom_inits),
+                 "Error from p10_gen_xscom_init");
+
+        //MBA_SCOMFIR_WATFNA
+        l_scom_data = 0;
+        l_scom_mask = 0;
+        //data
+        l_scom_data |= (uint64_t) 0x002003 << (64 - ( 0 + 22)); //WATFNA_WAT_FN1_CFG = 0x002003
+        //mask
+        l_scom_mask |= (uint64_t) 0x3FFFFF << (64 - ( 0 + 22)); //WATFNA_WAT_FN1_CFG
+
+        FAPI_TRY(p10_gen_xscom_init(
+                     i_target,
+                     p10_chipUnitPairing_t(PU_MI_CHIPUNIT, l_unit_num),
+                     scomt::mc::MBA_SCOMFIR_WATFNA,
+                     l_scom_data,
+                     l_scom_mask,
+                     o_xscom_inits),
+                 "Error from p10_gen_xscom_init");
+
+        //MBA_SCOMFIR_WATFNSEL
+        l_scom_data = 0;
+        l_scom_mask = 0;
+        //data
+        l_scom_data |= (uint64_t) 0x08000000000000 << (64 - ( 0 + 55)); //WATFNSEL_WAT_FN_SELECT = 0x08000000000000
+        //mask
+        l_scom_mask |= (uint64_t) 0x7FFFFFFFFFFFFF << (64 - ( 0 + 55)); //WATFNSEL_WAT_FN_SELECT
+
+        FAPI_TRY(p10_gen_xscom_init(
+                     i_target,
+                     p10_chipUnitPairing_t(PU_MI_CHIPUNIT, l_unit_num),
+                     scomt::mc::MBA_SCOMFIR_WATFNSEL,
+                     l_scom_data,
+                     l_scom_mask,
+                     o_xscom_inits),
+                 "Error from p10_gen_xscom_init");
+
+        //MBA_SCOMFIR_WATCTL
+        l_scom_data = 0;
+        l_scom_mask = 0;
+        //data
+        l_scom_data |= (uint64_t) 0x2000000 << (64 - ( 0 + 26)); //WATCTL_WAT_CONTROL = 0x2000000
+        //mask
+        l_scom_mask |= (uint64_t) 0x3FFFFFF << (64 - ( 0 + 26)); //WATCTL_WAT_CONTROL
+
+        FAPI_TRY(p10_gen_xscom_init(
+                     i_target,
+                     p10_chipUnitPairing_t(PU_MI_CHIPUNIT, l_unit_num),
+                     scomt::mc::MBA_SCOMFIR_WATCTL,
+                     l_scom_data,
+                     l_scom_mask,
+                     o_xscom_inits),
+                 "Error from p10_gen_xscom_init");
+    }
 
 fapi_try_exit:
     FAPI_DBG("End");
