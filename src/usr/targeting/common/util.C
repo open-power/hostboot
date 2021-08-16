@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -285,6 +285,15 @@ TARGETING::TargetHandle_t getTargetFromLocationCode(const std::vector<uint8_t>& 
     {
         TARGETING::targetService().getTopLevelTarget(out_target);
         assert(out_target != NULL);
+    }
+    else if (i_type == TARGETING::TYPE_TPM)
+    {
+        TARGETING::TargetHandleList l_tpms;
+        getChipResources(l_tpms, TARGETING::TYPE_TPM, TARGETING::UTIL_FILTER_ALL);
+
+        assert(l_tpms.size() == 1);
+
+        out_target = l_tpms[0];
     }
 
     return out_target;

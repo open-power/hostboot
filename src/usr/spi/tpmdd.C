@@ -52,7 +52,7 @@
 #include <secureboot/trustedbootif.H>
 #include "tpmdd.H"
 #include <spi/spi.H> // spiInitEngine
-
+#include <eeprom/eepromif.H>
 
 // ----------------------------------------------
 // Globals
@@ -562,7 +562,7 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
                 pError->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
                 // We never want to gard a TPM for failing presence detection at this point in the code so remove any
                 // gard elements of the error log associated with this TPM prior to commiting. GARDing the TPM will be
-                // handled in crosscheck_sp_presense_target which will precisely set the GARD to avoid triggering
+                // handled in crosscheck_sp_presence_target which will precisely set the GARD to avoid triggering
                 // endless failovers. See that function in hwasPlat.C for a much more detailed explanation.
                 pError->setGardType(i_pTpm, HWAS::GARD_NULL);
                 errlCommit(pError,TPMDD_COMP_ID);
@@ -664,7 +664,31 @@ errlHndl_t tpmPresenceDetect(DeviceFW::OperationType i_opType,
                                         true /*SW error*/);
         io_buflen = 0;
     } else {
+        if (!INITSERVICE::spBaseServicesEnabled() && !Util::isSimicsRunning())
+        {
+            // For BMC, TPM VPD is collected remotely and given to Hostboot.
+            auto foundPresentBySp = TARGETING::FOUND_PRESENT_BY_SP_MISSING;
+            if (EEPROM::hasRemoteVpdSource(i_target))
+            {
+                foundPresentBySp = TARGETING::FOUND_PRESENT_BY_SP_FOUND;
+                // FSP sets PN/SN so if there isn't one then set it here.
+                VPD::setPartAndSerialNumberAttributes(i_target);
+            }
+            i_target->setAttr<TARGETING::ATTR_FOUND_PRESENT_BY_SP>(foundPresentBySp);
+
+        }
+        else
+        {
+            // Clear the EECACHE entry for the TPM by requesting a non-present eeprom be cached.
+            // Since the BMC didn't give VPD for the TPM we don't want old VPD laying around.
+            std::vector<uint8_t> empty_vector;
+            EEPROM::cacheEepromBuffer(i_target,
+                                      false,
+                                      empty_vector);
+        }
+
         bool present = tpmPresence (i_target);
+
         memcpy(io_buffer, &present, sizeof(present));
         io_buflen = sizeof(present);
     }

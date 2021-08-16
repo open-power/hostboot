@@ -58,6 +58,18 @@ extern trace_desc_t* g_trac_vpd;
 //#define TRACSSCOMP(args...)  TRACFCOMP(args)
 #define TRACSSCOMP(args...)
 
+namespace
+{
+    inline bool usePvpdFacade(TARGETING::Target* i_target)
+    {
+        // Get the type of the target.
+        TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
+        // Only Node and TPM targets use pvpd facade.
+        // TPM shares numerous keywords with the planar vpd so reuse that facade.
+        return ((l_type == TARGETING::TYPE_NODE) || (l_type == TARGETING::TYPE_TPM));
+    }
+}
+
 namespace VPD
 {
 
@@ -365,7 +377,7 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
     do
     {
         IpVpdFacade * l_ipvpd = &(Singleton<MvpdFacade>::instance());
-        if(l_type == TARGETING::TYPE_NODE)
+        if(usePvpdFacade(i_target))
         {
             l_ipvpd = &(Singleton<PvpdFacade>::instance());
         }
@@ -654,7 +666,7 @@ errlHndl_t getPnAndSnRecordAndKeywords( TARGETING::Target * i_target,
                 io_keywordSN = SPD::MODULE_SERIAL_NUMBER;
             }
         }
-        else if( i_type == TARGETING::TYPE_NODE )
+        else if(usePvpdFacade(i_target))
         {
             io_record    = PVPD::VINI;
             io_keywordPN = PVPD::PN;
@@ -718,7 +730,7 @@ errlHndl_t getCcinRecordAndKeywords( TARGETING::Target * i_target,
                  // No CC, only in 11S
             }
         }
-        else if( i_type == TARGETING::TYPE_NODE )
+        else if(usePvpdFacade(i_target))
         {
             io_record    = PVPD::VINI;
             io_keywordCC = PVPD::CC;

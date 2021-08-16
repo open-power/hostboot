@@ -868,7 +868,7 @@ errlHndl_t spiPresence(TARGETING::Target* i_target,
                        bool&              o_present)
 {
     assert(i_target->getAttr<ATTR_TYPE>() == TYPE_PROC, "spiPresence(): i_target must be a processor.");
-    TRACDCOMP(g_trac_spi, "spiPresence(): Detect presense of EEPROM on engine %d for Proc 0x%.8X",
+    TRACDCOMP(g_trac_spi, "spiPresence(): Detect presence of EEPROM on engine %d for Proc 0x%.8X",
                            i_engine,
                            TARGETING::get_huid(i_target));
     errlHndl_t errl = nullptr;

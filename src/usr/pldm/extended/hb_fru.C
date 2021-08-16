@@ -1052,6 +1052,7 @@ errlHndl_t cacheRemoteFruVpd()
         extra_fru_data_t extra_fru_info = NO_EXTRA_FRU_INFO;
         bool cache_vpd = CACHE_VPD;
         location_code_setter_t location_code_setter = nullptr;
+        bool fail_on_missing_pdr = true;
     };
 
     static const pldm_entity_to_targeting_mapping pldm_entity_to_targeting_map[] = {
@@ -1073,7 +1074,16 @@ errlHndl_t cacheRemoteFruVpd()
           1,
           HAS_FW_VERSION_INFO,
           NO_CACHE_VPD,
-          setAttribute<ATTR_SYS_LOCATION_CODE> }
+          setAttribute<ATTR_SYS_LOCATION_CODE> },
+        { ENTITY_TYPE_TPM,
+          TYPE_TPM,
+          EEPROM::VPD_PRIMARY,
+          1,
+          HAS_SERIAL_NUMBER,
+          CACHE_VPD,
+          nullptr,
+          false
+        }
     };
 
     for(const auto& map_entry : pldm_entity_to_targeting_map)
@@ -1081,10 +1091,20 @@ errlHndl_t cacheRemoteFruVpd()
          auto device_rsis
              = thePdrManager().findFruRecordSetIdsByType(map_entry.pldm_entity_type);
 
-        if(device_rsis.empty() ||
-           device_rsis.size() > map_entry.max_expected_records)
+        if ((device_rsis.empty() && map_entry.fail_on_missing_pdr)
+                || device_rsis.size() > map_entry.max_expected_records)
         {
-            // error, expected exactly 1 RSI associated with a device
+            if (!map_entry.fail_on_missing_pdr)
+            {
+                // It's not required that this map entry have a pdr with which to extract data. Just move on.
+                PLDM_INF("cacheRemoteFruVpd: Found %d record set IDs matching"
+                         "entity type 0x%.02x and expected at least 1 and a max of %d but that's allowed, moving on.",
+                         device_rsis.size(),
+                         map_entry.pldm_entity_type,
+                         map_entry.max_expected_records);
+                continue;
+            }
+            // error, expected at least 1 RSI associated with a device
             PLDM_ERR("cacheRemoteFruVpd: Found %d record set IDs matching"
                      "entity type 0x%.02x and expected at least 1 and a max of %d",
                      device_rsis.size(),
@@ -1121,6 +1141,15 @@ errlHndl_t cacheRemoteFruVpd()
             if(device_fru_records.empty() ||
                records_in_set == 0)
             {
+                if (!map_entry.fail_on_missing_pdr)
+                {
+                    // It's not required that this map entry have a pdr with which to extract data. Just move on.
+                    PLDM_INF("cacheRemoteFruVpd: Couldn't find any OEM FRU records matching record set "
+                             "id 0x%.4x entity type 0x%.02x but that's allowed, moving on.",
+                             device_rsi, map_entry.pldm_entity_type);
+                    continue;
+                }
+
                 PLDM_ERR("cacheRemoteFruVpd: Failed to find any OEM Fru records"
                          " matching record set id 0x%.4x entity type 0x%.02x",
                          device_rsi, map_entry.pldm_entity_type);

@@ -60,6 +60,22 @@ void setAllowVPDOverrides(bool i_setVal);
 #endif
 
 /**
+* @brief Check if the target gets its VPD from a remote source
+*        such as the BMC. This function will check the VPD_SWITCHES
+*        attribute to see if vpdCollectedRemotely is set, if set
+*        this indicates a remote source thinks this target is present
+*        and has given us the VPD associated with it.
+*
+* @param[in] i_target Target we want to query for whether it has a remote VPD source or not
+*
+* @return bool True if vpdCollectedRemotely bit on ATTR_VPD_SWITCHES is true
+*
+* @note targets that do not have ATTR_VPD_SWITCHES will always return false
+*
+*/
+bool hasRemoteVpdSource(TARGETING::Target * i_target);
+
+/**
  * @brief This function tests to see if the VPD_PRIMARY eeprom is present
  *        for the specific target.
  *

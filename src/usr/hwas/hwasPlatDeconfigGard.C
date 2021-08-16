@@ -502,7 +502,7 @@ errlHndl_t DeconfigGard::platCreateGardRecord(
 
             // if this GARD record was a manual gard - overwrite
             //  with this new one
-            if (l_pRecord->iv_errorType == GARD_User_Manual)
+            if ((l_pRecord->iv_errorType == GARD_User_Manual) || (l_pRecord->iv_errorType == GARD_Reconfig))
             {
                 HWAS_INF("Duplicate is GARD_User_Manual - overwriting");
                 l_pRecord->iv_errlogEid = i_errlEid;

@@ -1278,7 +1278,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId,
                 break;
             }
 
-            TARGETING::ATTR_ORDINAL_ID_type l_procOrdinalId = 
+            TARGETING::ATTR_ORDINAL_ID_type l_procOrdinalId =
                                             l_procChip->getAttr<TARGETING::ATTR_ORDINAL_ID>();
             //Update proc specific metadata address into the PCRD table
             for (uint64_t l_pcrdInstance = 0;
@@ -1318,8 +1318,8 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId,
                 (uint32_t)l_pcrd->hdatChipData.hdatPcrdFabTopologyId,(uint64_t)l_pcrd->hdatChipData.hdatPcrdMPIPLMetadataAddr);
 
                 TRACDCOMP(g_trac_runtime," Address of l_pcrd->hdatChipData.hdatPcrdProcChipId=0x%.16llx : "
-                "after mm_virt_to_phys()=0x%.16llx", &(l_pcrd->hdatChipData.hdatPcrdProcChipId), 
-                mm_virt_to_phys( reinterpret_cast<void*>(&(l_pcrd->hdatChipData.hdatPcrdProcChipId)))); 
+                "after mm_virt_to_phys()=0x%.16llx", &(l_pcrd->hdatChipData.hdatPcrdProcChipId),
+                mm_virt_to_phys( reinterpret_cast<void*>(&(l_pcrd->hdatChipData.hdatPcrdProcChipId))));
 
                 TRACFCOMP(g_trac_runtime," Address of l_pcrd->hdatChipData.hdatPcrdMPIPLMetadataAddr=0x%.16llx "
                 ": after mm_virt_to_phys()=0x%.16llx ",  &(l_pcrd->hdatChipData.hdatPcrdMPIPLMetadataAddr),
@@ -3190,7 +3190,7 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
 
             if (itr == l_i2cTargetList.end())
             {
-                // couldn't find it, physical presense will not be available
+                // couldn't find it, physical presence will not be available
                 TRACFCOMP(g_trac_runtime,
                     "populate_TpmInfoByNode: I2c device in the PCRD with link ID %d does not have a match in the MRW",
                     l_i2cDev->hdatI2cLinkId);

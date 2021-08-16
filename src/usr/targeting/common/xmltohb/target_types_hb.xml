@@ -181,6 +181,9 @@
       <id>FORCE_TPM_NOT_PRESENT</id>
     </attribute>
     <attribute>
+      <id>FRU_CCIN</id>
+    </attribute>
+    <attribute>
       <id>HB_TPM_INIT_ATTEMPTED</id>
     </attribute>
     <attribute>
@@ -190,6 +193,12 @@
       <id>HB_TPM_MUTEX</id>
     </attribute>
     <attribute>
+      <id>PART_NUMBER</id>
+    </attribute>
+    <attribute>
+      <id>SERIAL_NUMBER</id>
+    </attribute>
+    <attribute>
       <id>STATIC_ABS_LOCATION_CODE</id>
     </attribute>
     <attribute>
@@ -197,6 +206,9 @@
     </attribute>
     <attribute>
       <id>TPM_ROLE</id>
+    </attribute>
+    <attribute>
+      <id>VPD_SWITCHES</id>
     </attribute>
   </targetTypeExtension>
 

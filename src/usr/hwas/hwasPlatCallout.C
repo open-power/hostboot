@@ -76,8 +76,8 @@ errlHndl_t platHandleHWCallout(
 
     errlHndl_t errl = NULL;
 
-    HWAS_INF("HW callout; pTarget %p gardErrorType %x deconfigState %x",
-            i_pTarget, i_gardErrorType, i_deconfigState);
+    HWAS_INF("HW callout; pTarget HUID 0x%.8X, gardErrorType %x deconfigState %x",
+            TARGETING::get_huid(i_pTarget), i_gardErrorType, i_deconfigState);
 
     // grab the bootproc target to use below
     TARGETING::Target* l_masterProc = nullptr;

@@ -29302,6 +29302,20 @@
         </default>
     </attribute>
     <attribute>
+            <id>EEPROM_VPD_PRIMARY_INFO</id>
+            <default>
+                    <field><id>byteAddrOffset</id><value>2</value></field>
+                    <field><id>chipCount</id><value>0x01</value></field>
+                    <field><id>devAddr</id><value>0xA2</value></field>
+                    <field><id>engine</id><value>0x00</value></field>
+                    <field><id>i2cMasterPath</id><value></value></field>
+                    <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+                    <field><id>port</id><value>1</value></field>
+                    <field><id>writeCycleTime</id><value>20</value></field>
+                    <field><id>writePageSize</id><value>32</value></field>
+            </default>
+    </attribute>
+    <attribute>
         <id>TPM_ROLE</id>
         <default>TPM_PRIMARY</default>
     </attribute>

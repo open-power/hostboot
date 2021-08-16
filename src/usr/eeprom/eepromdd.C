@@ -922,6 +922,12 @@ DEVICE_REGISTER_ROUTE( DeviceFW::WILDCARD,
                        TYPE_NODE,
                        eepromPerformOp );
 
+// Register the perform Op with the routing code for TPMs.
+DEVICE_REGISTER_ROUTE( DeviceFW::WILDCARD,
+                       DeviceFW::EEPROM,
+                       TYPE_TPM,
+                       eepromPerformOp );
+
 // Register the perform Op with the routing code for MCS chiplets.
 DEVICE_REGISTER_ROUTE( DeviceFW::WILDCARD,
                        DeviceFW::EEPROM,

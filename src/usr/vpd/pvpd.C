@@ -181,6 +181,14 @@ namespace PVPD
                            DeviceFW::PVPD,
                            TARGETING::TYPE_NODE,
                            pvpdWrite );
+    DEVICE_REGISTER_ROUTE( DeviceFW::READ,
+                           DeviceFW::PVPD,
+                           TARGETING::TYPE_TPM,
+                           pvpdRead );
+    DEVICE_REGISTER_ROUTE( DeviceFW::WRITE,
+                           DeviceFW::PVPD,
+                           TARGETING::TYPE_TPM,
+                           pvpdWrite );
 
 }; // end namespace PVPD
 

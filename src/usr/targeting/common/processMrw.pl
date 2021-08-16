@@ -1823,6 +1823,67 @@ sub processTpm
     $targetObj->setAttribute($target, "FAPI_NAME",     $tpmFapiName);
     $targetObj->setAttribute($target, "PHYS_PATH",     $tpmPhysical);
 
+    # Build up data for the EEPROM_VPD_PRIMARY_INFO attribute. Since the VPD is collected via
+    # BMC it won't be accessible by hostboot. However, hostboot still needs to have this data
+    # to store the VPD in EECACHE when it gets the VPD from the BMC.
+    #
+    # Get the parent of the TPM, which will be the FRU card the TPM sits on.
+    my $parent = $targetObj->getTargetParent($target);
+    # Find the i2c buses sitting off the TPM FRU
+    my $i2cBuses = $targetObj->findDestConnections($parent, "I2C", "");
+    if ($i2cBuses ne "")
+    {
+        my $byteAddrOffset = "";
+        my $chipCount = "0x01";
+        my $devAddr = "";
+        my $engine = "";
+        my $i2cMasterPath = "";
+        my $maxMemorySizeKb = "";
+        my $port = "";
+        my $writeCycleTime = "";
+        my $writePageSize = "";
+
+        # Walk through the connections to find the VPD connection
+        foreach my $i2cBus (@{$i2cBuses->{CONN}})
+        {
+            # Make sure the connection we're inspecting is the vpd connection.
+            if (index($i2cBus->{DEST}, "vpd") >= 0)
+            {
+                # The DEST_PARENT is the TPM itself, so to access the VPD card get the parent of
+                # the DEST connection, which is the i2c controller attached to the VPD card.
+                my $vpdParent = $targetObj->getTargetParent($i2cBus->{DEST});
+                $byteAddrOffset = $targetObj->getAttribute($vpdParent, "BYTE_ADDRESS_OFFSET");
+                $writePageSize = $targetObj->getAttribute($vpdParent, "WRITE_PAGE_SIZE");
+                $writeCycleTime = $targetObj->getAttribute($vpdParent, "WRITE_CYCLE_TIME");
+                $maxMemorySizeKb = $targetObj->getAttribute($vpdParent, "MEMORY_SIZE_IN_KB");
+
+                $devAddr = $targetObj->getAttribute($i2cBus->{DEST}, "I2C_ADDRESS");
+
+                $port = $targetObj->getAttribute($i2cBus->{SOURCE}, "I2C_PORT");
+                $engine = $targetObj->getAttribute($i2cBus->{SOURCE}, "I2C_ENGINE");
+
+                # The VPD is only accessible via the BMC, have to tranverse up the hierarchy a bit to get the
+                # PHYS_PATH since there are misc connections in the way.
+                my $bmc = $targetObj->getTargetParent(
+                          $targetObj->getTargetParent($i2cBus->{SOURCE_PARENT}));
+                $i2cMasterPath = $targetObj->getAttribute($bmc, "PHYS_PATH");
+
+                last;
+            }
+        }
+
+        # Set the EEPROM_VPD_PRIMARY_INFO fields with the gathered data.
+        $targetObj->setAttributeField($target, "EEPROM_VPD_PRIMARY_INFO", "byteAddrOffset", $byteAddrOffset);
+        $targetObj->setAttributeField($target, "EEPROM_VPD_PRIMARY_INFO", "chipCount", $chipCount);
+        $targetObj->setAttributeField($target, "EEPROM_VPD_PRIMARY_INFO", "devAddr", $devAddr);
+        $targetObj->setAttributeField($target, "EEPROM_VPD_PRIMARY_INFO", "engine", $engine);
+        $targetObj->setAttributeField($target, "EEPROM_VPD_PRIMARY_INFO", "i2cMasterPath", $i2cMasterPath);
+        $targetObj->setAttributeField($target, "EEPROM_VPD_PRIMARY_INFO", "maxMemorySizeKB", $maxMemorySizeKb);
+        $targetObj->setAttributeField($target, "EEPROM_VPD_PRIMARY_INFO", "port", $port);
+        $targetObj->setAttributeField($target, "EEPROM_VPD_PRIMARY_INFO", "writeCycleTime", $writeCycleTime);
+        $targetObj->setAttributeField($target, "EEPROM_VPD_PRIMARY_INFO", "writePageSize", $writePageSize);
+    }
+
     # Save this target for retrieval later when printing the xml (sub printXML)
     $targetObj->{targeting}{SYS}[$nodeParentPos]{NODES}[$nodeParentPos]
                 {TPMS}[$tpmPosPerSystem]{KEY} = $target;

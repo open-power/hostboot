@@ -1261,6 +1261,63 @@
       <id>DECONFIG_GARDABLE</id>
     </attribute>
     <attribute>
+      <default>
+        <field>
+          <value>0xFF</value>
+          <id>byteAddrOffset</id>
+        </field>
+        <field>
+          <value>0xFF</value>
+          <id>chipCount</id>
+        </field>
+        <field>
+          <value>0xFF</value>
+          <id>devAddr</id>
+        </field>
+        <field>
+          <!--Since enum values cannot be used as default values in
+                  a complexType, this is a workaround to set the value to the
+                  corresponding enum value.-->
+          <!--value>DDIMM</value-->
+          <value>0x0</value>
+          <id>eepromContentType</id>
+        </field>
+        <field>
+          <value>0xFF</value>
+          <id>engine</id>
+        </field>
+        <field>
+          <value>physical:sys-0</value>
+          <id>i2cMasterPath</id>
+        </field>
+        <field>
+          <value>0xFF</value>
+          <id>i2cMuxBusSelector</id>
+        </field>
+        <field>
+          <value>physical:sys-0</value>
+          <id>i2cMuxPath</id>
+        </field>
+        <field>
+          <value>0xFFFFFFFFFFFFFFFF</value>
+          <id>maxMemorySizeKB</id>
+        </field>
+        <field>
+          <value>0xFF</value>
+          <id>port</id>
+        </field>
+        <field>
+          <value>0xFFFFFFFFFFFFFFFF</value>
+          <id>writeCycleTime</id>
+        </field>
+        <field>
+          <value>0xFFFFFFFFFFFFFFFF</value>
+          <id>writePageSize</id>
+        </field>
+      </default>
+      <id>EEPROM_VPD_PRIMARY_INFO</id>
+    </attribute>
+    <attribute>
       <!-- GARD, RESRC_RECOV, GARD_APPLIED -->
       <default>0x00000031</default>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>

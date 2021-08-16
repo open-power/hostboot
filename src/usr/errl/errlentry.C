@@ -3081,8 +3081,8 @@ void ErrlEntry::addFruCalloutDataToSrc(TARGETING::Target *            const i_ta
                         reinterpret_cast<const char*>(l_partnum));
 
         // CCIN
-        ATTR_PCIE_NVME_CCIN_type l_ccin { };
-        UTIL::tryGetAttributeInHierarchy<ATTR_PCIE_NVME_CCIN>(i_target, l_ccin);
+        ATTR_FRU_CCIN_type l_ccin { };
+        UTIL::tryGetAttributeInHierarchy<ATTR_FRU_CCIN>(i_target, l_ccin);
         // Set CCIN truncating as necessary.
         set_errl_string(l_fruco.ccin,
                         reinterpret_cast<const char*>(&l_ccin),

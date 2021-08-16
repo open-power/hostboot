@@ -32,6 +32,7 @@
 #include <fsi/fsiif.H>
 #include <spi/spi.H>
 
+
 // ----------------------------------------------
 // Trace definitions
 // ----------------------------------------------
@@ -58,22 +59,6 @@ void setAllowVPDOverrides(bool i_setVal)
 }
 #endif
 
-#ifndef __HOSTBOOT_RUNTIME
-
-/**
-* @brief Check if the target gets its VPD from a remote source
-*        such as the BMC. This function will check the VPD_SWITCHES
-*        attribute to see if vpdCollectedRemotely is set, if set
-*        this indicates a remote source thinks this target is present
-*        and has given us the VPD associated with it.
-*
-* @param[in] i_target Target we want to query for whether it has a remote VPD source or not
-*
-* @return bool True if vpdCollectedRemotely bit on ATTR_VPD_SWITCHES is true
-*
-* @note targets that do not have ATTR_VPD_SWITCHES will always return false
-*
-*/
 bool hasRemoteVpdSource(TARGETING::Target * i_target)
 {
     bool vpd_source_is_remote = false;
@@ -86,6 +71,8 @@ bool hasRemoteVpdSource(TARGETING::Target * i_target)
     }
     return vpd_source_is_remote;
 }
+
+#ifndef __HOSTBOOT_RUNTIME
 
 //-------------------------------------------------------------------
 //eepromPresence
@@ -556,9 +543,9 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
             else
             {
                 TRACFCOMP( g_trac_eeprom,
-                           ERR_MRK"eepromReadAttributes() - INVALID ADDRESS "
-                           "OFFSET SIZE %d!",
-                           io_eepromAddr.accessAddr.i2c_addr.addrSize );
+                           ERR_MRK"eepromReadAttributes() - INVALID BYTE ADDRESS "
+                           "OFFSET %d!",
+                           eepromData.byteAddrOffset);
 
                     /*@
                      * @errortype
@@ -566,7 +553,7 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
                      * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
                      * @moduleid         EEPROM_READATTRIBUTES
                      * @userdata1        HUID of target
-                     * @userdata2        Address Offset Size
+                     * @userdata2        Byte Address Offset
                      * @devdesc          Invalid address offset size
                      */
                     err = new ERRORLOG::ErrlEntry(
@@ -574,7 +561,7 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
                                         EEPROM_READATTRIBUTES,
                                         EEPROM_INVALID_ADDR_OFFSET_SIZE,
                                         TARGETING::get_huid(i_target),
-                                        io_eepromAddr.accessAddr.i2c_addr.addrSize,
+                                        eepromData.byteAddrOffset,
                                         true /*Add HB SW Callout*/ );
 
                     err->collectTrace( EEPROM_COMP_NAME );
@@ -1127,30 +1114,57 @@ void getEEPROMs( std::list<EepromInfo_t>& o_info )
     TRACFCOMP(g_trac_eeprom,"<<getEEPROMs()");
 }
 
-
 void cacheEepromVpd(TARGETING::Target * i_target, bool i_present)
 {
     errlHndl_t errl = nullptr;
 
     TARGETING::EepromVpdPrimaryInfo eepromData;
     TARGETING::SpiEepromVpdPrimaryInfo spiEepromData;
-    if ( i_target->tryGetAttr<TARGETING::ATTR_EEPROM_VPD_PRIMARY_INFO>(eepromData) ||
-         i_target->tryGetAttr<TARGETING::ATTR_SPI_EEPROM_VPD_PRIMARY_INFO>
-          (spiEepromData) )
-    {
-        TRACFCOMP(g_trac_eeprom, "cacheEepromVpd(): Reading EEPROMs for target 0x%.8X, eeprom cache = %d VPD_AUTO, "
-                                 "target present = %d , eeprom type = %d",
-                  TARGETING::get_huid(i_target), DEVICE_CACHE_EEPROM_ADDRESS(i_present, EEPROM::VPD_AUTO));
 
-        void * empty_buffer = nullptr;
-        size_t empty_size = 0;
-        errl = deviceRead(i_target, empty_buffer, empty_size,
-                        DEVICE_CACHE_EEPROM_ADDRESS(i_present, EEPROM::VPD_AUTO));
-        if (errl != nullptr)
+    bool hasSpiEeprom = i_target->tryGetAttr<TARGETING::ATTR_SPI_EEPROM_VPD_PRIMARY_INFO>(spiEepromData),
+         hasI2cEeprom = i_target->tryGetAttr<TARGETING::ATTR_EEPROM_VPD_PRIMARY_INFO>(eepromData);
+
+    if (( hasSpiEeprom || hasI2cEeprom ) && !EEPROM::hasRemoteVpdSource(i_target))
+    {
+        // Check there is a valid controller target
+        TARGETING::EntityPath controllerPath;
+        if (hasSpiEeprom)
         {
-            TRACFCOMP(g_trac_eeprom,"pTarget %.8X - failed reading VPD eeprom",
-                i_target->getAttr<TARGETING::ATTR_HUID>());
-            errlCommit(errl, EEPROM_COMP_ID);
+            controllerPath = spiEepromData.spiMasterPath;
+        }
+        else
+        {
+            controllerPath = eepromData.i2cMasterPath;
+        }
+
+        TARGETING::Target* controllerTarget = TARGETING::targetService().toTarget(controllerPath);
+
+        // If the controller is nullptr or the SP then Hostboot shouldn't attempt to read the eeprom
+        if ((controllerTarget != nullptr)
+           && (controllerTarget->getAttr<TARGETING::ATTR_TYPE>() != TARGETING::TYPE_BMC)
+           && (controllerTarget->getAttr<TARGETING::ATTR_TYPE>() != TARGETING::TYPE_SYS))
+        {
+            TRACFCOMP(g_trac_eeprom, "cacheEepromVpd(): Reading EEPROMs for target 0x%.8X, eeprom cache = %d VPD_AUTO, "
+                                     "target present = %d , eeprom type = %d, controller target = 0x%.8X",
+                      TARGETING::get_huid(i_target), DEVICE_CACHE_EEPROM_ADDRESS(i_present, EEPROM::VPD_AUTO),
+                      TARGETING::get_huid(controllerTarget));
+
+            void * empty_buffer = nullptr;
+            size_t empty_size = 0;
+            errl = deviceRead(i_target, empty_buffer, empty_size,
+                            DEVICE_CACHE_EEPROM_ADDRESS(i_present, EEPROM::VPD_AUTO));
+            if (errl != nullptr)
+            {
+                TRACFCOMP(g_trac_eeprom,"pTarget %.8X - failed reading VPD eeprom",
+                          i_target->getAttr<TARGETING::ATTR_HUID>());
+                errlCommit(errl, EEPROM_COMP_ID);
+            }
+        }
+        else
+        {
+            TRACFCOMP(g_trac_eeprom, "cacheEepromVpd(): Skipping reading EEPROM(s) for target 0x%.8X since the SPI/I2C "
+                                     "controller target is not accessible.",
+                                     TARGETING::get_huid(i_target));
         }
     }
 }
