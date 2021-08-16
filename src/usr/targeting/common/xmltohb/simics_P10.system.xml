@@ -210,71 +210,39 @@
         <default>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0</default>
     </attribute>
     <attribute>
-        <id>OPEN_POWER_REGULATOR_EFFICIENCY_FACTOR</id>
+        <id>REGULATOR_EFFICIENCY_FACTOR</id>
         <default>90</default>
-    </attribute>
-    <attribute>
-        <id>OPEN_POWER_PROC_DVFS_TEMP_DEG_C</id>
-        <default>85</default>
-    </attribute>
-    <attribute>
-        <id>OPEN_POWER_PROC_ERROR_TEMP_DEG_C</id>
-        <default>95</default>
     </attribute>
     <!-- TODO RTC: 249144
          Adjust back to 5 when timeout issues resolved -->
     <attribute>
-        <id>OPEN_POWER_PROC_READ_TIMEOUT_SEC</id>
+        <id>PROC_READ_TIMEOUT_SEC</id>
         <default>255</default>
     </attribute>
     <attribute>
-        <id>OPEN_POWER_DIMM_ERROR_TEMP_DEG_C</id>
+        <id>DIMM_ERROR_TEMP_DEG_C</id>
         <default>74</default>
     </attribute>
     <!-- TODO RTC: 249144
          Adjust back to 30 when timeout issues resolved -->
     <attribute>
-        <id>OPEN_POWER_DIMM_READ_TIMEOUT_SEC</id>
+        <id>DIMM_READ_TIMEOUT_SEC</id>
         <default>255</default>
     </attribute>
     <attribute>
-        <id>OPEN_POWER_DIMM_THROTTLE_TEMP_DEG_C</id>
+        <id>DIMM_THROTTLE_TEMP_DEG_C</id>
         <default>74</default>
     </attribute>
     <attribute>
-        <id>OPEN_POWER_GPU_ERROR_TEMP_DEG_C</id>
-        <default>83</default>
-    </attribute>
-    <attribute>
-        <id>OPEN_POWER_GPU_MEM_ERROR_TEMP_DEG_C</id>
-        <default>85</default>
-    </attribute>
-    <!-- TODO RTC: 249144
-         Adjust back to 30 when timeout issues resolved -->
-    <attribute>
-        <id>OPEN_POWER_GPU_MEM_READ_TIMEOUT_SEC</id>
-        <default>255</default>
-    </attribute>
-    <!-- TODO RTC: 249144
-         Adjust back to 30 when timeout issues resolved -->
-    <attribute>
-        <id>OPEN_POWER_GPU_READ_TIMEOUT_SEC</id>
-        <default>255</default>
-    </attribute>
-    <attribute>
-      <id>OPEN_POWER_SOFT_MIN_PCAP_WATTS</id>
+      <id>SOFT_MIN_POWER_CAP_WATTS</id>
       <default>500</default>
     </attribute>
     <attribute>
-      <id>OPEN_POWER_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS</id>
+      <id>N_PLUS_ONE_BULK_POWER_LIMIT_WATTS</id>
       <default>3050</default>
     </attribute>
     <attribute>
-      <id>OPEN_POWER_N_PLUS_ONE_HPC_BULK_POWER_LIMIT_WATTS</id>
-      <default>3400</default>
-    </attribute>
-    <attribute>
-      <id>OPEN_POWER_MIN_POWER_CAP_WATTS</id>
+      <id>MIN_POWER_CAP_WATTS</id>
       <default>1700</default>
     </attribute>
     <attribute>

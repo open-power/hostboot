@@ -60,6 +60,7 @@ extern trace_desc_t *g_trac_hdat;
 /* Constants                                                              */
 /*------------------------------------------------------------------------*/
 
+#if 0
 /**
  * @brief This routine gets number of cores in each processor
  *
@@ -113,6 +114,7 @@ static void hdatGetNumberOfCores(uint32_t &o_numCores)
     }
     HDAT_EXIT();
 }
+#endif
 
 /**
  * @brief This routine gets the information for Enlarged IO Slot Count
@@ -638,6 +640,8 @@ void HdatIplParms::hdatGetSystemParamters()
 
     this->iv_hdatIPLParams->iv_sysParms.hdatMemoryScrubbing = 0;
 
+    // TODO: CQ SW533629 - remove use of ATTR_OPEN_POWER_TURBO_MODE_SUPPORTED for p10
+#if 0
     // Get SPPL information
     uint32_t l_numCores;
 
@@ -669,6 +673,9 @@ void HdatIplParms::hdatGetSystemParamters()
     {
         HDAT_ERR("Error in getting OPEN_POWER_TURBO_MODE_SUPPORTED attribute");
     }
+#else
+        HDAT_ERR("OPEN_POWER_TURBO_MODE_SUPPORTED attribute not supported in p10");
+#endif
 
     this->iv_hdatIPLParams->iv_sysParms.usePoreSleep  = 0x01;
 
