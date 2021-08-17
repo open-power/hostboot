@@ -69,6 +69,7 @@
 #include <pldm/requests/pldm_pdr_requests.H>
 #include <pldm/base/pldm_shutdown.H>
 #include <errlud_secure.H>
+#include "../spi/spidd.H"
 
 #ifdef CONFIG_BMC_IPMI
 #include <ipmi/ipmisensor.H>
@@ -89,6 +90,7 @@
 #include <p10_ipl_section_append.H>
 #include <p10_ipl_image.H>
 
+#include <p10_sbe_spi_cmd.H>
 #include <p10_infrastruct_help.H>
 #include <p10_scom_perv_a.H>
 #include <initservice/mboxRegs.H>
@@ -5055,6 +5057,13 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                                ERRL_UDT_NOFORMAT,   // parser ignores data
                                false );             // merge
 
+            const uint8_t l_sbeSpiEngine =
+                (io_sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY) ?
+                SPI_ENGINE_PRIMARY_BOOT_SEEPROM :
+                SPI_ENGINE_BACKUP_BOOT_SEEPROM;
+
+            // Add SPI registers to aid in debug in the future
+            SPI::addSpiStatusRegsToErrl(io_sbeState.target, l_sbeSpiEngine, err_info);
 
             err_info->collectTrace(SBE_COMP_NAME, KILOBYTE);
 
