@@ -35,6 +35,13 @@
         access      write_only;
     };
 
+    register IOHS_DLP_FIR_WOF
+    {
+        name        "P10 chip IOHS_DLP_FIR WOF register";
+        scomaddr    0x18011008;
+        capture     group default;
+    };
+
     register IOHS_DLP_PHY_CONFIG
     {
         name        "P10 IOHS DLP PHY Config Register";
