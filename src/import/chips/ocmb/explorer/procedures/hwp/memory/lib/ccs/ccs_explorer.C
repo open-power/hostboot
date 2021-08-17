@@ -53,6 +53,32 @@ namespace ccs
 {
 
 ///
+/// @brief Configures the CCS engine
+/// @param[in] i_target the target on which to operate
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode configure_mode(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+{
+    fapi2::buffer<uint64_t> l_ccs_config;
+
+    FAPI_TRY( mss::ccs::read_mode(i_target, l_ccs_config),
+              "%s Failed ccs read_mode",
+              mss::c_str(i_target) );
+
+    // We want to generate the parity after the command
+    // Note: this is not needed for most explorer configurations (as most do not run with parity enabled)
+    // However, the ones that do run with parity enabled need this logic
+    mss::ccs::parity_after_cmd(i_target, l_ccs_config, mss::HIGH);
+
+    FAPI_TRY( mss::ccs::write_mode(i_target, l_ccs_config),
+              "%s Failed ccs write_mode",
+              mss::c_str(i_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Configures the chip to properly execute CCS instructions - EXPLORER specialization
 /// @param[in] i_ports the vector of ports
 /// @return FAPI2_RC_SUCCSS iff ok

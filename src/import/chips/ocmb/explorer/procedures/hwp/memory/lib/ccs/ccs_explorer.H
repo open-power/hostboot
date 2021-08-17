@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,6 +44,13 @@ namespace mss
 {
 namespace ccs
 {
+
+///
+/// @brief Configures the CCS engine
+/// @param[in] i_target the target on which to operate
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode configure_mode(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
 
 } // namespace ccs
 } // namespace mss
