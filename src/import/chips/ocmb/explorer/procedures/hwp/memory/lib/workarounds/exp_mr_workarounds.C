@@ -174,6 +174,27 @@ fapi2::ReturnCode updates_mode_registers(const fapi2::Target<fapi2::TARGET_TYPE_
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
+    // Configure the CCS engine. Since this is a chunk of MCBIST logic, we don't want
+    // to do it for every port. If we ever break this code out so f/w can call draminit
+    // per-port (separate threads) we'll need to provide them a way to set this up before
+    // sapwning per-port threads.
+    {
+        fapi2::buffer<uint64_t> l_ccs_config;
+
+        FAPI_TRY( mss::ccs::read_mode(i_target, l_ccs_config),
+                  "%s Failed ccs read_mode",
+                  mss::c_str(i_target) );
+
+        // We want to generate the parity after the command
+        // Note: this is not needed for most explorer configurations (as most do not run with parity enabled)
+        // However, the ones that do run with parity enabled need this logic
+        mss::ccs::parity_after_cmd(i_target, l_ccs_config, mss::HIGH);
+
+        FAPI_TRY( mss::ccs::write_mode(i_target, l_ccs_config),
+                  "%s Failed ccs write_mode",
+                  mss::c_str(i_target) );
+    }
+
     // Update the CWL and/or LPASR to the workaround value
     {
         mss::ccs::program l_program;
