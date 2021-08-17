@@ -41,6 +41,7 @@
 #include <p10_scom_eq.H>
 #include <p10_scom_c.H>
 #include <p10_pm_hcd_flags.h>
+#include <p10_hcd_common.H>
 #include <p10_sbe_tp_chiplet_init.H>
 #include <multicast_group_defs.H>
 #include <cstdint>
@@ -733,6 +734,20 @@ fapi2::ReturnCode qme_tod_notify(
         for (const auto& l_core_target :
              l_target.getChildren<fapi2::TARGET_TYPE_CORE>(fapi2::TARGET_STATE_FUNCTIONAL) )
         {
+            uint8_t l_core_unit_pos = 0;
+            FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS,
+                                    l_core_target,
+                                    l_core_unit_pos));
+
+            fapi2::ATTR_DEAD_CORE_MODE_Type l_dead_core_mode;
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_DEAD_CORE_MODE, l_core_target, l_dead_core_mode));
+
+            if (l_dead_core_mode == fapi2::ENUM_ATTR_DEAD_CORE_MODE_ENABLED)
+            {
+                FAPI_IMP("Skip dead core %d for todinit procedure", l_core_unit_pos);
+                continue;
+            }
+
             fapi2::ATTR_ECO_MODE_Type l_eco_mode;
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ECO_MODE, l_core_target, l_eco_mode));
 
