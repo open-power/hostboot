@@ -441,34 +441,45 @@ errlHndl_t callWakeupHwp(TARGETING::Target* i_target,
         else if( TARGETING::TYPE_CORE == l_targType )
         {
             TRACFCOMP( g_trac_scom,
-                       "callWakeupHwp> p10_uc_core_special_wakeup(core %.8X)",
-                       TARGETING::get_huid(i_target) );
+                    "callWakeupHwp> p10_uc_core_special_wakeup(core %.8X)",
+                    TARGETING::get_huid(i_target) );
 
             // use a regular core target
             fapi2::Target<fapi2::TARGET_TYPE_CORE> l_fapi_core(i_target);
             fapi2::ReturnCode l_rc = 0;
 
-            FAPI_INVOKE_HWP_RC(l_errl,
-                               l_rc,
-                               p10_uc_core_special_wakeup,
-                               l_fapi_core,
-                               l_spcwkupType,
-                               p10specialWakeup::HOST);
+            if (i_target->getAttr<ATTR_DEAD_CORE_MODE>() == 
+                fapi2::ENUM_ATTR_DEAD_CORE_MODE_ENABLED)
+            {
+                TRACFCOMP(g_trac_scom,INFO_MRK
+                        "callWakeupHwp> p10_uc_core_special_wakeup (DEAD core %.8x op=%dis skipped from hwp)",
+                        TARGETING::get_huid(i_target),
+                        l_spcwkupType );
+            }
+            else
+            {
+                FAPI_INVOKE_HWP_RC(l_errl,
+                        l_rc,
+                        p10_uc_core_special_wakeup,
+                        l_fapi_core,
+                        l_spcwkupType,
+                        p10specialWakeup::HOST);
+            }
             if (l_rc == (fapi2::ReturnCode)fapi2::RC_ECO_CORE_SPWU_SKIPPED)
             {
                 TRACFCOMP(g_trac_scom,INFO_MRK
-                          "callWakeupHwp> p10_uc_core_special_wakeup (ECO core %.8x op=%dis skipped from hwp)",
-                          TARGETING::get_huid(i_target),
-                          l_spcwkupType );
+                        "callWakeupHwp> p10_uc_core_special_wakeup (ECO core %.8x op=%dis skipped from hwp)",
+                        TARGETING::get_huid(i_target),
+                        l_spcwkupType );
                 delete l_errl;
                 l_errl = NULL;
             }
             else if(l_errl) // any other RC
             {
                 TRACFCOMP( g_trac_scom,ERR_MRK
-                           "callWakeupHwp> p10_uc_core_special_wakeup(core %.8X, op=%d)",
-                           TARGETING::get_huid(i_target),
-                           l_spcwkupType );
+                        "callWakeupHwp> p10_uc_core_special_wakeup(core %.8X, op=%d)",
+                        TARGETING::get_huid(i_target),
+                        l_spcwkupType );
 
                 // Capture the target data in the elog
                 ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog( l_errl );
@@ -582,7 +593,7 @@ errlHndl_t checkForDeadCore( TARGETING::Target* i_core,
         //  to the FC parent, not the EQ.  Instead use the
         //  knowleve that a quad has 4 cores.
         auto l_corenum = i_core->getAttr<ATTR_CHIP_UNIT>();
-        uint64_t l_mask = 0x800000000000 >> (l_corenum%4);
+        uint64_t l_mask = 0x8000000000000000 >> (l_corenum%4);
         if( l_qmeScratchA & l_mask )
         {
             o_coreIsDead = true;

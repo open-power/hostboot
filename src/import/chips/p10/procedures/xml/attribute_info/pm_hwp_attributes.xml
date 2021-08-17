@@ -968,4 +968,19 @@
     <initToZero/>
   </attribute>
   <!-- *********************************************************************-->
+<attribute>
+  <id>ATTR_DEAD_CORE_MODE</id>
+  <targetType>TARGET_TYPE_CORE</targetType>
+  <description>
+   This tells core is dead or not. if it is dead, then this core shouldn't
+   be used in any of bringup activity
+   DISABLED: Not a dead core
+   ENABLED: Phyp marked dead core
+  </description>
+  <valueType>uint8</valueType>
+  <enum>DISABLED = 0x0, ENABLED = 0x1</enum>
+  <default>DISABLED</default>
+  <writeable/>
+</attribute>
+
 </attributes>

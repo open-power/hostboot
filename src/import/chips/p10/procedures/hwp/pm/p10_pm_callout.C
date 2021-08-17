@@ -151,6 +151,7 @@ fapi2::ReturnCode CoreAction::configDeadCoresForQmeAndDump( )
     fapi2::buffer< uint64_t > l_qmeScratchRegA;
     uint32_t l_regionPos = 0;
     uint8_t  l_corePos   = 0;
+    fapi2::ATTR_DEAD_CORE_MODE_Type l_dead_core = fapi2::ENUM_ATTR_DEAD_CORE_MODE_DISABLED;
 
     for( auto l_eq : l_eqList )
     {
@@ -167,9 +168,13 @@ fapi2::ReturnCode CoreAction::configDeadCoresForQmeAndDump( )
 
             if( iv_deadCoreVect.getBit( l_corePos ) )
             {
+                l_dead_core = fapi2::ENUM_ATTR_DEAD_CORE_MODE_ENABLED;
                 l_regionPos     =   l_corePos % 4;
                 l_pfetStatus    =   0;
                 l_qmeScratchRegA.setBit( l_corePos % 4 );
+
+                //Mark the core is Dead
+                FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_DEAD_CORE_MODE, l_core, l_dead_core) );
 
                 //Read the power status of EL
                 FAPI_TRY(scomt::c::GET_CPMS_CL2_PFETSTAT(l_core, l_data));

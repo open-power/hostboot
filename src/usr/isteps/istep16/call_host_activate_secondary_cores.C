@@ -175,6 +175,15 @@ void* call_host_activate_secondary_cores(void* const io_pArgs)
 
             const fapi2::Target<fapi2::TARGET_TYPE_CORE> l_fapi2_coreTarget(l_core);
 
+            const auto core_dead_state = l_core->getAttr<TARGETING::ATTR_DEAD_CORE_MODE>();
+
+            if ( core_dead_state )
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "Skipping this DEAD core : 0x%X", l_core->getAttr<TARGETING::ATTR_HUID>());
+                continue;
+            }
+
             // Determine PIR and threads to enable for this core
             const uint64_t pir = PIR_t(topologyId, coreId).word;
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,

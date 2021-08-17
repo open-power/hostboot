@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,6 +48,23 @@ fapi2::ReturnCode p10_core_checkstop_handler(
 
     fapi2::buffer<uint64_t> l_action0;
     fapi2::buffer<uint64_t> l_action1;
+    uint8_t l_core_unit_pos = 0;
+    uint8_t l_dead_core = 0;
+
+    FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_DEAD_CORE_MODE,
+                            i_target_core,
+                            l_dead_core));
+
+    FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS,
+                   i_target_core,
+                   l_core_unit_pos);
+
+    if ( l_dead_core )
+    {
+        FAPI_IMP("p10_core_checkstop_handler: Skipping Phyp Marked dead core %d ", l_core_unit_pos);
+        goto fapi_try_exit;
+    }
+
 
     //if true, save off the original action, and turn local xstops into system xstops.
     if(i_override_restore == CORE_XSTOP_HNDLR__SAVE_AND_ESCALATE)
