@@ -1223,8 +1223,8 @@ void ErrlEntry::collectCalloutDataForBMC(TARGETING::Target* const i_node)
                 case(HWAS::HW_CALLOUT):
                 {
                     // Try to get the target associated with this user detail section.
-                    uint8_t * l_uData = (uint8_t *)(l_ud + 1);
-                    Target * l_target = NULL;
+                    uint8_t * l_uData = reinterpret_cast<uint8_t *>(l_ud + 1);
+                    Target * l_target = nullptr;
                     bool l_err = HWAS::retrieveTarget(l_uData,
                                                       l_target,
                                                       this);
@@ -1262,8 +1262,8 @@ void ErrlEntry::collectCalloutDataForBMC(TARGETING::Target* const i_node)
                 case(HWAS::PART_CALLOUT):
                 {
                     // Try to get the target associated with this user detail section.
-                    uint8_t * l_uData = (uint8_t *)(l_ud + 1);
-                    Target * l_target = NULL;
+                    uint8_t * l_uData = reinterpret_cast<uint8_t *>(l_ud + 1);
+                    Target * l_target = nullptr;
                     bool l_err = HWAS::retrieveTarget(l_uData,
                                                       l_target,
                                                       this);
