@@ -190,7 +190,7 @@ typedef struct
     uint32_t attr_ext_vrm_transition_rate_dec_uv_per_us[4];
     uint32_t attr_ext_vrm_stabilization_time_us[4];
     uint32_t attr_ext_vrm_step_size_mv[4];
-    uint32_t attr_save_mode_nodds_uplift_mv[2]; //VDD,VCS
+    uint32_t attr_safe_mode_nodds_uplift_0p5pct[2]; //VDD,VCS
     uint32_t attr_pstate0_freq_mhz;
     uint32_t attr_nominal_freq_mhz;
     uint32_t attr_pstate0_freq;

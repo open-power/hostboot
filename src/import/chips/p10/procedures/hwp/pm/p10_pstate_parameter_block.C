@@ -1851,7 +1851,7 @@ void PlatPmPPB::attr_init( void )
    // Safe Mode attributes
     PPB_GET_ATTR(ATTR_SAFE_MODE_FREQUENCY_MHZ,              iv_procChip,  attr_pm_safe_frequency_mhz);
     PPB_GET_ATTR_2(ATTR_SAFE_MODE_VOLTAGE_MV,               iv_procChip,  attr_pm_safe_voltage_mv);
-    PPB_GET_ATTR_2(ATTR_SAVE_MODE_NODDS_UPLIFT_MV,          iv_procChip,  attr_save_mode_nodds_uplift_mv);
+    PPB_GET_ATTR_2(ATTR_SAFE_MODE_NODDS_UPLIFT_0P5PCT,      iv_procChip,  attr_safe_mode_nodds_uplift_0p5pct);
 
     // AVSBus ... needed by p10_setup_evid
     PPB_GET_ATTR(ATTR_AVSBUS_FREQUENCY,                     iv_procChip,  attr_avs_bus_freq);
@@ -4731,7 +4731,7 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
     // safe mode actuation.  Note: PGPE uses the safe mode frequency in Pstate
     // form to compute the safe mode voltage.
 
-    if (!iv_attrs.attr_system_dds_disable)
+    if (iv_attrs.attr_system_dds_disable)
     {
         if (l_hw543384 && iv_attrs.attr_war_mode == fapi2::ENUM_ATTR_HW543384_WAR_MODE_TIE_NEST_TO_PAU)
         {
@@ -4743,15 +4743,18 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
             l_safe_mode_mv[VDD] = ps2v_mv(l_safe_mode_ps, VDD, VPD_PT_SET_BIASED_SYSP);
             l_safe_mode_mv[VCS] = ps2v_mv(l_safe_mode_ps, VCS, VPD_PT_SET_BIASED_SYSP);
         }
-        FAPI_INF("DDS not enabled Setting safe mode VDD voltage to %d mv (0x%x)",
+        FAPI_INF("DDS disabled: Setting safe mode VDD voltage to %d mv (0x%x)",
                 l_safe_mode_mv[VDD],
                 l_safe_mode_mv[VDD]);
-        FAPI_INF("DDS not enabled Setting safe mode VCS voltage to %d mv (0x%x)",
+        FAPI_INF("DDS disabled: Setting safe mode VCS voltage to %d mv (0x%x)",
                 l_safe_mode_mv[VCS],
                 l_safe_mode_mv[VCS]);
     }
     else
     {
+        uint32_t l_vdd_sm_uplift = 0;
+        uint32_t l_vcs_sm_uplift = 0;
+
         if (l_hw543384 && iv_attrs.attr_war_mode == fapi2::ENUM_ATTR_HW543384_WAR_MODE_TIE_NEST_TO_PAU)
         {
             l_safe_mode_mv[VDD] = iv_operating_points[VPD_PT_SET_RAW][VPD_PV_CF0].vdd_mv;
@@ -4759,20 +4762,23 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
         }
         else
         {
-            l_safe_mode_mv[VDD] = ps2v_mv(l_safe_mode_ps, VDD, VPD_PT_SET_BIASED_SYSP) + iv_attrs.attr_save_mode_nodds_uplift_mv[VDD];
-            l_safe_mode_mv[VCS] = ps2v_mv(l_safe_mode_ps, VCS, VPD_PT_SET_BIASED_SYSP) + iv_attrs.attr_save_mode_nodds_uplift_mv[VCS];
+            l_safe_mode_mv[VDD]  = ps2v_mv(l_safe_mode_ps, VDD, VPD_PT_SET_BIASED_SYSP);
+            l_vdd_sm_uplift      = l_safe_mode_mv[VDD] * iv_attrs.attr_safe_mode_nodds_uplift_0p5pct[VDD] / 1000;
+            l_safe_mode_mv[VDD] += l_vdd_sm_uplift;
+
+            l_safe_mode_mv[VCS]  = ps2v_mv(l_safe_mode_ps, VCS, VPD_PT_SET_BIASED_SYSP);
+            l_vcs_sm_uplift      = l_safe_mode_mv[VCS] * iv_attrs.attr_safe_mode_nodds_uplift_0p5pct[VCS] / 1000;
+            l_safe_mode_mv[VCS] += l_vcs_sm_uplift;
         }
 
-        FAPI_INF("DDS enabled Setting safe mode VDD voltage to %d mv (0x%x) with uplift %d mv (0x%x)",
-                l_safe_mode_mv[VDD],
-                l_safe_mode_mv[VDD],
-                iv_attrs.attr_save_mode_nodds_uplift_mv[VDD],
-                iv_attrs.attr_save_mode_nodds_uplift_mv[VDD]);
-        FAPI_INF("DDS enabled Setting safe mode VCS voltage to %d mv (0x%x) with uplift %d mv (0x%x)",
-                l_safe_mode_mv[VCS],
-                l_safe_mode_mv[VCS],
-                iv_attrs.attr_save_mode_nodds_uplift_mv[VCS],
-                iv_attrs.attr_save_mode_nodds_uplift_mv[VCS]);
+        FAPI_INF("DDS enabled: Setting safe mode VDD voltage to %d mv (0x%x) from a base of %d mV with an uplift of %d mv",
+                l_safe_mode_mv[VDD], l_safe_mode_mv[VDD],
+                l_safe_mode_mv[VDD]-l_vdd_sm_uplift,
+                l_vdd_sm_uplift);
+        FAPI_INF("DDS enabled: Setting safe mode VCS voltage to %d mv (0x%x) from a base of %d mV with an uplift of %d mv",
+                l_safe_mode_mv[VCS], l_safe_mode_mv[VCS],
+                l_safe_mode_mv[VCS]-l_vcs_sm_uplift,
+                l_vcs_sm_uplift);
     }
 
 

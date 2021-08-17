@@ -45,6 +45,8 @@
 ///     - Mask PBA, QME FIRs
 ///     - Halt OCC, PGPE and XGPE
 ///     - Halt QME
+///     - Move to safe frequency and voltage if PGPE didn't get there.
+///     - Disable DDSs
 ///     - Reset OCB
 ///     - Reset PSS
 ///
@@ -59,7 +61,8 @@
 #include <p10_core_special_wakeup.H>
 #include <multicast_group_defs.H>
 #include <p10_pm_occ_firinit.H>
-
+#include <p10_setup_evid.H>
+#include <p10_pstate_parameter_block.H>
 #include <p10_scom_proc.H>
 #include <p10_scom_eq.H>
 using namespace scomt::eq;
@@ -73,6 +76,7 @@ using namespace scomt::proc;
 // -----------------------------------------------------------------------------
 
 fapi2::ReturnCode  initiateSPWU(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+fapi2::ReturnCode  p10_pm_halt_psafe_update(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
 // -----------------------------------------------------------------------------
 // Function definitions
@@ -109,7 +113,6 @@ fapi2::ReturnCode p10_pm_halt(
 
         goto fapi_try_exit;
     }
-
 
     if (l_malfEnabled == fapi2::ENUM_ATTR_PM_MALF_ALERT_ENABLE_TRUE)
     {
@@ -187,7 +190,7 @@ fapi2::ReturnCode p10_pm_halt(
     //  ************************************************************************
     //  Reset the XGPE (Bring it to HALT)
     //  ************************************************************************
-    FAPI_DBG("Executing p10_pm_stop_gpe_init to halt XGPE");
+    FAPI_DBG("Executing p10_pm_xgpe_init to halt XGPE");
     FAPI_EXEC_HWP(l_rc, p10_pm_xgpe_init, i_target, pm::PM_HALT);
     FAPI_TRY(l_rc, "ERROR: Failed to halt XGPE");
 
@@ -203,6 +206,13 @@ fapi2::ReturnCode p10_pm_halt(
     FAPI_DBG("Executing p10_pm_qme_init to halt QME");
     FAPI_EXEC_HWP(l_rc, p10_pm_qme_init, i_target, pm::PM_HALT);
     FAPI_TRY(l_rc, "ERROR: Failed to halt QME");
+
+    //  ************************************************************************
+    //  Move PSAFE values to DPLL and Ext Voltage
+    //  ************************************************************************
+    FAPI_DBG("Executing p10_pm_halt_psafe_update to check on safe mode");
+    FAPI_TRY(p10_pm_halt_psafe_update(i_target),
+             "Error from p10_pm_halt_psafe_update");
 
     //  ************************************************************************
     //  Issue halt to OCB
@@ -243,16 +253,69 @@ fapi2::ReturnCode initiateSPWU(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
     auto l_eq_mc_and =
         i_target.getMulticast<fapi2::TARGET_TYPE_EQ, fapi2::MULTICAST_AND >(fapi2::MCGROUP_GOOD_EQ);
 
+    auto l_core_functional_vector =
+        i_target.getChildren<fapi2::TARGET_TYPE_CORE>
+        (fapi2::TARGET_STATE_FUNCTIONAL);
+
     // First check if QME_ACTIVE is set before assert spwu
     FAPI_TRY( getScom( l_eq_mc_and, QME_FLAGS_RW, l_qme_flag ) );
     FAPI_TRY( getScom( l_eq_mc_and, QME_SCOM_XIDBGPRO, l_xsr ) );
 
-    FAPI_INF("Enable special wakeup for all functional  Core targets");
-    FAPI_TRY( fapi2::specialWakeup (i_target, true),
-              "Special Wakeup Failed" );
+    FAPI_INF("Enable special wakeup for all functional Core targets");
+
+    // Iterate through the returned chiplets.
+    for (auto l_core_target : l_core_functional_vector)
+    {
+        FAPI_TRY( fapi2::specialWakeup (l_core_target, true),
+                  "Special Wakeup Failed" );
+    }
 
 fapi_try_exit:
 
     FAPI_IMP("<< initiateSPWU");
+    return fapi2::current_err;
+}
+
+fapi2::ReturnCode
+p10_pm_halt_psafe_update(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+
+    FAPI_IMP(">> p10_pm_reset_psafe_update");
+
+    do
+    {
+        fapi2::ReturnCode l_rc;
+        fapi2::buffer<uint64_t> l_occflg_data(0);
+
+        FAPI_TRY(fapi2::getScom(i_target, TP_TPCHIP_OCC_OCI_OCB_OCCFLG2_RW, l_occflg_data),
+                 "Error setting OCC Flag register bit REQUEST_OCC_SAFE_STATE");
+        FAPI_DBG("OCC Flag 2 looking for safe mode 0x%016llX", l_occflg_data );
+
+        if (l_occflg_data.getBit<p10hcd::PGPE_SAFE_MODE_ACTIVE>())
+        {
+            FAPI_IMP("PGPE indicates valid safe mode has been achieved");
+            break;
+        }
+
+        {
+            // cross initialization guard
+            fapi2::ATTR_INITIATED_PM_HALT_Type l_pmHaltActive =
+                fapi2::ENUM_ATTR_INITIATED_PM_HALT_ACTIVE;
+            FAPI_TRY (FAPI_ATTR_SET (fapi2::ATTR_INITIATED_PM_HALT, i_target,
+                                     l_pmHaltActive));
+
+            FAPI_IMP("PGPE is not in safe mode.  Calling p10_setup_evid to move there");
+            FAPI_EXEC_HWP(l_rc, p10_setup_evid, i_target, APPLY_VOLTAGE_SETTINGS);
+            FAPI_TRY(l_rc, "ERROR: p10_setup_evid failure to move to safe mode");
+
+            l_pmHaltActive = fapi2::ENUM_ATTR_INITIATED_PM_HALT_INACTIVE;
+            FAPI_TRY (FAPI_ATTR_SET (fapi2::ATTR_INITIATED_PM_HALT, i_target,
+                                     l_pmHaltActive));
+        }
+    }
+    while (0);
+
+fapi_try_exit:
+    FAPI_IMP("<< p10_pm_reset_psafe_update");
     return fapi2::current_err;
 }

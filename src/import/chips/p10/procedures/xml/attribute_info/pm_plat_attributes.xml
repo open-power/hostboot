@@ -589,16 +589,21 @@
 
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_SAVE_MODE_NODDS_UPLIFT_MV</id>
+    <id>ATTR_SAFE_MODE_NODDS_UPLIFT_0P5PCT</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-    Attribute in place to allow override for boot mode voltage
-    Consumer: p9_setup_evid.C
+    Uplift voltage percentage (in 0.5% units) applied to the #V computed safe mode
+    value to account for the lack of DDS protection in Safe Mde.
+
+    Array of 2 entries-:
+        0: VDD;
+        1: VCS;
+    Consumer: p10_setup_evid.C
     </description>
     <valueType>uint32</valueType>
     <array>2</array>
     <platInit/>
-    <initToZero/>
+    <default>100, 100</default>  <!-- 10% for each -->
     <overrideOnly/>
     <group>dds</group>
   </attribute>
@@ -2984,7 +2989,7 @@
     <description>
     Core Frequency at or above which the OMI buses are forced to full width
     independent of what link reduction may attempt.  When the core frequency is
-    below this value.
+    below this value.SAFE_MODE
 
     Producer:  Override/Lab
     Consumers: p10_build_pstate_datablock
@@ -3112,7 +3117,7 @@
     </description>
     <valueType>uint8</valueType>
     <platInit/>
-    <default>0xFF</default>
+    <default>48</default>
     <writeable/>
     <group>safe</group>
   </attribute>

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019,2020
+# Contributors Listed Below - COPYRIGHT 2019,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -30,8 +30,12 @@ lib$(PROCEDURE)_EXTRALIBS+=p10_pm_pba_init
 lib$(PROCEDURE)_EXTRALIBS+=p10_pm_pss_init
 lib$(PROCEDURE)_EXTRALIBS+=p10_pm_firinit
 lib$(PROCEDURE)_EXTRALIBS+=p10_pm_ocb_init
+lib$(PROCEDURE)_EXTRALIBS+=p10_pm_occ_firinit
 lib$(PROCEDURE)_EXTRALIBS+=p10_pm_occ_control
 lib$(PROCEDURE)_EXTRALIBS+=p10_core_special_wakeup
+lib$(PROCEDURE)_EXTRALIBS+=p10_setup_evid
+lib$(PROCEDURE)_EXTRALIBS+=p10_avsbus_lib
+lib$(PROCEDURE)_EXTRALIBS+=p10_pstate_parameter_block
 $(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/procedures/hwp/lib)
 $(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/common/pmlib/include/registers)
 $(call BUILD_PROCEDURE)

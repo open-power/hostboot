@@ -534,8 +534,9 @@
     <id>ATTR_INITIATED_PM_HALT</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-    Attribute is set at the start of PM halt and cleared at the end. It act as a
-        for FFDC collection utility to behave differently during PM restart
+    Attribute is set at the start of PM halt and cleared at the end. It allows
+    underlying HWPS that don't have mode indicators to know that they are
+    being executed during a PM Halt.
     </description>
     <valueType>uint8</valueType>
     <enum>
@@ -957,7 +958,7 @@
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
     The index of the WOF I/O dimension that represents the Thermal Design Point (TDP) power
-    and originates from the WOF Tables Header for the table set used.  This value will be 
+    and originates from the WOF Tables Header for the table set used.  This value will be
     placed into the XGPE header for use in the WOF IO algorithm.
     Producer: p10_pstate_parameter_block
     Consumers: p10_hcode_image_build, XGPE Hcode

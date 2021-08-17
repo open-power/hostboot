@@ -53,6 +53,8 @@
 #include <p10_scom_iohs.H>
 #include <p10_scom_pec.H>
 #include <p10_scom_proc.H>
+#include <p10_scom_eq.H>
+#include <p10_scom_c.H>
 #include <multicast_group_defs.H>
 
 using namespace pm_pstate_parameter_block;
@@ -74,6 +76,14 @@ static const uint32_t NEST_DPLL_FREQ_FMIN_LEN    = TP_TPCHIP_TPC_DPLL_CNTL_NEST_
 
 fapi2::ReturnCode
 p10_update_net_ctrl(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+
+fapi2::ReturnCode
+p10_set_safe_mode_index(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+
+fapi2::ReturnCode
+p10_disable_dds(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+
+
 //-----------------------------------------------------------------------------
 // Procedure
 //-----------------------------------------------------------------------------
@@ -140,6 +150,9 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
 
         l_pmPPB.get_pstate_attrs(attrs);
 
+        // Throttle the core if at run-time
+        FAPI_TRY(p10_set_safe_mode_index (i_target));
+
         // Read and compare DPLL and safe mode value
         FAPI_TRY (p10_read_dpll_value(i_target,
                                       attrs.attr_freq_proc_refclock_khz,
@@ -199,6 +212,11 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                                             l_safe_mode_dpll_fmin_value),
                       "Error from p10_update_dpll_value function");
         }
+
+        // Disable the DDSs during runtime as the core is now throttled, the frequency
+        // has be put to the safe value and the voltage has been adjusted for the lack
+        // of DDS protection.
+        FAPI_TRY(p10_disable_dds(i_target));
 
         // Set Boot VDN Voltage
         if(attrs.attr_avs_bus_num[VDN] == INVALID_BUS_NUM)
@@ -725,6 +743,87 @@ fapi_try_exit:
 }
 
 /////////////////////////////////////////////////////////////////
+////// p10_set_safe_mode_index
+////////////////////////////////////////////////////////////////
+fapi2::ReturnCode
+p10_set_safe_mode_index (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    using namespace scomt::eq;
+    FAPI_INF("> p10_set_safe_mode_index");
+
+    fapi2::ATTR_INITIATED_PM_HALT_Type l_pmHaltActive;
+    FAPI_TRY (FAPI_ATTR_GET (fapi2::ATTR_INITIATED_PM_HALT,
+                             i_target,
+                             l_pmHaltActive));
+
+    if (l_pmHaltActive == fapi2::ENUM_ATTR_INITIATED_PM_HALT_ACTIVE)
+    {
+        // Set the throttles to the cores as part of the safe runtime state
+        fapi2::buffer<uint64_t> l_wcor;
+        auto l_eq_mc = i_target.getMulticast<fapi2::TARGET_TYPE_EQ, fapi2::MULTICAST_AND >(fapi2::MCGROUP_GOOD_EQ);
+
+        fapi2::ATTR_SAFE_MODE_THROTTLE_IDX_Type l_SMIdx;
+        FAPI_TRY (FAPI_ATTR_GET (fapi2::ATTR_SAFE_MODE_THROTTLE_IDX,
+                                 i_target,
+                                 l_SMIdx));
+
+        FAPI_INF("Installing Safe Mode Throttle Index of %u (0x%X) to all cores", l_SMIdx, l_SMIdx);
+
+        //Replicate present_ceff_overage_index to all Cx_THROTTLE_INEX fields
+        l_wcor.insertFromRight <QME_WCOR_0_THROTTLE_INDEX,
+                               QME_WCOR_0_THROTTLE_INDEX_LEN>(l_SMIdx);
+        l_wcor.insertFromRight <QME_WCOR_1_THROTTLE_INDEX,
+                               QME_WCOR_1_THROTTLE_INDEX_LEN>(l_SMIdx);
+        l_wcor.insertFromRight <QME_WCOR_2_THROTTLE_INDEX,
+                               QME_WCOR_2_THROTTLE_INDEX_LEN>(l_SMIdx);
+        l_wcor.insertFromRight <QME_WCOR_3_THROTTLE_INDEX,
+                               QME_WCOR_3_THROTTLE_INDEX_LEN>(l_SMIdx);
+
+        //Multicast Write all QMEs WCOR with above value
+        FAPI_TRY( fapi2::putScom( l_eq_mc, QME_WCOR, l_wcor ) );
+
+    }
+
+fapi_try_exit:
+    FAPI_INF("< p10_set_safe_mode_index");
+    return fapi2::current_err;
+}
+
+/////////////////////////////////////////////////////////////////
+////// p10_disable_dds
+////////////////////////////////////////////////////////////////
+fapi2::ReturnCode
+p10_disable_dds (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    using namespace scomt::c;
+    FAPI_INF("> p10_disable_dds");
+
+    fapi2::ATTR_INITIATED_PM_HALT_Type l_pmHaltActive;
+    FAPI_TRY (FAPI_ATTR_GET (fapi2::ATTR_INITIATED_PM_HALT,
+                             i_target,
+                             l_pmHaltActive));
+
+    if (l_pmHaltActive == fapi2::ENUM_ATTR_INITIATED_PM_HALT_ACTIVE)
+    {
+        // Set the throttles to the cores as part of the safe runtime state
+        fapi2::buffer<uint64_t> l_flmr, temp;
+        auto l_cores = i_target.getChildren<fapi2::TARGET_TYPE_CORE >(fapi2::TARGET_STATE_FUNCTIONAL);
+
+        FAPI_INF("Disabling DDS Large Droop Response in all cores via FLMR[13]");
+        l_flmr.flush<0>().setBit<CPMS_FLMR_LARGE_RESPONSE_DISABLE>();
+
+        for (auto& core : l_cores)
+        {
+            FAPI_TRY( fapi2::putScom( core, CPMS_FLMR_WO_OR, l_flmr ) );
+        }
+    }
+
+fapi_try_exit:
+    FAPI_INF("< p10_disable_dds");
+    return fapi2::current_err;
+}
+
+/////////////////////////////////////////////////////////////////
 //////p10_update_dpll_value
 ////////////////////////////////////////////////////////////////
 fapi2::ReturnCode
@@ -750,7 +849,6 @@ p10_update_dpll_value (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targ
 
         l_data64.insertFromRight < P10_20_TP_TPCHIP_NET_PCBSLPERV_SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS,
                                  P10_20_TP_TPCHIP_NET_PCBSLPERV_SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS_LEN > ( l_mask_restore | 0x01 );
-
         FAPI_TRY( fapi2::putScom( i_target, TP_TPCHIP_NET_PCBSLPERV_SLAVE_CONFIG_REG, l_data64 ),
                   "Failed To Write PERV_SLAVE_CONFIG_REG" );
 
