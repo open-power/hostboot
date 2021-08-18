@@ -189,6 +189,44 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Workaround for PMIC high current consumption false errors seen with IDT PMICs
+///
+/// @param[in] i_pmic_target PMIC target
+/// @return fapi2::FAPI2_RC_SUCCESS iff success
+/// @note Issue with IDT PMIC revision C (R3B=0x21) or earlier version
+/// @note Workaround:  Before VR enable, set R30=0x03, then set R30=0x00
+///
+fapi2::ReturnCode workaround_high_current_consumption_false_errors(
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target)
+{
+    static constexpr auto J = mss::pmic::product::JEDEC_COMPLIANT;
+    using REGS = pmicRegs<J>;
+
+    fapi2::buffer<uint8_t> l_rev_reg;
+    constexpr uint8_t WORKAROUND_R30_BEFORE_VR_ENABLE_STEP1 = 0x03;
+    constexpr uint8_t WORKAROUND_R30_BEFORE_VR_ENABLE_STEP2 = 0x00;
+    constexpr uint8_t IDT_C1_REV = 0x21;
+
+    // Get revision
+    FAPI_TRY(mss::pmic::i2c::reg_read(i_pmic_target, REGS::R3B_REVISION, l_rev_reg));
+
+    // Only do workaround for revisions that have the issue
+    // Register write only should be fine to do here for R30 (vs read/modify/write)
+    // If register is used for ADC readings, it will be reconfigured when those are done
+    // After the register writes are done here, it will be at the default state
+    if (l_rev_reg <= IDT_C1_REV)
+    {
+        FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, REGS::R30, WORKAROUND_R30_BEFORE_VR_ENABLE_STEP1));
+        FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, REGS::R30, WORKAROUND_R30_BEFORE_VR_ENABLE_STEP2));
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief set VR enable bit for system startup via R32 (not broadcast)
 ///
 /// @param[in] i_pmic_target PMIC target
@@ -951,6 +989,15 @@ fapi2::ReturnCode enable_1u_2u(
         {
             FAPI_TRY(set_pwr_good_pin_io(l_pmic));
         }
+
+        // Call the workaround procedure for IDT PMIC high current consumption false errors
+        // Workaround only needed for IDT PMICs revision C or earlier version
+        // Needs to be called before VR is enabled
+        if (l_vendor_id == mss::pmic::vendor::IDT)
+        {
+            FAPI_TRY(workaround_high_current_consumption_false_errors(l_pmic));
+        }
+
     }
 
     // So we will need a few loops, VR will be enabled here (in the if or else block here)

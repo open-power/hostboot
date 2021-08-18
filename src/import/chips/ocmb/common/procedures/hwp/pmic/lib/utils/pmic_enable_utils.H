@@ -459,6 +459,17 @@ fapi2::ReturnCode toggle_vr_enable(
     const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target);
 
 ///
+/// @brief Workaround for PMIC high current consumption false errors seen with IDT PMICs
+///
+/// @param[in] i_pmic_target PMIC target
+/// @return fapi2::FAPI2_RC_SUCCESS iff success
+/// @note Issue with IDT PMIC revision C (R3B=0x21) or earlier version
+/// @note Workaround:  Before VR enable, set R30=0x03, then set R30=0x00
+///
+fapi2::ReturnCode workaround_high_current_consumption_false_errors(
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target);
+
+///
 /// @brief set VR enable bit for system startup via R32 (not broadcast)
 ///
 /// @param[in] i_pmic_target PMIC target
