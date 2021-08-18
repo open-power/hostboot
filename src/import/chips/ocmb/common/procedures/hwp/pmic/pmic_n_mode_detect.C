@@ -49,7 +49,6 @@
 /// @param[in,out] io_pmic pmic_info class including target / state info
 /// @param[in] i_reg register
 /// @param[in] i_data input buffer
-/// @return fapi2::ReturnCode
 ///
 void reg_write(pmic_info& io_pmic, const uint8_t i_reg, const fapi2::buffer<uint8_t>& i_data)
 {
@@ -68,7 +67,6 @@ void reg_write(pmic_info& io_pmic, const uint8_t i_reg, const fapi2::buffer<uint
 /// @param[in,out] io_pmic pmic_info class including target / state info
 /// @param[in] i_reg register
 /// @param[out] o_output output buffer
-/// @return fapi2::ReturnCode
 ///
 void reg_read(pmic_info& io_pmic, const uint8_t i_reg, fapi2::buffer<uint8_t>& o_output)
 {
@@ -569,6 +567,7 @@ void populate_adc_data(
     static constexpr uint64_t TO_MV = 1000000;
     static constexpr uint8_t ADC_U16_MAP_LEN = 24;
     static constexpr uint8_t REG_SIZE_BITS = 8;
+    fapi2::buffer<uint8_t> l_reg_contents;
 
     // Fields that map a LSB register to the uint16_t destination in o_adc_data
     const adu_map_t ADC_U16_MAP[ADC_U16_MAP_LEN] =
@@ -601,6 +600,10 @@ void populate_adc_data(
         {mss::adc::regs::MIN_CH7_LSB, &o_adc_data.iv_min_ch7_mV}
     };
 
+    mss::pmic::i2c::reg_read_reverse_buffer(i_adc, mss::adc::regs::GENERAL_CFG, l_reg_contents);
+    l_reg_contents.clearBit<mss::adc::fields::GENERAL_CFG_STATUS_ENABLE>();
+    mss::pmic::i2c::reg_write_reverse_buffer(i_adc, mss::adc::regs::GENERAL_CFG, l_reg_contents);
+
     // Set each one
     for (const auto& l_adc_pair : ADC_U16_MAP)
     {
@@ -625,6 +628,9 @@ void populate_adc_data(
         (*l_adc_pair.second) = static_cast<uint16_t>(l_field_unscaled / TO_MV);
     }
 
+    mss::pmic::i2c::reg_read_reverse_buffer(i_adc, mss::adc::regs::GENERAL_CFG, l_reg_contents);
+    l_reg_contents.setBit<mss::adc::fields::GENERAL_CFG_STATUS_ENABLE>();
+    mss::pmic::i2c::reg_write_reverse_buffer(i_adc, mss::adc::regs::GENERAL_CFG, l_reg_contents);
     return;
 }
 
