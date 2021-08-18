@@ -796,16 +796,6 @@ sub manipulateImage
 
                         run_command("cat $tempImages{PROTECTED_PAYLOAD} $bin_file.unprotected > $tempImages{HDR_PHASE}");
                     }
-                    # Handle read-only protected payload
-                    elsif ($eyeCatch eq "HBD_RO")
-                    {
-                        run_command("$CUR_OPEN_SIGN_REQUEST "
-                                    . "--protectedPayload $bin_file.protected "
-                                    . "--contrHdrOut $final_header_file "
-                                    . "--out $tempImages{PROTECTED_PAYLOAD}");
-
-                        run_command("cat $tempImages{PROTECTED_PAYLOAD} > $tempImages{HDR_PHASE}");
-                    }
                     else
                     {
                         my $codeStartOffset = ($eyeCatch eq "HBB") ?
