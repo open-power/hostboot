@@ -192,7 +192,7 @@
     </description>
     <valueType>uint64</valueType>
     <platInit/>
-    <default>0x283E93E9C0000000</default>
+    <default>0x282893E9C0000000</default>
     <overrideOnly/>
     <writeable/>
     <group>dds</group>
