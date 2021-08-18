@@ -110,9 +110,24 @@ extern "C"
     /// @param[in] i_target the OCMB target to operate on
     /// @return FAPI2_RC_SUCCESS iff ok
     ///
-    fapi2::ReturnCode exp_omi_train(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&)
+    fapi2::ReturnCode exp_omi_train(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
     {
-        FAPI_DBG("Called exp_omi_train::Skipping...");
+        // Check if we running on Apollo
+        uint8_t l_is_apollo;
+        mss::attr::get_is_apollo(l_is_apollo);
+
+        if (l_is_apollo)
+        {
+            FAPI_TRY(exp_omi_train_internal(i_target));
+        }
+        else
+        {
+            FAPI_DBG("Called exp_omi_train::Skipping...");
+        }
+
         return fapi2::FAPI2_RC_SUCCESS;
+
+    fapi_try_exit:
+        return fapi2::current_err;
     }
 }
