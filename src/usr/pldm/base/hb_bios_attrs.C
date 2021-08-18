@@ -68,8 +68,12 @@ const char PLDM_BIOS_HB_LMB_SIZE_STRING[]                 = "hb_memory_region_si
 const char PLDM_BIOS_HB_MFG_FLAGS_STRING[]                = "hb_mfg_flags_current";
 const char PLDM_BIOS_HB_FIELD_CORE_OVERRIDE_STRING[]      = "hb_field_core_override_current";
 const char PLDM_BIOS_HB_USB_SECURITY_STRING[]             = "hb_usb_security";
-const char PLDM_BIOS_HB_POWER_LIMIT_ENABLE_STRING[]       = "hb_power_limit_enable_current";
-const char PLDM_BIOS_HB_POWER_LIMIT_IN_WATTS_STRING[]     = "hb_power_limit_in_watts_current";
+
+// When power limit values change, the effect on the OCCs is immediate, so we
+// always want the most recent values here.
+const char PLDM_BIOS_HB_POWER_LIMIT_ENABLE_STRING[]       = "hb_power_limit_enable";
+const char PLDM_BIOS_HB_POWER_LIMIT_IN_WATTS_STRING[]     = "hb_power_limit_in_watts";
+
 const char PLDM_BIOS_HB_SEC_VER_LOCKIN_SUPPORTED_STRING[] = "hb_secure_ver_lockin_enabled";
 const char PLDM_BIOS_HB_LID_IDS_STRING[]                  = "hb_lid_ids";
 const char PLDM_BIOS_HB_TPM_REQUIRED_POLICY_STRING[]      = "hb_tpm_required_current";
