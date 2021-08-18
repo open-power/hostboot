@@ -4889,6 +4889,53 @@ public:
         TS_INFO(EXIT_MRK"testInvokeDeconfigureAssocProc2");
     }
 
+    /* @brief Fill out the iv_pThisProc members of a list of ProcInfo. The first
+     *        master-capable entry in the list will receive the boot processor
+     *        target, and the rest will receive the same secondary processor
+     *        target. (There is not a one-to-one correspondence between ProcInfo
+     *        and processor targets).
+     */
+    void populateProcInfoTargetPointer(DeconfigGard::ProcInfoVector& io_procs)
+    {
+        TargetHandleList procList;
+        getAllChips(procList, TYPE_PROC);
+
+        size_t MASTER_PROC = 0;
+
+        // Find the acting master processor
+        for (const auto target : procList)
+        {
+            if (target->getAttr<ATTR_PROC_MASTER_TYPE>() == PROC_MASTER_TYPE_ACTING_MASTER)
+            {
+                break;
+            }
+            ++MASTER_PROC;
+        }
+
+        if (MASTER_PROC >= procList.size())
+        {
+            TS_FAIL("populateProcInfoTargetPointer: Cannot find acting master processor");
+        }
+        else
+        {
+            // Use any other processor as the secondary processors.
+            size_t SECONDARY_PROC = (MASTER_PROC + 1) % procList.size();
+
+            for (auto& proc : io_procs)
+            {
+                if (proc.iv_masterCapable)
+                {
+                    proc.iv_pThisProc = procList[MASTER_PROC];
+                    MASTER_PROC = SECONDARY_PROC; // the rest of the master-capable procs will be secondaries
+                }
+                else
+                {
+                    proc.iv_pThisProc = procList[SECONDARY_PROC];
+                }
+            }
+        }
+    }
+
     /**
      *  @brief Test Deconfigure Associated Proc1
      */
@@ -4974,6 +5021,8 @@ public:
         l_procs[3].iv_pOutGroupProcInfos[1] = &l_procs[2];
         // in-group bus links and states
         l_procs[3].iv_pInGroupProcInfos[0] = &l_procs[2];
+
+        populateProcInfoTargetPointer(l_procs);
 
         // Set the correct broadcast mode for a multi-group scenario, default broadcast mode is for single-group.
         UTIL::assertGetToplevelTarget()->setAttr<ATTR_PROC_FABRIC_BROADCAST_MODE>(PROC_FABRIC_BROADCAST_MODE_1HOP_CHIP_IS_NODE);
@@ -5083,6 +5132,8 @@ public:
         // in-group bus links and states
         l_procs[3].iv_pInGroupProcInfos[0] = &l_procs[2];
         l_procs[3].iv_InGroupLinkDeconfigured[0] = true;
+
+        populateProcInfoTargetPointer(l_procs);
 
         // Set the correct broadcast mode for a multi-group scenario, default broadcast mode is for single-group.
         UTIL::assertGetToplevelTarget()->setAttr<ATTR_PROC_FABRIC_BROADCAST_MODE>(PROC_FABRIC_BROADCAST_MODE_1HOP_CHIP_IS_NODE);
@@ -5250,6 +5301,8 @@ public:
         l_procs[7].iv_pOutGroupProcInfos[2] = &l_procs[5];
         // in-group bus links and states
         l_procs[7].iv_pInGroupProcInfos[0] = &l_procs[6];
+
+        populateProcInfoTargetPointer(l_procs);
 
         // Set the correct broadcast mode for a multi-group scenario, default broadcast mode is for single-group.
         UTIL::assertGetToplevelTarget()->setAttr<ATTR_PROC_FABRIC_BROADCAST_MODE>(PROC_FABRIC_BROADCAST_MODE_1HOP_CHIP_IS_NODE);
@@ -5424,6 +5477,8 @@ public:
         // in-group bus links and states
         l_procs[7].iv_pInGroupProcInfos[0] = &l_procs[6];
         l_procs[7].iv_InGroupLinkDeconfigured[0] = true;
+
+        populateProcInfoTargetPointer(l_procs);
 
         // Set the correct broadcast mode for a multi-group scenario, default broadcast mode is for single-group.
         UTIL::assertGetToplevelTarget()->setAttr<ATTR_PROC_FABRIC_BROADCAST_MODE>(PROC_FABRIC_BROADCAST_MODE_1HOP_CHIP_IS_NODE);
@@ -5606,6 +5661,8 @@ public:
         // in-group bus links and states
         l_procs[7].iv_pInGroupProcInfos[0] = &l_procs[6];
 
+        populateProcInfoTargetPointer(l_procs);
+
         // Set the correct broadcast mode for a multi-group scenario, default broadcast mode is for single-group.
         UTIL::assertGetToplevelTarget()->setAttr<ATTR_PROC_FABRIC_BROADCAST_MODE>(PROC_FABRIC_BROADCAST_MODE_1HOP_CHIP_IS_NODE);
         // Call _deconfigureAssocProc to determine which procs
@@ -5716,6 +5773,8 @@ public:
         l_procs[3].iv_pInGroupProcInfos[1] = &l_procs[1];
         l_procs[3].iv_pInGroupProcInfos[3] = &l_procs[2];
 
+        populateProcInfoTargetPointer(l_procs);
+
         // Call _deconfigureAssocProc to determine which procs
         // should be deconfigured based on state of system passed in
         l_pErr = DeconfigGard::_deconfigureAssocProc(l_procs);
@@ -5774,7 +5833,7 @@ public:
         l_procs[0].procFabricGroup = 0;          // FABRIC_GROUP_ID
         l_procs[0].procFabricChip = 0;           // FABRIC_CHIP_ID
         l_procs[0].iv_masterCapable = true;      // Master proc
-        l_procs[0].iv_deconfigured = true;      // HWAS state
+        l_procs[0].iv_deconfigured = false;      // HWAS state
         // in-group bus links and states
         l_procs[0].iv_pInGroupProcInfos[0] = &l_procs[1];
         l_procs[0].iv_pInGroupProcInfos[1] = &l_procs[2];
@@ -5821,6 +5880,8 @@ public:
         l_procs[3].iv_pInGroupProcInfos[1] = &l_procs[1];
         l_procs[3].iv_pInGroupProcInfos[3] = &l_procs[2];
 
+        populateProcInfoTargetPointer(l_procs);
+
         // Call _deconfigureAssocProc to determine which procs
         // should be deconfigured based on state of system passed in
         l_pErr = DeconfigGard::_deconfigureAssocProc(l_procs);
@@ -5830,16 +5891,21 @@ public:
         }
 
         // Check result
-        if (l_procs[0].iv_deconfigured == true &&
-            l_procs[1].iv_deconfigured == false &&
-            l_procs[2].iv_deconfigured == true &&
+        if (l_procs[0].iv_deconfigured == false &&
+            l_procs[1].iv_deconfigured == true &&
+            l_procs[2].iv_deconfigured == false &&
             l_procs[3].iv_deconfigured == false)
         {
             TS_INFO("testDeconfigureAssocProc7: Success");
         }
         else
         {
-            TS_FAIL("testDeconfigureAssocProc7: incorrect configuration returned");
+            TS_FAIL("testDeconfigureAssocProc7: incorrect configuration returned "
+                    "(p[0]: %d; p[1]: %d; p[2]: %d; p[3]: %d)",
+                    l_procs[0].iv_deconfigured,
+                    l_procs[1].iv_deconfigured,
+                    l_procs[2].iv_deconfigured,
+                    l_procs[3].iv_deconfigured);
         }
 
         TS_INFO("testDeconfigureAssocProc7: Ended");
@@ -5928,6 +5994,8 @@ public:
         l_procs[3].iv_OutGroupLinkDeconfigured[1] = true;
         l_procs[3].iv_pInGroupProcInfos[0] = &l_procs[2];
         l_procs[3].iv_InGroupLinkDeconfigured[0] = true;
+
+        populateProcInfoTargetPointer(l_procs);
 
         // Set the correct broadcast mode for a multi-group scenario, default broadcast mode is for single-group.
         UTIL::assertGetToplevelTarget()->setAttr<ATTR_PROC_FABRIC_BROADCAST_MODE>(PROC_FABRIC_BROADCAST_MODE_1HOP_CHIP_IS_NODE);
@@ -6029,6 +6097,8 @@ public:
         l_procs[3].iv_deconfigured = true;      // HWAS state
         // in-group bus links still has in-group bus to proc 2 because proc 2 is functional
         l_procs[3].iv_pInGroupProcInfos[0] = &l_procs[2];
+
+        populateProcInfoTargetPointer(l_procs);
 
         // Set the correct broadcast mode for a multi-group scenario, default broadcast mode is for single-group.
         UTIL::assertGetToplevelTarget()->setAttr<ATTR_PROC_FABRIC_BROADCAST_MODE>(PROC_FABRIC_BROADCAST_MODE_1HOP_CHIP_IS_NODE);
@@ -6137,6 +6207,8 @@ public:
         l_procs[3].iv_pInGroupProcInfos[1] = &l_procs[1];
         l_procs[3].iv_pInGroupProcInfos[3] = &l_procs[2];
 
+        populateProcInfoTargetPointer(l_procs);
+
         // Call _deconfigureAssocProc to determine which procs
         // should be deconfigured based on state of system passed in
         l_pErr = DeconfigGard::_deconfigureAssocProc(l_procs);
@@ -6196,7 +6268,7 @@ public:
         l_procs[0].procFabricGroup = 0;          // FABRIC_GROUP_ID
         l_procs[0].procFabricChip = 0;           // FABRIC_CHIP_ID
         l_procs[0].iv_masterCapable = true;      // Master proc
-        l_procs[0].iv_deconfigured = true;      // HWAS state
+        l_procs[0].iv_deconfigured = false;      // HWAS state
         // in-group bus links and states
         l_procs[0].iv_pInGroupProcInfos[0] = &l_procs[1];
         l_procs[0].iv_pInGroupProcInfos[1] = &l_procs[2];
@@ -6241,6 +6313,8 @@ public:
         l_procs[3].iv_pInGroupProcInfos[1] = &l_procs[1];
         l_procs[3].iv_pInGroupProcInfos[3] = &l_procs[2];
 
+        populateProcInfoTargetPointer(l_procs);
+
         // Call _deconfigureAssocProc to determine which procs
         // should be deconfigured based on state of system passed in
         l_pErr = DeconfigGard::_deconfigureAssocProc(l_procs);
@@ -6250,8 +6324,8 @@ public:
         }
 
         // Check result
-        if (l_procs[0].iv_deconfigured == true &&
-            l_procs[1].iv_deconfigured == false &&
+        if (l_procs[0].iv_deconfigured == false &&
+            l_procs[1].iv_deconfigured == true &&
             l_procs[2].iv_deconfigured == false &&
             l_procs[3].iv_deconfigured == false)
         {
@@ -6259,7 +6333,12 @@ public:
         }
         else
         {
-            TS_FAIL("testDeconfigureAssocProc11: incorrect configuration returned");
+            TS_FAIL("testDeconfigureAssocProc11: incorrect configuration returned "
+                    "(p[0]: %d; p[1]: %d; p[2]: %d; p[3]: %d)",
+                    l_procs[0].iv_deconfigured,
+                    l_procs[1].iv_deconfigured,
+                    l_procs[2].iv_deconfigured,
+                    l_procs[3].iv_deconfigured);
         }
 
         TS_INFO("testDeconfigureAssocProc11: Ended");
@@ -6345,6 +6424,8 @@ public:
         l_procs[3].iv_pInGroupProcInfos[1] = &l_procs[1];
         l_procs[3].iv_pInGroupProcInfos[3] = &l_procs[2];
 
+        populateProcInfoTargetPointer(l_procs);
+
         // Call _deconfigureAssocProc to determine which procs
         // should be deconfigured based on state of system passed in
         l_pErr = DeconfigGard::_deconfigureAssocProc(l_procs);
@@ -6367,6 +6448,117 @@ public:
         }
 
         TS_INFO("testDeconfigureAssocProc12: Ended");
+    }
+
+        /**
+     *  @brief Test Deconfigure Associated Proc13
+     */
+    void testDeconfigureAssocProc13()
+    {
+        TS_INFO("testDeconfigureAssocProc13: Started");
+
+        // This test populates structs which contain information
+        // regarding a processor and its child chiplet's linkage
+        // and states.  A vector of these structs, effectively
+        // describing the system, is passed to the
+        // _deconfigureAssocProc algorithm which marks procs to
+        // be deconfigured based on existing bus deconfigurations.
+
+        // SCENARIO: Procs 0 and 1 are master-capable, proc 1 is the master,
+        // In-group bus deconfigured between procs 0 and 1, proc 0 should be
+        // deconfigured.
+
+        // Return error for _deconfigureAssocProc
+        errlHndl_t l_pErr = nullptr;
+
+        // User-defined number of procs
+        size_t NUM_PROCS = 4;
+
+        // Define and populate vector
+        DeconfigGard::ProcInfoVector l_procs;
+        DeconfigGard::ProcInfo l_ProcInfo = DeconfigGard::ProcInfo();
+        l_procs.insert(l_procs.begin(), NUM_PROCS, l_ProcInfo);
+
+        // Set proc options
+        // Proc0:
+        l_procs[0].iv_pThisProc = nullptr;          // Target *
+        l_procs[0].procHUID = 0;                 // HUID
+        l_procs[0].procFabricGroup = 0;          // FABRIC_GROUP_ID
+        l_procs[0].procFabricChip = 0;           // FABRIC_CHIP_ID
+        l_procs[0].iv_masterCapable = false;     // Not master proc (will be changed after populating iv_pThisProc)
+        l_procs[0].iv_deconfigured = false;      // HWAS state
+        // in-group bus links and states
+        l_procs[0].iv_pInGroupProcInfos[0] = &l_procs[1];
+        l_procs[0].iv_pInGroupProcInfos[1] = &l_procs[2];
+        l_procs[0].iv_pInGroupProcInfos[3] = &l_procs[3];
+        l_procs[0].iv_InGroupLinkDeconfigured[0] = true;
+
+        // Proc1:
+        l_procs[1].iv_pThisProc = nullptr;          // Target *
+        l_procs[1].procHUID = 1;                 // HUID
+        l_procs[1].procFabricGroup = 0;          // FABRIC_GROUP_ID
+        l_procs[1].procFabricChip = 1;           // FABRIC_CHIP_ID
+        l_procs[1].iv_masterCapable = true;     // Not master proc
+        l_procs[1].iv_deconfigured = false;      // HWAS state
+        // in-group bus links and states
+        // in-group bus links and states
+        l_procs[1].iv_pInGroupProcInfos[0] = &l_procs[2];
+        l_procs[1].iv_pInGroupProcInfos[1] = &l_procs[3];
+        l_procs[1].iv_pInGroupProcInfos[3] = &l_procs[0];
+        l_procs[1].iv_InGroupLinkDeconfigured[3] = true;
+
+        // Proc2:
+        l_procs[2].iv_pThisProc = nullptr;          // Target *
+        l_procs[2].procHUID = 2;                 // HUID
+        l_procs[2].procFabricGroup = 0;          // FABRIC_GROUP_ID
+        l_procs[2].procFabricChip = 2;           // FABRIC_CHIP_ID
+        l_procs[2].iv_masterCapable = false;     // Not master proc
+        l_procs[2].iv_deconfigured = false;      // HWAS state
+        // in-group bus links and states
+        l_procs[2].iv_pInGroupProcInfos[0] = &l_procs[3];
+        l_procs[2].iv_pInGroupProcInfos[1] = &l_procs[0];
+        l_procs[2].iv_pInGroupProcInfos[3] = &l_procs[1];
+
+        // Proc3:
+        l_procs[3].iv_pThisProc = nullptr;          // Target *
+        l_procs[3].procHUID = 3;                 // HUID
+        l_procs[3].procFabricGroup = 0;          // FABRIC_GROUP_ID
+        l_procs[3].procFabricChip = 3;           // FABRIC_CHIP_ID
+        l_procs[3].iv_masterCapable = false;     // Not master proc
+        l_procs[3].iv_deconfigured = false;      // HWAS state
+        // in-group bus links and states
+        l_procs[3].iv_pInGroupProcInfos[0] = &l_procs[0];
+        l_procs[3].iv_pInGroupProcInfos[1] = &l_procs[1];
+        l_procs[3].iv_pInGroupProcInfos[3] = &l_procs[2];
+
+        populateProcInfoTargetPointer(l_procs);
+
+        // Proc 1 has the acting master target, now set proc 0 to master-capable
+        // (but it will have a non-acting-master proc target)
+        l_procs[0].iv_masterCapable = true;
+
+        // Call _deconfigureAssocProc to determine which procs
+        // should be deconfigured based on state of system passed in
+        l_pErr = DeconfigGard::_deconfigureAssocProc(l_procs);
+        if (l_pErr)
+        {
+            HWAS_ERR("Error from _deconfigureAssocProc ");
+        }
+
+        // Check result
+        if (l_procs[0].iv_deconfigured == true &&
+            l_procs[1].iv_deconfigured == false &&
+            l_procs[2].iv_deconfigured == false &&
+            l_procs[3].iv_deconfigured == false)
+        {
+            TS_INFO("testDeconfigureAssocProc12: Success");
+        }
+        else
+        {
+            TS_FAIL("testDeconfigureAssocProc13: incorrect configuration returned");
+        }
+
+        TS_INFO("testDeconfigureAssocProc13: Ended");
     }
 
     // @brief Simple type/instance pair describing a component of an entity path

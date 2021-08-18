@@ -1463,6 +1463,11 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
             if ( ((*l_procInfoIter).iv_masterCapable) &&
                  (!(*l_procInfoIter).iv_deconfigured) )
             {
+                if (l_procInfoIter->iv_pThisProc->getAttr<ATTR_PROC_MASTER_TYPE>() != PROC_MASTER_TYPE_ACTING_MASTER)
+                { // The first master-capable processor is not necessarily the acting master.
+                    continue;
+                }
+
                 // Save for subsequent use
                 l_pMasterProcInfo = &(*l_procInfoIter);
 
@@ -1484,7 +1489,7 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
                      proc != disconnected_procs.end();
                      ++proc)
                 {
-                    HWAS_INF("deconfigureAssocProc marked proc: 0x%08x for deconfiguration DECONFIGURED in step 1 "
+                    HWAS_INF("deconfigureAssocProc marked proc: 0x%08x for deconfiguration in step 1 "
                              "due to deconfigured bus to master proc",
                              (*proc)->procHUID);
                     (*proc)->iv_deconfigured = true;
@@ -1556,7 +1561,8 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
                 // and is functional
                 if (!(*proc)->iv_deconfigured)
                 {
-                    HWAS_INF("deconfigureAssocProc: The configured processor 0x%08x is not attached to 0x%08x in step 2",
+                    HWAS_INF("deconfigureAssocProc: The configured processor 0x%08x is not attached "
+                             "to 0x%08x in step 2",
                              (*proc)->procHUID,
                              l_procInfoIter->procHUID);
                     ++num_functional_disconnected_procs;
@@ -1565,7 +1571,8 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
 
             if (num_functional_disconnected_procs > 1)
             {
-                HWAS_INF("deconfigureAssocProc: The processor 0x%08x has %d configured non-master peers in step 2, marking deconfigured",
+                HWAS_INF("deconfigureAssocProc: The processor 0x%08x has %d configured non-master "
+                         "peers in step 2, marking deconfigured",
                          l_procInfoIter->procHUID,
                          num_functional_disconnected_procs);
                 l_procInfoIter->iv_deconfigured = true;
@@ -1615,15 +1622,15 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
                         // Mark proc with higher HUID to be deconfigured
                         if ((*proc)->procHUID > l_procInfoIter->procHUID)
                         {
-                            HWAS_INF("deconfigureAssocProc marked remote proc: %.8X for deconfiguration due to higher HUID than peer "
-                                     "proc on same master-containing logical group.",
+                            HWAS_INF("deconfigureAssocProc marked remote proc: %.8X for deconfiguration due to "
+                                     "higher HUID than peer proc on same master-containing logical group.",
                                      (*proc)->procHUID);
                             (*proc)->iv_deconfigured = true;
                         }
                         else
                         {
-                            HWAS_INF("deconfigureAssocProc marked proc: %.8X for deconfiguration due to higher HUID than peer "
-                                     "proc on same master-containing logical group.",
+                            HWAS_INF("deconfigureAssocProc marked proc: %.8X for deconfiguration due to "
+                                     " higher HUID than peer proc on same master-containing logical group.",
                                      l_procInfoIter->procHUID);
                             l_procInfoIter->iv_deconfigured = true;
                         }
@@ -1643,7 +1650,9 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
 
         // Iterate through procs and, if in non-master
         // logical group, check Bus[in-group] chiplets
-        for (ProcInfoVector::iterator l_procInfoIter = io_procInfo.begin(); l_procInfoIter != io_procInfo.end(); ++l_procInfoIter)
+        for (ProcInfoVector::iterator l_procInfoIter = io_procInfo.begin();
+             l_procInfoIter != io_procInfo.end();
+             ++l_procInfoIter)
         {
             // Don't examine previously marked proc
             if ((*l_procInfoIter).iv_deconfigured)
@@ -1677,7 +1686,9 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
                     bool l_chipIDmatch = false;
                     // Iterate through procs and examine ones found to
                     // be on the master-containing logical group
-                    for (ProcInfoVector::const_iterator l_mGroupProcInfoIter = io_procInfo.begin(); l_mGroupProcInfoIter != io_procInfo.end(); ++l_mGroupProcInfoIter)
+                    for (ProcInfoVector::const_iterator l_mGroupProcInfoIter = io_procInfo.begin();
+                         l_mGroupProcInfoIter != io_procInfo.end();
+                         ++l_mGroupProcInfoIter)
                     {
                         if (l_pMasterProcInfo->procFabricGroup == (*l_mGroupProcInfoIter).procFabricGroup)
                         {
@@ -1703,8 +1714,8 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
                             {
                                 // Mark peer proc to be deconfigured
                                 // and set chipIDmatch
-                                HWAS_INF("deconfigureAssocProc marked remote proc: %.8X for deconfiguration due to same position deconfigured "
-                                         "proc on master-containing logical group.",
+                                HWAS_INF("deconfigureAssocProc marked remote proc: %.8X for deconfiguration due to "
+                                         "same position deconfigured proc on master-containing logical group.",
                                          (*proc)->procHUID);
                                 (*proc)->iv_deconfigured = true;
                                 l_chipIDmatch = true;
@@ -1874,6 +1885,11 @@ errlHndl_t DeconfigGard::_symmetryValidation(ProcInfoVector &io_procInfo)
             // If master proc
             if ((*l_procInfoIter).iv_masterCapable)
             {
+                if (l_procInfoIter->iv_pThisProc->getAttr<ATTR_PROC_MASTER_TYPE>() != PROC_MASTER_TYPE_ACTING_MASTER)
+                { // The first master-capable processor is not necessarily the acting master.
+                    continue;
+                }
+
                 // Save for subsequent use
                 l_pMasterProcInfo = &(*l_procInfoIter);
                 break;
