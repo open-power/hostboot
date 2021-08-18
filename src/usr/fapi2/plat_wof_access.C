@@ -282,7 +282,15 @@ fapi2::ReturnCode platParseWOFTables(TARGETING::Target* i_procTarg, uint8_t* o_w
         // Check override image
 
         bool l_didFindOverride = false;
-        l_errl = getOverrideWofTable(i_procTarg, o_wofData, l_didFindOverride);
+        // Temporary workaround for SW532696, RTC 250794 will address missing WOFDATA binary
+        if( INITSERVICE::spBaseServicesEnabled() )
+        {
+            l_errl = getOverrideWofTable(i_procTarg, o_wofData, l_didFindOverride);
+        }
+        else
+        {
+            FAPI_INF("platParseWOFTables: NON-FSP SKIPPED looking for WOF table in PNOR/LID");
+        }
 
         if (l_didFindOverride && l_errl == nullptr)
         {
