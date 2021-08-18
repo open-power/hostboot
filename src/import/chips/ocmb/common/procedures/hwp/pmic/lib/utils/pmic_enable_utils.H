@@ -911,6 +911,15 @@ fapi2::ReturnCode enable_1u_2u(
     const mss::pmic::enable_mode i_mode);
 
 ///
+/// @brief Read adc min voltage registers so that they can track any dips in the voltages after
+///        power on as they are self resetting
+///
+/// @param[in] i_ocmb_target OCMB parent target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode adc_min_vltg_read(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> i_ocmb_target);
+
+///
 /// @brief Setup ADC1
 ///
 /// @param[in] i_adc ADC1

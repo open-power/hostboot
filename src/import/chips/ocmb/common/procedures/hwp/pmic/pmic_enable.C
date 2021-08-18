@@ -78,6 +78,10 @@ extern "C"
             {
                 FAPI_INF("Enabling PMICs on %s with Redundancy/4U Mode", mss::c_str(i_ocmb_target));
                 FAPI_TRY(mss::pmic::enable_with_redundancy(i_ocmb_target));
+
+                /// Read adc min voltage registers so that they can track any dips in the voltages after
+                /// power on as they are self resetting
+                FAPI_TRY(mss::pmic::adc_min_vltg_read(i_ocmb_target));
             }
             else
             {

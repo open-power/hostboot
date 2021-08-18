@@ -460,6 +460,7 @@ enum fields
     PIN_CFG_CH0_GPIO                                    = 0x01,
     GENERAL_CFG_EN_DIGITAL_WINDOW_COMPARATOR_AND_STATS  = 0x30,
     GENERAL_CFG_CLEAR_STATS_EN                          = 0x10,
+    GENERAL_CFG_STATUS_ENABLE                           = 5,
     SEQUENCE_CFG_CHANNEL_SEQUENCING                     = 0x11,
     SEQUENCE_CFG_AUTO_SEQUENCE                          = 0x01,
     AUTO_SEQ_CH_SEL_ALL_AUTO_SEQUENCING                 = 0xFF,

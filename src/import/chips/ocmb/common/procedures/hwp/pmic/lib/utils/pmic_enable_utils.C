@@ -1384,6 +1384,65 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Read adc min voltage registers so that they can track any dips in the voltages after
+///        power on as they are self resetting
+///
+/// @param[in] i_ocmb_target OCMB parent target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode adc_min_vltg_read(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> i_ocmb_target)
+{
+    fapi2::buffer<uint8_t> l_reg;
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+
+    // Grab the targets as a struct, if they exist
+    target_info_redundancy l_target_info(i_ocmb_target, l_rc);
+    FAPI_TRY(l_rc, "Unusable PMIC/GENERICI2CSLAVE child target configuration found from %s",
+             mss::c_str(i_ocmb_target));
+
+    // ADC1
+    mss::pmic::i2c::reg_read_reverse_buffer(l_target_info.iv_adc1, mss::adc::regs::GENERAL_CFG, l_reg);
+    l_reg.clearBit<mss::adc::fields::GENERAL_CFG_STATUS_ENABLE>();
+    mss::pmic::i2c::reg_write_reverse_buffer(l_target_info.iv_adc1, mss::adc::regs::GENERAL_CFG, l_reg);
+
+    // Read adc1 Min voltage regs
+    FAPI_TRY(mss::pmic::i2c::reg_read(l_target_info.iv_adc1, mss::adc::regs::MIN_CH0_LSB, l_reg));
+    FAPI_TRY(mss::pmic::i2c::reg_read(l_target_info.iv_adc1, mss::adc::regs::MIN_CH1_LSB, l_reg));
+    FAPI_TRY(mss::pmic::i2c::reg_read(l_target_info.iv_adc1, mss::adc::regs::MIN_CH2_LSB, l_reg));
+    FAPI_TRY(mss::pmic::i2c::reg_read(l_target_info.iv_adc1, mss::adc::regs::MIN_CH3_LSB, l_reg));
+    FAPI_TRY(mss::pmic::i2c::reg_read(l_target_info.iv_adc1, mss::adc::regs::MIN_CH4_LSB, l_reg));
+    FAPI_TRY(mss::pmic::i2c::reg_read(l_target_info.iv_adc1, mss::adc::regs::MIN_CH5_LSB, l_reg));
+    FAPI_TRY(mss::pmic::i2c::reg_read(l_target_info.iv_adc1, mss::adc::regs::MIN_CH6_LSB, l_reg));
+    FAPI_TRY(mss::pmic::i2c::reg_read(l_target_info.iv_adc1, mss::adc::regs::MIN_CH7_LSB, l_reg));
+
+    mss::pmic::i2c::reg_read_reverse_buffer(l_target_info.iv_adc1, mss::adc::regs::GENERAL_CFG, l_reg);
+    l_reg.setBit<mss::adc::fields::GENERAL_CFG_STATUS_ENABLE>();
+    mss::pmic::i2c::reg_write_reverse_buffer(l_target_info.iv_adc1, mss::adc::regs::GENERAL_CFG, l_reg);
+
+    // ADC2
+    mss::pmic::i2c::reg_read_reverse_buffer(l_target_info.iv_adc2, mss::adc::regs::GENERAL_CFG, l_reg);
+    l_reg.clearBit<mss::adc::fields::GENERAL_CFG_STATUS_ENABLE>();
+    mss::pmic::i2c::reg_write_reverse_buffer(l_target_info.iv_adc2, mss::adc::regs::GENERAL_CFG, l_reg);
+
+    // Read adc2 Min voltage regs
+    FAPI_TRY(mss::pmic::i2c::reg_read(l_target_info.iv_adc2, mss::adc::regs::MIN_CH0_LSB, l_reg));
+    FAPI_TRY(mss::pmic::i2c::reg_read(l_target_info.iv_adc2, mss::adc::regs::MIN_CH1_LSB, l_reg));
+    FAPI_TRY(mss::pmic::i2c::reg_read(l_target_info.iv_adc2, mss::adc::regs::MIN_CH2_LSB, l_reg));
+    FAPI_TRY(mss::pmic::i2c::reg_read(l_target_info.iv_adc2, mss::adc::regs::MIN_CH3_LSB, l_reg));
+    FAPI_TRY(mss::pmic::i2c::reg_read(l_target_info.iv_adc2, mss::adc::regs::MIN_CH4_LSB, l_reg));
+    FAPI_TRY(mss::pmic::i2c::reg_read(l_target_info.iv_adc2, mss::adc::regs::MIN_CH5_LSB, l_reg));
+    FAPI_TRY(mss::pmic::i2c::reg_read(l_target_info.iv_adc2, mss::adc::regs::MIN_CH6_LSB, l_reg));
+    FAPI_TRY(mss::pmic::i2c::reg_read(l_target_info.iv_adc2, mss::adc::regs::MIN_CH7_LSB, l_reg));
+
+    mss::pmic::i2c::reg_read_reverse_buffer(l_target_info.iv_adc2, mss::adc::regs::GENERAL_CFG, l_reg);
+    l_reg.setBit<mss::adc::fields::GENERAL_CFG_STATUS_ENABLE>();
+    mss::pmic::i2c::reg_write_reverse_buffer(l_target_info.iv_adc2, mss::adc::regs::GENERAL_CFG, l_reg);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Setup ADC1
 ///
 /// @param[in] i_adc ADC1
