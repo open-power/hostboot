@@ -262,15 +262,25 @@ int32_t CollectScratchpad( ExtensibleChip * i_chip,
 PRDF_PLUGIN_DEFINE( explorer_ocmb, CollectScratchpad );
 
 /**
- * @brief  Returns PRD_NO_CLEAR_FIR_BITS
+ * @brief  Returns PRD_NO_CLEAR_FIR_BITS if the primary attention type is
+ *         CHECK_STOP or UNIT_CS
  * @param  i_chip An OCMB chip.
  * @param  io_sc  The step code data struct.
- * @return SUCCESS
+ * @return PRD_NO_CLEAR_FIR_BITS if CHECK_STOP or UNIT_CS attn, else SUCCESS
  */
 int32_t returnNoClearFirBits( ExtensibleChip* i_chip,
                               STEP_CODE_DATA_STRUCT& io_sc )
 {
-    return PRD_NO_CLEAR_FIR_BITS;
+    int32_t o_rc = SUCCESS;
+
+    if ( CHECK_STOP == io_sc.service_data->getPrimaryAttnType() ||
+         UNIT_CS    == io_sc.service_data->getPrimaryAttnType() ||
+         UNIT_CS    == io_sc.service_data->getSecondaryAttnType() )
+    {
+        o_rc = PRD_NO_CLEAR_FIR_BITS;
+    }
+
+    return o_rc;
 }
 PRDF_PLUGIN_DEFINE( explorer_ocmb, returnNoClearFirBits );
 
