@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,16 +55,17 @@ typedef struct rawImageInfo
  *
  * @param[out] o_stepError Error handle for logging istep failures
  * @param[out] o_flashUpdateList List of Explorer OCMB's that mismatch
+ * @param[out] o_versionUpdateList List of Explorer OCMB's that need version
+ *                data rewritten
  * @param[out] o_imageInfo PNOR image information for update
  * @param[out] o_imageLoaded true if PNOR::OCMBFW secure section loaded
  * @param[out] o_rebootRequired true if any OCMB FW upate is triggered by a FW
  *                  mismatch or forced by attribute, but not the mfg flag
  * @param[in]  i_checkMfgFlag Use the mfg flag in update decision
- *
- * @return true if an update is needed, else false
  */
-bool explorerUpdateCheck(ISTEP_ERROR::IStepError& o_stepError,
+void explorerUpdateCheck(ISTEP_ERROR::IStepError& o_stepError,
                          TARGETING::TargetHandleList& o_flashUpdateList,
+                         TARGETING::TargetHandleList& o_versionUpdateList,
                          rawImageInfo_t & o_imageInfo,
                          bool & o_imageLoaded,
                          bool & o_rebootRequired,

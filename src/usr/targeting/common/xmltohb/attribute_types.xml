@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2022                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -5565,6 +5565,11 @@
       <!-- Force an update for the MDS -->
       <name>MDS_FORCE_UPDATE</name>
       <value>4</value>
+    </enumerator>
+    <enumerator>
+      <!-- Same as FORCE_UPDATE, but only runs once -->
+      <name>FORCE_UPDATE_ONCE</name>
+      <value>5</value>
     </enumerator>
     <id>OCMB_FW_UPDATE_BEHAVIOR</id>
   </enumerationType>

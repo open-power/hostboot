@@ -199,6 +199,89 @@ bool isMdsDdimm(TargetHandle_t i_ocmb)
     return l_isMdsDdimm;
 } // isMdsDdimm
 
+/**
+ * @brief Check if special FORCE_UPDATE_ONCE flag is in the SPD
+ * The SPD has byte 960 to 1023 reserved for this information.
+ * @param[in] i_ocmb  Target to act upon
+ * @param[inout] io_spdBuffer  Buffer containing SPD contents
+ * @return true if flag was set
+ */
+bool checkAndSetForceFlag(TargetHandle_t i_ocmb,
+                          uint8_t* io_spdBuffer = nullptr)
+{
+    errlHndl_t l_err = nullptr;
+    bool l_foundForce = false;
+
+    do
+    {
+        // Get SPD keyword EXPLORER_FW_VERSION info
+        const SPD::KeywordData *l_fWVerKeyword = {nullptr};
+        l_err = getKeywordEntry( SPD::EXPLORER_FW_VERSION,
+                                 SPD::SPD_DDR4_TYPE,
+                                 i_ocmb,
+                                 l_fWVerKeyword);
+        if( l_err )
+        {
+            TRACFCOMP(g_trac_expupd,"checkAndSetForceFlag> Error calling getKeywordEntry, deleting and returning false");
+            delete l_err;
+            l_err = nullptr;
+            break;
+        }
+
+        const size_t l_spdKeywordSize = l_fWVerKeyword->length;
+
+        uint8_t* l_versionData = io_spdBuffer;
+        uint8_t l_versionDataRead[l_spdKeywordSize] = {};
+
+        // Read the data out if it wasn't given to us
+        if( l_versionData == nullptr )
+        {
+            size_t l_kwSize = l_spdKeywordSize;
+            l_err = deviceRead(i_ocmb,
+                               l_versionDataRead,
+                               l_kwSize,
+                               DEVICE_SPD_ADDRESS(SPD::EXPLORER_FW_VERSION));
+            if( l_err )
+            {
+                TRACFCOMP(g_trac_expupd,"checkAndSetForceFlag> Error trying to read SPD, deleting and returning false");
+                delete l_err;
+                l_err = nullptr;
+                break;
+            }
+            l_versionData = l_versionDataRead;
+        }
+
+        // check for our special flag in the last 3 bytes
+        const char* l_forceFlag = "HBU"; //HostBootUpdate
+        if( !memcmp( &(l_versionData[l_spdKeywordSize-3]),
+                     l_forceFlag, 3 ) )
+        {
+            // flag is there, return true and clear it out
+            TRACFCOMP(g_trac_expupd,"checkAndSetForceFlag> Special update flag detected");
+            if( io_spdBuffer )
+            {
+                io_spdBuffer[l_spdKeywordSize-3] = '\0';
+                io_spdBuffer[l_spdKeywordSize-2] = '\0';
+                io_spdBuffer[l_spdKeywordSize-1] = '\0';
+            }
+            l_foundForce = true;
+        }
+        else
+        {
+            // flag is not there, return false and set it
+            TRACFCOMP(g_trac_expupd,"checkAndSetForceFlag> Special update flag not detected");
+            if( io_spdBuffer )
+            {
+                memcpy( &(io_spdBuffer[l_spdKeywordSize-3]),
+                        l_forceFlag, 3 );
+            }
+        }
+
+    } while(0);
+
+    return l_foundForce;
+}
+
 
 /**
  * @brief Write Explorer Firmware version into SPD of the given OCMB target.
@@ -263,7 +346,21 @@ void writeExplorerFwVersion(TargetHandle_t i_ocmb, const uint8_t* i_versionStr, 
         TRACDBIN(g_trac_expupd, "writeExplorerFwVersion: OCMB FW Version string: ",
             l_paddedData, l_spdKeywordSize);
 
-        l_err = deviceWrite(l_dimm, l_paddedData, (size_t&)l_spdKeywordSize, DEVICE_SPD_ADDRESS(SPD::EXPLORER_FW_VERSION));
+        // If we're in a force-once case, we need to add a special flag
+        //  if it isn't already there
+        auto l_forced_behavior = UTIL::assertGetToplevelTarget()
+          ->getAttr<ATTR_OCMB_FW_UPDATE_OVERRIDE>();
+        if( OCMB_FW_UPDATE_BEHAVIOR_FORCE_UPDATE_ONCE == l_forced_behavior )
+        {
+            // ignoring return value because we don't care
+            (void)checkAndSetForceFlag( i_ocmb, l_paddedData );
+            TRACDBIN(g_trac_expupd, "writeExplorerFwVersion: with flag: ",
+                     l_paddedData, l_spdKeywordSize);
+        }
+
+        l_err = deviceWrite(l_dimm, l_paddedData,
+                            (size_t&)l_spdKeywordSize,
+                            DEVICE_SPD_ADDRESS(SPD::EXPLORER_FW_VERSION));
 
     } while (0);
 
@@ -327,7 +424,8 @@ class OcmbWorkItem: public IStepWorkItem
                      rawImageInfo_t& i_imageInfo):
             iv_pStepError(&i_stepError),
             iv_ocmb(&i_Ocmb),
-            iv_imageInfo(&i_imageInfo)        {}
+            iv_imageInfo(&i_imageInfo)
+        {}
 
         // delete default copy/move constructors and operators
         OcmbWorkItem() = delete;
@@ -376,7 +474,7 @@ void OcmbWorkItem::operator()()
         mutex_unlock(&g_stepErrorMutex);
     }
 
-    // Invoke update procedure
+    // Invoke procedure
     FAPI_INVOKE_HWP(l_err, exp_fw_update, l_fapi2Target,
                     iv_imageInfo->imagePtr, iv_imageInfo->imageSize);
     if (l_err)
@@ -431,7 +529,7 @@ void OcmbWorkItem::operator()()
         if (iv_imageInfo->fwVersionStrPtr && iv_imageInfo->fwVersionStrSize != 0)
         {
             writeExplorerFwVersion((TargetHandle_t)iv_ocmb, iv_imageInfo->fwVersionStrPtr,
-                iv_imageInfo->fwVersionStrSize);
+                                   iv_imageInfo->fwVersionStrSize);
         }
 
         // Invoke flash read test procedure
@@ -443,8 +541,8 @@ void OcmbWorkItem::operator()()
             if (l_err)
             {
                 TRACFCOMP(g_trac_expupd,
-                        ERR_MRK"Error from exp_flash_read_test for OCMB 0x%08x",
-                        TARGETING::get_huid(iv_ocmb));
+                          ERR_MRK"Error from exp_flash_read_test for OCMB 0x%08x",
+                          TARGETING::get_huid(iv_ocmb));
 
                 l_err->collectTrace(EXPUPD_COMP_NAME);
 
@@ -463,19 +561,19 @@ void OcmbWorkItem::operator()()
 
 
 // Find out if any explorer chips need an update
-bool explorerUpdateCheck(IStepError& o_stepError,
-                        TargetHandleList& o_flashUpdateList,
-                        rawImageInfo_t & o_imageInfo,
-                        bool & o_imageLoaded,
-                        bool & o_rebootRequired,
-                        bool i_checkMfgFlag )
+void explorerUpdateCheck(IStepError& o_stepError,
+                         TargetHandleList& o_flashUpdateList,
+                         TARGETING::TargetHandleList& o_versionUpdateList,
+                         rawImageInfo_t & o_imageInfo,
+                         bool & o_imageLoaded,
+                         bool & o_rebootRequired,
+                         bool i_checkMfgFlag )
 {
     errlHndl_t l_err = nullptr;
     o_imageLoaded = false;
-    bool l_attemptUpdate = true;
-
-    // Clear flash update list.  Will populate with OCMB chips that need updating
-    o_flashUpdateList.clear();
+    o_rebootRequired = false; //assume we don't need to reboot
+    o_flashUpdateList.clear(); //start with empty list
+    o_versionUpdateList.clear(); //start with empty list
 
     // Get a list of OCMB chips
     TargetHandleList l_ocmbTargetList;
@@ -488,8 +586,8 @@ bool explorerUpdateCheck(IStepError& o_stepError,
             l_pTopLevel->getAttr<ATTR_OCMB_FW_UPDATE_OVERRIDE>();
 
     TRACFCOMP(g_trac_expupd, ENTER_MRK
-              "explorerUpdateCheck: %d ocmb chips found",
-              l_ocmbTargetList.size());
+              "explorerUpdateCheck: %d ocmb chips found, force=%d",
+              l_ocmbTargetList.size(), l_forced_behavior);
 
     do
     {
@@ -497,7 +595,6 @@ bool explorerUpdateCheck(IStepError& o_stepError,
         if(l_ocmbTargetList.size() == 0)
         {
             TRACFCOMP(g_trac_expupd, INFO_MRK "Skipping update, no OCMB found");
-            l_attemptUpdate = false;
             break;
         }
 
@@ -506,7 +603,6 @@ bool explorerUpdateCheck(IStepError& o_stepError,
         {
             TRACFCOMP(g_trac_expupd, INFO_MRK "Skipping update due to override "
                 "(PREVENT_UPDATE)");
-            l_attemptUpdate = false;
             break;
         }
 
@@ -527,7 +623,6 @@ bool explorerUpdateCheck(IStepError& o_stepError,
 
             // Capture error
             captureError(l_err, o_stepError, EXPUPD_COMP_ID);
-            l_attemptUpdate = false;
             break;
         }
         o_imageLoaded = true;
@@ -546,7 +641,6 @@ bool explorerUpdateCheck(IStepError& o_stepError,
 
             // Capture error
             captureError(l_err, o_stepError, EXPUPD_COMP_ID);
-            l_attemptUpdate = false;
             break;
         }
 
@@ -571,7 +665,6 @@ bool explorerUpdateCheck(IStepError& o_stepError,
 
             // Capture error
             captureError(l_err, o_stepError, EXPUPD_COMP_ID);
-            l_attemptUpdate = false;
             break;
         }
 
@@ -658,9 +751,19 @@ bool explorerUpdateCheck(IStepError& o_stepError,
                         "explorerUpdateCheck: SHA512 hash mismatch on ocmb[0x%08x]",
                         get_huid(l_ocmbTarget));
 
-                //add target to our list of targets needing an update
-                o_flashUpdateList.push_back(l_ocmbTarget);
-                o_rebootRequired = true;
+                if ( Util::isSimicsRunning() )
+                {
+                    TRACFCOMP(g_trac_expupd,
+                              INFO_MRK "explorerUpdateCheck: Simics running so ignoring mismatch");
+                    //force a write to the SPD to test out more paths
+                    o_versionUpdateList.push_back(l_ocmbTarget);
+                }
+                else
+                {
+                    //add target to our list of targets needing an update
+                    o_flashUpdateList.push_back(l_ocmbTarget);
+                    o_rebootRequired = true; //new code = do a reboot
+                }
             }
             else
             {
@@ -669,47 +772,108 @@ bool explorerUpdateCheck(IStepError& o_stepError,
                           " matches SHA512 hash of PNOR image.",
                           get_huid(l_ocmbTarget));
 
-                // Add every OCMB to the update list if told to
-                if( OCMB_FW_UPDATE_BEHAVIOR_FORCE_UPDATE
-                    == l_forced_behavior )
+                //-- Check if the SPD version info is out of date
+
+                // Get SPD keyword EXPLORER_FW_VERSION info
+                const SPD::KeywordData *l_fWVerKeyword = {nullptr};
+                l_err = getKeywordEntry( SPD::EXPLORER_FW_VERSION,
+                                         SPD::SPD_DDR4_TYPE,
+                                         l_ocmbTarget,
+                                         l_fWVerKeyword);
+                if( l_err )
                 {
-                    TRACFCOMP(g_trac_expupd, INFO_MRK "explorerUpdateCheck: "
-                              "Forcing ocmb[0x%08X] update due to override"
-                              " (FORCE_UPDATE)", get_huid(l_ocmbTarget) );
-                    o_flashUpdateList.push_back(l_ocmbTarget);
-                    o_rebootRequired = true;
+                    TRACFCOMP(g_trac_expupd,
+                              "explorerUpdateCheck: getKeywordEntry error");
+                    l_err->collectTrace(EXPUPD_COMP_NAME);
+                    captureError(l_err, o_stepError, EXPUPD_COMP_ID, l_ocmbTarget);
+                    continue; //Don't stop on error, go to next target.
                 }
-                // Or if we are using the MFG flag and the flag is set
-                else if (i_checkMfgFlag && TARGETING::isDimmSpiFlashScreenSet())
+
+                const size_t l_spdKeywordSize = l_fWVerKeyword->length;
+
+                uint8_t l_versionData[l_spdKeywordSize] = {};
+                size_t l_kwSize = l_spdKeywordSize;
+                l_err = deviceRead(l_ocmbTarget,
+                                   l_versionData,
+                                   l_kwSize,
+                                   DEVICE_SPD_ADDRESS(SPD::EXPLORER_FW_VERSION));
+                if( l_err )
                 {
-                    TRACFCOMP(g_trac_expupd, INFO_MRK "explorerUpdateCheck: "
-                              "Forcing ocmb[0x%08X] update due to mfg flag"
-                              " (MNFG_DIMM_SPI_FLASH_SCREEN)",
+                    TRACFCOMP(g_trac_expupd,"explorerUpdateCheck> Error trying to read SPD, deleting and returning false");
+                    l_err->collectTrace(EXPUPD_COMP_NAME);
+                    captureError(l_err, o_stepError, EXPUPD_COMP_ID, l_ocmbTarget);
+                    continue; //Don't stop on error, go to next target.
+                }
+
+                if( memcmp(l_versionData,
+                           o_imageInfo.fwVersionStrPtr,
+                           o_imageInfo.fwVersionStrSize) )
+                {
+                    TRACFCOMP(g_trac_expupd,"explorerUpdateCheck> Version info in SPD is out of date, will force a rewrite");
+                    o_versionUpdateList.push_back(l_ocmbTarget);
+                }
+            }
+
+            // Add every OCMB to the update list if told to
+            if( OCMB_FW_UPDATE_BEHAVIOR_FORCE_UPDATE
+                == l_forced_behavior )
+            {
+                TRACFCOMP(g_trac_expupd, INFO_MRK "explorerUpdateCheck: "
+                          "Forcing ocmb[0x%08X] update due to override"
+                          " (FORCE_UPDATE)", get_huid(l_ocmbTarget) );
+                o_flashUpdateList.push_back(l_ocmbTarget);
+                o_rebootRequired = true; //forcing update = do a reboot
+            }
+            // Or if we are using the MFG flag and the flag is set
+            else if (i_checkMfgFlag && TARGETING::isDimmSpiFlashScreenSet())
+            {
+                TRACFCOMP(g_trac_expupd, INFO_MRK "explorerUpdateCheck: "
+                          "Forcing ocmb[0x%08X] update due to mfg flag"
+                          " (MNFG_DIMM_SPI_FLASH_SCREEN)",
+                          get_huid(l_ocmbTarget) );
+                o_flashUpdateList.push_back(l_ocmbTarget);
+                //not setting o_rebootRequired=false because it just takes one
+            }
+            else if( OCMB_FW_UPDATE_BEHAVIOR_FORCE_UPDATE_ONCE
+                     == l_forced_behavior )
+            {
+                // check SPD for special flag
+                if( checkAndSetForceFlag( l_ocmbTarget ) )
+                {
+                    TRACFCOMP(g_trac_expupd, INFO_MRK "explorerUpdateCheck: Previously forced ocmb[0x%08X] update due to override (FORCE_UPDATE_ONCE), not forcing this time",
+                              get_huid(l_ocmbTarget) );
+                    o_versionUpdateList.push_back(l_ocmbTarget); //need to clear the flag
+                }
+                else
+                {
+                    TRACFCOMP(g_trac_expupd, INFO_MRK "explorerUpdateCheck: Forcing ocmb[0x%08X] update due to override (FORCE_UPDATE_ONCE)",
                               get_huid(l_ocmbTarget) );
                     o_flashUpdateList.push_back(l_ocmbTarget);
+                    o_rebootRequired = true; //forcing update = do a reboot
                 }
             }
         } // All OCMB loop
 
         TRACFCOMP(g_trac_expupd,
-                  "explorerUpdateCheck: %d OCMB chips require update",
-                  o_flashUpdateList.size());
+                  "explorerUpdateCheck: %d OCMB chips require update, %d SPDs will be rewritten",
+                  o_flashUpdateList.size(),
+                  o_versionUpdateList.size());
     } while (0);
+
     if( OCMB_FW_UPDATE_BEHAVIOR_CHECK_BUT_NO_UPDATE == l_forced_behavior )
     {
         TRACFCOMP(g_trac_expupd,
             INFO_MRK "explorerUpdateCheck: Skipping update due to override "
             "(CHECK_BUT_NO_UPDATE)");
-        l_attemptUpdate = false;
+        o_flashUpdateList.clear();
+        o_rebootRequired = false;
     }
 
-    if ( Util::isSimicsRunning() )
-    {
-        TRACFCOMP(g_trac_expupd,
-            INFO_MRK "explorerUpdateCheck: Simics running so skipping the update");
-        l_attemptUpdate = false;
-    }
-    return l_attemptUpdate;
+    TRACFCOMP(g_trac_expupd, EXIT_MRK
+              "explorerUpdateCheck: o_imageLoaded=%d, o_rebootRequired=%d",
+              o_imageLoaded,
+              o_rebootRequired);
+    return;
 }
 
 void performUpdate( IStepError& o_stepError,
@@ -721,6 +885,7 @@ void performUpdate( IStepError& o_stepError,
     Util::ThreadPool<IStepWorkItem> threadpool;
     constexpr size_t MAX_OCMB_THREADS = 8;
     Target* l_pTopLevel = UTIL::assertGetToplevelTarget();
+    bool l_rebootRequired = i_rebootRequired;
 
     do
     {
@@ -782,7 +947,7 @@ void performUpdate( IStepError& o_stepError,
 
     // force reboot if any update was triggered by a FW mismatch or
     // forced by attribute
-    if(i_rebootRequired)
+    if(l_rebootRequired)
     {
         TRACFCOMP(g_trac_expupd,
                   "performUpdate: %d OCMB chip(s) %s update.  Requesting reboot...",
@@ -808,27 +973,34 @@ void updateAll(IStepError& o_stepError)
     bool l_rebootRequired = false;
     bool l_checkMfgFlag = true;
     TargetHandleList l_flashUpdateList;
+    TargetHandleList l_versionUpdateList;
     rawImageInfo_t l_imageInfo;
 
+    // check to see if any OCMBs need to update
+    explorerUpdateCheck(o_stepError,
+                        l_flashUpdateList,
+                        l_versionUpdateList,
+                        l_imageInfo,
+                        l_imageLoaded,
+                        l_rebootRequired,
+                        l_checkMfgFlag);
 
-    // Check to see if any OCMBs need to update
-    // Use the MFG flag in this path
-    bool attemptUpdate = explorerUpdateCheck(o_stepError,
-                                             l_flashUpdateList,
-                                             l_imageInfo,
-                                             l_imageLoaded,
-                                             l_rebootRequired,
-                                             l_checkMfgFlag );
-
-    // Verify update should be attempted,
-    // attr overrides and major errors can prevent update
-    if (attemptUpdate)
+    // Execute the update procedure on all indicated parts
+    if (!l_flashUpdateList.empty())
     {
         // try to perform the update now with list
         performUpdate(o_stepError,
                       l_flashUpdateList,
                       l_imageInfo,
                       l_rebootRequired);
+    }
+
+    // Update the version information on all indicated parts
+    for( auto l_ocmb : l_versionUpdateList )
+    {
+        writeExplorerFwVersion( l_ocmb,
+                                l_imageInfo.fwVersionStrPtr,
+                                l_imageInfo.fwVersionStrSize );
     }
 
     // unload explorer fw image
@@ -892,6 +1064,7 @@ void ocmbFwI2cUpdateStatusCheck( IStepError & io_StepError)
     bool l_imageLoaded = false;
     bool l_rebootRequired = false;
     bool l_checkMfgFlag = false;
+    TargetHandleList l_versionUpdateList;//ignored here
 
     // Get a handle to the current node target
     TargetHandle_t l_nodeTarget = UTIL::getCurrentNodeTarget();
@@ -912,12 +1085,13 @@ void ocmbFwI2cUpdateStatusCheck( IStepError & io_StepError)
 
     // Get list of OCMBs that need updating + update image
     // Do not use the MFG flag in this path
-    bool doUpdate = explorerUpdateCheck(io_StepError,
-                                        l_ocmbUpdateList,
-                                        l_imageInfo,
-                                        l_imageLoaded,
-                                        l_rebootRequired,
-                                        l_checkMfgFlag );
+    explorerUpdateCheck(io_StepError,
+                        l_ocmbUpdateList,
+                        l_versionUpdateList, //ignored here
+                        l_imageInfo,
+                        l_imageLoaded,
+                        l_rebootRequired,
+                        l_checkMfgFlag );
 
     // check that at least one ocmb needs an update
     if (l_ocmbUpdateList.size() && !mfgMode)
@@ -932,18 +1106,15 @@ void ocmbFwI2cUpdateStatusCheck( IStepError & io_StepError)
         }
         else if (l_updStatus.updateI2c && !l_updStatus.i2cUpdateAttempted)
         {
-            // only perform update if the check says to do it
-            if (doUpdate)
-            {
-                // make sure i2c scom path is taken
-                disableInbandScomsOCMB(l_ocmbUpdateList);
+            // make sure i2c scom path is taken
+            disableInbandScomsOCMB(l_ocmbUpdateList);
 
-                // do the i2c update of the Explorer(s)
-                performUpdate(io_StepError,
-                              l_ocmbUpdateList,
-                              l_imageInfo,
-                              l_rebootRequired);
-            }
+            // do the i2c update of the Explorer(s)
+            performUpdate(io_StepError,
+                          l_ocmbUpdateList,
+                          l_imageInfo,
+                          l_rebootRequired);
+
             l_updStatus.i2cUpdateAttempted = 1;
         }
     }
