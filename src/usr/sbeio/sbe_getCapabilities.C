@@ -87,6 +87,18 @@ void applySbeCapabilities(TargetHandle_t i_target,
     i_target->setAttr<ATTR_SBE_RELEASE_TAG>(l_sbeReleaseTagString);
     TRACFCOMP(g_trac_sbeio,"applySbeCapabilities: "
               "Retrieved SBE Release Tag: %s", l_sbeReleaseTagString);
+
+    // SBE only supported accurate Hostboot requested halt reporting to FSP
+    // as of version 1.4 or later.
+    const uint8_t sbeSupportsHaltReporting =
+        (   (   (i_capabilities.majorVersion == 1)
+             && (i_capabilities.minorVersion >= 4))
+         || (   (i_capabilities.majorVersion >  1)));
+
+    i_target->setAttr<ATTR_SBE_SUPPORTS_HALT_STATUS>(sbeSupportsHaltReporting);
+    TRACFCOMP(g_trac_sbeio,"applySbeCapabilities: "
+              "SBE supports Hostboot requested halt status reporting: %d",
+              sbeSupportsHaltReporting);
 }
 
 /**

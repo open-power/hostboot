@@ -1370,6 +1370,23 @@
     <hbOnly/>
   </attribute>
 
+  <attribute>
+    <id>SBE_SUPPORTS_HALT_STATUS</id>
+    <description>
+        Boolean indicating whether SBE can accurately report when Hostboot
+        intentionally halts it, or not.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>1</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <no_export/>
+  </attribute>
+
   <enumerationType>
     <id>SBE_UPDATE_TYPE</id>
     <description> Enumeration used in OR expression to indicate why to update SBE.

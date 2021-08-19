@@ -150,6 +150,9 @@
       <id>I2C_PAGE_MUTEX_3</id>
     </attribute>
     <attribute>
+      <id>SBE_SUPPORTS_HALT_STATUS</id>
+    </attribute>
+    <attribute>
       <id>SPI_ENGINE_MUTEX_0</id>
     </attribute>
     <attribute>

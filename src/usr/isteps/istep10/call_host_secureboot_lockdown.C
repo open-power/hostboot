@@ -951,54 +951,87 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
         break;
     }
 
-    // HRESET SBEs and bring them back up
-    for (auto l_proc : l_secondaryProcsList)
+    const bool isMpipl = TARGETING::UTIL::assertGetToplevelTarget()->
+        getAttr<TARGETING::ATTR_IS_MPIPL_HB>();
+
+    if(!isMpipl)
     {
-        // Don't restart compromised secondary SBEs
-        if (l_proc->getAttr<ATTR_SBE_COMPROMISED_EID>())
+        // Unhalt the SBEs if they were halted in istep 10.1.  See that
+        // step for detailed explanation on the criteria for performing a halt.
+        bool unhaltSbes = true;
+        const bool isImprint = SECUREBOOT::getSbeSecurityBackdoor();
+        if(isImprint)
         {
-            continue;
-        }
-
-        // Clear FIFO and perform hreset to secondary SBE
-        recoverSBE(l_proc, l_istepError);
-
-        // recoverSBE will set useSbeScom if successful, so
-        // change to XSCOM if the proc chips supports it
-        if (l_proc->getAttr<ATTR_PRIMARY_CAPABILITIES>()
-            .supportsXscom)
-        {
-            ScomSwitches l_switches =
-                l_proc->getAttr<ATTR_SCOM_SWITCHES>();
-
-            // If Xscom is not already enabled.
-            if ((l_switches.useXscom != 1) || (l_switches.useSbeScom != 0))
+            for (auto l_proc : l_secondaryProcsList)
             {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                        "After hreset, switching back to useXscom from 0x%.2X for proc 0x%.8X",
-                        l_switches,
-                        get_huid(l_proc));
-
-                l_switches.useSbeScom = 0;
-                l_switches.useXscom = 1;
-
-                // Turn off SBE scom and turn on Xscom.
-                l_proc->setAttr<ATTR_SCOM_SWITCHES>(l_switches);
+                if(!l_proc->getAttr<TARGETING::ATTR_SBE_SUPPORTS_HALT_STATUS>())
+                {
+                    unhaltSbes = false;
+                    break;
+                }
             }
         }
-    }
-    if (!l_istepError.isNull())
-    {
-        // break out on istep failure
-        break;
-    }
 
-    // re-enable PRD to handle SBE Halt
-    enablePRDHaltHandling(l_secondaryProcsList, l_istepError);
-    if (!l_istepError.isNull())
-    {
-        // break out on istep failure
-        break;
+        if(unhaltSbes)
+        {
+            // HRESET SBEs and bring them back up
+            for (auto l_proc : l_secondaryProcsList)
+            {
+                // Don't restart compromised secondary SBEs
+                if (l_proc->getAttr<ATTR_SBE_COMPROMISED_EID>())
+                {
+                    continue;
+                }
+
+                // Clear FIFO and perform hreset to secondary SBE
+                recoverSBE(l_proc, l_istepError);
+
+                // recoverSBE will set useSbeScom if successful, so
+                // change to XSCOM if the proc chips supports it
+                if (l_proc->getAttr<ATTR_PRIMARY_CAPABILITIES>()
+                    .supportsXscom)
+                {
+                    ScomSwitches l_switches =
+                        l_proc->getAttr<ATTR_SCOM_SWITCHES>();
+
+                    // If Xscom is not already enabled.
+                    if ((l_switches.useXscom != 1) || (l_switches.useSbeScom != 0))
+                    {
+                        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                                "After hreset, switching back to useXscom from 0x%.2X for proc 0x%.8X",
+                                l_switches,
+                                get_huid(l_proc));
+
+                        l_switches.useSbeScom = 0;
+                        l_switches.useXscom = 1;
+
+                        // Turn off SBE scom and turn on Xscom.
+                        l_proc->setAttr<ATTR_SCOM_SWITCHES>(l_switches);
+                    }
+                }
+            }
+            if (!l_istepError.isNull())
+            {
+                // break out on istep failure
+                break;
+            }
+
+            // re-enable PRD to handle SBE Halt
+            enablePRDHaltHandling(l_secondaryProcsList, l_istepError);
+            if (!l_istepError.isNull())
+            {
+                // break out on istep failure
+                break;
+            }
+        }
+        else
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
+                "call_host_secureboot_lockdown: Skipped unhalting SBEs because "
+                "firmware was imprint signed and one or more SBEs did not "
+                "support reporting Hostboot requested halts to service "
+                "processor.");
+        }
     }
 
     for (auto l_proc_target : l_secondaryProcsList)

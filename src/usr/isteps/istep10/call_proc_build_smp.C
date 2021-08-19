@@ -494,47 +494,76 @@ void* call_proc_build_smp (void *io_pArgs)
             }
         }
 
-        // Mask appropriate bits to prevent PRDF handling of SBE halt
-        preventPRDHaltHandling(l_secondaryProcsList, l_StepError);
-        if (!l_StepError.isNull())
+        // On production signed firmware, always halt all secondary chip SBEs to
+        // prevent security holes.  To avoid firmware update co-reqs,
+        // on imprint signed firmware, halt all secondary chip SBEs unless one
+        // or more of them don't support accurately reporting to the service
+        // processor that Hostboot has intentionally halted it.
+        bool haltSbes = true;
+        const bool isImprint = SECUREBOOT::getSbeSecurityBackdoor();
+        if(isImprint)
         {
-            // NOTE: no need to try to re-enable PRD halt handling on
-            // the non-failed processors.  It will happen automatically
-            // during the reconfig loop after bad processors are deconfigured
-            break;
+            for (auto l_proc : l_secondaryProcsList)
+            {
+                if(!l_proc->getAttr<TARGETING::ATTR_SBE_SUPPORTS_HALT_STATUS>())
+                {
+                    haltSbes = false;
+                    break;
+                }
+            }
         }
 
-        // b) halt all non-boot chip SBEs
-        for (auto l_proc : l_secondaryProcsList)
+        if(haltSbes)
         {
-            // send halt request
-            l_errl = SBEIO::sendSecondarySbeHaltRequest(l_proc);
-            if (l_errl)
+            // Mask appropriate bits to prevent PRDF handling of SBE halt
+            preventPRDHaltHandling(l_secondaryProcsList, l_StepError);
+            if (!l_StepError.isNull())
             {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "ERROR : call_proc_build_smp: sendSecondarySbeHaltRequest returned error" );
-                forceProcDelayDeconfigCallout(l_proc, l_errl);
-                captureError(l_errl, l_StepError, ISTEP_COMP_ID, l_proc);
-                continue;  // no sense waiting for SBE attn
+                // NOTE: no need to try to re-enable PRD halt handling on
+                // the non-failed processors.  It will happen automatically
+                // during the reconfig loop after bad processors are deconfigured
+                break;
             }
 
-            // monitor for halt completion
-            l_errl = waitForSBEAttn(l_proc, MAX_SBE_WAIT_NS);
-            if (l_errl)
+            // b) halt all non-boot chip SBEs
+            for (auto l_proc : l_secondaryProcsList)
             {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "ERROR : call_proc_build_smp: waitForSBEAttn returned error" );
-                forceProcDelayDeconfigCallout(l_proc, l_errl);
-                captureError(l_errl, l_StepError, ISTEP_COMP_ID, l_proc);
-            }
+                // send halt request
+                l_errl = SBEIO::sendSecondarySbeHaltRequest(l_proc);
+                if (l_errl)
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "ERROR : call_proc_build_smp: sendSecondarySbeHaltRequest returned error" );
+                    forceProcDelayDeconfigCallout(l_proc, l_errl);
+                    captureError(l_errl, l_StepError, ISTEP_COMP_ID, l_proc);
+                    continue;  // no sense waiting for SBE attn
+                }
 
-            // reset the started attribute
-            l_proc->setAttr<ATTR_SBE_IS_STARTED>(0);
+                // monitor for halt completion
+                l_errl = waitForSBEAttn(l_proc, MAX_SBE_WAIT_NS);
+                if (l_errl)
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "ERROR : call_proc_build_smp: waitForSBEAttn returned error" );
+                    forceProcDelayDeconfigCallout(l_proc, l_errl);
+                    captureError(l_errl, l_StepError, ISTEP_COMP_ID, l_proc);
+                }
+
+                // reset the started attribute
+                l_proc->setAttr<ATTR_SBE_IS_STARTED>(0);
+            }
+            if (!l_StepError.isNull())
+            {
+                // break out on istep failure
+                break;
+            }
         }
-        if (!l_StepError.isNull())
+        else
         {
-            // break out on istep failure
-            break;
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
+                "call_proc_build_smp: Skipped halting SBEs because firmware "
+                "was imprint signed and one or more SBEs did not support "
+                "reporting Hostboot requested halts to service processor.");
         }
 
         // c) check for Secure Access mismatch via FSI to non-boot chips
