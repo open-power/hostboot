@@ -3908,6 +3908,18 @@ IpVpdFacade::validateAllOtherRecordEccData(
                     break;
                 }
             } // if ( unlikely(VPD_ECC_OK != l_returnCode) )
+
+            // Now that we've confirmed our cache looks valid, we will compare
+            //  the ECC data between our cache and the hardware seeprom to
+            //  detect any external changes.
+            l_err = checkForVpdChanges( i_target, l_ptEntry.record_name,
+                                        l_eccOffset, l_eccLength, l_eccData,
+                                        l_recordOffset, l_recordLength );
+            if( l_err )
+            {
+                TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateAllOtherRecordEccData(): Error from checkForExternalUpdates" );
+                break;
+            }
         } // for (const pt_entry &l_ptEntry: l_recordMetaDataList)
     } while (0);
 
@@ -4523,3 +4535,99 @@ IpVpdFacade::checkEccDataValidationReturnCode(
     return l_err;
 } // checkEccDataValidationReturnCode
 
+
+/**
+ * @brief Compare the ECC portion of this record between the cache
+ *        and the seeprom to detect any external vpd updates we
+ *        weren't aware of.  If a difference is found, update our
+ *        cache with the data in the seeprom.
+ */
+errlHndl_t
+IpVpdFacade::checkForVpdChanges( const TARGETING::TargetHandle_t i_target,
+                                 const char* i_recordName,
+                                 size_t i_eccOffset,
+                                 size_t i_eccLength,
+                                 uint8_t* i_eccDataCache,
+                                 size_t i_recordOffset,
+                                 size_t i_recordLength )
+{
+    errlHndl_t l_err = nullptr;
+
+    do {
+        uint8_t l_eccDataHW[i_eccLength] = {0};
+
+        // Retrieve the ECC data from the HW.
+        l_err = fetchDataFromEeprom(i_eccOffset, i_eccLength, l_eccDataHW,
+                                    i_target, EEPROM::HARDWARE);
+        if ( unlikely(nullptr != l_err) )
+        {
+            TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::checkForVpdChanges(): fetchDataFromEeprom(HW) failed to retrieve ECC data for record %s with ecc length %d and ecc offset 0x%.4X on target 0x%.8X",
+                       i_recordName, i_eccLength,
+                       i_eccOffset, TARGETING::get_huid(i_target) );
+            break;
+        }
+
+        // Compare HW and Cache ECC
+        if( 0 == memcmp( l_eccDataHW, i_eccDataCache, i_eccLength ) )
+        {
+            TRACFCOMP( g_trac_vpd, "ECC matches between HW and cache for record %s",
+                       i_recordName);
+            break;
+        }
+
+        TRACFCOMP( g_trac_vpd, "ECC does not match between HW and cache for record %s on %.8X",
+                   i_recordName,
+                   TARGETING::get_huid(i_target) );
+
+        // read the record's content from the seeprom so that we can update
+        //  our cache
+        uint8_t l_recordData[i_recordLength] = {0};
+        l_err = fetchDataFromEeprom(i_recordOffset, i_recordLength,
+                                    l_recordData,
+                                    i_target,
+                                    EEPROM::HARDWARE);
+
+        if ( unlikely(nullptr != l_err) )
+        {
+            TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::checkForVpdChanges(): "
+                       "fetchDataFromEeprom failed to retrieve record %s with record length "
+                       "%d and record offset 0x%.4X on target 0x%.8X", i_recordName,
+                       i_recordLength, i_recordOffset, TARGETING::get_huid(i_target) );
+            break;
+        }
+
+        // write the seeprom data into the cache
+        l_err = DeviceFW::deviceOp( DeviceFW::WRITE,
+                                    i_target,
+                                    l_recordData,
+                                    i_recordLength,
+                                    DEVICE_EEPROM_ADDRESS(
+                                       EEPROM::VPD_AUTO,
+                                       i_recordOffset,
+                                       EEPROM::CACHE) );
+        if ( unlikely(nullptr != l_err) )
+        {
+            TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::checkForVpdChanges(): Error updating cache with new seeprom data for record %s",
+                       i_recordName );
+            break;
+        }
+
+        // write the seeprom's ecc data into the cache
+        l_err = DeviceFW::deviceOp( DeviceFW::WRITE,
+                                    i_target,
+                                    l_eccDataHW,
+                                    i_eccLength,
+                                    DEVICE_EEPROM_ADDRESS(
+                                       EEPROM::VPD_AUTO,
+                                       i_eccOffset,
+                                       EEPROM::CACHE) );
+        if ( unlikely(nullptr != l_err) )
+        {
+            TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::checkForVpdChanges(): Error updating cache with new ECC data for record %s",
+                       i_recordName );
+            break;
+        }
+    } while(0);
+
+    return l_err;
+}

@@ -1291,6 +1291,29 @@ class IpVpdFacade
                 unsigned char*       io_recordData, size_t i_recordLength,
                 const unsigned char* i_eccData,     size_t i_eccLength);
 
+    /**
+     * @brief Compare the ECC portion of this record between the cache
+     *        and the seeprom to detect any external vpd updates we
+     *        weren't aware of.  If a difference is found, update our
+     *        cache with the data in the seeprom.
+     *
+     * @param[in] i_target - Target associated with this VPD.
+     * @param[in] i_recordName - Name of the record in ASCII.
+     * @param[in] i_eccOffset - Offset of the ECC data within the VPD.
+     * @param[in] i_eccLength - Length of the ECC data.
+     * @param[in] i_eccData - Point to ECC data read from cache.
+     * @param[in] i_recordOffset - Offset of the record data within the VPD.
+     * @param[in] i_recordLength - Length of the record data.
+     * @return error handle - nullptr on success
+     */
+    errlHndl_t checkForVpdChanges( const TARGETING::TargetHandle_t i_target,
+                                   const char* i_recordName,
+                                   size_t i_eccOffset,
+                                   size_t i_eccLength,
+                                   uint8_t* i_eccDataCache,
+                                   size_t i_recordOffset,
+                                   size_t i_recordLength );
+
   protected: // Variables
 
     /**
