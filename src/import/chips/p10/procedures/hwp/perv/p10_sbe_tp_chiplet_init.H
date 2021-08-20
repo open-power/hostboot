@@ -41,11 +41,8 @@
 
 enum P10_SBE_TP_CHIPLET_INIT_Public_Constants
 {
-    // Default TOD error mask, masks:
-    //   * received TType-X            - not an error but a status indication
-    //   * external xstop              - xstop coming in from outside, should not cause a secondary error
-    //   * interrupt from clock switch - only needed by firmware for error diagnosis, not an error
-    TOD_ERROR_MASK = 0x0000000003F00042,
+    // SW532974
+    TOD_ERROR_MASK = 0xFFFC1BFFB7FFFFFF,
 };
 
 typedef fapi2::ReturnCode (*p10_sbe_tp_chiplet_init_FP_t)(
