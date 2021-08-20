@@ -86,6 +86,15 @@ inline fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
                 break;
             }
 
+        case mss::spd::rev::V0_5:
+            {
+                o_decoder_ptr = std::make_shared<mss::efd::decoder<mss::spd::device_type::DDR4,
+                DDR4_CUSTOM_MICROCHIP,
+                mss::spd::rev::V0_5>>(i_target, i_data, i_phy_rank, i_dimm_rank);
+                return fapi2::FAPI2_RC_SUCCESS;
+                break;
+            }
+
         case mss::spd::rev::V1_0:
             {
                 o_decoder_ptr = std::make_shared<mss::efd::decoder<mss::spd::device_type::DDR4,

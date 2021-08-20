@@ -173,6 +173,7 @@ class rev_fallback
 
         const module_key DDIMM_DDR4_V0_3;
         const module_key DDIMM_DDR4_V0_4;
+        const module_key DDIMM_DDR4_V0_5;
         const module_key DDIMM_DDR4_V1_0;
 
         std::map<module_key, uint8_t> iv_lrdimm_rev_map;
@@ -226,6 +227,7 @@ class module_factory
             NVDIMM_DDR4_REV_1_1 {DDR4, NVDIMM_MODULE, rev::V1_1},
             DDIMM_DDR4_REV_0_3  {DDR4, DDIMM_MODULE,  rev::V0_3},
             DDIMM_DDR4_REV_0_4  {DDR4, DDIMM_MODULE,  rev::V0_4},
+            DDIMM_DDR4_REV_0_5  {DDR4, DDIMM_MODULE,  rev::V0_5},
             DDIMM_DDR4_REV_1_0  {DDR4, DDIMM_MODULE,  rev::V1_0}
         {
             // Setup pre-defined maps available to search through
@@ -278,6 +280,7 @@ class module_factory
         const module_key NVDIMM_DDR4_REV_1_1;
         const module_key DDIMM_DDR4_REV_0_3;
         const module_key DDIMM_DDR4_REV_0_4;
+        const module_key DDIMM_DDR4_REV_0_5;
         const module_key DDIMM_DDR4_REV_1_0;
 
         std::map< module_key, std::shared_ptr<T> > iv_decoder_map;
@@ -344,6 +347,9 @@ class module_factory
             // New PMIC current consumption warning fields, new enum for PHY_ODT_IMPEDANCE
             o_map[DDIMM_DDR4_REV_0_4] = std::make_shared< decoder<DDR4, BASE_CNFG, rev::V0_4> >(iv_target, i_spd_data);
 
+            // Rev 0.5
+            o_map[DDIMM_DDR4_REV_0_5] = std::make_shared< decoder<DDR4, BASE_CNFG, rev::V0_5> >(iv_target, i_spd_data);
+
             // MSL hardware
             // Rev 1.0
             // Note: we are working around the 1.0 DDIMM SPD really being DDR4 base version of 1.1
@@ -401,6 +407,9 @@ class module_factory
             // Rev 0.4
             // New PMIC current consumption warning fields, new enum for PHY_ODT_IMPEDANCE
             o_map[DDIMM_DDR4_REV_0_4] = std::make_shared< decoder<DDR4, DDIMM_MODULE, rev::V0_4> >(iv_target, i_spd_data);
+
+            // Rev 0.5
+            o_map[DDIMM_DDR4_REV_0_5] = std::make_shared< decoder<DDR4, DDIMM_MODULE, rev::V0_5> >(iv_target, i_spd_data);
 
             // MSL hardware
             // Rev 1.0
