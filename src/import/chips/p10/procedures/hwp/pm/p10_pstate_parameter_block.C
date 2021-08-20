@@ -1359,7 +1359,7 @@ fapi2::ReturnCode PlatPmPPB::oppb_init(
             //Translate pau  frequency to pstate
 
             l_rc = freq2pState((iv_attrs.attr_pau_frequency_mhz * 1000),
-                    &l_ps, ROUND_FAST);
+                    &l_ps, ROUND_NEAR);
             if (l_rc)
             {
                 // TODO put in notification controls
@@ -1370,7 +1370,7 @@ fapi2::ReturnCode PlatPmPPB::oppb_init(
         {
             //Translate safe mode frequency to pstate
             l_rc = freq2pState((iv_attrs.attr_pm_safe_frequency_mhz * 1000),
-                    &l_ps, ROUND_FAST);
+                    &l_ps, ROUND_NEAR);
 
             if (l_rc)
             {
@@ -1417,7 +1417,7 @@ fapi2::ReturnCode PlatPmPPB::oppb_init(
         Pstate pstate_min;
         l_rc = freq2pState(revle32(i_occppb->frequency_min_khz),
                              &pstate_min,
-                             ROUND_FAST);
+                             ROUND_NEAR);
 
         switch ((int)l_rc)
         {
@@ -4716,7 +4716,7 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
 
     // Recalculate the Pstate as jump uplifts may have changed the previous result
     l_rc = freq2pState(iv_attrs.attr_pm_safe_frequency_mhz*1000,
-                        &l_safe_mode_ps, ROUND_FAST, PPB_WARN);
+                        &l_safe_mode_ps, ROUND_NEAR, PPB_WARN);
     if (l_rc)
     {
         disable_pstates();
