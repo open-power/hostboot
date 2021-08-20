@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2020
+# Contributors Listed Below - COPYRIGHT 2011,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -24,6 +24,9 @@
 #
 # IBM_PROLOG_END_TAG
 use strict;
+
+# needed to use 'state' variables
+use 5.016;
 
 package Hostboot::Trace;
 use Hostboot::_DebugFrameworkVMM qw(NotFound NotPresent getPhysicalAddr);
@@ -206,11 +209,28 @@ sub main
 sub readPage
 {
     my ($addr, $offset, $pageArray) = @_;
+
+    # keep track of addresses we have already walked
+    # so we don't end up in an endless recursive loop
+    state %prev_addrs;
+
     return if (0 == $addr);
 
     my $buffer = ::readData($addr, 4096);
 
     my $pointer = readBuf64($buffer, $offset);
+
+    # stop ourselves from going down and endless loop
+    if(exists $prev_addrs{$pointer})
+    {
+        # clear the list of prev_addrs
+        # to setup for for next time
+        %prev_addrs = ();
+        return;
+    }
+
+    # add to our list of previous addresses we have walked
+    $prev_addrs{$addr} = 1;
 
     push @{$pageArray}, $buffer;
 
