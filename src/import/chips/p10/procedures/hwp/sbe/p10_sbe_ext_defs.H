@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,9 +42,11 @@ typedef union sbeMsgReg
         uint32_t currState : 4; ///< Current SBE state
         uint32_t majorStep : 8; ///< Last major istep executed by the SBE
         uint32_t minorStep : 6; ///< Last minor istep executed by the SBE
-        uint32_t reserved2 : 6; ///< Reserved
+        uint32_t reserved2 : 2; ///< Reserved
+        uint32_t iv_progressCode  : 4;
 #else
-        uint32_t reserved2 : 6; ///< Reserved
+        uint32_t iv_progressCode  : 4;
+        uint32_t reserved2 : 2; ///< Reserved
         uint32_t minorStep : 6; ///< Last minor istep executed by the SBE
         uint32_t majorStep : 8; ///< Last major istep executed by the SBE
         uint32_t currState : 4; ///< Current SBE state
@@ -70,10 +72,11 @@ typedef enum sbeState
     SBE_STATE_DMT     = 0x5, // Dead Man Timer State (transient)
     SBE_STATE_DUMP    = 0x6, // Dumping
     SBE_STATE_FAILURE = 0x7, // Internal SBE failure
-    SBE_STATE_QUIESCE = 0x8, // Final state - needs SBE reset to get out
+    SBE_STATE_QUIESCE = 0x8, // This state quiesces any seeprom access
+    SBE_STATE_HALT    = 0x9, // SBE halted via chip-op driven from Hostboot.Needs SBE reset to get out
 
     // Max States, Always keep it at the last of the enum and sequential
-    SBE_MAX_STATE     = 0x9,
+    SBE_MAX_STATE     = 0xA,
     // Don't count this in the state, just to intialize the state variables
     SBE_INVALID_STATE = 0xF,
 } sbeState_t;
