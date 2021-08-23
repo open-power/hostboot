@@ -429,14 +429,23 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target, bool i_sbe
                     // up in a endless loop
                     break;
                 }
-                l_errl = this->switch_sbe_sides(i_target, this->iv_currentAction, false);
-                if(l_errl)
+                // HRESET in RUNTIME AND IPL 10.x steps need to SKIP
+                // the switch_sbe_sides call in the FSP flow, to avoid
+                // altering the CFAM registers and MVPD.
+                // HWSV owns the policy for when and what algorithms
+                // are performed during any type of SEEPROM or MSEEPROM
+                // recovery, therefore do -NOT- make any modifications.
+                if(!INITSERVICE::spBaseServicesEnabled())
                 {
-                    errlCommit(l_errl, SBEIO_COMP_ID);
-                    // If any error occurs while we are trying to switch sides
-                    // this indicates big problems so we want to break out of the
-                    // retry loop
-                    break;
+                    l_errl = this->switch_sbe_sides(i_target, this->iv_currentAction, false);
+                    if(l_errl)
+                    {
+                        errlCommit(l_errl, SBEIO_COMP_ID);
+                        // If any error occurs while we are trying to switch sides
+                        // this indicates big problems so we want to break out of the
+                        // retry loop
+                        break;
+                    }
                 }
                 // Note that we do not want to continue here because we want to
                 // attempt to restart using whatever sbeRestartMethod is set to after
@@ -526,17 +535,26 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target, bool i_sbe
                     SBE_TRACF("main_sbe_handler(): SBE reports it was never booted and we reached MAX_RESTARTS. Setting next action to be NO_RECOVERY_ACTION");
                 }
                 // If we are RESTART_CBS we want to flip the MSEEPROM always
-                // If something is requiring a restart flip the MSEEPROM to aide the best results
-                l_errl = this->switch_sbe_sides(i_target, P10_EXTRACT_SBE_RC::REIPL_BKP_MSEEPROM, true);
-                if(l_errl)
+                // For the eBMC flow if something is requiring a restart flip
+                // the MSEEPROM to aide the best results.
+                //
+                // For the FSP flow, we SKIP the call to switch_sbe_sides to
+                // avoid altering the CFAM registers and MVPD.
+                // HWSV owns the policy for when and what algorithms
+                // are performed during any type of SEEPROM or MSEEPROM
+                // recovery, therefore do -NOT- make any modifications in FSP flow.
+                if(!INITSERVICE::spBaseServicesEnabled())
                 {
-                    errlCommit(l_errl, SBEIO_COMP_ID);
-                    // If any error occurs while we are trying to switch sides
-                    // this indicates big problems so we want to break out of the
-                    // retry loop
-                    break;
+                    l_errl = this->switch_sbe_sides(i_target, P10_EXTRACT_SBE_RC::REIPL_BKP_MSEEPROM, true);
+                    if(l_errl)
+                    {
+                        errlCommit(l_errl, SBEIO_COMP_ID);
+                        // If any error occurs while we are trying to switch sides
+                        // this indicates big problems so we want to break out of the
+                        // retry loop
+                        break;
+                    }
                 }
-
 
 #ifdef CONFIG_COMPILE_CXXTEST_HOOKS
                 if (this->iv_sbeTestMode == TEST_RESTART_CBS)
