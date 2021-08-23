@@ -34,6 +34,7 @@
 #include <prdfPlatServices.H>
 #include <prdfMemAddress.H>
 #include <prdfMemUtils.H>
+#include <prdfOcmbDataBundle.H>
 
 #include <stdio.h>
 
@@ -151,12 +152,13 @@ int32_t __getPortAddr<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip, MemAddr i_addr,
     uint8_t bitPos = 0;
 
     // Check MC_ADDR_TRANS0 register for bit positions
-    SCAN_COMM_REGISTER_CLASS * reg = i_chip->getRegister( "MC_ADDR_TRANS" );
-    o_rc = reg->Read();
+    OcmbDataBundle * db = getOcmbDataBundle( i_chip );
+    BitStringBuffer mc_addr_trans0(64);
+    o_rc = db->iv_addrConfig.getMcAddrTrans0( mc_addr_trans0 );
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( PRDF_FUNC "Read failed on MC_ADDR_TRANS: i_chip=0x%08x",
-                  i_chip->getHuid() );
+        PRDF_ERR( PRDF_FUNC "Unable to get address configuration data from "
+                  "0x%08x", i_chip->getHuid() );
         return o_rc;
     }
 
@@ -164,7 +166,7 @@ int32_t __getPortAddr<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip, MemAddr i_addr,
     if ( twoDimmConfig )
     {
         // DIMM bitmap: MC_ADDR_TRANS0[33:37]
-        bitPos = reg->GetBitFieldJustified( 33, 5 );
+        bitPos = mc_addr_trans0.getFieldJustify( 33, 5 );
         __adjustCapiAddrBitPos( bitPos );
         o_addr |= (dslct << bitPos);
     }
@@ -180,12 +182,12 @@ int32_t __getPortAddr<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip, MemAddr i_addr,
         {
             case 2:
                 // Master rank 0 bitmap: MC_ADDR_TRANS0[38:42]
-                bitPos = reg->GetBitFieldJustified( 38, 5 );
+                bitPos = mc_addr_trans0.getFieldJustify( 38, 5 );
                 __adjustCapiAddrBitPos( bitPos );
                 o_addr |= (m0 << bitPos);
             case 1:
                 // Master rank 1 bitmap: MC_ADDR_TRANS0[43:47]
-                bitPos = reg->GetBitFieldJustified( 43, 5 );
+                bitPos = mc_addr_trans0.getFieldJustify( 43, 5 );
                 __adjustCapiAddrBitPos( bitPos );
                 o_addr |= (m1 << bitPos);
                 break;
@@ -208,17 +210,17 @@ int32_t __getPortAddr<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip, MemAddr i_addr,
         {
             case 3:
                 // Row 17 bitmap: MC_ADDR_TRANS0[49:53]
-                bitPos = reg->GetBitFieldJustified( 49, 5 );
+                bitPos = mc_addr_trans0.getFieldJustify( 49, 5 );
                 __adjustCapiAddrBitPos( bitPos );
                 o_addr |= (r17 << bitPos);
             case 2:
                 // Row 16 bitmap: MC_ADDR_TRANS0[54:58]
-                bitPos = reg->GetBitFieldJustified( 54, 5 );
+                bitPos = mc_addr_trans0.getFieldJustify( 54, 5 );
                 __adjustCapiAddrBitPos( bitPos );
                 o_addr |= (r16 << bitPos);
             case 1:
                 // Row 15 bitmap: MC_ADDR_TRANS0[59:63]
-                bitPos = reg->GetBitFieldJustified( 59, 5 );
+                bitPos = mc_addr_trans0.getFieldJustify( 59, 5 );
                 __adjustCapiAddrBitPos( bitPos );
                 o_addr |= (r15 << bitPos);
                 break;
@@ -226,12 +228,12 @@ int32_t __getPortAddr<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip, MemAddr i_addr,
     }
 
     // Check MC_ADDR_TRANS1 register for bit positions
-    reg = i_chip->getRegister( "MC_ADDR_TRANS1" );
-    o_rc = reg->Read();
+    BitStringBuffer mc_addr_trans1(64);
+    o_rc = db->iv_addrConfig.getMcAddrTrans1( mc_addr_trans1 );
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( PRDF_FUNC "Read failed on MC_ADDR_TRANS1: i_chip=0x%08x",
-                  i_chip->getHuid() );
+        PRDF_ERR( PRDF_FUNC "Unable to get address configuration data from "
+                  "0x%08x", i_chip->getHuid() );
         return o_rc;
     }
 
@@ -247,17 +249,17 @@ int32_t __getPortAddr<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip, MemAddr i_addr,
         {
             case 3:
                 // Slave rank 0 bitmap: MC_ADDR_TRANS1[3:7]
-                bitPos = reg->GetBitFieldJustified( 3, 5 );
+                bitPos = mc_addr_trans1.getFieldJustify( 3, 5 );
                 __adjustCapiAddrBitPos( bitPos );
                 o_addr |= (s0 << bitPos);
             case 2:
                 // Slave rank 1 bitmap: MC_ADDR_TRANS1[11:15]
-                bitPos = reg->GetBitFieldJustified( 11, 5 );
+                bitPos = mc_addr_trans1.getFieldJustify( 11, 5 );
                 __adjustCapiAddrBitPos( bitPos );
                 o_addr |= (s1 << bitPos);
             case 1:
                 // Slave rank 2 bitmap: MC_ADDR_TRANS1[19:23]
-                bitPos = reg->GetBitFieldJustified( 19, 5 );
+                bitPos = mc_addr_trans1.getFieldJustify( 19, 5 );
                 __adjustCapiAddrBitPos( bitPos );
                 o_addr |= (s2 << bitPos);
                 break;
@@ -274,38 +276,38 @@ int32_t __getPortAddr<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip, MemAddr i_addr,
         uint64_t c3 = (col & 0x01);
 
         // Column 3 bitmap: MC_ADDR_TRANS1[30:34]
-        bitPos = reg->GetBitFieldJustified( 30, 5 );
+        bitPos = mc_addr_trans1.getFieldJustify( 30, 5 );
         __adjustCapiAddrBitPos( bitPos );
         o_addr |= (c3 << bitPos);
 
         // Column 4 bitmap: MC_ADDR_TRANS1[35:39]
-        bitPos = reg->GetBitFieldJustified( 35, 5 );
+        bitPos = mc_addr_trans1.getFieldJustify( 35, 5 );
         __adjustCapiAddrBitPos( bitPos );
         o_addr |= (c4 << bitPos);
 
         // Column 5 bitmap: MC_ADDR_TRANS1[43:47]
-        bitPos = reg->GetBitFieldJustified( 43, 5 );
+        bitPos = mc_addr_trans1.getFieldJustify( 43, 5 );
         __adjustCapiAddrBitPos( bitPos );
         o_addr |= (c5 << bitPos);
 
         // Column 6 bitmap: MC_ADDR_TRANS1[51:55]
-        bitPos = reg->GetBitFieldJustified( 51, 5 );
+        bitPos = mc_addr_trans1.getFieldJustify( 51, 5 );
         __adjustCapiAddrBitPos( bitPos );
         o_addr |= (c6 << bitPos);
 
         // Column 7 bitmap: MC_ADDR_TRANS1[59:63]
-        bitPos = reg->GetBitFieldJustified( 59, 5 );
+        bitPos = mc_addr_trans1.getFieldJustify( 59, 5 );
         __adjustCapiAddrBitPos( bitPos );
         o_addr |= (c7 << bitPos);
     }
 
     // Check MC_ADDR_TRANS2 register for bit positions
-    reg = i_chip->getRegister( "MC_ADDR_TRANS2" );
-    o_rc = reg->Read();
+    BitStringBuffer mc_addr_trans2(64);
+    o_rc = db->iv_addrConfig.getMcAddrTrans2( mc_addr_trans2 );
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( PRDF_FUNC "Read failed on MC_ADDR_TRANS2: i_chip=0x%08x",
-                  i_chip->getHuid() );
+        PRDF_ERR( PRDF_FUNC "Unable to get address configuration data from "
+                  "0x%08x", i_chip->getHuid() );
         return o_rc;
     }
 
@@ -316,12 +318,12 @@ int32_t __getPortAddr<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip, MemAddr i_addr,
         uint64_t c8 = (col & 0x20) >> 5;
 
         // Column 8 bitmap: MC_ADDR_TRANS2[3:7]
-        bitPos = reg->GetBitFieldJustified( 3, 5 );
+        bitPos = mc_addr_trans2.getFieldJustify( 3, 5 );
         __adjustCapiAddrBitPos( bitPos );
         o_addr |= (c8 << bitPos);
 
         // Column 9 bitmap: MC_ADDR_TRANS2[11:15]
-        bitPos = reg->GetBitFieldJustified( 11, 5 );
+        bitPos = mc_addr_trans2.getFieldJustify( 11, 5 );
         __adjustCapiAddrBitPos( bitPos );
         o_addr |= (c9 << bitPos);
     }
@@ -337,12 +339,12 @@ int32_t __getPortAddr<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip, MemAddr i_addr,
         uint64_t bg1 = (bnk & 0x1);
 
         // Bank 0 bitmap: MC_ADDR_TRANS2[19:23]
-        bitPos = reg->GetBitFieldJustified( 19, 5 );
+        bitPos = mc_addr_trans2.getFieldJustify( 19, 5 );
         __adjustCapiAddrBitPos( bitPos );
         o_addr |= (b0 << bitPos );
 
         // Bank 1 bitmap: MC_ADDR_TRANS2[27:31]
-        bitPos = reg->GetBitFieldJustified( 27, 5 );
+        bitPos = mc_addr_trans2.getFieldJustify( 27, 5 );
         __adjustCapiAddrBitPos( bitPos );
         o_addr |= (b1 << bitPos);
 
@@ -350,12 +352,12 @@ int32_t __getPortAddr<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip, MemAddr i_addr,
         // Note: Bank2 not used for OCMB
 
         // Bank group 0 bitmap: MC_ADDR_TRANS2[43:47]
-        bitPos = reg->GetBitFieldJustified( 43, 5 );
+        bitPos = mc_addr_trans2.getFieldJustify( 43, 5 );
         __adjustCapiAddrBitPos( bitPos );
         o_addr |= (bg0 << bitPos);
 
         // Bank group 1 bitmap: MC_ADDR_TRANS2[51:55]
-        bitPos = reg->GetBitFieldJustified( 51, 5 );
+        bitPos = mc_addr_trans2.getFieldJustify( 51, 5 );
         __adjustCapiAddrBitPos( bitPos );
         o_addr |= (bg1 << bitPos);
     }

@@ -37,6 +37,7 @@
 #include <prdfPlatServices.H>
 #include <prdfMemCeTable.H>
 #include <prdfMemUeTable.H>
+#include <prdfOcmbAddrConfig.H>
 
 #ifdef __HOSTBOOT_MODULE
 
@@ -64,7 +65,8 @@ class OcmbDataBundle : public DataBundle
      * @param i_ocmbChip The OCMB chip.
      */
     explicit OcmbDataBundle( ExtensibleChip * i_ocmbChip ) :
-        iv_chip(i_ocmbChip), iv_ceTable(i_ocmbChip), iv_ueTable(i_ocmbChip)
+        iv_chip(i_ocmbChip), iv_ceTable(i_ocmbChip), iv_ueTable(i_ocmbChip),
+        iv_addrConfig(i_ocmbChip)
     {}
 
     /** @brief Destructor. */
@@ -189,6 +191,9 @@ class OcmbDataBundle : public DataBundle
      *  also use this flag to indicate that this OCMB has failed and should
      *  be "masked" and not analyzed to in the future. */
     bool iv_maskChnl = false;
+
+    /** Ocmb Address Configuration */
+    OcmbAddrConfig iv_addrConfig;
 
     #ifdef __HOSTBOOT_MODULE
 

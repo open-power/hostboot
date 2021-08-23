@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2020
+# Contributors Listed Below - COPYRIGHT 2016,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -51,4 +51,5 @@ prd_obj += prdfMemUeTable.o
 prd_obj += prdfMemUtils.o
 prd_obj += prdfMemThresholds.o
 prd_obj += prdfOcmbChipDomain.o
+prd_obj += prdfOcmbAddrConfig.o
 

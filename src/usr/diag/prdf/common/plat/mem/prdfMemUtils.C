@@ -923,35 +923,35 @@ uint32_t getAddrConfig<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
     int32_t o_rc = SUCCESS;
 
-    SCAN_COMM_REGISTER_CLASS * mc_addr_trans =
-        i_chip->getRegister( "MC_ADDR_TRANS" );
-    o_rc = mc_addr_trans->Read();
+    OcmbDataBundle * db = getOcmbDataBundle( i_chip );
+    BitStringBuffer mc_addr_trans0(64);
+    o_rc = db->iv_addrConfig.getMcAddrTrans0( mc_addr_trans0 );
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( PRDF_FUNC "Read failed on MC_ADDR_TRANS: i_chip=0x%08x",
-                  i_chip->getHuid() );
+        PRDF_ERR( PRDF_FUNC "Unable to get address configuration data from "
+                  "0x%08x", i_chip->getHuid() );
         return o_rc;
     }
 
     // Check for two dimm config
     o_twoDimmConfig = false;
-    if ( mc_addr_trans->IsBitSet(0) && mc_addr_trans->IsBitSet(16) )
+    if ( mc_addr_trans0.isBitSet(0) && mc_addr_trans0.isBitSet(16) )
         o_twoDimmConfig = true;
 
     // Get the primary rank bits that are configured
     o_prnkBits = 0;
-    if ( mc_addr_trans->IsBitSet(i_dslct ? 21: 5) ) o_prnkBits++;
-    if ( mc_addr_trans->IsBitSet(i_dslct ? 22: 6) ) o_prnkBits++;
+    if ( mc_addr_trans0.isBitSet(i_dslct ? 21: 5) ) o_prnkBits++;
+    if ( mc_addr_trans0.isBitSet(i_dslct ? 22: 6) ) o_prnkBits++;
 
     // Get the secondary rank bits that are configured
     o_srnkBits = 0;
-    if ( mc_addr_trans->IsBitSet(i_dslct ? 25: 9) ) o_srnkBits++;
-    if ( mc_addr_trans->IsBitSet(i_dslct ? 26:10) ) o_srnkBits++;
-    if ( mc_addr_trans->IsBitSet(i_dslct ? 27:11) ) o_srnkBits++;
+    if ( mc_addr_trans0.isBitSet(i_dslct ? 25: 9) ) o_srnkBits++;
+    if ( mc_addr_trans0.isBitSet(i_dslct ? 26:10) ) o_srnkBits++;
+    if ( mc_addr_trans0.isBitSet(i_dslct ? 27:11) ) o_srnkBits++;
 
     // According to the hardware team, B2 is used for DDR4e which went away. If
     // for some reason B2 is valid, there is definitely a bug.
-    if ( mc_addr_trans->IsBitSet(i_dslct ? 28:12) )
+    if ( mc_addr_trans0.isBitSet(i_dslct ? 28:12) )
     {
         PRDF_ERR( PRDF_FUNC "B2 enabled in MC_ADDR_TRANS: i_chip=0x%08x "
                   "i_dslct=%d", i_chip->getHuid(), i_dslct );
@@ -960,26 +960,12 @@ uint32_t getAddrConfig<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
     // Get the extra row bits that are configured
     o_extraRowBits = 0;
-    if ( mc_addr_trans->IsBitSet(i_dslct ? 29:13) ) o_extraRowBits++;
-    if ( mc_addr_trans->IsBitSet(i_dslct ? 30:14) ) o_extraRowBits++;
-    if ( mc_addr_trans->IsBitSet(i_dslct ? 31:15) ) o_extraRowBits++;
+    if ( mc_addr_trans0.isBitSet(i_dslct ? 29:13) ) o_extraRowBits++;
+    if ( mc_addr_trans0.isBitSet(i_dslct ? 30:14) ) o_extraRowBits++;
+    if ( mc_addr_trans0.isBitSet(i_dslct ? 31:15) ) o_extraRowBits++;
 
     // Check whether the column3 bit is used
-    SCAN_COMM_REGISTER_CLASS * mcbcfg = i_chip->getRegister( "MCBCFG" );
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "Read failed on MCBCFG: i_chip=0x%08x",
-                  i_chip->getHuid() );
-        return o_rc;
-    }
-
-    // If MCBCFG[56]=1, mcbist will issue 64B operations and col3 will be used
-    // to select between the 2 64B halves of the 128B cacheline.
-    o_col3Config = false;
-    if ( mcbcfg->IsBitSet(56) )
-    {
-        o_col3Config = true;
-    }
+    o_col3Config = db->iv_addrConfig.getCol3Valid();
 
     return o_rc;
 

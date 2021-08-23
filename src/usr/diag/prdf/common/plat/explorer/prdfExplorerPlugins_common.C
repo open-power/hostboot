@@ -62,8 +62,42 @@ namespace explorer_ocmb
  */
 int32_t Initialize( ExtensibleChip * i_chip )
 {
+    #define PRDF_FUNC "[explorer_ocmb::Initialize] "
+
     i_chip->getDataBundle() = new OcmbDataBundle( i_chip );
+
+    // Initialize the address configuration variable within the OcmbDataBundle
+    do
+    {
+        // Call getMcAddrTrans# to populate those instance variables with data
+        // in the MC_ADDR_TRANS registers
+        OcmbDataBundle * db = getOcmbDataBundle( i_chip );
+        BitStringBuffer temp(64);
+
+        if ( SUCCESS != db->iv_addrConfig.getMcAddrTrans0( temp ) )
+        {
+            PRDF_ERR( PRDF_FUNC "Failed to initialize mc_addr_trans0 in ocmb "
+                      "data bundle for 0x%08x", i_chip->getHuid() );
+            break;
+        }
+        if ( SUCCESS != db->iv_addrConfig.getMcAddrTrans1( temp ) )
+        {
+            PRDF_ERR( PRDF_FUNC "Failed to initialize mc_addr_trans1 in ocmb "
+                      "data bundle for 0x%08x", i_chip->getHuid() );
+            break;
+        }
+        if ( SUCCESS != db->iv_addrConfig.getMcAddrTrans2( temp ) )
+        {
+            PRDF_ERR( PRDF_FUNC "Failed to initialize mc_addr_trans2 in ocmb "
+                      "data bundle for 0x%08x", i_chip->getHuid() );
+            break;
+        }
+
+    } while(0);
+
     return SUCCESS;
+
+    #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE( explorer_ocmb, Initialize );
 
