@@ -2164,6 +2164,28 @@ ID for the sensor number returned with the elog. -->
   </attribute>
 
   <attribute>
+    <id>SYS_CLK_NE_TERMINATION_SITE_PREVENT_SYNC</id>
+    <description>
+        This attribute is defined with a mapping to ATTR_SYS_CLK_NE_TERMINATION_SITE to
+        prevent Hostboot from seeing ATTR_SYS_CLK_NE_TERMINATION_SITE when we loop through
+        all attributes during DEVTREE sync.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <no_export/>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_SYS_CLK_NE_TERMINATION_SITE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+  </attribute>
+
+  <attribute>
     <id>VDD_CURRENT_OVERFLOW_WORKAROUND_ENABLE</id>
     <description>
         Used to enable Vdd current overflow worakaround.
