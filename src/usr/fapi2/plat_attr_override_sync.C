@@ -941,9 +941,16 @@ void AttrOverrideSync::dynAttrGet()
         uint32_t * l_targInfo =
           reinterpret_cast<uint32_t*>(l_vaddr);
 
+        // Target type gets passed to HB as a uint32_t value indicating
+        // what bit in uint64_t we need to set for this fapi2:TargetType.
+        // See import/hwpf/fapi2/include/target_types.H if this is not
+        // making sense to you.
+        auto target_type =
+            static_cast<fapi2::TargetType>(
+                1ULL << l_targInfo[Util::DEBUG_ATTRGET_FAPI_TYPE]);
+
         FAPI_INF("init: processing dynamic ATTR get");
-        triggerAttrSync(static_cast<fapi2::TargetType>(
-                          l_targInfo[Util::DEBUG_ATTRGET_FAPI_TYPE]),
+        triggerAttrSync(target_type,
                         l_targInfo[Util::DEBUG_ATTRGET_FAPI_POS],
                         l_targInfo[Util::DEBUG_ATTRGET_HASH]);
     }while(0);
