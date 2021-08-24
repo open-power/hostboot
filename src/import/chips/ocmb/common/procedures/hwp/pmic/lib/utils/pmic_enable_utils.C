@@ -159,6 +159,34 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Set PWR_GOOD pin to Output
+///
+/// @param[in] i_pmic_target PMIC target
+/// @return fapi2::FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode set_pwr_good_pin_output(
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target)
+{
+    static constexpr auto J = mss::pmic::product::JEDEC_COMPLIANT;
+    using REGS = pmicRegs<J>;
+    using FIELDS = pmicFields<J>;
+    using CONSTS = mss::pmic::consts<J>;
+
+    fapi2::buffer<uint8_t> l_vr_enable_buffer;
+
+    FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(i_pmic_target, REGS::R32, l_vr_enable_buffer));
+
+    // Enable Output PWR_GOOD pin (0 --> Bit 5)
+    l_vr_enable_buffer.writeBit<FIELDS::R32_PWR_GOOD_IO_TYPE>(CONSTS::PWR_GOOD_IO_TYPE_OUTPUT);
+    FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(i_pmic_target, REGS::R32, l_vr_enable_buffer));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Toggle the VR enable bit (0->1)
 ///
 /// @param[in] i_pmic_target PMIC target
@@ -178,6 +206,10 @@ fapi2::ReturnCode toggle_vr_enable(
     FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(i_pmic_target, REGS::R32, l_vr_enable_buffer));
     l_vr_enable_buffer.clearBit<FIELDS::R32_VR_ENABLE>();
     FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(i_pmic_target, REGS::R32, l_vr_enable_buffer));
+
+    // to be safe, let's delay 10ms to make sure PMICs rails are off before VR enable is done
+    fapi2::delay(10 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
+
     // VR enable
     l_vr_enable_buffer.setBit<FIELDS::R32_VR_ENABLE>();
     FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(i_pmic_target, REGS::R32, l_vr_enable_buffer));
@@ -962,9 +994,12 @@ fapi2::ReturnCode enable_1u_2u(
     // Let's kick off the enables
 
     // We must consider the PWR_GOOD mode. The enable sequence must be in this order:
-    // PMIC0,1:  pgood=input+output  (IDT ONLY)
+    // Note that before VR disable in disable_and_reset_pmics, TI PMICs get pgood set as output only
+    // PMIC0:  pgood=output        (IDT ONLY, could be intput+output but will setup the same way as TI)
+    // PMIC1:  pgood=input+output  (IDT ONLY)
     // PMIC0,1:  VR enable
-    // PMIC0,1:  pgood=input+output  (TI ONLY)
+    // PMIC0:  pgood=output        (TI ONLY - already set to output only in disable_and_reset_pmics)
+    // PMIC1:  pgood=input+output  (TI ONLY)
 
     // We should never have PMICs from both vendors on a dimm, so we shouldn't have to worry about any
     // interleaving. However, we do check the vendor on each PMIC anyway.
@@ -993,6 +1028,12 @@ fapi2::ReturnCode enable_1u_2u(
         {
             FAPI_TRY(set_pwr_good_pin_io(l_pmic));
         }
+        // Have first IDT PMIC in power on sequence set power good as output only to match what TI will have
+        // Added this because we have different default values depending on IDT chip revision
+        else if (l_vendor_id == mss::pmic::vendor::IDT)
+        {
+            FAPI_TRY(set_pwr_good_pin_output(l_pmic));
+        }
 
         // Call the workaround procedure for IDT PMIC high current consumption false errors
         // Workaround only needed for IDT PMICs revision C or earlier version
@@ -1010,11 +1051,24 @@ fapi2::ReturnCode enable_1u_2u(
         for (const auto& l_pmic : l_pmics)
         {
             l_current_pmic = l_pmic;
+            uint16_t l_vendor_id = 0;
+
+            // Get vendor ID
+            FAPI_TRY(mss::attr::get_mfg_id[get_relative_pmic_id(l_pmic)](i_ocmb_target, l_vendor_id));
+
             // Check to make sure VIN_BULK reports good, then we can enable the chip and write/read registers
             FAPI_TRY(check_vin_bulk_good(l_pmic),
                      "pmic_enable: Check for VIN_BULK good either failed, or returned not good status on PMIC %s",
                      mss::c_str(l_pmic));
             FAPI_TRY(start_vr_enable(l_pmic));
+
+            // Toggle VR enable bit for TI PMIC regardless of how pgood is configured
+            // Have seen some TI PMICs fail to power on outputs when VR enable bit is set
+            //   and a VR enable bit toggle allows the outputs to successfully power on
+            if (l_vendor_id == mss::pmic::vendor::TI)
+            {
+                FAPI_TRY(toggle_vr_enable(l_pmic));
+            }
         }
     }
     else
@@ -1031,12 +1085,18 @@ fapi2::ReturnCode enable_1u_2u(
             // Call the enable procedure
             FAPI_TRY((enable_spd(l_pmic, i_ocmb_target, l_vendor_id)),
                      "pmic_enable: Error enabling PMIC %s", mss::c_str(l_pmic));
-        }
 
+            // Toggle VR enable bit for TI PMIC regardless of how pgood is configured
+            // Have seen some TI PMICs fail to power on outputs when VR enable bit is set
+            //   and a VR enable bit toggle allows the outputs to successfully power on
+            if (l_vendor_id == mss::pmic::vendor::TI)
+            {
+                FAPI_TRY(toggle_vr_enable(l_pmic));
+            }
+        }
     }
 
     // After VR has been enabled, enable PWR_GOOD on TI PMICs
-    // Toggle VR enable for TI PMIC
     // Configure PWR_GOOD for TI PMIC
     for (const auto& l_pmic : l_pmics)
     {
@@ -1049,15 +1109,6 @@ fapi2::ReturnCode enable_1u_2u(
         // Only do for last TI PMIC in power on sequence as that is the one that will have PWR_GOOD set to I/O
         if ((l_vendor_id == mss::pmic::vendor::TI) && (l_pmic != l_pmics[0]))
         {
-
-            // Don't think that a delay is needed before toggling VR enable
-            // 4U DDIMMs have a VR enable toggle (0->1->0) toggle with no delay
-            // Have not seen fails on 2U DDIMMs with no delay here, so not adding it at this time
-
-            // Toggle VR enable for TI PMIC for last TI PMIC in power on sequence
-            // Needed for TI PMIC when PWR_GOOD=Input/output, otherwise PMICs may not power on after system power off/on
-            FAPI_TRY(toggle_vr_enable(l_pmic));
-
             // Setting PWR_GOOD to I/O too soon after VR enable causes PMIC to fail to power on successfully
             // Seen failure to power on rails with delay of 3ms with soft start time 4ms in a system with 2U DDIMMs
             // Seen failure to power on rails with delay of 29ms with soft start time 14ms in a system with 2U DDIMMs

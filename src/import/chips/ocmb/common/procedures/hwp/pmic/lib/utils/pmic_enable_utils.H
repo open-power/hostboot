@@ -460,6 +460,15 @@ fapi2::ReturnCode set_pwr_good_pin_io(
     const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target);
 
 ///
+/// @brief Set PWR_GOOD pin to Output
+///
+/// @param[in] i_pmic_target PMIC target
+/// @return fapi2::FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode set_pwr_good_pin_output(
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target);
+
+///
 /// @brief Toggle the VR enable bit (0->1->0)
 ///
 /// @param[in] i_pmic_target PMIC target
