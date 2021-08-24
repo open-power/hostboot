@@ -604,7 +604,7 @@ void validateSecuritySettings()
         }
 
         bootSide = SBE::SBE_SEEPROM_INVALID;
-        err = getSbeBootSeeprom(pProc, bootSide, false);
+        err = getSbeBootSeeprom(pProc, bootSide);
         if (err)
         {
             const auto plid = err->plid();

@@ -93,7 +93,9 @@ namespace SBE
     // (PERV_SB_CS_SCOM 0x00050008 or PERV_SB_CS_FSI 0x2808)
     // bit location identifies if boot side=0 or boot side=1
     const uint64_t SBE_BOOT_SELECT_MASK = 0x0000400000000000;   // SBE SEEPROM bit 17
+    const uint32_t SBE_BOOT_SELECT_MASK_FSI = SBE_BOOT_SELECT_MASK>>32;
     const uint64_t SBE_MBOOT_SELECT_MASK = 0x0000200000000000;  // Measurement SEEPROM bit 18
+    const uint32_t SBE_MBOOT_SELECT_MASK_FSI = SBE_MBOOT_SELECT_MASK>>32;
 
     // Hard coded value, pass in 2KB max
     const uint32_t RING_OVD_SIZE = 0x800;

@@ -354,15 +354,10 @@ namespace SBE
      *
      * @param[out] o_bootSide   The Seeprom the SBE booted from
      *
-     * @param[in] i_failoverToMaster If the SBE is not started for the supplied
-     *                               processor, use master processor instead.
-     *                               default is true
-     *
      * @return errlHndl_t       Error log handle on failure.
      */
     errlHndl_t getSbeBootSeeprom(TARGETING::Target* i_target,
-                                 sbeSeepromSide_t& o_bootSide,
-                                 bool i_failoverToMaster = true);
+                                 sbeSeepromSide_t& o_bootSide);
 
     /**
      * @brief Collects Version information from a specific SEEPROM using SPI

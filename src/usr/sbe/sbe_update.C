@@ -1795,64 +1795,69 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
 
 /////////////////////////////////////////////////////////////////////
     errlHndl_t getSbeBootSeeprom(TARGETING::Target* i_target,
-                                 sbeSeepromSide_t& o_bootSide,
-                                 const bool i_failoverToMaster)
+                                 sbeSeepromSide_t& o_bootSide)
     {
         TRACFCOMP( g_trac_sbe, ENTER_MRK"getSbeBootSeeprom()" );
 
         errlHndl_t err = nullptr;
-        uint64_t scomData = 0x0;
-        TARGETING::Target* masterProcChipTargetHandle = NULL;
+        uint32_t cfamData = 0x0;
 
         o_bootSide = SBE_SEEPROM_INVALID;
 
         do{
             assert(i_target != nullptr,"Bug! Attempting to get the boot seeprom of a null target.");
 
-            TARGETING::Target * l_target=i_target;
-
-            // Get the Master Proc Chip Target for comparisons later
-            TargetService& tS = targetService();
-            err = tS.queryMasterProcChipTargetHandle(
-                                                masterProcChipTargetHandle);
-
-            if ( err )
+            // Use scom if this is the boot proc (cannot fsi to boot proc)
+            TARGETING::Target* l_bootproc = nullptr;
+            targetService().queryMasterProcChipTargetHandle(l_bootproc);
+            if( i_target == l_bootproc )
             {
-                break;
+                // Read FSXCOMP_FSXLOG_SB_CS 0x00050008
+                uint64_t scomData = 0x0;
+                size_t op_size = sizeof(scomData);
+                err = deviceRead( i_target,
+                                  &scomData,
+                                  op_size,
+                                  DEVICE_SCOM_ADDRESS(FSXCOMP_FSXLOG_SB_CS) );
+                if( err )
+                {
+                    TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeBootSeeprom() -Error "
+                               "reading SB CS SCOM (0x%.8X) from Target :"
+                               "HUID=0x%.8X"
+                               TRACE_ERR_FMT,
+                               FSXCOMP_FSXLOG_SB_CS, // 0x00050008
+                               TARGETING::get_huid(i_target),
+                               TRACE_ERR_ARGS(err));
+                    break;
+                }
+
+                // convert to 32-bit FSI format
+                cfamData = scomData >> 32;
+            }
+            else // use FSI operations for secondary procs
+            {
+                // Read FSXCOMP_FSXLOG_SB_CS_FSI 0x2808 for target proc
+                size_t l_opSize = sizeof(uint32_t);
+                err = DeviceFW::deviceOp(
+                                         DeviceFW::READ,
+                                         i_target,
+                                         &cfamData,
+                                         l_opSize,
+                                         DEVICE_FSI_ADDRESS(FSXCOMP_FSXLOG_SB_CS_FSI_BYTE) );
+                if( err )
+                {
+                    TRACFCOMP( g_trac_sbe,
+                               ERR_MRK"getSbeBootSeeprom(): getCfamRegister, "
+                               "FSXCOMP_FSXLOG_SB_CS_FSI (0x%.4X), proc target = %.8X"
+                               TRACE_ERR_FMT,
+                               FSXCOMP_FSXLOG_SB_CS_FSI, // 0x2808
+                               TARGETING::get_huid(i_target),
+                               TRACE_ERR_ARGS(err));
+                    break;
+                }
             }
 
-            if( i_failoverToMaster &&
-                (i_target != masterProcChipTargetHandle) &&
-                !(i_target->getAttr<ATTR_SBE_IS_STARTED>()) )
-            {
-                l_target=masterProcChipTargetHandle;
-                TRACFCOMP( g_trac_sbe, INFO_MRK"getSbeBootSeeprom() "
-                           "using master proc to read SBE_VITAL_REG: "
-                           "i_target=0x%.8x, target=0x%.8x ",
-                           TARGETING::get_huid(i_target),
-                           TARGETING::get_huid(l_target));
-
-            }
-
-            // Read FSXCOMP_FSXLOG_SB_CS 0x00050008
-            size_t op_size = sizeof(scomData);
-            err = deviceRead( l_target,
-                              &scomData,
-                              op_size,
-                              DEVICE_SCOM_ADDRESS(FSXCOMP_FSXLOG_SB_CS) );
-            if( err )
-            {
-                TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeBootSeeprom() -Error "
-                           "reading SB CS SCOM (0x%.8X) from Target :"
-                           "HUID=0x%.8X"
-                           TRACE_ERR_FMT,
-                           FSXCOMP_FSXLOG_SB_CS, // 0x00050008
-                           TARGETING::get_huid(l_target),
-                           TRACE_ERR_ARGS(err));
-                break;
-            }
-
-            if(scomData & SBE_BOOT_SELECT_MASK)
+            if(cfamData & SBE_BOOT_SELECT_MASK_FSI)
             {
                 o_bootSide = SBE_SEEPROM1;
             }
@@ -1865,10 +1870,8 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
 
         TRACFCOMP( g_trac_sbe,
                    EXIT_MRK"getSbeBootSeeprom(): o_bootSide=0x%X (reg=0x%X, "
-                   "tgt=0x%X, %s)",
-                   o_bootSide, scomData, TARGETING::get_huid(i_target),
-                   (i_target != masterProcChipTargetHandle) ? "slave" :
-                   "master");
+                   "tgt=0x%X)",
+                   o_bootSide, cfamData, TARGETING::get_huid(i_target) );
 
         return err;
     }
