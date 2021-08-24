@@ -108,7 +108,7 @@ class RtPnor
          *         true = RtPnor::init() finished successfully
          */
         void setInitialized(bool i_initialized);
-#ifdef CONFIG_FILE_XFER_VIA_PLD
+#ifdef CONFIG_FILE_XFER_VIA_PLDM
         /**
         * @brief Return a const ref to the iv_ipltime_lid std:array
         * @return a const ref to the iv_ipltime_lid member variable.

@@ -803,7 +803,7 @@ errlHndl_t readFromDevicePldm(PNOR::SectionId i_section,
             * @devdesc             getLidFileFromOffset PLDM call failed
             * @custdesc            Error accessing system firmware flash
             */
-            l_err = new ERRORLOG::ErrlEntry(
+            errl = new ERRORLOG::ErrlEntry(
                             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                             PNOR::MOD_RTPNOR_READFROMDEVICE_PLDM,
                             PNOR::RC_WRONG_SIZE_FROM_READ,
@@ -879,7 +879,7 @@ errlHndl_t writeToDevicePldm(PNOR::SectionId i_section,
             * @devdesc             writeLidFileFromOffset PLDM call failed
             * @custdesc            Error accessing system firmware flash
             */
-            l_err = new ERRORLOG::ErrlEntry(
+            errl = new ERRORLOG::ErrlEntry(
                             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                             PNOR::MOD_RTPNOR_WRITETODEVICE_PLDM,
                             PNOR::RC_WRONG_SIZE_FROM_WRITE,

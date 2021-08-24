@@ -61,6 +61,7 @@
 
 #ifdef CONFIG_FILE_XFER_VIA_PLDM
 #include <pldm/base/hb_bios_attrs.H>
+#include <pldm/pldm_errl.H>
 #include "pnor_pldm_utils.H"
 #endif
 
