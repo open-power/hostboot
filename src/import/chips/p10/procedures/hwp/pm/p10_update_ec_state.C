@@ -230,6 +230,7 @@ static fapi2::ReturnCode update_ec_config(
     fapi2::buffer<uint64_t> l_core_config = 0;
     fapi2::buffer<uint64_t> l_pg_config = 0;
     fapi2::buffer<uint64_t> l_eco_config = 0;
+    uint8_t l_core_not_func = 0;
 
     auto l_core_present_vector =
         i_target.getChildren<fapi2::TARGET_TYPE_CORE>
@@ -255,6 +256,7 @@ static fapi2::ReturnCode update_ec_config(
 
         for (auto core_functional_it : l_core_functional_vector)
         {
+            l_core_not_func = 0;
             FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS,
                                     core_functional_it,
                                     l_functional_core_unit_pos));
@@ -269,12 +271,11 @@ static fapi2::ReturnCode update_ec_config(
                          l_present_core_unit_pos);
                 l_core_config.setBit(l_present_core_unit_pos);
 
-                auto l_eq = core_functional_it.getParent<fapi2::TARGET_TYPE_EQ>();
-
                 //Update the pg bits
                 l_pg_config.flush<0>().setBit((l_present_core_unit_pos % 4) + CL2_START_POSITION); //ecl2
                 l_pg_config.setBit((l_present_core_unit_pos % 4) + L3_START_POSITION); //l3
                 l_pg_config.setBit((l_present_core_unit_pos % 4) + MMA_START_POSITION); //mma
+                auto l_eq = core_functional_it.getParent<fapi2::TARGET_TYPE_EQ>();
 
                 //setting Region Partial Good bits
                 FAPI_TRY(fapi2::putScom(l_eq, CPLT_CTRL2_WO_OR, l_pg_config));
@@ -297,7 +298,24 @@ static fapi2::ReturnCode update_ec_config(
 
                 break;
             }  // Current core
+            else
+            {
+                l_core_not_func = 1;
+            }
         } // Functional core loop
+
+        if ( l_core_not_func )
+        {
+            //Update the pg bits
+            l_pg_config.flush<0>().setBit((l_present_core_unit_pos % 4) + CL2_START_POSITION); //ecl2
+            l_pg_config.setBit((l_present_core_unit_pos % 4) + L3_START_POSITION); //l3
+            l_pg_config.setBit((l_present_core_unit_pos % 4) + MMA_START_POSITION); //mma
+            auto l_eq = core_present_it.getParent<fapi2::TARGET_TYPE_EQ>();
+
+            //setting Region Partial Good bits
+            FAPI_TRY(fapi2::putScom(l_eq, CPLT_CTRL2_WO_CLEAR, l_pg_config));
+        }
+
     }  // Present core loop
 
     // Write the recalculated OCC CCSR and Flag6 for ECO cores
