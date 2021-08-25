@@ -47,6 +47,9 @@ namespace PRDF
 using namespace PlatServices;
 using namespace TOD;
 
+// FSP or HBRT only, not Hostboot
+#if !defined(__HOSTBOOT_MODULE) || defined(__HOSTBOOT_RUNTIME)
+
 /** @struct TodFaultData
  *  TOD Fault isolation information from a chip.
  */
@@ -102,8 +105,14 @@ struct TopologySwitchDetails
     {}
 };
 
+#endif // FSP or HBRT only, not Hostboot
+
 namespace Proc
 {
+
+// FSP or HBRT only, not Hostboot
+#if !defined(__HOSTBOOT_MODULE) || defined(__HOSTBOOT_RUNTIME)
+
 /**
  * @brief   Captures all the tod registers of all functional Proc chips.
  * @param   i_stepcode  The step code data struct
@@ -134,7 +143,8 @@ int32_t todCleanUpErrors( STEP_CODE_DATA_STRUCT & i_stepcode )
 
     uint32_t o_rc = SUCCESS;
 
-#ifdef __HOSTBOOT_RUNTIME
+    #ifdef __HOSTBOOT_RUNTIME // HBRT only
+
     ProcDomain * l_procDomain =
         (ProcDomain*)systemPtr->GetDomain( PROC_DOMAIN );
 
@@ -198,7 +208,9 @@ int32_t todCleanUpErrors( STEP_CODE_DATA_STRUCT & i_stepcode )
             continue;
         }
     }
-#endif
+
+    #endif // HBRT only
+
     return o_rc;
 
     #undef PRDF_FUNC
@@ -432,10 +444,8 @@ int32_t todCollectFaultDataChip(  ExtensibleChip * i_chip,
                     TargetHandle_t l_procClockSrc = nullptr;
 
                     uint32_t l_ret = FAIL;
-#ifdef __HOSTBOOT_RUNTIME
                     l_ret = getTodPortControlReg( l_chipTarget, l_slv0,
                                                   l_connection );
-#endif
                     if( SUCCESS != l_ret ) continue;
 
                     // The connection value is in bits 0:2.
@@ -652,6 +662,8 @@ void addFfdcToCaptureData(  ExtensibleChip * i_chip,
     cd.Add( i_chip->getTrgt(), Util::hashString("TOD_ERROR_DATA"), bs );
 }
 
+#endif // FSP or HBRT only, not Hostboot
+
 /**
  * @brief   Analyzes the step check error of all procs in the system
  * @param   i_chip      chip reporting TOD errors
@@ -662,6 +674,9 @@ int32_t todStepCheckFault( ExtensibleChip * i_chip,
                            STEP_CODE_DATA_STRUCT & i_stepcode )
 {
     #define PRDF_FUNC "[Proc::todStepCheckFault] "
+
+    // FSP or HBRT only, not Hostboot
+    #if !defined(__HOSTBOOT_MODULE) || defined(__HOSTBOOT_RUNTIME)
 
     // When we analyze a step check fault, we will look at all chips in the
     // system--both topologies. After we've collected TOD fault data on each
@@ -749,17 +764,9 @@ int32_t todStepCheckFault( ExtensibleChip * i_chip,
             l_chipBlackList.push_back( mdmtList[i] );
 
             // Callout and gard TOD OSC
-#ifdef __HOSTBOOT_MODULE
             i_stepcode.service_data->SetCallout(
                 PRDcallout( mdmtList[i], PRDcalloutData::TYPE_TODCLK ) );
-#else
-            TargetHandle_t l_clockTarget = nullptr;
-            l_clockTarget = getConnectedChild(  procOscTgtBl,
-                                                TYPE_TODCLK,
-                                                oscPosBl );
-            if (l_clockTarget)
-                i_stepcode.service_data->SetCallout( l_clockTarget, MRU_HIGH );
-#endif
+
             // Callout MDMT chip
             i_stepcode.service_data->SetCallout(mdmtList[i], MRU_MEDA );
 
@@ -905,7 +912,7 @@ int32_t todStepCheckFault( ExtensibleChip * i_chip,
 
     // Now we call HWSV to create a new backup topology. The chips in the black
     // list will not be selected as the new MDMT.
-#ifdef __HOSTBOOT_RUNTIME
+    #ifdef __HOSTBOOT_RUNTIME // HBRT only
     todErrorFfdc.topologyResetRequested = 0;
     if ( i_stepcode.service_data->IsAtThreshold() )
     {
@@ -913,7 +920,7 @@ int32_t todStepCheckFault( ExtensibleChip * i_chip,
                                l_chipBlackList, !l_phypError );
         todErrorFfdc.topologyResetRequested = 1;
     }
-#endif
+    #endif  // HBRT only
 
     // If we never made a callout, call out this chip.
     if ( 0 == i_stepcode.service_data->getMruListSize() )
@@ -947,6 +954,8 @@ int32_t todStepCheckFault( ExtensibleChip * i_chip,
     todErrorFfdc.backUpTopologySummary = analysisSummary[1];
     addFfdcToCaptureData( i_chip, i_stepcode, todErrorFfdc );
 
+    #endif // FSP or HBRT only, not Hostboot
+
     return SUCCESS;
 
     #undef PRDF_FUNC
@@ -962,7 +971,8 @@ PRDF_PLUGIN_DEFINE_NS( p10_proc, Proc, todStepCheckFault );
 int32_t todNewTopologyIfBackupMDMT( ExtensibleChip * i_chip,
                                     STEP_CODE_DATA_STRUCT & i_stepcode )
 {
-#ifdef __HOSTBOOT_RUNTIME
+    #ifdef __HOSTBOOT_RUNTIME // HBRT only
+
     do
     {
         SCAN_COMM_REGISTER_CLASS * l_todStatus =
@@ -1010,7 +1020,9 @@ int32_t todNewTopologyIfBackupMDMT( ExtensibleChip * i_chip,
         }
 
     } while(0);
-#endif
+
+    #endif // HBRT only
+
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE_NS( p10_proc, Proc, todNewTopologyIfBackupMDMT );
@@ -1025,7 +1037,7 @@ PRDF_PLUGIN_DEFINE_NS( p10_proc, Proc, todNewTopologyIfBackupMDMT );
 int32_t requestTopologySwitch( ExtensibleChip * i_chip,
                                STEP_CODE_DATA_STRUCT & i_stepcode )
 {
-#ifdef __HOSTBOOT_RUNTIME
+    #ifdef __HOSTBOOT_RUNTIME // HBRT only
     if ( i_stepcode.service_data->IsAtThreshold() )
     {
         // Reconfigure the TOD topology and let PHYP know when backup is good.
@@ -1033,7 +1045,8 @@ int32_t requestTopologySwitch( ExtensibleChip * i_chip,
         badChipList.push_back( i_chip->getTrgt( ) );
         requestNewTODTopology( 0xFFFFFFFF, nullptr, badChipList, true );
     }
-#endif
+    #endif
+
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE_NS( p10_proc, Proc, requestTopologySwitch );
@@ -1044,36 +1057,41 @@ PRDF_PLUGIN_DEFINE_NS( p10_proc, Proc, requestTopologySwitch );
  * @param   i_stepcode  The step code data struct.
  * @return  SUCCESS  if TOD analysis is disabled
  */
-int32_t isTodDisabled( ExtensibleChip * i_chip,
-                       STEP_CODE_DATA_STRUCT & i_stepcode )
+int32_t isTodDisabled(ExtensibleChip* i_chip, STEP_CODE_DATA_STRUCT& io_sc)
 {
-    int32_t o_rc = SUCCESS;
+    #if !defined(__HOSTBOOT_MODULE) // FSP only
 
-    if ( isHyprConfigOpal() )
+    // For now, assume the system terminated at runtime.
+
+    return PRD_SCAN_COMM_REGISTER_ZERO; // continue TOD analysis
+
+    #elif defined(__HOSTBOOT_RUNTIME) // HBRT only
+
+    // This is HBRT code so we can assume we are at runtime. Ensure PHYP is the
+    // hypervisor.
+    if (isHyprConfigPhyp() && !isMfgAvpEnabled() && !isMfgHdatAvpEnabled())
     {
-        // On OPAL machine, mask TOD errors on first instance. There
-        // should not be any service action.
-        i_stepcode.service_data->setFlag( ServiceDataCollector::AT_THRESHOLD );
-        i_stepcode.service_data->clearServiceCall();
-        o_rc = SUCCESS; // TOD fault analysis not supported
-    }
-    else if ( isHyprRunning() && isHyprConfigPhyp() &&
-              !isMfgAvpEnabled() && !isMfgHdatAvpEnabled() )
-    {
-        o_rc = FAIL; // TOD Fault analysis is supported
+        return PRD_SCAN_COMM_REGISTER_ZERO; // continue TOD analysis
     }
     else
     {
-        #ifdef ESW_SIM_COMPILE
-        o_rc = FAIL; // support TOD fault analysis for the simulator
-        #else
-        i_stepcode.service_data->SetCallout( LEVEL2_SUPPORT, MRU_MED, NO_GARD );
-        i_stepcode.service_data->SetCallout( SP_CODE, MRU_MED, NO_GARD );
-        o_rc =  SUCCESS; // TOD fault analysis not supported
-        #endif
+        // TOD fault analysis is not supported and we should not get this
+        // attention.
+        io_sc.service_data->SetCallout(LEVEL2_SUPPORT, MRU_MED);
+        io_sc.service_data->setPredictive();
+
+        return SUCCESS; // analysis done
     }
 
-    return o_rc;
+    #else // Hosbtoot only
+
+    // TOD fault analysis is not supported and we should not get this attention.
+    io_sc.service_data->SetCallout(LEVEL2_SUPPORT, MRU_MED);
+    io_sc.service_data->setPredictive();
+
+    return SUCCESS; // analysis done
+
+    #endif
 }
 PRDF_PLUGIN_DEFINE_NS( p10_proc, Proc, isTodDisabled );
 

@@ -505,6 +505,10 @@ int32_t pmCallout( TargetHandle_t i_tgt,
     return SUCCESS;
 }
 
+//##############################################################################
+//##                         TOD functions
+//##############################################################################
+
 void requestNewTODTopology( uint32_t i_oscPos,
                             const TargetHandle_t& i_procOscTgt,
                             const TargetHandleList& i_badChipList,
@@ -531,50 +535,6 @@ void requestNewTODTopology( uint32_t i_oscPos,
     #undef PRDF_FUNC
 }
 
-int32_t getTodPortControlReg ( const TARGETING::TargetHandle_t& i_procTgt,
-                               bool i_slvPath0,  uint32_t &o_regValue )
-{
-    #define PRDF_FUNC "[PlatServices::getTodPortControlReg] "
-    int32_t l_rc = SUCCESS;
-
-    errlHndl_t err = nullptr;
-    TOD::TodChipDataContainer todRegData;
-    bool foundChip = false;
-    uint32_t ordId = i_procTgt->getAttr<ATTR_ORDINAL_ID>();
-
-    do {
-        err = TOD::readTodProcDataFromFile( todRegData );
-        if ( err )
-        {
-            PRDF_ERR( PRDF_FUNC"failed to get TOD reg data from hwsv. "
-                               "i_procTgt 0x%08x", getHuid(i_procTgt) );
-            l_rc = FAIL;
-            PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
-            break;
-        }
-
-        for ( auto &chip : todRegData )
-        {
-            if ( chip.header.chipID == ordId )
-            {
-                o_regValue = i_slvPath0 ? chip.regs.pcrp0 : chip.regs.scrp1;
-                foundChip = true;
-                break;
-            }
-        }
-
-        if ( !foundChip )
-        {
-            PRDF_ERR( PRDF_FUNC"Could not find TOD chip Data for "
-                               "i_procTgt 0x%08x with ordId %d",
-                                getHuid(i_procTgt), ordId );
-            l_rc = FAIL;
-        }
-    } while (0);
-
-    return l_rc;
-    #undef PRDF_FUNC
-}
 //------------------------------------------------------------------------------
 
 } // end namespace PlatServices

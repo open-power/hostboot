@@ -428,7 +428,7 @@ actionclass self_H_th_32perDay_TopReConfig
 actionclass analyzeStepCheckErr
 {
     threshold32pday;
-    funccall("todStepCheckFault");
+    try( funccall("todStepCheckFault"), self_H_th_1 );
 };
 
 /**
@@ -458,8 +458,9 @@ actionclass analyzePibError
  */
 actionclass TodReportByPHYP
 {
+    capture(TODReg);
     threshold1;
-    funccall("todStepCheckFault");
+    try( funccall("todStepCheckFault"), self_H_th_1 );
 };
 
 /** analyzes active topology if TOD error analysis is enabled */

@@ -258,9 +258,30 @@ void getDimmDqAttr( TARGETING::TargetHandle_t i_target,
                     uint8_t (&io_dqMapPtr)[DQS_PER_DIMM] );
 
 //##############################################################################
-//##                        util functions
+//##                         TOD functions
 //##############################################################################
 
+// FSP or HBRT only, not Hostboot
+#if !defined(__HOSTBOOT_MODULE) || defined(__HOSTBOOT_RUNTIME)
+
+/**
+ * @brief   Retrieves a saved version of a TOD config register from HWSV.
+ *          We use the saved value rather than the live version because this
+ *          could have changed in response to the TOD fault we're currently
+ *          analyzing.
+ * @param   i_procTgt  Proc chip target
+ * @param   i_slvPath0 Whether we need the register for slave path 0 or 1
+ * @param   o_regValue Returns contents of the register
+ * @return non-SUCCESS for failure, SUCCESS otherwise
+ */
+int32_t getTodPortControlReg ( const TARGETING::TargetHandle_t& i_procTgt,
+                               bool i_slvPath0,  uint32_t &o_regValue );
+
+#endif
+
+//##############################################################################
+//##                        util functions
+//##############################################################################
 
 /**
  * @brief   get cfam data

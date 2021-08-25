@@ -190,6 +190,7 @@ chip p10_proc
         mask        (|, 0x01040105);
         capture     group default;
         capture     group default_pll_ffdc;
+        capture     group TODReg;
     };
 
     register TP_LOCAL_FIR_MASK
