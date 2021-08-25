@@ -3316,10 +3316,9 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
 
 #ifdef CONFIG_CONSOLE
         CONSOLE::displayf(CONSOLE::DEFAULT, SBE_COMP_NAME,
-                          "System Performing SBE Update for PROC %d, side %d. New SBE CRC: 0x%x",
+                          "System Performing SBE Update for PROC %d, side %d",
                         io_sbeState.target->getAttr<TARGETING::ATTR_POSITION>(),
-                        io_sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY ? SBE_SEEPROM0 : SBE_SEEPROM1,
-                        io_sbeState.new_seeprom_ver.data_crc);
+                        io_sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY ? SBE_SEEPROM0 : SBE_SEEPROM1);
 #endif
 
         errlHndl_t err = nullptr;
@@ -3684,8 +3683,8 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                 break;
             }
 
-            // Perform read-back verification of the SBE image on non-FSP systems
-            if(!INITSERVICE::spBaseServicesEnabled())
+            // Perform read-back verification of the SBE image when requested
+            if(UTIL::assertGetToplevelTarget()->getAttr<ATTR_DO_SBE_READBACK_VERIFICATION>())
             {
 
                 size_t l_offset = 0;
@@ -3777,7 +3776,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                                       io_sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY ? SBE_SEEPROM0 : SBE_SEEPROM1,
                                       io_sbeState.target->getAttr<TARGETING::ATTR_POSITION>());
                 }
-            } // if spBaseServicesEnabled
+            } // if perform SBE readback verification
 
             /*******************************************/
             /*  Update SBE Version Information         */

@@ -303,6 +303,9 @@
       <id>ATTN_POLL_PLID</id>
     </attribute>
     <attribute>
+      <id>DO_SBE_READBACK_VERIFICATION</id>
+    </attribute>
+    <attribute>
       <id>EARLY_TESTCASES_ISTEP</id>
     </attribute>
     <attribute>

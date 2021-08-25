@@ -147,6 +147,32 @@
   </attribute>
 
   <attribute>
+    <id>DO_SBE_READBACK_VERIFICATION</id>
+    <description>
+        When this attribute is set, Hostboot will perform a read-back verification of the SBE
+        images written to SEEPROM. HB will read out the images page-by-page after updating
+        the SEEPROM, check that the binaries match the customized SBE image, and check that
+        ECC is correct. If the binaries don't match or there is a unrecoverable ECC error,
+        Hostboot will throw an error. Note that this greatly slows down the SBE update
+        process.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <range>
+      <min>0</min>
+      <max>1</max>
+    </range>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <id>DYNAMIC_I2C_DEVICE_ADDRESS</id>
     <description>
       This attribute is used when a given target could have different
