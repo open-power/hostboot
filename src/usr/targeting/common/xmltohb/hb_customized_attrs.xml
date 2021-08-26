@@ -561,6 +561,7 @@
                to force max performance -->
           <id>ATTR_SBE_SELECT_EX_POLICY</id>
           <default>HB_MAX_FOOTPRINT</default>
+          <persistency>volatile</persistency>
           <no_export/>
     </attribute>
 
