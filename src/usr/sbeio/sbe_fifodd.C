@@ -698,8 +698,11 @@ errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target * i_target,
             // On open power systems if mode is set to informational we will run
             // p9_extract_rc then return back to this function
             SbeRetryHandler l_SBEobj = SbeRetryHandler(
+                i_target,
                 SbeRetryHandler::SBE_MODE_OF_OPERATION::INFORMATIONAL_ONLY,
-                l_errPlid);
+                SbeRetryHandler::SBE_RESTART_METHOD::HRESET,
+                l_errPlid,
+                NOT_INITIAL_POWERON);
 
             // Look at the scomSwitch attribute to tell what types
             // of scoms are going to be used. If the SMP is not yet up then we
@@ -716,7 +719,7 @@ errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target * i_target,
                 i_target->setAttr<TARGETING::ATTR_SCOM_SWITCHES>(l_switches);
             }
 
-            l_SBEobj.main_sbe_handler(i_target);
+            l_SBEobj.main_sbe_handler();
 
             //break out of continuous loop ( should only get here on openPower systems)
             break;

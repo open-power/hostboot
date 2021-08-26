@@ -343,19 +343,18 @@ void recoverSBE( Target * i_secProc, IStepError & io_StepError )
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "recoverSBE(): perform hreset to secondary SBE on target %.8X",
                get_huid(i_secProc) );
-    //Note no PLID passed in
+
     SbeRetryHandler l_SBEobj = SbeRetryHandler(
-            SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT);
-
-    l_SBEobj.setSbeRestartMethod(SbeRetryHandler::
-                                 SBE_RESTART_METHOD::HRESET);
-
-    l_SBEobj.setInitialPowerOn(false);
+                             i_secProc,
+                             SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT,
+                             SbeRetryHandler::SBE_RESTART_METHOD::HRESET,
+                             EMPTY_PLID,
+                             NOT_INITIAL_POWERON);
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "recoverSBE(): run hreset now" );
-    bool haltStateExpected = true;
-    l_SBEobj.main_sbe_handler(i_secProc, haltStateExpected);
+    const bool SBE_IS_HALTED = true;
+    l_SBEobj.main_sbe_handler(SBE_IS_HALTED);
 
     // We will judge whether or not the SBE had a successful
     // boot if it made it to runtime

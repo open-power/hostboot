@@ -331,13 +331,15 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
 
                 // reset the SBE
                 // Get the SBE Retry Handler
-                SBEIO::SbeRetryHandler l_SBEobj =
-                  SBEIO::SbeRetryHandler(SBEIO::SbeRetryHandler::
-                           SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT,
-                           0); //no plid to pass in
+                SBEIO::SbeRetryHandler l_SBEobj = SBEIO::SbeRetryHandler(
+                    i_target,
+                    SBEIO::SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT,
+                    SBEIO::SbeRetryHandler::SBE_RESTART_METHOD::HRESET,
+                    SBEIO::EMPTY_PLID,
+                    SBEIO::NOT_INITIAL_POWERON);
 
                 //Attempt to recover the SBE
-                l_SBEobj.main_sbe_handler(i_target);
+                l_SBEobj.main_sbe_handler();
                 if (l_SBEobj.isSbeAtRuntime())
                 {
                     TRACFCOMP(g_trac_i2c, "SBE Restarted successfully");

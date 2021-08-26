@@ -105,11 +105,11 @@ uint16_t SeqId_t::getCurrentSeqId()
 void spiLockRequest(TargetHandle_t i_proc,
                     uint8_t i_lockState)
 {
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
 
     do {
-        if( g_hostInterfaces == NULL ||
-            (g_hostInterfaces->firmware_request == NULL) )
+        if( g_hostInterfaces == nullptr ||
+            (g_hostInterfaces->firmware_request == nullptr) )
         {
             TRACFCOMP(g_trac_runtime,
                       ERR_MRK"spiLockRequest: firmware_request interface not linked");
@@ -249,12 +249,15 @@ void sbeAttemptRecovery(uint64_t i_data)
         spiLockRequest(l_target,1);
 
         // Get the SBE Retry Handler, propagating the supplied PLID
-        SbeRetryHandler l_SBEobj = SbeRetryHandler(SbeRetryHandler::
-                                    SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT,
-                                    l_sbeRetryData->plid);
+        SbeRetryHandler l_SBEobj =
+              SbeRetryHandler(l_target,
+                              SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT,
+                              SbeRetryHandler::SBE_RESTART_METHOD::HRESET,
+                              l_sbeRetryData->plid,
+                              NOT_INITIAL_POWERON);
 
         //Attempt to recover the SBE
-        l_SBEobj.main_sbe_handler(l_target);
+        l_SBEobj.main_sbe_handler();
 
         // Create the firmware_request request struct to send data
         hostInterfaces::hbrt_fw_msg l_req_fw_msg;

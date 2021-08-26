@@ -98,27 +98,6 @@ void* call_proc_check_secondary_sbe_seeprom_complete( void *io_pArgs )
             continue;
         }
 
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi2ProcTarget(
-                            const_cast<Target*> (l_cpu_target));
-
-        TRACFCOMP(g_trac_isteps_trace,
-                  "Running p10_get_sbe_msg_register HWP"
-                  " on processor target %.8X",
-                  get_huid(l_cpu_target));
-
-        //Note no PLID passed in
-        SbeRetryHandler l_SBEobj = SbeRetryHandler(
-                SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT);
-
-        l_SBEobj.setSbeRestartMethod(SbeRetryHandler::
-                                     SBE_RESTART_METHOD::START_CBS);
-
-        // We want to tell the retry handler that we have just powered
-        // on the sbe, to distinguish this case from other cases where
-        // we have determined there is something wrong w/ the sbe and
-        // want to diagnose the problem
-        l_SBEobj.setInitialPowerOn(true);
-
         // Enable HB SPI operations to this slave processor before
         // checking for success because we may end up doing SPI
         // operations (writing MVPD) as part of the recovery.
@@ -134,8 +113,19 @@ void* call_proc_check_secondary_sbe_seeprom_complete( void *io_pArgs )
             continue;
         }
 
+        TRACFCOMP(g_trac_isteps_trace,
+                  "Running SbeRetryHandler on processor target %.8X",
+                  get_huid(l_cpu_target));
+
+        SbeRetryHandler l_SBEobj = SbeRetryHandler(
+                        l_cpu_target,
+                        SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT,
+                        SbeRetryHandler::SBE_RESTART_METHOD::START_CBS,
+                        EMPTY_PLID,
+                        IS_INITIAL_POWERON);
+
         // Poll for SBE boot complete
-        l_SBEobj.main_sbe_handler(l_cpu_target);
+        l_SBEobj.main_sbe_handler();
 
         // We will judge whether or not the SBE had a successful
         // boot if it made it to runtime

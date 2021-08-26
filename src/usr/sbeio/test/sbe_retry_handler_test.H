@@ -131,16 +131,20 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
             uint8_t l_sbeTestCurrentSideCountMseeprom = 0;
             uint8_t l_sbeTestBootRestartCount = 0;
             SbeRetryHandler l_SBEobj = SbeRetryHandler(
-                    SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT);
-            l_SBEobj.setSBETestMode(SbeRetryHandler::SBE_MODE_OF_OPERATION::TEST_RESTART_SBE);
+                    l_cpu_target,
+                    SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT,
+                    SbeRetryHandler::SBE_RESTART_METHOD::HRESET,
+                    EMPTY_PLID,
+                    NOT_INITIAL_POWERON);
 
-            l_SBEobj.main_sbe_handler(l_cpu_target);
+            l_SBEobj.setSBETestMode(SbeRetryHandler::SBE_FORCED_TEST_PATH::TEST_RESTART_SBE);
+            l_SBEobj.main_sbe_handler();
 
-            l_sbeTestSwitchSidesCount = l_SBEobj.getSwitchCount();
-            l_sbeTestSwitchSidesCountMseeprom = l_SBEobj.getSwitchCountMseeprom();
-            l_sbeTestCurrentSideCount = l_SBEobj.getCurrentSideCount();
-            l_sbeTestCurrentSideCountMseeprom = l_SBEobj.getCurrentSideCountMseeprom();
-            l_sbeTestBootRestartCount = l_SBEobj.getBootRestartCount();
+            l_sbeTestSwitchSidesCount = l_SBEobj.iv_switchSidesCount;
+            l_sbeTestSwitchSidesCountMseeprom = l_SBEobj.iv_switchSidesCount_mseeprom;
+            l_sbeTestCurrentSideCount = l_SBEobj.iv_currentSideBootAttempts;
+            l_sbeTestCurrentSideCountMseeprom = l_SBEobj.iv_currentSideBootAttempts_mseeprom;
+            l_sbeTestBootRestartCount = l_SBEobj.iv_boot_restart_count;
 
             // l_sbeTestBootRestartCount is bumped in this test to 1 (for a boot restart attempt)
             // CurrentSideCount's are always initially set to 1 since we have booted on them already once
@@ -199,18 +203,20 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
             uint8_t l_sbeTestCurrentSideCountMseeprom = 0;
             uint8_t l_sbeTestBootRestartCount = 0;
             SbeRetryHandler l_SBEobj = SbeRetryHandler(
-                    SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT);
-            l_SBEobj.setSBETestMode(SbeRetryHandler::SBE_MODE_OF_OPERATION::TEST_RESTART_CBS);
-            // Debs do we need initialPowerOn ?  l_SBEobj.setInitialPowerOn(true);
-            l_SBEobj.setSbeRestartMethod(SbeRetryHandler::SBE_RESTART_METHOD::START_CBS);
+                    l_cpu_target,
+                    SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT,
+                    SbeRetryHandler::SBE_RESTART_METHOD::START_CBS,
+                    EMPTY_PLID,
+                    NOT_INITIAL_POWERON);
 
-            l_SBEobj.main_sbe_handler(l_cpu_target);
+            l_SBEobj.setSBETestMode(SbeRetryHandler::SBE_FORCED_TEST_PATH::TEST_RESTART_CBS);
+            l_SBEobj.main_sbe_handler();
 
-            l_sbeTestSwitchSidesCount = l_SBEobj.getSwitchCount();
-            l_sbeTestSwitchSidesCountMseeprom = l_SBEobj.getSwitchCountMseeprom();
-            l_sbeTestCurrentSideCount = l_SBEobj.getCurrentSideCount();
-            l_sbeTestCurrentSideCountMseeprom = l_SBEobj.getCurrentSideCountMseeprom();
-            l_sbeTestBootRestartCount = l_SBEobj.getBootRestartCount();
+            l_sbeTestSwitchSidesCount = l_SBEobj.iv_switchSidesCount;
+            l_sbeTestSwitchSidesCountMseeprom = l_SBEobj.iv_switchSidesCount_mseeprom;
+            l_sbeTestCurrentSideCount = l_SBEobj.iv_currentSideBootAttempts;
+            l_sbeTestCurrentSideCountMseeprom = l_SBEobj.iv_currentSideBootAttempts_mseeprom;
+            l_sbeTestBootRestartCount = l_SBEobj.iv_boot_restart_count;
 
             // l_sbeTestBootRestartCount is bumped in this test to 1 (for a boot restart attempt)
             // CurrentSideCount's are always initially set to 1 since we have booted on them already once
@@ -270,16 +276,20 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
             uint8_t l_sbeTestCurrentSideCountMseeprom = 0;
             uint8_t l_sbeTestBootRestartCount = 0;
             SbeRetryHandler l_SBEobj = SbeRetryHandler(
-                    SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT);
-            l_SBEobj.setSBETestMode(SbeRetryHandler::SBE_MODE_OF_OPERATION::TEST_BKP_SEEPROM);
+                    l_cpu_target,
+                    SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT,
+                    SbeRetryHandler::SBE_RESTART_METHOD::HRESET,
+                    EMPTY_PLID,
+                    NOT_INITIAL_POWERON);
 
-            l_SBEobj.main_sbe_handler(l_cpu_target);
+            l_SBEobj.setSBETestMode(SbeRetryHandler::SBE_FORCED_TEST_PATH::TEST_BKP_SEEPROM);
+            l_SBEobj.main_sbe_handler();
 
-            l_sbeTestSwitchSidesCount = l_SBEobj.getSwitchCount();
-            l_sbeTestSwitchSidesCountMseeprom = l_SBEobj.getSwitchCountMseeprom();
-            l_sbeTestCurrentSideCount = l_SBEobj.getCurrentSideCount();
-            l_sbeTestCurrentSideCountMseeprom = l_SBEobj.getCurrentSideCountMseeprom();
-            l_sbeTestBootRestartCount = l_SBEobj.getBootRestartCount();
+            l_sbeTestSwitchSidesCount = l_SBEobj.iv_switchSidesCount;
+            l_sbeTestSwitchSidesCountMseeprom = l_SBEobj.iv_switchSidesCount_mseeprom;
+            l_sbeTestCurrentSideCount = l_SBEobj.iv_currentSideBootAttempts;
+            l_sbeTestCurrentSideCountMseeprom = l_SBEobj.iv_currentSideBootAttempts_mseeprom;
+            l_sbeTestBootRestartCount = l_SBEobj.iv_boot_restart_count;
 
             // Most important value is the l_sbeTestSwitchSidesCount, this is what gets set in this test
             // CurrentSideCount's are always initially set to 1 since we have booted on them already once
@@ -337,16 +347,20 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
             uint8_t l_sbeTestCurrentSideCountMseeprom = 0;
             uint8_t l_sbeTestBootRestartCount = 0;
             SbeRetryHandler l_SBEobj = SbeRetryHandler(
-                    SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT);
-            l_SBEobj.setSBETestMode(SbeRetryHandler::SBE_MODE_OF_OPERATION::TEST_UPD_SEEPROM);
+                    l_cpu_target,
+                    SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT,
+                    SbeRetryHandler::SBE_RESTART_METHOD::HRESET,
+                    EMPTY_PLID,
+                    NOT_INITIAL_POWERON);
 
-            l_SBEobj.main_sbe_handler(l_cpu_target);
+            l_SBEobj.setSBETestMode(SbeRetryHandler::SBE_FORCED_TEST_PATH::TEST_UPD_SEEPROM);
+            l_SBEobj.main_sbe_handler();
 
-            l_sbeTestSwitchSidesCount = l_SBEobj.getSwitchCount();
-            l_sbeTestSwitchSidesCountMseeprom = l_SBEobj.getSwitchCountMseeprom();
-            l_sbeTestCurrentSideCount = l_SBEobj.getCurrentSideCount();
-            l_sbeTestCurrentSideCountMseeprom = l_SBEobj.getCurrentSideCountMseeprom();
-            l_sbeTestBootRestartCount = l_SBEobj.getBootRestartCount();
+            l_sbeTestSwitchSidesCount = l_SBEobj.iv_switchSidesCount;
+            l_sbeTestSwitchSidesCountMseeprom = l_SBEobj.iv_switchSidesCount_mseeprom;
+            l_sbeTestCurrentSideCount = l_SBEobj.iv_currentSideBootAttempts;
+            l_sbeTestCurrentSideCountMseeprom = l_SBEobj.iv_currentSideBootAttempts_mseeprom;
+            l_sbeTestBootRestartCount = l_SBEobj.iv_boot_restart_count;
 
             // Most important value is the l_sbeTestSwitchSidesCount, this is what gets set in this test
             // CurrentSideCount's are always initially set to 1 since we have booted on them already once
@@ -404,16 +418,20 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
             uint8_t l_sbeTestCurrentSideCountMseeprom = 0;
             uint8_t l_sbeTestBootRestartCount = 0;
             SbeRetryHandler l_SBEobj = SbeRetryHandler(
-                    SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT);
-            l_SBEobj.setSBETestMode(SbeRetryHandler::SBE_MODE_OF_OPERATION::TEST_BKP_MSEEPROM);
+                    l_cpu_target,
+                    SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT,
+                    SbeRetryHandler::SBE_RESTART_METHOD::HRESET,
+                    EMPTY_PLID,
+                    NOT_INITIAL_POWERON);
+            l_SBEobj.setSBETestMode(SbeRetryHandler::SBE_FORCED_TEST_PATH::TEST_BKP_MSEEPROM);
 
-            l_SBEobj.main_sbe_handler(l_cpu_target);
+            l_SBEobj.main_sbe_handler();
 
-            l_sbeTestSwitchSidesCount = l_SBEobj.getSwitchCount();
-            l_sbeTestSwitchSidesCountMseeprom = l_SBEobj.getSwitchCountMseeprom();
-            l_sbeTestCurrentSideCount = l_SBEobj.getCurrentSideCount();
-            l_sbeTestCurrentSideCountMseeprom = l_SBEobj.getCurrentSideCountMseeprom();
-            l_sbeTestBootRestartCount = l_SBEobj.getBootRestartCount();
+            l_sbeTestSwitchSidesCount = l_SBEobj.iv_switchSidesCount;
+            l_sbeTestSwitchSidesCountMseeprom = l_SBEobj.iv_switchSidesCount_mseeprom;
+            l_sbeTestCurrentSideCount = l_SBEobj.iv_currentSideBootAttempts;
+            l_sbeTestCurrentSideCountMseeprom = l_SBEobj.iv_currentSideBootAttempts_mseeprom;
+            l_sbeTestBootRestartCount = l_SBEobj.iv_boot_restart_count;
 
             // Most important value is the l_sbeTestSwitchSidesCountMseeprom, this is what gets set in this test
             // CurrentSideCount's are always initially set to 1 since we have booted on them already once
@@ -471,15 +489,19 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
             uint8_t l_sbeTestCurrentSideCountMseeprom = 0;
             uint8_t l_sbeTestBootRestartCount = 0;
             SbeRetryHandler l_SBEobj = SbeRetryHandler(
-                    SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT);
-            l_SBEobj.setSBETestMode(SbeRetryHandler::SBE_MODE_OF_OPERATION::TEST_UPD_MSEEPROM);
+                    l_cpu_target,
+                    SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT,
+                    SbeRetryHandler::SBE_RESTART_METHOD::HRESET,
+                    EMPTY_PLID,
+                    NOT_INITIAL_POWERON);
+            l_SBEobj.setSBETestMode(SbeRetryHandler::SBE_FORCED_TEST_PATH::TEST_UPD_MSEEPROM);
 
-            l_SBEobj.main_sbe_handler(l_cpu_target);
+            l_SBEobj.main_sbe_handler();
 
-            l_sbeTestSwitchSidesCount = l_SBEobj.getSwitchCount();
-            l_sbeTestSwitchSidesCountMseeprom = l_SBEobj.getSwitchCountMseeprom();
-            l_sbeTestCurrentSideCount = l_SBEobj.getCurrentSideCount();
-            l_sbeTestCurrentSideCountMseeprom = l_SBEobj.getCurrentSideCountMseeprom();
+            l_sbeTestSwitchSidesCount = l_SBEobj.iv_switchSidesCount;
+            l_sbeTestSwitchSidesCountMseeprom = l_SBEobj.iv_switchSidesCount_mseeprom;
+            l_sbeTestCurrentSideCount = l_SBEobj.iv_currentSideBootAttempts;
+            l_sbeTestCurrentSideCountMseeprom = l_SBEobj.iv_currentSideBootAttempts_mseeprom;
 
             // Most important value is the l_sbeTestSwitchSidesCountMseeprom, this is what gets set in this test
             // CurrentSideCount's are always initially set to 1 since we have booted on them already once
@@ -537,16 +559,20 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
             uint8_t l_sbeTestCurrentSideCountMseeprom = 0;
             uint8_t l_sbeTestBootRestartCount = 0;
             SbeRetryHandler l_SBEobj = SbeRetryHandler(
-                    SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT);
-            l_SBEobj.setSBETestMode(SbeRetryHandler::SBE_MODE_OF_OPERATION::TEST_MAX_LIMITS);
+                    l_cpu_target,
+                    SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT,
+                    SbeRetryHandler::SBE_RESTART_METHOD::HRESET,
+                    EMPTY_PLID,
+                    NOT_INITIAL_POWERON);
+            l_SBEobj.setSBETestMode(SbeRetryHandler::SBE_FORCED_TEST_PATH::TEST_MAX_LIMITS);
 
-            l_SBEobj.main_sbe_handler(l_cpu_target);
+            l_SBEobj.main_sbe_handler();
 
-            l_sbeTestSwitchSidesCount = l_SBEobj.getSwitchCount();
-            l_sbeTestSwitchSidesCountMseeprom = l_SBEobj.getSwitchCountMseeprom();
-            l_sbeTestCurrentSideCount = l_SBEobj.getCurrentSideCount();
-            l_sbeTestCurrentSideCountMseeprom = l_SBEobj.getCurrentSideCountMseeprom();
-            l_sbeTestBootRestartCount = l_SBEobj.getBootRestartCount();
+            l_sbeTestSwitchSidesCount = l_SBEobj.iv_switchSidesCount;
+            l_sbeTestSwitchSidesCountMseeprom = l_SBEobj.iv_switchSidesCount_mseeprom;
+            l_sbeTestCurrentSideCount = l_SBEobj.iv_currentSideBootAttempts;
+            l_sbeTestCurrentSideCountMseeprom = l_SBEobj.iv_currentSideBootAttempts_mseeprom;
+            l_sbeTestBootRestartCount = l_SBEobj.iv_boot_restart_count;
 
             // Most important value is the l_sbeTestSwitchSidesCountMseeprom, this is what gets set in this test
             // CurrentSideCount's are always initially set to 1 since we have booted on them already once
@@ -605,16 +631,20 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
             uint8_t l_sbeTestCurrentSideCountMseeprom = 0;
             uint8_t l_sbeTestBootRestartCount = 0;
             SbeRetryHandler l_SBEobj = SbeRetryHandler(
-                    SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT);
-            l_SBEobj.setSBETestMode(SbeRetryHandler::SBE_MODE_OF_OPERATION::TEST_SBE_FAILURE);
+                    l_cpu_target,
+                    SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT,
+                    SbeRetryHandler::SBE_RESTART_METHOD::HRESET,
+                    EMPTY_PLID,
+                    NOT_INITIAL_POWERON);
+            l_SBEobj.setSBETestMode(SbeRetryHandler::SBE_FORCED_TEST_PATH::TEST_SBE_FAILURE);
 
-            l_SBEobj.main_sbe_handler(l_cpu_target);
+            l_SBEobj.main_sbe_handler();
 
-            l_sbeTestSwitchSidesCount = l_SBEobj.getSwitchCount();
-            l_sbeTestSwitchSidesCountMseeprom = l_SBEobj.getSwitchCountMseeprom();
-            l_sbeTestCurrentSideCount = l_SBEobj.getCurrentSideCount();
-            l_sbeTestCurrentSideCountMseeprom = l_SBEobj.getCurrentSideCountMseeprom();
-            l_sbeTestBootRestartCount = l_SBEobj.getBootRestartCount();
+            l_sbeTestSwitchSidesCount = l_SBEobj.iv_switchSidesCount;
+            l_sbeTestSwitchSidesCountMseeprom = l_SBEobj.iv_switchSidesCount_mseeprom;
+            l_sbeTestCurrentSideCount = l_SBEobj.iv_currentSideBootAttempts;
+            l_sbeTestCurrentSideCountMseeprom = l_SBEobj.iv_currentSideBootAttempts_mseeprom;
+            l_sbeTestBootRestartCount = l_SBEobj.iv_boot_restart_count;
 
             // Most important values here are the SwitchSidesCount, CurrentSideCount and RestartCount
             // The flow would have switched sides on both the seeprom and mseeprom and finally given up
@@ -666,9 +696,13 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
                 continue;
             }
             SbeRetryHandler l_SBEobj = SbeRetryHandler(
-                    SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT);
+                    l_cpu_target,
+                    SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT,
+                    SbeRetryHandler::SBE_RESTART_METHOD::HRESET,
+                    EMPTY_PLID,
+                    NOT_INITIAL_POWERON);
 
-            l_SBEobj.main_sbe_handler(l_cpu_target);
+            l_SBEobj.main_sbe_handler();
 
             SBE_TRACF_RHT("testSBEReturns: Success, returned from main_sbe_handler HUID=0x%X", get_huid(l_cpu_target));
         }
@@ -708,9 +742,13 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
             }
             SBE_TRACF_RHT("testSBEStarted calling SbeRetryHandler SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT");
             SbeRetryHandler l_SBEobj = SbeRetryHandler(
-                    SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT);
+                    l_cpu_target,
+                    SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT,
+                    SbeRetryHandler::SBE_RESTART_METHOD::HRESET,
+                    EMPTY_PLID,
+                    NOT_INITIAL_POWERON);
 
-            l_SBEobj.main_sbe_handler(l_cpu_target);
+            l_SBEobj.main_sbe_handler();
 
             uint32_t l_sbeStarted = l_cpu_target->getAttr<
                                     TARGETING::ATTR_SBE_IS_STARTED>();

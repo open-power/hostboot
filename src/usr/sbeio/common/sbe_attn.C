@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -72,7 +72,11 @@ namespace SBEIO
         }
 
         SbeRetryHandler l_sbeObj = SbeRetryHandler(
-                      SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT);
+                i_procTarg,
+                SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT,
+                SbeRetryHandler::SBE_RESTART_METHOD::HRESET,
+                EMPTY_PLID,
+                NOT_INITIAL_POWERON);
 
         // We only want to handle vital attentions on BMC based systems.
         // If we have a FSP we should be ignoring Vital attentions and
@@ -80,7 +84,7 @@ namespace SBEIO
         // check just ensures on an FSP system we will not disrupt other
         // code that is attempting to handle the SBE fail
 #ifndef CONFIG_FSP_BUILD
-        l_sbeObj.main_sbe_handler(i_procTarg);
+        l_sbeObj.main_sbe_handler();
 #endif
 
         // Check if the SBE made it back to runtime, this tells us if the retry was a

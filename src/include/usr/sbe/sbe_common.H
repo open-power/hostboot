@@ -33,6 +33,7 @@
 #define __SBE_SBE_COMMON_H
 
 #include <stdint.h>  // size_t, uint8_t, etc
+#include <builtins.h> // PACKED
 
 namespace SBE
 {

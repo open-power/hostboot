@@ -525,11 +525,15 @@ errlHndl_t SbePsu::processEarlyError()
         SBE_TRACF(ERR_MRK"processEarlyError: early error occurred"
                   ", plid=0x%X, target huid=0x%X",
                   iv_earlyErrorPlid, TARGETING::get_huid(iv_earlyErrorTarget));
-        SbeRetryHandler l_SBEobj = SbeRetryHandler(
-            SbeRetryHandler::SBE_MODE_OF_OPERATION::INFORMATIONAL_ONLY,
-            iv_earlyErrorPlid);
 
-        l_SBEobj.main_sbe_handler(iv_earlyErrorTarget);
+        SbeRetryHandler l_SBEobj = SbeRetryHandler(
+            iv_earlyErrorTarget,
+            SbeRetryHandler::SBE_MODE_OF_OPERATION::INFORMATIONAL_ONLY,
+            SbeRetryHandler::SBE_RESTART_METHOD::HRESET,
+            iv_earlyErrorPlid,
+            NOT_INITIAL_POWERON);
+
+        l_SBEobj.main_sbe_handler();
 
         iv_earlyErrorOccurred = false;
         SBE_TRACF(ERR_MRK"processEarlyError: early error processed");
@@ -1043,10 +1047,13 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
                     // If we are on a BMC based system we expect to return from
                     // this fail
                     SbeRetryHandler l_SBEobj = SbeRetryHandler(
-                     SbeRetryHandler::SBE_MODE_OF_OPERATION::INFORMATIONAL_ONLY,
-                     l_errPlid);
+                        i_target,
+                        SbeRetryHandler::SBE_MODE_OF_OPERATION::INFORMATIONAL_ONLY,
+                        SbeRetryHandler::SBE_RESTART_METHOD::HRESET,
+                        l_errPlid,
+                        NOT_INITIAL_POWERON);
 
-                    l_SBEobj.main_sbe_handler(i_target);
+                    l_SBEobj.main_sbe_handler();
                 }
             }
             else
