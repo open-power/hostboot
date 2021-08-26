@@ -2491,6 +2491,9 @@
       <id>SUPPORTED_STOP_STATES</id>
     </attribute>
     <attribute>
+      <id>SW511706_CHECKSTOP_ON_GTE_LV1_HANG</id>
+    </attribute>
+    <attribute>
       <id>SYNC_BETWEEN_STEPS</id>
     </attribute>
     <attribute>

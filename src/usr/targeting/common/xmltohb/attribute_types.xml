@@ -8928,6 +8928,19 @@
   </attribute>
 
   <attribute>
+    <description>
+      If nonzero, will force "hang recovery gte level1" errors to
+      checkstop the system after host_ipl_complete.
+    </description>
+    <id>SW511706_CHECKSTOP_ON_GTE_LV1_HANG</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+  </attribute>
+
+  <attribute>
     <id>SYNC_BETWEEN_STEPS</id>
     <description>
         Attribute to enable targetting attribute sync when in istep mode.

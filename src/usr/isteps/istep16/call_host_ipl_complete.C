@@ -74,6 +74,8 @@ using namespace fapi2;
 namespace ISTEP_16
 {
 
+void sw511706(IStepError& stepError);
+
 void* call_host_ipl_complete(void* const io_pArgs)
 {
     errlHndl_t l_err = nullptr;
@@ -222,6 +224,11 @@ void* call_host_ipl_complete(void* const io_pArgs)
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   INFO_MRK"Send SYNC_POINT_REACHED msg to Fsp");
         l_err = INITSERVICE::sendSyncPoint();
+
+        if (sys->getAttr<TARGETING::ATTR_SW511706_CHECKSTOP_ON_GTE_LV1_HANG>() != 0)
+        {
+            sw511706(l_stepError);
+        }
     } while(0);
 
     // Collect and log any remaining errors
@@ -240,5 +247,81 @@ void* call_host_ipl_complete(void* const io_pArgs)
     // end task, returning any errorlogs to IStepDisp
     return l_stepError.getErrorHandle();
 } // end call_host_ipl_complete
+  
+using namespace TARGETING;
+
+void sw511706(IStepError& stepError)
+{
+    errlHndl_t l_err = nullptr;
+
+    // SW511706: Convert "hang recovery level gte1" errors into checkstops from recoverables
+
+    const auto zero_ninth_bit = [](TARGETING::Target* proc, const uint64_t address)
+        {
+            uint64_t value = 0;
+            uint64_t size = 8;
+
+            errlHndl_t l_err = deviceRead(proc, &value, size, DEVICE_SCOM_ADDRESS(address));
+
+            if (l_err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          ERR_MRK"SW511706: SCOM read of 0x%016x on 0x%08x failed: " TRACE_ERR_FMT,
+                          address, get_huid(proc), TRACE_ERR_ARGS(l_err));
+                return l_err;
+            }
+
+            const uint64_t ninth_bit_mask = 0x1ull << (63 - 9);
+
+            value &= ~ninth_bit_mask;
+            size = 8;
+
+            l_err = deviceWrite(proc, &value, size, DEVICE_SCOM_ADDRESS(address));
+
+            if (l_err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          ERR_MRK"SW511706: SCOM write of 0x%016x on 0x%08x failed: " TRACE_ERR_FMT,
+                          address, get_huid(proc), TRACE_ERR_ARGS(l_err));
+                return l_err;
+            }
+
+            return l_err;
+        };
+
+    TargetHandleList procs;
+    getAllChips(procs, TYPE_PROC);
+
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+              ERR_MRK"SW511706: found %d processors",
+              procs.size());
+
+    for (const auto proc : procs)
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  ERR_MRK"SW511706: Operating on processor 0x%08x",
+                  get_huid(proc));
+      
+        /* Perform SCOM operations to make "hang recovery level gte1" FIRs into
+         * checkstops rather than recoverable errors. */
+
+        // PowerBus PB RaceTrack Station nest domain FIR Action 0 Register
+        // PB.PB_COM.PB_SCOM_ES3.PB_STATION_FIR_ACTION0_REG
+        const uint64_t address1 = 0x03011386;
+        // PowerBus PB RaceTrack Station nest domain FIR Action 1 Register
+        // PB.PB_COM.PB_SCOM_ES3.PB_STATION_FIR_ACTION1_REG
+        const uint64_t address2 = 0x03011387;
+
+        l_err = zero_ninth_bit(proc, address1);
+        l_err || (l_err = zero_ninth_bit(proc, address2));
+
+        if (l_err)
+        {
+            stepError.addErrorDetails(l_err);
+            errlCommit(l_err, HWPF_COMP_ID);
+            break;
+        }
+    }
+}
 
 } // end namespace ISTEP_16
