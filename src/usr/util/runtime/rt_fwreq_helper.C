@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -278,10 +278,18 @@ errlHndl_t firmware_request_helper(uint64_t i_reqLen,   void *i_req,
                                 l_req_fw_msg->nvdimm_protection_state.i_procId,
                                 l_req_fw_msg->nvdimm_protection_state.i_state);
                 }
-            break; // END case hostInterfaces::HBRT_FW_MSG_TYPE_NVDIMM_PROTECTION:
+                break; // END case hostInterfaces::HBRT_FW_MSG_TYPE_NVDIMM_PROTECTION:
 
-            default:
-            break;
+                // There is no need for reset-reload handling for these message
+                // types.  They are either hyp-only, or they are responses.
+            case hostInterfaces::HBRT_FW_MSG_TYPE_REQ_NOP:
+            case hostInterfaces::HBRT_FW_MSG_TYPE_RESP_NOP:
+            case hostInterfaces::HBRT_FW_MSG_TYPE_RESP_GENERIC:
+            case hostInterfaces::HBRT_FW_MSG_TYPE_NVDIMM_OPERATION:
+            case hostInterfaces::HBRT_FW_MSG_TYPE_GARD_EVENT:
+            case hostInterfaces::HBRT_FW_MSG_TYPE_GET_ELOG_TIME:
+            case hostInterfaces::HBRT_FW_MSG_TYPE_SPILOCK:
+                break;
          }  // END switch (l_req_fw_msg->io_type)
 
          if (l_createErrorLog)
@@ -492,9 +500,36 @@ errlHndl_t firmware_request_helper(uint64_t i_reqLen,   void *i_req,
                                 l_req_fw_msg->nvdimm_protection_state.i_procId,
                                 l_req_fw_msg->nvdimm_protection_state.i_state);
                 }
-            break; // END case hostInterfaces::HBRT_FW_MSG_TYPE_NVDIMM_PROTECTION:
+                break; // END case hostInterfaces::HBRT_FW_MSG_TYPE_NVDIMM_PROTECTION:
 
-            default:
+            case hostInterfaces::HBRT_FW_MSG_TYPE_SPILOCK:
+                {
+                    TRACFCOMP(g_trac_runtime,
+                        ERR_MRK"Failed sending SPI Lock message to PHYP."
+                        " rc:0x%X, procChipId:0x%.8X, blockHyp:%d",
+                        rc,
+                        l_req_fw_msg->spi_lock.procChipId,
+                        l_req_fw_msg->spi_lock.blockHyp);
+
+                    // Pack user data 1 with Hypervisor return code and
+                    // firmware request message type
+                    l_userData1 = TWO_UINT32_TO_UINT64(rc,
+                                                       l_req_fw_msg->io_type);
+
+                    // Pack user data 2 with parameters
+                    l_userData2 = TWO_UINT32_TO_UINT64(
+                                l_req_fw_msg->spi_lock.procChipId,
+                                l_req_fw_msg->spi_lock.blockHyp);
+                }
+                break; // END case HBRT_FW_MSG_TYPE_SPILOCK
+
+            case hostInterfaces::HBRT_FW_MSG_TYPE_GET_ELOG_TIME: //TBD
+
+                // There is no need for reset-reload handling for these response
+                // types..
+            case hostInterfaces::HBRT_FW_MSG_TYPE_REQ_NOP:
+            case hostInterfaces::HBRT_FW_MSG_TYPE_RESP_NOP:
+            case hostInterfaces::HBRT_FW_MSG_TYPE_RESP_GENERIC:
                break;
          }  // END switch (l_req_fw_msg->io_type)
 

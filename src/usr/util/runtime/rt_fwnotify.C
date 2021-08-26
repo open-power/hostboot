@@ -43,6 +43,7 @@
 #include <mctp/mctp_errl.H>                // MCTP::addBmcAndHypErrorCallouts
 #include <pldm/pldmif.H>                   // PLDM::get_next_request
 #include <sys/time.h>                      // nanosleep
+#include <util/util_reasoncodes.H>
 
 using namespace TARGETING;
 using namespace RUNTIME;
@@ -95,11 +96,107 @@ uint16_t SeqId_t::getCurrentSeqId()
   return SeqId_t::SEQ_ID;
 }
 
+
+/**
+ *  @brief Send a spi lock request to the Hypervisor
+ *  @param[in] TargetHandl_t i_proc  Proc chip that owns the SPI engine
+ *  @param[in] uint8_t i_lockState  1:block HYP, 0:allow HYP
+ **/
+void spiLockRequest(TargetHandle_t i_proc,
+                    uint8_t i_lockState)
+{
+    errlHndl_t l_err = NULL;
+
+    do {
+        if( g_hostInterfaces == NULL ||
+            (g_hostInterfaces->firmware_request == NULL) )
+        {
+            TRACFCOMP(g_trac_runtime,
+                      ERR_MRK"spiLockRequest: firmware_request interface not linked");
+            /*@
+             * @errortype
+             * @severity         ERRL_SEV_INFORMATIONAL
+             * @moduleid         Util::UTIL_SPI_LOCK_REQUEST
+             * @reasoncode       Util::UTIL_RT_INTERFACE_ERR
+             * @userdata1[0:31]  Target Processor HUID
+             * @userdata1[32:63] Lock State
+             * @userdata2        <unused>
+             * @devdesc          firmware_request interface not linked.
+             * @custdesc         Internal firmware error
+             */
+            l_err= new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+                                 Util::UTIL_SPI_LOCK_REQUEST,
+                                 Util::UTIL_RT_INTERFACE_ERR,
+                                 TWO_UINT32_TO_UINT64(
+                                     TARGETING::get_huid(i_proc),
+                                     i_lockState),
+                                 0,
+                                 ErrlEntry::ADD_SW_CALLOUT);
+            break;
+        }
+
+        // Get the Proc Chip Id
+        TARGETING::rtChipId_t l_chipId = 0;
+        l_err = TARGETING::getRtTarget(i_proc, l_chipId);
+        if(l_err)
+        {
+            TRACFCOMP( g_trac_runtime,
+                       ERR_MRK"spiLockRequest: getRtTarget ERROR" );
+            break;
+        }
+
+        // Create the firmware_request request struct to send data
+        hostInterfaces::hbrt_fw_msg l_req_fw_msg;
+        uint64_t l_req_fw_msg_size = sizeof(l_req_fw_msg);
+        memset(&l_req_fw_msg, 0, l_req_fw_msg_size);
+
+        // Populate the firmware_request request struct with given data
+        l_req_fw_msg.io_type =
+          hostInterfaces::HBRT_FW_MSG_TYPE_SPILOCK;
+        l_req_fw_msg.spi_lock.procChipId = l_chipId;
+        l_req_fw_msg.spi_lock.blockHyp = i_lockState;
+
+        // Trace out firmware request info
+        TRACFCOMP(g_trac_runtime,
+                  INFO_MRK"spiLockRequest firmware request info: "
+                  "io_type:%d, procChipId:0x%.16X, blockHyp:%d",
+                  l_req_fw_msg.io_type,
+                  l_req_fw_msg.spi_lock.procChipId,
+                  l_req_fw_msg.spi_lock.blockHyp);
+
+        // Create the firmware_request response struct to receive data
+        hostInterfaces::hbrt_fw_msg l_resp_fw_msg;
+        uint64_t l_resp_fw_msg_size = sizeof(l_resp_fw_msg);
+        memset(&l_resp_fw_msg, 0, l_resp_fw_msg_size);
+
+        // Make the firmware_request call
+        l_err = firmware_request_helper(l_req_fw_msg_size,
+                                        &l_req_fw_msg,
+                                        &l_resp_fw_msg_size,
+                                        &l_resp_fw_msg);
+        if (l_err)
+        {
+            // If error, break out of encompassing while loop
+            break;
+        }
+
+    } while (0);
+
+    // There is nothing the caller can do here so just commit the log
+    //  internally and hope for the best
+    if( l_err )
+    {
+        //Commit the error if it exists
+        errlCommit(l_err, RUNTIME_COMP_ID);
+    }
+
+}
+
+
 /**
  *  @brief Attempt an SBE recovery after an SBE error
  *  @param[in] uint64_t i_data Contains a HUID (in the first 4 bytes)
  *                             and a plid (in the last 4 bytes)
- *  @platform FSP, OpenPOWER
  **/
 void sbeAttemptRecovery(uint64_t i_data)
 {
@@ -114,11 +211,12 @@ void sbeAttemptRecovery(uint64_t i_data)
 
     errlHndl_t l_err = nullptr;
 
+    TargetHandle_t l_target = nullptr;
+
     do
     {
         // Extract the target from the given HUID
-        TargetHandle_t l_target =
-                        Target::getTargetFromHuid(l_sbeRetryData->huid);
+        l_target = Target::getTargetFromHuid(l_sbeRetryData->huid);
 
         // If HUID invalid, log error and quit
         if (nullptr == l_target)
@@ -144,6 +242,10 @@ void sbeAttemptRecovery(uint64_t i_data)
                                    ErrlEntry::ADD_SW_CALLOUT);
             break;
         }
+
+        // Before restarting the SBE, need to block out PHYP access
+        //  to the SPI engine
+        spiLockRequest(l_target,1);
 
         // Get the SBE Retry Handler, propagating the supplied PLID
         SbeRetryHandler l_SBEobj = SbeRetryHandler(SbeRetryHandler::
@@ -260,6 +362,12 @@ void sbeAttemptRecovery(uint64_t i_data)
             break;
         }
     } while(0);
+
+    // No matter what happened, always release the lock at the end
+    if( l_target )
+    {
+        spiLockRequest(l_target,0);
+    }
 
     if (l_err)
     {

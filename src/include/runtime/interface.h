@@ -583,6 +583,8 @@ typedef struct hostInterfaces
        HBRT_FW_MSG_TYPE_MCTP_SEND         = 12, // struct mctp_send
        HBRT_FW_MSG_TYPE_MCTP_RECEIVE      = 13, // struct mctp_receive
        HBRT_FW_MSG_TYPE_MCTP_AVAILABLE    = 14, // struct mctp_available
+       HBRT_FW_MSG_TYPE_GET_ELOG_TIME     = 15, // TBD
+       HBRT_FW_MSG_TYPE_SPILOCK           = 16, // struct spi_lock
     };
 
     // NVDIMM protection state enum
@@ -756,6 +758,15 @@ typedef struct hostInterfaces
           {
             uint8_t   receive_data[1];
           } __attribute__ ((packed)) mctp_receive;
+
+          // This struct for HBRT_FW_MSG_TYPE_SPILOCK which
+          // is sent to the hypervisor from HBRT
+          // Block/unblock the hypervisor from using the SPI engines on this proc
+          struct
+          {
+             uint64_t procChipId; // ID of the processor chip that owns the spi engine
+             uint8_t blockHyp; // 1=block hyp SPI access, 0=allow hyp access
+          } __attribute__ ((packed)) spi_lock;
 
           // This struct is sent from HBRT with
           // io_type set to HBRT_FW_MSG_HBRT_FSP_REQ or
