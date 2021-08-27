@@ -2582,6 +2582,10 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                 //            "else if (pnor_sbe_secure_version > min_secure_version)"
                 // -- AND -- the current Minimum Secure Version is zero
                 // -- AND -- security is enabled
+                // -- AND -- the incoming driver is a production driver
+                //           NOTE: Using the lack of presence of a backdoor to assert we have a
+                //            production driver
+                //
                 // THEN set the minimum secure version to 1
                 //
                 // NOTE: This is intended to benefit early ship customers who likely will initially
@@ -2589,13 +2593,15 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                 // with MSV=1.  This method will safely update them without them having to set the
                 // LOCKIN _POLICY via the ASM menu.
                 else if ((min_secure_version == 0) &&
-                         (isSecurityEnabled == true))
+                         (isSecurityEnabled == true) &&
+                         (!SECUREBOOT::getSbeSecurityBackdoor()))
                 {
                     TRACFCOMP(g_trac_sbe, "getSbeInfoState() - Special Case: "
                               "SBE Image from pnor has secure version=0x%.2X, which is greater than"
                               " min_secure_version=0x%.2X. But ATTR_SECURE_VERSION_LOCKIN_POLICY=%d"
-                              ". However, since MSV==0 and security is enabled, will set new "
-                              "minimum secure version value to 1 (ie ignoring LOCKIN_POLICY)",
+                              ". However, since MSV==0, security is enabled, and running on "
+                              "production driver, will set new minimum secure version value to 1 "
+                              "(ie ignoring LOCKIN_POLICY)",
                               pnor_sbe_secure_version, min_secure_version,
                               lockin_policy);
                     pnor_sbe_secure_version = 1;
