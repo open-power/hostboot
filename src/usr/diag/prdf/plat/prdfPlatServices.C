@@ -285,10 +285,16 @@ void calloutBus(STEP_CODE_DATA_STRUCT& io_sc,
     PRDF_ASSERT(nullptr != i_rxTrgt);
     PRDF_ASSERT(nullptr != i_txTrgt);
 
-    // Add both endpoints to the callout list, priority medium group A.
-    GARD_POLICY guardPolicy = i_applyGuard ? GARD : NO_GARD;
-    io_sc.service_data->SetCallout(i_rxTrgt, i_rxPriority, guardPolicy);
-    io_sc.service_data->SetCallout(i_txTrgt, i_txPriority, guardPolicy);
+    // Do not callout the bus endpoint for ABUS callouts. The correct callout
+    // priorities will be handled in the HWSV bus callout interface when TDR is
+    // performed on the bus.
+    if (HWAS::A_BUS_TYPE != i_busType)
+    {
+        // Add both endpoints to the callout list, priority medium group A.
+        GARD_POLICY guardPolicy = i_applyGuard ? GARD : NO_GARD;
+        io_sc.service_data->SetCallout(i_rxTrgt, i_rxPriority, guardPolicy);
+        io_sc.service_data->SetCallout(i_txTrgt, i_txPriority, guardPolicy);
+    }
 
     // Callout the rest of the bus, priority low.
     errlHndl_t errl = ServiceGeneratorClass::ThisServiceGenerator().getErrl();
