@@ -442,7 +442,11 @@ enum P10_HCD_CLK_CTRL_CONSTANTS
     HCD_CLK_REGION_CLKADJ                       = BIT32(14),
     HCD_CLK_REGION_MMA                          = BITS32(15, 4),
     HCD_CLK_REGION_EQ                           = (BIT32(4) | BITS32(13, 2)),
+#ifndef DFT
     HCD_CLK_REGION_ALL                          = BITS32(4, 15),
+#else
+    HCD_CLK_REGION_ALL                          = BITS32(4, 13) | BITS32(15),
+#endif //DFT
     HCD_CLK_THOLD_ALL                           = BITS64SH(48, 3),
     HCD_CLK_THOLD_SL                            = BIT64SH(48),
     HCD_CLK_THOLD_NSL                           = BIT64SH(49),
