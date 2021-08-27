@@ -1941,6 +1941,10 @@ static size_t fullPelOnly(const size_t i_number)
 #endif
 }
 
+// Sections at the start of an error log (non user-defined)
+// 3 = PH, UH, PS + 2 more for full pel support (EH and ED)
+const uint8_t NON_UD_SECTION_CNT = 3 + fullPelOnly(2);
+
 //////////////////////////////////////////////////////////////////////////////
 // for use by ErrlManager
 
@@ -1976,6 +1980,9 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,
     uint64_t l_cb = 0;
     uint64_t l_sizeRemaining = i_bufsize;
 
+    // iv_Private.iv_sectns is one byte so can only add one byte's worth of sections
+    const uint8_t MAX_SECTIONS_ALLOWED = 0xFF;
+
     // The CPPASSERT() macro will cause the compile to abend
     // when the expression given evaluates to false.  If ever
     // these cause the compile to fail, then perhaps the size
@@ -2001,7 +2008,20 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,
         // Inform the private header how many sections there are,
         // counting the PH, UH, PS, EH, ED, and the optionals.
         const auto startingSectionCount = iv_SectionVector.size();
-        iv_Private.iv_sctns = 3 + fullPelOnly(2) + startingSectionCount;
+        auto sectionsLeft = startingSectionCount;
+        if ((startingSectionCount + NON_UD_SECTION_CNT) > MAX_SECTIONS_ALLOWED)
+        {
+            TRACFCOMP(g_trac_errl,
+                "Starting section count 0x%X is beyond max allowed by %d sections",
+                startingSectionCount + NON_UD_SECTION_CNT,
+                (startingSectionCount + NON_UD_SECTION_CNT) - MAX_SECTIONS_ALLOWED);
+            iv_Private.iv_sctns = MAX_SECTIONS_ALLOWED;
+            sectionsLeft = MAX_SECTIONS_ALLOWED - NON_UD_SECTION_CNT;
+        }
+        else
+        {
+            iv_Private.iv_sctns = NON_UD_SECTION_CNT + startingSectionCount;
+        }
 
         char * pBuffer = static_cast<char *>(o_pBuffer);
 
@@ -2061,7 +2081,7 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,
 
         std::vector<ErrlUD*>::const_iterator it;
         for(it = iv_SectionVector.begin();
-            (it != iv_SectionVector.end()) && (l_flatSize != 0);
+            (it != iv_SectionVector.end()) && (l_flatSize != 0) && sectionsLeft;
             it++)
         {
             // If UD section is a hardware callout.
@@ -2087,13 +2107,14 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,
                     }
                 }
                 ++flattenedSections;
+                --sectionsLeft;
                 pBuffer += l_cb;
                 l_sizeRemaining -= l_cb;
             }
         } // for
 
         for(it = iv_SectionVector.begin();
-            (it != iv_SectionVector.end()) && (l_flatSize != 0);
+            (it != iv_SectionVector.end()) && (l_flatSize != 0) && sectionsLeft;
             it++)
         {
             // If UD section is not a hardware callout and not a trace.
@@ -2121,6 +2142,7 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,
                     }
                 }
                 ++flattenedSections;
+                --sectionsLeft;
                 pBuffer += l_cb;
                 l_sizeRemaining -= l_cb;
             }
@@ -2131,7 +2153,7 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,
         removeDuplicateTraces();
 
         for(it = iv_SectionVector.begin();
-           (it != iv_SectionVector.end()) && (l_flatSize != 0);
+           (it != iv_SectionVector.end()) && (l_flatSize != 0) && sectionsLeft;
             it++)
         {
             // If UD section is a trace.
@@ -2158,6 +2180,7 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,
                     }
                 }
                 ++flattenedSections;
+                --sectionsLeft;
                 pBuffer += l_cb;
                 l_sizeRemaining -= l_cb;
             }
@@ -2170,10 +2193,17 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,
 
         if (flattenedSections != startingSectionCount)
         {
-            // some section was too big and didn't get flatten - update the
+            // some section was too big and didn't get flatten OR
+            // there were too many sections - update the
             // section count in the PH section and re-flatten it.
             // count is the PH, UH, PS, EH, ED and the optionals.
-            iv_Private.iv_sctns = 3 + fullPelOnly(2) + flattenedSections;
+            iv_Private.iv_sctns = NON_UD_SECTION_CNT + flattenedSections;
+            if (sectionsLeft == 0)
+            {
+                TRACFCOMP(g_trac_errl, "Skipped flattening %d sections - total sections: 0x%02X",
+                    startingSectionCount - flattenedSections, iv_Private.iv_sctns);
+            }
+
             // use ph size, since this is overwriting flattened data
             l_cb = iv_Private.flatten( pPHBuffer, iv_Private.flatSize() );
             if( 0 == l_cb )
@@ -2237,7 +2267,7 @@ uint64_t ErrlEntry::unflatten( const void * i_buffer,  uint64_t i_len )
 
     // loop thru the User Data sections (after already doing 3: Private, User
     // Header, SRC sections) while there's still data to process
-    for (int32_t l_sc = 3 + fullPelOnly(2);
+    for (int32_t l_sc = NON_UD_SECTION_CNT;
             (l_sc < iv_Private.iv_sctns) && (consumed < i_len);
             l_sc++)
     {
@@ -2266,7 +2296,7 @@ uint64_t ErrlEntry::unflatten( const void * i_buffer,  uint64_t i_len )
 
     // if we didn't get as many User Detail sections as the Private header says
     // we should have, then we have an error
-    if ((iv_SectionVector.size() + 3 + fullPelOnly(2)) != iv_Private.iv_sctns)
+    if ((iv_SectionVector.size() + NON_UD_SECTION_CNT) != iv_Private.iv_sctns)
     {
         rc = -1;
     }
