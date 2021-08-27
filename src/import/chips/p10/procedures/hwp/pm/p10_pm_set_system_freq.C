@@ -306,8 +306,14 @@ fapi2::ReturnCode pm_set_frequency(
                                     "The UltraTurbo frequencies need to be compatabile");
                             }
                         }
+
                         fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+                        // Don't break for Cronus to allow for non-product supported sort mixtures.
+                        #if defined(__HOSTBOOT_MODULE) || defined(FIPSODE)
                         break;
+                        #else
+                        FAPI_INF("**** WARNING : Skipping processor loop break for Cronus");
+                        #endif
                     }
 
                     if (l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_FAIL)
