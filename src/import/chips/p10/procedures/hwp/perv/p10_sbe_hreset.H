@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,7 +44,8 @@
 
 /// Function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p10_sbe_hreset_FP_t)(const
-        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
+        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
+        bool);
 
 //------------------------------------------------------------------------------
 // Function prototypes
@@ -58,7 +59,8 @@ typedef fapi2::ReturnCode (*p10_sbe_hreset_FP_t)(const
 extern "C"
 {
     fapi2::ReturnCode p10_sbe_hreset(
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+        bool i_is_fsp = false);
 }
 
 #endif
