@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -129,6 +129,12 @@ namespace Util
             }
             /** Pointer Operator */
             pointer operator->()
+            {
+                return &reinterpret_cast<__UTIL_SPLAYTREE_NS::Node<T>*>(
+                            const_cast<__UTIL_SPLAYTREE_NS::Node<const void*>*>(
+                                (Itr::getNode())))->data_T();
+            }
+            pointer operator->() const
             {
                 return &reinterpret_cast<__UTIL_SPLAYTREE_NS::Node<T>*>(
                             const_cast<__UTIL_SPLAYTREE_NS::Node<const void*>*>(

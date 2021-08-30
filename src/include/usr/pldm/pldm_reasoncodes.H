@@ -146,6 +146,7 @@ namespace PLDM
         RC_INVALID_LID_ID           = PLDM_COMP_ID | 0x2E,
         RC_NO_MATCHING_VALUE        = PLDM_COMP_ID | 0x2F,
         RC_EFFECTER_NOT_FOUND       = PLDM_COMP_ID | 0x30,
+        RC_MULTIPLE_REGISTRATIONS   = PLDM_COMP_ID | 0x31,
     };
 }
 #endif

@@ -750,9 +750,19 @@ errlHndl_t PdrManager::handleStateQueryRequest(const state_query_type_t i_queryt
 
     errlHndl_t errl = nullptr;
     uint8_t response_code = PLDM_SUCCESS; // Only sent if we don't find an appropriate query handler
+    bool dynamic_handler_invoked = false;
 
     do
     {
+
+    /* First, invoke any dynamically registered callbacks */
+
+#ifndef __HOSTBOOT_RUNTIME
+    if (i_querytype == STATE_QUERY_EFFECTER)
+    {
+        dynamic_handler_invoked = invokeStateEffecterCallback(*static_cast<const pldm_set_state_effecter_states_req*>(i_req));
+    }
+#endif
 
     /* Look up the query handler callback for this sensor. */
 
@@ -779,30 +789,34 @@ errlHndl_t PdrManager::handleStateQueryRequest(const state_query_type_t i_queryt
 
         if (handler_function_id == STATE_QUERY_HANDLER_INVALID)
         {
-            PLDM_ERR("PdrManager::handleStateQueryRequest: No handler for sensor/effecter ID 0x%08x",
-                     i_query_id);
+            if (!dynamic_handler_invoked)
+            {
+                PLDM_ERR("PdrManager::handleStateQueryRequest: No handler for sensor/effecter ID 0x%08x",
+                         i_query_id);
 
-            /*@
-             * @errortype  ERRL_SEV_UNRECOVERABLE
-             * @moduleid   MOD_PDR_MANAGER
-             * @reasoncode RC_INVALID_STATE_QUERY_ID
-             * @userdata1[0:31]  Sensor/effecter ID
-             * @userdata1[32:63] Query type (1 = sensor, 2 = effecter)
-             * @userdata2  Unused
-             * @devdesc    Software problem, invalid state sensor/effecter ID received from BMC
-             * @custdesc   A software error occurred during system boot
-             */
-            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                 MOD_PDR_MANAGER,
-                                 RC_INVALID_STATE_QUERY_ID,
-                                 TWO_UINT32_TO_UINT64(i_query_id, i_querytype),
-                                 0,
-                                 ErrlEntry::NO_SW_CALLOUT);
-            addBmcErrorCallouts(errl);
-            errlCommit(errl, PLDM_COMP_ID);
-            response_code = (i_querytype == STATE_QUERY_EFFECTER
-                             ? PLDM_PLATFORM_INVALID_EFFECTER_ID
-                             : PLDM_PLATFORM_INVALID_SENSOR_ID);
+                /*@
+                 * @errortype  ERRL_SEV_UNRECOVERABLE
+                 * @moduleid   MOD_PDR_MANAGER
+                 * @reasoncode RC_INVALID_STATE_QUERY_ID
+                 * @userdata1[0:31]  Sensor/effecter ID
+                 * @userdata1[32:63] Query type (1 = sensor, 2 = effecter)
+                 * @userdata2  Unused
+                 * @devdesc    Software problem, invalid state sensor/effecter ID received from BMC
+                 * @custdesc   A software error occurred during system boot
+                 */
+                errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                     MOD_PDR_MANAGER,
+                                     RC_INVALID_STATE_QUERY_ID,
+                                     TWO_UINT32_TO_UINT64(i_query_id, i_querytype),
+                                     0,
+                                     ErrlEntry::NO_SW_CALLOUT);
+                addBmcErrorCallouts(errl);
+                errlCommit(errl, PLDM_COMP_ID);
+                response_code = (i_querytype == STATE_QUERY_EFFECTER
+                                 ? PLDM_PLATFORM_INVALID_EFFECTER_ID
+                                 : PLDM_PLATFORM_INVALID_SENSOR_ID);
+            }
+
             break;
         }
     }
@@ -831,9 +845,11 @@ errlHndl_t PdrManager::handleStateQueryRequest(const state_query_type_t i_queryt
 
     /* Reply with an error if we didn't invoke any handler. If we call a query
        handler at all, it should send the response (even if there's an error
-       within it or something), so we don't need to do it here. */
+       within it or something), so we don't need to do it here.
+       Dynamic handlers, on the other hand, shouldn't send the response
+       themselves, so we do want to do that for them here. */
 
-    if (response_code != PLDM_SUCCESS)
+    if (response_code != PLDM_SUCCESS || dynamic_handler_invoked)
     {
         PLDM::send_cc_only_response(i_msgQ, i_msg, response_code);
     }
@@ -1119,5 +1135,117 @@ PdrManager& thePdrManager()
 {
     return Singleton<PdrManager>::instance();
 }
+
+#ifndef __HOSTBOOT_RUNTIME
+
+template<typename T>
+static bool operator==(T i_lhs, T i_rhs)
+{
+    return i_lhs.msgQ == i_rhs.msgQ;
+}
+
+using std::begin;
+using std::end;
+
+void PdrManager::registerStateEffecterCallbackMsgQ(const effecter_id_t i_effecter_id,
+                                                   const uint8_t i_composite_id,
+                                                   const msg_q_t i_msgQ,
+                                                   const uint32_t i_msg_type)
+{
+    const auto lock = scoped_mutex_lock(iv_access_mutex);
+
+    effecter_registry_key_t new_key(i_effecter_id, i_composite_id);
+
+    const effecter_registry_value_t new_value(i_msgQ, i_msg_type);
+
+    auto& list = iv_effecter_msgq_registry[new_key.fullword];
+
+    list.push_back(new_value);
+}
+
+void PdrManager::unregisterStateEffecterCallbackMsgQ(const effecter_id_t i_effecter_id,
+                                                     const uint8_t i_composite_id,
+                                                     const msg_q_t i_msgQ)
+{
+    const auto lock = scoped_mutex_lock(iv_access_mutex);
+
+    effecter_registry_key_t key(i_effecter_id, i_composite_id);
+    const effecter_registry_value_t remove_value(i_msgQ, 0);
+
+    const auto list = iv_effecter_msgq_registry.find(key.fullword);
+
+    if (list != iv_effecter_msgq_registry.end())
+    {
+        list->second.erase(std::remove(begin(list->second), end(list->second), remove_value),
+                           end(list->second));
+
+        if (list->second.empty()) // free up memory when we can
+        {
+            iv_effecter_msgq_registry.erase(list);
+        }
+    }
+}
+
+bool PdrManager::invokeStateEffecterCallback(const pldm_set_state_effecter_states_req& i_req)
+{
+    bool invoked_callback = false;
+
+    const auto lock = scoped_mutex_lock(iv_access_mutex);
+
+    for (int i = 0; i < i_req.comp_effecter_count; ++i)
+    {
+        if (i_req.field[i].set_request)
+        {
+            effecter_registry_key_t key(i_req.effecter_id, i);
+
+            const auto it = iv_effecter_msgq_registry.find(key.fullword);
+
+            if (it != end(iv_effecter_msgq_registry))
+            {
+                for (const auto entry : it->second)
+                {
+                    msg_t* msg = msg_allocate();
+                    msg->type = entry.msg_type;
+
+                    int rc = msg_sendrecv(entry.msgQ, msg);
+
+                    if (rc != 0)
+                    {
+                        PLDM_ERR("PdrManager::invokeStateEffecterCallback: msg_sendrecv failed with rc %d "
+                                 "on effecter %d/%d, message type = 0x%08x",
+                                 rc, i_req.effecter_id, i, entry.msg_type);
+
+                        /*@
+                         * @errortype        ERRL_SEV_UNRECOVERABLE
+                         * @moduleid         MOD_PDR_MANAGER
+                         * @reasoncode       RC_SENDRECV_FAIL
+                         * @userdata1[0:31]  Return code from msg_sendrecv
+                         * @userdata1[32:63] Message type for registered callback
+                         * @userdata2[0:31]  PLDM effecter ID
+                         * @userdata2[32:63] PLDM composite effecter ID
+                         * @devdesc          msg_sendrecv() failed
+                         * @custdesc         Firmware error during system boot
+                         */
+                        errlHndl_t err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                                       MOD_PDR_MANAGER,
+                                                       RC_SENDRECV_FAIL,
+                                                       TWO_UINT32_TO_UINT64(rc, entry.msg_type),
+                                                       TWO_UINT32_TO_UINT64(i_req.effecter_id, i),
+                                                       ErrlEntry::ADD_SW_CALLOUT);
+                        errlCommit(err, PLDM_COMP_ID);
+                    }
+
+                    msg_free(msg);
+                    msg = nullptr;
+                    invoked_callback = true;
+                }
+            }
+        }
+    }
+
+    return invoked_callback;
+}
+
+#endif // #ifndef __HOSTBOOT_RUNTIME
 
 }

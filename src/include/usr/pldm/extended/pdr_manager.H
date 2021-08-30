@@ -32,6 +32,7 @@
 #define PDR_MANAGER_H__
 
 // Standard library
+#include <map>
 #include <memory>
 #include <vector>
 
@@ -405,6 +406,50 @@ public:
     errlHndl_t findStateEffecterId(const pldm_state_set_ids i_state_set_id,
                                    uint16_t &o_effecter_id);
 
+#ifndef __HOSTBOOT_RUNTIME
+    /** @brief  Register a message queue to be messaged when a particular effecter is set.
+     *          See DSP0248 v1.2.0 for definitions.
+     *
+     * @param[in] i_effecter_id   The ID of the effecter to monitor.
+     * @param[in] i_composite_id  The offset of the composite effecter to monitor.
+     * @param[in] i_msgQ          The message queue to send the message to.
+     * @param[in] i_msg_type      The message type to send to the message queue.
+     *
+     * @note The message queue listener must respond with a message after it is
+     *       done operating.
+     * @note If a listener is registered to handle a particular effecter, a "success"
+     *       PLDM response will be sent in response to the effecter-set request
+     *       (unless there is also a static handler for this effecter registered
+     *       by addStateEffecterPdr, in which case the static handler is responsible
+     *       for responding).
+     * @note Dynamic handlers for the state effecter will be invoked before any static
+     *       handler.
+     * @note The PDR repository will be locked when a message is sent on the queue,
+     *       so the listener should respond to the message before doing locking operations
+     *       on the PDR manager.
+     * @note This function locks the PDR repository.
+     * @note Waiters on the message queue should use the msg_wait_timeout API to ensure
+     *       that they are able to progress even if a message send operation fails.
+     */
+    void registerStateEffecterCallbackMsgQ(effecter_id_t i_effecter_id,
+                                           uint8_t i_composite_id,
+                                           msg_q_t i_msgQ,
+                                           uint32_t i_msg_type);
+
+    /** @brief  Unregister a registered effecter callback message queue.
+     *
+     * @param[in] i_effecter_id   See registerStateEffecterCallbackMsgQ.
+     * @param[in] i_composite_id  See registerStateEffecterCallbackMsgQ.
+     * @param[in] i_msgQ          See registerStateEffecterCallbackMsgQ.
+     *
+     * @note If the queue is not registered under the given effecter info, this
+     *       function does nothing.
+     */
+    void unregisterStateEffecterCallbackMsgQ(effecter_id_t i_effecter_id,
+                                             uint8_t i_composite_id,
+                                             msg_q_t i_msgQ);
+#endif
+
 private:
     std::unique_ptr<pldm_pdr, void(*)(pldm_pdr*)> iv_pdr_repo;
     mutable mutex_t iv_access_mutex;
@@ -414,8 +459,53 @@ private:
     std::unique_ptr<mutex_t, void(*)(mutex_t*)> iv_access_mutex_owner;
 
 #ifndef __HOSTBOOT_RUNTIME
+    /** @brief  Invoke dynamic callback listeners for a PLDM state effecter.
+     *
+     * @param[in] i_req  The PLDM request
+     * @return    bool   Whether any handlers were invoked.
+     * @note             This function locks the PDR repository.
+     */
+    bool invokeStateEffecterCallback(const pldm_set_state_effecter_states_req& i_req);
+
     // Holds a msg_q_t
     std::shared_ptr<void> iv_bmc_repo_changed_event_q;
+
+    struct effecter_registry_value_t
+    {
+        effecter_registry_value_t(msg_q_t i_msgQ, uint32_t i_msg_type)
+            : msgQ(i_msgQ), msg_type(i_msg_type) { }
+
+        msg_q_t msgQ = nullptr;
+        uint32_t msg_type = 0;
+    };
+
+    struct effecter_registry_key_t
+    {
+        effecter_registry_key_t(uint32_t i_fullword)
+        {
+            fullword = i_fullword;
+        }
+
+        effecter_registry_key_t(effecter_id_t i_eff_id, uint8_t i_comp_id)
+        {
+            fullword = 0;
+            effecter_id = i_eff_id;
+            composite_id = i_comp_id;
+        }
+
+        union
+        {
+            struct
+            {
+                effecter_id_t effecter_id;
+                uint8_t composite_id;
+            } PACKED;
+
+            uint32_t fullword;
+        };
+    };
+
+    std::map<uint32_t, std::vector<effecter_registry_value_t>> iv_effecter_msgq_registry;
 #endif
 
     /* This monotonically increasing value is used to assign sensor/effecter IDs, and the IDs are stored in
