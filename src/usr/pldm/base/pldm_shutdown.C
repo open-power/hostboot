@@ -63,7 +63,7 @@
 using namespace PLDM;
 using namespace TARGETING;
 
-// This structure is passed as the argument to the thread that we create to wait
+// This structure is passed as the argument to the task that we create to wait
 // for the graceful shutdown.
 struct shutdown_args
 {
@@ -81,23 +81,82 @@ struct shutdown_args
     // shutdown path to avoid making page requests.
     terminus_id_t hb_terminus_id = 0;
 
-    // The shutdown sensor ID to use in the completion notification. We have to
-    // read this before shutting down, because we cannot read any attributes in
-    // the shutdown path, since it might entail making page requests to the BMC
-    // which we can't/shouldn't do while shutting down.
+    // The shutdown sensor ID to use in the completion notification. The
+    // completion notification is only sent in the case when the BMC initiates
+    // the soft poweroff.
+    // We have to read this before shutting down, because we cannot read any
+    // attributes in the shutdown path, since it might entail making page
+    // requests to the BMC which we can't/shouldn't do while shutting down.
     sensor_id_t shutdown_sensor_id;
+
+    // The effecter ID to use to tell the BMC to turn the chassis power off
+    // after a graceful shutdown. This is only used when the host initiates the
+    // soft poweroff.
+    // We have to read this before shutting down, because we cannot read any
+    // attributes in the shutdown path, since it might entail making page
+    // requests to the BMC which we can't/shouldn't do while shutting down.
+    effecter_id_t chassisoff_effecter_id;
 };
 
-/* @brief Wait for a message from Initservice on the message queue (provided in
+/** @brief Wait for a message from Initservice on the messsage queue (provided in
+ * the argument) that tells us that all dirty pages have been flushed from
+ * memory, after which we will ask the BMC to cut chassis power.
+ *
+ * This differs from the BMC-initated shutdown path in that here we request the
+ * chassis poweroff ourselves, whereas in the BMC-initiated path the BMC will
+ * cut the power when we notify it that the host is done shutting down.
+ *
+ * @param[in] i_args  Pointer to shutdown_args structure
+ */
+void* wait_for_host_initiated_shutdown(void* const i_args)
+{
+    task_detach(); // shut down hostboot if we crash
+
+    const std::unique_ptr<shutdown_args> args { static_cast<shutdown_args*>(i_args) };
+
+    msg_t* msg = msg_wait(args->msgq.get());
+
+    printk("\nSending PLDM chassis poweroff request\n");
+
+    const uint8_t SYSTEM_POWER_STATE_OFF_SOFT_GRACEFUL = 9;
+
+    errlHndl_t errl = sendSetStateEffecterStatesRequest(args->chassisoff_effecter_id,
+                                                        { { set_request::PLDM_REQUEST_SET, SYSTEM_POWER_STATE_OFF_SOFT_GRACEFUL } });
+
+    if (errl)
+    {
+        // We can't commit the error this late in the shutdown path because
+        // we've already flushed PNOR pages, shut down the error service etc. so
+        // we just send some traces to the printk buffer and upgrade the
+        // shutdown status to "error".
+
+        printk("requestSoftPowerOff: Error occurred in sendSetStateEffecterStatesRequest:\n");
+        printk(TRACE_ERR_FMT "\n", TRACE_ERR_ARGS(errl));
+
+        // This call to doShutdown will just update the "worst shutdown status"
+        // so that we don't completely lose the error.
+        INITSERVICE::doShutdown(SHUTDOWN_STATUS_PLDM_REQUEST_FAILED, true /* background shutdown */);
+    }
+
+    msg_respond(args->msgq.get(), msg);
+
+    return nullptr;
+}
+
+/** @brief Wait for a message from Initservice on the message queue (provided in
  * the argument) that tells us that all dirty pages have been flushed from
  * memory, after which we send a notification to the BMC letting it know that we
  * are finished gracefully shutting down.
  *
+ * This differs from the host-initated shutdown path in that here we notify the
+ * BMC that we are done and let it cut chassis power when it wants to, whereas
+ * in the host-initiated path we ourselves will instruct the BMC to cut power.
+ *
  * @param[in] i_args  Pointer to shutdown_args structure
  */
-static void* wait_for_graceful_shutdown(void* const i_args)
+void* wait_for_bmc_initiated_shutdown(void* const i_args)
 {
-    task_detach();
+    task_detach(); // shut down hostboot if we crash
 
     const std::unique_ptr<shutdown_args> args { static_cast<shutdown_args*>(i_args) };
 
@@ -122,7 +181,7 @@ static void* wait_for_graceful_shutdown(void* const i_args)
 
         // This call to doShutdown will just update the "worst shutdown status"
         // so that we don't completely lose the error.
-        INITSERVICE::doShutdown(SHUTDOWN_STATUS_PLDM_NOTI_FAILED, true /* background shutdown */);
+        INITSERVICE::doShutdown(SHUTDOWN_STATUS_PLDM_REQUEST_FAILED, true /* background shutdown */);
     }
 
     msg_respond(args->msgq.get(), msg);
@@ -130,7 +189,7 @@ static void* wait_for_graceful_shutdown(void* const i_args)
     return nullptr;
 }
 
-void PLDM::requestSoftPowerOff()
+void PLDM::requestSoftPowerOff(const poweroff_initiator_t i_initiator)
 {
     PLDM_INF(ENTER_MRK"requestSoftPowerOff");
 
@@ -139,31 +198,53 @@ void PLDM::requestSoftPowerOff()
                                                      PLDM_STATE_SET_SW_TERMINATION_STATUS,
                                                      UTIL::assertGetToplevelTarget());
 
-    // If we can find the shutdown sensor ID, then we start a task that will
-    // send a completion notification to the BMC using that sensor ID.
-    // If we cannot find the shutdown sensor ID, then we can't notify the BMC,
-    // so create an error and shutdown with an error code.
-    if (shutdown_sensor_id != 0)
+    sensor_id_t bmc_chassisoff_effecter_id
+        = thePdrManager().findStateEffecterId({ .entity_type = ENTITY_TYPE_CHASSIS, .entity_instance_num = 1 },
+                                              PLDM_STATE_SET_SYSTEM_POWER_STATE);
+
+    // TODO: Remove this once the BMC removes its redundant chassis entity
+    if (bmc_chassisoff_effecter_id == 0)
+    {
+        bmc_chassisoff_effecter_id
+            = thePdrManager().findStateEffecterId({ .entity_type = ENTITY_TYPE_CHASSIS, .entity_instance_num = 0 },
+                                                  PLDM_STATE_SET_SYSTEM_POWER_STATE);
+    }
+
+    // If we can find the shutdown sensor ID and chassisoff effecter IDs, then
+    // we start a task that will send a completion notification to the BMC using
+    // that sensor ID.  If we cannot find the shutdown sensor ID, then we can't
+    // notify the BMC, so create an error and shutdown with an error code.
+    if (shutdown_sensor_id != 0 && bmc_chassisoff_effecter_id != 0)
     {
         const msg_q_t msgQ = MSG_Q_RESOLVE("PLDM::requestSoftPowerOff", VFS_ROOT_MSG_PLDM_REQ_OUT);
 
+        // The shutdown task will take ownership of this pointer.
         const auto args = new shutdown_args
         {
             .msgq { msg_q_create(), msg_q_destroy },
             .pldm_msg_q = msgQ,
             .hb_terminus_id = thePdrManager().hostbootTerminusId(),
-            .shutdown_sensor_id = shutdown_sensor_id
+            .shutdown_sensor_id = shutdown_sensor_id,
+            .chassisoff_effecter_id = bmc_chassisoff_effecter_id
         };
 
-        // Create a thread waiting for the "memory flush complete" message from
+        // Create a task waiting for the "memory flush complete" message from
         // Initservice.
-        task_create(wait_for_graceful_shutdown, args);
+        switch (i_initiator)
+        {
+        case POWEROFF_BMC_INITIATED:
+            task_create(wait_for_bmc_initiated_shutdown, args);
+            break;
+        case POWEROFF_HOST_INITIATED:
+            task_create(wait_for_host_initiated_shutdown, args);
+            break;
+        }
 
         // Tell the istep dispacher to stop executing isteps.
         INITSERVICE::stopIpl();
 
         // Register for the post memory flush callback. Initservice will send us
-        // a message on this message queue, which the thread we created above is
+        // a message on this message queue, which the task we created above is
         // listening on.
         INITSERVICE::registerShutdownEvent(PLDM_COMP_ID,
                                            args->msgq.get(),
@@ -185,17 +266,22 @@ void PLDM::requestSoftPowerOff()
          * @severity   ERRL_SEV_UNRECOVERABLE
          * @moduleid   MOD_PLDM_SHUTDOWN
          * @reasoncode RC_NOT_READY
-         * @devdesc    Requested a graceful shutdown before creating the shutdown sensor.
+         * @userdata1  The graceful shutdown sensor ID
+         * @userdata2  The BMC chassis poweroff effecter ID
+         * @devdesc    Cannot locate graceful shutdown PDRs.
          * @custdesc   Internal firmware error
          */
         errlHndl_t errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                   MOD_PLDM_SHUTDOWN,
                                                   RC_NOT_READY,
-                                                  0,
-                                                  0,
+                                                  shutdown_sensor_id,
+                                                  bmc_chassisoff_effecter_id,
                                                   ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
 
-        PLDM_ERR("requestSoftPowerOff: Cannot find PLDM sensor ID, shutting down with error 0x%08x",
+        PLDM_ERR("requestSoftPowerOff: Cannot find PLDM shutdown PDRs (graceful shutdown sensor = %d, "
+                 "BMC chassisoff effecter = %d, shutting down with error 0x%08x",
+                 shutdown_sensor_id,
+                 bmc_chassisoff_effecter_id,
                  errl->plid());
 
         auto plid = errl->plid();

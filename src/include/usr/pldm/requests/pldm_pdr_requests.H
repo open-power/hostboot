@@ -33,6 +33,7 @@
 
 #include <errl/errlentry.H>
 #include <pldm/pldmif.H>
+#include <openbmc/pldm/libpldm/platform.h>
 
 // Struct representing PDR repository (see DSP0248 v1.2.0, section 8)
 struct pldm_pdr;
@@ -140,6 +141,10 @@ errlHndl_t sendFruFunctionalStateChangedEvent(const TARGETING::Target* i_target,
 errlHndl_t sendSetNumericEffecterValueRequest(effecter_id_t i_effecter_id,
                                               uint32_t i_effecter_value,
                                               uint8_t i_value_size);
+
+errlHndl_t sendSetStateEffecterStatesRequest(
+                                    effecter_id_t i_effecter_id,
+                                    const std::vector<set_effecter_state_field>& i_state_fields);
 
 /* @brief Send a PLDM command notifying the BMC that Hostboot wants to be restarted
  *

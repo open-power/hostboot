@@ -690,7 +690,7 @@ errlHndl_t handlePhysPresenceWindow(void)
     // Initiate a graceful power off
     SB_INF("handlePhysPresenceWindow: Opened Physical Presence Detection Window. "
            "System Will Power Off and Wait For Manual Power On");
-    PLDM::requestSoftPowerOff();
+    PLDM::requestSoftPowerOff(PLDM::POWEROFF_HOST_INITIATED);
 #else //non-PLDM
     SB_INF("handlePhysPresenceWindow: Opened Physical Presence Detection Window. "
            "Calling INITSERVICE::doShutdown() with "

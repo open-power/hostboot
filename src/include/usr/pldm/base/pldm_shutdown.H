@@ -32,9 +32,23 @@
 namespace PLDM
 {
 
+/** @brief Types of soft poweroffs for requestSoftPowerOff.
+ */
+enum poweroff_initiator_t
+{
+    POWEROFF_BMC_INITIATED,
+    POWEROFF_HOST_INITIATED
+};
+
 /* @brief  Initiate an asynchronous graceful poweroff.
  *
+ * @param[in] i_initiator  Who initiated the poweroff.
+ *
+ * @note If the BMC initiates a graceful poweroff, then the host will leave
+ * cutting the chassis power to the BMC. If the host initiates the poweroff,
+ * then the host itself is responsible for requesting to cut the chassis power
+ * when it is done shutting down. This function fully handles both of these cases.
  */
-void requestSoftPowerOff();
+void requestSoftPowerOff(poweroff_initiator_t i_initiator);
 
 }

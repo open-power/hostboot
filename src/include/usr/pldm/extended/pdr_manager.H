@@ -188,6 +188,16 @@ public:
     template<typename F>
     void foreachPdrOfType(pldm_pdr_types i_pdr_type, F&& i_func) const;
 
+    /* @brief  Find the ID of a state effecter with the given characteristics.
+     *
+     * @param[in] i_entity        The entity that the effecter is attached to.
+     * @param[in] i_state_set_id  The state set ID of the effecter.
+     * @return    effecter_id_t   The ID of the effecter if any, otherwise 0.
+     * @note                      If there are multiple effecters on the same entity with the
+     *                            same state set ID, any one of them may be returned.
+     */
+    effecter_id_t findStateEffecterId(pldm_entity i_entity, pldm_state_set_ids i_state_set_id);
+
     /* @brief  Collect the FRU Record Set IDs from all FRU Record Set PDRs for
      *         the given entity type.
      *

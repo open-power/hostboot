@@ -457,7 +457,7 @@ errlHndl_t handleGracefulShutdownRequest(Target* const i_sys,
     PLDM_INF("handleGracefulShutdownRequest: Received graceful shutdown request");
     send_cc_only_response(i_msgQ, i_msg, PLDM_SUCCESS);
 
-    PLDM::requestSoftPowerOff();
+    PLDM::requestSoftPowerOff(PLDM::POWEROFF_BMC_INITIATED);
 #endif
 
     PLDM_INF(EXIT_MRK"handleGracefulShutdownRequest");

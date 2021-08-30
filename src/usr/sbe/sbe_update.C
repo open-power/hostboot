@@ -6241,7 +6241,7 @@ errlHndl_t sbeDoReboot( void )
                 INFO_MRK"sbeDoReboot(): Performing Secure Boot key transition. "
                 "Requesting power off");
 
-            PLDM::requestSoftPowerOff();
+            PLDM::requestSoftPowerOff(PLDM::POWEROFF_HOST_INITIATED);
 #endif
         }
         else
