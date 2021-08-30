@@ -93,6 +93,7 @@ namespace PLDM
         MOD_GET_TPM_REQUIRED_POLICY                  = 0x34, // getTpmRequiredPolicy
         MOD_SET_BIOS_ATTR_ENUM_VALUE                 = 0x35, // setBiosAttrEnumValue
         MOD_SEND_SET_NUMERIC_EFFECTER_VALUE_REQUEST  = 0x36, // sendSetNumericEffecterValueRequest
+        MOD_SBE_DUMP                                 = 0x37, // dumpSbe
     };
 
     enum PLDMReasonCode
@@ -144,6 +145,7 @@ namespace PLDM
         RC_BAD_WATCHDOG_VALUE       = PLDM_COMP_ID | 0x2D,
         RC_INVALID_LID_ID           = PLDM_COMP_ID | 0x2E,
         RC_NO_MATCHING_VALUE        = PLDM_COMP_ID | 0x2F,
+        RC_EFFECTER_NOT_FOUND       = PLDM_COMP_ID | 0x30,
     };
 }
 #endif

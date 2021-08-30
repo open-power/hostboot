@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,9 +25,13 @@
 #include <sys/msg.h>
 #include <sys/syscall.h>
 #include <sys/vfs.h>
+#include <sys/sync.h>
+#include <sys/time.h>
 #include <errno.h>
 
 #include <string.h>
+#include <memory>
+#include <vector>
 
 using namespace Systemcalls;
 
@@ -149,6 +153,142 @@ int msg_respond(msg_q_t q, msg_t* msg)
 msg_t* msg_wait(msg_q_t q)
 {
     return (msg_t*)_syscall1(MSG_WAIT, q);
+}
+
+struct msg_wait_timeout_task_args
+{
+    uint64_t seconds_to_wait = 0;
+    msg_q_t queue = { };
+    std::unique_ptr<msg_t, decltype(&msg_free)> waiter_done_msg { nullptr, msg_free };
+    volatile bool done = false;
+};
+
+static void* msg_wait_timeout_waiter_task(void* const vargs)
+{
+    task_detach(); // shut hostboot down if we crash
+
+    const auto args = static_cast<msg_wait_timeout_task_args*>(vargs);
+
+    int64_t ms_to_wait = args->seconds_to_wait * MS_PER_SEC;
+    const uint64_t MS_PER_POLL = 50;
+
+    while (ms_to_wait > 0)
+    {
+        nanosleep(0, MS_PER_POLL * NS_PER_MSEC);
+
+        if (args->done)
+        {
+            break;
+        }
+
+        ms_to_wait -= MS_PER_POLL;
+    }
+
+    msg_send(args->queue, args->waiter_done_msg.get());
+    return nullptr;
+}
+
+std::vector<msg_t*> msg_wait_timeout(const msg_q_t q, const uint64_t seconds)
+{
+    /* This function waits for a message on a message queue with a timeout. It
+     * does this by calling msg_wait on the queue, and if it receives no message
+     * within a certain amount of time, a waiter task sends a "timeout" message
+     * to the queue to cause the msg_send to return, and we indicate a timeout
+     * to the caller.
+     *
+     * Any implementation of this functionality must satisfy these constraints:
+     *
+     * A. A "timeout" message has to appear somewhere in the implementation;
+     *    there is no other way to cause msg_send to stop blocking a task, and
+     *    there is no way to kill a task that is blocked. (We also must not
+     *    "leak" tasks, i.e. create tasks that run forever and consume
+     *    resources.)
+     *
+     * B. The timeout message must be sent on the same queue that the caller
+     *    gives us. If this does not happen, then the task that calls msg_wait
+     *    on the queue will will never be unblocked if a message never arrives
+     *    on the queue. (Tasks cannot be killed, and even if they could be,
+     *    doing so would introduce a race condition between the task kill and
+     *    the msg_read.)
+     *
+     * C. There will always be a TOCTOU-style race condition between the time
+     *    that the waiter task detects a timeout and the time that it actually
+     *    places the timeout message on the queue. (If the waiter detects a
+     *    timeout, gets descheduled, and then we receive a real message on the
+     *    queue, the "timeout" message will appear on the queue after a real
+     *    message.) The design of this function must accomodate this and render
+     *    the race benign.
+     *
+     * D. We cannot allow the timeout message to remain on the queue in any
+     *    circumstance. Callers cannot be expected to gracefully handle a
+     *    message that they do not recognize.
+     *
+     * E. An unbounded number of messages may appear on the queue before our
+     *    timeout message actually makes it on the queue. Given that we *must*
+     *    remove the timeout message from the queue, and given that we cannot
+     *    place "real" messages back on the queue after we have read them off,
+     *    this function must therefore be able to return multiple messages.
+     *
+     * F. We must not "lose" real messages that were sent on the queue
+     *    (i.e. by reading them and not returning them to the caller). Nor can
+     *    we "lose" the timeout message, because we must deallocate it or else
+     *    cause a memory leak.
+     *
+     * To satisfy these conditions, this function involves two concurrent tasks:
+     *
+     * 1. Task 1 will read all messages from the queue, until it receives the
+     *    "timeout" message from task 2. Then it will return the list to the
+     *    caller.
+     *
+     * 2. Task 2 will wait a given number of seconds, or until task 1 tells it
+     *    to stop waiting, and then send the "timeout" message to task 1. Then
+     *    it will exit.
+     *
+     * Since the timeout ("waiter done") message is always sent on the queue in
+     * any case and Task 1 will always read it off of the queue, we satisfy
+     * conditions (B), (D) and (F) above, and since we save and return ALL the
+     * messages that we receive between the time we start listening and the time
+     * we receive the "timeout" message, we satisfy conditions (C) and (E)
+     * above. (Task 2 will always exit promptly, so condition (A) is also
+     * fulfilled.)
+     */
+
+    msg_wait_timeout_task_args args { };
+
+    args.seconds_to_wait = seconds;
+    args.queue = q;
+
+    // We will provide this message to the waiter task. When it sends this
+    // message to us, we will know the waiter is done waiting (either by timeout
+    // or by us telling it to stop polling).
+    args.waiter_done_msg.reset(msg_allocate());
+
+    task_create(msg_wait_timeout_waiter_task, &args);
+
+    std::vector<msg_t*> results;
+
+    while (true)
+    {
+        msg_t* const msg = msg_wait(q);
+
+        if (msg == args.waiter_done_msg.get())
+        {
+            break;
+        }
+
+        // Accumulate the message, since it's not the "waiter done" message.
+        results.push_back(msg);
+
+        // Shut the timeout task down on its next polling loop. We will still
+        // wait for it to send us the timeout message to avoid race conditions
+        // should it time out between the time we receive a real message and the
+        // time we tell it to stop. This way we always read the timeout message
+        // from the queue, and the timeout message can't end up waiting on the
+        // queue after we have quit polling.
+        args.done = true;
+    }
+
+    return results;
 }
 
 int updateRemoteIpcAddr(uint64_t i_Node, uint64_t i_RemoteAddr)

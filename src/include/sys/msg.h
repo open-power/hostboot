@@ -347,6 +347,30 @@ inline uint32_t msg_is_sync_noblk(msg_t* msg)
 
 #ifdef __cplusplus
 }
+
+#include <vector>
+
+/** @fn msg_wait_timeout
+  * @brief  Read one or more messages from a message queue with a timeout.
+  *
+  * Behaves like msg_wait, except that if the given timeout elapses and no
+  * message is received, no message(s) will be returned.
+  *
+  * @param[in] q        The message queue.
+  * @param[in] seconds  The maximum number of seconds to wait for a message.
+  *
+  * @return A list of messages posted to the queue. Empty if the timeout
+  *         elapsed before any messages were received.
+  *
+  * @note   This function could return any number of messages, but will not
+  *         block for much longer than it takes to receive the first message.
+  *         (The definition of "much longer" depends on the implementation
+  *         and environmental factors, such as the task scheduler.)
+  * @note   This function must not be used by multiple threads on the same
+  *         queue at the same time. Doing so could cause a deadlock.
+  */
+std::vector<msg_t*> msg_wait_timeout(msg_q_t q, uint64_t seconds);
+
 #endif
 
 #endif

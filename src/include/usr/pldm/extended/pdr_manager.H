@@ -66,7 +66,7 @@ namespace PLDM
  *         used through the Singleton class).
  *
  * @note  The member functions of this class are thread-safe, and lock/unlock a
- *        per-instance mutex upon entry/exit.
+ *        per-instance mutex for the internal PDR repository upon entry/exit.
  */
 class PdrManager
 {
@@ -80,11 +80,13 @@ public:
     /* @brief  Fetches remote PDRs and adds them to the repository.
      *
      * @return Error if any, otherwise nullptr.
+     * @note   Locks the PDR repository.
      */
     errlHndl_t addRemotePdrs();
 
     /* @brief  Remove all PDRs from the repository. Does NOT remove the sensor/effecter handlers
      *         previously registered with addStateEffecterPdr/addStateSensorPdr.
+     * @note   Locks the PDR repository.
      */
     void resetPdrs();
 
@@ -101,6 +103,7 @@ public:
      * @param[out] o_next_record_handle  Next record handle if PDR is found,
      *                                   unaltered otherwise.
      * @return  True if PDR is found, false otherwise.
+     * @note    Locks the PDR repository.
      */
     bool findPdr(pdr_handle_t& io_record_handle,
                  std::vector<uint8_t>* o_data,
@@ -110,6 +113,7 @@ public:
      *        and syncs that PDR to BMC.
      *
      * @return nullptr on success; non-nullptr on error
+     * @note   Locks the PDR repository.
      */
     errlHndl_t invalidateHBTerminusLocatorPdr();
 
@@ -118,18 +122,21 @@ public:
      *
      * @param[in] i_handles  PDR handles that have been added.
      * @return errlHndl_t    Error if any, otherwise nullptr.
+     * @note                 Locks the PDR repository.
      */
     errlHndl_t sendPdrRepositoryChangeEvent(const std::vector<pdr_handle_t>& i_handles) const;
 
     /* @brief Retrieves a list of all the PDR handles in this repository.
      *
      * @return vector<pdr_handle_t>  List of PDR handles in the repository
+     * @note   Locks the PDR repository.
      */
     std::vector<pdr_handle_t> getAllPdrHandles() const;
 
     /* @brief  Return the number of PDRs in the repository.
      *
      * @return size_t Repository's PDR count
+     * @note   Locks the PDR repository.
      */
     size_t pdrCount() const;
 
@@ -163,12 +170,31 @@ public:
     errlHndl_t awaitBmcPdrRepoChanged(size_t i_timeout_ms = TIMEOUT_NONE);
 #endif
 
+    /* @brief  Iterate the PDR repository and invoke a callback for each PDR of
+     *         the given type.
+     *
+     * @param[in]  i_pdr_type  The type of PDR to iterate.
+     * @param[in]  i_func      The callback. Can be any object with an operator() that is
+     *                         compatible with the signature:
+     *                           bool i_func(uint8_t* pdr_data, uint32_t pdr_data_size)
+     *                         The functor will be called with the data and length of each
+     *                         PDR of the requested type in the PDR repository.
+     *                         If the functor returns a truthy value, the iteration will
+     *                         halt.
+     * @note                   This function acquires a lock on the PDR repository. The functor
+     *                         should not call other PdrManager functions that also lock the
+     *                         repository, because it will cause a deadlock.
+     */
+    template<typename F>
+    void foreachPdrOfType(pldm_pdr_types i_pdr_type, F&& i_func) const;
+
     /* @brief  Collect the FRU Record Set IDs from all FRU Record Set PDRs for
      *         the given entity type.
      *
      * @param[in] i_entity_type  Entity type to filter by
      * @param[in] i_terminus_id  Terminus ID for the terminus that originated the FRU record set PDR
      * @return vector            List of FRU Record Set IDs for the given entity type
+     * @note                     Locks the PDR repository.
      */
     std::vector<fru_record_set_id> findFruRecordSetIdsByType(entity_type i_entity_type, terminus_id_t i_terminus_id = TERMINUS_ID_ALL) const;
 
@@ -178,10 +204,10 @@ public:
      * @param[in] i_rsid     The FRU RSID to look up
      * @param[out] o_entity  The entity ID if found, otherwise unset
      * @return bool          Whether the FRU RSID was found in the PDR repository
+     * @note                 Locks the PDR repository.
      */
     bool findEntityByFruRecordSetId(fru_record_set_id i_rsid,
                                     pldm_entity& o_entity) const;
-
 
     /* A "state query" is either a state sensor get-request or a state effecter
      * set-request. */
@@ -225,6 +251,7 @@ public:
      *                               PDR. If this is NONE, then the PDR will be created, but the
      *                               SetStateEffecterStates PLDM command for this effecter will respond with
      *                               an error.
+     * @note                         Locks the PDR repository.
      */
     void addStateEffecterPdr(TARGETING::Target* i_target,
                              const pldm_entity& i_entity,
@@ -245,6 +272,7 @@ public:
      *                               PDR. If this is NONE, then the PDR will be created, but the
      *                               GetStateSensorReadings PLDM command for this effecter will respond with
      *                               an error.
+     * @note                         Locks the PDR repository.
      */
     void addStateSensorPdr(TARGETING::Target* i_target,
                            const pldm_entity& i_entity,
@@ -258,6 +286,7 @@ public:
      * @param[in] i_target  If non-NULL, only return state query records related
      *                      to this target. If NULL, return all records.
      * @return vector       List of PLDM state query records.
+     * @note                Locks the PDR repository.
      */
     std::vector<pldm_state_query_record_t> getStateQueryRecords(const TARGETING::Target* i_target = nullptr);
 
@@ -269,6 +298,7 @@ public:
      * @return                        The sensor or effecter ID of the registered handler if any, 0 if none.
      * @note                          If there are multiple query handlers registered for the same state set
      *                                on the relevant target(s), an arbitrary one will be returned.
+     * @note                          Locks the PDR repository.
      */
     state_query_id_t getStateQueryIdForStateSet(state_query_type_t i_state_query_type,
                                                 uint16_t i_state_set_id,
@@ -284,6 +314,7 @@ public:
      * @param[in] i_payload_len  Length of the PLDM message.
      * @param[in] i_req          Decoded PLDM request.
      * @return errlHndl_t        Error if any, otherwise nullptr.
+     * @note                     Locks the PDR repository.
      */
     errlHndl_t setStateEffecterStates(msg_q_t i_msgQ,
                                       const pldm_msg* i_msg,
@@ -300,6 +331,7 @@ public:
      * @param[in] i_payload_len  Length of the PLDM message.
      * @param[in] i_req          Decoded PLDM request.
      * @return errlHndl_t        Error if any, otherwise nullptr.
+     * @note                     Locks the PDR repository.
      */
     errlHndl_t getStateSensorReadings(msg_q_t i_msgQ,
                                       const pldm_msg* i_msg,
@@ -310,6 +342,7 @@ public:
      *
      * @param[in] i_rsid    Record Set ID for the new PDR.
      * @param[in] i_entity  Entity information for the PDR.
+     * @note                Locks the PDR repository.
      */
     void addFruRecordSetPdr(fru_record_set_id_t i_rsid,
                             const pldm_entity& i_entity);
@@ -318,12 +351,14 @@ public:
      *
      * @param[in] i_tree       The entity association tree to add.
      * @param[in] i_is_remote  Whether the PDRs should have the "remote" flag set.
+     * @note                   Locks the PDR repository.
      */
     void addEntityAssociationPdrs(const pldm_entity_association_tree& i_tree, bool i_is_remote);
 
     /* @brief  Send information about all the functional states of the FRUs in this repository to the BMC.
      *         FRUs that have functional state are the FRUs that have state sensor PDRs for the
      *         PLDM_STATE_SET_HEALTH_STATE state set.
+     * @note   Locks the PDR repository.
      */
     void sendAllFruFunctionalStates() const;
 
@@ -341,6 +376,7 @@ public:
 
     /*
      * @brief Adds a Terminus Locator PDR to the PDR repository
+     * @note  Locks the PDR repository.
      */
     void addTerminusLocatorPDR();
 
@@ -354,6 +390,7 @@ public:
      *
      * @return Errorlog if the effecter id was not found, otherwise will be
      *         nullptr.
+     * @note   Locks the PDR repository.
      */
     errlHndl_t findStateEffecterId(const pldm_state_set_ids i_state_set_id,
                                    uint16_t &o_effecter_id);
@@ -404,6 +441,34 @@ private:
  * @return Reference to the global PDR manager.
  */
 PdrManager& thePdrManager();
+
+template<typename F>
+void PdrManager::foreachPdrOfType(const pldm_pdr_types i_pdr_type, F&& i_func) const
+{
+    const auto lock = scoped_mutex_lock(iv_access_mutex);
+
+    const pldm_pdr_record* curr_record = nullptr;
+
+    do
+    {
+        uint8_t* pdr_data = nullptr;
+        uint32_t pdr_data_size = 0;
+
+        curr_record = pldm_pdr_find_record_by_type(iv_pdr_repo.get(),
+                                                   i_pdr_type,
+                                                   curr_record,
+                                                   &pdr_data,
+                                                   &pdr_data_size);
+
+        if (pdr_data)
+        {
+            if (i_func(pdr_data, pdr_data_size))
+            {
+                break;
+            }
+        }
+    } while (curr_record);
+}
 
 }
 
