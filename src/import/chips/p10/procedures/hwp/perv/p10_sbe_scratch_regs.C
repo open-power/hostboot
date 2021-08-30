@@ -1128,6 +1128,7 @@ fapi2::ReturnCode p10_sbe_scratch_regs_update(
     if (i_update_all || !l_scratch8_reg.getBit<SCRATCH13_REG_VALID_BIT>())
     {
         fapi2::buffer<uint32_t> l_scratch13_reg = 0;
+        FAPI_TRY(p10_sbe_scratch_regs_get_scratch(i_target_chip, i_use_scom, SCRATCH_REGISTER13, l_scratch13_reg));
         fapi2::ATTR_SPI_BUS_DIV_REF_Type l_attr_tpm_spi_bus_div;
 
         FAPI_DBG("Reading ATTR_TPM_SPI_BUS_DIV");
