@@ -1000,7 +1000,7 @@ void SbeRetryHandler::handleFspIplTimeFail(TARGETING::Target * i_target)
         if( l_errhdl )
         {
             SBE_TRACF("SbeRetryHandler::handleFspIplTimeFail> Error disabling shutdown");
-            errlCommit(l_errhdl, INITSVC_COMP_ID);        
+            errlCommit(l_errhdl, INITSVC_COMP_ID);
         }
     }
 
@@ -1135,25 +1135,22 @@ void SbeRetryHandler::sbe_get_ffdc_handler(TARGETING::Target * i_target)
                     // If we created an error successfully we must now commit it
                     if(l_sbeHwpfErr)
                     {
-                        // On BMC systems we must do a reconfig loop if gard is found
-                        if(!INITSERVICE::spBaseServicesEnabled())
+
+                        // Iterate over user details sections of the error log to check for UD
+                        // callouts from the HWPF component
+                        // NOTE: rcToErrl will make UD Callouts have ERRL_COMP_ID/ERRL_UDT_CALLOUT
+                        for(const auto l_callout : l_sbeHwpfErr->getUDSections(ERRL_COMP_ID,
+                                                                                ERRORLOG::ERRL_UDT_CALLOUT) )
                         {
-                            // Iterate over user details sections of the error log to check for UD
-                            // callouts from the HWPF component
-                            // NOTE: rcToErrl will make UD Callouts have ERRL_COMP_ID/ERRL_UDT_CALLOUT
-                            for(const auto l_callout : l_sbeHwpfErr->getUDSections(ERRL_COMP_ID,
-                                                                                    ERRORLOG::ERRL_UDT_CALLOUT) )
+                            // IF the callout has a gard associated with it we need to do a reconfig loop
+                            if((reinterpret_cast<HWAS::callout_ud_t*>(l_callout)->type == HWAS::HW_CALLOUT &&
+                                reinterpret_cast<HWAS::callout_ud_t*>(l_callout)->gardErrorType != HWAS::GARD_NULL) ||
+                               (reinterpret_cast<HWAS::callout_ud_t*>(l_callout)->type == HWAS::CLOCK_CALLOUT &&
+                                reinterpret_cast<HWAS::callout_ud_t*>(l_callout)->clkGardErrorType != HWAS::GARD_NULL) ||
+                               (reinterpret_cast<HWAS::callout_ud_t*>(l_callout)->type == HWAS::PART_CALLOUT &&
+                                reinterpret_cast<HWAS::callout_ud_t*>(l_callout)->partGardErrorType != HWAS::GARD_NULL))
                             {
-                              // IF the callout has a gard associated with it we need to do a reconfig loop
-                              if((reinterpret_cast<HWAS::callout_ud_t*>(l_callout)->type == HWAS::HW_CALLOUT &&
-                                  reinterpret_cast<HWAS::callout_ud_t*>(l_callout)->gardErrorType != HWAS::GARD_NULL) ||
-                                 (reinterpret_cast<HWAS::callout_ud_t*>(l_callout)->type == HWAS::CLOCK_CALLOUT &&
-                                  reinterpret_cast<HWAS::callout_ud_t*>(l_callout)->clkGardErrorType != HWAS::GARD_NULL) ||
-                                 (reinterpret_cast<HWAS::callout_ud_t*>(l_callout)->type == HWAS::PART_CALLOUT &&
-                                  reinterpret_cast<HWAS::callout_ud_t*>(l_callout)->partGardErrorType != HWAS::GARD_NULL))
-                              {
-                                  l_reconfigRequired = true;
-                              }
+                                l_reconfigRequired = true;
                             }
                         }
                         // Set the PLID of the error log to master PLID
