@@ -123,42 +123,6 @@ errlHndl_t updateTargetEntityIdAttribute(Target* const i_target,
         break;
     }
 
-    // @TODO RTC 256140: Remove this function call when the BMC normalizes all
-    // PDRs
-    if (!thePdrManager().findEntityByTypeAndId(ent))
-    {
-        PLDM_ERR("Cannot find normalized entity container ID in entity "
-                 "assocation PDRs from the BMC on target HUID = 0x%08x"
-                 "(RSID = 0x%08x, type = 0x%x, instance number = 0x%x)",
-                 get_huid(i_target),
-                 i_rsid,
-                 ent.entity_type,
-                 ent.entity_instance_num);
-
-        /*@
-         * @errortype  ERRL_SEV_UNRECOVERABLE
-         * @moduleid   MOD_PLDM_ENTITY_IDS
-         * @reasoncode RC_MISSING_ENTITY_ID
-         * @userdata1  The Target HUID
-         * @userdata2[0:15]   Entity type
-         * @userdata2[16:31]  Entity instance number
-         * @userdata2[32:63]  The FRU Record Set ID
-         * @devdesc    Software problem, cannot find Entity from FRU Record Set ID
-         * @custdesc   A software error occurred during system boot
-         */
-        errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                             MOD_PLDM_ENTITY_IDS,
-                             RC_MISSING_ENTITY_ID,
-                             get_huid(i_target),
-                             TWO_UINT16_ONE_UINT32_TO_UINT64(ent.entity_type,
-                                                             ent.entity_instance_num,
-                                                             i_rsid),
-                             ErrlEntry::ADD_SW_CALLOUT);
-
-        addBmcErrorCallouts(errl);
-        break;
-    }
-
     PLDM_INF("Set PLDM_ENTITY_ID for HUID 0x%08x (%s) to 0x%04x/0x%04x/0x%04x",
              get_huid(i_target),
              attrToString<ATTR_TYPE>(i_target->getAttr<ATTR_TYPE>()),

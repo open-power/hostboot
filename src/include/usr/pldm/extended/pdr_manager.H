@@ -181,18 +181,6 @@ public:
     bool findEntityByFruRecordSetId(fru_record_set_id i_rsid,
                                     pldm_entity& o_entity) const;
 
-    /* @brief  Search all the entity association PDRs in the repository for an
-     *         entity with the given entity type and instance number, and return
-     *         container ID of the matching entity.
-     *
-     * @param[in] io_entity.entity_type             The entity type to search for
-     * @param[in] io_entity.entity_instance_number  The entity instance number to search for
-     * @param[out] io_entity.entity_container_id    The container ID of the found entity
-     * @return bool Whether the entity was found.
-     * @note io_entity.entity_container_id is left unset if the entity is not found.
-     */
-    // @TODO RTC 256140: Remove this function when the BMC normalizes all PDRs
-    bool findEntityByTypeAndId(pldm_entity& io_entity) const;
 
     /* A "state query" is either a state sensor get-request or a state effecter
      * set-request. */
