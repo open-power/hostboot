@@ -56,18 +56,37 @@ int32_t ProcDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
     {
         PRDF_ERR( "PrdfProcDomain::Analyze::Power Fault detected!" );
     }
-    else
+    else if (attentionType == MACHINE_CHECK)
     {
-        // Capture global FIRs on system checkstop attention for extra FFDC.
-        if (attentionType == MACHINE_CHECK)
+        // Before stitching the nodes together, any system checkstop will be
+        // limited to a single node and ATTN will only pass us chips belonging
+        // to the node that raised the attention. In this scenario, we should
+        // only consider chips belonging this node.
+        TargetHandle_t node = nullptr;
+        if (!isSmpCoherent())
         {
-            // start at 1 to skip analyzed
-            for (uint32_t i = 1; i < GetSize(); ++i)
+            SYSTEM_DEBUG_CLASS sysDebug;
+            TargetHandle_t proc = sysDebug.getTargetWithAttn(TYPE_PROC,
+                                                             MACHINE_CHECK);
+            node = getConnectedParent(proc, TYPE_NODE);
+        }
+
+        // Start at 1 to skip analyzed chip.
+        for (unsigned int i = 1; i < GetSize(); ++i)
+        {
+            RuleChip* procChip = LookUp(i);
+
+            // Limit the scope to a node, if needed.
+            if ((nullptr != node) &&
+                (node != getConnectedParent(procChip->getTrgt(), TYPE_NODE)))
             {
-                LookUp(i)->CaptureErrorData(
-                                    serviceData.service_data->GetCaptureData(),
-                                    Util::hashString("GlobalFIRs"));
+                continue;
             }
+
+            // Capture global FIRs on system checkstop attention for extra FFDC.
+            procChip->CaptureErrorData(
+                    serviceData.service_data->GetCaptureData(),
+                    Util::hashString("GlobalFIRs"));
         }
     }
 
