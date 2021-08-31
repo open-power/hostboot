@@ -39,11 +39,12 @@ namespace MCTP
 
     enum MCTPReasonCode
     {
-        RC_CHANNEL_INACTIVE   = MCTP_COMP_ID | 0x01,
-        RC_SEND_PLDM_FAIL     = MCTP_COMP_ID | 0x02,
-        RC_INVALID_MSG_TYPE   = MCTP_COMP_ID | 0x03,
-        RC_ERROR_CACHING_MSG  = MCTP_COMP_ID | 0x04,
-      //RC_CRC_MISMATCH       = MCTP_COMP_ID | 0x05 <= defined in libmctp-hostlbc.h
+        RC_CHANNEL_INACTIVE         = MCTP_COMP_ID | 0x01,
+        RC_SEND_PLDM_FAIL           = MCTP_COMP_ID | 0x02,
+        RC_INVALID_MSG_TYPE         = MCTP_COMP_ID | 0x03,
+        RC_ERROR_CACHING_MSG        = MCTP_COMP_ID | 0x04,
+      //RC_CRC_MISMATCH             = MCTP_COMP_ID | 0x05 <= defined in libmctp-hostlbc.h
+      //RC_FAILED_ALLOCATING_PACKET = MCTP_COMP_ID | 0x06 <= defined in libmctp-hostlbc.h
     };
 };
 #endif

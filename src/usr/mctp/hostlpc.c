@@ -225,7 +225,9 @@ void mctp_hostlpc_rx_start(struct mctp_binding_hostlpc *hostlpc)
 
     if (!pkt)
     {
-        goto out_complete;
+        mctp_prwarn("Could not allocate a packet.");
+        hostlpc->ops.console_print("Could not allocate a packet, Hostboot should have asserted prior to reaching this! Shutting down.");
+        hostlpc->ops.do_shutdown(MCTP_COMP_ID | RC_FAILED_ALLOCATING_PACKET);
     }
 
     // after we get size and allocate the buffer then read the remainig
@@ -233,6 +235,14 @@ void mctp_hostlpc_rx_start(struct mctp_binding_hostlpc *hostlpc)
     hostlpc->ops.lpc_read(hostlpc->ops_data, mctp_pktbuf_hdr(pkt),
                           hostlpc->lpc_hdr->rx_offset + sizeof(len), len);
 
+    // Tell the BMC we have read the message off the bus before moving on
+    mctp_hostlpc_kcs_send(hostlpc, KCS_RX_COMPLETE);
+
+    // If the CRC is valid then send the MCTP packet along to the core mctp
+    // logic. The core mctp logic will determine if its a complete message
+    // or needs to be added to an existing message context. If this packet
+    // marks an end of message then the complete message will be routed out
+    // to the PLDM layer.
     if(mctp_hostlpc_validate_crc(pkt))
     {
         mctp_bus_rx(&hostlpc->binding, pkt);
@@ -246,8 +256,7 @@ void mctp_hostlpc_rx_start(struct mctp_binding_hostlpc *hostlpc)
         hostlpc->ops.do_shutdown(MCTP_COMP_ID | RC_CRC_MISMATCH);
     }
 
-out_complete:
-    mctp_hostlpc_kcs_send(hostlpc, KCS_RX_COMPLETE);
+    return;
 }
 
 // This will go away in future commits

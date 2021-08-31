@@ -56,9 +56,9 @@ extern "C" {
 // See extern/core.c mctp_msg_ctx_add_pkt for more info.
 #define HOST_MAX_INCOMING_MESSAGE_ALLOCATION 131072
 
-// CRC mismatch error code. Defined here because mctp_reasoncodes.H uses
-// C++ terminology.
+// Defined here because mctp_reasoncodes.H uses C++ syntax.
 #define RC_CRC_MISMATCH 0x05
+#define RC_FAILED_ALLOCATING_PACKET 0x06
 
 struct mctp_binding_hostlpc {
   struct mctp_binding  binding;
