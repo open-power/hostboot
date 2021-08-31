@@ -406,6 +406,14 @@ fapi2::ReturnCode host_fw_response_struct_from_little_endian(
     host_fw_response_struct& o_response)
 {
     uint32_t l_crc = 0;
+    uint32_t l_partition_id = 0;
+    uint32_t l_fw_version_a = 0;
+    uint32_t l_fw_version_b = 0;
+
+    FAPI_TRY(mss::attr::get_exp_fw_partition_id(i_target, l_partition_id));
+    FAPI_TRY(mss::attr::get_exp_fw_version_a(i_target, l_fw_version_a));
+    FAPI_TRY(mss::attr::get_exp_fw_version_b(i_target, l_fw_version_b));
+
     fapi2::current_err = host_fw_response_struct_from_little_endian(io_data, l_crc, o_response);
     // Re-assert here so we capture the OCMB target (lower level code uses FAPI_SYSTEM)
     FAPI_ASSERT(fapi2::current_err == fapi2::FAPI2_RC_SUCCESS,
@@ -421,7 +429,10 @@ fapi2::ReturnCode host_fw_response_struct_from_little_endian(
                 fapi2::EXP_INBAND_RSP_CRC_ERR()
                 .set_COMPUTED(l_crc)
                 .set_RECEIVED(o_response.response_header_crc)
-                .set_OCMB_TARGET(i_target),
+                .set_OCMB_TARGET(i_target)
+                .set_FW_PARTITION_ID(l_partition_id)
+                .set_FW_VERSION_A(l_fw_version_a)
+                .set_FW_VERSION_B(l_fw_version_b),
                 "%s Response CRC failed to validate computed: 0x%08x got: 0x%08x",
                 mss::c_str(i_target), l_crc, o_response.response_header_crc);
 
@@ -452,6 +463,13 @@ fapi2::ReturnCode poll_for_response_ready(const fapi2::Target<fapi2::TARGET_TYPE
     bool l_doorbell_response = false;
     uint64_t l_loop = 0;
     fapi2::buffer<uint64_t> l_data;
+    uint32_t l_partition_id = 0;
+    uint32_t l_fw_version_a = 0;
+    uint32_t l_fw_version_b = 0;
+
+    FAPI_TRY(mss::attr::get_exp_fw_partition_id(i_target, l_partition_id));
+    FAPI_TRY(mss::attr::get_exp_fw_version_a(i_target, l_fw_version_a));
+    FAPI_TRY(mss::attr::get_exp_fw_version_b(i_target, l_fw_version_b));
 
     // Loop until we max our our loop count or get a doorbell response
     for (; l_loop < NUM_LOOPS && !l_doorbell_response; ++l_loop)
@@ -470,7 +488,10 @@ fapi2::ReturnCode poll_for_response_ready(const fapi2::Target<fapi2::TARGET_TYPE
                 .set_OCMB_TARGET(i_target)
                 .set_DATA(l_data)
                 .set_CMD(i_cmd)
-                .set_NUM_LOOPS(l_loop),
+                .set_NUM_LOOPS(l_loop)
+                .set_FW_PARTITION_ID(l_partition_id)
+                .set_FW_VERSION_A(l_fw_version_a)
+                .set_FW_VERSION_B(l_fw_version_b),
                 "%s doorbell timed out after %u loops: data 0x%016lx",
                 mss::c_str(i_target), l_loop, l_data);
 
@@ -1055,6 +1076,13 @@ fapi2::ReturnCode app_fw_ddr_calibration_data_struct_from_little_endian(
     uint32_t l_idx = 0;
     uint32_t l_temp_var_for_conversion = 0;
     uint32_t l_crc = 0;
+    uint32_t l_partition_id = 0;
+    uint32_t l_fw_version_a = 0;
+    uint32_t l_fw_version_b = 0;
+
+    FAPI_TRY(mss::attr::get_exp_fw_partition_id(i_target, l_partition_id));
+    FAPI_TRY(mss::attr::get_exp_fw_version_a(i_target, l_fw_version_a));
+    FAPI_TRY(mss::attr::get_exp_fw_version_b(i_target, l_fw_version_b));
 
     FAPI_TRY(correctMMIOEndianForStruct(io_data));
     FAPI_TRY(correctMMIOword_order(io_data));
@@ -1140,7 +1168,10 @@ fapi2::ReturnCode app_fw_ddr_calibration_data_struct_from_little_endian(
                 fapi2::EXP_INBAND_RSP_CRC_ERR()
                 .set_COMPUTED(l_crc)
                 .set_RECEIVED(o_calib_params.crc)
-                .set_OCMB_TARGET(i_target),
+                .set_OCMB_TARGET(i_target)
+                .set_FW_PARTITION_ID(l_partition_id)
+                .set_FW_VERSION_A(l_fw_version_a)
+                .set_FW_VERSION_B(l_fw_version_b),
                 "%s Response CRC failed to validate computed: 0x%08x got: 0x%08x",
                 mss::c_str(i_target), l_crc, o_calib_params.crc);
 
@@ -1163,13 +1194,24 @@ fapi2::ReturnCode request_id(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& 
                              const host_fw_response_struct& i_rsp,
                              const host_fw_command_struct& i_cmd)
 {
+    uint32_t l_partition_id = 0;
+    uint32_t l_fw_version_a = 0;
+    uint32_t l_fw_version_b = 0;
+
+    FAPI_TRY(mss::attr::get_exp_fw_partition_id(i_target, l_partition_id));
+    FAPI_TRY(mss::attr::get_exp_fw_version_a(i_target, l_fw_version_a));
+    FAPI_TRY(mss::attr::get_exp_fw_version_b(i_target, l_fw_version_b));
+
     FAPI_ASSERT(i_rsp.request_identifier == i_cmd.request_identifier,
                 fapi2::EXP_RESPONSE_WRONG_REQID().
                 set_TARGET(i_target).
                 set_CMD_ID(i_cmd.cmd_id).
                 set_CMD_REQ_ID(i_cmd.request_identifier).
                 set_RSP_ID(i_rsp.response_id).
-                set_RSP_REQ_ID(i_rsp.request_identifier),
+                set_RSP_REQ_ID(i_rsp.request_identifier).
+                set_FW_PARTITION_ID(l_partition_id).
+                set_FW_VERSION_A(l_fw_version_a).
+                set_FW_VERSION_B(l_fw_version_b),
                 "%s Received response with incorrect request id (0x%02x when expecting 0x%02x). "
                 "Command ID was 0x%02x, and Response ID is 0x%02x",
                 mss::c_str(i_target),

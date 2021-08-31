@@ -267,6 +267,16 @@ fapi2::ReturnCode explorer_detailed_training_codes(const fapi2::Target<fapi2::TA
     constexpr uint64_t ERROR_CODE_START = 20;
     constexpr uint64_t ERROR_CODE_LEN = 12;
 
+    uint16_t l_extended_error_code_compare = 0;
+
+    uint32_t l_partition_id = 0;
+    uint32_t l_fw_version_a = 0;
+    uint32_t l_fw_version_b = 0;
+
+    FAPI_TRY(mss::attr::get_exp_fw_partition_id(i_target, l_partition_id));
+    FAPI_TRY(mss::attr::get_exp_fw_version_a(i_target, l_fw_version_a));
+    FAPI_TRY(mss::attr::get_exp_fw_version_b(i_target, l_fw_version_b));
+
     if (i_error_code != fw_ddr_phy_init_status::FW_DDR_PHY_INIT_TRAINING_FAIL)
     {
         FAPI_INF("%s error code:%u does not match a training fail:%u. Skipping training check",
@@ -276,7 +286,6 @@ fapi2::ReturnCode explorer_detailed_training_codes(const fapi2::Target<fapi2::TA
 
     // Microchip only puts the data we know about in the last three nibbles of the extended error code
     // We only use these three nibbles for the comparisons below
-    uint16_t l_extended_error_code_compare = 0;
     i_error_extended_code.extractToRight<ERROR_CODE_START, ERROR_CODE_LEN>(l_extended_error_code_compare);
 
     // Check for a training timeout first
@@ -286,7 +295,10 @@ fapi2::ReturnCode explorer_detailed_training_codes(const fapi2::Target<fapi2::TA
                 fapi2::MSS_EXP_DRAMINIT_TRAINING_TIMEOUT_FAIL().
                 set_OCMB_TARGET(i_target).
                 set_ERROR_CODE(i_error_code).
-                set_EXTENDED_ERROR_CODE(i_error_extended_code),
+                set_EXTENDED_ERROR_CODE(i_error_extended_code).
+                set_FW_PARTITION_ID(l_partition_id).
+                set_FW_VERSION_A(l_fw_version_a).
+                set_FW_VERSION_B(l_fw_version_b),
                 "Encountered a training timeout. Please retry the IPL (TARGET %s, error_code 0x%02X, extended_error_code=0x%08X)",
                 mss::c_str(i_target), i_error_code, i_error_extended_code);
 
@@ -298,7 +310,10 @@ fapi2::ReturnCode explorer_detailed_training_codes(const fapi2::Target<fapi2::TA
                 fapi2::MSS_EXP_CATASTROPHIC_DRAMINIT_TRAINING_FAIL().
                 set_OCMB_TARGET(i_target).
                 set_ERROR_CODE(i_error_code).
-                set_EXTENDED_ERROR_CODE(i_error_extended_code),
+                set_EXTENDED_ERROR_CODE(i_error_extended_code).
+                set_FW_PARTITION_ID(l_partition_id).
+                set_FW_VERSION_A(l_fw_version_a).
+                set_FW_VERSION_B(l_fw_version_b),
                 "Encountered a catastrophic training fail. (TARGET %s, error_code 0x%02X, extended_error_code=0x%08X)",
                 mss::c_str(i_target), i_error_code, i_error_extended_code);
 
@@ -341,7 +356,10 @@ fapi2::ReturnCode explorer_detailed_training_codes(const fapi2::Target<fapi2::TA
                     set_RANK2_BADDQ0_63(l_bad_dq_0_63[2]).
                     set_RANK2_BADDQ64_80(l_bad_dq_64_80[2]).
                     set_RANK3_BADDQ0_63(l_bad_dq_0_63[3]).
-                    set_RANK3_BADDQ64_80(l_bad_dq_64_80[3]),
+                    set_RANK3_BADDQ64_80(l_bad_dq_64_80[3]).
+                    set_FW_PARTITION_ID(l_partition_id).
+                    set_FW_VERSION_A(l_fw_version_a).
+                    set_FW_VERSION_B(l_fw_version_b),
                     "DDR_PHY_INIT encountered a training fail (TARGET %s, error_code 0x%02X, extended_error_code=0x%08X)",
                     mss::c_str(i_target), i_error_code, i_error_extended_code);
     }
@@ -370,6 +388,13 @@ fapi2::ReturnCode fw_ddr_phy_init_response_code(const fapi2::Target<fapi2::TARGE
         const uint8_t i_rsp_arg[ARGUMENT_SIZE])
 {
     const uint8_t l_rsp_status = i_rsp_arg[0];
+    uint32_t l_partition_id = 0;
+    uint32_t l_fw_version_a = 0;
+    uint32_t l_fw_version_b = 0;
+
+    FAPI_TRY(mss::attr::get_exp_fw_partition_id(i_target, l_partition_id));
+    FAPI_TRY(mss::attr::get_exp_fw_version_a(i_target, l_fw_version_a));
+    FAPI_TRY(mss::attr::get_exp_fw_version_b(i_target, l_fw_version_b));
 
     // If the response isn't a success check the return code
     if (l_rsp_status != omi::response_arg::RESPONSE_SUCCESS)
@@ -389,7 +414,10 @@ fapi2::ReturnCode fw_ddr_phy_init_response_code(const fapi2::Target<fapi2::TARGE
                      set_PROCEDURE(mss::EXP_DRAMINIT).
                      set_PHY_INIT_MODE(i_cmd.command_argument[0]).
                      set_ERROR_CODE(l_error_code).
-                     set_EXTENDED_ERROR_CODE(l_error_extended_code),
+                     set_EXTENDED_ERROR_CODE(l_error_extended_code).
+                     set_FW_PARTITION_ID(l_partition_id).
+                     set_FW_VERSION_A(l_fw_version_a).
+                     set_FW_VERSION_B(l_fw_version_b),
                      "DDR_PHY_INIT unsupported mode error (TARGET %s, PHY_INIT_MODE 0x%08X, "
                      "error_code 0x%02X, extended_error_code=0x%08X)",
                      mss::c_str(i_target), i_cmd.command_argument[0], l_error_code, l_error_extended_code);
@@ -400,7 +428,10 @@ fapi2::ReturnCode fw_ddr_phy_init_response_code(const fapi2::Target<fapi2::TARGE
                      set_PROCEDURE(mss::EXP_DRAMINIT).
                      set_COMMAND_SIZE(i_cmd.cmd_length).
                      set_ERROR_CODE(l_error_code).
-                     set_EXTENDED_ERROR_CODE(l_error_extended_code),
+                     set_EXTENDED_ERROR_CODE(l_error_extended_code).
+                     set_FW_PARTITION_ID(l_partition_id).
+                     set_FW_VERSION_A(l_fw_version_a).
+                     set_FW_VERSION_B(l_fw_version_b),
                      "DDR_PHY_INIT incorrect user_input_msdg size error (TARGET %s, CMD SIZE 0x%08X, "
                      "error_code 0x%02X, extended_error_code=0x%08X)",
                      mss::c_str(i_target), i_cmd.cmd_length, l_error_code, l_error_extended_code);
@@ -411,7 +442,10 @@ fapi2::ReturnCode fw_ddr_phy_init_response_code(const fapi2::Target<fapi2::TARGE
                      set_PROCEDURE(mss::EXP_DRAMINIT).
                      set_COMMAND_FLAGS(i_cmd.cmd_flags).
                      set_ERROR_CODE(l_error_code).
-                     set_EXTENDED_ERROR_CODE(l_error_extended_code),
+                     set_EXTENDED_ERROR_CODE(l_error_extended_code).
+                     set_FW_PARTITION_ID(l_partition_id).
+                     set_FW_VERSION_A(l_fw_version_a).
+                     set_FW_VERSION_B(l_fw_version_b),
                      "DDR_PHY_INIT user_input_msdg missing extended data flag (TARGET %s, CMD FLAGS 0x%08X, "
                      "error_code 0x%02X, extended_error_code=0x%08X)",
                      mss::c_str(i_target), i_cmd.cmd_flags, l_error_code, l_error_extended_code);
@@ -421,7 +455,10 @@ fapi2::ReturnCode fw_ddr_phy_init_response_code(const fapi2::Target<fapi2::TARGE
                      set_TARGET(i_target).
                      set_PROCEDURE(mss::EXP_DRAMINIT).
                      set_ERROR_CODE(l_error_code).
-                     set_EXTENDED_ERROR_CODE(l_error_extended_code),
+                     set_EXTENDED_ERROR_CODE(l_error_extended_code).
+                     set_FW_PARTITION_ID(l_partition_id).
+                     set_FW_VERSION_A(l_fw_version_a).
+                     set_FW_VERSION_B(l_fw_version_b),
                      "DDR_PHY_INIT encountered a user_input_msdg error (TARGET %s, error_code 0x%02X, extended_error_code=0x%08X)",
                      mss::c_str(i_target), l_error_code, l_error_extended_code);
 
@@ -433,7 +470,10 @@ fapi2::ReturnCode fw_ddr_phy_init_response_code(const fapi2::Target<fapi2::TARGE
                      set_TARGET(i_target).
                      set_PROCEDURE(mss::EXP_DRAMINIT).
                      set_ERROR_CODE(l_error_code).
-                     set_EXTENDED_ERROR_CODE(l_error_extended_code),
+                     set_EXTENDED_ERROR_CODE(l_error_extended_code).
+                     set_FW_PARTITION_ID(l_partition_id).
+                     set_FW_VERSION_A(l_fw_version_a).
+                     set_FW_VERSION_B(l_fw_version_b),
                      "DDR_PHY_INIT encountered an unknown error code causing a fail(TARGET %s, error_code 0x%02X, extended_error_code=0x%08X) for ",
                      mss::c_str(i_target), l_error_code, l_error_extended_code);
     }

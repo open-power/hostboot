@@ -62,7 +62,6 @@ extern "C"
         uint8_t l_sim = 0;
         bool l_has_rcd = false;
         bool l_is_mds = false;
-        bool l_mfg_thresholds = false;
 
         if (mss::count_dimm(i_target) == 0)
         {
@@ -80,9 +79,6 @@ extern "C"
                            .getParent<fapi2::TARGET_TYPE_MC>();
 
         FAPI_TRY( mss::attr::get_is_simulation( l_sim) );
-
-        // Check MNFG THRESHOLDS Policy flag
-        FAPI_TRY(mss::check_mfg_flag(fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_THRESHOLDS, l_mfg_thresholds));
 
         // Check if DIMM has an RCD
         FAPI_TRY(mss::dimm::has_rcd<mss::mc_type::EXPLORER>(i_target, l_has_rcd));
@@ -118,13 +114,22 @@ extern "C"
         // Run required unmasks for LOCAL_FIR, FABR0, SRQFIR after scominit
         FAPI_TRY(mss::unmask::after_scominit<mss::mc_type::EXPLORER>(i_target));
 
+#ifndef __HOSTBOOT_MODULE
+
+        // NOTE: We have to call run_fw_adapter_properties_get here in Cronus because we hadn't yet
+        // transitioned Explorer access to mmio/inband mode at p10_omi_init so our endianness attributes
+        // were not set correctly.
         if (!l_sim)
         {
             bool l_image_a_good = true;
             bool l_image_b_good = true;
+            bool l_mfg_thresholds = false;
 
-            FAPI_INF("mss::exp::ib::run_fw_adapter_properties_get %s", mss::c_str(i_target));
+            // Check MNFG THRESHOLDS Policy flag
+            FAPI_TRY(mss::check_mfg_flag(fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_THRESHOLDS, l_mfg_thresholds));
+
             // Print and record Explorer FW version info
+            FAPI_INF("run_fw_adapter_properties_get %s", mss::c_str(i_target));
             FAPI_TRY( mss::exp::ib::run_fw_adapter_properties_get(i_target, l_image_a_good, l_image_b_good) );
 
             // Assert MNFG_SPI_FLASH_AUTHENTICATION_FAIL if fw_adapter_properties says one of the images is bad
@@ -160,6 +165,8 @@ extern "C"
                 }
             }
         }
+
+#endif
 
         // Resets the explorer PHY if needed
         FAPI_TRY(mss::exp::phy::reset(i_target));

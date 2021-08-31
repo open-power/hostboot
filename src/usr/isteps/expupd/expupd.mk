@@ -34,6 +34,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils
 EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps
 EXTRAINCDIR += ${ROOTPATH}/src/usr/vpd
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/
 
 OBJS += expupd.o
 OBJS += ocmbFwImage.o

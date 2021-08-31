@@ -32,6 +32,9 @@
     </description>
     <ffdc>COMPUTED</ffdc>
     <ffdc>RECEIVED</ffdc>
+    <ffdc>FW_PARTITION_ID</ffdc>
+    <ffdc>FW_VERSION_A</ffdc>
+    <ffdc>FW_VERSION_B</ffdc>
     <callout>
       <target>OCMB_TARGET</target>
       <priority>HIGH</priority>
@@ -81,6 +84,9 @@
     <ffdc>NUM_LOOPS</ffdc>
     <ffdc>OCMB_TARGET</ffdc>
     <ffdc>CMD</ffdc>
+    <ffdc>FW_PARTITION_ID</ffdc>
+    <ffdc>FW_VERSION_A</ffdc>
+    <ffdc>FW_VERSION_B</ffdc>
     <callout>
       <target>OCMB_TARGET</target>
       <priority>HIGH</priority>

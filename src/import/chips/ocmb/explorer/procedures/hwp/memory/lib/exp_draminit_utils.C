@@ -59,6 +59,13 @@ fapi2::ReturnCode check_rsp_data_size(
     const phy_init_mode i_mode)
 {
     uint16_t l_expected_size = 0;
+    uint32_t l_partition_id = 0;
+    uint32_t l_fw_version_a = 0;
+    uint32_t l_fw_version_b = 0;
+
+    FAPI_TRY(mss::attr::get_exp_fw_partition_id(i_target, l_partition_id));
+    FAPI_TRY(mss::attr::get_exp_fw_version_a(i_target, l_fw_version_a));
+    FAPI_TRY(mss::attr::get_exp_fw_version_b(i_target, l_fw_version_b));
 
     switch (i_mode)
     {
@@ -91,7 +98,10 @@ fapi2::ReturnCode check_rsp_data_size(
                 .set_OCMB_TARGET(i_target)
                 .set_PHY_INIT_MODE(i_mode)
                 .set_EXPECTED_LENGTH(l_expected_size)
-                .set_ACTUAL_LENGTH(i_actual_size),
+                .set_ACTUAL_LENGTH(i_actual_size)
+                .set_FW_PARTITION_ID(l_partition_id)
+                .set_FW_VERSION_A(l_fw_version_a)
+                .set_FW_VERSION_B(l_fw_version_b),
                 "%s PHY INIT response data buffer size 0x%x did not match expected size 0x%x for phy_init_mode %u",
                 mss::c_str(i_target), i_actual_size, l_expected_size, i_mode);
 

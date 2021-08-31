@@ -54,6 +54,9 @@
         <ffdc>MCHP_ERROR_CODE_1</ffdc>
         <ffdc>MCHP_ERROR_CODE_2</ffdc>
         <ffdc>MCHP_ERROR_CODE_3</ffdc>
+        <ffdc>FW_PARTITION_ID</ffdc>
+        <ffdc>FW_VERSION_A</ffdc>
+        <ffdc>FW_VERSION_B</ffdc>
         <ffdc>EXP_ACTIVE_LOG_SIZE</ffdc>
         <collectFfdc>exp_collect_explorer_active_log, OCMB_TARGET, EXP_ACTIVE_LOG_SIZE</collectFfdc>
         <collectRegisterFfdc>
@@ -89,6 +92,9 @@
         <ffdc>MCHP_ERROR_CODE_1</ffdc>
         <ffdc>MCHP_ERROR_CODE_2</ffdc>
         <ffdc>MCHP_ERROR_CODE_3</ffdc>
+        <ffdc>FW_PARTITION_ID</ffdc>
+        <ffdc>FW_VERSION_A</ffdc>
+        <ffdc>FW_VERSION_B</ffdc>
         <ffdc>EXP_ACTIVE_LOG_SIZE</ffdc>
         <collectFfdc>exp_collect_explorer_active_log, OCMB_TARGET, EXP_ACTIVE_LOG_SIZE</collectFfdc>
         <collectRegisterFfdc>
@@ -120,6 +126,9 @@
         <ffdc>MCHP_ERROR_CODE_1</ffdc>
         <ffdc>MCHP_ERROR_CODE_2</ffdc>
         <ffdc>MCHP_ERROR_CODE_3</ffdc>
+        <ffdc>FW_PARTITION_ID</ffdc>
+        <ffdc>FW_VERSION_A</ffdc>
+        <ffdc>FW_VERSION_B</ffdc>
         <ffdc>EXP_ACTIVE_LOG_SIZE</ffdc>
         <collectFfdc>exp_collect_explorer_active_log, OCMB_TARGET, EXP_ACTIVE_LOG_SIZE</collectFfdc>
         <collectRegisterFfdc>
@@ -151,6 +160,9 @@
         <ffdc>MCHP_ERROR_CODE_1</ffdc>
         <ffdc>MCHP_ERROR_CODE_2</ffdc>
         <ffdc>MCHP_ERROR_CODE_3</ffdc>
+        <ffdc>FW_PARTITION_ID</ffdc>
+        <ffdc>FW_VERSION_A</ffdc>
+        <ffdc>FW_VERSION_B</ffdc>
         <ffdc>EXP_ACTIVE_LOG_SIZE</ffdc>
         <collectFfdc>exp_collect_explorer_active_log, OCMB_TARGET, EXP_ACTIVE_LOG_SIZE</collectFfdc>
         <collectRegisterFfdc>
@@ -182,6 +194,9 @@
         <ffdc>MCHP_ERROR_CODE_1</ffdc>
         <ffdc>MCHP_ERROR_CODE_2</ffdc>
         <ffdc>MCHP_ERROR_CODE_3</ffdc>
+        <ffdc>FW_PARTITION_ID</ffdc>
+        <ffdc>FW_VERSION_A</ffdc>
+        <ffdc>FW_VERSION_B</ffdc>
         <ffdc>EXP_ACTIVE_LOG_SIZE</ffdc>
         <collectFfdc>exp_collect_explorer_active_log, OCMB_TARGET, EXP_ACTIVE_LOG_SIZE</collectFfdc>
         <collectRegisterFfdc>
@@ -213,6 +228,9 @@
         <ffdc>MCHP_ERROR_CODE_1</ffdc>
         <ffdc>MCHP_ERROR_CODE_2</ffdc>
         <ffdc>MCHP_ERROR_CODE_3</ffdc>
+        <ffdc>FW_PARTITION_ID</ffdc>
+        <ffdc>FW_VERSION_A</ffdc>
+        <ffdc>FW_VERSION_B</ffdc>
         <ffdc>EXP_ACTIVE_LOG_SIZE</ffdc>
         <collectFfdc>exp_collect_explorer_active_log, OCMB_TARGET, EXP_ACTIVE_LOG_SIZE</collectFfdc>
         <callout>
@@ -232,6 +250,9 @@
         <ffdc>MCHP_ERROR_CODE_1</ffdc>
         <ffdc>MCHP_ERROR_CODE_2</ffdc>
         <ffdc>MCHP_ERROR_CODE_3</ffdc>
+        <ffdc>FW_PARTITION_ID</ffdc>
+        <ffdc>FW_VERSION_A</ffdc>
+        <ffdc>FW_VERSION_B</ffdc>
         <ffdc>EXP_ACTIVE_LOG_SIZE</ffdc>
         <collectFfdc>exp_collect_explorer_active_log, OCMB_TARGET, EXP_ACTIVE_LOG_SIZE</collectFfdc>
         <collectRegisterFfdc>
@@ -376,6 +397,9 @@
             Explorer firmware update write command did not receive the doorbell
         </description>
         <ffdc>SEQUENCE_NUMBER</ffdc>
+        <ffdc>FW_PARTITION_ID</ffdc>
+        <ffdc>FW_VERSION_A</ffdc>
+        <ffdc>FW_VERSION_B</ffdc>
         <ffdc>EXP_ACTIVE_LOG_SIZE</ffdc>
         <collectFfdc>exp_collect_explorer_active_log, OCMB_TARGET, EXP_ACTIVE_LOG_SIZE</collectFfdc>
         <collectRegisterFfdc>
@@ -404,6 +428,9 @@
         <description>
             Explorer firmware update write command did not receive the doorbell
         </description>
+        <ffdc>FW_PARTITION_ID</ffdc>
+        <ffdc>FW_VERSION_A</ffdc>
+        <ffdc>FW_VERSION_B</ffdc>
         <ffdc>EXP_ACTIVE_LOG_SIZE</ffdc>
         <collectFfdc>exp_collect_explorer_active_log, OCMB_TARGET, EXP_ACTIVE_LOG_SIZE</collectFfdc>
         <collectRegisterFfdc>

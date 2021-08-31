@@ -599,6 +599,9 @@
     <ffdc>RSP_ID</ffdc>
     <ffdc>ERROR_CODE_1</ffdc>
     <ffdc>ERROR_CODE_2</ffdc>
+    <ffdc>FW_PARTITION_ID</ffdc>
+    <ffdc>FW_VERSION_A</ffdc>
+    <ffdc>FW_VERSION_B</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
@@ -811,6 +814,9 @@
     <ffdc>PHY_INIT_MODE</ffdc>
     <ffdc>ERROR_CODE</ffdc>
     <ffdc>EXTENDED_ERROR_CODE</ffdc>
+    <ffdc>FW_PARTITION_ID</ffdc>
+    <ffdc>FW_VERSION_A</ffdc>
+    <ffdc>FW_VERSION_B</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -827,6 +833,9 @@
     <ffdc>COMMAND_SIZE</ffdc>
     <ffdc>ERROR_CODE</ffdc>
     <ffdc>EXTENDED_ERROR_CODE</ffdc>
+    <ffdc>FW_PARTITION_ID</ffdc>
+    <ffdc>FW_VERSION_A</ffdc>
+    <ffdc>FW_VERSION_B</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -843,6 +852,9 @@
     <ffdc>COMMAND_FLAGS</ffdc>
     <ffdc>ERROR_CODE</ffdc>
     <ffdc>EXTENDED_ERROR_CODE</ffdc>
+    <ffdc>FW_PARTITION_ID</ffdc>
+    <ffdc>FW_VERSION_A</ffdc>
+    <ffdc>FW_VERSION_B</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -859,6 +871,9 @@
     <ffdc>PROCEDURE</ffdc>
     <ffdc>ERROR_CODE</ffdc>
     <ffdc>EXTENDED_ERROR_CODE</ffdc>
+    <ffdc>FW_PARTITION_ID</ffdc>
+    <ffdc>FW_VERSION_A</ffdc>
+    <ffdc>FW_VERSION_B</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
@@ -890,6 +905,9 @@
     <ffdc>RANK2_BADDQ64_80</ffdc>
     <ffdc>RANK3_BADDQ0_63</ffdc>
     <ffdc>RANK3_BADDQ64_80</ffdc>
+    <ffdc>FW_PARTITION_ID</ffdc>
+    <ffdc>FW_VERSION_A</ffdc>
+    <ffdc>FW_VERSION_B</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
@@ -910,6 +928,9 @@
     <ffdc>OCMB_TARGET</ffdc>
     <ffdc>ERROR_CODE</ffdc>
     <ffdc>EXTENDED_ERROR_CODE</ffdc>
+    <ffdc>FW_PARTITION_ID</ffdc>
+    <ffdc>FW_VERSION_A</ffdc>
+    <ffdc>FW_VERSION_B</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
@@ -933,6 +954,9 @@
     <ffdc>OCMB_TARGET</ffdc>
     <ffdc>ERROR_CODE</ffdc>
     <ffdc>EXTENDED_ERROR_CODE</ffdc>
+    <ffdc>FW_PARTITION_ID</ffdc>
+    <ffdc>FW_VERSION_A</ffdc>
+    <ffdc>FW_VERSION_B</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
@@ -956,6 +980,9 @@
     <ffdc>PROCEDURE</ffdc>
     <ffdc>ERROR_CODE</ffdc>
     <ffdc>EXTENDED_ERROR_CODE</ffdc>
+    <ffdc>FW_PARTITION_ID</ffdc>
+    <ffdc>FW_VERSION_A</ffdc>
+    <ffdc>FW_VERSION_B</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -1161,6 +1188,9 @@
     <ffdc>CMD_REQ_ID</ffdc>
     <ffdc>RSP_ID</ffdc>
     <ffdc>RSP_REQ_ID</ffdc>
+    <ffdc>FW_PARTITION_ID</ffdc>
+    <ffdc>FW_VERSION_A</ffdc>
+    <ffdc>FW_VERSION_B</ffdc>
     <callout>
       <target>TARGET</target>
       <priority>HIGH</priority>
@@ -1195,6 +1225,9 @@
     <ffdc>PHY_INIT_MODE</ffdc>
     <ffdc>EXPECTED_LENGTH</ffdc>
     <ffdc>ACTUAL_LENGTH</ffdc>
+    <ffdc>FW_PARTITION_ID</ffdc>
+    <ffdc>FW_VERSION_A</ffdc>
+    <ffdc>FW_VERSION_B</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>

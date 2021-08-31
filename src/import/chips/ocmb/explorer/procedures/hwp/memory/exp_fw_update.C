@@ -42,6 +42,7 @@
 #include <generic/memory/lib/utils/c_str.H>
 #include <lib/omi/crc32.H>
 #include <mmio_access.H>
+#include <mss_explorer_attribute_getters.H>
 
 #ifndef __HOSTBOOT_MODULE
     // Included for progress / time left reporting (Cronus only)
@@ -80,6 +81,14 @@ fapi2::ReturnCode check_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
     // corresponding error log
     if (i_rsp.response_argument[0] != omi::response_arg::RESPONSE_SUCCESS)
     {
+        uint32_t l_partition_id = 0;
+        uint32_t l_fw_version_a = 0;
+        uint32_t l_fw_version_b = 0;
+
+        FAPI_TRY(mss::attr::get_exp_fw_partition_id(i_target, l_partition_id));
+        FAPI_TRY(mss::attr::get_exp_fw_version_a(i_target, l_fw_version_a));
+        FAPI_TRY(mss::attr::get_exp_fw_version_b(i_target, l_fw_version_b));
+
         switch(i_rsp.response_argument[MCHP_ERROR_CODE_1])
         {
             case bupg::fw_binary_upgrade_rc::DEV_INF_ERR:
@@ -92,6 +101,9 @@ fapi2::ReturnCode check_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
                             set_MCHP_ERROR_CODE_1(i_rsp.response_argument[MCHP_ERROR_CODE_1]).
                             set_MCHP_ERROR_CODE_2(i_rsp.response_argument[MCHP_ERROR_CODE_2]).
                             set_MCHP_ERROR_CODE_3(i_rsp.response_argument[MCHP_ERROR_CODE_3]).
+                            set_FW_PARTITION_ID(l_partition_id).
+                            set_FW_VERSION_A(l_fw_version_a).
+                            set_FW_VERSION_B(l_fw_version_b).
                             set_EXP_ACTIVE_LOG_SIZE(4096),
                             "%s Firmware update command encountered device info retrieve error. "
                             "MCHP Error codes: response_argument[1] = 0x%02X, [2] = 0x%02X, [3] = 0x%02X",
@@ -111,6 +123,9 @@ fapi2::ReturnCode check_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
                             set_MCHP_ERROR_CODE_1(i_rsp.response_argument[MCHP_ERROR_CODE_1]).
                             set_MCHP_ERROR_CODE_2(i_rsp.response_argument[MCHP_ERROR_CODE_2]).
                             set_MCHP_ERROR_CODE_3(i_rsp.response_argument[MCHP_ERROR_CODE_3]).
+                            set_FW_PARTITION_ID(l_partition_id).
+                            set_FW_VERSION_A(l_fw_version_a).
+                            set_FW_VERSION_B(l_fw_version_b).
                             set_EXP_ACTIVE_LOG_SIZE(4096),
                             "%s Firmware update command encountered device sector info retrieve error. "
                             "MCHP Error codes: response_argument[1] = 0x%02X, [2] = 0x%02X, [3] = 0x%02X",
@@ -130,6 +145,9 @@ fapi2::ReturnCode check_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
                             set_MCHP_ERROR_CODE_1(i_rsp.response_argument[MCHP_ERROR_CODE_1]).
                             set_MCHP_ERROR_CODE_2(i_rsp.response_argument[MCHP_ERROR_CODE_2]).
                             set_MCHP_ERROR_CODE_3(i_rsp.response_argument[MCHP_ERROR_CODE_3]).
+                            set_FW_PARTITION_ID(l_partition_id).
+                            set_FW_VERSION_A(l_fw_version_a).
+                            set_FW_VERSION_B(l_fw_version_b).
                             set_EXP_ACTIVE_LOG_SIZE(4096),
                             "%s Firmware update command encountered device erase error. "
                             "MCHP Error codes: response_argument[1] = 0x%02X, [2] = 0x%02X, [3] = 0x%02X",
@@ -149,6 +167,9 @@ fapi2::ReturnCode check_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
                             set_MCHP_ERROR_CODE_1(i_rsp.response_argument[MCHP_ERROR_CODE_1]).
                             set_MCHP_ERROR_CODE_2(i_rsp.response_argument[MCHP_ERROR_CODE_2]).
                             set_MCHP_ERROR_CODE_3(i_rsp.response_argument[MCHP_ERROR_CODE_3]).
+                            set_FW_PARTITION_ID(l_partition_id).
+                            set_FW_VERSION_A(l_fw_version_a).
+                            set_FW_VERSION_B(l_fw_version_b).
                             set_EXP_ACTIVE_LOG_SIZE(4096),
                             "%s Firmware update command encountered device write error. "
                             "MCHP Error codes: response_argument[1] = 0x%02X, [2] = 0x%02X, [3] = 0x%02X",
@@ -169,6 +190,9 @@ fapi2::ReturnCode check_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
                             set_MCHP_ERROR_CODE_1(i_rsp.response_argument[MCHP_ERROR_CODE_1]).
                             set_MCHP_ERROR_CODE_2(i_rsp.response_argument[MCHP_ERROR_CODE_2]).
                             set_MCHP_ERROR_CODE_3(i_rsp.response_argument[MCHP_ERROR_CODE_3]).
+                            set_FW_PARTITION_ID(l_partition_id).
+                            set_FW_VERSION_A(l_fw_version_a).
+                            set_FW_VERSION_B(l_fw_version_b).
                             set_EXP_ACTIVE_LOG_SIZE(4096),
                             "%s Firmware update command encountered invalid image length error. "
                             "MCHP Error codes: response_argument[1] = 0x%02X, [2] = 0x%02X, [3] = 0x%02X",
@@ -188,6 +212,9 @@ fapi2::ReturnCode check_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
                             set_MCHP_ERROR_CODE_1(i_rsp.response_argument[MCHP_ERROR_CODE_1]).
                             set_MCHP_ERROR_CODE_2(i_rsp.response_argument[MCHP_ERROR_CODE_2]).
                             set_MCHP_ERROR_CODE_3(i_rsp.response_argument[MCHP_ERROR_CODE_3]).
+                            set_FW_PARTITION_ID(l_partition_id).
+                            set_FW_VERSION_A(l_fw_version_a).
+                            set_FW_VERSION_B(l_fw_version_b).
                             set_EXP_ACTIVE_LOG_SIZE(4096),
                             "%s Firmware update command reported an authentication failure. "
                             "MCHP Error codes: response_argument[1] = 0x%02X, [2] = 0x%02X, [3] = 0x%02X",
@@ -207,6 +234,9 @@ fapi2::ReturnCode check_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
                             set_MCHP_ERROR_CODE_1(i_rsp.response_argument[MCHP_ERROR_CODE_1]).
                             set_MCHP_ERROR_CODE_2(i_rsp.response_argument[MCHP_ERROR_CODE_2]).
                             set_MCHP_ERROR_CODE_3(i_rsp.response_argument[MCHP_ERROR_CODE_3]).
+                            set_FW_PARTITION_ID(l_partition_id).
+                            set_FW_VERSION_A(l_fw_version_a).
+                            set_FW_VERSION_B(l_fw_version_b).
                             set_EXP_ACTIVE_LOG_SIZE(4096),
                             "%s Received unknown failure response for firmware update command. "
                             "MCHP Error codes: response_argument[1] = 0x%02X, [2] = 0x%02X, [3] = 0x%02X",
@@ -351,6 +381,14 @@ fapi2::ReturnCode callout_fw_write_no_doorbell(const fapi2::Target<fapi2::TARGET
     // If we have the no-doorbell RC, log it and then assert out with our specific error
     if(uint64_t(io_rc) == uint64_t(fapi2::RC_EXP_INBAND_RSP_NO_DOORBELL))
     {
+        uint32_t l_partition_id = 0;
+        uint32_t l_fw_version_a = 0;
+        uint32_t l_fw_version_b = 0;
+
+        FAPI_TRY(mss::attr::get_exp_fw_partition_id(i_target, l_partition_id));
+        FAPI_TRY(mss::attr::get_exp_fw_version_a(i_target, l_fw_version_a));
+        FAPI_TRY(mss::attr::get_exp_fw_version_b(i_target, l_fw_version_b));
+
         fapi2::logError(io_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
         io_rc = fapi2::FAPI2_RC_SUCCESS;
 
@@ -359,6 +397,9 @@ fapi2::ReturnCode callout_fw_write_no_doorbell(const fapi2::Target<fapi2::TARGET
                     fapi2::EXP_FW_UPDATE_WRITE_NO_DOORBELL()
                     .set_OCMB_TARGET(i_target)
                     .set_SEQUENCE_NUMBER(i_seq_num)
+                    .set_FW_PARTITION_ID(l_partition_id)
+                    .set_FW_VERSION_A(l_fw_version_a)
+                    .set_FW_VERSION_B(l_fw_version_b)
                     .set_EXP_ACTIVE_LOG_SIZE(4096),
                     "%s FW write failed by not finding a doorbell", mss::c_str(i_target));
     }
@@ -380,6 +421,14 @@ fapi2::ReturnCode callout_fw_commit_no_doorbell(const fapi2::Target<fapi2::TARGE
     // If we have the no-doorbell RC, log it and then assert out with our specific error
     if(uint64_t(io_rc) == uint64_t(fapi2::RC_EXP_INBAND_RSP_NO_DOORBELL))
     {
+        uint32_t l_partition_id = 0;
+        uint32_t l_fw_version_a = 0;
+        uint32_t l_fw_version_b = 0;
+
+        FAPI_TRY(mss::attr::get_exp_fw_partition_id(i_target, l_partition_id));
+        FAPI_TRY(mss::attr::get_exp_fw_version_a(i_target, l_fw_version_a));
+        FAPI_TRY(mss::attr::get_exp_fw_version_b(i_target, l_fw_version_b));
+
         fapi2::logError(io_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
         io_rc = fapi2::FAPI2_RC_SUCCESS;
 
@@ -387,6 +436,9 @@ fapi2::ReturnCode callout_fw_commit_no_doorbell(const fapi2::Target<fapi2::TARGE
         FAPI_ASSERT(false,
                     fapi2::EXP_FW_UPDATE_COMMIT_NO_DOORBELL()
                     .set_OCMB_TARGET(i_target)
+                    .set_FW_PARTITION_ID(l_partition_id)
+                    .set_FW_VERSION_A(l_fw_version_a)
+                    .set_FW_VERSION_B(l_fw_version_b)
                     .set_EXP_ACTIVE_LOG_SIZE(4096),
                     "%s FW commit failed by not finding a doorbell", mss::c_str(i_target));
     }

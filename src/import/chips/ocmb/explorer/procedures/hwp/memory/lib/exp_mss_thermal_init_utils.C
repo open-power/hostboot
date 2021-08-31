@@ -551,6 +551,14 @@ namespace check
 fapi2::ReturnCode sensor_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                   const host_fw_response_struct& i_rsp)
 {
+    uint32_t l_partition_id = 0;
+    uint32_t l_fw_version_a = 0;
+    uint32_t l_fw_version_b = 0;
+
+    FAPI_TRY(mss::attr::get_exp_fw_partition_id(i_target, l_partition_id));
+    FAPI_TRY(mss::attr::get_exp_fw_version_a(i_target, l_fw_version_a));
+    FAPI_TRY(mss::attr::get_exp_fw_version_b(i_target, l_fw_version_b));
+
     // Check if cmd was successful.
     // EXP_FW_TEMP_SENSOR_CONFIG_INTERVAL_READ has 2 error bytes
     // in response_argument[1] and [2], record and print both.
@@ -559,7 +567,10 @@ fapi2::ReturnCode sensor_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
                 set_OCMB_TARGET(i_target).
                 set_RSP_ID(i_rsp.response_id).
                 set_ERROR_CODE_1(i_rsp.response_argument[1]).
-                set_ERROR_CODE_2(i_rsp.response_argument[2]),
+                set_ERROR_CODE_2(i_rsp.response_argument[2]).
+                set_FW_PARTITION_ID(l_partition_id).
+                set_FW_VERSION_A(l_fw_version_a).
+                set_FW_VERSION_B(l_fw_version_b),
                 "Failed to enable sensor cache for %s . Error codes: "
                 "response_argument[1] = 0x%02X response_argument[2] = 0x%02X",
                 mss::c_str(i_target), i_rsp.response_argument[1], i_rsp.response_argument[2]);
