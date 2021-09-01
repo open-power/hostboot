@@ -130,6 +130,10 @@ int32_t __analyzeCoreFir( ExtensibleChip * i_chip,
         return o_rc;
     }
 
+    // We can't mask recoverable errors in the CORE_FIR like we do on all of the
+    // other FIRs because it will make core recovery hang. Therefore, we we make
+    // a predictive callout at threshold, we will mask recoverable attentions
+    // for the entire FIR.
     SCAN_COMM_REGISTER_CLASS * chipletMask =
         i_chip->getRegister( "EQ_CHIPLET_RE_FIR_MASK" );
 
@@ -149,6 +153,19 @@ int32_t __analyzeCoreFir( ExtensibleChip * i_chip,
         PRDF_ERR( PRDF_FUNC "Failed to read EQ_CHIPLET_RE_FIR_MASK on 0x%08x",
                   i_chip->getHuid() );
     }
+
+    // Because we are unable to mask the CORE_FIR in the traditional way, we are
+    // also unable to reset the WOF when at threshold. If we leave the WOF set,
+    // PHYP is unable to put the core to sleep, which is a small hit to power
+    // performance. Therefore, we need to clear the WOF register.
+    auto wof = core->getRegister("EQ_CORE_FIR_WOF");
+    wof->clearAllBits();
+    if (SUCCESS != wof->Write())
+    {
+        PRDF_ERR(PRDF_FUNC "Failed to clear EQ_CORE_FIR_WOF on 0x%08x",
+                 core->getHuid());
+    }
+
     #endif // __HOSTBOOT_MODULE
 
     return o_rc;
