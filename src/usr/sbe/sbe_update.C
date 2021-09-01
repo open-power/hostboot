@@ -888,6 +888,14 @@ namespace SBE
                 break;
             }
 
+#ifdef CONFIG_FILE_XFER_VIA_PLDM
+            // When we are using PLDM for pnor file i/o, this property is not
+            // communicated to us by the BMC so we must assume it to be true.
+            // It is safe to assume that the SBE pnor section will always
+            // have this sha512perEC header in front of the SBE image.
+            pnorInfo.sha512perEC = true;
+#endif
+
             //  The SBE Image for the corresponding EC was found, check if
             //  it includes a SBE Header
             if (pnorInfo.sha512perEC)
