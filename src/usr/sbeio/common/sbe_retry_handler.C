@@ -174,7 +174,7 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target, bool i_sbe
         // the SBE is in , if the asynFFDC bit is set on the sbe_reg
         // then FFDC will be collected at this point in time.
         // sbe_run_extract_msg_reg will return true if there was an error reading the status
-        if(!this->sbe_run_extract_msg_reg(i_target))
+        if( !i_sbeHalted && !this->sbe_run_extract_msg_reg(i_target))
         {
             SBE_TRACF("main_sbe_handler(): Failed to get sbe register something is seriously wrong, we should always be able to read that!!");
             //Error log should have already committed in sbe_run_extract_msg_reg for this issue
