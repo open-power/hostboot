@@ -100,7 +100,8 @@ HCD_HDR_UINT32( iv_coreL2ScomLength,    0);
 HCD_HDR_UINT32( iv_eqL3ScomOffset,      0);
 HCD_HDR_UINT32( iv_eqL3ScomLength,      0);
 HCD_HDR_UINT64( iv_reserved1,           0);
-HCD_HDR_UINT64( iv_reserved2,           0);
+HCD_HDR_UINT32( iv_homerGeneration,     0);
+HCD_HDR_UINT32( iv_reserved2,           0);
 HCD_HDR_UINT64( iv_reserved3,           0);
 HCD_HDR_UINT32( iv_autoWkUpVectOffset,  0);
 HCD_HDR_UINT32( iv_autoWkUpVectLength,  0); // Auto wakeup vector reside at offset starting from 0x80

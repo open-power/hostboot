@@ -2063,6 +2063,8 @@ fapi2::ReturnCode buildCpmrHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t   
          pCpmrHdr->iv_scomRestoreLength  =   htobe32( pCpmrHdr->iv_scomRestoreLength );
     }
 
+    pCpmrHdr->iv_homerGeneration    =   htobe32(P10_HOMER_GEN_MAGIC_WORD);
+
     i_qmeBuildRecord.dumpBuildRecord();
 
     FAPI_TRY( buildScomHeader( i_procTgt, i_pChipHomer ) );
@@ -2081,10 +2083,11 @@ fapi2::ReturnCode buildCpmrHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t   
     FAPI_INF( "Core Spec Ring Length        0x%08x",  htobe32( pCpmrHdr->iv_specRingLength ));
     FAPI_INF( "SCOM Restore Offset          0x%08x",  htobe32( pCpmrHdr->iv_scomRestoreOffset ));
     FAPI_INF( "SCOM Restore Length          0x%08x",  htobe32( pCpmrHdr->iv_scomRestoreLength ));
-
-#endif
+    FAPI_INF( "HOMER Generation             0x%08x",  htobe32( pCpmrHdr->iv_homerGeneration ));
     FAPI_INF( "Auto Wakeup Vector Offset    0x%08x",  htobe32( pCpmrHdr->iv_autoWkUpVectOffset));
     FAPI_INF( "Auto Wakeup Vector Length    0x%08x",  htobe32( pCpmrHdr->iv_autoWkUpVectLength));
+
+#endif
 
  fapi_try_exit:
     FAPI_INF( "<< buildCpmrHeader" )
