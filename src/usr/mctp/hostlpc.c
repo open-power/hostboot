@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,6 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
 /* SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later */
 
 // System Headers
@@ -154,7 +155,8 @@ void mctp_hostlpc_rx_start(struct mctp_binding_hostlpc *hostlpc)
 
     if (!pkt)
     {
-        goto out_complete;
+        // This path is impossible, we will assert prior to this.
+        return;
     }
 
     // after we get size and allocate the buffer then read the remainig
@@ -162,10 +164,12 @@ void mctp_hostlpc_rx_start(struct mctp_binding_hostlpc *hostlpc)
     hostlpc->ops.lpc_read(hostlpc->ops_data, mctp_pktbuf_hdr(pkt),
                           hostlpc->lpc_hdr->rx_offset + sizeof(len), len);
 
+    // Notify the BMC that we have read the packet off the bus before
+    // moving on to process it
+    mctp_hostlpc_kcs_send(hostlpc, KCS_RX_COMPLETE);
+
     mctp_bus_rx(&hostlpc->binding, pkt);
 
-out_complete:
-    mctp_hostlpc_kcs_send(hostlpc, KCS_RX_COMPLETE);
 }
 
 // This will go away in future commits
