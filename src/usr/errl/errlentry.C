@@ -194,7 +194,6 @@ ErrlEntry::ErrlEntry(const errlSeverity_t i_sev,
     iv_sevFinal(false),
     iv_skipProcessingLog(true),
     iv_skipShowingLog(true),
-    iv_eselCallhomeInfoEvent(false),
     iv_doHbDump(i_hbDump)
 {
     #ifdef CONFIG_ERRL_ENTRY_TRACE
@@ -1050,6 +1049,7 @@ void ErrlEntry::addPartIdInfoToErrLog
     TRACDCOMP(g_trac_errl, EXIT_MRK"ErrlEntry::addPartIdInfoToErrLog()");
 }
 
+
 void ErrlEntry::checkForDeconfigAndGard()
 {
     //Loop through each section of the errorlog
@@ -1127,11 +1127,7 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
     iv_Extended.setComponentId(i_committerComponent);
     iv_ED.setComponentId( i_committerComponent );
 
-    // Avoid adding a callout to informational callhome "error"
-    if (!getEselCallhomeInfoEvent())
-    {
-        setSubSystemIdBasedOnCallouts();
-    }
+    setSubSystemIdBasedOnCallouts();
 
     // Add the captured backtrace to the error log
     if (iv_pBackTrace)

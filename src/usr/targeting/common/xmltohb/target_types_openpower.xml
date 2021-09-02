@@ -213,9 +213,6 @@
       <id>ADC_CHANNEL_SENSOR_NUMBERS</id>
     </attribute>
     <attribute>
-      <id>ALLOW_CALLHOME_ESELS_TO_BMC</id>
-    </attribute>
-    <attribute>
       <id>APSS_GPIO_PORT_MODES</id>
     </attribute>
     <attribute>

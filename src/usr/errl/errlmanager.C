@@ -523,14 +523,14 @@ void ErrlManager::errlogMsgHndlr ()
                         if (_isFlagSet(*it, BMC_FLAG))
                         {
                             // send errorlog
-                            sendErrLogToBmcPLDM(it->first);
-                            // Mark IPMI processing complete
+                            sendErrLogToBmc(it->first);
+                            // Mark BMC processing complete
                             _clearFlag(*it, BMC_FLAG);
                         }
                         else if (_isFlagSet(*it, BMC_PREV_ERR_FLAG))
                         {
                             // send previous boot errorlog
-                            sendErrLogToBmcPLDM(it->first, true);
+                            sendErrLogToBmc(it->first, true);
                             // Mark BMC processing complete
                             _clearFlag(*it, BMC_PREV_ERR_FLAG);
                         }
@@ -649,7 +649,7 @@ void ErrlManager::errlogMsgHndlr ()
                     if (iv_isBmcInterfaceEnabled)
                     {
                         // send to BMC
-                        sendErrLogToBmcPLDM(l_err);
+                        sendErrLogToBmc(l_err);
 
                         // Mark BMC processing complete on this error
                         _clearFlag(l_pair, BMC_FLAG);

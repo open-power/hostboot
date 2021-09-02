@@ -87,7 +87,7 @@ class ErrlUserDetailsBackTrace;
 /**
  *  @brief      Host Boot Error log entry class.
  *  This class contains all of the entry management logic and necessary
- *  information to create a PEL or IPMI event type logs.
+ *  information to create a PEL event type log.
  *  A pointer to this class is known as an errlHndl_t (the error log handle)
  *  and it is the data type passed by applications on the stack to convey
  *  a failure.
@@ -802,24 +802,6 @@ public:
     void addUDSection( ErrlUD* i_section);
 
     /**
-     * @brief set iv_eselCallhomeInfoEvent
-     *
-     *      When true, send this error as a special callhome
-     *                 type of eSEL to the BMC
-     *
-     * @return nothing
-     */
-    void setEselCallhomeInfoEvent(bool i_valid);
-
-    /**
-     * @brief get iv_eselCallhomeInfoEvent
-     *
-     * @return true if this log should result in a callhome event type eSEL,
-     *         false otherwise
-     */
-    bool getEselCallhomeInfoEvent();
-
-    /**
      * @brief get iv_doHbDump
      *
      * @return true if this log should result in a HB dump during a shutdown,
@@ -999,20 +981,6 @@ private:
      */
     void addPartIdInfoToErrLog(const TARGETING::Target * i_target);
 
-#ifdef CONFIG_BMC_IPMI
-    /**
-     * @brief called by addHwCallout to retrieve the FRU ID and sensor ID
-     * from the current target. If the current target does not contain
-     * ATTR_FRU_ID, find the first parent that does and add the attribute
-     * to the error log.
-     *
-     * @param[in]       i_target        The target to get the IDs for
-     * @param[in]       i_priority      This target's callout priority
-     */
-    void addSensorDataToErrLog(TARGETING::Target * i_target,
-                               HWAS::callOutPriority i_priority );
-#endif
-
 #ifdef CONFIG_BUILD_FULL_PEL
     /*
      * @brief Collects the various data necessary to build the full PEL depending on callout type for the BMC.
@@ -1144,10 +1112,6 @@ private:
 
     // When true, the current error log will not be displayed on the console.
     bool iv_skipShowingLog;
-
-    // when true, send this special type of eSEL to the BMC
-    // This is used to send OCC informational errors up to BMC
-    bool iv_eselCallhomeInfoEvent;
 
     // when true, if error log is committed, then the error log is tracked so
     // doShutdown can request that a HB dump be done.
@@ -1324,21 +1288,6 @@ inline void ErrlEntry::setSkipProcessingLog(const bool i_skipProcessingLog)
 inline bool ErrlEntry::getSkipProcessingLog() const
 {
     return iv_skipProcessingLog;
-}
-
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-inline void ErrlEntry::setEselCallhomeInfoEvent(bool i_valid)
-{
-    iv_eselCallhomeInfoEvent = i_valid;
-    return;
-}
-
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-inline bool ErrlEntry::getEselCallhomeInfoEvent()
-{
-    return iv_eselCallhomeInfoEvent;
 }
 
 ////////////////////////////////////////////////////////////////////////////

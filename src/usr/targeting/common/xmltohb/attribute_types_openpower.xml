@@ -86,18 +86,6 @@
   </attribute>
 
   <attribute>
-    <id>ALLOW_CALLHOME_ESELS_TO_BMC</id>
-    <description>Flag used to allow sending informational call-home errors as ESELS to the BMC</description>
-    <simpleType>
-      <uint8_t>
-        <default>0</default>
-      </uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-  </attribute>
-
-  <attribute>
     <id>APSS_GPIO_PORT_MODES</id>
     <description>APSS GPIO PORT MODES</description>
     <simpleType>

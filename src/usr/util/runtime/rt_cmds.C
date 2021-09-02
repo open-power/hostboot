@@ -679,15 +679,6 @@ void cmd_errorlog( char*& o_output,
                          false );   // merge
             l_count++;
         } while (i_ffdcLength > 0);
-
-        // Change the default eSEL type if i_word1 is equal to 1
-        if (i_word1 == 1)
-        {
-            // mark error as callhome information eSEL 'dd' type
-            // Mimics error passed down by the OCC
-            l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-            l_err->setEselCallhomeInfoEvent(true);
-        }
     }
 
     l_err->collectTrace("UTIL", 1024);

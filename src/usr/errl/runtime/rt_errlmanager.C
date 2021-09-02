@@ -163,7 +163,7 @@ void ErrlManager::sendMboxMsg ( errlHndl_t& io_err )
                       io_err->eid());
 
             // send to BMC
-            bool l_passed = sendErrLogToBmcPLDM(io_err);
+            bool l_passed = sendErrLogToBmc(io_err);
             if (!l_passed)
             {
                 TRACFCOMP( g_trac_errl,
@@ -179,7 +179,6 @@ void ErrlManager::sendMboxMsg ( errlHndl_t& io_err )
                 io_err->eid(), io_err->sev() );
             io_err->traceLogEntry();
         }
-
 #else
 
         TRACFCOMP(g_trac_errl,

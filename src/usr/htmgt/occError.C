@@ -188,12 +188,6 @@ namespace HTMGT
                           l_occElog->extendedRC, // extended reason code
                           severity);
 
-                if (l_call_home_event)
-                {
-                    // Force info log to the BMC.
-                    // No HW Callouts (SELs) will be created for this error
-                    l_errlHndl->setEselCallhomeInfoEvent(true);
-                }
 
                 // Add callout information
                 const uint8_t l_max_callouts = l_occElog->maxCallouts;
