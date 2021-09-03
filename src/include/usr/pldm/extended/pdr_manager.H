@@ -299,7 +299,7 @@ public:
      * @return vector       List of PLDM state query records.
      * @note                Locks the PDR repository.
      */
-    std::vector<pldm_state_query_record_t> getStateQueryRecords(const TARGETING::Target* i_target = nullptr);
+    std::vector<pldm_state_query_record_t> getHostStateQueryRecords(const TARGETING::Target* i_target = nullptr);
 
     /* @brief Look up a state query ID by state set ID in the list of registered state query records.
      *
@@ -311,9 +311,9 @@ public:
      *                                on the relevant target(s), an arbitrary one will be returned.
      * @note                          Locks the PDR repository.
      */
-    state_query_id_t getStateQueryIdForStateSet(state_query_type_t i_state_query_type,
-                                                uint16_t i_state_set_id,
-                                                const TARGETING::Target* i_target = nullptr);
+    state_query_id_t getHostStateQueryIdForStateSet(state_query_type_t i_state_query_type,
+                                                    uint16_t i_state_set_id,
+                                                    const TARGETING::Target* i_target = nullptr);
 
     /* @brief  Handle a SetStateEffecterStates command and send a response.
      *
@@ -391,23 +391,28 @@ public:
      */
     void addTerminusLocatorPDR();
 
+    // Can be given as a field in the pldm_entity parameter to
+    // findStateEffecterId to act as a wildcard in the search.
+    static const uint16_t ENTITY_ID_DONTCARE = 0xFFFF;
+
     /** @brief Find the ID of an effecter that operates with the given state set
      * ID. If there are multiple effecters that operate with the given ID, any
      * of them may be returned.
      *
      * @param[in]  i_state_set_id  The state set ID to search for.
-     * @param[out] o_effecter_id   ID of the effecter for the given state set. If
-     *                             errorlog is set this value is invalid.
+     * @param[in]  i_entity        The entity to search for. If any member of this
+     *                             ID is ENTITY_ID_DONTCARE then that member will
+     *                             be ignored for purposes of comparison when searching.
      *
-     * @return Errorlog if the effecter id was not found, otherwise will be
-     *         nullptr.
-     * @note   Locks the PDR repository.
+     * @return effecter_id_t       The effecter if found, otherwise 0.
+     * @note                       Locks the PDR repository.
      */
-    errlHndl_t findStateEffecterId(const pldm_state_set_ids i_state_set_id,
-                                   uint16_t &o_effecter_id);
+    effecter_id_t findStateEffecterId(pldm_state_set_ids i_state_set_id,
+                                      pldm_entity i_entity);
 
 #ifndef __HOSTBOOT_RUNTIME
-    /** @brief  Register a message queue to be messaged when a particular effecter is set.
+    /** @brief  Register a message queue to be messaged when a particular Hostboot PLDM
+     *          effecter is set by another terminus.
      *          See DSP0248 v1.2.0 for definitions.
      *
      * @param[in] i_effecter_id   The ID of the effecter to monitor.
@@ -417,16 +422,17 @@ public:
      *
      * @note The message queue listener must respond with a message after it is
      *       done operating.
-     * @note If a listener is registered to handle a particular effecter, a "success"
-     *       PLDM response will be sent in response to the effecter-set request
-     *       (unless there is also a static handler for this effecter registered
-     *       by addStateEffecterPdr, in which case the static handler is responsible
-     *       for responding).
+     * @note The message sent to the listener will have two pieces of data:
+     *       data[0] will be the PLDM composite effecter ID (0..7 inclusive),
+     *       and data[1] will be the new effecter state. In the response
+     *       message, data[0] should be the 8-bit PLDM status code that will be
+     *       used to respond to the PLDM state effecter set-request.
      * @note Dynamic handlers for the state effecter will be invoked before any static
      *       handler.
-     * @note The PDR repository will be locked when a message is sent on the queue,
-     *       so the listener should respond to the message before doing locking operations
-     *       on the PDR manager.
+     * @note If there is a static handler for the effecter set-request, the PLDM
+     *       response code from the dynamic handler(s) will be ignored.
+     * @note The PDR repository will not be locked when a message is sent on the
+     *       given queue when handling a PLDM state effecter set-request.
      * @note This function locks the PDR repository.
      * @note Waiters on the message queue should use the msg_wait_timeout API to ensure
      *       that they are able to progress even if a message send operation fails.
@@ -444,6 +450,14 @@ public:
      *
      * @note If the queue is not registered under the given effecter info, this
      *       function does nothing.
+     * @note This function locks the PDR repository.
+     * @note Users of this function must be careful about how they accept callback
+     *       messages, and must be sure to always respond to any message the PDR
+     *       manager sends on the queue, otherwise the manager will hang. To avoid
+     *       deadlock, users should attempt to receive a message on the queue for a
+     *       short period of time after unregistering it to ensure that a message
+     *       wasn't sent between the time they stopped waiting and the time that they
+     *       unregistered the queue.
      */
     void unregisterStateEffecterCallbackMsgQ(effecter_id_t i_effecter_id,
                                              uint8_t i_composite_id,
@@ -461,11 +475,17 @@ private:
 #ifndef __HOSTBOOT_RUNTIME
     /** @brief  Invoke dynamic callback listeners for a PLDM state effecter.
      *
-     * @param[in] i_req  The PLDM request
-     * @return    bool   Whether any handlers were invoked.
-     * @note             This function locks the PDR repository.
+     * @param[in]     i_req                  The PLDM request
+     * @param[in/out] io_pldm_response_code  The response code to send, if there were no static handlers
+     *                                       for the PLDM message. For multiple handlers, this will be
+     *                                       the "worst" status.
+     * @return        bool                   Whether any handlers were invoked.
+     * @note                                 This function locks the PDR repository while accessing
+     *                                       member variables, then unlocks it when sending messages
+     *                                       to the registered message queues.
      */
-    bool invokeStateEffecterCallback(const pldm_set_state_effecter_states_req& i_req);
+    bool invokeStateEffecterCallback(const pldm_set_state_effecter_states_req& i_req,
+                                     uint8_t& io_pldm_response_code);
 
     // Holds a msg_q_t
     std::shared_ptr<void> iv_bmc_repo_changed_event_q;

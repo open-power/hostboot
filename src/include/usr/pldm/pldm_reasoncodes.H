@@ -148,6 +148,7 @@ namespace PLDM
         RC_NO_MATCHING_VALUE        = PLDM_COMP_ID | 0x2F,
         RC_EFFECTER_NOT_FOUND       = PLDM_COMP_ID | 0x30,
         RC_MULTIPLE_REGISTRATIONS   = PLDM_COMP_ID | 0x31,
+        RC_SBE_DUMP_TIMED_OUT       = PLDM_COMP_ID | 0x32,
     };
 }
 #endif

@@ -43,6 +43,7 @@ namespace PLDM
     enum entity_type : uint16_t
     {
         // These values are from Table 15 in DSP0249 v1.1.0
+        ENTITY_SYS_FIRMWARE = 31,
         ENTITY_TYPE_CHASSIS = 45,
         ENTITY_TYPE_BACKPLANE = 64,
         ENTITY_TYPE_DIMM = 66,

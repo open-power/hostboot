@@ -237,65 +237,59 @@ pldm_terminus_locator_pdr* findHBTerminusLocatorPdr(const pldm_pdr* const i_repo
     return l_hb_pdr;
 }
 
-errlHndl_t PdrManager::findStateEffecterId(const pldm_state_set_ids i_state_set_id,
-                                           uint16_t &o_effecter_id)
+/* @brief Compare components of an entity ID for equality. The haystack should
+ * come from a PDR (in little-endian format) and the needle should be a search
+ * pattern (number or ENTITY_ID_DONTCARE).
+ *
+ * @param[in] i_haystack  The component to search (little-endian).
+ * @param[in] i_needle    The component to match (host-endian; entity ID or ENTITY_ID_DONTCARE).
+ * @return    bool        Whether the components match.
+ */
+static bool entity_id_component_equal(const uint16_t i_haystack, const uint16_t i_needle)
 {
-    errlHndl_t errl = nullptr;
-    const auto lock = scoped_mutex_lock(iv_access_mutex);
-    const pldm_pdr_record* curr_record = nullptr;
-    bool termination_pdr_found = false;
-    do
-    {
-        uint8_t* record_data = nullptr;
-        uint32_t record_size = 0;
+    return i_needle == PdrManager::ENTITY_ID_DONTCARE || le16toh(i_haystack) == i_needle;
+}
 
-        curr_record = pldm_pdr_find_record_by_type(iv_pdr_repo.get(),
-                                                   PLDM_STATE_EFFECTER_PDR,
-                                                   curr_record,
-                                                   &record_data,
-                                                   &record_size);
-        if(curr_record)
-        {
-            auto cur_state_effecter_pdr =
-              reinterpret_cast<pldm_state_effecter_pdr*>(record_data);
+effecter_id_t PdrManager::findStateEffecterId(const pldm_state_set_ids i_state_set_id,
+                                              const pldm_entity i_entity_id)
+{
+    effecter_id_t effecter_id = 0;
 
-            auto possible_states =
-              reinterpret_cast<state_sensor_possible_states*>(cur_state_effecter_pdr->possible_states);
+    foreachPdrOfType(PLDM_STATE_EFFECTER_PDR,
+                     [&effecter_id, i_entity_id, i_state_set_id]
+                     (const uint8_t* const pdr_data, const uint32_t pdr_data_size)
+                     {
+                         const auto state_effecter_pdr =
+                             reinterpret_cast<const pldm_state_effecter_pdr*>(pdr_data);
 
-            if(le16toh(possible_states->state_set_id) == i_state_set_id)
-            {
+                         if (entity_id_component_equal(state_effecter_pdr->entity_type, i_entity_id.entity_type)
+                             && entity_id_component_equal(state_effecter_pdr->entity_instance, i_entity_id.entity_instance_num)
+                             && entity_id_component_equal(state_effecter_pdr->container_id, i_entity_id.entity_container_id))
+                         {
+                             const uint8_t* possible_states_ptr = state_effecter_pdr->possible_states;
 
-                // We found the pdr; return its effecter id.
-                o_effecter_id = le16toh(cur_state_effecter_pdr->effecter_id);
-                termination_pdr_found = true;
+                             for (int i = 0; i < state_effecter_pdr->composite_effecter_count; ++i)
+                             {
+                                 const auto possible_states =
+                                     reinterpret_cast<const state_effecter_possible_states*>(possible_states_ptr);
 
-                break;
-            }
-        }
-    } while(curr_record);
+                                 if(le16toh(possible_states->state_set_id) == i_state_set_id)
+                                 {
+                                     // We found the pdr; return its effecter id.
+                                     effecter_id = le16toh(state_effecter_pdr->effecter_id);
+                                     return true; // halt iteration
+                                 }
 
-    if(!termination_pdr_found)
-    {
-        /*@
-         * @errortype  ERRL_SEV_UNRECOVERABLE
-         * @moduleid   MOD_FIND_TERMINATION_STATUS_ID
-         * @reasoncode RC_INVALID_EFFECTER_ID
-         * @userdata1  The total number of PDRs that PDR Manager is aware of.
-         * @userdata2[0:31]  PLDM_STATE_EFFECTER_PDR enum value
-         * @userdata2[32:63] State set being searched for
-         * @devdesc    Software problem, could not find SW Termination PDR.
-         * @custdesc   A software error occurred during system boot.
-         */
-        errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                             MOD_FIND_TERMINATION_STATUS_ID,
-                             RC_INVALID_EFFECTER_ID,
-                             PLDM::thePdrManager().pdrCount(),
-                             TWO_UINT32_TO_UINT64(PLDM_STATE_EFFECTER_PDR,
-                                                  i_state_set_id),
-                             ErrlEntry::ADD_SW_CALLOUT);
-        addBmcErrorCallouts(errl);
-    }
-    return errl;
+                                 possible_states_ptr += (sizeof(*possible_states)
+                                                         - sizeof(possible_states->states) // subtract size of variable-length array
+                                                         + possible_states->possible_states_size);
+                             }
+                         }
+
+                         return false; // continue iteration
+                     });
+
+    return effecter_id;
 }
 
 errlHndl_t PdrManager::sendPdrRepositoryChangeEvent(const std::vector<pdr_handle_t>& i_handles) const
@@ -750,7 +744,7 @@ errlHndl_t PdrManager::handleStateQueryRequest(const state_query_type_t i_queryt
 
     errlHndl_t errl = nullptr;
     uint8_t response_code = PLDM_SUCCESS; // Only sent if we don't find an appropriate query handler
-    bool dynamic_handler_invoked = false;
+    bool dynamic_handler_invoked = false, static_handler_invoked = false;
 
     do
     {
@@ -760,7 +754,8 @@ errlHndl_t PdrManager::handleStateQueryRequest(const state_query_type_t i_queryt
 #ifndef __HOSTBOOT_RUNTIME
     if (i_querytype == STATE_QUERY_EFFECTER)
     {
-        dynamic_handler_invoked = invokeStateEffecterCallback(*static_cast<const pldm_set_state_effecter_states_req*>(i_req));
+        dynamic_handler_invoked = invokeStateEffecterCallback(*static_cast<const pldm_set_state_effecter_states_req*>(i_req),
+                                                              response_code);
     }
 #endif
 
@@ -826,6 +821,8 @@ errlHndl_t PdrManager::handleStateQueryRequest(const state_query_type_t i_queryt
      * so we don't modify response_code here, and we won't send a response
      * below. */
 
+    static_handler_invoked = true;
+
     if (i_querytype == STATE_QUERY_EFFECTER)
     {
         errl = invoke_state_effecter_handler(static_cast<state_query_handler_id_t>(handler_function_id),
@@ -843,13 +840,13 @@ errlHndl_t PdrManager::handleStateQueryRequest(const state_query_type_t i_queryt
 
     } while (false);
 
-    /* Reply with an error if we didn't invoke any handler. If we call a query
-       handler at all, it should send the response (even if there's an error
-       within it or something), so we don't need to do it here.
+    /* Reply with an error if we didn't invoke any static handler. If we call a
+       static query handler at all, it should send the response (even if there's
+       an error within it or something), so we don't need to do it here.
        Dynamic handlers, on the other hand, shouldn't send the response
        themselves, so we do want to do that for them here. */
 
-    if (response_code != PLDM_SUCCESS || dynamic_handler_invoked)
+    if (!static_handler_invoked)
     {
         PLDM::send_cc_only_response(i_msgQ, i_msg, response_code);
     }
@@ -859,7 +856,7 @@ errlHndl_t PdrManager::handleStateQueryRequest(const state_query_type_t i_queryt
     return errl;
 }
 
-std::vector<PdrManager::pldm_state_query_record_t> PdrManager::getStateQueryRecords(const Target* const i_target)
+std::vector<PdrManager::pldm_state_query_record_t> PdrManager::getHostStateQueryRecords(const Target* const i_target)
 {
     const auto lock = scoped_mutex_lock(iv_access_mutex);
     std::vector<pldm_state_query_record_t> query_ids;
@@ -880,13 +877,13 @@ std::vector<PdrManager::pldm_state_query_record_t> PdrManager::getStateQueryReco
     return query_ids;
 }
 
-state_query_id_t PdrManager::getStateQueryIdForStateSet(const state_query_type_t i_state_query_type,
-                                                        const uint16_t i_state_set_id,
-                                                        const TARGETING::Target* const i_target)
+state_query_id_t PdrManager::getHostStateQueryIdForStateSet(const state_query_type_t i_state_query_type,
+                                                            const uint16_t i_state_set_id,
+                                                            const TARGETING::Target* const i_target)
 {
     state_query_id_t query_id = 0;
 
-    for (const auto& record : thePdrManager().getStateQueryRecords(i_target))
+    for (const auto& record : thePdrManager().getHostStateQueryRecords(i_target))
     {
         if (record.state_set_id == i_state_set_id && record.query_type == i_state_query_type)
         {
@@ -1186,64 +1183,91 @@ void PdrManager::unregisterStateEffecterCallbackMsgQ(const effecter_id_t i_effec
     }
 }
 
-bool PdrManager::invokeStateEffecterCallback(const pldm_set_state_effecter_states_req& i_req)
+bool PdrManager::invokeStateEffecterCallback(const pldm_set_state_effecter_states_req& i_req,
+                                             uint8_t& io_pldm_response_code)
 {
-    bool invoked_callback = false;
-
-    const auto lock = scoped_mutex_lock(iv_access_mutex);
-
-    for (int i = 0; i < i_req.comp_effecter_count; ++i)
+    struct effecter_callback_args
     {
-        if (i_req.field[i].set_request)
+        effecter_registry_value_t callback_info;
+        int composite_id;
+        int state;
+    };
+
+    std::vector<effecter_callback_args> messages;
+
+    /* Lock the PDR manager and find all of the message queues that have
+     * registered to receive a callback about this state effecter */
+
+    {
+        const auto lock = scoped_mutex_lock(iv_access_mutex);
+
+        for (int i = 0; i < i_req.comp_effecter_count; ++i)
         {
-            effecter_registry_key_t key(i_req.effecter_id, i);
-
-            const auto it = iv_effecter_msgq_registry.find(key.fullword);
-
-            if (it != end(iv_effecter_msgq_registry))
+            if (i_req.field[i].set_request)
             {
-                for (const auto entry : it->second)
+                effecter_registry_key_t key(i_req.effecter_id, i);
+
+                const auto it = iv_effecter_msgq_registry.find(key.fullword);
+
+                if (it != end(iv_effecter_msgq_registry))
                 {
-                    msg_t* msg = msg_allocate();
-                    msg->type = entry.msg_type;
-
-                    int rc = msg_sendrecv(entry.msgQ, msg);
-
-                    if (rc != 0)
+                    for (const auto value : it->second)
                     {
-                        PLDM_ERR("PdrManager::invokeStateEffecterCallback: msg_sendrecv failed with rc %d "
-                                 "on effecter %d/%d, message type = 0x%08x",
-                                 rc, i_req.effecter_id, i, entry.msg_type);
-
-                        /*@
-                         * @errortype        ERRL_SEV_UNRECOVERABLE
-                         * @moduleid         MOD_PDR_MANAGER
-                         * @reasoncode       RC_SENDRECV_FAIL
-                         * @userdata1[0:31]  Return code from msg_sendrecv
-                         * @userdata1[32:63] Message type for registered callback
-                         * @userdata2[0:31]  PLDM effecter ID
-                         * @userdata2[32:63] PLDM composite effecter ID
-                         * @devdesc          msg_sendrecv() failed
-                         * @custdesc         Firmware error during system boot
-                         */
-                        errlHndl_t err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                                       MOD_PDR_MANAGER,
-                                                       RC_SENDRECV_FAIL,
-                                                       TWO_UINT32_TO_UINT64(rc, entry.msg_type),
-                                                       TWO_UINT32_TO_UINT64(i_req.effecter_id, i),
-                                                       ErrlEntry::ADD_SW_CALLOUT);
-                        errlCommit(err, PLDM_COMP_ID);
+                        messages.push_back({ value, i, i_req.field[i].effecter_state });
                     }
-
-                    msg_free(msg);
-                    msg = nullptr;
-                    invoked_callback = true;
                 }
             }
         }
     }
 
-    return invoked_callback;
+    /* With the PDR repository unlocked, send messages to each registered queue
+     * and wait for a response. */
+
+    for (const auto entry : messages)
+    {
+        msg_t* msg = msg_allocate();
+        msg->type = entry.callback_info.msg_type;
+        msg->data[0] = entry.composite_id;
+        msg->data[1] = entry.state;
+        const int rc = msg_sendrecv(entry.callback_info.msgQ, msg);
+        if (rc != 0)
+        {
+            PLDM_ERR("PdrManager::invokeStateEffecterCallback: msg_sendrecv failed with rc %d "
+                     "on effecter %d/%d, message type = 0x%08x",
+                     rc, i_req.effecter_id, entry.composite_id, entry.callback_info.msg_type);
+
+            /*@
+             * @errortype        ERRL_SEV_UNRECOVERABLE
+             * @moduleid         MOD_PDR_MANAGER
+             * @reasoncode       RC_SENDRECV_FAIL
+             * @userdata1[0:31]  Return code from msg_sendrecv
+             * @userdata1[32:63] Message type for registered callback
+             * @userdata2[0:31]  PLDM effecter ID
+             * @userdata2[32:63] PLDM composite effecter ID
+             * @devdesc          msg_sendrecv() failed
+             * @custdesc         Firmware error during system boot
+             */
+            errlHndl_t err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                           MOD_PDR_MANAGER,
+                                           RC_SENDRECV_FAIL,
+                                           TWO_UINT32_TO_UINT64(rc, entry.callback_info.msg_type),
+                                           TWO_UINT32_TO_UINT64(i_req.effecter_id, entry.composite_id),
+                                           ErrlEntry::ADD_SW_CALLOUT);
+            errlCommit(err, PLDM_COMP_ID);
+        }
+        else
+        {
+            if (msg->data[0] != PLDM_SUCCESS)
+            {
+                io_pldm_response_code = msg->data[0];
+            }
+        }
+
+        msg_free(msg);
+        msg = nullptr;
+    }
+
+    return !messages.empty();
 }
 
 #endif // #ifndef __HOSTBOOT_RUNTIME

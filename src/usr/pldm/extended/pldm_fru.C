@@ -65,12 +65,12 @@ PLDM::fru_record_set_id_t PLDM::getTargetFruRecordSetID(const Target* const i_ta
     const auto l_ordinal_id = i_target->getAttr<ATTR_ORDINAL_ID>();
 
     assert(l_target_type < (1 << target_type_bits),
-           "Target type for FRU Record Set ID is out of range (HUID 0x%08x)",
-           get_huid(i_target));
+           "Target type %d for FRU Record Set ID is out of range (HUID 0x%08x)",
+           l_target_type, get_huid(i_target));
 
     assert(l_ordinal_id < (1 << ordinal_id_bits),
-           "Ordinal ID for FRU Record Set ID is out of range (HUID 0x%08x) - max size: 0x%08x",
-           get_huid(i_target), (1 << ordinal_id_bits)-1);
+           "Ordinal ID %d for FRU Record Set ID is out of range (HUID 0x%08x) - max size: 0x%08x",
+           l_ordinal_id, get_huid(i_target), (1 << ordinal_id_bits)-1);
 
     encoded_rsid_t rsid = { };
 
@@ -112,4 +112,3 @@ Target* PLDM::getTargetFromHostbootFruRecordSetID(const fru_record_set_id_t i_rs
 
     return result_target;
 }
-

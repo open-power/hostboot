@@ -605,9 +605,9 @@ errlHndl_t sendOccStateChangedEvent(const TARGETING::Target* const i_occ_target,
 
     // Search for the OCC state sensor ID
     const sensor_id_t sensor_id
-        = thePdrManager().getStateQueryIdForStateSet(PdrManager::STATE_QUERY_SENSOR,
-                                                     PLDM_STATE_SET_OPERATIONAL_RUNNING_STATUS,
-                                                     i_occ_target);
+        = thePdrManager().getHostStateQueryIdForStateSet(PdrManager::STATE_QUERY_SENSOR,
+                                                         PLDM_STATE_SET_OPERATIONAL_RUNNING_STATUS,
+                                                         i_occ_target);
 
     assert(sensor_id != 0,
            "Sensor ID for OCC target HUID=0x%08x has not been assigned",
@@ -870,45 +870,47 @@ errlHndl_t sendSetStateEffecterStatesRequest(
     return errl;
 }
 
-errlHndl_t sendGracefulShutdownRequest()
+errlHndl_t sendGracefulRestartRequest()
 {
     errlHndl_t errl = nullptr;
 
     do
     {
-        uint16_t power_effecter_id = 0;
-        errl = thePdrManager().findStateEffecterId(PLDM_STATE_SET_SW_TERMINATION_STATUS, power_effecter_id);
+        const effecter_id_t sw_term_effecter_id
+            = thePdrManager().findStateEffecterId(PLDM_STATE_SET_SW_TERMINATION_STATUS,
+                                                  { .entity_type = ENTITY_SYS_FIRMWARE,
+                                                    .entity_instance_num = 0,
+                                                    .entity_container_id = PdrManager::ENTITY_ID_DONTCARE });
 
-        if (errl)
+        if (sw_term_effecter_id == 0)
         {
+            /*@
+             * @errortype  ERRL_SEV_UNRECOVERABLE
+             * @moduleid   MOD_FIND_TERMINATION_STATUS_ID
+             * @reasoncode RC_INVALID_EFFECTER_ID
+             * @userdata1  The total number of PDRs that PDR Manager is aware of.
+             * @userdata2[0:31]  PLDM_STATE_EFFECTER_PDR enum value
+             * @userdata2[32:63] State set being searched for
+             * @devdesc    Software problem, could not find SW Termination PDR.
+             * @custdesc   A software error occurred during system boot.
+             */
+            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                 MOD_FIND_TERMINATION_STATUS_ID,
+                                 RC_INVALID_EFFECTER_ID,
+                                 PLDM::thePdrManager().pdrCount(),
+                                 TWO_UINT32_TO_UINT64(PLDM_STATE_EFFECTER_PDR,
+                                                      PLDM_STATE_SET_SW_TERMINATION_STATUS),
+                                 ErrlEntry::ADD_SW_CALLOUT);
+            addBmcErrorCallouts(errl);
             break;
         }
 
         std::vector<set_effecter_state_field> fields_to_set;
-        fields_to_set.push_back({ set_request::PLDM_REQUEST_SET, PLDM_SW_TERM_GRACEFUL_SHUTDOWN });
-        errl = sendSetStateEffecterStatesRequest(power_effecter_id, fields_to_set);
+        fields_to_set.push_back({ set_request::PLDM_REQUEST_SET, PLDM_SW_TERM_GRACEFUL_RESTART_REQUESTED });
+        errl = sendSetStateEffecterStatesRequest(sw_term_effecter_id, fields_to_set);
     } while (false);
 
     return errl;
-}
-
-errlHndl_t sendGracefulRestartRequest()
-{
-    uint16_t sw_term_effecter_id = 0;
-    errlHndl_t err =
-        thePdrManager().findStateEffecterId(PLDM_STATE_SET_SW_TERMINATION_STATUS,
-                                            sw_term_effecter_id);
-
-    if(!err)
-    {
-        std::vector<set_effecter_state_field> fields_to_set;
-        fields_to_set.push_back({set_request::PLDM_REQUEST_SET,
-                                PLDM_SW_TERM_GRACEFUL_RESTART_REQUESTED});
-        err = sendSetStateEffecterStatesRequest(sw_term_effecter_id,
-                                                fields_to_set);
-    }
-
-    return err;
 }
 
 }

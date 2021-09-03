@@ -41,6 +41,7 @@
 #include <pldm/extended/pdr_manager.H>
 #include "../common/pldmtrace.H"
 #include <pldm/pldm_reasoncodes.H>
+#include <pldm/pldm_util.H>
 #include <pldm/responses/pldm_fru_data_responders.H>
 #include <pldm/responses/pldm_monitor_control_responders.H>
 
@@ -494,6 +495,33 @@ errlHndl_t addFruInventoryPdrs(PdrManager& io_pdrman)
     return errl;
 }
 
+void addSbeDumpCompletePdrs(PdrManager& io_pdrman)
+{
+    TargetHandleList procs;
+    getAllChips(procs, TYPE_PROC);
+
+    // @TODO RTC 247294: Delete these constants and use the ones from libpldm
+    const int PLDM_OEM_IBM_SBE_MAINTENANCE_STATE = 32772;
+
+    enum ibm_oem_pldm_state_set_sbe_dump_state_values {
+        SBE_DUMP_COMPLETED = 0x1,
+        SBE_RETRY_REQUIRED = 0x2,
+    };
+
+    for (const auto proc : procs)
+    {
+        const auto entity_info = targeting_to_pldm_entity_id(proc->getAttr<ATTR_PLDM_ENTITY_ID_INFO>());
+
+        io_pdrman.addStateEffecterPdr(proc,
+                                      entity_info,
+                                      PLDM_OEM_IBM_SBE_MAINTENANCE_STATE,
+                                      (enum_bit(SBE_DUMP_COMPLETED)
+                                       | SBE_RETRY_REQUIRED),
+                                      // We create a dynamic handler for this type of effecter
+                                      PdrManager::STATE_QUERY_HANDLER_INVALID);
+    }
+}
+
 }
 
 namespace PLDM
@@ -570,6 +598,7 @@ errlHndl_t addHostbootPdrs(PdrManager& io_pdrman)
     errl || (errl = addOccStateControlPdrs(io_pdrman));
     errl || (errl = addFruInventoryPdrs(io_pdrman));
 
+    addSbeDumpCompletePdrs(io_pdrman);
     io_pdrman.addTerminusLocatorPDR();
 
     PLDM_EXIT("addHostbootPdrs completed %s error", errl ? "with" : "without");

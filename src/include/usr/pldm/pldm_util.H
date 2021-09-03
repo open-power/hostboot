@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,6 +30,30 @@
 
 #ifndef PLDM_UTIL_H
 #define PLDM_UTIL_H
+
+#include <openbmc/pldm/libpldm/pdr.h>
+
+namespace PLDM
+{
+
+/* @brief Convert a PLDM entity ID from a target attribute
+ * (e.g. ATTR_PLDM_ENTITY_ID_INFO) to a pldm_entity structure.
+ *
+ * @param[in] i_targ_entity_id  The entity ID
+ * @return    pldm_entity       pldm_entity object
+ */
+template<typename T>
+inline pldm_entity targeting_to_pldm_entity_id(T i_targ_entity_id)
+{
+    return
+    {
+        .entity_type = i_targ_entity_id.entityType,
+        .entity_instance_num = i_targ_entity_id.entityInstanceNumber,
+        .entity_container_id = i_targ_entity_id.containerId
+    };
+}
+
+}
 
 #ifdef __HOSTBOOT_RUNTIME
 // For Hostboot Runtime we just use nullptr as the message queue parameter to

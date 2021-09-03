@@ -196,9 +196,9 @@ void PLDM::requestSoftPowerOff(const poweroff_initiator_t i_initiator)
     PLDM_INF(ENTER_MRK"requestSoftPowerOff");
 
     const sensor_id_t shutdown_sensor_id
-        = thePdrManager().getStateQueryIdForStateSet(PdrManager::STATE_QUERY_SENSOR,
-                                                     PLDM_STATE_SET_SW_TERMINATION_STATUS,
-                                                     UTIL::assertGetToplevelTarget());
+        = thePdrManager().getHostStateQueryIdForStateSet(PdrManager::STATE_QUERY_SENSOR,
+                                                         PLDM_STATE_SET_SW_TERMINATION_STATUS,
+                                                         UTIL::assertGetToplevelTarget());
 
     sensor_id_t bmc_chassisoff_effecter_id
         = thePdrManager().findStateEffecterId({ .entity_type = ENTITY_TYPE_CHASSIS, .entity_instance_num = 1 },
