@@ -157,13 +157,19 @@ int32_t __analyzeCoreFir( ExtensibleChip * i_chip,
     // Because we are unable to mask the CORE_FIR in the traditional way, we are
     // also unable to reset the WOF when at threshold. If we leave the WOF set,
     // PHYP is unable to put the core to sleep, which is a small hit to power
-    // performance. Therefore, we need to clear the WOF register.
-    auto wof = core->getRegister("EQ_CORE_FIR_WOF");
-    wof->clearAllBits();
-    if (SUCCESS != wof->Write())
+    // performance. Therefore, we need to clear the WOF register. Note that in
+    // fused core mode, both WOFs in the core pair need to be cleared.
+    for (const auto& c : {core, getNeighborCore(core)})
     {
-        PRDF_ERR(PRDF_FUNC "Failed to clear EQ_CORE_FIR_WOF on 0x%08x",
-                 core->getHuid());
+        if (nullptr == c) continue; // in case the pair core doesn't exist
+
+        auto wof = c->getRegister("EQ_CORE_FIR_WOF");
+        wof->clearAllBits();
+        if (SUCCESS != wof->Write())
+        {
+            PRDF_ERR(PRDF_FUNC "Failed to clear EQ_CORE_FIR_WOF on 0x%08x",
+                     c->getHuid());
+        }
     }
 
     #endif // __HOSTBOOT_MODULE
