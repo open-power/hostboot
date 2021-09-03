@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -177,17 +177,6 @@ public:
    */
   uint8_t getPrimaryAttnType(TARGETING::TargetHandle_t i_ptargetHandle ) const;
 
-    /**
-     * @brief Get the first target of a specified target type with given
-     *        attn Type
-     *
-     * @param   i_tgtType Target Type
-     * @param   i_attnType Attention Type
-     * @return  targethandle for first target with i_attnType
-     * @pre     IsAttentionActive() == true
-     */
-    TARGETING::TargetHandle_t getTargetWithAttn( TARGETING::TYPE i_tgtType,
-                                        ATTENTION_VALUE_TYPE i_attnType) const;
   /**
    Get the attention type for the attention that is active on this chip
    <ul>

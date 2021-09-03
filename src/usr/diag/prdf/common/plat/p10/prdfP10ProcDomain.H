@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,7 +51,7 @@ class ProcDomain : public RuleChipDomain
      * @return return code (0 == SUCCESS)
      */
      virtual int32_t Analyze( STEP_CODE_DATA_STRUCT & serviceData,
-                              ATTENTION_TYPE attentionType );
+                              ATTENTION_TYPE attentionType ) override;
 
 protected:
 
@@ -60,7 +60,7 @@ protected:
      * @param  attentionType Attention of the chip
      * @return SUCCESS
      */
-     virtual void Order(ATTENTION_TYPE attentionType);
+     virtual void Order(ATTENTION_TYPE attentionType) override;
 
     /**
      @brief Determine which chip to Analyze and put at front of list.

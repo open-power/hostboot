@@ -58,27 +58,17 @@ int32_t ProcDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
     }
     else if (attentionType == MACHINE_CHECK)
     {
-        // Before stitching the nodes together, any system checkstop will be
-        // limited to a single node and ATTN will only pass us chips belonging
-        // to the node that raised the attention. In this scenario, we should
-        // only consider chips belonging this node.
-        TargetHandle_t node = nullptr;
-        if (!isSmpCoherent())
-        {
-            SYSTEM_DEBUG_CLASS sysDebug;
-            TargetHandle_t proc = sysDebug.getTargetWithAttn(TYPE_PROC,
-                                                             MACHINE_CHECK);
-            node = getConnectedParent(proc, TYPE_NODE);
-        }
-
         // Start at 1 to skip analyzed chip.
         for (unsigned int i = 1; i < GetSize(); ++i)
         {
             RuleChip* procChip = LookUp(i);
 
-            // Limit the scope to a node, if needed.
-            if ((nullptr != node) &&
-                (node != getConnectedParent(procChip->getTrgt(), TYPE_NODE)))
+            // Analysis could be at the system or node scope depending on the
+            // IPL state of the nodes. To ensure we collect from the correct
+            // chips, only collect from the list of chips send from ATTN to PRD.
+            SYSTEM_DEBUG_CLASS sysDebug;
+            if (!sysDebug.isActiveAttentionPending(procChip->getTrgt(),
+                                                   MACHINE_CHECK))
             {
                 continue;
             }
@@ -127,19 +117,6 @@ void ProcDomain::Order(ATTENTION_TYPE attentionType)
 // originate from a connected processor and moves it to the front of the domain.
 void ProcDomain::SortForXstop()
 {
-    // Before stitching the nodes together, any system checkstop will be limited
-    // to a single node and ATTN will only pass us chips belonging to the node
-    // that raised the attention. In this scenario, we should only consider
-    // chips belonging this node.
-    TargetHandle_t nodeTrgt = nullptr;
-    if ( false == isSmpCoherent() )
-    {
-        SYSTEM_DEBUG_CLASS sysDebug;
-        TargetHandle_t proc = sysDebug.getTargetWithAttn(TYPE_PROC,
-                                                         MACHINE_CHECK);
-        nodeTrgt = getConnectedParent(proc, TYPE_NODE);
-    }
-
     // Look for the first chip with active checkstop attentions that did not
     // originate from a connected processor. In case of soft reIPL (i.e. the
     // service processor is not reset), start looking at the end of the domain
@@ -148,9 +125,12 @@ void ProcDomain::SortForXstop()
     {
         RuleChip * procChip = LookUp(i);
 
-        // Limit the scope to a node if needed.
-        if ((nullptr != nodeTrgt) &&
-            (nodeTrgt != getConnectedParent(procChip->getTrgt(), TYPE_NODE)))
+        // Analysis could be at the system or node scope depending on the IPL
+        // state of the nodes. To ensure we analyze to the correct chips, only
+        // check chips from the list send from ATTN to PRD.
+        SYSTEM_DEBUG_CLASS sysDebug;
+        if (!sysDebug.isActiveAttentionPending(procChip->getTrgt(),
+                                               MACHINE_CHECK))
         {
             continue;
         }

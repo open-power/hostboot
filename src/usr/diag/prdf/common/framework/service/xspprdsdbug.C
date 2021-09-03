@@ -269,26 +269,6 @@ void SYSTEM_DEBUG_CLASS::Clear(void)
     g_AttnDataList.clear();
 }
 
-// --------------------------------------------------------------------
-
-TargetHandle_t SYSTEM_DEBUG_CLASS::getTargetWithAttn
-                        ( TYPE i_tgtType, ATTENTION_VALUE_TYPE i_attnType) const
-{
-    TargetHandle_t o_tgt = nullptr;
-
-    for(AttnList::const_iterator i = g_AttnDataList.begin();
-                                  i != g_AttnDataList.end(); ++i)
-    {
-        if(( getTargetType( (*i).targetHndl ) == i_tgtType)
-            && ( (*i).attnType == i_attnType ) )
-        {
-            o_tgt = (*i).targetHndl;
-            break;
-        }
-    }
-    return o_tgt;
-}
-
 // -------------------------------------------------------------------
 
 uint8_t SYSTEM_DEBUG_CLASS::getPrimaryAttnType( TargetHandle_t i_chipTgt ) const
