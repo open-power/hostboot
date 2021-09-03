@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2020
+# Contributors Listed Below - COPYRIGHT 2015,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -83,6 +83,8 @@ OBJS += p10_set_fsi_gp_shadow.o
 
 # host_cbs_start
 OBJS += p10_start_cbs.o
+OBJS += p10_clock_test.o
+OBJS += p10_clock_test_cmn.o
 
 # proc_fbc_eff_config
 OBJS += p10_fbc_eff_config.o

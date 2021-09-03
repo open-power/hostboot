@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,7 @@
 #include <sbeio/sbeioif.H>
 #include <spi/spi.H> // for SPI lock support
 #include <p10_start_cbs.H>
+#include <p10_clock_test.H>
 
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
@@ -111,6 +112,23 @@ void* call_host_cbs_start(void *io_pArgs)
 
             const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
                 l_fapi2_proc_target (l_cpu_target);
+
+            // Run the clock_test before start_cbs
+            // to reduce the window for clock failure
+            TRACFCOMP(g_trac_isteps_trace,
+                     "Running p10_clock_test HWP on processor target %.8X",
+                     get_huid(l_cpu_target));
+
+            FAPI_INVOKE_HWP(l_errl, p10_clock_test, l_fapi2_proc_target);
+            if(l_errl)
+            {
+                TRACFCOMP(g_trac_isteps_trace,
+                          "ERROR : call p10_clock_test target %.8X"
+                          TRACE_ERR_FMT,
+                          get_huid(l_cpu_target),
+                          TRACE_ERR_ARGS(l_errl));
+                captureError(l_errl, l_stepError, HWPF_COMP_ID, l_cpu_target);
+            }
 
             TRACFCOMP(g_trac_isteps_trace,
                      "Running p10_start_cbs HWP on processor target %.8X",
