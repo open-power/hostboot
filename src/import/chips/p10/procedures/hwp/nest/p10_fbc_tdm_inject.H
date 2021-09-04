@@ -53,8 +53,9 @@ enum p10_fbc_tdm_inject_step_t
     P10_FBC_TDM_INJECT_CONFIRM_RECAL_STOP = 5,
     P10_FBC_TDM_INJECT_PARTIAL_RESET1     = 6,
     P10_FBC_TDM_INJECT_PARTIAL_RESET2     = 7,
-    P10_FBC_TDM_INJECT_PHY_RESET          = 8,
-    P10_FBC_TDM_INJECT_END                = 9
+    P10_FBC_TDM_INJECT_PHY_PON            = 8,
+    P10_FBC_TDM_INJECT_PHY_RESET          = 9,
+    P10_FBC_TDM_INJECT_END                = 10
 };
 
 // Flags controlling HWP behavior

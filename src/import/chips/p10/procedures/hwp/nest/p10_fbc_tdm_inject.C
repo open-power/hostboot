@@ -383,6 +383,7 @@ fapi2::ReturnCode p10_fbc_tdm_inject(
         p10_fbc_tdm_confirm_recal_stop,
         p10_fbc_tdm_partial_reset,
         p10_fbc_tdm_partial_reset,
+        p10_fbc_tdm_utils_phy_pon,
         p10_fbc_tdm_phy_reset
     };
 

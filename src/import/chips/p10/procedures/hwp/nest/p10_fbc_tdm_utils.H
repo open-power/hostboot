@@ -201,6 +201,20 @@ extern "C"
         const bool i_even_not_odd);
 
 ///
+/// @brief Ensure that all RX/TX lanes are powered up for specified half-link
+///        Previous lane sparing events could have caused lane power down
+///        to be triggered through PRD code
+///
+/// @param[in] i_target         Reference to IOHS endpoint target
+/// @param[in] i_even_not_odd   Identify half-link to check (true=even,false=odd)
+///
+/// @return fapi::ReturnCode    FAPI2_RC_SUCCESS if success, else error code.
+///
+    fapi2::ReturnCode p10_fbc_tdm_utils_phy_pon(
+        const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_target,
+        const bool i_even_not_odd);
+
+///
 /// @brief Cleanup Recal
 ///
 /// @param[in] i_target         Reference to IOHS endpoint target

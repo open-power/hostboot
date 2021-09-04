@@ -480,6 +480,78 @@ fapi_try_exit:
 }
 
 ////////////////////////////////////////////////////////
+// p10_fbc_tdm_utils_phy_pon
+////////////////////////////////////////////////////////
+fapi2::ReturnCode p10_fbc_tdm_utils_phy_pon(
+    const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_target,
+    const bool i_even_not_odd)
+{
+    using namespace scomt::iohs;
+
+    FAPI_DBG("Start");
+    fapi2::buffer<uint64_t> l_phy_psave_data = 0;
+
+    // clear psave force reg/fence req on RX and TX lanes, in sequence
+    if (i_even_not_odd)
+    {
+        FAPI_TRY(fapi2::getScom(i_target, IOO_RX0_RXCTL_DATASM_REGS_RX_CNT32_PG, l_phy_psave_data));
+        l_phy_psave_data.clearBit<48, 9>();
+        FAPI_TRY(fapi2::putScom(i_target, IOO_RX0_RXCTL_DATASM_REGS_RX_CNT32_PG, l_phy_psave_data));
+
+        FAPI_TRY(fapi2::getScom(i_target, IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL5_PG, l_phy_psave_data));
+        l_phy_psave_data.clearBit<48, 9>();
+        FAPI_TRY(fapi2::putScom(i_target, IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL5_PG, l_phy_psave_data));
+
+        FAPI_TRY(fapi2::getScom(i_target, IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL13_PG, l_phy_psave_data));
+        l_phy_psave_data.clearBit<48, 9>();
+        FAPI_TRY(fapi2::putScom(i_target, IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL13_PG, l_phy_psave_data));
+
+        FAPI_TRY(fapi2::getScom(i_target, IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL1_PG, l_phy_psave_data));
+        l_phy_psave_data.clearBit<48, 9>();
+        FAPI_TRY(fapi2::putScom(i_target, IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL1_PG, l_phy_psave_data));
+    }
+    else
+    {
+        FAPI_TRY(fapi2::getScom(i_target, IOO_RX0_RXCTL_DATASM_REGS_RX_CNT32_PG, l_phy_psave_data));
+        l_phy_psave_data.clearBit<57, 7>();
+        FAPI_TRY(fapi2::putScom(i_target, IOO_RX0_RXCTL_DATASM_REGS_RX_CNT32_PG, l_phy_psave_data));
+
+        FAPI_TRY(fapi2::getScom(i_target, IOO_RX0_RXCTL_DATASM_REGS_RX_CNT33_PG, l_phy_psave_data));
+        l_phy_psave_data.clearBit<48, 2>();
+        FAPI_TRY(fapi2::putScom(i_target, IOO_RX0_RXCTL_DATASM_REGS_RX_CNT33_PG, l_phy_psave_data));
+
+        FAPI_TRY(fapi2::getScom(i_target, IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL5_PG, l_phy_psave_data));
+        l_phy_psave_data.clearBit<57, 7>();
+        FAPI_TRY(fapi2::putScom(i_target, IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL5_PG, l_phy_psave_data));
+
+        FAPI_TRY(fapi2::getScom(i_target, IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL6_PG, l_phy_psave_data));
+        l_phy_psave_data.clearBit<48, 2>();
+        FAPI_TRY(fapi2::putScom(i_target, IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL6_PG, l_phy_psave_data));
+
+        FAPI_TRY(fapi2::getScom(i_target, IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL13_PG, l_phy_psave_data));
+        l_phy_psave_data.clearBit<57, 7>();
+        FAPI_TRY(fapi2::putScom(i_target, IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL13_PG, l_phy_psave_data));
+
+        FAPI_TRY(fapi2::getScom(i_target, IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL14_PG, l_phy_psave_data));
+        l_phy_psave_data.clearBit<48, 2>();
+        FAPI_TRY(fapi2::putScom(i_target, IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL14_PG, l_phy_psave_data));
+
+        FAPI_TRY(fapi2::getScom(i_target, IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL1_PG, l_phy_psave_data));
+        l_phy_psave_data.clearBit<57, 7>();
+        FAPI_TRY(fapi2::putScom(i_target, IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL1_PG, l_phy_psave_data));
+
+        FAPI_TRY(fapi2::getScom(i_target, IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL2_PG, l_phy_psave_data));
+        l_phy_psave_data.clearBit<48, 2>();
+        FAPI_TRY(fapi2::putScom(i_target, IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL2_PG, l_phy_psave_data));
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+
+////////////////////////////////////////////////////////
 // p10_fbc_tdm_utils_recal_cleanup
 ////////////////////////////////////////////////////////
 fapi2::ReturnCode p10_fbc_tdm_utils_recal_cleanup(
