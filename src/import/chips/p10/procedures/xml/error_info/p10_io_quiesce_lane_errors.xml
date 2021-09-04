@@ -1,0 +1,175 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p10/procedures/xml/error_info/p10_io_quiesce_lane_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2021                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- EKB-Mirror-To: hostboot -->
+<hwpErrors>
+<!-- ******************************************************************** -->
+<registerFfdc>
+  <id>REG_FFDC_P10_IO_QUIESCE_LANE_DL_STATUS</id>
+  <scomRegister>scomt::iohs::DLP_FIR_REG_RW</scomRegister>
+  <scomRegister>scomt::iohs::DLP_CONFIG</scomRegister>
+  <scomRegister>scomt::iohs::DLP_CONTROL</scomRegister>
+  <scomRegister>scomt::iohs::DLP_PHY_CONFIG</scomRegister>
+  <scomRegister>scomt::iohs::DLP_SEC_CONFIG</scomRegister>
+  <scomRegister>scomt::iohs::DLP_LAT_MEASURE</scomRegister>
+  <scomRegister>scomt::iohs::DLP_OPTICAL_CONFIG</scomRegister>
+  <scomRegister>scomt::iohs::DLP_LINK0_TX_LANE_CONTROL</scomRegister>
+  <scomRegister>scomt::iohs::DLP_LINK1_TX_LANE_CONTROL</scomRegister>
+  <scomRegister>scomt::iohs::DLP_LINK0_RX_LANE_CONTROL</scomRegister>
+  <scomRegister>scomt::iohs::DLP_LINK1_RX_LANE_CONTROL</scomRegister>
+  <scomRegister>scomt::iohs::DLP_LINK0_INFO</scomRegister>
+  <scomRegister>scomt::iohs::DLP_LINK1_INFO</scomRegister>
+  <scomRegister>scomt::iohs::DLP_LINK0_ERROR_STATUS</scomRegister>
+  <scomRegister>scomt::iohs::DLP_LINK1_ERROR_STATUS</scomRegister>
+  <scomRegister>scomt::iohs::DLP_DLL_STATUS</scomRegister>
+  <scomRegister>scomt::iohs::DLP_LINK0_QUALITY</scomRegister>
+  <scomRegister>scomt::iohs::DLP_LINK1_QUALITY</scomRegister>
+</registerFfdc>
+<!-- ******************************************************************** -->
+<registerFfdc>
+  <id>REG_FFDC_P10_IO_QUIESCE_LANE_TL_STATUS</id>
+  <scomRegister>scomt::pauc::PB_FP01_CFG</scomRegister>
+  <scomRegister>scomt::pauc::PB_FP23_CFG</scomRegister>
+  <scomRegister>scomt::pauc::PB_MISC_CFG</scomRegister>
+  <scomRegister>scomt::pauc::PB_FM0123_ERR</scomRegister>
+  <scomRegister>scomt::pauc::PB_PR0123_ERR</scomRegister>
+</registerFfdc>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_IO_QUIESCE_LANE_MULTIPLE_RX_IDENTIFIED_ERR</rc>
+  <description>
+    p10_io_quiesce_lane: Multiple lanes identified in DL RX Lane Control
+    Register which meet criteria for powerdown.  Skip PHY lane quiesce
+    in order to avoid action which may bring down the link.
+  </description>
+  <ffdc>IOLINK_TARGET</ffdc>
+  <ffdc>IOHS_TARGET</ffdc>
+  <ffdc>PAUC_TARGET</ffdc>
+  <ffdc>IOLINK_UNIT_POS</ffdc>
+  <ffdc>DL_RX_LANE_CONTROL_ADDR</ffdc>
+  <ffdc>DL_RX_LANE_CONTROL_DATA</ffdc>
+  <ffdc>IOHS_FABRIC_LANE_REVERSAL</ffdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_P10_IO_QUIESCE_LANE_DL_STATUS</id>
+    <targetType>TARGET_TYPE_IOHS</targetType>
+    <target>IOHS_TARGET</target>
+  </collectRegisterFfdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_P10_IO_QUIESCE_LANE_TL_STATUS</id>
+    <targetType>TARGET_TYPE_PAUC</targetType>
+    <target>PAUC_TARGET</target>
+  </collectRegisterFfdc>
+  <callout>
+    <target>IOLINK_TARGET</target>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_IO_QUIESCE_LANE_NO_RX_IDENTIFIED_ERR</rc>
+  <description>
+    p10_io_quiesce_lane: No lanes identified in DL RX Lane Control
+    Register which meet criteria for powerdown.  No PHY lane quiesce
+    action is taken.
+  </description>
+  <ffdc>IOLINK_TARGET</ffdc>
+  <ffdc>IOHS_TARGET</ffdc>
+  <ffdc>PAUC_TARGET</ffdc>
+  <ffdc>IOLINK_UNIT_POS</ffdc>
+  <ffdc>DL_RX_LANE_CONTROL_ADDR</ffdc>
+  <ffdc>DL_RX_LANE_CONTROL_DATA</ffdc>
+  <ffdc>IOHS_FABRIC_LANE_REVERSAL</ffdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_P10_IO_QUIESCE_LANE_DL_STATUS</id>
+    <targetType>TARGET_TYPE_IOHS</targetType>
+    <target>IOHS_TARGET</target>
+  </collectRegisterFfdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_P10_IO_QUIESCE_LANE_TL_STATUS</id>
+    <targetType>TARGET_TYPE_PAUC</targetType>
+    <target>PAUC_TARGET</target>
+  </collectRegisterFfdc>
+  <callout>
+    <target>IOLINK_TARGET</target>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_IO_QUIESCE_LANE_CALCULATION_ERR</rc>
+  <description>
+    p10_io_quiesce_lane: Lane number calculated for powerdown is out of range.
+  </description>
+  <ffdc>IOLINK_TARGET</ffdc>
+  <ffdc>IOHS_TARGET</ffdc>
+  <ffdc>PAUC_TARGET</ffdc>
+  <ffdc>IOLINK_UNIT_POS</ffdc>
+  <ffdc>DL_LANE</ffdc>
+  <ffdc>PHY_LANE</ffdc>
+  <ffdc>RX_NOT_TX</ffdc>
+  <ffdc>IOHS_FABRIC_LANE_REVERSAL</ffdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_P10_IO_QUIESCE_LANE_DL_STATUS</id>
+    <targetType>TARGET_TYPE_IOHS</targetType>
+    <target>IOHS_TARGET</target>
+  </collectRegisterFfdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_P10_IO_QUIESCE_LANE_TL_STATUS</id>
+    <targetType>TARGET_TYPE_PAUC</targetType>
+    <target>PAUC_TARGET</target>
+  </collectRegisterFfdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_IO_QUIESCE_LANE_RX_LANE_BUSY_TIMEOUT_ERROR</rc>
+  <description>
+    Timed out waiting for PHY PPE to complete recal
+  </description>
+  <ffdc>IOLINK_TARGET</ffdc>
+  <ffdc>IOHS_TARGET</ffdc>
+  <ffdc>PAUC_TARGET</ffdc>
+  <ffdc>IOLINK_UNIT_POS</ffdc>
+  <ffdc>RX_LANE_BUSY</ffdc>
+  <ffdc>IOHS_FABRIC_LANE_REVERSAL</ffdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_P10_IO_QUIESCE_LANE_DL_STATUS</id>
+    <targetType>TARGET_TYPE_IOHS</targetType>
+    <target>IOHS_TARGET</target>
+  </collectRegisterFfdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_P10_IO_QUIESCE_LANE_TL_STATUS</id>
+    <targetType>TARGET_TYPE_PAUC</targetType>
+    <target>PAUC_TARGET</target>
+  </collectRegisterFfdc>
+  <callout>
+    <target>IOLINK_TARGET</target>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
+</hwpErrors>

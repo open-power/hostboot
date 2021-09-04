@@ -596,6 +596,21 @@ static const uint32_t TP_TPVSB_FSI_W_SHIFT_COMMAND_REGISTER_SCAN_TYPE_LEN = 4;
 //<< [TP_TPVSB_FSI_W_SHIFT_COMMAND_REGISTER]
 // proc/reg00025.H
 
+//>> [TP_TPCHIP_OCC_OCI_OCB_OPIT2PRA]
+static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OPIT2PRA_RO = 0x0006c610ull;
+static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OPIT2PRA_WO_CLEAR = 0x0006c611ull;
+
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT2PRA_0 = 0;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT2PRA_1 = 1;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT2PRA_2 = 2;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT2PRA_3 = 3;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT2PRA_4 = 4;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT2PRA_5 = 5;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT2PRA_6 = 6;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT2PRA_7 = 7;
+//<< [TP_TPCHIP_OCC_OCI_OCB_OPIT2PRA]
+// proc/reg00023.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

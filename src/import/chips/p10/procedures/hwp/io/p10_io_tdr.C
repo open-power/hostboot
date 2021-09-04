@@ -112,6 +112,7 @@ fapi2::ReturnCode p10_io_tdr(
     fapi2::ATTR_CHIP_UNIT_POS_Type l_iolink_num;
     fapi2::ATTR_FREQ_IOHS_LINK_MHZ_Type l_iohs_freq;
     fapi2::buffer<uint64_t> l_dl_status;
+    fapi2::buffer<uint64_t> l_phy_psave_data;
 
     char l_tgt_str[fapi2::MAX_ECMD_STRING_LEN];
     auto l_iohs_target = i_iolink_target.getParent<fapi2::TARGET_TYPE_IOHS>();
@@ -140,6 +141,38 @@ fapi2::ReturnCode p10_io_tdr(
 
         FAPI_DBG("Analysis skipped, link is up");
         goto fapi_try_exit;
+    }
+
+    // ensure that TX psav force/fence controls are dropped prior to running TDR
+    // given that we only support execution when the DL layer is down, we should be
+    // safe to turn everything on here
+    if ((l_iolink_num % 2) == 0)
+    {
+        FAPI_TRY(fapi2::getScom(l_iohs_target, IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL13_PG, l_phy_psave_data));
+        l_phy_psave_data.clearBit<48, 9>();
+        FAPI_TRY(fapi2::putScom(l_iohs_target, IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL13_PG, l_phy_psave_data));
+
+        FAPI_TRY(fapi2::getScom(l_iohs_target, IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL1_PG, l_phy_psave_data));
+        l_phy_psave_data.clearBit<48, 9>();
+        FAPI_TRY(fapi2::putScom(l_iohs_target, IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL1_PG, l_phy_psave_data));
+    }
+    else
+    {
+        FAPI_TRY(fapi2::getScom(l_iohs_target, IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL13_PG, l_phy_psave_data));
+        l_phy_psave_data.clearBit<57, 7>();
+        FAPI_TRY(fapi2::putScom(l_iohs_target, IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL13_PG, l_phy_psave_data));
+
+        FAPI_TRY(fapi2::getScom(l_iohs_target, IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL14_PG, l_phy_psave_data));
+        l_phy_psave_data.clearBit<48, 2>();
+        FAPI_TRY(fapi2::putScom(l_iohs_target, IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL14_PG, l_phy_psave_data));
+
+        FAPI_TRY(fapi2::getScom(l_iohs_target, IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL1_PG, l_phy_psave_data));
+        l_phy_psave_data.clearBit<57, 7>();
+        FAPI_TRY(fapi2::putScom(l_iohs_target, IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL1_PG, l_phy_psave_data));
+
+        FAPI_TRY(fapi2::getScom(l_iohs_target, IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL2_PG, l_phy_psave_data));
+        l_phy_psave_data.clearBit<48, 2>();
+        FAPI_TRY(fapi2::putScom(l_iohs_target, IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL2_PG, l_phy_psave_data));
     }
 
     // check the IOHS frequency
@@ -505,6 +538,35 @@ fapi2::ReturnCode p10_io_tdr(
         }
     }
 
+    // leave with TX psav force/fence controls asserted
+    if ((l_iolink_num % 2) == 0)
+    {
+        FAPI_TRY(fapi2::getScom(l_iohs_target, IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL13_PG, l_phy_psave_data));
+        l_phy_psave_data.setBit<48, 9>();
+        FAPI_TRY(fapi2::putScom(l_iohs_target, IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL13_PG, l_phy_psave_data));
+
+        FAPI_TRY(fapi2::getScom(l_iohs_target, IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL1_PG, l_phy_psave_data));
+        l_phy_psave_data.setBit<48, 9>();
+        FAPI_TRY(fapi2::putScom(l_iohs_target, IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL1_PG, l_phy_psave_data));
+    }
+    else
+    {
+        FAPI_TRY(fapi2::getScom(l_iohs_target, IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL13_PG, l_phy_psave_data));
+        l_phy_psave_data.setBit<57, 7>();
+        FAPI_TRY(fapi2::putScom(l_iohs_target, IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL13_PG, l_phy_psave_data));
+
+        FAPI_TRY(fapi2::getScom(l_iohs_target, IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL14_PG, l_phy_psave_data));
+        l_phy_psave_data.setBit<48, 2>();
+        FAPI_TRY(fapi2::putScom(l_iohs_target, IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL14_PG, l_phy_psave_data));
+
+        FAPI_TRY(fapi2::getScom(l_iohs_target, IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL1_PG, l_phy_psave_data));
+        l_phy_psave_data.setBit<57, 7>();
+        FAPI_TRY(fapi2::putScom(l_iohs_target, IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL1_PG, l_phy_psave_data));
+
+        FAPI_TRY(fapi2::getScom(l_iohs_target, IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL2_PG, l_phy_psave_data));
+        l_phy_psave_data.setBit<48, 2>();
+        FAPI_TRY(fapi2::putScom(l_iohs_target, IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL2_PG, l_phy_psave_data));
+    }
 
 fapi_try_exit:
     FAPI_DBG("End TDR Isolation");
