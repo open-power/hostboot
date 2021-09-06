@@ -914,13 +914,17 @@ void PdrManager::addFruRecordSetPdr(const fru_record_set_id_t i_rsid,
                                     const pldm_entity& i_entity)
 {
     const auto lock = scoped_mutex_lock(iv_access_mutex);
+    // Passing 0 as the record handle will automatically
+    // assign the next record handle available to hostboot.
+    const auto NEXT_RECORD_HANDLE = 0;
 
     pldm_pdr_add_fru_record_set(iv_pdr_repo.get(),
                                 hostbootTerminusId(),
                                 i_rsid,
                                 i_entity.entity_type,
                                 i_entity.entity_instance_num,
-                                i_entity.entity_container_id);
+                                i_entity.entity_container_id,
+                                NEXT_RECORD_HANDLE);
 }
 
 void PdrManager::addEntityAssociationPdrs(const pldm_entity_association_tree& i_tree, const bool i_is_remote)
