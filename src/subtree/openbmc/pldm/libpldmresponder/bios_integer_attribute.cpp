@@ -2,6 +2,8 @@
 
 #include "common/utils.hpp"
 
+using namespace pldm::utils;
+
 namespace pldm
 {
 namespace responder

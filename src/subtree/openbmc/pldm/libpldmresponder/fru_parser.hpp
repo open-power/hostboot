@@ -40,17 +40,20 @@ namespace fru_parser
 {
 
 namespace fs = std::filesystem;
-using namespace dbus;
-using namespace fru;
 
 // DBusLookupInfo contains info to lookup in the D-Bus inventory, D-Bus
 // inventory service bus name, root path of the inventory D-Bus objects and list
 //  of xyz.openbmc_project.Inventory.Item.* interface names.
-using DBusLookupInfo = std::tuple<Service, RootPath, Interfaces>;
-using FieldInfo = std::tuple<Interface, Property, PropertyType, FieldType>;
+using DBusLookupInfo =
+    std::tuple<pldm::responder::dbus::Service, pldm::responder::dbus::RootPath,
+               pldm::responder::dbus::Interfaces>;
+using FieldInfo = std::tuple<
+    pldm::responder::dbus::Interface, pldm::responder::dbus::Property,
+    pldm::responder::dbus::PropertyType, pldm::responder::fru::FieldType>;
 
 using FruRecordInfo =
-    std::tuple<RecordType, EncodingType, std::vector<FieldInfo>>;
+    std::tuple<pldm::responder::fru::RecordType,
+               pldm::responder::fru::EncodingType, std::vector<FieldInfo>>;
 using FruRecordInfos = std::vector<FruRecordInfo>;
 
 using ItemIntfName = std::string;
@@ -94,12 +97,14 @@ class FruParser
      *  @return return the info create the PLDM FRU records from inventory D-Bus
      *          objects
      */
-    const FruRecordInfos& getRecordInfo(const Interface& intf) const
+    const FruRecordInfos&
+        getRecordInfo(const pldm::responder::dbus::Interface& intf) const
     {
         return recordMap.at(intf);
     }
 
-    EntityType getEntityType(const Interface& intf) const
+    pldm::responder::dbus::EntityType
+        getEntityType(const pldm::responder::dbus::Interface& intf) const
     {
         return intfToEntityType.at(intf);
     }
@@ -134,7 +139,9 @@ class FruParser
 
     std::optional<DBusLookupInfo> lookupInfo;
     FruRecordMap recordMap;
-    std::map<Interface, EntityType> intfToEntityType;
+    std::map<pldm::responder::dbus::Interface,
+             pldm::responder::dbus::EntityType>
+        intfToEntityType;
 };
 
 } // namespace fru_parser

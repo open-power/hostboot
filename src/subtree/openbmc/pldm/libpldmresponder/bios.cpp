@@ -13,6 +13,8 @@
 #include <variant>
 #include <vector>
 
+using namespace pldm::utils;
+
 namespace pldm
 {
 
@@ -123,7 +125,7 @@ Response Handler::getDateTime(const pldm_msg* request, size_t /*payloadLength*/)
         timeUsec = pldm::utils::DBusHandler().getDbusProperty<EpochTimeUS>(
             bmcTimePath, "Elapsed", timeInterface);
     }
-    catch (const sdbusplus::exception::SdBusError& e)
+    catch (const sdbusplus::exception::exception& e)
     {
         std::cerr << "Error getting time, PATH=" << bmcTimePath
                   << " TIME INTERACE=" << timeInterface << "\n";

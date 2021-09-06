@@ -10,6 +10,8 @@
 #include <fstream>
 #include <iostream>
 
+using namespace pldm::utils;
+
 namespace pldm
 {
 namespace host_effecters
@@ -171,7 +173,7 @@ void HostEffecterParser::processHostEffecterChangeNotification(
             return;
         }
     }
-    catch (const sdbusplus::exception::SdBusError& e)
+    catch (const sdbusplus::exception::exception& e)
     {
         std::cerr << "Error in getting current host state. Will still "
                      "continue to set the host effecter \n";

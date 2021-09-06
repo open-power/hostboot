@@ -78,8 +78,29 @@
          "default_values":[
             "Enabled"
          ],
-         "helpText" : "Select hypervisor boot policy, requires a reboot for a change to be applied. Disabled: Instructs server not to activate server firmware and partitions for either a user-initated power on or a recovery power on, Enabled: Instructs the server to automatically activate certain partitions for either a user-initated power on or a recovery power on, ManualOnly: Instructs the server to activate server firmware and partitions automatically only in case of a recovery power on after an abnormal termination."
+         "helpText" : "Select hypervisor boot policy, requires a reboot for a change to be applied. Disabled: Instructs server not to activate server firmware and partitions for either a user-initated power on or a recovery power on, Enabled: Instructs the server to automatically activate certain partitions for either a user-initated power on or a recovery power on, ManualOnly: Instructs the server to activate server firmware and partitions automatically only in case of a recovery power on after an abnormal termination.",
          "displayName" : "pvm_stop_at_standby",
+         "dbus":
+            {
+               "object_path" : "/xyz/openbmc_project/control/host0/boot",
+               "interface" : "xyz.openbmc_project.Control.Boot.Mode",
+               "property_name" : "BootMode",
+               "property_type" : "string",
+               "property_values" : ["xyz.openbmc_project.Control.Boot.Mode.Modes.Regular", "xyz.openbmc_project.Control.Boot.Mode.Modes.Setup", "xyz.openbmc_project.Control.Boot.Mode.Modes.Safe"]
+            }
+      },
+      {
+         "attribute_name":"pvm_stop_at_standby_current",
+         "possible_values":[
+            "Disabled",
+            "Enabled",
+            "ManualOnly"
+         ],
+         "default_values":[
+            "Enabled"
+         ],
+         "helpText" : "Specifies the current hypervisor boot policy. Do not set this attribute directly; set pvm_stop_at_standby instead.",
+         "displayName" : "pvm_stop_at_standby_current (current)",
          "dbus":
             {
                "object_path" : "/xyz/openbmc_project/control/host0/boot",
@@ -152,6 +173,19 @@
          "displayName" : "CEC Primary OS"
       },
       {
+         "attribute_name":"pvm_default_os_type_current",
+         "possible_values":[
+            "AIX",
+            "Linux",
+            "IBM I"
+         ],
+         "default_values":[
+            "AIX"
+         ],
+         "helpText" : "Specifies the current CEC Primary OS type. Do not set this attribute directly; set pvm_default_os_type instead.",
+         "displayName" : "CEC Primary OS (current)"
+      },
+      {
          "attribute_name":"pvm_system_operating_mode",
          "possible_values":[
             "Normal",
@@ -180,6 +214,22 @@
          "displayName" : "AIX/Linux Partition Boot Mode"
       },
       {
+         "attribute_name":"pvm_rpa_boot_mode_current",
+         "possible_values":[
+            "Normal",
+            "SavedList",
+            "SmsMenu",
+            "OkPrompt",
+            "DefaultList",
+            "PblBootLid"
+         ],
+         "default_values":[
+            "Normal"
+         ],
+         "helpText" : "Specifies the current boot type for an AIX/Linux partition. Do not set this attribute directly; set pvm_rpa_boot_mode instead.",
+         "displayName" : "AIX/Linux Partition Boot Mode (current)"
+      },
+      {
          "attribute_name":"pvm_os_boot_type",
          "possible_values":[
             "A_Mode",
@@ -194,6 +244,20 @@
          "displayName" : "IBMi Partition Boot Mode"
       },
       {
+         "attribute_name":"pvm_os_boot_type_current",
+         "possible_values":[
+            "A_Mode",
+            "B_Mode",
+            "C_Mode",
+            "D_Mode"
+         ],
+         "default_values":[
+            "D_Mode"
+         ],
+         "helpText" : "Specifies the current IBMi partition boot mode for next system boot. Do not set this attribute directly; set pvm_os_boot_type instead.",
+         "displayName" : "IBMi Partition Boot Mode (current)"
+      },
+      {
          "attribute_name":"pvm_vtpm",
          "possible_values":[
             "Disabled",
@@ -204,6 +268,18 @@
          ],
          "helpText" : "Enabling vTPM makes a TPM available to the guest operating system.",
          "displayName" : "Virtual Trusted Platform Module"
+      },
+      {
+         "attribute_name":"pvm_vtpm_current",
+         "possible_values":[
+            "Disabled",
+            "Enabled"
+         ],
+         "default_values":[
+            "Disabled"
+         ],
+         "helpText" : "Specifies the current vTPM policy. Do not set this attribute directly; set pvm_vtpm instead.",
+         "displayName" : "Virtual Trusted Platform Module (current)"
       },
       {
          "attribute_name":"hb_memory_region_size",
@@ -266,7 +342,7 @@
          "displayName" : "Secure Version Lockin Enabled"
       },
       {
-         "attribute_name":"hb_mirror_memory_mode",
+         "attribute_name":"hb_memory_mirror_mode",
          "possible_values":[
             "Disabled",
             "Enabled"
@@ -275,19 +351,75 @@
             "Enabled"
          ],
          "helpText" : "Specifies if the memory mirroring is enabled, requires a reboot for a change to be applied.",
-         "displayName" : "Mirror Memory Mode (pending)"
+         "displayName" : "Memory Mirror Mode (pending)"
       },
       {
-         "attribute_name":"hb_mirror_memory_mode_current",
+         "attribute_name":"hb_memory_mirror_mode_current",
          "possible_values":[
             "Disabled",
             "Enabled"
          ],
          "default_values":[
             "Enabled"
-         },
-         "helpText" : "Specifies if the memory mirroring is enabled for the current IPL. Do not set this attribute directly; set hb_mirror_memory_mode instead.",
-         "displayName" : "Mirror Memory Mode (current)"
+         ],
+         "helpText" : "Specifies if the memory mirroring is enabled for the current IPL. Do not set this attribute directly; set hb_memory_mirror_mode instead.",
+         "displayName" : "Memory Mirror Mode (current)"
+      },
+      {
+         "attribute_name":"hb_tpm_required",
+         "possible_values":[
+            "Required",
+            "Not Required"
+         ],
+         "default_values":[
+            "Required"
+         ],
+         "helpText" : "When the 'TPM Required Policy' is 'Required', a functional TPM is required to boot the system",
+         "displayName" : "TPM Required Policy (pending)"
+      },
+      {
+         "attribute_name":"hb_tpm_required_current",
+         "possible_values":[
+            "Required",
+            "Not Required"
+         ],
+         "default_values":[
+            "Required"
+         ],
+         "helpText" : "When the 'TPM Required Policy' is 'Required', a functional TPM is required to boot the system. Do not set this attribute directly; set hb_tpm_required instead.",
+         "displayName" : "TPM Required Policy (current)"
+      },
+      {
+         "attribute_name":"hb_key_clear_request",
+         "possible_values":[
+            "NONE",
+            "ALL",
+            "OS_KEYS",
+            "POWERVM_SYSKEY",
+            "MFG_ALL",
+            "MFG"
+         ],
+         "default_values":[
+            "NONE"
+         ],
+         "helpText" : "Specifies the requested level of security keys to be cleared from the system, requires a reboot to take effect",
+         "displayName" : "Key Clear Request (pending)"
+      },
+      {
+         "attribute_name":"hb_key_clear_request_current",
+         "possible_values":[
+            "NONE",
+            "ALL",
+            "OS_KEYS",
+            "POWERVM_SYSKEY",
+            "MFG_ALL",
+            "MFG"
+         ],
+         "default_values":[
+            "NONE"
+         ],
+         "helpText" : "Specifies the requested level of security keys to be cleared from the system for the current IPL. Do not set this attribute directly; set hb_key_clear_request instead.",
+         "displayName" : "Key Clear Request (current)"
       }
    ]
 }

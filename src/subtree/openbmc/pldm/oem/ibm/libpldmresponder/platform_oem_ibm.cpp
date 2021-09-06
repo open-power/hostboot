@@ -40,7 +40,7 @@ int sendBiosAttributeUpdateEvent(
             return PLDM_SUCCESS;
         }
     }
-    catch (const sdbusplus::exception::SdBusError& e)
+    catch (const sdbusplus::exception::exception& e)
     {
         std::cerr << "Error in getting current host state, continue ... \n";
     }

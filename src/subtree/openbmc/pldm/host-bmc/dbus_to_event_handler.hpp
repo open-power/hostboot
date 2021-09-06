@@ -8,16 +8,13 @@
 
 #include <map>
 
-using namespace pldm::dbus_api;
-using namespace pldm::responder;
-
 namespace pldm
 {
 
 using SensorId = uint16_t;
 using DbusObjMaps =
-    std::map<SensorId,
-             std::tuple<pdr_utils::DbusMappings, pdr_utils::DbusValMaps>>;
+    std::map<SensorId, std::tuple<pldm::responder::pdr_utils::DbusMappings,
+                                  pldm::responder::pdr_utils::DbusValMaps>>;
 using sensorEvent =
     std::function<void(SensorId sensorId, const DbusObjMaps& dbusMaps)>;
 
@@ -44,7 +41,7 @@ class DbusToPLDMEvent
      *  @param[in] handler - PLDM request handler
      */
     explicit DbusToPLDMEvent(
-        int mctp_fd, uint8_t mctp_eid, Requester& requester,
+        int mctp_fd, uint8_t mctp_eid, pldm::dbus_api::Requester& requester,
         pldm::requester::Handler<pldm::requester::Request>* handler);
 
   public:
@@ -52,7 +49,7 @@ class DbusToPLDMEvent
      *  @param[in] repo - pdr utils repo object
      *  @param[in] dbusMaps - The map of D-Bus mapping and value
      */
-    void listenSensorEvent(const pdr_utils::Repo& repo,
+    void listenSensorEvent(const pldm::responder::pdr_utils::Repo& repo,
                            const DbusObjMaps& dbusMaps);
 
   private:
@@ -77,7 +74,7 @@ class DbusToPLDMEvent
     /** @brief reference to Requester object, primarily used to access API to
      *  obtain PLDM instance id.
      */
-    Requester& requester;
+    pldm::dbus_api::Requester& requester;
 
     /** @brief D-Bus property changed signal match */
     std::vector<std::unique_ptr<sdbusplus::bus::match::match>>

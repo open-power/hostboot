@@ -155,6 +155,12 @@ class FruImpl
         return ++rsi;
     }
 
+    uint32_t nextRecordHandle()
+    {
+        return ++rh;
+    }
+
+    uint32_t rh = 0;
     uint16_t rsi = 0;
     uint16_t numRecs = 0;
     uint8_t padBytes = 0;

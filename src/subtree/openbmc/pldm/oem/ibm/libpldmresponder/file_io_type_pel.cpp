@@ -209,7 +209,6 @@ int PelHandler::writeFromMemory(uint32_t offset, uint32_t length,
     {
         rc = storePel(path.string());
     }
-    fs::remove(path);
     return rc;
 }
 
@@ -269,6 +268,60 @@ int PelHandler::storePel(std::string&& pelFileName)
     }
 
     return PLDM_SUCCESS;
+}
+
+int PelHandler::write(const char* buffer, uint32_t offset, uint32_t& length,
+                      oem_platform::Handler* /*oemPlatformHandler*/)
+{
+    int rc = PLDM_SUCCESS;
+
+    if (offset > 0)
+    {
+        std::cerr << "Offset is non zero \n";
+        return PLDM_ERROR;
+    }
+
+    char tmpFile[] = "/tmp/pel.XXXXXX";
+    auto fd = mkstemp(tmpFile);
+    if (fd == -1)
+    {
+        std::cerr << "failed to create a temporary pel, ERROR=" << errno
+                  << "\n";
+        return PLDM_ERROR;
+    }
+
+    size_t written = 0;
+    do
+    {
+        if ((rc = ::write(fd, buffer, length - written)) == -1)
+        {
+            break;
+        }
+        written += rc;
+        buffer += rc;
+    } while (rc && written < length);
+    close(fd);
+
+    if (rc == -1)
+    {
+        std::cerr << "file write failed, ERROR=" << errno
+                  << ", LENGTH=" << length << ", OFFSET=" << offset << "\n";
+        fs::remove(tmpFile);
+        return PLDM_ERROR;
+    }
+
+    if (written == length)
+    {
+        fs::path path(tmpFile);
+        rc = storePel(path.string());
+        if (rc != PLDM_SUCCESS)
+        {
+            std::cerr << "save PEL failed, ERROR = " << rc
+                      << "tmpFile = " << tmpFile << "\n";
+        }
+    }
+
+    return rc;
 }
 
 } // namespace responder

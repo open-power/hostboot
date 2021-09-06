@@ -4,9 +4,8 @@
 #include <gtest/gtest.h>
 
 using testing::ElementsAreArray;
-using namespace pldm::responder::bios;
 
-class MockBIOSStringTable : public BIOSStringTable
+class MockBIOSStringTable : public pldm::responder::bios::BIOSStringTable
 {
   public:
     MockBIOSStringTable() : BIOSStringTable({})
@@ -17,18 +16,21 @@ class MockBIOSStringTable : public BIOSStringTable
     MOCK_METHOD(std::string, findString, (const uint16_t), (const override));
 };
 
-void checkHeader(const Table& attrEntry, const Table& attrValueEntry)
+void checkHeader(const pldm::responder::bios::Table& attrEntry,
+                 const pldm::responder::bios::Table& attrValueEntry)
 {
-    auto attrHeader = table::attribute::decodeHeader(
+    auto attrHeader = pldm::responder::bios::table::attribute::decodeHeader(
         reinterpret_cast<const pldm_bios_attr_table_entry*>(attrEntry.data()));
-    auto attrValueHeader = table::attribute_value::decodeHeader(
-        reinterpret_cast<const pldm_bios_attr_val_table_entry*>(
-            attrValueEntry.data()));
+    auto attrValueHeader =
+        pldm::responder::bios::table::attribute_value::decodeHeader(
+            reinterpret_cast<const pldm_bios_attr_val_table_entry*>(
+                attrValueEntry.data()));
 
     EXPECT_EQ(attrHeader.attrHandle, attrValueHeader.attrHandle);
 }
 
-void checkEntry(Table& entry, Table& expectedEntry)
+void checkEntry(pldm::responder::bios::Table& entry,
+                pldm::responder::bios::Table& expectedEntry)
 {
     /** backup the attr handle */
     auto attr0 = entry[0], eAttr0 = expectedEntry[0];
@@ -45,11 +47,12 @@ void checkEntry(Table& entry, Table& expectedEntry)
     entry[1] = attr1, expectedEntry[1] = eAttr1;
 }
 
-void checkConstructEntry(BIOSAttribute& attribute, BIOSStringTable& stringTable,
-                         Table& expectedAttrEntry,
-                         Table& expectedAttrValueEntry)
+void checkConstructEntry(pldm::responder::bios::BIOSAttribute& attribute,
+                         pldm::responder::bios::BIOSStringTable& stringTable,
+                         pldm::responder::bios::Table& expectedAttrEntry,
+                         pldm::responder::bios::Table& expectedAttrValueEntry)
 {
-    Table attrEntry, attrValueEntry;
+    pldm::responder::bios::Table attrEntry, attrValueEntry;
     attribute.constructEntry(stringTable, attrEntry, attrValueEntry);
 
     checkHeader(attrEntry, attrValueEntry);

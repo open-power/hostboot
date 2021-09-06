@@ -8,6 +8,7 @@ extern "C" {
 /** @brief PLDM State Set IDs in DSP0249_1.1.0 specification
  */
 enum pldm_state_set_ids {
+
 	/* Table 1 - General State Sets */
 	PLDM_STATE_SET_HEALTH_STATE = 1,
 	PLDM_STATE_SET_AVAILABILITY = 2,
@@ -142,16 +143,17 @@ enum pldm_state_set_health_state_values {
 	PLDM_STATE_SET_HEALTH_STATE_LOWER_FATAL = 10,
 };
 
-/* @brief List of states for the Boot Restart Cause state set (ID 192).
+/* @brief List of states for the State Set Availability (ID 2),
  */
-enum pldm_state_set_boot_restart_cause_values {
-	PLDM_STATE_SET_BOOT_RESTART_CAUSE_POWERED_UP = 1,
-	PLDM_STATE_SET_BOOT_RESTART_CAUSE_HARD_RESET = 2,
-	PLDM_STATE_SET_BOOT_RESTART_CAUSE_WARM_RESET = 3,
-	PLDM_STATE_SET_BOOT_RESTART_CAUSE_MANUAL_HARD_RESET = 4,
-	PLDM_STATE_SET_BOOT_RESTART_CAUSE_MANUAL_WARM_RESET = 5,
-	PLDM_STATE_SET_BOOT_RESTART_CAUSE_SYSTEM_RESTART = 6,
-	PLDM_STATE_SET_BOOT_RESTART_CAUSE_WATCHDOG_TIMEOUT = 7
+enum pldm_state_set_availability_values {
+	PLDM_STATE_SET_AVAILABILITY_REBOOTING = 8
+};
+
+/* @brief List of states for the Operational Fault status (ID 10).
+ */
+enum pldm_state_set_operational_fault_status_values {
+	PLDM_STATE_SET_OPERATIONAL_FAULT_STATUS_NORMAL = 1,
+	PLDM_STATE_SET_OPERATIONAL_FAULT_STATUS_STRESSED = 2,
 };
 
 /* @brief List of states for the Operational Running Status state set (ID 11).
@@ -165,6 +167,20 @@ enum pldm_state_set_operational_running_status_values {
 	PLDM_STATE_SET_OPERATIONAL_RUNNING_STATUS_DORMANT = 6
 };
 
+/* @brief List of states for the Set Identify state (ID 17).
+ */
+enum pldm_state_set_identify_state_values {
+	PLDM_STATE_SET_IDENTIFY_STATE_UNASSERTED = 1,
+	PLDM_STATE_SET_IDENTIFY_STATE_ASSERTED = 2,
+};
+
+/* @brief List of states for the Set Thermal Trip state set (ID 21).
+ */
+enum pldm_state_set_thermal_trip_values {
+	PLDM_STATE_SET_THERMAL_TRIP_STATUS_NORMAL = 1,
+	PLDM_STATE_SET_THERMAL_TRIP_STATUS_THERMAL_TRIP = 2,
+};
+
 /* @brief List of states for the Software-related state set (ID 129).
  */
 enum pldm_software_termination_status_values {
@@ -176,6 +192,37 @@ enum pldm_software_termination_status_values {
 	PLDM_SW_TERM_GRACEFUL_RESTART_REQUESTED = 6,
 	PLDM_SW_TERM_GRACEFUL_SHUTDOWN = 7,
 	PLDM_SW_TERM_TERMINATION_REQUEST_FAILED = 8,
+};
+
+/* @brief List of states for the Boot Restart Cause state set (ID 192).
+ */
+enum pldm_state_set_boot_restart_cause_values {
+	PLDM_STATE_SET_BOOT_RESTART_CAUSE_POWERED_UP = 1,
+	PLDM_STATE_SET_BOOT_RESTART_CAUSE_HARD_RESET = 2,
+	PLDM_STATE_SET_BOOT_RESTART_CAUSE_WARM_RESET = 3,
+	PLDM_STATE_SET_BOOT_RESTART_CAUSE_MANUAL_HARD_RESET = 4,
+	PLDM_STATE_SET_BOOT_RESTART_CAUSE_MANUAL_WARM_RESET = 5,
+	PLDM_STATE_SET_BOOT_RESTART_CAUSE_SYSTEM_RESTART = 6,
+	PLDM_STATE_SET_BOOT_RESTART_CAUSE_WATCHDOG_TIMEOUT = 7
+};
+
+/* @brief List of states for the Boot Progress state set (ID 196).
+ */
+enum pldm_state_set_boot_progress_state_values {
+	PLDM_STATE_SET_BOOT_PROG_STATE_NOT_ACTIVE = 1,
+	PLDM_STATE_SET_BOOT_PROG_STATE_COMPLETED = 2,
+	PLDM_STATE_SET_BOOT_PROG_STATE_MEM_INITIALIZATION = 3,
+	PLDM_STATE_SET_BOOT_PROG_STATE_SEC_PROC_INITIALIZATION = 5,
+	PLDM_STATE_SET_BOOT_PROG_STATE_PCI_RESORUCE_CONFIG = 9,
+	PLDM_STATE_SET_BOOT_PROG_STATE_STARTING_OP_SYS = 21,
+	PLDM_STATE_SET_BOOT_PROG_STATE_BASE_BOARD_INITIALIZATION = 22,
+	PLDM_STATE_SET_BOOT_PROG_STATE_PRIMARY_PROC_INITIALIZATION = 26,
+};
+
+/* @brief List of states for the System Power State set (ID 260).
+ */
+enum pldm_state_set_system_power_state_values {
+	PLDM_STATE_SET_SYS_POWER_STATE_OFF_SOFT_GRACEFUL = 9
 };
 
 /* OEM ranges */

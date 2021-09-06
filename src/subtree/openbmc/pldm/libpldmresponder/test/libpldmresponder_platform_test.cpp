@@ -13,6 +13,7 @@
 
 #include <iostream>
 
+using namespace pldm::pdr;
 using namespace pldm::utils;
 using namespace pldm::responder;
 using namespace pldm::responder::platform;

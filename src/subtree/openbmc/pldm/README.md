@@ -4,10 +4,15 @@ Need `meson` and `ninja`. Alternatively, source an OpenBMC ARM/x86 SDK.
 meson build && ninja -C build
 ```
 ## To run unit tests
-Tests can be run in the CI docker container, or with an OpenBMC x86 sdk(see
-below for x86 steps).
+The simplest way of running the tests is as described by the meson man page:
 ```
-meson -Doe-sdk=enabled -Dtests=enabled build
+meson builddir && meson test -C builddir
+```
+
+Alternatively, tests can be run in the OpenBMC CI docker container, or with an
+OpenBMC x86 sdk(see below for x86 steps).
+```
+meson -Doe-sdk=enabled build
 ninja -C build test
 ```
 

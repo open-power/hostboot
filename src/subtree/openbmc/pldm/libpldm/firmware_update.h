@@ -5,6 +5,7 @@
 extern "C" {
 #endif
 #include "base.h"
+#include "stdbool.h"
 #include "utils.h"
 
 #define PLDM_FWUP_COMPONENT_BITMAP_MULTIPLE 8
@@ -17,6 +18,11 @@ extern "C" {
 #define PLDM_GET_FIRMWARE_PARAMETERS_REQ_BYTES 0
 #define PLDM_FWUP_BASELINE_TRANSFER_SIZE 32
 #define PLDM_FWUP_MIN_OUTSTANDING_REQ 1
+#define PLDM_GET_STATUS_REQ_BYTES 0
+/* Maximum progress percentage value*/
+#define PLDM_FWUP_MAX_PROGRESS_PERCENT 0x65
+#define PLDM_CANCEL_UPDATE_COMPONENT_REQ_BYTES 0
+#define PLDM_CANCEL_UPDATE_REQ_BYTES 0
 
 /** @brief PLDM Firmware update commands
  */
@@ -25,7 +31,15 @@ enum pldm_firmware_update_commands {
 	PLDM_GET_FIRMWARE_PARAMETERS = 0x02,
 	PLDM_REQUEST_UPDATE = 0x10,
 	PLDM_PASS_COMPONENT_TABLE = 0x13,
-	PLDM_UPDATE_COMPONENT = 0x14
+	PLDM_UPDATE_COMPONENT = 0x14,
+	PLDM_REQUEST_FIRMWARE_DATA = 0x15,
+	PLDM_TRANSFER_COMPLETE = 0x16,
+	PLDM_VERIFY_COMPLETE = 0x17,
+	PLDM_APPLY_COMPLETE = 0x18,
+	PLDM_ACTIVATE_FIRMWARE = 0x1A,
+	PLDM_GET_STATUS = 0x1B,
+	PLDM_CANCEL_UPDATE_COMPONENT = 0x1C,
+	PLDM_CANCEL_UPDATE = 0x1D
 };
 
 /** @brief PLDM Firmware update completion codes
@@ -39,7 +53,7 @@ enum pldm_firmware_update_completion_codes {
 	PLDM_FWUP_INCOMPLETE_UPDATE = 0x85,
 	PLDM_FWUP_BUSY_IN_BACKGROUND = 0x86,
 	PLDM_FWUP_CANCEL_PENDING = 0x87,
-	PLDM_FWUP_COMMAND_NOT_EXPECTED = 0x87,
+	PLDM_FWUP_COMMAND_NOT_EXPECTED = 0x88,
 	PLDM_FWUP_RETRY_REQUEST_FW_DATA = 0x89,
 	PLDM_FWUP_UNABLE_TO_INITIATE_UPDATE = 0x8A,
 	PLDM_FWUP_ACTIVATION_NOT_REQUIRED = 0x8B,
@@ -130,6 +144,21 @@ enum pldm_component_classification_values {
 	PLDM_COMP_DOWNSTREAM_DEVICE = 0xFFFF
 };
 
+/** @brief ComponentActivationMethods is the bit position in the bitfield that
+ *         provides the capability of the FD for firmware activation. Multiple
+ *         activation methods can be supported.
+ */
+enum pldm_comp_activation_methods {
+	PLDM_ACTIVATION_AUTOMATIC = 0,
+	PLDM_ACTIVATION_SELF_CONTAINED = 1,
+	PLDM_ACTIVATION_MEDIUM_SPECIFIC_RESET = 2,
+	PLDM_ACTIVATION_SYSTEM_REBOOT = 3,
+	PLDM_ACTIVATION_DC_POWER_CYCLE = 4,
+	PLDM_ACTIVATION_AC_POWER_CYCLE = 5,
+	PLDM_SUPPORTS_ACTIVATE_PENDING_IMAGE = 6,
+	PLDM_SUPPORTS_ACTIVATE_PENDING_IMAGE_SET = 7
+};
+
 /** @brief ComponentResponse values in the response of PassComponentTable
  */
 enum pldm_component_responses {
@@ -182,6 +211,111 @@ enum pldm_component_compatability_response_codes {
 	PLDM_CCRC_COMP_VER_STR_LOWER = 0x0B,
 	PLDM_CCRC_VENDOR_COMP_RESP_CODE_RANGE_MIN = 0xD0,
 	PLDM_CCRC_VENDOR_COMP_RESP_CODE_RANGE_MAX = 0xEF
+};
+
+/** @brief Common error codes in TransferComplete, VerifyComplete and
+ *        ApplyComplete request
+ */
+enum pldm_firmware_update_common_error_codes {
+	PLDM_FWUP_TIME_OUT = 0x09,
+	PLDM_FWUP_GENERIC_ERROR = 0x0A
+};
+
+/** @brief TransferResult values in the request of TransferComplete
+ */
+enum pldm_firmware_update_transfer_result_values {
+	PLDM_FWUP_TRANSFER_SUCCESS = 0x00,
+	PLDM_FWUP_TRANSFER_ERROR_IMAGE_CORRUPT = 0x02,
+	PLDM_FWUP_TRANSFER_ERROR_VERSION_MISMATCH = 0x02,
+	PLDM_FWUP_FD_ABORTED_TRANSFER = 0x03,
+	PLDM_FWUP_FD_ABORTED_TRANSFER_LOW_POWER_STATE = 0x0B,
+	PLDM_FWUP_FD_ABORTED_TRANSFER_RESET_NEEDED = 0x0C,
+	PLDM_FWUP_FD_ABORTED_TRANSFER_STORAGE_ISSUE = 0x0D,
+	PLDM_FWUP_VENDOR_TRANSFER_RESULT_RANGE_MIN = 0x70,
+	PLDM_FWUP_VENDOR_TRANSFER_RESULT_RANGE_MAX = 0x8F
+};
+
+/**@brief VerifyResult values in the request of VerifyComplete
+ */
+enum pldm_firmware_update_verify_result_values {
+	PLDM_FWUP_VERIFY_SUCCESS = 0x00,
+	PLDM_FWUP_VERIFY_ERROR_VERIFICATION_FAILURE = 0x01,
+	PLDM_FWUP_VERIFY_ERROR_VERSION_MISMATCH = 0x02,
+	PLDM_FWUP_VERIFY_FAILED_FD_SECURITY_CHECKS = 0x03,
+	PLDM_FWUP_VERIFY_ERROR_IMAGE_INCOMPLETE = 0x04,
+	PLDM_FWUP_VENDOR_VERIFY_RESULT_RANGE_MIN = 0x90,
+	PLDM_FWUP_VENDOR_VERIFY_RESULT_RANGE_MAX = 0xAF
+};
+
+/**@brief ApplyResult values in the request of ApplyComplete
+ */
+enum pldm_firmware_update_apply_result_values {
+	PLDM_FWUP_APPLY_SUCCESS = 0x00,
+	PLDM_FWUP_APPLY_SUCCESS_WITH_ACTIVATION_METHOD = 0x01,
+	PLDM_FWUP_APPLY_FAILURE_MEMORY_ISSUE = 0x02,
+	PLDM_FWUP_VENDOR_APPLY_RESULT_RANGE_MIN = 0xB0,
+	PLDM_FWUP_VENDOR_APPLY_RESULT_RANGE_MAX = 0xCF
+};
+
+/** @brief SelfContainedActivationRequest in the request of ActivateFirmware
+ */
+enum pldm_self_contained_activation_req {
+	PLDM_NOT_ACTIVATE_SELF_CONTAINED_COMPONENTS = false,
+	PLDM_ACTIVATE_SELF_CONTAINED_COMPONENTS = true
+};
+
+/** @brief Current state/previous state of the FD or FDP returned in GetStatus
+ *         response
+ */
+enum pldm_firmware_device_states {
+	PLDM_FD_STATE_IDLE = 0,
+	PLDM_FD_STATE_LEARN_COMPONENTS = 1,
+	PLDM_FD_STATE_READY_XFER = 2,
+	PLDM_FD_STATE_DOWNLOAD = 3,
+	PLDM_FD_STATE_VERIFY = 4,
+	PLDM_FD_STATE_APPLY = 5,
+	PLDM_FD_STATE_ACTIVATE = 6
+};
+
+/** @brief Firmware device aux state in GetStatus response
+ */
+enum pldm_get_status_aux_states {
+	PLDM_FD_OPERATION_IN_PROGRESS = 0,
+	PLDM_FD_OPERATION_SUCCESSFUL = 1,
+	PLDM_FD_OPERATION_FAILED = 2,
+	PLDM_FD_IDLE_LEARN_COMPONENTS_READ_XFER = 3
+};
+
+/** @brief Firmware device aux state status in GetStatus response
+ */
+enum pldm_get_status_aux_state_status_values {
+	PLDM_FD_AUX_STATE_IN_PROGRESS_OR_SUCCESS = 0x00,
+	PLDM_FD_TIMEOUT = 0x09,
+	PLDM_FD_GENERIC_ERROR = 0x0A,
+	PLDM_FD_VENDOR_DEFINED_STATUS_CODE_START = 0x70,
+	PLDM_FD_VENDOR_DEFINED_STATUS_CODE_END = 0xEF
+};
+
+/** @brief Firmware device reason code in GetStatus response
+ */
+enum pldm_get_status_reason_code_values {
+	PLDM_FD_INITIALIZATION = 0,
+	PLDM_FD_ACTIVATE_FW = 1,
+	PLDM_FD_CANCEL_UPDATE = 2,
+	PLDM_FD_TIMEOUT_LEARN_COMPONENT = 3,
+	PLDM_FD_TIMEOUT_READY_XFER = 4,
+	PLDM_FD_TIMEOUT_DOWNLOAD = 5,
+	PLDM_FD_TIMEOUT_VERIFY = 6,
+	PLDM_FD_TIMEOUT_APPLY = 7,
+	PLDM_FD_STATUS_VENDOR_DEFINED_MIN = 200,
+	PLDM_FD_STATUS_VENDOR_DEFINED_MAX = 255
+};
+
+/** @brief Components functional indicator in CancelUpdate response
+ */
+enum pldm_firmware_update_non_functioning_component_indication {
+	PLDM_FWUP_COMPONENTS_FUNCTIONING = 0,
+	PLDM_FWUP_COMPONENTS_NOT_FUNCTIONING = 1
 };
 
 /** @struct pldm_package_header_information
@@ -364,6 +498,66 @@ struct pldm_update_component_resp {
 	uint8_t comp_compatability_resp_code;
 	bitfield32_t update_option_flags_enabled;
 	uint16_t time_before_req_fw_data;
+} __attribute__((packed));
+
+/** @struct pldm_request_firmware_data_req
+ *
+ *  Structure representing RequestFirmwareData request.
+ */
+struct pldm_request_firmware_data_req {
+	uint32_t offset;
+	uint32_t length;
+} __attribute__((packed));
+
+/** @struct pldm_apply_complete_req
+ *
+ *  Structure representing ApplyComplete request.
+ */
+struct pldm_apply_complete_req {
+	uint8_t apply_result;
+	bitfield16_t comp_activation_methods_modification;
+} __attribute__((packed));
+
+/** @struct pldm_activate_firmware_req
+ *
+ *  Structure representing ActivateFirmware request
+ */
+struct pldm_activate_firmware_req {
+	bool8_t self_contained_activation_req;
+} __attribute__((packed));
+
+/** @struct activate_firmware_resp
+ *
+ *  Structure representing Activate Firmware response
+ */
+struct pldm_activate_firmware_resp {
+	uint8_t completion_code;
+	uint16_t estimated_time_activation;
+} __attribute__((packed));
+
+/** @struct pldm_get_status_resp
+ *
+ *  Structure representing GetStatus response.
+ */
+struct pldm_get_status_resp {
+	uint8_t completion_code;
+	uint8_t current_state;
+	uint8_t previous_state;
+	uint8_t aux_state;
+	uint8_t aux_state_status;
+	uint8_t progress_percent;
+	uint8_t reason_code;
+	bitfield32_t update_option_flags_enabled;
+} __attribute__((packed));
+
+/** @struct pldm_cancel_update_resp
+ *
+ *  Structure representing CancelUpdate response.
+ */
+struct pldm_cancel_update_resp {
+	uint8_t completion_code;
+	bool8_t non_functioning_component_indication;
+	uint64_t non_functioning_component_bitmap;
 } __attribute__((packed));
 
 /** @brief Decode the PLDM package header information
@@ -682,6 +876,255 @@ int decode_update_component_resp(const struct pldm_msg *msg,
 				 uint8_t *comp_compatability_resp_code,
 				 bitfield32_t *update_option_flags_enabled,
 				 uint16_t *time_before_req_fw_data);
+
+/** @brief Decode RequestFirmwareData request message
+ *
+ *	@param[in] msg - Request message
+ *	@param[in] payload_length - Length of request message payload
+ *	@param[out] offset - Pointer to hold offset
+ *	@param[out] length - Pointer to hold the size of the component image
+ *                       segment requested by the FD/FDP
+ *
+ *	@return pldm_completion_codes
+ */
+int decode_request_firmware_data_req(const struct pldm_msg *msg,
+				     size_t payload_length, uint32_t *offset,
+				     uint32_t *length);
+
+/** @brief Create PLDM response message for RequestFirmwareData
+ *
+ *  The ComponentImagePortion is not encoded in the PLDM response message
+ *  by encode_request_firmware_data_resp to avoid an additional copy. Populating
+ *  ComponentImagePortion in the PLDM response message is handled by the user
+ *  of this API. The payload_length validation considers only the
+ *  CompletionCode.
+ *
+ *	@param[in] instance_id - Message's instance id
+ *	@param[in] completion_code - CompletionCode
+ *	@param[in,out] msg - Message will be written to this
+ *  @param[in] payload_length - Length of response message payload
+ *
+ *	@return pldm_completion_codes
+ *
+ *	@note  Caller is responsible for memory alloc and dealloc of param
+ *		   'msg.payload'
+ */
+int encode_request_firmware_data_resp(uint8_t instance_id,
+				      uint8_t completion_code,
+				      struct pldm_msg *msg,
+				      size_t payload_length);
+
+/** @brief Decode TransferComplete request message
+ *
+ *  @param[in] msg - Request message
+ *  @param[in] payload_length - Length of request message payload
+ *  @param[out] transfer_result - Pointer to hold TransferResult
+ *
+ *  @return pldm_completion_codes
+ */
+int decode_transfer_complete_req(const struct pldm_msg *msg,
+				 size_t payload_length,
+				 uint8_t *transfer_result);
+
+/** @brief Create PLDM response message for TransferComplete
+ *
+ *  @param[in] instance_id - Message's instance id
+ *  @param[in] completion_code - CompletionCode
+ *  @param[in,out] msg - Message will be written to this
+ *  @param[in] payload_length - Length of response message payload
+ *
+ *  @return pldm_completion_codes
+ *
+ *  @note  Caller is responsible for memory alloc and dealloc of param
+ *         'msg.payload'
+ */
+int encode_transfer_complete_resp(uint8_t instance_id, uint8_t completion_code,
+				  struct pldm_msg *msg, size_t payload_length);
+
+/** @brief Decode VerifyComplete request message
+ *
+ *  @param[in] msg - Request message
+ *  @param[in] payload_length - Length of request message payload
+ *  @param[in] verify_result - Pointer to hold VerifyResult
+ *
+ *  @return pldm_completion_codes
+ */
+int decode_verify_complete_req(const struct pldm_msg *msg,
+			       size_t payload_length, uint8_t *verify_result);
+
+/** @brief Create PLDM response message for VerifyComplete
+ *
+ *  @param[in] instance_id - Message's instance id
+ *  @param[in] completion_code - CompletionCode
+ *  @param[in,out] msg - Message will be written to this
+ *  @param[in] payload_length - Length of response message payload
+ *
+ *  @return pldm_completion_codes
+ *
+ *  @note  Caller is responsible for memory alloc and dealloc of param
+ *         'msg.payload'
+ */
+int encode_verify_complete_resp(uint8_t instance_id, uint8_t completion_code,
+				struct pldm_msg *msg, size_t payload_length);
+
+/** @brief Decode ApplyComplete request message
+ *
+ *  @param[in] msg - Request message
+ *  @param[in] payload_length - Length of request message payload
+ *  @param[in] apply_result - Pointer to hold ApplyResult
+ *  @param[in] comp_activation_methods_modification - Pointer to hold the
+ *                                        ComponentActivationMethodsModification
+ *
+ *  @return pldm_completion_codes
+ */
+int decode_apply_complete_req(
+    const struct pldm_msg *msg, size_t payload_length, uint8_t *apply_result,
+    bitfield16_t *comp_activation_methods_modification);
+
+/** @brief Create PLDM response message for ApplyComplete
+ *
+ *  @param[in] instance_id - Message's instance id
+ *  @param[in] completion_code - CompletionCode
+ *  @param[in,out] msg - Message will be written to this
+ *  @param[in] payload_length - Length of response message payload
+ *
+ *  @return pldm_completion_codes
+ *
+ *  @note Caller is responsible for memory alloc and dealloc of param
+ *        'msg.payload'
+ */
+int encode_apply_complete_resp(uint8_t instance_id, uint8_t completion_code,
+			       struct pldm_msg *msg, size_t payload_length);
+
+/** @brief Create PLDM request message for ActivateFirmware
+ *
+ *  @param[in] instance_id - Message's instance id
+ *  @param[in] self_contained_activation_req SelfContainedActivationRequest
+ *  @param[in,out] msg - Message will be written to this
+ *  @param[in] payload_length - Length of request message payload
+ *
+ *  @return pldm_completion_codes
+ *
+ *  @note  Caller is responsible for memory alloc and dealloc of param
+ *         'msg.payload'
+ */
+int encode_activate_firmware_req(uint8_t instance_id,
+				 bool8_t self_contained_activation_req,
+				 struct pldm_msg *msg, size_t payload_length);
+
+/** @brief Decode ActivateFirmware response message
+ *
+ *  @param[in] msg - Response message
+ *  @param[in] payload_length - Length of response message payload
+ *  @param[out] completion_code - Pointer to hold CompletionCode
+ *  @param[out] estimated_time_activation - Pointer to hold
+ *                                       EstimatedTimeForSelfContainedActivation
+ *
+ *  @return pldm_completion_codes
+ */
+int decode_activate_firmware_resp(const struct pldm_msg *msg,
+				  size_t payload_length,
+				  uint8_t *completion_code,
+				  uint16_t *estimated_time_activation);
+
+/** @brief Create PLDM request message for GetStatus
+ *
+ *  @param[in] instance_id - Message's instance id
+ *  @param[in,out] msg - Message will be written to this
+ *  @param[in] payload_length - Length of request message payload
+ *
+ *  @return pldm_completion_codes
+ *
+ *  @note Caller is responsible for memory alloc and dealloc of param
+ *        'msg.payload'
+ */
+int encode_get_status_req(uint8_t instance_id, struct pldm_msg *msg,
+			  size_t payload_length);
+
+/** @brief Decode GetStatus response message
+ *
+ *  @param[in] msg - Response message
+ *  @param[in] payload_length - Length of response message payload
+ *  @param[out] completion_code - Pointer to completion code
+ *  @param[out] current_state - Pointer to current state machine state
+ *  @param[out] previous_state - Pointer to previous different state machine
+ *                               state
+ *  @param[out] aux_state - Pointer to current operation state of FD/FDP
+ *  @param[out] aux_state_status - Pointer to aux state status
+ *  @param[out] progress_percent - Pointer to progress percentage
+ *  @param[out] reason_code - Pointer to reason for entering current state
+ *  @param[out] update_option_flags_enabled - Pointer to update option flags
+ *                                            enabled
+ *
+ *  @return pldm_completion_codes
+ */
+int decode_get_status_resp(const struct pldm_msg *msg, size_t payload_length,
+			   uint8_t *completion_code, uint8_t *current_state,
+			   uint8_t *previous_state, uint8_t *aux_state,
+			   uint8_t *aux_state_status, uint8_t *progress_percent,
+			   uint8_t *reason_code,
+			   bitfield32_t *update_option_flags_enabled);
+
+/** @brief Create PLDM request message for CancelUpdateComponent
+ *
+ *  @param[in] instance_id - Message's instance id
+ *  @param[in,out] msg - Message will be written to this
+ *  @param[in] payload_length - Length of request message payload
+ *
+ *  @return pldm_completion_codes
+ *
+ *  @note  Caller is responsible for memory alloc and dealloc of param
+ *         'msg.payload'
+ */
+int encode_cancel_update_component_req(uint8_t instance_id,
+				       struct pldm_msg *msg,
+				       size_t payload_length);
+
+/** @brief Decode CancelUpdateComponent response message
+ *
+ *  @param[in] msg - Response message
+ *  @param[in] payload_length - Length of response message payload
+ *  @param[out] completion_code - Pointer to the completion code
+ *
+ *  @return pldm_completion_codes
+ */
+int decode_cancel_update_component_resp(const struct pldm_msg *msg,
+					size_t payload_length,
+					uint8_t *completion_code);
+
+/** @brief Create PLDM request message for CancelUpdate
+ *
+ *	@param[in] instance_id - Message's instance id
+ *	@param[in,out] msg - Message will be written to this
+ *  @param[in] payload_length - Length of request message payload
+ *
+ *	@return pldm_completion_codes
+ *
+ *	@note  Caller is responsible for memory alloc and dealloc of param
+ *         'msg.payload'
+ */
+int encode_cancel_update_req(uint8_t instance_id, struct pldm_msg *msg,
+			     size_t payload_length);
+
+/** @brief Decode CancelUpdate response message
+ *
+ *	@param[in] msg - Response message
+ *  @param[in] payload_length - Length of response message payload
+ *	@param[out] completion_code - Pointer to completion code
+ *	@param[out] non_functioning_component_indication - Pointer to non
+						       functioning
+ *                                                     component indication
+ *	@param[out] non_functioning_component_bitmap - Pointer to non
+ functioning
+ *                                                 component bitmap
+ *
+ *	@return pldm_completion_codes
+ */
+int decode_cancel_update_resp(const struct pldm_msg *msg, size_t payload_length,
+			      uint8_t *completion_code,
+			      bool8_t *non_functioning_component_indication,
+			      bitfield64_t *non_functioning_component_bitmap);
+
 #ifdef __cplusplus
 }
 #endif

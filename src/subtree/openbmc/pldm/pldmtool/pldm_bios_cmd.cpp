@@ -21,6 +21,7 @@ namespace
 
 using namespace pldmtool::helper;
 using namespace pldm::bios::utils;
+using namespace pldm::utils;
 
 std::vector<std::unique_ptr<CommandInterface>> commands;
 

@@ -13,6 +13,7 @@ using namespace pldm::responder;
 using namespace pldm::responder::platform;
 using namespace pldm::responder::pdr;
 using namespace pldm::responder::pdr_utils;
+using namespace pldm::utils;
 
 using ::testing::_;
 using ::testing::Return;

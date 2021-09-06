@@ -77,7 +77,7 @@ class BIOSConfig
      */
     explicit BIOSConfig(
         const char* jsonDir, const char* tableDir,
-        DBusHandler* const dbusHandler, int fd, uint8_t eid,
+        pldm::utils::DBusHandler* const dbusHandler, int fd, uint8_t eid,
         dbus_api::Requester* requester,
         pldm::requester::Handler<pldm::requester::Request>* handler);
 
@@ -134,7 +134,7 @@ class BIOSConfig
 
     const fs::path jsonDir;
     const fs::path tableDir;
-    DBusHandler* const dbusHandler;
+    pldm::utils::DBusHandler* const dbusHandler;
     BaseBIOSTable baseBIOSTableMaps;
 
     /** @brief socket descriptor to communicate to host */
@@ -156,7 +156,7 @@ class BIOSConfig
     BIOSAttributes biosAttributes;
 
     using propName = std::string;
-    using DbusChObjProperties = std::map<propName, PropertyValue>;
+    using DbusChObjProperties = std::map<propName, pldm::utils::PropertyValue>;
 
     // vector to catch the D-Bus property change signals for BIOS attributes
     std::vector<std::unique_ptr<sdbusplus::bus::match::match>> biosAttrMatch;

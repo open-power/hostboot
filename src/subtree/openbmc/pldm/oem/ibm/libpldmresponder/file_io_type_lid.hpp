@@ -13,7 +13,6 @@ namespace pldm
 namespace responder
 {
 
-using namespace pldm::responder::dma;
 namespace fs = std::filesystem;
 
 using MarkerLIDremainingSize = uint64_t;

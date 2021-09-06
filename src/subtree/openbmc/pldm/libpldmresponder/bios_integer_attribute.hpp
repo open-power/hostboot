@@ -24,7 +24,8 @@ class BIOSIntegerAttribute : public BIOSAttribute
      *  @param[in] entry - Json Object
      *  @param[in] dbusHandler - Dbus Handler
      */
-    BIOSIntegerAttribute(const Json& entry, DBusHandler* const dbusHandler);
+    BIOSIntegerAttribute(const Json& entry,
+                         pldm::utils::DBusHandler* const dbusHandler);
 
     /** @brief Set Attribute value On Dbus according to the attribute value
      *         entry
@@ -60,14 +61,14 @@ class BIOSIntegerAttribute : public BIOSAttribute
         Table& attrValueEntry) override;
 
     int updateAttrVal(Table& newValue, uint16_t attrHdl, uint8_t attrType,
-                      const PropertyValue& newPropVal);
+                      const pldm::utils::PropertyValue& newPropVal);
 
   private:
     /** @brief Integer field from json */
     table::attribute::IntegerField integerInfo;
 
     /** @brief Get pldm value from dbus propertyValue */
-    uint64_t getAttrValue(const PropertyValue& value);
+    uint64_t getAttrValue(const pldm::utils::PropertyValue& value);
 
     /** @brief Get value on dbus */
     uint64_t getAttrValue();

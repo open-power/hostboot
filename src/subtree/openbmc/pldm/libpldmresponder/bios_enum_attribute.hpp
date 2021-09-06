@@ -28,7 +28,8 @@ class BIOSEnumAttribute : public BIOSAttribute
      *  @param[in] entry - Json Object
      *  @param[in] dbusHandler - Dbus Handler
      */
-    BIOSEnumAttribute(const Json& entry, DBusHandler* const dbusHandler);
+    BIOSEnumAttribute(const Json& entry,
+                      pldm::utils::DBusHandler* const dbusHandler);
 
     /** @brief Set Attribute value On Dbus according to the attribute value
      *         entry
@@ -64,7 +65,7 @@ class BIOSEnumAttribute : public BIOSAttribute
         Table& attrValueEntry) override;
 
     int updateAttrVal(Table& newValue, uint16_t attrHdl, uint8_t attrType,
-                      const PropertyValue& newPropVal);
+                      const pldm::utils::PropertyValue& newPropVal);
 
   private:
     std::vector<std::string> possibleValues;
@@ -87,7 +88,7 @@ class BIOSEnumAttribute : public BIOSAttribute
         getPossibleValuesHandle(const BIOSStringTable& stringTable,
                                 const std::vector<std::string>& pVs);
 
-    using ValMap = std::map<PropertyValue, std::string>;
+    using ValMap = std::map<pldm::utils::PropertyValue, std::string>;
 
     /** @brief Map of value on dbus and pldm */
     ValMap valMap;
@@ -107,7 +108,7 @@ class BIOSEnumAttribute : public BIOSAttribute
      *
      *  @return The index of the property value in possible values
      */
-    uint8_t getAttrValueIndex(const PropertyValue& propValue);
+    uint8_t getAttrValueIndex(const pldm::utils::PropertyValue& propValue);
 };
 
 } // namespace bios

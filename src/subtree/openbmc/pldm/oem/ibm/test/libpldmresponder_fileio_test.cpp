@@ -11,7 +11,6 @@
 #include "xyz/openbmc_project/Common/error.hpp"
 
 #include <nlohmann/json.hpp>
-#include <phosphor-logging/elog-errors.hpp>
 
 #include <filesystem>
 #include <fstream>

@@ -6,6 +6,8 @@
 #include <tuple>
 #include <variant>
 
+using namespace pldm::utils;
+
 namespace pldm
 {
 namespace responder

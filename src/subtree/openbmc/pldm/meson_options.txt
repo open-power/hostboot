@@ -11,6 +11,8 @@ option('oem-ibm-dma-maxsize', type: 'integer', min:4096, max: 16773120, descript
 option('softoff', type: 'feature', description: 'Build soft power off application', value: 'enabled')
 option('softoff-timeout-seconds', type: 'integer', description: 'softoff: Time to wait for host to gracefully shutdown', value: 7200)
 
+option('systemd', type: 'feature', description: 'Include systemd support', value: 'enabled')
+
 # Timing specifications for PLDM messages
 option('number-of-request-retries', type: 'integer', min: 2, max: 30, description: 'The number of times a requester is obligated to retry a request', value: 2)
 option('instance-id-expiration-interval', type: 'integer', min: 5, max: 6, description: 'Instance ID expiration interval in seconds', value: 5)

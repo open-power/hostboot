@@ -13,8 +13,6 @@
 #include <cstdint>
 #include <map>
 
-using namespace pldm::responder::pdr;
-
 namespace pldm
 {
 namespace responder
@@ -34,8 +32,9 @@ namespace platform_state_sensor
 template <class DBusInterface>
 uint8_t getStateSensorEventState(
     const DBusInterface& dBusIntf,
-    const std::map<State, pldm::utils::PropertyValue>& stateToDbusValue,
-    const DBusMapping& dbusMapping)
+    const std::map<pldm::responder::pdr_utils::State,
+                   pldm::utils::PropertyValue>& stateToDbusValue,
+    const pldm::utils::DBusMapping& dbusMapping)
 {
     try
     {
@@ -88,7 +87,7 @@ int getStateSensorReadingsHandler(
 
     std::unique_ptr<pldm_pdr, decltype(&pldm_pdr_destroy)> stateSensorPdrRepo(
         pldm_pdr_init(), pldm_pdr_destroy);
-    Repo stateSensorPDRs(stateSensorPdrRepo.get());
+    pldm::responder::pdr_utils::Repo stateSensorPDRs(stateSensorPdrRepo.get());
     getRepoByType(handler.getRepo(), stateSensorPDRs, PLDM_STATE_SENSOR_PDR);
     if (stateSensorPDRs.empty())
     {
@@ -96,7 +95,7 @@ int getStateSensorReadingsHandler(
         return PLDM_PLATFORM_INVALID_SENSOR_ID;
     }
 
-    PdrEntry pdrEntry{};
+    pldm::responder::pdr_utils::PdrEntry pdrEntry{};
     auto pdrRecord = stateSensorPDRs.getFirstRecord(pdrEntry);
     while (pdrRecord)
     {
@@ -135,8 +134,8 @@ int getStateSensorReadingsHandler(
     int rc = PLDM_SUCCESS;
     try
     {
-        const auto& [dbusMappings, dbusValMaps] =
-            handler.getDbusObjMaps(sensorId, TypeId::PLDM_SENSOR_ID);
+        const auto& [dbusMappings, dbusValMaps] = handler.getDbusObjMaps(
+            sensorId, pldm::responder::pdr_utils::TypeId::PLDM_SENSOR_ID);
 
         stateField.clear();
         for (size_t i = 0; i < sensorRearmCnt; i++)

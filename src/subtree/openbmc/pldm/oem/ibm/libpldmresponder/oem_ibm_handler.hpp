@@ -52,7 +52,8 @@ class Handler : public oem_platform::Handler
   public:
     Handler(const pldm::utils::DBusHandler* dBusIntf,
             pldm::responder::CodeUpdate* codeUpdate, int mctp_fd,
-            uint8_t mctp_eid, Requester& requester, sdeventplus::Event& event,
+            uint8_t mctp_eid, pldm::dbus_api::Requester& requester,
+            sdeventplus::Event& event,
             pldm::requester::Handler<pldm::requester::Request>* handler) :
         oem_platform::Handler(dBusIntf),
         codeUpdate(codeUpdate), platformHandler(nullptr), mctp_fd(mctp_fd),
@@ -62,8 +63,9 @@ class Handler : public oem_platform::Handler
     }
 
     int getOemStateSensorReadingsHandler(
-        EntityType entityType, EntityInstance entityInstance,
-        StateSetId stateSetId, CompositeCount compSensorCnt,
+        EntityType entityType, pldm::pdr::EntityInstance entityInstance,
+        pldm::pdr::StateSetId stateSetId,
+        pldm::pdr::CompositeCount compSensorCnt,
         std::vector<get_sensor_state_field>& stateField);
 
     int oemSetStateEffecterStatesHandler(
@@ -159,7 +161,7 @@ class Handler : public oem_platform::Handler
     /** @brief reference to Requester object, primarily used to access API to
      *  obtain PLDM instance id.
      */
-    Requester& requester;
+    pldm::dbus_api::Requester& requester;
     /** @brief sdeventplus event source */
     std::unique_ptr<sdeventplus::source::Defer> assembleImageEvent;
     std::unique_ptr<sdeventplus::source::Defer> startUpdateEvent;

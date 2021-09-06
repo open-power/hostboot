@@ -16,9 +16,6 @@
 #include <map>
 #include <optional>
 
-using namespace pldm::responder::pdr;
-using namespace pldm::utils;
-
 namespace pldm
 {
 namespace responder
@@ -35,14 +32,14 @@ namespace platform_numeric_effecter
  *          failure, PropertyValue: The value to be set
  */
 template <typename T>
-std::pair<int, std::optional<PropertyValue>>
+std::pair<int, std::optional<pldm::utils::PropertyValue>>
     getEffecterRawValue(const pldm_numeric_effecter_value_pdr* pdr,
                         T& effecterValue, std::string propertyType)
 {
     // X = Round [ (Y - B) / m ]
     // refer to DSP0248_1.2.0 27.8
     int rc = 0;
-    PropertyValue value;
+    pldm::utils::PropertyValue value;
     switch (pdr->effecter_data_size)
     {
         case PLDM_EFFECTER_DATA_SIZE_UINT8:
@@ -58,8 +55,6 @@ std::pair<int, std::optional<PropertyValue>>
             value = rawValue;
             if (propertyType == "uint64_t")
             {
-                std::cerr << " Inside if when propertytype is uint64_t"
-                          << std::endl;
                 auto tempValue = std::get<uint8_t>(value);
                 value = static_cast<uint64_t>(tempValue);
             }
@@ -164,7 +159,7 @@ std::pair<int, std::optional<PropertyValue>>
  *  @return std::pair<int, std::optional<PropertyValue>> - rc:Success or
  *          failure, PropertyValue: The value to be set
  */
-std::pair<int, std::optional<PropertyValue>>
+std::pair<int, std::optional<pldm::utils::PropertyValue>>
     convertToDbusValue(const pldm_numeric_effecter_value_pdr* pdr,
                        uint8_t effecterDataSize, uint8_t* effecterValue,
                        std::string propertyType)
@@ -236,9 +231,10 @@ int setNumericEffecterValueHandler(const DBusInterface& dBusIntf,
 
     std::unique_ptr<pldm_pdr, decltype(&pldm_pdr_destroy)>
         numericEffecterPdrRepo(pldm_pdr_init(), pldm_pdr_destroy);
-    Repo numericEffecterPDRs(numericEffecterPdrRepo.get());
-    getRepoByType(handler.getRepo(), numericEffecterPDRs,
-                  PLDM_NUMERIC_EFFECTER_PDR);
+    pldm::responder::pdr_utils::Repo numericEffecterPDRs(
+        numericEffecterPdrRepo.get());
+    pldm::responder::pdr::getRepoByType(handler.getRepo(), numericEffecterPDRs,
+                                        PLDM_NUMERIC_EFFECTER_PDR);
     if (numericEffecterPDRs.empty())
     {
         std::cerr << "The Numeric Effecter PDR repo is empty." << std::endl;
@@ -247,7 +243,7 @@ int setNumericEffecterValueHandler(const DBusInterface& dBusIntf,
 
     // Get the pdr structure of pldm_numeric_effecter_value_pdr according
     // to the effecterId
-    PdrEntry pdrEntry{};
+    pldm::responder::pdr_utils::PdrEntry pdrEntry{};
     auto pdrRecord = numericEffecterPDRs.getFirstRecord(pdrEntry);
     while (pdrRecord)
     {
@@ -277,7 +273,7 @@ int setNumericEffecterValueHandler(const DBusInterface& dBusIntf,
     {
         const auto& [dbusMappings, dbusValMaps] =
             handler.getDbusObjMaps(effecterId);
-        DBusMapping dbusMapping{
+        pldm::utils::DBusMapping dbusMapping{
             dbusMappings[0].objectPath, dbusMappings[0].interface,
             dbusMappings[0].propertyName, dbusMappings[0].propertyType};
 

@@ -15,6 +15,8 @@
 #include <fstream>
 namespace pldm
 {
+using namespace utils;
+
 namespace responder
 {
 using namespace oem_ibm_platform;
@@ -304,7 +306,7 @@ void CodeUpdate::setVersions()
                             break;
                         }
                     }
-                    catch (const sdbusplus::exception::SdBusError& e)
+                    catch (const sdbusplus::exception::exception& e)
                     {
                         std::cerr << "Error in getting Activation status \n";
                     }

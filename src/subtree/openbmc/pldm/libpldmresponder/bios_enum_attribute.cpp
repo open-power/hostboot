@@ -6,6 +6,8 @@
 
 #include <iostream>
 
+using namespace pldm::utils;
+
 namespace pldm
 {
 namespace responder

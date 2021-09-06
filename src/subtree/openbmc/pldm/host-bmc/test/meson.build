@@ -20,6 +20,7 @@ foreach t : tests
                          host_bmc_test_src,
                          libpldm_dep,
                          libpldmutils,
+                         nlohmann_json,
                          phosphor_dbus_interfaces,
                          sdbusplus,
                          sdeventplus]),

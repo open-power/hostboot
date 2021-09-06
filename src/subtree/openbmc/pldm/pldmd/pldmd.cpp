@@ -38,6 +38,7 @@
 #include "dbus_impl_pdr.hpp"
 #include "host-bmc/dbus_to_event_handler.hpp"
 #include "host-bmc/dbus_to_host_effecters.hpp"
+#include "host-bmc/host_condition.hpp"
 #include "host-bmc/host_pdr_handler.hpp"
 #include "libpldmresponder/base.hpp"
 #include "libpldmresponder/bios.hpp"
@@ -167,12 +168,14 @@ int main(int argc, char** argv)
     auto event = Event::get_default();
     auto& bus = pldm::utils::DBusHandler::getBus();
     dbus_api::Requester dbusImplReq(bus, "/xyz/openbmc_project/pldm");
+
     Invoker invoker{};
     requester::Handler<requester::Request> reqHandler(sockfd, event,
                                                       dbusImplReq);
 
 #ifdef LIBPLDMRESPONDER
     using namespace pldm::state_sensor;
+    dbus_api::Host dbusImplHost(bus, "/xyz/openbmc_project/pldm");
     std::unique_ptr<pldm_pdr, decltype(&pldm_pdr_destroy)> pdrRepo(
         pldm_pdr_init(), pldm_pdr_destroy);
     std::unique_ptr<pldm_entity_association_tree,
@@ -183,7 +186,7 @@ int main(int argc, char** argv)
                     decltype(&pldm_entity_association_tree_destroy)>
         bmcEntityTree(pldm_entity_association_tree_init(),
                       pldm_entity_association_tree_destroy);
-    std::unique_ptr<HostPDRHandler> hostPDRHandler;
+    std::shared_ptr<HostPDRHandler> hostPDRHandler;
     std::unique_ptr<pldm::host_effecters::HostEffecterParser>
         hostEffecterParser;
     std::unique_ptr<DbusToPLDMEvent> dbusToPLDMEventHandler;
@@ -191,10 +194,14 @@ int main(int argc, char** argv)
     auto hostEID = pldm::utils::readHostEID();
     if (hostEID)
     {
-        hostPDRHandler = std::make_unique<HostPDRHandler>(
+        hostPDRHandler = std::make_shared<HostPDRHandler>(
             sockfd, hostEID, event, pdrRepo.get(), EVENTS_JSONS_DIR,
             entityTree.get(), bmcEntityTree.get(), dbusImplReq, &reqHandler,
             verbose);
+        // HostFirmware interface needs access to hostPDR to know if host
+        // is running
+        dbusImplHost.setHostPdrObj(hostPDRHandler);
+
         hostEffecterParser =
             std::make_unique<pldm::host_effecters::HostEffecterParser>(
                 &dbusImplReq, sockfd, pdrRepo.get(), dbusHandler.get(),
@@ -242,6 +249,11 @@ int main(int argc, char** argv)
     dbus_api::Pdr dbusImplPdr(bus, "/xyz/openbmc_project/pldm", pdrRepo.get());
     sdbusplus::xyz::openbmc_project::PLDM::server::Event dbusImplEvent(
         bus, "/xyz/openbmc_project/pldm");
+
+    if (hostPDRHandler)
+    {
+        hostPDRHandler->setHostFirmwareCondition();
+    }
 #endif
 
     pldm::utils::CustomFD socketFd(sockfd);
@@ -364,6 +376,7 @@ int main(int argc, char** argv)
     bus.attach_event(event.get(), SD_EVENT_PRIORITY_NORMAL);
     bus.request_name("xyz.openbmc_project.PLDM");
     IO io(event, socketFd(), EPOLLIN, std::move(callback));
+
     event.loop();
 
     result = shutdown(sockfd, SHUT_RDWR);

@@ -89,26 +89,6 @@ inline Json readJson(const std::string& path)
     return Json::parse(jsonFile);
 }
 
-/** @brief Function to get the Bitfield count to 1
- *
- *  @param[in] bit - Bitfield
- *
- *  @return - uint8_t return the number of 1
- */
-inline uint8_t getBitfieldCount(const bitfield8_t bit)
-{
-    uint8_t count = 0;
-    for (uint8_t i = 0; i < 8; ++i)
-    {
-        if (bit.byte & (1 << i))
-        {
-            ++count;
-        }
-    }
-
-    return count;
-}
-
 /** @brief Populate the mapping between D-Bus property stateId and attribute
  *          value for the effecter PDR enumeration attribute.
  *
@@ -224,7 +204,6 @@ class Repo : public RepoInterface
     bool empty() override;
 };
 
-using namespace pldm::pdr;
 /** @brief Parse the State Sensor PDR and return the parsed sensor info which
  *         will be used to lookup the sensor info in the PlatformEventMessage
  *         command of sensorEvent type.
@@ -233,7 +212,8 @@ using namespace pldm::pdr;
  *
  *  @return terminus handle, sensor ID and parsed sensor info
  */
-std::tuple<TerminusHandle, SensorID, SensorInfo>
+std::tuple<pldm::pdr::TerminusHandle, pldm::pdr::SensorID,
+           pldm::pdr::SensorInfo>
     parseStateSensorPDR(const std::vector<uint8_t>& stateSensorPdr);
 
 } // namespace pdr_utils

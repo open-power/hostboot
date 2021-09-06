@@ -9,8 +9,6 @@
 #include <fstream>
 #include <map>
 
-using namespace pldm::dbus_api;
-
 namespace pldm
 {
 namespace requester

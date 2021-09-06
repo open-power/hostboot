@@ -10,6 +10,7 @@
 #include <gtest/gtest.h>
 
 using namespace pldm::responder::bios;
+using namespace pldm::utils;
 using ::testing::_;
 using ::testing::ElementsAreArray;
 using ::testing::Return;

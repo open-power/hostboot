@@ -1,3 +1,5 @@
+#include "config.h"
+
 #include "utils.hpp"
 
 #include "libpldm/pdr.h"
@@ -24,7 +26,6 @@ namespace utils
 constexpr auto mapperBusName = "xyz.openbmc_project.ObjectMapper";
 constexpr auto mapperPath = "/xyz/openbmc_project/object_mapper";
 constexpr auto mapperInterface = "xyz.openbmc_project.ObjectMapper";
-constexpr auto eidPath = "/usr/share/pldm/host_eid";
 
 std::vector<std::vector<uint8_t>> findStateEffecterPDR(uint8_t /*tid*/,
                                                        uint16_t entityID,
@@ -137,7 +138,7 @@ std::vector<std::vector<uint8_t>> findStateSensorPDR(uint8_t /*tid*/,
 uint8_t readHostEID()
 {
     uint8_t eid{};
-    std::ifstream eidFile{eidPath};
+    std::ifstream eidFile{HOST_EID_PATH};
     if (!eidFile.good())
     {
         std::cerr << "Could not open host EID file"

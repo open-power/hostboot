@@ -18,9 +18,6 @@
 #include <memory>
 #include <vector>
 
-using namespace pldm::dbus_api;
-using namespace pldm::responder::events;
-
 namespace pldm
 {
 
@@ -51,6 +48,18 @@ struct SensorEntry
         return ((terminusID < e.terminusID) ||
                 ((terminusID == e.terminusID) && (sensorID < e.sensorID)));
     }
+};
+
+/* @struct TerminusLocatorInfo
+ * Contains validity, eid, terminus_id and terminus handle
+ * of a terminus locator PDR.
+ */
+struct TlInfo
+{
+    uint8_t valid;
+    uint8_t eid;
+    uint8_t tid;
+    uint16_t terminusHandle;
 };
 
 using HostStateSensorMap = std::map<SensorEntry, pdr::SensorInfo>;
@@ -92,7 +101,8 @@ class HostPDRHandler
         int mctp_fd, uint8_t mctp_eid, sdeventplus::Event& event,
         pldm_pdr* repo, const std::string& eventsJsonsDir,
         pldm_entity_association_tree* entityTree,
-        pldm_entity_association_tree* bmcEntityTree, Requester& requester,
+        pldm_entity_association_tree* bmcEntityTree,
+        pldm::dbus_api::Requester& requester,
         pldm::requester::Handler<pldm::requester::Request>* handler,
         bool verbose = false);
 
@@ -131,8 +141,9 @@ class HostPDRHandler
      *
      *  @return PLDM completion code
      */
-    int handleStateSensorEvent(const StateSensorEntry& entry,
-                               pdr::EventState state);
+    int handleStateSensorEvent(
+        const pldm::responder::events::StateSensorEntry& entry,
+        pdr::EventState state);
 
     /** @brief Parse state sensor PDRs and populate the sensorMap lookup data
      *         structure
@@ -144,19 +155,35 @@ class HostPDRHandler
     void parseStateSensorPDRs(const PDRList& stateSensorPDRs,
                               const TLPDRMap& tlpdrInfo);
 
-  private:
-    /** @brief deferred function to fetch PDR from Host, scheduled to work on
-     *  the event loop. The PDR exchg with the host is async.
-     *  @param[in] source - sdeventplus event source
-     */
-    void _fetchPDR(sdeventplus::source::EventBase& source);
-
     /** @brief this function sends a GetPDR request to Host firmware.
      *  And processes the PDRs based on type
      *
      *  @param[in] - nextRecordHandle - the next record handle to ask for
      */
     void getHostPDR(uint32_t nextRecordHandle = 0);
+
+    /** @brief set the Host firmware condition when pldmd starts
+     */
+    void setHostFirmwareCondition();
+
+    /** @brief set HostSensorStates when pldmd starts or restarts
+     *  and updates the D-Bus property
+     *  @param[in] stateSensorPDRs - host state sensor PDRs
+     *  @param[in] tlinfo - vector of struct TlInfo
+     */
+    void setHostSensorState(const PDRList& stateSensorPDRs,
+                            const std::vector<TlInfo>& tlinfo);
+
+    /** @brief check whether Host is running when pldmd starts
+     */
+    bool isHostUp();
+
+  private:
+    /** @brief deferred function to fetch PDR from Host, scheduled to work on
+     *  the event loop. The PDR exchg with the host is async.
+     *  @param[in] source - sdeventplus event source
+     */
+    void _fetchPDR(sdeventplus::source::EventBase& source);
 
     /** @brief Merge host firmware's entity association PDRs into BMC's
      *  @details A merge operation involves adding a pldm_entity under the
@@ -204,7 +231,7 @@ class HostPDRHandler
     /** @brief pointer to BMC's primary PDR repo, host PDRs are added here */
     pldm_pdr* repo;
 
-    StateSensorHandler stateSensorHandler;
+    pldm::responder::events::StateSensorHandler stateSensorHandler;
     /** @brief Pointer to BMC's and Host's entity association tree */
     pldm_entity_association_tree* entityTree;
 
@@ -214,7 +241,7 @@ class HostPDRHandler
     /** @brief reference to Requester object, primarily used to access API to
      *  obtain PLDM instance id.
      */
-    Requester& requester;
+    pldm::dbus_api::Requester& requester;
 
     /** @brief PLDM request handler */
     pldm::requester::Handler<pldm::requester::Request>* handler;
@@ -239,6 +266,9 @@ class HostPDRHandler
      */
     HostStateSensorMap sensorMap;
     bool verbose;
+
+    /** @brief whether response received from Host */
+    bool responseReceived;
 };
 
 } // namespace pldm

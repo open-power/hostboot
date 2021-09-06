@@ -190,7 +190,7 @@ class DBusHandler : public DBusHandlerInterface
      *
      *  @return std::string - the dbus service name
      *
-     *  @throw sdbusplus::exception::SdBusError when it fails
+     *  @throw sdbusplus::exception::exception when it fails
      */
     std::string getService(const char* path,
                            const char* interface) const override;
@@ -203,7 +203,7 @@ class DBusHandler : public DBusHandlerInterface
      *
      *  @return The value of the property(type: variant)
      *
-     *  @throw sdbusplus::exception::SdBusError when it fails
+     *  @throw sdbusplus::exception::exception when it fails
      */
     PropertyValue
         getDbusPropertyVariant(const char* objPath, const char* dbusProp,
@@ -220,7 +220,7 @@ class DBusHandler : public DBusHandlerInterface
      *
      *  @return The value of the property
      *
-     *  @throw sdbusplus::exception::SdBusError when dbus request fails
+     *  @throw sdbusplus::exception::exception when dbus request fails
      *         std::bad_variant_access when \p Property and property on dbus do
      *         not match
      */
@@ -239,7 +239,7 @@ class DBusHandler : public DBusHandlerInterface
      *                       type for the D-Bus object
      *  @param[in] value - The value to be set
      *
-     *  @throw sdbusplus::exception::SdBusError when it fails
+     *  @throw sdbusplus::exception::exception when it fails
      */
     void setDbusProperty(const DBusMapping& dBusMap,
                          const PropertyValue& value) const override;

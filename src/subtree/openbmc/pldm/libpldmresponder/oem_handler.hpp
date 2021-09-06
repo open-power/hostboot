@@ -7,8 +7,6 @@
 namespace pldm
 {
 
-using namespace pdr;
-
 namespace responder
 {
 
@@ -37,8 +35,9 @@ class Handler : public CmdHandler
      *            fails
      */
     virtual int getOemStateSensorReadingsHandler(
-        EntityType entityType, EntityInstance entityInstance,
-        StateSetId stateSetId, CompositeCount compSensorCnt,
+        EntityType entityType, pldm::pdr::EntityInstance entityInstance,
+        pldm::pdr::StateSetId stateSetId,
+        pldm::pdr::CompositeCount compSensorCnt,
         std::vector<get_sensor_state_field>& stateField) = 0;
 
     /** @brief Interface to set the effecter requested by pldm requester

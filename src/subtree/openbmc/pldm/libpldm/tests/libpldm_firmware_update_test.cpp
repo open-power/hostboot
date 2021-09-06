@@ -1975,3 +1975,948 @@ TEST(UpdateComponent, errorPathDecodeResponse)
         &updateOptionFlagsEnabled, &timeBeforeReqFWData);
     EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
 }
+
+TEST(RequestFirmwareData, goodPathDecodeRequest)
+{
+    constexpr uint32_t offset = 300;
+    constexpr uint32_t length = 255;
+    constexpr std::array<uint8_t,
+                         hdrSize + sizeof(pldm_request_firmware_data_req)>
+        reqFWDataReq{0x00, 0x00, 0x00, 0x2C, 0x01, 0x00,
+                     0x00, 0xFF, 0x00, 0x00, 0x00};
+    auto requestMsg = reinterpret_cast<const pldm_msg*>(reqFWDataReq.data());
+
+    uint32_t outOffset = 0;
+    uint32_t outLength = 0;
+    auto rc = decode_request_firmware_data_req(
+        requestMsg, sizeof(pldm_request_firmware_data_req), &outOffset,
+        &outLength);
+
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+    EXPECT_EQ(outOffset, offset);
+    EXPECT_EQ(outLength, length);
+}
+
+TEST(RequestFirmwareData, errorPathDecodeRequest)
+{
+    constexpr std::array<uint8_t,
+                         hdrSize + sizeof(pldm_request_firmware_data_req)>
+        reqFWDataReq{0x00, 0x00, 0x00, 0x2C, 0x01, 0x00,
+                     0x00, 0x1F, 0x00, 0x00, 0x00};
+    auto requestMsg = reinterpret_cast<const pldm_msg*>(reqFWDataReq.data());
+
+    uint32_t outOffset = 0;
+    uint32_t outLength = 0;
+    auto rc = decode_request_firmware_data_req(
+        nullptr, sizeof(pldm_request_firmware_data_req), &outOffset,
+        &outLength);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = decode_request_firmware_data_req(
+        requestMsg, sizeof(pldm_request_firmware_data_req), nullptr,
+        &outLength);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = decode_request_firmware_data_req(
+        requestMsg, sizeof(pldm_request_firmware_data_req), &outOffset,
+        nullptr);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = decode_request_firmware_data_req(
+        requestMsg, sizeof(pldm_request_firmware_data_req) - 1, &outOffset,
+        &outLength);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_LENGTH);
+
+    rc = decode_request_firmware_data_req(
+        requestMsg, sizeof(pldm_request_firmware_data_req), &outOffset,
+        &outLength);
+    EXPECT_EQ(rc, PLDM_FWUP_INVALID_TRANSFER_LENGTH);
+}
+
+TEST(RequestFirmwareData, goodPathEncodeResponse)
+{
+    constexpr uint8_t instanceId = 3;
+    constexpr uint8_t completionCode = PLDM_SUCCESS;
+    constexpr std::array<uint8_t, hdrSize + sizeof(completionCode) +
+                                      PLDM_FWUP_BASELINE_TRANSFER_SIZE>
+        outReqFwDataResponse1{0x03, 0x05, 0x15, 0x00, 0x01, 0x02, 0x03, 0x04,
+                              0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C,
+                              0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13, 0x14,
+                              0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C,
+                              0x1D, 0x1E, 0x1F, 0x20};
+    std::array<uint8_t, hdrSize + sizeof(completionCode) +
+                            PLDM_FWUP_BASELINE_TRANSFER_SIZE>
+        reqFwDataResponse1{0x00, 0x00, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04,
+                           0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C,
+                           0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13, 0x14,
+                           0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C,
+                           0x1D, 0x1E, 0x1F, 0x20};
+    auto responseMsg1 = reinterpret_cast<pldm_msg*>(reqFwDataResponse1.data());
+    auto rc = encode_request_firmware_data_resp(
+        instanceId, completionCode, responseMsg1,
+        sizeof(completionCode) + PLDM_FWUP_BASELINE_TRANSFER_SIZE);
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+    EXPECT_EQ(reqFwDataResponse1, outReqFwDataResponse1);
+
+    constexpr std::array<uint8_t, hdrSize + sizeof(completionCode)>
+        outReqFwDataResponse2{0x03, 0x05, 0x15, 0x82};
+    std::array<uint8_t, hdrSize + sizeof(completionCode)> reqFwDataResponse2{
+        0x00, 0x00, 0x00, 0x00};
+    auto responseMsg2 = reinterpret_cast<pldm_msg*>(reqFwDataResponse2.data());
+    rc = encode_request_firmware_data_resp(
+        instanceId, PLDM_FWUP_DATA_OUT_OF_RANGE, responseMsg2,
+        sizeof(completionCode));
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+    EXPECT_EQ(reqFwDataResponse2, outReqFwDataResponse2);
+}
+
+TEST(RequestFirmwareData, errorPathEncodeResponse)
+{
+    std::array<uint8_t, hdrSize> reqFwDataResponse{0x00, 0x00, 0x00};
+    auto responseMsg = reinterpret_cast<pldm_msg*>(reqFwDataResponse.data());
+    auto rc = encode_request_firmware_data_resp(0, PLDM_SUCCESS, nullptr, 0);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = encode_request_firmware_data_resp(0, PLDM_SUCCESS, responseMsg, 0);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+}
+
+TEST(TransferComplete, goodPathDecodeRequest)
+{
+    constexpr uint8_t transferResult = PLDM_FWUP_TRANSFER_SUCCESS;
+    constexpr std::array<uint8_t, hdrSize + sizeof(transferResult)>
+        transferCompleteReq1{0x00, 0x00, 0x00, 0x00};
+    auto requestMsg1 =
+        reinterpret_cast<const pldm_msg*>(transferCompleteReq1.data());
+    uint8_t outTransferResult = 0;
+
+    auto rc = decode_transfer_complete_req(requestMsg1, sizeof(transferResult),
+                                           &outTransferResult);
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+    EXPECT_EQ(outTransferResult, transferResult);
+
+    constexpr std::array<uint8_t, hdrSize + sizeof(transferResult)>
+        transferCompleteReq2{0x00, 0x00, 0x00, 0x02};
+    auto requestMsg2 =
+        reinterpret_cast<const pldm_msg*>(transferCompleteReq2.data());
+    rc = decode_transfer_complete_req(requestMsg2, sizeof(transferResult),
+                                      &outTransferResult);
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+    EXPECT_EQ(outTransferResult, PLDM_FWUP_TRANSFER_ERROR_IMAGE_CORRUPT);
+}
+
+TEST(TransferComplete, errorPathDecodeRequest)
+{
+    constexpr std::array<uint8_t, hdrSize> transferCompleteReq{0x00, 0x00,
+                                                               0x00};
+    auto requestMsg =
+        reinterpret_cast<const pldm_msg*>(transferCompleteReq.data());
+    uint8_t outTransferResult = 0;
+
+    auto rc = decode_transfer_complete_req(nullptr, 0, &outTransferResult);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = decode_transfer_complete_req(requestMsg, 0, nullptr);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = decode_transfer_complete_req(requestMsg, 0, &outTransferResult);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_LENGTH);
+}
+
+TEST(TransferComplete, goodPathEncodeResponse)
+{
+    constexpr uint8_t instanceId = 4;
+    constexpr uint8_t completionCode = PLDM_SUCCESS;
+    constexpr std::array<uint8_t, hdrSize + sizeof(completionCode)>
+        outTransferCompleteResponse1{0x04, 0x05, 0x16, 0x00};
+    std::array<uint8_t, hdrSize + sizeof(completionCode)>
+        transferCompleteResponse1{0x00, 0x00, 0x00, 0x00};
+    auto responseMsg1 =
+        reinterpret_cast<pldm_msg*>(transferCompleteResponse1.data());
+    auto rc = encode_transfer_complete_resp(
+        instanceId, completionCode, responseMsg1, sizeof(completionCode));
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+    EXPECT_EQ(transferCompleteResponse1, outTransferCompleteResponse1);
+
+    constexpr std::array<uint8_t, hdrSize + sizeof(completionCode)>
+        outTransferCompleteResponse2{0x04, 0x05, 0x16, 0x88};
+    std::array<uint8_t, hdrSize + sizeof(completionCode)>
+        transferCompleteResponse2{0x00, 0x00, 0x00, 0x00};
+    auto responseMsg2 =
+        reinterpret_cast<pldm_msg*>(transferCompleteResponse2.data());
+    rc = encode_transfer_complete_resp(instanceId,
+                                       PLDM_FWUP_COMMAND_NOT_EXPECTED,
+                                       responseMsg2, sizeof(completionCode));
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+    EXPECT_EQ(transferCompleteResponse2, outTransferCompleteResponse2);
+}
+
+TEST(TransferComplete, errorPathEncodeResponse)
+{
+    std::array<uint8_t, hdrSize> transferCompleteResponse{0x00, 0x00, 0x00};
+    auto responseMsg =
+        reinterpret_cast<pldm_msg*>(transferCompleteResponse.data());
+    auto rc = encode_transfer_complete_resp(0, PLDM_SUCCESS, nullptr, 0);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = encode_transfer_complete_resp(0, PLDM_SUCCESS, responseMsg, 0);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_LENGTH);
+}
+
+TEST(VerifyComplete, goodPathDecodeRequest)
+{
+    constexpr uint8_t verifyResult = PLDM_FWUP_VERIFY_SUCCESS;
+    constexpr std::array<uint8_t, hdrSize + sizeof(verifyResult)>
+        verifyCompleteReq1{0x00, 0x00, 0x00, 0x00};
+    auto requestMsg1 =
+        reinterpret_cast<const pldm_msg*>(verifyCompleteReq1.data());
+    uint8_t outVerifyResult = 0;
+
+    auto rc = decode_verify_complete_req(requestMsg1, sizeof(verifyResult),
+                                         &outVerifyResult);
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+    EXPECT_EQ(outVerifyResult, verifyResult);
+
+    constexpr std::array<uint8_t, hdrSize + sizeof(verifyResult)>
+        verifyCompleteReq2{0x00, 0x00, 0x00, 0x03};
+    auto requestMsg2 =
+        reinterpret_cast<const pldm_msg*>(verifyCompleteReq2.data());
+    rc = decode_verify_complete_req(requestMsg2, sizeof(verifyResult),
+                                    &outVerifyResult);
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+    EXPECT_EQ(outVerifyResult, PLDM_FWUP_VERIFY_FAILED_FD_SECURITY_CHECKS);
+}
+
+TEST(VerifyComplete, errorPathDecodeRequest)
+{
+    constexpr std::array<uint8_t, hdrSize> verifyCompleteReq{0x00, 0x00, 0x00};
+    auto requestMsg =
+        reinterpret_cast<const pldm_msg*>(verifyCompleteReq.data());
+    uint8_t outVerifyResult = 0;
+
+    auto rc = decode_verify_complete_req(nullptr, 0, &outVerifyResult);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = decode_verify_complete_req(requestMsg, 0, nullptr);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = decode_verify_complete_req(requestMsg, 0, &outVerifyResult);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_LENGTH);
+}
+
+TEST(VerifyComplete, goodPathEncodeResponse)
+{
+    constexpr uint8_t instanceId = 5;
+    constexpr uint8_t completionCode = PLDM_SUCCESS;
+    constexpr std::array<uint8_t, hdrSize + sizeof(completionCode)>
+        outVerifyCompleteResponse1{0x05, 0x05, 0x17, 0x00};
+    std::array<uint8_t, hdrSize + sizeof(completionCode)>
+        verifyCompleteResponse1{0x00, 0x00, 0x00, 0x00};
+    auto responseMsg1 =
+        reinterpret_cast<pldm_msg*>(verifyCompleteResponse1.data());
+    auto rc = encode_verify_complete_resp(instanceId, completionCode,
+                                          responseMsg1, sizeof(completionCode));
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+    EXPECT_EQ(verifyCompleteResponse1, outVerifyCompleteResponse1);
+
+    constexpr std::array<uint8_t, hdrSize + sizeof(completionCode)>
+        outVerifyCompleteResponse2{0x05, 0x05, 0x17, 0x88};
+    std::array<uint8_t, hdrSize + sizeof(completionCode)>
+        verifyCompleteResponse2{0x00, 0x00, 0x00, 0x00};
+    auto responseMsg2 =
+        reinterpret_cast<pldm_msg*>(verifyCompleteResponse2.data());
+    rc = encode_verify_complete_resp(instanceId, PLDM_FWUP_COMMAND_NOT_EXPECTED,
+                                     responseMsg2, sizeof(completionCode));
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+    EXPECT_EQ(verifyCompleteResponse2, outVerifyCompleteResponse2);
+}
+
+TEST(VerifyComplete, errorPathEncodeResponse)
+{
+    std::array<uint8_t, hdrSize> verifyCompleteResponse{0x00, 0x00, 0x00};
+    auto responseMsg =
+        reinterpret_cast<pldm_msg*>(verifyCompleteResponse.data());
+    auto rc = encode_verify_complete_resp(0, PLDM_SUCCESS, nullptr, 0);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = encode_verify_complete_resp(0, PLDM_SUCCESS, responseMsg, 0);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_LENGTH);
+}
+
+TEST(ApplyComplete, goodPathDecodeRequest)
+{
+    constexpr uint8_t applyResult1 =
+        PLDM_FWUP_APPLY_SUCCESS_WITH_ACTIVATION_METHOD;
+    // DC power cycle [Bit position 4] & AC power cycle [Bit position 5]
+    constexpr std::bitset<16> compActivationModification1{0x30};
+    constexpr std::array<uint8_t, hdrSize + sizeof(pldm_apply_complete_req)>
+        applyCompleteReq1{0x00, 0x00, 0x00, 0x01, 0x30, 0x00};
+    auto requestMsg1 =
+        reinterpret_cast<const pldm_msg*>(applyCompleteReq1.data());
+    uint8_t outApplyResult = 0;
+    bitfield16_t outCompActivationModification{};
+    auto rc = decode_apply_complete_req(
+        requestMsg1, sizeof(pldm_apply_complete_req), &outApplyResult,
+        &outCompActivationModification);
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+    EXPECT_EQ(outApplyResult, applyResult1);
+    EXPECT_EQ(outCompActivationModification.value, compActivationModification1);
+
+    constexpr uint8_t applyResult2 = PLDM_FWUP_APPLY_SUCCESS;
+    constexpr std::bitset<16> compActivationModification2{};
+    constexpr std::array<uint8_t, hdrSize + sizeof(pldm_apply_complete_req)>
+        applyCompleteReq2{0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    auto requestMsg2 =
+        reinterpret_cast<const pldm_msg*>(applyCompleteReq2.data());
+    rc = decode_apply_complete_req(requestMsg2, sizeof(pldm_apply_complete_req),
+                                   &outApplyResult,
+                                   &outCompActivationModification);
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+    EXPECT_EQ(outApplyResult, applyResult2);
+    EXPECT_EQ(outCompActivationModification.value, compActivationModification2);
+}
+
+TEST(ApplyComplete, errorPathDecodeRequest)
+{
+    constexpr std::array<uint8_t, hdrSize> applyCompleteReq1{0x00, 0x00, 0x00};
+    auto requestMsg1 =
+        reinterpret_cast<const pldm_msg*>(applyCompleteReq1.data());
+    uint8_t outApplyResult = 0;
+    bitfield16_t outCompActivationModification{};
+
+    auto rc = decode_apply_complete_req(
+        nullptr, sizeof(pldm_apply_complete_req), &outApplyResult,
+        &outCompActivationModification);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = decode_apply_complete_req(requestMsg1, sizeof(pldm_apply_complete_req),
+                                   nullptr, &outCompActivationModification);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = decode_apply_complete_req(requestMsg1, sizeof(pldm_apply_complete_req),
+                                   &outApplyResult, nullptr);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = decode_apply_complete_req(requestMsg1, 0, &outApplyResult,
+                                   &outCompActivationModification);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_LENGTH);
+
+    constexpr std::array<uint8_t, hdrSize + sizeof(pldm_apply_complete_req)>
+        applyCompleteReq2{0x00, 0x00, 0x00, 0x00, 0x01, 0x00};
+    auto requestMsg2 =
+        reinterpret_cast<const pldm_msg*>(applyCompleteReq2.data());
+    rc = decode_apply_complete_req(requestMsg2, sizeof(pldm_apply_complete_req),
+                                   &outApplyResult,
+                                   &outCompActivationModification);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+}
+
+TEST(ApplyComplete, goodPathEncodeResponse)
+{
+    constexpr uint8_t instanceId = 6;
+    constexpr uint8_t completionCode = PLDM_SUCCESS;
+    constexpr std::array<uint8_t, hdrSize + sizeof(completionCode)>
+        outApplyCompleteResponse1{0x06, 0x05, 0x18, 0x00};
+    std::array<uint8_t, hdrSize + sizeof(completionCode)>
+        applyCompleteResponse1{0x00, 0x00, 0x00, 0x00};
+    auto responseMsg1 =
+        reinterpret_cast<pldm_msg*>(applyCompleteResponse1.data());
+    auto rc = encode_apply_complete_resp(instanceId, completionCode,
+                                         responseMsg1, sizeof(completionCode));
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+    EXPECT_EQ(applyCompleteResponse1, outApplyCompleteResponse1);
+
+    constexpr std::array<uint8_t, hdrSize + sizeof(completionCode)>
+        outApplyCompleteResponse2{0x06, 0x05, 0x18, 0x88};
+    std::array<uint8_t, hdrSize + sizeof(completionCode)>
+        applyCompleteResponse2{0x00, 0x00, 0x00, 0x00};
+    auto responseMsg2 =
+        reinterpret_cast<pldm_msg*>(applyCompleteResponse2.data());
+    rc = encode_apply_complete_resp(instanceId, PLDM_FWUP_COMMAND_NOT_EXPECTED,
+                                    responseMsg2, sizeof(completionCode));
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+    EXPECT_EQ(applyCompleteResponse2, outApplyCompleteResponse2);
+}
+
+TEST(ApplyComplete, errorPathEncodeResponse)
+{
+    std::array<uint8_t, hdrSize> applyCompleteResponse{0x00, 0x00, 0x00};
+    auto responseMsg =
+        reinterpret_cast<pldm_msg*>(applyCompleteResponse.data());
+    auto rc = encode_apply_complete_resp(0, PLDM_SUCCESS, nullptr, 0);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = encode_apply_complete_resp(0, PLDM_SUCCESS, responseMsg, 0);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_LENGTH);
+}
+
+TEST(ActivateFirmware, goodPathEncodeRequest)
+{
+    constexpr uint8_t instanceId = 7;
+
+    std::array<uint8_t, hdrSize + sizeof(pldm_activate_firmware_req)> request{};
+    auto requestMsg = reinterpret_cast<pldm_msg*>(request.data());
+
+    auto rc = encode_activate_firmware_req(
+        instanceId, PLDM_ACTIVATE_SELF_CONTAINED_COMPONENTS, requestMsg,
+        sizeof(pldm_activate_firmware_req));
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+
+    std::array<uint8_t, hdrSize + sizeof(pldm_activate_firmware_req)>
+        outRequest{0x87, 0x05, 0x1A, 0x01};
+    EXPECT_EQ(request, outRequest);
+}
+
+TEST(ActivateFirmware, errorPathEncodeRequest)
+{
+    std::array<uint8_t, hdrSize + sizeof(pldm_activate_firmware_req)> request{};
+    auto requestMsg = reinterpret_cast<pldm_msg*>(request.data());
+
+    auto rc = encode_activate_firmware_req(
+        0, PLDM_ACTIVATE_SELF_CONTAINED_COMPONENTS, nullptr,
+        sizeof(pldm_activate_firmware_req));
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = encode_activate_firmware_req(
+        0, PLDM_ACTIVATE_SELF_CONTAINED_COMPONENTS, requestMsg, 0);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_LENGTH);
+
+    rc = encode_activate_firmware_req(0, 2, requestMsg,
+                                      sizeof(pldm_activate_firmware_req));
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+}
+
+TEST(ActivateFirmware, goodPathDecodeResponse)
+{
+    constexpr uint16_t estimatedTimeForActivation100s = 100;
+    constexpr std::array<uint8_t, hdrSize + sizeof(pldm_activate_firmware_resp)>
+        activateFirmwareResponse1{0x00, 0x00, 0x00, 0x00, 0x64, 0x00};
+    auto responseMsg1 =
+        reinterpret_cast<const pldm_msg*>(activateFirmwareResponse1.data());
+
+    uint8_t completionCode = 0;
+    uint16_t estimatedTimeForActivation = 0;
+
+    auto rc = decode_activate_firmware_resp(
+        responseMsg1, sizeof(pldm_activate_firmware_resp), &completionCode,
+        &estimatedTimeForActivation);
+
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+    EXPECT_EQ(completionCode, PLDM_SUCCESS);
+    EXPECT_EQ(estimatedTimeForActivation, estimatedTimeForActivation100s);
+
+    constexpr std::array<uint8_t, hdrSize + sizeof(completionCode)>
+        activateFirmwareResponse2{0x00, 0x00, 0x00, 0x85};
+    auto responseMsg2 =
+        reinterpret_cast<const pldm_msg*>(activateFirmwareResponse2.data());
+
+    rc = decode_activate_firmware_resp(responseMsg2, sizeof(completionCode),
+                                       &completionCode,
+                                       &estimatedTimeForActivation);
+
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+    EXPECT_EQ(completionCode, PLDM_FWUP_INCOMPLETE_UPDATE);
+}
+
+TEST(ActivateFirmware, errorPathDecodeResponse)
+{
+    constexpr std::array<uint8_t, hdrSize + sizeof(pldm_activate_firmware_resp)>
+        activateFirmwareResponse{0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    auto responseMsg =
+        reinterpret_cast<const pldm_msg*>(activateFirmwareResponse.data());
+
+    uint8_t completionCode = 0;
+    uint16_t estimatedTimeForActivation = 0;
+
+    auto rc = decode_activate_firmware_resp(
+        nullptr, sizeof(pldm_activate_firmware_resp), &completionCode,
+        &estimatedTimeForActivation);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = decode_activate_firmware_resp(responseMsg,
+                                       sizeof(pldm_activate_firmware_resp),
+                                       nullptr, &estimatedTimeForActivation);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = decode_activate_firmware_resp(responseMsg,
+                                       sizeof(pldm_activate_firmware_resp),
+                                       &completionCode, nullptr);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = decode_activate_firmware_resp(responseMsg, 0, &completionCode,
+                                       &estimatedTimeForActivation);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = decode_activate_firmware_resp(
+        responseMsg, sizeof(pldm_activate_firmware_resp) - 1, &completionCode,
+        &estimatedTimeForActivation);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_LENGTH);
+}
+
+TEST(GetStatus, goodPathEncodeRequest)
+{
+    constexpr uint8_t instanceId = 8;
+    std::array<uint8_t, hdrSize> request{};
+    auto requestMsg = reinterpret_cast<pldm_msg*>(request.data());
+
+    auto rc = encode_get_status_req(instanceId, requestMsg,
+                                    PLDM_GET_STATUS_REQ_BYTES);
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+
+    constexpr std::array<uint8_t, hdrSize> outRequest{0x88, 0x05, 0x1B};
+    EXPECT_EQ(request, outRequest);
+}
+
+TEST(GetStatus, errorPathEncodeRequest)
+{
+    std::array<uint8_t, hdrSize + sizeof(uint8_t)> request{};
+    auto requestMsg = reinterpret_cast<pldm_msg*>(request.data());
+
+    auto rc = encode_get_status_req(0, nullptr, PLDM_GET_STATUS_REQ_BYTES);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = encode_get_status_req(0, requestMsg, PLDM_GET_STATUS_REQ_BYTES + 1);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_LENGTH);
+}
+
+TEST(GetStatus, goodPathDecodeResponse)
+{
+    constexpr std::bitset<32> updateOptionFlagsEnabled1{0};
+    constexpr std::array<uint8_t, hdrSize + sizeof(pldm_get_status_resp)>
+        getStatusResponse1{0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x03,
+                           0x09, 0x65, 0x05, 0x00, 0x00, 0x00, 0x00};
+    auto responseMsg1 =
+        reinterpret_cast<const pldm_msg*>(getStatusResponse1.data());
+
+    uint8_t completionCode = 0;
+    uint8_t currentState = 0;
+    uint8_t previousState = 0;
+    uint8_t auxState = 0;
+    uint8_t auxStateStatus = 0;
+    uint8_t progressPercent = 0;
+    uint8_t reasonCode = 0;
+    bitfield32_t updateOptionFlagsEnabled{0};
+
+    auto rc = decode_get_status_resp(
+        responseMsg1, getStatusResponse1.size() - hdrSize, &completionCode,
+        &currentState, &previousState, &auxState, &auxStateStatus,
+        &progressPercent, &reasonCode, &updateOptionFlagsEnabled);
+
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+    EXPECT_EQ(completionCode, PLDM_SUCCESS);
+    EXPECT_EQ(currentState, PLDM_FD_STATE_IDLE);
+    EXPECT_EQ(previousState, PLDM_FD_STATE_DOWNLOAD);
+    EXPECT_EQ(auxState, PLDM_FD_IDLE_LEARN_COMPONENTS_READ_XFER);
+    EXPECT_EQ(auxStateStatus, PLDM_FD_TIMEOUT);
+    EXPECT_EQ(progressPercent, PLDM_FWUP_MAX_PROGRESS_PERCENT);
+    EXPECT_EQ(reasonCode, PLDM_FD_TIMEOUT_DOWNLOAD);
+    EXPECT_EQ(updateOptionFlagsEnabled.value, updateOptionFlagsEnabled1);
+
+    // Bit position 0 - Force update of component – FD will perform a force
+    // update of the component.
+    constexpr std::bitset<32> updateOptionFlagsEnabled2{1};
+    constexpr uint8_t progressPercent2 = 50;
+    constexpr std::array<uint8_t, hdrSize + sizeof(pldm_get_status_resp)>
+        getStatusResponse2{0x00, 0x00, 0x00, 0x00, 0x04, 0x03, 0x00,
+                           0x70, 0x32, 0x05, 0x01, 0x00, 0x00, 0x00};
+    auto responseMsg2 =
+        reinterpret_cast<const pldm_msg*>(getStatusResponse2.data());
+
+    rc = decode_get_status_resp(
+        responseMsg2, getStatusResponse2.size() - hdrSize, &completionCode,
+        &currentState, &previousState, &auxState, &auxStateStatus,
+        &progressPercent, &reasonCode, &updateOptionFlagsEnabled);
+
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+    EXPECT_EQ(completionCode, PLDM_SUCCESS);
+    EXPECT_EQ(currentState, PLDM_FD_STATE_VERIFY);
+    EXPECT_EQ(previousState, PLDM_FD_STATE_DOWNLOAD);
+    EXPECT_EQ(auxState, PLDM_FD_OPERATION_IN_PROGRESS);
+    EXPECT_EQ(auxStateStatus, PLDM_FD_VENDOR_DEFINED_STATUS_CODE_START);
+    EXPECT_EQ(progressPercent, progressPercent2);
+    EXPECT_EQ(reasonCode, PLDM_FD_TIMEOUT_DOWNLOAD);
+    EXPECT_EQ(updateOptionFlagsEnabled.value, updateOptionFlagsEnabled2);
+
+    constexpr std::array<uint8_t, hdrSize + sizeof(completionCode)>
+        getStatusResponse3{0x00, 0x00, 0x00, 0x04};
+    auto responseMsg3 =
+        reinterpret_cast<const pldm_msg*>(getStatusResponse3.data());
+    rc = decode_get_status_resp(
+        responseMsg3, getStatusResponse3.size() - hdrSize, &completionCode,
+        &currentState, &previousState, &auxState, &auxStateStatus,
+        &progressPercent, &reasonCode, &updateOptionFlagsEnabled);
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+    EXPECT_EQ(completionCode, PLDM_ERROR_NOT_READY);
+}
+
+TEST(GetStatus, errorPathDecodeResponse)
+{
+    uint8_t completionCode = 0;
+    uint8_t currentState = 0;
+    uint8_t previousState = 0;
+    uint8_t auxState = 0;
+    uint8_t auxStateStatus = 0;
+    uint8_t progressPercent = 0;
+    uint8_t reasonCode = 0;
+    bitfield32_t updateOptionFlagsEnabled{0};
+
+    constexpr std::array<uint8_t, hdrSize> getStatusResponse1{0x00, 0x00, 0x00};
+    auto responseMsg1 =
+        reinterpret_cast<const pldm_msg*>(getStatusResponse1.data());
+
+    auto rc = decode_get_status_resp(
+        nullptr, getStatusResponse1.size() - hdrSize, &completionCode,
+        &currentState, &previousState, &auxState, &auxStateStatus,
+        &progressPercent, &reasonCode, &updateOptionFlagsEnabled);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = decode_get_status_resp(
+        responseMsg1, getStatusResponse1.size() - hdrSize, nullptr,
+        &currentState, &previousState, &auxState, &auxStateStatus,
+        &progressPercent, &reasonCode, &updateOptionFlagsEnabled);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = decode_get_status_resp(
+        responseMsg1, getStatusResponse1.size() - hdrSize, &completionCode,
+        nullptr, &previousState, &auxState, &auxStateStatus, &progressPercent,
+        &reasonCode, &updateOptionFlagsEnabled);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = decode_get_status_resp(
+        responseMsg1, getStatusResponse1.size() - hdrSize, &completionCode,
+        &currentState, nullptr, &auxState, &auxStateStatus, &progressPercent,
+        &reasonCode, &updateOptionFlagsEnabled);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = decode_get_status_resp(
+        responseMsg1, getStatusResponse1.size() - hdrSize, &completionCode,
+        &currentState, &previousState, nullptr, &auxStateStatus,
+        &progressPercent, &reasonCode, &updateOptionFlagsEnabled);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = decode_get_status_resp(
+        responseMsg1, getStatusResponse1.size() - hdrSize, &completionCode,
+        &currentState, &previousState, &auxState, nullptr, &progressPercent,
+        &reasonCode, &updateOptionFlagsEnabled);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = decode_get_status_resp(
+        responseMsg1, getStatusResponse1.size() - hdrSize, &completionCode,
+        &currentState, &previousState, &auxState, &auxStateStatus, nullptr,
+        &reasonCode, &updateOptionFlagsEnabled);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = decode_get_status_resp(
+        responseMsg1, getStatusResponse1.size() - hdrSize, &completionCode,
+        &currentState, &previousState, &auxState, &auxStateStatus,
+        &progressPercent, nullptr, &updateOptionFlagsEnabled);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = decode_get_status_resp(
+        responseMsg1, getStatusResponse1.size() - hdrSize, &completionCode,
+        &currentState, &previousState, &auxState, &auxStateStatus,
+        &progressPercent, &reasonCode, nullptr);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = decode_get_status_resp(
+        responseMsg1, getStatusResponse1.size() - hdrSize, &completionCode,
+        &currentState, &previousState, &auxState, &auxStateStatus,
+        &progressPercent, &reasonCode, &updateOptionFlagsEnabled);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    constexpr std::array<uint8_t, hdrSize + sizeof(pldm_get_status_resp) - 1>
+        getStatusResponse2{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                           0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    auto responseMsg2 =
+        reinterpret_cast<const pldm_msg*>(getStatusResponse2.data());
+    rc = decode_get_status_resp(
+        responseMsg2, getStatusResponse2.size() - hdrSize, &completionCode,
+        &currentState, &previousState, &auxState, &auxStateStatus,
+        &progressPercent, &reasonCode, &updateOptionFlagsEnabled);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_LENGTH);
+
+    constexpr std::array<uint8_t, hdrSize + sizeof(pldm_get_status_resp)>
+        getStatusResponse3{0x00, 0x00, 0x00, 0x00, 0x07, 0x00, 0x00,
+                           0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    auto responseMsg3 =
+        reinterpret_cast<const pldm_msg*>(getStatusResponse3.data());
+    rc = decode_get_status_resp(
+        responseMsg3, getStatusResponse3.size() - hdrSize, &completionCode,
+        &currentState, &previousState, &auxState, &auxStateStatus,
+        &progressPercent, &reasonCode, &updateOptionFlagsEnabled);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    constexpr std::array<uint8_t, hdrSize + sizeof(pldm_get_status_resp)>
+        getStatusResponse4{0x00, 0x00, 0x00, 0x00, 0x00, 0x07, 0x00,
+                           0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    auto responseMsg4 =
+        reinterpret_cast<const pldm_msg*>(getStatusResponse4.data());
+    rc = decode_get_status_resp(
+        responseMsg4, getStatusResponse4.size() - hdrSize, &completionCode,
+        &currentState, &previousState, &auxState, &auxStateStatus,
+        &progressPercent, &reasonCode, &updateOptionFlagsEnabled);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    constexpr std::array<uint8_t, hdrSize + sizeof(pldm_get_status_resp)>
+        getStatusResponse5{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04,
+                           0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    auto responseMsg5 =
+        reinterpret_cast<const pldm_msg*>(getStatusResponse5.data());
+    rc = decode_get_status_resp(
+        responseMsg5, getStatusResponse5.size() - hdrSize, &completionCode,
+        &currentState, &previousState, &auxState, &auxStateStatus,
+        &progressPercent, &reasonCode, &updateOptionFlagsEnabled);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    constexpr std::array<uint8_t, hdrSize + sizeof(pldm_get_status_resp)>
+        getStatusResponse6{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                           0x0B, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    auto responseMsg6 =
+        reinterpret_cast<const pldm_msg*>(getStatusResponse6.data());
+    rc = decode_get_status_resp(
+        responseMsg6, getStatusResponse6.size() - hdrSize, &completionCode,
+        &currentState, &previousState, &auxState, &auxStateStatus,
+        &progressPercent, &reasonCode, &updateOptionFlagsEnabled);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    constexpr std::array<uint8_t, hdrSize + sizeof(pldm_get_status_resp)>
+        getStatusResponse7{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                           0x00, 0x66, 0x00, 0x00, 0x00, 0x00, 0x00};
+    auto responseMsg7 =
+        reinterpret_cast<const pldm_msg*>(getStatusResponse7.data());
+    rc = decode_get_status_resp(
+        responseMsg7, getStatusResponse7.size() - hdrSize, &completionCode,
+        &currentState, &previousState, &auxState, &auxStateStatus,
+        &progressPercent, &reasonCode, &updateOptionFlagsEnabled);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    constexpr std::array<uint8_t, hdrSize + sizeof(pldm_get_status_resp)>
+        getStatusResponse8{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                           0x00, 0x00, 0xC7, 0x00, 0x00, 0x00, 0x00};
+    auto responseMsg8 =
+        reinterpret_cast<const pldm_msg*>(getStatusResponse8.data());
+    rc = decode_get_status_resp(
+        responseMsg8, getStatusResponse8.size() - hdrSize, &completionCode,
+        &currentState, &previousState, &auxState, &auxStateStatus,
+        &progressPercent, &reasonCode, &updateOptionFlagsEnabled);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    // AuxState is not PLDM_FD_IDLE_LEARN_COMPONENTS_READ_XFER when the state is
+    // IDLE
+    constexpr std::array<uint8_t, hdrSize + sizeof(pldm_get_status_resp)>
+        getStatusResponse9{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
+                           0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    auto responseMsg9 =
+        reinterpret_cast<const pldm_msg*>(getStatusResponse9.data());
+    rc = decode_get_status_resp(
+        responseMsg9, getStatusResponse9.size() - hdrSize, &completionCode,
+        &currentState, &previousState, &auxState, &auxStateStatus,
+        &progressPercent, &reasonCode, &updateOptionFlagsEnabled);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+}
+
+TEST(CancelUpdateComponent, goodPathEncodeRequest)
+{
+    constexpr uint8_t instanceId = 9;
+    std::array<uint8_t, hdrSize> request{};
+    auto requestMsg = reinterpret_cast<pldm_msg*>(request.data());
+
+    auto rc = encode_cancel_update_component_req(
+        instanceId, requestMsg, PLDM_CANCEL_UPDATE_COMPONENT_REQ_BYTES);
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+
+    constexpr std::array<uint8_t, hdrSize> outRequest{0x89, 0x05, 0x1C};
+    EXPECT_EQ(request, outRequest);
+}
+
+TEST(CancelUpdateComponent, errorPathEncodeRequest)
+{
+    std::array<uint8_t, hdrSize + sizeof(uint8_t)> request{};
+    auto requestMsg = reinterpret_cast<pldm_msg*>(request.data());
+
+    auto rc = encode_cancel_update_component_req(
+        0, nullptr, PLDM_CANCEL_UPDATE_COMPONENT_REQ_BYTES);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = encode_cancel_update_component_req(
+        0, requestMsg, PLDM_CANCEL_UPDATE_COMPONENT_REQ_BYTES + 1);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_LENGTH);
+}
+
+TEST(CancelUpdateComponent, testGoodDecodeResponse)
+{
+    uint8_t completionCode = 0;
+    constexpr std::array<uint8_t, hdrSize + sizeof(completionCode)>
+        cancelUpdateComponentResponse1{0x00, 0x00, 0x00, 0x00};
+    auto responseMsg1 = reinterpret_cast<const pldm_msg*>(
+        cancelUpdateComponentResponse1.data());
+    auto rc = decode_cancel_update_component_resp(
+        responseMsg1, cancelUpdateComponentResponse1.size() - hdrSize,
+        &completionCode);
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+    EXPECT_EQ(completionCode, PLDM_SUCCESS);
+
+    constexpr std::array<uint8_t, hdrSize + sizeof(completionCode)>
+        cancelUpdateComponentResponse2{0x00, 0x00, 0x00, 0x86};
+    auto responseMsg2 = reinterpret_cast<const pldm_msg*>(
+        cancelUpdateComponentResponse2.data());
+    rc = decode_cancel_update_component_resp(
+        responseMsg2, cancelUpdateComponentResponse2.size() - hdrSize,
+        &completionCode);
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+    EXPECT_EQ(completionCode, PLDM_FWUP_BUSY_IN_BACKGROUND);
+}
+
+TEST(CancelUpdateComponent, testBadDecodeResponse)
+{
+    uint8_t completionCode = 0;
+    constexpr std::array<uint8_t, hdrSize> cancelUpdateComponentResponse{
+        0x00, 0x00, 0x00};
+    auto responseMsg =
+        reinterpret_cast<const pldm_msg*>(cancelUpdateComponentResponse.data());
+
+    auto rc = decode_cancel_update_component_resp(
+        nullptr, cancelUpdateComponentResponse.size() - hdrSize,
+        &completionCode);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = decode_cancel_update_component_resp(
+        responseMsg, cancelUpdateComponentResponse.size() - hdrSize, nullptr);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = decode_cancel_update_component_resp(
+        responseMsg, cancelUpdateComponentResponse.size() - hdrSize,
+        &completionCode);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_LENGTH);
+}
+
+TEST(CancelUpdate, goodPathEncodeRequest)
+{
+    constexpr uint8_t instanceId = 10;
+    std::array<uint8_t, hdrSize> request{};
+    auto requestMsg = reinterpret_cast<pldm_msg*>(request.data());
+
+    auto rc = encode_cancel_update_req(instanceId, requestMsg,
+                                       PLDM_CANCEL_UPDATE_REQ_BYTES);
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+
+    constexpr std::array<uint8_t, hdrSize> outRequest{0x8A, 0x05, 0x1D};
+    EXPECT_EQ(request, outRequest);
+}
+
+TEST(CancelUpdate, errorPathEncodeRequest)
+{
+    std::array<uint8_t, hdrSize + sizeof(uint8_t)> request{};
+    auto requestMsg = reinterpret_cast<pldm_msg*>(request.data());
+
+    auto rc =
+        encode_cancel_update_req(0, nullptr, PLDM_CANCEL_UPDATE_REQ_BYTES);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = encode_cancel_update_req(0, requestMsg,
+                                  PLDM_CANCEL_UPDATE_REQ_BYTES + 1);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_LENGTH);
+}
+
+TEST(CancelUpdate, goodPathDecodeResponse)
+{
+    constexpr std::bitset<64> nonFunctioningComponentBitmap1{0};
+    constexpr std::array<uint8_t, hdrSize + sizeof(pldm_cancel_update_resp)>
+        cancelUpdateResponse1{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                              0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    auto responseMsg1 =
+        reinterpret_cast<const pldm_msg*>(cancelUpdateResponse1.data());
+    uint8_t completionCode = 0;
+    bool8_t nonFunctioningComponentIndication = 0;
+    bitfield64_t nonFunctioningComponentBitmap{0};
+    auto rc = decode_cancel_update_resp(
+        responseMsg1, cancelUpdateResponse1.size() - hdrSize, &completionCode,
+        &nonFunctioningComponentIndication, &nonFunctioningComponentBitmap);
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+    EXPECT_EQ(completionCode, PLDM_SUCCESS);
+    EXPECT_EQ(nonFunctioningComponentIndication,
+              PLDM_FWUP_COMPONENTS_FUNCTIONING);
+    EXPECT_EQ(nonFunctioningComponentBitmap.value,
+              nonFunctioningComponentBitmap1);
+
+    constexpr std::bitset<64> nonFunctioningComponentBitmap2{0x0101};
+    constexpr std::array<uint8_t, hdrSize + sizeof(pldm_cancel_update_resp)>
+        cancelUpdateResponse2{0x00, 0x00, 0x00, 0x00, 0x01, 0x01, 0x01,
+                              0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    auto responseMsg2 =
+        reinterpret_cast<const pldm_msg*>(cancelUpdateResponse2.data());
+    rc = decode_cancel_update_resp(
+        responseMsg2, cancelUpdateResponse2.size() - hdrSize, &completionCode,
+        &nonFunctioningComponentIndication, &nonFunctioningComponentBitmap);
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+    EXPECT_EQ(completionCode, PLDM_SUCCESS);
+    EXPECT_EQ(nonFunctioningComponentIndication,
+              PLDM_FWUP_COMPONENTS_NOT_FUNCTIONING);
+    EXPECT_EQ(nonFunctioningComponentBitmap.value,
+              nonFunctioningComponentBitmap2);
+
+    constexpr std::array<uint8_t, hdrSize + sizeof(completionCode)>
+        cancelUpdateResponse3{0x00, 0x00, 0x00, 0x86};
+    auto responseMsg3 =
+        reinterpret_cast<const pldm_msg*>(cancelUpdateResponse3.data());
+    rc = decode_cancel_update_resp(
+        responseMsg3, cancelUpdateResponse3.size() - hdrSize, &completionCode,
+        &nonFunctioningComponentIndication, &nonFunctioningComponentBitmap);
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+    EXPECT_EQ(completionCode, PLDM_FWUP_BUSY_IN_BACKGROUND);
+}
+
+TEST(CancelUpdate, errorPathDecodeResponse)
+{
+    constexpr std::array<uint8_t, hdrSize> cancelUpdateResponse1{0x00, 0x00,
+                                                                 0x00};
+    auto responseMsg1 =
+        reinterpret_cast<const pldm_msg*>(cancelUpdateResponse1.data());
+    uint8_t completionCode = 0;
+    bool8_t nonFunctioningComponentIndication = 0;
+    bitfield64_t nonFunctioningComponentBitmap{0};
+
+    auto rc = decode_cancel_update_resp(
+        nullptr, cancelUpdateResponse1.size() - hdrSize, &completionCode,
+        &nonFunctioningComponentIndication, &nonFunctioningComponentBitmap);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = decode_cancel_update_resp(
+        responseMsg1, cancelUpdateResponse1.size() - hdrSize, nullptr,
+        &nonFunctioningComponentIndication, &nonFunctioningComponentBitmap);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = decode_cancel_update_resp(
+        responseMsg1, cancelUpdateResponse1.size() - hdrSize, &completionCode,
+        nullptr, &nonFunctioningComponentBitmap);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = decode_cancel_update_resp(
+        responseMsg1, cancelUpdateResponse1.size() - hdrSize, &completionCode,
+        &nonFunctioningComponentIndication, nullptr);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = decode_cancel_update_resp(
+        responseMsg1, cancelUpdateResponse1.size() - hdrSize, &completionCode,
+        &nonFunctioningComponentIndication, &nonFunctioningComponentBitmap);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    constexpr std::array<uint8_t, hdrSize + sizeof(completionCode)>
+        cancelUpdateResponse2{0x00, 0x00, 0x00, 0x00};
+    auto responseMsg2 =
+        reinterpret_cast<const pldm_msg*>(cancelUpdateResponse2.data());
+    rc = decode_cancel_update_resp(
+        responseMsg2, cancelUpdateResponse2.size() - hdrSize, &completionCode,
+        &nonFunctioningComponentIndication, &nonFunctioningComponentBitmap);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_LENGTH);
+
+    constexpr std::array<uint8_t, hdrSize + sizeof(pldm_cancel_update_resp)>
+        cancelUpdateResponse3{0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00,
+                              0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    auto responseMsg3 =
+        reinterpret_cast<const pldm_msg*>(cancelUpdateResponse3.data());
+    rc = decode_cancel_update_resp(
+        responseMsg3, cancelUpdateResponse3.size() - hdrSize, &completionCode,
+        &nonFunctioningComponentIndication, &nonFunctioningComponentBitmap);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+}

@@ -12,13 +12,11 @@
 namespace pldm
 {
 
-using namespace utils;
-using namespace dbus_api;
-
 namespace host_effecters
 {
 
-using DbusChgHostEffecterProps = std::map<dbus::Property, PropertyValue>;
+using DbusChgHostEffecterProps =
+    std::map<dbus::Property, pldm::utils::PropertyValue>;
 
 /** @struct State
  *  Contains the state set id and the possible states for
@@ -35,8 +33,9 @@ struct PossibleState
  */
 struct DBusEffecterMapping
 {
-    DBusMapping dbusMap;
-    std::vector<PropertyValue> propertyValues; //!< D-Bus property values
+    pldm::utils::DBusMapping dbusMap;
+    std::vector<pldm::utils::PropertyValue>
+        propertyValues;  //!< D-Bus property values
     PossibleState state; //!< Corresponding effecter states
 };
 
@@ -80,8 +79,9 @@ class HostEffecterParser
      *  @param[in] verbose - verbosity
      */
     explicit HostEffecterParser(
-        Requester* requester, int fd, const pldm_pdr* repo,
-        DBusHandler* const dbusHandler, const std::string& jsonPath,
+        pldm::dbus_api::Requester* requester, int fd, const pldm_pdr* repo,
+        pldm::utils::DBusHandler* const dbusHandler,
+        const std::string& jsonPath,
         pldm::requester::Handler<pldm::requester::Request>* handler,
         bool verbose = false) :
         requester(requester),
@@ -125,9 +125,10 @@ class HostEffecterParser
      * @param[in] propertyType - type of the D-Bus property
      * @return - none
      */
-    void populatePropVals(const Json& dBusValues,
-                          std::vector<PropertyValue>& propertyValues,
-                          const std::string& propertyType);
+    void populatePropVals(
+        const pldm::utils::Json& dBusValues,
+        std::vector<pldm::utils::PropertyValue>& propertyValues,
+        const std::string& propertyType);
 
     /* @brief Set a host state effecter
      *
@@ -151,7 +152,7 @@ class HostEffecterParser
      * @return - the new state value
      */
     uint8_t findNewStateValue(size_t effecterInfoIndex, size_t dbusInfoIndex,
-                              const PropertyValue& propertyValue);
+                              const pldm::utils::PropertyValue& propertyValue);
 
     /* @brief Subscribes for D-Bus property change signal on the specified
      * object
@@ -170,14 +171,15 @@ class HostEffecterParser
                                          uint16_t effecterId);
 
   protected:
-    Requester* requester;    //!< Reference to Requester to obtain instance id
+    pldm::dbus_api::Requester*
+        requester;           //!< Reference to Requester to obtain instance id
     int sockFd;              //!< Socket fd to send message to host
     const pldm_pdr* pdrRepo; //!< Reference to PDR repo
     std::vector<EffecterInfo> hostEffecterInfo; //!< Parsed effecter information
     std::vector<std::unique_ptr<sdbusplus::bus::match::match>>
         effecterInfoMatch; //!< vector to catch the D-Bus property change
                            //!< signals for the effecters
-    const DBusHandler* dbusHandler; //!< D-bus Handler
+    const pldm::utils::DBusHandler* dbusHandler; //!< D-bus Handler
     /** @brief PLDM request handler */
     pldm::requester::Handler<pldm::requester::Request>* handler;
     bool verbose; //!< verbose flag

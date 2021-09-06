@@ -62,11 +62,6 @@ struct RequestKeyHasher
 
 using ResponseHandler = fu2::unique_function<void(
     mctp_eid_t eid, const pldm_msg* response, size_t respMsgLen)>;
-using namespace std::chrono;
-using namespace sdeventplus;
-using namespace sdeventplus::source;
-using namespace pldm::dbus_api;
-using namespace phosphor;
 
 /** @class Handler
  *
@@ -101,11 +96,12 @@ class Handler
      *  @param[in] responseTimeOut - time to wait between each retry
      */
     explicit Handler(
-        int fd, Event& event, Requester& requester,
-        seconds instanceIdExpiryInterval =
-            seconds(INSTANCE_ID_EXPIRATION_INTERVAL),
+        int fd, sdeventplus::Event& event, pldm::dbus_api::Requester& requester,
+        std::chrono::seconds instanceIdExpiryInterval =
+            std::chrono::seconds(INSTANCE_ID_EXPIRATION_INTERVAL),
         uint8_t numRetries = static_cast<uint8_t>(NUMBER_OF_REQUEST_RETRIES),
-        milliseconds responseTimeOut = milliseconds(RESPONSE_TIME_OUT)) :
+        std::chrono::milliseconds responseTimeOut =
+            std::chrono::milliseconds(RESPONSE_TIME_OUT)) :
         fd(fd),
         event(event), requester(requester),
         instanceIdExpiryInterval(instanceIdExpiryInterval),
@@ -134,10 +130,10 @@ class Handler
             {
                 std::cerr << "Response not received for the request, instance "
                              "ID expired."
-                          << " EID = " << key.eid
-                          << " INSTANCE_ID = " << key.instanceId
-                          << " TYPE = " << key.type
-                          << " COMMAND = " << key.command << "\n";
+                          << " EID = " << (unsigned)key.eid
+                          << " INSTANCE_ID = " << (unsigned)key.instanceId
+                          << " TYPE = " << (unsigned)key.type
+                          << " COMMAND = " << (unsigned)key.command << "\n";
                 auto& [request, responseHandler, timerInstance] =
                     this->handlers[key];
                 request->stop();
@@ -181,7 +177,8 @@ class Handler
 
         try
         {
-            timer->start(duration_cast<microseconds>(instanceIdExpiryInterval));
+            timer->start(duration_cast<std::chrono::microseconds>(
+                instanceIdExpiryInterval));
         }
         catch (const std::runtime_error& e)
         {
@@ -237,19 +234,22 @@ class Handler
     }
 
   private:
-    int fd;               //!< file descriptor of MCTP communications socket
-    Event& event;         //!< reference to PLDM daemon's main event loop
-    Requester& requester; //!< reference to Requester object
-    seconds instanceIdExpiryInterval; //!< Instance ID expiration interval
-    uint8_t numRetries;               //!< number of request retries
-    milliseconds responseTimeOut;     //!< time to wait between each retry
+    int fd; //!< file descriptor of MCTP communications socket
+    sdeventplus::Event& event; //!< reference to PLDM daemon's main event loop
+    pldm::dbus_api::Requester& requester; //!< reference to Requester object
+    std::chrono::seconds
+        instanceIdExpiryInterval; //!< Instance ID expiration interval
+    uint8_t numRetries;           //!< number of request retries
+    std::chrono::milliseconds
+        responseTimeOut; //!< time to wait between each retry
 
     /** @brief Container for storing the details of the PLDM request message,
      *         handler for the corresponding PLDM response and the timer object
      *         for the Instance ID expiration
      */
-    using RequestValue = std::tuple<std::unique_ptr<RequestInterface>,
-                                    ResponseHandler, std::unique_ptr<Timer>>;
+    using RequestValue =
+        std::tuple<std::unique_ptr<RequestInterface>, ResponseHandler,
+                   std::unique_ptr<phosphor::Timer>>;
 
     /** @brief Container for storing the PLDM request entries */
     std::unordered_map<RequestKey, RequestValue, RequestKeyHasher> handlers;
@@ -257,7 +257,8 @@ class Handler
     /** @brief Container to store information about the request entries to be
      *         removed after the instance ID timer expires
      */
-    std::unordered_map<RequestKey, std::unique_ptr<Defer>, RequestKeyHasher>
+    std::unordered_map<RequestKey, std::unique_ptr<sdeventplus::source::Defer>,
+                       RequestKeyHasher>
         removeRequestContainer;
 
     /** @brief Remove request entry for which the instance ID expired

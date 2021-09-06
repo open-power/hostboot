@@ -4,6 +4,8 @@
 
 #include <climits>
 
+using namespace pldm::pdr;
+
 namespace pldm
 {
 

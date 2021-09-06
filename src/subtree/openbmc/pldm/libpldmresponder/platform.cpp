@@ -16,6 +16,10 @@
 #include "platform_state_effecter.hpp"
 #include "platform_state_sensor.hpp"
 
+using namespace pldm::utils;
+using namespace pldm::responder::pdr;
+using namespace pldm::responder::pdr_utils;
+
 namespace pldm
 {
 namespace responder
@@ -615,7 +619,7 @@ Response Handler::getStateSensorReadings(const pldm_msg* request,
     }
 
     // 0x01 to 0x08
-    uint8_t sensorRearmCount = getBitfieldCount(sensorRearm);
+    uint8_t sensorRearmCount = std::popcount(sensorRearm.byte);
     std::vector<get_sensor_state_field> stateField(sensorRearmCount);
     uint8_t comSensorCnt{};
     const pldm::utils::DBusHandler dBusIntf;

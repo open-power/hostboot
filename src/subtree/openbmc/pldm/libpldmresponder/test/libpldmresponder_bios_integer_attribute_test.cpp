@@ -9,6 +9,9 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+using namespace pldm::utils;
+using namespace pldm::responder::bios;
+
 using ::testing::_;
 using ::testing::ElementsAreArray;
 using ::testing::Return;

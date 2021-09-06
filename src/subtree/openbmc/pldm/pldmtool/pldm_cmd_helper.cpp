@@ -11,6 +11,8 @@
 
 #include <exception>
 
+using namespace pldm::utils;
+
 namespace pldmtool
 {
 

@@ -104,8 +104,8 @@ void generateStateEffecterPDR(const DBusInterface& dBusIntf, const Json& json,
         pdr->has_description_pdr = false;
         pdr->composite_effecter_count = effecters.size();
 
-        DbusMappings dbusMappings{};
-        DbusValMaps dbusValMaps{};
+        pldm::responder::pdr_utils::DbusMappings dbusMappings{};
+        pldm::responder::pdr_utils::DbusValMaps dbusValMaps{};
         uint8_t* start =
             entry.data() + sizeof(pldm_state_effecter_pdr) - sizeof(uint8_t);
         for (const auto& effecter : effecters)
@@ -119,7 +119,7 @@ void generateStateEffecterPDR(const DBusInterface& dBusIntf, const Json& json,
             start += sizeof(possibleStates->state_set_id) +
                      sizeof(possibleStates->possible_states_size);
             static const std::vector<uint8_t> emptyStates{};
-            PossibleValues stateValues;
+            pldm::responder::pdr_utils::PossibleValues stateValues;
             auto states = set.value("states", emptyStates);
             for (const auto& state : states)
             {
@@ -137,7 +137,7 @@ void generateStateEffecterPDR(const DBusInterface& dBusIntf, const Json& json,
             auto propertyName = dbusEntry.value("property_name", "");
             auto propertyType = dbusEntry.value("property_type", "");
 
-            StatestoDbusVal dbusIdToValMap{};
+            pldm::responder::pdr_utils::StatestoDbusVal dbusIdToValMap{};
             pldm::utils::DBusMapping dbusMapping{};
             try
             {
@@ -146,7 +146,7 @@ void generateStateEffecterPDR(const DBusInterface& dBusIntf, const Json& json,
 
                 dbusMapping = pldm::utils::DBusMapping{
                     objectPath, interface, propertyName, propertyType};
-                dbusIdToValMap = populateMapping(
+                dbusIdToValMap = pldm::responder::pdr_utils::populateMapping(
                     propertyType, dbusEntry["property_values"], stateValues);
             }
             catch (const std::exception& e)
@@ -161,7 +161,7 @@ void generateStateEffecterPDR(const DBusInterface& dBusIntf, const Json& json,
         handler.addDbusObjMaps(
             pdr->effecter_id,
             std::make_tuple(std::move(dbusMappings), std::move(dbusValMaps)));
-        PdrEntry pdrEntry{};
+        pldm::responder::pdr_utils::PdrEntry pdrEntry{};
         pdrEntry.data = entry.data();
         pdrEntry.size = pdrSize;
         repo.addRecord(pdrEntry);

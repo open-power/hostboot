@@ -13,8 +13,6 @@
 #include <cstdint>
 #include <map>
 
-using namespace pldm::responder::pdr;
-
 namespace pldm
 {
 namespace responder
@@ -49,7 +47,8 @@ int setStateEffecterStatesHandler(
 
     std::unique_ptr<pldm_pdr, decltype(&pldm_pdr_destroy)> stateEffecterPdrRepo(
         pldm_pdr_init(), pldm_pdr_destroy);
-    Repo stateEffecterPDRs(stateEffecterPdrRepo.get());
+    pldm::responder::pdr_utils::Repo stateEffecterPDRs(
+        stateEffecterPdrRepo.get());
     getRepoByType(handler.getRepo(), stateEffecterPDRs,
                   PLDM_STATE_EFFECTER_PDR);
     if (stateEffecterPDRs.empty())
@@ -58,7 +57,7 @@ int setStateEffecterStatesHandler(
         return PLDM_PLATFORM_INVALID_EFFECTER_ID;
     }
 
-    PdrEntry pdrEntry{};
+    pldm::responder::pdr_utils::PdrEntry pdrEntry{};
     auto pdrRecord = stateEffecterPDRs.getFirstRecord(pdrEntry);
     while (pdrRecord)
     {
@@ -112,7 +111,8 @@ int setStateEffecterStatesHandler(
                 break;
             }
             const DBusMapping& dbusMapping = dbusMappings[currState];
-            const StatestoDbusVal& dbusValToMap = dbusValMaps[currState];
+            const pldm::responder::pdr_utils::StatestoDbusVal& dbusValToMap =
+                dbusValMaps[currState];
 
             if (stateField[currState].set_request == PLDM_REQUEST_SET)
             {

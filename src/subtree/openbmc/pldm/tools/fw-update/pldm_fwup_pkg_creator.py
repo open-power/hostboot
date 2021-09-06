@@ -428,7 +428,8 @@ def update_pkg_header_size(pldm_fw_up_pkg):
         Parameters:
             pldm_fw_up_pkg: PLDM FW update package
     '''
-    file_size = pldm_fw_up_pkg.tell()
+    pkg_header_checksum_size = 4
+    file_size = pldm_fw_up_pkg.tell() + pkg_header_checksum_size
     pkg_header_size_offset = 17
     # Seek past PackageHeaderIdentifier and PackageHeaderFormatRevision
     pldm_fw_up_pkg.seek(pkg_header_size_offset)
@@ -483,8 +484,8 @@ def main():
                                                 component_bitmap_bit_length)
             write_component_image_info_area(pldm_fw_up_pkg, metadata,
                                             image_files)
-            write_pkg_header_checksum(pldm_fw_up_pkg)
             update_pkg_header_size(pldm_fw_up_pkg)
+            write_pkg_header_checksum(pldm_fw_up_pkg)
             append_component_images(pldm_fw_up_pkg, image_files)
             pldm_fw_up_pkg.close()
     except BaseException:

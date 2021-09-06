@@ -22,7 +22,6 @@ namespace bios
 {
 
 using Json = nlohmann::json;
-using namespace pldm::utils;
 
 /** @class BIOSAttribute
  *  @brief Provide interfaces to implement specific types of attributes
@@ -34,7 +33,8 @@ class BIOSAttribute
      *  @param[in] entry - Json Object
      *  @param[in] dbusHandler - Dbus Handler
      */
-    BIOSAttribute(const Json& entry, DBusHandler* const dbusHandler);
+    BIOSAttribute(const Json& entry,
+                  pldm::utils::DBusHandler* const dbusHandler);
 
     /** Virtual destructor
      */
@@ -75,7 +75,7 @@ class BIOSAttribute
      */
     virtual int updateAttrVal(Table& newValue, uint16_t attrHdl,
                               uint8_t attrType,
-                              const PropertyValue& newPropVal) = 0;
+                              const pldm::utils::PropertyValue& newPropVal) = 0;
 
     /** @brief Generate attribute entry by the spec DSP0247_1.0.0 Table 14
      *  @param[in] attributevalue - attribute value(Enumeration, String and
@@ -87,7 +87,7 @@ class BIOSAttribute
         Table& attrValueEntry) = 0;
 
     /** @brief Method to return the D-Bus map */
-    std::optional<DBusMapping> getDBusMap();
+    std::optional<pldm::utils::DBusMapping> getDBusMap();
 
     /** @brief Name of this attribute */
     const std::string name;
@@ -101,10 +101,10 @@ class BIOSAttribute
 
   protected:
     /** @brief dbus backend, nullopt if this attribute is read-only*/
-    std::optional<DBusMapping> dBusMap;
+    std::optional<pldm::utils::DBusMapping> dBusMap;
 
     /** @brief dbus handler */
-    DBusHandler* const dbusHandler;
+    pldm::utils::DBusHandler* const dbusHandler;
 };
 
 } // namespace bios

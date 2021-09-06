@@ -5,6 +5,8 @@ After=xyz.openbmc_project.biosconfig_manager.service
 
 [Service]
 Restart=always
+Type=dbus
+BusName=xyz.openbmc_project.PLDM
 EnvironmentFile=/etc/default/pldm_verbosity
 ExecStart=/usr/bin/pldmd --verbose $VERBOSE
 

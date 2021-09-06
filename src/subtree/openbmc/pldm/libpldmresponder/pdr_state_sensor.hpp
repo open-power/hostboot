@@ -116,8 +116,8 @@ void generateStateSensorPDR(const DBusInterface& dBusIntf, const Json& json,
         HTOLE16(pdr->entity_instance);
         HTOLE16(pdr->container_id);
 
-        DbusMappings dbusMappings{};
-        DbusValMaps dbusValMaps{};
+        pldm::responder::pdr_utils::DbusMappings dbusMappings{};
+        pldm::responder::pdr_utils::DbusValMaps dbusValMaps{};
         uint8_t* start =
             entry.data() + sizeof(pldm_state_sensor_pdr) - sizeof(uint8_t);
         for (const auto& sensor : sensors)
@@ -132,7 +132,7 @@ void generateStateSensorPDR(const DBusInterface& dBusIntf, const Json& json,
             start += sizeof(possibleStates->state_set_id) +
                      sizeof(possibleStates->possible_states_size);
             static const std::vector<uint8_t> emptyStates{};
-            PossibleValues stateValues;
+            pldm::responder::pdr_utils::PossibleValues stateValues;
             auto states = set.value("states", emptyStates);
             for (const auto& state : states)
             {
@@ -149,7 +149,7 @@ void generateStateSensorPDR(const DBusInterface& dBusIntf, const Json& json,
             auto propertyName = dbusEntry.value("property_name", "");
             auto propertyType = dbusEntry.value("property_type", "");
 
-            StatestoDbusVal dbusIdToValMap{};
+            pldm::responder::pdr_utils::StatestoDbusVal dbusIdToValMap{};
             pldm::utils::DBusMapping dbusMapping{};
             try
             {
@@ -158,7 +158,7 @@ void generateStateSensorPDR(const DBusInterface& dBusIntf, const Json& json,
 
                 dbusMapping = pldm::utils::DBusMapping{
                     objectPath, interface, propertyName, propertyType};
-                dbusIdToValMap = populateMapping(
+                dbusIdToValMap = pldm::responder::pdr_utils::populateMapping(
                     propertyType, dbusEntry["property_values"], stateValues);
             }
             catch (const std::exception& e)
@@ -174,8 +174,8 @@ void generateStateSensorPDR(const DBusInterface& dBusIntf, const Json& json,
         handler.addDbusObjMaps(
             pdr->sensor_id,
             std::make_tuple(std::move(dbusMappings), std::move(dbusValMaps)),
-            TypeId::PLDM_SENSOR_ID);
-        PdrEntry pdrEntry{};
+            pldm::responder::pdr_utils::TypeId::PLDM_SENSOR_ID);
+        pldm::responder::pdr_utils::PdrEntry pdrEntry{};
         pdrEntry.data = entry.data();
         pdrEntry.size = pdrSize;
         repo.addRecord(pdrEntry);

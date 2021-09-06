@@ -6,7 +6,6 @@
 
 #include <string>
 
-using namespace pldm::utils;
 namespace pldm
 {
 namespace responder
@@ -200,8 +199,8 @@ class CodeUpdate
      * @param[in] chProperties - list of properties which have changed
      * @return - none
      */
-    void
-        processPriorityChangeNotification(const DbusChangedProps& chProperties);
+    void processPriorityChangeNotification(
+        const pldm::utils::DbusChangedProps& chProperties);
 };
 
 /* @brief Method to fetch current or next boot side

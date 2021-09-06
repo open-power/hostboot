@@ -6,6 +6,10 @@
 #include "file_io_type_lid.hpp"
 #include "libpldmresponder/file_io.hpp"
 #include "libpldmresponder/pdr_utils.hpp"
+
+using namespace pldm::pdr;
+using namespace pldm::utils;
+
 namespace pldm
 {
 namespace responder

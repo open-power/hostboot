@@ -168,6 +168,136 @@ is_comp_compatibility_resp_code_valid(uint8_t comp_compatibility_resp_code)
 	}
 }
 
+/** @brief Check whether SelfContainedActivationRequest is valid
+ *
+ *  @return true if SelfContainedActivationRequest is valid, false if not
+ */
+static bool
+is_self_contained_activation_req_valid(bool8_t self_contained_activation_req)
+{
+	switch (self_contained_activation_req) {
+	case PLDM_NOT_ACTIVATE_SELF_CONTAINED_COMPONENTS:
+	case PLDM_ACTIVATE_SELF_CONTAINED_COMPONENTS:
+		return true;
+
+	default:
+		return false;
+	}
+}
+
+/** @brief Check if current or previous status in GetStatus command response is
+ *         valid
+ *
+ *	@param[in] state - current or previous different state machine state of
+ *                     the FD
+ *	@return true if state is valid, false if not
+ */
+static bool is_state_valid(uint8_t state)
+{
+	switch (state) {
+	case PLDM_FD_STATE_IDLE:
+	case PLDM_FD_STATE_LEARN_COMPONENTS:
+	case PLDM_FD_STATE_READY_XFER:
+	case PLDM_FD_STATE_DOWNLOAD:
+	case PLDM_FD_STATE_VERIFY:
+	case PLDM_FD_STATE_APPLY:
+	case PLDM_FD_STATE_ACTIVATE:
+		return true;
+
+	default:
+		return false;
+	}
+}
+
+/** @brief Check if aux state in GetStatus command response is valid
+ *
+ *  @param[in] aux_state - provides additional information to the UA to describe
+ *                         the current operation state of the FD/FDP
+ *
+ *	@return true if aux state is valid, false if not
+ */
+static bool is_aux_state_valid(uint8_t aux_state)
+{
+	switch (aux_state) {
+	case PLDM_FD_OPERATION_IN_PROGRESS:
+	case PLDM_FD_OPERATION_SUCCESSFUL:
+	case PLDM_FD_OPERATION_FAILED:
+	case PLDM_FD_IDLE_LEARN_COMPONENTS_READ_XFER:
+		return true;
+
+	default:
+		return false;
+	}
+}
+
+/** @brief Check if aux state status in GetStatus command response is valid
+ *
+ *	@param[in] aux_state_status - aux state status
+ *
+ *	@return true if aux state status is valid, false if not
+ */
+static bool is_aux_state_status_valid(uint8_t aux_state_status)
+{
+	if (aux_state_status == PLDM_FD_AUX_STATE_IN_PROGRESS_OR_SUCCESS ||
+	    aux_state_status == PLDM_FD_TIMEOUT ||
+	    aux_state_status == PLDM_FD_GENERIC_ERROR) {
+		return true;
+	} else if (aux_state_status >=
+		       PLDM_FD_VENDOR_DEFINED_STATUS_CODE_START &&
+		   aux_state_status <= PLDM_FD_VENDOR_DEFINED_STATUS_CODE_END) {
+		return true;
+	}
+
+	return false;
+}
+
+/** @brief Check if reason code in GetStatus command response is valid
+ *
+ *	@param[in] reason_code - provides the reason for why the current state
+ *                           entered the IDLE state
+ *
+ *	@return true if reason code is valid, false if not
+ */
+static bool is_reason_code_valid(uint8_t reason_code)
+{
+
+	switch (reason_code) {
+	case PLDM_FD_INITIALIZATION:
+	case PLDM_FD_ACTIVATE_FW:
+	case PLDM_FD_CANCEL_UPDATE:
+	case PLDM_FD_TIMEOUT_LEARN_COMPONENT:
+	case PLDM_FD_TIMEOUT_READY_XFER:
+	case PLDM_FD_TIMEOUT_DOWNLOAD:
+	case PLDM_FD_TIMEOUT_VERIFY:
+	case PLDM_FD_TIMEOUT_APPLY:
+		return true;
+
+	default:
+		if (reason_code >= PLDM_FD_STATUS_VENDOR_DEFINED_MIN) {
+			return true;
+		}
+		return false;
+	}
+}
+
+/** @brief Check if non functioning component indication in CancelUpdate
+ *         response is valid
+ *
+ *  @return true if non functioning component indication is valid, false if not
+ */
+static bool is_non_functioning_component_indication_valid(
+    bool8_t non_functioning_component_indication)
+{
+	switch (non_functioning_component_indication) {
+	case PLDM_FWUP_COMPONENTS_FUNCTIONING:
+	case PLDM_FWUP_COMPONENTS_NOT_FUNCTIONING:
+		return true;
+
+	default:
+		return false;
+	}
+}
+
 int decode_pldm_package_header_info(
     const uint8_t *data, size_t length,
     struct pldm_package_header_information *package_header_info,
@@ -991,6 +1121,445 @@ int decode_update_component_resp(const struct pldm_msg *msg,
 	update_option_flags_enabled->value =
 	    le32toh(response->update_option_flags_enabled.value);
 	*time_before_req_fw_data = le16toh(response->time_before_req_fw_data);
+
+	return PLDM_SUCCESS;
+}
+
+int decode_request_firmware_data_req(const struct pldm_msg *msg,
+				     size_t payload_length, uint32_t *offset,
+				     uint32_t *length)
+{
+	if (msg == NULL || offset == NULL || length == NULL) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+	if (payload_length != sizeof(struct pldm_request_firmware_data_req)) {
+		return PLDM_ERROR_INVALID_LENGTH;
+	}
+	struct pldm_request_firmware_data_req *request =
+	    (struct pldm_request_firmware_data_req *)msg->payload;
+	*offset = le32toh(request->offset);
+	*length = le32toh(request->length);
+
+	if (*length < PLDM_FWUP_BASELINE_TRANSFER_SIZE) {
+		return PLDM_FWUP_INVALID_TRANSFER_LENGTH;
+	}
+
+	return PLDM_SUCCESS;
+}
+
+int encode_request_firmware_data_resp(uint8_t instance_id,
+				      uint8_t completion_code,
+				      struct pldm_msg *msg,
+				      size_t payload_length)
+{
+	if (msg == NULL || !payload_length) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	struct pldm_header_info header = {0};
+	header.instance = instance_id;
+	header.msg_type = PLDM_RESPONSE;
+	header.pldm_type = PLDM_FWUP;
+	header.command = PLDM_REQUEST_FIRMWARE_DATA;
+	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
+	if (rc) {
+		return rc;
+	}
+
+	msg->payload[0] = completion_code;
+
+	return PLDM_SUCCESS;
+}
+
+int decode_transfer_complete_req(const struct pldm_msg *msg,
+				 size_t payload_length,
+				 uint8_t *transfer_result)
+{
+	if (msg == NULL || transfer_result == NULL) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	if (payload_length != sizeof(*transfer_result)) {
+		return PLDM_ERROR_INVALID_LENGTH;
+	}
+
+	*transfer_result = msg->payload[0];
+	return PLDM_SUCCESS;
+}
+
+int encode_transfer_complete_resp(uint8_t instance_id, uint8_t completion_code,
+				  struct pldm_msg *msg, size_t payload_length)
+{
+	if (msg == NULL) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	if (payload_length != sizeof(completion_code)) {
+		return PLDM_ERROR_INVALID_LENGTH;
+	}
+
+	struct pldm_header_info header = {0};
+	header.instance = instance_id;
+	header.msg_type = PLDM_RESPONSE;
+	header.pldm_type = PLDM_FWUP;
+	header.command = PLDM_TRANSFER_COMPLETE;
+	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
+	if (rc) {
+		return rc;
+	}
+
+	msg->payload[0] = completion_code;
+
+	return PLDM_SUCCESS;
+}
+
+int decode_verify_complete_req(const struct pldm_msg *msg,
+			       size_t payload_length, uint8_t *verify_result)
+{
+	if (msg == NULL || verify_result == NULL) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	if (payload_length != sizeof(*verify_result)) {
+		return PLDM_ERROR_INVALID_LENGTH;
+	}
+
+	*verify_result = msg->payload[0];
+	return PLDM_SUCCESS;
+}
+
+int encode_verify_complete_resp(uint8_t instance_id, uint8_t completion_code,
+				struct pldm_msg *msg, size_t payload_length)
+{
+	if (msg == NULL) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	if (payload_length != sizeof(completion_code)) {
+		return PLDM_ERROR_INVALID_LENGTH;
+	}
+
+	struct pldm_header_info header = {0};
+	header.instance = instance_id;
+	header.msg_type = PLDM_RESPONSE;
+	header.pldm_type = PLDM_FWUP;
+	header.command = PLDM_VERIFY_COMPLETE;
+	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
+	if (rc) {
+		return rc;
+	}
+
+	msg->payload[0] = completion_code;
+
+	return PLDM_SUCCESS;
+}
+
+int decode_apply_complete_req(
+    const struct pldm_msg *msg, size_t payload_length, uint8_t *apply_result,
+    bitfield16_t *comp_activation_methods_modification)
+{
+	if (msg == NULL || apply_result == NULL ||
+	    comp_activation_methods_modification == NULL) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	if (payload_length != sizeof(struct pldm_apply_complete_req)) {
+		return PLDM_ERROR_INVALID_LENGTH;
+	}
+
+	struct pldm_apply_complete_req *request =
+	    (struct pldm_apply_complete_req *)msg->payload;
+
+	*apply_result = request->apply_result;
+	comp_activation_methods_modification->value =
+	    le16toh(request->comp_activation_methods_modification.value);
+
+	if ((*apply_result != PLDM_FWUP_APPLY_SUCCESS_WITH_ACTIVATION_METHOD) &&
+	    comp_activation_methods_modification->value) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	return PLDM_SUCCESS;
+}
+
+int encode_apply_complete_resp(uint8_t instance_id, uint8_t completion_code,
+			       struct pldm_msg *msg, size_t payload_length)
+{
+	if (msg == NULL) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	if (payload_length != sizeof(completion_code)) {
+		return PLDM_ERROR_INVALID_LENGTH;
+	}
+
+	struct pldm_header_info header = {0};
+	header.instance = instance_id;
+	header.msg_type = PLDM_RESPONSE;
+	header.pldm_type = PLDM_FWUP;
+	header.command = PLDM_APPLY_COMPLETE;
+	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
+	if (rc) {
+		return rc;
+	}
+
+	msg->payload[0] = completion_code;
+
+	return PLDM_SUCCESS;
+}
+
+int encode_activate_firmware_req(uint8_t instance_id,
+				 bool8_t self_contained_activation_req,
+				 struct pldm_msg *msg, size_t payload_length)
+{
+	if (msg == NULL) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	if (payload_length != sizeof(struct pldm_activate_firmware_req)) {
+		return PLDM_ERROR_INVALID_LENGTH;
+	}
+
+	if (!is_self_contained_activation_req_valid(
+		self_contained_activation_req)) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	struct pldm_header_info header = {0};
+	header.instance = instance_id;
+	header.msg_type = PLDM_REQUEST;
+	header.pldm_type = PLDM_FWUP;
+	header.command = PLDM_ACTIVATE_FIRMWARE;
+	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
+	if (rc) {
+		return rc;
+	}
+
+	struct pldm_activate_firmware_req *request =
+	    (struct pldm_activate_firmware_req *)msg->payload;
+
+	request->self_contained_activation_req = self_contained_activation_req;
+
+	return PLDM_SUCCESS;
+}
+
+int decode_activate_firmware_resp(const struct pldm_msg *msg,
+				  size_t payload_length,
+				  uint8_t *completion_code,
+				  uint16_t *estimated_time_activation)
+{
+	if (msg == NULL || completion_code == NULL ||
+	    estimated_time_activation == NULL || !payload_length) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	*completion_code = msg->payload[0];
+	if (*completion_code != PLDM_SUCCESS) {
+		return PLDM_SUCCESS;
+	}
+
+	if (payload_length != sizeof(struct pldm_activate_firmware_resp)) {
+		return PLDM_ERROR_INVALID_LENGTH;
+	}
+
+	struct pldm_activate_firmware_resp *response =
+	    (struct pldm_activate_firmware_resp *)msg->payload;
+
+	*estimated_time_activation =
+	    le16toh(response->estimated_time_activation);
+
+	return PLDM_SUCCESS;
+}
+
+int encode_get_status_req(uint8_t instance_id, struct pldm_msg *msg,
+			  size_t payload_length)
+{
+	if (msg == NULL) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	if (payload_length != PLDM_GET_STATUS_REQ_BYTES) {
+		return PLDM_ERROR_INVALID_LENGTH;
+	}
+
+	struct pldm_header_info header = {0};
+	header.instance = instance_id;
+	header.msg_type = PLDM_REQUEST;
+	header.pldm_type = PLDM_FWUP;
+	header.command = PLDM_GET_STATUS;
+	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
+	if (rc) {
+		return rc;
+	}
+
+	return PLDM_SUCCESS;
+}
+
+int decode_get_status_resp(const struct pldm_msg *msg, size_t payload_length,
+			   uint8_t *completion_code, uint8_t *current_state,
+			   uint8_t *previous_state, uint8_t *aux_state,
+			   uint8_t *aux_state_status, uint8_t *progress_percent,
+			   uint8_t *reason_code,
+			   bitfield32_t *update_option_flags_enabled)
+{
+	if (msg == NULL || completion_code == NULL || current_state == NULL ||
+	    previous_state == NULL || aux_state == NULL ||
+	    aux_state_status == NULL || progress_percent == NULL ||
+	    reason_code == NULL || update_option_flags_enabled == NULL ||
+	    !payload_length) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	*completion_code = msg->payload[0];
+	if (*completion_code != PLDM_SUCCESS) {
+		return PLDM_SUCCESS;
+	}
+
+	if (payload_length != sizeof(struct pldm_get_status_resp)) {
+		return PLDM_ERROR_INVALID_LENGTH;
+	}
+	struct pldm_get_status_resp *response =
+	    (struct pldm_get_status_resp *)msg->payload;
+
+	if (!is_state_valid(response->current_state)) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+	if (!is_state_valid(response->previous_state)) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+	if (!is_aux_state_valid(response->aux_state)) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+	if (!is_aux_state_status_valid(response->aux_state_status)) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+	if (response->progress_percent > PLDM_FWUP_MAX_PROGRESS_PERCENT) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+	if (!is_reason_code_valid(response->reason_code)) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	if ((response->current_state == PLDM_FD_STATE_IDLE) ||
+	    (response->current_state == PLDM_FD_STATE_LEARN_COMPONENTS) ||
+	    (response->current_state == PLDM_FD_STATE_READY_XFER)) {
+		if (response->aux_state !=
+		    PLDM_FD_IDLE_LEARN_COMPONENTS_READ_XFER) {
+			return PLDM_ERROR_INVALID_DATA;
+		}
+	}
+
+	*current_state = response->current_state;
+	*previous_state = response->previous_state;
+	*aux_state = response->aux_state;
+	*aux_state_status = response->aux_state_status;
+	*progress_percent = response->progress_percent;
+	*reason_code = response->reason_code;
+	update_option_flags_enabled->value =
+	    le32toh(response->update_option_flags_enabled.value);
+
+	return PLDM_SUCCESS;
+}
+
+int encode_cancel_update_component_req(uint8_t instance_id,
+				       struct pldm_msg *msg,
+				       size_t payload_length)
+{
+	if (msg == NULL) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	if (payload_length != PLDM_CANCEL_UPDATE_COMPONENT_REQ_BYTES) {
+		return PLDM_ERROR_INVALID_LENGTH;
+	}
+
+	struct pldm_header_info header = {0};
+	header.instance = instance_id;
+	header.msg_type = PLDM_REQUEST;
+	header.pldm_type = PLDM_FWUP;
+	header.command = PLDM_CANCEL_UPDATE_COMPONENT;
+	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
+	if (rc) {
+		return rc;
+	}
+
+	return PLDM_SUCCESS;
+}
+
+int decode_cancel_update_component_resp(const struct pldm_msg *msg,
+					size_t payload_length,
+					uint8_t *completion_code)
+{
+	if (msg == NULL || completion_code == NULL) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	if (payload_length != sizeof(*completion_code)) {
+		return PLDM_ERROR_INVALID_LENGTH;
+	}
+
+	*completion_code = msg->payload[0];
+	return PLDM_SUCCESS;
+}
+
+int encode_cancel_update_req(uint8_t instance_id, struct pldm_msg *msg,
+			     size_t payload_length)
+{
+	if (msg == NULL) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	if (payload_length != PLDM_CANCEL_UPDATE_REQ_BYTES) {
+		return PLDM_ERROR_INVALID_LENGTH;
+	}
+
+	struct pldm_header_info header = {0};
+	header.instance = instance_id;
+	header.msg_type = PLDM_REQUEST;
+	header.pldm_type = PLDM_FWUP;
+	header.command = PLDM_CANCEL_UPDATE;
+	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
+	if (rc) {
+		return rc;
+	}
+
+	return PLDM_SUCCESS;
+}
+
+int decode_cancel_update_resp(const struct pldm_msg *msg, size_t payload_length,
+			      uint8_t *completion_code,
+			      bool8_t *non_functioning_component_indication,
+			      bitfield64_t *non_functioning_component_bitmap)
+{
+	if (msg == NULL || completion_code == NULL ||
+	    non_functioning_component_indication == NULL ||
+	    non_functioning_component_bitmap == NULL || !payload_length) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	*completion_code = msg->payload[0];
+	if (*completion_code != PLDM_SUCCESS) {
+		return PLDM_SUCCESS;
+	}
+
+	if (payload_length != sizeof(struct pldm_cancel_update_resp)) {
+		return PLDM_ERROR_INVALID_LENGTH;
+	}
+	struct pldm_cancel_update_resp *response =
+	    (struct pldm_cancel_update_resp *)msg->payload;
+
+	if (!is_non_functioning_component_indication_valid(
+		response->non_functioning_component_indication)) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	*non_functioning_component_indication =
+	    response->non_functioning_component_indication;
+
+	if (*non_functioning_component_indication) {
+		non_functioning_component_bitmap->value =
+		    le64toh(response->non_functioning_component_bitmap);
+	}
 
 	return PLDM_SUCCESS;
 }

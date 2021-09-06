@@ -27,13 +27,9 @@ namespace responder
 namespace platform
 {
 
-using namespace pldm::utils;
-using namespace pldm::responder::pdr_utils;
-using namespace pldm::state_sensor;
-
-using generatePDR =
-    std::function<void(const pldm::utils::DBusHandler& dBusIntf,
-                       const Json& json, pdr_utils::RepoInterface& repo)>;
+using generatePDR = std::function<void(const pldm::utils::DBusHandler& dBusIntf,
+                                       const pldm::utils::Json& json,
+                                       pdr_utils::RepoInterface& repo)>;
 
 using EffecterId = uint16_t;
 using DbusObjMaps =
@@ -55,7 +51,8 @@ class Handler : public CmdHandler
     Handler(const pldm::utils::DBusHandler* dBusIntf,
             const std::string& pdrJsonsDir, pldm_pdr* repo,
             HostPDRHandler* hostPDRHandler,
-            DbusToPLDMEvent* dbusToPLDMEventHandler, fru::Handler* fruHandler,
+            pldm::state_sensor::DbusToPLDMEvent* dbusToPLDMEventHandler,
+            fru::Handler* fruHandler,
             pldm::responder::oem_platform::Handler* oemPlatformHandler,
             sdeventplus::Event& event, bool buildPDRLazily = false,
             const std::optional<EventMap>& addOnHandlersMap = std::nullopt) :
@@ -152,7 +149,8 @@ class Handler : public CmdHandler
     void addDbusObjMaps(
         uint16_t id,
         std::tuple<pdr_utils::DbusMappings, pdr_utils::DbusValMaps> dbusObj,
-        TypeId typeId = TypeId::PLDM_EFFECTER_ID);
+        pldm::responder::pdr_utils::TypeId typeId =
+            pldm::responder::pdr_utils::TypeId::PLDM_EFFECTER_ID);
 
     /** @brief Retrieve an id -> D-Bus objects mapping
      *
@@ -164,8 +162,10 @@ class Handler : public CmdHandler
      *          to attribute value
      */
     const std::tuple<pdr_utils::DbusMappings, pdr_utils::DbusValMaps>&
-        getDbusObjMaps(uint16_t id,
-                       TypeId typeId = TypeId::PLDM_EFFECTER_ID) const;
+        getDbusObjMaps(
+            uint16_t id,
+            pldm::responder::pdr_utils::TypeId typeId =
+                pldm::responder::pdr_utils::TypeId::PLDM_EFFECTER_ID) const;
 
     uint16_t getNextEffecterId()
     {
@@ -184,14 +184,16 @@ class Handler : public CmdHandler
      *  @param[in] repo - instance of concrete implementation of Repo
      */
     void generate(const pldm::utils::DBusHandler& dBusIntf,
-                  const std::string& dir, Repo& repo);
+                  const std::string& dir,
+                  pldm::responder::pdr_utils::Repo& repo);
 
     /** @brief Parse PDR JSONs and build state effecter PDR repository
      *
      *  @param[in] json - platform specific PDR JSON files
      *  @param[in] repo - instance of state effecter implementation of Repo
      */
-    void generateStateEffecterRepo(const Json& json, Repo& repo);
+    void generateStateEffecterRepo(const pldm::utils::Json& json,
+                                   pldm::responder::pdr_utils::Repo& repo);
 
     /** @brief map of PLDM event type to EventHandlers
      *
@@ -307,7 +309,8 @@ class Handler : public CmdHandler
 
         std::unique_ptr<pldm_pdr, decltype(&pldm_pdr_destroy)>
             stateEffecterPdrRepo(pldm_pdr_init(), pldm_pdr_destroy);
-        Repo stateEffecterPDRs(stateEffecterPdrRepo.get());
+        pldm::responder::pdr_utils::Repo stateEffecterPDRs(
+            stateEffecterPdrRepo.get());
         getRepoByType(pdrRepo, stateEffecterPDRs, PLDM_STATE_EFFECTER_PDR);
         if (stateEffecterPDRs.empty())
         {
@@ -315,7 +318,7 @@ class Handler : public CmdHandler
             return PLDM_PLATFORM_INVALID_EFFECTER_ID;
         }
 
-        PdrEntry pdrEntry{};
+        pldm::responder::pdr_utils::PdrEntry pdrEntry{};
         auto pdrRecord = stateEffecterPDRs.getFirstRecord(pdrEntry);
         while (pdrRecord)
         {
@@ -334,7 +337,8 @@ class Handler : public CmdHandler
             {
                 std::cerr << "The requester sent wrong composite effecter"
                           << " count for the effecter, EFFECTER_ID="
-                          << effecterId << "COMP_EFF_CNT=" << compEffecterCnt
+                          << (unsigned)effecterId
+                          << "COMP_EFF_CNT=" << (unsigned)compEffecterCnt
                           << "\n";
                 return PLDM_ERROR_INVALID_DATA;
             }
@@ -364,16 +368,18 @@ class Handler : public CmdHandler
                     !(states->states[bitfieldIndex].byte & (1 << bit)))
                 {
                     std::cerr
-                        << "Invalid state set value, EFFECTER_ID=" << effecterId
-                        << " VALUE=" << stateField[currState].effecter_state
-                        << " COMPOSITE_EFFECTER_ID=" << currState
+                        << "Invalid state set value, EFFECTER_ID="
+                        << (unsigned)effecterId << " VALUE="
+                        << (unsigned)stateField[currState].effecter_state
+                        << " COMPOSITE_EFFECTER_ID=" << (unsigned)currState
                         << " DBUS_PATH=" << dbusMappings[currState].objectPath
                         << "\n";
                     rc = PLDM_PLATFORM_SET_EFFECTER_UNSUPPORTED_SENSORSTATE;
                     break;
                 }
                 const DBusMapping& dbusMapping = dbusMappings[currState];
-                const StatestoDbusVal& dbusValToMap = dbusValMaps[currState];
+                const pldm::responder::pdr_utils::StatestoDbusVal&
+                    dbusValToMap = dbusValMaps[currState];
 
                 if (stateField[currState].set_request == PLDM_REQUEST_SET)
                 {
@@ -407,7 +413,7 @@ class Handler : public CmdHandler
         catch (const std::out_of_range& e)
         {
             std::cerr << "the effecterId does not exist. effecter id: "
-                      << effecterId << e.what() << '\n';
+                      << (unsigned)effecterId << e.what() << '\n';
         }
 
         return rc;
@@ -417,7 +423,7 @@ class Handler : public CmdHandler
      *
      *  @param[in] repo - instance of concrete implementation of Repo
      */
-    void generateTerminusLocatorPDR(Repo& repo);
+    void generateTerminusLocatorPDR(pldm::responder::pdr_utils::Repo& repo);
 
     /** @brief Get std::map associated with the entity
      *         key: object path
@@ -447,7 +453,7 @@ class Handler : public CmdHandler
     DbusObjMaps effecterDbusObjMaps{};
     DbusObjMaps sensorDbusObjMaps{};
     HostPDRHandler* hostPDRHandler;
-    DbusToPLDMEvent* dbusToPLDMEventHandler;
+    pldm::state_sensor::DbusToPLDMEvent* dbusToPLDMEventHandler;
     fru::Handler* fruHandler;
     const pldm::utils::DBusHandler* dBusIntf;
     pldm::responder::oem_platform::Handler* oemPlatformHandler;

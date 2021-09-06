@@ -47,7 +47,8 @@ class BIOSStringAttribute : public BIOSAttribute
      *  @param[in] entry - Json Object
      *  @param[in] dbusHandler - Dbus Handler
      */
-    BIOSStringAttribute(const Json& entry, DBusHandler* const dbusHandler);
+    BIOSStringAttribute(const Json& entry,
+                        pldm::utils::DBusHandler* const dbusHandler);
 
     /** @brief Set Attribute value On Dbus according to the attribute value
      *         entry
@@ -83,7 +84,7 @@ class BIOSStringAttribute : public BIOSAttribute
         Table& attrValueEntry) override;
 
     int updateAttrVal(Table& newValue, uint16_t attrHdl, uint8_t attrType,
-                      const PropertyValue& newPropVal);
+                      const pldm::utils::PropertyValue& newPropVal);
 
   private:
     /** @brief string field from json */

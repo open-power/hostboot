@@ -15,6 +15,7 @@ foreach t : tests
                          common_test_src,
                          gtest,
                          libpldm_dep,
+                         nlohmann_json,
                          phosphor_dbus_interfaces,
                          sdbusplus]),
        workdir: meson.current_source_dir())

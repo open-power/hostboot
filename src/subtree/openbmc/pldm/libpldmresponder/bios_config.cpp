@@ -15,6 +15,9 @@
 #include "oem/ibm/libpldmresponder/platform_oem_ibm.hpp"
 #endif
 
+using namespace pldm::dbus_api;
+using namespace pldm::utils;
+
 namespace pldm
 {
 namespace responder

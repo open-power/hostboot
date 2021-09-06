@@ -13,6 +13,8 @@
 #include <gtest/gtest.h>
 
 using namespace pldm::bios::utils;
+using namespace pldm::responder::bios;
+using namespace pldm::utils;
 
 using ::testing::_;
 using ::testing::ElementsAreArray;

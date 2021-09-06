@@ -11,6 +11,8 @@
 
 namespace pldm
 {
+using namespace utils;
+
 namespace responder
 {
 

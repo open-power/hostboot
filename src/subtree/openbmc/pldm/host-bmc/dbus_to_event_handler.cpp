@@ -7,7 +7,10 @@
 namespace pldm
 {
 
+using namespace pldm::dbus_api;
+using namespace pldm::responder;
 using namespace pldm::responder::pdr;
+using namespace pldm::responder::pdr_utils;
 using namespace pldm::utils;
 using namespace sdbusplus::bus::match::rules;
 

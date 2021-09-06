@@ -4,6 +4,7 @@
 
 #include <gtest/gtest.h>
 
+using namespace pldm::utils;
 using namespace pldm::responder::bios;
 
 class TestAttribute : public BIOSAttribute

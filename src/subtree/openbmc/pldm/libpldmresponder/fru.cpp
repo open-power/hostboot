@@ -43,7 +43,7 @@ void FruImpl::buildFRUTable()
     catch (const std::exception& e)
     {
         std::cerr << "Look up of inventory objects failed and PLDM FRU table "
-                     "creation failed";
+                     "creation failed\n";
         return;
     }
 
@@ -161,6 +161,7 @@ void FruImpl::populateRecords(
     // added for the FRU
     uint16_t recordSetIdentifier = 0;
     auto numRecsCount = numRecs;
+    static uint32_t bmc_record_handle = 0;
 
     for (auto const& [recType, encType, fieldInfos] : recordInfos)
     {
@@ -221,9 +222,11 @@ void FruImpl::populateRecords(
             if (numRecs == numRecsCount)
             {
                 recordSetIdentifier = nextRSI();
+                bmc_record_handle = nextRecordHandle();
                 pldm_pdr_add_fru_record_set(
                     pdrRepo, 0, recordSetIdentifier, entity.entity_type,
-                    entity.entity_instance_num, entity.entity_container_id);
+                    entity.entity_instance_num, entity.entity_container_id,
+                    bmc_record_handle);
             }
             auto curSize = table.size();
             table.resize(curSize + recHeaderSize + tlvs.size());

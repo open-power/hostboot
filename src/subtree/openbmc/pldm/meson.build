@@ -21,22 +21,25 @@ if(get_option('optimization') == '0')
   message('Disabling FORTIFY_SOURCE as optimization is set to 0')
 endif
 
+package_datadir = join_paths(get_option('prefix'), get_option('datadir'), meson.project_name())
+package_localstatedir = join_paths(get_option('prefix'), get_option('localstatedir'), meson.project_name())
+
 conf_data = configuration_data()
 if get_option('libpldmresponder').enabled()
-conf_data.set_quoted('BIOS_JSONS_DIR', '/usr/share/pldm/bios')
-conf_data.set_quoted('BIOS_TABLES_DIR', '/var/lib/pldm/bios')
-conf_data.set_quoted('PDR_JSONS_DIR', '/usr/share/pldm/pdr')
-conf_data.set_quoted('FRU_JSONS_DIR', '/usr/share/pldm/fru')
-conf_data.set_quoted('FRU_MASTER_JSON', '/usr/share/pldm/fru_master.json')
-conf_data.set_quoted('HOST_JSONS_DIR', '/usr/share/pldm/host')
-conf_data.set_quoted('EVENTS_JSONS_DIR', '/usr/share/pldm/events')
+conf_data.set_quoted('BIOS_JSONS_DIR', join_paths(package_datadir, 'bios'))
+conf_data.set_quoted('BIOS_TABLES_DIR', join_paths(package_localstatedir, 'bios'))
+conf_data.set_quoted('PDR_JSONS_DIR', join_paths(package_datadir, 'pdr'))
+conf_data.set_quoted('FRU_JSONS_DIR', join_paths(package_datadir, 'fru'))
+conf_data.set_quoted('FRU_MASTER_JSON', join_paths(package_datadir, 'fru_master.json'))
+conf_data.set_quoted('HOST_JSONS_DIR', join_paths(package_datadir, 'host'))
+conf_data.set_quoted('EVENTS_JSONS_DIR', join_paths(package_datadir, 'events'))
 add_project_arguments('-DLIBPLDMRESPONDER', language : ['c','cpp'])
 endif
 if get_option('softoff').enabled()
   conf_data.set('SOFTOFF_TIMEOUT_SECONDS', get_option('softoff-timeout-seconds'))
 endif
 if get_option('oem-ibm').enabled()
-  conf_data.set_quoted('FILE_TABLE_JSON', '/usr/share/pldm/fileTable.json')
+  conf_data.set_quoted('FILE_TABLE_JSON', join_paths(package_datadir, 'fileTable.json'))
   conf_data.set_quoted('LID_RUNNING_DIR', '/var/lib/phosphor-software-manager/hostfw/running')
   conf_data.set_quoted('LID_ALTERNATE_DIR', '/var/lib/phosphor-software-manager/hostfw/alternate')
   conf_data.set_quoted('LID_STAGING_DIR', '/var/lib/phosphor-software-manager/hostfw/staging')
@@ -51,6 +54,9 @@ conf_data.set('PLDM_VERBOSITY',get_option('verbosity'))
 conf_data.set('NUMBER_OF_REQUEST_RETRIES', get_option('number-of-request-retries'))
 conf_data.set('INSTANCE_ID_EXPIRATION_INTERVAL',get_option('instance-id-expiration-interval'))
 conf_data.set('RESPONSE_TIME_OUT',get_option('response-time-out'))
+if get_option('libpldm-only').disabled()
+  conf_data.set_quoted('HOST_EID_PATH', join_paths(package_datadir, 'host_eid'))
+endif
 configure_file(output: 'config.h',
   configuration: conf_data
 )
@@ -67,7 +73,6 @@ sdeventplus = dependency(
   'sdeventplus',
   fallback: ['sdeventplus', 'sdeventplus_dep'],
 )
-systemd = dependency('systemd')
 
 cpp = meson.get_compiler('cpp')
 
@@ -191,27 +196,28 @@ executable(
   install: true,
   install_dir: get_option('bindir'))
 
-systemd_system_unit_dir = systemd.get_variable(
-        pkgconfig: 'systemdsystemunitdir',
-        pkgconfig_define: ['prefix', get_option('prefix')])
+if get_option('systemd').enabled()
+  systemd_system_unit_dir = dependency('systemd').get_variable(
+          pkgconfig: 'systemdsystemunitdir')
 
-configure_file(
-  copy: true,
-  input: 'pldmd/service_files/pldmd.service',
-  install: true,
-  install_dir: systemd_system_unit_dir,
-  output: 'pldmd.service',
-)
+  configure_file(
+    copy: true,
+    input: 'pldmd/service_files/pldmd.service',
+    install: true,
+    install_dir: systemd_system_unit_dir,
+    output: 'pldmd.service',
+  )
 
-configure_file(
-  input: 'pldmd/verbosity/verbosity',
-  output: 'pldm_verbosity',
-  configuration: conf_data,
-  install: true,
-  install_dir: '/etc/default')
+  configure_file(
+    input: 'pldmd/verbosity/verbosity',
+    output: 'pldm_verbosity',
+    configuration: conf_data,
+    install: true,
+    install_dir: join_paths(get_option('sysconfdir'), 'default'))
 
-if get_option('oem-ibm').enabled()
-  subdir('oem/ibm/service_files')
+  if get_option('oem-ibm').enabled()
+    subdir('oem/ibm/service_files')
+  endif
 endif
 
 subdir('pldmtool')

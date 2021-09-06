@@ -23,17 +23,17 @@ inline bool operator==(const DBusMapping& lhs, const DBusMapping& rhs)
 } // namespace utils
 } // namespace pldm
 
-using namespace pldm::utils;
-
-class MockdBusHandler : public DBusHandler
+class MockdBusHandler : public pldm::utils::DBusHandler
 {
   public:
     MOCK_METHOD(std::string, getService, (const char*, const char*),
                 (const override));
 
     MOCK_METHOD(void, setDbusProperty,
-                (const DBusMapping&, const PropertyValue&), (const override));
+                (const pldm::utils::DBusMapping&,
+                 const pldm::utils::PropertyValue&),
+                (const override));
 
-    MOCK_METHOD(PropertyValue, getDbusPropertyVariant,
+    MOCK_METHOD(pldm::utils::PropertyValue, getDbusPropertyVariant,
                 (const char*, const char*, const char*), (const override));
 };

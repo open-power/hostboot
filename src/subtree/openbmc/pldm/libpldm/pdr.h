@@ -144,6 +144,18 @@ bool pldm_pdr_record_is_remote(const pldm_pdr_record *record);
  */
 void pldm_pdr_remove_remote_pdrs(pldm_pdr *repo);
 
+/** @brief Update the validity of TL PDR - the validity is decided based on
+ * whether the valid bit is set or not as per the spec DSP0248
+ *
+ * @param[in] repo - opaque pointer acting as a PDR repo handle
+ * @param[in] terminusHandle - PLDM terminus handle
+ * @param[in] tid - Terminus ID
+ * @param[in] tlEid - MCTP endpoint EID
+ * @param[in] valid - validity bit of TLPDR
+ */
+void pldm_pdr_update_TL_pdr(const pldm_pdr *repo, uint16_t terminusHandle,
+			    uint8_t tid, uint8_t tlEid, bool valid);
+
 /* ======================= */
 /* FRU Record Set PDR APIs */
 /* ======================= */
@@ -157,13 +169,15 @@ void pldm_pdr_remove_remote_pdrs(pldm_pdr *repo);
  *  @param[in] entity_type - entity type of FRU
  *  @param[in] entity_instance_num - entity instance number of FRU
  *  @param[in] container_id - container id of FRU
+ *  @param[in] bmc_record_handle - handle used to construct the next record
  *
  *  @return uint32_t - record handle assigned to PDR record
  */
 uint32_t pldm_pdr_add_fru_record_set(pldm_pdr *repo, uint16_t terminus_handle,
 				     uint16_t fru_rsi, uint16_t entity_type,
 				     uint16_t entity_instance_num,
-				     uint16_t container_id);
+				     uint16_t container_id,
+				     uint32_t bmc_record_handle);
 
 /** @brief Find a FRU record set PDR by FRU record set identifier
  *
@@ -273,9 +287,17 @@ bool pldm_entity_is_node_parent(pldm_entity_node *node);
  *
  *  @param[in] node - opaque pointer acting as a handle to an entity node
  *
- *  @return pldm_entity_node* - opaque pointer to parent entity
+ *  @return pldm_entity - pldm entity
  */
-pldm_entity_node *pldm_entity_get_parent(pldm_entity_node *node);
+pldm_entity pldm_entity_get_parent(pldm_entity_node *node);
+
+/** @brief Check the current pldm entity is exist parent
+ *
+ *  @param[in] node - opaque pointer acting as a handle to an entity node
+ *
+ *  @return bool true if exist parent, false otherwise
+ */
+bool pldm_entity_is_exist_parent(pldm_entity_node *node);
 
 /** @brief Convert entity association tree to PDR
  *
@@ -285,6 +307,26 @@ pldm_entity_node *pldm_entity_get_parent(pldm_entity_node *node);
  */
 void pldm_entity_association_pdr_add(pldm_entity_association_tree *tree,
 				     pldm_pdr *repo, bool is_remote);
+/** @brief Add entity association pdr from node
+ *
+ *  @param[in] node - opaque pointer acting as a handle to an entity node
+ *  @param[in] repo - PDR repo where entity association records should be added
+ *  @param[in] is_remote  - if true, then the PDR is not from this terminus
+ */
+void pldm_entity_association_pdr_add_from_node(pldm_entity_node *node,
+					       pldm_pdr *repo,
+					       pldm_entity **entities,
+					       size_t num_entities,
+					       bool is_remote);
+
+/** @brief Find entity reference in tree
+ *
+ *  @param[in] tree - opaque pointer to entity association tree
+ *  @param[in] entity - PLDM entity
+ *  @param[in] node - node to the entity
+ */
+void pldm_find_entity_ref_in_tree(pldm_entity_association_tree *tree,
+				  pldm_entity entity, pldm_entity_node **node);
 
 /** @brief Get number of children of entity
  *

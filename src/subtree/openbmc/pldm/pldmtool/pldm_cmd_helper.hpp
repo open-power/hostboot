@@ -26,7 +26,6 @@ namespace pldmtool
 namespace helper
 {
 
-using namespace pldm::utils;
 constexpr uint8_t PLDM_ENTITY_ID = 8;
 constexpr uint8_t MCTP_MSG_TYPE_PLDM = 1;
 using ordered_json = nlohmann::ordered_json;

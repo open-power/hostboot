@@ -18,8 +18,6 @@ namespace pldm
 namespace requester
 {
 
-using namespace std::chrono;
-
 /** @class RequestRetryTimer
  *
  *  The abstract base class for implementing the PLDM request retry logic. This
@@ -44,7 +42,7 @@ class RequestRetryTimer
      *  @param[in] timeout - time to wait between each retry in milliseconds
      */
     explicit RequestRetryTimer(sdeventplus::Event& event, uint8_t numRetries,
-                               milliseconds timeout) :
+                               std::chrono::milliseconds timeout) :
 
         event(event),
         numRetries(numRetries), timeout(timeout),
@@ -67,7 +65,8 @@ class RequestRetryTimer
         {
             if (numRetries)
             {
-                timer.start(duration_cast<microseconds>(timeout), true);
+                timer.start(duration_cast<std::chrono::microseconds>(timeout),
+                            true);
             }
         }
         catch (const std::runtime_error& e)
@@ -94,7 +93,8 @@ class RequestRetryTimer
   protected:
     sdeventplus::Event& event; //!< reference to PLDM daemon's main event loop
     uint8_t numRetries;        //!< number of request retries
-    milliseconds timeout;  //!< time to wait between each retry in milliseconds
+    std::chrono::milliseconds
+        timeout;           //!< time to wait between each retry in milliseconds
     phosphor::Timer timer; //!< manages starting timers and handling timeouts
 
     /** @brief Sends the PLDM request message
@@ -147,15 +147,15 @@ class Request final : public RequestRetryTimer
      */
     explicit Request(int fd, mctp_eid_t eid, sdeventplus::Event& event,
                      pldm::Request&& requestMsg, uint8_t numRetries,
-                     milliseconds timeout) :
+                     std::chrono::milliseconds timeout) :
         RequestRetryTimer(event, numRetries, timeout),
         fd(fd), eid(eid), requestMsg(std::move(requestMsg))
     {}
 
   private:
-    int fd;         //!< file descriptor of MCTP communications socket
-    mctp_eid_t eid; //!< endpoint ID of the remote MCTP endpoint
-    pldm::Request&& requestMsg; //!< PLDM request message
+    int fd;                   //!< file descriptor of MCTP communications socket
+    mctp_eid_t eid;           //!< endpoint ID of the remote MCTP endpoint
+    pldm::Request requestMsg; //!< PLDM request message
 
     /** @brief Sends the PLDM request message on the socket
      *

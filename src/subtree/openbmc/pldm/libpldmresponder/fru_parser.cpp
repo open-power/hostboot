@@ -7,6 +7,8 @@
 #include <fstream>
 #include <iostream>
 
+using namespace pldm::responder::dbus;
+
 namespace pldm
 {
 

@@ -197,8 +197,8 @@ void generateNumericEffecterPDR(const DBusInterface& dBusIntf, const Json& json,
         auto propertyName = dbusEntry.value("property_name", "");
         auto propertyType = dbusEntry.value("property_type", "");
 
-        DbusMappings dbusMappings{};
-        DbusValMaps dbusValMaps{};
+        pldm::responder::pdr_utils::DbusMappings dbusMappings{};
+        pldm::responder::pdr_utils::DbusValMaps dbusValMaps{};
         pldm::utils::DBusMapping dbusMapping{};
         try
         {

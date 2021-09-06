@@ -5,8 +5,6 @@
 
 #include <stdint.h>
 
-using namespace pldm::responder::pdr_utils;
-
 namespace pldm
 {
 
@@ -27,7 +25,9 @@ constexpr uint8_t BmcTerminusId = 1;
  *
  *  @return Repo - Instance of pdr::Repo
  */
-void getRepoByType(const Repo& inRepo, Repo& outRepo, Type pdrType);
+void getRepoByType(const pldm::responder::pdr_utils::Repo& inRepo,
+                   pldm::responder::pdr_utils::Repo& outRepo,
+                   pldm::responder::pdr_utils::Type pdrType);
 
 /** @brief Get the record of PDR by the record handle
  *
@@ -38,9 +38,10 @@ void getRepoByType(const Repo& inRepo, Repo& outRepo, Type pdrType);
  *
  *  @return pldm_pdr_record - Instance of pdr::RepoInterface
  */
-const pldm_pdr_record* getRecordByHandle(const RepoInterface& pdrRepo,
-                                         RecordHandle recordHandle,
-                                         PdrEntry& pdrEntry);
+const pldm_pdr_record*
+    getRecordByHandle(const pldm::responder::pdr_utils::RepoInterface& pdrRepo,
+                      pldm::responder::pdr_utils::RecordHandle recordHandle,
+                      pldm::responder::pdr_utils::PdrEntry& pdrEntry);
 
 } // namespace pdr
 } // namespace responder
