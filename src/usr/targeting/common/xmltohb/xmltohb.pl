@@ -190,6 +190,25 @@ use constant BYTES_PER_ABSTRACT_POINTER => 8;
 # so that FSP can link a system target to multiple nodes
 use constant MAX_COMPUTE_AND_CONTROL_NODE_SUM => 5;
 
+# These constants describe the persistencies of different targeting attributes.
+# NOTE: keep this list in sync with the data that gets written out in writeHeaderFormatHeaderFile!
+use constant
+{
+    SECTION_TYPE_PNOR_RO => 0,
+    SECTION_TYPE_PNOR_RW => 1,
+    SECTION_TYPE_HEAP_PNOR_INIT => 2,
+    SECTION_TYPE_HEAP_ZERO_INIT => 3,
+    SECTION_TYPE_FSP_P0_ZERO_INIT => 4,
+    SECTION_TYPE_FSP_P0_FLASH_INIT => 5,
+    SECTION_TYPE_FSP_P3_RO => 6,
+    SECTION_TYPE_FSP_P3_RW => 7,
+    SECTION_TYPE_FSP_P1_ZERO_INIT => 8,
+    SECTION_TYPE_FSP_P1_FLASH_INIT => 9,
+    SECTION_TYPE_HB_HEAP_ZERO_INIT => 0xa,
+    SECTION_TYPE_HB_METADATA => 0xb,
+    SECTION_TYPE_BAD_VALUE => 255
+};
+
 my $xml = new XML::Simple (KeyAttr=>[]);
 use Digest::MD5 qw(md5_hex);
 
@@ -1575,43 +1594,46 @@ namespace TARGETING
     enum SECTION_TYPE
     {
         // Targeting read-only section backed to PNOR.  Always the 0th section.
-        SECTION_TYPE_PNOR_RO        = 0x00,
+        SECTION_TYPE_PNOR_RO        = @{[SECTION_TYPE_PNOR_RO]},
 
         // Targeting read-write section backed to PNOR
-        SECTION_TYPE_PNOR_RW        = 0x01,
+        SECTION_TYPE_PNOR_RW        = @{[SECTION_TYPE_PNOR_RW]},
 
         // Targeting heap section initialized out of PNOR
-        SECTION_TYPE_HEAP_PNOR_INIT = 0x02,
+        SECTION_TYPE_HEAP_PNOR_INIT = @{[SECTION_TYPE_HEAP_PNOR_INIT]},
 
         // Targeting heap section intialized to zero
-        SECTION_TYPE_HEAP_ZERO_INIT = 0x03,
+        SECTION_TYPE_HEAP_ZERO_INIT = @{[SECTION_TYPE_HEAP_ZERO_INIT]},
 
         // FSP section
 
         // Initialized to zero on Fsp Reset / Obliterate on Fsp Reset or R/R
-        SECTION_TYPE_FSP_P0_ZERO_INIT = 0x4,
+        SECTION_TYPE_FSP_P0_ZERO_INIT = @{[SECTION_TYPE_FSP_P0_ZERO_INIT]},
 
         // Initialized from Flash / Obliterate on Fsp Reset or R/R
-        SECTION_TYPE_FSP_P0_FLASH_INIT = 0x5,
+        SECTION_TYPE_FSP_P0_FLASH_INIT = @{[SECTION_TYPE_FSP_P0_FLASH_INIT]},
 
         // This section remains across fsp power cycle, fixed, never updates
-        SECTION_TYPE_FSP_P3_RO = 0x6,
+        SECTION_TYPE_FSP_P3_RO = @{[SECTION_TYPE_FSP_P3_RO]},
 
         // This section persist changes across Fsp Power cycle
-        SECTION_TYPE_FSP_P3_RW = 0x7,
+        SECTION_TYPE_FSP_P3_RW = @{[SECTION_TYPE_FSP_P3_RW]},
 
         // Initialized to zero on hard reset, else existing P1 memory
         // copied on R/R
-        SECTION_TYPE_FSP_P1_ZERO_INIT = 0x8,
+        SECTION_TYPE_FSP_P1_ZERO_INIT = @{[SECTION_TYPE_FSP_P1_ZERO_INIT]},
 
         // Intialized to default from P3 on hard reset, else existing P1
         // memory copied on R/R
-        SECTION_TYPE_FSP_P1_FLASH_INIT = 0x9,
+        SECTION_TYPE_FSP_P1_FLASH_INIT = @{[SECTION_TYPE_FSP_P1_FLASH_INIT]},
 
         // HOSTBOOT section
 
         // Targeting heap section intialized to zero
-        SECTION_TYPE_HB_HEAP_ZERO_INIT = 0x0A,
+        SECTION_TYPE_HB_HEAP_ZERO_INIT = @{[SECTION_TYPE_HB_HEAP_ZERO_INIT]},
+
+        // Attribute metadata section
+        SECTION_TYPE_HB_METADATA = @{[SECTION_TYPE_HB_METADATA]},
 
     };
 
@@ -6663,13 +6685,15 @@ sub generateTargetingImage {
     # 128 MB virtual memory offset between sections
     my $vmmSectionOffset = 128 * 1024 * 1024; # 128MB
 
+    my $rwMetadataSize = 0; # The size of the metadata section (calculated later)
+
     # Virtual memory addresses corresponding to the start of the targeting image
     # PNOR/heap sections
     my $pnorRoBaseAddress    = getPnorBaseAddress($vmmConstsFile);
     my $heapPnorInitBaseAddr = $pnorRoBaseAddress    + $vmmSectionOffset;
     my $heapZeroInitBaseAddr = $heapPnorInitBaseAddr + $vmmSectionOffset;
     my $hbHeapZeroInitBaseAddr = $heapZeroInitBaseAddr + $vmmSectionOffset;
-    my $pnorRwBaseAddress    = $hbHeapZeroInitBaseAddr    + $vmmSectionOffset;
+    my $pnorRwBaseAddress    = $hbHeapZeroInitBaseAddr + $vmmSectionOffset;
 
     # Split "fsp" into additional sections
     my $fspP0DefaultedFromZeroBaseAddr   = $pnorRwBaseAddress + $vmmSectionOffset;
@@ -6845,6 +6869,8 @@ sub generateTargetingImage {
     my $offsetWithinTargets = 0;
     my @NullPtrArray = ( 0 ) ;
 
+    my $attributeMetadataBinData = 0;
+
     foreach my $targetInstance (@targetsAoH)
     {
         my $data;
@@ -6996,6 +7022,9 @@ sub generateTargetingImage {
 
     # For the main loop, use all attributes including virtual
     my $attributeIdEnumerationAll = getAttributeIdEnumeration($allAttributes);
+
+    # The map to collect all of the attribute metadata info
+    my %attrMetadataMap = ();
 
     my %allattrhash; #Hash used to generate attribute report
     foreach my $targetInstance (@targetsAoH)
@@ -7238,6 +7267,13 @@ sub generateTargetingImage {
                       . "supported for attribute '$attributeId'.");
             }
 
+            my $attributeSize = 0; # The actual size of the attribute as it is packed into the image
+
+            # The persistency of the attribute. This value is being driven by the XML tags for each
+            # attribute. The persistency value assigned to each attribute matches the SECTION_TYPE
+            # enum in obj/genfiles/pnortargeting.H (also generated by this script).
+            my $attributePersistency = SECTION_TYPE_BAD_VALUE;
+
             if($section eq "pnor-ro")
             {
                 if ((exists ${$Target_t}{$attributeId}) &&
@@ -7271,6 +7307,9 @@ sub generateTargetingImage {
                 $offset += (length $rodata);
 
                 $roAttrBinData .= $rodata;
+
+                $attributeSize = length($rodata);
+                $attributePersistency = SECTION_TYPE_PNOR_RO;
             }
             elsif($section eq "pnor-rw")
             {
@@ -7279,8 +7318,8 @@ sub generateTargetingImage {
                                                         $attrhash{$attributeId}->{default},
                                                         \%attrhash);
 
-                #print "Wrote to pnor-rw value ",$attributeDef->{id}, ",
-                #", $attrhash{$attributeId}->{default}," \n";
+                #print "Wrote to pnor-rw value ",$attributeDef->{id}, ",", $attrhash{$attributeId}->{default}," \n";
+
                 my $hex = unpack ("H*",$rwdata);
 
                 push @attrDataforSM, [$attrValue, $huidValue,
@@ -7298,6 +7337,8 @@ sub generateTargetingImage {
                 $rwOffset += (length $rwdata);
 
                 $rwAttrBinData .= $rwdata;
+                $attributeSize = length($rwdata);
+                $attributePersistency = SECTION_TYPE_PNOR_RW;
 
             }
             elsif($section eq "heap-zero-initialized")
@@ -7328,6 +7369,8 @@ sub generateTargetingImage {
                 $heapZeroInitOffset += (length $heapZeroInitData);
 
                 $heapZeroInitBinData .= $heapZeroInitData;
+                $attributeSize = length($heapZeroInitData);
+                $attributePersistency = SECTION_TYPE_HEAP_ZERO_INIT;
 
             }
             elsif($section eq "heap-pnor-initialized")
@@ -7357,6 +7400,9 @@ sub generateTargetingImage {
                 $heapPnorInitOffset += (length $heapPnorInitData);
 
                 $heapPnorInitBinData .= $heapPnorInitData;
+                $attributeSize = length($heapPnorInitData);
+                $attributePersistency = SECTION_TYPE_HEAP_PNOR_INIT;
+
             }
             # Split FSP section into more granular sections
             elsif($section eq "fspP0DefaultedFromZero")
@@ -7386,6 +7432,8 @@ sub generateTargetingImage {
                 $fspP0DefaultedFromZeroOffset += (length $fspP0ZeroData);
 
                 $fspP0DefaultedFromZeroBinData .= $fspP0ZeroData;
+                $attributeSize = length($fspP0ZeroData);
+                $attributePersistency = SECTION_TYPE_FSP_P0_ZERO_INIT;
             }
             elsif($section eq "fspP0DefaultedFromP3")
             {
@@ -7414,6 +7462,8 @@ sub generateTargetingImage {
                 $fspP0DefaultedFromP3Offset += (length $fspP0FlashData);
 
                 $fspP0DefaultedFromP3BinData .= $fspP0FlashData;
+                $attributeSize = length($fspP0FlashData);
+                $attributePersistency = SECTION_TYPE_FSP_P0_FLASH_INIT;
             }
             elsif($section eq "fspP3Ro")
             {
@@ -7434,6 +7484,8 @@ sub generateTargetingImage {
                 $fspP3RoOffset += (length $fspP3RoData);
 
                 $fspP3RoBinData .= $fspP3RoData;
+                $attributeSize = length($fspP3RoData);
+                $attributePersistency = SECTION_TYPE_FSP_P3_RO;
             }
             elsif($section eq "fspP3Rw")
             {
@@ -7459,6 +7511,8 @@ sub generateTargetingImage {
                 $fspP3RwOffset += (length $fspP3RwData);
 
                 $fspP3RwBinData .= $fspP3RwData;
+                $attributeSize = length($fspP3RwData);
+                $attributePersistency = SECTION_TYPE_FSP_P3_RW;
             }
             elsif($section eq "fspP1DefaultedFromZero")
             {
@@ -7484,6 +7538,8 @@ sub generateTargetingImage {
                 $fspP1DefaultedFromZeroOffset += (length $fspP1ZeroData);
 
                 $fspP1DefaultedFromZeroBinData .= $fspP1ZeroData;
+                $attributeSize = length($fspP1ZeroData);
+                $attributePersistency = SECTION_TYPE_FSP_P1_ZERO_INIT;
             }
             elsif($section eq "fspP1DefaultedFromP3")
             {
@@ -7509,6 +7565,8 @@ sub generateTargetingImage {
                 $fspP1DefaultedFromP3Offset += (length $fspP1FlashData);
 
                 $fspP1DefaultedFromP3BinData .= $fspP1FlashData;
+                $attributeSize = length($fspP1FlashData);
+                $attributePersistency = SECTION_TYPE_FSP_P1_FLASH_INIT;
             }
             # Hostboot specific section
             elsif($section eq "hb-heap-zero-initialized")
@@ -7535,11 +7593,25 @@ sub generateTargetingImage {
                 $hbHeapZeroInitOffset += (length $hbHeapZeroInitData);
 
                 $hbHeapZeroInitBinData .= $hbHeapZeroInitData;
+                $attributeSize = length($hbHeapZeroInitData);
+                $attributePersistency = SECTION_TYPE_HB_HEAP_ZERO_INIT;
             }
 
             else
             {
                 croak("Could not find a suitable section.");
+            }
+
+            # If this is an attribute we haven't seen before, add it to the
+            # metadata map and metadata section.
+            my $attrIdHash = hex(getAttributeIdHashStr($attributeId));
+            if(not exists $attrMetadataMap{$attrIdHash})
+            {
+                $attrMetadataMap{$attrIdHash}{exists} = 1;
+                # Write the metadata for the current attribute into the metadata section
+                $attributeMetadataBinData .= pack4byte($attrIdHash);
+                $attributeMetadataBinData .= pack4byte($attributeSize);
+                $attributeMetadataBinData .= pack1byte($attributePersistency);
             }
 
             $attributesWritten++;
@@ -7552,6 +7624,12 @@ sub generateTargetingImage {
     } # End target instance loop
 
     generateAttrValuesReport(\%allattrhash);
+
+    # The number of attributes in the metadata section is packed in 4 bytes
+    # (uint32_t). Include that size in the total size of the metadata section.
+    use constant NUM_ATTR_SIZE => 4;
+
+    $rwMetadataSize = length($attributeMetadataBinData) + NUM_ATTR_SIZE;
 
     if($numAttributes != $attributesWritten)
     {
@@ -7732,31 +7810,33 @@ sub generateTargetingImage {
     }
 
     $sectionHoH{ pnorRo }{ offset } = 0;
-    $sectionHoH{ pnorRo }{ type   } = 0;
+    $sectionHoH{ pnorRo }{ type   } = SECTION_TYPE_PNOR_RO;
     $sectionHoH{ pnorRo }{ size   } = sizeBlockAligned($offset,$blockSize,1);
 
     $sectionHoH{ heapPnorInit }{ offset } = $sectionHoH{pnorRo}{offset}
                                             + $sectionHoH{pnorRo}{size};
-    $sectionHoH{ heapPnorInit }{ type   } = 2;
+    $sectionHoH{ heapPnorInit }{ type   } = SECTION_TYPE_HEAP_PNOR_INIT;
     $sectionHoH{ heapPnorInit }{ size   } =
         sizeBlockAligned($heapPnorInitOffset,$blockSize,1);
 
     $sectionHoH{ heapZeroInit }{ offset } = $sectionHoH{heapPnorInit}{offset}
                                             + $sectionHoH{heapPnorInit}{size};
-    $sectionHoH{ heapZeroInit }{ type   } = 3;
+    $sectionHoH{ heapZeroInit }{ type   } = SECTION_TYPE_HEAP_ZERO_INIT;
     $sectionHoH{ heapZeroInit }{ size   } =
         sizeBlockAligned($heapZeroInitOffset,$blockSize,1);
 
     # zeroInitSection occupies no space in the binary, so set the
     # Hostboot section address to that of the zeroInitSection
     $sectionHoH{ hbHeapZeroInit }{ offset } = $sectionHoH{heapZeroInit}{offset};
-    $sectionHoH{ hbHeapZeroInit }{ type } = 10;
+    $sectionHoH{ hbHeapZeroInit }{ type } = SECTION_TYPE_HB_HEAP_ZERO_INIT;
     $sectionHoH{ hbHeapZeroInit }{ size } =
         sizeBlockAligned($hbHeapZeroInitOffset,$blockSize,1);
 
     $sectionHoH{ pnorRw }{ offset } = $sectionHoH{hbHeapZeroInit}{offset};
-    $sectionHoH{ pnorRw }{ type   } = 1;
+    $sectionHoH{ pnorRw }{ type   } = SECTION_TYPE_PNOR_RW;
     $sectionHoH{ pnorRw }{ size   } = sizeBlockAligned($rwOffset,$blockSize,1);
+
+    my $metadataSectionOffset = $sectionHoH{pnorRw}{offset} + $sectionHoH{pnorRw}{size};
 
     # Split "fsp" into additional sections
     if($cfgIncludeFspAttributes)
@@ -7765,43 +7845,50 @@ sub generateTargetingImage {
         # section address to that of the zeroInitSection
         $sectionHoH{ fspP0DefaultedFromZero }{ offset } =
              $sectionHoH{pnorRw}{offset} + $sectionHoH{pnorRw}{size};
-        $sectionHoH{ fspP0DefaultedFromZero }{ type } = 4;
+        $sectionHoH{ fspP0DefaultedFromZero }{ type } = SECTION_TYPE_FSP_P0_ZERO_INIT;
         $sectionHoH{ fspP0DefaultedFromZero }{ size } =
             sizeBlockAligned($fspP0DefaultedFromZeroOffset,$blockSize,1);
 
         $sectionHoH{ fspP0DefaultedFromP3 }{ offset } =
              $sectionHoH{fspP0DefaultedFromZero}{offset} +
              $sectionHoH{fspP0DefaultedFromZero}{size};
-        $sectionHoH{ fspP0DefaultedFromP3 }{ type } = 5;
+        $sectionHoH{ fspP0DefaultedFromP3 }{ type } = SECTION_TYPE_FSP_P0_FLASH_INIT;
         $sectionHoH{ fspP0DefaultedFromP3 }{ size } =
             sizeBlockAligned($fspP0DefaultedFromP3Offset,$blockSize,1);
 
         $sectionHoH{ fspP3Ro }{ offset } =
              $sectionHoH{fspP0DefaultedFromP3}{offset} +
              $sectionHoH{fspP0DefaultedFromP3}{size};
-        $sectionHoH{ fspP3Ro }{ type } = 6;
+        $sectionHoH{ fspP3Ro }{ type } = SECTION_TYPE_FSP_P3_RO;
         $sectionHoH{ fspP3Ro }{ size } =
             sizeBlockAligned($fspP3RoOffset,$blockSize,1);
 
         $sectionHoH{ fspP3Rw }{ offset } =
              $sectionHoH{fspP3Ro}{offset} + $sectionHoH{fspP3Ro}{size};
-        $sectionHoH{ fspP3Rw }{ type } = 7;
+        $sectionHoH{ fspP3Rw }{ type } = SECTION_TYPE_FSP_P3_RW;
         $sectionHoH{ fspP3Rw }{ size } =
             sizeBlockAligned($fspP3RwOffset,$blockSize,1);
 
         $sectionHoH{ fspP1DefaultedFromZero }{ offset } =
              $sectionHoH{fspP3Rw}{offset} + $sectionHoH{fspP3Rw}{size};
-        $sectionHoH{ fspP1DefaultedFromZero }{ type } = 8;
+        $sectionHoH{ fspP1DefaultedFromZero }{ type } = SECTION_TYPE_FSP_P1_ZERO_INIT;
         $sectionHoH{ fspP1DefaultedFromZero }{ size } =
             sizeBlockAligned($fspP1DefaultedFromZeroOffset,$blockSize,1);
 
         $sectionHoH{ fspP1DefaultedFromP3 }{ offset } =
              $sectionHoH{fspP1DefaultedFromZero}{offset} +
              $sectionHoH{fspP1DefaultedFromZero}{size};
-        $sectionHoH{ fspP1DefaultedFromP3 }{ type } = 9;
+        $sectionHoH{ fspP1DefaultedFromP3 }{ type } = SECTION_TYPE_FSP_P1_FLASH_INIT;
         $sectionHoH{ fspP1DefaultedFromP3 }{ size } =
             sizeBlockAligned($fspP1DefaultedFromP3Offset,$blockSize,1);
+
+        $metadataSectionOffset = $sectionHoH{fspP1DefaultedFromP3}{offset} + $sectionHoH{fspP1DefaultedFromP3}{size};
     }
+
+    $sectionHoH{ pnorRwMetadata }{ offset } = $metadataSectionOffset;
+    $sectionHoH{ pnorRwMetadata }{ type } = SECTION_TYPE_HB_METADATA;
+    $sectionHoH{ pnorRwMetadata }{ size } =
+        sizeBlockAligned($rwMetadataSize,$blockSize,1);
 
     my $numSections = keys %sectionHoH;
 
@@ -7831,6 +7918,10 @@ sub generateTargetingImage {
         push(@sections,"fspP1DefaultedFromZero");
         push(@sections,"fspP1DefaultedFromP3");
     }
+
+    # pnorRwMetadata section will always be included. Push it here so that it's included
+    # in the header last, just like it would be in the HBD image
+    push(@sections,"pnorRwMetadata");
 
     foreach my $section (@sections)
     {
@@ -7866,6 +7957,7 @@ sub generateTargetingImage {
         $md5hex->add($roAttrBinData);
         $md5hex->add($associationsBinData);
         $md5hex->add($heapPnorInitBinData);
+        $md5hex->add($attributeMetadataBinData);
 
         my $versionHeader = "VERSION\0";
         $versionHeader .= $md5hex->hexdigest;
@@ -7948,6 +8040,10 @@ sub generateTargetingImage {
         $outFile .= pack("@".($sectionHoH{fspP1DefaultedFromP3}{size}
             - $fspP1DefaultedFromP3Offset));
     }
+
+    $outFile .= pack4byte(scalar keys %attrMetadataMap);
+    $outFile .= $attributeMetadataBinData;
+    $outFile .= pack("@".($sectionHoH{pnorRwMetadata}{size} - $rwMetadataSize));
 
     # Handle read-write data
     ${$unprotectedDataRef} = $outFile;

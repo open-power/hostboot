@@ -1256,6 +1256,7 @@ namespace TARGETING
                     switch(iv_sections[i].type)
                     {
                         case SECTION_TYPE_PNOR_RO:
+                        case SECTION_TYPE_HB_METADATA:
                             l_perm = READ_ONLY;
                             break;
 
@@ -1289,7 +1290,11 @@ namespace TARGETING
                                                 TARG_RC_UNHANDLED_ATTR_SEC_TYPE,
                                                 iv_sections[i].type,
                                                 0, hbSwError);
-                                                break;
+                            break;
+                    }
+                    if(l_errl)
+                    {
+                        break;
                     }
                 }
                 if( i_type == ALL_SECTION_TYPES || i_type == iv_sections[i].type)
