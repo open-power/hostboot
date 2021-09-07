@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,13 @@
 //------------------------------------------------------------------------------
 #include <fapi2.H>
 #include <p10_adu_constants.H>
+
+/// function pointer typedef definition for HWP call support
+typedef fapi2::ReturnCode (*p10_adu_utils_reset_adu_FP_t) (
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& );
+
+typedef fapi2::ReturnCode (*p10_adu_utils_cleanup_adu_FP_t) (
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& );
 
 extern"C"
 {
