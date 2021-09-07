@@ -142,12 +142,16 @@ uint64_t ErrlSrc::flatten( void * o_pBuffer, const uint64_t i_cbBuffer )
 
         CPPASSERT( ErrlSrc::SLEN == sizeof(pelSRCSection_t)-iv_header.flatSize());
         psrc->srcLength   = ErrlSrc::SLEN;
+
 #ifdef CONFIG_BUILD_FULL_PEL
         // FRU callouts included
         if (!iv_coVec.empty())
         {
             // There are FRU callouts, add them to total src size
             psrc->srcLength += fruCalloutFlatSize();
+
+            // Tell the PEL section header what the new length is.
+            iv_header.iv_slen = psrc->srcLength + iv_header.flatSize();
         }
 #endif
 
@@ -408,7 +412,7 @@ void ErrlSrc::flattenFruCallouts(pelSRCSection_t* i_psrc)
                           + entry.locCodeLen
                           + l_frusslen;
 
-        // Creaate a temp fru callout blob
+        // Create a temp fru callout blob
         uint8_t l_tmpfruco[l_frucolen] = {};
 
         // Pointer to the current fru data entry location
@@ -444,7 +448,8 @@ void ErrlSrc::flattenFruCallouts(pelSRCSection_t* i_psrc)
 
         // Flat PN/CCIN/SN are a fixed size, regardless of source string size
         // Source string is already truncated and null terminated if required
-        if (entry.fruCompType & FAILING_COMP_TYPE_FRU_PN)
+        if ((entry.fruCompType & FAILING_COMP_TYPE_FRU_PN) ||
+            (entry.fruCompType & FAILING_COMP_TYPE_FRU_PRC))
         {
             strncpy(l_fruss.fruidpnString,
                     entry.partNumber,

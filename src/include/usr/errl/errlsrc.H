@@ -252,14 +252,14 @@ inline size_t ErrlSrc::fruIdSubstructSize(const fruCallOutEntry_t& i_fruSubstruc
     if (i_fruSubstruct.fruCompType & FAILING_COMP_TYPE_FRU_PRC)
     {
         // CCIN and Serial Number are not present.
-        fruSubstructLength -= PEL_CCIN_SIZE - PEL_SERIAL_NUM_SIZE;
+        fruSubstructLength = fruSubstructLength - PEL_CCIN_SIZE - PEL_SERIAL_NUM_SIZE;
     }
     // If neither the Part Number nor the Procedure ID were supplied then this FRU callout
     // doesn't have any of the optional fields.
     else if (!(i_fruSubstruct.fruCompType & FAILING_COMP_TYPE_FRU_PN))
     {
         // Part Number, CCIN and Serial Number are not present.
-        fruSubstructLength -= PEL_PART_NUM_SIZE - PEL_CCIN_SIZE - PEL_SERIAL_NUM_SIZE;
+        fruSubstructLength = fruSubstructLength - PEL_PART_NUM_SIZE - PEL_CCIN_SIZE - PEL_SERIAL_NUM_SIZE;
     }
     return fruSubstructLength;
 }

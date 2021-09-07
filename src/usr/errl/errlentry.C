@@ -3050,7 +3050,7 @@ void ErrlEntry::addFruCalloutDataToSrc(TARGETING::Target *            const i_ta
             // Set the part number for this fru callout to be the HBxxxxx code. This is a shared field for part numbers
             // and procedure ids.
             set_errl_string(l_fruco.partNumber,
-                            procedureIdMapIterator->isolationProcedure);
+                            reinterpret_cast<const char *>(procedureIdMapIterator->isolationProcedure));
 
             // Add fruco to the src vector
             iv_Src.addFruCallout(l_fruco);
