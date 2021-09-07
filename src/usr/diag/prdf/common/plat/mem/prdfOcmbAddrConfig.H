@@ -47,10 +47,16 @@ class OcmbAddrConfig
 {
   public: // functions
 
+    #ifdef __HOSTBOOT_RUNTIME
     /** @brief Default constructor. */
     OcmbAddrConfig( ExtensibleChip * i_ocmb ) : iv_ocmb(i_ocmb),
         iv_addr_trans0(64), iv_addr_trans1(64), iv_addr_trans2(64)
     {}
+    #else
+    /** @brief Default constructor. */
+    OcmbAddrConfig( ExtensibleChip * i_ocmb ) : iv_ocmb(i_ocmb)
+    {}
+    #endif
 
     /**
      * @brief Returns the data stored in iv_mc_addr_trans0, reads from the
@@ -88,6 +94,7 @@ class OcmbAddrConfig
     // The OCMB chip associated with the data stored in this class
     ExtensibleChip * iv_ocmb;
 
+    #ifdef __HOSTBOOT_RUNTIME
     // These variables will be used to store the information within the
     // MC_ADDR_TRANS registers which will be needed for address translation
     // during dynamic memory deallocation. Information is stored within an
@@ -97,6 +104,7 @@ class OcmbAddrConfig
     BitStringBuffer iv_addr_trans0;
     BitStringBuffer iv_addr_trans1;
     BitStringBuffer iv_addr_trans2;
+    #endif
 };
 
 } // end namespace PRDF

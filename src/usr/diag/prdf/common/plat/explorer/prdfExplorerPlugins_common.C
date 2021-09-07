@@ -66,6 +66,7 @@ int32_t Initialize( ExtensibleChip * i_chip )
 
     i_chip->getDataBundle() = new OcmbDataBundle( i_chip );
 
+    #ifdef __HOSTBOOT_RUNTIME
     // Initialize the address configuration variable within the OcmbDataBundle
     do
     {
@@ -94,6 +95,7 @@ int32_t Initialize( ExtensibleChip * i_chip )
         }
 
     } while(0);
+    #endif
 
     return SUCCESS;
 

@@ -40,6 +40,8 @@ uint32_t OcmbAddrConfig::getMcAddrTrans0( BitStringBuffer & o_addr_trans0 )
 
     uint32_t o_rc = SUCCESS;
 
+    #ifdef __HOSTBOOT_RUNTIME
+
     if ( iv_addr_trans0.isZero() )
     {
         // Try to read MC_ADDR_TRANS and update the instance variable
@@ -60,6 +62,25 @@ uint32_t OcmbAddrConfig::getMcAddrTrans0( BitStringBuffer & o_addr_trans0 )
 
     o_addr_trans0 = iv_addr_trans0;
 
+    #else
+
+    // Try to read MC_ADDR_TRANS and update the instance variable
+    SCAN_COMM_REGISTER_CLASS * mc_addr_trans =
+        iv_ocmb->getRegister( "MC_ADDR_TRANS" );
+
+    o_rc = mc_addr_trans->Read();
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Read failed on MC_ADDR_TRANS: iv_ocmb=0x%08x",
+                  iv_ocmb->getHuid() );
+    }
+    else
+    {
+        o_addr_trans0 = *(mc_addr_trans->GetBitString());
+    }
+
+    #endif
+
     return o_rc;
 
     #undef PRDF_FUNC
@@ -72,6 +93,8 @@ uint32_t OcmbAddrConfig::getMcAddrTrans1( BitStringBuffer & o_addr_trans1 )
     #define PRDF_FUNC "[OcmbAddrConfig::getMcAddrTrans1] "
 
     uint32_t o_rc = SUCCESS;
+
+    #ifdef __HOSTBOOT_RUNTIME
 
     if ( iv_addr_trans1.isZero() )
     {
@@ -93,6 +116,25 @@ uint32_t OcmbAddrConfig::getMcAddrTrans1( BitStringBuffer & o_addr_trans1 )
 
     o_addr_trans1 = iv_addr_trans1;
 
+    #else
+
+    // Try to read MC_ADDR_TRANS and update the instance variable
+    SCAN_COMM_REGISTER_CLASS * mc_addr_trans1 =
+        iv_ocmb->getRegister( "MC_ADDR_TRANS1" );
+
+    o_rc = mc_addr_trans1->Read();
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Read failed on MC_ADDR_TRANS1: iv_ocmb=0x%08x",
+                  iv_ocmb->getHuid() );
+    }
+    else
+    {
+        o_addr_trans1 = *(mc_addr_trans1->GetBitString());
+    }
+
+    #endif
+
     return o_rc;
 
     #undef PRDF_FUNC
@@ -105,6 +147,8 @@ uint32_t OcmbAddrConfig::getMcAddrTrans2( BitStringBuffer & o_addr_trans2 )
     #define PRDF_FUNC "[OcmbAddrConfig::getMcAddrTrans2] "
 
     uint32_t o_rc = SUCCESS;
+
+    #ifdef __HOSTBOOT_RUNTIME
 
     if ( iv_addr_trans2.isZero() )
     {
@@ -125,6 +169,25 @@ uint32_t OcmbAddrConfig::getMcAddrTrans2( BitStringBuffer & o_addr_trans2 )
     }
 
     o_addr_trans2 = iv_addr_trans2;
+
+    #else
+
+    // Try to read MC_ADDR_TRANS and update the instance variable
+    SCAN_COMM_REGISTER_CLASS * mc_addr_trans2 =
+        iv_ocmb->getRegister( "MC_ADDR_TRANS2" );
+
+    o_rc = mc_addr_trans2->Read();
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Read failed on MC_ADDR_TRANS2: iv_ocmb=0x%08x",
+                  iv_ocmb->getHuid() );
+    }
+    else
+    {
+        o_addr_trans2 = *(mc_addr_trans2->GetBitString());
+    }
+
+    #endif
 
     return o_rc;
 
