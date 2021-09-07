@@ -115,3 +115,15 @@ actionclass threshold_and_mask_smp_l1
     threshold_and_mask_th32;
 };
 
+actionclass spare_lane_deploy_l0
+{
+    smp_callout_l0_th_32perDay;
+    funccall("power_down_lanes_l0");
+};
+
+actionclass spare_lane_deploy_l1
+{
+    smp_callout_l1_th_32perDay;
+    funccall("power_down_lanes_l1");
+};
+

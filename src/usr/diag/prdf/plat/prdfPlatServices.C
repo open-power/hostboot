@@ -68,6 +68,7 @@
 #include <exp_deploy_row_repairs.H>
 #include <plat_hwp_invoker.H>
 
+#include <p10_io_quiesce_lane.H>
 #include <p10_rcs_transient_check.H>
 
 #ifdef CONFIG_NVDIMM
@@ -376,6 +377,35 @@ int32_t smp_callout( ExtensibleChip* i_chip, STEP_CODE_DATA_STRUCT& io_sc,
     }
 
     return SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
+uint32_t powerDownSpareLanes(ExtensibleChip* i_chip, unsigned int i_link)
+{
+    PRDF_ASSERT(nullptr != i_chip);
+    PRDF_ASSERT(TYPE_IOHS == i_chip->getType());
+    PRDF_ASSERT(i_link < MAX_LINK_PER_IOHS);
+
+    uint32_t o_rc = SUCCESS;
+
+    TargetHandle_t smpTrgt = getConnectedChild(i_chip->getTrgt(), TYPE_SMPGROUP,
+                                               i_link);
+    PRDF_ASSERT(nullptr != smpTrgt);
+
+    errlHndl_t errl = nullptr;
+
+    fapi2::Target<fapi2::TARGET_TYPE_IOLINK> fapiSmp{smpTrgt};
+
+    FAPI_INVOKE_HWP(errl, p10_io_quiesce_lane, fapiSmp);
+    if (nullptr != errl)
+    {
+        PRDF_ERR("p10_io_quiesce_lane(0x%08x) failed", getHuid(smpTrgt));
+        PRDF_COMMIT_ERRL(errl, ERRL_ACTION_REPORT);
+        o_rc = FAIL;
+    }
+
+    return o_rc;
 }
 
 //##############################################################################

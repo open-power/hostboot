@@ -170,7 +170,12 @@ CLEAN_TARGETS += ${MFG_THRES_PATH}
 # Hardware procedure files needed for both IPL and RT
 ################################################################################
 
+prd_vpath += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/io/
 prd_vpath += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/perv/
+prd_obj_no_sim += p10_io_lib.o
+prd_obj_no_sim += p10_io_ppe_lib.o
+prd_obj_no_sim += p10_io_ppe_regs.o
+prd_obj_no_sim += p10_io_quiesce_lane.o
 prd_obj_no_sim += p10_proc_gettracearray.o
 prd_obj_no_sim += p10_sbe_tracearray.o
 

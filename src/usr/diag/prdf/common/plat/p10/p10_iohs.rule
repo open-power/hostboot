@@ -915,12 +915,12 @@ group gIOHS_DLP_FIR_SMP
     /** IOHS_DLP_FIR[44] (SMP mode)
      *  link0 spare done
      */
-    (rIOHS_DLP_FIR_SMP, bit(44)) ? smp_callout_l0_th_32perDay;
+    (rIOHS_DLP_FIR_SMP, bit(44)) ? spare_lane_deploy_l0;
 
     /** IOHS_DLP_FIR[45] (SMP mode)
      *  link1 spare done
      */
-    (rIOHS_DLP_FIR_SMP, bit(45)) ? smp_callout_l1_th_32perDay;
+    (rIOHS_DLP_FIR_SMP, bit(45)) ? spare_lane_deploy_l1;
 
     /** IOHS_DLP_FIR[46] (SMP mode)
      *  link0 too many crc errors

@@ -109,6 +109,19 @@ uint32_t putScom(TARGETING::TargetHandle_t i_target, BitString& io_bs,
                    uint64_t i_address);
 
 //##############################################################################
+//##                        Fabric/Memory bus functions
+//##############################################################################
+
+/**
+ * @brief  In the event of a spare lane deploy on an SMP bus, this function will
+ *         power down all of the spare lanes on the given link.
+ * @param  i_chip  An IOHS chip.
+ * @param  i_link  The IOLINK position relative to the given IOHS chip.
+ * @return Non-SUCCESS if internal function fails, SUCCESS otherwise.
+ */
+uint32_t powerDownSpareLanes(ExtensibleChip* i_chip, unsigned int i_link);
+
+//##############################################################################
 //##                        Memory specific functions
 //##############################################################################
 

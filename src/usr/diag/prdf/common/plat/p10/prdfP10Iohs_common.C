@@ -40,6 +40,30 @@ using namespace PlatServices;
 namespace p10_iohs
 {
 
+//------------------------------------------------------------------------------
+
+int32_t power_down_lanes_l0(ExtensibleChip* i_chip,
+                            STEP_CODE_DATA_STRUCT& io_sc)
+{
+    #ifdef __HOSTBOOT_MODULE
+    PlatServices::powerDownSpareLanes(i_chip, 0);
+    #endif
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE(p10_iohs, power_down_lanes_l0);
+
+int32_t power_down_lanes_l1(ExtensibleChip* i_chip,
+                            STEP_CODE_DATA_STRUCT& io_sc)
+{
+    #ifdef __HOSTBOOT_MODULE
+    PlatServices::powerDownSpareLanes(i_chip, 1);
+    #endif
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE(p10_iohs, power_down_lanes_l1);
+
+//------------------------------------------------------------------------------
+
 } // namespace p10_iohs
 
 } // namespace PRDF
