@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -161,7 +161,6 @@ errlHndl_t sendScomOpToFsp(DeviceFW::OperationType i_opType,
                    "FSP scom read/write failed. "
                    "target 0x%llX addr 0x%llX r/w %d",
                    get_huid(i_target), i_scomAddr, i_opType);
-
          break;
       }
 
@@ -178,7 +177,12 @@ errlHndl_t sendScomOpToFsp(DeviceFW::OperationType i_opType,
    delete [] l_resp_fw_msg;
    l_req_fw_msg = l_resp_fw_msg = nullptr;
 
-   return l_err;
+   if (l_err)
+   {
+       l_err->collectTrace(FSISCOM_COMP_NAME,512);
+   }
+
+  return l_err;
 }
 
 
@@ -303,7 +307,6 @@ errlHndl_t sendMultiScomReadToFsp(TARGETING::TargetHandle_t i_target,
          TRACFCOMP(g_trac_fsiscom, ERR_MRK
                    "FSP multi-scom read failed. target 0x%llX",
                    get_huid(i_target));
-
          break;
       }
 
@@ -352,6 +355,11 @@ errlHndl_t sendMultiScomReadToFsp(TARGETING::TargetHandle_t i_target,
    delete [] l_req_fw_msg;
    delete [] l_resp_fw_msg;
    l_req_fw_msg = l_resp_fw_msg = nullptr;
+
+   if (l_err)
+   {
+       l_err->collectTrace(FSISCOM_COMP_NAME,512);
+   }
 
    return l_err;
 }

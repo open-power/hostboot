@@ -293,6 +293,7 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
     //  function to complete even if we can't send the data out
     if (l_err)
     {
+        l_err->collectTrace("VPD",512);
         errlCommit( l_err, VPD_COMP_ID );
     }
 

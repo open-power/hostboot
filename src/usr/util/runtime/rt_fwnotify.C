@@ -186,6 +186,7 @@ void spiLockRequest(TargetHandle_t i_proc,
     //  internally and hope for the best
     if( l_err )
     {
+        l_err->collectTrace(RUNTIME_COMP_NAME,1024);
         //Commit the error if it exists
         errlCommit(l_err, RUNTIME_COMP_ID);
     }

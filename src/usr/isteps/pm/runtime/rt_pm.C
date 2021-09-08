@@ -528,6 +528,10 @@ namespace RTPM
 
         } while (0);
 
+        if (l_err)
+        {
+            l_err->collectTrace(ISTEP_COMP_NAME,1024);
+        }
         return l_err;
     }
 

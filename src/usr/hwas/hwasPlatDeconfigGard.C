@@ -1008,6 +1008,7 @@ void DeconfigGard::platPostDeconfigureTarget(
 
    if (l_err)
    {
+       l_err->collectTrace("HWAS_I",1024);
       errlCommit(l_err, HWAS_COMP_ID);
    }
 
