@@ -1458,28 +1458,31 @@ void getApssMessageData(uint8_t* o_data,
 
     ATTR_ADC_CHANNEL_GAINS_type gain;
     if (!sys->tryGetAttr<ATTR_ADC_CHANNEL_GAINS>(gain) ||
-        (sizeof(gain) != NUM_APSS_CHANNELS))
+        (sizeof(gain) != (NUM_APSS_CHANNELS*4)))
     {
-        TMGT_ERR("getApssMessageData: Failed to get GAINS");
+        TMGT_ERR("getApssMessageData: Failed to get GAINS, size=%d",
+                 sizeof(gain));
         attr_failure = true;
     }
 
     ATTR_ADC_CHANNEL_OFFSETS_type offset;
     if (!sys->tryGetAttr<ATTR_ADC_CHANNEL_OFFSETS>(offset) ||
-        (sizeof(offset) != NUM_APSS_CHANNELS))
+        (sizeof(offset) != (NUM_APSS_CHANNELS*4)))
     {
-        TMGT_ERR("getApssMessageData: Failed to get OFFSETS");
-        // Just use 00s for sensor numbers
-        memset(offset, 0, sizeof(offset));
+        TMGT_ERR("getApssMessageData: Failed to get OFFSETS, size=%d",
+                 sizeof(offset));
+        attr_failure = true;
     }
 
-    static TARGETING::ATTR_ADC_CHANNEL_SENSOR_NUMBERS_type
+    ATTR_ADC_CHANNEL_SENSOR_NUMBERS_type
         apss_sensors;
     if (!sys->tryGetAttr<ATTR_ADC_CHANNEL_SENSOR_NUMBERS>(apss_sensors) ||
-        (sizeof(apss_sensors) != NUM_APSS_CHANNELS))
+        (sizeof(apss_sensors) != (NUM_APSS_CHANNELS*4)))
     {
-        TMGT_ERR("getApssMessageData: Failed to get SENSOR_NUMBERS");
-        attr_failure = true;
+        TMGT_ERR("getApssMessageData: Failed to get SENSOR_NUMBERS, size=%d",
+                 sizeof(apss_sensors));
+        // Just use 00s for sensor numbers
+        memset(apss_sensors, 0, sizeof(apss_sensors));
     }
 
     ATTR_APSS_GPIO_PORT_MODES_type  gpioMode;
@@ -1497,8 +1500,7 @@ void getApssMessageData(uint8_t* o_data,
     }
 
     uint64_t idx = 0;
-    // TODO: RTC 290676
-    //if (attr_failure == false)
+    if (attr_failure == false)
     {
         o_data[0] = OCC_CFGDATA_APSS_CONFIG;
         o_data[1] = 0x20; // version
@@ -1546,7 +1548,6 @@ void getApssMessageData(uint8_t* o_data,
             pinIdx += pinsPerPort;
         }
     }
-#if 0 // TODO: RTC 290676
     else
     {
         /*@
@@ -1563,11 +1564,6 @@ void getApssMessageData(uint8_t* o_data,
                   0, 0,
                   ERRORLOG::ERRL_SEV_UNRECOVERABLE);
         ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
-    }
-#endif
-    if (attr_failure)
-    {
-        TMGT_ERR("getApssMessageData: Invalid APSS data found");
     }
 
     o_size = idx;
