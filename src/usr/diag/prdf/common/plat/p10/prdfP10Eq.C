@@ -122,53 +122,51 @@ int32_t __analyzeCoreFir( ExtensibleChip * i_chip,
     // EQ_CHIPLET_RE_FIR level here.
 
     #ifdef __HOSTBOOT_MODULE
-    // If we aren't doing recoverable analysis or are not at threshold, just
-    // return SUCCESS
-    if ( RECOVERABLE != io_sc.service_data->getPrimaryAttnType() ||
-         !io_sc.service_data->IsAtThreshold() )
+
+    // Mask and clear EQ_CORE_FIR recoverable attentions.
+    if (RECOVERABLE == io_sc.service_data->getPrimaryAttnType())
     {
-        return o_rc;
-    }
-
-    // We can't mask recoverable errors in the CORE_FIR like we do on all of the
-    // other FIRs because it will make core recovery hang. Therefore, we we make
-    // a predictive callout at threshold, we will mask recoverable attentions
-    // for the entire FIR.
-    SCAN_COMM_REGISTER_CLASS * chipletMask =
-        i_chip->getRegister( "EQ_CHIPLET_RE_FIR_MASK" );
-
-    if ( SUCCESS == chipletMask->Read() )
-    {
-        // Bits 5:8 are the bits for analysis to the EQ_CORE_FIR
-        chipletMask->SetBit( 5 + i_corePos );
-
-        if ( SUCCESS != chipletMask->Write() )
+        if (io_sc.service_data->IsAtThreshold())
         {
-            PRDF_ERR( PRDF_FUNC "Failed to write EQ_CHIPLET_RE_FIR_MASK on "
-                      "0x%08x", i_chip->getHuid() );
+            // We can't mask recoverable errors in the CORE_FIR like we do on
+            // all of the other FIRs because it will cause core recovery to
+            // hang. Therefore, we will we will mask recoverable attentions for
+            // the entire FIR (at threshold).
+            auto chipletMask = i_chip->getRegister("EQ_CHIPLET_RE_FIR_MASK");
+
+            if ( SUCCESS == chipletMask->Read() )
+            {
+                // Bits 5:8 are the bits for analysis to the EQ_CORE_FIR
+                chipletMask->SetBit( 5 + i_corePos );
+
+                if ( SUCCESS != chipletMask->Write() )
+                {
+                    PRDF_ERR(PRDF_FUNC "Failed to write EQ_CHIPLET_RE_FIR_MASK "
+                             "on 0x%08x", i_chip->getHuid());
+                }
+            }
+            else
+            {
+                PRDF_ERR(PRDF_FUNC "Failed to read EQ_CHIPLET_RE_FIR_MASK on "
+                         "0x%08x", i_chip->getHuid());
+            }
         }
-    }
-    else
-    {
-        PRDF_ERR( PRDF_FUNC "Failed to read EQ_CHIPLET_RE_FIR_MASK on 0x%08x",
-                  i_chip->getHuid() );
-    }
 
-    // Because we are unable to mask the CORE_FIR in the traditional way, we are
-    // also unable to reset the WOF when at threshold. If we leave the WOF set,
-    // PHYP is unable to put the core to sleep, which is a small hit to power
-    // performance. Therefore, we need to clear the WOF register. Note that in
-    // fused core mode, both WOFs in the core pair need to be cleared.
-    for (const auto& c : {core, getNeighborCore(core)})
-    {
-        if (nullptr == c) continue; // in case the pair core doesn't exist
-
-        auto wof = c->getRegister("EQ_CORE_FIR_WOF");
-        wof->clearAllBits();
-        if (SUCCESS != wof->Write())
+        // If there is a recoverable attention on a core in fused core mode,
+        // EQ_CORE_FIR_WOF[56] will be set by hardware on the other core in the
+        // core pair. If this bit is left on, PHYP will be unable to put the
+        // core to sleep, which is a small hit to power performance. Therefore,
+        // we need to ensure this bit is clear. Note that it is possible the
+        // rule code will clear it. So check if it is set before writing again.
+        auto neighbor = getNeighborCore(core);
+        if (nullptr != neighbor)
         {
-            PRDF_ERR(PRDF_FUNC "Failed to clear EQ_CORE_FIR_WOF on 0x%08x",
-                     c->getHuid());
+            auto wof = neighbor->getRegister("EQ_CORE_FIR_WOF");
+            if (SUCCESS == wof->Read() && wof->IsBitSet(56))
+            {
+                wof->ClearBit(56);
+                wof->Write();
+            }
         }
     }
 
