@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2020
+# Contributors Listed Below - COPYRIGHT 2010,2021
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -39,6 +39,7 @@ SUBDIRS += eeprom.d
 SUBDIRS += errl.d
 SUBDIRS += errldisplay.d
 SUBDIRS += expaccess.d
+SUBDIRS += mdsaccess.d
 SUBDIRS += fapi2.d
 SUBDIRS += fapiwrap.d
 SUBDIRS += fsi.d

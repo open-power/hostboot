@@ -229,6 +229,7 @@ my $resident_modules = {
     "libxscom.so"               => '1',
     "libnode_comm.so"           => '1',
     "libexpaccess.so"           => '1',
+    "libmdsaccess.so"           => '1',
     "libnvdimm.so"              => '1',
     "libmmio.so"                => '1',
     "libsmf.so"                 => '1',

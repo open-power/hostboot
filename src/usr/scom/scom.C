@@ -124,6 +124,11 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                       TARGETING::TYPE_OCMB_CHIP,
                       scomPerformOp);
 
+DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
+                      DeviceFW::SCOM,
+                      TARGETING::TYPE_MDS_CTLR,
+                      scomPerformOp);
+
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 errlHndl_t scomPerformOp(DeviceFW::OperationType i_opType,
@@ -997,10 +1002,10 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
             {
                 //do I2CSCOM
                 l_err = deviceOp(i_opType,
-                                i_target,
-                                io_buffer,
-                                io_buflen,
-                                DEVICE_I2CSCOM_ADDRESS(i_addr));
+                                 i_target,
+                                 io_buffer,
+                                 io_buflen,
+                                 DEVICE_I2CSCOM_ADDRESS(i_addr));
                 if( l_err ) { break; }
 
             }

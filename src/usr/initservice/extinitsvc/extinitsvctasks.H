@@ -433,6 +433,18 @@ const TaskInfo g_exttaskinfolist[]   =   {
         },
 
         /**
+         * @brief MDS (Micro-architectural Data Sampling) Controller library
+         */
+        {
+            "libmdsaccess.so" ,                 // taskname
+            NULL,                               // no pointer to fn
+            {
+                INIT_TASK,                      // task type
+                EXT_IMAGE,                      // Extended Module
+            }
+        },
+
+        /**
          * @brief   Common istep functions
          *
          *

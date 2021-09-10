@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -531,6 +531,14 @@ const char MCTP_COMP_NAME[] = "mctp";
 //@{
 const compId_t PLDM_COMP_ID = 0x4700;
 const char PLDM_COMP_NAME[] = "pldm";
+//@}
+
+/** @name MDSACCESS
+ *  MDS (Microarchitectural Data Sampling) access library module
+ */
+//@{
+const compId_t MDS_ACCESS_COMP_ID = 0x4800;
+const char MDS_ACCESS_COMP_NAME[] = "mdsaccess";
 //@}
 
 //
