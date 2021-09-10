@@ -146,6 +146,7 @@
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -1332,7 +1333,7 @@ ID for the sensor number returned with the elog. -->
         <default>0</default>
       </uint8_t>
       <array>
-	8192
+        8192
       </array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
