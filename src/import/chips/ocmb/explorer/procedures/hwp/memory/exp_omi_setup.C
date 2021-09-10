@@ -148,6 +148,11 @@ extern "C"
         // Note: This does not kick off OMI training
         FAPI_TRY(mss::exp::i2c::boot_config(i_target, l_boot_config_data));
 
+        //// Wait a bit for the command (DLL lock and OMI training) to complete
+        //// Value based on initial Explorer hardware.
+        //// The command takes ~300ms and we poll for around 100ms, so wait 250ms here
+        FAPI_TRY( fapi2::delay( (mss::DELAY_1MS * 250), 200) );
+
         // Check FW status for success
         FAPI_TRY(mss::exp::i2c::poll_fw_status(i_target, 2 * mss::DELAY_1MS, 100000, l_fw_status_data));
         l_rc_bootconfig0 = mss::exp::i2c::check::boot_config(i_target, l_boot_config_data, l_fw_status_data);

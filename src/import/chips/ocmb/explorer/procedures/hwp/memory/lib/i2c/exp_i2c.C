@@ -324,10 +324,6 @@ fapi2::ReturnCode boot_config(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
     // Send the command
     FAPI_TRY(fapi2::putI2c(i_target, io_data));
 
-    // Wait a bit for the command (DLL lock and OMI training) to complete
-    // Value based on initial Explorer hardware.
-    // The command takes ~300ms and we poll for around 100ms, so wait 250ms here
-    FAPI_TRY( fapi2::delay( (mss::DELAY_1MS * 250), 200) );
 
 fapi_try_exit:
     return fapi2::current_err;

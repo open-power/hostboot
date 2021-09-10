@@ -63,11 +63,11 @@ extern "C"
         uint8_t l_sim = 0;
         FAPI_TRY(mss::attr::get_is_simulation(l_sim));
 
-        if (!l_sim)
-        {
-            // Train mode 1 (PATTERN_A)
-            FAPI_TRY(mss::exp::workarounds::omi::training_prbs(i_target));
-        }
+//        if (!l_sim)
+//        {
+//            // Train mode 1 (PATTERN_A)
+//            FAPI_TRY(mss::exp::workarounds::omi::training_prbs(i_target));
+//        }
 
         // BOOT CONFIG 1
         {

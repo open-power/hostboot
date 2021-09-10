@@ -564,6 +564,29 @@ fapi2::ReturnCode p10_omi_train_prbs_helper2(
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_OMI_DL_X4_BACKOFF_ENABLE, i_ocmb, l_dl_x4_backoff_en),
              "Error getting ATTR_CHIP_EC_FEATURE_OMI_DL_X4_BACKOFF_ENABLE");
 
+    {
+        fapi2::buffer<uint64_t> l_data;
+        uint64_t l_pattern_a = 0;
+        uint64_t l_pattern_b = 0;
+        int i = 0;
+
+        for (; i < 400; i++)
+        {
+            FAPI_TRY(fapi2::delay(mss::common_timings::DELAY_1MS, 10));
+
+            FAPI_TRY(scomt::omi::GET_TRAINING_STATUS(i_omi, l_data));
+            scomt::omi::GET_TRAINING_STATUS_RX_PATTERN_A(l_data, l_pattern_a);
+            scomt::omi::GET_TRAINING_STATUS_RX_PATTERN_B(l_data, l_pattern_b);
+
+            if (l_pattern_a > 0 || l_pattern_b > 0)
+            {
+                break;
+            }
+        }
+
+        FAPI_DBG("%s Found Pattern A||B(0x%02X|0x%02X) after %dms...", mss::c_str(i_omi), l_pattern_a, l_pattern_b, i);
+    }
+
     // Enable auto training
     FAPI_TRY(mss::omi::setup_mc_config0(i_omi, mss::omi::train_mode::ENABLE_AUTO_TRAINING, l_dl_x4_backoff_en));
 
