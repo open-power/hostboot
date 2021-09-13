@@ -602,12 +602,14 @@ uint32_t __getSpareInfo( TargetHandle_t i_trgt, MemRank i_rank,
 
 //------------------------------------------------------------------------------
 
-uint32_t MemDqBitmap::isSpareAvailable( uint8_t i_portSlct, bool & o_dramSpare )
+uint32_t MemDqBitmap::isSpareAvailable( uint8_t i_portSlct, bool & o_sp0Avail,
+                                        bool & o_sp1Avail )
 {
     #define PRDF_FUNC "[MemDqBitmap::isSpareAvailable] "
 
     uint32_t o_rc = SUCCESS;
-    o_dramSpare = false;
+    o_sp0Avail = false;
+    o_sp1Avail = false;
 
     do
     {
@@ -632,17 +634,21 @@ uint32_t MemDqBitmap::isSpareAvailable( uint8_t i_portSlct, bool & o_dramSpare )
         // Spare is not available.
         if ( !spareSupported )
         {
-            o_dramSpare = false;
+            o_sp0Avail = false;
+            o_sp1Avail = false;
             break;
         }
 
         uint8_t spareDqBits = iv_data.at(i_portSlct).bitmap[iv_spareByte];
 
         // Check if either spare is available (lower or higher nibble)
-        if ( (0 == (spareDqBits & 0xf0)) ||
-             (0 == (spareDqBits & 0x0f)) )
+        if ( 0 == (spareDqBits & 0xf0) )
         {
-            o_dramSpare = true;
+            o_sp0Avail = true;
+        }
+        if ( 0 == (spareDqBits & 0x0f) )
+        {
+            o_sp1Avail = true;
         }
 
     } while (0);

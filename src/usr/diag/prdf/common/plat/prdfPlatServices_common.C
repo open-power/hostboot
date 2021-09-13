@@ -572,7 +572,8 @@ uint32_t isSpareAvailable( TARGETING::TargetHandle_t i_trgt, MemRank i_rank,
             break;
         }
 
-        bool dramSparePossible = false;
+        bool sp0Avail = false;
+        bool sp1Avail = false;
 
         // Get the bad dq data
         MemDqBitmap dqBitmap;
@@ -583,14 +584,15 @@ uint32_t isSpareAvailable( TARGETING::TargetHandle_t i_trgt, MemRank i_rank,
             break;
         }
 
-        o_rc = dqBitmap.isSpareAvailable( i_ps, dramSparePossible );
+        o_rc = dqBitmap.isSpareAvailable( i_ps, sp0Avail, sp1Avail );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "isSpareAvailable() failed" );
             break;
         }
 
-        if (dramSparePossible && (!sp0.isValid() || !sp1.isValid()))
+        if ( (sp0Avail && !sp0.isValid()) ||
+             (sp1Avail && !sp1.isValid()) )
         {
             o_spAvail = true;
         }

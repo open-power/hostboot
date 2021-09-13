@@ -212,10 +212,12 @@ class MemDqBitmap
     /**
      * @brief  Queries for DRAM spare status.
      * @param  i_portSlct  The target port.
-     * @param  o_dramSpare TRUE if the DRAM spare is available, FALSE otherwise.
+     * @param  o_sp0Avail TRUE if DRAM spare 0 is available, FALSE otherwise.
+     * @param  o_sp1Avail TRUE if DRAM spare 1 is available, FALSE otherwise.
      * @return Non-SUCCESS if an internal function failed, SUCCESS otherwise.
      */
-    uint32_t isSpareAvailable( uint8_t i_portSlct, bool & o_dramSpare );
+    uint32_t isSpareAvailable( uint8_t i_portSlct, bool & o_sp0Avail,
+                               bool & o_sp1Avail );
 
   private: // instance variables
 
