@@ -88,7 +88,8 @@ typedef struct __attribute__((__packed__))
     uint8_t  modelDataFlag;
     uint16_t SRVDDVmax;
     uint16_t SRVCSVmax;
-    uint8_t  SRRsvd[4];
+    uint8_t  QRVRM_enable;
+    uint8_t  SRRsvd[3];
 } poundV_static_rails_t;
 
 typedef struct __attribute__((__packed__))

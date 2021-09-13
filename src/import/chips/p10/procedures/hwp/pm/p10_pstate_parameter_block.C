@@ -1199,6 +1199,7 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         }
         io_globalppb->pgpe_flags[PGPE_FLAG_PHANTOM_HALT_ENABLE] = iv_attrs.attr_phantom_halt_enable;
         io_globalppb->pgpe_flags[PGPE_FLAG_RVRM_ENABLE] = iv_rvrm_enabled;
+        io_globalppb->pgpe_flags[PGPE_FLAG_RVRM_QVID_ENABLE_VEC] = iv_qrvrm_enable_flag;
         io_globalppb->pgpe_flags[PGPE_FLAG_WOF_THROTTLE_ENABLE] = is_wof_throttle_enabled();
         io_globalppb->base.vcs_vdd_offset_mv= revle16(uint16_t(iv_attrs.attr_vcs_vdd_offset_mv & 0xFF));//Attribute is 1-byte only so truncate it
         io_globalppb->base.vcs_floor_mv  = revle16(iv_attrs.attr_vcs_floor_mv);
@@ -2819,10 +2820,15 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
         FAPI_INF("#V data = 0x%04X  %-6d (%s)", l_temp, l_temp, outstr);
         l_buffer_inc += 2;
 
+        strcpy(outstr, "QRVRM enable flag");
+        iv_qrvrm_enable_flag = *l_buffer_inc;
+        FAPI_INF("#V data = 0x%04X  %-6d (%s)", iv_pdv_model_data, iv_pdv_model_data, outstr);
+        l_buffer_inc += 1;
+
         strcpy(outstr, "spare (used)");
         l_temp = *l_buffer_inc;
         FAPI_INF("#V data = 0x%04X  %-6d (%s)", l_temp, l_temp, outstr);
-        l_buffer_inc += 4;
+        l_buffer_inc += 3;
 
         // Other Rails
 
@@ -4929,6 +4935,14 @@ fapi2::ReturnCode PlatPmPPB::rvrm_enablement()
 
 
     do {
+        //Below class variable data comes from #V VPD, if the value is 0 then
+        //QVID circut is bad, else it is good
+        if ( iv_qrvrm_enable_flag == 0)
+        {
+            FAPI_INF("RVRM is not enabled in the #V VPD");
+            iv_rvrm_enabled = false;
+            break;
+        }
         if (!is_rvrm_enabled())
         {
             FAPI_INF("RVRM is not enabled");

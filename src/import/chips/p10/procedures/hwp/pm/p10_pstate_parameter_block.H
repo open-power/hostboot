@@ -796,6 +796,7 @@ class PlatPmPPB
         uint16_t                  iv_array_vdn_mv;
         uint16_t                  iv_array_vdd_mv;
         uint8_t                   iv_pdv_model_data;
+        uint8_t                   iv_qrvrm_enable_flag;
 
         PoundVOpPoint_t           iv_operating_points[NUM_VPD_PTS_SET][NUM_PV_POINTS];
         PoundVOpPoint_t           iv_attr_mvpd_poundV_raw[NUM_PV_POINTS];
