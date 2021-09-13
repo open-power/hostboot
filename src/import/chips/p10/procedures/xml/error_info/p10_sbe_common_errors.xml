@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -178,7 +178,7 @@
         <id>SBE_EXTERNAL_SCOMMABLE_REGISTERS</id>
         <scomRegister>scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIDBGPRO</scomRegister>
         <scomRegister>scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR</scomRegister>
-        <scomRegister>scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMDBG</scomRegister> 
+        <scomRegister>scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMDBG</scomRegister>
      </registerFfdc>
      <registerFfdc>
         <id>MIB_EXTERNAL_SCOMMABLE_REGISTERS</id>
@@ -186,7 +186,18 @@
         <scomRegister>scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_MIB_XIMEM</scomRegister>
         <scomRegister>scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_MIB_XISGB</scomRegister>
         <scomRegister>scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_MIB_XIICAC</scomRegister>
-     </registerFfdc>
+    </registerFfdc>
+    <registerFfdc>
+        <id>SBE_IPL_SCRATCH_REGISTERS</id>
+        <cfamRegister> scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_1_FSI</cfamRegister>
+        <cfamRegister> scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_2_FSI</cfamRegister>
+        <cfamRegister> scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI</cfamRegister>
+        <cfamRegister> scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_4_FSI</cfamRegister>
+        <cfamRegister> scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_5_FSI</cfamRegister>
+        <cfamRegister> scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_FSI</cfamRegister>
+        <cfamRegister> scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_7_FSI</cfamRegister>
+        <cfamRegister> scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_8_FSI</cfamRegister>
+    </registerFfdc>
    <!-- ******************************************************************** -->
     <hwpError>
       <sbeError/>

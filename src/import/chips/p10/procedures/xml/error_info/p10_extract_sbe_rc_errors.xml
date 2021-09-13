@@ -61,6 +61,8 @@
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>SBE_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>MIB_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>SBE_IPL_SCRATCH_REGISTERS       </id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>FSI2PIB_STATUS                  </id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -78,6 +80,8 @@
     <collectRegisterFfdc><id>PIBMEM_REGISTERS</id>                <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>SBE_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>SBE_IPL_SCRATCH_REGISTERS       </id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>FSI2PIB_STATUS                  </id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <callout>
       <target>TARGET_CHIP</target>
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -96,6 +100,7 @@
     <collectRegisterFfdc><id>PIBMEM_REGISTERS</id>                <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>SBE_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>FSI2PIB_STATUS                  </id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -184,6 +189,8 @@
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>SBE_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>MIB_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>SBE_IPL_SCRATCH_REGISTERS       </id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>FSI2PIB_STATUS                  </id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <callout>
       <target>TARGET_CHIP</target>
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -202,6 +209,8 @@
     <collectRegisterFfdc><id>PIBMEM_REGISTERS</id>                <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>SBE_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>SBE_IPL_SCRATCH_REGISTERS       </id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>FSI2PIB_STATUS                  </id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -224,6 +233,8 @@
     <collectRegisterFfdc><id>PIBMEM_REGISTERS</id>                <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>SBE_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>SBE_IPL_SCRATCH_REGISTERS       </id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>FSI2PIB_STATUS                  </id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -246,6 +257,8 @@
     <collectRegisterFfdc><id>PIBMEM_REGISTERS</id>                <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>SBE_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>SBE_IPL_SCRATCH_REGISTERS       </id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>FSI2PIB_STATUS                  </id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -269,6 +282,8 @@
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>SBE_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>MIB_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>SBE_IPL_SCRATCH_REGISTERS       </id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>FSI2PIB_STATUS                  </id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <callout>
       <target>TARGET_CHIP</target>
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -291,6 +306,8 @@
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>SBE_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>MIB_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>SBE_IPL_SCRATCH_REGISTERS       </id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>FSI2PIB_STATUS                  </id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <callout>
       <target>TARGET_CHIP</target>
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -317,6 +334,8 @@
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>SBE_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>MIB_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>SBE_IPL_SCRATCH_REGISTERS       </id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>FSI2PIB_STATUS                  </id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <callout>
       <target>TARGET_CHIP</target>
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -337,6 +356,8 @@
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>SBE_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>MIB_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>SBE_IPL_SCRATCH_REGISTERS       </id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>FSI2PIB_STATUS                  </id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -361,6 +382,8 @@
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>SBE_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>MIB_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>SBE_IPL_SCRATCH_REGISTERS       </id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>FSI2PIB_STATUS                  </id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -384,6 +407,8 @@
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>SBE_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>MIB_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>SBE_IPL_SCRATCH_REGISTERS       </id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>FSI2PIB_STATUS                  </id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <callout>
       <target>TARGET_CHIP</target>
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -404,6 +429,8 @@
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>SBE_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>MIB_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>SBE_IPL_SCRATCH_REGISTERS       </id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>FSI2PIB_STATUS                  </id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <callout>
       <target>TARGET_CHIP</target>
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -424,6 +451,8 @@
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>SBE_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>MIB_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>SBE_IPL_SCRATCH_REGISTERS       </id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>FSI2PIB_STATUS                  </id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <callout>
       <target>TARGET_CHIP</target>
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -443,6 +472,8 @@
     <collectRegisterFfdc><id>PIBMEM_REGISTERS</id>                <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>SBE_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>SBE_IPL_SCRATCH_REGISTERS       </id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>FSI2PIB_STATUS                  </id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -467,6 +498,8 @@
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>SBE_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>MIB_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>SBE_IPL_SCRATCH_REGISTERS       </id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>FSI2PIB_STATUS                  </id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <callout>
       <target>TARGET_CHIP</target>
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -486,6 +519,8 @@
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>SBE_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>MIB_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>SBE_IPL_SCRATCH_REGISTERS       </id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>FSI2PIB_STATUS                  </id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
