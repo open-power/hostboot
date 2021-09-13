@@ -1,0 +1,108 @@
+{
+    "0x00e9": {
+        "address": "0x000000000c010e12",
+        "description": "MC USTL LOL Mask Register",
+        "name": "MC_USTL_LOL_MASK"
+    },
+    "0x25ac": {
+        "address": "0x000000000c010d02",
+        "description": "P10 MCC target DSTLFIR atomic OR",
+        "name": "MC_DSTL_FIR_OR"
+    },
+    "0x374d": {
+        "address": "0x000000000c010e0e",
+        "description": "MC USTL Error Report 0",
+        "name": "MC_USTL_ERR_RPT_0"
+    },
+    "0x384d": {
+        "address": "0x000000000c010e16",
+        "description": "MC USTL Error Report 1",
+        "name": "MC_USTL_ERR_RPT_1"
+    },
+    "0x4da4": {
+        "address": "0x000000000c010d01",
+        "description": "P10 MCC target DSTLFIR atomic AND",
+        "name": "MC_DSTL_FIR_AND"
+    },
+    "0x61db": {
+        "address": "0x000000000c010e13",
+        "description": "P10 USTL Fail Response Channel Fail Mask",
+        "name": "USTLFAILMASK"
+    },
+    "0x7bcc": {
+        "address": "0x000000000c010d0c",
+        "description": "MC DSTL Error Report",
+        "name": "MC_DSTL_ERR_RPT"
+    },
+    "0x904f": {
+        "address": "0x000000000c010d05",
+        "description": "P10 MCC target DSTLFIR MASK atomic OR",
+        "name": "MC_DSTL_FIR_MASK_OR"
+    },
+    "0x90e8": {
+        "address": "0x000000000c010e05",
+        "description": "P10 MCC target USTLFIR MASK atomic OR",
+        "name": "MC_USTL_FIR_MASK_OR"
+    },
+    "0xbce5": {
+        "address": "0x000000000c010d00",
+        "description": "P10 chip MC_DSTL_FIR",
+        "name": "MC_DSTL_FIR"
+    },
+    "0xbd3a": {
+        "address": "0x000000000c010e00",
+        "description": "P10 chip MC_USTL_FIR",
+        "name": "MC_USTL_FIR"
+    },
+    "0xd813": {
+        "address": "0x000000000c010d06",
+        "description": "P10 chip MC_DSTL_FIR ACT0",
+        "name": "MC_DSTL_FIR_ACT0"
+    },
+    "0xd815": {
+        "address": "0x000000000c010d07",
+        "description": "P10 chip MC_DSTL_FIR ACT1",
+        "name": "MC_DSTL_FIR_ACT1"
+    },
+    "0xd817": {
+        "address": "0x000000000c010d09",
+        "description": "P10 chip MC_DSTL_FIR ACT2",
+        "name": "MC_DSTL_FIR_ACT2"
+    },
+    "0xd89b": {
+        "address": "0x000000000c010e06",
+        "description": "P10 chip MC_USTL_FIR ACT0",
+        "name": "MC_USTL_FIR_ACT0"
+    },
+    "0xd89d": {
+        "address": "0x000000000c010e07",
+        "description": "P10 chip MC_USTL_FIR ACT1",
+        "name": "MC_USTL_FIR_ACT1"
+    },
+    "0xd89f": {
+        "address": "0x000000000c010e09",
+        "description": "P10 chip MC_USTL_FIR ACT2",
+        "name": "MC_USTL_FIR_ACT2"
+    },
+    "0xde26": {
+        "address": "0x000000000c010e11",
+        "description": "MC USTL LOL DROP Register",
+        "name": "MC_USTL_LOL_DROP"
+    },
+    "0xfa43": {
+        "address": "0x000000000c010d03",
+        "description": "P10 chip MC_DSTL_FIR MASK",
+        "name": "MC_DSTL_FIR_MASK"
+    },
+    "0xfacb": {
+        "address": "0x000000000c010e03",
+        "description": "P10 chip MC_USTL_FIR MASK",
+        "name": "MC_USTL_FIR_MASK"
+    },
+    "0xff05": {
+        "address": "0x000000000c010d0e",
+        "description": "P10 DSTL Error Injection Register",
+        "name": "DSTLCFG2"
+    },
+    "target_type": "0x49"
+}

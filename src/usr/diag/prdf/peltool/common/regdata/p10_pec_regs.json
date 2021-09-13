@@ -1,0 +1,118 @@
+{
+    "0x1358": {
+        "address": "0x0000000008040004",
+        "description": "PCI Chiplet Host Attention FIR",
+        "name": "PCI_CHIPLET_HA_FIR"
+    },
+    "0x16c9": {
+        "address": "0x0000000008040043",
+        "description": "PCI Chiplet Unit Checkstop FIR MASK",
+        "name": "PCI_CHIPLET_UCS_FIR_MASK"
+    },
+    "0x384d": {
+        "address": "0x0000000008040100",
+        "description": "P10 chip PCI_LOCAL_FIR",
+        "name": "PCI_LOCAL_FIR"
+    },
+    "0x3b68": {
+        "address": "0x0000000008040001",
+        "description": "PCI Chiplet Recoverable FIR",
+        "name": "PCI_CHIPLET_RE_FIR"
+    },
+    "0x3d88": {
+        "address": "0x00000000080f001f",
+        "description": "PCI PCBSLV error register",
+        "name": "PEC_PCBSLV_ERROR"
+    },
+    "0x41af": {
+        "address": "0x0000000008011100",
+        "description": "P10 chip PCI_IOP_FIR 0",
+        "name": "PCI_IOP_FIR_0"
+    },
+    "0x42af": {
+        "address": "0x0000000008011500",
+        "description": "P10 chip PCI_IOP_FIR 1",
+        "name": "PCI_IOP_FIR_1"
+    },
+    "0x50bf": {
+        "address": "0x0000000008040040",
+        "description": "PCI Chiplet Checkstop FIR MASK",
+        "name": "PCI_CHIPLET_CS_FIR_MASK"
+    },
+    "0x6962": {
+        "address": "0x00000000080f001e",
+        "description": "PCI PCBSLV config register",
+        "name": "PEC_PCBSLV_CONFIG"
+    },
+    "0x6e53": {
+        "address": "0x0000000008040044",
+        "description": "PCI Chiplet Host Attention FIR MASK",
+        "name": "PCI_CHIPLET_HA_FIR_MASK"
+    },
+    "0x6f99": {
+        "address": "0x0000000008040003",
+        "description": "PCI Chiplet Unit Checkstop FIR",
+        "name": "PCI_CHIPLET_UCS_FIR"
+    },
+    "0xa33c": {
+        "address": "0x0000000008011106",
+        "description": "P10 chip PCI_IOP_FIR 0 ACT0",
+        "name": "PCI_IOP_FIR_0_ACT0"
+    },
+    "0xa33e": {
+        "address": "0x0000000008011107",
+        "description": "P10 chip PCI_IOP_FIR 0 ACT1",
+        "name": "PCI_IOP_FIR_0_ACT1"
+    },
+    "0xa73c": {
+        "address": "0x0000000008011506",
+        "description": "P10 chip PCI_IOP_FIR 1 ACT0",
+        "name": "PCI_IOP_FIR_1_ACT0"
+    },
+    "0xa73e": {
+        "address": "0x0000000008011507",
+        "description": "P10 chip PCI_IOP_FIR 1 ACT1",
+        "name": "PCI_IOP_FIR_1_ACT1"
+    },
+    "0xaa6b": {
+        "address": "0x0000000008040041",
+        "description": "PCI Chiplet Recoverable FIR MASK",
+        "name": "PCI_CHIPLET_RE_FIR_MASK"
+    },
+    "0xc56c": {
+        "address": "0x0000000008011103",
+        "description": "P10 chip PCI_IOP_FIR 0 MASK",
+        "name": "PCI_IOP_FIR_0_MASK"
+    },
+    "0xc96c": {
+        "address": "0x0000000008011503",
+        "description": "P10 chip PCI_IOP_FIR 1 MASK",
+        "name": "PCI_IOP_FIR_1_MASK"
+    },
+    "0xcf80": {
+        "address": "0x0000000008040106",
+        "description": "P10 chip PCI_LOCAL_FIR ACT0",
+        "name": "PCI_LOCAL_FIR_ACT0"
+    },
+    "0xcf82": {
+        "address": "0x0000000008040107",
+        "description": "P10 chip PCI_LOCAL_FIR ACT1",
+        "name": "PCI_LOCAL_FIR_ACT1"
+    },
+    "0xcf84": {
+        "address": "0x0000000008040109",
+        "description": "P10 chip PCI_LOCAL_FIR ACT2",
+        "name": "PCI_LOCAL_FIR_ACT2"
+    },
+    "0xf1b0": {
+        "address": "0x0000000008040103",
+        "description": "P10 chip PCI_LOCAL_FIR MASK",
+        "name": "PCI_LOCAL_FIR_MASK"
+    },
+    "0xffa0": {
+        "address": "0x0000000008040000",
+        "description": "PCI Chiplet Checkstop FIR",
+        "name": "PCI_CHIPLET_CS_FIR"
+    },
+    "target_type": "0x2d"
+}

@@ -1,0 +1,208 @@
+{
+    "0x01bd": {
+        "address": "0x0000000018040003",
+        "description": "IOHS Chiplet Unit Checkstop FIR",
+        "name": "IOHS_CHIPLET_UCS_FIR"
+    },
+    "0x0231": {
+        "address": "0x0000000018040103",
+        "description": "P10 chip IOHS_LOCAL_FIR MASK",
+        "name": "IOHS_LOCAL_FIR_MASK"
+    },
+    "0x112c": {
+        "address": "0x0000000018011006",
+        "description": "P10 chip IOHS_DLP_FIR ACT0",
+        "name": "IOHS_DLP_FIR_ACT0"
+    },
+    "0x122c": {
+        "address": "0x0000000018011007",
+        "description": "P10 chip IOHS_DLP_FIR ACT1",
+        "name": "IOHS_DLP_FIR_ACT1"
+    },
+    "0x2166": {
+        "address": "0x0000000018040043",
+        "description": "IOHS Chiplet Unit Checkstop FIR MASK",
+        "name": "IOHS_CHIPLET_UCS_FIR_MASK"
+    },
+    "0x284e": {
+        "address": "0x0000000018011003",
+        "description": "P10 chip IOHS_DLP_FIR MASK",
+        "name": "IOHS_DLP_FIR_MASK"
+    },
+    "0x30d1": {
+        "address": "0x0000000018011019",
+        "description": "P10 IOHS DLP SL ECC THRESHOLD",
+        "name": "IOHS_DLP_SL_ECC_THRESHOLD"
+    },
+    "0x32b3": {
+        "address": "0x0000000018011012",
+        "description": "P10 IOHS DLP LINK0 RECEIVE LANE CONTROL",
+        "name": "IOHS_DLP_LINK0_RX_LANE_CONTROL"
+    },
+    "0x32bd": {
+        "address": "0x0000000018011013",
+        "description": "P10 IOHS DLP LINK1 RECEIVE LANE CONTROL",
+        "name": "IOHS_DLP_LINK1_RX_LANE_CONTROL"
+    },
+    "0x32c5": {
+        "address": "0x0000000018011010",
+        "description": "P10 IOHS DLP LINK0 TRANSMIT LANE CONTROL",
+        "name": "IOHS_DLP_LINK0_TX_LANE_CONTROL"
+    },
+    "0x32cf": {
+        "address": "0x0000000018011011",
+        "description": "P10 IOHS DLP LINK1 TRANSMIT LANE CONTROL",
+        "name": "IOHS_DLP_LINK1_TX_LANE_CONTROL"
+    },
+    "0x4990": {
+        "address": "0x0000000018011022",
+        "description": "P10 IOHS DLP LINK0 SYNDROME CAPTURE",
+        "name": "IOHS_DLP_LINK0_SYN_CAPTURE"
+    },
+    "0x4998": {
+        "address": "0x0000000018011023",
+        "description": "P10 IOHS DLP LINK1 SYNDROME CAPTURE",
+        "name": "IOHS_DLP_LINK1_SYN_CAPTURE"
+    },
+    "0x58ca": {
+        "address": "0x0000000018011015",
+        "description": "P10 IOHS DLP LINK1 INFORMATION REG",
+        "name": "IOHS_DLP_LINK1_INFO"
+    },
+    "0x5c17": {
+        "address": "0x000000001801100f",
+        "description": "P10 IOHS DLP Optical Config Register",
+        "name": "IOHS_DLP_OPTICAL_CONFIG"
+    },
+    "0x5c76": {
+        "address": "0x000000001801100c",
+        "description": "P10 IOHS DLP PHY Config Register",
+        "name": "IOHS_DLP_PHY_CONFIG"
+    },
+    "0x5f62": {
+        "address": "0x0000000018040044",
+        "description": "IOHS Chiplet Host Attention FIR MASK",
+        "name": "IOHS_CHIPLET_HA_FIR_MASK"
+    },
+    "0x678e": {
+        "address": "0x00000000180f001e",
+        "description": "IOHS PCBSLV config register",
+        "name": "IOHS_PCBSLV_CONFIG"
+    },
+    "0x7085": {
+        "address": "0x0000000018011026",
+        "description": "P10 IOHS DLP LINK0 Quality Status Register",
+        "name": "IOHS_DLP_LINK0_QUALITY"
+    },
+    "0x708b": {
+        "address": "0x0000000018011027",
+        "description": "P10 IOHS DLP LINK1 Quality Status Register",
+        "name": "IOHS_DLP_LINK1_QUALITY"
+    },
+    "0x7125": {
+        "address": "0x0000000018011000",
+        "description": "P10 chip IOHS_DLP_FIR",
+        "name": "IOHS_DLP_FIR"
+    },
+    "0x77a8": {
+        "address": "0x0000000018040041",
+        "description": "IOHS Chiplet Recoverable FIR MASK",
+        "name": "IOHS_CHIPLET_RE_FIR_MASK"
+    },
+    "0x81ef": {
+        "address": "0x0000000018011024",
+        "description": "P10 IOHS DLP LINK0 EDPL Status Register",
+        "name": "IOHS_DLP_LINK0_EDPL_STATUS"
+    },
+    "0x81f7": {
+        "address": "0x0000000018011025",
+        "description": "P10 IOHS DLP LINK1 EDPL Status Register",
+        "name": "IOHS_DLP_LINK1_EDPL_STATUS"
+    },
+    "0x9e81": {
+        "address": "0x0000000018011016",
+        "description": "P10 IOHS DLP LINK0 ERROR STATUS",
+        "name": "IOHS_DLP_LINK0_ERROR_STATUS"
+    },
+    "0x9e89": {
+        "address": "0x0000000018011017",
+        "description": "P10 IOHS DLP LINK1 ERROR STATUS",
+        "name": "IOHS_DLP_LINK1_ERROR_STATUS"
+    },
+    "0xa08b": {
+        "address": "0x0000000018011014",
+        "description": "P10 IOHS DLP LINK0 INFORMATION REG",
+        "name": "IOHS_DLP_LINK0_INFO_REG"
+    },
+    "0xa71e": {
+        "address": "0x0000000018011028",
+        "description": "P10 IOHS DLP PLL Status Register",
+        "name": "IOHS_DLP_DLL_STATUS"
+    },
+    "0xad42": {
+        "address": "0x0000000018011018",
+        "description": "P10 IOHS DLP REPLAY THRESHOLD",
+        "name": "IOHS_DLP_REPLAY_THRESHOLD"
+    },
+    "0xb853": {
+        "address": "0x0000000018040004",
+        "description": "IOHS Chiplet Host Attention FIR",
+        "name": "IOHS_CHIPLET_HA_FIR"
+    },
+    "0xc27a": {
+        "address": "0x0000000018040100",
+        "description": "P10 chip IOHS_LOCAL_FIR",
+        "name": "IOHS_LOCAL_FIR"
+    },
+    "0xc47b": {
+        "address": "0x0000000018040001",
+        "description": "IOHS Chiplet Recoverable FIR",
+        "name": "IOHS_CHIPLET_RE_FIR"
+    },
+    "0xc5a7": {
+        "address": "0x00000000180f001f",
+        "description": "IOHS PCBSLV error register",
+        "name": "IOHS_PCBSLV_ERROR"
+    },
+    "0xcb3f": {
+        "address": "0x0000000018040040",
+        "description": "IOHS Chiplet Checkstop FIR MASK",
+        "name": "IOHS_CHIPLET_CS_FIR_MASK"
+    },
+    "0xeb0f": {
+        "address": "0x0000000018040106",
+        "description": "P10 chip IOHS_LOCAL_FIR ACT0",
+        "name": "IOHS_LOCAL_FIR_ACT0"
+    },
+    "0xec0f": {
+        "address": "0x0000000018040107",
+        "description": "P10 chip IOHS_LOCAL_FIR ACT1",
+        "name": "IOHS_LOCAL_FIR_ACT1"
+    },
+    "0xed0f": {
+        "address": "0x0000000018040109",
+        "description": "P10 chip IOHS_LOCAL_FIR ACT2",
+        "name": "IOHS_LOCAL_FIR_ACT2"
+    },
+    "0xee3f": {
+        "address": "0x0000000018040000",
+        "description": "IOHS Chiplet Checkstop FIR",
+        "name": "IOHS_CHIPLET_CS_FIR"
+    },
+    "0xf70c": {
+        "address": "0x0000000018011001",
+        "description": "P10 chip IOHS_DLP_FIR atomic AND register",
+        "name": "IOHS_DLP_FIR_AND"
+    },
+    "0xf952": {
+        "address": "0x0000000018011008",
+        "description": "P10 chip IOHS_DLP_FIR WOF register",
+        "name": "IOHS_DLP_FIR_WOF"
+    },
+    "0xfff3": {
+        "address": "0x0000000018011029",
+        "description": "P10 IOHS DLP Misc Error Status Register",
+        "name": "IOHS_DLP_MISC_ERROR_STATUS"
+    },
+    "target_type": "0x51"
+}

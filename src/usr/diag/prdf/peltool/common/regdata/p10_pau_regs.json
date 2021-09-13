@@ -1,0 +1,63 @@
+{
+    "0x46d7": {
+        "address": "0x0000000010010c06",
+        "description": "P10 chip PAU_FIR_0 ACT0",
+        "name": "PAU_FIR_0_ACT0"
+    },
+    "0x46d9": {
+        "address": "0x0000000010010c07",
+        "description": "P10 chip PAU_FIR_0 ACT1",
+        "name": "PAU_FIR_0_ACT1"
+    },
+    "0x4ad7": {
+        "address": "0x0000000010010c46",
+        "description": "P10 chip PAU_FIR_1 ACT0",
+        "name": "PAU_FIR_1_ACT0"
+    },
+    "0x4ad9": {
+        "address": "0x0000000010010c47",
+        "description": "P10 chip PAU_FIR_1 ACT1",
+        "name": "PAU_FIR_1_ACT1"
+    },
+    "0x4ed7": {
+        "address": "0x0000000010010c86",
+        "description": "P10 chip PAU_FIR_2 ACT0",
+        "name": "PAU_FIR_2_ACT0"
+    },
+    "0x4ed9": {
+        "address": "0x0000000010010c87",
+        "description": "P10 chip PAU_FIR_2 ACT1",
+        "name": "PAU_FIR_2_ACT1"
+    },
+    "0x6907": {
+        "address": "0x0000000010010c03",
+        "description": "P10 chip PAU_FIR_0 MASK",
+        "name": "PAU_FIR_0_MASK"
+    },
+    "0x6d07": {
+        "address": "0x0000000010010c43",
+        "description": "P10 chip PAU_FIR_1 MASK",
+        "name": "PAU_FIR_1_MASK"
+    },
+    "0x7107": {
+        "address": "0x0000000010010c83",
+        "description": "P10 chip PAU_FIR_2 MASK",
+        "name": "PAU_FIR_2_MASK"
+    },
+    "0x8e5a": {
+        "address": "0x0000000010010c00",
+        "description": "P10 chip PAU_FIR_0",
+        "name": "PAU_FIR_0"
+    },
+    "0x8f5a": {
+        "address": "0x0000000010010c40",
+        "description": "P10 chip PAU_FIR_1",
+        "name": "PAU_FIR_1"
+    },
+    "0x905a": {
+        "address": "0x0000000010010c80",
+        "description": "P10 chip PAU_FIR_2",
+        "name": "PAU_FIR_2"
+    },
+    "target_type": "0x50"
+}

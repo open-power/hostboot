@@ -1,0 +1,168 @@
+{
+    "0x07ad": {
+        "address": "0x000000000c040004",
+        "description": "MC Chiplet Host Attention FIR",
+        "name": "MC_CHIPLET_HA_FIR"
+    },
+    "0x0cb8": {
+        "address": "0x000000000c040003",
+        "description": "MC Chiplet Unit Checkstop FIR",
+        "name": "MC_CHIPLET_UCS_FIR"
+    },
+    "0x13d5": {
+        "address": "0x000000000c040001",
+        "description": "MC Chiplet Recoverable FIR",
+        "name": "MC_CHIPLET_RE_FIR"
+    },
+    "0x3a69": {
+        "address": "0x000000000c040106",
+        "description": "P10 chip MC_LOCAL_FIR ACT0",
+        "name": "MC_LOCAL_FIR_ACT0"
+    },
+    "0x3b69": {
+        "address": "0x000000000c040107",
+        "description": "P10 chip MC_LOCAL_FIR ACT1",
+        "name": "MC_LOCAL_FIR_ACT1"
+    },
+    "0x3c69": {
+        "address": "0x000000000c040109",
+        "description": "P10 chip MC_LOCAL_FIR ACT2",
+        "name": "MC_LOCAL_FIR_ACT2"
+    },
+    "0x3d99": {
+        "address": "0x000000000c040000",
+        "description": "MC Chiplet Checkstop FIR",
+        "name": "MC_CHIPLET_CS_FIR"
+    },
+    "0x4d7c": {
+        "address": "0x000000000c040040",
+        "description": "MC Chiplet Checkstop FIR MASK",
+        "name": "MC_CHIPLET_CS_FIR_MASK"
+    },
+    "0x518b": {
+        "address": "0x000000000c040103",
+        "description": "P10 chip MC_LOCAL_FIR MASK",
+        "name": "MC_LOCAL_FIR_MASK"
+    },
+    "0x5960": {
+        "address": "0x000000000c0f001f",
+        "description": "MC PCBSLV error register",
+        "name": "MC_PCBSLV_ERROR"
+    },
+    "0x5c54": {
+        "address": "0x000000000c010f06",
+        "description": "P10 chip MC_MISC_FIR ACT0",
+        "name": "MC_MISC_FIR_ACT0"
+    },
+    "0x5c56": {
+        "address": "0x000000000c010f07",
+        "description": "P10 chip MC_MISC_FIR ACT1",
+        "name": "MC_MISC_FIR_ACT1"
+    },
+    "0x5c58": {
+        "address": "0x000000000c010f09",
+        "description": "P10 chip MC_MISC_FIR ACT2",
+        "name": "MC_MISC_FIR_ACT2"
+    },
+    "0x7a0e": {
+        "address": "0x000000000c010f00",
+        "description": "P10 chip MC_MISC_FIR",
+        "name": "MC_MISC_FIR"
+    },
+    "0x7e84": {
+        "address": "0x000000000c010f03",
+        "description": "P10 chip MC_MISC_FIR MASK",
+        "name": "MC_MISC_FIR_MASK"
+    },
+    "0x9a92": {
+        "address": "0x000000000c040100",
+        "description": "P10 chip MC_LOCAL_FIR",
+        "name": "MC_LOCAL_FIR"
+    },
+    "0xa3a3": {
+        "address": "0x000000000c040043",
+        "description": "MC Chiplet Unit Checkstop FIR MASK",
+        "name": "MC_CHIPLET_UCS_FIR_MASK"
+    },
+    "0xa5a3": {
+        "address": "0x000000000c010c06",
+        "description": "P10 chip MC_FIR ACT0",
+        "name": "MC_FIR_ACT0"
+    },
+    "0xa6a3": {
+        "address": "0x000000000c010c07",
+        "description": "P10 chip MC_FIR ACT1",
+        "name": "MC_FIR_ACT1"
+    },
+    "0xa7a3": {
+        "address": "0x000000000c010c09",
+        "description": "P10 chip MC_FIR ACT2",
+        "name": "MC_FIR_ACT2"
+    },
+    "0xa841": {
+        "address": "0x000000000c010c0a",
+        "description": "Memory Configuration Register Channel 0",
+        "name": "MCFGP0"
+    },
+    "0xa843": {
+        "address": "0x000000000c010c0b",
+        "description": "Memory Configuration Register Channel 1",
+        "name": "MCFGP1"
+    },
+    "0xb6e8": {
+        "address": "0x000000000c0f001e",
+        "description": "MC PCBSLV config register",
+        "name": "MC_PCBSLV_CONFIG"
+    },
+    "0xbcc5": {
+        "address": "0x000000000c010c03",
+        "description": "P10 chip MC_FIR MASK",
+        "name": "MC_FIR_MASK"
+    },
+    "0xd87b": {
+        "address": "0x000000000c010c20",
+        "description": "MC Mirrored Memory Configuration Register Channel 0",
+        "name": "MCFGPM0"
+    },
+    "0xd97b": {
+        "address": "0x000000000c010c30",
+        "description": "MC Mirrored Memory Configuration Register Channel 1",
+        "name": "MCFGPM1"
+    },
+    "0xe19f": {
+        "address": "0x000000000c040044",
+        "description": "MC Chiplet Host Attention FIR MASK",
+        "name": "MC_CHIPLET_HA_FIR_MASK"
+    },
+    "0xe3d1": {
+        "address": "0x000000000c010c1e",
+        "description": "MC Error Report 0",
+        "name": "MC_ERR_RPT0"
+    },
+    "0xe4d1": {
+        "address": "0x000000000c010c1f",
+        "description": "MC Error Report 1",
+        "name": "MC_ERR_RPT1"
+    },
+    "0xe582": {
+        "address": "0x000000000c010c00",
+        "description": "P10 chip MC_FIR",
+        "name": "MC_FIR"
+    },
+    "0xe5d1": {
+        "address": "0x000000000c010c1a",
+        "description": "MC Error Report 2",
+        "name": "MC_ERR_RPT2"
+    },
+    "0xf4d0": {
+        "address": "0x000000000c010fe7",
+        "description": "MISC Error Report Register",
+        "name": "MISC_ERR_RPT"
+    },
+    "0xf9e5": {
+        "address": "0x000000000c040041",
+        "description": "MC Chiplet Recoverable FIR MASK",
+        "name": "MC_CHIPLET_RE_FIR_MASK"
+    },
+    "target_type": "0x44"
+}

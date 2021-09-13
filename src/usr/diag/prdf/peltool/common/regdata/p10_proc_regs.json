@@ -1,0 +1,1428 @@
+{
+    "0x0300": {
+        "address": "0x0000000002010836",
+        "description": "P10 chip INT_CQ_FIR ACT0",
+        "name": "INT_CQ_FIR_ACT0"
+    },
+    "0x0400": {
+        "address": "0x0000000002010837",
+        "description": "P10 chip INT_CQ_FIR ACT1",
+        "name": "INT_CQ_FIR_ACT1"
+    },
+    "0x0431": {
+        "address": "0x0000000003011200",
+        "description": "P10 chip PB_STATION_FIR_EN1",
+        "name": "PB_STATION_FIR_EN1"
+    },
+    "0x0433": {
+        "address": "0x0000000003011240",
+        "description": "P10 chip PB_STATION_FIR_EN2",
+        "name": "PB_STATION_FIR_EN2"
+    },
+    "0x0435": {
+        "address": "0x0000000003011280",
+        "description": "P10 chip PB_STATION_FIR_EN3",
+        "name": "PB_STATION_FIR_EN3"
+    },
+    "0x0437": {
+        "address": "0x00000000030112c0",
+        "description": "P10 chip PB_STATION_FIR_EN4",
+        "name": "PB_STATION_FIR_EN4"
+    },
+    "0x0501": {
+        "address": "0x0000000002040041",
+        "description": "N0 Chiplet Recoverable FIR MASK",
+        "name": "N0_CHIPLET_RE_FIR_MASK"
+    },
+    "0x050d": {
+        "address": "0x0000000003040041",
+        "description": "N1 Chiplet Recoverable FIR MASK",
+        "name": "N1_CHIPLET_RE_FIR_MASK"
+    },
+    "0x0ae1": {
+        "address": "0x0000000002011086",
+        "description": "P10 chip NX_CQ_FIR ACT0",
+        "name": "NX_CQ_FIR_ACT0"
+    },
+    "0x0ae3": {
+        "address": "0x0000000002011087",
+        "description": "P10 chip NX_CQ_FIR ACT1",
+        "name": "NX_CQ_FIR_ACT1"
+    },
+    "0x0c2a": {
+        "address": "0x0000000002010ad3",
+        "description": "INT NXC WOF Detail Register",
+        "name": "INT_PC_NXC_WOF_ERR_DETAIL"
+    },
+    "0x0e31": {
+        "address": "0x0000000003011300",
+        "description": "P10 chip PB_STATION_FIR_ES1",
+        "name": "PB_STATION_FIR_ES1"
+    },
+    "0x0e33": {
+        "address": "0x0000000003011340",
+        "description": "P10 chip PB_STATION_FIR_ES2",
+        "name": "PB_STATION_FIR_ES2"
+    },
+    "0x0e35": {
+        "address": "0x0000000003011380",
+        "description": "P10 chip PB_STATION_FIR_ES3",
+        "name": "PB_STATION_FIR_ES3"
+    },
+    "0x0e37": {
+        "address": "0x00000000030113c0",
+        "description": "P10 chip PB_STATION_FIR_ES4",
+        "name": "PB_STATION_FIR_ES4"
+    },
+    "0x1002": {
+        "address": "0x0000000002040004",
+        "description": "N0 Chiplet Host Attention FIR",
+        "name": "N0_CHIPLET_HA_FIR"
+    },
+    "0x100b": {
+        "address": "0x0000000003040004",
+        "description": "N1 Chiplet Host Attention FIR",
+        "name": "N1_CHIPLET_HA_FIR"
+    },
+    "0x135b": {
+        "address": "0x0000000000040024",
+        "description": "TOD FSM Register",
+        "name": "TOD_FSM_REGISTER"
+    },
+    "0x15fa": {
+        "address": "0x0000000002040003",
+        "description": "N0 Chiplet Unit Checkstop FIR",
+        "name": "N0_CHIPLET_UCS_FIR"
+    },
+    "0x1604": {
+        "address": "0x0000000003040003",
+        "description": "N1 Chiplet Unit Checkstop FIR",
+        "name": "N1_CHIPLET_UCS_FIR"
+    },
+    "0x160c": {
+        "address": "0x0000000010040043",
+        "description": "PAU0 Chiplet Unit Checkstop FIR MASK",
+        "name": "PAU0_CHIPLET_UCS_FIR_MASK"
+    },
+    "0x1618": {
+        "address": "0x0000000011040043",
+        "description": "PAU1 Chiplet Unit Checkstop FIR MASK",
+        "name": "PAU1_CHIPLET_UCS_FIR_MASK"
+    },
+    "0x1624": {
+        "address": "0x0000000012040043",
+        "description": "PAU2 Chiplet Unit Checkstop FIR MASK",
+        "name": "PAU2_CHIPLET_UCS_FIR_MASK"
+    },
+    "0x1630": {
+        "address": "0x0000000013040043",
+        "description": "PAU3 Chiplet Unit Checkstop FIR MASK",
+        "name": "PAU3_CHIPLET_UCS_FIR_MASK"
+    },
+    "0x197a": {
+        "address": "0x0000000002011106",
+        "description": "P10 chip NX_DMA_ENG_FIR ACT0",
+        "name": "NX_DMA_ENG_FIR_ACT0"
+    },
+    "0x1a22": {
+        "address": "0x0000000002010833",
+        "description": "P10 chip INT_CQ_FIR MASK",
+        "name": "INT_CQ_FIR_MASK"
+    },
+    "0x1a7a": {
+        "address": "0x0000000002011107",
+        "description": "P10 chip NX_DMA_ENG_FIR ACT1",
+        "name": "NX_DMA_ENG_FIR_ACT1"
+    },
+    "0x1b69": {
+        "address": "0x0000000002010830",
+        "description": "P10 chip INT_CQ_FIR",
+        "name": "INT_CQ_FIR"
+    },
+    "0x1c1e": {
+        "address": "0x00000000030113b1",
+        "description": "P10 chip PB_EXT_FIR MASK",
+        "name": "PB_EXT_FIR_MASK"
+    },
+    "0x1c2a": {
+        "address": "0x0000000002040001",
+        "description": "N0 Chiplet Recoverable FIR",
+        "name": "N0_CHIPLET_RE_FIR"
+    },
+    "0x1c33": {
+        "address": "0x0000000003040001",
+        "description": "N1 Chiplet Recoverable FIR",
+        "name": "N1_CHIPLET_RE_FIR"
+    },
+    "0x1d35": {
+        "address": "0x000000000101080b",
+        "description": "OCC Error Report 2",
+        "name": "OCC_SCOM_ERR_RPT2"
+    },
+    "0x1ebe": {
+        "address": "0x00000000020109c6",
+        "description": "INT VC Group0 Informational Errors Register",
+        "name": "INT_VC_INFO_ERR_G0"
+    },
+    "0x1ec0": {
+        "address": "0x00000000020109ce",
+        "description": "INT VC Group1 Informational Errors Register",
+        "name": "INT_VC_INFO_ERR_G1"
+    },
+    "0x255a": {
+        "address": "0x0000000000040006",
+        "description": "TOD INTERNAL PATH CTRL",
+        "name": "TOD_INTERNAL_PATH_CTRL"
+    },
+    "0x259b": {
+        "address": "0x0000000000040000",
+        "description": "TOD M Path Ctrl",
+        "name": "TOD_MPCR"
+    },
+    "0x25f7": {
+        "address": "0x0000000002010ac2",
+        "description": "INT PC Error0 WOF Register",
+        "name": "INT_PC_ERR0_WOF"
+    },
+    "0x26dc": {
+        "address": "0x0000000003011d06",
+        "description": "P10 chip PSIHB_FIR ACT0",
+        "name": "PSIHB_FIR_ACT0"
+    },
+    "0x26de": {
+        "address": "0x0000000003011d07",
+        "description": "P10 chip PSIHB_FIR ACT1",
+        "name": "PSIHB_FIR_ACT1"
+    },
+    "0x28f7": {
+        "address": "0x0000000002010aca",
+        "description": "INT PC Error1 WOF Register",
+        "name": "INT_PC_ERR1_WOF"
+    },
+    "0x28fa": {
+        "address": "0x0000000003011d56",
+        "description": "HCA Error Report Hold Register",
+        "name": "HCA_ERR_RPT_HOLD_REG"
+    },
+    "0x2d11": {
+        "address": "0x0000000002011083",
+        "description": "P10 chip NX_CQ_FIR MASK",
+        "name": "NX_CQ_FIR_MASK"
+    },
+    "0x309c": {
+        "address": "0x0000000002011103",
+        "description": "P10 chip NX_DMA_ENG_FIR MASK",
+        "name": "NX_DMA_ENG_FIR_MASK"
+    },
+    "0x31b3": {
+        "address": "0x0000000002011400",
+        "description": "P10 chip VAS_FIR",
+        "name": "VAS_FIR"
+    },
+    "0x34eb": {
+        "address": "0x00000000570f002b",
+        "description": "Global Host Attention FIR",
+        "name": "GLOBAL_HA_FIR"
+    },
+    "0x3515": {
+        "address": "0x0000000000001007",
+        "description": "TP.TPVSB.FSI.W.FSI2PIB.STATUS",
+        "name": "CFAM_FSI_STATUS"
+    },
+    "0x363b": {
+        "address": "0x0000000001040044",
+        "description": "TP Chiplet Host Attention FIR MASK",
+        "name": "TP_CHIPLET_HA_FIR_MASK"
+    },
+    "0x37e2": {
+        "address": "0x000000000004001d",
+        "description": "TOD Trace Dataset 1",
+        "name": "TOD_TRACE_DATASET_1"
+    },
+    "0x38e2": {
+        "address": "0x000000000004001e",
+        "description": "TOD Trace Dataset 2",
+        "name": "TOD_TRACE_DATASET_2"
+    },
+    "0x39e2": {
+        "address": "0x000000000004001f",
+        "description": "TOD Trace Dataset 3",
+        "name": "TOD_TRACE_DATASET_3"
+    },
+    "0x3a2d": {
+        "address": "0x0000000003011006",
+        "description": "P10 chip PB_STATION_FIR_EQ 0 ACT0",
+        "name": "PB_STATION_FIR_EQ_0_ACT0"
+    },
+    "0x3a2f": {
+        "address": "0x0000000003011007",
+        "description": "P10 chip PB_STATION_FIR_EQ 0 ACT1",
+        "name": "PB_STATION_FIR_EQ_0_ACT1"
+    },
+    "0x3a8d": {
+        "address": "0x0000000003011000",
+        "description": "P10 chip PB_STATION_FIR_EQ 0",
+        "name": "PB_STATION_FIR_EQ_0"
+    },
+    "0x3b8d": {
+        "address": "0x0000000003011040",
+        "description": "P10 chip PB_STATION_FIR_EQ 1",
+        "name": "PB_STATION_FIR_EQ_1"
+    },
+    "0x3c8d": {
+        "address": "0x0000000003011080",
+        "description": "P10 chip PB_STATION_FIR_EQ 2",
+        "name": "PB_STATION_FIR_EQ_2"
+    },
+    "0x3d8d": {
+        "address": "0x00000000030110c0",
+        "description": "P10 chip PB_STATION_FIR_EQ 3",
+        "name": "PB_STATION_FIR_EQ_3"
+    },
+    "0x3e2d": {
+        "address": "0x0000000003011046",
+        "description": "P10 chip PB_STATION_FIR_EQ 1 ACT0",
+        "name": "PB_STATION_FIR_EQ_1_ACT0"
+    },
+    "0x3e2f": {
+        "address": "0x0000000003011047",
+        "description": "P10 chip PB_STATION_FIR_EQ 1 ACT1",
+        "name": "PB_STATION_FIR_EQ_1_ACT1"
+    },
+    "0x3e8d": {
+        "address": "0x0000000003011100",
+        "description": "P10 chip PB_STATION_FIR_EQ 4",
+        "name": "PB_STATION_FIR_EQ_4"
+    },
+    "0x3eb6": {
+        "address": "0x0000000002010ad5",
+        "description": "INT NXC Recoverable Errors Register",
+        "name": "INT_PC_NXC_RECOV_ERR"
+    },
+    "0x3f8d": {
+        "address": "0x0000000003011140",
+        "description": "P10 chip PB_STATION_FIR_EQ 5",
+        "name": "PB_STATION_FIR_EQ_5"
+    },
+    "0x408d": {
+        "address": "0x0000000003011180",
+        "description": "P10 chip PB_STATION_FIR_EQ 6",
+        "name": "PB_STATION_FIR_EQ_6"
+    },
+    "0x4113": {
+        "address": "0x00000000570f001b",
+        "description": "Global Recoverable Attention FIR",
+        "name": "GLOBAL_RE_FIR"
+    },
+    "0x418d": {
+        "address": "0x00000000030111c0",
+        "description": "P10 chip PB_STATION_FIR_EQ 7",
+        "name": "PB_STATION_FIR_EQ_7"
+    },
+    "0x422d": {
+        "address": "0x0000000003011086",
+        "description": "P10 chip PB_STATION_FIR_EQ 2 ACT0",
+        "name": "PB_STATION_FIR_EQ_2_ACT0"
+    },
+    "0x422f": {
+        "address": "0x0000000003011087",
+        "description": "P10 chip PB_STATION_FIR_EQ 2 ACT1",
+        "name": "PB_STATION_FIR_EQ_2_ACT1"
+    },
+    "0x42be": {
+        "address": "0x0000000002040106",
+        "description": "P10 chip N0_LOCAL_FIR ACT0",
+        "name": "N0_LOCAL_FIR_ACT0"
+    },
+    "0x42c7": {
+        "address": "0x0000000003040106",
+        "description": "P10 chip N1_LOCAL_FIR ACT0",
+        "name": "N1_LOCAL_FIR_ACT0"
+    },
+    "0x43be": {
+        "address": "0x0000000002040107",
+        "description": "P10 chip N0_LOCAL_FIR ACT1",
+        "name": "N0_LOCAL_FIR_ACT1"
+    },
+    "0x43c7": {
+        "address": "0x0000000003040107",
+        "description": "P10 chip N1_LOCAL_FIR ACT1",
+        "name": "N1_LOCAL_FIR_ACT1"
+    },
+    "0x44be": {
+        "address": "0x0000000002040109",
+        "description": "P10 chip N0_LOCAL_FIR ACT2",
+        "name": "N0_LOCAL_FIR_ACT2"
+    },
+    "0x44c7": {
+        "address": "0x0000000003040109",
+        "description": "P10 chip N1_LOCAL_FIR ACT2",
+        "name": "N1_LOCAL_FIR_ACT2"
+    },
+    "0x45ee": {
+        "address": "0x0000000002040000",
+        "description": "N0 Chiplet Checkstop FIR",
+        "name": "N0_CHIPLET_CS_FIR"
+    },
+    "0x45f7": {
+        "address": "0x0000000003040000",
+        "description": "N1 Chiplet Checkstop FIR",
+        "name": "N1_CHIPLET_CS_FIR"
+    },
+    "0x462d": {
+        "address": "0x00000000030110c6",
+        "description": "P10 chip PB_STATION_FIR_EQ 3 ACT0",
+        "name": "PB_STATION_FIR_EQ_3_ACT0"
+    },
+    "0x462f": {
+        "address": "0x00000000030110c7",
+        "description": "P10 chip PB_STATION_FIR_EQ 3 ACT1",
+        "name": "PB_STATION_FIR_EQ_3_ACT1"
+    },
+    "0x46d8": {
+        "address": "0x0000000003011dc0",
+        "description": "P10 chip PBAF_FIR",
+        "name": "PBAF_FIR"
+    },
+    "0x46fc": {
+        "address": "0x0000000001010cc0",
+        "description": "P10 chip PBAO_FIR",
+        "name": "PBAO_FIR"
+    },
+    "0x4722": {
+        "address": "0x0000000001040004",
+        "description": "TP Chiplet Host Attention FIR",
+        "name": "TP_CHIPLET_HA_FIR"
+    },
+    "0x490c": {
+        "address": "0x0000000003011d03",
+        "description": "P10 chip PSIHB_FIR MASK",
+        "name": "PSIHB_FIR_MASK"
+    },
+    "0x49cc": {
+        "address": "0x0000000000040009",
+        "description": "TOD Master Path Status Reg",
+        "name": "TOD_MASTER_PATH_STATUS"
+    },
+    "0x4a2d": {
+        "address": "0x0000000003011106",
+        "description": "P10 chip PB_STATION_FIR_EQ 4 ACT0",
+        "name": "PB_STATION_FIR_EQ_4_ACT0"
+    },
+    "0x4a2f": {
+        "address": "0x0000000003011107",
+        "description": "P10 chip PB_STATION_FIR_EQ 4 ACT1",
+        "name": "PB_STATION_FIR_EQ_4_ACT1"
+    },
+    "0x4e2d": {
+        "address": "0x0000000003011146",
+        "description": "P10 chip PB_STATION_FIR_EQ 5 ACT0",
+        "name": "PB_STATION_FIR_EQ_5_ACT0"
+    },
+    "0x4e2f": {
+        "address": "0x0000000003011147",
+        "description": "P10 chip PB_STATION_FIR_EQ 5 ACT1",
+        "name": "PB_STATION_FIR_EQ_5_ACT1"
+    },
+    "0x4e81": {
+        "address": "0x0000000001040041",
+        "description": "TP Chiplet Recoverable FIR MASK",
+        "name": "TP_CHIPLET_RE_FIR_MASK"
+    },
+    "0x4f17": {
+        "address": "0x0000000001010ccd",
+        "description": "PBAO Error Report 1",
+        "name": "PBAO_ERR_RPT_1"
+    },
+    "0x4f19": {
+        "address": "0x0000000001010cce",
+        "description": "PBAO Error Report 2",
+        "name": "PBAO_ERR_RPT_2"
+    },
+    "0x50c6": {
+        "address": "0x0000000000040032",
+        "description": "TOD CERR Report",
+        "name": "TOD_ERRORMASK"
+    },
+    "0x522d": {
+        "address": "0x0000000003011186",
+        "description": "P10 chip PB_STATION_FIR_EQ 6 ACT0",
+        "name": "PB_STATION_FIR_EQ_6_ACT0"
+    },
+    "0x522f": {
+        "address": "0x0000000003011187",
+        "description": "P10 chip PB_STATION_FIR_EQ 6 ACT1",
+        "name": "PB_STATION_FIR_EQ_6_ACT1"
+    },
+    "0x5271": {
+        "address": "0x00000000020109c4",
+        "description": "INT VC Group0 Fatal Errors Register",
+        "name": "INT_VC_FATAL_ERR_G0"
+    },
+    "0x533a": {
+        "address": "0x0000000001040003",
+        "description": "TP Chiplet Unit Checkstop FIR",
+        "name": "TP_CHIPLET_UCS_FIR"
+    },
+    "0x534a": {
+        "address": "0x0000000001040001",
+        "description": "TP Chiplet Recoverable FIR",
+        "name": "TP_CHIPLET_RE_FIR"
+    },
+    "0x5368": {
+        "address": "0x0000000000040008",
+        "description": "TOD PSS MSS Status Reg",
+        "name": "TOD_STATUSREGISTER"
+    },
+    "0x5371": {
+        "address": "0x00000000020109cc",
+        "description": "INT VC Group1 Fatal Errors Register",
+        "name": "INT_VC_FATAL_ERR_G1"
+    },
+    "0x5408": {
+        "address": "0x0000000010040044",
+        "description": "PAU0 Chiplet Host Attention FIR MASK",
+        "name": "PAU0_CHIPLET_HA_FIR_MASK"
+    },
+    "0x5414": {
+        "address": "0x0000000011040044",
+        "description": "PAU1 Chiplet Host Attention FIR MASK",
+        "name": "PAU1_CHIPLET_HA_FIR_MASK"
+    },
+    "0x5420": {
+        "address": "0x0000000012040044",
+        "description": "PAU2 Chiplet Host Attention FIR MASK",
+        "name": "PAU2_CHIPLET_HA_FIR_MASK"
+    },
+    "0x542c": {
+        "address": "0x0000000013040044",
+        "description": "PAU3 Chiplet Host Attention FIR MASK",
+        "name": "PAU3_CHIPLET_HA_FIR_MASK"
+    },
+    "0x562d": {
+        "address": "0x00000000030111c6",
+        "description": "P10 chip PB_STATION_FIR_EQ 7 ACT0",
+        "name": "PB_STATION_FIR_EQ_7_ACT0"
+    },
+    "0x562f": {
+        "address": "0x00000000030111c7",
+        "description": "P10 chip PB_STATION_FIR_EQ 7 ACT1",
+        "name": "PB_STATION_FIR_EQ_7_ACT1"
+    },
+    "0x579b": {
+        "address": "0x000000000004000a",
+        "description": "TOD S PATH STATUS REG",
+        "name": "TOD_SPSR"
+    },
+    "0x5898": {
+        "address": "0x0000000002040040",
+        "description": "N0 Chiplet Checkstop FIR MASK",
+        "name": "N0_CHIPLET_CS_FIR_MASK"
+    },
+    "0x58a4": {
+        "address": "0x0000000003040040",
+        "description": "N1 Chiplet Checkstop FIR MASK",
+        "name": "N1_CHIPLET_CS_FIR_MASK"
+    },
+    "0x591e": {
+        "address": "0x0000000000040029",
+        "description": "TOD RX TType Ctrl reg",
+        "name": "TOD_RX_TTYPE_CTRL_REG"
+    },
+    "0x59e0": {
+        "address": "0x0000000002040103",
+        "description": "P10 chip N0_LOCAL_FIR MASK",
+        "name": "N0_LOCAL_FIR_MASK"
+    },
+    "0x59e9": {
+        "address": "0x0000000003040103",
+        "description": "P10 chip N1_LOCAL_FIR MASK",
+        "name": "N1_LOCAL_FIR_MASK"
+    },
+    "0x5c5d": {
+        "address": "0x0000000003011003",
+        "description": "P10 chip PB_STATION_FIR_EQ 0 MASK",
+        "name": "PB_STATION_FIR_EQ_0_MASK"
+    },
+    "0x5c6e": {
+        "address": "0x0000000003011d00",
+        "description": "P10 chip PSIHB_FIR",
+        "name": "PSIHB_FIR"
+    },
+    "0x5d35": {
+        "address": "0x00000000000f0034",
+        "description": "IPOLL status register",
+        "name": "IPOLL_STATUS_REG"
+    },
+    "0x5fbe": {
+        "address": "0x0000000001040101",
+        "description": "P10 chip TP_LOCAL_FIR atomic AND",
+        "name": "TP_LOCAL_FIR_AND"
+    },
+    "0x605d": {
+        "address": "0x0000000003011043",
+        "description": "P10 chip PB_STATION_FIR_EQ 1 MASK",
+        "name": "PB_STATION_FIR_EQ_1_MASK"
+    },
+    "0x60c8": {
+        "address": "0x00000000020f001f",
+        "description": "N0 PCBSLV error register",
+        "name": "N0_PCBSLV_ERROR"
+    },
+    "0x60d0": {
+        "address": "0x00000000030f001f",
+        "description": "N1 PCBSLV error register",
+        "name": "N1_PCBSLV_ERROR"
+    },
+    "0x645d": {
+        "address": "0x0000000003011083",
+        "description": "P10 chip PB_STATION_FIR_EQ 2 MASK",
+        "name": "PB_STATION_FIR_EQ_2_MASK"
+    },
+    "0x6513": {
+        "address": "0x0000000002011406",
+        "description": "P10 chip VAS_FIR ACT0",
+        "name": "VAS_FIR_ACT0"
+    },
+    "0x6515": {
+        "address": "0x0000000002011407",
+        "description": "P10 chip VAS_FIR ACT1",
+        "name": "VAS_FIR_ACT1"
+    },
+    "0x685d": {
+        "address": "0x00000000030110c3",
+        "description": "P10 chip PB_STATION_FIR_EQ 3 MASK",
+        "name": "PB_STATION_FIR_EQ_3_MASK"
+    },
+    "0x6993": {
+        "address": "0x00000000020110a2",
+        "description": "NX CQ error report 0",
+        "name": "NX_CQ_ERR_RPT_0"
+    },
+    "0x69c7": {
+        "address": "0x0000000002010ac6",
+        "description": "INT PC Error0 Informational Errors Register",
+        "name": "INT_PC_ERR0_INFO"
+    },
+    "0x6a93": {
+        "address": "0x00000000020110a1",
+        "description": "NX CQ error report 1",
+        "name": "NX_CQ_ERR_RPT_1"
+    },
+    "0x6ad7": {
+        "address": "0x00000000570f001c",
+        "description": "Global Checkstop Attention FIR",
+        "name": "GLOBAL_CS_FIR"
+    },
+    "0x6b1e": {
+        "address": "0x0000000000040027",
+        "description": "TOD TX TType Ctrl reg",
+        "name": "TOD_TX_TTYPE_CTRL_REG"
+    },
+    "0x6c4e": {
+        "address": "0x0000000010040041",
+        "description": "PAU0 Chiplet Recoverable FIR MASK",
+        "name": "PAU0_CHIPLET_RE_FIR_MASK"
+    },
+    "0x6c5a": {
+        "address": "0x0000000011040041",
+        "description": "PAU1 Chiplet Recoverable FIR MASK",
+        "name": "PAU1_CHIPLET_RE_FIR_MASK"
+    },
+    "0x6c5d": {
+        "address": "0x0000000003011103",
+        "description": "P10 chip PB_STATION_FIR_EQ 4 MASK",
+        "name": "PB_STATION_FIR_EQ_4_MASK"
+    },
+    "0x6c66": {
+        "address": "0x0000000012040041",
+        "description": "PAU2 Chiplet Recoverable FIR MASK",
+        "name": "PAU2_CHIPLET_RE_FIR_MASK"
+    },
+    "0x6c72": {
+        "address": "0x0000000013040041",
+        "description": "PAU3 Chiplet Recoverable FIR MASK",
+        "name": "PAU3_CHIPLET_RE_FIR_MASK"
+    },
+    "0x6dc7": {
+        "address": "0x0000000002010ace",
+        "description": "INT PC Error1 Informational Errors Register",
+        "name": "INT_PC_ERR1_INFO"
+    },
+    "0x705d": {
+        "address": "0x0000000003011143",
+        "description": "P10 chip PB_STATION_FIR_EQ 5 MASK",
+        "name": "PB_STATION_FIR_EQ_5_MASK"
+    },
+    "0x718c": {
+        "address": "0x0000000010040004",
+        "description": "PAU0 Chiplet Host Attention FIR",
+        "name": "PAU0_CHIPLET_HA_FIR"
+    },
+    "0x7195": {
+        "address": "0x0000000011040004",
+        "description": "PAU1 Chiplet Host Attention FIR",
+        "name": "PAU1_CHIPLET_HA_FIR"
+    },
+    "0x719e": {
+        "address": "0x0000000012040004",
+        "description": "PAU2 Chiplet Host Attention FIR",
+        "name": "PAU2_CHIPLET_HA_FIR"
+    },
+    "0x71a7": {
+        "address": "0x0000000013040004",
+        "description": "PAU3 Chiplet Host Attention FIR",
+        "name": "PAU3_CHIPLET_HA_FIR"
+    },
+    "0x7410": {
+        "address": "0x0000000000040030",
+        "description": "TOD Error and Interrupts",
+        "name": "TOD_ERRORREGISTER"
+    },
+    "0x745d": {
+        "address": "0x0000000003011183",
+        "description": "P10 chip PB_STATION_FIR_EQ 6 MASK",
+        "name": "PB_STATION_FIR_EQ_6_MASK"
+    },
+    "0x785d": {
+        "address": "0x00000000030111c3",
+        "description": "P10 chip PB_STATION_FIR_EQ 7 MASK",
+        "name": "PB_STATION_FIR_EQ_7_MASK"
+    },
+    "0x79de": {
+        "address": "0x0000000001040106",
+        "description": "P10 chip TP_LOCAL_FIR ACT0",
+        "name": "TP_LOCAL_FIR_ACT0"
+    },
+    "0x7ade": {
+        "address": "0x0000000001040107",
+        "description": "P10 chip TP_LOCAL_FIR ACT1",
+        "name": "TP_LOCAL_FIR_ACT1"
+    },
+    "0x7bde": {
+        "address": "0x0000000001040109",
+        "description": "P10 chip TP_LOCAL_FIR ACT2",
+        "name": "TP_LOCAL_FIR_ACT2"
+    },
+    "0x7c70": {
+        "address": "0x0000000000040001",
+        "description": "TOD Pri Port 0 Ctrl",
+        "name": "TOD_PCRP0"
+    },
+    "0x7d0e": {
+        "address": "0x0000000001040000",
+        "description": "TP Chiplet Checkstop FIR",
+        "name": "TP_CHIPLET_CS_FIR"
+    },
+    "0x7d15": {
+        "address": "0x0000000002010ac3",
+        "description": "INT PC Error0 WOF Detail Register",
+        "name": "INT_PC_ERR0_WOF_DETAIL"
+    },
+    "0x7d70": {
+        "address": "0x0000000000040002",
+        "description": "TOD Pri Port 1 Ctrl",
+        "name": "TOD_PCRP1"
+    },
+    "0x7db4": {
+        "address": "0x0000000010040001",
+        "description": "PAU0 Chiplet Recoverable FIR",
+        "name": "PAU0_CHIPLET_RE_FIR"
+    },
+    "0x7dbd": {
+        "address": "0x0000000011040001",
+        "description": "PAU1 Chiplet Recoverable FIR",
+        "name": "PAU1_CHIPLET_RE_FIR"
+    },
+    "0x7dc6": {
+        "address": "0x0000000012040001",
+        "description": "PAU2 Chiplet Recoverable FIR",
+        "name": "PAU2_CHIPLET_RE_FIR"
+    },
+    "0x7dcf": {
+        "address": "0x0000000013040001",
+        "description": "PAU3 Chiplet Recoverable FIR",
+        "name": "PAU3_CHIPLET_RE_FIR"
+    },
+    "0x8238": {
+        "address": "0x000000000005001d",
+        "description": "RCS Sense 1 register",
+        "name": "RCS_SENSE_1"
+    },
+    "0x8338": {
+        "address": "0x000000000005001e",
+        "description": "RCS Sense 2 register",
+        "name": "RCS_SENSE_2"
+    },
+    "0x8415": {
+        "address": "0x0000000002010acb",
+        "description": "INT PC Error1 WOF Detail Register",
+        "name": "INT_PC_ERR1_WOF_DETAIL"
+    },
+    "0x8570": {
+        "address": "0x0000000000040003",
+        "description": "TOD Sec Port 0 Ctrl",
+        "name": "TOD_SCRP0"
+    },
+    "0x8670": {
+        "address": "0x0000000000040004",
+        "description": "TOD Sec Port 1 Ctrl",
+        "name": "TOD_SCRP1"
+    },
+    "0x8743": {
+        "address": "0x0000000002011403",
+        "description": "P10 chip VAS_FIR MASK",
+        "name": "VAS_FIR_MASK"
+    },
+    "0x8761": {
+        "address": "0x00000000570f002a",
+        "description": "Global Unit Checkstop Attention FIR",
+        "name": "GLOBAL_UCS_FIR"
+    },
+    "0x8ce0": {
+        "address": "0x0000000000050010",
+        "description": "TP Chiplet ROOT CONTROL 0 register",
+        "name": "ROOT_CTRL0"
+    },
+    "0x8ce6": {
+        "address": "0x0000000000050013",
+        "description": "TP Chiplet ROOT CONTROL 3 register",
+        "name": "ROOT_CTRL3"
+    },
+    "0x8ce8": {
+        "address": "0x0000000000050014",
+        "description": "TP Chiplet ROOT CONTROL 4 register",
+        "name": "ROOT_CTRL4"
+    },
+    "0x8cea": {
+        "address": "0x0000000000050015",
+        "description": "TP Chiplet ROOT CONTROL 5 register",
+        "name": "ROOT_CTRL5"
+    },
+    "0x8cec": {
+        "address": "0x0000000000050016",
+        "description": "TP Chiplet ROOT CONTROL 6 register",
+        "name": "ROOT_CTRL6"
+    },
+    "0x8f83": {
+        "address": "0x0000000003011dc6",
+        "description": "P10 chip PBAF_FIR ACT0",
+        "name": "PBAF_FIR_ACT0"
+    },
+    "0x8fb9": {
+        "address": "0x0000000001010cc6",
+        "description": "P10 chip PBAO_FIR ACT0",
+        "name": "PBAO_FIR_ACT0"
+    },
+    "0x9083": {
+        "address": "0x0000000003011dc7",
+        "description": "P10 chip PBAF_FIR ACT1",
+        "name": "PBAF_FIR_ACT1"
+    },
+    "0x90b9": {
+        "address": "0x0000000001010cc7",
+        "description": "P10 chip PBAO_FIR ACT1",
+        "name": "PBAO_FIR_ACT1"
+    },
+    "0x9100": {
+        "address": "0x0000000001040103",
+        "description": "P10 chip TP_LOCAL_FIR MASK",
+        "name": "TP_LOCAL_FIR_MASK"
+    },
+    "0x91c8": {
+        "address": "0x00000000010f001f",
+        "description": "TP PCBSLV error register",
+        "name": "TP_PCBSLV_ERROR"
+    },
+    "0x9614": {
+        "address": "0x0000000002010839",
+        "description": "INT CQ error report hold",
+        "name": "INT_CQ_ERR_RPT_HOLD"
+    },
+    "0x9721": {
+        "address": "0x0000000003011d46",
+        "description": "P10 chip HCA_FIR ACT0",
+        "name": "HCA_FIR_ACT0"
+    },
+    "0x9723": {
+        "address": "0x0000000003011d47",
+        "description": "P10 chip HCA_FIR ACT1",
+        "name": "HCA_FIR_ACT1"
+    },
+    "0x9e69": {
+        "address": "0x000000000004000e",
+        "description": "TOD Master Path0 Step Steering",
+        "name": "TOD_MASTER_PATH0_STEP_STEERING"
+    },
+    "0x9e72": {
+        "address": "0x000000000004000f",
+        "description": "TOD Master Path1 Step Steering",
+        "name": "TOD_MASTER_PATH1_STEP_STEERING"
+    },
+    "0xa10d": {
+        "address": "0x0000000002040100",
+        "description": "P10 chip N0_LOCAL_FIR",
+        "name": "N0_LOCAL_FIR"
+    },
+    "0xa114": {
+        "address": "0x0000000003040100",
+        "description": "P10 chip N1_LOCAL_FIR",
+        "name": "N1_LOCAL_FIR"
+    },
+    "0xa218": {
+        "address": "0x0000000001040040",
+        "description": "TP Chiplet Checkstop FIR MASK",
+        "name": "TP_CHIPLET_CS_FIR_MASK"
+    },
+    "0xa30d": {
+        "address": "0x0000000002011100",
+        "description": "P10 chip NX_DMA_ENG_FIR",
+        "name": "NX_DMA_ENG_FIR"
+    },
+    "0xa6a5": {
+        "address": "0x0000000003011dc3",
+        "description": "P10 chip PBAF_FIR MASK",
+        "name": "PBAF_FIR_MASK"
+    },
+    "0xa6db": {
+        "address": "0x0000000001010cc3",
+        "description": "P10 chip PBAO_FIR MASK",
+        "name": "PBAO_FIR_MASK"
+    },
+    "0xa778": {
+        "address": "0x0000000010040000",
+        "description": "PAU0 Chiplet Checkstop FIR",
+        "name": "PAU0_CHIPLET_CS_FIR"
+    },
+    "0xa781": {
+        "address": "0x0000000011040000",
+        "description": "PAU1 Chiplet Checkstop FIR",
+        "name": "PAU1_CHIPLET_CS_FIR"
+    },
+    "0xa78a": {
+        "address": "0x0000000012040000",
+        "description": "PAU2 Chiplet Checkstop FIR",
+        "name": "PAU2_CHIPLET_CS_FIR"
+    },
+    "0xa793": {
+        "address": "0x0000000013040000",
+        "description": "PAU3 Chiplet Checkstop FIR",
+        "name": "PAU3_CHIPLET_CS_FIR"
+    },
+    "0xab33": {
+        "address": "0x0000000000040005",
+        "description": "TOD SLAVE PATH CTRL",
+        "name": "TOD_SLAVE_PATH_CTRL"
+    },
+    "0xaebf": {
+        "address": "0x0000000002040043",
+        "description": "N0 Chiplet Unit Checkstop FIR MASK",
+        "name": "N0_CHIPLET_UCS_FIR_MASK"
+    },
+    "0xaecb": {
+        "address": "0x0000000003040043",
+        "description": "N1 Chiplet Unit Checkstop FIR MASK",
+        "name": "N1_CHIPLET_UCS_FIR_MASK"
+    },
+    "0xb026": {
+        "address": "0x0000000000040033",
+        "description": "TOD Route Errors to Core",
+        "name": "TOD_ERRORACTION"
+    },
+    "0xb091": {
+        "address": "0x00000000020109c5",
+        "description": "INT VC Group0 Recoverable Errors Register",
+        "name": "INT_VC_RECOV_ERR_G0"
+    },
+    "0xb191": {
+        "address": "0x00000000020109cd",
+        "description": "INT VC Group1 Recoverable Errors Register",
+        "name": "INT_VC_RECOV_ERR_G1"
+    },
+    "0xb7c3": {
+        "address": "0x00000000000f0033",
+        "description": "IPOLL mask register",
+        "name": "IPOLL_MASK_REG"
+    },
+    "0xb951": {
+        "address": "0x0000000003011d43",
+        "description": "P10 chip HCA_FIR MASK",
+        "name": "HCA_FIR_MASK"
+    },
+    "0xbd8b": {
+        "address": "0x00000000020109c2",
+        "description": "INT VC Group0 WOF Register",
+        "name": "INT_VC_WOF_ERR_G0"
+    },
+    "0xbe8b": {
+        "address": "0x00000000020109ca",
+        "description": "INT VC Group1 WOF Register",
+        "name": "INT_VC_WOF_ERR_G1"
+    },
+    "0xbf3d": {
+        "address": "0x00000000020f001e",
+        "description": "N0 PCBSLV config register",
+        "name": "N0_PCBSLV_CONFIG"
+    },
+    "0xbf46": {
+        "address": "0x00000000030f001e",
+        "description": "N1 PCBSLV config register",
+        "name": "N1_PCBSLV_CONFIG"
+    },
+    "0xbf7c": {
+        "address": "0x0000000003012006",
+        "description": "P10 chip LPC_FIR ACT0",
+        "name": "LPC_FIR_ACT0"
+    },
+    "0xbf7e": {
+        "address": "0x0000000003012007",
+        "description": "P10 chip LPC_FIR ACT1",
+        "name": "LPC_FIR_ACT1"
+    },
+    "0xbfe5": {
+        "address": "0x0000000010040040",
+        "description": "PAU0 Chiplet Checkstop FIR MASK",
+        "name": "PAU0_CHIPLET_CS_FIR_MASK"
+    },
+    "0xbff1": {
+        "address": "0x0000000011040040",
+        "description": "PAU1 Chiplet Checkstop FIR MASK",
+        "name": "PAU1_CHIPLET_CS_FIR_MASK"
+    },
+    "0xbffd": {
+        "address": "0x0000000012040040",
+        "description": "PAU2 Chiplet Checkstop FIR MASK",
+        "name": "PAU2_CHIPLET_CS_FIR_MASK"
+    },
+    "0xc009": {
+        "address": "0x0000000013040040",
+        "description": "PAU3 Chiplet Checkstop FIR MASK",
+        "name": "PAU3_CHIPLET_CS_FIR_MASK"
+    },
+    "0xc3bb": {
+        "address": "0x0000000003011d40",
+        "description": "P10 chip HCA_FIR",
+        "name": "HCA_FIR"
+    },
+    "0xc4cc": {
+        "address": "0x000000000301138c",
+        "description": "PowerBus PB RaceTrack Station HP Mode1 Config register",
+        "name": "PB_STATION_HP_MODE1_CURR"
+    },
+    "0xc884": {
+        "address": "0x0000000002010ac4",
+        "description": "INT PC Error0 Fatal Errors Register",
+        "name": "INT_PC_ERR0_FATAL"
+    },
+    "0xcbed": {
+        "address": "0x0000000001040100",
+        "description": "P10 chip TP_LOCAL_FIR",
+        "name": "TP_LOCAL_FIR"
+    },
+    "0xcc21": {
+        "address": "0x0000000003010806",
+        "description": "P10 chip MCD_FIR ACT0",
+        "name": "MCD_FIR_ACT0"
+    },
+    "0xcc23": {
+        "address": "0x0000000003010807",
+        "description": "P10 chip MCD_FIR ACT1",
+        "name": "MCD_FIR_ACT1"
+    },
+    "0xcc84": {
+        "address": "0x0000000002010acc",
+        "description": "INT PC Error1 Fatal Errors Register",
+        "name": "INT_PC_ERR1_FATAL"
+    },
+    "0xcec5": {
+        "address": "0x0000000010040003",
+        "description": "PAU0 Chiplet Unit Checkstop FIR",
+        "name": "PAU0_CHIPLET_UCS_FIR"
+    },
+    "0xcecf": {
+        "address": "0x0000000011040003",
+        "description": "PAU1 Chiplet Unit Checkstop FIR",
+        "name": "PAU1_CHIPLET_UCS_FIR"
+    },
+    "0xced9": {
+        "address": "0x0000000012040003",
+        "description": "PAU2 Chiplet Unit Checkstop FIR",
+        "name": "PAU2_CHIPLET_UCS_FIR"
+    },
+    "0xcee3": {
+        "address": "0x0000000013040003",
+        "description": "PAU3 Chiplet Unit Checkstop FIR",
+        "name": "PAU3_CHIPLET_UCS_FIR"
+    },
+    "0xcfab": {
+        "address": "0x00000000030113ae",
+        "description": "P10 chip PB_EXT_FIR",
+        "name": "PB_EXT_FIR"
+    },
+    "0xd378": {
+        "address": "0x0000000002011057",
+        "description": "DMA CERR Report Register 0",
+        "name": "SU_DMA_ERROR_REPORT_0"
+    },
+    "0xd380": {
+        "address": "0x00000000470f001f",
+        "description": "Broadcast OR of PCBSLV error registers from all chiplets",
+        "name": "BC_OR_PCBSLV_ERROR"
+    },
+    "0xd392": {
+        "address": "0x0000000003011206",
+        "description": "P10 chip PB_STATION_FIR_EN1 ACT0",
+        "name": "PB_STATION_FIR_EN1_ACT0"
+    },
+    "0xd396": {
+        "address": "0x0000000003011246",
+        "description": "P10 chip PB_STATION_FIR_EN2 ACT0",
+        "name": "PB_STATION_FIR_EN2_ACT0"
+    },
+    "0xd39a": {
+        "address": "0x0000000003011286",
+        "description": "P10 chip PB_STATION_FIR_EN3 ACT0",
+        "name": "PB_STATION_FIR_EN3_ACT0"
+    },
+    "0xd39e": {
+        "address": "0x00000000030112c6",
+        "description": "P10 chip PB_STATION_FIR_EN4 ACT0",
+        "name": "PB_STATION_FIR_EN4_ACT0"
+    },
+    "0xd3d2": {
+        "address": "0x0000000000040007",
+        "description": "TOD Prim Sec Config Control",
+        "name": "TOD_CONFIG_CTRL"
+    },
+    "0xd421": {
+        "address": "0x0000000001010806",
+        "description": "P10 chip OCC_FIR ACT0",
+        "name": "OCC_FIR_ACT0"
+    },
+    "0xd423": {
+        "address": "0x0000000001010807",
+        "description": "P10 chip OCC_FIR ACT1",
+        "name": "OCC_FIR_ACT1"
+    },
+    "0xd478": {
+        "address": "0x0000000002011058",
+        "description": "DMA CERR Report Register 1",
+        "name": "SU_DMA_ERROR_REPORT_1"
+    },
+    "0xd492": {
+        "address": "0x0000000003011207",
+        "description": "P10 chip PB_STATION_FIR_EN1 ACT1",
+        "name": "PB_STATION_FIR_EN1_ACT1"
+    },
+    "0xd496": {
+        "address": "0x0000000003011247",
+        "description": "P10 chip PB_STATION_FIR_EN2 ACT1",
+        "name": "PB_STATION_FIR_EN2_ACT1"
+    },
+    "0xd49a": {
+        "address": "0x0000000003011287",
+        "description": "P10 chip PB_STATION_FIR_EN3 ACT1",
+        "name": "PB_STATION_FIR_EN3_ACT1"
+    },
+    "0xd49e": {
+        "address": "0x00000000030112c7",
+        "description": "P10 chip PB_STATION_FIR_EN4 ACT1",
+        "name": "PB_STATION_FIR_EN4_ACT1"
+    },
+    "0xd4ac": {
+        "address": "0x0000000002010ac5",
+        "description": "INT PC Error0 Recoverable Errors Register",
+        "name": "INT_PC_ERR0_RECOV"
+    },
+    "0xd773": {
+        "address": "0x0000000002011080",
+        "description": "P10 chip NX_CQ_FIR",
+        "name": "NX_CQ_FIR"
+    },
+    "0xd8ac": {
+        "address": "0x0000000002010acd",
+        "description": "INT PC Error1 Recoverable Errors Register",
+        "name": "INT_PC_ERR1_RECOV"
+    },
+    "0xd9ef": {
+        "address": "0x0000000003012000",
+        "description": "P10 chip LPC_FIR",
+        "name": "LPC_FIR"
+    },
+    "0xdf6d": {
+        "address": "0x0000000002010ad2",
+        "description": "INT NXC WOF Register",
+        "name": "INT_PC_NXC_WOF_ERR"
+    },
+    "0xe0bb": {
+        "address": "0x0000000003010800",
+        "description": "P10 chip MCD_FIR",
+        "name": "MCD_FIR"
+    },
+    "0xe187": {
+        "address": "0x0000000001040105",
+        "description": "P10 chip TP_LOCAL_FIR MASK atomic OR",
+        "name": "TP_LOCAL_FIR_MASK_OR"
+    },
+    "0xe1ac": {
+        "address": "0x0000000003012003",
+        "description": "P10 chip LPC_FIR MASK",
+        "name": "LPC_FIR_MASK"
+    },
+    "0xe375": {
+        "address": "0x0000000002010ad6",
+        "description": "INT NXC Informational Errors Register",
+        "name": "INT_PC_NXC_INFO_ERR"
+    },
+    "0xe5bb": {
+        "address": "0x0000000001010800",
+        "description": "P10 chip OCC_FIR",
+        "name": "OCC_FIR"
+    },
+    "0xe792": {
+        "address": "0x0000000003011306",
+        "description": "P10 chip PB_STATION_FIR_ES1 ACT0",
+        "name": "PB_STATION_FIR_ES1_ACT0"
+    },
+    "0xe796": {
+        "address": "0x0000000003011346",
+        "description": "P10 chip PB_STATION_FIR_ES2 ACT0",
+        "name": "PB_STATION_FIR_ES2_ACT0"
+    },
+    "0xe79a": {
+        "address": "0x0000000003011386",
+        "description": "P10 chip PB_STATION_FIR_ES3 ACT0",
+        "name": "PB_STATION_FIR_ES3_ACT0"
+    },
+    "0xe79e": {
+        "address": "0x00000000030113c6",
+        "description": "P10 chip PB_STATION_FIR_ES4 ACT0",
+        "name": "PB_STATION_FIR_ES4_ACT0"
+    },
+    "0xe892": {
+        "address": "0x0000000003011307",
+        "description": "P10 chip PB_STATION_FIR_ES1 ACT1",
+        "name": "PB_STATION_FIR_ES1_ACT1"
+    },
+    "0xe896": {
+        "address": "0x0000000003011347",
+        "description": "P10 chip PB_STATION_FIR_ES2 ACT1",
+        "name": "PB_STATION_FIR_ES2_ACT1"
+    },
+    "0xe89a": {
+        "address": "0x0000000003011387",
+        "description": "P10 chip PB_STATION_FIR_ES3 ACT1",
+        "name": "PB_STATION_FIR_ES3_ACT1"
+    },
+    "0xe89e": {
+        "address": "0x00000000030113c7",
+        "description": "P10 chip PB_STATION_FIR_ES4 ACT1",
+        "name": "PB_STATION_FIR_ES4_ACT1"
+    },
+    "0xeab4": {
+        "address": "0x0000000003011203",
+        "description": "P10 chip PB_STATION_FIR_EN1 MASK",
+        "name": "PB_STATION_FIR_EN1_MASK"
+    },
+    "0xeab8": {
+        "address": "0x0000000003011243",
+        "description": "P10 chip PB_STATION_FIR_EN2 MASK",
+        "name": "PB_STATION_FIR_EN2_MASK"
+    },
+    "0xeabc": {
+        "address": "0x0000000003011283",
+        "description": "P10 chip PB_STATION_FIR_EN3 MASK",
+        "name": "PB_STATION_FIR_EN3_MASK"
+    },
+    "0xeac0": {
+        "address": "0x00000000030112c3",
+        "description": "P10 chip PB_STATION_FIR_EN4 MASK",
+        "name": "PB_STATION_FIR_EN4_MASK"
+    },
+    "0xeb35": {
+        "address": "0x000000000101080a",
+        "description": "OCC Error Report",
+        "name": "OCC_SCOM_ERR_RPT"
+    },
+    "0xeb7d": {
+        "address": "0x000000000201083b",
+        "description": "INT CQ error info 1",
+        "name": "INT_CQ_ERR_INFO1"
+    },
+    "0xeb7f": {
+        "address": "0x000000000201083c",
+        "description": "INT CQ error info 2",
+        "name": "INT_CQ_ERR_INFO2"
+    },
+    "0xeb81": {
+        "address": "0x000000000201083d",
+        "description": "INT CQ error info 3",
+        "name": "INT_CQ_ERR_INFO3"
+    },
+    "0xecaa": {
+        "address": "0x000000000301100a",
+        "description": "PowerBus PB RaceTrack Station Mode Config register",
+        "name": "PB_STATION_MODE_EQ0"
+    },
+    "0xecbb": {
+        "address": "0x0000000002040044",
+        "description": "N0 Chiplet Host Attention FIR MASK",
+        "name": "N0_CHIPLET_HA_FIR_MASK"
+    },
+    "0xecc7": {
+        "address": "0x0000000003040044",
+        "description": "N1 Chiplet Host Attention FIR MASK",
+        "name": "N1_CHIPLET_HA_FIR_MASK"
+    },
+    "0xed81": {
+        "address": "0x00000000020109c3",
+        "description": "INT VC Group0 WOF Detail Register",
+        "name": "INT_VC_WOF_ERR_G0_DETAIL"
+    },
+    "0xeda4": {
+        "address": "0x000000000301120a",
+        "description": "PowerBus PB RaceTrack Station Mode Config register",
+        "name": "PB_STATION_MODE_EN1"
+    },
+    "0xedaa": {
+        "address": "0x000000000301104a",
+        "description": "PowerBus PB RaceTrack Station Mode Config register",
+        "name": "PB_STATION_MODE_EQ1"
+    },
+    "0xedae": {
+        "address": "0x000000000301130a",
+        "description": "PowerBus PB RaceTrack Station Mode Config register",
+        "name": "PB_STATION_MODE_ES1"
+    },
+    "0xee51": {
+        "address": "0x0000000003010803",
+        "description": "P10 chip MCD_FIR MASK",
+        "name": "MCD_FIR_MASK"
+    },
+    "0xeea4": {
+        "address": "0x000000000301124a",
+        "description": "PowerBus PB RaceTrack Station Mode Config register",
+        "name": "PB_STATION_MODE_EN2"
+    },
+    "0xeeaa": {
+        "address": "0x000000000301108a",
+        "description": "PowerBus PB RaceTrack Station Mode Config register",
+        "name": "PB_STATION_MODE_EQ2"
+    },
+    "0xeeae": {
+        "address": "0x000000000301134a",
+        "description": "PowerBus PB RaceTrack Station Mode Config register",
+        "name": "PB_STATION_MODE_ES2"
+    },
+    "0xefa4": {
+        "address": "0x000000000301128a",
+        "description": "PowerBus PB RaceTrack Station Mode Config register",
+        "name": "PB_STATION_MODE_EN3"
+    },
+    "0xefaa": {
+        "address": "0x00000000030110ca",
+        "description": "PowerBus PB RaceTrack Station Mode Config register",
+        "name": "PB_STATION_MODE_EQ3"
+    },
+    "0xefae": {
+        "address": "0x000000000301138a",
+        "description": "PowerBus PB RaceTrack Station Mode Config register",
+        "name": "PB_STATION_MODE_ES3"
+    },
+    "0xf0a4": {
+        "address": "0x00000000030112ca",
+        "description": "PowerBus PB RaceTrack Station Mode Config register",
+        "name": "PB_STATION_MODE_EN4"
+    },
+    "0xf0aa": {
+        "address": "0x000000000301110a",
+        "description": "PowerBus PB RaceTrack Station Mode Config register",
+        "name": "PB_STATION_MODE_EQ4"
+    },
+    "0xf0ae": {
+        "address": "0x00000000030113ca",
+        "description": "PowerBus PB RaceTrack Station Mode Config register",
+        "name": "PB_STATION_MODE_ES4"
+    },
+    "0xf1aa": {
+        "address": "0x000000000301114a",
+        "description": "PowerBus PB RaceTrack Station Mode Config register",
+        "name": "PB_STATION_MODE_EQ5"
+    },
+    "0xf281": {
+        "address": "0x00000000020109cb",
+        "description": "INT VC Group1 WOF Detail Register",
+        "name": "INT_VC_WOF_ERR_G1_DETAIL"
+    },
+    "0xf29b": {
+        "address": "0x0000000002010ad4",
+        "description": "INT NXC Fatal Errors Register",
+        "name": "INT_PC_NXC_FATAL_ERR"
+    },
+    "0xf2aa": {
+        "address": "0x000000000301118a",
+        "description": "PowerBus PB RaceTrack Station Mode Config register",
+        "name": "PB_STATION_MODE_EQ6"
+    },
+    "0xf3aa": {
+        "address": "0x00000000030111ca",
+        "description": "PowerBus PB RaceTrack Station Mode Config register",
+        "name": "PB_STATION_MODE_EQ7"
+    },
+    "0xf651": {
+        "address": "0x0000000001010803",
+        "description": "P10 chip OCC_FIR MASK",
+        "name": "OCC_FIR_MASK"
+    },
+    "0xf65d": {
+        "address": "0x00000000010f001e",
+        "description": "TP PCBSLV config register",
+        "name": "TP_PCBSLV_CONFIG"
+    },
+    "0xf6df": {
+        "address": "0x0000000000040010",
+        "description": "TOD CHIP CTRL REG",
+        "name": "TOD_CCR"
+    },
+    "0xf83f": {
+        "address": "0x0000000001040043",
+        "description": "TP Chiplet Unit Checkstop FIR MASK",
+        "name": "TP_CHIPLET_UCS_FIR_MASK"
+    },
+    "0xfd6e": {
+        "address": "0x0000000003011dcc",
+        "description": "PBA Error Report Register 0",
+        "name": "PBA_ERR_RPT0"
+    },
+    "0xfd70": {
+        "address": "0x0000000003011dcd",
+        "description": "PBA Error Report Register 1",
+        "name": "PBA_ERR_RPT1"
+    },
+    "0xfd72": {
+        "address": "0x0000000003011dce",
+        "description": "PBA Error Report Register 2",
+        "name": "PBA_ERR_RPT2"
+    },
+    "0xfeb4": {
+        "address": "0x0000000003011303",
+        "description": "P10 chip PB_STATION_FIR_ES1 MASK",
+        "name": "PB_STATION_FIR_ES1_MASK"
+    },
+    "0xfeb8": {
+        "address": "0x0000000003011343",
+        "description": "P10 chip PB_STATION_FIR_ES2 MASK",
+        "name": "PB_STATION_FIR_ES2_MASK"
+    },
+    "0xfebc": {
+        "address": "0x0000000003011383",
+        "description": "P10 chip PB_STATION_FIR_ES3 MASK",
+        "name": "PB_STATION_FIR_ES3_MASK"
+    },
+    "0xfec0": {
+        "address": "0x00000000030113c3",
+        "description": "P10 chip PB_STATION_FIR_ES4 MASK",
+        "name": "PB_STATION_FIR_ES4_MASK"
+    },
+    "target_type": "0x5"
+}

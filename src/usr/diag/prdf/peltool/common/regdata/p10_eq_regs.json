@@ -1,0 +1,98 @@
+{
+    "0x0a09": {
+        "address": "0x0000000020040103",
+        "description": "P10 chip EQ_LOCAL_FIR MASK",
+        "name": "EQ_LOCAL_FIR_MASK"
+    },
+    "0x19d0": {
+        "address": "0x00000000200f001f",
+        "description": "EQ PCBSLV error register",
+        "name": "EQ_PCBSLV_ERROR"
+    },
+    "0x444b": {
+        "address": "0x0000000020040043",
+        "description": "EQ Chiplet Unit Checkstop FIR MASK",
+        "name": "EQ_CHIPLET_UCS_FIR_MASK"
+    },
+    "0x6205": {
+        "address": "0x00000000200e0000",
+        "description": "P10 chip EQ_QME_FIR",
+        "name": "EQ_QME_FIR"
+    },
+    "0x62f4": {
+        "address": "0x0000000020040100",
+        "description": "P10 chip EQ_LOCAL_FIR",
+        "name": "EQ_LOCAL_FIR"
+    },
+    "0x6b6e": {
+        "address": "0x00000000200e0008",
+        "description": "P10 chip EQ_QME_FIR ACT0",
+        "name": "EQ_QME_FIR_ACT0"
+    },
+    "0x6c6e": {
+        "address": "0x00000000200e000c",
+        "description": "P10 chip EQ_QME_FIR ACT1",
+        "name": "EQ_QME_FIR_ACT1"
+    },
+    "0x6f66": {
+        "address": "0x00000000200f001e",
+        "description": "EQ PCBSLV config register",
+        "name": "EQ_PCBSLV_CONFIG"
+    },
+    "0x8247": {
+        "address": "0x0000000020040044",
+        "description": "EQ Chiplet Host Attention FIR MASK",
+        "name": "EQ_CHIPLET_HA_FIR_MASK"
+    },
+    "0x8290": {
+        "address": "0x00000000200e0004",
+        "description": "P10 chip EQ_QME_FIR MASK",
+        "name": "EQ_QME_FIR_MASK"
+    },
+    "0x9a8d": {
+        "address": "0x0000000020040041",
+        "description": "EQ Chiplet Recoverable FIR MASK",
+        "name": "EQ_CHIPLET_RE_FIR_MASK"
+    },
+    "0xbd44": {
+        "address": "0x0000000020040003",
+        "description": "EQ Chiplet Unit Checkstop FIR",
+        "name": "EQ_CHIPLET_UCS_FIR"
+    },
+    "0xc02b": {
+        "address": "0x0000000020040004",
+        "description": "EQ Chiplet Host Attention FIR",
+        "name": "EQ_CHIPLET_HA_FIR"
+    },
+    "0xcc53": {
+        "address": "0x0000000020040001",
+        "description": "EQ Chiplet Recoverable FIR",
+        "name": "EQ_CHIPLET_RE_FIR"
+    },
+    "0xee24": {
+        "address": "0x0000000020040040",
+        "description": "EQ Chiplet Checkstop FIR MASK",
+        "name": "EQ_CHIPLET_CS_FIR_MASK"
+    },
+    "0xf2e7": {
+        "address": "0x0000000020040106",
+        "description": "P10 chip EQ_LOCAL_FIR ACT0",
+        "name": "EQ_LOCAL_FIR_ACT0"
+    },
+    "0xf3e7": {
+        "address": "0x0000000020040107",
+        "description": "P10 chip EQ_LOCAL_FIR ACT1",
+        "name": "EQ_LOCAL_FIR_ACT1"
+    },
+    "0xf4e7": {
+        "address": "0x0000000020040109",
+        "description": "P10 chip EQ_LOCAL_FIR ACT2",
+        "name": "EQ_LOCAL_FIR_ACT2"
+    },
+    "0xf617": {
+        "address": "0x0000000020040000",
+        "description": "EQ Chiplet Checkstop FIR",
+        "name": "EQ_CHIPLET_CS_FIR"
+    },
+    "target_type": "0x23"
+}

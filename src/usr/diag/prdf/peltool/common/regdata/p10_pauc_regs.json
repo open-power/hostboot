@@ -1,0 +1,128 @@
+{
+    "0x0fe1": {
+        "address": "0x0000000010011828",
+        "description": "PowerBus TL Link DOB01/DIB01 internal errors",
+        "name": "PB_DOB01_DIB01_INT_ERR_REG"
+    },
+    "0x2172": {
+        "address": "0x00000000100f001e",
+        "description": "PAUC PCBSLV config register",
+        "name": "PAUC_PCBSLV_CONFIG"
+    },
+    "0x2aeb": {
+        "address": "0x0000000010011827",
+        "description": "PowerBus TL LINK Framer0123 Error Readout Register",
+        "name": "PB_FM0123_ERR"
+    },
+    "0x3607": {
+        "address": "0x000000001001182a",
+        "description": "PowerBus TL Link DOB23/DIB23 internal errors",
+        "name": "PB_DOB23_DIB23_INT_ERR_REG"
+    },
+    "0x3b6c": {
+        "address": "0x0000000010040106",
+        "description": "P10 chip PAU_LOCAL_FIR ACT0",
+        "name": "PAU_LOCAL_FIR_ACT0"
+    },
+    "0x3b6e": {
+        "address": "0x0000000010040107",
+        "description": "P10 chip PAU_LOCAL_FIR ACT1",
+        "name": "PAU_LOCAL_FIR_ACT1"
+    },
+    "0x3b70": {
+        "address": "0x0000000010040109",
+        "description": "P10 chip PAU_LOCAL_FIR ACT2",
+        "name": "PAU_LOCAL_FIR_ACT2"
+    },
+    "0x4427": {
+        "address": "0x0000000010011829",
+        "description": "PowerBus TL LINK Parser0123 Error Readout Register",
+        "name": "PB_PR0123_ERR"
+    },
+    "0x58a9": {
+        "address": "0x0000000010011812",
+        "description": "PowerBus TL Link 01 Syndrome Register",
+        "name": "PB_TL_LINK_SYN_01_REG"
+    },
+    "0x5d9c": {
+        "address": "0x0000000010040103",
+        "description": "P10 chip PAU_LOCAL_FIR MASK",
+        "name": "PAU_LOCAL_FIR_MASK"
+    },
+    "0x5eb1": {
+        "address": "0x0000000010011813",
+        "description": "PowerBus TL Link 23 Syndrome Register",
+        "name": "PB_TL_LINK_SYN_23_REG"
+    },
+    "0x6ba9": {
+        "address": "0x00000000100f001f",
+        "description": "PAUC PCBSLV error register",
+        "name": "PAUC_PCBSLV_ERROR"
+    },
+    "0x7b02": {
+        "address": "0x0000000010011825",
+        "description": "PowerBus AX TL Miscellaneous Config Register",
+        "name": "PB_MISC_CFG"
+    },
+    "0x803f": {
+        "address": "0x0000000010040100",
+        "description": "P10 chip PAU_LOCAL_FIR",
+        "name": "PAU_LOCAL_FIR"
+    },
+    "0x8ed9": {
+        "address": "0x0000000010011806",
+        "description": "P10 chip PAU_PTL_FIR ACT0",
+        "name": "PAU_PTL_FIR_ACT0"
+    },
+    "0x8edb": {
+        "address": "0x0000000010011807",
+        "description": "P10 chip PAU_PTL_FIR ACT1",
+        "name": "PAU_PTL_FIR_ACT1"
+    },
+    "0x9160": {
+        "address": "0x0000000010011800",
+        "description": "P10 chip PAU_PTL_FIR",
+        "name": "PAU_PTL_FIR"
+    },
+    "0x97ce": {
+        "address": "0x0000000010012c05",
+        "description": "PAU_PHY_FIR_MASK atomic OR reg",
+        "name": "PAU_PHY_FIR_MASK_OR"
+    },
+    "0xb109": {
+        "address": "0x0000000010011803",
+        "description": "P10 chip PAU_PTL_FIR MASK",
+        "name": "PAU_PTL_FIR_MASK"
+    },
+    "0xb830": {
+        "address": "0x0000000010012c00",
+        "description": "P10 chip PAU_PHY_FIR",
+        "name": "PAU_PHY_FIR"
+    },
+    "0xc84c": {
+        "address": "0x0000000010011818",
+        "description": "PowerBus TL Link UE/CE/SUE Register",
+        "name": "PB_EN_DOB_ECC_ERR_REG"
+    },
+    "0xd1e2": {
+        "address": "0x0000000010012c0e",
+        "description": "PPE Local SRAM Data Register",
+        "name": "PHY_LOCAL_SRAM_DATA"
+    },
+    "0xdc85": {
+        "address": "0x0000000010012c06",
+        "description": "P10 chip PAU_PHY_FIR ACT0",
+        "name": "PAU_PHY_FIR_ACT0"
+    },
+    "0xdc87": {
+        "address": "0x0000000010012c07",
+        "description": "P10 chip PAU_PHY_FIR ACT1",
+        "name": "PAU_PHY_FIR_ACT1"
+    },
+    "0xfeb5": {
+        "address": "0x0000000010012c03",
+        "description": "P10 chip PAU_PHY_FIR MASK",
+        "name": "PAU_PHY_FIR_MASK"
+    },
+    "target_type": "0x52"
+}

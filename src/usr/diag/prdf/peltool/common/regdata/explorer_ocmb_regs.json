@@ -1,0 +1,688 @@
+{
+    "0x0203": {
+        "address": "0x0000000008011805",
+        "description": "Explorer OCMB target MCBISTFIR MASK OR",
+        "name": "MCBISTFIR_MASK_OR"
+    },
+    "0x02b9": {
+        "address": "0x0000000008012401",
+        "description": "Explorer chip TLXFIR AND",
+        "name": "TLXFIR_AND"
+    },
+    "0x0884": {
+        "address": "0x0000000008011c05",
+        "description": "Explorer chip RDFFIR MASK OR",
+        "name": "RDFFIR_MASK_OR"
+    },
+    "0x0b1f": {
+        "address": "0x0000000008011403",
+        "description": "Explorer chip SRQFIR MASK",
+        "name": "SRQFIR_MASK"
+    },
+    "0x0cb0": {
+        "address": "0x0000000008012817",
+        "description": "Explorer DL0 Training Status Register",
+        "name": "DL0_TRAINING_STATUS"
+    },
+    "0x13ab": {
+        "address": "0x000000000801186e",
+        "description": "Explorer Mainline AUE Address Trap Register",
+        "name": "MBAUER"
+    },
+    "0x13fd": {
+        "address": "0x0000000008011406",
+        "description": "Explorer chip SRQFIR ACT0",
+        "name": "SRQFIR_ACT0"
+    },
+    "0x14fd": {
+        "address": "0x0000000008011407",
+        "description": "Explorer chip SRQFIR ACT1",
+        "name": "SRQFIR_ACT1"
+    },
+    "0x17b1": {
+        "address": "0x000000000801241c",
+        "description": "TLX Error report register 0 (TLXR)",
+        "name": "TLX_ERR0_REPORT"
+    },
+    "0x17b6": {
+        "address": "0x000000000801241d",
+        "description": "Explorer OCMB target TLX Error Report Register",
+        "name": "TLX_ERR1_REPORT"
+    },
+    "0x17bb": {
+        "address": "0x000000000801241e",
+        "description": "TLX Error report register 2 (TLXR)",
+        "name": "TLX_ERR2_REPORT"
+    },
+    "0x1845": {
+        "address": "0x0000000008012812",
+        "description": "Explorer DL0 Error Mask Register",
+        "name": "DL0_ERROR_MASK"
+    },
+    "0x1863": {
+        "address": "0x00000000080118e0",
+        "description": "Explorer MCBIST Configuration Register",
+        "name": "MCBCFG"
+    },
+    "0x1fcc": {
+        "address": "0x000000000801141c",
+        "description": "Explorer SRQ Error Report Register",
+        "name": "SRQ_ERR_RPT"
+    },
+    "0x2443": {
+        "address": "0x0000000000200860",
+        "description": "ADSP PCBI Lane 0 reg",
+        "name": "ADSP_PCBI_LANE0"
+    },
+    "0x2537": {
+        "address": "0x0000000008011855",
+        "description": "MCP.MCBIST.MBA_SCOMFIR.MBSEC0Q",
+        "name": "MBSEC0"
+    },
+    "0x2539": {
+        "address": "0x0000000008011856",
+        "description": "MCP.MCBIST.MBA_SCOMFIR.MBSEC1Q",
+        "name": "MBSEC1"
+    },
+    "0x2543": {
+        "address": "0x0000000000201860",
+        "description": "ADSP PCBI Lane 1 reg",
+        "name": "ADSP_PCBI_LANE1"
+    },
+    "0x2643": {
+        "address": "0x0000000000202860",
+        "description": "ADSP PCBI Lane 2 reg",
+        "name": "ADSP_PCBI_LANE2"
+    },
+    "0x2675": {
+        "address": "0x000000000801186b",
+        "description": "Explorer Mainline RCE Address Trap Register",
+        "name": "MBRCER"
+    },
+    "0x2743": {
+        "address": "0x0000000000203860",
+        "description": "ADSP PCBI Lane 3 reg",
+        "name": "ADSP_PCBI_LANE3"
+    },
+    "0x2843": {
+        "address": "0x0000000000204860",
+        "description": "ADSP PCBI Lane 4 reg",
+        "name": "ADSP_PCBI_LANE4"
+    },
+    "0x2943": {
+        "address": "0x0000000000205860",
+        "description": "ADSP PCBI Lane 5 reg",
+        "name": "ADSP_PCBI_LANE5"
+    },
+    "0x2a43": {
+        "address": "0x0000000000206860",
+        "description": "ADSP PCBI Lane 6 reg",
+        "name": "ADSP_PCBI_LANE6"
+    },
+    "0x2b43": {
+        "address": "0x0000000000207860",
+        "description": "ADSP PCBI Lane 7 reg",
+        "name": "ADSP_PCBI_LANE7"
+    },
+    "0x2be9": {
+        "address": "0x0000000008012414",
+        "description": "TLX Error Report Mask Register 0",
+        "name": "TLX_ERR0_REPORT_MASK"
+    },
+    "0x2bf1": {
+        "address": "0x0000000008012415",
+        "description": "Explorer OCMB target TLX Error Report Register Mask",
+        "name": "TLX_ERR1_REPORT_MASK"
+    },
+    "0x2dcd": {
+        "address": "0x000000000804000a",
+        "description": "Explorer chip OCMB_LFIR",
+        "name": "OCMB_LFIR"
+    },
+    "0x34a7": {
+        "address": "0x000000000300009c",
+        "description": "MicroChip scratchpad reg 0",
+        "name": "SCRATCH_PAD_0"
+    },
+    "0x35a7": {
+        "address": "0x00000000030000a0",
+        "description": "MicroChip scratchpad reg 1",
+        "name": "SCRATCH_PAD_1"
+    },
+    "0x3645": {
+        "address": "0x000000000801280e",
+        "description": "Explorer OMI-CMN Configuration Register",
+        "name": "CMN_CONFIG"
+    },
+    "0x36a7": {
+        "address": "0x00000000030000a4",
+        "description": "MicroChip scratchpad reg 2",
+        "name": "SCRATCH_PAD_2"
+    },
+    "0x3747": {
+        "address": "0x0000000008011415",
+        "description": "MB_SIM.SRQ.MBA_FARB0Q",
+        "name": "FARB0"
+    },
+    "0x379c": {
+        "address": "0x000000000801186c",
+        "description": "Explorer Mainline MPE Address Trap Register",
+        "name": "MBMPER"
+    },
+    "0x383d": {
+        "address": "0x0000000008040004",
+        "description": "OCMB Chiplet Special Attention FIR",
+        "name": "OCMB_CHIPLET_SPA_FIR"
+    },
+    "0x3a75": {
+        "address": "0x000000000801186a",
+        "description": "Explorer Mainline NCE Address Trap Register",
+        "name": "MBNCER"
+    },
+    "0x3cd9": {
+        "address": "0x0000000008012406",
+        "description": "Explorer chip TLXFIR ACT0",
+        "name": "TLXFIR_ACT0"
+    },
+    "0x3dba": {
+        "address": "0x000000000804000b",
+        "description": "Explorer chip OCMB_LFIR AND",
+        "name": "OCMB_LFIR_AND"
+    },
+    "0x3dd9": {
+        "address": "0x0000000008012407",
+        "description": "Explorer chip TLXFIR ACT1",
+        "name": "TLXFIR_ACT1"
+    },
+    "0x3e86": {
+        "address": "0x0000000008011c00",
+        "description": "Explorer chip RDFFIR",
+        "name": "RDFFIR"
+    },
+    "0x4246": {
+        "address": "0x0000000008011402",
+        "description": "Explorer OCMB Chip SRQFIR OR",
+        "name": "SRQFIR_OR"
+    },
+    "0x43be": {
+        "address": "0x0000000008011400",
+        "description": "Explorer chip SRQFIR",
+        "name": "SRQFIR"
+    },
+    "0x4675": {
+        "address": "0x00000000080118d7",
+        "description": "Explorer Maint Current Address Trap Register",
+        "name": "MCBMCAT"
+    },
+    "0x49e6": {
+        "address": "0x0000000008011858",
+        "description": "MCP.MCBIST.MBA_SCOMFIR.MBSSYMEC0Q",
+        "name": "OCMB_MBSSYMEC0"
+    },
+    "0x49e8": {
+        "address": "0x0000000008011859",
+        "description": "MCP.MCBIST.MBA_SCOMFIR.MBSSYMEC1Q",
+        "name": "OCMB_MBSSYMEC1"
+    },
+    "0x49ea": {
+        "address": "0x000000000801185a",
+        "description": "MCP.MCBIST.MBA_SCOMFIR.MBSSYMEC2Q",
+        "name": "OCMB_MBSSYMEC2"
+    },
+    "0x49ec": {
+        "address": "0x000000000801185b",
+        "description": "MCP.MCBIST.MBA_SCOMFIR.MBSSYMEC3Q",
+        "name": "OCMB_MBSSYMEC3"
+    },
+    "0x49ee": {
+        "address": "0x000000000801185c",
+        "description": "MCP.MCBIST.MBA_SCOMFIR.MBSSYMEC4Q",
+        "name": "OCMB_MBSSYMEC4"
+    },
+    "0x49f0": {
+        "address": "0x000000000801185d",
+        "description": "MCP.MCBIST.MBA_SCOMFIR.MBSSYMEC5Q",
+        "name": "OCMB_MBSSYMEC5"
+    },
+    "0x49f2": {
+        "address": "0x000000000801185e",
+        "description": "MCP.MCBIST.MBA_SCOMFIR.MBSSYMEC6Q",
+        "name": "OCMB_MBSSYMEC6"
+    },
+    "0x49f4": {
+        "address": "0x000000000801185f",
+        "description": "MCP.MCBIST.MBA_SCOMFIR.MBSSYMEC7Q",
+        "name": "OCMB_MBSSYMEC7"
+    },
+    "0x49f6": {
+        "address": "0x0000000008011860",
+        "description": "MCP.MCBIST.MBA_SCOMFIR.MBSSYMEC8Q",
+        "name": "OCMB_MBSSYMEC8"
+    },
+    "0x4da3": {
+        "address": "0x0000000008011c18",
+        "description": "Explorer Firmware Mark Store 0",
+        "name": "FW_MS0"
+    },
+    "0x4da5": {
+        "address": "0x0000000008011c19",
+        "description": "Explorer Firmware Mark Store 1",
+        "name": "FW_MS1"
+    },
+    "0x4da7": {
+        "address": "0x0000000008011c1a",
+        "description": "Explorer Firmware Mark Store 2",
+        "name": "FW_MS2"
+    },
+    "0x4da9": {
+        "address": "0x0000000008011c1b",
+        "description": "Explorer Firmware Mark Store 3",
+        "name": "FW_MS3"
+    },
+    "0x4dab": {
+        "address": "0x0000000008011c1c",
+        "description": "Explorer Firmware Mark Store 4",
+        "name": "FW_MS4"
+    },
+    "0x4dad": {
+        "address": "0x0000000008011c1d",
+        "description": "Explorer Firmware Mark Store 5",
+        "name": "FW_MS5"
+    },
+    "0x4daf": {
+        "address": "0x0000000008011c1e",
+        "description": "Explorer Firmware Mark Store 6",
+        "name": "FW_MS6"
+    },
+    "0x4db1": {
+        "address": "0x0000000008011c1f",
+        "description": "Explorer Firmware Mark Store 7",
+        "name": "FW_MS7"
+    },
+    "0x507c": {
+        "address": "0x0000000008011c04",
+        "description": "Explorer chip RDFFIR MASK AND",
+        "name": "RDFFIR_MASK_AND"
+    },
+    "0x53fb": {
+        "address": "0x0000000008012403",
+        "description": "Explorer chip TLXFIR MASK",
+        "name": "TLXFIR_MASK"
+    },
+    "0x5608": {
+        "address": "0x000000000801281f",
+        "description": "Explorer PowerBus DL0 CYA Bits Register",
+        "name": "DL0_CYA_BITS"
+    },
+    "0x5757": {
+        "address": "0x0000000008040002",
+        "description": "OCMB Chiplet FIR MASK",
+        "name": "OCMB_CHIPLET_FIR_MASK"
+    },
+    "0x5969": {
+        "address": "0x00000000080118dc",
+        "description": "Explorer MCBIST Configured Cmd Sequence Status Register",
+        "name": "MCB_CNTLSTAT"
+    },
+    "0x59bd": {
+        "address": "0x000000000801186f",
+        "description": "Explorer OCMB target address translation register0",
+        "name": "MC_ADDR_TRANS"
+    },
+    "0x5b73": {
+        "address": "0x00000000080118d6",
+        "description": "Explorer MCBIST Address Generator Configuration Register",
+        "name": "MCBAGRA"
+    },
+    "0x6323": {
+        "address": "0x0000000008011c0c",
+        "description": "Explorer Mark Shadow Register",
+        "name": "EXP_MSR"
+    },
+    "0x65e6": {
+        "address": "0x0000000008011870",
+        "description": "Explorer OCMB target address translation register1",
+        "name": "MC_ADDR_TRANS1"
+    },
+    "0x65e8": {
+        "address": "0x0000000008011871",
+        "description": "Explorer OCMB target address translation register2",
+        "name": "MC_ADDR_TRANS2"
+    },
+    "0x6784": {
+        "address": "0x0000000008040007",
+        "description": "OCMB Chiplet Special Attention FIR MASK",
+        "name": "OCMB_CHIPLET_SPA_FIR_MASK"
+    },
+    "0x691a": {
+        "address": "0x000000000801281d",
+        "description": "Explorer DL0 Error Action Register",
+        "name": "DL0_ERROR_ACTION"
+    },
+    "0x6a14": {
+        "address": "0x0000000008011802",
+        "description": "Explorer OCMB target MCBISTFIR OR",
+        "name": "MCBISTFIR_OR"
+    },
+    "0x6baa": {
+        "address": "0x000000000801281e",
+        "description": "Explorer DL0 Debug Aid Register",
+        "name": "DL0_DEBUG_AID"
+    },
+    "0x6e4d": {
+        "address": "0x00000000080118db",
+        "description": "Explorer MCBIST target MCBIST Control Register",
+        "name": "MCB_CNTL"
+    },
+    "0x706e": {
+        "address": "0x0000000008011857",
+        "description": "Explorer MCBIST Memory Scrub/Read Err Threshold Register",
+        "name": "MBSTR"
+    },
+    "0x7450": {
+        "address": "0x000000000801186d",
+        "description": "Explorer Mainline UE Address Trap Register",
+        "name": "MBUER"
+    },
+    "0x75a3": {
+        "address": "0x0000000008011c10",
+        "description": "Explorer Hardware Mark Store rank 0",
+        "name": "HW_MS0"
+    },
+    "0x75a5": {
+        "address": "0x0000000008011c11",
+        "description": "Explorer Hardware Mark Store rank 1",
+        "name": "HW_MS1"
+    },
+    "0x75a7": {
+        "address": "0x0000000008011c12",
+        "description": "Explorer Hardware Mark Store rank 2",
+        "name": "HW_MS2"
+    },
+    "0x75a9": {
+        "address": "0x0000000008011c13",
+        "description": "Explorer Hardware Mark Store rank 3",
+        "name": "HW_MS3"
+    },
+    "0x75ab": {
+        "address": "0x0000000008011c14",
+        "description": "Explorer Hardware Mark Store rank 4",
+        "name": "HW_MS4"
+    },
+    "0x75ad": {
+        "address": "0x0000000008011c15",
+        "description": "Explorer Hardware Mark Store rank 5",
+        "name": "HW_MS5"
+    },
+    "0x75af": {
+        "address": "0x0000000008011c16",
+        "description": "Explorer Hardware Mark Store rank 6",
+        "name": "HW_MS6"
+    },
+    "0x75b1": {
+        "address": "0x0000000008011c17",
+        "description": "Explorer Hardware Mark Store rank 7",
+        "name": "HW_MS7"
+    },
+    "0x77c0": {
+        "address": "0x0000000008040010",
+        "description": "Explorer chip OCMB_LFIR ACT0",
+        "name": "OCMB_LFIR_ACT0"
+    },
+    "0x77c2": {
+        "address": "0x0000000008040011",
+        "description": "Explorer chip OCMB_LFIR ACT1",
+        "name": "OCMB_LFIR_ACT1"
+    },
+    "0x7a07": {
+        "address": "0x0000000008010876",
+        "description": "Explorer chip MMIOFIR ACT0",
+        "name": "MMIOFIR_ACT0"
+    },
+    "0x7a09": {
+        "address": "0x0000000008010877",
+        "description": "Explorer chip MMIOFIR ACT1",
+        "name": "MMIOFIR_ACT1"
+    },
+    "0x7ca6": {
+        "address": "0x0000000008012400",
+        "description": "Explorer chip TLXFIR",
+        "name": "TLXFIR"
+    },
+    "0x7df4": {
+        "address": "0x0000000008011405",
+        "description": "Explorer OCMB Chip SRQFIR Mask OR",
+        "name": "SRQFIR_MASK_OR"
+    },
+    "0x7fb3": {
+        "address": "0x0000000008010870",
+        "description": "Explorer chip MMIOFIR",
+        "name": "MMIOFIR"
+    },
+    "0x85ec": {
+        "address": "0x0000000008011404",
+        "description": "Explorer OCMB Chip SRQFIR Mask AND",
+        "name": "SRQFIR_MASK_AND"
+    },
+    "0x8879": {
+        "address": "0x0000000008011869",
+        "description": "MCP.MCBIST.MBA_SCOMFIR.MBSMSECQ",
+        "name": "MBSMSEC"
+    },
+    "0x8ed3": {
+        "address": "0x00000000080118e7",
+        "description": "Explorer MCB Error Report Register 0",
+        "name": "MCB_ERR_RPT_0"
+    },
+    "0x8fce": {
+        "address": "0x0000000008012819",
+        "description": "Explorer DL0 Remote Information Register",
+        "name": "DL0_DLX_INFO"
+    },
+    "0x8fd3": {
+        "address": "0x00000000080118ec",
+        "description": "Explorer MCB Error Report Register 1",
+        "name": "MCB_ERR_RPT_1"
+    },
+    "0x99f0": {
+        "address": "0x000000000804000d",
+        "description": "Explorer chip OCMB_LFIR MASK",
+        "name": "OCMB_LFIR_MASK"
+    },
+    "0x9b7b": {
+        "address": "0x000000000801187e",
+        "description": "Explorer MBS Error Vector Trap reg 0 (port 0)",
+        "name": "MBSEVR0"
+    },
+    "0x9c37": {
+        "address": "0x0000000008010873",
+        "description": "Explorer chip MMIOFIR MASK",
+        "name": "MMIOFIR_MASK"
+    },
+    "0xb20c": {
+        "address": "0x0000000008011801",
+        "description": "Explorer OCMB target MCBISTFIR AND",
+        "name": "MCBISTFIR_AND"
+    },
+    "0xb6c4": {
+        "address": "0x0000000008012405",
+        "description": "Explorer chip TLXFIR MASK OR",
+        "name": "TLXFIR_MASK_OR"
+    },
+    "0xb907": {
+        "address": "0x0000000008012800",
+        "description": "Explorer chip OMIDLFIR",
+        "name": "OMIDLFIR"
+    },
+    "0xbc6a": {
+        "address": "0x0000000008040001",
+        "description": "OCMB Chiplet Recoverable FIR",
+        "name": "OCMB_CHIPLET_RE_FIR"
+    },
+    "0xbc89": {
+        "address": "0x0000000008011c01",
+        "description": "Explorer chip RDFFIR AND",
+        "name": "RDFFIR_AND"
+    },
+    "0xc338": {
+        "address": "0x0000000008012818",
+        "description": "Explorer PowerBus DL0 Endpoint Config Register",
+        "name": "DL0_DLX_CONFIG"
+    },
+    "0xc62e": {
+        "address": "0x0000000008040000",
+        "description": "OCMB Chiplet Checkstop FIR",
+        "name": "OCMB_CHIPLET_CS_FIR"
+    },
+    "0xc98b": {
+        "address": "0x000000000801280f",
+        "description": "Explorer PMU Counter Register",
+        "name": "PMU_CNTR"
+    },
+    "0xc9c4": {
+        "address": "0x0000000008012806",
+        "description": "Explorer chip OMIDLFIR ACT0",
+        "name": "OMIDLFIR_ACT0"
+    },
+    "0xc9da": {
+        "address": "0x0000000008011c0e",
+        "description": "Explorer RDF Error Report Register 0",
+        "name": "RDF_ERR_RPT_0"
+    },
+    "0xcac4": {
+        "address": "0x0000000008012807",
+        "description": "Explorer chip OMIDLFIR ACT1",
+        "name": "OMIDLFIR_ACT1"
+    },
+    "0xcada": {
+        "address": "0x0000000008011c0f",
+        "description": "Explorer RDF Error Report Register 1",
+        "name": "RDF_ERR_RPT_1"
+    },
+    "0xcdcb": {
+        "address": "0x0000000008011c03",
+        "description": "Explorer chip RDFFIR MASK",
+        "name": "RDFFIR_MASK"
+    },
+    "0xd321": {
+        "address": "0x0000000008011806",
+        "description": "Explorer chip MCBISTFIR ACT0",
+        "name": "MCBISTFIR_ACT0"
+    },
+    "0xd323": {
+        "address": "0x0000000008011807",
+        "description": "Explorer chip MCBISTFIR ACT1",
+        "name": "MCBISTFIR_ACT1"
+    },
+    "0xd4bc": {
+        "address": "0x0000000008012815",
+        "description": "Explorer DL0 EDPL Threshold Register",
+        "name": "DL0_EDPL_MAX_COUNT"
+    },
+    "0xd63b": {
+        "address": "0x0000000008012814",
+        "description": "Explorer DL0 Error Capture Register",
+        "name": "DL0_ERROR_CAPTURE"
+    },
+    "0xd63f": {
+        "address": "0x0000000008012810",
+        "description": "Explorer OMI-DL0 Configuration0 Register",
+        "name": "DL0_CONFIG0"
+    },
+    "0xd6a9": {
+        "address": "0x0000000008011c06",
+        "description": "Explorer chip RDFFIR ACT0",
+        "name": "RDFFIR_ACT0"
+    },
+    "0xd73f": {
+        "address": "0x0000000008012811",
+        "description": "Explorer OMI_DL0 Configuration1 Register",
+        "name": "DL0_CONFIG1"
+    },
+    "0xd795": {
+        "address": "0x0000000008012816",
+        "description": "Explorer DL0 Status Register",
+        "name": "DL0_STATUS"
+    },
+    "0xd7a9": {
+        "address": "0x0000000008011c07",
+        "description": "Explorer chip RDFFIR ACT1",
+        "name": "RDFFIR_ACT1"
+    },
+    "0xdf93": {
+        "address": "0x000000000804000f",
+        "description": "Explorer chip OCMB_LFIR MASK OR",
+        "name": "OCMB_LFIR_MASK_OR"
+    },
+    "0xe0e6": {
+        "address": "0x0000000008012803",
+        "description": "Explorer chip OMIDLFIR MASK",
+        "name": "OMIDLFIR_MASK"
+    },
+    "0xf401": {
+        "address": "0x0000000008011800",
+        "description": "Explorer chip MCBISTFIR",
+        "name": "MCBISTFIR"
+    },
+    "0xf551": {
+        "address": "0x0000000008011803",
+        "description": "Explorer chip MCBISTFIR MASK",
+        "name": "MCBISTFIR_MASK"
+    },
+    "0xf8aa": {
+        "address": "0x00000000002000b0",
+        "description": "CSU PCBI Lane 0 reg",
+        "name": "CSU_PCBI_LANE0"
+    },
+    "0xf8ac": {
+        "address": "0x00000000002010b0",
+        "description": "CSU PCBI Lane 1 reg",
+        "name": "CSU_PCBI_LANE1"
+    },
+    "0xf8ae": {
+        "address": "0x00000000002020b0",
+        "description": "CSU PCBI Lane 2 reg",
+        "name": "CSU_PCBI_LANE2"
+    },
+    "0xf8b0": {
+        "address": "0x00000000002030b0",
+        "description": "CSU PCBI Lane 3 reg",
+        "name": "CSU_PCBI_LANE3"
+    },
+    "0xf8b2": {
+        "address": "0x00000000002040b0",
+        "description": "CSU PCBI Lane 4 reg",
+        "name": "CSU_PCBI_LANE4"
+    },
+    "0xf8b4": {
+        "address": "0x00000000002050b0",
+        "description": "CSU PCBI Lane 5 reg",
+        "name": "CSU_PCBI_LANE5"
+    },
+    "0xf8b6": {
+        "address": "0x00000000002060b0",
+        "description": "CSU PCBI Lane 6 reg",
+        "name": "CSU_PCBI_LANE6"
+    },
+    "0xf8b8": {
+        "address": "0x00000000002070b0",
+        "description": "CSU PCBI Lane 7 reg",
+        "name": "CSU_PCBI_LANE7"
+    },
+    "0xfb61": {
+        "address": "0x0000000008012813",
+        "description": "Explorer OCMB target DL0 Error Hold Register",
+        "name": "DL0_ERROR_HOLD"
+    },
+    "0xff6d": {
+        "address": "0x000000000801087c",
+        "description": "Explorer MMIO Error Report Register 0",
+        "name": "MMIO_ERR_RPT_0"
+    },
+    "0xff6f": {
+        "address": "0x000000000801087e",
+        "description": "Explorer MMIO Error Report Register 1",
+        "name": "MMIO_ERR_RPT_1"
+    },
+    "target_type": "0x4b"
+}

@@ -1,0 +1,78 @@
+{
+    "0x0b3f": {
+        "address": "0x0000000003011846",
+        "description": "P10 chip PCI_NEST_FIR ACT0",
+        "name": "PCI_NEST_FIR_ACT0"
+    },
+    "0x0c3f": {
+        "address": "0x0000000003011847",
+        "description": "P10 chip PCI_NEST_FIR ACT1",
+        "name": "PCI_NEST_FIR_ACT1"
+    },
+    "0x0c5a": {
+        "address": "0x000000000801084b",
+        "description": "PCI PFIR Error Report",
+        "name": "PBAIB_CERR_RPT_REG"
+    },
+    "0x0d68": {
+        "address": "0x000000000201184a",
+        "description": "PCI NFIR Error Report 0",
+        "name": "PCI_NFIR_ERR_RPT0"
+    },
+    "0x0e68": {
+        "address": "0x000000000201184b",
+        "description": "PCI NFIR Error Report 1",
+        "name": "PCI_NFIR_ERR_RPT1"
+    },
+    "0x17eb": {
+        "address": "0x000000000801090e",
+        "description": "P10 chip PCI_ETU_FIR ACT0",
+        "name": "PCI_ETU_FIR_ACT0"
+    },
+    "0x17ed": {
+        "address": "0x000000000801090f",
+        "description": "P10 chip PCI_ETU_FIR ACT1",
+        "name": "PCI_ETU_FIR_ACT1"
+    },
+    "0x2151": {
+        "address": "0x0000000008010843",
+        "description": "P10 chip PCI_FIR MASK",
+        "name": "PCI_FIR_MASK"
+    },
+    "0x2261": {
+        "address": "0x0000000003011843",
+        "description": "P10 chip PCI_NEST_FIR MASK",
+        "name": "PCI_NEST_FIR_MASK"
+    },
+    "0x3a1b": {
+        "address": "0x000000000801090b",
+        "description": "P10 chip PCI_ETU_FIR MASK",
+        "name": "PCI_ETU_FIR_MASK"
+    },
+    "0x446c": {
+        "address": "0x0000000008010908",
+        "description": "P10 chip PCI_ETU_FIR",
+        "name": "PCI_ETU_FIR"
+    },
+    "0x6f2e": {
+        "address": "0x0000000003011840",
+        "description": "P10 chip PCI_NEST_FIR",
+        "name": "PCI_NEST_FIR"
+    },
+    "0xfbbb": {
+        "address": "0x0000000008010840",
+        "description": "P10 chip PCI_FIR",
+        "name": "PCI_FIR"
+    },
+    "0xff21": {
+        "address": "0x0000000008010846",
+        "description": "P10 chip PCI_FIR ACT0",
+        "name": "PCI_FIR_ACT0"
+    },
+    "0xff23": {
+        "address": "0x0000000008010847",
+        "description": "P10 chip PCI_FIR ACT1",
+        "name": "PCI_FIR_ACT1"
+    },
+    "target_type": "0x2e"
+}

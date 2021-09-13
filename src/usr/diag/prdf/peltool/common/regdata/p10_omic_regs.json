@@ -1,0 +1,158 @@
+{
+    "0x011a": {
+        "address": "0x000000000c01142d",
+        "description": "P10 DL1 Error Action Register",
+        "name": "DL1_ERROR_ACTION"
+    },
+    "0x1bdb": {
+        "address": "0x000000000c011400",
+        "description": "P10 chip MC_OMI_DL_FIR",
+        "name": "MC_OMI_DL_FIR"
+    },
+    "0x1fce": {
+        "address": "0x000000000c011419",
+        "description": "P10 DL0 Remote Information Register",
+        "name": "DL0_DLX_INFO"
+    },
+    "0x25ce": {
+        "address": "0x000000000c011429",
+        "description": "P10 DL1 Remote Information Register",
+        "name": "DL1_DLX_INFO"
+    },
+    "0x42d5": {
+        "address": "0x000000000c011406",
+        "description": "P10 chip MC_OMI_DL_FIR ACT0",
+        "name": "MC_OMI_DL_FIR_ACT0"
+    },
+    "0x42d7": {
+        "address": "0x000000000c011407",
+        "description": "P10 chip MC_OMI_DL_FIR ACT1",
+        "name": "MC_OMI_DL_FIR_ACT1"
+    },
+    "0x44bc": {
+        "address": "0x000000000c011415",
+        "description": "P10 DL0 EDPL MAX COUNT",
+        "name": "DL0_EDPL_MAX_COUNT"
+    },
+    "0x463b": {
+        "address": "0x000000000c011414",
+        "description": "P10 DL0 Error Capture Register",
+        "name": "DL0_ERROR_CAPTURE"
+    },
+    "0x463f": {
+        "address": "0x000000000c011410",
+        "description": "P10 OMI-DL0 Configuration0 Register",
+        "name": "DL0_CONFIG0"
+    },
+    "0x473f": {
+        "address": "0x000000000c011411",
+        "description": "P10 OMI-DL0 Configuration1 Register",
+        "name": "DL0_CONFIG1"
+    },
+    "0x4b3f": {
+        "address": "0x000000000c011420",
+        "description": "P10 OMI-DL1 Configuration0 Register",
+        "name": "DL1_CONFIG0"
+    },
+    "0x4c3f": {
+        "address": "0x000000000c011421",
+        "description": "P10 OMI-DL1 Configuration1 Register",
+        "name": "DL1_CONFIG1"
+    },
+    "0x4dbc": {
+        "address": "0x000000000c011425",
+        "description": "P10 DL1 EDPL MAX COUNT",
+        "name": "DL1_EDPL_MAX_COUNT"
+    },
+    "0x4e3b": {
+        "address": "0x000000000c011424",
+        "description": "P10 DL1 Error Capture Register",
+        "name": "DL1_ERROR_CAPTURE"
+    },
+    "0x5338": {
+        "address": "0x000000000c011418",
+        "description": "P10 PowerBus DL0 Endpoint Config Register",
+        "name": "DL0_DLX_CONFIG"
+    },
+    "0x5455": {
+        "address": "0x000000000c011405",
+        "description": "P10 OMIC target OMIDLFIR MASK atomic OR",
+        "name": "MC_OMI_DL_FIR_MASK_OR"
+    },
+    "0x598b": {
+        "address": "0x000000000c01140f",
+        "description": "P10 PMU Counter Register",
+        "name": "PMU_CNTR"
+    },
+    "0x5a38": {
+        "address": "0x000000000c011428",
+        "description": "P10 PowerBus DL1 Endpoint Config Register",
+        "name": "DL1_DLX_CONFIG"
+    },
+    "0x6505": {
+        "address": "0x000000000c011403",
+        "description": "P10 chip MC_OMI_DL_FIR MASK",
+        "name": "MC_OMI_DL_FIR_MASK"
+    },
+    "0x6b61": {
+        "address": "0x000000000c011413",
+        "description": "P10 target DL0 Error Hold Register",
+        "name": "DL0_ERROR_HOLD"
+    },
+    "0x7261": {
+        "address": "0x000000000c011423",
+        "description": "P10 target DL1 Error Hold Register",
+        "name": "DL1_ERROR_HOLD"
+    },
+    "0x8845": {
+        "address": "0x000000000c011412",
+        "description": "P10 DL0 Error Mask Register",
+        "name": "DL0_ERROR_MASK"
+    },
+    "0x8a66": {
+        "address": "0x000000000c011416",
+        "description": "P10 DL0 Status Register",
+        "name": "DL0_STATUS_REGISTER"
+    },
+    "0x8f45": {
+        "address": "0x000000000c011422",
+        "description": "P10 DL1 Error Mask Register",
+        "name": "DL1_ERROR_MASK"
+    },
+    "0x9366": {
+        "address": "0x000000000c011426",
+        "description": "P10 DL1 Status Register",
+        "name": "DL1_STATUS_REGISTER"
+    },
+    "0x9cb0": {
+        "address": "0x000000000c011417",
+        "description": "P10 DL0 Training Status Register",
+        "name": "DL0_TRAINING_STATUS"
+    },
+    "0xa5b0": {
+        "address": "0x000000000c011427",
+        "description": "P10 DL1 Training Status Register",
+        "name": "DL1_TRAINING_STATUS"
+    },
+    "0xa645": {
+        "address": "0x000000000c01140e",
+        "description": "P10 OMI-CMN Configuration Register",
+        "name": "CMN_CONFIG"
+    },
+    "0xc608": {
+        "address": "0x000000000c01141f",
+        "description": "P10 PowerBus DL0 CYA Bits Register",
+        "name": "DL0_CYA_BITS"
+    },
+    "0xcc08": {
+        "address": "0x000000000c01142f",
+        "description": "P10 PowerBus DL1 CYA Bits Register",
+        "name": "DL1_CYA_BITS"
+    },
+    "0xf91a": {
+        "address": "0x000000000c01141d",
+        "description": "P10 DL0 Error Action Register",
+        "name": "DL0_ERROR_ACTION"
+    },
+    "target_type": "0x4a"
+}

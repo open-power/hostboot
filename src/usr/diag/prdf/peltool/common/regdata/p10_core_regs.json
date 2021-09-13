@@ -1,0 +1,258 @@
+{
+    "0x0103": {
+        "address": "0x0000000020028448",
+        "description": "P10 chip EQ_CORE_FIR WOF",
+        "name": "EQ_CORE_FIR_WOF"
+    },
+    "0x08e8": {
+        "address": "0x0000000020028006",
+        "description": "P10 chip EQ_L2_FIR ACT0",
+        "name": "EQ_L2_FIR_ACT0"
+    },
+    "0x08ea": {
+        "address": "0x0000000020028007",
+        "description": "P10 chip EQ_L2_FIR ACT1",
+        "name": "EQ_L2_FIR_ACT1"
+    },
+    "0x0ee8": {
+        "address": "0x0000000020018606",
+        "description": "P10 chip EQ_L3_FIR ACT0",
+        "name": "EQ_L3_FIR_ACT0"
+    },
+    "0x0eea": {
+        "address": "0x0000000020018607",
+        "description": "P10 chip EQ_L3_FIR ACT1",
+        "name": "EQ_L3_FIR_ACT1"
+    },
+    "0x1941": {
+        "address": "0x0000000020018610",
+        "description": "L3 error report Hold Out 0",
+        "name": "L3_ERR_RPT_0"
+    },
+    "0x1943": {
+        "address": "0x0000000020018617",
+        "description": "L3 error report Hold Out 1",
+        "name": "L3_ERR_RPT_1"
+    },
+    "0x2803": {
+        "address": "0x00000000200286c0",
+        "description": "Core LSU Holdout 0",
+        "name": "LSU_HOLD_OUT_REG0"
+    },
+    "0x2903": {
+        "address": "0x00000000200286c1",
+        "description": "Core LSU Holdout 1",
+        "name": "LSU_HOLD_OUT_REG1"
+    },
+    "0x2a03": {
+        "address": "0x00000000200286c2",
+        "description": "Core LSU Holdout 2",
+        "name": "LSU_HOLD_OUT_REG2"
+    },
+    "0x2b03": {
+        "address": "0x00000000200286c3",
+        "description": "Core LSU Holdout 3",
+        "name": "LSU_HOLD_OUT_REG3"
+    },
+    "0x2b18": {
+        "address": "0x0000000020028003",
+        "description": "P10 chip EQ_L2_FIR MASK",
+        "name": "EQ_L2_FIR_MASK"
+    },
+    "0x2c03": {
+        "address": "0x00000000200286c4",
+        "description": "Core LSU Holdout 4",
+        "name": "LSU_HOLD_OUT_REG4"
+    },
+    "0x2d03": {
+        "address": "0x00000000200286c5",
+        "description": "Core LSU Holdout 5",
+        "name": "LSU_HOLD_OUT_REG5"
+    },
+    "0x2e03": {
+        "address": "0x00000000200286c6",
+        "description": "Core LSU Holdout 6",
+        "name": "LSU_HOLD_OUT_REG6"
+    },
+    "0x2f03": {
+        "address": "0x00000000200286c7",
+        "description": "Core LSU Holdout 7",
+        "name": "LSU_HOLD_OUT_REG7"
+    },
+    "0x2fb9": {
+        "address": "0x0000000020018646",
+        "description": "P10 chip EQ_NCU_FIR ACT0",
+        "name": "EQ_NCU_FIR_ACT0"
+    },
+    "0x3003": {
+        "address": "0x00000000200286c8",
+        "description": "Core LSU Holdout 8",
+        "name": "LSU_HOLD_OUT_REG8"
+    },
+    "0x30b9": {
+        "address": "0x0000000020018647",
+        "description": "P10 chip EQ_NCU_FIR ACT1",
+        "name": "EQ_NCU_FIR_ACT1"
+    },
+    "0x3103": {
+        "address": "0x00000000200286c9",
+        "description": "Core LSU Holdout 9",
+        "name": "LSU_HOLD_OUT_REG9"
+    },
+    "0x3118": {
+        "address": "0x0000000020018603",
+        "description": "P10 chip EQ_L3_FIR MASK",
+        "name": "EQ_L3_FIR_MASK"
+    },
+    "0x355f": {
+        "address": "0x000000002001864e",
+        "description": "NCU Error Report",
+        "name": "NCU_ERR_RPT_REG"
+    },
+    "0x3a36": {
+        "address": "0x0000000020018640",
+        "description": "P10 chip EQ_NCU_FIR",
+        "name": "EQ_NCU_FIR"
+    },
+    "0x46db": {
+        "address": "0x0000000020018643",
+        "description": "P10 chip EQ_NCU_FIR MASK",
+        "name": "EQ_NCU_FIR_MASK"
+    },
+    "0x4a7b": {
+        "address": "0x0000000020028446",
+        "description": "P10 chip EQ_CORE_FIR ACT0",
+        "name": "EQ_CORE_FIR_ACT0"
+    },
+    "0x4a7d": {
+        "address": "0x0000000020028447",
+        "description": "P10 chip EQ_CORE_FIR ACT1",
+        "name": "EQ_CORE_FIR_ACT1"
+    },
+    "0x4d74": {
+        "address": "0x0000000020028000",
+        "description": "P10 chip EQ_L2_FIR",
+        "name": "EQ_L2_FIR"
+    },
+    "0x5074": {
+        "address": "0x0000000020018600",
+        "description": "P10 chip EQ_L3_FIR",
+        "name": "EQ_L3_FIR"
+    },
+    "0x682c": {
+        "address": "0x0000000020028440",
+        "description": "P10 chip EQ_CORE_FIR",
+        "name": "EQ_CORE_FIR"
+    },
+    "0x6cab": {
+        "address": "0x0000000020028443",
+        "description": "P10 chip EQ_CORE_FIR MASK",
+        "name": "EQ_CORE_FIR_MASK"
+    },
+    "0x9454": {
+        "address": "0x0000000020028600",
+        "description": "Core IFU Holdout 0",
+        "name": "IFU_HOLD_OUT0"
+    },
+    "0x94af": {
+        "address": "0x0000000020028640",
+        "description": "Core ISU Holdout 0",
+        "name": "ISU_HOLD_OUT0"
+    },
+    "0x9554": {
+        "address": "0x0000000020028601",
+        "description": "Core IFU Holdout 1",
+        "name": "IFU_HOLD_OUT1"
+    },
+    "0x95af": {
+        "address": "0x0000000020028641",
+        "description": "Core ISU Holdout 1",
+        "name": "ISU_HOLD_OUT1"
+    },
+    "0x9654": {
+        "address": "0x0000000020028602",
+        "description": "Core IFU Holdout 2",
+        "name": "IFU_HOLD_OUT2"
+    },
+    "0x96af": {
+        "address": "0x0000000020028642",
+        "description": "Core ISU Holdout 2",
+        "name": "ISU_HOLD_OUT2"
+    },
+    "0x9754": {
+        "address": "0x0000000020028603",
+        "description": "Core IFU Holdout 3",
+        "name": "IFU_HOLD_OUT3"
+    },
+    "0x97af": {
+        "address": "0x0000000020028643",
+        "description": "Core ISU Holdout 3",
+        "name": "ISU_HOLD_OUT3"
+    },
+    "0xae4d": {
+        "address": "0x0000000020028451",
+        "description": "Core PC FIR Holdout",
+        "name": "PC_FIR_HOLD_OUT"
+    },
+    "0xaedb": {
+        "address": "0x00000000200284b7",
+        "description": "TFAC Error Report Hold Out",
+        "name": "TFAC_HOLD_OUT"
+    },
+    "0xb53c": {
+        "address": "0x0000000020028455",
+        "description": "Core Thread Control Holdout",
+        "name": "THRCTL_HOLD_OUT"
+    },
+    "0xbfaf": {
+        "address": "0x00000000200284b6",
+        "description": "VSU Error Report Hold Out",
+        "name": "VSU_HOLD_OUT"
+    },
+    "0xc692": {
+        "address": "0x000000002002849a",
+        "description": "Core target SPEC ATTN REASON MASK",
+        "name": "SPEC_ATTN_REASON_MASK"
+    },
+    "0xd72a": {
+        "address": "0x0000000020028496",
+        "description": "Core target HOMER ENABLE",
+        "name": "HOMER_ENABLE"
+    },
+    "0xdd6b": {
+        "address": "0x0000000020028012",
+        "description": "L2 Error Report 0",
+        "name": "L2_ERR_RPT0"
+    },
+    "0xde6b": {
+        "address": "0x0000000020028013",
+        "description": "L2 Error Report 1",
+        "name": "L2_ERR_RPT1"
+    },
+    "0xe02b": {
+        "address": "0x0000000020028499",
+        "description": "Core target SPEC ATTN REASON",
+        "name": "SPEC_ATTN_REASON"
+    },
+    "0xe9e4": {
+        "address": "0x00000000200286ca",
+        "description": "Core LSU Holdout 10",
+        "name": "LSU_HOLD_OUT_REG10"
+    },
+    "0xe9e6": {
+        "address": "0x00000000200286cb",
+        "description": "Core LSU Holdout 11",
+        "name": "LSU_HOLD_OUT_REG11"
+    },
+    "0xe9e8": {
+        "address": "0x00000000200286cc",
+        "description": "Core LSU Holdout 12",
+        "name": "LSU_HOLD_OUT_REG12"
+    },
+    "0xe9ea": {
+        "address": "0x00000000200286cd",
+        "description": "Core LSU Holdout 13",
+        "name": "LSU_HOLD_OUT_REG13"
+    },
+    "target_type": "0x7"
+}

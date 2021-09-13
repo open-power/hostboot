@@ -1,0 +1,48 @@
+{
+    "0x6d4b": {
+        "address": "0x0000000002010c40",
+        "description": "P10 chip NMMU_FIR",
+        "name": "NMMU_FIR"
+    },
+    "0x8742": {
+        "address": "0x0000000002010c22",
+        "description": "NMMU NXCQ Error Report 0",
+        "name": "NMMU_NXCQ_ERR_RPT_0"
+    },
+    "0xa832": {
+        "address": "0x0000000002010c00",
+        "description": "P10 chip NMMU_CQ_FIR",
+        "name": "NMMU_CQ_FIR"
+    },
+    "0xc37e": {
+        "address": "0x0000000002010c06",
+        "description": "P10 chip NMMU_CQ_FIR ACT0",
+        "name": "NMMU_CQ_FIR_ACT0"
+    },
+    "0xc380": {
+        "address": "0x0000000002010c07",
+        "description": "P10 chip NMMU_CQ_FIR ACT1",
+        "name": "NMMU_CQ_FIR_ACT1"
+    },
+    "0xca2a": {
+        "address": "0x0000000002010c46",
+        "description": "P10 chip NMMU_FIR ACT0",
+        "name": "NMMU_FIR_ACT0"
+    },
+    "0xcb2a": {
+        "address": "0x0000000002010c47",
+        "description": "P10 chip NMMU_FIR ACT1",
+        "name": "NMMU_FIR_ACT1"
+    },
+    "0xe14c": {
+        "address": "0x0000000002010c43",
+        "description": "P10 chip NMMU_FIR MASK",
+        "name": "NMMU_FIR_MASK"
+    },
+    "0xe5ae": {
+        "address": "0x0000000002010c03",
+        "description": "P10 chip NMMU_CQ_FIR MASK",
+        "name": "NMMU_CQ_FIR_MASK"
+    },
+    "target_type": "0x4f"
+}
