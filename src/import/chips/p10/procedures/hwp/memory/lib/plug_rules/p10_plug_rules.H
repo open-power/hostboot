@@ -52,6 +52,13 @@ namespace plug_rule
 fapi2::ReturnCode check_mds(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target);
 
 ///
+/// @brief Checks that the MDS Dimms have valid media controller targets
+/// @param[in] i_target the OCMB target
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode check_mds_media_controller(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+
+///
 /// @brief Enforce the plug-rules we can do before mss_freq
 /// @param[in] i_target FAPI2 target (proc chip)
 /// @return fapi2::FAPI2_RC_SUCCESS if okay, otherwise a MSS_PLUG_RULE error code

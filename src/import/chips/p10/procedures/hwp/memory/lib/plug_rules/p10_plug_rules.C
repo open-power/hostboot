@@ -112,11 +112,36 @@ fapi2::ReturnCode check_mds(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_targe
                     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
                 }
             }
+
         }
     }
 
     return l_worst_rc;
 
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Checks that the MDS Dimms have valid media controller targets
+/// @param[in] i_target the OCMB target
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode check_mds_media_controller(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+{
+    const uint8_t NUM_MDS_CNTL = 1;
+    const auto l_num_cntl = mss::find_targets<fapi2::TARGET_TYPE_MDS_CTLR>(i_target, fapi2::TARGET_STATE_PRESENT).size();
+
+    // If we are given a guaranteed failing list of targets (< 1 CNTL)
+    FAPI_ASSERT((l_num_cntl >= NUM_MDS_CNTL),
+                fapi2::INVALID_MDS_MEDIA_CNTL_TARGET_CONFIG()
+                .set_OCMB_TARGET(i_target)
+                .set_VALID_CONTROLLERS(l_num_cntl)
+                .set_EXPECTED_CONTROLLERS(NUM_MDS_CNTL),
+                "%s MDS Media Controller target missing or invalid, given %u controllers expected %u",
+                mss::c_str(i_target),
+                l_num_cntl,
+                NUM_MDS_CNTL);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -129,6 +154,7 @@ fapi_try_exit:
 fapi2::ReturnCode enforce_pre_freq(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     uint8_t l_ignore_plug_rules = 0;
+    bool l_is_mds = false;
 
     // If there are no DIMM, we can just get out.
     if (mss::count_dimm(mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target)) == 0)
@@ -146,10 +172,27 @@ fapi2::ReturnCode enforce_pre_freq(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
-    // Check for MDS/non-MDS dimm mixing
+    // Check mds plug rules
     for(const auto& l_mcc : i_target.getChildren<fapi2::TARGET_TYPE_MCC>() )
     {
+        // Check for MDS/non-MDS dimm mixing
         FAPI_TRY( mss::plug_rule::check_mds(l_mcc) );
+
+        // If an MDS MCC, check media targets
+        FAPI_TRY( mss::dimm::is_mds<mss::mc_type::EXPLORER>(l_mcc, l_is_mds) );
+
+        if ( l_is_mds )
+        {
+            // Loop through omi targets to get OCMB targets
+            for(const auto& l_omi : mss::find_targets<fapi2::TARGET_TYPE_OMI>(i_target))
+            {
+                // Check ocmb targets for mixed dimms
+                for(const auto& l_ocmb : mss::find_targets<fapi2::TARGET_TYPE_OCMB_CHIP>(l_omi))
+                {
+                    FAPI_TRY( check_mds_media_controller(l_ocmb) )
+                }
+            }
+        }
     }
 
     // Check shared reset signal plugging dependencies

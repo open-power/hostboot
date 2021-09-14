@@ -1571,6 +1571,23 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_INVALID_MDS_MEDIA_CNTL_TARGET_CONFIG</rc>
+    <description>
+       Did not find a valid media controller target on an MDS DDIMM
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>VALID_CONTROLLERS</ffdc>
+    <ffdc>EXPECTED_CONTROLLERS</ffdc>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_PLUG_RULES_INVALID_DIMM_SIZE_MIX</rc>
     <description>
         Memory addressing setup requires DIMMs under an OMI channel pair to be of equal size.
