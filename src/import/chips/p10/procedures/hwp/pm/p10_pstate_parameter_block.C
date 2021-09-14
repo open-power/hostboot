@@ -1913,6 +1913,11 @@ void PlatPmPPB::attr_init( void )
     // Current Scaling Factors
     PPB_GET_ATTR_8(ATTR_CURRENT_SCALING_FACTOR,             FAPI_SYSTEM,  attr_current_scaling_factor);
 
+    // DDS #W Biases
+    PPB_GET_ATTR_8(ATTR_DDS_DELAY_ADJUST,                   FAPI_SYSTEM,  attr_dds_delay_adjust);
+    PPB_GET_ATTR_8(ATTR_DDS_TRIP_OFFSET_ADJUST,             FAPI_SYSTEM,  attr_dds_trip_offset_adjust);
+    PPB_GET_ATTR_8(ATTR_DDS_LARGE_DROOP_DETECT_ADJUST,      FAPI_SYSTEM,  attr_dds_large_droop_detect_adjust);
+
     // Deal with defaults if attributes are not set
 #define SET_DEFAULT(_attr_name, _attr_default) \
     if (!(iv_attrs._attr_name)) \
@@ -2347,7 +2352,7 @@ fapi2::ReturnCode PlatPmPPB::vpd_init( void )
         FAPI_TRY(get_mvpd_poundV(),
                  "get_mvpd_poundV function failed to retrieve pound V data");
 
-        // Apply biased values if any
+        // Apply biased #V values if any
         FAPI_IMP("Apply Biasing to #V");
         FAPI_TRY(apply_biased_values(),
                 "apply_biased_values function failed");
@@ -2375,6 +2380,11 @@ fapi2::ReturnCode PlatPmPPB::vpd_init( void )
                                "Pstate Parameter Block get_mvpd_poundW function failed");
             fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
         }
+
+        // Apply biased #W values if any
+        FAPI_IMP("Apply Biasing to #W");
+        FAPI_TRY(apply_pdw_biased_values(),
+                "apply_pdw_biased_values function failed");
 
         // Read #IQ data
         // if wof is disabled.. don't call IQ function
@@ -3806,6 +3816,206 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+// Macro to compress duplicate code in apply_pdw_biased_values
+#define PDW_HANDLE_ERROR(_rc, _msg) \
+        limit = LIMITS[field][error];                                                                          \
+        FAPI_ASSERT_NOEXIT(b_dds_error[field][error] == false || b_suppress_dds_error[field][error] == true,   \
+                            fapi2::_rc(fapi2::FAPI2_ERRL_SEV_RECOVERED)                                        \
+                            .set_CHIP_TARGET(iv_procChip)                                                      \
+                            .set_LIMIT(limit)                                                                  \
+                            .set_ATTR_ADJ_VALUE(adjust)                                                        \
+                            .set_PDW_VALUE(value)                                                              \
+                            .set_ERROR_VALUE(calculated),                                                      \
+                            "Pstate Parameter Block: #_msg: Value %d Adjust %d Update %d Limit %d",            \
+                                    value, adjust, update, LIMITS[field][error]);                              \
+                                                                                                               \
+        if (b_dds_error[field][error])                                                                         \
+        {                                                                                                      \
+            b_suppress_dds_error[field][error] = true;                                                         \
+            sprintf(buffer, "{%s} ", PDW_STR[error]);                                                          \
+            strcat(mark, buffer);                                                                              \
+        }
+
+///////////////////////////////////////////////////////////
+////////   apply_pdw_biased_values
+///////////////////////////////////////////////////////////
+fapi2::ReturnCode PlatPmPPB::apply_pdw_biased_values ()
+{
+    FAPI_INF(">>>>>>>>>>>>> apply_pdw_biased_values");
+
+    char     mark[128];
+    char     buffer[32];
+
+    // boolean array usage [Underflow(UF)/Overflow(OF)]
+    static const int PDW_UF = 0;
+    static const int PDW_OF = 1;
+
+    static const char *PDW_STR[2] = {"UF", "OF"};
+
+    // fields array usage
+    typedef enum
+    {
+        PDW_DELAY       = 0,
+        PDW_LARGE_DROOP = 1,
+        PDW_TRIP_OFFSET = 2,
+        PDW_NUM_FIELDS  = 3
+    } PDW_BIAS_FIELDS;
+
+    bool b_dds_error[PDW_NUM_FIELDS][2] = {0};
+    bool b_suppress_dds_error[PDW_NUM_FIELDS][2] = {0};
+
+    int LIMITS[PDW_NUM_FIELDS][2] =
+        {
+            {0, 255},   // Delay
+            {0, 15},    // Large Droop
+            {0, 7}      // Trip Offset
+        };
+
+    do
+    {
+        FAPI_DBG("apply_pdw_biased_values: DDS enable = %d", is_dds_enabled());
+
+        // Exit if DDS is disabled
+        if (!is_dds_enabled())
+        {
+            FAPI_INF("   apply_pdw_biased_values: DDS is disabled.  Skipping futher #W processing");
+            disable_dds();   // this is to ensure the dependent functions are disabled.
+            break;
+        }
+
+        //  Breakout if this part doesn't need biasing
+        if ((iv_poundW_data.other.dds_calibration_version & 0xC0) >> 6 == 1)
+        {
+            FAPI_INF("No Biasing applied to #W as calibration version indicates it's not necessary");
+            break;
+        };
+
+        FAPI_INF("Apply Biasing to #W to all CF points. * indicates adjustment");
+
+        for (int i = 0; i < NUM_OP_POINTS; i++)
+        {
+            for (int j = 0; j < MAXIMUM_CORES; j++)
+            {
+
+                for(auto a = 0; a < PDW_NUM_FIELDS; ++a)
+                    for(auto b = 0; b < 2; ++b)
+                        b_dds_error[a][b] = false;
+
+                strcpy(mark, "");
+                for (int field = 0; field <  PDW_NUM_FIELDS; ++field)
+                {
+                    int value = 0;
+                    int adjust = 0;
+                    int calculated = 0;
+                    int update = 0;
+                    strcpy(buffer, "");
+
+                    switch (field)
+                    {
+                        case PDW_DELAY:
+                            value = iv_poundW_data.entry[i].entry[j].ddsc.fields.insrtn_dely;
+                            adjust = iv_attrs.attr_dds_delay_adjust[i];
+                            break;
+                        case PDW_LARGE_DROOP:
+                            value = iv_poundW_data.entry[i].entry[j].ddsc.fields.large_droop;
+                            adjust = iv_attrs.attr_dds_large_droop_detect_adjust[i];
+                            break;
+                        case PDW_TRIP_OFFSET:
+                            value = iv_poundW_data.entry[i].entry[j].ddsc.fields.trip_offset;
+                            adjust = iv_attrs.attr_dds_trip_offset_adjust[i];
+                            break;
+                    }
+
+                    if (strcmp(mark, "") == 0 && adjust != 0)
+                    {
+                        strcpy(mark, "[*] ");
+                    }
+
+                    update = value + adjust;
+
+                    if (update < LIMITS[field][PDW_UF])
+                    {
+                        b_dds_error[field][PDW_UF] = true;
+                        calculated = update;
+                        update = LIMITS[field][PDW_UF];
+                    }
+                    else if (update > LIMITS[field][PDW_OF])
+                    {
+                        b_dds_error[field][PDW_OF] = true;
+                        calculated = update;
+                        update = LIMITS[field][PDW_OF];
+                    }
+
+                    int error = 0;
+                    int limit = 0;
+                    switch (field)
+                    {
+                        case PDW_DELAY:
+                            iv_poundW_data.entry[i].entry[j].ddsc.fields.insrtn_dely = update;
+                            if (adjust)
+                            {
+                                sprintf(buffer, "delay: orig 0x%02X adj %d ", value, adjust);
+                                strcat(mark, buffer);
+                            }
+
+                            error = PDW_UF;
+                            PDW_HANDLE_ERROR(PSTATE_PB_DDS_ADJ_DELAY_OVERFLOW, "DDS Delay Adjust Underflow");
+
+                            error = PDW_OF;
+                            PDW_HANDLE_ERROR(PSTATE_PB_DDS_ADJ_DELAY_UNDERFLOW, "DDS Delay Adjust Overflow");
+
+                            break;
+                        case PDW_LARGE_DROOP:
+                            iv_poundW_data.entry[i].entry[j].ddsc.fields.large_droop = update;
+                            if (adjust)
+                            {
+                                sprintf(buffer, "large: orig 0x%02X adj %d ", value, adjust);
+                                strcat(mark, buffer);
+                            }
+
+                            error = PDW_UF;
+                            PDW_HANDLE_ERROR(PSTATE_PB_DDS_ADJ_LARGE_DROOP_UNDERFLOW, "DDS Large Droop Adjust Underflow");
+
+                            error = PDW_OF;
+                            PDW_HANDLE_ERROR(PSTATE_PB_DDS_ADJ_LARGE_DROOP_OVERFLOW, "DDS Large Droop Adjust Overflow");
+
+                            break;
+                        case PDW_TRIP_OFFSET:
+                            iv_poundW_data.entry[i].entry[j].ddsc.fields.trip_offset = update;
+                            if (adjust)
+                            {
+                                sprintf(buffer, "trip: orig 0x%02X adj %d ", value, adjust);
+                                strcat(mark, buffer);
+                            }
+
+                            error = PDW_UF;
+                            PDW_HANDLE_ERROR(PSTATE_PB_DDS_ADJ_TRIP_OFFSET_UNDERFLOW, "DDS Trip Offset Adjust Underflow");
+
+                            error = PDW_OF;
+                            PDW_HANDLE_ERROR(PSTATE_PB_DDS_ADJ_TRIP_OFFSET_OVERFLOW, "DDS Trip Offset Adjust Overflow");
+
+                            break;
+                    }
+                }
+
+                if (strcmp(mark, "") != 0)
+                {
+                    FAPI_INF("#W DDSC [CF %u][C %02u] = 0x%016llX %s" , i, j, iv_poundW_data.entry[i].entry[j].ddsc.value, mark );
+                }
+                else
+                {
+                    FAPI_INF("#W DDSC [CF %u][C %02u] = 0x%016llX" , i, j, iv_poundW_data.entry[i].entry[j].ddsc.value);
+                }
+            }
+        }
+    } while(0);
+
+    // Always return success as the function does set recovered values.
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    FAPI_INF("<<<<<<<<<<<< apply_pdw_biased_values");
+    return fapi2::current_err;
+}
+
 ///////////////////////////////////////////////////////////
 ////////   part_fmax
 ///////////////////////////////////////////////////////////
@@ -3891,7 +4101,6 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundW (void)
                 {
                     iv_poundW_data.entry[i].entry[j].ddsc.value =
                         revle64(iv_poundW_data.entry[i].entry[j].ddsc.value);
-                    FAPI_INF("#W DDSC[CF %u][C %u] = 0x%16llX" , i, j, iv_poundW_data.entry[i].entry[j].ddsc.value );
 
                     iv_poundW_data.entry[i].entry_alt_cal[j].alt_cal.value =
                         revle16(iv_poundW_data.entry[i].entry_alt_cal[j].alt_cal.value);

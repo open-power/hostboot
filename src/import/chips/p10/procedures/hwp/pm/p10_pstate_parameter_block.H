@@ -229,6 +229,11 @@ typedef struct
     uint64_t attr_wof_flmr_value;
     uint64_t attr_wof_fmmr_value;
 
+    int16_t attr_dds_delay_adjust[NUM_OP_POINTS];
+    int8_t attr_dds_large_droop_detect_adjust[NUM_OP_POINTS];
+    int8_t attr_dds_trip_offset_adjust[NUM_OP_POINTS];
+
+
 } AttributeList;
 
 //PlatPmPPB Object definition
@@ -617,6 +622,12 @@ class PlatPmPPB
         /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode apply_biased_values();
+
+        /// -----------------------------------------------------------------------
+        /// @brief apply biased values for #W data
+        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// -----------------------------------------------------------------------
+        fapi2::ReturnCode apply_pdw_biased_values();
 
         /// -----------------------------------------------------------------------
         /// @brief Get the raw #W data

@@ -383,6 +383,114 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <rc>RC_PSTATE_PB_DDS_ADJ_DELAY_UNDERFLOW</rc>
+    <description>The delay value created by adjustment with ATTR_DDS_DELAY_ADJUST
+    has underflowed to negative.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>LIMIT</ffdc>
+    <ffdc>CF</ffdc>
+    <ffdc>CORE</ffdc>
+    <ffdc>ATTR_ADJ_VALUE</ffdc>
+    <ffdc>PDW_VALUE</ffdc>
+    <ffdc>ERROR_VALUE</ffdc>
+     <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_DDS_ADJ_DELAY_OVERFLOW</rc>
+    <description>The delay value created by adjustment with ATTR_DDS_DELAY_ADJUST
+    has overflowed beyond the supported upper limit.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>LIMIT</ffdc>
+    <ffdc>CF</ffdc>
+    <ffdc>CORE</ffdc>
+    <ffdc>ATTR_ADJ_VALUE</ffdc>
+    <ffdc>PDW_VALUE</ffdc>
+    <ffdc>ERROR_VALUE</ffdc>
+     <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_DDS_ADJ_LARGE_DROOP_UNDERFLOW</rc>
+    <description>The delay value created by adjustment with ATTR_DDS_LARGE_DROOP_ADJUST
+    has underflowed to negative.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>LIMIT</ffdc>
+    <ffdc>CF</ffdc>
+    <ffdc>CORE</ffdc>
+    <ffdc>ATTR_ADJ_VALUE</ffdc>
+    <ffdc>PDW_VALUE</ffdc>
+    <ffdc>ERROR_VALUE</ffdc>
+     <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_DDS_ADJ_LARGE_DROOP_OVERFLOW</rc>
+    <description>The delay value created by adjustment with ATTR_DDS_LARGE_DROOP_ADJUST
+    has overflowed beyond the supported upper limit.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>LIMIT</ffdc>
+    <ffdc>CF</ffdc>
+    <ffdc>CORE</ffdc>
+    <ffdc>ATTR_ADJ_VALUE</ffdc>
+    <ffdc>PDW_VALUE</ffdc>
+    <ffdc>ERROR_VALUE</ffdc>
+     <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_DDS_ADJ_TRIP_OFFSET_UNDERFLOW</rc>
+    <description>The delay value created by adjustment with ATTR_DDS_TRIP_OFFSET_ADJUST
+    has underflowed to negative.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>LIMIT</ffdc>
+    <ffdc>CF</ffdc>
+    <ffdc>CORE</ffdc>
+    <ffdc>ATTR_ADJ_VALUE</ffdc>
+    <ffdc>PDW_VALUE</ffdc>
+    <ffdc>ERROR_VALUE</ffdc>
+     <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_DDS_ADJ_TRIP_OFFSET_OVERFLOW</rc>
+    <description>The delay value created by adjustment with ATTR_DDS_TRIP_OFFSET_ADJUST
+    has overflowed beyond the supported upper limit.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>LIMIT</ffdc>
+    <ffdc>CF</ffdc>
+    <ffdc>CORE</ffdc>
+    <ffdc>ATTR_ADJ_VALUE</ffdc>
+    <ffdc>PDW_VALUE</ffdc>
+    <ffdc>ERROR_VALUE</ffdc> >
+     <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
     <rc>RC_PSTATE_PB_POUND_W_TDP_IAC_INVALID</rc>
     <description>#W one or more Idd TDP AC values are zero</description>
     <ffdc>CHIP_TARGET</ffdc>
