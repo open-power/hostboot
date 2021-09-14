@@ -412,7 +412,9 @@ hb_fipssetup()
 hb_simsetup()
 {
     export_key_variables
-    SIMICS_LEVEL=`cat ${PROJECT_ROOT}/src/build/citest/etc/simbuild`
+
+    # Note - need to use 'eval echo $(cat' to expand the embedded env var in the path
+    SIMICS_LEVEL=`eval echo $(cat ${PROJECT_ROOT}/src/build/citest/etc/simbuild)`
 
     # Setup for P10 Standalone without ODE SB
 
@@ -454,18 +456,18 @@ hb_simsetup()
         # "hb prime" again in that case.
 
         # EECACHE to be used for VPO
-        EECACHE_VPO_PREBUILT=`cat ${PROJECT_ROOT}/src/build/citest/etc/eecache_vpo_prebuilt`
+        EECACHE_VPO_PREBUILT=`eval echo $(cat ${PROJECT_ROOT}/src/build/citest/etc/eecache_vpo_prebuilt)`
         echo "cp ${EECACHE_VPO_PREBUILT} ${STANDALONE_SIMICS}/eecache_vpo_prebuilt.bin.ecc"
         cp ${EECACHE_VPO_PREBUILT} ${STANDALONE_SIMICS}/eecache_vpo_prebuilt.bin.ecc
 
         # DD1 EECACHE to be used for $PNOR_LAYOUT_SELECTED set as "P10" or "STANDALONE" when STANDALONE_TEST_DD1 has
         # been exported as an env variable
-        EECACHE_PREBUILT=`cat ${PROJECT_ROOT}/src/build/citest/etc/eecache_prebuilt`
+        EECACHE_PREBUILT=`eval echo $(cat ${PROJECT_ROOT}/src/build/citest/etc/eecache_prebuilt)`
         echo "cp ${EECACHE_PREBUILT} ${STANDALONE_SIMICS}/eecache_prebuilt.bin.ecc"
         cp ${EECACHE_PREBUILT} ${STANDALONE_SIMICS}/eecache_prebuilt.bin.ecc
 
         # DD2 EECACHE to be used for $PNOR_LAYOUT_SELECTED set as "P10" or "STANDALONE" as the default.
-        EECACHE_PREBUILT=`cat ${PROJECT_ROOT}/src/build/citest/etc/eecache_prebuilt_dd2`
+        EECACHE_PREBUILT=`eval echo $(cat ${PROJECT_ROOT}/src/build/citest/etc/eecache_prebuilt_dd2)`
         echo "cp ${EECACHE_PREBUILT} ${STANDALONE_SIMICS}/eecache_prebuilt_dd2.bin.ecc"
         cp ${EECACHE_PREBUILT} ${STANDALONE_SIMICS}/eecache_prebuilt_dd2.bin.ecc
 

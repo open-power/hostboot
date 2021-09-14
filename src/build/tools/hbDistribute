@@ -261,8 +261,8 @@ if [[ $SNIFFER_CHECK -eq 1 || -n ${PARSE_RCDL_STRICT} ]]; then
 fi
 
 # Point to various signing related path components
-#export SIGNING_BASE_DIR=/esw/bin/sb-signing
-export SIGNING_BASE_DIR=/gsa/rchgsa/projects/s/sb_sign_tools
+export SIGNING_BASE_DIR=/esw/bin/sb-signing
+#export SIGNING_BASE_DIR=/gsa/rchgsa/projects/s/sb_sign_tools
 echo "Secure Boot: Signing base dir is ${SIGNING_BASE_DIR}"
 export SIGNING_UTILS_DIR=sb-signing-utils
 echo "Secure Boot: Signing utils dir is ${SIGNING_UTILS_DIR}"

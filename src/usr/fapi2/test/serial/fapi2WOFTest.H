@@ -418,7 +418,6 @@ public:
 
         do
         {
-break; // Temporary change to skip the test in rchgsa build environment
             /* Test code path of not finding an override-set entry match */
 
             // Set selection criteria to values that are purposefully incorrect

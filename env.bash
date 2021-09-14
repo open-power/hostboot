@@ -25,8 +25,22 @@
 
 ROOTDIR=.
 
-# Set this based on HOSTNAME later
-export HOSTBOOT_ENVIRONMENT=/gsa/rchgsa/projects/h/hostboot_rch/
+# Default to austin but optimize based on HOSTNAME
+if [ -z "${HOSTBOOT_ENVIRONMENT}" ]; then
+  export HOSTBOOT_ENVIRONMENT=/gsa/ausgsa/projects/h/hostboot/
+  ARTIFACTFILE=src/build/citest/etc/artifactspaces
+  if [ ! -f ${ARTIFACTFILE} ]; then
+    echo "Cannot open ${ARTIFACTFILE}, using default space"
+  elif [[ "$HOSTNAME" == *"rchland.ibm.com"* ]]; then
+    export HOSTBOOT_ENVIRONMENT=`grep rchland ${ARTIFACTFILE} | awk -F, '{print $2}'`
+    echo "Using rchland for Hostboot artifacts : $HOSTBOOT_ENVIRONMENT"
+  else
+    export HOSTBOOT_ENVIRONMENT=`grep austin ${ARTIFACTFILE} | awk -F, '{print $2}'`
+    echo "Using austin for Hostboot artifacts : $HOSTBOOT_ENVIRONMENT"
+  fi
+else
+  echo "Using custom path for Hostboot artifacts : $HOSTBOOT_ENVIRONMENT"
+fi
 
 if [ -e ./customrc ]; then
     . ./customrc

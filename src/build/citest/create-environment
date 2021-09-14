@@ -61,16 +61,17 @@ export bbsrc=$BACKING_BUILD/src
 
 # Populate simics directories.
 
-SIMICS_LEVEL=`cat ${PROJECT_ROOT}/src/build/citest/etc/simbuild`
+# Note - need to use 'eval echo $(cat' to expand the embedded env var in the path
+SIMICS_LEVEL=`eval echo $(cat ${PROJECT_ROOT}/src/build/citest/etc/simbuild)`
 
 if [[ ! -z "${VPO_COMPILE}" ]]; then
     # EECACHE to be used for VPO
-    EECACHE_VPO_PREBUILT=`cat ${PROJECT_ROOT}/src/build/citest/etc/eecache_vpo_prebuilt`
+    EECACHE_VPO_PREBUILT=`eval echo $(cat ${PROJECT_ROOT}/src/build/citest/etc/eecache_vpo_prebuilt)`
 else
     # EECACHE to be used for DD1 Standalone builds
-    EECACHE_PREBUILT_DD1=`cat ${PROJECT_ROOT}/src/build/citest/etc/eecache_prebuilt`
+    EECACHE_PREBUILT_DD1=`eval echo $(cat ${PROJECT_ROOT}/src/build/citest/etc/eecache_prebuilt)`
     # EECACHE to be used for DD2 Standalone builds
-    EECACHE_PREBUILT_DD2=`cat ${PROJECT_ROOT}/src/build/citest/etc/eecache_prebuilt_dd2`
+    EECACHE_PREBUILT_DD2=`eval echo $(cat ${PROJECT_ROOT}/src/build/citest/etc/eecache_prebuilt_dd2)`
 fi
 
 if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then

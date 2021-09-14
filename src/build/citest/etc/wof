@@ -1,2 +1,2 @@
 # WOF artifact ID used to assemble PNOR image for Standalone Simics
-export WOF_ARTIFACT_ID=rchgsahack
+export WOF_ARTIFACT_ID=10_29_2020_WOF_Override_Image

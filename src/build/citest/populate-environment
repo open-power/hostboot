@@ -40,9 +40,10 @@ fi
 # Create img directory.
 mkdir -p $SANDBOXBASE/img || exit -1
 
-# Set this based on HOSTNAME later (should match env.bash)
-HOSTBOOT_ENVIRONMENT=/gsa/rchgsa/projects/h/hostboot_rch/
-echo "HOSTBOOT_ENVIRONMENT=${HOSTBOOT_ENVIRONMENT}"
+# Default to austin but optimize based on HOSTNAME
+if [ -z "${HOSTBOOT_ENVIRONMENT}" ]; then
+  echo "HOSTBOOT_ENVIRONMENT is not set correctly"
+fi
 
 # Copy files -- Only populate testcases if they are
 # intended to be ran
