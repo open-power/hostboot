@@ -974,3 +974,8 @@ ispy MB_SIM.TLXT.TLXT_REGS.TLXCFG1_TLXT_INTRP_CMDFLAG_3 [when=S] {
   spyv;
   0b0001;
 }
+
+espy MB_SIM.RDF.SCOM.MBSECCQ_EXIT_OVERRIDE [when=S] {
+    spyv;
+    MIN_EXIT_1;
+}

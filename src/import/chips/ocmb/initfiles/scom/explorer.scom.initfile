@@ -1229,3 +1229,8 @@ ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT0Q_SLOT1_D_VALUE [when=S] {         ## slots
   0, (def_num_of_bitvals_1 > def_num_of_bitvals_0);
   1, (def_num_of_bitvals_0 >= def_num_of_bitvals_1);
 }
+
+espy MB_SIM.RDF.SCOM.MBSECCQ_EXIT_OVERRIDE [when=S] {
+    spyv;
+    MIN_EXIT_1;
+}

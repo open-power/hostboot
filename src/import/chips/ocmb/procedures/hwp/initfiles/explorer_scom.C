@@ -1902,6 +1902,13 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x8011871ull, l_scom_buffer));
         }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x8011c2dull, l_scom_buffer ));
+
+            constexpr auto l_MB_SIM_RDF_SCOM_MBSECCQ_EXIT_OVERRIDE_MIN_EXIT_1 = 0x1;
+            l_scom_buffer.insert<9, 2, 62, uint64_t>(l_MB_SIM_RDF_SCOM_MBSECCQ_EXIT_OVERRIDE_MIN_EXIT_1 );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x8011c2dull, l_scom_buffer));
+        }
 
     };
 fapi_try_exit:
