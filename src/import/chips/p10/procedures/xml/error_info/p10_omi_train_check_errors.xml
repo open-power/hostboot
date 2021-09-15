@@ -80,6 +80,7 @@
     <ffdc>TRAINING_STATUS</ffdc>
     <ffdc>CONFIG1</ffdc>
     <ffdc>OMI_FREQ</ffdc>
+    <ffdc>EXP_ACTIVE_LOG_SIZE</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_EXP_OMI_TRAIN_ERR_INFO</id>
       <target>OCMB_TARGET</target>
@@ -95,6 +96,7 @@
       <target>OMIC_TARGET</target>
       <targetType>TARGET_TYPE_OMIC</targetType>
     </collectRegisterFfdc>
+    <collectFfdc>exp_collect_explorer_active_log, OCMB_TARGET, EXP_ACTIVE_LOG_SIZE</collectFfdc>
     <callout>
         <target>OMI_TARGET</target>
         <priority>MEDIUM</priority>

@@ -122,7 +122,8 @@ fapi2::ReturnCode p10_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OMI
                 .set_STATUS(l_omi_status)
                 .set_TRAINING_STATUS(l_omi_training_status)
                 .set_CONFIG1(l_config1)
-                .set_OMI_FREQ(l_omi_freq),
+                .set_OMI_FREQ(l_omi_freq)
+                .set_EXP_ACTIVE_LOG_SIZE(4096),
                 "%s P10 OMI Training Failure, expected state:%d/actual state:%d, STATUS:0x%016llx, TRAINING_STATUS:0x%016llx"
                 "HOST_DL0_ERROR_HOLD:0x%016llx HOST_DL0_EDPL_MAX_COUNT:0x%016llx"
                 "EXP_DL0_ERROR_HOLD:0x%016llx EXP_DL0_EDPL_MAX_COUNT:0x%016llx"
