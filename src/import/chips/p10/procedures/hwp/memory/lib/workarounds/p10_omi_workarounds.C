@@ -172,10 +172,10 @@ fapi2::ReturnCode training_prbs(
     FAPI_DBG("Performing OMI Train P10 workaround on %s", mss::c_str(i_omi));
 
     // OMI training PRBS workaround for P10:
-    // Setup OMI side with pattern A
+    // Setup OMI side with pattern B
 
-    // Training mode 1: send Pattern A
-    FAPI_TRY(mss::omi::setup_mc_config0(i_omi, mss::omi::train_mode::TX_PATTERN_A, i_dl_x4_backoff_en));
+    // Training mode 1: send Pattern B
+    FAPI_TRY(mss::omi::setup_mc_config0(i_omi, mss::omi::train_mode::TX_PATTERN_B, i_dl_x4_backoff_en));
 
     FAPI_TRY(fapi2::delay(100 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS));
 

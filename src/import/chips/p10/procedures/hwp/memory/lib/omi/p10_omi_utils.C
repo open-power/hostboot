@@ -566,8 +566,7 @@ fapi2::ReturnCode p10_omi_train_prbs_helper2(
 
     {
         fapi2::buffer<uint64_t> l_data;
-        uint64_t l_pattern_a = 0;
-        uint64_t l_pattern_b = 0;
+        uint64_t l_sync_pattern = 0;
         int i = 0;
 
         for (; i < 400; i++)
@@ -575,16 +574,15 @@ fapi2::ReturnCode p10_omi_train_prbs_helper2(
             FAPI_TRY(fapi2::delay(mss::common_timings::DELAY_1MS, 10));
 
             FAPI_TRY(scomt::omi::GET_TRAINING_STATUS(i_omi, l_data));
-            scomt::omi::GET_TRAINING_STATUS_RX_PATTERN_A(l_data, l_pattern_a);
-            scomt::omi::GET_TRAINING_STATUS_RX_PATTERN_B(l_data, l_pattern_b);
+            scomt::omi::GET_TRAINING_STATUS_SYNC_PATTERN(l_data, l_sync_pattern);
 
-            if (l_pattern_a > 0 || l_pattern_b > 0)
+            if (l_sync_pattern > 0)
             {
                 break;
             }
         }
 
-        FAPI_DBG("%s Found Pattern A||B(0x%02X|0x%02X) after %dms...", mss::c_str(i_omi), l_pattern_a, l_pattern_b, i);
+        FAPI_DBG("%s Found Sync Pattern(0x%02X) after %dms...", mss::c_str(i_omi), l_sync_pattern, i);
     }
 
     // Enable auto training
