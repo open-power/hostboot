@@ -79,19 +79,25 @@ using state_set_id_t = uint16_t;
 /* @brief Send a Platform Event Message indicating a "Sensor State Changed"
  *        event to the BMC.
  *
+ * @param[in] i_target         The target that the sensor is related to (nullptr if none).
+ * @param[in] i_state_set_id   The sensor's state set ID.
  * @param[in] i_sensor_id      ID of the aggregate sensor that changed
  * @param[in] i_sensor_offset  Offset of the sensor within the aggregate sensor
  *                             that changed
  * @param[in] i_sensor_state   New state of the sensor
  * @return errlHndl_t          Error if any, otherwise nullptr.
  */
-errlHndl_t sendSensorStateChangedEvent(sensor_id_t i_sensor_id,
+errlHndl_t sendSensorStateChangedEvent(const TARGETING::Target* i_target,
+                                       uint16_t i_state_set_id,
+                                       sensor_id_t i_sensor_id,
                                        uint8_t i_sensor_offset,
                                        sensor_state_t i_sensor_state);
 
 /* @brief Send a Platform Event Message indicating a "Sensor State Changed"
  *        event to the BMC.
  *
+ * @param[in] i_target         The target that the sensor is related to (nullptr if none).
+ * @param[in] i_state_set_id   The sensor's state set ID.
  * @param[in] i_sensor_id      ID of the aggregate sensor that changed
  * @param[in] i_sensor_offset  Offset of the sensor within the aggregate sensor
  *                             that changed
@@ -99,7 +105,9 @@ errlHndl_t sendSensorStateChangedEvent(sensor_id_t i_sensor_id,
  * @param[in] i_terminus_id    ID of the terminus sending the event.
  * @return errlHndl_t          Error if any, otherwise nullptr.
  */
-errlHndl_t sendSensorStateChangedEvent(sensor_id_t i_sensor_id,
+errlHndl_t sendSensorStateChangedEvent(const TARGETING::Target* i_target,
+                                       uint16_t i_state_set_id,
+                                       sensor_id_t i_sensor_id,
                                        uint8_t i_sensor_offset,
                                        sensor_state_t i_sensor_state,
                                        terminus_id_t i_terminus_id);

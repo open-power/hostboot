@@ -456,21 +456,25 @@ errlHndl_t sendRepositoryChangedEvent(const pldm_pdr* const i_repo,
     return errl;
 }
 
-errlHndl_t sendSensorStateChangedEvent(const sensor_id_t i_sensor_id,
+errlHndl_t sendSensorStateChangedEvent(const TARGETING::Target* const i_target,
+                                       const uint16_t i_state_set_id,
+                                       const sensor_id_t i_sensor_id,
                                        const uint8_t i_sensor_offset,
                                        const sensor_state_t i_sensor_state)
 {
-    return sendSensorStateChangedEvent(i_sensor_id, i_sensor_offset, i_sensor_state, thePdrManager().
-                                       hostbootTerminusId());
+    return sendSensorStateChangedEvent(i_target, i_state_set_id, i_sensor_id, i_sensor_offset,
+                                       i_sensor_state, thePdrManager().hostbootTerminusId());
 }
 
-errlHndl_t sendSensorStateChangedEvent(const sensor_id_t i_sensor_id,
+errlHndl_t sendSensorStateChangedEvent(const TARGETING::Target* const i_target,
+                                       const uint16_t i_state_set_id,
+                                       const sensor_id_t i_sensor_id,
                                        const uint8_t i_sensor_offset,
                                        const sensor_state_t i_sensor_state,
                                        const terminus_id_t i_terminus_id)
 {
-    PLDM_ENTER("sendSensorStateChangedEvent (sensor id = %d, offset = %d, state = %d)",
-               i_sensor_id, i_sensor_offset, i_sensor_state);
+    PLDM_ENTER("sendSensorStateChangedEvent (target = 0x%08x, state set = %d, sensor id = %d, offset = %d, state = %d)",
+               get_huid(i_target), i_state_set_id, i_sensor_id, i_sensor_offset, i_sensor_state);
 
     errlHndl_t errl = nullptr;
 
@@ -556,19 +560,21 @@ errlHndl_t sendSensorStateChangedEvent(const sensor_id_t i_sensor_id,
                      status);
 
             /*@
-             * @errortype  ERRL_SEV_UNRECOVERABLE
-             * @moduleid   MOD_SEND_SENSOR_STATE_CHANGED_EVENT
-             * @reasoncode RC_BAD_COMPLETION_CODE
-             * @userdata1  Completion code returned from BMC
-             * @userdata2  Status code returned from BMC
-             * @devdesc    Software problem, Sensor State Changed notification unsuccessful
-             * @custdesc   A software error occurred during system boot
+             * @errortype        ERRL_SEV_UNRECOVERABLE
+             * @moduleid         MOD_SEND_SENSOR_STATE_CHANGED_EVENT
+             * @reasoncode       RC_BAD_COMPLETION_CODE
+             * @userdata1[0:31]  HUID of the relevant target
+             * @userdata1[32:63] State set ID of this sensor
+             * @userdata2[0:31]  Completion code returned from BMC
+             * @userdata2[32:63] Status code returned from BMC
+             * @devdesc          Software problem, Sensor State Changed notification unsuccessful
+             * @custdesc         A software error occurred during system boot
              */
             errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                  MOD_SEND_SENSOR_STATE_CHANGED_EVENT,
                                  RC_BAD_COMPLETION_CODE,
-                                 completion_code,
-                                 status,
+                                 TWO_UINT32_TO_UINT64(get_huid(i_target), i_state_set_id),
+                                 TWO_UINT32_TO_UINT64(completion_code, status),
                                  ErrlEntry::NO_SW_CALLOUT);
             errl->collectTrace(PLDM_COMP_NAME);
             addBmcErrorCallouts(errl);
@@ -626,7 +632,8 @@ errlHndl_t sendOccStateChangedEvent(const TARGETING::Target* const i_occ_target,
                i_new_state);
     }
 
-    return sendSensorStateChangedEvent(sensor_id, OCC_STATE_SENSOR_INDEX, new_occ_state);
+    return sendSensorStateChangedEvent(i_occ_target, PLDM_STATE_SET_OPERATIONAL_RUNNING_STATUS,
+                                       sensor_id, OCC_STATE_SENSOR_INDEX, new_occ_state);
 }
 
 errlHndl_t sendFruFunctionalStateChangedEvent(const TARGETING::Target* const i_target,
@@ -641,7 +648,9 @@ errlHndl_t sendFruFunctionalStateChangedEvent(const TARGETING::Target* const i_t
                                              ? PLDM_STATE_SET_HEALTH_STATE_NORMAL
                                              : PLDM_STATE_SET_HEALTH_STATE_CRITICAL);
 
-    return sendSensorStateChangedEvent(i_sensor_id,
+    return sendSensorStateChangedEvent(i_target,
+                                       PLDM_STATE_SET_HEALTH_STATE,
+                                       i_sensor_id,
                                        FUNCTIONAL_STATE_SENSOR_INDEX,
                                        functional_state);
 }

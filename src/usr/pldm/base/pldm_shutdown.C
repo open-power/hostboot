@@ -164,7 +164,9 @@ void* wait_for_bmc_initiated_shutdown(void* const i_args)
 
     printk("\nSending PLDM graceful shutdown notification\n");
 
-    errlHndl_t errl = sendSensorStateChangedEvent(args->shutdown_sensor_id,
+    errlHndl_t errl = sendSensorStateChangedEvent(UTIL::assertGetToplevelTarget(),
+                                                  PLDM_STATE_SET_SW_TERMINATION_STATUS,
+                                                  args->shutdown_sensor_id,
                                                   0, // subsensor offset 0
                                                   PLDM_SW_TERM_GRACEFUL_SHUTDOWN,
                                                   args->hb_terminus_id);
