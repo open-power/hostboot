@@ -220,7 +220,14 @@ void ErrlManager::setupPnorInfo()
                         if (iv_isBmcInterfaceEnabled)
                         {
                             // send log to BMC and mark as previous boot error
-                            sendErrLogToBmc(err, true);
+                            bool sentSuccessful = sendErrLogToBmc(err, true);
+                            if (!sentSuccessful)
+                            {
+                                TRACFCOMP(g_trac_errl,
+                                    INFO_MRK"setupPnorInfo: Attempt to send previous boot error "
+                                    "eid %.8X to BMC failed. Ignoring/Deleting error",
+                                    l_id);
+                            }
                             delete err;
                             err = nullptr;
                         }
@@ -502,6 +509,8 @@ void ErrlManager::setACKInFlattened(uint32_t i_position)
 
 bool ErrlManager::sendErrLogToBmc(errlHndl_t &io_err, bool i_isPrevBootErr)
 {
+    assert(io_err != nullptr, "sendErrLogToBmc has nullptr error handle");
+
     TRACFCOMP(g_trac_errl, ENTER_MRK "sendErrLogToBmc errlogId 0x%.8X, i_isPrevBootErr %d",
                 io_err->eid(), i_isPrevBootErr);
 

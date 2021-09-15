@@ -2200,8 +2200,12 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,
             iv_Private.iv_sctns = NON_UD_SECTION_CNT + flattenedSections;
             if (sectionsLeft == 0)
             {
-                TRACFCOMP(g_trac_errl, "Skipped flattening %d sections - total sections: 0x%02X",
-                    startingSectionCount - flattenedSections, iv_Private.iv_sctns);
+                TRACFCOMP(g_trac_errl, "Skipped flattening %d sections (sizeRemaining: %lld) "
+                    "- actual total sections: 0x%02X size: %lld",
+                    startingSectionCount - flattenedSections,
+                    l_sizeRemaining,
+                    iv_Private.iv_sctns,
+                    (i_bufsize - l_sizeRemaining));
             }
 
             // use ph size, since this is overwriting flattened data
