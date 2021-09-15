@@ -43,7 +43,7 @@ class SignatureData:
         """
         self._data = {}
 
-        data_path = os.path.dirname(pel.pel.sigdata.__file__)
+        data_path = os.path.dirname(pel.prd.sigdata.__file__)
 
         for data_file in glob.glob(os.path.join(data_path, '*.json')):
             with open(data_file, 'r') as fp:
@@ -52,6 +52,19 @@ class SignatureData:
             self._data[data["target_type"]] = data
 
 
-    # TODO: add parser function
+    def parseSignature(self, chipId: str, chipSig: str) -> str:
 
+        # The input chip ID and chip signature will be hex strings but without
+        # the preceding '0x' so add them here. Also, we will ensure we have
+        # lower case hex strings
+        chipType = "0x" + chipId.lower()
+        hexSig = "0x" + chipSig.lower()
+
+        signature = "Undefined error code " + hexSig
+
+        if chipType in self._data:
+            if hexSig in self._data[chipType]["signatures"]:
+                signature = self._data[chipType]["signatures"][hexSig]
+
+        return signature
 

@@ -38,7 +38,7 @@ def parseSRCToJson(refcode: str,
     impact any other fields in that section.
 
     IMPORTANT:
-    Components can define parser modules just like these defined for user data
+    Components can define parser modules just like those defined for user data
     sections. If a parser module is not defined in this fashion, the default SRC
     parser will be used.
 

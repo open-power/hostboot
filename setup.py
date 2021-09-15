@@ -78,7 +78,7 @@ package_directories = {
 }
 
 package_data = {
-    "pel.prd":  [ "sigdata/*.json" ]
+    "pel.prd":  [ "sigdata/*.json", "sigdata/*.py" ]
 }
 
 setup(
