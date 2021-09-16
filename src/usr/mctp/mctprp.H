@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -105,7 +105,8 @@ class MctpRP
       msg_q_t     iv_outboundMsgQ;             // MCTP outbound messages
       volatile bool iv_channelActive;          // MCTP channel ready for traffic
       uint16_t    iv_mctpVersion;              // MCTP version negotiated during initialization
-      mutex_t     iv_mctp_mutex;               // Mutex to protect tx_queue accesses
+      mutex_t     iv_mutex;                    // Mutex to protect calls to functions that access
+                                               // the tx_queue and/or write the IDR register
 
       // Disallow copying this class.
       MctpRP& operator=(const MctpRP&);

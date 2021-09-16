@@ -88,15 +88,6 @@ static void * poll_kcs_status_task(void*)
     return nullptr;
 }
 
-// Call hostlpc binding function mctp_hostlpc_tx_complete but wrap it in a mutex lock
-static void lock_and_mctp_hostlpc_tx_complete(struct mctp_binding_hostlpc *hostlpc,
-                                              mutex_t &mutex)
-{
-    mutex_lock(&mutex);
-    mctp_hostlpc_tx_complete(hostlpc);
-    mutex_unlock(&mutex);
-}
-
 errlHndl_t read_kcs_status(uint8_t & o_status)
 {
     size_t size = sizeof(o_status);
@@ -124,7 +115,9 @@ errlHndl_t drain_odr(void)
     uint8_t kcs_status = 0, kcs_data = 0;
     const uint8_t DRAIN_LIMIT = 255;
     uint8_t drain_counter = DRAIN_LIMIT;
-    auto errl = read_kcs_status(kcs_status);
+    errlHndl_t errl = nullptr;
+
+    errl = read_kcs_status(kcs_status);
 
     while((!errl) && --drain_counter && (kcs_status & KCS_STATUS_OBF))
     {
@@ -224,12 +217,16 @@ void MctpRP::poll_kcs_status(void)
               break;
           case MSG_TX_BEGIN:
               TRACDCOMP(g_trac_mctp, "BMC has sent us a message we need to read");
+              mutex_lock(&iv_mutex);
               mctp_hostlpc_rx_start(iv_hostlpc);
+              mutex_unlock(&iv_mutex);
               break;
           case MSG_RX_COMPLETE:
               // BMC has completed receiving the message we sent
               TRACDCOMP(g_trac_mctp, "BMC says they are complete reading what we sent");
-              lock_and_mctp_hostlpc_tx_complete(iv_hostlpc, iv_mctp_mutex);
+              mutex_lock(&iv_mutex);
+              mctp_hostlpc_tx_complete(iv_hostlpc);
+              mutex_unlock(&iv_mutex);
               break;
           case MSG_DUMMY:
 
@@ -319,16 +316,6 @@ static void * handle_outbound_messages_task(void*)
     return nullptr;
 }
 
-// Call libmctp core function mctp_message_tx but wrap it in a mutex lock
-static int lock_and_mctp_message_tx(struct mctp *mctp, mctp_eid_t eid,
-                                    void *msg, size_t msg_len, mutex_t &mutex)
-{
-    mutex_lock(&mutex);
-    int rc = mctp_message_tx(mctp, eid, msg, msg_len);
-    mutex_unlock(&mutex);
-    return rc;
-}
-
 void MctpRP::handle_outbound_messages(void)
 {
     task_detach();
@@ -357,15 +344,13 @@ void MctpRP::handle_outbound_messages(void)
               // so BMC knows to route the MCTP message to it's PLDM driver.
               *reinterpret_cast<uint8_t *>(msg->extra_data) =
                                                           MCTP_MSG_TYPE_PLDM;
-              TRACDBIN(g_trac_mctp,
-                       "pldm message : ",
-                       msg->extra_data ,
-                       msg->data[0]);
-              int rc = lock_and_mctp_message_tx(iv_mctp,
-                                                BMC_EID,
-                                                msg->extra_data,
-                                                msg->data[0],
-                                                iv_mctp_mutex);
+              TRACDBIN(g_trac_mctp, "pldm message : ",
+                       msg->extra_data , msg->data[0]);
+
+              mutex_lock(&iv_mutex);
+              auto rc = mctp_message_tx(iv_mctp, BMC_EID,
+                                        msg->extra_data, msg->data[0]);
+              mutex_unlock(&iv_mutex);
 
               if(rc != RC_MCTP_SUCCESS)
               {
@@ -527,11 +512,13 @@ void MctpRP::register_mctp_bus(void)
         errlCommit(errl, MCTP_COMP_ID);
     }
 
+    mutex_lock(&iv_mutex);
     // Register the binding to the LPC bus we are using for this
     // MCTP configuration. NOTE this will trigger the "start" function
     // associated with the iv_hostlpc binding which starts the
     // KCS init handshake with the BMC
     mctp_register_bus(iv_mctp, &iv_hostlpc->binding, HOST_EID);
+    mutex_unlock(&iv_mutex);
 
     // Start the poll kcs status daemon which will read the KCS status reg
     // every 1 ms and if we see that the OBF bit in the KCS status register is
@@ -582,7 +569,7 @@ MctpRP::MctpRP(void):
     iv_inboundMsgQ(msg_q_create()),
     iv_outboundMsgQ(msg_q_create()),
     iv_channelActive(false),
-    iv_mctp_mutex(MUTEX_INITIALIZER)
+    iv_mutex(MUTEX_INITIALIZER)
 {
 }
 
