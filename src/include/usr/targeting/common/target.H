@@ -611,6 +611,39 @@ class Target
         }
 
         /**
+         *  @brief Tries to get the target's specified attribute value
+         *         Only use if template attribute system can't be used
+         *         Relies on assumptions instead of enforcing them.
+         *         Assumes it is a readable attribute
+         *         Assumes i_size matches the size of the attribute
+         *
+         *  Tries to get the target's specified attribute value
+         *
+         *  @param[in] i_attr Attribute to retrieve
+         *  @param[in] i_size Size of the attribute
+         *  @param[in] i_pAttrData Location holding the buffer to write attribute data to
+         *
+         *  @pre Target service must be initialized
+         *
+         *  @post If attribute exists for the associated target, attribute value
+         *      read and success (true) returned.  Otherwise, attribute value
+         *      not read and failure (false) returned.
+         *
+         *  @return bool indicating if attribute read succeeded or not
+         *
+         *  @retval true Attribute read succeeded
+         *  @retval false Attribute read failed
+         */
+        bool unsafeTryGetAttr(
+            ATTRIBUTE_ID i_attr,
+            uint32_t     i_size,
+            void*        i_pAttrData) const
+        {
+            // no check for size or if attribute is readable
+            return _tryGetAttr(i_attr, i_size, i_pAttrData);
+        }
+
+       /**
          *  @brief Returns the target's type as used in a Targeting attribute
          *         tank.
          *

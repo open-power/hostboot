@@ -495,13 +495,14 @@ errlHndl_t addFruInventoryPdrs(PdrManager& io_pdrman)
     return errl;
 }
 
-void addSbeDumpCompletePdrs(PdrManager& io_pdrman)
+void addSbeManagementPdrs(PdrManager& io_pdrman)
 {
     TargetHandleList procs;
-    getAllChips(procs, TYPE_PROC);
+    TARGETING::getChildAffinityTargetsByState(procs, UTIL::assertGetToplevelTarget(), CLASS_NA, TYPE_PROC, UTIL_FILTER_PRESENT);
 
     // @TODO RTC 247294: Delete these constants and use the ones from libpldm
     const int PLDM_OEM_IBM_SBE_MAINTENANCE_STATE = 32772;
+    const int PLDM_OEM_IBM_SBE_HRESET_STATE = 32773;
 
     enum ibm_oem_pldm_state_set_sbe_dump_state_values {
         SBE_DUMP_COMPLETED = 0x1,
@@ -516,9 +517,22 @@ void addSbeDumpCompletePdrs(PdrManager& io_pdrman)
                                       entity_info,
                                       PLDM_OEM_IBM_SBE_MAINTENANCE_STATE,
                                       (enum_bit(SBE_DUMP_COMPLETED)
-                                       | SBE_RETRY_REQUIRED),
+                                       | enum_bit(SBE_RETRY_REQUIRED)),
                                       // We create a dynamic handler for this type of effecter
-                                      PdrManager::STATE_QUERY_HANDLER_INVALID);
+                                      PdrManager::STATE_QUERY_HANDLER_REQUEST_HRESET);
+
+        static_assert(AttributeTraits<ATTR_CURRENT_SBE_HRESET_STATUS>::readable);
+        static_assert(sizeof(ATTR_CURRENT_SBE_HRESET_STATUS_type) == 2,
+                      "ATTR_CURRENT_SBE_HRESET_STATUS must be 2 bytes (size of a sensor value)");
+
+        io_pdrman.addStateSensorPdr(proc,
+                                    entity_info,
+                                    PLDM_OEM_IBM_SBE_HRESET_STATE,
+                                    (enum_bit(SBE_HRESET_STATUS_READY)
+                                     | enum_bit(SBE_HRESET_STATUS_NOT_READY)
+                                     | enum_bit(SBE_HRESET_STATUS_FAILED)),
+                                    PdrManager::STATE_QUERY_HANDLER_ATTRIBUTE_GETTER,
+                                    ATTR_CURRENT_SBE_HRESET_STATUS);
     }
 }
 
@@ -598,7 +612,7 @@ errlHndl_t addHostbootPdrs(PdrManager& io_pdrman)
     errl || (errl = addOccStateControlPdrs(io_pdrman));
     errl || (errl = addFruInventoryPdrs(io_pdrman));
 
-    addSbeDumpCompletePdrs(io_pdrman);
+    addSbeManagementPdrs(io_pdrman);
     io_pdrman.addTerminusLocatorPDR();
 
     PLDM_EXIT("addHostbootPdrs completed %s error", errl ? "with" : "without");

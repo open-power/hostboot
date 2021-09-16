@@ -31,7 +31,6 @@ include ../common/common.mk
 OBJS += ${PLDM_EXTENDED_COMMON_OBJS}
 OBJS += pldm_extended_init.o
 OBJS += pldm_entity_ids.o
-OBJS += sbe_dump.o
 
 SUBDIRS += test.d
 

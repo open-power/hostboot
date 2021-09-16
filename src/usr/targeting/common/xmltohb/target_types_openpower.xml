@@ -97,6 +97,9 @@
   <targetTypeExtension>
     <id>chip-processor</id>
     <attribute>
+      <id>CURRENT_SBE_HRESET_STATUS</id>
+    </attribute>
+    <attribute>
       <id>GPU_SENSORS</id>
     </attribute>
     <attribute>

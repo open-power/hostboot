@@ -65,6 +65,10 @@
 #include <arch/ppc.H>
 #include <sys/misc.h>
 
+#ifdef __HOSTBOOT_RUNTIME
+#include <sbeio/sbe_retry_handler.H>
+#endif
+
 // Standard library
 #include <memory>
 
@@ -348,34 +352,26 @@ static errlHndl_t sendStateSensorGetRequestResponse(const msg_q_t i_msgQ,
          &sensor_state);
 }
 
-errlHndl_t handleFunctionalStateSensorGetRequest(Target* const i_target,
-                                                 const msg_q_t i_msgQ,
-                                                 const pldm_msg* const i_msg,
-                                                 const size_t i_payload_len,
-                                                 const pldm_get_state_sensor_readings_req& i_req)
+errlHndl_t handleFunctionalStateSensorGetRequest(const state_sensor_callback_args& i_args)
 {
     PLDM_INF(ENTER_MRK"handleFunctionalStateSensorGetRequest (target: 0x%08x, sensor ID %d)",
-             get_huid(i_target),
-             i_req.sensor_id);
+             get_huid(i_args.i_target),
+             i_args.i_req->sensor_id);
 
     /* Encode and send a PLDM response to the request. */
 
-    const sensor_state_t current_state = (i_target->getAttr<ATTR_HWAS_STATE>().functional
+    const sensor_state_t current_state = (i_args.i_target->getAttr<ATTR_HWAS_STATE>().functional
                                           ? PLDM_STATE_SET_HEALTH_STATE_NORMAL
                                           : PLDM_STATE_SET_HEALTH_STATE_CRITICAL);
 
-    const errlHndl_t errl = sendStateSensorGetRequestResponse(i_msgQ, i_msg, PLDM_SENSOR_NORMAL, current_state);
+    const errlHndl_t errl = sendStateSensorGetRequestResponse(i_args.i_msgQ, i_args.i_msg, PLDM_SENSOR_NORMAL, current_state);
 
     PLDM_INF(EXIT_MRK"handleFunctionalStateSensorGetRequest (errl = %p)", errl);
 
     return errl;
 }
 
-errlHndl_t handleGracefulShutdownSensorGetRequest(Target* const,
-                                                  const msg_q_t i_msgQ,
-                                                  const pldm_msg* const i_msg,
-                                                  const size_t i_payload_len,
-                                                  const pldm_get_state_sensor_readings_req& i_req)
+errlHndl_t handleGracefulShutdownSensorGetRequest(const state_sensor_callback_args& i_args)
 {
     PLDM_INF(ENTER_MRK"handleGracefulShutdownSensorGetRequest");
 
@@ -387,24 +383,20 @@ errlHndl_t handleGracefulShutdownSensorGetRequest(Target* const,
                                           : PLDM_SW_TERM_NORMAL);
 #endif
 
-    const errlHndl_t errl = sendStateSensorGetRequestResponse(i_msgQ, i_msg, PLDM_SENSOR_NORMAL, current_state);
+    const errlHndl_t errl = sendStateSensorGetRequestResponse(i_args.i_msgQ, i_args.i_msg, PLDM_SENSOR_NORMAL, current_state);
 
     PLDM_INF(EXIT_MRK"handleGracefulShutdownSensorGetRequest");
 
     return errl;
 }
 
-errlHndl_t handleOccStateSensorGetRequest(Target* const i_occ,
-                                          const msg_q_t i_msgQ,
-                                          const pldm_msg* const i_msg,
-                                          const size_t i_payload_len,
-                                          const pldm_get_state_sensor_readings_req& i_req)
+errlHndl_t handleOccStateSensorGetRequest(const state_sensor_callback_args& i_args)
 {
-    Target* const i_occ_proc = getImmediateParentByAffinity(i_occ);
+    Target* const i_occ_proc = getImmediateParentByAffinity(i_args.i_target);
 
     PLDM_INF(ENTER_MRK"handleOccStateSensorGetRequest 0x%08x %d",
              get_huid(i_occ_proc),
-             i_req.sensor_id);
+             i_args.i_req->sensor_id);
 
     /* Encode and send a PLDM response to the request. */
 
@@ -413,10 +405,10 @@ errlHndl_t handleOccStateSensorGetRequest(Target* const i_occ,
                                           ? PLDM_STATE_SET_OPERATIONAL_RUNNING_STATUS_IN_SERVICE
                                           : PLDM_STATE_SET_OPERATIONAL_RUNNING_STATUS_STOPPED);
 
-    const errlHndl_t errl = sendStateSensorGetRequestResponse(i_msgQ, i_msg, PLDM_SENSOR_NORMAL, current_state);
+    const errlHndl_t errl = sendStateSensorGetRequestResponse(i_args.i_msgQ, i_args.i_msg, PLDM_SENSOR_NORMAL, current_state);
 #else
     // The OCC state cannot be read until runtime.
-    const errlHndl_t errl = sendStateSensorGetRequestResponse(i_msgQ, i_msg, PLDM_SENSOR_UNKNOWN, 0);
+    const errlHndl_t errl = sendStateSensorGetRequestResponse(i_args.i_msgQ, i_args.i_msg, PLDM_SENSOR_UNKNOWN, 0);
 #endif
 
     PLDM_INF(EXIT_MRK"handleOccStateSensorGetRequest");
@@ -424,11 +416,7 @@ errlHndl_t handleOccStateSensorGetRequest(Target* const i_occ,
     return errl;
 }
 
-errlHndl_t handleGracefulShutdownRequest(Target* const i_sys,
-                                         const msg_q_t i_msgQ,
-                                         const pldm_msg* const i_msg,
-                                         const size_t i_payload_len,
-                                         const pldm_set_state_effecter_states_req& i_req)
+errlHndl_t handleGracefulShutdownRequest(const state_effecter_callback_args& i_args)
 {
     PLDM_INF(ENTER_MRK"handleGracefulShutdownRequest");
 
@@ -436,7 +424,7 @@ errlHndl_t handleGracefulShutdownRequest(Target* const i_sys,
 
 #ifdef __HOSTBOOT_RUNTIME
     PLDM_ERR("handleGracefulShutdownRequest: Received graceful shutdown request at runtime");
-    send_cc_only_response(i_msgQ, i_msg, PLDM_ERROR_NOT_READY);
+    send_cc_only_response(i_args.i_msgQ, i_args.i_msg, PLDM_ERROR_NOT_READY);
 
     /*@
      * @errortype  ERRL_SEV_UNRECOVERABLE
@@ -455,7 +443,7 @@ errlHndl_t handleGracefulShutdownRequest(Target* const i_sys,
     addBmcErrorCallouts(errl);
 #else
     PLDM_INF("handleGracefulShutdownRequest: Received graceful shutdown request");
-    send_cc_only_response(i_msgQ, i_msg, PLDM_SUCCESS);
+    send_cc_only_response(i_args.i_msgQ, i_args.i_msg, PLDM_SUCCESS);
 
     PLDM::requestSoftPowerOff(PLDM::POWEROFF_BMC_INITIATED);
 #endif
@@ -465,35 +453,33 @@ errlHndl_t handleGracefulShutdownRequest(Target* const i_sys,
     return errl;
 }
 
-errlHndl_t handleOccSetStateEffecterRequest(Target* const i_occ,
-                                            const msg_q_t i_msgQ,
-                                            const pldm_msg* const i_msg,
-                                            const size_t i_payload_len,
-                                            const pldm_set_state_effecter_states_req& i_req)
+errlHndl_t handleOccSetStateEffecterRequest(const state_effecter_callback_args& i_args)
 {
     errlHndl_t errl = nullptr;
     uint8_t response_code = PLDM_SUCCESS;
 
-    Target* const i_occ_proc = getImmediateParentByAffinity(i_occ);
+    Target* const i_occ_proc = getImmediateParentByAffinity(i_args.i_target);
 
     do
     {
 
     /* Validate some of the parameters in the requests that we can check immediately. */
 
-    if (i_req.comp_effecter_count != 1
-        || !i_req.field[0].set_request
-        || (i_req.field[0].effecter_state != PLDM_STATE_SET_BOOT_RESTART_CAUSE_WARM_RESET
-            && i_req.field[0].effecter_state != PLDM_STATE_SET_BOOT_RESTART_CAUSE_HARD_RESET))
+    const auto i_req = i_args.i_req;
+
+    if (i_req->comp_effecter_count != 1
+        || !i_req->field[0].set_request
+        || (i_req->field[0].effecter_state != PLDM_STATE_SET_BOOT_RESTART_CAUSE_WARM_RESET
+            && i_req->field[0].effecter_state != PLDM_STATE_SET_BOOT_RESTART_CAUSE_HARD_RESET))
     {
         PLDM_ERR("handleOccSetStateEffecterRequest: Received invalid state effecter set request "
                  "(effecter 0x%x, PROC = 0x%08x, effecter count = %d, "
                  "set_request = %d, effecter_state = %d)",
-                 i_req.effecter_id,
+                 i_req->effecter_id,
                  get_huid(i_occ_proc),
-                 i_req.comp_effecter_count,
-                 i_req.field[0].set_request,
-                 i_req.field[0].effecter_state);
+                 i_req->comp_effecter_count,
+                 i_req->field[0].set_request,
+                 i_req->field[0].effecter_state);
 
         /*@
          * @errortype  ERRL_SEV_PREDICTIVE
@@ -510,9 +496,9 @@ errlHndl_t handleOccSetStateEffecterRequest(Target* const i_occ,
                              MOD_HANDLE_SET_OCC_STATE,
                              RC_INVALID_EFFECTER_STATE,
                              get_huid(i_occ_proc),
-                             TWO_UINT16_ONE_UINT32_TO_UINT64(i_req.field[0].set_request,
-                                                             i_req.field[0].effecter_state,
-                                                             i_req.comp_effecter_count),
+                             TWO_UINT16_ONE_UINT32_TO_UINT64(i_req->field[0].set_request,
+                                                             i_req->field[0].effecter_state,
+                                                             i_req->comp_effecter_count),
                              ErrlEntry::NO_SW_CALLOUT);
 
         addBmcErrorCallouts(errl);
@@ -559,10 +545,10 @@ errlHndl_t handleOccSetStateEffecterRequest(Target* const i_occ,
     {
         errl =
             send_pldm_response<PLDM_SET_STATE_EFFECTER_STATES_RESP_BYTES>
-            (i_msgQ,
+            (i_args.i_msgQ,
              encode_set_state_effecter_states_resp,
              0, // No payload after the header
-             i_msg->hdr.instance_id,
+             i_args.i_msg->hdr.instance_id,
              response_code);
 
         if (errl)
@@ -803,5 +789,124 @@ errlHndl_t handleSetEventReceiverRequest(const msg_q_t i_msgQ,
     PLDM_EXIT("handleSetEventReceiverRequest");
     return l_errl;
 }
+
+errlHndl_t handleAttributeBackedSensorGetRequest(const state_sensor_callback_args& i_args)
+{
+    PLDM_ENTER("handleAttributeBackedSensorGetRequest");
+
+    uint16_t attr_data = 0;
+
+    assert(i_args.i_target->unsafeTryGetAttr(static_cast<ATTRIBUTE_ID>(i_args.i_userdata), sizeof(attr_data), &attr_data),
+           "Cannot read attribute 0x%08x on target 0x%08x",
+           i_args.i_userdata, get_huid(i_args.i_target));
+
+    const errlHndl_t errl = sendStateSensorGetRequestResponse(i_args.i_msgQ, i_args.i_msg, PLDM_SENSOR_NORMAL, attr_data);
+
+    PLDM_EXIT("handleAttributeBackedSensorGetRequest");
+
+    return errl;
+}
+
+// @TODO RTC 247294: Delete these constants and use the ones from libpldm
+enum ibm_oem_pldm_state_set_sbe_dump_state_values {
+    SBE_DUMP_COMPLETED = 0x1,
+    SBE_RETRY_REQUIRED = 0x2,
+};
+
+#ifdef __HOSTBOOT_RUNTIME
+
+errlHndl_t handleSbeHresetRequest(const state_effecter_callback_args& i_args)
+{
+    errlHndl_t errl = nullptr;
+    const auto proc = i_args.i_target;
+
+    PLDM_ENTER("handleSbeHresetRequest(0x%08x)", get_huid(proc));
+
+    do
+    {
+
+    if (i_args.i_req->field[0].effecter_state != SBE_RETRY_REQUIRED)
+    {
+        /*@
+         * @errortype  ERRL_SEV_INFORMATIONAL
+         * @moduleid   MOD_HANDLE_SBE_HRESET_REQUEST_RT
+         * @reasoncode RC_NOT_READY
+         * @userdata1  HUID of processor
+         * @userdata2  ID of PLDM effecter
+         * @devdesc    Software problem, SBE dump complete notification sent by BMC at runtime
+         * @custdesc   A software error occurred during runtime
+         */
+        errl = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+                             MOD_HANDLE_SBE_HRESET_REQUEST_RT,
+                             RC_NOT_READY,
+                             get_huid(proc),
+                             i_args.i_req->effecter_id,
+                             ErrlEntry::NO_SW_CALLOUT);
+        addBmcErrorCallouts(errl);
+
+        send_cc_only_response(i_args.i_msgQ, i_args.i_msg, PLDM_ERROR_NOT_READY);
+        break;
+    }
+
+    send_cc_only_response(i_args.i_msgQ, i_args.i_msg, PLDM_SUCCESS);
+
+    using namespace SBEIO;
+
+    PLDM_INF("handleSbeHresetRequest: Attempting SBE HRESET on processor 0x%08x", get_huid(proc));
+
+    SbeRetryHandler l_sbeObj(proc,
+                             SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT,
+                             SbeRetryHandler::SBE_RESTART_METHOD::HRESET,
+                             EMPTY_PLID,
+                             NOT_INITIAL_POWERON);
+
+    l_sbeObj.main_sbe_handler();
+
+    } while (false);
+
+    PLDM_EXIT("handleSbeHresetRequest(0x%08x)", get_huid(proc));
+
+    return errl;
+}
+
+#else
+
+errlHndl_t handleSbeHresetRequest(const state_effecter_callback_args& i_args)
+{
+    errlHndl_t errl = nullptr;
+
+    if (i_args.i_req->field[0].effecter_state != SBE_DUMP_COMPLETED)
+    {
+        PLDM_ERR("handleSbeHresetRequest: BMC sent HRESET request for processor 0x%08x at IPL time",
+                 get_huid(i_args.i_target));
+
+        /*@
+         * @errortype  ERRL_SEV_INFORMATIONAL
+         * @moduleid   MOD_HANDLE_SBE_HRESET_REQUEST
+         * @reasoncode RC_NOT_READY
+         * @userdata1  HUID of processor
+         * @userdata2  ID of PLDM effecter
+         * @devdesc    Software problem, SBE HRESET request sent by BMC at IPL time
+         * @custdesc   A software error occurred during runtime
+         */
+        errl = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+                             MOD_HANDLE_SBE_HRESET_REQUEST,
+                             RC_NOT_READY,
+                             get_huid(i_args.i_target),
+                             i_args.i_req->effecter_id,
+                             ErrlEntry::NO_SW_CALLOUT);
+        addBmcErrorCallouts(errl);
+
+        send_cc_only_response(i_args.i_msgQ, i_args.i_msg, PLDM_ERROR_NOT_READY);
+    }
+    else
+    {
+        send_cc_only_response(i_args.i_msgQ, i_args.i_msg, PLDM_SUCCESS);
+    }
+
+    return errl;
+}
+
+#endif
 
 }

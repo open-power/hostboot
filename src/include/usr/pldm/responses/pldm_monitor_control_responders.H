@@ -94,70 +94,86 @@ errlHndl_t handleGetStateSensorReadingsRequest(msg_q_t i_msgQ,
                                                const pldm_msg* i_msg,
                                                size_t i_payload_len);
 
+/* @brief Common arguments to all state sensor/effecter handler callbacks.
+ */
+struct state_query_handler_callback_args
+{
+    // Target that the effecter/sensor is related to.
+    TARGETING::Target* i_target = nullptr;
+    // The PLDM message queue.
+    msg_q_t i_msgQ = nullptr;
+    // The raw PLDM message.
+    const pldm_msg* i_msg = nullptr;
+    // The payload length of the raw PLDM message.
+    size_t i_payload_len = 0;
+    // Arbitrary data for the callback.
+    uint64_t i_userdata = 0;
+};
+
+/* @brief Arguments to state effecter handler callbacks.
+ */
+struct state_effecter_callback_args : state_query_handler_callback_args
+{
+    // The PLDM "set state effecter states" request structure.
+    const pldm_set_state_effecter_states_req* i_req = nullptr;
+};
+
+/* @brief Arguments to state sensor handler callbacks.
+ */
+struct state_sensor_callback_args : state_query_handler_callback_args
+{
+    // The PLDM "get state sensor readings" request structure.
+    const pldm_get_state_sensor_readings_req* i_req = nullptr;
+};
+
 /* @brief Handler for Set State Effecter requests for OCC state effecters.
  *
- * @param[in] i_occ          The OCC target.
- * @param[in] i_msgQ         Handle to MCTP outbound request message queue
- * @param[in] i_msg          PLDM message received
- * @param[in] i_payload_len  Length of PLDM message payload
- * @param[in] i_req          Decoded PLDM request.
+ * @param[in] i_args         State query handler arguments.
  * @return errlHndl_t        Error if any, otherwise nullptr.
  */
-errlHndl_t handleOccSetStateEffecterRequest(TARGETING::Target* i_occ,
-                                            msg_q_t i_msgQ,
-                                            const pldm_msg* i_msg,
-                                            size_t i_payload_len,
-                                            const pldm_set_state_effecter_states_req& i_req);
+errlHndl_t handleOccSetStateEffecterRequest(const state_effecter_callback_args& i_args);
 
 /* @brief Handler for Set State Effecter requests for graceful shutdown.
  *
- * @param[in] i_sys          System target
- * @param[in] i_msgQ         Handle to MCTP outbound request message queue
- * @param[in] i_msg          PLDM message received
- * @param[in] i_payload_len  Length of PLDM message payload
- * @param[in] i_req          Decoded PLDM request.
+ * @param[in] i_args         State query handler arguments.
  * @return errlHndl_t        Error if any, otherwise nullptr.
  */
-errlHndl_t handleGracefulShutdownRequest(TARGETING::Target* i_sys,
-                                         msg_q_t i_msgQ,
-                                         const pldm_msg* i_msg,
-                                         size_t i_payload_len,
-                                         const pldm_set_state_effecter_states_req& i_req);
+errlHndl_t handleGracefulShutdownRequest(const state_effecter_callback_args& i_args);
 
 /* @brief Handler for Get State Sensor Readings requests for FRU functional state sensors.
  *
- * @param[in] i_target       The FRU target for the sensor.
- * @param[in] i_msgQ         Handle to MCTP outbound request message queue
- * @param[in] i_msg          PLDM message received
- * @param[in] i_payload_len  Length of PLDM message payload
- * @param[in] i_req          Decoded PLDM request.
+ * @param[in] i_args         State query handler arguments.
  * @return errlHndl_t        Error if any, otherwise nullptr.
  */
-errlHndl_t handleFunctionalStateSensorGetRequest(TARGETING::Target* i_target,
-                                                 msg_q_t i_msgQ,
-                                                 const pldm_msg* i_msg,
-                                                 size_t i_payload_len,
-                                                 const pldm_get_state_sensor_readings_req& i_req);
+errlHndl_t handleFunctionalStateSensorGetRequest(const state_sensor_callback_args& i_args);
 
 /* @brief Handler for Get State Sensor Readings requests for OCC state sensor.
  *
- * See handleFunctionalStateSensorGetRequest for parameter documentation.
+ * @param[in] i_args         State query handler arguments.
+ * @return errlHndl_t        Error if any, otherwise nullptr.
  */
-errlHndl_t handleOccStateSensorGetRequest(TARGETING::Target* i_occ,
-                                          msg_q_t i_msgQ,
-                                          const pldm_msg* i_msg,
-                                          size_t i_payload_len,
-                                          const pldm_get_state_sensor_readings_req& i_req);
+errlHndl_t handleOccStateSensorGetRequest(const state_sensor_callback_args& i_args);
 
 /* @brief Handler for Get State Sensor Readings requests for graceful shutdown.
  *
- * See handleFunctionalStateSensorGetRequest for parameter documentation.
+ * @param[in] i_args         State query handler arguments.
+ * @return errlHndl_t        Error if any, otherwise nullptr.
  */
-errlHndl_t handleGracefulShutdownSensorGetRequest(TARGETING::Target* i_target,
-                                                  msg_q_t i_msgQ,
-                                                  const pldm_msg* i_msg,
-                                                  size_t i_payload_len,
-                                                  const pldm_get_state_sensor_readings_req& i_req);
+errlHndl_t handleGracefulShutdownSensorGetRequest(const state_sensor_callback_args& i_args);
+
+/* @brief Handler for Get State Sensor Readings requests for attribute-backed sensors.
+ *
+ * @param[in] i_args         State query handler arguments.
+ * @return errlHndl_t        Error if any, otherwise nullptr.
+ */
+errlHndl_t handleAttributeBackedSensorGetRequest(const state_sensor_callback_args& i_args);
+
+/* @brief Handler for Set State Effecter States requests for SBE HRESET functionality.
+ *
+ * @param[in] i_args         State query handler arguments.
+ * @return errlHndl_t        Error if any, otherwise nullptr.
+ */
+errlHndl_t handleSbeHresetRequest(const state_effecter_callback_args& i_args);
 
 /* @brief handleSetEventReceiverRequest
  *

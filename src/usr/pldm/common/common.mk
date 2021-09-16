@@ -39,6 +39,14 @@ EXTRAINCDIR += ${EXTERN_PLDM_PATH}
 EXTRAINCDIR += ${EXTERN_LIBPLDM_PATH}
 EXTRAINCDIR += ${EXTERN_LIBPLDM_OEM_PATH}
 EXTRAINCDIR += ${COMMON_IMPORT_PATH}
+EXTRAINCDIR += ${COMMON_ROOTPATH}/src/import/chips/p10/utils/imageProcs
+EXTRAINCDIR += ${COMMON_ROOTPATH}/src/import/hwpf/fapi2/include/
+EXTRAINCDIR += ${COMMON_ROOTPATH}/src/include/usr/fapi2/
+EXTRAINCDIR += ${COMMON_ROOTPATH}/src/import/chips/p10/common/include/
+EXTRAINCDIR += ${COMMON_ROOTPATH}/src/import/chips/common/utils/imageProcs
+EXTRAINCDIR += ${COMMON_ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc
+EXTRAINCDIR += ${COMMON_ROOTPATH}/src/import/chips/p10/procedures/hwp/sbe
+EXTRAINCDIR += ${COMMON_ROOTPATH}/src/import/chips/p10/procedures/hwp/perv
 
 PLDM_BASE_COMMON_OBJS += pldmtrace.o
 PLDM_BASE_COMMON_OBJS += pldm_utils.o
@@ -67,6 +75,7 @@ PLDM_EXTENDED_COMMON_OBJS += pldm_fru.o
 PLDM_EXTENDED_COMMON_OBJS += pldm_fru_data_responders.o
 PLDM_EXTENDED_COMMON_OBJS += pldm_watchdog.o
 PLDM_EXTENDED_COMMON_OBJS += pldm_monitor_control_responders.o
+PLDM_EXTENDED_COMMON_OBJS += sbe_dump.o
 
 # add these paths to VPATH so compiler knows
 # where to find the .C/.c files we need

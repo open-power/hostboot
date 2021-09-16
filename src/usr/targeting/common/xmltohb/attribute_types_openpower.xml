@@ -284,6 +284,23 @@
   </attribute>
 
   <attribute>
+    <id>CURRENT_SBE_HRESET_STATUS</id>
+    <description>
+      The state of the ongoing HRESET operation, if any.
+    </description>
+    <simpleType>
+      <uint16_t>
+        <!-- SBE_HRESET_STATUS enumeration, value NOT_READY -->
+        <default>1</default>
+      </uint16_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <id>DIMM_ERROR_TEMP_DEG_C</id>
     <description>
         DIMM Temperature in degrees C that a DIMM overtemp error will be logged
@@ -1352,7 +1369,7 @@ ID for the sensor number returned with the elog. -->
         <default>0</default>
       </uint8_t>
       <array>
-        8192
+      12288
       </array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -1585,6 +1602,31 @@ ID for the sensor number returned with the elog. -->
     <persistency>non-volatile</persistency>
     <readable/>
   </attribute>
+
+  <enumerationType>
+    <id>SBE_HRESET_STATUS</id>
+    <description>
+        Enumeration defining the states of an SBE HRESET
+        operation. These values correspond to the values of the
+        PLDM_OEM_IBM_SBE_HRESET_STATE PLDM state set.
+    </description>
+    <enumerator>
+      <name>UNKNOWN</name>
+      <value>0</value>
+    </enumerator>
+    <enumerator>
+      <name>NOT_READY</name>
+      <value>1</value>
+    </enumerator>
+    <enumerator>
+      <name>READY</name>
+      <value>2</value>
+    </enumerator>
+    <enumerator>
+      <name>FAILED</name>
+      <value>3</value>
+    </enumerator>
+  </enumerationType>
 
   <enumerationType>
     <id>SENSOR_TYPE</id>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,6 +31,7 @@
 #include <pldm/pldmif.H>
 #include <runtime/interface.h>
 #include <pldm/extended/pdr_manager.H>
+#include <pldm/extended/sbe_dump.H>
 
 using namespace PLDM;
 
@@ -113,6 +114,10 @@ pldmrp_rt_rc PldmRP::cache_next_pldm_msg(const uint8_t * const i_next_msg,
 void init_pldm(void)
 {
     PLDM_ENTER("init_pldm");
+
+    // Tell the BMC that we are now ready to handle HRESET requests.
+    PLDM::notifySbeHresetsReady(true);
+
     PLDM_EXIT("init_pldm");
 }
 

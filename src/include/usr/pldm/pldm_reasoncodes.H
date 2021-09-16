@@ -96,6 +96,8 @@ namespace PLDM
         MOD_SBE_DUMP                                 = 0x37, // dumpSbe
         MOD_GET_USB_ENABLEMENT                       = 0x38, // getUsbEnablement
         MOD_SET_BIOS_ATTR_INTEGER_VALUE              = 0x39, // setBiosIntegerAttrValue
+        MOD_HANDLE_SBE_HRESET_REQUEST                = 0x3A, // handleSbeHresetRequest
+        MOD_HANDLE_SBE_HRESET_REQUEST_RT             = 0x3B, // handleSbeHresetRequest
     };
 
     enum PLDMReasonCode

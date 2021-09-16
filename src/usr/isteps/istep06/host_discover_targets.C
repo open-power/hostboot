@@ -56,6 +56,7 @@
 #include <pldm/extended/pdr_manager.H>
 #include <pldm/extended/hb_fru.H>
 #include <pldm/extended/pldm_entity_ids.H>
+#include <pldm/extended/sbe_dump.H>
 #endif
 #include <fapi2/plat_hwp_invoker.H>
 #include <fapi2/target.H>
@@ -689,6 +690,10 @@ void* host_discover_targets( void *io_pArgs )
                       ERR_MRK"PDR exchange failed");
             captureError(l_err, l_stepError, ISTEP_COMP_ID);
         }
+
+        // Notify the BMC that we are not able to take SBE HRESET requests. (We
+        // will be ready at runtime.)
+        PLDM::notifySbeHresetsReady(false);
     }
 #endif // CONFIG_PLDM
 

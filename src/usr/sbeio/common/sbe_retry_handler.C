@@ -78,6 +78,11 @@
 // Generated
 #include <set_sbe_error.H>
 
+// PLDM
+#if defined(__HOSTBOOT_RUNTIME) && defined(CONFIG_PLDM)
+#include <pldm/extended/sbe_dump.H>
+#endif
+
 extern trace_desc_t* g_trac_sbeio;
 
 #define SBE_TRACF(printf_string,args...) \
@@ -159,6 +164,11 @@ SbeRetryHandler::~SbeRetryHandler() {}
 void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
 {
     SBE_TRACF(ENTER_MRK "main_sbe_handler()");
+
+#if defined(__HOSTBOOT_RUNTIME) && defined(CONFIG_PLDM)
+    const auto old_hreset_states = PLDM::notifyBeginSbeHreset(iv_proc);
+#endif
+
     do
     {
         errlHndl_t l_errl = nullptr;
@@ -778,6 +788,25 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
         }
 
     }while(0);
+
+#if defined(__HOSTBOOT_RUNTIME) && defined(CONFIG_PLDM)
+    TARGETING::ATTR_CURRENT_SBE_HRESET_STATUS_type op_result = 0;
+
+    if (isSbeAtRuntime())
+    {
+        SBE_TRACF("main_sbe_handler: HRESET on processor 0x%08x succeeded", get_huid(iv_proc));
+
+        op_result = TARGETING::SBE_HRESET_STATUS_READY;
+    }
+    else
+    {
+        SBE_TRACF("main_sbe_handler: HRESET on processor 0x%08x failed", get_huid(iv_proc));
+
+        op_result = TARGETING::SBE_HRESET_STATUS_FAILED;
+    }
+
+    PLDM::notifyEndSbeHreset(iv_proc, op_result, old_hreset_states);
+#endif
 
     SBE_TRACF(EXIT_MRK"main_sbe_handler: iv_switchSidesCount=%llx iv_switchSidesCount_mseeprom=%llx "
                       "iv_currentSideBootAttempts=%llx iv_currentSideBootAttempts_mseeprom=%llx iv_boot_restart_count=%d",

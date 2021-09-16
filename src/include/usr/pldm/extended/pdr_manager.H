@@ -221,18 +221,21 @@ public:
                                     pldm_entity& o_entity) const;
 
     /* A "state query" is either a state sensor get-request or a state effecter
-     * set-request. */
+     * set-request. Do NOT alter the values of this enumeration without updating
+     * the handlers[] array in pdr_manager.C. */
     enum state_query_handler_id_t
     {
         STATE_QUERY_HANDLER_FUNCTIONAL_STATE_SENSOR = 1,
         STATE_QUERY_HANDLER_OCC_STATE_QUERY = 2,
         STATE_QUERY_HANDLER_GRACEFUL_SHUTDOWN = 3,
+        STATE_QUERY_HANDLER_REQUEST_HRESET = 4,
+        STATE_QUERY_HANDLER_ATTRIBUTE_GETTER = 5,
         STATE_QUERY_HANDLER_INVALID = 0xFF
     };
 
     /* Enumeration for handleStateQueryRequest. A state query is either an
      * effecter set-request or a sensor get-request. */
-    enum state_query_type_t : uint8_t
+    enum state_query_type_t : uint16_t
     {
         STATE_QUERY_SENSOR = 1,
         STATE_QUERY_EFFECTER = 2
@@ -247,6 +250,7 @@ public:
         uint16_t state_set_id = 0;
         uint16_t function_id = 0;
         state_query_type_t query_type = { };
+        uint64_t userdata = 0;
     } PACKED;
 
     /* @brief  Add a state effecter PDR to the PDR repository.
@@ -262,13 +266,15 @@ public:
      *                               PDR. If this is NONE, then the PDR will be created, but the
      *                               SetStateEffecterStates PLDM command for this effecter will respond with
      *                               an error.
+     * @param[in] i_userdata         A 64-bit value that will be given to the callback handler for this effecter.
      * @note                         Locks the PDR repository.
      */
     void addStateEffecterPdr(TARGETING::Target* i_target,
                              const pldm_entity& i_entity,
                              uint16_t i_state_set_id,
                              uint8_t i_possible_states,
-                             state_query_handler_id_t i_qhandler);
+                             state_query_handler_id_t i_qhandler,
+                             uint64_t i_userdata = 0);
 
     /* @brief  Add a state sensor PDR to the PDR repository.
      *
@@ -283,13 +289,15 @@ public:
      *                               PDR. If this is NONE, then the PDR will be created, but the
      *                               GetStateSensorReadings PLDM command for this effecter will respond with
      *                               an error.
+     * @param[in] i_userdata         A 64-bit value that will be given to the callback handler for this sensor.
      * @note                         Locks the PDR repository.
      */
     void addStateSensorPdr(TARGETING::Target* i_target,
                            const pldm_entity& i_entity,
                            uint16_t i_state_set_id,
                            uint8_t i_possible_states,
-                           state_query_handler_id_t i_qhandler);
+                           state_query_handler_id_t i_qhandler,
+                           uint64_t i_userdata = 0);
 
     /* @brief Get the set of state query records (possibly related to a
      *        particular target).

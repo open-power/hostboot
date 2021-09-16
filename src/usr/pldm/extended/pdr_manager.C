@@ -457,7 +457,8 @@ void PdrManager::addStateSensorPdr(Target* const i_target,
                                    const pldm_entity& i_entity,
                                    const uint16_t i_state_set_id,
                                    const uint8_t i_possible_states,
-                                   const state_query_handler_id_t i_qhandler)
+                                   const state_query_handler_id_t i_qhandler,
+                                   const uint64_t i_userdata)
 {
     const auto lock = scoped_mutex_lock(iv_access_mutex);
 
@@ -513,9 +514,10 @@ void PdrManager::addStateSensorPdr(Target* const i_target,
                  PDR_AUTO_CALCULATE_RECORD_HANDLE,
                  PDR_IS_NOT_REMOTE);
 
-    PLDM_INF("Added state sensor PDR for target 0x%08x, sensor id = 0x%08x",
+    PLDM_INF("Added state sensor PDR for target 0x%08x, sensor id = 0x%08x, state set ID = %d",
              get_huid(i_target),
-             iv_next_state_query_id);
+             iv_next_state_query_id,
+             i_state_set_id);
 
     /* Update record-keeping state */
 
@@ -525,7 +527,8 @@ void PdrManager::addStateSensorPdr(Target* const i_target,
         .query_id = iv_next_state_query_id,
         .state_set_id = i_state_set_id,
         .function_id = i_qhandler,
-        .query_type = STATE_QUERY_SENSOR
+        .query_type = STATE_QUERY_SENSOR,
+        .userdata = i_userdata
     };
 
     appendStateQueryInfo(query_record);
@@ -537,7 +540,9 @@ void PdrManager::addStateEffecterPdr(Target* const i_target,
                                      const pldm_entity& i_entity,
                                      const uint16_t i_state_set_id,
                                      const uint8_t i_possible_states,
-                                     const state_query_handler_id_t i_qhandler)
+                                     const state_query_handler_id_t i_qhandler,
+                                     const uint64_t i_userdata)
+
 {
     const auto lock = scoped_mutex_lock(iv_access_mutex);
 
@@ -596,7 +601,8 @@ void PdrManager::addStateEffecterPdr(Target* const i_target,
         .query_id = iv_next_state_query_id,
         .state_set_id = i_state_set_id,
         .function_id = i_qhandler,
-        .query_type = STATE_QUERY_EFFECTER
+        .query_type = STATE_QUERY_EFFECTER,
+        .userdata = i_userdata
     };
 
     appendStateQueryInfo(query_record);
@@ -662,18 +668,10 @@ namespace
 {
 
 /* Signature for a SetStateEffecterStates callback function. */
-using state_effecter_handler_t = errlHndl_t(*)(TARGETING::Target*,
-                                               msg_q_t,
-                                               const pldm_msg*,
-                                               size_t,
-                                               const pldm_set_state_effecter_states_req&);
+using state_effecter_handler_t = errlHndl_t(*)(const state_effecter_callback_args&);
 
 /* Signature for a GetStateSensorReadings callback function. */
-using state_sensor_handler_t = errlHndl_t(*)(TARGETING::Target*,
-                                             msg_q_t,
-                                             const pldm_msg*,
-                                             size_t,
-                                             const pldm_get_state_sensor_readings_req&);
+using state_sensor_handler_t = errlHndl_t(*)(const state_sensor_callback_args&);
 
 struct state_query_handler_t
 {
@@ -684,11 +682,15 @@ struct state_query_handler_t
 const state_query_handler_t handlers[] =
 {
     { nullptr, nullptr },                               // STATE_QUERY_HANDLER enumeration starts at 1
-    { handleFunctionalStateSensorGetRequest, nullptr }, // STATE_QUERY_HANDLER_FUNCTIONAL_STATE_SENSOR
-    { handleOccStateSensorGetRequest,                   // STATE_QUERY_HANDLER_OCC_STATE_QUERY
+    { handleFunctionalStateSensorGetRequest, nullptr }, // 1: STATE_QUERY_HANDLER_FUNCTIONAL_STATE_SENSOR
+    { handleOccStateSensorGetRequest,                   // 2: STATE_QUERY_HANDLER_OCC_STATE_QUERY
       handleOccSetStateEffecterRequest },
-    { handleGracefulShutdownSensorGetRequest,           // STATE_QUERY_HANDLER_GRACEFUL_SHUTDOWN
-      handleGracefulShutdownRequest }
+    { handleGracefulShutdownSensorGetRequest,           // 3: STATE_QUERY_HANDLER_GRACEFUL_SHUTDOWN
+      handleGracefulShutdownRequest },
+    { nullptr,
+      handleSbeHresetRequest },                         // 4: STATE_QUERY_HANDLER_REQUEST_HRESET
+    { handleAttributeBackedSensorGetRequest,            // 5: STATE_QUERY_HANDLER_ATTRIBUTE_GETTER
+      nullptr },
 };
 
 state_query_handler_t get_state_handler(PdrManager::state_query_handler_id_t i_id)
@@ -704,7 +706,8 @@ errlHndl_t invoke_state_effecter_handler(const PdrManager::state_query_handler_i
                                          const msg_q_t i_msgq,
                                          const pldm_msg* const i_msg,
                                          const size_t i_msgsize,
-                                         const pldm_set_state_effecter_states_req& i_req)
+                                         const pldm_set_state_effecter_states_req& i_req,
+                                         const uint64_t i_userdata)
 {
     const auto handler = get_state_handler(i_handler_id);
 
@@ -712,7 +715,15 @@ errlHndl_t invoke_state_effecter_handler(const PdrManager::state_query_handler_i
            "invoke_state_effecter_handler: Invalid effecter ID %d registered on target 0x%08x",
            i_handler_id, get_huid(i_target));
 
-    return handler.effecter_handler(i_target, i_msgq, i_msg, i_msgsize, i_req);
+    state_effecter_callback_args args;
+    args.i_target = i_target;
+    args.i_msgQ = i_msgq;
+    args.i_msg = i_msg;
+    args.i_payload_len = i_msgsize;
+    args.i_userdata = i_userdata;
+    args.i_req = &i_req;
+
+    return handler.effecter_handler(args);
 }
 
 errlHndl_t invoke_state_sensor_handler(const PdrManager::state_query_handler_id_t i_handler_id,
@@ -720,7 +731,8 @@ errlHndl_t invoke_state_sensor_handler(const PdrManager::state_query_handler_id_
                                        const msg_q_t i_msgq,
                                        const pldm_msg* const i_msg,
                                        const size_t i_msgsize,
-                                       const pldm_get_state_sensor_readings_req& i_req)
+                                       const pldm_get_state_sensor_readings_req& i_req,
+                                       const uint64_t i_userdata)
 {
     const auto handler = get_state_handler(i_handler_id);
 
@@ -728,7 +740,15 @@ errlHndl_t invoke_state_sensor_handler(const PdrManager::state_query_handler_id_
            "invoke_state_sensor_handler: Invalid sensor ID %d registered on target 0x%08x",
            i_handler_id, get_huid(i_target));
 
-    return handler.sensor_handler(i_target, i_msgq, i_msg, i_msgsize, i_req);
+    state_sensor_callback_args args;
+    args.i_target = i_target;
+    args.i_msgQ = i_msgq;
+    args.i_msg = i_msg;
+    args.i_payload_len = i_msgsize;
+    args.i_userdata = i_userdata;
+    args.i_req = &i_req;
+
+    return handler.sensor_handler(args);
 }
 
 } // anonymous namespace
@@ -762,6 +782,7 @@ errlHndl_t PdrManager::handleStateQueryRequest(const state_query_type_t i_queryt
     /* Look up the query handler callback for this sensor. */
 
     Target* handler_target = nullptr;
+    uint64_t callback_userdata = 0;
     uint8_t handler_function_id = STATE_QUERY_HANDLER_INVALID;
 
     {
@@ -778,6 +799,7 @@ errlHndl_t PdrManager::handleStateQueryRequest(const state_query_type_t i_queryt
             {
                 handler_target = Target::getTargetFromHuid(records[i].target_huid);
                 handler_function_id = records[i].function_id;
+                callback_userdata = records[i].userdata;
                 break;
             }
         }
@@ -827,24 +849,26 @@ errlHndl_t PdrManager::handleStateQueryRequest(const state_query_type_t i_queryt
     {
         errl = invoke_state_effecter_handler(static_cast<state_query_handler_id_t>(handler_function_id),
                                              handler_target, i_msgQ, i_msg, i_payload_len,
-                                             *static_cast<const pldm_set_state_effecter_states_req*>(i_req));
+                                             *static_cast<const pldm_set_state_effecter_states_req*>(i_req),
+                                             callback_userdata);
         break;
     }
     else if (i_querytype == STATE_QUERY_SENSOR)
     {
         errl = invoke_state_sensor_handler(static_cast<state_query_handler_id_t>(handler_function_id),
                                            handler_target, i_msgQ, i_msg, i_payload_len,
-                                           *static_cast<const pldm_get_state_sensor_readings_req*>(i_req));
+                                           *static_cast<const pldm_get_state_sensor_readings_req*>(i_req),
+                                           callback_userdata);
         break;
     }
 
     } while (false);
 
-    /* Reply with an error if we didn't invoke any static handler. If we call a
-       static query handler at all, it should send the response (even if there's
-       an error within it or something), so we don't need to do it here.
-       Dynamic handlers, on the other hand, shouldn't send the response
-       themselves, so we do want to do that for them here. */
+    /* Reply if we didn't invoke any static handler. If we call a static query
+       handler at all, it should send the response (even if there's an error
+       within it or something), so we don't need to do it here.  Dynamic
+       handlers, on the other hand, shouldn't send the response themselves, so
+       we do want to do that for them here. */
 
     if (!static_handler_invoked)
     {

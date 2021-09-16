@@ -52,6 +52,44 @@ namespace PLDM
  */
 errlHndl_t dumpSbe(TARGETING::Target* i_proc, errlHndl_t i_errorlog);
 
+/* @brief Structure containing a snapshot of the CURRENT_SBE_HRESET_STATUS
+ *        attributes for a set of processors.
+ */
+struct sbe_hreset_states
+{
+    struct huid_state
+    {
+        TARGETING::ATTR_HUID_type huid = 0;
+        TARGETING::ATTR_CURRENT_SBE_HRESET_STATUS_type state = 0;
+    };
+
+    std::vector<huid_state> states;
+};
+
+/* @brief Notify the BMC that an HRESET has started on the given processor.
+ *
+ * @param[in] i_proc  The processor being HRESET.
+ *
+ * @return            A snapshot of the old HRESET states, to be given to notifyEndSbeHreset.
+ */
+sbe_hreset_states notifyBeginSbeHreset(TARGETING::Target* i_proc);
+
+/* @brief Notify the BMC that an HRESET is complete.
+ *
+ * @param[in] i_proc        The target processor
+ * @param[in] i_state       The result of the HRESET operation.
+ * @param[in] i_old_states  Return value of the corresponding notifyBeginSbeHreset call.
+ */
+void notifyEndSbeHreset(TARGETING::Target* i_proc,
+                        TARGETING::ATTR_CURRENT_SBE_HRESET_STATUS_type i_state,
+                        const sbe_hreset_states& i_old_states);
+
+/* @brief Notify the BMC about whether the host is ready to handle HRESET requests.
+ *
+ * @param[in] i_ready  True if the host is ready for HRESET requests, else false.
+ */
+void notifySbeHresetsReady(bool i_ready);
+
 }
 
 #endif

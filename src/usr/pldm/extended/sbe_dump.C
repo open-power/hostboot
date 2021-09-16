@@ -28,6 +28,8 @@
 
 // Targeting
 #include <targeting/common/target.H>
+#include <targeting/common/utilFilter.H>
+#include <targeting/targplatutil.H>
 
 // PLDM
 #include <pldm/extended/sbe_dump.H>
@@ -42,14 +44,15 @@
 // Miscellaneous
 #include <sys/msg.h>
 
-#include <console/consoleif.H>
-
 using namespace PLDM;
 using namespace ERRORLOG;
 using namespace TARGETING;
 
-// @TODO RTC 247294: Use the constant from libpldm
-const uint16_t PLDM_OEM_IBM_SBE_MAINTENANCE_STATE = 32772;
+// @TODO RTC 247294: Delete these constants and use the ones from libpldm
+const int PLDM_OEM_IBM_SBE_MAINTENANCE_STATE = 32772;
+const int PLDM_OEM_IBM_SBE_HRESET_STATE = 32773;
+
+#ifndef __HOSTBOOT_RUNTIME
 
 /* @brief Get the BMC's SBE Dump effecter ID for the given proc. Returns 0 if not found.
  *
@@ -88,9 +91,6 @@ effecter_id_t getSbeDumpEffecterId(const Target* const i_proc)
 errlHndl_t PLDM::dumpSbe(Target* const i_proc, const errlHndl_t i_errorlog)
 {
     PLDM_ENTER("dumpSbe(0x%08x, 0x%08x)", get_huid(i_proc), ERRL_GETPLID_SAFE(i_errorlog));
-
-    // @TODO RTC 247294: Delete this constant and use the ones from libpldm
-    const int PLDM_OEM_IBM_SBE_MAINTENANCE_STATE = 32772;
 
     errlHndl_t errl = nullptr;
 
@@ -269,4 +269,75 @@ errlHndl_t PLDM::dumpSbe(Target* const i_proc, const errlHndl_t i_errorlog)
               get_huid(i_proc), ERRL_GETPLID_SAFE(i_errorlog), ERRL_GETPLID_SAFE(errl));
 
     return errl;
+}
+
+#endif
+
+void updateSbeHresetStatus(Target* const i_proc, const ATTR_CURRENT_SBE_HRESET_STATUS_type i_state)
+{
+    i_proc->setAttr<ATTR_CURRENT_SBE_HRESET_STATUS>(i_state);
+
+    const sensor_id_t hreset_noti_sensor
+        = thePdrManager().getHostStateQueryIdForStateSet(PdrManager::STATE_QUERY_SENSOR,
+                                                         PLDM_OEM_IBM_SBE_HRESET_STATE,
+                                                         i_proc);
+
+    assert(hreset_noti_sensor != 0, "Cannot find HRESET notification sensor on proc 0x%08x",
+           get_huid(i_proc));
+
+    sendSensorStateChangedEvent(i_proc, PLDM_OEM_IBM_SBE_HRESET_STATE, hreset_noti_sensor, 0, i_state);
+}
+
+sbe_hreset_states PLDM::notifyBeginSbeHreset(Target* const i_proc)
+{
+    sbe_hreset_states state;
+
+    TargetHandleList procs;
+    getAllChips(procs, TYPE_PROC);
+
+    for (const auto proc : procs)
+    {
+        state.states.push_back({ get_huid(proc), proc->getAttr<ATTR_CURRENT_SBE_HRESET_STATUS>() });
+
+        updateSbeHresetStatus(proc, SBE_HRESET_STATUS_NOT_READY);
+    }
+
+    return state;
+}
+
+void PLDM::notifyEndSbeHreset(Target* const i_proc, const ATTR_CURRENT_SBE_HRESET_STATUS_type i_state, const sbe_hreset_states& states)
+{
+    const auto proc_huid = get_huid(i_proc);
+
+    for (const auto state : states.states)
+    {
+        if (state.huid != proc_huid)
+        {
+            Target* const targ = Target::getTargetFromHuid(state.huid);
+            assert(targ, "endHreset: Cannot find target with HUID 0x%08x", state.huid);
+
+            updateSbeHresetStatus(targ, state.state);
+        }
+    }
+
+    updateSbeHresetStatus(i_proc, i_state);
+}
+
+void PLDM::notifySbeHresetsReady(const bool i_ready)
+{
+    const ATTR_CURRENT_SBE_HRESET_STATUS_type state = (i_ready
+                                                       ? SBE_HRESET_STATUS_READY
+                                                       : SBE_HRESET_STATUS_NOT_READY);
+
+    // We can only HRESET functional SBEs, so if the caller says we're ready, we
+    // will notify the BMC that the FUNCTIONAL procs are ready; otherwise we
+    // will notify the BMC that the PRESENT procs are NOT ready.
+    TargetHandleList procs;
+    TARGETING::getChildAffinityTargetsByState(procs, UTIL::assertGetToplevelTarget(), CLASS_NA, TYPE_PROC,
+                                              i_ready ? UTIL_FILTER_FUNCTIONAL : UTIL_FILTER_PRESENT);
+
+    for (const auto proc : procs)
+    {
+        updateSbeHresetStatus(proc, state);
+    }
 }
