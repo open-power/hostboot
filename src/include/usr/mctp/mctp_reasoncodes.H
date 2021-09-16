@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,14 +35,16 @@ namespace MCTP
         MOD_MCTP_CHANNEL_INIT = 0x01, // _mctp_channel_init
         MOD_HANDLE_OUTBOUND   = 0x02, // handle_outbound_messages
         MOD_RX_CALLBACK       = 0x03, // rx_message
+        MOD_DRAIN_ODR         = 0x04, // drain_odr
     };
 
     enum MCTPReasonCode
     {
-        RC_CHANNEL_INACTIVE   = MCTP_COMP_ID | 0x01,
-        RC_SEND_PLDM_FAIL     = MCTP_COMP_ID | 0x02,
-        RC_INVALID_MSG_TYPE   = MCTP_COMP_ID | 0x03,
-        RC_ERROR_CACHING_MSG  = MCTP_COMP_ID | 0x04,
+        RC_CHANNEL_INACTIVE         = MCTP_COMP_ID | 0x01,
+        RC_SEND_PLDM_FAIL           = MCTP_COMP_ID | 0x02,
+        RC_INVALID_MSG_TYPE         = MCTP_COMP_ID | 0x03,
+        RC_ERROR_CACHING_MSG        = MCTP_COMP_ID | 0x04,
+        RC_DRAINED_MAX_ODR_MSGS     = MCTP_COMP_ID | 0x07,
     };
 };
 #endif
