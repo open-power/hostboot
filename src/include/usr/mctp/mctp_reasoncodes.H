@@ -35,6 +35,7 @@ namespace MCTP
         MOD_MCTP_CHANNEL_INIT = 0x01, // _mctp_channel_init
         MOD_HANDLE_OUTBOUND   = 0x02, // handle_outbound_messages
         MOD_RX_CALLBACK       = 0x03, // rx_message
+        MOD_DRAIN_ODR         = 0x04, // drain_odr
     };
 
     enum MCTPReasonCode
@@ -45,6 +46,7 @@ namespace MCTP
         RC_ERROR_CACHING_MSG        = MCTP_COMP_ID | 0x04,
       //RC_CRC_MISMATCH             = MCTP_COMP_ID | 0x05 <= defined in libmctp-hostlbc.h
       //RC_FAILED_ALLOCATING_PACKET = MCTP_COMP_ID | 0x06 <= defined in libmctp-hostlbc.h
+        RC_DRAINED_MAX_ODR_MSGS     = MCTP_COMP_ID | 0x07,
     };
 };
 #endif

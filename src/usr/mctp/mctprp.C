@@ -97,28 +97,96 @@ static void lock_and_mctp_hostlpc_tx_complete(struct mctp_binding_hostlpc *hostl
     mutex_unlock(&mutex);
 }
 
+errlHndl_t read_kcs_status(uint8_t & o_status)
+{
+    size_t size = sizeof(o_status);
+    return DeviceFW::deviceRead(
+                        TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                        &o_status,
+                        size,
+                        DEVICE_LPC_ADDRESS(LPC::TRANS_IO,
+                                           LPC::KCS_STATUS_REG));
+}
+
+errlHndl_t read_kcs_data(uint8_t & o_data)
+{
+    size_t size = sizeof(o_data);
+    return DeviceFW::deviceRead(
+                        TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                        &o_data,
+                        size,
+                        DEVICE_LPC_ADDRESS(LPC::TRANS_IO,
+                                            LPC::KCS_DATA_REG));
+}
+
+errlHndl_t drain_odr(void)
+{
+    uint8_t kcs_status = 0, kcs_data = 0;
+    const uint8_t DRAIN_LIMIT = 255;
+    uint8_t drain_counter = DRAIN_LIMIT;
+    auto errl = read_kcs_status(kcs_status);
+
+    while((!errl) && --drain_counter && (kcs_status & KCS_STATUS_OBF))
+    {
+        errl = read_kcs_data(kcs_data);
+        if(errl)
+        {
+            break;
+        }
+        // Give the other MCTP EID a 50 msec to react
+        nanosleep(0, 50 * NS_PER_MSEC);
+        errl = read_kcs_status(kcs_status);
+    }
+
+    if(!errl && !drain_counter)
+    {
+        TRACFCOMP(g_trac_mctp,
+                  "More messages found in ODR than we ever expected to find.");
+        /*@
+        * @errortype
+        * @severity   ERRL_SEV_PREDICTIVE
+        * @moduleid   MOD_DRAIN_ODR
+        * @reasoncode RC_DRAINED_MAX_ODR_MSGS
+        * @userdata1  Number of KCS messages we drain from ODR before
+        *             creating this error log.
+        * @userdata2  Unused
+        * @devdesc    BMC is likely DOSing the Host with PLDM messages
+        *             intended for PHYP or HBRT.
+        * @custdesc   A software error occured during system boot
+        */
+        errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                             MOD_DRAIN_ODR,
+                             RC_DRAINED_MAX_ODR_MSGS,
+                             DRAIN_LIMIT,
+                             0,
+                             ErrlEntry::NO_SW_CALLOUT);
+        errl->collectTrace(MCTP_COMP_NAME);
+        errl->collectTrace(PLDM_COMP_NAME);
+
+        // Call out service processor / BMC firmware as high priority
+        errl->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                  HWAS::SRCI_PRIORITY_HIGH);
+
+        // Call out Hostboot firmware as medium priority
+        errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                  HWAS::SRCI_PRIORITY_MED);
+    }
+
+    return errl;
+}
+
 void MctpRP::poll_kcs_status(void)
 {
     task_detach();
     errlHndl_t l_errl = nullptr;
-    msg_t* msg = nullptr;
-    uint8_t l_status = 0;
-    size_t l_size = sizeof(uint8_t);
+    uint8_t l_status = 0, l_data = 0;
 
     while(1)
     {
         // Perform an LPC read on the KCS status register to see if the BMC has
         // sent the Host a message. We know that the BMC has sent a message if
         // the OBF bit in the status reg is set.
-        l_errl =
-            DeviceFW::deviceRead(
-                            TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
-                            &l_status,
-                            l_size,
-                            DEVICE_LPC_ADDRESS(LPC::TRANS_IO,
-                                               LPC::KCS_STATUS_REG));
-        // If there was an error reading the status reg then something is wrong
-        // and we should exit
+        l_errl = read_kcs_status(l_status);
         if(l_errl)
         {
             // TODO RTC: 249716
@@ -138,13 +206,7 @@ void MctpRP::poll_kcs_status(void)
         // otherwise read the ODR and send a message to the mctp_cmd_daemon
         // when the host reads this register it will clear the OBF bit in the
         // status register
-        l_errl =
-            DeviceFW::deviceRead(
-                            TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
-                            &l_status,
-                            l_size,
-                            DEVICE_LPC_ADDRESS(LPC::TRANS_IO,
-                                               LPC::KCS_DATA_REG));
+        l_errl = read_kcs_data(l_data);;
 
         if(l_errl)
         {
@@ -154,12 +216,11 @@ void MctpRP::poll_kcs_status(void)
             break;
         }
 
-        switch(l_status)
+        switch(l_data)
         {
           case MSG_INIT:
               TRACFCOMP(g_trac_mctp,
-                        "Found kcs msg type: MCTP::MSG_INIT which we do not support, ignoring it",
-                        msg->type);
+                        "Found kcs msg type: MCTP::MSG_INIT which we do not support, ignoring it");
               break;
           case MSG_TX_BEGIN:
               TRACDCOMP(g_trac_mctp, "BMC has sent us a message we need to read");
@@ -199,7 +260,7 @@ void MctpRP::poll_kcs_status(void)
               // Just leave a trace and move on with our life
               TRACFCOMP(g_trac_mctp,
                         "Found invalid kcs msg type: 0x%.02x, ignoring it",
-                        msg->type);
+                        l_data);
               break;
         }
     }
@@ -315,7 +376,8 @@ void MctpRP::handle_outbound_messages(void)
                   const uint64_t mctp_payload =
                           *reinterpret_cast<uint64_t*>(msg->extra_data);
                   /*@
-                  * @errortype  ERRL_SEV_UNRECOVERABLE
+                  * @errortype
+                  * @severity   ERRL_SEV_UNRECOVERABLE
                   * @moduleid   MOD_HANDLE_OUTBOUND
                   * @reasoncode RC_SEND_PLDM_FAIL
                   * @userdata1  Return code returned by MCTP core logic
@@ -395,8 +457,9 @@ do
     {
         TRACFCOMP(g_trac_mctp,
                   "_mctp_channel_init: Error ! KCS status reports channel as inactive when HB thinks its active!" );
-        /*@errorlog
-        * @errortype       ERRL_SEV_UNRECOVERABLE
+        /*@
+        * @errortype
+        * @severity        ERRL_SEV_UNRECOVERABLE
         * @moduleid        MOD_MCTP_CHANNEL_INIT
         * @reasoncode      RC_CHANNEL_INACTIVE
         * @userdata1       kcs status register value
@@ -455,6 +518,14 @@ void MctpRP::init(errlHndl_t& o_errl)
 
 void MctpRP::register_mctp_bus(void)
 {
+    // Read and discard any potentially stale messages in the ODR
+    auto errl = drain_odr();
+    if(errl)
+    {
+        // Commit any errors from trying to drain the ODR queue then
+        // attempt to continue.
+        errlCommit(errl, MCTP_COMP_ID);
+    }
 
     // Register the binding to the LPC bus we are using for this
     // MCTP configuration. NOTE this will trigger the "start" function
@@ -464,8 +535,7 @@ void MctpRP::register_mctp_bus(void)
 
     // Start the poll kcs status daemon which will read the KCS status reg
     // every 1 ms and if we see that the OBF bit in the KCS status register is
-    // set we will read the OBR KCS data reg and send a message to the
-    // handle_obf_status daemon
+    // set we will read the ODR KCS data reg and act on it
     task_create(poll_kcs_status_task, NULL);
     return;
 }
