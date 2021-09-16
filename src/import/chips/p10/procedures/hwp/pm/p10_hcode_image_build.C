@@ -1189,6 +1189,15 @@ fapi2::ReturnCode initSelfRestoreRegion( Homerlayout_t* i_pChipHomer )
         l_pSelfRestLoc++;
     }
 
+    uint32_t *l_threadLock   =   (uint32_t *)( (uint8_t *)&i_pChipHomer->iv_cpmrRegion + CPMR_MSG_SND_VECTOR_OFFSET ) ;
+
+    for( size_t l_quadId = 0; l_quadId < MAX_QUADS_PER_CHIP; l_quadId++ )
+    {                
+        *l_threadLock   =   htobe32( CPMR_MSG_SND_LOCK_VAL );
+         l_threadLock  +=   ( CPMR_MSG_SND_VECTOR_LENGTH >> 2 );
+         FAPI_INF( "Thread Lock Init 0x%08x", htobe32( *l_threadLock ));
+    }
+
     //Initialize Core SPR and Thread SPR start boundary with BLR instruction.
 
     FAPI_INF( " Size Of SmfSprRestoreRegion_t 0x%08x", sizeof( SmfSprRestoreRegion_t ) );
