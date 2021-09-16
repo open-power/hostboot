@@ -68,6 +68,7 @@ fapi2::ReturnCode p10_pm_glob_fir_trace(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const char* i_msg);
 
+fapi2::ReturnCode  deassertSPWU(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 // -----------------------------------------------------------------------------
 // Function definitions
 // -----------------------------------------------------------------------------
@@ -163,7 +164,7 @@ fapi2::ReturnCode p10_pm_start(
     {
 
         FAPI_DBG("Disable special wakeup for all functional  core targets");
-        fapi2::specialWakeup (i_target, false);
+        FAPI_TRY(deassertSPWU(i_target));
     }
     else
     {
@@ -235,6 +236,30 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+fapi2::ReturnCode deassertSPWU(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    fapi2::ReturnCode l_rc;
+    fapi2::buffer<uint64_t> l_xsr;
+
+    auto l_core_functional_vector =
+        i_target.getChildren<fapi2::TARGET_TYPE_CORE>
+        (fapi2::TARGET_STATE_FUNCTIONAL);
+
+
+    FAPI_INF("Disable special wakeup for all functional Core targets");
+
+    // Iterate through the returned chiplets.
+    for (auto l_core_target : l_core_functional_vector)
+    {
+        FAPI_TRY( fapi2::specialWakeup (l_core_target, false),
+                  "Special Wakeup Failed" );
+    }
+
+fapi_try_exit:
+
+    FAPI_IMP("<< deassertSPWU");
+    return fapi2::current_err;
+}
 
 fapi2::ReturnCode p10_pm_glob_fir_trace(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
