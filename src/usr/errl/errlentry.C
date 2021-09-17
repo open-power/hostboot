@@ -1105,9 +1105,9 @@ void ErrlEntry::traceLogEntry()
     iv_Src.flatten(flatsrc.data(), flatsrc.size());
 
     const auto pelsrchdr = reinterpret_cast<const pelSRCSection_t*>(flatsrc.data());
-    const uint32_t * wordptr =  reinterpret_cast<const uint32_t*>(&(pelsrchdr->reserved1));
+    const uint32_t * wordptr =  reinterpret_cast<const uint32_t*>(&(pelsrchdr->src.reserved1));
 
-    TRACFCOMP(g_trac_errl, "PLID 0x%.8X EID 0x%.8X - Reference Code %.4X, log size 0x%llX", plid(), eid(), pelsrchdr->reserved1, flattenedSize());
+    TRACFCOMP(g_trac_errl, "PLID 0x%.8X EID 0x%.8X - Reference Code %.4X, log size 0x%llX", plid(), eid(), pelsrchdr->src.reserved1, flattenedSize());
     TRACFCOMP(g_trac_errl, "EID %.8X Hex Words 2 -5  : %08X %08X %08X %08X", eid(), wordptr[1], wordptr[2], wordptr[3], wordptr[4]);
     TRACFCOMP(g_trac_errl, "EID %.8X Hex Words 6 -9  : %08X %08X %08X %08X", eid(), wordptr[5], wordptr[6], wordptr[7], wordptr[8]);
 }
@@ -1214,7 +1214,7 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
         // Skip SRC words 0 and 1 to start at SRC word 2 for the symptom ID
         // (wordcount does not include the zeroth SRC word)
         const auto pelsrchdr = reinterpret_cast<const pelSRCSection_t*>(flatsrc.data());
-        iv_Extended.setSymptomId(pelsrchdr->srcString, &pelsrchdr->word2, pelsrchdr->wordcount - 1);
+        iv_Extended.setSymptomId(pelsrchdr->src.srcString, &pelsrchdr->src.word2, pelsrchdr->src.wordcount - 1);
     }
 }
 

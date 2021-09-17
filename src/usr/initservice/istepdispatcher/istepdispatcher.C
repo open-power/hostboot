@@ -59,6 +59,7 @@
 #include "istepdispatcher.H"
 #include "istep_mbox_msgs.H"
 #include "splesscommon.H"
+#include "progressSrc.H"
 #include <diag/attn/attn.H>
 #include <isteps/istep_reasoncodes.H>
 #include <hwas/common/deconfigGard.H>
@@ -2636,6 +2637,7 @@ errlHndl_t IStepDispatcher::sendProgressCode(bool i_needsLock)
        TRACFCOMP(g_trac_initsvc,
                  "init: ERROR: reset PLDM watchdog Failed");
         err_pldm->collectTrace(PLDM_COMP_NAME);
+        err_pldm->collectTrace(INITSVC_COMP_NAME);
         errlCommit(err_pldm, INITSVC_COMP_ID );
     }
 #endif
@@ -2661,6 +2663,22 @@ errlHndl_t IStepDispatcher::sendProgressCode(bool i_needsLock)
                        myMsg->data[0],myMsg->data[1]);
         }
     }
+
+    // -- Send the progress code src to the BMC
+#ifdef CONFIG_PLDM
+    ProgressCodeSrc l_progressSrc(iv_curIStep, iv_curSubStep, internalStep-1);
+    err_pldm = l_progressSrc.sendProgressCodeToBmc();
+    if (err_pldm)
+    {
+        TRACFCOMP(g_trac_initsvc, ERR_MRK"sendProgressCodeToBmc() failed for istep %d:%d",
+            iv_curIStep, iv_curSubStep);
+        err_pldm->collectTrace(PLDM_COMP_NAME);
+        err_pldm->collectTrace(INITSVC_COMP_NAME);
+        // make sure it is just informational, sending progress code shouldn't stop the IPL
+        err_pldm->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+        errlCommit(err_pldm, INITSVC_COMP_ID);
+    }
+#endif
 
     if ((iv_curIStep != lastIstep) || (iv_curSubStep != lastSubstep))
     {

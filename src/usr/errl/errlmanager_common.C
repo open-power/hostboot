@@ -481,10 +481,10 @@ bool ErrlManager::isSlotACKed(uint32_t i_position)
             reinterpret_cast<const pelSRCSection_t *>(l_pnorAddr);
 
     TRACDCOMP(g_trac_errl, "isSlotACKed(%d): word5 %08x - %s",
-        i_position, pSRC->word5,
-        (pSRC->word5 & ErrlSrc::ACK_BIT) ? "not ACKed" : "ACKed");
+        i_position, pSRC->src.word5,
+        (pSRC->src.word5 & ErrlSrc::ACK_BIT) ? "not ACKed" : "ACKed");
 
-    return (pSRC->word5 & ErrlSrc::ACK_BIT) ? false : true;
+    return (pSRC->src.word5 & ErrlSrc::ACK_BIT) ? false : true;
 }
 
 // setACKInFlattened()
@@ -495,11 +495,11 @@ void ErrlManager::setACKInFlattened(uint32_t i_position)
     l_pnorAddr += sizeof(pelUserHeaderSection_t);
     pelSRCSection_t *pSRC = reinterpret_cast<pelSRCSection_t *>(l_pnorAddr);
 
-    pSRC->word5 &= ~(ErrlSrc::ACK_BIT);
+    pSRC->src.word5 &= ~(ErrlSrc::ACK_BIT);
 
     TRACDCOMP(g_trac_errl, "setACKInFlattened(%d): word5 %08x - %s",
-        i_position, pSRC->word5,
-        (pSRC->word5 & ErrlSrc::ACK_BIT) ? "not ACKed" : "ACKed");
+        i_position, pSRC->src.word5,
+        (pSRC->src.word5 & ErrlSrc::ACK_BIT) ? "not ACKed" : "ACKed");
 
     return;
 }

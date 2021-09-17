@@ -778,24 +778,14 @@ typedef struct pelsrcflags
 } __attribute__((packed)) pelSRCFlags_t;
 
 /**
- * @brief pelSRCSection_t
- *
- * A PEL structure used to flatten error logs to PEL format.
- *
- * This structure represents an entire Primary SRC (PS)
- * PEL section. This section is a fixed overall
- * length of 80 bytes including the PEL section header.
- * This is the usually the third section found in a flat PEL dataset.
- * Populated by the flatten code of class ErrlSRC.
+ * @brief SRC section definition
  *
  * Hostboot generates a minimal SRC as described under
  * "Common Usage of the SRC Structure" (p.69) in the PEL
- * reference (mcdoc 1675). The page numbers below refer
- * to version 0.8 of that document.
+ * reference (mcdoc 1675).
  */
-typedef struct pelsrcsection
+struct SrcSection
 {
-  pelSectionHeader_t sectionheader;
   uint8_t       ver;        // src version, usually a 2
   pelSRCFlags_t flags;      // src flags
   uint8_t       reserved0;
@@ -818,6 +808,28 @@ typedef struct pelsrcsection
   // "Hex word 8-9" optional, iv_user2
   uint64_t      word8;
   char          srcString[SRC_STRING_SIZE];
+} __attribute__((packed));
+
+/**
+ * @brief pelSRCSection_t
+ *
+ * A PEL structure used to flatten error logs to PEL format.
+ *
+ * This structure represents an entire Primary SRC (PS)
+ * PEL section. This section is a fixed overall
+ * length of 80 bytes including the PEL section header.
+ * This is the usually the third section found in a flat PEL dataset.
+ * Populated by the flatten code of class ErrlSRC.
+ *
+ * Hostboot generates a minimal SRC as described under
+ * "Common Usage of the SRC Structure" (p.69) in the PEL
+ * reference (mcdoc 1675). The page numbers below refer
+ * to version 0.8 of that document.
+ */
+typedef struct pelsrcsection
+{
+  pelSectionHeader_t sectionheader;
+  SrcSection src;
 } __attribute__((packed)) pelSRCSection_t;
 
 

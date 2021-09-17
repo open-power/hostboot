@@ -788,6 +788,25 @@ ID for the sensor number returned with the elog. -->
   </attribute>
 
   <attribute>
+    <id>LAST_PROGRESS_CODE</id>
+    <description>
+        Last progress code
+        Structure includes nodeId, rolling count and isteps
+        Full structure is defined in progressSrc.H
+        Used in word4 of SRC
+    </description>
+    <simpleType>
+      <uint32_t>
+        <default>0</default>
+      </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <id>MAX_VDD_CURRENT_READING</id>
     <description>
        Maximum theoretical Vdd current reading in 10mA units.

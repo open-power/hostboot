@@ -257,14 +257,14 @@ pelSRCSection_t * ConvertSRC( pelSRCSection_t * p )
 {
     ConvertPELSectionHeader( &p->sectionheader );
     // mostly byte sized stuff
-    p->srcLength        = ntohs( p->srcLength );
-    p->reserved1        = ntohs( p->reserved1 );
-    p->word2            = ntohl( p->word2 );
-    p->word3            = ntohs( p->word3 );
-    p->word4            = ntohl( p->word4 );
-    p->word5            = ntohl( p->word5 );
-    p->word6            = ntohll( p->word6 );
-    p->word8            = ntohll( p->word8 );
+    p->src.srcLength        = ntohs( p->src.srcLength );
+    p->src.reserved1        = ntohs( p->src.reserved1 );
+    p->src.word2            = ntohl( p->src.word2 );
+    p->src.word3            = ntohs( p->src.word3 );
+    p->src.word4            = ntohl( p->src.word4 );
+    p->src.word5            = ntohl( p->src.word5 );
+    p->src.word6            = ntohll( p->src.word6 );
+    p->src.word8            = ntohll( p->src.word8 );
     return p;
 }
 
@@ -991,14 +991,14 @@ int main( int argc,  char *argv[] )
 
 #if 0
             // reasonCode has been "stringified" into the SRC string
-            pch = strchr( pSRCSection->srcString, ' ' );
+            pch = strchr( pSRCSection->src.srcString, ' ' );
             assert( pch );
             *pch = 0;
-            assert( 8 == strlen( pSRCSection->srcString));
-            sscanf( pSRCSection->srcString + 4, "%X", &l_reasonCode );
+            assert( 8 == strlen( pSRCSection->src.srcString));
+            sscanf( pSRCSection->src.srcString + 4, "%X", &l_reasonCode );
 #else
             // I have cheated and put reasonCode here:
-            l_reasonCode = pSRCSection->reserved1;
+            l_reasonCode = pSRCSection->src.reserved1;
 #endif
 
             // done with this tmp file

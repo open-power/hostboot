@@ -211,8 +211,10 @@ Target* getCurrentNodeTarget(void)
 {
     // Get node target
     TargetHandleList l_nodelist;
+    // if hostboot is active, then the node is functional
+    // this will be called sometimes before nodes are marked functional
     getEncResources(l_nodelist, TARGETING::TYPE_NODE,
-                    TARGETING::UTIL_FILTER_FUNCTIONAL);
+                    TARGETING::UTIL_FILTER_ALL);
     assert(l_nodelist.size() == 1,
            "ERROR, only expect one node, got %llu.",
            l_nodelist.size());

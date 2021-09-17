@@ -46,6 +46,7 @@ OBJS += splesscommon.o
 OBJS += bootconfig.o
 OBJS += bootconfigif.o
 OBJS += $(if $(CONFIG_BMC_AST2400),bootconfig_ast2400.o)
+OBJS += progressSrc.o
 
 ## SUBDIRS += test.d
 

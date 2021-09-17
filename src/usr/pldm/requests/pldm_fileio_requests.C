@@ -601,7 +601,7 @@ errlHndl_t writeLidFileFromOffset(const uint32_t i_fileHandle,
     {
         PLDM_ERR("writeLidFileFromOffset: writeFileByType failed - RC: 0x%X, requestedSize: 0x%08X, writtenSize: 0x%08X",
           ERRL_GETRC_SAFE(errl), requestedBytes, io_writeSizeBytes);
-  break;
+        break;
     }
 
     }while (0);
@@ -638,6 +638,33 @@ errlHndl_t sendErrLog(const uint32_t i_eid,
     return errl;
 }
 
+
+errlHndl_t sendProgressSrc(const uint8_t * const i_progressSrc, uint32_t & io_dataSize)
+{
+    PLDM_DBG_BIN("Enter sendProgressSrc", i_progressSrc, io_dataSize);
+
+    // should never be sending more than one transaction for progress code transfer
+    assert((io_dataSize <= MAX_TRANSFER_SIZE_BYTES),
+        "sendProgressSrc: Trying to send a progress SRC size 0x%08x that is more than a single transaction size 0x%08x",
+        io_dataSize, MAX_TRANSFER_SIZE_BYTES);
+
+    struct pldm_read_write_file_by_type_req request
+    {
+        .file_type = PLDM_FILE_TYPE_PROGRESS_SRC, // 0x0A
+        .file_handle = 0xFFFFFFFF,
+        .offset = 0,
+        .length = io_dataSize,
+    };
+    uint32_t requestedBytes = io_dataSize;
+    errlHndl_t errl = writeFileByType(request, io_dataSize, i_progressSrc);
+    if (errl)
+    {
+        PLDM_ERR("sendProgressSrc: writeFileByType failed - RC: 0x%X, requestedSize: 0x%08X, writtenSize: 0x%08X",
+          ERRL_GETRC_SAFE(errl), requestedBytes, io_dataSize);
+        PLDM_INF_BIN("sendProgressSrc SRC", i_progressSrc, requestedBytes);
+    }
+    return errl;
+}
 
 
 } // namespace PLDM

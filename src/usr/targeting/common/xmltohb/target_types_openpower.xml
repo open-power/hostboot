@@ -167,6 +167,9 @@
   <targetTypeExtension>
     <id>enc-node-power10</id>
     <attribute>
+      <id>LAST_PROGRESS_CODE</id>
+    </attribute>
+    <attribute>
       <id>PLDM_ENTITY_ID_INFO</id>
     </attribute>
   </targetTypeExtension>

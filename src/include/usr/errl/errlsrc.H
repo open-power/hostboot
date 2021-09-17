@@ -235,6 +235,7 @@ private:
     uint64_t        iv_user2;       // user data 2
     bool            iv_deconfig;    // true if there is a deconfigure callout
     bool            iv_gard;        // true if there is a gard callout
+    uint32_t        iv_progress_code; // last progress code (word4)
 
 #ifdef CONFIG_BUILD_FULL_PEL
     std::vector<fruCallOutEntry_t> iv_coVec; // vector of FRU callouts

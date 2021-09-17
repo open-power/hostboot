@@ -103,9 +103,9 @@ errlHndl_t getLidFileFromOffset(uint32_t i_fileHandle,
  * @return nullptr on success; non-nullptr on error
  */
 errlHndl_t writeLidFileFromOffset(const uint32_t i_fileHandle,
-                                 const uint32_t i_offset,
-                                 uint32_t& io_writeSizeBytes,
-                                 const uint8_t* const i_writeBuffer);
+                                  const uint32_t i_offset,
+                                  uint32_t& io_writeSizeBytes,
+                                  const uint8_t* const i_writeBuffer);
 
 /**
  * @brief Requests to send an error log to the BMC.
@@ -123,6 +123,21 @@ errlHndl_t writeLidFileFromOffset(const uint32_t i_fileHandle,
 errlHndl_t sendErrLog(const uint32_t i_eid,
                       const uint8_t * const i_pelData,
                       uint32_t & io_dataSize);
+
+
+/**
+ * @brief Requests to send a progress code src to the BMC.
+ *
+ * @param[in] i_progressSrc Flattened progress code src
+ * @param[in/out] io_dataSize - number of bytes to write to BMC
+ *                When the function returns, this will contain the number of
+ *                bytes that were actually sent. If this number is less than
+ *                input size, it will also be returning an error log
+ *
+ * @return nullptr on success; non-nullptr on error
+ */
+errlHndl_t sendProgressSrc(const uint8_t * const i_progressSrc,
+                           uint32_t & io_dataSize);
 
 } // namespace PLDM
 

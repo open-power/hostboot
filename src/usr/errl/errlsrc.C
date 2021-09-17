@@ -38,7 +38,8 @@
 #include <hbotcompid.H>
 #include <errl/errlentry.H>
 #include <hwas/common/hwasCallout.H>  // SRCI PRIORITY
-
+#include <targeting/targplatutil.H>
+#include <util/misc.H>
 
 
 namespace ERRORLOG
@@ -73,6 +74,20 @@ ErrlSrc::ErrlSrc( srcType_t i_srcType,
     iv_deconfig(false),
     iv_gard(false)
 {
+
+#ifdef CONFIG_BUILD_FULL_PEL
+    iv_progress_code = 0;
+#ifndef __HOSTBOOT_RUNTIME
+    if(Util::isTargetingLoaded() && TARGETING::targetService().isInitialized())
+    {
+        TARGETING::Target * l_node = TARGETING::UTIL::getCurrentNodeTarget();
+        if (l_node)
+        {
+            iv_progress_code = l_node->getAttr<TARGETING::ATTR_LAST_PROGRESS_CODE>();
+        }
+    }
+#endif
+#endif
 }
 
 
@@ -112,7 +127,7 @@ uint64_t ErrlSrc::flatten( void * o_pBuffer, const uint64_t i_cbBuffer )
         memset( psrc, 0, flatSize() );
 
         // memset spaces into the char array
-        memset( psrc->srcString, ' ', sizeof( psrc->srcString ));
+        memset( psrc->src.srcString, ' ', sizeof( psrc->src.srcString ));
 
         l_rc = iv_header.flatten( o_pBuffer, i_cbBuffer );
         if( 0 == l_rc )
@@ -124,59 +139,63 @@ uint64_t ErrlSrc::flatten( void * o_pBuffer, const uint64_t i_cbBuffer )
 
 
         // Place data into the flat structure.
-        psrc->ver         = ErrlSrc::SRCVER;    // 2;
+        psrc->src.ver         = ErrlSrc::SRCVER;    // 2;
 #ifdef CONFIG_BUILD_FULL_PEL
         // FRU callouts included
         if (!iv_coVec.empty())
         {
             // Flags bit 7 = 1: Additional subsections present
             // beyond ASCII character string field (FRU callout subsection)
-            psrc->flags.additionalSubsection = 1;
+            psrc->src.flags.additionalSubsection = 1;
         }
 #endif
-        psrc->wordcount   = ErrlSrc::WORDCOUNT; // 9;
+        psrc->src.wordcount   = ErrlSrc::WORDCOUNT; // 9;
 
         // Use reserved1 word to stash the reason code for easy extract in
         // unflatten rather than parsing srcString
-        psrc->reserved1   = iv_reasonCode;
+        psrc->src.reserved1   = iv_reasonCode;
 
         CPPASSERT( ErrlSrc::SLEN == sizeof(pelSRCSection_t)-iv_header.flatSize());
-        psrc->srcLength   = ErrlSrc::SLEN;
+        psrc->src.srcLength   = ErrlSrc::SLEN;
 
 #ifdef CONFIG_BUILD_FULL_PEL
         // FRU callouts included
         if (!iv_coVec.empty())
         {
             // There are FRU callouts, add them to total src size
-            psrc->srcLength += fruCalloutFlatSize();
+            psrc->src.srcLength += fruCalloutFlatSize();
 
             // Tell the PEL section header what the new length is.
-            iv_header.iv_slen = psrc->srcLength + iv_header.flatSize();
+            iv_header.iv_slen = psrc->src.srcLength + iv_header.flatSize();
         }
+
+        // 4.3.3.4 Hex Data Word 4
+        // Hex value of the SRC of the last progress code
+        psrc->src.word4 = iv_progress_code;
 #endif
 
         // SRC format
-        psrc->word2       =  0x000000E0; // SRCI_HBT_FORMAT
+        psrc->src.word2       =  0x000000E0; // SRCI_HBT_FORMAT
 
         // Stash the Hostboot module id into hex word 3
-        psrc->moduleId    = iv_modId;
+        psrc->src.moduleId    = iv_modId;
 
         // set deconfigure and/or gard bits
         if (iv_deconfig)
         {
-            psrc->word5 |= ErrlSrc::DECONFIG_BIT; // deconfigure
+            psrc->src.word5 |= ErrlSrc::DECONFIG_BIT; // deconfigure
         }
         if (iv_gard)
         {
-            psrc->word5 |= ErrlSrc::GARD_BIT; // GARD
+            psrc->src.word5 |= ErrlSrc::GARD_BIT; // GARD
         }
 
         // set ACK bit - means unacknowledged
-        psrc->word5 |= ErrlSrc::ACK_BIT; // ACK
+        psrc->src.word5 |= ErrlSrc::ACK_BIT; // ACK
 
         // Stash the Hostboot long long words into the hexwords of the SRC.
-        psrc->word6       = iv_user1;    // spans 6-7
-        psrc->word8       = iv_user2;    // spans 8-9
+        psrc->src.word6       = iv_user1;    // spans 6-7
+        psrc->src.word8       = iv_user2;    // spans 8-9
 
         // Build the char string for the SRC.
         uint32_t l_u32;
@@ -184,7 +203,7 @@ uint64_t ErrlSrc::flatten( void * o_pBuffer, const uint64_t i_cbBuffer )
 
         char l_tmpString[ 20 ];
         uint64_t cb = sprintf( l_tmpString, "%08X", l_u32 );
-        memcpy( psrc->srcString, l_tmpString, cb );
+        memcpy( psrc->src.srcString, l_tmpString, cb );
 
 #ifdef CONFIG_BUILD_FULL_PEL
         flattenFruCallouts(psrc);
@@ -204,20 +223,21 @@ uint64_t ErrlSrc::unflatten( const void * i_buf)
 
     iv_header.unflatten(&(p->sectionheader));
 
-    iv_srcType      = (srcType_t)((16 * aschex2bin(p->srcString[0])) +
-                        aschex2bin(p->srcString[1]));
-    iv_modId        = p->moduleId;
-    iv_reasonCode   = p->reserved1;
-    iv_ssid         = (epubSubSystem_t)((16 * aschex2bin(p->srcString[2])) +
-                       aschex2bin(p->srcString[3]));
-    iv_user1        = p->word6;
-    iv_user2        = p->word8;
+    iv_srcType      = (srcType_t)((16 * aschex2bin(p->src.srcString[0])) +
+                        aschex2bin(p->src.srcString[1]));
+    iv_modId        = p->src.moduleId;
+    iv_reasonCode   = p->src.reserved1;
+    iv_ssid         = (epubSubSystem_t)((16 * aschex2bin(p->src.srcString[2])) +
+                       aschex2bin(p->src.srcString[3]));
+    iv_user1        = p->src.word6;
+    iv_user2        = p->src.word8;
+    iv_progress_code = p->src.word4;
 
-    if(p->word5 & ErrlSrc::DECONFIG_BIT) // deconfigure
+    if(p->src.word5 & ErrlSrc::DECONFIG_BIT) // deconfigure
     {
         iv_deconfig = true;
     }
-    if(p->word5 & ErrlSrc::GARD_BIT) // GARD
+    if(p->src.word5 & ErrlSrc::GARD_BIT) // GARD
     {
         iv_gard = true;
     }
@@ -384,7 +404,7 @@ void ErrlSrc::flattenFruCallouts(pelSRCSection_t* i_psrc)
 
         // Pointer to the current src next data entry location
         l_tmpsrcptr =
-            reinterpret_cast<uint8_t*>(i_psrc->srcString + SRC_STRING_SIZE);
+            reinterpret_cast<uint8_t*>(i_psrc->src.srcString + SRC_STRING_SIZE);
 
         // Fru Callout subsection header
         pelSubSectionHeader_t l_ssheader;
