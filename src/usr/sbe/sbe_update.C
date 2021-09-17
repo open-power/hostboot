@@ -2583,22 +2583,20 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                 }
                 // Special case (likely for early ship customers) where ...
                 // The lockin policy is false
-                // -- AND -- the incoming value (ie, "pnor_sbe_secure_version") is >= 1
-                //           NOTE: which must be true for the above check to be true:
-                //            "else if (pnor_sbe_secure_version > min_secure_version)"
-                // -- AND -- the current Minimum Secure Version is zero
+                // -- AND -- the current Minimum Secure Version is < 2 (see note below)
                 // -- AND -- security is enabled
                 // -- AND -- the incoming driver is a production driver
                 //           NOTE: Using the lack of presence of a backdoor to assert we have a
                 //            production driver
                 //
-                // THEN set the minimum secure version to 1
+                // THEN set the minimum secure version to 2
                 //
                 // NOTE: This is intended to benefit early ship customers who likely will initially
-                // get a build with MSV=0 before normal GA and will eventually get a GA-level build
-                // with MSV=1.  This method will safely update them without them having to set the
-                // LOCKIN _POLICY via the ASM menu.
-                else if ((min_secure_version == 0) &&
+                // get a build with MSV=0 before normal GA, possibly put on the GA-level code of
+                // MSV=1, and will eventually need a required service pack build with MSV=2.
+                // This method will safely update them without them having to set the LOCKIN_POLICY
+                // via the ASM menu.
+                else if ((min_secure_version < 2) &&
                          (isSecurityEnabled == true) &&
                          (!SECUREBOOT::getSbeSecurityBackdoor()))
                 {
@@ -2606,11 +2604,11 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                               "SBE Image from pnor has secure version=0x%.2X, which is greater than"
                               " min_secure_version=0x%.2X. But ATTR_SECURE_VERSION_LOCKIN_POLICY=%d"
                               ". However, since MSV==0, security is enabled, and running on "
-                              "production driver, will set new minimum secure version value to 1 "
+                              "production driver, will set new minimum secure version value to 2 "
                               "(ie ignoring LOCKIN_POLICY)",
                               pnor_sbe_secure_version, min_secure_version,
                               lockin_policy);
-                    pnor_sbe_secure_version = 1;
+                    pnor_sbe_secure_version = 2;
                 }
                 // Default case where lockini_policy == false
                 else
