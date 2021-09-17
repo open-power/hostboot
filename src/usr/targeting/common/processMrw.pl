@@ -105,6 +105,7 @@ my %MAX_INST_PER_PARENT =
     MCC       => 2, # Number of MCCs per MI
     OMI       => 2, # Number of OMIs per MCC/OMIC (has two parents 'a nuclear family')
     OCMB_CHIP => 1, # Number of OCMB_CHIPs per OMI
+    MDS_CTLR  => 1, # Number of MDS_CTLRs per DIMM/logical OCMB
     PMIC      => 4, # Number of PMICs per DIMM/logical OCMB.  Adjusted for future
                     # systems.  Meaning, the current system may not have this many.
     GENERIC_I2C_DEVICE  => 4, # Number of GENERIC_I2C_DEVICEs per DIMM/logical OCMB.
@@ -166,6 +167,9 @@ my %MAX_INST_PER_PROC =
                   getMaxInstPerParent("MCC") * getMaxInstPerParent("OMI") *
                   getMaxInstPerParent("OCMB_CHIP") * getMaxInstPerParent("MEM_PORT") *
                   getMaxInstPerParent("DIMM"),
+    MDS_CTLR   => getMaxInstPerParent("MC") * getMaxInstPerParent("MI") *
+                  getMaxInstPerParent("MCC") * getMaxInstPerParent("OMI") *
+                  getMaxInstPerParent("OCMB_CHIP") * getMaxInstPerParent("MDS_CTLR"),
     PMIC       => getMaxInstPerParent("MC") * getMaxInstPerParent("MI") *
                   getMaxInstPerParent("MCC") * getMaxInstPerParent("OMI") *
                   getMaxInstPerParent("OCMB_CHIP") * getMaxInstPerParent("PMIC"),
@@ -310,7 +314,7 @@ sub main
     # Write the report
     writeReport($targetObj);
 
-    # Second pass of processing the target hierarchy attribute data that could
+    # Second pass of processing the target hierarchy attribute data that
     # could not be determined until after an initial pass.
     postProcessTargets($targetObj);
 
@@ -543,7 +547,8 @@ sub processTargets
                     (($targetObj->getTargetType($target) eq "lcard-dimm-ddimm") ||
                      ($targetObj->getTargetType($target) eq "lcard-dimm-ddimm4u")) )
             {
-                # The P10 children that get processed are PMIC, OCMB, MEM_PORT, GENERIC_I2C_DEVICE
+                # The P10 children that get processed are PMIC, OCMB, MEM_PORT,
+                # GENERIC_I2C_DEVICE and MDS_CTLR
                 processDdimmAndChildren($targetObj, $target);
             }
             elsif ($type eq "BMC")
@@ -1140,8 +1145,8 @@ sub processProcessorAndChildren
 } # end sub processProcessorAndChildren
 
 #--------------------------------------------------
-# @brief Process targets of type DDIMM and it's children,
-#        like PMIC, GENERIC_I2C_DEVICE, and OCMB
+# @brief Process targets of type DIMM and it's children,
+#        like PMIC, GENERIC_I2C_DEVICE, OCMB and MDS_CTLR
 #
 # @pre SYS, NODE and PROC targets need to be processed beforehand
 #
@@ -1306,7 +1311,8 @@ sub processDdimmAndChildren
     # Mark this target as processed
     markTargetAsProcessed($targetObj, $target);
 
-    ## Process children PMIC, OCMB, and Generic I2C Devices (aka ADCs and GPIO Expanders).
+    ## Process children PMIC, OCMB, Generic I2C Devices (aka ADCs and GPIO Expanders)
+    ## and MDS_CTLR (MDS controllers).
     # Children may differ for different systems.
     # Sanity check flag, to make sure that this code is still valid.
     my $foundPmic = false;
@@ -1338,6 +1344,12 @@ sub processDdimmAndChildren
             $targetObj->setAttribute($child, "TYPE", "GENERIC_I2C_DEVICE");
             processGenericI2cDevice($targetObj, $child, $dimmId);
         }
+        elsif ($childTargetType eq "mds_ctlr")
+        {
+            # Update TYPE to MDS_CTLR for all targets
+            $targetObj->setAttribute($child, "TYPE", "MDS_CTLR");
+            processMdsCtlr($targetObj, $child, $dimmId);
+        }
     }
 
     if ($foundPmic == false)
@@ -1356,7 +1368,8 @@ sub processDdimmAndChildren
             "change?  If so update this script to reflect changes.  Error"
     }
 
-    # NOTE: no check for GENERIC_I2C_DEVICES because some dimms/systems won't have them
+    # NOTE: No check for GENERIC_I2C_DEVICES and MDS_CTLR because some
+    #       ddimms/systems won't have them
 
 } # end sub processDdimmAndChildren
 
@@ -1472,6 +1485,47 @@ sub processGenericI2cDevice
     markTargetAsProcessed($targetObj, $target);
 } # end sub processGenericI2cDevice
 
+#--------------------------------------------------
+# @brief Process targets of type MDS_CTLR
+#
+# @pre DIMM targets need to be processed beforehand
+#
+# @param[in] $targetObj - The global target object blob
+# @param[in] $target    - The MDS_CTLR target
+# @param[in] $dimmId    - The DIMM's ID, used to calculate the MDS_CTLR's ID
+#--------------------------------------------------
+sub processMdsCtlr
+{
+    my $targetObj = shift;
+    my $target    = shift;
+    my $dimmId    = shift;
+
+    # Some sanity checks.  Make sure we are processing the correct target type
+    # and make sure the target's parent has been processed.
+    my $targetType = targetTypeSanityCheck($targetObj, $target, "MDS_CTLR");
+    validateParentHasBeenProcessed($targetObj, $target);
+
+    # Set the MDS_CTLR's attributes HUID, POSITION, FAPI_POS, FAPI_NAME, FAPINAME_NODE,
+    # FAPINAME_POS, ORDINAL_ID, REL_POS, AFFINITY_PATH and PHYS_PATH.
+    setCommonAttributesForTargetsAssociatedWithDdimm($targetObj, $target, $dimmId, $targetType);
+
+    # Set the FAPI_I2C_CONTROL_INFO attribute
+    setFapi2AttributeForDdimmI2cDevices($targetObj, $target, $targetType);
+
+    # Get some useful data from the MDS_CTLR parent's SYS, NODE and self targets
+    my $sysParent = $targetObj->findParentByType($target, "SYS");
+    my $sysParentPos = $targetObj->getAttribute($sysParent, "ORDINAL_ID");
+    my $nodeParent = $targetObj->findParentByType($target, "NODE");
+    my $nodeParentPos = $targetObj->getAttribute($nodeParent, "ORDINAL_ID");
+    my $mdsCtlrPosPerSystem = $targetObj->getAttribute($target, "FAPI_POS");
+
+    # Save this target for retrieval later when printing the xml (sub printXML)
+    $targetObj->{targeting}{SYS}[$sysParentPos]{NODES}[$nodeParentPos]
+                {MDS_CTLR}[$mdsCtlrPosPerSystem]{KEY} = $target;
+
+    # Mark this target as processed
+    markTargetAsProcessed($targetObj, $target);
+} # end sub processMdsCtlr
 
 #--------------------------------------------------
 # @brief Process targets of type OCMB_CHIP and it's child MEM_PORT
@@ -1779,7 +1833,7 @@ sub processTpm
 ################################################################################
 #--------------------------------------------------
 # @brief Set common attributes for targets that are associated with a DIMM.  Targets
-#        such as PMIC, GENERIC_I2C_DEVICE and OCMB_CHIP.
+#        such as PMIC, GENERIC_I2C_DEVICE, OCMB_CHIP and MDS_CTLR
 #
 # @details The attributes HUID, POSITION, FAPI_POS, FAPI_NAME, FAPINAME_NODE,
 #          FAPINAME_POS, ORDINAL_ID, AFFINITY_PATH and PHYS_PATH are set for the targets.

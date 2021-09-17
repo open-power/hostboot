@@ -894,7 +894,8 @@ sub getFapiName
     }
     elsif ($targetType eq "PROC"   || $targetType eq "DIMM" ||
            $targetType eq "MEMBUF" || $targetType eq "PMIC" ||
-           $targetType eq "OCMB_CHIP" || $targetType eq "GENERIC_I2C_DEVICE")
+           $targetType eq "OCMB_CHIP" || $targetType eq "GENERIC_I2C_DEVICE" ||
+           $targetType eq "MDS_CTLR" )
     {
         if ($node eq "" || $chipPos eq "")
         {
@@ -913,6 +914,10 @@ sub getFapiName
         elsif ($targetType eq "GENERIC_I2C_DEVICE")
         {
             $chipName = "generici2cslave";
+        }
+        elsif ($targetType eq "MDS_CTLR")
+        {
+            $chipName = "mds";
         }
 
         $chipName = lc $chipName;
