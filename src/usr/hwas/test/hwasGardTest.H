@@ -8719,6 +8719,56 @@ public:
         TS_INFO("testCdmDomainSet: Ended");
     }
 
+    /**
+     *  @brief Confirm that all targets that are gardable also have the appropriate
+     *         HWAS_SUBSCRIPTION bits set
+     */
+    void testHwasSubscriptionsSetForGard()
+    {
+        TS_INFO("testHwasSubscriptionsSetForGard: Started");
+
+        ATTR_DECONFIG_GARDABLE_type l_gardable = 0;
+        ATTR_HWAS_STATE_CHANGED_SUBSCRIPTION_MASK_type l_subscriptions = 0;
+        ATTR_TYPE_type l_type = TYPE_NA;
+        ATTR_HWAS_STATE_CHANGED_SUBSCRIPTION_MASK_type l_required =
+          HWAS_CHANGED_BIT_GARD |
+          HWAS_CHANGED_BIT_RESRC_RECOV |
+          HWAS_CHANGED_BIT_GARD_APPLIED;
+
+        // Go through all targets to ensure HWAS_STATE_CHANGED_SUBSCRIPTION_MASK
+        // is set correctly: GARD, RESRC_RECOV, GARD_APPLIED
+        for (TargetIterator t_iter = targetService().begin();
+             t_iter != targetService().end();
+             ++t_iter)
+        {
+            Target* l_pTarget = *t_iter;
+
+            if (l_pTarget->tryGetAttr<ATTR_DECONFIG_GARDABLE>(l_gardable))
+            {
+                // If DECONFIG_GARDABLE is set, then we must handle gard
+                if (l_gardable)
+                {
+                    l_type = l_pTarget->getAttr<ATTR_TYPE>();
+                    if (!l_pTarget->tryGetAttr<ATTR_HWAS_STATE_CHANGED_SUBSCRIPTION_MASK>
+                        (l_subscriptions))
+                    {
+                        TS_FAIL("testHwasSubscriptionsSetForGard: Target 0x%08X of type %d needs ATTR_HWAS_STATE_CHANGED_SUBSCRIPTION_MASK",
+                            get_huid(l_pTarget), l_type);
+                    }
+                    else if( (l_subscriptions & l_required) != l_required )
+                    {
+                        TS_FAIL("testHwasSubscriptionsSetForGard: Target 0x%08X of type %d is missing required subscriptions : expected=%.8X, actual=%.8X",
+                                get_huid(l_pTarget),
+                                l_type,
+                                l_required,
+                                l_subscriptions);
+                    }
+                }
+            }
+        } // for
+        TS_INFO("testHwasSubscriptionsSetForGard: Ended");
+    }
+
 
     /**
      *  @brief Test the deconfig rule for NMMU targets
