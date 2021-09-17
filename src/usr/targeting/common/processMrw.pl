@@ -1380,12 +1380,12 @@ sub processPmic
     my $targetType = targetTypeSanityCheck($targetObj, $target, "PMIC");
     validateParentHasBeenProcessed($targetObj, $target);
 
-    # Set the PMIC's attributes POSITION, FAPI_POS, FAPI_NAME, FAPINAME_NODE,
+    # Set the PMIC's attributes HUID, POSITION, FAPI_POS, FAPI_NAME, FAPINAME_NODE,
     # FAPINAME_POS, ORDINAL_ID, REL_POS, AFFINITY_PATH and PHYS_PATH.
-    setCommonAttributesForTargetsAssocaitedWithDimm($targetObj, $target, $dimmId, $targetType);
+    setCommonAttributesForTargetsAssociatedWithDdimm($targetObj, $target, $dimmId, $targetType);
 
     # Set the FAPI_I2C_CONTROL_INFO attribute
-    setFapi2AttributeForPmic($targetObj, $target);
+    setFapi2AttributeForDdimmI2cDevices($targetObj, $target, $targetType);
 
     # Get some useful data from the PMIC parent's SYS, NODE and self targets
     my $sysParent = $targetObj->findParentByType($target, "SYS");
@@ -1426,7 +1426,7 @@ sub processGenericI2cDevice
     # Currently supported instance names: adc0, adc1, PCA9554A, PCA9554B
     # Although different, the ADCs and the GPIO Expanders (PCA9554A/B) are grouped
     # together under GENERIC_I2C_DEVICES.
-    # Instance position is set in method setCommonAttributesForTargetsAssocaitedWithDimm below.
+    # Instance position is set in method setCommonAttributesForTargetsAssociatedWithDdimm below.
     my $instanceName = $targetObj->getInstanceName($target);
     my $i2cDevType = "ADS7138_ADC";
 
@@ -1447,15 +1447,15 @@ sub processGenericI2cDevice
 
     $targetObj->setAttribute($target, "I2C_DEV_TYPE", $i2cDevType);
 
-    # Set the GENERIC_I2C_DEVICES's attributes POSITION, FAPI_POS, FAPI_NAME,
+    # Set the GENERIC_I2C_DEVICES's attributes HUID, POSITION, FAPI_POS, FAPI_NAME,
     # FAPINAME_NODE, FAPINAME_POS, ORDINAL_ID, REL_POS, AFFINITY_PATH and PHYS_PATH.
-    setCommonAttributesForTargetsAssocaitedWithDimm($targetObj, $target, $dimmId, $targetType);
+    setCommonAttributesForTargetsAssociatedWithDdimm($targetObj, $target, $dimmId, $targetType);
 
     # Until CLASS is removed from MRW, rewrite it here
     $targetObj->setAttribute($target, "CLASS",     "ASIC");
 
     # Set the FAPI_I2C_CONTROL_INFO attribute
-    setFapi2AttributeForDimmI2cDevices($targetObj, $target, "GENERIC_I2C_DEVICE");
+    setFapi2AttributeForDdimmI2cDevices($targetObj, $target, $targetType);
 
     # Get some useful data from the device's parent's SYS, NODE and self targets
     my $sysParent = $targetObj->findParentByType($target, "SYS");
@@ -1497,14 +1497,15 @@ sub processOcmbChipAndChildren
     validateParentHasBeenProcessed($targetObj, $target);
 
     # Set the OCMB's attributes HUID, POSITION, FAPI_POS, FAPI_NAME, FAPINAME_NODE,
-    # FAPINAME_POS, AFFINITY_PATH and PHYS_PATH.
-    setCommonAttributesForTargetsAssocaitedWithDimm($targetObj, $target, $ocmbId, $type);
+    # FAPINAME_POS, ORDINAL_ID, AFFINITY_PATH and PHYS_PATH.
+    setCommonAttributesForTargetsAssociatedWithDdimm($targetObj, $target, $ocmbId, $type);
 
     my $staticAbsoluteLocationCode = getStaticAbsLocationCode($targetObj, $target);
     $targetObj->setAttribute($target, "STATIC_ABS_LOCATION_CODE", $staticAbsoluteLocationCode);
 
     # Set the EEPROM_VPD_PRIMARY_INFO and FAPI_I2C_CONTROL_INFO attributes
-    setEepromAndFapi2AttributesForOcmb($targetObj, $target);
+    setEepromAttributeForDdimmI2cDevices($targetObj, $target, $type);
+    setFapi2AttributeForDdimmI2cDevices($targetObj, $target, $type);
 
     # Get some useful info from the OCMB parent's SYS, NODE and self targets.
     my $sysParent = $targetObj->findParentByType($target, "SYS");
@@ -1781,9 +1782,8 @@ sub processTpm
 #        such as PMIC, GENERIC_I2C_DEVICE and OCMB_CHIP.
 #
 # @details The attributes HUID, POSITION, FAPI_POS, FAPI_NAME, FAPINAME_NODE,
-#          FAPINAME_POS, AFFINITY_PATH and PHYS_PATH are set for targets. The
-#          attributes ORDINAL_ID and REL_POS are set for the targets except the
-#          OCMB targets.
+#          FAPINAME_POS, ORDINAL_ID, AFFINITY_PATH and PHYS_PATH are set for the targets.
+#          The attribute REL_POS is set for the targets except the OCMB target.
 #          These attributes are set here because of commonality of setting them
 #          for the given targets.
 #
@@ -1792,7 +1792,7 @@ sub processTpm
 # @param[in] $parentId   - The parent's ID, used to calculate the target's ID
 # @param[in] $targetType - The type of the target
 #--------------------------------------------------
-sub setCommonAttributesForTargetsAssocaitedWithDimm
+sub setCommonAttributesForTargetsAssociatedWithDdimm
 {
     my $targetObj  = shift;
     my $target     = shift;
@@ -1842,7 +1842,7 @@ sub setCommonAttributesForTargetsAssocaitedWithDimm
     if ($targetInstancePos >= $maxTargetPerDdimm )
     {
         select()->flush(); # flush buffer before spewing out error message
-        die "\nsetCommonAttributesForTargetsAssocaitedWithDimm: ERROR: " .
+        die "\nsetCommonAttributesForTargetsAssociatedWithDdimm: ERROR: " .
             "The $targetType" . "'s instance position " .
             "($targetInstancePos), extracted from instance name " .
             "\"$targetInstanceName\", exceeds or is equal to the maximum $targetType " .
@@ -1887,14 +1887,14 @@ sub setCommonAttributesForTargetsAssocaitedWithDimm
     $targetObj->setAttribute($target, "FAPI_NAME",     $targetFapiName);
     $targetObj->setAttribute($target, "FAPINAME_NODE", $nodeParentPos);
     $targetObj->setAttribute($target, "FAPINAME_POS",  $targetPosPerNode);
+    $targetObj->setAttribute($target, "ORDINAL_ID",    $targetPosPerSystem);
 
-    # Set these attributes for targets that are *not* OCMB_CHIP
-    # OCMB_CHIP *does not* set the attributes ORDINAL_ID and REL_POS
+    # Set this attribute for targets that are *not* OCMB_CHIP
+    # OCMB_CHIP *does not* set the attribute REL_POS
     if ("OCMB_CHIP" ne $targetType)
     {
-        # Set the attributes ORDINAL_ID and REL_POS for targets that are not OCMB_CHIP
-        $targetObj->setAttribute($target, "ORDINAL_ID",    $targetPosPerSystem);
-        $targetObj->setAttribute($target, "REL_POS",       $targetInstancePos);
+        # Set the attribute REL_POS for targets that are not OCMB_CHIP
+        $targetObj->setAttribute($target, "REL_POS",   $targetInstancePos);
     }
 
     ## Set the attributes AFFINITY_PATH and PHYS_PATH
@@ -1916,7 +1916,7 @@ sub setCommonAttributesForTargetsAssocaitedWithDimm
     # Set the PHYS_PATH using the parent NODE as a basis
     my $targetPhysical = $nodeParentPhysical . "/" . $targetPathName . "-" . $targetId;
     $targetObj->setAttribute($target, "PHYS_PATH",     $targetPhysical);
-} # end sub setCommonAttributesForTargetsAssocaitedWithDimm
+} # end sub setCommonAttributesForTargetsAssociatedWithDdimm
 
 sub iterateOverChiplets
 {
@@ -2547,24 +2547,24 @@ sub setEepromAttribute
 } # end setEepromAttribute
 
 #--------------------------------------------------
-# @brief Set the EEPROM_VPD_PRIMARY_INFO and FAPI_I2C_CONTROL_INFO attributes
-#        for the given OCMB
+# @brief Set the EEPROM_VPD_PRIMARY_INFO attributes for the given I2C device
 #
 # @detail The EEPROM_VPD_PRIMARY_INFO data is exactly the same as the DDIMM
-#         parent, so will use the DDIMM parent EEPROM data to populate OCMB's
-#         EEPROM fields.  The majority of the FAPI_I2C_CONTROL_INFO data is
-#         equivalent to the EEPROM data, so copy the appropriate fields.
+#         parent, so will use the DDIMM parent EEPROM data to populate the
+#         I2C device EEPROM fields.
 #
 # @param[in] $targetObj - The global target object blob
 # @param[in] $target    - The OCMB target
+# @param[in] $type      - The type of the given I2C device
 #--------------------------------------------------
-sub setEepromAndFapi2AttributesForOcmb
+sub setEepromAttributeForDdimmI2cDevices
 {
     my $targetObj = shift;
     my $target    = shift;
+    my $type      = shift;
 
     # Sanity check.  Make sure we are processing the correct target type.
-    targetTypeSanityCheck($targetObj, $target, "OCMB_CHIP");
+    targetTypeSanityCheck($targetObj, $target, $type);
 
     # Get the DDIMM parent
     my $ddimmParent = $targetObj->getTargetParent($target);
@@ -2572,114 +2572,20 @@ sub setEepromAndFapi2AttributesForOcmb
     # Copy the parent DDIMM's EEPROM data
     my $eepromName = "EEPROM_VPD_PRIMARY_INFO";
     $targetObj->copyAttributeFields($ddimmParent, $target, $eepromName);
-
-    # Copy some of the parent DDIMM's EEPROM data over to the FAPI2 attribute
-    my $fapiName = "FAPI_I2C_CONTROL_INFO";
-    $targetObj->copySrcAttributeFieldToDestAttributeField($ddimmParent, $target,
-                $eepromName, $fapiName, "i2cMasterPath");
-    $targetObj->copySrcAttributeFieldToDestAttributeField($ddimmParent, $target,
-                $eepromName, $fapiName, "engine");
-    $targetObj->copySrcAttributeFieldToDestAttributeField($ddimmParent, $target,
-                $eepromName, $fapiName, "port");
-
-    # Retrieve the I2C Address from the 'i2c-ocmb' target. Set the field
-    # 'devAddr' for attribute FAPI2_I2C_CONTROL_INFO with value.
-    my $devAddr = "";
-    foreach my $i2cSlave (@{ $targetObj->getTargetChildren($target) })
-    {
-        # The OCMB has multiple i2c-slaves, so we query for instance name
-        my $instanceName = $targetObj->getInstanceName($i2cSlave);
-        if ($instanceName eq "i2c-ocmb")
-        {
-            $devAddr = $targetObj->getAttribute($i2cSlave, "I2C_ADDRESS");
-            last;
-        }
-    }
-
-    # If no value for the field devAddr, then this is an error.
-    if ($devAddr eq "")
-    {
-        select()->flush(); # flush buffer before spewing out error message
-        die "\nsetEepromAndFapi2AttributesForOcmb: ERROR: No child target " .
-            "\"i2c-ocmb\" found for target ($target), therefore value " .
-            "for field \"devAddr\" for attribute FAPI2_I2C_CONTROL_INFO " .
-            "cannot be properly set.\nError";
-    }
-
-    $targetObj->setAttributeField($target, $fapiName, "devAddr", $devAddr);
-
-} # end setEepromAndFapi2AttributesForOcmb
+} # end setEepromAttributeForDdimmI2cDevices
 
 #--------------------------------------------------
-# @brief Set the FAPI_I2C_CONTROL_INFO attribute for the given PMIC
+# @brief Set the FAPI_I2C_CONTROL_INFO attribute for the given I2C device
 #
 # @detail The majority of the FAPI_I2C_CONTROL_INFO data is equivalent to the
 #         the DDIMM parent EEPROM_VPD_PRIMARY_INFO attribute, so copy the
 #         appropriate fields.
 #
 # @param[in] $targetObj - The global target object blob
-# @param[in] $target    - The PMIC target
+# @param[in] $target    - The PMIC, GENERIC_I2C_DEVICE and the OCMB_CHIP target
+# @param[in] $type      - The type of the given I2C device
 #--------------------------------------------------
-sub setFapi2AttributeForPmic
-{
-    my $targetObj = shift;
-    my $target    = shift;
-
-    # Sanity check.  Make sure we are processing the correct target type.
-    targetTypeSanityCheck($targetObj, $target, "PMIC");
-
-    # Get the DDIMM parent
-    my $ddimmParent = $targetObj->getTargetParent($target);
-
-    # Copy some of the parent DDIMM's EEPROM data over to the FAPI2 attribute
-    my $eepromName = "EEPROM_VPD_PRIMARY_INFO";
-    my $fapiName = "FAPI_I2C_CONTROL_INFO";
-    $targetObj->copySrcAttributeFieldToDestAttributeField($ddimmParent, $target,
-                $eepromName, $fapiName, "i2cMasterPath");
-    $targetObj->copySrcAttributeFieldToDestAttributeField($ddimmParent, $target,
-                $eepromName, $fapiName, "engine");
-    $targetObj->copySrcAttributeFieldToDestAttributeField($ddimmParent, $target,
-                $eepromName, $fapiName, "port");
-
-    # Retrieve the I2C Address from the 'unit-i2c-slave' target. Set the field
-    # 'devAddr' for attribute FAPI2_I2C_CONTROL_INFO with value.
-    my $devAddr = "";
-    foreach my $i2cSlave (@{ $targetObj->getTargetChildren($target) })
-    {
-        # The PMIC has child "unit-i2c-slave" which contains the device address
-        my $type = $targetObj->getTargetType($i2cSlave);
-        if ($type eq "unit-i2c-slave")
-        {
-            $devAddr = $targetObj->getAttribute($i2cSlave, "I2C_ADDRESS");
-            last;
-        }
-    }
-
-    # If no value for the field devAddr, then this is an error.
-    if ($devAddr eq "")
-    {
-        select()->flush(); # flush buffer before spewing out error message
-        die "\nsetFapi2AttributeForPmic: ERROR: No child target " .
-            "\"unit-i2c-slave\" found for target ($target), therefore value " .
-            "for field \"devAddr\" for attribute FAPI2_I2C_CONTROL_INFO " .
-            "cannot be properly set.\nError";
-    }
-
-    $targetObj->setAttributeField($target, $fapiName, "devAddr", $devAddr);
-} # end setFapi2AttributeForPmic
-
-#--------------------------------------------------
-# @brief Set the FAPI_I2C_CONTROL_INFO attribute for the given Generic I2C Device
-#
-# @detail The majority of the FAPI_I2C_CONTROL_INFO data is equivalent to the
-#         the DDIMM parent EEPROM_VPD_PRIMARY_INFO attribute, so copy the
-#         appropriate fields.
-#
-# @param[in] $targetObj - The global target object blob
-# @param[in] $target    - The Pmic or Generic I2C Device target
-# @param[in] $type      - The type of the PMIC or Generic I2C Device
-#--------------------------------------------------
-sub setFapi2AttributeForDimmI2cDevices
+sub setFapi2AttributeForDdimmI2cDevices
 {
     my $targetObj = shift;
     my $target    = shift;
@@ -2701,16 +2607,27 @@ sub setFapi2AttributeForDimmI2cDevices
     $targetObj->copySrcAttributeFieldToDestAttributeField($ddimmParent, $target,
                 $eepromName, $fapiName, "port");
 
-    # Retrieve the I2C Address from the 'unit-i2c-slave' child target of $target.
-    # Set the field 'devAddr' for attribute FAPI2_I2C_CONTROL_INFO with value.
+    # Retrieve the I2C Address from the i2c child of $target.
+    # Set the field 'devAddr' for attribute FAPI2_I2C_CONTROL_INFO with I2C_ADDRESS value.
     my $devAddr = "";
     foreach my $i2cSlave (@{ $targetObj->getTargetChildren($target) })
     {
-        my $type = $targetObj->getTargetType($i2cSlave);
-        if ($type eq "unit-i2c-slave")
+        my $i2cType = $targetObj->getTargetType($i2cSlave);
+        if ($i2cType eq "unit-i2c-slave")
         {
-            $devAddr = $targetObj->getAttribute($i2cSlave, "I2C_ADDRESS");
-            last;
+            # The OCMB_CHIP target has multiple "unit-i2c-slave" types.  The one
+            # that is needed is the one with target instance value "i2c-ocmb".
+            # The following conditional reads as follows:
+            # * If the target type is *not* an "OCMB_CHIP", then knowing the i2c type
+            #   is "unit-i2c-slave" is good enough to retrieve the device address from.
+            # * If the target type is an "OCMB_CHIP", then need to confirm that the
+            #   i2c's instance name is "i2c-ocmb" before retrieving the device address from.
+            if ( ($type ne "OCMB_CHIP") ||
+                 ($targetObj->getInstanceName($i2cSlave) eq "i2c-ocmb") )
+            {
+                $devAddr = $targetObj->getAttribute($i2cSlave, "I2C_ADDRESS");
+                last;
+            }
         }
     }
 
@@ -2720,14 +2637,14 @@ sub setFapi2AttributeForDimmI2cDevices
     {
         select()->flush(); # flush buffer before spewing out error message
         $devAddr = 0xFF;
-        warn "\nsetFapi2AttributeForDimmI2cDevices: ERROR: No child target " .
+        warn "\nsetFapi2AttributeForDdimmI2cDevices: ERROR: No child target " .
             "\"unit-i2c-slave\" found for target ($target), therefore value " .
             "for field \"devAddr\" for attribute FAPI2_I2C_CONTROL_INFO " .
             "will use default value of $devAddr\n";
     }
 
     $targetObj->setAttributeField($target, $fapiName, "devAddr", $devAddr);
-} # end setFapi2AttributeForDimmI2cDevices
+} # end setFapi2AttributeForDdimmI2cDevices
 
 #--------------------------------------------------
 # @brief Validate that PROCs are being processed in Topology ID order.
