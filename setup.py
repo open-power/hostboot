@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020
+# Contributors Listed Below - COPYRIGHT 2020,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -40,69 +40,51 @@ Helper files for the modules should be added to the directory corresponding to
 Use "udparsers.helpers.helper_file_name" to include the file in a module.
 
 """
-dirmap = {
-    "b0100": "src/usr/errl/plugins/ebmc/",
-    "b0300": "src/usr/scom/plugins/ebmc",
-    "b0500": "src/usr/initservice/plugins/ebmc",
-    "b0700": "src/usr/i2c/plugins/ebmc",
-    "b0900": "src/usr/isteps/plugins/ebmc",
-    "b0a00": "src/usr/fsi/plugins/ebmc",
-    "b0c00": "src/usr/hwas/plugins/ebmc",
-    "b0e00": "src/usr/eeprom/plugins/ebmc",
-    "b1a00": "src/usr/runtime/plugins/ebmc",
-    "b1d00": "src/usr/vpd/plugins/ebmc",
-    "b1e00": "src/usr/secureboot/common/plugins/ebmc",
-    "b2600": "src/usr/htmgt/plugins/ebmc",
-    "b3600": "src/usr/expaccess/plugins/ebmc",
-    "b4500": "src/usr/spi/plugins/ebmc",
-    "be500": "src/usr/diag/prdf/plugins/ebmc",
-    "helpers": "src/build/tools/ebmc",
-    "bsrc": "src/usr/errl/parser/ebmc"
+
+package_directories = {
+    # User Data packages.
+    # Component package names must be in the form of: `udparsers.bxxxx`. Where
+    # 'xxxx' is the 4 digit component ID (lowercase).
+
+    "udparsers.b0100":   "src/usr/errl/plugins/ebmc/",
+    "udparsers.b0300":   "src/usr/scom/plugins/ebmc",
+    "udparsers.b0500":   "src/usr/initservice/plugins/ebmc",
+    "udparsers.b0700":   "src/usr/i2c/plugins/ebmc",
+    "udparsers.b0900":   "src/usr/isteps/plugins/ebmc",
+    "udparsers.b0a00":   "src/usr/fsi/plugins/ebmc",
+    "udparsers.b0c00":   "src/usr/hwas/plugins/ebmc",
+    "udparsers.b0e00":   "src/usr/eeprom/plugins/ebmc",
+    "udparsers.b1a00":   "src/usr/runtime/plugins/ebmc",
+    "udparsers.b1d00":   "src/usr/vpd/plugins/ebmc",
+    "udparsers.b1e00":   "src/usr/secureboot/common/plugins/ebmc",
+    "udparsers.b2600":   "src/usr/htmgt/plugins/ebmc",
+    "udparsers.b3600":   "src/usr/expaccess/plugins/ebmc",
+    "udparsers.b4500":   "src/usr/spi/plugins/ebmc",
+    "udparsers.be500":   "src/usr/diag/prdf/peltool/ud",
+    "udparsers.helpers": "src/build/tools/ebmc",
+
+    # SRC parsers packages.
+    # The only required package is 'srcparsers.bsrc', but other modules can be
+    # used if called from 'srcparsers.bsrc'.
+
+    "srcparsers.bsrc":  "src/usr/errl/parser/ebmc",
+    "srcparsers.be500": "src/usr/diag/prdf/peltool/src",
+
+    # Additional parser packages.
+    # These are useful when functions may be needed for both SRC and user data
+    # modules, or if there are any general utilities needed.
+
+    "pel.prd": "src/usr/diag/prdf/peltool/common",
 }
 
-"""Returns the package name for a parser module
-
-@param[in] dirmap_key: a key from the dirmap dictionary
-@returns: a string of the package name for the given key
-
-"""
-def get_package_name(dirmap_key):
-    if (dirmap_key == "bsrc"):
-        return "srcparsers.{}".format(dirmap_key)
-    else:
-        return "udparsers.{}".format(dirmap_key)
-
-"""Takes an item from dirmap and gets the package name and directory for the module
-
-@param[in] dirmap_item: a tuple of a key-value pair from dirmap
-@returns: a tuple in the form (module package name, package directory)
-
-"""
-def get_package_dirent(dirmap_item):
-    package_name = get_package_name(dirmap_item[0])
-    package_dir = dirmap_item[1]
-    return (package_name, package_dir)
-
-"""Applies the get_package_name() function to each key in dirmap
-
-@returns: a list of strings of the package names for each key
-
-"""
-def get_packages():
-    return map(get_package_name, dirmap.keys())
-
-"""Applies the get_package_dirent() function to each item in dirmap
-
-@returns: a list of tuples in the form (module package name, package directory)
-
-"""
-def get_package_dirs():
-    return map(get_package_dirent, dirmap.items())
-
+package_data = {
+    "pel.prd":  [ "sigdata/*.json" ]
+}
 
 setup(
-        name="Hostboot",
-        version="0.1",
-        packages=list(get_packages()),
-        package_dir=dict(get_package_dirs())
+    name            = "Hostboot",
+    version         = "0.1",
+    packages        = package_directories.keys(),
+    package_dir     = package_directories,
+    package_data    = package_data,
 )
