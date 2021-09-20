@@ -346,7 +346,6 @@
     <valueType>uint64</valueType>
     <initToZero/>
     <writeable/>
-    <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -366,7 +365,6 @@
     <valueType>uint64</valueType>
     <initToZero/>
     <writeable/>
-    <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
 </attributes>
