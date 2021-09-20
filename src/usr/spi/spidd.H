@@ -70,6 +70,19 @@ protected:
      */
     void addStatusRegs(errlHndl_t& io_errl);
 
+    /* @brief Checks the given error to determine if there is a mismatch between the root control register mux settings
+     *        and what Hostboot thought the settings were. If there is a mismatch then the given error will be committed
+     *        and a new error will be returned in its place. This is done to avoid returning a generic xscom error from
+     *        the spi device driver and to prevent erroneous callouts of the proc.
+     *
+     * @param[in,out] io_errl   IN: The generated error for the failing spi op.
+     *                         OUT: The given error or the new error if a mismatch was found.
+     *
+     * @return        bool     True if a mismatch was found, false otherwise. Note: if a mismatch was found then
+     *                         relevant FFDC was already added to the log is not necessary to add anything else.
+     */
+    bool spiMuxMismatchFound(errlHndl_t& io_errl);
+
     /**
      *  @brief Adds callouts for the SPI device to the error log.
      *         Does a medium callout on the SPI master proc
@@ -553,6 +566,26 @@ errlHndl_t spiEngineLockOp(TARGETING::Target* i_target,
 void addSpiStatusRegsToErrl(TARGETING::Target* i_proc,
                             uint8_t i_spiEngine,
                             errlHndl_t& io_errl);
+
+/* @brief Checks the given error to determine if there is a mismatch between the root control register mux settings
+ *        and what Hostboot thought the settings were. If there is a mismatch then the given error will be committed and
+ *        a new error will be returned in its place. This is done to avoid returning a generic xscom error from the spi
+ *        device driver and to prevent erroneous deconfigs/gards of the proc.
+ *
+ * @param[in]     i_proc        The proc with the failing spi op. Used to get the SPI_SWITCHES attribute
+ *
+ * @param[in]     i_engine      The spi engine used for the op.
+ *
+ * @param[in,out] io_errl   IN: The generated error for the failing spi op.
+ *                         OUT: The given error or the new error if a mismatch was found.
+ *
+ * @return        bool     True if a mismatch was found, false otherwise. Note: if a mismatch was found then relevant
+ *                         FFDC was already added to the log is not necessary to add anything else.
+ */
+bool checkForSpiMuxMismatch(TARGETING::Target* i_proc,
+                            uint8_t            i_engine,
+                            errlHndl_t&        io_errl);
+
 
 
 }; // end namespace SPI

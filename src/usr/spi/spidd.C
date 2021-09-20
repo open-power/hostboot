@@ -52,6 +52,8 @@
 #include <p10_scom_perv.H>
 #include <p10_spi_init_pib.H>
 
+#include <xscom/xscomreasoncodes.H>
+
 constexpr uint64_t HOSTBOOT_PIB_MASTER_ID = 9;
 
 // -----------------------------------------------------------------------------
@@ -538,6 +540,116 @@ void addSpiStatusRegsToErrl(TARGETING::Target* i_proc,
     } while(0);
 }
 
+bool checkForSpiMuxMismatch(TARGETING::Target* i_proc,
+                            const uint8_t      i_engine,
+                            errlHndl_t&        io_errl)
+{
+    TRACUCOMP(g_trac_spi, ENTER_MRK"checkForSpiMuxMismatch");
+    bool mismatchFound = false;
+    do {
+    // Check inputs.
+    if (io_errl == nullptr)
+    {
+        // io_errl cannot be nullptr.
+        TRACFCOMP(g_trac_spi, ERR_MRK"checkForSpiMuxMismatch: i_errl was nullptr. Skip adding additional FFDC");
+        break;
+    }
+    if (i_proc->getAttr<TARGETING::ATTR_TYPE>() != TARGETING::TYPE_PROC)
+    {
+        // A proc wasn't given. Can't get SPI_SWITCHES to compare with.
+        TRACFCOMP(g_trac_spi, ERR_MRK"checkForSpiMuxMismatch: "
+                  "i_proc wasn't a proc target. Skip adding additional FFDC");
+        break;
+    }
+
+    // Check if xscom error, if there was one need to check the state of the SPI engine MUX
+    if ((io_errl->reasonCode() == XSCOM::XSCOM_STATUS_ERR))
+    {
+        // Check the scom switches to verify PIB set and read the root control register to check the status of the mux.
+        // If these don't agree then it's possible that another subsystem took control of the SPI engines to do
+        // something and hostboot attempted to do something on one of the engines during that time.
+        auto l_spiSwitch = i_proc->getAttr<TARGETING::ATTR_SPI_SWITCHES>();
+        uint64_t l_data = 0;
+        size_t l_size = sizeof(l_data);
+        errlHndl_t l_err = deviceRead(i_proc,
+                                      &l_data,
+                                      l_size,
+                                      DEVICE_SCOM_ADDRESS(ROOT_CTRL_8_PIB));
+        if (l_err != nullptr)
+        {
+            TRACFCOMP(g_trac_spi, ERR_MRK"checkSpiForMuxMismatch: l_err wasn't nullptr. "
+                      "Couldn't read root ctrl reg to get mux status!");
+            l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_err, SPI_COMP_ID);
+            break;
+        }
+
+        // PIB mux select is the first four bits of the root ctrl reg. To select for PIB, the bit needs to be 0b0.
+        constexpr uint64_t USE_PIB_MASK = 0xF000000000000000ull;
+        if(((l_data & USE_PIB_MASK) == 0) && l_spiSwitch.usePibSPI)
+        {
+            // The mux is setup correctly. Nothing left to do
+            break;
+        }
+
+        mismatchFound = true;
+        // At this point there is a disagreement between what the root control reg is set to and what hostboot thinks
+        // it's set to. Can only assume something switched it without hostboot knowing. So generate a new error for the
+        // SPI MUX being in the wrong state and commit the XSCOM error as informational. io_errl will point to the new
+        // error.
+        uint8_t usePIB = l_spiSwitch.usePibSPI;
+
+        /*@
+        * @errortype
+        * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+        * @moduleid         SPI::SPI_CHECK_FOR_MUX_MISMATCH
+        * @reasoncode       SPI::SPI_MUX_MISMATCH_FOUND
+        * @userdata1[00:31] Proc HUID
+        * @userdata1[32:63] 1 = use PIB, 0 = use FSI
+        * @userdata2        Root Control Register contents
+        * @devdesc          There was a detected mismatch between what Hostboot thought the status of the root ctrl
+        *                   register was set to and what it actually was set to. See user detail sections for reg
+        *                   contents.
+        * @custdesc         A problem occurred during IPL of the system.
+        */
+        errlHndl_t errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                  SPI_CHECK_FOR_MUX_MISMATCH,
+                                                  SPI_MUX_MISMATCH_FOUND,
+                                                  TWO_UINT32_TO_UINT64(TARGETING::get_huid(i_proc),
+                                                                       usePIB),
+                                                  l_data,
+                                                  ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        // Most likely a misbehaving service processor
+        errl->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                  HWAS::SRCI_PRIORITY_HIGH);
+        addSpiStatusRegsToErrl(i_proc, i_engine, errl);
+
+        // Add useful traces to the visible log
+        // Note: SPI is added at a higher level
+        errl->collectTrace(XSCOM_COMP_NAME,256);
+
+        // Set the PLID of the XSCOM error to the new error for association.
+        io_errl->plid(errl->plid());
+
+        // Reduce severity to informational. This prevents unnecessary callouts/deconfig/gards.
+        io_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+
+        // Commit the log and return the new one.
+        errlCommit(io_errl, SPI_COMP_ID);
+        // io_errl now nullptr
+        io_errl = errl;
+    }
+    else
+    {
+        TRACFCOMP(g_trac_spi, INFO_MRK"checkForSpiMuxMismatch: No mismatch detected.");
+    }
+
+    } while(0);
+
+    TRACUCOMP(g_trac_spi, EXIT_MRK"checkForSpiMuxMismatch");
+    return mismatchFound;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // SpiOp
 ////////////////////////////////////////////////////////////////////////////////
@@ -553,6 +665,11 @@ SpiOp::SpiOp(TARGETING::Target* i_controller_target,
 void SpiOp::addStatusRegs(errlHndl_t& io_errl)
 {
     addSpiStatusRegsToErrl(iv_target, iv_engine, io_errl);
+}
+
+bool SpiOp::spiMuxMismatchFound(errlHndl_t& io_errl)
+{
+    return checkForSpiMuxMismatch(iv_target, iv_engine, io_errl);
 }
 
 void SpiOp::addCallouts(errlHndl_t& io_errl)
@@ -682,10 +799,14 @@ errlHndl_t SpiEepromOp::read(void*   o_buffer,
                       iv_adjusted_offset,
                       iv_adjusted_length,
                       iv_usingAdjustedBuffer ? "TRUE" : "FALSE");
-            addStatusRegs(errl);
-            addCallouts(errl);
-            ERRORLOG::ErrlUserDetailsTarget(iv_target, "Proc Target")
-                .addToLog(errl);
+            // If the error wasn't a PIB resource occupied error then add additional FFDC, otherwise
+            // spiMuxMismatchFound has handled that already.
+            if (!spiMuxMismatchFound(errl))
+            {
+                addStatusRegs(errl);
+                addCallouts(errl);
+                ERRORLOG::ErrlUserDetailsTarget(iv_target, "Proc Target").addToLog(errl);
+            }
             io_buflen = 0;
             break;
         }
@@ -782,10 +903,14 @@ errlHndl_t SpiEepromOp::write(void*   i_buffer,
                           "adjusted offset = %d, adjusted length = %d",
                           iv_adjusted_offset,
                           iv_adjusted_length);
-                addStatusRegs(errl);
-                addCallouts(errl);
-                ERRORLOG::ErrlUserDetailsTarget(iv_target, "Proc Target")
-                    .addToLog(errl);
+                // If the error wasn't a PIB resource occupied error then add additional FFDC, otherwise
+                // spiMuxMismatchFound has handled that already.
+                if (!spiMuxMismatchFound(errl))
+                {
+                    addStatusRegs(errl);
+                    addCallouts(errl);
+                    ERRORLOG::ErrlUserDetailsTarget(iv_target, "Proc Target").addToLog(errl);
+                }
                 io_buflen = 0;
                 break;
             }
@@ -819,10 +944,14 @@ errlHndl_t SpiEepromOp::write(void*   i_buffer,
             TRACFCOMP(g_trac_spi, "SpiOp::write(): "
                       "spi_write HWP error with params: offset = %d, "
                       "length = %d", iv_adjusted_offset, iv_adjusted_length);
-            addStatusRegs(errl);
-            addCallouts(errl);
-            ERRORLOG::ErrlUserDetailsTarget(iv_target, "Proc Target")
-                .addToLog(errl);
+            // If the error wasn't a PIB resource occupied error then add additional FFDC, otherwise
+            // spiMuxMismatchFound has handled that already.
+            if (!spiMuxMismatchFound(errl))
+            {
+                addStatusRegs(errl);
+                addCallouts(errl);
+                ERRORLOG::ErrlUserDetailsTarget(iv_target, "Proc Target").addToLog(errl);
+            }
             io_buflen = 0;
             break;
         }
@@ -1060,10 +1189,14 @@ errlHndl_t SpiTpmOp::read(void* o_buffer, size_t& io_buflen)
                   "spi_tpm_read_secure HWP error with params: "
                   "locality = %d, offset = 0x%llx, length = %d",
                   iv_locality, iv_offset, io_buflen);
-        addStatusRegs(errl);
-        addCallouts(errl);
-        ERRORLOG::ErrlUserDetailsTarget(iv_target, "Proc Target")
-            .addToLog(errl);
+        // If the error wasn't a PIB resource occupied error then add additional FFDC, otherwise
+        // spiMuxMismatchFound has handled that already.
+        if (!spiMuxMismatchFound(errl))
+        {
+            addStatusRegs(errl);
+            addCallouts(errl);
+            ERRORLOG::ErrlUserDetailsTarget(iv_target, "Proc Target").addToLog(errl);
+        }
         io_buflen = 0;
     }
 
@@ -1093,10 +1226,14 @@ errlHndl_t SpiTpmOp::write(void* i_buffer, size_t& io_buflen)
                   "spi_tpm_write_with_wait HWP error with params: "
                   "locality = %d, offset = 0x%llx, length = %d",
                   iv_locality, iv_offset, io_buflen);
-        addStatusRegs(errl);
-        addCallouts(errl);
-        ERRORLOG::ErrlUserDetailsTarget(iv_target, "Proc Target")
-            .addToLog(errl);
+        // If the error wasn't a PIB resource occupied error then add additional FFDC, otherwise
+        // spiMuxMismatchFound has handled that already.
+        if (!spiMuxMismatchFound(errl))
+        {
+            addStatusRegs(errl);
+            addCallouts(errl);
+            ERRORLOG::ErrlUserDetailsTarget(iv_target, "Proc Target").addToLog(errl);
+        }
     }
     return errl;
 }

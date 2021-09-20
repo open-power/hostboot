@@ -587,6 +587,9 @@ errlHndl_t spiInitEngine(
                   TRACE_ERR_FMT,
                   TARGETING::get_huid(i_pProc),i_engine,pibAccess,
                   TRACE_ERR_ARGS(pError));
+        checkForSpiMuxMismatch(i_pProc,
+                               i_engine,
+                               pError);
         pError->collectTrace(SPI_COMP_NAME, KILOBYTE);
         break;
     }
@@ -601,6 +604,9 @@ errlHndl_t spiInitEngine(
                   TRACE_ERR_FMT,
                   TARGETING::get_huid(i_pProc),i_engine,pibAccess,
                   TRACE_ERR_ARGS(pError));
+        checkForSpiMuxMismatch(i_pProc,
+                               i_engine,
+                               pError);
         pError->collectTrace(SPI_COMP_NAME, KILOBYTE);
         break;
     }
@@ -615,6 +621,9 @@ errlHndl_t spiInitEngine(
                   TRACE_ERR_FMT,
                   TARGETING::get_huid(i_pProc),i_engine,pibAccess,
                   TRACE_ERR_ARGS(pError));
+        checkForSpiMuxMismatch(i_pProc,
+                               i_engine,
+                               pError);
         pError->collectTrace(SPI_COMP_NAME, KILOBYTE);
         break;
     }
@@ -891,6 +900,12 @@ errlHndl_t spiPresence(TARGETING::Target* i_target,
         if ((errl == nullptr) && (id != 0))
         {
             o_present = true;
+        }
+        else if (errl != nullptr)
+        {
+            checkForSpiMuxMismatch(i_target,
+                                   i_engine,
+                                   errl);
         }
     }
     else

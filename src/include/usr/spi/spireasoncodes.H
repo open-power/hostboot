@@ -32,12 +32,13 @@ namespace SPI
 
     enum spiModuleId
     {
-        SPI_OP_READ             = 0x01,
-        SPI_OP_WRITE            = 0x02,
-        SPI_COPY_TO_BUFFER      = 0x03,
-        SPI_ENGINE_LOCK_OP      = 0x04,
-        SPI_PERFORM_OP          = 0x05,
-        SPI_PRESENCE            = 0x06,
+        SPI_OP_READ                = 0x01,
+        SPI_OP_WRITE               = 0x02,
+        SPI_COPY_TO_BUFFER         = 0x03,
+        SPI_ENGINE_LOCK_OP         = 0x04,
+        SPI_PERFORM_OP             = 0x05,
+        SPI_PRESENCE               = 0x06,
+        SPI_CHECK_FOR_MUX_MISMATCH = 0x07,
     };
 
     enum spiReasonCode
@@ -48,6 +49,7 @@ namespace SPI
         SPI_UNKNOWN_OP_TYPE                 = SPI_COMP_ID | 0x04,
         SPI_INVALID_BUFFER_SIZE             = SPI_COMP_ID | 0x05,
         SPI_PRESENCE_UNSUPPORTED_ENGINE     = SPI_COMP_ID | 0x06,
+        SPI_MUX_MISMATCH_FOUND              = SPI_COMP_ID | 0x07,
     };
 
     enum SpiUserDetailsTypes
