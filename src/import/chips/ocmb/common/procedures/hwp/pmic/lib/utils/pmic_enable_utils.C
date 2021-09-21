@@ -201,14 +201,22 @@ fapi2::ReturnCode toggle_vr_enable(
 
     fapi2::buffer<uint8_t> l_vr_enable_buffer;
 
+    // delay 20ms to make sure PMIC rails are on from previous VR enable, otherwise pmic
+    //   rails may not go through the pmic power off sequence when VR disable is done below
+    //   which can cause VDDR to be greater than VPP for a short time at low voltages (this was seen on 16GB 2U)
+    // power on sequence and idle delays add up to 12 ms for 2U DDIMMs, so have this delay be > 12 ms)
+    fapi2::delay(20 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
+
     // Toggle VR enable bit (0->1)
     // VR disable
     FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(i_pmic_target, REGS::R32, l_vr_enable_buffer));
     l_vr_enable_buffer.clearBit<FIELDS::R32_VR_ENABLE>();
     FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(i_pmic_target, REGS::R32, l_vr_enable_buffer));
 
-    // to be safe, let's delay 10ms to make sure PMICs rails are off before VR enable is done
-    fapi2::delay(10 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
+    // delay 40ms to make sure PMIC rails are off before VR enable is done
+    // Note that 16GB 2U uses 24 ms idle time after power off sequence0, so make sure this is accounted for
+    //   along with the 4ms soft stop times  (adds up to 32 ms, so have this delay be > 32 ms)
+    fapi2::delay(40 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
 
     // VR enable
     l_vr_enable_buffer.setBit<FIELDS::R32_VR_ENABLE>();
@@ -1358,7 +1366,8 @@ fapi2::ReturnCode enable_1u_2u(
     }
 
     // delay after final VR enable and before checking status
-    fapi2::delay(10 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
+    // soft start time and idle delays add up to 12 ms for 2U DDIMMs, so have this delay be > 12 ms)
+    fapi2::delay(20 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
 
     // Check that all the PMIC statuses are good post-enable
     FAPI_TRY(mss::pmic::status::check_all_pmics(i_ocmb_target),
