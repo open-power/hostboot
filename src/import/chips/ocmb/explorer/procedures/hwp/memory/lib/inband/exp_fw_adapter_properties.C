@@ -97,6 +97,9 @@ fapi2::ReturnCode process_fw_adapter_properties(const fapi2::Target<fapi2::TARGE
         const fw_adapter_properties_struct& i_fw_adapter_data,
         const spi_flash_plat_auth_info_struct& i_flash_auth_info)
 {
+    constexpr uint8_t IMAGE_A = 0;
+    constexpr uint8_t IMAGE_B = 1;
+
     // boot_partition_id is stored as an ASCII 'A' or 'B'.
     const auto boot_image_number = static_cast<char>(i_fw_adapter_data.boot_partion_id);
 
@@ -133,6 +136,9 @@ fapi2::ReturnCode process_fw_adapter_properties(const fapi2::Target<fapi2::TARGE
 
     FAPI_INF("%s uecc_compare: 0x%02X", mss::c_str(i_target), i_flash_auth_info.uecc_compare);
     FAPI_INF("%s image_updated: 0x%02X", mss::c_str(i_target), i_flash_auth_info.image_updated);
+
+    FAPI_TRY( mss::attr::set_exp_fw_failed_authentication_a(i_target, i_flash_auth_info.failed_authentication[IMAGE_A]) );
+    FAPI_TRY( mss::attr::set_exp_fw_failed_authentication_b(i_target, i_flash_auth_info.failed_authentication[IMAGE_B]) );
 
 fapi_try_exit:
     return fapi2::current_err;

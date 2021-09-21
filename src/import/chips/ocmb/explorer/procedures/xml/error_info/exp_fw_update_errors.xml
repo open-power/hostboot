@@ -274,9 +274,9 @@
     </hwpError>
 
     <hwpError>
-        <rc>RC_EXP_SPI_FLASH_AUTH_FAIL</rc>
+        <rc>RC_EXP_SPI_FLASH_AUTH_FAIL_MFG</rc>
         <description>
-            Explorer SPI flash authentication failed for one FW image during IPL.
+            Explorer SPI flash authentication failed for one FW image during MFG test.
         </description>
         <ffdc>IMAGE</ffdc>
         <ffdc>EXP_ACTIVE_LOG_SIZE</ffdc>
@@ -296,6 +296,113 @@
         <gard>
             <target>OCMB_TARGET</target>
         </gard>
+    </hwpError>
+
+    <hwpError>
+        <rc>RC_EXP_SPI_FLASH_AUTH_FAIL</rc>
+        <description>
+            Explorer SPI flash authentication failed for one FW image during MFG test.
+            Without MFG_THRESHOLDS set this error will not deconfigure or gard any hardware.
+        </description>
+        <ffdc>IMAGE</ffdc>
+        <ffdc>EXP_ACTIVE_LOG_SIZE</ffdc>
+        <collectFfdc>exp_collect_explorer_active_log, OCMB_TARGET, EXP_ACTIVE_LOG_SIZE</collectFfdc>
+        <collectRegisterFfdc>
+            <id>REG_FFDC_EXP_SPI_FLASH_ERR_INFO</id>
+            <target>OCMB_TARGET</target>
+            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        </collectRegisterFfdc>
+        <callout>
+            <target>OCMB_TARGET</target>
+            <priority>HIGH</priority>
+        </callout>
+    </hwpError>
+
+    <hwpError>
+        <rc>RC_EXP_FLASH_COMMAND_ERR</rc>
+        <description>
+            Explorer flash command returned a failure
+        </description>
+        <ffdc>RSP_ID</ffdc>
+        <ffdc>REQ_ID</ffdc>
+        <ffdc>MCHP_STATUS_CODE</ffdc>
+        <ffdc>MCHP_ERROR_CODE_1</ffdc>
+        <ffdc>MCHP_ERROR_CODE_2</ffdc>
+        <ffdc>MCHP_ERROR_CODE_3</ffdc>
+        <ffdc>MCHP_ERROR_CODE_4</ffdc>
+        <ffdc>EXP_ACTIVE_LOG_SIZE</ffdc>
+        <collectFfdc>exp_collect_explorer_active_log, OCMB_TARGET, EXP_ACTIVE_LOG_SIZE</collectFfdc>
+        <callout>
+            <target>OCMB_TARGET</target>
+            <priority>HIGH</priority>
+        </callout>
+        <deconfigure>
+            <target>OCMB_TARGET</target>
+        </deconfigure>
+    </hwpError>
+
+    <hwpError>
+        <rc>RC_EXP_MNFG_SPI_FLASH_CE</rc>
+        <description>
+            Explorer SPI Flash CE FIR bit, LOCAL_FIR[23], was set during MNFG SPI Flash screen test.
+        </description>
+        <ffdc>EXP_ACTIVE_LOG_SIZE</ffdc>
+        <collectFfdc>exp_collect_explorer_active_log, OCMB_TARGET, EXP_ACTIVE_LOG_SIZE</collectFfdc>
+        <collectRegisterFfdc>
+            <id>REG_FFDC_EXP_SPI_FLASH_ERR_INFO</id>
+            <target>OCMB_TARGET</target>
+            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        </collectRegisterFfdc>
+        <callout>
+            <target>OCMB_TARGET</target>
+            <priority>HIGH</priority>
+        </callout>
+        <deconfigure>
+            <target>OCMB_TARGET</target>
+        </deconfigure>
+    </hwpError>
+
+    <hwpError>
+        <rc>RC_EXP_MNFG_SPI_FLASH_TIMEOUT_READING_IMAGE</rc>
+        <description>
+            Explorer SPI flash timeout reading FW image during MNFG SPI Flash screen test.
+        </description>
+        <ffdc>IMAGE</ffdc>
+        <ffdc>EXP_ACTIVE_LOG_SIZE</ffdc>
+        <collectFfdc>exp_collect_explorer_active_log, OCMB_TARGET, EXP_ACTIVE_LOG_SIZE</collectFfdc>
+        <collectRegisterFfdc>
+            <id>REG_FFDC_EXP_SPI_FLASH_ERR_INFO</id>
+            <target>OCMB_TARGET</target>
+            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        </collectRegisterFfdc>
+        <callout>
+            <target>OCMB_TARGET</target>
+            <priority>HIGH</priority>
+        </callout>
+        <deconfigure>
+            <target>OCMB_TARGET</target>
+        </deconfigure>
+    </hwpError>
+
+    <hwpError>
+        <rc>RC_EXP_MNFG_SPI_FLASH_TIMEOUT_WRITING_TEMP_BANK</rc>
+        <description>
+            Explorer SPI flash timeout writing FW image to temp bank during MNFG SPI Flash screen test.
+        </description>
+        <ffdc>EXP_ACTIVE_LOG_SIZE</ffdc>
+        <collectFfdc>exp_collect_explorer_active_log, OCMB_TARGET, EXP_ACTIVE_LOG_SIZE</collectFfdc>
+        <collectRegisterFfdc>
+            <id>REG_FFDC_EXP_SPI_FLASH_ERR_INFO</id>
+            <target>OCMB_TARGET</target>
+            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        </collectRegisterFfdc>
+        <callout>
+            <target>OCMB_TARGET</target>
+            <priority>HIGH</priority>
+        </callout>
+        <deconfigure>
+            <target>OCMB_TARGET</target>
+        </deconfigure>
     </hwpError>
 
     <hwpError>

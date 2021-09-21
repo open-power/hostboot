@@ -239,7 +239,7 @@ fapi2::ReturnCode p10_omi_init(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_ta
                     {
                         // In MFG test, this fail should call out and deconfigure the DIMM, and fail the procedure
                         FAPI_ASSERT(false,
-                                    fapi2::EXP_SPI_FLASH_AUTH_FAIL().
+                                    fapi2::EXP_SPI_FLASH_AUTH_FAIL_MFG().
                                     set_OCMB_TARGET(l_ocmb).
                                     set_IMAGE(l_image_num).
                                     set_EXP_ACTIVE_LOG_SIZE(4096),
@@ -257,7 +257,7 @@ fapi2::ReturnCode p10_omi_init(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_ta
                                            "%s Explorer SPI flash authentication failed for image %s",
                                            mss::c_str(l_ocmb), (!l_image_a_good ? "A" : "B"));
 
-                        // Set current_err back to success
+                        // FAPI_ASSERT_NOEXIT already logs the error, so set current_err back to success so we pass the procedure
                         fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
                     }
                 }

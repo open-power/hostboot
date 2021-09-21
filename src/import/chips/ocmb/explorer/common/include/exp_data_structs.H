@@ -83,6 +83,9 @@ enum exp_struct_sizes
     NUM_DQ              = TRAINING_RESPONSE_NUM_LANES,
     NUM_DRAM            = TRAINING_RESPONSE_NUM_DRAM,
     NIBBLES_PER_BYTE    = 2,
+
+    // PART_INFO_GET enums
+    VERSION_INFO_SIZE   = 128,
 };
 
 ///
@@ -1267,5 +1270,28 @@ typedef struct __attribute__((packed))
     uint32_t            crc;
 }
 app_fw_ddr_calibration_data_struct;
+
+///
+/// @class partition_info_struct
+/// @brief SPI Flash partition info struct
+///
+typedef struct __attribute__((packed))
+{
+    // active image flag
+    uint32_t            actv_img_flag;
+
+    // FW version string - Bank A
+    uint8_t             fw_img_A_version_info[VERSION_INFO_SIZE];
+
+    // FW image length - Bank A
+    uint32_t            fw_img_A_length;
+
+    // FW version string - Bank B
+    uint8_t             fw_img_B_version_info[VERSION_INFO_SIZE];
+
+    // FW image length - Bank B
+    uint32_t            fw_img_B_length;
+}
+partition_info_struct;
 
 #endif

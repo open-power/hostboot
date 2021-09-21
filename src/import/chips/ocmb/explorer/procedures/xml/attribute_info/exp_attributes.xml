@@ -597,6 +597,34 @@
   </attribute>
 
   <attribute>
+    <id>ATTR_MSS_EXP_FW_FAILED_AUTHENTICATION_A</id>
+    <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    <description>
+      Explorer firmware authentication status for partition A.
+      '1' indicates the partition failed authentication.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <default>0</default>
+    <writeable/>
+    <mssAccessorName>exp_fw_failed_authentication_a</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_EXP_FW_FAILED_AUTHENTICATION_B</id>
+    <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    <description>
+      Explorer firmware authentication status for partition B.
+      '1' indicates the partition failed authentication.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <default>0</default>
+    <writeable/>
+    <mssAccessorName>exp_fw_failed_authentication_b</mssAccessorName>
+  </attribute>
+
+  <attribute>
     <id>ATTR_MSS_EXP_COMM_STATE</id>
     <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
     <description>
