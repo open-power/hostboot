@@ -347,18 +347,18 @@ static errlHndl_t exchange_pdrs()
 
         /* Notify the BMC that our PDR repository has changed. */
 
+        // The BMC will request the handle we tell them changed, and each
+        // subsequent handle in the PDR repository.
+        const auto lowest_handle = std::accumulate(begin(hb_pdr_handles), end(hb_pdr_handles),
+                                                   hb_pdr_handles.front(),
+                                                   std::min<PLDM::pdr_handle_t>);
+
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "Sending PDR notification to the BMC for %llu new Hostboot PDRs",
-                  hb_pdr_handles.size());
+                  "Sending PDR notification to the BMC for %llu new Hostboot PDRs (lowest handle = 0x%08x)",
+                  hb_pdr_handles.size(),
+                  lowest_handle);
 
-        for (const auto handle : hb_pdr_handles)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "Sending PDR notification to the BMC for handle 0x%08x",
-                      handle);
-        }
-
-        l_err = PLDM::thePdrManager().sendPdrRepositoryChangeEvent(hb_pdr_handles);
+        l_err = PLDM::thePdrManager().sendPdrRepositoryChangeEvent({ lowest_handle });
 
         if (l_err)
         {
