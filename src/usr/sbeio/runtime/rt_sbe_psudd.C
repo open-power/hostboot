@@ -149,34 +149,20 @@ SbePsu::SbePsu()
                  reinterpret_cast<uint64_t>(l_virtAddr));
         }
     }
-    else
-    {
-        //@fixme-hardcoding to known value since we have attribute ordering issue
-        SBE_TRACF("SbePsu::SbePsu()> Hardcoding ATTR_SBE_HBRT_PSU_PHYS_ADDR = 0xE76D0000");
-        UTIL::assertGetToplevelTarget()->
-          setAttr<ATTR_SBE_HBRT_PSU_PHYS_ADDR>(0xE76D0000);
-        uint64_t l_virtAddr = g_hostInterfaces->get_reserved_mem(
-                                 HBRT_RSVD_MEM__SBE_PSU,
-                                 0);
-        if( l_virtAddr != 0 )
-        {
-            UTIL::assertGetToplevelTarget()->
-              setAttr<TARGETING::ATTR_SBE_HBRT_PSU_VIRT_ADDR>(l_virtAddr);
-        }
-    }
-
 
     // Get a pointer to our reserved memory range
     auto l_physAddr = UTIL::assertGetToplevelTarget()->
       getAttr<ATTR_SBE_HBRT_PSU_PHYS_ADDR>();
     if( l_physAddr == 0 )
     {
+        auto l_virtAddr = UTIL::assertGetToplevelTarget()->
+          getAttr<ATTR_SBE_HBRT_PSU_VIRT_ADDR>();
         /*@
          * @errortype
          * @moduleid     SBEIO_RT_PSU
          * @reasoncode   SBEIO_NO_RUNTIME_BUFFER
          * @userdata1    Return code from get_reserved_mem_phys
-         * @userdata2    <unused>
+         * @userdata2    ATTR_SBE_HBRT_PSU_VIRT_ADDR
          * @devdesc      No reserved memory reserved for runtime SBE PSU
          *               operations (ATTR_SBE_HBRT_PSU_PHYS_ADDR==0).
          * @custdesc     Firmware error
@@ -185,7 +171,7 @@ SbePsu::SbePsu()
                                SBEIO_RT_PSU,
                                SBEIO_NO_RUNTIME_BUFFER,
                                rc,
-                               0,
+                               l_virtAddr,
                                ErrlEntry::ADD_SW_CALLOUT);
         saveEarlyError( l_errl->eid(), nullptr );
         errlCommit(l_errl, SBEIO_COMP_ID);
