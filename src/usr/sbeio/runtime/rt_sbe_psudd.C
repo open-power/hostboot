@@ -73,20 +73,19 @@ sbeAllocationHandle_t sbeMalloc(const size_t i_bytes)
     }
 
     // Get a pointer to our reserved memory range
-    void* l_psuMemoryVirt = nullptr;
     auto l_psuMemoryPhys = UTIL::assertGetToplevelTarget()->
       getAttr<ATTR_SBE_HBRT_PSU_PHYS_ADDR>();
-    if( l_psuMemoryPhys == 0 )
+    void* l_psuMemoryVirt = reinterpret_cast<void*>(
+      UTIL::assertGetToplevelTarget()->
+        getAttr<ATTR_SBE_HBRT_PSU_VIRT_ADDR>());
+    if( (l_psuMemoryPhys == 0) || (l_psuMemoryVirt == nullptr) )
     {
         // This should never happen because we already check this in the
-        //  constructor
-        SBE_TRACF("sbeMalloc> ATTR_SBE_HBRT_PSU_PHYS_ADDR is not set");
-    }
-    else
-    {
-        l_psuMemoryVirt = g_hostInterfaces->map_phys_mem(
-                                    l_psuMemoryPhys,
-                                    SbePsu::MAX_HBRT_PSU_OP_SIZE_BYTES);
+        //  contructor
+        SBE_TRACF("sbeMalloc> ATTR_SBE_HBRT_PSU_PHYS_ADDR=%X, ATTR_SBE_HBRT_PSU_VIRT_ADDR=%p is not set",
+                  l_psuMemoryPhys, l_psuMemoryVirt);
+        l_psuMemoryPhys = 0;
+        l_psuMemoryVirt = nullptr;
     }
 
     // Return a handle so we can free() the buffer later
@@ -107,18 +106,7 @@ sbeAllocationHandle_t sbeMalloc(const size_t i_bytes, void*& o_allocation)
 
 void sbeFree(sbeAllocationHandle_t& i_handle)
 {
-    // Since the adjunct has a limited number of mappings, we
-    //  will unmap our range when we're done using it.
-    if( i_handle.bufPtr )
-    {
-        int rc = g_hostInterfaces->unmap_phys_mem(i_handle.bufPtr);
-        if( rc )
-        {
-            SBE_TRACF("sbeFree> Error from unmap_phys_mem : rc=%d, ignoring",
-                      rc);
-        }
-    }
-    else
+    if( !i_handle.bufPtr )
     {
         SBE_TRACF("sbeFree> Attempt to free an empty buffer, ignoring");
     }
@@ -140,10 +128,42 @@ SbePsu::SbePsu()
 {
     SBE_TRACF("SbePsu::SbePsu() Runtime Constructor");
     errlHndl_t l_errl = nullptr;
+    int rc = 0;
 
-    //@fixme-hardcoding to known value since we have attribute ordering issue
-    UTIL::assertGetToplevelTarget()->
-      setAttr<ATTR_SBE_HBRT_PSU_PHYS_ADDR>(0xE76D0000);
+    // Get a pointer to our reserved memory range
+    if( g_hostInterfaces->get_reserved_mem_phys != nullptr )
+    {
+        uint64_t l_physAddr = 0;
+        void* l_virtAddr = nullptr;
+        rc = g_hostInterfaces->get_reserved_mem_phys(
+                        HBRT_RSVD_MEM__SBE_PSU,
+                        0,
+                        &l_virtAddr,
+                        &l_physAddr);
+        if( !rc )
+        {
+            UTIL::assertGetToplevelTarget()->
+              setAttr<TARGETING::ATTR_SBE_HBRT_PSU_PHYS_ADDR>(l_physAddr);
+            UTIL::assertGetToplevelTarget()->
+              setAttr<TARGETING::ATTR_SBE_HBRT_PSU_VIRT_ADDR>(
+                 reinterpret_cast<uint64_t>(l_virtAddr));
+        }
+    }
+    else
+    {
+        //@fixme-hardcoding to known value since we have attribute ordering issue
+        SBE_TRACF("SbePsu::SbePsu()> Hardcoding ATTR_SBE_HBRT_PSU_PHYS_ADDR = 0xE76D0000");
+        UTIL::assertGetToplevelTarget()->
+          setAttr<ATTR_SBE_HBRT_PSU_PHYS_ADDR>(0xE76D0000);
+        uint64_t l_virtAddr = g_hostInterfaces->get_reserved_mem(
+                                 HBRT_RSVD_MEM__SBE_PSU,
+                                 0);
+        if( l_virtAddr != 0 )
+        {
+            UTIL::assertGetToplevelTarget()->
+              setAttr<TARGETING::ATTR_SBE_HBRT_PSU_VIRT_ADDR>(l_virtAddr);
+        }
+    }
 
 
     // Get a pointer to our reserved memory range
@@ -155,7 +175,7 @@ SbePsu::SbePsu()
          * @errortype
          * @moduleid     SBEIO_RT_PSU
          * @reasoncode   SBEIO_NO_RUNTIME_BUFFER
-         * @userdata1    <unused>
+         * @userdata1    Return code from get_reserved_mem_phys
          * @userdata2    <unused>
          * @devdesc      No reserved memory reserved for runtime SBE PSU
          *               operations (ATTR_SBE_HBRT_PSU_PHYS_ADDR==0).
@@ -164,7 +184,7 @@ SbePsu::SbePsu()
         l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                SBEIO_RT_PSU,
                                SBEIO_NO_RUNTIME_BUFFER,
-                               0,
+                               rc,
                                0,
                                ErrlEntry::ADD_SW_CALLOUT);
         saveEarlyError( l_errl->eid(), nullptr );

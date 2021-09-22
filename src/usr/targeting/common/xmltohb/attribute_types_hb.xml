@@ -1414,6 +1414,18 @@
   </attribute>
 
   <attribute>
+    <id>SBE_HBRT_PSU_VIRT_ADDR</id>
+    <description>Cached Virtual Address of SBE PSU memory space</description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
     <id>SBE_SUPPORTS_HALT_STATUS</id>
     <description>
         Boolean indicating whether SBE can accurately report when Hostboot

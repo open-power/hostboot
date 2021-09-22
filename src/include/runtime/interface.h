@@ -331,7 +331,7 @@ typedef struct hostInterfaces
      *  @brief Get the address of a reserved memory region by its name
      *  @param[in] i_name     memory region name (ex. "hbrt-vpd-image")
      *  @param[in] i_instance instance number
-     *  @return physical address of region or NULL
+     *  @return virtual address of region or NULL
      *  @platform FSP, OpenPOWER
      **/
     uint64_t (*get_reserved_mem)(const char* i_name, uint32_t i_instance);
@@ -843,6 +843,20 @@ typedef struct hostInterfaces
                                      uint64_t& o_homerAddr,
                                      uint64_t& o_occCommonAddr );
 
+
+    /**
+     *  @brief Get the virtual and physical address of a reserved memory region by its name
+     *  @param[in] i_name     memory region name (ex. "hbrt-vpd-image")
+     *  @param[in] i_instance instance number
+     *  @param[out] o_vAddr   virtual address of region or NULL on error
+     *  @param[out] o_pAddr   physical address of region or zero on error
+     *  @return 0 on success, else return code
+     *  @platform FSP, OpenPOWER
+     **/
+    int (*get_reserved_mem_phys)(const char* i_name,
+                                 uint32_t i_instance,
+                                 void** o_vAddr,
+                                 uint64_t* o_pAddr );
 
     /* Reserve some space for future growth.
        do NOT ever change this number, even if you add functions.
