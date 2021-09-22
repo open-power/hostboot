@@ -116,13 +116,25 @@
     <writeable/>
   </attribute>
 
+  <enumerationType>
+    <default>PAGE_IS_16_GB</default>
+    <id>HUGE_PAGE_SIZE</id>
+    <description>Enumeration indicating the chip HW version</description>
+    <enumerator>
+      <name>PAGE_IS_16_GB</name>
+      <value>0x0</value>
+    </enumerator>
+  </enumerationType>
+
   <attribute>
     <id>HUGE_PAGE_SIZE</id>
     <description>
        Huge Memory Page Size
     </description>
     <simpleType>
-      <uint8_t/>
+      <enumeration>
+        <id>HUGE_PAGE_SIZE</id>
+      </enumeration>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>

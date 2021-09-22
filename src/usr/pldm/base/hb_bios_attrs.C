@@ -953,7 +953,7 @@ errlHndl_t getHugePageSize(
             break;
         }
 
-        o_hugePageSize = l_attr_val;
+        o_hugePageSize = static_cast<TARGETING::ATTR_HUGE_PAGE_SIZE_type>(l_attr_val);
 
     } while(0);
 

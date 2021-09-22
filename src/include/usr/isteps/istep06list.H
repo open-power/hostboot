@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -200,6 +200,9 @@ const DepModInfo  g_istep06Dependancies = {
       DEP_LIB(libistep06.so),
       DEP_LIB(libsbe.so),
       DEP_LIB(libpm.so),
+#ifdef CONFIG_PLDM
+      DEP_LIB(libbios_attr_accessors.so),
+#endif
 #ifndef CONFIG_VPO_COMPILE
       DEP_LIB(libnestmemutils.so),
       DEP_LIB(libisteps_nest.so),

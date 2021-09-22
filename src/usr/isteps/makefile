@@ -48,6 +48,7 @@ SUBDIRS+=fab_iovalid.d
 SUBDIRS+=nest.d
 SUBDIRS+=ucd.d
 SUBDIRS+=expupd.d
+SUBDIRS+=$(if $(CONFIG_PLDM)$(CONFIG_PLDM_TESTCASES),bios_attr_accessors.d)
 
 #TODO: RTC 176018
 EXTRAINCDIR += ${ROOTPATH}/src/import/
