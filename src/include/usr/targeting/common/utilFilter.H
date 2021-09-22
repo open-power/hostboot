@@ -546,7 +546,8 @@ void getCoreChiplets(TARGETING::TargetHandleList & o_coreList,
  * @param[in]    i_parent         The parent target to retrieve core chiplets from. Default nullptr; In that case all
  *                                cores in the system matching given criteria will be returned.
  *
- * @param[in]    i_functional     The requested functional state. Default true.
+ * @param[in]    i_functional     The requested functional state.
+ *                                true:functional; false:present
  */
 void getNonEcoCores(TARGETING::TargetHandleList & o_coreList,
                     Target*                       i_parent = nullptr,
@@ -560,7 +561,8 @@ void getNonEcoCores(TARGETING::TargetHandleList & o_coreList,
  * @param[in]    i_parent         The parent target to retrieve core chiplets from. Default nullptr; In that case all
  *                                cores in the system matching given criteria will be returned.
  *
- * @param[in]    i_functional     The requested functional state. Default true.
+ * @param[in]    i_functional     The requested functional state.
+ *                                true:functional; false:present
  */
 void getEcoCores(TARGETING::TargetHandleList & o_coreList,
                  Target*                       i_parent = nullptr,

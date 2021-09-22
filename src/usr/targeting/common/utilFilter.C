@@ -853,7 +853,7 @@ void getNonEcoCores(TARGETING::TargetHandleList & o_coreList,
 {
     getCoreChiplets(o_coreList,
                     UTIL_FILTER_CORE_NON_ECO,
-                    i_functional ? UTIL_FILTER_FUNCTIONAL : UTIL_FILTER_ALL,
+                    i_functional ? UTIL_FILTER_FUNCTIONAL : UTIL_FILTER_PRESENT,
                     i_parent);
 }
 
@@ -863,7 +863,7 @@ void getEcoCores(TARGETING::TargetHandleList & o_coreList,
 {
     getCoreChiplets(o_coreList,
                     UTIL_FILTER_CORE_ECO,
-                    i_functional ? UTIL_FILTER_FUNCTIONAL : UTIL_FILTER_ALL,
+                    i_functional ? UTIL_FILTER_FUNCTIONAL : UTIL_FILTER_PRESENT,
                     i_parent);
 }
 
