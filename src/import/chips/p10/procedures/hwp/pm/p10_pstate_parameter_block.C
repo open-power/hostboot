@@ -991,6 +991,7 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         io_globalppb->offsets[DDS_VDD_CAL_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,vdd_cal));
         io_globalppb->offsets[WOF_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,wof));
         io_globalppb->offsets[WOV_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,wov));
+        io_globalppb->offsets[THR_OFFSET_IDX] = revle16(offsetof(GlobalPstateParmBlock_v1_t,thr));
 
         io_globalppb->base.reference_frequency_khz = revle32(iv_reference_frequency_khz);
 
@@ -1237,6 +1238,10 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
             FAPI_INF("WOV_DIRTY_UNDERCURR_CTRL[%u]=%u",i,io_globalppb->wov.wov_dirty_undercurr_control[i]);
         }
         io_globalppb->wov.wov_idd_thresh                  =  revle16(iv_attr_mvpd_poundV_other_info.idd_rdp_limit_0p1A);
+
+        //Throttle
+        io_globalppb->thr.thr_kp = iv_attrs.attr_system_wof_throttle_control_kp;
+        io_globalppb->thr.thr_ki = iv_attrs.attr_system_wof_throttle_control_ki;
 
 #if 0
         io_globalppb->attr.fields.pstates_enabled     = is_pstates_enabled();
@@ -1883,6 +1888,10 @@ void PlatPmPPB::attr_init( void )
     PPB_GET_ATTR(ATTR_DDS_BIAS_ENABLE,                      iv_procChip,  attr_dds_bias_enable);
     PPB_GET_ATTR(ATTR_DDS_COARSE_THROTTLE_ENABLE,           iv_procChip,  attr_dds_coarse_thr_enable)
     PPB_GET_ATTR(ATTR_WOF_THROTTLE_CONTROL_LOOP_DISABLE,    FAPI_SYSTEM,  attr_system_wof_throttle_control_loop_disable);
+
+    PPB_GET_ATTR(ATTR_WOF_THROTTLE_CONTROL_KI,              FAPI_SYSTEM,  attr_system_wof_throttle_control_ki);
+    PPB_GET_ATTR(ATTR_WOF_THROTTLE_CONTROL_KP,              FAPI_SYSTEM,  attr_system_wof_throttle_control_kp);
+
     PPB_GET_ATTR(ATTR_WOF_PITCH_ENABLE,                     FAPI_SYSTEM,  attr_system_pitch_enable);
     PPB_GET_ATTR(ATTR_WOF_THROTTLE_CONTROL_LOOP_MODE,       FAPI_SYSTEM,  attr_system_wof_throttle_control_loop_mode);
     PPB_GET_ATTR(ATTR_WOF_ALTITUDE_TEMP_ADJUSTMENT,         FAPI_SYSTEM,  attr_system_wof_altitude_temp_adjustment);
