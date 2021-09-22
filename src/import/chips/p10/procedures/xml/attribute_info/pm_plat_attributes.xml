@@ -1460,6 +1460,43 @@
 
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_WOF_THROTTLE_CONTROL_KP</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Throttle control loop proportional parameter. Value is in 64ths
+
+    Producer: Override
+
+    Consumers: p10_build_pstate_datablock -> Pstate Parameter Block (PSPB)
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <default>48</default>
+    <overrideOnly/>
+    <group>wof</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WOF_THROTTLE_CONTROL_KI</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Throttle control loop integral parameter. Value is in 64ths
+
+    Producer: Override
+
+    Consumers: p10_build_pstate_datablock -> Pstate Parameter Block (PSPB)
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <default>32</default>
+    <overrideOnly/>
+    <group>wof</group>
+  </attribute>
+
+
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_SYSTEM_OCS_DISABLE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
