@@ -69,6 +69,7 @@ const char PLDM_BIOS_HB_LMB_SIZE_STRING[]                  = "hb_memory_region_s
 const char PLDM_BIOS_HB_MFG_FLAGS_STRING[]                 = "hb_mfg_flags_current";
 const char PLDM_BIOS_HB_FIELD_CORE_OVERRIDE_STRING[]       = "hb_field_core_override_current";
 const char PLDM_BIOS_HB_USB_ENABLEMENT_STRING[]            = "hb_host_usb_enablement_current";
+const char PLDM_BIOS_HB_MAX_NUMBER_HUGE_PAGES_STRING[]     = "hb_max_number_huge_pages";
 
 // When power limit values change, the effect on the OCCs is immediate, so we
 // always want the most recent values here.
@@ -1785,13 +1786,105 @@ errlHndl_t getKeyClearRequest(std::vector<uint8_t>& io_string_table,
     return errl;
 }
 
+errlHndl_t setBiosIntegerAttrValue(std::vector<uint8_t>& io_string_table,
+                                   std::vector<uint8_t>& io_attr_table,
+                                   const char *i_attr_string,
+                                   uint64_t i_attr_value)
+{
+    errlHndl_t errl = nullptr;
+    do {
+
+    errl = ensureTablesAreSet(io_string_table, io_attr_table);
+    if (errl)
+    {
+        PLDM_ERR("setBiosIntegerValue: An error occured when attempting to populate the bios tables");
+        break;
+    }
+
+    const pldm_bios_attribute_type expected_type = PLDM_BIOS_INTEGER;
+    const pldm_bios_attr_table_entry * attr_entry_ptr = nullptr;
+    std::vector<uint8_t> attr_value;
+
+    // get attr_entry_ptr for the passed i_attr_string
+    errl = getCurrentAttrValue(i_attr_string,
+                               expected_type,
+                               io_string_table,
+                               io_attr_table,
+                               attr_entry_ptr,
+                               attr_value);
+    if(errl)
+    {
+        PLDM_ERR("setBiosIntegerValue: An error occurred while requesting the value of %s from the BMC",
+                 i_attr_string)
+        break;
+    }
+    auto entry_fields =
+        reinterpret_cast<const attr_table_integer_entry_fields*>(attr_entry_ptr->metadata);
+
+    if(i_attr_value > entry_fields->upper_bound ||
+       i_attr_value < entry_fields->lower_bound)
+    {
+        PLDM_ERR("setBiosIntegerValue: The value for %s we tried to write, %ld, is out of range."
+                 " The maximum allowed = 0x%ld and the minimum allowed = %ld",
+                 i_attr_string,
+                 i_attr_value,
+                 entry_fields->upper_bound,
+                 entry_fields->lower_bound);
+        /*@
+         * @errortype
+         * @severity   ERRL_SEV_UNRECOVERABLE
+         * @moduleid   MOD_SET_BIOS_ATTR_INTEGER_VALUE
+         * @reasoncode RC_OUT_OF_RANGE
+         * @userdata1  Ascii representation of the bios attr to set
+         * @userdata2  Value hb is attempting to set the attr with
+         * @devdesc    Value we are trying to set BIOS attr with is
+         *             out of acceptable range of values.
+         * @custdesc   A software error occurred during system boot.
+         */
+        errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                             MOD_SET_BIOS_ATTR_INTEGER_VALUE,
+                             RC_OUT_OF_RANGE,
+                             *reinterpret_cast<const uint64_t *>(i_attr_string),
+                             i_attr_value,
+                             ErrlEntry::NO_SW_CALLOUT);
+        addBmcErrorCallouts(errl);
+        break;
+    }
+
+    // set the BIOS attr to the new value
+    const auto attr_handle = pldm_bios_table_attr_entry_decode_attribute_handle(attr_entry_ptr);
+    errl = setBiosAttrByHandle(attr_handle, expected_type,
+                               &i_attr_value, sizeof(i_attr_value));
+    if(errl)
+    {
+        PLDM_ERR("setBiosIntegerValue: An error occurred while sending the new value of %s, %ld, to the BMC",
+                 i_attr_string, i_attr_value);
+        break;
+    }
+
+    }
+    while(0);
+
+    return errl;
+
+}
+
+errlHndl_t setMaxNumberHugePages(std::vector<uint8_t>& io_string_table,
+                                 std::vector<uint8_t>& io_attr_table,
+                                 uint64_t i_maxPages)
+{
+    return setBiosIntegerAttrValue(io_string_table,
+                                   io_attr_table,
+                                   PLDM_BIOS_HB_MAX_NUMBER_HUGE_PAGES_STRING,
+                                   i_maxPages);
+}
+
 errlHndl_t setBiosEnumAttrValue(std::vector<uint8_t>& io_string_table,
                                 std::vector<uint8_t>& io_attr_table,
                                 const char *i_attr_string,
                                 const char *i_attr_enum_value_string)
 {
 
-    PLDM_ENTER("setBiosEnumAttrValue");
     errlHndl_t errl = nullptr;
 
     do {
@@ -1799,7 +1892,7 @@ errlHndl_t setBiosEnumAttrValue(std::vector<uint8_t>& io_string_table,
     errl = ensureTablesAreSet(io_string_table, io_attr_table);
     if (errl)
     {
-        PLDM_ERR("An error occured when attempting to populate the bios tables");
+        PLDM_ERR("setBiosEnumAttrValue: An error occured when attempting to populate the bios tables");
         break;
     }
 
@@ -1817,7 +1910,7 @@ errlHndl_t setBiosEnumAttrValue(std::vector<uint8_t>& io_string_table,
 
     if(errl)
     {
-        PLDM_ERR("An error occurred while requesting the value of %s from the BMC",
+        PLDM_ERR("setBiosEnumAttrValue: An error occurred while requesting the value of %s from the BMC",
                  i_attr_string)
         break;
     }
@@ -1832,7 +1925,7 @@ errlHndl_t setBiosEnumAttrValue(std::vector<uint8_t>& io_string_table,
                                                    possible_values,
                                                    num_possible_values);
 
-    PLDM_DBG("num_possible_values for %s: %d", i_attr_string, num_possible_values);
+    PLDM_DBG("setBiosEnumAttrValue: num_possible_values for %s: %d", i_attr_string, num_possible_values);
 
     uint8_t possible_value_index = 0;
     for(; possible_value_index < num_possible_values; possible_value_index++)
@@ -1841,7 +1934,7 @@ errlHndl_t setBiosEnumAttrValue(std::vector<uint8_t>& io_string_table,
          const auto& enum_value_string =
                      decode_string_handle(io_string_table, possible_values[possible_value_index]);
 
-         PLDM_DBG("BMC PLDM BIOS attribute enum %s has a value of (0x%X)",
+         PLDM_DBG("setBiosEnumAttrValue: BMC PLDM BIOS attribute enum %s has a value of (0x%X)",
                   enum_value_string.data(), possible_value_index);
 
          if(strcmp(enum_value_string.data(), i_attr_enum_value_string) == 0)
@@ -1856,7 +1949,7 @@ errlHndl_t setBiosEnumAttrValue(std::vector<uint8_t>& io_string_table,
              // To see how other BIOS attr types are validated on PLDM's side, see
              // checkAttrValueToUpdate() in src/subtree/openbmc/pldm/libpldmresponder/bios_config.cpp
              attr_value[1] = possible_value_index;
-             PLDM_DBG("Found matching BMC PLDM BIOS attribute enum value: %s (0x%X)",
+             PLDM_DBG("setBiosEnumAttrValue: Found matching BMC PLDM BIOS attribute enum value: %s (0x%X)",
                       enum_value_string.data(), possible_value_index);
              break;
          }
@@ -1864,7 +1957,7 @@ errlHndl_t setBiosEnumAttrValue(std::vector<uint8_t>& io_string_table,
 
     if (possible_value_index >= num_possible_values)
     {
-        PLDM_ERR("No match found in BMC PLDM BIOS attribute values for attr: %s, and string value: %s",
+        PLDM_ERR("setBiosEnumAttrValue: No match found in BMC PLDM BIOS attribute values for attr: %s, and string value: %s",
                  i_attr_string, i_attr_enum_value_string);
         /*@
          * @errortype  ERRL_SEV_UNRECOVERABLE
@@ -1893,14 +1986,12 @@ errlHndl_t setBiosEnumAttrValue(std::vector<uint8_t>& io_string_table,
                                attr_value.data(), attr_value.size());
     if (errl)
     {
-        PLDM_ERR("Cannot set current value for attribute %s", i_attr_string);
+        PLDM_ERR("setBiosEnumAttrValue: Cannot set current value for attribute %s", i_attr_string);
         break;
     }
 
 
     } while (0);
-
-    PLDM_EXIT("setBiosEnumAttrValue");
 
     return errl;
 }

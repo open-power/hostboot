@@ -350,6 +350,20 @@ namespace PLDM
     errlHndl_t clearKeyClearRequest(std::vector<uint8_t>& io_string_table,
                                     std::vector<uint8_t>& io_attr_table);
 
+    /** @brief Wrapper for setCurrentAttrValue() to set the BIOS
+     *         attr hb_max_number_huge_pages to a given uint64_t
+     *
+     * @param[in,out] io_string_table  See brief at the top of this file.
+     * @param[in,out] io_attr_table    See brief at the top of this file.
+     * @param[in] i_maxPages The maximum number of huge pages Hostboot
+     *                       has determined the system can support.
+     *
+     * @return nullptr on success; non-nullptr on error.
+     */
+    errlHndl_t setMaxNumberHugePages(std::vector<uint8_t>& io_string_table,
+                                     std::vector<uint8_t>& io_attr_table,
+                                     uint64_t i_maxPages);
+
 }
 
 #endif

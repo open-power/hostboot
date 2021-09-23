@@ -455,13 +455,6 @@ static size_t attr_table_entry_length_string(const void *entry)
 	return pldm_bios_table_attr_entry_string_encode_length(def_str_len);
 }
 
-struct attr_table_integer_entry_fields {
-	uint64_t lower_bound;
-	uint64_t upper_bound;
-	uint32_t scalar_increment;
-	uint64_t default_value;
-} __attribute__((packed));
-
 size_t pldm_bios_table_attr_entry_integer_encode_length()
 {
 	return sizeof(struct pldm_bios_attr_table_entry) - 1 +

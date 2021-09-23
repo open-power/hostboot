@@ -27,6 +27,7 @@ ROOTPATH = ../../../..
 EXTRAINCDIR += ${ROOTPATH}/src/subtree/openbmc/pldm/libpldm
 
 OBJS += bios_attr_parsers.o
+OBJS += bios_attr_setters.o
 
 MODULE = bios_attr_accessors
 include ${ROOTPATH}/config.mk

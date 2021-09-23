@@ -79,8 +79,11 @@
 #include <isteps/mem_utils.H>
 #include <arch/memorymap.H>
 #include <util/misc.H> // Util::isSimicsRunning
+#ifdef CONFIG_PLDM
 #include <pldm/requests/pldm_pdr_requests.H>
 #include <pldm/base/pldm_shutdown.H>
+#include <isteps/bios_attr_accessors/bios_attr_setters.H>
+#endif
 
 //#define TRACUCOMP(args...) TRACFCOMP(args)
 #define TRACUCOMP(args...)
@@ -809,6 +812,14 @@ void* call_mss_attr_update( void *io_pArgs )
             TRACUCOMP( g_trac_isteps_trace,
                        "SUCCESS:  check_proc0_memory_config");
         }
+
+#ifdef CONFIG_PLDM
+        // calculate the max number of huge pages the determined memory
+        // configuration supports and notify the BMC via PLDM BIOS attribute
+        // hb_max_number_huge_pages.
+        std::vector<uint8_t> string_table, attr_table;
+        ISTEP::set_hb_max_number_huge_pages(string_table, attr_table, l_StepError);
+#endif
 
         // Get all functional MI chiplets and call p10_mss_attr_update
         // on each

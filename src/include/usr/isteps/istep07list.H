@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -165,6 +165,9 @@ const DepModInfo g_istep07Dependancies = {
         DEP_LIB(libisteps_mss.so),
         DEP_LIB(libsbe.so),
         DEP_LIB(libimageprocs.so),
+#ifdef CONFIG_PLDM
+        DEP_LIB(libbios_attr_accessors.so),
+#endif
 #ifndef CONFIG_FSP_BUILD
         DEP_LIB(libnvram.so),
 #endif

@@ -91,6 +91,7 @@ namespace ISTEP
         MOD_CHECK_FOR_SECURITY_ACCESS_MISMATCH            = 0x3C,
         MOD_MONITOR_SBE_HALT                              = 0x3D,
         MOD_BIOS_ATTR_PARSERS                             = 0x3F,
+        MOD_BIOS_ATTR_SETTERS                             = 0x40,
     };
 
     /**
@@ -193,6 +194,7 @@ namespace ISTEP
         RC_ERROR_READING_LMB_SIZE                = ISTEP_COMP_ID | 0x6A,
         RC_INVALID_BOOTSIDE                      = ISTEP_COMP_ID | 0x6B,
         RC_UNHALTED_SBE                          = ISTEP_COMP_ID | 0x6C,
+        RC_INVALID_HUGE_PAGE_SIZE                = ISTEP_COMP_ID | 0x6D,
     };
 
 };
