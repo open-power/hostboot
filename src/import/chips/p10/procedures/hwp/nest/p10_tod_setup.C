@@ -410,6 +410,48 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+/// @brief MPIPL specific steps to disable the TOD step checkers, this should be
+//  called only during MPIPL
+/// @param[in] i_tod_node Reference to TOD topology (including FAPI targets)
+/// @return FAPI2_RC_SUCCESS if TOD step checkers are successfully disabled, else error
+fapi2::ReturnCode mpipl_disable_step_checkers(
+    const tod_topology_node* i_tod_node)
+{
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_target = *(i_tod_node->i_target);
+    fapi2::buffer<uint64_t> l_data = 0;
+
+    FAPI_DBG("Start");
+
+    FAPI_TRY(GET_TOD_PSS_MSS_CTRL_REG(l_target, l_data),
+             "Error from GET_TOD_PSS_MSS_CTRL_REG");
+
+    l_data.clearBit<TOD_PSS_MSS_CTRL_REG_PRI_S_PATH_1_STEP_CHECK_ENABLE>()
+    .clearBit<TOD_PSS_MSS_CTRL_REG_PRI_M_PATH_0_STEP_CHECK_ENABLE>()
+    .clearBit<TOD_PSS_MSS_CTRL_REG_PRI_M_PATH_1_STEP_CHECK_ENABLE>()
+    .clearBit<TOD_PSS_MSS_CTRL_REG_PRI_S_PATH_0_STEP_CHECK_ENABLE>()
+    .clearBit<TOD_PSS_MSS_CTRL_REG_PRI_I_PATH_STEP_CHECK_ENABLE>()
+    .clearBit<TOD_PSS_MSS_CTRL_REG_SEC_S_PATH_1_STEP_CHECK_ENABLE>()
+    .clearBit<TOD_PSS_MSS_CTRL_REG_SEC_M_PATH_0_STEP_CHECK_ENABLE>()
+    .clearBit<TOD_PSS_MSS_CTRL_REG_SEC_M_PATH_1_STEP_CHECK_ENABLE>()
+    .clearBit<TOD_PSS_MSS_CTRL_REG_SEC_S_PATH_0_STEP_CHECK_ENABLE>()
+    .clearBit<TOD_PSS_MSS_CTRL_REG_SEC_I_PATH_STEP_CHECK_ENABLE>();
+
+    FAPI_TRY(PUT_TOD_PSS_MSS_CTRL_REG(l_target, l_data),
+             "Error from PUT_TOD_PSS_MSS_CTRL_REG");
+
+    for(auto l_child = (i_tod_node->i_children).begin();
+        l_child != (i_tod_node->i_children).end();
+        ++l_child)
+    {
+        FAPI_TRY(mpipl_disable_step_checkers(*l_child),
+                 "Failure disabling TOD step checkers!");
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+
+}
 
 /// @brief MPIPL specific steps to clear the previous topology, this should be
 //  called only during MPIPL
@@ -433,12 +475,6 @@ fapi2::ReturnCode mpipl_clear_tod_node(
 
     FAPI_INF("MPIPL-Clearing previous %s topology from %s",
              (i_tod_sel == TOD_PRIMARY) ? "Primary" : "Secondary", l_targetStr);
-
-    FAPI_INF("MPIPL: stop step checkers");
-    //Stop step checkers
-    FAPI_TRY(PREP_TOD_PSS_MSS_CTRL_REG(l_target));
-    FAPI_TRY(PUT_TOD_PSS_MSS_CTRL_REG(l_target, 0x0ULL),
-             "Error from PUT_TOD_PSS_MSS_CTRL_REG");
 
     // If necessary, clear IS_SPECIAL error status bit
     FAPI_TRY(GET_TOD_PSS_MSS_STATUS_REG(l_target, l_data),
@@ -1244,9 +1280,9 @@ fapi_try_exit:
 }
 
 
-/// @brief Configures the INIT_CHIP_CTRL_REG; will be called by configure_tod_node
+/// @brief Configures the TOD_CHIP_CTRL_REG; will be called by configure_tod_node
 /// @param[in] i_tod_node Reference to TOD topology (including FAPI targets)
-/// @return FAPI2_RC_SUCCESS if the INIT_CHIP_CTRL_REG is successfully configured
+/// @return FAPI2_RC_SUCCESS if the TOD_CHIP_CTRL_REG is successfully configured
 ///         else error
 fapi2::ReturnCode init_chip_ctrl_reg(
     const tod_topology_node* i_tod_node,
@@ -2049,13 +2085,13 @@ fapi2::ReturnCode p10_tod_setup(
 
     if ( l_is_mpipl && ( i_tod_sel == TOD_PRIMARY))
     {
-        // Put the TOD in reset state, and clear the register
-        // TOD_PSS_MSS_CTRL_REG, we do it before the primary
-        // topology is configured and not repeat it to prevent overwriting
-        // the configuration.
+        // Disable the TOD step checkers
+        FAPI_TRY(mpipl_disable_step_checkers(i_tod_node),
+                 "Error from mpipl_disable_step_checkers!");
+
+        // Put the TOD in the stopped state.
         FAPI_TRY(mpipl_clear_tod_node(i_tod_node, i_tod_sel),
                  "Error from mpipl_clear_tod_node!");
-
     }
 
     display_tod_nodes(i_tod_node, 0);
