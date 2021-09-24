@@ -39,6 +39,7 @@
 #include <targeting/common/mfgFlagAccessors.H>
 #include <targeting/common/entitypath.H>
 #include <targeting/common/targetservice.H>
+#include <targeting/targplatutil.H>
 #include <initservice/taskargs.H>
 #include <initservice/isteps_trace.H>
 #include <initservice/initserviceif.H>
@@ -57,12 +58,14 @@
 #include <pldm/extended/hb_fru.H>
 #include <pldm/extended/pldm_entity_ids.H>
 #include <pldm/extended/sbe_dump.H>
+#include <pldm/requests/pldm_pdr_requests.H>
 #endif
 #include <fapi2/plat_hwp_invoker.H>
 #include <fapi2/target.H>
 #include <eeprom/eepromCache.H>
 #include <runtime/customize_attrs_for_payload.H>
 #include <devtree/devtree.H>
+
 
 //SBE interfacing
 #include <sbeio/sbeioif.H>
@@ -694,6 +697,10 @@ void* host_discover_targets( void *io_pArgs )
         // Notify the BMC that we are not able to take SBE HRESET requests. (We
         // will be ready at runtime.)
         PLDM::notifySbeHresetsReady(false);
+
+        // Set initial progress state
+        PLDM::sendProgressStateChangeEvent(
+            PLDM_STATE_SET_BOOT_PROG_STATE_PRIMARY_PROC_INITIALIZATION);
     }
 #endif // CONFIG_PLDM
 

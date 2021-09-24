@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,6 +29,9 @@
 #include <util/misc.H>
 #include <targeting/common/trace.H>
 #include <targeting/common/utilFilter.H>
+#ifdef CONFIG_PLDM
+#include <openbmc/pldm/libpldm/state_set.h>
+#endif
 
 using namespace TARGETING;
 
@@ -68,6 +71,16 @@ namespace RT_TARG
                 assert(false, "Could not reconnect system and node targets");
             }
         }
+
+#ifdef CONFIG_PLDM
+        // setup runtime variable(s) returned via PLDM sensor
+        TargetHandleList l_node_list;
+        getEncResources(l_node_list, TYPE_NODE, UTIL_FILTER_ALL);
+        for(auto & l_node : l_node_list)
+        {
+            l_node->setAttr<ATTR_BOOT_PROGRESS_STATE>(PLDM_STATE_SET_BOOT_PROG_STATE_COMPLETED);
+        }
+#endif
     }
 
     // Make any adjustments needed to targeting for runtime

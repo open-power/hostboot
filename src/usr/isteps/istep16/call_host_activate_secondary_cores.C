@@ -57,6 +57,10 @@
 #include <algorithm>
 #include <scom/wakeup.H>
 
+#ifdef CONFIG_PLDM
+#include <pldm/requests/pldm_pdr_requests.H>
+#endif
+
 using namespace ERRORLOG;
 using namespace TARGETING;
 using namespace ISTEP;
@@ -77,6 +81,10 @@ void* call_host_activate_secondary_cores(void* const io_pArgs)
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_activate_secondary_cores entry" );
+
+#ifdef CONFIG_PLDM
+    PLDM::sendProgressStateChangeEvent(PLDM_STATE_SET_BOOT_PROG_STATE_SEC_PROC_INITIALIZATION);
+#endif
 
     //track boot group/chip/core (no threads)
     const uint64_t l_bootPIR = PIR_t(task_getcpuid()).word;

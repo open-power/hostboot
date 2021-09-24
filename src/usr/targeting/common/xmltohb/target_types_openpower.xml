@@ -170,6 +170,9 @@
   <targetTypeExtension>
     <id>enc-node-power10</id>
     <attribute>
+      <id>BOOT_PROGRESS_STATE</id>
+    </attribute>
+    <attribute>
       <id>LAST_PROGRESS_CODE</id>
     </attribute>
     <attribute>

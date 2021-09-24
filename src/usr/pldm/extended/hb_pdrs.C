@@ -190,8 +190,9 @@ void addCoreEntityAssocAndRecordSetPdrs(pldm_entity_association_tree *io_tree,
  *        owns to the given PDR manager.
  *
  * @param[in/out] io_pdrman  The PDR manager to add to
+ * @param[out] o_backplane_entity The base backplane entity
  */
-void addEntityAssociationAndFruRecordSetPdrs(PdrManager& io_pdrman)
+void addEntityAssociationAndFruRecordSetPdrs(PdrManager& io_pdrman, pldm_entity & o_backplane_entity)
 {
     using enttree_ptr
         = std::unique_ptr<pldm_entity_association_tree,
@@ -205,19 +206,16 @@ void addEntityAssociationAndFruRecordSetPdrs(PdrManager& io_pdrman)
     SensorEntityMap core_sensor_entity_map;
 
     /* Add the backplane (root node) to the tree. */
-    pldm_entity backplane_entity
-    {
-        .entity_type = ENTITY_TYPE_BACKPLANE
-    };
+    o_backplane_entity.entity_type = ENTITY_TYPE_BACKPLANE;
 
     const auto backplane_node
         = pldm_entity_association_tree_add(enttree.get(),
-                                           &backplane_entity,
+                                           &o_backplane_entity,
                                            DEFAULT_TREE_ADD_ENTITY_INSTANCE_NUM,
                                            nullptr, // means "no parent" i.e. root
                                            PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     PLDM_DBG("Backplane_entity: entity_type 0x%04X, entity_instance_num 0x%04X, container_id 0x%04X",
-        backplane_entity.entity_type, backplane_entity.entity_instance_num, backplane_entity.entity_container_id);
+        o_backplane_entity.entity_type, o_backplane_entity.entity_instance_num, o_backplane_entity.entity_container_id);
 
     /* Now we add all the children under the backplane to the tree. */
     struct cmp_str
@@ -536,6 +534,29 @@ void addSbeManagementPdrs(PdrManager& io_pdrman)
     }
 }
 
+void addBootProgressPdrs(PdrManager& io_pdrman, const pldm_entity& i_backplane_entity)
+{
+#ifndef __HOSTBOOT_RUNTIME
+    static_assert(AttributeTraits<ATTR_BOOT_PROGRESS_STATE>::readable);
+    static_assert(sizeof(ATTR_BOOT_PROGRESS_STATE_type) == 2,
+        "ATTR_BOOT_PROGRESS_STATE must be 2 bytes (size of a sensor value)");
+
+    TargetHandle_t l_node = TARGETING::UTIL::getCurrentNodeTarget();
+    io_pdrman.addStateSensorPdr(l_node,
+            i_backplane_entity,
+            PLDM_STATE_SET_BOOT_PROGRESS,
+            (enum_bit(PLDM_STATE_SET_BOOT_PROG_STATE_COMPLETED)
+             | enum_bit(PLDM_STATE_SET_BOOT_PROG_STATE_PRIMARY_PROC_INITIALIZATION)
+             | enum_bit(PLDM_STATE_SET_BOOT_PROG_STATE_BASE_BOARD_INITIALIZATION)
+             | enum_bit(PLDM_STATE_SET_BOOT_PROG_STATE_MEM_INITIALIZATION)
+             | enum_bit(PLDM_STATE_SET_BOOT_PROG_STATE_SEC_PROC_INITIALIZATION)
+            ),
+            PdrManager::STATE_QUERY_HANDLER_ATTRIBUTE_GETTER,
+            ATTR_BOOT_PROGRESS_STATE);
+#endif
+}
+
+
 }
 
 namespace PLDM
@@ -606,8 +627,13 @@ errlHndl_t addHostbootPdrs(PdrManager& io_pdrman)
     UTIL::assertGetToplevelTarget()->setAttr<ATTR_NUM_PLDM_STATE_QUERY_RECORDS>(0);
 
     errlHndl_t errl = nullptr;
+    pldm_entity backplane_entity
+    {
+        .entity_type = ENTITY_TYPE_BACKPLANE
+    };
 
-    addEntityAssociationAndFruRecordSetPdrs(io_pdrman);
+    addEntityAssociationAndFruRecordSetPdrs(io_pdrman, backplane_entity);
+    addBootProgressPdrs(io_pdrman, backplane_entity);
     errl = addSystemStateControlPdrs(io_pdrman);
     errl || (errl = addOccStateControlPdrs(io_pdrman));
     errl || (errl = addFruInventoryPdrs(io_pdrman));

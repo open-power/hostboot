@@ -456,22 +456,30 @@ static void appendStateQueryInfo(const PdrManager::pldm_state_query_record_t i_r
 void PdrManager::addStateSensorPdr(Target* const i_target,
                                    const pldm_entity& i_entity,
                                    const uint16_t i_state_set_id,
-                                   const uint8_t i_possible_states,
+                                   const uint32_t i_possible_states,
                                    const state_query_handler_id_t i_qhandler,
                                    const uint64_t i_userdata)
 {
     const auto lock = scoped_mutex_lock(iv_access_mutex);
 
-    const state_sensor_possible_states states =
-    {
-        .state_set_id = i_state_set_id,
-        .possible_states_size = 1, // size of possible_states (only support 1 byte right now)
-        .states = { i_possible_states } // possible_states
-    };
+    // state_sensor_possible_states.states is a variable-length array
+    uint8_t state_storage[sizeof(state_sensor_possible_states)
+                          + sizeof(i_possible_states)
+                          - sizeof(state_sensor_possible_states::states)] = {};
+    auto possible_states = reinterpret_cast<state_sensor_possible_states*>(state_storage);
+
+    // fill in possible states structure
+    possible_states->state_set_id = i_state_set_id;
+    possible_states->possible_states_size = sizeof(i_possible_states);
+
+    // need to swap the byte order for little endian order
+    uint32_t swapped = htole32(i_possible_states);
+    memcpy(possible_states->states, &swapped, sizeof(swapped));
+
 
     /* Create and encode the PDR. */
 
-    uint8_t encoded_pdr[sizeof(pldm_state_sensor_pdr) + sizeof(states)] = { };
+    uint8_t encoded_pdr[sizeof(pldm_state_sensor_pdr) + sizeof(state_storage)] = { };
 
     const auto pdr = reinterpret_cast<pldm_state_sensor_pdr*>(encoded_pdr);
 
@@ -503,7 +511,7 @@ void PdrManager::addStateSensorPdr(Target* const i_target,
 
     size_t actual_pdr_size = 0;
 
-    const int rc = encode_state_sensor_pdr(pdr, sizeof(encoded_pdr), &states, sizeof(states), &actual_pdr_size);
+    const int rc = encode_state_sensor_pdr(pdr, sizeof(encoded_pdr), possible_states, sizeof(state_storage), &actual_pdr_size);
 
     assert(rc == PLDM_SUCCESS,
            "Failed to encode state sensor PDR");

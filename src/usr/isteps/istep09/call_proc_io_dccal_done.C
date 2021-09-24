@@ -67,6 +67,10 @@
 #include <p10_io_init_done.H>
 #include <sys/time.h>
 
+#ifdef CONFIG_PLDM
+#include <pldm/requests/pldm_pdr_requests.H>
+#endif
+
 namespace ISTEP_09
 {
 
@@ -83,6 +87,12 @@ void* call_proc_io_dccal_done(void* const io_pArgs)
 {
     ISTEP_ERROR::IStepError l_stepError;
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_io_dccal_done entry");
+
+#ifdef CONFIG_PLDM
+    // Send BusInitializationStarted status to BMC
+    PLDM::sendProgressStateChangeEvent(
+                            PLDM_STATE_SET_BOOT_PROG_STATE_BASE_BOARD_INITIALIZATION);
+#endif
 
     // Get all functional proc chip targets
     TARGETING::TargetHandleList l_cpuTargetList;

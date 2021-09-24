@@ -35,9 +35,13 @@
 
 // Error logs
 #include <errl/errlentry.H>
+#include <errl/errlmanager.H>
 
 // Console display
 #include <console/consoleif.H>
+
+// Targeting
+#include <targeting/targplatutil.H>
 
 // IPC
 #include <sys/msg.h>
@@ -589,6 +593,49 @@ errlHndl_t sendSensorStateChangedEvent(const TARGETING::Target* const i_target,
 
     return errl;
 }
+
+void sendProgressStateChangeEvent(const pldm_state_set_boot_progress_state_values i_boot_state)
+{
+    using namespace TARGETING;
+    PLDM_ENTER("sendProgressStateChangeEvent (boot_state = %d)", i_boot_state);
+    errlHndl_t l_errl = nullptr;
+    Target * l_node = nullptr;
+
+#ifndef __HOSTBOOT_RUNTIME
+    l_node = UTIL::getCurrentNodeTarget();
+#else
+    UTIL::getMasterNodeTarget(l_node);
+#endif
+
+    // Search for the BOOT_PROGRESS state sensor ID
+    const sensor_id_t sensor_id
+        = thePdrManager().getHostStateQueryIdForStateSet(PdrManager::STATE_QUERY_SENSOR,
+                                                         PLDM_STATE_SET_BOOT_PROGRESS,
+                                                         l_node);
+
+    assert(sensor_id != 0,
+           "Sensor ID for node target HUID=0x%08x has not been assigned",
+           get_huid(l_node));
+
+    constexpr int BOOT_STATE_SENSOR_INDEX = 0;
+
+    l_node->setAttr<ATTR_BOOT_PROGRESS_STATE>(static_cast<uint16_t>(i_boot_state));
+
+    l_errl = sendSensorStateChangedEvent(l_node, PLDM_STATE_SET_BOOT_PROGRESS,
+                              sensor_id, BOOT_STATE_SENSOR_INDEX, i_boot_state);
+    if (l_errl != nullptr)
+    {
+        PLDM_ERR("Sending boot state %d failed for node 0x%.8X",
+            i_boot_state, get_huid(l_node));
+        l_errl->collectTrace(PLDM_COMP_NAME);
+        l_errl->collectTrace(ISTEP_COMP_NAME);
+        ERRORLOG::errlCommit(l_errl, PLDM_COMP_ID);
+    }
+
+  PLDM_EXIT("sendProgressStateChangeEvent (boot_state = %d)", i_boot_state);
+
+}
+
 
 errlHndl_t sendOccStateChangedEvent(const TARGETING::Target* const i_occ_target,
                                     const occ_state i_new_state)

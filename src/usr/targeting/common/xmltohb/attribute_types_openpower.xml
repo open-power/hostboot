@@ -163,6 +163,30 @@
   </attribute>
 
   <attribute>
+    <id>BOOT_PROGRESS_STATE</id>
+    <description>
+      The PLDM boot progress state of the ongoing IPL.
+      Supported states:
+        COMPLETED = 2 (HBRT state)
+        MEM_INITIALIZATION = 3
+        SEC_PROC_INITIALIZATION = 5
+        BASE_BOARD_INITIALIZATION = 22
+        PRIMARY_PROC_INITIALIZATION = 26
+    </description>
+    <simpleType>
+      <uint16_t>
+        <!-- See pldm_state_set_boot_progress_state_values enumeration,
+             default to PRIMARY_PROC_INITIALIZATION -->
+        <default>26</default>
+      </uint16_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <id>CALCULATED_MAX_SYS_POWER_EXCLUDING_GPUS</id>
     <description>
         HTMGT calculates the total non-GPU maximum power in W when the

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,6 +48,10 @@
 #include <plat_hwp_invoker.H>
 #include <isteps/hwpisteperror.H>           // IStepError
 
+#ifdef CONFIG_PLDM
+#include <pldm/requests/pldm_pdr_requests.H>
+#endif
+
 //  HWP call support
 #include <p10_ocmb_enable.H>
 
@@ -64,6 +68,10 @@ void* call_proc_ocmb_enable (void *io_pArgs)
 
     errlHndl_t  l_errl = nullptr;
     IStepError l_StepError;
+
+#ifdef CONFIG_PLDM
+    PLDM::sendProgressStateChangeEvent(PLDM_STATE_SET_BOOT_PROG_STATE_MEM_INITIALIZATION);
+#endif
 
     TargetHandleList functionalProcChipList;
 

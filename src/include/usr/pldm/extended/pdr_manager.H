@@ -295,7 +295,7 @@ public:
     void addStateSensorPdr(TARGETING::Target* i_target,
                            const pldm_entity& i_entity,
                            uint16_t i_state_set_id,
-                           uint8_t i_possible_states,
+                           uint32_t i_possible_states,
                            state_query_handler_id_t i_qhandler,
                            uint64_t i_userdata = 0);
 
