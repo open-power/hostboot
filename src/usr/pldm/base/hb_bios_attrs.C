@@ -61,7 +61,7 @@
 namespace PLDM {
 
 // Attributes
-const char PLDM_BIOS_HB_HYP_SWITCH_STRING[]                = "hb_hyp_switch";
+const char PLDM_BIOS_HB_HYP_SWITCH_STRING[]                = "hb_hyp_switch_current";
 const char PLDM_BIOS_HB_DEBUG_CONSOLE_STRING[]             = "hb_debug_console";
 const char PLDM_BIOS_HB_HUGE_PAGE_COUNT_STRING[]           = "hb_number_huge_pages_current";
 const char PLDM_BIOS_HB_HUGE_PAGE_SIZE_STRING[]            = "hb_huge_page_size_current";
@@ -385,8 +385,8 @@ errlHndl_t getCurrentAttrValue(const char *i_attr_string,
     static_cast<pldm_bios_attribute_type>(
                 pldm_bios_table_attr_entry_decode_attribute_type(o_attr_entry_ptr));
 
-  // Bit 0 indicates if its read-only or not and hostboot ignores that.
-  // Only the BMC honors read-only status of bios attributes.
+  // Bit 0 indicates if its read-only or not. Only the BMC honors read-only status
+  // of bios attributes. Hostboot ignores the read-only status of bios attributes.
   const uint8_t IGNORE_READONLY = 0x7f;
   if((attr_type_found & IGNORE_READONLY) != (io_attr_type & IGNORE_READONLY))
   {
@@ -2283,8 +2283,14 @@ errlHndl_t latchBiosAttrs(std::vector<uint8_t>& io_string_table,
                 const pldm_bios_attr_table_entry* pending_attr_entry = nullptr;
                 std::vector<uint8_t> pending_attr_value;
 
+                /* Attributes with _current will likely be readonly, and their pending counterparts
+                 * are likely not. getCurrentAttrValue will accept either the read-only version of the type
+                 * or the read-write version on input but will return whichever is found. We want to preserve
+                 * current_attr_type for when we call setBiosAttrByHandle later on.
+                 */
+                pldm_bios_attribute_type pending_attr_type = current_attr_type;
                 errlHndl_t attr_errl =
-                    getCurrentAttrValue(pending_attr_name.data(), current_attr_type,
+                    getCurrentAttrValue(pending_attr_name.data(), pending_attr_type,
                                         io_string_table, io_attr_table, pending_attr_entry, pending_attr_value);
 
                 if (attr_errl)
