@@ -795,6 +795,13 @@ typedef struct
 
 } GlobalPstateParmBlockWOV_t;
 
+typedef struct
+{
+    uint8_t thr_kp;
+    uint8_t thr_ki;
+    uint16_t pad;
+} GlobalPstateParmBlockThr_t;
+
 enum GPPB_OFFSET_IDX
 {
     PGPE_FLAGS_OFFSET_IDX       = 0,
@@ -816,6 +823,7 @@ enum GPPB_OFFSET_IDX
     DDS_VDD_CAL_OFFSET_IDX      = 16,
     WOF_OFFSET_IDX              = 17,
     WOV_OFFSET_IDX              = 18,
+    THR_OFFSET_IDX              = 19,
     MAX_GPPB_OFFSET_IDX         = 32,
 };
 
@@ -893,6 +901,10 @@ typedef struct
 
     //WOV
     GlobalPstateParmBlockWOV_t wov;
+
+    //Thr
+    GlobalPstateParmBlockThr_t thr;
+
 // __attribute__((packed, aligned(1024))) GlobalPstateParmBlock_t;
 } GlobalPstateParmBlock_v1_t;
 
