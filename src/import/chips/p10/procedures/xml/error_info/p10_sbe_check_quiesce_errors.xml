@@ -27,7 +27,8 @@
   <!-- Note:
        The p10_sbe_check_quiesce HWP is to be called during MPIPL.
        We just want to log the error and then continue on. No callout,
-       deconfigure, or gard HW for the errors below -->
+       deconfigure, or gard HW for the errors below
+  -->
 
   <!-- ******************************************************************** -->
   <hwpError>
