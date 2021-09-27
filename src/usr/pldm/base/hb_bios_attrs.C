@@ -68,7 +68,7 @@ const char PLDM_BIOS_HB_HUGE_PAGE_SIZE_STRING[]            = "hb_huge_page_size_
 const char PLDM_BIOS_HB_LMB_SIZE_STRING[]                  = "hb_memory_region_size_current";
 const char PLDM_BIOS_HB_MFG_FLAGS_STRING[]                 = "hb_mfg_flags_current";
 const char PLDM_BIOS_HB_FIELD_CORE_OVERRIDE_STRING[]       = "hb_field_core_override_current";
-const char PLDM_BIOS_HB_USB_SECURITY_STRING[]              = "hb_usb_security";
+const char PLDM_BIOS_HB_USB_ENABLEMENT_STRING[]            = "hb_host_usb_enablement_current";
 
 // When power limit values change, the effect on the OCCs is immediate, so we
 // always want the most recent values here.
@@ -113,6 +113,9 @@ const std::vector<const char*> POSSIBLE_HB_DEBUG_CONSOLE_STRINGS = {PLDM_BIOS_EN
 
 const std::vector<const char*> POSSIBLE_HB_MIRROR_MEM_STRINGS = {PLDM_BIOS_ENABLED_STRING,
                                                                  PLDM_BIOS_DISABLED_STRING};
+
+const std::vector<const char*> POSSIBLE_HB_USB_ENABLEMENT_STRINGS = {PLDM_BIOS_ENABLED_STRING,
+                                                                     PLDM_BIOS_DISABLED_STRING};
 
 const std::vector<const char*> POSSIBLE_HB_MEM_REGION_SIZE_STRINGS = {PLDM_BIOS_128_MB_STRING,
                                                                       PLDM_BIOS_256_MB_STRING};
@@ -1576,28 +1579,66 @@ errlHndl_t getMfgFlags(std::vector<uint8_t>& io_string_table,
     return errl;
 }
 
-errlHndl_t getUsbSecurity(
+errlHndl_t getUsbEnablement(
         std::vector<uint8_t>& io_string_table,
         std::vector<uint8_t>& io_attr_table,
-        TARGETING::ATTR_USB_SECURITY_type &o_usbSecurity)
+        TARGETING::ATTR_USB_SECURITY_type &o_usbEnablement)
 {
     errlHndl_t errl = nullptr;
 
     do {
 
-    uint64_t l_attr_val = 0;
-    errl = systemIntAttrLookup(io_string_table,
-                               io_attr_table,
-                               PLDM_BIOS_HB_USB_SECURITY_STRING,
-                               l_attr_val);
-    if(errl)
+    // Enable Attribute
+    std::vector<char> decoded_value;
+
+    errl = getDecodedEnumAttr(io_string_table,
+                              io_attr_table,
+                              PLDM_BIOS_HB_USB_ENABLEMENT_STRING,
+                              POSSIBLE_HB_USB_ENABLEMENT_STRINGS,
+                              decoded_value);
+
+    if (errl)
     {
-        PLDM_ERR("getUsbSecurity() Failed to lookup value for %s",
-                 PLDM_BIOS_HB_USB_SECURITY_STRING);
+        PLDM_ERR("Failed to lookup value for %s",
+                 PLDM_BIOS_HB_USB_ENABLEMENT_STRING);
         break;
     }
 
-    o_usbSecurity = static_cast<TARGETING::ATTR_USB_SECURITY_type>(l_attr_val);
+    if (strncmp(decoded_value.data(), PLDM_BIOS_DISABLED_STRING, decoded_value.size()) == 0)
+    {
+        o_usbEnablement = static_cast<TARGETING::ATTR_USB_SECURITY_type>(false);
+        PLDM_INF("USB Enablement disabled by BMC PLDM BIOS attribute");
+    }
+    else if (strncmp(decoded_value.data(), PLDM_BIOS_ENABLED_STRING, decoded_value.size()) == 0)
+    {
+        o_usbEnablement = static_cast<TARGETING::ATTR_USB_SECURITY_type>(true);
+        PLDM_INF("USB Enablement enabled by BMC PLDM BIOS attribute");
+    }
+    else
+    {
+        // print the entire buffer
+        PLDM_INF_BIN("Unexpected string : ",decoded_value.data(), decoded_value.size());
+        /*@
+          * @errortype
+          * @severity   ERRL_SEV_UNRECOVERABLE
+          * @moduleid   MOD_GET_USB_ENABLEMENT
+          * @reasoncode RC_UNSUPPORTED_TYPE
+          * @userdata1  Unused
+          * @userdata2  Unused
+          * @devdesc    Software problem, incorrect data from BMC
+          * @custdesc   A software error occurred during system boot
+          */
+        errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                             MOD_GET_USB_ENABLEMENT,
+                             RC_UNSUPPORTED_TYPE,
+                             0,
+                             0,
+                             ErrlEntry::NO_SW_CALLOUT);
+        ErrlUserDetailsString(PLDM_BIOS_HB_USB_ENABLEMENT_STRING).addToLog(errl);
+        ErrlUserDetailsString(decoded_value.data()).addToLog(errl);
+        addBmcErrorCallouts(errl);
+        break;
+    }
 
     } while(0);
 

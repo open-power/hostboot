@@ -79,22 +79,6 @@ void parse_hb_field_core_override(std::vector<uint8_t>& io_string_table,
                                   ISTEP_ERROR::IStepError & io_stepError);
 
 /**
- * @brief Retrieve the USB Security State from the BMC BIOS and set the system
- *        attribute ATTR_USB_SECURITY to the retrieved value, if no error occurred.
- *        If an error occurs retrieving the BMC BIOS, then the attribute is left as is.
- *
- * @param[in,out] io_string_table   See brief in file hb_bios_attrs.H
- * @param[in,out] io_attr_table     See brief in file hb_bios_attrs.H
- * @param[in,out] io_stepError      If an error occurs which require a TI it can be attached
- *                                  to this IstepError log.
- * @return void
- */
-void parse_hb_usb_policy(std::vector<uint8_t>& io_string_table,
-                         std::vector<uint8_t>& io_attr_table,
-                         ISTEP_ERROR::IStepError & io_stepError);
-
-
-/**
  * @brief Retrieve the Mirror Memory State from the BMC BIOS and set the system
  *        attribute ATTR_PAYLOAD_IN_MIRROR_MEM to the retrieved value, if no error occurred.
  *        If an error occurs retrieving the BMC BIOS, then the attribute is left as is.
@@ -216,6 +200,21 @@ void parse_hb_hyp_switch(std::vector<uint8_t>& io_string_table,
 void parse_pvm_fw_boot_side(std::vector<uint8_t>& io_string_table,
                             std::vector<uint8_t>& io_attr_table,
                             ISTEP_ERROR::IStepError & io_stepError);
+
+/**
+ * @brief Retrieve the USB Enablement from the BMC BIOS and set the system
+ *        attribute ATTR_USB_SECURITY to the retrieved value, if no error occurred.
+ *        If an error occurs retrieving the BMC BIOS, then the attribute is left as is.
+ *
+ * @param[in,out] io_string_table   See brief in file hb_bios_attrs.H
+ * @param[in,out] io_attr_table     See brief in file hb_bios_attrs.H
+ * @param[in,out] io_stepError      If an error occurs which require a TI it can be attached
+ *                                  to this IstepError log.
+ * @return void
+ */
+void parse_hb_host_usb_enablement(std::vector<uint8_t>& io_string_table,
+                                  std::vector<uint8_t>& io_attr_table,
+                                  ISTEP_ERROR::IStepError & io_stepError);
 
 
 }

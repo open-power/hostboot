@@ -63,7 +63,6 @@ void parsePLDMBiosAttrs(ISTEP_ERROR::IStepError & io_stepError)
     {
         ISTEP::parse_hb_tpm_required,
         ISTEP::parse_hb_field_core_override,
-        ISTEP::parse_hb_usb_policy,
         ISTEP::parse_hb_memory_mirror_mode,
         ISTEP::parse_hb_key_clear_request,
         ISTEP::parse_hb_number_huge_pages,
@@ -71,7 +70,8 @@ void parsePLDMBiosAttrs(ISTEP_ERROR::IStepError & io_stepError)
         ISTEP::parse_hb_memory_region_size,
         ISTEP::parse_hb_mfg_flags,
         ISTEP::parse_hb_hyp_switch,
-        ISTEP::parse_pvm_fw_boot_side
+        ISTEP::parse_pvm_fw_boot_side,
+        ISTEP::parse_hb_host_usb_enablement
     };
 
     std::vector<uint8_t> bios_string_table, bios_attr_table;

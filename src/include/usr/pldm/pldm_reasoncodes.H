@@ -94,6 +94,7 @@ namespace PLDM
         MOD_SET_BIOS_ATTR_ENUM_VALUE                 = 0x35, // setBiosAttrEnumValue
         MOD_SEND_SET_NUMERIC_EFFECTER_VALUE_REQUEST  = 0x36, // sendSetNumericEffecterValueRequest
         MOD_SBE_DUMP                                 = 0x37, // dumpSbe
+        MOD_GET_USB_ENABLEMENT                       = 0x38, // getUsbEnablement
     };
 
     enum PLDMReasonCode

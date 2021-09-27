@@ -141,42 +141,6 @@ void parse_hb_field_core_override(std::vector<uint8_t>& io_string_table,
     return;
 }
 
-void parse_hb_usb_policy(std::vector<uint8_t>& io_string_table,
-                         std::vector<uint8_t>& io_attr_table,
-                         ISTEP_ERROR::IStepError & io_stepError)
-{
-    // Create a variable to hold the retrieved USB security value from the BMC BIOS
-    TARGETING::ATTR_USB_SECURITY_type l_usbSecurity(0);
-
-    // Get the USB Security from the BMC BIOS
-    errlHndl_t l_errl = PLDM::getUsbSecurity(io_string_table, io_attr_table,
-                                             l_usbSecurity);
-    const auto l_sys = TARGETING::UTIL::assertGetToplevelTarget();
-
-    if (unlikely(l_errl != nullptr))
-    {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
-                  "parse_hb_usb_policy(): An error occurred getting "
-                  "USB Security State from the BMC BIOS. Leaving the system "
-                  "attribute ATTR_USB_SECURITY at its current value %d",
-                  l_sys->getAttr<ATTR_USB_SECURITY>());
-        l_errl->collectTrace("ISTEPS_TRACE",256);
-        errlCommit( l_errl, ISTEP_COMP_ID );
-    }
-    else
-    {
-        // Set the system attribute ATTR_USB_SECURITY to the retrieved value
-        l_sys->setAttr<ATTR_USB_SECURITY>(l_usbSecurity);
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
-                  "parse_hb_usb_policy(): Succeeded in getting the BMC "
-                  "BIOS USB Securirty State attribute %d and setting the attribute "
-                  "ATTR_USB_SECURITY",
-                  l_usbSecurity);
-    }
-
-    return;
-}
-
 void parse_hb_memory_mirror_mode(std::vector<uint8_t>& io_string_table,
                                  std::vector<uint8_t>& io_attr_table,
                                  ISTEP_ERROR::IStepError & io_stepError)
@@ -490,6 +454,42 @@ void parse_pvm_fw_boot_side(std::vector<uint8_t>& io_string_table,
 
     } while(0);
 
+    return;
+}
+
+void parse_hb_host_usb_enablement(std::vector<uint8_t>& io_string_table,
+                                  std::vector<uint8_t>& io_attr_table,
+                                  ISTEP_ERROR::IStepError & io_stepError)
+{
+    // Create a variable to hold the retrieved USB Enablement value from the BMC BIOS
+    TARGETING::ATTR_USB_SECURITY_type l_usbEnablement(0);
+
+    // Get the USB Enablement from the BMC BIOS
+    errlHndl_t l_errl = PLDM::getUsbEnablement(io_string_table, io_attr_table,
+                                               l_usbEnablement);
+
+    const auto l_sys = TARGETING::UTIL::assertGetToplevelTarget();
+
+    if (unlikely(l_errl != nullptr))
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                  "getAndSetUsbEnablementFromBmcBios(): An error occurred getting "
+                  "USB Enablement from the BMC BIOS. Leaving the system "
+                  "attribute ATTR_USB_SECURITY at its current value %d",
+                  l_sys->getAttr<ATTR_USB_SECURITY>());
+        l_errl->collectTrace("ISTEPS_TRACE",256);
+        errlCommit( l_errl, ISTEP_COMP_ID );
+    }
+    else
+    {
+        // Set the system attribute ATTR_USB_SECURITY to the retrieved value
+        l_sys->setAttr<ATTR_USB_SECURITY>(l_usbEnablement);
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
+                  "getAndSetUsbEnablementFromBmcBios(): Succeeded in getting the BMC "
+                  "BIOS USB Enablement attribute %d and setting the attribute "
+                  "ATTR_USB_SECURITY",
+                  l_usbEnablement);
+    }
     return;
 }
 
