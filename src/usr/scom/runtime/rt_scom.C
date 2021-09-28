@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -242,7 +242,8 @@ errlHndl_t sendScomToHyp(DeviceFW::OperationType i_opType,
                     if (i_target->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_OCMB_CHIP)
                     {
                         // Channel is dead so switch to using the SBE for
-                        //  access
+                        //  access, fail out and let the caller retry, next
+                        //  access will use fsp mailbox
                         SBESCOM::switchToSbeScomAccess(i_target);
                     }
 
