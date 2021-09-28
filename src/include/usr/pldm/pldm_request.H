@@ -116,6 +116,27 @@ struct mctp_pldm_msg<0>
     pldm_msg pldm_message { };
 } __attribute__((packed));
 
+/* @brief  Assign the contents of a memory region to the given vector.
+ *         This is a public interface meant to be overloaded by callers of
+ *         sendrecv_pldm_request to customize memory management.
+ *
+ * param[in/out] io_response_container  The container to insert data into.
+ * param[in/out] io_data                The data to insert.
+ * param[in]     i_data_length          The length of the data in io_data.
+ *
+ * @note Callers of sendrecv_pldm_request who use a custom ResponseContainer can
+ *       overload this function to customize how data is owned and
+ *       deallocated. This function should either copy the data from io_data
+ *       into the container, or else take ownership of the data directly and
+ *       call io_data.release().
+ */
+inline void sendrecv_pldm_request_assign_response_container(std::vector<uint8_t>& io_response_container,
+                                                            std::unique_ptr<uint8_t, decltype(&free)>& io_data,
+                                                            const size_t i_data_length)
+{
+    io_response_container.assign(io_data.get(), io_data.get() + i_data_length);
+}
+
 /* @brief sendrecv_pldm_request
  *
  *        Encode and send a PLDM request with a fixed-size payload section and a
@@ -130,8 +151,8 @@ struct mctp_pldm_msg<0>
  *                               pldm_msg* and payload size.
  * @return errlHndl_t            Error if any, otherwise nullptr.
  */
-template<size_t MsgSize, typename Encoder, typename... Args>
-errlHndl_t sendrecv_pldm_request(std::vector<uint8_t>& o_response_bytes,
+template<size_t MsgSize, typename ResponseContainer, typename Encoder, typename... Args>
+errlHndl_t sendrecv_pldm_request(ResponseContainer& o_response_bytes,
                                  const size_t i_payload_size,
                                  const msg_q_t i_msgQ,
                                  const Encoder i_encoder,
@@ -169,7 +190,7 @@ errlHndl_t sendrecv_pldm_request(std::vector<uint8_t>& o_response_bytes,
         // Place message on the queue and wait for a response
         const int return_code = msg_sendrecv(i_msgQ, msg.get());
 
-        if(return_code)
+        if (return_code)
         {
             const uint64_t request_hdr_data = pldmHdrToUint64(*pldm_request);
             /*
@@ -190,7 +211,7 @@ errlHndl_t sendrecv_pldm_request(std::vector<uint8_t>& o_response_bytes,
             errl->collectTrace(PLDM_COMP_NAME);
             break;
         }
-        else if(msg.get()->data[1] != REQ_SUCCESS)
+        else if (msg.get()->data[1] != REQ_SUCCESS)
         {
             errl = reinterpret_cast<errlHndl_t>(msg.get()->extra_data);
             msg->extra_data = nullptr;
@@ -201,8 +222,7 @@ errlHndl_t sendrecv_pldm_request(std::vector<uint8_t>& o_response_bytes,
         std::unique_ptr<uint8_t, decltype(&free)>
             extra_data(static_cast<uint8_t*>(msg->extra_data), free);
 
-        o_response_bytes.assign(extra_data.get(),
-                                extra_data.get() + msg->data[0]);
+        sendrecv_pldm_request_assign_response_container(o_response_bytes, extra_data, msg->data[0]);
 #else
         int return_code = MCTP::send_message(msgbuf_bytes);
 
@@ -287,8 +307,8 @@ errlHndl_t sendrecv_pldm_request(std::vector<uint8_t>& o_response_bytes,
  *                               pldm_msg* and payload size.
  * @return errlHndl_t            Error if any, otherwise nullptr.
  */
-template<size_t MsgSize, typename Encoder, typename... Args>
-errlHndl_t sendrecv_pldm_request(std::vector<uint8_t>& o_response_bytes,
+template<size_t MsgSize, typename ResponseContainer, typename Encoder, typename... Args>
+errlHndl_t sendrecv_pldm_request(ResponseContainer& o_response_bytes,
                                  const std::vector<uint8_t>& i_payload_bytes,
                                  const msg_q_t i_msgQ,
                                  const Encoder i_encoder,
@@ -324,19 +344,19 @@ errlHndl_t sendrecv_pldm_request(std::vector<uint8_t>& o_response_bytes,
  *
  * @note                         If message encoding fails, assert triggers.
  */
-template<size_t MsgSize, typename Encoder, typename... Args>
-errlHndl_t sendrecv_pldm_request(std::vector<uint8_t>& o_response_bytes,
+template<size_t MsgSize, typename ResponseContainer, typename Encoder, typename... Args>
+errlHndl_t sendrecv_pldm_request(ResponseContainer& o_response_bytes,
                                  const msg_q_t i_msgQ,
                                  const Encoder i_encoder,
                                  Args... i_args)
 {
     return sendrecv_pldm_request<MsgSize>(o_response_bytes,
-                                                  std::vector<uint8_t> { }, // Empty variable-size payload
-                                                                            // portion (this does not make any
-                                                                            // dynamic allocation at runtime)
-                                                  i_msgQ,
-                                                  i_encoder,
-                                                  i_args...);
+                                          std::vector<uint8_t> { }, // Empty variable-size payload
+                                          // portion (this does not make any
+                                          // dynamic allocation at runtime)
+                                          i_msgQ,
+                                          i_encoder,
+                                          i_args...);
 }
 
 /* @brief Decode a PLDM response.
@@ -347,10 +367,10 @@ errlHndl_t sendrecv_pldm_request(std::vector<uint8_t>& o_response_bytes,
  *                       payload or payload size arguments.
  * @return               Return value of message decoder function
  */
-template<typename Decoder, typename... Args>
+template<typename Decoder, typename Container, typename... Args>
 errlHndl_t decode_pldm_response(const Decoder i_decoder,
-                                           const std::vector<uint8_t>& i_data,
-                                           Args... i_args)
+                                const Container& i_data,
+                                Args... i_args)
 {
     errlHndl_t errl = nullptr;
     assert(i_data.size() >= sizeof(pldm_msg_hdr),
