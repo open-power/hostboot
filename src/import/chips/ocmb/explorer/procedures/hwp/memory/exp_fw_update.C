@@ -37,6 +37,7 @@
 #include <exp_fw_update.H>
 #include <generic/memory/lib/utils/find.H>
 #include <lib/inband/exp_flash_utils.H>
+#include <generic/memory/lib/utils/count_dimm.H>
 
 extern "C"
 {
@@ -78,6 +79,12 @@ extern "C"
     {
         FAPI_INF("Entering exp_fw_update_all(%s). imageSize[0x%08x]",
                  mss::c_str(i_target), i_image_sz);
+
+        if (mss::count_dimm(mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target)) == 0)
+        {
+            FAPI_INF("No Dimms found on: (%s)", mss::c_str(i_target));
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
 
         for (const auto& l_omi : mss::find_targets<fapi2::TARGET_TYPE_OMI>(i_target))
         {
