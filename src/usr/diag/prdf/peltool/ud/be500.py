@@ -496,6 +496,10 @@ class errludP_prdf:
                         count, i=intConcat(data, i, i+1)
                         parsedLength += 2
 
+                        # Continue to next entry if the count is 0
+                        if (count == 0):
+                            continue
+
                         d[cd]['IUE Counts'][y] = OrderedDict()
                         d[cd]['IUE Counts'][y]['Count'] = count
                         d[cd]['IUE Counts'][y]['Rank'] = rank
