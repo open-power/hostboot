@@ -1022,9 +1022,10 @@ errlHndl_t cacheRemoteFruVpd()
     errl =  getFruRecordTableMetaData(table_metadata);
     if(errl) { break; }
 
-    /* The fruTableSize returned for the getFruRecordTableMetaData will
-       not include the padding to force 4 byte alignment */
-    const auto fru_table_len = ALIGN_4(table_metadata.fruTableSize);
+    /* The fruTableSize returned for the getFruRecordTableMetaData will NOT
+       include the size for the crc32 checksum or the padding to force 4 byte
+       alignment */
+    const auto fru_table_len = ALIGN_4(table_metadata.fruTableSize + sizeof(uint32_t));
 
     std::unique_ptr<uint8_t, decltype(&free)>
         table_ptr(static_cast<uint8_t*>(malloc(fru_table_len)), free);

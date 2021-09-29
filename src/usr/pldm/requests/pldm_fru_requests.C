@@ -278,10 +278,8 @@ errlHndl_t getFruRecordTable(const size_t i_table_buffer_len,
 
     // The table returned could have some padding at the end we do not want.
     // Just make sure the padding it within a valid range (0-3 bytes)
-    // @TODO RTC 256353: Fix this check
-    if(false &&
-       (table_data_len < i_table_buffer_len ||
-        table_data_len - i_table_buffer_len > 3))
+    if((table_data_len < i_table_buffer_len) ||
+       (table_data_len - i_table_buffer_len > 3))
     {
         // The buffer that was returnd from BMC that contains table info does
         // not match the size that the get fru table meta data cmd told us
@@ -289,23 +287,23 @@ errlHndl_t getFruRecordTable(const size_t i_table_buffer_len,
         PLDM_ERR("decode_get_fru_record_table_resp table_data_len - i_table_buffer_len = %d  , expected this difference to be between 0-3",
                 table_data_len - i_table_buffer_len );
         /*@
-        * @errortype  ERRL_SEV_UNRECOVERABLE
-        * @moduleid   MOD_GET_FRU_TABLE
-        * @reasoncode RC_INVALID_LENGTH
-        * @userdata1[0:31]   Table Length Expected
-        * @userdata1[32:63]  Table Length returned from BMC
-        *                    (We expected diff between 0<= diff <=3)
-        * @userdata2  Response header data (see pldm_msg_hdr struct)
-        * @devdesc    Software problem, likely PLDM version problem w/ bmc
-        * @custdesc   A software error occurred during system boot
-        */
+         * @errortype  ERRL_SEV_UNRECOVERABLE
+         * @moduleid   MOD_GET_FRU_TABLE
+         * @reasoncode RC_INVALID_LENGTH
+         * @userdata1[0:31]   Table Length Expected
+         * @userdata1[32:63]  Table Length returned from BMC
+         *                    (We expected diff between 0<= diff <=3)
+         * @userdata2  Response header data (see pldm_msg_hdr struct)
+         * @devdesc    Software problem, likely PLDM version problem w/ bmc
+         * @custdesc   A software error occurred during system boot
+         */
         errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                               PLDM::MOD_GET_FRU_TABLE,
-                               PLDM::RC_INVALID_LENGTH,
-                               TWO_UINT32_TO_UINT64(i_table_buffer_len,
-                                                    table_data_len),
-                               response_hdr_data,
-                               ErrlEntry::NO_SW_CALLOUT);
+                             PLDM::MOD_GET_FRU_TABLE,
+                             PLDM::RC_INVALID_LENGTH,
+                             TWO_UINT32_TO_UINT64(i_table_buffer_len,
+                                                  table_data_len),
+                             response_hdr_data,
+                             ErrlEntry::NO_SW_CALLOUT);
         addBmcErrorCallouts(errl);
         break;
     }
