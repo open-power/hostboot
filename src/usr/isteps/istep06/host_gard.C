@@ -58,6 +58,7 @@
 #include <isteps/hwpisteperror.H>
 #include <errl/errlmanager.H>
 #include <arch/pirformat.H>
+#include <algorithm>
 
 #ifdef CONFIG_PLDM
 #include <pldm/extended/pdr_manager.H>
@@ -81,12 +82,9 @@ void* host_gard( void *io_pArgs )
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "host_gard: MPIPL mode");
 
-            PredicateCTM l_coreFilter(CLASS_UNIT,
-                                                 TYPE_CORE);
-            PredicateCTM l_exFilter(CLASS_UNIT,
-                                               TYPE_EX);
-            PredicateCTM l_eqFilter(CLASS_UNIT,
-                                               TYPE_EQ);
+            PredicateCTM l_coreFilter(CLASS_UNIT, TYPE_CORE);
+            PredicateCTM l_exFilter(CLASS_UNIT, TYPE_EX);
+            PredicateCTM l_eqFilter(CLASS_UNIT, TYPE_EQ);
 
             PredicatePostfixExpr l_coreExEq;
             l_coreExEq.push(&l_coreFilter)
@@ -116,6 +114,41 @@ void* host_gard( void *io_pArgs )
             }
         }
 
+        TargetHandleList l_cores;
+        TargetHandleList l_procsFunc;
+        getAllChips(l_procsFunc,
+                    TYPE_PROC,
+                    true);
+
+        for (const auto l_proc : l_procsFunc)
+        {
+            // for each proc, get the list of its functional non-ECO cores
+            l_cores.clear();
+            getNonEcoCores( l_cores,
+                            l_proc,
+                            true);
+
+            // if there are functional non-ECO ungarded cores
+            if (l_cores.size() > 0)
+            {
+                //guarantee l_cores is ordered by ATTR_CHIP_UNIT:
+                std::sort(l_cores.begin(), l_cores.end(), compareTargetChipUnit);
+
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"host_gard: "
+                          "the first functional non-ECO core on proc 0x%X is ATTR_CHIP_UNIT: %d",
+                          get_huid(l_proc),
+                          l_cores[0]->getAttr<ATTR_CHIP_UNIT>());
+
+                l_proc->setAttr<ATTR_DEFAULT_HB_CORE>(l_cores[0]->getAttr<ATTR_CHIP_UNIT>());
+
+            }
+            else
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"host_gard: "
+                          "no functional ungarded non-ECO cores on proc 0x%X", get_huid(l_proc));
+            }
+        }
+
         // Put out some helpful messages that show which targets are usable
         typedef struct { uint64_t x[4]; } posbits_t; //256 bits
         std::map<TARGETING::TYPE,posbits_t> l_funcData;
@@ -140,6 +173,7 @@ void* host_gard( void *io_pArgs )
                 }
             }
         }
+
         EntityPath l_epath;
         for( auto l_data : l_funcData)
         {
@@ -198,7 +232,7 @@ void* host_gard( void *io_pArgs )
         core_msg->type = SBE::MSG_IPL_MASTER_CORE;
         const Target* l_bootCore = getBootCore( );
 
-        if (l_bootCore == NULL)
+        if (l_bootCore == nullptr)
         {
             Target* l_bootproc = nullptr;
             TARGETING::targetService().masterProcChipTargetHandle( l_bootproc );

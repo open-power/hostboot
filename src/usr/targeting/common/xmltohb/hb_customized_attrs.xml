@@ -959,6 +959,13 @@
         <writeable/>
     </attribute>
 
+    <attribute>
+        <id>ATTR_DEFAULT_HB_CORE</id>
+        <writeable/>
+        <no_export/>
+        <persistency>volatile-zeroed</persistency>
+    </attribute>
+
     <!-- =====================================================================
      End of customizations definitions
      ================================================================= -->

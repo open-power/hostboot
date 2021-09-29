@@ -106,6 +106,19 @@ inline bool compareAffinity(TargetHandle_t t1, TargetHandle_t t2)
 }
 
 /**
+ * @brief Predicate function to sort by CHIP_UNIT
+ *
+ * @parm[in]  t1, Target 1 for CHIP_UNIT comparison against target 2
+ * @parm[in]  t2, Target 2 for CHIP_UNIT comparison against target 1
+ *
+ * @return bool, true if t1 CHIP_UNIT < t2 CHIP_UNIT, false otherwise
+ */
+inline bool compareTargetChipUnit(TargetHandle_t t1, TargetHandle_t t2)
+{
+  return (t1->getAttr<ATTR_CHIP_UNIT>() < t2->getAttr<ATTR_CHIP_UNIT>());
+}
+
+/**
  * @brief Populate the o_vector with target chip pointers based on the
  *        requested type, and functional state.
  *
