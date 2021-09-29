@@ -36,5 +36,6 @@ OBJS += pldm_base_init.o
 OBJS += pldm_msg_router.o
 OBJS += pldm_requester.o
 OBJS += pldm_shutdown.o
+OBJS += pldm_fr.o
 
 include ${ROOTPATH}/config.mk

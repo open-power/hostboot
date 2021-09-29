@@ -199,12 +199,17 @@ static void rx_message(uint8_t i_eid, void * i_data, void *i_msg, size_t i_len)
    {
       case MCTP_MSG_TYPE_PLDM :
       {
+          auto msg_byte_ptr = reinterpret_cast<uint8_t *>(i_msg);
+          auto pldm_hdr_ptr =
+                reinterpret_cast<pldm_msg_hdr *>(
+                    msg_byte_ptr + sizeof(MCTP::MCTP_MSG_TYPE_PLDM));
+          PLDM::logPldmMsg(pldm_hdr_ptr, PLDM::INBOUND);
           errlHndl_t errl = nullptr;
           // Offset into sizeof(MCTP::MCTP_MSG_TYPE_PLDM) MCTP packet payload
           // as where PLDM message begins. (see DSP0236 v1.3.0 figure 4)
           // Also update the len param to account for this offset
           errl = PLDM::routeInboundMsg(
-                            ( reinterpret_cast<uint8_t *>(i_msg) +
+                            ( msg_byte_ptr +
                               sizeof(MCTP::MCTP_MSG_TYPE_PLDM)),
                             (i_len - sizeof(MCTP::MCTP_MSG_TYPE_PLDM)));
 
@@ -274,16 +279,21 @@ void MctpRP::handle_outbound_messages(void)
           // Send a message
           case MSG_SEND_PLDM:
           {
+              auto extra_data_byte_ptr = reinterpret_cast<uint8_t*>(msg->extra_data);
               // The first byte of MCTP payload describes the contents
               // of the payload. Set first byte to be TYPE_PLDM (0x01)
               // so BMC knows to route the MCTP message to it's PLDM driver.
-              *reinterpret_cast<uint8_t *>(msg->extra_data) =
-                                                          MCTP_MSG_TYPE_PLDM;
+              *extra_data_byte_ptr = MCTP_MSG_TYPE_PLDM;
               TRACDBIN(g_trac_mctp, "pldm message : ",
                        msg->extra_data , msg->data[0]);
+
               int rc = 0;
 #ifdef CONFIG_MCTP
+              auto pldm_hdr_ptr =
+                reinterpret_cast<pldm_msg_hdr *>(
+                    extra_data_byte_ptr + sizeof(MCTP::MCTP_MSG_TYPE_PLDM));
               mutex_lock(&iv_mutex);
+              PLDM::logPldmMsg(pldm_hdr_ptr, PLDM::OUTBOUND);
               rc = mctp_message_tx(iv_mctp, BMC_EID,
                                    msg->extra_data, msg->data[0]);
               mutex_unlock(&iv_mutex);

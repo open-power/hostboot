@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,6 +25,10 @@
 #ifndef _DEBUGPOINTERS_H
 #define _DEBUGPOINTERS_H
 
+#include <stdint.h>
+#include <cstring>
+#include <builtins.h>
+
 /**
  * This file contains details on a list of pointers that can be used
  *  by our debug framework without requiring an exact build match.
@@ -37,7 +41,7 @@ extern void* debug_pointers;
 namespace DEBUG
 {
 // Maximum number of entries
-constexpr uint16_t MAX_ENTRIES = 20;
+constexpr uint16_t MAX_ENTRIES = 30;
 
 // Eyecatcher to detect levels without this support
 //  = DEBUGPTR
@@ -100,6 +104,15 @@ constexpr uint64_t SEGMENTMANAGER            = 0x53474d4e544d4752; //'SGMNTMGR'
 constexpr uint64_t BLOCKREADONLYEVICT        = 0x424c4f434b524f45; //'BLOCKROE'
 constexpr uint64_t BLOCKREADWRITEEVICT       = 0x424c4f434b525745; //'BLOCKRWE'
 constexpr uint64_t HUGEBLOCKALLOCATED        = 0x48554745564D4D20; //'HUGEVMM '
+constexpr uint64_t PLDMFRMAX                 = 0x504c444d46524d58; //'PLDMFRMX'
+constexpr uint64_t PLDMOUTREQFR              = 0x504c444d4f524551; //'PLDMOREQ'
+constexpr uint64_t PLDMINREQFR               = 0x504c444d49524551; //'PLDMIREQ'
+constexpr uint64_t PLDMOUTRSPFR              = 0x504c444d4f525350; //'PLDMORSP'
+constexpr uint64_t PLDMINRSPFR               = 0x504c444d49525350; //'PLDMIRSP'
+constexpr uint64_t PLDMOUTREQNEXT            = 0x504c444d4f52514e; //'PLDMORQN'
+constexpr uint64_t PLDMINREQNEXT             = 0x504c444d4952514e; //'PLDMIRQN'
+constexpr uint64_t PLDMOUTRSPNEXT            = 0x504c444d4f52504e; //'PLDMORPN'
+constexpr uint64_t PLDMINRSPNEXT             = 0x504c444d4952504e; //'PLDMIRPN'
 // Number of values cannot exceed MAX_ENTRIES
 
 

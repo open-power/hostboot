@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,7 +34,6 @@
 #define PLDMREQUESTER_H
 
 #include <sys/msg.h>
-
 class pldmRequester
 {
   public:
@@ -64,7 +63,7 @@ class pldmRequester
   private:
 
       //Private Member Variables
-      msg_q_t     iv_mctpOutboundMsgQ; // mctp outbound rsp/req msgQ
+      msg_q_t iv_mctpOutboundMsgQ; // mctp outbound rsp/req msgQ
 
       // Disallow copying this class.
       pldmRequester& operator=(const pldmRequester&);

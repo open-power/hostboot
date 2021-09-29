@@ -62,6 +62,25 @@ namespace PLDM
      * @param[in] i_context  Callback context, forwarded to the callback
      */
     void registerShutdownCallback(shutdown_callback_t i_handler, void* i_context);
+
+
+    enum traffic_direction : uint8_t
+    {
+        INBOUND, /* Coming from the BMC */
+        OUTBOUND /* Going to the BMC */
+    };
+
+    /**
+     * @brief Log a given PLDM message in the appropriate PLDM flight recorder log
+     *        based upon the information in the header of the PLDM message and
+     *        the direction parameter.
+     *
+     * @param[in] i_hdr A ptr to a PLDM message, no change of memory ownership.
+     * @param[in] i_dir The direction of the PLDM message:
+     *                   - INBOUND if message is coming from the BMC.
+     *                   - OUTBOUND if message is going to the BMC
+     */
+    void logPldmMsg(const pldm_msg_hdr* const i_hdr, traffic_direction i_dir);
 #else
     /**
     * @brief This function is intended to be used by the MCTP resource
