@@ -20,7 +20,7 @@ config CONSOLE_OUTPUT_TRACE_COMP_NAME
         set CONSOLE_OUTPUT_TRACE_COMP_NAME "<component_string_name>"
 
 config NO_FAPI_IN_TRACE_LITE_OUTPUT
-    default y
+    default n
     help
         Do not output FAPI traces when CONSOLE_TRACE_LITE is enabled.
 
