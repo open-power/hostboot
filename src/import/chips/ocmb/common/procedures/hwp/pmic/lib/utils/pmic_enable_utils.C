@@ -1066,10 +1066,16 @@ fapi2::ReturnCode power_down_sequence_4u(const fapi2::Target<fapi2::TARGET_TYPE_
 
     // Grab the targets as a struct, if they exist
     target_info_redundancy l_target_info(i_target, l_rc);
-    // If platform did not provide a usable set of targets (4 GENERICI2CSLAVE, at least 2 PMICs),
+
+    // If platform did not provide a usable (functional) set of targets (4 GENERICI2CSLAVE, at least 2 PMICs),
     // Then we can't properly disable, the part is as good as dead, since re-enable would fail
-    FAPI_TRY(l_rc, "Unusable PMIC/GENERICI2CSLAVE child target configuration found from %s",
-             mss::c_str(i_target));
+    if (l_rc != fapi2::FAPI2_RC_SUCCESS)
+    {
+        // We don't fail here because we could be looking at a DIMM that's been deconfigured already
+        FAPI_INF("Non-functional targets found from %s", mss::c_str(i_target));
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
 
     // ADC or GPIO fails are hard fails.
     // ADCs and GPIOs are guaranted to exist as asserted by l_rc above
