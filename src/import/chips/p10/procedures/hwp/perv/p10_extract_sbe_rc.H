@@ -57,6 +57,8 @@ enum RETURN_ACTION
     REIPL_UPD_SPI_CLK_DIV   = 7,  // Update SP code and reipl the system/chip
     NO_RECOVERY_ACTION = 8, // No recovery action possible to correct this error
     REIPL_BKP_BMSEEPROM  = 9, // Run IPL by selecting backup Measurement and  Boot seeproms
+    RECONFIG_WITH_CLOCK_GARD = 10, // SBE boot failed due to failure of primary clock. HWP will gard the clock.
+    // Need to do reconfig for recovering
 };
 };
 

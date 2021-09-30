@@ -116,6 +116,7 @@
 #include <p10_ppe_common.H>
 #include <p10_scom_proc.H>
 #include <p10_scom_perv.H>
+#include <p10_clock_test.H>
 
 
 fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
@@ -216,8 +217,19 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
     uint32_t spi_clk_div = 0;
     uint32_t spi_config_val = 0;
     uint32_t SPRG0   = 272;
+    fapi2::ATTR_CP_REFCLOCK_SELECT_Type l_cp_refclck_select;
 
     FAPI_INF("p10_extract_sbe_rc : Entering ...");
+
+    // First run the clock test on primary clock.
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CP_REFCLOCK_SELECT, i_target_chip, l_cp_refclck_select));
+    p10_clock_test_loop(i_target_chip, l_cp_refclck_select); // expanding FAPI_TRY macro to assign recovery action value
+
+    if(fapi2::current_err != fapi2::FAPI2_RC_SUCCESS)
+    {
+        o_return_action = P10_EXTRACT_SBE_RC::RECONFIG_WITH_CLOCK_GARD;
+        goto fapi_try_exit;
+    }
 
 #ifdef __HOSTBOOT_MODULE
     l_is_HB_module = true;

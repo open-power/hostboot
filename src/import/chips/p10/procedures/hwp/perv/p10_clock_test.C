@@ -99,14 +99,7 @@ fapi2::ReturnCode p10_clock_test(const
     l_root_ctrl0_copy.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL0_CFAM_PROTECTION_0_DC>();
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL0_COPY_FSI, l_root_ctrl0_copy));
 
-    for(int i = 0; i < POLL_COUNT; i++)
-    {
-        FAPI_DBG("Set input value to clock test latches - RCS_CLOCK_TEST_IN = 1");
-        FAPI_TRY(p10_clock_test_latches(i_target_chip, l_cp_refclck_select, true));
-
-        FAPI_DBG("Set input value to clock test latches - RCS_CLOCK_TEST_IN = 0");
-        FAPI_TRY(p10_clock_test_latches(i_target_chip, l_cp_refclck_select, false));
-    }
+    FAPI_TRY(p10_clock_test_loop(i_target_chip, l_cp_refclck_select));
 
     if ((l_hw543822 != 0) &&
         (l_hw543822_war_mode != fapi2::ENUM_ATTR_HW543822_WAR_MODE_NONE))
@@ -119,6 +112,28 @@ fapi2::ReturnCode p10_clock_test(const
 fapi_try_exit:
     return fapi2::current_err;
 
+}
+
+/// @brief run the clock test loop using p10_clock_test_latches
+///
+/// @param[in]     i_target_chip   Reference to TARGET_TYPE_PROC_CHIP target
+/// @param[in]     i_cp_refclock_select     input indicating which all clock has to be tested
+/// @return  FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p10_clock_test_loop(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
+    const uint8_t i_cp_refclock_select)
+{
+    for(int i = 0; i < POLL_COUNT; i++)
+    {
+        FAPI_DBG("Set input value to clock test latches - RCS_CLOCK_TEST_IN = 1");
+        FAPI_TRY(p10_clock_test_latches(i_target_chip, i_cp_refclock_select, true));
+
+        FAPI_DBG("Set input value to clock test latches - RCS_CLOCK_TEST_IN = 0");
+        FAPI_TRY(p10_clock_test_latches(i_target_chip, i_cp_refclock_select, false));
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 /// @brief Verify that latches clocked by input clocks transported input value to output
