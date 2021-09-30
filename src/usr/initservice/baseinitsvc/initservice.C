@@ -54,6 +54,7 @@
 #include    <sbe/sbereasoncodes.H>
 #include    <util/misc.H>
 #include    <arch/magic.H>
+#include    <kernel/bltohbdatamgr.H>
 
 #include    <errl/errludstring.H>
 #include    <errl/errludprintk.H>
@@ -72,6 +73,8 @@
 #ifdef CONFIG_PLDM
 #include    <pldm/extended/pdr_manager.H>
 #endif
+
+extern char hbi_ImageId;
 
 //  -----   namespace   SPLESS  -----------------------------------------------
 namespace   SPLESS
@@ -111,6 +114,16 @@ void* _start(void *ptr)
 
     TRACFCOMP( g_trac_initsvc,
             "Executing Initialization Service module." );
+
+    // Repeat a few key pieces of information that are already
+    //  in our kernel printk in case we only have traces to debug
+    //  with.
+    TRACFCOMP( g_trac_initsvc,
+               "HostbootLevel=%s, CacheSize=%dMB, HRMOR=%X",
+               &hbi_ImageId,
+               g_BlToHbDataManager.getHbCacheSizeMb(),
+               cpu_spr_value(CPU_SPR_HRMOR) );
+
 
     // initialize the base modules in Hostboot.
     InitService::getTheInstance().init( ptr );
