@@ -262,7 +262,7 @@ errlHndl_t memPowerThrottleOT(
                 if (omi_target != nullptr)
                 {
                     // get relative OCMB per processor
-                    l_ocmb_pos = omi_target->getAttr<TARGETING::ATTR_REL_POS>();
+                    l_ocmb_pos = omi_target->getAttr<TARGETING::ATTR_CHIP_UNIT>();
                 }
                 else
                 {
@@ -564,7 +564,7 @@ errlHndl_t memPowerThrottleRedPower(
                 if (omi_target != nullptr)
                 {
                     // get relative OCMB per processor
-                    l_ocmb_pos = omi_target->getAttr<TARGETING::ATTR_REL_POS>();
+                    l_ocmb_pos = omi_target->getAttr<TARGETING::ATTR_CHIP_UNIT>();
                 }
                 else
                 {
@@ -716,7 +716,7 @@ errlHndl_t calcMemThrottles()
             if (omi_target != nullptr)
             {
                 // get relative OCMB per processor
-                l_ocmb_pos = omi_target->getAttr<TARGETING::ATTR_REL_POS>();
+                l_ocmb_pos = omi_target->getAttr<ATTR_CHIP_UNIT>();
             }
             else
             {

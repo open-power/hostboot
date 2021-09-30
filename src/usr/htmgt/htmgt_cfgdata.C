@@ -436,7 +436,7 @@ uint8_t ocmbInit(Occ *i_occ,
             if (omi_target != NULL)
             {
                 // get relative OCMB per processor
-                l_ocmb_num = omi_target->getAttr<ATTR_REL_POS>();
+                l_ocmb_num = omi_target->getAttr<ATTR_CHIP_UNIT>();
             }
             else
             {
@@ -719,7 +719,7 @@ void getMemThrottleMessageData(const TargetHandle_t i_occ,
         if (omi_target != NULL)
         {
             // get relative OCMB per processor
-            l_ocmb_pos = omi_target->getAttr<TARGETING::ATTR_REL_POS>();
+            l_ocmb_pos = omi_target->getAttr<ATTR_CHIP_UNIT>();
         }
         else
         {
@@ -830,7 +830,7 @@ void getMemThrottleMessageData(const TargetHandle_t i_occ,
                     UINT16_PUT(&o_data[index+16], nps_redun[port_rel_pos]);
                     UINT16_PUT(&o_data[index+18], npp_redun[port_rel_pos]);
                     // reserved
-                    memset(&o_data[index], 0, 2); // reserved
+                    memset(&o_data[index+20], 0, 2); // reserved
                     index += 22;
                     ++numSets ;
                 }
