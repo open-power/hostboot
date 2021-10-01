@@ -93,18 +93,18 @@ class RegisterData:
 
     def parseRegister(self, chipId: str, regId: str) -> dict:
 
-        # The input chip ID and chip signature will be hex strings but without
+        # The input chip ID and register ID will be hex strings but without
         # the preceding '0x' so add them here. Also, we will ensure we have
         # lower case hex strings
         chipType = '0x' + chipId.lower()
         hashReg = '0x' + regId.lower()
 
-        signature = { 'name': 'Undefined Register Hash',
-                      'address': hashReg }
+        register = { 'name': 'Undefined Register Hash',
+                     'address': hashReg }
 
         if chipType in self._data:
             if hashReg in self._data[chipType]:
-                signature = self._data[chipType][hashReg]
+                register = self._data[chipType][hashReg]
 
-        return signature
+        return register
 

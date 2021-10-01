@@ -295,6 +295,9 @@ def hashString(string):
         val <<= 8
         pos += 1
 
+    # The sum is added to the hash value an additional time here despite the
+    # defined behavior specified above to keep consistent with the behavior of
+    # the hashString function in the PRD project.
     sumA += val
     sumB += sumA
     val = 0
