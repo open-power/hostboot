@@ -58,6 +58,8 @@ OBJS += p10_ppe_common.o
 OBJS += sbe_psuSyncFabTopoIdTable.o
 OBJS += sbe_halt.o
 OBJS += sbe_psuSendMemConfig.o
+OBJS += p10_clock_test.o
+OBJS += p10_clock_test_cmn.o
 
 # sbeio's sub directories
 SUBDIRS += test.d

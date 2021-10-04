@@ -39,7 +39,9 @@ OBJS += rt_sbescom.o
 OBJS += sbeio_attr_override.o
 OBJS += sbeio_vpd_override.o
 OBJS += sbeio_vital_attn.o
+OBJS += p10_clock_test.o
 OBJS += p10_extract_sbe_rc.o
+OBJS += p10_clock_test_cmn.o
 OBJS += p10_ppe_utils.o
 OBJS += p10_ppe_common.o
 
