@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -678,33 +678,42 @@ inline fapi2::ReturnCode decode_rcw_and_run_engine(
                                   false));
 
     // F0RC6X:
-    // Set up using RCW's data
-    fapi2::buffer<uint8_t> l_f0rc6x_data(i_cw_info.iv_cw_data.iv_data);
-
-    // Overwrite A7-A4 with iv_number for DATA_LEN_4 CWs
-    if (i_cw_info.iv_data_len == DATA_LEN_4)
+    uint8_t l_f0rc6x_data_temp(i_cw_info.iv_cw_data.iv_data);
     {
-        l_f0rc6x_data.insert<F0RC6X_A7A4_START, F0RC6X_A7A4_LEN>(i_cw_info.iv_cw_data.iv_number);
+        // Set up using RCW's data, but use the attr accessor in case the user passed that in
+        FAPI_TRY( i_cw_info.iv_cw_data.iv_attr_get(i_target, l_f0rc6x_data_temp) );
+        fapi2::buffer<uint8_t> l_f0rc6x_data(l_f0rc6x_data_temp);
+
+        // Overwrite A7-A4 with iv_number for DATA_LEN_4 CWs
+        if (i_cw_info.iv_data_len == DATA_LEN_4)
+        {
+            l_f0rc6x_data.insert<F0RC6X_A7A4_START, F0RC6X_A7A4_LEN>(i_cw_info.iv_cw_data.iv_number);
+        }
+
+        l_info_list.push_back(cw_info(FUNCTION_SPACE_0,
+                                      CW_6,
+                                      l_f0rc6x_data,
+                                      i_cw_info.iv_cw_data.iv_delay,
+                                      CW8_DATA_LEN,
+                                      false));
     }
 
-    l_info_list.push_back(cw_info(FUNCTION_SPACE_0,
-                                  CW_6,
-                                  l_f0rc6x_data,
-                                  i_cw_info.iv_cw_data.iv_delay,
-                                  CW8_DATA_LEN,
-                                  false));
-
     // F0RC06 - RCD_WRITE:
-    fapi2::buffer<uint8_t> l_f0rc06_data(F0RC06_CMD_WRITE);
-    l_info_list.push_back(cw_info(FUNCTION_SPACE_0,
-                                  CW_6,
-                                  l_f0rc06_data,
-                                  i_cw_info.iv_cw_data.iv_delay,
-                                  CW4_DATA_LEN,
-                                  false));
+    {
+        fapi2::buffer<uint8_t> l_f0rc06_data(F0RC06_CMD_WRITE);
+        l_info_list.push_back(cw_info(FUNCTION_SPACE_0,
+                                      CW_6,
+                                      l_f0rc06_data,
+                                      i_cw_info.iv_cw_data.iv_delay,
+                                      CW4_DATA_LEN,
+                                      false));
+    }
 
     // Issue command
     return control_word_engine(i_target, l_info_list, i_sim, io_inst, TURN_ON_CKE);
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 }// mss
