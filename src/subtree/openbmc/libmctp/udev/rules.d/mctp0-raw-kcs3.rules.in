@@ -1,0 +1,1 @@
+ACTION=="add", DEVPATH=="/devices/virtual/misc/raw-kcs3", SUBSYSTEM=="misc", SYMLINK+="mctp0"

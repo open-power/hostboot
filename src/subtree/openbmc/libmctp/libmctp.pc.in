@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: libmctp
+Description: MCTP protocol implementation
+Version: @VERSION@
+Libs: -L${libdir} -lmctp
+Cflags: -I${includedir}
