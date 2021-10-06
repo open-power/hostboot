@@ -2,7 +2,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/build/tools/update_pldm_subtree.sh $
+# $Source: src/build/tools/update_subtree.sh $
 #
 # OpenPOWER HostBoot Project
 #
@@ -24,32 +24,35 @@
 #
 # IBM_PROLOG_END_TAG
 
-#    update_pldm_subtree.sh
+#    update_subtree.sh
 #
 #    Author: Christian Geddes (crgeddes@us.ibm.com)
 #
 #    Hostboot developers sometimes want to make changes to the local
-#    subtree that are not in the upstream openbmc/pldm repo yet. This
-#    can make pulling in the latest upstream changes difficult. This
-#    script eases that process.
-
-PUSH_COMMITS="0"
+#    subtree that are not in the upstream repo yet. This can make
+#    pulling in the latest upstream changes difficult. This script
+#    eases that process.
 
 function usage()
 {
     echo "Hostboot developers sometimes want to make changes to the local"
-    echo "subtree that are not in the upstream openbmc/pldm repo yet. This"
-    echo "can make pulling in the latest upstream changes difficult. This"
-    echo "script eases that process."
+    echo "subtree that are not in the upstream repo yet. This can make"
+    echo "pulling in the latest upstream changes difficult. This script"
+    echo "eases that process."
     echo ""
-    echo "update_pldm_subtree.sh"
+    echo "update_subtree.sh"
     echo "    -h --help"
     echo "    -p --push"
     echo "    -r --reviewer=<reviewer email>"
+    echo "    -s --subtree=<subtree>"
     echo ""
+    echo "Subtrees that are currently supported: $SUPPORTED_SUBTREES"
 }
 
+PUSH_COMMITS="0"
+SUPPORTED_SUBTREES="pldm,libmctp"
 REVIEWER=""
+SUBTREE="wrong"
 
 while [ "$1" != "" ]; do
     PARAM=`echo $1 | awk -F= '{print $1}'`
@@ -65,6 +68,9 @@ while [ "$1" != "" ]; do
         -r | --reviewer)
             REVIEWER=$VALUE;
             ;;
+        -s | --subtree)
+            SUBTREE=$VALUE;
+            ;;
         *)
             echo "ERROR: unknown parameter \"$PARAM\""
             usage
@@ -73,6 +79,13 @@ while [ "$1" != "" ]; do
     esac
     shift
 done
+
+if !(echo "$SUPPORTED_SUBTREES" | grep -w -q "$SUBTREE") ; then
+  echo "  Error! Must specify a valid subtree to use!"
+  echo "  Subtrees that are currently supported: $SUPPORTED_SUBTREES"
+  exit 1
+fi
+
 
 # Check if we are in a hostboot repository directory
 if [ `ls ./example_customrc 2>/dev/null | wc -c` -eq 0 ] > /dev/null 2>&1; then
@@ -95,49 +108,54 @@ if [ `git status --porcelain 2>/dev/null| grep "^??" | wc -l` -gt 0 ]; then
   exit 1
 fi
 
-# Find the last commit's gerrit Change-Id that we use to sync with openbmc/pldm
-LAST_SYNC_CHANGE_ID=`grep pldm src/subtree/latest_commit_sync | awk '{print $2}'`
+# Find the last commit's gerrit Change-Id that we use to sync with the upstream repo
+LAST_SYNC_CHANGE_ID=`grep $SUBTREE src/subtree/latest_commit_sync | awk '{print $2}'`
 LAST_SYNC_COMMIT=`ssh gerrit gerrit query --current-patch-set $LAST_SYNC_CHANGE_ID | grep revision | awk '{print $2}'| cut -b1-6`
 # Find the current commit's GUID
 CURRENT_TOP_COMMIT=`git rev-parse --short HEAD`
 
-# Figure out all of the changes we have made to the pldm subtree between now and
+# Figure out all of the changes we have made to the subtree between now and
 # the last sync commit. Note this command will create outstanding changes
 # that undo all of the downstream work hostboot has done on the subtree
 # that has not been upstreamed yet
-git checkout $LAST_SYNC_COMMIT -- src/subtree/openbmc/pldm/*
+git checkout $LAST_SYNC_COMMIT -- src/subtree/openbmc/$SUBTREE/*
 diff_found=0
 
 # If outstanding changes are detected we know there are some changes
 # that we want to try to patch after updating from upstream
 if ! git diff-index --quiet HEAD --; then
-    echo "Changes have been made to src/subtree/openbmc/pldm locally since the last sync, creating a patch that apply these changes post sync"
+    echo "Changes have been made to src/subtree/openbmc/$SUBTREE locally since the last sync, creating a patch that apply these changes post sync"
     diff_found=1
     git add --a
     # temporarily commit the changes, this will undo all of the downstream edits hostboot has done
-    git commit -m "Revert PLDM changes from $LAST_SYNC_COMMIT to $CURRENT_TOP_COMMIT"  > /dev/null 2>&1
+    git commit -m "Revert $SUBTREE changes from $LAST_SYNC_COMMIT to $CURRENT_TOP_COMMIT"  > /dev/null 2>&1
     # revert the commit we just did so we can build a single patch with all of the edits we have done
     git revert HEAD --no-edit > /dev/null 2>&1
     # commit the revert
-    git commit --amend -m "Reapply PLDM subtree changes made from $LAST_SYNC_COMMIT to $CURRENT_TOP_COMMIT"  > /dev/null 2>&1
+    git commit --amend -m "Reapply $SUBTREE subtree changes made from $LAST_SYNC_COMMIT to $CURRENT_TOP_COMMIT"  > /dev/null 2>&1
     # generate a patch of the revert, this patch will allow us to reapply all of
-    # the downstream edits after syncing to latest openbmc/pldm
+    # the downstream edits after syncing to latest openbmc/subtree
     git format-patch HEAD~1
     # reset back to the state prior to the temporary commit we created above
     git reset HEAD~2 --hard
 fi
 
 echo "Updating subtree with changes from remote.."
-# add the bmc-pldm remote repository
-git remote add bmc-pldm  https://github.com/openbmc/pldm.git > /dev/null 2>&1
-# update the bmc-pldm remote repository
-git fetch bmc-pldm > /dev/null 2>&1
+# add the bmc-subtree remote repository
+git remote add bmc-$SUBTREE  https://github.com/openbmc/$SUBTREE.git > /dev/null 2>&1
+# update the bmc-subtree remote repository
+git fetch bmc-$SUBTREE > /dev/null 2>&1
 # we will put the top level commit from the BMC repo in the commit message of the subtree update commit
-BMC_PLDM_TOP_COMMIT=`git rev-parse --short bmc-pldm/master`
-# Forcefully subtree update to the latest openbmc/pldm master branch, discard all local changes
-git merge --squash -s recursive -Xsubtree=src/subtree/openbmc/pldm -Xtheirs bmc-pldm/master > /dev/null 2>&1
+BMC_SUBTREE_TOP_COMMIT=`git rev-parse --short bmc-$SUBTREE/master`
+# Forcefully subtree update to the latest openbmc/subtree master branch, discard all local changes
+git merge --squash -s recursive -Xsubtree=src/subtree/openbmc/$SUBTREE -Xtheirs bmc-$SUBTREE/master > /dev/null 2>&1
+# If there are still merge conflicts because git thinks 'both' parties have added the
+# file, explicitly checkout 'our' version of the file(s) and then add the files.
+git status | grep both | awk '{print $4}' | xargs git checkout --ours
+git status | grep both | awk '{print $4}' | xargs git add
+
 # Create a commit with the changes generated from the merge
-git commit -m "Update to latest openbmc/pldm commit $BMC_PLDM_TOP_COMMIT" > /dev/null 2>&1
+git commit -m "Update to latest openbmc/$SUBTREE commit $BMC_SUBTREE_TOP_COMMIT" > /dev/null 2>&1
 
 # store the new sync commit which will be used to update src/subtree/latest_commit_sync
 NEW_SYNC_CHANGE_ID=`git log -1 | grep "Change-Id" | awk '{print $2}'`
@@ -146,11 +164,11 @@ NEW_SYNC_CHANGE_ID=`git log -1 | grep "Change-Id" | awk '{print $2}'`
 if [ $diff_found -eq 1 ]; then
   echo "Attempting to apply changes found earlier"
   # do a 3 way merge
-  git am -3 0001-Reapply-PLDM-subtree-changes-made-from-*
+  git am -3 0001-Reapply-$SUBTREE-subtree-changes-made-from-*
 fi
 
 echo "Updating src/subtree/latest/commit_sync .."
-sed -i "s/pldm $LAST_SYNC_CHANGE_ID/pldm $NEW_SYNC_CHANGE_ID/g" src/subtree/latest_commit_sync
+sed -i "s/$SUBTREE $LAST_SYNC_CHANGE_ID/$SUBTREE $NEW_SYNC_CHANGE_ID/g" src/subtree/latest_commit_sync
 git add src/subtree/latest_commit_sync
 
 # If the git am ran clean then we need to amend the latest_commit_sync changes
@@ -167,4 +185,4 @@ if [ "$PUSH_COMMITS" == "1" ]; then
 fi
 
 #cleanup patch
-rm 0001-Reapply-PLDM-subtree-changes-made-from-*
+rm 0001-Reapply-$SUBTREE-subtree-changes-made-from-*
