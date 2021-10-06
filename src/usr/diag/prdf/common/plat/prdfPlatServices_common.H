@@ -257,6 +257,15 @@ template <TARGETING::TYPE>
 void getDimmDqAttr( TARGETING::TargetHandle_t i_target,
                     uint8_t (&io_dqMapPtr)[DQS_PER_DIMM] );
 
+/**
+ * @brief  Queries the ATTR_MEM_EFF_HYBRID and ATTR_MEM_EFF_HYBRID_MEMORY_TYPE
+ *         attributes to determine if a DIMM is an MDS DDIMM.
+ * @param  i_target Target DIMM/OCMB.
+ * @return True if the target is an MDS DDIMM, false otherwise.
+ */
+template<TARGETING::TYPE T>
+bool isMdsDimm( TARGETING::TargetHandle_t i_target );
+
 //##############################################################################
 //##                         TOD functions
 //##############################################################################

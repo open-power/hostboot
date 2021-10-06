@@ -319,6 +319,71 @@ void getDimmDqAttr<TYPE_OCMB_CHIP>( TargetHandle_t i_target,
 //------------------------------------------------------------------------------
 
 template<>
+bool isMdsDimm<TYPE_DIMM>( TARGETING::TargetHandle_t i_dimm )
+{
+    #define PRDF_FUNC "[PlatServices::isMdsDimm<TYPE_DIMM>] "
+
+    PRDF_ASSERT( nullptr != i_dimm );
+    PRDF_ASSERT( TYPE_DIMM == getTargetType(i_dimm) );
+
+    bool o_mds = false;
+
+    // Get the parent MEM_PORT target to read the attributes from
+    TargetHandle_t memPort = getConnectedParent( i_dimm, TYPE_MEM_PORT );
+
+    // Get the MEM_EFF_HYBRID attribute
+    uint8_t hybrid[MAX_DIMM_PER_PORT];
+    if ( !memPort->tryGetAttr<ATTR_MEM_EFF_HYBRID>(hybrid) )
+    {
+        PRDF_ERR( PRDF_FUNC "tryGetAttr<ATTR_MEM_EFF_HYBRID>() failed for "
+                  "target 0x%08x", getHuid(memPort) );
+        PRDF_ASSERT( false );
+    }
+
+    // Get the MEM_EFF_HYBRID_MEMORY_TYPE attribute
+    uint8_t memType[MAX_DIMM_PER_PORT];
+    if ( !memPort->tryGetAttr<ATTR_MEM_EFF_HYBRID_MEMORY_TYPE>(memType) )
+    {
+        PRDF_ERR( PRDF_FUNC "tryGetAttr<ATTR_MEM_EFF_HYBRID_MEMORY_TYPE>() "
+                  "failed for target 0x%08x", getHuid(memPort) );
+        PRDF_ASSERT( false );
+    }
+
+    // Get the dimm position relative to the MEM_PORT
+    uint8_t dimmPos = getTargetPosition(i_dimm) % MAX_DIMM_PER_PORT;
+
+    // If the attributes indicate we have hybrid memory and the memory type
+    // is MDS, then we have MDS DDIMMs connected
+    if ( hybrid[dimmPos]  == fapi2::ENUM_ATTR_MEM_EFF_HYBRID_IS_HYBRID &&
+         memType[dimmPos] == fapi2::ENUM_ATTR_MEM_EFF_HYBRID_MEMORY_TYPE_MDS )
+    {
+        o_mds = true;
+    }
+
+    return o_mds;
+
+    #undef PRDF_FUNC
+}
+
+template<>
+bool isMdsDimm<TYPE_OCMB_CHIP>( TARGETING::TargetHandle_t i_ocmb )
+{
+    #define PRDF_FUNC "[PlatServices::isMdsDimm<TYPE_OCMB_CHIP>] "
+
+    PRDF_ASSERT( nullptr != i_ocmb );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == getTargetType(i_ocmb) );
+
+    // Get a child DIMM to check
+    TargetHandle_t dimm = getConnectedChild( i_ocmb, TYPE_DIMM, 0 );
+
+    return isMdsDimm<TYPE_DIMM>(dimm);
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
 int32_t mssGetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
                                         const MemRank & i_rank,
                                         MemSymbol & o_spare0,
