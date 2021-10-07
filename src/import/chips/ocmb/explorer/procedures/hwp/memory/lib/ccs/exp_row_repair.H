@@ -155,7 +155,7 @@ fapi2::ReturnCode log_repairs_disabled_errors(const fapi2::Target<fapi2::TARGET_
         const mss::row_repair::repair_entry<mss::mc_type::EXPLORER>& i_repair);
 
 ///
-/// @brief Perform a PPR row repair operation
+/// @brief Perform a sPPR row repair operation
 /// @param[in] i_rank_info rank info of the address to repair
 /// @param[in] i_repair the address repair information
 /// @param[in] i_dram_bitmap bitmap of DRAMs selected for repair (b'1 to repair, b'0 to not repair)
@@ -168,6 +168,34 @@ fapi2::ReturnCode setup_sppr( const mss::rank::info<mss::mc_type::EXPLORER>& i_r
                               mss::ccs::program& io_program);
 
 ///
+/// @brief Perform a hPPR row repair operation, part 1
+/// @param[in] i_rank_info rank info of the address to repair
+/// @param[in] i_repair the address repair information
+/// @param[in] i_dram_bitmap bitmap of DRAMs selected for repair (b'1 to repair, b'0 to not repair)
+/// @param[in, out] io_program the ccs program to setup for row repair
+/// @return FAPI2_RC_SUCCESS iff successful
+/// @note hPPR has to be done in two steps because it requires a 1-second delay to execute the repair
+///
+fapi2::ReturnCode setup_hppr_pre_delay( const mss::rank::info<mss::mc_type::EXPLORER>& i_rank_info,
+                                        const mss::row_repair::repair_entry<mss::mc_type::EXPLORER>& i_repair,
+                                        const fapi2::buffer<uint64_t>& i_dram_bitmap,
+                                        mss::ccs::program& io_program);
+
+///
+/// @brief Perform a hPPR row repair operation, part 2
+/// @param[in] i_rank_info rank info of the address to repair
+/// @param[in] i_repair the address repair information
+/// @param[in] i_dram_bitmap bitmap of DRAMs selected for repair (b'1 to repair, b'0 to not repair)
+/// @param[in, out] io_program the ccs program to setup for row repair
+/// @return FAPI2_RC_SUCCESS iff successful
+/// @note hPPR has to be done in two steps because it requires a 1-second delay to execute the repair
+///
+fapi2::ReturnCode setup_hppr_post_delay( const mss::rank::info<mss::mc_type::EXPLORER>& i_rank_info,
+        const mss::row_repair::repair_entry<mss::mc_type::EXPLORER>& i_repair,
+        const fapi2::buffer<uint64_t>& i_dram_bitmap,
+        mss::ccs::program& io_program);
+
+///
 /// @brief Perform a sPPR row repair operation during ipl
 /// @param[in] i_rank_info rank info of the address to repair
 /// @param[in] i_repair the address repair information
@@ -178,6 +206,16 @@ fapi2::ReturnCode maint_row_repair( const mss::rank::info<mss::mc_type::EXPLORER
                                     const mss::row_repair::repair_entry<mss::mc_type::EXPLORER>& i_repair,
                                     const fapi2::buffer<uint64_t>& i_dram_bitmap);
 
+///
+/// @brief Perform a hPPR row repair operation during ipl
+/// @param[in] i_rank_info rank info of the address to repair
+/// @param[in] i_repair the address repair information
+/// @param[in] i_dram_bitmap bitmap of DRAMs selected for repair (b'1 to repair, b'0 to not repair)
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode hppr_row_repair( const mss::rank::info<mss::mc_type::EXPLORER>& i_rank_info,
+                                   const mss::row_repair::repair_entry<mss::mc_type::EXPLORER>& i_repair,
+                                   const fapi2::buffer<uint64_t>& i_dram_bitmap);
 
 ///
 /// @brief Helper that adds power down disable for dynamic row repair

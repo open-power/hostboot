@@ -386,7 +386,7 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Perform a PPR row repair operation
+/// @brief Perform a sPPR row repair operation
 /// @param[in] i_rank_info rank info of the address to repair
 /// @param[in] i_repair the address repair information
 /// @param[in] i_dram_bitmap bitmap of DRAMs selected for repair (b'1 to repair, b'0 to not repair)
@@ -401,10 +401,12 @@ fapi2::ReturnCode setup_sppr( const mss::rank::info<mss::mc_type::EXPLORER>& i_r
     using TT = mrsTraits<mss::mc_type::EXPLORER>;
     constexpr size_t ENABLE_SPPR = 1;
     constexpr size_t NO_DELAY = 0;
+    // Delay for PRE command
+    constexpr uint64_t PRE_DELAY = 0;
+    // Repeat value for ODT command
+    constexpr uint64_t ODT_REPEAT = 4;
 
     // Variable Declarations
-    uint64_t l_delay = 0;
-    uint64_t l_repeat = 0;
     uint64_t l_freq = 0;
     uint8_t l_odt_bits = 0;
     mss::states l_invert = mss::states::OFF;
@@ -503,15 +505,14 @@ fapi2::ReturnCode setup_sppr( const mss::rank::info<mss::mc_type::EXPLORER>& i_r
     FAPI_TRY( mss::ccs::process_inst<mss::mc_type::EXPLORER>(i_rank_info, NO_DELAY, l_inst, io_program.iv_instructions) );
 
     // 6. Add odt command
-    l_repeat = 4;
     l_inst = mss::ccs::odt_command(l_odt_bits);
-    mss::ccs::set_wr_repeats<mss::mc_type::EXPLORER>(l_repeat, l_inst);
+    mss::ccs::set_wr_repeats<mss::mc_type::EXPLORER>(ODT_REPEAT, l_inst);
     FAPI_TRY( mss::ccs::process_inst<mss::mc_type::EXPLORER>(i_rank_info, tWR, l_inst, io_program.iv_instructions) );
 
     // 7. PRE to Bank (and wait at least 20ns to register)
     // Currently waiting tWR for debug
     l_inst = mss::ccs::pre_load<mss::mc_type::EXPLORER>(i_rank_info, i_repair.iv_bank, i_repair.iv_bg, i_repair.iv_srank,
-             l_delay);
+             PRE_DELAY);
     FAPI_TRY( mss::ccs::process_inst<mss::mc_type::EXPLORER>(i_rank_info, tWR, l_inst, io_program.iv_instructions) );
 
     // 8. Set MR4 bit "A5=0" to exit sPPR
@@ -519,6 +520,200 @@ fapi2::ReturnCode setup_sppr( const mss::rank::info<mss::mc_type::EXPLORER>& i_r
     FAPI_TRY( mss::mrs_engine(l_dimm_target, l_data4, l_port_rank, tMOD, io_program.iv_instructions),
               "Failed to setup mrs engine on rank %d on %s",
               l_dimm_rank, mss::c_str(l_dimm_target) );
+
+    // Add des command
+    l_inst = mss::ccs::des_command();
+    FAPI_TRY( mss::ccs::process_inst<mss::mc_type::EXPLORER>(i_rank_info, tMOD, l_inst, io_program.iv_instructions) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform a hPPR row repair operation, part 1
+/// @param[in] i_rank_info rank info of the address to repair
+/// @param[in] i_repair the address repair information
+/// @param[in] i_dram_bitmap bitmap of DRAMs selected for repair (b'1 to repair, b'0 to not repair)
+/// @param[in, out] io_program the ccs program to setup for row repair
+/// @return FAPI2_RC_SUCCESS iff successful
+/// @note hPPR has to be done in two steps because it requires a 1-second delay to execute the repair
+///
+fapi2::ReturnCode setup_hppr_pre_delay( const mss::rank::info<mss::mc_type::EXPLORER>& i_rank_info,
+                                        const mss::row_repair::repair_entry<mss::mc_type::EXPLORER>& i_repair,
+                                        const fapi2::buffer<uint64_t>& i_dram_bitmap,
+                                        mss::ccs::program& io_program)
+{
+    using TT = mrsTraits<mss::mc_type::EXPLORER>;
+    constexpr size_t ENABLE_HPPR = 1;
+    constexpr size_t NO_DELAY = 0;
+    // Repeat value for ODT command
+    constexpr uint64_t ODT_REPEAT = 4;
+
+    // Variable Declarations
+    uint8_t l_odt_bits = 0;
+    mss::states l_invert = mss::states::OFF;
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+    uint8_t l_odt_attr[4] = {0};
+
+    // Use rank to determine ranks and targets
+    // Get port rank and target
+    const auto l_port_target = i_rank_info.get_port_target();
+    const auto l_port_rank = i_rank_info.get_port_rank();
+
+    // Get dimm rank and target
+    const auto l_dimm_target = i_rank_info.get_dimm_target();
+    const auto l_dimm_rank = i_rank_info.get_dimm_rank();
+
+    // Declare timings
+    const uint64_t tMOD = TT::mrs_tmod( l_port_target );
+    uint8_t tRCD = 0;
+    uint8_t tWR = 255;
+
+    // Create local instruction
+    mss::ccs::instruction_t l_inst;
+
+    // Initialize MRS data:
+    mss::ddr4::mrs04_data<mss::mc_type::EXPLORER> l_data4(l_dimm_target, l_rc);
+    FAPI_TRY(l_rc, "Failed initializing MRS04 Data on %s", mss::c_str(l_dimm_target));
+
+    // Get timing from API and attributes
+    FAPI_TRY( mss::attr::get_dram_trcd(l_port_target, tRCD) );
+
+    // Get ODT bits for ccs
+    FAPI_TRY( mss::attr::get_si_odt_wr(l_dimm_target, l_odt_attr) );
+    FAPI_TRY( mss::ccs::convert_odt_attr_to_ccs(l_odt_attr[l_dimm_rank], l_port_target, l_odt_bits),
+              "Failed odt to ccs conversion on port rank %d on port %s",
+              l_port_rank, mss::c_str(l_port_target));
+
+    //-------------------------------
+    // hPPR COMMAND:
+    //-------------------------------
+
+    // 0. Add des command for Self Time Refresh
+    l_inst = mss::ccs::des_command();
+    FAPI_TRY( mss::ccs::process_inst<mss::mc_type::EXPLORER>(i_rank_info, tMOD, l_inst, io_program.iv_instructions) );
+
+    // 1. Precharge_all(): Create instruction for precharge and add it to the instruction array.
+    l_inst = mss::ccs::init_pre_load<mss::mc_type::EXPLORER>(i_rank_info, i_repair.iv_srank);
+    FAPI_TRY( mss::ccs::process_inst<mss::mc_type::EXPLORER>(i_rank_info, tRCD, l_inst, io_program.iv_instructions) );
+
+    FAPI_MFG( "Running srank fix on dimm %s with srank %d", mss::c_str(l_dimm_target), i_repair.iv_srank );
+
+    // 2. Enable hPPR and wait tMOD:
+    l_data4.iv_ppr = ENABLE_HPPR;
+    FAPI_TRY(mss::mrs_engine( l_dimm_target, l_data4, l_port_rank, tMOD, io_program.iv_instructions),
+             "Failed to setup mrs engine on dimm rank %d on dimm %s",
+             l_dimm_rank, mss::c_str(l_dimm_target) );
+
+    // 3. Guard Key Sequence:
+    FAPI_TRY( add_sppr_guardkey(i_rank_info, tMOD, GUARDKEY_SEQ_ONE,
+                                io_program.iv_instructions),
+              "Failed to setup guard key seq one for dimm rank %d on dimm %s",
+              l_dimm_rank, mss::c_str(l_dimm_target) );
+    FAPI_TRY( add_sppr_guardkey(i_rank_info, tMOD, GUARDKEY_SEQ_TWO,
+                                io_program.iv_instructions),
+              "Failed to setup guard key seq two for dimm rank %d on dimm %s",
+              l_dimm_rank, mss::c_str(l_dimm_target) );
+    FAPI_TRY( add_sppr_guardkey(i_rank_info, tMOD, GUARDKEY_SEQ_THREE,
+                                io_program.iv_instructions),
+              "Failed to setup guard key seq three for dimm rank %d on dimm %s",
+              l_dimm_rank, mss::c_str(l_dimm_target) );
+    FAPI_TRY( add_sppr_guardkey(i_rank_info, tMOD, GUARDKEY_SEQ_FOUR,
+                                io_program.iv_instructions),
+              "Failed to setup guard key seq four for dimm rank %d on dimm %s",
+              l_dimm_rank, mss::c_str(l_dimm_target) );
+
+    // 4. ACT to failed bank/address
+    l_inst = mss::ccs::act_load<mss::mc_type::EXPLORER>(i_rank_info, i_repair.iv_bank, i_repair.iv_bg,
+             i_repair.iv_row, i_repair.iv_srank, tRCD);
+    FAPI_TRY( mss::ccs::process_inst<mss::mc_type::EXPLORER>(i_rank_info, tRCD, l_inst, io_program.iv_instructions) );
+
+    // 5. WR Command with dq bits low:
+    l_inst = mss::ccs::wr_load<mss::mc_type::EXPLORER>(i_rank_info, i_repair.iv_bank, i_repair.iv_bg, i_repair.iv_srank,
+             NO_DELAY);
+    // Check for data inversion and invert data if on
+    FAPI_TRY( mss::exp::ccs::process_inversion(l_port_target, l_invert) );
+    mss::exp::ccs::set_write_data(i_dram_bitmap, l_invert, l_inst);
+    // Set ODT Bits on WR command
+    mss::ccs::set_odt_bits<mss::mc_type::EXPLORER>(l_odt_bits, l_inst);
+    FAPI_TRY( mss::ccs::process_inst<mss::mc_type::EXPLORER>(i_rank_info, NO_DELAY, l_inst, io_program.iv_instructions) );
+
+    // 6. Add odt command
+    l_inst = mss::ccs::odt_command(l_odt_bits);
+    mss::ccs::set_wr_repeats<mss::mc_type::EXPLORER>(ODT_REPEAT, l_inst);
+    FAPI_TRY( mss::ccs::process_inst<mss::mc_type::EXPLORER>(i_rank_info, tWR, l_inst, io_program.iv_instructions) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform a hPPR row repair operation, part 2
+/// @param[in] i_rank_info rank info of the address to repair
+/// @param[in] i_repair the address repair information
+/// @param[in] i_dram_bitmap bitmap of DRAMs selected for repair (b'1 to repair, b'0 to not repair)
+/// @param[in, out] io_program the ccs program to setup for row repair
+/// @return FAPI2_RC_SUCCESS iff successful
+/// @note hPPR has to be done in two steps because it requires a 1-second delay to execute the repair
+///
+fapi2::ReturnCode setup_hppr_post_delay( const mss::rank::info<mss::mc_type::EXPLORER>& i_rank_info,
+        const mss::row_repair::repair_entry<mss::mc_type::EXPLORER>& i_repair,
+        const fapi2::buffer<uint64_t>& i_dram_bitmap,
+        mss::ccs::program& io_program)
+{
+    using TT = mrsTraits<mss::mc_type::EXPLORER>;
+
+    // delay for PRE command
+    constexpr uint64_t PRE_DELAY = 0;
+    // delay at the end of the program (used twice to get 128K idles)
+    constexpr uint64_t FINAL_DELAY = 0xFFFF;
+
+    // Variable Declarations
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+
+    // Use rank to determine ranks and targets
+    // Get port rank and target
+    const auto l_port_target = i_rank_info.get_port_target();
+    const auto l_port_rank = i_rank_info.get_port_rank();
+
+    // Get dimm rank and target
+    const auto l_dimm_target = i_rank_info.get_dimm_target();
+    const auto l_dimm_rank = i_rank_info.get_dimm_rank();
+
+    // Declare timings
+    const uint64_t tMOD = TT::mrs_tmod( l_port_target );
+    uint8_t tWR = 255;
+
+    // Create local instruction
+    mss::ccs::instruction_t l_inst;
+
+    // Initialize MRS data:
+    mss::ddr4::mrs04_data<mss::mc_type::EXPLORER> l_data4(l_dimm_target, l_rc);
+    FAPI_TRY(l_rc, "Failed initializing MRS04 Data on %s", mss::c_str(l_dimm_target));
+
+    //-------------------------------
+    // hPPR COMMAND:
+    //-------------------------------
+
+    // 7. PRE to Bank (and wait at least 20ns to register)
+    // Currently waiting tWR for debug
+    l_inst = mss::ccs::pre_load<mss::mc_type::EXPLORER>(i_rank_info, i_repair.iv_bank, i_repair.iv_bg, i_repair.iv_srank,
+             PRE_DELAY);
+    FAPI_TRY( mss::ccs::process_inst<mss::mc_type::EXPLORER>(i_rank_info, tWR, l_inst, io_program.iv_instructions) );
+
+    // 8. Set MR4 bit "A13=0" to exit sPPR
+    l_data4.iv_ppr = 0;
+    FAPI_TRY( mss::mrs_engine(l_dimm_target, l_data4, l_port_rank, tMOD, io_program.iv_instructions),
+              "Failed to setup mrs engine on rank %d on %s",
+              l_dimm_rank, mss::c_str(l_dimm_target) );
+
+    // Add 2 64k cycle idles to prevent the controller from sending any other commands before hPPR is done
+    l_inst = mss::ccs::des_command();
+    FAPI_TRY( mss::ccs::process_inst<mss::mc_type::EXPLORER>(i_rank_info, FINAL_DELAY, l_inst,
+              io_program.iv_instructions) );
+    l_inst = mss::ccs::des_command();
+    FAPI_TRY( mss::ccs::process_inst<mss::mc_type::EXPLORER>(i_rank_info, FINAL_DELAY, l_inst,
+              io_program.iv_instructions) );
 
     // Add des command
     l_inst = mss::ccs::des_command();
@@ -562,6 +757,64 @@ fapi2::ReturnCode maint_row_repair( const mss::rank::info<mss::mc_type::EXPLORER
     FAPI_TRY( mss::row_repair::config_ccs_regs<mss::mc_type::EXPLORER>(l_ocmb_target, l_port_target, l_modeq_reg) );
     FAPI_TRY( mss::ccs::execute(l_ocmb_target, l_program, l_port_target) );
     FAPI_TRY( mss::row_repair::revert_config_regs<mss::mc_type::EXPLORER>(l_ocmb_target, l_port_target, l_modeq_reg) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform a hPPR row repair operation during ipl
+/// @param[in] i_rank_info rank info of the address to repair
+/// @param[in] i_repair the address repair information
+/// @param[in] i_dram_bitmap bitmap of DRAMs selected for repair (b'1 to repair, b'0 to not repair)
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode hppr_row_repair( const mss::rank::info<mss::mc_type::EXPLORER>& i_rank_info,
+                                   const mss::row_repair::repair_entry<mss::mc_type::EXPLORER>& i_repair,
+                                   const fapi2::buffer<uint64_t>& i_dram_bitmap)
+{
+    fapi2::buffer<uint64_t> l_modeq_reg;
+
+    // Get port rank and target
+    const auto l_port_target = i_rank_info.get_port_target();
+
+    // Get OCMB Target
+    const auto l_ocmb_target = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(l_port_target);
+
+    // Create Program
+    mss::ccs::program l_program;
+
+    // Turn off refresh
+    FAPI_TRY(mss::change_refresh_enable<mss::mc_type::EXPLORER>(l_port_target, mss::states::LOW));
+
+    // Setup HPPR CCS program, part 1
+    FAPI_TRY( setup_hppr_pre_delay(i_rank_info, i_repair, i_dram_bitmap, l_program),
+              "Failed hppr program setup, part 1 for hppr_row_repair on %s",
+              mss::c_str(l_port_target) );
+
+    FAPI_INF("%s Deploying hPPR row repair", mss::c_str(l_ocmb_target));
+
+    // EXECUTE CCS ARRAY
+    FAPI_TRY( mss::row_repair::config_ccs_regs<mss::mc_type::EXPLORER>(l_ocmb_target, l_port_target, l_modeq_reg) );
+    FAPI_TRY( mss::ccs::execute(l_ocmb_target, l_program, l_port_target) );
+
+    // Delay for tPGM (1 second for x4 and x8 DIMMs - setting to 2 seconds for further safety)
+    FAPI_TRY(fapi2::delay(2 * mss::DELAY_1S, 200));
+
+    // Setup HPPR CCS program, part 2
+    l_program.iv_instructions.clear();
+    FAPI_TRY( setup_hppr_post_delay(i_rank_info, i_repair, i_dram_bitmap, l_program),
+              "Failed hppr program setup, part 1 for hppr_row_repair on %s",
+              mss::c_str(l_port_target) );
+
+    FAPI_INF("%s Deploying hPPR row repair, part 2 (post tPGM delay)", mss::c_str(l_ocmb_target));
+
+    // EXECUTE CCS ARRAY
+    FAPI_TRY( mss::ccs::execute(l_ocmb_target, l_program, l_port_target) );
+    FAPI_TRY( mss::row_repair::revert_config_regs<mss::mc_type::EXPLORER>(l_ocmb_target, l_port_target, l_modeq_reg) );
+
+    // Turn refresh back on
+    FAPI_TRY(mss::change_refresh_enable<mss::mc_type::EXPLORER>(l_port_target, mss::states::HIGH));
 
 fapi_try_exit:
     return fapi2::current_err;
