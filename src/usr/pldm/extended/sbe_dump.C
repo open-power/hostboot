@@ -88,9 +88,9 @@ effecter_id_t getSbeDumpEffecterId(const Target* const i_proc)
     return effecter_id;
 }
 
-errlHndl_t PLDM::dumpSbe(Target* const i_proc, const errlHndl_t i_errorlog)
+errlHndl_t PLDM::dumpSbe(Target* const i_proc, const uint32_t i_plid)
 {
-    PLDM_ENTER("dumpSbe(0x%08x, 0x%08x)", get_huid(i_proc), ERRL_GETPLID_SAFE(i_errorlog));
+    PLDM_ENTER("dumpSbe(0x%08x, 0x%08x)", get_huid(i_proc), i_plid);
 
     errlHndl_t errl = nullptr;
 
@@ -146,9 +146,7 @@ errlHndl_t PLDM::dumpSbe(Target* const i_proc, const errlHndl_t i_errorlog)
     const uint32_t MSG = 0xd05be;
     thePdrManager().registerStateEffecterCallbackMsgQ(dump_complete_effecter, 0, msgQ.get(), MSG);
 
-    const uint32_t plid = ERRL_GETPLID_SAFE(i_errorlog);
-
-    errl = sendSetNumericEffecterValueRequest(sbe_dump_effecter, plid, sizeof(plid));
+    errl = sendSetNumericEffecterValueRequest(sbe_dump_effecter, i_plid, sizeof(i_plid));
 
     if (errl)
     {
@@ -173,52 +171,33 @@ errlHndl_t PLDM::dumpSbe(Target* const i_proc, const errlHndl_t i_errorlog)
     thePdrManager().unregisterStateEffecterCallbackMsgQ(dump_complete_effecter, 0, msgQ.get());
 
     const auto respond_to_msg =
-        [&msgQ, i_errorlog, i_proc, dump_complete_effecter](const bool prev_completed, msg_t* const msg)
-    {
-        bool this_completed = false;
+        [&](const bool prev_completed, msg_t* const msg)
+        {
+            bool this_completed = false;
 
-        // @TODO RTC 247294: Remove this and use libpldm constants
-        enum ibm_oem_pldm_state_set_sbe_dump_state_values {
-            SBE_DUMP_COMPLETED = 0x1,
-            SBE_RETRY_REQUIRED = 0x2,
+            // @TODO RTC 247294: Remove this and use libpldm constants
+            enum ibm_oem_pldm_state_set_sbe_dump_state_values {
+                SBE_DUMP_COMPLETED = 0x1,
+                SBE_RETRY_REQUIRED = 0x2,
+            };
+
+            // The static handler for this effecter will take care of the
+            // SBE_RETRY_REQUIRED case
+            if (msg->data[1] == SBE_DUMP_COMPLETED)
+            {
+                this_completed = true;
+            }
+
+            msg->data[0] = PLDM_SUCCESS;
+            const int rc = msg_respond(msgQ.get(), msg);
+
+            assert(rc == 0,
+                   "dumpSbe: msg_respond failed: rc = %d, plid = 0x%08x, proc huid = 0x%08x, "
+                   "dump_complete_effecter = %d",
+                   rc, i_plid, get_huid(i_proc), dump_complete_effecter);
+
+            return this_completed || prev_completed;
         };
-
-        // The static handler for this effecter will take care of the
-        // SBE_RETRY_REQUIRED case
-        if (msg->data[1] == SBE_DUMP_COMPLETED)
-        {
-            this_completed = true;
-        }
-
-        msg->data[0] = PLDM_SUCCESS;
-        const int rc = msg_respond(msgQ.get(), msg);
-
-        if (rc != 0)
-        {
-            /*@
-             * @errortype
-             * @severity         ERRL_SEV_UNRECOVERABLE
-             * @moduleid         MOD_SBE_DUMP
-             * @reasoncode       RC_SEND_FAIL
-             * @userdata1[0:31]  Return code from msg_respond
-             * @userdata1[32:63] PLID of error log that triggered SBE dump
-             * @userdata2[0:31]  HUID of processor with faulty SBE
-             * @userdata2[32:63] PLDM effecter ID of dump-complete effecter
-             * @devdesc          msg_respond() failed
-             * @custdesc         Firmware error during system boot
-             */
-            errlHndl_t err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                           MOD_SBE_DUMP,
-                                           RC_SEND_FAIL,
-                                           TWO_UINT32_TO_UINT64(rc, ERRL_GETPLID_SAFE(i_errorlog)),
-                                           TWO_UINT32_TO_UINT64(get_huid(i_proc),
-                                                                dump_complete_effecter),
-                                           ErrlEntry::ADD_SW_CALLOUT);
-            errlCommit(err, PLDM_COMP_ID);
-        }
-
-        return this_completed || prev_completed;
-    };
 
     bool dump_completed = false;
 
@@ -266,7 +245,7 @@ errlHndl_t PLDM::dumpSbe(Target* const i_proc, const errlHndl_t i_errorlog)
     } while (false);
 
     PLDM_EXIT("dumpSbe(0x%08x, 0x%08x) = 0x%08x",
-              get_huid(i_proc), ERRL_GETPLID_SAFE(i_errorlog), ERRL_GETPLID_SAFE(errl));
+              get_huid(i_proc), i_plid, ERRL_GETPLID_SAFE(errl));
 
     return errl;
 }

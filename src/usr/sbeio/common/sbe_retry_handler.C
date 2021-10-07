@@ -79,7 +79,7 @@
 #include <set_sbe_error.H>
 
 // PLDM
-#if defined(__HOSTBOOT_RUNTIME) && defined(CONFIG_PLDM)
+#if defined(CONFIG_PLDM)
 #include <pldm/extended/sbe_dump.H>
 #endif
 
@@ -215,6 +215,19 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
             // Call the function that runs extract_rc, this needs to run to determine
             // what broke and what our retry action should be
             this->sbe_run_extract_rc();
+
+#if !defined(__HOSTBOOT_RUNTIME) && defined(CONFIG_PLDM)
+            errlHndl_t dump_errl = PLDM::dumpSbe(iv_proc, iv_masterErrorLogPLID);
+
+            if (dump_errl)
+            {
+                SBE_TRACF("main_sbe_handler(1): SBE dump failed for processor 0x%08x, PLID 0x%08x",
+                          get_huid(iv_proc), iv_masterErrorLogPLID);
+                dump_errl->collectTrace("ISTEPS_TRACE");
+                dump_errl->collectTrace(SBEIO_COMP_NAME);
+                errlCommit(dump_errl, SBEIO_COMP_ID);
+            }
+#endif
         }
         // If we have determined that the sbe never booted
         // then set the current action to be "restart sbe"
@@ -748,6 +761,19 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
             if ((this->iv_sbeRegister.currState != SBE_STATE_RUNTIME) && (this->iv_sbeRegister.sbeBooted))
             {
                 this->sbe_run_extract_rc();
+
+#if !defined(__HOSTBOOT_RUNTIME) && defined(CONFIG_PLDM)
+                errlHndl_t dump_errl = PLDM::dumpSbe(iv_proc, iv_masterErrorLogPLID);
+
+                if (dump_errl)
+                {
+                    SBE_TRACF("main_sbe_handler(2): SBE dump failed for processor 0x%08x, PLID 0x%08x",
+                              get_huid(iv_proc), iv_masterErrorLogPLID);
+                    dump_errl->collectTrace("ISTEPS_TRACE");
+                    dump_errl->collectTrace(SBEIO_COMP_NAME);
+                    errlCommit(dump_errl, SBEIO_COMP_ID);
+                }
+#endif
             }
 
         } while( (this->iv_sbeRegister).currState != SBE_STATE_RUNTIME );
