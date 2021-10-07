@@ -43,6 +43,7 @@
 #include <p10_io_omi_prbs.H>
 #include <mss_generic_system_attribute_getters.H>
 #include <mss_generic_attribute_getters.H>
+#include <explorer_scom_addresses.H>
 
 ///
 /// @brief Setup OMI for P10
@@ -70,6 +71,12 @@ fapi2::ReturnCode p10_omi_setup( const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i
 
     FAPI_TRY(mss::attr::get_is_apollo(l_is_apollo));
 
+
+    FAPI_TRY(mss::omi::setup_mc_cmn_config(i_target));
+
+    // Add 120ms delay before PRBS
+    FAPI_TRY( fapi2::delay( 120 * mss::DELAY_1MS, 200) );
+
     // Terminate downstream PRBS23 pattern
     if (l_is_apollo == fapi2::ENUM_ATTR_MSS_IS_APOLLO_FALSE)
     {
@@ -78,11 +85,6 @@ fapi2::ReturnCode p10_omi_setup( const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i
             FAPI_TRY(p10_io_omi_prbs(mss::find_target<fapi2::TARGET_TYPE_OMI>(l_omi_target), false));
         }
     }
-
-    FAPI_TRY(mss::omi::setup_mc_cmn_config(i_target));
-
-    // Add 120ms delay before PRBS
-    FAPI_TRY( fapi2::delay( 120 * mss::DELAY_1MS, 200) );
 
     // Two OMI per OMIC
     for (const auto& l_omi : mss::find_targets<fapi2::TARGET_TYPE_OMI>(i_target))
@@ -102,6 +104,7 @@ fapi2::ReturnCode p10_omi_setup( const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i
             FAPI_TRY(mss::omi::p10_omi_setup_prbs_helper(i_target, l_omi, l_ocmb));
         }
     }
+
 
 fapi_try_exit:
     return fapi2::current_err;

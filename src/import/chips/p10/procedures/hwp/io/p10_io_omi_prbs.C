@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,23 +65,52 @@ fapi2::ReturnCode p10_io_omi_prbs(
     {
         l_pattern_sel = 6; // PRBS23
         l_pattern_enable = 1;
+
+        // tx_pattern_sel = 6 (PRBS23), tx_ctl_cntl1_pg
+        auto l_omic_target = i_omi_target.getParent<fapi2::TARGET_TYPE_OMIC>();
+        FAPI_TRY(GET_CTL_REGS_TX_CNTL1_PG(l_omic_target, l_data));
+        SET_CTL_REGS_TX_CNTL1_PG_TX_PATTERN_SEL(l_pattern_sel, l_data);
+        FAPI_TRY(PUT_CTL_REGS_TX_CNTL1_PG(l_omic_target, l_data));
+
+
+        // tx_pattern_enable = 1, pl, tx_cntl3_pl
+        FAPI_TRY(p10_io_omi_put_pl_regs(i_omi_target,
+                                        TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL3_PL,
+                                        TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL3_PL_PATTERN_ENABLE,
+                                        1,
+                                        l_num_lanes,
+                                        l_pattern_enable));
+    }
+    else // OFF
+    {
+        // If we are turning PRBS OFF, we need to disable the lanes fist, then reset the pattern.
+        // - Otherwise, we will be driving stale data for a period of time.
+        // - If we have DLs observing this data, there is a chance that stale data could look like
+        //   a valid pattern.
+
+        // tx_pattern_sel = 1 (1010), tx_ctl_cntl1_pg
+        l_pattern_sel = 1;
+        auto l_omic_target = i_omi_target.getParent<fapi2::TARGET_TYPE_OMIC>();
+        FAPI_TRY(GET_CTL_REGS_TX_CNTL1_PG(l_omic_target, l_data));
+        SET_CTL_REGS_TX_CNTL1_PG_TX_PATTERN_SEL(l_pattern_sel, l_data);
+        FAPI_TRY(PUT_CTL_REGS_TX_CNTL1_PG(l_omic_target, l_data));
+
+        // tx_pattern_enable = 1, pl, tx_cntl3_pl
+        FAPI_TRY(p10_io_omi_put_pl_regs(i_omi_target,
+                                        TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL3_PL,
+                                        TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL3_PL_PATTERN_ENABLE,
+                                        1,
+                                        l_num_lanes,
+                                        l_pattern_enable));
+
+        // tx_pattern_sel = 6 (PRBS23), tx_ctl_cntl1_pg
+        l_pattern_sel = 0;
+        FAPI_TRY(GET_CTL_REGS_TX_CNTL1_PG(l_omic_target, l_data));
+        SET_CTL_REGS_TX_CNTL1_PG_TX_PATTERN_SEL(l_pattern_sel, l_data);
+        FAPI_TRY(PUT_CTL_REGS_TX_CNTL1_PG(l_omic_target, l_data));
     }
 
 
-    // tx_pattern_sel = 6 (PRBS23), tx_ctl_cntl1_pg
-    auto l_omic_target = i_omi_target.getParent<fapi2::TARGET_TYPE_OMIC>();
-    FAPI_TRY(GET_CTL_REGS_TX_CNTL1_PG(l_omic_target, l_data));
-    SET_CTL_REGS_TX_CNTL1_PG_TX_PATTERN_SEL(l_pattern_sel, l_data);
-    FAPI_TRY(PUT_CTL_REGS_TX_CNTL1_PG(l_omic_target, l_data));
-
-
-    // tx_pattern_enable = 1, pl, tx_cntl3_pl
-    FAPI_TRY(p10_io_omi_put_pl_regs(i_omi_target,
-                                    TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL3_PL,
-                                    TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL3_PL_PATTERN_ENABLE,
-                                    1,
-                                    l_num_lanes,
-                                    l_pattern_enable));
 
 fapi_try_exit:
     FAPI_DBG("End");
