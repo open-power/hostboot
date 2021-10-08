@@ -364,6 +364,22 @@ namespace PLDM
                                      std::vector<uint8_t>& io_attr_table,
                                      uint64_t i_maxPages);
 
+   /** @brief Retrieve the current value of the hb_ioadapter_enlarged_capacity
+    *         PLDM bios attribute and return the value converted
+    *         to a ATTR_ENLARGED_IO_SLOT_COUNT_type.
+    *
+    * @param[in,out] io_string_table     See brief at the top of this file.
+    * @param[in,out] io_attr_table       See brief at the top of this file.
+    * @param[out]    o_enlarged_capacity If no error occurs will contain the value
+    *                                    for hb_ioadapter_enlarged_capacity translated
+    *                                    to terms of ATTR_ENLARGED_IO_SLOT_COUNT_type.
+    *
+    * @return Error if any, otherwise nullptr.
+    */
+    errlHndl_t getEnlargedCapacity(std::vector<uint8_t>& io_string_table,
+                                   std::vector<uint8_t>& io_attr_table,
+                                   TARGETING::ATTR_ENLARGED_IO_SLOT_COUNT_type &o_enlarged_capacity);
+
 }
 
 #endif

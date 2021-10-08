@@ -70,6 +70,7 @@ const char PLDM_BIOS_HB_MFG_FLAGS_STRING[]                 = "hb_mfg_flags_curre
 const char PLDM_BIOS_HB_FIELD_CORE_OVERRIDE_STRING[]       = "hb_field_core_override_current";
 const char PLDM_BIOS_HB_USB_ENABLEMENT_STRING[]            = "hb_host_usb_enablement_current";
 const char PLDM_BIOS_HB_MAX_NUMBER_HUGE_PAGES_STRING[]     = "hb_max_number_huge_pages";
+const char PLDM_BIOS_HB_ENLARGED_CAPACITY_STRING[]         = "hb_ioadapter_enlarged_capacity_current";
 
 // When power limit values change, the effect on the OCCs is immediate, so we
 // always want the most recent values here.
@@ -2313,6 +2314,34 @@ errlHndl_t latchBiosAttrs(std::vector<uint8_t>& io_string_table,
     } while (false);
 
     PLDM_EXIT("latchBiosAttrs");
+
+    return errl;
+}
+
+errlHndl_t getEnlargedCapacity(
+        std::vector<uint8_t>& io_string_table,
+        std::vector<uint8_t>& io_attr_table,
+        TARGETING::ATTR_ENLARGED_IO_SLOT_COUNT_type &o_enlargedCapacity)
+{
+    errlHndl_t errl = nullptr;
+
+    do {
+
+    uint64_t l_attr_val = 0;
+    errl = systemIntAttrLookup(io_string_table,
+                               io_attr_table,
+                               PLDM_BIOS_HB_ENLARGED_CAPACITY_STRING,
+                               l_attr_val);
+    if(errl)
+    {
+        PLDM_ERR("getEnlargedCapacity() Failed to lookup value for %s",
+                 PLDM_BIOS_HB_ENLARGED_CAPACITY_STRING);
+        break;
+    }
+
+    o_enlargedCapacity =
+        static_cast<TARGETING::ATTR_ENLARGED_IO_SLOT_COUNT_type>(l_attr_val);
+    } while(0);
 
     return errl;
 }

@@ -42,6 +42,7 @@
 #include <pldm/pldm_errl.H>
 #include <targeting/common/mfgFlagAccessors.H>
 #include <targeting/common/targetservice.H>
+#include <targeting/targplatutil.H>
 #include <targeting/common/utilFilter.H>
 #include <trace/interface.H>
 
@@ -489,6 +490,44 @@ void parse_hb_host_usb_enablement(std::vector<uint8_t>& io_string_table,
                   "BIOS USB Enablement attribute %d and setting the attribute "
                   "ATTR_USB_SECURITY",
                   l_usbEnablement);
+    }
+    return;
+}
+
+void parse_hb_ioadapter_enlarged_capacity(std::vector<uint8_t>& io_string_table,
+                                          std::vector<uint8_t>& io_attr_table,
+                                          ISTEP_ERROR::IStepError & io_stepError)
+{
+    // Create a variable to hold the retrieved Enlarged Capacity value from the BMC BIOS
+    TARGETING::ATTR_ENLARGED_IO_SLOT_COUNT_type l_enlargedCapacity(0);
+
+    // Get the Enlarged Capacity from the BMC BIOS
+    errlHndl_t l_errl = PLDM::getEnlargedCapacity(io_string_table, io_attr_table,
+                                                  l_enlargedCapacity);
+
+    // Only need to update master node
+    TARGETING::Target* l_masterNode = nullptr;
+    TARGETING::UTIL::getMasterNodeTarget(l_masterNode);
+
+    if (unlikely(l_errl != nullptr))
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                  "parse_hb_ioadapter_enlarged_capacity(): An error occurred getting "
+                  "Enlarged Capacity from the BMC BIOS. Leaving the node "
+                  "attribute ATTR_ENLARGED_IO_SLOT_COUNT at its current value %d",
+                  l_masterNode->getAttr<ATTR_ENLARGED_IO_SLOT_COUNT>());
+        l_errl->collectTrace("ISTEPS_TRACE",256);
+        errlCommit( l_errl, ISTEP_COMP_ID );
+    }
+    else
+    {
+        // Set the node attribute ATTR_ENLARGED_IO_SLOT_COUNT to the retrieved value
+        l_masterNode->setAttr<ATTR_ENLARGED_IO_SLOT_COUNT>(l_enlargedCapacity);
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
+                  "parse_hb_ioadapter_enlarged_capacity(): Succeeded in getting the BMC "
+                  "BIOS Enlarged Capacity attribute %d and setting the attribute "
+                  "ATTR_ENLARGED_IO_SLOT_COUNT",
+                  l_enlargedCapacity);
     }
     return;
 }

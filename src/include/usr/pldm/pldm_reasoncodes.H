@@ -98,6 +98,7 @@ namespace PLDM
         MOD_SET_BIOS_ATTR_INTEGER_VALUE              = 0x39, // setBiosIntegerAttrValue
         MOD_HANDLE_SBE_HRESET_REQUEST                = 0x3A, // handleSbeHresetRequest
         MOD_HANDLE_SBE_HRESET_REQUEST_RT             = 0x3B, // handleSbeHresetRequest
+        MOD_GET_ENLARGED_CAPACITY                    = 0x3C, // getEnlargedCapacity
     };
 
     enum PLDMReasonCode
