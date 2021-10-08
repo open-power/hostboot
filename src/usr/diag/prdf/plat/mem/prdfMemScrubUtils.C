@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -210,6 +210,7 @@ uint32_t checkEccFirs<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         if ( rdffir->IsBitSet(29) ) o_eccAttns |= MAINT_TCE;
         if ( rdffir->IsBitSet(30) ) o_eccAttns |= MAINT_SCE;
         if ( rdffir->IsBitSet(31) ) o_eccAttns |= MAINT_MCE;
+        if ( rdffir->IsBitSet(32) ) o_eccAttns |= MAINT_SUE;
         if ( rdffir->IsBitSet(34) ) o_eccAttns |= MAINT_UE;
         if ( rdffir->IsBitSet(37) ) o_eccAttns |= MAINT_IUE;
         if ( rdffir->IsBitSet(39) ) o_eccAttns |= MAINT_IMPE;

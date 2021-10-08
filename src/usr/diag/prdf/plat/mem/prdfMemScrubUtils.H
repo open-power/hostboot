@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -140,6 +140,8 @@ enum MaintEccAttns
     // Maintenance CEs
     MAINT_NCE           = 0x0020, ///< CE
     MAINT_TCE           = 0x0010, ///< CE on two symbols
+
+    MAINT_SUE           = 0x0008, ///< Maint SUE
 };
 
 /**
