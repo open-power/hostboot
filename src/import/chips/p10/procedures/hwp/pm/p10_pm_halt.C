@@ -287,6 +287,8 @@ p10_pm_halt_psafe_update(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_ta
         fapi2::ReturnCode l_rc;
         fapi2::buffer<uint64_t> l_occflg_data(0);
 
+        //Only skip during Hostboot MPIPL boot, never at runtime
+#ifndef __HOSTBOOT_RUNTIME
         fapi2::ATTR_IS_MPIPL_Type l_mpipl;
         const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_MPIPL, FAPI_SYSTEM, l_mpipl));
@@ -296,6 +298,8 @@ p10_pm_halt_psafe_update(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_ta
             FAPI_IMP("Skip p10_pm_reset_psafe_update during MPIPL");
             break;
         }
+
+#endif
 
         FAPI_TRY(fapi2::getScom(i_target, TP_TPCHIP_OCC_OCI_OCB_OCCFLG2_RW, l_occflg_data),
                  "Error setting OCC Flag register bit REQUEST_OCC_SAFE_STATE");
