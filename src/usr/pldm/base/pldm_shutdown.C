@@ -200,15 +200,20 @@ void PLDM::requestSoftPowerOff(const poweroff_initiator_t i_initiator)
                                                          PLDM_STATE_SET_SW_TERMINATION_STATUS,
                                                          UTIL::assertGetToplevelTarget());
 
+    //there should only be one chassis entity, so use ENTITY_ID_DONTCARE for the container
     sensor_id_t bmc_chassisoff_effecter_id
-        = thePdrManager().findStateEffecterId({ .entity_type = ENTITY_TYPE_CHASSIS, .entity_instance_num = 1 },
+        = thePdrManager().findStateEffecterId({ .entity_type = ENTITY_TYPE_CHASSIS,
+                                                .entity_instance_num = 1,
+                                                .entity_container_id = PdrManager::ENTITY_ID_DONTCARE },
                                               PLDM_STATE_SET_SYSTEM_POWER_STATE);
 
     // TODO: Remove this once the BMC removes its redundant chassis entity
     if (bmc_chassisoff_effecter_id == 0)
     {
         bmc_chassisoff_effecter_id
-            = thePdrManager().findStateEffecterId({ .entity_type = ENTITY_TYPE_CHASSIS, .entity_instance_num = 0 },
+            = thePdrManager().findStateEffecterId({ .entity_type = ENTITY_TYPE_CHASSIS,
+                                                    .entity_instance_num = 0,
+                                                    .entity_container_id = PdrManager::ENTITY_ID_DONTCARE },
                                                   PLDM_STATE_SET_SYSTEM_POWER_STATE);
     }
 
