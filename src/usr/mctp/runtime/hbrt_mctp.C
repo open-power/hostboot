@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,7 +35,6 @@
 #include "hbrt_mctp.H"
 // libmctp headers
 #include <libmctp.h>
-#include <libmctp_rc.h>
 // runtime interface headers
 #include <runtime/interface.h>
 // error handling

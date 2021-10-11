@@ -966,9 +966,6 @@ static void mctp_astlpc_rx_start(struct mctp_binding_astlpc *astlpc)
 		mctp_pktbuf_free(pkt);
 		astlpc_prdebug(astlpc, "Dropped corrupt packet");
 	}
-
-out_complete:
-
 }
 
 static void mctp_astlpc_tx_complete(struct mctp_binding_astlpc *astlpc)
@@ -1320,7 +1317,7 @@ struct mctp_binding_astlpc *mctp_astlpc_init_fileio(void)
 struct mctp_binding_astlpc * __attribute__((const))
 	mctp_astlpc_init_fileio(void)
 {
-	astlpc_prerr(astlpc, "Missing support for file IO");
+	// Missing support for file IO
 	return NULL;
 }
 

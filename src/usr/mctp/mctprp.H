@@ -44,15 +44,6 @@ class MctpRP
      * @return void
      */
       void poll_kcs_status(void);
-     /**
-     * Function that polls endlessly on a message Q that gets initialized
-     * in the MctpRP ctor. When a message is found in the ODR it is read and
-     *  handled by this queue.
-     *
-     *
-     * @return void
-     */
-      void handle_inbound_messages(void);
 
      /**
      * Function that polls endlessly on a message Q that gets initialized
@@ -89,22 +80,12 @@ class MctpRP
 
       // Private Member Functions
       void _init(void);       // See public "init" function above
-      /**
-      * When we receive the "DUMMY" KCS command in the ODR we know
-      * that the bmc has written the negotiated status and activated the channel
-      * This is the function that is called when we receive that DUMMY message
-      *
-      * @return errlHndl_t return 0 on success and an error log if there is a fail
-      */
-      errlHndl_t _mctp_channel_init(void);
 
       // Private Member Variables
-      struct mctp_binding_hostlpc *iv_hostlpc; // ptr to hostlpc binding struct
+      struct mctp_binding_astlpc *iv_astlpc;   // ptr to astlpc binding struct
       struct mctp *iv_mctp;                    // ptr to struct that has business logic
-      msg_q_t     iv_inboundMsgQ;              // MCTP inbound messages
       msg_q_t     iv_outboundMsgQ;             // MCTP outbound messages
       volatile bool iv_channelActive;          // MCTP channel ready for traffic
-      uint16_t    iv_mctpVersion;              // MCTP version negotiated during initialization
       mutex_t     iv_mutex;                    // Mutex to protect calls to functions that access
                                                // the tx_queue and/or write the IDR register
 

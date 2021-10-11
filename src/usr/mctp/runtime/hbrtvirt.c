@@ -39,7 +39,6 @@
 // libmctp headers
 #include <libmctp-alloc.h>
 #include <libmctp-log.h>
-#include <libmctp_rc.h>
 
 extern int __mctp_hbrtvirt_hostboot_mctp_send(uint32_t len,
                                               void *val);
@@ -64,7 +63,7 @@ static int mctp_binding_hbrtvirt_tx(struct mctp_binding *b,
         struct mctp_binding_hbrtvirt *hbrtvirt = binding_to_hbrtvirt(b);
         uint32_t len = mctp_pktbuf_size(pkt);
         if (len > tx_size) {
-            rc = RC_MCTP_INVALID_LENGTH;
+            rc = -1;
             break;
         }
 
@@ -93,7 +92,7 @@ int mctp_hbrtvirt_rx_start(struct mctp_binding_hbrtvirt * const i_hbrtvirt)
     struct mctp_pktbuf *pkt = mctp_pktbuf_alloc(&i_hbrtvirt->binding, len);
     if (!pkt)
     {
-        rc = RC_MCTP_ALLOCATION_FAIL;
+        rc = -1;
         break;
     }
 
@@ -125,7 +124,7 @@ static struct mctp_binding_hbrtvirt *__mctp_hbrtvirt_init(void)
     hbrtvirt->binding.tx = mctp_binding_hbrtvirt_tx;
     hbrtvirt->binding.start = NULL;
     hbrtvirt->binding.pkt_size = RT_MCTP_BMTU;
-    hbrtvirt->binding.pkt_pad = 0;
+    hbrtvirt->binding.pkt_header = 0;
     return hbrtvirt;
 }
 

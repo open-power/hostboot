@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,5 +27,8 @@
 #define _INTTYPES_H
 
 #define PRIx64 "llx"
+#define PRIx32 "x"
+#define PRIu32 "u"
+#define PRIu16 "u"
 
 #endif

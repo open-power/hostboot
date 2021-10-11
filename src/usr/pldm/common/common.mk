@@ -34,11 +34,12 @@ COMMON_ROOTPATH = ../../../..
 EXTERN_PLDM_PATH = ${COMMON_ROOTPATH}/src/subtree/openbmc/pldm
 EXTERN_LIBPLDM_PATH = ${COMMON_ROOTPATH}/src/subtree/openbmc/pldm/libpldm
 EXTERN_LIBPLDM_OEM_PATH = ${COMMON_ROOTPATH}/src/subtree/openbmc/pldm/oem/ibm/libpldm
+EXTERN_LIBMCTP_PATH = ${COMMON_ROOTPATH}/src/subtree/openbmc/libmctp/
 
 EXTRAINCDIR += ${EXTERN_PLDM_PATH}
 EXTRAINCDIR += ${EXTERN_LIBPLDM_PATH}
 EXTRAINCDIR += ${EXTERN_LIBPLDM_OEM_PATH}
-EXTRAINCDIR += ${COMMON_IMPORT_PATH}
+EXTRAINCDIR += ${EXTERN_LIBMCTP_PATH}
 EXTRAINCDIR += ${COMMON_ROOTPATH}/src/import/chips/p10/utils/imageProcs
 EXTRAINCDIR += ${COMMON_ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${COMMON_ROOTPATH}/src/include/usr/fapi2/

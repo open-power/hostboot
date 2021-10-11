@@ -31,6 +31,7 @@
  */
 
 #include <libmctp.h>
+#include <container_of.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,8 +30,6 @@
  * @brief Defines error number for standard errors
  */
 
-#include <map>
-
 #define ENOENT           2      // No such file or directory
 #define	EIO              5      // I/O error
 #define ENXIO            6      // No such device or address
@@ -45,6 +43,7 @@
 #define ENFILE          23      // Too many open files in system
 #define EDEADLK         35      // Operation would cause deadlock.
 #define ETIME           62      // Time expired.
+#define EHOSTDOWN       112     // Host is down
 #define EALREADY        114     // Operation already in progress
 
 #define EWOULDBLOCK     EAGAIN  // operation would block

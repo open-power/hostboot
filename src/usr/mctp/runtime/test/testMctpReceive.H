@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,7 +33,7 @@
 
 #include <cxxtest/TestSuite.H>
 #include <runtime/interface.h>
-#include <extern/libmctp.h>
+#include <libmctp.h>
 #include <memory>
 
 extern trace_desc_t* g_trac_mctp;
@@ -68,7 +68,7 @@ class mctpReceiveTest : public CxxTest::TestSuite
 
 
         size_t l_resp_fw_msg_size =
-          hostInterfaces::HBRT_FW_MSG_BASE_SIZE + MCTP_BMTU;
+          hostInterfaces::HBRT_FW_MSG_BASE_SIZE + MCTP_BTU;
         std::unique_ptr<hostInterfaces::hbrt_fw_msg, decltype(&free)> l_resp_fw_msg(
             static_cast<hostInterfaces::hbrt_fw_msg *>(malloc( l_resp_fw_msg_size)), free);
 

@@ -1,11 +1,12 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/mctp/extern/libmctp-alloc.h $                         */
+/* $Source: src/usr/mctp/err.h $                                          */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2021                             */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -21,15 +22,6 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/* SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later */
-
-#ifndef _LIBMCTP_ALLOC_H
-#define _LIBMCTP_ALLOC_H
-
-#include <stdlib.h>
-
-void *__mctp_alloc(size_t size);
-void __mctp_free(void *ptr);
-void *__mctp_realloc(void *ptr, size_t size);
-
-#endif /* _LIBMCTP_ALLOC_H */
+/* This is header is defined solely to satisfy the compiler when
+   compiling astlpc.c. If the #include <err.h> is removed from
+   that file then we can remove this file. */

@@ -37,10 +37,10 @@
 #include <pldm/pldm_errl.H>
 #include <pldm/pldm_response.H>
 #include "../common/pldmtrace.H"
-#include "../../mctp/libmctp-hostlpc.h"
 
 #include <util/singleton.H>
 
+#include "openbmc/libmctp/libmctp-astlpc.h"
 #include <openbmc/pldm/libpldm/platform.h>
 #include <openbmc/pldm/libpldm/pdr.h>
 #include <openbmc/pldm/libpldm/state_set.h>

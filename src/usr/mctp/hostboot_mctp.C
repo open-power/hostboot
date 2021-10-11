@@ -39,7 +39,7 @@
 extern trace_desc_t* g_trac_mctp;
 
 int __mctp_hostlpc_hostboot_kcs_read(void *arg,
-                                     enum mctp_binding_lpc_kcs_reg reg,
+                                     enum mctp_binding_astlpc_kcs_reg reg,
                                      uint8_t *val)
 {
     errlHndl_t l_err = NULL;
@@ -63,7 +63,7 @@ int __mctp_hostlpc_hostboot_kcs_read(void *arg,
 }
 
 int __mctp_hostlpc_hostboot_kcs_write(void *arg,
-                                      enum mctp_binding_lpc_kcs_reg reg,
+                                      enum mctp_binding_astlpc_kcs_reg reg,
                                       uint8_t val)
 {
     errlHndl_t l_err = NULL;
@@ -88,7 +88,7 @@ int __mctp_hostlpc_hostboot_kcs_write(void *arg,
 
 int __mctp_hostlpc_hostboot_lpc_read(void *arg,
                                      void * buf,
-                                     uint64_t offset,
+                                     long offset,
                                      size_t len)
 {
     errlHndl_t l_err = nullptr;
@@ -117,8 +117,8 @@ int __mctp_hostlpc_hostboot_lpc_read(void *arg,
 }
 
 int __mctp_hostlpc_hostboot_lpc_write(void *arg,
-                                      void * buf,
-                                      uint64_t offset,
+                                      const void * buf,
+                                      long offset,
                                       size_t len)
 {
     errlHndl_t l_err = nullptr;
@@ -126,7 +126,7 @@ int __mctp_hostlpc_hostboot_lpc_write(void *arg,
 
     // Write a given value to a given offset in the MCTP window of LPC space
     l_err = DeviceFW::deviceWrite(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
-                                 static_cast<uint8_t*>(buf),
+                                 const_cast<void *>(buf),
                                  len,
                                  DEVICE_LPC_ADDRESS(LPC::TRANS_FW,
                                                     offset + LPC::LPCHC_MCTP_PLDM_BASE));

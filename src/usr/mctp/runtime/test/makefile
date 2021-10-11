@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020
+# Contributors Listed Below - COPYRIGHT 2020,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -31,6 +31,7 @@ MODULE = testmctp_rt
 
 EXTRAINCDIR += ${ROOTPATH}/src/usr/mctp
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/mctp/
+EXTRAINCDIR += ${ROOTPATH}/src/subtree/openbmc/libmctp/
 
 TESTS = *.H
 

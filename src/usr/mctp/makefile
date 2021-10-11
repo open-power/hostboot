@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019,2020
+# Contributors Listed Below - COPYRIGHT 2019,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -30,8 +30,10 @@ SUBDIRS += runtime.d
 
 include ./common.mk
 
+CFLAGS += -DHAVE_ENDIAN_H
+
 OBJS += hostboot_mctp.o
-OBJS += hostlpc.o
+OBJS += astlpc.o
 OBJS += mctprp.o
 
 include ${ROOTPATH}/config.mk

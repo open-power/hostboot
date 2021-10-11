@@ -24,7 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #include "mctp_trace.H"
 #include <string.h>
-#include "../extern/libmctp.h"
+#include <libmctp.h>
 
 /**
  * @file  mctp_trace.C

@@ -25,9 +25,8 @@
 
 EXTRAINCDIR += ${ROOTPATH}/src/usr/mctp
 EXTRAINCDIR += ${ROOTPATH}/src/import
-EXTRAINCDIR += ${ROOTPATH}/src/usr/mctp/extern
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/mctp
-
+EXTRAINCDIR += ${ROOTPATH}/src/subtree/openbmc/libmctp/
 
 OBJS += core.o
 OBJS += alloc.o
@@ -35,4 +34,4 @@ OBJS += log.o
 OBJS += mctp_trace.o
 
 VPATH += ${ROOTPATH}/src/usr/mctp
-VPATH += ${ROOTPATH}/src/usr/mctp/extern
+VPATH += ${ROOTPATH}/src/subtree/openbmc/libmctp/
