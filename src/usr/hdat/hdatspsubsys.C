@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /* [+] Super Micro Computer, Inc.                                         */
 /*                                                                        */
@@ -204,6 +204,14 @@ static errlHndl_t hdatGetPathInfo(
                                                          LPC::KCS_STATUS_REG;
         o_pathArray[o_arrayHdr.hdatArrayCnt].hdatKCSInterruptNum =
                                                          LPC::KCS_SERIAL_IRQ;
+
+        // Interface to initiate a soft reset to BMC from Host in AST2600
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatKCS2DataRegAddr =
+                                                         LPC::KCS2_DATA_REG;
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatKCS2StatusRegAddr =
+                                                         LPC::KCS2_STATUS_REG;
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatKCS2InterruptNum =
+                                                         LPC::KCS2_SERIAL_IRQ;
 
 #ifdef CONFIG_CONSOLE
         CONSOLE::UartInfo_t l_vuart2Info =

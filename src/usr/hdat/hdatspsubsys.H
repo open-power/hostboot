@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,11 +22,11 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
- 
+
 /**
  *  @file hdatspsubsys.H
  *
- *  @brief This file contains the class definition for the service processor 
+ *  @brief This file contains the class definition for the service processor
  *         subsystem object.
  *
  */
@@ -39,7 +39,7 @@
 /*--------------------------------------------------------------------------*/
 #include <stdint.h>              // standard types
 #include <hdat/hdat.H>                // HDAT header type definitions
-#include "hdathdif.H"            // HdatHdif base class definition 
+#include "hdathdif.H"            // HdatHdif base class definition
 #include <hdat/hdat_reasoncodes.H>
 
 namespace HDAT
@@ -50,7 +50,7 @@ namespace HDAT
 /*--------------------------------------------------------------------------*/
 
 /** @enum hdatSpStatus
- *        Status of a service procesor card 
+ *        Status of a service procesor card
  */
 enum hdatSpStatus
 {
@@ -73,7 +73,7 @@ const uint8_t HDAT_UART_IS_VALID = 1;
 
 /** @brief Structure version number
  */
-const uint16_t HDAT_SP_SUBSYS_VERSION = 0x0040;
+const uint16_t HDAT_SP_SUBSYS_VERSION = 0x0041;
 
 /** @brief Structure definition for service processor hardware and software.
     Reserved bytes are added to make the structure a multiple of 4 bytes.
@@ -82,13 +82,13 @@ const uint16_t HDAT_SP_SUBSYS_VERSION = 0x0040;
  */
 struct hdatSpImpl_t
 {
-    uint16_t hdatHdwVer;    // 0x0000 Hardware version              
+    uint16_t hdatHdwVer;    // 0x0000 Hardware version
     uint16_t hdatSftVer;    // 0x0002 Software version
     uint16_t hdatStatus;    // 0x0004 SP functionality/status
     uint8_t  hdatChipVer;   // 0x0006 SP chip DD level
     uint8_t  hdatReserved1; // 0x0007 padding for alignment
     char     hdatBmcFamily[64];  // 0x0008 bmc family
-} __attribute__ ((packed));   
+} __attribute__ ((packed));
 
 /** @brief Structure for uart interrupt info
 */
@@ -118,7 +118,7 @@ struct hdatSpIoPath_t
     uint16_t     hdatLinkStatus;        // 0x0002 PSI Link status
     uint8_t      hdatML2ChipVer;        // 0x0004 Chip DD level of ML2 controller
     uint8_t      hdatResvd[3];          // 0x0005 Reserved
-    uint32_t     hdatProcChipId;        // 0x0008 Processor chip id 
+    uint32_t     hdatProcChipId;        // 0x0008 Processor chip id
     uint32_t     hdatLPCHCBarIOAdrSpc;  // 0x000C LPCHC BAR for I/O Adr Space
     uint32_t     hdatLPCHCBarMemAdrSpc; // 0x0010 LPCHC BAR for MemAdr Space
     uint32_t     hdatLPCHCBarFwAdrSpc;  // 0x0014 LPCHC BAR for FW Adr Space
@@ -153,6 +153,12 @@ struct hdatSpIoPath_t
     uint32_t     hdatCurVUART2DevBaudRate;    // 0x005D Current Baud rate of
                                               //        VUART2 device
     uartIntData_t  hdatVUART2InterruptDetails;// 0x0061 VUART2 interrupt details
+
+    // Interface to initiate a soft reset to BMC from Host in AST2600
+    uint16_t     hdatKCS2DataRegAddr;         // 0x0065 KCS 2 Data Register Address
+    uint16_t     hdatKCS2StatusRegAddr;       // 0x0067 KCS 2 Status Register Address
+    uint8_t      hdatKCS2InterruptNum;        // 0x0069 KCS 2 Interrupt Number
+
 } __attribute__ ((packed));
 
 #define HDAT_NON_FUNCTIONAL 0 // PSI link is not functional
@@ -195,7 +201,7 @@ const uint32_t LPC_PATH_FRU_CNT_FOR_BMC = 2;
 /* C++ class definition                                                        */
 /*-----------------------------------------------------------------------------*/
 
-/** Begin Class Description                                                        
+/** Begin Class Description
  *
  * @brief  The HdatSpSubsys class is used to construct objects that describe
  *         the service processor hardware and software.
@@ -213,25 +219,25 @@ const uint32_t LPC_PATH_FRU_CNT_FOR_BMC = 2;
  *
  * Thread safety:  An HdatSpSubsys object is not thread safe.  That is, a single
  *                 object cannot be shared and used concurrently by
- *                 multiple threads at the same time.  An object can be used by  
- *                 multiple threads if the threads serialize access.  And of       
+ *                 multiple threads at the same time.  An object can be used by
+ *                 multiple threads if the threads serialize access.  And of
  *                 course, each thread can use its own object with no concerns
  *                 about what other threads are doing.
  *
  * Signal handler usage: This class is not intended to be used in a signal handler
  *                       and nothing has been done to try and make it safe to use
  *                       in a signal handler.
- *                                             
+ *
  * End Class Description
  */
 class HdatSpSubsys : public HdatHdif
 {
     public:
 
-	/** 
+        /**
          * @brief Construct an HdatSpSubsys object.
          *
-         *       This is the constructor for the HdatSpSubsys object.  
+         *       This is the constructor for the HdatSpSubsys object.
          *
          *       If you are constructing this object on the heap by using new, then
          *       you must check the pointer returned from new to see if it is null.
@@ -251,8 +257,8 @@ class HdatSpSubsys : public HdatHdif
          * @param i_resourceId - input parameter - The resource id of the service processor FRU
          * @param i_msAddr     - input parameter - The main memory address that the service
          *                       processor subsystem structure will be DMA'd to.
-         *                        
-         * @return A null error log handle if successful, else the return code pointed 
+         *
+         * @return A null error log handle if successful, else the return code pointed
          *         to by o_errlHndl contains one of:
          *
          * @retval HDAT_REGISTRY_ERROR
@@ -265,7 +271,7 @@ class HdatSpSubsys : public HdatHdif
         /**
          * @brief HdatSpSubsys object destructor
          *
-         *        This is the destructor for an HdatSpSubsys object.  Any heap storage 
+         *        This is the destructor for an HdatSpSubsys object.  Any heap storage
          *        allocated for the object is dallocated.
          *
          * @pre No preconditions exist
@@ -287,19 +293,19 @@ class HdatSpSubsys : public HdatHdif
         * @return A null error handle if successfull
         */
         errlHndl_t hdatFillDataPtrs();
-        
+
 
     private:
        /** Object Instance Data
          *
          * @li iv_msAddr         - Mainstore phyisical address
          * @li iv_kwdSize        - size of the ASCII keyword
-         * @li iv_kwd            - ptr to storage which holds the ASCII keyword     
+         * @li iv_kwd            - ptr to storage which holds the ASCII keyword
          * @li iv_fru            - FRU Id information
          * @li iv_impl           - hardware/software implementation
          * @li iv_mem            - FSP memory information
          * @li iv_ioPathArrayHdr - I/O path array header
-         * @li iv_ioPathArray    - I/O path(s) to the FSP card 
+         * @li iv_ioPathArray    - I/O path(s) to the FSP card
          * @li iv_spSubsys       - virtual address for SP sub sys data
          * @li iv_size           - size of the sp sub sys total structure
          */
@@ -316,9 +322,9 @@ class HdatSpSubsys : public HdatHdif
         uint32_t             iv_numOfIoPaths;
 
 
-        /** Class (static) Data 
+        /** Class (static) Data
          *
-         * Only one copy of this data exists in a process. 
+         * Only one copy of this data exists in a process.
          *
          * @li cv_actualCnt - a count of how many HdatSpSubsys objects are created
          */

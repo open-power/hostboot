@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -85,6 +85,23 @@ namespace LPC
          * (provided by hypervisor team)
          */
         KCS_SERIAL_IRQ =        11,
+
+        // KCS2 - Interface to initiate a soft reset to BMC from Host in AST2600
+        /* Keyboard Controller Style (KCS) data register address
+         * (provided by hypervisor team)
+         */
+        KCS2_DATA_REG =          0xCA8,
+
+        /* Keyboard Controller Style (KCS) status register address
+         * (provided by hypervisor team)
+         */
+        KCS2_STATUS_REG =        0xCA9,
+
+        /* Serial IRQ number for KCS interface
+         * (provided by hypervisor team)
+         */
+        KCS2_SERIAL_IRQ =        12,
+
     };
 }
 
