@@ -45,6 +45,8 @@ OBJS += sbe_psudd_common.o
 OBJS += sbe_ffdc_parser.o
 OBJS += sbe_ffdc_package_parser.o
 OBJS += sbe_getCapabilities.o
+OBJS += sbe_psuGetHwReg.o
+OBJS += sbe_utils.o
 
 #Common VPATHs
 VPATH += ${ROOTPATH}/src/usr/sbeio/common

@@ -368,6 +368,17 @@ errlHndl_t SbePsu::handleInterrupt(PIR_t i_pir)
         {
             break;
         }
+
+        //Clear the rest of the PSU Scom Reg Interrupt Status register
+        //  This clears the PSU interrupt condition to avoid any other
+        //  spurious interrupts
+        uint64_t l_data = HOST_CLEAR_OTHER_BITS;
+        errl = writeScom(l_intrChip,PSU_HOST_DOORBELL_REG_AND,&l_data);
+        if (errl)
+        {
+            break;
+        }
+
     } while (0);
 
     SBE_TRACD(EXIT_MRK "SbePsu::handleInterrupt");

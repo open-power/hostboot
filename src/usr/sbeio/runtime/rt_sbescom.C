@@ -34,6 +34,7 @@
 #include <scom/scomif.H>
 #include <scom/runtime/rt_scomif.H>
 #include <targeting/common/utilFilter.H>
+#include <sbeio/sbeioif.H>
 
 #include <plat/mem/prdfMemChnlFailCache.H> // chnlFailScomList
 
@@ -74,13 +75,13 @@ static void markUseSbeScom(TARGETING::TargetHandle_t i_ocmb)
  */
 void switchToSbeScomAccess(TARGETING::TargetHandle_t i_ocmb)
 {
-    TRACFCOMP(g_trac_sbeio,ENTER_MRK"switchToSbeScomAccess : 0x%.8X OCMB",
+    TRACDCOMP(g_trac_sbeio,ENTER_MRK"switchToSbeScomAccess : 0x%.8X OCMB",
               TARGETING::get_huid(i_ocmb));
 
     // switch to sbe scom since inband path does not work anymore
     markUseSbeScom(i_ocmb);
 
-    TRACFCOMP(g_trac_sbeio,EXIT_MRK"switchToSbeScomAccess");
+    TRACDCOMP(g_trac_sbeio,EXIT_MRK"switchToSbeScomAccess");
 }
 
 
@@ -126,8 +127,12 @@ errlHndl_t sbeScomPerformOp(DeviceFW::OperationType i_opType,
     }
     else
     {
-        // routes from FSP to SBE scom
-        l_err = FSISCOM::sendScomOpToFsp(i_opType, i_ocmb, l_addr, io_buffer);
+        assert(io_buflen == sizeof(uint64_t) ,
+               "We only support read lengths of 8 bytes for PSU scom ops");
+        l_err = SBEIO::sendPsuGetHwRegRequest(
+                                i_ocmb,
+                                l_addr,
+                                *static_cast<uint64_t *>(io_buffer));
     }
 
     TRACDCOMP(g_trac_sbeio,EXIT_MRK"sbeScomPerformOp");

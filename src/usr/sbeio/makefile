@@ -31,12 +31,10 @@ include common/common.mk
 
 # sbeio's unique objects
 OBJS += sbe_psudd.o
-OBJS += sbe_utils.o
 OBJS += sbe_secureHwp.o
 OBJS += sbe_coreStateControl.o
 OBJS += sbe_psuReadSeeprom.o
 OBJS += sbe_psuQuiesce.o
-OBJS += sbe_psuGetHwReg.o
 OBJS += sbe_stashKeyAddr.o
 OBJS += sbe_continueMpipl.o
 OBJS += sbe_systemConfig.o

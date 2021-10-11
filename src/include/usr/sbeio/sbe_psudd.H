@@ -1248,11 +1248,16 @@ class SbePsu
         };
         enum hostDoorbellReg
         {
-            // Doorbell Register for Host Bridge interrupt. Set by the SBE to
-            // inform host firmware about a response message in the Host/SBE
-            // Mailbox Registers
+            // Doorbell Register bit for Host Bridge interrupt (Doorbell 0).
+            // Set by the SBE to inform host firmware about a response message
+            // in the Host/SBE Mailbox Registers
             HOST_RESPONSE_WAITING       = 0x8000000000000000,
             HOST_CLEAR_RESPONSE_WAITING = 0x7FFFFFFFFFFFFFFF,
+            // Doorbell Register bits for all other doorbell interrupts
+            HOST_CLEAR_OTHER_BITS       = 0x8000FFFFFFFFFFFF,
+            // Doorbell Register bits for interrupt masks
+            HOST_MASK_BITS              = 0x0000FFFF00000000,
+            HOST_CLEAR_MASK_BITS        = 0xFFFF0000FFFFFFFF,
         };
 
         //wrappers for page allocator diffs for IPL vs Runtime

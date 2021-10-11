@@ -460,6 +460,14 @@ errlHndl_t SbePsu::writeRequest(TARGETING::Target * i_target,
         errl = writeScom(i_target,PSU_SBE_DOORBELL_REG_OR,&l_data);
         if (errl) break;
 
+#ifdef __HOSTBOOT_RUNTIME
+        // Set all the interrup mask bits at runtime
+        // else PHYP may see the interrupt and clear the register
+        l_data = HOST_MASK_BITS;
+        errl = writeScom(i_target,PSU_HOST_DOORBELL_REG_OR,&l_data);
+        if (errl) break;
+#endif
+
     }
     while (0);
 
@@ -485,7 +493,9 @@ errlHndl_t SbePsu::handleMessage(TARGETING::Target* i_proc)
         uint64_t l_doorbellVal = 0x0;
         errl = readScom(i_proc,PSU_HOST_DOORBELL_REG_RW,&l_doorbellVal);
         if (errl)
-        { break; }
+        {
+            break;
+        }
 
         if ( l_simicsRunning &&
              HOST_RESPONSE_WAITING != (l_doorbellVal & HOST_RESPONSE_WAITING) )
@@ -522,8 +532,12 @@ errlHndl_t SbePsu::handleMessage(TARGETING::Target* i_proc)
             if (errl)
             { break; }
 
-            //Notify PSU response has been read
+            // Notify PSU response has been read
             uint64_t l_data = HOST_CLEAR_RESPONSE_WAITING;
+#ifdef __HOSTBOOT_RUNTIME
+            // Also clear all the mask bits
+            l_data &= HOST_CLEAR_MASK_BITS;
+#endif
             errl = writeScom(i_proc,PSU_HOST_DOORBELL_REG_AND,&l_data);
             if (errl)
             { break; }
@@ -537,13 +551,6 @@ errlHndl_t SbePsu::handleMessage(TARGETING::Target* i_proc)
             MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
         }
 #endif //#ifndef __HOSTBOOT_RUNTIME
-
-        //Clear the rest of the PSU Scom Reg Interrupt Status register
-        //  This clears the PSU interrupt condition so the PSU interrupt
-        //  won't be re-presented
-        uint64_t l_data = HOST_RESPONSE_WAITING;
-        errl = writeScom(i_proc,PSU_HOST_DOORBELL_REG_AND,&l_data);
-        if (errl) break;
 
     } while (0);
 
