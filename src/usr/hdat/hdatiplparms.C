@@ -47,6 +47,7 @@
 
 #include <devicefw/userif.H>
 #include <targeting/common/util.H>
+#include <pldm/extended/pdr_manager.H>
 
 using namespace TARGETING;
 
@@ -641,6 +642,13 @@ void HdatIplParms::hdatGetSystemParamters()
     }
     HDAT_DBG("after selective memory mirroring");
 
+    // Populate USB Security data
+    this->iv_hdatIPLParams->iv_sysParms.hdatSystemAttributes |=
+        l_pSysTarget->getAttr<ATTR_USB_SECURITY>() ?
+        0 : HDAT_ENABLE_SYSTEM_USB_PORT;
+
+    HDAT_DBG("after USB security policy");
+
     //@TODO: RTC 256999 HDAT: Rainier- Revisit on MPIPL SUPPORTED flag
     //Its returning zero value
     this->iv_hdatIPLParams->iv_sysParms.hdatSystemAttributes |=
@@ -689,6 +697,11 @@ void HdatIplParms::hdatGetSystemParamters()
 #endif
 
     this->iv_hdatIPLParams->iv_sysParms.usePoreSleep  = 0x01;
+
+    // hostbootTerminusId() returns terminus_id_t which is uint16_t but HDAT
+    // spec defined it as uint8_t so doing a a type cast here
+    this->iv_hdatIPLParams->iv_sysParms.hdatHbrtTerminusId =
+        static_cast<uint8_t>(PLDM::thePdrManager().hostbootTerminusId());
 
     TARGETING::ATTR_VTPM_ENABLED_type l_vTpmEnabled;
     if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_VTPM_ENABLED>

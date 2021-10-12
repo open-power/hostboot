@@ -93,7 +93,7 @@ struct hdatSysParms_t
     uint32_t hdatSystemAttributes;     // System supports multiple TPMDs
     uint32_t hdatMemoryScrubbing;      // Memory Scrubbing
     uint16_t hdatCurrentSPPLValue;     // The Current SPPL Value
-    uint8_t  hdatReserved2;            // Reserved
+    uint8_t  hdatHbrtTerminusId;       // HBRT Terminus Id
     uint8_t  usePoreSleep;             // Use PORE Sleep
     uint32_t hdatReserved1;            // Reserved
     uint8_t  vTpmEnabled;              // vTPM Enabled
@@ -346,6 +346,7 @@ const hdatIplpFeatureFlagSetting_t hdatIplpFeatureFlagSettingsArray[NUM_RISK_LEV
 #define HDAT_CRYPTO_DISABLED_BIT                   0x20000000
 #define HDAT_RISK_LEVEL_ELEVATED                   0x10000000
 #define HDAT_MPIPL_SUPPORTED                       0x04000000
+#define HDAT_ENABLE_SYSTEM_USB_PORT                0x08000000
 
 #define HDAT_ECO_ENABLED                           0x80000000
 #define HDAT_ECO_CAPABLE                           0x40000000
