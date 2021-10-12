@@ -3245,7 +3245,6 @@
     <valueType>uint8</valueType>
     <platInit/>
     <default>48</default>
-    <writeable/>
     <group>safe</group>
   </attribute>
 
