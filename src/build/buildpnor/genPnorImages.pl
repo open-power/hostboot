@@ -305,6 +305,23 @@ if(!$ENV{'SB_KEEP_CACHE'})
 
 my $OPEN_SIGN_REQUEST=
     "$SIGNING_DIR/crtSignedContainer.sh --scratchDir $bin_dir ";
+
+# Check if secure version parameter was passed in and add it to the signing command, if necessary
+if ($secureVersionStr eq "")
+{
+    # Without input still write Secure Version 0 to HBBL,
+    # but dont pass in "--security version" to signing tool
+    $secureVersionStr = "0";
+    $secureVersionHbbl = sprintf("%02X",$secureVersionStr);
+}
+else
+{
+    $secureVersionHbbl = sprintf("%02X",$secureVersionStr);
+
+    # Pass this parameter to the signing tool
+    $OPEN_SIGN_REQUEST .= " --security-version $secureVersionStr ";
+}
+
 # By default key transition container is unused
 my $OPEN_SIGN_KEY_TRANS_REQUEST = $OPEN_SIGN_REQUEST;
 
@@ -432,22 +449,6 @@ $SETTINGS .= $labSecurityOverride ? "Yes\n" : "No\n";
 $SETTINGS .= "Max number of parallel subprocesses: $max_processes\n";
 $SETTINGS .= "//======================================================//\n\n";
 print $SETTINGS;
-
-# Check if secure version parameter was passed in and add it to the signing command, if necessary
-if ($secureVersionStr eq "")
-{
-    # Without input still write Secure Version 0 to HBBL,
-    # but dont pass in "--security version" to signing tool
-    $secureVersionStr = "0";
-    $secureVersionHbbl = sprintf("%02X",$secureVersionStr);
-}
-else
-{
-    $secureVersionHbbl = sprintf("%02X",$secureVersionStr);
-
-    # Pass this parameter to the signing tool
-    $OPEN_SIGN_REQUEST .= " --security-version $secureVersionStr ";
-}
 
 if ($build_all && $secureboot)
 {
