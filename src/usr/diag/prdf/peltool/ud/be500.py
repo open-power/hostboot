@@ -307,6 +307,96 @@ def hashString(string):
     return hexValue
 
 # ###################################################
+# Used to decompress the capture data buffer
+# ###################################################
+
+def uncompressCdBuffer(i_buf):
+
+    # index to keep track of our position in our input buffer
+    i = 0
+
+    # Keep track of the size and position of our look behind buffer
+    lbPos = 0
+    lbSize = 0
+
+    # temporary string variable that will be used to store our hex string buffer
+    # which will be converted to a memory view and returned
+    tempBuf = bytearray()
+
+    # get the size of the input buffer
+    inSize = len(i_buf)
+
+    # max size of output buffer, will be decremented to keep track of size left
+    maxSize = 2052
+
+    # variables to store the byte compressed token bundle (tokC) and the token
+    # position within the bundle (tokPos)
+    tokPos = 8
+    tokC = 0
+
+    while ( (inSize > 0) and (maxSize > 0) ):
+
+        # Check if we need to get a new bundle of tokens
+        if ( tokPos == 8 ):
+            tokPos = 0
+            tokC, i=intConcat(i_buf, i, i+1)
+            inSize -= 1
+            continue
+
+        # Check if the token was compressed or not
+        if ( (tokC >> (7-tokPos)) & 0x1 ):
+            # Check if the input buffer has tokens
+            if ( inSize < 2 ):
+                # set exit condition
+                inSize = 0
+                continue
+
+            # Compressed token
+            # read token from stream
+            token, i=intConcat(i_buf, i, i+2)
+            inSize -= 2
+
+            # get the postion and size within the look-behind buffer
+            pos = (token & 0xFFC0) >> 6
+            matchSize = (token & 0x3F) + 3
+
+            # only take as much data as we can if we are out of room
+            size = min(matchSize, maxSize)
+
+            # convert our tempBuf into a memoryview we can parse as a
+            # look-behind buffer
+            lbBuf = memoryview(tempBuf)
+
+            # get the uncompressed data from the look-behind buffer at the
+            # position we got from the token
+            match, tmp=memConcat(lbBuf, lbPos+pos, lbPos+pos+size)
+            tempBa = tempBuf + bytearray.fromhex(match)
+            tempBuf = tempBa
+
+            # fix up all our sizes
+            lbSize += matchSize
+            maxSize -= size
+
+        else:
+            # uncompressed token, just copy the byte and adjust sizes
+            string, i=memConcat(i_buf, i, i+1)
+            tempBa = tempBuf + bytearray.fromhex(string)
+            tempBuf = tempBa
+            maxSize -= 1
+            inSize -= 1
+            lbSize += 1
+
+        # just did a token, so increment the bundle count
+        tokPos += 1
+
+        # advance the look-behind buffer as needed
+        while ( lbSize >= 1024 ):
+            lbPos += 1
+            lbSize -= 1
+
+    return memoryview(tempBuf)
+
+# ###################################################
 
 class errludP_prdf:
 
@@ -316,8 +406,14 @@ class errludP_prdf:
         d = OrderedDict()
         i=0
 
+        buf = data
+
+        # version 2 and above are compressed
+        if ( 2 <= ver ):
+            buf = uncompressCdBuffer(data)
+
         # First 4 bytes are the capture data size
-        captureDataSize, i=intConcat(data, i, i+4)
+        captureDataSize, i=intConcat(buf, i, i+4)
 
         # CaptureData Format:
         #        capture data -> ( <chip header> <registers> )*
@@ -339,7 +435,7 @@ class errludP_prdf:
             # T=Target Type (matches TYPE attribute)
             # i=Instance/Sequence number of target, relative to node
             #
-            intHuid, i=intConcat(data, i, i+4)
+            intHuid, i=intConcat(buf, i, i+4)
             chipHuid = '0x' + format(intHuid, 'x').rjust(8, '0')
 
             # Check for an invalid chip ID, reached end of input (0xFFFFFFFF)
@@ -347,7 +443,7 @@ class errludP_prdf:
                 break
 
             # Get the number of IDs for this chip
-            numIDs, i=intConcat(data, i, i+4)
+            numIDs, i=intConcat(buf, i, i+4)
 
             cd = 'Capture Data'
             if cd not in d:
@@ -358,12 +454,12 @@ class errludP_prdf:
                 if ( i >= captureDataSize ):
                     break;
 
-                dataId, i=memConcat(data, i, i+2)
-                dataLength, i=intConcat(data, i, i+2)
+                dataId, i=memConcat(buf, i, i+2)
+                dataLength, i=intConcat(buf, i, i+2)
                 hexId = '0x' + dataId
                 # check for special cases where the data we have isn't registers
                 if (hexId == hashString("ATTN_DATA")):
-                    attnData, i=hexConcat(data, i, i+dataLength)
+                    attnData, i=hexConcat(buf, i, i+dataLength)
                     d[cd]['ATTN_DEBUG'] = attnData
 
                 elif (hexId == hashString("MEM_UE_TABLE")):
@@ -385,7 +481,7 @@ class errludP_prdf:
                     d[cd]['UE Table'] = OrderedDict()
 
                     for y in range(entries):
-                        entryData, i=intConcat(data, i, i+7)
+                        entryData, i=intConcat(buf, i, i+7)
                         parsedLength += 7
 
                         count     = (entryData >> 48) & 0xff
@@ -410,14 +506,14 @@ class errludP_prdf:
                     # Collect any extra junk data at the end just in case
                     junkLength = dataLength - parsedLength
                     if (junkLength >= 1):
-                        junk, i=memConcat(data, i, i+junkLength)
+                        junk, i=memConcat(buf, i, i+junkLength)
 
                 elif (hexId == hashString("MEM_CE_TABLE")):
                     # Keep track of the length of the data we've parsed
                     parsedLength = 0
 
                     # Skip the first 8 bytes for the table's metadata
-                    ceTableMetaData, i=memConcat(data, i, i+8)
+                    ceTableMetaData, i=memConcat(buf, i, i+8)
                     parsedLength += 8
 
                     # 9 bytes (72 bits) per entry:
@@ -443,7 +539,7 @@ class errludP_prdf:
                     d[cd]['CE Table'] = OrderedDict()
 
                     for y in range(entries):
-                        entryData, i=intConcat(data, i, i+9)
+                        entryData, i=intConcat(buf, i, i+9)
                         parsedLength += 9
 
                         count     = (entryData >> 64) & 0xff
@@ -478,7 +574,7 @@ class errludP_prdf:
                     # Collect any extra junk data at the end just in case
                     junkLength = dataLength - parsedLength
                     if (junkLength >= 1):
-                        junk, i=memConcat(data, i, i+junkLength)
+                        junk, i=memConcat(buf, i, i+junkLength)
 
                 elif (hexId == hashString("IUE_COUNTS")):
                     # Keep track of the length of the data we've parsed
@@ -492,8 +588,8 @@ class errludP_prdf:
 
                     for y in range(entries):
 
-                        rank, i=intConcat(data, i, i+1)
-                        count, i=intConcat(data, i, i+1)
+                        rank, i=intConcat(buf, i, i+1)
+                        count, i=intConcat(buf, i, i+1)
                         parsedLength += 2
 
                         # Continue to next entry if the count is 0
@@ -507,7 +603,7 @@ class errludP_prdf:
                     # Collect any extra junk data at the end just in case
                     junkLength = dataLength - parsedLength
                     if (junkLength >= 1):
-                        junk, i=memConcat(data, i, i+junkLength)
+                        junk, i=memConcat(buf, i, i+junkLength)
 
                 elif (hexId == hashString("DRAM_REPAIRS_DATA")):
 
@@ -520,7 +616,7 @@ class errludP_prdf:
                     # 1-bit:  isSpareDram
                     # 2-bits: reserved
                     # 8-bits: wiring type
-                    headerData, i=intConcat(data, i, i+2)
+                    headerData, i=intConcat(buf, i, i+2)
                     parsedLength += 2
 
                     rankCount   = (headerData >> 12) & 0xf
@@ -538,11 +634,11 @@ class errludP_prdf:
                         # 8-bits: symbol mark
                         # 8-bits: spare0
                         # 8-bits: spare1
-                        rank, i=intConcat(data, i, i+1)
-                        chipMark, i=intConcat(data, i, i+1)
-                        symbolMark, i=intConcat(data, i, i+1)
-                        spare0, i=intConcat(data, i, i+1)
-                        spare1, i=intConcat(data, i, i+1)
+                        rank, i=intConcat(buf, i, i+1)
+                        chipMark, i=intConcat(buf, i, i+1)
+                        symbolMark, i=intConcat(buf, i, i+1)
+                        spare0, i=intConcat(buf, i, i+1)
+                        spare1, i=intConcat(buf, i, i+1)
                         parsedLength += 5
 
                         d[cd]['Dram Repairs Data'][y] = OrderedDict()
@@ -564,7 +660,7 @@ class errludP_prdf:
                     # Collect any extra junk data at the end just in case
                     junkLength = dataLength - parsedLength
                     if (junkLength >= 1):
-                        junk, i=memConcat(data, i, i+junkLength)
+                        junk, i=memConcat(buf, i, i+junkLength)
 
                 elif (hexId == hashString("DRAM_REPAIRS_VPD")):
                     # Keep track of the length of the data we've parsed
@@ -579,9 +675,9 @@ class errludP_prdf:
                     d[cd]['Dram Repairs VPD'] = OrderedDict()
 
                     for y in range(entries):
-                        rank, i=intConcat(data, i, i+1)
-                        port, i=intConcat(data, i, i+1)
-                        bitmap, i=intConcat(data, i, i+10)
+                        rank, i=intConcat(buf, i, i+1)
+                        port, i=intConcat(buf, i, i+1)
+                        bitmap, i=intConcat(buf, i, i+10)
                         parsedLength += 12
 
                         d[cd]['Dram Repairs VPD'][y] = OrderedDict()
@@ -592,7 +688,7 @@ class errludP_prdf:
                     # Collect any extra junk data at the end just in case
                     junkLength = dataLength - parsedLength
                     if (junkLength >= 1):
-                        junk, i=memConcat(data, i, i+junkLength)
+                        junk, i=memConcat(buf, i, i+junkLength)
 
                 elif (hexId == hashString("BAD_DQ_BITMAP")):
                     # Keep track of the length of the data we've parsed
@@ -602,9 +698,9 @@ class errludP_prdf:
                     # 8-bits:  rank
                     # 8-bits:  port
                     # 10-bits: bad dq bitmap
-                    rank, i=intConcat(data, i, i+1)
-                    port, i=intConcat(data, i, i+1)
-                    bitmap, i=intConcat(data, i, i+10)
+                    rank, i=intConcat(buf, i, i+1)
+                    port, i=intConcat(buf, i, i+1)
+                    bitmap, i=intConcat(buf, i, i+10)
                     parsedLength += 12
 
                     d[cd]['Bad Dq Bitmap'] = OrderedDict()
@@ -615,7 +711,7 @@ class errludP_prdf:
                     # Collect any extra junk data at the end just in case
                     junkLength = dataLength - parsedLength
                     if (junkLength >= 1):
-                        junk, i=memConcat(data, i, i+junkLength)
+                        junk, i=memConcat(buf, i, i+junkLength)
 
                 elif (hexId == hashString("ROW_REPAIR_VPD")):
                     # Keep track of the length of the data we've parsed
@@ -629,9 +725,9 @@ class errludP_prdf:
                     d[cd]['Row Repair VPD'] = OrderedDict()
 
                     for y in range(entries):
-                        rank, i=intConcat(data, i, i+1)
-                        port, i=intConcat(data, i, i+1)
-                        repair, i=hexConcat(data, i, i+4)
+                        rank, i=intConcat(buf, i, i+1)
+                        port, i=intConcat(buf, i, i+1)
+                        repair, i=hexConcat(buf, i, i+4)
                         parsedLength += 6
 
                         d[cd]['Row Repair VPD'][y] = OrderedDict()
@@ -642,7 +738,7 @@ class errludP_prdf:
                     # Collect any extra junk data at the end just in case
                     junkLength = dataLength - parsedLength
                     if (junkLength >= 1):
-                        junk, i=memConcat(data, i, i+junkLength)
+                        junk, i=memConcat(buf, i, i+junkLength)
 
                 elif (hexId == hashString("TDCTLR_STATE_DATA_START") or
                       hexId == hashString("TDCTLR_STATE_DATA_END")):
@@ -662,7 +758,7 @@ class errludP_prdf:
                     else:
                         section = "TDCTLR_STATE_DATA_END"
 
-                    tdctlrData, i=intConcat(data, i, i+dataLength)
+                    tdctlrData, i=intConcat(buf, i, i+dataLength)
 
                     shift = (dataLength*8) - 1
                     state = (tdctlrData >> shift) & 0x1
@@ -731,9 +827,9 @@ class errludP_prdf:
                     # Keep track of the length of the data we've parsed
                     parsedLength = 0
 
-                    todErrSummary, i=intConcat(data, i, i+4)
-                    activeMdmt, i=intConcat(data, i, i+4)
-                    backupMdmt, i=intConcat(data, i, i+4)
+                    todErrSummary, i=intConcat(buf, i, i+4)
+                    activeMdmt, i=intConcat(buf, i, i+4)
+                    backupMdmt, i=intConcat(buf, i, i+4)
                     parsedLength += 12
 
                     # TOD Error Summary Format (32-bits)
@@ -778,7 +874,7 @@ class errludP_prdf:
                     # Collect any extra junk data at the end just in case
                     junkLength = dataLength - parsedLength
                     if (junkLength >= 1):
-                        junk, i=memConcat(data, i, i+junkLength)
+                        junk, i=memConcat(buf, i, i+junkLength)
 
                 elif (hexId == hashString("L2_LD_COLRPR_FFDC")):
                     # Keep track of the length of the data we've parsed
@@ -797,7 +893,7 @@ class errludP_prdf:
                     # 1-bit:   l2errBank
                     # 3-bits:  l2errDW
                     # 3-bits:  l2errMember
-                    l2FFDC, i=intConcat(data, i, i+8)
+                    l2FFDC, i=intConcat(buf, i, i+8)
                     parsedLength += 8
 
                     l2reserved1    = (l2FFDC >> 48) & 0xff
@@ -829,7 +925,7 @@ class errludP_prdf:
                     # Collect any extra junk data at the end just in case
                     junkLength = dataLength - parsedLength
                     if (junkLength >= 1):
-                        junk, i=memConcat(data, i, i+junkLength)
+                        junk, i=memConcat(buf, i, i+junkLength)
 
                 elif (hexId == hashString("L3_LD_COLRPR_FFDC")):
                     # Keep track of the length of the data we've parsed
@@ -848,7 +944,7 @@ class errludP_prdf:
                     # 1-bit:   l3errBank
                     # 3-bits:  l3errDW
                     # 3-bits:  l3errMember
-                    l3FFDC, i=intConcat(data, i, i+8)
+                    l3FFDC, i=intConcat(buf, i, i+8)
                     parsedLength += 8
 
                     l3reserved1    = (l3FFDC >> 56) & 0xff
@@ -879,7 +975,7 @@ class errludP_prdf:
                     # Collect any extra junk data at the end just in case
                     junkLength = dataLength - parsedLength
                     if (junkLength >= 1):
-                        junk, i=memConcat(data, i, i+junkLength)
+                        junk, i=memConcat(buf, i, i+junkLength)
 
                 elif ( (0 != dataLength) and (8 >= dataLength) ):
                     # Get the registers name and address and print the data
@@ -887,7 +983,7 @@ class errludP_prdf:
                     targetType = (intHuid >> 16) & 0xFF
                     regInfo = registerData.parseRegister(format(targetType, 'x'), dataId)
                     regIndex = regInfo['name'].ljust(25) + ' (' + regInfo['address'] + ')'
-                    regData, i=hexConcat(data, i, i+dataLength)
+                    regData, i=hexConcat(buf, i, i+dataLength)
 
                     if 'Registers' not in d[cd]:
                         d[cd]['Registers'] = OrderedDict()
