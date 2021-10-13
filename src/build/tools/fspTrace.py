@@ -124,6 +124,7 @@ def trexMyVsnprintf(bData, fstring, vparms_start, vparms_end):
             else:
                 #find index of null char, if no null char use vparms_end + 1
                 nullCharIndx = j
+                strStartIndx = j
                 while nullCharIndx < vparms_end + 1:
                     if bData[nullCharIndx]:
                         nullCharIndx += 1
@@ -136,9 +137,29 @@ def trexMyVsnprintf(bData, fstring, vparms_start, vparms_end):
                 parsedArgs.append(struct.unpack_from(unpackStr, bData, j)[0].decode('UTF-8'))
 
                 #make sure index is increased by a multiple of 4
-                j = nullCharIndx + 4 - (nullCharIndx % 4)
+                strLen = nullCharIndx - strStartIndx
 
-        elif "pcdiouxX".find(fstring[i]) != -1:
+                tmpint = strLen + 1;
+                tmpint = (tmpint + 3) & ~3;
+
+                j += tmpint
+
+        elif "pcdiou".find(fstring[i]) != -1:
+            if j >= vparms_end:
+                parsedArgs.append("[[NODATA]]")
+            else:
+                if longflag:
+                    #Unpack long long (8 bytes) from bData
+                    #and add integer to parsed arguments list
+                    parsedArgs.append(struct.unpack_from('>q', bData, j)[0])
+                    j += 8
+                else:
+                    #Unpack long (4 bytes) from bData
+                    #and add integer string to parsed arguments list
+                    parsedArgs.append(struct.unpack_from('>l', bData, j)[0])
+                    j += 4
+            i += 1
+        elif "xX".find(fstring[i]) != -1:
             if j >= vparms_end:
                 parsedArgs.append("[[NODATA]]")
             else:
@@ -240,7 +261,7 @@ def get_pipe_trace(bf, start):
     parsedData = struct.unpack_from('>3IHHII', bf, i)
 
     #Format header data for trace
-    headerStr = f'{parsedData[0]:08}' + "." + str(parsedData[1]) + "|" + f'{parsedData[2]:>5}' + "|"
+    headerStr = f'{parsedData[0]:08}' + "." + f'{parsedData[1]:09}' + "|" + f'{parsedData[2]:>5}' + "|"
     headerStr += (f'{compStr:<16}' + "|" + f'{parsedData[6]:>4}' + "|")
 
     #Get starting index of args
@@ -266,7 +287,6 @@ def trace_adal_print_pipe(bData, oFile, printNumTraces):
             if end <= len(bData):
                 #get format string
                 fstring = get_format_by_hash(str(gpt[2]))
-                print("format string: ", fstring)
                 #Format full trace
                 trace = gpt[3] + trexMyVsnprintf(bData, fstring, gpt[0], end)
                 if flags & TRACE_FILENAME:
