@@ -240,8 +240,12 @@ static std::vector<char> decode_string_handle(const std::vector<uint8_t>& i_stri
 *
 * @param[in]     i_attr_string
 *       String representing PLDM Bios attribute we want the value of.
-* @param[in]     i_expected_attr_type
-*       Type of PLDM attribute, See bios.h.
+* @param[in,out] io_attr_type
+*       Type of PLDM attribute, See bios.h. On input, this param is the type
+*       of bios attr we expect to be returned from the other terminus. Note
+*       that Hostboot does not care if the attribute is read-only or not. If
+*       the other terminus returns a read-only version of the type then set
+*       this param to that type prior to returning from this function.
 * @param[in,out] io_string_table
 *       See file brief in hb_bios_attrs.H.
 * @param[in,out] io_attr_table
@@ -257,7 +261,7 @@ static std::vector<char> decode_string_handle(const std::vector<uint8_t>& i_stri
 * @return Error if any, otherwise nullptr.
 */
 errlHndl_t getCurrentAttrValue(const char *i_attr_string,
-                               const pldm_bios_attribute_type i_expected_attr_type,
+                               pldm_bios_attribute_type & io_attr_type,
                                std::vector<uint8_t>& io_string_table,
                                std::vector<uint8_t>& io_attr_table,
                                const pldm_bios_attr_table_entry * &o_attr_entry_ptr,
@@ -380,11 +384,14 @@ errlHndl_t getCurrentAttrValue(const char *i_attr_string,
     static_cast<pldm_bios_attribute_type>(
                 pldm_bios_table_attr_entry_decode_attribute_type(o_attr_entry_ptr));
 
-  if(attr_type_found != i_expected_attr_type)
+  // Bit 0 indicates if its read-only or not and hostboot ignores that.
+  // Only the BMC honors read-only status of bios attributes.
+  const uint8_t IGNORE_READONLY = 0x7f;
+  if((attr_type_found & IGNORE_READONLY) != io_attr_type)
   {
       PLDM_ERR("Attribute type as 0x%x reported when we expected 0x%x for attribute %s",
                 attr_type_found,
-                i_expected_attr_type,
+                io_attr_type,
                 i_attr_string);
       /*@
         * @errortype
@@ -400,12 +407,16 @@ errlHndl_t getCurrentAttrValue(const char *i_attr_string,
                             MOD_GET_CURRENT_VALUE,
                             RC_UNSUPPORTED_TYPE,
                             attr_type_found,
-                            i_expected_attr_type,
+                            io_attr_type,
                             ErrlEntry::NO_SW_CALLOUT);
       ErrlUserDetailsString(i_attr_string).addToLog(errl);
       addBmcErrorCallouts(errl);
       break;
   }
+
+  // It's possible the attribute type found was actually the read-only
+  // type. If this is the case we want to return that type.
+  io_attr_type = attr_type_found;
 
   std::vector<uint8_t> entry_val_vector;
   errl = getBiosAttrFromHandle(attribute_handle,
@@ -430,7 +441,7 @@ errlHndl_t getCurrentAttrValue(const char *i_attr_string,
 
   PLDM_DBG_BIN("Value found was ", o_attr_val.data(), o_attr_val.size());
   PLDM_EXIT("getCurrentAttrValue Found type 0x%x for attribute %s",
-             attr_type_found, i_attr_string);
+             io_attr_type, i_attr_string);
 
   }while(0);
 
@@ -598,7 +609,7 @@ errlHndl_t genericEnumAttrLookup(std::vector<uint8_t>& io_string_table,
 
         // we have to default to something
         // enum has no invalid values
-        const pldm_bios_attribute_type expected_type = PLDM_BIOS_ENUMERATION;
+        pldm_bios_attribute_type expected_type = PLDM_BIOS_ENUMERATION;
         const pldm_bios_attr_table_entry * attr_entry_ptr = nullptr;
         std::vector<uint8_t> attr_value;
 
@@ -881,7 +892,7 @@ errlHndl_t systemIntAttrLookup(
     o_attr_val = 0;
 
     // Get the bios attribute info from the attr table
-    const pldm_bios_attribute_type expected_type = PLDM_BIOS_INTEGER;
+    pldm_bios_attribute_type expected_type = PLDM_BIOS_INTEGER;
     const pldm_bios_attr_table_entry * attr_entry_ptr = nullptr;
     std::vector<uint8_t> attr_value;
 
@@ -1086,7 +1097,7 @@ errlHndl_t systemStringAttrLookup(std::vector<uint8_t>& io_string_table,
     do{
 
     // Get the attribute info from the attr table
-    const pldm_bios_attribute_type expected_type = PLDM_BIOS_STRING;
+    pldm_bios_attribute_type expected_type = PLDM_BIOS_STRING;
     const pldm_bios_attr_table_entry * attr_entry_ptr = nullptr;
     std::vector<uint8_t> attr_value;
 
@@ -1801,7 +1812,7 @@ errlHndl_t setBiosIntegerAttrValue(std::vector<uint8_t>& io_string_table,
         break;
     }
 
-    const pldm_bios_attribute_type expected_type = PLDM_BIOS_INTEGER;
+    pldm_bios_attribute_type expected_type = PLDM_BIOS_INTEGER;
     const pldm_bios_attr_table_entry * attr_entry_ptr = nullptr;
     std::vector<uint8_t> attr_value;
 
@@ -1853,8 +1864,10 @@ errlHndl_t setBiosIntegerAttrValue(std::vector<uint8_t>& io_string_table,
 
     // set the BIOS attr to the new value
     const auto attr_handle = pldm_bios_table_attr_entry_decode_attribute_handle(attr_entry_ptr);
+    // Make sure the integer value we pass is little-endian
+    const auto attr_value_le = htole64(i_attr_value);
     errl = setBiosAttrByHandle(attr_handle, expected_type,
-                               &i_attr_value, sizeof(i_attr_value));
+                               &attr_value_le, sizeof(attr_value_le));
     if(errl)
     {
         PLDM_ERR("setBiosIntegerValue: An error occurred while sending the new value of %s, %ld, to the BMC",
@@ -1896,7 +1909,7 @@ errlHndl_t setBiosEnumAttrValue(std::vector<uint8_t>& io_string_table,
         break;
     }
 
-    const pldm_bios_attribute_type expected_type = PLDM_BIOS_ENUMERATION;
+    pldm_bios_attribute_type expected_type = PLDM_BIOS_ENUMERATION;
     const pldm_bios_attr_table_entry * attr_entry_ptr = nullptr;
     std::vector<uint8_t> attr_value;
 
@@ -2263,7 +2276,7 @@ errlHndl_t latchBiosAttrs(std::vector<uint8_t>& io_string_table,
                                                     current_attr_name.data() + current_attr_name.size() - 1 - strlen(suffix));
                 pending_attr_name.push_back('\0');
 
-                const auto current_attr_type
+                auto current_attr_type
                     = static_cast<pldm_bios_attribute_type>(pldm_bios_table_attr_entry_decode_attribute_type(current_attr_entry));
 
                 const pldm_bios_attr_table_entry* pending_attr_entry = nullptr;
