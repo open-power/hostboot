@@ -124,6 +124,8 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                                      bool i_set_sdb,
                                      bool i_unsecure_mode)
 {
+    using namespace scomt::perv;
+
     // FAPI_ASSERT condition constant
     const bool FAIL = false;
     // PIBMEM address offset constant
@@ -217,18 +219,27 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
     uint32_t spi_clk_div = 0;
     uint32_t spi_config_val = 0;
     uint32_t SPRG0   = 272;
+
+    fapi2::buffer<uint32_t> l_rcs_sense_reg = 0;
     fapi2::ATTR_CP_REFCLOCK_SELECT_Type l_cp_refclck_select;
 
     FAPI_INF("p10_extract_sbe_rc : Entering ...");
 
-    // First run the clock test on primary clock.
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CP_REFCLOCK_SELECT, i_target_chip, l_cp_refclck_select));
-    p10_clock_test_loop(i_target_chip, l_cp_refclck_select); // expanding FAPI_TRY macro to assign recovery action value
+    // First run the clock test on primary clock, if RCS is still in bypass mode
+    FAPI_TRY(fapi2::getCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL5_FSI, l_rcs_sense_reg));
 
-    if(fapi2::current_err != fapi2::FAPI2_RC_SUCCESS)
+    if(l_rcs_sense_reg.getBit<FSXCOMP_FSXLOG_ROOT_CTRL5_TPFSI_RCS_BYPASS_DC>())
     {
-        o_return_action = P10_EXTRACT_SBE_RC::RECONFIG_WITH_CLOCK_GARD;
-        goto fapi_try_exit;
+        l_cp_refclck_select = l_rcs_sense_reg.getBit<FSXCOMP_FSXLOG_ROOT_CTRL5_TPFSI_RCS_FORCE_BYPASS_CLKSEL_DC>() ?
+                              fapi2::ENUM_ATTR_CP_REFCLOCK_SELECT_OSC1 :
+                              fapi2::ENUM_ATTR_CP_REFCLOCK_SELECT_OSC0;
+        p10_clock_test_loop(i_target_chip, l_cp_refclck_select); // expanding FAPI_TRY macro to assign recovery action value
+
+        if(fapi2::current_err != fapi2::FAPI2_RC_SUCCESS)
+        {
+            o_return_action = P10_EXTRACT_SBE_RC::RECONFIG_WITH_CLOCK_GARD;
+            goto fapi_try_exit;
+        }
     }
 
 #ifdef __HOSTBOOT_MODULE
