@@ -130,14 +130,23 @@ int32_t __analyzeCoreFir( ExtensibleChip * i_chip,
         {
             // We can't mask recoverable errors in the CORE_FIR like we do on
             // all of the other FIRs because it will cause core recovery to
-            // hang. Therefore, we will we will mask recoverable attentions for
-            // the entire FIR (at threshold).
+            // hang. Therefore, we will mask recoverable attentions for the
+            // entire FIR (at threshold).
             auto chipletMask = i_chip->getRegister("EQ_CHIPLET_RE_FIR_MASK");
 
             if ( SUCCESS == chipletMask->Read() )
             {
-                // Bits 5:8 are the bits for analysis to the EQ_CORE_FIR
-                chipletMask->SetBit( 5 + i_corePos );
+                // EQ_CHIPLET_RE_FIR_MASK[5:8] is for the four attached cores.
+                // In fused core mode, any other FIR bits that fire in a masked
+                // core will trigger EQ_CORE_FIR_WOF[56] in the neighbor core.
+                // To prevent the unexpected attentions, we will need to mask
+                // off both cores in the fused core pair.
+                for (const auto& c : {core, getNeighborCore(core)})
+                {
+                    if (nullptr == c) continue; // in case neighbor core is null
+
+                    chipletMask->SetBit(5 + (c->getPos() % MAX_EC_PER_EQ));
+                }
 
                 if ( SUCCESS != chipletMask->Write() )
                 {
