@@ -516,7 +516,7 @@ uint32_t __getGrpInfo<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
             case 2: o_grpChnls = 2; break; // 2MCS
             case 3: o_grpChnls = 3; break; // 3MCS
             case 4: o_grpChnls = 4; break; // 4MCS
-            case 5: o_grpChnls = 6; break; // 6MCS
+            case 6: o_grpChnls = 6; break; // 6MCS
             default:
                 PRDF_ERR( PRDF_FUNC "Invalid MC channels per group value: 0x%x "
                           "on 0x%08x", mcGrpCnfg, i_chip->getHuid() );
