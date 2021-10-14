@@ -581,11 +581,15 @@ public:
      *         maintenance, such as part replacement, would help resolve
      *         the issue being reported.
      *
+     *  @param[in]  i_includeInfo  false = Return false if log is informational
+     *                                     even if there is a callout present;
+     *                             true = Ignore log severity
+     *
      *  @return bool True if a ERRL_UDT_CALLOUT subsection that is not of type
      *               HWAS::PROCEDURE_CALLOUT is found. False if no ERRL_UDT_CALLOUT
      *               or only PROCEDURE_CALLOUT is found.
      */
-    bool hasMaintenanceCallout(void);
+    bool hasMaintenanceCallout(bool i_includeInfo = false);
 
     /**
     *  @brief Search through UD details sections for HW, clock, and part

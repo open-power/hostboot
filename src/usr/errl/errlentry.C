@@ -2418,7 +2418,7 @@ uint8_t ErrlEntry::queryCallouts(TARGETING::Target         * const i_target,
     return criteria_matched;
 }
 
-bool ErrlEntry::hasMaintenanceCallout(void)
+bool ErrlEntry::hasMaintenanceCallout(bool i_includeInfo)
 {
     bool maintenance_callout_found = false;
     //Loop through each section of the errorlog
@@ -2434,6 +2434,11 @@ bool ErrlEntry::hasMaintenanceCallout(void)
                 maintenance_callout_found = true;
             }
         }
+    }
+    //Informational logs might have callouts but generally we don't care
+    if( !i_includeInfo && !isSevVisible() )
+    {
+        maintenance_callout_found = false;
     }
     return maintenance_callout_found;
 }
