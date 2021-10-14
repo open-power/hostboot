@@ -180,6 +180,14 @@ fapi2::ReturnCode pm_set_frequency(
         // Find Pstate 0 across the processor chips depending on the mode (FMax or UT)
         for (auto l_proc_target : i_sys_target.getChildren<fapi2::TARGET_TYPE_PROC_CHIP>())
         {
+            auto l_coreList  =
+                l_proc_target.getChildren< fapi2::TARGET_TYPE_CORE >( fapi2::TARGET_STATE_FUNCTIONAL );
+
+            if (l_coreList.size() == 0)
+            {
+                FAPI_INF("Skip setting_frequency as we don't have any cores in the proc");
+                continue;
+            }
             static const uint32_t TGT_STRING_SIZE = 64;
             char l_tgt_string[TGT_STRING_SIZE];
             fapi2::toString(l_proc_target, l_tgt_string, TGT_STRING_SIZE);
@@ -616,6 +624,16 @@ fapi2::ReturnCode pm_set_wofbase_frequency(
         // Find Pstate 0 across the processor chips depending on the mode (FMax or UT)
         for (auto l_proc_target : i_sys_target.getChildren<fapi2::TARGET_TYPE_PROC_CHIP>())
         {
+            auto l_coreList  =
+                l_proc_target.getChildren< fapi2::TARGET_TYPE_CORE >( fapi2::TARGET_STATE_FUNCTIONAL );
+
+            if (l_coreList.size() == 0)
+            {
+                FAPI_INF("Skip pm_set_wofbase_frequency as we don't have any cores in the proc");
+                continue;
+            }
+
+
             static const uint32_t TGT_STRING_SIZE = 64;
             char l_tgt_string[TGT_STRING_SIZE];
             fapi2::toString(l_proc_target, l_tgt_string, TGT_STRING_SIZE);
@@ -661,7 +679,7 @@ fapi2::ReturnCode pm_set_wofbase_frequency(
             }
 
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SOCKET_POWER_NOMINAL,
-                            l_proc_target, l_powr_nom));
+                        l_proc_target, l_powr_nom));
             //Update power nominal target
             if (!l_powr_nom)
             {

@@ -57,6 +57,9 @@
 #include <p10_scom_c.H>
 #include <multicast_group_defs.H>
 
+#define __INTERNAL_POUNDV__
+#include "p10_pstate_parameter_block_int_vpd.H"
+
 using namespace pm_pstate_parameter_block;
 using namespace scomt;
 static const uint32_t DPLL_TIMEOUT_MS       = 50000;
@@ -83,6 +86,8 @@ p10_set_safe_mode_index(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_tar
 fapi2::ReturnCode
 p10_disable_dds(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
+fapi2::ReturnCode
+update_vdn_dpll_data(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
 //-----------------------------------------------------------------------------
 // Procedure
@@ -127,6 +132,10 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     fapi2::buffer<uint64_t> l_fmult_data(0);
     uint32_t l_safe_mode_dpll_value = 0;
     uint32_t l_safe_mode_dpll_fmin_value = 0;
+    auto l_coreList  =
+        i_target.getChildren< fapi2::TARGET_TYPE_CORE >( fapi2::TARGET_STATE_FUNCTIONAL );
+
+
     //Instantiate PPB object
     PlatPmPPB l_pmPPB(i_target);
 
@@ -134,6 +143,21 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                 fapi2::PSTATE_PB_ATTRIBUTE_ACCESS_ERROR()
                 .set_CHIP_TARGET(i_target),
                 "Pstate Parameter Block attribute access error");
+
+    if (l_coreList.size() == 0 && i_action != APPLY_VOLTAGE_SETTINGS)
+    {
+        FAPI_INF("Skip p10_setup_evid(6.6) as we don't have any cores in the proc");
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    if (l_coreList.size() == 0 && i_action == APPLY_VOLTAGE_SETTINGS)
+    {
+        FAPI_INF("Update VDN and dpll only as we don't have any cores in the proc");
+        FAPI_TRY(update_vdn_dpll_data(i_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+
 
     // Compute the boot/safe values
     FAPI_TRY(l_pmPPB.compute_boot_safe(i_action));
@@ -820,6 +844,117 @@ p10_disable_dds (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 
 fapi_try_exit:
     FAPI_INF("< p10_disable_dds");
+    return fapi2::current_err;
+}
+
+////////////////////////////////////////////////////////////
+//////// update_vdn_dpll_data
+///////////////////////////////////////////////////////////
+fapi2::ReturnCode update_vdn_dpll_data(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    FAPI_INF("update_vdn_dpll_data >>>>>");
+
+    fapi2::voltageBucketData_t l_poundV_data;
+    pm_pstate_parameter_block::AttributeList attrs;
+    uint32_t l_safe_mode_dpll_value = 0;
+    uint32_t l_present_boot_voltage[MAX_VRM];
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+
+    //Instantiate PPB object
+    PlatPmPPB l_pmPPB(i_target);
+
+    l_pmPPB.get_pstate_attrs(attrs);
+
+    fapi2::ATTR_CHIP_EC_FEATURE_STATIC_POUND_V_Type l_chip_static_pound_v = 0;
+    fapi2::ATTR_POUND_V_STATIC_DATA_ENABLE_Type l_poundv_static_data = 0;
+    fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ_Type l_sys_freq_core_floor_mhz;
+
+    do
+    {
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ,
+                               FAPI_SYSTEM, l_sys_freq_core_floor_mhz));
+
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_STATIC_POUND_V,
+                               i_target, l_chip_static_pound_v));
+
+        // if static data is needed, set the enable
+        if (l_chip_static_pound_v)
+        {
+            l_poundv_static_data = 0x1;
+            FAPI_INF("EC level requiring static #V data detected.  Setting ATTR_POUND_V_STATIC_DATA_ENABLE");
+        }
+
+        // Write the enable out
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_POUND_V_STATIC_DATA_ENABLE,
+                               FAPI_SYSTEM,
+                               l_poundv_static_data),
+                 "Error from FAPI_ATTR_SET for attribute ATTR_POUND_V_STATIC_DATA_ENABLE");
+
+        // Read back to pick up any override
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_POUND_V_STATIC_DATA_ENABLE,
+                               FAPI_SYSTEM,
+                               l_poundv_static_data));
+
+        if (l_poundv_static_data)
+        {
+            FAPI_INF("attribute ATTR_POUND_V_STATIC_DATA_ENABLE is set");
+            FAPI_INF("&l_poundV_data %p;   &g_vpd_PVData %p sizeof(g_vpd_PVData) %d sizeof(l_poundV_data) %d",
+                     &l_poundV_data, &g_vpd_PVData, sizeof(g_vpd_PVData), sizeof(l_poundV_data));
+
+            memset(&l_poundV_data, 0, sizeof(g_vpd_PVData));
+            memcpy(&l_poundV_data, &g_vpd_PVData, sizeof(g_vpd_PVData));
+        }
+        else
+        {
+            FAPI_INF("attribute ATTR_POUND_V_STATIC_DATA_ENABLE is NOT set");
+            //Read #V data from each proc
+            FAPI_TRY(p10_pm_get_poundv_bucket(i_target, l_poundV_data));
+        }
+
+        // Set Boot VDN Voltage
+        if(attrs.attr_avs_bus_num[VDN] == INVALID_BUS_NUM)
+        {
+            FAPI_INF("VDN rail is not connected to AVSBus. Skipping VDN programming");
+        }
+        else
+        {
+            //Read VDN present voltage from HW
+            FAPI_TRY(p10_setup_evid_voltageRead(i_target,
+                                                attrs.attr_avs_bus_num,
+                                                attrs.attr_avs_bus_rail_select,
+                                                l_present_boot_voltage),
+                     "Error from voltage read function");
+
+
+            FAPI_INF("Setting Boot voltage value for VDN (%d mv)", attrs.attr_boot_voltage_mv[VDN]);
+            FAPI_TRY(p10_setup_evid_voltageWrite(i_target,
+                                                 attrs.attr_avs_bus_num[VDN],
+                                                 attrs.attr_avs_bus_rail_select[VDN],
+                                                 l_poundV_data.static_rails.SRVdnVltg,
+                                                 0,
+                                                 l_present_boot_voltage[VDN],
+                                                 VDN_SETUP),
+                     "error from VDN setup function");
+        }
+
+        // Convert frequency value to a format that needs to be written to the
+        // register
+        l_safe_mode_dpll_value = ((l_sys_freq_core_floor_mhz * 1000) * attrs.attr_proc_dpll_divider) /
+                                 attrs.attr_freq_proc_refclock_khz;
+
+        // Set the DPLL frequency values to safe mode values
+        FAPI_TRY (p10_update_dpll_value(i_target,
+                                        l_safe_mode_dpll_value,
+                                        l_safe_mode_dpll_value),
+                  "Error from p10_update_dpll_value function");
+
+    }
+    while(0);
+
+fapi_try_exit:
+    FAPI_INF("update_vdn_dpll_data <<<<<<<");
     return fapi2::current_err;
 }
 

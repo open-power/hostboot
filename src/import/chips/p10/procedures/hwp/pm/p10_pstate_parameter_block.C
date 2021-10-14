@@ -201,6 +201,17 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
         // OCC content
         memset (&l_occppb , 0, sizeof (OCCPstateParmBlock_t));
 
+        auto l_coreList  =  
+        i_target.getChildren< fapi2::TARGET_TYPE_CORE >( fapi2::TARGET_STATE_FUNCTIONAL );
+
+        if (l_coreList.size() == 0)
+        {
+            FAPI_INF("Skip p10_pstate_parameter_block as we don't have any cores in the proc");
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+
+
         //if PSTATES_MODE is off then we don't need to execute further to collect
         //the data.
         if (!(l_pmPPB->isPstateModeEnabled()))
