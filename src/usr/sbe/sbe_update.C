@@ -3341,9 +3341,9 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
         PNOR::ECC::eccStatus eccStatus = PNOR::ECC::CLEAN;
 
         // This struct is always 8-byte aligned
-        size_t sbeInfoSize = sizeof(sbeSeepromVersionInfo_t);
-        size_t sbeInfoSize_ECC = (sbeInfoSize*9)/8;
-
+        const size_t sbeInfoSize = sizeof(sbeSeepromVersionInfo_t);
+        const size_t sbeInfoSize_ECC = (sbeInfoSize*9)/8;
+        size_t dd_op_size = 0;
 
         // Buffers for reading/writing SBE Version Information
         uint8_t * sbeInfo_data = static_cast<uint8_t*>(
@@ -3389,9 +3389,10 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
             TRACDBIN( g_trac_sbe, "updateSeepromSide: Invalid Info ECC",
                       sbeInfo_data_ECC, sbeInfoSize_ECC);
 
+            dd_op_size = sbeInfoSize_ECC;
             err = deviceWrite( io_sbeState.target,
                                sbeInfo_data_ECC,
-                               sbeInfoSize_ECC,
+                               dd_op_size,
                                DEVICE_EEPROM_ADDRESS(
                                              io_sbeState.seeprom_side_to_update,
                                              SBE_VERSION_SEEPROM_ADDRESS,
@@ -3407,6 +3408,9 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                            ERRL_GETEID_SAFE(err));
                 break;
             }
+            assert(dd_op_size == sbeInfoSize_ECC,
+                   "updateSeepromSide() - devWrite-1 returned size %d; expected %d",
+                   dd_op_size, sbeInfoSize_ECC);
 
             // In an effort to avoid an infinite loop of updates, if there
             // was an ECC error when reading this SBE Version Information
@@ -3415,9 +3419,10 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
             if ( io_sbeState.new_readBack_check == true )
             {
                 // Read Back Version Information
+                dd_op_size = sbeInfoSize_ECC;
                 err = deviceRead( io_sbeState.target,
                                   sbeInfo_data_ECC_readBack,
-                                  sbeInfoSize_ECC,
+                                  dd_op_size,
                                   DEVICE_EEPROM_ADDRESS(
                                              io_sbeState.seeprom_side_to_update,
                                              SBE_VERSION_SEEPROM_ADDRESS,
@@ -3434,6 +3439,9 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                                ERRL_GETEID_SAFE(err));
                     break;
                 }
+                assert(dd_op_size == sbeInfoSize_ECC,
+                       "updateSeepromSide() - devRead-1 returned size %d; expected %d",
+                       dd_op_size, sbeInfoSize_ECC);
 
                 // Compare ECC data
                 rc_readBack_ECC_memcmp = memcmp( sbeInfo_data_ECC,
@@ -3663,6 +3671,9 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                             err = nullptr;
                         }
                     }
+                    assert(l_regSize == sizeof(l_scomreg),
+                           "updateSeepromSide() - ScomReadWrite returned size %d; expected %d",
+                           l_regSize, sizeof(l_scomreg));
                 }
             }
 
@@ -3673,9 +3684,10 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                        io_sbeState.seeprom_side_to_update );
 
             //Write image to indicated side
+            dd_op_size = sbeEccImgSize;
             err = deviceWrite(io_sbeState.target,
                               reinterpret_cast<void*>(SBE_ECC_IMG_VADDR),
-                              sbeEccImgSize,
+                              dd_op_size,
                               DEVICE_EEPROM_ADDRESS(
                                             io_sbeState.seeprom_side_to_update,
                                             SBE_IMAGE_SEEPROM_ADDRESS,
@@ -3695,6 +3707,9 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                            ERRL_GETRC_SAFE(err), ERRL_GETEID_SAFE(err));
                 break;
             }
+            assert(dd_op_size == sbeEccImgSize,
+                   "updateSeepromSide() - devWrite-2 returned size %d; expected %d",
+                   dd_op_size, sbeEccImgSize);
 
             // Perform read-back verification of the SBE image when requested
             if(UTIL::assertGetToplevelTarget()->getAttr<ATTR_DO_SBE_READBACK_VERIFICATION>())
@@ -3811,9 +3826,10 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
             TRACDBIN( g_trac_sbe, "updateSeepromSide: Info ECC",
                       sbeInfo_data_ECC, sbeInfoSize_ECC);
 
+            dd_op_size = sbeInfoSize_ECC;
             err = deviceWrite( io_sbeState.target,
                                sbeInfo_data_ECC,
-                               sbeInfoSize_ECC,
+                               dd_op_size,
                                DEVICE_EEPROM_ADDRESS(
                                              io_sbeState.seeprom_side_to_update,
                                              SBE_VERSION_SEEPROM_ADDRESS,
@@ -3829,7 +3845,127 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                            ERRL_GETEID_SAFE(err));
                 break;
             }
+            assert(dd_op_size == sbeInfoSize_ECC,
+                   "updateSeepromSide() - devWrite-3 returned size %d; expected %d",
+                   dd_op_size, sbeInfoSize_ECC);
 
+            // In an effort to catch bad HW, do a read back of the updated
+            // SBE Version Information that was just written looking for any data mismatch
+
+            // Clear buffers
+            memset( sbeInfo_data_ECC_readBack, 0, sbeInfoSize_ECC);
+            memset( sbeInfo_data_readBack, 0, sbeInfoSize);
+
+            // Read Back Version Information
+            dd_op_size = sbeInfoSize_ECC;
+            err = deviceRead( io_sbeState.target,
+                              sbeInfo_data_ECC_readBack,
+                              dd_op_size,
+                              DEVICE_EEPROM_ADDRESS(
+                                         io_sbeState.seeprom_side_to_update,
+                                         SBE_VERSION_SEEPROM_ADDRESS,
+                                         EEPROM::HARDWARE));
+
+            if(err)
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK"updateSeepromSide() - Error "
+                           "Reading Back Upodated SBE Version Info: HUID=0x%.8X, "
+                           "side=%d, RC=0x%X, EID=0x%lX",
+                           TARGETING::get_huid(io_sbeState.target),
+                           io_sbeState.seeprom_side_to_update,
+                           ERRL_GETRC_SAFE(err),
+                           ERRL_GETEID_SAFE(err));
+                break;
+            }
+            assert(dd_op_size == sbeInfoSize_ECC,
+                   "updateSeepromSide() - devRead-2 returned size %d; expected %d",
+                   dd_op_size, sbeInfoSize_ECC);
+
+            // Compare ECC data
+            rc_readBack_ECC_memcmp = memcmp( sbeInfo_data_ECC,
+                                             sbeInfo_data_ECC_readBack,
+                                             sbeInfoSize_ECC);
+
+            // Fail if any data miscompare
+            if ( rc_readBack_ECC_memcmp != 0 )
+            {
+                // There is an issue with this SEEPROM
+
+                TRACFCOMP( g_trac_sbe,ERR_MRK"updateSeepromSide() - "
+                           "Data Miscompare On SBE Version Read Back After Writing It: "
+                           "rc_ECC=%d sI=%d, sI_ECC=%d, HUID=0x%.8X, side=%d",
+                           rc_readBack_ECC_memcmp, sbeInfoSize, sbeInfoSize_ECC,
+                           TARGETING::get_huid(io_sbeState.target),
+                           io_sbeState.seeprom_side_to_update);
+
+                TRACFBIN( g_trac_sbe, "updateSeepromSide: readback_wECC",
+                          sbeInfo_data_ECC_readBack, sbeInfoSize_ECC);
+
+                TRACFBIN( g_trac_sbe, "updateSeepromSide: written data",
+                          sbeInfo_data_ECC, sbeInfoSize_ECC);
+
+
+                /*@
+                 * @errortype
+                 * @moduleid     SBE_UPDATE_SEEPROMS
+                 * @reasoncode   SBE_DATA_MISCOMPARE
+                 * @userdata1[0:31]     Proc Target HUID
+                 * @userdata1[32:63]    SEEPROM Side
+                 * @userdata2[0:31]     Size - No Ecc
+                 * @userdata2[32:63]    Size - ECC
+                 * @devdesc      Data Miscompare Fail Reading Back
+                 *               SBE Version Information
+                 * @custdesc     A problem occurred with processor seeprom
+                 */
+                err = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                                    SBE_UPDATE_SEEPROMS,
+                                    SBE_DATA_MISCOMPARE,
+                                    TWO_UINT32_TO_UINT64(
+                                         TARGETING::get_huid(io_sbeState.target),
+                                         io_sbeState.seeprom_side_to_update),
+                                    TWO_UINT32_TO_UINT64(sbeInfoSize,
+                                                         sbeInfoSize_ECC));
+
+                // Callout Seeprom
+                err->addPartCallout(io_sbeState.target,
+                                    HWAS::SBE_SEEPROM_PART_TYPE,
+                                    HWAS::SRCI_PRIORITY_HIGH,
+                                    HWAS::NO_DECONFIG,
+                                    HWAS::GARD_NULL );
+
+                // Callout the proc, too, in case the Seeprom Callout
+                // above does not lead to a FRU callout
+                err->addHwCallout(io_sbeState.target,
+                                  HWAS::SRCI_PRIORITY_MED,
+                                  HWAS::NO_DECONFIG,
+                                  HWAS::GARD_NULL);
+
+                // Add general data sections to capture the
+                // different versions
+                err->addFFDC(SBE_COMP_ID,
+                             sbeInfo_data_ECC_readBack,
+                             SBE_IMAGE_VERSION_SIZE,
+                             0,                 // Version
+                             ERRL_UDT_NOFORMAT, // parser ignores data
+                             false );           // merge
+
+                err->addFFDC(SBE_COMP_ID,
+                             sbeInfo_data_ECC,
+                             SBE_IMAGE_VERSION_SIZE,
+                             0,                 // Version
+                             ERRL_UDT_NOFORMAT, // parser ignores data
+                             false );           // merge
+
+                ErrlUserDetailsTarget(io_sbeState.target).addToLog(err);
+                err->collectTrace(SBE_COMP_NAME);
+
+                break;
+            }
+
+
+            /*********************************************************************/
+            /*  Update Internal Code Structure with new SBE Version Information  */
+            /*********************************************************************/
             // Successful update if we get here, so update internal code
             // structure with the new version information
             memcpy( io_sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY
