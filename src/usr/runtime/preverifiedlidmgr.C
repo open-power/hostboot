@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -172,7 +172,7 @@ errlHndl_t PreVerifiedLidMgr::_loadFromPnor(const PNOR::SectionId i_sec,
     // If SB compiled in, only add fake secure header if the section is never
     // signed. e.g. RINGOVD section
     // Otherwise always add fake secure header when SB compiled out
-    if (RUNTIME::isPreVerifiedSectionSecure(i_sec))
+    if (!RUNTIME::isPreVerifiedSectionSecure(i_sec))
     {
 #endif
         // Check if Header is mising
