@@ -220,27 +220,12 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
     uint32_t spi_config_val = 0;
     uint32_t SPRG0   = 272;
 
+#ifndef __HOSTBOOT_RUNTIME
     fapi2::buffer<uint32_t> l_rcs_sense_reg = 0;
     fapi2::ATTR_CP_REFCLOCK_SELECT_Type l_cp_refclck_select;
+#endif
 
     FAPI_INF("p10_extract_sbe_rc : Entering ...");
-
-    // First run the clock test on primary clock, if RCS is still in bypass mode
-    FAPI_TRY(fapi2::getCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL5_FSI, l_rcs_sense_reg));
-
-    if(l_rcs_sense_reg.getBit<FSXCOMP_FSXLOG_ROOT_CTRL5_TPFSI_RCS_BYPASS_DC>())
-    {
-        l_cp_refclck_select = l_rcs_sense_reg.getBit<FSXCOMP_FSXLOG_ROOT_CTRL5_TPFSI_RCS_FORCE_BYPASS_CLKSEL_DC>() ?
-                              fapi2::ENUM_ATTR_CP_REFCLOCK_SELECT_OSC1 :
-                              fapi2::ENUM_ATTR_CP_REFCLOCK_SELECT_OSC0;
-        p10_clock_test_loop(i_target_chip, l_cp_refclck_select); // expanding FAPI_TRY macro to assign recovery action value
-
-        if(fapi2::current_err != fapi2::FAPI2_RC_SUCCESS)
-        {
-            o_return_action = P10_EXTRACT_SBE_RC::RECONFIG_WITH_CLOCK_GARD;
-            goto fapi_try_exit;
-        }
-    }
 
 #ifdef __HOSTBOOT_MODULE
     l_is_HB_module = true;
@@ -272,6 +257,31 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
         fapi2::current_err = fapi2::FAPI2_RC_INVALID_PARAMETER;
         goto fapi_try_exit;
     }
+
+#ifndef __HOSTBOOT_RUNTIME
+
+    // First run the clock test on primary clock, if RCS is still in bypass mode
+    // call this only if SP or SLAVE_HB_BEFORE_SMP case
+    if(i_set_sdb)
+    {
+        FAPI_TRY(fapi2::getCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL5_FSI, l_rcs_sense_reg));
+
+        if(l_rcs_sense_reg.getBit<FSXCOMP_FSXLOG_ROOT_CTRL5_TPFSI_RCS_BYPASS_DC>())
+        {
+            l_cp_refclck_select = l_rcs_sense_reg.getBit<FSXCOMP_FSXLOG_ROOT_CTRL5_TPFSI_RCS_FORCE_BYPASS_CLKSEL_DC>() ?
+                                  fapi2::ENUM_ATTR_CP_REFCLOCK_SELECT_OSC1 :
+                                  fapi2::ENUM_ATTR_CP_REFCLOCK_SELECT_OSC0;
+            p10_clock_test_loop(i_target_chip, l_cp_refclck_select); // expanding FAPI_TRY macro to assign recovery action value
+
+            if(fapi2::current_err != fapi2::FAPI2_RC_SUCCESS)
+            {
+                o_return_action = P10_EXTRACT_SBE_RC::RECONFIG_WITH_CLOCK_GARD;
+                goto fapi_try_exit;
+            }
+        }
+    }
+
+#endif
 
 #ifndef __HOSTBOOT_MODULE
     FAPI_INF("p10_extract_sbe_rc: Reading CBS Status register");
