@@ -128,6 +128,7 @@ void* call_host_cbs_start(void *io_pArgs)
                           get_huid(l_cpu_target),
                           TRACE_ERR_ARGS(l_errl));
                 captureError(l_errl, l_stepError, HWPF_COMP_ID, l_cpu_target);
+                continue; //Don't continue on this chip if p10_clock_test failed
             }
 
             TRACFCOMP(g_trac_isteps_trace,
