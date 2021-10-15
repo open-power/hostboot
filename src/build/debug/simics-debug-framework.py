@@ -78,7 +78,7 @@ class DebugFrameworkIPCMessage:
         if sys.version_info.major == 3:
             msg_bytes = bytes(self.msg, 'latin-1')
             return ("[ \"" + self.msgtype + "\", \"" +
-                    binascii.hexlify(msg_bytes).decode('utf-8') + "\" ]\n")
+                    binascii.hexlify(msg_bytes).decode('utf-8',errors='replace') + "\" ]\n")
         else:
             return ("[ \"" + self.msgtype + "\", \"" +
                 self.msg.encode("hex") + "\" ]\n")
@@ -91,7 +91,7 @@ class DebugFrameworkIPCMessage:
             print(  "       Check for print's in your perl script!!!")
         else:
             self.msgtype = match.group(1)
-            self.msg = bytearray.fromhex(match.group(2)).decode('utf-8')
+            self.msg = bytearray.fromhex(match.group(2)).decode('utf-8',errors='replace')
 
 # @class DebugFrameworkProcess
 # @brief Provides a wrapper to the 'subprocess' interface and IPC bridge.
