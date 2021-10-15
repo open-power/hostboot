@@ -75,11 +75,13 @@ fapi2::ReturnCode is_ccs_2666_write_needed(const fapi2::Target<fapi2::TARGET_TYP
     FAPI_TRY(mss::attr::get_freq(i_target, l_freq));
     FAPI_TRY(mss::dimm::has_rcd<mss::mc_type::EXPLORER>(i_target, l_has_rcd));
     FAPI_TRY(mss::attr::get_dram_module_height(l_ocmb, l_height));
+    FAPI_DBG("%s Ran has_rcd attribute returned as %d", mss::c_str(i_target), l_has_rcd);
 
     // The workaround is needed if we're at 2666 and do not have an RCD parity delay
-    // 4U DDIMM's do not run in RCD parity mode but have an RCD so we do not have a delay from parity
+    // 2U and 4U DDIMM's do not run in RCD parity mode but have an RCD so we do not have a delay from parity
     {
-        const bool l_no_rcd_delay = (l_has_rcd == NO_RCD) || (l_height == fapi2::ENUM_ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_4U);
+        bool l_no_rcd_delay = l_has_rcd == NO_RCD  || (l_height == fapi2::ENUM_ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_4U)
+                              || (l_height == fapi2::ENUM_ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_2U);
         o_is_needed = (l_freq == FREQ_NEEDS_WORKAROUND) && (l_no_rcd_delay);
         FAPI_DBG("%s freq:%lu, RCD:%s, workaround %s needed",
                  mss::c_str(i_target), l_freq, l_no_rcd_delay ? "yes" : "no", o_is_needed ? "is" : "not");
