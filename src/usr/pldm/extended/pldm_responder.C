@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -237,13 +237,13 @@ errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const void* i_msg, const siz
 
         if (cat_table == std::cend(pldm_message_categories))
         {
-            PLDM_INF("Unsupported PLDM request category %d",
+            PLDM_INF("handle_inbound_req PLDM_ERROR_NOT_READY RC_INVALID_MSG_CATEGORY=%d",
                      category);
 
-            send_cc_only_response(i_msgQ, pldm_message, PLDM_ERROR_INVALID_PLDM_TYPE);
+            send_cc_only_response(i_msgQ, pldm_message, PLDM_ERROR_NOT_READY);
 
             /*@
-             * @errortype  ERRL_SEV_UNRECOVERABLE
+             * @errortype  ERRL_SEV_INFORMATIONAL
              * @moduleid   MOD_HANDLE_INBOUND_REQ
              * @reasoncode RC_INVALID_MSG_CATEGORY
              * @userdata1  The unsupported category of the PLDM message
@@ -251,7 +251,7 @@ errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const void* i_msg, const siz
              * @devdesc    Software problem, unknown PLDM message category
              * @custdesc   A software error occurred during system boot
              */
-            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+            errl = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
                                  MOD_HANDLE_INBOUND_REQ,
                                  RC_INVALID_MSG_CATEGORY,
                                  category,
@@ -344,14 +344,13 @@ errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const void* i_msg, const siz
 
         if (handler == cat_table->handlers + cat_table->num_handlers)
         {
-            PLDM_INF("Unsupported PLDM request command type "
-                     "(category = %d, command = %d)",
+            PLDM_INF("handle_inbound_req PLDM_ERROR_NOT_READY RC_INVALID_COMMAND category=%d pldm_command=%d",
                      category, pldm_command);
 
-            send_cc_only_response(i_msgQ, pldm_message, PLDM_ERROR_UNSUPPORTED_PLDM_CMD);
+            send_cc_only_response(i_msgQ, pldm_message, PLDM_ERROR_NOT_READY);
 
             /*@
-             * @errortype  ERRL_SEV_UNRECOVERABLE
+             * @errortype  ERRL_SEV_INFORMATIONAL
              * @moduleid   MOD_HANDLE_INBOUND_REQ
              * @reasoncode RC_INVALID_COMMAND
              * @userdata1  Unrecognized PLDM command
@@ -359,7 +358,7 @@ errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const void* i_msg, const siz
              * @devdesc    Software problem, unrecognized PLDM command
              * @custdesc   A software error occurred during system boot
              */
-            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+            errl = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
                                  MOD_HANDLE_INBOUND_REQ,
                                  RC_INVALID_COMMAND,
                                  pldm_command,
@@ -374,10 +373,9 @@ errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const void* i_msg, const siz
         if(!Util::isTargetingLoaded())
         {
             send_cc_only_response(i_msgQ, pldm_message, PLDM_ERROR_NOT_READY);
-            PLDM_INF("Received a PLDM request of category %d message type %d but targeting"
-                     " has yet to be loaded. This usually indicates the message is left over"
-                     " from a previous boot and was actually intended for PHYP at runtime."
-                     " Hostboot should ignore it but log an informational error just in case.",
+            PLDM_INF("handle_inbound_req PLDM_ERROR_NOT_READY IGNORING "
+                     "category=%d pldm_command=%d, TARGETING -NOT- loaded, "
+                     "probably stray from previous boot or intended for PHYP at runtime",
                      category, pldm_command);
             /*@
              * @errortype  ERRL_SEV_INFORMATIONAL

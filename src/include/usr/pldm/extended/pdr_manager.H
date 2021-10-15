@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -242,6 +242,12 @@ public:
         state_query_type_t query_type = { };
         uint64_t userdata = 0;
     } PACKED;
+
+    /* @brief Logs and asserts for unsupported PDR range usages
+     *
+     * @param[in] i_next_query_id    The next query id which exceeded the limits.
+     */
+    void AssertInvalidRange(const state_query_id_t i_next_query_id);
 
     /* @brief  Add a state effecter PDR to the PDR repository.
      *
@@ -484,7 +490,7 @@ public:
      *                            Its required that the functor return true in order to idenify that the PDR was found.
      *                            The functor will be called for each numeric effecter that is associated with
      *                            i_target_entity.
-     * @return effecter_id_t     The BMC's effecter ID for the given entity id, or 0 if not found.
+     * @return effecter_id_t      The BMC's effecter ID for the given entity id, or 0 if not found.
      */
     template<typename F>
     effecter_id_t findNumericEffecterId(const pldm_entity & i_target_entity,
@@ -554,10 +560,24 @@ private:
     std::map<uint32_t, std::vector<effecter_registry_value_t>> iv_effecter_msgq_registry;
 #endif
 
+    // BMC range 0x0001 - 0x5555
+    // Hostboot range 0x5556 - 0xAAAA
+    // PHYP range 0xAAAB - 0xFFFF
+    const uint16_t HB_PLDM_SENSOR_EFFECTER_ID_RANGE_START = 0x5556;
+    const uint16_t HB_PLDM_SENSOR_EFFECTER_ID_RANGE_END = 0xAAAA;
+
     /* This monotonically increasing value is used to assign sensor/effecter IDs, and the IDs are stored in
      * attributes, along with a state_query_handler_id_t value, to record how to handle PLDM sensor/effecter
      * queries. */
-    state_query_id_t iv_next_state_query_id = 1;
+    state_query_id_t iv_next_state_query_id = HB_PLDM_SENSOR_EFFECTER_ID_RANGE_START;
+
+    // Documentation Notation - get_new_record_handle imposes a set of similar
+    // segregated ranges for the PDR creations
+    //   See libpldm/pdr.c for implementation details
+    // BMC: 0x00000001 to 0x00FFFFFF (recall: 0x00000000 is reserved per PLDM spec)
+    // Hostboot: 0x01000000 to 0x01FFFFFF
+    // PHYP: 0x02000000 to 0x02FFFFFF
+    // Reserved: 0x03000000 to 0xFFFFFFFF
 
     /* @brief  Handle a PLDM state sensor or effecter command.
      *

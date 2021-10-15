@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -423,7 +423,8 @@ errlHndl_t handleGracefulShutdownRequest(const state_effecter_callback_args& i_a
     errlHndl_t errl = nullptr;
 
 #ifdef __HOSTBOOT_RUNTIME
-    PLDM_ERR("handleGracefulShutdownRequest: Received graceful shutdown request at runtime");
+    PLDM_ERR("handleGracefulShutdownRequest: PLDM_ERROR_NOT_READY Received graceful "
+             "shutdown request while at runtime, returning PLDM_ERROR_NOT_READY to BMC.");
     send_cc_only_response(i_args.i_msgQ, i_args.i_msg, PLDM_ERROR_NOT_READY);
 
     /*@
@@ -534,6 +535,7 @@ errlHndl_t handleOccSetStateEffecterRequest(const state_effecter_callback_args& 
         addBmcErrorCallouts(errl);
         errlCommit(errl, PLDM_COMP_ID);
         response_code = PLDM_ERROR_NOT_READY;
+        PLDM_ERR("handleOccSetStateEffecterRequest PLDM_ERROR_NOT_READY being set response_code");
         break;
     }
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,6 +32,7 @@
 #include <vector>
 #include <cstdint>
 #include <memory>
+#include <map>
 
 // Error logs
 #include <errl/errlentry.H>
@@ -92,11 +93,17 @@ struct pdr
  * @param[out] o_pdr
  *             The PDR from the BMC. Output not valid if error returned.
  *             Pre-existing data will be cleared from the container.
+ * @param[in/out] io_pdr_usage_map
+ *                A usage map to keep track of the PDR's seen.
+ *                If, during the life cycle of the map, a duplicate PDR is seen,
+ *                an error log will be made and returned to caller for
+ *                proper handling.
  * @return Error if any, otherwise nullptr.
  */
 errlHndl_t getPDR(const msg_q_t i_msgQ,
                   pdr_handle_t& io_pdr_record_handle,
-                  pdr& o_pdr)
+                  pdr& o_pdr,
+                  std::map< pdr_handle_t, uint32_t > &io_pdr_usage_map)
 {
     PLDM_ENTER("getPDR");
 
@@ -254,7 +261,49 @@ errlHndl_t getPDR(const msg_q_t i_msgQ,
         const auto pdr_hdr = reinterpret_cast<pldm_pdr_hdr*>(o_pdr.data.data());
         o_pdr.record_handle = le32toh(pdr_hdr->record_handle);
 
+        // Used to abort the IPL if PLDM PDRs are marked as having
+        // already been seen (integrity check the getPDR flow)
+        // If in the future any caller desires to -NOT- do a uniqueness check here
+        // the io_pdr_usage_map provided as input would need to be cleared prior to invocation.
+        bool pdr_abort = false;
+
+        if (io_pdr_usage_map.count(o_pdr.record_handle))
+        {
+            // Problem observed has been an infinite PDR loop where we -NEVER- receive
+            // the null terminator which causes Hostboot to hang/crash when resources
+            // are depleted
+            PLDM_ERR("PDR ENCOUNTERED already been seen -> io_pdr_usage_map[0x%08x]=%d",
+                o_pdr.record_handle, io_pdr_usage_map[o_pdr.record_handle]);
+            pdr_abort = true;
+        }
+        else
+        {
+            // first invocation will pass io_pdr_record_handle as FIRST_PDR_HANDLE
+            // so we need to get the REAL record_handle to log the usage properly
+            io_pdr_usage_map[o_pdr.record_handle] = 1;
+        }
+
         io_pdr_record_handle = response.next_record_hndl;
+
+        if (pdr_abort)
+        {
+            /*@
+             * @errortype  ERRL_SEV_UNRECOVERABLE
+             * @moduleid   MOD_GET_PDR_REPO
+             * @reasoncode RC_DEFENSIVE_LIMIT
+             * @userdata1  o_pdr.record_handle
+             * @userdata2  Unused
+             * @devdesc    Software problem, PLDM transaction problem
+             * @custdesc   A software error occurred during system boot
+             */
+            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                 MOD_GET_PDR_REPO,
+                                 RC_DEFENSIVE_LIMIT,
+                                 o_pdr.record_handle,
+                                 0,
+                                 ErrlEntry::NO_SW_CALLOUT);
+            addBmcErrorCallouts(errl);
+        }
     } while (false);
 
     PLDM_EXIT("getPDR");
@@ -273,15 +322,20 @@ errlHndl_t getAllPdrs(std::vector<pdr>& o_pdrs)
 
     pdr_handle_t pdr_handle = FIRST_PDR_HANDLE; // getPDR updates this for us
     errlHndl_t errl = nullptr;
+    std::map< pdr_handle_t, uint32_t > pdr_usage_map;
 
     do
     {
         pdr result_pdr { };
 
-        errl = getPDR(msgQ, pdr_handle, result_pdr);
+        // Current implementation uses the same pdr_usage_map to track uniqueness.
+        // If in the future callers of getPDR do -NOT- wish to abort on duplicates,
+        // the pdr_usage_map should be cleared prior to invocation.
+        errl = getPDR(msgQ, pdr_handle, result_pdr, pdr_usage_map);
 
         if (errl)
         {
+            PLDM_ERR("getAllPdrs encountered a problem in getPDR, look for an errlog");
             break;
         }
 

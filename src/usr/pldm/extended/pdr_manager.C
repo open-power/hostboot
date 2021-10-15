@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -178,7 +178,6 @@ errlHndl_t PdrManager::invalidateHBTerminusLocatorPdr()
     if(!l_terminus_locator_pdr)
     {
         /*@
-         * @errortype
          * @moduleid   MOD_PDR_MANAGER
          * @reasoncode RC_TERM_LOCATOR_NOT_FOUND
          * @devdesc    Could not find Terminus Locator PDR in the PDR repo
@@ -385,7 +384,6 @@ std::vector<fru_record_set_id> PdrManager::findFruRecordSetIdsByType(const entit
     return rsis;
 }
 
-
 /* @brief The number of pldm_state_query_record_t we need to allocate to hold an
  *        instance of ATTR_PLDM_STATE_QUERY_RECORDS_type.
  */
@@ -443,6 +441,30 @@ static void appendStateQueryInfo(const PdrManager::pldm_state_query_record_t i_r
     records[num_records] = i_record;
     writePldmStateQueryRecords(sys, records);
     sys->setAttr<ATTR_NUM_PLDM_STATE_QUERY_RECORDS>(num_records + 1);
+}
+
+void PdrManager::AssertInvalidRange(const state_query_id_t next_state_query_id)
+{
+    errlHndl_t errl = nullptr;
+    /*@
+     * @moduleid   MOD_PDR_MANAGER
+     * @reasoncode RC_INVALID_OFFSET_ID
+     * @userdata1  HB_PLDM_SENSOR_EFFECTER_ID_RANGE_END
+     * @userdata2  next_state_query_id
+     * @devdesc    Software problem, overrun state sensor/effecter IDs
+     * @custdesc   A software error occurred during system boot
+     */
+    errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                         MOD_PDR_MANAGER,
+                         RC_INVALID_OFFSET_ID,
+                         HB_PLDM_SENSOR_EFFECTER_ID_RANGE_END,
+                         next_state_query_id,
+                         ErrlEntry::NO_SW_CALLOUT);
+    addBmcErrorCallouts(errl);
+    errlCommit(errl, PLDM_COMP_ID);
+    // We commit the errl to have an identifier as to why we assert,
+    // this condition should -NOT- happen
+    assert(false, "Exceeded Hostboot PDR ID range");
 }
 
 void PdrManager::addStateSensorPdr(Target* const i_target,
@@ -534,6 +556,12 @@ void PdrManager::addStateSensorPdr(Target* const i_target,
     appendStateQueryInfo(query_record);
 
     ++iv_next_state_query_id;
+    if (iv_next_state_query_id > HB_PLDM_SENSOR_EFFECTER_ID_RANGE_END)
+    {
+        // This should -NOT- ever happen
+        PLDM_ERR("addStateSensorPdr HB_PLDM_SENSOR_EFFECTER_ID_RANGE_END reached, this should -NOT- have happened");
+        AssertInvalidRange(iv_next_state_query_id);
+    }
 }
 
 void PdrManager::addStateEffecterPdr(Target* const i_target,
@@ -608,6 +636,12 @@ void PdrManager::addStateEffecterPdr(Target* const i_target,
     appendStateQueryInfo(query_record);
 
     ++iv_next_state_query_id;
+    if (iv_next_state_query_id > HB_PLDM_SENSOR_EFFECTER_ID_RANGE_END)
+    {
+        // This should -NOT- ever happen
+        PLDM_ERR("addStateEffecterPdr HB_PLDM_SENSOR_EFFECTER_ID_RANGE_END reached, this should -NOT- have happened");
+        AssertInvalidRange(iv_next_state_query_id);
+    }
 }
 
 /**
@@ -812,7 +846,6 @@ errlHndl_t PdrManager::handleStateQueryRequest(const state_query_type_t i_queryt
                          i_query_id);
 
                 /*@
-                 * @errortype  ERRL_SEV_UNRECOVERABLE
                  * @moduleid   MOD_PDR_MANAGER
                  * @reasoncode RC_INVALID_STATE_QUERY_ID
                  * @userdata1[0:31]  Sensor/effecter ID
@@ -821,7 +854,7 @@ errlHndl_t PdrManager::handleStateQueryRequest(const state_query_type_t i_queryt
                  * @devdesc    Software problem, invalid state sensor/effecter ID received from BMC
                  * @custdesc   A software error occurred during system boot
                  */
-                errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                errl = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
                                      MOD_PDR_MANAGER,
                                      RC_INVALID_STATE_QUERY_ID,
                                      TWO_UINT32_TO_UINT64(i_query_id, i_querytype),
@@ -829,9 +862,12 @@ errlHndl_t PdrManager::handleStateQueryRequest(const state_query_type_t i_queryt
                                      ErrlEntry::NO_SW_CALLOUT);
                 addBmcErrorCallouts(errl);
                 errlCommit(errl, PLDM_COMP_ID);
-                response_code = (i_querytype == STATE_QUERY_EFFECTER
-                                 ? PLDM_PLATFORM_INVALID_EFFECTER_ID
-                                 : PLDM_PLATFORM_INVALID_SENSOR_ID);
+                response_code = PLDM_ERROR_NOT_READY;
+                // Trace so we can observe if Hostboot encounters any issues
+                // with BMC continually hitting NOT READY conditions, otherwise it
+                // will not be noticed
+                PLDM_INF(INFO_MRK"PLDM_ERROR_NOT_READY i_query_id=0x%08x i_querytype=0x%08x response_code=0x%08x",
+                    i_query_id, i_querytype, response_code);
             }
 
             break;
@@ -1029,7 +1065,6 @@ errlHndl_t PdrManager::notifyBmcPdrRepoChanged()
         PLDM_INF("PdrManager::notifyBmcPdrRepoChanged: msg_send failed (rc = %d)",
                  rc);
         /*@
-         * @errortype  ERRL_SEV_UNRECOVERABLE
          * @moduleid   MOD_PDR_MANAGER
          * @reasoncode RC_SEND_FAIL
          * @userdata1  Return code from message send routine
@@ -1080,7 +1115,6 @@ errlHndl_t PdrManager::awaitBmcPdrRepoChanged(const size_t i_timeout_ms)
     else
     {
         /*@
-         * @errortype  ERRL_SEV_PREDICTIVE
          * @moduleid   MOD_PDR_MANAGER
          * @reasoncode RC_MULTIPLE_AWAIT
          * @devdesc    Software problem, multiple awaits on PDR manager
@@ -1224,7 +1258,6 @@ bool PdrManager::invokeStateEffecterCallback(const pldm_set_state_effecter_state
                      rc, i_req.effecter_id, entry.composite_id, entry.callback_info.msg_type);
 
             /*@
-             * @errortype        ERRL_SEV_UNRECOVERABLE
              * @moduleid         MOD_PDR_MANAGER
              * @reasoncode       RC_SENDRECV_FAIL
              * @userdata1[0:31]  Return code from msg_sendrecv

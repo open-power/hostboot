@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -161,6 +161,8 @@ namespace PLDM
         RC_UNSUPPORTED_MINOR_VERSION = PLDM_COMP_ID | 0x34,
         RC_BASE_INIT_FAIL           = PLDM_COMP_ID | 0x35,
         RC_CRC_MISMATCH             = PLDM_COMP_ID | 0x36,
+        RC_INVALID_OFFSET_ID        = PLDM_COMP_ID | 0x37,
+        RC_DEFENSIVE_LIMIT          = PLDM_COMP_ID | 0x38,
     };
 
     /**

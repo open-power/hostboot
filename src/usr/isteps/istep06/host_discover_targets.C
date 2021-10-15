@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -447,45 +447,39 @@ static errlHndl_t finish_pdr_exchange()
  */
 void* host_discover_targets( void *io_pArgs )
 {
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "host_discover_targets entry" );
 
     errlHndl_t l_err(nullptr);
     ISTEP_ERROR::IStepError l_stepError;
 
-#ifdef CONFIG_PLDM
-    // This flag guards later portions of the PDR exchange (we don't want to do
-    // subsequent steps if earlier steps failed).
-    bool pdr_exchange_failed = false;
+    do
+    {
 
+#ifdef CONFIG_PLDM
     /* First step of the PDR exchange is to fetch remote PDRs and then cache
      * remote FRU VPD. Presence detection depends on this data. */
 
-    do
+    l_err = fetch_remote_pdrs();
+
+    if (l_err)
     {
-        l_err = fetch_remote_pdrs();
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  ERR_MRK"host_discover_targets: Failed to fetch PDRs from the BMC");
 
-        if (l_err)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      ERR_MRK"Failed to fetch PDRs from the BMC");
+        captureError(l_err, l_stepError, ISTEP_COMP_ID);
+        break;
+    }
 
-            pdr_exchange_failed = true;
-            captureError(l_err, l_stepError, ISTEP_COMP_ID);
-            break;
-        }
+    l_err = PLDM::cacheRemoteFruVpd();
+    if (l_err)
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  ERR_MRK"host_discover_targets: Failed to cache remote FRU info from the BMC");
 
-        l_err = PLDM::cacheRemoteFruVpd();
-        if (l_err)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      ERR_MRK"Failed to cache remote FRU info from the BMC");
-
-            captureError(l_err, l_stepError, ISTEP_COMP_ID);
-            break;
-        }
-    } while (false);
-
+        captureError(l_err, l_stepError, ISTEP_COMP_ID);
+        break;
+    }
 #endif
 
     // Check whether we're in MPIPL mode
@@ -505,6 +499,8 @@ void* host_discover_targets( void *io_pArgs )
             l_err = EEPROM::cacheEECACHEPartition();
             if (l_err)
             {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          ERR_MRK"host_discover_targets: BREAK Failed to cacheEECACHEPartition");
                 break;
             }
 
@@ -513,6 +509,8 @@ void* host_discover_targets( void *io_pArgs )
             l_err = updateSecondarySbeScratchRegs();
             if (l_err)
             {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          ERR_MRK"host_discover_targets: BREAK Failed to updateSecondarySbeScratchRegs");
                 break;
             }
 
@@ -520,6 +518,8 @@ void* host_discover_targets( void *io_pArgs )
             l_err = sendContinueMpiplChipOp();
             if (l_err)
             {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          ERR_MRK"host_discover_targets: BREAK Failed to sendContinueMpiplChipOp");
                 break;
             }
 
@@ -534,7 +534,7 @@ void* host_discover_targets( void *io_pArgs )
             if( !l_success )
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          ERR_MRK"Error calling p10_io_iohs_firmask_save_restore");
+                          ERR_MRK"host_discover_targets: Error calling p10_io_iohs_firmask_save_restore");
             }
 
         }while(0);
@@ -561,17 +561,17 @@ void* host_discover_targets( void *io_pArgs )
      * BMC that we have done so. This will cause them to fetch the new PDRs
      * from us. This has to be done after presence detection. */
 
-    if (!pdr_exchange_failed && !l_err)
+    if (!l_err)
     {
         l_err = exchange_pdrs();
 
         if (l_err)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      ERR_MRK"Failed to exchange PDRs with the BMC");
+                      ERR_MRK"host_discover_targets: Failed to exchange PDRs with the BMC");
 
-            pdr_exchange_failed = true;
             captureError(l_err, l_stepError, ISTEP_COMP_ID);
+            break;
         }
     }
 #endif
@@ -689,25 +689,23 @@ void* host_discover_targets( void *io_pArgs )
     }
 
 #if CONFIG_PLDM
-    if (!pdr_exchange_failed)
+    l_err = finish_pdr_exchange();
+
+    if (l_err)
     {
-        l_err = finish_pdr_exchange();
-
-        if (l_err)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      ERR_MRK"PDR exchange failed");
-            captureError(l_err, l_stepError, ISTEP_COMP_ID);
-        }
-
-        // Notify the BMC that we are not able to take SBE HRESET requests. (We
-        // will be ready at runtime.)
-        PLDM::notifySbeHresetsReady(false);
-
-        // Set initial progress state
-        PLDM::sendProgressStateChangeEvent(
-            PLDM_STATE_SET_BOOT_PROG_STATE_PRIMARY_PROC_INITIALIZATION);
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  ERR_MRK"host_discover_targets: PDR exchange failed");
+        captureError(l_err, l_stepError, ISTEP_COMP_ID);
+        break;
     }
+
+    // Notify the BMC that we are not able to take SBE HRESET requests. (We
+    // will be ready at runtime.)
+    PLDM::notifySbeHresetsReady(false);
+
+    // Set initial progress state
+    PLDM::sendProgressStateChangeEvent(
+        PLDM_STATE_SET_BOOT_PROG_STATE_PRIMARY_PROC_INITIALIZATION);
 #endif // CONFIG_PLDM
 
     // Send AttrRP notification that we have completed host_discover_targets
@@ -724,12 +722,14 @@ void* host_discover_targets( void *io_pArgs )
               TARGETING::AttrRP::RESOURCE::SYNC_WINDOW_OPEN);
     if (l_err)
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK"host_discover_targets PROBLEM with SYNC_WINDOW_OPEN");
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK"host_discover_targets: PROBLEM with SYNC_WINDOW_OPEN");
         captureError(l_err, l_stepError, ISTEP_COMP_ID);
     }
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "host_discover_targets exit" );
+
+    } while (0); // main loop
 
     return l_stepError.getErrorHandle();
 }
