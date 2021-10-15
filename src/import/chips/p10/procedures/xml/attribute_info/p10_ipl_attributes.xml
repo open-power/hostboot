@@ -424,4 +424,25 @@
   <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_DEFAULT_HB_CORE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    CHIP_UNIT of the first functional core on the chip after applying all guard records.
+    On genesis ipl, this value will be set to it's default, 0xFF, however this is not a
+    valid core number, and should be ignored by SBE. For resource recovery during a
+    reconfig loop, this attr with be consumed by SBE as follows:
+      if ATTR_PG_MVPD + core guard results in zero good smallcores/FCs
+         if ATTR_DEFAULT_HB_CORE indicates a core that is valid in ATTR_PG_MVPD
+            hbcore = ATTR_DEFAULT_HB_CORE
+         else // needed to handle genesis boot and lab scenarios
+            hbcore = first valid core in ATTR_PG_MVPD
+      else
+         normal behavior
+  </description>
+  <valueType>uint8</valueType>
+  <default>0xFF</default>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
 </attributes>

@@ -320,7 +320,7 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
-   <id>ATTR_LPC_CONSOLE_CNFG</id>
+  <id>ATTR_LPC_CONSOLE_CNFG</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Indicates if LPC console is enabled on system</description>
   <valueType>uint8</valueType>
