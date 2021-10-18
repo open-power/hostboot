@@ -38,6 +38,7 @@
 #include <attribute_service.H>
 #include <hwpf_fapi2_reasoncodes.H>
 #include <fapi2/plat_mmio_access.H>
+#include <initservice/istepdispatcherif.H>
 
 namespace fapi2
 {
@@ -207,6 +208,7 @@ errlHndl_t explrIbI2cWrite(TARGETING::Target * i_target,
     }
     else
     {
+
         // counter for bytes written out to SRAM space
         size_t total_bytes_written = 0;
 
@@ -219,6 +221,11 @@ errlHndl_t explrIbI2cWrite(TARGETING::Target * i_target,
 
         FAPI_INF("explrIbI2cWrite: deviceWrite() starting at i2cscom address "
             "0x%08X for %d bytes", i_i2c_addr, io_write_size);
+
+#ifndef __HOSTBOOT_RUNTIME
+        // Reset the watchdog/send progress code with each write
+        INITSERVICE::sendProgressCode();
+#endif
 
         // Only able to write 4 bytes at a time with i2c,
         // so need to break into multiple i2c write transactions
