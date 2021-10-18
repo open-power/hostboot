@@ -48,8 +48,8 @@ extern "C" {
 #define HOST_EID 9
 #define HBRT_EID 10
 
-// HBRT will use a base max transmission unit of 4 KB - 4
-#define RT_MCTP_BMTU (4092)
+// HBRT will use a base max transmission unit of 4 KB - 4 (size) - 4 (crc32)
+#define RT_MCTP_BMTU (4088)
 
 // Phyp messages have a header size of 8 bytes to
 // define the type of message.
