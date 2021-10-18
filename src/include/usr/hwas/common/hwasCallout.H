@@ -212,6 +212,8 @@ enum clockTypeEnum
     OSCREFCLK1_TYPE =  9, //Specifically clock 1
     OSCPCICLK0_TYPE = 10, //Specifically clock 0
     OSCPCICLK1_TYPE = 11, //Specifically clock 1
+
+    LPCREFCLK_TYPE  = 12, // LPC clock
 };
 
 

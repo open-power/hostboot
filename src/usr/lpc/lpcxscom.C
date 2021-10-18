@@ -580,10 +580,20 @@ errlHndl_t XscomLpc::_rwLPC(
                                HWAS::NO_DECONFIG,
                                HWAS::GARD_NULL);
 
+        pError->addPartCallout(iv_proc,
+                               HWAS::PNOR_PART_TYPE,
+                               HWAS::SRCI_PRIORITY_MED,
+                               HWAS::NO_DECONFIG,
+                               HWAS::GARD_Fatal);
+
         pError->addHwCallout(iv_proc,
                              HWAS::SRCI_PRIORITY_MED,
                              HWAS::NO_DECONFIG,
                              HWAS::GARD_NULL);
+
+        pError->addClockCallout(iv_proc,
+                                HWAS::LPCREFCLK_TYPE,
+                                HWAS::SRCI_PRIORITY_MED);
 
         pError->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
                                     HWAS::SRCI_PRIORITY_LOW);
@@ -935,10 +945,20 @@ errlHndl_t XscomLpc::checkAndHandleOpbmError(const bool i_useActual)
                                    HWAS::NO_DECONFIG,
                                    HWAS::GARD_NULL);
 
+            pError->addPartCallout(iv_proc,
+                                   HWAS::PNOR_PART_TYPE,
+                                   HWAS::SRCI_PRIORITY_MED,
+                                   HWAS::NO_DECONFIG,
+                                   HWAS::GARD_Fatal);
+
             pError->addHwCallout(iv_proc,
                                  HWAS::SRCI_PRIORITY_MED,
                                  HWAS::NO_DECONFIG,
                                  HWAS::GARD_NULL );
+
+            pError->addClockCallout(iv_proc,
+                                    HWAS::LPCREFCLK_TYPE,
+                                    HWAS::SRCI_PRIORITY_MED);
 
             pError->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
                                         HWAS::SRCI_PRIORITY_LOW);
@@ -1068,10 +1088,20 @@ errlHndl_t XscomLpc::checkForLpcErrors()
                                    HWAS::NO_DECONFIG,
                                    HWAS::GARD_NULL);
 
+            pError->addPartCallout(iv_proc,
+                                   HWAS::PNOR_PART_TYPE,
+                                   HWAS::SRCI_PRIORITY_MED,
+                                   HWAS::NO_DECONFIG,
+                                   HWAS::GARD_Fatal);
+
             pError->addHwCallout(iv_proc,
                                  HWAS::SRCI_PRIORITY_MED,
                                  HWAS::NO_DECONFIG,
                                  HWAS::GARD_NULL );
+
+            pError->addClockCallout(iv_proc,
+                                    HWAS::LPCREFCLK_TYPE,
+                                    HWAS::SRCI_PRIORITY_MED);
 
             pError->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
                                         HWAS::SRCI_PRIORITY_LOW);
