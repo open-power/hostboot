@@ -110,14 +110,6 @@ class FruParser
     }
 
   private:
-    /** @brief Parse the FRU_Master.json file and populate the D-Bus lookup
-     *         information which provides the service, root D-Bus path and the
-     *         item interfaces.
-     *
-     *  @param[in] filePath - file path to FRU_Master.json
-     */
-    void setupDBusLookup(const fs::path& filePath);
-
     /** @brief Parse the FRU Configuration JSON file in the directory path
      *         except the FRU_Master.json and build the FRU record information
      *

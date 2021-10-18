@@ -33,13 +33,13 @@ namespace sdbusRule = sdbusplus::bus::match::rules;
 SoftPowerOff::SoftPowerOff(sdbusplus::bus::bus& bus, sd_event* event) :
     bus(bus), timer(event)
 {
-    auto rc = getHostState();
+    getHostState();
     if (hasError || completed)
     {
         return;
     }
 
-    rc = getEffecterID();
+    auto rc = getEffecterID();
     if (completed)
     {
         std::cerr
@@ -254,12 +254,11 @@ int SoftPowerOff::getSensorInfo()
         for (auto& rep : Response)
         {
             pdr = reinterpret_cast<pldm_state_sensor_pdr*>(rep.data());
-        }
-
-        if (!pdr)
-        {
-            std::cerr << "Failed to get state sensor PDR.\n";
-            return PLDM_ERROR;
+            if (!pdr)
+            {
+                std::cerr << "Failed to get state sensor PDR.\n";
+                return PLDM_ERROR;
+            }
         }
 
         sensorID = pdr->sensor_id;

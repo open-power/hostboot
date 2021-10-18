@@ -115,23 +115,6 @@ int DumpHandler::newFileAvailable(uint64_t length)
     {
         // Setting the Notify path for resource dump
         notifyObjPath = resDumpObjPath;
-
-        uint32_t sourceDumpId = fileHandle;
-        auto path = findDumpObjPath(fileHandle);
-
-        pldm::utils::PropertyValue propValue{sourceDumpId};
-
-        DBusMapping dbusMapping{path, resDumpEntry, "SourceDumpId", "uint32_t"};
-        try
-        {
-            pldm::utils::DBusHandler().setDbusProperty(dbusMapping, propValue);
-        }
-        catch (const std::exception& e)
-        {
-            std::cerr << "failed to make a d-bus call to DUMP manager to set "
-                         "resource dump SourceDumpId, ERROR="
-                      << e.what() << "\n";
-        }
     }
 
     try

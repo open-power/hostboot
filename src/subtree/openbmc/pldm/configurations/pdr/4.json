@@ -116,7 +116,7 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/pcie_cable_card0/cxp_bot",
+        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/pcieslot0/pcie_card0/cxp_bot",
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -133,7 +133,7 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/pcie_cable_card0/cxp_top",
+        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/pcieslot0/pcie_card0/cxp_top",
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -150,7 +150,7 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/pcie_cable_card3/cxp_bot",
+        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/pcieslot3/pcie_card3/cxp_bot",
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -167,7 +167,7 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/pcie_cable_card3/cxp_top",
+        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/pcieslot3/pcie_card3/cxp_top",
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -184,7 +184,7 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/pcie_cable_card4/cxp_bot",
+        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/pcieslot4/pcie_card4/cxp_bot",
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -201,7 +201,7 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/pcie_cable_card4/cxp_top",
+        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/pcieslot4/pcie_card4/cxp_top",
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -218,7 +218,7 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/pcie_cable_card10/cxp_bot",
+        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/pcieslot10/pcie_card10/cxp_bot",
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -235,7 +235,7 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/pcie_cable_card10/cxp_top",
+        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/pcieslot10/pcie_card10/cxp_top",
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -252,7 +252,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu0",
+        "type" : 135,
+        "instance" : 1,
+        "container" : 4,
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -269,7 +271,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu1",
+        "type" : 135,
+        "instance" : 2,
+        "container" : 4,
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -286,7 +290,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu2",
+        "type" : 135,
+        "instance" : 3,
+        "container" : 4,
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -303,7 +309,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu3",
+        "type" : 135,
+        "instance" : 4,
+        "container" : 4,
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -405,7 +413,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm0",
+        "type" : 142,
+        "instance" : 1,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -422,7 +432,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm1",
+        "type" : 142,
+        "instance" : 2,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -439,7 +451,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm2",
+        "type" : 142,
+        "instance" : 3,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -456,7 +470,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm3",
+        "type" : 142,
+        "instance" : 4,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -473,7 +489,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm4",
+        "type" : 142,
+        "instance" : 5,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -490,7 +508,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm5",
+        "type" : 142,
+        "instance" : 6,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -507,7 +527,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm6",
+        "type" : 142,
+        "instance" : 7,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -524,7 +546,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm7",
+        "type" : 142,
+        "instance" : 8,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -541,7 +565,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm8",
+        "type" : 142,
+        "instance" : 9,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -558,7 +584,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm9",
+        "type" : 142,
+        "instance" : 10,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -575,7 +603,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm10",
+        "type" : 142,
+        "instance" : 11,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -592,7 +622,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm11",
+        "type" : 142,
+        "instance" : 12,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -609,7 +641,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm12",
+        "type" : 142,
+        "instance" : 13,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -626,7 +660,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm13",
+        "type" : 142,
+        "instance" : 14,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -643,7 +679,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm14",
+        "type" : 142,
+        "instance" : 15,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -660,7 +698,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm15",
+        "type" : 142,
+        "instance" : 16,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -677,7 +717,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm16",
+        "type" : 142,
+        "instance" : 17,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -694,7 +736,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm17",
+        "type" : 142,
+        "instance" : 18,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -711,7 +755,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm18",
+        "type" : 142,
+        "instance" : 19,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -728,7 +774,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm19",
+        "type" : 142,
+        "instance" : 20,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -745,7 +793,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm20",
+        "type" : 142,
+        "instance" : 21,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -762,7 +812,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm21",
+        "type" : 142,
+        "instance" : 22,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -779,7 +831,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm22",
+        "type" : 142,
+        "instance" : 23,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -796,7 +850,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm23",
+        "type" : 142,
+        "instance" : 24,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -813,7 +869,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm24",
+        "type" : 142,
+        "instance" : 25,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -830,7 +888,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm25",
+        "type" : 142,
+        "instance" : 26,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -847,7 +907,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm26",
+        "type" : 142,
+        "instance" : 27,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -864,7 +926,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm27",
+        "type" : 142,
+        "instance" : 28,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -881,7 +945,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm28",
+        "type" : 142,
+        "instance" : 29,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -898,7 +964,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm29",
+        "type" : 142,
+        "instance" : 30,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -915,7 +983,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm30",
+        "type" : 142,
+        "instance" : 31,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -932,7 +1002,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm31",
+        "type" : 142,
+        "instance" : 32,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -1838,7 +1910,7 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/pcie_cable_card0/cxp_bot",
+        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/pcieslot0/pcie_card0/cxp_bot",
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -1855,7 +1927,7 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/pcie_cable_card0/cxp_top",
+        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/pcieslot0/pcie_card0/cxp_top",
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -1872,7 +1944,7 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/pcie_cable_card3/cxp_bot",
+        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/pcieslot3/pcie_card3/cxp_bot",
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -1889,7 +1961,7 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/pcie_cable_card3/cxp_top",
+        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/pcieslot3/pcie_card3/cxp_top",
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -1906,7 +1978,7 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/pcie_cable_card4/cxp_bot",
+        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/pcieslot4/pcie_card4/cxp_bot",
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -1923,7 +1995,7 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/pcie_cable_card4/cxp_top",
+        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/pcieslot4/pcie_card4/cxp_top",
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -1940,7 +2012,7 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/pcie_cable_card10/cxp_bot",
+        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/pcieslot10/pcie_card10/cxp_bot",
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -1957,7 +2029,7 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/pcie_cable_card10/cxp_top",
+        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/pcieslot10/pcie_card10/cxp_top",
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -1974,7 +2046,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu0",
+        "type" : 135,
+        "instance" : 1,
+        "container" : 4,
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -1991,7 +2065,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu1",
+        "type" : 135,
+        "instance" : 2,
+        "container" : 4,
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -2008,7 +2084,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu2",
+        "type" : 135,
+        "instance" : 3,
+        "container" : 4,
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -2025,7 +2103,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu3",
+        "type" : 135,
+        "instance" : 4,
+        "container" : 4,
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -2127,7 +2207,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm0",
+        "type" : 142,
+        "instance" : 1,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -2144,7 +2226,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm1",
+        "type" : 142,
+        "instance" : 2,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -2161,7 +2245,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm2",
+        "type" : 142,
+        "instance" : 3,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -2178,7 +2264,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm3",
+        "type" : 142,
+        "instance" : 4,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -2195,7 +2283,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm4",
+        "type" : 142,
+        "instance" : 5,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -2212,7 +2302,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm5",
+        "type" : 142,
+        "instance" : 6,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -2229,7 +2321,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm6",
+        "type" : 142,
+        "instance" : 7,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -2246,7 +2340,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm7",
+        "type" : 142,
+        "instance" : 8,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -2263,7 +2359,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm8",
+        "type" : 142,
+        "instance" : 9,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -2280,7 +2378,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm9",
+        "type" : 142,
+        "instance" : 10,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -2297,7 +2397,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm10",
+        "type" : 142,
+        "instance" : 11,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -2314,7 +2416,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm11",
+        "type" : 142,
+        "instance" : 12,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -2331,7 +2435,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm12",
+        "type" : 142,
+        "instance" : 13,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -2348,7 +2454,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm13",
+        "type" : 142,
+        "instance" : 14,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -2365,7 +2473,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm14",
+        "type" : 142,
+        "instance" : 15,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -2382,7 +2492,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm15",
+        "type" : 142,
+        "instance" : 16,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -2399,7 +2511,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm16",
+        "type" : 142,
+        "instance" : 17,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -2416,7 +2530,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm17",
+        "type" : 142,
+        "instance" : 18,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -2433,7 +2549,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm18",
+        "type" : 142,
+        "instance" : 19,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -2450,7 +2568,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm19",
+        "type" : 142,
+        "instance" : 20,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -2467,7 +2587,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm20",
+        "type" : 142,
+        "instance" : 21,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -2484,7 +2606,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm21",
+        "type" : 142,
+        "instance" : 22,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -2501,7 +2625,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm22",
+        "type" : 142,
+        "instance" : 23,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -2518,7 +2644,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm23",
+        "type" : 142,
+        "instance" : 24,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -2535,7 +2663,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm24",
+        "type" : 142,
+        "instance" : 25,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -2552,7 +2682,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm25",
+        "type" : 142,
+        "instance" : 26,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -2569,7 +2701,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm26",
+        "type" : 142,
+        "instance" : 27,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -2586,7 +2720,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm27",
+        "type" : 142,
+        "instance" : 28,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -2603,7 +2739,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm28",
+        "type" : 142,
+        "instance" : 29,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -2620,7 +2758,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm29",
+        "type" : 142,
+        "instance" : 30,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -2637,7 +2777,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm30",
+        "type" : 142,
+        "instance" : 31,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 10,
@@ -2654,7 +2796,9 @@
         }]
     },
     {
-        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm31",
+        "type" : 142,
+        "instance" : 32,
+        "container" : 3,
         "sensors" : [{
             "set" : {
                 "id" : 10,

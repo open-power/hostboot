@@ -172,7 +172,7 @@ void buildAllCodeUpdateEffecterPDR(oem_ibm_platform::Handler* platformHandler,
     pdr->hdr.type = PLDM_STATE_EFFECTER_PDR;
     pdr->hdr.record_change_num = 0;
     pdr->hdr.length = sizeof(pldm_state_effecter_pdr) - sizeof(pldm_pdr_hdr);
-    pdr->terminus_handle = pdr::BmcPldmTerminusHandle;
+    pdr->terminus_handle = TERMINUS_HANDLE;
     pdr->effecter_id = platformHandler->getNextEffecterId();
     pdr->entity_type = entityType;
     pdr->entity_instance = entityInstance;
@@ -223,7 +223,7 @@ void buildAllCodeUpdateSensorPDR(oem_ibm_platform::Handler* platformHandler,
     pdr->hdr.type = PLDM_STATE_SENSOR_PDR;
     pdr->hdr.record_change_num = 0;
     pdr->hdr.length = sizeof(pldm_state_sensor_pdr) - sizeof(pldm_pdr_hdr);
-    pdr->terminus_handle = pdr::BmcPldmTerminusHandle;
+    pdr->terminus_handle = TERMINUS_HANDLE;
     pdr->sensor_id = platformHandler->getNextSensorId();
     pdr->entity_type = entityType;
     pdr->entity_instance = entityInstance;
@@ -240,7 +240,7 @@ void buildAllCodeUpdateSensorPDR(oem_ibm_platform::Handler* platformHandler,
     auto state =
         reinterpret_cast<state_sensor_possible_states*>(possibleStates);
     if ((stateSetID == PLDM_OEM_IBM_BOOT_STATE) ||
-        (stateSetID == oem_ibm_platform::PLDM_OEM_IBM_VERIFICATION_STATE))
+        (stateSetID == PLDM_OEM_IBM_VERIFICATION_STATE))
         state->states[0].byte = 6;
     else if (stateSetID == PLDM_OEM_IBM_FIRMWARE_UPDATE_STATE)
         state->states[0].byte = 126;
@@ -390,7 +390,7 @@ void pldm::responder::oem_ibm_platform::Handler::_processEndUpdate(
     sdeventplus::source::EventBase& /*source */)
 {
     assembleImageEvent.reset();
-    int retc = assembleCodeUpdateImage();
+    int retc = codeUpdate->assembleCodeUpdateImage();
     if (retc != PLDM_SUCCESS)
     {
         codeUpdate->setCodeUpdateProgress(false);
@@ -491,6 +491,115 @@ void pldm::responder::oem_ibm_platform::Handler::_processSystemReboot(
             }
         });
 }
+
+void pldm::responder::oem_ibm_platform::Handler::checkAndDisableWatchDog()
+{
+    if (!hostOff && setEventReceiverCnt == SET_EVENT_RECEIVER_SENT)
+    {
+        disableWatchDogTimer();
+    }
+
+    return;
+}
+
+bool pldm::responder::oem_ibm_platform::Handler::watchDogRunning()
+{
+    static constexpr auto watchDogObjectPath =
+        "/xyz/openbmc_project/watchdog/host0";
+    static constexpr auto watchDogEnablePropName = "Enabled";
+    static constexpr auto watchDogInterface =
+        "xyz.openbmc_project.State.Watchdog";
+    bool isWatchDogRunning = false;
+    try
+    {
+        isWatchDogRunning = pldm::utils::DBusHandler().getDbusProperty<bool>(
+            watchDogObjectPath, watchDogEnablePropName, watchDogInterface);
+    }
+    catch (const std::exception& e)
+    {
+        return false;
+    }
+    return isWatchDogRunning;
+}
+
+void pldm::responder::oem_ibm_platform::Handler::resetWatchDogTimer()
+{
+    static constexpr auto watchDogService = "xyz.openbmc_project.Watchdog";
+    static constexpr auto watchDogObjectPath =
+        "/xyz/openbmc_project/watchdog/host0";
+    static constexpr auto watchDogInterface =
+        "xyz.openbmc_project.State.Watchdog";
+    static constexpr auto watchDogResetPropName = "ResetTimeRemaining";
+
+    bool wdStatus = watchDogRunning();
+    if (wdStatus == false)
+    {
+        return;
+    }
+    try
+    {
+        auto& bus = pldm::utils::DBusHandler::getBus();
+        auto resetMethod =
+            bus.new_method_call(watchDogService, watchDogObjectPath,
+                                watchDogInterface, watchDogResetPropName);
+        resetMethod.append(true);
+        bus.call_noreply(resetMethod);
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "Failed To reset watchdog timer"
+                  << "ERROR=" << e.what() << std::endl;
+        return;
+    }
+}
+
+void pldm::responder::oem_ibm_platform::Handler::disableWatchDogTimer()
+{
+    setEventReceiverCnt = 0;
+    pldm::utils::DBusMapping dbusMapping{"/xyz/openbmc_project/watchdog/host0",
+                                         "xyz.openbmc_project.State.Watchdog",
+                                         "Enabled", "bool"};
+    bool wdStatus = watchDogRunning();
+
+    if (!wdStatus)
+    {
+        return;
+    }
+    try
+    {
+        pldm::utils::DBusHandler().setDbusProperty(dbusMapping, false);
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "Failed To disable watchdog timer"
+                  << "ERROR=" << e.what() << "\n";
+    }
+}
+int pldm::responder::oem_ibm_platform::Handler::checkBMCState()
+{
+    try
+    {
+        pldm::utils::PropertyValue propertyValue =
+            pldm::utils::DBusHandler().getDbusPropertyVariant(
+                "/xyz/openbmc_project/state/bmc0", "CurrentBMCState",
+                "xyz.openbmc_project.State.BMC");
+
+        if (std::get<std::string>(propertyValue) ==
+            "xyz.openbmc_project.State.BMC.BMCState.NotReady")
+        {
+            std::cerr << "GetPDR : PLDM stack is not ready for PDR exchange"
+                      << std::endl;
+            return PLDM_ERROR_NOT_READY;
+        }
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "Error getting the current BMC state" << std::endl;
+        return PLDM_ERROR;
+    }
+    return PLDM_SUCCESS;
+}
+
 } // namespace oem_ibm_platform
 } // namespace responder
 } // namespace pldm

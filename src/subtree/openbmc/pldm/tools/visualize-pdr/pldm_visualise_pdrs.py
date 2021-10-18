@@ -197,19 +197,17 @@ def main():
     parser = argparse.ArgumentParser(prog='pldm_visualise_pdrs.py')
     parser.add_argument('--bmc', type=str, required=True,
                         help="BMC IPAddress/BMC Hostname")
-    parser.add_argument('--user', type=str, required=True,
-                        help="BMC username")
+    parser.add_argument('--user', type=str, help="BMC username")
     parser.add_argument('--password', type=str, required=True,
                         help="BMC Password")
     parser.add_argument('--port', type=int, help="BMC SSH port",
                         default=22)
     args = parser.parse_args()
-    if args.bmc and args.password and args.user:
-        client = connect_to_bmc(args.bmc, args.user, args.password, args.port)
-        association_pdr, state_sensor_pdr, state_effecter_pdr, counter = \
-            fetch_pdrs_from_bmc(client)
-        draw_entity_associations(association_pdr, counter)
-        prepare_summary_report(state_sensor_pdr, state_effecter_pdr)
+    client = connect_to_bmc(args.bmc, args.user, args.password, args.port)
+    association_pdr, state_sensor_pdr, state_effecter_pdr, counter = \
+        fetch_pdrs_from_bmc(client)
+    draw_entity_associations(association_pdr, counter)
+    prepare_summary_report(state_sensor_pdr, state_effecter_pdr)
 
 
 if __name__ == "__main__":

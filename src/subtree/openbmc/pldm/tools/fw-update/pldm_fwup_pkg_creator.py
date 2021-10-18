@@ -22,12 +22,25 @@ string_types = dict([
     ("UTF16LE", 4),
     ("UTF16BE", 5)])
 
-descriptor_type_name_length = {
+initial_descriptor_type_name_length = {
     0x0000: ["PCI Vendor ID", 2],
     0x0001: ["IANA Enterprise ID", 4],
     0x0002: ["UUID", 16],
     0x0003: ["PnP Vendor ID", 3],
     0x0004: ["ACPI Vendor ID", 4]}
+
+descriptor_type_name_length = {
+    0x0000: ["PCI Vendor ID", 2],
+    0x0001: ["IANA Enterprise ID", 4],
+    0x0002: ["UUID", 16],
+    0x0003: ["PnP Vendor ID", 3],
+    0x0004: ["ACPI Vendor ID", 4],
+    0x0100: ["PCI Device ID", 2],
+    0x0101: ["PCI Subsystem Vendor ID", 2],
+    0x0102: ["PCI Subsystem ID", 2],
+    0x0103: ["PCI Revision ID", 1],
+    0x0104: ["PnP Product Identifier", 4],
+    0x0105: ["ACPI Product Identifier", 4]}
 
 
 def check_string_length(string):
@@ -185,6 +198,74 @@ def get_applicable_components(device, components, component_bitmap_bit_length):
     return applicable_components
 
 
+def prepare_record_descriptors(descriptors):
+    '''
+    This function processes the Descriptors and prepares the RecordDescriptors
+    section of the the firmware device ID record.
+
+        Parameters:
+            descriptors: Descriptors entry
+
+        Returns:
+            RecordDescriptors, DescriptorCount
+    '''
+    record_descriptors = bytearray()
+    vendor_defined_desc_type = 65535
+    vendor_desc_title_str_type_len = 1
+    vendor_desc_title_str_len_len = 1
+    descriptor_count = 0
+
+    for descriptor in descriptors:
+
+        descriptor_type = descriptor["DescriptorType"]
+        if descriptor_count == 0:
+            if initial_descriptor_type_name_length.get(descriptor_type) \
+                    is None:
+                sys.exit("ERROR: Initial descriptor type not supported")
+        else:
+            if descriptor_type_name_length.get(descriptor_type) is None and \
+                    descriptor_type != vendor_defined_desc_type:
+                sys.exit("ERROR: Descriptor type not supported")
+
+        if descriptor_type == vendor_defined_desc_type:
+            vendor_desc_title_str = \
+                descriptor["VendorDefinedDescriptorTitleString"]
+            vendor_desc_data = descriptor["VendorDefinedDescriptorData"]
+            check_string_length(vendor_desc_title_str)
+            vendor_desc_title_str_type = string_types["ASCII"]
+            descriptor_length = vendor_desc_title_str_type_len + \
+                vendor_desc_title_str_len_len + len(vendor_desc_title_str) + \
+                len(bytearray.fromhex(vendor_desc_data))
+            format_string = '<HHBB' + str(len(vendor_desc_title_str)) + 's'
+            record_descriptors.extend(struct.pack(
+                format_string,
+                descriptor_type,
+                descriptor_length,
+                vendor_desc_title_str_type,
+                len(vendor_desc_title_str),
+                vendor_desc_title_str.encode('ascii')))
+            record_descriptors.extend(bytearray.fromhex(vendor_desc_data))
+            descriptor_count += 1
+        else:
+            descriptor_type = descriptor["DescriptorType"]
+            descriptor_data = descriptor["DescriptorData"]
+            descriptor_length = len(bytearray.fromhex(descriptor_data))
+            if descriptor_length != \
+                    descriptor_type_name_length.get(descriptor_type)[1]:
+                err_string = "ERROR: Descriptor type - " + \
+                    descriptor_type_name_length.get(descriptor_type)[0] + \
+                    " length is incorrect"
+                sys.exit(err_string)
+            format_string = '<HH'
+            record_descriptors.extend(struct.pack(
+                format_string,
+                descriptor_type,
+                descriptor_length))
+            record_descriptors.extend(bytearray.fromhex(descriptor_data))
+            descriptor_count += 1
+    return record_descriptors, descriptor_count
+
+
 def write_fw_device_identification_area(pldm_fw_up_pkg, metadata,
                                         component_bitmap_bit_length):
     '''
@@ -193,7 +274,7 @@ def write_fw_device_identification_area(pldm_fw_up_pkg, metadata,
     This function writes the DeviceIDRecordCount and the
     FirmwareDeviceIDRecords into the firmware update package by processing the
     metadata JSON. Currently there is no support for optional
-    FirmwareDevicePackageData and for Additional descriptors.
+    FirmwareDevicePackageData.
 
         Parameters:
             pldm_fw_up_pkg: PLDM FW update package
@@ -216,8 +297,7 @@ def write_fw_device_identification_area(pldm_fw_up_pkg, metadata,
         # RecordLength size
         record_length = 2
 
-        # Only initial descriptor type supported now
-        descriptor_count = 1
+        # DescriptorCount
         record_length += 1
 
         # DeviceUpdateOptionFlags
@@ -257,32 +337,15 @@ def write_fw_device_identification_area(pldm_fw_up_pkg, metadata,
             round(len(applicable_components)/8)
         record_length += applicable_components_bitfield_length
 
-        initial_descriptor = device["InitialDescriptor"]
-        initial_descriptor_type = initial_descriptor["InitialDescriptorType"]
-        initial_descriptor_data = initial_descriptor["InitialDescriptorData"]
-
-        # InitialDescriptorType
-        if descriptor_type_name_length.get(initial_descriptor_type) is None:
-            sys.exit("ERROR: Initial descriptor type not supported")
-        record_length += 2
-
-        # InitialDescriptorLength
-        initial_descriptor_length = \
-            len(bytearray.fromhex(initial_descriptor_data))
-        if initial_descriptor_length != \
-                descriptor_type_name_length.get(initial_descriptor_type)[1]:
-            err_string = "ERROR: Initial descriptor type - " + \
-                descriptor_type_name_length.get(initial_descriptor_type)[0] + \
-                " length is incorrect"
-            sys.exit(err_string)
-        record_length += 2
-
-        # InitialDescriptorData, the byte order in the JSON is retained.
-        record_length += initial_descriptor_length
+        # RecordDescriptors
+        descriptors = device["Descriptors"]
+        record_descriptors, descriptor_count = \
+            prepare_record_descriptors(descriptors)
+        record_length += len(record_descriptors)
 
         format_string = '<HBIBBH' + \
             str(applicable_components_bitfield_length) + 's' + \
-            str(len(component_image_set_version_string)) + 'sHH'
+            str(len(component_image_set_version_string)) + 's'
         pldm_fw_up_pkg.write(
             struct.pack(
                 format_string,
@@ -293,10 +356,8 @@ def write_fw_device_identification_area(pldm_fw_up_pkg, metadata,
                 len(component_image_set_version_string),
                 fw_device_pkg_data_length,
                 applicable_components.tobytes(),
-                component_image_set_version_string.encode('ascii'),
-                initial_descriptor_type,
-                initial_descriptor_length))
-        pldm_fw_up_pkg.write(bytearray.fromhex(initial_descriptor_data))
+                component_image_set_version_string.encode('ascii')))
+        pldm_fw_up_pkg.write(record_descriptors)
 
 
 def write_component_image_info_area(pldm_fw_up_pkg, metadata, image_files):

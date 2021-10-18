@@ -636,6 +636,7 @@ int BIOSConfig::checkAttrValueToUpdate(
     switch (attrType)
     {
         case PLDM_BIOS_ENUMERATION:
+        case PLDM_BIOS_ENUMERATION_READ_ONLY:
         {
             auto value =
                 table::attribute_value::decodeEnumEntry(attrValueEntry);
@@ -652,6 +653,7 @@ int BIOSConfig::checkAttrValueToUpdate(
             return PLDM_SUCCESS;
         }
         case PLDM_BIOS_INTEGER:
+        case PLDM_BIOS_INTEGER_READ_ONLY:
         {
             auto value =
                 table::attribute_value::decodeIntegerEntry(attrValueEntry);
@@ -667,6 +669,7 @@ int BIOSConfig::checkAttrValueToUpdate(
             return PLDM_SUCCESS;
         }
         case PLDM_BIOS_STRING:
+        case PLDM_BIOS_STRING_READ_ONLY:
         {
             auto stringConf = table::attribute::decodeStringEntry(attrEntry);
             auto value =
@@ -796,7 +799,7 @@ void BIOSConfig::processBiosAttrChangeNotification(
     {
         attrNameHdl = biosStringTable.findHandle(attrName);
     }
-    catch (std::invalid_argument& e)
+    catch (const std::invalid_argument& e)
     {
         std::cerr << "Could not find handle for BIOS string, ATTRIBUTE="
                   << attrName.c_str() << "\n";

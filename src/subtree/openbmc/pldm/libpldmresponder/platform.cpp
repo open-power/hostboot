@@ -1,4 +1,3 @@
-
 #include "platform.hpp"
 
 #include "libpldm/entity.h"
@@ -15,6 +14,8 @@
 #include "platform_numeric_effecter.hpp"
 #include "platform_state_effecter.hpp"
 #include "platform_state_sensor.hpp"
+
+#include <config.h>
 
 using namespace pldm::utils;
 using namespace pldm::responder::pdr;
@@ -143,8 +144,20 @@ void Handler::generate(const pldm::utils::DBusHandler& dBusIntf,
 
 Response Handler::getPDR(const pldm_msg* request, size_t payloadLength)
 {
-    // Build FRU table if not built, since entity association PDR's are built
-    // when the FRU table is constructed.
+    if (hostPDRHandler)
+    {
+        if (hostPDRHandler->isHostUp() && oemPlatformHandler != nullptr)
+        {
+            auto rc = oemPlatformHandler->checkBMCState();
+            if (rc != PLDM_SUCCESS)
+            {
+                return ccOnlyResponse(request, PLDM_ERROR_NOT_READY);
+            }
+        }
+    }
+
+    // Build FRU table if not built, since entity association PDR's
+    // are built when the FRU table is constructed.
     if (fruHandler)
     {
         fruHandler->buildFRUTable();
@@ -172,7 +185,6 @@ Response Handler::getPDR(const pldm_msg* request, size_t payloadLength)
     }
 
     Response response(sizeof(pldm_msg_hdr) + PLDM_GET_PDR_MIN_RESP_BYTES, 0);
-    auto responsePtr = reinterpret_cast<pldm_msg*>(response.data());
 
     if (payloadLength != PLDM_GET_PDR_REQ_BYTES)
     {
@@ -217,7 +229,7 @@ Response Handler::getPDR(const pldm_msg* request, size_t payloadLength)
         response.resize(sizeof(pldm_msg_hdr) + PLDM_GET_PDR_MIN_RESP_BYTES +
                             respSizeBytes,
                         0);
-        responsePtr = reinterpret_cast<pldm_msg*>(response.data());
+        auto responsePtr = reinterpret_cast<pldm_msg*>(response.data());
         rc = encode_get_pdr_resp(
             request->hdr.instance_id, PLDM_SUCCESS, e.handle.nextRecordHandle,
             0, PLDM_START_AND_END, respSizeBytes, recordData, 0, responsePtr);
@@ -313,24 +325,34 @@ Response Handler::platformEventMessage(const pldm_msg* request,
         return CmdHandler::ccOnlyResponse(request, rc);
     }
 
-    try
+    if (eventClass == PLDM_HEARTBEAT_TIMER_ELAPSED_EVENT)
     {
-        const auto& handlers = eventHandlers.at(eventClass);
-        for (const auto& handler : handlers)
+        rc = PLDM_SUCCESS;
+        if (oemPlatformHandler)
         {
-            auto rc =
-                handler(request, payloadLength, formatVersion, tid, offset);
-            if (rc != PLDM_SUCCESS)
-            {
-                return CmdHandler::ccOnlyResponse(request, rc);
-            }
+            oemPlatformHandler->resetWatchDogTimer();
         }
     }
-    catch (const std::out_of_range& e)
+    else
     {
-        return CmdHandler::ccOnlyResponse(request, PLDM_ERROR_INVALID_DATA);
+        try
+        {
+            const auto& handlers = eventHandlers.at(eventClass);
+            for (const auto& handler : handlers)
+            {
+                auto rc =
+                    handler(request, payloadLength, formatVersion, tid, offset);
+                if (rc != PLDM_SUCCESS)
+                {
+                    return CmdHandler::ccOnlyResponse(request, rc);
+                }
+            }
+        }
+        catch (const std::out_of_range& e)
+        {
+            return CmdHandler::ccOnlyResponse(request, PLDM_ERROR_INVALID_DATA);
+        }
     }
-
     Response response(
         sizeof(pldm_msg_hdr) + PLDM_PLATFORM_EVENT_MESSAGE_RESP_BYTES, 0);
     auto responsePtr = reinterpret_cast<pldm_msg*>(response.data());
@@ -508,6 +530,11 @@ int Handler::pldmPDRRepositoryChgEvent(const pldm_msg* request,
                 }
             }
 
+            if (eventDataOperation == PLDM_RECORDS_MODIFIED)
+            {
+                return PLDM_ERROR_UNSUPPORTED_PLDM_CMD;
+            }
+
             changeRecordData +=
                 dataOffset + (numberOfChangeEntries * sizeof(ChangeEntry));
             changeRecordDataSize -=
@@ -581,9 +608,9 @@ void Handler::generateTerminusLocatorPDR(Repo& repo)
     pdr->hdr.type = PLDM_TERMINUS_LOCATOR_PDR;
     pdr->hdr.record_change_num = 0;
     pdr->hdr.length = sizeof(pldm_terminus_locator_pdr) - sizeof(pldm_pdr_hdr);
-    pdr->terminus_handle = BmcPldmTerminusHandle;
+    pdr->terminus_handle = TERMINUS_HANDLE;
     pdr->validity = PLDM_TL_PDR_VALID;
-    pdr->tid = BmcTerminusId;
+    pdr->tid = TERMINUS_ID;
     pdr->container_id = 0x0;
     pdr->terminus_locator_type = PLDM_TERMINUS_LOCATOR_TYPE_MCTP_EID;
     pdr->terminus_locator_value_size =
@@ -663,8 +690,8 @@ Response Handler::getStateSensorReadings(const pldm_msg* request,
     return response;
 }
 
-void Handler::_processPostGetPDRActions(
-    sdeventplus::source::EventBase& /*source */)
+void Handler::_processPostGetPDRActions(sdeventplus::source::EventBase&
+                                        /*source */)
 {
     deferredGetPDREvent.reset();
     dbusToPLDMEventHandler->listenSensorEvent(pdrRepo, sensorDbusObjMaps);

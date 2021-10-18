@@ -5,6 +5,7 @@
 
 #include "common/utils.hpp"
 
+#include <config.h>
 #include <systemd/sd-journal.h>
 
 #include <sdbusplus/bus.hpp>
@@ -224,9 +225,9 @@ void FruImpl::populateRecords(
                 recordSetIdentifier = nextRSI();
                 bmc_record_handle = nextRecordHandle();
                 pldm_pdr_add_fru_record_set(
-                    pdrRepo, 0, recordSetIdentifier, entity.entity_type,
-                    entity.entity_instance_num, entity.entity_container_id,
-                    bmc_record_handle);
+                    pdrRepo, TERMINUS_HANDLE, recordSetIdentifier,
+                    entity.entity_type, entity.entity_instance_num,
+                    entity.entity_container_id, bmc_record_handle);
             }
             auto curSize = table.size();
             table.resize(curSize + recHeaderSize + tlvs.size());
@@ -256,6 +257,8 @@ int FruImpl::getFRURecordByOption(std::vector<uint8_t>& fruData,
                                   uint16_t recordSetIdentifer,
                                   uint8_t recordType, uint8_t fieldType)
 {
+    using sum = uint32_t;
+
     // FRU table is built lazily, build if not done.
     buildFRUTable();
 
@@ -277,7 +280,7 @@ int FruImpl::getFRURecordByOption(std::vector<uint8_t>& fruData,
     }
 
     auto pads = utils::getNumPadBytes(recordTableSize);
-    auto sum = crc32(fruData.data(), recordTableSize + pads);
+    crc32(fruData.data(), recordTableSize + pads);
 
     auto iter = fruData.begin() + recordTableSize + pads;
     std::copy_n(reinterpret_cast<const uint8_t*>(&checksum), sizeof(checksum),

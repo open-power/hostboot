@@ -98,6 +98,16 @@
          "default_value" : 0,
          "helpText" : "Specifies the power limit in watts for the current IPL. Do not set this attribute directly; set hb_power_limit_in_watts instead.",
          "displayName" : "Power Limit In Watts (current)"
+      },
+      {
+         "attribute_name" : "hb_max_number_huge_pages",
+         "lower_bound" : 0,
+         "upper_bound" : 65535,
+         "scalar_increment" : 1,
+         "default_value" : 0,
+         "readOnly":true,
+         "helpText" : "Specifies the actual maximum number of huge pages available given the current system configuration.",
+         "displayName" : "Max Number Huge Pages"
       }
    ]
 }

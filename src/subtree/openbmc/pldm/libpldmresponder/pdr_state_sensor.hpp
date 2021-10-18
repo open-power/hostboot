@@ -71,7 +71,7 @@ void generateStateSensorPDR(const DBusInterface& dBusIntf, const Json& json,
         HTOLE16(pdr->hdr.record_change_num);
         HTOLE16(pdr->hdr.length);
 
-        pdr->terminus_handle = 0;
+        pdr->terminus_handle = TERMINUS_HANDLE;
         pdr->sensor_id = handler.getNextSensorId();
 
         try

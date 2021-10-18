@@ -193,8 +193,11 @@ int CommandInterface::pldmSendRecv(std::vector<uint8_t>& requestMsg,
         pldmVerbose = true;
     }
 
-    Logger(pldmVerbose, "Request Message:", "");
-    printBuffer(requestMsg, pldmVerbose);
+    if (pldmVerbose)
+    {
+        std::cout << "pldmtool: ";
+        printBuffer(Tx, requestMsg);
+    }
 
     if (mctp_eid != PLDM_ENTITY_ID)
     {
@@ -211,18 +214,24 @@ int CommandInterface::pldmSendRecv(std::vector<uint8_t>& requestMsg,
                        requestMsg.size() - 2, &responseMessage,
                        &responseMessageSize);
 
-        Logger(pldmVerbose, "Response Message:", "");
         responseMsg.resize(responseMessageSize);
         memcpy(responseMsg.data(), responseMessage, responseMsg.size());
 
         free(responseMessage);
-        printBuffer(responseMsg, pldmVerbose);
+        if (pldmVerbose)
+        {
+            std::cout << "pldmtool: ";
+            printBuffer(Rx, responseMsg);
+        }
     }
     else
     {
         mctpSockSendRecv(requestMsg, responseMsg, mctpVerbose);
-        Logger(pldmVerbose, "Response Message:", "");
-        printBuffer(responseMsg, pldmVerbose);
+        if (pldmVerbose)
+        {
+            std::cout << "pldmtool: ";
+            printBuffer(Rx, responseMsg);
+        }
         responseMsg.erase(responseMsg.begin(),
                           responseMsg.begin() + 2 /* skip the mctp header */);
     }

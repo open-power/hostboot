@@ -1,14 +1,14 @@
-# This JSON is tied with BMC's PDRs. Each entry is used to identify a group of
-# composite sensors.
+// This JSON is tied with BMC's PDRs. Each entry is used to identify a group of
+// composite sensors.
 {
   "sensorPDRs": [
     {
-      # StateSensorPDR
-      # Each sensor in each group of composite sensors has a separate entry and the
-      # supported event states, up to eight.
-      # The "dbus" section contains information about the corresponding D-Bus
-      # property for the sensor and "property_values" are the D-Bus property values
-      # for each corresponding entry in the "states".
+      // StateSensorPDR
+      // Each sensor in each group of composite sensors has a separate entry and the
+      // supported event states, up to eight.
+      // The "dbus" section contains information about the corresponding D-Bus
+      // property for the sensor and "property_values" are the D-Bus property values
+      // for each corresponding entry in the "states".
       "pdrType": 4,
       "entries": [
         {

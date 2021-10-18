@@ -1,6 +1,7 @@
 #pragma once
 #include "libpldm/entity.h"
 #include "libpldm/platform.h"
+#include "oem/ibm/libpldm/state_set.h"
 
 #include "inband_code_update.hpp"
 #include "libpldmresponder/oem_handler.hpp"
@@ -8,43 +9,21 @@
 #include "libpldmresponder/platform.hpp"
 #include "requester/handler.hpp"
 
+typedef ibm_oem_pldm_state_set_firmware_update_state_values CodeUpdateState;
+
 namespace pldm
 {
 namespace responder
 {
 namespace oem_ibm_platform
 {
-
-#define PLDM_OEM_IBM_FIRMWARE_UPDATE_STATE 32768
-#define PLDM_OEM_IBM_BOOT_STATE 32769
-#define PLDM_OEM_IBM_SYSTEM_POWER_STATE 32771
-
 static constexpr auto PLDM_OEM_IBM_ENTITY_FIRMWARE_UPDATE = 24577;
-static constexpr auto PLDM_OEM_IBM_VERIFICATION_STATE = 32770;
 constexpr uint16_t ENTITY_INSTANCE_0 = 0;
 constexpr uint16_t ENTITY_INSTANCE_1 = 1;
 
-enum class CodeUpdateState : uint8_t
+enum SetEventReceiverCount
 {
-    START = 0x1,
-    END = 0x2,
-    FAIL = 0x3,
-    ABORT = 0x4,
-    ACCEPT = 0x5,
-    REJECT = 0x6
-};
-
-enum VerificationStateValues
-{
-    VALID = 0x0,
-    ENTITLEMENT_FAIL = 0x1,
-    BANNED_PLATFORM_FAIL = 0x2,
-    MIN_MIF_FAIL = 0x4,
-};
-
-enum SystemPowerStates
-{
-    POWER_CYCLE_HARD = 0x1,
+    SET_EVENT_RECEIVER_SENT = 0x2,
 };
 
 class Handler : public oem_platform::Handler
@@ -60,6 +39,36 @@ class Handler : public oem_platform::Handler
         mctp_eid(mctp_eid), requester(requester), event(event), handler(handler)
     {
         codeUpdate->setVersions();
+        setEventReceiverCnt = 0;
+
+        using namespace sdbusplus::bus::match::rules;
+        hostOffMatch = std::make_unique<sdbusplus::bus::match::match>(
+            pldm::utils::DBusHandler::getBus(),
+            propertiesChanged("/xyz/openbmc_project/state/host0",
+                              "xyz.openbmc_project.State.Host"),
+            [this](sdbusplus::message::message& msg) {
+                pldm::utils::DbusChangedProps props{};
+                std::string intf;
+                msg.read(intf, props);
+                const auto itr = props.find("CurrentHostState");
+                if (itr != props.end())
+                {
+                    pldm::utils::PropertyValue value = itr->second;
+                    auto propVal = std::get<std::string>(value);
+                    if (propVal ==
+                        "xyz.openbmc_project.State.Host.HostState.Off")
+                    {
+                        hostOff = true;
+                        setEventReceiverCnt = 0;
+                        disableWatchDogTimer();
+                    }
+                    else if (propVal ==
+                             "xyz.openbmc_project.State.Host.HostState.Running")
+                    {
+                        hostOff = false;
+                    }
+                }
+            });
     }
 
     int getOemStateSensorReadingsHandler(
@@ -146,6 +155,32 @@ class Handler : public oem_platform::Handler
      */
     void _processSystemReboot(sdeventplus::source::EventBase& source);
 
+    /*keeps track how many times setEventReceiver is sent */
+    void countSetEventReceiver()
+    {
+        setEventReceiverCnt++;
+    }
+
+    /* disables watchdog if running and Host is up */
+    void checkAndDisableWatchDog();
+
+    /** @brief To check if the watchdog app is running
+     *
+     *  @return the running status of watchdog app
+     */
+    bool watchDogRunning();
+
+    /** @brief Method to reset the Watchdog timer on receiving platform Event
+     *  Message for heartbeat elapsed time from Hostboot
+     */
+    void resetWatchDogTimer();
+
+    /** @brief To disable to the watchdog timer on host poweron completion*/
+    void disableWatchDogTimer();
+
+    /** @brief to check the BMC state*/
+    int checkBMCState();
+
     ~Handler() = default;
 
     pldm::responder::CodeUpdate* codeUpdate; //!< pointer to CodeUpdate object
@@ -178,6 +213,13 @@ class Handler : public oem_platform::Handler
 
     /** @brief PLDM request handler */
     pldm::requester::Handler<pldm::requester::Request>* handler;
+
+    /** @brief D-Bus property changed signal match */
+    std::unique_ptr<sdbusplus::bus::match::match> hostOffMatch;
+
+    bool hostOff = true;
+
+    int setEventReceiverCnt = 0;
 };
 
 /** @brief Method to encode code update event msg

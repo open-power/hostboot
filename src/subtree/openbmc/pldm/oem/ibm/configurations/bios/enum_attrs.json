@@ -57,7 +57,7 @@
          "default_values":[
             "PowerVM"
          ],
-         "helpText" : "hb_hyp_switch",
+         "helpText" : "Tells the host boot fw which type of hypervisor will be loaded.",
          "displayName" : "hb_hyp_switch",
          "dbus":
             {
@@ -67,6 +67,19 @@
              "property_type" : "string",
              "property_values" : ["com.ibm.Host.Target.Hypervisor.PowerVM" , "com.ibm.Host.Target.Hypervisor.OPAL"]
             }
+      },
+      {
+         "attribute_name":"hb_hyp_switch_current",
+         "possible_values":[
+            "PowerVM",
+            "OPAL"
+         ],
+         "default_values":[
+            "PowerVM"
+         ],
+         "helpText" : "Do not set this attribute directly; set hb_hyp_switch instead.",
+         "displayName" : "hb_hyp_switch (current)",
+         "readOnly":true
       },
       {
          "attribute_name":"pvm_stop_at_standby",
@@ -100,15 +113,7 @@
             "Enabled"
          ],
          "helpText" : "Specifies the current hypervisor boot policy. Do not set this attribute directly; set pvm_stop_at_standby instead.",
-         "displayName" : "pvm_stop_at_standby_current (current)",
-         "dbus":
-            {
-               "object_path" : "/xyz/openbmc_project/control/host0/boot",
-               "interface" : "xyz.openbmc_project.Control.Boot.Mode",
-               "property_name" : "BootMode",
-               "property_type" : "string",
-               "property_values" : ["xyz.openbmc_project.Control.Boot.Mode.Modes.Regular", "xyz.openbmc_project.Control.Boot.Mode.Modes.Setup", "xyz.openbmc_project.Control.Boot.Mode.Modes.Safe"]
-            }
+         "displayName" : "pvm_stop_at_standby_current (current)"
       },
       {
          "attribute_name":"hb_debug_console",
@@ -420,6 +425,30 @@
          ],
          "helpText" : "Specifies the requested level of security keys to be cleared from the system for the current IPL. Do not set this attribute directly; set hb_key_clear_request instead.",
          "displayName" : "Key Clear Request (current)"
+      },
+      {
+         "attribute_name":"hb_host_usb_enablement",
+         "possible_values":[
+            "Disabled",
+            "Enabled"
+         ],
+         "default_values":[
+            "Enabled"
+         ],
+         "helpText" : "Specifies if Host USB is disabled or enabled for security reasons, requires a reboot for a change to be applied.",
+         "displayName" : "Host USB Enablement (pending)"
+      },
+      {
+         "attribute_name":"hb_host_usb_enablement_current",
+         "possible_values":[
+            "Disabled",
+            "Enabled"
+         ],
+         "default_values":[
+            "Enabled"
+         ],
+         "helpText" : "Specifies if Host USB is disabled or enabled for security reasons. Do not set this attribute directly; set hb_host_usb_enablement instead.",
+         "displayName" : "Host USB Enablement (current)"
       }
    ]
 }

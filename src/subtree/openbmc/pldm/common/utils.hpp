@@ -29,6 +29,8 @@ namespace utils
 
 namespace fs = std::filesystem;
 using Json = nlohmann::json;
+constexpr bool Tx = true;
+constexpr bool Rx = false;
 
 /** @struct CustomFD
  *
@@ -344,12 +346,13 @@ int emitStateSensorEventSignal(uint8_t tid, uint16_t sensorId,
 
 /** @brief Print the buffer
  *
- *  @param[in]  buffer  - Buffer to print
- *  @param[in]  pldmVerbose -verbosity flag - true/false
+ *  @param[in]  isTx - True if the buffer is an outgoing PLDM message, false if
+                       the buffer is an incoming PLDM message
+ *  @param[in]  buffer - Buffer to print
  *
  *  @return - None
  */
-void printBuffer(const std::vector<uint8_t>& buffer, bool pldmVerbose);
+void printBuffer(bool isTx, const std::vector<uint8_t>& buffer);
 
 /** @brief Convert the buffer to std::string
  *

@@ -4,6 +4,7 @@
 #include "libpldm/requester/pldm.h"
 
 #include "common/types.hpp"
+#include "common/utils.hpp"
 
 #include <sdbusplus/timer.hpp>
 #include <sdeventplus/event.hpp>
@@ -144,18 +145,20 @@ class Request final : public RequestRetryTimer
      *  @param[in] requestMsg - PLDM request message
      *  @param[in] numRetries - number of request retries
      *  @param[in] timeout - time to wait between each retry in milliseconds
+     *  @param[in] verbose - verbose tracing flag
      */
     explicit Request(int fd, mctp_eid_t eid, sdeventplus::Event& event,
                      pldm::Request&& requestMsg, uint8_t numRetries,
-                     std::chrono::milliseconds timeout) :
+                     std::chrono::milliseconds timeout, bool verbose) :
         RequestRetryTimer(event, numRetries, timeout),
-        fd(fd), eid(eid), requestMsg(std::move(requestMsg))
+        fd(fd), eid(eid), requestMsg(std::move(requestMsg)), verbose(verbose)
     {}
 
   private:
     int fd;                   //!< file descriptor of MCTP communications socket
     mctp_eid_t eid;           //!< endpoint ID of the remote MCTP endpoint
     pldm::Request requestMsg; //!< PLDM request message
+    bool verbose;             //!< verbose tracing flag
 
     /** @brief Sends the PLDM request message on the socket
      *
@@ -163,6 +166,10 @@ class Request final : public RequestRetryTimer
      */
     int send() const
     {
+        if (verbose)
+        {
+            pldm::utils::printBuffer(pldm::utils::Tx, requestMsg);
+        }
         auto rc = pldm_send(eid, fd, requestMsg.data(), requestMsg.size());
         if (rc < 0)
         {

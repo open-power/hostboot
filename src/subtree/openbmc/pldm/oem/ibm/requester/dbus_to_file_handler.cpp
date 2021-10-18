@@ -113,28 +113,6 @@ void DbusToFileHandler::reportResourceDumpFailure()
 void DbusToFileHandler::processNewResourceDump(
     const std::string& vspString, const std::string& resDumpReqPass)
 {
-    // This needs special handling in later point of time. Resource dump without
-    // the vsp string is supposed to be a non-disruptive system dump.
-    if (vspString.empty())
-    {
-        std::cerr << "Empty vsp string"
-                  << "\n";
-        PropertyValue value{resDumpStatus};
-        DBusMapping dbusMapping{resDumpCurrentObjPath, resDumpProgressIntf,
-                                "Status", "string"};
-        try
-        {
-            pldm::utils::DBusHandler().setDbusProperty(dbusMapping, value);
-        }
-        catch (const std::exception& e)
-        {
-            std::cerr << "failed to set resource dump operation status, "
-                         "ERROR="
-                      << e.what() << "\n";
-        }
-        return;
-    }
-
     namespace fs = std::filesystem;
     const fs::path resDumpDirPath = "/var/lib/pldm/resourcedump";
 

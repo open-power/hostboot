@@ -62,7 +62,7 @@ void BIOSStringAttribute::setAttrValueOnDbus(
     const pldm_bios_attr_val_table_entry* attrValueEntry,
     const pldm_bios_attr_table_entry*, const BIOSStringTable&)
 {
-    if (readOnly || !dBusMap.has_value())
+    if (!dBusMap.has_value())
     {
         return;
     }
@@ -74,7 +74,7 @@ void BIOSStringAttribute::setAttrValueOnDbus(
 
 std::string BIOSStringAttribute::getAttrValue()
 {
-    if (readOnly || !dBusMap.has_value())
+    if (!dBusMap.has_value())
     {
         return stringInfo.defString;
     }

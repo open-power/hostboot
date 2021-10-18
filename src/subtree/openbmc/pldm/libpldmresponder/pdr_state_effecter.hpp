@@ -5,6 +5,8 @@
 #include "pdr.hpp"
 #include "pdr_utils.hpp"
 
+#include <config.h>
+
 namespace pldm
 {
 
@@ -68,7 +70,7 @@ void generateStateEffecterPDR(const DBusInterface& dBusIntf, const Json& json,
         pdr->hdr.record_change_num = 0;
         pdr->hdr.length = pdrSize - sizeof(pldm_pdr_hdr);
 
-        pdr->terminus_handle = pdr::BmcPldmTerminusHandle;
+        pdr->terminus_handle = TERMINUS_HANDLE;
         pdr->effecter_id = handler.getNextEffecterId();
 
         try

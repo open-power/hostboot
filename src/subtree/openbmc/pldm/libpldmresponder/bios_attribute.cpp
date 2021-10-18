@@ -32,21 +32,18 @@ BIOSAttribute::BIOSAttribute(const Json& entry,
         // No action required, readOnly is initialised to false
     }
 
-    if (!readOnly)
+    try
     {
-        try
-        {
-            std::string objectPath = entry.at("dbus").at("object_path");
-            std::string interface = entry.at("dbus").at("interface");
-            std::string propertyName = entry.at("dbus").at("property_name");
-            std::string propertyType = entry.at("dbus").at("property_type");
+        std::string objectPath = entry.at("dbus").at("object_path");
+        std::string interface = entry.at("dbus").at("interface");
+        std::string propertyName = entry.at("dbus").at("property_name");
+        std::string propertyType = entry.at("dbus").at("property_type");
 
-            dBusMap = {objectPath, interface, propertyName, propertyType};
-        }
-        catch (const std::exception& e)
-        {
-            // No action required, dBusMap whill have no value
-        }
+        dBusMap = {objectPath, interface, propertyName, propertyType};
+    }
+    catch (const std::exception& e)
+    {
+        // No action required, dBusMap whill have no value
     }
 }
 

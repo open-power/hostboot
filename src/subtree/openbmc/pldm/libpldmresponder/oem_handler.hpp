@@ -68,6 +68,30 @@ class Handler : public CmdHandler
      */
     virtual void buildOEMPDR(pdr_utils::Repo& repo) = 0;
 
+    /** @brief Interface to check if setEventReceiver is sent to host already.
+     *         If sent then then disableWatchDogTimer() would be called to
+     *         disable the watchdog timer */
+    virtual void checkAndDisableWatchDog() = 0;
+
+    /** @brief Interface to check if the watchdog timer is running
+     *
+     * @return - true if watchdog is running, false otherwise
+     * */
+    virtual bool watchDogRunning() = 0;
+
+    /** @brief Interface to reset the watchdog timer */
+    virtual void resetWatchDogTimer() = 0;
+
+    /** @brief Interface to disable the watchdog timer */
+    virtual void disableWatchDogTimer() = 0;
+
+    /** @brief Interface to keep track of how many times setEventReceiver
+     *         is sent to host */
+    virtual void countSetEventReceiver() = 0;
+
+    /** @brief Interface to check the BMC state */
+    virtual int checkBMCState() = 0;
+
     virtual ~Handler() = default;
 
   protected:

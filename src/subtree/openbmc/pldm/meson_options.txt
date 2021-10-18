@@ -18,3 +18,10 @@ option('number-of-request-retries', type: 'integer', min: 2, max: 30, descriptio
 option('instance-id-expiration-interval', type: 'integer', min: 5, max: 6, description: 'Instance ID expiration interval in seconds', value: 5)
 # Default response-time-out set to 2 seconds to facilitate a minimum retry of the request of 2.
 option('response-time-out', type: 'integer', min: 300, max: 4800, description: 'The amount of time a requester has to wait for a response message in milliseconds', value: 2000)
+
+option('heartbeat-timeout-seconds', type: 'integer', description: ' The amount of time host waits for BMC to respond to pings from host, as part of host-bmc surveillance', value: 120)
+
+# PLDM Terminus options
+option('terminus-id', type:'integer', min:0, max: 255, description: 'The terminus id value of the device that is running this pldm stack', value:1)
+option('terminus-handle',type:'integer',min:0, max:65535, description: 'The terminus handle value of the device that is running this pldm stack', value:1)
+

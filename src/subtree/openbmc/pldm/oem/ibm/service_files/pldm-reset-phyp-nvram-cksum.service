@@ -1,0 +1,9 @@
+[Unit]
+Description=Reset PHYP-NVRAM-CKSUM file
+Requires=pldm-create-phyp-nvram-cksum.service
+Before=pldm-create-phyp-nvram-cksum.service
+
+[Service]
+ExecStart=/bin/rm -f /var/lib/pldm/PHYP-NVRAM-CKSUM
+Type=oneshot
+RemainAfterExit=no

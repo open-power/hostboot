@@ -1,27 +1,27 @@
 {
     "entries": [
         {
-            #mctp eid is needed for communicating with the host
+            // mctp eid is needed for communicating with the host
             "mctp_eid": 9,
             "effecter_info": {
-                #a 0xFFFF means effecter id is not hard coded and will be
-                #fetched from the PDR
-                "effecterID": 0xFFFF,
+                // a 0xFFFF(65535) means effecter id is not hard coded and
+                // will be fetched from the PDR
+                "effecterID": 65535,
                 "containerID": 1,
                 "entityType": 32801,
-                # entity type 33 means Phyp will set value 32801 
-                # this is because the MSB is set to indicate
-                #virtual entity
+                // entity type 33 means Phyp will set value 32801
+                // this is because the MSB is set to indicate
+                // virtual entity
                 "entityInstance": 1,
                 "compositeEffecterCount": 3
             },
             "effecters": [
                 {
-                # Following are the D-Bus information under each effecter 
-                #which are monitored for a property change signal
+                // Following are the D-Bus information under each effecter
+                // which are monitored for a property change signal
 
-                #if there is a property change, the corresponding
-                #state value is picked up to set the host effecter
+                // if there is a property change, the corresponding
+                // state value is picked up to set the host effecter
 
                     "dbus_info": {
                         "object_path": "/xyz/abc/def",
@@ -35,8 +35,8 @@
                     },
                     "state" : {
                         "id" : 197,
-                        # This should be of same size and order as
-                        # property_values
+                        // This should be of same size and order as
+                        // property_values
                         "state_values": [
                             0,
                             1

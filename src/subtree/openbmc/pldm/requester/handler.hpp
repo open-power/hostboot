@@ -91,19 +91,21 @@ class Handler
      *  @param[in] fd - fd of MCTP communications socket
      *  @param[in] event - reference to PLDM daemon's main event loop
      *  @param[in] requester - reference to Requester object
+     *  @param[in] verbose - verbose tracing flag
      *  @param[in] instanceIdExpiryInterval - instance ID expiration interval
      *  @param[in] numRetries - number of request retries
      *  @param[in] responseTimeOut - time to wait between each retry
      */
     explicit Handler(
         int fd, sdeventplus::Event& event, pldm::dbus_api::Requester& requester,
+        bool verbose,
         std::chrono::seconds instanceIdExpiryInterval =
             std::chrono::seconds(INSTANCE_ID_EXPIRATION_INTERVAL),
         uint8_t numRetries = static_cast<uint8_t>(NUMBER_OF_REQUEST_RETRIES),
         std::chrono::milliseconds responseTimeOut =
             std::chrono::milliseconds(RESPONSE_TIME_OUT)) :
         fd(fd),
-        event(event), requester(requester),
+        event(event), requester(requester), verbose(verbose),
         instanceIdExpiryInterval(instanceIdExpiryInterval),
         numRetries(numRetries), responseTimeOut(responseTimeOut)
     {}
@@ -162,7 +164,8 @@ class Handler
         };
 
         auto request = std::make_unique<RequestInterface>(
-            fd, eid, event, std::move(requestMsg), numRetries, responseTimeOut);
+            fd, eid, event, std::move(requestMsg), numRetries, responseTimeOut,
+            verbose);
         auto timer = std::make_unique<phosphor::Timer>(
             event.get(), instanceIdExpiryCallBack);
 
@@ -237,15 +240,16 @@ class Handler
     int fd; //!< file descriptor of MCTP communications socket
     sdeventplus::Event& event; //!< reference to PLDM daemon's main event loop
     pldm::dbus_api::Requester& requester; //!< reference to Requester object
+    bool verbose;                         //!< verbose tracing flag
     std::chrono::seconds
         instanceIdExpiryInterval; //!< Instance ID expiration interval
     uint8_t numRetries;           //!< number of request retries
     std::chrono::milliseconds
         responseTimeOut; //!< time to wait between each retry
 
-    /** @brief Container for storing the details of the PLDM request message,
-     *         handler for the corresponding PLDM response and the timer object
-     *         for the Instance ID expiration
+    /** @brief Container for storing the details of the PLDM request
+     *         message, handler for the corresponding PLDM response and the
+     *         timer object for the Instance ID expiration
      */
     using RequestValue =
         std::tuple<std::unique_ptr<RequestInterface>, ResponseHandler,

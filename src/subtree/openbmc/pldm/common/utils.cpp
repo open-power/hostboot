@@ -141,8 +141,7 @@ uint8_t readHostEID()
     std::ifstream eidFile{HOST_EID_PATH};
     if (!eidFile.good())
     {
-        std::cerr << "Could not open host EID file"
-                  << "\n";
+        std::cerr << "Could not open host EID file: " << HOST_EID_PATH << "\n";
     }
     else
     {
@@ -451,7 +450,7 @@ int emitStateSensorEventSignal(uint8_t tid, uint16_t sensorId,
 
         msg.signal_send();
     }
-    catch (std::exception& e)
+    catch (const std::exception& e)
     {
         std::cerr << "Error emitting pldm event signal:"
                   << "ERROR=" << e.what() << "\n";
@@ -492,10 +491,18 @@ uint16_t findStateSensorId(const pldm_pdr* pdrRepo, uint8_t tid,
     return PLDM_INVALID_EFFECTER_ID;
 }
 
-void printBuffer(const std::vector<uint8_t>& buffer, bool pldmVerbose)
+void printBuffer(bool isTx, const std::vector<uint8_t>& buffer)
 {
-    if (pldmVerbose && !buffer.empty())
+    if (!buffer.empty())
     {
+        if (isTx)
+        {
+            std::cout << "Tx: ";
+        }
+        else
+        {
+            std::cout << "Rx: ";
+        }
         std::ostringstream tempStream;
         for (int byte : buffer)
         {

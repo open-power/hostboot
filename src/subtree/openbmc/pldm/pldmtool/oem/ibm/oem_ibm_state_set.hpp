@@ -1,3 +1,5 @@
+#include "oem/ibm/libpldm/state_set.h"
+
 #include "oem/ibm/libpldmresponder/oem_ibm_handler.hpp"
 
 /** @brief PLDM OEM State Set range as per DSP0249_1.1.0 specification
@@ -60,8 +62,7 @@ extern const std::map<uint8_t, std::string> OemIBMEntityType{
 extern const std::map<uint16_t, std::string> OemIBMstateSet{
     {PLDM_OEM_IBM_FIRMWARE_UPDATE_STATE, "OEM IBM Firmware Update State"},
     {PLDM_OEM_IBM_BOOT_STATE, "OEM IBM Boot State"},
-    {pldm::responder::oem_ibm_platform::PLDM_OEM_IBM_VERIFICATION_STATE,
-     "OEM IBM Verification State"},
+    {PLDM_OEM_IBM_VERIFICATION_STATE, "OEM IBM Verification State"},
     {PLDM_OEM_IBM_SYSTEM_POWER_STATE, "OEM IBM System Power State"}};
 
 /** @brief Map for PLDM OEM IBM firmware update possible state values
@@ -98,8 +99,7 @@ extern const std::map<uint8_t, std::string> SetOemIBMBootStateValues{
  */
 extern const std::map<uint16_t, const std::map<uint8_t, std::string>>
     populateOemIBMStateMaps{
-        {pldm::responder::oem_ibm_platform::PLDM_OEM_IBM_VERIFICATION_STATE,
-         SetOemIBMVerStateValues},
+        {PLDM_OEM_IBM_VERIFICATION_STATE, SetOemIBMVerStateValues},
         {PLDM_OEM_IBM_SYSTEM_POWER_STATE, SetOemIBMSysPowerStatesValues},
         {PLDM_OEM_IBM_BOOT_STATE, SetOemIBMBootStateValues},
         {PLDM_OEM_IBM_FIRMWARE_UPDATE_STATE, SetOemIBMFWUpdateStateValues},

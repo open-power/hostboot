@@ -103,8 +103,7 @@ class HostPDRHandler
         pldm_entity_association_tree* entityTree,
         pldm_entity_association_tree* bmcEntityTree,
         pldm::dbus_api::Requester& requester,
-        pldm::requester::Handler<pldm::requester::Request>* handler,
-        bool verbose = false);
+        pldm::requester::Handler<pldm::requester::Request>* handler);
 
     /** @brief fetch PDRs from host firmware. See @class.
      *  @param[in] recordHandles - list of record handles pointing to host's
@@ -265,7 +264,6 @@ class HostPDRHandler
      *         PlatformEventMessage command request.
      */
     HostStateSensorMap sensorMap;
-    bool verbose;
 
     /** @brief whether response received from Host */
     bool responseReceived;

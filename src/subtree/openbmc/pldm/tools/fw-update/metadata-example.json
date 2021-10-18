@@ -1,7 +1,7 @@
 {
     "PackageHeaderInformation": {
-        "PackageHeaderIdentifier": "1244D2648D7D4718A030FC8A56587D5A",
-        "PackageHeaderFormatVersion": 2,
+        "PackageHeaderIdentifier": "F018878CCB7D49439800A02F059ACA02",
+        "PackageHeaderFormatVersion": 1,
         "PackageReleaseDateTime": "25/12/2021 00:00:00",
         "PackageVersionString": "VersionString1"
     },
@@ -15,10 +15,21 @@
                 100,
                 200
             ],
-            "InitialDescriptor": {
-                "InitialDescriptorType": 2,
-                "InitialDescriptorData": "1244D2648D7D4718A030FC8A56587D5B"
-            }
+            "Descriptors": [
+                {
+                    "DescriptorType": 2,
+                    "DescriptorData": "1244D2648D7D4718A030FC8A56587D5B"
+                },
+                {
+                    "DescriptorType": 1,
+                    "DescriptorData": "47160000"
+                },
+                {
+                    "DescriptorType": 65535,
+                    "VendorDefinedDescriptorTitleString": "OpenBMC",
+                    "VendorDefinedDescriptorData": "1234"
+                }
+            ]
         },
         {
             "DeviceUpdateOptionFlags": [
@@ -29,10 +40,12 @@
                 200,
                 300
             ],
-            "InitialDescriptor": {
-                "InitialDescriptorType": 2,
-                "InitialDescriptorData": "1244D2648D7D4718A030FC8A56587D5C"
-            }
+            "Descriptors": [
+                {
+                    "DescriptorType": 2,
+                    "DescriptorData": "1244D2648D7D4718A030FC8A56587D5C"
+                }
+            ]
         },
         {
             "DeviceUpdateOptionFlags": [
@@ -41,10 +54,12 @@
             "ApplicableComponents": [
                 100
             ],
-            "InitialDescriptor": {
-                "InitialDescriptorType": 2,
-                "InitialDescriptorData": "1244D2648D7D4718A030FC8A56587D5D"
-            }
+            "Descriptors": [
+                {
+                    "DescriptorType": 2,
+                    "DescriptorData": "1244D2648D7D4718A030FC8A56587D5D"
+                }
+            ]
         }
     ],
     "ComponentImageInformationArea": [

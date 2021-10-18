@@ -76,17 +76,14 @@ class HostEffecterParser
      *  @param[in] dbusHandler - D-bus Handler
      *  @param[in] jsonPath - path for the json file
      *  @param[in] handler - PLDM request handler
-     *  @param[in] verbose - verbosity
      */
     explicit HostEffecterParser(
         pldm::dbus_api::Requester* requester, int fd, const pldm_pdr* repo,
         pldm::utils::DBusHandler* const dbusHandler,
         const std::string& jsonPath,
-        pldm::requester::Handler<pldm::requester::Request>* handler,
-        bool verbose = false) :
+        pldm::requester::Handler<pldm::requester::Request>* handler) :
         requester(requester),
-        sockFd(fd), pdrRepo(repo), dbusHandler(dbusHandler), handler(handler),
-        verbose(verbose)
+        sockFd(fd), pdrRepo(repo), dbusHandler(dbusHandler), handler(handler)
     {
         try
         {
@@ -182,7 +179,6 @@ class HostEffecterParser
     const pldm::utils::DBusHandler* dbusHandler; //!< D-bus Handler
     /** @brief PLDM request handler */
     pldm::requester::Handler<pldm::requester::Request>* handler;
-    bool verbose; //!< verbose flag
 };
 
 } // namespace host_effecters

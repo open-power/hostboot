@@ -269,19 +269,6 @@ int HostEffecterParser::setHostStateEffecter(
         return rc;
     }
 
-    if (verbose)
-    {
-        if (requestMsg.size())
-        {
-            std::ostringstream tempStream;
-            for (int byte : requestMsg)
-            {
-                tempStream << std::setfill('0') << std::setw(2) << std::hex
-                           << byte << " ";
-            }
-            std::cout << tempStream.str() << std::endl;
-        }
-    }
     auto setStateEffecterStatesRespHandler =
         [](mctp_eid_t /*eid*/, const pldm_msg* response, size_t respMsgLen) {
             if (response == nullptr || !respMsgLen)

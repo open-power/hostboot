@@ -65,12 +65,57 @@ class GetPDR : public CommandInterface
     explicit GetPDR(const char* type, const char* name, CLI::App* app) :
         CommandInterface(type, name, app)
     {
-        app->add_option(
-               "-d,--data", recordHandle,
-               "retrieve individual PDRs from a PDR Repository\n"
-               "eg: The recordHandle value for the PDR to be retrieved and 0 "
-               "means get first PDR in the repository.")
-            ->required();
+        auto pdrOptionGroup = app->add_option_group(
+            "Required Option",
+            "Retrieve individual PDR, all PDRs, or PDRs of a requested type");
+        pdrOptionGroup->add_option(
+            "-d,--data", recordHandle,
+            "retrieve individual PDRs from a PDR Repository\n"
+            "eg: The recordHandle value for the PDR to be retrieved and 0 "
+            "means get first PDR in the repository.");
+        pdrRecType = "";
+        pdrOptionGroup->add_option("-t, --type", pdrRecType,
+                                   "retrieve all PDRs of the requested type\n"
+                                   "supported types:\n"
+                                   "[terminusLocator, stateSensor, "
+                                   "numericEffecter, stateEffecter, "
+                                   "EntityAssociation, fruRecord, ... ]");
+        allPDRs = false;
+        pdrOptionGroup->add_flag("-a, --all", allPDRs,
+                                 "retrieve all PDRs from a PDR repository");
+        pdrOptionGroup->require_option(1);
+    }
+
+    void exec() override
+    {
+        if (allPDRs || !pdrRecType.empty())
+        {
+            if (!pdrRecType.empty())
+            {
+                std::transform(pdrRecType.begin(), pdrRecType.end(),
+                               pdrRecType.begin(), tolower);
+            }
+
+            // Retrieve all PDR records starting from the first
+            recordHandle = 0;
+            uint32_t prevRecordHandle = 0;
+            do
+            {
+                CommandInterface::exec();
+                // recordHandle is updated to nextRecord when
+                // CommandInterface::exec() is successful.
+                // In case of any error, return.
+                if (recordHandle == prevRecordHandle)
+                {
+                    return;
+                }
+                prevRecordHandle = recordHandle;
+            } while (recordHandle != 0);
+        }
+        else
+        {
+            CommandInterface::exec();
+        }
     }
 
     std::pair<int, std::vector<uint8_t>> createRequestMsg() override
@@ -109,6 +154,7 @@ class GetPDR : public CommandInterface
         }
 
         printPDRMsg(nextRecordHndl, respCnt, recordData);
+        recordHandle = nextRecordHndl;
     }
 
   private:
@@ -423,6 +469,16 @@ class GetPDR : public CommandInterface
             {PLDM_STATE_SET_AVAILABILITY, setAvailability},
             {PLDM_STATE_SET_HEALTH_STATE, setHealthState},
         };
+
+    const std::map<std::string, uint8_t> strToPdrType = {
+        {"terminuslocator", PLDM_TERMINUS_LOCATOR_PDR},
+        {"statesensor", PLDM_STATE_SENSOR_PDR},
+        {"numericeffecter", PLDM_NUMERIC_EFFECTER_PDR},
+        {"stateeffecter", PLDM_STATE_EFFECTER_PDR},
+        {"entityassociation", PLDM_PDR_ENTITY_ASSOCIATION},
+        {"frurecord", PLDM_PDR_FRU_RECORD_SET},
+        // Add other types
+    };
 
     bool isLogicalBitSet(const uint16_t entity_type)
     {
@@ -885,7 +941,7 @@ class GetPDR : public CommandInterface
         }
     }
 
-    void printPDRMsg(const uint32_t nextRecordHndl, const uint16_t respCnt,
+    void printPDRMsg(uint32_t& nextRecordHndl, const uint16_t respCnt,
                      uint8_t* data)
     {
         if (data == NULL)
@@ -903,6 +959,29 @@ class GetPDR : public CommandInterface
         {
             return;
         }
+
+        if (!pdrRecType.empty())
+        {
+            // Need to return if the requested PDR type
+            // is not supported
+            if (!strToPdrType.contains(pdrRecType))
+            {
+                std::cerr << "PDR type '" << pdrRecType
+                          << "' is not supported or invalid\n";
+                // PDR type not supported, setting next record handle to 0
+                // to avoid looping through all PDR records
+                nextRecordHndl = 0;
+                return;
+            }
+
+            // Do not print PDR record if the current record
+            // PDR type does not match with requested type
+            if (pdr->type != strToPdrType.at(pdrRecType))
+            {
+                return;
+            }
+        }
+
         printCommonPDRHeader(pdr, output);
 
         switch (pdr->type)
@@ -933,6 +1012,8 @@ class GetPDR : public CommandInterface
 
   private:
     uint32_t recordHandle;
+    bool allPDRs;
+    std::string pdrRecType;
 };
 
 class SetStateEffecter : public CommandInterface

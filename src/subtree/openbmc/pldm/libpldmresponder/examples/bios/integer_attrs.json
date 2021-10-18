@@ -6,7 +6,7 @@
          "upper_bound" : 15,
          "scalar_increment" : 1,
          "default_value" : 0,
-         # This BIOS attribute has a D-Bus property as backend.
+         // This BIOS attribute has a D-Bus property as backend.
          "dbus":{
             "object_path" : "/xyz/openbmc_project/avsbus",
             "interface" : "xyz.openbmc.AvsBus.Manager",
@@ -15,7 +15,7 @@
          }
       },
       {
-         # This is an example of BIOS Integer Read only attribute
+         // This is an example of BIOS Integer Read only attribute
          "attribute_name" : "SBE_IMAGE_MINIMUM_VALID_ECS",
          "lower_bound" : 1,
          "upper_bound" : 15,
@@ -23,8 +23,8 @@
          "default_value" : 2
       },
       {
-         # This atttribute has invalid default value or scalar_increment, when
-         # scalar_increment=2 and lower_bound=1, default_value must be 1, 3, 5...
+         // This atttribute has invalid default value or scalar_increment, when
+         // scalar_increment=2 and lower_bound=1, default_value must be 1, 3, 5...
          "attribute_name" : "INTEGER_INVALID_CASE",
          "lower_bound" : 1,
          "upper_bound" : 15,

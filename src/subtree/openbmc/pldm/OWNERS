@@ -44,6 +44,9 @@ matches:
 - partial_regex: ibm
   owners:
   - sampmisr@in.ibm.com
+- exact: tools/visualize-pdr
+  owners:
+  - manojkiran.eda@gmail.com
 
 openbmc:
 - name: Deepak Kodihalli

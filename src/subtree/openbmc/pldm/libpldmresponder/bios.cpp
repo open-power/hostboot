@@ -183,7 +183,7 @@ Response Handler::setDateTime(const pldm_msg* request, size_t payloadLength)
                                 "uint64_t"};
         pldm::utils::DBusHandler().setDbusProperty(dbusMapping, value);
     }
-    catch (std::exception& e)
+    catch (const std::exception& e)
     {
 
         std::cerr << "Error Setting time,PATH=" << setTimePath

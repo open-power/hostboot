@@ -1,19 +1,19 @@
-# This JSON has the information needed to create OEM FRU record VINI for FRU of
-# type Board.
+// This JSON has the information needed to create OEM FRU record VINI for FRU of
+// type Board.
 {
    "record_details":
    {
-        # FRU Record Type - OEM FRU Record
+        // FRU Record Type - OEM FRU Record
         "fru_record_type" : 254,
-        # Encoding Type for FRU fields - ASCII
+        // Encoding Type for FRU fields - ASCII
         "fru_encoding_type": 1,
         "dbus_interface_name": "xyz.openbmc_project.Inventory.Item.Board"
    },
    "fru_fields":[
       {
-         # FRU Field Type 2 - Keyword RT
+         // FRU Field Type 2 - Keyword RT
          "fru_field_type" : 2,
-         # D-Bus property to read and populate the FRU field
+         // D-Bus property to read and populate the FRU field
          "dbus":
             {
                "interface" : "com.ibm.ipzvpd.VINI",
@@ -22,9 +22,9 @@
             }
       },
       {
-         # FRU Field Type 3 - Keyword B3
+         // FRU Field Type 3 - Keyword B3
          "fru_field_type" : 3,
-         # D-Bus property to read and populate the FRU field
+         // D-Bus property to read and populate the FRU field
          "dbus":
             {
                "interface" : "com.ibm.ipzvpd.VINI",

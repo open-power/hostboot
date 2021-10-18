@@ -125,7 +125,7 @@ void BIOSEnumAttribute::buildValMap(const Json& dbusVals)
 uint8_t BIOSEnumAttribute::getAttrValueIndex()
 {
     auto defaultValueIndex = getValueIndex(defaultValue, possibleValues);
-    if (readOnly || !dBusMap.has_value())
+    if (!dBusMap.has_value())
     {
         return defaultValueIndex;
     }
@@ -166,7 +166,7 @@ void BIOSEnumAttribute::setAttrValueOnDbus(
     const pldm_bios_attr_table_entry* attrEntry,
     const BIOSStringTable& stringTable)
 {
-    if (readOnly || !dBusMap.has_value())
+    if (!dBusMap.has_value())
     {
         return;
     }
@@ -263,15 +263,7 @@ void BIOSEnumAttribute::generateAttributeEntry(
     std::string value = std::get<std::string>(attributevalue);
     entry->attr_type = 0;
     entry->value[0] = 1; // number of current values, default 1
-
-    if (readOnly)
-    {
-        entry->value[1] = getValueIndex(defaultValue, possibleValues);
-    }
-    else
-    {
-        entry->value[1] = getAttrValueIndex(value);
-    }
+    entry->value[1] = getAttrValueIndex(value);
 }
 
 } // namespace bios

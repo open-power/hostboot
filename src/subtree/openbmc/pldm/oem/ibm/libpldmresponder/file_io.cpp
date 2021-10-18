@@ -262,7 +262,7 @@ Response Handler::readFileIntoMemory(const pldm_msg* request,
     {
         value = table.at(fileHandle);
     }
-    catch (std::exception& e)
+    catch (const std::exception& e)
     {
         std::cerr << "File handle does not exist in the file table, HANDLE="
                   << fileHandle << "\n";
@@ -354,7 +354,7 @@ Response Handler::writeFileFromMemory(const pldm_msg* request,
     {
         value = table.at(fileHandle);
     }
-    catch (std::exception& e)
+    catch (const std::exception& e)
     {
         std::cerr << "File handle does not exist in the file table, HANDLE="
                   << fileHandle << "\n";
@@ -479,7 +479,7 @@ Response Handler::readFile(const pldm_msg* request, size_t payloadLength)
     {
         value = table.at(fileHandle);
     }
-    catch (std::exception& e)
+    catch (const std::exception& e)
     {
         std::cerr << "File handle does not exist in the file table, HANDLE="
                   << fileHandle << "\n";
@@ -560,7 +560,7 @@ Response Handler::writeFile(const pldm_msg* request, size_t payloadLength)
     {
         value = table.at(fileHandle);
     }
-    catch (std::exception& e)
+    catch (const std::exception& e)
     {
         std::cerr << "File handle does not exist in the file table, HANDLE="
                   << fileHandle << "\n";

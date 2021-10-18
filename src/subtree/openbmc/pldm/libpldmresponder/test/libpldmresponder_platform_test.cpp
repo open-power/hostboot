@@ -566,9 +566,9 @@ TEST(TerminusLocatorPDR, BMCTerminusLocatorPDR)
     EXPECT_EQ(pdr->hdr.record_change_num, 0);
     EXPECT_EQ(pdr->hdr.length,
               sizeof(pldm_terminus_locator_pdr) - sizeof(pldm_pdr_hdr));
-    EXPECT_EQ(pdr->terminus_handle, BmcPldmTerminusHandle);
+    EXPECT_EQ(pdr->terminus_handle, TERMINUS_HANDLE);
     EXPECT_EQ(pdr->validity, PLDM_TL_PDR_VALID);
-    EXPECT_EQ(pdr->tid, BmcTerminusId);
+    EXPECT_EQ(pdr->tid, TERMINUS_ID);
     EXPECT_EQ(pdr->container_id, 0);
     EXPECT_EQ(pdr->terminus_locator_type, PLDM_TERMINUS_LOCATOR_TYPE_MCTP_EID);
     EXPECT_EQ(pdr->terminus_locator_value_size,

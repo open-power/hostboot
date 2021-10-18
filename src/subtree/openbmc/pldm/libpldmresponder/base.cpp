@@ -1,13 +1,19 @@
+#include "config.h"
+
 #include "libpldm/base.h"
 
 #include "libpldm/bios.h"
 #include "libpldm/fru.h"
 #include "libpldm/platform.h"
+#include "libpldm/requester/pldm.h"
 
 #include "base.hpp"
+#include "common/utils.hpp"
+#include "libpldmresponder/pdr.hpp"
 
 #include <array>
 #include <cstring>
+#include <iostream>
 #include <map>
 #include <stdexcept>
 #include <vector>
@@ -170,6 +176,70 @@ Response Handler::getPLDMVersion(const pldm_msg* request, size_t payloadLength)
     return response;
 }
 
+void Handler::processSetEventReceiver(
+    sdeventplus::source::EventBase& /*source */)
+{
+    survEvent.reset();
+    std::vector<uint8_t> requestMsg(sizeof(pldm_msg_hdr) +
+                                    PLDM_SET_EVENT_RECEIVER_REQ_BYTES);
+    auto request = reinterpret_cast<pldm_msg*>(requestMsg.data());
+    auto instanceId = requester.getInstanceId(eid);
+    uint8_t eventMessageGlobalEnable =
+        PLDM_EVENT_MESSAGE_GLOBAL_ENABLE_ASYNC_KEEP_ALIVE;
+    uint8_t transportProtocolType = PLDM_TRANSPORT_PROTOCOL_TYPE_MCTP;
+    uint8_t eventReceiverAddressInfo = pldm::responder::pdr::BmcMctpEid;
+    uint16_t heartbeatTimer = HEARTBEAT_TIMEOUT;
+
+    auto rc = encode_set_event_receiver_req(
+        instanceId, eventMessageGlobalEnable, transportProtocolType,
+        eventReceiverAddressInfo, heartbeatTimer, request);
+    if (rc != PLDM_SUCCESS)
+    {
+        requester.markFree(eid, instanceId);
+        std::cerr << "Failed to encode_set_event_receiver_req, rc = "
+                  << std::hex << std::showbase << rc << std::endl;
+        return;
+    }
+
+    auto processSetEventReceiverResponse = [](mctp_eid_t /*eid*/,
+                                              const pldm_msg* response,
+                                              size_t respMsgLen) {
+        if (response == nullptr || !respMsgLen)
+        {
+            std::cerr << "Failed to receive response for "
+                         "setEventReceiver command \n";
+            return;
+        }
+
+        uint8_t completionCode{};
+        auto rc = decode_set_event_receiver_resp(response, respMsgLen,
+                                                 &completionCode);
+        if (rc || completionCode)
+        {
+            std::cerr << "Failed to decode setEventReceiver command response,"
+                      << " rc=" << rc << "cc=" << (uint8_t)completionCode
+                      << "\n";
+            pldm::utils::reportError(
+                "xyz.openbmc_project.bmc.pldm.InternalFailure");
+        }
+    };
+    rc = handler->registerRequest(
+        eid, instanceId, PLDM_PLATFORM, PLDM_SET_EVENT_RECEIVER,
+        std::move(requestMsg), std::move(processSetEventReceiverResponse));
+
+    if (rc != PLDM_SUCCESS)
+    {
+        std::cerr << "Failed to send the setEventReceiver request"
+                  << "\n";
+    }
+
+    if (oemPlatformHandler)
+    {
+        oemPlatformHandler->countSetEventReceiver();
+        oemPlatformHandler->checkAndDisableWatchDog();
+    }
+}
+
 Response Handler::getTID(const pldm_msg* request, size_t /*payloadLength*/)
 {
     // assigned 1 to the bmc as the PLDM terminus
@@ -183,6 +253,9 @@ Response Handler::getTID(const pldm_msg* request, size_t /*payloadLength*/)
     {
         return ccOnlyResponse(request, rc);
     }
+
+    survEvent = std::make_unique<sdeventplus::source::Defer>(
+        event, std::bind_front(&Handler::processSetEventReceiver, this));
 
     return response;
 }

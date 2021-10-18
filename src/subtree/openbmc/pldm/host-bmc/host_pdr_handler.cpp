@@ -31,12 +31,11 @@ HostPDRHandler::HostPDRHandler(
     int mctp_fd, uint8_t mctp_eid, sdeventplus::Event& event, pldm_pdr* repo,
     const std::string& eventsJsonsDir, pldm_entity_association_tree* entityTree,
     pldm_entity_association_tree* bmcEntityTree, Requester& requester,
-    pldm::requester::Handler<pldm::requester::Request>* handler, bool verbose) :
+    pldm::requester::Handler<pldm::requester::Request>* handler) :
     mctp_fd(mctp_fd),
     mctp_eid(mctp_eid), event(event), repo(repo),
     stateSensorHandler(eventsJsonsDir), entityTree(entityTree),
-    bmcEntityTree(bmcEntityTree), requester(requester), handler(handler),
-    verbose(verbose)
+    bmcEntityTree(bmcEntityTree), requester(requester), handler(handler)
 {
     fs::path hostFruJson(fs::path(HOST_JSONS_DIR) / fruJson);
     if (fs::exists(hostFruJson))
@@ -93,6 +92,7 @@ HostPDRHandler::HostPDRHandler(
                     pldm_entity_association_tree_copy_root(bmcEntityTree,
                                                            entityTree);
                     this->sensorMap.clear();
+                    this->responseReceived = false;
                 }
             }
         });
@@ -146,11 +146,6 @@ void HostPDRHandler::getHostPDR(uint32_t nextRecordHandle)
         requester.markFree(mctp_eid, instanceId);
         std::cerr << "Failed to encode_get_pdr_req, rc = " << rc << std::endl;
         return;
-    }
-    if (verbose)
-    {
-        std::cout << "Sending Msg:" << std::endl;
-        printBuffer(requestMsg, verbose);
     }
 
     rc = handler->registerRequest(
@@ -316,9 +311,8 @@ void HostPDRHandler::sendPDRRepositoryChgEvent(std::vector<uint8_t>&& pdrTypes,
         uint8_t completionCode{};
         uint8_t status{};
         auto responsePtr = reinterpret_cast<const struct pldm_msg*>(response);
-        auto rc = decode_platform_event_message_resp(
-            responsePtr, respMsgLen - sizeof(pldm_msg_hdr), &completionCode,
-            &status);
+        auto rc = decode_platform_event_message_resp(responsePtr, respMsgLen,
+                                                     &completionCode, &status);
         if (rc || completionCode)
         {
             std::cerr << "Failed to decode_platform_event_message_resp: "
@@ -395,11 +389,6 @@ void HostPDRHandler::processHostPDRs(mctp_eid_t /*eid*/,
     std::vector<uint8_t> responsePDRMsg;
     responsePDRMsg.resize(respMsgLen + sizeof(pldm_msg_hdr));
     memcpy(responsePDRMsg.data(), response, respMsgLen + sizeof(pldm_msg_hdr));
-    if (verbose)
-    {
-        std::cout << "Receiving Msg:" << std::endl;
-        printBuffer(responsePDRMsg, verbose);
-    }
     if (rc != PLDM_SUCCESS)
     {
         std::cerr << "Failed to decode_get_pdr_resp, rc = " << rc << std::endl;
@@ -559,10 +548,6 @@ void HostPDRHandler::setHostFirmwareCondition()
                   << std::hex << std::showbase << rc << "\n";
         requester.markFree(mctp_eid, instanceId);
         return;
-    }
-    if (verbose)
-    {
-        printBuffer(requestMsg, verbose);
     }
 
     auto getPLDMVersionHandler = [this](mctp_eid_t /*eid*/,

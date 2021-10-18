@@ -2,11 +2,18 @@
 
 #include "libpldm/base.h"
 
+#include "libpldmresponder/platform.hpp"
 #include "pldmd/handler.hpp"
+#include "requester/handler.hpp"
 
 #include <stdint.h>
 
+#include <sdeventplus/source/event.hpp>
+
 #include <vector>
+
+using namespace pldm::dbus_api;
+using namespace pldm::responder;
 
 namespace pldm
 {
@@ -18,7 +25,12 @@ namespace base
 class Handler : public CmdHandler
 {
   public:
-    Handler()
+    Handler(uint8_t eid, Requester& requester, sdeventplus::Event& event,
+            pldm::responder::oem_platform::Handler* oemPlatformHandler,
+            pldm::requester::Handler<pldm::requester::Request>* handler) :
+        eid(eid),
+        requester(requester), event(event),
+        oemPlatformHandler(oemPlatformHandler), handler(handler)
     {
         handlers.emplace(PLDM_GET_PLDM_TYPES,
                          [this](const pldm_msg* request, size_t payloadLength) {
@@ -62,6 +74,14 @@ class Handler : public CmdHandler
      */
     Response getPLDMVersion(const pldm_msg* request, size_t payloadLength);
 
+    /** @brief _processSetEventReceiver does the actual work that needs
+     *  to be carried out for setEventReceiver command. This is deferred
+     *  after sending response for getTID command to the host
+     *
+     *  @param[in] source - sdeventplus event source
+     */
+    void processSetEventReceiver(sdeventplus::source::EventBase& source);
+
     /** @brief Handler for getTID
      *
      *  @param[in] request - Request message payload
@@ -69,6 +89,29 @@ class Handler : public CmdHandler
      *  @param[return] Response - PLDM Response message
      */
     Response getTID(const pldm_msg* request, size_t payloadLength);
+
+  private:
+    /** @brief MCTP EID of host firmware */
+    uint8_t eid;
+
+    /** @brief reference to Requester object, primarily used to access API to
+     *  obtain PLDM instance id.
+     */
+    Requester& requester;
+
+    /** @brief reference of main event loop of pldmd, primarily used to schedule
+     *  work
+     */
+    sdeventplus::Event& event;
+
+    /** @brief OEM platform handler */
+    pldm::responder::oem_platform::Handler* oemPlatformHandler;
+
+    /** @brief PLDM request handler */
+    pldm::requester::Handler<pldm::requester::Request>* handler;
+
+    /** @brief sdeventplus event source */
+    std::unique_ptr<sdeventplus::source::Defer> survEvent;
 };
 
 } // namespace base

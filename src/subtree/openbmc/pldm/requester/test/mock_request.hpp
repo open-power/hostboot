@@ -16,7 +16,7 @@ class MockRequest : public RequestRetryTimer
   public:
     MockRequest(int /*fd*/, mctp_eid_t /*eid*/, sdeventplus::Event& event,
                 pldm::Request&& /*requestMsg*/, uint8_t numRetries,
-                std::chrono::milliseconds responseTimeOut) :
+                std::chrono::milliseconds responseTimeOut, bool /*verbose*/) :
         RequestRetryTimer(event, numRetries, responseTimeOut)
     {}
 

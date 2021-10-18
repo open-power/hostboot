@@ -1,8 +1,11 @@
 #include "libpldm/base.h"
 
+#include "common/utils.hpp"
 #include "libpldmresponder/base.hpp"
 
 #include <string.h>
+
+#include <sdeventplus/event.hpp>
 
 #include <array>
 
@@ -10,13 +13,26 @@
 
 using namespace pldm::responder;
 
-TEST(GetPLDMTypes, testGoodRequest)
+class TestBaseCommands : public testing::Test
+{
+  protected:
+    TestBaseCommands() :
+        requester(pldm::utils::DBusHandler::getBus(), "/abc/def"),
+        event(sdeventplus::Event::get_default())
+    {}
+
+    uint8_t mctpEid = 0;
+    Requester requester;
+    sdeventplus::Event event;
+};
+
+TEST_F(TestBaseCommands, testPLDMTypesGoodRequest)
 {
     std::array<uint8_t, sizeof(pldm_msg_hdr)> requestPayload{};
     auto request = reinterpret_cast<pldm_msg*>(requestPayload.data());
     // payload length will be 0 in this case
     size_t requestPayloadLength = 0;
-    base::Handler handler;
+    base::Handler handler(mctpEid, requester, event, nullptr, nullptr);
     auto response = handler.getPLDMTypes(request, requestPayloadLength);
     // Need to support OEM type.
     auto responsePtr = reinterpret_cast<pldm_msg*>(response.data());
@@ -26,14 +42,14 @@ TEST(GetPLDMTypes, testGoodRequest)
     ASSERT_EQ(payload_ptr[2], 0);
 }
 
-TEST(GetPLDMCommands, testGoodRequest)
+TEST_F(TestBaseCommands, testGetPLDMCommandsGoodRequest)
 {
     // Need to support OEM type commands.
     std::array<uint8_t, sizeof(pldm_msg_hdr) + PLDM_GET_COMMANDS_REQ_BYTES>
         requestPayload{};
     auto request = reinterpret_cast<pldm_msg*>(requestPayload.data());
     size_t requestPayloadLength = requestPayload.size() - sizeof(pldm_msg_hdr);
-    base::Handler handler;
+    base::Handler handler(mctpEid, requester, event, nullptr, nullptr);
     auto response = handler.getPLDMCommands(request, requestPayloadLength);
     auto responsePtr = reinterpret_cast<pldm_msg*>(response.data());
     uint8_t* payload_ptr = responsePtr->payload;
@@ -42,7 +58,7 @@ TEST(GetPLDMCommands, testGoodRequest)
     ASSERT_EQ(payload_ptr[2], 0);
 }
 
-TEST(GetPLDMCommands, testBadRequest)
+TEST_F(TestBaseCommands, testGetPLDMCommandsBadRequest)
 {
     std::array<uint8_t, sizeof(pldm_msg_hdr) + PLDM_GET_COMMANDS_REQ_BYTES>
         requestPayload{};
@@ -50,13 +66,14 @@ TEST(GetPLDMCommands, testBadRequest)
 
     request->payload[0] = 0xFF;
     size_t requestPayloadLength = requestPayload.size() - sizeof(pldm_msg_hdr);
-    base::Handler handler;
+    base::Handler handler(mctpEid, requester, event, nullptr, nullptr);
     auto response = handler.getPLDMCommands(request, requestPayloadLength);
     auto responsePtr = reinterpret_cast<pldm_msg*>(response.data());
     uint8_t* payload_ptr = responsePtr->payload;
     ASSERT_EQ(payload_ptr[0], PLDM_ERROR_INVALID_PLDM_TYPE);
 }
-TEST(GetPLDMVersion, testGoodRequest)
+
+TEST_F(TestBaseCommands, testGetPLDMVersionGoodRequest)
 {
     std::array<uint8_t, sizeof(pldm_msg_hdr) + PLDM_GET_VERSION_REQ_BYTES>
         requestPayload{};
@@ -74,7 +91,7 @@ TEST(GetPLDMVersion, testGoodRequest)
 
     ASSERT_EQ(0, rc);
 
-    base::Handler handler;
+    base::Handler handler(mctpEid, requester, event, nullptr, nullptr);
     auto response = handler.getPLDMVersion(request, requestPayloadLength);
     auto responsePtr = reinterpret_cast<pldm_msg*>(response.data());
 
@@ -88,7 +105,8 @@ TEST(GetPLDMVersion, testGoodRequest)
                             sizeof(transferHandle) + sizeof(flag),
                         &version, sizeof(version)));
 }
-TEST(GetPLDMVersion, testBadRequest)
+
+TEST_F(TestBaseCommands, testGetPLDMVersionBadRequest)
 {
     std::array<uint8_t, sizeof(pldm_msg_hdr) + PLDM_GET_VERSION_REQ_BYTES>
         requestPayload{};
@@ -104,7 +122,7 @@ TEST(GetPLDMVersion, testBadRequest)
 
     ASSERT_EQ(0, rc);
 
-    base::Handler handler;
+    base::Handler handler(mctpEid, requester, event, nullptr, nullptr);
     auto response = handler.getPLDMVersion(request, requestPayloadLength - 1);
     auto responsePtr = reinterpret_cast<pldm_msg*>(response.data());
 
@@ -123,13 +141,13 @@ TEST(GetPLDMVersion, testBadRequest)
     ASSERT_EQ(responsePtr->payload[0], PLDM_ERROR_INVALID_PLDM_TYPE);
 }
 
-TEST(GetTID, testGoodRequest)
+TEST_F(TestBaseCommands, testGetTIDGoodRequest)
 {
     std::array<uint8_t, sizeof(pldm_msg_hdr)> requestPayload{};
     auto request = reinterpret_cast<pldm_msg*>(requestPayload.data());
     size_t requestPayloadLength = 0;
 
-    base::Handler handler;
+    base::Handler handler(mctpEid, requester, event, nullptr, nullptr);
     auto response = handler.getTID(request, requestPayloadLength);
 
     auto responsePtr = reinterpret_cast<pldm_msg*>(response.data());

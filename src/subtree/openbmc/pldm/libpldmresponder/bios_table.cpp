@@ -23,7 +23,7 @@ bool BIOSTable::isEmpty() const noexcept
     {
         empty = fs::is_empty(filePath);
     }
-    catch (fs::filesystem_error& e)
+    catch (const fs::filesystem_error& e)
     {
         return true;
     }
