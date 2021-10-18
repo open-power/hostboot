@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2019
+# Contributors Listed Below - COPYRIGHT 2015,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -25,6 +25,6 @@
 PROCEDURE=p10_stop_api
 STOP_UTIL=$(ROOTPATH)/chips/p10/procedures/utils/stopreg/
 STOP_UTIL+=$(ROOTPATH)/chips/p10/procedures/hwp/lib
-lib$(PROCEDURE)_DEPLIBS += p10_stop_util
+lib$(PROCEDURE)_USELIBS += p10_stop_util
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(STOP_UTIL))
 $(call BUILD_PROCEDURE)
