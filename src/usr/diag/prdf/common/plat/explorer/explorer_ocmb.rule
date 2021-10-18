@@ -33,6 +33,7 @@ chip explorer_ocmb
 
 # Import signatures
 .include "prdfMemExtraSig.H";
+.include "prdfMemMdsExtraSig.H";
 
  #############################################################################
  #                                                                           #

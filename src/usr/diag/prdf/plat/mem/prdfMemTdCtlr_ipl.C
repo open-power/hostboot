@@ -32,6 +32,7 @@
 // Platform includes
 #include <prdfMemEccAnalysis.H>
 #include <prdfMemMark.H>
+#include <prdfMemMds_ipl.H>
 #include <prdfMemoryMru.H>
 #include <prdfMemScrubUtils.H>
 #include <prdfMemUtils.H>
@@ -153,7 +154,43 @@ uint32_t __mdsCheckEcc( ExtensibleChip * i_chip, bool & o_errorsFound,
 
     o_errorsFound = false;
 
-    // TODO
+    // TODO check if the command run was a write
+    // Check for write-path interface errors
+    o_rc = MDS::checkWritePathInterfaceErrors_ipl( i_chip, o_errorsFound,
+                                                   io_sc );
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Failure from checkReadPathInterfaceErrors_ipl "
+                  "(0x%08x)", i_chip->getHuid() );
+    }
+
+    // If we found write path interface errors, there's no need to continue, as
+    // we'll have performed a predictive callout and will be stopping memdiags
+    // on this DIMM.
+    if ( o_errorsFound )
+    {
+        return o_rc;
+    }
+
+    // Check for media and interface errors independently
+
+    // TODO - check if the command run was a read?
+    // Check for media errors
+    o_rc = MDS::checkMediaErrors_ipl( i_chip, o_errorsFound, io_sc );
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Failure from checkMediaErrors_ipl (0x%08x)",
+                  i_chip->getHuid() );
+    }
+
+    // Check for read-path interface errors
+    o_rc = MDS::checkReadPathInterfaceErrors_ipl( i_chip, o_errorsFound,
+                                                  io_sc );
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Failure from checkReadPathInterfaceErrors_ipl "
+                  "(0x%08x)", i_chip->getHuid() );
+    }
 
     return o_rc;
 

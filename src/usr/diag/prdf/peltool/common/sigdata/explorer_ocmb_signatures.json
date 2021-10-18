@@ -388,6 +388,10 @@
         "0xbbbb0031": "DSD: DRAM spare is bad",
         "0xbbbb0032": "RRD: Spare row successfully deployed",
         "0xbbbb0033": "RRD: Bad spare row",
-        "0xffff009f": "Root cause of CRC error found in PAU_PHY_FIR"
+        "0xffff009f": "Root cause of CRC error found in PAU_PHY_FIR",
+        "0xdddd0000": "MDS Interface UE",
+        "0xdddd0001": "MDS Maintenance MPE",
+        "0xdddd0002": "MDS Memdiags VCM Verified",
+        "0xdddd0003": "MDS Memdiags VCM False Alarm"
     }
 }

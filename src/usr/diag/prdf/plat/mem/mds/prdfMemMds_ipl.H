@@ -43,43 +43,37 @@ namespace MDS
  * @brief  This is called for analyzing media errors on an MDS
  *         DDIMM when handling a command complete attention.
  * @param  i_chip        The input OCMB
- * @param  i_addr        The input address the mcbist command stopped on
  * @param  o_errorsFound True if errors where found and handled. False
  *                       otherwise.
  * @param  io_sc         The step code data struct.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
-uint32_t checkMediaErrors_ipl( ExtensibleChip * i_chip,
-    const MemAddr & i_addr, bool & o_errorsFound,
+uint32_t checkMediaErrors_ipl( ExtensibleChip * i_chip, bool & o_errorsFound,
     STEP_CODE_DATA_STRUCT & io_sc );
 
 /**
  * @brief  This is called for analyzing read-path interface errors on an MDS
  *         DDIMM when handling a command complete attention.
  * @param  i_chip        The input OCMB
- * @param  i_addr        The input address the mcbist command stopped on
  * @param  o_errorsFound True if errors where found and handled. False
  *                       otherwise.
  * @param  io_sc         The step code data struct.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
 uint32_t checkReadPathInterfaceErrors_ipl( ExtensibleChip * i_chip,
-    const MemAddr & i_addr, bool & o_errorsFound,
-    STEP_CODE_DATA_STRUCT & io_sc );
+    bool & o_errorsFound, STEP_CODE_DATA_STRUCT & io_sc );
 
 /**
  * @brief  This is called for analyzing write-path interface errors on an MDS
  *         DDIMM when handling a command complete attention.
  * @param  i_chip        The input OCMB
- * @param  i_addr        The input address the mcbist command stopped on
  * @param  o_errorsFound True if errors where found and handled. False
  *                       otherwise.
  * @param  io_sc         The step code data struct.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
 uint32_t checkWritePathInterfaceErrors_ipl( ExtensibleChip * i_chip,
-    const MemAddr & i_addr, bool & o_errorsFound,
-    STEP_CODE_DATA_STRUCT & io_sc );
+    bool & o_errorsFound, STEP_CODE_DATA_STRUCT & io_sc );
 
 } // end namespace MDS
 
