@@ -2350,7 +2350,7 @@ void deconfigPresentByAssoc(TargetInfo i_targInfo)
             ++pChild_it)
     {
         TargetHandle_t l_affinityTarget = *pChild_it;
-        enableHwasState(l_affinityTarget,true,false, i_targInfo.reason);
+        enableHwasState(l_affinityTarget, true, false, i_targInfo.reason);
         HWAS_INF("deconfigPresentByAssoc: Parent Target %.8X: Child Target by Affinity %.8X"
                  " marked present, not functional: reason %.x",
                  get_huid(i_targInfo.pThisTarget),
@@ -2358,11 +2358,33 @@ void deconfigPresentByAssoc(TargetInfo i_targInfo)
     }
 
     // deconfigure the target itself
-    enableHwasState(i_targInfo.pThisTarget,true,false,i_targInfo.reason);
+    enableHwasState(i_targInfo.pThisTarget, true, false, i_targInfo.reason);
     HWAS_INF("deconfigPresentByAssoc: Target itself %.8X"
-            " marked present, not functional, reason %.x",
-            i_targInfo.pThisTarget->getAttr<ATTR_HUID>(), i_targInfo.reason);
+             " marked present, not functional, reason %.x",
+             get_huid(i_targInfo.pThisTarget), i_targInfo.reason);
 
+    // find all Parent Pervasive matches for this target and deconfigure them,
+    // iff all the targets associated with the Parent Pervasive are not functional
+    getParentPervasiveTargetsByState(pChildList, i_targInfo.pThisTarget, CLASS_UNIT,
+                                    TYPE_PERV, UTIL_FILTER_FUNCTIONAL);
+    for (auto l_parentPervasive: pChildList)
+    {
+        // Retrieve all the functional targets associated with this Parent Pervasive target
+        TargetHandleList l_associatesOfPervTargetsList;
+        getPervasiveChildTargetsByState(l_associatesOfPervTargetsList, l_parentPervasive,
+                                        CLASS_NA, TYPE_NA, UTIL_FILTER_FUNCTIONAL);
+
+        // If there are no functional targets associated with this Parent Pervasive target,
+        // then it is OK to deconfigure it
+        if (!l_associatesOfPervTargetsList.size())
+        {
+            HWAS_INF("deconfigPresentByAssoc: Target itself %.8X: "
+                     "Associated Parent Pervasive Target %0.8X"
+                     " marked present, not functional, reason %.x",
+                     get_huid(i_targInfo.pThisTarget), get_huid(l_parentPervasive), i_targInfo.reason);
+            enableHwasState(l_parentPervasive, true, false, i_targInfo.reason);
+        }
+    } // for (auto l_parentPervasive: pChildList)
 } // deconfigPresentByAssoc
 
 void invokePresentByAssoc()
