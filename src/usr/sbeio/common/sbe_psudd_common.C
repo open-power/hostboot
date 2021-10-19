@@ -506,7 +506,12 @@ errlHndl_t SbePsu::handleMessage(TARGETING::Target* i_proc)
             //read the door bell again to see if the simics model caught up
             errl = readScom(i_proc,PSU_HOST_DOORBELL_REG_RW,&l_doorbellVal);
             if (errl)
-            { break; }
+            {
+                SBE_TRACF("SbePsu::handleMessage: Could not read PSU_HOST_DOORBELL_REG_RW (%X) on %.8X",
+                          PSU_HOST_DOORBELL_REG_RW,
+                          TARGETING::get_huid(i_proc));
+                break;
+            }
 
         }
 
@@ -518,13 +523,38 @@ errlHndl_t SbePsu::handleMessage(TARGETING::Target* i_proc)
             //read the response registers
             uint64_t * l_pMessage =
                         reinterpret_cast<uint64_t *>(iv_psuResponse);
-            uint64_t   l_addr     = PSU_HOST_SBE_MBOX4_REG;
 
+            //Make sure we are expecting a response, if not we need to use
+            // a local buffer for these reads
+            bool l_noResponse = false;
+            uint64_t l_localMessage[sizeof(psuResponse)/sizeof(uint64_t)];
+            if( iv_psuResponse == nullptr )
+            {
+                SBE_TRACF("SbePsu::handleMessage: iv_psuResponse is null for %.8X",
+                          TARGETING::get_huid(i_proc));
+                l_noResponse = true;
+                l_pMessage = l_localMessage;
+            }
+
+            uint64_t   l_addr     = PSU_HOST_SBE_MBOX4_REG;
             for (uint8_t i=0; i<(sizeof(psuResponse)/sizeof(uint64_t)); i++)
             {
                 errl = readScom(i_proc,l_addr,l_pMessage);
                 if (errl)
-                { break; }
+                {
+                    SBE_TRACF("SbePsu::handleMessage: Could not read PSU_HOST_SBE_MBOX%d_REG (%X) on %.8X",
+                              i+4,
+                              l_addr,
+                              TARGETING::get_huid(i_proc));
+                    break;
+                }
+
+                // Nobody is waiting for this data, print out what we saw
+                if( l_noResponse )
+                {
+                    SBE_TRACF("Reg %X = %.16X", l_addr, *l_pMessage );
+                }
+
                 l_addr++;
                 l_pMessage++;
             }
@@ -767,30 +797,36 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
             }
 #endif //#ifndef __HOSTBOOT_RUNTIME
 
-            //read the response registers for FFDC
-            uint64_t l_respRegs[4];
-            ERRORLOG::ErrlUserDetailsLogRegister l_respRegsFFDC(i_target);
-            uint64_t l_addr = PSU_HOST_SBE_MBOX4_REG;
-            for (uint8_t i=0;i<4;i++)
+            //read all the MBOX registers for FFDC
+            uint64_t l_mboxRegs[8];
+            ERRORLOG::ErrlUserDetailsLogRegister l_regsFFDC(i_target);
+            uint64_t l_addr = PSU_HOST_SBE_MBOX0_REG;
+            for (uint8_t i=0;i<8;i++)
             {
-                l_errl = readScom(i_target,l_addr,&l_respRegs[i]);
+                l_errl = readScom(i_target,l_addr,&l_mboxRegs[i]);
                 if (l_errl)
                 {
-                    l_respRegs[i] = 0;
+                    l_mboxRegs[i] = 0;
                     delete l_errl;
                     l_errl = nullptr;
                 }
 
-                l_respRegsFFDC.addData(DEVICE_XSCOM_ADDRESS(l_addr));
+                l_regsFFDC.addDataBuffer(&l_mboxRegs[i], 8,
+                                         DEVICE_SCOM_ADDRESS(l_addr));
 
                 l_addr++;
             }
-            psuResponse* l_resp = reinterpret_cast<psuResponse*>(l_respRegs);
+            // Add the doorbell reg
+            l_regsFFDC.addData(DEVICE_SCOM_ADDRESS(PSU_SBE_DOORBELL_REG_RW));
+            // Add the TP LOCAL FIR (includes SBE vital attentions)
+            l_regsFFDC.addData(DEVICE_SCOM_ADDRESS(0x01040100));
 
             // Collect SBE traces in simics
             MAGIC_INST_GET_SBE_TRACES(i_target->getAttr<TARGETING::ATTR_POSITION>(),
                                       SBEIO_PSU_RESPONSE_TIMEOUT);
 
+            // Response regs start at MBOX4, check for an error
+            psuResponse* l_resp = reinterpret_cast<psuResponse*>(&(l_mboxRegs[4]));
             if(!(l_resp->primaryStatus & SBE_PRI_FFDC_ERROR))
             {
                 SBE_TRACF("Error: PSU Timeout and no FFDC present");
@@ -818,7 +854,7 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
 
                 // log the failing proc as FFDC
                 ErrlUserDetailsTarget(i_target).addToLog(l_errl);
-                l_respRegsFFDC.addToLog(l_errl);
+                l_regsFFDC.addToLog(l_errl);
                 l_errl->collectTrace(SBEIO_COMP_NAME);
 
                 // Keep a copy of the plid so we can pass it to the retry_handler
@@ -926,7 +962,7 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
 
                 // log the failing proc as FFDC
                 ErrlUserDetailsTarget(i_target).addToLog(l_errl);
-                l_respRegsFFDC.addToLog(l_errl);
+                l_regsFFDC.addToLog(l_errl);
                 l_errl->collectTrace(SBEIO_COMP_NAME);
             }
 
