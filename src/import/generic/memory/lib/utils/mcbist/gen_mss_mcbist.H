@@ -177,6 +177,21 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Sets the contents of MCBCFGQ_CFG_RESET_CNTS_START_OF_RANK
+/// @tparam MC the mc type of the T
+/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCBIST
+/// @tparam TT traits type defaults to mcbistTraits<MC, T>
+/// @param[in,out] io_data the value of the register
+/// @param[in] i_state the state to write into the enable
+///
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = DEFAULT_MC_TARGET, typename TT = mcbistTraits<MC, T> >
+inline void set_reset_cnts_start_of_rank( fapi2::buffer<uint64_t>& io_data, const mss::states i_state )
+{
+    io_data.writeBit<TT::CFG_RESET_CNTS_START_OF_RANK>(i_state == mss::states::ON);
+    FAPI_DBG("set_cfg_reset_start_of_rank to %d 0x%016lx", i_state, io_data);
+}
+
+///
 /// @brief Sets the mask for program complete
 /// @tparam MC the mc type of the T
 /// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCBIST
@@ -212,7 +227,6 @@ inline void set_mcbist_wat_debug_attn_mask( fapi2::buffer<uint64_t>& io_data, co
 /// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCBIST
 /// @tparam TT traits type defaults to mcbistTraits<MC, T>
 /// @param[in,out] io_data the value of the register
-/// @param[in] i_state the state to write into the enable
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = fapi2::TARGET_TYPE_MCBIST, typename TT = mcbistTraits<MC, T> >
 inline void clear_mcbist_program_complete( fapi2::buffer<uint64_t>& io_data )
@@ -222,6 +236,29 @@ inline void clear_mcbist_program_complete( fapi2::buffer<uint64_t>& io_data )
     FAPI_DBG("clear_mcbist_program_complete to %d 0x%016lx", mss::states::OFF, io_data);
 }
 
+///
+/// @brief Gets the contents of MCBCFGQ_CFG_RESET_CNTS_START_OF_RANK
+/// @tparam MC the mc type of the T
+/// @tparam T fapi2 Target Type - defaults to MC_TARGET_TYPE
+/// @tparam TT traits type defaults to mcbistTraits<MC, T>
+/// @param[in] i_data the value of the register
+/// @param[out] o_state the state read out of the register field
+///
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = DEFAULT_MC_TARGET, typename TT = mcbistTraits<MC, T> >
+inline void get_reset_cnts_start_of_rank( const fapi2::buffer<uint64_t> i_data, mss::states& o_state )
+{
+    o_state = i_data.getBit<TT::CFG_RESET_CNTS_START_OF_RANK>() ? mss::states::ON : mss::states::OFF;
+    FAPI_DBG("set_cfg_reset_start_of_rank to %d", o_state);
+}
+
+///
+/// @brief Gets the contents of the program complete
+/// @tparam MC the mc type of the T
+/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCBIST
+/// @tparam TT traits type defaults to mcbistTraits<MC, T>
+/// @param[in] i_data the value of the register
+/// @param[out] o_state the state read out of the register field
+///
 template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = fapi2::TARGET_TYPE_MCBIST, typename TT = mcbistTraits<MC, T> >
 inline void get_mcbist_program_complete_mask( const fapi2::buffer<uint64_t> i_data, mss::states& o_state )
 {
@@ -229,6 +266,14 @@ inline void get_mcbist_program_complete_mask( const fapi2::buffer<uint64_t> i_da
     FAPI_DBG("get_mcbist_program_complete_mask %d", o_state);
 }
 
+///
+/// @brief Gets the contents of MCBCFGQ_CFG_RESET_CNTS_START_OF_RANK
+/// @tparam MC the mc type of the T
+/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCBIST
+/// @tparam TT traits type defaults to mcbistTraits<MC, T>
+/// @param[in] i_data the value of the register
+/// @param[out] o_state the state read out of the register bit
+///
 template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = fapi2::TARGET_TYPE_MCBIST, typename TT = mcbistTraits<MC, T> >
 inline void get_mcbist_wat_debug_attn_mask( const fapi2::buffer<uint64_t> i_data, mss::states& o_state )
 {
