@@ -89,6 +89,17 @@ RegisterHWASFunctions registerHWASFunctions;
 
 using   namespace   TARGETING;
 
+/**
+ * @brief Collect all(both) HWAS trace buffers
+ * @param[in] i_errhdl  Error log handle
+ * @param[in] i_size  Number of bytes to save
+ */
+void collectHwasTraces( errlHndl_t i_errhdl,
+                        const uint64_t i_size = KILOBYTE )
+{
+    i_errhdl->collectTrace("HWAS", i_size);
+    i_errhdl->collectTrace("HWAS_I", i_size);
+}
 
 //******************************************************************************
 // platReadIDEC function
@@ -1509,7 +1520,7 @@ errlHndl_t HWASPlatVerification::verificationMatchHandler(Target * i_target,
             )
         );
 
-        l_errLog->collectTrace(HWAS_COMP_NAME);
+        collectHwasTraces(l_errLog);
     }
     else
     {
@@ -1675,7 +1686,7 @@ errlHndl_t HWASPlatVerification::verifyDeconfiguration(Target* i_target,
                                 0,
                                 0);
 
-                        l_errLog->collectTrace(HWAS_COMP_NAME);
+                        collectHwasTraces(l_errLog);
                     }
 
                     matchError->plid(l_errLog->plid());
@@ -1786,7 +1797,7 @@ errlHndl_t crosscheck_sp_presence_target(TARGETING::Target * i_target)
             l_errhdl->addProcedureCallout( HWAS::EPUB_PRC_SP_CODE,
                                            HWAS::SRCI_PRIORITY_MED );
             l_errhdl->collectTrace(ISTEP_COMP_NAME,256);
-            l_errhdl->collectTrace(HWAS_COMP_NAME,256);
+            collectHwasTraces(l_errhdl,256);
 
         }
         // The SP sees it but HB didn't
@@ -1868,7 +1879,7 @@ errlHndl_t crosscheck_sp_presence_target(TARGETING::Target * i_target)
                 l_errhdl->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
                                                HWAS::SRCI_PRIORITY_MED );
                 l_errhdl->collectTrace(ISTEP_COMP_NAME,256);
-                l_errhdl->collectTrace(HWAS_COMP_NAME,256);
+                collectHwasTraces(l_errhdl,256);
                 l_errhdl->collectTrace(FSI_COMP_NAME,256);
                 l_errhdl->collectTrace(I2C_COMP_NAME,256);
                 l_errhdl->collectTrace(SPI_COMP_NAME,256);
