@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,11 +78,8 @@ enum hdatMsAreaDataPtrs
     HDAT_MS_AREA_ADDR_RNG      =  4,
     HDAT_MS_AREA_AFF           =  5,
     HDAT_MS_AREA_EC_ARRAY      =  6,
-    HDAT_MS_AREA_HOST_I2C      =  7,
-    HDAT_MS_AREA_MMIO_ADDR_RNG =  8,
-    HDAT_MS_AREA_RESERVED1     =  9,
-    HDAT_MS_AREA_RESERVED2     = 10,
-    HDAT_MS_AREA_LAST          = 11
+    HDAT_MS_AREA_MMIO_ADDR_RNG =  7,
+    HDAT_MS_AREA_LAST          =  8
 };
 
 
@@ -485,21 +482,6 @@ public:
     errlHndl_t addEcEntry(uint32_t i_manfId,
                         uint32_t i_ecLvl);
 
-   /**
-    * @brief Update the Host I2C device info
-    *
-    * @pre None
-    *
-    * @post None
-    *
-    * @param[in] i_I2cDevEntries - This contains I2C master info,
-    *     I2C slave device type and I2C device purpose
-    *
-    * @retval void
-    */
-   void setMsaI2cInfo (
-       std::vector<hdatI2cData_t>& i_I2cDevEntries );
-
   /**
    * @brief This routine returns the length of all RAM objects associated
    *        with this mainstore area
@@ -632,8 +614,6 @@ private:
     uint32_t                     iv_maxAddrRngCnt;
     uint32_t                     iv_maxMmioAddrRngCnt;
     uint32_t                     iv_maxEcCnt;
-    uint32_t                     iv_msaHostI2cCnt;
-    uint32_t                     iv_msaHostI2cSize;
     uint32_t                     iv_maxRamCnt;
     uint32_t                     iv_actRamCnt;
     uint32_t                     iv_maxRamObjSize;
@@ -649,8 +629,6 @@ private:
     hdatMsAreaAffinity_t         iv_aff;
     hdatHDIFDataArray_t          iv_ecArrayHdr;
     hdatEcLvl_t           *iv_ecLvl;
-    hdatHDIFVersionedDataArray_t iv_msaI2cHdr;
-    uint8_t                     *iv_msaI2cDataPtr;
     HdatRam                    **iv_ramPtrs;
 
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -702,26 +702,6 @@ errlHndl_t HdatMsVpd::addEcEntry(uint16_t i_msAreaId,
 
     HDAT_EXIT();
     return l_errlHndl;
-}
-
-/** @brief See the prologue in hdatmsvpd.H
- */
-void HdatMsVpd::setMsaI2cInfo(uint16_t i_msAreaId,
-    std::vector<hdatI2cData_t>& i_I2cDevEntries)
-{
-    HDAT_ENTER();
-    HdatMsArea *l_obj;
-
-    if (i_msAreaId < iv_actMsAreaCnt)
-    {
-        l_obj = HDAT_MS_AREA(i_msAreaId);
-        l_obj->setMsaI2cInfo(i_I2cDevEntries);
-    }
-    else
-    {
-        HDAT_ERR("hdatmsvpd:setMsaI2cInfo - invalid i_msAreadId parametera");
-    }
-    HDAT_EXIT();
 }
 
 /** @brief See the prologue in hdatmsvpd.H
@@ -1472,9 +1452,6 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                                 break;
                             }
 
-                            // Need to get i2c Master data correctly
-                            std::vector<hdatI2cData_t> l_i2cDevEntries;
-
                             TARGETING::PredicateCTM l_membufPredicate(
                                 TARGETING::CLASS_CHIP, TARGETING::TYPE_MEMBUF);
 
@@ -1491,20 +1468,6 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                                 TARGETING::TargetService::CHILD_BY_AFFINITY,
                                 TARGETING::TargetService::ALL,
                                 &l_presentMemBuf);
-                            //Skip is there is no Membuf attached to this MCS
-                            if(l_membufList.size() > 0)
-                            {
-                                TARGETING::Target *l_pMembufTarget =
-                                    l_membufList[0];
-                                if (l_pMembufTarget != NULL)
-                                {
-                                    hdatGetI2cDeviceInfo(l_pMembufTarget,
-                                                         l_model,
-                                                         l_i2cDevEntries);
-                                }
-                            }
-
-                            setMsaI2cInfo(l_index, l_i2cDevEntries);
 
                             std::list<hdatRamArea>::iterator l_area =
                                 l_areas.begin();
@@ -2079,18 +2042,6 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                                             <TARGETING::ATTR_HUID>());
                                        break;
                                     }
-
-                                    // Get the i2c Master data
-                                    std::vector<hdatI2cData_t> l_i2cDevEntries;
-
-                                    if (l_pOcmbTarget != NULL)
-                                    {
-                                        hdatGetI2cDeviceInfo(l_pOcmbTarget,
-                                                             l_model,
-                                                             l_i2cDevEntries);
-                                    }
-
-                                    setMsaI2cInfo(l_index, l_i2cDevEntries);
 
                                     //for each mem-port connected to this this
                                     //ocmb_chip

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -101,9 +101,6 @@ HdatMsArea::HdatMsArea(errlHndl_t &o_errlHndl,
     HDAT_ENTER( );
 
     uint32_t l_slcaIdx = 0;
-    iv_msaHostI2cCnt = 0;
-    iv_msaHostI2cSize = 0;
-    iv_msaI2cDataPtr = NULL;
     iv_mmioAddrRngArray = NULL;
 
     o_errlHndl = NULL;
@@ -233,7 +230,6 @@ HdatMsArea::~HdatMsArea()
                     + sizeof(HdatRam *));
     }
     
-    delete[] iv_msaI2cDataPtr;
     delete[] iv_kwd;
     delete[] iv_addrRange;
     delete[] iv_ecLvl;
@@ -456,38 +452,6 @@ errlHndl_t HdatMsArea::addEcEntry(uint32_t i_manfId,
 }
 
 /** @brief See the prologue in hdatmsarea.H
- */ 
-void HdatMsArea::setMsaI2cInfo(
-    std::vector<hdatI2cData_t> &i_I2cDevEntries )
-{
-    HDAT_ENTER();
-    // this is just header of 5 words. arrays start at 0x0014
-    iv_msaI2cHdr.hdatOffset = sizeof(iv_msaI2cHdr);
-    iv_msaI2cHdr.hdatArrayCnt = i_I2cDevEntries.size();
-    iv_msaI2cHdr.hdatAllocSize = sizeof(hdatI2cData_t);
-    iv_msaI2cHdr.hdatActSize = sizeof(hdatI2cData_t);
-    iv_msaI2cHdr.hdatVersion = HOST_I2C_DEV_INFO_VERSION::V2;
-    iv_msaHostI2cCnt = i_I2cDevEntries.size();
-    iv_msaHostI2cSize = sizeof(iv_msaI2cHdr) +
-        (sizeof(hdatI2cData_t) * iv_msaHostI2cCnt);
-    HDAT_INF("iv_msaHostI2cCnt=%d, iv_msaHostI2cSize=%d",
-        iv_msaHostI2cCnt, iv_msaHostI2cSize);
-    if ( i_I2cDevEntries.size() != 0 )
-    {
-        iv_msaI2cDataPtr = new uint8_t[sizeof(hdatI2cData_t) * iv_msaHostI2cCnt];
-        memcpy(iv_msaI2cDataPtr , i_I2cDevEntries.begin() ,
-                    (sizeof(hdatI2cData_t) * iv_msaHostI2cCnt));  
-
-    }
-    else
-    {
-        HDAT_INF("Empty Host I2C device info vector : Ms Area Id=%d, Size=%d",
-            iv_msId.hdatMsAreaId, i_I2cDevEntries.size());
-    } 
-    HDAT_EXIT();
-}
-
-/** @brief See the prologue in hdatmsarea.H
  */
 errlHndl_t HdatMsArea::addRam(HdatRam &i_ram)
 {
@@ -597,7 +561,6 @@ void HdatMsArea::finalizeObjSize()
     this->addData(HDAT_MS_AREA_AFF, sizeof(hdatMsAreaAffinity_t));
     this->addData(HDAT_MS_AREA_EC_ARRAY, sizeof(hdatHDIFDataArray_t) +
                     iv_maxEcCnt * sizeof(hdatEcLvl_t));
-    this->addData(HDAT_MS_AREA_HOST_I2C, iv_msaHostI2cSize);
     this->addData(HDAT_MS_AREA_MMIO_ADDR_RNG, sizeof(hdatHDIFDataArray_t) +
                   iv_maxMmioAddrRngCnt * sizeof(hdatMsAreaMmioAddrRange_t));
 
@@ -665,10 +628,6 @@ uint32_t  HdatMsArea::getMsAreaSize()
 
     l_size += (iv_maxEcCnt * sizeof(hdatEcLvl_t));
 
-    l_size += sizeof(iv_msaI2cHdr);
-
-    l_size += (sizeof(hdatI2cData_t) * iv_msaHostI2cCnt);
-
     l_size += sizeof(hdatHDIFDataArray_t);
 
     l_size += (iv_maxMmioAddrRngCnt * sizeof(hdatMsAreaMmioAddrRange_t));
@@ -733,14 +692,6 @@ void HdatMsArea::commit(UtilMem &i_data)
     i_data.write(&iv_ecArrayHdr, sizeof(hdatHDIFDataArray_t));
 
     i_data.write(iv_ecLvl,iv_maxEcCnt * sizeof(hdatEcLvl_t));
-
-    i_data.write(&iv_msaI2cHdr, sizeof(iv_msaI2cHdr));
-
-    if (NULL != iv_msaI2cDataPtr)
-    {
-        i_data.write(iv_msaI2cDataPtr,
-            (iv_msaHostI2cSize - sizeof(iv_msaI2cHdr)));
-    }
 
     i_data.write(&iv_mmioAddrRngArrayHdr,sizeof(hdatHDIFDataArray_t));
 

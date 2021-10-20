@@ -723,24 +723,6 @@ class HdatMsVpd : public HdatHdif
                               uint32_t i_ecLvl);
 
         /**
-         * @brief Update the mainstore area to specify the host I2C device info
-         *
-         * @pre The i_msAreaId parameter must be for a valid mainstore area that
-         *      was added with the addMsAreaFru() method.  HDAT does not check
-         *      or enforce that this is a valid main store area ID.
-         *
-         * @post None
-         *
-         * @param[in] i_msAreaId - A unique id for each main
-         *                         store area associated with a mainstore VPD
-         *                         object.  The id identifies the mainstore area
-         *                         that is to be updated.
-         * @param[in] i_I2cDevEntries - host I2c device info
-         */
-        void setMsaI2cInfo(uint16_t i_msAreaId,
-            std::vector<hdatI2cData_t>& i_I2cDevEntries);
-
-        /**
          * @brief Add a RAM area FRU.
          *
          *   After a mainstore area has been added to the mainstore VBPD object,
