@@ -388,7 +388,7 @@ errlHndl_t getCurrentAttrValue(const char *i_attr_string,
   // Bit 0 indicates if its read-only or not and hostboot ignores that.
   // Only the BMC honors read-only status of bios attributes.
   const uint8_t IGNORE_READONLY = 0x7f;
-  if((attr_type_found & IGNORE_READONLY) != io_attr_type)
+  if((attr_type_found & IGNORE_READONLY) != (io_attr_type & IGNORE_READONLY))
   {
       PLDM_ERR("Attribute type as 0x%x reported when we expected 0x%x for attribute %s",
                 attr_type_found,
