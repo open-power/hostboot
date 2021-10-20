@@ -727,6 +727,12 @@ bool parsePfaData( void * i_buffer, uint32_t i_buflen,
                         i_parser.PrintString( header, data );
                         break;
 
+                    case PRDcalloutData::TYPE_TODCLK:
+                        strcat( data, "(TODCLK) " );
+                        strcat( data, tmpStr );
+                        i_parser.PrintString( header, data );
+                        break;
+
                     default:
                         i_parser.PrintString( header, "(Unknown/Invalid)" );
 

@@ -404,6 +404,17 @@ int32_t todCollectFaultDataChip(  ExtensibleChip * i_chip,
                 // Read step check error bit in TOD error register
                 l_oscFail = l_todError->IsBitSet( l_osc0 ? 14 : 15 );
 
+                if ( !l_oscFail )
+                {
+                    // It is possible that the master path select may have
+                    // switched before PRD had the chance to analysis. Since we
+                    // have no knowledge of when that could have happened,
+                    // we'll simply look for a step check error on the other
+                    // master path.
+                    l_osc0 = !l_osc0;
+                    l_oscFail = l_todError->IsBitSet( l_osc0 ? 14 : 15 );
+                }
+
                 if ( l_oscFail )
                 {
                     // Set fault data.
@@ -768,7 +779,7 @@ int32_t todStepCheckFault( ExtensibleChip * i_chip,
                 PRDcallout( mdmtList[i], PRDcalloutData::TYPE_TODCLK ) );
 
             // Callout MDMT chip
-            i_stepcode.service_data->SetCallout(mdmtList[i], MRU_MEDA );
+            i_stepcode.service_data->SetCallout(mdmtList[i], MRU_MED, NO_GARD);
 
             //callout a symbolic FRU to replace FRU/interfaces between Proc and
             //TOD OSC card
