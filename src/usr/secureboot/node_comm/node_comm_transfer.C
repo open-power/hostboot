@@ -45,7 +45,8 @@ namespace SECUREBOOT
 
 namespace NODECOMM
 {
-
+// mutex for TransferSizeMap access
+mutex_t g_transferSizeMutex = MUTEX_INITIALIZER;
 
 errlHndl_t nodeCommTransferSend(TARGETING::Target* i_pTarget,
                                 const uint8_t i_linkId,
@@ -75,14 +76,24 @@ errlHndl_t nodeCommTransferSend(TARGETING::Target* i_pTarget,
     do
     {
         // Check expected size of msgType here
-        if ((TransferSizeMap.count(i_transferType) > 0) &&
-            (TransferSizeMap.at(i_transferType) != i_dataSize))
+        // need mutex as map accesses are not thread-safe
+        mutex_lock(&g_transferSizeMutex);
+        size_t typeCount = TransferSizeMap.count(i_transferType);
+        size_t transferSize = -1;
+        if (typeCount > 0)
+        {
+            transferSize = TransferSizeMap.at(i_transferType);
+        }
+        mutex_unlock(&g_transferSizeMutex);
+
+        // If msgType is found and the size is different
+        if ((typeCount > 0) && (transferSize != i_dataSize))
         {
             TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommTransferSend: i_pTarget=0x%.08X: "
               "i_dataSize %d bytes does not align with i_transferType 0x%X: "
               "Expected size %d bytes.",
               get_huid(i_pTarget), i_dataSize, i_transferType,
-              TransferSizeMap.at(i_transferType));
+              transferSize);
 
             /*@
              * @errortype
@@ -103,8 +114,7 @@ errlHndl_t nodeCommTransferSend(TARGETING::Target* i_pTarget,
                                             i_dataSize),
                                           TWO_UINT32_TO_UINT64(
                                             i_transferType,
-                                            TransferSizeMap.at(
-                                              i_transferType)),
+                                            transferSize),
                                           ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
             break;
         }
@@ -494,18 +504,27 @@ errlHndl_t nodeCommTransferRecv(TARGETING::Target* i_pTarget,
             o_data = data_buffer;
             o_dataSize = init_msg.totalDataSize;
 
-
             // Check size of data returned against the expected amount based
             // on the msgType
-            if ((TransferSizeMap.count(i_transferType) > 0) &&
-                (TransferSizeMap.at(i_transferType) != o_dataSize))
+            // need mutex as map accesses are not thread-safe
+            mutex_lock(&g_transferSizeMutex);
+            size_t typeCount = TransferSizeMap.count(i_transferType);
+            size_t transferSize = -1;
+            if (typeCount > 0)
+            {
+                transferSize = TransferSizeMap.at(i_transferType);
+            }
+            mutex_unlock(&g_transferSizeMutex);
+
+            // If msgType is found and the size is different
+            if ((typeCount > 0) && (transferSize != o_dataSize))
             {
                 TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommTransferReceive: "
                           "iProc=0x%.08X: o_dataSize %d bytes does not "
                           "align with i_transferType 0x%X: "
                           "Expected size %d bytes.",
                           get_huid(i_pTarget), o_dataSize, i_transferType,
-                          TransferSizeMap.at(i_transferType));
+                          transferSize);
 
                 /*@
                  * @errortype
@@ -528,8 +547,7 @@ errlHndl_t nodeCommTransferRecv(TARGETING::Target* i_pTarget,
                                 o_dataSize),
                               TWO_UINT32_TO_UINT64(
                                 i_transferType,
-                                TransferSizeMap.at(
-                                  i_transferType)),
+                                transferSize),
                               ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
                 break;
             }
