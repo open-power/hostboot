@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,13 +53,11 @@ namespace I2C
  *        Generic I2C Device targets (like DDIMM ADC and GPIO Expander targets)
  *
  * @param[in]   i_target     Presence detect target
- * @param[in]   i_buflen     lengh of operation requested
- * @param[in]   o_present    Present = 1, NOT Present = 0
- * @
+ * @param[in]   o_present    Present = 1, NOT Present (and/or error) = 0
+ *
  * @return  errlHndl_t
  */
 errlHndl_t genericI2CTargetPresenceDetect(TARGETING::Target* i_target,
-                                          size_t i_buflen,
                                           bool & o_present)
 {
     errlHndl_t l_errl = nullptr;
@@ -73,30 +71,6 @@ errlHndl_t genericI2CTargetPresenceDetect(TARGETING::Target* i_target,
                 "Target HUID 0x%.08X ENTER", TARGETING::get_huid(i_target));
 
     do{
-        if (unlikely(i_buflen != sizeof(bool)))
-        {
-            TRACFCOMP(g_trac_i2c,
-                      ERR_MRK "I2C::ddimmPresenceDetect> Invalid data length: %d",
-                      i_buflen);
-            /*@
-            * @errortype
-            * @moduleid     I2C::I2C_GENERIC_PRES_DETECT
-            * @reasoncode   I2C::I2C_INVALID_LENGTH
-            * @userdata1    Data Length
-            * @userdata2    HUID of target being detected
-            * @devdesc      ddimmPresenceDetect> Invalid data length (!= 1 bytes)
-            * @custdesc     Firmware error during boot
-            */
-            l_errl =
-                    new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                            I2C::I2C_GENERIC_PRES_DETECT,
-                                            I2C::I2C_INVALID_LENGTH,
-                                            TO_UINT64(i_buflen),
-                                            TARGETING::get_huid(i_target),
-                                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-            break;
-        }
-
         // Get a ptr to the target service which we will use later on
         TARGETING::TargetService& l_targetService = TARGETING::targetService();
 
@@ -336,6 +310,7 @@ errlHndl_t pmicI2CPresencePerformOp(DeviceFW::OperationType i_opType,
                                     int64_t i_accessType,
                                     va_list i_args)
 {
+    assert(1 == io_buflen, "Expected buffer length (io_buflen) to be 1, received %d", io_buflen);
 
     errlHndl_t l_errl = nullptr;
     bool l_pmicPresent = false;
@@ -380,7 +355,7 @@ errlHndl_t pmicI2CPresencePerformOp(DeviceFW::OperationType i_opType,
             break;
         }
 
-        if(l_devAddr == FAPIWRAP::NO_PMIC_DEV_ADDR)
+        if(l_devAddr == FAPIWRAP::NO_DEV_ADDR)
         {
             // There is no pmic device address for this rel position on this ocmb so
             // break and return not present.
@@ -390,7 +365,6 @@ errlHndl_t pmicI2CPresencePerformOp(DeviceFW::OperationType i_opType,
         i_target->setAttr<TARGETING::ATTR_DYNAMIC_I2C_DEVICE_ADDRESS>(l_devAddr);
 
         l_errl = genericI2CTargetPresenceDetect(i_target,
-                                                io_buflen,
                                                 l_pmicPresent);
 
         if (l_errl)
@@ -414,6 +388,97 @@ errlHndl_t pmicI2CPresencePerformOp(DeviceFW::OperationType i_opType,
 
     return l_errl;
 }
+
+
+/**
+ * @brief Performs a presence detect operation on a MDS_CTLR Target
+ *
+ * @note Paramter io_buflen must be size of 1, will assert if not
+ *
+ * @param[in] DeviceFW::OperationType:
+ *                           Parameter for the DD framework, not needed and not used
+ * @param[in]     i_target   MDS target to detect presence of
+ * @param[out]    o_buffer   Pointer to output data storage, the results of this call,
+ *                           Where 1 = Success and 0 = Failure
+ * @param[in/out] io_buflen  Size of io_buffer (in bytes, always 1, size of a bool)
+ * @param[in]     int64_t    Parameter for the DD framework, not needed and not used
+ * @param[in]     va_list    Parameter for the DD framework, not needed and not used
+ *
+ * @return  errlHndl_t
+ */
+errlHndl_t mdsI2CPresencePerformOp(DeviceFW::OperationType,    // DD framework parameter, not used
+                                   TARGETING::Target* i_target,
+                                   void*   o_buffer,
+                                   size_t& io_buflen,
+                                   int64_t, va_list) // DD framework parameters, not used
+{
+    assert(1 == io_buflen, "Expected buffer length (io_buflen) to be 1, received %d", io_buflen);
+
+    errlHndl_t l_errl(nullptr);
+
+    // Create a reference for easy access and ease of setting the outgoing buffer
+    bool &l_mdsPresent = (static_cast<bool*>(o_buffer))[0];
+    l_mdsPresent = false;  // Default outgoing buffer to false
+
+    // Holds the device address of the MDS target
+    uint8_t l_devAddr(0);
+
+    // Get the state of the OCMB parent
+    TARGETING::Target* l_parentOcmb(TARGETING::getImmediateParentByAffinity(i_target));
+    auto l_parentHwasState(l_parentOcmb->getAttr<TARGETING::ATTR_HWAS_STATE>());
+
+    do{
+        if (!l_parentHwasState.present)
+        {
+            // If the parent chip is not present, then neither is the MDS target
+            // so just break out and return not present
+            break;
+        }
+
+        // Prior to doing present detection on an MDS we must first query the
+        // device address from the parent OCMB's SPD
+        l_errl = FAPIWRAP::get_mds_dev_addr( l_parentOcmb, l_devAddr );
+
+        if (l_errl)
+        {
+            TRACFCOMP( g_trac_i2c, ERR_MRK"get_mds_dev_addr() "
+                        "Error attempting to read MDS device address on OCMB 0x%.08X",
+                        TARGETING::get_huid(l_parentOcmb));
+            break;
+        }
+
+        if (l_devAddr == 0)
+        {
+            TRACFCOMP(g_trac_i2c, ERR_MRK"mdsI2CPresencePerformOp() "
+                      "Found devAddr for MDS 0x%.08x to be 0. Likely that SPD returned "
+                      "a value of 0 because this MDS does not exist for parent OCMB 0x%.8X",
+                      TARGETING::get_huid(i_target),
+                      TARGETING::get_huid(l_parentOcmb));
+            break;
+        }
+
+        if (l_devAddr == FAPIWRAP::NO_DEV_ADDR)
+        {
+            TRACFCOMP(g_trac_i2c, ERR_MRK"mdsI2CPresencePerformOp() "
+                      "No device address found for MDS 0x%.08x for parent OCMB 0x%.8X",
+                      TARGETING::get_huid(i_target),
+                      TARGETING::get_huid(l_parentOcmb));
+            break;
+        }
+
+        // Set the dynamic I2C device address for the MDS with the retrieved device address
+        i_target->setAttr<TARGETING::ATTR_DYNAMIC_I2C_DEVICE_ADDRESS>(l_devAddr);
+
+        // Can't do an I2C operation on the MDS at this juncture therefore will
+        // assume the MDS target is present on the premise of being able to set
+        // the device address for the MDS target.
+        // Set the outgoing buffer, o_buffer, to true via the l_mdsPresent reference
+        l_mdsPresent = true;
+    }while(0);
+
+    return l_errl;
+}  // mdsI2CPresencePerformOp
+
 
 /**
  * @brief Performs a presence detect operation on a Mux Target that has the
@@ -439,11 +504,12 @@ errlHndl_t muxI2CPresencePerformOp(DeviceFW::OperationType i_opType,
                                      int64_t i_accessType,
                                      va_list i_args)
 {
+    assert(1 == io_buflen, "Expected buffer length (io_buflen) to be 1, received %d", io_buflen);
+
     bool l_muxPresent = 0;
     errlHndl_t l_errl = nullptr;
 
     l_errl = genericI2CTargetPresenceDetect(i_target,
-                                            io_buflen,
                                             l_muxPresent);
     if (l_errl)
     {
@@ -485,6 +551,8 @@ errlHndl_t genericI2CDevicePresencePerformOp(DeviceFW::OperationType i_opType,
                                             int64_t i_accessType,
                                             va_list i_args)
 {
+    assert(1 == io_buflen, "Expected buffer length (io_buflen) to be 1, received %d", io_buflen);
+
     errlHndl_t l_errl = nullptr;
     bool l_gi2cPresent = false;
     uint8_t l_devAddr = 0;
@@ -532,7 +600,6 @@ errlHndl_t genericI2CDevicePresencePerformOp(DeviceFW::OperationType i_opType,
         i_target->setAttr<TARGETING::ATTR_DYNAMIC_I2C_DEVICE_ADDRESS>(l_devAddr);
 
         l_errl = genericI2CTargetPresenceDetect(i_target,
-                                                io_buflen,
                                                 l_gi2cPresent);
         if (l_errl)
         {
@@ -570,9 +637,15 @@ DEVICE_REGISTER_ROUTE( DeviceFW::READ,
                        TARGETING::TYPE_PMIC,
                        pmicI2CPresencePerformOp );
 
-// Register the pmic vrm presence detect function with the device framework
+// Register the Generic I2C Device presence detect function with the device framework
 DEVICE_REGISTER_ROUTE( DeviceFW::READ,
                        DeviceFW::PRESENT,
                        TARGETING::TYPE_GENERIC_I2C_DEVICE,
                        genericI2CDevicePresencePerformOp );
+
+// Register the MDS presence detect function with the device framework
+DEVICE_REGISTER_ROUTE( DeviceFW::READ,
+                       DeviceFW::PRESENT,
+                       TARGETING::TYPE_MDS_CTLR,
+                       mdsI2CPresencePerformOp );
 }

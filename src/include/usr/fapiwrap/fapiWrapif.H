@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,11 @@
 
 namespace FAPIWRAP
 {
+
+// Global constant
+    // If no device address is found for a given target then NO_DEV_ADDR will be returned
+    constexpr uint8_t NO_DEV_ADDR = 0xFF;
+
     /**
      * @brief This function wraps around the FAPI2 HWP "exp_getidec" which
      *        takes in a OCMB target and returns the associated chipId
@@ -65,14 +70,28 @@ namespace FAPIWRAP
      * @param[in] i_ocmbChip - Parent ocmb of the PMIC we wish to find the device addres of
      * @param[in] i_pmic_id  - PMIC's position relative to parent OCMB
      * @param[out]o_pmic_devAddr - If this pmic exists on the ocmb then return the device address
-                                   found in the SPD. Otherwise return NO_PMIC_DEV_ADDR
+     *                             found in the SPD. Otherwise return NO_DEV_ADDR
      * @return errlHndl_t - nullptr if no error, otherwise contains error
+     *
+     * @pre i_ocmbChip is a valid pointer to an OCMB target
      */
     errlHndl_t get_pmic_dev_addr( TARGETING::Target * i_ocmbChip,
                                   const uint8_t i_pmic_id,
                                   uint8_t& o_pmic_devAddr);
 
-    constexpr uint8_t NO_PMIC_DEV_ADDR = 0xFF;
+    /**
+     * @brief This function wraps around the FAPI2 HWP "get_mds_i2c_addr" which
+     *        takes in a DDIMM's DDR4 SPD and returns the device address for the
+     *        MDS targets.
+     * @param[in] i_ocmbChip - Parent ocmb of the MDS we wish to find the device addres of
+     * @param[out]o_mds_devAddr - If this exists on the OCMB then return the device address
+     *                            found in the SPD. Otherwise return NO_DEV_ADDR
+     * @return errlHndl_t - nullptr if no error, otherwise contains error
+     *
+     * @pre i_ocmbChip is a valid pointer to an OCMB target
+     */
+    errlHndl_t get_mds_dev_addr(TARGETING::Target *i_ocmbChip,
+                                          uint8_t &o_mds_devAddr);
 
     /**
      * @brief This function wraps around the FAPI2 HWP "get_gpio_adc_i2c_addr" which

@@ -374,6 +374,65 @@ errlHndl_t discoverPmicTargetsAndEnable(const Target &i_sysTarget)
     return l_err;
 }
 
+
+/**
+ * @brief Do presence detect on only MDS targets and enable HWAS state
+ *
+ * @param[in] i_sysTarget the top level target (CLASS_SYS)
+ * @return    errlHndl_t  return nullptr if no error,
+ *                        else return a handle to an error entry
+ *
+ */
+errlHndl_t discoverMdsTargetsAndEnable(const Target &i_sysTarget)
+{
+    HWAS_INF(ENTER_MRK"discoverMdsTargetsAndEnable");
+
+    errlHndl_t l_err{nullptr};
+
+    do
+    {
+        // Only get MDS targets
+        const PredicateCTM l_mdsPred(CLASS_NA, TYPE_MDS_CTLR);
+        TARGETING::PredicatePostfixExpr l_asicPredExpr;
+        l_asicPredExpr.push(&l_mdsPred);
+        TargetHandleList l_pMdsCheckPresList;
+        targetService().getAssociated( l_pMdsCheckPresList, (&i_sysTarget),
+            TargetService::CHILD, TargetService::ALL, &l_asicPredExpr);
+
+        // If no MDS targets found, then nothing to do but exit
+        if (!l_pMdsCheckPresList.size())
+        {
+            break;
+        }
+
+        // Do the presence detect on only MDS targets
+        // NOTE: this function will remove any non-present targets from l_pMdsCheckPresList
+        l_err = platPresenceDetect(l_pMdsCheckPresList);
+
+        // If an issue with platPresenceDetect, then exit, returning error back to caller
+        if (l_err)
+        {
+            break;
+        }
+
+        // Enable the HWAS State for the MDSs
+        const bool l_present(true);
+        const bool l_functional(true);
+        const uint32_t l_errlEid(0);
+        for (TargetHandle_t pTarget : l_pMdsCheckPresList)
+        {
+            // set HWAS state to show MDS is present and functional
+            enableHwasState(pTarget, l_present, l_functional, l_errlEid);
+        }
+    } while (0);
+
+    HWAS_INF(EXIT_MRK"discoverMdsTargetsAndEnable exit with %s",
+             (nullptr == l_err ? "no error" : "error"));
+
+    return l_err;
+} // discoverMdsTargetsAndEnable
+
+
 /**
  * @brief Do presence detect on Generic I2C Device targets and enable HWAS state
  *
@@ -781,15 +840,20 @@ errlHndl_t HWASDiscovery::discoverTargets()
         // we must wait because we need the SPD cached from the OCMBs
         // which occurs when OCMBs go through presence detection above
         errl = discoverPmicTargetsAndEnable(*pSys);
-
         if (errl != NULL)
         {
             break; // break out of the do/while so that we can return
         }
 
-
         // After processing PMICs look at the Generic I2C Slaves
         errl = discoverGenericI2cDeviceTargetsAndEnable(*pSys);
+        if (errl != NULL)
+        {
+            break; // break out of the do/while so that we can return
+        }
+
+        // After processing Generic I2C slaves, look at the MDS
+        errl = discoverMdsTargetsAndEnable(*pSys);
         if (errl != NULL)
         {
             break; // break out of the do/while so that we can return
