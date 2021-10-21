@@ -52,7 +52,7 @@ fapi2::ReturnCode p10_io_dynamic_vio(
     const uint32_t C_MIN_VIO_MV = 930;
     const uint32_t C_MAX_VIO_MV = 1040;
     const uint32_t C_MIN_CONFIG_DIMMS = 8;
-    const uint32_t C_BASE_VIO_UV = i_version ? 960000 : 1020000; // 960mv or 1020mv
+    const uint32_t C_BASE_VIO_UV = 1020000; // 1020mv
     const uint32_t C_DIMM_UPLIFT = 900; // 900uV
     const uint32_t C_ABUS_UPLIFT = 2666; // 2.666mV
     uint32_t l_uplift = 0;
