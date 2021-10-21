@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -276,9 +276,9 @@ class DumpTest: public CxxTest::TestSuite
             }
 
 
-            // unmap the previous src entry
+            // Unmap the previous destination entry
             int rc =
-              mm_block_unmap(reinterpret_cast<void*>(va_mapsrcTableAddr));
+              mm_block_unmap(reinterpret_cast<void*>(va_mapdestTableAddr));
 
             if (rc != 0)
             {
