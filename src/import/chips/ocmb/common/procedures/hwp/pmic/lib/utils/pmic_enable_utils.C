@@ -1548,7 +1548,7 @@ fapi2::ReturnCode validate_efuse_off(const fapi2::Target<fapi2::TARGET_TYPE_PMIC
     // Prior to turning on the efuse via the GPIO expander, we expect to see VIN below the
     // EFUSE_OFF_HIGH threshold, as power will not be applied.
     // Otherwise the efuse must be blown, and we should declare N-mode.
-    // Will poll for 2.5 seconds for the VIN to go below 560mV. If not then will declare N-mode.
+    // Will poll for 2.5 seconds for the VIN to go below EFUSE_OFF_HIGH. If not then will declare N-mode.
     // 25ms * 100 = 2.5 Seconds
     constexpr uint8_t POLL_2_5_SECS = 100;
     constexpr uint8_t THRESHOLD_HIGH = CONSTS::R31_VIN_BULK_EFUSE_OFF_HIGH;

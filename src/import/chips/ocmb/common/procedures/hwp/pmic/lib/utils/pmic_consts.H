@@ -280,7 +280,9 @@ struct consts<mss::pmic::product::JEDEC_COMPLIANT>
     static constexpr uint8_t R30_SAMPLE_VIN_BULK_ENABLE_ADC = 0xA8;
 
     // R31
-    static constexpr uint8_t R31_VIN_BULK_EFUSE_OFF_HIGH  = 0x08;
+    // each tick is 70mV
+    // EFUSE_OFF_HIGH increased to 9.94 V since VIN can ramp down slowly
+    static constexpr uint8_t R31_VIN_BULK_EFUSE_OFF_HIGH  = 0x8E;
     static constexpr uint8_t R31_VIN_BULK_EFUSE_ON_HIGH   = 0xBF;
     static constexpr uint8_t R31_VIN_BULK_EFUSE_ON_LOW    = 0x9D;
 
