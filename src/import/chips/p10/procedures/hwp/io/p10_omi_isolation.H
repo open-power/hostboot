@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p10/common/include/p10_scom_omi_2.H $        */
+/* $Source: src/import/chips/p10/procedures/hwp/io/p10_omi_isolation.H $  */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,40 +22,52 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+///
+/// @file p10_omi_isolation.H
+/// @brief Isolate OMI failure to callout proc as needed
+///-----------------------------------------------------------------------------
+/// *HW HW Maintainer: Chris Steffen <cwsteffen@us.ibm.com>
+/// *HW FW Maintainer: Ilya Smirnov <ismirno@us.ibm.com>
+/// *HW Consumed by  : HWSV
+///-----------------------------------------------------------------------------
+// EKB-Mirror-To: hostboot
 
-#ifndef __PPE_HCODE__
-    #include "proc_scomt.H"
-#endif
+#include <fapi2.H>
+#include <p10_io_tdr.H>
 
-#ifndef __p10_scom_omi_2_H_
-#define __p10_scom_omi_2_H_
+//------------------------------------------------------------------------------
+// Consts
+//------------------------------------------------------------------------------
 
-
-#ifndef __PPE_HCODE__
-namespace scomt
+//------------------------------------------------------------------------------
+// Structure definitions
+//------------------------------------------------------------------------------
+struct TdrStruct
 {
-namespace omi
+    uint32_t  iv_lane;
+    TdrResult iv_status;
+    uint32_t  iv_length;
+};
+
+typedef fapi2::ReturnCode (*p10_omi_isolation_FP_t)(
+    const fapi2::Target<fapi2::TARGET_TYPE_OMI>&,
+    std::vector<TdrStruct>&);
+
+//------------------------------------------------------------------------------
+// Function prototypes
+//------------------------------------------------------------------------------
+
+extern "C"
 {
-#endif
+
+///
+/// @brief Isolate OMI failure to callout proc as needed
+///
+/// @param[in]  i_omi_target    OMI target called out
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+    fapi2::ReturnCode p10_omi_isolation(const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_omi_target,
+                                        std::vector<TdrStruct>& o_data);
 
 
-//>> [TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_STAT1_PL]
-static const uint64_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_STAT1_PL = 0x8005244010012c3full;
-
-static const uint32_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_STAT1_PL_BIST_PRBS_ERR_DET_RO_SIGNAL = 48;
-static const uint32_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_STAT1_PL_BIST_PRBS_ACTIVITY_DET_RO_SIGNAL = 49;
-static const uint32_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_STAT1_PL_SEG_TEST_STATUS_RO_SIGNAL = 50;
-static const uint32_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_STAT1_PL_SEG_TEST_STATUS_RO_SIGNAL_LEN = 2;
-static const uint32_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_STAT1_PL_TDR_CAPT_VAL_RO_SIGNAL = 63;
-//<< [TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_STAT1_PL]
-// omi/reg00005.H
-
-//>>THE END<<
-
-#ifndef __PPE_HCODE__
-}
-}
-#include "omi/reg00004.H"
-#include "omi/reg00005.H"
-#endif
-#endif
+} // extern "C"

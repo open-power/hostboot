@@ -63,19 +63,6 @@ fapi2::ReturnCode p10_io_tdr_find_limit(const fapi2::Target<fapi2::TARGET_TYPE_I
                                         bool i_max_not_min,
                                         int32_t& o_limit);
 
-enum TdrResult
-{
-    None              = 0x0000,
-    Good              = 0x0010,
-    Open              = 0x0020,
-    Short             = 0x0030,
-    ShortToGnd        = 0x0001 | Short,
-    ShortToVdd        = 0x0002 | Short,
-    DidNotRun         = 0x2000,
-    NotSupported      = 0x4000,
-    UnableToDetermine = 0x8000
-};
-
 /// @brief Use TDR to check for net opens and shorts
 /// @param[in] i_iolink_target      IOLINK target to get thread id for
 /// @param[in] i_lanes              Lanes to run TDR on
@@ -105,7 +92,7 @@ fapi2::ReturnCode p10_io_tdr(
     int32_t base_point_y2     = 0;
     // uint32_t min_length_ui    = 0;
     std::vector<uint32_t> l_status(2, TdrResult::None);
-    std::vector<uint32_t> l_length_ui(2, 0);
+    std::vector<uint32_t> l_length_ui(2, 0ul);
 
     bool loopExit = false;
     fapi2::ATTR_CHIP_EC_FEATURE_DD2_TDR_Type l_tdr_dd2;
@@ -635,7 +622,6 @@ fapi2::ReturnCode p10_io_tdr_get_tdr_offsets(const fapi2::Target<fapi2::TARGET_T
     o_tdr_width = 4 * tx_mode * i_pw;
     FAPI_DBG("TDR Offset width: %d", o_tdr_width);
 
-fapi_try_exit:
     return fapi2::current_err;
 }
 
@@ -898,7 +884,6 @@ fapi2::ReturnCode p10_io_tdr_diagnose(const uint32_t i_bp1,
 
     FAPI_DBG("o_result = 0x%04x", o_result);
 
-fapi_try_exit:
     FAPI_DBG("End TDR Diagnose");
     return fapi2::current_err;
 }

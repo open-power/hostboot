@@ -22,7 +22,68 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- EKB-Mirror-To: hostboot -->
 <hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P10_IO_TX_TDR_SCREEN_ERROR</rc>
+    <description>
+      Tx TDR screen found an error
+    </description>
+    <ffdc>OMI_TARGET</ffdc>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>TDR_LANE</ffdc>
+    <ffdc>TDR_STATUS</ffdc>
+    <callout>
+        <target>OMI_TARGET</target>
+        <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+        <target>OCMB_TARGET</target>
+        <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+        <bus>OMI_TARGET, OCMB_TARGET</bus>
+        <priority>LOW</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P10_IO_TX_TDR_SCREEN_MULTI_GROUP_ERROR</rc>
+    <description>
+      Tx TDR screen found an error on both degrade groups
+    </description>
+    <ffdc>OMI_TARGET</ffdc>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>OMI_GROUPA</ffdc>
+    <ffdc>OMI_GROUPB</ffdc>
+    <callout>
+        <target>OMI_TARGET</target>
+        <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+        <target>OCMB_TARGET</target>
+        <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+        <bus>OMI_TARGET, OCMB_TARGET</bus>
+        <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+        <target>OMI_TARGET</target>
+    </deconfigure>
+    <deconfigure>
+        <target>OCMB_TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>OMI_TARGET</target>
+    </gard>
+    <gard>
+        <target>OCMB_TARGET</target>
+    </gard>
+  </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <sbeError/>

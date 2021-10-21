@@ -37,6 +37,18 @@
 //------------------------------------------------------------------------------
 // Structure definitions
 //------------------------------------------------------------------------------
+enum TdrResult
+{
+    None              = 0x0000,
+    Good              = 0x0010,
+    Open              = 0x0020,
+    Short             = 0x0030,
+    ShortToGnd        = 0x0001 | Short,
+    ShortToVdd        = 0x0002 | Short,
+    DidNotRun         = 0x2000,
+    NotSupported      = 0x4000,
+    UnableToDetermine = 0x8000
+};
 
 /// function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p10_io_tdr_FP_t)(

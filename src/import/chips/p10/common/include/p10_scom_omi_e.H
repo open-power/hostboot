@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,24 @@ namespace omi
 {
 #endif
 
+
+//>> [TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL]
+static const uint64_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL = 0x80041c4010012c3full;
+
+static const uint32_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_LANE_INVERT = 48;
+static const uint32_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_LANE_QUIESCE = 49;
+static const uint32_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_LANE_QUIESCE_LEN = 2;
+static const uint32_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN = 51;
+static const uint32_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN = 52;
+static const uint32_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_PSAVE_REQ_DIS = 53;
+static const uint32_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_ERR_INJ_A_ENABLE = 54;
+static const uint32_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_ERR_INJ_B_ENABLE = 55;
+static const uint32_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_PL_SPARE_MODE_0 = 60;
+static const uint32_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_PL_SPARE_MODE_1 = 61;
+static const uint32_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_PL_SPARE_MODE_2 = 62;
+static const uint32_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_PL_SPARE_MODE_3 = 63;
+//<< [TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL]
+// omi/reg00029.H
 
 //>>THE END<<
 

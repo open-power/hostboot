@@ -100,5 +100,7 @@ OBJS += p10_io_ppe_lib.o
 OBJS += p10_io_ppe_regs.o
 OBJS += p10_init_mem_encryption.o
 OBJS += p10_io_omi_prbs.o
+OBJS += p10_io_tdr.o
+OBJS += p10_omi_isolation.o
 
 include ${ROOTPATH}/config.mk
