@@ -280,6 +280,17 @@
   </targetTypeExtension>
 
   <targetTypeExtension>
+    <id>mds_ctlr</id>
+    <attribute>
+      <id>DYNAMIC_I2C_DEVICE_ADDRESS</id>
+      <default>0xB0</default>
+    </attribute>
+    <attribute>
+      <id>SCOM_ACCESS_MUTEX</id>
+    </attribute>
+  </targetTypeExtension>
+
+  <targetTypeExtension>
     <id>pmic</id>
     <attribute>
       <id>DYNAMIC_I2C_DEVICE_ADDRESS</id>
