@@ -64,7 +64,7 @@ if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
     START_SIMICS_CMD+=" dimm_type=4U"
     START_SIMICS_CMD+=" fused_core=TRUE"
     START_SIMICS_CMD+=" xive_gen=2"
-    START_SIMICS_CMD+=" bmc_files=/host/genEecache:/usr/local/share/pnor/EECACHE"
+    START_SIMICS_CMD+=" bmc_files=/host/genEecache:/usr/local/share/hostfw/running/81e00679.lid"
     START_SIMICS_CMD+=" eecacheEcc=1"
     #@FIXME-RTC:254475-Remove once this works everywhere
     START_SIMICS_CMD+=" hb_ignoresmpfail=0"

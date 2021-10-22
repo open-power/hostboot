@@ -111,6 +111,7 @@ if defined bmc_files {
             } else {
                 echo "Successfully created "+$eecache_file
             }
+            @setMinFileSize( simenv.eecache_file, 0x2C0000 )
         }
     } else {
         echo "bmc_files is NIL, so no EECACHE auto generated"

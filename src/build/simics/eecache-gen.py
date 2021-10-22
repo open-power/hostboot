@@ -287,7 +287,7 @@ def hb_eecache_setup(file_name, version, verbose):
 # bmc_files is a parameter passed into runsim
 ###########################################################################
 def find_eecache_file( bmc_files_str ):
-    x = re.search('/host/(.+):/usr/local/share/pnor/EECACHE', bmc_files_str)
+    x = re.search('/host/(.+):/usr/local/share/hostfw/running/81e00679.lid', bmc_files_str)
     if x != None:
       #print(x.group(1))
       return x.group(1)
@@ -303,7 +303,7 @@ def find_eecache_file( bmc_files_str ):
 ##########################################################################
 def resolve_eecache_path( bmc_files_str, absolute_simics_eecache ):
     #print "resolve_eecache_path("+bmc_files_str+ ", "+absolute_simics_eecache+")"
-    x = re.sub(r'([^,]+):/usr/local/share/pnor/EECACHE', absolute_simics_eecache+":/usr/local/share/pnor/EECACHE", bmc_files_str)
+    x = re.sub(r'([^,]+):/usr/local/share/hostfw/running/81e00679.lid', absolute_simics_eecache+":/usr/local/share/hostfw/running/81e00679.lid", bmc_files_str)
     if x != None:
       return x
     return None
@@ -348,3 +348,14 @@ def get_eq_pg_records(vpd_path):
 
         return [ struct.unpack(">I", b'\x00' + vpd_bytes[pg_idx+offset:pg_idx+offset+3])[0]
                  for offset in range(0, 8*3, 3) ]
+
+################################################################
+# Adds 0xFF to end of io_filename until it at least i_min_size
+# bytes long. If the file is already larger than i_min_size then
+# no extra bytes are added.
+################################################################
+def setMinFileSize(io_filename, i_min_size):
+    pad_size = i_min_size - os.stat( io_filename ).st_size;
+    if pad_size > 0:
+        with open( io_filename, 'ab') as p:
+            p.write(bytes([255]) * pad_size)

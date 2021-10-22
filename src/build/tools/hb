@@ -559,7 +559,7 @@ hb_startsimics()
         STARTSIMCMD+=(hb_script_to_run=${STANDALONE_SIMICS}/hbfw/startup.simics)
         STARTSIMCMD+=(pnor_img=${PROJECT_ROOT}/standalone/pnor/${PNOR_LAYOUT_SELECTED}.pnor)
         STARTSIMCMD+=(xive_gen=2)
-        STARTSIMCMD+=(bmc_files=/host/genEecache:/usr/local/share/pnor/EECACHE)
+        STARTSIMCMD+=(bmc_files=/host/genEecache:/usr/local/share/hostfw/running/81e00679.lid)
         STARTSIMCMD+=(eecacheEcc=1)
 
         # Comment out the following line to switch from 4U to 2U DDIMMs
