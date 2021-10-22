@@ -36,8 +36,8 @@
 #ifndef __MDS_I2C_ADDR_GET__
 #define __MDS_I2C_ADDR_GET__
 
-// SPD byte address that contains the MDS controller address
-constexpr uint8_t SPD_MDS_I2C_BYTE = 415;
+// SPD byte address that contains the MDS controller I2C address
+constexpr uint16_t SPD_MDS_I2C_BYTE = 415;
 
 ///
 /// @brief Get the mds i2c address from the given spd
