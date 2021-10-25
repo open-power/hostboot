@@ -27,7 +27,7 @@
 
 import json
 from udparsers.helpers.errludP_Helpers import hexConcat, intConcat, findNull, strConcat
-from udparsers.b0100.entityPath import errlud_parse_entity_path
+from udparsers.helpers.entityPath import errlud_parse_entity_path
 
 """ User Details Parser Target called by b0100.py
 
@@ -141,7 +141,9 @@ def ErrlUserDetailsParserTarget(ver, data):
                  0x53: "TYPE_FC",
                  0x54: "TYPE_LPCREFCLKENDPT",
                  0x55: "TYPE_GENERIC_I2C_DEVICE",
-                 0x56: "TYPE_LAST_IN_RANGE",
+                 0x56: "TYPE_MDS_CTLR",
+                 0x57: "TYPE_DCM",
+                 0x58: "TYPE_LAST_IN_RANGE",
                 }
 
     attrModel = {
