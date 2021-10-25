@@ -368,6 +368,14 @@ void HdatMsVpd::setBSR(const hdatMsAddr_t &i_bsrAddr,
     return;
 }
 
+/** @brief See the prologue in hdatmsvpd.H
+ */
+void HdatMsVpd::setMirrorableMemoryStartAddress(
+    const uint64_t &i_MirrMemStartAddr)
+{
+    memcpy(&iv_maxAddr.hdatMirrMemStartAddr, &i_MirrMemStartAddr,
+        sizeof(hdatMsAddr_t));
+}
 
 /** @brief See the prologue in hdatmsvpd.H
  */
@@ -1065,6 +1073,7 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
         uint32_t l_mostSigAffinityDomain_x = 0;
         uint32_t l_ueCount = 1;
 
+        uint64_t l_origMirroringBaseAddress = 0xFFFFFFFFFFFFFFFFull;
         HDAT_INF("fetching ATTR_MIRROR_BASE_ADDRESS");
         TARGETING::ATTR_MIRROR_BASE_ADDRESS_type l_mirroringBaseAddress_x =
              l_pSysTarget->getAttr<TARGETING::ATTR_MIRROR_BASE_ADDRESS>();
@@ -1733,6 +1742,11 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                 TARGETING::ATTR_MSS_MEM_MC_IN_GROUP_type l_mccSharingCount
                     = {0};
 
+                //Group ID for each group, group id will be assigned only
+                //if the group is shared
+                TARGETING::ATTR_MSS_MEM_MC_IN_GROUP_type l_mccSharingGrpIds =
+                    {0};
+
                 //Size configured under each group
                 TARGETING::ATTR_PROC_MEM_SIZES_type l_procMemSizesBytes = {0};
 
@@ -1769,10 +1783,25 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                         continue;
                     }
 
+                    HDAT_INF("hdatFindGroupForMcc returned group: %d, "
+                        "procmemsizes[%d]: 0X%x",
+                        l_mccInGrp,l_mccInGrp,
+                        l_procMemSizesBytes[l_mccInGrp]);
+
                     //Increment sharing count if mem configured under group.
                     if(l_procMemSizesBytes[l_mccInGrp] > 0)
                     {
                         l_mccSharingCount[l_mccInGrp]++;
+
+                        //Assign sharing group id only if shared
+                        //And only when first instance of sharing is found
+                        if(l_mccSharingCount[l_mccInGrp] ==
+                            HDAT_MIN_NUM_FOR_SHARING)
+                        {
+                            l_mccSharingGrpIds[l_mccInGrp] =
+                                l_nxtSharingGroupId;
+                            l_nxtSharingGroupId++;
+                        }
                     }
                 }
 
@@ -1983,7 +2012,7 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                                     {
                                         l_memStatus = HDAT_MEM_SHARED;
                                         setMsAreaInterleavedId(l_index,
-                                                               l_mccInGrp);
+                                            l_mccSharingGrpIds[l_mccInGrp]);
                                     }
                                     //The memory channel is defined as a single
                                     // MCC, and all of the memory on that
@@ -1998,7 +2027,7 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                                     {
                                         l_memStatus = HDAT_MEM_SHARED;
                                         setMsAreaInterleavedId(l_index,
-                                                               l_mccInGrp);
+                                            l_mccSharingGrpIds[l_mccInGrp]);
                                     }
 
                                     setMsAreaType(l_index,l_parentType);
@@ -2168,50 +2197,30 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                                     uint64_t l_hdatMirrorAddr_x = 0x0ull;
                                     uint64_t l_hdatMirrorAddr = 0x0ull;
                                     uint32_t l_hdatMemcntrlID = 0x0 ;
-                                    uint8_t l_hdatMirrorAlogrithm = 0xFF;
+                                    uint8_t l_hdatMirrorAlogrithm = 0xA;
                                     bool l_rangeIsMirrorable = false;
-
-                                    //Calculate the mirror address and
-                                    //related data
-                                    uint64_t l_startAddr =
-                                        (((uint64_t)(l_addr_range.hi) << 32 )
-                                          | (uint64_t)(l_addr_range.lo));
-                                    l_hdatMirrorAddr_x = (l_startAddr / 2) +
-                                        l_mirrorBaseAddress_x;
-
-                                    HDAT_INF("Start add : 0x%016llX "
-                                        "MirrorBase : 0x%016llX"
-                                        " MirrorAddr : 0x%016llX"
-                                        " PayLoadMirrorMem : 0x%X",
-                                        l_startAddr, l_mirrorBaseAddress_x,
-                                        l_hdatMirrorAddr_x, l_payLoadMirrorMem);
 
                                     if ( 0 != l_payLoadMirrorMem )
                                     {
-                                        for ( int idx=0 ; idx <
-                                        (int)(sizeof
-                                        (TARGETING::ATTR_PROC_MIRROR_SIZES_type)
-                                        / sizeof(uint64_t)) ; idx++ )
+                                        if( 0 != l_MirrorSize[l_mccInGrp])
                                         {
-                                            HDAT_INF("Mirror size : 0x%016llX"
-                                               " MirrorAddr : 0x%016llX"
-                                               " hdatMirrorAddr_x : 0x%016llX",
-                                               l_MirrorSize[idx],
-                                               l_MirrorAddr[idx],
-                                               l_hdatMirrorAddr_x);
-
-                                            if( (0 != l_MirrorSize[idx]) &&
-                                            (l_MirrorAddr[idx] ==
-                                                 l_hdatMirrorAddr_x) )
-                                            {
-                                                l_rangeIsMirrorable = true;
-                                                l_hdatMirrorAddr =
-                                                   l_MirrorAddr[idx] |
-                                                   HDAT_REAL_ADDRESS_MASK64;
-                                                break;
-                                            }
+                                            l_hdatMirrorAddr =
+                                                l_MirrorAddr[l_mccInGrp] |
+                                                HDAT_REAL_ADDRESS_MASK64;
+                                            l_rangeIsMirrorable = true;
+                                        }
+                                        else
+                                        {
+                                            l_rangeIsMirrorable = false;
                                         }
                                     }
+
+                                    HDAT_INF(
+                                        "MirrorBase : 0x%016llX"
+                                        " MirrorAddr : 0x%016llX"
+                                        " PayLoadMirrorMem : 0x%X",
+                                        l_mirrorBaseAddress_x,
+                                        l_hdatMirrorAddr_x, l_payLoadMirrorMem);
 
                                     // Set the memory controller ID
                                     l_hdatMemcntrlID |=
@@ -2241,6 +2250,21 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                                         " to ms area index[%d]",
                                         l_index);
                                         break;
+                                    }
+                                    else
+                                    {
+                                        /* Update the Mirrorable Memory Starting
+                                         * Address in MSVPD here
+                                         */
+                                        if( (l_origMirroringBaseAddress >
+                                             l_hdatMirrorAddr) &&
+                                            l_rangeIsMirrorable == true)
+                                        {
+                                            l_origMirroringBaseAddress =
+                                                l_hdatMirrorAddr;
+                                            setMirrorableMemoryStartAddress(
+                                                l_hdatMirrorAddr);
+                                        }
                                     }
 
                                     // TODO : RTC Story 159682

@@ -431,6 +431,19 @@ class HdatMsVpd : public HdatHdif
         void setBSR(const hdatMsAddr_t &i_bsrAddr,
                      hdatBsrMode i_bsrMode = HDAT_BSR_128_BYTE);
 
+        /**
+         * @brief Update the Mirrorable Memory Starting Address
+         *
+         *
+         * @pre None
+         *
+         * @post None
+         *
+         * @param[in] i_MirrMemStartAddr - input parameter - Starting Address of
+         *        Mirrorable Memory
+         */
+        void setMirrorableMemoryStartAddress(
+            const uint64_t &i_MirrMemStartAddr);
 
         /**
          * @brief Update the mainstore VPD with address of XSCOM
