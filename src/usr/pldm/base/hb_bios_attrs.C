@@ -82,7 +82,7 @@ const char PLDM_BIOS_HB_LID_IDS_STRING[]                   = "hb_lid_ids";
 const char PLDM_BIOS_HB_TPM_REQUIRED_POLICY_STRING[]       = "hb_tpm_required_current";
 
 const char PLDM_BIOS_PVM_FW_BOOT_SIDE_STRING[]             = "pvm_fw_boot_side";
-const char PLDM_BIOS_HB_MIRROR_MEMORY_STRING[]             = "hb_mirror_memory_mode_current";
+const char PLDM_BIOS_HB_MIRROR_MEMORY_STRING[]             = "hb_memory_mirror_mode_current";
 
 const char PLDM_BIOS_HB_KEY_CLEAR_REQUEST_STRING[]         = "hb_key_clear_request_current";
 const char PLDM_BIOS_HB_KEY_CLEAR_REQUEST_STRING_PENDING[] = "hb_key_clear_request";
