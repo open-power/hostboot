@@ -52,6 +52,7 @@
 #include <spdenums.H>
 #include <spd.H>
 #include <kernel/bltohbdatamgr.H>
+#include <targeting/common/mfgFlagAccessors.H>
 
 using namespace ISTEP_ERROR;
 using namespace ERRORLOG;
@@ -712,18 +713,23 @@ void ocmbFwI2cUpdateStatusCheck( IStepError & io_StepError)
     ATTR_OCMB_FW_UPDATE_STATUS_type l_updStatus =
         l_nodeTarget->getAttr<ATTR_OCMB_FW_UPDATE_STATUS>();
 
+    // Avoid falling back to i2c mode in manufacturing mode
+    bool mfgMode = TARGETING::areMfgThresholdsActive();
+
     TRACFCOMP(g_trac_expupd, "ocmbFwI2cUpdateStatusCheck: "
               "Enter OCMB_FW_UPDATE_STATUS: updateRequired = %d, "
-              "updateI2c = %d, i2cUpdateAttepted = %d, hardFailure = %d",
+              "updateI2c = %d, i2cUpdateAttepted = %d, hardFailure = %d, "
+              "mdfgMode = %d",
               l_updStatus.updateRequired, l_updStatus.updateI2c,
-              l_updStatus.i2cUpdateAttempted, l_updStatus.hardFailure);
+              l_updStatus.i2cUpdateAttempted, l_updStatus.hardFailure,
+              mfgMode);
 
     // Get list of OCMBs that need updating + update image
     bool doUpdate = explorerUpdateCheck(io_StepError, l_ocmbUpdateList,
                                         l_imageInfo, l_imageLoaded);
 
     // check that at least one ocmb needs an update
-    if (l_ocmbUpdateList.size())
+    if (l_ocmbUpdateList.size() && !mfgMode)
     {
         l_updStatus.updateRequired = 1;
         if (l_updStatus.hardFailure)
