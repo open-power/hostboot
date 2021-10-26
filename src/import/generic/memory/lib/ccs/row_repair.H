@@ -153,6 +153,30 @@ void set_bank_group_addr( const fapi2::buffer<uint64_t>& i_bank_addr,
 }
 
 ///
+/// @brief Set the row bits of the passed in instruction array
+/// @tparam MC the memory controller type which executes the CCS instruction
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @param[in] i_row_addr Row Address
+/// @param[in, out] io_inst The ccs instruction to add to
+///
+template< mss::mc_type MC, typename TT = ccsTraits<MC> >
+void set_srank_addr( const fapi2::buffer<uint64_t>& i_srank_addr,
+                     mss::ccs::instruction_t& io_inst)
+{
+    // Sub-rank bits aren't contiguous
+    constexpr uint64_t CID01_BIT = 61;
+    constexpr uint64_t CID_2_BIT = 63;
+
+    // Sub-rank is used for the Chip ID Bits
+    io_inst.arr0.template insert<TT::ARR0_DDR_CID_0_1,
+                          TT::ARR0_DDR_CID_0_1_LEN, CID01_BIT>(i_srank_addr);
+    io_inst.arr0.template writeBit<TT::ARR0_DDR_CID_2>(i_srank_addr.getBit<CID_2_BIT>());
+
+    FAPI_MFG("Debug srank information: srank bit 0: %d 1: %d 2: %d",
+             i_srank_addr.getBit<CID01_BIT>(), i_srank_addr.getBit < CID01_BIT + 1 > (), i_srank_addr.getBit<CID_2_BIT>());
+}
+
+///
 /// @brief Set number of repeats in INST_ARR1 for a ccs write command
 /// @tparam MC the memory controller type which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
@@ -190,6 +214,7 @@ void set_odt_bits( const uint8_t i_odt_bits,
 /// @param[in] i_bank_addr Bank Address
 /// @param[in] i_bank_group_addr Bank Group Address
 /// @param[in] i_row_addr Row Address to activate
+/// @param[in] i_srank_addr Sub-Rank Address to activate
 /// @param[in] i_delay_in_cycles Delay to add after instruction
 /// @return ccs::instruction_t for a loaded act command
 ///
@@ -198,10 +223,14 @@ mss::ccs::instruction_t act_load( const mss::rank::info<MC>& i_rank_info,
                                   const fapi2::buffer<uint64_t>& i_bank_addr,
                                   const fapi2::buffer<uint64_t>& i_bank_group_addr,
                                   const fapi2::buffer<uint64_t>& i_row_addr,
+                                  const fapi2::buffer<uint64_t>& i_srank_addr,
                                   const uint64_t i_delay_in_cycles )
 {
     // Create Activate command
     mss::ccs::instruction_t l_inst = act_command(i_rank_info.get_port_rank());
+
+    // Set Sub-rank address
+    set_srank_addr<MC>(i_srank_addr, l_inst);
 
     // Set Row address
     set_row_addr<MC>(i_row_addr, l_inst);
@@ -219,6 +248,7 @@ mss::ccs::instruction_t act_load( const mss::rank::info<MC>& i_rank_info,
 /// @param[in] i_rank_info Rank information class
 /// @param[in] i_bank_addr Bank Address
 /// @param[in] i_bank_group_addr Bank Group Address
+/// @param[in] i_srank_addr Sub-Rank Address to activate
 /// @param[in] i_delay_in_cycles Delay to add after instruction
 /// @return ccs::instruction_t for a loaded act command
 ///
@@ -226,10 +256,14 @@ template< mss::mc_type MC, typename TT = ccsTraits<MC> >
 mss::ccs::instruction_t wr_load( const mss::rank::info<MC>& i_rank_info,
                                  const fapi2::buffer<uint64_t>& i_bank_addr,
                                  const fapi2::buffer<uint64_t>& i_bank_group_addr,
+                                 const fapi2::buffer<uint64_t>& i_srank_addr,
                                  const uint64_t i_delay_in_cycles)
 {
     // Create Write command
     mss::ccs::instruction_t l_inst = wr_command(i_rank_info.get_port_rank(), i_bank_addr, i_bank_group_addr);
+
+    // Set Sub-rank address
+    set_srank_addr<MC>(i_srank_addr, l_inst);
 
     // Set A10 low
     l_inst.arr0.template clearBit<TT::ARR0_DDR_ADDRESS_10>();
@@ -246,6 +280,7 @@ mss::ccs::instruction_t wr_load( const mss::rank::info<MC>& i_rank_info,
 /// @param[in] i_rank_info Rank information class
 /// @param[in] i_bank_addr Buffer of all Bank Addresses
 /// @param[in] i_bank_group_addr Buffer of all Bank Group Addresses
+/// @param[in] i_srank_addr Sub-Rank Address to activate
 /// @param[in] i_delay_in_cycles Delay to add after instruction
 /// @return ccs::instruction_t for a loaded act command
 ///
@@ -253,16 +288,41 @@ template< mss::mc_type MC, typename TT = ccsTraits<MC> >
 mss::ccs::instruction_t pre_load( const mss::rank::info<MC>& i_rank_info,
                                   const fapi2::buffer<uint64_t>& i_bank_addr,
                                   const fapi2::buffer<uint64_t>& i_bank_group_addr,
+                                  const fapi2::buffer<uint64_t>& i_srank_addr,
                                   const uint64_t i_delay_in_cycles)
 {
     // Create Precharge command
     mss::ccs::instruction_t l_inst = precharge_all_command(i_rank_info.get_port_rank(), i_delay_in_cycles);
+
+    // Set Sub-rank address
+    set_srank_addr<MC>(i_srank_addr, l_inst);
 
     // Set Bank address
     set_bank_group_addr<MC>( i_bank_addr, i_bank_group_addr, l_inst );
 
     // Set A10 low
     l_inst.arr0.template clearBit<TT::ARR0_DDR_ADDRESS_10>();
+
+    return l_inst;
+}
+
+///
+/// @brief Loads a PRECHARGE command for the initial sppr ccs instruction
+/// @tparam MC the memory controller type which executes the CCS instruction
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @param[in] i_rank_info Rank information class
+/// @param[in] i_srank_addr Sub-Rank Address to activate
+/// @return ccs::instruction_t for a loaded precharge command
+///
+template< mss::mc_type MC, typename TT = ccsTraits<MC> >
+mss::ccs::instruction_t init_pre_load( const mss::rank::info<MC>& i_rank_info,
+                                       const fapi2::buffer<uint64_t>& i_srank_addr)
+{
+    // Create Precharge command
+    mss::ccs::instruction_t l_inst = precharge_all_command(i_rank_info.get_port_rank());
+
+    // Set Sub-rank address
+    set_srank_addr<MC>(i_srank_addr, l_inst);
 
     return l_inst;
 }

@@ -457,8 +457,10 @@ fapi2::ReturnCode setup_sppr( const mss::rank::info<mss::mc_type::EXPLORER>& i_r
     FAPI_TRY( mss::ccs::process_inst<mss::mc_type::EXPLORER>(i_rank_info, tMOD, l_inst, io_program.iv_instructions) );
 
     // 1. Precharge_all(): Create instruction for precharge and add it to the instruction array.
-    l_inst = mss::ccs::precharge_all_command(l_port_rank);
+    l_inst = mss::ccs::init_pre_load<mss::mc_type::EXPLORER>(i_rank_info, i_repair.iv_srank);
     FAPI_TRY( mss::ccs::process_inst<mss::mc_type::EXPLORER>(i_rank_info, tRCD, l_inst, io_program.iv_instructions) );
+
+    FAPI_MFG( "Running srank fix on dimm %s with srank %d", mss::c_str(l_dimm_target), i_repair.iv_srank );
 
     // 2. Enable sPPR and wait tMOD:
     l_data4.iv_soft_ppr = ENABLE_SPPR;
@@ -486,11 +488,12 @@ fapi2::ReturnCode setup_sppr( const mss::rank::info<mss::mc_type::EXPLORER>& i_r
 
     // 4. ACT to failed bank/address
     l_inst = mss::ccs::act_load<mss::mc_type::EXPLORER>(i_rank_info, i_repair.iv_bank, i_repair.iv_bg,
-             i_repair.iv_row, tRCD);
+             i_repair.iv_row, i_repair.iv_srank, tRCD);
     FAPI_TRY( mss::ccs::process_inst<mss::mc_type::EXPLORER>(i_rank_info, tRCD, l_inst, io_program.iv_instructions) );
 
     // 5. WR Command with dq bits low:
-    l_inst = mss::ccs::wr_load<mss::mc_type::EXPLORER>(i_rank_info, i_repair.iv_bank, i_repair.iv_bg, NO_DELAY);
+    l_inst = mss::ccs::wr_load<mss::mc_type::EXPLORER>(i_rank_info, i_repair.iv_bank, i_repair.iv_bg, i_repair.iv_srank,
+             NO_DELAY);
     // Check for data inversion and invert data if on
     FAPI_TRY( mss::exp::ccs::process_inversion(l_port_target, l_invert) );
     mss::exp::ccs::set_write_data(i_dram_bitmap, l_invert, l_inst);
@@ -506,7 +509,8 @@ fapi2::ReturnCode setup_sppr( const mss::rank::info<mss::mc_type::EXPLORER>& i_r
 
     // 7. PRE to Bank (and wait at least 20ns to register)
     // Currently waiting tWR for debug
-    l_inst = mss::ccs::pre_load<mss::mc_type::EXPLORER>(i_rank_info, i_repair.iv_bank, i_repair.iv_bg, l_delay);
+    l_inst = mss::ccs::pre_load<mss::mc_type::EXPLORER>(i_rank_info, i_repair.iv_bank, i_repair.iv_bg, i_repair.iv_srank,
+             l_delay);
     FAPI_TRY( mss::ccs::process_inst<mss::mc_type::EXPLORER>(i_rank_info, tWR, l_inst, io_program.iv_instructions) );
 
     // 8. Set MR4 bit "A5=0" to exit sPPR
