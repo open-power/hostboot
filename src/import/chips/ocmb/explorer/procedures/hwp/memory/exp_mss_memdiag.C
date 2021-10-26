@@ -55,7 +55,7 @@ extern "C"
         uint8_t l_post_memdiags_subtest = 0;
 
         FAPI_INF("Start exp_mss_memdiag on: %s", mss::c_str( i_target ));
-        FAPI_TRY(mss::memdiags::mss_initialize_memory(i_target));
+        FAPI_TRY(mss::memdiags::mss_initialize_memory<mss::mc_type::EXPLORER>(i_target));
 
         FAPI_TRY(mss::attr::get_post_memdiags_read_subtest(i_target, l_post_memdiags_subtest));
 
@@ -65,7 +65,7 @@ extern "C"
             FAPI_TRY(mss::exp::memdiags::perform_read_only_subtest(i_target));
 
             // Polls for completion here to avoid issues in future isteps
-            FAPI_TRY(mss::memdiags::mss_async_polling_loop(i_target));
+            FAPI_TRY(mss::memdiags::mss_async_polling_loop<mss::mc_type::EXPLORER>(i_target));
 
             // Turn off FIFO mode again
             // Note this is normally done in mss_initialize_memory but

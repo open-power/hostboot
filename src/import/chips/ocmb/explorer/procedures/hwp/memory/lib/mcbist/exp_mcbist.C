@@ -133,13 +133,13 @@ namespace mcbist
 {
 ///
 /// @brief Get a list of ports involved in the program
-/// Specialization for program<>
+/// Specialization for program<mss::mc_type::EXPLORER>
 /// @param[in] i_target the target for this program
 /// @return vector of port targets
 ///
 template<>
 std::vector<fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>>
-        program<>::get_port_list( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target ) const
+        program<mss::mc_type::EXPLORER>::get_port_list( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target ) const
 {
 
     return mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
@@ -160,7 +160,7 @@ fapi2::ReturnCode configure_broadcast_mode(const fapi2::Target<fapi2::TARGET_TYP
 
 ///
 /// @brief Read entries from MCBIST Read Buffer (RB) array
-/// Specialization for fapi2::TARGET_TYPE_MEM_PORT
+/// Specialization for EXPLORER/fapi2::TARGET_TYPE_MEM_PORT
 /// @param[in] i_target the target to effect
 /// @param[in] i_start_addr the array address to read first
 /// @param[in] i_num_entries the number of array entries to read
@@ -169,11 +169,11 @@ fapi2::ReturnCode configure_broadcast_mode(const fapi2::Target<fapi2::TARGET_TYP
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
 template<>
-fapi2::ReturnCode read_rb_array(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
-                                const uint64_t i_start_addr,
-                                const uint64_t i_num_entries,
-                                std::vector< fapi2::buffer<uint64_t> >& o_data,
-                                std::vector< fapi2::buffer<uint64_t> >& o_ecc_data)
+fapi2::ReturnCode read_rb_array<mss::mc_type::EXPLORER>(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const uint64_t i_start_addr,
+        const uint64_t i_num_entries,
+        std::vector< fapi2::buffer<uint64_t> >& o_data,
+        std::vector< fapi2::buffer<uint64_t> >& o_ecc_data)
 {
     using TT = mcbistTraits<DEFAULT_MC_TYPE, fapi2::TARGET_TYPE_OCMB_CHIP>;
 

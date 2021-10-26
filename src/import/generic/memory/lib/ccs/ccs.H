@@ -1213,7 +1213,7 @@ fapi2::ReturnCode execute_inst_via_mcbist(const fapi2::Target<T>& i_target)
     l_program.iv_subtests.push_back( mss::mcbist::ccsexec_subtest<MC, T>() );
 
     // NOTE: Unsure if needed, if required, need to discover how to set the range up
-    FAPI_TRY( mcbist::config_address_range0(i_target, START, END) );
+    FAPI_TRY( mcbist::config_address_range0<MC>(i_target, START, END) );
 
     // Setup the polling based on lab experiments
     // Looks like tests run with 5 clock cycles or 6ns for polling, rounding to 10ns
@@ -1464,7 +1464,8 @@ static inline fapi2::ReturnCode execute_via_mcbist( const fapi2::Target<T>& i_ta
               mss::c_str(i_target));
 
     // Stop any ongoing MCBIST command
-    FAPI_TRY( mss::memdiags::stop(i_target), "MCBIST engine failed to stop current command in progress on %s",
+    FAPI_TRY( mss::memdiags::stop<DEFAULT_MC_TYPE>(i_target),
+              "MCBIST engine failed to stop current command in progress on %s",
               mss::c_str(i_target) );
 
     // Setup CCS per port

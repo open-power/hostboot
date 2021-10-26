@@ -50,9 +50,9 @@ extern "C"
     {
         FAPI_INF("Start exp scrub for %s", mss::c_str(i_target));
         // Initialize memory and set firs accordingly
-        FAPI_TRY(mss::memdiags::mss_initialize_memory(i_target));
+        FAPI_TRY(mss::memdiags::mss_initialize_memory<mss::mc_type::EXPLORER>(i_target));
         // Kickoff background scrub and unmask firs
-        FAPI_TRY(mss::memdiags::mss_background_scrub_helper(i_target));
+        FAPI_TRY(mss::memdiags::mss_background_scrub_helper<mss::mc_type::EXPLORER>(i_target));
 
     fapi_try_exit:
         FAPI_INF("End exp scrub for %s", mss::c_str(i_target));

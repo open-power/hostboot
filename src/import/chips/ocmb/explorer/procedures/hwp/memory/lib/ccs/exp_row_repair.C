@@ -438,7 +438,7 @@ fapi2::ReturnCode setup_sppr( const mss::rank::info<>& i_rank_info,
     FAPI_TRY( mss::attr::get_dram_trcd(l_port_target, tRCD) );
 
     // Get freq from attributes:
-    FAPI_TRY( mss::freq(l_ocmb_target, l_freq),
+    FAPI_TRY( mss::freq<mss::mc_type::EXPLORER>(l_ocmb_target, l_freq),
               "Failed to retrieve freq values on %s",
               mss::c_str(l_ocmb_target) );
 
@@ -640,7 +640,8 @@ fapi2::ReturnCode dynamic_row_repair( const mss::rank::info<>& i_rank_info,
                 mss::c_str(l_ocmb_target));
 
     // Stop any ongoing MCBIST command
-    FAPI_TRY( mss::memdiags::stop(l_ocmb_target), "MCBIST engine failed to stop current command in progress on %s",
+    FAPI_TRY( mss::memdiags::stop<mss::mc_type::EXPLORER>(l_ocmb_target),
+              "MCBIST engine failed to stop current command in progress on %s",
               mss::c_str(l_ocmb_target) );
 
     // Verify that the in-progress bit has not been set for MCBIST, meaning the MCBIST is free

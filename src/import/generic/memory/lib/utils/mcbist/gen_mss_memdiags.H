@@ -93,7 +93,7 @@ namespace sim
 /// @param[in] i_pattern an index representing a pattern to use to initialize memory (defaults to 0)
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 fapi2::ReturnCode sf_init( const fapi2::Target<T>& i_target, const uint64_t i_pattern )
 {
     FAPI_INF("Start sim init for %s", mss::c_str(i_target));
@@ -271,7 +271,7 @@ fapi2::ReturnCode pre_scrub_settings( const fapi2::Target<T>& i_target );
 /// @param[in] i_target the target
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T>
+template< mss::mc_type MC, fapi2::TargetType T>
 fapi2::ReturnCode stop( const fapi2::Target<T>& i_target )
 {
     // Too long, make shorter
@@ -326,7 +326,7 @@ fapi_try_exit:
 /// @tparam T fapi2::TargetType of the MCBIST engine
 /// @tparam TT the mcbistTraits associated with T
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE , typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE , typename TT = mcbistTraits<MC, T> >
 class operation
 {
     public:
@@ -595,7 +595,7 @@ inline fapi2::ReturnCode operation<MC, T, TT>::multi_port_init()
 /// @tparam T fapi2::TargetType of the MCBIST engine
 /// @tparam TT the mcbistTraits associated with T
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE , typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE , typename TT = mcbistTraits<MC, T> >
 struct sf_init_operation : public operation<MC>
 {
 
@@ -631,7 +631,7 @@ struct sf_init_operation : public operation<MC>
 /// @tparam T fapi2::TargetType of the MCBIST engine
 /// @tparam TT the mcbistTraits associated with T
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE , typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE , typename TT = mcbistTraits<MC, T> >
 struct sf_read_operation : public operation<MC>
 {
 
@@ -660,7 +660,7 @@ struct sf_read_operation : public operation<MC>
 /// @tparam T fapi2::TargetType of the MCBIST engine
 /// @tparam TT the mcbistTraits associated with T
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE , typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE , typename TT = mcbistTraits<MC, T> >
 struct sf_read_eop_operation : public operation<MC>
 {
     ///
@@ -687,7 +687,7 @@ struct sf_read_eop_operation : public operation<MC>
 /// @tparam T fapi2::TargetType of the MCBIST engine
 /// @tparam TT the mcbistTraits associated with T
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE , typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE , typename TT = mcbistTraits<MC, T> >
 struct continuous_scrub_operation : public operation<MC>
 {
 
@@ -798,7 +798,7 @@ continuous_scrub_operation<MC, T, TT>::continuous_scrub_operation(
             operation<MC>::iv_const.iv_start_address.template get_range<mss::mcbist::address::DIMM>(operation<MC>::iv_const.iv_end_address);
         // *INDENT-ON*
 
-        FAPI_TRY( mss::mcbist::config_address_range1(i_target, operation<MC>::iv_const.iv_start_address,
+        FAPI_TRY( mss::mcbist::config_address_range1<MC>(i_target, operation<MC>::iv_const.iv_start_address,
                   operation<MC>::iv_const.iv_end_address) );
 
         // We need to use this address range. We know it's ok to write to element 0 as we pushed it on above
@@ -856,7 +856,7 @@ fapi_try_exit:
 /// @tparam T fapi2::TargetType of the MCBIST engine
 /// @tparam TT the mcbistTraits associated with T
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE , typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE , typename TT = mcbistTraits<MC, T> >
 struct targeted_scrub_operation : public operation<MC>
 {
 
@@ -896,7 +896,7 @@ struct targeted_scrub_operation : public operation<MC>
 /// @return FAPI2_RC_SUCCESS iff everything ok
 /// @note The function is asynchronous, and the caller should be looking for a done attention
 ///
-template<  mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
+template<  mss::mc_type MC, fapi2::TargetType T >
 fapi2::ReturnCode sf_init( const fapi2::Target<T>& i_target,
                            const uint64_t i_pattern = PATTERN_0 )
 {
@@ -1072,7 +1072,7 @@ fapi_try_exit:
 /// @param[in] i_speed the speed to scrub (default - SAME_SPEED meaning leave speed untouched)
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
+template< mss::mc_type MC, fapi2::TargetType T >
 fapi2::ReturnCode continue_cmd( const fapi2::Target<T>& i_target,
                                 const end_boundary i_end = end_boundary::DONT_CHANGE,
                                 const stop_conditions<MC>& i_stop = stop_conditions<MC>(stop_conditions<MC>::DONT_CHANGE),
@@ -1154,16 +1154,16 @@ fapi2::ReturnCode continue_cmd( const fapi2::Target<T>& i_target,
 
         l_program.change_end_boundary(i_end);
 
-        FAPI_TRY( mss::mcbist::load_addr_gen(i_target, l_program) );
+        FAPI_TRY( mss::mcbist::load_addr_gen<MC>(i_target, l_program) );
 
-        FAPI_TRY( mss::mcbist::load_config(i_target, l_program) );
+        FAPI_TRY( mss::mcbist::load_config<MC>(i_target, l_program) );
     }
 
     // Thresholds
     // According to API definition, 0 means don't change conditions
     if( i_stop != stop_conditions<MC>::DONT_CHANGE)
     {
-        FAPI_TRY( mss::mcbist::load_thresholds(i_target, i_stop) );
+        FAPI_TRY( mss::mcbist::load_thresholds<MC>(i_target, i_stop) );
     }
 
     // Setup speed
@@ -1176,7 +1176,7 @@ fapi2::ReturnCode continue_cmd( const fapi2::Target<T>& i_target,
     }
 
     // Tickle the resume from pause
-    FAPI_TRY( mss::mcbist::resume(i_target) );
+    FAPI_TRY( mss::mcbist::resume<MC>(i_target) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -1190,7 +1190,7 @@ fapi_try_exit:
 /// @param[in] i_target MC
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 fapi2::ReturnCode mss_async_polling_loop(const fapi2::Target<T>& i_target )
 {
     using ET = mss::mcbistMCTraits<MC>;
@@ -1241,7 +1241,7 @@ fapi_try_exit:
 /// @param[in] i_target MC
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 fapi2::ReturnCode mss_initialize_memory(const fapi2::Target<T>& i_target )
 {
     FAPI_INF("Start mss_initialize_memory for %s", mss::c_str(i_target));
@@ -1282,7 +1282,7 @@ fapi2::ReturnCode mss_initialize_memory(const fapi2::Target<T>& i_target )
     FAPI_TRY( mss::memdiags::sf_init<MC>(i_target, mss::mcbist::PATTERN_0) );
 
     // Polls for completion
-    FAPI_TRY(mss_async_polling_loop(i_target));
+    FAPI_TRY(mss_async_polling_loop<MC>(i_target));
 
     // Unmask firs after memdiags and turn off FIFO mode
     FAPI_TRY ( mss::unmask::after_memdiags<MC>( i_target ) );
@@ -1300,7 +1300,7 @@ fapi_try_exit:
 /// @param[in] i_target MC
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 fapi2::ReturnCode mss_background_scrub_helper( const fapi2::Target<T>& i_target )
 {
     FAPI_INF("Start mss_background_scrub_helper b on: %s", mss::c_str( i_target ));
@@ -1345,7 +1345,7 @@ fapi_try_exit:
 /// @param[in] i_address mcbist::address representing the address from which to start
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 fapi2::ReturnCode mss_firmware_background_scrub_helper( const fapi2::Target<T>& i_target,
         const stop_conditions<MC>& i_stop,
         const speed i_speed,

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -88,7 +88,7 @@ enum speed
 /// @tparam TT the mcbistTraits associated with T - derived
 /// @note Matches Nimbus MBSTRQ, but might be changed later for Centaur, or mapped.
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE , typename TT = mss::mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE , typename TT = mss::mcbistTraits<MC, T> >
 class stop_conditions
 {
     public:
@@ -721,7 +721,7 @@ constexpr uint64_t stop_conditions<MC, T, TT>::DONT_CHANGE;
 /// @tparam T the fapi2::TargetType - derived
 /// @tparam TT the mcbistTraits associated with T - derived
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE , typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE , typename TT = mcbistTraits<MC, T> >
 struct constraints
 {
     ///

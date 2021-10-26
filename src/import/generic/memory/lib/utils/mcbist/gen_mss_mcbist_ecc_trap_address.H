@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,7 +55,7 @@ namespace ecc
 /// @tparam T fapi2 Target Type defaults to fapi2::TARGET_TYPE_MCA or TARGET_TYPE_MEM_PORT
 /// @tparam TT traits type defaults to eccTraits<T>
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::FWMS_ADDR_TARGET_TYPE, typename TT = mss::eccTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::FWMS_ADDR_TARGET_TYPE, typename TT = mss::eccTraits<MC, T> >
 class trap_address
 {
     public:

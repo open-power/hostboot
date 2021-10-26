@@ -60,7 +60,7 @@ namespace mss
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
 /// @note  Frequency of this memory channel in MT/s (Mega Transfers per second)
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T>
+template< mss::mc_type MC, fapi2::TargetType T>
 fapi2::ReturnCode freq(const fapi2::Target<T>& i_target, uint64_t& o_value);
 
 ///
@@ -76,7 +76,7 @@ fapi2::ReturnCode freq(const fapi2::Target<T>& i_target, uint64_t& o_value);
 /// @param[in] i_64B_per mss::YES if the command is 64B, mss::NO if it's 128B. Defaults to mss::YES
 /// @return the initial polling delay for this program in ns
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
+template< mss::mc_type MC, fapi2::TargetType T >
 inline uint64_t calculate_initial_delay(const fapi2::Target<T>& i_target,
                                         const uint64_t i_bytes,
                                         fapi2::ReturnCode& o_rc,
@@ -101,7 +101,7 @@ inline uint64_t calculate_initial_delay(const fapi2::Target<T>& i_target,
 /// @param[out] o_data the register data
 /// @return fapi2::fapi2_rc_success if ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode read_mcbfirmask( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
     o_data = 0;
@@ -123,7 +123,7 @@ fapi_try_exit:
 /// @param[in] i_data the register data
 /// @return fapi2::fapi2_rc_success if ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode write_mcbfirmask( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
     FAPI_TRY( fapi2::putScom(i_target, TT::MCBFIRMASK_REG, i_data ), "%s failed to write MCBISTFIRMASK regiser",
@@ -143,7 +143,7 @@ fapi_try_exit:
 /// @param[out] o_data the register data
 /// @return fapi2::fapi2_rc_success if ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode read_mcbfirq( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
     o_data = 0;
@@ -165,7 +165,7 @@ fapi_try_exit:
 /// @param[in] i_data the register data
 /// @return fapi2::fapi2_rc_success if ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode write_mcbfirq( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
     FAPI_TRY( fapi2::putScom(i_target, TT::MCBFIRQ_REG, i_data ), "%s failed to write MCBISTFIRQ regiser",
@@ -179,12 +179,12 @@ fapi_try_exit:
 ///
 /// @brief Sets the contents of MCBCFGQ_CFG_RESET_CNTS_START_OF_RANK
 /// @tparam MC the mc type of the T
-/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCBIST
+/// @tparam T fapi2 Target Type - defaults to mss::mcbistMCTraits<MC>::MC_TARGET_TYPE
 /// @tparam TT traits type defaults to mcbistTraits<MC, T>
 /// @param[in,out] io_data the value of the register
 /// @param[in] i_state the state to write into the enable
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = DEFAULT_MC_TARGET, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
 inline void set_reset_cnts_start_of_rank( fapi2::buffer<uint64_t>& io_data, const mss::states i_state )
 {
     io_data.writeBit<TT::CFG_RESET_CNTS_START_OF_RANK>(i_state == mss::states::ON);
@@ -194,12 +194,12 @@ inline void set_reset_cnts_start_of_rank( fapi2::buffer<uint64_t>& io_data, cons
 ///
 /// @brief Sets the mask for program complete
 /// @tparam MC the mc type of the T
-/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCBIST
+/// @tparam T fapi2 Target Type - defaults to mss::mcbistMCTraits<MC>::MC_TARGET_TYPE
 /// @tparam TT traits type defaults to mcbistTraits<MC, T>
 /// @param[in,out] io_data the value of the register
 /// @param[in] i_state the state to write into the enable
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = fapi2::TARGET_TYPE_MCBIST, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
 inline void set_mcbist_program_complete_mask( fapi2::buffer<uint64_t>& io_data, const mss::states i_state )
 {
     io_data.writeBit<TT::MCB_PROGRAM_COMPLETE_MASK>(i_state == mss::states::ON);
@@ -209,12 +209,12 @@ inline void set_mcbist_program_complete_mask( fapi2::buffer<uint64_t>& io_data, 
 ///
 /// @brief Sets the mask for WAT debug ATTN
 /// @tparam MC the mc type of the T
-/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCBIST
+/// @tparam T fapi2 Target Type - defaults to mss::mcbistMCTraits<MC>::MC_TARGET_TYPE
 /// @tparam TT traits type defaults to mcbistTraits<MC, T>
 /// @param[in,out] io_data the value of the register
 /// @param[in] i_state the state to write into the enable
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = fapi2::TARGET_TYPE_MCBIST, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
 inline void set_mcbist_wat_debug_attn_mask( fapi2::buffer<uint64_t>& io_data, const mss::states i_state )
 {
     io_data.writeBit<TT::MCB_WAT_DEBUG_ATTN_MASK>(i_state == mss::states::ON);
@@ -224,11 +224,11 @@ inline void set_mcbist_wat_debug_attn_mask( fapi2::buffer<uint64_t>& io_data, co
 ///
 /// @brief Clears the program complete and WAT debug ATTN
 /// @tparam MC the mc type of the T
-/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCBIST
+/// @tparam T fapi2 Target Type - defaults to mss::mcbistMCTraits<MC>::MC_TARGET_TYPE
 /// @tparam TT traits type defaults to mcbistTraits<MC, T>
 /// @param[in,out] io_data the value of the register
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = fapi2::TARGET_TYPE_MCBIST, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
 inline void clear_mcbist_program_complete( fapi2::buffer<uint64_t>& io_data )
 {
     io_data.writeBit<TT::MCB_PROGRAM_COMPLETE>(mss::states::OFF);
@@ -239,12 +239,12 @@ inline void clear_mcbist_program_complete( fapi2::buffer<uint64_t>& io_data )
 ///
 /// @brief Gets the contents of MCBCFGQ_CFG_RESET_CNTS_START_OF_RANK
 /// @tparam MC the mc type of the T
-/// @tparam T fapi2 Target Type - defaults to MC_TARGET_TYPE
+/// @tparam T fapi2 Target Type - defaults to mss::mcbistMCTraits<MC>::MC_TARGET_TYPE
 /// @tparam TT traits type defaults to mcbistTraits<MC, T>
 /// @param[in] i_data the value of the register
 /// @param[out] o_state the state read out of the register field
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = DEFAULT_MC_TARGET, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
 inline void get_reset_cnts_start_of_rank( const fapi2::buffer<uint64_t> i_data, mss::states& o_state )
 {
     o_state = i_data.getBit<TT::CFG_RESET_CNTS_START_OF_RANK>() ? mss::states::ON : mss::states::OFF;
@@ -254,12 +254,12 @@ inline void get_reset_cnts_start_of_rank( const fapi2::buffer<uint64_t> i_data, 
 ///
 /// @brief Gets the contents of the program complete
 /// @tparam MC the mc type of the T
-/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCBIST
+/// @tparam T fapi2 Target Type - defaults to mss::mcbistMCTraits<MC>::MC_TARGET_TYPE
 /// @tparam TT traits type defaults to mcbistTraits<MC, T>
 /// @param[in] i_data the value of the register
 /// @param[out] o_state the state read out of the register field
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = fapi2::TARGET_TYPE_MCBIST, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
 inline void get_mcbist_program_complete_mask( const fapi2::buffer<uint64_t> i_data, mss::states& o_state )
 {
     o_state = i_data.getBit<TT::MCB_PROGRAM_COMPLETE>() ? mss::states::HIGH : mss::states::LOW;
@@ -269,12 +269,12 @@ inline void get_mcbist_program_complete_mask( const fapi2::buffer<uint64_t> i_da
 ///
 /// @brief Gets the contents of MCBCFGQ_CFG_RESET_CNTS_START_OF_RANK
 /// @tparam MC the mc type of the T
-/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCBIST
+/// @tparam T fapi2 Target Type - defaults to mss::mcbistMCTraits<MC>::MC_TARGET_TYPE
 /// @tparam TT traits type defaults to mcbistTraits<MC, T>
 /// @param[in] i_data the value of the register
 /// @param[out] o_state the state read out of the register bit
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = fapi2::TARGET_TYPE_MCBIST, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
 inline void get_mcbist_wat_debug_attn_mask( const fapi2::buffer<uint64_t> i_data, mss::states& o_state )
 {
     o_state = i_data.getBit<TT::MCB_WAT_DEBUG_ATTN>() ? mss::states::HIGH : mss::states::LOW;
@@ -292,7 +292,7 @@ namespace mcbist
 /// @tparam TT the mcbistTraits associated with T
 /// @brief encapsulation of an MCBIST subtest.
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE , typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE , typename TT = mcbistTraits<MC, T> >
 class subtest_t
 {
     public:
@@ -540,7 +540,7 @@ class subtest_t
 /// @note Turns on ECC mode for the returned subtest - caller can turn it off
 /// @note Configures for start/end address select bit as address config register 0
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE , typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE , typename TT = mcbistTraits<MC, T> >
 inline subtest_t<MC, T, TT> write_subtest()
 {
     // Starts life full of 0's
@@ -576,7 +576,7 @@ inline subtest_t<MC, T, TT> write_subtest()
 /// @note Turns on ECC mode for the returned subtest - caller can turn it off
 /// @note Configures for start/end address select bit as address config register 0
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
 inline subtest_t<MC, T, TT> alter_subtest()
 {
     // Starts life full of 0's
@@ -610,7 +610,7 @@ inline subtest_t<MC, T, TT> alter_subtest()
 /// @note Turns on ECC mode for the returned subtest - caller can turn it off
 /// @note Configures for start/end address select bit as address config register 0
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
 inline subtest_t<MC, T, TT> display_subtest()
 {
     // Starts life full of 0's
@@ -644,7 +644,7 @@ inline subtest_t<MC, T, TT> display_subtest()
 /// @note Turns on ECC mode for the returned subtest - caller can turn it off
 /// @note Configures for start/end address select bit as address config register 0
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
 inline subtest_t<MC, T, TT> scrub_subtest()
 {
     // Starts life full of 0's
@@ -678,7 +678,7 @@ inline subtest_t<MC, T, TT> scrub_subtest()
 /// @note Turns on ECC mode for the returned subtest - caller can turn it off
 /// @note Configures for start/end address select bit as address config register 0
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
 inline subtest_t<MC, T, TT> steer_subtest()
 {
     // Starts life full of 0's
@@ -712,7 +712,7 @@ inline subtest_t<MC, T, TT> steer_subtest()
 /// @note Turns on ECC mode for the returned subtest - caller can turn it off
 /// @note Configures for start/end address select bit as address config register 0
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
 inline subtest_t<MC, T, TT> ccsexec_subtest()
 {
     // Starts life full of 0's
@@ -744,7 +744,7 @@ inline subtest_t<MC, T, TT> ccsexec_subtest()
 /// @note Turns on ECC mode for the returned subtest - caller can turn it off
 /// @note Configures for start/end address select bit as address config register 0
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
 inline subtest_t<MC, T, TT> read_subtest()
 {
     // Starts life full of 0's
@@ -778,7 +778,7 @@ inline subtest_t<MC, T, TT> read_subtest()
 /// @note Turns on ECC mode for the returned subtest - caller can turn it off
 /// @note Configures for start/end address select bit as address config register 0
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
 inline subtest_t<MC, T, TT> read_write_subtest()
 {
     // Starts life full of 0's
@@ -813,7 +813,7 @@ inline subtest_t<MC, T, TT> read_write_subtest()
 /// @note Turns on ECC mode for the returned subtest - caller can turn it off
 /// @note Configures for start/end address select bit as address config register 0
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
 inline subtest_t<MC, T, TT> write_read_subtest()
 {
     // Starts life full of 0's
@@ -847,7 +847,7 @@ inline subtest_t<MC, T, TT> write_read_subtest()
 /// @note Turns on ECC mode for the returned subtest - caller can turn it off
 /// @note Configures for start/end address select bit as address config register 0
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
 inline subtest_t<MC, T, TT> read_write_read_subtest()
 {
     // Starts life full of 0's
@@ -881,7 +881,7 @@ inline subtest_t<MC, T, TT> read_write_read_subtest()
 /// @note Turns on ECC mode for the returned subtest - caller can turn it off
 /// @note Configures for start/end address select bit as address config register 0
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
 inline subtest_t<MC, T, TT> read_read_write_subtest()
 {
     // Starts life full of 0's
@@ -915,7 +915,7 @@ inline subtest_t<MC, T, TT> read_read_write_subtest()
 /// @note Turns on ECC mode for the returned subtest - caller can turn it off
 /// @note Configures for start/end address select bit as address config register 0
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
 inline subtest_t<MC, T, TT> read_write_write_subtest()
 {
     // Starts life full of 0's
@@ -949,7 +949,7 @@ inline subtest_t<MC, T, TT> read_write_write_subtest()
 /// @note Turns on ECC mode for the returned subtest - caller can turn it off
 /// @note Configures for start/end address select bit as address config register 0
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
 inline subtest_t<MC, T, TT> random_subtest()
 {
     // Starts life full of 0's
@@ -984,7 +984,7 @@ inline subtest_t<MC, T, TT> random_subtest()
 /// @note Turns on ECC mode for the returned subtest - caller can turn it off
 /// @note Configures for start/end address select bit as address config register 0
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
 inline subtest_t<MC, T, TT> goto_subtest( const uint64_t i_jump_to )
 {
     // Starts life full of 0's
@@ -1008,7 +1008,7 @@ inline subtest_t<MC, T, TT> goto_subtest( const uint64_t i_jump_to )
 /// @note Turns on ECC mode for the returned subtest - caller can turn it off
 /// @note Configures for start/end address select bit as address config register 0
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
 inline subtest_t<MC, T, TT> refresh_subtest( )
 {
     // Starts life full of 0's
@@ -1031,7 +1031,7 @@ inline subtest_t<MC, T, TT> refresh_subtest( )
 /// @return mss::mcbist::subtest_t
 /// @note Configures for start/end address select bit as address config register 0
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
 inline subtest_t<MC, T, TT> init_subtest()
 {
     return write_subtest<MC, T, TT>();
@@ -1080,7 +1080,7 @@ inline subtest_t<MC, T, TT> init_subtest()
 /// - ENABLE_SPEC_ATTN - disabled
 /// - ENABLE_HOST_ATTN - enabled
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE , typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE , typename TT = mcbistTraits<MC, T> >
 class program
 {
     private:
@@ -1997,7 +1997,7 @@ class program
 
                         constexpr uint64_t l_seconds = SEC_IN_HOUR * BG_SCRUB_IN_HOURS;
 
-                        FAPI_TRY( mss::freq(i_target, l_freq) );
+                        FAPI_TRY( mss::freq<MC>(i_target, l_freq) );
                         FAPI_TRY( mss::eff_memory_size<MC>(i_target, l_size) );
 
                         FAPI_TRY( calculate_min_cmd_gap(i_target, l_freq, l_size, l_min_cmd_gap, l_timebase) );
@@ -2573,7 +2573,7 @@ class program
 /// @param[in] i_program the mcbist::program
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode load_config( const fapi2::Target<T>& i_target, const mcbist::program<MC>& i_program )
 {
     FAPI_INF("%s loading MCBIST Config 0x%016lx", mss::c_str(i_target), i_program.iv_config);
@@ -2610,7 +2610,7 @@ fapi_try_exit:
 /// @param[in] i_program the mcbist::program
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode load_control( const fapi2::Target<T>& i_target, const mcbist::program<MC>& i_program )
 {
     FAPI_INF("loading MCBIST Control 0x%016lx for %s", i_program.iv_control, mss::c_str(i_target));
@@ -2627,7 +2627,7 @@ inline fapi2::ReturnCode load_control( const fapi2::Target<T>& i_target, const m
 /// @param[in] i_program the mcbist::program
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode load_addr_gen( const fapi2::Target<T>& i_target, const mcbist::program<MC>& i_program )
 {
     FAPI_INF("loading MCBIST Address Generation 0x%016lx for %s", i_program.iv_addr_gen, mss::c_str(i_target));
@@ -2647,7 +2647,7 @@ inline fapi2::ReturnCode load_addr_gen( const fapi2::Target<T>& i_target, const 
 /// @note Only the right-most 37 bits of the start/end are used.
 /// @warn if address counting mode is enabled in the MCBIST program, these bits are start, len
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode config_address_range( const fapi2::Target<T>& i_target,
         const uint64_t i_start,
         const uint64_t i_end,
@@ -2683,7 +2683,7 @@ fapi_try_exit:
 /// @note Only the right-most 37 bits of the start/end are used.
 /// @warn if address counting mode is enabled in the MCBIST program, these bits are start, len
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode config_address_range0( const fapi2::Target<T>& i_target,
         const uint64_t i_start,
         const uint64_t i_end )
@@ -2704,7 +2704,7 @@ inline fapi2::ReturnCode config_address_range0( const fapi2::Target<T>& i_target
 /// @note Only the right-most 37 bits of the start/end are used.
 /// @warn if address counting mode is enabled in the MCBIST program, these bits are start, len
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode config_address_range1( const fapi2::Target<T>& i_target,
         const uint64_t i_start,
         const uint64_t i_end )
@@ -2725,7 +2725,7 @@ inline fapi2::ReturnCode config_address_range1( const fapi2::Target<T>& i_target
 /// @note Only the right-most 37 bits of the start/end are used.
 /// @warn if address counting mode is enabled in the MCBIST program, these bits are start, len
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode config_address_range2( const fapi2::Target<T>& i_target,
         const uint64_t i_start,
         const uint64_t i_end )
@@ -2745,7 +2745,7 @@ inline fapi2::ReturnCode config_address_range2( const fapi2::Target<T>& i_target
 /// @return FAPI2_RC_SUCCSS iff ok
 /// @note Only the right-most 37 bits of the start/end are used.
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode config_address_range3( const fapi2::Target<T>& i_target,
         const uint64_t i_start,
         const uint64_t i_end )
@@ -2762,7 +2762,7 @@ inline fapi2::ReturnCode config_address_range3( const fapi2::Target<T>& i_target
 /// @param[in] i_start_stop bool START for starting, STOP otherwise
 /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff OK
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode start_stop( const fapi2::Target<T>& i_target, const bool i_start_stop )
 {
     // This is the same as the CCS start_stop ... perhaps we need one template for all
@@ -2785,7 +2785,7 @@ fapi_try_exit:
 /// @param[in] i_target the target to effect
 /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff OK
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode resume( const fapi2::Target<T>& i_target )
 {
     fapi2::buffer<uint64_t> l_buf;
@@ -2805,7 +2805,7 @@ fapi_try_exit:
 /// @param[in] i_target the target to effect
 /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff OK
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode reset_errors( const fapi2::Target<T>& i_target )
 {
     fapi2::buffer<uint64_t> l_buf;
@@ -2826,7 +2826,7 @@ fapi_try_exit:
 /// @param[out] o_in_progress - false if no operation is in progress
 /// @return FAPI2_RC_SUCCESS if getScom succeeded
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode in_progress( const fapi2::Target<T>& i_target, bool& o_in_progress )
 {
     fapi2::buffer<uint64_t> l_buf;
@@ -2848,7 +2848,7 @@ fapi_try_exit:
 /// @param[in] i_program the mcbist::program
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template<  mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 fapi2::ReturnCode load_mcbmr( const fapi2::Target<T>& i_target, const mcbist::program<MC>& i_program )
 {
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
@@ -2928,7 +2928,7 @@ fapi_try_exit:
 /// @param[in] the mcbist::program
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template<  mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 fapi2::ReturnCode load_mcbamr( const fapi2::Target<T>& i_target, const mcbist::program<MC>& i_program )
 {
     // Vector? Can decide when we fully understand the methods to twiddle the maps themselves. BRS
@@ -2958,7 +2958,7 @@ fapi_try_exit:
 /// @param[in] the mcbist::program
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template<  mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode load_mcbparm( const fapi2::Target<T>& i_target, const mcbist::program<MC>& i_program )
 {
     FAPI_INF("load MCBIST parameter register: 0x%016lx for %s", i_program.iv_parameters, mss::c_str(i_target));
@@ -2973,7 +2973,7 @@ inline fapi2::ReturnCode load_mcbparm( const fapi2::Target<T>& i_target, const m
 /// @param[in] i_target fapi2::Target<T> of the MCBIST
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 ///
-template<  mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode clear_errors( const fapi2::Target<T> i_target )
 {
     // TK: Clear the more detailed errors checked above
@@ -3070,7 +3070,7 @@ fapi2::ReturnCode load_eccspare_pattern( const fapi2::Target<T>& i_target, const
 /// @note this overload disappears when we have real patterns.
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template<  mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode load_pattern( const fapi2::Target<T>& i_target, const pattern& i_pattern, const bool i_invert )
 {
     uint64_t l_address = TT::PATTERN0_REG;
@@ -3153,7 +3153,7 @@ fapi_try_exit:
 /// @param[in] i_index the pattern index
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template<  mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode load_pattern( const fapi2::Target<T>& i_target, const uint64_t i_pattern )
 {
     if (NO_PATTERN != i_pattern)
@@ -3162,7 +3162,7 @@ inline fapi2::ReturnCode load_pattern( const fapi2::Target<T>& i_target, const u
         uint64_t l_pattern_index = 0;
 
         FAPI_TRY(get_pattern(i_pattern, l_pattern_index, l_invert));
-        return load_pattern(i_target, patterns[l_pattern_index], l_invert);
+        return load_pattern<MC>(i_target, patterns[l_pattern_index], l_invert);
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -3180,10 +3180,10 @@ fapi_try_exit:
 /// @param[in] i_program the mcbist::program
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template<  mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode load_pattern( const fapi2::Target<T>& i_target, const mcbist::program<MC>& i_program )
 {
-    return load_pattern(i_target, i_program.iv_pattern);
+    return load_pattern<MC>(i_target, i_program.iv_pattern);
 }
 
 ///
@@ -3197,7 +3197,7 @@ inline fapi2::ReturnCode load_pattern( const fapi2::Target<T>& i_target, const m
 /// @note this overload disappears when we have real patterns.
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template<  mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 fapi2::ReturnCode load_maint_pattern( const fapi2::Target<T>& i_target, const pattern& i_pattern, const bool i_invert )
 {
     // The scom registers are in the port target. PT: port traits
@@ -3273,7 +3273,7 @@ fapi_try_exit:
 /// @param[in] i_index the pattern index
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template<  mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode load_maint_pattern( const fapi2::Target<T>& i_target, uint64_t i_pattern )
 {
     if (NO_PATTERN != i_pattern)
@@ -3282,7 +3282,7 @@ inline fapi2::ReturnCode load_maint_pattern( const fapi2::Target<T>& i_target, u
         uint64_t l_pattern_index = 0;
 
         FAPI_TRY(get_pattern(i_pattern, l_pattern_index, l_invert));
-        return load_maint_pattern(i_target, patterns[l_pattern_index], l_invert);
+        return load_maint_pattern<MC>(i_target, patterns[l_pattern_index], l_invert);
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -3300,10 +3300,10 @@ fapi_try_exit:
 /// @param[in] i_program the mcbist::program
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template<  mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode load_maint_pattern( const fapi2::Target<T>& i_target, const mcbist::program<MC>& i_program )
 {
-    return load_maint_pattern(i_target, i_program.iv_pattern);
+    return load_maint_pattern<MC>(i_target, i_program.iv_pattern);
 }
 
 
@@ -3319,7 +3319,7 @@ inline fapi2::ReturnCode load_maint_pattern( const fapi2::Target<T>& i_target, c
 /// @note this overload disappears when we have real patterns.
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template<  mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 fapi2::ReturnCode load_random24b_seeds( const fapi2::Target<T>& i_target,
                                         const random24_data_seed& i_random24_data_seed,
                                         const random24_seed_map& i_random24_map,
@@ -3417,7 +3417,7 @@ fapi_try_exit:
 /// @param[in] i_seed_map the 24b random data map index
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template<  mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode load_random24b_seeds( const fapi2::Target<T>& i_target, uint64_t i_data_seed,
         uint64_t i_seed_map )
 {
@@ -3443,7 +3443,8 @@ inline fapi2::ReturnCode load_random24b_seeds( const fapi2::Target<T>& i_target,
             i_data_seed -= 1;
         }
 
-        return load_random24b_seeds(i_target, random24_data_seeds[i_data_seed / 2], random24_seed_maps[i_seed_map], l_invert);
+        return load_random24b_seeds<MC>(i_target, random24_data_seeds[i_data_seed / 2], random24_seed_maps[i_seed_map],
+                                        l_invert);
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -3461,10 +3462,10 @@ fapi_try_exit:
 /// @param[in] i_program the mcbist::program
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template<  mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode load_random24b_seeds( const fapi2::Target<T>& i_target, const mcbist::program<MC>& i_program )
 {
-    return load_random24b_seeds(i_target, i_program.iv_random24_data_seed, i_program.iv_random24_seed_map);
+    return load_random24b_seeds<MC>(i_target, i_program.iv_random24_data_seed, i_program.iv_random24_seed_map);
 }
 
 ///
@@ -3476,7 +3477,7 @@ inline fapi2::ReturnCode load_random24b_seeds( const fapi2::Target<T>& i_target,
 /// @param[in] i_program the mcbist::program
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template<  mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode load_fifo_mode( const fapi2::Target<T>& i_target, const mcbist::program<MC>& i_program )
 {
     // Checks if FIFO mode is required by checking all subtests
@@ -3511,16 +3512,16 @@ fapi_try_exit:
 /// @param[in] i_program the mcbist::program
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template<  mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode load_data_config( const fapi2::Target<T>& i_target, const mcbist::program<MC>& i_program )
 {
     // First load the data pattern registers
     FAPI_INF("Loading the data pattern seeds for %s!", mss::c_str(i_target));
-    FAPI_TRY( mss::mcbist::load_pattern(i_target, i_program.iv_pattern) );
+    FAPI_TRY( mss::mcbist::load_pattern<MC>(i_target, i_program.iv_pattern) );
 
     // Load the 24b random data pattern seeds registers
     FAPI_INF("Loading the 24b Random data pattern seeds for %s!", mss::c_str(i_target));
-    FAPI_TRY( mss::mcbist::load_random24b_seeds(i_target, i_program.iv_random24_data_seed,
+    FAPI_TRY( mss::mcbist::load_random24b_seeds<MC>(i_target, i_program.iv_random24_data_seed,
               i_program.iv_random24_seed_map) );
 
     // Load the maint data pattern into the Maint entry in the RMW buffer
@@ -3528,7 +3529,7 @@ inline fapi2::ReturnCode load_data_config( const fapi2::Target<T>& i_target, con
     // The load takes 33 Putscoms to load 16 64B registers, might slow down mcbist programs that
     // don't need the RMW buffer maint entry loaded
     FAPI_INF("Loading the maint data pattern into the RMW buffer for %s!", mss::c_str(i_target));
-    FAPI_TRY( mss::mcbist::load_maint_pattern(i_target, i_program.iv_pattern) );
+    FAPI_TRY( mss::mcbist::load_maint_pattern<MC>(i_target, i_program.iv_pattern) );
 
     FAPI_INF("Loading the data rotate config and seeds for %s!", mss::c_str(i_target));
     FAPI_TRY( fapi2::putScom(i_target, TT::DATA_ROTATE_CNFG_REG, i_program.iv_data_rotate_cnfg) );
@@ -3548,7 +3549,7 @@ fapi_try_exit:
 /// @param[in] i_program the mcbist::program
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template<  mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 fapi2::ReturnCode load_data_compare_mask( const fapi2::Target<T>& i_target,
         const mcbist::program<MC>& i_program )
 {
@@ -3578,7 +3579,7 @@ fapi_try_exit:
 /// @param[in] i_thresholds the thresholds
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template<  mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode load_thresholds( const fapi2::Target<T>& i_target, const uint64_t i_thresholds )
 {
     FAPI_INF("load MCBIST threshold register: 0x%016lx for %s", i_thresholds, mss::c_str(i_target) );
@@ -3594,10 +3595,10 @@ inline fapi2::ReturnCode load_thresholds( const fapi2::Target<T>& i_target, cons
 /// @param[in] i_program the program containing the thresholds
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template<  mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode load_thresholds( const fapi2::Target<T>& i_target, const mcbist::program<MC>& i_program )
 {
-    return load_thresholds(i_target, i_program.iv_thresholds);
+    return load_thresholds<MC>(i_target, i_program.iv_thresholds);
 }
 
 ///
@@ -3617,7 +3618,7 @@ inline fapi2::ReturnCode load_thresholds( const fapi2::Target<T>& i_target, cons
 /// (NUM_COMPARE_LOG_ENTRIES for false, NUM_COMPARE_INFO_ENTRIES for true) but user may read more than
 /// that since reads work in a circular buffer fashion
 ///
-template<  mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 fapi2::ReturnCode read_rmw_array(const fapi2::Target<T>& i_target,
                                  const uint64_t i_start_addr,
                                  const uint64_t i_num_entries,
@@ -3694,7 +3695,7 @@ fapi_try_exit:
 /// (NUM_COMPARE_LOG_ENTRIES for false, NUM_COMPARE_INFO_ENTRIES for true) but user may read more than
 /// that since reads work in a circular buffer fashion
 ///
-template<  mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode read_rmw_array(const fapi2::Target<T>& i_target,
                                         const uint64_t i_start_addr,
                                         const uint64_t i_num_entries,
@@ -3702,7 +3703,7 @@ inline fapi2::ReturnCode read_rmw_array(const fapi2::Target<T>& i_target,
                                         std::vector< fapi2::buffer<uint64_t> >& o_data)
 {
     std::vector< fapi2::buffer<uint64_t> > l_temp;
-    return read_rmw_array(i_target, i_start_addr, i_num_entries, i_roll_over_for_compare_mode, o_data, l_temp);
+    return read_rmw_array<MC>(i_target, i_start_addr, i_num_entries, i_roll_over_for_compare_mode, o_data, l_temp);
 }
 
 ///
@@ -3713,7 +3714,7 @@ inline fapi2::ReturnCode read_rmw_array(const fapi2::Target<T>& i_target,
 /// @param[in,out] io_program the mcbist::program
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template<  mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
+template<  mss::mc_type MC, fapi2::TargetType T >
 fapi2::ReturnCode configure_broadcast_mode(const fapi2::Target<T>& i_target, mcbist::program<MC>& io_program);
 
 ///
@@ -3728,7 +3729,7 @@ fapi2::ReturnCode configure_broadcast_mode(const fapi2::Target<T>& i_target, mcb
 /// @param[out] o_ecc_data vector of ecc data
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template<  mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 fapi2::ReturnCode read_rb_array(const fapi2::Target<T>& i_target,
                                 const uint64_t i_start_addr,
                                 const uint64_t i_num_entries,
@@ -3747,7 +3748,7 @@ fapi2::ReturnCode read_rb_array(const fapi2::Target<T>& i_target,
 /// @param[out] o_data vector of output data
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template<  mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 fapi2::ReturnCode read_rb_array(const fapi2::Target<T>& i_target,
                                 const uint64_t i_start_addr,
                                 const uint64_t i_num_entries,
@@ -3766,7 +3767,7 @@ fapi2::ReturnCode read_rb_array(const fapi2::Target<T>& i_target,
 /// @param[in] i_program, the mcbist program which is executing
 /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff OK
 ///
-template<  mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 fapi2::ReturnCode poll( const fapi2::Target<T>& i_target, const program<MC>& i_program )
 {
     using ET = mss::mcbistMCTraits<MC>;
@@ -3838,10 +3839,10 @@ fapi_try_exit:
 /// @param[in] i_program the mcbist program to execute
 /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff OK
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 fapi2::ReturnCode clear_error_helper( const fapi2::Target<T>& i_target, const program<MC>& i_program )
 {
-    FAPI_TRY( clear_errors(i_target) );
+    FAPI_TRY( clear_errors<MC>(i_target) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -3856,7 +3857,7 @@ fapi_try_exit:
 /// @param[in] i_program the mcbist program to execute
 /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff OK
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T>, typename ET = mcbistMCTraits<MC> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T>, typename ET = mcbistMCTraits<MC> >
 fapi2::ReturnCode execute( const fapi2::Target<T>& i_target, const program<MC>& i_program )
 {
     fapi2::buffer<uint64_t> l_status;
@@ -3884,7 +3885,7 @@ fapi2::ReturnCode execute( const fapi2::Target<T>& i_target, const program<MC>& 
     FAPI_TRY( load_mcbparm<MC>(i_target, i_program) );
 
     // Slam the configured address maps down
-    FAPI_TRY( load_mcbamr( i_target, i_program) );
+    FAPI_TRY( load_mcbamr<MC>( i_target, i_program) );
 
     // Slam the config register down
     FAPI_TRY( load_config<MC>( i_target, i_program) );
@@ -3924,7 +3925,7 @@ fapi2::ReturnCode execute( const fapi2::Target<T>& i_target, const program<MC>& 
     // If the user asked for async mode, we can leave. Otherwise, poll and check for errors
     if (!i_program.iv_async)
     {
-        return mcbist::poll(i_target, i_program);
+        return mcbist::poll<MC>(i_target, i_program);
     }
 
 fapi_try_exit:
@@ -3938,14 +3939,15 @@ namespace ecc
 
 ///
 /// @brief Clear all MAINT.ECC counters
+/// @tparam MC the mc type of the T
 /// @tparam T the fapi2::TargetType - derived
 /// @param[in] i_target the fapi2 target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-template< fapi2::TargetType T >
+template< mss::mc_type MC, fapi2::TargetType T >
 inline fapi2::ReturnCode clear_all_counters( const fapi2::Target<T>& i_target )
 {
-    return ( mss::mcbist::reset_errors(i_target) );
+    return ( mss::mcbist::reset_errors<MC>(i_target) );
 }
 
 } // namespace ecc

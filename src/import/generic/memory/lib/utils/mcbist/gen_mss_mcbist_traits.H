@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,7 +49,7 @@ namespace mss
 /// @tparam MC the mc type
 /// @brief A MC to MC_TARGET_TYPE mapping
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE >
+template< mss::mc_type MC >
 class mcbistMCTraits;
 
 ///
@@ -58,7 +58,7 @@ class mcbistMCTraits;
 /// @tparam T the fapi2::TargetType - derived
 /// @brief a collection of traits associated with the MCBIST engine or hardware
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE>
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE>
 class mcbistTraits;
 
 }// mss
