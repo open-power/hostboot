@@ -38,6 +38,7 @@
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/trace.H>
 
+
 namespace TARGETING
 {
 
@@ -327,5 +328,211 @@ TARGETING::TargetHandleList getProcNVDIMMs( TARGETING::Target * i_proc )
 
     return o_nvdimmList;
 }
+
+#ifdef __HOSTBOOT_MODULE
+errlHndl_t getAttrMetadataPtr(void* i_targetingPtr,
+                              section_metadata_mem_layout_t*& o_metadataPtr)
+{
+    errlHndl_t l_errl = nullptr;
+    o_metadataPtr = nullptr;
+
+    do {
+
+    if(i_targetingPtr == nullptr)
+    {
+        TRACFCOMP(g_trac_targeting,
+                  ERR_MRK"getAttrMetadataPtr: Bad targeting pointer passed");
+        /*@
+         * @errortype
+         * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid   TARG_GET_ATTR_METADATA_PTR
+         * @reasoncode TARG_RC_BAD_TARGETING_PTR
+         * @devdesc    nullptr was passed as the targeting pointer
+         * @custdesc   Failure during the boot of the system
+         */
+        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                         TARG_GET_ATTR_METADATA_PTR,
+                                         TARG_RC_BAD_TARGETING_PTR,
+                                         0,
+                                         0,
+                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        break;
+    }
+
+    const TARGETING::TargetingHeader* l_targetingHeader =
+        reinterpret_cast<TARGETING::TargetingHeader*>(i_targetingPtr);
+
+    if(l_targetingHeader->eyeCatcher != TARGETING::PNOR_TARG_EYE_CATCHER)
+    {
+        TRACFCOMP(g_trac_targeting,
+                  ERR_MRK"getAttrMetadataPtr: Targeting header is incorrect. Expected 0x%x; actual 0x%x",
+                  TARGETING::PNOR_TARG_EYE_CATCHER,
+                  l_targetingHeader->eyeCatcher);
+        /*@
+         * @errortype
+         * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid   TARG_GET_ATTR_METADATA_PTR
+         * @reasoncode TARG_RC_BAD_EYECATCH
+         * @userdata1  Expected targeting eye catcher
+         * @userdata2  Actual eye catcher
+         * @devdesc    Incorrect pointer to targeting was passed
+         * @custdesc   Failure during the boot of the system
+         */
+        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                         TARG_GET_ATTR_METADATA_PTR,
+                                         TARG_RC_BAD_EYECATCH,
+                                         PNOR_TARG_EYE_CATCHER,
+                                         l_targetingHeader->eyeCatcher,
+                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        break;
+    }
+
+    const size_t l_sectionCount = l_targetingHeader->numSections;
+    const TargetingSection* l_sectionPtr =
+        reinterpret_cast<TargetingSection*>(
+            reinterpret_cast<uint8_t*>(i_targetingPtr) +
+            sizeof(TargetingHeader) +
+            l_targetingHeader->offsetToSections);
+
+    for(size_t i = 0; i < l_sectionCount; ++i, ++l_sectionPtr)
+    {
+        if(l_sectionPtr->sectionType == SECTION_TYPE_HB_METADATA)
+        {
+            o_metadataPtr = reinterpret_cast<section_metadata_mem_layout_t*>(
+                                reinterpret_cast<uint8_t*>(i_targetingPtr) +
+                                l_sectionPtr->sectionOffset);
+            break;
+        }
+    }
+
+    if(o_metadataPtr == nullptr)
+    {
+        TRACFCOMP(g_trac_targeting,
+                  ERR_MRK"getAttrMetadataPtr: Could not find metadata section");
+        /*@
+         * @errortype
+         * @severity   ERRORLOG::ERRL_SEV_INFORMATIONAL
+         * @moduleid   TARG_GET_ATTR_METADATA_PTR
+         * @reasoncode TARG_RC_NO_METADATA
+         * @userdata1  The number of sections included in the HBD image
+         * @devdesc    HBD metadata section was not found in targeting image
+         * @custdesc   Failure during the boot of the system
+         */
+        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL, // TODO RTC: 205059 change to unrecoverable once all pieces are merged
+                                         TARG_GET_ATTR_METADATA_PTR,
+                                         TARG_RC_NO_METADATA,
+                                         l_sectionCount,
+                                         0,
+                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        break;
+    }
+
+    } while(0);
+    return l_errl;
+}
+
+errlHndl_t parseAttrMetadataSection(section_metadata_mem_layout_t const* i_attrMetadataPtr,
+                                    attr_metadata_map& o_map)
+{
+    errlHndl_t l_errl = nullptr;
+
+    do {
+    if(i_attrMetadataPtr == nullptr)
+    {
+        TRACFCOMP(g_trac_targeting,
+                  ERR_MRK"parseAttrMetadataSection: nullptr passed for metadata section");
+        /*@
+         * @errortype
+         * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid TARG_PARSE_ATTR_METADATA
+         * @reasoncode TARG_RC_BAD_METADATA_PTR
+         * @devdesc nullptr passed for metadata section pointer
+         * @custdesc Failure during the boot of the system
+         */
+        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                         TARG_PARSE_ATTR_METADATA,
+                                         TARG_RC_BAD_METADATA_PTR,
+                                         0,
+                                         0,
+                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        break;
+    }
+    // First is the number of attributes in the section (uint32_t)
+    uint32_t const l_numAttrs = i_attrMetadataPtr->numAttrs;
+    // After are structs attributeId(uint32_t),size(uint32_t),persistency(uint8_t)
+    // TODO RTC: 205059 for some reason xmltohb.pl adds an additional byte in
+    // one of the data fields at the start of the section, which messes up the
+    // math here.
+    section_metadata_t const * l_sectionMetadata = reinterpret_cast<section_metadata_t const *>(
+                                                    reinterpret_cast<uint8_t const *>(i_attrMetadataPtr) + sizeof(l_numAttrs) + 1);
+
+
+    for(size_t i = 0; i < l_numAttrs; ++i, ++l_sectionMetadata)
+    {
+        o_map[l_sectionMetadata->attrId] = l_sectionMetadata->attrMetadata;
+    }
+    }while(0);
+
+    return l_errl;
+}
+
+errlHndl_t parseRWAttributeData(rw_attr_section_t const* i_rwAttributePtr,
+                                huid_rw_attrs_map& o_parsedData)
+{
+    errlHndl_t l_errl = nullptr;
+    do
+    {
+
+    if(i_rwAttributePtr == nullptr)
+    {
+        TRACFCOMP(g_trac_targeting,
+                  ERR_MRK"parseRWAttributeData: Bad RW Attribute Section pointer passed");
+        /*@
+         * @errortype
+         * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid   TARG_PARSE_RW_ATTR_DATA
+         * @reasoncode TARG_RC_BAD_RW_ATTR_PTR
+         * @devdesc    nullptr passed for RW attribute data pointer
+         * @custdesc   Failure during the boot of the system
+         */
+        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                         TARG_PARSE_RW_ATTR_DATA,
+                                         TARG_RC_BAD_RW_ATTR_PTR,
+                                         0,
+                                         0,
+                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        break;
+    }
+
+    // After the hash is the 4-byte number of attributes included
+    const uint32_t l_numAttributes = i_rwAttributePtr->numAttributes;
+    // Then the actual attribute data in format: attr hash, HUID, size, persistency, value
+    const rw_attr_memory_layout_t* l_attrDataPtr = &(i_rwAttributePtr->attrArray);
+
+    for(size_t i = 0; i < l_numAttributes; ++i)
+    {
+        o_parsedData[l_attrDataPtr->huid][l_attrDataPtr->attrHash].metadata.attrSize =
+                l_attrDataPtr->attrData.metadata.attrSize;
+        o_parsedData[l_attrDataPtr->huid][l_attrDataPtr->attrHash].metadata.attrPersistency =
+                l_attrDataPtr->attrData.metadata.attrPersistency;
+        // Make sure the vector has enough space to fit the value of the attr
+        o_parsedData[l_attrDataPtr->huid][l_attrDataPtr->attrHash].value.resize(l_attrDataPtr->attrData.metadata.attrSize);
+        memcpy(o_parsedData[l_attrDataPtr->huid][l_attrDataPtr->attrHash].value.data(),
+               &(l_attrDataPtr->attrData.valuePtr),
+               l_attrDataPtr->attrData.metadata.attrSize);
+
+        // Compute the next attribute pointer. We need to skip (size of the
+        // attribute) bytes over the value of the current attribute.
+        l_attrDataPtr = reinterpret_cast<const rw_attr_memory_layout_t*>(
+                            reinterpret_cast<const uint8_t*>(l_attrDataPtr) +
+                            sizeof(rw_attr_memory_layout_t) +
+                            l_attrDataPtr->attrData.metadata.attrSize - 1);
+    }
+    } while(0);
+
+    return l_errl;
+}
+
+#endif
 
 } // end namespace TARGETING

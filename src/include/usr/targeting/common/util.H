@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,13 @@
  */
 
 #include <targeting/common/attributes.H>
+
+#ifdef __HOSTBOOT_MODULE
+#include <map>
+#include <pnortargeting.H>
+#include <errl/errlentry.H>
+#include <targeting/common/targreasoncodes.H>
+#endif
 
 namespace TARGETING
 {
@@ -213,6 +220,141 @@ typedef union
 void extractGroupAndChip(const topoId_t i_topologyId,
                          groupId_t& o_group,
                          chipId_t& o_chip);
+
+#ifdef __HOSTBOOT_MODULE
+
+/**
+ * @brief The structure to hold the metadata of an attribute: its
+ *        size and persistency.
+ */
+typedef struct
+{
+    uint32_t attrSize;
+    SECTION_TYPE attrPersistency; // Persistency takes the same values as the
+                                  // targeting section types, so we can reuse
+                                  // the section type enum here.
+} __attribute__((packed)) attr_metadata_t;
+
+/**
+ * @brief The structure that holds the attribute ID in addition to
+ *        its metadata.
+ */
+typedef struct
+{
+    uint32_t attrId;
+    attr_metadata_t attrMetadata;
+} __attribute__((packed)) section_metadata_t;
+
+/**
+ * @brief The structure represents the memory layout of the metadata section.
+ *        The metadata section starts with the number of attributes included
+ *        followed by each attribute's metadata as defined above.
+ */
+typedef struct
+{
+    uint32_t numAttrs;
+    section_metadata_t attrMetadata;
+} __attribute__((packed)) section_metadata_mem_layout_t;
+
+/**
+ * @brief The structure that contains the metadata of an attribute
+ *        and its value in memory. This structure is used to help
+ *        map the memory contents of all RW attributes to data that
+ *        Hostboot can manipulate.
+ */
+typedef struct
+{
+    attr_metadata_t metadata;
+    uint8_t valuePtr; // The actual value of the attribute may be larger than
+                      // uint8_t. However, this struct can be overlayed on top
+                      // of memory and the address of this uint8_t will point
+                      // to the start of the value of the attribute, whose true
+                      // size we can fetch out of the metadata section.
+} __attribute__((packed)) rw_attr_t;
+
+/**
+ * @brief This structure matches the exact layout of each RW attribute's
+ *        data in memory. The memory layout of each RW attribute is
+ *        attribute hash, HUID, attribute size, attribute persistency,
+ *        attribute value.
+ */
+typedef struct
+{
+    uint32_t attrHash;
+    uint32_t huid;
+    rw_attr_t attrData;
+} __attribute__((packed)) rw_attr_memory_layout_t;
+
+/**
+ * @brief This structure holds the metadata + value of a RW attribute.
+ *        The usage of std::vector for the value of the attribute
+ *        simplifies memory allocation and management.
+ */
+typedef struct
+{
+    attr_metadata_t metadata;
+    std::vector<uint8_t>value;
+} rw_attr_data_t;
+
+/**
+ * @brief This structure represents the memory layout of the whole
+ *        RW attribute data section. The RW attribute data section
+ *        consists of the hash over the data, the number of attributes
+ *        included, followed by the list of all included attributes/data.
+ */
+typedef struct
+{
+    uint32_t dataHash;
+    uint32_t numAttributes;
+    rw_attr_memory_layout_t attrArray;
+} rw_attr_section_t;
+
+// Note that map access is not thread-safe, so the below data types
+// should be used in single-threaded environment or data access protection
+// needs to be guaranteed.
+// Map of attribute hash -> {size, persistency}
+using attr_metadata_map = std::map<uint32_t, attr_metadata_t>;
+// Map of attribute hash -> {size, persistency, value}
+using rw_attr_data_map = std::map<uint32_t, rw_attr_data_t>;
+// Map of HUID -> { hash -> {size, persistency, value} }
+using huid_rw_attrs_map = std::map<uint32_t, rw_attr_data_map>;
+
+/**
+ * @brief Returns the pointer to the attribute metadata section of the passed
+ *        targeting image.
+ *
+ * @param[in] i_targetingPtr the pointer to a valid targeting image
+ * @param[out] o_metadataPtr the pointer to the start of the attribute
+ *             metadata section. This pointer is nullified at the start
+ *             of the function and will be nullptr if the section is not
+ *             found.
+ * @return nullptr on success; non-nullptr on error
+ */
+ERRORLOG::ErrlEntry* getAttrMetadataPtr(void* i_targetingPtr, section_metadata_mem_layout_t*& o_metadataPtr);
+
+/**
+ * @brief Parses the input attribute metadata section into a map of format
+ *        attributeId : (size, persistency).
+ *
+ * @param[in] i_attrMetadataPtr the pointer to the beginning of the attribute
+ *            metadata section.
+ * @param[out] o_map the map of the format attributeId : (size, persistency)
+ * @return nullptr on success; non-nullptr on error
+ */
+ERRORLOG::ErrlEntry* parseAttrMetadataSection(section_metadata_mem_layout_t const* i_attrMetadataPtr, attr_metadata_map& o_map);
+
+/**
+ * @brief Parses the input RW attribute data partition (HBD_RW) into a map of
+ *        format HUID : (attribute ID : (size of attr, persistency of the attr, value of the attr)).
+ *
+ * @param[in] i_rwAttributePtr the pointer to a valid RW attribute data partition
+ * @param[out] o_parsedData the parsed data in a format described above
+ * @return nullptr on success; non-nullptr on error
+ */
+ERRORLOG::ErrlEntry* parseRWAttributeData(rw_attr_section_t const* i_rwAttributePtr, huid_rw_attrs_map& o_parsedData);
+#endif
+
+
 } // TARGETING
 
 #endif // __TARGETING_COMMON_UTIL_H

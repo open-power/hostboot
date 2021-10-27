@@ -1591,7 +1591,7 @@ namespace TARGETING
 {
     const uint32_t PNOR_TARG_EYE_CATCHER = 0x54415247;
 
-    enum SECTION_TYPE
+    enum SECTION_TYPE : uint8_t
     {
         // Targeting read-only section backed to PNOR.  Always the 0th section.
         SECTION_TYPE_PNOR_RO        = @{[SECTION_TYPE_PNOR_RO]},
