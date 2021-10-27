@@ -201,7 +201,7 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
         // OCC content
         memset (&l_occppb , 0, sizeof (OCCPstateParmBlock_t));
 
-        auto l_coreList  =  
+        auto l_coreList  =
         i_target.getChildren< fapi2::TARGET_TYPE_CORE >( fapi2::TARGET_STATE_FUNCTIONAL );
 
         if (l_coreList.size() == 0)
@@ -2401,11 +2401,6 @@ fapi2::ReturnCode PlatPmPPB::vpd_init( void )
             fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
         }
 
-        // Apply biased #W values if any
-        FAPI_IMP("Apply Biasing to #W");
-        FAPI_TRY(apply_pdw_biased_values(),
-                "apply_pdw_biased_values function failed");
-
         // Read #IQ data
         // if wof is disabled.. don't call IQ function
         if (is_wof_enabled())
@@ -2429,6 +2424,12 @@ fapi2::ReturnCode PlatPmPPB::vpd_init( void )
             FAPI_INF("Skipping IQ (IDDQ) Data as WOF is disabled");
             iv_wof_enabled = false;
         }
+
+        // Apply biased #W values if any (needs IQ Good Sort Cores)
+        FAPI_IMP("Apply Biasing to #W");
+        FAPI_TRY(apply_pdw_biased_values(),
+                "apply_pdw_biased_values function failed");
+
 
     } while(0);
 
@@ -3910,7 +3911,8 @@ fapi2::ReturnCode PlatPmPPB::apply_pdw_biased_values ()
             break;
         };
 
-        FAPI_INF("Apply Biasing to #W to all CF points. * indicates adjustment");
+        FAPI_INF("Apply Biasing to #W to all CF points using sort core count = %u. * indicates adjustment",
+                  iv_iddqt.good_normal_cores_per_sort);
 
         for (int i = 0; i < NUM_OP_POINTS; i++)
         {
@@ -3934,7 +3936,21 @@ fapi2::ReturnCode PlatPmPPB::apply_pdw_biased_values ()
                     {
                         case PDW_DELAY:
                             value = iv_poundW_data.entry[i].entry[j].ddsc.fields.insrtn_dely;
-                            adjust = iv_attrs.attr_dds_delay_adjust[i];
+                            adjust = 0;  // default to no adjustment
+
+                            // Use attribute indexes 0 to 3 to update CF4 - CF7 for 10BC and 15BC parts
+                            if (iv_iddqt.good_normal_cores_per_sort == 20 ||
+                                iv_iddqt.good_normal_cores_per_sort == 30)
+                            {
+                                if (i > 3)
+                                    adjust = iv_attrs.attr_dds_delay_adjust[i-4];
+                            }
+                            // Use attribute indexes 4 to 7 to update CF4 - CF7 for 12BC parts
+                            else if (iv_iddqt.good_normal_cores_per_sort == 24)
+                            {
+                                if (i > 3)
+                                    adjust = iv_attrs.attr_dds_delay_adjust[i];
+                            }
                             break;
                         case PDW_LARGE_DROOP:
                             value = iv_poundW_data.entry[i].entry[j].ddsc.fields.large_droop;

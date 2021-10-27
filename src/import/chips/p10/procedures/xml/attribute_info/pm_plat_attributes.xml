@@ -545,26 +545,30 @@
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
     Integer adjustment value applied to the #W DELAY value of the respective
-    curve fit (CF) point.
+    curve fit (CF) point that depends on the good sorted cores.
+
+    10BC/15BC is considered config A;  12BC is considered config B
 
     [Point] ->8 entries-:
-        0: CF0;
-        1: CF1;
-        2: CF2;
-        3: CF3;
-        4: CF4;
-        5: CF5;
-        6: CF6;
-        7: CF7;
-
-    Producer:MRW
+        0: 10BC/15BC CF4;
+        1: 10BC/15BC CF5;
+        2: 10BC/15BC CF6;
+        3: 10BC/15BC CF7;
+        4: 12BC CF4;
+        5: 12BC CF5;
+        6: 12BC CF6;
+        7: 12BC CF7;
 
     Consumer: p10_pstate_parameter_build
+
     </description>
     <valueType>int16</valueType>
     <array>8</array>
     <platInit/>
-    <initToZero/>
+    <!-- Idx 0 1 2 3 4 5 6 7  -->
+    <!-- CFG A A A A B B B B  -->
+    <!-- CF  4 5 6 7 4 5 6 7  -->
+    <default>0,2,2,2,0,2,2,4</default>
     <mrw/>
     <group>bias</group>
   </attribute>
@@ -586,8 +590,6 @@
         5: CF5;
         6: CF6;
         7: CF7;
-
-    Producer:MRW
 
     Consumer: p10_pstate_parameter_build
     </description>
@@ -617,13 +619,10 @@
         6: CF6;
         7: CF7;
 
-    Producer:MRW
-
     Consumer: p10_pstate_parameter_build
     </description>
     <valueType>int8</valueType>
     <array>8</array>
-    <platInit/>
     <initToZero/>
     <mrw/>
     <group>bias</group>
