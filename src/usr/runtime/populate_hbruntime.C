@@ -1032,8 +1032,6 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId,
                i_nodeId, i_master_node, i_skipHDAT );
     errlHndl_t l_elog = nullptr;
 
-    bool l_preVerLidMgrLock = false;
-
 #ifdef CONFIG_SECUREBOOT
     auto l_hbrtSecurelyLoaded = false;
 #endif
@@ -1708,48 +1706,15 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId,
                 }
             }
 
-            // Initialize Pre-Verified Lid manager
-            PreVerifiedLidMgr::initLock(l_prevDataAddr, l_prevDataSize,
-                                        i_nodeId);
-            l_preVerLidMgrLock = true;
-
-            // Handle all Pre verified PNOR sections
-            for (const auto & secIdPair : preVerifiedPnorSections)
+            // Initialize Pre-Verified Lid Manager, which is required to
+            // to process the MCL, then process the MCL and unlock the Pre-Verified
+            // Lid Manager.
+            if(TARGETING::is_phyp_load())
             {
-                // Skip RINGOVD section in POWERVM mode
-                // Skip loading WOFDATA in POWERVM mode due to its huge size;
-                // PHyp will just dynamically load it at runtime when requested.
-                if (   (   (secIdPair.first == PNOR::RINGOVD)
-                        || (secIdPair.first == PNOR::WOFDATA))
-                    && TARGETING::is_phyp_load())
-                {
-                    continue;
-                }
-
-                l_elog = hbResvLoadSecureSection(secIdPair.first,
-                                                 secIdPair.second);
-                if (l_elog)
-                {
-                    break;
-                }
-            }
-            if (l_elog)
-            {
-                break;
-            }
-
-            bool l_processMCL = INITSERVICE::spBaseServicesEnabled() &&
-                                TARGETING::is_phyp_load();
-
-#ifdef CONFIG_LOAD_LIDS_VIA_PLDM
-            l_processMCL = TARGETING::is_phyp_load();
-#endif
-
-            // Load lids from Master Container Lid Container in POWERVM mode
-            if (l_processMCL)
-            {
+                PreVerifiedLidMgr::initLock(l_prevDataAddr, l_prevDataSize,i_nodeId);
                 MCL::MasterContainerLidMgr l_mcl;
                 l_elog = l_mcl.processComponents();
+                PreVerifiedLidMgr::unlock();
                 if(l_elog)
                 {
                     break;
@@ -1842,12 +1807,6 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId,
         }
     }
 #endif
-
-    // If lock obtained, always unlock Pre verified lid manager
-    if (l_preVerLidMgrLock)
-    {
-        PreVerifiedLidMgr::unlock();
-    }
 
     TRACFCOMP( g_trac_runtime, EXIT_MRK"populate_HbRsvMem> l_elog=%.8X", ERRL_GETRC_SAFE(l_elog) );
     return(l_elog);

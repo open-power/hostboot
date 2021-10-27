@@ -427,22 +427,8 @@ const uint32_t * UtilLidMgr::getLidList(size_t * o_num)
 
 bool UtilLidMgr::lidInHbResvMem(const uint32_t i_lidId) const
 {
-    if( TARGETING::is_sapphire_load() &&
-        ((i_lidId == Util::OCC_LIDID) ||
-        (i_lidId == Util::OCC_CONTAINER_LIDID) ||
-        (i_lidId == Util::WOF_LIDID) ||
-        (i_lidId == Util::WOF_CONTAINER_LIDID) ||
-        (i_lidId == Util::P10_HCODE_LIDID) ||
-        (i_lidId == Util::HCODE_CONTAINER_LIDID) ||
-        (i_lidId == Util::HWREFIMG_RINGOVD_LIDID) ||
-        (i_lidId == Util::TARGETING_BINARY_LIDID)) )
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    // No lids are stored in hb reserved memory as of now
+    return false;
 }
 
 //------------------------------------------------------------------------
