@@ -578,7 +578,7 @@ class bad_bit_interface
         fapi2::ReturnCode record_bad_bits_interface( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 uint8_t (&o_bad_dq)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT]) const
         {
-            std::vector<mss::rank::info<>> l_rank_infos;
+            std::vector<mss::rank::info<mss::mc_type::EXPLORER>> l_rank_infos;
             FAPI_TRY(mss::rank::ranks_on_dimm(i_target, l_rank_infos));
 
             for(const auto& l_rank_info : l_rank_infos)

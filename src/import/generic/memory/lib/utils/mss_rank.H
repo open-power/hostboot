@@ -62,7 +62,7 @@ inline fapi2::ReturnCode phy_rank_swizzle_workaround(const fapi2::Target<T>& i_t
 /// @brief Rank traits class for variations depending on MC
 /// @tparam MC the memory controller type
 ///
-template <mss::mc_type MC = DEFAULT_MC_TYPE>
+template <mss::mc_type MC>
 class rankTraits;
 
 ///
@@ -70,7 +70,7 @@ class rankTraits;
 /// @tparam MC the memory controller type
 /// @tparam TT the class traits for the port
 ///
-template <mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = rankTraits<MC>>
+template <mss::mc_type MC, typename TT = rankTraits<MC>>
 class info
 {
 
@@ -107,7 +107,7 @@ class info
                         i_index, mss::c_str(i_dimm_target));
             // Targets
             iv_dimm_target = i_dimm_target;
-            iv_port_target = mss::find_target<DEFAULT_MEM_PORT_TARGET>(i_dimm_target);
+            iv_port_target = mss::find_target<TT::MEM_PORT_TARGET_TYPE>(i_dimm_target);
 
             // Ranks
             iv_dimm_rank = i_index;
@@ -125,7 +125,7 @@ class info
         /// @param[in] i_index port rank index 0-7
         /// @param[out] o_rc return code, FAPI2_RC_SUCCESS if no error
         ///
-        info(const fapi2::Target<DEFAULT_MEM_PORT_TARGET>& i_port_target, const uint8_t i_index, fapi2::ReturnCode& o_rc)
+        info(const fapi2::Target<TT::MEM_PORT_TARGET_TYPE>& i_port_target, const uint8_t i_index, fapi2::ReturnCode& o_rc)
         {
             o_rc = fapi2::FAPI2_RC_SUCCESS;
 
@@ -237,7 +237,7 @@ class info
         /// @brief Accessor for PORT target
         /// @return the port target associated with the rank
         ///
-        inline const fapi2::Target<DEFAULT_MEM_PORT_TARGET> get_port_target() const
+        inline const fapi2::Target<TT::MEM_PORT_TARGET_TYPE> get_port_target() const
         {
             return iv_port_target;
         }
@@ -275,7 +275,7 @@ class info
 
     private:
         fapi2::Target<fapi2::TARGET_TYPE_DIMM> iv_dimm_target;
-        fapi2::Target<DEFAULT_MEM_PORT_TARGET> iv_port_target;
+        fapi2::Target<TT::MEM_PORT_TARGET_TYPE> iv_port_target;
         uint8_t iv_dimm_rank;
         uint8_t iv_port_rank;
 
@@ -297,8 +297,8 @@ class info
 /// @param[out] o_vect vector of ranks
 /// @return FAPI2_RC_SUCCESS iff success
 ///
-template <mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = rankTraits<MC>>
-fapi2::ReturnCode ranks_on_port(const fapi2::Target<DEFAULT_MEM_PORT_TARGET>& i_port_target,
+template <mss::mc_type MC, typename TT = rankTraits<MC>>
+fapi2::ReturnCode ranks_on_port(const fapi2::Target<TT::MEM_PORT_TARGET_TYPE>& i_port_target,
                                 std::vector<info<MC>>& o_vect)
 {
     o_vect.clear();
@@ -325,7 +325,7 @@ fapi2::ReturnCode ranks_on_port(const fapi2::Target<DEFAULT_MEM_PORT_TARGET>& i_
         for (uint8_t l_index = l_port_index_start; l_index < (l_port_index_start + l_master_ranks_per_dimm[l_dimm_index]);
              ++l_index)
         {
-            o_vect.push_back(mss::rank::info<>(i_port_target, l_index, l_rc));
+            o_vect.push_back(mss::rank::info<MC>(i_port_target, l_index, l_rc));
             FAPI_TRY(l_rc);
         }
     }
@@ -342,7 +342,7 @@ fapi_try_exit:
 /// @param[out] o_vect vector of ranks
 /// @return FAPI2_RC_SUCCESS iff success
 ///
-template <mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = rankTraits<MC>>
+template <mss::mc_type MC, typename TT = rankTraits<MC>>
 fapi2::ReturnCode ranks_on_dimm(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm_target,
                                 std::vector<info<MC>>& o_vect)
 {
@@ -364,7 +364,7 @@ fapi2::ReturnCode ranks_on_dimm(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_
         // For each rank index from the dimm's perspective
         for (uint8_t l_index = 0; l_index < l_master_ranks_per_dimm; l_index++)
         {
-            o_vect.push_back(mss::rank::info<>(i_dimm_target, l_index, l_rc));
+            o_vect.push_back(mss::rank::info<MC>(i_dimm_target, l_index, l_rc));
             FAPI_TRY(l_rc, "ranks_on_dimm(): Error in rank::info constructor call for DIMM %s and rank %u",
                      mss::c_str(i_dimm_target), l_index);
         }

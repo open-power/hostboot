@@ -231,7 +231,7 @@ fapi_try_exit:
 /// @param[out] l_lr_dimm true if LRDIMM, else false
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success
 ///
-inline fapi2::ReturnCode rank_is_lr_dimm(const mss::rank::info<> i_rank_info, bool& o_lr_dimm)
+inline fapi2::ReturnCode rank_is_lr_dimm(const mss::rank::info<mss::mc_type::EXPLORER> i_rank_info, bool& o_lr_dimm)
 {
     uint8_t l_dimm_type = 0;
     FAPI_TRY(mss::attr::get_dimm_type(i_rank_info.get_dimm_target(), l_dimm_type));
@@ -258,7 +258,7 @@ fapi2::ReturnCode check_freq_support_vpd<mss::proc_type::PROC_P10>( const fapi2:
     using TT = mss::frequency_traits<mss::proc_type::PROC_P10>;
     o_supported = false;
 
-    std::vector<mss::rank::info<>> l_ranks;
+    std::vector<mss::rank::info<mss::mc_type::EXPLORER>> l_ranks;
     fapi2::VPDInfo<TT::VPD_TARGET_TYPE> l_vpd_info(TT::VPD_BLOB);
 
     const auto& l_vpd_target = mss::find_target<TT::VPD_TARGET_TYPE>(i_target);

@@ -317,7 +317,7 @@ fapi2::ReturnCode check_if_spare_is_free(const fapi2::Target<fapi2::TARGET_TYPE_
     uint8_t l_dram_spare0_symbol = 0;
     uint8_t l_dram_spare1_symbol = 0;
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
-    mss::rank::info<> l_rank_info(i_target, i_port_rank, l_rc);
+    mss::rank::info<mss::mc_type::EXPLORER> l_rank_info(i_target, i_port_rank, l_rc);
     FAPI_TRY(l_rc, "%s failed to obtain rank info", mss::c_str(i_target));
 
     // 1) Checks if the spares exist

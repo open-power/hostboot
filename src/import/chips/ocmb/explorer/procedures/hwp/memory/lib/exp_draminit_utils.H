@@ -724,7 +724,7 @@ class phy_params
 
         fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> iv_target;
         user_input_msdg_attrs iv_attrs_params;
-        std::vector<mss::rank::info<>> iv_rank_info;
+        std::vector<mss::rank::info<mss::mc_type::EXPLORER>> iv_rank_info;
 
         ///
         /// @brief Set the rank-based phy field from the attribute
@@ -956,7 +956,7 @@ class phy_params
         ///
         phy_params(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
                    const user_input_msdg_attrs& i_phy_param_attrs,
-                   const std::vector<mss::rank::info<>> i_rank_info):
+                   const std::vector<mss::rank::info<mss::mc_type::EXPLORER>> i_rank_info):
             iv_target(i_target), iv_attrs_params(i_phy_param_attrs), iv_rank_info(i_rank_info)
         {}
 

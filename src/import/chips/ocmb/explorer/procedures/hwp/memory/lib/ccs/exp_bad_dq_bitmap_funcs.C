@@ -59,7 +59,7 @@ namespace exp
 /// @param[in,out] io_data Reference to data where Bad DQ bitmap is copied to
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode get_bad_dq_bitmap( const mss::rank::info<>& i_rank_info,
+fapi2::ReturnCode get_bad_dq_bitmap( const mss::rank::info<mss::mc_type::EXPLORER>& i_rank_info,
                                      uint8_t io_data[BAD_DQ_BYTE_COUNT])
 {
     using RT = mss::rank::rankTraits<mss::mc_type::EXPLORER>;
@@ -84,7 +84,7 @@ fapi_try_exit:
 /// @param[in] i_data Reference to data where Bad DQ bitmap is copied to
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode set_bad_dq_bitmap( const mss::rank::info<>& i_rank_info,
+fapi2::ReturnCode set_bad_dq_bitmap( const mss::rank::info<mss::mc_type::EXPLORER>& i_rank_info,
                                      const uint8_t i_data[BAD_DQ_BYTE_COUNT])
 {
     using RT = mss::rank::rankTraits<mss::mc_type::EXPLORER>;

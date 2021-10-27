@@ -135,7 +135,7 @@ fapi2::ReturnCode display_mrs_info(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
     for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
     {
         // Rank info object for
-        std::vector<mss::rank::info<>> l_rank_info_vect;
+        std::vector<mss::rank::info<mss::mc_type::EXPLORER>> l_rank_info_vect;
         uint8_t l_dram_width[mss::exp::sizes::MAX_DIMM_PER_PORT] = {};
         FAPI_TRY(mss::rank::ranks_on_port<>(l_port, l_rank_info_vect));
         FAPI_TRY(mss::attr::get_dram_width(l_port, l_dram_width));
@@ -265,7 +265,7 @@ inline fapi2::ReturnCode display_response_timing(const fapi2::Target<fapi2::TARG
     for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
     {
         // Rank info object for
-        std::vector<mss::rank::info<>> l_rank_info_vect;
+        std::vector<mss::rank::info<mss::mc_type::EXPLORER>> l_rank_info_vect;
         FAPI_TRY(mss::rank::ranks_on_port<>(l_port, l_rank_info_vect));
 
         // DFIMRL_DDRCLK_trained training result

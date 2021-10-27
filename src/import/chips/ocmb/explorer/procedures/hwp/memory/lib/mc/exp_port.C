@@ -361,7 +361,8 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
 template<>
-fapi2::ReturnCode unspare<mss::mc_type::EXPLORER>(const size_t i_spare, const mss::rank::info<>& i_rank)
+fapi2::ReturnCode unspare<mss::mc_type::EXPLORER>(const size_t i_spare,
+        const mss::rank::info<mss::mc_type::EXPLORER>& i_rank)
 {
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
 

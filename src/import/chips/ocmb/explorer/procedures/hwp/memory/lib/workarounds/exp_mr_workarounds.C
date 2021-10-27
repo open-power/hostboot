@@ -133,7 +133,7 @@ fapi2::ReturnCode updates_mode_registers_helper(const fapi2::Target<fapi2::TARGE
         fapi2::ReturnCode l_mrs_rc = fapi2::FAPI2_RC_SUCCESS;
         mss::ddr4::mrs02_data<mss::mc_type::EXPLORER> l_data(l_dimm, l_mrs_rc);
 
-        std::vector<mss::rank::info<>> l_ranks;
+        std::vector<mss::rank::info<mss::mc_type::EXPLORER>> l_ranks;
         FAPI_TRY(mss::rank::ranks_on_dimm(l_dimm, l_ranks));
         FAPI_TRY(l_mrs_rc);
 

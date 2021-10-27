@@ -358,7 +358,7 @@ fapi2::ReturnCode put_steer_mux(
     uint8_t l_dramSpareIndex = 0;
 
     // Get rank information
-    mss::rank::info<> l_rank_info(i_target, i_port_rank, l_rc);
+    mss::rank::info<mss::mc_type::EXPLORER> l_rank_info(i_target, i_port_rank, l_rc);
     FAPI_TRY(l_rc, "%s failed to obtain rank info", mss::c_str(i_target));
 
     // Check for i_port_rank or i_steer_type or i_symbol out of range

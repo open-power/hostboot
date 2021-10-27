@@ -60,6 +60,8 @@ class rankTraits<mss::mc_type::EXPLORER>
         // In this hypothetical scenario, the value for phy-rank would not
         // be valid / does not apply, as there will be some rollover.
         static constexpr uint8_t PHY_RANK_INDEX_STEP = 2;
+
+        static constexpr fapi2::TargetType MEM_PORT_TARGET_TYPE = fapi2::TARGET_TYPE_MEM_PORT;
 };
 
 ///
@@ -129,7 +131,7 @@ inline fapi2::ReturnCode ranks_on_dimm_helper<mss::mc_type::EXPLORER>(
     std::vector<uint64_t>& o_port_ranks)
 {
     std::vector<uint64_t> l_port_ranks;
-    std::vector<mss::rank::info<>> l_vect;
+    std::vector<mss::rank::info<mss::mc_type::EXPLORER>> l_vect;
 
     FAPI_TRY( mss::rank::ranks_on_dimm<mss::mc_type::EXPLORER>(i_dimm_target, l_vect) );
 

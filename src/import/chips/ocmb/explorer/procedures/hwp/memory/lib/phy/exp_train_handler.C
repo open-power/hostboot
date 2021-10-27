@@ -165,7 +165,7 @@ fapi2::ReturnCode parse_mrs_data_attributes(const fapi2::Target<fapi2::TARGET_TY
         uint8_t l_vrefdq_range[mss::exp::MAX_DIMM_PER_PORT][TT::MAX_RANKS_PER_DIMM][mss::exp::MAX_NIBBLES_PER_PORT] = {0};
         uint8_t l_vrefdq_enable[mss::exp::MAX_DIMM_PER_PORT][TT::MAX_RANKS_PER_DIMM][mss::exp::MAX_NIBBLES_PER_PORT] = {0};
 
-        std::vector<mss::rank::info<>> l_rank_infos;
+        std::vector<mss::rank::info<mss::mc_type::EXPLORER>> l_rank_infos;
         FAPI_TRY(mss::rank::ranks_on_port(l_port_target, l_rank_infos));
 
         // Parse MR0 Attributes

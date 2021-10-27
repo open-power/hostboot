@@ -118,7 +118,7 @@ enum guard_key_step
 /// @param[in] i_rank_info master rank
 /// @param[in,out] io_row_repair_data data for this DIMM/rank
 ///
-void clear_row_repair_entry( const mss::rank::info<>& i_rank_info,
+void clear_row_repair_entry( const mss::rank::info<mss::mc_type::EXPLORER>& i_rank_info,
                              uint8_t (&io_row_repair_data)[MAX_RANK_PER_DIMM][ROW_REPAIR_BYTES_PER_RANK]);
 
 ///
@@ -129,7 +129,7 @@ void clear_row_repair_entry( const mss::rank::info<>& i_rank_info,
 /// @param[in,out] io_inst ccs instruction to create guardkey for
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode add_sppr_guardkey( const mss::rank::info<>& i_rank_info,
+fapi2::ReturnCode add_sppr_guardkey( const mss::rank::info<mss::mc_type::EXPLORER>& i_rank_info,
                                      const uint64_t i_delay_in_cycles,
                                      const uint64_t i_guard_key_addr,
                                      std::vector< mss::ccs::instruction_t >& io_inst );
@@ -162,7 +162,7 @@ fapi2::ReturnCode log_repairs_disabled_errors(const fapi2::Target<fapi2::TARGET_
 /// @param[in, out] io_program the ccs program to setup for row repair
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode setup_sppr( const mss::rank::info<>& i_rank_info,
+fapi2::ReturnCode setup_sppr( const mss::rank::info<mss::mc_type::EXPLORER>& i_rank_info,
                               const mss::row_repair::repair_entry<mss::mc_type::EXPLORER>& i_repair,
                               const fapi2::buffer<uint64_t>& i_dram_bitmap,
                               mss::ccs::program& io_program);
@@ -174,7 +174,7 @@ fapi2::ReturnCode setup_sppr( const mss::rank::info<>& i_rank_info,
 /// @param[in] i_dram_bitmap bitmap of DRAMs selected for repair (b'1 to repair, b'0 to not repair)
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode maint_row_repair( const mss::rank::info<>& i_rank_info,
+fapi2::ReturnCode maint_row_repair( const mss::rank::info<mss::mc_type::EXPLORER>& i_rank_info,
                                     const mss::row_repair::repair_entry<mss::mc_type::EXPLORER>& i_repair,
                                     const fapi2::buffer<uint64_t>& i_dram_bitmap);
 
@@ -194,7 +194,7 @@ void disable_power_down_helper(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
 /// @param[in] i_dram_bitmap bitmap of DRAMs selected for repair (b'1 to repair, b'0 to not repair)
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode dynamic_row_repair( const mss::rank::info<>& i_rank_info,
+fapi2::ReturnCode dynamic_row_repair( const mss::rank::info<mss::mc_type::EXPLORER>& i_rank_info,
                                       const mss::row_repair::repair_entry<mss::mc_type::EXPLORER>& i_repair,
                                       const fapi2::buffer<uint64_t>& i_dram_bitmap);
 

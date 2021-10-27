@@ -76,7 +76,7 @@ fapi2::ReturnCode p10_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
         FAPI_TRY( mss::convert_ddr_freq_to_omi_freq(i_target, l_freq, l_omi_freq));
 
         // Get ranks via rank API
-        std::vector<mss::rank::info<>> l_rank_infos;
+        std::vector<mss::rank::info<mss::mc_type::EXPLORER>> l_rank_infos;
 
         // We run the base module + the DDIMM module first as our rank API needs to know if we are in quad encoded CS mode or not
         {
