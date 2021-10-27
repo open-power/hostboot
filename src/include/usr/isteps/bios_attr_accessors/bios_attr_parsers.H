@@ -231,4 +231,20 @@ void parse_hb_ioadapter_enlarged_capacity(std::vector<uint8_t>& io_string_table,
                                           std::vector<uint8_t>& io_attr_table,
                                           ISTEP_ERROR::IStepError & io_stepError);
 
+/**
+ * @brief Retrieve the Inhibit BMC Reset BIOS attribute and set the system
+ *        attribute ATTR_HYP_INHIBIT_RUNTIME_BMC_RESET to the retrieved value if no
+ *        error occurred.  If an error occurs retrieving the BMC BIOS, then the
+ *        attribute is set to not inhibit resets.
+ *
+ * @param[in,out] io_string_table   See brief in file hb_bios_attrs.H
+ * @param[in,out] io_attr_table     See brief in file hb_bios_attrs.H
+ * @param[in,out] io_stepError      If an error occurs which requires a TI, it will be attached
+ *                                  to this IstepError log.
+ * @return void
+ */
+void parse_hb_inhibit_bmc_reset(std::vector<uint8_t>& io_string_table,
+                                std::vector<uint8_t>& io_attr_table,
+                                ISTEP_ERROR::IStepError & io_stepError);
+
 }

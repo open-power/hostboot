@@ -71,6 +71,7 @@ const char PLDM_BIOS_HB_FIELD_CORE_OVERRIDE_STRING[]       = "hb_field_core_over
 const char PLDM_BIOS_HB_USB_ENABLEMENT_STRING[]            = "hb_host_usb_enablement_current";
 const char PLDM_BIOS_HB_MAX_NUMBER_HUGE_PAGES_STRING[]     = "hb_max_number_huge_pages";
 const char PLDM_BIOS_HB_ENLARGED_CAPACITY_STRING[]         = "hb_ioadapter_enlarged_capacity_current";
+const char PLDM_BIOS_HB_INHIBIT_BMC_RESET_STRING[]         = "hb_inhibit_bmc_reset";
 
 // When power limit values change, the effect on the OCCs is immediate, so we
 // always want the most recent values here.
@@ -98,6 +99,10 @@ const char PLDM_BIOS_PERM_STRING[]             = "Perm";
 const char PLDM_BIOS_TEMP_STRING[]             = "Temp";
 const char PLDM_BIOS_TPM_REQUIRED_STRING[]     = "Required";
 const char PLDM_BIOS_TPM_NOT_REQUIRED_STRING[] = "Not Required";
+
+// Possible Inhibit BMC Reset values
+const char PLDM_BIOS_INHIBIT_STRING[] = "Inhibit";
+const char PLDM_BIOS_NOINHIBIT_STRING[] = "NoInhibit";
 
 // Possible Key Clear Request Values
 const char PLDM_BIOS_KEY_CLEAR_NONE_STRING[]           = "NONE";
@@ -140,6 +145,9 @@ const std::vector<const char*> POSSIBLE_HB_KEY_CLEAR_STRINGS = { PLDM_BIOS_KEY_C
 
 const std::vector<const char*> POSSIBLE_TPM_REQUIRED_STRINGS = {PLDM_BIOS_TPM_REQUIRED_STRING,
                                                                 PLDM_BIOS_TPM_NOT_REQUIRED_STRING};
+
+const std::vector<const char*> POSSIBLE_INHIBIT_BMC_RESET_STRINGS = { PLDM_BIOS_NOINHIBIT_STRING,
+                                                                      PLDM_BIOS_INHIBIT_STRING };
 
 constexpr uint8_t PLDM_BIOS_STRING_TYPE_ASCII = 0x1;
 constexpr uint8_t PLDM_BIOS_STRING_TYPE_HEX = 0x2;
@@ -2348,6 +2356,73 @@ errlHndl_t getEnlargedCapacity(
     o_enlargedCapacity =
         static_cast<TARGETING::ATTR_ENLARGED_IO_SLOT_COUNT_type>(l_attr_val);
     } while(0);
+
+    return errl;
+}
+
+errlHndl_t getInhibitBmcResetValue(std::vector<uint8_t>& io_string_table,
+                                   std::vector<uint8_t>& io_attr_table,
+                                   bool &o_inhibitResets)
+{
+    PLDM_INF(ENTER_MRK"PLDM::getInhibitBmcResetValue");
+
+    errlHndl_t errl = nullptr;
+
+    do {
+
+    std::vector<char> decoded_value;
+
+    errl = getDecodedEnumAttr(io_string_table,
+                              io_attr_table,
+                              PLDM_BIOS_HB_INHIBIT_BMC_RESET_STRING,
+                              POSSIBLE_INHIBIT_BMC_RESET_STRINGS,
+                              decoded_value);
+
+    if (errl)
+    {
+        PLDM_ERR("PLDM::getInhibitBmcResetValue: Failed to lookup value for %s", PLDM_BIOS_HB_INHIBIT_BMC_RESET_STRING);
+        break;
+    }
+
+    if (strncmp(decoded_value.data(), PLDM_BIOS_INHIBIT_STRING, decoded_value.size()) == 0)
+    {
+        o_inhibitResets = true;
+    }
+    else if (strncmp(decoded_value.data(), PLDM_BIOS_NOINHIBIT_STRING, decoded_value.size()) == 0)
+    {
+        o_inhibitResets = false;
+    }
+    else
+    {
+        PLDM_INF_BIN("PLDM::getInhibitBmcResetValue: Unexpected string : ", decoded_value.data(), decoded_value.size());
+
+        /*@
+          * @errortype
+          * @severity   ERRL_SEV_UNRECOVERABLE
+          * @moduleid   MOD_GET_INHIBIT_BMC_RESET_VALUE
+          * @reasoncode RC_UNSUPPORTED_TYPE
+          * @userdata1  Unused
+          * @userdata2  Unused
+          * @devdesc    Software problem, incorrect data from BMC
+          * @custdesc   A software error occurred during system boot
+          */
+        errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                             MOD_GET_INHIBIT_BMC_RESET_VALUE,
+                             RC_UNSUPPORTED_TYPE,
+                             0,
+                             0,
+                             ErrlEntry::NO_SW_CALLOUT);
+        ErrlUserDetailsString(PLDM_BIOS_HB_INHIBIT_BMC_RESET_STRING).addToLog(errl);
+        ErrlUserDetailsString(decoded_value.data()).addToLog(errl);
+        addBmcErrorCallouts(errl);
+        o_inhibitResets = false;
+        break;
+    }
+
+    } while(0);
+
+    PLDM_INF(EXIT_MRK"PLDM::getInhibitBmcResetValue: returning %s",
+             o_inhibitResets ? "true" : "false");
 
     return errl;
 }

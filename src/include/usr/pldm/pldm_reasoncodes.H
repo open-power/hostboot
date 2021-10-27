@@ -99,6 +99,7 @@ namespace PLDM
         MOD_HANDLE_SBE_HRESET_REQUEST                = 0x3A, // handleSbeHresetRequest
         MOD_HANDLE_SBE_HRESET_REQUEST_RT             = 0x3B, // handleSbeHresetRequest
         MOD_GET_ENLARGED_CAPACITY                    = 0x3C, // getEnlargedCapacity
+        MOD_GET_INHIBIT_BMC_RESET_VALUE              = 0x3D, // getInhibitBmcResetValue
     };
 
     enum PLDMReasonCode

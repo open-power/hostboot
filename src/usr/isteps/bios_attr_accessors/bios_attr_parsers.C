@@ -532,4 +532,36 @@ void parse_hb_ioadapter_enlarged_capacity(std::vector<uint8_t>& io_string_table,
     return;
 }
 
+void parse_hb_inhibit_bmc_reset(std::vector<uint8_t>& io_string_table,
+                                std::vector<uint8_t>& io_attr_table,
+                                ISTEP_ERROR::IStepError & io_stepError)
+{
+    bool inhibit_resets = false;
+
+    errlHndl_t l_errl = PLDM::getInhibitBmcResetValue(io_string_table, io_attr_table, inhibit_resets);
+
+    if (l_errl)
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  ERR_MRK"parse_hb_inhibit_bmc_reset(): An error occurred getting "
+                  "the PLDM Inhibit BMC Reset BIOS attribute from the BMC. Setting the BMC reset "
+                  "inhibition attribute to false.");
+
+        inhibit_resets = false;
+        l_errl->collectTrace("ISTEPS_TRACE", 256);
+        errlCommit(l_errl, ISTEP_COMP_ID); // don't cause a TI by attaching to io_stepError
+    }
+    else
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  INFO_MRK"parse_hb_inhibit_bmc_reset(): Succeeded in getting the PLDM Inhibit BMC Reset "
+                  "BIOS attribute from the BMC. Setting the BMC reset inhibition attribute "
+                  "to %s",
+                  inhibit_resets ? "true" : "false");
+    }
+
+    const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
+    sys->setAttr<TARGETING::ATTR_HYP_INHIBIT_RUNTIME_BMC_RESET>(inhibit_resets ? 1 : 0);
+}
+
 }

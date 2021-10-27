@@ -149,7 +149,7 @@ struct hdatIPLParams_t
     uint8_t  hdatOSIPLMode;            // Operating System IPL Mode
     uint8_t  hdatKeyLockPosition;      // Key Lock Position
     uint8_t  hdatLMBSize;              // Logical Memory Block Size
-    uint8_t  hdatReserved2;            // Reserved
+    uint8_t  hdatDisablePhypBmcReset;  // Disable PHYP BMC Reset Flag (only applicable to BMC systems)
     uint32_t hdatMaxHSLConns;          // Max number of HSL Opticonnect
                                        //                         connections
     hdatOtherIPLAttributes_t hdatOIA;  // Other IPL Attributes

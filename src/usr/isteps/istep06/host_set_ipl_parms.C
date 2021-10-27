@@ -72,7 +72,8 @@ void parsePLDMBiosAttrs(ISTEP_ERROR::IStepError & io_stepError)
         ISTEP::parse_hb_hyp_switch,
         ISTEP::parse_pvm_fw_boot_side,
         ISTEP::parse_hb_host_usb_enablement,
-        ISTEP::parse_hb_ioadapter_enlarged_capacity
+        ISTEP::parse_hb_ioadapter_enlarged_capacity,
+        ISTEP::parse_hb_inhibit_bmc_reset
     };
 
     std::vector<uint8_t> bios_string_table, bios_attr_table;

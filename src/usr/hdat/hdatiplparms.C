@@ -339,6 +339,17 @@ void  HdatIplParms::hdatGetIplParmsData()
         HDAT_ERR("Error in getting LMB_SIZE attribute");
     }
 
+    TARGETING::ATTR_HYP_INHIBIT_RUNTIME_BMC_RESET_type l_inhibitRuntimeReset;
+
+    if (l_pSysTarget->tryGetAttr<TARGETING::ATTR_HYP_INHIBIT_RUNTIME_BMC_RESET>(l_inhibitRuntimeReset))
+    {
+        this->iv_hdatIPLParams->iv_iplParms.hdatDisablePhypBmcReset = l_inhibitRuntimeReset;
+    }
+    else
+    {
+        HDAT_ERR("Error in getting HYP_INHIBIT_RUNTIME_BMC_RESET attribute");
+    }
+
     TARGETING::ATTR_MAX_HSL_OPTICONNECT_CONNECTIONS_type l_hslConnections;
     if(l_pSysTarget->tryGetAttr
                             <TARGETING::ATTR_MAX_HSL_OPTICONNECT_CONNECTIONS>

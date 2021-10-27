@@ -756,6 +756,24 @@
   </attribute>
 
   <attribute>
+    <id>HYP_INHIBIT_RUNTIME_BMC_RESET</id>
+    <description>
+      When set to 1, signal the hypervisor to inhibit BMC
+      resets/reloads at runtime, for debugging purposes. When set to
+      0, resets/reloads will be permitted.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <id>IPMI_INSTANCE</id>
     <description>Holds the IPMI instance number for this entity.</description>
     <simpleType>

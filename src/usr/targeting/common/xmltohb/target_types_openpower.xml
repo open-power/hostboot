@@ -267,6 +267,9 @@
       <id>HTMGT_SAVED_POWER_LIMIT</id>
     </attribute>
     <attribute>
+      <id>HYP_INHIBIT_RUNTIME_BMC_RESET</id>
+    </attribute>
+    <attribute>
       <id>IPMI_MAX_BUFFER_SIZE</id>
     </attribute>
     <attribute>
