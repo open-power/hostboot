@@ -22,15 +22,93 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
 #include <prdfMemMdsUtils.H>
+
+#include <prdfErrlUtil.H>
+#include <prdfMain_common.H>
+#include <prdf_service_codes.H>
+
+#include <devicefw/userif.H>
 
 using namespace TARGETING;
 
 namespace PRDF
 {
 
+using namespace PlatServices;
+
 namespace MDS
 {
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t readMdsCtlr<TYPE_MDS_CTLR>( TargetHandle_t i_mdsCtlr, uint32_t i_addr,
+                                     uint32_t & o_data )
+{
+    #define PRDF_FUNC "[readMdsCtlr] "
+
+    PRDF_ASSERT( nullptr != i_mdsCtlr );
+    PRDF_ASSERT( TYPE_MDS_CTLR == getTargetType(i_mdsCtlr) );
+
+    uint32_t o_rc = SUCCESS;
+
+    o_data = 0;
+
+    // Buffer length must be 4 bytes
+    size_t bufLen = sizeof(uint32_t);
+    void * buf = malloc(bufLen);
+
+    errlHndl_t errl = nullptr;
+
+    errl = DeviceFW::deviceRead( i_mdsCtlr, buf, bufLen,
+                                 DEVICE_SCOM_ADDRESS(i_addr) );
+    if ( nullptr != errl )
+    {
+        PRDF_ERR( PRDF_FUNC "deviceRead() failed on i_mdsCtlr=0x%08x "
+                  "i_addr=0x%016llx", getHuid(i_mdsCtlr), i_addr );
+
+        o_rc = PRD_SCANCOM_FAILURE;
+        PRDF_ADD_SW_ERR(errl, o_rc, PRDF_HOM_SCOM, __LINE__);
+
+        bool l_isAbort = false;
+        PRDF_ABORTING(l_isAbort);
+        if (!l_isAbort)
+        {
+            PRDF_SET_ERRL_SEV(errl, ERRL_SEV_INFORMATIONAL);
+            PRDF_COMMIT_ERRL(errl, ERRL_ACTION_HIDDEN);
+        }
+        else
+        {
+            delete errl;
+            errl = nullptr;
+        }
+    }
+    else
+    {
+        o_data = *reinterpret_cast<uint32_t*>(buf);
+    }
+
+    free(buf);
+    buf = nullptr;
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+template<>
+uint32_t readMdsCtlr<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb, uint32_t i_addr,
+                                      uint32_t & o_data )
+{
+    PRDF_ASSERT( nullptr != i_ocmb );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == getTargetType(i_ocmb) );
+
+    TargetHandle_t mdsCtlr = getConnectedChild( i_ocmb, TYPE_MDS_CTLR, 0 );
+
+    return readMdsCtlr<TYPE_MDS_CTLR>(mdsCtlr, i_addr, o_data);
+}
 
 //------------------------------------------------------------------------------
 
