@@ -72,9 +72,9 @@ fapi2::ReturnCode get_power_attrs (const mss::throttle_type i_throttle_type,
                                    const std::vector< uint64_t >& i_intercept,
                                    const std::vector< uint64_t >& i_thermal_power_limit,
                                    const std::vector< uint64_t >& i_current_curve_with_limit,
-                                   uint16_t o_slope [throttle_traits<>::DIMMS_PER_PORT],
-                                   uint16_t o_intercept [throttle_traits<>::DIMMS_PER_PORT],
-                                   uint32_t o_limit [throttle_traits<>::DIMMS_PER_PORT]);
+                                   uint16_t o_slope [throttle_traits<mss::mc_type::EXPLORER>::DIMMS_PER_PORT],
+                                   uint16_t o_intercept [throttle_traits<mss::mc_type::EXPLORER>::DIMMS_PER_PORT],
+                                   uint32_t o_limit [throttle_traits<mss::mc_type::EXPLORER>::DIMMS_PER_PORT]);
 
 
 ///

@@ -145,7 +145,7 @@ static const std::vector < std::pair< uint8_t, uint8_t> > DIMMS_PORT_MAP =
 };
 
 // Forward declaration
-template<mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = throttle_traits<MC>>
+template<mss::mc_type MC, typename TT = throttle_traits<MC>>
 fapi2::ReturnCode generate_wildcard_mask(const uint32_t i_hash, uint32_t& o_mask);
 
 
@@ -153,7 +153,7 @@ fapi2::ReturnCode generate_wildcard_mask(const uint32_t i_hash, uint32_t& o_mask
 ///@brief a compare functor for the decoder::find_attr functions below
 /// @tparam MC mss::mc_type
 ///
-template<mss::mc_type MC = DEFAULT_MC_TYPE>
+template<mss::mc_type MC>
 struct is_match
 {
     ///
@@ -254,7 +254,7 @@ fapi_try_exit:
 /// @param[out] o_mask The wildcard mask
 ///
 
-template<mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = throttle_traits<MC>>
+template<mss::mc_type MC, typename TT = throttle_traits<MC>>
 fapi2::ReturnCode generate_wildcard_mask(const uint32_t i_hash, uint32_t& o_mask)
 {
 
@@ -579,7 +579,7 @@ fapi2::ReturnCode decoder<MC, TT>::get_power_thermal_value(const std::vector<uin
     // Find iterator to matching key (if it exists)
     auto l_value_iterator  =  std::find_if(i_array.begin(),
                                            i_array.end(),
-                                           is_match<>(iv_gen_key));
+                                           is_match<MC>(iv_gen_key));
 
     FAPI_ASSERT(l_value_iterator != i_array.end(),
                 fapi2::MSS_NO_POWER_THERMAL_ATTR_FOUND()

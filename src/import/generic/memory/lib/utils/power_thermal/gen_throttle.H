@@ -121,7 +121,7 @@ inline uint32_t throttled_cmds(const uint32_t i_databus_util, const uint32_t i_n
 /// @note Uses N/M Throttling.
 /// @note DRAM databus utilization = N * 4 * 10000 / M
 ///
-template<mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = throttle_traits<MC>, typename T>
+template<mss::mc_type MC, typename TT = throttle_traits<MC>, typename T>
 fapi2::ReturnCode calc_util_from_throttles(const uint16_t i_n_throttles,
         const uint32_t i_num_dram_clocks,
         T& o_calc_util)
@@ -969,12 +969,12 @@ fapi2::ReturnCode throttle<MC, TT>::calc_power_from_n (const uint16_t i_n_slot,
     double l_port_power_max = 0;
     double l_port_power_idle = 0;
 
-    FAPI_TRY( calc_util_from_throttles(i_n_slot, iv_m_clocks, l_calc_util_slot),
+    FAPI_TRY( calc_util_from_throttles<MC>(i_n_slot, iv_m_clocks, l_calc_util_slot),
               "%s Error calculating utilization from slot throttle %d and mem clocks %d",
               mss::c_str(iv_target),
               i_n_slot,
               iv_m_clocks);
-    FAPI_TRY( calc_util_from_throttles(i_n_port, iv_m_clocks, l_calc_util_port),
+    FAPI_TRY( calc_util_from_throttles<MC>(i_n_port, iv_m_clocks, l_calc_util_port),
               "%s Error calculating utilization from port throttle %d and mem clocks %d",
               mss::c_str(iv_target),
               i_n_port,
@@ -1228,7 +1228,7 @@ fapi_try_exit:
 /// @note sets the throttles and power to the worst case
 /// Called by p9_mss_bulk_pwr_throttles and by p9_mss_utils_to_throttle (so by IPL or by OCC)
 ///
-template<mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = throttle_traits<MC>>
+template<mss::mc_type MC, fapi2::TargetType T, typename TT = throttle_traits<MC>>
 fapi2::ReturnCode equalize_throttles (const std::vector< fapi2::Target<T> >& i_targets,
                                       const throttle_type i_throttle_type,
                                       std::vector< fapi2::Target<TT::PORT_TARGET_TYPE> >& o_exceeded_power)
@@ -1385,7 +1385,7 @@ fapi_try_exit:
 /// @return fapi2::FAPI2_RC_SUCCESS iff ok
 /// @note overwriting the safemode throttle values
 ///
-template<mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = throttle_traits<MC>>
+template<mss::mc_type MC, fapi2::TargetType T, typename TT = throttle_traits<MC>>
 fapi2::ReturnCode write_runtime_throttles(const fapi2::Target<T>& i_target)
 {
     FAPI_INF("%s Start write_runtime_throttles", mss::c_str(i_target));
@@ -1543,7 +1543,7 @@ fapi_try_exit:
 /// @param[in] i_target the port target
 /// @return fapi2::FAPI2_RC_SUCCESS if ok
 ///
-template<mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = throttle_traits<MC>>
+template<mss::mc_type MC, fapi2::TargetType T, typename TT = throttle_traits<MC>>
 fapi2::ReturnCode set_nm_support(const fapi2::Target<T>& i_target)
 {
     uint16_t l_run_slot = 0;
@@ -1594,7 +1594,7 @@ fapi_try_exit:
 /// @note sets FARB4Q
 /// @note used to set throttle window (N throttles  / M clocks)
 ///
-template<mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = throttle_traits<MC>>
+template<mss::mc_type MC, fapi2::TargetType T, typename TT = throttle_traits<MC>>
 fapi2::ReturnCode set_safemode_throttles(const fapi2::Target<T>& i_target)
 {
     fapi2::buffer<uint64_t> l_data;
@@ -1626,7 +1626,7 @@ fapi_try_exit:
 /// @return fapi2::FAPI2_RC_SUCCESS if ok
 /// @note sets safemode values for emergency mode and regular throttling
 ///
-template<mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T>
+template<mss::mc_type MC, fapi2::TargetType T>
 fapi2::ReturnCode thermal_throttle_scominit(const fapi2::Target<T>& i_target)
 {
     FAPI_TRY(set_pwr_cntrl_reg<MC>(i_target));

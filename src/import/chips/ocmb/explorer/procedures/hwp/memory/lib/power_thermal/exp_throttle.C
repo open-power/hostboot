@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -127,7 +127,7 @@ fapi2::ReturnCode equalize_throttles( const std::vector< fapi2::Target<fapi2::TA
     std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> > l_exceeded_power;
 
     // Set all of the throttles to the lowest value per port for performance reasons
-    FAPI_TRY(mss::power_thermal::equalize_throttles(i_targets, i_throttle_type, l_exceeded_power));
+    FAPI_TRY(mss::power_thermal::equalize_throttles<mss::mc_type::EXPLORER>(i_targets, i_throttle_type, l_exceeded_power));
 
     // Report any port that exceeded the max power limit, and return a failing RC if we have any
     for (const auto& l_port : l_exceeded_power)

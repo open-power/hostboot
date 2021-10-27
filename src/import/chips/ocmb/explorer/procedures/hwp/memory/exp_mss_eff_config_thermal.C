@@ -59,7 +59,7 @@ extern "C"
     fapi2::ReturnCode exp_mss_eff_config_thermal( const std::vector< fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> >&
             i_targets )
     {
-        using TT = mss::power_thermal::throttle_traits<>;
+        using TT = mss::power_thermal::throttle_traits<mss::mc_type::EXPLORER>;
         fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
         FAPI_INF("Start exp_mss_eff_config_thermal");
 

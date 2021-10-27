@@ -49,7 +49,7 @@ namespace power_thermal
 /// @class Traits for throttle
 /// @tparam MC mss::mc_type memory controller type
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE >
+template< mss::mc_type MC >
 class throttle_traits;
 
 } //ns power_thermal
