@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,6 +47,12 @@ void* calloc(size_t, size_t) __attribute__((malloc));
  *         if the function failed to convert
  */
 uint64_t strtoul(const char *nptr, char **endptr, int base);
+
+/**
+ * @brief Returns the absolute value of parameter n ( /n/ )
+ * See C spec for details
+ */
+int abs(int n);
 
 #ifdef __cplusplus
 };

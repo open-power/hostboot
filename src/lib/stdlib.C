@@ -207,3 +207,13 @@ uint64_t strtoul(const char *nptr, char **endptr, int base)
     }
     return l_data;
 }
+
+
+/**
+ * @brief Returns the absolute value of parameter n ( /n/ )
+ * See C spec for details
+ */
+int abs(int n)
+{
+    return( (n < 0) ? -n : n );
+}
