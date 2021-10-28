@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,13 +53,14 @@ namespace mark_shadow_reg
 
 ///
 /// @brief Read Mark Shadow register
+/// @tparam MC the memory controller type
 /// @tparam T fapi2 Target Type - derived from i_target's type
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in] i_target the fapi2 target of the mc
 /// @param[out] o_data the value of the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-template< fapi2::TargetType T, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 inline fapi2::ReturnCode read( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
     FAPI_TRY( mss::getScom(i_target, TT::MARK_SHADOW_REG, o_data) );
@@ -70,13 +71,14 @@ fapi_try_exit:
 
 ///
 /// @brief Write Mark Shadow register
+/// @tparam MC the memory controller type
 /// @tparam T fapi2 Target Type - derived from i_target's type
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in] i_target the fapi2 target of the mc
 /// @param[in] i_data the value to write to the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-template< fapi2::TargetType T, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 inline fapi2::ReturnCode write( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
     FAPI_TRY( mss::putScom(i_target, TT::MARK_SHADOW_REG, i_data) );
@@ -87,12 +89,13 @@ fapi_try_exit:
 
 ///
 /// @brief set_chipmark
-/// @tparam T fapi2 Target Type defaults to DEFAULT_MEM_PORT_TARGET
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccMCTraits<MC>::MEM_PORT_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in, out] io_data the register value
 /// @param[in] i_value the value of the field
 ///
-template< fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MEM_PORT_TARGET_TYPE, typename TT = eccTraits<MC, T> >
 inline void set_chipmark( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::SHADOW_CHIPMARK, TT::SHADOW_CHIPMARK_LEN>(i_value);
@@ -101,12 +104,13 @@ inline void set_chipmark( fapi2::buffer<uint64_t>& io_data, const uint64_t i_val
 
 ///
 /// @brief get_chipmark
-/// @tparam T fapi2 Target Type defaults to DEFAULT_MEM_PORT_TARGET
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccMCTraits<MC>::MEM_PORT_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in] i_data the register value
 /// @param[out] o_value the value of the field
 ///
-template< fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MEM_PORT_TARGET_TYPE, typename TT = eccTraits<MC, T> >
 inline void get_chipmark( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::SHADOW_CHIPMARK, TT::SHADOW_CHIPMARK_LEN>(o_value);
@@ -115,12 +119,13 @@ inline void get_chipmark( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_val
 
 ///
 /// @brief set_rank
-/// @tparam T fapi2 Target Type defaults to DEFAULT_MEM_PORT_TARGET
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccMCTraits<MC>::MEM_PORT_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in, out] io_data the register value
 /// @param[in] i_value the value of the field
 ///
-template< fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MEM_PORT_TARGET_TYPE, typename TT = eccTraits<MC, T> >
 inline void set_rank( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::SHADOW_RANK, TT::SHADOW_RANK_LEN>(i_value);
@@ -129,12 +134,13 @@ inline void set_rank( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 
 ///
 /// @brief get_rank
-/// @tparam T fapi2 Target Type defaults to DEFAULT_MEM_PORT_TARGET
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccMCTraits<MC>::MEM_PORT_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in] i_data the register value
 /// @param[out] o_value the value of the field
 ///
-template< fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MEM_PORT_TARGET_TYPE, typename TT = eccTraits<MC, T> >
 inline void get_rank( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::SHADOW_RANK, TT::SHADOW_RANK_LEN>(o_value);

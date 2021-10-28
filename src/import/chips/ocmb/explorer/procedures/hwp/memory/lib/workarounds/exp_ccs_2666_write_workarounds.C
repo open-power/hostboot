@@ -35,6 +35,7 @@
 
 #include <lib/shared/exp_defaults.H>
 #include <lib/ccs/ccs_traits_explorer.H>
+#include <lib/ecc/ecc_traits_explorer.H>
 #include <lib/dimm/exp_mrs_traits.H>
 #include <lib/dimm/exp_kind.H>
 #include <fapi2.H>

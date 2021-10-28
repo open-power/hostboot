@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,19 +54,20 @@ namespace mainline_ue_trap
 
 ///
 /// @brief Read MBS Mainline UE Address Trap (MBUER*Q) register
+/// @tparam MC the memory controller type
 /// @tparam T fapi2 Target Type - derived from i_target's type
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in] i_target the fapi2 target of the mc
 /// @param[out] o_data the value of the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-template< fapi2::TargetType T, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 inline fapi2::ReturnCode read( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
-    const auto& l_mcbist_target = mss::find_target<DEFAULT_MC_TARGET>(i_target);
-    const auto& l_port = mss::relative_pos<DEFAULT_MC_TARGET>(i_target);
+    const auto& l_mc_target = mss::find_target<eccMCTraits<MC>::MC_TARGET_TYPE>(i_target);
+    const auto& l_port_pos = mss::relative_pos<eccMCTraits<MC>::MC_TARGET_TYPE>(i_target);
 
-    FAPI_TRY( mss::getScom(l_mcbist_target, (TT::MAINLINE_UE_REGS[l_port]), o_data) );
+    FAPI_TRY( mss::getScom(l_mc_target, (TT::MAINLINE_UE_REGS[l_port_pos]), o_data) );
     FAPI_INF("read: 0x%016lx", o_data);
 fapi_try_exit:
     return fapi2::current_err;
@@ -74,19 +75,20 @@ fapi_try_exit:
 
 ///
 /// @brief Write MBS Mainline UE Address Trap (MBUER*Q) register
+/// @tparam MC the memory controller type
 /// @tparam T fapi2 Target Type - derived from i_target's type
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in] i_target the fapi2 target of the mc
 /// @param[in] i_data the value to write to the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-template< fapi2::TargetType T, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 inline fapi2::ReturnCode write( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
-    const auto& l_mcbist_target = mss::find_target<DEFAULT_MC_TARGET>(i_target);
-    const auto& l_port = mss::relative_pos<DEFAULT_MC_TARGET>(i_target);
+    const auto& l_mc_target = mss::find_target<eccMCTraits<MC>::MC_TARGET_TYPE>(i_target);
+    const auto& l_port_pos = mss::relative_pos<eccMCTraits<MC>::MC_TARGET_TYPE>(i_target);
 
-    FAPI_TRY( mss::putScom(l_mcbist_target, (TT::MAINLINE_UE_REGS[l_port]), i_data) );
+    FAPI_TRY( mss::putScom(l_mc_target, (TT::MAINLINE_UE_REGS[l_port_pos]), i_data) );
     FAPI_INF("write: 0x%016lx", i_data);
 fapi_try_exit:
     return fapi2::current_err;
@@ -94,12 +96,13 @@ fapi_try_exit:
 
 ///
 /// @brief set_address
-/// @tparam T fapi2 Target Type defaults to DEFAULT_MEM_PORT_TARGET
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccMCTraits<MC>::MEM_PORT_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in, out] io_data the register value
 /// @param[in] i_address mcbist::address form of address field
 ///
-template< fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MEM_PORT_TARGET_TYPE, typename TT = eccTraits<MC, T> >
 inline void set_address( fapi2::buffer<uint64_t>& io_data, const mcbist::address& i_address)
 {
     io_data.insertFromRight<TT::UE_ADDR_TRAP, TT::UE_ADDR_TRAP_LEN>(uint64_t(i_address));
@@ -108,12 +111,13 @@ inline void set_address( fapi2::buffer<uint64_t>& io_data, const mcbist::address
 
 ///
 /// @brief get_address
-/// @tparam T fapi2 Target Type defaults to DEFAULT_MEM_PORT_TARGET
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccMCTraits<MC>::MEM_PORT_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in] i_data the register value
 /// @param[out] o_address mcbist::address form of address field
 ///
-template< fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MEM_PORT_TARGET_TYPE, typename TT = eccTraits<MC, T> >
 inline void get_address( const fapi2::buffer<uint64_t>& i_data, mcbist::address& o_address )
 {
     uint64_t l_addr = 0;

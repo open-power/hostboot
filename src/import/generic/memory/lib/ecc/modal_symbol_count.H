@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,14 +52,15 @@ namespace modal_symbol_count
 
 ///
 /// @brief Read modal symbol count (MBSSYMEC*Q) register
+/// @tparam MC the memory controller type
 /// @tparam T fapi2 Target Type - derived from i_target's type
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in] i_target the fapi2 target of the mc
 /// @param[in] i_index the register index (0-9)
 /// @param[out] o_data the value of the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-template<fapi2::TargetType T, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 inline fapi2::ReturnCode read(
     const fapi2::Target<T>& i_target,
     const uint32_t i_index,
@@ -71,7 +72,7 @@ inline fapi2::ReturnCode read(
                 .set_INDEX(i_index)
                 .set_TARGET(i_target)
                 .set_FUNCTION(SYMBOL_COUNT_READ),
-                "%s Invalid index passed to fwms::ecc::modal_symbol_count::read (%d)",
+                "%s Invalid index passed to mss::ecc::modal_symbol_count::read (%d)",
                 mss::c_str(i_target),
                 i_index);
 
@@ -85,14 +86,15 @@ fapi_try_exit:
 
 ///
 /// @brief Write modal symbol count (MBSSYMEC*Q) register
+/// @tparam MC the memory controller type
 /// @tparam T fapi2 Target Type - derived from i_target's type
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in] i_target the fapi2 target of the mc
 /// @param[in] i_index the register index (0-9)
 /// @param[in] i_data the value to write to the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-template<fapi2::TargetType T, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 inline fapi2::ReturnCode write(
     const fapi2::Target<T>& i_target,
     const uint32_t i_index,
@@ -103,7 +105,7 @@ inline fapi2::ReturnCode write(
                 .set_INDEX(i_index)
                 .set_TARGET(i_target)
                 .set_FUNCTION(SYMBOL_COUNT_WRITE),
-                "%s Invalid index passed to fwms::ecc::modal_symbol_count::write (%d)",
+                "%s Invalid index passed to mss::ecc::modal_symbol_count::write (%d)",
                 mss::c_str(i_target),
                 i_index);
 
@@ -115,8 +117,9 @@ fapi_try_exit:
 
 ///
 /// @brief set_count
-/// @tparam T fapi2 Target Type defaults to TARGET_TYPE_MCBIST
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccMCTraits<MC>::MC_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in, out] io_data the register value
 /// @param[in] i_index the counter index
 /// @param[in] i_value the value of the field
@@ -126,7 +129,7 @@ fapi_try_exit:
 /// @note 0:3 = MCBIST error counter for port XX/18 and nibble XX%18 4:7 = MCBIST error rank map for
 /// @note port XX/18 and nibble XX%18
 ///
-template< fapi2::TargetType T = DEFAULT_MC_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE, typename TT = eccTraits<MC, T> >
 inline void set_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_index, const uint64_t i_value )
 {
     static_assert ( TT::MODAL_SYMBOL_COUNTERS_PER_REG  <= 8,
@@ -179,8 +182,9 @@ inline void set_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_index,
 
 ///
 /// @brief get_count
-/// @tparam T fapi2 Target Type defaults to TARGET_TYPE_MCBIST
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccMCTraits<MC>::MC_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in] i_data the register value
 /// @param[in] i_index the counter index
 /// @param[out] o_value the value of the field
@@ -190,7 +194,7 @@ inline void set_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_index,
 /// @note 0:3 = MCBIST error counter for port XX/18 and nibble XX%18 4:7 = MCBIST error rank map for
 /// @note port XX/18 and nibble XX%18
 ///
-template< fapi2::TargetType T = DEFAULT_MC_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE, typename TT = eccTraits<MC, T> >
 inline void get_count( const fapi2::buffer<uint64_t>& i_data, const uint64_t i_index, uint64_t& o_value )
 {
     const uint64_t l_field = i_index % TT::MODAL_SYMBOL_COUNTERS_PER_REG;

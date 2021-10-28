@@ -38,12 +38,14 @@
 //    Includes
 //------------------------------------------------------------------------------
 
+#include <lib/shared/exp_defaults.H>
+#include <lib/ecc/ecc_traits_explorer.H>
+#include <lib/shared/exp_consts.H>
+
+
 #include <lib/mcbist/exp_maint_cmds.H>
 #include <explorer_scom_addresses.H>
 #include <explorer_scom_addresses_fld.H>
-
-#include <lib/shared/exp_defaults.H>
-#include <lib/shared/exp_consts.H>
 #include <lib/dimm/exp_rank.H>
 #include <exp_port.H>
 

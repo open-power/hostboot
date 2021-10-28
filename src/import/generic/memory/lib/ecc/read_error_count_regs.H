@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,7 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 ///
-/// @file mainline_ue_trap.H
+/// @file read_error_count_regs.H
 /// @brief Subroutines for the MBS Memory Scrub/Read Error Count registers (MBSEC*Q)
 ///
 // *HWP HWP Owner: Matt Hickman <Matthew.Hickman@ibm.com>
@@ -54,13 +54,14 @@ namespace read_error_count_reg0
 
 ///
 /// @brief Read MBS Memory Scrub/Read Error Count Register 0 (MBSEC0Q)
+/// @tparam MC the memory controller type
 /// @tparam T fapi2 Target Type - derived from i_target's type
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in] i_target the fapi2 target of the mcbist
 /// @param[out] o_data the value of the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-template< fapi2::TargetType T, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 inline fapi2::ReturnCode read( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
     FAPI_TRY( mss::getScom(i_target, TT::READ_ERROR_COUNT_REG0, o_data) );
@@ -71,13 +72,14 @@ fapi_try_exit:
 
 ///
 /// @brief Write MBS Memory Scrub/Read Error Count Register 0 (MBSEC0Q)
+/// @tparam MC the memory controller type
 /// @tparam T fapi2 Target Type - derived from i_target's type
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in] i_target the fapi2 target of the mcbist
 /// @param[in] i_data the value to write to the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-template< fapi2::TargetType T, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 inline fapi2::ReturnCode write( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
     FAPI_TRY( mss::putScom(i_target, TT::READ_ERROR_COUNT_REG0, i_data) );
@@ -88,15 +90,16 @@ fapi_try_exit:
 
 ///
 /// @brief set_intermittent_ce_count
-/// @tparam T fapi2 Target Type defaults to DEFAULT_MC_TARGET
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccMCTraits<MC>::MC_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in, out] io_data the register value
 /// @param[in] i_value the value of the field
 /// @note MBSEC0Q_INTERMITTENT_CE_COUNT: Intermittent CE Count This is a 12-bit count of
 /// @note intermittent CE events. Will freeze its value upon incrementing to the max
 /// @note value until reset.
 ///
-template< fapi2::TargetType T = DEFAULT_MC_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE, typename TT = eccTraits<MC, T> >
 inline void set_intermittent_ce_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::INTERMITTENT_CE_COUNT, TT::INTERMITTENT_CE_COUNT_LEN>(i_value);
@@ -105,15 +108,16 @@ inline void set_intermittent_ce_count( fapi2::buffer<uint64_t>& io_data, const u
 
 ///
 /// @brief get_intermittent_ce_count
-/// @tparam T fapi2 Target Type defaults to DEFAULT_MC_TARGET
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccTraits<MC>::MC_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in] i_data the register value
 /// @param[out] o_value the value of the field
 /// @note MBSEC0Q_INTERMITTENT_CE_COUNT: Intermittent CE Count This is a 12-bit count of
 /// @note intermittent CE events. Will freeze its value upon incrementing to the max
 /// @note value until reset.
 ///
-template< fapi2::TargetType T = DEFAULT_MC_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE, typename TT = eccTraits<MC, T> >
 inline void get_intermittent_ce_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::INTERMITTENT_CE_COUNT, TT::INTERMITTENT_CE_COUNT_LEN>(o_value);
@@ -122,15 +126,16 @@ inline void get_intermittent_ce_count( const fapi2::buffer<uint64_t>& i_data, ui
 
 ///
 /// @brief set_soft_ce_count
-/// @tparam T fapi2 Target Type defaults to DEFAULT_MC_TARGET
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccTraits<MC>::MC_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in, out] io_data the register value
 /// @param[in] i_value the value of the field
 /// @note MBSEC0Q_SOFT_CE_COUNT: Soft CE Count This is a 12-bit count of
 /// @note soft CE events. Will freeze its value upon incrementing to the max
 /// @note value until reset.
 ///
-template< fapi2::TargetType T = DEFAULT_MC_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE, typename TT = eccTraits<MC, T> >
 inline void set_soft_ce_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::SOFT_CE_COUNT, TT::SOFT_CE_COUNT_LEN>(i_value);
@@ -139,15 +144,16 @@ inline void set_soft_ce_count( fapi2::buffer<uint64_t>& io_data, const uint64_t 
 
 ///
 /// @brief get_soft_ce_count
-/// @tparam T fapi2 Target Type defaults to DEFAULT_MC_TARGET
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccTraits<MC>::MC_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in] i_data the register value
 /// @param[out] o_value the value of the field
 /// @note MBSEC0Q_SOFT_CE_COUNT: Soft CE Count This is a 12-bit count of
 /// @note soft CE events. Will freeze its value upon incrementing to the max
 /// @note value until reset.
 ///
-template< fapi2::TargetType T = DEFAULT_MC_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE, typename TT = eccTraits<MC, T> >
 inline void get_soft_ce_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::SOFT_CE_COUNT, TT::SOFT_CE_COUNT_LEN>(o_value);
@@ -156,15 +162,16 @@ inline void get_soft_ce_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& 
 
 ///
 /// @brief set_hard_ce_count
-/// @tparam T fapi2 Target Type defaults to DEFAULT_MC_TARGET
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccTraits<MC>::MC_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in, out] io_data the register value
 /// @param[in] i_value the value of the field
 /// @note MBSEC0Q_HARD_CE_COUNT: Hard CE Count This is a 12-bit count of
 /// @note hard CE events. Will freeze its value upon incrementing to the max
 /// @note value until reset.
 ///
-template< fapi2::TargetType T = DEFAULT_MC_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE, typename TT = eccTraits<MC, T> >
 inline void set_hard_ce_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::HARD_CE_COUNT, TT::HARD_CE_COUNT_LEN>(i_value);
@@ -173,15 +180,16 @@ inline void set_hard_ce_count( fapi2::buffer<uint64_t>& io_data, const uint64_t 
 
 ///
 /// @brief get_hard_ce_count
-/// @tparam T fapi2 Target Type defaults to DEFAULT_MC_TARGET
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccTraits<MC>::MC_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in] i_data the register value
 /// @param[out] o_value the value of the field
 /// @note MBSEC0Q_HARD_CE_COUNT: Hard CE Count This is a 12-bit count of
 /// @note hard CE events. Will freeze its value upon incrementing to the max
 /// @note value until reset.
 ///
-template< fapi2::TargetType T = DEFAULT_MC_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE, typename TT = eccTraits<MC, T> >
 inline void get_hard_ce_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::HARD_CE_COUNT, TT::HARD_CE_COUNT_LEN>(o_value);
@@ -190,15 +198,16 @@ inline void get_hard_ce_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& 
 
 ///
 /// @brief set_intermittent_mce_count
-/// @tparam T fapi2 Target Type defaults to DEFAULT_MC_TARGET
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccTraits<MC>::MC_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in, out] io_data the register value
 /// @param[in] i_value the value of the field
 /// @note MBSEC0Q_INTERMITTENT_MCE_COUNT: Intermittent MCE Count This is a 12-bit count of
 /// @note intermittent Marked Chip Correctable Error events. Will freeze its value upon
 /// @note incrementing to the max value until reset.
 ///
-template< fapi2::TargetType T = DEFAULT_MC_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE, typename TT = eccTraits<MC, T> >
 inline void set_intermittent_mce_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::INTERMITTENT_MCE_COUNT, TT::INTERMITTENT_MCE_COUNT_LEN>(i_value);
@@ -207,15 +216,16 @@ inline void set_intermittent_mce_count( fapi2::buffer<uint64_t>& io_data, const 
 
 ///
 /// @brief get_intermittent_mce_count
-/// @tparam T fapi2 Target Type defaults to DEFAULT_MC_TARGET
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccTraits<MC>::MC_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in] i_data the register value
 /// @param[out] o_value the value of the field
 /// @note MBSEC0Q_INTERMITTENT_MCE_COUNT: Intermittent MCE Count This is a 12-bit count of
 /// @note intermittent Marked Chip Correctable Error events. Will freeze its value upon
 /// @note incrementing to the max value until reset.
 ///
-template< fapi2::TargetType T = DEFAULT_MC_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE, typename TT = eccTraits<MC, T> >
 inline void get_intermittent_mce_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::INTERMITTENT_MCE_COUNT, TT::INTERMITTENT_MCE_COUNT_LEN>(o_value);
@@ -224,15 +234,16 @@ inline void get_intermittent_mce_count( const fapi2::buffer<uint64_t>& i_data, u
 
 ///
 /// @brief set_soft_mce_count
-/// @tparam T fapi2 Target Type defaults to DEFAULT_MC_TARGET
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccTraits<MC>::MC_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in, out] io_data the register value
 /// @param[in] i_value the value of the field
 /// @note MBSEC0Q_SOFT_MCE_COUNT: Soft MCE Count This is a 12-bit count of
 /// @note soft Marked Chip Correctable Error events. Will freeze its value upon
 /// @note incrementing to the max value until reset.
 ///
-template< fapi2::TargetType T = DEFAULT_MC_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE, typename TT = eccTraits<MC, T> >
 inline void set_soft_mce_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::SOFT_MCE_COUNT, TT::SOFT_MCE_COUNT_LEN>(i_value);
@@ -241,15 +252,16 @@ inline void set_soft_mce_count( fapi2::buffer<uint64_t>& io_data, const uint64_t
 
 ///
 /// @brief get_soft_mce_count
-/// @tparam T fapi2 Target Type defaults to DEFAULT_MC_TARGET
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccTraits<MC>::MC_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in] i_data the register value
 /// @param[out] o_value the value of the field
 /// @note MBSEC0Q_SOFT_MCE_COUNT: Soft MCE Count This is a 12-bit count of
 /// @note soft Marked Chip Correctable Error events. Will freeze its value upon
 /// @note incrementing to the max value until reset.
 ///
-template< fapi2::TargetType T = DEFAULT_MC_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE, typename TT = eccTraits<MC, T> >
 inline void get_soft_mce_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::SOFT_MCE_COUNT, TT::SOFT_MCE_COUNT_LEN>(o_value);
@@ -263,13 +275,14 @@ namespace read_error_count_reg1
 
 ///
 /// @brief Read MBS Memory Scrub/Read Error Count Register 1 (MBSEC1Q)
+/// @tparam MC the memory controller type
 /// @tparam T fapi2 Target Type - derived from i_target's type
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in] i_target the fapi2 target of the mcbist
 /// @param[out] o_data the value of the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-template< fapi2::TargetType T, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 inline fapi2::ReturnCode read( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
     FAPI_TRY( mss::getScom(i_target, TT::READ_ERROR_COUNT_REG1, o_data) );
@@ -280,13 +293,14 @@ fapi_try_exit:
 
 ///
 /// @brief Write MBS Memory Scrub/Read Error Count Register 1 (MBSEC1Q)
+/// @tparam MC the memory controller type
 /// @tparam T fapi2 Target Type - derived from i_target's type
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in] i_target the fapi2 target of the mcbist
 /// @param[in] i_data the value to write to the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-template< fapi2::TargetType T, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 inline fapi2::ReturnCode write( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
     FAPI_TRY( mss::putScom(i_target, TT::READ_ERROR_COUNT_REG1, i_data) );
@@ -297,15 +311,16 @@ fapi_try_exit:
 
 ///
 /// @brief set_hard_mce_count
-/// @tparam T fapi2 Target Type defaults to DEFAULT_MC_TARGET
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccTraits<MC>::MC_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in, out] io_data the register value
 /// @param[in] i_value the value of the field
 /// @note MBSEC0Q_HARD_MCE_COUNT: Hard MCE Count This is a 12-bit count of
 /// @note hard Marked Chip Correctable Error events. Will freeze its value upon
 /// @note incrementing to the max value until reset.
 ///
-template< fapi2::TargetType T = DEFAULT_MC_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE, typename TT = eccTraits<MC, T> >
 inline void set_hard_mce_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::HARD_MCE_COUNT, TT::HARD_MCE_COUNT_LEN>(i_value);
@@ -314,15 +329,16 @@ inline void set_hard_mce_count( fapi2::buffer<uint64_t>& io_data, const uint64_t
 
 ///
 /// @brief get_hard_mce_count
-/// @tparam T fapi2 Target Type defaults to DEFAULT_MC_TARGET
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccTraits<MC>::MC_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in] i_data the register value
 /// @param[out] o_value the value of the field
 /// @note MBSEC0Q_HARD_MCE_COUNT: Hard MCE Count This is a 12-bit count of
 /// @note hard Marked Chip Correctable Error events. Will freeze its value upon
 /// @note incrementing to the max value until reset.
 ///
-template< fapi2::TargetType T = DEFAULT_MC_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE, typename TT = eccTraits<MC, T> >
 inline void get_hard_mce_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::HARD_MCE_COUNT, TT::HARD_MCE_COUNT_LEN>(o_value);
@@ -331,15 +347,16 @@ inline void get_hard_mce_count( const fapi2::buffer<uint64_t>& i_data, uint64_t&
 
 ///
 /// @brief set_ice_count
-/// @tparam T fapi2 Target Type defaults to DEFAULT_MC_TARGET
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccTraits<MC>::MC_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in, out] io_data the register value
 /// @param[in] i_value the value of the field
 /// @note MBSEC0Q_ICE_COUNT: ICE (IMPE) Count This is a 12-bit count of
 /// @note Intermittent Marked-Placed Chip Error events. Will freeze its value upon
 /// @note incrementing to the max value until reset.
 ///
-template< fapi2::TargetType T = DEFAULT_MC_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE, typename TT = eccTraits<MC, T> >
 inline void set_ice_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::ICE_COUNT, TT::ICE_COUNT_LEN>(i_value);
@@ -348,15 +365,16 @@ inline void set_ice_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_va
 
 ///
 /// @brief get_ice_count
-/// @tparam T fapi2 Target Type defaults to DEFAULT_MC_TARGET
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccTraits<MC>::MC_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in] i_data the register value
 /// @param[out] o_value the value of the field
 /// @note MBSEC0Q_ICE_COUNT: ICE (IMPE) Count This is a 12-bit count of
 /// @note Intermittent Marked-Placed Chip Error events. Will freeze its value upon
 /// @note incrementing to the max value until reset.
 ///
-template< fapi2::TargetType T = DEFAULT_MC_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE, typename TT = eccTraits<MC, T> >
 inline void get_ice_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::ICE_COUNT, TT::ICE_COUNT_LEN>(o_value);
@@ -365,15 +383,16 @@ inline void get_ice_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_va
 
 ///
 /// @brief set_ue_count
-/// @tparam T fapi2 Target Type defaults to DEFAULT_MC_TARGET
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccTraits<MC>::MC_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in, out] io_data the register value
 /// @param[in] i_value the value of the field
 /// @note MBSEC0Q_UE_COUNT: UE Count This is a 12-bit count of
 /// @note Uncorrectable Error events. Will freeze its value upon
 /// @note incrementing to the max value until reset.
 ///
-template< fapi2::TargetType T = DEFAULT_MC_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE, typename TT = eccTraits<MC, T> >
 inline void set_ue_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::UE_COUNT, TT::UE_COUNT_LEN>(i_value);
@@ -382,15 +401,16 @@ inline void set_ue_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_val
 
 ///
 /// @brief get_ue_count
-/// @tparam T fapi2 Target Type defaults to DEFAULT_MC_TARGET
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccTraits<MC>::MC_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in] i_data the register value
 /// @param[out] o_value the value of the field
 /// @note MBSEC0Q_UE_COUNT: UE Count This is a 12-bit count of
 /// @note Uncorrectable Error events. Will freeze its value upon
 /// @note incrementing to the max value until reset.
 ///
-template< fapi2::TargetType T = DEFAULT_MC_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE, typename TT = eccTraits<MC, T> >
 inline void get_ue_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::UE_COUNT, TT::UE_COUNT_LEN>(o_value);
@@ -399,15 +419,16 @@ inline void get_ue_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_val
 
 ///
 /// @brief set_aue_count
-/// @tparam T fapi2 Target Type defaults to DEFAULT_MC_TARGET
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccTraits<MC>::MC_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in, out] io_data the register value
 /// @param[in] i_value the value of the field
 /// @note MBSEC0Q_AUE_COUNT: AUE Count This is a 12-bit count of
 /// @note AUE Parity Error events. Will freeze its value upon
 /// @note incrementing to the max value until reset.
 ///
-template< fapi2::TargetType T = DEFAULT_MC_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE, typename TT = eccTraits<MC, T> >
 inline void set_aue_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::AUE_COUNT, TT::AUE_COUNT_LEN>(i_value);
@@ -416,15 +437,16 @@ inline void set_aue_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_va
 
 ///
 /// @brief get_aue_count
-/// @tparam T fapi2 Target Type defaults to DEFAULT_MC_TARGET
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccTraits<MC>::MC_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in] i_data the register value
 /// @param[out] o_value the value of the field
 /// @note MBSEC0Q_AUE_COUNT: AUE Count This is a 12-bit count of
 /// @note AUE Parity Error events. Will freeze its value upon
 /// @note incrementing to the max value until reset.
 ///
-template< fapi2::TargetType T = DEFAULT_MC_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE, typename TT = eccTraits<MC, T> >
 inline void get_aue_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::AUE_COUNT, TT::AUE_COUNT_LEN>(o_value);
@@ -433,15 +455,16 @@ inline void get_aue_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_va
 
 ///
 /// @brief set_rce_count
-/// @tparam T fapi2 Target Type defaults to DEFAULT_MC_TARGET
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccTraits<MC>::MC_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in, out] io_data the register value
 /// @param[in] i_value the value of the field
 /// @note MBSEC0Q_RCE_COUNT: RCE Count This is a 12-bit count of
 /// @note Retried Correctable Error events. Will freeze its value upon
 /// @note incrementing to the max value until reset.
 ///
-template< fapi2::TargetType T = DEFAULT_MC_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE, typename TT = eccTraits<MC, T> >
 inline void set_rce_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::RCE_COUNT, TT::RCE_COUNT_LEN>(i_value);
@@ -450,15 +473,16 @@ inline void set_rce_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_va
 
 ///
 /// @brief get_rce_count
-/// @tparam T fapi2 Target Type defaults to DEFAULT_MC_TARGET
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccTraits<MC>::MC_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in] i_data the register value
 /// @param[out] o_value the value of the field
 /// @note MBSEC0Q_RCE_COUNT: RCE Count This is a 12-bit count of
 /// @note Retried Correctable Error events. Will freeze its value upon
 /// @note incrementing to the max value until reset.
 ///
-template< fapi2::TargetType T = DEFAULT_MC_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE, typename TT = eccTraits<MC, T> >
 inline void get_rce_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::RCE_COUNT, TT::RCE_COUNT_LEN>(o_value);
@@ -472,13 +496,14 @@ namespace mark_symbol_count_reg
 
 ///
 /// @brief Read MBS Mark Symbol Error Count Register (MBSMSECQ)
+/// @tparam MC the memory controller type
 /// @tparam T fapi2 Target Type - derived from i_target's type
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in] i_target the fapi2 target of the mcbist
 /// @param[out] o_data the value of the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-template< fapi2::TargetType T, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 inline fapi2::ReturnCode read( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
     FAPI_TRY( mss::getScom(i_target, TT::MARK_SYMBOL_COUNT_REG, o_data) );
@@ -489,13 +514,14 @@ fapi_try_exit:
 
 ///
 /// @brief Write MBS Mark Symbol Error Count Register (MBSMSECQ)
+/// @tparam MC the memory controller type
 /// @tparam T fapi2 Target Type - derived from i_target's type
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in] i_target the fapi2 target of the mcbist
 /// @param[in] i_data the value to write to the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-template< fapi2::TargetType T, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 inline fapi2::ReturnCode write( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
     FAPI_TRY( mss::putScom(i_target, TT::MARK_SYMBOL_COUNT_REG, i_data) );
@@ -506,15 +532,16 @@ fapi_try_exit:
 
 ///
 /// @brief set_symbol0_count
-/// @tparam T fapi2 Target Type defaults to DEFAULT_MC_TARGET
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccTraits<MC>::MC_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in, out] io_data the register value
 /// @param[in] i_value the value of the field
 /// @note MBSMSECQ_MCE_SYMBOL0_COUNT: MCE Symbol 0 Error Count This is a 8-bit count
 /// @note that increments on MCE when Symbol 0 under chip mark takes error. Will freeze
 /// @note its value upon incrementing to the max value until reset.
 ///
-template< fapi2::TargetType T = DEFAULT_MC_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE, typename TT = eccTraits<MC, T> >
 inline void set_symbol0_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::SYMBOL0_COUNT, TT::SYMBOL0_COUNT_LEN>(i_value);
@@ -523,15 +550,16 @@ inline void set_symbol0_count( fapi2::buffer<uint64_t>& io_data, const uint64_t 
 
 ///
 /// @brief get_symbol0_count
-/// @tparam T fapi2 Target Type defaults to DEFAULT_MC_TARGET
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccTraits<MC>::MC_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in] i_data the register value
 /// @param[out] o_value the value of the field
 /// @note MBSMSECQ_MCE_SYMBOL0_COUNT: MCE Symbol 0 Error Count This is a 8-bit count
 /// @note that increments on MCE when Symbol 0 under chip mark takes error. Will freeze
 /// @note its value upon incrementing to the max value until reset.
 ///
-template< fapi2::TargetType T = DEFAULT_MC_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE, typename TT = eccTraits<MC, T> >
 inline void get_symbol0_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::SYMBOL0_COUNT, TT::SYMBOL0_COUNT_LEN>(o_value);
@@ -540,15 +568,16 @@ inline void get_symbol0_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& 
 
 ///
 /// @brief set_symbol1_count
-/// @tparam T fapi2 Target Type defaults to DEFAULT_MC_TARGET
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccTraits<MC>::MC_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in, out] io_data the register value
 /// @param[in] i_value the value of the field
 /// @note MBSMSECQ_MCE_SYMBOL1_COUNT: MCE Symbol 1 Error Count This is a 8-bit count
 /// @note that increments on MCE when Symbol 1 under chip mark takes error. Will freeze
 /// @note its value upon incrementing to the max value until reset.
 ///
-template< fapi2::TargetType T = DEFAULT_MC_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE, typename TT = eccTraits<MC, T> >
 inline void set_symbol1_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::SYMBOL1_COUNT, TT::SYMBOL1_COUNT_LEN>(i_value);
@@ -557,15 +586,16 @@ inline void set_symbol1_count( fapi2::buffer<uint64_t>& io_data, const uint64_t 
 
 ///
 /// @brief get_symbol1_count
-/// @tparam T fapi2 Target Type defaults to DEFAULT_MC_TARGET
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccTraits<MC>::MC_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in] i_data the register value
 /// @param[out] o_value the value of the field
 /// @note MBSMSECQ_MCE_SYMBOL1_COUNT: MCE Symbol 1 Error Count This is a 8-bit count
 /// @note that increments on MCE when Symbol 1 under chip mark takes error. Will freeze
 /// @note its value upon incrementing to the max value until reset.
 ///
-template< fapi2::TargetType T = DEFAULT_MC_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE, typename TT = eccTraits<MC, T> >
 inline void get_symbol1_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::SYMBOL1_COUNT, TT::SYMBOL1_COUNT_LEN>(o_value);
@@ -574,15 +604,16 @@ inline void get_symbol1_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& 
 
 ///
 /// @brief set_symbol2_count
-/// @tparam T fapi2 Target Type defaults to DEFAULT_MC_TARGET
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccTraits<MC>::MC_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in, out] io_data the register value
 /// @param[in] i_value the value of the field
 /// @note MBSMSECQ_MCE_SYMBOL2_COUNT: MCE Symbol 2 Error Count This is a 8-bit count
 /// @note that increments on MCE when Symbol 2 under chip mark takes error. Will freeze
 /// @note its value upon incrementing to the max value until reset.
 ///
-template< fapi2::TargetType T = DEFAULT_MC_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE, typename TT = eccTraits<MC, T> >
 inline void set_symbol2_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::SYMBOL2_COUNT, TT::SYMBOL2_COUNT_LEN>(i_value);
@@ -591,15 +622,16 @@ inline void set_symbol2_count( fapi2::buffer<uint64_t>& io_data, const uint64_t 
 
 ///
 /// @brief get_symbol2_count
-/// @tparam T fapi2 Target Type defaults to DEFAULT_MC_TARGET
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccTraits<MC>::MC_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in] i_data the register value
 /// @param[out] o_value the value of the field
 /// @note MBSMSECQ_MCE_SYMBOL2_COUNT: MCE Symbol 2 Error Count This is a 8-bit count
 /// @note that increments on MCE when Symbol 2 under chip mark takes error. Will freeze
 /// @note its value upon incrementing to the max value until reset.
 ///
-template< fapi2::TargetType T = DEFAULT_MC_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE, typename TT = eccTraits<MC, T> >
 inline void get_symbol2_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::SYMBOL2_COUNT, TT::SYMBOL2_COUNT_LEN>(o_value);
@@ -608,15 +640,16 @@ inline void get_symbol2_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& 
 
 ///
 /// @brief set_symbol3_count
-/// @tparam T fapi2 Target Type defaults to DEFAULT_MC_TARGET
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccTraits<MC>::MC_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in, out] io_data the register value
 /// @param[in] i_value the value of the field
 /// @note MBSMSECQ_MCE_SYMBOL3_COUNT: MCE Symbol 3 Error Count This is a 8-bit count
 /// @note that increments on MCE when Symbol 3 under chip mark takes error. Will freeze
 /// @note its value upon incrementing to the max value until reset.
 ///
-template< fapi2::TargetType T = DEFAULT_MC_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE, typename TT = eccTraits<MC, T> >
 inline void set_symbol3_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::SYMBOL3_COUNT, TT::SYMBOL3_COUNT_LEN>(i_value);
@@ -625,15 +658,16 @@ inline void set_symbol3_count( fapi2::buffer<uint64_t>& io_data, const uint64_t 
 
 ///
 /// @brief get_symbol3_count
-/// @tparam T fapi2 Target Type defaults to DEFAULT_MC_TARGET
-/// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccTraits<MC>::MC_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in] i_data the register value
 /// @param[out] o_value the value of the field
 /// @note MBSMSECQ_MCE_SYMBOL3_COUNT: MCE Symbol 3 Error Count This is a 8-bit count
 /// @note that increments on MCE when Symbol 3 under chip mark takes error. Will freeze
 /// @note its value upon incrementing to the max value until reset.
 ///
-template< fapi2::TargetType T = DEFAULT_MC_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE, typename TT = eccTraits<MC, T> >
 inline void get_symbol3_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::SYMBOL3_COUNT, TT::SYMBOL3_COUNT_LEN>(o_value);

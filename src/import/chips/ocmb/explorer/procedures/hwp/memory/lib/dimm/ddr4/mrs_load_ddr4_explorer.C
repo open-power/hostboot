@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,7 @@
 
 #include <lib/shared/exp_defaults.H>
 #include <lib/ccs/ccs_traits_explorer.H>
+#include <lib/ecc/ecc_traits_explorer.H>
 #include <lib/dimm/exp_mrs_traits.H>
 #include <fapi2.H>
 #include <mss_generic_attribute_getters.H>

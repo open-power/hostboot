@@ -47,8 +47,20 @@ namespace mss
 {
 
 ///
+/// @class eccMCTraits
+/// @brief a collection of traits associated with the Explorer memory controller
+///
+template<>
+class eccMCTraits<mc_type::EXPLORER>
+{
+    public:
+        static constexpr fapi2::TargetType MEM_PORT_TARGET_TYPE = fapi2::TARGET_TYPE_MEM_PORT;
+        static constexpr fapi2::TargetType MC_TARGET_TYPE = fapi2::TARGET_TYPE_OCMB_CHIP;
+};
+
+///
 /// @class eccTraits
-/// @brief a collection of traits associated with the Axone Mem Port ECC interface
+/// @brief a collection of traits associated with the Explorer Mem Port ECC interface
 ///
 template<>
 class eccTraits<mc_type::EXPLORER, fapi2::TARGET_TYPE_MEM_PORT>

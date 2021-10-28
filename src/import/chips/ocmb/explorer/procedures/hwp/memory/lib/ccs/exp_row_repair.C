@@ -37,6 +37,7 @@
 #include <fapi2.H>
 #include <lib/shared/exp_defaults.H>
 #include <lib/shared/exp_consts.H>
+#include <lib/ecc/ecc_traits_explorer.H>
 #include <lib/ccs/ccs_traits_explorer.H>
 #include <lib/mcbist/exp_mcbist_traits.H>
 #include <lib/dimm/exp_mrs_traits.H>

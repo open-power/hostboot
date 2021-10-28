@@ -37,6 +37,7 @@
 #include <exp_deploy_row_repairs.H>
 #include <fapi2.H>
 #include <lib/shared/exp_defaults.H>
+#include <lib/ecc/ecc_traits_explorer.H>
 #include <lib/shared/exp_consts.H>
 #include <lib/dimm/exp_mrs_traits.H>
 #include <lib/ccs/exp_row_repair.H>

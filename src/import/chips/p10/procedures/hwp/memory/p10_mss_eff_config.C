@@ -36,6 +36,7 @@
 #include <fapi2.H>
 #include <p10_mss_eff_config.H>
 #include <lib/shared/exp_defaults.H>
+#include <lib/ecc/ecc_traits_explorer.H>
 #include <lib/dimm/exp_rank.H>
 #include <generic/memory/lib/utils/mss_rank.H>
 #include <generic/memory/lib/data_engine/data_engine.H>

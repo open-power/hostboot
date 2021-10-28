@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,8 +42,16 @@ namespace mss
 {
 
 ///
-/// @class eccTraits
+/// @class eccMCTraits
 /// @brief a collection of traits associated with the MC ECC interface
+/// @tparam T fapi2::TargetType representing the memory controller
+///
+template< mss::mc_type MC >
+class eccMCTraits;
+
+///
+/// @class eccTraits
+/// @brief a collection of traits associated with the MC/Target ECC interface
 /// @tparam T fapi2::TargetType representing the memory controller
 ///
 template< mss::mc_type MC, fapi2::TargetType T >
