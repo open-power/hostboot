@@ -60,6 +60,39 @@ uint32_t readMdsCtlr( TARGETING::TargetHandle_t i_target, uint32_t i_addr,
  */
 uint32_t clearMediaErrLogs( ExtensibleChip * i_ocmb );
 
+/**
+ * @brief  This is called to get the poison count from the MDS DDIMMs media
+ *         controller
+ * @param  i_target      The input MDS_CTLR/OCMB
+ * @param  o_poisonCount The output poison count
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T>
+uint32_t getPoisonCount( TARGETING::TargetHandle_t i_target,
+                         uint8_t & o_poisonCount );
+
+/**
+ * @brief  This is called to get the single bit error count from the MDS DDIMMs
+ *         media controller
+ * @param  i_target         The input MDS_CTLR/OCMB
+ * @param  o_singleBitCount The output single bit error count
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T>
+uint32_t getSingleBitCount( TARGETING::TargetHandle_t i_target,
+                            uint8_t & o_singleBitCount );
+
+/**
+ * @brief  This is called to get the double bit error count from the MDS DDIMMs
+ *         media controller
+ * @param  i_target         The input MDS_CTLR/OCMB
+ * @param  o_singleBitCount The output double bit error count
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T>
+uint32_t getDoubleBitCount( TARGETING::TargetHandle_t i_target,
+                            uint8_t & o_doubleBitCount );
+
 } // end namespace MDS
 
 } // end namespace PRDF

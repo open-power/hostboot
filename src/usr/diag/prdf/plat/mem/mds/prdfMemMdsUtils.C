@@ -127,6 +127,137 @@ uint32_t clearMediaErrLogs( ExtensibleChip * i_ocmb )
 
 //------------------------------------------------------------------------------
 
+// This enum defines the types of interface errors to be read from the media
+// controller for the below __getErrorCount function. The value of each type is
+// the address that needs to be read from.
+enum interfaceErr: uint32_t
+{
+    SINGLE_BIT = 0x000C0013,
+    DOUBLE_BIT = 0x000C0016,
+    POISON     = 0x000C0019,
+};
+
+uint32_t __getInterfaceErrCount( TargetHandle_t i_mdsCtlr, uint32_t i_addr,
+                                 uint8_t & o_errCount )
+{
+    #define PRDF_FUNC "[__getInterfaceErrCount] "
+
+    PRDF_ASSERT( nullptr != i_mdsCtlr );
+    PRDF_ASSERT( TYPE_MDS_CTLR == getTargetType(i_mdsCtlr) );
+
+    uint32_t o_rc = SUCCESS;
+
+    // The error counts we are interested in reading are defined in the first
+    // byte of the data, the first bit being the counter reset bit, and the
+    // remaining 7 bits being the counter itself.
+    uint32_t data = 0;
+    o_errCount = 0;
+
+    o_rc = readMdsCtlr<TYPE_MDS_CTLR>( i_mdsCtlr, i_addr, data );
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "readMdsCtlr(0x%08x, 0x%08x) failed.",
+                  getHuid(i_mdsCtlr), i_addr );
+    }
+    else
+    {
+        o_errCount = (data >> 24) & 0x7f;
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t getSingleBitCount<TYPE_MDS_CTLR>( TargetHandle_t i_mdsCtlr,
+                                           uint8_t & o_singleBitCount )
+{
+    PRDF_ASSERT( nullptr != i_mdsCtlr );
+    PRDF_ASSERT( TYPE_MDS_CTLR == getTargetType(i_mdsCtlr) );
+
+    // The single bit error counter is located in control word FCRC4x (8 bits)
+    // on the media controller which begins at address 0x000C0013.
+    o_singleBitCount = 0;
+
+    return __getInterfaceErrCount( i_mdsCtlr, interfaceErr::SINGLE_BIT,
+                                   o_singleBitCount );
+}
+
+template<>
+uint32_t getSingleBitCount<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
+                                            uint8_t & o_singleBitCount )
+{
+    PRDF_ASSERT( nullptr != i_ocmb );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == getTargetType(i_ocmb) );
+
+    TargetHandle_t mdsCtlr = getConnectedChild( i_ocmb, TYPE_MDS_CTLR, 0 );
+
+    return getSingleBitCount<TYPE_MDS_CTLR>( mdsCtlr, o_singleBitCount );
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t getDoubleBitCount<TYPE_MDS_CTLR>( TargetHandle_t i_mdsCtlr,
+                                           uint8_t & o_doubleBitCount )
+{
+    PRDF_ASSERT( nullptr != i_mdsCtlr );
+    PRDF_ASSERT( TYPE_MDS_CTLR == getTargetType(i_mdsCtlr) );
+
+    // The double bit error counter is located in control word FCRC7x (8 bits)
+    // on the media controller which begins at address 0x000C0016.
+    o_doubleBitCount = 0;
+
+    return __getInterfaceErrCount( i_mdsCtlr, interfaceErr::DOUBLE_BIT,
+                                   o_doubleBitCount );
+}
+
+template<>
+uint32_t getDoubleBitCount<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
+                                            uint8_t & o_doubleBitCount )
+{
+    PRDF_ASSERT( nullptr != i_ocmb );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == getTargetType(i_ocmb) );
+
+    TargetHandle_t mdsCtlr = getConnectedChild( i_ocmb, TYPE_MDS_CTLR, 0 );
+
+    return getDoubleBitCount<TYPE_MDS_CTLR>( mdsCtlr, o_doubleBitCount );
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t getPoisonCount<TYPE_MDS_CTLR>( TargetHandle_t i_mdsCtlr,
+                                        uint8_t & o_poisonCount )
+{
+    PRDF_ASSERT( nullptr != i_mdsCtlr );
+    PRDF_ASSERT( TYPE_MDS_CTLR == getTargetType(i_mdsCtlr) );
+
+    // The poison counter is located in control word FCRCAx (8 bits) on the
+    // media controller which begins at address 0x000C0019.
+    o_poisonCount = 0;
+
+    return __getInterfaceErrCount( i_mdsCtlr, interfaceErr::POISON,
+                                   o_poisonCount );
+}
+
+template<>
+uint32_t getPoisonCount<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
+                                         uint8_t & o_poisonCount )
+{
+    PRDF_ASSERT( nullptr != i_ocmb );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == getTargetType(i_ocmb) );
+
+    TargetHandle_t mdsCtlr = getConnectedChild( i_ocmb, TYPE_MDS_CTLR, 0 );
+
+    return getPoisonCount<TYPE_MDS_CTLR>( mdsCtlr, o_poisonCount );
+}
+
+//------------------------------------------------------------------------------
+
 } // end namespace MDS
 
 } // end namespace PRDF
