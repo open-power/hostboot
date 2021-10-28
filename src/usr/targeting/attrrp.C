@@ -1723,4 +1723,169 @@ namespace TARGETING
         TRACFCOMP( g_trac_targeting, ENTER_MRK"AttrRP::saveOverrideTank: io_size=%d", io_size );
         return l_err;
     }
+
+    errlHndl_t AttrRP::mergeAttributes()
+    {
+        TRACFCOMP(g_trac_targeting, ENTER_MRK"AttrRP::mergeAttributes");
+        errlHndl_t l_errl = nullptr;
+        do {
+        PNOR::SectionInfo_t l_hbdSectionInfo;
+        // This code assumes that the secure provider has alredy loaded
+        // HBD_DATA and that it has not been unloaded yet.
+        l_errl = PNOR::getSectionInfo(PNOR::HB_DATA,
+                                      l_hbdSectionInfo);
+        if(l_errl)
+        {
+            TRACFCOMP(g_trac_targeting, ERR_MRK"AttrRP::mergeAttributes: could not get HBD section info");
+            break;
+        }
+
+        // The existence of HBD_RW is driven by the HPT enabled bit of HBD,
+        // so check that bit to make sure we actually need to perform the merge
+        // (HBD_RW exists).
+        if(l_hbdSectionInfo.hasHashTable)
+        {
+            PNOR::SectionInfo_t l_hbd_rwSectionInfo;
+            l_errl = PNOR::getSectionInfo(PNOR::HB_DATA_RW,
+                                          l_hbd_rwSectionInfo);
+            if(l_errl)
+            {
+                TRACFCOMP(g_trac_targeting, ERR_MRK"AttrRP::mergeAttributes: could not get HBD_RW section info");
+                break;
+            }
+            void* l_hbdPtr = reinterpret_cast<void*>(l_hbdSectionInfo.vaddr);
+            rw_attr_section_t* l_hbdRwPtr = reinterpret_cast<rw_attr_section_t*>(l_hbd_rwSectionInfo.vaddr);
+
+            // The map of attributes that have been persisted so far (old
+            // attributes)
+            huid_rw_attrs_map l_persistedRwAttrMap;
+            l_errl = parseRWAttributeData(l_hbdRwPtr, l_persistedRwAttrMap);
+            if(l_errl)
+            {
+                break;
+            }
+
+            section_metadata_mem_layout_t* l_attrMetadataPtr = nullptr;
+            l_errl = getAttrMetadataPtr(l_hbdPtr, l_attrMetadataPtr);
+            if(l_errl)
+            {
+                break;
+            }
+
+            // The map of new attributes from the current HBD
+            attr_metadata_map l_newRwAttrMetadataMap;
+            l_errl = parseAttrMetadataSection(l_attrMetadataPtr, l_newRwAttrMetadataMap);
+            if(l_errl)
+            {
+                break;
+            }
+
+            // Grab all the targets to check their attributes
+            TargetRangeFilter l_allTargets(targetService().begin(),
+                                           targetService().end(),
+                                           nullptr);
+
+            for(; l_allTargets; ++l_allTargets)
+            {
+                const auto l_targetHuid = l_allTargets->getAttr<ATTR_HUID>();
+                if(l_persistedRwAttrMap.find(l_targetHuid) == l_persistedRwAttrMap.end())
+                {
+                    // Target is not in RW data; continue to the next target
+                    TRACFCOMP(g_trac_targeting, INFO_MRK"AttrRP::mergeAttributes: HUID 0x%x is not found in persistent section; keeping the attribute value",
+                              l_targetHuid);
+                    continue;
+                }
+
+                TRACDCOMP(g_trac_targeting, INFO_MRK"AttrRP::mergeAttributes: Target HUID 0x%x",
+                          l_targetHuid);
+
+                // Get all new (non-persisted) attributes and filter out only
+                // the attributes with read-write persistency
+                ATTRIBUTE_ID* l_attrIdArr = nullptr;
+                AbstractPointer<void>* l_attrAddressesArr = nullptr;
+                const uint32_t l_attrCnt = targetService().getTargetAttributes(*l_allTargets,
+                                                                         &TARG_GET_SINGLETON(theAttrRP),
+                                                                         l_attrIdArr,
+                                                                         l_attrAddressesArr);
+                TRACDCOMP(g_trac_targeting, INFO_MRK"AttrRP::mergeAttributes: Found %d attributes for the target",
+                          l_attrCnt);
+                // Iterate the non-persistent RW attributes and compair their
+                // values and metadata to the attributes we have preserved so
+                // far
+                for(uint32_t l_attrNum = 0; l_attrNum < l_attrCnt; ++l_attrNum)
+                {
+                    ATTRIBUTE_ID* l_attrId = l_attrIdArr + l_attrNum;
+                    if(l_newRwAttrMetadataMap[*l_attrId].attrPersistency != SECTION_TYPE_PNOR_RW)
+                    {
+                        continue;
+                    }
+
+                    TRACDCOMP(g_trac_targeting, INFO_MRK"AttrRP::mergeAttributes: Attribute 0x%x is RW",
+                              *l_attrId);
+                    // Get the attribute data out of the persistent attr
+                    // section
+                    if(l_persistedRwAttrMap[l_targetHuid].find(*l_attrId) == l_persistedRwAttrMap[l_targetHuid].end())
+                    {
+                        TRACFCOMP(g_trac_targeting, INFO_MRK"AttrRP::mergeAttributes: HUID 0x%x  attr ID 0x%x is not found in the persistent section; keeping the new attribute value",
+                                  l_targetHuid, *l_attrId)
+                        continue;
+                    }
+                    TRACDCOMP(g_trac_targeting, INFO_MRK"AttrRP::mergeAttributes: found attribute ID 0x%x HUID 0x%x in persistent data",
+                              *l_attrId, l_targetHuid);
+                    TRACDCOMP(g_trac_targeting, INFO_MRK"AttrRP::mergeAttributes: attr size in persistent: %d",
+                              l_persistedRwAttrMap[l_targetHuid][*l_attrId].metadata.attrSize);
+                    TRACDBIN(g_trac_targeting, INFO_MRK"AttrRP::mergeAttributes: value in persistent data", l_persistedRwAttrMap[l_targetHuid][*l_attrId].value.data(), l_persistedRwAttrMap[l_targetHuid][*l_attrId].metadata.attrSize);
+                    if(l_persistedRwAttrMap[l_targetHuid][*l_attrId].metadata.attrSize ==
+                       l_newRwAttrMetadataMap[*l_attrId].attrSize)
+                    {
+                        // Everything matched up to this point. Now
+                        // compare the attr values.
+                        void* l_attrAddr = nullptr;
+                        l_allTargets->_getAttrPtr(*l_attrId,
+                                                  &TARG_GET_SINGLETON(theAttrRP),
+                                                  l_attrIdArr,
+                                                  l_attrAddressesArr,
+                                                  l_attrAddr);
+                        if(l_attrAddr)
+                        {
+                            if(memcmp(l_attrAddr,
+                                      l_persistedRwAttrMap[l_targetHuid][*l_attrId].value.data(),
+                                      l_persistedRwAttrMap[l_targetHuid][*l_attrId].metadata.attrSize))
+                            {
+                                TRACFCOMP(g_trac_targeting, INFO_MRK"AttrRP::mergeAttributes: HUID 0x%x  attr ID 0x%x values don't match. Keeping the persisted value",
+                                          l_targetHuid, *l_attrId);
+                                TRACFBIN(g_trac_targeting, INFO_MRK"AttrRP::mergeAttributes: Incoming value",
+                                         l_attrAddr,
+                                         l_persistedRwAttrMap[l_targetHuid][*l_attrId].metadata.attrSize);
+                                TRACFBIN(g_trac_targeting, INFO_MRK"AttrRP::mergeAttributes: Persisted value",
+                                         l_persistedRwAttrMap[l_targetHuid][*l_attrId].value.data(),
+                                         l_persistedRwAttrMap[l_targetHuid][*l_attrId].metadata.attrSize);
+                                memcpy(l_attrAddr,
+                                       l_persistedRwAttrMap[l_targetHuid][*l_attrId].value.data(),
+                                       l_persistedRwAttrMap[l_targetHuid][*l_attrId].metadata.attrSize);
+                            }
+                        }
+                        else // attr value is nullptr
+                        {
+                            TRACFCOMP(g_trac_targeting, INFO_MRK"AttrRP::mergeAttributes: HUID 0x%x  attr ID 0x%x not found",
+                                      l_targetHuid, *l_attrId);
+                        }
+                    }
+                    else // attr size is different
+                    {
+                        TRACFCOMP(g_trac_targeting, INFO_MRK"AttrRP::mergeAttributes: HUID 0x%x  attr ID 0x%x's size has changed. Old size: %d; new size: %d. Keeping the new value/size",
+                                  l_targetHuid, *l_attrId, l_persistedRwAttrMap[l_targetHuid][*l_attrId].metadata.attrSize, l_newRwAttrMetadataMap[*l_attrId].attrSize);
+                    }
+                } // for each attribute
+            } // for each target
+        }
+        else
+        {
+            TRACFCOMP(g_trac_targeting,INFO_MRK"AttrRP::mergeAttributes: HBD_RW doesn't exist");
+        }
+        } while(0);
+
+        TRACFCOMP(g_trac_targeting, EXIT_MRK"AttrRP::mergeAttributes");
+        return l_errl;
+    }
 };

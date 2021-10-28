@@ -503,6 +503,18 @@ class AttrRP
         static errlHndl_t saveOverrides( uint8_t* i_dest,
                                          size_t& io_size );
 
+        /**
+         * @brief Performs the merge of attributes from the HBD_RW PNOR section
+         *        to HBD section. Non-volatile, read-write attributes are copied
+         *        into the HBD partition from HBD_RW if their sizes and
+         *        persistencies match across HBD and HBD_RW. Attributes whose
+         *        size or persistency changed retain the value from HBD
+         *        partition.
+         *
+         * @return nullptr on success; non-nullptr on error.
+         */
+        static errlHndl_t mergeAttributes();
+
 #else
         /**
          *  @brief Get count of nodes handled by attribute resource provider.

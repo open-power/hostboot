@@ -971,6 +971,11 @@ class Target
                                                               uint8_t);
 #endif
 
+#ifndef __HOSTBOOT_RUNTIME
+        // FIXME RTC: 205059 Opening the whole AttrRP is too much; need to only
+        // friend AttrRP::mergeAttributes
+        friend class AttrRP;
+#endif
 
          friend bool fapi2::
                      platAttrSvc::
