@@ -5561,6 +5561,11 @@
       <name>CHECK_BUT_NO_UPDATE</name>
       <value>3</value>
     </enumerator>
+    <enumerator>
+      <!-- Force an update for the MDS -->
+      <name>MDS_FORCE_UPDATE</name>
+      <value>4</value>
+    </enumerator>
     <id>OCMB_FW_UPDATE_BEHAVIOR</id>
   </enumerationType>
 

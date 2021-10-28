@@ -37,6 +37,7 @@ namespace EXPUPD
         MOD_PARSE_TAGGED_DATA_TRIPLET = 0x02,
         MOD_SET_FW_VERSION_INFO = 0x03,
         MOD_WRITE_EXPLORER_FW_VERSION = 0x04,
+        MOD_IS_MDS_DDIMM = 0x05,
     };
 
     enum ExpUpdReasonCode
@@ -51,6 +52,7 @@ namespace EXPUPD
         INVALID_TAG_ID                            = EXPUPD_COMP_ID | 0x08,
         MISSING_FW_VERSION                        = EXPUPD_COMP_ID | 0x09,
         UNSUPPORTED_NUMBER_OF_DIMMS               = EXPUPD_COMP_ID | 0x0a,
+        DEVICE_READ_FAIL                          = EXPUPD_COMP_ID | 0x0b,
     };
 
 }; // namespace EXPUPD

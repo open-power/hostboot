@@ -136,6 +136,71 @@ errlHndl_t getFlashedHash(TargetHandle_t i_target, sha512regs_t& o_regs)
 }
 
 /**
+ * @brief Determine if the OCMB chip is a MDS DDIMM
+ *        If an error occurs while trying to determine this, the error is deleted
+ *        and false will be returned.
+ *
+ * @param[in] i_ocmb        OCMB chip target handler from which to read the SPD from
+ * @return true if OCMB chip is a MDS DDIMM; false otherwise
+ */
+bool isMdsDdimm(TargetHandle_t i_ocmb)
+{
+    // Assume the OCMB chip is *not* a MDS DDIMM until determined otherwise
+    bool l_isMdsDdimm(false);
+
+    errlHndl_t l_err(nullptr);
+
+    do
+    {
+        // Read the memory type from the SPD of the OCMB chip
+        size_t l_memTypeSize(SPD::MEM_TYPE_SZ);
+        uint8_t l_memType(0);
+        l_err = deviceRead(i_ocmb,
+                           &l_memType,
+                           l_memTypeSize,
+                           DEVICE_SPD_ADDRESS(SPD::BASIC_MEMORY_TYPE));
+
+        // If an error occurred, then commit the error and return false
+        if( l_err )
+        {
+            TRACFCOMP(g_trac_expupd, ERR_MRK"isMdsDdimm> Error trying to read SPD for 0x%0.8X, "
+                                     "committing error and returning false", get_huid(i_ocmb));
+
+           /*@
+            * @errortype
+            * @moduleid        EXPUPD::MOD_IS_MDS_DDIMM
+            * @reasoncode      EXPUPD::DEVICE_READ_FAIL
+            * @userdata1       HUID of OCMB target being examined
+            * @userdata2       <unused>
+            * @devdesc         Device read failed on OCMB target - indeterminate
+            *                  if OCMB is an MDS DDIMM
+            * @custdesc        Error occurred during system boot.
+            */
+            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                            EXPUPD::MOD_IS_MDS_DDIMM,
+                                            EXPUPD::DEVICE_READ_FAIL,
+                                            get_huid(i_ocmb),
+                                            0,
+                                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            errlCommit(l_err, EXPUPD_COMP_ID);
+            break;
+        }
+
+        // If the memory type is indeed a MDS DDIMM then return true
+        if (l_memType == SPD::SPD_MDS_TYPE)
+        {
+           l_isMdsDdimm = true;
+        }
+    }
+    while (0);
+
+    TRACFCOMP(g_trac_expupd, INFO_MRK"isMdsDdimm> returning %s for 0x%0.8X",
+                             (l_isMdsDdimm ? "true" : "false"), get_huid(i_ocmb) );
+    return l_isMdsDdimm;
+} // isMdsDdimm
+
+
+/**
  * @brief Write Explorer Firmware version into SPD of the given OCMB target.
  * The SPD has byte 960 to 1023 reserved for this information.
  * Any errors found will be committed inside of the function itself.
@@ -409,6 +474,9 @@ bool explorerUpdateCheck(IStepError& o_stepError,
     o_imageLoaded = false;
     bool l_attemptUpdate = true;
 
+    // Clear flash update list.  Will populate with OCMB chips that need updating
+    o_flashUpdateList.clear();
+
     // Get a list of OCMB chips
     TargetHandleList l_ocmbTargetList;
     getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
@@ -507,6 +575,13 @@ bool explorerUpdateCheck(IStepError& o_stepError,
             break;
         }
 
+        // A quick reference for determining if forcing updates on MDS targets only
+        bool l_forceMdsUpdate = (OCMB_FW_UPDATE_BEHAVIOR_MDS_FORCE_UPDATE == l_forced_behavior);
+        if (l_forceMdsUpdate)
+        {
+            TRACFCOMP(g_trac_expupd, "explorerUpdateCheck: Forcing updates on MDS targets only");
+        }
+
         // For each explorer chip, compare flash hash with PNOR hash and
         // create a list of explorer chips with differing hash values.
         for(const auto & l_ocmbTarget : l_ocmbTargetList)
@@ -520,6 +595,32 @@ bool explorerUpdateCheck(IStepError& o_stepError,
                 TRACFCOMP(g_trac_expupd,
                       "explorerUpdateCheck: skipping update of non-Explorer OCMB 0x%08x",
                       get_huid(l_ocmbTarget));
+                continue;
+            }
+
+            // A quick reference for determining if OCMB target is an MDS DDIMM or not
+            bool l_isMdsDimm = isMdsDdimm(l_ocmbTarget);
+
+            // If forcing updates on MDS then *only* update MDS targets
+            if (l_forceMdsUpdate)
+            {
+                // If target is an MDS then update it
+                if (l_isMdsDimm)
+                {
+                    o_flashUpdateList.push_back(l_ocmbTarget);
+                    o_rebootRequired = true;
+
+                    TRACFCOMP(g_trac_expupd,
+                              "explorerUpdateCheck: Forcing an update on OCMB MDS DIMM "
+                              "[0x%08x]", get_huid(l_ocmbTarget));
+                }
+                // Skip the rest of the code that deals with non-MDS targets
+                continue;
+            }
+            // If not forcing MDS updates then only want to update non-MDS targets
+            // therefore if this an MDS target, skip
+            else if (l_isMdsDimm)
+            {
                 continue;
             }
 
