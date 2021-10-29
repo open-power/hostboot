@@ -226,6 +226,7 @@ errlHndl_t SbePsu::allocateFFDCBuffer(TARGETING::Target * i_target)
         uint64_t l_instance = i_target->getAttr<ATTR_HBRT_HYP_ID>();
 
         // Buffers should have been allocated by IPL code
+        // Note: data isn't allocated here so it will never be released
         uint64_t l_sbeFfdcAddr = g_hostInterfaces->get_reserved_mem(
                                            HBRT_RSVD_MEM__SBE_FFDC,
                                            l_instance);

@@ -81,16 +81,7 @@ SbePsu & SbePsu::getTheInstance()
  **/
 void SbePsu::commonDestructor( void )
 {
-    std::map<TARGETING::Target *, void *>::iterator l_iter;
-    for(l_iter = iv_ffdcPackageBuffer.begin();
-        l_iter != iv_ffdcPackageBuffer.end(); l_iter++)
-    {
-        if(l_iter->second != NULL)
-        {
-            freePage(l_iter->second);
-            l_iter->second = nullptr;
-        }
-    }
+    //nothing to do yet
 }
 
 const SbePsu::unsupported_command_error_severity

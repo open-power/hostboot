@@ -202,6 +202,17 @@ SbePsu::~SbePsu()
     INTR::unRegisterMsgQ(INTR::ISN_PSU);
     msg_q_destroy(iv_msgQ);
 
+    std::map<TARGETING::Target *, void *>::iterator l_iter;
+    for(l_iter = iv_ffdcPackageBuffer.begin();
+        l_iter != iv_ffdcPackageBuffer.end(); l_iter++)
+    {
+        if(l_iter->second != NULL)
+        {
+            freePage(l_iter->second);
+            l_iter->second = nullptr;
+        }
+    }
+
     commonDestructor();
 }
 
