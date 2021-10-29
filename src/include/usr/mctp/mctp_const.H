@@ -47,7 +47,7 @@ namespace MCTP
 
     // The maximum amount of memory we will allocate for a message
     // context we are building for an incoming MCTP message made
-    // of multiple MCTP packets. We will se this to be 128KB as the
+    // of multiple MCTP packets. We will set this to be 128KB as the
     // largest message we expect is the response to 127KB +1 PLDM
     // file read requests HB makes during lid verification in istep 21
     // We cannot use 127KB+1 directly because this value must be a

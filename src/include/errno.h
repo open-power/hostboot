@@ -31,14 +31,14 @@
  */
 
 #define ENOENT           2      // No such file or directory
-#define	EIO              5      // I/O error
+#define EIO              5      // I/O error
 #define ENXIO            6      // No such device or address
 #define ENOEXEC          8      // Exec format error
 #define EBADF            9      // Bad file descriptor
 #define EAGAIN          11      // Try again
 #define ENOMEM          12      // Not enough space
 #define EACCES          13      // Permission denied
-#define	EFAULT          14      // Bad address
+#define EFAULT          14      // Bad address
 #define EINVAL          22      // Invalid argument
 #define ENFILE          23      // Too many open files in system
 #define EDEADLK         35      // Operation would cause deadlock.

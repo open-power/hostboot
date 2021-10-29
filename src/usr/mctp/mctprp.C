@@ -253,7 +253,14 @@ void MctpRP::handle_outbound_messages(void)
     while(!iv_channelActive)
     {
         counter++;
-        assert(counter < 1000, "It took longer than 10 seconds to init MCTP");
+        if(counter >= 1000)
+        {
+            // Either host or bmc is failing in its responsibilty to init the channel.
+            // If this happens check bmc's journal to see if the mctp daemon crashed.
+            printk("Failed to initialize MCTP channel with BMC in under 10 seconds,"
+                   " triggering a critical assert as normal shutdown path is impossible without PLDM");
+            crit_assert(0);
+        }
         nanosleep(0, NS_PER_MSEC * 10);
     }
 #endif
