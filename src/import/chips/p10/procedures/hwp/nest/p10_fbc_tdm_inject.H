@@ -22,6 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+// EKB-Mirror-To: hostboot
 ///
 /// @file p10_fbc_tdm_inject.H
 /// @brief Force TDM entry on IOHS link (FAPI2)
