@@ -49,8 +49,8 @@ using namespace ERRORLOG;
 using namespace TARGETING;
 
 // @TODO RTC 247294: Delete these constants and use the ones from libpldm
-const int PLDM_OEM_IBM_SBE_MAINTENANCE_STATE = 32772;
-const int PLDM_OEM_IBM_SBE_HRESET_STATE = 32773;
+const uint16_t PLDM_OEM_IBM_SBE_MAINTENANCE_STATE = 32775;
+const uint16_t PLDM_OEM_IBM_SBE_HRESET_STATE = 32773;
 
 #ifndef __HOSTBOOT_RUNTIME
 
@@ -72,9 +72,9 @@ effecter_id_t getSbeDumpEffecterId(const Target* const i_proc)
                                          const auto numeric_effecter_pdr
                                              = reinterpret_cast<const pldm_numeric_effecter_value_pdr*>(pdr_data);
 
-                                         if (le16toh(numeric_effecter_pdr->entity_type) == targ_entity_id.entityType
-                                             && le16toh(numeric_effecter_pdr->entity_instance) == targ_entity_id.entityInstanceNumber
-                                             && le16toh(numeric_effecter_pdr->container_id) == targ_entity_id.containerId)
+                                         if (numeric_effecter_pdr->entity_type == targ_entity_id.entityType
+                                             && numeric_effecter_pdr->entity_instance == targ_entity_id.entityInstanceNumber
+                                             && numeric_effecter_pdr->container_id == targ_entity_id.containerId)
                                          {
                                              if (le16toh(numeric_effecter_pdr->effecter_semantic_id) == PLDM_OEM_IBM_SBE_MAINTENANCE_STATE)
                                              {

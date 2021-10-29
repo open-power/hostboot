@@ -56,7 +56,6 @@
 #include <targeting/common/predicates/predicatehwas.H>
 #include <targeting/targplatutil.H>
 
-
 using namespace TARGETING;
 using namespace PLDM;
 using namespace ERRORLOG;
@@ -252,6 +251,7 @@ void addEntityAssociationAndFruRecordSetPdrs(PdrManager& io_pdrman, pldm_entity 
                 assert(UTIL::tryGetAttributeInHierarchy<ATTR_STATIC_ABS_LOCATION_CODE>(targets[i], abs_location_code),
                         "Cannot get ATTR_STATIC_ABS_LOCATION_CODE from HUID = 0x%08x", get_huid(targets[i]));
                 std::vector<char> vLocationStr(abs_location_code, abs_location_code + sizeof(abs_location_code)/sizeof(*abs_location_code));
+                pldm_entity_node* proc_parent_entity = nullptr;
                 auto it = l_dcmLocationMap.find(vLocationStr);
                 if (it == l_dcmLocationMap.end())
                 {
@@ -267,30 +267,42 @@ void addEntityAssociationAndFruRecordSetPdrs(PdrManager& io_pdrman, pldm_entity 
 
                     l_dcmLocationMap[vLocationStr] = newDcmEntity;
 
-                    // now add the processor under the DCM
-                    proc_node= createEntityAssociationAndFruRecordSetPdrs(enttree.get(),
-                                              io_pdrman,
-                                              newDcmEntity,
-                                              PLDM_ENTITY_ASSOCIAION_PHYSICAL,
-                                              entity.entityType,
-                                              targets[i],
-                                              fru_record_set_map);
+                    proc_parent_entity = newDcmEntity;
                 }
                 else
                 {
                     // Second processor target found, place this under DCM
                     PLDM_DBG("Second processor HUID 0x%x found location code %s", get_huid(targets[i]), abs_location_code);
                     // it->second = DCM_NODE entity
-                    proc_node = createEntityAssociationAndFruRecordSetPdrs(enttree.get(),
-                                              io_pdrman,
-                                              it->second,
-                                              PLDM_ENTITY_ASSOCIAION_PHYSICAL,
-                                              entity.entityType,
-                                              targets[i],
-                                              fru_record_set_map);
+                    proc_parent_entity = it->second;
                 }
+
+                proc_node = createEntityAssociationAndFruRecordSetPdrs(enttree.get(),
+                                                                       io_pdrman,
+                                                                       proc_parent_entity,
+                                                                       PLDM_ENTITY_ASSOCIAION_PHYSICAL,
+                                                                       entity.entityType,
+                                                                       targets[i],
+                                                                       fru_record_set_map);
+
                 // Add core entries under the processor
                 addCoreEntityAssocAndRecordSetPdrs(enttree.get(), io_pdrman, proc_node, targets[i], fru_record_set_map, core_sensor_entity_map);
+
+                /* Set ATTR_PLDM_ENTITY_ID_INFO on the processor so that it can
+                 * be used when creating sensors/effecters on this target
+                 * later. This attribute will be overwritten with an updated ID
+                 * after hostboot fetches the normalized PDR repository from the
+                 * BMC. */
+
+                const auto entity_id = pldm_entity_extract(proc_node);
+
+                ATTR_PLDM_ENTITY_ID_INFO_type targeting_entity_id = { };
+                // These values are already in little-endian.
+                targeting_entity_id.entityType = entity_id.entity_type;
+                targeting_entity_id.entityInstanceNumber = entity_id.entity_instance_num;
+                targeting_entity_id.containerId = entity_id.entity_container_id;
+
+                targets[i]->setAttr<ATTR_PLDM_ENTITY_ID_INFO>(targeting_entity_id);
             }
             else
             {
@@ -499,8 +511,8 @@ void addSbeManagementPdrs(PdrManager& io_pdrman)
     TARGETING::getChildAffinityTargetsByState(procs, UTIL::assertGetToplevelTarget(), CLASS_NA, TYPE_PROC, UTIL_FILTER_PRESENT);
 
     // @TODO RTC 247294: Delete these constants and use the ones from libpldm
-    const int PLDM_OEM_IBM_SBE_MAINTENANCE_STATE = 32772;
-    const int PLDM_OEM_IBM_SBE_HRESET_STATE = 32773;
+    const uint16_t PLDM_OEM_IBM_SBE_MAINTENANCE_STATE = 32775;
+    const uint16_t PLDM_OEM_IBM_SBE_HRESET_STATE = 32773;
 
     enum ibm_oem_pldm_state_set_sbe_dump_state_values {
         SBE_DUMP_COMPLETED = 0x1,

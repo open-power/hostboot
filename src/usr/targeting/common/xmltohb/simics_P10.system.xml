@@ -405,7 +405,7 @@
     </attribute>
     <attribute>
         <id>MRU_ID</id>
-        <default>0x00010000</default>
+        <default>0x00010001</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
