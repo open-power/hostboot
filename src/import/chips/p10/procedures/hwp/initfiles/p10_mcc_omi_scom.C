@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,7 +40,7 @@ constexpr uint64_t literal_0 = 0;
 constexpr uint64_t literal_4 = 4;
 constexpr uint64_t literal_6 = 6;
 constexpr uint64_t literal_0xFF = 0xFF;
-constexpr uint64_t literal_0b0000100011 = 0b0000100011;
+constexpr uint64_t literal_0b0000010010 = 0b0000010010;
 constexpr uint64_t literal_0b0000110011 = 0b0000110011;
 constexpr uint64_t literal_0b0001000000 = 0b0001000000;
 constexpr uint64_t literal_1 = 1;
@@ -167,7 +167,7 @@ fapi2::ReturnCode p10_mcc_omi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& 
             l_scom_buffer.insert<0, 1, 63, uint64_t>(l_MCP_CHAN0_ATCL_CL_CLSCOM_MCBUSYQ_ENABLE_BUSY_COUNTERS_ON );
             constexpr auto l_MCP_CHAN0_ATCL_CL_CLSCOM_MCBUSYQ_BUSY_COUNTER_WINDOW_SELECT_1024_CYCLES = 0x1;
             l_scom_buffer.insert<1, 3, 61, uint64_t>(l_MCP_CHAN0_ATCL_CL_CLSCOM_MCBUSYQ_BUSY_COUNTER_WINDOW_SELECT_1024_CYCLES );
-            l_scom_buffer.insert<4, 10, 54, uint64_t>(literal_0b0000100011 );
+            l_scom_buffer.insert<4, 10, 54, uint64_t>(literal_0b0000010010 );
             l_scom_buffer.insert<14, 10, 54, uint64_t>(literal_0b0000110011 );
             l_scom_buffer.insert<24, 10, 54, uint64_t>(literal_0b0001000000 );
             FAPI_TRY(fapi2::putScom(TGT0, 0xc010c27ull, l_scom_buffer));

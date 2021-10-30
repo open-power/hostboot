@@ -743,7 +743,7 @@ p10_exit_cache_contained_run_mcc_initfile_xscom(
     //data
     l_scom_data |= (uint64_t)  0x1   << (64 - ( 0 +  1));
     l_scom_data |= (uint64_t)  0x1   << (64 - ( 1 +  3));
-    l_scom_data |= (uint64_t)  0x023 << (64 - ( 4 + 10));
+    l_scom_data |= (uint64_t)  0x012 << (64 - ( 4 + 10));
     l_scom_data |= (uint64_t)  0x033 << (64 - (14 + 10));
     l_scom_data |= (uint64_t)  0x040 << (64 - (24 + 10));
     //mask
@@ -1050,7 +1050,7 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
     l_scom_mask = 0;
     //data
     l_scom_data |= (uint64_t)  0x0 << (64 - ( 0 + 1)); //MCPERF1_DISABLE_FASTPATH=OFF
-    l_scom_data |= (uint64_t) 0x19 << (64 - (10 +  7)); //MCPERF1_PF_DROP_CNT_THRESH=25
+    l_scom_data |= (uint64_t) 0x12 << (64 - (10 +  7)); //MCPERF1_PF_DROP_CNT_THRESH=18
     l_scom_data |= (uint64_t)  0x1 << (64 - (21 +  1)); //MCPERF1_ENABLE_PF_DROP_CMDLIST=ON
     l_scom_data |= (uint64_t)  0x1 << (64 - (22 + 1)); //MCPERF1_ENABLE_PREFETCH_PROMOTE=ON
     l_scom_data |= (uint64_t) 0x0F << (64 - (38 + 5)); //MCPERF1_WBIT_SCOPE_ENABLE=0b01111
