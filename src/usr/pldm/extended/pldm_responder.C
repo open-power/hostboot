@@ -41,6 +41,9 @@
 // Standard library
 #include <memory>
 
+// KILOBYTE def
+#include <limits.h>
+
 // Userspace Headers
 #include <trace/interface.H>
 #include <initservice/taskargs.H>
@@ -134,6 +137,28 @@ void * handle_inbound_req_messages_task(void*)
 }
 #endif
 
+/* @brief Add a debug section to error log with PLDM msg
+ * @param[in/out] io_errl Error log for adding new section
+ * @param[in] i_msg       PLDM message handle
+ * @param[in] i_msg_len   Size of message
+ */
+void addPldmMsgSection(errlHndl_t & io_errl, const void *i_msg, const size_t i_msg_len)
+{
+    assert(io_errl != nullptr, "io_errl is nullptr in addPldmMsgSection");
+    const size_t MAX_SECTION_SIZE = 2*KILOBYTE;
+
+    if (i_msg_len > MAX_SECTION_SIZE)
+    {
+        // Only add MAX_SECTION_SIZE of the PLDM msg with version 1, subsection 1
+        io_errl->addFFDC(PLDM_COMP_ID, i_msg, MAX_SECTION_SIZE, 1, PLDM_UDT_MSG_DATA);
+    }
+    else
+    {
+        // Add the full PLDM msg with version 1, subsection 2
+        io_errl->addFFDC(PLDM_COMP_ID, i_msg, i_msg_len, 1, PLDM_UDT_MSG_INCOMPLETE_DATA);
+    }
+}
+
 /* @brief handle_inbound_req
  *
  *        Dispatches incoming PLDM requests according to their contents.
@@ -177,7 +202,17 @@ errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const void* i_msg, const siz
         }
 
         const pldm_msg* const pldm_message = reinterpret_cast<const pldm_msg* const>(i_msg);
-        const uint64_t response_hdr_data = pldmHdrToUint64(*pldm_message);
+
+        // Will contain first 8 bytes of msg (first 3 are just header)
+        uint64_t response_hdr_data = 0;
+        if (i_msg_len >= sizeof(response_hdr_data))
+        {
+            memcpy(&response_hdr_data, i_msg, sizeof(response_hdr_data));
+        }
+        else
+        {
+            memcpy(&response_hdr_data, i_msg, i_msg_len);
+        }
         const size_t payload_len = i_msg_len - sizeof(pldm_msg_hdr);
 
         /* Lookup the message category in the first-level dispatch table to get
@@ -215,6 +250,8 @@ errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const void* i_msg, const siz
                                  ErrlEntry::NO_SW_CALLOUT);
 
             addBmcErrorCallouts(errl);
+            // Add PLDM msg to error for debug
+            addPldmMsgSection(errl, i_msg, i_msg_len);
             break;
         }
 
@@ -250,6 +287,8 @@ errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const void* i_msg, const siz
                                      ErrlEntry::NO_SW_CALLOUT);
 
                 addBmcErrorCallouts(errl);
+                // Add PLDM msg to error for debug
+                addPldmMsgSection(errl, i_msg, i_msg_len);
                 break;
             }
         }
@@ -278,6 +317,8 @@ errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const void* i_msg, const siz
                                  header_info.msg_type,
                                  response_hdr_data,
                                  ErrlEntry::ADD_SW_CALLOUT);
+            // Add PLDM msg to error for debug
+            addPldmMsgSection(errl, i_msg, i_msg_len);
             break;
         }
 
@@ -315,8 +356,9 @@ errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const void* i_msg, const siz
                                  pldm_command,
                                  category,
                                  ErrlEntry::NO_SW_CALLOUT);
-
             addBmcErrorCallouts(errl);
+            // Add PLDM msg to error for debug
+            addPldmMsgSection(errl, i_msg, i_msg_len);
             break;
         }
 
@@ -344,8 +386,9 @@ errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const void* i_msg, const siz
                                  pldm_command,
                                  category,
                                  ErrlEntry::NO_SW_CALLOUT);
-
             addBmcErrorCallouts(errl);
+            // Add PLDM msg to error for debug
+            addPldmMsgSection(errl, i_msg, i_msg_len);
             break;
         }
 

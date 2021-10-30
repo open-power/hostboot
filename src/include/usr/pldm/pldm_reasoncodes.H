@@ -155,5 +155,15 @@ namespace PLDM
         RC_MULTIPLE_REGISTRATIONS   = PLDM_COMP_ID | 0x31,
         RC_SBE_DUMP_TIMED_OUT       = PLDM_COMP_ID | 0x32,
     };
+
+    /**
+     * Defines for PLDM error log user detail data sections
+     */
+    enum pldmUserDetailDataSubsection
+    {
+        // no parsers for these two, just raw hex dump of data
+        PLDM_UDT_MSG_DATA            = 0x01,
+        PLDM_UDT_MSG_INCOMPLETE_DATA = 0x02,
+    };
 }
 #endif
