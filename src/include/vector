@@ -159,8 +159,8 @@ namespace std
                  * @pre      last > first; first,last contained within source vector
                  * @post     vector is created from slice given
                  */
-                template<typename InputIterator>
-                    vector(InputIterator first, InputIterator last)
+                template<typename InputIterator, typename X = decltype(*declval<InputIterator>())>
+                vector(InputIterator first, InputIterator last)
                     :
                         iv_start(NULL),
                         iv_finish(NULL),
