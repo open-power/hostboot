@@ -53,6 +53,18 @@ uint32_t readMdsCtlr( TARGETING::TargetHandle_t i_target, uint32_t i_addr,
                       uint32_t & o_data );
 
 /**
+ * @brief  This is the utility used for writing registers from the MDS dimm's
+ *         media controller.
+ * @param  i_target The input MDS_CTLR/OCMB
+ * @param  i_addr   The input address
+ * @param  i_data   The data to be written
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T>
+uint32_t writeMdsCtlr( TARGETING::TargetHandle_t i_target, uint32_t i_addr,
+                       uint32_t i_data );
+
+/**
  * @brief  This is called to clear the media error logs on an MDS DDIMMs
  *         media controller.
  * @param  i_chip The input OCMB
