@@ -246,6 +246,7 @@ namespace HTMGT
 
     // Check if reset count needs to be cleared due to periodic timer.
     // Should not be called if the system is in safe mode.
+    // Will not clear WOF reset counts if WOF has been disabled.
     void check_reset_count()
     {
         TARGETING::Target* sys = NULL;
@@ -273,7 +274,7 @@ namespace HTMGT
                               OCC_RCOUNT_RESET_TIME))
                     {
                         // Clear reset counters (counter wrapped/exceeded time)
-                        OccManager::clearResetCounts();
+                        OccManager::clearResetCounts(true);
                         update_attr = true;
                     }
                     if (update_attr)

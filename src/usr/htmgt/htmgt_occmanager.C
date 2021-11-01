@@ -1224,7 +1224,7 @@ namespace HTMGT
 
     // Clear all OCC reset counts
     // Should not be called if the system is in safe mode.
-    void OccManager::_clearResetCounts()
+    void OccManager::_clearResetCounts(const bool i_periodicClear)
     {
         for( const auto & occ : iv_occArray )
         {
@@ -1237,7 +1237,12 @@ namespace HTMGT
                 occ->iv_resetCount = 0;
             }
 
-            if (occ->iv_wofResetCount != 0)
+            // Don't clear WOF reset counts if WOF was disabled.
+            // This will prevent WOF from being re-enabled until next boot.
+            // Manual/user requested clears will clear all reset counts.
+            if ( (occ->iv_wofResetCount > 0) &&
+                 ((i_periodicClear == false) ||
+                  (occ->iv_wofResetCount < WOF_RESET_COUNT_THRESHOLD)) )
             {
                 TMGT_INF("_clearResetCounts: Clearing OCC%d WOF reset count "
                          "(was %d) reason(s): 0x%08X",
@@ -1536,9 +1541,9 @@ namespace HTMGT
         Singleton<OccManager>::instance()._syncOccStates();
     }
 
-    void OccManager::clearResetCounts()
+    void OccManager::clearResetCounts(const bool i_periodicClear)
     {
-        Singleton<OccManager>::instance()._clearResetCounts();
+        Singleton<OccManager>::instance()._clearResetCounts(i_periodicClear);
     }
 
     uint8_t OccManager::validateOccsPresent(const uint8_t i_present,

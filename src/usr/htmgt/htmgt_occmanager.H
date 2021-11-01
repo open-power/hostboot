@@ -258,8 +258,11 @@ namespace HTMGT
             /**
              * @brief Clear all OCC reset counts
              *
+             * @param[in]  i_periodicClear  When TRUE, the WOF reset counts
+             *             will not get cleared if WOF was disabled.
+             *
              */
-            static void clearResetCounts();
+            static void clearResetCounts(const bool i_periodicClear = false);
 
 
             /**
@@ -425,7 +428,7 @@ namespace HTMGT
             void _syncOccStates();
 
             /** See clearResetCounts() above */
-            void _clearResetCounts();
+            void _clearResetCounts(const bool i_periodicClear);
 
             /** See validateOccsPresent() above */
             uint8_t _validateOccsPresent(const uint8_t i_present,

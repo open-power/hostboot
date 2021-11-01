@@ -992,8 +992,8 @@ namespace HTMGT
                 }
             }
         }
-        TMGT_INF("<<passThruCommand() returning 0x%04X",
-                 (err==nullptr) ? 0 : err->reasonCode());
+        TMGT_INF("<<passThruCommand() returning %d bytes (err=0x%04X)",
+                 o_rspLength, (err==nullptr) ? 0 : err->reasonCode());
 
         return err;
 
