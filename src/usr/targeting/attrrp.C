@@ -389,6 +389,12 @@ namespace TARGETING
                 TRACFCOMP(g_trac_targeting, INFO_MRK "_invokeAttrSync: "
                         "Calling devtree attribute sync for BMC.");
                 (void)DEVTREE::devtreeSyncAttrs();
+
+/* TODO RTC: 205059 enable the update once all pieces are merged
+                // Update the persistent HBD partition with the current
+                // state of RW attributes
+                pError = updatePreservedAttrSection();
+*/
 #endif
                 break;
             }
@@ -1728,8 +1734,9 @@ namespace TARGETING
     {
         TRACFCOMP(g_trac_targeting, ENTER_MRK"AttrRP::mergeAttributes");
         errlHndl_t l_errl = nullptr;
-        do {
         PNOR::SectionInfo_t l_hbdSectionInfo;
+
+        do {
         // This code assumes that the secure provider has alredy loaded
         // HBD_DATA and that it has not been unloaded yet.
         l_errl = PNOR::getSectionInfo(PNOR::HB_DATA,
@@ -1885,7 +1892,143 @@ namespace TARGETING
         }
         } while(0);
 
+        // Update the persistent partition even if there is an error
+        if(l_hbdSectionInfo.hasHashTable)
+        {
+            errlHndl_t l_updateError = updatePreservedAttrSection();
+            if(l_updateError)
+            {
+                TRACFCOMP(g_trac_targeting, ERR_MRK"AttrRP::mergeAttributes: could not update HBD_RW partition");
+                if(l_errl)
+                {
+                    l_updateError->plid(l_errl->plid());
+                    errlCommit(l_updateError, TARG_COMP_ID);
+                }
+                else
+                {
+                    l_errl = l_updateError;
+                    l_updateError = nullptr;
+                }
+            }
+        }
+
         TRACFCOMP(g_trac_targeting, EXIT_MRK"AttrRP::mergeAttributes");
+        return l_errl;
+    }
+
+    errlHndl_t AttrRP::updatePreservedAttrSection()
+    {
+        TRACFCOMP(g_trac_targeting, ENTER_MRK"AttrRP::updatePreservedAttrSection");
+        errlHndl_t l_errl = nullptr;
+
+        do {
+
+        PNOR::SectionInfo_t l_hbdSectionInfo;
+        l_errl = PNOR::getSectionInfo(PNOR::HB_DATA,
+                                      l_hbdSectionInfo);
+        if(l_errl)
+        {
+            TRACFCOMP(g_trac_targeting, ERR_MRK"AttrRP::updatePreservedAttrSection: could not get HBD section info");
+            break;
+        }
+
+        if(l_hbdSectionInfo.hasHashTable)
+        {
+            void* l_hbdPtr = reinterpret_cast<void*>(l_hbdSectionInfo.vaddr);
+
+            PNOR::SectionInfo_t l_hbd_rwSectionInfo;
+            l_errl = PNOR::getSectionInfo(PNOR::HB_DATA_RW,
+                                          l_hbd_rwSectionInfo);
+            if(l_errl)
+            {
+                TRACFCOMP(g_trac_targeting, ERR_MRK"AttrRP::updatePreservedAttrSection: could not get HBD_RW section info");
+                break;
+            }
+
+            rw_attr_section_t* l_hbdRwPtr = reinterpret_cast<rw_attr_section_t*>(l_hbd_rwSectionInfo.vaddr);
+
+            section_metadata_mem_layout_t* l_attrMetadataPtr = nullptr;
+            l_errl = getAttrMetadataPtr(l_hbdPtr, l_attrMetadataPtr);
+            if(l_errl)
+            {
+                break;
+            }
+
+            attr_metadata_map l_rwAttrMetadataMap;
+            l_errl = parseAttrMetadataSection(l_attrMetadataPtr, l_rwAttrMetadataMap);
+            if(l_errl)
+            {
+                break;
+            }
+
+            // Reset the preserved section
+            memset(l_hbdRwPtr, 0, l_hbd_rwSectionInfo.size);
+
+            TargetRangeFilter l_allTargets(targetService().begin(),
+                                           targetService().end(),
+                                           nullptr);
+
+            uint32_t l_rwAttrCnt = 0;
+            rw_attr_memory_layout_t* l_preservedAttrPtr = &l_hbdRwPtr->attrArray;
+            // Iterate over all targets and write the RW attributes into the
+            // persistent HBD_RW partition
+            for(; l_allTargets; ++l_allTargets)
+            {
+                ATTRIBUTE_ID* l_attrIdArr = nullptr;
+                AbstractPointer<void>* l_attrAddressesArr = nullptr;
+                uint32_t l_attrCnt = targetService().getTargetAttributes(*l_allTargets,
+                                                                         &TARG_GET_SINGLETON(theAttrRP),
+                                                                         l_attrIdArr,
+                                                                         l_attrAddressesArr);
+
+                for(uint32_t l_attrNum = 0; l_attrNum < l_attrCnt; ++l_attrNum)
+                {
+                    ATTRIBUTE_ID* l_attrId = l_attrIdArr + l_attrNum;
+                    if(l_rwAttrMetadataMap[*l_attrId].attrPersistency == SECTION_TYPE_PNOR_RW)
+                    {
+                        // Save the RW attribute info
+                        l_rwAttrCnt++;
+                        l_preservedAttrPtr->attrHash = *l_attrId;
+                        l_preservedAttrPtr->huid = l_allTargets->getAttr<ATTR_HUID>();
+                        l_preservedAttrPtr->attrData.metadata.attrSize =
+                            l_rwAttrMetadataMap[*l_attrId].attrSize;
+                        l_preservedAttrPtr->attrData.metadata.attrPersistency =
+                            l_rwAttrMetadataMap[*l_attrId].attrPersistency;
+
+                        void* l_attrValue = nullptr;
+                        l_allTargets->_getAttrPtr(*l_attrId,
+                                                  &TARG_GET_SINGLETON(theAttrRP),
+                                                  l_attrIdArr,
+                                                  l_attrAddressesArr,
+                                                  l_attrValue);
+                        if(l_attrValue)
+                        {
+                            memcpy(&l_preservedAttrPtr->attrData.valuePtr,
+                                   l_attrValue,
+                                   l_rwAttrMetadataMap[*l_attrId].attrSize);
+                        }
+                        // Move to the next RW attribute pointer
+                        l_preservedAttrPtr = reinterpret_cast<rw_attr_memory_layout_t*>(
+                            reinterpret_cast<uint8_t*>(l_preservedAttrPtr) +
+                            sizeof(rw_attr_memory_layout_t) +
+                            l_rwAttrMetadataMap[*l_attrId].attrSize - 1); // Subract 1 rw_attr_t has an extra byte in "value"
+                    }
+                } // for all attributes
+            } // for all targets
+            // Write the hash and the number of RW attributes
+            l_hbdRwPtr->dataHash = 0x666978a; // TODO RTC: 205059 compute the hash of the data and write it at the start of preserved HBD
+            l_hbdRwPtr->numAttributes = l_rwAttrCnt;
+
+            // Make sure the data is written out to PNOR
+            l_errl = PNOR::flush(PNOR::HB_DATA_RW);
+            if(l_errl)
+            {
+                break;
+            }
+        }
+        } while(0);
+
+        TRACFCOMP(g_trac_targeting, EXIT_MRK"AttrRP::updatePreservedAttrSection");
         return l_errl;
     }
 };

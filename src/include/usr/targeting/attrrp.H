@@ -881,6 +881,18 @@ class AttrRP
          */
         static void* startAttrSyncTask(void* i_pInstance);
 
+        /**
+         * @brief Update the preserved RW attribute section with the current
+         *        state of HBD so that potentially new RW attributes are
+         *        preserved across code updates/reboots. This needs to be
+         *        done after mergeAttributes so that all existing RW attrs
+         *        are preserved. The preserved HBD partition is cleared
+         *        before the new data is written into it.
+         *
+         * @return nullptr on success; non-nullptr on error.
+         */
+        static errlHndl_t updatePreservedAttrSection();
+
         // Message Queue for VMM requests
         msg_q_t iv_msgQ;
 
