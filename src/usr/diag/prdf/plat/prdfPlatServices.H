@@ -121,6 +121,17 @@ uint32_t putScom(TARGETING::TargetHandle_t i_target, BitString& io_bs,
  */
 uint32_t powerDownSpareLanes(ExtensibleChip* i_chip, unsigned int i_link);
 
+/**
+ * @brief  In the event of a spare lane deploy on an SMP bus when the
+ *         manufacturing thresholds policy is enabled, we want to run TDR on the
+ *         half-link containing the spare. However, TDR can only be run on a
+ *         failed link. So we'll have to force the link into half-bandwidth mode
+ *         if it isn't already in that mode.
+ * @param  i_chip  An IOHS chip.
+ * @param  i_link  The IOLINK position relative to the given IOHS chip.
+ */
+void mnfgForceHalfBandwidthMode(ExtensibleChip* i_chip, unsigned int i_link);
+
 //##############################################################################
 //##                        Memory specific functions
 //##############################################################################

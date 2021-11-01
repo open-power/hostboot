@@ -68,6 +68,7 @@
 #include <exp_deploy_row_repairs.H>
 #include <plat_hwp_invoker.H>
 
+#include <p10_fbc_tdm_inject.H>
 #include <p10_io_quiesce_lane.H>
 #include <p10_rcs_transient_check.H>
 
@@ -406,6 +407,49 @@ uint32_t powerDownSpareLanes(ExtensibleChip* i_chip, unsigned int i_link)
     }
 
     return o_rc;
+}
+
+//------------------------------------------------------------------------------
+
+void mnfgForceHalfBandwidthMode(ExtensibleChip* i_chip, unsigned int i_link)
+{
+    PRDF_ASSERT(nullptr != i_chip);
+    PRDF_ASSERT(TYPE_IOHS == i_chip->getType());
+    PRDF_ASSERT(i_link < MAX_LINK_PER_IOHS);
+
+    // Only proceed if mnfg thresholds policy if enabled.
+    if (!mfgMode())
+    {
+        return; // nothing more to do.
+    }
+
+    // Check if the link is already down.
+    const char* reg_str = (0 == i_link) ? "IOHS_DLP_LINK0_QUALITY"
+                                        : "IOHS_DLP_LINK1_QUALITY";
+    SCAN_COMM_REGISTER_CLASS* reg = i_chip->getRegister(reg_str);
+    if (SUCCESS == reg->Read() && reg->BitStringIsZero())
+    {
+        return; // nothing more to do.
+    }
+
+    // Force the half-link to fail. Note that we only need to set the `run_all`
+    // options to true. All other options are a don't care.
+    errlHndl_t errl = nullptr;
+    fapi2::Target<fapi2::TARGET_TYPE_IOHS> fapiIohs{i_chip->getTrgt()};
+    p10_fbc_tdm_inject_opt_t opts{true, P10_FBC_TDM_INJECT_END};
+
+    FAPI_INVOKE_HWP(errl, p10_fbc_tdm_inject, fapiIohs, (0 == i_link), opts);
+    if (nullptr != errl)
+    {
+        PRDF_ERR("p10_fbc_tdm_inject(0x%08x, %u) failed", i_chip->getHuid(),
+                 i_link);
+        PRDF_COMMIT_ERRL(errl, ERRL_ACTION_REPORT);
+    }
+
+    // Since we forced the half-link to fail after collecting the initial FFDC,
+    // we need to clear the register cache so that we can query the new values
+    // of the necessary registers.
+    RegDataCache::getCachedRegisters().flush(i_chip, reg);
 }
 
 //##############################################################################

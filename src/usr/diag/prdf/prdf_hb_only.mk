@@ -171,6 +171,7 @@ CLEAN_TARGETS += ${MFG_THRES_PATH}
 ################################################################################
 
 prd_vpath += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/io/
+prd_vpath += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/nest/
 prd_vpath += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/perv/
 prd_obj_no_sim += p10_io_lib.o
 prd_obj_no_sim += p10_io_ppe_lib.o
@@ -178,6 +179,12 @@ prd_obj_no_sim += p10_io_ppe_regs.o
 prd_obj_no_sim += p10_io_quiesce_lane.o
 prd_obj_no_sim += p10_proc_gettracearray.o
 prd_obj_no_sim += p10_sbe_tracearray.o
+
+prd_obj_no_sim += p10_fbc_tdm_inject.o
+prd_obj_no_sim += p10_fbc_tdm_utils.o
+prd_obj_no_sim += p10_io_iohs_poll_recal.o
+prd_obj_no_sim += p10_iohs_reset.o
+prd_obj_no_sim += p10_smp_link_firs.o
 
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/

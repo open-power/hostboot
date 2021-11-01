@@ -99,6 +99,22 @@ int32_t smp_failure_l1(ExtensibleChip* i_chip, STEP_CODE_DATA_STRUCT& io_sc)
 }
 PRDF_PLUGIN_DEFINE(p10_iohs, smp_failure_l1);
 
+int32_t mnfg_force_half_bandwidth_mode_l0(ExtensibleChip* i_chip,
+                                          STEP_CODE_DATA_STRUCT& io_sc)
+{
+    PlatServices::mnfgForceHalfBandwidthMode(i_chip, 0);
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE(p10_iohs, mnfg_force_half_bandwidth_mode_l0);
+
+int32_t mnfg_force_half_bandwidth_mode_l1(ExtensibleChip* i_chip,
+                                          STEP_CODE_DATA_STRUCT& io_sc)
+{
+    PlatServices::mnfgForceHalfBandwidthMode(i_chip, 1);
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE(p10_iohs, mnfg_force_half_bandwidth_mode_l1);
+
 } // namespace p10_iohs
 
 } // namespace PRDF
