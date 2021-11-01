@@ -70,7 +70,7 @@ extern "C"
             // Turn off FIFO mode again
             // Note this is normally done in mss_initialize_memory but
             // the read-only subtest above switches back to FIFO mode
-            FAPI_TRY(mss::reset_reorder_queue_settings(i_target) );
+            FAPI_TRY(mss::reset_reorder_queue_settings<mss::mc_type::EXPLORER>(i_target) );
         }
 
     fapi_try_exit:

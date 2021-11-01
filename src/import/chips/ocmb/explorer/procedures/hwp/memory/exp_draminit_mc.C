@@ -71,11 +71,11 @@ extern "C"
         FAPI_TRY(mss::dimm::is_mds<mss::mc_type::EXPLORER>(i_target, l_is_mds));
 
         // Enable Power management based off of mrw_power_control_requested
-        FAPI_TRY( mss::enable_power_management(i_target), "%s Failed to enable power management",
+        FAPI_TRY( mss::enable_power_management<mss::mc_type::EXPLORER>(i_target), "%s Failed to enable power management",
                   mss::c_str(i_target) );
 
         // Set the IML Complete bit. Steve Powell to find a bit in the SRQ to use for this purpose
-        FAPI_TRY( mss::change_iml_complete(i_target, mss::HIGH), "%s Failed to set_ipm_complete",
+        FAPI_TRY( mss::change_iml_complete<mss::mc_type::EXPLORER>(i_target, mss::HIGH), "%s Failed to set_ipm_complete",
                   mss::c_str(i_target));
 
         // Run any necessary row repairs
@@ -83,12 +83,12 @@ extern "C"
         FAPI_TRY(exp_deploy_row_repairs(i_target), "%s Failed exp_deploy_row_repairs", mss::c_str(i_target));
 
         // Set DFI init start requested from Stephen Powell
-        FAPI_TRY( mss::change_dfi_init_start(i_target, mss::ON ), "%s Failed to change_dfi_init_start",
+        FAPI_TRY( mss::change_dfi_init_start<mss::mc_type::EXPLORER>(i_target, mss::ON ), "%s Failed to change_dfi_init_start",
                   mss::c_str(i_target));
 
         // Start the refresh engines by setting MBAREF0Q(0) = 1. Note that the remaining bits in
         // MBAREF0Q should retain their initialization values.
-        FAPI_TRY( mss::change_refresh_enable(i_target, mss::HIGH), "%s Failed change_refresh_enable",
+        FAPI_TRY( mss::change_refresh_enable<mss::mc_type::EXPLORER>(i_target, mss::HIGH), "%s Failed change_refresh_enable",
                   mss::c_str(i_target) );
 
         // Trigger the MC to take the DRAMs out of self refresh
@@ -96,7 +96,7 @@ extern "C"
                   mss::c_str(i_target) );
 
         // Enable periodic short zq cal
-        FAPI_TRY( mss::enable_zq_cal(i_target), "%s Failed enable_zq_cal", mss::c_str(i_target) );
+        FAPI_TRY( mss::enable_zq_cal<mss::mc_type::EXPLORER>(i_target), "%s Failed enable_zq_cal", mss::c_str(i_target) );
 
         // Enable periodic mem calibration
         FAPI_TRY( mss::enable_periodic_cal<mss::mc_type::EXPLORER>(i_target), "%s Failed enable_periodic_cal",
@@ -106,7 +106,8 @@ extern "C"
         FAPI_TRY( mss::enable_read_ecc<mss::mc_type::EXPLORER>(i_target), "%s Failed enable_read_ecc", mss::c_str(i_target) );
 
         // Unmask registers after draminit_mc
-        FAPI_TRY(mss::unmask::after_draminit_mc(i_target), "%s Failed after_draminit_mc", mss::c_str(i_target));
+        FAPI_TRY(mss::unmask::after_draminit_mc<mss::mc_type::EXPLORER>(i_target), "%s Failed after_draminit_mc",
+                 mss::c_str(i_target));
 
         // Check if the dimms are MDS
         if (l_is_mds)

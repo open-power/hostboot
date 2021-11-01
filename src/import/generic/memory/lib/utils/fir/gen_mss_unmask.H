@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,7 +53,7 @@ namespace unmask
 /// @param[in] i_target the fapi2::Target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
+template< mss::mc_type MC, fapi2::TargetType T >
 fapi2::ReturnCode after_draminit_mc( const fapi2::Target<T>& i_target );
 
 ///
@@ -63,7 +63,7 @@ fapi2::ReturnCode after_draminit_mc( const fapi2::Target<T>& i_target );
 /// @param[in] i_target the fapi2::Target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
+template< mss::mc_type MC, fapi2::TargetType T >
 fapi2::ReturnCode after_draminit_training( const fapi2::Target<T>& i_target );
 
 ///
@@ -73,7 +73,7 @@ fapi2::ReturnCode after_draminit_training( const fapi2::Target<T>& i_target );
 /// @param[in] i_target the fapi2::Target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
+template< mss::mc_type MC, fapi2::TargetType T >
 fapi2::ReturnCode after_mc_omi_init( const fapi2::Target<T>& i_target );
 
 ///
@@ -83,7 +83,7 @@ fapi2::ReturnCode after_mc_omi_init( const fapi2::Target<T>& i_target );
 /// @param[in] i_target the fapi2::Target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
+template< mss::mc_type MC, fapi2::TargetType T >
 fapi2::ReturnCode after_scominit( const fapi2::Target<T>& i_target );
 
 ///
@@ -93,7 +93,7 @@ fapi2::ReturnCode after_scominit( const fapi2::Target<T>& i_target );
 /// @param[in] i_target the fapi2::Target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
+template< mss::mc_type MC, fapi2::TargetType T >
 fapi2::ReturnCode after_phy_reset( const fapi2::Target<T>& i_target );
 
 ///
@@ -103,7 +103,7 @@ fapi2::ReturnCode after_phy_reset( const fapi2::Target<T>& i_target );
 /// @param[in] i_target the fapi2::Target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
+template< mss::mc_type MC, fapi2::TargetType T >
 fapi2::ReturnCode after_mc_omi_setup( const fapi2::Target<T>& i_target );
 
 ///
@@ -113,7 +113,7 @@ fapi2::ReturnCode after_mc_omi_setup( const fapi2::Target<T>& i_target );
 /// @param[in] i_target the fapi2::Target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
+template< mss::mc_type MC, fapi2::TargetType T >
 fapi2::ReturnCode after_memdiags( const fapi2::Target<T>& i_target );
 
 ///
@@ -123,7 +123,7 @@ fapi2::ReturnCode after_memdiags( const fapi2::Target<T>& i_target );
 /// @param[in] i_target the fapi2::Target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
+template< mss::mc_type MC, fapi2::TargetType T >
 fapi2::ReturnCode after_background_scrub( const fapi2::Target<T>& i_target );
 
 }

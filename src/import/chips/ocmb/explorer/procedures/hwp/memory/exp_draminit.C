@@ -99,7 +99,8 @@ extern "C"
         }
 
         // Unmask registers after draminit training
-        FAPI_TRY(mss::unmask::after_draminit_training(i_target), "%s Failed after_draminit_training", mss::c_str(i_target));
+        FAPI_TRY(mss::unmask::after_draminit_training<mss::mc_type::EXPLORER>(i_target), "%s Failed after_draminit_training",
+                 mss::c_str(i_target));
 
         return fapi2::FAPI2_RC_SUCCESS;
 

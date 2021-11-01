@@ -62,7 +62,7 @@ namespace mss
 /// @return FAPI2_RC_SUCCESS if and only if ok
 /// @note Disable Port Fail after recurring RCD errors.
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = portTraits<MC> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
 fapi2::ReturnCode read_farb0q( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
     FAPI_TRY( mss::getScom(i_target, TT::FARB0Q_REG, o_data) );
@@ -81,7 +81,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS if and only if ok
 /// @note Disable Port Fail after recurring RCD errors.
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = portTraits<MC> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
 fapi2::ReturnCode write_farb0q( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
     FAPI_TRY( mss::putScom(i_target, TT::FARB0Q_REG, i_data) );
@@ -100,7 +100,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS if and only if ok
 /// @note Disable Port Fail after recurring RCD errors.
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = portTraits<MC> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
 fapi2::ReturnCode read_farb6q( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
     FAPI_TRY( mss::getScom(i_target, TT::FARB6Q_REG, o_data) );
@@ -119,7 +119,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS if and only if ok
 /// @note Disable Port Fail after recurring RCD errors.
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = portTraits<MC> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
 fapi2::ReturnCode write_farb6q( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
     FAPI_TRY( mss::putScom(i_target, TT::FARB6Q_REG, i_data) );
@@ -137,7 +137,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS if and only if ok
 /// @note Disable Port Fail after recurring RCD errors.
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = portTraits<MC> >
+template< mss::mc_type MC, typename TT = portTraits<MC> >
 void get_bw_window( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_bw_window )
 {
     o_bw_window = 0;
@@ -153,7 +153,7 @@ void get_bw_window( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_bw_window
 /// @return FAPI2_RC_SUCCESS if and only if ok
 /// @note Disable Port Fail after recurring RCD errors.
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = portTraits<MC> >
+template< mss::mc_type MC, typename TT = portTraits<MC> >
 void get_bw_snapshot( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_bw_snapshot )
 {
     o_bw_snapshot = 0;
@@ -170,7 +170,7 @@ void get_bw_snapshot( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_bw_snap
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
 /// @note  Mark store records from MPVD Lx keyword
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T>
+template< mss::mc_type MC, fapi2::TargetType T>
 fapi2::ReturnCode mvpd_fwms(const fapi2::Target< T>& i_target, uint32_t (&o_array)[MARK_STORE_COUNT]);
 
 ///
@@ -195,7 +195,7 @@ inline fapi2::ReturnCode dimm_spare(
 /// @param[in] i_target the target
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = portTraits<MC> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
 fapi2::ReturnCode enable_power_management( const fapi2::Target<T>& i_target )
 {
     //Enable Power management based off of mrw_power_control_requested
@@ -232,7 +232,7 @@ fapi_try_exit:
 /// @param[in] i_state the state
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = portTraits<MC> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
 fapi2::ReturnCode change_iml_complete( const fapi2::Target<T>& i_target, states i_state )
 {
     fapi2::buffer<uint64_t> l_data;
@@ -256,7 +256,7 @@ fapi_try_exit:
 /// @param[out] o_buffer the buffer to write the register data into
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = portTraits<MC> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
 fapi2::ReturnCode read_recr_register( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_buffer )
 {
     FAPI_TRY( mss::getScom(i_target, TT::ECC_REG, o_buffer) );
@@ -276,7 +276,7 @@ fapi_try_exit:
 /// @param[in] i_buffer the buffer that holds the register data to write
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = portTraits<MC> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
 fapi2::ReturnCode write_recr_register( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_buffer )
 {
     FAPI_INF( "Change Read ECC Control register to 0x%016lx for %s",  i_buffer, mss::c_str(i_target) );
@@ -294,7 +294,7 @@ fapi_try_exit:
 /// @param[in] i_data the data buffer containing the RECR register
 /// @param[out] o_value TCE_CORRECTION_ENABLE value (on or off)
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = portTraits<MC> >
+template< mss::mc_type MC, typename TT = portTraits<MC> >
 void get_tce_correction( const fapi2::buffer<uint64_t>& i_data, mss::states& o_value )
 {
     o_value = i_data.template getBit<TT::RECR_TCE_CORRECTION>() ? mss::states::ON : mss::states::OFF;
@@ -309,7 +309,7 @@ void get_tce_correction( const fapi2::buffer<uint64_t>& i_data, mss::states& o_v
 /// @param[in,out] io_data the target data buffer
 /// @param[in] i_value TCE_CORRECTION_ENABLE value (on or off) to set
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = portTraits<MC> >
+template< mss::mc_type MC, typename TT = portTraits<MC> >
 void set_tce_correction( fapi2::buffer<uint64_t>& io_data, const mss::states i_value )
 {
     FAPI_INF( "Set TCE_CORRECTION_ENABLE to %lu", i_value);
@@ -325,7 +325,7 @@ void set_tce_correction( fapi2::buffer<uint64_t>& io_data, const mss::states i_v
 /// @param[in] i_target the target
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = portTraits<MC> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
 fapi2::ReturnCode setup_tce_correction (const fapi2::Target<T>& i_target)
 {
     fapi2::buffer<uint64_t> l_data;
@@ -335,11 +335,13 @@ fapi2::ReturnCode setup_tce_correction (const fapi2::Target<T>& i_target)
     // Check for manufacturing disable dram repair flag to disable TCE correction
     FAPI_TRY(mss::check_mfg_flag(fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_DISABLE_MEMORY_eREPAIR, l_erepairs_disabled));
 
-    FAPI_TRY(mss::read_recr_register(i_target, l_data ), "%s: Failed read_recr_register", mss::c_str(i_target));
+    FAPI_TRY(mss::read_recr_register<MC>(i_target, l_data ), "%s: Failed read_recr_register",
+             mss::c_str(i_target));
     l_state = l_erepairs_disabled ? mss::OFF : mss::ON;
-    mss::set_tce_correction(l_data, l_state);
+    mss::set_tce_correction<MC>(l_data, l_state);
 
-    FAPI_TRY( mss::write_recr_register(i_target, l_data), "%s: Failed write_recr_register", mss::c_str(i_target));
+    FAPI_TRY( mss::write_recr_register<MC>(i_target, l_data), "%s: Failed write_recr_register",
+              mss::c_str(i_target));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -355,7 +357,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS if and only if ok
 /// @note Disable Port Fail after recurring RCD errors.
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = portTraits<MC> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
 fapi2::ReturnCode change_port_fail_disable( const fapi2::Target<T>& i_target, states i_state )
 {
     fapi2::buffer<uint64_t> l_data;
@@ -379,7 +381,7 @@ fapi_try_exit:
 /// @param[in] i_state the state
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = portTraits<MC> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
 fapi2::ReturnCode change_dfi_init_start( const fapi2::Target<T>& i_target, states i_state )
 {
     fapi2::buffer<uint64_t> l_data;
@@ -403,7 +405,7 @@ fapi_try_exit:
 /// @param[in] i_state the state
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = portTraits<MC> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
 fapi2::ReturnCode change_addr_mux_sel( const fapi2::Target<T>& i_target, states i_state )
 {
     fapi2::buffer<uint64_t> l_data;
@@ -425,7 +427,7 @@ fapi_try_exit:
 /// @param[in] i_target the target
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = portTraits<MC> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
 fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<T>& i_target );
 
 
@@ -438,7 +440,7 @@ fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<T>& i_target );
 /// @param[in] i_state the state
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = portTraits<MC> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
 fapi2::ReturnCode change_force_str( const fapi2::Target<T>& i_target, const states i_state );
 
 
@@ -451,7 +453,7 @@ fapi2::ReturnCode change_force_str( const fapi2::Target<T>& i_target, const stat
 /// @param[in] i_state the state
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = portTraits<MC> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
 fapi2::ReturnCode change_refresh_enable( const fapi2::Target<T>& i_target, states i_state )
 {
     fapi2::buffer<uint64_t> l_data;
@@ -474,7 +476,7 @@ fapi_try_exit:
 /// @param[in] i_target the target
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = portTraits<MC> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
 fapi2::ReturnCode enable_zq_cal( const fapi2::Target<T>& i_target )
 {
     fapi2::buffer<uint64_t> l_data;
@@ -548,6 +550,7 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+// TODO Zen:MST-1309 Remove DEFAULT_MC_TYPE
 ///
 /// @brief Configures the write reorder queue bit
 /// @tparam MC the memory controller type
@@ -558,8 +561,8 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = portTraits<MC> >
-inline fapi2::ReturnCode configure_wrq(const fapi2::Target<T>& i_target,
-                                       const mss::states i_state)
+fapi2::ReturnCode configure_wrq(const fapi2::Target<T>& i_target,
+                                const mss::states i_state)
 {
     // Loops through all port targets, hitting all the registers
     for( const auto& l_port : mss::find_targets<TT::PORT_TYPE>(i_target) )
@@ -583,6 +586,7 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+// TODO Zen:MST-1309 Remove DEFAULT_MC_TYPE
 ///
 /// @brief Configures the read reorder queue bit
 /// @tparam MC the memory controller type
@@ -625,7 +629,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
 /// @note  Contains the settings for write/read reorder queue
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
+template< mss::mc_type MC, fapi2::TargetType T >
 fapi2::ReturnCode reorder_queue_setting(const fapi2::Target<T>& i_target, uint8_t& o_value);
 
 ///
@@ -636,7 +640,7 @@ fapi2::ReturnCode reorder_queue_setting(const fapi2::Target<T>& i_target, uint8_
 /// @param[in] i_target the target to effect
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = portTraits<MC> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
 inline fapi2::ReturnCode reset_reorder_queue_settings(const fapi2::Target<T>& i_target)
 {
     uint8_t l_reorder_queue = 0;
@@ -648,7 +652,7 @@ inline fapi2::ReturnCode reset_reorder_queue_settings(const fapi2::Target<T>& i_
         const mss::states l_state = ((l_reorder_queue == fapi2::ENUM_ATTR_MEM_REORDER_QUEUE_SETTING_FIFO) ?
                                      mss::states::ON : mss::states::OFF);
         FAPI_TRY(configure_rrq(i_target, l_state), "%s failed to reset read reorder queue settings", mss::c_str(i_target));
-        FAPI_TRY(configure_wrq(i_target, l_state), "%s failed to reset read reorder queue settings", mss::c_str(i_target));
+        FAPI_TRY(configure_wrq(i_target, l_state), "%s failed to reset write reorder queue settings", mss::c_str(i_target));
     }
 
 
