@@ -3953,6 +3953,9 @@ sub setCommonBusConfigAttributes
             my $busDestHuid = $targetObj->getAttribute($busDestTargetCopy, "HUID");
             my $busDestPhysicalPath = $targetObj->getAttribute($busDestTargetCopy, "PHYS_PATH");
 
+            my $busSrcInstancePath = $targetObj->getAttribute($busSrcTargetCopy, "INSTANCE_PATH");
+            my $busDestInstancePath = $targetObj->getAttribute($busDestTargetCopy, "INSTANCE_PATH");
+
             # The MRWs contain four half-link targets and "fills out" at most two. Hostboot only
             # represents two half-link targets, and chooses the two ABUS MRW targets (groupA and
             # groupB) to become the SMPGROUP Hostboot targets. When the MRW sets up the XBUS MRW
@@ -3964,15 +3967,17 @@ sub setCommonBusConfigAttributes
             $busDestTargetCopy =~ s/xbus/abus/;
 
             # Set attributes for the target ends
-            $targetObj->setAttribute($busSrcTargetCopy, "PEER_TARGET", $busDestPhysicalPath);
-            $targetObj->setAttribute($busSrcTargetCopy, "PEER_PATH",   $busDestPhysicalPath);
-            $targetObj->setAttribute($busSrcTargetCopy, "PEER_HUID",   $busDestHuid);
-            $targetObj->setAttribute($busSrcTargetCopy, "BUS_TYPE",    $busType);
+            $targetObj->setAttribute($busSrcTargetCopy, "PEER_TARGET",   $busDestPhysicalPath);
+            $targetObj->setAttribute($busSrcTargetCopy, "PEER_PATH",     $busDestPhysicalPath);
+            $targetObj->setAttribute($busSrcTargetCopy, "PEER_HUID",     $busDestHuid);
+            $targetObj->setAttribute($busSrcTargetCopy, "BUS_TYPE",      $busType);
+            $targetObj->setAttribute($busSrcTargetCopy, "INSTANCE_PATH", $busSrcInstancePath);
 
-            $targetObj->setAttribute($busDestTargetCopy, "PEER_TARGET", $busSrcPhysicalPath);
-            $targetObj->setAttribute($busDestTargetCopy, "PEER_PATH",   $busSrcPhysicalPath);
-            $targetObj->setAttribute($busDestTargetCopy, "PEER_HUID",   $busSrcHuid);
-            $targetObj->setAttribute($busDestTargetCopy, "BUS_TYPE",    $busType);
+            $targetObj->setAttribute($busDestTargetCopy, "PEER_TARGET",   $busSrcPhysicalPath);
+            $targetObj->setAttribute($busDestTargetCopy, "PEER_PATH",     $busSrcPhysicalPath);
+            $targetObj->setAttribute($busDestTargetCopy, "PEER_HUID",     $busSrcHuid);
+            $targetObj->setAttribute($busDestTargetCopy, "BUS_TYPE",      $busType);
+            $targetObj->setAttribute($busDestTargetCopy, "INSTANCE_PATH", $busDestInstancePath);
         }
 
         my $busSrcHuid = $targetObj->getAttribute($busSrcTarget, "HUID");
