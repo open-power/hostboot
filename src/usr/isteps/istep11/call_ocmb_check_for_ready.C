@@ -62,6 +62,9 @@
 // Explorer error logs
 #include <expscom/expscom_errlog.H>
 
+// sendProgressCode
+#include <initservice/istepdispatcherif.H>
+
 using namespace ISTEPS_TRACE;
 using namespace ISTEP_ERROR;
 using namespace ERRORLOG;
@@ -164,6 +167,10 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
             // succeed or time out
             while (true)
             {
+                // Each attempt can take a few minutes so poke the
+                //  watchdog before each attempt
+                INITSERVICE::sendProgressCode();
+
                 // Delete the log from the previous iteration
                 if( l_errl )
                 {
