@@ -1132,12 +1132,23 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
         EEPROM::cacheEepromVpd(pTarget, present);
 
         // Validate the ECC data of the VPD cache if target is a PROC and is present
+        bool eccValidationError = false; // Assume no errors
         if ( (TYPE_PROC == l_attrType) && present )
         {
             errl = VPD::validateAllRecordEccData( pTarget );
             if (errl)
             {
-                break;
+                HWAS_ERR("platPresenceDetect: Committing processor MVPD ECC "
+                         "validation error for 0x%08X.  Marking non-present "
+                         "and processing remaining targets, but will attempt "
+                         "to save (possibly bad) part identification "
+                         "information (PN/SN/CCIN) for later callouts.",
+                         TARGETING::get_huid(pTarget));
+                errlCommit(errl, HWAS_COMP_ID);
+
+                // Flag the error to mark target as non-present after setting
+                // the FRU identification information.
+                eccValidationError = true;
             }
         }
         // Validate the CRC data of the VPD cache if target is a OCMB and is present
@@ -1200,6 +1211,13 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
             }
 
             //otherwise, do nothing.
+        }
+
+        // If previous ECC validation error, mark as not-present and let the
+        // target mismatch checking catch it later
+        if(eccValidationError == true)
+        {
+            present=false;
         }
 
         // Evaluate presence status, if we determine the target
