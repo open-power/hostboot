@@ -238,6 +238,88 @@ uint32_t clearMediaErrLogs( ExtensibleChip * i_ocmb )
 
 //------------------------------------------------------------------------------
 
+uint32_t readMediaErrLogErrCount( ExtensibleChip * i_ocmb, uint8_t & o_ueCount,
+    uint8_t & o_nonUeCount )
+{
+    #define PRDF_FUNC "[readMediaErrLogs] "
+
+    PRDF_ASSERT( nullptr != i_ocmb );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == i_ocmb->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    o_ueCount = 0;
+    o_nonUeCount = 0;
+
+    // The media error logs are split between two 32-bit sections. The first
+    // section has address information such as the column, row, and bank. The
+    // second section contains other information such as the error log valid and
+    // uncorrectable error flags. In this case we are interest in the
+    // information within the second section.
+
+    // The sections we are interested in are at addresses 0x0020F004,
+    // 0x0020F00C, 0x0020F014, etc, to a possible maximum of 512 entries.
+    // The format of that section of the media errors logs is (32 bits):
+    // 4 bits - Reserved
+    // 1 bit  - CS
+    // 3 bits - CID
+    // 4 bits - No. ERR_LOG (0:3)
+    // 1 bit  - ERROR_LOG_VALID
+    // 1 bit  - CHIP_KILL_COUNT_UP_EVENT
+    // 1 bit  - UNCORRECTABLE_ERROR_FLAG
+    // 1 bit  - CHIP_KILL_FLAG
+    // 8 bits - No. ERR_LOG (4:11)
+    // 8 bits - Reserved
+    uint32_t addr = 0x0020F004;
+
+    for ( uint16_t n = 0; n < 512; n++ )
+    {
+        uint32_t data = 0;
+        o_rc = readMdsCtlr<TYPE_OCMB_CHIP>( i_ocmb->getTrgt(), addr, data );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "readMdsCtlr(0x%08x, 0x%08x) failed.",
+                      i_ocmb->getHuid(), addr );
+            break;
+        }
+
+        // Check if the media error log is valid (bit 12)
+        uint32_t validBit = (data >> 19) & 0x1;
+
+        // If the log is not valid, we assume the rest of the logs left are also
+        // not valid. This will save us from having to read through all 512
+        // entries of the media error logs.
+        if ( validBit != 0x1 )
+        {
+            break;
+        }
+
+        // Check if the media error logs UE flag is set (bit 14)
+        uint32_t ueFlagBit = (data >> 17) & 0x1;
+
+        // If the UE flag is set, increment the UE count, else increment the
+        // non-UE count.
+        if ( ueFlagBit == 0x1 )
+        {
+            o_ueCount++;
+        }
+        else
+        {
+            o_nonUeCount++;
+        }
+
+        // increment the addres
+        addr += 8;
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+
+}
+
+//------------------------------------------------------------------------------
+
 // This enum defines the types of interface errors to be read from the media
 // controller for the below __getErrorCount function. The value of each type is
 // the address that needs to be read from.

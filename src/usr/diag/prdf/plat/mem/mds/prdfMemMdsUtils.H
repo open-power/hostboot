@@ -73,6 +73,17 @@ uint32_t writeMdsCtlr( TARGETING::TargetHandle_t i_target, uint32_t i_addr,
 uint32_t clearMediaErrLogs( ExtensibleChip * i_ocmb );
 
 /**
+ * @brief  This is called to collect the UE and non-UE error count from the MDS
+ *         media error logs.
+ * @param  i_chip The input OCMB
+ * @param  o_ueCount Denotes the count of UEs in the media err logs
+ * @param  o_nonUeCount Denotes the count of non-UEs in the media err logs
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+uint32_t readMediaErrLogErrCount( ExtensibleChip * i_ocmb, uint8_t & o_ueCount,
+    uint8_t & o_nonUeCount );
+
+/**
  * @brief  This is called to get the poison count from the MDS DDIMMs media
  *         controller
  * @param  i_target      The input MDS_CTLR/OCMB
