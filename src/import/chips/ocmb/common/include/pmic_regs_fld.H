@@ -182,8 +182,14 @@ struct pmicFields<mss::pmic::product::JEDEC_COMPLIANT>
     static constexpr uint8_t R2F_SECURE_MODE           = 2;
 
     // R32
-    static constexpr uint8_t R32_PWR_GOOD_IO_TYPE      = 5;
-    static constexpr uint8_t R32_VR_ENABLE             = 7;
+    // R32 as per IDT D0 revision
+    static constexpr uint8_t R32_CAMP_PWR_GOOD_OUTPUT_SIGNAL_CONTROL  = 3;
+    static constexpr uint8_t R32_EXECUTE_CAMP_FAIL_N_FUNCTION_CONTROL = 4;
+    static constexpr uint8_t R32_EXECUTE_VR_ENABLE_CONTROL            = 5;
+    // R32 as per TI and older IDT revisions
+    static constexpr uint8_t R32_PWR_GOOD_IO_TYPE                     = 5;
+    // R32 VR enable for IDT and TI
+    static constexpr uint8_t R32_VR_ENABLE                            = 7;
 
     // R3B
     static constexpr uint8_t R3B_PMIC_CURRENT_CAPABILITY = 0;

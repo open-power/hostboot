@@ -460,6 +460,18 @@ fapi2::ReturnCode set_pwr_good_pin_io(
     const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target);
 
 ///
+/// @brief Set EXECUTE_VR_ENABLE_CONTROL to execute VR enable command,
+///        clear VR execute disbale command for camp fail_n function,
+///        clear CAMP_PWR_GOOD_OUTPUT_SIGNAL_CONTROL so that PMIC can control PWR_GOOD output on its own based on internal status
+///
+/// @param[in] i_pmic_target PMIC target
+/// @return fapi2::FAPI2_RC_SUCCESS iff success
+/// @note This is intended for use on IDT 1U/2U DDIMMs with revision greater than 0x31
+///
+fapi2::ReturnCode set_vr_enable_clear_camp_pwr_good_pins(
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target);
+
+///
 /// @brief Set PWR_GOOD pin to Output
 ///
 /// @param[in] i_pmic_target PMIC target
@@ -1159,15 +1171,17 @@ fapi2::ReturnCode matching_vendors_helper(
     const uint8_t i_vendor_reg_hi);
 
 ///
-/// @brief Check that the IDT revision # register and attribute match
+/// @brief Check that the IDT revision # register and attribute match and return revision number
 ///
 /// @param[in] i_ocmb_target OCMB target
 /// @param[in] i_pmic_target PMIC target to check
+/// @param[out] o_rev_reg revision number of IDT PMIC
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
 ///
-fapi2::ReturnCode valid_idt_revisions(
+fapi2::ReturnCode validate_and_return_idt_revisions(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
-    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
+    fapi2::buffer<uint8_t>& o_rev_reg);
 
 ///
 /// @brief Unit testable helper function: Check that the IDT revision # register and attribute match
@@ -1177,7 +1191,7 @@ fapi2::ReturnCode valid_idt_revisions(
 /// @param[in] i_rev_reg revision value from register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
 ///
-fapi2::ReturnCode valid_idt_revisions_helper(
+fapi2::ReturnCode validate_and_return_idt_revisions_helper(
     const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
     const uint8_t i_rev_attr,
     const uint8_t i_rev_reg);

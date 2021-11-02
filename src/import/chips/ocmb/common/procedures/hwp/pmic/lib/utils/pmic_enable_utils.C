@@ -159,6 +159,42 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Set EXECUTE_VR_ENABLE_CONTROL to execute VR enable command,
+///        clear VR execute disable command for camp fail_n function,
+///        clear CAMP_PWR_GOOD_OUTPUT_SIGNAL_CONTROL so that PMIC can control PWR_GOOD output on its own based on internal status
+///
+/// @param[in] i_pmic_target PMIC target
+/// @return fapi2::FAPI2_RC_SUCCESS iff success
+/// @note This is intended for use on IDT 1U/2U DDIMMs with revision greater than 0x31
+///
+fapi2::ReturnCode set_vr_enable_clear_camp_pwr_good_pins(
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target)
+{
+    static constexpr auto J = mss::pmic::product::JEDEC_COMPLIANT;
+    using REGS = pmicRegs<J>;
+    using FIELDS = pmicFields<J>;
+
+    fapi2::buffer<uint8_t> l_vr_enable_buffer;
+
+    FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(i_pmic_target, REGS::R32, l_vr_enable_buffer));
+
+    // Set EXECUTE_VR_ENABLE_CONTROL to execute VR enable command (1 --> Bit 5)
+    l_vr_enable_buffer.setBit<FIELDS::R32_EXECUTE_VR_ENABLE_CONTROL>();
+    // Clear VR execute disable command for camp fail_n function (0 --> Bit 4)
+    l_vr_enable_buffer.clearBit<FIELDS::R32_EXECUTE_CAMP_FAIL_N_FUNCTION_CONTROL>();
+    // Clear CAMP_PWR_GOOD_OUTPUT_SIGNAL_CONTROL so that PMIC can control PWR_GOOD output on its own based on internal status
+    // (0 --> Bit 3)
+    l_vr_enable_buffer.clearBit<FIELDS::R32_CAMP_PWR_GOOD_OUTPUT_SIGNAL_CONTROL>();
+    FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(i_pmic_target, REGS::R32, l_vr_enable_buffer));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+///
 /// @brief Set PWR_GOOD pin to Output
 ///
 /// @param[in] i_pmic_target PMIC target
@@ -848,6 +884,8 @@ fapi2::ReturnCode enable_spd(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
     const uint16_t i_vendor_id)
 {
+    fapi2::buffer<uint8_t> l_rev_reg;
+
     FAPI_INF("Setting PMIC %s settings from SPD", mss::c_str(i_pmic_target));
 
     // Make sure it is TI or IDT
@@ -867,7 +905,7 @@ fapi2::ReturnCode enable_spd(
 
     if (i_vendor_id == mss::pmic::vendor::IDT)
     {
-        FAPI_TRY(mss::pmic::check::valid_idt_revisions(i_ocmb_target, i_pmic_target));
+        FAPI_TRY(mss::pmic::check::validate_and_return_idt_revisions(i_ocmb_target, i_pmic_target, l_rev_reg));
         FAPI_TRY(mss::pmic::bias_with_spd_settings<mss::pmic::vendor::IDT>(i_pmic_target, i_ocmb_target),
                  "enable_spd (IDT): Error biasing PMIC %s with SPD settings",
                  mss::c_str(i_pmic_target));
@@ -1217,6 +1255,8 @@ fapi2::ReturnCode enable_1u_2u(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
     const mss::pmic::enable_mode i_mode)
 {
+    constexpr uint8_t IDT_D0_REV = 0x31;
+
     auto l_pmics = mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target, fapi2::TARGET_STATE_PRESENT);
 
     // We're guaranteed to have at least one PMIC here due to the check in pmic_enable
@@ -1227,8 +1267,14 @@ fapi2::ReturnCode enable_1u_2u(
 
     // We must consider the PWR_GOOD mode. The enable sequence must be in this order:
     // Note that before VR disable in disable_and_reset_pmics, TI PMICs get pgood set as output only
+    // For IDT:
+    // Revision < IDT_D0_REV
     // PMIC0:  pgood=output        (IDT ONLY, could be intput+output but will setup the same way as TI)
     // PMIC1:  pgood=input+output  (IDT ONLY)
+    // Revision >= IDT_D0_REV Power good pin has been paired with Camp functionality
+    // PMIC0,1:  PMIC CAMP PWR_GOOD=PMIC controls PWR_GOOD output on its own based on internal status
+    //           PMIC CAMP Fail_n function=Execute VR Disable Command
+    // IDT/TI all revisions
     // PMIC0,1:  VR enable
     // PMIC0:  pgood=output        (TI ONLY - already set to output only in disable_and_reset_pmics)
     // PMIC1:  pgood=input+output  (TI ONLY)
@@ -1239,32 +1285,47 @@ fapi2::ReturnCode enable_1u_2u(
     // Ensure the PMICs are in sorted order
     FAPI_TRY(mss::pmic::order_pmics_by_sequence(i_ocmb_target, l_pmics));
 
-    // Before VR enable is done, enable PWR_GOOD on IDT PMICs
-    // Configure PWR_GOOD for IDT PMIC
+    // Before VR enable is done, enable appropriate bits on IDT PMICs w.r.t. the revision of the PMICs
     for (const auto& l_pmic : l_pmics)
     {
         l_current_pmic = l_pmic;
         uint16_t l_vendor_id = 0;
+        fapi2::buffer<uint8_t> l_idt_rev;
 
         // Get vendor ID
         FAPI_TRY(mss::attr::get_mfg_id[get_relative_pmic_id(l_pmic)](i_ocmb_target, l_vendor_id));
 
-        // Call the procedure to configure power good pin to I/O for last PMIC in power on sequence in
+        // Get revision number
+        FAPI_TRY(mss::pmic::check::validate_and_return_idt_revisions(i_ocmb_target, l_pmic, l_idt_rev));
+
+        // For revision less than 0x31: Call the procedure to configure power good pin to I/O for last PMIC in power on sequence in
         // order to have DDR4 SDRAM VPP/VDDR power sequencing spec met (VPP >= VDDR) when a PMIC fails
         // TI PMICs violate this power sequencing spec if both PMICs have PWR_GOOD=I/O when system
         //   does a power off/on.  IDT does not, but will set both up the same way.
         // TI PMICs PWR_GOOD I/O mode must be enabled after VR Enable
-        // IDT PMICs PWR_GOOD I/O mode must be enabled before VR Enable
+        // IDT PMICs PWR_GOOD I/O mode must be enabled before VR Enable for revisions less than 0x31
 
-        if ((l_vendor_id == mss::pmic::vendor::IDT) && (l_pmic != l_pmics[0]))
+        // For IDT PMIC revisions >= 0x31, following should be done before VR Enable:
+        //          EXECUTE_VR_ENABLE_CONTROL_=Execute VR Enable Command
+        //          PMIC CAMP PWR_GOOD=PMIC controls PWR_GOOD output on its own based on internal status
+        //          PMIC CAMP Fail_n function=Execute VR Disable Command
+
+        if (l_vendor_id == mss::pmic::vendor::IDT)
         {
-            FAPI_TRY(set_pwr_good_pin_io(l_pmic));
-        }
-        // Have first IDT PMIC in power on sequence set power good as output only to match what TI will have
-        // Added this because we have different default values depending on IDT chip revision
-        else if (l_vendor_id == mss::pmic::vendor::IDT)
-        {
-            FAPI_TRY(set_pwr_good_pin_output(l_pmic));
+            if (l_idt_rev >= IDT_D0_REV)
+            {
+                FAPI_TRY(set_vr_enable_clear_camp_pwr_good_pins(l_pmic));
+            }
+            // Have first IDT PMIC in power on sequence set power good as output only to match what TI will have
+            // Added this because we have different default values depending on IDT chip revision
+            else if (l_pmic == l_pmics[0])
+            {
+                FAPI_TRY(set_pwr_good_pin_output(l_pmic));
+            }
+            else
+            {
+                FAPI_TRY(set_pwr_good_pin_io(l_pmic));
+            }
         }
 
         // Call the workaround procedure for IDT PMIC high current consumption false errors
@@ -2188,29 +2249,44 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Check that the IDT revision # register and attribute match
+/// @brief Check that the IDT revision # register and attribute match and return revision number
 ///
-/// @param[in] i_ocmb_target OCMB target
-/// @param[in] i_pmic_target PMIC target to check
+/// @param[in]  i_ocmb_target OCMB target
+/// @param[in]  i_pmic_target PMIC target to check
+/// @param[out] o_rev_reg revision number of IDT PMIC
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
 ///
-fapi2::ReturnCode valid_idt_revisions(
+fapi2::ReturnCode validate_and_return_idt_revisions(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
-    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target)
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
+    fapi2::buffer<uint8_t>& o_rev_reg)
 {
     using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
 
     uint8_t l_pmic_id = mss::index(i_pmic_target);
     uint8_t l_rev = 0;
-    fapi2::buffer<uint8_t> l_rev_reg;
+    uint8_t l_simics = 0;
 
     // Get attribute
     FAPI_TRY(mss::attr::get_revision[l_pmic_id](i_ocmb_target, l_rev));
 
     // Now check the register
-    FAPI_TRY(mss::pmic::i2c::reg_read(i_pmic_target, REGS::R3B_REVISION, l_rev_reg));
+    FAPI_TRY(mss::pmic::i2c::reg_read(i_pmic_target, REGS::R3B_REVISION, o_rev_reg));
 
-    FAPI_TRY(mss::pmic::check::valid_idt_revisions_helper(i_pmic_target, l_rev, l_rev_reg()));
+    // The simics check has been added here to skip simics testing of the below function as
+    // simics is throwing error for the attribute and revision register mismatch condition.
+    // Updating simics is not recommended as there are no real PMICs on the simulation model
+    // and skipping this check will not affect rest of the pmic_enable functionality in simics
+    FAPI_TRY(mss::attr::get_is_simics(l_simics));
+
+    if (!l_simics)
+    {
+        FAPI_TRY(mss::pmic::check::validate_and_return_idt_revisions_helper(i_pmic_target, l_rev, o_rev_reg()));
+    }
+    else
+    {
+        FAPI_DBG("Simulation mode detected. Skipping IDT revision check");
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -2224,18 +2300,18 @@ fapi_try_exit:
 /// @param[in] i_rev_reg revision value from register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
 ///
-fapi2::ReturnCode valid_idt_revisions_helper(
+fapi2::ReturnCode validate_and_return_idt_revisions_helper(
     const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
     const uint8_t i_rev_attr,
     const uint8_t i_rev_reg)
 {
-    // At the moment, we only care that if we have C1 revision in either the SPD, or
-    // in the revision register, that the other matches. That way we use new C1 settings
-    // on C1 PMICs only, and vice-versa.
+    // At the moment, we only care that if we have revisions less than C1 in either the SPD, or
+    // in the revision register, that the other matches. That way we use C1 and above revision settings
+    // on C1 and above PMICs only, and vice-versa.
     constexpr uint8_t IDT_C1_REV = 0x21;
 
-    // If neither are IDT_C1, return
-    if (i_rev_attr != IDT_C1_REV && i_rev_reg != IDT_C1_REV)
+    // Check for revisions less than IDT_C1, return if true
+    if ( (i_rev_attr < IDT_C1_REV && i_rev_reg < IDT_C1_REV) )
     {
         return fapi2::FAPI2_RC_SUCCESS;
     }
