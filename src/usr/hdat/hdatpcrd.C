@@ -271,6 +271,11 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
                                     TARGETING::targetService().begin(),
                                     TARGETING::targetService().end(),
                                     &l_presentProc);
+
+        TARGETING::ATTR_LOCATION_CODE_type l_cur_location_code { };
+        TARGETING::ATTR_LOCATION_CODE_type l_last_location_code { };
+        uint8_t l_pcrd_fabnodeid = 0;
+
         for (;l_filter;++l_filter)
         {
             HDAT_DBG("Pcrd Address 0x%08X \n",
@@ -329,6 +334,26 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
                         l_errl->reasonCode());
                 break;
             }
+
+            // Fabric Node Id needs to get set according to the DCM number that
+            // contains the processor chip
+            l_pProcTarget->tryGetAttr<TARGETING::ATTR_LOCATION_CODE>
+                (l_cur_location_code);
+
+            // Value of index is based on the proc numbers, so here depending
+            // on the index, the first value is set and consecutive dcm values
+            // are determined from location code match result
+            if ( (index !=0) &&
+                  strcmp(l_cur_location_code, l_last_location_code)
+               )
+            {
+                l_pcrd_fabnodeid++;
+            }
+
+            strcpy(l_last_location_code, l_cur_location_code);
+            iv_spPcrd->hdatChipData.hdatPcrdFabricId = l_pcrd_fabnodeid;
+            HDAT_DBG("Last iv_spPcrd->hdatChipData.hdatPcrdFabricId=%d",
+                iv_spPcrd->hdatChipData.hdatPcrdFabricId);
 
             this->iv_spPcrd->hdatFruId.hdatSlcaIdx =
                                     l_pProcTarget->getAttr<ATTR_SLCA_INDEX>();
@@ -986,7 +1011,7 @@ errlHndl_t HdatPcrd::hdatSetProcessorInfo(
         HDAT_DBG("hw card ID:0x%llx", l_HWCardId);
 
         iv_spPcrd->hdatChipData.hdatPcrdHwCardID = l_HWCardId;
-        iv_spPcrd->hdatChipData.hdatPcrdFabricId = l_procRealFabricGrpId;
+
         iv_spPcrd->hdatChipData.hdatPcrdCcmNodeID =
                     l_pNodeTarget->getAttr<TARGETING::ATTR_ORDINAL_ID>();
 
