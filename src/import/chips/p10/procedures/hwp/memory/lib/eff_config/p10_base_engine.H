@@ -1303,6 +1303,44 @@ class base_0_3
         }
 
         ///
+        /// @brief Set the mds_ddimm field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_mds_ddimm(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_hybrid = 0;
+            uint8_t l_hybrid_memory_type = 0;
+            uint8_t l_field = 0;
+
+            FAPI_TRY( mss::attr::get_hybrid(iv_dimm, l_hybrid) );
+            FAPI_TRY( mss::attr::get_hybrid_memory_type(iv_dimm, l_hybrid_memory_type) );
+
+            // First check the consistency of the attributes
+            // HYBRID_MEMORY_TYPE cannot be MDS if HYBRID is not set
+            FAPI_ASSERT(!((l_hybrid_memory_type == fapi2::ENUM_ATTR_MEM_EFF_HYBRID_MEMORY_TYPE_MDS) &&
+                          (l_hybrid != fapi2::ENUM_ATTR_MEM_EFF_HYBRID_IS_HYBRID)),
+                        fapi2::MSS_INVALID_SPD_NONHYBRID_MDS().
+                        set_HYBRID_MEDIA_TYPE(l_hybrid_memory_type).
+                        set_HYBRID(l_hybrid),
+                        "%s Invalid SPD fields: HYBRID=0x%02x HYBRID_MEMORY_TYPE=0x%02x",
+                        spd::c_str(iv_dimm), l_hybrid, l_hybrid_memory_type);
+
+            // This is an MDS DDIMM if it's hybrid and the memory type is MDS
+            l_field = ((l_hybrid_memory_type == fapi2::ENUM_ATTR_MEM_EFF_HYBRID_MEMORY_TYPE_MDS) &&
+                       (l_hybrid == fapi2::ENUM_ATTR_MEM_EFF_HYBRID_IS_HYBRID)) ?
+                      fapi2::ENUM_ATTR_MEM_EFF_MDS_DDIMM_TRUE : fapi2::ENUM_ATTR_MEM_EFF_MDS_DDIMM_FALSE;
+
+            FAPI_DBG("%s MDS DDIMM = %d", spd::c_str(iv_dimm), l_field);
+
+            FAPI_TRY(mss::attr::set_mds_ddimm(iv_dimm, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
         /// @brief Set the height 3ds field
         ///
         /// @param[in] i_spd SPD binary
@@ -2381,6 +2419,7 @@ class base_0_3
             FAPI_TRY(set_logical_ranks(i_spd));
             FAPI_TRY(set_height_3ds(i_spd)); // 3ds must be calculated after logical ranks
             FAPI_TRY(set_mem_dimm_size(i_spd));
+            FAPI_TRY(set_mds_ddimm(i_spd));
 
         fapi_try_exit:
             return fapi2::current_err;

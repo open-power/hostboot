@@ -553,6 +553,34 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_INVALID_SPD_NONHYBRID_MDS</rc>
+    <description>
+        Conflict in SPD fields: HYBRID_MEDIA_TYPE (byte 3, bits 1:3) cannot be MDS
+        if HYBRID (byte 3, bit 0) is not set.
+    </description>
+    <ffdc>HYBRID</ffdc>
+    <ffdc>HYBRID_MEDIA_TYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>DIMM_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_INVALID_SPD_REVISION</rc>
     <description>
       Unable to fall back SPD decoder to the highest decoded

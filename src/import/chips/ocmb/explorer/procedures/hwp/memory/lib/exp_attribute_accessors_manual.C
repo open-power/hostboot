@@ -115,14 +115,11 @@ fapi2::ReturnCode is_mds( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target
     // Assume its not MDS to start
     o_is_mds = false;
 
-    uint8_t l_hybrid = 0;
-    uint8_t l_hybrid_media_type = 0;
+    uint8_t l_mds_ddimm = 0;
 
-    FAPI_TRY(mss::attr::get_hybrid(i_target, l_hybrid));
-    FAPI_TRY(mss::attr::get_hybrid_memory_type(i_target, l_hybrid_media_type));
+    FAPI_TRY(mss::attr::get_mds_ddimm(i_target, l_mds_ddimm));
 
-    o_is_mds = (l_hybrid_media_type == fapi2::ENUM_ATTR_MEM_EFF_HYBRID_MEMORY_TYPE_MDS &&
-                l_hybrid == fapi2::ENUM_ATTR_MEM_EFF_HYBRID_IS_HYBRID);
+    o_is_mds = (l_mds_ddimm == fapi2::ENUM_ATTR_MEM_EFF_MDS_DDIMM_TRUE);
 
 fapi_try_exit:
 
@@ -140,12 +137,14 @@ fapi2::ReturnCode is_mds( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_ta
     // Assume its not MDS to start
     o_is_mds = false;
 
+    fapi2::ATTR_MEM_EFF_MDS_DDIMM_Type l_mds_ddimm_on_port = {};
+
+    FAPI_TRY(mss::attr::get_mds_ddimm(i_target, l_mds_ddimm_on_port));
+
     // Loop over all DIMM's and determine if we have any MDS type DIMMs
-    for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
+    for (const auto l_mds_ddimm : l_mds_ddimm_on_port)
     {
-        bool l_current_mds = false;
-        FAPI_TRY(is_mds(l_dimm, l_current_mds));
-        o_is_mds |= l_current_mds;
+        o_is_mds |= (l_mds_ddimm == fapi2::ENUM_ATTR_MEM_EFF_MDS_DDIMM_TRUE);
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
