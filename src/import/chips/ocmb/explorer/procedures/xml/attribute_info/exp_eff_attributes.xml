@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -87,6 +87,23 @@
         <array>2</array>
         <mssUnits>bool</mssUnits>
         <mssAccessorName>four_rank_mode</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_MDS_DDIMM</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          ARRAY[DIMM]
+          MDS DDIMM type derived attribute
+          Will be true if HYBRID_MEMORY_TYPE is MDS and HYBRID is true
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <enum>FALSE = 0, TRUE = 1</enum>
+        <writeable/>
+        <array>2</array>
+        <mssUnits>bool</mssUnits>
+        <mssAccessorName>mds_ddimm</mssAccessorName>
     </attribute>
 
     <attribute>
