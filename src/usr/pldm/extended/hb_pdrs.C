@@ -297,10 +297,10 @@ void addEntityAssociationAndFruRecordSetPdrs(PdrManager& io_pdrman, pldm_entity 
                 const auto entity_id = pldm_entity_extract(proc_node);
 
                 ATTR_PLDM_ENTITY_ID_INFO_type targeting_entity_id = { };
-                // These values are already in little-endian.
-                targeting_entity_id.entityType = entity_id.entity_type;
-                targeting_entity_id.entityInstanceNumber = entity_id.entity_instance_num;
-                targeting_entity_id.containerId = entity_id.entity_container_id;
+
+                targeting_entity_id.entityType = htole16(entity_id.entity_type);
+                targeting_entity_id.entityInstanceNumber = htole16(entity_id.entity_instance_num);
+                targeting_entity_id.containerId = htole16(entity_id.entity_container_id);
 
                 targets[i]->setAttr<ATTR_PLDM_ENTITY_ID_INFO>(targeting_entity_id);
             }

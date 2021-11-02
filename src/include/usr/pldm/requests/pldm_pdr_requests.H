@@ -33,6 +33,7 @@
 
 #include <errl/errlentry.H>
 #include <pldm/pldmif.H>
+#include <pldm/pldm_const.H>
 
 #include <openbmc/pldm/libpldm/platform.h>
 #include <openbmc/pldm/libpldm/state_set.h>
@@ -49,7 +50,6 @@ class Target;
 namespace PLDM
 {
 
-using pdr_handle_t = uint32_t;
 
 static constexpr pdr_handle_t FIRST_PDR_HANDLE = 0,
                               NO_MORE_PDR_HANDLES = 0;
@@ -74,12 +74,6 @@ errlHndl_t getRemotePdrRepository(pldm_pdr* io_repo);
  */
 errlHndl_t sendRepositoryChangedEvent(const pldm_pdr* i_repo,
                                       const std::vector<pdr_handle_t>& i_handles);
-
-using sensor_state_t = uint8_t;
-using sensor_id_t = uint16_t;
-using effecter_id_t = uint16_t;
-using state_query_id_t = uint16_t; // Either a state sensor or effecter ID
-using state_set_id_t = uint16_t;
 
 /**
  * @brief Send a Platform Event Message indicating a "Sensor State Changed"

@@ -34,7 +34,13 @@ typedef uint8_t mctp_eid_t;
 
 namespace PLDM
 {
+    using pdr_handle_t = uint32_t;
     using terminus_id_t = uint16_t;
+    using sensor_state_t = uint8_t;
+    using sensor_id_t = uint16_t;
+    using effecter_id_t = uint16_t;
+    using state_query_id_t = uint16_t; // Either a state sensor or effecter ID
+    using state_set_id_t = uint16_t;
 
     // used to match any terminus id
     const terminus_id_t TERMINUS_ID_ALL = 0xFFFF;

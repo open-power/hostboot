@@ -393,6 +393,16 @@ public:
     // findStateEffecterId to act as a wildcard in the search.
     static const uint16_t ENTITY_ID_DONTCARE = 0xFFFF;
 
+    /* @brief Compare components of an entity ID for equality. The haystack should
+     * come from a PDR (in little-endian format) and the needle should be a search
+     * pattern (number or ENTITY_ID_DONTCARE).
+     *
+     * @param[in] i_haystack  The component to search (little-endian).
+     * @param[in] i_needle    The component to match (host-endian; entity ID or ENTITY_ID_DONTCARE).
+     * @return    bool        Whether the components match.
+     */
+    static bool entity_id_component_equal(const uint16_t i_haystack, const uint16_t i_needle);
+
     /** @brief Find the ID of an effecter that operates with the given state set
      * ID. If there are multiple effecters that operate with the given ID, any
      * of them may be returned.
@@ -461,6 +471,24 @@ public:
                                              uint8_t i_composite_id,
                                              msg_q_t i_msgQ);
 #endif
+
+    /**
+     * @brief Searches for the numeric effecter id matching the given target entity and semantic id.
+     *
+     * @param[in] i_target_entity A reference to the pldm entity struct which can be retrieved by calling
+     *                            targeting_to_pldm_entity_id on the target's ATTR_*PLDM_ENTITY_ID_INFO.
+     *
+     * @param[in]  i_func         The comparator function. Can be any object with an operator() that is
+     *                            compatible with the signature:
+     *                              bool i_func(pldm_numeric_effecter_value_pdr*)
+     *                            Its required that the functor return true in order to idenify that the PDR was found.
+     *                            The functor will be called for each numeric effecter that is associated with
+     *                            i_target_entity.
+     * @return effecter_id_t     The BMC's effecter ID for the given entity id, or 0 if not found.
+     */
+    template<typename F>
+    effecter_id_t findNumericEffecterId(const pldm_entity & i_target_entity,
+                                        F&& i_func);
 
 private:
     std::unique_ptr<pldm_pdr, void(*)(pldm_pdr*)> iv_pdr_repo;
@@ -586,6 +614,42 @@ void PdrManager::foreachPdrOfType(const pldm_pdr_types i_pdr_type, F&& i_func) c
             }
         }
     } while (curr_record);
+}
+
+template<typename F>
+effecter_id_t PdrManager::findNumericEffecterId(const pldm_entity & i_target_entity, F&& i_comp)
+{
+    effecter_id_t effecter_id = 0;
+
+    thePdrManager()
+        .foreachPdrOfType(PLDM_NUMERIC_EFFECTER_PDR,
+                          [&effecter_id, i_target_entity, &i_comp]
+                          (uint8_t const * const pdr_data, const uint32_t pdr_data_size)
+                          {
+                              const auto numeric_effecter_pdr =
+                                  reinterpret_cast<const pldm_numeric_effecter_value_pdr*>(pdr_data);
+                              // The following three ids comprise the entity id.
+                              // It is necessary for all three to match with their respective pdr values
+                              if (entity_id_component_equal(numeric_effecter_pdr->entity_type,
+                                                            i_target_entity.entity_type)
+                                  && entity_id_component_equal(numeric_effecter_pdr->entity_instance,
+                                                               i_target_entity.entity_instance_num)
+                                  && entity_id_component_equal(numeric_effecter_pdr->container_id,
+                                                               i_target_entity.entity_container_id))
+                              {
+                                  // Numeric effecters don't have a specific id to uniquely identify them among other
+                                  // numeric effecters on the same entity. So, caller has provided a way to identify
+                                  // the numeric effecter they are looking for. This could be a semantic id, base unit,
+                                  // or anything else that is unique to the numeric effecter being searched for.
+                                  if(i_comp(numeric_effecter_pdr))
+                                  {
+                                      effecter_id = le16toh(numeric_effecter_pdr->effecter_id);
+                                      return true; // Stop searching
+                                  }
+                              }
+                              return false; // This isn't the effecter we're looking for, move along.
+                          });
+    return effecter_id;
 }
 
 }

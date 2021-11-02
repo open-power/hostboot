@@ -237,15 +237,7 @@ pldm_terminus_locator_pdr* findHBTerminusLocatorPdr(const pldm_pdr* const i_repo
     return l_hb_pdr;
 }
 
-/* @brief Compare components of an entity ID for equality. The haystack should
- * come from a PDR (in little-endian format) and the needle should be a search
- * pattern (number or ENTITY_ID_DONTCARE).
- *
- * @param[in] i_haystack  The component to search (little-endian).
- * @param[in] i_needle    The component to match (host-endian; entity ID or ENTITY_ID_DONTCARE).
- * @return    bool        Whether the components match.
- */
-static bool entity_id_component_equal(const uint16_t i_haystack, const uint16_t i_needle)
+bool PdrManager::entity_id_component_equal(const uint16_t i_haystack, const uint16_t i_needle)
 {
     return i_needle == PdrManager::ENTITY_ID_DONTCARE || le16toh(i_haystack) == i_needle;
 }

@@ -61,31 +61,14 @@ const uint16_t PLDM_OEM_IBM_SBE_HRESET_STATE = 32776;
  */
 effecter_id_t getSbeDumpEffecterId(const Target* const i_proc)
 {
-    const auto targ_entity_id = i_proc->getAttr<ATTR_PLDM_ENTITY_ID_INFO>();
+    pldm_entity entity_info = targeting_to_pldm_entity_id(i_proc->getAttr<ATTR_PLDM_ENTITY_ID_INFO>());
 
-    effecter_id_t effecter_id = 0;
-
-    thePdrManager().foreachPdrOfType(PLDM_NUMERIC_EFFECTER_PDR,
-                                     [&effecter_id, targ_entity_id]
-                                     (const uint8_t* const pdr_data, const uint32_t pdr_data_size)
-                                     {
-                                         const auto numeric_effecter_pdr
-                                             = reinterpret_cast<const pldm_numeric_effecter_value_pdr*>(pdr_data);
-
-                                         if (numeric_effecter_pdr->entity_type == targ_entity_id.entityType
-                                             && numeric_effecter_pdr->entity_instance == targ_entity_id.entityInstanceNumber
-                                             && numeric_effecter_pdr->container_id == targ_entity_id.containerId)
-                                         {
-                                             if (le16toh(numeric_effecter_pdr->effecter_semantic_id) == PLDM_OEM_IBM_SBE_MAINTENANCE_STATE)
-                                             {
-                                                 effecter_id = le16toh(numeric_effecter_pdr->effecter_id);
-                                                 return true; // halt the iteration
-                                             }
-                                         }
-                                         return false; // continue the iteration
-                                     });
-
-    return effecter_id;
+    return thePdrManager()
+        .findNumericEffecterId(entity_info,
+                               [](pldm_numeric_effecter_value_pdr const * const numeric_effecter)
+                               {
+                                   return (le16toh(numeric_effecter->effecter_semantic_id) == PLDM_OEM_IBM_SBE_MAINTENANCE_STATE);
+                               });
 }
 
 errlHndl_t PLDM::dumpSbe(Target* const i_proc, const uint32_t i_plid)
