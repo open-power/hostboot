@@ -42,6 +42,7 @@
 
 // Targeting
 #include <targeting/targplatutil.H>
+#include <targeting/common/targetservice.H>
 
 // IPC
 #include <sys/msg.h>
@@ -917,12 +918,75 @@ errlHndl_t sendSetStateEffecterStatesRequest(
     return errl;
 }
 
+errlHndl_t sendResetRebootCountRequest()
+{
+    PLDM_ENTER("sendResetRebootCountRequest()");
+    errlHndl_t errl = nullptr;
+    do {
+
+    TARGETING::Target* system = TARGETING::UTIL::assertGetToplevelTarget();
+    pldm_entity chassis_entity =
+        targeting_to_pldm_entity_id(system->getAttr<TARGETING::ATTR_CHASSIS_PLDM_ENTITY_ID_INFO>());
+
+    // This is effectively the unique id for this PDR. Since other PDRs aren't allowed to have this base unit
+    const uint8_t PLDM_BASE_UNIT_RETRIES = 72;
+    const effecter_id_t reboot_count_effecter =
+        thePdrManager().findNumericEffecterId(chassis_entity,
+                                              [](pldm_numeric_effecter_value_pdr const * const numeric_effecter)
+                                              {
+                                                  return (le16toh(numeric_effecter->base_unit) == PLDM_BASE_UNIT_RETRIES);
+                                              });
+
+    if (reboot_count_effecter == 0)
+    {
+            /*@
+             * @errortype
+             * @severity   ERRL_SEV_PREDICTIVE
+             * @moduleid   MOD_RESET_REBOOT_COUNT
+             * @reasoncode RC_INVALID_EFFECTER_ID
+             * @userdata1  The total number of PDRs that PDR Manager is aware of.
+             * @devdesc    Software problem, could not find reboot count effecter PDR.
+             * @custdesc   A software error occurred during system boot.
+             */
+            errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                                 MOD_RESET_REBOOT_COUNT,
+                                 RC_INVALID_EFFECTER_ID,
+                                 PLDM::thePdrManager().pdrCount(),
+                                 0,
+                                 ErrlEntry::ADD_SW_CALLOUT);
+            addBmcErrorCallouts(errl);
+            break;
+    }
+
+    // BMC reboot counter defaults to three and regardless of value sent BMC will treat it as three. So just send three.
+    const uint8_t MAX_REBOOT_COUNT = 3;
+    errl = sendSetNumericEffecterValueRequest(reboot_count_effecter, MAX_REBOOT_COUNT, sizeof(MAX_REBOOT_COUNT));
+
+    if (errl)
+    {
+        PLDM_ERR("sendResetRebootCountRequest(): Failed to send numeric effecter value set request for system target.");
+        break;
+    }
+
+    } while(0);
+
+    PLDM_EXIT("sendResetRebootCountRequest()");
+    return errl;
+}
+
 errlHndl_t sendGracefulRestartRequest()
 {
     errlHndl_t errl = nullptr;
 
     do
     {
+// @TODO RTC:293028 Uncomment when BMC commit is in
+//        errl = sendResetRebootCountRequest();
+//        if (errl)
+//        {
+//            break;
+//        }
+
         const effecter_id_t sw_term_effecter_id
             = thePdrManager().findStateEffecterId(PLDM_STATE_SET_SW_TERMINATION_STATUS,
                                                   { .entity_type = ENTITY_SYS_FIRMWARE,
@@ -932,7 +996,8 @@ errlHndl_t sendGracefulRestartRequest()
         if (sw_term_effecter_id == 0)
         {
             /*@
-             * @errortype  ERRL_SEV_UNRECOVERABLE
+             * @errortype
+             * @severity   ERRL_SEV_UNRECOVERABLE
              * @moduleid   MOD_FIND_TERMINATION_STATUS_ID
              * @reasoncode RC_INVALID_EFFECTER_ID
              * @userdata1  The total number of PDRs that PDR Manager is aware of.

@@ -198,32 +198,6 @@ errlHndl_t rediscoverI2CTargets(void)
             CONSOLE::flush();
 #endif
 
-#ifdef CONFIG_BMC_IPMI
-            uint16_t count = SENSOR::DEFAULT_REBOOT_COUNT;
-            SENSOR::RebootCountSensor l_sensor;
-
-            // Set reboot count to default value
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,INFO_MRK
-                       "rediscoverI2CTargets: Writing Reboot Sensor Count=%d",
-                       count);
-
-            auto new_err = l_sensor.setRebootCount( count );
-            if ( new_err )
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           ERR_MRK"rediscoverI2CTargets: "
-                           "FAIL Writing Reboot Sensor Count to %d, "
-                           "but continuing shutdown"
-                           TRACE_ERR_FMT,
-                           count,
-                           TRACE_ERR_ARGS(new_err));
-                new_err->collectTrace(ISTEP_COMP_NAME);
-                errlCommit( new_err, ISTEP_COMP_ID );
-
-                // No Break - Still send chassis power cycle
-            }
-#endif
-
             // Initiate a graceful power cycle
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,INFO_MRK
                    "rediscoverI2CTargets: requesting power cycle");

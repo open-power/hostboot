@@ -725,40 +725,7 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                               l_deconfig ? "Deconfig" : "Recoverable Error" );
                             CONSOLE::flush();
                             #endif
-                            #ifdef CONFIG_BMC_IPMI
-                            // Check the newGardRecord instance variable
-                            if(iv_newGardRecord)
-                            {
-                                // We have a new gard record committed. We need
-                                // to increment the reboot count
-                                uint16_t l_count = 0;
-                                SENSOR::RebootCountSensor l_sensor;
-                                // Read reboot count sensor
-                                errhdl = l_sensor.getRebootCount(l_count);
-                                if (errhdl)
-                                {
-                                    TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps: getRebootCount failed");
-                                    break;
-                                }
-                                // Increment reboot count
-                                l_count++;
-                                errhdl = l_sensor.setRebootCount(l_count);
-                                if (errhdl)
-                                {
-                                    TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps: setRebootCount failed");
-                                    break;
-                                }
-                            }
-                            else
-                            {
-                                // We are in a reconfig loop, but no new gard
-                                // records have been set. We will not increment
-                                // the reboot count.
-                                TRACFCOMP(g_trac_initsvc, "Reconfig loop needed "
-                                    "but no new gard records were committed. Do "
-                                    "not increment reboot count.");
-                            }
-                            #endif // CONFIG_BMC_IPMI
+
                             TRACFCOMP(g_trac_initsvc, INFO_MRK"executeAllISteps: sending reboot request");
                             // Request BMC to do power cycle that sends shutdown
                             // and reset the host

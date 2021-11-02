@@ -6312,35 +6312,6 @@ errlHndl_t sbeDoReboot( void )
             }
         }
 
-#ifdef CONFIG_BMC_IPMI
-        uint16_t count = SENSOR::DEFAULT_REBOOT_COUNT;
-        SENSOR::RebootCountSensor l_sensor;
-
-        // Set reboot count to default value
-        TRACFCOMP( g_trac_sbe,
-                   INFO_MRK"sbeDoReboot: "
-                   "Writing Reboot Sensor Count=%d", count);
-
-        err = l_sensor.setRebootCount( count );
-        if ( err )
-        {
-            TRACFCOMP( g_trac_sbe,
-                       ERR_MRK"sbeDoReboot: "
-                       "FAIL Writing Reboot Sensor Count to %d. "
-                       "Committing Error Log rc=0x%.4X eid=0x%.8X "
-                       "plid=0x%.8X, but continuing shutdown",
-                       count,
-                       err->reasonCode(),
-                       err->eid(),
-                       err->plid());
-            err->collectTrace(SBE_COMP_NAME);
-            errlCommit( err, SBE_COMP_ID );
-
-            // No Break - Still send chassis power cycle
-        }
-
-#endif
-
         if (!g_do_hw_keys_hash_transition)
         {
             // Sync all attributes to the FSP/BMC before doing the Shutdown
