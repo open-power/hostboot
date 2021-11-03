@@ -258,7 +258,7 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                                                      attrs.attr_boot_voltage_mv[VDN],
                                                      attrs.attr_ext_vrm_step_size_mv[VDN],
                                                      l_present_boot_voltage[VDN],
-                                                     VDN_SETUP),
+                                                     VDN),
                          "error from VDN setup function");
 
                 if (attrs.attr_array_write_assist_set)
@@ -287,7 +287,7 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                                                      attrs.attr_boot_voltage_mv[VIO],
                                                      attrs.attr_ext_vrm_step_size_mv[VIO],
                                                      l_present_boot_voltage[VIO],
-                                                     VIO_SETUP),
+                                                     VIO),
                          "error from VIO setup function");
             }
         }
@@ -322,7 +322,7 @@ p10_setup_evid_voltageRead(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
     {
         switch (i_evid_value)
         {
-            case VCS_SETUP:
+            case VCS:
                 if (i_bus_num[i_evid_value] == INVALID_BUS_NUM)
                 {
                     FAPI_INF("VCS not connected. skipping");
@@ -332,7 +332,7 @@ p10_setup_evid_voltageRead(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
                 strcpy(rail_str, "VCS");
                 break;
 
-            case VDD_SETUP:
+            case VDD:
                 if (i_bus_num[i_evid_value] == INVALID_BUS_NUM)
                 {
                     FAPI_INF("VDD not connected. skipping");
@@ -342,7 +342,7 @@ p10_setup_evid_voltageRead(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
                 strcpy(rail_str, "VDD");
                 break;
 
-            case VDN_SETUP:
+            case VDN:
                 if (i_bus_num[i_evid_value] == INVALID_BUS_NUM)
                 {
                     FAPI_INF("VDN not connected. skipping");
@@ -352,7 +352,7 @@ p10_setup_evid_voltageRead(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
                 strcpy(rail_str, "VDN");
                 break;
 
-            case VIO_SETUP:
+            case VIO:
                 if (i_bus_num[i_evid_value] == INVALID_BUS_NUM)
                 {
                     FAPI_INF("VIO not connected. skipping");
@@ -367,7 +367,7 @@ p10_setup_evid_voltageRead(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
                 ;
         }
 
-        if (i_evid_value != VIO_SETUP)
+        if (i_evid_value != VIO)
         {
             // Initialize the buses
             FAPI_TRY(avsInitExtVoltageControl(i_target,
@@ -377,7 +377,7 @@ p10_setup_evid_voltageRead(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
 
         // Drive AVS Bus with a frame value 0xFFFFFFFF (idle frame) to
         // initialize the AVS slave
-        FAPI_INF("   Sending AVSBus idle frame");
+        FAPI_DBG("   Sending AVSBus idle frame");
         FAPI_TRY(avsIdleFrame(i_target, i_bus_num[i_evid_value], BRIDGE_NUMBER));
 
         // Read the present voltage
@@ -408,7 +408,7 @@ p10_setup_evid_voltageRead(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         }
         while (!l_goodResponse);
 
-        FAPI_DBG("%s voltage read: %d mv", rail_str, l_present_voltage_mv);
+        FAPI_INF("%s voltage read: %d mv", rail_str, l_present_voltage_mv);
         o_voltage_mv[i_evid_value] = l_present_voltage_mv;
     } //end of for
 
@@ -430,10 +430,15 @@ update_VDD_VCS_voltage(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targ
                        const uint32_t* i_present_boot_voltage)
 
 {
-    enum P10_SETUP_EVID_CONSTANTS l_evid_value;
+    uint8_t l_evid_value;
 
     do
     {
+
+        FAPI_INF("%s present voltage %d mv voltage_mv %d",
+                 "VDD", i_present_boot_voltage[VDD], i_voltage_mv[VDD]);
+        FAPI_INF("%s boot voltage %d mv voltage_mv %d",
+                 "VCS", i_present_boot_voltage[VCS], i_voltage_mv[VCS]);
 
         if (i_present_boot_voltage[VDD] == i_voltage_mv[VDD] &&
             i_present_boot_voltage[VCS] == i_voltage_mv[VCS])
@@ -445,12 +450,14 @@ update_VDD_VCS_voltage(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targ
         // Here if boot voltage is less than computed voltage, then we are
         // moving the voltage upwards, in this case we should first update VCS
         // and then VDD
-        if (i_present_boot_voltage[VDD] < i_voltage_mv[VDD] &&
-            i_present_boot_voltage[VCS] <= i_voltage_mv[VCS])
+        if (i_present_boot_voltage[VDD] < i_voltage_mv[VDD] ||
+            i_present_boot_voltage[VCS] < i_voltage_mv[VCS])
         {
+            FAPI_INF("   Raising VDD and VCS voltages");
+
             for (int8_t i = VCS; i >= VDD;  --i)
             {
-                l_evid_value = (i == VDD) ? VDD_SETUP : VCS_SETUP;
+                l_evid_value = (i == VDD) ? VDD : VCS;
 
                 FAPI_TRY(p10_setup_evid_voltageWrite(i_target,
                                                      i_bus_num[i],
@@ -463,17 +470,16 @@ update_VDD_VCS_voltage(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targ
             }
         }
 
-
         //if boot voltage is greater than computed voltage, then we are
         //moving downwards,in this case VDD first and VCS should be updated
-        if ((i_present_boot_voltage[VDD] > i_voltage_mv[VDD] &&
-             i_present_boot_voltage[VCS] >= i_voltage_mv[VCS]) ||
-            (i_present_boot_voltage[VDD] > i_voltage_mv[VDD] &&
-             i_present_boot_voltage[VCS] <= i_voltage_mv[VCS]))
+        if (i_present_boot_voltage[VDD] > i_voltage_mv[VDD] ||
+            i_present_boot_voltage[VCS] > i_voltage_mv[VCS])
         {
+            FAPI_INF("   Lowering VDD and VCS voltages");
+
             for (int8_t i = VDD; i <= VCS;  ++i)
             {
-                l_evid_value = (i == VDD) ? VDD_SETUP : VCS_SETUP;
+                l_evid_value = (i == VDD) ? VDD : VCS;
 
                 FAPI_TRY(p10_setup_evid_voltageWrite(i_target,
                                                      i_bus_num[i],
@@ -502,7 +508,7 @@ p10_setup_evid_voltageWrite(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
                             const uint32_t i_voltage_mv,
                             const uint32_t i_ext_vrm_step_size_mv,
                             const uint32_t i_present_voltage_mv,
-                            const P10_SETUP_EVID_CONSTANTS i_evid_value)
+                            const uint8_t i_evid_value)
 {
     uint8_t     l_goodResponse = 0;
     uint8_t     l_throwAssert = true;
@@ -514,19 +520,19 @@ p10_setup_evid_voltageWrite(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
 
     switch (i_evid_value)
     {
-        case VCS_SETUP:
+        case VCS:
             strcpy(rail_str, "VCS");
             break;
 
-        case VDD_SETUP:
+        case VDD:
             strcpy(rail_str, "VDD");
             break;
 
-        case VDN_SETUP:
+        case VDN:
             strcpy(rail_str, "VDN");
             break;
 
-        case VIO_SETUP:
+        case VIO:
             strcpy(rail_str, "VIO");
             break;
 
@@ -534,7 +540,7 @@ p10_setup_evid_voltageWrite(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
             ;
     }
 
-    if (i_evid_value != VCS_SETUP)
+    if (i_evid_value != VCS)
     {
         // Initialize the buses
         FAPI_TRY(avsInitExtVoltageControl(i_target,
@@ -935,7 +941,7 @@ fapi2::ReturnCode update_vdn_dpll_data(
                                                  l_poundV_data.static_rails.SRVdnVltg,
                                                  0,
                                                  l_present_boot_voltage[VDN],
-                                                 VDN_SETUP),
+                                                 VDN),
                      "error from VDN setup function");
         }
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,11 +48,6 @@ enum P10_SETUP_EVID_CONSTANTS
 // Default voltages if mailbox -> attributes are not setup
     AVSBUS_RETRY_COUNT = 5,
 
-// VRM rails
-    VDD_SETUP = 0,
-    VDN_SETUP = 1,
-    VCS_SETUP = 2,
-    VIO_SETUP = 3,
 };
 
 
@@ -121,7 +116,7 @@ extern "C"
         const uint32_t i_voltage_mv,
         const uint32_t i_ext_vrm_step_size_mv,
         const uint32_t i_present_boot_voltage,
-        const P10_SETUP_EVID_CONSTANTS i_evid_value);
+        const uint8_t i_evid_value);
 
     /// @brief Read DPLL freq value from hw
     /// @param [in]  i_target TARGET_TYPE_PROC_CHIP
