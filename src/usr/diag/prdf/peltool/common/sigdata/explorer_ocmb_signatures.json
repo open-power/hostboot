@@ -392,6 +392,9 @@
         "0xdddd0000": "MDS Interface UE",
         "0xdddd0001": "MDS Maintenance MPE",
         "0xdddd0002": "MDS Memdiags VCM Verified",
-        "0xdddd0003": "MDS Memdiags VCM False Alarm"
+        "0xdddd0003": "MDS Memdiags VCM False Alarm",
+        "0xdddd0004": "MDS Double Bit Error",
+        "0xdddd0005": "MDS Single Bit Error",
+        "0xdddd0006": "MDS Poison Error"
     }
 }

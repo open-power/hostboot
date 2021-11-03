@@ -28,6 +28,7 @@
 #include <prdfMemDbUtils.H>
 #include <prdfMemMark.H>
 #include <prdfMemMdsExtraSig.H>
+#include <prdfMemMdsUtils.H>
 #include <prdfMemScrubUtils.H>
 #include <prdfMemVcm.H>
 #include <prdfParserEnums.H>
@@ -296,14 +297,124 @@ uint32_t checkWritePathInterfaceErrors_ipl( ExtensibleChip * i_chip,
     uint32_t o_rc = SUCCESS;
 
     o_errorsFound = false;
+    TargetHandle_t target = i_chip->getTrgt();
+    HUID huid = i_chip->getHuid();
+
+    // Flag to keep track of if we need to stop memdiags testing on this DIMM.
+    bool stopMemdiags = false;
+
+    // Get the double bit error count, poison count, and single bit error count
+    // from the MDS media controller.
+    uint8_t dbCount = 0;
+    o_rc = getDoubleBitCount<TYPE_OCMB_CHIP>( target, dbCount );
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "getDoubleBitCount<TYPE_OCMB_CHIP>(0x%08x) failed",
+                  huid );
+        return o_rc;
+    }
+
+    uint8_t sbCount = 0;
+    o_rc = getSingleBitCount<TYPE_OCMB_CHIP>( target, sbCount );
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "getSingleBitCount<TYPE_OCMB_CHIP>(0x%08x) failed",
+                  huid );
+        return o_rc;
+    }
+
+    uint8_t poisonCount = 0;
+    o_rc = getPoisonCount<TYPE_OCMB_CHIP>( target, poisonCount );
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "getPoisonCount<TYPE_OCMB_CHIP>(0x%08x) failed",
+                  huid );
+        return o_rc;
+    }
 
     // Check for write-path interface errors on the media controller
     // DBE (double bit error) count > 0
-    // TODO
+    if ( dbCount > 0 )
+    {
+        // Double bit error means more than one bad symbol (dq) in a given ECC
+        // word on write path from explorer to the media controller
+        io_sc.service_data->AddSignatureList( target, PRDFSIG_MdsDbe );
+        o_errorsFound = true;
+
+        PRDF_TRAC( PRDF_FUNC "Double bit error encountered. Count = %d",
+                   dbCount );
+
+        // Predictive callout and exit memdiags for this DIMM
+        io_sc.service_data->SetCallout( target );
+        io_sc.service_data->setServiceCall();
+        stopMemdiags = true;
+    }
     // Poison count > 0
-    // TODO
+    else if ( poisonCount > 0 )
+    {
+        // Poison means an SUE is already in the data we sent to the media
+        // controller. This should not be possible to send an SUE using the
+        // write command, so this check is mainly as a precaution to catch
+        // something unexpected.
+        io_sc.service_data->AddSignatureList( target, PRDFSIG_MdsPoison );
+        o_errorsFound = true;
+
+        PRDF_TRAC( PRDF_FUNC "Poison error encountered. Count = %d",
+                   poisonCount );
+
+        // Predictive callout and exit memdiags for this DIMM
+        io_sc.service_data->SetCallout( target );
+        io_sc.service_data->setServiceCall();
+        stopMemdiags = true;
+    }
     // SBE (single bit error) count > 0
-    // TODO
+    else if ( sbCount > 0 )
+    {
+        // Means a single bad symbol (dq) in a given ECC word on the write path
+        // from explorer to the media controller.
+        // - Could be caused by one bad DQ, affecting multiple ECC words
+        // - Could be caused by random bit flips on multiple DQs, just not
+        //   lining up in a given ECC word
+        io_sc.service_data->AddSignatureList( target, PRDFSIG_MdsSbe );
+        o_errorsFound = true;
+
+        PRDF_TRAC( PRDF_FUNC "Single bit error encountered. Count = %d",
+                   sbCount );
+
+        // If MNFG CE screening enabled and count > 0
+        // or count == max value of 0x7F
+        if ( isMfgCeCheckingEnabled() || (sbCount == 0x7f) )
+        {
+            // Predictive callout and exit memdiags for this DIMM
+            io_sc.service_data->SetCallout( target );
+            io_sc.service_data->setServiceCall();
+            stopMemdiags = true;
+        }
+        // Else if count < max value of 0x7F
+        else
+        {
+            // Keep the log hidden and clear the count to prevent accumulation
+            // across patterns, and allow memdiags to continue for this DIMM.
+            o_rc = clearSingleBitCount( i_chip );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR(PRDF_FUNC "clearSingleBitCount(0x%08x) failed", huid)
+            }
+        }
+    }
+
+    if ( stopMemdiags )
+    {
+        if ( isInMdiaMode() )
+        {
+            o_rc = mdiaSendEventMsg( target, MDIA::STOP_TESTING );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "mdiaSendEventMsg(0x%08x, STOP_TESTING)"
+                          " failed", huid );
+            }
+        }
+    }
 
     return o_rc;
 

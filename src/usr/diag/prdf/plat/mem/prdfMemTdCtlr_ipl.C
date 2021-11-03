@@ -154,7 +154,6 @@ uint32_t __mdsCheckEcc( ExtensibleChip * i_chip, bool & o_errorsFound,
 
     o_errorsFound = false;
 
-    // TODO check if the command run was a write
     // Check for write-path interface errors
     o_rc = MDS::checkWritePathInterfaceErrors_ipl( i_chip, o_errorsFound,
                                                    io_sc );
@@ -174,7 +173,6 @@ uint32_t __mdsCheckEcc( ExtensibleChip * i_chip, bool & o_errorsFound,
 
     // Check for media and interface errors independently
 
-    // TODO - check if the command run was a read?
     // Check for media errors
     o_rc = MDS::checkMediaErrors_ipl( i_chip, o_errorsFound, io_sc );
     if ( SUCCESS != o_rc )
