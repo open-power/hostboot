@@ -479,6 +479,7 @@ case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  GARD Error Type  
                 case_GARD_ERROR_TYPE(GARD_Power)
                 case_GARD_ERROR_TYPE(GARD_PHYP)
                 case_GARD_ERROR_TYPE(GARD_Reconfig)
+                case_GARD_ERROR_TYPE(GARD_Sticky_deconfig)
                 case_GARD_ERROR_TYPE(GARD_Void)
                 default:
                     CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  GARD Error Type            : UNKNOWN: 0x%X",

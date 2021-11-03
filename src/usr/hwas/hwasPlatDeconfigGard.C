@@ -111,23 +111,67 @@ errlHndl_t DeconfigGard::platReLogGardError (GardRecord &i_gardRecord)
     return l_pErr;
 }
 
-#ifndef __HOSTBOOT_RUNTIME
-errlHndl_t DeconfigGard::platClearGardRecords(
-    const Target * const i_pTarget)
+bool isDupGardRecord(const GARD_ErrorType i_existingGardType,
+                     const GARD_ErrorType i_incomingGardType)
 {
-    errlHndl_t l_pErr = NULL;
+    // special case for Deconfig GARDs
+    // if the pre-existing record for the garded target is not a Deconfig Gard
+    // we do NOT want to mark the incoming Deconfig Gard record as a duplicate.
+    //   - i.e. there already exists a GARD_Unrecoverable for this target and then
+    //     we receive an incoming gard with GARD_Reconfig
+    // Instead we want to make a new Deconfig Gard record to indicate the
+    // target is deconfigured. This is for HB to track which targets are avalible
+    // for resource recovery on eBMC systems during reconfig loops
+    bool l_existing_GARD_isDeconfig = isDeconfigGard(i_existingGardType);
+    bool l_incoming_GARD_isDeconfig = isDeconfigGard(i_incomingGardType);
+
+    HWAS_DBG("l_incoming_GARD_isDeconfig = %s", l_incoming_GARD_isDeconfig ? "TRUE" : "FALSE");
+    HWAS_DBG("l_existing_GARD_isDeconfig = %s", l_existing_GARD_isDeconfig ? "TRUE" : "FALSE");
+    HWAS_DBG("l_incoming_GARD_isDeconfig XOR l_existing_GARD_isDeconfig = %s",
+              l_incoming_GARD_isDeconfig^l_existing_GARD_isDeconfig ? "TRUE" : "FALSE");
+    HWAS_DBG("!(l_incoming_GARD_isDeconfig XOR l_existing_GARD_isDeconfig) = %s",
+              !(l_incoming_GARD_isDeconfig^l_existing_GARD_isDeconfig) ? "TRUE" : "FALSE");
+
+    //For FSP systems, treat any incoming gards with the same l_targetId as an existing gard as duplicates
+    //For eBMC sytems, if both are a Deconfig Gard type or neither are Deconfig Gard type, then treat as duplicate
+    return (INITSERVICE::spBaseServicesEnabled() || !(l_incoming_GARD_isDeconfig^l_existing_GARD_isDeconfig));
+}
+
+
+#ifndef __HOSTBOOT_RUNTIME
+
+errlHndl_t DeconfigGard::platClearGardRecords(
+    const Target * const i_pTarget,
+    const bool i_clearOnlyDeconfig)
+{
+    errlHndl_t l_pErr = nullptr;
     char * tmp_str = nullptr;
+    bool l_clearingAll = false;
+
+    // For ebmc systems only,
+    // if the gard we want to clear is something other than:
+    //   GARD_Reconfig
+    //   GARD_Sticky_deconfig
+    // then we want to clear the original gard and any Deconfig GARD
+    // that goes with it
+    // otherwise, if it IS GARD_Sticky_deconfig or GARD_Reconfig,
+    // just clear the matching deconfig record, leaving the orig
+    // gard untouched
+    bool only_clear_deconfig = !INITSERVICE::spBaseServicesEnabled() && i_clearOnlyDeconfig;
 
     EntityPath l_targetId;
     if (!i_pTarget)
     {
-        HWAS_INF("platClearGardRecords: Clear all GARD Records");
+        HWAS_INF("platClearGardRecords: Clear all %sGARD Records",
+                 only_clear_deconfig ? "Deconfig " : "");
+        l_clearingAll = true;
     }
     else
     {
         l_targetId = i_pTarget->getAttr<ATTR_PHYS_PATH>();
         tmp_str = l_targetId.toString();
-        HWAS_INF("platClearGardRecords: Clear GARD Records for %.8X %s",
+        HWAS_INF("platClearGardRecords: Clear %sGARD Record for %.8X %s",
+            only_clear_deconfig ? "Deconfig " : "",
             get_huid(i_pTarget), tmp_str);
         free(tmp_str);
         tmp_str = nullptr;
@@ -138,7 +182,6 @@ errlHndl_t DeconfigGard::platClearGardRecords(
     if (!l_pErr && iv_platDeconfigGard)
     {
         uint32_t l_gardRecordsCleared = 0;
-        bool l_clearingAll = false;
         HBDeconfigGard *l_hbDeconfigGard =
                 (HBDeconfigGard *)iv_platDeconfigGard;
         DeconfigGard::GardRecord * l_pGardRecords =
@@ -152,22 +195,42 @@ errlHndl_t DeconfigGard::platClearGardRecords(
                 HWAS_INF("platClearGardRecords: Non-EMPTY i=0x%X iv_recordId=0x%X",
                     i, l_pGardRecords[i].iv_recordId);
                 // specific or all
-                if (i_pTarget)
+                if (!l_clearingAll)
                 {
-                    // if we have a match
+                    // if specific, check if we have a potential match
                     if (l_pGardRecords[i].iv_targetId == l_targetId)
                     {
-                        HWAS_INF("platClearGardRecords: Clearing GARD Record for %.8X",
-                                get_huid(i_pTarget));
+                        // if we only want to clear deconfig records and the gard we found is
+                        // not a deconfig record, continue to the next record
+                        if (only_clear_deconfig && !isDeconfigGard(l_pGardRecords[i].iv_errorType))
+                        {
+                            continue;
+                        }
+
+                        // otherwise clear the record we found
+                        HWAS_INF("platClearGardRecords: Clearing %sGARD Record for %.8X",
+                                  isDeconfigGard(l_pGardRecords[i].iv_errorType) ? "Deconfig " : "",
+                                  get_huid(i_pTarget));
                         l_pGardRecords[i].iv_recordId = EMPTY_GARD_RECORDID;
                         _flush(&l_pGardRecords[i]);
                         l_gardRecordsCleared++;
-                        break; // done - can only be 1 GARD record per target
+
+                        if (INITSERVICE::spBaseServicesEnabled())
+                        {
+                            // on FSP systems there can only be 1 GARD record per target
+                            break;
+                        }
                     }
                 }
                 else // Clear all records
                 {
-                    l_clearingAll = true;
+                    // if we only want to clear deconfig records and the gard we found is
+                    // not a deconfig record, continue to the next record
+                    if (only_clear_deconfig && !isDeconfigGard(l_pGardRecords[i].iv_errorType))
+                    {
+                        continue;
+                    }
+
                     l_pGardRecords[i].iv_recordId = EMPTY_GARD_RECORDID;
                     _flush(&l_pGardRecords[i]);
                     l_gardRecordsCleared++;
@@ -282,7 +345,12 @@ errlHndl_t DeconfigGard::platGetGardRecords(
                         HWAS_INF("platGetGardRecords: Getting GARD Record for %.8X",
                                 get_huid(i_pTarget));
                         o_records.push_back(l_pGardRecords[i]);
-                        break; // done - can only be 1 GARD record per target
+
+                        if (INITSERVICE::spBaseServicesEnabled())
+                        {
+                            // on FSP systems there can only be 1 GARD record per target
+                            break;
+                        }
                     }
                 }
                 else // get all records
@@ -304,8 +372,9 @@ errlHndl_t DeconfigGard::platCreateGardRecord(
         const uint32_t i_errlEid,
         const GARD_ErrorType i_errorType)
 {
-    HWAS_INF("Creating GARD Record for %.8X, errl 0x%X",
-        get_huid(i_pTarget), i_errlEid);
+    HWAS_INF("Creating %sGARD Record for %.8X, errl 0x%X",
+              isDeconfigGard(i_errorType) ? "Deconfig ": "",
+              get_huid(i_pTarget), i_errlEid);
     errlHndl_t l_pErr = NULL;
 
     HWAS_MUTEX_LOCK(iv_mutex);
@@ -475,41 +544,103 @@ errlHndl_t DeconfigGard::platCreateGardRecord(
         const uint32_t l_maxGardRecords = l_hbDeconfigGard->iv_maxGardRecords;
         for (uint32_t i = 0; i < l_maxGardRecords; i++)
         {
+            // found an empty guard record
             if (l_pGardRecords[i].iv_recordId == EMPTY_GARD_RECORDID)
             {
                 if (!l_pRecord)
                 {
-                    // save the first empty location we find
+                    // if l_pRecord is not set, save the first empty location we find
                     l_pRecord = &(l_pGardRecords[i]);
                 }
             }
-            else
+            // found a non-empty gard record, check if the targets match
+            else if (l_pGardRecords[i].iv_targetId == l_targetId)
             {
-                if (l_pGardRecords[i].iv_targetId == l_targetId)
+                // will return true for FSP systems since the targets are the same
+                // Special treatment for BMC systems to handle both Persistent and
+                // Deconfig Gard Records
+                if (isDupGardRecord(l_pGardRecords[i].iv_errorType, i_errorType))
                 {
                     l_duplicate = true;
                     l_pRecord = &(l_pGardRecords[i]);
                     HWAS_INF("Duplicate GARD Record from error 0x%X",
-                            l_pGardRecords[i].iv_errlogEid);
+                             l_pGardRecords[i].iv_errlogEid);
                     break;
                 }
+                // else: we could still potentially have a new incoming gard
+                // or deconfig record, keep looping
             }
         } // for
 
         if (l_duplicate)
         {
-            // there's already a GARD record for this target
+            // there's already a GARD or Deconfig record for this target
 
-            // if this GARD record was a manual gard - overwrite
-            //  with this new one
-            if ((l_pRecord->iv_errorType == GARD_User_Manual) || (l_pRecord->iv_errorType == GARD_Reconfig))
+            // for FSP systems
+            if(INITSERVICE::spBaseServicesEnabled())
             {
-                HWAS_INF("Duplicate is GARD_User_Manual - overwriting");
-                l_pRecord->iv_errlogEid = i_errlEid;
-                l_pRecord->iv_errorType = i_errorType;
-                _flush((void *)l_pRecord);
+                if (l_pRecord->iv_errorType == GARD_User_Manual)
+                {
+                    HWAS_INF("Duplicate is GARD_User_Manual - overwriting");
+                    l_pRecord->iv_errlogEid = i_errlEid;
+                    l_pRecord->iv_errorType = i_errorType;
+                    _flush((void *)l_pRecord);
+                }
             }
-
+            else // for eBMC systems
+            {
+                switch(l_pRecord->iv_errorType)
+                {
+                    case GARD_User_Manual:
+                        // if this GARD record was a manual gard - overwrite
+                        // with this new one
+                        HWAS_INF("Duplicate existing Gard is GARD_User_Manual - overwriting");
+                        l_pRecord->iv_errlogEid = i_errlEid;
+                        l_pRecord->iv_errorType = i_errorType;
+                        _flush((void *)l_pRecord);
+                        break;
+                    case GARD_Reconfig:
+                        // if this GARD record is a GARD_Reconfig
+                        // and the incoming Gard is a Sticky Deconfig
+                        if (i_errorType == GARD_Sticky_deconfig)
+                        {
+                            // update existing Gard to Sticky Deconfig
+                            HWAS_INF("Duplicate existing Deconfig Gard is GARD_Reconfig - "
+                                     "promoting to incoming GARD_Sticky_deconfig");
+                            l_pRecord->iv_errlogEid = i_errlEid;
+                            l_pRecord->iv_errorType = i_errorType;
+                            _flush((void *)l_pRecord);
+                        }
+                        // if the incoming Gard is a Reconfig Gard
+                        else if(i_errorType == GARD_Reconfig)
+                        {
+                            // don't update the existing gard record since
+                            // we already have a Gard of the same error level
+                            HWAS_INF("Duplicate existing and incoming Deconfig Gard records are both GARD_Reconfig - "
+                                     "keeping existing Deconfig Gard record");
+                        }
+                        break;
+                    case GARD_Sticky_deconfig:
+                        // if this GARD record is a GARD_Sticky_deconfig
+                        // and the incoming Gard is either a GARD_Reconfig or a Sticky Deconfig
+                        if (isDeconfigGard(i_errorType))
+                        {
+                            // don't update the existing gard record
+                            HWAS_INF("Duplicate existing Deconfig Gard is GARD_Sticky_deconfig - "
+                                     "keeping existing Deconfig Gard record");
+                        }
+                        break;
+                    case GARD_NULL:
+                    case GARD_Unrecoverable:
+                    case GARD_Fatal:
+                    case GARD_Predictive:
+                    case GARD_Power:
+                    case GARD_PHYP:
+                    case GARD_Void:
+                        HWAS_INF("No Duplication rule for existing Gard type - "
+                                 "keeping existing Deconfig Gard record");
+                }
+            }
             // either way, return success
             break;
         }
@@ -1216,6 +1347,7 @@ errlHndl_t hwasError(const uint8_t i_sev,
     l_pErr->collectTrace("HWAS_I");
     return l_pErr;
 }
+
 
 //******************************************************************************
 // HOSTBOOT RUNTIME methods

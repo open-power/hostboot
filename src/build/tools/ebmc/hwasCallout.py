@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020
+# Contributors Listed Below - COPYRIGHT 2020,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -50,6 +50,7 @@ GARD_ErrorType  = { 0x00: "GARD_NULL",
                     0xE9: "GARD_Power",
                     0xEA: "GARD_PHYP",
                     0xEB: "GARD_Reconfig",
+                    0xEC: "GARD_Sticky_deconfig",
                     0xFF: "GARD_Void" }
 
 epubProcedureID = { 0x00: "EPUB_PRC_NONE",

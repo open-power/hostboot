@@ -462,7 +462,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
         {
             uint64_t rc = 0;
             TRACFCOMP(g_trac_hbrt,
-                      "Log error. Plid: %d  len: %d",
+                      "Log error. Plid: 0x%X  len: %d",
                       plid,
                       data_len);
 

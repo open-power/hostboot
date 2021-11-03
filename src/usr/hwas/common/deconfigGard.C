@@ -57,7 +57,6 @@
 #include <../../usr/secureboot/trusted/trustedbootUtils.H>
 #endif
 
-
 // Trace definition
 #define __COMP_TD__ g_trac_deconf
 
@@ -94,6 +93,23 @@ DeconfigGard::~DeconfigGard()
     free(iv_platDeconfigGard);
 }
 
+uint8_t isBlockSpecDeconfigSetOnAnyNode()
+{
+    ATTR_BLOCK_SPEC_DECONFIG_type l_block_spec_deconfig = 0;
+    TargetHandleList l_nodelist;
+    getEncResources(l_nodelist, TARGETING::TYPE_NODE,
+                    TARGETING::UTIL_FILTER_FUNCTIONAL);
+    for( auto l_node : l_nodelist )
+    {
+        l_block_spec_deconfig = l_node->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
+        if (l_block_spec_deconfig)
+        {
+            break;
+        }
+    }
+    return l_block_spec_deconfig;
+}
+
 //******************************************************************************
 errlHndl_t DeconfigGard::deconfigureTarget(
         Target & i_target,
@@ -102,7 +118,7 @@ errlHndl_t DeconfigGard::deconfigureTarget(
         const DeconfigureFlags i_deconfigRule)
 {
     HWAS_DBG("Deconfigure Target");
-    errlHndl_t l_pErr = NULL;
+    errlHndl_t l_pErr = nullptr;
 
     do
     {
@@ -193,18 +209,17 @@ errlHndl_t DeconfigGard::deconfigureTarget(
 void DeconfigGard::_deconfigureTarget(
         Target & i_target,
         const uint32_t i_errlEid,
-        bool *o_targetDeconfigured /* default is NULL */,
+        bool *o_targetDeconfigured /* default is nullptr */,
         const DeconfigureFlags i_deconfigRule /* default is NOT_AT_RUNTIME */)
 {
     HWAS_INF("Deconfiguring Target %.8X, errlEid 0x%X",
             get_huid(&i_target), i_errlEid);
 
-    // Set the Target state to non-functional. The assumption is that it is
-    // not possible for another thread (other than deconfigGard) to be
-    // updating HWAS_STATE concurrently.
     HwasState l_state = i_target.getAttr<ATTR_HWAS_STATE>();
 
     // if the rule is DUMP_AT_RUNTIME and we got here, then we are at runtime.
+    // FSP Only, used by DUMP applet; 0b0: target is dump capable; 0b1:
+    // target is not dump capable; see obj/genfiles/attributestructs.H
     if (i_deconfigRule == DUMP_AT_RUNTIME)
     {
         l_state.dumpfunctional = 1;
@@ -214,12 +229,14 @@ void DeconfigGard::_deconfigureTarget(
         l_state.dumpfunctional = 0;
     }
 
+    // Set the Target state to non-functional. The assumption is that it is
+    // not possible for another thread (other than deconfigGard) to be
+    // updating HWAS_STATE concurrently.
     updateAttrPG(i_target, false);
 
     if (!l_state.functional)
     {
-        HWAS_DBG(
-        "Target HWAS_STATE already has functional=0; deconfiguredByEid=0x%X",
+        HWAS_DBG("Target HWAS_STATE already has functional=0; deconfiguredByEid=0x%X",
                 l_state.deconfiguredByEid);
 
         if (i_deconfigRule != NOT_AT_RUNTIME)
@@ -239,7 +256,7 @@ void DeconfigGard::_deconfigureTarget(
             i_target.setAttr<ATTR_HWAS_STATE>(l_state);
         }
     }
-    else
+    else //HWAS state functional
     {
         if(i_deconfigRule == SPEC_DECONFIG)
         {
@@ -250,8 +267,7 @@ void DeconfigGard::_deconfigureTarget(
         }
         else
         {
-            HWAS_INF(
-                    "Setting Target HWAS_STATE: functional=0, deconfiguredByEid=0x%X",
+            HWAS_INF("Setting Target HWAS_STATE: functional=0; deconfiguredByEid=0x%X",
                     i_errlEid);
 
             l_state.functional = 0;
@@ -270,7 +286,7 @@ void DeconfigGard::_deconfigureTarget(
             {
                 // Set RECONFIGURE_LOOP attribute to indicate it was caused by
                 // a hw deconfigure
-                TARGETING::Target* l_pTopLevel = NULL;
+                TARGETING::Target* l_pTopLevel = nullptr;
                 TARGETING::targetService().getTopLevelTarget(l_pTopLevel);
                 TARGETING::ATTR_RECONFIGURE_LOOP_type l_reconfigAttr =
                         l_pTopLevel->getAttr<ATTR_RECONFIGURE_LOOP>();
@@ -425,7 +441,7 @@ void DeconfigGard::_deconfigureByAssoc(
 
         HWAS_INF("_deconfigureByAssoc %.8X _deconfigureTarget on CHILD: %.8X",
                  l_targetHuid, get_huid(pChild));
-        _deconfigureTarget(*pChild, i_errlEid, NULL,
+        _deconfigureTarget(*pChild, i_errlEid, nullptr,
                 i_deconfigRule);
 
         // Deconfigure other Targets by association
@@ -460,7 +476,7 @@ void DeconfigGard::_deconfigureByAssoc(
             HWAS_INF("_deconfigureByAssoc %.8X _deconfigureTarget "
                      "CHILD_BY_AFFINITY: %.8X",
                     l_targetHuid, get_huid(pChild));
-            _deconfigureTarget(*pChild, i_errlEid, NULL,
+            _deconfigureTarget(*pChild, i_errlEid, nullptr,
                     i_deconfigRule);
 
             // Deconfigure other Targets by association
@@ -552,7 +568,7 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
                         HWAS_DBG("_deconfigParentAssoc is_fused_mode");
                         // If parent is functional, deconfigure it
                         _deconfigureTarget(*l_parentFC,
-                           i_errlEid, NULL,i_deconfigRule);
+                           i_errlEid, nullptr, i_deconfigRule);
                         _deconfigureByAssoc(*l_parentFC,
                           i_errlEid,i_deconfigRule);
                         // After deconfiguring FC the other FC of EQ
@@ -579,7 +595,7 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
                        // If parent is functional, deconfigure it
                        HWAS_DBG("_deconfigParentAssoc parent functional deconfigure");
                        _deconfigureTarget(*l_parentFC,
-                          l_errlEidOverride, NULL, i_deconfigRule);
+                          l_errlEidOverride, nullptr, i_deconfigRule);
                        _deconfigureByAssoc(*l_parentFC,
                           l_errlEidOverride, i_deconfigRule);
                     } // is_fused
@@ -618,7 +634,7 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
                     HWAS_INF("_deconfigParentAssoc DIMM parent: %.8X",
                              get_huid(l_parentMba));
                     _deconfigureTarget(const_cast<Target &> (*l_parentMba),
-                                       i_errlEid, NULL, i_deconfigRule);
+                                       i_errlEid, nullptr, i_deconfigRule);
                     _deconfigureByAssoc(const_cast<Target &> (*l_parentMba),
                                         i_errlEid, i_deconfigRule);
                 }
@@ -689,7 +705,7 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
 
                 if (!anyChildFunctional(*parentOmic, TargetService::OMI_CHILD))
                 {
-                    _deconfigureTarget(*parentOmic, i_errlEid, NULL,
+                    _deconfigureTarget(*parentOmic, i_errlEid, nullptr,
                                        i_deconfigRule);
                 }
 
@@ -806,7 +822,7 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
                     HWAS_INF("_deconfigParentAssoc PSI Peer: 0x%08x",
                         get_huid(l_pDstTarget));
                     _deconfigureTarget(const_cast<Target &> (*l_pDstTarget),
-                                       i_errlEid, NULL,
+                                       i_errlEid, nullptr,
                                        i_deconfigRule);
                 }
                 break;
@@ -948,7 +964,7 @@ void DeconfigGard::_deconfigAffinityParent( TARGETING::Target & i_child,
                                         const uint32_t i_errlEid,
                                         const DeconfigureFlags i_deconfigRule )
 {
-    Target * l_parent = NULL;
+    Target * l_parent = nullptr;
     TARGETING::ATTR_PARENT_DECONFIG_RULES_type l_child_rules =
         i_child.getAttr<ATTR_PARENT_DECONFIG_RULES>();
 
@@ -960,7 +976,7 @@ void DeconfigGard::_deconfigAffinityParent( TARGETING::Target & i_child,
 
         l_parent = getImmediateParentByAffinity(&i_child);
 
-        if ((l_parent != NULL) && isFunctional(l_parent))
+        if ((l_parent != nullptr) && isFunctional(l_parent))
         {
             TARGETING::ATTR_PARENT_DECONFIG_RULES_type l_parent_rules =
                   l_parent->getAttr<ATTR_PARENT_DECONFIG_RULES>();
@@ -1000,7 +1016,7 @@ void DeconfigGard::_deconfigAffinityParent( TARGETING::Target & i_child,
         }
         else
         {
-            if (l_parent != NULL)
+            if (l_parent != nullptr)
             {
                 HWAS_INF("_deconfigAffinityParent: non-functional parent 0x%.8X of 0x%.8X, EID 0x%.8X",
                     get_huid(l_parent), get_huid(&i_child), i_errlEid);
@@ -1070,7 +1086,7 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc(TARGETING::ConstTargetHandl
 {
     HWAS_INF("Preparing data for _deconfigureAssocProc");
     // Return error
-    errlHndl_t l_pErr = NULL;
+    errlHndl_t l_pErr = nullptr;
 
     // Define vector of ProcInfo structs to be used by
     // _deconfigAssocProc algorithm.
@@ -1096,7 +1112,7 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc(TARGETING::ConstTargetHandl
         // Get top 'starting' level target - use top level target if no
         // i_node given (hostboot)
         Target *pTop;
-        if (i_node == NULL)
+        if (i_node == nullptr)
         {
             HWAS_INF("_invokeDeconfigureAssocProc: i_node not specified");
             targetService().getTopLevelTarget(pTop);
@@ -1440,7 +1456,7 @@ void DeconfigGard::_collectDisconnectedProcs(const ProcInfo* const i_proc,
 errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
 {
     // Defined for possible use in future applications
-    errlHndl_t l_errlHdl = NULL;
+    errlHndl_t l_errlHdl = nullptr;
 
     do
     {
@@ -1450,7 +1466,7 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
         // master processor.
 
         // Find master proc
-        ProcInfo * l_pMasterProcInfo = NULL;
+        ProcInfo * l_pMasterProcInfo = nullptr;
         for (ProcInfoVector::iterator
                  l_procInfoIter = io_procInfo.begin();
                  l_procInfoIter != io_procInfo.end();
@@ -1496,7 +1512,7 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
         } // STEP 1
 
         // If no master proc found, mark all proc as deconfigured
-        if (l_pMasterProcInfo == NULL)
+        if (l_pMasterProcInfo == nullptr)
         {
             HWAS_INF("deconfigureAssocProc: Master proc not found");
             // Iterate through procs, and mark deconfigured all proc
@@ -1844,7 +1860,7 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
 errlHndl_t DeconfigGard::_symmetryValidation(ProcInfoVector &io_procInfo)
 {
     // Defined for possible use in future applications
-    errlHndl_t l_errlHdl = NULL;
+    errlHndl_t l_errlHdl = nullptr;
 
     HWAS_INF("_symmetryValidation - entry");
 
@@ -1872,7 +1888,7 @@ errlHndl_t DeconfigGard::_symmetryValidation(ProcInfoVector &io_procInfo)
         // with the same FABRIC_CHIP_ID (procFabricChip)
 
         // Find master proc
-        ProcInfo * l_pMasterProcInfo = NULL;
+        ProcInfo * l_pMasterProcInfo = nullptr;
         for (ProcInfoVector::iterator
                  l_procInfoIter = io_procInfo.begin();
                  l_procInfoIter != io_procInfo.end();
@@ -2116,7 +2132,7 @@ pg_entry_t getDeconfigMaskedPGValue(const Target& i_target)
 errlHndl_t collectGard(const PredicateBase *i_pPredicate)
 {
     HWAS_DBG("collectGard entry" );
-    errlHndl_t errl = NULL;
+    errlHndl_t errl = nullptr;
 
     do
     {
@@ -2170,8 +2186,9 @@ errlHndl_t DeconfigGard::applyGardRecord(Target *i_pTarget,
         GardRecord &i_gardRecord,
         const DeconfigureFlags i_deconfigRule)
 {
-    HWAS_INF("Apply gard record for target %.8X, gard type 0x%.2X", get_huid(i_pTarget), i_gardRecord.iv_errorType);
-    errlHndl_t l_pErr = NULL;
+    HWAS_INF("Apply gard record for target %.8X, gard type 0x%.X",
+              get_huid(i_pTarget), i_gardRecord.iv_errorType);
+    errlHndl_t l_pErr = nullptr;
     do
     {
         // skip if not present
@@ -2196,17 +2213,15 @@ errlHndl_t DeconfigGard::applyGardRecord(Target *i_pTarget,
         HWAS_MUTEX_LOCK(iv_mutex);
 
 #if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
-        // Don't emit a console message if the GARD is GARD_Reconfig since that
-        //  type is considered a "fake" GARD record.  Emitting a message as if
-        //  a GARD is being applied in that case leads to confusion since no
-        //  GARD is actually being created. Its actually just used as a means
-        //  to remember to deconfig.
+        // Don't emit a console message if the GARD type is considered a
+        //  Deconfig GARD record. Emitting a message as if a GARD is being
+        //  applied in that case leads to confusion since its actually just
+        //  used as a means to remember to deconfig.
         // Similarly, there should be no message as we're speculatively acting
         //  on the gard records since the message will either be redundant
         //  with the real apply we do later or it will be misleading when we
         //  do not actually deconfigure the part.
-        if( (i_gardRecord.iv_errorType != GARD_Reconfig)
-            && (i_deconfigRule != SPEC_DECONFIG) )
+        if(!isDeconfigGard(i_gardRecord.iv_errorType) && (i_deconfigRule != SPEC_DECONFIG) )
         {
             const char* l_tmpstring =
               i_pTarget->getAttr<TARGETING::ATTR_PHYS_PATH>().toString();
@@ -2221,11 +2236,11 @@ errlHndl_t DeconfigGard::applyGardRecord(Target *i_pTarget,
 
         // Deconfigure the Target
         // don't need to check ATTR_DECONFIG_GARDABLE -- if we get
-        //  here, it's because of a gard record on this target
-        _deconfigureTarget(*i_pTarget, l_errlogEid, NULL, i_deconfigRule);
+        // here, it's because of a gard record on this target
+        _deconfigureTarget(*i_pTarget, l_errlogEid, nullptr, i_deconfigRule);
 
         // Deconfigure other Targets by association
-        _deconfigureByAssoc(*i_pTarget, l_errlogEid,i_deconfigRule);
+        _deconfigureByAssoc(*i_pTarget, l_errlogEid, i_deconfigRule);
 
         HWAS_MUTEX_UNLOCK(iv_mutex);
 
@@ -2239,10 +2254,32 @@ errlHndl_t DeconfigGard::applyGardRecord(Target *i_pTarget,
         if(i_deconfigRule == SPEC_DECONFIG)
         {
             HWAS_INF(
-                "Skip platLogEvent(GARD_APPLIED) for spec_deconfig target %.8X",
+                "Skip platLogEvent(GARD_APPLIED) and platCreateGardRecord(GARD_Reconfig) for spec_deconfig target %.8X",
                 get_huid(i_pTarget));
             break;
         }
+
+#ifdef __HOSTBOOT_MODULE
+        // only create deconfig gard records for BMC systems
+        if(!INITSERVICE::spBaseServicesEnabled())
+        {
+            // if ATTR_BLOCK_SPEC_DECONFIG is set for any node, make the gard type GARD_Sticky_deconfig,
+            // otherwise set to GARD_Reconfig
+            GARD_ErrorType gardDeconfig = isBlockSpecDeconfigSetOnAnyNode() ? GARD_Sticky_deconfig : GARD_Reconfig;
+            HWAS_INF("call platCreateGardRecord to create a deconfig record for the garded target %.8X",
+                     get_huid(i_pTarget));
+            l_pErr = HWAS::theDeconfigGard().platCreateGardRecord(i_pTarget,
+                                                                  l_errlogEid,
+                                                                  gardDeconfig);
+            if (l_pErr)
+            {
+                HWAS_ERR("platCreateGardRecord returned an error creating a Deconfig Gard record for %.8X",
+                         get_huid(i_pTarget));
+                break;
+            }
+        }
+#endif
+
         l_pErr = platLogEvent(i_pTarget, GARD_APPLIED);
         if (l_pErr)
         {
@@ -2258,7 +2295,7 @@ errlHndl_t DeconfigGard::applyGardRecord(Target *i_pTarget,
 errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
 {
     HWAS_INF("Clear GARD Records for replaced Targets");
-    errlHndl_t l_pErr = NULL;
+    errlHndl_t l_pErr = nullptr;
 
     // Create the predicate with HWAS changed state and our GARD bit
     PredicateHwasChanged l_predicateHwasChanged;
@@ -2268,7 +2305,7 @@ errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
     do
     {
         GardRecords_t l_gardRecords;
-        l_pErr = platGetGardRecords(NULL, l_gardRecords);
+        l_pErr = platGetGardRecords(nullptr, l_gardRecords);
         if (l_pErr)
         {
             HWAS_ERR("Error from platGetGardRecords");
@@ -2286,7 +2323,7 @@ errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
             Target* l_pTarget = targetService().
                             toTarget(l_gardRecord.iv_targetId);
 
-            if (l_pTarget == NULL)
+            if (l_pTarget == nullptr)
             {
                 // could be a platform specific target for the other
                 // ie, we are hostboot and this is an FSP target, or vice-versa
@@ -2331,14 +2368,14 @@ errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
             uint64_t * l_pPred_iv_valid = l_pPred + 2;
 
             HWAS_INF( "clearGardRecordsForReplacedTargets() "
-                      "HUID :0x%08x "
-                      "\npredicate ATTR_HWAS_STATE_CHANGED_FLAG "
-                      "iv_valid : 0x%08x%08x "
+                      "HUID :0x%08X, "
                       "predicate ATTR_HWAS_STATE_CHANGED_FLAG "
-                      "iv_desired : 0x%08x%08x "
-                      "\nTarget ATTR_HWAS_STATE_CHANGED_FLAG : 0x%08x%08x "
+                      "iv_valid : 0x%08X%08X, "
+                      "predicate ATTR_HWAS_STATE_CHANGED_FLAG "
+                      "iv_desired : 0x%08X%08X, "
+                      "Target ATTR_HWAS_STATE_CHANGED_FLAG : 0x%08X%08X, "
                       "Target ATTR_HWAS_STATE_CHANGED_SUBSCRIPTION_MASK "
-                      ": 0x%08x%08x ",
+                      ": 0x%08X%08X ",
                       get_huid(l_pTarget),
                       (*l_pPred_iv_valid) >> 32, (*l_pPred_iv_valid),
                       (*l_pPred_iv_desired) >> 32, (*l_pPred_iv_desired),
@@ -2364,7 +2401,7 @@ errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
         {
             // Second pass over present gard records to look for Errlog Ids
             GardRecords_t l_gardRecordsSecond;
-            l_pErr = platGetGardRecords(NULL, l_gardRecordsSecond);
+            l_pErr = platGetGardRecords(nullptr, l_gardRecordsSecond);
             if (l_pErr)
             {
                 HWAS_ERR("Error from platGetGardRecords");
@@ -2381,7 +2418,7 @@ errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
                 Target* l_pTarget = targetService().
                                 toTarget(l_gardRecord.iv_targetId);
 
-                if (l_pTarget == NULL)
+                if (l_pTarget == nullptr)
                 {
                     // could be a platform specific target for the other
                     // ie, we are hostboot and this is an FSP target,
@@ -2485,7 +2522,7 @@ errlHndl_t DeconfigGard::clearGardRecordsByType(const GARD_ErrorType i_type)
                     continue;
                 }
 
-                l_pErr = platClearGardRecords(l_pTarget);
+                l_pErr = clearGardRecords(l_pTarget, isDeconfigGard(i_type));
                 if (l_pErr)
                 {
                     HWAS_ERR("Error from platClearGardRecords");
@@ -2504,7 +2541,7 @@ errlHndl_t DeconfigGard::clearGardRecordsByType(const GARD_ErrorType i_type)
 errlHndl_t DeconfigGard::updateSpecDeconfigTargetStates(
         const PredicateBase *i_pPredicate)
 {
-    errlHndl_t l_pErr = NULL;
+    errlHndl_t l_pErr = nullptr;
 
     do
     {
@@ -2514,7 +2551,7 @@ errlHndl_t DeconfigGard::updateSpecDeconfigTargetStates(
         TargetHandleList l_nodelist;
         getEncResources(l_nodelist, TARGETING::TYPE_NODE,
                         TARGETING::UTIL_FILTER_FUNCTIONAL);
-        int l_blockSet = 0;
+        ATTR_BLOCK_SPEC_DECONFIG_type l_blockSet = 0;
         for( auto l_node : l_nodelist )
         {
             l_blockSet |= l_node->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
@@ -2525,7 +2562,7 @@ errlHndl_t DeconfigGard::updateSpecDeconfigTargetStates(
 
         // Get all GARD Records
         GardRecords_t l_gardRecords;
-        l_pErr = platGetGardRecords(NULL, l_gardRecords);
+        l_pErr = platGetGardRecords(nullptr, l_gardRecords);
         if (l_pErr)
         {
             HWAS_ERR("Error from platGetGardRecords");
@@ -2542,7 +2579,7 @@ errlHndl_t DeconfigGard::updateSpecDeconfigTargetStates(
             Target * l_pTarget =
                 targetService().toTarget(l_gardRecord.iv_targetId);
 
-            if (l_pTarget == NULL)
+            if (l_pTarget == nullptr)
             {
                 // could be a platform specific target for the other
                 // ie, we are hostboot and this is an FSP target, or vice-versa
@@ -2585,7 +2622,7 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
         const PredicateBase *i_pPredicate)
 {
     HWAS_INF("Deconfigure Targets from GARD Records for IPL");
-    errlHndl_t l_pErr = NULL;
+    errlHndl_t l_pErr = nullptr;
 
     do
     {
@@ -2601,7 +2638,7 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
             // manufacturing records are disabled
             //  - don't process
             HWAS_INF("Manufacturing policy: disabled - skipping GARD Records");
-            l_pErr = platLogEvent(NULL, MFG);
+            l_pErr = platLogEvent(nullptr, MFG);
             if (l_pErr)
             {
                 HWAS_ERR("platLogEvent returned an error");
@@ -2616,7 +2653,7 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
 
         // Get all GARD Records
         GardRecords_t l_gardRecords;
-        l_pErr = platGetGardRecords(NULL, l_gardRecords);
+        l_pErr = platGetGardRecords(nullptr, l_gardRecords);
         if (l_pErr)
         {
             HWAS_ERR("Error from platGetGardRecords");
@@ -2639,7 +2676,7 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
             Target * l_pTarget =
                 targetService().toTarget(l_gardRecord.iv_targetId);
 
-            if (l_pTarget == NULL)
+            if (l_pTarget == nullptr)
             {
                 // could be a platform specific target for the other
                 // ie, we are hostboot and this is an FSP target, or vice-versa
@@ -2650,13 +2687,16 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
                 continue;
             }
 
+            bool l_isUnrecoverableGard = (l_gardRecord.iv_errorType == GARD_Fatal) ||
+                                         (l_gardRecord.iv_errorType == GARD_Unrecoverable) ||
+                                         (l_gardRecord.iv_errorType == GARD_Sticky_deconfig) ||
+                                         (l_pTarget->getAttr<ATTR_TYPE>() == TYPE_NODE);
             // Only apply the record if it is Fatal, Unrecoverable,
-            // or for a Node
-            if (!((l_gardRecord.iv_errorType == GARD_Fatal)||
-               (l_gardRecord.iv_errorType == GARD_Unrecoverable)||
-               (l_pTarget->getAttr<ATTR_TYPE>() == TYPE_NODE)))
+            // Sticky_deconfig, or for a Node
+            if (!l_isUnrecoverableGard)
             {
-                //Skip recoverable gard records
+                //Skip applying the 'recoverable' record
+                //and continue to the next record in l_gardRecords
                 continue;
             }
 
@@ -2673,6 +2713,7 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
                 }
                 continue;
             }
+
             l_pErr = applyGardRecord(l_pTarget, l_gardRecord);
             if (l_pErr)
             {
@@ -2725,15 +2766,14 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
 
         if(!l_isSystemBootable)
         {
-            //Break here system is not bootable after applying
-            //non recoverable gard records.
-            HWAS_ERR("System is not bootable after applying gard record");
+            HWAS_ERR("System is not bootable after applying non recoverable gard records");
             break;
         }
 
-        // If any targets have been replaced, clear Block Spec Deconfig
+        // Check if any targets have been replaced, and if so clear(set to 0)
+        //Block Spec Deconfig
         TARGETING::ATTR_BLOCK_SPEC_DECONFIG_type l_block_spec_deconfig =
-            DeconfigGard::clearBlockSpecDeconfigForReplacedTargets();
+            clearBlockSpecDeconfigForReplacedTargets();
 
         l_pErr =
             clearBlockSpecDeconfigForUngardedTargets(l_block_spec_deconfig);
@@ -2750,7 +2790,7 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
             CONSOLE::displayf(CONSOLE::DEFAULT, "HWAS", "Blocking Speculative Deconfig");
 #endif
             HWAS_INF("Blocking Speculative Deconfig: skipping Predictive GARD "
-                     " and updating recovered resources");
+                     "and updating recovered resources");
 
             l_pErr = updateSpecDeconfigTargetStates(i_pPredicate);
             if(l_pErr)
@@ -2764,20 +2804,19 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
 
         //If allowed, that is if Block Spec Deconfig is cleared,
         //loop through all gard records and apply recoverable
-        //gard records(non Fatal and non Unrecoverable).  Check
+        //gard records(non Fatal and non Unrecoverable). Check
         //whether system can be booted after applying all gard
-        //records.  If system can't be booted after applying gard
-        //records, then need to rolled them back.
+        //records. If system can't be booted after attempting to
+        //applying gard records, then need to roll them back.
         for (GardRecordsCItr_t l_itr = l_gardRecords.begin();
-             (l_block_spec_deconfig == 0) && (l_itr != l_gardRecords.end());
-             ++l_itr)
+             l_itr != l_gardRecords.end(); ++l_itr)
         {
             GardRecord l_gardRecord = *l_itr;
             // Find the associated Target
             Target * l_pTarget =
                 targetService().toTarget(l_gardRecord.iv_targetId);
 
-            if (l_pTarget == NULL)
+            if (l_pTarget == nullptr)
             {
                 // could be a platform specific target for the other
                 // ie, we are hostboot and this is an FSP target, or vice-versa
@@ -2787,6 +2826,47 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
                              sizeof(l_gardRecord.iv_targetId));
                 continue;
             }
+
+            bool l_isUnrecoverableGard = (l_gardRecord.iv_errorType == GARD_Fatal) ||
+                                         (l_gardRecord.iv_errorType == GARD_Unrecoverable) ||
+                                         (l_gardRecord.iv_errorType == GARD_Sticky_deconfig) ||
+                                         (l_pTarget->getAttr<ATTR_TYPE>() == TYPE_NODE);
+            // Skip apply the record if it is Fatal, Unrecoverable,
+            // Sticky_deconfig, or for a Node
+            if(l_isUnrecoverableGard)
+            {
+                //Skip applying the 'unrecoverable' record (since we already applied
+                //them in the prior loop), and continue to the next record in l_gardRecords
+                continue;
+            }
+
+            // if Block spec deconfig is set, write out to the console
+            // which gard records are not being applied
+            if (l_block_spec_deconfig == 1)
+            {
+                // use errlogEid UNLESS it's a Manual Gard
+                uint32_t l_errlogEid = (l_gardRecord.iv_errorType == GARD_User_Manual) ?
+                                        DECONFIGURED_BY_MANUAL_GARD : l_gardRecord.iv_errlogEid;
+                const char* l_tmpstring =
+                    l_pTarget->getAttr<TARGETING::ATTR_PHYS_PATH>().toString();
+#if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
+                CONSOLE::displayf(CONSOLE::DEFAULT, "HWAS", "Skip applying %sGARD record for HUID=0x%08X (%s) due to 0x%.8X",
+                                  isDeconfigGard(l_gardRecord.iv_errorType) ? "Deconfig " : "",
+                                  get_huid(l_pTarget),
+                                  l_tmpstring,
+                                  l_errlogEid);
+#endif
+                HWAS_INF("Skip applying %sGARD record for HUID=0x%08X (%s) due to 0x%.8X",
+                          isDeconfigGard(l_gardRecord.iv_errorType) ? "Deconfig " : "",
+                          get_huid(l_pTarget),
+                          l_tmpstring,
+                          l_errlogEid);
+                free((void*)(l_tmpstring));
+                l_tmpstring = nullptr;
+
+                continue;
+            }
+
             if ((l_sys_policy & CDM_POLICIES_PREDICTIVE_DISABLED) &&
                 (l_gardRecord.iv_errorType == GARD_Predictive))
             {
@@ -2801,15 +2881,6 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
                 }
                 continue;
             }
-            //Continue only with recoverable or non node gard errors.
-            if((l_gardRecord.iv_errorType == GARD_Fatal)||
-               (l_gardRecord.iv_errorType == GARD_Unrecoverable)||
-               (l_pTarget->getAttr<ATTR_TYPE>() == TYPE_NODE))
-            {
-                //Skip non-recoverable gard records
-                continue;
-            }
-
             // if this does NOT match, continue to next in loop
             if (i_pPredicate && ((*i_pPredicate)(l_pTarget) == false))
             {
@@ -2829,12 +2900,12 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
             if ((l_gardRecord.iv_errorType == GARD_Predictive) &&
                  (l_pTarget->getAttr<ATTR_TYPE>() == TYPE_OSCREFCLK))
             {
-                HWAS_INF("skipping applying gard record for clock  %.8X",
+                HWAS_INF("skipping applying gard record for clock %.8X",
                     get_huid(l_pTarget));
                 continue;
             }
 
-            //Apply the gard record.
+            //Apply the speculative gard record.
             l_pErr = applyGardRecord(l_pTarget, l_gardRecord, SPEC_DECONFIG);
             if (l_pErr)
             {
@@ -2884,7 +2955,7 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
                                MOD_DECONFIG_TARGETS_FROM_GARD,
                                RC_RESOURCE_RECOVERED,
                                userdata1,
-                               userdata2);          
+                               userdata2);
 
             //Now go through all targets which are speculatively
             //deconfigured and roll back gard on them.
@@ -2953,9 +3024,26 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
                     break;
                 }
             } // for
+
+#ifdef __HOSTBOOT_MODULE
+            if(!INITSERVICE::spBaseServicesEnabled())
+            {
+                // for eBMC systems, we want to remove all GARD_Reconfigs
+                // from the Gard list so that eBMC will know that HB is NOT
+                // applying those Gards for the next reconfig loop
+                l_pErr = clearGardRecordsByType(GARD_Reconfig);
+                if (l_pErr)
+                {
+                    HWAS_ERR("Error clearing all GARD_Reconfigs");
+                    break;
+                }
+            }
+#endif
+
         }
         else
         {
+            HWAS_INF("System can ipl with gard + spec deconfig, converting all spec deconfig to gard");
             //Loop through gard records where spec deconfig was applied
             while(!l_specDeconfigVector.empty())
             {
@@ -2964,7 +3052,7 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
                 Target * l_pTarget =
                     targetService().toTarget(l_gardRecord.iv_targetId);
 
-                //Apply the gard record.
+                //Apply the spec gard record as a normal gard record.
                 l_pErr = applyGardRecord(l_pTarget, l_gardRecord);
                 if (l_pErr)
                 {
@@ -3064,9 +3152,17 @@ void DeconfigGard::clearFcoDeconfigures()
 
 //******************************************************************************
 errlHndl_t DeconfigGard::clearGardRecords(
-    const Target * const i_pTarget)
+    const Target * const i_pTarget,
+    const bool i_clearOnlyDeconfig)
 {
+#ifndef __HOSTBOOT_MODULE
     errlHndl_t l_pErr = platClearGardRecords(i_pTarget);
+#else
+    // eBMC systems have a Deconfig gard record in addition to
+    // normal Gard record. Need to pass in i_type to know which
+    // of the two to remove
+    errlHndl_t l_pErr = platClearGardRecords(i_pTarget, i_clearOnlyDeconfig);
+#endif
     return l_pErr;
 }
 
@@ -3147,7 +3243,7 @@ errlHndl_t DeconfigGard::_getDeconfigureRecords(
     HWAS_MUTEX_LOCK(iv_mutex);
     DeconfigureRecordsCItr_t l_itr = iv_deconfigureRecords.begin();
 
-    if (i_pTarget == NULL)
+    if (i_pTarget == nullptr)
     {
         HWAS_INF("Getting all %d Deconfigure Records",
                  iv_deconfigureRecords.size());
@@ -3180,7 +3276,7 @@ errlHndl_t DeconfigGard::_getDeconfigureRecords(
     }
 
     HWAS_MUTEX_UNLOCK(iv_mutex);
-    return NULL;
+    return nullptr;
 } // _getDeconfigureRecords
 
 //******************************************************************************
@@ -3219,7 +3315,7 @@ void DeconfigGard::_createDeconfigureRecord(
 void DeconfigGard::clearDeconfigureRecords(
         const Target * const i_pTarget)
 {
-    if (i_pTarget == NULL)
+    if (i_pTarget == nullptr)
     {
         HWAS_INF("Clearing all %d Deconfigure Records",
                  iv_deconfigureRecords.size());
@@ -3407,7 +3503,7 @@ errlHndl_t
 {
     HWAS_INF("Clear Block Spec Deconfig for ungarded Targets");
 
-    errlHndl_t l_pErr = NULL;
+    errlHndl_t l_pErr = nullptr;
     GardRecords_t l_records;
 
     do

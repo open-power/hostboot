@@ -88,7 +88,7 @@ void* call_host_ipl_complete(void* const io_pArgs)
         if (!INITSERVICE::spBaseServicesEnabled())
         {
             //No more reconfig loops are supported from this point
-            //forward.  Clean up the semi persistent area
+            //forward. Clean up the semi persistent area
             //   1) clear magic number (so next boot thinks it is cold)
             //      a) DON'T clear mfg term setting (so read-modify)
             //   2) clear any reconfig specific gard records
@@ -101,7 +101,18 @@ void* call_host_ipl_complete(void* const io_pArgs)
             if (l_err)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "ERROR 0x%.8X: clearGardByType( )",
+                          "ERROR 0x%.8X: clearGardByType(GARD_Reconfig)",
+                          l_err->reasonCode() );
+                // Create IStep error log and cross ref error that occurred
+                l_stepError.addErrorDetails( l_err );
+                errlCommit( l_err, ISTEP_COMP_ID );
+            }
+
+            l_err = HWAS::clearGardByType(HWAS::GARD_Sticky_deconfig);
+            if (l_err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR 0x%.8X: clearGardByType(GARD_Sticky_deconfig)",
                           l_err->reasonCode() );
                 // Create IStep error log and cross ref error that occurred
                 l_stepError.addErrorDetails( l_err );

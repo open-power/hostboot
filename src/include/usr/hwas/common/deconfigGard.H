@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -97,6 +97,60 @@ void updateAttrPG(TARGETING::Target& i_target,
  * @return pg_entry_t       Masked PG value.
  */
 pg_entry_t getDeconfigMaskedPGValue(const TARGETING::Target& i_target);
+
+
+/**
+ * @brief isDeconfigGard
+ *
+ *                          Common HWAS function to determine is a Gard type is
+ *                          a Deconfig Gard type.
+ *
+ * @param[in] i_gardType    the GARD_ErrorType to check
+ *
+ * @return True  if i_gardType is GARD_Reconfig or GARD_Sticky_deconfig
+ *         False otherwise
+ */
+inline bool isDeconfigGard(GARD_ErrorType gardType)
+{
+    return (gardType == GARD_Reconfig || gardType == GARD_Sticky_deconfig);
+}
+
+/**
+ * @brief isBlockSpecDeconfigSetOnAnyNode
+ *
+ *                          Common HWAS function returns a uint8_t indicating
+ *                          if ATTR_BLOCK_SPEC_DECONFIG is set on any node in
+ *                          the system
+ *
+ * @return 0 if no nodes on the system has ATTR_BLOCK_SPEC_DECONFIG set
+ *         1 if at least one node on the system has ATTR_BLOCK_SPEC_DECONFIG set
+ */
+uint8_t isBlockSpecDeconfigSetOnAnyNode();
+
+/**
+ * @brief isDupGardRecord
+ *
+ *                          Common HWAS function if a new Gard Record for a
+ *                          target should be treated as a duplicate based off
+ *                          of the GARD_ErrorType of each of the existing
+ *                          Gard and the new Gard for the target
+ *
+ * @param[in] i_existingGardType type of a GARD Record that already exists
+ *                               in iv_pGardRecords.
+ * @param[in] i_incomingGardType type of the new GARD Record to attempt adding
+ *                               to iv_pGardRecords.
+ *
+ * @note      This function was written to handle allowing both Persistent and Deconfig
+ *            Gard Records for one target on BMC systems. FSP systems will only keep
+ *            one Persistent Gard Record for one target, so this function will return
+ *            True for FSP systems if the targets are the same.
+ *
+ * @return bool. True  if the Gard associated with i_incomingGardType should be
+ *                     treated as a duplicate
+ *               False otherwise
+ */
+bool isDupGardRecord(const GARD_ErrorType i_existingGardType,
+                     const GARD_ErrorType i_incomingGardType);
 
 /**
  * @brief Returns a reference to the DeconfigGard singleton.
@@ -493,8 +547,8 @@ public:
                                 const GARD_ErrorType i_errorType);
 
     /**
-     * @brief Clears GARD Record for the specified Target, or ALL GARD
-     *          records.
+     * @brief Clears GARD Records for the specified Target, or ALL GARD
+     *        records.
      *
      * Called by an administrator to clear GARD records manually.
      *
@@ -503,23 +557,56 @@ public:
      * Records.
      *
      * @param[in] i_pTarget Pointer to Target to clear GARD record for.
-     *              If NULL, then ALL GARD Records will be cleared.
+     *            If nullptr, then ALL GARD Records will be cleared.
+     *
+     * @param[in] i_clearOnlyDeconfig bool to determine if only Deconfig Gard
+     *            Records should be cleared for i_pTarget (or all targets if
+     *            i_pTarget=nullptr).
+     *              True:  clear only Deconfig Gard Records for i_pTarget
+     *              False: clear both Deconfig and Persistent Gard Records
+     *                     for i_pTarget
+     *
+     * @note i_clearOnlyDeconfig is for BMC use only. FSP systems should always
+     *       use the default value
      *
      * @return errlHndl_t. Error log handle.
      */
-    errlHndl_t clearGardRecords(const TARGETING::Target * const i_pTarget);
-
+    errlHndl_t clearGardRecords(const TARGETING::Target * const i_pTarget,
+                                const bool i_clearOnlyDeconfig = false);
+#ifdef __HOSTBOOT_MODULE
     /**
-     * @brief Platform specific function that
-     *          Clears Record for the specified Target.
+     * @brief Platform specific function that clears Gard Records for the
+     *        specified Target, or ALL GARD records.
      *
      * @param[in] i_pTarget Pointer to Target to clear GARD record for.
-     *              If NULL, then ALL GARD Records will be cleared.
+     *            If nullptr, then ALL GARD Records will be cleared.
+     *
+     * @param[in] i_clearOnlyDeconfig bool to determine if only Deconfig Gard
+     *            Records should be cleared for i_pTarget (or all targets if
+     *            i_pTarget=nullptr).
+     *              True:  clear only Deconfig Gard Records for i_pTarget
+     *              False: clear both Deconfig and Persistent Gard Records
+     *                     for i_pTarget
+     *
+     * @note i_clearOnlyDeconfig is for BMC use only. FSP systems should always
+     *       use the default value
+     *
+     * @return errlHndl_t. Error log handle.
+     */
+    errlHndl_t platClearGardRecords(const TARGETING::Target * const i_pTarget,
+                                    const bool i_clearOnlyDeconfig = false);
+#else
+    /**
+     * @brief Platform specific function that clears Gard Records for the
+     *        specified Target, or ALL GARD records.
+     *
+     * @param[in] i_pTarget Pointer to Target to clear GARD record for.
+     *            If nullptr, then ALL GARD Records will be cleared.
      *
      * @return errlHndl_t. Error log handle.
      */
     errlHndl_t platClearGardRecords(const TARGETING::Target * const i_pTarget);
-
+#endif
     /**
      * @brief Dumps all GARD Records for the specified Target.
      *

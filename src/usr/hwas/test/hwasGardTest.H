@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -3665,10 +3665,10 @@ public:
             TS_INFO("testGard6: POST collectGard l_records.size()=%d should be 1 for doGard setup", l_records.size());
             HwasState l_state = l_target->getAttr<ATTR_HWAS_STATE>();
             TS_INFO("testGard6: l_state=0x%X", l_state);
-            if (l_records.size() != 1)
+            if (l_records.size() != 2)
             {
-                TS_WARN("testGard6: should be 1 record; instead %d records, check logs for "
-                        "Insufficient HW to continue IPL: (no func cores)",
+                TS_WARN("testGard6: should be 2 records, 1 Deconfig Gard and 1 Gard; instead found %d records, "
+                        "check logs/traces for missing/extra Gard records",
                         l_records.size());
             }
             else

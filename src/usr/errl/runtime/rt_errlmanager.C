@@ -594,9 +594,9 @@ bool rt_processCallout(errlHndl_t &io_errl,
             pCalloutUD->deconfigState = HWAS::NO_DECONFIG;
 
             TRACFCOMP( g_trac_errl, ERR_MRK
-                       "Runtime errorlog callout with DELAYED_DECONFIG or "
+                       "Runtime HW_CALLOUT errorlog with DELAYED_DECONFIG or "
                        "DECONFIG not allowed! Changed to NO_DECONFIG. "
-                       " plid: 0x%X. Deconfig State: 0x%x", io_errl->plid(),
+                       "plid: 0x%X. Deconfig State: 0x%x", io_errl->plid(),
                        pCalloutUD->deconfigState);
         }
 
