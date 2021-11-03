@@ -7395,6 +7395,7 @@
         <default>0</default>
       </uint8_t>
     </simpleType>
+    <global/>
   </attribute>
 
   <attribute>
