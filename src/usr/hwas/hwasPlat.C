@@ -1205,7 +1205,7 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
             {
                 VPD::setPartAndSerialNumberAttributes(pTarget);
             }
-            else if (l_attrType == TYPE_DIMM)
+            else if (l_attrType == TYPE_DIMM || l_attrType == TYPE_OCMB_CHIP)
             {
                 SPD::setPartAndSerialNumberAttributes(pTarget);
             }

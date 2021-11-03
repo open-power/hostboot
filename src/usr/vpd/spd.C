@@ -2325,6 +2325,8 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
                 break;
             }
         }
+        TRACFCOMP(g_trac_spd,
+            "setPartAndSerialNumberAttributes: HUID=%lx", get_huid(i_target));
 
         // Set the attributes
         TARGETING::ATTR_PART_NUMBER_type l_PN = {0};
@@ -2339,6 +2341,9 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
         {
             memcpy(l_PN, l_partNumberData, l_partDataSize);
             i_target->trySetAttr<TARGETING::ATTR_PART_NUMBER>(l_PN);
+            TRACFBIN(g_trac_spd,
+                     "                                : PART NUMBER =",
+                     l_PN, l_partDataSize);
         }
 
         TARGETING::ATTR_SERIAL_NUMBER_type l_SN = {0};
@@ -2352,6 +2357,9 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
         {
             memcpy(l_SN, l_serialNumberData, l_serialDataSize);
             i_target->trySetAttr<TARGETING::ATTR_SERIAL_NUMBER>(l_SN);
+            TRACFBIN(g_trac_spd,
+                     "                                : SERIAL NUMBER =",
+                     l_SN, l_serialDataSize);
         }
 
         if (l_ccinKeyword != 0)
@@ -2368,6 +2376,9 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
             {
                 memcpy(&l_CC, l_ccinData, l_ccinDataSize);
                 i_target->trySetAttr<TARGETING::ATTR_FRU_CCIN>(l_CC);
+                TRACFCOMP(g_trac_spd,
+                         "                                : CCIN = %lx",
+                         l_CC);
             }
         }
 

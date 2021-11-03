@@ -48,6 +48,9 @@
       <id>SERIAL_NUMBER</id>
     </attribute>
     <attribute>
+      <id>STATIC_ABS_LOCATION_CODE</id>
+    </attribute>
+    <attribute>
       <id>VPD_SWITCHES</id>
     </attribute>
   </targetTypeExtension>
