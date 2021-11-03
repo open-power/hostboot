@@ -50,7 +50,7 @@ using namespace TARGETING;
 
 // @TODO RTC 247294: Delete these constants and use the ones from libpldm
 const uint16_t PLDM_OEM_IBM_SBE_MAINTENANCE_STATE = 32775;
-const uint16_t PLDM_OEM_IBM_SBE_HRESET_STATE = 32773;
+const uint16_t PLDM_OEM_IBM_SBE_HRESET_STATE = 32776;
 
 #ifndef __HOSTBOOT_RUNTIME
 
