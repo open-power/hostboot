@@ -106,6 +106,14 @@ uint32_t getSingleBitCount( TARGETING::TargetHandle_t i_target,
                             uint8_t & o_singleBitCount );
 
 /**
+ * @brief  This is called to clear the single bit error count on an MDS DDIMMs
+ *         media controller.
+ * @param  i_chip The input OCMB
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+uint32_t clearSingleBitCount( ExtensibleChip * i_ocmb );
+
+/**
  * @brief  This is called to get the double bit error count from the MDS DDIMMs
  *         media controller
  * @param  i_target         The input MDS_CTLR/OCMB

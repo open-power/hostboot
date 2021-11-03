@@ -393,6 +393,41 @@ uint32_t getSingleBitCount<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
 
 //------------------------------------------------------------------------------
 
+uint32_t clearSingleBitCount( ExtensibleChip * i_ocmb )
+{
+    #define PRDF_FUNC "[clearSingleBitCount] "
+
+    PRDF_ASSERT( nullptr != i_ocmb );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == i_ocmb->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    // Set the single bit error counter reset bit (bit 0 of FCRC4x).
+    uint32_t data = 0;
+    o_rc = readMdsCtlr<TYPE_OCMB_CHIP>( i_ocmb->getTrgt(),
+                                        interfaceErr::SINGLE_BIT, data );
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "readMdsCtlr(0x%08x, 0x%08x) failed.",
+                  i_ocmb->getHuid(), interfaceErr::SINGLE_BIT );
+    }
+
+    data |= 0x80000000;
+    o_rc = writeMdsCtlr<TYPE_OCMB_CHIP>( i_ocmb->getTrgt(),
+                                         interfaceErr::SINGLE_BIT, data );
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "writeMdsCtlr(0x%08x, 0x%08x) failed.",
+                  i_ocmb->getHuid(), interfaceErr::SINGLE_BIT );
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
 template<>
 uint32_t getDoubleBitCount<TYPE_MDS_CTLR>( TargetHandle_t i_mdsCtlr,
                                            uint8_t & o_doubleBitCount )
