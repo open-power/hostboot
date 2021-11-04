@@ -37,8 +37,6 @@
 #include <lib/fir/p10_fir.H>
 #include <mss_generic_attribute_getters.H>
 #include <generic/memory/lib/utils/find.H>
-#include <generic/memory/lib/generic_attribute_accessors_manual.H>
-#include <lib/inband/exp_fw_adapter_properties.H>
 
 ///
 /// @brief Run initfile to enable templates and set pacing.
@@ -192,12 +190,10 @@ fapi_try_exit:
 fapi2::ReturnCode p10_omi_init(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target)
 {
     uint8_t l_enable_fir_unmasking = 0;
-    uint8_t l_sim = 0;
 
     FAPI_TRY(p10_omi_init_scominit(i_target));
     FAPI_TRY(p10_omi_init_enable_templates(i_target));
     FAPI_TRY(p10_omi_init_enable_lol(i_target));
-    FAPI_TRY(mss::attr::get_is_simulation(l_sim));
 
     // Perform fir unmasking if attribute is set to enabled, default disabled
     FAPI_TRY(mss::attr::get_enable_fir_unmasking(l_enable_fir_unmasking));
@@ -206,66 +202,6 @@ fapi2::ReturnCode p10_omi_init(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_ta
     {
         FAPI_TRY(mss::unmask::after_p10_omi_init(i_target));
     }
-
-#ifdef __HOSTBOOT_MODULE
-
-    // NOTE: We're calling run_fw_adapter_properties_get here so we get the Explorer FW version into attributes
-    // for use in the FFDC in the update_omi_firmware step. We cannot run this in Cronus here because we haven't yet
-    // transitioned Explorer access to mmio/inband mode so our endianness attributes are not set correctly.
-    if (!l_sim)
-    {
-        for (const auto& l_omi : mss::find_targets<fapi2::TARGET_TYPE_OMI>(i_target))
-        {
-            for (const auto& l_ocmb : mss::find_targets<fapi2::TARGET_TYPE_OCMB_CHIP>(l_omi))
-            {
-                bool l_image_a_good = true;
-                bool l_image_b_good = true;
-                bool l_mfg_thresholds = false;
-
-                // Check MNFG THRESHOLDS Policy flag
-                FAPI_TRY(mss::check_mfg_flag(fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_THRESHOLDS, l_mfg_thresholds));
-
-                // Print and record Explorer FW version info into attributes
-                FAPI_INF("run_fw_adapter_properties_get %s", mss::c_str(l_ocmb));
-                FAPI_TRY( mss::exp::ib::run_fw_adapter_properties_get(l_ocmb, l_image_a_good, l_image_b_good) );
-
-                // Assert MNFG_SPI_FLASH_AUTHENTICATION_FAIL if fw_adapter_properties says one of the images is bad
-                if (!l_image_a_good || !l_image_b_good)
-                {
-                    // Note: there is no way we could see both images bad here, because then we would not have booted this far
-                    const uint8_t l_image_num = !l_image_a_good ? 0 : 1;
-
-                    if (l_mfg_thresholds)
-                    {
-                        // In MFG test, this fail should call out and deconfigure the DIMM, and fail the procedure
-                        FAPI_ASSERT(false,
-                                    fapi2::EXP_SPI_FLASH_AUTH_FAIL_MFG().
-                                    set_OCMB_TARGET(l_ocmb).
-                                    set_IMAGE(l_image_num).
-                                    set_EXP_ACTIVE_LOG_SIZE(4096),
-                                    "%s Explorer SPI flash authentication failed for image %s in MFG test",
-                                    mss::c_str(l_ocmb), (!l_image_a_good ? "A" : "B"));
-                    }
-                    else
-                    {
-                        // In normal IPL, this fail should produce a recovered log and pass the procedure
-                        FAPI_ASSERT_NOEXIT(false,
-                                           fapi2::EXP_SPI_FLASH_AUTH_FAIL(fapi2::FAPI2_ERRL_SEV_RECOVERED).
-                                           set_OCMB_TARGET(l_ocmb).
-                                           set_IMAGE(l_image_num).
-                                           set_EXP_ACTIVE_LOG_SIZE(4096),
-                                           "%s Explorer SPI flash authentication failed for image %s",
-                                           mss::c_str(l_ocmb), (!l_image_a_good ? "A" : "B"));
-
-                        // FAPI_ASSERT_NOEXIT already logs the error, so set current_err back to success so we pass the procedure
-                        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-                    }
-                }
-            }
-        }
-    }
-
-#endif
 
 fapi_try_exit:
 
