@@ -102,5 +102,6 @@ OBJS += p10_init_mem_encryption.o
 OBJS += p10_io_omi_prbs.o
 OBJS += p10_io_tdr.o
 OBJS += p10_omi_isolation.o
+OBJS += exp_process_image_status.o
 
 include ${ROOTPATH}/config.mk
