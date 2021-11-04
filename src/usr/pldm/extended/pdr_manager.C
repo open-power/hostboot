@@ -1123,43 +1123,6 @@ bool PdrManager::findEntityByFruRecordSetId(const fru_record_set_id i_rsid,
                                                &o_entity.entity_container_id);
 }
 
-effecter_id_t PdrManager::findStateEffecterId(const pldm_entity i_entity,
-                                              const pldm_state_set_ids i_state_set_id)
-{
-    effecter_id_t effecter_id = 0;
-
-    thePdrManager().foreachPdrOfType(PLDM_STATE_EFFECTER_PDR,
-                                     [&effecter_id, i_entity, i_state_set_id]
-                                     (const uint8_t* const pdr_data, const uint16_t pdr_data_size)
-                                     {
-                                         const auto pdr = reinterpret_cast<const pldm_state_effecter_pdr*>(pdr_data);
-
-                                         if (le16toh(pdr->entity_type) == i_entity.entity_type
-                                             && le16toh(pdr->entity_instance) == i_entity.entity_instance_num
-                                             && le16toh(pdr->container_id) == i_entity.entity_container_id)
-                                         {
-                                             const uint8_t* states_ptr = pdr->possible_states;
-
-                                             for (int i = 0; i < pdr->composite_effecter_count; ++i)
-                                             {
-                                                 const auto states = reinterpret_cast<const state_effecter_possible_states*>(states_ptr);
-
-                                                 if (le16toh(states->state_set_id) == i_state_set_id)
-                                                 {
-                                                     effecter_id = le16toh(pdr->effecter_id);
-                                                     return true; // stop iteration
-                                                 }
-
-                                                 states_ptr += sizeof(*states) - sizeof(states->states) + states->possible_states_size;
-                                             }
-                                         }
-
-                                         return false; // continue iteration
-                                     });
-
-    return effecter_id;
-}
-
 PdrManager& thePdrManager()
 {
     return Singleton<PdrManager>::instance();
