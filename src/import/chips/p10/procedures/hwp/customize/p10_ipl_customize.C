@@ -64,8 +64,8 @@ using namespace fapi2;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ID,TARGET,ID##_attrVal),\
                  "MBOX_ATTR_WRITE: Error getting %s", #ID); \
         FAPI_TRY(p9_xip_set_scalar(IMAGE,#ID,ID##_attrVal),\
-                 "MBOX_ATTR_WRITE: Error writing attr %s to seeprom image",\
-                 #ID); \
+                 "MBOX_ATTR_WRITE: Error writing attr %s to seeprom image, rc=0x%.8x",\
+                 #ID, (uint64_t)fapi2::current_err); \
     }
 
 #define MBOX_ATTR_WRITE_VECTOR(ID,TARGET,IMAGE,SIZE) \
@@ -120,6 +120,8 @@ fapi2::ReturnCode writeMboxRegs (
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CONTAINED_IPL_TYPE,
                            FAPI_SYSTEM,
                            l_attr_contained_ipl_type));
+
+    MBOX_ATTR_WRITE(ATTR_DEFAULT_HB_CORE,                       i_procTarget, i_image);
 
     // customize only attributes
     MBOX_ATTR_WRITE(ATTR_SECTOR_BUFFER_STRENGTH,                FAPI_SYSTEM,  i_image);
