@@ -37,6 +37,9 @@
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/trace.H>
+#ifdef __HOSTBOOT_MODULE
+#include <util/crc32.H>
+#endif
 
 
 namespace TARGETING
@@ -504,6 +507,33 @@ errlHndl_t parseRWAttributeData(rw_attr_section_t const* i_rwAttributePtr,
         break;
     }
 
+    // Compute the hash of the entire partition for comparison
+    const uint8_t* l_rwDataPtr = reinterpret_cast<const uint8_t*>(&(i_rwAttributePtr->dataSize));
+    uint32_t l_crcHash = Util::crc32_calc(l_rwDataPtr, i_rwAttributePtr->dataSize);
+    if(i_rwAttributePtr->dataHash != l_crcHash)
+    {
+        TRACFCOMP(g_trac_targeting, ERR_MRK"parseRWAttributeData: computed hash of RW data doesn't match current hash. Computed hash: 0x%x; current hash: 0x%x",
+                 l_crcHash, i_rwAttributePtr->dataHash);
+        /*@
+         * @errortype
+         * @severity   ERRORLOG::ERRL_SEV_INFORMATIONAL
+         * @moduleid   TARG_PARSE_RW_DATA
+         * @reasoncode TARG_RC_BAD_HASH
+         * @userdata1  The computed hash of the data
+         * @userdata2  The hash of the data in the image
+         * @devdesc    The computed hash of RW partition doesn't match the
+         *             hash in the image (probably indicates image corruption)
+         * @custdesc  Failure during the boot of the system
+         */
+        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                         TARG_PARSE_RW_DATA,
+                                         TARG_RC_BAD_HASH,
+                                         l_crcHash,
+                                         i_rwAttributePtr->dataHash,
+                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        break;
+    }
+
     // After the hash is the 4-byte number of attributes included
     const uint32_t l_numAttributes = i_rwAttributePtr->numAttributes;
     // Then the actual attribute data in format: attr hash, HUID, size, persistency, value
@@ -529,7 +559,6 @@ errlHndl_t parseRWAttributeData(rw_attr_section_t const* i_rwAttributePtr,
                             l_attrDataPtr->attrData.metadata.attrSize - 1);
     }
     } while(0);
-
     return l_errl;
 }
 

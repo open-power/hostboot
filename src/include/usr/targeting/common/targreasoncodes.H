@@ -58,6 +58,7 @@ enum TargetingModuleId
     TARG_GET_ATTR_METADATA_PTR      = 0x12,
     TARG_PARSE_RW_ATTR_DATA         = 0x13,
     TARG_PARSE_ATTR_METADATA        = 0x14,
+    TARG_PARSE_RW_DATA              = 0x15,
 };
 
 enum TargetingReasonCode
@@ -96,6 +97,7 @@ enum TargetingReasonCode
     TARG_RC_BAD_TARGETING_PTR               = TARG_COMP_ID | 0x20,
     TARG_RC_BAD_RW_ATTR_PTR                 = TARG_COMP_ID | 0x21,
     TARG_RC_BAD_METADATA_PTR                = TARG_COMP_ID | 0x22,
+    TARG_RC_BAD_HASH                        = TARG_COMP_ID | 0x23,
 };
 
 }; // End TARGETING namespace

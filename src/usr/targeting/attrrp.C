@@ -58,6 +58,7 @@
 #include <fapi2.H>
 #include <fapi2/plat_hwp_invoker.H>
 #include <sbeio/sbeioif.H>
+#include <util/crc32.H>
 
 using namespace INITSERVICE;
 using namespace ERRORLOG;
@@ -1766,7 +1767,8 @@ namespace TARGETING
             // The map of attributes that have been persisted so far (old
             // attributes)
             huid_rw_attrs_map l_persistedRwAttrMap;
-            l_errl = parseRWAttributeData(l_hbdRwPtr, l_persistedRwAttrMap);
+            l_errl = parseRWAttributeData(l_hbdRwPtr,
+                                          l_persistedRwAttrMap);
             if(l_errl)
             {
                 break;
@@ -1969,6 +1971,8 @@ namespace TARGETING
                                            nullptr);
 
             uint32_t l_rwAttrCnt = 0;
+            uint32_t l_rwDataSize = sizeof(l_hbdRwPtr->dataSize) +
+                                    sizeof(l_hbdRwPtr->numAttributes);
             rw_attr_memory_layout_t* l_preservedAttrPtr = &l_hbdRwPtr->attrArray;
             // Iterate over all targets and write the RW attributes into the
             // persistent HBD_RW partition
@@ -2008,16 +2012,21 @@ namespace TARGETING
                                    l_rwAttrMetadataMap[*l_attrId].attrSize);
                         }
                         // Move to the next RW attribute pointer
+                        uint32_t l_currAttrSize = sizeof(rw_attr_memory_layout_t) +
+                                                  l_rwAttrMetadataMap[*l_attrId].attrSize - 1; // Subract 1 rw_attr_t has an extra byte in "value"
                         l_preservedAttrPtr = reinterpret_cast<rw_attr_memory_layout_t*>(
                             reinterpret_cast<uint8_t*>(l_preservedAttrPtr) +
-                            sizeof(rw_attr_memory_layout_t) +
-                            l_rwAttrMetadataMap[*l_attrId].attrSize - 1); // Subract 1 rw_attr_t has an extra byte in "value"
+                            l_currAttrSize);
+                        l_rwDataSize += l_currAttrSize;
                     }
                 } // for all attributes
             } // for all targets
+
             // Write the hash and the number of RW attributes
-            l_hbdRwPtr->dataHash = 0x666978a; // TODO RTC: 205059 compute the hash of the data and write it at the start of preserved HBD
             l_hbdRwPtr->numAttributes = l_rwAttrCnt;
+            l_hbdRwPtr->dataSize = l_rwDataSize;
+            uint8_t* l_rwDataPtr = reinterpret_cast<uint8_t*>(&(l_hbdRwPtr->dataSize));
+            l_hbdRwPtr->dataHash = Util::crc32_calc(l_rwDataPtr, l_hbdRwPtr->dataSize);
 
             // Make sure the data is written out to PNOR
             l_errl = PNOR::flush(PNOR::HB_DATA_RW);

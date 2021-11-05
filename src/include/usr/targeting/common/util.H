@@ -299,12 +299,14 @@ typedef struct
 /**
  * @brief This structure represents the memory layout of the whole
  *        RW attribute data section. The RW attribute data section
- *        consists of the hash over the data, the number of attributes
- *        included, followed by the list of all included attributes/data.
+ *        consists of the hash over the data, the size of the data in bytes,
+ *        the number of attributes included, followed by the list of all
+ *        included attributes/data.
  */
 typedef struct
 {
     uint32_t dataHash;
+    uint32_t dataSize;
     uint32_t numAttributes;
     rw_attr_memory_layout_t attrArray;
 } rw_attr_section_t;
@@ -351,7 +353,8 @@ ERRORLOG::ErrlEntry* parseAttrMetadataSection(section_metadata_mem_layout_t cons
  * @param[out] o_parsedData the parsed data in a format described above
  * @return nullptr on success; non-nullptr on error
  */
-ERRORLOG::ErrlEntry* parseRWAttributeData(rw_attr_section_t const* i_rwAttributePtr, huid_rw_attrs_map& o_parsedData);
+ERRORLOG::ErrlEntry* parseRWAttributeData(rw_attr_section_t const* i_rwAttributePtr,
+                                          huid_rw_attrs_map& o_parsedData);
 #endif
 
 
