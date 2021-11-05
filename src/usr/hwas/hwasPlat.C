@@ -1122,6 +1122,8 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
             continue;
         }
 
+        bool eccValidationError = false; // Assume no errors
+
 #if defined(CONFIG_SUPPORT_EEPROM_CACHING) && defined(CONFIG_SUPPORT_EEPROM_HWACCESS)
         // pulling the data from the eeprom can be very slow so be sure to
         //  indicate we're still making progress
@@ -1132,7 +1134,6 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
         EEPROM::cacheEepromVpd(pTarget, present);
 
         // Validate the ECC data of the VPD cache if target is a PROC and is present
-        bool eccValidationError = false; // Assume no errors
         if ( (TYPE_PROC == l_attrType) && present )
         {
             errl = VPD::validateAllRecordEccData( pTarget );
