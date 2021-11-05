@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,6 +32,7 @@
 #include <string.h>
 #include <memory>
 #include <vector>
+#include <time.h>
 
 using namespace Systemcalls;
 
@@ -157,7 +158,7 @@ msg_t* msg_wait(msg_q_t q)
 
 struct msg_wait_timeout_task_args
 {
-    uint64_t seconds_to_wait = 0;
+    uint64_t milliseconds_to_wait = 0;
     msg_q_t queue = { };
     std::unique_ptr<msg_t, decltype(&msg_free)> waiter_done_msg { nullptr, msg_free };
     volatile bool done = false;
@@ -167,28 +168,27 @@ static void* msg_wait_timeout_waiter_task(void* const vargs)
 {
     task_detach(); // shut hostboot down if we crash
 
-    const auto args = static_cast<msg_wait_timeout_task_args*>(vargs);
+    auto args = static_cast<msg_wait_timeout_task_args*>(vargs);
 
-    int64_t ms_to_wait = args->seconds_to_wait * MS_PER_SEC;
-    const uint64_t MS_PER_POLL = 50;
+    int64_t ms_to_wait = args->milliseconds_to_wait;
+    const uint64_t MS_PER_POLL = 1;
 
     while (ms_to_wait > 0)
     {
         nanosleep(0, MS_PER_POLL * NS_PER_MSEC);
+        ms_to_wait -= MS_PER_POLL;
 
         if (args->done)
         {
             break;
         }
-
-        ms_to_wait -= MS_PER_POLL;
     }
 
     msg_send(args->queue, args->waiter_done_msg.get());
     return nullptr;
 }
 
-std::vector<msg_t*> msg_wait_timeout(const msg_q_t q, const uint64_t seconds)
+std::vector<msg_t*> msg_wait_timeout(const msg_q_t q, uint64_t & io_milliseconds)
 {
     /* This function waits for a message on a message queue with a timeout. It
      * does this by calling msg_wait on the queue, and if it receives no message
@@ -240,9 +240,9 @@ std::vector<msg_t*> msg_wait_timeout(const msg_q_t q, const uint64_t seconds)
      *    "timeout" message from task 2. Then it will return the list to the
      *    caller.
      *
-     * 2. Task 2 will wait a given number of seconds, or until task 1 tells it
-     *    to stop waiting, and then send the "timeout" message to task 1. Then
-     *    it will exit.
+     * 2. Task 2 will wait a given number of milliseconds, or until task 1 tells
+     *    it to stop waiting, and then send the "timeout" message to task 1.
+     *    Then it will exit.
      *
      * Since the timeout ("waiter done") message is always sent on the queue in
      * any case and Task 1 will always read it off of the queue, we satisfy
@@ -255,7 +255,9 @@ std::vector<msg_t*> msg_wait_timeout(const msg_q_t q, const uint64_t seconds)
 
     msg_wait_timeout_task_args args { };
 
-    args.seconds_to_wait = seconds;
+    timespec_t start, finish;
+
+    args.milliseconds_to_wait = io_milliseconds;
     args.queue = q;
 
     // We will provide this message to the waiter task. When it sends this
@@ -263,6 +265,7 @@ std::vector<msg_t*> msg_wait_timeout(const msg_q_t q, const uint64_t seconds)
     // or by us telling it to stop polling).
     args.waiter_done_msg.reset(msg_allocate());
 
+    clock_gettime(CLOCK_MONOTONIC, &start);
     task_create(msg_wait_timeout_waiter_task, &args);
 
     std::vector<msg_t*> results;
@@ -286,6 +289,21 @@ std::vector<msg_t*> msg_wait_timeout(const msg_q_t q, const uint64_t seconds)
         // from the queue, and the timeout message can't end up waiting on the
         // queue after we have quit polling.
         args.done = true;
+    }
+
+    clock_gettime(CLOCK_MONOTONIC, &finish);
+
+    // calculate if any time is left after waiting
+    uint64_t start_time_ns = (NS_PER_SEC * start.tv_sec) + start.tv_nsec;
+    uint64_t finish_time_ns = (NS_PER_SEC * finish.tv_sec) + finish.tv_nsec;
+    if (finish_time_ns > start_time_ns)
+    {
+        // return the milliseconds remaining of total wait time
+        io_milliseconds -= ((finish_time_ns - start_time_ns) / NS_PER_MSEC);
+    }
+    else
+    {
+        io_milliseconds = 0;
     }
 
     return results;

@@ -34,6 +34,7 @@
 #include <mctp/mctpif.H>
 #include "pldm_requester.H"
 #include "pldm_msg_queues.H"
+#include "pldm_msg_timeout.H"
 #include <initservice/taskargs.H>
 #include <pldm/requests/pldm_tid_requests.H>
 #include <pldm/pldm_reasoncodes.H>
@@ -110,10 +111,17 @@ void base_init(errlHndl_t& o_errl)
     // them easily
     registerPldmMsgQs();
 
+    // Avoiding long testcase runs by not even having these threads around during standalone
+#ifdef CONFIG_PLDM
     // This will call the pldmRequester constructor which
     // will launch the task waiting for inbound PLDM requests
     // from the BMC
     Singleton<pldmRequester>::instance().init();
+
+    // This will call the pldmMsgTimeout constructor which
+    // will allow timeout checks for waiting on message responses
+    Singleton<pldmMsgTimeout>::instance().init();
+#endif
 
     // Notify MCTP layer that they can register the bus
     // and start MCTP traffic

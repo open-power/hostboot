@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -357,7 +357,8 @@ inline uint32_t msg_is_sync_noblk(msg_t* msg)
   * message is received, no message(s) will be returned.
   *
   * @param[in] q        The message queue.
-  * @param[in] seconds  The maximum number of seconds to wait for a message.
+  * @param[in/out] io_milliseconds  The maximum number of milliseconds to wait for a message.
+  *                                 Returns any remaining milliseconds after receiving msg
   *
   * @return A list of messages posted to the queue. Empty if the timeout
   *         elapsed before any messages were received.
@@ -369,7 +370,7 @@ inline uint32_t msg_is_sync_noblk(msg_t* msg)
   * @note   This function must not be used by multiple threads on the same
   *         queue at the same time. Doing so could cause a deadlock.
   */
-std::vector<msg_t*> msg_wait_timeout(msg_q_t q, uint64_t seconds);
+std::vector<msg_t*> msg_wait_timeout(msg_q_t q, uint64_t & io_milliseconds);
 
 #endif
 

@@ -52,6 +52,7 @@
 #include <sys/sync.h>
 #include <errl/errlentry.H>
 #include <sys/msg.h>
+#include <sys/time.h>
 
 // Forward declarations
 
@@ -153,22 +154,22 @@ public:
      */
     errlHndl_t notifyBmcPdrRepoChanged();
 
-    // This value can be given to awaitBmcPdrRepoChanged to disable the watchdog
-    // timer.
-    static constexpr size_t TIMEOUT_NONE = 0;
+    // This value can be given to awaitBmcPdrRepoChanged for maximum timeout wait
+    // Table 5 Timing Specifications for PLDM Messages as per DSP0240 document
+    // Time-out waiting for a response max = PT3min - 2*PT4max = 5 seconds - 2 * 100ms
+    static constexpr size_t TIMEOUT_MAX_MS = 5 * MS_PER_SEC - 2 * 100;
 
     /* @brief  Wait for notification that the BMC's PDR repository has changed
      *         (i.e. some task called notifyBmcPdrRepoChanged on this object).
      *
      * @param[in] i_timeout_ms  Timeout in milliseconds. If this timeout elapses,
-     *                          then an error log is created and returned. A value
-     *                          of TIMEOUT_NONE means wait forever.
+     *                          then an error log is created and returned.
      * @return errlHndl_t       Error if any, otherwise nullptr.
      *
      * @note After notifyBmcPdrRepoChanged() has been called once, this function
      *       will return immediately, even on subsequent invocations.
      */
-    errlHndl_t awaitBmcPdrRepoChanged(size_t i_timeout_ms = TIMEOUT_NONE);
+    errlHndl_t awaitBmcPdrRepoChanged(size_t i_timeout_ms = TIMEOUT_MAX_MS);
 #endif
 
     /* @brief  Iterate the PDR repository and invoke a callback for each PDR of

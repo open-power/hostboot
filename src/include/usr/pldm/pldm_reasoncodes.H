@@ -103,6 +103,7 @@ namespace PLDM
         MOD_RESET_REBOOT_COUNT                       = 0x3E, // sendResetRebootCountRequest
         MOD_GET_PDR                                  = 0x3F, // getPDR
         MOD_GET_DATE_TIME                            = 0x40, // getDateTime
+        MOD_PLDM_SEND_REQ_RETRY                      = 0x41, // sendReqWithRetry
     };
 
     enum PLDMReasonCode
@@ -163,6 +164,7 @@ namespace PLDM
         RC_CRC_MISMATCH             = PLDM_COMP_ID | 0x36,
         RC_INVALID_OFFSET_ID        = PLDM_COMP_ID | 0x37,
         RC_DEFENSIVE_LIMIT          = PLDM_COMP_ID | 0x38,
+        RC_TIMEOUT                  = PLDM_COMP_ID | 0x39,
     };
 
     /**

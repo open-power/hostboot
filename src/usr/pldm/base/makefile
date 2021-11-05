@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2021
+# Contributors Listed Below - COPYRIGHT 2020,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -35,6 +35,7 @@ OBJS += pldm_msg_queues.o
 OBJS += pldm_base_init.o
 OBJS += pldm_msg_router.o
 OBJS += pldm_requester.o
+OBJS += pldm_msg_timeout.o
 OBJS += pldm_shutdown.o
 OBJS += pldm_fr.o
 

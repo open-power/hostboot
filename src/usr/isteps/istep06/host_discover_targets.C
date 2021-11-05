@@ -398,7 +398,7 @@ static errlHndl_t finish_pdr_exchange()
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "Awaiting PDR Repository Changed notification from the BMC");
 
-        l_err = PLDM::thePdrManager().awaitBmcPdrRepoChanged(PLDM::PdrManager::TIMEOUT_NONE);
+        l_err = PLDM::thePdrManager().awaitBmcPdrRepoChanged(PLDM::PdrManager::TIMEOUT_MAX_MS);
 
         if (l_err)
         {

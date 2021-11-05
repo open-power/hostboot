@@ -43,6 +43,7 @@
 
 // Miscellaneous
 #include <sys/msg.h>
+#include <sys/time.h>
 
 using namespace PLDM;
 using namespace ERRORLOG;
@@ -141,8 +142,8 @@ errlHndl_t PLDM::dumpSbe(Target* const i_proc, const uint32_t i_plid)
 
     /* Wait on the BMC to set our effecter. */
 
-    const int SBE_DUMP_TIMEOUT_SECONDS = 30;
-    const auto dump_done_msgs = msg_wait_timeout(msgQ.get(), SBE_DUMP_TIMEOUT_SECONDS);
+    uint64_t sbe_dump_timeout_milliseconds = 30 * MS_PER_SEC; // 30 seconds
+    const auto dump_done_msgs = msg_wait_timeout(msgQ.get(), sbe_dump_timeout_milliseconds);
 
     // After waiting, we remove our queue from the PDR manager's callback list,
     // and we wait again for one second. This is to avoid a race condition where
@@ -188,7 +189,8 @@ errlHndl_t PLDM::dumpSbe(Target* const i_proc, const uint32_t i_plid)
     dump_completed = std::accumulate(begin(dump_done_msgs), end(dump_done_msgs),
                                      dump_completed, respond_to_msg);
 
-    const auto stragglers = msg_wait_timeout(msgQ.get(), 1);
+    sbe_dump_timeout_milliseconds = MS_PER_SEC; // 1 second for stragglers
+    const auto stragglers = msg_wait_timeout(msgQ.get(), sbe_dump_timeout_milliseconds);
 
     dump_completed = std::accumulate(begin(stragglers), end(stragglers),
                                      dump_completed, respond_to_msg);

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,6 +59,37 @@ class pldmRequester
 
       // Constructor
       pldmRequester(void);
+
+  protected:
+    /**
+     * @brief msg wait on g_inboundPldmRspMsgQ for a matching response msg or
+     *        max timeout
+     *
+     * @param[in/out] io_req PLDM msg sent to iv_mctpOutboundMsgQ that a response is requested.
+     *                       Updated data[0] and extra_data to point to the valid response
+     * @param[in]  i_max_timeout_milliseconds Maximum time to wait for response
+     * @param[out] o_bad_rsp_count Count of how many non-matching msgs were found (and discarded)
+     *
+     * @return true if matching response found, false otherwise
+     */
+    bool wait_for_matching_response(msg_t* io_req,
+                                    uint64_t i_max_timeout_milliseconds,
+                                    uint32_t & o_bad_rsp_count);
+
+    /**
+     * @brief Send a PLDM request message and attempt retry if necessary
+     *        Per PLDM DSP0240 document:
+     *        - request retries = 2 (minimum)
+     *        - maximum timeout wait of (5 seconds - 200ms) per unique request
+     *        This will call wait_for_matching_response with a maximum 2 seconds
+     *        after each req command send.
+     *
+     * @param[in/out] io_req PLDM request message
+     *                  On return, data[0] and extra_data will be updated to a response
+     *                             data[1] = REQ_FAILED, if an error log is in extra_data field
+     */
+    void send_req_with_retry(msg_t* io_req);
+
 
   private:
 

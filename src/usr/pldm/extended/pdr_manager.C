@@ -178,6 +178,7 @@ errlHndl_t PdrManager::invalidateHBTerminusLocatorPdr()
     if(!l_terminus_locator_pdr)
     {
         /*@
+         * @errortype
          * @moduleid   MOD_PDR_MANAGER
          * @reasoncode RC_TERM_LOCATOR_NOT_FOUND
          * @devdesc    Could not find Terminus Locator PDR in the PDR repo
@@ -846,6 +847,7 @@ errlHndl_t PdrManager::handleStateQueryRequest(const state_query_type_t i_queryt
                          i_query_id);
 
                 /*@
+                 * @errortype  ERRL_SEV_INFORMATIONAL
                  * @moduleid   MOD_PDR_MANAGER
                  * @reasoncode RC_INVALID_STATE_QUERY_ID
                  * @userdata1[0:31]  Sensor/effecter ID
@@ -1065,6 +1067,7 @@ errlHndl_t PdrManager::notifyBmcPdrRepoChanged()
         PLDM_INF("PdrManager::notifyBmcPdrRepoChanged: msg_send failed (rc = %d)",
                  rc);
         /*@
+         * @errortype
          * @moduleid   MOD_PDR_MANAGER
          * @reasoncode RC_SEND_FAIL
          * @userdata1  Return code from message send routine
@@ -1084,10 +1087,6 @@ errlHndl_t PdrManager::notifyBmcPdrRepoChanged()
 
 errlHndl_t PdrManager::awaitBmcPdrRepoChanged(const size_t i_timeout_ms)
 {
-    // @TODO RTC 249701: Add watchdog timer for the msg_wait below
-    assert(i_timeout_ms == TIMEOUT_NONE,
-           "awaitBmcPdrRepoChanged: timeout not supported");
-
     // This mutex protects this function from being called while another task is
     // already waiting on a message.
     static mutex_t wait_mutex = MUTEX_INITIALIZER;
@@ -1102,10 +1101,43 @@ errlHndl_t PdrManager::awaitBmcPdrRepoChanged(const size_t i_timeout_ms)
 
     if (msgq)
     {
-        msg_t* msg = msg_wait(msgq.get());
-
-        msg_free(msg);
-        msg = nullptr;
+        uint64_t l_timeout_ms = i_timeout_ms;
+        auto msgs = msg_wait_timeout(msgq.get(), l_timeout_ms);
+        if (msgs.size() == 0)
+        {
+            PLDM_INF("msg_wait_timeout(iv_bmc_repo_changed_event_q, %lld) timed out", i_timeout_ms);
+            /*@
+             * @errortype
+             * @moduleid   MOD_PDR_MANAGER
+             * @reasoncode RC_TIMEOUT
+             * @userdata1  Timeout in milliseconds
+             * @userdata2  Time left in milliseconds (usually 0)
+             * @devdesc    Timeout while waiting for BMC PDR repo changed event
+             * @custdesc   A software error occurred during system boot
+             */
+            errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                                 MOD_PDR_MANAGER,
+                                 RC_TIMEOUT,
+                                 i_timeout_ms,
+                                 l_timeout_ms,
+                                 ErrlEntry::NO_SW_CALLOUT);
+            addBmcErrorCallouts(errl);
+        }
+        else
+        {
+            // cleanup memory for all msgs returned
+            for( auto & msg : msgs)
+            {
+                // should not see this extra_data populated for this queue but just incase
+                if (msg->extra_data != nullptr)
+                {
+                    free(msg->extra_data);
+                    msg->extra_data = nullptr;
+                }
+                msg_free(msg);
+                msg = nullptr;
+            }
+        }
 
         // Null out the event queue so that it gets destroyed when we exit this
         // function, to prevent messages from accumulating in the queue and
@@ -1115,6 +1147,7 @@ errlHndl_t PdrManager::awaitBmcPdrRepoChanged(const size_t i_timeout_ms)
     else
     {
         /*@
+         * @errortype
          * @moduleid   MOD_PDR_MANAGER
          * @reasoncode RC_MULTIPLE_AWAIT
          * @devdesc    Software problem, multiple awaits on PDR manager
@@ -1258,6 +1291,7 @@ bool PdrManager::invokeStateEffecterCallback(const pldm_set_state_effecter_state
                      rc, i_req.effecter_id, entry.composite_id, entry.callback_info.msg_type);
 
             /*@
+             * @errortype        ERRL_SEV_UNRECOVERABLE
              * @moduleid         MOD_PDR_MANAGER
              * @reasoncode       RC_SENDRECV_FAIL
              * @userdata1[0:31]  Return code from msg_sendrecv
