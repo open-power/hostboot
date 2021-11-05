@@ -540,7 +540,7 @@ hb_startsimics()
             exit 1
         fi
 
-        SBE_SCRIPT_TO_RUN=${PROJECT_ROOT}/standalone/simics/targets/p10_standalone/sbeTest/sbe_startup_p10_standalone.simics
+        SBE_SCRIPT_TO_RUN=${PROJECT_ROOT}/standalone/simics/targets/p10_standalone/sbeTest/sbe_startup.simics
         if [[ ! -f ${SBE_SCRIPT_TO_RUN} ]]; then
             echo "File does not exist: " ${SBE_SCRIPT_TO_RUN}
             echo "Please make sure to run \"hb prime\" to create it."
