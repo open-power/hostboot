@@ -43,6 +43,7 @@
 #include <spi/spi.H> // for SPI lock support
 #include <p10_start_cbs.H>
 #include <p10_clock_test.H>
+#include <sbe/sbe_update.H>
 
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
@@ -131,9 +132,26 @@ void* call_host_cbs_start(void *io_pArgs)
                 continue; //Don't continue on this chip if p10_clock_test failed
             }
 
+            // Trace Measurement and Boot Seeproms
+            SBE::sbeSeepromSide_t l_boot_side = SBE::SBE_SEEPROM_INVALID;
+            SBE::sbeMeasurementSeepromSide_t l_measurement_side =
+                                               SBE::SBE_MEASUREMENT_SEEPROM_INVALID;
+            l_errl = getSbeBootSeeprom(l_cpu_target, l_boot_side, l_measurement_side);
+            if(l_errl)
+            {
+                TRACFCOMP(g_trac_isteps_trace,
+                          "ERROR : call getSbeBootSeeprom target %.8X"
+                          TRACE_ERR_FMT,
+                          get_huid(l_cpu_target),
+                          TRACE_ERR_ARGS(l_errl));
+
+                captureError(l_errl, l_stepError, HWPF_COMP_ID, l_cpu_target);
+                continue; // Don't continue if a simple scom/cfam access failed
+            }
+
             TRACFCOMP(g_trac_isteps_trace,
-                     "Running p10_start_cbs HWP on processor target %.8X",
-                     get_huid(l_cpu_target));
+                     "Running p10_start_cbs HWP on processor target %.8X, bootSide=%d, mSide=%d",
+                     get_huid(l_cpu_target), l_boot_side, l_measurement_side);
 
             FAPI_INVOKE_HWP(l_errl, p10_start_cbs, l_fapi2_proc_target, true);
             if(l_errl)

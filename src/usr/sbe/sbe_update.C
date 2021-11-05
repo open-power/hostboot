@@ -1801,14 +1801,16 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
 
 /////////////////////////////////////////////////////////////////////
     errlHndl_t getSbeBootSeeprom(TARGETING::Target* i_target,
-                                 sbeSeepromSide_t& o_bootSide)
+                                 sbeSeepromSide_t& o_bootSide,
+                                 sbeMeasurementSeepromSide_t& o_mSide)
     {
-        TRACFCOMP( g_trac_sbe, ENTER_MRK"getSbeBootSeeprom()" );
+        TRACUCOMP( g_trac_sbe, ENTER_MRK"getSbeBootSeeprom()" );
 
         errlHndl_t err = nullptr;
         uint32_t cfamData = 0x0;
 
         o_bootSide = SBE_SEEPROM_INVALID;
+        o_mSide = SBE_MEASUREMENT_SEEPROM_INVALID;
 
         do{
             assert(i_target != nullptr,"Bug! Attempting to get the boot seeprom of a null target.");
@@ -1872,12 +1874,21 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                 o_bootSide = SBE_SEEPROM0;
             }
 
+            if(cfamData & SBE_MBOOT_SELECT_MASK_FSI)
+            {
+                o_mSide = SBE_MEASUREMENT_SEEPROM1;
+            }
+            else
+            {
+                o_mSide = SBE_MEASUREMENT_SEEPROM0;
+            }
+
         }while(0);
 
         TRACFCOMP( g_trac_sbe,
-                   EXIT_MRK"getSbeBootSeeprom(): o_bootSide=0x%X (reg=0x%X, "
-                   "tgt=0x%X)",
-                   o_bootSide, cfamData, TARGETING::get_huid(i_target) );
+                   EXIT_MRK"getSbeBootSeeprom(): o_bootSide=0x%X o_mSide=0x%X "
+                   "(reg=0x%X, tgt=0x%X)",
+                   o_bootSide, o_mSide, cfamData, TARGETING::get_huid(i_target) );
 
         return err;
     }
@@ -1942,9 +1953,10 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
 #else
             // The slave will use the same side setting as the master
             sbeSeepromSide_t l_bootside = SBE_SEEPROM_INVALID;
+            sbeMeasurementSeepromSide_t l_mside = SBE_MEASUREMENT_SEEPROM_INVALID;
             TARGETING::Target * l_masterTarget = nullptr;
             targetService().masterProcChipTargetHandle(l_masterTarget);
-            err = getSbeBootSeeprom( l_masterTarget, l_bootside );
+            err = getSbeBootSeeprom( l_masterTarget, l_bootside, l_mside );
             if( err )
             {
                 TRACFCOMP( g_trac_sbe,
@@ -2130,7 +2142,8 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
         {
             //Get Current (boot) Side
             sbeSeepromSide_t tmp_cur_side = SBE_SEEPROM_INVALID;
-            l_err = getSbeBootSeeprom(io_sbeState.target, tmp_cur_side);
+            sbeMeasurementSeepromSide_t tmp_measurement_side = SBE_MEASUREMENT_SEEPROM_INVALID;
+            l_err = getSbeBootSeeprom(io_sbeState.target, tmp_cur_side, tmp_measurement_side);
             if(l_err)
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getSeepromVersions() - Error "
@@ -2280,7 +2293,8 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             /***********************************************/
             //Get Current (boot) Side
             sbeSeepromSide_t tmp_cur_side = SBE_SEEPROM_INVALID;
-            err = getSbeBootSeeprom(io_sbeState.target, tmp_cur_side);
+            sbeMeasurementSeepromSide_t tmp_measurement_side = SBE_MEASUREMENT_SEEPROM_INVALID;
+            err = getSbeBootSeeprom(io_sbeState.target, tmp_cur_side, tmp_measurement_side);
             if(err)
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - "

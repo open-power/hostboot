@@ -391,7 +391,8 @@ void validateSecuritySettings()
     }
 
     SBE::sbeSeepromSide_t bootSide = SBE::SBE_SEEPROM_INVALID;
-    err = SBE::getSbeBootSeeprom(mProc, bootSide);
+    SBE::sbeMeasurementSeepromSide_t mSide = SBE::SBE_MEASUREMENT_SEEPROM_INVALID;
+    err = SBE::getSbeBootSeeprom(mProc, bootSide, mSide);
     if (err)
     {
         const auto plid = err->plid();
@@ -604,7 +605,8 @@ void validateSecuritySettings()
         }
 
         bootSide = SBE::SBE_SEEPROM_INVALID;
-        err = getSbeBootSeeprom(pProc, bootSide);
+        mSide = SBE::SBE_MEASUREMENT_SEEPROM_INVALID;
+        err = getSbeBootSeeprom(pProc, bootSide, mSide);
         if (err)
         {
             const auto plid = err->plid();

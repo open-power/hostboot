@@ -130,12 +130,20 @@ namespace SBE
         MVPDOP_WRITE,     // Write version data to MVPD
     };
 
-    // Used to keep track of perm/temp, and cur/alt
+    // Used to keep track of Boot Seeprom perm/temp, and cur/alt
     enum sbeSeepromSide_t
     {
         SBE_SEEPROM0         = 0x00,   // corresponds to EEPROM::SBE_PRIMARY
         SBE_SEEPROM1         = 0x01,   // corresponds to EEPROM::SBE_BACKUP
         SBE_SEEPROM_INVALID  = 0xFF,
+    };
+
+    // Used to keep track of Measurement Seeprom side
+    enum sbeMeasurementSeepromSide_t
+    {
+        SBE_MEASUREMENT_SEEPROM0         = 0x00,
+        SBE_MEASUREMENT_SEEPROM1         = 0x01,
+        SBE_MEASUREMENT_SEEPROM_INVALID  = 0xFF,
     };
 
     // Actions can be combined
@@ -352,12 +360,15 @@ namespace SBE
      *
      * @param[in] i_target      Target processor to customize.
      *
-     * @param[out] o_bootSide   The Seeprom the SBE booted from
+     * @param[out] o_bootSide   The Boot Seeprom the SBE booted from
+     *
+     * @param[out] o_mSide         The Measurement Seeprom the SBE booted from
      *
      * @return errlHndl_t       Error log handle on failure.
      */
     errlHndl_t getSbeBootSeeprom(TARGETING::Target* i_target,
-                                 sbeSeepromSide_t& o_bootSide);
+                                 sbeSeepromSide_t& o_bootSide,
+                                 sbeMeasurementSeepromSide_t& o_mSide);
 
     /**
      * @brief Collects Version information from a specific SEEPROM using SPI

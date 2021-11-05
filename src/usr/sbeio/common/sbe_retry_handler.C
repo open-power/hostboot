@@ -207,11 +207,12 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
         // If we have made it this far we can assume that something is wrong w/ the SBE
         //////******************************************************************
 
-        // if the sbe is not booted at all extract_rc will fail so we only
-        // will run extract RC if we know the sbe has at least tried to boot
-        if(this->iv_sbeRegister.sbeBooted && !i_sbeHalted)
+        // if the sbe is not halted, run extract_rc
+        // NOTE: any asyncFFDC should have previously been caught in the call to
+        // sbe_run_extract_msg_reg above
+        if(!i_sbeHalted)
         {
-            SBE_TRACF("main_sbe_handler(): No async ffdc found and sbe says it has been booted, running p10_sbe_extract_rc.");
+            SBE_TRACF("main_sbe_handler(): No async ffdc found, but SBE not at runtime, running p10_sbe_extract_rc.");
             // Call the function that runs extract_rc, this needs to run to determine
             // what broke and what our retry action should be
             this->sbe_run_extract_rc();
@@ -229,12 +230,11 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
             }
 #endif
         }
-        // If we have determined that the sbe never booted
-        // then set the current action to be "restart sbe"
-        // that way we will attempt to start the sbe again
+        // If we are halted then set the current action to be "restart sbe"
+        // (the restart handler should already be initialized with with the HRESET reason)
         else
         {
-            SBE_TRACF("main_sbe_handler(): SBE reports it was never booted, calling p10_sbe_extract_rc will fail. Setting action to be RESTART_SBE");
+            SBE_TRACF("main_sbe_handler(): SBE is halted. Setting action to be RESTART_SBE");
             this->iv_currentAction = P10_EXTRACT_SBE_RC::RESTART_SBE;
         }
 
