@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] Evan Lojewski                                                      */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -51,15 +51,19 @@ namespace SPD
 enum
 {
     // Memory Type address/size/constants for DDRx (DDR3, DDR4, etc)
+    // Some values are assigned to equivalent values found in file
+    // vpd/spdenums.H to avoid mismatches and errors
     MEM_TYPE_INVALID = 0x0,
     MEM_TYPE_ADDR = 0x2,
     MEM_TYPE_SZ = 0x1,
-    SPD_DDR3_TYPE = 0xB,    // SPD type for DDR3 as found in SPD byte 2
-    SPD_DDR4_TYPE = 0xC,    // SPD type for DDR4 as found in SPD byte 2
-    SPD_DDR5_TYPE = 0x12,   // SPD type for DDR5 as found in SPD byte 2
-    SPD_DDR3_SIZE = 256,    // SPD size for DDR3, 256 bytes
-    SPD_DDR4_SIZE = 512,    // SPD size for DDR4, 512 bytes
-    SPD_DDR5_SIZE = 1024,   // SPD size for DDR5, 1024 bytes
+    SPD_DDR3_TYPE = SPD::MEM_DDR3,   // SPD type for DDR3 as found in SPD byte 2
+    SPD_DDR4_TYPE = SPD::MEM_DDR4,   // SPD type for DDR4 as found in SPD byte 2
+    SPD_DDR5_TYPE = 0x12,            // SPD type for DDR5 as found in SPD byte 2
+    SPD_MDS_TYPE  = SPD::MEM_MDS,    // SPD type for MDS as found in SPD byte 2
+    SPD_DDR3_SIZE = SPD::DDR3_SPD_SIZE,  // SPD size for DDR3, 256 bytes
+    SPD_DDR4_SIZE = SPD::DDR4_SPD_SIZE,  // SPD size for DDR4, 512 bytes
+    SPD_DDR5_SIZE = 1024,
+
 
     // Module Type address/size/mask/constants for DDRx (DDR3, DDR4, etc)
     MOD_TYPE_ADDR            = 0x03,

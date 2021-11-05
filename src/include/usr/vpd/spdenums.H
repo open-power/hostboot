@@ -52,6 +52,7 @@ enum
 {
     MEM_DDR3 = 0xB,
     MEM_DDR4 = 0xC,
+    MEM_MDS = 0x3A,
     DDR3_SPD_SIZE = 256,
     DDR4_SPD_SIZE = 512,
     DDIMM_DDR4_SPD_SIZE = 640,
