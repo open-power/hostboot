@@ -180,6 +180,7 @@ static void rx_message(uint8_t i_eid, void * i_data,
 */
 void init_mctp_resource_provider(void)
 {
+    mctp_set_alloc_ops(malloc, free, realloc);
     Singleton<MctpRP>::instance();
 }
 
