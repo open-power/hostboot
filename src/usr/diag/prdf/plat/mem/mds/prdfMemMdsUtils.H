@@ -124,6 +124,14 @@ template<TARGETING::TYPE T>
 uint32_t getDoubleBitCount( TARGETING::TargetHandle_t i_target,
                             uint8_t & o_doubleBitCount );
 
+/**
+ * @brief  A function to capture the FFDC data from the MDS media error logs
+ *         for our error log.
+ * @param  i_chip The input OCMB
+ * @param  io_sc The step code data struct
+ */
+void captureMediaFfdc( ExtensibleChip * i_ocmb, STEP_CODE_DATA_STRUCT & io_sc );
+
 } // end namespace MDS
 
 } // end namespace PRDF

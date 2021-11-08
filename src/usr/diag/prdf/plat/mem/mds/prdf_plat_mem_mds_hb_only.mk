@@ -35,6 +35,7 @@ prd_incpath += ${PRD_SRC_PATH}/plat/mem/mds
 ################################################################################
 
 prd_obj += prdfMemMdsUtils.o
+prd_obj += prdfMemMdsMediaLogCounts.o
 
 ################################################################################
 # Hostboot only object files (IPL only)

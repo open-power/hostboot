@@ -486,6 +486,17 @@ uint32_t getPoisonCount<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
 
 //------------------------------------------------------------------------------
 
+void captureMediaFfdc( ExtensibleChip * i_ocmb, STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[captureMediaFfdc] "
+
+    // TODO
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
 } // end namespace MDS
 
 } // end namespace PRDF
