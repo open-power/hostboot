@@ -104,177 +104,84 @@ errlHndl_t TodControls::pickMdmt(const p10_tod_setup_tod_sel i_config)
 
     do{
 
-
-        p10_tod_setup_tod_sel l_oppConfig =
-            (i_config == TOD_PRIMARY) ? TOD_SECONDARY : TOD_PRIMARY;
-        TodProc* l_otherConfigMdmt = iv_todConfig[l_oppConfig].iv_mdmt;
         TodDrawerContainer l_todDrawerList =
             iv_todConfig[i_config].iv_todDrawerList;
         TodProcContainer l_procList;
 
-        if(l_otherConfigMdmt)
-        {
-            TOD_INF("MDMT(0x%.8X) is configured for the "
-                    "opposite config(0x%.2X)",
-                    GETHUID(l_otherConfigMdmt->getTarget()),
-                    l_oppConfig);
-            if(nullptr == pickMdmt(l_otherConfigMdmt, i_config))
-            {
-                TOD_INF("For config 0x%.2X, the only option for the MDMT "
-                        "is the MDMT(0x%.8X) chosen for "
-                        "the opposite config 0x%.2X",
-                        i_config,
-                        GETHUID(l_otherConfigMdmt->getTarget()),
-                        l_oppConfig);
+        TodProc* l_newMdmt = nullptr;
+        TodDrawer* l_pTodDrw = nullptr;
+        TodProcContainer l_procCompleteList; 
+        TARGETING::Target* l_bootProc = nullptr;
 
-                //Get the TodProc pointer to l_otherConfigMdmt from this
-                //config's data structures.
-                for (const auto & l_drwItr: l_todDrawerList)
+        l_errHdl = targetService().queryMasterProcChipTargetHandle(
+                                                 l_bootProc,
+                                                 nullptr,
+                                                 true );
+        if(l_errHdl)
+        {
+            TOD_ERR( "ERROR : pickMdmt "
+                       "queryMasterProcChipTargetHandle() " );
+            errlCommit(l_errHdl, TOD_COMP_ID);
+            break;
+        }
+
+        //No MDMT configured yet. We need to select boot proc as MDMT.
+
+        //In P10, all TOD errors are configured as checkstop.
+        //For eBMC based systems, LPC clock is used as TOD refrence clock. During
+        //IPL, for non boot Procs, LPC clock paths are not verified. If such a Proc is 
+        //chosen as MDMT, a single instance of TOD error can bring down the platform.
+        //Since, recovery from TOD error in P10 is not possible, it is safer to choose
+        //only boot proc as MDMT.
+
+        for (const auto & l_drwItr: l_todDrawerList)
+        {
+            l_procList.clear();
+            bool l_mdmtFound = false;            
+
+            //Get the list of procs on this TOD drawer that have oscillator
+            //input.
+
+            l_drwItr->
+                getPotentialMdmts(l_procList);
+
+            for( const auto & l_proc: l_procList )
+            {
+                if( l_proc->getTarget() == l_bootProc )
                 {
-                    //This call will filter out GARDed/blacklisted chips
-                    l_drwItr->
-                        getPotentialMdmts(l_procList);
-                    //Now we check if l_otherConfigMdmt is still good.
-                    for (const auto & l_procItr: l_procList)
-                    {
-                        if(l_procItr->getTarget() ==
-                            (iv_todConfig[l_oppConfig].iv_mdmt)->getTarget())
-                        {
-                            //Found l_otherConfigMdmt pointer
-                            l_errHdl = setMdmt(i_config,
-                                               l_procItr,
-                                               l_drwItr);
-                            if(l_errHdl)
-                            {
-                                TOD_ERR("Error setting proc 0x%.8X on "
-                                        "TOD drawer 0x%.2X as MDMT "
-                                        "for config 0x%.2X",
-                                        GETHUID(l_procItr->getTarget()),
-                                        l_drwItr->getId(),
-                                        i_config);
-                                errlCommit(l_errHdl, TOD_COMP_ID);
-                            }
-                            break;
-                        }
-                    }
-                    if(iv_todConfig[i_config].iv_mdmt)
-                    {
-                        break;
-                    }
+                    l_pTodDrw = l_drwItr;
+                    l_newMdmt = l_proc;
+                    l_mdmtFound  = true;
+                    break;
                 }
+            }
+
+            if(l_mdmtFound)
+            {
+                break;
             }
         }
-        else
+
+        if(l_newMdmt)
         {
-            TOD_INF("No MDMT configured for other config(0x%.2X) yet",
-                    l_oppConfig);
-
-            uint32_t l_coreCount = 0;
-            uint32_t l_maxCoreCount = 0;
-            TodProc* l_newMdmt = nullptr;
-            TodProc* l_pTodProc = nullptr;
-            TodDrawer* l_pTodDrw = nullptr;
-
-            //No MDMT configured yet. Our criteria to pick one is to
-            //look at TOD drawers and pick the one with max no of cores
-
-            for (const auto & l_drwItr: l_todDrawerList)
+            // If new MDMT, we set the todConfig
+            l_errHdl = setMdmt(i_config,
+                               l_newMdmt,
+                               l_pTodDrw );
+            if(l_errHdl)
             {
-                l_pTodProc = nullptr;
-                l_coreCount = 0;
-                //Get the list of procs on this TOD drawer that have oscillator
-                //input. Each of them is a potential MDMT, choose the one with
-                //max no. of cores
-                l_drwItr->
-                    getPotentialMdmts(l_procList);
-                l_drwItr->
-                    getProcWithMaxCores(nullptr,
-                                        l_pTodProc,
-                                        l_coreCount,
-                                        &l_procList);
-                if(l_coreCount > l_maxCoreCount)
-                {
-                    l_maxCoreCount = l_coreCount;
-                    l_pTodDrw = l_drwItr;
-                    l_newMdmt = l_pTodProc;
-                }
-            }
-
-            if(l_newMdmt)
-            {
-                // If new MDMT, we set the todConfig
-                l_errHdl = setMdmt(i_config,
-                                   l_newMdmt,
-                                   l_pTodDrw);
-                if(l_errHdl)
-                {
-                    TOD_ERR("Error setting proc 0x%.8X on "
-                            "TOD drawer 0x%.2X as MDMT "
-                            "for config 0x%.2X",
-                            l_newMdmt->getTarget()->
-                            getAttr<TARGETING::ATTR_HUID>(),
-                            l_pTodDrw->getId(),
-                            i_config);
-                    errlCommit(l_errHdl, TOD_COMP_ID);
-                }
+                TOD_ERR("Error setting proc 0x%.8X on "
+                        "TOD drawer 0x%.2X as MDMT "
+                        "for config 0x%.2X",
+                        l_newMdmt->getTarget()->
+                        getAttr<TARGETING::ATTR_HUID>(),
+                        l_pTodDrw->getId(),
+                        i_config);
+                errlCommit(l_errHdl, TOD_COMP_ID);
             }
         }
     }while(0);
 
-    if(!iv_todConfig[i_config].iv_mdmt)
-    {
-        TOD_ERR("MDMT couldn't be chosen for configuration 0x%.2X",
-                i_config);
-
-        /*@
-         * @errortype
-         * @moduleid     TOD_PICK_MDMT
-         * @reasoncode   TOD_MASTER_TARGET_NOT_FOUND
-         * @userdata1    TOD topology type
-         * @devdesc      MDMT could not be chosen for the supplied
-         *               topology type
-         * @custdesc     Host Processor Firmware couldn't detect any
-         *               functional master processor required to boot the host
-         */
-        const bool hbSwError = true;
-        l_errHdl = new ERRORLOG::ErrlEntry(
-                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                           TOD_PICK_MDMT,
-                           TOD_MASTER_TARGET_NOT_FOUND,
-                           i_config,
-                           hbSwError);
-
-        //Check the list of garded targets on the system and pick the garded
-        //targets for adding it into FFDC data.
-        //
-        std::vector<TARGETING::ATTR_HUID_type>::iterator l_iter;
-
-        for ( l_iter = iv_gardedTargets.begin();
-                l_iter != iv_gardedTargets.end();
-                ++l_iter )
-        {
-            //Get the target corresponding to the HUID stored in
-            //iv_gardedTargets
-            TARGETING::Target* l_pTarget =
-                 TARGETING::Target::getTargetFromHuid(*l_iter);
-            if ( l_pTarget )
-            {
-                if ( TARGETING::TYPE_PROC == GETTYPE(l_pTarget))
-                {
-                    // Add garded PROC targets into the errorlog
-                    ERRORLOG::ErrlUserDetailsTarget(l_pTarget,
-                        "GARDed Part").addToLog(l_errHdl);
-                }
-            }
-        }
-    }
-    else
-    {
-        TOD_INF("MDMT for configuration 0x%.2X, is proc 0x%.8X",
-                 i_config,
-                 iv_todConfig[i_config].iv_mdmt->
-                 getTarget()->getAttr<TARGETING::ATTR_HUID>());
-    }
 
     TOD_EXIT("TodControls::pickMdmt");
 
@@ -1723,6 +1630,7 @@ errlHndl_t checkGardStatusOfTarget(TARGETING::ConstTargetHandle_t i_target,
     return Singleton<TodControls>::instance().checkGardStatusOfTarget(
         i_target, o_isTargetGarded);
 }
+
 
 // Wrapper function for TodControls::destroy instance
 void destroy(const p10_tod_setup_tod_sel i_config)
