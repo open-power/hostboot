@@ -356,6 +356,20 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_EXP_FW_STATUS_POLLING_TIMEOUT</rc>
+    <description>
+      An OCMB chip failed to reply over i2c during FW_STATUS loop.
+    </description>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_EXP_HALF_DIMM_MODE_NOT_SUPPORTED</rc>
     <description>
       The enterprise settings do not support half dimm mode.

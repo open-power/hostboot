@@ -263,9 +263,8 @@ fapi2::ReturnCode poll_fw_status(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
     // Loop until we max our our loop count or get a non-busy response
     for(; l_loop < i_loops; ++l_loop)
     {
-        // Lab debug: We're seeing i2c timeout on some fw_status commands during OMI training
+        // These i2c transactions can timeout during check_for_ready and OMI training
         // so remove FAPI_TRY around get_fw_status to avoid bailing out of polling loop
-        // TK #622 : update once EDBC-671 is resolved
         l_fw_status_rc = get_fw_status(i_target, o_data);
 
         if (l_fw_status_rc == fapi2::FAPI2_RC_SUCCESS)
@@ -287,6 +286,17 @@ fapi2::ReturnCode poll_fw_status(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
         }
 
         FAPI_TRY( fapi2::delay( i_delay, 200) );
+    }
+
+    // Check the RC from the last get_fw_status and if it's bad we'll log it as recovered
+    // then return an RC specific to the FW_STATUS loop
+    if (l_fw_status_rc != fapi2::FAPI2_RC_SUCCESS)
+    {
+        fapi2::logError(l_fw_status_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+        FAPI_ASSERT(false,
+                    fapi2::MSS_EXP_FW_STATUS_POLLING_TIMEOUT().
+                    set_OCMB_TARGET(i_target),
+                    TARGTIDFORMAT " failed to reply over i2c during FW_STATUS loop", MSSTARGID);
     }
 
     FAPI_DBG(TARGTIDFORMAT " stopped on loop %u/%u", MSSTARGID , l_loop, i_loops);
