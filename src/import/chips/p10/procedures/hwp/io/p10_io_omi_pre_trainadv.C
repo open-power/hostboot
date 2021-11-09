@@ -70,15 +70,6 @@ fapi2::ReturnCode p10_omi_tx_tdr_screen_check(
 
         if (l_data.iv_status != TdrResult::Good)
         {
-            FAPI_ASSERT_NOEXIT(false,
-                               fapi2::P10_IO_TX_TDR_SCREEN_ERROR()
-                               .set_OMI_TARGET(i_omi)
-                               .set_OCMB_TARGET(i_ocmb)
-                               .set_TDR_LANE(l_data.iv_lane)
-                               .set_TDR_STATUS(l_data.iv_status),
-                               "OMI Tx TDR Screen Fail on %s - %s :: lane(%d), status(0x%04X)...",
-                               l_tgt_str, l_ocmb_str, l_data.iv_lane, l_data.iv_status);
-
             if (l_mfg_flags[fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_THRESHOLDS / 32] & (1 << (31 -
                     (fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_THRESHOLDS % 32))))
             {
@@ -89,7 +80,15 @@ fapi2::ReturnCode p10_omi_tx_tdr_screen_check(
                 l_sev = fapi2::FAPI2_ERRL_SEV_RECOVERED;
             }
 
-            fapi2::logError(fapi2::current_err, l_sev);
+            // note - FAPI_ASSERT_NOEXIT clears current_err on return
+            FAPI_ASSERT_NOEXIT(false,
+                               fapi2::P10_IO_TX_TDR_SCREEN_ERROR(l_sev)
+                               .set_OMI_TARGET(i_omi)
+                               .set_OCMB_TARGET(i_ocmb)
+                               .set_TDR_LANE(l_data.iv_lane)
+                               .set_TDR_STATUS(l_data.iv_status),
+                               "OMI Tx TDR Screen Fail on %s - %s :: lane(%d), status(0x%04X)...",
+                               l_tgt_str, l_ocmb_str, l_data.iv_lane, l_data.iv_status);
 
             l_groupa |= (0x1 << l_data.iv_lane) & c_groupa_mask;
             l_groupb |= (0x1 << l_data.iv_lane) & c_groupb_mask;
@@ -98,6 +97,7 @@ fapi2::ReturnCode p10_omi_tx_tdr_screen_check(
 
     if (l_groupa && l_groupb)
     {
+        // note - FAPI_ASSERT_NOEXIT clears current_err on return
         FAPI_ASSERT_NOEXIT(false,
                            fapi2::P10_IO_TX_TDR_SCREEN_MULTI_GROUP_ERROR()
                            .set_OMI_TARGET(i_omi)
@@ -106,7 +106,6 @@ fapi2::ReturnCode p10_omi_tx_tdr_screen_check(
                            .set_OMI_GROUPB(l_groupb),
                            "OMI Tx TDR Screen Multiple Degrade Groups Fail on %s - %s :: groupa(0x%02X), groupb(0x%02X)...",
                            l_tgt_str, l_ocmb_str, l_groupa, l_groupb);
-        fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_PREDICTIVE);
     }
 
 fapi_try_exit:
