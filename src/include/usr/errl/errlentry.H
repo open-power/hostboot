@@ -1200,7 +1200,7 @@ private:
 
 inline uint64_t ErrlEntry::timeCreated() const
 {
-    return iv_Private.iv_created;
+    return iv_Private.iv_created.value;
 }
 inline uint32_t ErrlEntry::eid() const
 {

@@ -224,7 +224,7 @@ ErrlEntry::ErrlEntry(const errlSeverity_t i_sev,
 ErrlEntry::~ErrlEntry()
 {
     // Trace a delete/destruction on an uncommitted log
-    if (iv_Private.iv_committed == 0)
+    if (iv_Private.iv_committed.value == 0)
     {
         #ifdef CONFIG_ERRL_ENTRY_TRACE
         TRACFCOMP( g_trac_errl, ERR_MRK"Error deleted without commit : PLID=%.8X, EID=%.8X", plid(), eid());
@@ -991,7 +991,7 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
 
     // TODO RTC 35258 need a better timepiece, or else apply a transform onto
     // timebase for an approximation of real time.
-    iv_Private.iv_committed = getTB();
+    iv_Private.iv_committed.value = getTB();
 
     // User/Extended headers contain the component ID of the committer.
     iv_User.setComponentId( i_committerComponent );

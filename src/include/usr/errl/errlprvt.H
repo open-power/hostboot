@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,6 +34,7 @@
 */
 
 #include <errl/errlsctnhdr.H>
+#include <time.h>
 
 
 namespace ERRORLOG
@@ -115,10 +116,10 @@ private:
 
     ErrlSctnHdr	iv_header;    // section header for any/all sections
 
-    uint64_t    iv_created;   // TODO RTC 35258 Expects BCD_time8_t, but using
-                              // timebase
-    uint64_t    iv_committed; // TODO RTC 35258 Expects BCD_time8_t, but using
-                              // timebase
+    // The errl parser expects the timestamp data to be
+    // represented in BCD format: 0xYYYYDDMMHHMMSS00
+    BCD_time8_t iv_created;
+    BCD_time8_t iv_committed;
     uint8_t     iv_cid;       // Creator 'B' (enum errlCreator)
     uint8_t     iv_sctns;     // count of sections
     uint32_t    iv_plid;      // platform log id

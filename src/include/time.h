@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -39,6 +41,23 @@ typedef enum
     CLOCK_REALTIME = 0,
     CLOCK_MONOTONIC = 1
 } clockid_t;
+
+// A union representing the BCD (Binary-Coded Decimal) format of
+// date/time timestamps.
+union BCD_time8_t
+{
+    uint64_t value;
+    struct
+    {
+        uint64_t year   : 16;
+        uint64_t day    : 8;
+        uint64_t month  : 8;
+        uint64_t hour   : 8;
+        uint64_t minute : 8;
+        uint64_t second : 8;
+        uint64_t unused : 8;
+    } format;
+};
 
 /** @fn clock_gettime
  *  @brief Reads the clock value from a POSIX clock.
