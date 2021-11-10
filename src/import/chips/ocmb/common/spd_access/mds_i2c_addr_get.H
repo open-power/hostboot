@@ -36,6 +36,15 @@
 #ifndef __MDS_I2C_ADDR_GET__
 #define __MDS_I2C_ADDR_GET__
 
+// SPD byte address that contains the memory type of the DDIMM
+constexpr uint8_t SPD_MEM_TYPE_ADDR = 2;
+
+// MDS memory type value of a DDIMM
+constexpr uint8_t SPD_MDS_MEM_TYPE = 0x3A;
+
+// Invalid return value if an issue retrieving the MDS I2C address
+constexpr uint8_t SPD_INVALID_I2C_ADDR = 0xFF;
+
 // SPD byte address that contains the MDS controller I2C address
 constexpr uint16_t SPD_MDS_I2C_BYTE = 415;
 
@@ -44,10 +53,20 @@ constexpr uint16_t SPD_MDS_I2C_BYTE = 415;
 ///
 /// @param[in] i_spd SPD binary containing DDR JEDEC and the extended DDIMM portion
 /// @return uint8_t I2C address for MDS controller
+///                 or return 0xFF(SPD_INVALID_I2C_ADDR) if SPD is not for an MDS DDIMM.
 ///
 inline uint8_t get_mds_i2c_addr(const char* i_spd)
 {
-    return uint8_t(i_spd[SPD_MDS_I2C_BYTE]);
+    // Default to invalid until proven otherwise
+    uint8_t l_mdsI2cAddress = SPD_INVALID_I2C_ADDR;
+
+    // If SPD belongs to a DDIMM of MDS memory type, then retrieve I2C address
+    if (SPD_MDS_MEM_TYPE == i_spd[SPD_MEM_TYPE_ADDR])
+    {
+        l_mdsI2cAddress = uint8_t(i_spd[SPD_MDS_I2C_BYTE]);
+    }
+
+    return l_mdsI2cAddress;
 }
 
 #endif
