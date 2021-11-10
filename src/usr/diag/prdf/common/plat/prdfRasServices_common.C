@@ -538,6 +538,28 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                 SecondLevel = true;
             }
         }
+#if !defined(__HOSTBOOT_MODULE) && !defined(ESW_SIM_COMPILE)
+        else if (PRDcalloutData::TYPE_PNOR == thiscallout.getType())
+        {
+            auto errl = HWSV::SvrError::AddPnorCallout(
+                    thiscallout.getTarget(), (srciPriority)thispriority,
+                    thisDeconfig, thisGard, iv_errl);
+            if (nullptr != errl)
+            {
+                PRDF_COMMIT_ERRL(errl, ERRL_ACTION_REPORT);
+            }
+        }
+        else if (PRDcalloutData::TYPE_DPSS == thiscallout.getType())
+        {
+            auto errl = HWSV::SvrError::AddDpssCallout(
+                    thiscallout.getTarget(), (srciPriority)thispriority,
+                    thisDeconfig, thisGard, iv_errl);
+            if (nullptr != errl)
+            {
+                PRDF_COMMIT_ERRL(errl, ERRL_ACTION_REPORT);
+            }
+        }
+#endif
     }
 
     // Send the dynamic memory Dealloc message for DIMMS for Predictive

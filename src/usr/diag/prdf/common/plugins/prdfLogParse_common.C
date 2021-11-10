@@ -733,6 +733,20 @@ bool parsePfaData( void * i_buffer, uint32_t i_buflen,
                         i_parser.PrintString( header, data );
                         break;
 
+#ifndef __HOSTBOOT_MODULE
+                    case PRDcalloutData::TYPE_PNOR:
+                        strcat( data, "(PNOR) " );
+                        strcat( data, tmpStr );
+                        i_parser.PrintString( header, data );
+                        break;
+
+                    case PRDcalloutData::TYPE_DPSS:
+                        strcat( data, "(DPSS) " );
+                        strcat( data, tmpStr );
+                        i_parser.PrintString( header, data );
+                        break;
+#endif
+
                     default:
                         i_parser.PrintString( header, "(Unknown/Invalid)" );
 

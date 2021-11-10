@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,6 +54,10 @@ enum MruType
     TYPE_PROCCLK0,
     TYPE_PROCCLK1,
     TYPE_TODCLK,
+#ifndef __HOSTBOOT_MODULE
+    TYPE_PNOR,
+    TYPE_DPSS,
+#endif
 };
 
 } // end namespace PRDcalloutData
