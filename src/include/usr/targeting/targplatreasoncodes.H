@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -89,6 +89,7 @@ enum PlatTargetingReasonCode
     TARG_RT_NODE_NOT_IN_IMAGE      = TARG_COMP_ID | 0x8A,
     TARG_RC_FAILED_TO_XLATE_ADDR   = TARG_COMP_ID | 0x8B,
     TARG_RC_EXCEEDED_ENTRY_LIMIT   = TARG_COMP_ID | 0x8C,
+    TARG_RT_BAD_LID_MAPPING        = TARG_COMP_ID | 0x8D,
 };
 
 } // End TARGETING namespace

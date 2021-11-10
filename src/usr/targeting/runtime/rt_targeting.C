@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,10 +41,12 @@
 #include <runtime/customize_attrs_for_payload.H>
 #include <targeting/translateTarget.H>
 #include <runtime/interface.h>
+#include <pldm/pldm_errl.H>
 #include <map>
 #include <util/memoize.H>
 #include <util/runtime/util_rt.H>
 #include <util/utillidmgr.H>
+#include <util/utillidpnor.H>
 #include <sys/internode.h>
 
 
@@ -603,8 +605,24 @@ int hbrt_update_prep(void)
         // Set pointer to reserved memory targeting data
         void *l_rsvdMemPtr = reinterpret_cast<void*>(l_rsvdMem);
 
+        uint32_t lid_id = Util::TARGETING_BINARY_LIDID + l_nodeId;
+#ifdef CONFIG_PLDM
+        // Translate Pnor Section Id to Lid
+        Util::LidAndContainerLid l_lids;
+        pError = Util::getPnorSecLidIds(PNOR::HB_DATA, l_lids);
+
+        if(pError)
+        {
+            TRACFCOMP( g_trac_targeting,
+                       ERR_MRK"hbrt_update_prep: Unable to determine HBD_RT lid id");
+            pError->collectTrace(TARG_COMP_NAME);
+            break;
+        }
+        lid_id = l_lids.lid;
+#endif
+
         // Set LID for this node
-        UtilLidMgr l_lidMgr(Util::TARGETING_BINARY_LIDID+l_nodeId);
+        UtilLidMgr l_lidMgr(lid_id);
 
         // Create lidMgr and get size of Targeting Binary LID
         size_t l_lidSize = 0;

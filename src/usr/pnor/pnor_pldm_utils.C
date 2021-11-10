@@ -24,14 +24,18 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 /* Local includes */
-#include "pnor_pldm_utils.H"
+#include <pnor/pnor_pldm_utils.H>
 
 
 /* Misc Userspace Module Includes */
 #include <trace/interface.H>
 #include <pnor/pnor_reasoncodes.H>
-#include <pldm/pldm_errl.H>
 #include <pnor/pnorif.H>
+#include <pldm/pldm_errl.H>
+#include <pldm/base/hb_bios_attrs.H>
+#include <errl/errludstring.H>
+#include <errl/errlmanager.H>
+#include <util/utillidpnor.H>
 
 /* PLDM Subtree Includes */
 #include <openbmc/pldm/oem/ibm/libpldm/file_io.h>
@@ -112,5 +116,242 @@ namespace PLDM_PNOR
           static_cast<PNOR::SectionId>(i_vaddr / VMM_SIZE_RESERVED_PER_SECTION);
 
         return sectionIdToLidId(section_id, o_lidId);
+    }
+
+    /**
+     * @brief This struct is used to map a PNOR::SectionId enum with
+     *        a 4-byte lid id. We derive this mapping from the hb_lid_ids
+     *        PLDM BIOS Attribute.
+     */
+    struct pnor_lid_mapping_t
+    {
+        PNOR::SectionId section_id;
+        uint32_t lid_id;
+    };
+
+    /**
+     * @brief Validate the contents of the parsed pnor to lid mapping
+     *
+     * @details This method will check that the section id and lid id found
+     *          when parsing the hb_lid_ids attribute make sense.
+     *
+     * @param[in]  i_mapping           SectionId to Lid Id mapping to check
+     * @param[out] o_validMapping      true if mapping is good; false otherwise
+     *
+     * @return Return an errorlog if an error occured, nullptr otherwise.
+     */
+    errlHndl_t checkPnorToLidMapping(const pnor_lid_mapping_t & i_mapping,
+                                     bool & o_validMapping)
+    {
+        const uint32_t MIN_LID_ID_NUM = 0x80000000;
+        o_validMapping = true;
+        errlHndl_t errl = nullptr;
+        if(i_mapping.section_id >= PNOR::INVALID_SECTION)
+        {
+            // We will hit this case when we find ipl ids when we are looking for runtime ids,
+            // and we will hit this case when we find runtime ids but we are looking for ipl-time ids.
+            TRACFCOMP(g_trac_pnor,"checkPnorToLidMapping: Could not find mapping for entry with lidId %x so we will discard the map entry",
+                      i_mapping.lid_id);
+            o_validMapping = false;
+        }
+        else if( i_mapping.lid_id < MIN_LID_ID_NUM )
+        {
+            // All valid lid ids should have first bit set.
+            TRACFCOMP(g_trac_pnor,
+                      "checkPnorToLidMapping: Invalid lid_id %lx found for section %d",
+                      i_mapping.lid_id, i_mapping.section_id);
+            /*@
+              * @errortype
+              * @severity   ERRL_SEV_PREDICTIVE
+              * @moduleid   PNOR::MOD_CHECK_PNOR_LID_MAPPING
+              * @reasoncode PNOR::RC_INVALID_LID_ID
+              * @userdata1  Lid Id Found
+              * @userdata2  Section Id Found
+              * @devdesc    Software problem, incorrect data from BMC
+              * @custdesc   A software error occurred during system boot
+              */
+            errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                                 PNOR::MOD_CHECK_PNOR_LID_MAPPING,
+                                 PNOR::RC_INVALID_LID_ID,
+                                 i_mapping.lid_id,
+                                 i_mapping.section_id,
+                                 ErrlEntry::NO_SW_CALLOUT);
+            ErrlUserDetailsString("hb_lid_ids").addToLog(errl);
+            errl->collectTrace(PNOR_COMP_NAME);
+            PLDM::addBmcErrorCallouts(errl);
+            o_validMapping = false;
+        }
+        return errl;
+    }
+
+    template<class T>
+    errlHndl_t parse_hb_lid_ids_string(T i_str_lookup_fn,
+                                       std::vector<pnor_lid_mapping_t>& o_mappings_found)
+    {
+        std::vector<uint8_t> bios_string_table, bios_attr_table;
+        std::vector<char> lid_ids_string;
+        errlHndl_t errl = nullptr;
+        do{
+
+        errl = PLDM::getLidIds(bios_string_table, bios_attr_table, lid_ids_string);
+
+        if(errl)
+        {
+            TRACFCOMP(g_trac_pnor, "parse_hb_lid_ids_string: An error occurred while looking up the hb_lid_ids PLDM BIOS attribute");
+            break;
+        }
+
+        // setup some working variables which will be used
+        // in the for-loop below
+        std::vector<char> eyecatch, lid_id;
+        pnor_lid_mapping_t mapping = {PNOR::INVALID_SECTION, 0};
+
+        // parse a string of the format:
+        //   <EYECATCH_a>=<lid_id_1>,<EYECATCH_b>=<lid_id_2>
+        for(size_t i = 0; i < lid_ids_string.size(); i++)
+        {
+            char c = lid_ids_string[i];
+            switch(c)
+            {
+                case '=' :
+                    eyecatch.push_back('\0');
+                    // lookup eyecatch string's SectionId mapping and
+                    // set it in the mapping struct we are using to
+                    //  fill mappings_found
+                    for(uint32_t eye_index=PNOR::FIRST_SECTION;
+                        eye_index < PNOR::NUM_SECTIONS;
+                        eye_index++)
+                        {
+                            if(strcmp(i_str_lookup_fn(eye_index), eyecatch.data()) == 0)
+                            {
+                                mapping.section_id = static_cast<PNOR::SectionId>(eye_index);
+                                break;
+                            }
+                        }
+                    break;
+                case ',' :
+                    lid_id.push_back('\0');
+                    mapping.lid_id = strtoul(lid_id.data(), nullptr, 16);
+                    {
+                        bool mapping_valid = true;
+                        errlHndl_t map_check_err = checkPnorToLidMapping(mapping, mapping_valid);
+                        if(map_check_err)
+                        {
+                            if(errl)
+                            {
+                                map_check_err->plid(errl->plid());
+                                errlCommit(errl, PLDM_COMP_ID);
+                            }
+                            errl = map_check_err;
+                            map_check_err = nullptr;
+                        }
+                        else if(mapping_valid)
+                        {
+                            o_mappings_found.push_back(mapping);
+                        }
+
+                    }
+                    eyecatch.clear();
+                    lid_id.clear();
+                    mapping = {PNOR::INVALID_SECTION, 0};
+                    break;
+                default :
+                    if(eyecatch.size() == 0 ||
+                      eyecatch.back() != '\0')
+                    {
+                        eyecatch.push_back(c);
+                    }
+                    else
+                    {
+                        lid_id.push_back(c);
+                    }
+                    break;
+            }
+        }
+
+        // catch the case where the list of entries was not terminated by ','
+        if(eyecatch.size() && lid_id.size())
+        {
+            lid_id.push_back('\0');
+            mapping.lid_id = strtoul(lid_id.data(), nullptr, 16);
+            bool mapping_valid = true;
+            errlHndl_t map_check_err = checkPnorToLidMapping(mapping, mapping_valid);
+            if(map_check_err)
+            {
+                if(errl)
+                {
+                    map_check_err->plid(errl->plid());
+                    errlCommit(errl, PLDM_COMP_ID);
+                }
+                errl = map_check_err;
+                map_check_err = nullptr;
+            }
+            else if(mapping_valid)
+            {
+                o_mappings_found.push_back(mapping);
+            }
+        }
+
+        }while(0);
+        return errl;
+    }
+
+    errlHndl_t parse_ipl_lid_ids(std::array<uint32_t, PNOR::NUM_SECTIONS>& io_pnorToLidMappings)
+    {
+        errlHndl_t errl = nullptr;
+        std::vector<pnor_lid_mapping_t> mappings_found;
+        do{
+
+        /* Initialize all entries to be invalid, we will correctly write any mappings we find below */
+        constexpr uint32_t INVALID_LID = 0xffffffff;
+        for(auto &entry : io_pnorToLidMappings)
+        {
+            entry = INVALID_LID;
+        }
+
+        errl = parse_hb_lid_ids_string(PNOR::SectionIdToString, mappings_found);
+        if(errl)
+        {
+            TRACFCOMP(g_trac_pnor,"parse_ipl_lid_ids: an error occurred parsing hb_lid_ids bios attribute.");
+            break;
+        }
+
+        for(auto mapping : mappings_found)
+        {
+            TRACFCOMP(g_trac_pnor,"parse_ipl_lid_ids: %s = %lx ", PNOR::SectionIdToString(mapping.section_id) , mapping.lid_id);
+            io_pnorToLidMappings[mapping.section_id] = mapping.lid_id;
+        }
+        }while(0);
+
+        return errl;
+    }
+
+    errlHndl_t parse_rt_lid_ids(void)
+    {
+        errlHndl_t errl = nullptr;
+        do{
+        std::vector<pnor_lid_mapping_t> mappings_found;
+        errl = parse_hb_lid_ids_string(PNOR::SectionIdToRTString, mappings_found);
+        if(errl)
+        {
+            TRACFCOMP(g_trac_pnor,"parse_rt_lid_ids: an error occurred parsing hb_lid_ids bios attribute.");
+            break;
+        }
+
+        /* Update any runtime lid ids we find */
+        for(auto mapping : mappings_found)
+        {
+            TRACFCOMP(g_trac_pnor,"parse_rt_lid_ids: %s = %lx ", PNOR::SectionIdToRTString(mapping.section_id) , mapping.lid_id);
+            errl = Util::updateDataLidMapping(mapping.section_id,
+                                              static_cast<Util::LidId>(mapping.lid_id));
+            if(errl)
+            {
+                TRACFCOMP(g_trac_pnor,"parse_rt_lid_ids: An error occurred trying to update the mapping in the utillidpnor code for %s = %lx ",
+                          PNOR::SectionIdToRTString(mapping.section_id) , mapping.lid_id);
+                break;
+            }
+        }
+        }while(0);
+        return errl;
     }
 }

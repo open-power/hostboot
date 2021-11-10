@@ -60,9 +60,8 @@
 #endif
 
 #ifdef CONFIG_FILE_XFER_VIA_PLDM
-#include <pldm/base/hb_bios_attrs.H>
 #include <pldm/pldm_errl.H>
-#include "pnor_pldm_utils.H"
+#include <pnor/pnor_pldm_utils.H>
 #endif
 
 extern trace_desc_t* g_trac_pnor;
@@ -435,15 +434,10 @@ void PnorRP::initDaemon()
                                             INITSERVICE::PNOR_RP_PRIORITY );
 
 #ifdef CONFIG_FILE_XFER_VIA_PLDM
-        // declare these vectors in their own scope so we dont keep them around any
-        // longer than we need to
-        {
-            std::vector<uint8_t> bios_string_table, bios_attr_table;
-            l_errhdl = PLDM::getLidIds(bios_string_table, bios_attr_table, iv_ipltime_lid_ids);
-        }
+        l_errhdl = PLDM_PNOR::parse_ipl_lid_ids(iv_ipltime_lid_ids);
         if(l_errhdl)
         {
-            TRACFCOMP(g_trac_pnor, "An error occurred when we requested the hb_lid_ids attribute from the BMC");
+            TRACFCOMP(g_trac_pnor, "An error occurred when while trying to get the ipl-time lid ids from the BMC.");
             break;
         }
 

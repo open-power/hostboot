@@ -194,23 +194,20 @@ namespace PLDM
                                      std::vector<uint8_t>& io_attr_table,
                                      TARGETING::ATTR_TPM_REQUIRED_type &o_tpmRequiredPolicy);
 
-    /** @brief Retrieve and parse the hb_lid_ids attribute from the BMC.
+    /** @brief Retrieve the hb_lid_ids attribute from the BMC.
     *
-    * @details This method retrieves the mapping of traditional PNOR eyecatch
-    *          identifiers used by hostboot to the lid ids that are used by the
-    *          BMC file system.
+    * @details Lookup the hb_lid_ids and return the string that the BMC gives us
     *
     * @param[in,out] io_string_table   See brief at the top of this file.
     * @param[in,out] io_attr_table     See brief at the top of this file.
-    * @param[out] io_pnorToLidMappings An array of length PNOR::NUM_SECTIONS
-    *                                  that this function will update any lid
-    *                                  id mappings it finds in.
+    * @param[out] o_lid_ids_string     Vector of characters holding the string
+    *                                  returned from the BMC for hb_lid_ids
     *
     * @return Errorlog is an error occurred, otherwise nullptr on success
     */
     errlHndl_t getLidIds(std::vector<uint8_t>& io_string_table,
                          std::vector<uint8_t>& io_attr_table,
-                         std::array<uint32_t, PNOR::NUM_SECTIONS>& io_pnorToLidMappings);
+                         std::vector<char>& o_lid_ids_string);
 
     /** @brief Retrieve the current value of the hb_mfg_flags
     *          PLDM bios attribute from the BMC and return the value

@@ -194,34 +194,19 @@ errlHndl_t PreVerifiedLidMgr::_loadFromPnor(const PNOR::SectionId i_sec,
     do {
 
     // Translate Pnor Section Id to Lid
-    auto l_lids = Util::getPnorSecLidIds(i_sec);
-    TRACDCOMP( g_trac_runtime, "PreVerifiedLidMgr::_loadFromPnor - getPnorSecLidIds lid = 0x%X, containerLid = 0x%X",
-               l_lids.lid, l_lids.containerLid);
-    if(l_lids.lid == Util::INVALID_LIDID)
+    Util::LidAndContainerLid l_lids;
+    l_errl = Util::getPnorSecLidIds(i_sec, l_lids);
+
+    if(l_errl)
     {
         TRACFCOMP( g_trac_runtime, ERR_MRK "PreVerifiedLidMgr::_loadFromPnor - Pnor Section = %s not associated with any Lids",
                    PNOR::SectionIdToString(i_sec));
-
-        /*@
-         * @errortype
-         * @severity      ERRL_SEV_UNRECOVERABLE
-         * @moduleid      RUNTIME::MOD_PREVERLIDMGR_LOAD_FROM_PNOR
-         * @reasoncode    RUNTIME::RC_INVALID_LID
-         * @userdata1     PNOR section
-         * @userdata2     Lid id mapped from PNOR section
-         * @devdesc       Trying to load invalid lid
-         * @custdesc      Platform security problem detected
-         */
-        l_errl = new ERRORLOG::ErrlEntry(
-            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-            RUNTIME::MOD_PREVERLIDMGR_LOAD_FROM_PNOR,
-            RUNTIME::RC_INVALID_LID,
-            i_sec,
-            l_lids.lid,
-            true);
         l_errl->collectTrace(RUNTIME_COMP_NAME);
         break;
     }
+
+    TRACDCOMP( g_trac_runtime, "PreVerifiedLidMgr::_loadFromPnor - getPnorSecLidIds lid = 0x%X, containerLid = 0x%X",
+            l_lids.lid, l_lids.containerLid);
 
     // Only load if not previously done.
     if( isLidLoaded(l_lids.containerLid) && isLidLoaded(l_lids.lid) )

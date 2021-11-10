@@ -34,7 +34,7 @@
 #include <pldm/requests/pldm_fileio_requests.H>
 
 #include "pnor_pldmdd.H"
-#include "pnor_pldm_utils.H"
+#include <pnor/pnor_pldm_utils.H>
 
 extern trace_desc_t* g_trac_pnor;
 

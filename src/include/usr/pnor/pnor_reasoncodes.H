@@ -126,7 +126,8 @@ namespace PNOR
         MOD_POPULATE_TOC                = 0xF3, /**< populateTOC */
 
         // pnor_pldm_utils.C
-        MOD_PNOR_PLDM_SEC_TO_LID        = 0xF4 /**< sectionIdToLidId */
+        MOD_PNOR_PLDM_SEC_TO_LID        = 0xF4, /**< sectionIdToLidId */
+        MOD_CHECK_PNOR_LID_MAPPING      = 0xF5  /**< checkPnorToLidMapping */
     };
 
     enum PNORReasonCode
@@ -208,6 +209,7 @@ namespace PNOR
         RC_ZERO_NOR_CHIPID           = PNOR_COMP_ID | 0x3F,
         RC_WRONG_SIZE_FROM_WRITE     = PNOR_COMP_ID | 0x40,
         RC_NO_LID_MAPPING            = PNOR_COMP_ID | 0x41,
+        RC_INVALID_LID_ID            = PNOR_COMP_ID | 0x42,
         //@fixme-RTC:131607-Temporary value to allow HWSV compile
         //termination_rc
         RC_PNOR_CORRUPTION           = PNOR_COMP_ID | 0x99,

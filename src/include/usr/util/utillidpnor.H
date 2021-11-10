@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,16 +56,28 @@ typedef std::pair<PNOR::SectionId, LidAndContainerLid> PnorLidsPair;
 typedef std::vector<PnorLidsPair> PnorLidsMap;
 
 /**
+ * @brief Lookup the PnorToLidsMap array entry for a given SectionId
+ *        and set the lid member of the LidAndContainerLid struct
+ *        with a given LidId.
+ *
+ * @param[in] i_sec  The entry to update.
+ * @param[in] i_dataLid The value we want to update the entry with.
+ *
+ * @return error log if an error occurs nullptr otherwise
+ */
+errlHndl_t updateDataLidMapping(const PNOR::SectionId i_sec,
+                                const LidId i_datalid);
+/**
   * @brief Returns Lid and ContainerLid (Secure Header) Ids associated with a
   *        PNOR section.
   *
   * @param[in] i_sec     Pnor section to find associated LIDs for
-  *
-  * @return  LidAndContainerLid - If found, valid LidIds
-  *                               else, invalid LidIds
-  * Note: May return valid LidId with an invalid ContainerLid
+  * @param[in] o_lids    LidAndContainerLid - If found, valid LidIds
+  *                      else, invalid LidIds
+  * @return error log if an error occurs nullptr otherwise
 */
-LidAndContainerLid getPnorSecLidIds(PNOR::SectionId i_sec);
+errlHndl_t getPnorSecLidIds(const PNOR::SectionId i_sec,
+                            LidAndContainerLid& o_lids);
 
 /**
   * @brief Returns PNOR section ID associated with a LidID.

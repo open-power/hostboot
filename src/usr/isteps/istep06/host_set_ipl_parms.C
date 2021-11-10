@@ -37,10 +37,12 @@
 #include <console/consoleif.H>
 #include <initservice/initserviceif.H>
 #include <targeting/common/mfgFlagAccessors.H>
+#include <istepHelperFuncs.H> // captureError
 
 #ifdef CONFIG_PLDM
 #include <isteps/bios_attr_accessors/bios_attr_parsers.H>
 #include <pldm/base/hb_bios_attrs.H>
+#include <pnor/pnor_pldm_utils.H>
 #include <pldm/pldm_errl.H>
 #endif
 
@@ -144,6 +146,15 @@ void* host_set_ipl_parms( void *io_pArgs )
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                           "host_set_ipl_parms: MPIPL detected, using PLDM bios attrs values from previous boot");
+        }
+
+        errlHndl_t errl = PLDM_PNOR::parse_rt_lid_ids();
+        if(errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "host_set_ipl_parms: An error occurred parsing out the runtime lid ids from the hb_lid_ids bios attribute.");
+            captureError(errl, l_stepError, ISTEP_COMP_ID);
+            break;
         }
 
         // Force the update of the VPD ECC data if there is a mismatch, for BMC only

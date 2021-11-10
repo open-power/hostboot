@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/pnor/pnor_pldm_utils.H $                              */
+/* $Source: src/include/usr/pnor/pnor_pldm_utils.H $                      */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -82,21 +82,44 @@ namespace PLDM_PNOR
                               uint32_t & o_lidId,
                               const std::array<uint32_t, PNOR::NUM_SECTIONS> & i_lid_ids);
 
+  /**
+  * @brief Given virtual address in PNOR VMM space, return what
+  *        IPL-time lid id the address maps to, and what offset
+  *        into that lid id that virtual address would be.
+  *
+  * @param[in]  i_vaddr A virtual address in PNOR space
+  * @param[out] o_lidId The lid id associated with this virtual address
+  * @param[out] o_offset The offset the input address would be
+  *                      into the lid id that is returned
+  * @return nullptr on success; errorlog if unable to find valid lid id
+  */
+  errlHndl_t vaddrToLidId(const uint64_t i_vaddr,
+                          uint32_t &o_lidId,
+                          uint32_t &o_offset);
 
-    /**
-    * @brief Given virtual address in PNOR VMM space, return what
-    *        IPL-time lid id the address maps to, and what offset
-    *        into that lid id that virtual address would be.
-    *
-    * @param[in]  i_vaddr A virtual address in PNOR space
-    * @param[out] o_lidId The lid id associated with this virtual address
-    * @param[out] o_offset The offset the input address would be
-    *                      into the lid id that is returned
-    * @return nullptr on success; errorlog if unable to find valid lid id
-    */
-    errlHndl_t vaddrToLidId(const uint64_t i_vaddr,
-                            uint32_t &o_lidId,
-                            uint32_t &o_offset);
+  /**
+  * @brief Lookup the hb_lid_ids PLDM BIOS attribute and parse out
+  *        information about PNOR SectionId -> IPL Time Lid ID mappings.
+  *        Fill out the io_pnorToLidMappings parameter with lid IDs using
+  *        the PNOR section id as the key.
+  *
+  * @param[in,out]  io_pnorToLidMappings Statically sized array mapping pnor section
+  *                                      ids to lid ids. PNOR section id is used as
+  *                                      the key and lid ids are the value.
+  *
+  * @return nullptr on success; errlog if an error occurs
+  */
+  errlHndl_t parse_ipl_lid_ids(std::array<uint32_t, PNOR::NUM_SECTIONS>& io_pnorToLidMappings);
+
+  /**
+  * @brief Lookup the hb_lid_ids PLDM BIOS attribute and parse out
+  *        information about PNOR SectionId -> Runtime Lid ID mappings.
+  *        This function will update the static array used by the utillidpnor code
+  *        to map these relations.
+  *
+  * @return nullptr on success; errlog if an error occurs
+  */
+  errlHndl_t parse_rt_lid_ids(void);
 
 }
 

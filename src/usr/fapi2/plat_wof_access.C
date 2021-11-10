@@ -35,6 +35,7 @@
 #include <errl/errludattribute.H>
 #include <errl/errlreasoncodes.H>
 #include <util/utillidmgr.H>
+#include <util/utillidpnor.H>
 #include <pstates_common.H>
 #include <initservice/initserviceif.H>
 #include <sys/mm.h>
@@ -768,8 +769,21 @@ errlHndl_t getOverrideWofTable(TARGETING::Target* i_procTarg, uint8_t* o_wofData
 
     do {
         // @todo RTC 172776 Make WOF table parser PNOR accesses more efficient
-        uint32_t l_lidNumber = Util::WOF_LIDID;
+        // Lookup the runtime lid id associated with WOFDATA
+        Util::LidAndContainerLid l_lids;
+        l_errl = Util::getPnorSecLidIds(PNOR::WOFDATA, l_lids);
 
+        if(l_errl)
+        {
+            FAPI_ERR("getOverrideWofTable: Unable to determine the runtime lid id for WOFDATA");
+            l_errl->collectTrace(FAPI2_COMP_NAME);
+            break;
+        }
+
+        uint32_t l_lidNumber = l_lids.lid;
+
+        /* If this is an FSP system, override the lid number with the attribute
+           that the FSP set. */
         if( INITSERVICE::spBaseServicesEnabled() )
         {
             // Lid number is system dependent on FSP systems

@@ -1706,7 +1706,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId,
                 }
             }
 
-            // Initialize Pre-Verified Lid Manager, which is required to
+            // Initialize Pre-Verified Lid Manager, which is required
             // to process the MCL, then process the MCL and unlock the Pre-Verified
             // Lid Manager.
             if(TARGETING::is_phyp_load())

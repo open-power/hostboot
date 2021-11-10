@@ -56,6 +56,8 @@ namespace Util
         UTIL_MOD_TP_SHUTDOWN    = 0x17,       // Util::__Util_ThreadPool_Impl::ThreadPoolImpl::__shutdown
         UTIL_LIDMGR_GET_LID_BMC = 0x18,       // UtilLigMgr::getLidFromBMC
         UTIL_SPI_LOCK_REQUEST   = 0x19,       // spiLockRequest
+        UTIL_UPDATE_DATA_LID_MAP = 0x1A,      // Util::updateDataLidMapping
+        UTL_GET_PNOR_SEC_LID_IDS = 0x1B,      // Util::getPnorSecLidIds
     };
 
     enum ReasonCode
@@ -91,6 +93,7 @@ namespace Util
         UTIL_RC_CHILD_TASK_FAILED        = UTIL_COMP_ID | 0x1E,
         UTIL_LIDMGR_LID_TOO_BIG          = UTIL_COMP_ID | 0x1F,
         UTIL_RT_INTERFACE_ERR            = UTIL_COMP_ID | 0x20,
+        UTIL_NO_MAP_ENTRY                = UTIL_COMP_ID | 0x21,
     };
 };
 

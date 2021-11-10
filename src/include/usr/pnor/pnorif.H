@@ -256,6 +256,22 @@ errlHndl_t setSecure(const uint32_t i_secId, SectionData_t* io_TOC);
 */
 const char * SectionIdToString( uint32_t i_secIdIndex );
 
+#ifndef BOOTLOADER
+/**
+  * @brief Returns string associated with pnor section for runtime lid
+  *        mapping. This is used to parse the hb_lid_ids bios attribute
+  *        to determine the runtime lid mappings.
+  *
+  * @param[in] i_secIdIndex     PNOR section id which also represents the index
+  *                             into the string array.
+  *
+  * @return  const char*  - Runtime String associated with Section ID, if not associaton
+  *                         found function will return "INVALID SECTION"
+  *
+*/
+const char * SectionIdToRTString(uint32_t i_secIdIndex);
+#endif
+
 /**
  * @brief  Memcmp a vaddr to the known secureboot magic number
  *

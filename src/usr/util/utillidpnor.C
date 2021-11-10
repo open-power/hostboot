@@ -34,6 +34,7 @@
 #include "utilbase.H"
 #include <initservice/initserviceif.H>
 #include <pnor/pnor_reasoncodes.H>
+#include <util/util_reasoncodes.H>
 
 
 namespace Util
@@ -50,19 +51,70 @@ const size_t lidIdStrLength = 9;
 //  SPECIAL NOTE: HCODE_LID is listed first in table lookups
 //  to allow prioritization of picking the non-HPT HCODE_LID partition
 //  to insulate the HPT handling from affecting the LID validation steps.
-static const PnorLidsMap PnorToLidsMap =
+static PnorLidsMap PnorToLidsMap =
 {
     { PNOR::TESTRO,      LidAndContainerLid(TEST_LIDID, INVALID_LIDID)},
     { PNOR::OCC,         LidAndContainerLid(OCC_LIDID, OCC_CONTAINER_LIDID)},
+#ifdef CONFIG_PLDM
+    { PNOR::WOFDATA,     LidAndContainerLid(INVALID_LIDID, WOF_CONTAINER_LIDID)},
+    { PNOR::HB_DATA,     LidAndContainerLid(INVALID_LIDID, TARGETING_CONTAINER_LIDID)},
+#else
     { PNOR::WOFDATA,     LidAndContainerLid(WOF_LIDID, WOF_CONTAINER_LIDID)},
+#endif
     { PNOR::HCODE_LID,   LidAndContainerLid(P10_HCODE_LIDID, HCODE_CONTAINER_LIDID)},
     { PNOR::HCODE,       LidAndContainerLid(P10_HCODE_LIDID, HCODE_CONTAINER_LIDID)},
     { PNOR::RINGOVD,     LidAndContainerLid(HWREFIMG_RINGOVD_LIDID,INVALID_LIDID)},
 };
 
-LidAndContainerLid getPnorSecLidIds(const PNOR::SectionId i_sec)
+static mutex_t pnor_lid_map_mutex = MUTEX_INITIALIZER;
+
+errlHndl_t updateDataLidMapping(const PNOR::SectionId i_sec,
+                                const LidId i_datalid)
 {
-    LidAndContainerLid l_lids;
+    errlHndl_t errl = nullptr;
+    mutex_lock(&pnor_lid_map_mutex);
+    auto l_secIter = std::find_if(PnorToLidsMap.begin(),
+                                  PnorToLidsMap.end(),
+                                  [i_sec](const PnorLidsPair & pair) -> bool
+                                  {
+                                      return pair.first == i_sec;
+                                  });
+    if (l_secIter != PnorToLidsMap.end())
+    {
+        l_secIter->second.lid = i_datalid;
+    }
+    else
+    {
+        UTIL_FT("UtilLidMgr::updateDataLidMapping unable to find mapping for section %d when trying to update the mapping value with 0x%lx",
+                i_sec, i_datalid);
+        /*@
+          * @errortype
+          * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
+          * @moduleid   Util::UTIL_UPDATE_DATA_LID_MAP
+          * @reasoncode Util::UTIL_NO_MAP_ENTRY
+          * @userdata1  PNOR section Id we tried to lookup
+          * @userdata2  Data lid value we tried to update with
+          * @devdesc    Software problem, trying to update a lid the lidpnor
+          *             code doesn't know about
+          * @custdesc   A software error occurred during system boot
+          */
+        errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                              Util::UTIL_UPDATE_DATA_LID_MAP,
+                              Util::UTIL_NO_MAP_ENTRY,
+                              i_sec,
+                              i_datalid,
+                              ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        errl->collectTrace(UTIL_COMP_NAME);
+    }
+    mutex_unlock(&pnor_lid_map_mutex);
+    return errl;
+}
+
+errlHndl_t getPnorSecLidIds(const PNOR::SectionId i_sec,
+                            LidAndContainerLid& o_lids)
+{
+    errlHndl_t errl = nullptr;
+    mutex_lock(&pnor_lid_map_mutex);
 
     auto l_secIter = std::find_if(PnorToLidsMap.begin(),
                                   PnorToLidsMap.end(),
@@ -72,17 +124,42 @@ LidAndContainerLid getPnorSecLidIds(const PNOR::SectionId i_sec)
                                   });
     if (l_secIter != PnorToLidsMap.end())
     {
-        l_lids.lid = l_secIter->second.lid;
-        l_lids.containerLid = l_secIter->second.containerLid;
+        o_lids.lid = l_secIter->second.lid;
+        o_lids.containerLid = l_secIter->second.containerLid;
     }
-
-    return l_lids;
+    else
+    {
+        // Make sure the LidAndContainerLid object we return has invalid ids set
+        o_lids.lid = INVALID_LIDID;
+        o_lids.containerLid = INVALID_LIDID;
+        UTIL_FT("UtilLidMgr::getPnorSecLidIds unable to find mapping for section %d", i_sec);
+        /*@
+          * @errortype
+          * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
+          * @moduleid   Util::UTL_GET_PNOR_SEC_LID_IDS
+          * @reasoncode Util::UTIL_NO_MAP_ENTRY
+          * @userdata1  PNOR section Id we tried to lookup
+          * @userdata2  Unused
+          * @devdesc    Software problem, trying to lookup a lid the lidpnor
+          *             code doesn't know about
+          * @custdesc   A software error occurred during system boot
+          */
+        errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                              Util::UTL_GET_PNOR_SEC_LID_IDS,
+                              Util::UTIL_NO_MAP_ENTRY,
+                              i_sec,
+                              0,
+                              ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        errl->collectTrace(UTIL_COMP_NAME);
+    }
+    mutex_unlock(&pnor_lid_map_mutex);
+    return errl;
 }
 
 PNOR::SectionId getLidPnorSection(const LidId i_lid)
 {
     PNOR::SectionId l_secId  = PNOR::INVALID_SECTION;
-
+    mutex_lock(&pnor_lid_map_mutex);
     // Search map by value
     // Note: Sacrificed constant look up with another map in the reverse
     //       direction to simplify maintenance with a single map
@@ -97,7 +174,7 @@ PNOR::SectionId getLidPnorSection(const LidId i_lid)
     {
         l_secId = l_secIter->first;
     }
-
+    mutex_unlock(&pnor_lid_map_mutex);
     return l_secId;
 }
 

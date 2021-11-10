@@ -474,6 +474,22 @@ const char * PNOR::SectionIdToString( uint32_t i_secIdIndex )
     return l_str;
 }
 
+#ifndef BOOTLOADER
+const char * PNOR::SectionIdToRTString(uint32_t i_secIdIndex)
+{
+    const char * str = "INVALID SECTION";
+    if(i_secIdIndex == PNOR::HB_DATA)
+    {
+        str = "HBD_RT";
+    }
+    else if(i_secIdIndex == PNOR::WOFDATA)
+    {
+        str = "WOFDATA_RT";
+    }
+    return str;
+}
+#endif
+
 bool PNOR::cmpSecurebootMagicNumber(const uint8_t* i_vaddr)
 {
     // Assert if accessing index out of array.
