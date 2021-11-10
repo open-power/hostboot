@@ -206,6 +206,28 @@ void ErrlManager::setupPnorInfo()
                         TRACFCOMP( g_trac_errl,
                             ERR_MRK"setupPnorInfo unflatten failed on slot %d eid %.8X.",
                             i, l_id);
+
+                        // trace the invalid log entry
+                        uint32_t errlOffset = 0;
+                        // divide invalid log into smaller chunks
+                        const uint32_t LOG_CHUNCK_SIZE = PNOR_ERROR_LENGTH / 4;
+                        while ((errlOffset+LOG_CHUNCK_SIZE) <= PNOR_ERROR_LENGTH)
+                        {
+                            TRACFCOMP(g_trac_errl, "Log bytes 0x%04X-0x%04X",
+                                errlOffset, errlOffset+(LOG_CHUNCK_SIZE-1));
+                            TRACFBIN( g_trac_errl, "Unflatten Log",
+                                l_errlAddr+errlOffset, LOG_CHUNCK_SIZE );
+                            errlOffset+=LOG_CHUNCK_SIZE;
+                        }
+                        // at least try to trace the bad entries SRC data
+                        err->traceLogEntry();
+
+                        // cleanup error log memory
+                        delete err;
+                        err = nullptr;
+
+                        // set the ACK or this log will prevent future logs in PNOR
+                        setACKInFlattened(i);
                     }
                     else
                     {

@@ -217,12 +217,30 @@ private:
     char hwasPriToFruPri( uint32_t i_hwasPri );
 
     /**
+     *  @brief Translate the FRU priority to a HWAS priority
+     *
+     *  @param[in]  i_fruPri The FRU priority ('H','M','L','A','B','C')
+     *
+     */
+    uint32_t fruPriToHwasPri( char i_fruPri );
+
+    /**
      *  @brief Flatten the FRU callouts into PEL.
      *
      *  @param[in]  i_psrc Pointer to the flattened src.
      *
      */
     void flattenFruCallouts(pelSRCSection_t* i_psrc);
+
+    /**
+     * @brief Unflatten the FRU callouts into iv_coVec
+     *
+     * @param[in] i_pFruCallouts Pointer to the start of FRU callout data
+     * @param[in] i_flatSize     Flattened byte size of FRU callout data
+     */
+    void unflattenFruCallouts(const void* i_pFruCallouts, uint64_t i_flatSize);
+
+
 
 #endif
 

@@ -2110,16 +2110,19 @@ uint64_t ErrlEntry::unflatten( const void * i_buffer,  uint64_t i_len )
     bytes_used = iv_Private.unflatten(l_buf);
     consumed    += bytes_used;
     l_buf       += bytes_used;
+    TRACDCOMP(g_trac_errl, INFO_MRK"PH section, size 0x%04X, consumed=0x%04X", bytes_used, consumed);
 
     TRACDCOMP(g_trac_errl, INFO_MRK"Unflatten User Header section...");
     bytes_used = iv_User.unflatten(l_buf);
     consumed    += bytes_used;
     l_buf       += bytes_used;
+    TRACDCOMP(g_trac_errl, INFO_MRK"UH section, size 0x%04X, consumed=0x%04X", bytes_used, consumed);
 
     TRACDCOMP(g_trac_errl, INFO_MRK"Unflatten SRC section...");
     bytes_used = iv_Src.unflatten(l_buf);
     consumed    += bytes_used;
     l_buf       += bytes_used;
+    TRACDCOMP(g_trac_errl, INFO_MRK"PS section, size 0x%04X, consumed=0x%04X", bytes_used, consumed);
 
     if (fullPelOnly(true))
     {
@@ -2127,6 +2130,7 @@ uint64_t ErrlEntry::unflatten( const void * i_buffer,  uint64_t i_len )
         bytes_used = iv_Extended.unflatten(l_buf);
         consumed    += bytes_used;
         l_buf       += bytes_used;
+        TRACDCOMP(g_trac_errl, INFO_MRK"EH section, size 0x%04X, consumed=0x%04X", bytes_used, consumed);
     }
 
     if (fullPelOnly(true))
@@ -2135,6 +2139,7 @@ uint64_t ErrlEntry::unflatten( const void * i_buffer,  uint64_t i_len )
         bytes_used = iv_ED.unflatten(l_buf);
         consumed    += bytes_used;
         l_buf       += bytes_used;
+        TRACDCOMP(g_trac_errl, INFO_MRK"ED section, size 0x%04X, consumed=0x%04X", bytes_used, consumed);
     }
 
     iv_SectionVector.clear();
@@ -2154,9 +2159,11 @@ uint64_t ErrlEntry::unflatten( const void * i_buffer,  uint64_t i_len )
         if(p->sid != ERRORLOG::ERRL_SID_USER_DEFINED) // 'UD'
         {
             // yikes - bad section
-            TRACFCOMP(g_trac_errl, ERR_MRK"Bad UserData section found while "
+            TRACFCOMP(g_trac_errl, ERR_MRK"Bad UserData section (0x%04X) found while "
                       "importing flattened data into error log. plid=%08x",
-                      iv_Private.iv_plid);
+                      p->sid, iv_Private.iv_plid);
+            TRACFCOMP(g_trac_errl, ERR_MRK"Section %d of %d sections, overall offset in data 0x%.16llX",
+                l_sc, iv_Private.iv_sctns, consumed);
             rc = -1;
             break;
         }

@@ -241,7 +241,17 @@ uint64_t ErrlSrc::unflatten( const void * i_buf)
     {
         iv_gard = true;
     }
-
+#ifdef CONFIG_BUILD_FULL_PEL
+    // check if ErrlSrc contains any FRU callouts
+    // FRU callouts are added after the base SRC data when building a full PEL
+    // flatSize() at this point contains everything but the FRU callouts
+    uint64_t baseSrcSize = flatSize();
+    if ((iv_header.iv_slen - baseSrcSize) > 0)
+    {
+        const char* pBuf = static_cast<const char *>(i_buf);
+        unflattenFruCallouts(pBuf + baseSrcSize, (iv_header.iv_slen - baseSrcSize));
+    }
+#endif
     return flatSize();
 }
 
@@ -380,6 +390,109 @@ char ErrlSrc::hwasPriToFruPri( uint32_t i_hwasPri )
             break;
    }
    return retchar;
+}
+
+uint32_t ErrlSrc::fruPriToHwasPri( char i_fruPri )
+{
+    uint32_t hwasPri = HWAS::SRCI_PRIORITY_NONE;
+
+    switch( i_fruPri )
+    {
+        case 'H':
+            hwasPri = HWAS::SRCI_PRIORITY_HIGH;
+            break;
+        case 'M':
+            hwasPri = HWAS::SRCI_PRIORITY_MED;
+            break;
+        case 'A':
+            hwasPri = HWAS::SRCI_PRIORITY_MEDA;
+            break;
+        case 'B':
+            hwasPri = HWAS::SRCI_PRIORITY_MEDB;
+            break;
+        case 'C':
+            hwasPri = HWAS::SRCI_PRIORITY_MEDC;
+            break;
+        case 'L':
+            hwasPri = HWAS::SRCI_PRIORITY_LOW;
+            break;
+        default:
+            hwasPri = HWAS::SRCI_PRIORITY_NONE;
+            break;
+   }
+   return hwasPri;
+}
+
+void ErrlSrc::unflattenFruCallouts(const void* i_pFruCallouts, uint64_t i_flatSize)
+{
+    const pelSubSectionHeader_t * pHeader = reinterpret_cast<const pelSubSectionHeader_t *>(i_pFruCallouts);
+    uint64_t bytesAvailable = pHeader->sslen * 4; // # words including header
+    uint64_t bytesUsed = sizeof(pelSubSectionHeader_t);
+
+    // safety check to avoid accessing memory out-of-bounds
+    if (i_flatSize != bytesAvailable)
+    {
+        TRACFCOMP(g_trac_errl, "ErrlSrc::unflattenFruCallouts(): size mismatch (%lld vs expected %lld)",
+            bytesAvailable, i_flatSize);
+
+        // cause early exit if not enough bytes are in remaining flatSize
+        if (i_flatSize < bytesAvailable)
+        {
+            bytesUsed = bytesAvailable;
+        }
+    }
+
+    const uint8_t * pStart = reinterpret_cast<const uint8_t *>(i_pFruCallouts);
+
+    // loop through entries
+    while (bytesAvailable > bytesUsed)
+    {
+        fruCallOutEntry_t calloutEntry;
+        const pelFRUCalloutHeader_t * pFrucoheader = reinterpret_cast<const pelFRUCalloutHeader_t *>(pStart + bytesUsed);
+        calloutEntry.priority = fruPriToHwasPri(pFrucoheader->fcpri);
+        calloutEntry.locCodeLen = pFrucoheader->fclclen;
+        bytesUsed += sizeof(pelFRUCalloutHeader_t);
+        if (calloutEntry.locCodeLen)
+        {
+            if (calloutEntry.locCodeLen <= PEL_LOC_CODE_SIZE)
+            {
+                memcpy(calloutEntry.locationCode, pStart + bytesUsed, calloutEntry.locCodeLen);
+            }
+            else
+            {
+                TRACFCOMP(g_trac_errl,
+                          "ErrlSrc:unflattenFruCallouts(): location code length %d over max %d",
+                          calloutEntry.locCodeLen, PEL_LOC_CODE_SIZE);
+                break;
+            }
+        }
+        bytesUsed += calloutEntry.locCodeLen;
+
+        const pelFRUIDSubstruct_t * pFruIdSubStruct = reinterpret_cast<const pelFRUIDSubstruct_t *>(pStart + bytesUsed);
+        calloutEntry.fruCompType = pFruIdSubStruct->frusshead.fssflags;
+        if ( (calloutEntry.fruCompType & FAILING_COMP_TYPE_FRU_PN) ||
+             (calloutEntry.fruCompType & FAILING_COMP_TYPE_FRU_PRC) )
+        {
+            strncpy(calloutEntry.partNumber,
+                    pFruIdSubStruct->fruidpnString,
+                    sizeof(calloutEntry.partNumber));
+        }
+        if (calloutEntry.fruCompType & FAILING_COMP_TYPE_FRU_CCIN)
+        {
+            strncpy(calloutEntry.ccin,
+                    pFruIdSubStruct->fruidccinString,
+                    sizeof(calloutEntry.ccin));
+        }
+        if (calloutEntry.fruCompType & FAILING_COMP_TYPE_FRU_SN)
+        {
+            strncpy(calloutEntry.serialNumber,
+                    pFruIdSubStruct->fruidsnString,
+                    sizeof(calloutEntry.serialNumber));
+        }
+        bytesUsed += pFruIdSubStruct->frusshead.fsslen;
+
+        addFruCallout(calloutEntry);
+    }
 }
 
 void ErrlSrc::flattenFruCallouts(pelSRCSection_t* i_psrc)
