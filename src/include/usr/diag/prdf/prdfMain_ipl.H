@@ -78,7 +78,7 @@ namespace PlatServices
 /**
  * @brief  Queries the ATTR_MEM_EFF_HYBRID and ATTR_MEM_EFF_HYBRID_MEMORY_TYPE
  *         attributes to determine if a DIMM is an MDS DDIMM.
- * @param  i_target Target DIMM/OCMB.
+ * @param  i_target Target MEM_PORT/OCMB.
  * @return True if the target is an MDS DDIMM, false otherwise.
  */
 template<TARGETING::TYPE T>
