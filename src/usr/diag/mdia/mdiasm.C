@@ -682,7 +682,8 @@ errlHndl_t __runPostMemdiagsHwps( TargetHandle_t i_trgt )
                    "target HUID 0x%08X.", get_huid(i_trgt));
 
         // Unmask mainline FIRs.
-        FAPI_INVOKE_HWP( err, mss::unmask::after_memdiags, fapiTrgt );
+        FAPI_INVOKE_HWP( err,
+            mss::unmask::after_memdiags<mss::mc_type::EXPLORER>, fapiTrgt );
 
         if ( err )
         {
@@ -701,7 +702,9 @@ errlHndl_t __runPostMemdiagsHwps( TargetHandle_t i_trgt )
                    "target HUID 0x%08X.", get_huid(i_trgt) );
 
         // Turn off FIFO mode to improve performance.
-        FAPI_INVOKE_HWP( err, mss::reset_reorder_queue_settings, fapiTrgt );
+        FAPI_INVOKE_HWP( err,
+            mss::reset_reorder_queue_settings<mss::mc_type::EXPLORER>,
+            fapiTrgt );
         if ( err )
         {
             MDIA_FAST( "ERROR: mss::reset_reorder_queue_settings HWP call on "
