@@ -62,9 +62,6 @@ namespace ERRORLOG
 // Declared in errlentry.C
 extern std::map<uint8_t, const char *> errl_sev_str_map;
 
-// Used in VERSION partition caching
-mutex_t g_errlMutex = MUTEX_INITIALIZER;
-
 extern trace_desc_t* g_trac_errl;
 
 // Store error logs in this memory buffer in L3 RAM.
@@ -102,21 +99,6 @@ bool compareEidToPlid(const uint32_t i_plid,
     return (i_pair.first->eid() == i_plid);
 }
 
-const uint8_t* getCachedVersionPartition()
-{
-    return Singleton<ErrlManager>::instance().getCachedVersionPartition();
-}
-
-size_t getCachedVersionPartitionSize()
-{
-    return Singleton<ErrlManager>::instance().getCachedVersionPartitionSize();
-}
-
-errlHndl_t cacheVersionPartition()
-{
-    return Singleton<ErrlManager>::instance().cacheVersionPartition();
-}
-
 class AtLoadFunctions
 {
     public:
@@ -144,9 +126,7 @@ ErrlManager::ErrlManager() :
     iv_nonInfoCommitted(false),
     iv_isErrlDisplayEnabled(false),
     iv_pldWaitEnable(true), // error on the side of caution and default to waitings
-    iv_isBmcInterfaceEnabled(false),    // assume bmc interface isn't ready yet..
-    iv_versionPartitionCache(nullptr),
-    iv_versionPartitionCacheSize(0)
+    iv_isBmcInterfaceEnabled(false)    // assume bmc interface isn't ready yet..
 {
     TRACFCOMP( g_trac_errl, ENTER_MRK "ErrlManager::ErrlManager constructor" );
 
@@ -1154,120 +1134,6 @@ bool ErrlManager::_updateErrlListIter(ErrlListItr_t & io_it)
         ++io_it;
     }
     return l_removed;
-}
-
-const uint8_t* ErrlManager::getCachedVersionPartition() const
-{
-    mutex_lock(&g_errlMutex);
-    const uint8_t* l_versionPtr = iv_versionPartitionCache;
-    mutex_unlock(&g_errlMutex);
-    return l_versionPtr;
-}
-
-size_t ErrlManager::getCachedVersionPartitionSize() const
-{
-    mutex_lock(&g_errlMutex);
-    size_t l_versionSize = iv_versionPartitionCacheSize;
-    mutex_unlock(&g_errlMutex);
-    return l_versionSize;
-}
-
-errlHndl_t ErrlManager::cacheVersionPartition()
-{
-    errlHndl_t l_errl = nullptr;
-    bool l_versionPartitionLoaded = false;
-
-    do {
-
-    if(iv_isVersionPartitionCached ||
-       !PNOR::isSectionAvailable(PNOR::VERSION))
-    {
-        // No need to try to cache more than once or if
-        // there is no VERSION partition
-        break;
-    }
-
-#ifdef CONFIG_SECUREBOOT
-    l_errl = PNOR::loadSecureSection(PNOR::VERSION);
-    if(l_errl)
-    {
-        TRACFCOMP(g_trac_errl, ERR_MRK"ErrlManager::cacheVersionPartition() - could not load VERSION partition");
-        break;
-    }
-
-    l_versionPartitionLoaded = true;
-#endif
-
-    PNOR::SectionInfo_t l_pnorVersionSectionInfo;
-    l_errl = getSectionInfo(PNOR::VERSION, l_pnorVersionSectionInfo);
-    if(l_errl)
-    {
-        TRACFCOMP(g_trac_errl, ERR_MRK"ErrlManager::cacheVersionPartition() - could not get VERSION section info");
-        break;
-    }
-
-    // Since multiple errls may be at different stages of commit at the same
-    // time, lock the mutex to prevent atomicity issues
-    mutex_lock(&g_errlMutex);
-
-    iv_versionPartitionCacheSize = 0;
-
-    const char* l_versionSectionPtr =
-        reinterpret_cast<char*>(l_pnorVersionSectionInfo.vaddr);
-
-    // The actual size of the text in the VERSION partition is likely to be less
-    // than the declared size. Calculate the actual size here.
-    while((l_versionSectionPtr[iv_versionPartitionCacheSize] != '\0') &&
-          (iv_versionPartitionCacheSize < l_pnorVersionSectionInfo.size))
-    {
-        ++iv_versionPartitionCacheSize;
-    }
-    iv_versionPartitionCache = new uint8_t[iv_versionPartitionCacheSize];
-
-    memcpy(const_cast<uint8_t*>(iv_versionPartitionCache),
-           reinterpret_cast<uint8_t*>(l_pnorVersionSectionInfo.vaddr),
-           iv_versionPartitionCacheSize);
-
-    mutex_unlock(&g_errlMutex);
-
-    } while(0);
-
-    if(l_versionPartitionLoaded)
-    {
-#ifdef CONFIG_SECUREBOOT
-        errlHndl_t l_unloadSecErr = PNOR::unloadSecureSection(PNOR::VERSION);
-        if(l_unloadSecErr)
-        {
-            TRACFCOMP(g_trac_errl, ERR_MRK"ErrlManager::cacheVersionPartition() - could not unload VERSION partition");
-            if(l_errl)
-            {
-                l_unloadSecErr->plid(l_errl->plid());
-                errlCommit(l_unloadSecErr, ERRL_COMP_ID);
-            }
-            else
-            {
-                l_errl = l_unloadSecErr;
-                l_unloadSecErr = nullptr;
-            }
-        }
-#endif
-    }
-
-    if(l_errl)
-    {
-        if(iv_versionPartitionCache)
-        {
-            delete[] iv_versionPartitionCache;
-            iv_versionPartitionCache = nullptr;
-        }
-        iv_versionPartitionCacheSize = 0;
-    }
-
-    // Set the cache attrmpted flag regardless of whether we actually
-    // were able to cache the partition
-    iv_isVersionPartitionCached = true;
-
-    return l_errl;
 }
 
 } // End namespace

@@ -1726,13 +1726,6 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId,
                     continue;
                 }
 
-                // Skip VERSION section for non-BMC based systems.
-                if ((secIdPair.first == PNOR::VERSION)
-                    && INITSERVICE::spBaseServicesEnabled())
-                {
-                    continue;
-                }
-
                 l_elog = hbResvLoadSecureSection(secIdPair.first,
                                                  secIdPair.second);
                 if (l_elog)

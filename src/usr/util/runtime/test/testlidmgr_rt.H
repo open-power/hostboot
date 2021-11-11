@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,78 +48,6 @@ class LidMgrRtTest : public CxxTest::TestSuite
                 l_errl = NULL;
             }
             UTIL_FT(EXIT_MRK"testMissingLid()");
-        }
-
-        /**
-         *  @brief Test a lid request that is in reserved memory
-         */
-        void testLidInRsvdMem(void)
-        {
-            UTIL_FT(ENTER_MRK"testLidInRsvdMem()");
-            errlHndl_t l_errl = NULL;
-
-            do
-            {
-                //@fixme-RTC:249746-Standalone HBRT support
-                UTIL_FT(ENTER_MRK"skipping for now");
-                break;
-
-                size_t l_lidSize = 0;
-
-                UtilLidMgr l_lidMgr(Util::VERSION_LIDID);
-
-                l_errl = l_lidMgr.getLidSize(l_lidSize);
-                if(l_errl)
-                {
-                    errlCommit(l_errl,UTIL_COMP_ID);
-                    TS_FAIL("testLidInRsvdMem: Error getting lidId=0x%.8x",
-                            Util::TEST_LIDID);
-                    break;
-                }
-
-                const size_t EXPECTED_SIZE = 0x2000; //from pnorLayoutP10.xml
-                if (l_lidSize != EXPECTED_SIZE)
-                {
-                    TS_FAIL("testLidInRsvdMem: lidSize does not match expected"
-                            " section size 0x%.8X != 0x%.8X",
-                            l_lidSize, EXPECTED_SIZE);
-                    break;
-                }
-
-                char * l_ptr = new char[l_lidSize];
-                l_errl = l_lidMgr.getLid(l_ptr, l_lidSize);
-                if(l_errl)
-                {
-                    errlCommit(l_errl, UTIL_COMP_ID);
-                    TS_FAIL("testLidInRsvdMem: failed to get lid");
-                }
-                delete[] l_ptr;
-
-                void* l_pLidImage = NULL;
-                size_t l_lidImageSize = 0;
-                l_errl = l_lidMgr.getStoredLidImage(l_pLidImage,
-                                                    l_lidImageSize);
-                if (l_errl)
-                {
-                    errlCommit(l_errl, UTIL_COMP_ID);
-                    TS_FAIL("testLidInRsvdMem: failed to get stored lid");
-                }
-
-                if (l_lidImageSize != EXPECTED_SIZE)
-                {
-                    TS_FAIL("testLidInRsvdMem: stored size does not match"
-                            " section size 0x%.8X != 0x%.8X",
-                            l_lidImageSize, EXPECTED_SIZE);
-                }
-
-                l_errl = l_lidMgr.releaseLidImage();
-                if(l_errl)
-                {
-                    errlCommit(l_errl, UTIL_COMP_ID);
-                    TS_FAIL("testLidInRsvdMem: failed to release lid");
-                }
-            }while(0);
-            UTIL_FT(EXIT_MRK"testLidInRsvdMem()");
         }
 
         /**

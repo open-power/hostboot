@@ -95,32 +95,6 @@ void errlCommitAllowExtraLogs(errlHndl_t& io_err, compId_t i_committerComp, bool
 uint8_t getHiddenLogsEnable();
 
 /**
- * @brief Returns the cached VERSION partition, if any. Makes a call to
- *        ErrlManager::getCachedVersionPartition
- * @return uint8_t* The pointer to the binary contents of the VERSION
- *         partition; nullptr will be returned if VERSION hasn't been
- *         cached yet of if there was an error during caching
- */
-const uint8_t* getCachedVersionPartition();
-
-/**
- * @brief Returns the size of the cached VERSION partition. Makes a call
- *        to ErrlManager::getCachedVersionPartitionSize
- * @return size_t The size of the cached VERSION partition. A 0 will be
- *         returned if VERSION hasn't been cached yet or if there was an
- *         error during caching
- */
-size_t getCachedVersionPartitionSize();
-
-/**
- * @brief Call to ErrlManager to cache the VERSION PNOR partition into an
- *        internal buffer.
- *
- * @return errlHndl_t nullptr on success; non-nullptr on error.
- */
-errlHndl_t cacheVersionPartition();
-
-/**
  *  @brief  Global enums used by static errlResourceReady function
  */
 enum errlManagerNeeds
@@ -268,34 +242,6 @@ public:
      * @return true - A non-informational log has been committed.
      */
     static bool errlCommittedThisBoot();
-
-    /**
-     * @brief Returns the cached VERSION partition, if any
-     * @return uint8_t* The pointer to the binary contents of the VERSION
-     *         partition
-     */
-    const uint8_t* getCachedVersionPartition() const;
-
-    /**
-     * @brief Returns the size of the cached VERSION partition
-     * @return size_t The size of the cached VERSION partition
-     */
-    size_t getCachedVersionPartitionSize() const;
-
-    /**
-     * @brief Cache the VERSION PNOR partition into a member buffer. The
-     *        buffer is dynamically allocated here to hold the contents of the
-     *        partition. If any error occurs during the execution, the buffer
-     *        is deleted and the error is returned. This function is not
-     *        supposed to be called within ErrlManager message handler, since
-     *        the function itself makes synchronous calls to various message
-     *        handlers. Note that once the partition is cached, the cache is
-     *        never purged to make sure all possible error logs receive the
-     *        VERSION field. No-op on FSP systems.
-     *
-     * @return errlHndl_t nullptr on success; non-nullptr on error.
-     */
-    errlHndl_t cacheVersionPartition();
 
 
     /**
@@ -669,17 +615,6 @@ private:
     typedef std::list<ErrlFlagPair_t> ErrlList_t;
     typedef ErrlList_t::iterator ErrlListItr_t;
     ErrlList_t iv_errlList;
-
-#ifndef __HOSTBOOT_RUNTIME
-    const uint8_t* iv_versionPartitionCache; // The bin contents of the VERSION
-                                             // partition; once cached, the
-                                             // constents are never removed
-
-    size_t iv_versionPartitionCacheSize; // The size of the VERSION partition
-
-    bool iv_isVersionPartitionCached; // Whether the caching of the VERSION
-                                      // partition has been attempted
-#endif //#ifndef __HOSTBOOT_RUNTIME
 
     /**
      * @brief checks if the flag is set

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,7 +37,6 @@ const PreVerifyVector preVerifiedPnorSections {
     {PNOR::OCC, true},
     {PNOR::WOFDATA, true},
     {PNOR::HCODE, true},
-    {PNOR::VERSION, true},
     {PNOR::RINGOVD, false},
 };
 

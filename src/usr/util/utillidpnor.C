@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,7 +53,6 @@ const size_t lidIdStrLength = 9;
 static const PnorLidsMap PnorToLidsMap =
 {
     { PNOR::TESTRO,      LidAndContainerLid(TEST_LIDID, INVALID_LIDID)},
-    { PNOR::VERSION,     LidAndContainerLid(VERSION_LIDID, INVALID_LIDID)},
     { PNOR::OCC,         LidAndContainerLid(OCC_LIDID, OCC_CONTAINER_LIDID)},
     { PNOR::WOFDATA,     LidAndContainerLid(WOF_LIDID, WOF_CONTAINER_LIDID)},
     { PNOR::HCODE_LID,   LidAndContainerLid(P10_HCODE_LIDID, HCODE_CONTAINER_LIDID)},

@@ -246,13 +246,6 @@ void PnorRP::init( errlHndl_t   &io_rtaskRetErrl )
         #ifdef CONFIG_SECUREBOOT
         // Extend the base image to the TPM, regardless of how it was obtained
         l_errl = TRUSTEDBOOT::extendBaseImage();
-
-        // Cache the VERSION partition data for future use by the errl commit
-        // code.
-        if(!l_errl)
-        {
-            l_errl = ERRORLOG::cacheVersionPartition();
-        }
         #endif
         #endif
     }

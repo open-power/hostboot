@@ -86,12 +86,6 @@ class PreVerifiedLidMgrTest : public CxxTest::TestSuite
         {
             TRACFCOMP( g_trac_runtime, "section=%d", secIdPair.first  );
 
-            // VERSION is not in standalone so ignore it here.
-            if (secIdPair.first == PNOR::VERSION)
-            {
-                continue;
-            }
-
             l_errl = RUNTIME::hbResvLoadSecureSection(secIdPair.first,
                                                       secIdPair.second);
             if (l_errl)
@@ -123,10 +117,6 @@ class PreVerifiedLidMgrTest : public CxxTest::TestSuite
             {
                 l_expectedLids -= 2;
             }
-
-            // VERSION is only an OpenPOWER partition so we need to adjust for
-            // it here since it doesn't exist for standalone.
-            l_expectedLids -= 2;
         }
 
         // Ensure the expected number of lids were loaded.

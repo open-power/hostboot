@@ -970,14 +970,6 @@ private:
     void addHbBuildId();
 
     /**
-     *  @brief Called by commit(), this function creates a user details section
-     *  which contains the version info for each of the fw components in an
-     *  OpenPOWER System and adds it to the current error log being processed.
-     *  Note: This function only executes on a BMC based system.
-     */
-    void addVersionInfo(void);
-
-    /**
      * @brief called by addHwCallout to retrieve various pieces of card
      *  and/or chip data, e.g. part number, serial number, ecid.
      *
