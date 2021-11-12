@@ -55,6 +55,7 @@ template<>
 class ccsTraits<mss::mc_type::EXPLORER>
 {
     public:
+        static constexpr fapi2::TargetType MC_TARGET_TYPE = fapi2::TARGET_TYPE_OCMB_CHIP;
         static constexpr fapi2::TargetType PORT_TARGET_TYPE = fapi2::TARGET_TYPE_MEM_PORT;
         static constexpr uint64_t MODEQ_REG = EXPLR_MCBIST_CCS_MODEQ;
         static constexpr uint64_t MCB_CNTL_REG = EXPLR_MCBIST_MCB_CNTLQ;

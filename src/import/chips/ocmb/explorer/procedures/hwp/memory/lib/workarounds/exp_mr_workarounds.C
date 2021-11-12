@@ -117,7 +117,7 @@ fapi_try_exit:
 /// @note Unit test helper
 ///
 fapi2::ReturnCode updates_mode_registers_helper(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
-        std::vector<ccs::instruction_t>& o_instructions)
+        std::vector<ccs::instruction_t<mss::mc_type::EXPLORER>>& o_instructions)
 {
     // The PHY puts us into self time refresh mode prior
     // We need to exit self time refresh mode by holding the CKE high
@@ -127,7 +127,7 @@ fapi2::ReturnCode updates_mode_registers_helper(const fapi2::Target<fapi2::TARGE
 
     o_instructions.clear();
 
-    o_instructions.push_back(mss::ccs::des_command(TXPR_SAFE_MARGIN));
+    o_instructions.push_back(mss::ccs::des_command<mss::mc_type::EXPLORER>(TXPR_SAFE_MARGIN));
 
     for(const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
     {
@@ -184,15 +184,15 @@ fapi2::ReturnCode updates_mode_registers(const fapi2::Target<fapi2::TARGET_TYPE_
 
     // Update the CWL and/or LPASR to the workaround value
     {
-        mss::ccs::program l_program;
+        mss::ccs::program<mss::mc_type::EXPLORER> l_program;
 
         // Adds the instructions
         FAPI_TRY(updates_mode_registers_helper(i_target, l_program.iv_instructions));
 
         // Executes the CCS commands
-        FAPI_TRY(mss::ccs::execute(mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target),
-                                   l_program,
-                                   i_target));
+        FAPI_TRY(mss::ccs::execute<mss::mc_type::EXPLORER>(mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target),
+                 l_program,
+                 i_target));
     }
 
 fapi_try_exit:

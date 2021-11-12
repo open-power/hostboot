@@ -97,7 +97,7 @@ template <mss::mc_type MC>
 fapi2::ReturnCode add_latch_wr_vref_commands( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const mrs06_data<MC>& i_mrs06,
         const uint64_t i_port_rank,
-        std::vector< ccs::instruction_t >& io_inst)
+        std::vector< ccs::instruction_t<MC> >& io_inst)
 {
     // JEDEC has a 3 step latching process for WR VREF
     // 1) enter into VREFDQ training mode, with the desired range value is XXXXXX
@@ -145,7 +145,7 @@ fapi2::ReturnCode setup_latch_wr_vref_commands_by_rank( const fapi2::Target<fapi
         const uint64_t i_port_rank,
         const uint8_t i_train_range,
         const uint8_t i_train_value,
-        std::vector< ccs::instruction_t >& io_inst)
+        std::vector< ccs::instruction_t<MC> >& io_inst)
 {
     // Check to make sure our ctor worked ok
     mrs06_data<MC> l_mrs06( i_target, fapi2::current_err );

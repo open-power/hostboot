@@ -64,7 +64,7 @@ namespace ddr4
 template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = ccsTraits<MC>, typename MRS = mrsTraits<MC> >
 fapi2::ReturnCode mrs06(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         const mrs06_data<MC>& i_data,
-                        ccs::instruction_t& io_inst,
+                        ccs::instruction_t<MC>& io_inst,
                         const uint64_t i_port_rank)
 {
     constexpr uint64_t VREFDQ_TRAIN_LENGTH = 6;
@@ -99,8 +99,8 @@ fapi2::ReturnCode mrs06(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
              i_data.iv_vrefdq_train_enable[mss::index(i_port_rank)], i_data.iv_tccd_l, uint8_t(l_tccd_l_buffer));
 
     mss::swizzle<TT::A0, VREFDQ_TRAIN_LENGTH, VREFDQ_TRAIN_START>(l_vrefdq_train_value_buffer, io_inst.arr0);
-    io_inst.arr0.writeBit<TT::A6>(i_data.iv_vrefdq_train_range[mss::index(i_port_rank)]);
-    io_inst.arr0.writeBit<TT::A7>(i_data.iv_vrefdq_train_enable[mss::index(i_port_rank)]);
+    io_inst.arr0.template writeBit<TT::A6>(i_data.iv_vrefdq_train_range[mss::index(i_port_rank)]);
+    io_inst.arr0.template writeBit<TT::A7>(i_data.iv_vrefdq_train_enable[mss::index(i_port_rank)]);
     mss::swizzle<TT::A10, TCCD_L_LENGTH, TCCD_L_START>(l_tccd_l_buffer, io_inst.arr0);
 
     FAPI_INF("%s MR6: 0x%016llx", mss::c_str(i_target), uint64_t(io_inst.arr0));
@@ -121,7 +121,7 @@ fapi_try_exit:
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE >
 fapi2::ReturnCode mrs06(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                        ccs::instruction_t& io_inst,
+                        ccs::instruction_t<MC>& io_inst,
                         const uint64_t i_port_rank)
 {
     // Check to make sure our ctor worked ok
@@ -146,7 +146,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = ccsTraits<MC> >
-fapi2::ReturnCode mrs06_decode_helper(const ccs::instruction_t& i_inst,
+fapi2::ReturnCode mrs06_decode_helper(const ccs::instruction_t<MC>& i_inst,
                                       const uint64_t i_port_rank,
                                       uint8_t& o_vrefdq_train_range,
                                       uint8_t& o_vrefdq_train_enable,
@@ -157,8 +157,8 @@ fapi2::ReturnCode mrs06_decode_helper(const ccs::instruction_t& i_inst,
     o_vrefdq_train_value_buffer = 0;
 
     mss::swizzle<2, 6, TT::A5>(i_inst.arr0, o_vrefdq_train_value_buffer);
-    o_vrefdq_train_range = i_inst.arr0.getBit<TT::A6>();
-    o_vrefdq_train_enable = i_inst.arr0.getBit<TT::A7>();
+    o_vrefdq_train_range = i_inst.arr0.template getBit<TT::A6>();
+    o_vrefdq_train_enable = i_inst.arr0.template getBit<TT::A7>();
     mss::swizzle<5, 3, TT::A12>(i_inst.arr0, o_tccd_l_buffer);
 
     FAPI_INF("MR6 rank %d decode: TRAIN_V: 0x%x, TRAIN_R: 0x%x, TRAIN_E: 0x%x, TCCD_L: 0x%x",
@@ -171,11 +171,13 @@ fapi2::ReturnCode mrs06_decode_helper(const ccs::instruction_t& i_inst,
 ///
 /// @brief Given a CCS instruction which contains address bits with an encoded MRS6,
 /// decode and trace the contents
+/// @tparam MC mss::mc_type memory controller type
 /// @param[in] i_inst the CCS instruction
 /// @param[in] i_port_rank the rank in question
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-inline fapi2::ReturnCode mrs06_decode(const ccs::instruction_t& i_inst,
+template< mss::mc_type MC = DEFAULT_MC_TYPE >
+inline fapi2::ReturnCode mrs06_decode(const ccs::instruction_t<MC>& i_inst,
                                       const uint64_t i_port_rank)
 {
     fapi2::buffer<uint8_t> l_tccd_l_buffer;

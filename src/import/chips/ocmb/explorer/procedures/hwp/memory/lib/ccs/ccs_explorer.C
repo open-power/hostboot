@@ -62,16 +62,16 @@ fapi2::ReturnCode configure_mode(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
 {
     fapi2::buffer<uint64_t> l_ccs_config;
 
-    FAPI_TRY( mss::ccs::read_mode(i_target, l_ccs_config),
+    FAPI_TRY( mss::ccs::read_mode<mss::mc_type::EXPLORER>(i_target, l_ccs_config),
               "%s Failed ccs read_mode",
               mss::c_str(i_target) );
 
     // We want to generate the parity after the command
     // Note: this is not needed for most explorer configurations (as most do not run with parity enabled)
     // However, the ones that do run with parity enabled need this logic
-    mss::ccs::parity_after_cmd(i_target, l_ccs_config, mss::HIGH);
+    mss::ccs::parity_after_cmd<mss::mc_type::EXPLORER>(i_target, l_ccs_config, mss::HIGH);
 
-    FAPI_TRY( mss::ccs::write_mode(i_target, l_ccs_config),
+    FAPI_TRY( mss::ccs::write_mode<mss::mc_type::EXPLORER>(i_target, l_ccs_config),
               "%s Failed ccs write_mode",
               mss::c_str(i_target) );
 
@@ -113,7 +113,7 @@ fapi_try_exit:
 ///
 template<>
 fapi2::ReturnCode cleanup_from_execute<mss::mc_type::EXPLORER>
-(const ccs::program& i_program,
+(const ccs::program<mss::mc_type::EXPLORER>& i_program,
  const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_ports)
 {
     // Loops through all ports
@@ -134,7 +134,7 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Determine the CCS failure type
+/// @brief Determine the CCS failure type - EXPLORER specialization
 /// @param[in] i_target OCMB target
 /// @param[in] i_type the failure type
 /// @param[in] i_port The port the CCS instruction is training
@@ -142,9 +142,9 @@ fapi_try_exit:
 /// @note FFDC is handled here, caller doesn't need to do it
 ///
 template<>
-fapi2::ReturnCode fail_type( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                             const uint64_t i_type,
-                             const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port )
+fapi2::ReturnCode fail_type<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const uint64_t i_type,
+        const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port )
 {
     typedef ccsTraits<mss::mc_type::EXPLORER> TT;
 
@@ -184,7 +184,7 @@ fapi_try_exit:
 /// @note no-op for p9n
 ///
 template<>
-void copy_cke_to_spare_cke<fapi2::TARGET_TYPE_OCMB_CHIP>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
+void copy_cke_to_spare_cke<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
         fapi2::buffer<uint64_t>&, states )
 {
     return;
@@ -198,10 +198,10 @@ void copy_cke_to_spare_cke<fapi2::TARGET_TYPE_OCMB_CHIP>( const fapi2::Target<fa
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
 template<>
-fapi2::ReturnCode update_initial_delays<fapi2::TARGET_TYPE_OCMB_CHIP, mss::mc_type::EXPLORER>
+fapi2::ReturnCode update_initial_delays<mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>
 ( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
   const uint64_t i_delay,
-  ccs::program& io_program)
+  ccs::program<mss::mc_type::EXPLORER>& io_program)
 {
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
 

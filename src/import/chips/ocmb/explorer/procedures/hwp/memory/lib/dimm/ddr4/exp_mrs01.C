@@ -118,11 +118,12 @@ template<>
 fapi2::ReturnCode (*mrs01_data<mss::mc_type::EXPLORER>::make_ccs_instruction)(const
         fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const mrs01_data<mss::mc_type::EXPLORER>& i_data,
-        ccs::instruction_t& io_inst,
+        ccs::instruction_t<mss::mc_type::EXPLORER>& io_inst,
         const uint64_t i_rank) = &mrs01;
 
 template<>
-fapi2::ReturnCode (*mrs01_data<mss::mc_type::EXPLORER>::decode)(const ccs::instruction_t& i_inst,
+fapi2::ReturnCode (*mrs01_data<mss::mc_type::EXPLORER>::decode)(const ccs::instruction_t<mss::mc_type::EXPLORER>&
+        i_inst,
         const uint64_t i_rank) = &mrs01_decode;
 
 } // ns ddr4

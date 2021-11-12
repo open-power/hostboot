@@ -70,8 +70,8 @@ namespace ccs
 template< mss::mc_type MC, typename TT = ccsTraits<MC> >
 fapi2::ReturnCode process_inst(const mss::rank::info<MC>& i_rank_info,
                                const uint64_t i_delay_in_cycles,
-                               mss::ccs::instruction_t& io_instruction,
-                               std::vector< mss::ccs::instruction_t >& io_inst)
+                               mss::ccs::instruction_t<MC>& io_instruction,
+                               std::vector< mss::ccs::instruction_t<MC> >& io_inst)
 {
     // Insert the delay into arr1 (conroll reg)
     io_instruction.arr1.template insertFromRight < TT::ARR1_IDLES,
@@ -92,7 +92,7 @@ fapi2::ReturnCode process_inst(const mss::rank::info<MC>& i_rank_info,
 ///
 template< mss::mc_type MC, typename TT = ccsTraits<MC> >
 void set_col_addr( const fapi2::buffer<uint64_t>& i_column_addr,
-                   mss::ccs::instruction_t& io_inst)
+                   mss::ccs::instruction_t<MC>& io_inst)
 {
     // Column Address is A[0:9]
     io_inst.arr0.template insertFromRight<TT::ARR0_DDR_ADDRESS_0_9,
@@ -108,7 +108,7 @@ void set_col_addr( const fapi2::buffer<uint64_t>& i_column_addr,
 ///
 template< mss::mc_type MC, typename TT = ccsTraits<MC> >
 void set_row_addr( const fapi2::buffer<uint64_t>& i_row_addr,
-                   mss::ccs::instruction_t& io_inst)
+                   mss::ccs::instruction_t<MC>& io_inst)
 {
     constexpr uint64_t LAST_ADDR_BIT = 63;
     constexpr uint64_t LAST_ROW_BIT = 17;
@@ -134,7 +134,7 @@ void set_row_addr( const fapi2::buffer<uint64_t>& i_row_addr,
 template< mss::mc_type MC, typename TT = ccsTraits<MC> >
 void set_bank_group_addr( const fapi2::buffer<uint64_t>& i_bank_addr,
                           const fapi2::buffer<uint64_t>& i_bank_group_addr,
-                          mss::ccs::instruction_t& io_inst)
+                          mss::ccs::instruction_t<MC>& io_inst)
 {
     // The row repair attribute includes BA2, which doesn't exist for DDR4
     // We want to grab BA0 and BA1
@@ -161,7 +161,7 @@ void set_bank_group_addr( const fapi2::buffer<uint64_t>& i_bank_addr,
 ///
 template< mss::mc_type MC, typename TT = ccsTraits<MC> >
 void set_srank_addr( const fapi2::buffer<uint64_t>& i_srank_addr,
-                     mss::ccs::instruction_t& io_inst)
+                     mss::ccs::instruction_t<MC>& io_inst)
 {
     // Sub-rank bits aren't contiguous
     constexpr uint64_t CID01_BIT = 61;
@@ -185,7 +185,7 @@ void set_srank_addr( const fapi2::buffer<uint64_t>& i_srank_addr,
 ///
 template< mss::mc_type MC, typename TT = ccsTraits<MC> >
 void set_wr_repeats( const uint64_t i_rep,
-                     mss::ccs::instruction_t& io_inst )
+                     mss::ccs::instruction_t<MC>& io_inst )
 {
     // set data
     io_inst.arr1.template insertFromRight<TT::ARR1_REPEAT_CMD_CNT,
@@ -201,7 +201,7 @@ void set_wr_repeats( const uint64_t i_rep,
 ///
 template< mss::mc_type MC, typename TT = ccsTraits<MC> >
 void set_odt_bits( const uint8_t i_odt_bits,
-                   mss::ccs::instruction_t& io_inst )
+                   mss::ccs::instruction_t<MC>& io_inst )
 {
     // set data
     io_inst.arr0.template insertFromRight<TT::ARR0_DDR_ODT, TT::ARR0_DDR_ODT_LEN>(i_odt_bits);
@@ -219,15 +219,15 @@ void set_odt_bits( const uint8_t i_odt_bits,
 /// @return ccs::instruction_t for a loaded act command
 ///
 template< mss::mc_type MC >
-mss::ccs::instruction_t act_load( const mss::rank::info<MC>& i_rank_info,
-                                  const fapi2::buffer<uint64_t>& i_bank_addr,
-                                  const fapi2::buffer<uint64_t>& i_bank_group_addr,
-                                  const fapi2::buffer<uint64_t>& i_row_addr,
-                                  const fapi2::buffer<uint64_t>& i_srank_addr,
-                                  const uint64_t i_delay_in_cycles )
+mss::ccs::instruction_t<MC> act_load( const mss::rank::info<MC>& i_rank_info,
+                                      const fapi2::buffer<uint64_t>& i_bank_addr,
+                                      const fapi2::buffer<uint64_t>& i_bank_group_addr,
+                                      const fapi2::buffer<uint64_t>& i_row_addr,
+                                      const fapi2::buffer<uint64_t>& i_srank_addr,
+                                      const uint64_t i_delay_in_cycles )
 {
     // Create Activate command
-    mss::ccs::instruction_t l_inst = act_command(i_rank_info.get_port_rank());
+    mss::ccs::instruction_t<MC> l_inst = act_command<MC>(i_rank_info.get_port_rank());
 
     // Set Sub-rank address
     set_srank_addr<MC>(i_srank_addr, l_inst);
@@ -253,14 +253,14 @@ mss::ccs::instruction_t act_load( const mss::rank::info<MC>& i_rank_info,
 /// @return ccs::instruction_t for a loaded act command
 ///
 template< mss::mc_type MC, typename TT = ccsTraits<MC> >
-mss::ccs::instruction_t wr_load( const mss::rank::info<MC>& i_rank_info,
-                                 const fapi2::buffer<uint64_t>& i_bank_addr,
-                                 const fapi2::buffer<uint64_t>& i_bank_group_addr,
-                                 const fapi2::buffer<uint64_t>& i_srank_addr,
-                                 const uint64_t i_delay_in_cycles)
+mss::ccs::instruction_t<MC> wr_load( const mss::rank::info<MC>& i_rank_info,
+                                     const fapi2::buffer<uint64_t>& i_bank_addr,
+                                     const fapi2::buffer<uint64_t>& i_bank_group_addr,
+                                     const fapi2::buffer<uint64_t>& i_srank_addr,
+                                     const uint64_t i_delay_in_cycles)
 {
     // Create Write command
-    mss::ccs::instruction_t l_inst = wr_command(i_rank_info.get_port_rank(), i_bank_addr, i_bank_group_addr);
+    mss::ccs::instruction_t<MC> l_inst = wr_command<MC>(i_rank_info.get_port_rank(), i_bank_addr, i_bank_group_addr);
 
     // Set Sub-rank address
     set_srank_addr<MC>(i_srank_addr, l_inst);
@@ -285,14 +285,14 @@ mss::ccs::instruction_t wr_load( const mss::rank::info<MC>& i_rank_info,
 /// @return ccs::instruction_t for a loaded act command
 ///
 template< mss::mc_type MC, typename TT = ccsTraits<MC> >
-mss::ccs::instruction_t pre_load( const mss::rank::info<MC>& i_rank_info,
-                                  const fapi2::buffer<uint64_t>& i_bank_addr,
-                                  const fapi2::buffer<uint64_t>& i_bank_group_addr,
-                                  const fapi2::buffer<uint64_t>& i_srank_addr,
-                                  const uint64_t i_delay_in_cycles)
+mss::ccs::instruction_t<MC> pre_load( const mss::rank::info<MC>& i_rank_info,
+                                      const fapi2::buffer<uint64_t>& i_bank_addr,
+                                      const fapi2::buffer<uint64_t>& i_bank_group_addr,
+                                      const fapi2::buffer<uint64_t>& i_srank_addr,
+                                      const uint64_t i_delay_in_cycles)
 {
     // Create Precharge command
-    mss::ccs::instruction_t l_inst = precharge_all_command(i_rank_info.get_port_rank(), i_delay_in_cycles);
+    mss::ccs::instruction_t<MC> l_inst = precharge_all_command<MC>(i_rank_info.get_port_rank(), i_delay_in_cycles);
 
     // Set Sub-rank address
     set_srank_addr<MC>(i_srank_addr, l_inst);
@@ -315,11 +315,11 @@ mss::ccs::instruction_t pre_load( const mss::rank::info<MC>& i_rank_info,
 /// @return ccs::instruction_t for a loaded precharge command
 ///
 template< mss::mc_type MC, typename TT = ccsTraits<MC> >
-mss::ccs::instruction_t init_pre_load( const mss::rank::info<MC>& i_rank_info,
-                                       const fapi2::buffer<uint64_t>& i_srank_addr)
+mss::ccs::instruction_t<MC> init_pre_load( const mss::rank::info<MC>& i_rank_info,
+        const fapi2::buffer<uint64_t>& i_srank_addr)
 {
     // Create Precharge command
-    mss::ccs::instruction_t l_inst = precharge_all_command(i_rank_info.get_port_rank());
+    mss::ccs::instruction_t<MC> l_inst = precharge_all_command<MC>(i_rank_info.get_port_rank());
 
     // Set Sub-rank address
     set_srank_addr<MC>(i_srank_addr, l_inst);

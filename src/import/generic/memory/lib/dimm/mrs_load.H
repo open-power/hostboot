@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -91,8 +91,9 @@ struct mrs_data
     // The attribute getter. For MRS we pass in the ARR0 of the CCS instruction
     // as that allows us to encapsulate the attribute processing and the bit
     // manipulation in one function.
-    fapi2::ReturnCode (*iv_func)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&, ccs::instruction_t&, const uint64_t);
-    fapi2::ReturnCode (*iv_dumper)(const ccs::instruction_t&, const uint64_t);
+    fapi2::ReturnCode (*iv_func)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&, ccs::instruction_t<DEFAULT_MC_TYPE>&,
+                                 const uint64_t);
+    fapi2::ReturnCode (*iv_dumper)(const ccs::instruction_t<DEFAULT_MC_TYPE>&, const uint64_t);
 
     // The delay needed after this MRS word is written
     uint64_t iv_delay;
@@ -104,8 +105,9 @@ struct mrs_data
     /// @param[in] *i_dumper return code from the MRS data dumper
     /// @param[in] i_delay, the delay post mrs command
     mrs_data( const uint64_t i_mrs,
-              fapi2::ReturnCode (*i_func)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&, ccs::instruction_t&, const uint64_t),
-              fapi2::ReturnCode (*i_dumper)(const ccs::instruction_t&, const uint64_t),
+              fapi2::ReturnCode (*i_func)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&, ccs::instruction_t<DEFAULT_MC_TYPE>&,
+                                          const uint64_t),
+              fapi2::ReturnCode (*i_dumper)(const ccs::instruction_t<DEFAULT_MC_TYPE>&, const uint64_t),
               const uint64_t i_delay ):
         iv_mrs(i_mrs),
         iv_func(i_func),
@@ -190,7 +192,7 @@ struct perform_mrs_load_overload< KIND_LRDIMM_DDR4 >
 template< kind_t K = FORCE_DISPATCH >
 typename std::enable_if< perform_mrs_load_overload<DEFAULT_KIND>::available, fapi2::ReturnCode>::type
 perform_mrs_load( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                  std::vector< ccs::instruction_t >& io_inst);
+                  std::vector< ccs::instruction_t<DEFAULT_MC_TYPE> >& io_inst);
 
 ///
 /// @brief Function to perform mrs load overloads
@@ -202,7 +204,7 @@ perform_mrs_load( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 ///
 template<>
 fapi2::ReturnCode perform_mrs_load<FORCE_DISPATCH>( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t >& io_inst);
+        std::vector< ccs::instruction_t<DEFAULT_MC_TYPE> >& io_inst);
 
 ///
 /// @brief Function to perform mrs load overloads
@@ -214,7 +216,7 @@ fapi2::ReturnCode perform_mrs_load<FORCE_DISPATCH>( const fapi2::Target<fapi2::T
 ///
 template<>
 fapi2::ReturnCode perform_mrs_load<DEFAULT_KIND>( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t >& io_inst);
+        std::vector< ccs::instruction_t<DEFAULT_MC_TYPE> >& io_inst);
 
 ///
 /// @brief Function to perform mrs load overloads
@@ -226,7 +228,7 @@ fapi2::ReturnCode perform_mrs_load<DEFAULT_KIND>( const fapi2::Target<fapi2::TAR
 template< kind_t K, bool B = perform_mrs_load_overload<K>::available >
 inline fapi2::ReturnCode perform_mrs_load_dispatch( const kind_t& i_kind,
         const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t >& io_inst)
+        std::vector< ccs::instruction_t<DEFAULT_MC_TYPE> >& io_inst)
 {
     // We dispatch to another kind if:
     // We don't have an overload defined (B == false)
@@ -250,7 +252,7 @@ inline fapi2::ReturnCode perform_mrs_load_dispatch( const kind_t& i_kind,
 template<>
 inline fapi2::ReturnCode perform_mrs_load_dispatch<DEFAULT_KIND>(const kind_t&,
         const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t >& io_inst)
+        std::vector< ccs::instruction_t<DEFAULT_MC_TYPE> >& io_inst)
 {
     return perform_mrs_load<DEFAULT_KIND>(i_target, io_inst);
 }

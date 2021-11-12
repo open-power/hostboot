@@ -73,7 +73,7 @@ fapi2::ReturnCode process_inversion(const fapi2::Target<fapi2::TARGET_TYPE_MEM_P
 ///
 void set_write_data( const fapi2::buffer<uint64_t>& i_data,
                      const mss::states i_inverse,
-                     mss::ccs::instruction_t& io_inst);
+                     mss::ccs::instruction_t<mss::mc_type::EXPLORER>& io_inst);
 
 } // namespace ccs
 
@@ -132,7 +132,7 @@ void clear_row_repair_entry( const mss::rank::info<mss::mc_type::EXPLORER>& i_ra
 fapi2::ReturnCode add_sppr_guardkey( const mss::rank::info<mss::mc_type::EXPLORER>& i_rank_info,
                                      const uint64_t i_delay_in_cycles,
                                      const uint64_t i_guard_key_addr,
-                                     std::vector< mss::ccs::instruction_t >& io_inst );
+                                     std::vector< mss::ccs::instruction_t<mss::mc_type::EXPLORER> >& io_inst );
 
 ///
 /// @brief Build a table of PPR row repairs from attribute data for a given DIMM
@@ -165,7 +165,7 @@ fapi2::ReturnCode log_repairs_disabled_errors(const fapi2::Target<fapi2::TARGET_
 fapi2::ReturnCode setup_sppr( const mss::rank::info<mss::mc_type::EXPLORER>& i_rank_info,
                               const mss::row_repair::repair_entry<mss::mc_type::EXPLORER>& i_repair,
                               const fapi2::buffer<uint64_t>& i_dram_bitmap,
-                              mss::ccs::program& io_program);
+                              mss::ccs::program<mss::mc_type::EXPLORER>& io_program);
 
 ///
 /// @brief Perform a hPPR row repair operation, part 1
@@ -179,7 +179,7 @@ fapi2::ReturnCode setup_sppr( const mss::rank::info<mss::mc_type::EXPLORER>& i_r
 fapi2::ReturnCode setup_hppr_pre_delay( const mss::rank::info<mss::mc_type::EXPLORER>& i_rank_info,
                                         const mss::row_repair::repair_entry<mss::mc_type::EXPLORER>& i_repair,
                                         const fapi2::buffer<uint64_t>& i_dram_bitmap,
-                                        mss::ccs::program& io_program);
+                                        mss::ccs::program<mss::mc_type::EXPLORER>& io_program);
 
 ///
 /// @brief Perform a hPPR row repair operation, part 2
@@ -193,7 +193,7 @@ fapi2::ReturnCode setup_hppr_pre_delay( const mss::rank::info<mss::mc_type::EXPL
 fapi2::ReturnCode setup_hppr_post_delay( const mss::rank::info<mss::mc_type::EXPLORER>& i_rank_info,
         const mss::row_repair::repair_entry<mss::mc_type::EXPLORER>& i_repair,
         const fapi2::buffer<uint64_t>& i_dram_bitmap,
-        mss::ccs::program& io_program);
+        mss::ccs::program<mss::mc_type::EXPLORER>& io_program);
 
 ///
 /// @brief Perform a sPPR row repair operation during ipl
@@ -223,7 +223,7 @@ fapi2::ReturnCode hppr_row_repair( const mss::rank::info<mss::mc_type::EXPLORER>
 /// @param[in, out] io_program program holding CCS instructions to add to
 ///
 void disable_power_down_helper(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
-                               mss::ccs::program& io_program);
+                               mss::ccs::program<mss::mc_type::EXPLORER>& io_program);
 
 ///
 /// @brief Perform a sPPR row repair operation at runtime

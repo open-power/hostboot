@@ -148,7 +148,7 @@ enum command : size_t
 ///
 fapi2::ReturnCode function_space_select(const fapi2::Target< fapi2::TARGET_TYPE_DIMM >& i_target,
                                         const uint64_t i_func_space,
-                                        std::vector< ccs::instruction_t >& io_inst);
+                                        std::vector< ccs::instruction_t<DEFAULT_MC_TYPE> >& io_inst);
 
 ///
 /// @brief Boilerplate for setting & printing BCWs
@@ -161,13 +161,13 @@ fapi2::ReturnCode function_space_select(const fapi2::Target< fapi2::TARGET_TYPE_
 template< mss::control_word T >
 static fapi2::ReturnCode settings_boilerplate(const fapi2::Target< fapi2::TARGET_TYPE_DIMM >& i_target,
         const cw_data& i_data,
-        std::vector< ccs::instruction_t >& io_inst)
+        std::vector< ccs::instruction_t<DEFAULT_MC_TYPE> >& io_inst)
 {
     uint8_t l_sim = 0;
     mss::is_simulation(l_sim);
 
     // DES first - make sure those CKE go high and stay there
-    io_inst.push_back(mss::ccs::des_command());
+    io_inst.push_back(mss::ccs::des_command<DEFAULT_MC_TYPE>());
 
     FAPI_TRY( function_space_select(i_target, i_data.iv_func_space, io_inst),
               "%s. Failed to select function space %d",
@@ -201,7 +201,7 @@ fapi_try_exit:
 template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = mrsTraits<MC> >
 fapi2::ReturnCode set_pba_mode( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                 const mss::states i_state,
-                                std::vector< ccs::instruction_t >& io_inst )
+                                std::vector< ccs::instruction_t<MC> >& io_inst )
 {
     constexpr uint64_t OUT_OF_BOUNDS = 2;
     uint8_t l_nominal_bc_value = 0;

@@ -292,7 +292,7 @@ fapi2::ReturnCode control_word_engine(const fapi2::Target<fapi2::TARGET_TYPE_DIM
                                       const cw_data& i_data,
                                       const bool i_sim,
                                       const bool i_turn_on_cke,
-                                      ccs::instruction_t& o_instruction)
+                                      ccs::instruction_t<MC>& o_instruction)
 {
     // You're probably asking "Why always turn off CKE's? What is this madness?"
     // Well, due to a vendor sensitivity, we need to have the CKE's off until we run RC09 at the very end
@@ -301,7 +301,7 @@ fapi2::ReturnCode control_word_engine(const fapi2::Target<fapi2::TARGET_TYPE_DIM
     // Therefore, we want to setup all RCW commands to have CKE's off across both DIMM's
     // We then manually turn on the CKE's associated with a specific DIMM
     constexpr bool CKE_OFF = false;
-    ccs::instruction_t l_inst = ccs::rcd_command(i_target, i_sim, CKE_OFF);
+    ccs::instruction_t<MC> l_inst = ccs::rcd_command<MC>(i_target, i_sim, CKE_OFF);
 
     // Turn on the CKE's for the ranks we're not touching, if it's needed
     // Note: we only have the whole CKE field, not the per DIMM one by default
@@ -374,10 +374,10 @@ template< control_word T, mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = cwTra
 fapi2::ReturnCode control_word_engine(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                       const cw_data& i_data,
                                       const bool i_sim,
-                                      std::vector< ccs::instruction_t >& io_inst,
+                                      std::vector< ccs::instruction_t<MC> >& io_inst,
                                       const bool i_turn_on_cke = true)
 {
-    ccs::instruction_t l_inst;
+    ccs::instruction_t<MC> l_inst;
     FAPI_TRY(control_word_engine<T>(i_target, i_data, i_sim, i_turn_on_cke, l_inst));
     io_inst.push_back(l_inst);
 
@@ -402,7 +402,7 @@ template< control_word T, mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = cwTra
 fapi2::ReturnCode control_word_engine(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                       const std::vector<cw_data>& i_data_list,
                                       const bool i_sim,
-                                      std::vector< ccs::instruction_t >& io_inst,
+                                      std::vector< ccs::instruction_t<MC> >& io_inst,
                                       const bool i_turn_on_cke = true)
 {
     FAPI_ASSERT( !i_data_list.empty(),
@@ -510,7 +510,7 @@ inline fapi2::ReturnCode control_word_engine(const fapi2::Target<fapi2::TARGET_T
         const cw_info& i_info,
         const bool i_sim,
         const bool i_turn_on_cke,
-        ccs::instruction_t& o_instruction)
+        ccs::instruction_t<DEFAULT_MC_TYPE>& o_instruction)
 {
     // BCW 4-bit
     if(i_info.iv_is_bcw && i_info.iv_data_len == CW4_DATA_LEN)
@@ -560,7 +560,7 @@ fapi_try_exit:
 inline fapi2::ReturnCode control_word_engine(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const std::vector<cw_info>& i_info_list,
         const bool i_sim,
-        std::vector< ccs::instruction_t >& io_inst,
+        std::vector< ccs::instruction_t<DEFAULT_MC_TYPE> >& io_inst,
         const bool i_turn_on_cke = true)
 {
     FAPI_ASSERT( !i_info_list.empty(),
@@ -571,7 +571,7 @@ inline fapi2::ReturnCode control_word_engine(const fapi2::Target<fapi2::TARGET_T
 
     for (const auto& l_info : i_info_list)
     {
-        ccs::instruction_t l_inst;
+        ccs::instruction_t<DEFAULT_MC_TYPE> l_inst;
         FAPI_TRY( control_word_engine(i_target, l_info, i_sim, i_turn_on_cke, l_inst) );
         io_inst.push_back(l_inst);
     }
@@ -609,7 +609,7 @@ inline fapi2::ReturnCode decode_rcw_and_run_engine(
     const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
     const bool i_sim,
     const cw_info& i_cw_info,
-    std::vector< ccs::instruction_t >& io_inst)
+    std::vector< ccs::instruction_t<DEFAULT_MC_TYPE> >& io_inst)
 {
     fapi2::buffer<uint8_t> l_f0rc2x_data;
     fapi2::buffer<uint8_t> l_f0rc4x_data;

@@ -64,7 +64,7 @@ namespace ddr4
 template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = ccsTraits<MC>, typename MRS = mrsTraits<MC> >
 fapi2::ReturnCode mrs02(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         const mrs02_data<MC>& i_data,
-                        ccs::instruction_t& io_inst,
+                        ccs::instruction_t<MC>& io_inst,
                         const uint64_t i_port_rank)
 {
     constexpr uint64_t CWL_LENGTH = 3;
@@ -117,7 +117,7 @@ fapi2::ReturnCode mrs02(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 
         mss::swizzle<TT::A9, RTT_WR_LENGTH, RTT_WR_START>(l_rtt_wr_buffer, io_inst.arr0);
 
-        io_inst.arr0.writeBit<TT::A12>(i_data.iv_write_crc);
+        io_inst.arr0.template writeBit<TT::A12>(i_data.iv_write_crc);
 
         FAPI_INF("MR2: 0x%016llx", uint64_t(io_inst.arr0));
     }
@@ -138,7 +138,7 @@ fapi_try_exit:
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE >
 fapi2::ReturnCode mrs02(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                        ccs::instruction_t& io_inst,
+                        ccs::instruction_t<MC>& io_inst,
                         const uint64_t i_port_rank)
 {
     // Check to make sure our ctor worked ok
@@ -165,7 +165,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = ccsTraits<MC> >
-fapi2::ReturnCode mrs02_decode_helper(const ccs::instruction_t& i_inst,
+fapi2::ReturnCode mrs02_decode_helper(const ccs::instruction_t<MC>& i_inst,
                                       const uint64_t i_port_rank,
                                       uint8_t& o_write_crc,
                                       fapi2::buffer<uint8_t>& o_lpasr,
@@ -176,7 +176,7 @@ fapi2::ReturnCode mrs02_decode_helper(const ccs::instruction_t& i_inst,
     o_cwl = 0;
     o_rtt_wr = 0;
 
-    o_write_crc = i_inst.arr0.getBit<TT::A12>();
+    o_write_crc = i_inst.arr0.template getBit<TT::A12>();
     mss::swizzle<5, 3, TT::A5>(i_inst.arr0, o_cwl);
     mss::swizzle<6, 2, TT::A7>(i_inst.arr0, o_lpasr);
     mss::swizzle<5, 3, TT::A11>(i_inst.arr0, o_rtt_wr);
@@ -190,11 +190,13 @@ fapi2::ReturnCode mrs02_decode_helper(const ccs::instruction_t& i_inst,
 ///
 /// @brief Given a CCS instruction which contains address bits with an encoded MRS2,
 /// decode and trace the contents
+/// @tparam MC mss::mc_type memory controller type
 /// @param[in] i_inst the CCS instruction
 /// @param[in] i_port_rank ths rank in question
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-inline fapi2::ReturnCode mrs02_decode(const ccs::instruction_t& i_inst,
+template< mss::mc_type MC = DEFAULT_MC_TYPE >
+inline fapi2::ReturnCode mrs02_decode(const ccs::instruction_t<MC>& i_inst,
                                       const uint64_t i_port_rank)
 {
     uint8_t l_write_crc = 0;

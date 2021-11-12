@@ -88,7 +88,7 @@ fapi2::ReturnCode crc_wr_latency_helper(const fapi2::Target<fapi2::TARGET_TYPE_D
 template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = ccsTraits<MC>, typename MRS = mrsTraits<MC> >
 fapi2::ReturnCode mrs03(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         const mrs03_data<MC>& i_data,
-                        ccs::instruction_t& io_inst,
+                        ccs::instruction_t<MC>& io_inst,
                         const uint64_t i_port_rank)
 {
     // Decode CRC WR latency
@@ -96,10 +96,10 @@ fapi2::ReturnCode mrs03(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
     FAPI_TRY(crc_wr_latency_helper<MC>(i_target, i_data.iv_crc_wr_latency, l_crc_wr_latency_buffer));
 
     mss::swizzle<TT::A0, MPR_PAGE_LENGTH, MPR_PAGE_START>(fapi2::buffer<uint8_t>(i_data.iv_mpr_page), io_inst.arr0);
-    io_inst.arr0.writeBit<TT::A2>(i_data.iv_mpr_mode);
-    io_inst.arr0.writeBit<TT::A3>(i_data.iv_geardown);
-    io_inst.arr0.writeBit<TT::A4>(i_data.iv_pda);
-    io_inst.arr0.writeBit<TT::A5>(i_data.iv_temp_readout);
+    io_inst.arr0.template writeBit<TT::A2>(i_data.iv_mpr_mode);
+    io_inst.arr0.template writeBit<TT::A3>(i_data.iv_geardown);
+    io_inst.arr0.template writeBit<TT::A4>(i_data.iv_pda);
+    io_inst.arr0.template writeBit<TT::A5>(i_data.iv_temp_readout);
 
     mss::swizzle<TT::A6, FINE_REFRESH_LENGTH, FINE_REFRESH_START>(fapi2::buffer<uint8_t>(i_data.iv_fine_refresh),
             io_inst.arr0);
@@ -125,7 +125,7 @@ fapi_try_exit:
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE >
 fapi2::ReturnCode mrs03(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                        ccs::instruction_t& io_inst,
+                        ccs::instruction_t<MC>& io_inst,
                         const uint64_t i_port_rank)
 {
     // Check to make sure our ctor worked ok
@@ -156,7 +156,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = ccsTraits<MC> >
-fapi2::ReturnCode mrs03_decode_helper(const ccs::instruction_t& i_inst,
+fapi2::ReturnCode mrs03_decode_helper(const ccs::instruction_t<MC>& i_inst,
                                       const uint64_t i_port_rank,
                                       uint8_t& o_mpr_mode,
                                       uint8_t& o_geardown,
@@ -172,10 +172,10 @@ fapi2::ReturnCode mrs03_decode_helper(const ccs::instruction_t& i_inst,
     o_crc_wr_latency_buffer = 0;
     o_read_format = 0;
 
-    o_mpr_mode = i_inst.arr0.getBit<TT::A2>();
-    o_geardown = i_inst.arr0.getBit<TT::A3>();
-    o_pda = i_inst.arr0.getBit<TT::A4>();
-    o_temp_readout = i_inst.arr0.getBit<TT::A5>();
+    o_mpr_mode = i_inst.arr0.template getBit<TT::A2>();
+    o_geardown = i_inst.arr0.template getBit<TT::A3>();
+    o_pda = i_inst.arr0.template getBit<TT::A4>();
+    o_temp_readout = i_inst.arr0.template getBit<TT::A5>();
 
     mss::swizzle<6, 2, TT::A1>(i_inst.arr0, o_mpr_page);
     mss::swizzle<5, 3, TT::A8>(i_inst.arr0, o_fine_refresh);
@@ -193,11 +193,13 @@ fapi2::ReturnCode mrs03_decode_helper(const ccs::instruction_t& i_inst,
 ///
 /// @brief Given a CCS instruction which contains address bits with an encoded MRS3,
 /// decode and trace the contents
+/// @tparam MC mss::mc_type memory controller type
 /// @param[in] i_inst the CCS instruction
 /// @param[in] i_port_rank the rank in question
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-inline fapi2::ReturnCode mrs03_decode(const ccs::instruction_t& i_inst,
+template< mss::mc_type MC = DEFAULT_MC_TYPE >
+inline fapi2::ReturnCode mrs03_decode(const ccs::instruction_t<MC>& i_inst,
                                       const uint64_t i_port_rank)
 {
     uint8_t l_mpr_mode = 0;

@@ -64,7 +64,7 @@ namespace ddr4
 template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = ccsTraits<MC>, typename MRS = mrsTraits<MC> >
 fapi2::ReturnCode mrs04(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         const mrs04_data<MC>& i_data,
-                        ccs::instruction_t& io_inst,
+                        ccs::instruction_t<MC>& io_inst,
                         const uint64_t i_port_rank)
 {
     constexpr uint64_t CS_CMD_LATENCY_LENGTH = 3;
@@ -86,18 +86,18 @@ fapi2::ReturnCode mrs04(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 
     l_cs_cmd_latency_buffer = cs_cmd_latency_map[i_data.iv_cs_cmd_latency];
 
-    io_inst.arr0.writeBit<TT::A1>(i_data.iv_max_pd_mode);
-    io_inst.arr0.writeBit<TT::A2>(i_data.iv_temp_refresh_range);
-    io_inst.arr0.writeBit<TT::A3>(i_data.iv_temp_ref_mode);
-    io_inst.arr0.writeBit<TT::A4>(i_data.iv_vref_mon);
-    io_inst.arr0.writeBit<TT::A5>(i_data.iv_soft_ppr);
+    io_inst.arr0.template writeBit<TT::A1>(i_data.iv_max_pd_mode);
+    io_inst.arr0.template writeBit<TT::A2>(i_data.iv_temp_refresh_range);
+    io_inst.arr0.template writeBit<TT::A3>(i_data.iv_temp_ref_mode);
+    io_inst.arr0.template writeBit<TT::A4>(i_data.iv_vref_mon);
+    io_inst.arr0.template writeBit<TT::A5>(i_data.iv_soft_ppr);
 
     mss::swizzle<TT::A6, CS_CMD_LATENCY_LENGTH, CS_CMD_LATENCY_START>(l_cs_cmd_latency_buffer, io_inst.arr0);
-    io_inst.arr0.writeBit<TT::A9>(i_data.iv_ref_abort);
-    io_inst.arr0.writeBit<TT::A10>(i_data.iv_rd_pre_train_mode);
-    io_inst.arr0.writeBit<TT::A11>(i_data.iv_rd_preamble);
-    io_inst.arr0.writeBit<TT::A12>(i_data.iv_wr_preamble);
-    io_inst.arr0.writeBit<TT::A13>(i_data.iv_ppr);
+    io_inst.arr0.template writeBit<TT::A9>(i_data.iv_ref_abort);
+    io_inst.arr0.template writeBit<TT::A10>(i_data.iv_rd_pre_train_mode);
+    io_inst.arr0.template writeBit<TT::A11>(i_data.iv_rd_preamble);
+    io_inst.arr0.template writeBit<TT::A12>(i_data.iv_wr_preamble);
+    io_inst.arr0.template writeBit<TT::A13>(i_data.iv_ppr);
 
     FAPI_INF("%s MR4: 0x%016llx", mss::c_str(i_target), uint64_t(io_inst.arr0));
 
@@ -117,7 +117,7 @@ fapi_try_exit:
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE >
 fapi2::ReturnCode mrs04(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                        ccs::instruction_t& io_inst,
+                        ccs::instruction_t<MC>& io_inst,
                         const uint64_t i_port_rank)
 {
     // Check to make sure our ctor worked ok
@@ -148,7 +148,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = ccsTraits<MC> >
-fapi2::ReturnCode mrs04_decode_helper(const ccs::instruction_t& i_inst,
+fapi2::ReturnCode mrs04_decode_helper(const ccs::instruction_t<MC>& i_inst,
                                       const uint64_t i_port_rank,
                                       uint8_t& o_max_pd_mode,
                                       uint8_t& o_temp_refresh_range,
@@ -162,20 +162,20 @@ fapi2::ReturnCode mrs04_decode_helper(const ccs::instruction_t& i_inst,
                                       uint8_t& o_soft_ppr,
                                       fapi2::buffer<uint8_t>& o_cs_cmd_latency_buffer)
 {
-    o_max_pd_mode = i_inst.arr0.getBit<TT::A1>();
-    o_temp_refresh_range = i_inst.arr0.getBit<TT::A2>();
-    o_temp_ref_mode = i_inst.arr0.getBit<TT::A3>();
-    o_vref_mon = i_inst.arr0.getBit<TT::A4>();
-    o_soft_ppr = i_inst.arr0.getBit<TT::A5>();
+    o_max_pd_mode = i_inst.arr0.template getBit<TT::A1>();
+    o_temp_refresh_range = i_inst.arr0.template getBit<TT::A2>();
+    o_temp_ref_mode = i_inst.arr0.template getBit<TT::A3>();
+    o_vref_mon = i_inst.arr0.template getBit<TT::A4>();
+    o_soft_ppr = i_inst.arr0.template getBit<TT::A5>();
 
     o_cs_cmd_latency_buffer = 0;
     mss::swizzle<5, 3, TT::A8>(i_inst.arr0, o_cs_cmd_latency_buffer);
 
-    o_ref_abort = i_inst.arr0.getBit<TT::A9>();
-    o_rd_pre_train_mode = i_inst.arr0.getBit<TT::A10>();
-    o_rd_preamble = i_inst.arr0.getBit<TT::A11>();
-    o_wr_preamble = i_inst.arr0.getBit<TT::A12>();
-    o_ppr = i_inst.arr0.getBit<TT::A13>();
+    o_ref_abort = i_inst.arr0.template getBit<TT::A9>();
+    o_rd_pre_train_mode = i_inst.arr0.template getBit<TT::A10>();
+    o_rd_preamble = i_inst.arr0.template getBit<TT::A11>();
+    o_wr_preamble = i_inst.arr0.template getBit<TT::A12>();
+    o_ppr = i_inst.arr0.template getBit<TT::A13>();
 
     FAPI_INF("MR4 rank %d decode: MAX_PD: 0x%x, TEMP_REFRESH_RANGE: 0x%x, TEMP_REF_MODE: 0x%x "
              "VREF_MON: 0x%x, CSL: 0x%x, REF_ABORT: 0x%x, RD_PTM: 0x%x, RD_PRE: 0x%x, "
@@ -190,11 +190,13 @@ fapi2::ReturnCode mrs04_decode_helper(const ccs::instruction_t& i_inst,
 ///
 /// @brief Given a CCS instruction which contains address bits with an encoded MRS4,
 /// decode and trace the contents
+/// @tparam MC mss::mc_type memory controller type
 /// @param[in] i_inst the CCS instruction
 /// @param[in] i_port_rank the rank in question
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-inline fapi2::ReturnCode mrs04_decode(const ccs::instruction_t& i_inst,
+template< mss::mc_type MC = DEFAULT_MC_TYPE >
+inline fapi2::ReturnCode mrs04_decode(const ccs::instruction_t<MC>& i_inst,
                                       const uint64_t i_port_rank)
 {
     uint8_t l_max_pd_mode = 0;

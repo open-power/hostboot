@@ -90,14 +90,13 @@ enum rank_configuration
 ///
 /// @class instruction_t
 /// @brief Class for ccs instructions
-/// @tparam T fapi2::TargetType representing the target of the CCS instructions
+/// @tparam MC The memory controller type of the traits
+/// @tparam TT the CCS traits related to MC
 /// @note A ccs instruction is data (array 0) and some control information (array 1)cc
 ///
+template< mss::mc_type MC, typename TT = ccsTraits<MC> >
 class instruction_t
 {
-    private:
-        using TT = ccsTraits<DEFAULT_MC_TYPE>;
-
     public:
         fapi2::buffer<uint64_t> arr0;
         fapi2::buffer<uint64_t> arr1;
@@ -242,7 +241,7 @@ class instruction_t
         /// @param[in] i_rhs - the instruction to compare to
         /// @return True if both instructions are equal
         ///
-        inline bool operator==( const instruction_t& i_rhs ) const
+        inline bool operator==( const instruction_t<MC>& i_rhs ) const
         {
             return arr0 == i_rhs.arr0 &&
                    arr1 == i_rhs.arr1 &&
@@ -253,14 +252,16 @@ class instruction_t
 
 ///
 /// @brief Determines our rank configuration type
+/// @tparam MC The memory controller type of the traits
+/// @tparam TT the CCS traits related to MC
 /// @param[in] i_target the MCA target on which to operate
 /// @param[out] o_rank_config the rank configuration
 /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS if ok
 ///
-inline fapi2::ReturnCode get_rank_config(const fapi2::Target<DEFAULT_MEM_PORT_TARGET>& i_target,
+template< mss::mc_type MC, typename TT = ccsTraits<MC> >
+inline fapi2::ReturnCode get_rank_config(const fapi2::Target<TT::PORT_TARGET_TYPE>& i_target,
         rank_configuration& o_rank_config)
 {
-    typedef ccsTraits<DEFAULT_MC_TYPE> TT;
     constexpr uint8_t QUAD_RANK_ENABLE = 4;
     o_rank_config = rank_configuration::DUAL_DIRECT;
 
@@ -283,24 +284,25 @@ fapi_try_exit:
 
 ///
 /// @brief Determines our rank configuration type across all ports
+/// @tparam MC The memory controller type of the traits
+/// @tparam TT the CCS traits related to MC
 /// @param[in] i_target the MCA target on which to operate
 /// @param[out] o_rank_config the rank configuration
 /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS if ok
 ///
-inline fapi2::ReturnCode get_rank_config(const fapi2::Target<DEFAULT_MC_TARGET>& i_target,
+template< mss::mc_type MC, typename TT = ccsTraits<MC> >
+inline fapi2::ReturnCode get_rank_config(const fapi2::Target<TT::MC_TARGET_TYPE>& i_target,
         std::vector<rank_configuration>& o_rank_config)
 {
-    typedef ccsTraits<DEFAULT_MC_TYPE> TT;
-
     o_rank_config.clear();
     // Create one per port, we then use relative indexing to get us the number we need
     o_rank_config = std::vector<rank_configuration>(TT::PORTS_PER_MC_TARGET);
 
-    for(const auto& l_port : mss::find_targets<DEFAULT_MEM_PORT_TARGET>(i_target))
+    for(const auto& l_port : mss::find_targets<TT::PORT_TARGET_TYPE>(i_target))
     {
         rank_configuration l_config;
-        FAPI_TRY(get_rank_config(l_port, l_config));
-        o_rank_config[mss::relative_pos<DEFAULT_MC_TARGET>(l_port)] = l_config;
+        FAPI_TRY(get_rank_config<MC>(l_port, l_config));
+        o_rank_config[mss::relative_pos<TT::MC_TARGET_TYPE>(l_port)] = l_config;
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -311,14 +313,12 @@ fapi_try_exit:
 ///
 /// @brief A class representing a series of CCS instructions, and the
 /// CCS engine parameters associated with running the instructions
-/// @tparam T fapi2::TargetType  representing the fapi2 target which
-/// @tparam P fapi2::TargetType representing the port
+/// @tparam MC The memory controller type of the traits
+/// @tparam TT the CCS traits related to MC
 /// contains the CCS engine
+template< mss::mc_type MC, typename TT = ccsTraits<MC> >
 class program
 {
-    private:
-        using TT = ccsTraits<DEFAULT_MC_TYPE>;
-
     public:
         // Setup our poll parameters so the CCS executer can see
         // whether to use the delays in the instruction stream or not
@@ -326,7 +326,7 @@ class program
         {}
 
         // Vector of instructions
-        std::vector< instruction_t > iv_instructions;
+        std::vector< instruction_t<MC> > iv_instructions;
         poll_parameters                 iv_poll;
 
         // Vector of polling probes
@@ -335,13 +335,13 @@ class program
 
 ///
 /// @brief Common setup for all MRS/RCD instructions
-/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @tparam MC The memory controller type of the traits
+/// @tparam TT the CCS traits related to MC
 /// @param[in,out] i_arr0 fapi2::buffer<uint64_t> representing the ARR0 of the instruction
 ///
+template< mss::mc_type MC, typename TT = ccsTraits<MC> >
 static void mrs_rcd_helper( fapi2::buffer<uint64_t>& i_arr0 )
 {
-    using TT = ccsTraits<DEFAULT_MC_TYPE>;
-
     //
     // Generic DDR4 MRS setup (RCD is an MRS)
     //
@@ -359,14 +359,14 @@ static void mrs_rcd_helper( fapi2::buffer<uint64_t>& i_arr0 )
 
 ///
 /// @brief Setup activate command instruction
-/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @tparam MC The memory controller type of the traits
+/// @tparam TT the CCS traits related to MC
 /// @param[in] i_target the DIMM this instruction is headed for
 /// @param[in] i_port_rank the rank on this dimm
 ///
-inline instruction_t act_command( const uint64_t i_port_rank )
+template< mss::mc_type MC, typename TT = ccsTraits<MC> >
+inline instruction_t<MC> act_command( const uint64_t i_port_rank )
 {
-    using TT = ccsTraits<DEFAULT_MC_TYPE>;
-
     fapi2::buffer<uint64_t> l_boilerplate_arr0;
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
 
@@ -390,12 +390,13 @@ inline instruction_t act_command( const uint64_t i_port_rank )
     l_boilerplate_arr0.clearBit<TT::ARR0_DDR_BANK_0_1, TT::ARR0_DDR_BANK_0_1_LEN>();
     l_boilerplate_arr0.clearBit<TT::ARR0_DDR_BANK_2>();
 
-    return instruction_t(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1);
+    return instruction_t<MC>(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1);
 }
 
 ///
 /// @brief Create, initialize an RCD (RCW - JEDEC) CCS command
-/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @tparam MC The memory controller type of the traits
+/// @tparam TT the CCS traits related to MC
 /// @param[in] i_target the DIMM this instruction is headed for
 /// @param[in] i_turn_on_cke flag that states whether we want CKE on for this RCW (defaulted to true)
 /// @return the RCD CCS instruction
@@ -403,19 +404,18 @@ inline instruction_t act_command( const uint64_t i_port_rank )
 /// for the controller (Nimbus v Centaur) and then correct for DRAM generation (not included
 /// in this template definition)
 ///
-inline instruction_t rcd_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                  const bool i_sim,
-                                  const bool i_turn_on_cke = true)
+template< mss::mc_type MC, typename TT = ccsTraits<MC> >
+inline instruction_t<MC> rcd_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                      const bool i_sim,
+                                      const bool i_turn_on_cke = true)
 {
-    using TT = ccsTraits<DEFAULT_MC_TYPE>;
-
     fapi2::buffer<uint64_t> rcd_boilerplate_arr0;
     fapi2::buffer<uint64_t> rcd_boilerplate_arr1;
 
     //
     // Generic DDR4 MRS setup (RCD is an MRS)
     //
-    mrs_rcd_helper(rcd_boilerplate_arr0);
+    mrs_rcd_helper<MC>(rcd_boilerplate_arr0);
 
     // Not adding i_turn_on_cke in the mrs_rcd helper because we only need this
     // for RCWs and there is no need to complicate/change the MRS cmd API with
@@ -436,12 +436,13 @@ inline instruction_t rcd_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& 
     .template setBit<TT::ARR0_DDR_BANK_GROUP_0>();
 
     // RCD always goes to the 0th rank on the DIMM; either 0 or 4.
-    return instruction_t((mss::index(i_target) == 0) ? 0 : 4, rcd_boilerplate_arr0, rcd_boilerplate_arr1);
+    return instruction_t<MC>((mss::index(i_target) == 0) ? 0 : 4, rcd_boilerplate_arr0, rcd_boilerplate_arr1);
 }
 
 ///
 /// @brief Create, initialize an MRS CCS command
-/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @tparam MC The memory controller type of the traits
+/// @tparam TT the CCS traits related to MC
 /// @param[in] i_target the DIMM this instruction is headed for
 /// @param[in] i_port_rank the port rank
 /// @param[in] i_mrs the specific MRS
@@ -450,11 +451,10 @@ inline instruction_t rcd_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& 
 /// for the controller (Nimbus v Centaur) and then correct for DRAM generation (not included
 /// in this template definition)
 ///
-inline instruction_t mrs_command ( const uint64_t i_port_rank,
-                                   const uint64_t i_mrs )
+template< mss::mc_type MC, typename TT = ccsTraits<MC> >
+inline instruction_t<MC> mrs_command ( const uint64_t i_port_rank,
+                                       const uint64_t i_mrs )
 {
-    using TT = ccsTraits<DEFAULT_MC_TYPE>;
-
     fapi2::buffer<uint64_t> rcd_boilerplate_arr0;
     fapi2::buffer<uint64_t> rcd_boilerplate_arr1;
     fapi2::buffer<uint8_t> mrs(i_mrs);
@@ -462,7 +462,7 @@ inline instruction_t mrs_command ( const uint64_t i_port_rank,
     //
     // Generic DDR4 MRS setup (RCD is an MRS)
     //
-    mrs_rcd_helper(rcd_boilerplate_arr0);
+    mrs_rcd_helper<MC>(rcd_boilerplate_arr0);
 
     //
     // MRS setup
@@ -471,21 +471,22 @@ inline instruction_t mrs_command ( const uint64_t i_port_rank,
     rcd_boilerplate_arr0.clearBit<TT::ARR0_DDR_BANK_GROUP_1>();
     mss::swizzle<TT::ARR0_DDR_BANK_0_1, 3, 7>(mrs, rcd_boilerplate_arr0);
     FAPI_DBG("mrs rcd boiler 0x%016lx 0x%llx", uint8_t(mrs), uint64_t(rcd_boilerplate_arr0));
-    return instruction_t(i_port_rank, rcd_boilerplate_arr0, rcd_boilerplate_arr1);
+    return instruction_t<MC>(i_port_rank, rcd_boilerplate_arr0, rcd_boilerplate_arr1);
 }
 
 ///
 /// @brief Create, initialize a JEDEC Device Deselect CCS command
+/// @tparam MC The memory controller type of the traits
+/// @tparam TT the CCS traits related to MC
 /// @param[in] i_idle the idle time to the next command (default to 0)
 /// @return the Device Deselect CCS instruction
 /// @note THIS IS DDR4 ONLY RIGHT NOW. We can (and possibly should) specialize this
 /// for the controller (Nimbus v Centaur) and then correct for DRAM generation (not included
 /// in this template definition)
 ///
-inline instruction_t des_command(const uint16_t i_idle = 0)
+template< mss::mc_type MC, typename TT = ccsTraits<MC> >
+inline instruction_t<MC> des_command(const uint16_t i_idle = 0)
 {
-    using TT = ccsTraits<DEFAULT_MC_TYPE>;
-
     fapi2::buffer<uint64_t> rcd_boilerplate_arr0;
     fapi2::buffer<uint64_t> rcd_boilerplate_arr1;
 
@@ -503,20 +504,21 @@ inline instruction_t des_command(const uint16_t i_idle = 0)
     // RAS, CAS, WE no-care
 
     // Device Deslect wants CS_n always high (select nothing using rank NO_CHIP_SELECT_ACTIVE)
-    return instruction_t( NO_CHIP_SELECT_ACTIVE,
-                          rcd_boilerplate_arr0,
-                          rcd_boilerplate_arr1);
+    return instruction_t<MC>( NO_CHIP_SELECT_ACTIVE,
+                              rcd_boilerplate_arr0,
+                              rcd_boilerplate_arr1);
 }
 
 ///
 /// @brief Converts an ODT attribute to CCS array input
+/// @tparam MC The memory controller type of the traits
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_attr_value ODT attribute value
 /// @param[in] i_target PORT target type
 /// @param[out] CCS value for the ODT's
 /// @return FAPI2_RC_SUCCESS iff success, else error code
 ///
-template< typename TT = ccsTraits<DEFAULT_MC_TYPE> >
+template< mss::mc_type MC, typename TT = ccsTraits<MC> >
 inline fapi2::ReturnCode convert_odt_attr_to_ccs(
     const fapi2::buffer<uint8_t>& i_attr_value,
     const fapi2::Target<TT::PORT_TARGET_TYPE>& i_target,
@@ -541,7 +543,8 @@ fapi_try_exit:
 
 ///
 /// @brief Create, initialize an ODT CCS command
-/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @tparam MC The memory controller type of the traits
+/// @tparam TT the CCS traits related to MC
 /// @param[in] i_odt_values CCS defined ODT values
 /// @param[in] i_cycles the number of cycles to hold the ODT for - defaults to DEFAULT_ODT_CYCLE_LEN
 /// @return the Device Deselect CCS instruction
@@ -550,10 +553,10 @@ fapi_try_exit:
 /// As such, it's up to the programmers to hold the ODT's appropriately
 /// This "command" will greatly help us do that
 ///
-template< typename TT = ccsTraits<DEFAULT_MC_TYPE> >
-inline instruction_t odt_command(const uint8_t i_odt_values, const uint64_t i_cycles = TT::DEFAULT_ODT_CYCLE_LEN)
+template< mss::mc_type MC, typename TT = ccsTraits<MC> >
+inline instruction_t<MC> odt_command(const uint8_t i_odt_values, const uint64_t i_cycles = TT::DEFAULT_ODT_CYCLE_LEN)
 {
-    auto l_odt_cmd = des_command();
+    auto l_odt_cmd = des_command<MC>();
     l_odt_cmd.arr0.template insertFromRight<TT::ARR0_DDR_ODT, TT::ARR0_DDR_ODT_LEN>(i_odt_values);
     l_odt_cmd.arr1.template insertFromRight<TT::ARR1_REPEAT_CMD_CNT, TT::ARR1_REPEAT_CMD_CNT_LEN>(i_cycles);
 
@@ -563,16 +566,16 @@ inline instruction_t odt_command(const uint8_t i_odt_values, const uint64_t i_cy
 
 ///
 /// @brief Create, initialize a NTTM read CCS command
-/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @tparam MC The memory controller type of the traits
+/// @tparam TT the CCS traits related to MC
 /// @return the Device Deselect CCS instruction
 /// @note need to setup 4 cycles delay
 ///
-inline instruction_t nttm_read_command()
+template< mss::mc_type MC, typename TT = ccsTraits<MC> >
+inline instruction_t<MC> nttm_read_command()
 {
-    using TT = ccsTraits<DEFAULT_MC_TYPE>;
-
     // get the des_command
-    auto l_command = des_command();
+    auto l_command = des_command<MC>();
     // set to CCS_INST_ARR1 register
     l_command.arr1.template setBit<TT::NTTM_MODE_FORCE_READ>();
     l_command.arr1.template insertFromRight<TT::ARR1_IDLES, TT::ARR1_IDLES_LEN>(TT::NTTM_READ_DELAY);
@@ -582,21 +585,21 @@ inline instruction_t nttm_read_command()
 
 ///
 /// @brief Create, initialize a JEDEC Device Power Down Entry CCS command
-/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @tparam MC The memory controller type of the traits
+/// @tparam TT the CCS traits related to MC
 /// @return the Device Deselect CCS instruction
 /// @note THIS IS DDR4 ONLY RIGHT NOW. We can (and possibly should) specialize this
 /// for the controller (Nimbus v Centaur) and then correct for DRAM generation (not included
 /// in this template definition)
 ///
-inline instruction_t pde_command()
+template< mss::mc_type MC, typename TT = ccsTraits<MC> >
+inline instruction_t<MC> pde_command()
 {
-    using TT = ccsTraits<DEFAULT_MC_TYPE>;
-
     fapi2::buffer<uint64_t> rcd_boilerplate_arr0;
     fapi2::buffer<uint64_t> rcd_boilerplate_arr1;
 
     // Power Down Entry just like a DES, but we set CKE low
-    instruction_t l_inst = des_command();
+    instruction_t<MC> l_inst = des_command<MC>();
 
     // CKE is low. Note: P8 set all 4 of these low - not sure if that's correct.
     l_inst.arr0.template insertFromRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(CKE_LOW);
@@ -608,6 +611,8 @@ inline instruction_t pde_command()
 
 ///
 /// @brief Setup ZQ Long instruction
+/// @tparam MC The memory controller type of the traits
+/// @tparam TT the CCS traits related to MC
 /// @param[in] i_port_rank the port rank
 /// @param[in] i_idle the idle time to the next command (default to 0)
 /// @return the MRS CCS instruction
@@ -615,11 +620,10 @@ inline instruction_t pde_command()
 /// for the controller (Nimbus v Centaur) and then correct for DRAM generation (not included
 /// in this template definition)
 ///
-inline instruction_t zqcl_command( const uint64_t i_port_rank,
-                                   const uint16_t i_idle = 0 )
+template< mss::mc_type MC, typename TT = ccsTraits<MC> >
+inline instruction_t<MC> zqcl_command( const uint64_t i_port_rank,
+                                       const uint16_t i_idle = 0 )
 {
-    using TT = ccsTraits<DEFAULT_MC_TYPE>;
-
     fapi2::buffer<uint64_t> l_boilerplate_arr0;
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
 
@@ -640,11 +644,13 @@ inline instruction_t zqcl_command( const uint64_t i_port_rank,
     // Insert idle
     l_boilerplate_arr1.template insertFromRight<TT::ARR1_IDLES, TT::ARR1_IDLES_LEN>( i_idle );
 
-    return instruction_t(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1);
+    return instruction_t<MC>(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1);
 }
 
 ///
 /// @brief Setup read command helper function
+/// @tparam MC The memory controller type of the traits
+/// @tparam TT the CCS traits related to MC
 /// @param[in] i_port_rank the port rank
 /// @param[in] i_bank_addr bank address bits [BG0:BG1] = [62:63] (right aligned)
 /// @param[in] i_bank_group_addr bank group address bits [BA0:BA1] = [62:63] (right aligned)
@@ -654,13 +660,12 @@ inline instruction_t zqcl_command( const uint64_t i_port_rank,
 /// for the controller (Nimbus v Centaur) and then correct for DRAM generation (not included
 /// in this template definition)
 ///
+template< mss::mc_type MC, typename TT = ccsTraits<MC> >
 static fapi2::buffer<uint64_t> read_cmd_boilerplate( const uint64_t i_port_rank,
         const fapi2::buffer<uint64_t>& i_bank_addr = 0,
         const fapi2::buffer<uint64_t>& i_bank_group_addr = 0,
         const fapi2::buffer<uint64_t>& i_column_addr = 0)
 {
-    using TT = ccsTraits<DEFAULT_MC_TYPE>;
-
     // TODO - RTC 166175 Encapsulate command truth table in a subclass for ccs.H
     fapi2::buffer<uint64_t> l_boilerplate_arr0;
 
@@ -695,7 +700,8 @@ static fapi2::buffer<uint64_t> read_cmd_boilerplate( const uint64_t i_port_rank,
 
 ///
 /// @brief Setup write command (Fixed BL8 or BC4) instruction
-/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @tparam MC The memory controller type of the traits
+/// @tparam TT the CCS traits related to MC
 /// @param[in] i_port_rank the port rank
 /// @param[in] i_bank_addr bank address bits [BA0:BA1] = [62:63] (right aligned)
 /// @param[in] i_bank_group_addr bank group address bits [BG0:BG1] = [62:63] (right aligned)
@@ -705,15 +711,14 @@ static fapi2::buffer<uint64_t> read_cmd_boilerplate( const uint64_t i_port_rank,
 /// for the controller (Nimbus v Centaur) and then correct for DRAM generation (not included
 /// in this template definition)
 ///
-inline instruction_t wr_command( const uint64_t i_port_rank,
-                                 const fapi2::buffer<uint64_t>& i_bank_addr = 0,
-                                 const fapi2::buffer<uint64_t>& i_bank_group_addr = 0,
-                                 const fapi2::buffer<uint64_t>& i_column_addr = 0)
+template< mss::mc_type MC, typename TT = ccsTraits<MC> >
+inline instruction_t<MC> wr_command( const uint64_t i_port_rank,
+                                     const fapi2::buffer<uint64_t>& i_bank_addr = 0,
+                                     const fapi2::buffer<uint64_t>& i_bank_group_addr = 0,
+                                     const fapi2::buffer<uint64_t>& i_column_addr = 0)
 {
-    using TT = ccsTraits<DEFAULT_MC_TYPE>;
-
     // WR's and RD's are very similar, so we just use the RD command boiler plate and modify the command to a WR
-    fapi2::buffer<uint64_t> l_boilerplate_arr0 = read_cmd_boilerplate(i_port_rank,
+    fapi2::buffer<uint64_t> l_boilerplate_arr0 = read_cmd_boilerplate<MC>(i_port_rank,
             i_bank_addr,
             i_bank_group_addr,
             i_column_addr);
@@ -724,12 +729,13 @@ inline instruction_t wr_command( const uint64_t i_port_rank,
     .template clearBit<TT::ARR0_DDR_ADDRESS_15>()
     .template clearBit<TT::ARR0_DDR_ADDRESS_14>();
 
-    return instruction_t(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1);
+    return instruction_t<MC>(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1);
 }
 
 ///
 /// @brief Setup read command (Fixed BL8 or BC4) instruction
-/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @tparam MC The memory controller type of the traits
+/// @tparam TT the CCS traits related to MC
 /// @param[in] i_port_rank the port rank
 /// @param[in] i_bank_addr bank address bits [BA0:BA1] = [62:63] (right aligned)
 /// @param[in] i_bank_group_addr bank group address bits [BG0:BG1] = [62:63] (right aligned)
@@ -739,17 +745,16 @@ inline instruction_t wr_command( const uint64_t i_port_rank,
 /// for the controller (Nimbus v Centaur) and then correct for DRAM generation (not included
 /// in this template definition)
 ///
-inline instruction_t rd_command( const uint64_t i_port_rank,
-                                 const fapi2::buffer<uint64_t>& i_bank_addr = 0,
-                                 const fapi2::buffer<uint64_t>& i_bank_group_addr = 0,
-                                 const fapi2::buffer<uint64_t>& i_column_addr = 0)
+template< mss::mc_type MC, typename TT = ccsTraits<MC> >
+inline instruction_t<MC> rd_command( const uint64_t i_port_rank,
+                                     const fapi2::buffer<uint64_t>& i_bank_addr = 0,
+                                     const fapi2::buffer<uint64_t>& i_bank_group_addr = 0,
+                                     const fapi2::buffer<uint64_t>& i_column_addr = 0)
 {
-    using TT = ccsTraits<DEFAULT_MC_TYPE>;
-
     fapi2::buffer<uint64_t> l_boilerplate_arr0;
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
 
-    l_boilerplate_arr0 = read_cmd_boilerplate(i_port_rank,
+    l_boilerplate_arr0 = read_cmd_boilerplate<MC>(i_port_rank,
                          i_bank_addr,
                          i_bank_group_addr,
                          i_column_addr);
@@ -757,12 +762,13 @@ inline instruction_t rd_command( const uint64_t i_port_rank,
     // Setup ADDR10/AP based on read type
     l_boilerplate_arr0.clearBit<TT::ARR0_DDR_ADDRESS_10>();
 
-    return instruction_t(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1);
+    return instruction_t<MC>(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1);
 }
 
 ///
 /// @brief Setup read w/auto precharge command (Fixed BL8 or BC4) instruction
-/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @tparam MC The memory controller type of the traits
+/// @tparam TT the CCS traits related to MC
 /// @param[in] i_port_rank the port rank
 /// @param[in] i_bank_addr bank address bits [BG0:BG1] = [62:63] (right aligned)
 /// @param[in] i_bank_group_addr bank group address bits [BA0:BA1] = [62:63] (right aligned)
@@ -772,17 +778,16 @@ inline instruction_t rd_command( const uint64_t i_port_rank,
 /// for the controller (Nimbus v Centaur) and then correct for DRAM generation (not included
 /// in this template definition)
 ///
-inline instruction_t rda_command( const uint64_t i_port_rank,
-                                  const fapi2::buffer<uint64_t>& i_bank_addr = 0,
-                                  const fapi2::buffer<uint64_t>& i_bank_group_addr = 0,
-                                  const fapi2::buffer<uint64_t>& i_column_addr = 0)
+template< mss::mc_type MC, typename TT = ccsTraits<MC> >
+inline instruction_t<MC> rda_command( const uint64_t i_port_rank,
+                                      const fapi2::buffer<uint64_t>& i_bank_addr = 0,
+                                      const fapi2::buffer<uint64_t>& i_bank_group_addr = 0,
+                                      const fapi2::buffer<uint64_t>& i_column_addr = 0)
 {
-    using TT = ccsTraits<DEFAULT_MC_TYPE>;
-
     fapi2::buffer<uint64_t> l_boilerplate_arr0;
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
 
-    l_boilerplate_arr0 = read_cmd_boilerplate(i_port_rank,
+    l_boilerplate_arr0 = read_cmd_boilerplate<MC>(i_port_rank,
                          i_bank_addr,
                          i_bank_group_addr,
                          i_column_addr);
@@ -790,12 +795,13 @@ inline instruction_t rda_command( const uint64_t i_port_rank,
     // Setup ADDR10/AP based on read type
     l_boilerplate_arr0.setBit<TT::ARR0_DDR_ADDRESS_10>();
 
-    return instruction_t(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1);
+    return instruction_t<MC>(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1);
 }
 
 ///
 /// @brief Setup precharge all banks command instruction
-/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @tparam MC The memory controller type of the traits
+/// @tparam TT the CCS traits related to MC
 /// @param[in] i_port_rank the port rank
 /// @param[in] i_idle the idle time to the next command (default to 0)
 /// @return the precharge all banks command CCS instruction
@@ -803,11 +809,10 @@ inline instruction_t rda_command( const uint64_t i_port_rank,
 /// for the controller (Nimbus v Centaur) and then correct for DRAM generation (not included
 /// in this template definition)
 ///
-inline instruction_t precharge_all_command( const uint64_t i_port_rank,
+template< mss::mc_type MC, typename TT = ccsTraits<MC> >
+inline instruction_t<MC> precharge_all_command( const uint64_t i_port_rank,
         const uint16_t i_idle = 0 )
 {
-    using TT = ccsTraits<DEFAULT_MC_TYPE>;
-
     fapi2::buffer<uint64_t> l_boilerplate_arr0;
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
 
@@ -831,21 +836,21 @@ inline instruction_t precharge_all_command( const uint64_t i_port_rank,
     // From DDR4 Spec table 17:
     // All other bits from the command truth table or 'V', for valid (1 or 0)
 
-    return instruction_t(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1);
+    return instruction_t<MC>(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1);
 }
 
 ///
 /// @brief Setup self-refresh entry command instruction
-/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @tparam MC The memory controller type of the traits
+/// @tparam TT the CCS traits related to MC
 /// @param[in] i_port_rank the port rank
 /// @param[in] i_idle the idle time to the next command (default to 0)
 /// @return the self-refresh entry command CCS instruction
 /// @note THIS IS FOR DDR4 NON-LRDIMM ONLY RIGHT NOW
 ///
-inline instruction_t self_refresh_entry_command( const uint64_t i_port_rank, const uint16_t i_idle = 0 )
+template< mss::mc_type MC, typename TT = ccsTraits<MC> >
+inline instruction_t<MC> self_refresh_entry_command( const uint64_t i_port_rank, const uint16_t i_idle = 0 )
 {
-    using TT = ccsTraits<DEFAULT_MC_TYPE>;
-
     fapi2::buffer<uint64_t> l_boilerplate_arr0;
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
 
@@ -866,22 +871,22 @@ inline instruction_t self_refresh_entry_command( const uint64_t i_port_rank, con
     // From DDR4 Spec table 17:
     // All other bits from the command truth table are 'V', for valid (1 or 0)
 
-    return instruction_t(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1);
+    return instruction_t<MC>(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1);
 }
 
 ///
 /// @brief Setup self-refresh exit using NOP command instruction
-/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @tparam MC The memory controller type of the traits
+/// @tparam TT the CCS traits related to MC
 /// @param[in] i_port_rank the port rank
 /// @param[in] i_idle the idle time to the next command (default to 0)
 /// @return the self-refresh exit command CCS instruction
 /// @note Using NOP in case SDRAM is in gear down mode and max power saving mode exit
 /// @note THIS IS FOR DDR4 NON-LRDIMM ONLY RIGHT NOW
 ///
-inline instruction_t self_refresh_exit_command( const uint64_t i_port_rank, const uint16_t i_idle = 0 )
+template< mss::mc_type MC, typename TT = ccsTraits<MC> >
+inline instruction_t<MC> self_refresh_exit_command( const uint64_t i_port_rank, const uint16_t i_idle = 0 )
 {
-    using TT = ccsTraits<DEFAULT_MC_TYPE>;
-
     fapi2::buffer<uint64_t> l_boilerplate_arr0;
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
 
@@ -902,25 +907,24 @@ inline instruction_t self_refresh_exit_command( const uint64_t i_port_rank, cons
     // From DDR4 Spec table 17:
     // All other bits from the command truth table are 'V', for valid (1 or 0)
 
-    return instruction_t(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1);
+    return instruction_t<MC>(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1);
 }
 
 ///
 /// @brief Setup refresh command instruction
-/// @tparam T the target type of the chiplet which executes the CCS instruction
-/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @tparam MC The memory controller type of the traits
+/// @tparam TT the CCS traits related to MC
 /// @param[in] i_target the DIMM this instruction is headed for
 /// @param[in] i_port_rank the port rank
 /// @param[in] i_idle the idle time to the next command (default to 0)
 /// @return the self-refresh entry command CCS instruction
 /// @note THIS IS FOR DDR4 NON-LRDIMM ONLY RIGHT NOW
 ///
-inline instruction_t refresh_command( const uint64_t i_port_rank, const uint16_t i_idle = 0 )
+template< mss::mc_type MC, typename TT = ccsTraits<MC> >
+inline instruction_t<MC> refresh_command( const uint64_t i_port_rank, const uint16_t i_idle = 0 )
 {
-    using TT = ccsTraits<DEFAULT_MC_TYPE>;
-
     // Refresh is self-refresh entry with CKE high
-    auto l_refresh_template = self_refresh_entry_command(i_port_rank, i_idle);
+    auto l_refresh_template = self_refresh_entry_command<MC>(i_port_rank, i_idle);
 
     // CKE is high
     l_refresh_template.arr0.template insertFromRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(CKE_HIGH);
@@ -947,13 +951,14 @@ fapi2::ReturnCode select_ports( const fapi2::Target<T>& i_target, uint64_t i_por
 ///
 /// @brief User sets to a '1'b to tell the Hdw to stop CCS whenever failure occurs. When a
 ///        '0'b, Hdw will continue CCS even if a failure occurs.
+/// @tparam MC the memory controller type which executes the CCS instruction
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in]  the target to effect
 /// @param[in,out] io_buffer the buffer representing the mode register
 /// @param[in] i_value true iff stop whenever failure occurs.
 ///
-template< fapi2::TargetType T, typename TT = ccsTraits<DEFAULT_MC_TYPE> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = ccsTraits<MC> >
 inline void stop_on_err( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_buffer, const states i_value)
 {
     io_buffer.writeBit<TT::STOP_ON_ERR>(i_value);
@@ -961,12 +966,13 @@ inline void stop_on_err( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_bu
 
 ///
 /// @brief Disable ECC checking on the CCS arrays
+/// @tparam MC the memory controller type which executes the CCS instruction
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] the target to effect
 /// @param[in,out] io_buffer the buffer representing the mode register
 ///
-template< fapi2::TargetType T, typename TT = ccsTraits<DEFAULT_MC_TYPE> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = ccsTraits<MC> >
 inline void disable_ecc( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_buffer)
 {
     io_buffer.setBit<TT::DISABLE_ECC_ARRAY_CHK>()
@@ -976,13 +982,14 @@ inline void disable_ecc( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_bu
 ///
 /// @brief User sets to a '1'b to force the Hdw to ignore any array ue or sue errors
 ///        during CCS command fetching.
+/// @tparam MC the memory controller type which executes the CCS instruction
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] the target to effect
 /// @param[in,out] io_buffer the buffer representing the mode register
 /// @param[in] i_value true iff ignore any array ue or sue errors.
 ///
-template< fapi2::TargetType T, typename TT = ccsTraits<DEFAULT_MC_TYPE> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = ccsTraits<MC> >
 inline void ue_disable( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_buffer, const states i_value)
 {
     io_buffer.writeBit<TT::UE_DISABLE>(i_value);
@@ -990,13 +997,14 @@ inline void ue_disable( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_buf
 
 ///
 /// @brief User sets to a '1'b to force the Hdw to delay parity a cycle
+/// @tparam MC the memory controller type which executes the CCS instruction
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] the target to effect
 /// @param[in,out] io_buffer the buffer representing the mode register
 /// @param[in] i_value mss::ON iff delay parity a cycle
 ///
-template< fapi2::TargetType T, typename TT = ccsTraits<DEFAULT_MC_TYPE> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = ccsTraits<MC> >
 inline void parity_after_cmd( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_buffer, const states i_value)
 {
     io_buffer.writeBit<TT::CFG_PARITY_AFTER_CMD>(i_value);
@@ -1004,6 +1012,7 @@ inline void parity_after_cmd( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& 
 
 ///
 /// @brief DDr calibration counter
+/// @tparam MC the memory controller type which executes the CCS instruction
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] the target to effect
@@ -1011,7 +1020,7 @@ inline void parity_after_cmd( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& 
 /// @param[in] i_count the count to wait for DDR cal to complete.
 /// @param[in] i_mult the DDR calibration time multiplaction factor
 ///
-template< fapi2::TargetType T, typename TT = ccsTraits<DEFAULT_MC_TYPE> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = ccsTraits<MC> >
 inline void cal_count( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_buffer,
                        const uint64_t i_count, const uint64_t i_mult)
 {
@@ -1025,6 +1034,7 @@ inline void cal_count( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_buff
 ///         CKE(4:5) 1 - Port A CKE(0:1) copied to Port A CKE(2:3), Port A CKE(4:5) copied
 ///         to Port A CKE(6:7), Port B CKE(0:1) copied to Port B CKE(2:3) and Port B CKE(4:5)
 ///         copied to Port B CKE(6:7)
+/// @tparam MC the memory controller type which executes the CCS instruction
 /// @tparam T the fapi2::TargetType - derived
 /// @tparam TT the ccsTraits associated with T - derived
 /// @param[in] i_target the target to effect
@@ -1032,18 +1042,19 @@ inline void cal_count( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_buff
 /// @param[in] i_value mss::ON iff Copy CKE signals to CKE Spare on both ports
 /// @note no-op for p9n
 ///
-template< fapi2::TargetType T, typename TT = ccsTraits<DEFAULT_MC_TYPE> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = ccsTraits<MC> >
 void copy_cke_to_spare_cke( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_buffer, const states i_value);
 
 ///
 /// @brief Read the modeq register appropriate for this target
+/// @tparam MC the memory controller type which executes the CCS instruction
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_target the target to effect
 /// @param[in,out] io_buffer the buffer representing the mode register
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template< fapi2::TargetType T, typename TT = ccsTraits<DEFAULT_MC_TYPE> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = ccsTraits<MC> >
 inline fapi2::ReturnCode read_mode( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& io_buffer)
 {
     return mss::getScom(i_target, TT::MODEQ_REG, io_buffer);
@@ -1051,13 +1062,14 @@ inline fapi2::ReturnCode read_mode( const fapi2::Target<T>& i_target, fapi2::buf
 
 ///
 /// @brief Write the modeq register appropriate for this target
+/// @tparam MC the memory controller type which executes the CCS instruction
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_target the target to effect
 /// @param[in] i_buffer the buffer representing the mode register
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template< fapi2::TargetType T, typename TT = ccsTraits<DEFAULT_MC_TYPE> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = ccsTraits<MC> >
 inline fapi2::ReturnCode write_mode( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_buffer)
 {
     return mss::putScom(i_target, TT::MODEQ_REG, i_buffer);
@@ -1065,23 +1077,24 @@ inline fapi2::ReturnCode write_mode( const fapi2::Target<T>& i_target, const fap
 
 ///
 /// @brief config the NTTM
+/// @tparam MC the memory controller type which executes the CCS instruction
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_mcbist the target to operate
 /// @param[in] i_nttm_mode NTTM we need to turn on or off (i.e. ON, OFF)
 /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS if ok
 ///
-template< fapi2::TargetType T, typename TT = ccsTraits<DEFAULT_MC_TYPE> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = ccsTraits<MC> >
 inline fapi2::ReturnCode configure_nttm( const fapi2::Target<T>& i_target,
         const mss::states i_nttm_mode)
 {
     fapi2::buffer<uint64_t> l_data;
 
-    FAPI_TRY(read_mode(i_target, l_data));
+    FAPI_TRY(read_mode<MC>(i_target, l_data));
 
     l_data.writeBit<TT::NTTM_MODE>(i_nttm_mode);
 
-    FAPI_TRY(write_mode(i_target, l_data));
+    FAPI_TRY(write_mode<MC>(i_target, l_data));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -1108,18 +1121,19 @@ fapi2::ReturnCode setup_to_execute(const std::vector< fapi2::Target<P> >& i_port
 /// @note Code location for post CCS execute workarounds
 ///
 template< mss::mc_type MC, fapi2::TargetType P>
-fapi2::ReturnCode cleanup_from_execute(const ccs::program& i_program,
+fapi2::ReturnCode cleanup_from_execute(const ccs::program<MC>& i_program,
                                        const std::vector< fapi2::Target<P> >& i_ports);
 
 ///
 /// @brief Start or stop the CCS engine
+/// @tparam MC the memory controller type which executes the CCS instruction
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_target The MCBIST containing the CCS engine
 /// @param[in] i_start_stop bool MSS_CCS_START for starting MSS_CCS_STOP otherwise
 /// @return FAPI2_RC_SUCCESS iff success
 ///
-template< fapi2::TargetType T, typename TT = ccsTraits<DEFAULT_MC_TYPE> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = ccsTraits<MC> >
 fapi2::ReturnCode start_stop( const fapi2::Target<T>& i_target, const bool i_start_stop )
 {
     fapi2::buffer<uint64_t> l_buf;
@@ -1136,22 +1150,24 @@ fapi_try_exit:
 
 ///
 /// @brief Determine the CCS failure type
+/// @tparam MC the memory controller type which executes the CCS instruction
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam P the target of the CCS instruction (the port)
-/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_target MC target
 /// @param[in] i_type the failure type
 /// @param[in] i_port The port the CCS instruction is training
 /// @return ReturnCode associated with the fail.
 /// @note FFDC is handled here, caller doesn't need to do it
 ///
-template< fapi2::TargetType T = DEFAULT_MC_TARGET, fapi2::TargetType P = DEFAULT_MEM_PORT_TARGET, typename TT = ccsTraits<DEFAULT_MC_TYPE> >
+template< mss::mc_type MC, typename TT = ccsTraits<MC>, fapi2::TargetType T = TT::MC_TARGET_TYPE, fapi2::TargetType P = TT::PORT_TARGET_TYPE >
 fapi2::ReturnCode fail_type( const fapi2::Target<T>& i_target,
                              const uint64_t i_type,
                              const fapi2::Target<P>& i_port );
 
 ///
 /// @brief Execute a CCS array already loaded in to the engine
+/// @tparam MC the memory controller type which executes the CCS instruction
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam P the target of the CCS instruction (the port)
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
@@ -1160,14 +1176,14 @@ fapi2::ReturnCode fail_type( const fapi2::Target<T>& i_target,
 /// @param[in] i_port the port associated with the MCBIST array
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template< fapi2::TargetType T, fapi2::TargetType P, typename TT = ccsTraits<DEFAULT_MC_TYPE> >
+template< mss::mc_type MC, fapi2::TargetType T, fapi2::TargetType P, typename TT = ccsTraits<MC> >
 fapi2::ReturnCode execute_inst_array(const fapi2::Target<T>& i_target,
-                                     ccs::program& i_program,
+                                     ccs::program<MC>& i_program,
                                      const fapi2::Target<P>& i_port)
 {
     fapi2::buffer<uint64_t> status;
 
-    FAPI_TRY(start_stop(i_target, mss::START), "%s Error in execute_inst_array", mss::c_str(i_port) );
+    FAPI_TRY(start_stop<MC>(i_target, mss::START), "%s Error in execute_inst_array", mss::c_str(i_port) );
 
     mss::poll(i_target, TT::STATQ_REG, i_program.iv_poll,
               [&status](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
@@ -1187,7 +1203,7 @@ fapi2::ReturnCode execute_inst_array(const fapi2::Target<T>& i_target,
 
     // So we failed or we're still in progress. Mask off the fail bits
     // and run this through the FFDC generator.
-    FAPI_TRY(fail_type(i_target, status & TT::STAT_ERR_MASK, i_port), "Error in execute_inst_array" );
+    FAPI_TRY(fail_type<MC>(i_target, status & TT::STAT_ERR_MASK, i_port), "Error in execute_inst_array" );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -1200,7 +1216,7 @@ fapi_try_exit:
 /// @param[in] i_target the target to effect
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T>
+template< mss::mc_type MC, fapi2::TargetType T>
 fapi2::ReturnCode execute_inst_via_mcbist(const fapi2::Target<T>& i_target)
 {
     mss::mcbist::program<MC> l_program;
@@ -1231,32 +1247,32 @@ fapi_try_exit:
 
 ///
 /// @brief Updates the initial delays based upon the total delays passed in
-/// @tparam fapi2::TargetType T the type of the target running CCS
 /// @tparam MC the memory controller type running CCS
+/// @tparam fapi2::TargetType T the type of the target running CCS
 /// @param[in] i_target the target type on which to operate
 /// @param[in] i_delay the calculated delays from CCS
 /// @param[in,out] io_program the program for which to update the delays
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template< fapi2::TargetType T, mss::mc_type MC = DEFAULT_MC_TYPE >
+template< mss::mc_type MC, fapi2::TargetType T  >
 fapi2::ReturnCode update_initial_delays( const fapi2::Target<T>& i_target,
         const uint64_t i_delay,
-        ccs::program& io_program);
+        ccs::program<MC>& io_program);
 
 ///
 /// @brief Execute first part of preperation for a set of CCS instructions - multiple ports
+/// @tparam MC the memory controller type running CCS
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam P  the port type for this CCS engine
-/// @tparam MC the memory controller type running CCS
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_target the target to effect
 /// @param[in, out] io_program the vector of instructions
 /// @param[in] i_ports the vector of ports
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template< fapi2::TargetType T, fapi2::TargetType P, mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = ccsTraits<MC> >
+template< mss::mc_type MC, fapi2::TargetType T, fapi2::TargetType P, typename TT = ccsTraits<MC> >
 static inline fapi2::ReturnCode prelude_to_execution( const fapi2::Target<T>& i_target,
-        ccs::program& io_program,
+        ccs::program<MC>& io_program,
         const std::vector< fapi2::Target<P> >& i_ports)
 {
     FAPI_INF("loading ccs instructions (%d) for %s", io_program.iv_instructions.size(), mss::c_str(i_target));
@@ -1265,7 +1281,7 @@ static inline fapi2::ReturnCode prelude_to_execution( const fapi2::Target<T>& i_
     FAPI_TRY(setup_to_execute<MC>(i_ports));
 
     // Stop the CCS engine just for giggles - it might be running ...
-    FAPI_TRY( start_stop(i_target, mss::states::STOP), "Error stopping CCS engine before ccs::execution on %s",
+    FAPI_TRY( start_stop<MC>(i_target, mss::states::STOP), "Error stopping CCS engine before ccs::execution on %s",
               mss::c_str(i_target) );
 
     FAPI_ASSERT( mss::poll(i_target, TT::STATQ_REG, poll_parameters(),
@@ -1282,9 +1298,9 @@ fapi_try_exit:
 
 ///
 /// @brief Setup all the CCS registers for CCS instructions passed in
+/// @tparam MC the memory controller type running CCS
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam P  the port type for this CCS engine
-/// @tparam MC the memory controller type running CCS
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_target the target to effect
 /// @param[in, out] io_inst_iter the iterator for the ccs instructions
@@ -1292,10 +1308,10 @@ fapi_try_exit:
 /// @param[in] i_port the port target to effect
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template< fapi2::TargetType T, fapi2::TargetType P, mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = ccsTraits<MC> >
+template< mss::mc_type MC, fapi2::TargetType T, fapi2::TargetType P, typename TT = ccsTraits<MC>, typename IT = typename std::vector< mss::ccs::instruction_t<MC> >::iterator >
 static inline fapi2::ReturnCode setup_ccs_instructions( const fapi2::Target<T>& i_target,
-        std::vector<mss::ccs::instruction_t>::iterator io_inst_iter,
-        ccs::program& io_program,
+        IT io_inst_iter,
+        ccs::program<MC>& io_program,
         const fapi2::Target<P>& i_port )
 {
     // Subtract one for the idle we insert at the end
@@ -1311,10 +1327,10 @@ static inline fapi2::ReturnCode setup_ccs_instructions( const fapi2::Target<T>& 
 
     // Grab port index and first inst
     const auto l_port_index = mss::relative_pos<T>(i_port);
-    ccs::instruction_t l_des = ccs::des_command();
+    ccs::instruction_t<MC> l_des = ccs::des_command<MC>();
 
     std::vector<rank_configuration> l_rank_configs;
-    FAPI_TRY(get_rank_config(i_target, l_rank_configs));
+    FAPI_TRY(get_rank_config<MC>(i_target, l_rank_configs));
 
     // Shove the instructions into the CCS engine, in 32 instruction chunks, and execute them
     // NOTE: For concurrent CCS the CCS_INSTRUCTION_DEPTH of 32 will never be hit
@@ -1325,19 +1341,19 @@ static inline fapi2::ReturnCode setup_ccs_instructions( const fapi2::Target<T>& 
         FAPI_TRY(io_inst_iter->configure_rank(i_port, l_rank_configs[l_port_index]),
                  "Error configuring rank in ccs::execute on port %s", mss::c_str(i_port));
 
-        io_inst_iter->arr0.extractToRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(l_current_cke);
+        io_inst_iter->arr0.template extractToRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(l_current_cke);
 
         // Make sure this instruction leads to the next. Notice this limits this mechanism to pretty
         // simple (straight line) CCS programs. Anything with a loop or such will need another mechanism.
-        io_inst_iter->arr1.insertFromRight<TT::ARR1_GOTO_CMD, TT::ARR1_GOTO_CMD_LEN>(l_inst_count + 1);
+        io_inst_iter->arr1.template insertFromRight<TT::ARR1_GOTO_CMD, TT::ARR1_GOTO_CMD_LEN>(l_inst_count + 1);
         FAPI_TRY( mss::putScom(i_target, CCS_ARR0_ZERO + l_inst_count, io_inst_iter->arr0) );
         FAPI_TRY( mss::putScom(i_target, CCS_ARR1_ZERO + l_inst_count, io_inst_iter->arr1) );
 
         // arr1 contains a specification of the delay and repeat after this instruction, as well
         // as a repeat. Total up the delays as we go so we know how long to wait before polling
         // the CCS engine for completion
-        io_inst_iter->arr1.extractToRight<TT::ARR1_IDLES, TT::ARR1_IDLES_LEN>(l_delay);
-        io_inst_iter->arr1.extractToRight<TT::ARR1_REPEAT_CMD_CNT, TT::ARR1_REPEAT_CMD_CNT_LEN>(l_repeat);
+        io_inst_iter->arr1.template extractToRight<TT::ARR1_IDLES, TT::ARR1_IDLES_LEN>(l_delay);
+        io_inst_iter->arr1.template extractToRight<TT::ARR1_REPEAT_CMD_CNT, TT::ARR1_REPEAT_CMD_CNT_LEN>(l_repeat);
 
         l_total_delay += l_delay * (l_repeat + 1);
 
@@ -1348,19 +1364,19 @@ static inline fapi2::ReturnCode setup_ccs_instructions( const fapi2::Target<T>& 
     }
 
     // Updates the initial delays
-    FAPI_TRY(update_initial_delays(i_target, l_total_delay, io_program),
+    FAPI_TRY(update_initial_delays<MC>(i_target, l_total_delay, io_program),
              "Failed in update_initial_delays for ccs::execute_via_mcbist on %s", mss::c_str(i_target));
 
     FAPI_INF("executing ccs instructions via MCBIST (%d:%d, %d) for %s",
              io_program.iv_instructions.size(), l_inst_count, io_program.iv_poll.iv_initial_delay, mss::c_str(i_target));
 
     // Deselect
-    l_des.arr0.insertFromRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(l_current_cke);
+    l_des.arr0.template insertFromRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(l_current_cke);
 
     // Insert a DES as our last instruction. DES is idle state anyway and having this
     // here as an instruction forces the CCS engine to wait the delay specified in
     // the last instruction in this array (which it otherwise doesn't do.)
-    l_des.arr1.setBit<TT::ARR1_END>();
+    l_des.arr1.template setBit<TT::ARR1_END>();
     FAPI_TRY( mss::putScom(i_target, CCS_ARR0_ZERO + l_inst_count, l_des.arr0) );
     FAPI_TRY( mss::putScom(i_target, CCS_ARR1_ZERO + l_inst_count, l_des.arr1) );
 
@@ -1376,6 +1392,7 @@ fapi_try_exit:
 
 ///
 /// @brief Execute a set of CCS instructions - multiple ports
+/// @tparam MC the memory controller type running CCS
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam P  the port type for this CCS engine
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
@@ -1384,9 +1401,9 @@ fapi_try_exit:
 /// @param[in] i_ports the vector of ports
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template< fapi2::TargetType T, fapi2::TargetType P, typename TT = ccsTraits<DEFAULT_MC_TYPE> >
+template< mss::mc_type MC, fapi2::TargetType T, fapi2::TargetType P, typename TT = ccsTraits<MC> >
 static inline fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
-        ccs::program& io_program,
+        ccs::program<MC>& io_program,
         const std::vector< fapi2::Target<P> >& i_ports)
 {
     FAPI_INF("Execution standalone CCS commands (%d) for %s", io_program.iv_instructions.size(), mss::c_str(i_target));
@@ -1394,7 +1411,7 @@ static inline fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
     auto l_inst_iter = io_program.iv_instructions.begin();
 
     // Run prelude to execution
-    FAPI_TRY( prelude_to_execution(i_target, io_program, i_ports),
+    FAPI_TRY( prelude_to_execution<MC>(i_target, io_program, i_ports),
               "Error setting up ccs engine before execution on %s", mss::c_str(i_target) );
 
     // Execute via standalone CCS
@@ -1406,19 +1423,19 @@ static inline fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
             const auto l_port_index = mss::relative_pos<T>(p);
 
             // Run ccs instruction setup
-            FAPI_TRY( setup_ccs_instructions(i_target, l_inst_iter, io_program, p),
+            FAPI_TRY( setup_ccs_instructions<MC>(i_target, l_inst_iter, io_program, p),
                       "Error setting up ccs instructions in registers on %s", mss::c_str(i_target) );
 
             FAPI_INF("executing CCS array for port %d (%s)", l_port_index, mss::c_str(p));
-            FAPI_TRY( select_ports<DEFAULT_MC_TYPE>( i_target, l_port_index),
+            FAPI_TRY( select_ports<MC>( i_target, l_port_index),
                       "Error in port select for %s", mss::c_str(i_target) );
-            FAPI_TRY( execute_inst_array(i_target, io_program, p),
+            FAPI_TRY( execute_inst_array<MC>(i_target, io_program, p),
                       "Error in executing ccs array for %s", mss::c_str(i_target) );
         }
     }
 
     // Cleans up after executing the CCS program (runs workarounds if needed)
-    FAPI_TRY((cleanup_from_execute<DEFAULT_MC_TYPE>(io_program, i_ports)));
+    FAPI_TRY((cleanup_from_execute<MC>(io_program, i_ports)));
 
 fapi_try_exit:
     io_program.iv_instructions.clear();
@@ -1427,6 +1444,7 @@ fapi_try_exit:
 
 ///
 /// @brief Execute a set of CCS instructions via the MCBIST engine
+/// @tparam MC the memory controller type running CCS
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam P  the port type for this CCS engine
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
@@ -1435,9 +1453,9 @@ fapi_try_exit:
 /// @param[in] i_ports the vector of ports
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template< fapi2::TargetType T, fapi2::TargetType P, typename TT = ccsTraits<DEFAULT_MC_TYPE> >
+template< mss::mc_type MC, fapi2::TargetType T, fapi2::TargetType P, typename TT = ccsTraits<MC> >
 static inline fapi2::ReturnCode execute_via_mcbist( const fapi2::Target<T>& i_target,
-        ccs::program& io_program,
+        ccs::program<MC>& io_program,
         const std::vector< fapi2::Target<P> >& i_ports)
 {
     // Subtract one for the idle we insert at the end
@@ -1460,11 +1478,11 @@ static inline fapi2::ReturnCode execute_via_mcbist( const fapi2::Target<T>& i_ta
 
 
     // Run prelude to execution
-    FAPI_TRY( prelude_to_execution(i_target, io_program, i_ports), "Error setting up ccs engine before execution on %s",
+    FAPI_TRY( prelude_to_execution<MC>(i_target, io_program, i_ports), "Error setting up ccs engine before execution on %s",
               mss::c_str(i_target));
 
     // Stop any ongoing MCBIST command
-    FAPI_TRY( mss::memdiags::stop<DEFAULT_MC_TYPE>(i_target),
+    FAPI_TRY( mss::memdiags::stop<MC>(i_target),
               "MCBIST engine failed to stop current command in progress on %s",
               mss::c_str(i_target) );
 
@@ -1474,17 +1492,17 @@ static inline fapi2::ReturnCode execute_via_mcbist( const fapi2::Target<T>& i_ta
         const auto l_port_index = mss::relative_pos<T>(p);
 
         // Run ccs instruction setup
-        FAPI_TRY( setup_ccs_instructions(i_target, l_inst_iter, io_program, p),
+        FAPI_TRY( setup_ccs_instructions<MC>(i_target, l_inst_iter, io_program, p),
                   "Error setting up ccs instructions in registers on %s", mss::c_str(i_target) );
 
         FAPI_INF("executing CCS via MCBIST for port %d (%s)", l_port_index, mss::c_str(p));
-        FAPI_TRY( select_ports<DEFAULT_MC_TYPE>( i_target, l_port_index),
+        FAPI_TRY( select_ports<MC>( i_target, l_port_index),
                   "Error in port select for ccs::execute_via_mcbist on %s", mss::c_str(i_target) );
-        FAPI_TRY( execute_inst_via_mcbist(i_target), "Error in ccs::execute_inst_via_mcbist on %s", mss::c_str(i_target) );
+        FAPI_TRY( execute_inst_via_mcbist<MC>(i_target), "Error in ccs::execute_inst_via_mcbist on %s", mss::c_str(i_target) );
     }
 
     // Cleans up after executing the CCS program (runs workarounds if needed)
-    FAPI_TRY((cleanup_from_execute<DEFAULT_MC_TYPE>(io_program, i_ports)));
+    FAPI_TRY((cleanup_from_execute<MC>(io_program, i_ports)));
 
 fapi_try_exit:
     io_program.iv_instructions.clear();
@@ -1493,6 +1511,7 @@ fapi_try_exit:
 
 ///
 /// @brief Execute a set of CCS instructions - single port
+/// @tparam MC the memory controller type running CCS
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam P the target of the CCS instruction (the port)
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
@@ -1501,18 +1520,19 @@ fapi_try_exit:
 /// @param[in] i_port The target that's being programmed by the array
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template< fapi2::TargetType T, fapi2::TargetType P, typename TT = ccsTraits<DEFAULT_MC_TYPE> >
+template< mss::mc_type MC, fapi2::TargetType T, fapi2::TargetType P, typename TT = ccsTraits<MC> >
 static inline fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
-        ccs::program& i_program,
+        ccs::program<MC>& i_program,
         const fapi2::Target<P>& i_port)
 {
     // Mmm. Might want to find a better way to do this - seems expensive. BRS
     std::vector< fapi2::Target<P> > l_ports{ i_port };
-    return execute(i_target, i_program, l_ports);
+    return execute<MC>(i_target, i_program, l_ports);
 }
 
 ///
 /// @brief Execute a set of CCS instructions via the MCBIST engine - single port
+/// @tparam MC the memory controller type running CCS
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam P the target of the CCS instruction (the port)
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
@@ -1521,25 +1541,26 @@ static inline fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
 /// @param[in] i_port The target that's being programmed by the array
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template< fapi2::TargetType T, fapi2::TargetType P, typename TT = ccsTraits<DEFAULT_MC_TYPE> >
+template< mss::mc_type MC, fapi2::TargetType T, fapi2::TargetType P, typename TT = ccsTraits<MC> >
 static inline fapi2::ReturnCode execute_via_mcbist( const fapi2::Target<T>& i_target,
-        ccs::program& io_program,
+        ccs::program<MC>& io_program,
         const fapi2::Target<P>& i_port)
 {
     // Mmm. Might want to find a better way to do this - seems expensive. BRS
     std::vector< fapi2::Target<P> > l_ports{ i_port };
-    return execute_via_mcbist(i_target, io_program, l_ports);
+    return execute_via_mcbist<MC>(i_target, io_program, l_ports);
 }
 
 ///
 /// @brief Query the status of the CCS engine
+/// @tparam MC the memory controller type running CCS
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_target The MCBIST containing the CCS engine
 /// @param[out] io_status The query result first being the result, second the type
 /// @return FAPI2_RC_SUCCESS iff success
 ///
-template< fapi2::TargetType T, typename TT = ccsTraits<DEFAULT_MC_TYPE> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = ccsTraits<MC> >
 fapi2::ReturnCode status_query( const fapi2::Target<T>& i_target, std::pair<uint64_t, uint64_t>& io_status );
 
 } // ends namespace ccs
