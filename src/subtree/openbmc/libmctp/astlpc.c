@@ -1225,6 +1225,42 @@ static int mctp_astlpc_init_fileio_lpc(struct mctp_binding_astlpc *astlpc)
 		return -1;
 	}
 
+	/*
+	 * 🚨🚨🚨
+	 *
+	 * Decouple ourselves from hiomapd[1] (another user of the FW2AHB) by
+	 * mapping the FW2AHB to the reserved memory here as well.
+	 *
+	 * It's not possible to use the MCTP ASTLPC binding on machines that
+	 * need the FW2AHB bridge mapped anywhere except to the reserved memory
+	 * (e.g. the host SPI NOR).
+	 *
+	 * [1] https://github.com/openbmc/hiomapd/
+	 *
+	 * 🚨🚨🚨
+	 *
+	 * The following calculation must align with what's going on in
+	 * hiomapd's lpc.c so as not to disrupt its behaviour:
+	 *
+	 * https://github.com/openbmc/hiomapd/blob/5ff50e3cbd7702aefc185264e4adfb9952040575/lpc.c#L68
+	 *
+	 * 🚨🚨🚨
+	 */
+
+	/* Map the reserved memory at the top of the 28-bit LPC firmware address space */
+	map.addr = 0x0FFFFFFF & -map.size;
+	astlpc_prinfo(astlpc,
+		      "Configuring FW2AHB to map reserved memory at 0x%08x for 0x%x in the LPC FW cycle address-space",
+		      map.addr, map.size);
+
+	rc = ioctl(fd, ASPEED_LPC_CTRL_IOCTL_MAP, &map);
+	if (rc) {
+		astlpc_prwarn(astlpc, "Failed to map FW2AHB to reserved memory");
+		close(fd);
+		return -1;
+	}
+
+	/* Map the reserved memory into our address space */
 	lpc_map_base =
 		mmap(NULL, map.size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 	if (lpc_map_base == MAP_FAILED) {
@@ -1317,7 +1353,7 @@ struct mctp_binding_astlpc *mctp_astlpc_init_fileio(void)
 struct mctp_binding_astlpc * __attribute__((const))
 	mctp_astlpc_init_fileio(void)
 {
-	// Missing support for file IO
+	astlpc_prerr(astlpc, "Missing support for file IO");
 	return NULL;
 }
 

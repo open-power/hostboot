@@ -95,7 +95,7 @@ struct mctp_pktbuf *mctp_pktbuf_alloc(struct mctp_binding *binding, size_t len)
 	struct mctp_pktbuf *buf;
 	size_t size;
 
-	size = len + binding->pkt_header + binding->pkt_trailer;
+	size = binding->pkt_size + binding->pkt_header + binding->pkt_trailer;
 
 	/* todo: pools */
 	buf = __mctp_alloc(sizeof(*buf) + size);
@@ -332,6 +332,9 @@ int mctp_set_rx_all(struct mctp *mctp, mctp_rx_fn fn, void *data)
 static struct mctp_bus *find_bus_for_eid(struct mctp *mctp,
 		mctp_eid_t dest __attribute__((unused)))
 {
+	if (mctp->n_busses == 0)
+		return NULL;
+
 	/* for now, just use the first bus. For full routing support,
 	 * we will need a table of neighbours */
 	return &mctp->busses[0];
@@ -803,5 +806,8 @@ int mctp_message_tx(struct mctp *mctp, mctp_eid_t eid,
 	struct mctp_bus *bus;
 
 	bus = find_bus_for_eid(mctp, eid);
+	if (!bus)
+		return 0;
+
 	return mctp_message_tx_on_bus(bus, bus->eid, eid, msg, msg_len);
 }
