@@ -306,7 +306,6 @@ errlHndl_t UtilLidMgr::loadLid()
             UTIL_FT("UtilLidMgr::loadLid> size=%d, ptr=%p",
                     iv_lidSize, iv_lidBuffer);
         }
-        //@TODO-RTC:249470-Might be a PLDM option as well for OpenPOWER
 
     } while (0);
 

@@ -1768,6 +1768,9 @@ void ErrlEntry::deferredDeconfigure()
                         (*it)->iv_pData)->deconfigState) ||
                  (HWAS::DECONFIG ==
                     reinterpret_cast<HWAS::callout_ud_t*>(
+                        (*it)->iv_pData)->deconfigState) ||
+                 (HWAS::NO_DECONFIG ==
+                    reinterpret_cast<HWAS::callout_ud_t*>(
                         (*it)->iv_pData)->deconfigState))
 #else
                 (HWAS::DELAYED_DECONFIG ==

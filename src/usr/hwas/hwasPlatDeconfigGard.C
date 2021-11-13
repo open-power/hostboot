@@ -71,7 +71,7 @@ using namespace TARGETING;
 
 const uint32_t EMPTY_GARD_RECORDID = 0xFFFFFFFF;
 
-#ifndef __HOSTBOOT_RUNTIME
+#if !defined(__HOSTBOOT_RUNTIME) || defined(CONFIG_FILE_XFER_VIA_PLDM)
 /**
  * @brief Guard PNOR section info, obtained once for efficiency
  */
@@ -81,7 +81,7 @@ static PNOR::SectionInfo_t g_GardSectionInfo;
  * @brief Flag indicating if getGardSectionInfo() was called previously
  */
 static bool getGardSectionInfoCalled;
-#endif //#ifndef __HOSTBOOT_RUNTIME
+#endif
 
 //******************************************************************************
 // RUNTIME/NON-RUNTIME/HOSTBOOT/NON-HOSTBOOT methods
@@ -652,10 +652,9 @@ errlHndl_t _GardRecordIdSetup( void *&io_platDeconfigGard)
             break;
         }
 
-#ifdef __HOSTBOOT_RUNTIME
-        //@TODO-RTC:249470-PLDM support for GUARD file
-        HWAS_ERR("_GardRecordIdSetup: No gard support at runtime yet!!!");
-        //falsify some data for now
+#if defined(__HOSTBOOT_RUNTIME) && !defined(CONFIG_FILE_XFER_VIA_PLDM)
+        HWAS_INF("_GardRecordIdSetup: No gard support at runtime except VIA PLDM FILE XFER");
+        //falsify some data for compilations
         PNOR::SectionInfo_t l_section;
         l_section.size = 0x1000;
         l_section.vaddr = reinterpret_cast<uint64_t>(malloc(0x1000));
@@ -822,13 +821,13 @@ void _flush(void *i_addr)
         HWAS_ERR("_flush: mm_remove_pages(FLUSH,%p,%d) returned %d",
                 i_addr, sizeof(DeconfigGard::GardRecord),l_rc);
     }
-#else
-    HWAS_INF("_flush: TBD RTC 249470 flushing all GARD in PNOR due to addr=%p", i_addr);
-    //@TODO-RTC:249470-PLDM support for GUARD file
+#elif defined (CONFIG_FILE_XFER_VIA_PLDM)
+    HWAS_DBG("_flush: flushing all GARD in PNOR addr=%p", i_addr);
+    PNOR::flush(PNOR::GUARD_DATA);
 #endif
 }
 
-#ifndef __HOSTBOOT_RUNTIME
+#if !defined(__HOSTBOOT_RUNTIME) || defined(CONFIG_FILE_XFER_VIA_PLDM)
 errlHndl_t getGardSectionInfo(PNOR::SectionInfo_t& o_sectionInfo)
 {
     errlHndl_t l_errl = NULL;
@@ -878,7 +877,7 @@ errlHndl_t getGardSectionInfo(PNOR::SectionInfo_t& o_sectionInfo)
 
     return l_errl;
 }
-#endif //#ifndef __HOSTBOOT_RUNTIME
+#endif //ifdef CONFIG_FILE_XFER_VIA_PLDM
 
 /**
  * @brief This will perform any post-deconfig operations,
