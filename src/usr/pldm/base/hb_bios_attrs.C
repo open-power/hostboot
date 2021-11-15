@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -80,7 +80,7 @@ const char PLDM_BIOS_HB_SEC_VER_LOCKIN_SUPPORTED_STRING[]  = "hb_secure_ver_lock
 const char PLDM_BIOS_HB_LID_IDS_STRING[]                   = "hb_lid_ids";
 const char PLDM_BIOS_HB_TPM_REQUIRED_POLICY_STRING[]       = "hb_tpm_required_current";
 
-const char PLDM_BIOS_PVM_FW_BOOT_SIDE_STRING[]             = "pvm_fw_boot_side";
+const char PLDM_BIOS_FW_BOOT_SIDE_STRING[]                 = "fw_boot_side_current";
 const char PLDM_BIOS_HB_MIRROR_MEMORY_STRING[]             = "hb_memory_mirror_mode_current";
 
 const char PLDM_BIOS_HB_KEY_CLEAR_REQUEST_STRING[]         = "hb_key_clear_request_current";
@@ -128,7 +128,7 @@ const std::vector<const char*> POSSIBLE_HB_MEM_REGION_SIZE_STRINGS = {PLDM_BIOS_
 const std::vector<const char*> POSSIBLE_HB_POWER_LIMIT_STRINGS = {PLDM_BIOS_ENABLED_STRING,
                                                                   PLDM_BIOS_DISABLED_STRING};
 
-const std::vector<const char*> POSSIBLE_PVM_FW_BOOT_SIDE_STRINGS = {PLDM_BIOS_PERM_STRING,
+const std::vector<const char*> POSSIBLE_FW_BOOT_SIDE_STRINGS = {PLDM_BIOS_PERM_STRING,
                                                                     PLDM_BIOS_TEMP_STRING};
 
 const std::vector<const char*> POSSIBLE_SEC_VER_LOCKIN_STRINGS = {PLDM_BIOS_ENABLED_STRING,
@@ -1231,12 +1231,12 @@ errlHndl_t getBootside(std::vector<uint8_t>                     & io_string_tabl
 
     errl = getDecodedEnumAttr(io_string_table,
                               io_attr_table,
-                              PLDM_BIOS_PVM_FW_BOOT_SIDE_STRING,
-                              POSSIBLE_PVM_FW_BOOT_SIDE_STRINGS,
+                              PLDM_BIOS_FW_BOOT_SIDE_STRING,
+                              POSSIBLE_FW_BOOT_SIDE_STRINGS,
                               decoded_value);
     if(errl)
     {
-        PLDM_ERR("Failed to lookup value for %s", PLDM_BIOS_PVM_FW_BOOT_SIDE_STRING);
+        PLDM_ERR("Failed to lookup value for %s", PLDM_BIOS_FW_BOOT_SIDE_STRING);
         break;
     }
 
@@ -1275,12 +1275,12 @@ errlHndl_t getBootside(std::vector<uint8_t>   & io_string_table,
 
     errl = getDecodedEnumAttr(io_string_table,
                               io_attr_table,
-                              PLDM_BIOS_PVM_FW_BOOT_SIDE_STRING,
-                              POSSIBLE_PVM_FW_BOOT_SIDE_STRINGS,
+                              PLDM_BIOS_FW_BOOT_SIDE_STRING,
+                              POSSIBLE_FW_BOOT_SIDE_STRINGS,
                               decoded_value);
     if(errl)
     {
-        PLDM_ERR("Failed to lookup value for %s", PLDM_BIOS_PVM_FW_BOOT_SIDE_STRING);
+        PLDM_ERR("Failed to lookup value for %s", PLDM_BIOS_FW_BOOT_SIDE_STRING);
         break;
     }
 
