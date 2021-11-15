@@ -223,6 +223,8 @@ void extractGroupAndChip(const topoId_t i_topologyId,
 
 #ifdef __HOSTBOOT_MODULE
 
+const uint8_t CURRENT_HBD_PERSISTENT_VERSION = 0;
+
 /**
  * @brief The structure to hold the metadata of an attribute: its
  *        size and persistency.
@@ -299,17 +301,18 @@ typedef struct
 /**
  * @brief This structure represents the memory layout of the whole
  *        RW attribute data section. The RW attribute data section
- *        consists of the hash over the data, the size of the data in bytes,
- *        the number of attributes included, followed by the list of all
- *        included attributes/data.
+ *        consists of the hash over the data, the version of the data set,
+ *        the size of the data in bytes, the number of attributes included,
+ *        followed by the list of all included attributes/data.
  */
 typedef struct
 {
     uint32_t dataHash;
+    uint8_t version;
     uint32_t dataSize;
     uint32_t numAttributes;
     rw_attr_memory_layout_t attrArray;
-} rw_attr_section_t;
+}__attribute__((packed)) rw_attr_section_t;
 
 // Note that map access is not thread-safe, so the below data types
 // should be used in single-threaded environment or data access protection

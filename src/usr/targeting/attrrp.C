@@ -734,9 +734,16 @@ namespace TARGETING
                             rc = -EINVAL;
                             break;
                         }
-                        // if we are NOT in mpipl OR if this IS a r/w section,
-                        // Do a memcpy from PNOR address into physical page.
-                        if(!iv_isMpipl || (iv_sections[section].type == SECTION_TYPE_PNOR_RW)  )
+                        // if we are NOT in mpipl OR if this IS a r/w section
+                        // on FSP system, do a memcpy from PNOR address into
+                        // physical page.
+                        if(!iv_isMpipl
+                        #ifndef CONFIG_ENABLE_PERSISTENT_RW_ATTR
+                           ||
+                           (iv_sections[section].type == SECTION_TYPE_PNOR_RW))
+                        #else
+                            )
+                        #endif
                         {
                             memcpy(pAddr,
                                 reinterpret_cast<void*>(
@@ -754,6 +761,7 @@ namespace TARGETING
                         break;
 
                     case MSG_MM_RP_WRITE:
+                        #ifndef CONFIG_ENABLE_PERSISTENT_RW_ATTR
                         // Only PNOR_RW should ever be requested for write-back
                         // because others are not allowed to be pushed back to
                         // PNOR.
@@ -771,9 +779,17 @@ namespace TARGETING
                                     iv_sections[section].pnorAddress + offset),
                                pAddr,
                                size);
+                        #else
+                        // We should not be writing back into the RW partition,
+                        // since it lives on the heap now.
+                        assert(false, "AttrRP::msgServiceTask: attempt to write to RW partition");
+                        #endif
                         break;
                     case MSG_MM_RP_RUNTIME_PREP:
                     {
+                        // Only do this prep if the RW section needs to be
+                        // flushed out to PNOR.
+                        #ifndef CONFIG_ENABLE_PERSISTENT_RW_ATTR
                         // used for security purposes to pin all the attribute
                         // memory just prior to copying to reserve memory
                         uint64_t l_access =
@@ -797,6 +813,7 @@ namespace TARGETING
                                        l_access);
                             }
                         }
+                        #endif
                         break;
                     }
                     default:
@@ -1039,7 +1056,6 @@ namespace TARGETING
     errlHndl_t AttrRP::parseAttrSectHeader()
     {
         errlHndl_t l_errl = nullptr;
-        PNOR::SectionInfo_t l_pnorSectionInfo_RW;
         bool hasHBD_HPT = false;
 
         do
@@ -1068,19 +1084,6 @@ namespace TARGETING
                 hasHBD_HPT = true;
             }
             TRACFCOMP(g_trac_targeting, INFO_MRK "parseAttrSectHeader: HBD hasHashTable=%d", hasHBD_HPT);
-
-            if (hasHBD_HPT)
-            {
-                // Locate RW attribute section in PNOR.
-                l_errl = PNOR::getSectionInfo(PNOR::HB_DATA_RW,
-                             l_pnorSectionInfo_RW);
-                if(l_errl)
-                {
-                    TRACFCOMP(g_trac_targeting, INFO_MRK "parseAttrSectHeader: Problem with finding the HB_DATA_RW,"
-                        " HBD hasHashTable=%d", hasHBD_HPT);
-                    break;
-                }
-            }
 
             if(!iv_isMpipl)
             {
@@ -1194,15 +1197,11 @@ namespace TARGETING
                 iv_sections[i].pnorAddress =
                     l_pnorSectionInfo.vaddr + l_section->sectionOffset;
 
-                if ((iv_sections[i].type == SECTION_TYPE_PNOR_RW) && hasHBD_HPT)
-                {
-                    iv_sections[i].pnorAddress =
-                        l_pnorSectionInfo_RW.vaddr;
-                }
-
                 #ifdef CONFIG_SECUREBOOT
                 // RW targeting section is part of the unprotected payload
-                // so use the normal PNOR virtual address space
+                // so use the normal PNOR virtual address space unless HBD
+                // has hash page table, in which case pull from the secure
+                // provider that validates each page.
                 if(   l_pnorSectionInfo.secure
                    && iv_sections[i].type == SECTION_TYPE_PNOR_RW)
                 {
@@ -1268,9 +1267,13 @@ namespace TARGETING
                             break;
 
                         case SECTION_TYPE_PNOR_RW:
-                            l_perm = WRITABLE | WRITE_TRACKED;
-                            break;
-
+                            l_perm = WRITABLE;
+                            #ifndef CONFIG_ENABLE_PERSISTENT_RW_ATTR
+                            // Mark the RW section write-tracked for FSP
+                            // systems. On BMC, the RW section behaves
+                            // just like the PNOR_INIT section.
+                            l_perm |= WRITE_TRACKED;
+                            #endif
                         case SECTION_TYPE_HEAP_PNOR_INIT:
                             l_perm = WRITABLE;
                             break;
@@ -1396,6 +1399,9 @@ namespace TARGETING
                     break;
                 }
 
+#ifndef CONFIG_ENABLE_PERSISTENT_RW_ATTR
+                // Only register the RW block if the RW section lives in PNOR
+                // and needs to be flushed back into PNOR
                 if(iv_sections[i].type == SECTION_TYPE_PNOR_RW)
                 {
                     /*
@@ -1406,6 +1412,7 @@ namespace TARGETING
                         reinterpret_cast<void*>(iv_sections[i].vmmAddress),
                         iv_sections[i].size,ATTR_PRIORITY);
                 }
+#endif
             } // End iteration through each section
 
             if(l_errl)
@@ -1436,9 +1443,14 @@ namespace TARGETING
                 // into the vmmAddress in order to make future r/w come
                 // from the pnor address, not real memory
                 if(((iv_sections[i].type == SECTION_TYPE_HEAP_ZERO_INIT) ||
-                    (iv_sections[i].type == SECTION_TYPE_HB_HEAP_ZERO_INIT) ||
-                    (iv_sections[i].type == SECTION_TYPE_PNOR_RW)) &&
-                    iv_isMpipl)
+                    (iv_sections[i].type == SECTION_TYPE_HB_HEAP_ZERO_INIT)
+#ifndef CONFIG_ENABLE_PERSISTENT_RW_ATTR
+                    /* Copy RW section only in FSP case; on BMC, we use
+                       in-memory copy of RW data */
+                    || (iv_sections[i].type == SECTION_TYPE_PNOR_RW)
+#endif
+                    )
+                    && iv_isMpipl)
                 {
                     memcpy(reinterpret_cast<void*>(iv_sections[i].vmmAddress),
                         reinterpret_cast<void*>(iv_sections[i].realMemAddress),
@@ -1735,10 +1747,20 @@ namespace TARGETING
     {
         TRACFCOMP(g_trac_targeting, ENTER_MRK"AttrRP::mergeAttributes");
         errlHndl_t l_errl = nullptr;
+#ifdef CONFIG_ENABLE_PERSISTENT_RW_ATTR
         PNOR::SectionInfo_t l_hbdSectionInfo;
 
         do {
-        // This code assumes that the secure provider has alredy loaded
+
+        if(UTIL::assertGetToplevelTarget()->getAttr<TARGETING::ATTR_IS_MPIPL_HB>())
+        {
+            // No need to re-merge attributes in MPIPL. It would have been done
+            // during the normal boot.
+            TRACFCOMP(g_trac_targeting, INFO_MRK"AttrRP::mergeAttributes: Skipping merge in MPIPL");
+            break;
+        }
+
+        // This code assumes that the secure provider has already loaded
         // HBD_DATA and that it has not been unloaded yet.
         l_errl = PNOR::getSectionInfo(PNOR::HB_DATA,
                                       l_hbdSectionInfo);
@@ -1818,7 +1840,7 @@ namespace TARGETING
                                                                          l_attrAddressesArr);
                 TRACDCOMP(g_trac_targeting, INFO_MRK"AttrRP::mergeAttributes: Found %d attributes for the target",
                           l_attrCnt);
-                // Iterate the non-persistent RW attributes and compair their
+                // Iterate the non-persistent RW attributes and compare their
                 // values and metadata to the attributes we have preserved so
                 // far
                 for(uint32_t l_attrNum = 0; l_attrNum < l_attrCnt; ++l_attrNum)
@@ -1914,6 +1936,7 @@ namespace TARGETING
             }
         }
 
+#endif // CONFIG_ENABLE_PERSISTENT_RW_ATTR
         TRACFCOMP(g_trac_targeting, EXIT_MRK"AttrRP::mergeAttributes");
         return l_errl;
     }
@@ -1924,6 +1947,13 @@ namespace TARGETING
         errlHndl_t l_errl = nullptr;
 
         do {
+
+        if(UTIL::assertGetToplevelTarget()->getAttr<TARGETING::ATTR_IS_MPIPL_HB>())
+        {
+            // No need to update preserved section during MPIPL.
+            TRACFCOMP(g_trac_targeting, INFO_MRK"AttrRP::updatePreservedAttrSection: Skipping update in MPIPL");
+            break;
+        }
 
         PNOR::SectionInfo_t l_hbdSectionInfo;
         l_errl = PNOR::getSectionInfo(PNOR::HB_DATA,
@@ -1971,7 +2001,8 @@ namespace TARGETING
                                            nullptr);
 
             uint32_t l_rwAttrCnt = 0;
-            uint32_t l_rwDataSize = sizeof(l_hbdRwPtr->dataSize) +
+            uint32_t l_rwDataSize = sizeof(l_hbdRwPtr->version) +
+                                    sizeof(l_hbdRwPtr->dataSize) +
                                     sizeof(l_hbdRwPtr->numAttributes);
             rw_attr_memory_layout_t* l_preservedAttrPtr = &l_hbdRwPtr->attrArray;
             // Iterate over all targets and write the RW attributes into the
@@ -2022,10 +2053,11 @@ namespace TARGETING
                 } // for all attributes
             } // for all targets
 
-            // Write the hash and the number of RW attributes
+            // Write the version, the hash, and the number of RW attributes
+            l_hbdRwPtr->version = CURRENT_HBD_PERSISTENT_VERSION;
             l_hbdRwPtr->numAttributes = l_rwAttrCnt;
             l_hbdRwPtr->dataSize = l_rwDataSize;
-            uint8_t* l_rwDataPtr = reinterpret_cast<uint8_t*>(&(l_hbdRwPtr->dataSize));
+            uint8_t* l_rwDataPtr = reinterpret_cast<uint8_t*>(&(l_hbdRwPtr->version));
             l_hbdRwPtr->dataHash = Util::crc32_calc(l_rwDataPtr, l_hbdRwPtr->dataSize);
 
             // Make sure the data is written out to PNOR

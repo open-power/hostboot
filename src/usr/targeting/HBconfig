@@ -4,3 +4,10 @@ config TARG_TRACE_AS_DEBUG
         Reduce number of traces by making TARG_ENTER and TARG_EXIT debug traces
 
 # @TODO RTC:106879 BMC:Console - May reconsider approach to quiet trace.
+
+config ENABLE_PERSISTENT_RW_ATTR
+    default y
+    help
+        Whether to persist the read-write attributes across boots and code updates.
+        This flag requires HBD_RW PNOR partition to be generated and uses it to
+        store the RW attributes.

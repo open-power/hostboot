@@ -98,6 +98,7 @@ enum TargetingReasonCode
     TARG_RC_BAD_RW_ATTR_PTR                 = TARG_COMP_ID | 0x21,
     TARG_RC_BAD_METADATA_PTR                = TARG_COMP_ID | 0x22,
     TARG_RC_BAD_HASH                        = TARG_COMP_ID | 0x23,
+    TARG_RC_BAD_VERSION                     = TARG_COMP_ID | 0x24,
 };
 
 }; // End TARGETING namespace

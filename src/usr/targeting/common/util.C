@@ -483,6 +483,7 @@ errlHndl_t parseRWAttributeData(rw_attr_section_t const* i_rwAttributePtr,
                                 huid_rw_attrs_map& o_parsedData)
 {
     errlHndl_t l_errl = nullptr;
+
     do
     {
 
@@ -507,9 +508,35 @@ errlHndl_t parseRWAttributeData(rw_attr_section_t const* i_rwAttributePtr,
         break;
     }
 
+    if(i_rwAttributePtr->version != CURRENT_HBD_PERSISTENT_VERSION)
+    {
+        TRACFCOMP(g_trac_targeting, ERR_MRK"parseRWAttributeData: version mismatch; expected version: %d; actual version: %d",
+                  CURRENT_HBD_PERSISTENT_VERSION, i_rwAttributePtr->version);
+        /*@
+         * @errortype
+         * @severity   ERRORLOG::ERRL_SEV_INFORMATIONAL
+         * @moduleid   TARG_PARSE_RW_DATA
+         * @reasoncode TARG_RC_BAD_VERSION
+         * @userdata1  Expected persistent data version
+         * @userdata2  Actual persistent data version
+         * @devdesc    The HBD persistent data has unexpected version. The data
+         *             can no longer be used and will be updated to the current
+         *             version.
+         * @custdesc   Failure during the boot of the system
+         */
+        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                         TARG_PARSE_RW_DATA,
+                                         TARG_RC_BAD_VERSION,
+                                         CURRENT_HBD_PERSISTENT_VERSION,
+                                         i_rwAttributePtr->version,
+                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        break;
+    }
+
     // Compute the hash of the entire partition for comparison
-    const uint8_t* l_rwDataPtr = reinterpret_cast<const uint8_t*>(&(i_rwAttributePtr->dataSize));
+    const uint8_t* l_rwDataPtr = reinterpret_cast<const uint8_t*>(&(i_rwAttributePtr->version));
     uint32_t l_crcHash = Util::crc32_calc(l_rwDataPtr, i_rwAttributePtr->dataSize);
+
     if(i_rwAttributePtr->dataHash != l_crcHash)
     {
         TRACFCOMP(g_trac_targeting, ERR_MRK"parseRWAttributeData: computed hash of RW data doesn't match current hash. Computed hash: 0x%x; current hash: 0x%x",
