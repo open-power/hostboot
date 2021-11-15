@@ -87,15 +87,6 @@ HostPDRHandler::HostPDRHandler(
                 auto propVal = std::get<std::string>(value);
                 if (propVal == "xyz.openbmc_project.State.Host.HostState.Off")
                 {
-                    // Delete all the remote terminus information
-                    for (const auto& terminusInfo : this->tlPDRInfo)
-                    {
-                        if (terminusInfo.first != TERMINUS_HANDLE)
-                        {
-                            this->tlPDRInfo.erase(terminusInfo.first);
-                        }
-                    }
-
                     pldm_pdr_remove_remote_pdrs(repo);
                     pldm_entity_association_tree_destroy_root(entityTree);
                     pldm_entity_association_tree_copy_root(bmcEntityTree,
@@ -341,7 +332,8 @@ void HostPDRHandler::sendPDRRepositoryChgEvent(std::vector<uint8_t>&& pdrTypes,
     }
 }
 
-void HostPDRHandler::parseStateSensorPDRs(const PDRList& stateSensorPDRs)
+void HostPDRHandler::parseStateSensorPDRs(const PDRList& stateSensorPDRs,
+                                          const TLPDRMap& tlpdrInfo)
 {
     for (const auto& pdr : stateSensorPDRs)
     {
@@ -351,7 +343,7 @@ void HostPDRHandler::parseStateSensorPDRs(const PDRList& stateSensorPDRs)
         sensorEntry.sensorID = sensorID;
         try
         {
-            sensorEntry.terminusID = std::get<0>(tlPDRInfo.at(terminusHandle));
+            sensorEntry.terminusID = tlpdrInfo.at(terminusHandle);
         }
         // If there is no mapping for terminusHandle assign the reserved TID
         // value of 0xFF to indicate that.
@@ -369,7 +361,9 @@ void HostPDRHandler::processHostPDRs(mctp_eid_t /*eid*/,
 {
     static bool merged = false;
     static PDRList stateSensorPDRs{};
+    static TLPDRMap tlpdrInfo{};
     uint32_t nextRecordHandle{};
+    std::vector<TlInfo> tlInfo;
     uint8_t tlEid = 0;
     bool tlValid = true;
     uint32_t rh = 0;
@@ -446,6 +440,10 @@ void HostPDRHandler::processHostPDRs(mctp_eid_t /*eid*/,
                     auto tlpdr =
                         reinterpret_cast<const pldm_terminus_locator_pdr*>(
                             pdr.data());
+                    tlpdrInfo.emplace(
+                        static_cast<pldm::pdr::TerminusHandle>(
+                            tlpdr->terminus_handle),
+                        static_cast<pldm::pdr::TerminusID>(tlpdr->tid));
 
                     terminusHandle = tlpdr->terminus_handle;
                     tid = tlpdr->tid;
@@ -462,9 +460,9 @@ void HostPDRHandler::processHostPDRs(mctp_eid_t /*eid*/,
                     {
                         tlValid = false;
                     }
-                    tlPDRInfo.insert_or_assign(
-                        tlpdr->terminus_handle,
-                        std::make_tuple(tlpdr->tid, tlEid, tlpdr->validity));
+                    tlInfo.emplace_back(
+                        TlInfo{tlpdr->validity, static_cast<uint8_t>(tlEid),
+                               tlpdr->tid, tlpdr->terminus_handle});
                 }
                 else if (pdrHdr->type == PLDM_STATE_SENSOR_PDR)
                 {
@@ -487,12 +485,13 @@ void HostPDRHandler::processHostPDRs(mctp_eid_t /*eid*/,
     if (!nextRecordHandle)
     {
         /*received last record*/
-        this->parseStateSensorPDRs(stateSensorPDRs);
+        this->parseStateSensorPDRs(stateSensorPDRs, tlpdrInfo);
         if (isHostUp())
         {
-            this->setHostSensorState(stateSensorPDRs);
+            this->setHostSensorState(stateSensorPDRs, tlInfo);
         }
         stateSensorPDRs.clear();
+        tlpdrInfo.clear();
         if (merged)
         {
             merged = false;
@@ -580,7 +579,8 @@ bool HostPDRHandler::isHostUp()
     return responseReceived;
 }
 
-void HostPDRHandler::setHostSensorState(const PDRList& stateSensorPDRs)
+void HostPDRHandler::setHostSensorState(const PDRList& stateSensorPDRs,
+                                        const std::vector<TlInfo>& tlinfo)
 {
     for (const auto& stateSensorPDR : stateSensorPDRs)
     {
@@ -597,18 +597,18 @@ void HostPDRHandler::setHostSensorState(const PDRList& stateSensorPDRs)
 
         uint16_t sensorId = pdr->sensor_id;
 
-        for (const auto& [terminusHandle, terminusInfo] : tlPDRInfo)
+        for (auto info : tlinfo)
         {
-            if (terminusHandle == pdr->terminus_handle)
+            if (info.terminusHandle == pdr->terminus_handle)
             {
-                if (std::get<2>(terminusInfo) == PLDM_TL_PDR_VALID)
+                if (info.valid == PLDM_TL_PDR_VALID)
                 {
-                    mctp_eid = std::get<1>(terminusInfo);
+                    mctp_eid = info.eid;
                 }
 
                 bitfield8_t sensorRearm;
                 sensorRearm.byte = 0;
-                uint8_t tid = std::get<0>(terminusInfo);
+                uint8_t tid = info.tid;
 
                 auto instanceId = requester.getInstanceId(mctp_eid);
                 std::vector<uint8_t> requestMsg(

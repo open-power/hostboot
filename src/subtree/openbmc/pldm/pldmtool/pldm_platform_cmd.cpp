@@ -4,9 +4,6 @@
 #include "common/types.hpp"
 #include "pldm_cmd_helper.hpp"
 
-#include <cstddef>
-#include <map>
-
 #ifdef OEM_IBM
 #include "oem/ibm/oem_ibm_state_set.hpp"
 #endif
@@ -99,13 +96,9 @@ class GetPDR : public CommandInterface
                                pdrRecType.begin(), tolower);
             }
 
-            // start the array
-            std::cout << "[\n";
-
             // Retrieve all PDR records starting from the first
             recordHandle = 0;
             uint32_t prevRecordHandle = 0;
-            std::map<uint32_t, uint32_t> recordsSeen;
             do
             {
                 CommandInterface::exec();
@@ -116,29 +109,8 @@ class GetPDR : public CommandInterface
                 {
                     return;
                 }
-
-                // check for circular references.
-                auto result =
-                    recordsSeen.emplace(recordHandle, prevRecordHandle);
-                if (!result.second)
-                {
-                    std::cerr
-                        << "Record handle " << recordHandle
-                        << " has multiple references: " << result.first->second
-                        << ", " << prevRecordHandle << "\n";
-                    return;
-                }
                 prevRecordHandle = recordHandle;
-
-                if (recordHandle != 0)
-                {
-                    // close the array
-                    std::cout << ",";
-                }
             } while (recordHandle != 0);
-
-            // close the array
-            std::cout << "]\n";
         }
         else
         {

@@ -8,14 +8,7 @@
          "default_string_length" : 0,
          "default_string" : "",
          "helpText" : "pvm_system_name",
-         "displayName" : "pvm_system_name",
-         "dbus":
-            {
-               "object_path" : "/xyz/openbmc_project/inventory/system",
-               "interface" : "xyz.openbmc_project.Inventory.Decorator.AssetTag",
-               "property_name" : "AssetTag",
-               "property_type" : "string"
-            }
+         "displayName" : "pvm_system_name"
       },
       {
          "attribute_name" : "vmi_hostname",

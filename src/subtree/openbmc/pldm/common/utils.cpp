@@ -231,21 +231,6 @@ std::string DBusHandler::getService(const char* path,
     return mapperResponse.begin()->first;
 }
 
-GetSubTreeResponse
-    DBusHandler::getSubtree(const std::string& searchPath, int depth,
-                            const std::vector<std::string>& ifaceList) const
-{
-
-    auto& bus = pldm::utils::DBusHandler::getBus();
-    auto method = bus.new_method_call(mapperBusName, mapperPath,
-                                      mapperInterface, "GetSubTree");
-    method.append(searchPath, depth, ifaceList);
-    auto reply = bus.call(method);
-    GetSubTreeResponse response;
-    reply.read(response);
-    return response;
-}
-
 void reportError(const char* errorMsg)
 {
     static constexpr auto logObjPath = "/xyz/openbmc_project/logging";

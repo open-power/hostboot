@@ -623,12 +623,6 @@ void Handler::generateTerminusLocatorPDR(Repo& repo)
     pdrEntry.data = pdrBuffer.data();
     pdrEntry.size = pdrBuffer.size();
     repo.addRecord(pdrEntry);
-    if (hostPDRHandler)
-    {
-        hostPDRHandler->tlPDRInfo.insert_or_assign(
-            pdr->terminus_handle,
-            std::make_tuple(pdr->tid, locatorValue->eid, pdr->validity));
-    }
 }
 
 Response Handler::getStateSensorReadings(const pldm_msg* request,

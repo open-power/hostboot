@@ -25,5 +25,3 @@ option('heartbeat-timeout-seconds', type: 'integer', description: ' The amount o
 option('terminus-id', type:'integer', min:0, max: 255, description: 'The terminus id value of the device that is running this pldm stack', value:1)
 option('terminus-handle',type:'integer',min:0, max:65535, description: 'The terminus handle value of the device that is running this pldm stack', value:1)
 
-# Firmware update configuration parameters
-option('maximum-transfer-size', type: 'integer', min: 16, max: 4294967295, description: 'Maximum size in bytes of the variable payload allowed to be requested by the FD, via RequestFirmwareData command', value: 4096)

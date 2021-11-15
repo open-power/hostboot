@@ -128,19 +128,6 @@
          "displayName" : "hb-debug-console"
       },
       {
-         "attribute_name":"hb_inhibit_bmc_reset",
-         "possible_values":[
-            "NoInhibit",
-            "Inhibit"
-         ],
-         "default_values":[
-            "NoInhibit"
-         ],
-         "helpText" : "When set to Inhibit, the hypervisor shall not reset/reload the BMC at runtime.",
-         "displayName" : "hb-inhibit-bmc-reset",
-         "readOnly":true
-      },
-      {
          "attribute_name":"pvm_system_power_off_policy",
          "possible_values":[
             "Power Off",
