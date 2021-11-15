@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -127,7 +127,9 @@ void* call_mss_scrub(void* const io_pArgs)
             {
                 fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> ft (maintTrgt);
 
-                FAPI_INVOKE_HWP(errl, mss::unmask::after_background_scrub, ft);
+                FAPI_INVOKE_HWP(errl,
+                    mss::unmask::after_background_scrub<mss::mc_type::EXPLORER>,
+                    ft);
 
                 if (errl)
                 {
