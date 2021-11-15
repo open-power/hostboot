@@ -359,9 +359,10 @@ enum
     IBM_11S_SN                       = SPD_FIRST_MOD_SPEC | 0xb6,
     IBM_11S_CC                       = SPD_FIRST_MOD_SPEC | 0xb7,
     EXPLORER_FW_VERSION              = SPD_FIRST_MOD_SPEC | 0xb8,
-    SPD_LAST_MOD_SPEC                = SPD_FIRST_MOD_SPEC | 0xb9,
+    SAFE_PARK_ZONE                   = SPD_FIRST_MOD_SPEC | 0xb9,
+    SPD_LAST_MOD_SPEC                = SPD_FIRST_MOD_SPEC | 0xba,
 
-    // Latest DDR SPD specifications have standard SPD
+    // Latest DDIMM SPD specifications have standard SPD
     // in the front followed by extendable function
     // descriptors (EFDs). ENTIRE_SPD will grab everything
     // ENTIRE_SPD_WITHOUT_EFD will skip getting the EFD info

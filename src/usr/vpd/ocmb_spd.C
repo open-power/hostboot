@@ -51,7 +51,7 @@ namespace SPD
  * @brief Handle SPD READ deviceOp to OCMB_CHIP targets
  *
  * @param[in]     i_opType    Operation type, see driverif.H
- * @param[in]     i_target    MMIO target
+ * @param[in]     i_target    OCMB target
  * @param[in/out] io_buffer   Read:   Pointer to output data storage
  *                            Write:  Pointer to input data storage
  * @param[in/out] io_buflen   Input:  Read:  size of data to read (in bytes)
@@ -68,6 +68,7 @@ errlHndl_t ocmbSPDPerformOp(DeviceFW::OperationType i_opType,
                             size_t&                 io_buflen,
                             int64_t                 i_accessType,
                             va_list                 i_args);
+
 
 // Register the perform Op with the routing code for OCMBs.
 DEVICE_REGISTER_ROUTE(DeviceFW::READ,
@@ -465,6 +466,7 @@ errlHndl_t checkCRC( T::TargetHandle_t i_target,
         {
             TRACFCOMP( g_trac_spd,
                       "Error fetching SPD for CRC verification" );
+
             break;
         }
 
@@ -695,9 +697,68 @@ errlHndl_t fixEEPROM( TARGETING::TargetHandle_t i_target )
             TRACFCOMP( g_trac_spd, "Error writing SPD on %.8X", T::get_huid(i_target) );
             break;
         }
+
     } while(0);
 
     return l_errl;
+}
+
+
+/**
+ * Needed to prevent infinite recursion since ddimmParkEeprom calls
+ * into the EEPROM layer which then calls into ddimmParkEeprom
+ */
+thread_local bool tl_parkRecursion = false;
+
+/**
+ * @brief As a workaround to avoid some SPD corruption that can occur
+ *  in power off scenarios, we want to park the eeprom onto a
+ *  "safe" unused portion after any access.  We will do this
+ *  by doing a 1-byte read to address 2048.
+ */
+errlHndl_t ddimmParkEeprom(TARGETING::TargetHandle_t i_target)
+{
+    errlHndl_t l_errhdl = nullptr;
+
+    // Only need to worry if we actually touch hardware
+#ifdef CONFIG_SUPPORT_EEPROM_HWACCESS
+
+    TARGETING::EEPROM_CONTENT_TYPE eepromType = T::EEPROM_CONTENT_TYPE_RAW;
+    T::ATTR_EEPROM_VPD_PRIMARY_INFO_type l_eepromVpd;
+    if( i_target->tryGetAttr<T::ATTR_EEPROM_VPD_PRIMARY_INFO>(l_eepromVpd) )
+    {
+        eepromType = static_cast<TARGETING::EEPROM_CONTENT_TYPE>
+          (l_eepromVpd.eepromContentType);
+    }
+
+    // Make sure this is a DDIMM (in case we support ISDIMMs at some point)
+    if( (TARGETING::EEPROM_CONTENT_TYPE_DDIMM == eepromType)
+        && !tl_parkRecursion ) //avoid infinite recursion
+    {
+        tl_parkRecursion = true;
+        constexpr size_t DDIMM_SPD_SAFE_OFFSET = 2048;
+        uint8_t l_byte = 0;
+        size_t l_numBytes = 1;
+        l_errhdl = DeviceFW::deviceOp(DeviceFW::READ,
+                                i_target,
+                                &l_byte,
+                                l_numBytes,
+                                DEVICE_EEPROM_ADDRESS(EEPROM::VPD_PRIMARY,
+                                                      DDIMM_SPD_SAFE_OFFSET,
+                                                      EEPROM::HARDWARE));
+        if( l_errhdl )
+        {
+            TRACFCOMP(g_trac_spd,
+                      ERR_MRK"ddimmParkEeprom> Failed on %.8X",
+                      TARGETING::get_huid(i_target));
+            l_errhdl->collectTrace( "SPD", 1*KILOBYTE );
+        }
+        tl_parkRecursion = false;
+    }
+
+#endif //#ifdef CONFIG_SUPPORT_EEPROM_CACHING
+
+    return l_errhdl;
 }
 
 } // End of SPD namespace

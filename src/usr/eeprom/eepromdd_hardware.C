@@ -34,6 +34,8 @@
 #include <errl/errludtarget.H>
 #include <util/misc.H>
 #include <targeting/common/targetservice.H>
+#include <vpd/vpd_if.H>
+#include <arch/magic.H>
 
 extern trace_desc_t* g_trac_eeprom;
 
@@ -188,7 +190,7 @@ errlHndl_t eepromPerformSpiOpHW( DeviceFW::OperationType i_opType,
              * @userdata2        target
              * @devdesc          Operation type is not supported
              * @custdesc         A problem occurred during the IPL of the
-             *                   system: SPI operation not supported.
+             *                   system.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            EEPROM_PERFORM_SPI_OP,
@@ -273,7 +275,7 @@ errlHndl_t eepromPerformI2cOpHW(DeviceFW::OperationType i_opType,
              * @userdata2        Device Max Size (in KB)
              * @devdesc          I2C Buffer Length + Offset > Max Size
              * @custdesc         A problem occurred during the IPL of the
-             *                   system: I2C buffer offset is too large.
+             *                   system.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            EEPROM_PERFORM_OP,
@@ -368,6 +370,8 @@ errlHndl_t eepromPerformI2cOpHW(DeviceFW::OperationType i_opType,
                  * @userdata1      Operation Type
                  * @userdata2      Chip to Access
                  * @devdesc        Invalid operation type.
+                 * @custdesc       A problem occurred during the IPL of the
+                 *                 system.
                  */
                 err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                EEPROM_PERFORM_OP,
@@ -409,6 +413,17 @@ errlHndl_t eepromPerformI2cOpHW(DeviceFW::OperationType i_opType,
             io_i2cInfo.offset = 0;
             io_i2cInfo.accessAddr.i2c_addr.devAddr += EEPROM_DEVADDR_INC;
         } // Do the read or write
+        if( err ) { break; }
+
+        // Park the eeprom at a safe spot if this is a DDIMM
+        err = SPD::ddimmParkEeprom( i_target );
+        if( err )
+        {
+            TRACFCOMP(g_trac_eeprom,
+                      ERR_MRK"eepromPerformOpHW(): failing on park operation");
+            err->collectTrace( EEPROM_COMP_NAME );
+            break;
+        }
     } while( 0 );
 
 #ifdef __HOSTBOOT_RUNTIME
@@ -519,8 +534,9 @@ errlHndl_t eepromPerformOpHW(DeviceFW::OperationType i_opType,
                                               TARGETING::get_huid(i_target),
                                               i_eepromInfo.accessMethod ),
                                            i_opType,
-                                           true /*Add HB SW Callout*/ );
+                                           ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
             err->collectTrace( EEPROM_COMP_NAME );
+            break;
         }
     } while (0);
     return err;
@@ -1757,7 +1773,7 @@ errlHndl_t eepromPrepareI2cAddress ( TARGETING::Target * i_target,
                  * @userdata2        EEPROM chip
                  * @devdesc          The Device type not supported (addrSize)
                  * @custdesc         A problem was detected during the IPL of
-                 *                   the system: Device type not supported.
+                 *                   the system.
                  */
                 err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                EEPROM_PREPAREADDRESS,

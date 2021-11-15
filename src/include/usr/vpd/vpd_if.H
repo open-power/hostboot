@@ -269,5 +269,16 @@ namespace SPD
      */
     errlHndl_t fixEEPROM( TARGETING::TargetHandle_t i_target );
 
+    /**
+     * @brief As a workaround to avoid some SPD corruption that can occur
+     *  in power off scenarios, we want to park the eeprom onto a
+     *  "safe" unused portion after any access.  We will do this
+     *  by doing a 1-byte read to address 2048.
+     *
+     * @param[in]     i_target    OCMB or DIMM Target
+     *
+     * @return  errlHndl_t
+     */
+    errlHndl_t ddimmParkEeprom(TARGETING::TargetHandle_t i_target);
 }
 #endif
