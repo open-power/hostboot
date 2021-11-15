@@ -15,6 +15,9 @@ $cur_path = $cur_path+":"+$hb_script_location
 python "os.environ['HB_TOOLPATH'] = \""+$hb_script_location+"\""
 python "os.environ['PATH'] = \""+$cur_path+"\""
 
+# Default to honoring MAGIC_BREAK
+$hb_ignorebreak = 0
+
 $hb_machine = "P10"
 # Simics relies on hb_mode; hb_mode is 0 for Axone and beyond
 $hb_mode = 0

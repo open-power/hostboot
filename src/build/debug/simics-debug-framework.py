@@ -546,7 +546,10 @@ def magic_instruction_callback(user_arg, cpu, arg):
 
     if arg == 7007:   # MAGIC_BREAK
         # Stop the simulation, much like a hard-coded breakpoint
-        SIM_break_simulation( "Simulation stopped. (hap 7007)"  )
+
+        # look for a simics variable that tells us to skip this
+        if( simenv.hb_ignorebreak == 0 ):
+            SIM_break_simulation( "Simulation stopped. (hap 7007)"  )
 
     if arg == 7008:
         cpu.r3 = random.randint(1, 0xffffffffffffffff)
