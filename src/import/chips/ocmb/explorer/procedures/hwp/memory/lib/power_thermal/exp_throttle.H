@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,6 +50,30 @@ namespace mss
 {
 namespace power_thermal
 {
+
+///
+/// @brief Updates the max databus utilization based upon the DIMM type - EXPLORER specialization
+/// @param[in] i_target the target on which to operate
+/// @param[in,out] io_max_util the utilization of the dimm at maximum possible percentage (mrw or calculated)
+/// @return fapi2::FAPI2_RC_SUCCESS iff the method was a success
+///
+template<>
+fapi2::ReturnCode update_max_util_by_dimm_type<mss::mc_type::EXPLORER>(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
+        i_target,
+        double& io_max_util);
+
+///
+/// @brief Updates the database port max utilization based upon the DIMM type - EXPLORER/MEM_PORT specialization
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_database_port_max the maximum utilization to use depending upon the DIMM type
+/// @param[in,out] io_util the utilization of the dimm at maximum possible percentage (mrw or calculated)
+/// @return fapi2::FAPI2_RC_SUCCESS iff the method was a success
+///
+template<>
+fapi2::ReturnCode update_databus_port_max_util_by_dimm_type<mss::mc_type::EXPLORER>(const
+        fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const double i_databus_port_max,
+        double& io_util);
 
 ///
 /// @brief Set ATTR_EXP_PORT_MAXPOWER, ATTR_OCMB_EXP_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT,

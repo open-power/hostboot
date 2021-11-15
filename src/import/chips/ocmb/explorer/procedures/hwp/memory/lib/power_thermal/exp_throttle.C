@@ -47,6 +47,59 @@ namespace mss
 {
 namespace power_thermal
 {
+
+///
+/// @brief Updates the max databus utilization based upon the DIMM type - EXPLORER specialization
+/// @param[in] i_target the target on which to operate
+/// @param[in,out] io_max_util the utilization of the dimm at maximum possible percentage (mrw or calculated)
+/// @return fapi2::FAPI2_RC_SUCCESS iff the method was a success
+///
+template<>
+fapi2::ReturnCode update_max_util_by_dimm_type<mss::mc_type::EXPLORER>(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
+        i_target,
+        double& io_max_util)
+{
+    uint8_t l_is_mds = 0;
+    FAPI_TRY(mss::attr::get_mds_ddimm(i_target, l_is_mds));
+
+    // If this part is an MDS DIMM, then limit the power thermal calculations
+    if(l_is_mds == fapi2::ENUM_ATTR_MEM_EFF_MDS_DDIMM_TRUE )
+    {
+        constexpr auto MDS_MAX_UTILIZATION = throttle_traits<mss::mc_type::EXPLORER>::MDS_MAX_UTILIZATION;
+        io_max_util = std::min(io_max_util, MDS_MAX_UTILIZATION);
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Updates the database port max utilization based upon the DIMM type - EXPLORER/MEM_PORT specialization
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_database_port_max the maximum utilization to use depending upon the DIMM type
+/// @param[in,out] io_util the utilization of the dimm at maximum possible percentage (mrw or calculated)
+/// @return fapi2::FAPI2_RC_SUCCESS iff the method was a success
+///
+template<>
+fapi2::ReturnCode update_databus_port_max_util_by_dimm_type<mss::mc_type::EXPLORER>(const
+        fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const double i_databus_port_max,
+        double& io_util)
+{
+    uint8_t l_is_mds[2] = {};
+    FAPI_TRY(mss::attr::get_mds_ddimm(i_target, l_is_mds));
+
+    // If this part is an MDS DIMM, then do not limit the utilization if above the MDS maximum defined utilization
+    if(l_is_mds[0] == fapi2::ENUM_ATTR_MEM_EFF_MDS_DDIMM_TRUE)
+    {
+        constexpr auto MDS_MAX_UTILIZATION = throttle_traits<mss::mc_type::EXPLORER>::MDS_MAX_UTILIZATION;
+        io_util = io_util > MDS_MAX_UTILIZATION ? i_databus_port_max : io_util;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 ///
 /// @brief Calcuate the throttle values based on throttle type
 /// @param[in] i_target

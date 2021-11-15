@@ -218,6 +218,9 @@ class throttle_traits<mss::mc_type::EXPLORER>
             EMERGENCY_N = EXPLR_SRQ_MBA_FARB4Q_EMERGENCY_N,
             EMERGENCY_N_LEN = EXPLR_SRQ_MBA_FARB4Q_EMERGENCY_N_LEN,
         };
+
+        // MDS throttle constants - utilization is in c%
+        static constexpr double MDS_MAX_UTILIZATION = 3500;
 };
 }//power_thermal
 }// mss

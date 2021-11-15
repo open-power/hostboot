@@ -407,13 +407,14 @@ class throttle
         /// @param[in] i_int the intercept of power curve
         /// @param[in] i_power_limit either iv_port_power_limit or thermal_power_limit depending on throttle type
         /// @param[out] o_port_util the port's databus utilization
+        /// @return fapi2::FAPI2_RC_SUCCESS iff the method was a success
         /// @note Called in p9_mss_bulk_pwr_throttles
         /// @note Chooses worst case between the maximum allowed databus utilization and the calculated value
         ///
-        void calc_util_usage(const uint32_t i_slope,
-                             const uint32_t i_int,
-                             const uint32_t i_power_limit,
-                             double& o_util) const;
+        fapi2::ReturnCode calc_util_usage(const uint32_t i_slope,
+                                          const uint32_t i_int,
+                                          const uint32_t i_power_limit,
+                                          double& o_util) const;
         ///
         /// @brief set iv_n_port, iv_n_slot, iv_calc_port_maxpower
         /// @param[in] i_util_port pass in the calculated port databus utilization
@@ -628,10 +629,10 @@ fapi2::ReturnCode throttle<MC, TT>::power_regulator_throttles ()
 
     FAPI_INF("%s POWER Port power limit is %d", mss::c_str(iv_target), iv_port_power_limit);
     //Calculate the port's utilization to get under watt target using the port's calculated slopes
-    calc_util_usage(l_port_power_slope,
-                    l_port_power_int,
-                    iv_port_power_limit,
-                    l_calc_util_port);
+    FAPI_TRY(calc_util_usage(l_port_power_slope,
+                             l_port_power_int,
+                             iv_port_power_limit,
+                             l_calc_util_port), "%s Error in calc_util_usage", mss::c_str(iv_target));
 
     FAPI_INF("%s POWER calc util port is %u",  mss::c_str(iv_target), static_cast<uint32_t>(l_calc_util_port));
 
@@ -713,10 +714,10 @@ fapi2::ReturnCode throttle<MC, TT>::thermal_throttles ()
                   l_dimm_power_int[l_pos]);
 
         //Calculate the databus utilization at the calculated power curve
-        calc_util_usage(l_dimm_power_slope[l_pos],
-                        l_dimm_power_int[l_pos],
-                        iv_dimm_thermal_limit[l_pos],
-                        l_calc_util[l_pos]);
+        FAPI_TRY(calc_util_usage(l_dimm_power_slope[l_pos],
+                                 l_dimm_power_int[l_pos],
+                                 iv_dimm_thermal_limit[l_pos],
+                                 l_calc_util[l_pos]), "Failed calc_util_usage %s", mss::c_str(l_dimm));
 
         FAPI_INF("THERMAL throttles: %s dram databus utilization is %u", mss::c_str(l_dimm),
                  static_cast<uint32_t>(l_calc_util[l_pos]));
@@ -760,6 +761,16 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Updates the max databus utilization based upon the DIMM type
+/// @param[in] i_target the target on which to operate
+/// @param[in,out] io_max_util the utilization of the dimm at maximum possible percentage (mrw or calculated)
+/// @return fapi2::FAPI2_RC_SUCCESS iff the method was a success
+///
+template<mss::mc_type MC>
+fapi2::ReturnCode update_max_util_by_dimm_type(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        double& io_max_util);
+
+///
 /// @brief Calculates the min and max power usage for a port based off of power curves and utilizations
 /// @param[in] i_idle_util the utilization of the databus in idle mode (0% most likely)
 /// @param[in] i_max_util the utilization of the dimm at maximum possible percentage (mrw or calculated)
@@ -784,16 +795,21 @@ fapi2::ReturnCode throttle<MC, TT>::calc_port_power(const double i_idle_util [TT
     for ( const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(iv_target) )
     {
         const auto l_pos = mss::index(l_dimm);
+
+        // Updates the max power utilization by the DIMM type
+        double l_max_util = i_max_util[l_pos];
+        FAPI_TRY(update_max_util_by_dimm_type<MC>(l_dimm, l_max_util));
+
         //Printing as decimals because HB messes up floats
         FAPI_INF("%s max dram databus for DIMM in pos %d is %u, databus for idle is %u",
                  mss::c_str(iv_target),
                  l_pos,
-                 static_cast<uint32_t>(i_max_util[l_pos]),
+                 static_cast<uint32_t>(l_max_util),
                  static_cast<uint32_t>(i_idle_util[l_pos]) );
         //Sum up the dimm's power to calculate the port power curve
         o_port_power_idle += calc_power(i_idle_util[l_pos], l_pos, l_rc);
         FAPI_TRY(l_rc, "calc_power failed on %s", l_dimm);
-        o_port_power_max  += calc_power(i_max_util[l_pos], l_pos, l_rc);
+        o_port_power_max  += calc_power(l_max_util, l_pos, l_rc);
         FAPI_TRY(l_rc, "calc_power failed on %s", l_dimm);
     }
 
@@ -920,25 +936,43 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Updates the database port max utilization based upon the DIMM type
+/// @tparam mc_type MC the type of the memory controller under test
+/// @tparam fapi2::TargetType T the target type under test
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_database_port_max the maximum utilization to use depending upon the DIMM type
+/// @param[in,out] io_util the utilization of the dimm at maximum possible percentage (mrw or calculated)
+/// @return fapi2::FAPI2_RC_SUCCESS iff the method was a success
+///
+template<mss::mc_type MC, fapi2::TargetType T>
+fapi2::ReturnCode update_databus_port_max_util_by_dimm_type(const fapi2::Target<T>& i_target,
+        const double i_databus_port_max,
+        double& io_util);
+
+///
 /// @brief Calculate the databus utilization given the power curve
 /// @param[in] i_slope
 /// @param[in] i_int
 /// @param[in] i_power_limit either the port_power_limit or the dimm thermal power limit
 /// @param[out] o_port_util the port's databus utilization
+/// @return fapi2::FAPI2_RC_SUCCESS iff the method was a success
 /// @note Called in p9_mss_bulk_pwr_throttles
 /// @note Chooses worst case between the maximum allowed databus utilization and the calculated value
 ///
 template<mss::mc_type MC, typename TT>
-void throttle<MC, TT>::calc_util_usage(const uint32_t i_slope,
-                                       const uint32_t i_int,
-                                       const uint32_t i_power_limit,
-                                       double& o_util) const
+fapi2::ReturnCode throttle<MC, TT>::calc_util_usage(const uint32_t i_slope,
+        const uint32_t i_int,
+        const uint32_t i_power_limit,
+        double& o_util) const
 {
     // Return 0 utilization if our intercept is above the power limit
     o_util = (i_power_limit > i_int) ? (((static_cast<double>(i_power_limit) - i_int) / i_slope ) * UTIL_CONVERSION) : 0;
 
     // Cast to uint32 for edge case where it has decimals
     o_util = (static_cast<uint32_t>(o_util) < iv_databus_port_max) ? static_cast<uint32_t>(o_util) : iv_databus_port_max;
+
+    FAPI_TRY(update_databus_port_max_util_by_dimm_type<MC>(iv_target, iv_databus_port_max, o_util),
+             "failed update_databus_port_max_util_by_dimm_type %s", mss::c_str(iv_target));
 
     // Check for the minimum threshnold and update if need be
     if(o_util < TT::MIN_UTIL)
@@ -948,6 +982,9 @@ void throttle<MC, TT>::calc_util_usage(const uint32_t i_slope,
                  static_cast<uint32_t>(TT::MIN_UTIL), mss::c_str(iv_target));
         o_util = TT::MIN_UTIL;
     }
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
