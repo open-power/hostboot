@@ -80,7 +80,7 @@ fapi2::ReturnCode pwr_throttles( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
             continue;
         }
 
-        mss::power_thermal::throttle<> l_pwr_struct(l_port_target, l_rc);
+        mss::power_thermal::throttle<mss::mc_type::EXPLORER> l_pwr_struct(l_port_target, l_rc);
         FAPI_TRY(l_rc, "Error constructing mss:power_thermal::throttle object for target %s",
                  mss::c_str(l_port_target));
 

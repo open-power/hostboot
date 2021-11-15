@@ -94,7 +94,7 @@ extern "C"
             //Restore runtime_throttles
             //Sets throttles to max_databus_util value
             FAPI_INF("Restoring throttles for %s", mss::c_str(l_ocmb));
-            FAPI_TRY( mss::power_thermal::restore_runtime_throttles<>(l_ocmb),
+            FAPI_TRY( mss::power_thermal::restore_runtime_throttles<mss::mc_type::EXPLORER>(l_ocmb),
                       "Fail encountered in restore runtime throttles for %s", mss::c_str(l_ocmb));
         }
 
@@ -185,7 +185,7 @@ extern "C"
             {
                 //Set runtime throttles to worst case between ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_SLOT
                 //and ATTR_EXP_MEM_RUNTIME_THROTTLED_N_COMMANDS_PER_SLOT and the _PORT equivalents also
-                FAPI_TRY( mss::power_thermal::update_runtime_throttle(l_ocmb),
+                FAPI_TRY( mss::power_thermal::update_runtime_throttle<mss::mc_type::EXPLORER>(l_ocmb),
                           "Fail encountered in update_runtime_throttle for %s", mss::c_str(l_ocmb));
             }
         }

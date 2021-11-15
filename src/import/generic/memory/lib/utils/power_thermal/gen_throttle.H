@@ -174,7 +174,7 @@ fapi_try_exit:
 /// @param[in] i_target the MCS target in which the runtime throttles will be reset
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-template<mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = throttle_traits<MC>>
+template<mss::mc_type MC, fapi2::TargetType T, typename TT = throttle_traits<MC>>
 fapi2::ReturnCode restore_runtime_throttles( const fapi2::Target<T>& i_target )
 {
 
@@ -211,7 +211,7 @@ fapi_try_exit:
 /// @param[in] i_target the MCS target in which the runtime throttles will be set
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-template<mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = throttle_traits<MC>>
+template<mss::mc_type MC, fapi2::TargetType T, typename TT = throttle_traits<MC>>
 fapi2::ReturnCode update_runtime_throttle(const fapi2::Target<T>& i_target)
 
 {
@@ -265,7 +265,7 @@ fapi_try_exit:
 /// @param[in] i_target the MCS target in which the runtime throttles will be set
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-template<mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = throttle_traits<MC>>
+template<mss::mc_type MC, fapi2::TargetType T, typename TT = throttle_traits<MC>>
 fapi2::ReturnCode update_runtime_throttles(const std::vector< fapi2::Target<T> >& i_targets)
 
 {
@@ -285,7 +285,7 @@ fapi_try_exit:
 /// @tparam MC mss::mc_type
 /// @tparam TT throttle_traits throttle traits for the given mc_type
 ///
-template<mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = throttle_traits<MC>>
+template<mss::mc_type MC, typename TT = throttle_traits<MC>>
 class throttle
 {
     private:
@@ -1166,7 +1166,7 @@ fapi_try_exit:
 /// @param[out] o_safemode true if safemode throttle values were used for calculation
 /// @return fapi2::FAPI2_RC_SUCCESS if ok
 ///
-template<mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = throttle_traits<MC>>
+template<mss::mc_type MC, fapi2::TargetType T, typename TT = throttle_traits<MC>>
 fapi2::ReturnCode calc_utilization(const fapi2::Target<T>& i_target,
                                    const uint32_t i_input_databus_util,
                                    const uint32_t i_dram_clocks,
