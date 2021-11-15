@@ -407,7 +407,7 @@ def write_component_image_info_area(pldm_fw_up_pkg, metadata, image_files):
         # ComponentOptions
         component_options = bitarray(16, endian='little')
         component_options.setall(0)
-        supported_component_options = [0]
+        supported_component_options = [0, 1, 2]
         for option in component["ComponentOptions"]:
             if option not in supported_component_options:
                 sys.exit(

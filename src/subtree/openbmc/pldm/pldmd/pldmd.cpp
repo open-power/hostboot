@@ -5,8 +5,10 @@
 
 #include "common/utils.hpp"
 #include "dbus_impl_requester.hpp"
+#include "fw-update/manager.hpp"
 #include "invoker.hpp"
 #include "requester/handler.hpp"
+#include "requester/mctp_endpoint_discovery.hpp"
 #include "requester/request.hpp"
 
 #include <err.h>
@@ -63,7 +65,8 @@ using namespace pldm::utils;
 
 static std::optional<Response>
     processRxMsg(const std::vector<uint8_t>& requestMsg, Invoker& invoker,
-                 requester::Handler<requester::Request>& handler)
+                 requester::Handler<requester::Request>& handler,
+                 fw_update::Manager* fwManager)
 {
     using type = uint8_t;
     uint8_t eid = requestMsg[0];
@@ -84,8 +87,17 @@ static std::optional<Response>
                             sizeof(eid) - sizeof(type);
         try
         {
-            response = invoker.handle(hdrFields.pldm_type, hdrFields.command,
-                                      request, requestLen);
+            if (hdrFields.pldm_type != PLDM_FWUP)
+            {
+                response =
+                    invoker.handle(hdrFields.pldm_type, hdrFields.command,
+                                   request, requestLen);
+            }
+            else
+            {
+                response = fwManager->handleRequest(eid, hdrFields.command,
+                                                    request, requestLen);
+            }
         }
         catch (const std::out_of_range& e)
         {
@@ -147,12 +159,13 @@ int main(int argc, char** argv)
                     break;
                 default:
                     optionUsage();
-                    break;
+                    exit(EXIT_FAILURE);
             }
             break;
-        default:
-            optionUsage();
+        case -1:
             break;
+        default:
+            exit(EXIT_FAILURE);
     }
 
     /* Create local socket. */
@@ -167,12 +180,13 @@ int main(int argc, char** argv)
 
     auto event = Event::get_default();
     auto& bus = pldm::utils::DBusHandler::getBus();
+    sdbusplus::server::manager::manager objManager(
+        bus, "/xyz/openbmc_project/software");
     dbus_api::Requester dbusImplReq(bus, "/xyz/openbmc_project/pldm");
 
     Invoker invoker{};
     requester::Handler<requester::Request> reqHandler(sockfd, event,
                                                       dbusImplReq, verbose);
-
 #ifdef LIBPLDMRESPONDER
     using namespace pldm::state_sensor;
     dbus_api::Host dbusImplHost(bus, "/xyz/openbmc_project/pldm");
@@ -280,8 +294,13 @@ int main(int argc, char** argv)
         exit(EXIT_FAILURE);
     }
 
-    auto callback = [verbose, &invoker, &reqHandler](IO& io, int fd,
-                                                     uint32_t revents) {
+    std::unique_ptr<fw_update::Manager> fwManager =
+        std::make_unique<fw_update::Manager>(event, reqHandler, dbusImplReq);
+    std::unique_ptr<MctpDiscovery> mctpDiscoveryHandler =
+        std::make_unique<MctpDiscovery>(bus, fwManager.get());
+
+    auto callback = [verbose, &invoker, &reqHandler,
+                     &fwManager](IO& io, int fd, uint32_t revents) {
         if (!(revents & EPOLLIN))
         {
             return;
@@ -326,14 +345,12 @@ int main(int argc, char** argv)
                 if (MCTP_MSG_TYPE_PLDM != requestMsg[1])
                 {
                     // Skip this message and continue.
-                    std::cerr << "Encountered Non-PLDM type message"
-                              << "\n";
                 }
                 else
                 {
                     // process message and send response
-                    auto response =
-                        processRxMsg(requestMsg, invoker, reqHandler);
+                    auto response = processRxMsg(requestMsg, invoker,
+                                                 reqHandler, fwManager.get());
                     if (response.has_value())
                     {
                         if (verbose)

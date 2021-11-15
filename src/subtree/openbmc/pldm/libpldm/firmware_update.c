@@ -782,9 +782,6 @@ int decode_get_firmware_parameters_resp_comp_entry(
 
 	struct pldm_component_parameter_entry *entry =
 	    (struct pldm_component_parameter_entry *)(data);
-	if (entry->active_comp_ver_str_len == 0) {
-		return PLDM_ERROR_INVALID_LENGTH;
-	}
 
 	size_t entry_length = sizeof(struct pldm_component_parameter_entry) +
 			      entry->active_comp_ver_str_len +
@@ -822,9 +819,14 @@ int decode_get_firmware_parameters_resp_comp_entry(
 	component_data->capabilities_during_update.value =
 	    le32toh(entry->capabilities_during_update.value);
 
-	active_comp_ver_str->ptr =
-	    data + sizeof(struct pldm_component_parameter_entry);
-	active_comp_ver_str->length = entry->active_comp_ver_str_len;
+	if (entry->active_comp_ver_str_len != 0) {
+		active_comp_ver_str->ptr =
+		    data + sizeof(struct pldm_component_parameter_entry);
+		active_comp_ver_str->length = entry->active_comp_ver_str_len;
+	} else {
+		active_comp_ver_str->ptr = NULL;
+		active_comp_ver_str->length = 0;
+	}
 
 	if (entry->pending_comp_ver_str_len != 0) {
 

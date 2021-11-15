@@ -60,6 +60,7 @@ conf_data.set('RESPONSE_TIME_OUT',get_option('response-time-out'))
 if get_option('libpldm-only').disabled()
   conf_data.set_quoted('HOST_EID_PATH', join_paths(package_datadir, 'host_eid'))
 endif
+conf_data.set('MAXIMUM_TRANSFER_SIZE', get_option('maximum-transfer-size'))
 configure_file(output: 'config.h',
   configuration: conf_data
 )
@@ -194,6 +195,12 @@ executable(
   'pldmd/dbus_impl_requester.cpp',
   'pldmd/instance_id.cpp',
   'pldmd/dbus_impl_pdr.cpp',
+  'fw-update/inventory_manager.cpp',
+  'fw-update/package_parser.cpp',
+  'fw-update/device_updater.cpp',
+  'fw-update/watch.cpp',
+  'fw-update/update_manager.cpp',
+  'requester/mctp_endpoint_discovery.cpp',
   implicit_include_directories: false,
   dependencies: deps,
   install: true,
@@ -237,6 +244,7 @@ endif
 
 if get_option('tests').enabled()
   subdir('common/test')
+  subdir('fw-update/test')
   subdir('host-bmc/test')
   subdir('requester/test')
   subdir('test')

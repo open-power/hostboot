@@ -5,7 +5,7 @@
     "entries" : [{
         "type" : 91,
         "instance" : 0,
-        "container" : 0,
+        "container" : 1,
         "sensors" : [{
             "set" : {
                 "id" : 21,
@@ -24,7 +24,7 @@
     {
         "type" : 5,
         "instance" : 0,
-        "container" : 0,
+        "container" : 1,
         "sensors" : [{
             "set" : {
                 "id" : 1,
@@ -43,7 +43,7 @@
     {
         "type" : 5,
         "instance" : 0,
-        "container" : 0,
+        "container" : 1,
         "sensors" : [{
             "set" : {
                 "id" : 1,
@@ -62,7 +62,7 @@
     {
         "type" : 45,
         "instance" : 1,
-        "container" : 0,
+        "container" : 1,
         "sensors" : [{
             "set" : {
                 "id" : 17,
@@ -1856,7 +1856,7 @@
     {
         "type" : 45,
         "instance" : 1,
-        "container" : 0,
+        "container" : 1,
         "sensors" : [{
             "set" : {
                 "id" : 10,
