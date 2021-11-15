@@ -67,7 +67,7 @@ sub main
     # @HBBL_SIZE_SYNC@
     # Data address is bootloader HRMOR + HBBL_MAX_SIZE + 12K exception
     # vectors
-    my $dataAddr = 0xF020B000;
+    my $dataAddr = 0xE020B000;
     my $dataOffset = 0;
 
     # Parse data address from options.
