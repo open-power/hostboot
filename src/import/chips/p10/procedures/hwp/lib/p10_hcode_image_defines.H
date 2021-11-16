@@ -240,11 +240,13 @@ HCD_HDR_UINT32( g_pgpe_reserved2,           0);
 HCD_HDR_UINT32( g_pgpe_wofTableAddress,     0);
 HCD_HDR_UINT32( g_pgpe_wofTableLength,      0);
 HCD_HDR_UINT32( g_pgpe_reserved3,           0);
-HCD_HDR_UINT32( g_pgpe_scrBrdAddr,           0);
+HCD_HDR_UINT32( g_pgpe_scrBrdAddr,          0);
 HCD_HDR_UINT32( g_pgpe_traceAddr,           0);
 HCD_HDR_UINT32( g_pgpe_opTracePtr,          0);
-HCD_HDR_UINT32( g_pgpe_deepOpTraceMemAddress, 0);
-HCD_HDR_UINT32( g_pgpe_deepOpTraceLength,     0);
+HCD_HDR_UINT32( g_pgpe_deepOpTraceMemAddress,   0);
+HCD_HDR_UINT32( g_pgpe_deepOpTraceLength,       0);
+HCD_HDR_UINT32( g_pgpe_traceLength,             0);
+HCD_HDR_UINT32( g_pgpe_opTraceLength,           0);
 #ifdef __ASSEMBLER__
 .endm
 #else
