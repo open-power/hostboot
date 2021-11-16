@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,6 +27,7 @@
 #include <sys/mmio.h>
 #include "hdatpcia.H"
 #include <targeting/common/util.H>
+#include <targeting/common/utilFilter.H>
 #include <util/align.H>
 #include <arch/pirformat.H>
 
@@ -230,23 +231,10 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
                 const uint8_t l_procTopologyId =
                     l_pProcTarget->getAttr<TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID>();
 
-                TARGETING::PredicateCTM l_corePredicate(TARGETING::CLASS_UNIT,
-                                                    TARGETING::TYPE_CORE);
-
-                //Cores with partial good data are present and reported
-                //Cores that are present but not functional, also reported
-                TARGETING::PredicateHwas l_predPresent;
-                l_predPresent.present(true);
-
-                TARGETING::PredicatePostfixExpr l_PresentCore;
-                l_PresentCore.push(&l_corePredicate).push(&l_predPresent).And();
-
                 TARGETING::TargetHandleList l_coreList;
-
-                TARGETING::targetService().getAssociated(l_coreList, l_pProcTarget,
-                                                TARGETING::TargetService::CHILD,
-                                                TARGETING::TargetService::ALL,
-                                                &l_PresentCore);
+                TARGETING::getNonEcoCores(l_coreList,
+                                          l_pProcTarget,
+                                          false);
 
                 for (uint32_t l_idx = 0; l_idx < l_coreList.size(); ++l_idx)
                 {
@@ -421,22 +409,10 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
 
                     //Get the the FC targets
                     TARGETING::TargetHandleList l_fcList;
-                    TARGETING::PredicateCTM
-                        l_fcFilter(TARGETING::CLASS_UNIT, TARGETING::TYPE_FC);
-
-                    //Check the presence of FCs
-                    TARGETING::PredicateHwas l_predFcPresent;
-                    l_predFcPresent.present(true);
-
-                    TARGETING::PredicatePostfixExpr l_presentFc;
-                    l_presentFc.push(&l_fcFilter).push(&l_predFcPresent).And();
-
-                    TARGETING::targetService().getAssociated(
-                        l_fcList,
-                        l_pTarget,
-                        TARGETING::TargetService::CHILD,
-                        TARGETING::TargetService::ALL,
-                        &l_presentFc);
+                    // Get the present (functional is not necessary) FC targets that don't have ECO CORE children.
+                    TARGETING::getNonEcoFcs(l_fcList,
+                                            l_pTarget,
+                                            false);
 
                     HDAT_DBG("thread count :0x%.8X", l_coreThreadCount);
                     TARGETING::ATTR_CHIP_UNIT_type l_fcId = 0;

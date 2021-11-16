@@ -147,20 +147,22 @@ void addCoreEntityAssocAndRecordSetPdrs(pldm_entity_association_tree *io_tree,
                                         FruRecordSetMap &io_fru_record_set_map,
                                         SensorEntityMap &io_core_sensor_map )
 {
+    TARGETING::TargetHandleList l_coreTargetList;
     TARGETING::TYPE l_core_type = TYPE_CORE;
+    // find all CORE or FC chiplets of the proc
     if(TARGETING::is_fused_mode())
     {
         l_core_type = TYPE_FC;
+        TARGETING::getNonEcoFcs(l_coreTargetList,
+                                i_proc_target,
+                                false);
     }
-
-    // @TODO RTC 282978: Update this to only report non-ECO cores
-    // find all CORE or FC chiplets of the proc
-    TARGETING::TargetHandleList l_coreTargetList;
-    TARGETING::getChildAffinityTargetsByState( l_coreTargetList,
-                                               i_proc_target,
-                                               CLASS_UNIT,
-                                               l_core_type,
-                                               UTIL_FILTER_PRESENT);
+    else
+    {
+        TARGETING::getNonEcoCores(l_coreTargetList,
+                                  i_proc_target,
+                                  false);
+    }
 
     std::sort(begin(l_coreTargetList), end(l_coreTargetList),
           [](const Target* const t1, const Target* const t2) {

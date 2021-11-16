@@ -581,6 +581,58 @@ void getEcoCores(TARGETING::TargetHandleList & o_coreList,
                  Target*                       i_parent = nullptr,
                  bool                          i_functional = true);
 
+/*
+ * @brief Returns a list of FC chiplet targets of the requested resource state and with CORE children of the requested
+ *        "Extended Cache-Only" (ECO) mode. The resource state requested of the FC will be used when searching for CORE
+ *        children.
+ *
+ * @param[out]   o_coreList       A list of target handles matching the request.
+ *
+ * @param[in]    i_coreEcoState   The requested ECO state of the child cores. See CoreEcoState for valid options.
+ *
+ * @param[in]    i_state          The requested resource state of the FCs and COREs in the returned list.
+ *                                See ResourceState for valid options.
+ *
+ * @param[in]    i_parent         The parent target to retrieve core chiplets from. Default nullptr; In that case all
+ *                                cores in the system matching given criteria will be returned.
+ */
+void getFcsByEcoMode(TARGETING::TargetHandleList & o_fcList,
+                     CoreEcoState                  i_coreEcoState,
+                     ResourceState                 i_state,
+                     Target *                      i_parent = nullptr);
+
+/*
+ * @brief Returns a list of FC chiplet targets whose child COREs are non-ECO. The functional state requested of the FC
+ *        is also used when searching for its child COREs.
+ *
+ * @param[out]   o_fcList         A list of target handles matching the request.
+ *
+ * @param[in]    i_parent         The parent target to retrieve chiplets from. Default nullptr; In that case all
+ *                                FCs in the system matching given criteria will be returned.
+ *
+ * @param[in]    i_functional     The requested functional state.
+ *                                true:functional; false:present
+ */
+void getNonEcoFcs(TARGETING::TargetHandleList & o_fcList,
+                  Target*                       i_parent = nullptr,
+                  bool                          i_functional = true);
+
+/*
+ * @brief Returns a list of FC chiplet targets whose child COREs are ECO. The functional state requested of the FC
+ *        is also used when searching for its child COREs.
+ *
+ * @param[out]   o_fcList         A list of target handles matching the request.
+ *
+ * @param[in]    i_parent         The parent target to retrieve chiplets from. Default nullptr; In that case all
+ *                                FCs in the system matching given criteria will be returned.
+ *
+ * @param[in]    i_functional     The requested functional state.
+ *                                true:functional; false:present
+ */
+void getEcoFcs(TARGETING::TargetHandleList & o_fcList,
+               Target*                       i_parent = nullptr,
+               bool                          i_functional = true);
+
 /**
  * @brief Return a list of all cards in a system
  *

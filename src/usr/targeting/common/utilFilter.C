@@ -867,6 +867,117 @@ void getEcoCores(TARGETING::TargetHandleList & o_coreList,
                     i_parent);
 }
 
+void getFcsByEcoMode(TARGETING::TargetHandleList & o_fcList,
+                     const CoreEcoState i_coreEcoState,
+                     const ResourceState i_state,
+                     Target * const i_parent)
+{
+    Target* parent = i_parent;
+
+    if (i_parent == nullptr)
+    {
+        // No parent given, use system target;
+        parent = UTIL::assertGetToplevelTarget();
+    }
+
+    // Start with an empty list.
+    o_fcList.clear();
+
+    // Build up the filtering criteria for the FC list
+    PredicateCTM fcPredicate(TARGETING::CLASS_UNIT, TARGETING::TYPE_FC);
+    PredicatePostfixExpr ecoFcFilter;
+    ecoFcFilter.push(&fcPredicate);
+
+    // Predicates to store requested resource state.
+    PredicateHwas            predHwas;
+    PredicateIsFunctional    predFunctional;
+    PredicateIsNonFunctional presNonFunctional;
+    PredicateIsNonFunctional nonFunctional(false);
+
+    switch(i_state)
+    {
+        case UTIL_FILTER_ALL:
+        {
+            // Don't need to add anything to the predicate that's being built up.
+            break;
+        }
+        case UTIL_FILTER_PRESENT:
+        {
+            predHwas.present(true);
+            // Set up compound predicate
+            ecoFcFilter.push(&predHwas).And();
+            break;
+        }
+        case UTIL_FILTER_FUNCTIONAL:
+        {
+            // Set up compound predicate
+            ecoFcFilter.push(&predFunctional).And();
+            break;
+        }
+        case UTIL_FILTER_PRESENT_NON_FUNCTIONAL:
+        {
+            // Get all present and non-functional chips or chiplets
+            // Present and non-functional predicate
+            // Set up compound predicate
+            ecoFcFilter.push(&presNonFunctional).And();
+            break;
+        }
+        case UTIL_FILTER_NON_FUNCTIONAL:
+        {
+            // Get all non-functional chips or chiplets
+            // Non-functional predicate
+            // Set up compound predicate
+            ecoFcFilter.push(&nonFunctional).And();
+            break;
+        }
+    }
+
+    TARGETING::targetService().getAssociated(o_fcList,
+                                             parent,
+                                             TARGETING::TargetService::CHILD,
+                                             TARGETING::TargetService::ALL,
+                                             &ecoFcFilter);
+    if (i_coreEcoState != UTIL_FILTER_CORE_ALL)
+    {
+
+        // FCs are made up by CORE children which are either both flagged as ECO or non-ECO COREs.
+        // To gather a list of the requested FC type, check their CORE children for the requested ECO state
+        // and eliminate FCs from the list that don't have COREs matching the requested state.
+        o_fcList.erase(std::remove_if(o_fcList.begin(),
+                                      o_fcList.end(),
+                                      [&i_coreEcoState, &i_state](Target* fc)
+                                      {
+                                          TargetHandleList coreList;
+                                          getCoreChiplets(coreList,
+                                                          i_coreEcoState,
+                                                          i_state,
+                                                          fc);
+                                          return (coreList.size() == 0);
+                                      }),
+                       o_fcList.end());
+    }
+
+}
+
+void getNonEcoFcs(TARGETING::TargetHandleList & o_fcList,
+                  Target *                      i_parent,
+                  const bool i_functional)
+{
+    getFcsByEcoMode(o_fcList,
+                    UTIL_FILTER_CORE_NON_ECO,
+                    i_functional ? UTIL_FILTER_FUNCTIONAL : UTIL_FILTER_PRESENT,
+                    i_parent);
+}
+
+void getEcoFcs(TARGETING::TargetHandleList & o_fcList,
+                  Target *                      i_parent,
+                  const bool i_functional)
+{
+    getFcsByEcoMode(o_fcList,
+                    UTIL_FILTER_CORE_ECO,
+                    i_functional ? UTIL_FILTER_FUNCTIONAL : UTIL_FILTER_PRESENT,
+                    i_parent);
+}
 
 void getPeerTargets(
           TARGETING::TargetHandleList& o_peerTargetList,
