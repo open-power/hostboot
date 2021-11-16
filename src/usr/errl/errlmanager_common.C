@@ -36,9 +36,10 @@
 #include <errl/errludstring.H>
 #include <map>
 #include <util/misc.H>
-
+#include <console/consoleif.H>
 #include <errl/errlreasoncodes.H>
 #include <targeting/common/targetservice.H>
+#include <initservice/initserviceif.H>
 
 #ifdef CONFIG_PLDM
 #include <pldm/requests/pldm_fileio_requests.H>
@@ -610,8 +611,21 @@ bool ErrlManager::sendErrLogToBmc(errlHndl_t &io_err, bool i_isPrevBootErr)
             // stop sending error logs down to PLDM
             iv_isBmcInterfaceEnabled = false;
 
+#ifndef __HOSTBOOT_RUNTIME
+            // save off these trace variables
+            const uint16_t rc = l_errl->reasonCode();
+            const uint32_t eid = l_errl->eid();
+#endif
             // commit this error to local memory and PNOR if possible
             commitErrLog(l_errl, ERRL_COMP_ID);
+
+#ifndef __HOSTBOOT_RUNTIME
+            CONSOLE::displayf(CONSOLE::DEFAULT, PLDM_COMP_NAME,
+                "Unable to send error log 0x%.8X rc=0x%04X to BMC.  "
+                "Shutting down with RC_PLDM_SEND_LOG_FAILED",
+                eid, rc);
+            INITSERVICE::doShutdown(RC_PLDM_SEND_LOG_FAILED, true /* background shutdown */);
+#endif
         }
         else
         {

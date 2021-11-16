@@ -27,14 +27,18 @@
 #include <errl/errlentry.H>
 #include <trace/interface.H>
 #include <sys/sync.h>
+#include <sys/time.h>
 #include <kernel/console.H>
 #include <devicefw/driverif.H>
 #include <targeting/common/targetservice.H>
+#include <initservice/initserviceif.H>
+#include <console/consoleif.H>
 
 #include <pldm/requests/pldm_fileio_requests.H>
 
 #include "pnor_pldmdd.H"
 #include <pnor/pnor_pldm_utils.H>
+
 
 extern trace_desc_t* g_trac_pnor;
 
@@ -260,6 +264,19 @@ errlHndl_t PnorPldmDD::_writeFlash( uint64_t i_addr,
                       lid_id,
                       offset_into_section,
                       TRACE_ERR_ARGS(err));
+#ifndef __HOSTBOOT_RUNTIME
+            // PNOR access is not working, need to fail
+            CONSOLE::displayf(CONSOLE::DEFAULT, PNOR_COMP_NAME,
+              "PNOR PLDM write failed (rc=0x%04X). HB asserting since PNOR is no longer accessible",
+              err->reasonCode());
+
+            printk("E> PLDM PNOR write failed (rc=0x%04X).  HB asserting since PNOR is no longer accessible\n", err->reasonCode());
+
+            // allow for msg to reach console output
+            nanosleep(5, 0);
+
+            crit_assert(0);
+#endif
             break;
         }
 
@@ -310,6 +327,19 @@ errlHndl_t PnorPldmDD::_readFlash( uint64_t i_addr,
                       lid_id,
                       offset_into_section,
                       TRACE_ERR_ARGS(err));
+#ifndef __HOSTBOOT_RUNTIME
+            // PNOR access is not working, need to fail
+            CONSOLE::displayf(CONSOLE::DEFAULT, PNOR_COMP_NAME,
+              "PNOR PLDM read failed (rc=0x%04X).  HB asserting since PNOR is no longer accessible",
+              err->reasonCode());
+
+            printk("E> PLDM PNOR read failed (rc=0x%04X).  HB asserting since PNOR is no longer accessible\n", err->reasonCode());
+
+            // allow for msg to reach console output
+            nanosleep(5, 0);
+
+            crit_assert(0);
+#endif
             break;
         }
         io_size =  read_size;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,6 +61,7 @@ namespace ERRORLOG
         ERRL_CORE_EX_TARGET_NULL  = ERRL_COMP_ID | 0x07,
         ERRL_TEST_DUPLICATE_TRACE = ERRL_COMP_ID | 0x08,
         ERRL_EXTRA_LOG_RC         = ERRL_COMP_ID | 0x09,
+        RC_PLDM_SEND_LOG_FAILED   = ERRL_COMP_ID | 0x0A,
         //........
         ERRL_LAST_ERR             = ERRL_COMP_ID | 0xFF
     };
