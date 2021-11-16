@@ -75,7 +75,7 @@ fapi2::ReturnCode odic_helper(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_ta
 /// @param[in] i_port_rank the rank in question
 /// @return FAPI2_RC_SUCCESS iff OK
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = ccsTraits<MC>, typename MRS = mrsTraits<MC> >
+template< mss::mc_type MC, typename TT = ccsTraits<MC>, typename MRS = mrsTraits<MC> >
 fapi2::ReturnCode mrs01(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         const mrs01_data<MC>& i_data,
                         ccs::instruction_t<MC>& io_inst,
@@ -142,7 +142,7 @@ fapi_try_exit:
 /// @param[in] i_port_rank the rank in question
 /// @return FAPI2_RC_SUCCESS iff OK
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE >
+template< mss::mc_type MC >
 fapi2::ReturnCode mrs01(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         ccs::instruction_t<MC>& io_inst,
                         const uint64_t i_port_rank)
@@ -171,7 +171,7 @@ fapi_try_exit:
 /// @param[out] o_rtt_nom the rtt_nom setting
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = ccsTraits<MC> >
+template< mss::mc_type MC, typename TT = ccsTraits<MC> >
 fapi2::ReturnCode mrs01_decode_helper(const ccs::instruction_t<MC>& i_inst,
                                       const uint64_t i_port_rank,
                                       uint8_t& o_dll_enable,
@@ -211,7 +211,7 @@ fapi2::ReturnCode mrs01_decode_helper(const ccs::instruction_t<MC>& i_inst,
 /// @param[in] i_port_rank ths rank in question
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE >
+template< mss::mc_type MC >
 inline fapi2::ReturnCode mrs01_decode(const ccs::instruction_t<MC>& i_inst,
                                       const uint64_t i_port_rank)
 {

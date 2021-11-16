@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -68,10 +68,10 @@ class pda_traits
 ///
 /// @brief PDA commands container that also has compression
 /// @tparam D the MRS command type
-/// @tparam MC the memory controller type - defaults to MRS
-/// @tparam D the MRS command type
+/// @tparam MC the memory controller type
+/// @tparam TT the pda_traits for the controller
 ///
-template< typename D, mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = pda_traits<MC> >
+template< typename D, mss::mc_type MC, typename TT = pda_traits<MC> >
 class commands
 {
     public:
@@ -172,7 +172,7 @@ class commands
 /// @note A PDA latch of WR VREF settings is the most common PDA operations
 /// This function adds a bit of fanciness (compression) to speed up the overall runtime
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE >
+template< mss::mc_type MC >
 fapi2::ReturnCode execute_wr_vref_latch( const commands<mss::ddr4::mrs06_data<MC>, MC>& i_commands );
 
 } // ns pda

@@ -141,35 +141,38 @@ enum command : size_t
 
 ///
 /// @brief Sets the function space for the BCW
+/// @tparam MC mss::mc_type memory controller type
 /// @param[in] i_target a DIMM target
 /// @param[in] i_func_space the functon space number we want
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
+template< mss::mc_type MC >
 fapi2::ReturnCode function_space_select(const fapi2::Target< fapi2::TARGET_TYPE_DIMM >& i_target,
                                         const uint64_t i_func_space,
-                                        std::vector< ccs::instruction_t<DEFAULT_MC_TYPE> >& io_inst);
+                                        std::vector< ccs::instruction_t<MC> >& io_inst);
 
 ///
 /// @brief Boilerplate for setting & printing BCWs
 /// @tparam T the functon space number we want
+/// @tparam MC mss::mc_type memory controller type
 /// @param[in] i_target a DIMM target
 /// @param[in] i_data control word data
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::control_word T >
+template< mss::control_word T, mss::mc_type MC >
 static fapi2::ReturnCode settings_boilerplate(const fapi2::Target< fapi2::TARGET_TYPE_DIMM >& i_target,
         const cw_data& i_data,
-        std::vector< ccs::instruction_t<DEFAULT_MC_TYPE> >& io_inst)
+        std::vector< ccs::instruction_t<MC> >& io_inst)
 {
     uint8_t l_sim = 0;
     mss::is_simulation(l_sim);
 
     // DES first - make sure those CKE go high and stay there
-    io_inst.push_back(mss::ccs::des_command<DEFAULT_MC_TYPE>());
+    io_inst.push_back(mss::ccs::des_command<MC>());
 
-    FAPI_TRY( function_space_select(i_target, i_data.iv_func_space, io_inst),
+    FAPI_TRY( function_space_select<MC>(i_target, i_data.iv_func_space, io_inst),
               "%s. Failed to select function space %d",
               mss::c_str(i_target), uint8_t(i_data.iv_func_space) );
 
@@ -198,7 +201,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS iff ok
 /// @note Sets DA0 setting for buffer control word (F0BC1x)
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = mrsTraits<MC> >
+template< mss::mc_type MC, typename TT = mrsTraits<MC> >
 fapi2::ReturnCode set_pba_mode( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                 const mss::states i_state,
                                 std::vector< ccs::instruction_t<MC> >& io_inst )

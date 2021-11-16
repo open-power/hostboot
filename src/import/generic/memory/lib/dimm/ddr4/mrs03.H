@@ -85,7 +85,7 @@ fapi2::ReturnCode crc_wr_latency_helper(const fapi2::Target<fapi2::TARGET_TYPE_D
 /// @param[in] i_port_rank the rank in question
 /// @return FAPI2_RC_SUCCESS iff OK
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = ccsTraits<MC>, typename MRS = mrsTraits<MC> >
+template< mss::mc_type MC, typename TT = ccsTraits<MC>, typename MRS = mrsTraits<MC> >
 fapi2::ReturnCode mrs03(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         const mrs03_data<MC>& i_data,
                         ccs::instruction_t<MC>& io_inst,
@@ -123,7 +123,7 @@ fapi_try_exit:
 /// @param[in] i_port_rank the rank in question
 /// @return FAPI2_RC_SUCCESS iff OK
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE >
+template< mss::mc_type MC >
 fapi2::ReturnCode mrs03(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         ccs::instruction_t<MC>& io_inst,
                         const uint64_t i_port_rank)
@@ -155,7 +155,7 @@ fapi_try_exit:
 /// @param[out] o_read_fromat the mpr read format setting
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = ccsTraits<MC> >
+template< mss::mc_type MC, typename TT = ccsTraits<MC> >
 fapi2::ReturnCode mrs03_decode_helper(const ccs::instruction_t<MC>& i_inst,
                                       const uint64_t i_port_rank,
                                       uint8_t& o_mpr_mode,
@@ -198,7 +198,7 @@ fapi2::ReturnCode mrs03_decode_helper(const ccs::instruction_t<MC>& i_inst,
 /// @param[in] i_port_rank the rank in question
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE >
+template< mss::mc_type MC >
 inline fapi2::ReturnCode mrs03_decode(const ccs::instruction_t<MC>& i_inst,
                                       const uint64_t i_port_rank)
 {

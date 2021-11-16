@@ -80,9 +80,10 @@ enum mrs_bad_field
 
 ///
 /// @brief A structure to represent an MRS operation
+/// @tparam MC mss::mc_type memory controller type
 /// @tparam T, the target type of the CCS engine chiplet
 ///
-template< fapi2::TargetType T >
+template< mss::mc_type MC, fapi2::TargetType T >
 struct mrs_data
 {
     // Which MRS# this is
@@ -91,9 +92,9 @@ struct mrs_data
     // The attribute getter. For MRS we pass in the ARR0 of the CCS instruction
     // as that allows us to encapsulate the attribute processing and the bit
     // manipulation in one function.
-    fapi2::ReturnCode (*iv_func)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&, ccs::instruction_t<DEFAULT_MC_TYPE>&,
+    fapi2::ReturnCode (*iv_func)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&, ccs::instruction_t<MC>&,
                                  const uint64_t);
-    fapi2::ReturnCode (*iv_dumper)(const ccs::instruction_t<DEFAULT_MC_TYPE>&, const uint64_t);
+    fapi2::ReturnCode (*iv_dumper)(const ccs::instruction_t<MC>&, const uint64_t);
 
     // The delay needed after this MRS word is written
     uint64_t iv_delay;
@@ -105,9 +106,9 @@ struct mrs_data
     /// @param[in] *i_dumper return code from the MRS data dumper
     /// @param[in] i_delay, the delay post mrs command
     mrs_data( const uint64_t i_mrs,
-              fapi2::ReturnCode (*i_func)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&, ccs::instruction_t<DEFAULT_MC_TYPE>&,
+              fapi2::ReturnCode (*i_func)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&, ccs::instruction_t<MC>&,
                                           const uint64_t),
-              fapi2::ReturnCode (*i_dumper)(const ccs::instruction_t<DEFAULT_MC_TYPE>&, const uint64_t),
+              fapi2::ReturnCode (*i_dumper)(const ccs::instruction_t<MC>&, const uint64_t),
               const uint64_t i_delay ):
         iv_mrs(i_mrs),
         iv_func(i_func),
@@ -184,77 +185,73 @@ struct perform_mrs_load_overload< KIND_LRDIMM_DDR4 >
 
 ///
 /// @brief Perform the mrs_load operations
+/// @tparam MC mss::mc_type memory controller type
 /// @tparam K, the kind of DIMM we're operating on (derived)
 /// @param[in] i_target, a fapi2::Target<fapi2::TARGET_TYPE_DIMM>
 /// @param[in] a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< kind_t K = FORCE_DISPATCH >
+template< mss::mc_type MC, kind_t K = FORCE_DISPATCH >
 typename std::enable_if< perform_mrs_load_overload<DEFAULT_KIND>::available, fapi2::ReturnCode>::type
 perform_mrs_load( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                  std::vector< ccs::instruction_t<DEFAULT_MC_TYPE> >& io_inst);
+                  std::vector< ccs::instruction_t<MC> >& io_inst);
 
 ///
 /// @brief Function to perform mrs load overloads
+/// @tparam MC mss::mc_type memory controller type
+/// @tparam K, the kind of DIMM we're operating on
 /// @param[in] i_target the dimm target for the mrs's
 /// @param[in,out] io_inst the MCBIST instruction
 /// @note We know we registered overloads for perform_mrs_load, so we need the entry point to
 /// the dispatcher. Add a set of these for all TargetTypes which get overloads
 /// for this API
 ///
-template<>
-fapi2::ReturnCode perform_mrs_load<FORCE_DISPATCH>( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t<DEFAULT_MC_TYPE> >& io_inst);
+template< mss::mc_type MC, kind_t K >
+fapi2::ReturnCode perform_mrs_load( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                    std::vector< ccs::instruction_t<MC> >& io_inst);
 
 ///
 /// @brief Function to perform mrs load overloads
-/// @param[in] i_target the dimm target for the mrs's
-/// @param[in,out] io_inst the MCBIST instruction
-/// @note We know we registered overloads for perform_mrs_load, so we need the entry point to
-/// the dispatcher. Add a set of these for all TargetTypes which get overloads
-/// for this API
-///
-template<>
-fapi2::ReturnCode perform_mrs_load<DEFAULT_KIND>( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t<DEFAULT_MC_TYPE> >& io_inst);
-
-///
-/// @brief Function to perform mrs load overloads
+/// @tparam K kind of the DIMM
+/// @tparam MC mss::mc_type memory controller type
+/// @tparam B true if we should overload to a different kind
 /// @param[in] i_kind the i_target's dimm_kind struct
 /// @param[in] i_target the dimm target for the mrs's
 /// @param[in,out] io_inst the MCBIST instruction
 /// @note boilerplate
 ///
-template< kind_t K, bool B = perform_mrs_load_overload<K>::available >
+template< kind_t K, mss::mc_type MC, bool B = perform_mrs_load_overload<K>::available >
 inline fapi2::ReturnCode perform_mrs_load_dispatch( const kind_t& i_kind,
         const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t<DEFAULT_MC_TYPE> >& io_inst)
+        std::vector< ccs::instruction_t<MC> >& io_inst)
 {
     // We dispatch to another kind if:
     // We don't have an overload defined (B == false)
     // Or, if we do have an overload (B == true) and this is not out kind.
     if ((B == false) || ((B == true) && (K != i_kind)))
     {
-        return perform_mrs_load_dispatch < (kind_t)(K - 1) > (i_kind, i_target, io_inst);
+        return perform_mrs_load_dispatch < MC, (kind_t)(K - 1) > (i_kind, i_target, io_inst);
     }
 
     // Otherwise, we call the overload.
-    return perform_mrs_load<K>(i_target, io_inst);
+    return perform_mrs_load<MC, K>(i_target, io_inst);
 }
 
 ///
 /// @brief Function to perform mrs load overloads
+/// @tparam MC mss::mc_type memory controller type
+/// @tparam K kind of the DIMM
 /// @param[in] i_kind the i_target's dimm_kind struct
 /// @param[in] i_target the dimm target for the mrs's
 /// @param[in,out] io_inst the MCBIST instruction
 /// @note DEFAULT_KIND is 0 so this is the end of the recursion
 ///
-template<>
-inline fapi2::ReturnCode perform_mrs_load_dispatch<DEFAULT_KIND>(const kind_t&,
+template< mss::mc_type MC, kind_t K >
+inline fapi2::ReturnCode perform_mrs_load_dispatch(const kind_t&,
         const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t<DEFAULT_MC_TYPE> >& io_inst)
+        std::vector< ccs::instruction_t<MC> >& io_inst)
 {
-    return perform_mrs_load<DEFAULT_KIND>(i_target, io_inst);
+    return perform_mrs_load<K>(i_target, io_inst);
 }
 
 }//mss

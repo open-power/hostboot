@@ -74,13 +74,13 @@ enum rtt_nom_settings
 
 ///
 /// @brief Mirror (front to back) the ADR bits of a CCS instruction - implementation
-/// @tparam mc_type MC - defaults to DEFAULT_MC_TYPE
-/// @tparam ccsTraits - defaults to use DEFAULT_MC_TYPE
+/// @tparam mc_type MC - type of memory controller
+/// @tparam ccsTraits - CCS engine traits of the memory controller
 /// @param[in, out] io_inst reference to a CCS instruction to be mirrored
 /// @return FAPI2_RC_SUCESS iff ok
 /// @note written this way so this is easier to test
 ///
-template<mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = ccsTraits<MC>>
+template<mss::mc_type MC, typename TT = ccsTraits<MC>>
 inline void address_mirror_impl(ccs::instruction_t<MC>& io_inst)
 {
     // Nothing fancy here, just mirror the bits we're told to mirror in Table 14 Address Mirroring and Inversion
@@ -94,15 +94,15 @@ inline void address_mirror_impl(ccs::instruction_t<MC>& io_inst)
 
 ///
 /// @brief Mirror (front to back) the ADR bits of a CCS instruction
-/// @tparam MC mss::mc_type memory controller type
-/// @tparam TT traits type defaults to mrsTraits<MC>
+/// @tparam mc_type MC - type of memory controller
+/// @tparam ccsTraits - CCS engine traits of the memory controller
 /// @param[in] i_target target to use to get mirroring attribute
 /// @param[in] i_port_rank the rank in question
 /// @param[in, out] io_inst reference to a CCS instruction to be mirrored
 /// @return FAPI2_RC_SUCESS iff ok
 /// @note assumes the input is from an even number rank
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = mrsTraits<MC> >
+template< mss::mc_type MC, typename TT = mrsTraits<MC> >
 fapi2::ReturnCode address_mirror(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                  const uint64_t i_port_rank,
                                  ccs::instruction_t<MC>& io_inst)
@@ -115,7 +115,7 @@ fapi2::ReturnCode address_mirror(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i
     // We only mirror odd ranks.
     if (l_mirror == TT::attr_mirror_mode_on())
     {
-        address_mirror_impl(io_inst);
+        address_mirror_impl<MC>(io_inst);
     }
 
 fapi_try_exit:
@@ -124,14 +124,14 @@ fapi_try_exit:
 
 ///
 /// @brief Invert (side to side) the ADR bits of a CCS instruction
-/// @tparam mc_type MC - defaults to DEFAULT_MC_TYPE
-/// @tparam ccsTraits - defaults to use DEFAULT_MC_TYPE
+/// @tparam mc_type MC - type of memory controller
+/// @tparam ccsTraits - CCS engine traits of the memory controller
 /// @param[in] i_target the DIMM target of the ccs command
 /// @param[in] i_inst const reference to a CCS instruction.
 /// @param[in] l_is_a17 Boolean for whether A17 bit is enabled or not
 /// @return ccs instruction with the ADR bits inverted (side-to-side)
 ///
-template<mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = ccsTraits<MC>>
+template<mss::mc_type MC, typename TT = ccsTraits<MC>>
 inline ccs::instruction_t<MC> address_invert(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const ccs::instruction_t<MC>& i_inst,
         const bool i_is_a17 = false)
@@ -174,11 +174,11 @@ inline ccs::instruction_t<MC> address_invert(const fapi2::Target<fapi2::TARGET_T
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< typename D >
+template< typename D, mss::mc_type MC >
 inline fapi2::ReturnCode make_ccs_helper( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const D& i_data,
         const uint64_t i_port_rank,
-        ccs::instruction_t<DEFAULT_MC_TYPE>& io_inst )
+        ccs::instruction_t<MC>& io_inst )
 {
     FAPI_TRY( D::make_ccs_instruction(i_target, i_data, io_inst, i_port_rank),
               "Failed making a CCS instruction for templated MRS data. MR%d rank %d on %s",
@@ -195,10 +195,10 @@ fapi_try_exit:
 /// @param[in] i_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< typename D >
+template< typename D, mss::mc_type MC >
 inline fapi2::ReturnCode decode_helper(const D& i_data,
                                        const uint64_t i_port_rank,
-                                       const ccs::instruction_t<DEFAULT_MC_TYPE>& i_inst )
+                                       const ccs::instruction_t<MC>& i_inst )
 {
     // Dump out the 'decoded' MRS and trace the CCS instructions.
     FAPI_TRY( D::decode(i_inst, i_port_rank),
@@ -225,8 +225,8 @@ fapi2::ReturnCode is_a17_needed(const fapi2::Target<T>& i_target,
 ///
 /// @brief Sets up MRS CCS instructions
 /// @tparam D the mrs data structure to send out
-/// @tparam mc_type MC - defaults to DEFAULT_MC_TYPE
-/// @tparam ccsTraits - defaults to use DEFAULT_MC_TYPE
+/// @tparam mc_type MC - type of memory controller
+/// @tparam ccsTraits - CCS engine traits of the memory controller
 /// @param[in] i_target a fapi2::Target DIMM
 /// @param[in] i_data the completed MRS data to send
 /// @param[in] i_port_rank the rank to send to
@@ -234,7 +234,7 @@ fapi2::ReturnCode is_a17_needed(const fapi2::Target<T>& i_target,
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< typename D, mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = ccsTraits<MC> >
+template< typename D, mss::mc_type MC, typename TT = ccsTraits<MC> >
 fapi2::ReturnCode mrs_engine( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                               const D& i_data,
                               const uint64_t i_port_rank,
@@ -254,7 +254,7 @@ fapi2::ReturnCode mrs_engine( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_ta
               i_data.iv_mrs, mss::c_str(i_target) );
 
     // Call traits mirroring to determine if necessary
-    FAPI_TRY( mss::address_mirror(i_target, i_port_rank, l_inst_a_side),
+    FAPI_TRY( mss::address_mirror<MC>(i_target, i_port_rank, l_inst_a_side),
               "Failed mirroring MR%d rank %d on %s",
               i_data.iv_mrs, i_port_rank, mss::c_str(i_target) );
 
@@ -297,17 +297,18 @@ fapi_try_exit:
 ///
 /// @brief Sets up MRS CCS instructions
 /// @tparam D the mrs data structure to send out
+/// @tparam mc_type MC - type of memory controller
 /// @param[in] i_target a fapi2::Target DIMM
 /// @param[in] i_data the completed MRS data to send
 /// @param[in] i_port_rank the rank to send to
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< typename D >
+template< typename D, mss::mc_type MC >
 fapi2::ReturnCode mrs_engine( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                               const D& i_data,
                               const uint64_t i_port_rank,
-                              std::vector< ccs::instruction_t<DEFAULT_MC_TYPE> >& io_inst );
+                              std::vector< ccs::instruction_t<MC> >& io_inst );
 
 namespace ddr4
 {
@@ -1069,7 +1070,7 @@ struct mrs06_data
 /// @param[in,out] io_data data we are modifying MPR mode to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = mrsTraits<MC> >
+template< mss::mc_type MC, typename TT = mrsTraits<MC> >
 fapi2::ReturnCode set_wr_lvl_mode(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                   const mss::states i_mode,
                                   mrs01_data<MC>& io_data)
@@ -1104,7 +1105,7 @@ fapi_try_exit:
 /// @param[in,out] io_data data we are modifying MPR mode to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = mrsTraits<MC> >
+template< mss::mc_type MC, typename TT = mrsTraits<MC> >
 fapi2::ReturnCode set_dram_mpr_mode(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                     const uint8_t i_mode,
                                     mrs03_data<MC>& io_data)
@@ -1132,12 +1133,14 @@ fapi_try_exit:
 
 ///
 /// @brief Set RTT_NOM values in an mrs01_data object
+/// @tparam MC mss::mc_type memory controller type
+/// @tparam TT traits type defaults to mrsTraits<MC>
 /// @param[in] i_target a DIMM target
 /// @param[in] i_value settings for RTT_NOM
 /// @param[in,out] io_data data we are modifying RTT_NOM to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = mrsTraits<MC> >
+template< mss::mc_type MC, typename TT = mrsTraits<MC> >
 fapi2::ReturnCode set_dram_rtt_nom(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                    const uint8_t i_value[MAX_RANK_PER_DIMM],
                                    mrs01_data<MC>& io_data)
@@ -1175,7 +1178,7 @@ fapi_try_exit:
 /// @param[in,out] io_data data we are modifying RTT_WR to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = mrsTraits<MC> >
+template< mss::mc_type MC, typename TT = mrsTraits<MC> >
 fapi2::ReturnCode set_dram_rtt_wr(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                   const uint8_t i_value[MAX_RANK_PER_DIMM],
                                   mrs02_data<MC>& io_data)
@@ -1213,7 +1216,7 @@ fapi_try_exit:
 /// @param[in,out] io_data data we are modifying MPR mode to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = mrsTraits<MC> >
+template< mss::mc_type MC, typename TT = mrsTraits<MC> >
 fapi2::ReturnCode set_dram_mpr_rd_format(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const uint8_t i_format,
         mrs03_data<MC>& io_data)
@@ -1248,7 +1251,7 @@ fapi_try_exit:
 /// @param[in,out] io_data data we are modifying MPR mode to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = mrsTraits<MC> >
+template< mss::mc_type MC, typename TT = mrsTraits<MC> >
 fapi2::ReturnCode set_dram_mpr_page(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                     const uint8_t i_page,
                                     mrs03_data<MC>& io_data)
@@ -1284,7 +1287,7 @@ fapi_try_exit:
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = mrsTraits<MC> >
+template< mss::mc_type MC, typename TT = mrsTraits<MC> >
 fapi2::ReturnCode wr_lvl(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                          const mss::states i_mode,
                          const uint64_t i_port_rank,
@@ -1319,7 +1322,7 @@ fapi_try_exit:
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = mrsTraits<MC> >
+template< mss::mc_type MC, typename TT = mrsTraits<MC> >
 fapi2::ReturnCode mpr_load(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                            const uint8_t i_mode,
                            const uint64_t i_port_rank,
@@ -1356,7 +1359,7 @@ fapi_try_exit:
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = mrsTraits<MC> >
+template< mss::mc_type MC, typename TT = mrsTraits<MC> >
 fapi2::ReturnCode mpr_load(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                            const uint8_t i_mode,
                            const uint8_t i_rd_format,
@@ -1397,7 +1400,7 @@ fapi_try_exit:
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = mrsTraits<MC> >
+template< mss::mc_type MC, typename TT = mrsTraits<MC> >
 fapi2::ReturnCode rtt_nom_load(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                const uint8_t i_value[MAX_RANK_PER_DIMM],
                                const uint64_t i_port_rank,
@@ -1432,7 +1435,7 @@ fapi_try_exit:
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = mrsTraits<MC> >
+template< mss::mc_type MC, typename TT = mrsTraits<MC> >
 fapi2::ReturnCode rtt_wr_load(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                               const uint8_t i_value[MAX_RANK_PER_DIMM],
                               const uint64_t i_port_rank,
@@ -1468,7 +1471,7 @@ fapi_try_exit:
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = ccsTraits<MC>, typename MRS = mrsTraits<MC> >
+template< mss::mc_type MC, typename TT = ccsTraits<MC>, typename MRS = mrsTraits<MC> >
 inline fapi2::ReturnCode mpr_read( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                    const uint64_t i_mpr_loc,
                                    const uint64_t i_port_rank,
@@ -1519,7 +1522,7 @@ fapi_try_exit:
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = ccsTraits<MC>, typename MRS = mrsTraits<MC> >
+template< mss::mc_type MC, typename TT = ccsTraits<MC>, typename MRS = mrsTraits<MC> >
 inline fapi2::ReturnCode precharge_all( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                         const uint64_t i_port_rank,
                                         std::vector< ccs::instruction_t<MC> >& io_inst )
@@ -1632,13 +1635,13 @@ fapi2::ReturnCode rtt_wr_attr_helper(const fapi2::Target<fapi2::TARGET_TYPE_DIMM
 
 ///
 /// @brief Executes CCS instructions to set RTT_WR value into RTT_NOM
-/// @tparam mc_type MC - defaults to DEFAULT_MC_TYPE
+/// @tparam mc_type MC
 /// @param[in] i_target a DIMM target
 /// @param[in] i_port_rank selected rank
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE >
+template< mss::mc_type MC >
 fapi2::ReturnCode rtt_nom_override(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                    const uint64_t i_port_rank,
                                    std::vector< ccs::instruction_t<MC> >& io_inst)
@@ -1674,13 +1677,13 @@ fapi_try_exit:
 
 ///
 /// @brief Executes CCS instructions to disable RTT_WR
-/// @tparam mc_type MC - defaults to DEFAULT_MC_TYPE
+/// @tparam mc_type MC
 /// @param[in] i_target a DIMM target
 /// @param[in] i_port_rank selected rank
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE >
+template< mss::mc_type MC >
 fapi2::ReturnCode rtt_wr_disable(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                  const uint64_t i_port_rank,
                                  std::vector< ccs::instruction_t<MC> >& io_inst)
@@ -1702,13 +1705,13 @@ fapi_try_exit:
 
 ///
 /// @brief Executes CCS instructions to restore original value to RTT_NOM
-/// @tparam mc_type MC - defaults to DEFAULT_MC_TYPE
+/// @tparam mc_type MC
 /// @param[in] i_target a DIMM target
 /// @param[in] i_port_rank selected rank
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE >
+template< mss::mc_type MC >
 fapi2::ReturnCode rtt_nom_restore(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                   const uint64_t i_port_rank,
                                   std::vector< ccs::instruction_t<MC> >& io_inst)
@@ -1736,13 +1739,13 @@ fapi_try_exit:
 
 ///
 /// @brief Executes CCS instructions to restore original value to RTT_WR
-/// @tparam mc_type MC - defaults to DEFAULT_MC_TYPE
+/// @tparam mc_type MC
 /// @param[in] i_target a DIMM target
 /// @param[in] i_port_rank selected rank
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE >
+template< mss::mc_type MC >
 fapi2::ReturnCode rtt_wr_restore(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                  const uint64_t i_port_rank,
                                  std::vector< ccs::instruction_t<MC> >& io_inst)

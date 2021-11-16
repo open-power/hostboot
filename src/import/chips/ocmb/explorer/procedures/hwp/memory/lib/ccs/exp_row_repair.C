@@ -219,7 +219,7 @@ fapi2::ReturnCode add_sppr_guardkey( const mss::rank::info<mss::mc_type::EXPLORE
     l_inst_a_side.arr0.template clearBit<TT::ARR0_DDR_BANK_GROUP_0>();
 
     // Perform Address Mirroring if necessary
-    FAPI_TRY( mss::address_mirror(l_dimm, l_port_rank, l_inst_a_side),
+    FAPI_TRY( mss::address_mirror<mss::mc_type::EXPLORER>(l_dimm, l_port_rank, l_inst_a_side),
               "Failed mirroring rank %d on %s",
               l_port_rank, mss::c_str(l_dimm) );
 
