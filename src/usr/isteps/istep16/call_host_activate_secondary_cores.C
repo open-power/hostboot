@@ -127,6 +127,22 @@ void* call_host_activate_secondary_cores(void* const io_pArgs)
 
             for (const auto & l_proc: l_procTargetList)
             {
+                // Do not call special wakeup for procs with no PG-good cores
+                // Find all PRESENT CORE chiplets of the proc
+                TargetHandleList l_coreTargetList;
+                getCoreChiplets( l_coreTargetList,
+                                 UTIL_FILTER_CORE_ALL,
+                                 UTIL_FILTER_PRESENT,
+                                 l_proc);
+                if (l_coreTargetList.empty())
+                {
+                    // No PRESENT cores, continue
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "Proc 0x%x has no PG-good cores, not calling p10_core_special_wakeup (ENABLE)",
+                        l_proc->getAttr<ATTR_HUID>());
+                    continue;
+                }
+
                 fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(l_proc);
 
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -352,6 +368,22 @@ void* call_host_activate_secondary_cores(void* const io_pArgs)
 
             for (const auto & l_proc: l_procTargetList)
             {
+                // Do not call special wakeup for procs with no PG-good cores
+                // Find all PRESENT CORE chiplets of the proc
+                TargetHandleList l_coreTargetList;
+                getCoreChiplets( l_coreTargetList,
+                                 UTIL_FILTER_CORE_ALL,
+                                 UTIL_FILTER_PRESENT,
+                                 l_proc);
+                if (l_coreTargetList.empty())
+                {
+                    // No PRESENT cores, continue
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "Proc 0x%x has no PG-good cores, not calling p10_core_special_wakeup (DISABLE)",
+                        l_proc->getAttr<ATTR_HUID>());
+                    continue;
+                }
+
                 fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(l_proc);
 
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,

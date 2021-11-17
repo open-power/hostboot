@@ -448,7 +448,7 @@ errlHndl_t callWakeupHwp(TARGETING::Target* i_target,
             fapi2::Target<fapi2::TARGET_TYPE_CORE> l_fapi_core(i_target);
             fapi2::ReturnCode l_rc = 0;
 
-            if (i_target->getAttr<ATTR_DEAD_CORE_MODE>() == 
+            if (i_target->getAttr<ATTR_DEAD_CORE_MODE>() ==
                 fapi2::ENUM_ATTR_DEAD_CORE_MODE_ENABLED)
             {
                 TRACFCOMP(g_trac_scom,INFO_MRK
@@ -613,6 +613,26 @@ errlHndl_t handleSpecialWakeup(TARGETING::Target* i_target,
     errlHndl_t l_errl = NULL;
 
     do {
+
+        // Do not call special wakeup for procs with no PG-good cores
+        if (i_target->getAttr<ATTR_TYPE>() == TYPE_PROC)
+        {
+            // Find all PRESENT CORE chiplets of the proc
+            TargetHandleList l_coreTargetList;
+            getCoreChiplets( l_coreTargetList,
+                             UTIL_FILTER_CORE_ALL,
+                             UTIL_FILTER_PRESENT,
+                             i_target);
+            if (l_coreTargetList.empty())
+            {
+                // No PRESENT cores, exit
+                TRACFCOMP(g_trac_scom,
+                    "Proc 0x%x has no PG-good cores, not calling p10_core_special_wakeup (i_enable=%d)",
+                    i_target->getAttr<ATTR_HUID>(),i_enable);
+                break;
+            }
+        }
+
 #ifndef __HOSTBOOT_RUNTIME //IPL context
         // Always use the HWP inside the IPL context
         l_errl = callWakeupHwp(i_target, i_enable);
