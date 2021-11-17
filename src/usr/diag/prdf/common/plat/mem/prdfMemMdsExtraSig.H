@@ -36,5 +36,10 @@ PRDR_ERROR_SIGNATURE(MdsMdiaVcmFa, 0xdddd0003, "", "MDS Memdiags VCM False Alarm
 PRDR_ERROR_SIGNATURE(MdsDbe, 0xdddd0004, "", "MDS Double Bit Error");
 PRDR_ERROR_SIGNATURE(MdsSbe, 0xdddd0005, "", "MDS Single Bit Error");
 PRDR_ERROR_SIGNATURE(MdsPoison, 0xdddd0006, "", "MDS Poison Error");
+PRDR_ERROR_SIGNATURE(MdsMediaUe, 0xdddd0007, "", "MDS Media UE");
+PRDR_ERROR_SIGNATURE(MdsMediaUeSeen, 0xdddd0008, "", "MDS Media UE already seen");
+PRDR_ERROR_SIGNATURE(MdsMediaUeRisk, 0xdddd0009, "", "MDS Media UE Risk");
+PRDR_ERROR_SIGNATURE(MdsMediaBadSrank, 0xdddd000a, "", "MDS Media UE Risk - Bad Secondary Rank");
+PRDR_ERROR_SIGNATURE(MdsMediaBadPrank, 0xdddd000b, "", "MDS Media UE Risk - Bad Primary Rank");
 
 #endif // __prdfMemMdsExtraSig_H

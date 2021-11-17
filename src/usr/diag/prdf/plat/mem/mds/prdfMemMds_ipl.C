@@ -52,25 +52,147 @@ uint32_t checkMediaErrors_ipl( ExtensibleChip * i_chip,
     #define PRDF_FUNC "[checkMediaErrors_ipl] "
 
     uint32_t o_rc = SUCCESS;
-
     o_errorsFound = false;
+    TargetHandle_t target = i_chip->getTrgt();
+    HUID huid = i_chip->getHuid();
+    OcmbDataBundle * db = getOcmbDataBundle( i_chip );
+
+    // Note: for media errors that result in predictive callouts we'll be
+    // calling out the DIMM, so get the DIMM target here.
+    // First, get the address in which the command stopped.
+    MemAddr addr;
+    o_rc = getMemMaintAddr<TYPE_OCMB_CHIP>( i_chip, addr );
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "getMemMaintAddr<TYPE_OCMB_CHIP>(0x%08x) failed",
+                  i_chip->getHuid() );
+        return o_rc;
+    }
+    // TODO RTC 210072 - Support for multiple ports per OCMB
+    MemRank rank = addr.getRank();
+    TargetHandle_t dimmTarget = getConnectedDimm( target, rank );
+
+    // Update the media error log counts stored in the data bundle
+    o_rc = db->iv_mediaFfdc.updateCounts( rank );
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "iv_mediaFfdc.updateCounts(0x%02x) for huid 0x%08x "
+                  "failed.", rank.getKey(), huid );
+    }
+
+    // Variables to store the rank information if we need it
+    uint8_t prank = 0;
+
+    // Get the active ecc attentions
+    uint32_t eccAttns = 0;
+    o_rc = checkEccFirs<TYPE_OCMB_CHIP>( i_chip, eccAttns );
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "checkEccFirs(0x%08x) failed", huid );
+        return o_rc;
+    }
 
     // Check for a media UE (as indicated by RDFFIR maint SUE)
-    // TODO
+    if ( 0 != (eccAttns & MAINT_SUE ) )
+    {
+        io_sc.service_data->AddSignatureList( target, PRDFSIG_MdsMediaUe );
+
+        // predictive callout for media UE
+        io_sc.service_data->SetCallout( dimmTarget );
+        io_sc.service_data->setServiceCall();
+
+        // collect FFDC for media errors
+        captureMediaFfdc( i_chip, io_sc );
+
+        // Set flag indicating we've seen a media UE on this pattern
+        db->iv_mediaUeSeen = true;
+
+        // clear maint SUE - will be done when prepareNextCmd is called
+    }
     // Check if media UEs already logged on previous sranks for this pattern
-    // TODO
+    else if ( db->iv_mediaUeSeen )
+    {
+        // Skip the rest of the checks for media errors
+        io_sc.service_data->AddSignatureList( target, PRDFSIG_MdsMediaUeSeen );
+    }
     // Check if MFG MDS 2-symbol media screening flag is enabled and media
     // error log count for any mrank is above threshold
     // TODO
-    // Check if MFG mode is enabled and media error log count is above threshold
-    // TODO
-    // Check if the media error log count for any mrank is 8 or more
-    // TODO
-    // Check if there is a media chip kill
-    // TODO
+    // Check if MFG mode is enabled and media error log count for any primary
+    // rank is above threshold
+    // TODO Eventually we will want the mfg threshold to have an attribute we
+    // can adjust. For now, default to 1
+    else if ( mfgMode() && db->iv_mediaFfdc.checkPrankCount(prank, 1) )
+    {
+        io_sc.service_data->AddSignatureList( target, PRDFSIG_MdsMediaUeRisk );
+
+        // Predictive callout for media UE risk
+        io_sc.service_data->SetCallout( dimmTarget );
+        io_sc.service_data->setServiceCall();
+
+        // collect FFDC for media errors
+        captureMediaFfdc( i_chip, io_sc );
+    }
+    // Check if the media error log count for any primary rank is 8 or more
+    else if ( db->iv_mediaFfdc.checkPrankCount(prank, 8) )
+    {
+        // Note: there's no need for additional verification of the chip kill
+        // as the chip kill field threshold should be set high enough in
+        // hardware to rule out soft errors or interface noise.
+
+        // Check if we can classify the error as a single bad secondary rank
+        uint8_t srank = 0;
+        if ( db->iv_mediaFfdc.checkSrankCount( prank, srank ) )
+        {
+            io_sc.service_data->AddSignatureList( target,
+                                                  PRDFSIG_MdsMediaBadSrank );
+        }
+        // Else classify as a whole bad primary rank
+        else
+        {
+            io_sc.service_data->AddSignatureList( target,
+                                                  PRDFSIG_MdsMediaBadPrank );
+        }
+        // Predictive callout for media UE risk
+        io_sc.service_data->SetCallout( dimmTarget );
+        io_sc.service_data->setServiceCall();
+
+        // collect FFDC for media errors
+        captureMediaFfdc( i_chip, io_sc );
+    }
+    else
+    {
+        // Check if there is a media chip kill
+        std::map<MemRank, uint8_t> ckMap;
+        o_rc = getChipKillInfo<TYPE_OCMB_CHIP>( target, ckMap );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getChipKillInfo(0x%08x) failed.", huid );
+            return o_rc;
+        }
+
+        if ( !ckMap.empty() )
+        {
+            io_sc.service_data->SetCallout( dimmTarget );
+
+            // In mfg mode, make the log predictive
+            if ( mfgMode() )
+            {
+                io_sc.service_data->setServiceCall();
+            }
+
+            // collect FFDC for media errors
+            captureMediaFfdc( i_chip, io_sc );
+        }
+    }
 
     // Clear media error logs
-    // TODO
+    o_rc = clearMediaErrLogs( i_chip );
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "clearMediaErrLogs(0x%08x) failed.", huid );
+        return o_rc;
+    }
 
     return o_rc;
 

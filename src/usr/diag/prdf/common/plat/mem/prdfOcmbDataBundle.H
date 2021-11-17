@@ -41,6 +41,7 @@
 
 #ifdef __HOSTBOOT_MODULE
 
+#include <prdfMemMdsMediaLogCounts.H>
 #include <prdfMemScrubUtils.H>
 #include <prdfMemTdFalseAlarm.H>
 #include <prdfMemThresholds.H>
@@ -60,6 +61,16 @@ class OcmbDataBundle : public DataBundle
 {
   public: // functions
 
+    #ifdef __HOSTBOOT_MODULE
+    /**
+     * @brief Constructor.
+     * @param i_ocmbChip The OCMB chip.
+     */
+    explicit OcmbDataBundle( ExtensibleChip * i_ocmbChip ) :
+        iv_chip(i_ocmbChip), iv_ceTable(i_ocmbChip), iv_ueTable(i_ocmbChip),
+        iv_addrConfig(i_ocmbChip), iv_mediaFfdc(i_ocmbChip)
+    {}
+    #else
     /**
      * @brief Constructor.
      * @param i_ocmbChip The OCMB chip.
@@ -68,6 +79,7 @@ class OcmbDataBundle : public DataBundle
         iv_chip(i_ocmbChip), iv_ceTable(i_ocmbChip), iv_ueTable(i_ocmbChip),
         iv_addrConfig(i_ocmbChip)
     {}
+    #endif
 
     /** @brief Destructor. */
     ~OcmbDataBundle()
@@ -203,6 +215,10 @@ class OcmbDataBundle : public DataBundle
     /** Bool to indicate if we've triggered a channel fail because of IUEs. */
     bool iv_iueChnlFail = false;
 
+    /** Class for storing the FFDC gathered from the media error logs on the
+     *  MDS media controller. MDS DIMM specific. */
+    MDS::MediaLogCounts iv_mediaFfdc;
+
     #ifdef __HOSTBOOT_RUNTIME
 
     /** VCM false alarm counter. */
@@ -233,6 +249,10 @@ class OcmbDataBundle : public DataBundle
 
     /** MNFG IPL CE statistics. */
     MemIplCeStats<TARGETING::TYPE_OCMB_CHIP> * iv_iplCeStats = nullptr;
+
+    /** Flag to track if a media UE has been logged on previous sranks for
+     *  a pattern during memdiags. MDS DIMM specific */
+    bool iv_mediaUeSeen = false;
 
     #endif
 

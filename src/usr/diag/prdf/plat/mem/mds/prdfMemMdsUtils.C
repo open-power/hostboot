@@ -27,6 +27,7 @@
 
 #include <prdfErrlUtil.H>
 #include <prdfMain_common.H>
+#include <prdfOcmbDataBundle.H>
 #include <prdf_service_codes.H>
 
 #include <devicefw/userif.H>
@@ -486,11 +487,148 @@ uint32_t getPoisonCount<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
 
 //------------------------------------------------------------------------------
 
+uint32_t __getChipKillLocation( TARGETING::TargetHandle_t i_mdsCtlr,
+                                uint8_t i_prank, uint8_t i_srank,
+                                uint8_t & o_ckLoc )
+{
+    #define PRDF_FUNC "[__getChipKillLocation] "
+
+    PRDF_ASSERT( nullptr != i_mdsCtlr );
+    PRDF_ASSERT( TYPE_MDS_CTLR == getTargetType(i_mdsCtlr) );
+
+    uint32_t o_rc = SUCCESS;
+
+    // The chip kill location registers begin at address 0x00202402 and continue
+    // until address 0x00202411 (1 per rank, 16 total). Each is 5 bits
+    // denoting the dram location of the chip kill on it's corresponding rank.
+    // The first 8 registers cover primary rank 0 and the second 8 cover primary
+    // rank 1. The secondary ranks are in ascending order, so address 0x00202402
+    // denotes primary rank 0, secondary rank 0, and address 0x00202411 denotes
+    // primary rank 1, secondary rank 7.
+
+    uint32_t ckLocRegAddr = 0x00202402 + (8*i_prank) + i_srank;
+    uint32_t ckLocData = 0;
+
+    o_rc = readMdsCtlr<TYPE_MDS_CTLR>( i_mdsCtlr, ckLocRegAddr, ckLocData );
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "readMdsCtlr(0x%08x, 0x%08x) failed.",
+                  getHuid(i_mdsCtlr), ckLocRegAddr );
+        return o_rc;
+    }
+
+    // Get the 5 bits denoting the dram location of the chip kill
+    o_ckLoc = (ckLocData >> 27) & 0x1f;
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t getChipKillInfo<TYPE_MDS_CTLR>( TARGETING::TargetHandle_t i_mdsCtlr,
+    std::map<MemRank, uint8_t> & o_chipKillMap )
+{
+    #define PRDF_FUNC "[getChipKillInfo] "
+
+    PRDF_ASSERT( nullptr != i_mdsCtlr );
+    PRDF_ASSERT( TYPE_MDS_CTLR == getTargetType(i_mdsCtlr) );
+
+    uint32_t o_rc = SUCCESS;
+
+    // First, read the chip kill flags. There is one per rank, covering the
+    // first 16 bits starting at address 0x00202400
+    const uint32_t ckFlagAddr = 0x00202400;
+
+    uint32_t ckFlagData = 0;
+    o_rc = readMdsCtlr<TYPE_MDS_CTLR>( i_mdsCtlr, ckFlagAddr, ckFlagData );
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "readMdsCtlr(0x%08x, 0x%08x) failed.",
+                  getHuid(i_mdsCtlr), ckFlagAddr );
+        return o_rc;
+    }
+
+    // Shift the data over so the chip kill flags are right justified
+    ckFlagData = (ckFlagData >> 16) & 0xffff;
+
+    // Parse the chip kill flag data to see if any are set. The first byte
+    // covers primary rank 0, while the second byte covers primary rank 1.
+    // Within those bytes, the secondary ranks are in descending order, so the
+    // first bit is secondary rank 7, then 6, and so on.
+    for ( uint8_t prank = 0; prank < 2; prank++ )
+    {
+        for ( uint8_t srank = 0; srank < 8; srank++ )
+        {
+            uint8_t shift = (8-(8*prank)) + srank;
+            uint8_t ckFlag = (ckFlagData >> shift) & 0x1;
+
+            // If the chip kill flag is set, get the chip kill location
+            if ( 0 != (ckFlag & 0x1) )
+            {
+                uint8_t ckLoc = 0;
+                o_rc = __getChipKillLocation( i_mdsCtlr, prank, srank, ckLoc );
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "__getChipKillLocation(0x%08x,%d,%d) "
+                              "failed", getHuid(i_mdsCtlr), prank, srank );
+                    continue;
+                }
+
+                // Add the chip kill to the output map
+                MemRank rank( prank, srank );
+                o_chipKillMap[rank] = ckLoc;
+            }
+        }
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+template<>
+uint32_t getChipKillInfo<TYPE_OCMB_CHIP>( TARGETING::TargetHandle_t i_ocmb,
+    std::map<MemRank, uint8_t> & o_chipKillMap )
+{
+    PRDF_ASSERT( nullptr != i_ocmb );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == getTargetType(i_ocmb) );
+
+    TargetHandle_t mdsCtlr = getConnectedChild( i_ocmb, TYPE_MDS_CTLR, 0 );
+
+    return getChipKillInfo<TYPE_MDS_CTLR>( mdsCtlr, o_chipKillMap );
+}
+
+//------------------------------------------------------------------------------
+
 void captureMediaFfdc( ExtensibleChip * i_ocmb, STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[captureMediaFfdc] "
 
-    // TODO
+    // TODO RTC 294645 - update this function to properly add the FFDC to our
+    // capture data and update the parsing code needed as well. For now, just
+    // print out the data.
+
+    // Print out the data from the MediaErrCounts in the data bundle
+    OcmbDataBundle * db = getOcmbDataBundle( i_ocmb );
+    db->iv_mediaFfdc.captureMediaLogCounts( io_sc );
+
+    // Print out the chip kill flag and location register information
+    std::map<MemRank, uint8_t> ckMap;
+    if (SUCCESS != getChipKillInfo<TYPE_OCMB_CHIP>( i_ocmb->getTrgt(), ckMap ))
+    {
+        PRDF_ERR( PRDF_FUNC "getChipKillInfo(0x%08x) failed.",
+                  i_ocmb->getHuid() );
+    }
+
+    for ( const auto & ck : ckMap )
+    {
+        PRDF_TRAC( PRDF_FUNC "Chip Kill on primary rank=%d, secondary rank=%d, "
+                   "dram location=%d", ck.first.getMaster(),
+                   ck.first.getSlave(), ck.second );
+    }
 
     #undef PRDF_FUNC
 }

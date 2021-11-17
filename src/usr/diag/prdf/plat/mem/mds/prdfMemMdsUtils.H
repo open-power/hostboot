@@ -132,6 +132,18 @@ uint32_t getDoubleBitCount( TARGETING::TargetHandle_t i_target,
  */
 void captureMediaFfdc( ExtensibleChip * i_ocmb, STEP_CODE_DATA_STRUCT & io_sc );
 
+/**
+ * @brief  This is called to check the chip kill flags and location registers
+ *         on the MDS DDIMMs media controller, returning a map of ranks to
+ *         the dram locations of the chip kills.
+ * @param  i_target      The input MDS_CTLR/OCMB
+ * @param  o_chipKillMap A map of ranks to chip kill locations
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T>
+uint32_t getChipKillInfo( TARGETING::TargetHandle_t i_target,
+                          std::map<MemRank, uint8_t> & o_chipKillMap );
+
 } // end namespace MDS
 
 } // end namespace PRDF
