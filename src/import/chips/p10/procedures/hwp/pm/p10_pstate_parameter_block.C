@@ -867,6 +867,11 @@ void gppb_print(
     FAPI_INF("  %-26s : %1d", "wof_disable_vratio",
             i_gppb->pgpe_flags[PGPE_FLAG_WOF_DISABLE_VRATIO]);
 
+    FAPI_INF("Other Info:");
+
+    FAPI_INF("  %-26s : 0x%08X", "DVFS Adjustment",
+            revle32(i_gppb->base.dvfs_adjustment));
+
     FAPI_INF("---------------------------------------------------------------------------------------");
 }
 
@@ -1034,6 +1039,7 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         io_globalppb->base.array_write_vdn_mv = revle16(iv_array_vdn_mv);
         io_globalppb->base.array_write_vdd_mv = revle16(iv_array_vdd_mv);
         io_globalppb->base.rvrm_deadzone_mv   = iv_attrs.attr_rvrm_deadzone_mv;
+        io_globalppb->base.dvfs_adjustment    = revle32(iv_attrs.attr_dvfs_adjustment);
 
         //Avs bus topology
         io_globalppb->avs_bus_topology.vdd_avsbus_num  = iv_attrs.attr_avs_bus_num[VDD];
@@ -1937,6 +1943,9 @@ void PlatPmPPB::attr_init( void )
     PPB_GET_ATTR_8(ATTR_DDS_DELAY_ADJUST,                   FAPI_SYSTEM,  attr_dds_delay_adjust);
     PPB_GET_ATTR_8(ATTR_DDS_TRIP_OFFSET_ADJUST,             FAPI_SYSTEM,  attr_dds_trip_offset_adjust);
     PPB_GET_ATTR_8(ATTR_DDS_LARGE_DROOP_DETECT_ADJUST,      FAPI_SYSTEM,  attr_dds_large_droop_detect_adjust);
+
+    // Generic DFVS adjustment attribute for future usen
+    PPB_GET_ATTR(ATTR_DVFS_ADJUSTMENT,                      iv_procChip,  attr_dvfs_adjustment);
 
     // Deal with defaults if attributes are not set
 #define SET_DEFAULT(_attr_name, _attr_default) \

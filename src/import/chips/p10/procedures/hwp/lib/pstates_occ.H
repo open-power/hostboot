@@ -219,16 +219,16 @@ typedef struct
     uint8_t             pad_a[3];
 
     // UltraTurbo frequency from #V
-    uint32_t ultraturbo_freq_mhz;
+    uint32_t            ultraturbo_freq_mhz;
 
     // Fmax frequency from #V
-    uint32_t fmax_freq_mhz;
+    uint32_t            fmax_freq_mhz;
 
     // TDP Sort Temperature from #V
-    uint32_t tdp_sort_power_temp_0p5C;
+    uint32_t            tdp_sort_power_temp_0p5C;
 
     // I/O Throttle Temperature from #V
-    uint32_t io_throttle_temp_0p5C;
+    uint32_t            io_throttle_temp_0p5C;
 
     // Pad to make the structure an even 1KB
     uint8_t             pad_b[16];

@@ -235,6 +235,7 @@ typedef struct
     int8_t attr_dds_large_droop_detect_adjust[NUM_OP_POINTS];
     int8_t attr_dds_trip_offset_adjust[NUM_OP_POINTS];
 
+    uint32_t attr_dvfs_adjustment;
 
 } AttributeList;
 
