@@ -151,9 +151,9 @@ Layout Description
         <ecc/>
     </section>
     <section>
-        <description>Hostboot Runtime Services for Sapphire (10.0MB)</description>
+        <description>Hostboot Runtime Services for Sapphire (12.0MB)</description>
         <eyeCatch>HBRT</eyeCatch>
-        <physicalRegionSize>0xA00000</physicalRegionSize>
+        <physicalRegionSize>0xC00000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
     </section>
