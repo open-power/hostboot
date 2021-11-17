@@ -310,16 +310,16 @@ void* call_host_sbe_update (void *io_pArgs)
                                true); // true: return functional targets
 
         // Loop through all processors
-        for (const auto & l_target : l_procList)
+        for (const auto & l_procTarg : l_procList)
         {
             // Check if processor is MASTER_CANDIDATE
             TARGETING::ATTR_PROC_MASTER_TYPE_type type_enum =
-                       l_target->getAttr<TARGETING::ATTR_PROC_MASTER_TYPE>();
+                       l_procTarg->getAttr<TARGETING::ATTR_PROC_MASTER_TYPE>();
 
             if ( type_enum == TARGETING::PROC_MASTER_TYPE_MASTER_CANDIDATE )
             {
                 // Initialize the LPC Bus by calling the p10_sbe_lpc_init hwp
-                fapi2::Target <fapi2::TARGET_TYPE_PROC_CHIP> l_fapi_target (l_target);
+                fapi2::Target <fapi2::TARGET_TYPE_PROC_CHIP> l_fapi_target (l_procTarg);
                 FAPI_INVOKE_HWP(l_errl, p10_sbe_lpc_init_any, l_fapi_target, true);
 
                 if (l_errl)
@@ -327,14 +327,17 @@ void* call_host_sbe_update (void *io_pArgs)
                     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                                ERR_MRK"PNOR::validateAltMaster> p10_sbe_lpc_init target 0x%.8X"
                                TRACE_ERR_FMT,
-                               get_huid(l_target),
+                               get_huid(l_procTarg),
                                TRACE_ERR_ARGS(l_errl));
 
                     // capture the target data in the elog
-                    ErrlUserDetailsTarget(l_target).addToLog(l_errl);
-                    //Remove any deconfigure information, we only need the PNOR Part callout and do not want
-                    // to deconfigure the entire proc because of a PNOR part problem
-                    l_errl->removeGardAndDeconfigure();
+                    ErrlUserDetailsTarget(l_procTarg).addToLog(l_errl);
+                    //Remove any processor deconfigure/gard information, we
+                    // only need the deconfig/gard actions for the PNOR Part
+                    // and do not want to deconfigure the entire proc because
+                    // of a PNOR part problem
+                    l_errl->setGardType(l_procTarg,HWAS::GARD_NULL);
+                    l_errl->setDeconfigState(l_procTarg,HWAS::NO_DECONFIG);
                     // Commit error
                     errlCommit( l_errl, HWPF_COMP_ID );
                     l_testAltMaster = false;
@@ -343,7 +346,7 @@ void* call_host_sbe_update (void *io_pArgs)
                 {
                     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            "SUCCESS running p10_sbe_lpc_init HWP on "
-                           "target HUID %.8X", TARGETING::get_huid(l_target));
+                           "target HUID %.8X", TARGETING::get_huid(l_procTarg));
                 }
             }
         }
@@ -355,9 +358,22 @@ void* call_host_sbe_update (void *io_pArgs)
             l_errl = PNOR::validateAltMaster();
             if (l_errl)
             {
-                //Remove any deconfigure information, we only need the PNOR Part callout and do not want
-                // to deconfigure the entire proc because of a PNOR part problem
-                l_errl->removeGardAndDeconfigure();
+                for (const auto & l_procTarg : l_procList)
+                {
+                    // Check if processor is MASTER_CANDIDATE
+                    TARGETING::ATTR_PROC_MASTER_TYPE_type type_enum =
+                      l_procTarg->getAttr<TARGETING::ATTR_PROC_MASTER_TYPE>();
+
+                    if ( type_enum == TARGETING::PROC_MASTER_TYPE_MASTER_CANDIDATE )
+                    {
+                        //Remove any processor deconfigure/gard information, we
+                        // only need the deconfig/gard actions for the PNOR Part
+                        // and do not want to deconfigure the entire proc because
+                        // of a PNOR part problem
+                        l_errl->setGardType(l_procTarg,HWAS::GARD_NULL);
+                        l_errl->setDeconfigState(l_procTarg,HWAS::NO_DECONFIG);
+                    }
+                }
                 // Commit error
                 errlCommit( l_errl, HWPF_COMP_ID );
             }
