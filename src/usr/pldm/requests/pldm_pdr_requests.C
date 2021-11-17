@@ -980,12 +980,12 @@ errlHndl_t sendGracefulRestartRequest()
 
     do
     {
-// @TODO RTC:293028 Uncomment when BMC commit is in
-//        errl = sendResetRebootCountRequest();
-//        if (errl)
-//        {
-//            break;
-//        }
+        errl = sendResetRebootCountRequest();
+        if (errl)
+        {
+            // Commit the log and continue to give the system a chance at recovery.
+            ERRORLOG::errlCommit(errl, PLDM_COMP_ID);
+        }
 
         const effecter_id_t sw_term_effecter_id
             = thePdrManager().findStateEffecterId(PLDM_STATE_SET_SW_TERMINATION_STATUS,
