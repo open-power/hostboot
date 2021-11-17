@@ -857,6 +857,17 @@ sub getTargetPosition
 }
 
 
+#--------------------------------------------------
+# @brief Generate the fapi string for a given target
+#
+# @param[in] $self   - The global target object
+# @param[in] $targetType - The target type to get name of
+# @param[in] $node - The node parent of the input target
+# @param[in] $chipPos - chip position relative to node
+# @param[in] $chipletPos - unit position relative to chip
+#
+# @return the position of the target given
+#--------------------------------------------------
 sub getFapiName
 {
     my $self        = shift;

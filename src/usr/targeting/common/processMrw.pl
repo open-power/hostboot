@@ -1588,7 +1588,7 @@ sub processOcmbChipAndChildren
     {
         if ( ($targetObj->getType($child)) eq "MEM_PORT")
         {
-            processMemPort($targetObj, $child, $ocmbPosPerNode);
+            processMemPort($targetObj, $child);
             $foundMemPort = true;
         }
     }
@@ -1612,14 +1612,11 @@ sub processOcmbChipAndChildren
 #
 # @param[in] $targetObj - The global target object blob
 # @param[in] $target    - The MEM_PORT target
-# @param[in] $memPortPosPerNode - The MEM_PORT position per NODE, derived from
-#                                 the OCMB's position per NODE.
 #--------------------------------------------------
 sub processMemPort
 {
     my $targetObj         = shift;
     my $target            = shift;
-    my $memPortPosPerNode = shift;
 
     # Some sanity checks.  Make sure we are processing the correct target type
     # and make sure the target's parent has been processed.
@@ -1634,6 +1631,7 @@ sub processMemPort
     my $ocmbParent = $targetObj->getTargetParent($target);
     my $ocmbParentAffinity = $targetObj->getAttribute($ocmbParent, "AFFINITY_PATH");
     my $ocmbParentPhysical = $targetObj->getAttribute($ocmbParent, "PHYS_PATH");
+    my $ocmbParentPos = $targetObj->getAttribute($ocmbParent, "FAPINAME_POS");
 
     # Use the parent OCMB's FAPI_POS, per system, to set the MEM_PORT's
     # FAPI_POS, per system. IE, the FAPI_POS is an increasing sequential
@@ -1641,14 +1639,16 @@ sub processMemPort
     # (target type SYS).
     my $memPortPosPerSystem = $targetObj->getAttribute($ocmbParent, "FAPI_POS");
 
+    # One memport per OCMB means that the position matches the parent
+    my $memPortPosPerNode = $ocmbParentPos;
+
     # Use the MEM_PORT's position per system to calculate the MEM_PORT's
     # position per parent.  This is done by taking the modulo of the MEM_PORT's
     # position per system against the maximum instance per parent.
     my $memPortPosPerParent = $memPortPosPerSystem % getMaxInstPerParent($type);
 
     # Get the FAPI_NAME by using the data gathered above.
-    my $chipPos = 0; # The chip position for MEM_PORT is 0
-    my $memPortFapiName = $targetObj->getFapiName($type, $nodeParentPos, $chipPos, $memPortPosPerNode);
+    my $memPortFapiName = $targetObj->getFapiName($type, $nodeParentPos, $ocmbParentPos, $memPortPosPerParent);
 
     # Take advantage of previous work done on the DDIMMs.  Use the parent DDIMM's
     # affinity/physical path for our self and append the mem_port to the end.
