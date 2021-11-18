@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -287,6 +287,26 @@ errlHndl_t markDisabledMcas();
  * @retval: error log handle
  */
 errlHndl_t update_proc_mem_to_use(const TARGETING::Target* i_node);
+
+/**
+ * @brief       simple helper fn to get and set hwas state to poweredOn,
+ *                  present, functional and then execute any secondary
+ *                  behaviors that are required.
+ *
+ * @param[in]   i_target        pointer to target that we're looking at
+ * @param[in]   i_present       boolean indicating present or not
+ * @param[in]   i_functional    boolean indicating functional or not
+ * @param[in]   i_errlEid       erreid that caused change to non-funcational;
+ *                              0 if not associated with an error or if
+ *                              functional is true
+ *
+ * @return      none
+ *
+ */
+void enableHwasState(TARGETING::Target *i_target,
+                     bool i_present,
+                     bool i_functional,
+                     uint32_t i_errlEid);
 
 };   // end namespace
 

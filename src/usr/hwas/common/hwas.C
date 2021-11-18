@@ -135,7 +135,8 @@ Target* shouldPowerGateNMMU1(const Target& i_proc)
 
 /**
  * @brief       simple helper fn to get and set hwas state to poweredOn,
- *                  present, functional
+ *                  present, functional and then execute any secondary
+ *                  behaviors that are required.
  *
  * @param[in]   i_target        pointer to target that we're looking at
  * @param[in]   i_present       boolean indicating present or not
@@ -156,6 +157,11 @@ void enableHwasState(Target *i_target,
     if (i_functional == false)
     {   // record the EID as a reason that we're marking non-functional
         hwasState.deconfiguredByEid = i_errlEid;
+    }
+    else
+    {
+        // clear speculative deconfig if we're functional now
+        hwasState.specdeconfig = 0;
     }
 
     hwasState.poweredOn     = true;

@@ -2006,7 +2006,6 @@ errlHndl_t DeconfigGard::_symmetryValidation(ProcInfoVector &io_procInfo)
 //******************************************************************************
 void updateAttrPG(Target& i_target, const bool i_shouldSetFunctional)
 {
-
     Target* const l_perv = getTargetWithPGAttr(i_target);
 
     if (l_perv)
@@ -2878,8 +2877,7 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
                                MOD_DECONFIG_TARGETS_FROM_GARD,
                                RC_RESOURCE_RECOVERED,
                                userdata1,
-                               userdata2);
-            errlCommit(l_pErr, HWAS_COMP_ID);
+                               userdata2);          
 
             //Now go through all targets which are speculatively
             //deconfigured and roll back gard on them.
@@ -2897,9 +2895,13 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
                  ++l_sdIter)
             {
                 HwasState l_state = (*l_sdIter)->getAttr<ATTR_HWAS_STATE>();
-                l_state.deconfiguredByEid = CONFIGURED_BY_RESOURCE_RECOVERY;
-                l_state.specdeconfig = 0;
-                (*l_sdIter)->setAttr<ATTR_HWAS_STATE>(l_state);
+
+                //Need to call enableHwasState() to make sure any secondary
+                // actions run, specifically the logic that sets ATTR_PG.
+                enableHwasState( *l_sdIter,
+                                 l_state.present,
+                                 l_state.functional,
+                                 CONFIGURED_BY_RESOURCE_RECOVERY );
 
                 //Mark parent node as resource recovered
                 PredicateCTM predNode(CLASS_ENC, TYPE_NODE);
@@ -2920,7 +2922,13 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
                             CONFIGURED_BY_RESOURCE_RECOVERY;
                     pNodeList[0]->setAttr<ATTR_HWAS_STATE>(l_state);
                 }
+
+                // TODO: Should add some of this data to the info log, but
+                //  we can't use normal interfaces in this common code
             } // for
+
+            // commit the informational log
+            errlCommit(l_pErr, HWAS_COMP_ID);
 
             //After recovery go through all recovered gard records and
             //log an event.
