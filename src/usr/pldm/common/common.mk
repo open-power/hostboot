@@ -62,6 +62,7 @@ PLDM_BASE_COMMON_OBJS += file_io.o
 PLDM_BASE_COMMON_OBJS += pldm_fileio_requests.o
 PLDM_BASE_COMMON_OBJS += pldm_pdr_requests.o
 PLDM_BASE_COMMON_OBJS += platform.o
+PLDM_BASE_COMMON_OBJS += pldm_datetime_requests.o
 
 PLDM_EXTENDED_COMMON_OBJS += fru.o
 

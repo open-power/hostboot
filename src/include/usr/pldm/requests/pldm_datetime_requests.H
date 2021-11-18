@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/pldm/pldm_util.H $                            */
+/* $Source: src/include/usr/pldm/requests/pldm_datetime_requests.H $      */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2021                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,52 +22,30 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#ifndef PLDM_DATETIME_REQUESTS_H
+#define PLDM_DATETIME_REQUESTS_H
 
-/** @file pldm_util.H
+#include <time.h>
+#include <errl/errlentry.H>
+
+/* @file pldm_datetime_requests.H
  *
- *  @brief PLDM utility functions and macros.
+ * This file contains the declarations of the functions involved in getting
+ * the timestamp (date/time) from the BMC.
  */
-
-#ifndef PLDM_UTIL_H
-#define PLDM_UTIL_H
-
-#include <openbmc/pldm/libpldm/pdr.h>
-#include <sys/msg.h>
 
 namespace PLDM
 {
 
-/* @brief Convert a PLDM entity ID from a target attribute
- * (e.g. ATTR_PLDM_ENTITY_ID_INFO) to a pldm_entity structure.
- * NOTE: The attribute is stored in Little Endian but Hostboot is Big Endian so it will be coverted to BE.
+/*
+ * @brief This function requests the current date/time from BMC. The
+ *        resulting date/time is encoded in BDC format.
  *
- * @param[in] i_targ_entity_id  The entity ID
- * @return    pldm_entity       pldm_entity object
+ * @param[out] o_dateTime the date/time that BMC returned (0 on error)
+ * @return nullptr on success; non-nullptr on error
  */
-template<typename T>
-inline pldm_entity targeting_to_pldm_entity_id(T i_targ_entity_id)
-{
-    pldm_entity entity;
-    entity.entity_type = le16toh(i_targ_entity_id.entityType);
-    entity.entity_instance_num = le16toh(i_targ_entity_id.entityInstanceNumber);
-    entity.entity_container_id = le16toh(i_targ_entity_id.containerId);
-    return entity;
-}
+errlHndl_t getDateTime(BCD_time8_t& o_dateTime);
 
-}
-
-#ifdef __HOSTBOOT_RUNTIME
-// For Hostboot Runtime we just use nullptr as the message queue parameter to
-// the various send/receive functions.
-#define MSG_Q_RESOLVE(FUNC, QNAME) nullptr
-#else
-#define MSG_Q_RESOLVE(FUNC, QNAME)                                      \
-    ({                                                                  \
-    const msg_q_t msgQ = msg_q_resolve(QNAME);                          \
-    assert(msgQ != nullptr,                                             \
-           FUNC ": PLDM Req Out Message queue did not resolve properly!"); \
-    msgQ;                                                               \
-    })
-#endif
+} // namespace PLDM
 
 #endif

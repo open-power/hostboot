@@ -102,6 +102,7 @@ namespace PLDM
         MOD_GET_INHIBIT_BMC_RESET_VALUE              = 0x3D, // getInhibitBmcResetValue
         MOD_RESET_REBOOT_COUNT                       = 0x3E, // sendResetRebootCountRequest
         MOD_GET_PDR                                  = 0x3F, // getPDR
+        MOD_GET_DATE_TIME                            = 0x40, // getDateTime
     };
 
     enum PLDMReasonCode
