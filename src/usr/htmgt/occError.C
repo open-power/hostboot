@@ -556,12 +556,19 @@ namespace HTMGT
 
                 // We compare against one less than the threshold because the
                 // WOF reset count doesn't get incremented until the resetPrep
-                if ((iv_wofResetCount < (WOF_RESET_COUNT_THRESHOLD-1)) &&
-                    (! isMfgFlagSet(TARGETING::
-                                  MFG_FLAGS_MNFG_ENERGYSCALE_SPECIAL_POLICIES)))
+                if (iv_wofResetCount < (WOF_RESET_COUNT_THRESHOLD-1))
                 {
-                    // Not at WOF reset threshold yet and not MFG, set as INFO
-                    io_errlSeverity = ERRORLOG::ERRL_SEV_INFORMATIONAL;
+                    if (! isMfgFlagSet(TARGETING::
+                                       MFG_FLAGS_MNFG_ENERGYSCALE_SPECIAL_POLICIES))
+                    {
+                        // Not at WOF reset threshold yet and not MFG, set as INFO
+                        io_errlSeverity = ERRORLOG::ERRL_SEV_INFORMATIONAL;
+                    }
+                }
+                else
+                {
+                    // Set sev to Unrecoverable w/Performance Loss
+                    io_errlSeverity = ERRORLOG::ERRL_SEV_UNRECOVERABLE1;
                 }
             }
 
@@ -585,13 +592,13 @@ namespace HTMGT
                 // If reset will force safe mode, then make error unrecoverable
                 if (OCC_RESET_COUNT_THRESHOLD == iv_resetCount)
                 {
-                    if (io_errlSeverity != ERRORLOG::ERRL_SEV_UNRECOVERABLE)
+                    if (io_errlSeverity != ERRORLOG::ERRL_SEV_UNRECOVERABLE1)
                     {
-                        // update severity to UNRECOVERABLE
+                        // update severity to UNRECOVERABLE1 (w/degraded preformance)
                         TMGT_ERR("elogProcessActions: changing severity to "
-                                 "UNRECOVERABLE (was sev=0x%02X)",
+                                 "UNRECOVERABLE/DEGRADED (was sev=0x%02X)",
                                  io_errlSeverity);
-                        io_errlSeverity = ERRORLOG::ERRL_SEV_UNRECOVERABLE;
+                        io_errlSeverity = ERRORLOG::ERRL_SEV_UNRECOVERABLE1;
                     }
                 }
                 else if ((io_errlSeverity != ERRORLOG::ERRL_SEV_INFORMATIONAL)&&

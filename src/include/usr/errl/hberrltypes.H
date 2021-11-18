@@ -185,6 +185,7 @@ enum errlSeverity_t
     ERRL_SEV_RECOVERED         = 0x10,  //Recovered
     ERRL_SEV_PREDICTIVE        = 0x20,  //Predictive Error, general
     ERRL_SEV_UNRECOVERABLE     = 0x40,  //Unrecoverable, general
+    ERRL_SEV_UNRECOVERABLE1	   = 0x41,	//Unrecoverable, bypassed w/degraded perf
     ERRL_SEV_CRITICAL_SYS_TERM = 0x51,  //Critical, System Termination
     ERRL_SEV_UNKNOWN           = 0xFF   //Reserved
 };

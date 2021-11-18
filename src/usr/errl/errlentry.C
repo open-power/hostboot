@@ -98,6 +98,7 @@ std::map<uint8_t, const char *> errl_sev_str_map {
     {ERRL_SEV_RECOVERED,         "RECOVERED"},
     {ERRL_SEV_PREDICTIVE,        "PREDICTIVE"},
     {ERRL_SEV_UNRECOVERABLE,     "UNRECOVERABLE"},
+    {ERRL_SEV_UNRECOVERABLE1,    "UNRECOVERABLE1"},
     {ERRL_SEV_CRITICAL_SYS_TERM, "CRITICAL_SYS_TERM"},
     {ERRL_SEV_UNKNOWN,           "UNKNOWN"},
 };
@@ -2754,6 +2755,7 @@ bool ErrlEntry::isSevVisible( void )
         // Visible logs
         case( ERRL_SEV_PREDICTIVE ): l_vis = true; break;
         case( ERRL_SEV_UNRECOVERABLE ): l_vis = true; break;
+        case( ERRL_SEV_UNRECOVERABLE1 ): l_vis = true; break;
         case( ERRL_SEV_CRITICAL_SYS_TERM ): l_vis = true; break;
 
         // Error case, shouldn't happen so make it show up

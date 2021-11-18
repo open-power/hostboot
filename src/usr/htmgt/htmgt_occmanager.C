@@ -195,7 +195,7 @@ namespace HTMGT
                                   0, instance,
                                   (uint64_t)homer>>32,
                                   (uint64_t)homer&0xFFFFFFFF,
-                                  ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                                  ERRORLOG::ERRL_SEV_UNRECOVERABLE1);
                     }
                     else
                     {
@@ -778,7 +778,7 @@ namespace HTMGT
                               HTMGT_MOD_OCC_RESET,
                               HTMGT_RC_OCC_CRIT_FAILURE,
                               0, cv_safeReturnCode, 0, cv_safeOccInstance,
-                              ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                              ERRORLOG::ERRL_SEV_UNRECOVERABLE1);
 
                     TMGT_ERR("_resetOccs: Safe Mode (RC: 0x%04X OCC%d)",
                              cv_safeReturnCode, cv_safeOccInstance);
@@ -875,7 +875,7 @@ namespace HTMGT
 
     void OccManager::updateForSafeMode(errlHndl_t & io_err)
     {
-        io_err->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+        io_err->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE1);
 
         // Add level 2 support callout
         io_err->addProcedureCallout(HWAS::EPUB_PRC_LVL_SUPP,

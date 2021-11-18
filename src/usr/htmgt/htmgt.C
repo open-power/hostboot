@@ -175,8 +175,8 @@ namespace HTMGT
                 else
                 {
                     // Failed to find functional OCCs, no need to try again
-                    // Set original error log  as unrecoverable and commit
-                    l_err->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                    // Set original error log as unrecoverable/degraded performance and commit
+                    l_err->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE1);
                     ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
                 }
             }
@@ -224,8 +224,8 @@ namespace HTMGT
                              " failed with 0x%04X",
                              reset_err->reasonCode());
 
-                    // Set original error log  as unrecoverable and commit
-                    l_err->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                    // Set original error log  as unrecoverable/degraded and commit
+                    l_err->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE1);
                     ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
 
                     // Commit occReset error
@@ -509,7 +509,7 @@ namespace HTMGT
                       HTMGT_MOD_ENABLE_OCC_ACTUATION,
                       HTMGT_RC_OCC_CRIT_FAILURE,
                       i_occActivation, safeRc, safeMode, safeInstance,
-                      ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                      ERRORLOG::ERRL_SEV_UNRECOVERABLE1);
         }
 
         TMGT_INF("<<enableOccActuation() returning 0x%04X",
