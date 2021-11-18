@@ -142,7 +142,7 @@ class SbeFifo
         enum fifoGenericMessage
         {
             SBE_FIFO_CMD_GET_SBE_FFDC        = 0x01,
-            SBE_FIFO_CMD_GET_CAPABILITIES    = 0x02,
+            SBE_FIFO_CMD_GET_CAPABILITIES_2  = 0x07,
         };
 
         /**
@@ -360,26 +360,27 @@ class SbeFifo
             }
         } PACKED;
 
-        /**
-        * @brief Struct for FIFO Get Capabilities Request
-        *
-        * Complies with document FipS_SBE_Interface_Specification_v1.5b-1.pdf
-        */
-        struct fifoGetCapabilitiesRequest
-        {
-            uint32_t wordCnt;       // 0x02 (The number of 32 bits in msg)
-            uint16_t reserved;
-            uint8_t  commandClass;  // 0xA8 (SBE_FIFO_CLASS_GENERIC_MESSAGE)
-            uint8_t  command;       // 0x02 (SBE_FIFO_CMD_GET_CAPABILITIES)
-            fifoGetCapabilitiesRequest() :
-                  wordCnt(2)
-                , reserved(0)
-                , commandClass(SBE_FIFO_CLASS_GENERIC_MESSAGE)
-                , command(SBE_FIFO_CMD_GET_CAPABILITIES)
-            {
-            }
-        } PACKED;
-
+          /**
+          * @brief Struct for FIFO Get Capabilities Request including
+          *        new additions. Original get capabilities is no longer
+          *        supported
+          *
+          * Complies with document FipS_SBE_Interface_Specification_v1.5b-1.pdf
+          */
+          struct fifoGetCapabilitiesRequest2
+          {
+              uint32_t wordCnt;       // 0x02 (The number of 32 bits in msg)
+              uint16_t reserved;
+              uint8_t  commandClass;  // 0xA8 (SBE_FIFO_CLASS_GENERIC_MESSAGE)
+              uint8_t  command;       // 0x07 (SBE_FIFO_CMD_GET_CAPABILITIES_2)
+              fifoGetCapabilitiesRequest2() :
+                    wordCnt(2)
+                  , reserved(0)
+                  , commandClass(SBE_FIFO_CLASS_GENERIC_MESSAGE)
+                  , command(SBE_FIFO_CMD_GET_CAPABILITIES_2)
+              {
+              }
+          } PACKED;
 
         /**
         * @brief enums for FIFO Magic values

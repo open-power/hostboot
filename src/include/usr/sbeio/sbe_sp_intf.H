@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -155,10 +155,11 @@ enum sbeInstructionControlCommands
 */
 enum sbeGenericMessageCommands
 {
-    SBE_CMD_GET_SBE_FFDC          = 0x01, /* Get FFDC */
-    SBE_CMD_GET_SBE_CAPABILITIES  = 0x02, /* GET SBE capabilities */
-    SBE_CMD_GET_FREQ_SUPPORTED    = 0x03, /* Get Supported frequencies */
-    SBE_CMD_QUIESCE               = 0x06, /* Sbe Quiesce */
+    SBE_CMD_GET_SBE_FFDC            = 0x01, /* Get FFDC */
+    SBE_CMD_GET_SBE_CAPABILITIES    = 0x02, /* GET SBE capabilities */
+    SBE_CMD_GET_FREQ_SUPPORTED      = 0x03, /* Get Supported frequencies */
+    SBE_CMD_QUIESCE                 = 0x06, /* Sbe Quiesce */
+    SBE_CMD_GET_SBE_CAPABILITIES_2  = 0x07, /* GET SBE capabilities including new additions */
 };
 
 enum sbeMpIplCommands

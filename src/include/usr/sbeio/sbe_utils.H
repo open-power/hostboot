@@ -40,9 +40,7 @@ namespace SBEIO
     * Complies with document Host_SBE_Interface_Specification_v0.9e.pdf
     */
     static constexpr uint8_t SBE_RELEASE_TAG_MAX_CHARS = 20;
-    static constexpr uint8_t SBE_CAPABILITY_VERSION_1_1_SIZE = 20;
-    static constexpr uint8_t SBE_CAPABILITY_VERSION_1_2_SIZE = 24;
-    static constexpr uint8_t SBE_MAX_CAPABILITIES = SBE_CAPABILITY_VERSION_1_2_SIZE;
+    static constexpr uint8_t SBE_MAX_CAPABILITIES_2 = 26;
 
     // access values into capabilities array
     static constexpr uint8_t  SBE_CAPABILITY_HALT_OFFSET = 22;
@@ -54,7 +52,7 @@ namespace SBEIO
         uint16_t minorVersion;
         uint32_t commitId;
         char     releaseTag[SBE_RELEASE_TAG_MAX_CHARS];  // AKA build tag
-        uint32_t capabilities[SBE_MAX_CAPABILITIES];
+        uint32_t capabilities[SBE_MAX_CAPABILITIES_2];
 
         sbeCapabilities_t() :
               majorVersion(0)

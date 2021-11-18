@@ -280,7 +280,7 @@ errlHndl_t getFifoSbeCapabilities(TargetHandle_t i_target)
     {
         // Get the needed structures to make the FIFO call
         // Create a FIFO request message. Default ctor initializes correctly
-        SbeFifo::fifoGetCapabilitiesRequest l_fifoRequest;
+        SbeFifo::fifoGetCapabilitiesRequest2 l_fifoRequest;
 
         // Create a FIFO response message.  No need to iniitilaize
         SbeFifo::fifoGetCapabilitiesResponseEnd * l_fifoResponseEnd;
@@ -310,18 +310,7 @@ errlHndl_t getFifoSbeCapabilities(TargetHandle_t i_target)
         uint32_t rspEndOffset = 0;
 
         // update this based on version
-        uint8_t capabilities_array_size = SBEIO::SBE_MAX_CAPABILITIES;
-
-        if ((pSbeCapabilities->majorVersion == 1) &&
-            (pSbeCapabilities->minorVersion == 1))
-        {
-            capabilities_array_size = SBEIO::SBE_CAPABILITY_VERSION_1_1_SIZE;
-        }
-        else if ((pSbeCapabilities->majorVersion >= 1) &&
-                 (pSbeCapabilities->minorVersion >= 2))
-        {
-            capabilities_array_size = SBEIO::SBE_CAPABILITY_VERSION_1_2_SIZE;
-        }
+        uint8_t capabilities_array_size = SBEIO::SBE_MAX_CAPABILITIES_2;
 
         // update response end pointer to after sbeCapabilities size
         rspEndOffset = sizeof(pSbeCapabilities->majorVersion) +
@@ -337,7 +326,7 @@ errlHndl_t getFifoSbeCapabilities(TargetHandle_t i_target)
         if ((SbeFifo::FIFO_STATUS_MAGIC != l_fifoResponseEnd->status.magic)  ||
             (SbeFifo::SBE_FIFO_CLASS_GENERIC_MESSAGE !=
                                       l_fifoResponseEnd->status.commandClass) ||
-            (SbeFifo::SBE_FIFO_CMD_GET_CAPABILITIES !=
+            (SbeFifo::SBE_FIFO_CMD_GET_CAPABILITIES_2 !=
                                       l_fifoResponseEnd->status.command))
         {
             TRACFCOMP(g_trac_sbeio,
@@ -354,7 +343,7 @@ errlHndl_t getFifoSbeCapabilities(TargetHandle_t i_target)
                       l_fifoResponseEnd->status.commandClass,
                       SbeFifo::SBE_FIFO_CLASS_GENERIC_MESSAGE,
                       l_fifoResponseEnd->status.command,
-                      SbeFifo::SBE_FIFO_CMD_GET_CAPABILITIES);
+                      SbeFifo::SBE_FIFO_CMD_GET_CAPABILITIES_2);
 
             /*@
              * @errortype
@@ -375,7 +364,7 @@ errlHndl_t getFifoSbeCapabilities(TargetHandle_t i_target)
                 get_huid(i_target),
                 TWO_UINT32_TO_UINT64(
                   TWO_UINT16_TO_UINT32(SbeFifo::SBE_FIFO_CLASS_GENERIC_MESSAGE,
-                                       SbeFifo::SBE_FIFO_CMD_GET_CAPABILITIES),
+                                       SbeFifo::SBE_FIFO_CMD_GET_CAPABILITIES_2),
                   TWO_UINT16_TO_UINT32(l_fifoResponseEnd->status.commandClass,
                                        l_fifoResponseEnd->status.command) ));
 
