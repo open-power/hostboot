@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2021
+# Contributors Listed Below - COPYRIGHT 2012,2022
 # [+] International Business Machines Corp.
 # [+] YADRO
 #
@@ -6869,7 +6869,8 @@ sub generateTargetingImage {
     my $offsetWithinTargets = 0;
     my @NullPtrArray = ( 0 ) ;
 
-    my $attributeMetadataBinData = 0;
+    # The metadate for RW attributes
+    my $rwAttributeMetadataBinData = "";
 
     foreach my $targetInstance (@targetsAoH)
     {
@@ -7605,13 +7606,14 @@ sub generateTargetingImage {
             # If this is an attribute we haven't seen before, add it to the
             # metadata map and metadata section.
             my $attrIdHash = hex(getAttributeIdHashStr($attributeId));
-            if(not exists $attrMetadataMap{$attrIdHash})
+            if( (not exists $attrMetadataMap{$attrIdHash} )  &&
+                ($attributePersistency eq SECTION_TYPE_PNOR_RW) )
             {
                 $attrMetadataMap{$attrIdHash}{exists} = 1;
                 # Write the metadata for the current attribute into the metadata section
-                $attributeMetadataBinData .= pack4byte($attrIdHash);
-                $attributeMetadataBinData .= pack4byte($attributeSize);
-                $attributeMetadataBinData .= pack1byte($attributePersistency);
+                $rwAttributeMetadataBinData .= pack4byte($attrIdHash);
+                $rwAttributeMetadataBinData .= pack4byte($attributeSize);
+                $rwAttributeMetadataBinData .= pack1byte($attributePersistency);
             }
 
             $attributesWritten++;
@@ -7629,7 +7631,7 @@ sub generateTargetingImage {
     # (uint32_t). Include that size in the total size of the metadata section.
     use constant NUM_ATTR_SIZE => 4;
 
-    $rwMetadataSize = length($attributeMetadataBinData) + NUM_ATTR_SIZE;
+    $rwMetadataSize = length($rwAttributeMetadataBinData) + NUM_ATTR_SIZE;
 
     if($numAttributes != $attributesWritten)
     {
@@ -7957,7 +7959,7 @@ sub generateTargetingImage {
         $md5hex->add($roAttrBinData);
         $md5hex->add($associationsBinData);
         $md5hex->add($heapPnorInitBinData);
-        $md5hex->add($attributeMetadataBinData);
+        $md5hex->add($rwAttributeMetadataBinData);
 
         my $versionHeader = "VERSION\0";
         $versionHeader .= $md5hex->hexdigest;
@@ -8042,7 +8044,7 @@ sub generateTargetingImage {
     }
 
     $outFile .= pack4byte(scalar keys %attrMetadataMap);
-    $outFile .= $attributeMetadataBinData;
+    $outFile .= $rwAttributeMetadataBinData;
     $outFile .= pack("@".($sectionHoH{pnorRwMetadata}{size} - $rwMetadataSize));
 
     # Handle read-write data

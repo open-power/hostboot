@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -255,7 +255,7 @@ typedef struct
 typedef struct
 {
     uint32_t numAttrs;
-    section_metadata_t attrMetadata;
+    section_metadata_t attrMetadata[];
 } __attribute__((packed)) section_metadata_mem_layout_t;
 
 /**
@@ -267,7 +267,7 @@ typedef struct
 typedef struct
 {
     attr_metadata_t metadata;
-    uint8_t valuePtr; // The actual value of the attribute may be larger than
+    uint8_t value[]; // The actual value of the attribute may be larger than
                       // uint8_t. However, this struct can be overlayed on top
                       // of memory and the address of this uint8_t will point
                       // to the start of the value of the attribute, whose true
@@ -311,7 +311,7 @@ typedef struct
     uint8_t version;
     uint32_t dataSize;
     uint32_t numAttributes;
-    rw_attr_memory_layout_t attrArray;
+    rw_attr_memory_layout_t attrArray[];
 }__attribute__((packed)) rw_attr_section_t;
 
 // Note that map access is not thread-safe, so the below data types

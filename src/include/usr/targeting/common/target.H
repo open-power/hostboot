@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -972,33 +972,31 @@ class Target
 #endif
 
 #ifndef __HOSTBOOT_RUNTIME
-        // FIXME RTC: 205059 Opening the whole AttrRP is too much; need to only
-        // friend AttrRP::mergeAttributes
         friend class AttrRP;
 #endif
 
-         friend bool fapi2::
-                     platAttrSvc::
-                     setTargetingAttrHelper(TARGETING::Target*,
-                                            const TARGETING::ATTRIBUTE_ID ,
-                                            const uint32_t , void * );
-         friend bool fapi2::
-                     platAttrSvc::
-                     getTargetingAttrHelper(TARGETING::Target * ,
-                                            const TARGETING::ATTRIBUTE_ID ,
-                                            const uint32_t , void * );
-      /*
-       * @brief allow targetattrbulksync access to the target class store.
-       */
-      friend class TargetAttrBulkSync;
+        friend bool fapi2::
+                    platAttrSvc::
+                    setTargetingAttrHelper(TARGETING::Target*,
+                                           const TARGETING::ATTRIBUTE_ID ,
+                                           const uint32_t , void * );
+        friend bool fapi2::
+                    platAttrSvc::
+                    getTargetingAttrHelper(TARGETING::Target * ,
+                                           const TARGETING::ATTRIBUTE_ID ,
+                                           const uint32_t , void * );
+        /*
+         * @brief allow targetattrbulksync access to the target class store.
+         */
+        friend class TargetAttrBulkSync;
 
-      /*
-       * @brief allow rt_cmds to use private _tryGetAttr.
-       */
-      friend void Util::cmd_getattr( char*& o_output,
-                                     uint32_t i_huid,
-                                     uint32_t i_attrId,
-                                     uint32_t i_size );
+        /*
+         * @brief allow rt_cmds to use private _tryGetAttr.
+         */
+        friend void Util::cmd_getattr( char*& o_output,
+                                       uint32_t i_huid,
+                                       uint32_t i_attrId,
+                                       uint32_t i_size );
 
 #ifdef __HOSTBOOT_MODULE
         friend void UTIL::dumpHBAttrs(uint32_t i_huid);

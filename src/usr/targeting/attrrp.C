@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1950,6 +1950,8 @@ namespace TARGETING
         TRACFCOMP(g_trac_targeting, ENTER_MRK"AttrRP::updatePreservedAttrSection");
         errlHndl_t l_errl = nullptr;
 
+#ifdef CONFIG_ENABLE_PERSISTENT_RW_ATTR
+
         do {
 
         if(UTIL::assertGetToplevelTarget()->getAttr<TARGETING::ATTR_IS_MPIPL_HB>())
@@ -2005,9 +2007,6 @@ namespace TARGETING
                 break;
             }
 
-            // Reset the preserved section
-            memset(l_hbdRwPtr, 0, l_hbd_rwSectionInfo.size);
-
             TargetRangeFilter l_allTargets(targetService().begin(),
                                            targetService().end(),
                                            nullptr);
@@ -2016,7 +2015,7 @@ namespace TARGETING
             uint32_t l_rwDataSize = sizeof(l_hbdRwPtr->version) +
                                     sizeof(l_hbdRwPtr->dataSize) +
                                     sizeof(l_hbdRwPtr->numAttributes);
-            rw_attr_memory_layout_t* l_preservedAttrPtr = &l_hbdRwPtr->attrArray;
+            rw_attr_memory_layout_t* l_preservedAttrPtr = l_hbdRwPtr->attrArray;
             // Iterate over all targets and write the RW attributes into the
             // persistent HBD_RW partition
             for(; l_allTargets; ++l_allTargets)
@@ -2050,13 +2049,13 @@ namespace TARGETING
                                                   l_attrValue);
                         if(l_attrValue)
                         {
-                            memcpy(&l_preservedAttrPtr->attrData.valuePtr,
+                            memcpy(l_preservedAttrPtr->attrData.value,
                                    l_attrValue,
                                    l_rwAttrMetadataMap[*l_attrId].attrSize);
                         }
                         // Move to the next RW attribute pointer
                         uint32_t l_currAttrSize = sizeof(rw_attr_memory_layout_t) +
-                                                  l_rwAttrMetadataMap[*l_attrId].attrSize - 1; // Subract 1 rw_attr_t has an extra byte in "value"
+                                                  l_rwAttrMetadataMap[*l_attrId].attrSize;
                         l_preservedAttrPtr = reinterpret_cast<rw_attr_memory_layout_t*>(
                             reinterpret_cast<uint8_t*>(l_preservedAttrPtr) +
                             l_currAttrSize);
@@ -2064,6 +2063,10 @@ namespace TARGETING
                     }
                 } // for all attributes
             } // for all targets
+
+            const uint64_t END_OF_DATA_MARKER = 0x454e4444415441; // ENDDATA
+            // Copy in the end of data marker
+            memcpy(l_preservedAttrPtr, &END_OF_DATA_MARKER, sizeof(END_OF_DATA_MARKER));
 
             // Write the version, the hash, and the number of RW attributes
             l_hbdRwPtr->version = CURRENT_HBD_PERSISTENT_VERSION;
@@ -2080,6 +2083,8 @@ namespace TARGETING
             }
         }
         } while(0);
+
+#endif
 
         TRACFCOMP(g_trac_targeting, EXIT_MRK"AttrRP::updatePreservedAttrSection");
         return l_errl;
