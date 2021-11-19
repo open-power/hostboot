@@ -1202,7 +1202,7 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
         {
             // set part and serial number attributes for current target
             // (error handling is done internally)
-            if (l_attrType == TYPE_PROC)
+            if( (l_attrType == TYPE_PROC) || (l_attrType == TYPE_NODE) )
             {
                 VPD::setPartAndSerialNumberAttributes(pTarget);
             }
