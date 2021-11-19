@@ -100,6 +100,12 @@
       <id>CURRENT_SBE_HRESET_STATUS</id>
     </attribute>
     <attribute>
+      <id>FRU_PATH</id>
+    </attribute>
+    <attribute>
+      <id>FSI_CALLOUTS</id>
+    </attribute>
+    <attribute>
       <id>GPU_SENSORS</id>
     </attribute>
     <attribute>
@@ -148,6 +154,18 @@
     <attribute>
       <id>PROC_IO_ERROR_TEMP_DELTA_C</id>
     </attribute>
+    <attribute>
+      <id>SPI_MVPD_BACKUP_INFO_CALLOUTS</id>
+    </attribute>
+    <attribute>
+      <id>SPI_MVPD_PRIMARY_INFO_CALLOUTS</id>
+    </attribute>
+    <attribute>
+      <id>SPI_SBE_BOOT_CODE_BACKUP_INFO_CALLOUTS</id>
+    </attribute>
+    <attribute>
+      <id>SPI_SBE_BOOT_CODE_PRIMARY_INFO_CALLOUTS</id>
+    </attribute>
   </targetTypeExtension>
 
   <targetTypeExtension>
@@ -162,6 +180,9 @@
 
   <targetTypeExtension>
     <id>chip-tpm-cectpm</id>
+    <attribute>
+      <id>FRU_PATH</id>
+    </attribute>
     <attribute>
       <id>PLDM_ENTITY_ID_INFO</id>
     </attribute>
@@ -189,6 +210,9 @@
 
   <targetTypeExtension>
     <id>lcard-dimm</id>
+    <attribute>
+      <id>I2C_CALLOUTS</id>
+    </attribute>
     <attribute>
       <id>IPMI_SENSORS</id>
     </attribute>
@@ -406,6 +430,20 @@
     <id>unit-occ-power10</id>
     <attribute>
       <id>IPMI_SENSORS</id>
+    </attribute>
+  </targetTypeExtension>
+
+  <targetTypeExtension>
+    <id>unit-omi</id>
+    <attribute>
+      <id>FRU_PATH</id>
+    </attribute>
+  </targetTypeExtension>
+
+  <targetTypeExtension>
+    <id>unit-smpgroup</id>
+    <attribute>
+      <id>FRU_PATH</id>
     </attribute>
   </targetTypeExtension>
 

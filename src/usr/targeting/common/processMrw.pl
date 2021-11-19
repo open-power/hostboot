@@ -42,6 +42,7 @@ use FindBin qw($RealBin);
 use FindBin qw($RealScript);
 use lib "$RealBin";
 
+use BusFruCallouts;
 use Targets;
 
 ################################################################################
@@ -318,6 +319,10 @@ sub main
     # could not be determined until after an initial pass.
     postProcessTargets($targetObj);
 
+    # Fill out intermediate FRU callout information for bus
+    # connections for BMC systems.
+    BusFruCallouts::setupBusses($targetObj);
+
     if ($targetObj->{build} eq "fsp")
     {
         processMrw_fsp::loadFSP($targetObj);
@@ -333,7 +338,6 @@ sub main
     # Write the results of processing the targets to an XML file
     writeResultsToXml($targetObj);
 }
-
 
 ################################################################################
 # Subroutines called from the main, except test and print
@@ -1804,7 +1808,9 @@ sub processTpm
     my $nodeParentPhysical = $targetObj->getAttribute($nodeParent, "PHYS_PATH");
 
     my $staticAbsLocationCode = getStaticAbsLocationCode($targetObj,$target);
+    my $targetParent = $targetObj->getTargetParent($target);
     $targetObj->setAttribute($target, "STATIC_ABS_LOCATION_CODE",$staticAbsLocationCode);
+    $targetObj->setAttribute($targetParent, "STATIC_ABS_LOCATION_CODE",$staticAbsLocationCode);
 
     # Get the TPM's position for further use below
     my $tpmPosPerSystem = $targetObj->getTargetPosition($target);
@@ -2952,6 +2958,13 @@ sub postProcessProcessor
 
     my $staticAbsLocationCode = getStaticAbsLocationCode($targetObj,$target);
     $targetObj->setAttribute($target, "STATIC_ABS_LOCATION_CODE",$staticAbsLocationCode);
+
+    # Set the static portion of the location code of the module to
+    # that of the processor. If the module contains multiple
+    # processors, this will happen once for each of them, but they
+    # should all have the same location code so the redundancy will be
+    # harmless.
+    $targetObj->setAttribute($module_target, "STATIC_ABS_LOCATION_CODE", $staticAbsLocationCode);
 
     my $systemName = $targetObj->getSystemName();
 

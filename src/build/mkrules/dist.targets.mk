@@ -99,6 +99,7 @@ COPY_FILES = \
     src/build/buildpnor/pkgOcmbFw.pl:openpower,openpower-sim \
     src/usr/targeting/common/processMrw.pl:openpower,openpower-sim \
     src/usr/targeting/common/Targets.pm:openpower,openpower-sim \
+    src/usr/targeting/common/BusFruCallouts.pm:openpower,openpower-sim \
     src/usr/targeting/common/genHDATstructures.pl:openpower,openpower-sim \
     src/usr/hdat/genHdatBin.pl:openpower,openpower-sim \
     src/usr/targeting/common/filter_out_unwanted_attributes.pl:openpower,openpower-sim \
