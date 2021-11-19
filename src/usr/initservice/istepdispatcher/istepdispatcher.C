@@ -695,44 +695,51 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                 }
                 else
                 {
-                    if (!errhdl)
+                    // Reconfig loop required, but the istep is either outside
+                    // of the reconfig loop, too many reconfigs have been
+                    // attempted, in manufacturing mode, or in MPIPL
+
+                    // FSP and not a doIstep error then
+                    // return an error to cause termination
+                    if (!errhdl && iv_spBaseServicesEnabled)
                     {
-                        // Reconfig loop required, but the istep is either outside
-                        // of the reconfig loop, too many reconfigs have been
-                        // attempted, in manufacturing mode, or in MPIPL.
-                        // Return an error to cause termination on FSP systems
-                        if (iv_spBaseServicesEnabled)
-                        {
-                            l_termToReconfig = true;
-                            errhdl = failedDueToDeconfig(istep, substep,
-                                                      newIstep, newSubstep);
-                        }
-                        else if (!l_manufacturingMode)
-                        {
-                            #ifdef CONFIG_CONSOLE
-                            auto l_reconfigAttr =
-                              l_pTopLevel->getAttr<TARGETING::ATTR_RECONFIGURE_LOOP>();
-                            bool l_deconfig = false;
-                            if( l_reconfigAttr ==
-                                TARGETING::RECONFIGURE_LOOP_DECONFIGURE )
-                            {
-                                l_deconfig = true;
-                            }
-
-                            CONSOLE::displayf(CONSOLE::VUART1, NULL,
-                              "System Shutting Down"
-                              "To Perform Reconfiguration After %s",
-                              l_deconfig ? "Deconfig" : "Recoverable Error" );
-                            CONSOLE::flush();
-                            #endif
-
-                            TRACFCOMP(g_trac_initsvc, INFO_MRK"executeAllISteps: sending reboot request");
-                            // Request BMC to do power cycle that sends shutdown
-                            // and reset the host
-                            requestReboot("reconfig loop");
-                        }
+                        l_termToReconfig = true;
+                        errhdl = failedDueToDeconfig(istep, substep,
+                                                     newIstep, newSubstep);
                     }
-                    // else return the error from doIstep
+                    // Not FSP and not in mfg mode,
+                    // still want to do the reconfig
+                    else if (!iv_spBaseServicesEnabled && !l_manufacturingMode)
+                    {
+                        // If there was a doIstep error then commit it
+                        // before the reconfig loop
+                        if (errhdl)
+                        {
+                            errlCommit(errhdl, INITSVC_COMP_ID);
+                        }
+
+                        #ifdef CONFIG_CONSOLE
+                        auto l_reconfigAttr =
+                            l_pTopLevel->getAttr<TARGETING::ATTR_RECONFIGURE_LOOP>();
+                        bool l_deconfig = false;
+                        if( l_reconfigAttr ==
+                            TARGETING::RECONFIGURE_LOOP_DECONFIGURE )
+                        {
+                            l_deconfig = true;
+                        }
+
+                        CONSOLE::displayf(CONSOLE::VUART1, NULL,
+                            "System Shutting Down"
+                            "To Perform Reconfiguration After %s",
+                            l_deconfig ? "Deconfig" : "Recoverable Error" );
+                        CONSOLE::flush();
+                        #endif
+
+                        TRACFCOMP(g_trac_initsvc, INFO_MRK"executeAllISteps: sending reboot request");
+                        // Request BMC to do power cycle that sends shutdown
+                        // and reset the host
+                        requestReboot("reconfig loop");
+                    }
                 }
             }
 
@@ -1048,16 +1055,14 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
 
         // Run check attention if system attribute is set
         bool runCheckAttn = l_pTopLevel->getAttr<TARGETING::ATTR_CHECK_ATTN_AFTER_ISTEP_FAIL>();
-        if (err)
-        {
-            TRACFCOMP(g_trac_initsvc, ERR_MRK"doIstep: Istep failed, plid 0x%x",
-                      err->plid());
-        }
 
         // Check for any attentions and invoke PRD for analysis
-        // if not in MPIPL mode
-        else if ((true == theStep->taskflags.check_attn) &&
-                 (false == iv_mpiplMode))
+        // if not in MPIPL mode and no istep error
+        if (true == iv_mpiplMode)
+        {
+            runCheckAttn = false;
+        }
+        else if ((true == theStep->taskflags.check_attn) && !err)
         {
             runCheckAttn = true;
         }
@@ -1169,11 +1174,20 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
         uint32_t l_status = SHUTDOWN_STATUS_GOOD;
 
         //  - Run CXX testcases
-        err = INITSERVICE::executeUnitTests();
-        if(err)
+        errlHndl_t l_errl = INITSERVICE::executeUnitTests();
+        if (l_errl)
         {
-            errlCommit (err, INITSVC_COMP_ID);
             l_status = SHUTDOWN_STATUS_UT_FAILED;
+            if (err)
+            {
+                l_errl->plid(err->plid());
+                errlCommit(l_errl, INITSVC_COMP_ID);
+            }
+            else
+            {
+                err = l_errl;
+                l_errl = nullptr;
+            }
         }
 
         //  - Call shutdown using payload base, and payload entry.
