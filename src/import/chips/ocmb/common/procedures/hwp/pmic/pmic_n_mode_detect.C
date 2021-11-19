@@ -305,32 +305,26 @@ aggregate_state voltage_checks(std::vector<pmic_info>& i_pmics)
     // SWC used for VIO, which we will not check as per spec
     static constexpr uint8_t SWD_CURRENT = 0x0F;
 
-    // This PMIC numbering is intentionally NOT the same as those in pmic_consts.H
-    // It is made to match the Functional 4U DDIMM Spec to be consistent with the
-    // sequence defined there for voltage phase checking
-    auto& PMIC1 = i_pmics[mss::pmic::id::PMIC0];
-    auto& PMIC2 = i_pmics[mss::pmic::id::PMIC2];
-    auto& PMIC3 = i_pmics[mss::pmic::id::PMIC1];
-    auto& PMIC4 = i_pmics[mss::pmic::id::PMIC3];
-
     // VDDR1
     // Note that for RCDless dimms this voltage domain does not exist, but this is fine.
     // We should read out close to 0A for both currents and therefore should not trigger
     // the N-mode condition.
     FAPI_INF("Checking voltage domain VDDR1");
-    read_double_domain(PMIC1, PMIC2, SWA_CURRENT, SWB_CURRENT, l_aggregate_state);
+    read_double_domain(i_pmics[mss::pmic::id::PMIC0], i_pmics[mss::pmic::id::PMIC2], SWA_CURRENT, SWB_CURRENT,
+                       l_aggregate_state);
 
     // VPP
     FAPI_INF("Checking voltage domain VPP");
-    read_single_domain(PMIC1, PMIC2, SWD_CURRENT, l_aggregate_state);
+    read_single_domain(i_pmics[mss::pmic::id::PMIC0], i_pmics[mss::pmic::id::PMIC2], SWD_CURRENT, l_aggregate_state);
 
     // VDDR2 (or VDDR for RCDless dimms)
     FAPI_INF("Checking voltage domain VDDR2");
-    read_double_domain(PMIC3, PMIC4, SWA_CURRENT, SWB_CURRENT, l_aggregate_state);
+    read_double_domain(i_pmics[mss::pmic::id::PMIC1], i_pmics[mss::pmic::id::PMIC3], SWA_CURRENT, SWB_CURRENT,
+                       l_aggregate_state);
 
     // VDD
     FAPI_INF("Checking voltage domain VDD");
-    read_single_domain(PMIC3, PMIC4, SWD_CURRENT, l_aggregate_state);
+    read_single_domain(i_pmics[mss::pmic::id::PMIC1], i_pmics[mss::pmic::id::PMIC3], SWD_CURRENT, l_aggregate_state);
 
     // VIO is intentionally skipped as the current draw
     // is too low to draw any meaningful conclusions
