@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1037,7 +1037,26 @@ namespace std
         }
         return init;
     }
-};
+}
+
+namespace hbstd
+{
+
+/* @brief Sort and deduplicate a container
+ * @param[in] i_container  The container
+ * @return    vector       Sorted container without duplicates
+ */
+template<typename T>
+T deduplicate(T i_container)
+{
+    using namespace std;
+
+    sort(begin(i_container), end(i_container));
+    i_container.erase(unique(begin(i_container), end(i_container)), end(i_container));
+    return move(i_container);
+}
+
+}
 #endif
 
 #endif

@@ -831,6 +831,43 @@ public:
      */
     uint32_t getErrorType() const;
 
+    /* @brief Structure to hold a callout and priority pair.
+     */
+    struct target_callout
+    {
+        HWAS::callOutPriority priority = HWAS::SRCI_PRIORITY_NONE;
+        TARGETING::Target* target = nullptr;
+
+        bool operator<(const target_callout& rhs) const
+        {
+            // We want callouts to be sorted such that all the callouts to the same
+            // target are adjacent and in order of descending priority. This way the
+            // std::unique algorithm will remove all but the highest priority
+            // callout.
+            return target < rhs.target || (target == rhs.target && priority > rhs.priority);
+        }
+
+        bool operator==(const target_callout& rhs) const
+        {
+            // Two callouts are equivalent if they call out the same target,
+            // regardless of priority (for std::unique). This definition is
+            // mathematically inconsistent with operator< because it allows a == b
+            // and a < b to be simultaneously true, but std::sort only uses
+            // operator< and std::unique only uses operator== so the issue is benign.
+            return target == rhs.target;
+        }
+    };
+
+    /* @brief Get a list of all targets called out by a given string in the format
+     *        P1:LOC1,P2:LOC2,...
+     * where P1, P2, ... are the letters L, M or H (for low, medium, or high) and LOC1,
+     * LOC2, ... are strings designating location codes.
+     *
+     * @param[in] i_callout_list  The callout list string
+     * @return    vector          List of callouts
+     */
+    static std::vector<target_callout> getTargetCallouts(const char* i_callout_list);
+
 private:
 
      /**
@@ -978,6 +1015,29 @@ private:
     void addPartIdInfoToErrLog(const TARGETING::Target * i_target);
 
 #ifdef CONFIG_BUILD_FULL_PEL
+    /* @brief Collect the various data necessary to build the full PEL for bus
+     *        callouts on the BMC.
+     *
+     * @param[in] i_ud  The Userdata pointer for the error log
+     */
+    void collectBusCalloutDataForBMC(HWAS::callout_ud_t* i_ud);
+
+    /* @brief Collect the various data necessary to build the full PEL for
+     *        transitive FRU callouts on the BMC.
+     *
+     * @param[in] i_ud  The Userdata pointer for the error log
+     */
+    void collectFruPathCalloutDataForBMC(HWAS::callout_ud_t* i_ud);
+
+    /* @brief Collect the various data necessary to build the full PEL for
+     *        SEEPROM callouts on the BMC.
+     *
+     * @param[in] i_target  The target from the callout
+     * @param[in] i_ud      The Userdata pointer for the error log
+     */
+    void collectSeepromCalloutDataForBMC(TARGETING::Target* const i_target,
+                                         HWAS::callout_ud_t* const i_ud);
+
     /*
      * @brief Collects the various data necessary to build the full PEL depending on callout type for the BMC.
      *

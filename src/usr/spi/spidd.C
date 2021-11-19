@@ -1248,6 +1248,42 @@ const TARGETING::Target* SpiTpmOp::getTpmTarget() const
     return iv_tpmTarget;
 }
 
+/* @brief Collect the various data necessary to build the full PEL for TPM SPI
+ *        bus callouts on the BMC.
+ *
+ * @param[in] i_tpm       The TPM target on which an SPI operation failed
+ * @param[in] i_errl      The error log to add callouts to
+ * @param[in] i_priority  Callout priority
+ */
+void addTpmSpiFruCallouts(const TARGETING::Target* const i_tpm,
+                          const errlHndl_t i_errl,
+                          const HWAS::callOutPriority i_priority)
+{
+#ifdef CONFIG_BUILD_FULL_PEL
+    using namespace TARGETING;
+    using namespace ERRORLOG;
+
+    ATTR_FRU_PATH_type fru_path = { };
+
+    if (i_tpm->tryGetAttr<ATTR_FRU_PATH>(fru_path))
+    {
+        const auto callouts = hbstd::deduplicate(ErrlEntry::getTargetCallouts(fru_path));
+
+        for (const auto callout : callouts)
+        {
+            // The TPM itself has already been called out.
+            if (callout.target != i_tpm)
+            {
+                TRACFCOMP(g_trac_spi, "addTpmSpiFruCallouts(plid=0x%08x): Calling out 0x%08x with priority %d",
+                          ERRL_GETRC_SAFE(i_errl), get_huid(callout.target), i_priority);
+
+                i_errl->addHwCallout(callout.target, i_priority, HWAS::NO_DECONFIG, HWAS::GARD_NULL);
+            }
+        }
+    }
+#endif
+}
+
 void SpiTpmOp::addCallouts(errlHndl_t& io_errl)
 {
     do {
@@ -1264,6 +1300,8 @@ void SpiTpmOp::addCallouts(errlHndl_t& io_errl)
                               HWAS::SRCI_PRIORITY_HIGH,
                               HWAS::DECONFIG,
                               HWAS::GARD_Fatal);
+
+        addTpmSpiFruCallouts(iv_tpmTarget, io_errl, HWAS::SRCI_PRIORITY_HIGH);
 
         // Add the lower level SPI callouts
         SpiOp::addCallouts(io_errl);

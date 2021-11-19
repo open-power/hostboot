@@ -73,6 +73,7 @@ extern char hbi_ImageId;
 
 using namespace ERRORLOG;
 using namespace HWAS;
+using namespace TARGETING;
 
 namespace ERRORLOG
 {
@@ -1088,6 +1089,287 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
 }
 
 #ifdef CONFIG_BUILD_FULL_PEL
+
+/* @brief Look up a target given a relative location code. If there are multiple
+ *        targets with the same relative location code, prefer the one with
+ *        valid FRU attributes (like FRU_CCIN etc.)
+ *
+ * @param[in] i_location_code  The relative location code to search for.
+ * @return    Target*          The target with the given location code, or nullptr if not found.
+ */
+Target* findFruByLocationCode(const ATTR_STATIC_ABS_LOCATION_CODE_type& i_location_code)
+{
+    ATTR_STATIC_ABS_LOCATION_CODE_type target_location_code = { };
+
+    Target* result = nullptr;
+
+    // Prefer to find a target that has FRU attributes on it, but if we can't
+    // then return this value.
+    Target* worse_result = nullptr;
+
+    for (const auto targ : targetService())
+    {
+        if (targ->tryGetAttr<ATTR_STATIC_ABS_LOCATION_CODE>(target_location_code))
+        {
+            if (strcmp(target_location_code, i_location_code) == 0)
+            {
+                // If the target has a good CCIN then return it.
+                ATTR_FRU_CCIN_type ccin = { };
+                if (targ->tryGetAttr<ATTR_FRU_CCIN>(ccin) && ccin != 0)
+                {
+                    result = targ;
+                    break;
+                }
+                else
+                {
+                    worse_result = targ;
+                }
+            }
+        }
+    }
+
+    if (!result)
+    {
+        result = worse_result;
+    }
+
+    return result;
+}
+
+/* @brief Parse the next callout in a list of callouts in the form
+ *  P1:LOC1,P2:LOC2,...
+ *
+ * @param[in/out] io_callout_list  A list of callouts. On exit, points to the character in
+ *                                 the string where parsing ended.
+ * @param[out]    o_callout        The next callout. Only valid if the return value is true.
+ * @return        bool             True if a valid callout was parsed, false otherwise.
+ */
+bool parseTargetCallout(const char*& io_callout_list, ErrlEntry::target_callout& o_callout)
+{
+    using namespace HWAS;
+
+    bool parsed = false;
+
+    do
+    {
+
+    if (*io_callout_list)
+    {
+        /* Look for the callout priority (L, M or H) */
+
+        if (*io_callout_list == 'H')
+        {
+            o_callout.priority = SRCI_PRIORITY_HIGH;
+        }
+        else if (*io_callout_list == 'M')
+        {
+            o_callout.priority = SRCI_PRIORITY_MED;
+        }
+        else if (*io_callout_list == 'L')
+        {
+            o_callout.priority = SRCI_PRIORITY_LOW;
+        }
+        else
+        {
+            break;
+        }
+
+        /* Look for the colon separator */
+
+        ++io_callout_list;
+
+        if (*io_callout_list != ':')
+        {
+            break;
+        }
+
+        /* Look for a comma or the end of the string to delimit our location code */
+
+        ++io_callout_list;
+
+        const char* location_code_begin = io_callout_list;
+
+        while (*io_callout_list && *io_callout_list != ',')
+        {
+            ++io_callout_list;
+        }
+
+        const char* location_code_end = io_callout_list;
+
+        if (*io_callout_list == ',')
+        {
+            ++io_callout_list;
+        }
+
+        /* Copy it into a local variable and look up the target */
+
+        ATTR_STATIC_ABS_LOCATION_CODE_type loccode = { };
+
+        if (static_cast<size_t>(location_code_end - location_code_begin) >= sizeof(loccode))
+        {
+            break;
+        }
+
+        std::copy(location_code_begin, location_code_end, loccode);
+
+        o_callout.target = findFruByLocationCode(loccode);
+
+        if (!o_callout.target)
+        {
+            break;
+        }
+
+        parsed = true;
+    }
+
+    } while (false);
+
+    return parsed;
+}
+
+/* @brief Get a list of all targets called out by a given string in the format
+ *        P1:LOC1,P2:LOC2,...
+ * where P1, P2, ... are the letters L, M or H (for low, medium, or high) and LOC1,
+ * LOC2, ... are strings designating location codes.
+ */
+std::vector<ErrlEntry::target_callout> ErrlEntry::getTargetCallouts(const char* i_callout_list)
+{
+    std::vector<target_callout> callouts;
+
+    while (*i_callout_list)
+    {
+        target_callout callout = { };
+
+        if (parseTargetCallout(i_callout_list, callout))
+        {
+            callouts.push_back(callout);
+        }
+    }
+
+    return callouts;
+}
+
+void ErrlEntry::collectFruPathCalloutDataForBMC(HWAS::callout_ud_t* i_ud)
+{
+    do
+    {
+
+    /* Read the called-out source and destination bus targets from the userdata */
+
+    uint8_t* l_uData = reinterpret_cast<uint8_t *>(i_ud + 1);
+    Target* targets[2] = { };
+
+    bool l_err = HWAS::retrieveTarget(l_uData, targets[0], this);
+
+    if (l_err)
+    {
+        TRACFCOMP(g_trac_errl, ERR_MRK"collectFruPathCalloutDataForBMC: Getting source bus from callout failed (plid = 0x%08x)",
+                  plid());
+        break;
+    }
+
+    l_err = HWAS::retrieveTarget(l_uData, targets[1], this);
+
+    if (l_err)
+    {
+        TRACFCOMP(g_trac_errl, ERR_MRK"collectFruPathCalloutDataForBMC: Getting destination bus from callout failed (plid = 0x%08x)",
+                  plid());
+        break;
+    }
+
+    /* Parse and collect the FRU callouts from the bus targets */
+
+    std::vector<target_callout> callouts;
+
+    for (const auto target : targets)
+    {
+        ATTR_FRU_PATH_type fru_path = { };
+
+        if (target->tryGetAttr<ATTR_FRU_PATH>(fru_path))
+        {
+            const auto target_callouts = getTargetCallouts(fru_path);
+
+            callouts.insert(end(callouts), begin(target_callouts), end(target_callouts));
+        }
+    }
+
+    callouts = hbstd::deduplicate(std::move(callouts));
+
+    /* Collect FRU callout data from each called-out target */
+
+    if (!callouts.empty())
+    {
+        for (const auto callout : callouts)
+        {
+            TRACFCOMP(g_trac_errl, INFO_MRK"collectFruPathCalloutDataForBMC(plid=0x%08x): Calling out 0x%08x with priority %d",
+                      plid(), get_huid(callout.target), i_ud->priority);
+
+            addFruCalloutDataToSrc(callout.target, i_ud->priority, FAILING_COMP_TYPE_NORMAL_HW, i_ud->procedure);
+        }
+    }
+    else
+    {
+        // If we don't get any targets in the FRU path to call out, fall back to
+        // calling out the two targets in the userdata directly.
+        addFruCalloutDataToSrc(targets[0], i_ud->priority, FAILING_COMP_TYPE_NORMAL_HW, i_ud->procedure);
+        addFruCalloutDataToSrc(targets[1], i_ud->priority, FAILING_COMP_TYPE_NORMAL_HW, i_ud->procedure);
+    }
+
+    } while (false);
+}
+
+void ErrlEntry::collectBusCalloutDataForBMC(HWAS::callout_ud_t* const i_ud)
+{
+    switch (i_ud->busType)
+    {
+    case HWAS::X_BUS_TYPE:
+    case HWAS::OMI_BUS_TYPE:
+    case HWAS::FSI_BUS_TYPE:
+        collectFruPathCalloutDataForBMC(i_ud);
+        break;
+    default:
+        // If we can't parse this kind of bus connection callout, we can't get a
+        // target handle target and can't add any FRU data to the log.
+        break;
+    }
+}
+
+void ErrlEntry::collectSeepromCalloutDataForBMC(Target* const i_target, HWAS::callout_ud_t* const i_ud)
+{
+    ATTR_FRU_PATH_type fru_path = { };
+
+    switch (i_ud->partType)
+    {
+    case HWAS::SBE_SEEPROM_PART_TYPE:
+        i_target->tryGetAttr<ATTR_SPI_SBE_BOOT_CODE_PRIMARY_INFO_CALLOUTS>(fru_path);
+        break;
+    case HWAS::VPD_PART_TYPE:
+        i_target->tryGetAttr<ATTR_SPI_MVPD_PRIMARY_INFO_CALLOUTS>(fru_path);
+        break;
+    default:
+        // The callout list attributes we pull in the other cases above will
+        // include all relevant targets in them. If we don't recognize this part
+        // type, then we will by default call out the input target below.
+        break;
+    }
+
+    const auto callouts = hbstd::deduplicate(getTargetCallouts(fru_path));
+    const bool have_callouts = !callouts.empty();
+
+    for (const auto callout : callouts)
+    {
+        TRACFCOMP(g_trac_errl, "collectSeepromCalloutDataForBMC(plid=0x%08x): Calling out 0x%08x with priority %d",
+                  plid(), get_huid(callout.target), i_ud->priority);
+
+        addFruCalloutDataToSrc(callout.target, i_ud->priority, FAILING_COMP_TYPE_NORMAL_HW, i_ud->procedure);
+    }
+
+    if (!have_callouts)
+    { // If we didn't call anything out, call the target itself out.
+        addFruCalloutDataToSrc(i_target, i_ud->priority, FAILING_COMP_TYPE_NORMAL_HW);
+    }
+}
+
 void ErrlEntry::collectCalloutDataForBMC(TARGETING::Target* const i_node)
 {
     using namespace TARGETING;
@@ -1138,7 +1420,7 @@ void ErrlEntry::collectCalloutDataForBMC(TARGETING::Target* const i_node)
                 }
                 case(HWAS::BUS_CALLOUT):
                 {
-                    //@TODO RTC-122928: Handle Bus Callouts
+                    collectBusCalloutDataForBMC(l_ud);
                     break;
                 }
                 case(HWAS::CLOCK_CALLOUT):
@@ -1168,37 +1450,17 @@ void ErrlEntry::collectCalloutDataForBMC(TARGETING::Target* const i_node)
                             break;
                         }
                         case(HWAS::SBE_SEEPROM_PART_TYPE):
-                        {
-                            if (!l_err)
-                            {
-                                // FRU callout of the processor.
-                                addFruCalloutDataToSrc(l_target,
-                                                       l_ud->priority,
-                                                       FAILING_COMP_TYPE_NORMAL_HW);
-                            }
-                            else
-                            {
-                                TRACFCOMP(g_trac_errl, ERR_MRK
-                                          "ErrlEntry::collectCalloutDataForBMC() - "
-                                          "SBE_SEEPROM_PART_TYPE Error retrieving target");
-                            }
-                            break;
-                        }
                         case(HWAS::VPD_PART_TYPE):
                         {
                             if (!l_err)
                             {
-                                // The FRU will be the associated target that contains the EEPROM being called out.
-                                // PROC, DIMM, etc.
-                                addFruCalloutDataToSrc(l_target,
-                                                       l_ud->priority,
-                                                       FAILING_COMP_TYPE_NORMAL_HW);
+                                collectSeepromCalloutDataForBMC(l_target, l_ud);
                             }
                             else
                             {
                                 TRACFCOMP(g_trac_errl, ERR_MRK
                                           "ErrlEntry::collectCalloutDataForBMC() - "
-                                          "VPD_PART_TYPE Error retrieving target");
+                                          "SBE_SEEPROM_PART_TYPE/VPD_PART_TYPE Error retrieving target");
                             }
                             break;
                         }

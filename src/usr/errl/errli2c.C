@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,6 +26,7 @@
 // I n c l u d e s
 /*****************************************************************************/
 #include <stdio.h>
+#include <algorithm>
 #include <errl/errli2c.H>
 #include <errl/errlmanager.H>
 #include <trace/interface.H>
@@ -95,6 +96,41 @@ I2cDevInfos::I2cDevInfos()
     }
 }
 
+
+/* @brief Given an I2C device FRU, call out targets in the electrical path
+ *        leading to it.
+ *
+ * @param[in] i_target     The target called out in the error log
+ * @param[in] i_errl       The error log
+ * @param[in] i_priority   The callout priority
+ */
+void addI2cFruPathCallouts(const TARGETING::Target* const i_target,
+                           ErrlEntry* const i_errl,
+                           const HWAS::callOutPriority i_priority)
+{
+#ifdef CONFIG_BUILD_FULL_PEL
+    using namespace TARGETING;
+
+    ATTR_I2C_CALLOUTS_type fru_path = { };
+
+    if (i_target->tryGetAttr<ATTR_I2C_CALLOUTS>(fru_path))
+    {
+        const auto callouts = hbstd::deduplicate(ErrlEntry::getTargetCallouts(fru_path));
+
+        for (const auto callout : callouts)
+        {
+            // The target itself has already been added to the error log.
+            if (callout.target != i_target)
+            {
+                TRACFCOMP(g_trac_errl, "addI2cFruPathCallouts(plid=0x%08x): Calling out 0x%08x with priority %d",
+                          ERRL_GETRC_SAFE(i_errl), get_huid(callout.target), i_priority);
+
+                i_errl->addHwCallout(callout.target, i_priority, HWAS::NO_DECONFIG, HWAS::GARD_NULL);
+            }
+        }
+    }
+#endif
+}
 
 void handleI2cDeviceCalloutWithinHostboot(
         errlHndl_t i_errl,
@@ -264,6 +300,8 @@ void handleI2cDeviceCalloutWithinHostboot(
         {
             l_priority = i_priority;
             l_devFound = true;
+
+            addI2cFruPathCallouts(i2cd.tgt, i_errl, i_priority);
         }
         TRACDCOMP(g_trac_errl, "handleI2cDeviceCalloutWithinHostboot: "
                   "Match found! Adding Hw callout for huid 0x%X",
@@ -272,7 +310,6 @@ void handleI2cDeviceCalloutWithinHostboot(
                              l_priority,
                              HWAS::NO_DECONFIG,
                              HWAS::GARD_NULL);
-
     }
 
     // callout i2c master as the priorty passed in if nothing else was found
