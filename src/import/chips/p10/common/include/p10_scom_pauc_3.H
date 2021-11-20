@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -291,6 +291,14 @@ static const uint32_t SPATTN_MASK_33 = 33;
 static const uint32_t SPATTN_MASK_34 = 34;
 static const uint32_t SPATTN_MASK_35 = 35;
 //<< [SPATTN_MASK]
+// pauc/reg00003.H
+
+//>> [PHY_PPE_WRAP_SCOM_WORK_REG1]
+static const uint64_t PHY_PPE_WRAP_SCOM_WORK_REG1 = 0x10012c21ull;
+
+static const uint32_t PHY_PPE_WRAP_SCOM_WORK_REG1_SCOM_PPE_WORK1 = 0;
+static const uint32_t PHY_PPE_WRAP_SCOM_WORK_REG1_SCOM_PPE_WORK1_LEN = 32;
+//<< [PHY_PPE_WRAP_SCOM_WORK_REG1]
 // pauc/reg00003.H
 
 //>>THE END<<

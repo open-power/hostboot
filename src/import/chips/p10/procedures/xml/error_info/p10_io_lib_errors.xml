@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2022                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -37,6 +37,20 @@
     <deconfigure>
         <target>TARGET</target>
     </deconfigure>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P10_IOHS_POLL_ACTION_STATE_ERROR</rc>
+    <description>
+      Timed out waiting for PHY Action to complete
+    </description>
+    <ffdc>IOHS_TARGET</ffdc>
+    <ffdc>PAUC_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021                             */
+/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -423,20 +423,32 @@ fapi2::ReturnCode p10_io_quiesce_lane(
 
     // DL bit lane which is spared (in range of 0:8 for a single x9 link)
     uint8_t l_dl_lane = 0xFF;
+    bool l_action_state = false;
 
-    // PRD provides IOLINK associated with RX side registering error, use FAPI
-    // API to find connected IOLINK to manipulate TX side resources
-    fapi2::Target<fapi2::TARGET_TYPE_IOLINK> l_tx_iolink_target;
-    FAPI_TRY(i_rx_iolink_target.getOtherEnd(l_tx_iolink_target));
 
-    // examine RX DL logic to determine lane spared & power down associated
-    // PHY lane (taking into account RX side lane reversal in PHY->DL path)
-    FAPI_TRY(p10_io_quiesce_lane(i_rx_iolink_target, true, l_dl_lane));
+    const auto l_iohs_target = i_rx_iolink_target.getParent<fapi2::TARGET_TYPE_IOHS>();
+    FAPI_TRY(p10_iohs_phy_get_action_state(l_iohs_target, l_action_state))
 
-    // given this information, power down associated PHY lane on TX side
-    // (using connected link target and knowledge of the TX side x9 lane
-    // reversal/x18 end-to-end swap)
-    FAPI_TRY(p10_io_quiesce_lane(l_tx_iolink_target, false, l_dl_lane));
+    if (l_action_state)
+    {
+        FAPI_DBG("Quiesce Lane skipped, IOHS Action in progress...");
+    }
+    else
+    {
+        // PRD provides IOLINK associated with RX side registering error, use FAPI
+        // API to find connected IOLINK to manipulate TX side resources
+        fapi2::Target<fapi2::TARGET_TYPE_IOLINK> l_tx_iolink_target;
+        FAPI_TRY(i_rx_iolink_target.getOtherEnd(l_tx_iolink_target));
+
+        // examine RX DL logic to determine lane spared & power down associated
+        // PHY lane (taking into account RX side lane reversal in PHY->DL path)
+        FAPI_TRY(p10_io_quiesce_lane(i_rx_iolink_target, true, l_dl_lane));
+
+        // given this information, power down associated PHY lane on TX side
+        // (using connected link target and knowledge of the TX side x9 lane
+        // reversal/x18 end-to-end swap)
+        FAPI_TRY(p10_io_quiesce_lane(l_tx_iolink_target, false, l_dl_lane));
+    }
 
 fapi_try_exit:
     FAPI_DBG("End");

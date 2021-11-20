@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -159,5 +159,36 @@ fapi2::ReturnCode p10_io_omi_poll_init_done(const fapi2::Target<fapi2::TARGET_TY
 ///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 fapi2::ReturnCode p10_io_clear_error_valid(const fapi2::Target<fapi2::TARGET_TYPE_PAUC>& i_pauc_target);
+
+///
+/// @brief Get PHY Action State
+///
+/// @param[in]  i_iohs_target IOHS target
+/// @param[out] o_data        Action State
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p10_iohs_phy_get_action_state(
+    const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_target,
+    bool& o_data);
+
+///
+/// @brief Set PHY Action State
+///
+/// @param[in] i_iohs_target IOHS target
+/// @param[in] i_data        Action State
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p10_iohs_phy_set_action_state(
+    const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_target,
+    const bool& i_data);
+
+///
+/// @brief Poll PHY Action State
+///
+/// @param[in] i_iohs_target IOHS target
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p10_iohs_phy_poll_action_state(
+    const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_target);
 
 #endif
