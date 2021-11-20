@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -427,6 +427,73 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+
+fapi2::ReturnCode p10_iohs_init_setup(
+    const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_target, const uint8_t i_half)
+{
+    FAPI_DBG("Start");
+    using namespace scomt::iohs;
+    uint64_t l_lanes_start = 0;
+    uint64_t l_lanes_end = 0;
+
+    if (i_half == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH)
+    {
+        l_lanes_start = 0;
+        l_lanes_end = 18;
+    }
+    else if (i_half == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY)
+    {
+        l_lanes_start = 0;
+        l_lanes_end = 9;
+    }
+    else if (i_half == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_ODD_ONLY)
+    {
+        l_lanes_start = 9;
+        l_lanes_end = 18;
+    }
+
+    for (uint64_t l_lane = l_lanes_start; l_lane < l_lanes_end; l_lane++)
+    {
+
+
+        // RX A LTE_GAIN
+        FAPI_TRY(p10_io_iohs_put_pl_regs_single(i_target,
+                                                IOO_RX0_0_RD_RX_DAC_REGS_CNTL3_PL,
+                                                IOO_RX0_0_RD_RX_DAC_REGS_CNTL3_PL_GAIN,
+                                                IOO_RX0_0_RD_RX_DAC_REGS_CNTL3_PL_GAIN_LEN,
+                                                l_lane,
+                                                7));
+
+        // RX B LTE_GAIN
+        FAPI_TRY(p10_io_iohs_put_pl_regs_single(i_target,
+                                                IOO_RX0_0_RD_RX_DAC_REGS_CNTL4_PL,
+                                                IOO_RX0_0_RD_RX_DAC_REGS_CNTL4_PL_GAIN,
+                                                IOO_RX0_0_RD_RX_DAC_REGS_CNTL4_PL_GAIN_LEN,
+                                                l_lane,
+                                                7));
+
+        // RX A LTE_ZERO
+        FAPI_TRY(p10_io_iohs_put_pl_regs_single(i_target,
+                                                IOO_RX0_0_RD_RX_DAC_REGS_CNTL3_PL,
+                                                IOO_RX0_0_RD_RX_DAC_REGS_CNTL3_PL_ZERO,
+                                                IOO_RX0_0_RD_RX_DAC_REGS_CNTL3_PL_ZERO_LEN,
+                                                l_lane,
+                                                3));
+
+        // RX B LTE_ZERO
+        FAPI_TRY(p10_io_iohs_put_pl_regs_single(i_target,
+                                                IOO_RX0_0_RD_RX_DAC_REGS_CNTL4_PL,
+                                                IOO_RX0_0_RD_RX_DAC_REGS_CNTL4_PL_ZERO,
+                                                IOO_RX0_0_RD_RX_DAC_REGS_CNTL4_PL_ZERO_LEN,
+                                                l_lane,
+                                                3));
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
 ///
 /// @brief Reset the IOHS phy
 ///
@@ -446,6 +513,8 @@ fapi2::ReturnCode p10_iohs_init(
     const int POLLING_LOOPS = 6000; // wait 60s, manual servo op can take up to 50s to finish
     int l_try = 0;
     p10_iohs_reset_cls l_p;
+
+    FAPI_TRY(p10_iohs_init_setup(i_target, i_half));
 
     FAPI_TRY(l_p.p10_iohs_clear_ext_cmd(i_target));
     FAPI_TRY(l_p.p10_iohs_ext_req_lanes(i_target, i_half));
