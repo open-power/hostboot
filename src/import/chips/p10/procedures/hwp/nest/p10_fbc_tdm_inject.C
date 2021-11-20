@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,6 +74,9 @@ fapi2::ReturnCode p10_fbc_tdm_enter(
     const bool i_even_not_odd)
 {
     FAPI_DBG("Start");
+
+    FAPI_TRY(p10_iohs_phy_poll_action_state(i_target));
+    FAPI_TRY(p10_iohs_phy_set_action_state(i_target, 0x1));
 
 
     // Note that RESET is either a soft reset (when link is up)

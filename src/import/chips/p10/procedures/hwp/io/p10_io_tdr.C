@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -95,6 +95,7 @@ fapi2::ReturnCode p10_io_tdr(
     std::vector<uint32_t> l_length_ui(2, 0ul);
 
     bool loopExit = false;
+    bool l_action_state = false;
     fapi2::ATTR_CHIP_EC_FEATURE_DD2_TDR_Type l_tdr_dd2;
     fapi2::ATTR_CHIP_UNIT_POS_Type l_iolink_num;
     fapi2::ATTR_FREQ_IOHS_LINK_MHZ_Type l_iohs_freq;
@@ -118,17 +119,22 @@ fapi2::ReturnCode p10_io_tdr(
     // execution and return DidNotRun status on all lanes
     FAPI_TRY(GET_DLP_DLL_STATUS(l_iohs_target, l_dl_status));
 
+    FAPI_TRY(p10_iohs_phy_get_action_state(l_iohs_target, l_action_state))
+
     if ((((l_iolink_num % 2) == 0) && (l_dl_status.getBit<DLP_DLL_STATUS_0_LINK_UP>())) || // even link
-        (((l_iolink_num % 2) == 1) && (l_dl_status.getBit<DLP_DLL_STATUS_1_LINK_UP>())))   // odd link
+        (((l_iolink_num % 2) == 1) && (l_dl_status.getBit<DLP_DLL_STATUS_1_LINK_UP>())) || // odd link
+        l_action_state)
     {
         for (uint32_t l_index = 0; l_index < i_lanes.size(); l_index++)
         {
             o_status[l_index] = TdrResult::DidNotRun;
         }
 
-        FAPI_DBG("Analysis skipped, link is up");
+        FAPI_DBG("Analysis skipped, link is up or action in progress...");
         goto fapi_try_exit;
     }
+
+    FAPI_TRY(p10_iohs_phy_set_action_state(l_iohs_target, 0x1));
 
     // ensure that TX psav force/fence controls are dropped prior to running TDR
     // given that we only support execution when the DL layer is down, we should be
@@ -555,6 +561,7 @@ fapi2::ReturnCode p10_io_tdr(
         FAPI_TRY(fapi2::putScom(l_iohs_target, IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL2_PG, l_phy_psave_data));
     }
 
+    FAPI_TRY(p10_iohs_phy_set_action_state(l_iohs_target, 0x0));
 fapi_try_exit:
     FAPI_DBG("End TDR Isolation");
     return fapi2::current_err;

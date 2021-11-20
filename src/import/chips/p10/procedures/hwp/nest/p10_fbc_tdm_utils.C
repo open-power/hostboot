@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -586,6 +586,8 @@ fapi2::ReturnCode p10_fbc_tdm_utils_recal_cleanup(
 
     // clear IO PPE error valid state
     FAPI_TRY(p10_io_clear_error_valid(l_pauc_target));
+
+    FAPI_TRY(p10_iohs_phy_set_action_state(i_target, 0x0));
 
 fapi_try_exit:
     FAPI_DBG("End");

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -430,6 +430,105 @@ fapi2::ReturnCode p10_io_lib::clear_error_valid(const fapi2::Target<fapi2::TARGE
     FAPI_TRY(p10_io_ppe_ppe_error_valid.putData(i_pauc_target, 0, true));
 
     FAPI_TRY(p10_io_ppe_img_regs.flush());
+
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+////////////////////////////////////////////////////////
+// p10_iohs_phy_get_action_state
+////////////////////////////////////////////////////////
+fapi2::ReturnCode p10_iohs_phy_get_action_state(
+    const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_target,
+    bool& o_data)
+{
+    FAPI_DBG("Start");
+    using namespace scomt::pauc;
+    auto l_pauc_target = i_target.getParent<fapi2::TARGET_TYPE_PAUC>();
+    fapi2::buffer<uint64_t> l_data(0x0);
+
+    FAPI_TRY(GET_PHY_PPE_WRAP_SCOM_WORK_REG1(l_pauc_target, l_data));
+
+    if (l_data.getBit<0>())
+    {
+        o_data = true;
+    }
+    else
+    {
+        o_data = false;
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+////////////////////////////////////////////////////////
+// p10_iohs_phy_set_action_state
+////////////////////////////////////////////////////////
+fapi2::ReturnCode p10_iohs_phy_set_action_state(
+    const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_target,
+    const bool& i_data)
+{
+    FAPI_DBG("Start");
+    using namespace scomt::pauc;
+    auto l_pauc_target = i_target.getParent<fapi2::TARGET_TYPE_PAUC>();
+    fapi2::buffer<uint64_t> l_data(0x0);
+
+    FAPI_TRY(GET_PHY_PPE_WRAP_SCOM_WORK_REG1(l_pauc_target, l_data));
+
+    if (i_data)
+    {
+        l_data.setBit<0>();
+    }
+    else
+    {
+        l_data.clearBit<0>();
+    }
+
+    FAPI_TRY(PUT_PHY_PPE_WRAP_SCOM_WORK_REG1(l_pauc_target, l_data));
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+////////////////////////////////////////////////////////
+// p10_iohs_phy_poll_action_state
+////////////////////////////////////////////////////////
+fapi2::ReturnCode p10_iohs_phy_poll_action_state(
+    const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_target)
+{
+    FAPI_DBG("Start");
+    using namespace scomt::pauc;
+    const uint32_t C_MAX_LOOPS = 6000; // 60 seconds
+    const uint32_t C_HW_NS_DELAY = 10000000; // 10ms
+    const uint32_t C_SIM_CYCLE_DELAY = 1000;
+    uint32_t l_loops = 0;
+    auto l_pauc_target = i_target.getParent<fapi2::TARGET_TYPE_PAUC>();
+    fapi2::buffer<uint64_t> l_data(0x0);
+
+    // Wait for action to complete
+    for(; l_loops < C_MAX_LOOPS; l_loops++)
+    {
+        FAPI_TRY(GET_PHY_PPE_WRAP_SCOM_WORK_REG1(l_pauc_target, l_data));
+
+        if(l_data.getBit<1>() == 0)
+        {
+            break;
+        }
+
+        FAPI_TRY(fapi2::delay(C_HW_NS_DELAY, C_SIM_CYCLE_DELAY),
+                 "fapiDelay error");
+    }
+
+    FAPI_ASSERT(l_loops < C_MAX_LOOPS,
+                fapi2::P10_IOHS_POLL_ACTION_STATE_ERROR()
+                .set_IOHS_TARGET(i_target)
+                .set_PAUC_TARGET(l_pauc_target),
+                "IOHS Timeout waiting for PHY Action to Complete...");
 
 
 fapi_try_exit:

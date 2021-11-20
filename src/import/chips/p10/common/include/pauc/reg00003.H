@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -17553,6 +17553,111 @@ fapi_try_exit:
 #endif
 }
 //<< GET_[SPATTN_MASK_35]
+
+//>> PREP_[PHY_PPE_WRAP_SCOM_WORK_REG1]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_PHY_PPE_WRAP_SCOM_WORK_REG1(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = PHY_PPE_WRAP_SCOM_WORK_REG1;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[PHY_PPE_WRAP_SCOM_WORK_REG1]
+
+//>> GET_[PHY_PPE_WRAP_SCOM_WORK_REG1]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_PHY_PPE_WRAP_SCOM_WORK_REG1(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = PHY_PPE_WRAP_SCOM_WORK_REG1;
+#endif
+    return fapi2::getScom(i_target, PHY_PPE_WRAP_SCOM_WORK_REG1, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[PHY_PPE_WRAP_SCOM_WORK_REG1]
+
+//>> PUT_[PHY_PPE_WRAP_SCOM_WORK_REG1]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_PHY_PPE_WRAP_SCOM_WORK_REG1(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(PHY_PPE_WRAP_SCOM_WORK_REG1));
+#endif
+    return fapi2::putScom(i_target, PHY_PPE_WRAP_SCOM_WORK_REG1, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[PHY_PPE_WRAP_SCOM_WORK_REG1]
+
+
+//>> SET_[PHY_PPE_WRAP_SCOM_WORK_REG1_SCOM_PPE_WORK1]
+static inline fapi2::buffer<uint64_t>& SET_PHY_PPE_WRAP_SCOM_WORK_REG1_SCOM_PPE_WORK1(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PHY_PPE_WRAP_SCOM_WORK_REG1));
+#endif
+    return o_data.insertFromRight<PHY_PPE_WRAP_SCOM_WORK_REG1_SCOM_PPE_WORK1,
+           PHY_PPE_WRAP_SCOM_WORK_REG1_SCOM_PPE_WORK1_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_pauc Invalid dial access PHY_PPE_WRAP_SCOM_WORK_REG1_SCOM_PPE_WORK1 chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PHY_PPE_WRAP_SCOM_WORK_REG1_SCOM_PPE_WORK1]
+
+//>> SET_[PHY_PPE_WRAP_SCOM_WORK_REG1_SCOM_PPE_WORK1]
+static inline fapi2::buffer<uint64_t>& SET_PHY_PPE_WRAP_SCOM_WORK_REG1_SCOM_PPE_WORK1(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PHY_PPE_WRAP_SCOM_WORK_REG1));
+#endif
+    return o_data.insertFromRight<PHY_PPE_WRAP_SCOM_WORK_REG1_SCOM_PPE_WORK1,
+           PHY_PPE_WRAP_SCOM_WORK_REG1_SCOM_PPE_WORK1_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_pauc Invalid dial access PHY_PPE_WRAP_SCOM_WORK_REG1_SCOM_PPE_WORK1 chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PHY_PPE_WRAP_SCOM_WORK_REG1_SCOM_PPE_WORK1]
+
+//>> GET_[PHY_PPE_WRAP_SCOM_WORK_REG1_SCOM_PPE_WORK1]
+static inline fapi2::buffer<uint64_t>& GET_PHY_PPE_WRAP_SCOM_WORK_REG1_SCOM_PPE_WORK1(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PHY_PPE_WRAP_SCOM_WORK_REG1));
+#endif
+    return i_data.extractToRight<PHY_PPE_WRAP_SCOM_WORK_REG1_SCOM_PPE_WORK1,
+           PHY_PPE_WRAP_SCOM_WORK_REG1_SCOM_PPE_WORK1_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_pauc Invalid dial access PHY_PPE_WRAP_SCOM_WORK_REG1_SCOM_PPE_WORK1 chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PHY_PPE_WRAP_SCOM_WORK_REG1_SCOM_PPE_WORK1]
 
 //>>THE END<<
 
