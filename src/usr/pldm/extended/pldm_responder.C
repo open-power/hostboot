@@ -62,6 +62,7 @@
 #include <fru.h>
 
 // Message handler headers
+#include <pldm/responses/pldm_discovery_control_responders.H>
 #include <pldm/responses/pldm_monitor_control_responders.H>
 #include <pldm/responses/pldm_fru_data_responders.H>
 
@@ -84,6 +85,13 @@ struct msg_type_handler
 {
     uint8_t command;
     msg_handler handler;
+};
+
+
+/*** Handlers for the MSG_CONTROL_DISCOVERY (pldm_const.H - enum msgq_msg_t) type ***/
+const msg_type_handler pldm_discovery_control_handlers[] =
+{
+    { PLDM_GET_PLDM_VERSION, handleGetPldmVersionRequest },
 };
 
 /*** Handlers for the MSG_MONITOR_CONTROL (PLDM_MC) type ***/
@@ -116,6 +124,8 @@ struct msg_category
 
 const msg_category pldm_message_categories[] =
 {
+    { PLDM::MSG_CONTROL_DISCOVERY, pldm_discovery_control_handlers,
+                                   std::size(pldm_discovery_control_handlers) },
     { PLDM::MSG_MONITOR_CONTROL, pldm_monitor_control_handlers,
                                  std::size(pldm_monitor_control_handlers) },
     { PLDM::MSG_FRU_DATA,        pldm_fru_data_handlers,

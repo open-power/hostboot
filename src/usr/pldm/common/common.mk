@@ -76,6 +76,7 @@ PLDM_EXTENDED_COMMON_OBJS += pldm_fru.o
 PLDM_EXTENDED_COMMON_OBJS += pldm_fru_data_responders.o
 PLDM_EXTENDED_COMMON_OBJS += pldm_watchdog.o
 PLDM_EXTENDED_COMMON_OBJS += pldm_monitor_control_responders.o
+PLDM_EXTENDED_COMMON_OBJS += pldm_discovery_control_responders.o
 PLDM_EXTENDED_COMMON_OBJS += sbe_dump.o
 
 # add these paths to VPATH so compiler knows
