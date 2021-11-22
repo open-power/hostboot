@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/pldm/common/pldmtrace.C $                             */
+/* $Source: src/usr/pldm/common/pldm_trace.C $                            */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,7 +30,7 @@
 
 #include <hbotcompid.H>
 #include <limits.h>
-#include "pldmtrace.H"
+#include <pldm/pldm_trace.H>
 
 namespace PLDM
 {

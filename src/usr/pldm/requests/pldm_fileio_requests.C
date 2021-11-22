@@ -37,7 +37,7 @@
 #include <openbmc/pldm/oem/ibm/libpldm/file_io.h>
 #include <openbmc/pldm/libpldm/base.h>
 #include <pldm/pldm_request.H>
-#include "../common/pldmtrace.H"
+#include <pldm/pldm_trace.H>
 #include "../common/pldm_utils.H"
 #include <pldm/pldmif.H>
 #include <hbotcompid.H>

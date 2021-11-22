@@ -47,7 +47,7 @@
 #include <pldm/pldm_request.H>
 #include <pldm/extended/pldm_fru.H>
 // Common PLDM
-#include "../common/pldmtrace.H"
+#include <pldm/pldm_trace.H>
 // libpldm
 #include <fru.h>
 

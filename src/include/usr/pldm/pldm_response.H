@@ -39,7 +39,7 @@
 #include <pldm/pldm_reasoncodes.H>
 #include <pldm/pldm_errl.H>
 #include <pldm/pldmif.H>
-#include "../../../src/usr/pldm/common/pldmtrace.H"
+#include <pldm/pldm_trace.H>
 #include <base.h>
 
 // IPC

@@ -33,11 +33,11 @@
 #include <pldm/pldm_const.H>
 #include <pldm/pldm_reasoncodes.H>
 #include <pldm/pldm_response.H>
+#include <pldm/pldm_trace.H>
 #include <pldm/extended/pldm_fru.H>
 #include <pldm/extended/pdr_manager.H>
 #include <pldm/extended/hb_pdrs.H>
 #include <pldm/responses/pldm_fru_data_responders.H>
-#include "../common/pldmtrace.H"
 
 // libpldm headers from pldm subtree
 #include <openbmc/pldm/libpldm/platform.h>

@@ -63,7 +63,7 @@
 #include <pldm/pldm_reasoncodes.H>
 #include <pldm/pldm_request.H>
 #include <pldm/extended/pdr_manager.H>
-#include "../common/pldmtrace.H"
+#include <pldm/pldm_trace.H>
 #include <pldm/pldm_util.H>
 
 namespace

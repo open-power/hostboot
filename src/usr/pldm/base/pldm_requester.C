@@ -34,7 +34,7 @@
 // Headers from local directory
 #include <utils.h>
 #include <base.h>
-#include "../common/pldmtrace.H"
+#include <pldm/pldm_trace.H>
 #include "pldm_requester.H"
 
 // Userspace Headers

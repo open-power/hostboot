@@ -33,8 +33,8 @@
 #include <pldm/base/hb_bios_attrs.H>
 #include <pldm/pldm_errl.H>
 #include <pldm/pldm_reasoncodes.H>
+#include <pldm/pldm_trace.H>
 #include "pldm_utils.H"
-#include "pldmtrace.H"
 #include <cstring>
 
 namespace PLDM

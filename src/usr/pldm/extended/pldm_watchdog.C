@@ -23,7 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 #include <pldm/extended/pldm_watchdog.H>
-#include "../common/pldmtrace.H"
+#include <pldm/pldm_trace.H>
 #include <pldm/extended/pdr_manager.H>
 #include <pldm/pldm_reasoncodes.H>
 #include <sys/msg.h>

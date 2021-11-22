@@ -36,7 +36,7 @@
 #include <pldm/pldm_const.H>
 #include <pldm/pldm_reasoncodes.H>
 #include <pldm/pldm_response.H>
-#include "../common/pldmtrace.H"
+#include <pldm/pldm_trace.H>
 #include <pldm/extended/pldm_watchdog.H>
 #include <pldm/base/pldm_shutdown.H>
 

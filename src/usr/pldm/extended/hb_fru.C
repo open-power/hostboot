@@ -47,15 +47,15 @@
 
 // pldm userspace /src/ headers
 #include <pldm/extended/hb_fru.H>
-#include "../common/pldmtrace.H"
 
 // pldm userspace /include/ headers
 #include <pldm/pldm_errl.H>
 #include <pldm/pldm_reasoncodes.H>
 #include <pldm/extended/pdr_manager.H>
 #include <pldm/requests/pldm_fru_requests.H>
+#include <pldm/pldm_trace.H>
 
-// libpldm header from pldm subtree
+// libpldm subtree headers
 #include <openbmc/pldm/libpldm/fru.h>
 
 using namespace ERRORLOG;

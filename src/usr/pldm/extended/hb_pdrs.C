@@ -39,7 +39,7 @@
 #include <pldm/extended/hb_pdrs.H>
 #include <pldm/extended/pldm_fru.H>
 #include <pldm/extended/pdr_manager.H>
-#include "../common/pldmtrace.H"
+#include <pldm/pldm_trace.H>
 #include <pldm/pldm_reasoncodes.H>
 #include <pldm/pldm_util.H>
 #include <pldm/responses/pldm_fru_data_responders.H>

@@ -36,7 +36,7 @@
 #include <pldm/pldm_errl.H>
 #include <pldm/requests/pldm_pdr_requests.H>
 #include <pldm/extended/pdr_manager.H>
-#include "../common/pldmtrace.H"
+#include <pldm/pldm_trace.H>
 #include <pldm/pldm_reasoncodes.H>
 #include <pldm/pldm_util.H>
 #include <openbmc/pldm/libpldm/platform.h>

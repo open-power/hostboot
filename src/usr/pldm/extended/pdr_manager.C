@@ -36,7 +36,7 @@
 #include <pldm/pldm_reasoncodes.H>
 #include <pldm/pldm_errl.H>
 #include <pldm/pldm_response.H>
-#include "../common/pldmtrace.H"
+#include <pldm/pldm_trace.H>
 
 #include <util/singleton.H>
 

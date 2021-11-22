@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,11 +39,10 @@
 #include <pldm/pldmif.H>
 #include <pldm/pldm_reasoncodes.H>
 #include <pldm/pldm_errl.H>
+#include <pldm/pldm_trace.H>
 #include <mctp/mctp_message_types.H>
 // From src/usr/pldm/extern/
 #include <base.h>
-// From src/usr/pldm/common/
-#include "../common/pldmtrace.H"
 
 using namespace ERRORLOG;
 

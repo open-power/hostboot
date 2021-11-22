@@ -41,9 +41,7 @@
 #include <pldm/base/hb_bios_attrs_if.H>
 #include <pldm/pldm_errl.H>
 #include <pldm/pldm_reasoncodes.H>
-
-// pldm /src/ headers
-#include "../common/pldmtrace.H"
+#include <pldm/pldm_trace.H>
 
 // support for string user details sections
 #include <errl/errludstring.H>

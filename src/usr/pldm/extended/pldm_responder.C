@@ -35,7 +35,6 @@
  */
 
 // Headers from local directory
-#include "../common/pldmtrace.H"
 #include "pldm_responder.H"
 
 // Standard library
@@ -54,7 +53,7 @@
 #include <pldm/pldm_reasoncodes.H>
 #include <pldm/pldmif.H>
 #include <pldm/pldm_response.H>
-#include "../common/pldmtrace.H"
+#include <pldm/pldm_trace.H>
 #include "pldm_responder.H"
 
 // libpldm

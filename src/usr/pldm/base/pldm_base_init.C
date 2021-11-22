@@ -40,7 +40,7 @@
 #include <vector>
 #include <pldm/pldmif.H>
 #include <pldm/base/hb_bios_attrs.H>
-#include "../common/pldmtrace.H"
+#include <pldm/pldm_trace.H>
 #include <initservice/initserviceif.H>
 
 using namespace PLDM;

@@ -33,7 +33,7 @@
 #include <targeting/common/utilFilter.H>
 
 // PLDM
-#include "../common/pldmtrace.H"
+#include <pldm/pldm_trace.H>
 #include <pldm/extended/pldm_entity_ids.H>
 #include <pldm/extended/pdr_manager.H>
 #include <pldm/extended/hb_pdrs.H>

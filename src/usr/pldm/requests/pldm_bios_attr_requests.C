@@ -44,11 +44,10 @@
 #include <pldm/pldm_errl.H>
 #include <pldm/pldm_reasoncodes.H>
 #include <pldm/pldm_request.H>
+#include <pldm/pldm_trace.H>
 #include <pldm/pldm_util.H>
 #include <pldm/requests/pldm_bios_attr_requests.H>
 
-// pldm /src/ headers
-#include "../common/pldmtrace.H"
 
 // miscellaneous
 #include <errl/errludstring.H>

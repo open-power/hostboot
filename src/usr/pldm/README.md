@@ -113,11 +113,11 @@ described above.
     src/usr/pldm/extended/makefile and src/usr/pldm/runtime/makefile.
     - The items defined only need to be common between at least 2 of the modules
       (ie. PLDM_COMMON_BASE_OBJS is only for runtime/base and not extended)
-- pldmtrace.H/C
-  - [pldmtrace.C](common/pldmtrace.C) declares/initializes g_trac_pldm,
+- pldm_trace.H/C
+  - [pldm_trace.C](common/pldm_trace.C) declares/initializes g_trac_pldm,
     which is the 4 KB non-blocking trace buffer
     - It must be non-blocking because this is part of PNOR page request code
-  - [pldmtrace.H](common/pldmtrace.H) declares all of the PLDM_ trace macros
+  - [pldm_trace.H](src/include/usr/pldm/pldm_trace.H) declares all of the PLDM_ trace macros
     and an extern to g_trac_pldm
 
 ### External github imports [src/usr/pldm/extern/](extern/)

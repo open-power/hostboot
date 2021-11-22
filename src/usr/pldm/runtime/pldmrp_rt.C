@@ -26,9 +26,9 @@
 /** @file  pldmrp_rt.C
  *  @brief Source code for hbrt's PLDM resource provider.
  */
-#include "../common/pldmtrace.H"
 #include "pldmrp_rt.H"
 #include <pldm/pldmif.H>
+#include <pldm/pldm_trace.H>
 #include <runtime/interface.h>
 #include <pldm/extended/pdr_manager.H>
 #include <pldm/extended/sbe_dump.H>

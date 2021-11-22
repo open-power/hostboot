@@ -49,7 +49,7 @@ EXTRAINCDIR += ${COMMON_ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc
 EXTRAINCDIR += ${COMMON_ROOTPATH}/src/import/chips/p10/procedures/hwp/sbe
 EXTRAINCDIR += ${COMMON_ROOTPATH}/src/import/chips/p10/procedures/hwp/perv
 
-PLDM_BASE_COMMON_OBJS += pldmtrace.o
+PLDM_BASE_COMMON_OBJS += pldm_trace.o
 PLDM_BASE_COMMON_OBJS += pldm_utils.o
 PLDM_BASE_COMMON_OBJS += base.o
 PLDM_BASE_COMMON_OBJS += utils.o

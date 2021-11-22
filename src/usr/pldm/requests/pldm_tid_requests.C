@@ -24,10 +24,10 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #include <pldm/requests/pldm_tid_requests.H>
 #include <pldm/pldm_request.H>
+#include <pldm/pldm_trace.H>
 #include <sys/msg.h>
 // VFS_ROOT_MSG_PLDM_REQ_OUT
 #include <sys/vfs.h>
-#include "../common/pldmtrace.H"
 
 /* @file pldm_tid_requests.C
  *
