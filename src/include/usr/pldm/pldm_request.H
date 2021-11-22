@@ -54,6 +54,7 @@
 #include <pldm/pldm_const.H>
 #include <pldm/pldm_errl.H>
 #include <pldm/pldm_reasoncodes.H>
+#include <pldm/pldm_trace.H>
 
 #ifdef __HOSTBOOT_RUNTIME
 #include <mctp/mctp_const.H>
@@ -287,6 +288,31 @@ errlHndl_t sendrecv_pldm_request(ResponseContainer& o_response_bytes,
         o_response_bytes = PLDM::get_next_response();
         PLDM::clear_next_response();
 #endif
+
+    const size_t MIN_RESP_LEN = (sizeof(pldm_msg_hdr) + 1);
+    if(o_response_bytes.size() < MIN_RESP_LEN)
+    {
+        auto hdr64 = pldmHdrToUint64(*pldm_request);
+        PLDM_ERR("The length of the response to request (0x%lx) was %d bytes when at least %d bytes was expected",
+                 hdr64, o_response_bytes.size(), MIN_RESP_LEN);
+        /*@
+        * @errortype
+        * @severity   ERRL_SEV_UNRECOVERABLE
+        * @moduleid   MOD_MAKE_PLDM_REQUEST
+        * @reasoncode RC_INVALID_LENGTH
+        * @userdata1  Actual Response Length
+        * @userdata2  Header of original pldm request
+        * @devdesc    PLDM Response from BMC is too small.
+        * @custdesc   A host failure occurred
+        */
+        errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                             MOD_MAKE_PLDM_REQUEST,
+                             RC_INVALID_LENGTH,
+                             o_response_bytes.size(),
+                             hdr64);
+        addBmcErrorCallouts(errl);
+        break;
+    }
 
     } while (false);
 
