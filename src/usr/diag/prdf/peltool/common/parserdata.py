@@ -55,10 +55,15 @@ class SignatureData:
 
     def parseSignature(self, chipId: str, chipSig: str) -> str:
 
-        # The input chip ID and chip signature will be hex strings but without
-        # the preceding '0x' so add them here. Also, we will ensure we have
+        # convert the input chipId to int and back to a hex string to prevent
+        # possible issues with preceding 0s in the string
+        intId = int(chipId, 16)
+        hexId = hex(intId)
+
+        # The input chip signature will be a hex string but without
+        # the preceding '0x' so add that here. Also, we will ensure we have
         # lower case hex strings
-        chipType = "0x" + chipId.lower()
+        chipType = hexId.lower()
         hexSig = "0x" + chipSig.lower()
 
         signature = "Undefined error code " + hexSig
@@ -93,10 +98,15 @@ class RegisterData:
 
     def parseRegister(self, chipId: str, regId: str) -> dict:
 
-        # The input chip ID and register ID will be hex strings but without
-        # the preceding '0x' so add them here. Also, we will ensure we have
+        # convert the input chipId to int and back to a hex string to prevent
+        # possible issues with preceding 0s in the string
+        intId = int(chipId, 16)
+        hexId = hex(intId)
+
+        # The input register ID will be a hex string but without
+        # the preceding '0x' so add that here. Also, we will ensure we have
         # lower case hex strings
-        chipType = '0x' + chipId.lower()
+        chipType = hexId.lower()
         hashReg = '0x' + regId.lower()
 
         register = { 'name': 'Undefined Register Hash',

@@ -57,6 +57,33 @@ class TestPrdSrcParsing(unittest.TestCase):
         self.assertEqual( jsonOut["Target Instance"], 33 )
         self.assertEqual( jsonOut["Signature"], "RDFFIR[8]: Mainline read NCE" )
 
+    def testCorefir(self):
+
+        refcode = "BC13E504"
+        hex2 = "000000E0"
+        hex3 = "00000B00"
+        hex4 = "00000000"
+        hex5 = "01200000"
+        hex6 = "0007002E"
+        hex7 = "00000303"
+        hex8 = "BB710008"
+        hex9 = "00000000"
+
+        testOut = srcparsers.be500.be500.parseSRCToJson(refcode, hex2, hex3,
+            hex4, hex5, hex6, hex7, hex8, hex9)
+
+        jsonOut = json.loads(testOut)
+        # Print the output for manual testing
+        print(json.dumps(jsonOut, indent=4))
+
+        self.assertEqual( jsonOut["Attention Type"], "RECOVERABLE" )
+        self.assertEqual( jsonOut["Node"], 0 )
+        self.assertEqual( jsonOut["Target Type"], "TYPE_CORE" )
+        self.assertEqual( jsonOut["Target Instance"], 46 )
+        sigCheck = "EQ_L2_FIR[8]: L2 directory CE due to stuck bit"
+        self.assertEqual( jsonOut["Signature"], sigCheck )
+
 if __name__ == '__main__':
     test = TestPrdSrcParsing()
     test.testOutput()
+    test.testCorefir()
