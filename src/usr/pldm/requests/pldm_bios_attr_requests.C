@@ -48,6 +48,8 @@
 #include <pldm/pldm_util.H>
 #include <pldm/requests/pldm_bios_attr_requests.H>
 
+// pldm /src/ headers
+#include "pldm_request_utils.H"
 
 // miscellaneous
 #include <errl/errludstring.H>
@@ -101,11 +103,11 @@ errlHndl_t getBiosTable(const pldm_bios_table_types i_type,
 
         errl =
             decode_pldm_response(decode_get_bios_table_resp,
-                                  response_bytes,
-                                  &response.completion_code,
-                                  &response.next_transfer_handle,
-                                  &response.transfer_flag,
-                                  &table_data_offset);
+                                 response_bytes,
+                                 &response.completion_code,
+                                 &response.next_transfer_handle,
+                                 &response.transfer_flag,
+                                 &table_data_offset);
 
         if (errl)
         {
@@ -113,42 +115,60 @@ errlHndl_t getBiosTable(const pldm_bios_table_types i_type,
             break;
         }
 
-        if (response.completion_code != PLDM_SUCCESS)
+        /*@
+          * @errortype
+          * @severity   ERRL_SEV_UNRECOVERABLE
+          * @moduleid   MOD_GET_BIOS_TABLE
+          * @reasoncode RC_BAD_COMPLETION_CODE
+          * @userdata1  Actual Completion Code
+          * @userdata2  Expected Completion Code
+          * @devdesc    Software problem, bad PLDM response from BMC
+          * @custdesc   A software error occurred during system boot
+          */
+        errl = validate_resp(response.completion_code, PLDM_SUCCESS,
+                             MOD_GET_BIOS_TABLE, RC_BAD_COMPLETION_CODE,
+                             response_bytes);
+        if(errl)
         {
-            pldm_msg* const pldm_response =
-              reinterpret_cast<pldm_msg*>(response_bytes.data());
-            const uint64_t response_hdr_data = pldmHdrToUint64(*pldm_response);
-
-            /*@
-             * @errortype  ERRL_SEV_UNRECOVERABLE
-             * @moduleid   MOD_GET_BIOS_TABLE
-             * @reasoncode RC_BAD_COMPLETION_CODE
-             * @userdata1  Completion code
-             * @userdata2  Response Header Data
-             * @devdesc    Software problem, PLDM transaction failed
-             * @custdesc   A software error occurred during system boot
-             */
-            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                 MOD_GET_BIOS_TABLE,
-                                 RC_BAD_COMPLETION_CODE,
-                                 response.completion_code,
-                                 response_hdr_data,
-                                 ErrlEntry::NO_SW_CALLOUT);
-            addBmcErrorCallouts(errl);
-
             break;
         }
 
-        /* If these assertions fail, then the other end is trying to do a
-         * multipart transfer, which we do not support. */
-        assert(response.transfer_flag == PLDM_START_AND_END,
-               "Expected PLDM response transfer flag to be PLDM_START_AND_END "
-               "got %d",
-               response.transfer_flag);
+        /*@
+          * @errortype
+          * @severity   ERRL_SEV_UNRECOVERABLE
+          * @moduleid   MOD_GET_BIOS_TABLE
+          * @reasoncode RC_BAD_NEXT_TRANSFER_HANDLE
+          * @userdata1  Actual Next Transfer Handle
+          * @userdata2  Expected Next Transfer Handle
+          * @devdesc    Software problem, bad PLDM response from BMC
+          * @custdesc   A software error occurred during system boot
+          */
+        /* HB does not support multipart transfers */
+        errl = validate_resp(response.next_transfer_handle, static_cast<pdr_handle_t>(0),
+                             MOD_GET_BIOS_TABLE, RC_BAD_NEXT_TRANSFER_HANDLE,
+                             response_bytes);
+        if(errl)
+        {
+            break;
+        }
 
-        assert(response.next_transfer_handle == 0,
-               "Expected PLDM next data transfer handle to be 0, got %d",
-               response.next_transfer_handle);
+        /*@
+          * @errortype
+          * @severity   ERRL_SEV_UNRECOVERABLE
+          * @moduleid   MOD_GET_BIOS_TABLE
+          * @reasoncode RC_BAD_TRANSFER_FLAG
+          * @userdata1  Actual Transfer Flag
+          * @userdata2  Expected Transfer Flag
+          * @devdesc    Software problem, bad PLDM response from BMC
+          * @custdesc   A software error occurred during system boot
+          */
+        errl = validate_resp(response.transfer_flag, PLDM_START_AND_END,
+                             MOD_GET_BIOS_TABLE, RC_BAD_TRANSFER_FLAG,
+                             response_bytes);
+        if(errl)
+        {
+            break;
+        }
 
         o_table.insert(o_table.begin(),
                         (response_bytes.data() + sizeof(pldm_msg_hdr) + table_data_offset),
@@ -160,7 +180,7 @@ errlHndl_t getBiosTable(const pldm_bios_table_types i_type,
 
     } while(false);
 
-        PLDM_EXIT("getBiosTable");
+    PLDM_EXIT("getBiosTable");
 
     return errl;
 }
@@ -234,29 +254,58 @@ errlHndl_t getBiosAttrFromHandle(const bios_handle_t i_bios_attr_handle,
             break;
         }
 
-        if (response.completion_code != PLDM_SUCCESS)
+        /*@
+          * @errortype
+          * @severity   ERRL_SEV_UNRECOVERABLE
+          * @moduleid   MOD_GET_BIOS_ATTR_FROM_HANDLE
+          * @reasoncode RC_BAD_COMPLETION_CODE
+          * @userdata1  Actual Completion Code
+          * @userdata2  Expected Completion Code
+          * @devdesc    Software problem, bad PLDM response from BMC
+          * @custdesc   A software error occurred during system boot
+          */
+        errl = validate_resp(response.completion_code, PLDM_SUCCESS,
+                             MOD_GET_BIOS_ATTR_FROM_HANDLE, RC_BAD_COMPLETION_CODE,
+                             response_bytes);
+        if(errl)
         {
-            pldm_msg* const pldm_response =
-              reinterpret_cast<pldm_msg*>(response_bytes.data());
-            const uint64_t response_hdr_data = pldmHdrToUint64(*pldm_response);
+            break;
+        }
 
-            /*@
-             * @errortype  ERRL_SEV_UNRECOVERABLE
-             * @moduleid   MOD_GET_BIOS_ATTR_FROM_HANDLE
-             * @reasoncode RC_BAD_COMPLETION_CODE
-             * @userdata1  Completion code
-             * @userdata2  Response Header Data
-             * @devdesc    Software problem, PLDM transaction failed
-             * @custdesc   A software error occurred during system boot
-             */
-            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                 MOD_GET_BIOS_ATTR_FROM_HANDLE,
-                                 RC_BAD_COMPLETION_CODE,
-                                 response.completion_code,
-                                 response_hdr_data,
-                                 ErrlEntry::NO_SW_CALLOUT);
-            addBmcErrorCallouts(errl);
+        /*@
+          * @errortype
+          * @severity   ERRL_SEV_UNRECOVERABLE
+          * @moduleid   MOD_GET_BIOS_ATTR_FROM_HANDLE
+          * @reasoncode RC_BAD_NEXT_TRANSFER_HANDLE
+          * @userdata1  Actual Next Transfer Handle
+          * @userdata2  Expected Next Transfer Handle
+          * @devdesc    Software problem, bad PLDM response from BMC
+          * @custdesc   A software error occurred during system boot
+          */
+        /* HB does not support multipart transfers */
+        errl = validate_resp(response.next_transfer_handle, static_cast<pdr_handle_t>(0),
+                             MOD_GET_BIOS_ATTR_FROM_HANDLE, RC_BAD_NEXT_TRANSFER_HANDLE,
+                             response_bytes);
+        if(errl)
+        {
+            break;
+        }
 
+        /*@
+          * @errortype
+          * @severity   ERRL_SEV_UNRECOVERABLE
+          * @moduleid   MOD_GET_BIOS_ATTR_FROM_HANDLE
+          * @reasoncode RC_BAD_TRANSFER_FLAG
+          * @userdata1  Actual Transfer Flag
+          * @userdata2  Expected Transfer Flag
+          * @devdesc    Software problem, bad PLDM response from BMC
+          * @custdesc   A software error occurred during system boot
+          */
+        errl = validate_resp(response.transfer_flag, PLDM_START_AND_END,
+                             MOD_GET_BIOS_ATTR_FROM_HANDLE, RC_BAD_TRANSFER_FLAG,
+                             response_bytes);
+        if(errl)
+        {
             break;
         }
 
@@ -285,17 +334,6 @@ errlHndl_t getBiosAttrFromHandle(const bios_handle_t i_bios_attr_handle,
             break;
         }
 
-        /* If these assertions fail, then the other end is trying to do a
-         * multipart transfer, which we do not support. */
-        assert(response.transfer_flag == PLDM_START_AND_END,
-               "Expected PLDM response transfer flag to be PLDM_START_AND_END "
-               "got %d",
-               response.transfer_flag);
-
-        assert(response.next_transfer_handle == 0,
-               "Expected PLDM next data transfer handle to be 0, got %d",
-               response.next_transfer_handle);
-
         o_attrVal.insert(o_attrVal.begin(),
                          attribute_data.ptr,
                          attribute_data.ptr + attribute_data.length);
@@ -303,6 +341,13 @@ errlHndl_t getBiosAttrFromHandle(const bios_handle_t i_bios_attr_handle,
                      o_attrVal.data(),
                      o_attrVal.size());
     } while (false);
+
+    if(errl)
+    {
+        char message[40] = { };
+        snprintf(message, sizeof(message), "Attribute handle: %d", i_bios_attr_handle);
+        ErrlUserDetailsString(message).addToLog(errl);
+    }
 
     PLDM_EXIT("getBiosAttrFromHandle");
 
@@ -375,40 +420,52 @@ errlHndl_t setBiosAttrByHandle(const bios_handle_t i_attribute_handle,
         break;
     }
 
-    if (response.completion_code != PLDM_SUCCESS)
+    /*@
+      * @errortype
+      * @severity   ERRL_SEV_UNRECOVERABLE
+      * @moduleid   MOD_SET_BIOS_ATTR_BY_HANDLE
+      * @reasoncode RC_BAD_COMPLETION_CODE
+      * @userdata1  Actual Completion Code
+      * @userdata2  Expected Completion Code
+      * @devdesc    Software problem, bad PLDM response from BMC
+      * @custdesc   A software error occurred during system boot
+      */
+    errl = validate_resp(response.completion_code, PLDM_SUCCESS,
+                         MOD_SET_BIOS_ATTR_BY_HANDLE, RC_BAD_COMPLETION_CODE,
+                         response_bytes);
+    if(errl)
     {
-        PLDM_ERR("setBiosAttrByHandle: Expected completion code PLDM_SUCCESS, got %d", response.completion_code);
-        pldm_msg* const pldm_response = reinterpret_cast<pldm_msg*>(response_bytes.data());
-        const uint64_t response_hdr_data = pldmHdrToUint64(*pldm_response);
+        break;
+    }
 
-        /*@
-         * @errortype  ERRL_SEV_UNRECOVERABLE
-         * @moduleid   MOD_SET_BIOS_ATTR_BY_HANDLE
-         * @reasoncode RC_BAD_COMPLETION_CODE
-         * @userdata1  Completion code
-         * @userdata2  Response Header Data
-         * @devdesc    Software problem, PLDM transaction failed
-         * @custdesc   A software error occurred during system boot
-         */
-        errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                             MOD_SET_BIOS_ATTR_BY_HANDLE,
-                             RC_BAD_COMPLETION_CODE,
-                             response.completion_code,
-                             response_hdr_data,
-                             ErrlEntry::NO_SW_CALLOUT);
+    /*@
+      * @errortype
+      * @severity   ERRL_SEV_UNRECOVERABLE
+      * @moduleid   MOD_SET_BIOS_ATTR_BY_HANDLE
+      * @reasoncode RC_BAD_NEXT_TRANSFER_HANDLE
+      * @userdata1  Actual Next Transfer Handle
+      * @userdata2  Expected Next Transfer Handle
+      * @devdesc    Software problem, bad PLDM response from BMC
+      * @custdesc   A software error occurred during system boot
+      */
+    /* HB does not support multipart transfers */
+    errl = validate_resp(response.next_transfer_handle, static_cast<pdr_handle_t>(0),
+                         MOD_SET_BIOS_ATTR_BY_HANDLE, RC_BAD_NEXT_TRANSFER_HANDLE,
+                         response_bytes);
+    if(errl)
+    {
+        break;
+    }
+
+    } while (false);
+
+    if(errl)
+    {
         char message[128] = { };
         snprintf(message, sizeof(message), "Attribute handle: %d; attribute type: %d; value size: %d",
                  i_attribute_handle, i_attribute_type, i_attribute_size);
         ErrlUserDetailsString(message).addToLog(errl);
-        addBmcErrorCallouts(errl);
-        break;
     }
-
-    assert(response.next_transfer_handle == 0,
-           "setBiosAttrByHandle: Expected PLDM next data transfer handle to be 0, got %d",
-           response.next_transfer_handle);
-
-    } while (false);
 
     PLDM_EXIT("setBiosAttrByHandle (errl = %p)", errl);
 

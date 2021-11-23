@@ -1018,14 +1018,14 @@ errlHndl_t cacheRemoteFruVpd()
     errlHndl_t errl = nullptr;
     do{
 
-    PLDM::pldm_fru_record_table_metadata_t table_metadata;
+    pldm_get_fru_record_table_metadata_resp table_metadata;
     errl =  getFruRecordTableMetaData(table_metadata);
     if(errl) { break; }
 
     /* The fruTableSize returned for the getFruRecordTableMetaData will NOT
        include the size for the crc32 checksum or the padding to force 4 byte
        alignment */
-    const auto fru_table_len = ALIGN_4(table_metadata.fruTableSize + sizeof(uint32_t));
+    const auto fru_table_len = ALIGN_4(table_metadata.fru_table_length + sizeof(uint32_t));
 
     std::unique_ptr<uint8_t, decltype(&free)>
         table_ptr(static_cast<uint8_t*>(malloc(fru_table_len)), free);
@@ -1134,7 +1134,7 @@ errlHndl_t cacheRemoteFruVpd()
         {
             uint16_t records_in_set = 0;
             std::vector<uint8_t> device_fru_records;
-            PLDM::getRecordSetByIdAndType(table_ptr.get(), table_metadata.recordCount,
+            PLDM::getRecordSetByIdAndType(table_ptr.get(), table_metadata.total_table_records,
                                           device_rsi, PLDM_FRU_RECORD_TYPE_OEM,
                                           device_fru_records, records_in_set);
 

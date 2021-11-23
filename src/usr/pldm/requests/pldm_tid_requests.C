@@ -25,6 +25,7 @@
 #include <pldm/requests/pldm_tid_requests.H>
 #include <pldm/pldm_request.H>
 #include <pldm/pldm_trace.H>
+#include "pldm_request_utils.H"
 #include <sys/msg.h>
 // VFS_ROOT_MSG_PLDM_REQ_OUT
 #include <sys/vfs.h>
@@ -90,28 +91,25 @@ errlHndl_t getTID()
         break;
     }
 
-    if(l_resp.completion_code != PLDM_SUCCESS)
+    /*@
+      * @errortype
+      * @severity   ERRL_SEV_UNRECOVERABLE
+      * @moduleid   MOD_GET_TID
+      * @reasoncode RC_BAD_COMPLETION_CODE
+      * @userdata1  Actual Completion Code
+      * @userdata2  Expected Completion Code
+      * @devdesc    Software problem, bad PLDM response from BMC
+      * @custdesc   A software error occurred during system boot
+      */
+    l_errl = validate_resp(l_resp.completion_code, PLDM_SUCCESS,
+                           MOD_GET_TID, RC_BAD_COMPLETION_CODE,
+                           l_responseBytes);
+    if(l_errl)
     {
-        PLDM_ERR("getTID: PLDM op returned code %d", l_resp.completion_code);
-        /*@
-         * @errortype
-         * @moduleid   MOD_GET_TID
-         * @reasoncode RC_BAD_COMPLETION_CODE
-         * @userdata1  Completion code
-         * @devdesc    Bad completion code received for get TID PLDM operation
-         * @custdesc   A firmware failure occurred
-         */
-        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                         MOD_GET_TID,
-                                         RC_BAD_COMPLETION_CODE,
-                                         l_resp.completion_code);
-        addBmcErrorCallouts(l_errl);
         break;
     }
-    else
-    {
-        PLDM_INF("getTID: BMC's TID is %d", l_resp.tid);
-    }
+
+    PLDM_INF("getTID: BMC's TID is %d", l_resp.tid);
     } while(0);
     return l_errl;
 }

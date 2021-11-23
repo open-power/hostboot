@@ -66,6 +66,7 @@
 #include <pldm/extended/pdr_manager.H>
 #include <pldm/pldm_trace.H>
 #include <pldm/pldm_util.H>
+#include "pldm_request_utils.H"
 
 namespace
 {
@@ -190,60 +191,63 @@ errlHndl_t getPDR(const msg_q_t i_msgQ,
             break;
         }
 
-        /* Once we decode the message, then we can add the PDR to the caller's
-         * PDR byte buffer and return. */
-
-        if (response.completion_code != PLDM_SUCCESS)
+        /*@
+          * @errortype
+          * @severity   ERRL_SEV_UNRECOVERABLE
+          * @moduleid   MOD_GET_PDR
+          * @reasoncode RC_BAD_COMPLETION_CODE
+          * @userdata1  Actual Completion Code
+          * @userdata2  Expected Completion Code
+          * @devdesc    Software problem, bad PLDM response from BMC
+          * @custdesc   A software error occurred during system boot
+          */
+        errl = validate_resp(response.completion_code, PLDM_SUCCESS,
+                             MOD_GET_PDR, RC_BAD_COMPLETION_CODE,
+                             response_bytes);
+        if(errl)
         {
-            // @TODO RTC 251835: libpldm does not have an enumeration for the
-            // REPOSITORY_UPDATE_IN_PROGRESS completion code, but if it adds
-            // that, we can retry the transfer here.
-
-            pldm_msg* const pldm_response =
-              reinterpret_cast<pldm_msg*>(response_bytes.data());
-            const uint64_t response_hdr_data = pldmHdrToUint64(*pldm_response);
-
-            /*@
-             * @errortype  ERRL_SEV_UNRECOVERABLE
-             * @moduleid   MOD_GET_PDR_REPO
-             * @reasoncode RC_BAD_COMPLETION_CODE
-             * @userdata1  Completion code
-             * @userdata2  Response Header Data
-             * @devdesc    Software problem, PLDM transaction failed
-             * @custdesc   A software error occurred during system boot
-             */
-            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                 MOD_GET_PDR_REPO,
-                                 RC_BAD_COMPLETION_CODE,
-                                 response.completion_code,
-                                 response_hdr_data,
-                                 ErrlEntry::NO_SW_CALLOUT);
-
-            // Call out service processor / BMC firmware as high priority
-            errl->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
-                                      HWAS::SRCI_PRIORITY_HIGH);
-
-            // Call out Hostboot firmware as medium priority
-            errl->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
-                                       HWAS::SRCI_PRIORITY_MED );
-
-            errl->collectTrace(PLDM_COMP_NAME);
-
             break;
         }
 
-        /* If these assertions fail, then the other end is trying to do a
-         * multipart transfer, which we do not support. */
+        /*@
+          * @errortype
+          * @severity   ERRL_SEV_UNRECOVERABLE
+          * @moduleid   MOD_GET_PDR
+          * @reasoncode RC_BAD_NEXT_TRANSFER_HANDLE
+          * @userdata1  Actual Next Transfer Handle
+          * @userdata2  Expected Next Transfer Handle
+          * @devdesc    Software problem, bad PLDM response from BMC
+          * @custdesc   A software error occurred during system boot
+          */
+        /* HB does not support multipart transfers */
+        errl = validate_resp(response.next_data_transfer_hndl, static_cast<pdr_handle_t>(0),
+                             MOD_GET_PDR, RC_BAD_NEXT_TRANSFER_HANDLE,
+                             response_bytes);
+        if(errl)
+        {
+            break;
+        }
 
-        assert(response.transfer_flag == PLDM_START_AND_END,
-               "Expected PLDM response transfer flag to be PLDM_START_AND_END "
-               "got %d",
-               response.transfer_flag);
+        /*@
+          * @errortype
+          * @severity   ERRL_SEV_UNRECOVERABLE
+          * @moduleid   MOD_GET_PDR
+          * @reasoncode RC_BAD_TRANSFER_FLAG
+          * @userdata1  Actual Transfer Flag
+          * @userdata2  Expected Transfer Flag
+          * @devdesc    Software problem, bad PLDM response from BMC
+          * @custdesc   A software error occurred during system boot
+          */
+        errl = validate_resp(response.transfer_flag, PLDM_START_AND_END,
+                             MOD_GET_PDR, RC_BAD_TRANSFER_FLAG,
+                             response_bytes);
+        if(errl)
+        {
+            break;
+        }
 
-        assert(response.next_data_transfer_hndl == 0,
-               "Expected PLDM next data transfer handle to be 0, got %d",
-               response.next_data_transfer_hndl);
-
+        /* Once we decode the message, then we can add the PDR to the caller's
+         * PDR byte buffer and return. */
         o_pdr.data.assign(begin(response.record_data),
                           begin(response.record_data) + response.resp_cnt);
 
@@ -312,6 +316,15 @@ errlHndl_t getRemotePdrRepository(pldm_pdr* const io_repo)
 
     return errl;
 }
+
+struct event_msg_response
+{
+    uint8_t completion_code = 0;
+    uint8_t status = 0; // Don't really care about this status, it
+                        // just tells us what happened with the
+                        // logging (see DSP0248 1.2.0 section 16.6
+                        // for details)
+};
 
 errlHndl_t sendRepositoryChangedEvent(const pldm_pdr* const i_repo,
                                       const std::vector<pdr_handle_t>& i_handles)
@@ -406,17 +419,13 @@ errlHndl_t sendRepositoryChangedEvent(const pldm_pdr* const i_repo,
                     break;
                 }
 
-                uint8_t completion_code = PLDM_SUCCESS;
-                uint8_t status = 0; // Don't really care about this status, it
-                                    // just tells us what happened with the
-                                    // logging (see DSP0248 1.2.0 section 16.6
-                                    // for details)
+                event_msg_response response { };
 
                 errl =
                     decode_pldm_response(decode_platform_event_message_resp,
                                          response_bytes,
-                                         &completion_code,
-                                         &status);
+                                         &response.completion_code,
+                                         &response.status);
 
                 if (errl)
                 {
@@ -424,34 +433,25 @@ errlHndl_t sendRepositoryChangedEvent(const pldm_pdr* const i_repo,
                     break;
                 }
 
-                if (completion_code != PLDM_SUCCESS)
+              /*@
+                * @errortype
+                * @severity   ERRL_SEV_UNRECOVERABLE
+                * @moduleid   MOD_SEND_REPO_CHANGED_EVENT
+                * @reasoncode RC_BAD_COMPLETION_CODE
+                * @userdata1  Actual Completion Code
+                * @userdata2  Expected Completion Code
+                * @devdesc    Software problem, bad PLDM response from BMC
+                * @custdesc   A software error occurred during system boot
+                */
+                errl = validate_resp(response.completion_code, PLDM_SUCCESS,
+                                     MOD_SEND_REPO_CHANGED_EVENT, RC_BAD_COMPLETION_CODE,
+                                     response_bytes);
+                if(errl)
                 {
-                    PLDM_INF("Event completion code is not PLDM_SUCCESS, is %d (status = %d)",
-                             completion_code,
-                             status);
-
-                    /*@
-                     * @errortype  ERRL_SEV_UNRECOVERABLE
-                     * @moduleid   MOD_SEND_REPO_CHANGED_EVENT
-                     * @reasoncode RC_BAD_COMPLETION_CODE
-                     * @userdata1  Completion code returned from BMC
-                     * @userdata2  Status code returned from BMC
-                     * @devdesc    Software problem, PLDM Repo Changed notification unsuccessful
-                     * @custdesc   A software error occurred during system boot
-                     */
-                    errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                         MOD_SEND_REPO_CHANGED_EVENT,
-                                         RC_BAD_COMPLETION_CODE,
-                                         completion_code,
-                                         status,
-                                         ErrlEntry::NO_SW_CALLOUT);
-                    errl->collectTrace(PLDM_COMP_NAME);
-                    addBmcErrorCallouts(errl);
                     break;
                 }
 
-                PLDM_INF("Sent PDR Repository Changed Event successfully (code is %d, status is %d)",
-                         completion_code, status);
+                PLDM_INF("Sent PDR Repository Changed Event successfully");
             }
         } while (false);
     }
@@ -544,13 +544,11 @@ errlHndl_t sendSensorStateChangedEvent(const TARGETING::Target* const i_target,
             break;
         }
 
-        uint8_t completion_code = PLDM_SUCCESS;
-        uint8_t status = 0;
-
+        event_msg_response response { };
         errl = decode_pldm_response(decode_platform_event_message_resp,
                                     response_bytes,
-                                    &completion_code,
-                                    &status);
+                                    &response.completion_code,
+                                    &response.status);
 
         if (errl)
         {
@@ -558,36 +556,24 @@ errlHndl_t sendSensorStateChangedEvent(const TARGETING::Target* const i_target,
             break;
         }
 
-        if (completion_code != PLDM_SUCCESS)
+        /*@
+          * @errortype
+          * @severity   ERRL_SEV_UNRECOVERABLE
+          * @moduleid   MOD_SEND_SENSOR_STATE_CHANGED_EVENT
+          * @reasoncode RC_BAD_COMPLETION_CODE
+          * @userdata1  Actual Completion Code
+          * @userdata2  Expected Completion Code
+          * @devdesc    Software problem, bad PLDM response from BMC
+          * @custdesc   A software error occurred during system boot
+          */
+        errl = validate_resp(response.completion_code, PLDM_SUCCESS,
+                             MOD_SEND_SENSOR_STATE_CHANGED_EVENT, RC_BAD_COMPLETION_CODE,
+                             response_bytes);
+        if(errl)
         {
-            PLDM_INF("Event completion code is not PLDM_SUCCESS, is %d (status = %d)",
-                     completion_code,
-                     status);
-
-            /*@
-             * @errortype        ERRL_SEV_UNRECOVERABLE
-             * @moduleid         MOD_SEND_SENSOR_STATE_CHANGED_EVENT
-             * @reasoncode       RC_BAD_COMPLETION_CODE
-             * @userdata1[0:31]  HUID of the relevant target
-             * @userdata1[32:63] State set ID of this sensor
-             * @userdata2[0:31]  Completion code returned from BMC
-             * @userdata2[32:63] Status code returned from BMC
-             * @devdesc          Software problem, Sensor State Changed notification unsuccessful
-             * @custdesc         A software error occurred during system boot
-             */
-            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                 MOD_SEND_SENSOR_STATE_CHANGED_EVENT,
-                                 RC_BAD_COMPLETION_CODE,
-                                 TWO_UINT32_TO_UINT64(get_huid(i_target), i_state_set_id),
-                                 TWO_UINT32_TO_UINT64(completion_code, status),
-                                 ErrlEntry::NO_SW_CALLOUT);
-            errl->collectTrace(PLDM_COMP_NAME);
-            addBmcErrorCallouts(errl);
             break;
         }
-
-        PLDM_INF("Sent Sensor State Changed Event successfully (code is %d, status is %d)",
-                 completion_code, status);
+        PLDM_INF("Sent Sensor State Changed Event successfully");
     } while (false);
 
     PLDM_EXIT("sendSensorStateChangedEvent");
@@ -703,6 +689,11 @@ errlHndl_t sendFruFunctionalStateChangedEvent(const TARGETING::Target* const i_t
                                        functional_state);
 }
 
+struct cc_only_response
+{
+    uint8_t completion_code = 0;
+};
+
 errlHndl_t sendSetNumericEffecterValueRequest(const effecter_id_t i_effecter_id,
                                               const uint32_t i_effecter_value,
                                               const uint8_t i_value_size)
@@ -761,12 +752,10 @@ errlHndl_t sendSetNumericEffecterValueRequest(const effecter_id_t i_effecter_id,
         break;
     }
 
-    uint8_t response_code = 0xFF;
-
+    cc_only_response response { };
     errl = decode_pldm_response(decode_set_numeric_effecter_value_resp,
                                 response_bytes,
-                                &response_code);
-
+                                &response.completion_code);
     if (errl)
     {
         PLDM_ERR("sendSetNumericEffecterValueRequest: failed to decode PLDM response; "
@@ -775,30 +764,21 @@ errlHndl_t sendSetNumericEffecterValueRequest(const effecter_id_t i_effecter_id,
         break;
     }
 
-    if (response_code)
+    /*@
+      * @errortype
+      * @severity   ERRL_SEV_UNRECOVERABLE
+      * @moduleid   MOD_SEND_SET_NUMERIC_EFFECTER_VALUE_REQUEST
+      * @reasoncode RC_BAD_COMPLETION_CODE
+      * @userdata1  Actual Completion Code
+      * @userdata2  Expected Completion Code
+      * @devdesc    Software problem, bad PLDM response from BMC
+      * @custdesc   A software error occurred during system boot
+      */
+    errl = validate_resp(response.completion_code, PLDM_SUCCESS,
+                         MOD_SEND_SET_NUMERIC_EFFECTER_VALUE_REQUEST,
+                         RC_BAD_COMPLETION_CODE, response_bytes);
+    if(errl)
     {
-        PLDM_ERR("decode_set_numeric_effecter_value_resp failed with rc 0x%.02x",
-                 response_code);
-
-        const uint64_t response_hdr_data =
-            pldmHdrToUint64(*reinterpret_cast<pldm_msg*>(response_bytes.data()));
-
-        /*@
-         * @errortype  ERRL_SEV_UNRECOVERABLE
-         * @moduleid   MOD_SEND_SET_NUMERIC_EFFECTER_VALUE_REQUEST
-         * @reasoncode RC_BAD_COMPLETION_CODE
-         * @userdata1  Complete code returned
-         * @userdata2  Response header data (see pldm_msg_hdr struct)
-         * @devdesc    Software problem, BMC returned bad PLDM response code
-         * @custdesc   A software error occurred during system boot
-         */
-        errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                             PLDM::MOD_SEND_SET_NUMERIC_EFFECTER_VALUE_REQUEST,
-                             PLDM::RC_BAD_COMPLETION_CODE,
-                             response_code,
-                             response_hdr_data,
-                             ErrlEntry::NO_SW_CALLOUT);
-        addBmcErrorCallouts(errl);
         break;
     }
 
@@ -867,50 +847,35 @@ errlHndl_t sendSetStateEffecterStatesRequest(
             break;
         }
 
-        // pack the PLDM header of the response into a uint64_t which can
-        // be used for error logging / debugging
-        uint64_t response_hdr_data =
-          pldmHdrToUint64(*reinterpret_cast<pldm_msg*>(response_bytes.data()));
-
-        set_effecter_state_response response { };
-
-        errl =
-            decode_pldm_response(decode_set_state_effecter_states_resp,
-                                 response_bytes,
-                                 &response.completion_code);
-
+        cc_only_response response { };
+        errl = decode_pldm_response(decode_set_state_effecter_states_resp,
+                                    response_bytes,
+                                    &response.completion_code);
         if (errl)
         {
-            // Message decoding failed; break out of the block;
-            PLDM_ERR("getEffecter: Error occurred trying to decode pldm response.");
+            PLDM_ERR("sendSetNumericEffecterValueRequest: failed to decode PLDM response; "
+                    TRACE_ERR_FMT,
+                    TRACE_ERR_ARGS(errl));
             break;
         }
 
-        if (response.completion_code != PLDM_SUCCESS)
+        /*@
+          * @errortype
+          * @severity   ERRL_SEV_UNRECOVERABLE
+          * @moduleid   MOD_SEND_SET_STATE_EFFECTER_STATES_REQUEST
+          * @reasoncode RC_BAD_COMPLETION_CODE
+          * @userdata1  Actual Completion Code
+          * @userdata2  Expected Completion Code
+          * @devdesc    Software problem, bad PLDM response from BMC
+          * @custdesc   A software error occurred during system boot
+          */
+        errl = validate_resp(response.completion_code, PLDM_SUCCESS,
+                             MOD_SEND_SET_STATE_EFFECTER_STATES_REQUEST,
+                             RC_BAD_COMPLETION_CODE, response_bytes);
+        if(errl)
         {
-            PLDM_ERR("decode_set_state_effecter_states_resp failed with rc 0x%.02x",
-                    response.completion_code);
-
-            /*@
-            * @errortype  ERRL_SEV_UNRECOVERABLE
-            * @moduleid   MOD_SEND_SET_STATE_EFFECTER_STATES_REQUEST
-            * @reasoncode RC_BAD_COMPLETION_CODE
-            * @userdata1  Complete code returned
-            * @userdata2  Response header data (see pldm_msg_hdr struct)
-            * @devdesc    Software problem, BMC returned bad PLDM response code
-            * @custdesc   A software error occurred during system boot
-            */
-            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                   PLDM::MOD_SEND_SET_STATE_EFFECTER_STATES_REQUEST,
-                                   PLDM::RC_BAD_COMPLETION_CODE,
-                                   response.completion_code,
-                                   response_hdr_data,
-                                   ErrlEntry::NO_SW_CALLOUT);
-            addBmcErrorCallouts(errl);
-
             break;
         }
-
     } while (false);
 
     PLDM_EXIT("sendSetStateEffecterStatesRequest");

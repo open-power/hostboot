@@ -51,7 +51,7 @@ namespace PLDM
         MOD_HANDLE_INBOUND_REQ                       = 0x0A, // handle_inbound_req
         MOD_SEND_REPO_CHANGED_EVENT                  = 0x0B, // sendRepositoryChangedEvent
         MOD_GET_FILE_TABLE                           = 0x0C, // getFileTable
-        MOD_GET_LID_FILE                             = 0x0D, // getLidFile
+        MOD_GET_LID_FILE                             = 0x0D, // getLidFileFromOffset
         MOD_HANDLE_REPO_CHANGED_EVENT                = 0x0E, // handlePdrRepoChangeEventRequest
         MOD_PDR_MANAGER                              = 0x0F, // pdr_manager.C
         MOD_PLDM_FRU_TO_IPZ                          = 0x10, // generate_ipz_formatted_vpd
@@ -101,13 +101,14 @@ namespace PLDM
         MOD_GET_ENLARGED_CAPACITY                    = 0x3C, // getEnlargedCapacity
         MOD_GET_INHIBIT_BMC_RESET_VALUE              = 0x3D, // getInhibitBmcResetValue
         MOD_RESET_REBOOT_COUNT                       = 0x3E, // sendResetRebootCountRequest
+        MOD_GET_PDR                                  = 0x3F, // getPDR
     };
 
     enum PLDMReasonCode
     {
         RC_MSG_DECODE_FAIL          = PLDM_COMP_ID | 0x01,
         RC_MSG_ENCODE_FAIL          = PLDM_COMP_ID | 0x02,
-        RC_UNSUPPORTED_VERSION      = PLDM_COMP_ID | 0x03,
+        RC_UNSUPPORTED_MAJOR_VERSION = PLDM_COMP_ID | 0x03,
         RC_BAD_COMPLETION_CODE      = PLDM_COMP_ID | 0x04,
         RC_INVALID_LENGTH           = PLDM_COMP_ID | 0x05,
         RC_MCTP_FAIL                = PLDM_COMP_ID | 0x06,
@@ -155,6 +156,8 @@ namespace PLDM
         RC_EFFECTER_NOT_FOUND       = PLDM_COMP_ID | 0x30,
         RC_MULTIPLE_REGISTRATIONS   = PLDM_COMP_ID | 0x31,
         RC_SBE_DUMP_TIMED_OUT       = PLDM_COMP_ID | 0x32,
+        RC_BAD_NEXT_TRANSFER_HANDLE = PLDM_COMP_ID | 0x33,
+        RC_UNSUPPORTED_MINOR_VERSION = PLDM_COMP_ID | 0x34,
     };
 
     /**

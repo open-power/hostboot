@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,6 +32,8 @@
 #define PLDM_ERRL_H__
 
 #include <errl/errlentry.H>
+#include <errl/errludstring.H>
+#include <openbmc/pldm/libpldm/base.h>
 
 using namespace ERRORLOG;
 
@@ -88,6 +90,56 @@ inline void addBmcAndHypErrorCallouts(const errlHndl_t i_errl)
     // Call out Hostboot firmware as low priority
     i_errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                 HWAS::SRCI_PRIORITY_LOW);
+}
+
+/**
+ * @brief Cast raw binary data to a pldm_msg_hdr struct and return the 'type' member
+ *
+ * @param[in] i_response container holding the pldm response data as raw binary data
+ *
+ * @return uint8_t PLDM command type found
+*/
+template <typename container>
+uint8_t getCommandType(const container& i_response)
+{
+    /* sendrecv_pldm_request should return error if response was too small */
+    assert(i_response.size() >= sizeof(pldm_msg_hdr));
+    return reinterpret_cast<const pldm_msg_hdr *>(i_response.data())->type;
+}
+
+/**
+ * @brief Cast raw binary data to a pldm_msg_hdr struct and return the 'command' member
+ *
+ * @param[in] i_response container holding the pldm response data as raw binary data
+ *
+ * @return uint8_t PLDM command found
+*/
+template <typename container>
+uint8_t getCommand(const container& i_response)
+{
+    /* sendrecv_pldm_request should return error if response was too small */
+    assert(i_response.size() >= sizeof(pldm_msg_hdr));
+    return reinterpret_cast<const pldm_msg_hdr *>(i_response.data())->command;
+}
+
+/**
+ * @brief Lookup the command type, and the command in a PLDM response and attach it to
+ *        a given error log as a User Details String.
+ *
+ * @param[in] i_errl Error log we would like command type and command data attached to
+ * @param[in] i_response container holding the pldm response data as raw binary data
+ *
+ * @return uint8_t PLDM command type found
+*/
+template <typename container>
+void addCmdInfo(const errlHndl_t i_errl,
+                const container& i_response)
+{
+    assert(i_errl != nullptr, "nullptr passed to PLDM::addCmdInfo");
+    char message[48] = { };
+    snprintf(message, sizeof(message), "Command Type: 0x%x; Command: 0x%x",
+             getCommandType(i_response), getCommand(i_response));
+    ErrlUserDetailsString(message).addToLog(i_errl);
 }
 
 }

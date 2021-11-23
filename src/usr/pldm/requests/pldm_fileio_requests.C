@@ -46,6 +46,7 @@
 #include <limits.h>
 #include <util/misc.H>
 #include <targeting/common/targetservice.H>
+#include "pldm_request_utils.H"
 
 namespace PLDM
 {
@@ -113,59 +114,57 @@ errlHndl_t getFileTable(std::vector<uint8_t>& o_table)
         break;
     }
 
-    if(l_fileTableResp.completion_code != PLDM_SUCCESS)
+    /*@
+      * @errortype
+      * @severity   ERRL_SEV_UNRECOVERABLE
+      * @moduleid   MOD_GET_FILE_TABLE
+      * @reasoncode RC_BAD_COMPLETION_CODE
+      * @userdata1  Actual Completion Code
+      * @userdata2  Expected Completion Code
+      * @devdesc    Software problem, bad PLDM response from BMC
+      * @custdesc   A software error occurred during system boot
+      */
+    l_errl = validate_resp(l_fileTableResp.completion_code, PLDM_SUCCESS,
+                           MOD_GET_FILE_TABLE, RC_BAD_COMPLETION_CODE,
+                           l_responseBytes);
+    if(l_errl)
     {
-        PLDM_ERR("getFileTable: PLDM op retuned code %d",
-                  l_fileTableResp.completion_code);
-        pldm_msg* const l_pldmResponse =
-            reinterpret_cast<pldm_msg*>(l_responseBytes.data());
-        const uint64_t l_responseHeader = pldmHdrToUint64(*l_pldmResponse);
-
-        /*@
-          * @errortype
-          * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
-          * @moduleid   MOD_GET_FILE_TABLE
-          * @reasoncode RC_BAD_COMPLETION_CODE
-          * @userdata1  Completion code
-          * @userdata2  Response header data
-          * @devdesc    File Table request completed unsuccessfully
-          *             (bad completion code)
-          * @custdesc   A host failure occurred
-          */
-        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                          MOD_GET_FILE_TABLE,
-                                          RC_BAD_COMPLETION_CODE,
-                                          l_fileTableResp.completion_code,
-                                          l_responseHeader);
-        addBmcErrorCallouts(l_errl);
         break;
     }
 
-    if(l_fileTableResp.transfer_flag != PLDM_START_AND_END)
+    /*@
+      * @errortype
+      * @severity   ERRL_SEV_UNRECOVERABLE
+      * @moduleid   MOD_GET_FILE_TABLE
+      * @reasoncode RC_BAD_NEXT_TRANSFER_HANDLE
+      * @userdata1  Actual Next Transfer Handle
+      * @userdata2  Expected Next Transfer Handle
+      * @devdesc    Software problem, bad PLDM response from BMC
+      * @custdesc   A software error occurred during system boot
+      */
+    l_errl = validate_resp(l_fileTableResp.next_transfer_handle, static_cast<pdr_handle_t>(0),
+                           MOD_GET_FILE_TABLE, RC_BAD_NEXT_TRANSFER_HANDLE,
+                           l_responseBytes);
+    if(l_errl)
     {
-        PLDM_ERR("getFileTable: bad transfer flag %d",
-                  l_fileTableResp.transfer_flag);
-        pldm_msg* const l_pldmResponse =
-            reinterpret_cast<pldm_msg*>(l_responseBytes.data());
-        const uint64_t l_responseHeader = pldmHdrToUint64(*l_pldmResponse);
+        break;
+    }
 
-        /*@
-          * @errortype
-          * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
-          * @moduleid   MOD_GET_FILE_TABLE
-          * @reasoncode RC_BAD_TRANSFER_FLAG
-          * @userdata1  Returned transfer flag
-          * @userdata2  Response header data
-          * @devdesc    File Table request completed unsuccessfully
-          *             (bad response flag)
-          * @custdesc   A host failure occurred
-          */
-        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                          MOD_GET_FILE_TABLE,
-                                          RC_BAD_TRANSFER_FLAG,
-                                          l_fileTableResp.transfer_flag,
-                                          l_responseHeader);
-        addBmcErrorCallouts(l_errl);
+    /*@
+      * @errortype
+      * @severity   ERRL_SEV_UNRECOVERABLE
+      * @moduleid   MOD_GET_FILE_TABLE
+      * @reasoncode RC_BAD_TRANSFER_FLAG
+      * @userdata1  Actual Transfer Flag
+      * @userdata2  Expected Transfer Flag
+      * @devdesc    Software problem, bad PLDM response from BMC
+      * @custdesc   A software error occurred during system boot
+      */
+    l_errl = validate_resp(l_fileTableResp.transfer_flag, PLDM_START_AND_END,
+                           MOD_GET_FILE_TABLE, RC_BAD_TRANSFER_FLAG,
+                           l_responseBytes);
+    if(l_errl)
+    {
         break;
     }
 
@@ -178,11 +177,6 @@ errlHndl_t getFileTable(std::vector<uint8_t>& o_table)
     else if(l_fileTableSize == 0)
     {
         // BMC returned file table size of 0; no need to decode again
-        break;
-    }
-
-    if(l_errl)
-    {
         break;
     }
 
@@ -357,33 +351,21 @@ errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
             l_resp.completion_code = PLDM_SUCCESS;
         }
 
-
-        if(l_resp.completion_code != PLDM_SUCCESS)
+        /*@
+          * @errortype
+          * @severity   ERRL_SEV_UNRECOVERABLE
+          * @moduleid   MOD_GET_LID_FILE
+          * @reasoncode RC_BAD_COMPLETION_CODE
+          * @userdata1  Actual Completion Code
+          * @userdata2  Expected Completion Code
+          * @devdesc    Software problem, bad PLDM response from BMC
+          * @custdesc   A software error occurred during system boot
+          */
+        l_errl = validate_resp(l_resp.completion_code, PLDM_SUCCESS,
+                               MOD_GET_LID_FILE, RC_BAD_COMPLETION_CODE,
+                               l_responseBytes);
+        if(l_errl)
         {
-            PLDM_ERR("getLidFileFromOffset: PLDM op returned code %d",
-                     l_resp.completion_code);
-            const pldm_msg* const l_pldmResponse =
-                reinterpret_cast<const pldm_msg*>(l_responseBytes.data());
-            const uint64_t l_responseHeader =
-                pldmHdrToUint64(*l_pldmResponse);
-
-            /*@
-             * @errortype
-             * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid   MOD_GET_LID_FILE
-             * @reasoncode RC_BAD_COMPLETION_CODE
-             * @userdata1  Completion code
-             * @userdata2  Response header data
-             * @devdesc    File request completed unsuccessfully
-             * @custdesc   A host failure occurred
-             */
-            l_errl = new ERRORLOG::ErrlEntry(
-                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                            MOD_GET_LID_FILE,
-                            RC_BAD_COMPLETION_CODE,
-                            l_resp.completion_code,
-                            l_responseHeader);
-            addBmcErrorCallouts(l_errl);
             break;
         }
 
@@ -417,12 +399,6 @@ errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
             // We need to request a smaller chunk than MAX_TRANSFER_SIZE_BYTES
             l_req.length = io_numBytesToRead - l_totalRead;
         }
-
-        if(l_errl)
-        {
-            break;
-        }
-
     } // number of transfers
 
     io_numBytesToRead = l_totalRead;
@@ -525,77 +501,50 @@ errlHndl_t writeFileByType(pldm_read_write_file_by_type_req & io_request,
             break;
         }
 
-        if(response.completion_code != PLDM_SUCCESS)
+        /*@
+          * @errortype
+          * @severity   ERRL_SEV_UNRECOVERABLE
+          * @moduleid   MOD_WRITE_FILE_BY_TYPE
+          * @reasoncode RC_BAD_COMPLETION_CODE
+          * @userdata1  Actual Completion Code
+          * @userdata2  Expected Completion Code
+          * @devdesc    Software problem, bad PLDM response from BMC
+          * @custdesc   A software error occurred during system boot
+          */
+        errl = validate_resp(response.completion_code, PLDM_SUCCESS,
+                             MOD_WRITE_FILE_BY_TYPE, RC_BAD_COMPLETION_CODE,
+                             response_bytes);
+        if(errl)
         {
-            PLDM_ERR("writeFileByType: PLDM op returned code %d",
-                     response.completion_code);
-            pldm_msg* const generic_response =
-                reinterpret_cast<pldm_msg*>(response_bytes.data());
-            const uint64_t generic_response_hdr =
-                pldmHdrToUint64(*generic_response);
-
-            /*@
-             * @errortype
-             * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid   MOD_WRITE_FILE_BY_TYPE
-             * @reasoncode RC_BAD_COMPLETION_CODE
-             * @userdata1  Completion code
-             * @userdata2  Response header data
-             * @devdesc    File write request completed unsuccessfully
-             * @custdesc   A host failure occurred
-             */
-            errl = new ERRORLOG::ErrlEntry(
-                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                            MOD_WRITE_FILE_BY_TYPE,
-                            RC_BAD_COMPLETION_CODE,
-                            response.completion_code,
-                            generic_response_hdr);
-            addBmcErrorCallouts(errl);
             break;
         }
-
-        PLDM_DBG("writeFileByType: Response %llu; the actual size of written is 0x%08x",
-                  i, response.length);
 
         bytes_written += response.length;
         current_ptr += response.length;
-        if(io_writeSizeBytes == bytes_written)
-        {
-            break;
-        }
-        else if(response.length != io_request.length)
+
+        /*@
+          * @errortype
+          * @severity   ERRL_SEV_UNRECOVERABLE
+          * @moduleid   MOD_WRITE_FILE_BY_TYPE
+          * @reasoncode RC_INVALID_LENGTH
+          * @userdata1  Actual Length
+          * @userdata2  Expected Length
+          * @devdesc    Software problem, bad PLDM response from BMC
+          * @custdesc   A software error occurred during system boot
+          */
+        errl = validate_resp(response.length, io_request.length,
+                             MOD_WRITE_FILE_BY_TYPE, RC_INVALID_LENGTH,
+                             response_bytes);
+        if(errl)
         {
             PLDM_ERR("writeFileByType: BMC returned length 0x%08x of file written; requested length was 0x%08x."
                      " This indicates End Of File overrun (total bytes written: 0x%08x).",
                      response.length, io_request.length, bytes_written);
-            pldm_msg* const generic_response =
-                reinterpret_cast<pldm_msg*>(response_bytes.data());
-            const uint64_t generic_response_hdr =
-                pldmHdrToUint64(*generic_response);
-
-            /*@
-             * @errortype
-             * @severity   ERRORLOG::ERRL_SEV_PREDICTIVE
-             * @moduleid   MOD_WRITE_FILE_BY_TYPE
-             * @reasoncode RC_OUT_OF_RANGE
-             * @userdata1  Response header data
-             * @userdata2[0:31] Requested Write Length (bytes)
-             * @userdata2[32:63] Actual Length Written (bytes)
-             * @devdesc    File write request partial failure
-             * @custdesc   A host failure occurred
-             */
-            errl = new ERRORLOG::ErrlEntry(
-                            ERRORLOG::ERRL_SEV_PREDICTIVE,
-                            MOD_WRITE_FILE_BY_TYPE,
-                            RC_OUT_OF_RANGE,
-                            generic_response_hdr,
-                            TWO_UINT32_TO_UINT64(
-                              io_request.length,
-                              response.length),
-                            ErrlEntry::ADD_SW_CALLOUT);
             break;
         }
-        else if((MAX_TRANSFER_SIZE_BYTES > (io_writeSizeBytes - bytes_written)) &&
+
+
+        if((MAX_TRANSFER_SIZE_BYTES > (io_writeSizeBytes - bytes_written)) &&
                 (io_writeSizeBytes != 0))
         {
             // We need to request a smaller chunk than MAX_TRANSFER_SIZE_BYTES

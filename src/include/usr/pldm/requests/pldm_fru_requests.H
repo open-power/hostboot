@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,32 +33,12 @@
  */
 
 #include <errl/errlentry.H>
+#include <openbmc/pldm/libpldm/fru.h>
 
 namespace PLDM
 {
 
 using fru_record_set_id = uint16_t;
-
-struct pldm_fru_record_table_metadata_t
-{
-    // Major Version of Fru Record Table format
-    uint8_t  fruDataVerMajor = 0xFF;
-    // Minor Version of Fru Record Table format
-    uint8_t  fruDataVerMinor = 0xFF;
-    // Max allowed size for Fru Record Table in bytes
-    // (needed if we intend to send setFruTable cmds)
-    uint32_t fruTableMaxSize = 0x00000000;
-    // Current length of Fru Record Table in bytes
-    uint32_t fruTableSize    = 0x00000000;
-    // Total number of Record Set Identifiers in table
-    uint16_t rsiCount        = 0x0000;
-    // Total number of Fru Records in table
-    uint16_t recordCount     = 0x0000;
-    // CRC-32 checksum of fru data type (excludes pad bytes)
-    uint32_t checksum        = 0x00000000;
-
-    pldm_fru_record_table_metadata_t() {};
-} __attribute__((packed));
 
 /**
  * @brief Make PLDM request to get the Fru Record Table meta data
@@ -73,7 +53,7 @@ struct pldm_fru_record_table_metadata_t
  * @return returns error log if error occurs, otherwise returns nullptr
  */
 errlHndl_t getFruRecordTableMetaData(
-                  pldm_fru_record_table_metadata_t&  o_table_metadata);
+                  pldm_get_fru_record_table_metadata_resp&  o_table_metadata);
 
 /**
  * @brief Make PLDM request to get the Fru Record Table
