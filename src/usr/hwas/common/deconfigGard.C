@@ -2175,7 +2175,7 @@ errlHndl_t DeconfigGard::applyGardRecord(Target *i_pTarget,
         GardRecord &i_gardRecord,
         const DeconfigureFlags i_deconfigRule)
 {
-    HWAS_INF("Apply gard record for target %.8X", get_huid(i_pTarget));
+    HWAS_INF("Apply gard record for target %.8X, gard type 0x%.2X", get_huid(i_pTarget), i_gardRecord.iv_errorType);
     errlHndl_t l_pErr = NULL;
     do
     {
@@ -2201,14 +2201,20 @@ errlHndl_t DeconfigGard::applyGardRecord(Target *i_pTarget,
         HWAS_MUTEX_LOCK(iv_mutex);
 
 #if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
-        const char* l_tmpstring =
-          i_pTarget->getAttr<TARGETING::ATTR_PHYS_PATH>().toString();
-        CONSOLE::displayf(CONSOLE::DEFAULT, "HWAS", "Applying GARD record for HUID=0x%08X (%s) due to 0x%.8X",
-                    get_huid(i_pTarget),
-                    l_tmpstring,
-                    l_errlogEid);
-        free((void*)(l_tmpstring));
-        l_tmpstring = nullptr;
+        // Don't emit a console message if the GARD is GARD_Reconfig since that type is considered a "fake" GARD record.
+        // Emitting a message as if a GARD is being applied in that case leads to confusion since no GARD is actually
+        // being created. Its actually just used as a means to remember to deconfig.
+        if (i_gardRecord.iv_errorType != GARD_Reconfig)
+        {
+            const char* l_tmpstring =
+              i_pTarget->getAttr<TARGETING::ATTR_PHYS_PATH>().toString();
+            CONSOLE::displayf(CONSOLE::DEFAULT, "HWAS", "Applying GARD record for HUID=0x%08X (%s) due to 0x%.8X",
+                        get_huid(i_pTarget),
+                        l_tmpstring,
+                        l_errlogEid);
+            free((void*)(l_tmpstring));
+            l_tmpstring = nullptr;
+        }
 #endif
 
         // Deconfigure the Target
@@ -2689,9 +2695,10 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
 #if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
             const char* l_tmpstring =
               l_pTarget->getAttr<TARGETING::ATTR_PHYS_PATH>().toString();
-            CONSOLE::displayf(CONSOLE::DEFAULT, "HWAS", "Deconfig HUID 0x%08X, %s",
+            CONSOLE::displayf(CONSOLE::DEFAULT, "HWAS", "Deconfig HUID 0x%08X, %s due to 0x%.8X",
                     get_huid(l_pTarget),
-                    l_tmpstring);
+                    l_tmpstring,
+                    l_errlogEid);
             free((void*)(l_tmpstring));
             l_tmpstring = nullptr;
 #endif
@@ -2972,9 +2979,10 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
 #if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
                 const char* l_tmpstring =
                   l_pTarget->getAttr<TARGETING::ATTR_PHYS_PATH>().toString();
-                CONSOLE::displayf(CONSOLE::DEFAULT, "HWAS", "Deconfig HUID 0x%08X, %s",
+                CONSOLE::displayf(CONSOLE::DEFAULT, "HWAS", "Deconfig HUID 0x%08X, %s due to 0x%.08X",
                     get_huid(l_pTarget),
-                    l_tmpstring);
+                    l_tmpstring,
+                    l_errlogEid);
                 free((void*)(l_tmpstring));
                 l_tmpstring = nullptr;
 #endif
