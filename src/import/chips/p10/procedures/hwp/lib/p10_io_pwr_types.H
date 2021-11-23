@@ -132,6 +132,28 @@ typedef enum
     NUM_OF_IO_PWRS,
 } io_link_powers_t;
 
+//This is added for the tool purpose to identify
+//the links which are pgated
+//
+typedef enum
+{
+    OMIC0 = 16,     //1
+    OMIC1 = 17,     //2
+    OMIC2 = 18,     //3
+    OMIC3 = 19,     //4
+    OMIC4 = 20,     //5
+    OMIC5 = 21,     //6
+    OMIC6 = 22,     //7
+    OMIC7 = 23,     //8
+    PHB0  = 24,      //17
+    PHB1  = 25,      //18
+    PHB2  = 26,      //19
+    PHB3  = 27,      //20
+    PHB4  = 28,      //21
+    PHB5  = 29,      //22
+} mem_phb_cnts;
+
+
 typedef enum
 {
     NONE,      //0
@@ -151,7 +173,6 @@ typedef enum
     PEC1,      //14
     NUM_IO_CNTRLS,  //15
 } io_controllers;
-
 typedef enum
 {
     MC00_OMI0, //0

@@ -46,6 +46,7 @@
 #include <p10_scom_mc_f.H>
 #include <p10_scom_pauc_f.H>
 #include <p10_scom_pec_f.H>
+#include <p10_scom_iohs_f.H>
 #include <multicast_group_defs.H>
 #include <vector>
 #ifndef __PPE__
@@ -69,6 +70,7 @@ using namespace scomt::eq;
 using namespace scomt::pauc;
 using namespace scomt::mc;
 using namespace scomt::pec;
+using namespace scomt::iohs;
 // Following constants hold an approximate value.
 static const uint32_t XGPE_TIMEOUT_MS       = 50000;
 static const uint32_t XGPE_TIMEOUT_MCYCLES  = 20;
@@ -89,21 +91,29 @@ static const uint32_t INTERRUPT_SRC_MASK_REG = 0xFFFFFFFF;
 #define FREEZE_PROXY            11
 
 uint64_t g_io_pow_gated_cntrlr = 0;
-uint64_t g_io_omi_cntrlr_link = 0;
+uint64_t g_io_omi_active_link = 0;
+uint64_t g_io_omi_disable_link = 0;
+uint32_t g_ax_speed_type = 0;
+uint32_t g_oc_speed_type = 0;
 #ifndef __PPE__
 static uint32_t TP_TPCHIP_TPC_CPLT_CTRL5_RW = 0x01000005;
 controller_entry_t g_cntrlr_data[NUM_IO_CNTRLS];
 link_entry_t g_link_data[NUMBER_OF_IO_LINKS];
 uint8_t  g_io_iohs_sub_type = 0;
+uint8_t  g_io_omi_sub_type = 0;
 uint8_t  g_io_pcie_sub_type = 0;
-uint64_t  g_io_pci_cntrlr_link = 0;
-uint64_t g_io_iohs_ax_cntrlr_link = 0;
-uint64_t g_io_iohs_oc_cntrlr_link = 0;
+uint64_t  g_io_pci_active_link = 0;
+uint64_t  g_io_pci_disable_link = 0;
+uint64_t g_io_iohs_ax_active_link = 0;
+uint64_t g_io_iohs_ax_disable_link = 0;
+uint64_t g_io_iohs_oc_active_link = 0;
+uint64_t g_io_iohs_oc_disable_link = 0;
 uint64_t g_io_lnk_disable_cntrlr = 0;
 
 //static uint32_t g_iohs_ax_apsr_reg[] = {0x18011039, 0x1801103D};
 static uint32_t g_iohs_ax_apor_reg[]  = {0x1801103a, 0x1801103e};
 static uint32_t g_iohs_ax_apcr_reg[]  = {0x18011038, 0x1801103c};
+static uint32_t g_iohs_ax_dll_status_reg[]  = {0x18011028};
 static uint32_t g_omi_even_apcr_reg[] = {0x0C011430, 0x0C011438}; //MC00, MC10, MC20, MC30
 //static uint32_t g_omi_odd_apcr_reg[]  = {0x0C011830, 0x0C011838}; //MC01, MC11, MC21, MC31
 static uint32_t g_omi_even_apor_reg[] = {0x0c011432, 0x0C01143a}; //MC01, MC11, MC21, MC31
@@ -565,11 +575,26 @@ fapi2::ReturnCode p10_pm_iodlr_static_config(
             break;
         }
 
+//We identify Active, Disable and Pgated links using targting infrastructure and
+//register values.
+//Active links: are identifed by reading APCR register and bit 10 (DL_ENABLE)
+//              should be set.
+//Disable links: are identified by reading APCR register and bit 10 not set.
+//Pgated links: are indentified, if PFET enable bit is not set in CPLT_CNTRL_5
+//register and also if the targets is not functional but pfet enable is still set,
+//then that target(link) is considered for pgated
+
 
         g_io_pow_gated_cntrlr = 0;
-        g_io_omi_cntrlr_link = 0;
-        g_io_iohs_ax_cntrlr_link = 0;
-        g_io_iohs_oc_cntrlr_link = 0;
+        g_io_omi_active_link = 0;
+        g_io_pci_active_link = 0;
+        g_io_iohs_ax_active_link = 0;
+        g_io_iohs_oc_active_link = 0;
+        g_io_omi_disable_link = 0;
+        g_io_pci_disable_link = 0;
+        g_io_iohs_ax_disable_link = 0;
+        g_io_iohs_oc_disable_link = 0;
+        g_oc_speed_type = 0;
         memset (&g_cntrlr_data, 0, sizeof (g_cntrlr_data));
         memset (&g_link_data, 0, sizeof (g_link_data));
 
@@ -605,6 +630,8 @@ fapi2::ReturnCode pec_iodlr_static_config(
     uint32_t l_attr_vio_boot_vlt = 0;
     uint32_t l_sub_type = 0;
     uint32_t l_pci_gen_info = 0;
+    uint32_t l_pci_gen_size = 0;
+    uint32_t l_width = 0;
 
     do
     {
@@ -634,9 +661,10 @@ fapi2::ReturnCode pec_iodlr_static_config(
                                     l_pec_unit_pos),
                       "Error getting fapi2::ATTR_CHIP_UNIT_POS");
 
-
             for (const auto l_phb_target : l_pec_target.getChildren<fapi2::TARGET_TYPE_PHB>(fapi2::TARGET_STATE_FUNCTIONAL))
             {
+                l_pci_gen_info = 0;
+                l_pci_gen_size = 0;
                 FAPI_TRY(getScom(l_phb_target, g_pcie_pasr_reg[0], l_data64));
 
                 l_data64.setBit<LINK_POPULATED_BIT>();
@@ -646,20 +674,27 @@ fapi2::ReturnCode pec_iodlr_static_config(
                     l_data64.setBit<FREEZE_PROXY>();
                 }
 
-                //If enable bit is not set just update
-                //link type and populate bits
-                if (!l_data64.getBit<DL_ENABLE_BIT>())
-                {
-                    FAPI_TRY(putScom(l_phb_target, g_pcie_pasr_reg[0], l_data64));
-                    continue;
-                }
-
                 FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
                                         l_phb_target,
                                         l_phb_unit_pos),
                           "Error getting fapi2::ATTR_CHIP_UNIT_POS");
 
-                g_io_pci_cntrlr_link |= BIT64(l_phb_unit_pos);
+                FAPI_INF("PHB target %d", l_phb_unit_pos);
+
+                //If enable bit is not set just update
+                //link type and populate bits
+                if (!l_data64.getBit<DL_ENABLE_BIT>())
+                {
+                    FAPI_INF("DISABLED PHB target %d", l_phb_unit_pos);
+                    g_io_pci_disable_link |= BIT64(l_phb_unit_pos);
+                    g_link_data[l_phb_unit_pos + PCI0_0].sub_type = htobe32(l_sub_type);
+                    g_link_data[l_phb_unit_pos + PCI0_0].base_power_mw = htobe32(link_powers[l_sub_type].power_mw[DISABLED]);
+                    FAPI_TRY(putScom(l_phb_target, g_pcie_pasr_reg[0], l_data64));
+                    continue;
+                }
+
+
+                g_io_pci_active_link |= BIT64(l_phb_unit_pos);
 
 
 
@@ -667,15 +702,17 @@ fapi2::ReturnCode pec_iodlr_static_config(
                 FAPI_TRY(putScom(l_phb_target, g_pcie_pasr_reg[0], l_data64));
 
                 //We read PAST register to find the PCIE Generation
-                //001: GEN1
-                //010: GEN2
-                //011: GEN3
-                //100: GEN4
+                //Bit 5:7       Bit8:9 (Bifurcation way)
+                //001: GEN1     00 - x4
+                //010: GEN2     01 - x4
+                //011: GEN3     10 - x8
+                //100: GEN4     11 - x16
                 //101: GEN5
                 FAPI_TRY(getScom(l_phb_target, g_pcie_past_reg[0], l_data64));
-                l_data64.extractToRight<uint32_t>(l_pci_gen_info, 5, 3);
+                l_data64.extractToRight<5, 3>(l_pci_gen_info);
+                l_data64.extractToRight<8, 2>(l_pci_gen_size);
 
-                FAPI_INF("PCI GEN info %d", l_pci_gen_info);
+                FAPI_INF("PCI GEN info %d l_pci_gen_size %d", l_pci_gen_info, l_pci_gen_size);
 
                 if ( l_attr_vio_boot_vlt >= 1000)
                 {
@@ -686,16 +723,30 @@ fapi2::ReturnCode pec_iodlr_static_config(
                     l_sub_type = G5_32G_VIO_PT_9V + (5 - l_pci_gen_info % 5);
                 }
 
+                l_width = QTR;
+
+                if (l_pci_gen_size == 2)
+                {
+                    l_width = HALF;
+                }
+
+                if (l_pci_gen_size == 3)
+                {
+                    l_width = FULL;
+                }
+
+
 
                 g_link_data[l_phb_unit_pos + PCI0_0].sub_type = htobe32(l_sub_type);
-                g_link_data[l_phb_unit_pos + PCI0_0].base_power_mw = htobe32(link_powers[l_sub_type].power_mw[FULL]);
-                FAPI_INF("PCIE g_link_data[%d] = %08x", l_phb_unit_pos + PCI0_0,
-                         htobe32(g_link_data[l_phb_unit_pos + PCI0_0].base_power_mw));
+                g_link_data[l_phb_unit_pos + PCI0_0].base_power_mw = htobe32(link_powers[l_sub_type].power_mw[l_width]);
+                FAPI_INF("PCIE g_link_data[%d] = %08x width %d, l_sub_type %d", l_phb_unit_pos + PCI0_0,
+                         htobe32(g_link_data[l_phb_unit_pos + PCI0_0].base_power_mw), l_width, l_sub_type);
             }
 
         }
 
-        FAPI_INF("g_io_pci_cntrlr_link %08x", g_io_pci_cntrlr_link >> 32);
+        FAPI_INF("g_io_pci_active_link %08x", g_io_pci_active_link >> 32);
+        FAPI_INF("g_io_pci_disable_link %08x", g_io_pci_disable_link >> 32);
 
     }
     while(0);
@@ -771,8 +822,174 @@ fapi2::ReturnCode iohs_iodlr_static_config(
 
             iohs_pos = l_iohs_unit_pos * 2;
 
-            uint8_t ax_lane_width = 0;
-            uint8_t ax_prev_cnt = 0;
+
+            //Find the 9/18 lane width
+            for (uint8_t x = 0; x < 1; x++)
+            {
+                FAPI_TRY(getScom(l_iohs_target, g_iohs_ax_dll_status_reg[x], l_data64));
+
+                if (l_iohs_freq > 25781 && l_iohs_freq < 32000)
+                {
+                    l_speed = 3; //A/X Bus 25G
+                }
+                else
+                {
+                    l_speed = 4; //A/X Bus 32G
+                }
+
+
+                if (l_iohs_config == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPX ||
+                    l_iohs_config == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPA)
+                {
+                    l_sub_speed_type = (l_speed == 3 && l_attr_vio_boot_vlt >= 1000) ? AX_25G_VIO_1V : AX_25G_VIO_PT_9V;
+
+                    if (l_speed == 4)
+                    {
+                        l_sub_speed_type = l_attr_vio_boot_vlt >= 1000 ? AX_32G_VIO_1V : AX_32G_VIO_PT_9V;
+                    }
+
+                }
+                else
+                {
+                    l_speed += 2; //OC 5:25G, 6:32G
+                    l_sub_speed_type = (l_speed == 5 && l_attr_vio_boot_vlt >= 1000) ? OC_25G_VIO_1V : OC_25G_VIO_PT_9V;
+
+                    if (l_speed == 6)
+                    {
+                        l_sub_speed_type = l_attr_vio_boot_vlt >= 1000 ? OC_32G_VIO_1V : OC_32G_VIO_PT_9V;
+                    }
+
+                }
+
+                //If enable bit is not set just update
+                //link type and populate bits
+                if (!l_data64.getBit<DLP_DLL_STATUS_0_LINK_UP>() &&
+                    !l_data64.getBit<DLP_DLL_STATUS_1_LINK_UP>())
+                {
+                    {
+                        if ( l_sub_speed_type < OC_25G_VIO_PT_9V)
+                        {
+                            g_link_data[iohs_pos + x + OPT0_AX0].sub_type = htobe32(l_sub_speed_type);
+                            g_io_iohs_ax_disable_link |= BIT64(iohs_pos + x);
+                            g_link_data[iohs_pos + x + OPT0_AX0].base_power_mw = htobe32(
+                                        link_powers[l_sub_speed_type].power_mw[DISABLED] >> 1);
+                        }
+                        else
+                        {
+                            g_link_data[iohs_pos + x + OPT0_O0].sub_type = htobe32(l_sub_speed_type);
+                            g_io_iohs_oc_disable_link |= BIT64((iohs_pos) + x);
+                            g_link_data[iohs_pos + x + OPT0_O0].base_power_mw = htobe32(
+                                        link_powers[l_sub_speed_type].power_mw[DISABLED] >> 1);
+                        }
+                    }
+                    {
+                        if ( l_sub_speed_type < OC_25G_VIO_PT_9V)
+                        {
+                            g_link_data[iohs_pos + x + OPT0_AX0 + 1].sub_type = htobe32(l_sub_speed_type);
+                            g_io_iohs_ax_disable_link |= BIT64(iohs_pos + x + 1);
+                            g_link_data[iohs_pos + x + OPT0_AX0 + 1].base_power_mw = htobe32(
+                                        link_powers[l_sub_speed_type].power_mw[DISABLED] >> 1);
+                        }
+                        else
+                        {
+                            g_link_data[iohs_pos + x + OPT0_O0 + 1].sub_type = htobe32(l_sub_speed_type);
+                            g_io_iohs_oc_disable_link |= BIT64((iohs_pos) + x + 1);
+                            g_link_data[iohs_pos + x + OPT0_O0 + 1].base_power_mw = htobe32(
+                                        link_powers[l_sub_speed_type].power_mw[DISABLED] >> 1);
+                        }
+                    }
+                    continue;
+                }
+
+                g_io_iohs_sub_type = l_sub_speed_type;
+
+                if ( l_sub_speed_type < OC_25G_VIO_PT_9V)
+                {
+
+                    if ( l_data64.getBit<DLP_DLL_STATUS_0_LINK_UP>() &&
+                         l_data64.getBit<DLP_DLL_STATUS_1_LINK_UP>())
+                    {
+                        g_link_data[iohs_pos + x + OPT0_AX0].sub_type = htobe32(l_sub_speed_type);
+                        g_link_data[iohs_pos + x + OPT0_AX0 + 1].sub_type = htobe32(l_sub_speed_type);
+                        g_io_iohs_ax_active_link |= BIT64(iohs_pos + x);
+                        g_io_iohs_ax_active_link |= BIT64(iohs_pos + x + 1);
+                        g_link_data[iohs_pos + x + OPT0_AX0].base_power_mw = htobe32(
+                                    link_powers[l_sub_speed_type].power_mw[FULL] >> 1);
+                        g_link_data[iohs_pos + x + OPT0_AX0 + 1].base_power_mw = htobe32(
+                                    link_powers[l_sub_speed_type].power_mw[FULL] >> 1);
+                    }
+                    else if ( l_data64.getBit<DLP_DLL_STATUS_0_LINK_UP>())
+                    {
+                        g_link_data[iohs_pos + x + OPT0_AX0].sub_type = htobe32(l_sub_speed_type);
+                        g_io_iohs_ax_active_link |= BIT64(iohs_pos + x);
+                        g_link_data[iohs_pos + x + OPT0_AX0].base_power_mw = htobe32(
+                                    link_powers[l_sub_speed_type].power_mw[HALF]);
+                    }
+                    else if(l_data64.getBit<DLP_DLL_STATUS_1_LINK_UP>())
+                    {
+                        g_link_data[iohs_pos + x + OPT0_AX0 + 1].sub_type = htobe32(l_sub_speed_type);
+                        g_io_iohs_ax_active_link |= BIT64(iohs_pos + x + 1);
+                        g_link_data[iohs_pos + x + OPT0_AX0 + 1].base_power_mw = htobe32(
+                                    link_powers[l_sub_speed_type].power_mw[HALF]);
+                    }
+
+                    FAPI_INF("AX0 g_link_data[%d] = %08x", iohs_pos + x + OPT0_AX0,
+                             htobe32(g_link_data[iohs_pos + x + OPT0_AX0].base_power_mw));
+                }
+                else
+                {
+                    if (l_iohs_unit_pos == 1 ||
+                        l_iohs_unit_pos == 2)
+                    {
+                        FAPI_INF("Skip as we are in OC configuration %d", l_iohs_unit_pos);
+                        continue;
+                    }
+
+#if 0
+
+                    if ( l_iohs_unit_pos != 1 && l_iohs_unit_pos != 2)
+                    {
+                        g_io_iohs_oc_active_link |= BIT64((iohs_pos) + x);
+                    }
+
+#endif
+
+                    uint8_t index = iohs_pos;
+
+                    if ( l_data64.getBit<DLP_DLL_STATUS_0_LINK_UP>() &&
+                         l_data64.getBit<DLP_DLL_STATUS_1_LINK_UP>())
+                    {
+                        g_link_data[index + x + OPT0_O0].sub_type = htobe32(l_sub_speed_type);
+                        g_link_data[index + x + OPT0_O0 + 1].sub_type = htobe32(l_sub_speed_type);
+                        g_io_iohs_oc_active_link |= BIT64((iohs_pos) + x);
+                        g_io_iohs_oc_active_link |= BIT64((iohs_pos) + x + 1);
+                        g_link_data[index + x + OPT0_O0].base_power_mw = htobe32(
+                                    link_powers[l_sub_speed_type].power_mw[FULL] >> 1);
+                        g_link_data[index + x + OPT0_O0 + 1].base_power_mw = htobe32(
+                                    link_powers[l_sub_speed_type].power_mw[FULL] >> 1);
+
+                    }
+                    else if ( l_data64.getBit<DLP_DLL_STATUS_0_LINK_UP>())
+                    {
+                        g_link_data[index + x + OPT0_O0].sub_type = htobe32(l_sub_speed_type);
+                        g_io_iohs_oc_active_link |= BIT64((iohs_pos) + x);
+                        g_link_data[index + x + OPT0_O0].base_power_mw = htobe32(
+                                    link_powers[l_sub_speed_type].power_mw[HALF]);
+                    }
+                    else if(l_data64.getBit<DLP_DLL_STATUS_1_LINK_UP>())
+                    {
+                        g_link_data[index + x + OPT0_O0 + 1].sub_type = htobe32(l_sub_speed_type);
+                        g_io_iohs_oc_active_link |= BIT64((iohs_pos) + x + 1);
+                        g_link_data[index + x + OPT0_O0 + 1].base_power_mw = htobe32(
+                                    link_powers[l_sub_speed_type].power_mw[HALF]);
+                    }
+
+                    FAPI_INF("OC0 g_link_data[%d] = %08x", index + OPT0_O0, htobe32(g_link_data[index + OPT0_O0].base_power_mw));
+                }
+
+                g_oc_speed_type = l_sub_speed_type;
+
+            }
 
             for (uint8_t x = 0; x < 2; x++)
             {
@@ -827,38 +1044,11 @@ fapi2::ReturnCode iohs_iodlr_static_config(
                     FAPI_TRY(putScom(l_iohs_target, g_iohs_ax_apcr_reg[x], l_data64));
                     continue;
                 }
-                else
-                {
-                    ax_lane_width += 9;
-                }
 
                 if ( l_sub_speed_type < OC_25G_VIO_PT_9V)
                 {
                     l_total_half_wght = link_powers[l_sub_speed_type].half_weight;
-
                     l_total_qtr_wght = link_powers[l_sub_speed_type].qtr_weight;
-
-                    g_io_iohs_ax_cntrlr_link |= BIT64(iohs_pos + x);
-
-                    g_link_data[iohs_pos + x + OPT0_AX0].sub_type = htobe32(l_sub_speed_type);
-
-                    if ( ax_lane_width == 9)
-                    {
-                        ax_prev_cnt = iohs_pos + x + OPT0_AX0;
-                        g_link_data[iohs_pos + x + OPT0_AX0].base_power_mw = htobe32(
-                                    link_powers[l_sub_speed_type].power_mw[HALF]);
-                    }
-                    else
-                    {
-                        g_link_data[ax_prev_cnt].base_power_mw = htobe32(
-                                    link_powers[l_sub_speed_type].power_mw[FULL] >> 1);
-                        g_link_data[iohs_pos + x + OPT0_AX0].base_power_mw = htobe32(
-                                    link_powers[l_sub_speed_type].power_mw[FULL] >> 1);
-                    }
-
-                    FAPI_INF("AX0 g_link_data[%d] = %08x", iohs_pos + OPT0_AX0, htobe32(g_link_data[iohs_pos + OPT0_AX0].base_power_mw));
-
-
                 }
                 else
                 {
@@ -870,32 +1060,7 @@ fapi2::ReturnCode iohs_iodlr_static_config(
                     }
 
                     l_total_half_wght = link_powers[l_sub_speed_type].half_weight;
-
                     l_total_qtr_wght = link_powers[l_sub_speed_type].qtr_weight;
-
-                    if ( l_iohs_unit_pos != 1 && l_iohs_unit_pos != 2)
-                    {
-                        g_io_iohs_oc_cntrlr_link |= BIT64((iohs_pos) + x);
-                    }
-
-                    uint8_t index = iohs_pos;
-                    g_link_data[index + x + OPT0_O0].sub_type = htobe32(l_sub_speed_type);
-
-                    if (ax_lane_width == 9)
-                    {
-                        ax_prev_cnt = index + x + OPT0_O0;
-                        g_link_data[index + x + OPT0_O0].base_power_mw =
-                            htobe32(link_powers[l_sub_speed_type].power_mw[HALF]);
-                    }
-                    else
-                    {
-                        g_link_data[ax_prev_cnt].base_power_mw =
-                            htobe32(link_powers[l_sub_speed_type].power_mw[FULL] >> 1);
-                        g_link_data[index + x + OPT0_O0].base_power_mw =
-                            htobe32(link_powers[l_sub_speed_type].power_mw[FULL] >> 1);
-                    }
-
-                    FAPI_INF("OC0 g_link_data[%d] = %08x", index + OPT0_O0, htobe32(g_link_data[index + OPT0_O0].base_power_mw));
                 }
 
                 l_data64.insertFromRight(l_total_half_wght, DIV2_WEIGHT_BIT, DIV2_WEIGHT_BIT_LEN);
@@ -907,8 +1072,11 @@ fapi2::ReturnCode iohs_iodlr_static_config(
 
         } //end of iohs target
 
-        FAPI_INF("g_io_iohs_ax_cntrlr_link %08x", g_io_iohs_ax_cntrlr_link >> 32);
-        FAPI_INF("g_io_iohs_oc_cntrlr_link %08x", g_io_iohs_oc_cntrlr_link >> 32);
+
+        FAPI_INF("g_io_iohs_ax_active_link %08x", g_io_iohs_ax_active_link >> 32);
+        FAPI_INF("g_io_iohs_ax_disable_link %08x", g_io_iohs_ax_disable_link >> 32);
+        FAPI_INF("g_io_iohs_oc_active_link %08x", g_io_iohs_oc_active_link >> 32);
+        FAPI_INF("g_io_iohs_oc_disable_link %08x", g_io_iohs_oc_disable_link >> 32);
     }
     while(0);
 
@@ -981,6 +1149,8 @@ fapi2::ReturnCode omi_iodlr_static_config(
             }
         }
 
+        g_io_omi_sub_type = l_sub_speed_type;
+
         for (const auto l_omic_target :
              i_target.getChildren<fapi2::TARGET_TYPE_OMIC>(fapi2::TARGET_STATE_FUNCTIONAL))
         {
@@ -1025,6 +1195,9 @@ fapi2::ReturnCode omi_iodlr_static_config(
                 //link type and populate bits
                 if (!l_data64.getBit<DL_ENABLE_BIT>())
                 {
+                    g_io_omi_disable_link |= BIT64(l_omi_pos);
+                    g_link_data[l_omi_pos + MC00_OMI0].sub_type = htobe32(l_sub_speed_type);
+                    g_link_data[l_omi_pos + MC00_OMI0].base_power_mw += htobe32(link_powers[l_sub_speed_type].power_mw[DISABLED] >> 1);
                     FAPI_TRY(putScom(l_omic_target, apcr_address, l_data64));
                     continue;
                 }
@@ -1041,7 +1214,7 @@ fapi2::ReturnCode omi_iodlr_static_config(
                 FAPI_TRY(putScom(l_omic_target, apcr_address, l_data64));
 
                 //link power is enabled
-                g_io_omi_cntrlr_link |= BIT64(l_omi_pos);
+                g_io_omi_active_link |= BIT64(l_omi_pos);
                 g_link_data[l_omi_pos + MC00_OMI0].sub_type = htobe32(l_sub_speed_type);
 
                 if ( omi_lane_width == 8)
@@ -1060,7 +1233,8 @@ fapi2::ReturnCode omi_iodlr_static_config(
             }
         }//end of omic
 
-        FAPI_INF("g_io_omi_cntrlr_link %08x", g_io_omi_cntrlr_link >> 32);
+        FAPI_INF("g_io_omi_active_link %08x", g_io_omi_active_link >> 32);
+        FAPI_INF("g_io_omi_disable_link %08x", g_io_omi_disable_link >> 32);
 
     }
     while(0);
@@ -1087,21 +1261,14 @@ fapi2::ReturnCode iodlr_pgated_validation(
     fapi2::ATTR_FREQ_OMI_MHZ_Type l_omi_freq;
     uint32_t l_attr_vio_boot_vlt = 1000;
     uint8_t l_mc_unit_pos = 0;
-    uint8_t l_pau_unit_pos = 0;
-    uint8_t l_pec_unit_pos = 0;
-    uint8_t l_phb_unit_pos = 0;
+//    uint8_t l_pau_unit_pos = 0;
     uint8_t l_iohs_unit_pos = 0;
-    uint8_t l_omi_unit_pos = 0;
+    uint8_t l_pec_unit_pos = 0;
     uint32_t l_ocb_length_act = 0;
-    uint32_t l_speed = 0;
-    uint16_t l_pau_cntrlr = 0;
-    uint16_t l_pwr_gated_cntrlrs = 0;
-    uint16_t l_mc_cntrlr = 0;
-    uint16_t l_pec_cntrlr = 0;
-    io_sub_type_speed_t l_sub_speed_type = NUM_OF_IO_TYPES_SPEED;
 
     do
     {
+
         memset(&l_static_data, 0, sizeof(l_static_data));
 
         FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_VIO_SET_POINT_MV,
@@ -1132,8 +1299,8 @@ fapi2::ReturnCode iodlr_pgated_validation(
 
         l_static_data.io_magic = htobe32(0x53540000);
         l_static_data.io_disable_links = 0;
-        l_static_data.io_disable_links = (l_gnd_links & ~(g_io_omi_cntrlr_link | (g_io_pci_cntrlr_link >> 16)
-                                          | (g_io_iohs_ax_cntrlr_link >> 22 ) | (g_io_iohs_oc_cntrlr_link >> 38)));
+        l_static_data.io_disable_links = (g_io_omi_disable_link | (g_io_pci_disable_link >> 16)
+                                          | (g_io_iohs_ax_disable_link >> 22 ) | (g_io_iohs_oc_disable_link >> 38));
 
         FAPI_INF("l_static_data.io_disable_links %08x %08x", l_static_data.io_disable_links >> 32,
                  l_static_data.io_disable_links);
@@ -1142,8 +1309,8 @@ fapi2::ReturnCode iodlr_pgated_validation(
 
         l_static_data.io_active_links = 0;
 
-        l_static_data.io_active_links = (g_io_omi_cntrlr_link | (g_io_pci_cntrlr_link >> 16)
-                                         | (g_io_iohs_ax_cntrlr_link >> 22 ) | (g_io_iohs_oc_cntrlr_link >> 38));
+        l_static_data.io_active_links = (g_io_omi_active_link | (g_io_pci_active_link >> 16)
+                                         | (g_io_iohs_ax_active_link >> 22 ) | (g_io_iohs_oc_active_link >> 38));
 
         FAPI_INF("l_static_data.io_active_links %08x %08x", l_static_data.io_active_links >> 32,
                  l_static_data.io_active_links);
@@ -1154,153 +1321,28 @@ fapi2::ReturnCode iodlr_pgated_validation(
         //Read the CPLT_CTRL5 register to check the power gated bitstate
         FAPI_TRY(getScom(i_target, TP_TPCHIP_TPC_CPLT_CTRL5_RW, l_cplt_cntl5));
 
-        for (const auto l_pau_target :
-             i_target.getChildren<fapi2::TARGET_TYPE_PAU>(fapi2::TARGET_STATE_PRESENT))
+        for (const auto l_iohs_target :
+             i_target.getChildren<fapi2::TARGET_TYPE_IOHS>(fapi2::TARGET_STATE_PRESENT))
         {
             FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
-                                    l_pau_target,
-                                    l_pau_unit_pos),
+                                    l_iohs_target,
+                                    l_iohs_unit_pos),
                       "Error getting fapi2::ATTR_CHIP_UNIT_POS");
+            FAPI_INF("IOHS POS PRESENT and FUNCTIONAL %d %d", l_iohs_unit_pos, l_iohs_target.isFunctional());
 
-            if(l_cplt_cntl5.getBit(l_pau_unit_pos + 8) )
+            if ( l_iohs_target.isFunctional())
             {
-                l_pau_cntrlr = BIT16(l_pau_unit_pos + PAU0);
-            }
-
-            if (l_gnd_cntrlr & l_pau_cntrlr)
-            {
-                FAPI_ERR("PAU %d grounded controller and Pgated bit is set which is invalid", l_pau_unit_pos);
                 continue;
             }
 
-            l_pwr_gated_cntrlrs = (~l_gnd_cntrlr & ~l_pau_cntrlr);
+            l_static_data.io_pwr_gated_cntrlrs |= BIT32(l_iohs_unit_pos + PAU0);
+            g_cntrlr_data[l_iohs_unit_pos + PAU0].sub_type = htobe32(g_io_iohs_sub_type);
+            g_cntrlr_data[l_iohs_unit_pos + PAU0].base_power_mw = htobe32(link_powers[g_io_iohs_sub_type].power_mw[PGATED]);
 
-            if (l_pwr_gated_cntrlrs & BIT16(l_pau_unit_pos + PAU0))
-            {
-                l_static_data.io_pwr_gated_cntrlrs |= BIT32(l_pau_unit_pos + PAU0);
-                FAPI_INF("PAU controller %d is power gated", l_pau_unit_pos);
-            }
-            else
-            {
-                FAPI_INF("PAU controller %d NOT power gated", l_pau_unit_pos);
-                continue; //not power gated
-            }
 
-            //Bits defined in gnd_cntrlr
-            //05  PAU0
-            //06  Reserved
-            //07  Reserved
-            //08  PAU3
-            //09  PAU4
-            //10  PAU5
-            //11  PAU6
-            //12  PAU7
-
-            fapi2::ATTR_IOHS_CONFIG_MODE_Type l_iohs_config;
-            fapi2::ATTR_FREQ_IOHS_LINK_MHZ_Type l_iohs_freq;
-            auto l_pauc_target = l_pau_target.getParent<fapi2::TARGET_TYPE_PAUC>();
-
-            for (const auto l_iohs_target : l_pauc_target.getChildren<fapi2::TARGET_TYPE_IOHS>(fapi2::TARGET_STATE_PRESENT))
-            {
-                FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IOHS_CONFIG_MODE,
-                                        l_iohs_target,
-                                        l_iohs_config),
-                          "Error getting ATTR_IOHS_CONFIG_MODE");
-
-                FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_FREQ_IOHS_LINK_MHZ,
-                                        l_iohs_target,
-                                        l_iohs_freq),
-                          "Error getting ATTR_FREQ_IOHS_LINK_MHZ");
-
-                FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
-                                        l_iohs_target,
-                                        l_iohs_unit_pos),
-                          "Error getting fapi2::ATTR_CHIP_UNIT_POS");
-
-                uint8_t iohs_pos = l_iohs_unit_pos * 2;
-
-                if (l_iohs_freq > 25781 && l_iohs_freq < 32000)
-                {
-                    l_speed = 3; //A/X Bus 25G
-                }
-                else
-                {
-                    l_speed = 4; //A/X Bus 32G
-                }
-
-                if (l_iohs_config == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPX ||
-                    l_iohs_config == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPA)
-                {
-                    l_sub_speed_type = (l_speed == 3 && l_attr_vio_boot_vlt >= 1000) ? AX_25G_VIO_1V : AX_25G_VIO_PT_9V;
-
-                    if (l_speed == 4)
-                    {
-                        l_sub_speed_type = l_attr_vio_boot_vlt >= 1000 ? AX_32G_VIO_1V : AX_32G_VIO_PT_9V;
-                    }
-
-                    g_link_data[iohs_pos + OPT0_AX0].sub_type = htobe32(l_sub_speed_type);
-                    g_link_data[iohs_pos + OPT0_AX0].base_power_mw += htobe32(
-                                link_powers[l_sub_speed_type].power_mw[DISABLED] >> 1);
-
-                    g_link_data[iohs_pos + 1 + OPT0_AX0].sub_type = htobe32(l_sub_speed_type);
-                    g_link_data[iohs_pos + 1 + OPT0_AX0].base_power_mw +=
-                        htobe32(link_powers[l_sub_speed_type].power_mw[DISABLED] >> 1);
-                }
-                else
-                {
-                    if (l_iohs_unit_pos == 1 ||
-                        l_iohs_unit_pos == 2)
-                    {
-                        FAPI_INF("Skip as we are in OC configuration %d", iohs_pos);
-                        continue;
-                    }
-
-                    l_speed += 2; //OC 5:25G, 6:32G
-                    l_sub_speed_type = (l_speed == 5 && l_attr_vio_boot_vlt >= 1000) ? OC_25G_VIO_1V : OC_25G_VIO_PT_9V;
-
-                    if (l_speed == 6)
-                    {
-                        l_sub_speed_type = l_attr_vio_boot_vlt >= 1000 ? OC_32G_VIO_1V : OC_32G_VIO_PT_9V;
-                    }
-
-                    g_link_data[iohs_pos + OPT0_O0].sub_type = htobe32(l_sub_speed_type);
-                    g_link_data[iohs_pos + OPT0_O0].base_power_mw += htobe32(link_powers[l_sub_speed_type].power_mw[DISABLED] >> 1);
-
-                    g_link_data[iohs_pos + 1 + OPT0_O0].sub_type = htobe32(l_sub_speed_type);
-                    g_link_data[iohs_pos + 1 + OPT0_O0].base_power_mw += htobe32(link_powers[l_sub_speed_type].power_mw[DISABLED] >> 1);
-                }
-
-            }
-
-            if ( l_sub_speed_type != NUM_OF_IO_TYPES_SPEED)
-            {
-                g_cntrlr_data[l_pau_unit_pos + PAU0].sub_type = htobe32(l_sub_speed_type);
-                g_cntrlr_data[l_pau_unit_pos + PAU0].base_power_mw = htobe32(link_powers[l_sub_speed_type].power_mw[PGATED]);
-            }
-        }//end of PAU
-
-        FAPI_INF("PAU l_static_data.io_pwr_gated_cntrlrs %08x ", l_static_data.io_pwr_gated_cntrlrs);
-
-        //Find speed type for OMI
-
-        if (l_omi_freq < 25600)
-        {
-            l_sub_speed_type = OMI_25G_VIO_PT_9V;
-
-            if (l_attr_vio_boot_vlt >= 1000)
-            {
-                l_sub_speed_type = OMI_25G_VIO_1V;
-            }
         }
-        else
-        {
-            l_sub_speed_type = OMI_32G_VIO_PT_9V;
 
-            if (l_attr_vio_boot_vlt >= 1000)
-            {
-                l_sub_speed_type = OMI_32G_VIO_1V;
-            }
-        }
+        FAPI_INF("AXON l_static_data.io_pwr_gated_cntrlrs %08x ", l_static_data.io_pwr_gated_cntrlrs);
 
         //Pgated calculation
         for (const auto l_mc_target :
@@ -1311,59 +1353,52 @@ fapi2::ReturnCode iodlr_pgated_validation(
                                     l_mc_unit_pos),
                       "Error getting fapi2::ATTR_CHIP_UNIT_POS");
 
-            if(l_cplt_cntl5.getBit(7 - l_mc_unit_pos))
-            {
-                l_mc_cntrlr = BIT16(l_mc_unit_pos + EMO01);
-            }
+            FAPI_INF("MC controller %d is PRESENT functional %d", l_mc_unit_pos, l_mc_target.isFunctional());
 
-            if (l_gnd_cntrlr & l_mc_cntrlr)
+            if(l_cplt_cntl5.getBit(7 - l_mc_unit_pos) && l_mc_target.isFunctional())
             {
-                FAPI_ERR("MC %d grounded controller and Pgated bit is set which is invalid", l_mc_unit_pos);
-                continue;
-            }
+                FAPI_INF("MC controller %d NOT power gated ", l_mc_unit_pos);
 
-            l_pwr_gated_cntrlrs = (~l_gnd_cntrlr & ~l_mc_cntrlr);
+                for (const auto l_omic_target :
+                     l_mc_target.getChildren<fapi2::TARGET_TYPE_OMIC>(fapi2::TARGET_STATE_PRESENT))
+                {
+                    uint8_t l_omic_pos = 0;
 
-            if (l_pwr_gated_cntrlrs & BIT16(l_mc_unit_pos + EMO01))
-            {
-                l_static_data.io_pwr_gated_cntrlrs |= BIT32(l_mc_unit_pos + EMO01);
-                FAPI_INF("MC controller %d is power gated", l_mc_unit_pos);
-            }
-            else
-            {
-                FAPI_INF("MC controller %d NOT power gated", l_mc_unit_pos);
+                    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
+                                           l_omic_target,
+                                           l_omic_pos),
+                             "fapiGetAttribute of ATTR_CHIP_UNIT_POS failed");
+
+                    if ( l_omic_target.isFunctional())
+                    {
+                        FAPI_INF("OMIC controller %d is functional ", l_omic_pos);
+                        continue;
+                    }
+                    else
+                    {
+                        l_static_data.io_pwr_gated_cntrlrs |= BIT32(l_mc_unit_pos + EMO01);
+                        l_static_data.io_pwr_gated_cntrlrs |= BIT32(l_omic_pos + OMIC0);
+                        g_cntrlr_data[l_mc_unit_pos + EMO01].sub_type = htobe32(g_io_omi_sub_type);
+                        g_cntrlr_data[l_mc_unit_pos + EMO01].base_power_mw += htobe32(link_powers[g_io_omi_sub_type].power_mw[PGATED]);
+                        FAPI_INF("OMIC controller %d is not functional ", l_omic_pos);
+                    }
+                }
+
                 continue; //not power gated
             }
 
-            //Bits defined in gnd_cntrlr
-            //01  EMO01
-            //02  EMO23
-            //03  EMO45
-            //04  EMO67
+            l_static_data.io_pwr_gated_cntrlrs |= BIT32(l_mc_unit_pos + EMO01);
+            FAPI_INF("MC controller %d is power gated ", l_mc_unit_pos);
 
-            g_cntrlr_data[l_mc_unit_pos + EMO01].sub_type = htobe32(l_sub_speed_type);
-            g_cntrlr_data[l_mc_unit_pos + EMO01].base_power_mw = htobe32(link_powers[l_sub_speed_type].power_mw[PGATED]);
+            g_cntrlr_data[l_mc_unit_pos + EMO01].sub_type = htobe32(g_io_omi_sub_type);
+            g_cntrlr_data[l_mc_unit_pos + EMO01].base_power_mw = htobe32(link_powers[g_io_omi_sub_type].power_mw[PGATED] * 2);
 
-            for (const auto l_omi_target : l_mc_target.getChildren<fapi2::TARGET_TYPE_OMI>(fapi2::TARGET_STATE_PRESENT))
-            {
-
-                FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
-                                        l_omi_target,
-                                        l_omi_unit_pos),
-                          "Error getting fapi2::ATTR_CHIP_UNIT_POS");
-                FAPI_IMP("MC position %d %d", l_mc_unit_pos, l_omi_unit_pos);
-                g_link_data[l_omi_unit_pos + MC00_OMI0].sub_type = htobe32(l_sub_speed_type);
-                g_link_data[l_omi_unit_pos + MC00_OMI0].base_power_mw += htobe32(link_powers[l_sub_speed_type].power_mw[DISABLED] >> 1);
-            }
         }//end of MC
 
         FAPI_INF("MC l_static_data.io_pwr_gated_cntrlrs %08x ", l_static_data.io_pwr_gated_cntrlrs);
 
         for (auto l_pec_target : i_target.getChildren<fapi2::TARGET_TYPE_PEC>(fapi2::TARGET_STATE_PRESENT))
         {
-            //Bits defined in gnd_cntrlr
-            //13  PEC0
-            //14  PEC0
             FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
                                     l_pec_target,
                                     l_pec_unit_pos),
@@ -1372,43 +1407,39 @@ fapi2::ReturnCode iodlr_pgated_validation(
 
             if(l_cplt_cntl5.getBit(17 - l_pec_unit_pos))
             {
-                l_pec_cntrlr = BIT16(l_pec_unit_pos + PEC0);
-            }
+                for (const auto l_phb_target : l_pec_target.getChildren<fapi2::TARGET_TYPE_PHB>(fapi2::TARGET_STATE_PRESENT))
+                {
+                    uint8_t l_phb_unit_pos = 0;
+                    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
+                                            l_phb_target,
+                                            l_phb_unit_pos),
+                              "Error getting fapi2::ATTR_CHIP_UNIT_POS");
 
-            if (l_gnd_cntrlr & l_pec_cntrlr)
-            {
-                FAPI_ERR("PEC %d grounded controller and Pgated bit is set which is invalid", l_pec_unit_pos);
-                continue;
-            }
 
-            l_pwr_gated_cntrlrs = (~l_gnd_cntrlr & ~l_pec_cntrlr);
+                    if (l_phb_target.isFunctional())
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        FAPI_INF("PHB unit is not functional %d of PEC %d", l_phb_unit_pos, l_pec_unit_pos);
+                        l_static_data.io_pwr_gated_cntrlrs |= BIT32(l_pec_unit_pos + PEC0);
+                        l_static_data.io_pwr_gated_cntrlrs |= BIT32(l_phb_unit_pos + PHB0);
+                        g_cntrlr_data[l_pec_unit_pos + PEC0].sub_type = htobe32(G4_32G_VIO_1V);
+                        g_cntrlr_data[l_pec_unit_pos + PEC0].base_power_mw += htobe32(link_powers[G4_32G_VIO_1V].power_mw[PGATED]);
+                    }
+                }
 
-            if (l_pwr_gated_cntrlrs & BIT16(l_pec_unit_pos + PEC0))
-            {
-                l_static_data.io_pwr_gated_cntrlrs |= BIT32(l_pec_unit_pos + PEC0);
-                FAPI_INF("PEC controller %d is power gated", l_pec_unit_pos);
-            }
-            else
-            {
                 FAPI_INF("PEC controller %d NOT power gated", l_pec_unit_pos);
                 continue; //not power gated
             }
 
+
+            l_static_data.io_pwr_gated_cntrlrs |= BIT32(l_pec_unit_pos + PEC0);
+            FAPI_INF("PEC controller %d is power gated", l_pec_unit_pos);
+
             g_cntrlr_data[l_pec_unit_pos + PEC0].sub_type = htobe32(G4_32G_VIO_1V);
-            g_cntrlr_data[l_pec_unit_pos + PEC0].base_power_mw = htobe32(link_powers[G4_32G_VIO_1V].power_mw[PGATED]);
-
-            for (const auto l_phb_target : l_pec_target.getChildren<fapi2::TARGET_TYPE_PHB>(fapi2::TARGET_STATE_PRESENT))
-            {
-                FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
-                                        l_phb_target,
-                                        l_phb_unit_pos),
-                          "Error getting fapi2::ATTR_CHIP_UNIT_POS");
-
-
-                g_link_data[l_phb_unit_pos + PCI0_0].sub_type = htobe32(G4_32G_VIO_1V);
-                g_link_data[l_phb_unit_pos + PCI0_0].base_power_mw += htobe32(link_powers[G4_32G_VIO_1V].power_mw[DISABLED]);
-            }
-
+            g_cntrlr_data[l_pec_unit_pos + PEC0].base_power_mw = htobe32(link_powers[G4_32G_VIO_1V].power_mw[PGATED] * 3);
         } //end of PEC
 
         FAPI_INF("PEC l_static_data.io_pwr_gated_cntrlrs %08x ", l_static_data.io_pwr_gated_cntrlrs);
