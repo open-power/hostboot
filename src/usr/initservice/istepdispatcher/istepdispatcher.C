@@ -495,7 +495,7 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
 // ----------------------------------------------------------------------------
 errlHndl_t IStepDispatcher::executeAllISteps()
 {
-    errlHndl_t err = NULL;
+    errlHndl_t errhdl = NULL;
     uint32_t istep = 0;
     uint32_t substep = 0;
     bool l_doReconfig = false;
@@ -554,7 +554,12 @@ errlHndl_t IStepDispatcher::executeAllISteps()
             // Keep track of each call since the last one will not return here
             // and we need to know this at completion time in initservice.C
             INITSERVICE::start_substep_inprogress(istep, substep);
-            err = doIstep(istep, substep, l_doReconfig);
+
+            //-----------------------------------------
+            // Issue the Istep
+            errhdl = doIstep(istep, substep, l_doReconfig);
+            //-----------------------------------------
+
             INITSERVICE::stop_substep_inprogress(istep, substep);
 
             if (l_doReconfig)
@@ -594,9 +599,9 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                         TRACFCOMP(g_trac_initsvc,
                             ERR_MRK"Error from checkMinimumHardware");
 
-                        if (err == NULL)
+                        if (errhdl == NULL)
                         {
-                            err = l_errl;
+                            errhdl = l_errl;
                             l_errl = NULL;
                         }
                         else
@@ -606,22 +611,22 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                             // IStepError class; real errors detailing the
                             // failure have already been committed. Record the
                             // PLID and delete it if 'Istep failed' or
-                            // commit it otherwised. This will be replaced by
+                            // commit it otherwise. This will be replaced by
                             // the checkMinimumHardware error with the same
                             // plid that matches the real errors
-                            const uint32_t l_plid = err->plid();
-                            if (ISTEP::RC_FAILURE == err->reasonCode())
+                            const uint32_t l_plid = errhdl->plid();
+                            if (ISTEP::RC_FAILURE == errhdl->reasonCode())
                             {
-                                delete err;
-                                err = nullptr;
+                                delete errhdl;
+                                errhdl = nullptr;
                             }
                             else
                             {
-                                errlCommit(err, INITSVC_COMP_ID);
+                                errlCommit(errhdl, INITSVC_COMP_ID);
                             }
-                            err = l_errl;
+                            errhdl = l_errl;
                             l_errl = NULL;
-                            err->plid(l_plid);
+                            errhdl->plid(l_plid);
                         }
 
                         // Break out of the istep loop with the error
@@ -632,21 +637,21 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                     numReconfigs++;
                     uint32_t l_plid = 0;
 
-                    if (err)
+                    if (errhdl)
                     {
                         // The IStep returned an error, This is the generic
                         // 'IStep failed' from the IStepError class, the real
                         // errors detailing the failure have already been
-                        // committed. Record the PLID and delete it. This will
+                        // committed. Record the PLID and commit it. This will
                         // be replaced by the ReconfigLoop info error with the
                         // same plid that matches the real errors
-                        l_plid = err->plid();
+                        l_plid = errhdl->plid();
 
                         // Commit the istep log as informational since it
                         // might include some useful information
-                        err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-                        errlCommit(err, INITSVC_COMP_ID);
-                        err = NULL;
+                        errhdl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                        errlCommit(errhdl, INITSVC_COMP_ID);
+                        errhdl = NULL;
                     }
 
                     // Create a new info error stating that a reconfig loop is
@@ -667,20 +672,20 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                      *                   Looped back to an earlier istep
                      *                   (Reconfigure loop).
                      */
-                    err = new ERRORLOG::ErrlEntry(
+                    errhdl = new ERRORLOG::ErrlEntry(
                         ERRORLOG::ERRL_SEV_INFORMATIONAL,
                         ISTEP_INITSVC_MOD_ID,
                         ISTEP_RECONFIG_LOOP_ENTERED,
                         errWord,
                         numReconfigs);
-                    err->collectTrace("HWAS_I", 1024);
+                    errhdl->collectTrace("HWAS_I", 1024);
 
                     if (l_plid != 0)
                     {
                         // Use the same plid as the IStep error
-                        err->plid(l_plid);
+                        errhdl->plid(l_plid);
                     }
-                    errlCommit(err, INITSVC_COMP_ID);
+                    errlCommit(errhdl, INITSVC_COMP_ID);
                     istep = newIstep;
                     substep = newSubstep;
                     TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps: "
@@ -690,7 +695,7 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                 }
                 else
                 {
-                    if (!err)
+                    if (!errhdl)
                     {
                         // Reconfig loop required, but the istep is either outside
                         // of the reconfig loop, too many reconfigs have been
@@ -699,7 +704,7 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                         if (iv_spBaseServicesEnabled)
                         {
                             l_termToReconfig = true;
-                            err = failedDueToDeconfig(istep, substep,
+                            errhdl = failedDueToDeconfig(istep, substep,
                                                       newIstep, newSubstep);
                         }
                         else if (!l_manufacturingMode)
@@ -729,16 +734,16 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                                 uint16_t l_count = 0;
                                 SENSOR::RebootCountSensor l_sensor;
                                 // Read reboot count sensor
-                                err = l_sensor.getRebootCount(l_count);
-                                if (err)
+                                errhdl = l_sensor.getRebootCount(l_count);
+                                if (errhdl)
                                 {
                                     TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps: getRebootCount failed");
                                     break;
                                 }
                                 // Increment reboot count
                                 l_count++;
-                                err = l_sensor.setRebootCount(l_count);
-                                if (err)
+                                errhdl = l_sensor.setRebootCount(l_count);
+                                if (errhdl)
                                 {
                                     TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps: setRebootCount failed");
                                     break;
@@ -813,7 +818,7 @@ errlHndl_t IStepDispatcher::executeAllISteps()
             }
 #endif
 
-            if (err)
+            if (errhdl)
             {
                 TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps: "
                           "IStep Error on %d:%d", istep, substep);
@@ -835,16 +840,16 @@ errlHndl_t IStepDispatcher::executeAllISteps()
             substep++;
         }
 
-        if (err)
+        if (errhdl)
         {
             // If we are terminating the IPL to force a reconfig loop on the
             //  FSP then leave the severity alone
             if( !l_termToReconfig )
             {
                 // Ensure severity reflects IPL will be terminated
-                if (err->sev() != ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM)
+                if (errhdl->sev() != ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM)
                 {
-                    err->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                    errhdl->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
                 }
             }
             break;
@@ -859,7 +864,7 @@ errlHndl_t IStepDispatcher::executeAllISteps()
 
     TRACFCOMP(g_trac_initsvc, EXIT_MRK"IStepDispatcher::executeAllISteps()");
 
-    return err;
+    return errhdl;
 }
 
 
@@ -1041,7 +1046,14 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
 
 #endif
 
+        //---------------------------------------------------------
+        // Run the Istep
         err = InitService::getTheInstance().executeFn(theStep, NULL);
+        if( err )
+        {
+            TRACFCOMP(g_trac_initsvc,"Error returned from istep : %.8X=%.4X",
+                      err->eid(), err->reasonCode());
+        }
 
         //  flush contTrace immediately after each i_istep/substep  returns
         TRAC_FLUSH_BUFFERS();

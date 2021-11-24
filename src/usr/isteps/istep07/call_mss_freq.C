@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -109,7 +109,7 @@ void*    call_mss_freq( void *io_pArgs )
             }
         }
 
-        if(l_StepError.getErrorHandle() != nullptr)
+        if(!l_StepError.isNull())
         {
             // If we have encountered an error, bail out now
             break;
@@ -150,7 +150,7 @@ void*    call_mss_freq( void *io_pArgs )
             }
         }
 
-        if(l_StepError.getErrorHandle() != nullptr)
+        if(!l_StepError.isNull())
         {
             // If we have encountered an error, bail out now
             break;

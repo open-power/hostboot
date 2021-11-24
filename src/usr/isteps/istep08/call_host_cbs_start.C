@@ -167,7 +167,7 @@ void* call_host_cbs_start(void *io_pArgs)
     }
 
     // For recovery, attempt to unlock all slave processor SPI engines
-    if (l_stepError.getErrorHandle() != nullptr)
+    if (!l_stepError.isNull())
     {
         // loop thru all processors, only call procedure on non-master processors
         for (const auto & l_cpu_target: l_cpuTargetList)

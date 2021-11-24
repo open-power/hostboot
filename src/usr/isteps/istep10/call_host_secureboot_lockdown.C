@@ -900,7 +900,7 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
         } // end of SECUREBOOT::enabled() check
 #endif
     } // end of loop on procs
-    if(l_istepError.getErrorHandle())
+    if(!l_istepError.isNull())
     {
         break;
     }
