@@ -500,6 +500,7 @@ static void initializeAttributes(TargetService& i_targetService,
             //Clear out some attributes that could have stale data
             l_pTopLevel->setAttr<ATTR_HB_RSV_MEM_NEXT_SECTION>(0);
             l_pTopLevel->setAttr<ATTR_ATTN_CHK_ALL_PROCS>(1);
+            l_pTopLevel->setAttr<ATTR_HALT_ON_BMC_PLDM_RESET>(0);
 
             //Clear out PM MALF and FFDC enabled attributes
             l_pTopLevel->setAttr<ATTR_PM_MALF_ALERT_ENABLE> (0x0);

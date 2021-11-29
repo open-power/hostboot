@@ -471,6 +471,30 @@
   </attribute>
 
   <attribute>
+    <id>HALT_ON_BMC_PLDM_RESET</id>
+    <description>
+        A flag to be set when HB starts an exchange with the PLDM such that a
+        reset on the PLDM daemon would be disruptive to HB and its operations.
+            0x00 = false(default); HB has *not* started a critical PLDM exchange with the BMC
+            0x01 = true; HB has started a critical PLDM exchange with the BMC
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0x00</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <range>
+      <min>0</min>
+      <max>1</max>
+    </range>
+    <no_export/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
     <description>Indicates the MCTP EID of HBRT</description>
     <id>HBRT_EID</id>
     <persistency>volatile</persistency>

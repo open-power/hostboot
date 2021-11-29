@@ -282,6 +282,12 @@ static errlHndl_t fetch_remote_pdrs()
 
     do
     {
+        // Starting the PDR exchange, ergo, set the flag stating that HB is starting
+        // a critical PLDM exchange with the BMC.
+        const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
+        const bool l_criticalExchangeCommencing = true;
+        sys->setAttr<TARGETING::ATTR_HALT_ON_BMC_PLDM_RESET>(l_criticalExchangeCommencing);
+
         PLDM::thePdrManager().resetPdrs();
 
         /* Get the BMC's PDRs. */

@@ -341,6 +341,9 @@
       <id>FORCE_SBE_UPDATE</id>
     </attribute>
     <attribute>
+      <id>HALT_ON_BMC_PLDM_RESET</id>
+    </attribute>
+    <attribute>
       <id>HBRT_EID</id>
     </attribute>
     <attribute>

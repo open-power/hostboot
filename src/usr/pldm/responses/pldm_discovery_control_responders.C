@@ -33,6 +33,9 @@
 #include <pldm/pldm_trace.H>    // PLDM_INF
 #include <libpldm/base.h>       // PLDM_ERROR_UNSUPPORTED_PLDM_CMD
 #include <pldm/pldm_response.H> // send_cc_only_response
+#include <sys/misc.h>           // SHUTDOWN_STATUS_PLDM_RESET_DETECTED
+#include <initservice/initserviceif.H> // INITSERVICE::doShutdown
+#include <targeting/common/targetservice.H> // TARGETING::UTIL::assertGetToplevelTarget
 
 namespace PLDM
 {
@@ -50,6 +53,24 @@ errlHndl_t handleGetPldmVersionRequest(const msg_q_t i_msgQ,
     // to indicate that the PLDM daemon has been restarted therefore
     // sending back 'unsupported'.
     send_cc_only_response(i_msgQ, i_msg, PLDM_ERROR_UNSUPPORTED_PLDM_CMD);
+
+#ifndef __HOSTBOOT_RUNTIME
+    // Determine if HB has started a critical PLDM exchange with the BMC. If so then
+    // receiving this message can be disruptive to HB and is cause for HB to shut down.
+    const auto l_criticalExchangeCommencing = TARGETING::UTIL::assertGetToplevelTarget()->
+         getAttr<TARGETING::ATTR_HALT_ON_BMC_PLDM_RESET>();
+    if ( l_criticalExchangeCommencing )
+    {
+        // Receiving a getPLDMVersion request is indicative of the PLDM daemon being
+        // restarted/reloaded which will reset the HB PLDM sequencing *after* a
+        // critical PLDM exchange with the BMC has started (an example of a
+        // critical exchange is the exchange of the PDRs).
+        // Resetting the sequencing will cause issues for HB which are hard to
+        // recover from, so instead of attempting recovery, HB will shut down.
+        bool l_runInBackground(true);
+        INITSERVICE::doShutdown(SHUTDOWN_STATUS_PLDM_RESET_DETECTED, l_runInBackground);
+    }
+#endif
 
     return l_err;
 }
