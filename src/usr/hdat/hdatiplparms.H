@@ -309,7 +309,7 @@ const hdatIplpFeatureFlagSetting_t hdatIplpFeatureFlagSettingsArray[NUM_RISK_LEV
 {"fw-count-cache-disabled",                         0x0000000000000000},
 {"fw-count-cache-flush-bcctr2,0,0",                 0x8000000000000000},
 {"fw-link-stack-disabled",                          0x0000000000000000},
-{"fw-link-stack-flush-bcctr2,0,0",                  0x8000000000000000},
+{"fw-link-stack-flush-bcctr2,0,0",                  0x0000000000000000},
 {"speculation-policy-favor-security",               0x8000000000000000},
 {"user-mode-branch-speculation",                    0x0000000000000000},
 {"needs-l1d-flush-msr-hv-1-to-0",                   0x0000000000000000},
