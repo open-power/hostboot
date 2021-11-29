@@ -3598,4 +3598,16 @@
     <platInit/>
   </attribute>
   <!-- *********************************************************************-->
+  <attribute>
+    <id>ATTR_DVFS_ADJUSTMENT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>This is placeholder attribute that is plumbed into the Global Pstate Parameter Block
+    for future use.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <initToZero/>
+    <overrideOnly/>
+  </attribute>
+  <!-- *********************************************************************-->
 </attributes>
