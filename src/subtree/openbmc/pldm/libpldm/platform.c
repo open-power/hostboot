@@ -165,8 +165,7 @@ int encode_set_state_effecter_states_req(uint8_t instance_id,
 					 uint16_t effecter_id,
 					 uint8_t comp_effecter_count,
 					 set_effecter_state_field *field,
-					 struct pldm_msg *msg,
-                                         size_t payload_length)
+					 struct pldm_msg *msg)
 {
 	if (msg == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
@@ -175,10 +174,6 @@ int encode_set_state_effecter_states_req(uint8_t instance_id,
 	if (comp_effecter_count < 0x1 || comp_effecter_count > 0x8 ||
 	    field == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
-	}
-
-	if (payload_length < PLDM_SET_STATE_EFFECTER_STATES_REQ_BYTES ) {
-		return PLDM_ERROR_INVALID_LENGTH;
 	}
 
 	struct pldm_header_info header = {0};
@@ -314,6 +309,52 @@ int encode_get_pdr_resp(uint8_t instance_id, uint8_t completion_code,
 			    (sizeof(struct pldm_get_pdr_resp) - 1) + resp_cnt;
 			*dst = transfer_crc;
 		}
+	}
+
+	return PLDM_SUCCESS;
+}
+
+int encode_get_pdr_repository_info_resp(
+    uint8_t instance_id, uint8_t completion_code, uint8_t repository_state,
+    const uint8_t *update_time, const uint8_t *oem_update_time,
+    uint32_t record_count, uint32_t repository_size,
+    uint32_t largest_record_size, uint8_t data_transfer_handle_timeout,
+    struct pldm_msg *msg)
+{
+	if (msg == NULL) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	struct pldm_header_info header = {0};
+	header.msg_type = PLDM_RESPONSE;
+	header.instance = instance_id;
+	header.pldm_type = PLDM_PLATFORM;
+	header.command = PLDM_GET_PDR_REPOSITORY_INFO;
+
+	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
+	if (rc != PLDM_SUCCESS) {
+		return rc;
+	}
+
+	struct pldm_pdr_repository_info_resp *response =
+	    (struct pldm_pdr_repository_info_resp *)msg->payload;
+	response->completion_code = completion_code;
+
+	if (response->completion_code == PLDM_SUCCESS) {
+		response->repository_state = repository_state;
+		if (update_time != NULL) {
+			memcpy(response->update_time, update_time,
+			       PLDM_TIMESTAMP104_SIZE);
+		}
+		if (oem_update_time != NULL) {
+			memcpy(response->oem_update_time, oem_update_time,
+			       PLDM_TIMESTAMP104_SIZE);
+		}
+		response->record_count = htole32(record_count);
+		response->repository_size = htole32(repository_size);
+		response->largest_record_size = htole32(largest_record_size);
+		response->data_transfer_handle_timeout =
+		    data_transfer_handle_timeout;
 	}
 
 	return PLDM_SUCCESS;

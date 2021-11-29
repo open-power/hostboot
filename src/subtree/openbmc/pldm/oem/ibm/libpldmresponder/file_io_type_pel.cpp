@@ -115,8 +115,8 @@ int PelHandler::readIntoMemory(uint32_t offset, uint32_t& length,
     }
     catch (const std::exception& e)
     {
-        std::cerr << "GetPEL D-Bus call failed, PEL id = " << fileHandle
-                  << ", error = " << e.what() << "\n";
+        std::cerr << "GetPEL D-Bus call failed, PEL id = 0x" << std::hex
+                  << fileHandle << ", error = " << e.what() << "\n";
         return PLDM_ERROR;
     }
 
@@ -183,7 +183,8 @@ int PelHandler::read(uint32_t offset, uint32_t& length, Response& response,
     }
     catch (const std::exception& e)
     {
-        std::cerr << "GetPEL D-Bus call failed";
+        std::cerr << "GetPEL D-Bus call failed on PEL ID 0x" << std::hex
+                  << fileHandle << ", error = " << e.what() << "\n";
         return PLDM_ERROR;
     }
     return PLDM_SUCCESS;
@@ -229,7 +230,8 @@ int PelHandler::fileAck(uint8_t /*fileStatus*/)
     }
     catch (const std::exception& e)
     {
-        std::cerr << "HostAck D-Bus call failed";
+        std::cerr << "HostAck D-Bus call failed on PEL ID 0x" << std::hex
+                  << fileHandle << ", error = " << e.what() << "\n";
         return PLDM_ERROR;
     }
 

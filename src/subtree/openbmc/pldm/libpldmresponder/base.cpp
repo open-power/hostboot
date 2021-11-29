@@ -217,7 +217,7 @@ void Handler::processSetEventReceiver(
         if (rc || completionCode)
         {
             std::cerr << "Failed to decode setEventReceiver command response,"
-                      << " rc=" << rc << "cc=" << (uint8_t)completionCode
+                      << " rc=" << rc << "cc=" << (unsigned)completionCode
                       << "\n";
             pldm::utils::reportError(
                 "xyz.openbmc_project.bmc.pldm.InternalFailure");

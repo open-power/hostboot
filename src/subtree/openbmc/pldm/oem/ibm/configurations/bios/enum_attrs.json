@@ -128,6 +128,19 @@
          "displayName" : "hb-debug-console"
       },
       {
+         "attribute_name":"hb_inhibit_bmc_reset",
+         "possible_values":[
+            "NoInhibit",
+            "Inhibit"
+         ],
+         "default_values":[
+            "NoInhibit"
+         ],
+         "helpText" : "When set to Inhibit, the hypervisor shall not reset/reload the BMC at runtime.",
+         "displayName" : "hb-inhibit-bmc-reset",
+         "readOnly":true
+      },
+      {
          "attribute_name":"pvm_system_power_off_policy",
          "possible_values":[
             "Power Off",
@@ -380,7 +393,15 @@
             "Required"
          ],
          "helpText" : "When the 'TPM Required Policy' is 'Required', a functional TPM is required to boot the system",
-         "displayName" : "TPM Required Policy (pending)"
+         "displayName" : "TPM Required Policy (pending)",
+         "dbus":
+            {
+               "object_path" : "/xyz/openbmc_project/control/host0/TPMEnable",
+               "interface" : "xyz.openbmc_project.Control.TPM.Policy",
+               "property_name" : "TPMEnable",
+               "property_type" : "bool",
+               "property_values" : [true, false]
+            }
       },
       {
          "attribute_name":"hb_tpm_required_current",

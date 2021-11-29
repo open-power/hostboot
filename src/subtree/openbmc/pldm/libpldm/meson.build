@@ -30,7 +30,8 @@ if get_option('oem-ibm').enabled()
   headers += [
     '../oem/ibm/libpldm/file_io.h',
     '../oem/ibm/libpldm/host.h',
-    '../oem/ibm/libpldm/platform_oem_ibm.h'
+    '../oem/ibm/libpldm/platform_oem_ibm.h',
+    '../oem/ibm/libpldm/state_set_oem_ibm.h'
   ]
   sources += [
     '../oem/ibm/libpldm/file_io.c',

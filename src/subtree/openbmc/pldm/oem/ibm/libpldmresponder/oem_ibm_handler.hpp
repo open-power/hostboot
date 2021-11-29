@@ -1,7 +1,7 @@
 #pragma once
 #include "libpldm/entity.h"
 #include "libpldm/platform.h"
-#include "oem/ibm/libpldm/state_set.h"
+#include "oem/ibm/libpldm/state_set_oem_ibm.h"
 
 #include "inband_code_update.hpp"
 #include "libpldmresponder/oem_handler.hpp"

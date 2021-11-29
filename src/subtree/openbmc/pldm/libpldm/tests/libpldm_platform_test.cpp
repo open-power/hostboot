@@ -381,6 +381,59 @@ TEST(GetPDR, testBadDecodeResponse)
     EXPECT_EQ(rc, PLDM_ERROR_INVALID_LENGTH);
 }
 
+TEST(GetPDRRepositoryInfo, testGoodEncodeResponse)
+{
+    uint8_t completionCode = 0;
+    uint8_t repositoryState = PLDM_AVAILABLE;
+    uint8_t updateTime[PLDM_TIMESTAMP104_SIZE] = {0};
+    uint8_t oemUpdateTime[PLDM_TIMESTAMP104_SIZE] = {0};
+    uint32_t recordCount = 100;
+    uint32_t repositorySize = 100;
+    uint32_t largestRecordSize = UINT32_MAX;
+    uint8_t dataTransferHandleTimeout = PLDM_NO_TIMEOUT;
+
+    std::vector<uint8_t> responseMsg(hdrSize +
+                                     PLDM_GET_PDR_REPOSITORY_INFO_RESP_BYTES);
+    auto response = reinterpret_cast<pldm_msg*>(responseMsg.data());
+
+    auto rc = encode_get_pdr_repository_info_resp(
+        0, PLDM_SUCCESS, repositoryState, updateTime, oemUpdateTime,
+        recordCount, repositorySize, largestRecordSize,
+        dataTransferHandleTimeout, response);
+
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+    struct pldm_pdr_repository_info_resp* resp =
+        reinterpret_cast<struct pldm_pdr_repository_info_resp*>(
+            response->payload);
+
+    EXPECT_EQ(completionCode, resp->completion_code);
+    EXPECT_EQ(repositoryState, resp->repository_state);
+    EXPECT_EQ(0, memcmp(updateTime, resp->update_time, PLDM_TIMESTAMP104_SIZE));
+    EXPECT_EQ(0, memcmp(oemUpdateTime, resp->oem_update_time,
+                        PLDM_TIMESTAMP104_SIZE));
+    EXPECT_EQ(recordCount, le32toh(resp->record_count));
+    EXPECT_EQ(repositorySize, le32toh(resp->repository_size));
+    EXPECT_EQ(largestRecordSize, le32toh(resp->largest_record_size));
+    EXPECT_EQ(dataTransferHandleTimeout, resp->data_transfer_handle_timeout);
+}
+
+TEST(GetPDRRepositoryInfo, testBadEncodeResponse)
+{
+    uint8_t repositoryState = PLDM_AVAILABLE;
+    uint8_t updateTime[PLDM_TIMESTAMP104_SIZE] = {0};
+    uint8_t oemUpdateTime[PLDM_TIMESTAMP104_SIZE] = {0};
+    uint32_t recordCount = 100;
+    uint32_t repositorySize = 100;
+    uint32_t largestRecordSize = UINT32_MAX;
+    uint8_t dataTransferHandleTimeout = PLDM_NO_TIMEOUT;
+
+    auto rc = encode_get_pdr_repository_info_resp(
+        0, PLDM_SUCCESS, repositoryState, updateTime, oemUpdateTime,
+        recordCount, repositorySize, largestRecordSize,
+        dataTransferHandleTimeout, nullptr);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+}
+
 TEST(SetNumericEffecterValue, testGoodDecodeRequest)
 {
     std::array<uint8_t,

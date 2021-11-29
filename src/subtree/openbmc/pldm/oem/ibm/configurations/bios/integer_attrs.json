@@ -108,6 +108,25 @@
          "readOnly":true,
          "helpText" : "Specifies the actual maximum number of huge pages available given the current system configuration.",
          "displayName" : "Max Number Huge Pages"
+      },
+      {
+         "attribute_name" : "hb_ioadapter_enlarged_capacity",
+         "lower_bound" : 0,
+         "upper_bound" : 255,
+         "scalar_increment" : 1,
+         "default_value" : 0,
+         "helpText" : "Specifies the enlarged IO capacity, requires a reboot for a change to be applied.",
+         "displayName" : "Enlarged IO Capacity (pending)"
+      },
+      {
+         "attribute_name" : "hb_ioadapter_enlarged_capacity_current",
+         "lower_bound" : 0,
+         "upper_bound" : 255,
+         "scalar_increment" : 1,
+         "default_value" : 0,
+         "readOnly" : true,
+         "helpText" : "Specifies the enlarged IO capacity for the current IPL. Do not set this attribute directly; set hb_ioadapter_enlarged_capacity instead.",
+         "displayName" : "Enlarged IO Capacity (current)"
       }
    ]
 }

@@ -50,18 +50,6 @@ struct SensorEntry
     }
 };
 
-/* @struct TerminusLocatorInfo
- * Contains validity, eid, terminus_id and terminus handle
- * of a terminus locator PDR.
- */
-struct TlInfo
-{
-    uint8_t valid;
-    uint8_t eid;
-    uint8_t tid;
-    uint16_t terminusHandle;
-};
-
 using HostStateSensorMap = std::map<SensorEntry, pdr::SensorInfo>;
 using PDRList = std::vector<std::vector<uint8_t>>;
 
@@ -84,7 +72,9 @@ class HostPDRHandler
     HostPDRHandler& operator=(HostPDRHandler&&) = delete;
     ~HostPDRHandler() = default;
 
-    using TLPDRMap = std::map<pdr::TerminusHandle, pdr::TerminusID>;
+    using TerminusInfo =
+        std::tuple<pdr::TerminusID, pdr::EID, pdr::TerminusValidity>;
+    using TLPDRMap = std::map<pdr::TerminusHandle, TerminusInfo>;
 
     /** @brief Constructor
      *  @param[in] mctp_fd - fd of MCTP communications socket
@@ -148,11 +138,9 @@ class HostPDRHandler
      *         structure
      *
      *  @param[in] stateSensorPDRs - host state sensor PDRs
-     *  @param[in] tlpdrInfo - terminus locator PDRs info
      *
      */
-    void parseStateSensorPDRs(const PDRList& stateSensorPDRs,
-                              const TLPDRMap& tlpdrInfo);
+    void parseStateSensorPDRs(const PDRList& stateSensorPDRs);
 
     /** @brief this function sends a GetPDR request to Host firmware.
      *  And processes the PDRs based on type
@@ -168,14 +156,15 @@ class HostPDRHandler
     /** @brief set HostSensorStates when pldmd starts or restarts
      *  and updates the D-Bus property
      *  @param[in] stateSensorPDRs - host state sensor PDRs
-     *  @param[in] tlinfo - vector of struct TlInfo
      */
-    void setHostSensorState(const PDRList& stateSensorPDRs,
-                            const std::vector<TlInfo>& tlinfo);
+    void setHostSensorState(const PDRList& stateSensorPDRs);
 
     /** @brief check whether Host is running when pldmd starts
      */
     bool isHostUp();
+
+    /** @brief map that captures various terminus information **/
+    TLPDRMap tlPDRInfo;
 
   private:
     /** @brief deferred function to fetch PDR from Host, scheduled to work on

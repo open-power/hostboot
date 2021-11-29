@@ -1,4 +1,4 @@
-#include "oem/ibm/libpldm/state_set.h"
+#include "oem/ibm/libpldm/state_set_oem_ibm.h"
 
 #include "oem/ibm/libpldmresponder/oem_ibm_handler.hpp"
 
