@@ -48,6 +48,11 @@
 #include "ipvpd.H"
 #include "errlud_vpd.H"
 
+//@fixme-SW540308 - Enable visible logs for lab debug
+//Temporarily make visible logs for all failures so that we can
+//quickly find corruptions in the lab
+#define MAKE_CORRECTABLE_ECC_ERRORS_VISIBLE
+
 // ------------------------
 // Macros for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
@@ -2860,8 +2865,13 @@ IpVpdFacade::updateRecordData( errlHndl_t &io_vpdValidationError,
                    "Setting the VPD validation error to informational.",
                    i_recordName, TARGETING::get_huid(i_target) );
 
+#ifdef MAKE_CORRECTABLE_ECC_ERRORS_VISIBLE
+        io_vpdValidationError->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+#else
         // Set original error to informational, commit and return as a nullptr.
         io_vpdValidationError->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+#endif
+
         errlCommit(io_vpdValidationError, VPD_COMP_ID);
     } // if (l_writeError)
 
