@@ -35,7 +35,7 @@ OBJS += $(if $(CONFIG_SECUREBOOT),spnorrp.o)
 OBJS += $(if $(CONFIG_PNORDD_IS_SFC),pnor_sfcdd.o)
 OBJS += $(if $(CONFIG_PNORDD_IS_BMCMBOX),$(HIOMAP_DEPS))
 OBJS += $(if $(CONFIG_PNORDD_IS_IPMI),$(HIOMAP_DEPS))
-OBJS += $(if $(CONFIG_FILE_XFER_VIA_PLDM),$(PLDM_DEPS))
+OBJS += $(if $(CONFIG_PLDM),$(PLDM_DEPS))
 OBJS += pnor_common.o
 OBJS += pnorvalid.o
 OBJS += ecc.o
@@ -54,7 +54,7 @@ OBJS += $(if $(CONFIG_SFC_IS_FAKE),sfc_fake.o)
 OBJS += $(if $(CONFIG_ALLOW_MICRON_PNOR),nor_micron.o)
 
 #Extra includes
-EXTRAINCDIR += $(if $(CONFIG_FILE_XFER_VIA_PLDM),${ROOTPATH}/src/subtree/openbmc/pldm/libpldm)
+EXTRAINCDIR += $(if $(CONFIG_PLDM),${ROOTPATH}/src/subtree/openbmc/pldm/libpldm)
 
 SUBDIRS += test.d
 SUBDIRS += runtime.d
