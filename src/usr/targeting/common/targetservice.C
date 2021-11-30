@@ -251,7 +251,6 @@ void TargetService::init(const size_t i_maxNodes)
         _setProcessorModel();
     }
 
-/* TODO RTC: 205059 Enable the attr merging once all pieces are merged
 #if defined(__HOSTBOOT_MODULE) && !defined( __HOSTBOOT_RUNTIME)
     errlHndl_t l_errl = TARGETING::AttrRP::mergeAttributes();
     if(l_errl)
@@ -261,7 +260,6 @@ void TargetService::init(const size_t i_maxNodes)
         errlCommit(l_errl, TARG_COMP_ID);
     }
 #endif
-*/
 
     TARG_EXIT();
 

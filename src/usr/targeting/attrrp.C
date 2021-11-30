@@ -391,11 +391,9 @@ namespace TARGETING
                         "Calling devtree attribute sync for BMC.");
                 (void)DEVTREE::devtreeSyncAttrs();
 
-/* TODO RTC: 205059 enable the update once all pieces are merged
                 // Update the persistent HBD partition with the current
                 // state of RW attributes
                 pError = updatePreservedAttrSection();
-*/
 #endif
                 break;
             }
@@ -1760,8 +1758,14 @@ namespace TARGETING
             break;
         }
 
-        // This code assumes that the secure provider has already loaded
-        // HBD_DATA and that it has not been unloaded yet.
+        #ifdef CONFIG_SECUREBOOT
+        l_errl = PNOR::loadSecureSection(PNOR::HB_DATA);
+        if(l_errl)
+        {
+            break;
+        }
+        #endif
+
         l_errl = PNOR::getSectionInfo(PNOR::HB_DATA,
                                       l_hbdSectionInfo);
         if(l_errl)
@@ -1954,6 +1958,14 @@ namespace TARGETING
             TRACFCOMP(g_trac_targeting, INFO_MRK"AttrRP::updatePreservedAttrSection: Skipping update in MPIPL");
             break;
         }
+
+        #ifdef CONFIG_SECUREBOOT
+        l_errl = PNOR::loadSecureSection(PNOR::HB_DATA);
+        if(l_errl)
+        {
+            break;
+        }
+        #endif
 
         PNOR::SectionInfo_t l_hbdSectionInfo;
         l_errl = PNOR::getSectionInfo(PNOR::HB_DATA,
