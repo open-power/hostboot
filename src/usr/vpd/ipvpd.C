@@ -3639,7 +3639,7 @@ IpVpdFacade::validateVtocRecordEccData(
 
             // Update the ECC data if forcing an update and the error is not a correctable error.
             // A correctable error is handled after this conditional.
-            if ( l_forceEccUpdateFlag && (VPD::VPD_ECC_DATA_CORRECTABLE_DATA != l_returnCode) )
+            if ( l_forceEccUpdateFlag && (VPD_ECC_CORRECTABLE_DATA != l_returnCode) )
             {
                 // Attempt to update the ECC data for record
                 TRACFCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::validateVtocRecordEccData(): "
@@ -3833,7 +3833,7 @@ IpVpdFacade::validateAllOtherRecordEccData(
 
                 // Update the ECC data if forcing an update and the error is not a correctable error.
                 // A correctable error is handled after this conditional.
-                if ( l_forceEccUpdateFlag && (VPD::VPD_ECC_DATA_CORRECTABLE_DATA != l_returnCode) )
+                if ( l_forceEccUpdateFlag && (VPD_ECC_CORRECTABLE_DATA != l_returnCode) )
                 {
                     // Attempt to update the ECC data for record
                     TRACFCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::validateAllOtherRecordEccData(): "
