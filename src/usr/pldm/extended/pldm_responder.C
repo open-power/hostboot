@@ -149,12 +149,12 @@ void addPldmMsgSection(errlHndl_t & io_errl, const void *i_msg, const size_t i_m
     if (i_msg_len > MAX_SECTION_SIZE)
     {
         // Only add MAX_SECTION_SIZE of the PLDM msg with version 1, subsection 1
-        io_errl->addFFDC(PLDM_COMP_ID, i_msg, MAX_SECTION_SIZE, 1, PLDM_UDT_MSG_DATA);
+        io_errl->addFFDC(PLDM_COMP_ID, i_msg, MAX_SECTION_SIZE, 1, PLDM_UDT_MSG_INCOMPLETE_DATA);
     }
     else
     {
         // Add the full PLDM msg with version 1, subsection 2
-        io_errl->addFFDC(PLDM_COMP_ID, i_msg, i_msg_len, 1, PLDM_UDT_MSG_INCOMPLETE_DATA);
+        io_errl->addFFDC(PLDM_COMP_ID, i_msg, i_msg_len, 1, PLDM_UDT_MSG_DATA);
     }
 }
 

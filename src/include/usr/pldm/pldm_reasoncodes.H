@@ -162,8 +162,8 @@ namespace PLDM
     enum pldmUserDetailDataSubsection
     {
         // no parsers for these two, just raw hex dump of data
-        PLDM_UDT_MSG_DATA            = 0x01,
-        PLDM_UDT_MSG_INCOMPLETE_DATA = 0x02,
+        PLDM_UDT_MSG_INCOMPLETE_DATA = 0x01, // partial msg data (first 2K bytes)
+        PLDM_UDT_MSG_DATA            = 0x02, // full msg data
     };
 }
 #endif
