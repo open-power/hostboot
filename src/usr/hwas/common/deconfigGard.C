@@ -2200,10 +2200,17 @@ errlHndl_t DeconfigGard::applyGardRecord(Target *i_pTarget,
         HWAS_MUTEX_LOCK(iv_mutex);
 
 #if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
-        // Don't emit a console message if the GARD is GARD_Reconfig since that type is considered a "fake" GARD record.
-        // Emitting a message as if a GARD is being applied in that case leads to confusion since no GARD is actually
-        // being created. Its actually just used as a means to remember to deconfig.
-        if (i_gardRecord.iv_errorType != GARD_Reconfig)
+        // Don't emit a console message if the GARD is GARD_Reconfig since that
+        //  type is considered a "fake" GARD record.  Emitting a message as if
+        //  a GARD is being applied in that case leads to confusion since no
+        //  GARD is actually being created. Its actually just used as a means
+        //  to remember to deconfig.
+        // Similarly, there should be no message as we're speculatively acting
+        //  on the gard records since the message will either be redundant
+        //  with the real apply we do later or it will be misleading when we
+        //  do not actually deconfigure the part.
+        if( (i_gardRecord.iv_errorType != GARD_Reconfig)
+            && (i_deconfigRule != SPEC_DECONFIG) )
         {
             const char* l_tmpstring =
               i_pTarget->getAttr<TARGETING::ATTR_PHYS_PATH>().toString();
