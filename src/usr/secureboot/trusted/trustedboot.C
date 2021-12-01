@@ -1794,7 +1794,7 @@ void tpmVerifyFunctionalPrimaryTpmExists(
                  *                 functional boot processor trusted platform
                  *                 module is required to boot the system (or
                  *                 node, if multi-node system), but none are
-                 *                 available.  Therefore, the system (or node,
+                 *                 available. Therefore, the system (or node,
                  *                 if multi-node system) will terminate.
                  *                 Trusted platform module required mode may be
                  *                 disabled via the appropriate systems
@@ -1837,6 +1837,23 @@ void tpmVerifyFunctionalPrimaryTpmExists(
                                       HWAS::GARD_NULL);
                 }
                 errlCommit(err, TRBOOT_COMP_ID);
+
+                // if a TPM is guarded out for FSP systems, the recovery action is
+                // to force a failover and flip sides to utilize TPM redundancy.
+                // eBMC systems will attempt to recover the TPM via Resourse Recovery
+                if (!INITSERVICE::spBaseServicesEnabled())
+                {
+                    // Get all node targets
+                    TARGETING::TargetHandleList l_nodelist;
+                    getEncResources(l_nodelist, TARGETING::TYPE_NODE,
+                                    TARGETING::UTIL_FILTER_FUNCTIONAL);
+                    for( auto l_node : l_nodelist )
+                    {
+                        //For eBMC, in the case where the TPM is garded out by a recoverable gard,
+                        //set block speculative deconfig to resource recover the TPM on next ipl
+                        l_node->setAttr<TARGETING::ATTR_BLOCK_SPEC_DECONFIG>(1);
+                    }
+                }
 
                 // Sync the attributes to FSP or BMC if applicable.
                 // This will allow for FSP to attempt to perform
