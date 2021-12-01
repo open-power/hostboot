@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,7 +74,8 @@ extern "C"
 ///
 /// @brief p10_load_iop_override procedure
 ///
-/// Initializes CReg Overrides through the CR Parallel Interface
+/// - Initializes CReg Overrides through the CR Parallel Interface
+/// - Raise Tx Vreg gain (from 2 to 2.3)
 /// Function needs to be called when phy is out of reset in proc_load_iop_xram
 ///
 /// @param[in] i_target Reference to processor chip target

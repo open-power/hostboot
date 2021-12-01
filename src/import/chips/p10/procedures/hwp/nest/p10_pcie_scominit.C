@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -135,6 +135,14 @@ const uint64_t  RAWCMN_DIG_AON_FW_VERSION_1[NUM_OF_INSTANCES] =
     0x800101790801113F,
     0x800001790801153F,
     0x800101790801153F,
+};
+
+const uint64_t TX_VREG_GAIN[NUM_OF_INSTANCES] =
+{
+    0x800051CA0801113F,
+    0x800151CA0801113F,
+    0x800051CA0801153F,
+    0x800151CA0801153F,
 };
 
 // MPLLA Calibration Override Registers
@@ -398,8 +406,12 @@ fapi2::ReturnCode p10_load_iop_override(
             FAPI_TRY(fapi2::putScom(l_pec_target, SUP_DIG_ANA_MPLLA_OVRD_OUT0[i] , l_data),
                      "Error from putScom 0x%.16llX", SUP_DIG_ANA_MPLLA_OVRD_OUT0[i]);
 
-            FAPI_TRY(fapi2::delay(MICRO_SEC_DELAY, SIM_CYC_DELAY), "fapiDelay error.");
+            // Raise TX Vreg gain (from 2 to 2.3)
+            l_data = 0x0000000000000004;
+            FAPI_TRY(fapi2::putScom(l_pec_target, TX_VREG_GAIN[i] , l_data),
+                     "Error from putScom 0x%.16llX", TX_VREG_GAIN[i]);
 
+            FAPI_TRY(fapi2::delay(MICRO_SEC_DELAY, SIM_CYC_DELAY), "fapiDelay error.");
         }
     }
 
