@@ -387,8 +387,6 @@ case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Procedure        
                     case_PROCEDURE(EPUB_PRC_TOD_CLOCK_ERR)
                     case_PROCEDURE(EPUB_PRC_COOLING_SYSTEM_ERR)
                     case_PROCEDURE(EPUB_PRC_FW_VERIFICATION_ERR)
-                    case_PROCEDURE(EPUB_PRC_GPU_ISOLATION_PROCEDURE)
-                    case_PROCEDURE(EPUB_PRC_NVDIMM_ERR)
                     case_PROCEDURE(EPUB_PRC_SBE_CODE)
                     default:
                         CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Procedure                  : UNKNOWN: 0x%X",

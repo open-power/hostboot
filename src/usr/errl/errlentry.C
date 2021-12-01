@@ -129,7 +129,7 @@ struct epubProcedureToIsolationProcedure_t
     epubProcedureID epub_procedure_id;
     char isolationProcedure[PEL_PART_NUM_SIZE];
 };
-static constexpr std::array<epubProcedureToIsolationProcedure_t, 27> EPUB_TO_ISOLATION_PROCEDURE =
+static constexpr std::array<epubProcedureToIsolationProcedure_t, 25> EPUB_TO_ISOLATION_PROCEDURE =
 {
     epubProcedureToIsolationProcedure_t
     { EPUB_PRC_NONE                   , "       "},
@@ -141,13 +141,13 @@ static constexpr std::array<epubProcedureToIsolationProcedure_t, 27> EPUB_TO_ISO
     { EPUB_PRC_INVALID_PART           , "HB0000A"}, // FSPSP10
     { EPUB_PRC_LVL_SUPP               , "HB00010"}, // FSPSP16
     { EPUB_PRC_SUE_PREVERROR          , "HB00011"}, // FSPSP17
-    { EPUB_PRC_PROCPATH               , "HB00016"}, // FSPSP22
-    { EPUB_PRC_NO_VPD_FOR_FRU         , "HB0001C"}, // FSPSP28
+    { EPUB_PRC_PROCPATH               , "HB00010"}, // map to EPUB_PRC_LVL_SUPP
+    { EPUB_PRC_NO_VPD_FOR_FRU         , "HB00010"}, // map to EPUB_PRC_LVL_SUPP
     { EPUB_PRC_MEMORY_PLUGGING_ERROR  , "HB00022"}, // FSPSP34
     { EPUB_PRC_FSI_PATH               , "HB0002D"}, // FSPSP45
-    { EPUB_PRC_PROC_AB_BUS            , "HB00030"}, // FSPSP48
-    { EPUB_PRC_PROC_XYZ_BUS           , "HB00031"}, // FSPSP49
-    { EPUB_PRC_MEMBUS_ERROR           , "HB00034"}, // FSPSP52
+    { EPUB_PRC_PROC_AB_BUS            , "HB00037"}, // map to EPUB_PRC_EIBUS_ERROR
+    { EPUB_PRC_PROC_XYZ_BUS           , "HB00037"}, // map to EPUB_PRC_EIBUS_ERROR
+    { EPUB_PRC_MEMBUS_ERROR           , "HB00037"}, // map to EPUB_PRC_EIBUS_ERROR
     { EPUB_PRC_EIBUS_ERROR            , "HB00037"}, // FSPSP55
     { EPUB_PRC_POWER_ERROR            , "HB0003F"}, // FSPSP63
     { EPUB_PRC_PERFORMANCE_DEGRADED   , "HB0004D"}, // FSPSP77
@@ -156,8 +156,6 @@ static constexpr std::array<epubProcedureToIsolationProcedure_t, 27> EPUB_TO_ISO
     { EPUB_PRC_TOD_CLOCK_ERR          , "HB00056"}, // FSPSP86
     { EPUB_PRC_COOLING_SYSTEM_ERR     , "HB0005C"}, // FSPSP92
     { EPUB_PRC_FW_VERIFICATION_ERR    , "HB0005D"}, // FSPSP93
-    { EPUB_PRC_GPU_ISOLATION_PROCEDURE, "HB0005E"}, // FSPSP94
-    { EPUB_PRC_NVDIMM_ERR             , "HB00061"}, // FSPSP97
     { EPUB_PRC_SBE_CODE               , "HB00062"}, // FSPSP98
 };
 

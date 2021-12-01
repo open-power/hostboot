@@ -113,8 +113,6 @@ public:
             case(EPUB_PRC_TOD_CLOCK_ERR          ):
             case(EPUB_PRC_COOLING_SYSTEM_ERR     ):
             case(EPUB_PRC_FW_VERIFICATION_ERR    ):
-            case(EPUB_PRC_GPU_ISOLATION_PROCEDURE):
-            case(EPUB_PRC_NVDIMM_ERR             ):
             case(EPUB_PRC_SBE_CODE               ):
             {
                 // If a new enum is added to the above list to overcome a compile failure then a corresponding HBxxxxx

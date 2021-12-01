@@ -159,15 +159,6 @@ enum epubProcedureID
     ///< Verification of one or more firmware images failed,
     ///<   Reinstall your firmware
 
-    EPUB_PRC_GPU_ISOLATION_PROCEDURE= 0x5E,
-    ///< Problem is related to one or more installed GPUs,
-    ///<   Manual isolation is required to determine which one
-
-    EPUB_PRC_NVDIMM_ERR             = 0x61,
-    ///< The diagnostic function detected a problem with the NVDIMM.
-    ///<    Both the NVDIMM and the cable connecting the DIMM to the
-    ///<    Backup Power Module should be replaced
-
     EPUB_PRC_SBE_CODE               = 0x62,
     ///< Problem is in SBE code, upgrade your firmware
 };

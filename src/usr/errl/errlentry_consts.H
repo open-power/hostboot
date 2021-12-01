@@ -65,7 +65,6 @@ const epubProcToSub_t PROCEDURE_TO_SUBSYS_TABLE[] =
     { EPUB_PRC_TOD_CLOCK_ERR          , EPUB_CEC_HDW_SUBSYS         },
     { EPUB_PRC_COOLING_SYSTEM_ERR     , EPUB_MISC_SUBSYS            },
     { EPUB_PRC_FW_VERIFICATION_ERR    , EPUB_FIRMWARE_SUBSYS        },
-    { EPUB_PRC_GPU_ISOLATION_PROCEDURE, EPUB_CEC_HDW_SUBSYS         },
 };
 
 struct epubTargetTypeToSub_t
