@@ -163,6 +163,18 @@ actionclass threshold_and_mask_chnl1_ocmb_th_1
     threshold_and_mask_th1;
 };
 
+actionclass chnl0_omi_bus_level2_L
+{
+    chnl0_omi_bus;
+    callout2ndLvlLow;
+};
+
+actionclass chnl1_omi_bus_level2_L
+{
+    chnl1_omi_bus;
+    callout2ndLvlLow;
+};
+
 # Bits using these actions are CRC-related errors that are potential
 # side-effects of bits in the PAU_PHY_FIR. There is additional handling
 # to determine the callout if a root cause bit is found on as well.
@@ -204,13 +216,15 @@ actionclass analyze_ocmb_chnl1
 actionclass analyze_ocmb_chnl0_UERE
 {
     SueSource;
-    analyze_ocmb_chnl0;
+    # Callout the bus if analysis of the UNIT_CS fails for some reason
+    try( analyze_ocmb_chnl0, chnl0_omi_bus_level2_L );
 };
 
 actionclass analyze_ocmb_chnl1_UERE
 {
     SueSource;
-    analyze_ocmb_chnl1;
+    # Callout the bus if analysis of the UNIT_CS fails for some reason
+    try( analyze_ocmb_chnl1, chnl1_omi_bus_level2_L );
 };
 
 actionclass analyzeMC_DSTL_FIR
