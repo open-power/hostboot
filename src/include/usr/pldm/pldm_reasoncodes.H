@@ -159,6 +159,7 @@ namespace PLDM
         RC_BAD_NEXT_TRANSFER_HANDLE = PLDM_COMP_ID | 0x33,
         RC_UNSUPPORTED_MINOR_VERSION = PLDM_COMP_ID | 0x34,
         RC_BASE_INIT_FAIL           = PLDM_COMP_ID | 0x35,
+        RC_CRC_MISMATCH             = PLDM_COMP_ID | 0x36,
     };
 
     /**

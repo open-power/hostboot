@@ -36,9 +36,7 @@
 #include <map>
 #include <vector>
 #include <endian.h>
-// IPC
 #include <sys/msg.h>
-//VFS_ROOT_MSG_PLDM_REQ_OUT
 #include <sys/vfs.h>
 // Hostboot PLDM includes
 #include <pldm/pldm_const.H>
@@ -50,11 +48,13 @@
 #include <pldm/pldm_trace.H>
 // libpldm
 #include <fru.h>
+#include <openbmc/pldm/libpldm/utils.h>
 // Local includes
 #include "pldm_request_utils.H"
 
 // Other userspace module includes
 #include <mctp/mctp_message_types.H>
+
 
 using namespace ERRORLOG;
 
@@ -107,15 +107,15 @@ errlHndl_t getFruRecordTableMetaData(pldm_get_fru_record_table_metadata_resp & o
         break;
     }
 
-    PLDM_DBG("Output Vars:  FruVer %.02x.%.02x  "
+    PLDM_INF("Output Vars:"
              "Max Table Size 0x%.08x  Actual Table Size 0x%.08x  "
-             "Record Set Indexes 0x%.04x    Record Count 0x%.04x ",
-             o_table_metadata.fru_data_major_version,
-             o_table_metadata.fru_data_minor_version,
+             "Record Set Indexes 0x%.04x    Record Count 0x%.04x "
+             "Checksum = 0x%.04x" ,
              o_table_metadata.fru_table_maximum_size,
              o_table_metadata.fru_table_length,
              o_table_metadata.total_record_set_identifiers,
-             o_table_metadata.total_table_records);
+             o_table_metadata.total_table_records,
+             o_table_metadata.checksum);
 
     /*@
       * @errortype
@@ -178,7 +178,6 @@ errlHndl_t getFruRecordTableMetaData(pldm_get_fru_record_table_metadata_resp & o
 
 }
 
-// TODO RTC:248498 add crc integrity check
 errlHndl_t getFruRecordTable(const size_t i_table_buffer_len,
                              uint8_t * o_table_buffer)
 {
@@ -212,14 +211,8 @@ errlHndl_t getFruRecordTable(const size_t i_table_buffer_len,
         break;
     }
 
-    // pack the PLDM header of the response into a uint64_t which can
-    // be used for error logging / debugging
-    uint64_t response_hdr_data =
-      pldmHdrToUint64(*reinterpret_cast<pldm_msg*>(response_bytes.data()));
-
     pldm_get_fru_record_table_resp response = { };
     size_t table_data_len = 0;
-
 
     errl =
         decode_pldm_response(decode_get_fru_record_table_resp,
@@ -292,43 +285,52 @@ errlHndl_t getFruRecordTable(const size_t i_table_buffer_len,
         break;
     }
 
-    // The table returned could have some padding at the end we do not want.
-    // Just make sure the padding it within a valid range (0-3 bytes)
-    if((table_data_len < i_table_buffer_len) ||
-       (table_data_len - i_table_buffer_len > 3))
+    /*@
+      * @errortype
+      * @severity   ERRL_SEV_UNRECOVERABLE
+      * @moduleid   MOD_GET_FRU_TABLE
+      * @reasoncode RC_INVALID_LENGTH
+      * @userdata1  Actual table length
+      * @userdata2  Table length from metadata
+      * @devdesc    Software problem, bad PLDM response from BMC
+      * @custdesc   A software error occurred during system boot
+      */
+    errl = validate_resp(table_data_len, i_table_buffer_len,
+                         MOD_GET_FRU_TABLE, RC_INVALID_LENGTH,
+                         response_bytes);
+    if(errl)
     {
-        // The buffer that was returnd from BMC that contains table info does
-        // not match the size that the get fru table meta data cmd told us
-
-        PLDM_ERR("decode_get_fru_record_table_resp table_data_len - i_table_buffer_len = %d  , expected this difference to be between 0-3",
-                table_data_len - i_table_buffer_len );
-        /*@
-         * @errortype  ERRL_SEV_UNRECOVERABLE
-         * @moduleid   MOD_GET_FRU_TABLE
-         * @reasoncode RC_INVALID_LENGTH
-         * @userdata1[0:31]   Table Length Expected
-         * @userdata1[32:63]  Table Length returned from BMC
-         *                    (We expected diff between 0<= diff <=3)
-         * @userdata2  Response header data (see pldm_msg_hdr struct)
-         * @devdesc    Software problem, likely PLDM version problem w/ bmc
-         * @custdesc   A software error occurred during system boot
-         */
-        errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                             PLDM::MOD_GET_FRU_TABLE,
-                             PLDM::RC_INVALID_LENGTH,
-                             TWO_UINT32_TO_UINT64(i_table_buffer_len,
-                                                  table_data_len),
-                             response_hdr_data,
-                             ErrlEntry::NO_SW_CALLOUT);
-        addBmcErrorCallouts(errl);
         break;
     }
 
-    TRACDBIN( PLDM::g_trac_pldm,"Table Buffer:", o_table_buffer, i_table_buffer_len);
+    /* Calculate the CRC32 on the table data excluding the last 4 bytes which
+       contains the CRC32 we will compare our result against.*/
+    auto actual_crc = crc32(o_table_buffer, table_data_len - 4);
+    auto expected_crc = le32toh(*reinterpret_cast<uint32_t *>(o_table_buffer + table_data_len - 4));
+
+    /*@
+      * @errortype
+      * @severity   ERRL_SEV_UNRECOVERABLE
+      * @moduleid   MOD_GET_FRU_TABLE
+      * @reasoncode RC_CRC_MISMATCH
+      * @userdata1  Actual CRC
+      * @userdata2  Expected CRC
+      * @devdesc    Software problem, bad PLDM response from BMC
+      * @custdesc   A software error occurred during system boot
+      */
+    errl = validate_resp(actual_crc, expected_crc,
+                         MOD_GET_FRU_TABLE, RC_CRC_MISMATCH,
+                         response_bytes);
+    if(errl)
+    {
+        break;
+    }
+
+    TRACFBIN( PLDM::g_trac_pldm,"Table Buffer:", o_table_buffer, i_table_buffer_len);
 
     }while(0);
 
-    PLDM_EXIT("Exit getFruRecordTableMetaData");
+    PLDM_EXIT("Exit getFruRecordTable");
     return errl;
 }
 }
