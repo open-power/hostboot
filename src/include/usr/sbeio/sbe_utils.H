@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,6 +64,10 @@ namespace SBEIO
         }
     } PACKED;  // end struct sbeCapabilities_t
 
+    // For 4U max is 181 bytes - setting max to 256 words
+    // See fips1010 sbeiInternal.H
+    // SBE is a 32-bit engine so use uint32_t (Hostboot words are uint64_t)
+    static constexpr uint32_t SBE_PMIC_HLTH_CHECK_BUFFER_LEN_BYTES = 256 * sizeof(uint32_t);
 
     enum SBE_TARGET_TYPES {
         SBE_TARGET_TYPE_PROC_CHIP    = 0x0000,

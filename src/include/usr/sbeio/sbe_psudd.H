@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -144,6 +144,7 @@ class SbePsu
             SBE_PSU_OCMB_CONFIG              = 0x09,
             SBE_PSU_TOPOLOGY_ID_TABLE        = 0x0A, //syncFabTopoIdTable
             SBE_CMD_MEM_CONFIG               = 0x0B, //getMemConfigInfo
+            SBE_CMD_PMIC_HEALTH_CHECK_DATA   = 0x0C, //getPmicHlthCheckData
         };
 
         /**
@@ -254,6 +255,35 @@ class SbePsu
             SBE_MEM_CONFIG_REQ_USED_REGS  = 0x05,
             // Use Response Reg 4 (0x1)
             SBE_MEM_CONFIG_RSP_USED_REGS  = 0x01,
+        };
+
+        /**
+         * @brief non reserved word enums
+         *
+         * Shows which of the request and response msg registers are
+         * not reserved. Reserved registers do not need to be written
+         * or read.
+         *
+         * This is a 4 bit field, each bit indicates as follows:
+         * 0x1 - Reg 0 is non-reserved (read or write this reg)
+         * 0x2 - Reg 1 is non-reserved (read or write this reg)
+         * 0x4 - Reg 2 is non-reserved (read or write this reg)
+         * 0x8 - Reg 3 is non-reserved (read or write this reg)
+         */
+        enum getPmicHlthCheckDataNonReservedMsgs
+        {
+            // Using Request Reg 0,1,2 (0x1 + 0x2 + 0x4)
+            // Reg 0 - byte 6 Command Class, byte 7 Command
+            // Reg 1 - byte 0-1 OCMB target type=0x4, byte 2 reserved, byte 3 instance id (0-15), byte 4-7 reserved
+            // Reg 2 - physical data address allocated by Hostboot where SBE copies PMIC data
+            // Reg 3 - byte 0-7 reserved
+            SBE_HEALTH_CHECK_DATA_REQ_USED_REGS  = 0x07,
+            // Using Response Reg 4,5 (0x1 + 0x2)
+            // Reg 4 - byte 0-1  Primary Status, byte 2-3 Secondary Status, byte 4-5 Seq ID, byte 6=0xD7, byte 7=0x0C
+            // Reg 5 - byte 0-7 length of PMIC data in bytes
+            // Reg 6 - byte 0-7 reserved
+            // Reg 7 - byte 0-7 reserved
+            SBE_HEALTH_CHECK_DATA_RSP_USED_REGS  = 0x03,
         };
 
         /**
@@ -387,6 +417,24 @@ class SbePsu
             i2cdevice_t ocmb_chips[SbePsu::SBE_OCMB_CONFIG_MAX_NUMBER];
         } PACKED;
 
+        typedef struct pmic_health_data_t
+        {
+            uint8_t pmic_revision;
+            uint8_t pmic_status;
+        } PACKED pmic_health_data_t;
+
+        // PMIC status
+        // See HWSV hwcoSbeSvc.C
+        enum psu_aggregate_status : uint8_t
+        {
+            SBE_N_PLUS_1 = 0,
+            SBE_N_MODE = 1,
+            SBE_LOST = 2,
+            SBE_GI2C_FAIL = 3,
+            SBE_DIMM_NOT_4U = 4,
+        };
+
+        static const uint8_t SBE_PMIC_VERSION = 0x02;
 
         /**
         * @brief non reserved word enums
@@ -798,6 +846,21 @@ class SbePsu
                 uint64_t cd7_sendMemConfig_MbxReg3Reserved; // mbxReg3
             } PACKED;
 
+            struct
+            {
+                uint16_t cd7_getPmicHlthCheckData_Reserved0;
+                uint16_t cd7_getPmicHlthCheckData_ControlFlags;
+                uint16_t cd7_getPmicHlthCheckData_SeqID;
+                uint8_t  cd7_getPmicHlthCheckData_CommandClass;        // Mbx Reg 0, Byte 6: 0xD7 (SBE_PSU_GENERIC_MESSAGE)
+                uint8_t  cd7_getPmicHlthCheckData_Command;             // Mbx Reg 0, Byte 7: 0x0C (SBE_CMD_HEALTH_CHECK_DATA)
+                uint16_t cd7_getPmicHlthCheckData_MbxReg1_OCMB_TYPE;   // mbxReg1 byte 0-1
+                uint8_t  cd7_getPmicHlthCheckData_MbxReg1_Reserved2;   // mbxReg1 byte 2
+                uint8_t  cd7_getPmicHlthCheckData_MbxReg1_InstanceId;  // mbxReg1 byte 3
+                uint32_t cd7_getPmicHlthCheckData_MbxReg1_Reserved4;   // mbxReg1 byte 4-7
+                uint64_t cd7_getPmicHlthCheckData_DataAddr;            // mbxReg2
+                uint64_t cd7_getPmicHlthCheckData_MbxReg3Reserved;     // mbxReg3
+            } PACKED;
+
             psuCommand(uint16_t i_controlFlags, //Mbx Reg 0 input
                        uint8_t  i_commandClass, //Mbx Reg 0 input
                        uint8_t  i_command) :    //Mbx Reg 0 input
@@ -897,6 +960,22 @@ class SbePsu
                 uint32_t sbe_commit_id;
                 // mbxReg 7
                 uint64_t sbe_reserved2;
+            } PACKED;
+
+            struct // fields for the PMIC HealthCheckData response
+            {
+                // mbxReg 4
+                uint16_t pmic_primaryStatus;
+                uint16_t pmic_secondaryStatus;
+                uint16_t pmic_seqID;
+                uint8_t  pmic_commandClass;  // 0xD7 (SBE_PSU_GENERIC_MESSAGE)
+                uint8_t  pmic_command;       // 0x0C (SBE_CMD_HEALTH_CHECK_DATA)
+                // mbxReg 5
+                uint64_t pmic_health_check_data_size;  // Size of PMIC HealthCheckData returned in bytes
+                // mbxReg 6
+                uint64_t pmic_reserved6;
+                // mbxReg 7
+                uint64_t pmic_reserved7;
             } PACKED;
 
             struct // fields for the SBE get hw register response

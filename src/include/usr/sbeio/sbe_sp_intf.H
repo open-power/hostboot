@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -190,6 +190,8 @@ enum sbePrimResponse
  *   @TODO via RTC: 129763
  *         Discuss on SBE_SEC_INVALID_TARGET_ID_PASSED
  *
+ *  Reference PPE repo file of same name, sbe_sp_intf.H
+ *
 */
 enum sbeSecondaryResponse
 {
@@ -218,6 +220,46 @@ enum sbeSecondaryResponse
     SBE_SEC_MAXIMUM_MEM_REGION_EXCEEDED       = 0x16,
     SBE_SEC_MEM_REGION_AMEND_ATTEMPTED        = 0x17,
     SBE_SEC_INPUT_BUFFER_OVERFLOW             = 0x18,
+    SBE_SEC_INVALID_PARAMS                    = 0x19,
+    SBE_SEC_BLACKLISTED_CHIPOP_ACCESS         = 0x20,
+    SBE_SEC_DMT_TIMEOUT                       = 0x21,
+    SBE_SEC_SYSTEM_CHECKSTOP                  = 0x22,
+    SBE_SEC_BLACKLISTED_REG_ACCESS_BLOCKED    = 0x23,
+    SBE_SEC_S0_START_MPIPL_FAILED             = 0x24,
+    SBE_SEC_S0_STOP_CLOCK_FAILED              = 0x25,
+    SBE_SEC_S0_CONTINUE_MPIPL_FAILED          = 0x26,
+    SBE_SEC_PERIODIC_IO_TOGGLE_FAILED         = 0x27,
+    SBE_SEC_SPECIAL_WAKEUP_TIMEOUT            = 0x28,
+    SBE_SEC_SPECIAL_WAKEUP_SCOM_FAILURE       = 0x29,
+    SBE_SEC_S0_ARCH_REG_DUMP_FAILED           = 0x2A,
+    SBE_SEC_LPC_ACCESS_FAILED                 = 0x2B,
+    SBE_SEC_HWP_FAILURE                       = 0x2C,
+    SBE_SEC_TI_CORE_SCRATCH_READ_FAILED       = 0x2D,
+    SBE_SEC_TI_DATA_READ_FAILED               = 0x2E,
+    SBE_SEC_PUT_SRAM_FAILED                   = 0x2F,
+    SBE_SEC_GET_SRAM_FAILED                   = 0x30,
+    SBE_SEC_THREAD_CONTROL_INSTR_FAILED       = 0x31,
+    SBE_SEC_RAM_CORE_SETUP_FAILED             = 0x32,
+    SBE_SEC_RAM_CORE_ACCESS_FAILED            = 0x33,
+    SBE_SEC_RAM_CORE_CLEANUP_FAILED           = 0x34,
+    SBE_SEC_SUSPEND_IO_FAILED                 = 0x35,
+    SBE_SEC_ENTER_MPIPL_FAILED                = 0X36,
+    SBE_SEC_STOP_CLOCK_FAILED                 = 0x37,
+    SBE_SEC_OCMB_SCOM_FAILED                  = 0x38,
+    SBE_SEC_GET_DUMP_FAILED                   = 0x39,
+    SBE_SEC_INVALID_DUMP_TYPE                 = 0x40,
+    SBE_SEC_INVALID_OCMB_INSTANCE             = 0x41,
+    SBE_SEC_FAILED_TO_CHECKSTOP               = 0x42,
+    SBE_SEC_GET_DUMP_STREAM_FAILED            = 0x43,
+    SBE_SEC_MPIPL_DUMP_INVALID_PARAMS         = 0x44,
+    SBE_SEC_OCMB_TARGET_NOT_PRESENT           = 0x45,
+    SBE_SEC_OCMB_TARGET_NOT_FUNCTIONAL        = 0x46,
+    SBE_SEC_INVALID_FASTARRAY_COLLECTION_INFO = 0x47,
+    SBE_SEC_PMIC_HEALTH_CHECK_FAILED          = 0x48,
+    SBE_SEC_INVALID_I2C_CONFIG_VERSION        = 0x49,
+    SBE_SEC_INVALID_I2C_TARGET_SUPPORT        = 0x4A,
+    SBE_SEC_LPC_ERROR                         = 0x4B,
+    SBE_SEC_NOT_ALLOWED_VIA_FIFO_1            = 0x4C,
 };
 
 /**

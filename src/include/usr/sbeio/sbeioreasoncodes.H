@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,6 +64,7 @@ enum sbeioModuleId
     SBEIO_PSUSYNCFABTOPOIDTABLE         = 0x13,
     SBEIO_FIFO_HALT                     = 0x14,
     SBEIO_RT_PSU                        = 0x15,
+    SBEIO_PSU_PMIC_HEALTH_CHECK         = 0x16,
 };
 
 /**
@@ -156,6 +157,9 @@ enum sbeioReasonCode
     SBEIO_MVPD_WRITE_FAILURE           = SBEIO_COMP_ID | 0x67,
     SBEIO_NO_RUNTIME_BUFFER            = SBEIO_COMP_ID | 0x68,
     SBEIO_EARLY_ERROR                  = SBEIO_COMP_ID | 0x69,
+    // PMIC Health Check Data Logs
+    SBEIO_PMIC_HEALTH_CHECK_DATA       = SBEIO_COMP_ID | 0x6A,
+    SBEIO_PMIC_FAILED_HEALTH_CHECK     = SBEIO_COMP_ID | 0x6B,
 
     // Remove once we collect the FFDC ourselves - @todo-RTC:144313
     //termination_rc

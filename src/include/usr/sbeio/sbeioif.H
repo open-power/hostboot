@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -199,6 +199,14 @@ namespace SBEIO
      *
      */
     errlHndl_t psuSendSbeMemConfig(TARGETING::Target* i_pProc);
+
+    /**
+     * @brief Get PMIC Health Check Data from the SBE
+     *
+     * @return errlHndl_t Error log handle on failure.
+     *
+     */
+    errlHndl_t getPmicHlthCheckData();
 
      /**
      * @brief Get the capabilities of the SBE via PSU

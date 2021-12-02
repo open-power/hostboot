@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,7 @@
 #include <sbeio/sbe_psudd.H>                   // SbePsu::psuCommand
 #include <targeting/common/commontargeting.H>  // get_huid
 #include <targeting/common/utilFilter.H>       // getAllChips
+
 
 #define SBE_TRACFBIN(printf_string,args...) \
     TRACFBIN(g_trac_sbeio, "PsuSendMemConfigTest: testMemConfigInfo " printf_string,##args)
@@ -134,8 +135,19 @@ class PsuSendMemConfigTest : public CxxTest::TestSuite
 
                 // Get the FAPI I2C control info from the target. The port info,
                 // engine and device address resides within the FAPI I2C control info.
-                const ATTR_FAPI_I2C_CONTROL_INFO_type l_fapiI2cControlInfo
+                ATTR_FAPI_I2C_CONTROL_INFO_type l_fapiI2cControlInfo
                     = l_pmicTarget->getAttr<ATTR_FAPI_I2C_CONTROL_INFO>();
+
+                ATTR_FAPI_I2C_CONTROL_INFO_type l_dynamic_I2cControlInfo = { };
+
+                // If the target has dynamic device address attribute, then use that instead of the
+                // read-only address found in ATTR_FAPI_I2C_CONTROL_INFO. We use the dynamic address
+                // attribute because ATTR_FAPI_I2C_CONTROL_INFO is not writable and its difficult
+                // to override complex attributes.
+                if (l_pmicTarget->tryGetAttr<TARGETING::ATTR_DYNAMIC_I2C_DEVICE_ADDRESS>(l_dynamic_I2cControlInfo.devAddr))
+                {
+                    l_fapiI2cControlInfo.devAddr = l_dynamic_I2cControlInfo.devAddr;
+                }
 
                 // Gather the port info, engine and device address of the target
                 l_i2c_telemetry_data.pmic_chips[l_arrayIndex].i2c_port= l_fapiI2cControlInfo.port;
@@ -174,8 +186,19 @@ class PsuSendMemConfigTest : public CxxTest::TestSuite
 
                 // Get the FAPI I2C control info from the target. The port info,
                 // engine and device address resides within the FAPI I2C control info.
-                const ATTR_FAPI_I2C_CONTROL_INFO_type l_fapiI2cControlInfo
+                ATTR_FAPI_I2C_CONTROL_INFO_type l_fapiI2cControlInfo
                     = l_genericTarget->getAttr<ATTR_FAPI_I2C_CONTROL_INFO>();
+
+                ATTR_FAPI_I2C_CONTROL_INFO_type l_dynamic_I2cControlInfo = { };
+
+                // If the target has dynamic device address attribute, then use that instead of the
+                // read-only address found in ATTR_FAPI_I2C_CONTROL_INFO. We use the dynamic address
+                // attribute because ATTR_FAPI_I2C_CONTROL_INFO is not writable and its difficult
+                // to override complex attributes.
+                if (l_genericTarget->tryGetAttr<TARGETING::ATTR_DYNAMIC_I2C_DEVICE_ADDRESS>(l_dynamic_I2cControlInfo.devAddr))
+                {
+                    l_fapiI2cControlInfo.devAddr = l_dynamic_I2cControlInfo.devAddr;
+                }
 
                 // Gather the port info, engine and device address of the target
                 l_i2c_telemetry_data.gi2c_chips[l_arrayIndex].i2c_port = l_fapiI2cControlInfo.port;

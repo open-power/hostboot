@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2021
+# Contributors Listed Below - COPYRIGHT 2011,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -393,7 +393,7 @@ while [ $(($modsstarted)) -lt 1 -o $(($modsstarted)) -ne $(($modscompleted)) ]; 
 
     if [ "$loopcount" -ge "$loop_timeout" ];   then
         timestamp=`date +'%H:%M:%S'`
-        echo    "$timestamp ERROR: timed out waiting for until test completion"
+        echo    "$timestamp ERROR: timed out waiting for unit test completion"
         stopsim # grab ffdc data from timeout time
         autosim $NOWIN --simcmd   "hb-Ps with-backtrace"
         timeout=$(($modsstarted - $modscompleted))
