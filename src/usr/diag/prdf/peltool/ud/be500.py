@@ -683,7 +683,10 @@ class errludP_prdf:
                         d[cd]['Dram Repairs VPD'][y] = OrderedDict()
                         d[cd]['Dram Repairs VPD'][y]['Rank'] = rank
                         d[cd]['Dram Repairs VPD'][y]['Port'] = port
-                        d[cd]['Dram Repairs VPD'][y]['Bitmap'] = hex(bitmap)
+
+                        # Pad the bitmap with 0s to 20 hex characters (80 bits)
+                        formatMap = '0x{0:0{1}x}'.format(bitmap, 20)
+                        d[cd]['Dram Repairs VPD'][y]['Bitmap'] = formatMap
 
                     # Collect any extra junk data at the end just in case
                     junkLength = dataLength - parsedLength
@@ -695,9 +698,9 @@ class errludP_prdf:
                     parsedLength = 0
 
                     # One 12 byte entry:
-                    # 8-bits:  rank
-                    # 8-bits:  port
-                    # 10-bits: bad dq bitmap
+                    # 1-byte:   rank
+                    # 1-byte:   port
+                    # 10-bytes: bad dq bitmap
                     rank, i=intConcat(buf, i, i+1)
                     port, i=intConcat(buf, i, i+1)
                     bitmap, i=intConcat(buf, i, i+10)
@@ -706,7 +709,9 @@ class errludP_prdf:
                     d[cd]['Bad Dq Bitmap'] = OrderedDict()
                     d[cd]['Bad Dq Bitmap']['Rank'] = rank
                     d[cd]['Bad Dq Bitmap']['Port'] = port
-                    d[cd]['Bad Dq Bitmap']['Bitmap'] = hex(bitmap)
+
+                    formatMap = '0x{0:0{1}x}'.format(bitmap, 20)
+                    d[cd]['Bad Dq Bitmap']['Bitmap'] = formatMap
 
                     # Collect any extra junk data at the end just in case
                     junkLength = dataLength - parsedLength
