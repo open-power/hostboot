@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2022                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -254,6 +254,10 @@
     <attribute>
           <id>MSS_INTERLEAVE_ENABLE</id>
           <default>0xAE</default><!-- Require pairs -->
+    </attribute>
+    <attribute>
+          <id>PMIC_HEALTH_CHECK_TIMER</id>
+          <default>0xFFFFFFFF</default><!-- Disabled -->
     </attribute>
 </targetInstance>
 

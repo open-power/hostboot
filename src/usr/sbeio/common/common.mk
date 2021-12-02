@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2021
+# Contributors Listed Below - COPYRIGHT 2018,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -47,6 +47,7 @@ OBJS += sbe_ffdc_package_parser.o
 OBJS += sbe_getCapabilities.o
 OBJS += sbe_psuGetHwReg.o
 OBJS += sbe_utils.o
+OBJS += sbe_psuSendMemConfig.o
 
 #Common VPATHs
 VPATH += ${ROOTPATH}/src/usr/sbeio/common

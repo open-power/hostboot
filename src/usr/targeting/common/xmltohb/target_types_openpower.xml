@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2022                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -364,6 +364,9 @@
     </attribute>
     <attribute>
       <id>PMIC_ERROR_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>PMIC_HEALTH_CHECK_TIMER</id>
     </attribute>
     <attribute>
       <id>PMIC_READ_TIMEOUT_SEC</id>

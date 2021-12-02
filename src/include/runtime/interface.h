@@ -587,6 +587,7 @@ typedef struct hostInterfaces
        HBRT_FW_MSG_TYPE_GET_ELOG_TIME     = 15, // struct dateTime
        HBRT_FW_MSG_TYPE_SPILOCK           = 16, // struct spi_lock
        HBRT_FW_MSG_TYPE_INITIATE_GARD     = 17, // struct initiate_gard
+       HBRT_FW_MSG_TYPE_PMIC_HEALTH_CHECK = 18, // no additional data required
     };
 
     // NVDIMM protection state enum
@@ -1298,6 +1299,12 @@ struct postInitCalls_t
      *         this flow.
      */
     void (*callLoadAndStartPMComplex)();
+
+    /** @brief Initiates callback from PHYP into HBRT for PMIC health check
+     *         using the host_callback interface function. Callback will be
+     *         made to the firmware_notify function.
+     */
+    void (*callSetupPmicHealthCheck)();
 
 };
 

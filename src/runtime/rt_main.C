@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -179,6 +179,11 @@ runtimeInterfaces_t* rt_start(hostInterfaces_t* intf)
 
     // callLoadAndStartPMComplex is no-op on OPAL systems
     rtPost->callLoadAndStartPMComplex();
+
+#ifndef CONFIG_FSP_BUILD
+    // set up PHYP callback to HBRT
+    rtPost->callSetupPmicHealthCheck();
+#endif
 
     // check for possible missed in-flight messages/interrupts
     if (rtPost->callClearPendingOccMsgs != nullptr )

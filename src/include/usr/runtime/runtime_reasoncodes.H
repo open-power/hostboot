@@ -72,6 +72,7 @@ namespace RUNTIME
         MOD_PM_RT_RESET_W_REASON         = 0x2E,  /**< rt_occ.C */
         MOD_VERIFY_AND_MOVE_PAYLOAD      = 0x2F,  /**< populate_hbruntime.C */
         MOD_LOG_GARD_EVENT               = 0x30,  /**< rt_fwnotify.C */
+        MOD_CREATE_PMIC_HEALTH_CHECK_CALLBACK = 0x31,  /**< rt_fwnotify.C */
     };
 
     enum RuntimeReasonCode
@@ -162,6 +163,8 @@ namespace RUNTIME
         RC_SPI_DEVICE_DUPLICATE_IN_MRW = RUNTIME_COMP_ID | 0x53,
         RC_EXTRA_SPI_DEVICE_IN_MRW     = RUNTIME_COMP_ID | 0x54,
         RC_LOG_NX_GARD_INVALID_NX_QUANTITY = RUNTIME_COMP_ID | 0x55,
+        RC_HOST_CALLBACK_INTERFACE_ERR = RUNTIME_COMP_ID | 0x56,
+        RC_HOST_CALLBACK_ERR           = RUNTIME_COMP_ID | 0x57,
     };
 
     enum UserDetailsTypes

@@ -30,6 +30,8 @@
  */
 
 #include <sbeio/sbe_retry_handler.H>       // SbeRetryHandler
+#include <sbeio/sbeioif.H>                 // getPmicHlthCheckData
+#include <sbeio/sbe_psudd.H>               // SbePsu
 #include <util/runtime/rt_fwreq_helper.H>  // firmware_request_helper
 #include <runtime/interface.h>             // g_hostInterfaces
 #include <runtime/runtime_reasoncodes.H>   // MOD_RT_FIRMWARE_NOTIFY, etc
@@ -44,6 +46,7 @@
 #include <pldm/pldmif.H>                   // PLDM::get_next_request
 #include <sys/time.h>                      // nanosleep
 #include <util/util_reasoncodes.H>
+#include <runtime/hbrt_utilities.H>        // HBRT_TRACE_NAME
 
 using namespace TARGETING;
 using namespace RUNTIME;
@@ -54,6 +57,9 @@ using namespace SBEIO;
 // Trace definition
 extern trace_desc_t* g_trac_runtime;
 extern trace_desc_t* g_trac_hbrt;
+
+const uint32_t HOST_CALLBACK_TIMER_DISABLED = 0xFFFFFFFF;
+const uint32_t HOST_CALLBACK_TIMER_ONE_SECOND = MS_PER_SEC;
 
 /**
  * @brief The lower and upper bounds for the sequence ID.
@@ -731,6 +737,183 @@ void handleMctpAvailable(void)
 }
 #endif
 
+#ifndef CONFIG_FSP_BUILD
+/**
+ *  @brief Create the callback into HBRT for the PMIC health check
+ *
+ *  @param[in] i_firstCall - Creating the first callback
+ *
+ *  @return errlHndl_t - nullptr if no error
+ **/
+errlHndl_t createPmicHealthCheckCallback(bool i_firstCall)
+{
+    errlHndl_t l_err = nullptr;
+
+    do {
+
+        // Get the PMIC health check callback timer value from
+        // the attribute (in milliseconds)
+        auto l_host_callback_timer = UTIL::assertGetToplevelTarget()->
+                                        getAttr<ATTR_PMIC_HEALTH_CHECK_TIMER>();
+
+        // First check for callback disabled
+        if (l_host_callback_timer == HOST_CALLBACK_TIMER_DISABLED)
+        {
+            TRACFCOMP(g_trac_hbrt,
+                "createPmicHealthCheckCallback: ATTR_PMIC_HEALTH_CHECK_TIMER = %d Host callback disabled.",
+                HOST_CALLBACK_TIMER_DISABLED);
+            break;
+        }
+
+        // On the first call to this function set the callback timer to 1 second
+        if (i_firstCall)
+        {
+            l_host_callback_timer = HOST_CALLBACK_TIMER_ONE_SECOND;
+        }
+
+        // Check the interface
+        if( g_hostInterfaces == nullptr ||
+          ( g_hostInterfaces->host_callback == nullptr ) )
+        {
+            TRACFCOMP(g_trac_runtime,
+                ERR_MRK"createPmicHealthCheckCallback: host_callback interface not linked");
+            /*@
+             * @errortype
+             * @severity         ERRL_SEV_INFORMATIONAL
+             * @moduleid         MOD_CREATE_PMIC_HEALTH_CHECK_CALLBACK
+             * @reasoncode       RC_HOST_CALLBACK_INTERFACE_ERR
+             * @userdata1        First call to create callback function
+             * @userdata2        <unused>
+             * @devdesc          Host callback interface not linked
+             * @custdesc         Internal firmware error
+             */
+            l_err = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+                                  MOD_CREATE_PMIC_HEALTH_CHECK_CALLBACK,
+                                  RC_HOST_CALLBACK_INTERFACE_ERR,
+                                  i_firstCall,
+                                  0,
+                                  ErrlEntry::ADD_SW_CALLOUT);
+            l_err->collectTrace(HBRT_TRACE_NAME,1024);
+            break;
+        }
+
+        // Generate a new host callback (in milliseconds)
+        TRACFCOMP(g_trac_hbrt,
+            "createPmicHealthCheckCallback: Create host_callback for PMIC health check in %d milliseconds",
+            l_host_callback_timer);
+
+        size_t l_msg_size = hostInterfaces::HBRT_FW_MSG_BASE_SIZE;
+        uint8_t l_msg_buf[l_msg_size] = {0};
+
+        hostInterfaces::hbrt_fw_msg* l_fw_msg =
+            reinterpret_cast<hostInterfaces::hbrt_fw_msg *>(l_msg_buf);
+        l_fw_msg->io_type = hostInterfaces::HBRT_FW_MSG_TYPE_PMIC_HEALTH_CHECK;
+
+        int l_rc = g_hostInterfaces->host_callback(
+                                        l_host_callback_timer,
+                                        l_msg_size,
+                                        reinterpret_cast<void*>(l_fw_msg) );
+
+        if(l_rc)
+        {
+            TRACFCOMP( g_trac_hbrt, ERR_MRK
+                "createPmicHealthCheckCallback: host_callback failed. "
+                "rc 0x%X host callback timer 0x%X message size %d",
+                l_rc, l_host_callback_timer, l_msg_size );
+
+            // Convert rc to error log
+            /*@
+             * @errortype
+             * @moduleid         MOD_CREATE_PMIC_HEALTH_CHECK_CALLBACK
+             * @reasoncode       RC_HOST_CALLBACK_ERR
+             * @userdata1        Hypervisor return code
+             * @userdata2[0:31]  Callback timer value
+             * @userdata2[32:63] Callback message size
+             * @devdesc          Host Callback failed.
+             * @custdesc         Internal firmware error.
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                                        ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                        MOD_CREATE_PMIC_HEALTH_CHECK_CALLBACK,
+                                        RC_HOST_CALLBACK_ERR,
+                                        l_rc,
+                                        TWO_UINT32_TO_UINT64(
+                                                    l_host_callback_timer,
+                                                    l_msg_size));
+
+            l_err->collectTrace(HBRT_TRACE_NAME,1024);
+            break;
+        }
+    } while (0);
+
+    return l_err;
+}
+
+/**
+ *  @brief Handle the PHYP callback to perform the PMIC health check.
+ *
+ *  @return void
+ **/
+void handlePmicHealthCheckCallback(void)
+{
+    errlHndl_t l_err = nullptr;
+
+    do
+    {
+        // PMIC health check uses the SBE PSU interface,
+        // make sure it is constructed
+        SbePsu::getTheInstance();
+
+        // Call function to create a PEL with PMIC telemetry data from the SBE.
+        // This info PEL will be committed inside the health check function.
+        // The error returned indicates a problem with the health check, commit it.
+        l_err = SBEIO::getPmicHlthCheckData();
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_hbrt,
+                "handlePmicHealthCheckCallback: Call to getPmicHlthCheckData failed");
+            // Do not break out, commit the error then create a new
+            // callback and try again, make sure the error is informational
+            l_err->setSev(ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_err, RUNTIME_COMP_ID);
+        }
+
+        // Call the function to create a new callback
+        uint32_t l_firstCall = false;
+        l_err = createPmicHealthCheckCallback( l_firstCall );
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_hbrt,
+                "handlePmicHealthCheckCallback: Call to createPmicHealthCheckCallback failed");
+            // Make sure the error is informational
+            l_err->setSev(ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_err, RUNTIME_COMP_ID);
+            break;
+        }
+
+    } while (0);
+
+}
+
+/**
+ *  @brief Setup the initial callback into HBRT for the PMIC health check
+ **/
+void setupPmicHealthCheck()
+{
+    errlHndl_t l_err = nullptr;
+
+    // Call the function to create the first host callback
+    uint32_t l_firstCall = true;
+    l_err = createPmicHealthCheckCallback( l_firstCall );
+    if (l_err)
+    {
+        TRACFCOMP(g_trac_hbrt,
+            "setupPmicHealthCheck: Call to createPmicHealthCheckCallback failed");
+        errlCommit(l_err, RUNTIME_COMP_ID);
+    }
+}
+#endif
+
 /**
  * @see  src/include/runtime/interface.h for definition of call
  *
@@ -853,6 +1036,17 @@ void firmware_notify( uint64_t i_len, void *i_data )
             }// END case hostInterfaces::HBRT_FW_MSG_TYPE_MCTP_AVAILABLE:
             break;
 #endif
+#ifndef CONFIG_FSP_BUILD
+            case hostInterfaces::HBRT_FW_MSG_TYPE_PMIC_HEALTH_CHECK:
+            {
+                TRACFCOMP(g_trac_runtime,
+                          "firmware_notify: PMIC health check callback");
+
+                handlePmicHealthCheckCallback();
+            }
+            break;
+#endif
+
             default:
             {
                 l_badMessage = true;
@@ -909,11 +1103,17 @@ void firmware_notify( uint64_t i_len, void *i_data )
    TRACFCOMP(g_trac_hbrt, EXIT_MRK"firmware_notify");
 };
 
+
 struct registerFwNotify
 {
     registerFwNotify()
     {
         getRuntimeInterfaces()->firmware_notify = &firmware_notify;
+
+#ifndef CONFIG_FSP_BUILD
+        postInitCalls_t* rt_postInits = getPostInitCalls();
+        rt_postInits->callSetupPmicHealthCheck = &setupPmicHealthCheck;
+#endif
     }
 };
 
