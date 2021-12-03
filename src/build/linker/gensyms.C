@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -284,9 +284,16 @@ void* read_module_symbols(void* input)
     string module_path = g_imageName.substr(0, g_imageName.rfind('/') + 1) +
                          module;
 
+    const char* demangle = " -C ";
+
+    if (getenv("HOSTBOOT_GENSYMS_NO_DEMANGLE"))
+    {
+        demangle = "";
+    }
+
     // Create the 'objdump' command for finding all the symbols and start as
     // a sub-process.
-    string command = string(g_crossPrefix) + string("objdump --syms -C ") +
+    string command = string(g_crossPrefix) + "objdump --syms " + demangle +
                      module_path;
     FILE* pipe = popen(command.c_str(), "r");
     if (NULL == pipe) return NULL;

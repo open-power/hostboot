@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -188,6 +188,14 @@ errlHndl_t handleSbeHresetRequest(const state_effecter_callback_args& i_args);
 errlHndl_t handleSetEventReceiverRequest(msg_q_t i_msgQ,
                                          const pldm_msg* i_msg,
                                          size_t i_payload_len);
+
+/* @brief Handler for Set State Effecter requests for DCE invocation.
+ *
+ * @param[in] i_args         State query handler arguments.
+ * @return errlHndl_t        Error if any, otherwise nullptr.
+ */
+errlHndl_t handleInvokeDceRequest(const state_effecter_callback_args& i_args);
+
 }
 
 #endif

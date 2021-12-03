@@ -56,6 +56,10 @@
 #include <targeting/common/predicates/predicatehwas.H>
 #include <targeting/targplatutil.H>
 
+// Misc
+#include <secureboot/service.H>
+
+
 using namespace TARGETING;
 using namespace PLDM;
 using namespace ERRORLOG;
@@ -587,6 +591,32 @@ errlHndl_t addSystemStateControlPdrs(PdrManager& io_pdrman)
     return nullptr;
 }
 
+/* @brief Add the state effecter PDR for Hostboot Dynamic Code Execution. This
+ * should only be done in non-secure mode.
+ *
+ * @param[in/out] io_pdrman  The PDR manager to add to
+ * @return errlHndl_t        Error if any, otherwise nullptr
+ */
+void addDcePdrs(PdrManager& io_pdrman)
+{
+    const uint16_t CONTAINER_ID_TOPLEVEL = 0;
+
+    pldm_entity chassis =
+    {
+        .entity_type = ENTITY_TYPE_CHASSIS,
+        .entity_instance_num = 1, // There's only one chassis
+        .entity_container_id = CONTAINER_ID_TOPLEVEL
+    };
+
+    const uint16_t DCE_STATE_SET = 0x7dce; // Arbitrary number unlikely to be used elsewhere
+
+    io_pdrman.addStateEffecterPdr(UTIL::assertGetToplevelTarget(),
+                                  chassis,
+                                  DCE_STATE_SET,
+                                  1, // valid states, don't care what this is
+                                  PdrManager::STATE_QUERY_HANDLER_INVOKE_DCE);
+}
+
 errlHndl_t addFruInventoryPdrs(PdrManager& io_pdrman)
 {
     errlHndl_t errl = nullptr;
@@ -796,6 +826,12 @@ errlHndl_t addHostbootPdrs(PdrManager& io_pdrman)
     errl || (errl = addFruInventoryPdrs(io_pdrman));
 
     addSbeManagementPdrs(io_pdrman);
+
+    if (SECUREBOOT::enabled() == false)
+    { // Dynamic Code Execution should not be enabled in secure mode
+        addDcePdrs(io_pdrman);
+    }
+
     io_pdrman.addTerminusLocatorPDR();
 
     PLDM_EXIT("addHostbootPdrs completed %s error", errl ? "with" : "without");

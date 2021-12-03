@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2021
+# Contributors Listed Below - COPYRIGHT 2020,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -77,6 +77,7 @@ PLDM_EXTENDED_COMMON_OBJS += pldm_fru.o
 PLDM_EXTENDED_COMMON_OBJS += pldm_fru_data_responders.o
 PLDM_EXTENDED_COMMON_OBJS += pldm_watchdog.o
 PLDM_EXTENDED_COMMON_OBJS += pldm_monitor_control_responders.o
+PLDM_EXTENDED_COMMON_OBJS += pldm_dce_responder.o
 PLDM_EXTENDED_COMMON_OBJS += pldm_discovery_control_responders.o
 PLDM_EXTENDED_COMMON_OBJS += sbe_dump.o
 

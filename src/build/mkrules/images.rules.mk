@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2017
+# Contributors Listed Below - COPYRIGHT 2013,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -70,5 +70,10 @@ $(IMGDIR)/%.list.bz2 $(IMGDIR)/%.syms: $(IMGDIR)/%.bin
 		  $(if $($*_EXTENDED_MODULES), $*_extended.bin 0x40000000) \
                   > ./img/$*.syms && \
               src/build/linker/genlist $*.bin | bzip2 -zc > ./img/$*.list.bz2)
+#	Generate mangled symbols for Dynamic Code Execution tooling support
+	$(C1)(cd $(ROOTPATH)&& \
+              HOSTBOOT_GENSYMS_NO_DEMANGLE=1 src/build/linker/gensyms $*.bin \
+		  $(if $($*_EXTENDED_MODULES), $*_extended.bin 0x40000000) \
+                  > ./img/$*.syms.mangled)
 
 endif

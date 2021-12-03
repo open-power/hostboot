@@ -1,11 +1,12 @@
+#!/bin/bash
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: config.mk $
+# $Source: src/build/tools/dce/dce-bmc-invoke.sh $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2022
+# Contributors Listed Below - COPYRIGHT 2021,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -23,12 +24,12 @@
 #
 # IBM_PROLOG_END_TAG
 
-.DEFAULT_GOAL = all
+# Usage: dce-bmc-invoke.sh
+#
+# This script makes a PLDM request to Hostboot to request the DCE LID
+# from the BMC and execute it.
 
-MKRULESDIR = $(ROOTPATH)/src/build/mkrules
+# 0x7dce is the DCE state set ID from the Hostboot PDR creation code.
+EFFECTER_ID=$(busctl call xyz.openbmc_project.PLDM /xyz/openbmc_project/pldm xyz.openbmc_project.PLDM.PDR FindStateEffecterPDR yqq 2 45 0x7dce | awk '{print int(256 * $17 + $16)}')
 
-include $(MKRULESDIR)/util.mk
-include $(MKRULESDIR)/env.mk
-include $(MKRULESDIR)/rules.mk
-include $(MKRULESDIR)/passes.mk
-include $(MKRULESDIR)/dce.mk
+pldmtool platform SetStateEffecterStates -m 9 -i $EFFECTER_ID -c 1 -d 00 00

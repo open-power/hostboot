@@ -1,0 +1,45 @@
+#!/bin/bash
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/build/tools/dce/dce-compile $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2020,2022
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+# Usage: dce-compile [arguments...]
+#
+# This script runs the C++ compiler with the flags required for
+# building Dynamic Code Execution (DCE) binaries. Invoke it like you
+# would g++.
+# Requires that the user be in a Hostboot workon.
+
+if [[ ! "$PROJECT_ROOT" ]] ; then
+    echo "$0: Must be inside a Hostboot workon" >&2
+    exit 1
+fi
+
+set -e
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+
+set -x
+
+${CROSS_PREFIX}g++ -D__HOSTBOOT_MODULE=DCE -DNO_INITIALIZER_LIST -DNO_PLAT_STD_STRING_SUPPORT -D__FAPI -include config.h -Os -nostdlib -nostdinc -g -mno-vsx -mno-altivec -Werror -Wall -mtraceback=no -pipe -ffunction-sections -fdata-sections -ffreestanding -mbig-endian -DFAPI2_ENABLE_PLATFORM_GET_TARGET -DCOMPILETIME_TRACEHASH -nostdinc++ -fno-rtti -fno-exceptions -Werror -Wall -fuse-cxa-atexit -std=gnu++14 -s -Os -nostdinc -nostdlib -nostartfiles -fPIC -Wl,-z,norelro -Wl,-z,max-page-size=1 -fno-zero-initialized-in-bss -mabi=elfv1 -I $PROJECT_ROOT/src/include -I $PROJECT_ROOT/src/include/usr -I $PROJECT_ROOT/src/subtree -I $PROJECT_ROOT/obj/genfiles $INCDIRS -shared "$@" -T "$SCRIPT_DIR/dce.ld"

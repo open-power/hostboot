@@ -672,6 +672,11 @@ void PdrManager::addStateEffecterPdr(Target* const i_target,
                  PDR_AUTO_CALCULATE_RECORD_HANDLE,
                  PDR_IS_NOT_REMOTE);
 
+    PLDM_INF("Added state effecter PDR for target 0x%08x, sensor id = 0x%08x, state set id = %d",
+             get_huid(i_target),
+             iv_next_state_query_id,
+             i_state_set_id);
+
     const pldm_state_query_record_t query_record
     {
         .target_huid = get_huid(i_target),
@@ -762,9 +767,15 @@ struct state_query_handler_t
     state_effecter_handler_t effecter_handler = nullptr;
 };
 
+/* @brief Array associating state query handler enumeration values with functions.
+ *
+ * The offset in this array should correspond to the value of the
+ * state_query_handler_id_t enumeration that the function handles (e.g. array
+ * element 2 should correspond to STATE_QUERY_HANDLER_OCC_STATE_QUERY).
+ */
 const state_query_handler_t handlers[] =
 {
-    { nullptr, nullptr },                               // STATE_QUERY_HANDLER enumeration starts at 1
+    { nullptr, nullptr },                               //    STATE_QUERY_HANDLER enumeration starts at 1
     { handleFunctionalStateSensorGetRequest, nullptr }, // 1: STATE_QUERY_HANDLER_FUNCTIONAL_STATE_SENSOR
     { handleOccStateSensorGetRequest,                   // 2: STATE_QUERY_HANDLER_OCC_STATE_QUERY
       handleOccSetStateEffecterRequest },
@@ -774,6 +785,8 @@ const state_query_handler_t handlers[] =
       handleSbeHresetRequest },                         // 4: STATE_QUERY_HANDLER_REQUEST_HRESET
     { handleAttributeBackedSensorGetRequest,            // 5: STATE_QUERY_HANDLER_ATTRIBUTE_GETTER
       nullptr },
+    { nullptr,
+      handleInvokeDceRequest }                          // 6: STATE_QUERY_HANDLER_INVOKE_DCE
 };
 
 state_query_handler_t get_state_handler(PdrManager::state_query_handler_id_t i_id)

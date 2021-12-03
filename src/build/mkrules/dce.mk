@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: config.mk $
+# $Source: src/build/mkrules/dce.mk $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2022
+# Contributors Listed Below - COPYRIGHT 2021,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -23,12 +23,8 @@
 #
 # IBM_PROLOG_END_TAG
 
-.DEFAULT_GOAL = all
-
-MKRULESDIR = $(ROOTPATH)/src/build/mkrules
-
-include $(MKRULESDIR)/util.mk
-include $(MKRULESDIR)/env.mk
-include $(MKRULESDIR)/rules.mk
-include $(MKRULESDIR)/passes.mk
-include $(MKRULESDIR)/dce.mk
+%.dce.lid: %.c++ $(PROJECT_ROOT)/img/hbicore.list.bz2
+	$(ROOTPATH)/src/build/tools/dce/dce-compile "$<" -o $@.intermediate $(INCFLAGS)
+	$(ROOTPATH)/src/build/tools/dce/preplib.py $@.intermediate
+	mv $@.intermediate.lid $@
+	@echo Copy $@ to the BMC
