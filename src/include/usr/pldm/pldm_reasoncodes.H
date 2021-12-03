@@ -158,6 +158,7 @@ namespace PLDM
         RC_SBE_DUMP_TIMED_OUT       = PLDM_COMP_ID | 0x32,
         RC_BAD_NEXT_TRANSFER_HANDLE = PLDM_COMP_ID | 0x33,
         RC_UNSUPPORTED_MINOR_VERSION = PLDM_COMP_ID | 0x34,
+        RC_BASE_INIT_FAIL           = PLDM_COMP_ID | 0x35,
     };
 
     /**

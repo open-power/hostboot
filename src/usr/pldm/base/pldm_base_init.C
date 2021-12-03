@@ -36,8 +36,12 @@
 #include "pldm_msg_queues.H"
 #include <initservice/taskargs.H>
 #include <pldm/requests/pldm_tid_requests.H>
+#include <pldm/pldm_reasoncodes.H>
+#include <assert.h>
 #include <sys/sync.h>
+#include <sys/task.h>
 #include <vector>
+#include <errl/errlmanager.H>
 #include <pldm/pldmif.H>
 #include <pldm/base/hb_bios_attrs.H>
 #include <pldm/pldm_trace.H>
@@ -156,6 +160,15 @@ void base_init(errlHndl_t& o_errl)
     ERRORLOG::ErrlManager::errlResourceReady(ERRORLOG::BMC);
 #endif
     }while(0);
+
+    if(o_errl)
+    {
+        ERRORLOG::errlCommit(o_errl, PLDM_COMP_ID);
+        /* Give ErrlManager a chance to handle committed log */
+        task_yield();
+        INITSERVICE::doShutdown(RC_BASE_INIT_FAIL);
+        assert(false, "pldm_base_init: should never return from doShutdown");
+    }
 }
 
 } // anonymous namespace
