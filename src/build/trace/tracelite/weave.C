@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -503,15 +503,6 @@ void inputloop()
     }
 }
 
-void cleanup_strings()
-{
-    for(int i = 0; i < g_hbotStrings.size(); i++)
-    {
-        delete[] g_hbotStrings[i];
-    }
-
-}
-
 // Main weave function
 // Requires hbotStringFile, debug file is optional
 int main(int argc, char** argv)
@@ -538,9 +529,6 @@ int main(int argc, char** argv)
 
     // Try to parse stdin, whether or not hbotStringFile was parsed correctly
     inputloop();
-
-    // Cleanup the unorder_map we built that has all of the strings
-    cleanup_strings();
 
     // Close the debug file
     if (debugfd)
