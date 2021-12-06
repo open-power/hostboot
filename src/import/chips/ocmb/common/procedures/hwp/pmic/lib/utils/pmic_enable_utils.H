@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -623,6 +623,20 @@ fapi2::ReturnCode set_startup_seq_register(
 //-----------------------------------
 // Templated SPD Biasing functions
 //-----------------------------------
+///
+/// @brief Bias with spd voltages for TI pmic with revision less than 0x23
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[in] i_ocmb_target OCMB parent target of pmic
+/// @param[in] i_id relative ID of PMIC (0/1)
+/// @param[in] i_rail_index SWA/SWB/SWC/SWD rails of pmic
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode bias_with_spd_voltages_TI_rev_less_then_23(
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const mss::pmic::id i_id,
+    const uint8_t i_rail_index);
 
 ///
 /// @brief Bias with spd voltages for IDT pmic
@@ -650,122 +664,6 @@ fapi2::ReturnCode order_pmics_by_sequence(
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& io_pmics);
 
 ///
-/// @brief Bias with spd voltages for IDT pmic
-///
-/// @param[in] i_pmic_target PMIC target
-/// @param[in] i_ocmb_target OCMB parent target of pmic
-/// @param[in] i_id relative ID of PMIC (0/1)
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
-///
-template <>
-inline fapi2::ReturnCode bias_with_spd_voltages<mss::pmic::vendor::IDT>(
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
-    const mss::pmic::id i_id)
-{
-    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
-
-    for (uint8_t l_rail_index = mss::pmic::rail::SWA; l_rail_index <= mss::pmic::rail::SWD; ++l_rail_index)
-    {
-        uint8_t l_volt_bitmap;
-        FAPI_TRY(calculate_voltage_bitmap_from_attr(i_pmic_target, i_id, l_rail_index, l_volt_bitmap));
-
-        {
-            fapi2::buffer<uint8_t> l_volt_buffer = l_volt_bitmap << CONSTS::SHIFT_VOLTAGE_FOR_REG;
-            FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, mss::pmic::VOLT_SETTING_ACTIVE_REGS[l_rail_index], l_volt_buffer),
-                     "Error writing address 0x%02hhX of PMIC %s", mss::pmic::VOLT_SETTING_ACTIVE_REGS[l_rail_index],
-                     mss::c_str(i_pmic_target));
-        }
-
-    }
-
-    return fapi2::FAPI2_RC_SUCCESS;
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief Bias with spd voltages for TI pmic
-///
-/// @param[in] i_pmic_target PMIC target
-/// @param[in] i_ocmb_target OCMB parent target of pmic
-/// @param[in] i_id relative ID of PMIC (0/1)
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
-///
-template <>
-inline fapi2::ReturnCode bias_with_spd_voltages<mss::pmic::vendor::TI>(
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
-    const mss::pmic::id i_id)
-{
-    using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
-    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
-
-    for (uint8_t l_rail_index = mss::pmic::rail::SWA; l_rail_index <= mss::pmic::rail::SWD; ++l_rail_index)
-    {
-        uint8_t l_volt_bitmap;
-        FAPI_TRY(calculate_voltage_bitmap_from_attr(i_pmic_target, i_id, l_rail_index, l_volt_bitmap));
-
-        uint8_t l_volt_range_select = 0;
-        FAPI_TRY(mss::attr::get_volt_range_select[l_rail_index][i_id](i_ocmb_target, l_volt_range_select));
-
-        // SWD supports a RANGE 1, but NOT SWA-C
-        if (l_rail_index == mss::pmic::rail::SWD)
-        {
-            // Can set range and voltage directly
-            fapi2::buffer<uint8_t> l_volt_range_buffer;
-
-            // Read in what the register has, as to not overwrite any default values
-            FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(i_pmic_target, REGS::R2B, l_volt_range_buffer));
-
-            l_volt_range_buffer.writeBit<FIELDS::SWD_VOLTAGE_RANGE>(l_volt_range_select);
-
-            // Write to PMIC
-            FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(i_pmic_target, REGS::R2B, l_volt_range_buffer));
-        }
-        else
-        {
-            // Check if the range is range 1, in which case we will need to convert to range 0 (thanks TI)
-            if (l_volt_range_select == CONSTS::RANGE_1)
-            {
-                // Convert from RANGE1 -> RANGE0
-
-                // Since both ranges are 5mV (at least they're supposed to be)
-                // we can just subtract the difference between range 1 and 0
-                // which is 600mV -> 800mV
-                // 200mV / 5 = 40
-                uint8_t l_old_voltage = l_volt_bitmap;
-                l_volt_bitmap = l_volt_bitmap - CONSTS::CONVERT_RANGE1_TO_RANGE0;
-
-                // Check for overflow (the old voltage should be larger unless we rolled over)
-                FAPI_ASSERT(l_volt_bitmap < l_old_voltage ,
-                            fapi2::PMIC_RANGE_CONVERSION_OVERFLOW()
-                            .set_PMIC_TARGET(i_pmic_target)
-                            .set_RANGE_0_VOLT(l_volt_bitmap)
-                            .set_RANGE_1_VOLT(l_old_voltage)
-                            .set_RAIL(mss::pmic::VOLT_SETTING_ACTIVE_REGS[l_rail_index]),
-                            "Voltage appeared overflowed during conversion from range 1 to 0 on rail %s of %s "
-                            "RANGE_1_VOLT: 0x%02X RANGE_0_VOLT: 0x%02X",
-                            PMIC_RAIL_NAMES[l_rail_index], mss::c_str(i_pmic_target), l_old_voltage, l_volt_bitmap);
-            }
-        }
-
-        {
-            fapi2::buffer<uint8_t> l_volt_buffer = l_volt_bitmap << CONSTS::SHIFT_VOLTAGE_FOR_REG;
-            FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, mss::pmic::VOLT_SETTING_ACTIVE_REGS[l_rail_index], l_volt_buffer),
-                     "Error writing address 0x%02hhX of PMIC %s", mss::pmic::VOLT_SETTING_ACTIVE_REGS[l_rail_index],
-                     mss::c_str(i_pmic_target));
-        }
-    }
-
-    return fapi2::FAPI2_RC_SUCCESS;
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
 /// @brief Bias PMIC from SPD settings per vendor
 ///
 /// @tparam V mss::pmic::vendor (IDT/TI)
@@ -777,85 +675,6 @@ template <mss::pmic::vendor V>
 fapi2::ReturnCode bias_with_spd_settings(
     const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
     const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target);
-
-///
-/// @brief Bias IDT PMIC from SPD settings
-///
-/// @param[in] i_pmic_target PMIC target
-/// @param[in] i_ocmb_target OCMB parent target of pmic
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
-///
-template<>
-inline fapi2::ReturnCode bias_with_spd_settings<mss::pmic::vendor::IDT>(
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target)
-{
-    // Unlock Vendor Region
-    FAPI_TRY(mss::pmic::unlock_vendor_region(i_pmic_target),
-             "Error unlocking vendor region on PMIC %s", mss::c_str(i_pmic_target));
-
-    {
-        // PMIC position/ID of the OCMB target. There could be 4 total, but we care about whether its PMIC0(2) or PMIC1(3)
-        const mss::pmic::id l_relative_pmic_id = get_relative_pmic_id(i_pmic_target);
-
-        // Phase combination
-        FAPI_TRY(mss::pmic::bias_with_spd_phase_comb(i_pmic_target, i_ocmb_target, l_relative_pmic_id));
-
-        // Voltage ranges
-        FAPI_TRY(mss::pmic::bias_with_spd_volt_ranges(i_pmic_target, i_ocmb_target, l_relative_pmic_id));
-
-        // Voltages
-        FAPI_TRY(mss::pmic::bias_with_spd_voltages<mss::pmic::IDT>(i_pmic_target, i_ocmb_target, l_relative_pmic_id));
-
-        // Startup sequence
-        FAPI_TRY(mss::pmic::bias_with_spd_startup_seq(i_pmic_target, i_ocmb_target, l_relative_pmic_id));
-
-        // Current consumption
-        FAPI_TRY(mss::pmic::set_current_limiter_warnings(i_pmic_target, i_ocmb_target));
-    }
-
-fapi_try_exit:
-    // Try to lock vendor region even in the case of an error in this function
-    return mss::pmic::lock_vendor_region(i_pmic_target, fapi2::current_err);
-}
-
-///
-/// @brief Bias TI PMIC from SPD settings
-///
-/// @param[in] i_pmic_target PMIC target
-/// @param[in] i_ocmb_target OCMB parent target of pmic
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
-///
-template<>
-inline fapi2::ReturnCode bias_with_spd_settings<mss::pmic::vendor::TI>(
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target)
-{
-    // Unlock Vendor Region
-    FAPI_TRY(mss::pmic::unlock_vendor_region(i_pmic_target),
-             "Error unlocking vendor region on PMIC %s", mss::c_str(i_pmic_target));
-    {
-        // PMIC position/ID under OCMB target
-        const mss::pmic::id l_relative_pmic_id = get_relative_pmic_id(i_pmic_target);
-
-        // Phase combination
-        FAPI_TRY(mss::pmic::bias_with_spd_phase_comb(i_pmic_target, i_ocmb_target, l_relative_pmic_id));
-
-        // Voltages
-        // TI pmic only has range 0 for SWA-C. We need to convert anything SPD that says range 1 --> range 0
-        FAPI_TRY(mss::pmic::bias_with_spd_voltages<mss::pmic::TI>(i_pmic_target, i_ocmb_target, l_relative_pmic_id));
-
-        // Startup sequence
-        FAPI_TRY(mss::pmic::bias_with_spd_startup_seq(i_pmic_target, i_ocmb_target, l_relative_pmic_id));
-
-        // Current consumption
-        FAPI_TRY(mss::pmic::set_current_limiter_warnings(i_pmic_target, i_ocmb_target));
-    }
-
-fapi_try_exit:
-    // Try to lock vendor region even in the case of an error in this function
-    return mss::pmic::lock_vendor_region(i_pmic_target, fapi2::current_err);
-}
 
 //------------------- ENABLE FUNCTIONS-----------------//
 
@@ -902,6 +721,19 @@ fapi2::ReturnCode power_down_sequence_4u(const fapi2::Target<fapi2::TARGET_TYPE_
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode pmic_power_down(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+
+///
+/// @brief Check if PMIC is TI vendor and if the PMIC revision is less than 23
+///
+/// @param[in] i_ocmb_target OCMB parent target
+/// @param[in] i_pmic_target PMIC target
+/// @param[out] o_pmic_is_ti_is_less_than_23 true/false
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+/// @note Can't unit test this properly as R3D is hardcoded in simics
+///
+fapi2::ReturnCode pmic_is_ti_is_rev_less_than_23(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> i_ocmb_target,
+        const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
+        bool& o_pmic_is_ti_is_less_than_23);
 
 ///
 /// @brief Disable PMICs and clear status bits in preparation for enable
@@ -1171,16 +1003,19 @@ fapi2::ReturnCode matching_vendors_helper(
     const uint8_t i_vendor_reg_hi);
 
 ///
-/// @brief Check that the IDT revision # register and attribute match and return revision number
+/// @brief Check that the IDT revision # register and attribute match and return revision number.
+///        In case of TI, just return the revision number
 ///
-/// @param[in] i_ocmb_target OCMB target
-/// @param[in] i_pmic_target PMIC target to check
-/// @param[out] o_rev_reg revision number of IDT PMIC
+/// @param[in]  i_ocmb_target OCMB target
+/// @param[in]  i_pmic_target PMIC target to check
+/// @param[in]  i_vendor_id to run IDT revision check
+/// @param[out] o_rev_reg revision number of PMIC
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
 ///
-fapi2::ReturnCode validate_and_return_idt_revisions(
+fapi2::ReturnCode validate_and_return_pmic_revisions(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
     const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
+    const uint16_t i_vendor_id,
     fapi2::buffer<uint8_t>& o_rev_reg);
 
 ///

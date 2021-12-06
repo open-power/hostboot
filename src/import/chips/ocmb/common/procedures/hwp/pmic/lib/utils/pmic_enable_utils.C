@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -125,7 +125,8 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-}
+} //ns gpio
+
 namespace pmic
 {
 
@@ -661,8 +662,8 @@ fapi2::ReturnCode bias_with_spd_startup_seq(
 
         // Now erase the registers that are higher than our highest sequence (in order to satisfy note 2
         // for registers R40 - R43):
-        // - 2. If bit [7] = ‘0’, bits [6:3] must be programmed as ‘0000’. If bit [7] = ‘1’,
-        // - at least one of the bits [6:3] must be programmed as ‘1’.
+        // - 2. If bit [7] = '0', bits [6:3] must be programmed as '0000'. If bit [7] = '1',
+        // - at least one of the bits [6:3] must be programmed as '1'.
         for (++l_highest_sequence; l_highest_sequence < SEQUENCE_REGS.size(); ++l_highest_sequence)
         {
             fapi2::buffer<uint8_t> l_clear;
@@ -672,6 +673,252 @@ fapi2::ReturnCode bias_with_spd_startup_seq(
 
 fapi_try_exit:
     return fapi2::current_err;
+}
+
+///
+/// @brief Bias with spd voltages for IDT pmic
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[in] i_ocmb_target OCMB parent target of pmic
+/// @param[in] i_id relative ID of PMIC (0/1)
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+template <>
+fapi2::ReturnCode bias_with_spd_voltages<mss::pmic::vendor::IDT>(
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const mss::pmic::id i_id)
+{
+    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
+
+    for (uint8_t l_rail_index = mss::pmic::rail::SWA; l_rail_index <= mss::pmic::rail::SWD; ++l_rail_index)
+    {
+        uint8_t l_volt_bitmap;
+        FAPI_TRY(calculate_voltage_bitmap_from_attr(i_pmic_target, i_id, l_rail_index, l_volt_bitmap));
+
+        {
+            fapi2::buffer<uint8_t> l_volt_buffer = l_volt_bitmap << CONSTS::SHIFT_VOLTAGE_FOR_REG;
+            FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, mss::pmic::VOLT_SETTING_ACTIVE_REGS[l_rail_index], l_volt_buffer),
+                     "Error writing address 0x%02hhX of PMIC %s", mss::pmic::VOLT_SETTING_ACTIVE_REGS[l_rail_index],
+                     mss::c_str(i_pmic_target));
+        }
+
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Bias with spd voltages for TI pmic with revision less than 0x23
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[in] i_ocmb_target OCMB parent target of pmic
+/// @param[in] i_id relative ID of PMIC (0/1)
+/// @param[in] i_rail_index SWA/SWB/SWC/SWD rails of pmic
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode bias_with_spd_voltages_TI_rev_less_then_23(
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const mss::pmic::id i_id,
+    const uint8_t i_rail_index)
+{
+    using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
+    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
+    uint8_t l_volt_bitmap;
+    uint8_t l_volt_range_select = 0;
+
+    FAPI_TRY(calculate_voltage_bitmap_from_attr(i_pmic_target, i_id, i_rail_index, l_volt_bitmap));
+
+    FAPI_TRY(mss::attr::get_volt_range_select[i_rail_index][i_id](i_ocmb_target, l_volt_range_select));
+
+    // SWD supports a RANGE 1, but NOT SWA-C
+    if (i_rail_index == mss::pmic::rail::SWD)
+    {
+        // Can set range and voltage directly
+        fapi2::buffer<uint8_t> l_volt_range_buffer;
+
+        // Read in what the register has, as to not overwrite any default values
+        FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(i_pmic_target, REGS::R2B, l_volt_range_buffer));
+
+        l_volt_range_buffer.writeBit<FIELDS::SWD_VOLTAGE_RANGE>(l_volt_range_select);
+
+        // Write to PMIC
+        FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(i_pmic_target, REGS::R2B, l_volt_range_buffer));
+    }
+    else
+    {
+        // Check if the range is range 1, in which case we will need to convert to range 0 (thanks TI)
+        if (l_volt_range_select == CONSTS::RANGE_1)
+        {
+            // Convert from RANGE1 -> RANGE0
+
+            // Since both ranges are 5mV (at least they're supposed to be)
+            // we can just subtract the difference between range 1 and 0
+            // which is 600mV -> 800mV
+            // 200mV / 5 = 40
+            uint8_t l_old_voltage = l_volt_bitmap;
+            l_volt_bitmap = l_volt_bitmap - CONSTS::CONVERT_RANGE1_TO_RANGE0;
+
+            // Check for overflow (the old voltage should be larger unless we rolled over)
+            FAPI_ASSERT(l_volt_bitmap < l_old_voltage ,
+                        fapi2::PMIC_RANGE_CONVERSION_OVERFLOW()
+                        .set_PMIC_TARGET(i_pmic_target)
+                        .set_RANGE_0_VOLT(l_volt_bitmap)
+                        .set_RANGE_1_VOLT(l_old_voltage)
+                        .set_RAIL(mss::pmic::VOLT_SETTING_ACTIVE_REGS[i_rail_index]),
+                        "Voltage appeared overflowed during conversion from range 1 to 0 on rail %s of %s "
+                        "RANGE_1_VOLT: 0x%02X RANGE_0_VOLT: 0x%02X",
+                        PMIC_RAIL_NAMES[i_rail_index], mss::c_str(i_pmic_target), l_old_voltage, l_volt_bitmap);
+        }
+    }
+
+    {
+        fapi2::buffer<uint8_t> l_volt_buffer = l_volt_bitmap << CONSTS::SHIFT_VOLTAGE_FOR_REG;
+        FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, mss::pmic::VOLT_SETTING_ACTIVE_REGS[i_rail_index], l_volt_buffer),
+                 "Error writing address 0x%02hhX of PMIC %s", mss::pmic::VOLT_SETTING_ACTIVE_REGS[i_rail_index],
+                 mss::c_str(i_pmic_target));
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Bias with spd voltages for TI pmic
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[in] i_ocmb_target OCMB parent target of pmic
+/// @param[in] i_id relative ID of PMIC (0/1)
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+template <>
+fapi2::ReturnCode bias_with_spd_voltages<mss::pmic::vendor::TI>(
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const mss::pmic::id i_id)
+{
+    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
+    fapi2::buffer<uint8_t> l_pmic_rev;
+    constexpr uint8_t TI_REV_23 = 0x23;
+
+    // Get revision number
+    FAPI_TRY(mss::pmic::check::validate_and_return_pmic_revisions(i_ocmb_target, i_pmic_target, mss::pmic::vendor::TI,
+             l_pmic_rev));
+
+    for (uint8_t l_rail_index = mss::pmic::rail::SWA; l_rail_index <= mss::pmic::rail::SWD; ++l_rail_index)
+    {
+        if (l_pmic_rev < TI_REV_23)
+        {
+            FAPI_TRY(bias_with_spd_voltages_TI_rev_less_then_23(i_pmic_target, i_ocmb_target, i_id, l_rail_index));
+        }
+        else
+        {
+            // Voltage ranges
+            FAPI_TRY(mss::pmic::bias_with_spd_volt_ranges(i_pmic_target, i_ocmb_target, i_id));
+
+            // Voltage settings
+            uint8_t l_volt_bitmap;
+            FAPI_TRY(calculate_voltage_bitmap_from_attr(i_pmic_target, i_id, l_rail_index, l_volt_bitmap));
+
+            fapi2::buffer<uint8_t> l_volt_buffer = l_volt_bitmap << CONSTS::SHIFT_VOLTAGE_FOR_REG;
+            FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, mss::pmic::VOLT_SETTING_ACTIVE_REGS[l_rail_index], l_volt_buffer),
+                     "Error writing address 0x%02hhX of PMIC %s", mss::pmic::VOLT_SETTING_ACTIVE_REGS[l_rail_index],
+                     mss::c_str(i_pmic_target));
+        }
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+///
+/// @brief Bias IDT PMIC from SPD settings
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[in] i_ocmb_target OCMB parent target of pmic
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+template<>
+fapi2::ReturnCode bias_with_spd_settings<mss::pmic::vendor::IDT>(
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target)
+{
+    // Unlock Vendor Region
+    FAPI_TRY(mss::pmic::unlock_vendor_region(i_pmic_target),
+             "Error unlocking vendor region on PMIC %s", mss::c_str(i_pmic_target));
+
+    {
+        // PMIC position/ID of the OCMB target. There could be 4 total, but we care about whether its PMIC0(2) or PMIC1(3)
+        const mss::pmic::id l_relative_pmic_id = get_relative_pmic_id(i_pmic_target);
+
+        // Phase combination
+        FAPI_TRY(mss::pmic::bias_with_spd_phase_comb(i_pmic_target, i_ocmb_target, l_relative_pmic_id));
+
+        // Voltage ranges
+        FAPI_TRY(mss::pmic::bias_with_spd_volt_ranges(i_pmic_target, i_ocmb_target, l_relative_pmic_id));
+
+        // Voltages
+        FAPI_TRY(mss::pmic::bias_with_spd_voltages<mss::pmic::IDT>(i_pmic_target, i_ocmb_target, l_relative_pmic_id));
+
+        // Startup sequence
+        FAPI_TRY(mss::pmic::bias_with_spd_startup_seq(i_pmic_target, i_ocmb_target, l_relative_pmic_id));
+
+        // Current consumption
+        FAPI_TRY(mss::pmic::set_current_limiter_warnings(i_pmic_target, i_ocmb_target));
+    }
+
+fapi_try_exit:
+    // Try to lock vendor region even in the case of an error in this function
+    return mss::pmic::lock_vendor_region(i_pmic_target, fapi2::current_err);
+}
+
+///
+/// @brief Bias TI PMIC from SPD settings
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[in] i_ocmb_target OCMB parent target of pmic
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+template<>
+fapi2::ReturnCode bias_with_spd_settings<mss::pmic::vendor::TI>(
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target)
+{
+    // Unlock Vendor Region
+    FAPI_TRY(mss::pmic::unlock_vendor_region(i_pmic_target),
+             "Error unlocking vendor region on PMIC %s", mss::c_str(i_pmic_target));
+    {
+        // PMIC position/ID under OCMB target
+        const mss::pmic::id l_relative_pmic_id = get_relative_pmic_id(i_pmic_target);
+
+        // Phase combination
+        FAPI_TRY(mss::pmic::bias_with_spd_phase_comb(i_pmic_target, i_ocmb_target, l_relative_pmic_id));
+
+        // Voltages
+        // For TI pmic revision < 0x23, the PMIC only has range 0 for SWA-C.
+        // We need to convert anything SPD that says range 1 --> range 0
+        // For revision >= 0x23, use the SPD data
+        FAPI_TRY(mss::pmic::bias_with_spd_voltages<mss::pmic::TI>(i_pmic_target, i_ocmb_target, l_relative_pmic_id));
+
+        // Startup sequence
+        FAPI_TRY(mss::pmic::bias_with_spd_startup_seq(i_pmic_target, i_ocmb_target, l_relative_pmic_id));
+
+        // Current consumption
+        FAPI_TRY(mss::pmic::set_current_limiter_warnings(i_pmic_target, i_ocmb_target));
+    }
+
+fapi_try_exit:
+    // Try to lock vendor region even in the case of an error in this function
+    return mss::pmic::lock_vendor_region(i_pmic_target, fapi2::current_err);
 }
 
 ///
@@ -905,7 +1152,7 @@ fapi2::ReturnCode enable_spd(
 
     if (i_vendor_id == mss::pmic::vendor::IDT)
     {
-        FAPI_TRY(mss::pmic::check::validate_and_return_idt_revisions(i_ocmb_target, i_pmic_target, l_rev_reg));
+        FAPI_TRY(mss::pmic::check::validate_and_return_pmic_revisions(i_ocmb_target, i_pmic_target, i_vendor_id, l_rev_reg));
         FAPI_TRY(mss::pmic::bias_with_spd_settings<mss::pmic::vendor::IDT>(i_pmic_target, i_ocmb_target),
                  "enable_spd (IDT): Error biasing PMIC %s with SPD settings",
                  mss::c_str(i_pmic_target));
@@ -1175,6 +1422,42 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Check if PMIC is TI vendor and if the PMIC revision is less than 23
+///
+/// @param[in] i_ocmb_target OCMB parent target
+/// @param[in] i_pmic_target PMIC target
+/// @param[out] o_pmic_is_ti_is_less_than_23 true/false
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+/// @note Can't unit test this properly as R3D is hardcoded in simics
+///
+fapi2::ReturnCode pmic_is_ti_is_rev_less_than_23(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> i_ocmb_target,
+        const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
+        bool& o_pmic_is_ti_is_less_than_23)
+{
+    fapi2::buffer<uint8_t> l_reg_contents;
+    constexpr uint8_t TI_REV_23  = 0x23;
+    o_pmic_is_ti_is_less_than_23 = false;
+    using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
+
+    FAPI_TRY(mss::pmic::i2c::reg_read(i_pmic_target, REGS::R3D_VENDOR_ID_BYTE_1, l_reg_contents));
+
+    // First check if the vendor is TI
+    o_pmic_is_ti_is_less_than_23 = (l_reg_contents == mss::pmic::vendor::TI_SHORT);
+
+    // If vendor is TI then check for TI PMIC revision. Return true if revision is less than 0x23, else return false
+    if (o_pmic_is_ti_is_less_than_23)
+    {
+        FAPI_TRY(mss::pmic::check::validate_and_return_pmic_revisions(i_ocmb_target, i_pmic_target, mss::pmic::vendor::TI,
+                 l_reg_contents));
+
+        o_pmic_is_ti_is_less_than_23 = (l_reg_contents < TI_REV_23);
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Disable PMICs and clear status bits in preparation for enable
 ///
 /// @param[in] i_ocmb_target OCMB parent target
@@ -1190,7 +1473,7 @@ fapi2::ReturnCode disable_and_reset_pmics(const fapi2::Target<fapi2::TARGET_TYPE
     // First, grab the PMIC targets in REL_POS order
     // Make sure to grab all pmics - functional or not, in case the parent OCMB
     // was deconfigured. That may have marked the PMICs as non-functional
-    bool l_pmic_is_ti = false;
+    bool l_pmic_is_ti_is_less_than_23 = false;
     auto l_pmics = mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target, fapi2::TARGET_STATE_PRESENT);
 
     // Next, sort them by the sequence attributes
@@ -1208,16 +1491,15 @@ fapi2::ReturnCode disable_and_reset_pmics(const fapi2::Target<fapi2::TARGET_TYPE
 
         // TI PMICS, we need to reset the PWR_GOOD_IO_TYPE to OUTPUT (instead of I/O) before we VR_DISABLE
         // For 4U this is essentially a no-op since we'll always be in Output mode, but is required for 2U
-        FAPI_TRY(pmic_is_ti(PMIC, l_pmic_is_ti));
+        FAPI_TRY(pmic_is_ti_is_rev_less_than_23(i_ocmb_target, PMIC, l_pmic_is_ti_is_less_than_23));
 
-        if (l_pmic_is_ti)
+        if (l_pmic_is_ti_is_less_than_23)
         {
             fapi2::buffer<uint8_t> l_reg_contents;
 
             FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(PMIC, REGS::R32, l_reg_contents));
             l_reg_contents.writeBit<FIELDS::R32_PWR_GOOD_IO_TYPE>(CONSTS::PWR_GOOD_IO_TYPE_OUTPUT);
             FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(PMIC, REGS::R32, l_reg_contents));
-
         }
     }
 
@@ -1256,6 +1538,7 @@ fapi2::ReturnCode enable_1u_2u(
     const mss::pmic::enable_mode i_mode)
 {
     constexpr uint8_t IDT_D0_REV = 0x31;
+    constexpr uint8_t TI_REV_23  = 0x23;
 
     auto l_pmics = mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target, fapi2::TARGET_STATE_PRESENT);
 
@@ -1271,11 +1554,12 @@ fapi2::ReturnCode enable_1u_2u(
     // Revision < IDT_D0_REV
     // PMIC0:  pgood=output        (IDT ONLY, could be intput+output but will setup the same way as TI)
     // PMIC1:  pgood=input+output  (IDT ONLY)
-    // Revision >= IDT_D0_REV Power good pin has been paired with Camp functionality
+    // Revision >= IDT_D0_REV and >= TI_REV_23 Power good pin has been paired with Camp functionality
     // PMIC0,1:  PMIC CAMP PWR_GOOD=PMIC controls PWR_GOOD output on its own based on internal status
     //           PMIC CAMP Fail_n function=Execute VR Disable Command
     // IDT/TI all revisions
     // PMIC0,1:  VR enable
+    // Revision < TI_REV_23
     // PMIC0:  pgood=output        (TI ONLY - already set to output only in disable_and_reset_pmics)
     // PMIC1:  pgood=input+output  (TI ONLY)
 
@@ -1290,13 +1574,13 @@ fapi2::ReturnCode enable_1u_2u(
     {
         l_current_pmic = l_pmic;
         uint16_t l_vendor_id = 0;
-        fapi2::buffer<uint8_t> l_idt_rev;
+        fapi2::buffer<uint8_t> l_pmic_rev;
 
         // Get vendor ID
         FAPI_TRY(mss::attr::get_mfg_id[get_relative_pmic_id(l_pmic)](i_ocmb_target, l_vendor_id));
 
         // Get revision number
-        FAPI_TRY(mss::pmic::check::validate_and_return_idt_revisions(i_ocmb_target, l_pmic, l_idt_rev));
+        FAPI_TRY(mss::pmic::check::validate_and_return_pmic_revisions(i_ocmb_target, l_pmic, l_vendor_id, l_pmic_rev));
 
         // For revision less than 0x31: Call the procedure to configure power good pin to I/O for last PMIC in power on sequence in
         // order to have DDR4 SDRAM VPP/VDDR power sequencing spec met (VPP >= VDDR) when a PMIC fails
@@ -1305,14 +1589,14 @@ fapi2::ReturnCode enable_1u_2u(
         // TI PMICs PWR_GOOD I/O mode must be enabled after VR Enable
         // IDT PMICs PWR_GOOD I/O mode must be enabled before VR Enable for revisions less than 0x31
 
-        // For IDT PMIC revisions >= 0x31, following should be done before VR Enable:
+        // For IDT PMIC revisions >= 0x31 and for TI PMIC revision >= 0x23, following should be done before VR Enable:
         //          EXECUTE_VR_ENABLE_CONTROL_=Execute VR Enable Command
         //          PMIC CAMP PWR_GOOD=PMIC controls PWR_GOOD output on its own based on internal status
         //          PMIC CAMP Fail_n function=Execute VR Disable Command
 
         if (l_vendor_id == mss::pmic::vendor::IDT)
         {
-            if (l_idt_rev >= IDT_D0_REV)
+            if (l_pmic_rev >= IDT_D0_REV)
             {
                 FAPI_TRY(set_vr_enable_clear_camp_pwr_good_pins(l_pmic));
             }
@@ -1325,6 +1609,13 @@ fapi2::ReturnCode enable_1u_2u(
             else
             {
                 FAPI_TRY(set_pwr_good_pin_io(l_pmic));
+            }
+        }
+        else if (l_vendor_id == mss::pmic::vendor::TI)
+        {
+            if (l_pmic_rev >= TI_REV_23)
+            {
+                FAPI_TRY(set_vr_enable_clear_camp_pwr_good_pins(l_pmic));
             }
         }
 
@@ -1395,12 +1686,17 @@ fapi2::ReturnCode enable_1u_2u(
     {
         l_current_pmic = l_pmic;
         uint16_t l_vendor_id = 0;
+        fapi2::buffer<uint8_t> l_pmic_rev;
 
         // Get vendor ID
         FAPI_TRY(mss::attr::get_mfg_id[get_relative_pmic_id(l_pmic)](i_ocmb_target, l_vendor_id));
 
+        // Get revision number
+        FAPI_TRY(mss::pmic::check::validate_and_return_pmic_revisions(i_ocmb_target, l_pmic, l_vendor_id, l_pmic_rev));
+
         // Only do for last TI PMIC in power on sequence as that is the one that will have PWR_GOOD set to I/O
-        if ((l_vendor_id == mss::pmic::vendor::TI) && (l_pmic != l_pmics[0]))
+        // Skip in case of TI revision greater than 0x23
+        if ((l_vendor_id == mss::pmic::vendor::TI) && (l_pmic_rev < TI_REV_23) && (l_pmic != l_pmics[0]))
         {
             // Setting PWR_GOOD to I/O too soon after VR enable causes PMIC to fail to power on successfully
             // Seen failure to power on rails with delay of 3ms with soft start time 4ms in a system with 2U DDIMMs
@@ -1781,7 +2077,7 @@ fapi2::ReturnCode setup_pmic_pair_and_gpio(
 {
     bool l_already_enabled = false;
     // The sequence below is defined in section 6.1.1 of the
-    // Redundant Power on DIMM – Functional Specification document
+    // Redundant Power on DIMM - Functional Specification document
     // Check if GPIO is already enabled
     FAPI_TRY(check::efuses_already_enabled(i_gpio, l_already_enabled));
 
@@ -2249,16 +2545,19 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Check that the IDT revision # register and attribute match and return revision number
+/// @brief Check that the IDT revision # register and attribute match and return revision number.
+///        In case of TI, just return the revision number
 ///
 /// @param[in]  i_ocmb_target OCMB target
 /// @param[in]  i_pmic_target PMIC target to check
-/// @param[out] o_rev_reg revision number of IDT PMIC
+/// @param[in]  i_vendor_id to run IDT revision check
+/// @param[out] o_rev_reg revision number of PMIC
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
 ///
-fapi2::ReturnCode validate_and_return_idt_revisions(
+fapi2::ReturnCode validate_and_return_pmic_revisions(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
     const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
+    const uint16_t i_vendor_id,
     fapi2::buffer<uint8_t>& o_rev_reg)
 {
     using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
@@ -2273,19 +2572,22 @@ fapi2::ReturnCode validate_and_return_idt_revisions(
     // Now check the register
     FAPI_TRY(mss::pmic::i2c::reg_read(i_pmic_target, REGS::R3B_REVISION, o_rev_reg));
 
-    // The simics check has been added here to skip simics testing of the below function as
-    // simics is throwing error for the attribute and revision register mismatch condition.
-    // Updating simics is not recommended as there are no real PMICs on the simulation model
-    // and skipping this check will not affect rest of the pmic_enable functionality in simics
-    FAPI_TRY(mss::attr::get_is_simics(l_simics));
+    if (i_vendor_id == mss::pmic::vendor::IDT)
+    {
+        // The simics check has been added here for IDT to skip simics testing of the below function as
+        // simics is throwing error for the attribute and revision register mismatch condition.
+        // Updating simics is not recommended as there are no real PMICs on the simulation model
+        // and skipping this check will not affect rest of the pmic_enable functionality in simics
+        FAPI_TRY(mss::attr::get_is_simics(l_simics));
 
-    if (!l_simics)
-    {
-        FAPI_TRY(mss::pmic::check::validate_and_return_idt_revisions_helper(i_pmic_target, l_rev, o_rev_reg()));
-    }
-    else
-    {
-        FAPI_DBG("Simulation mode detected. Skipping IDT revision check");
+        if (!l_simics)
+        {
+            FAPI_TRY(mss::pmic::check::validate_and_return_idt_revisions_helper(i_pmic_target, l_rev, o_rev_reg()));
+        }
+        else
+        {
+            FAPI_DBG("Simulation mode detected. Skipping IDT revision check");
+        }
     }
 
 fapi_try_exit:
@@ -2581,5 +2883,5 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-} // pmic
-} // mss
+} // ns pmic
+} // ns mss
