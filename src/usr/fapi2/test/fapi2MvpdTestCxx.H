@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -222,11 +222,14 @@ public:
                       l_mvpdRecords[i].record,
                       l_mvpdRecords[i].keyword);
 
+              fapi2::Target<TARGET_TYPE_PROC_CHIP>
+                l_fapi_proc_target(l_cpu_target);
+
               //  call getMvpdField once with a NULL pointer to get the
               //  buffer size should return the size
               l_rc = getMvpdField(l_mvpdRecords[i].record,
                       l_mvpdRecords[i].keyword,
-                      { l_cpu_target },
+                      l_fapi_proc_target,
                       NULL,
                       l_fieldBuffer );
               if ( l_rc != fapi2::FAPI2_RC_SUCCESS )
@@ -246,7 +249,7 @@ public:
               //  call getMvpdField once with a valid buffer
               l_rc = getMvpdField(l_mvpdRecords[i].record,
                       l_mvpdRecords[i].keyword,
-                      { l_cpu_target },
+                      l_fapi_proc_target,
                       l_fieldData,
                       l_fieldBuffer );
               if ( l_rc != fapi2::FAPI2_RC_SUCCESS )
