@@ -39,6 +39,7 @@
 #include <lib/shared/exp_consts.H>
 #include <lib/ecc/ecc_traits_explorer.H>
 #include <lib/ccs/ccs_traits_explorer.H>
+#include <lib/mc/exp_port_traits.H>
 #include <lib/mcbist/exp_mcbist_traits.H>
 #include <lib/dimm/exp_mrs_traits.H>
 #include <lib/ccs/exp_row_repair.H>

@@ -39,6 +39,7 @@
 #include <fapi2.H>
 #include <generic/memory/lib/ecc/ecc_traits.H>
 #include <generic/memory/lib/utils/scom.H>
+#include <generic/memory/lib/ecc/galois.H>
 
 namespace mss
 {

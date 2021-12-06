@@ -67,6 +67,20 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief ATTR_MEM_EFF_DIMM_SPARE getter
+/// @tparam MC the memory controller type
+/// @param[in] const ref to the TARGET_TYPE_DIMM
+/// @param[out] uint32_t&[] array reference to store the value
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
+/// @note  Spare DRAM availability. Used in various locations and is computed in mss_eff_cnfg.
+/// Array indexes are [DIMM][RANK]
+///
+template< mss::mc_type MC >
+fapi2::ReturnCode dimm_spare(
+    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+    uint8_t (&o_array)[MAX_RANK_PER_DIMM_ATTR]);
+
 } // ns mss
 
 #endif

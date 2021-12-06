@@ -42,7 +42,7 @@
 namespace mss
 {
 
-constexpr mss::mc_type DEFAULT_MC_TYPE = mss::mc_type::EXPLORER;
+//constexpr mss::mc_type DEFAULT_MC_TYPE = mss::mc_type::EXPLORER;
 constexpr fapi2::TargetType DEFAULT_MC_TARGET = fapi2::TARGET_TYPE_OCMB_CHIP;
 constexpr fapi2::TargetType DEFAULT_MEM_PORT_TARGET = fapi2::TARGET_TYPE_MEM_PORT;
 

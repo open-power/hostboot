@@ -3496,8 +3496,8 @@ inline fapi2::ReturnCode load_fifo_mode( const fapi2::Target<T>& i_target, const
     // Turns on FIFO mode
     constexpr mss::states FIFO_ON = mss::states::ON;
 
-    FAPI_TRY( configure_wrq(i_target, FIFO_ON) );
-    FAPI_TRY( configure_rrq(i_target, FIFO_ON) );
+    FAPI_TRY( mss::template configure_wrq<MC>(i_target, FIFO_ON) );
+    FAPI_TRY( mss::template configure_rrq<MC>(i_target, FIFO_ON) );
 
 fapi_try_exit:
     return fapi2::current_err;

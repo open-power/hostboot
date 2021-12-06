@@ -46,6 +46,8 @@
 #include <generic/memory/lib/ecc/fw_mark_store.H>
 #include <generic/memory/lib/utils/mss_bad_bits.H>
 #include <generic/memory/lib/utils/mss_rank.H>
+#include <generic/memory/lib/utils/mc/gen_mss_port_traits.H>
+#include <generic/memory/lib/generic_attribute_accessors_manual.H>
 
 namespace mss
 {
@@ -385,7 +387,7 @@ class symbol_mark_only : public repair_state<MC, T>
             mss::repair_state<MC, T>::set_state(io_machine, new_state);
 
             uint8_t l_dimm_spare[MAX_RANK_PER_DIMM_ATTR] = {0};
-            FAPI_TRY(mss::dimm_spare<MC>(i_target, l_dimm_spare));
+            FAPI_TRY(dimm_spare<MC>(i_target, l_dimm_spare));
 
             // For 4U - we want to mark repairs exceeded
             // Spec was written such that "4U" = DDIMM with spares = DDIMM with

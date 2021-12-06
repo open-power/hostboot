@@ -47,7 +47,8 @@
 #include <explorer_scom_addresses.H>
 #include <explorer_scom_addresses_fld.H>
 #include <lib/dimm/exp_rank.H>
-#include <exp_port.H>
+#include <lib/mc/exp_port_traits.H>
+#include <generic/memory/lib/utils/mc/gen_mss_restore_repairs.H>
 
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>

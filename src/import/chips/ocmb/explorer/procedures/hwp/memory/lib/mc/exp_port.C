@@ -37,13 +37,68 @@
 #include <lib/shared/exp_defaults.H>
 #include <lib/ecc/ecc_traits_explorer.H>
 #include <lib/mcbist/exp_mcbist_traits.H>
-#include <exp_port.H>
+#include <lib/mc/exp_port.H>
 #include <lib/mcbist/exp_maint_cmds.H>
 #include <lib/ecc/ecc_traits_explorer.H>
 #include <generic/memory/lib/utils/mc/gen_mss_restore_repairs.H>
 
 namespace mss
 {
+
+/// @brief Get the attributes for the reorder queue setting - EXPLORER specialization
+/// @param[in] const ref to the mc target
+/// @param[out] uint8_t& reference to store the value
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
+/// @note  Contains the settings for write/read reorder
+/// queue
+///
+template< >
+fapi2::ReturnCode reorder_queue_setting<mss::mc_type::EXPLORER>(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    uint8_t& o_value)
+{
+    return mss::attr::get_reorder_queue_setting(i_target, o_value);
+}
+
+///
+/// @brief ATTR_MEM_EFF_DIMM_SPARE getter - EXPLORER specialization
+/// @param[in] const ref to the TARGET_TYPE_DIMM
+/// @param[out] uint32_t&[] array reference to store the value
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
+/// @note  Spare DRAM availability. Used in various locations and is computed in mss_eff_cnfg.
+/// Array indexes are [DIMM][RANK]
+///
+template<>
+fapi2::ReturnCode dimm_spare< mss::mc_type::EXPLORER >(
+    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+    uint8_t (&o_array)[mss::MAX_RANK_PER_DIMM_ATTR])
+{
+    return mss::attr::get_dimm_spare(i_target, o_array);
+}
+
+///
+/// @brief Change the state of the force_str bit - EXPLORER specialization
+/// @tparam MC the memory controller type
+/// @param[in] i_target the target
+/// @param[in] i_state the state
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< >
+fapi2::ReturnCode change_force_str<mss::mc_type::EXPLORER>(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const states i_state )
+{
+    using TT = portTraits<mss::mc_type::EXPLORER>;
+    fapi2::buffer<uint64_t> l_data;
+
+    FAPI_DBG("Change force_str to %s %s", (i_state == HIGH ? "high" : "low"), mss::c_str(i_target));
+    FAPI_TRY( mss::getScom(i_target, TT::STR0Q_REG, l_data) );
+    l_data.writeBit<TT::CFG_FORCE_STR>(i_state);
+    FAPI_TRY( mss::putScom(i_target, TT::STR0Q_REG, l_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Set up memory controller specific settings for ECC registers (at the end of draminit_mc)

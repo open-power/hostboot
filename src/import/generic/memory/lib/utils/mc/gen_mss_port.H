@@ -44,7 +44,6 @@
 #include <generic/memory/lib/utils/scom.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/find.H>
-#include <generic/memory/lib/ecc/ecc.H>
 #include <generic/memory/lib/utils/mss_bad_bits.H>
 #include <generic/memory/lib/utils/mss_rank.H>
 #include <generic/memory/lib/generic_attribute_accessors_manual.H>
@@ -172,20 +171,6 @@ void get_bw_snapshot( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_bw_snap
 ///
 template< mss::mc_type MC, fapi2::TargetType T>
 fapi2::ReturnCode mvpd_fwms(const fapi2::Target< T>& i_target, uint32_t (&o_array)[MARK_STORE_COUNT]);
-
-///
-/// @brief ATTR_MEM_EFF_DIMM_SPARE getter
-/// @tparam MC the memory controller type
-/// @param[in] const ref to the TARGET_TYPE_DIMM
-/// @param[out] uint32_t&[] array reference to store the value
-/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
-/// @note  Spare DRAM availability. Used in various locations and is computed in mss_eff_cnfg.
-/// Array indexes are [DIMM][RANK]
-///
-template< mss::mc_type MC >
-inline fapi2::ReturnCode dimm_spare(
-    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-    uint8_t (&o_array)[MAX_RANK_PER_DIMM_ATTR]);
 
 ///
 /// @brief Enable power management
@@ -560,9 +545,9 @@ fapi_try_exit:
 /// @param[in] i_state to set the bit too
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = portTraits<MC> >
-fapi2::ReturnCode configure_wrq(const fapi2::Target<T>& i_target,
-                                const mss::states i_state)
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
+inline fapi2::ReturnCode configure_wrq(const fapi2::Target<T>& i_target,
+                                       const mss::states i_state)
 {
     // Loops through all port targets, hitting all the registers
     for( const auto& l_port : mss::find_targets<TT::PORT_TYPE>(i_target) )
@@ -596,7 +581,7 @@ fapi_try_exit:
 /// @param[in] i_state to set the bit too
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = portTraits<MC> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
 inline fapi2::ReturnCode configure_rrq(const fapi2::Target<T>& i_target, const mss::states i_state)
 {
     // Loops through all port targets, hitting all the registers
@@ -651,8 +636,10 @@ inline fapi2::ReturnCode reset_reorder_queue_settings(const fapi2::Target<T>& i_
         // Two settings are FIFO and REORDER.  FIFO is a 1 in the registers, while reorder is a 0 state
         const mss::states l_state = ((l_reorder_queue == fapi2::ENUM_ATTR_MEM_REORDER_QUEUE_SETTING_FIFO) ?
                                      mss::states::ON : mss::states::OFF);
-        FAPI_TRY(configure_rrq(i_target, l_state), "%s failed to reset read reorder queue settings", mss::c_str(i_target));
-        FAPI_TRY(configure_wrq(i_target, l_state), "%s failed to reset write reorder queue settings", mss::c_str(i_target));
+        FAPI_TRY(mss::template configure_rrq<MC>(i_target, l_state), "%s failed to reset read reorder queue settings",
+                 mss::c_str(i_target));
+        FAPI_TRY(mss::template configure_wrq<MC>(i_target, l_state), "%s failed to reset write reorder queue settings",
+                 mss::c_str(i_target));
     }
 
 

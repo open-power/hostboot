@@ -41,11 +41,10 @@
 #include <explorer_scom_addresses_fld.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
-#include <generic/memory/lib/utils/mss_rank.H>
+#include <lib/dimm/exp_rank.H>
 #include <generic/memory/lib/utils/find.H>
 #include <lib/shared/exp_consts.H>
 #include <lib/exp_attribute_accessors_manual.H>
-#include <lib/mc/exp_port.H>
 #include <generic/memory/lib/dimm/mrs_traits.H>
 
 ///

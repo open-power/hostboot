@@ -175,7 +175,7 @@ fapi2::ReturnCode read_rb_array<mss::mc_type::EXPLORER>(const fapi2::Target<fapi
         std::vector< fapi2::buffer<uint64_t> >& o_data,
         std::vector< fapi2::buffer<uint64_t> >& o_ecc_data)
 {
-    using TT = mcbistTraits<DEFAULT_MC_TYPE, fapi2::TARGET_TYPE_OCMB_CHIP>;
+    using TT = mcbistTraits<mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>;
 
     fapi2::buffer<uint64_t> l_data;
     uint64_t l_array_addr = i_start_addr;

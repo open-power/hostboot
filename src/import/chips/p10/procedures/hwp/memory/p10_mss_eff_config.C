@@ -61,8 +61,6 @@
 ///
 fapi2::ReturnCode p10_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target )
 {
-    using mss::DEFAULT_MC_TYPE;
-
     mss::display_git_commit_info("p10_mss_eff_config");
 
     uint8_t l_spd_rev = 0;
