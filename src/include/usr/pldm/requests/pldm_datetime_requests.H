@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021                             */
+/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,13 +38,12 @@ namespace PLDM
 {
 
 /*
- * @brief This function requests the current date/time from BMC. The
- *        resulting date/time is encoded in BDC format.
+ * @brief This function requests the current date/time from BMC.
  *
  * @param[out] o_dateTime the date/time that BMC returned (0 on error)
  * @return nullptr on success; non-nullptr on error
  */
-errlHndl_t getDateTime(BCD_time8_t& o_dateTime);
+errlHndl_t getDateTime(date_time_t& o_dateTime);
 
 } // namespace PLDM
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,7 @@
 #include <pldm/requests/pldm_tid_requests.H>
 #include <pldm/pldm_reasoncodes.H>
 #include <assert.h>
+#include <pldm/requests/pldm_datetime_requests.H>
 #include <sys/sync.h>
 #include <sys/task.h>
 #include <vector>
@@ -129,6 +130,16 @@ void base_init(errlHndl_t& o_errl)
         break;
     }
 
+    // Fetch the current date/time from the BMC and seed it into
+    // ErrlManager for error log timestamps.
+    date_time_t l_currentTime{};
+    o_errl = getDateTime(l_currentTime);
+    if(o_errl)
+    {
+        break;
+    }
+    ERRORLOG::ErrlManager::setBaseDateTime(l_currentTime);
+
     // We don't want to keep these vectors around any longer than we have
     // to so put them in their own scope along with the call that needs them
     {
@@ -158,6 +169,7 @@ void base_init(errlHndl_t& o_errl)
 
     // call ErrlManager function - tell him that BMC interface is ready!
     ERRORLOG::ErrlManager::errlResourceReady(ERRORLOG::BMC);
+
 #endif
     }while(0);
 

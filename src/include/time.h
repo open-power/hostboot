@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,21 +42,30 @@ typedef enum
     CLOCK_MONOTONIC = 1
 } clockid_t;
 
-// A union representing the BCD (Binary-Coded Decimal) format of
-// date/time timestamps.
-union BCD_time8_t
+// A union representing the date/time timestamps.
+union date_time_t
 {
     uint64_t value;
     struct
     {
-        uint64_t year   : 16;
-        uint64_t day    : 8;
-        uint64_t month  : 8;
-        uint64_t hour   : 8;
-        uint64_t minute : 8;
-        uint64_t second : 8;
-        uint64_t unused : 8;
+        uint64_t year      : 16;
+        uint64_t day       : 8;
+        uint64_t month     : 8;
+        uint64_t hour      : 8;
+        uint64_t minute    : 8;
+        uint64_t second    : 8;
+        uint64_t hundredth : 8;
     } format;
+};
+
+// A struct containing the initial date/time values. date_time
+// represents the absolute time, and timebase is the initial
+// tick value reported by the system (used to calculate the
+// difference in time).
+struct base_time_t
+{
+    date_time_t date_time;
+    uint64_t    timebase;
 };
 
 /** @fn clock_gettime

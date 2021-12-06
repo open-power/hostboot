@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,7 +40,6 @@
 #include <arch/ppc.H>
 
 
-
 namespace ERRORLOG
 {
 
@@ -62,17 +61,19 @@ ErrlPrvt::ErrlPrvt( compId_t  i_CreatorCompId ) :
     iv_cid( ERRL_CID_HOSTBOOT ),  // 'B' See errlCreator_t in errltypes.H
     iv_sctns( 0 )
 {
-    iv_committed.value = 0; // committed time
+    iv_committed.date_time.value = 0; // committed time
+    iv_committed.timebase = 0;
     // Ask the errl manager for the next ID to assign.
     iv_plid = iv_eid = ERRORLOG::theErrlManager::instance().getUniqueErrId();
 
     // Set the time of creation.
-    // TODO RTC 35258 The field iv_created and iv_committed expect an 8-byte
-    // BCD-encoded timestamp.  However, the FSP errl tool does not complain
-    // about displaying the timebase value. Perhaps we can apply a transform
-    // on time base to get an approximation of real time.
     // iv_created is in the format 0xYYYYDDMMHHMMSS00
-    iv_created.value = getTB();
+    iv_created.timebase = getTB();
+#ifndef __HOSTBOOT_RUNTIME
+    iv_created.date_time = ERRORLOG::ErrlManager::getCurrentDateTime();
+#else
+    // TODO RTC: 255972 Fetch date/time from PHYP
+#endif
 
 }
 
@@ -115,8 +116,15 @@ uint64_t ErrlPrvt::flatten( void * o_pBuffer, const uint64_t i_cbBuffer )
         }
 
         // Set the ErrlPrvt instance data items.
-        p->creationTime   = iv_created.value;
-        p->commitTime     = iv_committed.value;
+#ifndef __HOSTBOOT_RUNTIME
+        p->creationTime   = ErrlManager::dateTimeToRawBCD(iv_created.date_time);
+        p->commitTime     = ErrlManager::dateTimeToRawBCD(iv_committed.date_time);
+#else
+        // TODO RTC: 255972 This will change depending on the format of date/time
+        // we get from PHYP.
+        p->creationTime   = iv_created.date_time.value;
+        p->commitTime     = iv_committed.date_time.value;
+#endif
         p->creatorId      = iv_cid;
         p->sectionCount   = iv_sctns;
         p->plid           = iv_plid;
@@ -137,12 +145,12 @@ uint64_t ErrlPrvt::unflatten( const void * i_buf )
 
     iv_header.unflatten(&(p->sectionheader));
 
-    iv_created.value    = p->creationTime;
-    iv_committed.value  = p->commitTime;
-    iv_cid              = p->creatorId;
-    iv_sctns            = p->sectionCount;
-    iv_plid             = p->plid;
-    iv_eid              = p->eid;
+    iv_created.date_time.value    = p->creationTime;
+    iv_committed.date_time.value  = p->commitTime;
+    iv_cid                       = p->creatorId;
+    iv_sctns                     = p->sectionCount;
+    iv_plid                      = p->plid;
+    iv_eid                       = p->eid;
 
     return flatSize();
 }

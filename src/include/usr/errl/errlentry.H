@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -258,11 +258,18 @@ public:
     void setModuleId( const uint8_t i_moduleId );
 
     /**
+     *  @brief Get the date/time value for when this log was created
+     *
+     *  @return date/time collected in error log's constructor
+     */
+    date_time_t timeCreated() const;
+
+    /**
      *  @brief Get the timebase value for when this log was created
      *
      *  @return timebase collected in error log's constructor
      */
-    uint64_t timeCreated() const;
+    uint64_t timeCreatedTimebase() const;
 
     /**
      *  @brief Get the unique error log identifier (EID) of the error log.
@@ -1198,10 +1205,16 @@ private:
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 
-inline uint64_t ErrlEntry::timeCreated() const
+inline date_time_t ErrlEntry::timeCreated() const
 {
-    return iv_Private.iv_created.value;
+    return iv_Private.iv_created.date_time;
 }
+
+inline uint64_t ErrlEntry::timeCreatedTimebase() const
+{
+    return iv_Private.iv_created.timebase;
+}
+
 inline uint32_t ErrlEntry::eid() const
 {
     return iv_Private.iv_eid;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -45,6 +45,7 @@
 #include <mbox/mboxif.H>
 #include <utility>
 #include <list>
+#include <time.h>
 
 namespace ERRORLOG
 {
@@ -249,6 +250,80 @@ public:
      *          what is currently set in ATTR_HIDDEN_ERRLOGS_ENABLE
      */
     static uint8_t iv_hiddenErrLogsEnable;
+
+    /**
+     * @brief Returns the base date/time structure populated when the
+     *        daemon started. The base date/time values can be used to
+     *        calculate current date/time based on the number of clock
+     *        ticks that have elapsed.
+     *
+     * @return The base date/time structure
+     */
+    base_time_t _getBaseDateTime();
+
+    /**
+     * @brief A wrapper around the ErrlManager's _getBaseDateTime member
+     *        function. Returns the base date/time.
+     *
+     * @return The base date/time structure
+     */
+    static base_time_t getBaseDateTime();
+
+    /**
+     * @brief Returns the current calculated date/time.
+     *        The current date/time is the base date/time (calculated at the
+     *        time this daemon started) plus the number of ticks that have
+     *        elapsed since converted to seconds.
+     *
+     * @return The current date/time
+     */
+    date_time_t _getCurrentDateTime();
+
+    /**
+     * @brief A wrapper around ErrlManager's _getCurrentDateTime member
+     *        function. Returns the current date/time.
+     *
+     * @return The current date/time
+     */
+    static date_time_t getCurrentDateTime();
+
+    /**
+     * @brief Sets the member date/time structure to the date/time passed in.
+     *        The timebase member of the structure is set to the current
+     *        timebase at the time of the call of this function.
+     *
+     * @param[in] i_dateTime the current date/time value
+     */
+    void _setBaseDateTime(const date_time_t& i_dateTime);
+
+    /**
+     * @brief A wrapper around ErrlManager's _setBaseDateTime member function.
+     *        Sets the current date/time of the ErrlManager.
+     *
+     * @param[in] i_dateTime the current date/time value
+     */
+    static void setBaseDateTime(const date_time_t& i_dateTime);
+
+    /**
+     * @brief Converts the input date/time structure to a raw BCD-formatted
+     *        uint64_t value in the format: 0xYYYYMMDDHHMMSS00.
+     *
+     * @param[in] i_dateTime the input date/time structure to convert
+     * @return The raw BDC-formatted date/time in the format:
+     *         0xYYYYMMDDHHMMSS00
+     */
+    uint64_t _dateTimeToRawBCD(const date_time_t& i_dateTime);
+
+    /**
+     * @brief A wrapper around ErrlManager's _dateTimeToRawBCD member
+     *        function. Converts the input date/time in BCD format to
+     *        a raw BCD uint64_t.
+     *
+     * @param[in] i_dateTime the input date/time structure to covert
+     * @return The raw BDC-formatted date/time in the format:
+     *         0xYYYYMMDDHHMMSS00
+     */
+    static uint64_t dateTimeToRawBCD(const date_time_t& i_dateTime);
 
 protected:
     /**
@@ -665,6 +740,19 @@ private:
      * @param[in/out]   io_err - errorlog that's being checked and updatd
      */
     void setErrlSkipFlag(errlHndl_t io_err);
+
+    base_time_t iv_baseDateTime; // The base/reference date/time taken at the
+                                 // time this daemon starts
+
+    /**
+     * @brief Adds seconds to the provided date/time
+     *
+     * @param[in] i_dateTime the current date/time
+     * @param[in] i_seconds the number of seconds to add to the date/time
+     * @return The new date/time
+     */
+    date_time_t dateTimeAddSeconds(const date_time_t& i_dateTime,
+                                   uint64_t i_seconds);
 
 };
 

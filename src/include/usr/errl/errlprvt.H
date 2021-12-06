@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -118,8 +118,8 @@ private:
 
     // The errl parser expects the timestamp data to be
     // represented in BCD format: 0xYYYYDDMMHHMMSS00
-    BCD_time8_t iv_created;
-    BCD_time8_t iv_committed;
+    base_time_t iv_created;
+    base_time_t iv_committed;
     uint8_t     iv_cid;       // Creator 'B' (enum errlCreator)
     uint8_t     iv_sctns;     // count of sections
     uint32_t    iv_plid;      // platform log id

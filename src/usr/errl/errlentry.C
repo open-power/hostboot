@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -224,7 +224,7 @@ ErrlEntry::ErrlEntry(const errlSeverity_t i_sev,
 ErrlEntry::~ErrlEntry()
 {
     // Trace a delete/destruction on an uncommitted log
-    if (iv_Private.iv_committed.value == 0)
+    if (iv_Private.iv_committed.date_time.value == 0)
     {
         #ifdef CONFIG_ERRL_ENTRY_TRACE
         TRACFCOMP( g_trac_errl, ERR_MRK"Error deleted without commit : PLID=%.8X, EID=%.8X", plid(), eid());
@@ -989,9 +989,12 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
 {
     using namespace TARGETING;
 
-    // TODO RTC 35258 need a better timepiece, or else apply a transform onto
-    // timebase for an approximation of real time.
-    iv_Private.iv_committed.value = getTB();
+    iv_Private.iv_committed.timebase = getTB();
+#ifndef __HOSTBOOT_RUNTIME
+    iv_Private.iv_committed.date_time = ERRORLOG::ErrlManager::getCurrentDateTime();
+#else
+    // TODO RTC: 255972 Fetch date/time from PHYP
+#endif
 
     // User/Extended headers contain the component ID of the committer.
     iv_User.setComponentId( i_committerComponent );

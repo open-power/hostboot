@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021                             */
+/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,6 +28,7 @@
 #include <sys/vfs.h>
 #include <pldm/pldm_trace.H>
 #include <pldm/pldm_request.H>
+#include "pldm_request_utils.H"
 
 /* @file pldm_datetime_requests.C
  *
@@ -55,7 +56,7 @@ int encode_get_datetime_req_hb(const uint8_t i_instance_id,
     return encode_get_date_time_req(i_instance_id, o_msg);
 }
 
-errlHndl_t getDateTime(BCD_time8_t& o_dateTime)
+errlHndl_t getDateTime(date_time_t& o_dateTime)
 {
     errlHndl_t l_errl = nullptr;
     o_dateTime.value = 0;
@@ -91,25 +92,25 @@ errlHndl_t getDateTime(BCD_time8_t& o_dateTime)
         break;
     }
 
-    if(l_resp.completion_code != PLDM_SUCCESS)
+
+    /*@
+     * @errortype
+     * @moduleid   MOD_GET_DATE_TIME
+     * @reasoncode RC_BAD_COMPLETION_CODE
+     * @userdata1  Completion code
+     * @devdesc    Bad completion code received for get date/time PLDM operation
+     * @custdesc   A firmware failure occurred
+     */
+    l_errl = validate_resp(l_resp.completion_code, PLDM_SUCCESS,
+                           MOD_GET_DATE_TIME, RC_BAD_COMPLETION_CODE,
+                           l_responseBytes);
+    if(l_errl)
     {
-        PLDM_ERR("getDateTime: PLDM op returned code %d", l_resp.completion_code);
-        /*@
-         * @errortype
-         * @moduleid   MOD_GET_DATE_TIME
-         * @reasoncode RC_BAD_COMPLETION_CODE
-         * @userdata1  Completion code
-         * @devdesc    Bad completion code received for get date/time PLDM operation
-         * @custdesc   A firmware failure occurred
-         */
-        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                         MOD_GET_DATE_TIME,
-                                         RC_BAD_COMPLETION_CODE,
-                                         l_resp.completion_code);
-        addBmcErrorCallouts(l_errl);
         break;
     }
 
+    // The data arrives from BMC in BCD format. Convert it to decimal for
+    // processing.
     o_dateTime.format.year = bcd2dec16(l_resp.year);
     o_dateTime.format.month = bcd2dec8(l_resp.month);
     o_dateTime.format.day = bcd2dec8(l_resp.day);
