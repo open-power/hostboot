@@ -3042,6 +3042,7 @@ sub writeAttrErrlCFile {
          "ECID",
          "HUID",
          "BOOT_PAU_DPLL_BYPASS",
+         "MASTER_MBOX_SCRATCH"
     );
 
     # loop through every attribute to make the switch/case
@@ -3054,7 +3055,7 @@ sub writeAttrErrlCFile {
         }
         else
         {
-            print $outFile "#if 0 //\@fixme-RTC:152874\n";
+            print $outFile "#if 0 //Modify writeAttrErrlCFile in xmltohb.pl to add this attribute\n";
             $skippedattr = 1;
         }
 
@@ -3129,13 +3130,12 @@ sub writeAttrErrlCFile {
             print $outFile "                attrSize += sizeof(lSize);\n";
             print $outFile "                for (uint32_t i=0;i<lSize;i++) {\n";
             print $outFile "                    EntityPath::PathElement lType = tmp[i];\n";
-            print $outFile "                    memcpy(tmpBuffer + attrSize,&tmp[i],sizeof(tmp[i]));\n";
-            print $outFile "                    attrSize += sizeof(tmp[i]);\n";
+            print $outFile "                    memcpy(tmpBuffer + attrSize,&lType,sizeof(lType));\n";
+            print $outFile "                    attrSize += sizeof(lType);\n";
             print $outFile "                }\n";
             print $outFile "            }\n";
             print $outFile "            break;\n";
             print $outFile "        }\n";
-            print $outFile "}\n";
         }
         # any other nativeTypes are just decimals...  (I never saw one)
         elsif(exists $attribute->{nativeType}) {
@@ -3153,7 +3153,7 @@ sub writeAttrErrlCFile {
 
         if( $skippedattr )
         {
-            print $outFile "#endif //\@fixme-RTC:152874\n";
+            print $outFile "#endif\n";
         }
     }
 

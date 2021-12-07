@@ -38,6 +38,7 @@
 #include    <initservice/taskargs.H>
 #include    <errl/errlentry.H>
 #include    <errl/errlmanager.H>
+#include    <errl/errludattribute.H>
 
 #include    <hbotcompid.H>           // HWPF_COMP_ID
 #include    <isteps/hwpisteperror.H>
@@ -728,22 +729,12 @@ void check_scratch_regs_vs_attrs( IStepError & io_StepError )
                   "bitwise failing scratch reg: 0x%.8X "
                   "triggering reconfig loop", l_reconfigReg);
 
-#if defined(CONFIG_PLDM) or defined(CONFIG_BMC_IPMI)
-        // Explicitly for a devtree sync because we don't currently
-        //  go through a shutdown when we send a reboot request
-        TARGETING::AttrRP::syncAllAttributesToSP();
-
-        // Initiate a graceful power cycle
-        TRACFCOMP( g_trac_isteps_trace,"check_scratch_regs_vs_attrs(): requesting power cycle");
-        INITSERVICE::requestReboot("boot parm adjustment");
-
-#else // FSP Systems
         /*@
          * @errortype
          * @moduleid          MOD_CALL_MSS_ATTR_UPDATE
          * @reasoncode        RC_SCRATCH_REG_ATTR_MISMATCH
          * @userdata1         Bitwise scratch register miscompare
-         * @userdata2         0
+         * @userdata2         <unused>
          * @devdesc           Scratch reg / attribute mismatch
          * @custdesc          Firmware detected a problem during boot
          */
@@ -753,9 +744,23 @@ void check_scratch_regs_vs_attrs( IStepError & io_StepError )
                                l_reconfigReg,
                                0,
                                ErrlEntry::ADD_SW_CALLOUT);
+        ERRORLOG::ErrlUserDetailsAttribute(l_sys,
+              ATTR_MASTER_MBOX_SCRATCH).addToLog(l_err);
         l_err->collectTrace("ISTEPS_TRACE");
         errlCommit(l_err, ISTEP_COMP_ID);
 
+#if defined(CONFIG_PLDM) or defined(CONFIG_BMC_IPMI)
+        // Explicitly force a devtree sync because we don't currently
+        //  go through a shutdown when we send a reboot request
+        TARGETING::AttrRP::syncAllAttributesToSP();
+
+        // Initiate a graceful power cycle
+        TRACFCOMP( g_trac_isteps_trace,"check_scratch_regs_vs_attrs(): requesting power cycle");
+        INITSERVICE::requestReboot("boot parm adjustment");
+
+#else // FSP Systems
+
+        // Shutdown in a way that HWSV will recognize
         INITSERVICE::doShutdown(INITSERVICE::SHUTDOWN_DO_RECONFIG_LOOP);
 
 #endif
