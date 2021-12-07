@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -138,6 +138,8 @@ p10_sbe_scratch_calc_gard_vector(
     }
 
     // in non-contained mode, PAUC chiplets may never be deconfigured
+    // to support resource recovery on BMC, remove assertion and simply ignore
+    // deconfiguration requests in non-contained IPL types
     if ((i_contained_ipl_type == fapi2::ENUM_ATTR_CONTAINED_IPL_TYPE_NONE) &&
         (T == fapi2::TARGET_TYPE_PAUC))
     {
@@ -152,13 +154,7 @@ p10_sbe_scratch_calc_gard_vector(
                      "Error from setBit (present, unit target pos: %d)", l_unit_pos);
         }
 
-        FAPI_ASSERT(l_present == l_functional,
-                    fapi2::P10_SBE_SCRATCH_REGS_PAUC_GARD_ERR()
-                    .set_TARGET_CHIP(i_target_chip)
-                    .set_CONTAINED_IPL_TYPE(i_contained_ipl_type)
-                    .set_PAUC_FUNCTIONAL(l_functional)
-                    .set_PAUC_PRESENT(l_present),
-                    "PAUC chiplets may not be deconfigured for current IPL type!");
+        l_functional = l_present;
     }
 
 fapi_try_exit:
