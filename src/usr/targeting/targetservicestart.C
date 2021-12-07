@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -505,6 +505,9 @@ static void initializeAttributes(TargetService& i_targetService,
             //Clear out PM MALF and FFDC enabled attributes
             l_pTopLevel->setAttr<ATTR_PM_MALF_ALERT_ENABLE> (0x0);
             l_pTopLevel->setAttr<ATTR_PM_RESET_FFDC_ENABLE> (0x0);
+
+            //Set this back to its default of zero (PM_COMPLEX_LOAD_TYPE_LOAD)
+            l_pTopLevel->setAttr<ATTR_PM_COMPLEX_LOAD_REQ>(0);
 
             //Assemble list of functional procs and zero out virtual address values
             //to ensure they get set again this IPL

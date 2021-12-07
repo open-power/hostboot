@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -172,7 +172,10 @@ namespace HTMGT
 #ifdef CONFIG_HTMGT
         errlHndl_t l_errl = nullptr;
         TARGETING::Target* l_proc = nullptr;
+
         do{
+        TRACFCOMP(g_trac_hbrt,ENTER_MRK
+                  "reset_pm_complex_with_reason: i_reason=%d, i_chipId=%d ", i_reason, i_chipId);
         l_errl = RT_TARG::getHbTarget(i_chipId,
                                       l_proc);
         if(l_errl)
@@ -181,6 +184,17 @@ namespace HTMGT
             l_rc = ERRL_GETRC_SAFE(l_errl);
             errlCommit(l_errl, RUNTIME_COMP_ID);
             break;
+        }
+
+        // NOTE: have to use static_cast to avoid collision with enum HTMGT::occResetReason
+        if (i_reason == static_cast<OCC_RESET_REASON>(OCC_RESET_REASON_CODE_UPDATE))
+        {
+            // For this special case we want to make sure that the PM Complex is RE-loaded
+            Target* l_sys = UTIL::assertGetToplevelTarget();
+            auto pm_type = PM_COMPLEX_LOAD_TYPE_RELOAD;
+            l_sys->setAttr<ATTR_PM_COMPLEX_LOAD_REQ>(pm_type);
+            TRACFCOMP(g_trac_hbrt, INFO_MRK
+                      "reset_pm_complex_with_reason: set pm_type=0x%X to RELOAD", pm_type);
         }
 
         occResetReason l_resetReason = HTMGT::OCC_RESET_REASON_NONE;
@@ -224,6 +238,9 @@ namespace HTMGT
         }
         }while(0);
 #endif
+
+        TRACFCOMP(g_trac_hbrt,EXIT_MRK"reset_pm_complex_with_reason: rc=%d ", l_rc);
+
         return l_rc;
     }
 

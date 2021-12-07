@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -544,45 +544,63 @@ namespace RTPM
         int l_rc = 0;
         errlHndl_t l_errl = nullptr;
         Target* l_failedProc = nullptr;
+        bool l_attemptedLoadAndStart = false;
+
+        Target* l_sys = UTIL::assertGetToplevelTarget();
+        auto pm_type = l_sys->getAttr<ATTR_PM_COMPLEX_LOAD_REQ>();
 
         // Load and start the PM Complex/OCCs on PHYP systems
         if(is_phyp_load())
         {
-            bool l_start_completed = true;
-            l_errl = HBPM::loadAndStartPMAll(HBPM::PM_LOAD,
-                                             l_failedProc);
-            if(l_errl)
+            if ((pm_type == PM_COMPLEX_LOAD_TYPE_LOAD) ||
+                (pm_type == PM_COMPLEX_LOAD_TYPE_RELOAD))
             {
-                pm_complex_error(l_errl, l_rc);
-                l_start_completed = false;
-            }
 
-            if(l_failedProc)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          ERR_MRK"load_and_start_pm_complex: could not load/start PM Complex on proc HUID 0x%08x",
-                          get_huid(l_failedProc));
-                l_start_completed = false;
-            }
-
-#ifdef CONFIG_HTMGT
-            // Notify HTMGT of the PM Complex start status.
-            // HTMGT will attempt recovery if necessary.
-            HTMGT::processOccStartStatus(l_start_completed,
-                                         l_failedProc);
-#else
-            // Verify all OCCs completed their init and reached checkpoint
-            if (l_start_completed)
-            {
-                l_errl = HBPM::verifyOccChkptAll();
+                bool l_start_completed = true;
+                l_attemptedLoadAndStart = true;
+                l_errl = HBPM::loadAndStartPMAll(
+                              (pm_type == PM_COMPLEX_LOAD_TYPE_LOAD)
+                                ? HBPM::PM_LOAD : HBPM::PM_RELOAD,
+                              l_failedProc);
                 if(l_errl)
                 {
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                              ERR_MRK"load_and_start_pm_complex: verifyOccChkptAll failed!");
                     pm_complex_error(l_errl, l_rc);
+                    l_start_completed = false;
                 }
-            }
+
+                if(l_failedProc)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              ERR_MRK"load_and_start_pm_complex: could not load/start PM Complex on proc HUID 0x%08x",
+                              get_huid(l_failedProc));
+                    l_start_completed = false;
+                }
+
+#ifdef CONFIG_HTMGT
+                // Notify HTMGT of the PM Complex start status.
+                // HTMGT will attempt recovery if necessary.
+                HTMGT::processOccStartStatus(l_start_completed,
+                                             l_failedProc);
+#else
+                // Verify all OCCs completed their init and reached checkpoint
+                if (l_start_completed)
+                {
+                    l_errl = HBPM::verifyOccChkptAll();
+                    if(l_errl)
+                    {
+                        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                                  ERR_MRK"load_and_start_pm_complex: verifyOccChkptAll failed!");
+                        pm_complex_error(l_errl, l_rc);
+                    }
+                }
 #endif
+            }
+            else
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          INFO_MRK"load_and_start_pm_complex: skipping (re)load due to pm_type=0x%X",
+                          pm_type);
+            }
         }
 
         if(l_rc)
@@ -591,6 +609,16 @@ namespace RTPM
                       ERR_MRK"load_and_start_pm_complex: error occurred; rc: %d", l_rc);
         }
 
+        if (l_attemptedLoadAndStart == true)
+        {
+            // Only ever try to load or reload once, so always change to "Do Not Load" here
+            pm_type = PM_COMPLEX_LOAD_TYPE_DO_NOT_LOAD;
+            l_sys->setAttr<ATTR_PM_COMPLEX_LOAD_REQ>(pm_type);
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,INFO_MRK
+                      "load_and_start_pm_complex: Attempted. Setting ATTR_PM_COMPLEX_LOAD_REQ to "
+                      "PM_COMPLEX_LOAD_TYPE_DO_NOT_LOAD (0x%X) to not (re)load again",
+                      pm_type);
+        }
 #endif
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   EXIT_MRK"load_and_start_pm_complex");

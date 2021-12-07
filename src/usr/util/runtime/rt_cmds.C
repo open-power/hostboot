@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1544,12 +1544,67 @@ int hbrtCommand( int argc,
             sprintf(*l_output, "ERROR: getcaps");
         }
     }
+    else if( !strcmp( argv[0], "resetPmComplexWithReason" ) )
+    {
+        // resetPmComplexWithReason [<OCC_RESET_REASON>] [<chipId>]
+        if(argc <= 3)
+        {
+            int rc = 0;
+            uint64_t occ_reset_reason = 0;
+            uint64_t chipId = 0;
+
+            *l_output = new char[300];
+            char tmpstr[100];
+
+            sprintf(*l_output, "resetPmComplexWithReason> ");
+
+            if (argc == 2)
+            {
+                occ_reset_reason = strtou64( argv[1], NULL, 16 ); // OCC_RESET_REASON
+                sprintf(tmpstr, "occ_reason=0x%.16llX (chipId defaults to 0)", occ_reset_reason);
+            }
+            else if (argc == 3)
+            {
+                occ_reset_reason = strtou64( argv[1], NULL, 16 ); // OCC_RESET_REASON
+                chipId  = strtou64( argv[2], NULL, 16 ); // chipId
+                sprintf(tmpstr, "occ_reason=0x%.16llX, chipId=0x%.16llX", occ_reset_reason, chipId);
+            }
+            else // arc==1
+            {
+                sprintf(tmpstr, "defaulting occ_reason to 0 and chipId defaults to 0", occ_reset_reason);
+            }
+
+            strcat( *l_output, tmpstr );
+            UTIL_FT("::%s",*l_output);
+
+            // Get the runtime interface object
+            runtimeInterfaces_t *l_rt_intf = getRuntimeInterfaces();
+            if(nullptr == l_rt_intf)
+            {
+                sprintf( *l_output, "Not able to get run time interface object for resetPmComplexWithReason");
+            }
+            else
+            {
+                rc = l_rt_intf->reset_pm_complex_with_reason(
+                         static_cast<OCC_RESET_REASON>(occ_reset_reason),
+                         chipId);
+                sprintf(*l_output, "back from resetPmComplexWithReason> rc=%d", rc);
+            }
+            UTIL_FT("::%s",*l_output);
+        }
+        else
+        {
+            *l_output = new char[100];
+            sprintf( *l_output,
+                     "ERROR: resetPmComplexWithReason [0x<OCC_RESET_REASON>] [0x<chipId>]\n");
+        }
+    }
     else
     {
         *l_output = new char[50+100*12];
         char l_tmpstr[100];
         sprintf( *l_output, "HBRT Commands:\n" );
-        sprintf( l_tmpstr, "testRunCommand <args...>\n" );
+        sprintf( l_tmpstr, "testRunCommand <arg>\n" );
         strcat( *l_output, l_tmpstr );
         sprintf( l_tmpstr, "getattr <huid> <attribute id> <size>\n" );
         strcat( *l_output, l_tmpstr );
@@ -1589,6 +1644,8 @@ int hbrtCommand( int argc,
         sprintf( l_tmpstr, "lidload <lid number>\n");
         strcat( *l_output, l_tmpstr );
         sprintf( l_tmpstr, "getcaps\n");
+        strcat( *l_output, l_tmpstr );
+        sprintf( l_tmpstr, "resetPmComplexWithReason [0x<OCC_RESET_REASON>] [0x<chipId>]\n");
         strcat( *l_output, l_tmpstr );
 
     }

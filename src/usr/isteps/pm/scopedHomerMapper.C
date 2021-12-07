@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -85,7 +85,10 @@ errlHndl_t HBPM::ScopedHomerMapper::map()
         // Someone's already mapped the HOMER virt (may have been done
         // recursively), so we don't need to map it again here.
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-               INFO_MRK"ScopedHomerMapper::map: HOMER virt is already mapped (potentially by another instance of ScopedHomerMapper).");
+               INFO_MRK"ScopedHomerMapper::map: HOMER virt is already mapped = 0x%.16llx for "
+               "proc 0x%.08X (potentially by another instance of ScopedHomerMapper).",
+               iv_proc->getAttr<TARGETING::ATTR_HOMER_VIRT_ADDR>(), TARGETING::get_huid(iv_proc));
+
         // Set the internal virt addr so that it's still fetchable via
         // getHomerVirtAddr()
         iv_homerVirtAddr = iv_proc->getAttr<TARGETING::ATTR_HOMER_VIRT_ADDR>();
