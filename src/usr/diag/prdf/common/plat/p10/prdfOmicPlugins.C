@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -247,6 +247,8 @@ PRDF_PLUGIN_DEFINE( p10_omic, DlFatalError_##POS );
 DL_FATAL_ERROR_PLUGIN( 0 );
 DL_FATAL_ERROR_PLUGIN( 1 );
 
+#undef DL_FATAL_ERROR_PLUGIN
+
 /**
  * @brief  Plugin function to collect OMI fail related FFDC from the appropriate
  *         OCMB.
@@ -307,6 +309,44 @@ PRDF_PLUGIN_DEFINE( p10_omic, CollectOmiOcmbFfdc_##POS );
 
 OMI_OCMB_FFDC_PLUGIN( 0 );
 OMI_OCMB_FFDC_PLUGIN( 1 );
+
+#undef OMI_OCMB_FFDC_PLUGIN
+
+/**
+ * @brief   Whenever an OMI link has degraded, the bus must be reconfigured to
+ *          avoid infinite retrains.
+ * @param   i_chip An OMIC chip.
+ * @param   i_dl   OMI position relative to the OMIC.
+ * @returns SUCCESS always.
+ */
+int32_t omiDegradeRetrainWorkaround(ExtensibleChip* i_chip, unsigned int i_dl)
+{
+    #ifdef __HOSTBOOT_MODULE
+
+    auto omiTarget = getConnectedChild(i_chip->getTrgt(), TYPE_OMI, i_dl);
+
+    if (nullptr != omiTarget)
+    {
+        PlatServices::omiDegradeDlReconfig(omiTarget);
+    }
+
+    #endif
+
+    return SUCCESS;
+}
+
+#define OMIC_PLUGIN(POS) \
+int32_t omiDegradeRetrainWorkaround_##POS(ExtensibleChip* i_chip, \
+                                          STEP_CODE_DATA_STRUCT& io_sc) \
+{ \
+    return omiDegradeRetrainWorkaround(i_chip, POS); \
+} \
+PRDF_PLUGIN_DEFINE(p10_omic, omiDegradeRetrainWorkaround_##POS);
+
+OMIC_PLUGIN(0);
+OMIC_PLUGIN(1);
+
+#undef OMIC_PLUGIN
 
 } // end namespace p10_omic
 

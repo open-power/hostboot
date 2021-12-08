@@ -277,6 +277,7 @@ actionclass omi_degraded_mode
 {
     try( funccall("OmiRunningInDegradedMode"),
          try(funccall("CrcSideEffect_Ocmb"), omi_bus) );
+    funccall("omiDegradeRetrainWorkaround");
     threshold1;
     funccall("OmiDegradeDD1Workaround"); # Must be called after threshold
 };

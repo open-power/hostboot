@@ -162,7 +162,7 @@ group gMC_OMI_DL_FIR
     /** MC_OMI_DL_FIR[5]
      *  OMI-DL0 running in degraded mode
      */
-    (rMC_OMI_DL_FIR, bit(5)) ? dl0_omi_bus_th_1_CRC;
+    (rMC_OMI_DL_FIR, bit(5)) ? dl0_omi_degraded_mode;
 
     /** MC_OMI_DL_FIR[6]
      *  OMI-DL0 parity error detection on a lane
@@ -263,7 +263,7 @@ group gMC_OMI_DL_FIR
     /** MC_OMI_DL_FIR[25]
      *  OMI-DL1 running in degraded mode
      */
-    (rMC_OMI_DL_FIR, bit(25)) ? dl1_omi_bus_th_1_CRC;
+    (rMC_OMI_DL_FIR, bit(25)) ? dl1_omi_degraded_mode;
 
     /** MC_OMI_DL_FIR[26]
      *  OMI-DL1 parity error detection on a lane

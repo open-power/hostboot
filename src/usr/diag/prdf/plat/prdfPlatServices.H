@@ -213,6 +213,14 @@ void nvdimmAddFfdc( TARGETING::TargetHandle_t i_nvdimm, errlHndl_t & io_errl  );
 
 #endif
 
+/**
+ * @brief  Whenever an OMI link has degraded, the bus must be reconfigured to
+ *         avoid infinite retrains.
+ * @param  i_target An OMI.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+uint32_t omiDegradeDlReconfig(TARGETING::TargetHandle_t i_target);
+
 //##############################################################################
 //##                    Maintenance Command wrappers
 //##############################################################################

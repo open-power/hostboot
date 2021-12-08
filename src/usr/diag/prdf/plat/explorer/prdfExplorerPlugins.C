@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -80,6 +80,27 @@ int32_t McbistCmdComplete( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE( explorer_ocmb, McbistCmdComplete );
+
+/**
+ * @brief   Whenever an OMI link has degraded, the bus must be reconfigured to
+ *          avoid infinite retrains.
+ * @param   i_chip An OCMB chip.
+ * @param   io_sc  The step code data struct.
+ * @returns SUCCESS always.
+ */
+int32_t omiDegradeRetrainWorkaround(ExtensibleChip* i_chip,
+                                    STEP_CODE_DATA_STRUCT& io_sc)
+{
+    auto omiTarget = getConnectedParent(i_chip->getTrgt(), TYPE_OMI);
+
+    if (nullptr != omiTarget)
+    {
+        PlatServices::omiDegradeDlReconfig(omiTarget);
+    }
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE(explorer_ocmb, omiDegradeRetrainWorkaround);
 
 } // end namespace explorer_ocmb
 

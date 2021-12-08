@@ -185,6 +185,7 @@ prd_obj_no_sim += p10_fbc_tdm_utils.o
 prd_obj_no_sim += p10_io_iohs_poll_recal.o
 prd_obj_no_sim += p10_iohs_reset.o
 prd_obj_no_sim += p10_smp_link_firs.o
+prd_obj_no_sim += p10_omi_degrade_dl_reconfig.o
 
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/
@@ -236,7 +237,6 @@ prd_obj_no_sim += p10_clock_test_cmn.o # required by p10_rcs_transient_check
 
 ifeq (${HOSTBOOT_RUNTIME},1)
 prd_vpath += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/corecache/
-prd_vpath += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/nest/
 prd_vpath += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/pm/
 prd_obj_no_sim += p10_l2err_linedelete.o
 prd_obj_no_sim += p10_l2err_extract.o

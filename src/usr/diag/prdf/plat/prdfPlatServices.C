@@ -70,6 +70,7 @@
 #include <p10_fbc_tdm_inject.H>
 #include <p10_io_quiesce_lane.H>
 #include <p10_rcs_transient_check.H>
+#include <p10_omi_degrade_dl_reconfig.H>
 
 #ifdef CONFIG_NVDIMM
 #include <nvdimm.H>
@@ -813,6 +814,31 @@ void nvdimmAddFfdc( TARGETING::TargetHandle_t i_nvdimm, errlHndl_t & io_errl  )
 }
 
 #endif
+
+//------------------------------------------------------------------------------
+
+uint32_t omiDegradeDlReconfig(TargetHandle_t i_target)
+{
+    PRDF_ASSERT(nullptr != i_target);
+    PRDF_ASSERT(TYPE_OMI == getTargetType(i_target));
+
+    uint32_t o_rc = SUCCESS;
+
+    errlHndl_t errl = nullptr;
+    fapi2::Target<fapi2::TARGET_TYPE_OMI> fapiTrgt{i_target};
+
+    FAPI_INVOKE_HWP(errl, p10_omi_degrade_dl_reconfig, fapiTrgt);
+
+    if (nullptr != errl)
+    {
+        PRDF_ERR("p10_omi_degrade_dl_reconfig(0x%08x) failed",
+                 getHuid(i_target));
+        PRDF_COMMIT_ERRL(errl, ERRL_ACTION_REPORT);
+        o_rc = FAIL;
+    }
+
+    return o_rc;
+}
 
 //##############################################################################
 //##                Explorer Maintenance Command wrappers

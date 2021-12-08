@@ -151,9 +151,10 @@ actionclass threshold_and_mask_dl1_omi_bus
 # Bits using these actions are CRC-related errors that are potential
 # side-effects of bits in the PAU_PHY_FIR. There is additional handling
 # to determine the callout if a root cause bit is found on as well.
-actionclass dl0_omi_bus_th_1_CRC
+actionclass dl0_omi_degraded_mode
 {
     try( funccall("CrcSideEffect_0"), dl0_omi_bus );
+    funccall("omiDegradeRetrainWorkaround_0");
     threshold1;
     funccall("OmiDegradeDD1Workaround"); # Must be called after threshold
 };
@@ -171,9 +172,10 @@ actionclass threshold_and_mask_dl0_omi_bus_CRC
     try( funccall("IsNotDD1"), funccall("ClearServiceCallFlag") );
 };
 
-actionclass dl1_omi_bus_th_1_CRC
+actionclass dl1_omi_degraded_mode
 {
     try( funccall("CrcSideEffect_1"), dl1_omi_bus );
+    funccall("omiDegradeRetrainWorkaround_1");
     threshold1;
     funccall("OmiDegradeDD1Workaround"); # Must be called after threshold
 };
