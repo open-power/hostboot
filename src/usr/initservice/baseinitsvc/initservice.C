@@ -602,13 +602,14 @@ void  buildSummary( errlHndl_t& io_stats, const uint64_t i_total_istep_nsecs )
         uint64_t arg1, arg2;
     };
 
-    std::array<stat_data, 6> stat_table {
+    std::array<stat_data, 7> stat_table {
     { { "Total IPL msecs = %llu",          i_total_istep_nsecs/NS_PER_MSEC },
       { "PROCs: Functional=%d Present=%d", l_procList_functional.size(), l_procList_present.size() },
       { "COREs: %d",                       l_coreList.size() },
       { "OCMBs: Functional=%d Present=%d", l_ocmbList_functional.size(), l_ocmbList_present.size() },
       { "Initial Cache Size: %d MB",       g_BlToHbDataManager.getHbCacheSizeMb() },
-      { "Total Memory Size: %d MB",        (l_total_memory/MEGABYTE) }
+      { "Total Memory Size: %d MB",        (l_total_memory/MEGABYTE) },
+      { "trace-lite enabled: %d",          TRACE::getTraceLite()}
     }
     };
 
