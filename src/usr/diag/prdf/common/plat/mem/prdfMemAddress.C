@@ -148,11 +148,12 @@ uint64_t MemAddr::incRowAddr( ExtensibleChip * i_chip ) const
     else
     {
         // Increment row
-        // Note: we need to increment row0, so we need to reverse the row bits,
-        // increment, and then reverse back.
-        incRow = MemUtils::reverseBits( iv_row, 18 );
+        // Note: we need to increment the rightmost row bit that is valid, so
+        //       we shift our row value over based on the number of extra row
+        //       bits first before incrementing.
+        incRow = iv_row >> shift;
         incRow += 1;
-        incRow = MemUtils::reverseBits( incRow, 18 );
+        incRow = incRow << shift;
     }
 
     // Note: the uint64_t passed back will be right justified as that is the
