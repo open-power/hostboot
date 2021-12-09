@@ -53,4 +53,8 @@
         <id>ATTR_FREQ_CORE_FLOOR_MHZ</id>
         <persistency>volatile-zeroed</persistency>
     </attribute>
+    <attribute>
+        <id>ATTR_CP_REFCLOCK_SELECT</id>
+        <persistency>volatile-zeroed</persistency>
+    </attribute>
 </attributes>
