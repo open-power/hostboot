@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2021
+# Contributors Listed Below - COPYRIGHT 2013,2022
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -219,8 +219,6 @@ my $resident_modules = {
     "liblpc.so"                 => '1',
     "libconsole.so"             => '1',
     "liberrldisplay.so"         => '1',
-    "libipmibase.so"            => '1',
-    "libipmiext.so"             => '1',
     "libsbeio.so"               => '1',
     "libvpd.so"                 => '1',
     "libsecureboot_trusted.so"  => '1',

@@ -1,5 +1,0 @@
-config BMC_IPMI_LONG_WATCHDOG
-    default y if CONSOLE_OUTPUT_TRACE || CONSOLE_TRACE_LITE
-    depends on BMC_IPMI
-    help
-        Sets watchdog default timer to several times normal for debugging

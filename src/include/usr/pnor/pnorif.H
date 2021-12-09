@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -62,7 +62,6 @@ struct PnorInfo_t
 /** PNOR access mode */
 enum hiomapMode
 {
-    PNOR_IPMI,
     PNOR_MBOX,
     PNOR_UNKNOWN
 };
@@ -223,7 +222,7 @@ void getPnorInfo( PnorInfo_t& o_pnorInfo );
 /**
  * @brief Get HIOMAP PNOR access mode
  *
- * @return hiomapMode  Pnor access mode (ipmi/mbox)
+ * @return hiomapMode  Pnor access mode (mbox)
  */
 hiomapMode getPnorAccessMode( void );
 

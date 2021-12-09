@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -318,15 +318,6 @@ errlHndl_t getCcinRecordAndKeywords( TARGETING::Target * i_target,
                                      TARGETING::TYPE i_type,
                                      vpdRecord & io_record,
                                      vpdKeyword & io_keywordCC );
-
-/**
- * @brief Read data from the BMC to update the system serial number
- * @param[in] i_target - node target to update vpd of
- *
- * @return errlHndl_t - nullptr if successful, otherwise a pointer to the
- *                      error log.
- */
-errlHndl_t updateSerialNumberFromBMC( TARGETING::Target * i_nodetarget );
 
 /**
  * Define useful constants for VPD code

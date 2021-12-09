@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -77,13 +77,6 @@
 #include <pldm/requests/pldm_pdr_requests.H>
 #include <pldm/base/hb_bios_attrs.H>
 #include <pldm/extended/pldm_watchdog.H>
-#endif
-
-#ifdef CONFIG_BMC_IPMI
-#include <ipmi/ipmipowerstate.H>    //IPMI System ACPI Power State
-#include <ipmi/ipmichassiscontrol.H>
-#include <ipmi/ipmisensor.H>
-#include <ipmi/ipmiif.H>
 #endif
 
 #include <initservice/bootconfigif.H>
@@ -408,18 +401,6 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
                 break;
             }
         }
-#ifdef CONFIG_BMC_IPMI
-        //set ACPI power state
-        errlHndl_t err_ipmi = IPMI::setACPIPowerState();
-
-        if(err_ipmi)
-        {
-           TRACFCOMP(g_trac_initsvc,
-                          "init: ERROR: IPMI set ACPI Power State Failed");
-            err_ipmi->collectTrace("INITSVC", 1024);
-            errlCommit(err_ipmi, INITSVC_COMP_ID );
-        }
-#endif
 
         if(iv_istepMode)
         {
@@ -743,7 +724,7 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                 }
             }
 
-#ifdef CONFIG_BMC_IPMI
+#ifdef CONFIG_BMC_PLDM
             if(l_manufacturingMode &&
                 (ERRORLOG::ErrlManager::errlCommittedThisBoot()))
             {
@@ -767,24 +748,6 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                 // Stop the IPL
                 stop();
 #else
-                //Disable reboots so system really halts
-                SENSOR::RebootControlSensor l_rbotCtl;
-                errlHndl_t err_ipmi = l_rbotCtl.setRebootControl(
-                 SENSOR::RebootControlSensor::autoRebootSetting::DISABLE_REBOOTS
-                    );
-
-                if(err_ipmi)
-                {
-                    #ifdef CONFIG_CONSOLE
-                    CONSOLE::displayf(CONSOLE::VUART1, NULL, "Failed to disable BMC auto reboots....");
-                    CONSOLE::flush();
-                    #endif
-                    TRACFCOMP(g_trac_initsvc,
-                              "Failed to disable BMC auto reboots....");
-                    err_ipmi->collectTrace("INITSVC");
-                    errlCommit(err_ipmi, INITSVC_COMP_ID );
-                }
-
                 // Shutdown with a TI
                 doShutdown( SHUTDOWN_MFG_TERM );
 #endif
@@ -1001,24 +964,6 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
                     "istep is enabled");
             istepPauseSet(i_istep, i_substep);
         }
-
-#ifdef CONFIG_BMC_IPMI
-
-        if(theStep->taskflags.fwprogtype != PHASE_NA)
-        {
-            SENSOR::FirmwareProgressSensor l_progressSensor;
-            errlHndl_t err_fwprog = l_progressSensor.setBootProgressPhase(
-                theStep->taskflags.fwprogtype);
-
-            if(err_fwprog)
-            {
-                TRACFCOMP(g_trac_initsvc,
-                    "init: ERROR: Update FW Progress Phase Failed");
-                errlCommit(err_fwprog, INITSVC_COMP_ID);
-            }
-        }
-
-#endif
 
         //---------------------------------------------------------
         // Run the Istep

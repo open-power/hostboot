@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,7 +54,6 @@
 #include "hdatbldda.H"
 #include "hdatiohub.H"
 #include "hdathbrt.H"
-#include "hdatipmi.H"
 #include "hdattpmdata.H"
 #include <util/align.H>
 #include <targeting/common/commontargeting.H>
@@ -594,18 +593,6 @@ errlHndl_t HdatSpiraS::loadDataArea( const hdat5Tuple_t& i_spirasHostEntry,
             case HDAT_SPIRAS_IPMI:
             {
                 HDAT_DBG("not creating IPMI data")
-
-                //@TODO RTC 246357 missing attribute
-                /*HDAT_DBG("Calling IPMI Sensor Data structure from spiras");
-                l_err = hdatLoadIpmi(l_addrToPass,l_size,l_count);
-                if ( l_err )
-                {
-                    HDAT_ERR("loading IPMI data  failed");
-                }
-                else
-                {
-                    HDAT_DBG("IPMI count=%d,size=0x%x",l_count,l_size);
-                }*/
             }
             break;
             case HDAT_SPIRAS_TPM_RELATED:

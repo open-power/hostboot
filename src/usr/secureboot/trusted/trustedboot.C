@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,9 +55,6 @@
 #include <sys/task.h>
 #include <sys/sync.h>
 #include <initservice/initserviceif.H>
-#ifdef CONFIG_BMC_IPMI
-#include <ipmi/ipmisensor.H>
-#endif
 #include <devicefw/driverif.H>
 #include <spi/tpmddif.H>
 #include <spi/tpmdd_common.H>
@@ -2598,23 +2595,6 @@ bool isTpmRequired()
     bool retVal = false;
     do
     {
-/* TODO RTC: 259970 Fetch TPM Required sensor value via PLDM
-        // First check if sensor is available
-        if ( getTpmRequiredSensorValue(retVal) )
-        {
-            // Sensor is available so use its setting of retVal
-            TRACUCOMP( g_trac_trustedboot, "isTpmRequired: Sensor is "
-                       "available: using retVal=%d",
-                       retVal );
-            break;
-        }
-        else
-        {
-            // Sensor not available; reset retVal to be safe
-            retVal = false;
-        }
-*/
-
         // TPM always required in simics
         if(Util::isSimicsRunning())
         {
@@ -2639,87 +2619,6 @@ bool isTpmRequired()
 
     return retVal;
 }
-
-bool getTpmRequiredSensorValue(bool& o_isTpmRequired)
-{
-    bool retVal = false;
-    o_isTpmRequired = false;
-
-    // Get TPM Required Sensor
-#ifdef CONFIG_BMC_IPMI
-
-    TARGETING::Target* pTopLevel = nullptr;
-    (void)TARGETING::targetService().getTopLevelTarget(pTopLevel);
-    assert(pTopLevel != nullptr, "Unable to get top level target");
-
-    uint32_t sensorNum = TARGETING::UTIL::getSensorNumber(pTopLevel,
-                                        TARGETING::SENSOR_NAME_TPM_REQUIRED);
-
-    TRACUCOMP( g_trac_trustedboot,"getTpmRequiredSensorValue: sensorNum=0x%X, "
-               "enum=0x%X",
-               sensorNum, TARGETING::SENSOR_NAME_TPM_REQUIRED);
-
-    // VALID IPMI sensors are 0-0xFE
-    if (TARGETING::UTIL::INVALID_IPMI_SENSOR != sensorNum)
-    {
-        // Check if TPM is required by BMC
-        SENSOR::getSensorReadingData tpmRequiredData;
-        SENSOR::SensorBase tpmRequired(TARGETING::SENSOR_NAME_TPM_REQUIRED,
-                                       pTopLevel);
-
-        errlHndl_t err = tpmRequired.readSensorData(tpmRequiredData);
-        if (nullptr == err)
-        {
-            // Sensor is available and found without error
-            retVal = true;
-
-            // 0x02 == Asserted bit (TPM is required)
-            if ((tpmRequiredData.event_status &
-                 (1 << SENSOR::ASSERTED)) ==
-                (1 << SENSOR::ASSERTED))
-            {
-                o_isTpmRequired = true;
-            }
-        }
-        else
-        {
-            // error reading sensor, so consider sensor not available
-            TRACFCOMP( g_trac_trustedboot,ERR_MRK"getTpmRequiredSensorValue: "
-                       "Unable to read Tpm Required Sensor: rc = 0x%04X "
-                       "(sensorNum=0x%X, enum=0x%X) Deleting Error plid=0x%04X."
-                       " Considering Sensor NOT required",
-                       err->reasonCode(), sensorNum,
-                       TARGETING::SENSOR_NAME_TPM_REQUIRED,
-                       err->plid());
-            delete err;
-            err = nullptr;
-            retVal = false;
-        }
-    }
-    else
-    {
-        // Sensor not available
-        retVal = false;
-        TRACUCOMP( g_trac_trustedboot, "getTpmRequiredSensorValue: Sensor "
-                   "not available: retVal=%d (sensorNum=0x%X)",
-                   retVal, sensorNum );
-    }
-
-    TRACFCOMP( g_trac_trustedboot,
-               "getTpmRequiredSensorValue: isAvail=%s, o_isTpmRequired=%s",
-               (retVal ? "Yes" : "No"),
-               (o_isTpmRequired ? "Yes" : "No") );
-#else
-    // IPMI support not there, so consider sensor not available
-    retVal = false;
-    TRACUCOMP( g_trac_trustedboot, "getTpmRequiredSensorValue: IPMI Support "
-               "not found; retVal=%d",
-               retVal );
-#endif
-
-    return retVal;
-}
-
 
 #ifdef CONFIG_TPMDD
 errlHndl_t GetRandom(const TpmTarget* i_pTpm,

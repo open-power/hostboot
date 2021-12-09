@@ -48,7 +48,6 @@ necessary for base enablement, and other interactions with other components.
 - GPIO
 - I2C
 - SCAN/SCOM/IBSCOM/FSISCOM/XSCOM
-- IPMI
 - LPC
 - MBOX
 - PNOR

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -749,7 +749,7 @@ void check_scratch_regs_vs_attrs( IStepError & io_StepError )
         l_err->collectTrace("ISTEPS_TRACE");
         errlCommit(l_err, ISTEP_COMP_ID);
 
-#if defined(CONFIG_PLDM) or defined(CONFIG_BMC_IPMI)
+#if defined(CONFIG_PLDM)
         // Explicitly force a devtree sync because we don't currently
         //  go through a shutdown when we send a reboot request
         TARGETING::AttrRP::syncAllAttributesToSP();

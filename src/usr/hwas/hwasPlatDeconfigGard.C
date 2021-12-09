@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -625,7 +625,7 @@ errlHndl_t DeconfigGard::platCreateGardRecord(
         // reboot count so we can reconfigure and attempt to IPL
         // Call setNewGardRecord in initservice.
         #ifndef __HOSTBOOT_RUNTIME
-        #ifdef CONFIG_BMC_IPMI
+        #ifdef CONFIG_PLDM
         HWAS_INF("platCreateGardRecord: New gard record committed, call INITSERVICE "
             "::setNewGardRecord()");
         INITSERVICE::setNewGardRecord();

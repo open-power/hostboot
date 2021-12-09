@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2021
+# Contributors Listed Below - COPYRIGHT 2011,2022
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -25,7 +25,7 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../..
 
-HIOMAP_DEPS = ast_mboxdd.o pnor_mboxdd.o pnor_ipmidd.o pnor_hiomapdd.o
+HIOMAP_DEPS = ast_mboxdd.o pnor_mboxdd.o pnor_hiomapdd.o
 PLDM_DEPS = pnor_pldmdd.o pnor_pldm_utils.o
 
 MODULE = pnor
@@ -34,7 +34,6 @@ OBJS += pnorrp.o
 OBJS += $(if $(CONFIG_SECUREBOOT),spnorrp.o)
 OBJS += $(if $(CONFIG_PNORDD_IS_SFC),pnor_sfcdd.o)
 OBJS += $(if $(CONFIG_PNORDD_IS_BMCMBOX),$(HIOMAP_DEPS))
-OBJS += $(if $(CONFIG_PNORDD_IS_IPMI),$(HIOMAP_DEPS))
 OBJS += $(if $(CONFIG_PLDM),$(PLDM_DEPS))
 OBJS += pnor_common.o
 OBJS += pnorvalid.o

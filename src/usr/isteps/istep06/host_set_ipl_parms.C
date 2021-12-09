@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,7 +46,7 @@
 #include <pldm/pldm_errl.H>
 #endif
 
-#if (defined(CONFIG_PNORDD_IS_BMCMBOX) || defined(CONFIG_PNORDD_IS_IPMI))
+#if defined(CONFIG_PNORDD_IS_BMCMBOX)
 #include <pnor/pnorif.H>
 #endif
 
@@ -210,7 +210,7 @@ void* host_set_ipl_parms( void *io_pArgs )
     }
 #endif
 
-#if (defined(CONFIG_PNORDD_IS_BMCMBOX) || defined(CONFIG_PNORDD_IS_IPMI))
+#if defined(CONFIG_PNORDD_IS_BMCMBOX)
     // Add a check to indicate the BMC does not support HIOMAP pnor-ipmi access
     // and the BMC firmware should be updated
     errlHndl_t l_pnor_err; // needed for scope compilation
@@ -231,11 +231,7 @@ void* host_set_ipl_parms( void *io_pArgs )
         bool l_IS_BMCMBOX = false;
 #endif
 
-#ifdef CONFIG_PNORDD_IS_IPMI
-        bool l_IS_IPMI = true;
-#else
         bool l_IS_IPMI = false;
-#endif
 
         /*@
          * @errortype

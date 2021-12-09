@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2021
+# Contributors Listed Below - COPYRIGHT 2010,2022
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -51,8 +51,6 @@ SUBDIRS += hwas.d
 SUBDIRS += hwplibs.d
 SUBDIRS += i2c.d
 SUBDIRS += imageprocs.d
-SUBDIRS += $(if $(CONFIG_BMC_BT_LPC_IPMI),ipmibase.d)
-SUBDIRS += $(if $(CONFIG_BMC_BT_LPC_IPMI),ipmiext.d)
 SUBDIRS += initservice.d
 SUBDIRS += intr.d
 SUBDIRS += isteps.d

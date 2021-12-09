@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /* [+] Super Micro Computer, Inc.                                         */
 /*                                                                        */
@@ -41,7 +41,6 @@
 #include <pnor/pnorif.H>
 #include <lpc/lpc_const.H>
 #include <console/uartif.H>
-#include <ipmi/ipmiif.H>
 #include <util/align.H>
 #include "hdatspsubsys.H"
 #include "hdathdif.H"
@@ -233,8 +232,9 @@ static errlHndl_t hdatGetPathInfo(
                                hdatIsURARTValid = HDAT_UART_IS_VALID;
 #endif
 
+// @TODO RTC 296530: Remove from HDAT
 // Enablng IPMI BT support in SP Subsystem
-#ifdef CONFIG_BMC_IPMI
+#if 0
         IPMI::BmcInfo_t l_bmcInfo = IPMI::getBmcInfo();
 
         o_pathArray[o_arrayHdr.hdatArrayCnt].hdatBarOfBTDev =

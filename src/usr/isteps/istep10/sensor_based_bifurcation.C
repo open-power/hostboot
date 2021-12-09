@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,7 +29,6 @@
 // FIXME RTC: 210975
 //#include <fapi2/target.H>
 #include <targeting/targplatutil.H>
-#include "ipmi/ipmisensor.H"
 
 #include <trace/interface.H>
 #include <initservice/taskargs.H>
@@ -68,6 +67,8 @@ errlHndl_t _queryIopsToBifurcateAndPhbsToDisable(
                "ATTR_PEC_PCIE_LANE_MASK_BIFURCATED attribute");
         if (laneMaskBifurcated[0] || laneMaskBifurcated[1] || laneMaskBifurcated[2]
             || laneMaskBifurcated[3]) {
+
+            #if 0 // @TODO RTC 250046: provide PLDM replacement, if any
             TARGETING::Target* sys = nullptr;
             TARGETING::targetService().getTopLevelTarget(sys);
             assert(sys != nullptr);
@@ -90,6 +91,7 @@ errlHndl_t _queryIopsToBifurcateAndPhbsToDisable(
                     errlCommit(pError, ISTEP_COMP_ID);
                 }
             }
+            #endif
         }
     // Extension point to return bifurcated IOPs and PHBs to disable.
     // Assuming no extensions are added, the function returns no IOPs to

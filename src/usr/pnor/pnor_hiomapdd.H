@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,8 +27,8 @@
 
 /*
  * The PnorHiomapDD class implements fallback semantics for the HIOMAP
- * transport implementations (currently, AST mailbox and IPMI). The constructor
- * probes each transport, preferring IPMI over the mailbox. If a transport's
+ * transport implementations (currently, AST mailbox). The constructor
+ * probes each transport. If a transport's
  * probe is successful the instance of the transport's class is stored in
  * the iv_pnor member of PnorHiomapDD.
  *

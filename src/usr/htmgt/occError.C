@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,7 +35,7 @@
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
 #include <variable_buffer.H>
-#include "ipmi/ipmisensor.H"
+#include <targeting/targplatutil.H>
 #include <targeting/common/mfgFlagAccessors.H>
 
 

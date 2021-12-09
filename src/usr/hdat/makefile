@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2019
+# Contributors Listed Below - COPYRIGHT 2015,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -57,6 +57,5 @@ OBJS += hdathbrt.o
 OBJS += hdattpmdata.o
 OBJS += hdatspiraS.o
 OBJS += hdatspiraH.o
-OBJS += hdatipmi.o
 
 include ${ROOTPATH}/config.mk

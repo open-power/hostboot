@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,10 +66,6 @@ namespace UTIL
  *                      (default all targets)
  */
 void dumpHBAttrs(uint32_t i_huid = 0);
-
-// IPMI sensors have the range 0x0-0xFE - 0xFF
-// is reserved for invalid sensor
-static const uint16_t INVALID_IPMI_SENSOR = 0xFF;
 
 /* @brief tryGetAttributes<Attrs...>
  *
@@ -427,7 +423,6 @@ inline void subsystemIsMasterNodeCapable(bool& o_masterNodeCapable)
  */
 uint32_t getSensorNumber( const Target* i_pTarget,
                           TARGETING::SENSOR_NAME i_name );
-
 /**
  * Return the target for a given sensor number
  *
@@ -446,25 +441,6 @@ uint32_t getSensorNumber( const Target* i_pTarget,
  */
 TARGETING::Target * getSensorTarget( uint32_t i_sensorNumber,
                                      TARGETING::Target* i_occ);
-
-#ifdef CONFIG_BMC_IPMI
-/**
- *  @brief Returns the target handle referencing a target whose sensor
- *          number matches the caller supplied value
- *
- *  @param[in] i_sensorNumber IPMI sensor number of target to find
- *
- *  @pre Target service must be initialized
- *
- *  @return Target handle referencing a target whose sensor matches the
- *      caller supplied value
- *
- *  @retval !NULL Target handle referencing a target whose sensor
- *      matches the caller supplied value.
- *  @retval NULL No target found
- */
-Target * getTargetFromIPMISensor( uint32_t i_sensorNumber );
-#endif
 
 /**
  * @brief   check_proc0_memory_config   Check memory config for proc0

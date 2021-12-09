@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -51,7 +51,7 @@ namespace INITSERVICE
      *      2. Post memory flush callback priorities are in the range 127-255,
      *      and are signaled after the memory has been flushed to pnor.
      *
-     *      NOTE: The final call back for systems which support IPMI should be
+     *      NOTE: The final call back for systems which support PLDM should be
      *      POST_MEM_FLUSH_NOTIFY_LAST since it will trigger a power off
      *      request to the BMC.
      *
@@ -61,7 +61,6 @@ namespace INITSERVICE
         NOTIFY_FIRST                    = 0,
         HIGHEST_PRIORITY                = NOTIFY_FIRST,
         NO_PRIORITY                     = 16,
-        IPMI_SEL_PRIORITY               = 17,
         MBOX_PRIORITY                   = 18,
         INTR_PRIORITY                   = 19,
         PRESHUTDOWN_INIT_PRIORITY       = 20,

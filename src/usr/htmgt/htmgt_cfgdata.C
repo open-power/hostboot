@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,7 +30,14 @@
 #include "htmgt_utility.H"
 #include "htmgt_poll.H"
 #include "htmgt_occmanager.H"
-#include "ipmi/ipmisensor.H"
+
+#include <initservice/initsvcstructs.H>
+#include <attributeenums.H>
+#include <targeting/common/target.H>
+#include <errl/errlentry.H>
+#include <targeting/common/targetservice.H>
+#include <targeting/targplatutil.H>
+
 #include <htmgt/htmgt_reasoncodes.H>
 #include <fapi2_attribute_service.H>
 #include <isteps/pm/scopedHomerMapper.H>

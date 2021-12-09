@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,9 +34,7 @@
 #include <hwas/common/deconfigGard.H>
 #include <hwas/hwasPlat.H>
 #include <initservice/initserviceif.H>
-#ifdef CONFIG_BMC_IPMI
-#include <ipmi/ipmisensor.H>
-#endif
+
 namespace HWAS
 {
 
@@ -256,61 +254,9 @@ errlHndl_t platHandleClockCallout(
     }
     else
     {
-#ifdef CONFIG_BMC_IPMI
+#ifdef CONFIG_PLDM
 
-        // If BMC is present and IPMI is configured system has a simple clock
-        // topology, so need to update the BMC fault sensor for the clock if
-        // there is a deconfig since Hostboot is the only party able to handle
-        // clock fails.
-        // For now, all clock sensors reside on the node target
-        if(i_deconfigState == HWAS::DECONFIG)
-        {
-            TARGETING::TargetHandleList parentList;
-
-            (void)getParentAffinityTargets (
-                parentList,
-                i_pTarget, TARGETING::CLASS_ENC, TARGETING::TYPE_NODE,
-                false);
-
-            assert(parentList.size() == 1, "Bug! Query returned multiple or no "
-                "(actual = %d) parents",
-                parentList.size());
-
-            TARGETING::TargetHandle_t pTarget = parentList[0];
-
-            // Get associated target
-            TARGETING::ENTITY_ID associatedType = TARGETING::ENTITY_ID_NA;
-            switch(i_clockType)
-            {
-                case TODCLK_TYPE:
-                    associatedType = TARGETING::ENTITY_ID_TOD_CLOCK;
-                    break;
-                case MEMCLK_TYPE:
-                case OSCREFCLK_TYPE:
-                    associatedType = TARGETING::ENTITY_ID_REF_CLOCK;
-                    break;
-                case OSCPCICLK_TYPE:
-                    associatedType = TARGETING::ENTITY_ID_PCI_CLOCK;
-                    break;
-                default:
-                    assert(0,"Bug! Caller supplied illegal clock type.  "
-                        "i_clockType = 0x%X",
-                        i_clockType);
-            }
-
-            SENSOR::FaultSensor faultSensor(pTarget,associatedType);
-
-            pError = faultSensor.setStatus(
-                SENSOR::FaultSensor::FAULT_STATE_ASSERTED);
-            if(pError)
-            {
-                HWAS_ERR("Failed setting fault sensor status for clock type "
-                    "0x%X and HUID 0x%X",
-                    i_clockType, TARGETING::get_huid(pTarget));
-                pError->collectTrace(HWAS_COMP_NAME, 512);
-                errlCommit(pError, HWAS_COMP_ID);
-            }
-        }
+    // @TODO RTC 295271: Support PLDM clock callouts
 
 #endif
 

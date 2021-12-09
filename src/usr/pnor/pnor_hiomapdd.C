@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,7 +30,6 @@
 #include <devicefw/driverif.H>
 #include <initservice/initserviceif.H>
 #include <pnor/pnor_reasoncodes.H>
-#include "pnor_ipmidd.H"
 #include "pnor_mboxdd.H"
 #include "pnor_hiomapdd.H"
 #include "pnor_utils.H"
@@ -237,12 +236,6 @@ static PnorIf* probeHiomapTransport(TARGETING::Target* i_target,
     PnorIf* pnor;
 
     do {
-        if ((pnor = PnorIpmiDD::probe(i_target)))
-        {
-            io_mode = PNOR::PNOR_IPMI;
-            break;
-        }
-
         if ((pnor = PnorMboxDD::probe(i_target)))
         {
             io_mode = PNOR::PNOR_MBOX;
@@ -255,7 +248,7 @@ static PnorIf* probeHiomapTransport(TARGETING::Target* i_target,
         return pnor;
     }
 
-    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "Probes for MBOX and IPMI HIOMAP transports failed\n");
+    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "Probes for MBOX HIOMAP transports failed\n");
     CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "Cannot access PNOR!\n");
     CONSOLE::flush();
     INITSERVICE::doShutdown(PNOR::RC_PNOR_INIT_FAILURE);

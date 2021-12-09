@@ -138,14 +138,6 @@ foreach $proc in (get-component-list -all proc_p10_pib) {
     }
 }
 
-###################################
-#Enable the IPMI Responder
-###################################
-echo "Enable IPMI Responder"
-try {
-      run-python-file (lookup-file hbfw/ipmi_bt_responder.py)
-} except { echo "ERROR: Failed to load IPMIresponder." }
-
 ###############################
 #Initialize Explorer Registers
 ###############################

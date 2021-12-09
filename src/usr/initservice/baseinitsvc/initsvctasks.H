@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,20 +55,6 @@ const TaskInfo    g_taskinfolist[]   =   {
                 }
         },
 
-#ifdef CONFIG_BMC_IPMI
-        /**
-         * @brief IPMI resource provider
-         */
-        {
-            "libipmibase.so",                           // taskname
-            NULL,                                       // no ptr to fnct
-            {
-
-                START_TASK,                             // task type
-                BASE_IMAGE,                             // Base Module
-            }
-        },
-#endif
 #if defined(CONFIG_MCTP) || defined(CONFIG_MCTP_TESTCASES)
         /**
          * @brief   libmctp

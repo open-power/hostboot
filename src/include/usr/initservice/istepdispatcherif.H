@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -98,26 +98,12 @@ bool isShutdownRequested ( void );
 /**
  *  @brief This function is to be used by external code to
  *    initiate a system reboot. The function will figure out which reboot
- *    mechanism it needs to use to reboot the system (IPMI message, PLDM
+ *    mechanism it needs to use to reboot the system (PLDM
  *    message, or shutdown() call)
  *
  * @param[in] i_reason the reason for reboot (printed to the console)
  */
 void requestReboot(const char* i_reason = nullptr);
-
-#ifdef CONFIG_BMC_IPMI
-/**
- *  @brief This function is to be used by external code to
- *    initiate a system power off via IPMI commands
- */
-void requestPowerOff( void );
-
-/**
- *  @brief This function is to be used by external code to
- *    initiate a soft system power off via IPMI commands
- */
-void requestSoftPowerOff( void );
-#endif
 
 /**
  * @brief This function is to be used by external code to tell

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -71,9 +71,6 @@
 #include <errlud_secure.H>
 #include "../spi/spidd.H"
 
-#ifdef CONFIG_BMC_IPMI
-#include <ipmi/ipmisensor.H>
-#endif
 #include <initservice/istepdispatcherif.H>
 #ifdef CONFIG_SECUREBOOT
 #include <secureboot/containerheader.H>
@@ -6350,7 +6347,7 @@ errlHndl_t sbeDoReboot( void )
         }
 #endif
 
-#if defined(CONFIG_PLDM) or defined(CONFIG_BMC_IPMI)
+#if defined(CONFIG_PLDM)
         if(g_do_hw_keys_hash_transition)
         {
 #ifdef CONFIG_PLDM
@@ -6368,7 +6365,7 @@ errlHndl_t sbeDoReboot( void )
                        "requesting power cycle");
             INITSERVICE::requestReboot("SBE update");
         }
-#else //non-IPMI and non-PLDM
+#else // non-PLDM
         if(g_do_hw_keys_hash_transition)
         {
             TRACFCOMP(g_trac_sbe,

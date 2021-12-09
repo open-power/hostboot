@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -227,21 +227,6 @@ void setTpmLogMgr(
 void getTpmWithRoleOf(
     TARGETING::TPM_ROLE i_tpmRole,
     TARGETING::Target*& o_pTpm);
-
-/**
- *  @brief Returns value of TPM Sensor if it is available
- *         All error handing is contained in the function and the output value
- *         is only valid if the function returns TRUE
- *
- *  @param[out] o_isTpmRequired Value returned from TPM Required sensor:
- *              TRUE if TPM is required; FALSE if TPM is NOT required
- *              NOTE: this parameter is only valid if this function returns TRUE
- *
- *  @return bool  Returns TRUE if sensor was available and found without error;
- *                otherwise returns FALSE
- */
-bool getTpmRequiredSensorValue(
-    bool& o_isTpmRequired);
 
 /**
  * @brief Adds the SBE Measurement Registers from a Processor to the TPM's SW Log.

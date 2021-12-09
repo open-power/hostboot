@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2021
+# Contributors Listed Below - COPYRIGHT 2013,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -254,7 +254,6 @@ simics.tar_CONTENTS = \
     src/build/simics/combined.simics \
     src/build/simics/run_as_vpo.simics \
     src/build/simics/fake_mem.simics \
-    src/build/simics/ipmi_bt_responder.py \
     src/build/simics/hb-simdebug.py \
     src/build/debug/hb-dump-debug \
     src/build/debug/ecmd-debug-framework.pl \

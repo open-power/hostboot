@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,7 +42,6 @@
 #include <devicefw/userif.H>
 #include <devicefw/driverif.H>
 #include <pnor/ecc.H>
-#include <ipmi/ipmiif.H>
 #include <targeting/common/attributeTank.H>
 #include <util/utilrsvdmem.H>
 #include <sys/misc.h>
@@ -150,7 +149,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                 intf->get_reserved_mem = rt_get_reserved_mem;
                 intf->pnor_read = rt_pnor_read;
                 intf->pnor_write= rt_pnor_write;
-                intf->ipmi_msg= rt_ipmi_msg;
+                intf->ipmi_msg= nullptr;
                 intf->clock_gettime = clock_gettime;
                 intf->hcode_scom_update = rt_hcode_update;
                 intf->firmware_request = rt_firmware_request;
@@ -914,33 +913,6 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             }
             TRACFCOMP(g_trac_hbrt, EXIT_MRK"rt_pnor_write");
             return rc;
-        }
-
-        //--------------------------------------------------------------------
-        static int rt_ipmi_msg(uint8_t netfn, uint8_t cmd,
-                    void *tx_buf, size_t tx_size,
-                    void *rx_buf, size_t *rx_size)
-        {
-            TRACFCOMP(g_trac_hbrt, ENTER_MRK
-                "rt_ipmi_msg: tx_buf:%x/%x, size:%d, rx_buf:%p, size:%d",
-                    netfn, cmd, tx_size,
-                    rx_buf, *rx_size);
-
-            errlHndl_t l_err = NULL;
-            do {
-                ((uint8_t*)rx_buf)[0] = IPMI::CC_OK;
-                rx_size = 0;
-            } while (0);
-
-            //commit the error
-            uint32_t  l_plid = 0;
-            if (l_err)
-            {
-                l_plid = l_err->plid();
-                errlCommit (l_err, CXXTEST_COMP_ID);
-            }
-            TRACFCOMP(g_trac_hbrt, EXIT_MRK"rt_ipmi_msg");
-            return l_plid;
         }
 
         //--------------------------------------------------------------------

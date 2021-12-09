@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2021
+# Contributors Listed Below - COPYRIGHT 2010,2022
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -151,7 +151,6 @@ BASE_MODULES += xscom
 BASE_MODULES += initservice
 BASE_MODULES += secureboot_base
 BASE_MODULES += lpc
-BASE_MODULES += $(if $(CONFIG_BMC_IPMI),ipmibase)
 BASE_MODULES += pnor
 BASE_MODULES += vfs
 BASE_MODULES += $(if $(CONFIG_AST2400) || $(CONFIG_AST2500), sio)
@@ -225,7 +224,6 @@ EXTENDED_MODULES += $(if $(CONFIG_UCD_FLASH_UPDATES),ucd)
 EXTENDED_MODULES += $(if $(CONFIG_FSP_BUILD),,nvram)
 EXTENDED_MODULES += expupd
 EXTENDED_MODULES += $(if $(CONFIG_HTMGT),htmgt)
-EXTENDED_MODULES += $(if $(CONFIG_BMC_IPMI),ipmiext)
 EXTENDED_MODULES += isteps_mss
 EXTENDED_MODULES += isteps_nest
 EXTENDED_MODULES += nestmemutils
@@ -342,7 +340,6 @@ RUNTIME_MODULES += eeprom_rt     # ~/src/usr/eeprom/runtime/
 RUNTIME_MODULES += $(if $(CONFIG_HBRT_PRD),prdf_rt) # ~/src/usr/diag/prdf/runtime/
 RUNTIME_MODULES += $(if $(CONFIG_HBRT_PRD),attn_rt) # ~/src/usr/diag/attn/runtime/
 RUNTIME_MODULES += $(if $(CONFIG_HTMGT),htmgt_rt)   # ~/src/usr/htmgt/runtime/
-#RUNTIME_MODULES += $(if $(CONFIG_BMC_IPMI),ipmi_rt) # ~/src/usr/ipmiext/runtime/
 #RUNTIME_MODULES += $(if $(CONFIG_NVDIMM),nvdimm_rt)
 #RUNTIME_MODULES += p9_cpuWkup
 RUNTIME_MODULES += $(if $(CONFIG_MCTP)$(CONFIG_MCTP_TESTCASES),mctp_rt) # ~/src/usr/mctp/runtime/
@@ -378,7 +375,6 @@ RUNTIME_TESTCASE_MODULES += testsyslib_rt # ~/src/usr/testcore/lib/runtime/
 RUNTIME_TESTCASE_MODULES += testexpaccess_rt # ~/src/usr/expaccess/runtime/test/
 RUNTIME_TESTCASE_MODULES += $(if $(CONFIG_HBRT_PRD),testprdf_rt)
 RUNTIME_TESTCASE_MODULES += $(if $(CONFIG_HBRT_PRD),testattn_rt)
-#RUNTIME_TESTCASE_MODULES += $(if $(CONFIG_BMC_IPMI),testipmi_rt)
 RUNTIME_TESTCASE_MODULES += $(if $(CONFIG_MCTP)$(CONFIG_MCTP_TESTCASES),testmctp_rt) # ~/src/usr/mctp/runtime/
 RUNTIME_TESTCASE_MODULES += testi2c_rt
 endif

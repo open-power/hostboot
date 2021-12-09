@@ -50,17 +50,9 @@ In all cases, the various services have a chance to clean themselves up before
      and into PNOR
   * _Attribute Resource Provider_ --
      Sync all attributes down to the FSP
-* __IPMI_SEL_PRIORITY (17)__ --
-    Must be before MBOX_PRIORITY because it uses IPMI RP, must be after ERRL
-    because SEL messages are sent by ERRL.
-  * _IPMI SEL Daemon_ --
-     Stop accepting new SEL messages.
 * __MBOX_PRIORITY (18)__ --
     Must be before INTR_PRIORITY since interrupts are being used.
   * _Mailbox Daemon_ --
-     Flushes out any pending messages and stops accepting new ones, returns
-     after all messages have been sent and acked.
-  * _IPMI Resource Provider_ --
      Flushes out any pending messages and stops accepting new ones, returns
      after all messages have been sent and acked.
 * __INTR_PRIORITY (19)__ --
@@ -99,7 +91,5 @@ In all cases, the various services have a chance to clean themselves up before
      may still end up getting paged in.
 * __POST_MEM_FLUSH_NOTIFY_LAST (255)__ --
     Absolute last message sent
-  * _IPMI Resource Provider_ --
-     Responds to the shutdown request from the BMC, this must be at the very
-     end because the BMC will power off the box when they receive the response.
+
 

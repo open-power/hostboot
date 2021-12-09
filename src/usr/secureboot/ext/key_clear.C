@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,10 +40,6 @@
 #include <secureboot/key_clear_if.H>
 #include "../common/securetrace.H"
 #include <secureboot/service.H>    // for getSbeSecurityBackdoor();
-
-#ifdef CONFIG_BMC_IPMI
-#include <ipmi/ipmisensor.H>
-#endif
 
 using namespace TARGETING;
 using namespace ERRORLOG;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,10 +51,6 @@
 #if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
 #include <console/consoleif.H>
 #endif
-#endif
-
-#ifdef CONFIG_BMC_IPMI
-#include <ipmi/ipmisensor.H>
 #endif
 
 #ifdef CONFIG_TPMDD

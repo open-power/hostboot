@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -281,7 +281,6 @@ errlHndl_t nodePresenceDetect(DeviceFW::OperationType i_opType,
         pvpd_present = true;  //node PVDP always returns present
     }
 #endif
-    l_errl = VPD::updateSerialNumberFromBMC( i_target );
 
     //Fsp sets PN/SN so if there is none, do it here
     if(!INITSERVICE::spBaseServicesEnabled())

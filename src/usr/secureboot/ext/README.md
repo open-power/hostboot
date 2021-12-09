@@ -35,7 +35,7 @@ The Hostboot perspective of the Key Clear Algorithm is to (1) take the customer'
 
 * __At Standby Power__ the customer sets the requested Key Clear Information one of these two ways:
 
-  1. For OpenPOWER/BMC systems: Sets an IPMI sensor via the BMC
+  1. For OpenPOWER/BMC systems: Sets an PLDM BIOS attribute via the BMC
 
 
   2. For FSP-based systems: Sets the values on the appropriate ASMI menu option
@@ -86,7 +86,7 @@ The Hostboot perspective of the Key Clear Algorithm is to (1) take the customer'
 
     * Get Key Clear Request Information:
 
-      * For OpenPOWER/BMC systems: Read IPMI sensor and map to ATTR_KEY_CLEAR_REQUEST
+      * For OpenPOWER/BMC systems: Read PLDM BIOS attribute and map to ATTR_KEY_CLEAR_REQUEST
 
       * For FSP-based systems: Read ATTR_KEY_CLEAR_REQUEST which should have been set by the FSP when the ASMI menu was set at standby
 

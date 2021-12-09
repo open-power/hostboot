@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -171,8 +171,6 @@ struct  TaskFlags
                                          //    for analysis after executing
                                          //    the istep substep
                                          //    true = check for attentions
-    firmwareProgressPhase  fwprogtype;   // -- Flag indicating current IPMI
-                                         //    Boot Progress code
 };
 
 

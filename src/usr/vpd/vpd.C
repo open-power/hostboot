@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,7 +40,6 @@
 #include <map>
 #include <console/consoleif.H>
 #include <initservice/istepdispatcherif.H>
-#include <ipmi/ipmifruinv.H>
 #include <pldm/requests/pldm_pdr_requests.H>
 #include <targeting/targplatutil.H>     // assertGetToplevelTarget
 #include <arch/pvrformat.H>
@@ -575,60 +574,6 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
 
     }while( 0 );
 
-}
-
-// ------------------------------------------------------------------
-// updateSerialNumberFromBMC
-// ------------------------------------------------------------------
-errlHndl_t updateSerialNumberFromBMC( TARGETING::Target * i_nodetarget )
-{
-    errlHndl_t l_errl = nullptr;
-#ifdef CONFIG_UPDATE_SN_FROM_BMC
-    size_t     l_vpdSize = 0;
-
-    //Get Product Serial Number from Backplane
-    char* l_sn_prod = nullptr;
-    l_sn_prod = IPMIFRUINV::getProductSN(0);
-    if (l_sn_prod != nullptr)
-    {
-        TRACFCOMP(g_trac_vpd, "Got system serial number from BMC.");
-        TRACFCOMP(g_trac_vpd, "SN from BMC is: %s", l_sn_prod);
-
-        l_errl = deviceRead(i_nodetarget, nullptr, l_vpdSize,
-                DEVICE_PVPD_ADDRESS( PVPD::OSYS, PVPD::SS ));
-
-        if(l_errl == nullptr)
-        {
-            uint8_t l_vpddata[l_vpdSize];
-
-            l_errl = deviceRead(i_nodetarget, l_vpddata, l_vpdSize,
-                DEVICE_PVPD_ADDRESS( PVPD::OSYS, PVPD::SS ));
-
-            if(l_errl == nullptr)
-            {
-                TRACFCOMP(g_trac_vpd, "SN in PVPD::OSYS:SS: %s, size: %d", l_vpddata, l_vpdSize);
-
-                if (strncmp(l_sn_prod, l_vpddata, l_vpdSize) != 0)
-                {
-                    l_errl = deviceWrite(i_nodetarget, l_sn_prod, l_vpdSize,
-                                DEVICE_PVPD_ADDRESS( PVPD::OSYS, PVPD::SS ));
-                    CONSOLE::displayf(CONSOLE::DEFAULT, nullptr, "updated SN from BMC into PVPD.");
-                    CONSOLE::flush();
-                    CONSOLE::displayf(CONSOLE::DEFAULT, nullptr, "Need a reboot.");
-                    CONSOLE::flush();
-                    INITSERVICE::requestReboot("serial number update");
-                }
-            }
-        }
-
-         //getProductSN requires the caller to delete the char array
-         delete[] l_sn_prod;
-         l_sn_prod = nullptr;
-
-        TRACFCOMP(g_trac_vpd, "End updateSerialNumberFromBMC.");
-    }
-#endif
-    return l_errl;
 }
 
 // ------------------------------------------------------------------

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,9 +43,6 @@
 #include    <i2c/i2cif.H>
 #include    <console/consoleif.H>
 #include    <config.h>
-#ifdef CONFIG_BMC_IPMI
-#include    <ipmi/ipmisensor.H>
-#endif
 #include    <sys/time.h>
 #include    <hwas/common/hwasCommon.H>
 

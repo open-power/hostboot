@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,15 +61,6 @@ namespace SECUREBOOT
      */
     void getKeyClearRequest(bool & o_requestPhysPresence,
                             TARGETING::KEY_CLEAR_REQUEST & o_keyClearRequests);
-
-#ifdef CONFIG_BMC_IPMI
-    /*
-     * @brief Clears the Key Clear Sensor
-     *
-     * @return errlHndl_t nullptr on success; non-nullptr on error.
-     */
-    errlHndl_t clearKeyClearSensor(void);
-#endif
 
 } // namespace SECUREBOOT
 

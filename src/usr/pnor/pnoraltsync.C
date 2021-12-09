@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021                             */
+/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,7 +49,7 @@
 #if defined(CONFIG_PNORDD_IS_SFC)
 #include "pnor_sfcdd.H"
 using PnorDD = PnorSfcDD;
-#elif (defined(CONFIG_PNORDD_IS_BMCMBOX) || defined(CONFIG_PNORDD_IS_IPMI))
+#elif defined(CONFIG_PNORDD_IS_BMCMBOX)
 #include "pnor_hiomapdd.H"
 using PnorDD = PnorHiomapDD;
 #elif CONFIG_FILE_XFER_VIA_PLDM

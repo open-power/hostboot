@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -220,25 +220,12 @@ public:
 
     /**
      * @brief Trigger a reboot. The function will figure out which reboot
-     *    mechanism it needs to use to reboot the system (IPMI message, PLDM
+     *    mechanism it needs to use to reboot the system (PLDM
      *    message, or shutdown() call)
      *
      * @param[in] i_reason the reason for reboot (gets printed to the console)
      */
     void requestReboot(const char* i_reason = nullptr);
-
-#ifdef CONFIG_BMC_IPMI
-
-    /**
-     * @brief Trigger a power off via IPMI commands
-     */
-    void requestPowerOff();
-
-    /**
-     * @brief Trigger a soft power off via IPMI commands
-     */
-    void requestSoftPowerOff();
-#endif
 
     /**
      * @brief  For a given istep/substep combo, calculate (destructively)
