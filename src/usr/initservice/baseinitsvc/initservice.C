@@ -62,6 +62,7 @@
 
 #include    <initservice/taskargs.H>        // TASK_ENTRY_MACRO
 
+#include    "../../trace/debug.H"
 #include    "initservice.H"
 #include    "initsvctasks.H"
 #include    <isteps/istepmasterlist.H>
@@ -602,14 +603,25 @@ void  buildSummary( errlHndl_t& io_stats, const uint64_t i_total_istep_nsecs )
         uint64_t arg1, arg2;
     };
 
-    std::array<stat_data, 7> stat_table {
+    // Need to check if continuous tracing is enabled as it could skew the data.
+    TARGETING::Target* l_sys = TARGETING::UTIL::assertGetToplevelTarget();
+    TARGETING::HbSettings hbSettings = l_sys->getAttr<TARGETING::ATTR_HB_SETTINGS>();
+
+    bool continuousEnabled = hbSettings.traceContinuous;
+    if (TRACE::g_debugSettings.contTraceOverride != TRACE::DebugSettings::CONT_TRACE_USE_ATTR)
+    {
+        continuousEnabled = (TRACE::g_debugSettings.contTraceOverride >= TRACE::DebugSettings::CONT_TRACE_FORCE_ENABLE);
+    }
+
+    std::array<stat_data, 8> stat_table {
     { { "Total IPL msecs = %llu",          i_total_istep_nsecs/NS_PER_MSEC },
       { "PROCs: Functional=%d Present=%d", l_procList_functional.size(), l_procList_present.size() },
       { "COREs: %d",                       l_coreList.size() },
       { "OCMBs: Functional=%d Present=%d", l_ocmbList_functional.size(), l_ocmbList_present.size() },
       { "Initial Cache Size: %d MB",       g_BlToHbDataManager.getHbCacheSizeMb() },
       { "Total Memory Size: %d MB",        (l_total_memory/MEGABYTE) },
-      { "trace-lite enabled: %d",          TRACE::getTraceLite()}
+      { "trace-lite enabled: %d",          TRACE::getTraceLite()},
+      { "Continuous Trace enabled: %d",    continuousEnabled}
     }
     };
 
