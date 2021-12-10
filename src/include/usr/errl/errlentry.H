@@ -835,7 +835,11 @@ public:
      */
     struct target_callout
     {
+        // Note: The original callout priority should be used to set the
+        // priority of associated callouts rather than this field. This field is
+        // only for sorting callouts.
         HWAS::callOutPriority priority = HWAS::SRCI_PRIORITY_NONE;
+
         TARGETING::Target* target = nullptr;
 
         bool operator<(const target_callout& rhs) const

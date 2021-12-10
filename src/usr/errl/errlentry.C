@@ -1131,6 +1131,13 @@ Target* findFruByLocationCode(const ATTR_STATIC_ABS_LOCATION_CODE_type& i_locati
         result = worse_result;
     }
 
+    if (!result)
+    {
+        TRACFCOMP(g_trac_errl,
+                  ERR_MRK"findFruByLocationCode: Cannot find target by location code %s",
+                  target_location_code);
+    }
+
     return result;
 }
 
@@ -1169,6 +1176,10 @@ bool parseTargetCallout(const char*& io_callout_list, ErrlEntry::target_callout&
         }
         else
         {
+            TRACFCOMP(g_trac_errl,
+                      ERR_MRK"parseTargetCallout: Invalid priority %c found when parsing callout list %s",
+                      *io_callout_list,
+                      io_callout_list);
             break;
         }
 
@@ -1205,6 +1216,11 @@ bool parseTargetCallout(const char*& io_callout_list, ErrlEntry::target_callout&
 
         if (static_cast<size_t>(location_code_end - location_code_begin) >= sizeof(loccode))
         {
+            TRACFCOMP(g_trac_errl,
+                      ERR_MRK"parseTargetCallout: Location code in callout list is too long; "
+                      "expected maximum %d, got %d",
+                      sizeof(loccode) - 1,
+                      location_code_end - location_code_begin);
             break;
         }
 
@@ -1320,14 +1336,20 @@ void ErrlEntry::collectBusCalloutDataForBMC(HWAS::callout_ud_t* const i_ud)
 {
     switch (i_ud->busType)
     {
-    case HWAS::X_BUS_TYPE:
-    case HWAS::OMI_BUS_TYPE:
-    case HWAS::FSI_BUS_TYPE:
+    case X_BUS_TYPE:
+    case OMI_BUS_TYPE:
+    case FSI_BUS_TYPE:
         collectFruPathCalloutDataForBMC(i_ud);
         break;
-    default:
+
+    case A_BUS_TYPE:
+    case I2C_BUS_TYPE:
+    case PSI_BUS_TYPE:
+    case O_BUS_TYPE:
         // If we can't parse this kind of bus connection callout, we can't get a
         // target handle target and can't add any FRU data to the log.
+        TRACFCOMP(g_trac_errl,
+                  "collectBusCalloutDataForBMC: Unexpected bus type %d, not collecting callouts", i_ud->busType);
         break;
     }
 }
@@ -1338,13 +1360,28 @@ void ErrlEntry::collectSeepromCalloutDataForBMC(Target* const i_target, HWAS::ca
 
     switch (i_ud->partType)
     {
-    case HWAS::SBE_SEEPROM_PART_TYPE:
+    case SBE_SEEPROM_PART_TYPE:
         i_target->tryGetAttr<ATTR_SPI_SBE_BOOT_CODE_PRIMARY_INFO_CALLOUTS>(fru_path);
         break;
-    case HWAS::VPD_PART_TYPE:
+    case VPD_PART_TYPE:
         i_target->tryGetAttr<ATTR_SPI_MVPD_PRIMARY_INFO_CALLOUTS>(fru_path);
         break;
-    default:
+
+    case NO_PART_TYPE:
+    case FLASH_CONTROLLER_PART_TYPE:
+    case PNOR_PART_TYPE:
+    case LPC_SLAVE_PART_TYPE:
+    case GPIO_EXPANDER_PART_TYPE:
+    case SPIVID_SLAVE_PART_TYPE:
+    case TOD_CLOCK:
+    case MEM_REF_CLOCK:
+    case PROC_REF_CLOCK:
+    case PCI_REF_CLOCK:
+    case SMP_CABLE:
+    case BPM_CABLE_PART_TYPE:
+    case NV_CONTROLLER_PART_TYPE:
+    case BPM_PART_TYPE:
+    case SPI_DUMP_PART_TYPE:
         // The callout list attributes we pull in the other cases above will
         // include all relevant targets in them. If we don't recognize this part
         // type, then we will by default call out the input target below.

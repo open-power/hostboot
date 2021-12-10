@@ -1810,6 +1810,8 @@ sub processTpm
     my $staticAbsLocationCode = getStaticAbsLocationCode($targetObj,$target);
     my $targetParent = $targetObj->getTargetParent($target);
     $targetObj->setAttribute($target, "STATIC_ABS_LOCATION_CODE",$staticAbsLocationCode);
+    # The TPM has an intermediate target between it and its node
+    # parent. Set the location code there too.
     $targetObj->setAttribute($targetParent, "STATIC_ABS_LOCATION_CODE",$staticAbsLocationCode);
 
     # Get the TPM's position for further use below

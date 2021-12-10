@@ -25,8 +25,7 @@
 
 # This file defines the function BusFruCallouts::setupBusses which
 # sets attributes on targets related to calling out targets that
-# represent intermediate intermediate FRUs for different kinds of bus
-# connections.
+# represent intermediate FRUs for different kinds of bus connections.
 #
 # When an error occurs over a hardware bus (such as an XBUS or SPI
 # connection), any field-replaceable unit (FRU) between the two

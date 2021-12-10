@@ -25,8 +25,8 @@
 # IBM_PROLOG_END_TAG
 
 # This script generates a hostboot-compatible file from a machine-specific MRW.
-# The generated file can be used in place of the simics system XML to 
-# create patches for eBMC machines from a standalone Hostboot environment. 
+# The generated file can be used in place of the simics system XML to
+# create patches for eBMC machines from a standalone Hostboot environment.
 
 set -x
 set -e

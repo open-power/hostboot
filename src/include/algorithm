@@ -1044,7 +1044,7 @@ namespace hbstd
 
 /* @brief Sort and deduplicate a container
  * @param[in] i_container  The container
- * @return    vector       Sorted container without duplicates
+ * @return    T            Sorted container without duplicates
  */
 template<typename T>
 T deduplicate(T i_container)
