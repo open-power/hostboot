@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,7 @@
 #include "p10_core_checkstop_handler.H"
 #include "p10_scom_c_b.H"
 #include "p10_scom_c_d.H"
+#include <p10_scom_c.H>
 
 using namespace scomt;
 using namespace scomt::c;
@@ -48,6 +49,8 @@ fapi2::ReturnCode p10_core_checkstop_handler(
 
     fapi2::buffer<uint64_t> l_action0;
     fapi2::buffer<uint64_t> l_action1;
+    fapi2::buffer<uint64_t> l_data;
+
     uint8_t l_core_unit_pos = 0;
     uint8_t l_dead_core = 0;
 
@@ -88,6 +91,13 @@ fapi2::ReturnCode p10_core_checkstop_handler(
         uint64_t l_local_xstop = l_action0 & l_action1; //gets bits that are both set to 1
         l_action0 &= ~l_local_xstop;
         l_action1 &= ~l_local_xstop;
+
+        // Mask PC TimeBase Facility for TOD setup in istep 18.
+        // It's done here because security doesn't allow SCOMs to FIR reg in istep 18.
+        FAPI_TRY(PREP_EC_PC_FIR_CORE_FIRMASK_WO_OR(i_target_core));
+        l_data.flush<0>();
+        SET_EC_PC_FIR_CORE_FIRMASK_MASK_PC_TFAC_XSTOP_ERROR(l_data);
+        FAPI_TRY(PUT_EC_PC_FIR_CORE_FIRMASK_WO_OR(i_target_core, l_data));
     }
     else
     {
@@ -97,6 +107,17 @@ fapi2::ReturnCode p10_core_checkstop_handler(
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ORIG_FIR_SETTINGS_ACTION1, i_target_core, l_action1),
                  "Error from FAPI_ATTR_GET (ATTR_ORIG_FIR_SETTINGS_ACTION1)");
+
+        // Clear error and unmask PC TimeBase Facility
+        FAPI_TRY(PREP_EC_PC_FIR_CORE_WO_AND(i_target_core));
+        l_data.flush<1>();
+        CLEAR_EC_PC_FIR_CORE_PC_TFAC_XSTOP_ERROR(l_data);
+        FAPI_TRY(PUT_EC_PC_FIR_CORE_WO_AND(i_target_core, l_data));
+
+        FAPI_TRY(PREP_EC_PC_FIR_CORE_FIRMASK_WO_AND(i_target_core));
+        l_data.flush<1>();
+        CLEAR_EC_PC_FIR_CORE_FIRMASK_MASK_PC_TFAC_XSTOP_ERROR(l_data);
+        FAPI_TRY(PUT_EC_PC_FIR_CORE_FIRMASK_WO_AND(i_target_core, l_data));
     }
 
     // Save off the current values of actions into the register
