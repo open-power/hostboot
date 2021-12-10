@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -450,8 +450,7 @@ namespace SPLESS
                 // external C4 pin to determine whether master or slave
                 uint32_t isMaster                 :1; // 24    ATTR_PROC_SBE_MASTER_CHIP
 
-                DONOTUSE()
-                uint32_t reserved4                :3; // 25:27
+                uint32_t cp_refclock_select       :3; // 25:27 ATTR_CP_REFCLOCK_SELECT
 
                 uint32_t fabricTopologyId         :4; // 28:31 ATTR_PROC_FABRIC_TOPOLOGY_ID
             } masterSlaveNodeChipSel;

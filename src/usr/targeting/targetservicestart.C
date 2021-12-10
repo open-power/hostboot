@@ -350,6 +350,20 @@ static void checkProcessorTargeting(TargetService& i_targetService)
     #undef TARG_FN
 }
 
+/* @brief Set the CP_REFCLOCK_SELECT attribute on the given processor using the
+ *        value in SBE Mailbox Scratch Register 6 (used by p10_clock_test).
+ *
+ * @param[in] i_proc  The processor to operate on
+ * @param[in] i_regs  The boot processor's SBE mailbox scratch registers
+ */
+void set_cp_refclock_select_attribute(Target* const i_proc,
+                                      const TARGETING::ATTR_MASTER_MBOX_SCRATCH_typeStdArr& i_regs)
+{
+    INITSERVICE::SPLESS::MboxScratch6_t scratch { };
+    scratch.data32 = i_regs[scratch.REG_IDX];
+    i_proc->setAttr<ATTR_CP_REFCLOCK_SELECT>(scratch.masterSlaveNodeChipSel.cp_refclock_select);
+}
+
 /*
  * @brief Initialize any attributes that need to be set early on
  */
@@ -455,6 +469,13 @@ static void initializeAttributes(TargetService& i_targetService,
         getAllChips(l_allProcChips, TYPE_PROC, false);
         for(auto l_chip : l_allProcChips)
         {
+            if (!INITSERVICE::spBaseServicesEnabled())
+            {
+                // The FSP will already have set this attribute on enterprise systems,
+                // so we only do this calculation on eBMC-based systems.
+                set_cp_refclock_select_attribute(l_chip, i_masterScratch);
+            }
+
             // value for master set above
             if( l_chip == l_pMasterProcChip )
             {
