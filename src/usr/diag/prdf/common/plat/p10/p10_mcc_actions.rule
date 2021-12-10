@@ -123,30 +123,16 @@ actionclass all_ocmb_and_mcc_th_1
     threshold1;
 };
 
-actionclass chnl0_ocmb_H_omi_L_th_1
-{
-    chnl0_ocmb;
-    chnl0_omi_L;
-    threshold1;
-};
-
-actionclass chnl1_ocmb_H_omi_L_th_1
-{
-    chnl1_ocmb;
-    chnl1_omi_L;
-    threshold1;
-};
-
 actionclass chnl0_ocmb_H_omi_L_th_32_perDay
 {
-    chnl0_ocmb;
+    callout(connected(TYPE_OCMB_CHIP,0), MRU_HIGH);
     chnl0_omi_L;
     threshold32pday;
 };
 
 actionclass chnl1_ocmb_H_omi_L_th_32_perDay
 {
-    chnl1_ocmb;
+    callout(connected(TYPE_OCMB_CHIP,1), MRU_HIGH);
     chnl1_omi_L;
     threshold32pday;
 };
