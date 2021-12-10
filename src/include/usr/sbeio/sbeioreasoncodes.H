@@ -160,6 +160,7 @@ enum sbeioReasonCode
     // PMIC Health Check Data Logs
     SBEIO_PMIC_HEALTH_CHECK_DATA       = SBEIO_COMP_ID | 0x6A,
     SBEIO_PMIC_FAILED_HEALTH_CHECK     = SBEIO_COMP_ID | 0x6B,
+    SBEIO_RECONFIG_WITH_CLOCK_GUARD    = SBEIO_COMP_ID | 0x6C,
 
     // Remove once we collect the FFDC ourselves - @todo-RTC:144313
     //termination_rc

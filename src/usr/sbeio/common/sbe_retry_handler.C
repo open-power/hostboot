@@ -278,6 +278,8 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
             //            - then attempt to restart the sbe w/ iv_sbeRestartMethod
             //        NO_RECOVERY_ACTION = 8,
             //            - we deconfigure the processor we are retrying and fail out
+            //        RECONFIG_WITH_CLOCK_GARD = 10,
+            //            - we deconfigure the processor we are retrying and fail out
             //
             // Important things to remember, we only want to attempt a single side
             // a maxiumum of 2 times, and also we only want to switch sides once
@@ -320,31 +322,52 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
             }
 #endif
 
-            if(this->iv_currentAction == P10_EXTRACT_SBE_RC::NO_RECOVERY_ACTION)
+            if (this->iv_currentAction == P10_EXTRACT_SBE_RC::NO_RECOVERY_ACTION
+                || this->iv_currentAction == P10_EXTRACT_SBE_RC::RECONFIG_WITH_CLOCK_GARD)
             {
                 SBE_TRACF("main_sbe_handler(): We have concluded there are no further recovery actions to take, deconfiguring proc and exiting handler");
-                /*@ There is no action possible. Gard and Callout the proc
-                    * @errortype  ERRL_SEV_UNRECOVERABLE
-                    * @moduleid   SBEIO_EXTRACT_RC_HANDLER
-                    * @reasoncode SBEIO_NO_RECOVERY_ACTION
-                    * @userdata1  SBE current error
-                    * @userdata2  HUID of proc
-                    * @devdesc    There is no recovery action on the SBE.
-                    *             We're deconfiguring this proc
-                    * @custdesc   Processor Error
-                    */
-                l_errl = new ERRORLOG::ErrlEntry(
-                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                            SBEIO_EXTRACT_RC_HANDLER,
-                            SBEIO_NO_RECOVERY_ACTION,
-                            P10_EXTRACT_SBE_RC::NO_RECOVERY_ACTION,
-                            TARGETING::get_huid(iv_proc));
+
+                if (this->iv_currentAction == P10_EXTRACT_SBE_RC::NO_RECOVERY_ACTION)
+                {
+                    /*@ There is no action possible. Gard and Callout the proc
+                     * @errortype  ERRL_SEV_UNRECOVERABLE
+                     * @moduleid   SBEIO_EXTRACT_RC_HANDLER
+                     * @reasoncode SBEIO_NO_RECOVERY_ACTION
+                     * @userdata1  SBE current error
+                     * @userdata2  HUID of proc
+                     * @devdesc    There is no recovery action on the SBE.
+                     *             We're deconfiguring this proc
+                     * @custdesc   Processor Error
+                     */
+                    l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                     SBEIO_EXTRACT_RC_HANDLER,
+                                                     SBEIO_NO_RECOVERY_ACTION,
+                                                     P10_EXTRACT_SBE_RC::NO_RECOVERY_ACTION,
+                                                     TARGETING::get_huid(iv_proc));
+                    l_errl->addHwCallout(iv_proc, HWAS::SRCI_PRIORITY_HIGH, HWAS::DELAYED_DECONFIG, HWAS::GARD_NULL);
+                }
+                else if (this->iv_currentAction == P10_EXTRACT_SBE_RC::RECONFIG_WITH_CLOCK_GARD)
+                {
+                    /*@ There is no action possible. Gard and Callout the proc
+                     * @errortype  ERRL_SEV_UNRECOVERABLE
+                     * @moduleid   SBEIO_EXTRACT_RC_HANDLER
+                     * @reasoncode SBEIO_RECONFIG_WITH_CLOCK_GUARD
+                     * @userdata1  SBE current error
+                     * @userdata2  HUID of proc
+                     * @devdesc    Deconfiguring processor due to clock guard
+                     * @custdesc   Processor Error
+                     */
+                    l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                     SBEIO_EXTRACT_RC_HANDLER,
+                                                     SBEIO_RECONFIG_WITH_CLOCK_GUARD,
+                                                     P10_EXTRACT_SBE_RC::RECONFIG_WITH_CLOCK_GARD,
+                                                     TARGETING::get_huid(iv_proc));
+                    l_errl->addClockCallout(iv_proc, HWAS::OSCREFCLK_TYPE, HWAS::SRCI_PRIORITY_HIGH);
+                    l_errl->addHwCallout(iv_proc, HWAS::SRCI_PRIORITY_MED, HWAS::DELAYED_DECONFIG, HWAS::GARD_NULL);
+                }
+
                 l_errl->collectTrace("ISTEPS_TRACE", 256);
                 l_errl->collectTrace(SBEIO_COMP_NAME, 256);
-                l_errl->addHwCallout(iv_proc,
-                                     HWAS::SRCI_PRIORITY_HIGH,
-                                     HWAS::DELAYED_DECONFIG,
-                                     HWAS::GARD_NULL );
 
                 // Set the PLID of the error log to master PLID
                 // if the master PLID is set
