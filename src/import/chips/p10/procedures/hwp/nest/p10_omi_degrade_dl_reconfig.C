@@ -69,16 +69,22 @@ fapi2::ReturnCode p10_omi_degrade_dl_reconfig(
         if (!l_x4)
         {
             FAPI_DBG("Polling buffer side DL status...");
-            fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_exp_target;
-            const uint64_t EXP_DL_STATUS_ADDR = 0x8012816ull;
-            FAPI_TRY(i_target.getOtherEnd(l_exp_target));
-            FAPI_TRY(fapi2::getScom(l_exp_target, EXP_DL_STATUS_ADDR, l_dl_status));
-            l_dl_status.extractToRight<STATUS_ACTUAL_LN_WIDTH, STATUS_ACTUAL_LN_WIDTH_LEN>
-            (l_dl_actual_ln_width);
-            l_x4 = (l_dl_actual_ln_width == DL_LN_WIDTH_X4);
-            FAPI_DBG("  Width encoded: 0x%X (x4: %d)",
-                     l_dl_actual_ln_width, ((l_x4) ? (1) : (0)));
 
+            for (auto l_exp_target : i_target.getChildren<fapi2::TARGET_TYPE_OCMB_CHIP>())
+            {
+                const uint64_t EXP_DL_STATUS_ADDR = 0x8012816ull;
+                FAPI_TRY(fapi2::getScom(l_exp_target, EXP_DL_STATUS_ADDR, l_dl_status));
+                l_dl_status.extractToRight<STATUS_ACTUAL_LN_WIDTH, STATUS_ACTUAL_LN_WIDTH_LEN>
+                (l_dl_actual_ln_width);
+                l_x4 = (l_dl_actual_ln_width == DL_LN_WIDTH_X4);
+                FAPI_DBG("  Width encoded: 0x%X (x4: %d)",
+                         l_dl_actual_ln_width, ((l_x4) ? (1) : (0)));
+
+                if (l_x4)
+                {
+                    break;
+                }
+            }
         }
     }
 
