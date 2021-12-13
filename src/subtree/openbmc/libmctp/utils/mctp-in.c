@@ -32,7 +32,7 @@ int main(void)
 
 	mctp_serial_open_fd(serial, STDIN_FILENO);
 
-	mctp_serial_register_bus(serial, mctp, 8);
+	mctp_register_bus(mctp, mctp_binding_serial_core(serial), 8);
 
 	mctp_set_rx_all(mctp, rx_message, NULL);
 

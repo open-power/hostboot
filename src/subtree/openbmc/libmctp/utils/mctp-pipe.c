@@ -43,8 +43,8 @@ int main(void)
 	mctp_serial_open_fd(serial[0], mctp_fds[0]);
 	mctp_serial_open_fd(serial[1], mctp_fds[1]);
 
-	mctp_serial_register_bus(serial[0], mctp[0], eids[0]);
-	mctp_serial_register_bus(serial[1], mctp[1], eids[1]);
+	mctp_register_bus(mctp[0], mctp_binding_serial_core(serial[0]), eids[0]);
+	mctp_register_bus(mctp[1], mctp_binding_serial_core(serial[1]), eids[1]);
 
 	mctp_set_rx_all(mctp[1], rx_message, NULL);
 

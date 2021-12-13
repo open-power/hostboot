@@ -8,7 +8,7 @@ plus transport binding specifications.
 Contact
 -------
 
-* Email: See [MAINTAINERS](MAINTAINERS). Please also Cc openbmc@lists.ozlabs.org
+* Email: See [OWNERS](OWNERS). Please also Cc openbmc@lists.ozlabs.org
 * Discord: #mctp on https://discord.gg/69Km47zH98
 * IRC: #openbmc on Freenode
 
