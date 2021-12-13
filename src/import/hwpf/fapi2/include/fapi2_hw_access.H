@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -186,6 +186,17 @@ inline ReturnCode modifyCfamRegister(const Target<K, M, V>& i_target,
 template< TargetType K, MulticastType M, typename V >
 ReturnCode putRing(const Target<K, M, V>& i_target,
                    const RingId_t i_ringID,
+                   const RingMode i_ringMode = RING_MODE_HEADER_CHECK);
+
+/// @brief Writes a ring to a chip.
+/// @tparam K template parameter, passed in target.
+/// @param[in] i_target   Target to operate on.
+/// @param[in] i_ringID   Ring ID name that will identify the Ring in the image.
+/// @param[in] i_ringMode Ring operation mode.
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+template< TargetType K, MulticastType M, typename V >
+ReturnCode putRing(const Target<K, M, V>& i_target,
+                   const char* i_ringID,
                    const RingMode i_ringMode = RING_MODE_HEADER_CHECK);
 
 // variable_buffer isn't supported on PPE
