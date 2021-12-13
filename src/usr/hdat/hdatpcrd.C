@@ -337,8 +337,8 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
 
             // Fabric Node Id needs to get set according to the DCM number that
             // contains the processor chip
-            l_pProcTarget->tryGetAttr<TARGETING::ATTR_LOCATION_CODE>
-                (l_cur_location_code);
+            hdatGetLocationCode(l_pProcTarget, HDAT_SLCA_FRU_TYPE_PROC,
+                l_cur_location_code);
 
             // Value of index is based on the proc numbers, so here depending
             // on the index, the first value is set and consecutive dcm values
