@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -928,6 +928,48 @@ class IpVpdFacade
     virtual errlHndl_t checkForRecordOverride( const char* i_record,
                                                TARGETING::Target* i_target,
                                                uint8_t*& o_ptr );
+
+    /**
+     * @brief A rudimentary check on the VHDR VPD record to verify it is valid
+     *
+     * @details The VHDR VPD retrieved from an EEPROM, i_vhdrFullRecordData, will contain the
+     *          name and size of itself within the record data. This method will
+     *          compare the name and size of the record, as found in the record data,
+     *          to the name and size given by a prepopulated structure vhdr_record.
+     *
+     * @param[in] i_target - Pointer to the PROC target where the record is retrieved from
+     * @param[in] i_vhdrFullRecordData - The VHDR VPD record data retreieved from an
+     *                                   EEPROM, in it's entirety, which should
+     *                                   include its large and small resource markers.
+     * @return errlHndl_t - nullptr if record is valid, otherwise a pointer to the error log.
+     */
+    errlHndl_t verifyVhdrRecordIsValid(const TARGETING::TargetHandle_t i_target,
+                                       const vhdr_record &i_vhdrFullRecordData);
+
+    /**
+     * @brief A rudimentary check on a VPD record to verify it is valid. This method
+     *        only verifies records that are not the VHDR record.  The VHDR record is
+     *        verified via method verifyVhdrRecordIsValid above.
+     *
+     * @details The VPD record given, i_recordData, will contain the name and size
+     *          of itself within the record data. This method will compare the name
+     *          and size of the record, as found in the record data, to the name
+     *          and size given. Ideally the record name and size given would
+     *          come from the record's meta data as found in the VTOC.
+     *
+     * @param[in] i_target - Pointer to the PROC target where the record is retrieved from
+     * @param[in] i_recordName - The record name, ideally from the record's meta data
+     * @param[in] i_recordData - The VPD record data in it's entirety, which should
+     *                           include its large and small resource markers
+     * @param[in] i_recordDataFullSize - The record size which includes both
+     *                                   large and small resource markers
+     * @return errlHndl_t - nullptr if record is valid, otherwise a pointer to the error log.
+     */
+    errlHndl_t verifyRecordIsValid(const TARGETING::TargetHandle_t i_target,
+                                   const char* const    i_recordName,
+                                   const uint8_t* const i_recordData,
+                                   const size_t         i_recordDataFullSize );
+
     /**
      * @brief Update the record data with the given data.
      *

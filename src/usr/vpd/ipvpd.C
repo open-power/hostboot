@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -2818,6 +2818,178 @@ errlHndl_t IpVpdFacade::loadUnloadSecureSection( input_args_t i_args,
 #endif
 
 // ------------------------------------------------------------------
+// IpVpdFacade::verifyVhdrRecordIsValid
+// ------------------------------------------------------------------
+errlHndl_t
+IpVpdFacade::verifyVhdrRecordIsValid(const TARGETING::TargetHandle_t i_target,
+                                     const vhdr_record               &i_vhdrRecordData )
+{
+    errlHndl_t l_err(nullptr);
+
+    // Get the target HUID for quick reference to be used later in the code
+    auto l_targetHuid = TARGETING::get_huid(i_target);
+
+    // Create a VHDR record, prepopulated with the expected data
+    vhdr_record l_vhdrRecordPopulated(i_vhdrRecordData.pt_kw_vtoc_len);
+
+    // Compare the given VHDR record data to what is expected.
+    // Only checking the name and length of record.
+    if ( (l_vhdrRecordPopulated.rt_kw_data != i_vhdrRecordData.rt_kw_data) ||
+         (l_vhdrRecordPopulated.record_len != i_vhdrRecordData.record_len)    )
+    {
+        TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::verifyVhdrRecordIsValid(): "
+        "Either the record name(0x%.4X) does not match what is expected(0x%.4X) "
+        "or the record length(%d) does not match what is expected(%d) "
+        "for target 0x%.4X",
+         i_vhdrRecordData.rt_kw_data, l_vhdrRecordPopulated.rt_kw_data,
+         i_vhdrRecordData.record_len, l_vhdrRecordPopulated.record_len,
+         l_targetHuid);
+
+        /*@
+         * @errortype
+         * @reasoncode       VPD::VPD_RECORD_INVALID_VHDR
+         * @moduleid         VPD::VPD_IPVPD_VERIFY_VHDR_RECORD_IS_VALID
+         * @userdata1[00:31] Huid of target
+         * @userdata1[32:47] Expected record length
+         * @userdata1[48:63] Actual record length
+         * @userdata2[00:31] Expected record name
+         * @userdata2[32:63] Actual record name
+         * @devdesc          VPD VHDR record data does not match what is expected
+         * @custdesc         Firmware error with the VPD.
+         */
+        l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                         VPD::VPD_IPVPD_VERIFY_VHDR_RECORD_IS_VALID,
+                                         VPD::VPD_RECORD_INVALID_VHDR,
+                                         TWO_UINT32_TO_UINT64(
+                                             l_targetHuid,
+                                             TWO_UINT16_TO_UINT32(
+                                                 l_vhdrRecordPopulated.record_len,
+                                                 i_vhdrRecordData.record_len ) ),
+                                         TWO_UINT32_TO_UINT64(
+                                             l_vhdrRecordPopulated.rt_kw_data,
+                                             i_vhdrRecordData.rt_kw_data ),
+                                         ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
+    }
+
+    TRACSSCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::verifyVhdrRecordIsValid(): "
+    "Actual record name(0x%.4X), expected record name(0x%.4X), "
+    "actual record length(%d), expected record length(%d) for target 0x%.4X",
+     i_vhdrRecordData.rt_kw_data, l_vhdrRecordPopulated.rt_kw_data,
+     i_vhdrRecordData.record_len, l_vhdrRecordPopulated.record_len,
+     l_targetHuid);
+
+    // Add a HW callout here so we get it even if we commit as RECOVERED later
+    if( l_err )
+    {
+        l_err->addHwCallout( i_target,
+                             HWAS::SRCI_PRIORITY_MED,
+                             HWAS::NO_DECONFIG,
+                             HWAS::GARD_NULL );
+        l_err->collectTrace( VPD_COMP_NAME, 256 );
+    }
+
+    return l_err;
+}  // verifyVhdrRecordIsValid
+
+// ------------------------------------------------------------------
+// IpVpdFacade::verifyRecordIsValid
+// ------------------------------------------------------------------
+errlHndl_t
+IpVpdFacade::verifyRecordIsValid(const TARGETING::TargetHandle_t i_target,
+                                 const char* const i_recordName,
+                                 const uint8_t* const i_recordData,
+                                 const size_t i_recordDataFullSize )
+{
+    errlHndl_t l_err(nullptr);
+
+    // Get the target HUID for quick reference to be used later in the code
+    auto l_targetHuid = TARGETING::get_huid(i_target);
+
+    // Convert the record name to it's equivalent integral value for
+    // easy comparison and easy tracing.
+    uint32_t l_recordName = *(reinterpret_cast<const uint32_t* const>(i_recordName));
+
+    // Get the record length, from the within record itself
+    // The record length is after the large resource marker(1 byte).
+    // It is 2 bytes long and is little endian, will need to convert.
+    const uint16_t l_recordLengthOffset(1);
+    uint16_t l_recordLengthWithinRecord = le16toh(*(reinterpret_cast<const uint16_t* const>
+                                                   (&i_recordData[l_recordLengthOffset])));
+
+    // The record length does not include the small and large resource marker,
+    // 1 byte each, nor the size of the record length itself, 2 bytes. Therefore
+    // add 4 to the record length to match the full size of the record passed in.
+    l_recordLengthWithinRecord+=4;
+
+    // Convert the record name, from the within record itself, to
+    // it's equivalent integral value.
+    // The record name is after the large resource marker(1 byte), the
+    // record length(2 bytes), the "RT" keyword (2 bytes), the "RT" keyword
+    // size (1 byte) for a total of 6 bytes (1 + 2 + 2 + 1).
+    const uint16_t l_recordNameOffset(6);
+    uint32_t l_recordNameWithinRecord = *(reinterpret_cast<const uint32_t* const>
+                                            (&i_recordData[l_recordNameOffset]));
+
+    // Confirm that record data has the correct record name and size, if not throw
+    // an error of possible corruption of the record data
+    if ( (l_recordName != l_recordNameWithinRecord) ||
+         (i_recordDataFullSize != l_recordLengthWithinRecord) )
+    {
+        TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::verifyRecordIsValid(): "
+        "Either the record name(0x%.4X) does not match what is in the meta data(0x%.4X) "
+        "or the record length + 4(%d) does not match what is in the meta data(%d) "
+        "for target 0x%.4X",
+         l_recordNameWithinRecord, l_recordName,
+         l_recordLengthWithinRecord, i_recordDataFullSize,
+         l_targetHuid);
+
+        /*@
+         * @errortype
+         * @reasoncode       VPD::VPD_RECORD_INVALID
+         * @moduleid         VPD::VPD_IPVPD_VERIFY_RECORD_IS_VALID
+         * @userdata1[00:31] Huid of target
+         * @userdata1[32:47] Record length from record meta data
+         * @userdata1[48:63] Record length + 4 from record itself
+         * @userdata2[00:31] Record name from record meta data
+         * @userdata2[32:63] Record name from record itself
+         * @devdesc          VPD record data does not match what is in the record meta data
+         * @custdesc         Firmware error with the VPD.
+         */
+        l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                         VPD::VPD_IPVPD_VERIFY_RECORD_IS_VALID,
+                                         VPD::VPD_RECORD_INVALID,
+                                         TWO_UINT32_TO_UINT64(
+                                             l_targetHuid,
+                                             TWO_UINT16_TO_UINT32(
+                                                 i_recordDataFullSize,
+                                                 l_recordLengthWithinRecord ) ),
+                                         TWO_UINT32_TO_UINT64(
+                                             l_recordName,
+                                             l_recordNameWithinRecord),
+                                         ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
+    }
+
+    TRACSSCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::verifyRecordIsValid(): "
+    "meta data record name = 0x%.4X and record length = %d; record itself "
+    "record name = 0x%.4X and record length + 4 = %d for target 0x%.4X",
+    l_recordName, i_recordDataFullSize,
+    l_recordNameWithinRecord, l_recordLengthWithinRecord,
+    l_targetHuid);
+
+    // Add a HW callout here so we get it even if we commit as RECOVERED later
+    if( l_err )
+    {
+        l_err->addHwCallout( i_target,
+                             HWAS::SRCI_PRIORITY_MED,
+                             HWAS::NO_DECONFIG,
+                             HWAS::GARD_NULL );
+        l_err->collectTrace( VPD_COMP_NAME, 256 );
+    }
+
+    return l_err;
+}  // verifyRecordIsValid
+
+// ------------------------------------------------------------------
 // IpVpdFacade::updateRecordData
 // ------------------------------------------------------------------
 void
@@ -3262,7 +3434,10 @@ IpVpdFacade::validateAllRecordEccData ( const TARGETING::TargetHandle_t  i_targe
             // If the error returned because the VPD ECC validation failed, then
             // get next MVPD source.
             if ( l_validationError &&
-                 (VPD::VPD_IPVPD_ECC_DATA_CHECK == l_validationError->moduleId()) )
+                 ( (VPD::VPD_IPVPD_ECC_DATA_CHECK == l_validationError->moduleId()) ||
+                   (VPD::VPD_IPVPD_VERIFY_VHDR_RECORD_IS_VALID == l_validationError->moduleId()) ||
+                   (VPD::VPD_IPVPD_VERIFY_RECORD_IS_VALID == l_validationError->moduleId()) )
+               )
             {
                 #ifndef __HOSTBOOT_RUNTIME
                     errlHndl_t l_mvpdSourceError(nullptr);
@@ -3433,7 +3608,7 @@ IpVpdFacade::validateVhdrRecordEccData( const TARGETING::TargetHandle_t i_target
 
         // Verify that retrieved ECC data is as expected.
         auto l_returnCode = vpdeccCheckData(l_recordData, l_recordLength,
-                                              l_eccData,    l_eccLength);
+                                            l_eccData,    l_eccLength);
 
         // If the return code from the call to vpdeccCheckData is not VPD_ECC_OK, then an error occurred
         if ( unlikely(VPD_ECC_OK != l_returnCode) )
@@ -3481,6 +3656,17 @@ IpVpdFacade::validateVhdrRecordEccData( const TARGETING::TargetHandle_t i_target
                 break;
             }
         } // if ( unlikely(VPD_ECC_OK != l_returnCode) )
+
+        // The ECC data validation only validates that the ECC data is correct
+        // for the record data as a blob. verifyVhdrRecordIsValid will check that
+        // the record itself is valid by checking a few data members
+        l_err = verifyVhdrRecordIsValid(i_target, o_vhdrRecordData );
+        if (l_err)
+        {
+            TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateVhdrRecordEccData(): "
+                      "verifyVhdrRecordIsValid failed" );
+            break;
+        }
     } while( 0 );
 
     TRACSSCOMP( g_trac_vpd, EXIT_MRK"IpVpdFacade::validateVhdrRecordEccData(): "
@@ -3534,9 +3720,9 @@ IpVpdFacade::getFullVhdrRecordData ( const TARGETING::TargetHandle_t i_target,
          * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
          * @moduleid         VPD::VPD_IPVPD_FETCH_DATA
          * @userdata1[00:31] Target to find record in
-         * @userdata1[32:64] Input arg: Record ID
+         * @userdata1[32:63] Input arg: Record ID
          * @userdata2[00:31] Input arg: Location
-         * @userdata2[32:64] Input arg: EEEPROM SOURCE
+         * @userdata2[32:63] Input arg: EEEPROM SOURCE
          * @devdesc          The retrieved VPD Header Record (VHDR) is incomplete.
          * @custdesc         Firmware error with the VPD.
          */
@@ -3595,10 +3781,14 @@ IpVpdFacade::validateVtocRecordEccData(
         size_t l_eccOffset(le16toh(l_ptEntry.ecc_offset));
         size_t l_eccLength(le16toh(l_ptEntry.ecc_length));
 
+        // Convert the record name to a NULL terminated string for pretty tracing
+        char l_recordName[RECORD_BYTE_SIZE + 1] = {0};
+        memcpy(l_recordName, l_ptEntry.record_name, RECORD_BYTE_SIZE);
+
         TRACSSCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::validateVtocRecordEccData(): "
-                    "The record %s meta data: record length %d, record offset 0x%.4X, "
+                    "The record %s meta data: record name %s, record length %d, record offset 0x%.4X, "
                     "ecc length %d and ecc offset 0x%.4X",
-                    VPD_TABLE_OF_CONTENTS_RECORD_NAME,
+                    VPD_TABLE_OF_CONTENTS_RECORD_NAME, l_recordName,
                     l_recordLength, l_recordOffset, l_eccLength, l_eccOffset);
 
         // Retrieve the record data.
@@ -3611,8 +3801,8 @@ IpVpdFacade::validateVtocRecordEccData(
             TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateVtocRecordEccData(): "
                        "fetchDataFromEeprom failed to retrieve record %s with record length %d "
                        "and record offset 0x%.4X on target 0x%.8X",
-                       VPD_TABLE_OF_CONTENTS_RECORD_NAME,
-                       l_recordLength, l_recordOffset, TARGETING::get_huid(i_target) );
+                       l_recordName,   l_recordLength,
+                       l_recordOffset, TARGETING::get_huid(i_target) );
             break;
         }
 
@@ -3626,8 +3816,8 @@ IpVpdFacade::validateVtocRecordEccData(
             TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateVtocRecordEccData(): "
                        "fetchDataFromEeprom failed to retrieve ECC data for record %s "
                        "with ecc length %d and ecc offset 0x%.4X on target 0x%.8X",
-                       VPD_TABLE_OF_CONTENTS_RECORD_NAME,
-                       l_eccLength, l_eccOffset, TARGETING::get_huid(i_target) );
+                       l_recordName, l_eccLength,
+                       l_eccOffset,  TARGETING::get_huid(i_target) );
             break;
         }
 
@@ -3640,7 +3830,7 @@ IpVpdFacade::validateVtocRecordEccData(
         {
             TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateVtocRecordEccData(): "
                        "vpdeccCheckData failed with error code %d for record %s "
-                       "on target 0x%.8X", l_returnCode, VPD_TABLE_OF_CONTENTS_RECORD_NAME,
+                       "on target 0x%.8X", l_returnCode, l_recordName,
                        TARGETING::get_huid(i_target) );
 
             // Get the 'force an ECC data update' flag
@@ -3654,9 +3844,9 @@ IpVpdFacade::validateVtocRecordEccData(
                 // Attempt to update the ECC data for record
                 TRACFCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::validateVtocRecordEccData(): "
                            "Will attempt to update the ECC data based on the "
-                           "ATTR_FORCE_ECC_UPDATE_ON_VALIDATION_ERROR flag %d for record %s "
-                           "on target 0x%.8X", l_forceEccUpdateFlag,
-                           VPD_TABLE_OF_CONTENTS_RECORD_NAME, TARGETING::get_huid(i_target) );
+                           "ATTR_FORCE_ECC_UPDATE_ON_VALIDATION_ERROR flag = %d for record %s "
+                           "on target 0x%.8X", l_forceEccUpdateFlag, l_recordName,
+                           TARGETING::get_huid(i_target) );
 
                 errlHndl_t l_updateEccDataError = updateRecordEccData(i_target, i_args, &l_ptEntry);
                 if (l_updateEccDataError)
@@ -3665,7 +3855,7 @@ IpVpdFacade::validateVtocRecordEccData(
                     TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateVtocRecordEccData(): "
                                "updateRecordEccData failed to update the ECC data for "
                                "record %s on target 0x%.8X.  Setting error to informational.",
-                               VPD_TABLE_OF_CONTENTS_RECORD_NAME, TARGETING::get_huid(i_target) );
+                               l_recordName, TARGETING::get_huid(i_target) );
 
                     // Set the error, from the failed update, as informational. The original
                     // validation fail, of the ECC data, will be handled below and severity
@@ -3679,19 +3869,19 @@ IpVpdFacade::validateVtocRecordEccData(
                     TRACFCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::validateVtocRecordEccData(): "
                                "updateRecordEccData successfully updated the ECC data for "
                                "record %s on target 0x%.8X",
-                               VPD_TABLE_OF_CONTENTS_RECORD_NAME, TARGETING::get_huid(i_target) );
+                               l_recordName, TARGETING::get_huid(i_target) );
 
                     // Setting the return code to 'OK', will allow the following code to
                     // have a successful resolution irrespective that the code is currently
                     // in an error path.
                     l_returnCode = VPD_ECC_OK;
                 }
-            } // if ( TARGETING::UTIL::assertGetToplevelTarget()->
+            } // if ( l_forceEccUpdateFlag && (VPD_ECC_CORRECTABLE_DATA != l_returnCode) )
 
             // Check the return code of the call to "vpdeccCheckData()" and create the
             // appropriate error log if necessary.
             l_err = checkEccDataValidationReturnCode(l_returnCode, i_target, i_args,
-                    VPD_TABLE_OF_CONTENTS_RECORD_NAME, l_recordOffset, l_recordLength,
+                    l_recordName, l_recordOffset, l_recordLength,
                     l_eccOffset, l_eccLength);
 
             if (l_err && (l_err->reasonCode() == VPD::VPD_ECC_DATA_CORRECTABLE_DATA) )
@@ -3724,6 +3914,18 @@ IpVpdFacade::validateVtocRecordEccData(
                 break;
             }
         } // if ( unlikely(VPD_ECC_OK != l_returnCode) )
+
+        // The ECC data validation only validates that the ECC data is correct
+        // for the record data as a blob. verifyRecordIsValid will check that
+        // the record itself is valid in relation to its associated meta data.
+        l_err = verifyRecordIsValid(i_target,     l_recordName,
+                                    l_recordData, l_recordLength);
+        if (l_err)
+        {
+            TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateVtocRecordEccData(): "
+                      "verifyRecordIsValid failed" );
+            break;
+        }
     } while( 0 );
 
     TRACSSCOMP( g_trac_vpd, EXIT_MRK"IpVpdFacade::validateVtocRecordEccData(): "
@@ -3784,6 +3986,9 @@ IpVpdFacade::validateAllOtherRecordEccData(
         uint8_t l_recordData[l_maxRecordBufferLength] = {0};
         uint8_t l_eccData[l_maxEccBufferLength] = {0};
 
+        // Pre-allocate the record name + 1, for a null terminated string, for pretty tracing
+        char l_recordName[RECORD_BYTE_SIZE + 1] = {0};
+
         // Iterate thru the records validating it's ECC data
         for (const pt_entry &l_ptEntry: l_recordMetaDataList)
         {
@@ -3793,9 +3998,12 @@ IpVpdFacade::validateAllOtherRecordEccData(
             size_t l_eccOffset(le16toh(l_ptEntry.ecc_offset));
             size_t l_eccLength(le16toh(l_ptEntry.ecc_length));
 
+            // Convert the record name to a NULL terminated string for pretty tracing
+            memcpy(l_recordName, l_ptEntry.record_name, RECORD_BYTE_SIZE);
+
             TRACSSCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::validateAllOtherRecordEccData(): "
                         "Validating record's %s meta data: record length %d, record offset "
-                        "0x%.4X, ecc length %d and ecc offset 0x%.4X", l_ptEntry.record_name,
+                        "0x%.4X, ecc length %d and ecc offset 0x%.4X", l_recordName,
                         l_recordLength, l_recordOffset, l_eccLength, l_eccOffset);
 
             // Retrieve the record data.
@@ -3806,7 +4014,7 @@ IpVpdFacade::validateAllOtherRecordEccData(
             {
                 TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateAllOtherRecordEccData(): "
                            "fetchDataFromEeprom failed to retrieve record %s with record length "
-                           "%d and record offset 0x%.4X on target 0x%.8X", l_ptEntry.record_name,
+                           "%d and record offset 0x%.4X on target 0x%.8X", l_recordName,
                            l_recordLength, l_recordOffset, TARGETING::get_huid(i_target) );
                 break;
             }
@@ -3820,21 +4028,21 @@ IpVpdFacade::validateAllOtherRecordEccData(
                 TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateAllOtherRecordEccData(): "
                            "fetchDataFromEeprom failed to retrieve ECC data for record %s "
                            "with ecc length %d and ecc offset 0x%.4X on target 0x%.8X",
-                           l_ptEntry.record_name, l_eccLength,
+                           l_recordName, l_eccLength,
                            l_eccOffset, TARGETING::get_huid(i_target) );
                 break;
             }
 
             // Verify that the retrieved ECC data is as expected.
             auto l_returnCode = vpdeccCheckData(l_recordData, l_recordLength,
-                                                  l_eccData,    l_eccLength);
+                                                l_eccData,    l_eccLength);
 
             // If the return code from the call to vpdeccCheckData is not VPD_ECC_OK, then an error occurred
             if ( unlikely(VPD_ECC_OK != l_returnCode) )
             {
                 TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateAllOtherRecordEccData(): "
                            "vpdeccCheckData failed with error code %d for record %s "
-                           "on target 0x%.8X", l_returnCode, l_ptEntry.record_name,
+                           "on target 0x%.8X", l_returnCode, l_recordName,
                            TARGETING::get_huid(i_target) );
 
                 // Get the 'force an ECC data update' flag
@@ -3848,9 +4056,9 @@ IpVpdFacade::validateAllOtherRecordEccData(
                     // Attempt to update the ECC data for record
                     TRACFCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::validateAllOtherRecordEccData(): "
                                "Will attempt to update the ECC data based on the "
-                               "ATTR_FORCE_ECC_UPDATE_ON_VALIDATION_ERROR flag %d for record %s "
+                               "ATTR_FORCE_ECC_UPDATE_ON_VALIDATION_ERROR flag = %d for record %s "
                                "on target 0x%.8X", l_forceEccUpdateFlag,
-                               l_ptEntry.record_name, TARGETING::get_huid(i_target) );
+                               l_recordName, TARGETING::get_huid(i_target) );
 
                     errlHndl_t l_updateEccDataError = updateRecordEccData(i_target, i_args, &l_ptEntry);
                     if (l_updateEccDataError)
@@ -3859,7 +4067,7 @@ IpVpdFacade::validateAllOtherRecordEccData(
                         TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateAllOtherRecordEccData(): "
                                    "updateRecordEccData failed to update the ECC data for "
                                    "record %s on target 0x%.8X. Setting error to informational.",
-                                   l_ptEntry.record_name, TARGETING::get_huid(i_target) );
+                                   l_recordName, TARGETING::get_huid(i_target) );
 
                         // Set the error, from the failed update, as informational. The original
                         // validation fail, of the ECC data, will be handled below and severity
@@ -3873,19 +4081,19 @@ IpVpdFacade::validateAllOtherRecordEccData(
                         TRACFCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::validateAllOtherRecordEccData(): "
                                    "updateRecordEccData successfully updated the ECC data for "
                                    "record %s on target 0x%.8X",
-                                   l_ptEntry.record_name, TARGETING::get_huid(i_target) );
+                                   l_recordName, TARGETING::get_huid(i_target) );
 
                         // Setting the return code to 'OK', will allow the following code to
                         // have a successful resolution irrespective that the code is currently
                         // in an error path.
                         l_returnCode = VPD_ECC_OK;
                     }
-                } // if ( TARGETING::UTIL::assertGetToplevelTarget()->
+                } // if ( l_forceEccUpdateFlag && (VPD_ECC_CORRECTABLE_DATA != l_returnCode) )
 
                 // Check the return code of the call to "vpdeccCheckData()" and create the
                 // appropriate error log if necessary.
                 l_err = checkEccDataValidationReturnCode(l_returnCode, i_target, i_args,
-                        l_ptEntry.record_name, l_recordOffset, l_recordLength,
+                        l_recordName, l_recordOffset, l_recordLength,
                         l_eccOffset, l_eccLength);
 
                 if (l_err && (l_err->reasonCode() == VPD::VPD_ECC_DATA_CORRECTABLE_DATA) )
@@ -3894,21 +4102,21 @@ IpVpdFacade::validateAllOtherRecordEccData(
                     TRACFCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::validateAllOtherRecordEccData(): "
                                "Attempt to update and correct the record %s to be in sync with "
                                "the ECC data on target 0x%.8X",
-                               l_ptEntry.record_name, TARGETING::get_huid(i_target) );
+                               l_recordName, TARGETING::get_huid(i_target) );
 
-                    updateRecordData( l_err,        i_target,       l_ptEntry.record_name,
+                    updateRecordData( l_err,        i_target,       l_recordName,
                                       l_recordData, l_recordOffset, l_recordLength  );
                     if (l_err)
                     {
                         TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateAllOtherRecordEccData(): "
                                    "updateRecordData failed to update record %s on target 0x%.8X",
-                                   l_ptEntry.record_name, TARGETING::get_huid(i_target) );
+                                   l_recordName, TARGETING::get_huid(i_target) );
                         break;
                     }
 
                     TRACFCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::validateAllOtherRecordEccData(): "
                                "updateRecordData successfully updated record %s on target 0x%.8X",
-                               l_ptEntry.record_name, TARGETING::get_huid(i_target) );
+                               l_recordName, TARGETING::get_huid(i_target) );
                 }
                 else if (l_err)
                 {
@@ -3919,10 +4127,22 @@ IpVpdFacade::validateAllOtherRecordEccData(
                 }
             } // if ( unlikely(VPD_ECC_OK != l_returnCode) )
 
+            // The ECC data validation only validates that the ECC data is correct
+            // for the record data as a blob. verifyRecordIsValid will check that
+            // the record itself is valid in relation to its associated meta data.
+            l_err = verifyRecordIsValid(i_target,     l_recordName,
+                                        l_recordData, l_recordLength);
+            if (l_err)
+            {
+                TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateAllOtherRecordEccData(): "
+                          "verifyRecordIsValid failed" );
+                break;
+            }
+
             // Now that we've confirmed our cache looks valid, we will compare
             //  the ECC data between our cache and the hardware seeprom to
             //  detect any external changes.
-            l_err = checkForVpdChanges( i_target, l_ptEntry.record_name,
+            l_err = checkForVpdChanges( i_target,    l_recordName,
                                         l_eccOffset, l_eccLength, l_eccData,
                                         l_recordOffset, l_recordLength );
             if( l_err )
@@ -4069,9 +4289,9 @@ IpVpdFacade::getRecordMetaData (
              * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
              * @moduleid         VPD::VPD_IPVPD_GET_RECORD_META_DATA
              * @userdata1[00:31] Target to find record in
-             * @userdata1[32:64] Input arg: Record ID
+             * @userdata1[32:63] Input arg: Record ID
              * @userdata2[00:31] Input arg: Location
-             * @userdata2[32:64] Input arg: EEEPROM SOURCE
+             * @userdata2[32:63] Input arg: EEEPROM SOURCE
              * @devdesc          VPD record was not found.
              * @custdesc         Firmware error with the VPD.
              */
