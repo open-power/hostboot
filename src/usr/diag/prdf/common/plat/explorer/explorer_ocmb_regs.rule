@@ -34,63 +34,63 @@
     {
         name        "MCP.MCBIST.MBA_SCOMFIR.MBSSYMEC0Q";
         scomaddr    0x08011858;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register OCMB_MBSSYMEC1
     {
         name        "MCP.MCBIST.MBA_SCOMFIR.MBSSYMEC1Q";
         scomaddr    0x08011859;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register OCMB_MBSSYMEC2
     {
         name        "MCP.MCBIST.MBA_SCOMFIR.MBSSYMEC2Q";
         scomaddr    0x0801185A;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register OCMB_MBSSYMEC3
     {
         name        "MCP.MCBIST.MBA_SCOMFIR.MBSSYMEC3Q";
         scomaddr    0x0801185B;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register OCMB_MBSSYMEC4
     {
         name        "MCP.MCBIST.MBA_SCOMFIR.MBSSYMEC4Q";
         scomaddr    0x0801185C;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register OCMB_MBSSYMEC5
     {
         name        "MCP.MCBIST.MBA_SCOMFIR.MBSSYMEC5Q";
         scomaddr    0x0801185D;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register OCMB_MBSSYMEC6
     {
         name        "MCP.MCBIST.MBA_SCOMFIR.MBSSYMEC6Q";
         scomaddr    0x0801185E;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register OCMB_MBSSYMEC7
     {
         name        "MCP.MCBIST.MBA_SCOMFIR.MBSSYMEC7Q";
         scomaddr    0x0801185F;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register OCMB_MBSSYMEC8
     {
         name        "MCP.MCBIST.MBA_SCOMFIR.MBSSYMEC8Q";
         scomaddr    0x08011860;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     ###########################################################################
@@ -101,7 +101,7 @@
     {
         name        "Explorer MBS Error Vector Trap reg 0 (port 0)";
         scomaddr    0x0801187E;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     ############################################################################
@@ -112,21 +112,21 @@
     {
         name        "MCP.MCBIST.MBA_SCOMFIR.MBSEC0Q";
         scomaddr    0x08011855;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register MBSEC1
     {
         name        "MCP.MCBIST.MBA_SCOMFIR.MBSEC1Q";
         scomaddr    0x08011856;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register MBSMSEC
     {
         name        "MCP.MCBIST.MBA_SCOMFIR.MBSMSECQ";
         scomaddr    0x08011869;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     ###########################################################################
@@ -137,35 +137,35 @@
     {
         name        "Explorer MCBIST Memory Scrub/Read Err Threshold Register";
         scomaddr    0x08011857;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register MCBAGRA
     {
         name        "Explorer MCBIST Address Generator Configuration Register";
         scomaddr    0x080118D6;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register MCBMCAT
     {
         name        "Explorer Maint Current Address Trap Register";
         scomaddr    0x080118D7;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register MCB_CNTL
     {
         name        "Explorer MCBIST target MCBIST Control Register";
         scomaddr    0x080118DB;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register MCB_CNTLSTAT
     {
         name        "Explorer MCBIST Configured Cmd Sequence Status Register";
         scomaddr    0x080118DC;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     ############################################################################
@@ -280,56 +280,56 @@
     {
         name        "Explorer Hardware Mark Store rank 0";
         scomaddr    0x08011C10;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register HW_MS1
     {
         name        "Explorer Hardware Mark Store rank 1";
         scomaddr    0x08011C11;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register HW_MS2
     {
         name        "Explorer Hardware Mark Store rank 2";
         scomaddr    0x08011C12;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register HW_MS3
     {
         name        "Explorer Hardware Mark Store rank 3";
         scomaddr    0x08011C13;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register HW_MS4
     {
         name        "Explorer Hardware Mark Store rank 4";
         scomaddr    0x08011C14;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register HW_MS5
     {
         name        "Explorer Hardware Mark Store rank 5";
         scomaddr    0x08011C15;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register HW_MS6
     {
         name        "Explorer Hardware Mark Store rank 6";
         scomaddr    0x08011C16;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register HW_MS7
     {
         name        "Explorer Hardware Mark Store rank 7";
         scomaddr    0x08011C17;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     ############################################################################
@@ -340,56 +340,56 @@
     {
         name        "Explorer Firmware Mark Store 0";
         scomaddr    0x08011C18;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register FW_MS1
     {
         name        "Explorer Firmware Mark Store 1";
         scomaddr    0x08011C19;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register FW_MS2
     {
         name        "Explorer Firmware Mark Store 2";
         scomaddr    0x08011C1A;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register FW_MS3
     {
         name        "Explorer Firmware Mark Store 3";
         scomaddr    0x08011C1B;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register FW_MS4
     {
         name        "Explorer Firmware Mark Store 4";
         scomaddr    0x08011C1C;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register FW_MS5
     {
         name        "Explorer Firmware Mark Store 5";
         scomaddr    0x08011C1D;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register FW_MS6
     {
         name        "Explorer Firmware Mark Store 6";
         scomaddr    0x08011C1E;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register FW_MS7
     {
         name        "Explorer Firmware Mark Store 7";
         scomaddr    0x08011C1F;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     ###########################################################################
@@ -427,7 +427,7 @@
     {
         name        "TLX Error report register 0 (TLXR)";
         scomaddr    0x0801241C;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register TLX_ERR1_REPORT
@@ -436,28 +436,28 @@
         scomaddr    0x0801241D;
         reset       (&, 0x0801241D);
         mask        (|, 0x08012415);
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register TLX_ERR2_REPORT
     {
         name        "TLX Error report register 2 (TLXR)";
         scomaddr    0x0801241E;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register TLX_ERR0_REPORT_MASK
     {
         name        "TLX Error Report Mask Register 0";
         scomaddr    0x08012414;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register TLX_ERR1_REPORT_MASK
     {
         name        "Explorer OCMB target TLX Error Report Register Mask";
         scomaddr    0x08012415;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     ############################################################################
@@ -468,35 +468,35 @@
     {
         name        "Explorer Mainline NCE Address Trap Register";
         scomaddr    0x0801186A;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register MBRCER
     {
         name        "Explorer Mainline RCE Address Trap Register";
         scomaddr    0x0801186B;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register MBMPER
     {
         name        "Explorer Mainline MPE Address Trap Register";
         scomaddr    0x0801186C;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register MBUER
     {
         name        "Explorer Mainline UE Address Trap Register";
         scomaddr    0x0801186D;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register MBAUER
     {
         name        "Explorer Mainline AUE Address Trap Register";
         scomaddr    0x0801186E;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     ############################################################################
@@ -605,49 +605,49 @@
     {
         name        "Explorer MMIO Error Report Register 0";
         scomaddr    0x0801087C;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register MMIO_ERR_RPT_1
     {
         name        "Explorer MMIO Error Report Register 1";
         scomaddr    0x0801087E;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register SRQ_ERR_RPT
     {
         name        "Explorer SRQ Error Report Register";
         scomaddr    0x0801141C;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register MCB_ERR_RPT_0
     {
         name        "Explorer MCB Error Report Register 0";
         scomaddr    0x080118E7;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register MCB_ERR_RPT_1
     {
         name        "Explorer MCB Error Report Register 1";
         scomaddr    0x080118EC;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register RDF_ERR_RPT_0
     {
         name        "Explorer RDF Error Report Register 0";
         scomaddr    0x08011C0E;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register RDF_ERR_RPT_1
     {
         name        "Explorer RDF Error Report Register 1";
         scomaddr    0x08011C0F;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
 
@@ -659,42 +659,42 @@
     {
         name        "MB_SIM.SRQ.MBA_FARB0Q";
         scomaddr    0x08011415;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register EXP_MSR
     {
         name        "Explorer Mark Shadow Register";
         scomaddr    0x08011C0C;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register MC_ADDR_TRANS
     {
         name        "Explorer OCMB target address translation register0";
         scomaddr    0x0801186F;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register MC_ADDR_TRANS1
     {
         name        "Explorer OCMB target address translation register1";
         scomaddr    0x08011870;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register MC_ADDR_TRANS2
     {
         name        "Explorer OCMB target address translation register2";
         scomaddr    0x08011871;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register MCBCFG
     {
         name        "Explorer MCBIST Configuration Register";
         scomaddr    0x080118E0;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     ############################################################################

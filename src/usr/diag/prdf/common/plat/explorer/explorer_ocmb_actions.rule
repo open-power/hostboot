@@ -603,17 +603,44 @@ group gTLX_ERR1_REPORT
 
 actionclass analyzeOCMB_LFIR
 {
+    capture(ocmb_regs);
     funccall("CollectScratchpad");
     analyze(gOCMB_LFIR);
 };
 
-actionclass analyzeMMIOFIR   { analyze(gMMIOFIR);   };
-actionclass analyzeSRQFIR    { analyze(gSRQFIR);    };
-actionclass analyzeMCBISTFIR { analyze(gMCBISTFIR); };
-actionclass analyzeRDFFIR    { analyze(gRDFFIR);    };
-actionclass analyzeTLXFIR    { analyze(gTLXFIR);    };
+actionclass analyzeMMIOFIR
+{
+    capture(ocmb_regs);
+    analyze(gMMIOFIR);
+};
+
+actionclass analyzeSRQFIR
+{
+    capture(ocmb_regs);
+    analyze(gSRQFIR);
+};
+
+actionclass analyzeMCBISTFIR
+{
+    capture(ocmb_regs);
+    analyze(gMCBISTFIR);
+};
+
+actionclass analyzeRDFFIR
+{
+    capture(ocmb_regs);
+    analyze(gRDFFIR);
+};
+
+actionclass analyzeTLXFIR
+{
+    capture(ocmb_regs);
+    analyze(gTLXFIR);
+};
+
 actionclass analyzeOMIDLFIR
 {
+    capture(ocmb_regs);
     capture(omi_ocmb_ffdc);
     funccall("CollectOmiFfdc");
     analyze(gOMIDLFIR);
