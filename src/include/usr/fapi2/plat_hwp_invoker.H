@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,6 +43,7 @@
 #include <hw_access_def.H>
 #include "plat_utils.H"
 #include <xscom/piberror.H>
+#include <errl/errludstring.H>
 
 namespace fapi2 {
 /*
@@ -73,6 +74,7 @@ void hwpResetGlobals(void);
         if( ERRHNDL ) {\
             ERRHNDL->collectTrace(FAPI_IMP_TRACE_NAME,256);\
             ERRHNDL->collectTrace(FAPI_TRACE_NAME,384);\
+            ERRORLOG::ErrlUserDetailsString(#FUNC).addToLog(ERRHNDL);\
         }\
         fapi2::hwpResetGlobals(); \
     }
