@@ -1359,6 +1359,52 @@
   </attribute>
 
   <attribute>
+    <description>
+        Designates how and if the PM Complex should be loaded at runtime
+        See PM_COMPLEX_LOAD_TYPE enum for values.
+    </description>
+    <id>PM_COMPLEX_LOAD_REQ</id>
+    <simpleType>
+      <uint8_t>
+        <default>0x0</default>
+      </uint8_t>
+    </simpleType>
+    <hbOnly/>
+    <no_export/>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <enumerationType>
+    <id>PM_COMPLEX_LOAD_TYPE</id>
+    <description>
+        Enumeration used for different PM Complex Load Types
+    </description>
+    <enumerator>
+      <description>
+        Load the PM Complex
+      </description>
+      <name>LOAD</name>
+      <value>0x0</value>
+    </enumerator>
+    <enumerator>
+      <description>
+        Reload the PM Complex
+      </description>
+      <name>RELOAD</name>
+      <value>0x1</value>
+    </enumerator>
+    <enumerator>
+      <description>
+        Do NOT load the PM Complex
+      </description>
+      <name>DO_NOT_LOAD</name>
+      <value>0x2</value>
+    </enumerator>
+  </enumerationType>
+
+  <attribute>
     <id>SBE_ARCH_DUMP_ADDR</id>
     <description>
         Physical address where SBE Architectued Dump Area is located (per

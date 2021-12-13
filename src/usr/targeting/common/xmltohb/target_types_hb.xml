@@ -389,6 +389,9 @@
       <id>PDA_THREAD_REG_STATE_ENTRY_FORMAT</id>
     </attribute>
     <attribute>
+      <id>PM_COMPLEX_LOAD_REQ</id>
+    </attribute>
+    <attribute>
       <id>SBE_ARCH_DUMP_ADDR</id>
     </attribute>
     <attribute>
