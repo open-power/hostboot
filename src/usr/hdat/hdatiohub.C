@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1011,19 +1011,14 @@ errlHndl_t HdatIoHubFru::hdatGetSlotMapTableAreas(/*uint32_t i_numProc,*/
         {
             switch(i_iohubNum)
             {
-                case 1: arrayCount = PROC0_NUM_SLOT_TABLE_AREAS;
-                        break;
-                case 2: arrayCount = PROC0_NUM_SLOT_TABLE_AREAS +
+                case 1: arrayCount = PROC0_NUM_SLOT_TABLE_AREAS +
                                      PROC1_NUM_SLOT_TABLE_AREAS;
                         break;
-                case 3: arrayCount = PROC0_NUM_SLOT_TABLE_AREAS +
-                                     PROC1_NUM_SLOT_TABLE_AREAS +
-                                     PROC2_NUM_SLOT_TABLE_AREAS;
-                        break;
-                case 4: arrayCount = PROC0_NUM_SLOT_TABLE_AREAS +
-                                     PROC1_NUM_SLOT_TABLE_AREAS +
-                                     PROC2_NUM_SLOT_TABLE_AREAS +
+                case 2: arrayCount = PROC2_NUM_SLOT_TABLE_AREAS +
                                      PROC3_NUM_SLOT_TABLE_AREAS;
+
+                        startIndex = PROC0_NUM_SLOT_TABLE_AREAS +
+                                     PROC1_NUM_SLOT_TABLE_AREAS;
                         break;
             }
         }
@@ -1031,49 +1026,32 @@ errlHndl_t HdatIoHubFru::hdatGetSlotMapTableAreas(/*uint32_t i_numProc,*/
         {
             switch(i_iohubNum)
             {
-                case 1: arrayCount = PROC0_NUM_SLOTS;
-                        break;
-                case 2: arrayCount = PROC0_NUM_SLOTS +
+                case 1: arrayCount = PROC0_NUM_SLOTS +
                                      PROC1_NUM_SLOTS;
                         break;
-                case 3: arrayCount = PROC0_NUM_SLOTS +
-                                     PROC1_NUM_SLOTS +
-                                     PROC2_NUM_SLOTS;
+                case 2: arrayCount = PROC2_NUM_SLOTS +
+                                     PROC3_NUM_SLOTS;
+
+                        startIndex = PROC0_NUM_SLOTS +
+                                     PROC1_NUM_SLOTS;
                         break;
-                case 4: arrayCount = PROC0_NUM_SLOTS +
+                case 3: arrayCount = PROC4_NUM_SLOTS +
+                                     PROC5_NUM_SLOTS;
+
+                        startIndex = PROC0_NUM_SLOTS +
                                      PROC1_NUM_SLOTS +
                                      PROC2_NUM_SLOTS +
                                      PROC3_NUM_SLOTS;
                         break;
-                case 5: arrayCount = PROC0_NUM_SLOTS +
-                                     PROC1_NUM_SLOTS +
-                                     PROC2_NUM_SLOTS +
-                                     PROC3_NUM_SLOTS +
-                                     PROC4_NUM_SLOTS;
-                        break;
-                case 6: arrayCount = PROC0_NUM_SLOTS +
+                case 4: arrayCount = PROC6_NUM_SLOTS +
+                                     PROC7_NUM_SLOTS;
+
+                        startIndex = PROC0_NUM_SLOTS +
                                      PROC1_NUM_SLOTS +
                                      PROC2_NUM_SLOTS +
                                      PROC3_NUM_SLOTS +
                                      PROC4_NUM_SLOTS +
                                      PROC5_NUM_SLOTS;
-                        break;
-                case 7: arrayCount = PROC0_NUM_SLOTS +
-                                     PROC1_NUM_SLOTS +
-                                     PROC2_NUM_SLOTS +
-                                     PROC3_NUM_SLOTS +
-                                     PROC4_NUM_SLOTS +
-                                     PROC5_NUM_SLOTS +
-                                     PROC6_NUM_SLOTS;
-                        break;
-                case 8: arrayCount = PROC0_NUM_SLOTS +
-                                     PROC1_NUM_SLOTS +
-                                     PROC2_NUM_SLOTS +
-                                     PROC3_NUM_SLOTS +
-                                     PROC4_NUM_SLOTS +
-                                     PROC5_NUM_SLOTS +
-                                     PROC6_NUM_SLOTS +
-                                     PROC7_NUM_SLOTS;
                         break;
             }
         }
@@ -1194,19 +1172,14 @@ errlHndl_t HdatIoHubFru::hdatGetSlotMapEntryInfos(/*uint32_t i_numProc,*/
         {
             switch(i_iohubNum)
             {
-                case 1: arrayCount = PROC0_NUM_SLOT_ENTRY_INFO;
-                        break;
-                case 2: arrayCount = PROC0_NUM_SLOT_ENTRY_INFO +
+                case 1: arrayCount = PROC0_NUM_SLOT_ENTRY_INFO +
                                      PROC1_NUM_SLOT_ENTRY_INFO;
                         break;
-                case 3: arrayCount = PROC0_NUM_SLOT_ENTRY_INFO +
-                                     PROC1_NUM_SLOT_ENTRY_INFO +
-                                     PROC2_NUM_SLOT_ENTRY_INFO;
-                        break;
-                case 4: arrayCount = PROC0_NUM_SLOT_ENTRY_INFO +
-                                     PROC1_NUM_SLOT_ENTRY_INFO +
-                                     PROC2_NUM_SLOT_ENTRY_INFO +
+                case 2: arrayCount = PROC2_NUM_SLOT_ENTRY_INFO +
                                      PROC3_NUM_SLOT_ENTRY_INFO;
+
+                        startIndex = PROC0_NUM_SLOT_ENTRY_INFO +
+                                     PROC1_NUM_SLOT_ENTRY_INFO;
                         break;
             }
         }
@@ -1214,49 +1187,32 @@ errlHndl_t HdatIoHubFru::hdatGetSlotMapEntryInfos(/*uint32_t i_numProc,*/
         {
             switch(i_iohubNum)
             {
-                case 1: arrayCount = PROC0_NUM_SLOTS;
-                        break;
-                case 2: arrayCount = PROC0_NUM_SLOTS +
+                case 1: arrayCount = PROC0_NUM_SLOTS +
                                      PROC1_NUM_SLOTS;
                         break;
-                case 3: arrayCount = PROC0_NUM_SLOTS +
-                                     PROC1_NUM_SLOTS +
-                                     PROC2_NUM_SLOTS;
+                case 2: arrayCount = PROC2_NUM_SLOTS +
+                                     PROC3_NUM_SLOTS;
+
+                        startIndex = PROC0_NUM_SLOTS +
+                                     PROC1_NUM_SLOTS;
                         break;
-                case 4: arrayCount = PROC0_NUM_SLOTS +
+                case 3: arrayCount = PROC4_NUM_SLOTS +
+                                     PROC5_NUM_SLOTS;
+
+                        startIndex = PROC0_NUM_SLOTS +
                                      PROC1_NUM_SLOTS +
                                      PROC2_NUM_SLOTS +
                                      PROC3_NUM_SLOTS;
                         break;
-                case 5: arrayCount = PROC0_NUM_SLOTS +
-                                     PROC1_NUM_SLOTS +
-                                     PROC2_NUM_SLOTS +
-                                     PROC3_NUM_SLOTS +
-                                     PROC4_NUM_SLOTS;
-                        break;
-                case 6: arrayCount = PROC0_NUM_SLOTS +
+                case 4: arrayCount = PROC6_NUM_SLOTS +
+                                     PROC7_NUM_SLOTS;
+
+                        startIndex = PROC0_NUM_SLOTS +
                                      PROC1_NUM_SLOTS +
                                      PROC2_NUM_SLOTS +
                                      PROC3_NUM_SLOTS +
                                      PROC4_NUM_SLOTS +
                                      PROC5_NUM_SLOTS;
-                        break;
-                case 7: arrayCount = PROC0_NUM_SLOTS +
-                                     PROC1_NUM_SLOTS +
-                                     PROC2_NUM_SLOTS +
-                                     PROC3_NUM_SLOTS +
-                                     PROC4_NUM_SLOTS +
-                                     PROC5_NUM_SLOTS +
-                                     PROC6_NUM_SLOTS;
-                        break;
-                case 8: arrayCount = PROC0_NUM_SLOTS +
-                                     PROC1_NUM_SLOTS +
-                                     PROC2_NUM_SLOTS +
-                                     PROC3_NUM_SLOTS +
-                                     PROC4_NUM_SLOTS +
-                                     PROC5_NUM_SLOTS +
-                                     PROC6_NUM_SLOTS +
-                                     PROC7_NUM_SLOTS;
                         break;
             }
         }
@@ -1318,9 +1274,11 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
                    &l_presentProc);
 
         uint32_t l_numProcs = 0; //number of io entries
-        uint32_t l_procFruId{};
-        uint32_t l_prevFruId = 0xFFFF;
         std::vector<HdatIoHubFru *>hdatIoHubFrus;
+        TARGETING::ATTR_LOCATION_CODE_type l_cur_location_code { };
+        TARGETING::ATTR_LOCATION_CODE_type l_last_location_code { };
+        uint8_t l_dcmNum = 0;
+
         for (;l_proc;++l_proc,l_numProcs++)  //so index will be same as l_proc
         {
             HDAT_DBG("for loop starting for index=%d",l_numProcs);
@@ -1332,7 +1290,10 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
 
             l_rid = l_pProcTarget->getAttr<ATTR_SLCA_RID>();
             l_slcaIdx = l_pProcTarget->getAttr<ATTR_SLCA_INDEX>();
-            l_procFruId = l_pProcTarget->getAttr<ATTR_FRU_ID>();
+
+            // Get the current proc location code
+            hdatGetLocationCode(l_pProcTarget, HDAT_SLCA_FRU_TYPE_PROC,
+                l_cur_location_code);
 
             uint32_t l_procOrdId =
                      l_pProcTarget->getAttr<TARGETING::ATTR_ORDINAL_ID>();
@@ -1362,6 +1323,7 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
                 HDAT_ERR("Error in getting MRU ID");
                 break;
             }
+
             //here check for SCM or DCM
             //create a new HdatIoHubFru object each time for SCM which means
             //a new HdatIoHubFru (eye catcher IO HUB) for each
@@ -1374,19 +1336,26 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
             //in fsp this is checked by comparing the fru id. if same
             //then add a new hubentry in hub array otherwise create a 
             //new HdatIoHubFru object
-            if(hdatIoHubFrus.size() == 0 ||
-                (l_procFruId != l_prevFruId))
+
+            // Procs under DCM shares the same location code. This logic
+            // is used to determine the DCM number.
+            if ( strcmp(l_cur_location_code, l_last_location_code) )
             {
-                l_prevFruId = l_procFruId;
+                // Increment of dcm number needed to be skipped
+                // for the first DCM set
+                if (l_numProcs !=0)
+                {
+                    l_dcmNum++;
+                }
+
                 HDAT_DBG("creating new fruData");
-             HdatIoHubFru * fruData = new HdatIoHubFru(l_err,
+                HdatIoHubFru * fruData = new HdatIoHubFru(l_err,
                                  l_rid,
                                  l_cardType,
                                  0,
-                                 l_numProcs,
+                                 l_dcmNum,
                                  l_slcaIdx);
-             hdatIoHubFrus.push_back(std::move(fruData));
-
+                hdatIoHubFrus.push_back(std::move(fruData));
             }
             else
             {
@@ -1394,6 +1363,12 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
                 //once the vector is created then l_hub will be added to the 
                 //end of the last fruData object in the vector
             }
+
+            // Preserving the current location code for the next proc
+            // comparision
+            strcpy(l_last_location_code, l_cur_location_code);
+            HDAT_DBG("l_dcmNum: %d", l_dcmNum);
+
             size_t lastElem = hdatIoHubFrus.size() - 1;
             HDAT_DBG("setting l_hub->hdatIoHubId");
             hdatHubEntry_t *l_hub = reinterpret_cast<hdatHubEntry_t *>
@@ -1567,9 +1542,7 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
 
         HDAT_DBG("number of fruData objects created=%d",hdatIoHubFrus.size());
 
-        // Slot map is getting created once for the first time of below loop
-        bool l_slotMapDone = false;
-
+        int l_slotMapIndex = 0;
         for(auto fruData : hdatIoHubFrus)
         {
             //build the daughter structure
@@ -1586,22 +1559,17 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
             //how to know SCM vs DCM
             //build the slot map info structure
             //Creating slot map info once using the fruData count
-            if (l_slotMapDone == false)
+            l_err = 
+                fruData->bldSlotMapInfoStruct(++l_slotMapIndex,
+                    true);//taking DCM by default 
+            if ( l_err )
             {
-                l_err = 
-                    fruData->bldSlotMapInfoStruct(
-                        fruData->iv_hubArrayHdr.hdatArrayCnt,
-                        true);//taking DCM by default 
-                if ( l_err )
-                {
-                    HDAT_ERR("error in building Slot map info structure");
-                    break;
-                }
-                l_totalSlotMapSize += fruData->iv_slotMapInfoObjs.size() *
-                                 fruData->iv_slotMapInfoSize;
-                HDAT_DBG("slotmap size=0x%x",l_totalSlotMapSize);
+                HDAT_ERR("error in building Slot map info structure");
+                break;
             }
-            l_slotMapDone = true;
+            l_totalSlotMapSize += fruData->iv_slotMapInfoObjs.size() *
+                             fruData->iv_slotMapInfoSize;
+            HDAT_DBG("slotmap size=0x%x",l_totalSlotMapSize);
 
             l_totKwdSize += fruData->getTotalIoKwdSize();
             HDAT_DBG("got l_totKwdSize=%x",l_totKwdSize);
