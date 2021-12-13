@@ -254,19 +254,28 @@ void MctpRP::handle_outbound_messages(void)
    unit test cases. */
 #ifdef CONFIG_MCTP
     size_t counter = 0;
-    // Don't start sending messages to the BMC until the channel is active
-    while(!iv_channelActive)
+
+    /* bus_ptr is nullptr until MctpRP::register_mctp_bus(void) is called */
+    auto bus_ptr = mctp_binding_astlpc_core(iv_astlpc)->bus;
+
+    /* Don't start sending messages to the BMC until the bus has been registered and
+       tx has been enabled */
+    while((bus_ptr == nullptr) || (mctp_bus_get_state(bus_ptr) == mctp_bus_state_constructed))
     {
-        counter++;
-        if(counter >= 1000)
+        if(++counter >= 1000)
         {
             // Either host or bmc is failing in its responsibilty to init the channel.
             // If this happens check bmc's journal to see if the mctp daemon crashed.
             printk("Failed to initialize MCTP channel with BMC in under 10 seconds,"
-                   " triggering a critical assert as normal shutdown path is impossible without PLDM");
+                   " triggering a critical assert as normal shutdown path is impossible without PLDM\n");
             crit_assert(0);
         }
         nanosleep(0, NS_PER_MSEC * 10);
+        /* Update bus pointer if it is a nullptr */
+        if (bus_ptr == nullptr)
+        {
+            bus_ptr = mctp_binding_astlpc_core(iv_astlpc)->bus;
+        }
     }
 #endif
 
@@ -385,8 +394,6 @@ void MctpRP::register_mctp_bus(void)
     mctp_register_bus(iv_mctp, mctp_binding_astlpc_core(iv_astlpc), HOST_EID);
     mutex_unlock(&iv_mutex);
 
-    iv_channelActive = true;
-
     // Start the poll kcs status daemon which will read the KCS status reg
     // every 1 ms and if we see that the OBF bit in the KCS status register is
     // set we will read the ODR KCS data reg and act on it
@@ -457,7 +464,6 @@ MctpRP::MctpRP(void):
     iv_astlpc(nullptr),
     iv_mctp(mctp_init()),
     iv_outboundMsgQ(msg_q_create()),
-    iv_channelActive(false),
     iv_mutex(MUTEX_INITIALIZER)
 {
 }

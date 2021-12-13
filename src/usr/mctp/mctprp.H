@@ -85,7 +85,6 @@ class MctpRP
       struct mctp_binding_astlpc *iv_astlpc;   // ptr to astlpc binding struct
       struct mctp *iv_mctp;                    // ptr to struct that has business logic
       msg_q_t     iv_outboundMsgQ;             // MCTP outbound messages
-      volatile bool iv_channelActive;          // MCTP channel ready for traffic
       mutex_t     iv_mutex;                    // Mutex to protect calls to functions that access
                                                // the tx_queue and/or write the IDR register
 

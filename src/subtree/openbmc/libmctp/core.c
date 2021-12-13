@@ -20,12 +20,6 @@
 
 /* Internal data structures */
 
-enum mctp_bus_state {
-	mctp_bus_state_constructed = 0,
-	mctp_bus_state_tx_enabled,
-	mctp_bus_state_tx_disabled,
-};
-
 struct mctp_bus {
 	mctp_eid_t eid;
 	struct mctp_binding *binding;
@@ -732,6 +726,11 @@ void mctp_binding_set_tx_enabled(struct mctp_binding *binding, bool enable)
 		mctp_send_tx_queue(bus);
 		return;
 	}
+}
+
+enum mctp_bus_state mctp_bus_get_state(struct mctp_bus *bus)
+{
+        return bus->state;
 }
 
 static int mctp_message_tx_on_bus(struct mctp_bus *bus, mctp_eid_t src,
