@@ -70,9 +70,8 @@ ErrlPrvt::ErrlPrvt( compId_t  i_CreatorCompId ) :
     // iv_created is in the format 0xYYYYDDMMHHMMSS00
     iv_created.timebase = getTB();
 #ifndef __HOSTBOOT_RUNTIME
+    // At runtime, the created timestamp will be populated at the time of commit
     iv_created.date_time = ERRORLOG::ErrlManager::getCurrentDateTime();
-#else
-    // TODO RTC: 255972 Fetch date/time from PHYP
 #endif
 
 }
@@ -120,8 +119,6 @@ uint64_t ErrlPrvt::flatten( void * o_pBuffer, const uint64_t i_cbBuffer )
         p->creationTime   = ErrlManager::dateTimeToRawBCD(iv_created.date_time);
         p->commitTime     = ErrlManager::dateTimeToRawBCD(iv_committed.date_time);
 #else
-        // TODO RTC: 255972 This will change depending on the format of date/time
-        // we get from PHYP.
         p->creationTime   = iv_created.date_time.value;
         p->commitTime     = iv_committed.date_time.value;
 #endif

@@ -308,8 +308,8 @@ public:
      * @brief Converts the input date/time structure to a raw BCD-formatted
      *        uint64_t value in the format: 0xYYYYMMDDHHMMSS00.
      *
-     * @param[in] i_dateTime the input date/time structure to convert
-     * @return The raw BDC-formatted date/time in the format:
+     * @param[in] i_dateTime the input date/time structure to covert
+     * @return The raw BCD-formatted date/time in the format:
      *         0xYYYYMMDDHHMMSS00
      */
     uint64_t _dateTimeToRawBCD(const date_time_t& i_dateTime);
@@ -320,7 +320,7 @@ public:
      *        a raw BCD uint64_t.
      *
      * @param[in] i_dateTime the input date/time structure to covert
-     * @return The raw BDC-formatted date/time in the format:
+     * @return The raw BCD-formatted date/time in the format:
      *         0xYYYYMMDDHHMMSS00
      */
     static uint64_t dateTimeToRawBCD(const date_time_t& i_dateTime);

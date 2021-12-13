@@ -990,10 +990,9 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
     using namespace TARGETING;
 
     iv_Private.iv_committed.timebase = getTB();
-#ifndef __HOSTBOOT_RUNTIME
     iv_Private.iv_committed.date_time = ERRORLOG::ErrlManager::getCurrentDateTime();
-#else
-    // TODO RTC: 255972 Fetch date/time from PHYP
+#ifdef __HOSTBOOT_RUNTIME
+    iv_Private.iv_created.date_time = ERRORLOG::ErrlManager::getCurrentDateTime();
 #endif
 
     // User/Extended headers contain the component ID of the committer.

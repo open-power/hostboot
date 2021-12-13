@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -584,7 +584,7 @@ typedef struct hostInterfaces
        HBRT_FW_MSG_TYPE_MCTP_SEND         = 12, // struct mctp_send
        HBRT_FW_MSG_TYPE_MCTP_RECEIVE      = 13, // struct mctp_receive
        HBRT_FW_MSG_TYPE_MCTP_AVAILABLE    = 14, // struct mctp_available
-       HBRT_FW_MSG_TYPE_GET_ELOG_TIME     = 15, // TBD
+       HBRT_FW_MSG_TYPE_GET_ELOG_TIME     = 15, // struct dateTime
        HBRT_FW_MSG_TYPE_SPILOCK           = 16, // struct spi_lock
     };
 
@@ -777,6 +777,19 @@ typedef struct hostInterfaces
 
        }; // end union
     };  // end struct hbrt_fw_msg
+
+    // This struct is a response for HBRT_FW_MSG_TYPE_GET_ELOG_TIME.
+    // It represents the date/time timestamp.
+    struct dateTime
+    {
+        uint16_t year;
+        uint8_t day;
+        uint8_t month;
+        uint8_t hour;
+        uint8_t minute;
+        uint8_t second;
+        uint8_t unused;
+    }__attribute__((packed));
 
     // Created a static constexpr to return the base size of hbrt_fw_msg
     // Cannot do #define - sizeof not allowed to be used in #defines

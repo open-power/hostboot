@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,7 @@
 #include <targeting/common/targetservice.H>
 #include <hwas/common/deconfigGard.H>
 #include <initservice/initserviceif.H> // spBaseServiceEnabled()
+#include <errl/errlreasoncodes.H>
 
 namespace ERRORLOG
 {
@@ -443,6 +444,58 @@ bool rt_processCallout(errlHndl_t &io_errl,
         }
     }
     return true;
+}
+
+date_time_t ErrlManager::_getCurrentDateTime()
+{
+    date_time_t l_result{};
+
+    errlHndl_t l_errl = nullptr;
+
+    do {
+    if((nullptr == g_hostInterfaces) ||
+       (nullptr == g_hostInterfaces->firmware_request))
+    {
+        TRACFCOMP(g_trac_errl, ERR_MRK"_getCurrentDateTime: firmware_request interface not found");
+        break;
+    }
+
+    hostInterfaces::hbrt_fw_msg l_request{};
+    size_t l_requestSize = sizeof(l_request);
+    l_request.io_type = hostInterfaces::HBRT_FW_MSG_TYPE_GET_ELOG_TIME;
+
+    hostInterfaces::hbrt_fw_msg l_response{};
+    size_t l_responseSize = sizeof(l_response);
+
+    l_errl = firmware_request_helper(l_requestSize,
+                                     &l_request,
+                                     &l_responseSize,
+                                     &l_response);
+    if(l_errl)
+    {
+        TRACFCOMP(g_trac_errl, ERR_MRK"_getCurrentDateTime: firmware_request_helper returned an error; deleting the error and continuing");
+        delete l_errl;
+        l_errl = nullptr;
+        break;
+    }
+
+    hostInterfaces::dateTime* l_bcdTime = reinterpret_cast<hostInterfaces::dateTime*>(&l_response);
+
+    l_result.format.year = l_bcdTime->year;
+    l_result.format.month = l_bcdTime->month;
+    l_result.format.day = l_bcdTime->day;
+    l_result.format.hour = l_bcdTime->hour;
+    l_result.format.minute = l_bcdTime->minute;
+    l_result.format.second = l_bcdTime->second;
+
+    } while(0);
+
+    return l_result;
+}
+
+date_time_t ErrlManager::getCurrentDateTime()
+{
+    return ERRORLOG::theErrlManager::instance()._getCurrentDateTime();
 }
 
 } // End namespace

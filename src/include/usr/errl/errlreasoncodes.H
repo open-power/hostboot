@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,7 @@ namespace ERRORLOG
         ERRL_RT_TEST_MOD_ID         = 0x03,
         ERRL_ADD_HW_CALLOUT_ID      = 0x04,
         ERRL_COMMIT_EXTRA_LOGS_ID   = 0x05,
+        ERRL_GET_CURRENT_DATE_TIME  = 0x06,
         //........
         ERRL_LAST_MODULE_ID         = 0xFF
     };
@@ -62,6 +63,7 @@ namespace ERRORLOG
         ERRL_TEST_DUPLICATE_TRACE = ERRL_COMP_ID | 0x08,
         ERRL_EXTRA_LOG_RC         = ERRL_COMP_ID | 0x09,
         RC_PLDM_SEND_LOG_FAILED   = ERRL_COMP_ID | 0x0A,
+        ERRL_RT_NO_INTERFACE      = ERRL_COMP_ID | 0x0B,
         //........
         ERRL_LAST_ERR             = ERRL_COMP_ID | 0xFF
     };
