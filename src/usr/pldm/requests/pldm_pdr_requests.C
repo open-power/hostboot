@@ -890,8 +890,10 @@ errlHndl_t sendResetRebootCountRequest()
     do {
 
     TARGETING::Target* system = TARGETING::UTIL::assertGetToplevelTarget();
+
+    // The effecter attached to the Logical System pldm entity
     pldm_entity chassis_entity =
-        targeting_to_pldm_entity_id(system->getAttr<TARGETING::ATTR_CHASSIS_PLDM_ENTITY_ID_INFO>());
+        targeting_to_pldm_entity_id(system->getAttr<TARGETING::ATTR_SYSTEM_PLDM_ENTITY_ID_INFO>());
 
     // This is effectively the unique id for this PDR. Since other PDRs aren't allowed to have this base unit
     const uint8_t PLDM_BASE_UNIT_RETRIES = 72;
@@ -899,7 +901,7 @@ errlHndl_t sendResetRebootCountRequest()
         thePdrManager().findNumericEffecterId(chassis_entity,
                                               [](pldm_numeric_effecter_value_pdr const * const numeric_effecter)
                                               {
-                                                  return (le16toh(numeric_effecter->base_unit) == PLDM_BASE_UNIT_RETRIES);
+                                                  return numeric_effecter->base_unit == PLDM_BASE_UNIT_RETRIES;
                                               });
 
     if (reboot_count_effecter == 0)
