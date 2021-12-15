@@ -318,6 +318,38 @@ public:
     }
 
     /**
+     *  @brief Set the action flags based on severity
+     *
+     *  @param[in]  i_actions  Action flags. See errl/errltypes.H
+     *
+     *  @return void
+     *
+     */
+    void setActionFlagsBasedOnSev(uint16_t i_actions);
+
+    /**
+     *  @brief Get the action flags of the error log.
+     *         See errl/hberrltypes.H
+     *  @return uint16_t action flags
+     *
+     */
+    uint16_t actionFlags() const { return iv_User.iv_actions; }
+
+    /**
+     *  @brief Update the log's action flags. Note that this is only additive
+     *         and will not clear action flags
+     *
+     *  @param[in]   i_actionFlags   Action flags. See errl/hberrltypes.H
+     *
+     *  @return void
+     *
+     */
+    void updateActionFlags(uint16_t i_actionFlags)
+    {
+        iv_User.iv_actions |= i_actionFlags;
+    }
+
+    /**
      *  @brief Returns the log's sub system. See errl/errltypes.H
      *
      *  @return epubSubSystem_t

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -131,6 +133,7 @@ private:
 
     errlSeverity_t     iv_severity;
     errlEventType_t    iv_etype;
+    uint16_t           iv_actions;
 
     // failing sub system ID
     epubSubSystem_t    iv_ssid;
@@ -139,8 +142,14 @@ private:
     // no setters/getters are provided currently
     errlDomain_t       iv_domain;
     errlVector_t       iv_vector;
-    uint16_t           iv_actions;
     errlScope_t        iv_scope;
+
+    /**  @brief Set the event type to TRACING or severity to INFORMATIONAL.
+     *          Taken from errluh.H in FSP code
+     *
+     *   @param[in]  i_etype  event type
+     */
+    void setInformationalEvent( errlEventType_t i_etype );
 
 };
 

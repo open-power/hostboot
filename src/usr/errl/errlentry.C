@@ -95,13 +95,30 @@ TRAC_INIT(&g_trac_errl, "ERRL", KILOBYTE, TRACE::BUFFER_SLOW);
 // std::map to trace severity in trace
 // NOTE: must be kept in sync with enum definition in hberrltypes.H
 std::map<uint8_t, const char *> errl_sev_str_map {
-    {ERRL_SEV_INFORMATIONAL,     "INFORMATIONAL"},
-    {ERRL_SEV_RECOVERED,         "RECOVERED"},
-    {ERRL_SEV_PREDICTIVE,        "PREDICTIVE"},
-    {ERRL_SEV_UNRECOVERABLE,     "UNRECOVERABLE"},
-    {ERRL_SEV_UNRECOVERABLE1,    "UNRECOVERABLE1"},
-    {ERRL_SEV_CRITICAL_SYS_TERM, "CRITICAL_SYS_TERM"},
-    {ERRL_SEV_UNKNOWN,           "UNKNOWN"},
+    {ERRL_SEV_INFORMATIONAL,              "INFORMATIONAL"},
+    {ERRL_SEV_RECOVERED,                  "RECOVERED"},
+    {ERRL_SEV_PREDICTIVE,                 "PREDICTIVE"},
+    {ERRL_SEV_PREDICTIVE_DEGRADED,        "PREDICTIVE_DEGRADED"},
+    {ERRL_SEV_PREDICTIVE_CORRECTABLE,     "PREDICTIVE_CORRECTABLE"},
+    {ERRL_SEV_PREDICTIVE_CORRECTABLE2,    "PREDICTIVE_CORRECTABLE2"},
+    {ERRL_SEV_PREDICTIVE_REDUNDANCY_LOST, "PREDICTIVE_REDUNDANCY_LOST"},
+    {ERRL_SEV_UNRECOVERABLE,              "UNRECOVERABLE"},
+    {ERRL_SEV_UNRECOVERABLE1,             "UNRECOVERABLE1"},
+    {ERRL_SEV_UNRECOVERABLE2,             "UNRECOVERABLE2"},
+    {ERRL_SEV_UNRECOVERABLE3,             "UNRECOVERABLE3"},
+    {ERRL_SEV_UNRECOVERABLE4,             "UNRECOVERABLE4"},
+    {ERRL_SEV_CRITICAL_FAIL_UNKNOWN,      "CRITICAL_FAIL_UNKNOWN"},
+    {ERRL_SEV_CRITICAL_SYS_TERM,          "CRITICAL_SYS_TERM"},
+    {ERRL_SEV_CRITICAL_SYS_FAIL,          "CRITICAL_SYS_FAIL"},
+    {ERRL_SEV_CRITICAL_PART_TERM,         "CRITICAL_PART_TERM"},
+    {ERRL_SEV_CRITICAL_PART_FAIL,         "CRITICAL_PART_FAIL"},
+    {ERRL_SEV_DIAGNOSTIC_ERROR1,          "DIAGNOSTIC_ERROR1"},
+    {ERRL_SEV_DIAGNOSTIC_ERROR2,          "DIAGNOSTIC_ERROR2"},
+    {ERRL_SEV_SYMPTOM_RECOVERED,          "SYMPTOM_RECOVERED"},
+    {ERRL_SEV_SYMPTOM_PREDICTIVE,         "SYMPTOM_PREDICTIVE"},
+    {ERRL_SEV_SYMPTOM_UNRECOV,            "SYMPTOM_UNRECOV"},
+    {ERRL_SEV_SYMPTOM_DIAGERR,            "SYMPTOM_DIAGERR"},
+    {ERRL_SEV_UNKNOWN,                    "UNKNOWN"},
 };
 
 #ifdef CONFIG_BUILD_FULL_PEL
@@ -1002,6 +1019,8 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
 
     setSubSystemIdBasedOnCallouts();
 
+    setActionFlagsBasedOnSev(iv_User.iv_actions);
+
     // Add the captured backtrace to the error log
     if (iv_pBackTrace)
     {
@@ -1583,12 +1602,92 @@ void ErrlEntry::collectCalloutDataForBMC(TARGETING::Target* const i_node)
 }
 #endif
 
+void ErrlEntry::setActionFlagsBasedOnSev(uint16_t i_actions)
+{
+    TRACDCOMP(g_trac_errl, ENTER_MRK
+            "ErrlEntry::setActionFlagsBasedOnSev()");
+
+    uint8_t l_sevcat = sev();
+    // Takes the severity and shifts it to a severity category
+    // defined in hberrltypes.H
+    l_sevcat = l_sevcat >> 4;
+
+    // All logs have ACTION_REPORT enabled irrespective of severity.
+    // Except if the Action is set to Report HMC Only
+    // Currently does not do anything because there is no REPORT_HMC_ONLY
+    if (! (i_actions & ERRL_ACTIONS_REPORT_HMC_ONLY) )
+    {
+        i_actions |= ERRL_ACTIONS_REPORT;
+    }
+
+    // Set SA and CALL_HOME if Severity is 2X, 4X, 5X, 6X, or 7X
+    // Recovered errors are made hidden
+    switch (l_sevcat)
+    {
+        case ERRL_SEVCAT_RECOVERED:
+            i_actions |= ERRL_ACTIONS_HIDDEN;
+            break;
+        case ERRL_SEVCAT_PREDICTIVE:
+        case ERRL_SEVCAT_UNRECOVERABLE:
+        case ERRL_SEVCAT_DIAGNOSTIC:
+        case ERRL_SEVCAT_CRITICAL:
+            i_actions |= ERRL_ACTIONS_CALL_HOME | ERRL_ACTIONS_SA;
+            break;
+        case ERRL_SEVCAT_SYMPTOM:
+            if (sev() == ERRL_SEV_SYMPTOM_RECOVERED)
+            {
+                i_actions |= ERRL_ACTIONS_HIDDEN;
+            }
+            else if (sev() == ERRL_SEV_SYMPTOM_UNRECOV)
+            {
+                i_actions |= ERRL_ACTIONS_CALL_HOME | ERRL_ACTIONS_SA;
+            }
+            break;
+        default:
+            break;
+    }
+
+    // Given the following conditions:
+    // 1. It's informational AND
+    // 2. Its Event type is TRACING or MISCELLANEOUS
+    // Result : Log action is Report and Hidden
+    if (sev() == ERRL_SEV_INFORMATIONAL)
+    {
+        if ( (eventType() == ERRL_ETYPE_TRACING) ||
+             (eventType() == ERRL_ETYPE_MISCELLANEOUS) )
+        {
+            i_actions |= ERRL_ACTIONS_HIDDEN;
+            i_actions &= ~(ERRL_ACTIONS_SA);
+        }
+    }
+
+    // Reset action SA for recovered errors which are committed with SA bit
+    // and covert to informational event
+    if ( (sev() == ERRL_SEV_RECOVERED) && (i_actions & ERRL_ACTIONS_SA) )
+    {
+        i_actions &= ~(ERRL_ACTIONS_SA);
+        i_actions |= ERRL_ACTIONS_HIDDEN;
+        iv_User.setInformationalEvent(ERRL_ETYPE_TRACING);
+    }
+    else if (i_actions & ERRL_ACTIONS_SA)
+    {
+        // For Errlog with action SA, HIDDEN bit needs to be reset
+        i_actions &= ~(ERRL_ACTIONS_HIDDEN);
+    }
+
+    updateActionFlags(i_actions);
+
+    TRACDCOMP(g_trac_errl, EXIT_MRK
+                "ErrlEntry::setActionFlagsBasedOnSev() "
+                "action flags 0x%X", i_actions);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Function to set the correct subsystem ID based on callout priorities
 void ErrlEntry::setSubSystemIdBasedOnCallouts()
 {
     TRACDCOMP(g_trac_errl, INFO_MRK
-            "ErrlEntry::getSubSystemIdBasedOnCallouts()");
+            "ErrlEntry::setSubSystemIdBasedOnCallouts()");
 
     HWAS::callout_ud_t *    pData = NULL;
 
@@ -3059,13 +3158,7 @@ bool ErrlEntry::isSevVisible( void )
         case( ERRL_SEV_RECOVERED ): l_vis = false; break;
 
         // Visible logs
-        case( ERRL_SEV_PREDICTIVE ): l_vis = true; break;
-        case( ERRL_SEV_UNRECOVERABLE ): l_vis = true; break;
-        case( ERRL_SEV_UNRECOVERABLE1 ): l_vis = true; break;
-        case( ERRL_SEV_CRITICAL_SYS_TERM ): l_vis = true; break;
-
-        // Error case, shouldn't happen so make it show up
-        case( ERRL_SEV_UNKNOWN ): l_vis = true; break;
+        default: l_vis = true;
     }
     return l_vis;
 }

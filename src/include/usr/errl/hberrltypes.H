@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -129,14 +129,40 @@ enum errlVector_t
  *  Several action flags used to trigger various
  *  handling mechanisms for an event log such as
  *  calling home and sending to the hypervisor.
+ *  Naming these ERRL_ACTIONS because they are
+ *  used in the prdf code with different values
  */
 enum errlActions_t
 {
-    ERRL_ACTION_NONE             = 0x0000, // No action required
+    ERRL_ACTIONS_NONE             = 0x0000, // No action required
+    ERRL_ACTIONS_REPORT           = 0x2000, // Report Externally (Send to HMC and Hypervisor)
+    ERRL_ACTIONS_SA               = 0x8000, // Service Action (Customer Notification) Required, Report bit automatically set
+    ERRL_ACTIONS_HIDDEN           = 0x4000, // Hidden Error - exclusive with SA Required, Report bit automatically set
+    ERRL_ACTIONS_REPORT_HMC_ONLY  = 0x1000, // Report to HMC only (Only report to HMC), Report bit automatically set
+    ERRL_ACTIONS_REPORT_HYP_ONLY  = 0x0200, // Report to Hypervisor only
+    ERRL_ACTIONS_CALL_HOME        = 0x0800, // Call Home Required
+    ERRL_ACTIONS_FNM_REQ          = 0x0400, // Further Analysis Required
+    ERRL_ACTIONS_SP_CALL_HOME     = 0x0100, // The service processor should call home
+
+    // The Following are internal actions and should NOT
+    // be used by callers unless explicitly allowed.
+    ERRL_ACTIONS_SKIP_ACK                    = 0x0001, // Override Error Logger's default ack wait
+    ERRL_ACTIONS_DONT_TERMINATE              = 0x0002, // Override Error Logger's termination call
+    ERRL_ACTIONS_IGNORE_CONSISTENCY_CHECKS   = 0x0004, // Error Logging infrastrucure will ignore consistency checking on this error log
 };
 
-
-
+// Severity Categories
+// Corresponds to the first nibble of the error log severity definition
+enum errlSevCat
+{
+    ERRL_SEVCAT_INFORMATIONAL  = 0,
+    ERRL_SEVCAT_RECOVERED      = 1,
+    ERRL_SEVCAT_PREDICTIVE     = 2,
+    ERRL_SEVCAT_UNRECOVERABLE  = 4,
+    ERRL_SEVCAT_CRITICAL       = 5,
+    ERRL_SEVCAT_DIAGNOSTIC     = 6,
+    ERRL_SEVCAT_SYMPTOM        = 7
+};
 
 /**
  *  @brief Creator types.
@@ -181,13 +207,30 @@ enum errlSectionId_t
  */
 enum errlSeverity_t
 {
-    ERRL_SEV_INFORMATIONAL     = 0x00,  //Information
-    ERRL_SEV_RECOVERED         = 0x10,  //Recovered
-    ERRL_SEV_PREDICTIVE        = 0x20,  //Predictive Error, general
-    ERRL_SEV_UNRECOVERABLE     = 0x40,  //Unrecoverable, general
-    ERRL_SEV_UNRECOVERABLE1	   = 0x41,	//Unrecoverable, bypassed w/degraded perf
-    ERRL_SEV_CRITICAL_SYS_TERM = 0x51,  //Critical, System Termination
-    ERRL_SEV_UNKNOWN           = 0xFF   //Reserved
+    ERRL_SEV_INFORMATIONAL                     = 0x00,     // Informational Error, general
+    ERRL_SEV_RECOVERED                         = 0x10,     // Recovered Error, general
+    ERRL_SEV_PREDICTIVE                        = 0x20,     // Predictive Error, general
+    ERRL_SEV_PREDICTIVE_DEGRADED               = 0x21,     // Predictive, degraded performance
+    ERRL_SEV_PREDICTIVE_CORRECTABLE            = 0x22,     // Predictive, may correct after re-ipl
+    ERRL_SEV_PREDICTIVE_CORRECTABLE2           = 0x23,     // Predictive, degraded perf, re-ipl correctable
+    ERRL_SEV_PREDICTIVE_REDUNDANCY_LOST        = 0x24,     // Predictive, loss of redundancy
+    ERRL_SEV_UNRECOVERABLE                     = 0x40,     // Unrecoverable, general
+    ERRL_SEV_UNRECOVERABLE1                    = 0x41,     // Unrecoverable, bypassed w/degraded perf
+    ERRL_SEV_UNRECOVERABLE2                    = 0x44,     // Unrecoverable, bypassed w/loss of redundancy
+    ERRL_SEV_UNRECOVERABLE3                    = 0x45,     // Unrecoverable, bypassed w/loss of red+perf
+    ERRL_SEV_UNRECOVERABLE4                    = 0x48,     // Unrecoverable, bypassed w/loss of function
+    ERRL_SEV_CRITICAL_FAIL_UNKNOWN             = 0x50,     // Critical, Scope of failure unknown
+    ERRL_SEV_CRITICAL_SYS_TERM                 = 0x51,     // Critical, System Termination
+    ERRL_SEV_CRITICAL_SYS_FAIL                 = 0x52,     // Critical, System Failure
+    ERRL_SEV_CRITICAL_PART_TERM                = 0x53,     // Critical, Partition Termination
+    ERRL_SEV_CRITICAL_PART_FAIL                = 0x54,     // Critical, Partition Failure
+    ERRL_SEV_DIAGNOSTIC_ERROR1                 = 0x60,     // Disagnostic test error
+    ERRL_SEV_DIAGNOSTIC_ERROR2                 = 0x61,     // Diagnostic test error, resource may produce bad results
+    ERRL_SEV_SYMPTOM_RECOVERED                 = 0x71,     // Symptom Recovered
+    ERRL_SEV_SYMPTOM_PREDICTIVE                = 0x72,     // Symptom Predictive
+    ERRL_SEV_SYMPTOM_UNRECOV                   = 0x74,     // Symptom Unrecoverable
+    ERRL_SEV_SYMPTOM_DIAGERR                   = 0x76,     // Symptom Diag Err
+    ERRL_SEV_UNKNOWN                           = 0xFF      // Reserved
 };
 
 
@@ -206,6 +249,7 @@ enum errlEventType_t
 {
     ERRL_ETYPE_NOT_APPLICABLE           = 0x00,
     ERRL_ETYPE_MISCELLANEOUS            = 0x01,
+    ERRL_ETYPE_TRACING                  = 0x02,
     ERRL_ETYPE_DUMP_NOTIFICATION        = 0x08,
     ERRL_ETYPE_USER_DECONFIG            = 0x20,
     ERRL_ETYPE_SYS_DECONFIG             = 0x21,

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1938,6 +1938,64 @@ public:
         }while(0);
     }
 
+    void testSetActionFlags(void)
+    {
+        /*
+         * The purpose of this test is to verify that setActionFlagsBasedOnSev
+         * is setting the correct action flags based on the severity of the logs
+         */
+
+        errlHndl_t l_err = new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                ERRORLOG::ERRL_TEST_AFLAGS_MOD_ID,
+                                ERRORLOG::ERRL_TEST_REASON_CODE);
+
+        // Test 0: Verify the action flags as 0 because they have not been set yet
+        if (l_err->actionFlags() != 0)
+        {
+            TS_FAIL("testSetActionFlags: actionFlags not 0, actionFlags: %d",
+                    l_err->actionFlags());
+        }
+
+        l_err->setActionFlagsBasedOnSev(0);
+
+        // Test 1: Verify the action flags as just REPORT
+        if (l_err->actionFlags() != ERRORLOG::ERRL_ACTIONS_REPORT)
+        {
+            TS_FAIL("testSetActionFlags: actionFlags not REPORT, actionFlags: %d",
+                    l_err->actionFlags());
+        }
+
+        // Set the event type and verify the action flags changed
+        l_err->setEventType(ERRORLOG::ERRL_ETYPE_TRACING);
+        l_err->setActionFlagsBasedOnSev(0);
+
+        // Test 2: Verify the action flags as REPORT + HIDDEN
+        if (l_err->actionFlags() != (ERRORLOG::ERRL_ACTIONS_REPORT |
+                                     ERRORLOG::ERRL_ACTIONS_HIDDEN))
+        {
+            TS_FAIL("testSetActionFlags: actionFlags not REPORT+HIDDEN, actionFlags: %d",
+                    l_err->actionFlags());
+        }
+
+        // Set severity as critical and verify the action flags changed
+        l_err->setSev(ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM);
+        l_err->setActionFlagsBasedOnSev(l_err->actionFlags());
+
+        // Test 3: Verify the action flags as REPORT + CALL_HOME + SA + HIDDEN
+        if (l_err->actionFlags() != (ERRORLOG::ERRL_ACTIONS_REPORT |
+                                     ERRORLOG::ERRL_ACTIONS_CALL_HOME |
+                                     ERRORLOG::ERRL_ACTIONS_SA |
+                                     ERRORLOG::ERRL_ACTIONS_HIDDEN))
+        {
+            TS_FAIL("testSetActionFlags: actionFlags not REPORT+CALL_HOME+SA+HIDDEN, actionFlags: %d",
+                    l_err->actionFlags());
+        }
+
+        delete l_err;
+        l_err = nullptr;
+    }
+
     void testSetDeconfigState(void)
     {
         /*
@@ -2106,7 +2164,6 @@ public:
             errl = nullptr;
       }while(0);
   };
-
 
 };
 }

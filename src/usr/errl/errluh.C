@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -54,10 +56,10 @@ ErrlUH::ErrlUH( errlSeverity_t i_sev  ) :
              0),   // Component ID is zero until commit time
   iv_severity( i_sev ),
   iv_etype( ERRL_ETYPE_NOT_APPLICABLE ),
+  iv_actions( ERRL_ACTIONS_NONE ),
   iv_ssid( EPUB_FIRMWARE_SUBSYS  ),   // 0x80 here yields SRC B180xxxx
   iv_domain( ERRL_DOMAIN_DEFAULT ),
   iv_vector( ERRL_VECTOR_DEFAULT ),
-  iv_actions( ERRL_ACTION_NONE ),
   iv_scope( ERRL_SCOPE_PLATFORM )
 {
 
@@ -122,6 +124,24 @@ uint64_t ErrlUH::unflatten(const void * i_buf )
     iv_actions      = p->actions;
 
     return flatSize();
+}
+
+void ErrlUH::setInformationalEvent(errlEventType_t i_etype)
+{
+    // Update the event type
+    iv_etype = i_etype;
+
+    if (i_etype == ERRL_ETYPE_NOT_APPLICABLE)
+    {
+        if (iv_severity == ERRL_SEV_INFORMATIONAL)
+        {
+            iv_etype = ERRL_ETYPE_TRACING;
+        }
+    }
+    else
+    {
+        iv_severity = ERRL_SEV_INFORMATIONAL;
+    }
 }
 
 }  // namespace

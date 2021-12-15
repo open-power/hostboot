@@ -48,6 +48,7 @@ namespace ERRORLOG
         ERRL_GET_CURRENT_DATE_TIME              = 0x06,
         ERRL_GET_MARKER_LID_MI_KEYWORD          = 0x07,
         ERRL_NOTIFY_HYPERVISOR_OF_RESOURCE_GARD = 0x08,
+        ERRL_TEST_AFLAGS_MOD_ID                 = 0x09,
         //........
         ERRL_LAST_MODULE_ID                     = 0xFF
     };
