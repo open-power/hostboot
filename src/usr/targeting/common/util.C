@@ -228,43 +228,7 @@ uint8_t  is_fused_mode( )
 
 bool isNVDIMM( const TARGETING::Target * i_target )
 {
-    // Not the most elegant way of doing it but the hybrid attributes
-    // are at the MCS level. Need to find my way up to MCS and check
-    // if the dimm is hybrid
-    TARGETING::TargetHandleList l_mcaList;
-    getParentAffinityTargets(l_mcaList, i_target, TARGETING::CLASS_UNIT, TARGETING::TYPE_MCA);
-
-    if (l_mcaList.size())
-    {
-        TARGETING::TargetHandleList l_mcsList;
-        getParentAffinityTargets(l_mcsList, l_mcaList[0], TARGETING::CLASS_UNIT, TARGETING::TYPE_MCS);
-
-        if(l_mcsList.size())
-        {
-            // 2-D array. [MCA][DIMM]
-            TARGETING::ATTR_EFF_HYBRID_type l_hybrid;
-            TARGETING::ATTR_EFF_HYBRID_MEMORY_TYPE_type l_hybrid_type;
-
-            if( l_mcsList[0]->tryGetAttr<TARGETING::ATTR_EFF_HYBRID>(l_hybrid) &&
-                l_mcsList[0]->tryGetAttr<TARGETING::ATTR_EFF_HYBRID_MEMORY_TYPE>(l_hybrid_type) )
-            {
-                //Using relative position to lookup the hybrid attribute for the current dimm
-                TARGETING::ATTR_REL_POS_type l_dimm_rel_pos = i_target->getAttr<ATTR_REL_POS>();
-                TARGETING::ATTR_REL_POS_type l_mca_rel_pos = l_mcaList[0]->getAttr<ATTR_REL_POS>();
-
-                // Verify code is not accessing outside of the array boundaries
-                // Check if l_dimm_rel_pos is outside of l_hybrid column boundary
-                assert(l_dimm_rel_pos < sizeof(l_hybrid[0]));
-
-                // Check if l_mca_rel_pos is outside of l_hybrid row boundary
-                assert(l_mca_rel_pos < (sizeof(l_hybrid)/sizeof(l_hybrid[0])));
-
-                return (l_hybrid[l_mca_rel_pos][l_dimm_rel_pos] == TARGETING::EFF_HYBRID_IS_HYBRID &&
-                        l_hybrid_type[l_mca_rel_pos][l_dimm_rel_pos] == TARGETING::EFF_HYBRID_MEMORY_TYPE_NVDIMM);
-            }
-        }
-    }
-
+    // no nvdimm support in p10
     return false;
 }
 
