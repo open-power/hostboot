@@ -394,6 +394,7 @@ while [ $(($modsstarted)) -lt 1 -o $(($modsstarted)) -ne $(($modscompleted)) ]; 
     if [ "$loopcount" -ge "$loop_timeout" ];   then
         timestamp=`date +'%H:%M:%S'`
         echo    "$timestamp ERROR: timed out waiting for until test completion"
+        stopsim # grab ffdc data from timeout time
         autosim $NOWIN --simcmd   "hb-Ps with-backtrace"
         timeout=$(($modsstarted - $modscompleted))
         break
