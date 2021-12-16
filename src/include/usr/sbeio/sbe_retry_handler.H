@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -304,6 +304,21 @@ class SbeRetryHandler
          *           return false if there was an error getting the sbe msg register
          */
         bool sbe_run_extract_msg_reg();
+
+        /**
+         * @brief  Read or write the Selfboot Control/Status register
+         *
+         * @param[in] i_writeNotRead - true=write; false=read
+         * @param[inout] io_ctlreg - data to read or write
+         *
+         * @return - error, NULL if no error
+         */
+        errlHndl_t accessControlReg( bool i_writeNotRead,
+                                     uint32_t& io_ctlreg );
+        static constexpr bool ACCESS_WRITE = true;
+        static constexpr bool ACCESS_READ = false;
+
+        /************************** Class Elements **************************/
 
         /**
          * @brief Bit used to tell if we are in secure debug mode. This means

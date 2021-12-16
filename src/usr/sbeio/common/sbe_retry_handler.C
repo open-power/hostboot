@@ -48,6 +48,7 @@
 #include <initservice/initsvcreasoncodes.H>
 #include <errl/errludtarget.H>
 #include <util/misc.H>
+#include <arch/magic.H>
 #include <sbe/sbe_update.H>
 #include <sbeio/sbeioif.H>
 #include <sbeio/sbe_sp_intf.H>
@@ -61,6 +62,7 @@
 #include <sbeio/sbe_retry_handler.H>
 #include <secureboot/service.H>
 #include <i2c/i2cif.H>
+#include <spi/spi.H> // for SPI lock support
 #include <devicefw/driverif.H>
 #include <plat_utils.H>
 #include <fapi2/target.H>
@@ -207,12 +209,31 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
         // If we have made it this far we can assume that something is wrong w/ the SBE
         //////******************************************************************
 
+        // Grab the current seeprom sides from the HW directly
+        //  before we change anything
+        uint8_t l_bootside = 0xFF;
+        uint8_t l_mside = 0xFF;
+        uint32_t l_ctl_reg = 0;
+        errlHndl_t tmp_errl = accessControlReg( ACCESS_READ,
+                                                l_ctl_reg );
+        if( tmp_errl )
+        {
+            SBE_TRACF("Error from accessControlReg, data is invalid");
+            delete tmp_errl;
+            tmp_errl = nullptr;
+        }
+        else
+        {
+            l_bootside = (l_ctl_reg & SBE_BOOT_SELECT_MASK_FSI) ? 1 : 0;
+            l_mside = (l_ctl_reg & SBE_MBOOT_SELECT_MASK_FSI) ? 1 : 0;
+        }
+
         // if the sbe is not halted, run extract_rc
         // NOTE: any asyncFFDC should have previously been caught in the call to
         // sbe_run_extract_msg_reg above
         if(!i_sbeHalted)
         {
-            SBE_TRACF("main_sbe_handler(): No async ffdc found, but SBE not at runtime, running p10_sbe_extract_rc.");
+            SBE_TRACF("main_sbe_handler(sides:b=%d,m=%d): No async ffdc found and sbe isn't explicitly halted, running p10_sbe_extract_rc.", l_bootside, l_mside);
             // Call the function that runs extract_rc, this needs to run to determine
             // what broke and what our retry action should be
             this->sbe_run_extract_rc();
@@ -238,11 +259,34 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
             this->iv_currentAction = P10_EXTRACT_SBE_RC::RESTART_SBE;
         }
 
+#ifndef __HOSTBOOT_RUNTIME
+        // Need to switch SPI control register back to FSI_ACCESS mode
+        // if we are in the initial boot flow since SBE might flip the
+        // access mode into PIB_ACCESS.  Do this after we read the hw
+        // regs in extract_rc and the sbe dump, but before we take
+        // any actions ourselves.
+        if( this->iv_initialPowerOn )
+        {
+            l_errl = SPI::spiSetAccessMode(iv_proc, SPI::FSI_ACCESS);
+            if (l_errl)
+            {
+                SBE_TRACF("ERROR: SPI access mode switch to FSI_ACCESS failed for target %.8X"
+                          TRACE_ERR_FMT,
+                          TARGETING::get_huid(iv_proc),
+                          TRACE_ERR_ARGS(l_errl));
+                // this error is secondary to what we're really trying
+                // to do so just commit it as informational
+                l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                errlCommit( l_errl, SBEIO_COMP_ID);
+            }
+        }
+#endif
+
         // If the mode was marked as informational that means the caller did not want
         // any actions to take place, the caller only wanted information collected
         if(this->iv_sbeMode == INFORMATIONAL_ONLY)
         {
-            SBE_TRACF("main_sbe_handler(): Retry handler is being called in INFORMATIONAL mode so we are exiting without attempting any retry actions");
+            SBE_TRACF("main_sbe_handler(sides:b=%d,m=%d): Retry handler is being called in INFORMATIONAL mode so we are exiting without attempting any retry actions", l_bootside, l_mside);
             break;
         }
 
@@ -289,11 +333,14 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
                         "iv_currentSideBootAttempts: %d , "
                         "iv_currentAction: %d , "
                         "iv_currentSideBootAttempts_mseeprom: %d",
+                        "bootside=%d , measurementside=%d",
                         this->iv_sbeRegister.currState,
                         this->iv_currentSBEState,
                         this->iv_currentSideBootAttempts,
                         this->iv_currentAction,
-                        this->iv_currentSideBootAttempts_mseeprom);
+                        this->iv_currentSideBootAttempts_mseeprom,
+                        l_bootside,
+                        l_mside);
 
 #ifdef CONFIG_COMPILE_CXXTEST_HOOKS
             if (this->iv_sbeTestMode)
@@ -654,42 +701,42 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
 #endif
 
 #ifndef __HOSTBOOT_RUNTIME
-                    // If something is wrong w/ the SBE during IPL time on a FSP based system then
-                    // we will always TI and let hwsv deal with the problem.
-                    if(INITSERVICE::spBaseServicesEnabled())
-                    {
-                        // If this is the initial power on there will be no logs that point out this fail
-                        // so we need to create one now
-                        /*@
-                         * @errortype  ERRL_SEV_UNRECOVERABLE
-                         * @moduleid   SBEIO_EXTRACT_RC_HANDLER
-                         * @reasoncode SBEIO_SLAVE_FAILED_TO_BOOT
-                         * @userdata1  Bool to describe if FFDC data is found
-                         * @userdata2  HUID of proc
-                         * @devdesc    There was a problem attempting to boot SBE
-                         *             on the slave processor
-                         * @custdesc   Processor Error
-                         */
-                         l_errl = new ERRORLOG::ErrlEntry(
-                                      ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                      SBEIO_EXTRACT_RC_HANDLER,
-                                      SBEIO_SLAVE_FAILED_TO_BOOT,
-                                      this->iv_sbeRegister.asyncFFDC,
-                                      TARGETING::get_huid(iv_proc));
+                // If something is wrong w/ the SBE during IPL time on a FSP based system then
+                // we will always TI and let hwsv deal with the problem.
+                if(INITSERVICE::spBaseServicesEnabled())
+                {
+                    // If this is the initial power on there will be no logs that point out this fail
+                    // so we need to create one now
+                    /*@
+                     * @errortype  ERRL_SEV_UNRECOVERABLE
+                     * @moduleid   SBEIO_EXTRACT_RC_HANDLER
+                     * @reasoncode SBEIO_SLAVE_FAILED_TO_BOOT
+                     * @userdata1  Bool to describe if FFDC data is found
+                     * @userdata2  HUID of proc
+                     * @devdesc    There was a problem attempting to boot SBE
+                     *             on the slave processor
+                     * @custdesc   Processor Error
+                     */
+                    l_errl = new ERRORLOG::ErrlEntry(
+                                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                     SBEIO_EXTRACT_RC_HANDLER,
+                                                     SBEIO_SLAVE_FAILED_TO_BOOT,
+                                                     this->iv_sbeRegister.asyncFFDC,
+                                                     TARGETING::get_huid(iv_proc));
 
-                         l_errl->collectTrace( "ISTEPS_TRACE", 256);
-                         l_errl->collectTrace( SBEIO_COMP_NAME, 256);
-                         // Set the PLID of the error log to master PLID
-                         // if the master PLID is set
-                         updatePlids(l_errl);
+                    l_errl->collectTrace( "ISTEPS_TRACE", 256);
+                    l_errl->collectTrace( SBEIO_COMP_NAME, 256);
+                    // Set the PLID of the error log to master PLID
+                    // if the master PLID is set
+                    updatePlids(l_errl);
 
-                         errlCommit(l_errl, SBEIO_COMP_ID);
-                         // This function will TI Hostboot so don't expect to return
-                         handleFspIplTimeFail();
-                         SBE_TRACF("main_sbe_handler(): We failed to TI the system when we should have, forcing an assert(0) call");
-                         // We should never return from handleFspIplTimeFail
-                         assert(0, "We have determined that there was an error with the SBE and should have TI'ed but for some reason we did not.");
-                    }
+                    errlCommit(l_errl, SBEIO_COMP_ID);
+                    // This function will TI Hostboot so don't expect to return
+                    handleFspIplTimeFail();
+                    SBE_TRACF("main_sbe_handler(): We failed to TI the system when we should have, forcing an assert(0) call");
+                    // We should never return from handleFspIplTimeFail
+                    assert(0, "We have determined that there was an error with the SBE and should have TI'ed but for some reason we did not.");
+                }
 #endif
 
                 SBE_TRACF("Invoking p10_start_cbs HWP on processor %.8X", get_huid(iv_proc));
@@ -704,12 +751,30 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
 
                 if(l_errl)
                 {
+                    // Grab the side info again since we switched it above
+                    errlHndl_t tmp_errl = accessControlReg( ACCESS_READ,
+                                                            l_ctl_reg );
+                    if( tmp_errl )
+                    {
+                        SBE_TRACF("Error from accessControlReg, data is invalid");
+                        delete tmp_errl;
+                        tmp_errl = nullptr;
+                    }
+                    else
+                    {
+                        l_bootside = (l_ctl_reg & SBE_BOOT_SELECT_MASK_FSI) ? 1 : 0;
+                        l_mside = (l_ctl_reg & SBE_MBOOT_SELECT_MASK_FSI) ? 1 : 0;
+                    }
+
                     // Flag the currentSBEState since something bad has happened
                     // and the caller checks the currentSBEState as an indicator of success
                     // This prevents infinite loop when we deconfig the proc
                     // and caller checks only isSbeAtRuntime
-                    SBE_TRACF("ERROR: call p10_start_cbs iv_currentSBEState=%d PLID=0x%x",
-                                this->iv_currentSBEState, l_errl->plid() );
+                    SBE_TRACF("ERROR: call p10_start_cbs boot/meas-side=%d/%d, iv_currentSBEState=%d, PLID=0x%x",
+                              l_bootside,
+                              l_mside,
+                              this->iv_currentSBEState,
+                              l_errl->plid() );
                     this->iv_currentSBEState = SbeRetryHandler::SBE_STATUS::SBE_NOT_AT_RUNTIME;
                     l_errl->collectTrace(SBEIO_COMP_NAME, 256 );
                     l_errl->collectTrace(FAPI_IMP_TRACE_NAME, 256);
@@ -857,7 +922,9 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
              * @errortype   ERRL_SEV_INFORMATIONAL
              * @moduleid    SBEIO_EXTRACT_RC_HANDLER
              * @reasoncode  SBEIO_BOOTED_UNEXPECTED_SIDE
-             * @userdata1[00:31] Switch Sides Count
+             * @userdata1[00:07]  Current SBE boot side
+             * @userdata1[08:15]  Current SBE measurement side
+             * @userdata1[16:31] Switch Sides Count
              * @userdata1[32:63] Switch Sides Count Mseeprom
              * @userdata2[00:31] Current Action
              * @userdata2[32:63] HUID of proc
@@ -868,7 +935,11 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
                         ERRORLOG::ERRL_SEV_INFORMATIONAL,
                         SBEIO_EXTRACT_RC_HANDLER,
                         SBEIO_BOOTED_UNEXPECTED_SIDE,
-                        TWO_UINT32_TO_UINT64(this->iv_switchSidesCount, this->iv_switchSidesCount_mseeprom),
+                        TWO_UINT32_TO_UINT64(
+                           TWO_UINT16_TO_UINT32(
+                              TWO_UINT8_TO_UINT16(l_bootside, l_mside),
+                              this->iv_switchSidesCount),
+                           this->iv_switchSidesCount_mseeprom),
                         TWO_UINT32_TO_UINT64(this->iv_currentAction, TARGETING::get_huid(iv_proc)));
             l_errl->collectTrace("ISTEPS_TRACE",256);
             l_errl->collectTrace(SBEIO_COMP_NAME,256);
@@ -1370,7 +1441,7 @@ void SbeRetryHandler::sbe_run_extract_rc()
                   " returned action %d (from bestEffortCheck) and errorlog PLID=0x%x, rc=0x%.4X",
                   this->iv_currentAction, l_errl->plid(), l_errl->reasonCode());
 
-        l_errl->collectTrace(SBEIO_COMP_NAME,256);
+        l_errl->collectTrace(SBEIO_COMP_NAME,512);
         l_errl->collectTrace(FAPI_IMP_TRACE_NAME, 256);
         l_errl->collectTrace(FAPI_TRACE_NAME, 384);
 
@@ -1576,154 +1647,57 @@ errlHndl_t SbeRetryHandler::switch_sbe_sides(P10_EXTRACT_SBE_RC::RETURN_ACTION i
               i_action, l_sbeOperationMask, l_sbe_mvpd_reipl_mask, l_mvpdSbKeyword.flags);
 
 
-#ifdef __HOSTBOOT_RUNTIME
-    const bool l_isRuntime = true;
-#else
-    const bool l_isRuntime = false;
-#endif
-
     do{
-
-        if(!l_isRuntime && !iv_proc->getAttr<TARGETING::ATTR_PROC_SBE_MASTER_CHIP>())
+        // Read the Selfboot Control/Status register from the appropriate place
+        uint32_t l_ctl_reg = 0;
+        l_errl = accessControlReg( ACCESS_READ, l_ctl_reg );
+        if( l_errl )
         {
-            // Read FSXCOMP_FSXLOG_SB_CS_FSI_BYTE 0x2820 for target proc
-            uint32_t l_read_reg = 0;
-            size_t l_opSize = sizeof(uint32_t);
-            l_errl = DeviceFW::deviceOp(
-                            DeviceFW::READ,
-                            iv_proc,
-                            &l_read_reg,
-                            l_opSize,
-                            DEVICE_FSI_ADDRESS(FSXCOMP_FSXLOG_SB_CS_FSI_BYTE) );
-
-            if( l_errl )
-            {
-                SBE_TRACF( ERR_MRK"switch_sbe_sides: FSI device read "
-                        "FSXCOMP_FSXLOG_SB_CS_FSI_BYTE (0x%.4X), proc target = %.8X, "
-                        "RC=0x%X, PLID=0x%lX",
-                        FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, // 0x2820
-                        TARGETING::get_huid(iv_proc),
-                        ERRL_GETRC_SAFE(l_errl),
-                        ERRL_GETPLID_SAFE(l_errl));
-                break;
-            }
-
-            // Determine how boot side is currently set
-            // Works on the previously set l_sbeOperationMask which is either the SEEPROM or MSEEPROM
-            // We check either bit 17 (SEEPROM) or bit 18 (MSEEPROM) based on the previous logic above
-            // Operations are done on single SEEPROM at a time
-            SBE_TRACF("switch_sbe_sides: HUID=0x%X FSI Currently l_read_reg=0x%X", TARGETING::get_huid(iv_proc), l_read_reg);
-            // Check if bit 17 or bit 18 currently set for Boot Side 1, mask set previously for which SEEPROM
-            if(l_read_reg & l_sbeOperationMask)
-            {
-                // Set Boot Side 0
-                SBE_TRACF( "switch_sbe_sides: iv_switchSidesCount=%d iv_switchSidesCount_mseeprom=%d: Flip to Set Boot Side 0 for HUID 0x%08X",
-                        iv_switchSidesCount, iv_switchSidesCount_mseeprom,
-                        TARGETING::get_huid(iv_proc));
-                l_read_reg &= ~l_sbeOperationMask; // clear bit 17 or bit 18 based on previously set mask for SEEPROM
-                l_mvpdSbKeyword.flags &= ~l_sbe_mvpd_reipl_mask;  // clear MVPD SEEPROM flag bit
-                // We are reading the PROC register as the authoritative source at this point in time
-            }
-            else // Opposite case for the mask previously set for SEEPROM
-            {
-                // Set Boot Side 1
-                SBE_TRACF( "switch_sbe_sides: iv_switchSidesCount=%d iv_switchSidesCount_mseeprom=%d: Flip to Set Boot Side 1 for HUID 0x%08X",
-                        iv_switchSidesCount, iv_switchSidesCount_mseeprom,
-                        TARGETING::get_huid(iv_proc));
-                l_read_reg |= l_sbeOperationMask; // set bit 17 or bit 18 based on previously set mask for SEEPROM
-                l_mvpdSbKeyword.flags |= l_sbe_mvpd_reipl_mask;   // set MVPD SEEPROM flag bit
-            }
-            SBE_TRACF("switch_sbe_sides: HUID=0x%X register to FSI WRITE l_read_reg=0x%X MVPDOP_WRITE l_mvpdSbKeyword.flags=0x%X",
-                      TARGETING::get_huid(iv_proc), l_read_reg, l_mvpdSbKeyword.flags);
-
-            // Write updated FSXCOMP_FSXLOG_SB_CS_FSI 0x2820 back into target proc
-            l_errl = DeviceFW::deviceOp(
-                            DeviceFW::WRITE,
-                            iv_proc,
-                            &l_read_reg,
-                            l_opSize,
-                            DEVICE_FSI_ADDRESS(FSXCOMP_FSXLOG_SB_CS_FSI_BYTE) );
-            if( l_errl )
-            {
-                SBE_TRACF( ERR_MRK"switch_sbe_sides: FSI device write "
-                        "FSXCOMP_FSXLOG_SB_CS_FSI_BYTE (0x%.4X), proc target = %.8X, "
-                        "RC=0x%X, PLID=0x%lX",
-                        FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, // 0x2820
-                        TARGETING::get_huid(iv_proc),
-                        ERRL_GETRC_SAFE(l_errl),
-                        ERRL_GETPLID_SAFE(l_errl));
-                break;
-            }
+            SBE_TRACF( ERR_MRK"switch_sbe_sides: Control reg read failed : proc target = %.8X, RC=0x%X, PLID=0x%lX",
+                       TARGETING::get_huid(iv_proc),
+                       ERRL_GETRC_SAFE(l_errl),
+                       ERRL_GETPLID_SAFE(l_errl));
+            break;
         }
-        else
+
+        // Determine how boot side is currently set
+        // Works on the previously set l_sbeOperationMask which is either the SEEPROM or MSEEPROM
+        // We check either bit 17 (SEEPROM) or bit 18 (MSEEPROM) based on the previous logic above
+        // Operations are done on single SEEPROM at a time
+        SBE_TRACF("switch_sbe_sides: HUID=0x%X Currently l_ctl_reg=0x%.8X",
+                  TARGETING::get_huid(iv_proc), l_ctl_reg);
+        // Check if bit 17 or bit 18 currently set for Boot Side 1, mask set previously for which SEEPROM
+        if(l_ctl_reg & l_sbeOperationMask)
         {
-            // Read FSXCOMP_FSXLOG_SB_CS 0x50008 for target proc
-            uint64_t l_read_reg = 0;
-            size_t l_opSize = sizeof(uint64_t);
-            l_errl = DeviceFW::deviceOp(
-                            DeviceFW::READ,
-                            iv_proc,
-                            &l_read_reg,
-                            l_opSize,
-                            DEVICE_SCOM_ADDRESS(FSXCOMP_FSXLOG_SB_CS) );
+            // Set Boot Side 0
+            SBE_TRACF( "switch_sbe_sides: iv_switchSidesCount=%d iv_switchSidesCount_mseeprom=%d: Flip to Set Boot Side 0 for HUID 0x%08X",
+                       iv_switchSidesCount, iv_switchSidesCount_mseeprom,
+                       TARGETING::get_huid(iv_proc));
+            l_ctl_reg &= ~l_sbeOperationMask; // clear bit 17 or bit 18 based on previously set mask for SEEPROM
+            l_mvpdSbKeyword.flags &= ~l_sbe_mvpd_reipl_mask;  // clear MVPD SEEPROM flag bit
+            // We are reading the PROC register as the authoritative source at this point in time
+        }
+        else // Opposite case for the mask previously set for SEEPROM
+        {
+            // Set Boot Side 1
+            SBE_TRACF( "switch_sbe_sides: iv_switchSidesCount=%d iv_switchSidesCount_mseeprom=%d: Flip to Set Boot Side 1 for HUID 0x%08X",
+                       iv_switchSidesCount, iv_switchSidesCount_mseeprom,
+                       TARGETING::get_huid(iv_proc));
+            l_ctl_reg |= l_sbeOperationMask; // set bit 17 or bit 18 based on previously set mask for SEEPROM
+            l_mvpdSbKeyword.flags |= l_sbe_mvpd_reipl_mask;   // set MVPD SEEPROM flag bit
+        }
+        SBE_TRACF("switch_sbe_sides: HUID=0x%X register to WRITE l_read_reg=0x%.8X MVPDOP_WRITE l_mvpdSbKeyword.flags=0x%X",
+                  TARGETING::get_huid(iv_proc), l_ctl_reg, l_mvpdSbKeyword.flags);
 
-            if( l_errl )
-            {
-                SBE_TRACF( ERR_MRK"switch_sbe_sides: SCOM device read "
-                        "FSXCOMP_FSXLOG_SB_CS (0x%.4X), proc target = %.8X, "
-                        "RC=0x%X, PLID=0x%lX",
-                        FSXCOMP_FSXLOG_SB_CS, // 0x50008
-                        TARGETING::get_huid(iv_proc),
-                        ERRL_GETRC_SAFE(l_errl),
-                        ERRL_GETPLID_SAFE(l_errl));
-                break;
-            }
-
-            // Determine how boot side is currently set
-            // Works on the previously set l_sbeOperationMask which is either the SEEPROM or MSEEPROM
-            // We check either bit 17 (SEEPROM) or bit 18 (MSEEPROM) based on the previous logic above
-            // Operations are done on single SEEPROM at a time
-            SBE_TRACF("switch_sbe_sides: HUID=0x%X SCOM Currently l_read_reg=0x%X", TARGETING::get_huid(iv_proc), l_read_reg);
-            // Check if bit 17 or bit 18 currently set for Boot Side 1, mask set previously for which SEEPROM
-            if(l_read_reg & l_sbeOperationMask)
-            {
-                // Set Boot Side 0
-                SBE_TRACF( "switch_sbe_sides iv_switchSidesCount=%d iv_switchSidesCount_mseeprom=%d: Flip to Set Boot Side 0 for HUID 0x%08X",
-                        iv_switchSidesCount, iv_switchSidesCount_mseeprom,
-                        TARGETING::get_huid(iv_proc));
-                l_read_reg &= ~l_sbeOperationMask;  // clear bit 17 or bit 18 based on previously set mask for SEEPROM
-                l_mvpdSbKeyword.flags &= ~l_sbe_mvpd_reipl_mask;  // clear MVPD SEEPROM flag bit
-            }
-            else // Opposite case for the mask previously set for SEEPROM
-            {
-                // Set Boot Side 1
-                SBE_TRACF( "switch_sbe_sides iv_switchSidesCount=%d iv_switchSidesCount_mseeprom=%d: Flip to Set Boot Side 1 for HUID 0x%08X",
-                        iv_switchSidesCount, iv_switchSidesCount_mseeprom,
-                        TARGETING::get_huid(iv_proc));
-                l_read_reg |= l_sbeOperationMask;  // set bit 17 or bit 18 based on previously set mask for SEEPROM
-                l_mvpdSbKeyword.flags |= l_sbe_mvpd_reipl_mask;  // set MVPD SEEPROM flag bit
-            }
-            SBE_TRACF("switch_sbe_sides: HUID=0x%X register to SCOM WRITE l_read_reg=0x%X MVPDOP_WRITE l_mvpdSbKeyword.flags=0x%X",
-                      TARGETING::get_huid(iv_proc), l_read_reg, l_mvpdSbKeyword.flags);
-
-            // Write updated FSXCOMP_FSXLOG_SB_CS 0x50008 back into target proc
-            l_errl = DeviceFW::deviceOp(
-                            DeviceFW::WRITE,
-                            iv_proc,
-                            &l_read_reg,
-                            l_opSize,
-                            DEVICE_SCOM_ADDRESS(FSXCOMP_FSXLOG_SB_CS) );
-            if( l_errl )
-            {
-                SBE_TRACF( ERR_MRK"switch_sbe_sides: SCOM device write "
-                        "FSXCOMP_FSXLOG_SB_CS (0x%.4X), proc target = %.8X, "
-                        "RC=0x%X, PLID=0x%lX",
-                        FSXCOMP_FSXLOG_SB_CS, // 0x50008
-                        TARGETING::get_huid(iv_proc),
-                        ERRL_GETRC_SAFE(l_errl),
-                        ERRL_GETPLID_SAFE(l_errl));
-                break;
-            }
+        // Write updated Selfboot Control/Status register back into target proc
+        l_errl = accessControlReg( ACCESS_WRITE, l_ctl_reg );
+        if( l_errl )
+        {
+            SBE_TRACF( ERR_MRK"switch_sbe_sides: Control reg read failed : proc target = %.8X, RC=0x%X, PLID=0x%lX",
+                       TARGETING::get_huid(iv_proc),
+                       ERRL_GETRC_SAFE(l_errl),
+                       ERRL_GETPLID_SAFE(l_errl));
+            break;
         }
 
 #ifndef __HOSTBOOT_RUNTIME
@@ -1797,6 +1771,132 @@ errlHndl_t SbeRetryHandler::switch_sbe_sides(P10_EXTRACT_SBE_RC::RETURN_ACTION i
     }
 
     SBE_TRACF(EXIT_MRK "switch_sbe_sides");
+    return l_errl;
+}
+
+/**
+ * @brief  Read or write the Selfboot Control/Status register
+ */
+errlHndl_t SbeRetryHandler::accessControlReg( bool i_writeNotRead,
+                                              uint32_t& io_ctlreg )
+{
+    errlHndl_t l_errl = nullptr;
+
+#ifdef __HOSTBOOT_RUNTIME
+    const bool l_isRuntime = true;
+#else
+    const bool l_isRuntime = false;
+#endif
+
+    do {
+    if(!l_isRuntime && !iv_proc->getAttr<TARGETING::ATTR_PROC_SBE_MASTER_CHIP>())
+    {
+        if( i_writeNotRead == ACCESS_READ ) //read
+        {
+            // Read FSXCOMP_FSXLOG_SB_CS_FSI_BYTE 0x2820 for target proc
+            uint32_t l_read_reg = 0;
+            size_t l_opSize = sizeof(uint32_t);
+            l_errl = DeviceFW::deviceOp(
+                                        DeviceFW::READ,
+                                        iv_proc,
+                                        &l_read_reg,
+                                        l_opSize,
+                                        DEVICE_FSI_ADDRESS(FSXCOMP_FSXLOG_SB_CS_FSI_BYTE) );
+
+            if( l_errl )
+            {
+                SBE_TRACF( ERR_MRK"accessControlReg: FSI device read "
+                           "FSXCOMP_FSXLOG_SB_CS_FSI_BYTE (0x%.4X), proc target = %.8X, "
+                           "RC=0x%X, PLID=0x%lX",
+                           FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, // 0x2820
+                           TARGETING::get_huid(iv_proc),
+                           ERRL_GETRC_SAFE(l_errl),
+                           ERRL_GETPLID_SAFE(l_errl));
+                break;
+            }
+
+            io_ctlreg = l_read_reg;
+        }
+        else
+        {
+            // Write updated FSXCOMP_FSXLOG_SB_CS_FSI 0x2820 back into target proc
+            uint32_t l_write_reg = io_ctlreg;
+            size_t l_opSize = sizeof(uint32_t);
+            l_errl = DeviceFW::deviceOp(
+                                        DeviceFW::WRITE,
+                                        iv_proc,
+                                        &l_write_reg,
+                                        l_opSize,
+                                        DEVICE_FSI_ADDRESS(FSXCOMP_FSXLOG_SB_CS_FSI_BYTE) );
+            if( l_errl )
+            {
+                SBE_TRACF( ERR_MRK"accessControlReg: FSI device write "
+                           "FSXCOMP_FSXLOG_SB_CS_FSI_BYTE (0x%.4X), proc target = %.8X, "
+                           "RC=0x%X, PLID=0x%lX",
+                           FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, // 0x2820
+                           TARGETING::get_huid(iv_proc),
+                           ERRL_GETRC_SAFE(l_errl),
+                           ERRL_GETPLID_SAFE(l_errl));
+                break;
+            }
+        }
+    }
+    else
+    {
+        if( i_writeNotRead == ACCESS_READ ) //read
+        {
+            // Read FSXCOMP_FSXLOG_SB_CS 0x50008 for target proc
+            uint64_t l_read_reg = 0;
+            size_t l_opSize = sizeof(uint64_t);
+            l_errl = DeviceFW::deviceOp(
+                                        DeviceFW::READ,
+                                        iv_proc,
+                                        &l_read_reg,
+                                        l_opSize,
+                                        DEVICE_SCOM_ADDRESS(FSXCOMP_FSXLOG_SB_CS) );
+
+            if( l_errl )
+            {
+                SBE_TRACF( ERR_MRK"accessControlReg: SCOM device read "
+                           "FSXCOMP_FSXLOG_SB_CS (0x%.4X), proc target = %.8X, "
+                           "RC=0x%X, PLID=0x%lX",
+                           FSXCOMP_FSXLOG_SB_CS, // 0x50008
+                           TARGETING::get_huid(iv_proc),
+                           ERRL_GETRC_SAFE(l_errl),
+                           ERRL_GETPLID_SAFE(l_errl));
+                break;
+            }
+
+            // data is in the top word
+            io_ctlreg = static_cast<uint32_t>(l_read_reg >> 32);
+        }
+        else
+        {
+            // Write updated FSXCOMP_FSXLOG_SB_CS 0x50008 back into target proc
+            uint64_t l_write_reg = io_ctlreg;
+            l_write_reg = (l_write_reg << 32); //data is in the top word
+            size_t l_opSize = sizeof(uint64_t);
+            l_errl = DeviceFW::deviceOp(
+                                        DeviceFW::WRITE,
+                                        iv_proc,
+                                        &l_write_reg,
+                                        l_opSize,
+                                        DEVICE_SCOM_ADDRESS(FSXCOMP_FSXLOG_SB_CS) );
+            if( l_errl )
+            {
+                SBE_TRACF( ERR_MRK"accessControlReg: SCOM device write "
+                           "FSXCOMP_FSXLOG_SB_CS (0x%.4X), proc target = %.8X, "
+                           "RC=0x%X, PLID=0x%lX",
+                           FSXCOMP_FSXLOG_SB_CS, // 0x50008
+                           TARGETING::get_huid(iv_proc),
+                           ERRL_GETRC_SAFE(l_errl),
+                           ERRL_GETPLID_SAFE(l_errl));
+                break;
+            }
+        }
+    }
+    } while(0);
+
     return l_errl;
 }
 
