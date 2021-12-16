@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,6 +31,7 @@
 #include <sbeio/runtime/sbeio_vpd_override.H>
 #include <sbeio/runtime/sbeio_attr_override.H>
 #include <sbeio/sbeioreasoncodes.H>
+#include <sbeio/sbeioif.H>                 // getPmicHlthCheckData
 #include <errno.h>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
@@ -752,6 +753,41 @@ namespace RT_SBEIO
     }
 #endif
 
+    /**
+     * @brief Function to process PMIC health check pass-through command
+     *
+     * @param[in]  i_procTgt      HB processor target
+     * @param[in]  i_reqDataSize  Pass-through command request data size
+     * @param[in]  i_reqData      Pass-through command request data
+     * @param[out] o_rspStatus    Pass-through command response status
+     * @param[out] o_rspDataSize  Pass-through command response data size
+     * @param[out] o_rspData      Pass-through command response data
+     *
+     * @return errlHndl_t    Error log handle on failure.
+     */
+    errlHndl_t pmic_health_check_wrapper(TARGETING::TargetHandle_t i_procTgt,
+                                         uint32_t i_reqDataSize,
+                                         uint8_t* i_reqData,
+                                         uint32_t* o_rspStatus,
+                                         uint32_t* o_rspDataSize,
+                                         uint8_t* o_rspData)
+    {
+        errlHndl_t l_err = nullptr;
+
+        *o_rspStatus = 0;
+        *o_rspDataSize = 0;
+        *o_rspData = 0;
+
+        l_err = SBEIO::getPmicHlthCheckData();
+
+        if (l_err)
+        {   // if error, return a bad status
+            *o_rspStatus = 0xFFFFFFFF; // -1
+        }
+
+        return l_err;
+    }
+
     //------------------------------------------------------------------------
 
     struct registerSbeio
@@ -781,11 +817,13 @@ namespace RT_SBEIO
             SBE_MSG::setProcessCmdFunction(PASSTHRU_HTMGT_GENERIC,
                                            htmgt_pass_thru_wrapper);
 #endif
-           SBE_MSG::setProcessCmdFunction(PASSTHRU_HBRT_OVERRIDE_ATTR,
-                                          sbeApplyAttrOverrides);
-           SBE_MSG::setProcessCmdFunction(PASSTHRU_HBRT_OVERRIDE_VPD,
-                                          sbeApplyVpdOverrides);
-        }
+            SBE_MSG::setProcessCmdFunction(PASSTHRU_HBRT_OVERRIDE_ATTR,
+                                           sbeApplyAttrOverrides);
+            SBE_MSG::setProcessCmdFunction(PASSTHRU_HBRT_OVERRIDE_VPD,
+                                           sbeApplyVpdOverrides);
+            SBE_MSG::setProcessCmdFunction(PASSTHRU_HBRT_PMIC_HLTH_CHK,
+                                           pmic_health_check_wrapper);
+       }
     };
 
     registerSbeio g_registerSbeio;
