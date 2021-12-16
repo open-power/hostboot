@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,6 +58,7 @@ const epubProcToSub_t PROCEDURE_TO_SUBSYS_TABLE[] =
     { EPUB_PRC_PROC_XYZ_BUS           , EPUB_PROCESSOR_BUS_CTL      },
     { EPUB_PRC_MEMBUS_ERROR           , EPUB_MEMORY_SUBSYS          },
     { EPUB_PRC_EIBUS_ERROR            , EPUB_CEC_HDW_SUBSYS         },
+    { EPUB_PRC_MULTINODE_CHECKSTOP    , EPUB_CEC_HDW_SUBSYS         },
     { EPUB_PRC_MEMORY_UE              , EPUB_MEMORY_SUBSYS          },
     { EPUB_PRC_POWER_ERROR            , EPUB_POWER_SUBSYS           },
     { EPUB_PRC_PERFORMANCE_DEGRADED   , EPUB_MISC_SUBSYS            },

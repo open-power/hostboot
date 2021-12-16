@@ -106,6 +106,7 @@ public:
             case(EPUB_PRC_PROC_XYZ_BUS           ):
             case(EPUB_PRC_MEMBUS_ERROR           ):
             case(EPUB_PRC_EIBUS_ERROR            ):
+            case(EPUB_PRC_MULTINODE_CHECKSTOP    ):
             case(EPUB_PRC_POWER_ERROR            ):
             case(EPUB_PRC_PERFORMANCE_DEGRADED   ):
             case(EPUB_PRC_MEMORY_UE              ):

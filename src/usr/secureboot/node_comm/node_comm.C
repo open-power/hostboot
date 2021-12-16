@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -145,6 +145,12 @@ errlHndl_t nodeCommRecvMessage(TARGETING::Target* i_pTarget,
                                            TWO_UINT32_TO_UINT64(
                                              NODE_COMM_POLL_DELAY_TOTAL_NS,
                                              interval_ns));
+
+            // This failure could be caused by the other side of the bus
+            //  having checkstopped.  Log a procedure callout to direct
+            //  service to investigate.
+            err->addProcedureCallout(HWAS::EPUB_PRC_MULTINODE_CHECKSTOP,
+                                     HWAS::SRCI_PRIORITY_HIGH);
 
             // Since we know what bus we expected the message on, call it out
             addNodeCommBusCallout(i_pTarget,

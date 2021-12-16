@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -134,6 +134,9 @@ enum epubProcedureID
     EPUB_PRC_EIBUS_ERROR            = 0x37,
     ///< Problem is on a bus, could not be isolated to a specific part,
     ///<   Callouts will indicate the endpoints that are involved
+
+    EPUB_PRC_MULTINODE_CHECKSTOP    = 0x3D,
+    ///< Possible checkstop caused communication problem between drawers.
 
     EPUB_PRC_POWER_ERROR            = 0x3F,
     ///< Problem is related to the power subsystem

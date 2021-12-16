@@ -146,7 +146,7 @@ struct epubProcedureToIsolationProcedure_t
     epubProcedureID epub_procedure_id;
     char isolationProcedure[PEL_PART_NUM_SIZE];
 };
-static constexpr std::array<epubProcedureToIsolationProcedure_t, 25> EPUB_TO_ISOLATION_PROCEDURE =
+static constexpr std::array<epubProcedureToIsolationProcedure_t, 26> EPUB_TO_ISOLATION_PROCEDURE =
 {
     epubProcedureToIsolationProcedure_t
     { EPUB_PRC_NONE                   , "       "},
@@ -166,6 +166,7 @@ static constexpr std::array<epubProcedureToIsolationProcedure_t, 25> EPUB_TO_ISO
     { EPUB_PRC_PROC_XYZ_BUS           , "HB00037"}, // map to EPUB_PRC_EIBUS_ERROR
     { EPUB_PRC_MEMBUS_ERROR           , "HB00037"}, // map to EPUB_PRC_EIBUS_ERROR
     { EPUB_PRC_EIBUS_ERROR            , "HB00037"}, // FSPSP55
+    { EPUB_PRC_MULTINODE_CHECKSTOP    , "HB00010"}, // FSPSP61, n/a for P10 ebmc
     { EPUB_PRC_POWER_ERROR            , "HB0003F"}, // FSPSP63
     { EPUB_PRC_PERFORMANCE_DEGRADED   , "HB0004D"}, // FSPSP77
     { EPUB_PRC_MEMORY_UE              , "HB0004F"}, // FSPSP79
