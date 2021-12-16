@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,7 +64,7 @@ class frequency_traits<mss::proc_type::PROC_P10>
         //////////////////////////////////////////////////////////////
         static const std::vector<uint64_t> SUPPORTED_FREQS;
         // PROC_CHIP is our frequency domain
-        static constexpr uint64_t PORTS_PER_FREQ_DOMAIN = 16;
+        static constexpr uint64_t PORTS_PER_FREQ_DOMAIN = 32;
         // Max DIMM's per port
         static constexpr uint64_t MAX_DIMM_PER_PORT = 2;
         // Maxium number of primary ranks on a DIMM

@@ -1192,7 +1192,7 @@ struct mcTypeTraits<mc_type::EXPLORER>
         MCC_PER_MI = 2,
         OMI_PER_MCC = 2,
         OCMB_PER_OMI = 1,
-        PORTS_PER_OCMB = 1,
+        PORTS_PER_OCMB = 2,
         DIMMS_PER_PORT = 2,
     };
 };
