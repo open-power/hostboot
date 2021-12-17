@@ -891,8 +891,7 @@ fapi2::ReturnCode boot_config( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
                  set_COMMAND(l_cmd_data).
                  set_BOOT_MODE(l_boot_mode).
                  set_STATUS_DATA(l_fw_status_data).
-                 set_EXP_ACTIVE_LOG_SIZE(4096).
-                 set_OMI_TARGET(l_omi),
+                 set_EXP_ACTIVE_LOG_SIZE(4096),
                  "BOOT_CONFIG DLx config fail (BOOT_MODE 0x%02X, full status 0x%016X) for " TARGTIDFORMAT,
                  l_boot_mode, l_fw_status_data, MSSTARGID );
     FAPI_ASSERT( (l_status != fw_boot_cfg_status::LANE_INV_FAIL),
@@ -901,8 +900,7 @@ fapi2::ReturnCode boot_config( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
                  set_COMMAND(l_cmd_data).
                  set_BOOT_MODE(l_boot_mode).
                  set_STATUS_DATA(l_fw_status_data).
-                 set_EXP_ACTIVE_LOG_SIZE(4096).
-                 set_OMI_TARGET(l_omi),
+                 set_EXP_ACTIVE_LOG_SIZE(4096),
                  "BOOT_CONFIG Lane Inversion configuration fail (BOOT_MODE 0x%02X, full status 0x%016X) for " TARGTIDFORMAT,
                  l_boot_mode, l_fw_status_data, MSSTARGID );
     FAPI_ASSERT( (l_status != fw_boot_cfg_status::PARITY_UECC_ERROR),
@@ -911,15 +909,12 @@ fapi2::ReturnCode boot_config( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
                  set_COMMAND(l_cmd_data).
                  set_BOOT_MODE(l_boot_mode).
                  set_STATUS_DATA(l_fw_status_data).
-                 set_EXP_ACTIVE_LOG_SIZE(4096).
-                 set_OMI_TARGET(l_omi),
+                 set_EXP_ACTIVE_LOG_SIZE(4096),
                  "BOOT_CONFIG reported SerDes parity and/or UECC errors (BOOT_MODE 0x%02X, full status 0x%016X) for " TARGTIDFORMAT,
                  l_boot_mode, l_fw_status_data, MSSTARGID );
 
     if (l_status == fw_boot_cfg_status::SERDES_INIT_FAIL)
     {
-        const auto& l_omi = mss::find_target<fapi2::TARGET_TYPE_OMI>(i_target);
-
         // DLL lock fail is a special case for this error, as it causes the host OMI target to be called out
         FAPI_ASSERT( (l_ext_err != fw_boot_cfg_ext_err::DLL_LOCK_FAIL),
                      fapi2::MSS_EXP_BOOT_CONFIG_SERDES_DLL_LOCK_FAIL().
@@ -940,8 +935,7 @@ fapi2::ReturnCode boot_config( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
                      set_BOOT_MODE(l_boot_mode).
                      set_STATUS_DATA(l_fw_status_data).
                      set_EXT_ERR_CODE(l_ext_err).
-                     set_EXP_ACTIVE_LOG_SIZE(4096).
-                     set_OMI_TARGET(l_omi),
+                     set_EXP_ACTIVE_LOG_SIZE(4096),
                      "BOOT_CONFIG OpenCapi SerDes init fail (BOOT_MODE 0x%02X, full status 0x%016X) for " TARGTIDFORMAT,
                      l_boot_mode, l_fw_status_data, MSSTARGID );
 
