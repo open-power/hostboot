@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2022                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -442,6 +442,27 @@
   </description>
   <valueType>uint8</valueType>
   <default>0xFF</default>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_HB_FALLBACK_CORES</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Bit mask of all the functional cores on the chip after applying all guard records.
+    On genesis ipl, this value will be set to it's default, 0xFFFFFFFF, assuming that
+    all cores are functional. For resource recovery during a reconfig loop, this attr
+    with be consumed by SBE as follows:
+      if ATTR_PG_MVPD + core guard results in zero good smallcores/FCs
+         if ATTR_HB_FALLBACK_CORES indicates a core that is valid in ATTR_PG_MVPD
+            hbcore = first valid core in ATTR_HB_FALLBACK_CORES
+         else // needed to handle genesis boot and lab scenarios
+            hbcore = first valid core in ATTR_PG_MVPD
+      else
+         normal behavior
+  </description>
+  <valueType>uint32</valueType>
+  <default>0xFFFFFFFF</default>
   <platInit/>
 </attribute>
 <!-- ********************************************************************** -->
