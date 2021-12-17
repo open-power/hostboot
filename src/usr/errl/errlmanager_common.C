@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,7 @@
 #include <errl/errludstring.H>
 #include <map>
 #include <util/misc.H>
+#include <util/utillidmgr.H>
 #include <console/consoleif.H>
 #include <errl/errlreasoncodes.H>
 #include <targeting/common/targetservice.H>
@@ -43,6 +44,7 @@
 
 #ifdef CONFIG_PLDM
 #include <pldm/requests/pldm_fileio_requests.H>
+#include <pldm/pldm_errl.H>
 #endif
 
 namespace ERRORLOG
@@ -879,5 +881,157 @@ void ErrlManager::commitErrAllowExtraLogs(errlHndl_t& io_err, compId_t i_committ
     }
     } while (0);
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// Global function (not a method on an object) to get the MI Keyword from the
+// Marker LID via the PLDM file input/output framework,
+errlHndl_t ErrlManager::getMarkerLidMiKeyword(size_t &io_bufferSize, char* const o_buffer)
+{
+    errlHndl_t l_err(nullptr);
+
+#ifdef CONFIG_PLDM
+
+    do
+    {
+        ////////////////////////////////////////////////////////////////////////
+        /// Get the Marker Lid Header from via the PLDM::getLidFileFromOffset call
+        ////////////////////////////////////////////////////////////////////////
+        // Set up the Marker Lid file handler
+        uint32_t l_fileHandle(Util::MARKER_LIDID);
+
+        // Set up variables to read the Marker Lid Header
+        uint32_t l_offset(0);
+        uint32_t l_markerLidHeaderSize = sizeof(Util::markerHeader_t);
+
+        // Create a unique pointer for the Marker Lid Header for auto cleanup
+        // and clear the memory via calloc
+        std::unique_ptr<Util::markerHeader_t, decltype(free)*> l_markerLidHeader{
+            static_cast<Util::markerHeader_t*>(calloc(l_markerLidHeaderSize, sizeof(uint8_t))),
+            free};
+
+        // Get the Marker Lid Header Info
+        l_err = PLDM::getLidFileFromOffset(l_fileHandle, l_offset, l_markerLidHeaderSize,
+                                           reinterpret_cast<uint8_t*>(l_markerLidHeader.get()));
+
+        if (l_err)
+        {
+            TRACFCOMP( g_trac_errl, ERR_MRK"ErrlManager::getMarkerLidMiKeyword(): "
+                       "PLDM::getLidFileFromOffset() Failed to retrieve the Marker lid header");
+            break;
+        }
+
+        ////////////////////////////////////////////////////////////////////////
+        /// Get the MI Keyword Section from the Marker LID via the PLDM::getLidFileFromOffset call
+        ////////////////////////////////////////////////////////////////////////
+        // Set up variables to read the MI Keyword Section
+        l_offset = l_markerLidHeader->MIKeyWordOffset;
+        uint32_t l_markerMiSize = sizeof(Util::markerMI_t);
+
+        // Create a unique pointer for the MI Keyword Section for auto cleanup
+        // and clear the memory via calloc
+        std::unique_ptr<Util::markerMI_t, decltype(free)*> l_markerMi{
+            static_cast<Util::markerMI_t*>(calloc(l_markerMiSize, sizeof(uint8_t))),
+            free};
+
+        // Get the MI keyword section from the Marker Lid
+        l_err = PLDM::getLidFileFromOffset(l_fileHandle, l_offset, l_markerMiSize,
+                                           reinterpret_cast<uint8_t*>(l_markerMi.get()) );
+        if (l_err)
+        {
+            TRACFCOMP( g_trac_errl, ERR_MRK"ErrlManager::getMarkerLidMiKeyword(): "
+                       "PLDM::getLidFileFromOffset() Failed to retrieve the MI keyword section");
+            break;
+        }
+
+        // If no buffer size given, then the caller is asking for the buffer size
+        // of the MI keyword
+        if (!io_bufferSize)
+        {
+            io_bufferSize = l_markerMi->MIKeyWordSize;
+            TRACFCOMP( g_trac_errl, INFO_MRK"ErrlManager::getMarkerLidMiKeyword(): "
+                       "Returning the MI keyword size (%d) to caller", io_bufferSize);
+            break;
+        }
+
+        ////////////////////////////////////////////////////////////////////////
+        /// Do some sanity checks on the size of buffer (io_bufferSize) and
+        /// the buffer (o_buffer) itself
+        ////////////////////////////////////////////////////////////////////////
+        // If buffer size is less than the size of the MI keyword then return back an error
+        if (io_bufferSize < l_markerMi->MIKeyWordSize)
+        {
+            TRACFCOMP( g_trac_errl, ERR_MRK"ErrlManager::getMarkerLidMiKeyword(): "
+                       "Buffer size(%d) is insufficient to contain the MI keyword with size(%d)",
+                       io_bufferSize, l_markerMi->MIKeyWordSize );
+
+            /*@
+             * @errortype
+             * @moduleid   ERRL_GET_MARKER_LID_MI_KEYWORD
+             * @reasoncode ERRL_MARKER_LID_INVALID_BUFFER_SIZE
+             * @userdata1  Size of the buffer the caller provided
+             * @userdata2  Size of MI keyword, the minimum size needed for the buffer
+             * @devdesc    The size of the buffer is insufficient to contain the MI keyword
+             * @custdesc   A host failure occurred
+             */
+            l_err = new ErrlEntry( ERRL_SEV_UNRECOVERABLE,
+                                   ERRL_GET_MARKER_LID_MI_KEYWORD,
+                                   ERRL_MARKER_LID_INVALID_BUFFER_SIZE,
+                                   io_bufferSize,
+                                   l_markerMi->MIKeyWordSize,
+                                   ErrlEntry::NO_SW_CALLOUT);
+
+            PLDM::addBmcErrorCallouts(l_err);
+            break;
+        }
+
+        // If the buffer is a nullptr, then return an error
+        if (!o_buffer)
+        {
+            TRACFCOMP( g_trac_errl, ERR_MRK"ErrlManager::getMarkerLidMiKeyword(): "
+                       "Buffer size(%d) is not 0 but provided buffer is a nullptr",
+                       io_bufferSize);
+
+            /*@
+             * @errortype
+             * @moduleid   ERRL_GET_MARKER_LID_MI_KEYWORD
+             * @reasoncode ERRL_MARKER_LID_INVALID_BUFFER
+             * @userdata1  Size of the buffer the caller provided
+             * @userdata2  unused
+             * @devdesc    The size of the buffer is not 0 but buffer is a nullptr
+             * @custdesc   A host failure occurred
+             */
+            l_err = new ErrlEntry( ERRL_SEV_UNRECOVERABLE,
+                                   ERRL_GET_MARKER_LID_MI_KEYWORD,
+                                   ERRL_MARKER_LID_INVALID_BUFFER,
+                                   io_bufferSize,
+                                   0,
+                                   ErrlEntry::ADD_SW_CALLOUT);
+            break;
+        }
+
+        ////////////////////////////////////////////////////////////////////////
+        /// Copy the MI keyword into the out going buffer (o_buffer) and send back to caller
+        ////////////////////////////////////////////////////////////////////////
+        // Clear the outgoing buffer for good measure, before setting the buffer size
+        memset(o_buffer, 0, io_bufferSize);
+        // Set the outgoing size to the actual size of the MI keyword
+        io_bufferSize = l_markerMi->MIKeyWordSize;
+        // Copy contents from MI keyword to callers buffer
+        memcpy(o_buffer, l_markerMi->MIKeyword, io_bufferSize);
+    }
+    while (0);
+
+#else // #ifdef CONFIG_PLDM
+    // Considering that the PLDM framework is being used to get the MI Keyword,
+    // if the framework is not available then zero out the outgoing data
+    if (o_buffer)
+    {
+        memset(o_buffer, 0, io_bufferSize);
+    }
+    io_bufferSize = 0;
+#endif // #ifdef CONFIG_PLDM ... #else
+
+    return l_err;
+} // ErrlManager::getMarkerLidMiKeyword
 
 } // end namespace

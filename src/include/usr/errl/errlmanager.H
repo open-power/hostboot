@@ -325,6 +325,44 @@ public:
      */
     static uint64_t dateTimeToRawBCD(const date_time_t& i_dateTime);
 
+    /**
+     * @brief Retrieve the MI keyword from the Marker LID.
+     *
+     * @details If the caller passes in 0 for the buffer size (io_bufferSize) then the
+     *           size of the MI keyword will be returned and the buffer (o_buffer) will
+     *           remain untouched.
+     *          If the caller passes in a length of N for the buffer size and the size
+     *           is less than the size of the MI keyword then an error log will be
+     *           generated and returned.
+     *          If the caller passes in a length of N for the buffer size but the buffer
+     *           (o_buffer) is a nullptr then an error log will be generated and returned.
+     *          If the caller passes in a length of N for the buffer and the buffer is not
+     *           a nullptr; if N is greater than or equal to the size of MI keyword
+     *           then the retuned buffer size will be the size of the MI keyword and the
+     *           MI keyword will be copied over into the buffer with any bytes beyond
+     *           the size of the MI keyword zeroed out.
+     *
+     * @note The MI keyword, that is copied over to the out buffer (o_buffer), is not a
+     *       string in the sense that it is null terminated.  If the actual data of the MI
+     *       keyword is less than the size of the buffer and/or less than the size of
+     *       MI keyword itself, then the bits beyond the MI keyword actual data will
+     *       be zeroed out acting as null terminated string.
+     *
+     * @param[in/out] io_bufferSize - Input: If 0, then the method will return the size of
+     *                                       the MI Keyword
+     *                                Input: If N, then the size should be large enough to
+     *                                       hold the MI keyword, else an error will be returned
+     *                                Output: If no error, will return the size of MI keyword
+     *                                        regardless of the value of the input
+     *
+     * @param[out] o_buffer - If given a nullptr then a nullptr is returned, else the buffer
+     *                        will contain the MI Keyword if large enough to hold the MI Keyword
+     *                        otherwise an error is returned
+     *
+     * @return nullptr on success; non-nullptr on error.
+     */
+    static errlHndl_t getMarkerLidMiKeyword(size_t &io_bufferSize, char* const o_buffer);
+
 protected:
     /**
      * @brief   Destructor

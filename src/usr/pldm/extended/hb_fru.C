@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,6 +44,7 @@
 #include <targeting/common/targetservice.H>
 #include <util/align.H>
 #include <vpd/ipz_vpd_consts.H>
+#include <errl/errlmanager.H>
 
 // pldm userspace /src/ headers
 #include <pldm/extended/hb_fru.H>
@@ -1293,12 +1294,24 @@ errlHndl_t cacheRemoteFruVpd()
                 ATTR_FW_RELEASE_VERSION_type fw_release_string = { };
                 ATTR_FW_SUBSYS_VERSION_type subsys_version_string = { };
 
+                // Get the FW release string
+                size_t l_miKeywordSize(sizeof(fw_release_string));
+                char   l_miKeyword[l_miKeywordSize] = { 0 };
+
+#ifndef __HOSTBOOT_RUNTIME
+                errl = ErrlManager::getMarkerLidMiKeyword(l_miKeywordSize, l_miKeyword);
+                if (errl)
+                {
+                    PLDM_ERR("cacheRemoteFruVpd: getMarkerLidMiKeyword failed");
+                    break;
+                }
+#endif
+
+                memcpy(fw_release_string, l_miKeyword, l_miKeywordSize);
+
                 getrecord(PLDM_FRU_FIELD_TYPE_VERSION,
                           subsys_version_string, sizeof(subsys_version_string),
                           "subsystem version");
-                getrecord(PLDM_FRU_FIELD_TYPE_OTHER,
-                          fw_release_string, sizeof(fw_release_string),
-                          "firmware release version");
 
                 entity_target->setAttr<ATTR_FW_RELEASE_VERSION>(fw_release_string);
                 entity_target->setAttr<ATTR_FW_SUBSYS_VERSION>(subsys_version_string);
