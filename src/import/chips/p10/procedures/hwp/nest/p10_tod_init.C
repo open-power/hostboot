@@ -773,6 +773,67 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+/// @brief This function clears PC TimeBase Facility fir for all cores
+///        then unmasks the Timebase Facility FIR.
+///        This FIR will was masked before running p10_tod_setup
+///
+/// @param[iN] i_tod_node Reference to MDMT (master drawer, master TOD) node.
+/// @return FAPI2_RC_SUCCESS if no error.
+fapi2::ReturnCode unmask_timebase_fac_fir(const tod_topology_node* i_tod_node)
+{
+    fapi2::buffer<uint64_t> l_data = 0;
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_target = *(i_tod_node->i_target);
+
+    FAPI_DBG("Start");
+
+    for (const auto& l_core_target :
+         l_target.getChildren<fapi2::TARGET_TYPE_CORE>(fapi2::TARGET_STATE_FUNCTIONAL) )
+    {
+        uint8_t l_core_unit_pos = 0;
+        FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS,
+                                l_core_target,
+                                l_core_unit_pos));
+
+        fapi2::ATTR_DEAD_CORE_MODE_Type l_dead_core_mode;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_DEAD_CORE_MODE, l_core_target, l_dead_core_mode));
+
+        if (l_dead_core_mode == fapi2::ENUM_ATTR_DEAD_CORE_MODE_ENABLED)
+        {
+            FAPI_IMP("Skip dead core %d for unmask_timebase_fac_fir procedure", l_core_unit_pos);
+            continue;
+        }
+
+        fapi2::ATTR_ECO_MODE_Type l_eco_mode;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ECO_MODE, l_core_target, l_eco_mode));
+
+        if (l_eco_mode == fapi2::ENUM_ATTR_ECO_MODE_DISABLED)
+        {
+            // Clear error
+            FAPI_TRY(PREP_EC_PC_FIR_CORE_WO_AND(l_core_target));
+            l_data.flush<1>();
+            CLEAR_EC_PC_FIR_CORE_PC_TFAC_XSTOP_ERROR(l_data);
+            FAPI_TRY(PUT_EC_PC_FIR_CORE_WO_AND(l_core_target, l_data));
+
+            // Unmask
+            FAPI_TRY(PREP_EC_PC_FIR_CORE_FIRMASK_WO_AND(l_core_target));
+            l_data.flush<1>();
+            CLEAR_EC_PC_FIR_CORE_FIRMASK_MASK_PC_TFAC_XSTOP_ERROR(l_data);
+            FAPI_TRY(PUT_EC_PC_FIR_CORE_FIRMASK_WO_AND(l_core_target, l_data));
+        }
+    }
+
+    for(auto l_child = (i_tod_node->i_children).begin();
+        l_child != (i_tod_node->i_children).end();
+        ++l_child)
+    {
+        FAPI_TRY(unmask_timebase_fac_fir(*l_child),
+                 "Error from unmask_timebase_fac_fir!");
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
 
 // NOTE: description in header
 fapi2::ReturnCode p10_tod_init(
@@ -820,6 +881,13 @@ fapi2::ReturnCode p10_tod_init(
     {
         FAPI_TRY(sync_spread_check(i_tod_node, l_attr_is_simulation),
                  "Error from sync_spread_check!");
+    }
+
+    if (fapi2::is_platform<fapi2::PLAT_HOSTBOOT>())
+    {
+        // Clear and unmask PC TimeBase Facility checkstop -- see SW538725
+        FAPI_TRY(unmask_timebase_fac_fir(i_tod_node),
+                 "Error from unmask_timebase_fac_fir!");
     }
 
     // Notify the QMEs in each node that TOD setup is complete;
