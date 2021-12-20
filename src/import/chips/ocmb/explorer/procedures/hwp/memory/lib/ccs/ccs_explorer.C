@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,7 +35,6 @@
 
 #include <fapi2.H>
 
-#include <lib/shared/exp_defaults.H>
 #include <lib/ecc/ecc_traits_explorer.H>
 #include <lib/ccs/ccs_traits_explorer.H>
 #include <generic/memory/lib/ccs/ccs.H>

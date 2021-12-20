@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,10 +38,9 @@
 //    Includes
 //------------------------------------------------------------------------------
 
-#include <lib/shared/exp_defaults.H>
+#include <fapi2.H>
 #include <lib/ecc/ecc_traits_explorer.H>
 #include <lib/shared/exp_consts.H>
-
 
 #include <lib/mcbist/exp_maint_cmds.H>
 #include <explorer_scom_addresses.H>

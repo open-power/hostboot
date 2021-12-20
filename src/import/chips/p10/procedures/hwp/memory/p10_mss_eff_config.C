@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,7 +35,6 @@
 
 #include <fapi2.H>
 #include <p10_mss_eff_config.H>
-#include <lib/shared/exp_defaults.H>
 #include <lib/ecc/ecc_traits_explorer.H>
 #include <lib/dimm/exp_rank.H>
 #include <generic/memory/lib/utils/mss_rank.H>

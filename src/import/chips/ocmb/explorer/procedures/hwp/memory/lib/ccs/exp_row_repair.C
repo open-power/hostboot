@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,7 +35,6 @@
 // EKB-Mirror-To: hostboot
 
 #include <fapi2.H>
-#include <lib/shared/exp_defaults.H>
 #include <lib/shared/exp_consts.H>
 #include <lib/ecc/ecc_traits_explorer.H>
 #include <lib/ccs/ccs_traits_explorer.H>

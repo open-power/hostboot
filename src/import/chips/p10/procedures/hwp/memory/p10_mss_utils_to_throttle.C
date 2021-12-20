@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,7 +38,6 @@
 // *HWP Consumed by: FSP:HB
 
 #include <p10_mss_utils_to_throttle.H>
-#include <lib/shared/exp_defaults.H>
 #include <lib/shared/exp_consts.H>
 #include <mss_explorer_attribute_getters.H>
 #include <lib/power_thermal/exp_throttle.H>

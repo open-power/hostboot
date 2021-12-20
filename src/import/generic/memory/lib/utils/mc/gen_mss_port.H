@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -535,7 +535,6 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-// TODO Zen:MST-1309 Remove DEFAULT_MC_TYPE
 ///
 /// @brief Configures the write reorder queue bit
 /// @tparam MC the memory controller type
@@ -571,7 +570,6 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-// TODO Zen:MST-1309 Remove DEFAULT_MC_TYPE
 ///
 /// @brief Configures the read reorder queue bit
 /// @tparam MC the memory controller type

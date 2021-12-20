@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,7 +33,6 @@
 // *HWP Level: 3
 // *HWP Consumed by: Memory
 
-#include <lib/shared/exp_defaults.H>
 #include <vector>
 
 #include <fapi2.H>

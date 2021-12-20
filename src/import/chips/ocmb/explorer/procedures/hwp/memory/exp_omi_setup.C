@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,7 +34,6 @@
 // *HWP Consumed by: Memory
 
 #include <fapi2.H>
-#include <lib/shared/exp_defaults.H>
 #include <exp_omi_setup.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <lib/exp_attribute_accessors_manual.H>

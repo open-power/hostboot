@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,7 +45,7 @@ namespace mss
 
 ///
 /// @brief Return the total memory size behind the target
-/// @tparam MC the type of memory controller (defaults to DEFAULT_MC_TYPE)
+/// @tparam MC the type of memory controller
 /// @tparam T fapi2 target template parameter
 /// @param[in] i_target the fapi2::Target, typically a port
 /// @param[out] o_size the size of memory in GB behind the target

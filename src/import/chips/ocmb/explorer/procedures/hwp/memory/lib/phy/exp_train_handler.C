@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,9 +34,7 @@
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
-#include <lib/shared/exp_defaults.H>
 #include <lib/shared/exp_consts.H>
-#include <lib/shared/exp_defaults.H>
 #include <exp_data_structs.H>
 #include <generic/memory/lib/utils/mss_bad_bits.H>
 #include <generic/memory/lib/utils/endian_utils.H>

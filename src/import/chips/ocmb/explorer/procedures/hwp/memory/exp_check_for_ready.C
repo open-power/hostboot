@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,7 +34,6 @@
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
-#include <lib/shared/exp_defaults.H>
 #include <exp_check_for_ready.H>
 #include <lib/i2c/exp_i2c.H>
 #include <generic/memory/mss_git_data_helper.H>

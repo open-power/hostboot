@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,7 +33,6 @@
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
-#include <lib/shared/exp_defaults.H>
 #include <lib/ccs/ccs_traits_explorer.H>
 #include <lib/ecc/ecc_traits_explorer.H>
 #include <lib/dimm/exp_mrs_traits.H>

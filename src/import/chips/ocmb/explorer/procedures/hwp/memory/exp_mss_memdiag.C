@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,7 +35,6 @@
 
 #include <fapi2.H>
 #include <exp_mss_memdiag.H>
-#include <lib/shared/exp_defaults.H>
 
 #include <lib/dimm/exp_rank.H>
 #include <lib/mc/exp_port.H>

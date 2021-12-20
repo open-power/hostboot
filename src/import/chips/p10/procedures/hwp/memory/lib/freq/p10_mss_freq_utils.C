@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,7 +38,6 @@
 #include <vector>
 
 // Explorer rank API
-#include <lib/shared/exp_defaults.H>
 #include <lib/dimm/exp_rank.H>
 
 // Memory libraries

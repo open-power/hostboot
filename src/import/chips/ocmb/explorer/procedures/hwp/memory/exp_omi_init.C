@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,7 +32,6 @@
 // *HWP Level: 3
 // *HWP Consumed by: HB
 
-#include <lib/shared/exp_defaults.H>
 #include <exp_omi_init.H>
 #include <exp_oc_regs.H>
 #include <lib/inband/exp_inband.H>

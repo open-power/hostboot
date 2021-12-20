@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,7 +35,6 @@
 
 #include <fapi2.H>
 #include <lib/shared/p10_consts.H>
-#include <lib/shared/p10_defaults.H>
 #include <algorithm>
 
 #include <generic/memory/lib/utils/find.H>

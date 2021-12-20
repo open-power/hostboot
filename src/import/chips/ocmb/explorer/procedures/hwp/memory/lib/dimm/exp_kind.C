@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,7 +34,6 @@
 // *HWP Consumed by: HB:FSP
 
 #include <fapi2.H>
-#include <lib/shared/exp_defaults.H>
 #include <generic/memory/lib/utils/dimm/kind.H>
 #include <mss_generic_attribute_getters.H>
 #include <mss_generic_system_attribute_getters.H>
