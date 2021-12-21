@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,7 +35,6 @@
 #include <prdfMemExtraSig.H>
 #include <prdfPlatServices.H>
 
-#include <exp_defaults.H>
 #include <exp_rank.H>
 #include <kind.H>
 #include <hwp_wrappers.H>

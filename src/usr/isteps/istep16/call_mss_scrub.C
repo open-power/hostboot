@@ -31,7 +31,6 @@
 #include <util/misc.H>
 #include <diag/prdf/prdfMain.H>
 #include <plat_hwp_invoker.H>     // for FAPI_INVOKE_HWP
-#include <lib/shared/exp_defaults.H> // needed by gen_mss_unmask.H
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H> // mss::unmask::after_background_scrub
 
 using namespace ERRORLOG;

@@ -51,7 +51,6 @@
 
 // External includes
 #include <targeting/common/targetservice.H>
-#include <exp_defaults.H>
 #include <gen_mss_mcbist_settings.H>
 
 #ifdef CONFIG_NVDIMM

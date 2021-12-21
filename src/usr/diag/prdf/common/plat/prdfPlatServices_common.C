@@ -45,7 +45,6 @@
 #include <dimmBadDqBitmapFuncs.H>
 #include <exp_maint_cmds.H>
 
-#include <exp_defaults.H>
 #include <exp_rank.H>
 #include <kind.H>
 #include <hwp_wrappers.H>

@@ -28,7 +28,6 @@
 // Platform includes
 #include <prdfMemRrd.H>
 
-#include <exp_defaults.H>
 #include <exp_rank.H>
 #include <kind.H>
 #include <hwp_wrappers.H>

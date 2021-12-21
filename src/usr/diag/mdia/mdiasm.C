@@ -46,7 +46,6 @@
 #include <sys/time.h>
 #include <sys/misc.h>
 
-#include <exp_defaults.H>
 #include <exp_rank.H>
 #include <kind.H>
 #include <hwp_wrappers.H>
