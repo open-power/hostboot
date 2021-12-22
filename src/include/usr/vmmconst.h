@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -94,11 +94,14 @@
 /** Secure PNOR Resource Provider is at 8GB */
 #define VMM_VADDR_SPNOR_RP (VMM_VADDR_SPNOR_TEMP + VMM_VADDR_SPNOR_DELTA)
 
-/** SBE Update process is at 3GB, see the map layout in sbe_update.H */
+/** Start of SBE Update process is at 3GB, see the map layout in sbe_update.H */
+/** Up to 8 unique 4MB spaces used for multi-threaded updating of SBEs */
+#define VMM_MAX_SBE_IMAGE_SPACES 8
 #define VMM_VADDR_SBE_UPDATE (3 * GIGABYTE)
 /* See sbe_update.H SBE VADDR Layout map for usage and sizes needed */
-#define VMM_SBE_UPDATE_SIZE (4096 * KILOBYTE)
-#define VMM_VADDR_SBE_UPDATE_END (VMM_VADDR_SBE_UPDATE + VMM_SBE_UPDATE_SIZE)
+#define VMM_SBE_UPDATE_SIZE (4 * MEGABYTE)
+#define VMM_VADDR_SBE_UPDATE_END (VMM_VADDR_SBE_UPDATE + (VMM_MAX_SBE_IMAGE_SPACES * VMM_SBE_UPDATE_SIZE))
+
 
 /** Debug Comm Channel is at 3.5GB, uses 32KB */
 #define VMM_VADDR_DEBUG_COMM ((3 * GIGABYTE) + (500 * MEGABYTE))

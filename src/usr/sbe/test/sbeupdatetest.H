@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -685,7 +685,7 @@ class SBEUpdateTest: public CxxTest::TestSuite
             sbeState.ec = 0xFF;
 
             total++;
-            err = getSbeInfoState(sbeState);
+            err = getSbeInfoState(sbeState, VMM_VADDR_SBE_UPDATE);
             if(err)
             {
                 fails++;
@@ -762,7 +762,7 @@ class SBEUpdateTest: public CxxTest::TestSuite
             }
             total++;
 
-            err = performUpdateActions(sbeState);
+            err = performUpdateActions(sbeState, VMM_VADDR_SBE_UPDATE);
             if(err)
             {
                 fails++;
@@ -1187,7 +1187,7 @@ class SBEUpdateTest: public CxxTest::TestSuite
             errlCommit( err, SBE_COMP_ID );
         }
 
-        err = createSbeImageVmmSpace();
+        err = createSbeImageVmmSpace(VMM_VADDR_SBE_UPDATE);
         if(err)
         {
             TS_FAIL("SBEUpdateTest() - Constructor: Call to createSbeImageVmmSpace() failed");
@@ -1204,7 +1204,7 @@ class SBEUpdateTest: public CxxTest::TestSuite
     {
         errlHndl_t err = nullptr;
 
-        err = cleanupSbeImageVmmSpace();
+        err = cleanupSbeImageVmmSpace(VMM_VADDR_SBE_UPDATE);
         if(err)
         {
             TS_FAIL("~SBEUpdateTest() - Destructor: Call to cleanupSbeImageVmmSpace() failed.");

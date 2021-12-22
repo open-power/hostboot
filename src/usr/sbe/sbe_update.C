@@ -70,6 +70,8 @@
 #include <pldm/base/pldm_shutdown.H>
 #include <errlud_secure.H>
 #include "../spi/spidd.H"
+#include <kernel/bltohbdatamgr.H> // CacheSize
+#include <util/threadpool.H>
 
 #include <initservice/istepdispatcherif.H>
 #ifdef CONFIG_SECUREBOOT
@@ -99,7 +101,7 @@
 // ----------------------------------------------
 // Trace definitions
 // ----------------------------------------------
-trace_desc_t* g_trac_sbe = NULL;
+trace_desc_t* g_trac_sbe = nullptr;
 TRAC_INIT( & g_trac_sbe, SBE_COMP_NAME, 4*KILOBYTE );
 
 // ------------------------
@@ -119,20 +121,33 @@ static bool g_update_both_sides = false;
 static bool    g_do_hw_keys_hash_transition = false;
 static SHA512_t g_hw_keys_hash_transition_data = {0};
 
+// -----------------------------------------
+// Global Variables for threaded update
+static bool g_restart_needed = false;
+
 // Define used to generate SBE Section Names for tracing
 P9_XIP_SECTION_NAMES_SBE(g_sectionNamesSbe);
 
-// ----------------------------------------
-// Global Variables for VMM management
-//   Note - this implies that we can not run any of this code multithread
-static std::list<PNOR::SectionId> g_loadedSections;
+// Minimum memory (MB) needed for an SBE update space
+constexpr uint8_t MIN_MB_PER_SBE_IMAGE_SPACE = 8;
+
+
 
 using namespace ERRORLOG;
 using namespace TARGETING;
 using namespace scomt::perv;
 
+
+
 namespace SBE
 {
+    // initialize mutex used around access to iv_sbeStates
+    mutex_t UpdateProcessorSbes::iv_sbeStateMutex = MUTEX_INITIALIZER;
+
+    // type used to divvy up SBE update spaces to a list of SBEs
+    typedef std::map<uint64_t, std::vector<TargetHandle_t>> vaddr_sbes_map_t;
+
+    // Function prototypes
     /**
      * @brief Retrieve the PNOR information for a section and perform
      *        secure load if required
@@ -151,20 +166,335 @@ namespace SBE
      */
     errlHndl_t unloadPnorSection( PNOR::SectionId i_section);
 
+    /**
+     * @brief Loads up pnor sections that are used by each SBE update thread
+     * @param[out] List of newly loaded sections
+     * @return error on load failure, else nullptr
+     */
+    errlHndl_t preloadPnorSections(std::vector<PNOR::SectionId> & o_loadedSections);
 
+    /**
+     * @brief Unloads pnor sections that were used for SBE update by each thread
+     * @param[in] List of loaded sections to be unloaded
+     */
+    errlHndl_t cleanupPreloadedPnorSections(const std::vector<PNOR::SectionId>& i_loadedSections);
+
+    /**
+     * @brief Distributes the list of sbe's that might be updated amongst
+     *        VMM_VADDR_SBE_UPDATE spaces which are based on available memory
+     *
+     * @param[in] i_proc_sbes Functional SBE targets that might be updated
+     * @param[out] o_sbe_space_to_procs Map of processor targets under a memory space
+     */
+    void distribute_sbe_list(const TargetHandleList i_proc_sbes,
+                             vaddr_sbes_map_t & o_sbe_space_to_procs);
+
+    /**
+     * @brief Trace sbe assignment mapping
+     * @param[in] map of assignments (vaddr -> vector of proc targets)
+     */
+    void traceVaddrSbeAssignments(const vaddr_sbes_map_t & i_sbe_space_to_procs);
+
+    /**
+     * @brief A predicate function to return if powerbus is up or not.
+     *        Will use XSCOM setting to determine if powerbus is up
+     * @param[in] Processor target
+     * @return true = powerbus off, false = powerbus on
+     */
+    bool isChipPowerbusOff (const TargetHandle_t & i_proc_target)
+    {
+        // default powerbus up (not off)
+        bool powerbus_off = false;
+
+        //Can only update the SBE once the powerbus is up (secureboot)
+        //Use the scom switch Xscom capability flag as a proxy for
+        //powerbus access.  If we can't access via powerbus, then skip
+        ScomSwitches scomSetting =
+              i_proc_target->getAttr<ATTR_SCOM_SWITCHES>();
+
+        if(!(scomSetting.useXscom))
+        {
+            //Xscom is not viable on this chip, thus powerbus isn't
+            //up to chip -- skip it
+            TRACFCOMP( g_trac_sbe,
+                       INFO_MRK"isChipPowerbusOff(): "
+                       "Power bus not established to chip 0x%X,"
+                       " not performing update",
+                       get_huid(i_proc_target) );
+            powerbus_off = true;
+        }
+        return powerbus_off;
+    }
+
+    /////////////////////////////////////////////
+    // Threadpool main SBE update function
+    /////////////////////////////////////////////
+    void UpdateProcessorSbes::operator()()
+    {
+        errlHndl_t err = nullptr;
+
+
+        TRACFCOMP(g_trac_sbe, "UpdateProcessorSbes: This thread will operate on %d "
+            "processors using 0x%llX vddr space",
+            iv_procSbes.size(), iv_sbe_update_vaddr);
+
+        do {
+        // create the unique SBE update space for this thread
+        err = createSbeImageVmmSpace(iv_sbe_update_vaddr);
+        if (err)
+        {
+            TRACFCOMP( g_trac_sbe,
+                       INFO_MRK"UpdateProcessorSbes(): "
+                       "createSbeImageVmmSpace(0x%llX) failed."
+                       TRACE_ERR_FMT,
+                       iv_sbe_update_vaddr,
+                       TRACE_ERR_ARGS(err));
+            errlCommit(err, SBE_COMP_ID);
+            break;
+        }
+
+        // Get the Master Proc Chip Target for comparisons later
+        Target* masterProcChipTargetHandle = nullptr;
+        err = targetService().queryMasterProcChipTargetHandle(masterProcChipTargetHandle);
+        if (err)
+        {
+            TRACFCOMP( g_trac_sbe, ERR_MRK"UpdateProcessorSbes() - "
+                       "queryMasterProcChipTargetHandle returned error. "
+                       "Commit here and continue.  Check against "
+                       "masterProcChipTargetHandle=nullptr is ok"
+                       TRACE_ERR_FMT,
+                       TRACE_ERR_ARGS(err));
+             errlCommit(err, SBE_COMP_ID);
+             err = nullptr;
+        }
+
+        // Cycle through each processor in this list for this particular thread
+        for (const auto & procSbe : iv_procSbes)
+        {
+            sbeTargetState_t sbeState;
+
+            /*********************************************/
+            /*  Collect SBE Information for this Target  */
+            /*********************************************/
+            sbeState.target = procSbe;
+
+            TRACUCOMP( g_trac_sbe, "UpdateProcessorSbes(): "
+                       "Main Loop: tgt=0x%X",
+                       get_huid(sbeState.target) );
+
+            // Check to see if current target is master processor
+            if ( sbeState.target == masterProcChipTargetHandle)
+            {
+                TRACFCOMP(g_trac_sbe,"sbeState.target=0x%X is BOOT proc.",
+                          get_huid(sbeState.target));
+                sbeState.target_is_master = true;
+            }
+            else
+            {
+                TRACFCOMP(g_trac_sbe,"sbeState.target=0x%X is non-BOOT proc.",
+                          get_huid(sbeState.target));
+                sbeState.target_is_master = false;
+            }
+
+            err = getSbeInfoState(sbeState, iv_sbe_update_vaddr);
+            if (err)
+            {
+                TRACFCOMP( g_trac_sbe,
+                           INFO_MRK"UpdateProcessorSbes(): "
+                           "getSbeInfoState() Failed "
+                           "Target UID=0x%X"
+                           TRACE_ERR_FMT,
+                           get_huid(sbeState.target),
+                           TRACE_ERR_ARGS(err));
+
+                // Don't break - handle error at the end of the loop
+            }
+
+
+            /**********************************************/
+            /*  Determine update actions for this target  */
+            /**********************************************/
+            // Skip if we got an error collecting SBE Info State
+            if ( err == nullptr )
+            {
+                err = getTargetUpdateActions(sbeState);
+                if (err)
+                {
+                    TRACFCOMP( g_trac_sbe,
+                               INFO_MRK"UpdateProcessorSbes(): "
+                               "getTargetUpdateActions() Failed"
+                               "Target UID=0x%X"
+                               TRACE_ERR_FMT,
+                               get_huid(sbeState.target),
+                               TRACE_ERR_ARGS(err));
+
+                    // Don't break - handle error at the end of the loop,
+                }
+            }
+
+            /**********************************************/
+            /*  Perform Update Actions For This Target    */
+            /**********************************************/
+            // Force an update of SEEPROM 0 or SEEPROM 1 if SB keyword
+            // flags is requesting an update for that particular seeprom
+            if (((sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY) &&
+            (sbeState.mvpdSbKeyword.flags & SEEPROM_0_FORCE_UPDATE_MASK)) ||
+                ((sbeState.seeprom_side_to_update == EEPROM::SBE_BACKUP) &&
+            (sbeState.mvpdSbKeyword.flags & SEEPROM_1_FORCE_UPDATE_MASK)))
+            {
+               // The DO_UPDATE flag alone might not be enough to
+               // force an update, setting UPDATE_SBE flag as well
+               // because I know that performUpdateActions checks that flag
+               sbeState.update_actions = static_cast<sbeUpdateActions_t>
+                         (sbeState.update_actions | DO_UPDATE | UPDATE_SBE);
+            }
+
+            if ((err == nullptr) && (sbeState.update_actions & DO_UPDATE))
+            {
+                Target* sys = UTIL::assertGetToplevelTarget();
+
+                // If update is needed, check to see if it's in MPIPL
+                if(sys->getAttr<ATTR_IS_MPIPL_HB>() == true)
+                {
+                    TRACFCOMP( g_trac_sbe,
+                                   INFO_MRK"UpdateProcessorSbes(): "
+                                   "Skip SBE update during MPIPL, "
+                                   "Target UID=0x%X",
+                                   get_huid(sbeState.target));
+                    /*@
+                     * @errortype
+                     * @moduleid          SBE_UPDATE_SEEPROMS
+                     * @reasoncode        SBE_UPDATE_DURING_MPIPL
+                     * @userdata1         Target huid id
+                     * @userdata2[0:31]   Update actions
+                     * @userdata2[32:63]  SEEPROM side to update
+                     * @devdesc           SBE update is being skipped
+                     *                    during MPIPL
+                     * @custdesc          SBE is not being updated
+                     */
+                    err = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+                              SBE_UPDATE_SEEPROMS,
+                              SBE_UPDATE_DURING_MPIPL,
+                              get_huid(sbeState.target),
+                              TWO_UINT32_TO_UINT64(
+                                  TO_UINT32(sbeState.update_actions),
+                                  TO_UINT32(sbeState.seeprom_side_to_update)
+                              )
+                    );
+                    err->collectTrace(SBE_COMP_NAME);
+                }
+                else
+                {
+                    err = performUpdateActions(sbeState, iv_sbe_update_vaddr);
+                    if (err)
+                    {
+                        TRACFCOMP( g_trac_sbe,
+                                   INFO_MRK"UpdateProcessorSbes(): "
+                                   "performUpdateActions() Failed "
+                                   "Target UID=0x%X"
+                                   TRACE_ERR_FMT,
+                                   get_huid(sbeState.target),
+                                   TRACE_ERR_ARGS(err));
+
+                        //Don't break - handle error at the end of the loop,
+                    }
+                    else
+                    {
+                        //Target updated without failure, so set IPL_RESTART
+                        //flag, if necessary
+                        if (sbeState.update_actions & IPL_RESTART)
+                        {
+                            // update global flag so after all sbe's have been updated
+                            // it will send the system through a restart
+                            g_restart_needed = true;
+                        }
+                    }
+                }  // end else of if(sys->getAttr<ATTR_IS_MPIPL_HB>() == true)
+            }  // end if ((err == nullptr) && (sbeState.update_actions & DO_UPDATE))
+
+            if ( err )
+            {
+                // Something failed for this target.
+                // Save error information
+                sbeState.err_plid = err->plid();
+                sbeState.err_eid  = err->eid();
+                sbeState.err_rc   = err->reasonCode();
+                sbeState.err_sev  = err->sev();
+
+                // Commit the error here and move on to the next target,
+                // or if no targets left, will just continue the IPL
+                TRACFCOMP( g_trac_sbe,
+                           INFO_MRK"UpdateProcessorSbes(): "
+                           "Committing Error Log "
+                           "sev=0x%.2X for Target UID=0x%X, "
+                           "but continuing procedure"
+                           TRACE_ERR_FMT,
+                           sbeState.err_sev,
+                           get_huid(sbeState.target),
+                           TRACE_ERR_ARGS(err));
+                errlCommit(err, SBE_COMP_ID);
+            }
+
+            /**********************************************/
+            /*   Reset the watchdog after each Action     */
+            /**********************************************/
+            INITSERVICE::sendProgressCode();
+
+            // return sbeState for this target in shared iv_sbeStates vector
+            mutex_lock(&iv_sbeStateMutex);
+            TRACFCOMP( g_trac_sbe,
+              INFO_MRK"UpdateProcessorSbes(): adding 0x%.8X target to iv_sbeStates",
+              get_huid(sbeState.target) );
+            // Push this sbeState onto the vector
+            iv_sbeStates->push_back(sbeState);
+            mutex_unlock(&iv_sbeStateMutex);
+        }
+        err = cleanupSbeImageVmmSpace(iv_sbe_update_vaddr);
+        if (err)
+        {
+            TRACFCOMP( g_trac_sbe,
+                       INFO_MRK"UpdateProcessorSbes(): "
+                       "cleanupSbeImageVmmSpace(0x%llX) failed."
+                       TRACE_ERR_FMT,
+                       iv_sbe_update_vaddr,
+                       TRACE_ERR_ARGS(err));
+            errlCommit(err, SBE_COMP_ID);
+            break;
+        }
+
+        } while (0);
+
+        // trace exit of this thread
+        char procStr[12*iv_procSbes.size()] = {};
+        char * pStr = procStr;
+        int cSize = 0;
+        for (const auto & procSbe : iv_procSbes)
+        {
+            cSize = sprintf( pStr, "0x%.8X, ", get_huid(procSbe) );
+            pStr += cSize;
+        }
+        if (cSize != 0)
+        {
+            *(pStr-2) = 0;
+        }
+        TRACFCOMP( g_trac_sbe, EXIT_MRK"UpdateProcessorSbes(0x%llX) - SBE procs (%s) done", iv_sbe_update_vaddr, procStr);
+    }
+
+
+/////////////////////////////////////////////////////
+// main function to update SBEs
+/////////////////////////////////////////////////////
     errlHndl_t updateProcessorSbeSeeproms(
         const KEY_TRANSITION_PERM i_keyTransPerm)
     {
         errlHndl_t err = nullptr;
         errlHndl_t err_cleanup = nullptr;
-        sbeTargetState_t sbeState;
-        std::vector<sbeTargetState_t> sbeStates_vector;
-
-        bool l_cleanupVmmSpace = false;
-        bool l_restartNeeded   = false;
+        std::vector<PNOR::SectionId> l_loadedPnorSections;
 
         TRACFCOMP( g_trac_sbe,
-                   ENTER_MRK"updateProcessorSbeSeeproms()");
+                   ENTER_MRK"updateProcessorSbeSeeproms(%d)", i_keyTransPerm);
+
+        l_loadedPnorSections.clear(); // start with no loaded sections
 
         do{
 
@@ -179,7 +509,7 @@ namespace SBE
             if ( !INITSERVICE::spBaseServicesEnabled() &&
                  !Util::isSimicsRunning() )
             {
-                assert (false, "resolveProcessorSbeSeeproms() - "
+                assert (false, "updateProcessorSbeSeeproms() - "
                         "SBE_UPDATE_SEQUENTIAL mode, but FSP-services are not "
                         "enabled - Invalid Configuration");
             }
@@ -206,23 +536,23 @@ namespace SBE
             /* is set AND there is a FSP present                             */
             /*****************************************************************/
             // Get the list of manufacturing flags to check against
-            TARGETING::ATTR_MFG_FLAGS_typeStdArr l_mfgFlags;
-            TARGETING::getAllMfgFlags(l_mfgFlags);
+            ATTR_MFG_FLAGS_typeStdArr l_mfgFlags;
+            getAllMfgFlags(l_mfgFlags);
 
-            if ( TARGETING::isUpdateSbeImage(l_mfgFlags)       &&
+            if ( isUpdateSbeImage(l_mfgFlags)       &&
                  INITSERVICE::spBaseServicesEnabled() // true => FSP present
                )
             {
                 // Get all the manufacturing flags
-                TARGETING::ATTR_MFG_FLAGS_typeStdArr l_allMfgFlags;
-                TARGETING::getAllMfgFlags(l_allMfgFlags);
+                ATTR_MFG_FLAGS_typeStdArr l_allMfgFlags;
+                getAllMfgFlags(l_allMfgFlags);
 
-                uint32_t l_cellIndex = TARGETING::getMfgFlagCellIndex
-                         (TARGETING::MFG_FLAGS_MNFG_FSP_UPDATE_SBE_IMAGE);
+                uint32_t l_cellIndex = getMfgFlagCellIndex
+                         (MFG_FLAGS_MNFG_FSP_UPDATE_SBE_IMAGE);
                 TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update skipped due to "
                            "FSP present and MNFG_FLAG_FSP_UPDATE_SBE_IMAGE "
                            "(0x%.16X) is set in MNFG Flags (Cell %d) 0x%08X",
-                           TARGETING::MFG_FLAGS_MNFG_FSP_UPDATE_SBE_IMAGE,
+                           MFG_FLAGS_MNFG_FSP_UPDATE_SBE_IMAGE,
                            l_cellIndex,
                            l_allMfgFlags[l_cellIndex]);
                 break;
@@ -235,7 +565,7 @@ namespace SBE
                 g_istep_mode = true;
             }
 
-            if ( TARGETING::isUpdateBothSidesOfSbe(l_mfgFlags) )
+            if ( isUpdateBothSidesOfSbe(l_mfgFlags) )
             {
                 TRACFCOMP(g_trac_sbe,
                             INFO_MRK"Update Both Sides of SBE Flag Indicated.");
@@ -254,37 +584,19 @@ namespace SBE
             g_mbox_query_done   = false;
             g_mbox_query_result = false;
 
-            // Create VMM space for p10_ipl_customize() procedure
-            err = createSbeImageVmmSpace();
-            if (err)
-            {
-                TRACFCOMP( g_trac_sbe,
-                           INFO_MRK"updateProcessorSbeSeeproms(): "
-                           "createSbeImageVmmSpace() Failed."
-                           TRACE_ERR_FMT,
-                           TRACE_ERR_ARGS(err));
-
-                break;
-            }
-            else
-            {
-                // Make sure cleanup gets called
-                l_cleanupVmmSpace = true;
-            }
-
             /*****************************************************************/
             /*  Iterate over all the functional processors and do for each:  */
             /*  1) Check their SBE State  (PNOR, MVPD, SEEPROMs, etc),       */
             /*  2) Determine the Necessary Update                            */
             /*  3) Perform Update Action                                     */
             /*****************************************************************/
-            TARGETING::TargetHandleList procList;
-            TARGETING::getAllChips(procList,
-                                   TARGETING::TYPE_PROC,
+            TargetHandleList procList;
+            getAllChips(procList,
+                                   TYPE_PROC,
                                    true); // true: return functional targets
 
             if( ( 0 == procList.size() ) ||
-                ( NULL == procList[0] ) )
+                ( nullptr == procList[0] ) )
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"updateProcessorSbeSeeproms() - "
                            "No functional processors Found!" );
@@ -292,7 +604,7 @@ namespace SBE
             }
 
             // Get the Master Proc Chip Target for comparisons later
-            TARGETING::Target* masterProcChipTargetHandle = NULL;
+            Target* masterProcChipTargetHandle = nullptr;
             err = tS.queryMasterProcChipTargetHandle(
                                                 masterProcChipTargetHandle);
             if (err)
@@ -300,7 +612,7 @@ namespace SBE
                 TRACFCOMP( g_trac_sbe, ERR_MRK"updateProcessorSbeSeeproms() - "
                            "queryMasterProcChipTargetHandle returned error. "
                            "Commit here and continue.  Check against "
-                           "masterProcChipTargetHandle=NULL is ok"
+                           "masterProcChipTargetHandle=nullptr is ok"
                            TRACE_ERR_FMT,
                            TRACE_ERR_ARGS(err));
                  errlCommit(err, SBE_COMP_ID);
@@ -327,7 +639,7 @@ namespace SBE
 
                 // Sync all attributes to FSP/BMC before we quiesce all the
                 // SBEs.
-                err = TARGETING::AttrRP::syncAllAttributesToSP();
+                err = AttrRP::syncAllAttributesToSP();
                 if( err )
                 {
                     // Failed to sync all attributes to FSP/BMC; this is not
@@ -342,198 +654,63 @@ namespace SBE
                 }
             }
 
-            for(uint32_t i=0; i<procList.size(); i++)
+            // Remove any chips that do not have powerbus up yet as
+            // it is required for update to work
+            std::remove_if(procList.begin(), procList.end(), isChipPowerbusOff);
+            if (procList.size() == 0)
             {
-                /*********************************************/
-                /*  Collect SBE Information for this Target  */
-                /*********************************************/
-                memset(&sbeState, 0, sizeof(sbeState));
-                sbeState.target = procList[i];
+                TRACFCOMP(g_trac_sbe, "No processor has powerbus up yet");
+                break;
+            }
 
-                TRACUCOMP( g_trac_sbe, "updateProcessorSbeSeeproms(): "
-                           "Main Loop: tgt=0x%X, i=%d",
-                           TARGETING::get_huid(sbeState.target), i);
+            vaddr_sbes_map_t l_thread_procs_map;
+            distribute_sbe_list(procList, l_thread_procs_map);
+            traceVaddrSbeAssignments(l_thread_procs_map);
 
-                // Check to see if current target is master processor
-                if ( sbeState.target == masterProcChipTargetHandle)
-                {
-                    TRACFCOMP(g_trac_sbe,"sbeState.target=0x%X is BOOT proc. "
-                              " (i=%d)",
-                              TARGETING::get_huid(sbeState.target), i);
-                    sbeState.target_is_master = true;
-                }
-                else
-                {
-                    TRACFCOMP(g_trac_sbe,"sbeState.target=0x%X is non-BOOT proc. "
-                              " (i=%d)",
-                              TARGETING::get_huid(sbeState.target), i);
-                    sbeState.target_is_master = false;
-                }
+            // Pre-load any PNOR sections that will be used by each thread
+            err = preloadPnorSections(l_loadedPnorSections);
+            if (err)
+            {
+                TRACFCOMP(g_trac_sbe, "updateProcessorSbeSeeproms: Unable to load all pnor sections");
+                break;
+            }
 
-                //Can only update the SBE once the powerbus is up (secureboot)
-                //Use the scom switch Xscom capability flag as a proxy for
-                //powerbus access.  If we can't access via powerbus, then skip
-                TARGETING::ScomSwitches scomSetting =
-                      sbeState.target->getAttr<TARGETING::ATTR_SCOM_SWITCHES>();
+            Util::ThreadPool<UpdateWorkItem> threadpool;
+            std::vector<sbeTargetState_t> l_sbeTargetStates;
 
-                if(!(scomSetting.useXscom))
-                {
-                    //Xscom is not viable on this chip, thus powerbus isn't
-                    //up to chip -- skip it
-                    TRACFCOMP( g_trac_sbe,
-                               INFO_MRK"updateProcessorSbeSeeproms(): "
-                               "Power bus not established to chip 0x%X,"
-                               " not performing update",
-                               TARGETING::get_huid(sbeState.target));
-                    continue;
-                }
+            // Set the number of threads to use in the threadpool
+            Util::ThreadPoolManager::setThreadCount(l_thread_procs_map.size());
 
-                err = getSbeInfoState(sbeState);
+            for (const auto& poolSbe : l_thread_procs_map)
+            {
+                // Each workitem will create its workspace area and clean it up
+                // l_sbeTargetStates will be updated with each target's status
+                // key sbeWorkspaceVaddr = sbeList
+                threadpool.insert(new UpdateProcessorSbes(poolSbe.first, poolSbe.second, &l_sbeTargetStates));
+            }
 
-                if (err)
-                {
-                    TRACFCOMP( g_trac_sbe,
-                               INFO_MRK"updateProcessorSbeSeeproms(): "
-                               "getSbeInfoState() Failed "
-                               "Target UID=0x%X"
-                               TRACE_ERR_FMT,
-                               TARGETING::get_huid(sbeState.target),
-                               TRACE_ERR_ARGS(err));
+            TRACFCOMP(g_trac_sbe,
+                      INFO_MRK"updateProcessorSbeSeeproms(): starting %llu thread(s) to handle %llu SBE target(s)",
+                      l_thread_procs_map.size(),
+                      procList.size());
 
-                    // Don't break - handle error at the end of the loop
-                }
+            // Start all threads
+            threadpool.start();
 
+            // Wait for the threads to finish running (don't interrupt the update)
+            err = threadpool.shutdown();
+            if (err)
+            {
+                TRACFCOMP(g_trac_sbe, ERR_MRK"UpdateProcessorSbeSeeproms(): thread pool returned an error "
+                    TRACE_ERR_FMT,
+                    TRACE_ERR_ARGS(err));
+                    err->collectTrace(SBE_COMP_NAME);
+                uint32_t rc = err->reasonCode();
+                errlCommit(err, SBE_COMP_ID);
 
-                /**********************************************/
-                /*  Determine update actions for this target  */
-                /**********************************************/
-                // Skip if we got an error collecting SBE Info State
-                if ( err == NULL )
-                {
-                    err = getTargetUpdateActions(sbeState);
-                    if (err)
-                    {
-                        TRACFCOMP( g_trac_sbe,
-                                   INFO_MRK"updateProcessorSbeSeeproms(): "
-                                   "getTargetUpdateActions() Failed"
-                                   "Target UID=0x%X"
-                                   TRACE_ERR_FMT,
-                                   TARGETING::get_huid(sbeState.target),
-                                   TRACE_ERR_ARGS(err));
-
-                        // Don't break - handle error at the end of the loop,
-                    }
-
-                }
-
-                /**********************************************/
-                /*  Perform Update Actions For This Target    */
-                /**********************************************/
-                // Force an update of SEEPROM 0 or SEEPROM 1 if SB keyword
-                // flags is requesting an update for that particular seeprom
-                if (((sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY) &&
-                (sbeState.mvpdSbKeyword.flags & SEEPROM_0_FORCE_UPDATE_MASK)) ||
-                    ((sbeState.seeprom_side_to_update == EEPROM::SBE_BACKUP) &&
-                (sbeState.mvpdSbKeyword.flags & SEEPROM_1_FORCE_UPDATE_MASK)))
-                {
-                   // The DO_UPDATE flag alone might not be enough to
-                   // force an update, setting UPDATE_SBE flag as well
-                   // because I know that performUpdateActions checks that flag
-                   sbeState.update_actions = static_cast<sbeUpdateActions_t>
-                             (sbeState.update_actions | DO_UPDATE | UPDATE_SBE);
-                }
-
-                if ((err == NULL) && (sbeState.update_actions & DO_UPDATE))
-                {
-                    // If update is needed, check to see if it's in MPIPL
-                    if(sys->getAttr<TARGETING::ATTR_IS_MPIPL_HB>() == true)
-                    {
-                        TRACFCOMP( g_trac_sbe,
-                                       INFO_MRK"updateProcessorSbeSeeproms(): "
-                                       "Skip SBE update during MPIPL "
-                                       ", Target UID=0x%X",
-                                       TARGETING::get_huid(sbeState.target));
-                        /*@
-                         * @errortype
-                         * @moduleid          SBE_UPDATE_SEEPROMS
-                         * @reasoncode        SBE_UPDATE_DURING_MPIPL
-                         * @userdata1         Target huid id
-                         * @userdata2[0:31]   Update actions
-                         * @userdata2[32:63]  SEEPROM side to update
-                         * @devdesc           SBE update is being skipped
-                         *                    during MPIPL
-                         * @custdesc          SBE is not being updated
-                         */
-                        err = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
-                                  SBE_UPDATE_SEEPROMS,
-                                  SBE_UPDATE_DURING_MPIPL,
-                                  TARGETING::get_huid(sbeState.target),
-                                  TWO_UINT32_TO_UINT64(
-                                      TO_UINT32(sbeState.update_actions),
-                                      TO_UINT32(sbeState.seeprom_side_to_update)
-                                  )
-                        );
-                        err->collectTrace(SBE_COMP_NAME);
-                    }
-                    else
-                    {
-                        err = performUpdateActions(sbeState);
-                        if (err)
-                        {
-                            TRACFCOMP( g_trac_sbe,
-                                       INFO_MRK"updateProcessorSbeSeeproms(): "
-                                       "performUpdateActions() Failed "
-                                       "Target UID=0x%X"
-                                       TRACE_ERR_FMT,
-                                       TARGETING::get_huid(sbeState.target),
-                                       TRACE_ERR_ARGS(err));
-
-                            //Don't break - handle error at the end of the loop,
-                        }
-                        else
-                        {
-                            //Target updated without failure, so set IPL_RESTART
-                            //flag, if necessary
-                            if (sbeState.update_actions & IPL_RESTART)
-                            {
-                                l_restartNeeded = true;
-                            }
-                        }
-                    }  // end else of if(sys->getAttr<TARGETING::ATTR_IS_MPIPL_HB>() == true)
-                }  // end if ((err == NULL) && (sbeState.update_actions & DO_UPDATE))
-
-                if ( err )
-                {
-                    // Something failed for this target.
-                    // Save error information
-                    sbeState.err_plid = err->plid();
-                    sbeState.err_eid  = err->eid();
-                    sbeState.err_rc   = err->reasonCode();
-                    sbeState.err_sev  = err->sev();
-
-                    // Commit the error here and move on to the next target,
-                    // or if no targets left, will just continue the IPL
-                    TRACFCOMP( g_trac_sbe,
-                               INFO_MRK"updateProcessorSbeSeeproms(): "
-                               "Committing Error Log "
-                               "sev=0x%.2X for Target UID=0x%X, "
-                               "but continuing procedure"
-                               TRACE_ERR_FMT,
-                               sbeState.err_sev,
-                               TARGETING::get_huid(sbeState.target),
-                               TRACE_ERR_ARGS(err));
-                    errlCommit(err, SBE_COMP_ID);
-                }
-
-                /**********************************************/
-                /*   Reset the watchdog after each Action     */
-                /**********************************************/
-                INITSERVICE::sendProgressCode();
-
-                // Push this sbeState onto the vector
-                sbeStates_vector.push_back(sbeState);
-
-            } //end of Target for loop collecting each target's SBE State
+                assert(0,"Thread pool failed to shutdown - rc=0x%.4X", rc);
+            }
+            //end of Target for loop collecting/updating each target's SBE State
 
             /**************************************************************/
             /*  Perform System Operation                                  */
@@ -541,16 +718,15 @@ namespace SBE
 
             // Restart IPL if SBE Update requires it or key transition occurred
             // No restart if running Simics
-            if (((l_restartNeeded == true) || (g_do_hw_keys_hash_transition))
+            if ( ((g_restart_needed == true) || (g_do_hw_keys_hash_transition))
                     && !Util::isSimicsRunning())
             {
                 TRACFCOMP( g_trac_sbe,
                            INFO_MRK"updateProcessorSbeSeeproms(): Restart "
                            "Needed (%d). Calling preReIplCheck()",
-                           l_restartNeeded);
+                           g_restart_needed);
 
-                err = preReIplCheck(sbeStates_vector);
-
+                err = preReIplCheck(l_sbeTargetStates);
                 if ( err )
                 {
                     // Something failed on the check.  Commit the error here
@@ -577,8 +753,7 @@ namespace SBE
                 /* Deconfigure any Processors that have a Version different */
                 /*   from the Master Processor's Version                    */
                 /************************************************************/
-                err = masterVersionCompare(sbeStates_vector);
-
+                err = masterVersionCompare(l_sbeTargetStates);
                 if ( err )
                 {
                     // Something failed on the check
@@ -592,35 +767,32 @@ namespace SBE
 
         }while(0);
 
-        // Cleanup VMM Workspace
-        if ( l_cleanupVmmSpace == true )
+        // Cleanup PNOR section memory
+        TRACFCOMP( g_trac_sbe, INFO_MRK"updateProcessorSbeSeeproms(): Cleanup PNOR section memory" );
+        err_cleanup = cleanupPreloadedPnorSections(l_loadedPnorSections);
+        if ( err_cleanup != nullptr )
         {
-            err_cleanup = cleanupSbeImageVmmSpace();
-            if ( err_cleanup != NULL )
+            if ( err != nullptr )
             {
+                // 2 error logs, so commit the cleanup log here
+                TRACFCOMP( g_trac_sbe,
+                           ERR_MRK"updateProcessorSbeSeeproms(): Previous "
+                           "error (rc=0x%X) before cleanupPreloadedPnorSections"
+                           "() failed.  Committing cleanup error (rc=0x%X) "
+                           "and returning original error",
+                           err->reasonCode(), err_cleanup->reasonCode()  );
 
-                if ( err != NULL )
-                {
-                    // 2 error logs, so commit the cleanup log here
-                    TRACFCOMP( g_trac_sbe,
-                               ERR_MRK"updateProcessorSbeSeeproms(): Previous "
-                               "error (rc=0x%X) before cleanupSbeImageVmmSpace"
-                               "() failed.  Committing cleanup error (rc=0x%X) "
-                               "and returning original error",
-                               err->reasonCode(), err_cleanup->reasonCode()  );
-
-                     errlCommit( err_cleanup, SBE_COMP_ID );
-                }
-                else
-                {
-                    // no previous error, so returning cleanup error
-                    TRACFCOMP( g_trac_sbe,
-                               ERR_MRK"updateProcessorSbeSeeproms(): "
-                               "cleanupSbeImageVmmSpace() failed.",
-                               "rc=0x%.4X", err_cleanup->reasonCode() );
-                    err = err_cleanup;
-                }
-            }
+                 errlCommit( err_cleanup, SBE_COMP_ID );
+             }
+             else
+             {
+                  // no previous error, so returning cleanup error
+                  TRACFCOMP( g_trac_sbe,
+                             ERR_MRK"updateProcessorSbeSeeproms(): "
+                             "cleanupPreloadedPnorSections() failed.",
+                             "rc=0x%.4X", err_cleanup->reasonCode() );
+                  err = err_cleanup;
+             }
         }
 
         if(err && g_do_hw_keys_hash_transition)
@@ -630,7 +802,7 @@ namespace SBE
             // treat that as a failure of the key transition process to call
             // attention to the unexpected sequence.
             errlHndl_t pError = updateKeyTransitionState(
-                TARGETING::KEY_TRANSITION_STATE_KEY_TRANSITION_FAILED);
+                KEY_TRANSITION_STATE_KEY_TRANSITION_FAILED);
             if(pError)
             {
                 TRACFCOMP(g_trac_sbe,
@@ -656,14 +828,90 @@ namespace SBE
     }
 
 /////////////////////////////////////////////////////////////////////
-    errlHndl_t findSBEInPnor(TARGETING::Target* i_target,
+    void traceVaddrSbeAssignments(const vaddr_sbes_map_t & i_sbe_space_to_procs)
+    {
+        for (const auto& singleSpaceProcs : i_sbe_space_to_procs)
+        {
+            char sbeListStr[250] = {};
+            auto vProcSbes = singleSpaceProcs.second;
+            char * pStr = sbeListStr;
+            int cSize = 0;
+            cSize = sprintf( pStr, "vAddr[%llX] = ", singleSpaceProcs.first );
+            pStr += cSize;
+            for (const auto & procSbe : vProcSbes)
+            {
+                cSize = sprintf( pStr, "0x%.8X, ", get_huid(procSbe) );
+                pStr += cSize;
+            }
+            if (cSize != 0)
+            {
+                *(pStr-2) = 0;
+            }
+            TRACFCOMP(g_trac_sbe, "traceVaddrSbeAssignments: %s", sbeListStr);
+        }
+    }
+
+/////////////////////////////////////////////////////////////////////
+    void distribute_sbe_list(const TargetHandleList i_proc_sbes,
+                             vaddr_sbes_map_t & o_sbe_space_to_procs)
+    {
+        // calculate how many sbeImageVmmSpaces should be used
+        auto l_cacheSize = g_BlToHbDataManager.getHbCacheSizeMb();
+
+        // need MIN_MB_PER_SBE_IMAGE_SPACE available per SBE image space
+        uint8_t numSbeImageVmmSpaces = l_cacheSize / MIN_MB_PER_SBE_IMAGE_SPACE;
+        if (numSbeImageVmmSpaces > VMM_MAX_SBE_IMAGE_SPACES)
+        {
+            numSbeImageVmmSpaces = VMM_MAX_SBE_IMAGE_SPACES;
+        }
+        else if (numSbeImageVmmSpaces == 0)
+        {
+            numSbeImageVmmSpaces = 1;
+        }
+
+        int total_sbes = i_proc_sbes.size();
+        const int min_sbes_per_space = total_sbes / numSbeImageVmmSpaces;
+        int leftover_sbes = total_sbes % numSbeImageVmmSpaces;
+
+        TRACFCOMP(g_trac_sbe, "distribute_sbe_list(%d sbes) - cacheSize %d MB -> %d vmm spaces",
+          i_proc_sbes.size(), l_cacheSize, numSbeImageVmmSpaces);
+
+        auto pProcSbes = i_proc_sbes.begin();
+
+        // Each thread gets its own update space in virtual memory
+        // Addresses start at VMM_VADDR_SBE_UPDATE and are VMM_VADDR_SBE_UPDATE bytes
+        uint64_t sbeUpdateSpaceVaddr = VMM_VADDR_SBE_UPDATE;
+
+        while (total_sbes > 0)
+        {
+            for (int i = 0; i < min_sbes_per_space; i++)
+            {
+                o_sbe_space_to_procs[sbeUpdateSpaceVaddr].push_back(*pProcSbes);
+                pProcSbes++; // increment to next sbe in list
+                total_sbes--; // added an sbe, so remove from total left
+            }
+            // might need to add one more sbe to list of sbes under this vaddr space
+            if (leftover_sbes > 0)
+            {
+                o_sbe_space_to_procs[sbeUpdateSpaceVaddr].push_back(*pProcSbes);
+                pProcSbes++; // increment to next sbe in list
+                leftover_sbes--;
+                total_sbes--;  // added an sbe, so remove from total left
+            }
+            // go to the next update space
+            sbeUpdateSpaceVaddr += VMM_SBE_UPDATE_SIZE;
+        }
+    }
+
+/////////////////////////////////////////////////////////////////////
+    errlHndl_t findSBEInPnor(Target* i_target,
                              void*& o_imgPtr,
                              size_t& o_imgSize,
                              sbe_image_version_t* o_version)
     {
         errlHndl_t err = nullptr;
         PNOR::SectionInfo_t pnorInfo;
-        sbeToc_t* sbeToc = NULL;
+        sbeToc_t* sbeToc = nullptr;
         uint8_t ec = 0;
         PNOR::SectionId pnorSectionId = PNOR::INVALID_SECTION;
 
@@ -686,7 +934,7 @@ namespace SBE
                 // Unsupported target type was passed in
                 TRACFCOMP( g_trac_sbe, ERR_MRK"findSBEInPnor: Unsupported "
                            "target type was passed in: uid=0x%X, type=0x%X",
-                           TARGETING::get_huid(i_target),
+                           get_huid(i_target),
                            i_target->getAttr<ATTR_TYPE>());
 
                 /*@
@@ -702,7 +950,7 @@ namespace SBE
                 err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                     SBE_FIND_IN_PNOR,
                                     SBE_INVALID_INPUT,
-                                    TARGETING::get_huid(i_target),
+                                    get_huid(i_target),
                                     i_target->getAttr<ATTR_TYPE>());
                 err->collectTrace(SBE_COMP_NAME);
                 err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
@@ -726,7 +974,7 @@ namespace SBE
             TRACUCOMP( g_trac_sbe,
                        INFO_MRK"findSBEInPnor: UID=0x%X, sectionId=0x%X. "
                        "pnor vaddr = 0x%.16X",
-                       TARGETING::get_huid(i_target),
+                       get_huid(i_target),
                        pnorSectionId, pnorInfo.vaddr);
 
             sbeToc = reinterpret_cast<sbeToc_t*>( pnorInfo.vaddr );
@@ -800,7 +1048,7 @@ namespace SBE
                 }
 
                 //Walk the TOC and find our current EC
-                ec = i_target->getAttr<TARGETING::ATTR_EC>();
+                ec = i_target->getAttr<ATTR_EC>();
 
                 // If ec == 0 then this indicates simics is not correctly
                 // writing EC to the FSI register we get the EC level from
@@ -820,7 +1068,7 @@ namespace SBE
                     err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                         SBE_FIND_IN_PNOR,
                                         SBE_UNSUPPORTED_EC,
-                                        TARGETING::get_huid(i_target),
+                                        get_huid(i_target),
                                         0,
                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
                     err->collectTrace(SBE_COMP_NAME);
@@ -851,7 +1099,7 @@ namespace SBE
                 }
             }
             // IF we failed to find hdr_Ptr then no matching EC found
-            if(NULL == hdr_Ptr)
+            if(nullptr == hdr_Ptr)
             {
                 //if we get here, it's an error
                 TRACFCOMP( g_trac_sbe,ERR_MRK"findSBEInPnor:SBE Image not "
@@ -907,7 +1155,7 @@ namespace SBE
                 o_imgSize -= PAGE_SIZE;
             }
 
-            if(NULL != o_version)
+            if(nullptr != o_version)
             {
                 err = readPNORVersion(hdr_Ptr,
                                       *o_version);
@@ -1215,7 +1463,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
 
 
 /////////////////////////////////////////////////////////////////////
-    errlHndl_t procCustomizeSbeImg(TARGETING::Target* i_target,
+    errlHndl_t procCustomizeSbeImg(Target* i_target,
                                    const void* const  i_hwImgPtr,
                                    const void* const  i_sbeImgPtr,
                                    const size_t       i_maxImgSize,
@@ -1229,20 +1477,25 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
         ///////////////////////////////////////////////////////////////////////
         // Cache the maximum system cores for easy access and updating
         size_t l_maxCores = P10_MAX_EC_PER_PROC;
+
         // The number of cores the SBE customized image is composed of.  Will be
         // determined via call to p10_ipl_customize
         uint32_t l_coreCount(0);
+
         // The desired number of cores, will be calculated via attribute
         // IMAGE_MINIMUM_VALID_ECS and if using fused cores
         uint32_t l_desiredMinCores(0);
+
         // Will be populated with attribute SBE_IMAGE_MINIMUM_VALID_ECS when retrieved
         uint32_t l_AttrSbeImageMinValidEcs(0);
+
         // Set up core mask to include all possible cores
         uint32_t l_coreMask = 0xFFFFFFFF; // Bits(0:31) = EC00:EC31
 
+
         TRACUCOMP( g_trac_sbe, ENTER_MRK"procCustomizeSbeImg(): HUID=0x%X, i_sbeImgPtr= "
                    "%p, i_maxImgSize=%d, io_imgPtr=%p",
-                   TARGETING::get_huid(i_target), i_sbeImgPtr, i_maxImgSize, io_imgPtr);
+                   get_huid(i_target), i_sbeImgPtr, i_maxImgSize, io_imgPtr);
 
         do{
             ///////////////////////////////////////////////////////////////////
@@ -1300,20 +1553,21 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
 
             // Call HWP p10_ipl_customize to get cores
             uint32_t l_ringSectionBufSize = MAX_SEEPROM_IMAGE_SIZE;
+            uint8_t * pSbeImgVddr = reinterpret_cast<uint8_t*>(io_imgPtr);
             FAPI_INVOKE_HWP( l_err,
                              p10_ipl_customize,
                              l_fapiTarg,
                              (void*)i_hwImgPtr,
                              io_imgPtr, //In: Ringless SBE image, Out: Customized SBE image w/rings
                              l_tmpImgSize, // In: Max, Out: Actual
-                             (void*)RING_SEC_VADDR,
+                             (void*)(pSbeImgVddr + RING_SEC_VADDR_OFFSET),
                              l_ringSectionBufSize,
                              SYSPHASE_HB_SBE,
-                             (void*)RING_BUF1_VADDR,
+                             (void*)(pSbeImgVddr + RING_BUF1_VADDR_OFFSET),
                              (uint32_t)XIPC_RING_BUF1_SIZE,
-                             (void*)RING_BUF2_VADDR,
+                             (void*)(pSbeImgVddr + RING_BUF2_VADDR_OFFSET),
                              (uint32_t)XIPC_RING_BUF2_SIZE,
-                             (void*)RING_BUF3_VADDR,
+                             (void*)(pSbeImgVddr + RING_BUF3_VADDR_OFFSET),
                              (uint32_t)XIPC_RING_BUF3_SIZE,
                              l_coreMask ); // In: All cores, Out: Actual cores gathered
 
@@ -1364,11 +1618,12 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                 l_err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                       SBE_CUSTOMIZE_IMG,
                                       SBE_INSUFFICIENT_SPACE_FOR_REQUESTED_CORES,
-                                      TWO_UINT32_TO_UINT64(TARGETING::get_huid(i_target),
-                                                           l_desiredMinCores),
-                                      TWO_UINT32_TO_UINT64( TWO_UINT16_TO_UINT32( l_coreCount,
-                                                                                  l_maxCores ),
-                                                            l_coreMask));
+                                      TWO_UINT32_TO_UINT64( get_huid(i_target),
+                                                            l_desiredMinCores ),
+                                      TWO_UINT32_TO_UINT64(
+                                        TWO_UINT16_TO_UINT32( l_coreCount,
+                                                              l_maxCores ),
+                                        l_coreMask) );
 
                 ErrlUserDetailsTarget(i_target).addToLog(l_err);
                 l_err->collectTrace("FAPI", 256);
@@ -1387,7 +1642,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                        "max system cores = %d, number of cores in image = %d, core mask = 0x%.8X, "
                        "desired minimum cores = %d, is fused core = %d(0=no, 1=yes), "
                        "attribute SBE_IMAGE_MINIMUM_VALID_ECS = %d",
-                       TARGETING::get_huid(i_target), io_imgPtr, o_actImgSize,
+                       get_huid(i_target), io_imgPtr, o_actImgSize,
                        l_maxCores, l_coreCount, l_coreMask, l_desiredMinCores,
                        is_fused_mode(), l_AttrSbeImageMinValidEcs );
 
@@ -1399,7 +1654,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                        "max system cores = %d, desired minimum cores = %d, "
                        "is fused core = %d(0=no, 1=yes), "
                        "attribute SBE_IMAGE_MINIMUM_VALID_ECS = %d",
-                       ERRL_GETRC_SAFE(l_err), TARGETING::get_huid(i_target),
+                       ERRL_GETRC_SAFE(l_err), get_huid(i_target),
                        l_maxCores, l_desiredMinCores,
                        is_fused_mode(), l_AttrSbeImageMinValidEcs );
 
@@ -1411,7 +1666,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
     }
 
 /////////////////////////////////////////////////////////////////////
-    errlHndl_t getSetMVPDVersion(TARGETING::Target* i_target,
+    errlHndl_t getSetMVPDVersion(Target* i_target,
                                  opType_t i_op,
                                  mvpdSbKeyword_t& io_sb_keyword)
     {
@@ -1424,10 +1679,10 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
         do{
             // Read SB Keyword which contains SBE version and dirty bit
             // information
-            // Note: First read with NULL for o_buffer sets vpdSize to the
+            // Note: First read with nullptr for o_buffer sets vpdSize to the
             // correct length
             err = deviceRead( i_target,
-                              NULL,
+                              nullptr,
                               vpdSize,
                               DEVICE_MVPD_ADDRESS( MVPD::CP00,
                                                    MVPD::SB ) );
@@ -1437,7 +1692,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getSetMVPDVersion() - MVPD "
                            "failure getting SB keyword size HUID=0x%.8X"
                            TRACE_ERR_FMT,
-                           TARGETING::get_huid(i_target),
+                           get_huid(i_target),
                            TRACE_ERR_ARGS(err));
                 break;
             }
@@ -1447,7 +1702,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getSetMVPDVersion() - MVPD SB "
                            "keyword wrong length HUID=0x%.8X, length=0x%.2X, "
                            "expected=0x%.2x",
-                           TARGETING::get_huid(i_target), vpdSize,
+                           get_huid(i_target), vpdSize,
                            MVPD_SB_RECORD_SIZE);
                 /*@
                  * @errortype
@@ -1487,7 +1742,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                     TRACFCOMP( g_trac_sbe, ERR_MRK"getSetMVPDVersion() - MVPD "
                                "failure reading SB keyword data HUID=0x%.8X"
                                TRACE_ERR_FMT,
-                               TARGETING::get_huid(i_target),
+                               get_huid(i_target),
                                TRACE_ERR_ARGS(err));
                     break;
                 }
@@ -1508,7 +1763,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                     TRACFCOMP( g_trac_sbe, ERR_MRK"getSetMVPDVersion() - MVPD "
                                "failure writing SB keyword data HUID=0x%.8X"
                                TRACE_ERR_FMT,
-                               TARGETING::get_huid(i_target),
+                               get_huid(i_target),
                                TRACE_ERR_ARGS(err));
                     break;
                 }
@@ -1597,7 +1852,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
     }
 
 /////////////////////////////////////////////////////////////////////
-    errlHndl_t getSbeBootSeeprom(TARGETING::Target* i_target,
+    errlHndl_t getSbeBootSeeprom(Target* i_target,
                                  sbeSeepromSide_t& o_bootSide,
                                  sbeMeasurementSeepromSide_t& o_mSide)
     {
@@ -1613,8 +1868,17 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             assert(i_target != nullptr,"Bug! Attempting to get the boot seeprom of a null target.");
 
             // Use scom if this is the boot proc (cannot fsi to boot proc)
-            TARGETING::Target* l_bootproc = nullptr;
-            targetService().queryMasterProcChipTargetHandle(l_bootproc);
+            Target* l_bootproc = nullptr;
+            err = targetService().queryMasterProcChipTargetHandle(l_bootproc);
+            if (err)
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeBootSeeprom() - "
+                    "queryMasterProcChipTargetHandle returned an error"
+                    TRACE_ERR_FMT,
+                    TRACE_ERR_ARGS(err) );
+                break;
+            }
+
             if( i_target == l_bootproc )
             {
                 // Read FSXCOMP_FSXLOG_SB_CS 0x00050008
@@ -1631,7 +1895,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                                "HUID=0x%.8X"
                                TRACE_ERR_FMT,
                                FSXCOMP_FSXLOG_SB_CS, // 0x00050008
-                               TARGETING::get_huid(i_target),
+                               get_huid(i_target),
                                TRACE_ERR_ARGS(err));
                     break;
                 }
@@ -1656,7 +1920,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                                "FSXCOMP_FSXLOG_SB_CS_FSI (0x%.4X), proc target = %.8X"
                                TRACE_ERR_FMT,
                                FSXCOMP_FSXLOG_SB_CS_FSI, // 0x2808
-                               TARGETING::get_huid(i_target),
+                               get_huid(i_target),
                                TRACE_ERR_ARGS(err));
                     break;
                 }
@@ -1685,13 +1949,13 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
         TRACFCOMP( g_trac_sbe,
                    EXIT_MRK"getSbeBootSeeprom(): o_bootSide=0x%X o_mSide=0x%X "
                    "(reg=0x%X, tgt=0x%X)",
-                   o_bootSide, o_mSide, cfamData, TARGETING::get_huid(i_target) );
+                   o_bootSide, o_mSide, cfamData, get_huid(i_target) );
 
         return err;
     }
 
 /////////////////////////////////////////////////////////////////////
-    errlHndl_t updateSbeBootSeeprom(TARGETING::Target* i_target)
+    errlHndl_t updateSbeBootSeeprom(Target* i_target)
     {
         TRACFCOMP( g_trac_sbe, ENTER_MRK"updateSbeBootSeeprom()" );
 
@@ -1717,7 +1981,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                            "FSXCOMP_FSXLOG_SB_CS_FSI (0x%.4X), proc target = %.8X"
                            TRACE_ERR_FMT,
                            FSXCOMP_FSXLOG_SB_CS_FSI, // 0x2808
-                           TARGETING::get_huid(i_target),
+                           get_huid(i_target),
                            TRACE_ERR_ARGS(err));
                 break;
             }
@@ -1751,7 +2015,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             // The slave will use the same side setting as the master
             sbeSeepromSide_t l_bootside = SBE_SEEPROM_INVALID;
             sbeMeasurementSeepromSide_t l_mside = SBE_MEASUREMENT_SEEPROM_INVALID;
-            TARGETING::Target * l_masterTarget = nullptr;
+            Target * l_masterTarget = nullptr;
             targetService().masterProcChipTargetHandle(l_masterTarget);
             err = getSbeBootSeeprom( l_masterTarget, l_bootside, l_mside );
             if( err )
@@ -1767,7 +2031,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
 
             TRACFCOMP( g_trac_sbe,INFO_MRK"updateSbeBootSeeprom(): set SBE boot side %d for proc=%.8X",
                        !l_bootSide0,
-                       TARGETING::get_huid(i_target) );
+                       get_huid(i_target) );
 #endif
             if(l_bootSide0)
             {
@@ -1778,7 +2042,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                            INFO_MRK"updateSbeBootSeeprom(): l_read_reg=0x%.8X "
                            "set SBE boot side 0 for proc=%.8llX",
                            l_targetReg,
-                           TARGETING::get_huid(i_target) );
+                           get_huid(i_target) );
             }
             else
             {
@@ -1789,7 +2053,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                            INFO_MRK"updateSbeBootSeeprom(): l_read_reg=0x%.8X "
                            "set SBE boot side 1 for proc=%.8llX",
                            l_targetReg,
-                           TARGETING::get_huid(i_target) );
+                           get_huid(i_target) );
             }
 
             if(l_mbootSide0)
@@ -1801,7 +2065,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                            INFO_MRK"updateSbeBootSeeprom(): l_read_reg=0x%.8X "
                            "set SBE Measurement boot side 0 for proc=%.8X",
                            l_targetReg,
-                           TARGETING::get_huid(i_target) );
+                           get_huid(i_target) );
             }
             else
             {
@@ -1812,7 +2076,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                            INFO_MRK"updateSbeBootSeeprom(): l_read_reg=0x%.8X "
                            "set SBE Measurement boot side 1 for proc=%.8X",
                            l_targetReg,
-                           TARGETING::get_huid(i_target) );
+                           get_huid(i_target) );
             }
 
             // Write FSXCOMP_FSXLOG_SB_CS_FSI 0x2808 back into target proc
@@ -1829,7 +2093,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                            "FSXCOMP_FSXLOG_SB_CS_FSI (0x%.4X), proc target = %.8X"
                            TRACE_ERR_FMT,
                            FSXCOMP_FSXLOG_SB_CS_FSI, // 0x2808
-                           TARGETING::get_huid(i_target),
+                           get_huid(i_target),
                            TRACE_ERR_ARGS(err));
                 break;
             }
@@ -1883,10 +2147,6 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             TRACUCOMP( g_trac_sbe,
                        INFO_MRK"loadPnorSection(%d) - addr = 0x%p ",
                        i_section, o_info.vaddr);
-
-            // Remember that we loaded this section so that we can
-            //  try to clean up later if something goes awry
-            g_loadedSections.push_back(i_section);
         } while ( 0 );
 
         return  l_errl;
@@ -1903,19 +2163,38 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             l_errl = unloadSecureSection(i_section);
             if (l_errl)
             {
-                TRACFCOMP( g_trac_sbe, ERR_MRK,"unloadPnorSection() - Error from unloadSecureSection(%d)", i_section);
+                TRACFCOMP( g_trac_sbe, ERR_MRK"unloadPnorSection() - Error from unloadSecureSection(%d)", i_section);
                 break;
             }
 #endif
-
             // kick any pages out of the VMM
             PNOR::flush( i_section );
 
-            // remove this section from the list of loaded ones
-            g_loadedSections.remove(i_section);
         } while ( 0 );
 
         return  l_errl;
+    }
+//////////////////////////////////////////////////////////////////////
+    errlHndl_t preloadPnorSections(std::vector<PNOR::SectionId> & o_loadedSections)
+    {
+        errlHndl_t l_errl = nullptr;
+
+        std::vector<PNOR::SectionId> preloadPnorIds =
+          { PNOR::SBE_IPL, PNOR::HB_BOOTLOADER, PNOR::HCODE };
+        PNOR::SectionInfo_t tmpInfo;
+        for (const auto & id : preloadPnorIds)
+        {
+            l_errl = loadPnorSection(id ,tmpInfo);
+            if (l_errl)
+            {
+                break;
+            }
+            else
+            {
+                o_loadedSections.push_back(id);
+            }
+        } while (0);
+        return l_errl;
     }
 
 /////////////////////////////////////////////////////////////////////
@@ -1934,7 +2213,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                sizeof(sbeSeepromVersionInfo_t));
 
         //Make sure that io_sbeState had valid information
-        assert(io_sbeState.target != NULL, "target member variable not set on io_sbeState");
+        assert(io_sbeState.target != nullptr, "target member variable not set on io_sbeState");
         do
         {
             //Get Current (boot) Side
@@ -2063,11 +2342,11 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
     }
 
     /////////////////////////////////////////////////////////////////////
-    errlHndl_t getSbeInfoState(sbeTargetState_t& io_sbeState)
+    errlHndl_t getSbeInfoState(sbeTargetState_t& io_sbeState, uint64_t i_sbe_update_vaddr)
     {
         TRACUCOMP( g_trac_sbe,
-                   ENTER_MRK"getSbeInfoState(): HUID=0x%.8X",
-                   TARGETING::get_huid(io_sbeState.target));
+                   ENTER_MRK"getSbeInfoState(0x%llX): HUID=0x%.8X",
+                   i_sbe_update_vaddr, get_huid(io_sbeState.target) );
 
 
         errlHndl_t err = nullptr;
@@ -2077,8 +2356,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
         // Clear build information
         io_sbeState.new_imageBuild.buildDate = 0;
         io_sbeState.new_imageBuild.buildTime = 0;
-        memset(io_sbeState.new_imageBuild.buildTag,
-               '\0',
+        memset(io_sbeState.new_imageBuild.buildTag, '\0',
                sizeof(io_sbeState.new_imageBuild.buildTag) );
 
         do{
@@ -2144,7 +2422,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             /************************************************************/
             /*  Set Target Properties (target_is_master previously set) */
             /************************************************************/
-            io_sbeState.ec = io_sbeState.target->getAttr<TARGETING::ATTR_EC>();
+            io_sbeState.ec = io_sbeState.target->getAttr<ATTR_EC>();
 
             /*******************************************/
             /*  Get SBE SEEPROM Version Information    */
@@ -2239,7 +2517,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                 static_cast<uint32_t>(sbePnorImageSize + MAX_HBBL_SIZE);
 
             // copy SBE image from PNOR to memory
-            sbeHbblImgPtr = (void*)SBE_HBBL_IMG_VADDR;
+            sbeHbblImgPtr = (void*)(i_sbe_update_vaddr + SBE_HBBL_IMG_VADDR_OFFSET);
             memcpy ( sbeHbblImgPtr,
                      sbePnorPtr,
                      sbePnorImageSize);
@@ -2570,8 +2848,10 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             }
             l_latestSize = sbeSbSettingsImgSize;
 
+
             // We are now done with the SBE and HBBL images in PNOR, unload
             //  them now to save memory for the other images we have to load
+            // Note: this will just decrease the in-use count
             err = unloadPnorSection(PNOR::SBE_IPL);
             if (err)
             {
@@ -2582,7 +2862,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             err = unloadPnorSection(PNOR::HB_BOOTLOADER);
             if (err)
             {
-                TRACFCOMP( g_trac_sbe, ERR_MRK,"getSbeInfoState() - Error from unloadPnorSection(PNOR::HB_BOOTLOADER)");
+                TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - Error from unloadPnorSection(PNOR::HB_BOOTLOADER)");
                 break;
             }
 
@@ -2645,7 +2925,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             char* l_hCodeAddr = reinterpret_cast<char*>(l_hcodePnorInfo.vaddr);
 
 
-            void * pCustomizedBfr = reinterpret_cast<void*>(SBE_IMG_VADDR);
+            void * pCustomizedBfr = reinterpret_cast<void*>(i_sbe_update_vaddr);
 
             err = procCustomizeSbeImg(io_sbeState.target,
                                       l_hCodeAddr,    // HCODE in memory
@@ -2664,14 +2944,17 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                 break;
             }
 
+
             // We are now done with the HCODE image in PNOR, unload
             //  it now to save memory.
+            // Note: this will just decrease the in-use count
             err = unloadPnorSection(PNOR::HCODE);
             if (err)
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - Error from unloadPnorSection(PNOR::HCODE)");
                 break;
             }
+
 
             // Retrieve the Secure Version and HW Key Hash included in customized image
             SHA512_t sbe_hash = {0};
@@ -2701,7 +2984,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                            "match expected value of 0x%.2X for proc=0x%X",
                            sbe_secure_version,
                            sb_settings.minimum_secure_version,
-                           TARGETING::get_huid(io_sbeState.target));
+                           get_huid(io_sbeState.target));
 
                 /*@
                  * @errortype
@@ -2719,7 +3002,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                 err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                     SBE_GET_TARGET_INFO_STATE,
                                     SBE_MISMATCHED_SECURE_VERSION,
-                                    TARGETING::get_huid(io_sbeState.target),
+                                    get_huid(io_sbeState.target),
                                     FOUR_UINT16_TO_UINT64(
                                       sbe_secure_version,
                                       sb_settings.minimum_secure_version,
@@ -2742,7 +3025,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                            "match expected hash 0x%.8X for proc=0x%X",
                            sha512_to_u32(sbe_hash),
                            sha512_to_u32(sb_settings.hw_keys_hash),
-                           TARGETING::get_huid(io_sbeState.target));
+                           get_huid(io_sbeState.target));
 
                 /*@
                  * @errortype
@@ -2758,7 +3041,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                 err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                     SBE_GET_TARGET_INFO_STATE,
                                     SBE_MISMATCHED_HW_KEY_HASH,
-                                    TARGETING::get_huid(io_sbeState.target),
+                                    get_huid(io_sbeState.target),
                                     TWO_UINT32_TO_UINT64(
                                       sha512_to_u32(sbe_hash),
                                       sha512_to_u32(sb_settings.hw_keys_hash)));
@@ -2882,21 +3165,21 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
 
         TRACUCOMP( g_trac_sbe,
                    EXIT_MRK"getSbeInfoState(): HUID=0x%.8X",
-                   TARGETING::get_huid(io_sbeState.target));
+                   get_huid(io_sbeState.target));
         return err;
 
     }
 
 
 /////////////////////////////////////////////////////////////////////
-    errlHndl_t getSeepromSideVersionViaSPI(TARGETING::Target* i_target,
+    errlHndl_t getSeepromSideVersionViaSPI(Target* i_target,
                                      EEPROM::EEPROM_ROLE i_seepromSide,
                                      sbeSeepromVersionInfo_t& o_info,
                                      bool& o_seeprom_ver_ECC_fail)
     {
         TRACUCOMP( g_trac_sbe,
                    ENTER_MRK"getSeepromSideVersionViaSPI(): HUID=0x%.8X, side:%d",
-                   TARGETING::get_huid(i_target), i_seepromSide);
+                   get_huid(i_target), i_seepromSide);
 
         errlHndl_t err = nullptr;
         PNOR::ECC::eccStatus eccStatus = PNOR::ECC::CLEAN;
@@ -2932,7 +3215,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                            "Error reading SBE Version from Seeprom 0x%X, "
                            "HUID=0x%.8X"
                            TRACE_ERR_FMT,
-                           i_seepromSide, TARGETING::get_huid(i_target),
+                           i_seepromSide, get_huid(i_target),
                            TRACE_ERR_ARGS(err));
                 break;
             }
@@ -3033,7 +3316,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
         return err;
     }
 
-errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
+errlHndl_t getSeepromSideVersionViaChipOp(Target* i_target,
                                           sbeSeepromVersionInfo_t& o_info)
     {
         errlHndl_t l_err = nullptr;
@@ -3131,17 +3414,17 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
 
 
 /////////////////////////////////////////////////////////////////////
-    errlHndl_t updateSeepromSide(sbeTargetState_t& io_sbeState)
+    errlHndl_t updateSeepromSide(sbeTargetState_t& io_sbeState, uint64_t i_sbe_update_vaddr)
     {
         TRACUCOMP( g_trac_sbe,
-                   ENTER_MRK"updateSeepromSide(): HUID=0x%.8X, side=%d",
-                   TARGETING::get_huid(io_sbeState.target),
+                   ENTER_MRK"updateSeepromSide(0x%16llX): HUID=0x%.8X, side=%d",
+                   i_sbe_update_vaddr, get_huid(io_sbeState.target),
                    io_sbeState.seeprom_side_to_update);
 
 #ifdef CONFIG_CONSOLE
         CONSOLE::displayf(CONSOLE::DEFAULT, SBE_COMP_NAME,
                           "System Performing SBE Update for PROC %d, side %d",
-                        io_sbeState.target->getAttr<TARGETING::ATTR_POSITION>(),
+                        io_sbeState.target->getAttr<ATTR_POSITION>(),
                         io_sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY ? SBE_SEEPROM0 : SBE_SEEPROM1);
 #endif
 
@@ -3213,7 +3496,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                 TRACFCOMP( g_trac_sbe, ERR_MRK"updateSeepromSide() - Error "
                            "Writing SBE Version Info: HUID=0x%.8X, side=%d, "
                            "RC=0x%X, EID=0x%lX",
-                           TARGETING::get_huid(io_sbeState.target),
+                           get_huid(io_sbeState.target),
                            io_sbeState.seeprom_side_to_update,
                            ERRL_GETRC_SAFE(err),
                            ERRL_GETEID_SAFE(err));
@@ -3244,7 +3527,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                     TRACFCOMP( g_trac_sbe, ERR_MRK"updateSeepromSide() - Error "
                                "Reading Back SBE Version Info: HUID=0x%.8X, "
                                "side=%d, RC=0x%X, EID=0x%lX",
-                               TARGETING::get_huid(io_sbeState.target),
+                               get_huid(io_sbeState.target),
                                io_sbeState.seeprom_side_to_update,
                                ERRL_GETRC_SAFE(err),
                                ERRL_GETEID_SAFE(err));
@@ -3285,7 +3568,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                                "sI=%d, sI_ECC=%d, HUID=0x%.8X, side=%d",
                                eccStatus, rc_readBack_ECC_memcmp,
                                sbeInfoSize, sbeInfoSize_ECC,
-                               TARGETING::get_huid(io_sbeState.target),
+                               get_huid(io_sbeState.target),
                                io_sbeState.seeprom_side_to_update);
 
                     TRACFBIN( g_trac_sbe, "updateSeepromSide: readback_wECC",
@@ -3319,8 +3602,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
 
                     err->collectTrace(SBE_COMP_NAME);
 
-                    err->addPartCallout(
-                                         io_sbeState.target,
+                    err->addPartCallout( io_sbeState.target,
                                          HWAS::SBE_SEEPROM_PART_TYPE,
                                          HWAS::SRCI_PRIORITY_HIGH,
                                          HWAS::NO_DECONFIG,
@@ -3338,21 +3620,21 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
             /*  Update SBE with Customized Image       */
             /*******************************************/
             // The Customized Image For This Target Still Resides In
-            // The SBE Update VMM Space: SBE_IMG_VADDR = VMM_VADDR_SBE_UPDATE
+            // The SBE Update VMM Space: i_sbe_update_vaddr
 
             // Inject ECC
             // clear out back half of page block to use as temp space
             // for ECC injected SBE Image.
             rc = mm_remove_pages(RELEASE,
-                                 reinterpret_cast<void*>(SBE_ECC_IMG_VADDR),
+                                 reinterpret_cast<void*>(i_sbe_update_vaddr + SBE_ECC_IMG_VADDR_OFFSET),
                                  SBE_ECC_IMG_MAX_SIZE);
             if( rc )
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"updateSeepromSide() - Error "
                            "from mm_remove_pages : rc=%d,  HUID=0x%.8X, "
                            "ECC_VADDR=0x%.16X, eccSize=0x%.8X.",
-                           rc, TARGETING::get_huid(io_sbeState.target),
-                           SBE_ECC_IMG_VADDR,
+                           rc, get_huid(io_sbeState.target),
+                           (i_sbe_update_vaddr + SBE_ECC_IMG_VADDR_OFFSET),
                            SBE_ECC_IMG_MAX_SIZE );
                 /*@
                  * @errortype
@@ -3368,7 +3650,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                 err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                     SBE_UPDATE_SEEPROMS,
                                     SBE_REMOVE_PAGES_FOR_EC,
-                                    TO_UINT64(SBE_ECC_IMG_VADDR),
+                                    (i_sbe_update_vaddr + SBE_ECC_IMG_VADDR_OFFSET),
                                     TO_UINT64(rc));
                 //Target isn't directly related to fail, but could be useful
                 // to see how far we got before failing.
@@ -3400,23 +3682,23 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
             TRACUCOMP( g_trac_sbe, INFO_MRK"updateSeepromSide(): "
                        "SBE_VADDR=0x%.16X, ECC_VADDR=0x%.16X, size=0x%.8X, "
                        "eccSize=0x%.8X, UPDATE_END=0x%.16X, UPDATE_SIZE=0x%.8X",
-                       SBE_IMG_VADDR,
-                       SBE_ECC_IMG_VADDR,
+                       i_sbe_update_vaddr,
+                       (i_sbe_update_vaddr + SBE_ECC_IMG_VADDR_OFFSET),
                        sbeImgSize,
                        sbeEccImgSize,
-                       VMM_VADDR_SBE_UPDATE_END,
+                       (i_sbe_update_vaddr + VMM_SBE_UPDATE_SIZE),
                        VMM_SBE_UPDATE_SIZE );
 
-            injectECC(reinterpret_cast<uint8_t*>(SBE_IMG_VADDR),
+            injectECC(reinterpret_cast<uint8_t*>(i_sbe_update_vaddr),
                       sbeImgSize,
                       SBE_IMAGE_SEEPROM_ADDRESS,
                       SBE_SEEPROM_SIZE,
-                      reinterpret_cast<uint8_t*>(SBE_ECC_IMG_VADDR));
+                      reinterpret_cast<uint8_t*>(i_sbe_update_vaddr + SBE_ECC_IMG_VADDR_OFFSET));
 
             TRACDBIN(g_trac_sbe,"updateSeepromSide()-start of IMG - no ECC",
-                     reinterpret_cast<void*>(SBE_IMG_VADDR), 0x80);
+                     reinterpret_cast<void*>(i_sbe_update_vaddr), 0x80);
             TRACDBIN(g_trac_sbe,"updateSeepromSide()-start of IMG - ECC",
-                     reinterpret_cast<void*>(SBE_ECC_IMG_VADDR), 0x80);
+                     reinterpret_cast<void*>(i_sbe_update_vaddr + SBE_ECC_IMG_VADDR_OFFSET), 0x80);
 
             ATTR_SBE_IS_STARTED_type l_sbeStarted =
                 io_sbeState.target->getAttr<ATTR_SBE_IS_STARTED>();
@@ -3460,7 +3742,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                     {
                         TRACFCOMP( g_trac_sbe,
                                    ERR_MRK"updateSeepromSide() - Error reading SBE control reg on %.8X - ignoring",
-                                   TARGETING::get_huid(io_sbeState.target));
+                                   get_huid(io_sbeState.target));
                         delete err;
                         err = nullptr;
                     }
@@ -3477,7 +3759,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                         {
                             TRACFCOMP( g_trac_sbe,
                                        ERR_MRK"updateSeepromSide() - Error writing SBE control reg on %.8X - ignoring",
-                                       TARGETING::get_huid(io_sbeState.target));
+                                       get_huid(io_sbeState.target));
                             delete err;
                             err = nullptr;
                         }
@@ -3491,13 +3773,13 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
             //Write new data to seeprom
             TRACFCOMP( g_trac_sbe, INFO_MRK"updateSeepromSide(): Write New "
                        "SBE Image for Target 0x%X to Seeprom %d",
-                       TARGETING::get_huid(io_sbeState.target),
+                       get_huid(io_sbeState.target),
                        io_sbeState.seeprom_side_to_update );
 
             //Write image to indicated side
             dd_op_size = sbeEccImgSize;
             err = deviceWrite(io_sbeState.target,
-                              reinterpret_cast<void*>(SBE_ECC_IMG_VADDR),
+                              reinterpret_cast<void*>(i_sbe_update_vaddr + SBE_ECC_IMG_VADDR_OFFSET),
                               dd_op_size,
                               DEVICE_EEPROM_ADDRESS(
                                             io_sbeState.seeprom_side_to_update,
@@ -3512,9 +3794,10 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                            "eccSize=0x%.8X, EEPROM offset=0x%X, "
                            "RC=0x%X, EID=0x%lX",
                            io_sbeState.seeprom_side_to_update,
-                           TARGETING::get_huid(io_sbeState.target),
-                           SBE_IMG_VADDR, SBE_ECC_IMG_VADDR, sbeImgSize,
-                           sbeEccImgSize, SBE_IMAGE_SEEPROM_ADDRESS,
+                           get_huid(io_sbeState.target),
+                           i_sbe_update_vaddr,
+                           (i_sbe_update_vaddr + SBE_ECC_IMG_VADDR_OFFSET),
+                           sbeImgSize, sbeEccImgSize, SBE_IMAGE_SEEPROM_ADDRESS,
                            ERRL_GETRC_SAFE(err), ERRL_GETEID_SAFE(err));
                 break;
             }
@@ -3551,14 +3834,14 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                     if(err)
                     {
                         TRACFCOMP(g_trac_sbe, ERR_MRK"updateSeepromSize() - Error reading updated SBE image from SEEPROM from HUID 0x%.8x side %d offset 0x%x",
-                                  TARGETING::get_huid(io_sbeState.target),
+                                  get_huid(io_sbeState.target),
                                   io_sbeState.seeprom_side_to_update,
                                   l_offset);
                         break;
                     }
 
                     // Compare it to the written image
-                    uint8_t l_imageCmpRc = memcmp(reinterpret_cast<void*>(SBE_ECC_IMG_VADDR + l_offset),
+                    uint8_t l_imageCmpRc = memcmp(reinterpret_cast<void*>((i_sbe_update_vaddr + SBE_ECC_IMG_VADDR_OFFSET) + l_offset),
                                                   l_sbeImgCheck.data(),
                                                   l_readSize);
 
@@ -3575,13 +3858,13 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                     {
                         CONSOLE::displayf(CONSOLE::DEFAULT, SBE_COMP_NAME, "SBE side %d of PROC %d failed read-back verification on page %ld; size of SBE image with ECC: 0x%x",
                                           io_sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY ? SBE_SEEPROM0 : SBE_SEEPROM1,
-                                          io_sbeState.target->getAttr<TARGETING::ATTR_POSITION>(),
+                                          io_sbeState.target->getAttr<ATTR_POSITION>(),
                                           (l_offset / PAGE_WITH_ECC),
                                           sbeEccImgSize);
                         TRACFCOMP(g_trac_sbe, ERR_MRK"updateSeepromSide() - SBE ECC error or data miscompare. Page=%ld eccStatus=%d, Image compare RC=%d, ECC size=0x%x, Size without ECC=0x%x, HUID=0x%.8x",
                                   (l_offset/PAGE_WITH_ECC), eccStatus,
                                   l_imageCmpRc, sbeEccImgSize, sbeImgSize,
-                                  TARGETING::get_huid(io_sbeState.target));
+                                  get_huid(io_sbeState.target));
                         TRACFBIN(g_trac_sbe, "Page that failed verification", l_sbeImgCheck.data(), l_readSize);
                         TRACFBIN(g_trac_sbe, "ECC-less page", l_sbeImgCheckNoEcc.data(), l_readSizeNoEcc);
 
@@ -3613,7 +3896,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                 {
                     CONSOLE::displayf(CONSOLE::DEFAULT, SBE_COMP_NAME, "SBE side %d of PROC %d passed read-back verification",
                                       io_sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY ? SBE_SEEPROM0 : SBE_SEEPROM1,
-                                      io_sbeState.target->getAttr<TARGETING::ATTR_POSITION>());
+                                      io_sbeState.target->getAttr<ATTR_POSITION>());
                 }
             } // if perform SBE readback verification
 
@@ -3650,7 +3933,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                 TRACFCOMP( g_trac_sbe, ERR_MRK"updateSeepromSide() - Error "
                            "Writing SBE Version Info: HUID=0x%.8X, side=%d, "
                            "RC=0x%X, EID=0x%lX",
-                           TARGETING::get_huid(io_sbeState.target),
+                           get_huid(io_sbeState.target),
                            io_sbeState.seeprom_side_to_update,
                            ERRL_GETRC_SAFE(err),
                            ERRL_GETEID_SAFE(err));
@@ -3682,7 +3965,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                 TRACFCOMP( g_trac_sbe, ERR_MRK"updateSeepromSide() - Error "
                            "Reading Back Upodated SBE Version Info: HUID=0x%.8X, "
                            "side=%d, RC=0x%X, EID=0x%lX",
-                           TARGETING::get_huid(io_sbeState.target),
+                           get_huid(io_sbeState.target),
                            io_sbeState.seeprom_side_to_update,
                            ERRL_GETRC_SAFE(err),
                            ERRL_GETEID_SAFE(err));
@@ -3706,7 +3989,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                            "Data Miscompare On SBE Version Read Back After Writing It: "
                            "rc_ECC=%d sI=%d, sI_ECC=%d, HUID=0x%.8X, side=%d",
                            rc_readBack_ECC_memcmp, sbeInfoSize, sbeInfoSize_ECC,
-                           TARGETING::get_huid(io_sbeState.target),
+                           get_huid(io_sbeState.target),
                            io_sbeState.seeprom_side_to_update);
 
                 TRACFBIN( g_trac_sbe, "updateSeepromSide: readback_wECC",
@@ -3732,7 +4015,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                                     SBE_UPDATE_SEEPROMS,
                                     SBE_DATA_MISCOMPARE,
                                     TWO_UINT32_TO_UINT64(
-                                         TARGETING::get_huid(io_sbeState.target),
+                                         get_huid(io_sbeState.target),
                                          io_sbeState.seeprom_side_to_update),
                                     TWO_UINT32_TO_UINT64(sbeInfoSize,
                                                          sbeInfoSize_ECC));
@@ -3804,17 +4087,17 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
 
 #ifdef CONFIG_SBE_UPDATE_SIMULTANEOUS
         // If no error, recursively call this function for the other SEEPROM
-        if ( ( err == NULL ) &&
+        if ( ( err == nullptr ) &&
              ( io_sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY ) )
         {
             io_sbeState.seeprom_side_to_update = EEPROM::SBE_BACKUP;
             TRACFCOMP( g_trac_sbe,
                        "updateSeepromSide(): Recursively calling itself: "
                        "HUID=0x%.8X, side=%d",
-                       TARGETING::get_huid(io_sbeState.target),
+                       get_huid(io_sbeState.target),
                        io_sbeState.seeprom_side_to_update);
 
-            err = updateSeepromSide(io_sbeState);
+            err = updateSeepromSide(io_sbeState, i_sbe_update_vaddr);
         }
 #endif
 
@@ -3830,10 +4113,10 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
             TRACFCOMP( g_trac_sbe,
                        "updateSeepromSide(): Recursively calling itself: "
                        "HUID=0x%.8X, side=%d",
-                       TARGETING::get_huid(io_sbeState.target),
+                       get_huid(io_sbeState.target),
                        io_sbeState.seeprom_side_to_update);
 
-            err = updateSeepromSide(io_sbeState);
+            err = updateSeepromSide(io_sbeState, i_sbe_update_vaddr);
         }
 #endif
 
@@ -3843,7 +4126,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
         if (g_update_both_sides)
         {
             // If no error, recursively call this function for the other SEEPROM
-            if ( ( err == NULL ) &&
+            if ( ( err == nullptr ) &&
                  ( io_sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY ) )
             {
                 io_sbeState.seeprom_side_to_update = EEPROM::SBE_BACKUP;
@@ -3851,7 +4134,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                 TRACFCOMP( g_trac_sbe,
                            "updateSeepromSide(): Recursively calling itself: "
                            "HUID=0x%.8X, side=%d",
-                           TARGETING::get_huid(io_sbeState.target),
+                           get_huid(io_sbeState.target),
                            io_sbeState.seeprom_side_to_update);
                  err = updateSeepromSide(io_sbeState);
             }
@@ -3868,7 +4151,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
     {
         TRACUCOMP( g_trac_sbe,
                    ENTER_MRK"getTargetUpdateActions(): HUID=0x%.8X",
-                   TARGETING::get_huid(io_sbeState.target));
+                   get_huid(io_sbeState.target));
 
         errlHndl_t err = nullptr;
 
@@ -3928,7 +4211,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
 #endif
                 TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: Seeprom0 "
                            "dirty: pnor=%d, crc=%d (custom=0x%X/s0=0x%X) isSimics_check=0x%X",
-                           TARGETING::get_huid(io_sbeState.target),
+                           get_huid(io_sbeState.target),
                            pnor_check_dirty, crc_check_dirty,
                            io_sbeState.customizedImage_crc,
                            io_sbeState.seeprom_0_ver.data_crc,
@@ -3939,7 +4222,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                 TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: Seeprom0 "
                            "flagged as clean: pnor=%d, crc=%d "
                            "(custom=0x%X/s0=0x%X) isSimics_check=0x%X",
-                           TARGETING::get_huid(io_sbeState.target),
+                           get_huid(io_sbeState.target),
                            pnor_check_dirty, crc_check_dirty,
                            io_sbeState.customizedImage_crc,
                            io_sbeState.seeprom_0_ver.data_crc,
@@ -3991,7 +4274,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
 #endif
                 TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: Seeprom1 "
                            "dirty: pnor=%d, crc=%d (custom=0x%X/s1=0x%X) isSimics_check 0x%X",
-                           TARGETING::get_huid(io_sbeState.target),
+                           get_huid(io_sbeState.target),
                            pnor_check_dirty, crc_check_dirty,
                            io_sbeState.customizedImage_crc,
                            io_sbeState.seeprom_1_ver.data_crc,
@@ -4002,7 +4285,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                 TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: Seeprom1 "
                            "flagged as clean: pnor=%d, crc=%d "
                            "(custom=0x%X/s1=0x%X) isSimics_check 0x%X",
-                           TARGETING::get_huid(io_sbeState.target),
+                           get_huid(io_sbeState.target),
                            pnor_check_dirty, crc_check_dirty,
                            io_sbeState.customizedImage_crc,
                            io_sbeState.seeprom_1_ver.data_crc,
@@ -4197,13 +4480,13 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                                "SBE Update() - Error returned from "
                                "PNOR::getSideInfo() rc=0x%.4X, Target UID=0x%X",
                                err->reasonCode(),
-                               TARGETING::get_huid(io_sbeState.target));
+                               get_huid(io_sbeState.target));
                     break;
                 }
 
                 TRACUCOMP( g_trac_sbe,INFO_MRK"SBE Update tgt=0x%X: PNOR Info: "
                            "side-%c, sideId=0x%X, isGolden=%d, hasOtherSide=%d",
-                           TARGETING::get_huid(io_sbeState.target),
+                           get_huid(io_sbeState.target),
                            pnor_side_info.side, pnor_side_info.id,
                            pnor_side_info.isGolden,
                            pnor_side_info.hasOtherSide);
@@ -4217,7 +4500,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                             "Booting READ_ONLY SEEPROM pointing at PNOR's "
                             "GOLDEN side. No updates for cur side=%d. Continue "
                             "IPL. (sit=0x%.2X, act=0x%.8X flags=0x%.2X)",
-                            TARGETING::get_huid(io_sbeState.target),
+                            get_huid(io_sbeState.target),
                             io_sbeState.cur_seeprom_side,
                             i_system_situation, l_actions,
                             io_sbeState.mvpdSbKeyword.flags);
@@ -4235,7 +4518,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                                "Treating cur like READ_ONLY SBE SEEPROM. "
                                "No updates for cur side=%d. Continue IPL. "
                                "(sit=0x%.2X, act=0x%.8X flags=0x%.2X)",
-                               TARGETING::get_huid(io_sbeState.target),
+                               get_huid(io_sbeState.target),
                                io_sbeState.cur_seeprom_side,
                                i_system_situation, l_actions,
                                io_sbeState.mvpdSbKeyword.flags);
@@ -4246,7 +4529,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                     TRACUCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
                                "NOT Booting READ_ONLY SEEPROM. Check for update"
                                " on cur side=%d ",
-                               TARGETING::get_huid(io_sbeState.target),
+                               get_huid(io_sbeState.target),
                                io_sbeState.cur_seeprom_side);
 
                     // Check for clean vs. dirty only on cur side
@@ -4268,7 +4551,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                         TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
                                    "cur side (%d) dirty. Update cur. Re-IPL. "
                                    "(sit=0x%.2X, act=0x%.8X flags=0x%.2X)",
-                                   TARGETING::get_huid(io_sbeState.target),
+                                   get_huid(io_sbeState.target),
                                    io_sbeState.cur_seeprom_side,
                                    i_system_situation, l_actions,
                                    io_sbeState.mvpdSbKeyword.flags);
@@ -4281,7 +4564,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                         TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
                                    "cur side (%d) clean-no updates. "
                                    "Continue IPL. (sit=0x%.2X, act=0x%.8X)",
-                                   TARGETING::get_huid(io_sbeState.target),
+                                   get_huid(io_sbeState.target),
                                    io_sbeState.cur_seeprom_side,
                                    i_system_situation, l_actions);
                     }
@@ -4362,7 +4645,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                                    "cur=temp/dirty(%d). Update alt. Re-IPL. "
                                    "Update MVPD flag "
                                    "(sit=0x%.2X, act=0x%.8X flags=0x%.2X)",
-                                   TARGETING::get_huid(io_sbeState.target),
+                                   get_huid(io_sbeState.target),
                                    io_sbeState.cur_seeprom_side,
                                    i_system_situation, l_actions,
                                    io_sbeState.mvpdSbKeyword.flags);
@@ -4405,7 +4688,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                                    "cur=temp/clean(%d), alt=dirty. "
                                    "Update alt. Continue IPL. Update MVPD flag."
                                    "(sit=0x%.2X, act=0x%.8X flags=0x%.2X)",
-                                   TARGETING::get_huid(io_sbeState.target),
+                                   get_huid(io_sbeState.target),
                                    io_sbeState.cur_seeprom_side,
                                    i_system_situation, l_actions,
                                    io_sbeState.mvpdSbKeyword.flags);
@@ -4428,7 +4711,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                                    "Both sides clean-no updates. cur was temp "
                                    "(%d). Continue IPL. (sit=0x%.2X, "
                                    "act=0x%.8X)",
-                                   TARGETING::get_huid(io_sbeState.target),
+                                   get_huid(io_sbeState.target),
                                    io_sbeState.cur_seeprom_side,
                                    i_system_situation, l_actions);
 
@@ -4479,7 +4762,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                             TRACFCOMP(g_trac_sbe,INFO_MRK"SBE Update tgt=0x%X: "
                                       "istep mode: update alt to perm, (sit="
                                       "0x%.2X)",
-                                      TARGETING::get_huid(io_sbeState.target),
+                                      get_huid(io_sbeState.target),
                                       i_system_situation);
                         }
 
@@ -4487,7 +4770,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                                    "cur=perm/dirty(%d), alt=dirty. Update alt. "
                                    "re-IPL. (sit=0x%.2X, act=0x%.8X, "
                                    "flags=0x%.2X)",
-                                   TARGETING::get_huid(io_sbeState.target),
+                                   get_huid(io_sbeState.target),
                                    io_sbeState.cur_seeprom_side,
                                    i_system_situation, l_actions,
                                    io_sbeState.mvpdSbKeyword.flags);
@@ -4514,7 +4797,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                                       "alt=clean. On our Re-"
                                       "IPL. Call-out SBE code but Continue "
                                       "IPL. (sit=0x%.2X, act=0x%.8X)",
-                                      TARGETING::get_huid(io_sbeState.target),
+                                      get_huid(io_sbeState.target),
                                       io_sbeState.cur_seeprom_side,
                                       i_system_situation, l_actions);
 
@@ -4571,7 +4854,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                                       "cur=perm/dirty(%d), alt=clean. Not our "
                                       "Re-IPL. Update alt and MVPD. re-IPL. "
                                       "(sit=0x%.2X, act=0x%.8X, flags=0x%.2X)",
-                                      TARGETING::get_huid(io_sbeState.target),
+                                      get_huid(io_sbeState.target),
                                       io_sbeState.cur_seeprom_side,
                                       i_system_situation, l_actions,
                                       io_sbeState.mvpdSbKeyword.flags);
@@ -4601,7 +4884,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                                    "cur=perm/clean(%d), alt=dirty. "
                                    "Update alt. Continue IPL. "
                                    "(sit=0x%.2X, act=0x%.8X)",
-                                   TARGETING::get_huid(io_sbeState.target),
+                                   get_huid(io_sbeState.target),
                                    io_sbeState.cur_seeprom_side,
                                    i_system_situation, l_actions);
 
@@ -4622,7 +4905,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                                    "Both sides clean-no updates. cur was "
                                    "perm(%d). Continue IPL. (sit=0x%.2X, "
                                    "act=0x%.8X)",
-                                   TARGETING::get_huid(io_sbeState.target),
+                                   get_huid(io_sbeState.target),
                                    io_sbeState.cur_seeprom_side,
                                    i_system_situation, l_actions);
 
@@ -4636,7 +4919,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                         TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
                                    "Unsupported Scenario.  Just Continue IPL. "
                                    "(sit=0x%.2X, act=0x%.8X, cur=%d)",
-                                   TARGETING::get_huid(io_sbeState.target),
+                                   get_huid(io_sbeState.target),
                                    i_system_situation, l_actions,
                                    io_sbeState.cur_seeprom_side);
 
@@ -4696,7 +4979,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                                "side 0=dirty, side 1=%s. Boot side %d. "
                                "Update side 0 (primary). re-IPL. "
                                "(sit=0x%.2X, act=0x%.8X)",
-                               TARGETING::get_huid(io_sbeState.target),
+                               get_huid(io_sbeState.target),
                                ( i_system_situation & SITUATION_SIDE_1_DIRTY)
                                    ? "dirty" : "clean",
                                io_sbeState.cur_seeprom_side,
@@ -4720,7 +5003,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                                "side 0=clean, side 1=dirty. Boot side 1. "
                                "Call-out SBE code. Continue IPL. "
                                "(sit=0x%.2X, act=0x%.8X)",
-                               TARGETING::get_huid(io_sbeState.target),
+                               get_huid(io_sbeState.target),
                                i_system_situation, l_actions);
 
                     /*
@@ -4769,7 +5052,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                                "side 0=clean, side 1=dirty. Boot side 0. "
                                "Update side 1 (backup). Continue IPL. "
                                "(sit=0x%.2X, act=0x%.8X)",
-                               TARGETING::get_huid(io_sbeState.target),
+                               get_huid(io_sbeState.target),
                                i_system_situation, l_actions);
 
                     break;
@@ -4795,7 +5078,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                     TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
                                "Both sides clean-no updates. Boot side %d. "
                                "Continue IPL. (sit=0x%.2X, act=0x%.8X)",
-                               TARGETING::get_huid(io_sbeState.target),
+                               get_huid(io_sbeState.target),
                                io_sbeState.cur_seeprom_side,
                                i_system_situation, l_actions);
 
@@ -4809,7 +5092,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                     TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
                                "Unsupported Scenario.  Just Continue IPL. "
                                "(sit=0x%.2X, act=0x%.8X, Boot side %d)",
-                               TARGETING::get_huid(io_sbeState.target),
+                               get_huid(io_sbeState.target),
                                i_system_situation, l_actions,
                                io_sbeState.cur_seeprom_side);
 
@@ -4828,7 +5111,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
             TRACUCOMP( g_trac_sbe, "decisionTreeForUpdates() Tgt=0x%X: "
                        "i_system_situation=0x%.2X, actions=0x%.8X, "
                        "Update EEPROM=0x%X, flags=0x%X, cur=%d",
-                       TARGETING::get_huid(io_sbeState.target),
+                       get_huid(io_sbeState.target),
                        i_system_situation,
                        io_sbeState.update_actions,
                        io_sbeState.seeprom_side_to_update,
@@ -4882,7 +5165,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                            "At least one side dirty. cur side=%d. Update "
                            "alt. Re-IPL. Update MVPD flag "
                            "(sit=0x%.2X, act=0x%.8X flags=0x%.2X)",
-                           TARGETING::get_huid(io_sbeState.target),
+                           get_huid(io_sbeState.target),
                            io_sbeState.cur_seeprom_side,
                            i_system_situation, io_actions,
                            io_sbeState.mvpdSbKeyword.flags);
@@ -4896,19 +5179,19 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                 TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
                            "Both sides clean-no updates. cur side=%d. "
                            "Continue IPL. (sit=0x%.2X, act=0x%.8X)",
-                           TARGETING::get_huid(io_sbeState.target),
+                           get_huid(io_sbeState.target),
                            io_sbeState.cur_seeprom_side,
                            i_system_situation, io_actions);
         }
     }
 
 /////////////////////////////////////////////////////////////////////
-    errlHndl_t performUpdateActions(sbeTargetState_t& io_sbeState)
+    errlHndl_t performUpdateActions(sbeTargetState_t& io_sbeState, uint64_t i_sbe_update_vaddr)
     {
         TRACUCOMP( g_trac_sbe,
                    ENTER_MRK"performUpdateActions(): HUID=0x%.8X, "
                    "updateActions=0x%.8X",
-                   TARGETING::get_huid(io_sbeState.target),
+                   get_huid(io_sbeState.target),
                    io_sbeState.update_actions);
 
         errlHndl_t err      = nullptr;
@@ -4941,13 +5224,13 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                 }
 #endif
 
-                err = updateSeepromSide(io_sbeState);
+                err = updateSeepromSide(io_sbeState, i_sbe_update_vaddr);
                 if(err)
                 {
                     TRACFCOMP( g_trac_sbe, ERR_MRK"performUpdateActions() - "
                                "updateProcessorSbeSeeproms() failed. "
                                "HUID=0x%.8X.",
-                               TARGETING::get_huid(io_sbeState.target));
+                               get_huid(io_sbeState.target));
                     break;
                 }
                 l_actions |= SBE_UPDATE_COMPLETE;
@@ -4967,7 +5250,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                                "Error Updating MVPD with new SBE Image Info "
                                "HUID=0x%.8X, rc=0x%.4x. Skipping SBE Update. "
                                "(actions=0x%.8X)",
-                               TARGETING::get_huid(io_sbeState.target),
+                               get_huid(io_sbeState.target),
                                err->reasonCode(), l_actions );
                     break;
                 }
@@ -4980,12 +5263,12 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
 #ifndef CONFIG_SBE_UPDATE_SIMULTANEOUS
             TRACFCOMP( g_trac_sbe,INFO_MRK"performUpdateActions(): Successful "
                        "SBE Update of HUID=0x%.8X SEEPROM %d",
-                       TARGETING::get_huid(io_sbeState.target),
+                       get_huid(io_sbeState.target),
                        io_sbeState.seeprom_side_to_update);
 #else
             TRACFCOMP( g_trac_sbe,INFO_MRK"performUpdateActions(): Successful "
                        "SBE Update of HUID=0x%.8X - Both SEEPROMs",
-                       TARGETING::get_huid(io_sbeState.target));
+                       get_huid(io_sbeState.target));
 #endif
 
             /*@
@@ -5053,7 +5336,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
         TRACUCOMP( g_trac_sbe,
                    EXIT_MRK"performUpdateActions(): HUID=0x%.8X, "
                    "updateActions=0x%.8X",
-                   TARGETING::get_huid(io_sbeState.target),
+                   get_huid(io_sbeState.target),
                    io_sbeState.update_actions);
 
         return err;
@@ -5085,11 +5368,11 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
 
 
 /////////////////////////////////////////////////////////////////////
-    errlHndl_t createSbeImageVmmSpace(void)
+    errlHndl_t createSbeImageVmmSpace(uint64_t i_vmm_vaddr)
     {
-
         TRACDCOMP( g_trac_sbe,
-                   ENTER_MRK"createSbeImageVmmSpace");
+                   ENTER_MRK"createSbeImageVmmSpace(0x%llX)",
+                   i_vmm_vaddr);
 
         int64_t rc = 0;
         errlHndl_t err = nullptr;
@@ -5106,25 +5389,25 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
             // NOTE: using mm_alloc_block since this code is running before we
             // have mainstore and we must have contiguous blocks of memory for
             // the customize procedure to use.
-            rc = mm_alloc_block( NULL,
-                                 reinterpret_cast<void*>
-                                 (VMM_VADDR_SBE_UPDATE),
+            rc = mm_alloc_block( nullptr,
+                                 reinterpret_cast<void*>(i_vmm_vaddr),
                                  VMM_SBE_UPDATE_SIZE);
 
             if(rc == -EALREADY)
             {
-                //-EALREADY inidciates the block is already mapped
+                //-EALREADY indicates the block is already mapped
                 // so just ignore
                 rc = 0;
             }
 
             if( rc )
             {
-                TRACFCOMP( g_trac_sbe, ERR_MRK"createSbeImageVmmSpace() - "
-                           "Error from mm_alloc_block : rc=%d", rc );
+                TRACFCOMP( g_trac_sbe, ERR_MRK"createSbeImageVmmSpace(0x%llX) - "
+                           "Error from mm_alloc_block : rc=%d",
+                           i_vmm_vaddr, rc );
                 /*@
                  * @errortype
-                 * @moduleid     SBE_CREATE_TEST_SPACE
+                 * @moduleid     SBE_CREATE_SBE_VMM_SPACE
                  * @reasoncode   SBE_ALLOC_BLOCK_FAIL
                  * @userdata1    Requested Address
                  * @userdata2    rc from mm_alloc_block
@@ -5134,9 +5417,9 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                  *               boot code.
                  */
                 err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                    SBE_CREATE_TEST_SPACE,
+                                    SBE_CREATE_SBE_VMM_SPACE,
                                     SBE_ALLOC_BLOCK_FAIL,
-                                    TO_UINT64(VMM_VADDR_SBE_UPDATE),
+                                    i_vmm_vaddr,
                                     TO_UINT64(rc));
 
                 err->collectTrace(SBE_COMP_NAME);
@@ -5146,16 +5429,17 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                 break;
             }
 
-            rc = mm_set_permission(reinterpret_cast<void*>
-                                   (VMM_VADDR_SBE_UPDATE),
+            rc = mm_set_permission(reinterpret_cast<void*>(i_vmm_vaddr),
                                    VMM_SBE_UPDATE_SIZE,
                                    WRITABLE | ALLOCATE_FROM_ZERO );
             if( rc )
             {
-                TRACFCOMP( g_trac_sbe, ERR_MRK"createSbeImageVmmSpace() - Error from mm_set_permission : rc=%d", rc );
+                TRACFCOMP( g_trac_sbe, ERR_MRK"createSbeImageVmmSpace(0x%llX) - "
+                          "Error from mm_set_permission : rc=%d",
+                          i_vmm_vaddr, rc );
                 /*@
                  * @errortype
-                 * @moduleid     SBE_CREATE_TEST_SPACE
+                 * @moduleid     SBE_CREATE_SBE_VMM_SPACE
                  * @reasoncode   SBE_SET_PERMISSION_FAIL
                  * @userdata1    Requested Address
                  * @userdata2    rc from mm_set_permission
@@ -5165,9 +5449,9 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                  *               boot code.
                  */
                 err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                    SBE_CREATE_TEST_SPACE,
+                                    SBE_CREATE_SBE_VMM_SPACE,
                                     SBE_SET_PERMISSION_FAIL,
-                                    TO_UINT64(VMM_VADDR_SBE_UPDATE),
+                                    i_vmm_vaddr,
                                     TO_UINT64(rc));
                 err->collectTrace(SBE_COMP_NAME);
                 err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
@@ -5178,7 +5462,8 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
         }while(0);
 
         TRACDCOMP( g_trac_sbe,
-                   EXIT_MRK"createSbeImageVmmSpace() - rc =0x%X", rc);
+                   EXIT_MRK"createSbeImageVmmSpace(0x%llX) - rc =0x%X",
+                   i_vmm_vaddr, rc );
 
         return err;
 
@@ -5186,10 +5471,11 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
 
 
 /////////////////////////////////////////////////////////////////////
-    errlHndl_t cleanupSbeImageVmmSpace(void)
+    errlHndl_t cleanupSbeImageVmmSpace(uint64_t i_vmm_vaddr)
     {
         TRACDCOMP( g_trac_sbe,
-                   ENTER_MRK"cleanupSbeImageVmmSpace");
+                   ENTER_MRK"cleanupSbeImageVmmSpace(0x%llX)",
+                   i_vmm_vaddr);
 
         errlHndl_t err = nullptr;
         int64_t rc = 0;
@@ -5198,16 +5484,16 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
 
             //release all pages in page block
             rc = mm_remove_pages(RELEASE,
-                                 reinterpret_cast<void*>
-                                 (VMM_VADDR_SBE_UPDATE),
+                                 reinterpret_cast<void*>(i_vmm_vaddr),
                                  VMM_SBE_UPDATE_SIZE);
             if( rc )
             {
-                TRACFCOMP( g_trac_sbe, ERR_MRK"cleanupSbeImageVmmSpace() - "
-                           "Error from mm_remove_pages : rc=%d", rc );
+                TRACFCOMP( g_trac_sbe, ERR_MRK"cleanupSbeImageVmmSpace(0x%llX) - "
+                           "Error from mm_remove_pages : rc=%d",
+                           i_vmm_vaddr, rc );
                 /*@
                  * @errortype
-                 * @moduleid     SBE_CLEANUP_TEST_SPACE
+                 * @moduleid     SBE_CLEANUP_SBE_VMM_SPACE
                  * @reasoncode   SBE_REMOVE_PAGES_FAIL
                  * @userdata1    Requested Address
                  * @userdata2    rc from mm_remove_pages
@@ -5217,9 +5503,9 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                  *               boot code.
                  */
                 err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                    SBE_CLEANUP_TEST_SPACE,
+                                    SBE_CLEANUP_SBE_VMM_SPACE,
                                     SBE_REMOVE_PAGES_FAIL,
-                                    TO_UINT64(VMM_VADDR_SBE_UPDATE),
+                                    TO_UINT64(i_vmm_vaddr),
                                     TO_UINT64(rc));
                 err->collectTrace(SBE_COMP_NAME);
                 err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
@@ -5229,17 +5515,16 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
             }
 
             // Set permissions back to "no_access"
-            rc = mm_set_permission(reinterpret_cast<void*>
-                                   (VMM_VADDR_SBE_UPDATE),
+            rc = mm_set_permission(reinterpret_cast<void*>(i_vmm_vaddr),
                                    VMM_SBE_UPDATE_SIZE,
                                    NO_ACCESS | ALLOCATE_FROM_ZERO );
             if( rc )
             {
-                TRACFCOMP( g_trac_sbe, ERR_MRK"cleanupSbeImageVmmSpace() - "
-                           "Error from mm_set_permission : rc=%d", rc );
+                TRACFCOMP( g_trac_sbe, ERR_MRK"cleanupSbeImageVmmSpace(0x%llX) - "
+                           "Error from mm_set_permission : rc=%d", i_vmm_vaddr, rc );
                 /*@
                  * @errortype
-                 * @moduleid     SBE_CLEANUP_TEST_SPACE
+                 * @moduleid     SBE_CLEANUP_SBE_VMM_SPACE
                  * @reasoncode   SBE_SET_PERMISSION_FAIL
                  * @userdata1    Requested Address
                  * @userdata2    rc from mm_set_permission
@@ -5249,9 +5534,9 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                  *               boot code.
                  */
                 err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                    SBE_CLEANUP_TEST_SPACE,
+                                    SBE_CLEANUP_SBE_VMM_SPACE,
                                     SBE_SET_PERMISSION_FAIL,
-                                    TO_UINT64(VMM_VADDR_SBE_UPDATE),
+                                    i_vmm_vaddr,
                                     TO_UINT64(rc));
                 err->collectTrace(SBE_COMP_NAME);
                 err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
@@ -5259,31 +5544,37 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                 break;
             }
 
-            // Unload any PNOR sections that might've gotten left loaded
-            //  (probably due to some error path)
-            std::list<PNOR::SectionId> tmplist = g_loadedSections;
-            for( const auto & section : tmplist )
-            {
-                TRACFCOMP(g_trac_sbe,"Leftover section %d",section);
-                err = unloadPnorSection(section);
-                if( err )
-                {
-                    break;
-                }
-            }
-            if( err ) { break; }
-            g_loadedSections.clear();
-
         }while(0);
 
 
         TRACDCOMP( g_trac_sbe,
-                   EXIT_MRK"cleanupSbeImageVmmSpace() - rc =0x%X", rc);
+                   EXIT_MRK"cleanupSbeImageVmmSpace(0x%llX) - rc =0x%X",
+                   i_vmm_vaddr, rc );
 
         return err;
 
     }
 
+/////////////////////////////////////////////////////////////////////
+    errlHndl_t cleanupPreloadedPnorSections(const std::vector<PNOR::SectionId>& i_remainingSections)
+    {
+        TRACDCOMP( g_trac_sbe, ENTER_MRK"cleanupPreloadedPnorSections()");
+
+        errlHndl_t err = nullptr;
+
+        for ( const auto & id : i_remainingSections )
+        {
+            TRACDCOMP(g_trac_sbe,"cleanupPreloadedPnorSections() cleanup section %d", id);
+            err = unloadPnorSection(id);
+            if( err )
+            {
+                break;
+            }
+        }
+
+        TRACDCOMP( g_trac_sbe, EXIT_MRK"cleanupPreloadedPnorSections() - RC=%.4X", ERRL_GETRC_SAFE(err));
+        return err;
+    }
 
 /////////////////////////////////////////////////////////////////////
     bool isIplFromReIplRequest(void)
@@ -5293,7 +5584,13 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
 
         bool o_reIplRequest = false;
         errlHndl_t err = nullptr;
-        msg_t * msg = msg_allocate();
+        msg_t * msg = nullptr;
+
+        // This mutex protects this function from sending another msg
+        // while another task is already sending the msg and updating the
+        // g_mbox global variables
+        static mutex_t check_ipl_mutex = MUTEX_INITIALIZER;
+        const auto lock = scoped_mutex_lock(check_ipl_mutex);
 
         do{
 
@@ -5310,16 +5607,17 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                 break;
             }
 
+
             /*********************************************/
             /*  Check if MBOX is enabled                 */
             /*********************************************/
             bool mbox_enabled = false;
 
-            TARGETING::Target * sys = NULL;
-            TARGETING::targetService().getTopLevelTarget( sys );
-            TARGETING::SpFunctions spfuncs;
+            Target * sys = nullptr;
+            targetService().getTopLevelTarget( sys );
+            SpFunctions spfuncs;
             if( sys &&
-                sys->tryGetAttr<TARGETING::ATTR_SP_FUNCTIONS>(spfuncs) &&
+                sys->tryGetAttr<ATTR_SP_FUNCTIONS>(spfuncs) &&
                 spfuncs.mailboxEnabled)
             {
                 mbox_enabled = true;
@@ -5341,10 +5639,11 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
             /*********************************************/
             /*  MBOX enabled, send message               */
             /*********************************************/
+            msg = msg_allocate();
             msg->type = MSG_IPL_DUE_TO_SBE_UPDATE;
             msg->data[0] = 0x0;
             msg->data[1] = 0x0;
-            msg->extra_data = NULL;
+            msg->extra_data = nullptr;
 
             err = MBOX::sendrecv(MBOX::IPL_SERVICE_QUEUE, msg);
 
@@ -5417,8 +5716,11 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
 
 
         // msg cleanup
-        msg_free(msg);
-        msg = NULL;
+        if (msg != nullptr)
+        {
+            msg_free(msg);
+            msg = nullptr;
+        }
 
         TRACDCOMP( g_trac_sbe,
                    EXIT_MRK"isIplFromReIplRequest(): o_reIplRequest=%d",
@@ -5430,122 +5732,118 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
 
 
 /////////////////////////////////////////////////////////////////////
-    errlHndl_t preReIplCheck(std::vector<sbeTargetState_t>& io_sbeStates_v)
+errlHndl_t preReIplCheck(std::vector<sbeTargetState_t>& io_sbeStates_v)
+{
+
+    TRACDCOMP( g_trac_sbe,
+               ENTER_MRK"preReIplCheck" );
+
+    errlHndl_t err = nullptr;
+
+    // MVPD PERMANENT and Re-IPL Seeprom flags
+    uint8_t perm_and_reipl = 0x0;
+    uint8_t flags_mask = (PERMANENT_FLAG_MASK | REIPL_SEEPROM_MASK);
+    uint8_t flags_match_0 =    SEEPROM_0_PERMANENT_VALUE |
+                               REIPL_SEEPROM_0_VALUE;
+    uint8_t flags_match_1 =    SEEPROM_1_PERMANENT_VALUE |
+                               REIPL_SEEPROM_1_VALUE;
+    uint8_t flags_misMatch_A = SEEPROM_1_PERMANENT_VALUE |
+                               REIPL_SEEPROM_0_VALUE;
+    uint8_t flags_misMatch_B = SEEPROM_0_PERMANENT_VALUE |
+                               REIPL_SEEPROM_1_VALUE;
+
+    /*****************************************************************/
+    /*  Iterate over all the processors and check/update each for:   */
+    /*  1) MVPD SB Keyword has correct flag set for the              */
+    /*     re-IPL SEEPROM                                            */
+    /*****************************************************************/
+    for ( uint8_t i=0; i < io_sbeStates_v.size(); i++ )
     {
+        /*************************************************************/
+        /* If not already updated, make sure MVPD SB Keyword has     */
+        /*     correct flag set for re-IPL SEEPROM                   */
+        /*************************************************************/
+        if (!(io_sbeStates_v[i].update_actions & MVPD_UPDATE_COMPLETE))
+        {
+            // This target has not already had its MVPD updated
+            // Check that perm and re-IPL boot flag match
 
-        TRACDCOMP( g_trac_sbe,
-                   ENTER_MRK"preReIplCheck");
-
-        errlHndl_t err = nullptr;
-
-        // MVPD PERMANENT and Re-IPL Seeprom flags
-        uint8_t perm_and_reipl = 0x0;
-        uint8_t flags_mask = (PERMANENT_FLAG_MASK | REIPL_SEEPROM_MASK);
-        uint8_t flags_match_0 =    SEEPROM_0_PERMANENT_VALUE |
-                                   REIPL_SEEPROM_0_VALUE;
-        uint8_t flags_match_1 =    SEEPROM_1_PERMANENT_VALUE |
-                                   REIPL_SEEPROM_1_VALUE;
-        uint8_t flags_misMatch_A = SEEPROM_1_PERMANENT_VALUE |
-                                   REIPL_SEEPROM_0_VALUE;
-        uint8_t flags_misMatch_B = SEEPROM_0_PERMANENT_VALUE |
-                                   REIPL_SEEPROM_1_VALUE;
-
-        do{
+            perm_and_reipl = io_sbeStates_v[i].mvpdSbKeyword.flags &
+                             flags_mask;
 
 
-            /*****************************************************************/
-            /*  Iterate over all the processors and check/update each for:   */
-            /*  1) MVPD SB Keyword has correct flag set for the              */
-            /*     re-IPL SEEPROM                                            */
-            /*****************************************************************/
-            for ( uint8_t i=0; i < io_sbeStates_v.size(); i++ )
+            if ( ( perm_and_reipl == flags_match_0 ) ||
+                 ( perm_and_reipl == flags_match_1 )   )
             {
-                /*************************************************************/
-                /* If not already updated, make sure MVPD SB Keyword has     */
-                /*     correct flag set for re-IPL SEEPROM                   */
-                /*************************************************************/
-                if (!(io_sbeStates_v[i].update_actions & MVPD_UPDATE_COMPLETE))
+                TRACUCOMP(g_trac_sbe,"preReIplCheck(): no MVPD update "
+                          "required for tgt=0x%X (u_a=0x%X, flag=0x%X)",
+                          get_huid(io_sbeStates_v[i].target),
+                          io_sbeStates_v[i].update_actions,
+                          io_sbeStates_v[i].mvpdSbKeyword.flags);
+                continue;
+
+            }
+            else if ( ( perm_and_reipl == flags_misMatch_A ) ||
+                      ( perm_and_reipl == flags_misMatch_B )   )
+
+            {
+                if ( perm_and_reipl == flags_misMatch_A )
                 {
-                    // This target has not already had its MVPD updated
-                    // Check that perm and re-IPL boot flag match
-
-                    perm_and_reipl = io_sbeStates_v[i].mvpdSbKeyword.flags &
-                                     flags_mask;
-
-
-                    if ( ( perm_and_reipl == flags_match_0 ) ||
-                         ( perm_and_reipl == flags_match_1 )   )
-                    {
-                        TRACUCOMP(g_trac_sbe,"preReIplCheck(): no MVPD update "
-                                  "required for tgt=0x%X (u_a=0x%X, flag=0x%X)",
-                                  TARGETING::get_huid(io_sbeStates_v[i].target),
-                                  io_sbeStates_v[i].update_actions,
-                                  io_sbeStates_v[i].mvpdSbKeyword.flags);
-                        continue;
-
-                    }
-                    else if ( ( perm_and_reipl == flags_misMatch_A ) ||
-                              ( perm_and_reipl == flags_misMatch_B )   )
-
-                    {
-                        if ( perm_and_reipl == flags_misMatch_A )
-                        {
-                            // Perm is SEEPROM 1, so set both to 1
-                            io_sbeStates_v[i].mvpdSbKeyword.flags |=
-                                                            flags_match_1;
-                        }
-                        else
-                        {
-                            // Perm is SEEPROM 0, so set both to 0
-                            io_sbeStates_v[i].mvpdSbKeyword.flags &=
-                                                           ~flags_mask;
-                        }
-
-
-                        TRACFCOMP(g_trac_sbe,"preReIplCheck(): MVPD update "
-                                  "Required for tgt=0x%X (u_a=0x%X, flag=0x%X)",
-                                  TARGETING::get_huid(io_sbeStates_v[i].target),
-                                  io_sbeStates_v[i].update_actions,
-                                  io_sbeStates_v[i].mvpdSbKeyword.flags);
-
-                        err = getSetMVPDVersion(
-                                    io_sbeStates_v[i].target,
-                                    MVPDOP_WRITE,
-                                    io_sbeStates_v[i].mvpdSbKeyword);
-                        if(err)
-                        {
-                            TRACFCOMP(g_trac_sbe,ERR_MRK"preReIplCheck() "
-                                "Error Updating MVPD with new flag Info: "
-                                "HUID=0x%.8X, rc=0x%.4X. Committing log "
-                                "here and continuing.",
-                                TARGETING::get_huid(io_sbeStates_v[i].target),
-                                err->reasonCode());
-                             errlCommit( err, SBE_COMP_ID );
-                        }
-
-                        // update actions field
-                        uint32_t tmp_actions = io_sbeStates_v[i].update_actions
-                                                | MVPD_UPDATE_COMPLETE;
-
-                        io_sbeStates_v[i].update_actions =
-                                          static_cast<sbeUpdateActions_t>
-                                                          (tmp_actions);
-
-                        continue;
-
-                    }
+                    // Perm is SEEPROM 1, so set both to 1
+                    io_sbeStates_v[i].mvpdSbKeyword.flags |=
+                                                    flags_match_1;
                 }
-            } // end of for loop
+                else
+                {
+                    // Perm is SEEPROM 0, so set both to 0
+                    io_sbeStates_v[i].mvpdSbKeyword.flags &=
+                                                   ~flags_mask;
+                }
 
-        }while(0);
+
+                TRACFCOMP(g_trac_sbe,"preReIplCheck(): MVPD update "
+                          "Required for tgt=0x%X (u_a=0x%X, flag=0x%X)",
+                          get_huid(io_sbeStates_v[i].target),
+                          io_sbeStates_v[i].update_actions,
+                          io_sbeStates_v[i].mvpdSbKeyword.flags);
+
+                err = getSetMVPDVersion(
+                            io_sbeStates_v[i].target,
+                            MVPDOP_WRITE,
+                            io_sbeStates_v[i].mvpdSbKeyword);
+                if(err)
+                {
+                    TRACFCOMP(g_trac_sbe,ERR_MRK"preReIplCheck() "
+                        "Error Updating MVPD with new flag Info: "
+                        "HUID=0x%.8X, rc=0x%.4X. Committing log "
+                        "here and continuing.",
+                        get_huid(io_sbeStates_v[i].target),
+                        err->reasonCode());
+                     errlCommit( err, SBE_COMP_ID );
+                }
+
+                // update actions field
+                uint32_t tmp_actions = io_sbeStates_v[i].update_actions
+                                        | MVPD_UPDATE_COMPLETE;
+
+                io_sbeStates_v[i].update_actions =
+                                  static_cast<sbeUpdateActions_t>
+                                                  (tmp_actions);
+
+                continue;
+
+            }
+        }
+    } // end of for loop
 
 
-        TRACDCOMP( g_trac_sbe,
-                   EXIT_MRK"preReIplCheck()");
 
-        return err;
+    TRACDCOMP( g_trac_sbe,
+               EXIT_MRK"preReIplCheck()");
 
-    }
+    return err;
+
+}
 
 
 /////////////////////////////////////////////////////////////////////
@@ -5560,7 +5858,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
         uint8_t mP = UINT8_MAX;
         sbe_image_version_t mP_version;
         sbe_image_version_t * ver_ptr;
-        TARGETING::ATTR_MODEL_type l_model;
+        ATTR_MODEL_type l_model;
 
         do{
 
@@ -5579,7 +5877,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                 {
                     mP = i;
                     l_model = io_sbeStates_v[i].target
-                                           ->getAttr<TARGETING::ATTR_MODEL>();
+                                           ->getAttr<ATTR_MODEL>();
 
                     // Compare against 'current' Master side in case there is
                     // an issue with the other side
@@ -5646,8 +5944,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                                    "SBE Version Miscompare Between Master "
                                    "Target SEEPROMs (HUID=0x%.8X, current "
                                    "side=%d)",
-                                   TARGETING::get_huid(
-                                                  io_sbeStates_v[mP].target),
+                                   get_huid(io_sbeStates_v[mP].target),
                                    io_sbeStates_v[mP].cur_seeprom_side);
 
                         // Trace first 8 bytes of each section
@@ -5683,8 +5980,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                         err = new ErrlEntry(ERRL_SEV_PREDICTIVE,
                                             SBE_MASTER_VERSION_COMPARE,
                                             SBE_MASTER_VERSION_DOWNLEVEL,
-                                            TARGETING::get_huid(
-                                                  io_sbeStates_v[mP].target),
+                                            get_huid(io_sbeStates_v[mP].target),
                                             mP);
 
                         err->collectTrace(SBE_COMP_NAME);
@@ -5757,7 +6053,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                                "HUID=0x%.8X: plid=0x%.8X, eid=0x%.8X, "
                                "rc=0x%.4X, sev=0x%.2X. "
                                "Can't trust its SBE Version",
-                               TARGETING::get_huid(io_sbeStates_v[i].target),
+                               get_huid(io_sbeStates_v[i].target),
                                io_sbeStates_v[i].err_plid,
                                io_sbeStates_v[i].err_eid,
                                io_sbeStates_v[i].err_rc,
@@ -5777,8 +6073,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                                         SBE_MASTER_VERSION_COMPARE,
                                         SBE_ERROR_ON_UPDATE,
                                         TWO_UINT32_TO_UINT64(
-                                          TARGETING::get_huid(
-                                                     io_sbeStates_v[i].target),
+                                          get_huid(io_sbeStates_v[i].target),
                                           io_sbeStates_v[i].err_plid),
                                         TWO_UINT32_TO_UINT64(
                                           io_sbeStates_v[i].err_eid,
@@ -5805,10 +6100,9 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                                "SBE Version Miscompare Between Master Target "
                                "HUID=0x%.8X (side=%d) and Target HUID=0x%.8X "
                                "(side=%d)",
-                               TARGETING::get_huid(
-                                          io_sbeStates_v[mP].target),
+                               get_huid(io_sbeStates_v[mP].target),
                                io_sbeStates_v[mP].cur_seeprom_side,
-                               TARGETING::get_huid(io_sbeStates_v[i].target),
+                               get_huid(io_sbeStates_v[i].target),
                                io_sbeStates_v[i].cur_seeprom_side);
 
                     // Trace first 8 bytes of each section
@@ -5852,10 +6146,8 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                     err = new ErrlEntry(ERRL_SEV_PREDICTIVE,
                                         SBE_MASTER_VERSION_COMPARE,
                                         SBE_MISCOMPARE_WITH_MASTER_VERSION,
-                                        TARGETING::get_huid(
-                                                   io_sbeStates_v[mP].target),
-                                        TARGETING::get_huid(
-                                                   io_sbeStates_v[i].target));
+                                        get_huid(io_sbeStates_v[mP].target),
+                                        get_huid(io_sbeStates_v[i].target));
 
                     // Add general data sections to capture the
                     // different versions
@@ -6098,7 +6390,7 @@ errlHndl_t sbeDoReboot( void )
         if(g_do_hw_keys_hash_transition)
         {
             err = updateKeyTransitionState(
-                      TARGETING::KEY_TRANSITION_STATE_KEY_TRANSITION_SUCCEEDED);
+                      KEY_TRANSITION_STATE_KEY_TRANSITION_SUCCEEDED);
             if(err)
             {
                 TRACFCOMP(g_trac_sbe,
@@ -6112,7 +6404,7 @@ errlHndl_t sbeDoReboot( void )
         if (!g_do_hw_keys_hash_transition)
         {
             // Sync all attributes to the FSP/BMC before doing the Shutdown
-            err = TARGETING::AttrRP::syncAllAttributesToSP();
+            err = AttrRP::syncAllAttributesToSP();
             if( err )
             {
                 // Something failed on the sync.  Commit the error here
@@ -6197,7 +6489,7 @@ errlHndl_t sbeDoReboot( void )
 
 /////////////////////////////////////////////////////////////////////
 errlHndl_t getSecuritySettingsFromSbeImage(
-                           TARGETING::Target* const i_target,
+                           Target* const i_target,
                            const EEPROM::EEPROM_ROLE i_seeprom,
                            const sbeSeepromSide_t i_bootSide,
                            SHA512_t o_hash,
@@ -6235,8 +6527,8 @@ errlHndl_t getSecuritySettingsFromSbeImage(
     {
         // Only check i_target and i_seeprom if i_image_ptr == nullptr;
         // otherwise they're ignored as i_image_ptr is used
-        assert(i_target != nullptr,"getSecuritySettingsFromSbeImage i_target can't be NULL");
-        assert(i_target->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_PROC, "getSecuritySettingsFromSbeImage i_target must be TYPE_PROC");
+        assert(i_target != nullptr,"getSecuritySettingsFromSbeImage i_target can't be nullptr");
+        assert(i_target->getAttr<ATTR_TYPE>() == TYPE_PROC, "getSecuritySettingsFromSbeImage i_target must be TYPE_PROC");
         assert(((i_seeprom == EEPROM::SBE_PRIMARY) || (i_seeprom == EEPROM::SBE_BACKUP)), "getSecuritySettingsFromSbeImage i_seeprom=%d is invalid", i_seeprom);
     }
 
@@ -6428,7 +6720,7 @@ errlHndl_t getSecuritySettingsFromSbeImage(
                                 SBE_GET_HW_KEY_HASH,
                                 ERROR_FROM_XIP_FIND,
                                 TWO_UINT32_TO_UINT64(
-                                  TARGETING::get_huid(i_target),
+                                  get_huid(i_target),
                                   i_seeprom),
                                 TWO_UINT16_ONE_UINT32_TO_UINT64(
                                   l_xipSection.iv_offset,
@@ -6605,7 +6897,7 @@ errlHndl_t getSecuritySettingsFromSbeImage(
                             SBE_GET_HW_KEY_HASH,
                             SBE_ECC_FAIL,
                             TWO_UINT32_TO_UINT64(
-                              TARGETING::get_huid(i_target),
+                              get_huid(i_target),
                               i_seeprom),
                             TWO_UINT16_ONE_UINT32_TO_UINT64(
                               eccStatus,
@@ -6697,7 +6989,7 @@ errlHndl_t secureKeyTransition()
         g_do_hw_keys_hash_transition = true;
 
         l_errl = updateKeyTransitionState(
-                     TARGETING::KEY_TRANSITION_STATE_KEY_TRANSITION_STARTED);
+                     KEY_TRANSITION_STATE_KEY_TRANSITION_STARTED);
         if(l_errl)
         {
             TRACFCOMP(g_trac_sbe,ERR_MRK "secureKeyTransition(): Failed in "
@@ -6815,7 +7107,7 @@ errlHndl_t locateHbblIdStringBfr( void * i_pSourceBfr,
 /////////////////////////////////////////////////////////////////////
 
 errlHndl_t updateKeyTransitionState(
-    const TARGETING::KEY_TRANSITION_STATE i_keyTransitionState)
+    const KEY_TRANSITION_STATE i_keyTransitionState)
 {
     errlHndl_t pError = nullptr;
 
@@ -6826,8 +7118,8 @@ errlHndl_t updateKeyTransitionState(
         "0x%08X",
         i_keyTransitionState);
 
-    TARGETING::UTIL::getCurrentNodeTarget()->setAttr<
-        TARGETING::ATTR_KEY_TRANSITION_STATE>(i_keyTransitionState);
+    UTIL::getCurrentNodeTarget()->setAttr<
+        ATTR_KEY_TRANSITION_STATE>(i_keyTransitionState);
 
     if(INITSERVICE::spBaseServicesEnabled())
     {
@@ -6863,12 +7155,12 @@ errlHndl_t querySbeSeepromVersions()
 {
     errlHndl_t l_errl = nullptr;
     sbeTargetState_t l_sbeState;
-    TARGETING::TargetHandleList l_procList;
+    TargetHandleList l_procList;
     do {
         // Query all of the functional processor targets
-        TARGETING::getAllChips(l_procList,
-                            TARGETING::TYPE_PROC,
-                            true); // true: return functional targets
+        getAllChips(l_procList,
+                    TYPE_PROC,
+                    true); // true: return functional targets
         assert( l_procList.size(), "querySbeSeepromVersions: no functional procs found!")
 
         if(!Util::isSimicsRunning())

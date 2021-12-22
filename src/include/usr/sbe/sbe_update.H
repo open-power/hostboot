@@ -93,22 +93,23 @@ namespace SBE
     // SBE VADDR Layout
     // 000K - 512K  = Dest for SEEPROM SBE image
     //
-    //  512K - 1146K  = Ring buf1
-    // 1146K - 1780K  = Ring buf2
-    // 1780K - 2414K  = Ring buf3
-    // 2414K - 3048K  = Ring Section buf
-    // ---- Use 512K-3048K for SBE ECC image
-    // 3048K - 3560K  = SBE + HBBL image
+    //  512K - 576K      = Ring buf1 (64K size)
+    //  576K - 640K      = Ring buf2 (64K size)
+    //  640K - 896K      = Ring buf3 (256K size)
+    //  896K - 1350.8K   = Ring Section buf (~454.8K SBE_ECC_IMG_MAX_SIZE)
+    // ---- Use 512K-1350.8K for SBE ECC image
+    // 1350.8K - 1862.8K = SBE + HBBL image (512K size)
     enum {
         FIXED_SEEPROM_WORK_SPACE = 512 * 1024,
-        SBE_IMG_VADDR = VMM_VADDR_SBE_UPDATE, // 3G address
-        RING_BUF1_VADDR = FIXED_SEEPROM_WORK_SPACE + SBE_IMG_VADDR,
-        RING_BUF2_VADDR = RING_BUF1_VADDR + XIPC_RING_BUF1_SIZE,
-        RING_BUF3_VADDR = RING_BUF2_VADDR + XIPC_RING_BUF2_SIZE,
-        RING_SEC_VADDR  = RING_BUF3_VADDR + XIPC_RING_BUF3_SIZE,
+        SBE_IMG_VADDR = VMM_VADDR_SBE_UPDATE, // 3G address (1st space to use)
+        RING_BUF1_VADDR_OFFSET = FIXED_SEEPROM_WORK_SPACE,
+        RING_BUF2_VADDR_OFFSET = RING_BUF1_VADDR_OFFSET + XIPC_RING_BUF1_SIZE,
+        RING_BUF3_VADDR_OFFSET = RING_BUF2_VADDR_OFFSET + XIPC_RING_BUF2_SIZE,
+        RING_SEC_VADDR_OFFSET  = RING_BUF3_VADDR_OFFSET + XIPC_RING_BUF3_SIZE,
         //NOTE: recycling the same memory space for different
         //steps in the process.
-        SBE_ECC_IMG_VADDR = RING_BUF1_VADDR,
+        SBE_ECC_IMG_VADDR_OFFSET = FIXED_SEEPROM_WORK_SPACE,
+
         // for every 8 bytes of data use 1 byte for ECC = 9 bytes
         // then take that result of the space needed to store ECC data
         // and multiply by 8 bytes to know max data for ECC storage
@@ -119,7 +120,7 @@ namespace SBE
         // to keep physical to logical algorithm above, put the unused ECC space
         // calculated for each physical chip back into the calculation to allow
         // logical jump of offsets from physical chip to physical chip
-        SBE_HBBL_IMG_VADDR = RING_SEC_VADDR + FIXED_SEEPROM_WORK_SPACE,
+        SBE_HBBL_IMG_VADDR_OFFSET = RING_SEC_VADDR_OFFSET + FIXED_SEEPROM_WORK_SPACE,
     };
 
     // Used for MVPD function
@@ -238,6 +239,59 @@ namespace SBE
     static_assert(0 == (sizeof(sbeSectionSbSettings_t) % 8),
                   "sbeSectionSbSettings_t is not 8-byte-aligned");
 
+
+
+
+
+
+/*******************************************************************************
+ * @brief virtual base work item class for updates (used by thread pool)
+ */
+class UpdateWorkItem
+{
+    public:
+      virtual ~UpdateWorkItem(){}
+      virtual void operator()() = 0;
+};
+
+class UpdateProcessorSbes : public UpdateWorkItem
+{
+    protected:
+      // @brief Virtual space used for updating SBEs
+      uint64_t iv_sbe_update_vaddr;
+
+      // @brief List of SBEs to operate on
+      std::vector<TARGETING::TargetHandle_t> iv_procSbes;
+
+      // @brief A vector of SBE states.  All states at the end are checked for
+      //        re-ipl and key transitioning. This is updated at the end of operator()
+      std::vector<sbeTargetState_t>* iv_sbeStates;
+
+      // @brief A mutex to protect multithreaded additions to the sbeStates vector
+      static mutex_t iv_sbeStateMutex;
+
+
+    public:
+      // @brief ThreadPool uses this function to do the actual work
+      void operator()();
+
+      // A constructor that takes an address for the sbe update workspace,
+      // a list of sbes to update, and a return sbeStates vector for reporting
+      // sbe state after update
+      UpdateProcessorSbes(const uint64_t i_sbe_update_vaddr,
+                          const std::vector<TARGETING::TargetHandle_t>& i_procSbes,
+                          std::vector<sbeTargetState_t>* io_sbeStates)
+      {
+          iv_sbe_update_vaddr = i_sbe_update_vaddr;
+          iv_procSbes = i_procSbes;
+          iv_sbeStates = io_sbeStates;
+      };
+
+      // Delete copy constructor and assignment operator
+      UpdateProcessorSbes(const UpdateProcessorSbes&) = delete;
+      UpdateProcessorSbes& operator=(const UpdateProcessorSbes&) = delete;
+};
+
     /******************************************/
     /*  Functions -- High Level Functions     */
     /******************************************/
@@ -246,10 +300,11 @@ namespace SBE
      * @brief Collects SBE Information for a specifc target
      *
      * @param[io/out] io_sbeState   Struct containing SBE State of the target
+     * @param[in] i_sbe_update_vaddr Address of start of sbe update space (allows for threading)
      *
      * @return errlHndl_t    Error log handle on failure.
      */
-    errlHndl_t getSbeInfoState(sbeTargetState_t& io_sbeState);
+    errlHndl_t getSbeInfoState(sbeTargetState_t& io_sbeState, uint64_t i_sbe_update_vaddr);
 
     /**
      * @brief Analyze and Determine Update Actions for a specific target
@@ -264,16 +319,15 @@ namespace SBE
      * @brief Performs the Update Actions for a specific target
      *
      * @param[io/out] io_sbeState   Struct containing SBE State of the target
+     * @param[in] i_sbe_update_vaddr Address of start of sbe update space (allows for threading)
      *
      * @return errlHndl_t    Error log handle on failure.
      */
-    errlHndl_t performUpdateActions(sbeTargetState_t& io_sbeState);
-
+    errlHndl_t performUpdateActions(sbeTargetState_t& io_sbeState, uint64_t i_sbe_update_vaddr);
 
     /******************************************/
-    /*  Functions -- System Access            */
+    /*  System Access Functions               */
     /******************************************/
-
     /**
      * @brief Read or Write SB Keyword in MVPD
      *
@@ -288,7 +342,6 @@ namespace SBE
     errlHndl_t getSetMVPDVersion(TARGETING::Target* i_target,
                                  opType_t i_op,
                                  mvpdSbKeyword_t& io_sb_keyword);
-
 
     /**
      * @brief Read SBE Version from PNOR
@@ -408,13 +461,14 @@ namespace SBE
     /**
      * @brief Updates a specific SEEPROM
      *
-     * @param[io/out] io_sbeState   Struct containing SBE State of the target
+     * @param[in/out] io_sbeState   Struct containing SBE State of the target
      *                              and the information to be used for updating
      *                              the SBE State of the target
+     * @param[in] i_sbe_update_vaddr Address of workspace for sbe update
      *
      * @return errlHndl_t    Error log handle on failure.
      */
-    errlHndl_t updateSeepromSide(sbeTargetState_t& io_sbeState);
+    errlHndl_t updateSeepromSide(sbeTargetState_t& io_sbeState, uint64_t i_sbe_update_vaddr);
 
     /**
      * @brief Check and Update all targets before Re-IPL Request
@@ -487,23 +541,24 @@ namespace SBE
 
     /**
      * @brief Creates the memory space needed for SBE Image Customization
-     *        by allocating and setting permissions on VMM_VADDR_SBE_UPDATE
-     *        area defined in vmmconst.H
+     *        by allocating and setting permissions on i_vmm_addr
      *
-     * @param[in]   void
+     * @param[in]   i_vmm_vaddr Virtual memory address spot
+     *                          for VMM_SBE_UPDATE_SIZE allocation
      *
-     * @return      void
+     * @return errlHndl_t    Error log handle on failure.
      */
-    errlHndl_t createSbeImageVmmSpace(void);
+    errlHndl_t createSbeImageVmmSpace(uint64_t i_vmm_vaddr);
 
     /**
      * @brief Cleans up memory space needed for SBE Image Customization
      *
-     * @param[in]   void
+     * @param[in]   i_vmm_vaddr Virtual memory address spot
+     *                          for VMM_SBE_UPDATE_SIZE deallocation
      *
-     * @return      void
+     * @return errlHndl_t    Error log handle on failure.
      */
-    errlHndl_t cleanupSbeImageVmmSpace(void);
+    errlHndl_t cleanupSbeImageVmmSpace(uint64_t i_vmm_vaddr);
 
     /**
      * @brief Reduces bits set in a bit mask until there is a

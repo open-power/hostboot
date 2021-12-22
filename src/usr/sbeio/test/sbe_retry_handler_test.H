@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -784,7 +784,7 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
             errlCommit( err, SBEIO_COMP_ID );
         }
 
-        err = createSbeImageVmmSpace();
+        err = createSbeImageVmmSpace(VMM_VADDR_SBE_UPDATE);
         if(err)
         {
             TS_FAIL("SbeRetryHandlerTest() - Constructor: Call to createSbeImageVmmSpace() failed");
@@ -806,7 +806,7 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
         SBE_TRACF_RHT(ENTER_MRK"SbeRetryHandlerTest Destructor");
         errlHndl_t err = nullptr;
 
-        err = cleanupSbeImageVmmSpace();
+        err = cleanupSbeImageVmmSpace(VMM_VADDR_SBE_UPDATE);
         if(err)
         {
             TS_FAIL("~SbeRetryHandlerTest() - Destructor: Call to cleanupSbeImageVmmSpace() failed.");
