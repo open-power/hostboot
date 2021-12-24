@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,6 +40,7 @@
 //Utilities
 #include    <util/utilxipimage.H>
 #include    <scom/wakeup.H>
+#include    <initservice/istepdispatcherif.H>
 
 //Error handling and tracing
 #include    <errl/errlentry.H>
@@ -515,6 +516,11 @@ void* host_build_stop_image (void *io_pArgs)
                               "host_build_stop_image: unsecure HOMER addr = 0x%.16llX",
                               l_unsecureHomerAddr);
                 }
+
+                // If trace-lite is on, then the call to p10_hcode_image_build
+                // will a take long time to execute and will cause the watchdog
+                // timer to timeout therefore ping the watchdog to not timeout.
+                INITSERVICE::sendProgressCode();
 
                 //Call p10_hcode_image_build.C HWP
                 FAPI_INVOKE_HWP( l_errl,
