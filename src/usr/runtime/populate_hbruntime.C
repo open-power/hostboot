@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1630,7 +1630,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId,
                                           0,
                                           l_hbrtPsuAddr,
                                           SBEIO::SbePsu::MAX_HBRT_PSU_OP_SIZE_BYTES,
-                                          HBRT_RSVD_MEM__SBE_FFDC,
+                                          HBRT_RSVD_MEM__SBE_PSU,
                                           HDAT::RHB_READ_WRITE,
                                           true,
                                           i_skipHDAT);
