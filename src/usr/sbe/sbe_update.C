@@ -1213,402 +1213,194 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
         return l_err;
     }
 
+
 /////////////////////////////////////////////////////////////////////
     errlHndl_t procCustomizeSbeImg(TARGETING::Target* i_target,
-                                   void* i_hwImgPtr,
-                                   void* i_sbeImgPtr,
-                                   size_t i_maxImgSize,
-                                   void* io_imgPtr,
+                                   const void* const  i_hwImgPtr,
+                                   const void* const  i_sbeImgPtr,
+                                   const size_t       i_maxImgSize,
+                                   void*   io_imgPtr,
                                    size_t& o_actImgSize)
     {
-        errlHndl_t err = nullptr;
-        uint32_t tmpImgSize = static_cast<uint32_t>(i_maxImgSize);
-        uint32_t coreMask = 0xFFFFFFFF; // Bits(0:31) = EC00:EC31
-        size_t maxCores = P10_MAX_EC_PER_PROC;
-        uint32_t coreCount = 0;
-        uint32_t procIOMask = 0;
-        bool procedure_success = false;
+        errlHndl_t l_err(nullptr);
 
-        TRACUCOMP( g_trac_sbe,
-                   ENTER_MRK"procCustomizeSbeImg(): uid=0x%X, i_sbeImgPtr= "
-                            "%p, maxS=0x%X, io_imgPtr=%p",
-                            TARGETING::get_huid(i_target), i_sbeImgPtr,
-                            i_maxImgSize, io_imgPtr);
+        /// Create variables here for ease of tracing at end of method
+        // Cache the maximum system cores for easy access and updating
+        size_t l_maxCores = P10_MAX_EC_PER_PROC;
+        // The number of cores the SBE customized image is composed of.  Will be
+        // be determined via call to p10_ipl_customize
+        uint32_t l_coreCount(0);
+        // The desired number of cores, will be calculated via attribute
+        // IMAGE_MINIMUM_VALID_ECS and if using fused cores
+        uint32_t l_desiredMinCores(0);
+        // Will be populated with attribute SBE_IMAGE_MINIMUM_VALID_ECS when retrieved
+        uint32_t l_AttrSbeImageMinValidEcs(0);
+        // Set up core mask to include all possible cores
+        uint32_t l_coreMask = 0xFFFFFFFF; // Bits(0:31) = EC00:EC31
+
+        TRACUCOMP( g_trac_sbe, ENTER_MRK"procCustomizeSbeImg(): HUID=0x%X, i_sbeImgPtr= "
+                   "%p, i_maxImgSize=%d, io_imgPtr=%p",
+                   TARGETING::get_huid(i_target), i_sbeImgPtr, i_maxImgSize, io_imgPtr);
 
         do{
+            /// Sanity check - validate that the desired minimum of cores does not
+            /// exceed the maximum cores available
+            // Get Target Service
+            Target* l_sys = UTIL::assertGetToplevelTarget();
 
+            // Get the desired minimum cores from attribute SBE_IMAGE_MINIMUM_VALID_ECS
+            l_AttrSbeImageMinValidEcs = l_sys->getAttr<ATTR_SBE_IMAGE_MINIMUM_VALID_ECS>();
+            l_desiredMinCores = ((is_fused_mode()) ? 2 : 1) * l_AttrSbeImageMinValidEcs;
+
+            // Verify that the desired minimum cores is not greater than the max cores available
+            if (unlikely(l_desiredMinCores > l_maxCores))
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK"procCustomizeSbeImg(): Error - "
+                           "Desired minimum number of cores(%d) exceeds system's max cores(%d) "
+                           "for HUID=0x%X",
+                           l_desiredMinCores, l_maxCores, TARGETING::get_huid(i_target));
+
+                /*@
+                 * @errortype
+                 * @moduleid          SBE_CUSTOMIZE_IMG
+                 * @reasoncode        SBE_DESIRED_MIN_CORES_EXCEED_MAX_CORES
+                 * @userdata1         Target HUID
+                 * @userdata2[0:31]   Desired minimum cores
+                 * @userdata2[32:63]  Max cores available on system
+                 * @devdesc      Desired minimum cores exceeds max cores available on system
+                 * @custdesc     A problem occurred while updating processor
+                 *               boot code.
+                 */
+                l_err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                      SBE_CUSTOMIZE_IMG,
+                                      SBE_DESIRED_MIN_CORES_EXCEED_MAX_CORES,
+                                      TARGETING::get_huid(i_target),
+                                      TWO_UINT32_TO_UINT64(l_desiredMinCores,
+                                                           l_maxCores),
+                                      ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                break;
+            }
+
+            /// Populate SBE image with available cores from HWP call p10_ipl_customize
             // cast OUR type of target to a FAPI type of target.
             const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
                 l_fapiTarg(i_target);
 
-            // The p10_ipl_customize() procedure tries to include as much core
-            // information as possible, but is limited by SBE Image size
-            // constraints.
-            // First, maximize core mask for the target
-            // Then loop on the procedure call, where the loop is designed to
-            // remove the number of cores passed into p10_ipl_customize() until
-            // an image can be created successfully.
+            // Copy SBE (ringless) image to destination.
+            // Will be customized by p10_ipl_customize call
+            uint32_t l_tmpImgSize = i_maxImgSize;
+            memcpy ( io_imgPtr, i_sbeImgPtr, l_tmpImgSize);
 
-            // Maximize Core mask for this target
-            err = selectBestCores(i_target,
-                                  maxCores,
-                                  coreMask);
-            if(err)
+            // Call HWP p10_ipl_customize to get cores
+            uint32_t l_ringSectionBufSize = MAX_SEEPROM_IMAGE_SIZE;
+            FAPI_INVOKE_HWP( l_err,
+                             p10_ipl_customize,
+                             l_fapiTarg,
+                             (void*)i_hwImgPtr,
+                             io_imgPtr, //In: Ringless SBE image, Out: Customized SBE image w/rings
+                             l_tmpImgSize, // In: Max, Out: Actual
+                             (void*)RING_SEC_VADDR,
+                             l_ringSectionBufSize,
+                             SYSPHASE_HB_SBE,
+                             (void*)RING_BUF1_VADDR,
+                             (uint32_t)XIPC_RING_BUF1_SIZE,
+                             (void*)RING_BUF2_VADDR,
+                             (uint32_t)XIPC_RING_BUF2_SIZE,
+                             (void*)RING_BUF3_VADDR,
+                             (uint32_t)XIPC_RING_BUF3_SIZE,
+                             l_coreMask ); // In: All cores, Out: Actual cores gathered
+
+            // Assume HWP call was successful, if not o_actImgSize will be reset to 0 further down
+            o_actImgSize = l_tmpImgSize;
+
+            if (unlikely(l_err != nullptr))
             {
-                TRACFCOMP( g_trac_sbe, ERR_MRK"procCustomizeSbeImg() - "
-                           "selectBestCores() failed"
-                           "MaxCores=0x%.8X. HUID=0x%X. Aborting "
-                           "Customization of SBE Image"
-                           TRACE_ERR_FMT,
-                           maxCores,
-                           TARGETING::get_huid(i_target),
-                           TRACE_ERR_ARGS(err));
+                TRACFCOMP( g_trac_sbe, ERR_MRK"procCustomizeSbeImg(): FAPI_INVOKE_HWP("
+                           "p10_ipl_customize) failed with RC=0x%X, "
+                           "HUID=0x%X, l_maxCores=%d, l_coreMask=0x%.8X",
+                           ERRL_GETRC_SAFE(l_err),
+                           TARGETING::get_huid(i_target), l_maxCores, l_coreMask);
+
+                ERRORLOG::ErrlUserDetailsTarget(i_target, "Proc Target").addToLog(l_err);
+                l_err->collectTrace(SBE_COMP_NAME, 256);
+
                 break;
             }
 
-            // Get Target Service
-            Target* sys = UTIL::assertGetToplevelTarget();
 
-            // setup loop parameters
-            coreCount = __builtin_popcount(coreMask);
-            uint32_t desired_min_cores = ((is_fused_mode()) ? 2 : 1) *
-                sys->getAttr<ATTR_SBE_IMAGE_MINIMUM_VALID_ECS>();
-
-            // Use desired minimum number of cores, but be less restrictive if
-            // fewer cores are found to be present
-            uint32_t min_cores = std::min(desired_min_cores, coreCount);
-            if(min_cores < desired_min_cores)
+            // Count the number cores that the p10_ipl_customize was able to gather
+            // and compare to the minimum cores desired.
+            l_coreCount = __builtin_popcount(l_coreMask);
+            if (unlikely(l_coreCount < l_desiredMinCores))
             {
-                // Identify that the desired minimum core count was not met
-                TRACFCOMP( g_trac_sbe, INFO_MRK"procCustomizeSbeImg() - "
-                           "Using fewer cores than desired minimum number of "
-                           "cores. HUID=0x%X, coreCount=%d, coreMask=0x%.8X, "
-                           "desired_min_cores=0x%X",
+                TRACFCOMP( g_trac_sbe, ERR_MRK"procCustomizeSbeImg(): "
+                           "p10_ipl_customize failed to get min cores:"
+                           "HUID=0x%X, desired min cores=%d, cores retrieved=%d, "
+                           "max system cores=%d, core mask of gathered cores=0x%.8X",
                            TARGETING::get_huid(i_target),
-                           coreCount, coreMask, desired_min_cores);
-            }
-
-            while( coreCount >= min_cores )
-            {
-                // copy customized SBE image to destination
-                memcpy ( io_imgPtr,
-                         i_sbeImgPtr,
-                         tmpImgSize);
-
-                procIOMask = coreMask;
-                uint32_t l_ringSectionBufSize = MAX_SEEPROM_IMAGE_SIZE;
-                FAPI_INVOKE_HWP( err,
-                                 p10_ipl_customize,
-                                 l_fapiTarg,
-                                 i_hwImgPtr,
-                                 io_imgPtr, //image in/out
-                                 tmpImgSize, // In: Max, Out: Actual
-                                 (void*)RING_SEC_VADDR,
-                                 l_ringSectionBufSize,
-                                 SYSPHASE_HB_SBE,
-                                 (void*)RING_BUF1_VADDR,
-                                 (uint32_t)XIPC_RING_BUF1_SIZE,
-                                 (void*)RING_BUF2_VADDR,
-                                 (uint32_t)XIPC_RING_BUF2_SIZE,
-                                 (void*)RING_BUF3_VADDR,
-                                 (uint32_t)XIPC_RING_BUF3_SIZE,
-                                 procIOMask ); // Bits(0:31) = EC00:EC31
-
-                // Check for no error and use of input cores
-                if (nullptr == err)
-                {
-                    // FAPI_INVOKE_HWP returned with no error, check input cores
-                    if (procIOMask == coreMask)
-                    {
-                        // Procedure was successful
-                        procedure_success = true;
-
-                        o_actImgSize = static_cast<size_t>(tmpImgSize);
-
-                        TRACUCOMP( g_trac_sbe, "procCustomizeSbeImg(): "
-                                 "p10_ipl_customize success=%d, procIOMask=0x%X "
-                                 "o_actImgSize=0x%X",
-                                 procedure_success, procIOMask, o_actImgSize);
-
-                        // exit inner loop
-                        break;
-                    }  // end if (procIOMask == coreMask)
-                    // p10_ipl_customize returned a different core mask:
-                    // procIOMask != coreMask
-                    else
-                    {
-                        // A different core mask is returned from
-                        // p10_ipl_customize, when the cores sent in couldn't
-                        // fit, but possibly a different procIOMask would work
-
-                        TRACFCOMP( g_trac_sbe,
-                                ERR_MRK"procCustomizeSbeImg(): FAPI_INVOKE_HWP("
-                                "p10_ipl_customize) returned rc=0x%X, "
-                                "XIPC_IMAGE_WOULD_OVERFLOW-Retry "
-                                "MaxCores=0x%.8X. HUID=0x%X. coreMask=0x%.8X, "
-                                "procIOMask=0x%.8X. coreCount=%d",
-                                ERRL_GETRC_SAFE(err), maxCores,
-                                TARGETING::get_huid(i_target),
-                                coreMask, procIOMask, coreCount);
-
-                        // Setup for next loop - update coreMask
-                        err = selectBestCores(i_target,
-                                              --coreCount,
-                                              coreMask);
-
-                        if ( err )
-                        {
-                            TRACFCOMP(g_trac_sbe,
-                                      ERR_MRK"procCustomizeSbeImg() - "
-                                      "selectBestCores() failed "
-                                      "coreCount=0x%.8X. HUID=0x%X. Aborting "
-                                      "Customization of SBE Image"
-                                      TRACE_ERR_FMT,
-                                      coreCount,
-                                      TARGETING::get_huid(i_target),
-                                      TRACE_ERR_ARGS(err));
-
-                            // break from inner while loop
-                            break;
-                        }
-
-                        TRACFCOMP( g_trac_sbe, "procCustomizeSbeImg(): for "
-                                   "next loop: coreMask=0x%.8X, coreCount=%d",
-                                   coreMask, coreCount);
-
-                        // Check if loop will execute again
-                        // Clean up some data if it will
-                        if( coreCount >= min_cores )
-                        {
-                            // Reset size and clear image buffer
-                            tmpImgSize = static_cast<uint32_t>(i_maxImgSize);
-                            memset ( io_imgPtr,
-                                     0,
-                                     tmpImgSize);
-                        }
-                    } // end if (procIOMask == coreMask) ... else ...
-
-                    // No break - keep looping
-
-                }  // end if (nullptr == err)
-                else
-                {
-                    // Unexpected return code - create err and fail
-                    TRACFCOMP( g_trac_sbe,
-                               ERR_MRK"procCustomizeSbeImg(): FAPI_INVOKE_HWP("
-                               "p10_ipl_customize) failed with rc=0x%X, "
-                               "MaxCores=0x%X. HUID=0x%X. coreMask=0x%.8X, "
-                               "procIOMask=0x%.8X. coreCount=%d. Create "
-                               "err and break loop",
-                               ERRL_GETRC_SAFE(err), maxCores,
-                               TARGETING::get_huid(i_target),
-                               coreMask, procIOMask, coreCount);
-
-                    ERRORLOG::ErrlUserDetailsTarget(i_target,
-                                                    "Proc Target")
-                                                    .addToLog(err);
-                    err->collectTrace(SBE_COMP_NAME, 256);
-
-                    // break from inner while loop
-                    break;
-                }  // end if (nullptr == err) ... else ...
-            }  // end of inner while loop
-
-            if(err)
-            {
-                // There was a previous error, so break here
-                break;
-            }
-
-            if ( procedure_success == false )
-            {
-                // No err, but exit from while loop before successful
-                TRACFCOMP( g_trac_sbe, ERR_MRK"procCustomizeSbeImg() - "
-                           "Failure to successfully complete p10_ipl_customize()"
-                           ". HUID=0x%X, rc=0x%X, coreCount=%d, coreMask=0x%.8X"
-                           " procIOMask=0x%.8X, maxCores=0x%X, min_cores=0x%X, "
-                           "desired_min_cores=0x%X",
-                           TARGETING::get_huid(i_target), ERRL_GETRC_SAFE(err),
-                           coreCount, coreMask, procIOMask, maxCores,
-                           min_cores, desired_min_cores);
+                           l_desiredMinCores, l_coreCount, l_maxCores, l_coreMask);
                 /*@
                  * @errortype
                  * @moduleid          SBE_CUSTOMIZE_IMG
-                 * @reasoncode        SBE_P10_XIP_CUSTOMIZE_UNSUCCESSFUL
-                 * @userdata1[0:31]   procIOMask in/out parameter
-                 * @userdata1[32:63]  rc of procedure
-                 * @userdata2[0:31]   coreMask of target
-                 * @userdata2[32:63]  coreCount - updated on the loops
-                 * @devdesc      Unsuccessful in creating Customized SBE Image
+                 * @reasoncode        SBE_INSUFFICIENT_SPACE_FOR_REQUESTED_CORES
+                 * @userdata1[0:31]   HUID of target
+                 * @userdata1[32:63]  The desired min cores
+                 * @userdata2[0:15]   The number of cores successfully gathered
+                 * @userdata2[16:31]  Max system cores available
+                 * @userdata2[32:63]  Core mask of cores gathered
+                 * @devdesc      Unsuccessful in creating Customized SBE Image.
+                 *               Unable to get the desired minimum cores.
                  * @custdesc     A problem occurred while updating processor
                  *               boot code.
                  */
-                err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                    SBE_CUSTOMIZE_IMG,
-                                    SBE_P10_XIP_CUSTOMIZE_UNSUCCESSFUL,
-                                    TWO_UINT32_TO_UINT64(procIOMask,
-                                                         ERRL_GETRC_SAFE(err)),
-                                    TWO_UINT32_TO_UINT64(coreMask,
-                                                         coreCount));
+                l_err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                      SBE_CUSTOMIZE_IMG,
+                                      SBE_INSUFFICIENT_SPACE_FOR_REQUESTED_CORES,
+                                      TWO_UINT32_TO_UINT64(TARGETING::get_huid(i_target),
+                                                           l_desiredMinCores),
+                                      TWO_UINT32_TO_UINT64( TWO_UINT16_TO_UINT32( l_coreCount,
+                                                                                  l_maxCores ),
+                                                            l_coreMask));
 
-                ErrlUserDetailsTarget(i_target
-                                      ).addToLog(err);
-                err->collectTrace("FAPI", 256);
-                err->collectTrace(SBE_COMP_NAME, 256);
-                err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
-                                          HWAS::SRCI_PRIORITY_HIGH );
-            }
-
+                ErrlUserDetailsTarget(i_target).addToLog(l_err);
+                l_err->collectTrace("FAPI", 256);
+                l_err->collectTrace(SBE_COMP_NAME, 256);
+                l_err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
+                                            HWAS::SRCI_PRIORITY_HIGH );
+                break;
+            } // if (unlikely(l_coreCount < l_desiredMinCores))
         }while(0);
 
-        TRACUCOMP( g_trac_sbe,
-                   EXIT_MRK"procCustomizeSbeImg(): io_imgPtr=%p, "
-                   "o_actImgSize=0x%X, RC=0x%X, procedure_success=%d",
-                   io_imgPtr, o_actImgSize, ERRL_GETRC_SAFE(err),
-                   procedure_success );
 
-        return err;
+        if (!l_err)
+        {
+            TRACFCOMP( g_trac_sbe, EXIT_MRK"procCustomizeSbeImg() succeeded: HUID=0x%.8X, "
+                       "SBE customized image ptr = %p, SBE customized image size = %d, "
+                       "max system cores = %d, number of cores in image = %d, core mask = 0x%.8X, "
+                       "desired minimum cores = %d, is fused core = %d(0=no, 1=yes), "
+                       "attribute SBE_IMAGE_MINIMUM_VALID_ECS = %d",
+                       TARGETING::get_huid(i_target), io_imgPtr, o_actImgSize,
+                       l_maxCores, l_coreCount, l_coreMask, l_desiredMinCores,
+                       is_fused_mode(), l_AttrSbeImageMinValidEcs );
+
+        }
+        // If an error occurred, then zero out outgoing parameters for safe measure
+        else
+        {
+            TRACFCOMP( g_trac_sbe, EXIT_MRK"procCustomizeSbeImg() failed: RC=0x%X, HUID=0x%.8X, "
+                       "max system cores = %d, desired minimum cores = %d, "
+                       "is fused core = %d(0=no, 1=yes), "
+                       "attribute SBE_IMAGE_MINIMUM_VALID_ECS = %d",
+                       ERRL_GETRC_SAFE(l_err), TARGETING::get_huid(i_target),
+                       l_maxCores, l_desiredMinCores,
+                       is_fused_mode(), l_AttrSbeImageMinValidEcs );
+
+            memset (io_imgPtr, 0, i_maxImgSize);
+            o_actImgSize = 0;
+        }
+
+        return l_err;
     }
-
-
-/////////////////////////////////////////////////////////////////////
-    errlHndl_t selectBestCores(TARGETING::Target* i_target,
-                               size_t i_maxCores,
-                               uint32_t& o_coreMask)
-    {
-        TRACUCOMP( g_trac_sbe,
-                   ENTER_MRK"selectBestCores(i_maxCores=0x%.8X)",
-                   i_maxCores);
-
-        errlHndl_t err = nullptr;
-        const uint32_t chipUnitMask = 0x80000000; // Bits(0:31) = EC00:EC31
-        uint32_t manGuardEcs = 0x00000000;
-        uint32_t remainingEcs = 0x00000000;
-        uint32_t coreCount = 0;
-        uint32_t deconfigByEid = 0;
-
-        o_coreMask = 0x00000000;
-
-        do{
-
-            // Special case: if i_maxCores == 0 don't loop through cores
-            if (unlikely(i_maxCores == 0 ))
-            {
-                break;
-            }
-
-            // find all CORE chiplets of the proc
-            TARGETING::TargetHandleList l_coreTargetList;
-            TARGETING::getNonEcoCores( l_coreTargetList,
-                                       i_target,
-                                       false );
-
-            //Sort through cores
-            for( const auto & l_core_target: l_coreTargetList )
-            {
-                uint8_t chipUnit = l_core_target->
-                    getAttr<TARGETING::ATTR_CHIP_UNIT>();
-
-                if(l_core_target->
-                    getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
-                {
-                    o_coreMask |= (chipUnitMask >> chipUnit);
-                    coreCount++;
-                }
-                else
-                {
-                    //If non-functional due to FCO or Manual gard,
-                    //add it to list of cores to include if
-                    //more are needed
-
-                    deconfigByEid = l_core_target->
-                                      getAttr<TARGETING::ATTR_HWAS_STATE>().
-                                      deconfiguredByEid;
-                    if(
-                       // FCO
-                       (deconfigByEid ==
-                        HWAS::DeconfigGard::DECONFIGURED_BY_FIELD_CORE_OVERRIDE)
-                       || // Manual GARD
-                       (deconfigByEid ==
-                        HWAS::DeconfigGard::DECONFIGURED_BY_MANUAL_GARD)
-                       )
-                    {
-                        manGuardEcs |= (chipUnitMask >> chipUnit);
-                    }
-                    // Add it to the 'remaining' list in case
-                    // more are needed
-                    else
-                    {
-                        remainingEcs |= (chipUnitMask >> chipUnit);
-                    }
-
-                }
-            }   // end core target loop
-
-            if(coreCount == i_maxCores)
-            {
-                //We've found the exact amount, break out of function
-                break;
-            }
-
-            else if(coreCount > i_maxCores)
-            {
-                //We have too many, so need to trim
-                o_coreMask = trimBitMask(o_coreMask,
-                                         i_maxCores);
-                break;
-            }
-
-            else
-            {
-                // We need to add 'other' cores
-                TRACUCOMP( g_trac_sbe,INFO_MRK"selectBestCores: non-functional "
-                           "cores needed for bit mask: coreCount=%d, "
-                           "i_maxCores=%d, o_coreMask=0x%.8X, "
-                           "manGuardEcs=0x%.8X, remainingEcs=0x%.8X",
-                           coreCount, i_maxCores, o_coreMask, manGuardEcs,
-                           remainingEcs );
-            }
-
-            // Add more 'good' cores.
-            manGuardEcs = trimBitMask(manGuardEcs,
-                                      i_maxCores-coreCount);
-            o_coreMask |= manGuardEcs;
-            coreCount = __builtin_popcount(o_coreMask);
-            TRACUCOMP( g_trac_sbe,INFO_MRK"selectBestCores: trimBitMask "
-                       "manGuardEcs=0x%.8X", manGuardEcs);
-
-            if(coreCount >= i_maxCores)
-            {
-                //We've found enough, break out of function
-                break;
-            }
-
-            // If we still need more, add 'remaining' cores
-            Target* sys = UTIL::assertGetToplevelTarget();
-
-            uint32_t min_cores =
-                sys->getAttr<ATTR_SBE_IMAGE_MINIMUM_VALID_ECS>();
-            min_cores *= (is_fused_mode()) ? 2 : 1; // double minimum for fused
-            if ( coreCount < min_cores )
-            {
-                remainingEcs = trimBitMask(remainingEcs,
-                                           min_cores-coreCount);
-                o_coreMask |= remainingEcs;
-                TRACUCOMP( g_trac_sbe,INFO_MRK"selectBestCores: trimBitMask "
-                           "remainingEcs=0x%.8X, min_cores=%d",
-                           remainingEcs, min_cores);
-            }
-
-        }while(0);
-
-        TRACUCOMP( g_trac_sbe,
-                   EXIT_MRK"selectBestCores(o_coreMask=0x%.8X)",
-                   o_coreMask);
-
-        return err;
-    }
-
 
 /////////////////////////////////////////////////////////////////////
     errlHndl_t getSetMVPDVersion(TARGETING::Target* i_target,
@@ -2798,7 +2590,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             if(err)
             {
                 TRACFCOMP( g_trac_sbe,
-                           ERR_MRK"procCustomizeSbeImg(): "
+                           ERR_MRK"getSbeInfoState(): "
                            "Error in call to ringOvd!");
                 break;
             }
@@ -2807,7 +2599,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             if(l_ovdImgSize > l_latestSize)
             {
                 TRACFCOMP( g_trac_sbe,
-                           INFO_MRK"procCustomizeSbeImg(): We added some "
+                           INFO_MRK"getSbeInfoState(): We added some "
                            "ring overrides, initial image size:%u "
                            "new image size:%u",
                            l_latestSize, l_ovdImgSize);

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -333,6 +333,8 @@ namespace SBE
      *
      * @param[in] i_target      Target processor to customize
      *
+     * @param[in] i_hwImgPtr    Pointer to the HW image.
+     *
      * @param[in] i_sbeImgPtr   Pointer to SBE Image with HBBL appended
      *                          Expected that this pointer points to memory
      *                          where the SBE Image in PNOR was copied and
@@ -340,19 +342,21 @@ namespace SBE
      *
      * @param[in] i_maxImgSize  Maximum size of customized image
      *
-     * @param[out] io_imgPtr    Pointer to SBE image in memory
-     *                          Memory from this pointer through
-     *                          i_maxImgSize is expected to be pre-allocated
+     * @param[out] io_imgPtr    Pointer to SBE image in memory.
+     *                          Memory from this pointer is expected to be pre-allocated
+     *                          with size of i_maxImgSize.
+     *                          In: Ringless SBE image
+     *                          Out: Customized SBE image w/rings
      *
      * @param[out] o_actImgSize  Actual size of the customized image
      *
      * @return errlHndl_t    Error log handle on failure.
      */
     errlHndl_t procCustomizeSbeImg(TARGETING::Target* i_target,
-                                   void* i_hwImgPtr,
-                                   void* i_sbeImgPtr,
-                                   size_t i_maxImgSize,
-                                   void* io_imgPtr,
+                                   const void* const i_hwImgPtr,
+                                   const void* const i_sbeImgPtr,
+                                   const size_t      i_maxImgSize,
+                                   void*   io_imgPtr,
                                    size_t& o_actImgSize);
 
     /**
@@ -500,30 +504,6 @@ namespace SBE
      * @return      void
      */
     errlHndl_t cleanupSbeImageVmmSpace(void);
-
-
-    /**
-     * @brief Select best cores to include in SBE Image.
-     *        The output is used to indicate to the image customization procedures
-     *        which cores should be included in the SBE image.
-     *
-     * @param[in] i_target   Target processor to use for core selection
-     *
-     * @param[in] i_maxCores  Maximum number of cores to select for inclusion
-     *                        in the SBE Image
-     *
-     * @param[out] o_coreMask  Core Mask for the target that does not exceed
-     *                         the maximum number of cores
-     *                         NOTE: bits 0:31 = EC00:EC31
-     *                         This value is used as input into
-     *                         the image customization procedures.
-     *
-     * @return errlHndl_t    Error log handle on failure.
-     */
-    errlHndl_t selectBestCores(TARGETING::Target* i_target,
-                               size_t i_maxCores,
-                               uint32_t& o_coreMask);
-
 
     /**
      * @brief Reduces bits set in a bit mask until there is a

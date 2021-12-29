@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -115,6 +115,8 @@ enum sbeReasonCode
     SBE_SECUREBOOT_ESCAPE               = SBE_COMP_ID | 0x22,
     SBE_IMG_MISCOMPARE                  = SBE_COMP_ID | 0x23,
     SBE_DATA_MISCOMPARE                 = SBE_COMP_ID | 0x24,
+    SBE_INSUFFICIENT_SPACE_FOR_REQUESTED_CORES = SBE_COMP_ID | 0x25,
+    SBE_DESIRED_MIN_CORES_EXCEED_MAX_CORES     = SBE_COMP_ID | 0x26,
 };
 
 };  // end SBE
