@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -406,38 +406,18 @@ errlHndl_t HdatMsVpd::addMsAreaFru(uint32_t i_resourceId,
 {
     HDAT_ENTER();
     errlHndl_t l_errlHndl = NULL;
-    HdatMsArea *l_msArea, *l_prevMsArea, **l_arrayEntry;
-    uint32_t l_slcaIdx, l_kwdSize, l_resourceId, l_prevIdx;
+    HdatMsArea *l_msArea, **l_arrayEntry;
     char *l_kwd;
+    uint32_t l_kwdSize;
 
     l_msArea = NULL;
     l_kwd = NULL;
-    l_slcaIdx = i_slcaIndex;
     l_kwdSize = 0;
 
     // Ensure we are not over max mainstore areas that we were told this object
     // could handle on the constructor.
     if (iv_actMsAreaCnt < iv_maxMsAreaCnt)
     {
-
-        // Determine if the resource ID associated with this mainstore area is
-        // the same as the resoruce id of the previous mainstore area.If it is,
-        // we can gain a performance advantage (translates into a smaller IPL
-        // time for the builddata step) by using the ASCII keyword data we
-        // already have rather than going to svpd to get it again.
-        if (iv_actMsAreaCnt > 0)
-        {
-            l_prevIdx = iv_actMsAreaCnt - 1;
-            l_prevMsArea =  HDAT_MS_AREA(l_prevIdx);
-            l_prevMsArea->getKwdInfo(l_resourceId, l_slcaIdx, l_kwdSize, l_kwd);
-            if (l_resourceId != i_resourceId)
-            {
-                l_kwd = NULL;
-                l_slcaIdx = 0;
-                l_kwdSize = 0;
-            }
-        }
-
         // Create a mainstore area object and add it to the array of objects we
         // are managing
         l_msArea = new HdatMsArea(l_errlHndl,
@@ -447,7 +427,7 @@ errlHndl_t HdatMsVpd::addMsAreaFru(uint32_t i_resourceId,
                               i_chipEcCnt,
                               i_addrRngCnt,
                               i_resourceId,
-                              l_slcaIdx,
+                              i_slcaIndex,
                               l_kwdSize,
                               l_kwd);
         if (NULL == l_errlHndl)
