@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -49,18 +49,18 @@ extern trace_desc_t *g_trac_hdat;
  */
 vpdData procVpdData[] =
 {
-    { MVPD::VRML, MVPD::RT },
-    { MVPD::VRML, MVPD::VD },
-    { MVPD::VRML, MVPD::PN },
-    { MVPD::VRML, MVPD::SN },
+    { MVPD::VINI, MVPD::RT },
+    { MVPD::VINI, MVPD::DR },
+    { MVPD::VINI, MVPD::CC },
+    { MVPD::VINI, MVPD::FN },
  };
 
 const HdatKeywordInfo l_mvpdKeywords[] =
 {
     { MVPD::RT, "RT" },
-    { MVPD::VD, "VD" },
-    { MVPD::PN, "PN" },
-    { MVPD::SN, "SN" },
+    { MVPD::DR, "DR" },
+    { MVPD::CC, "CC" },
+    { MVPD::FN, "FN" },
 };
 
 /*******************************************************************************
