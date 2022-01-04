@@ -60,11 +60,6 @@ config FSP_BUILD
     help
         Indicates that this is an FSP build
 
-config P10_BRING_UP
-    default n
-    help
-        Only enable for P10 bringup, will be removed eventually
-
 config SUPPORT_EEPROM_CACHING
     default y
     help
