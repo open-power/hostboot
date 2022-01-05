@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -628,6 +628,7 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
              * @userdata2[0:7]   TOC used
              * @userdata2[8:15]  Inhibited flag
              * @userdata2[16:23] Requested Section
+             * @userdata2[24:63] <Unused/Reserved>
              * @devdesc          PnorRP::getSectionInfo> Invalid Address for
              *                   read/write or prohibited by secureboot
              * @custdesc         A problem occurred while accessing the boot
@@ -637,11 +638,13 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
                                                PNOR::MOD_PNORRP_GETSECTIONINFO,
                                                PNOR::RC_INVALID_SECTION,
                                                size,
-                                               TO_UINT64(FOUR_UINT8_TO_UINT32(
+                                               TWO_UINT32_TO_UINT64(
+                                                 FOUR_UINT8_TO_UINT32(
                                                    iv_TOC_used,
                                                    l_inhibited,
                                                    i_section,
-                                                   0)),
+                                                   0),
+                                                 0),
                                                true /*Add HB SW Callout*/);
             l_errhdl->collectTrace(PNOR_COMP_NAME);
 
