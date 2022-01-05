@@ -56,6 +56,7 @@ void reg_write(pmic_info& io_pmic, const uint8_t i_reg, const fapi2::buffer<uint
     {
         if (mss::pmic::i2c::reg_write(io_pmic.iv_pmic, i_reg, i_data) != fapi2::FAPI2_RC_SUCCESS)
         {
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
             io_pmic.iv_state |= pmic_state::I2C_FAIL;
         }
     }
@@ -74,6 +75,7 @@ void reg_read(pmic_info& io_pmic, const uint8_t i_reg, fapi2::buffer<uint8_t>& o
     {
         if (mss::pmic::i2c::reg_read(io_pmic.iv_pmic, i_reg, o_output) != fapi2::FAPI2_RC_SUCCESS)
         {
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
             io_pmic.iv_state |= pmic_state::I2C_FAIL;
             o_output = 0x00;
         }
@@ -119,6 +121,7 @@ aggregate_state gpio_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAV
         != fapi2::FAPI2_RC_SUCCESS)
     {
         FAPI_INF(TARGTIDFORMAT " INPUT_PORT_REG register read failed", MSSTARGID(i_gpio));
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
         l_state = aggregate_state::GI2C_I2C_FAIL;
         return l_state;
     }
@@ -173,6 +176,7 @@ aggregate_state adc_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE
     if (mss::pmic::i2c::reg_read(i_adc, mss::adc::regs::EVENT_FLAG, l_reg) != fapi2::FAPI2_RC_SUCCESS)
     {
         FAPI_INF(TARGTIDFORMAT " EVENT_FLAG register read failed", MSSTARGID(i_adc));
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
         return aggregate_state::GI2C_I2C_FAIL;
     }
 
@@ -381,9 +385,11 @@ void populate_gpio_port_states(
 
     FAPI_INF(TARGTIDFORMAT " Reading GPIO Input Port State", MSSTARGID(i_gpio1));
     mss::pmic::i2c::reg_read(i_gpio1, mss::gpio::regs::INPUT_PORT_REG, l_reg_contents_1);
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
     FAPI_INF(TARGTIDFORMAT " Reading GPIO Input Port State", MSSTARGID(i_gpio2));
     mss::pmic::i2c::reg_read(i_gpio2, mss::gpio::regs::INPUT_PORT_REG, l_reg_contents_2);
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
     // In the case of an I2C read failure, we don't want to abort the procedure. The
     // struct values will remain zeroed, which is fine for telemetry collection.
@@ -595,8 +601,10 @@ void populate_adc_data(
     };
 
     mss::pmic::i2c::reg_read_reverse_buffer(i_adc, mss::adc::regs::GENERAL_CFG, l_reg_contents);
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     l_reg_contents.clearBit<mss::adc::fields::GENERAL_CFG_STATUS_ENABLE>();
     mss::pmic::i2c::reg_write_reverse_buffer(i_adc, mss::adc::regs::GENERAL_CFG, l_reg_contents);
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
     // Set each one
     for (const auto& l_adc_pair : ADC_U16_MAP)
@@ -611,7 +619,9 @@ void populate_adc_data(
 
         // First read the LSB reg. Then the MSB reg is the next one
         mss::pmic::i2c::reg_read(i_adc, REG, l_channel_lsb);
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
         mss::pmic::i2c::reg_read(i_adc, REG + REG_MSB_OFFSET, l_channel_msb);
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
         // MSB then LSB
         l_channel_msb.extract<0, REG_SIZE_BITS, 0>(l_channel_field);
@@ -623,8 +633,10 @@ void populate_adc_data(
     }
 
     mss::pmic::i2c::reg_read_reverse_buffer(i_adc, mss::adc::regs::GENERAL_CFG, l_reg_contents);
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     l_reg_contents.setBit<mss::adc::fields::GENERAL_CFG_STATUS_ENABLE>();
     mss::pmic::i2c::reg_write_reverse_buffer(i_adc, mss::adc::regs::GENERAL_CFG, l_reg_contents);
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     return;
 }
 
