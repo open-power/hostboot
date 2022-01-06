@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,6 +34,7 @@
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <fapi2_spd_access.H>
+#include <spd.H>
 #include <vpd/spdenums.H>
 #include <hwas/common/hwasCallout.H>
 #include <plat_utils.H>
@@ -107,7 +108,7 @@ fapi2::ReturnCode getSPD(
                         break;
                     }
 
-                    if( l_memModule == SPD::MEM_DDIMM )
+                    if( l_memModule == SPD::MOD_TYPE_DDIMM )
                     {
                         // currently getSPD only supports the ENTIRE_SPD
                         // keyword. In the DDIMM case this include the EFD

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -152,13 +152,13 @@ bool isMdsDdimm(TargetHandle_t i_ocmb)
 
     do
     {
-        // Read the memory type from the SPD of the OCMB chip
+        // Read the module type from the SPD of the OCMB chip
         size_t l_memTypeSize(SPD::MEM_TYPE_SZ);
         uint8_t l_memType(0);
         l_err = deviceRead(i_ocmb,
                            &l_memType,
                            l_memTypeSize,
-                           DEVICE_SPD_ADDRESS(SPD::BASIC_MEMORY_TYPE));
+                           DEVICE_SPD_ADDRESS(SPD::MODULE_TYPE));
 
         // If an error occurred, then commit the error and return false
         if( l_err )
@@ -186,8 +186,8 @@ bool isMdsDdimm(TargetHandle_t i_ocmb)
             break;
         }
 
-        // If the memory type is indeed a MDS DDIMM then return true
-        if (l_memType == SPD::SPD_MDS_TYPE)
+        // If the module type is indeed a MDS DDIMM then return true
+        if (l_memType == SPD::MOD_TYPE_MDS_DDIMM)
         {
            l_isMdsDdimm = true;
         }
