@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021                             */
+/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,14 +39,26 @@
 // SPD byte address that contains the memory type of the DDIMM
 constexpr uint8_t SPD_MEM_TYPE_ADDR = 2;
 
-// MDS memory type value of a DDIMM
-constexpr uint8_t SPD_MDS_MEM_TYPE = 0x3A;
+// The memory type value to indicate the SPD format for an MDS, the same format as DDR4
+constexpr uint8_t SPD_MDS_MEM_TYPE = 0x0C;
+
+// SPD byte address that contains the module type of the DDIMM
+constexpr uint8_t SPD_MOD_TYPE_ADDR = 3;
+
+// The module type value to indicate working with an MDS DDIMM
+constexpr uint8_t SPD_MDS_MOD_TYPE = 0xBA;
+
+// SPD byte address for the Registered Clock Drivers (RCD)
+constexpr uint16_t SPD_RCD_ADDR = 264;
+
+// The Registered Clock Drivers (RCD) value to indicate that the DDIMM is an MDS
+constexpr uint8_t SPD_MDS_RCD_VALUE = 0x15;
 
 // Invalid return value if an issue retrieving the MDS I2C address
 constexpr uint8_t SPD_INVALID_I2C_ADDR = 0xFF;
 
 // SPD byte address that contains the MDS controller I2C address
-constexpr uint16_t SPD_MDS_I2C_BYTE = 415;
+constexpr uint16_t SPD_MDS_I2C_ADDR = 415;
 
 ///
 /// @brief Get the mds i2c address from the given spd
@@ -61,9 +73,11 @@ inline uint8_t get_mds_i2c_addr(const char* i_spd)
     uint8_t l_mdsI2cAddress = SPD_INVALID_I2C_ADDR;
 
     // If SPD belongs to a DDIMM of MDS memory type, then retrieve I2C address
-    if (SPD_MDS_MEM_TYPE == i_spd[SPD_MEM_TYPE_ADDR])
+    if (  (SPD_MDS_MEM_TYPE == i_spd[SPD_MEM_TYPE_ADDR]) &&
+          (SPD_MDS_MOD_TYPE == i_spd[SPD_MOD_TYPE_ADDR]) &&
+          (SPD_MDS_RCD_VALUE == i_spd[SPD_RCD_ADDR]) )
     {
-        l_mdsI2cAddress = uint8_t(i_spd[SPD_MDS_I2C_BYTE]);
+        l_mdsI2cAddress = uint8_t(i_spd[SPD_MDS_I2C_ADDR]);
     }
 
     return l_mdsI2cAddress;
