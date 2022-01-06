@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -710,6 +710,8 @@ void handleSecurebootFailure(errlHndl_t &io_err, const bool i_waitForShutdown,
     if(!i_waitForShutdown)
     {
         ErrlManager::callFlushErrorLogs();
+        // Stop IPL from propagating into other isteps
+        INITSERVICE::stopIpl();
     }
 
     // Shutdown with Secureboot error status
