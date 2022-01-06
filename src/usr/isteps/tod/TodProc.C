@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,12 +76,12 @@ TodProc::TodProc(
     {
       if(!iv_procTarget)
       {
-          TOD_ERR_ASSERT("Target input i_procTarget is nullptr ");
+          TOD_ERR_ASSERT(false, "Target input i_procTarget is nullptr ");
           break;
       }
       if(!iv_parentDrawer)
       {
-          TOD_ERR_ASSERT("TOD drawer input iv_parentDrawer is nullptr ");
+          TOD_ERR_ASSERT(false, "TOD drawer input iv_parentDrawer is nullptr ");
           break;
       }
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -228,7 +228,7 @@ void TodDrawer::addProc(TodProc* i_proc)
     }
     else
     {
-        TOD_ERR_ASSERT("Code bug! Null Proc Target passed!");
+        TOD_ERR_ASSERT(false,"Code bug! Null Proc Target passed!");
     }
 }
 

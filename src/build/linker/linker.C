@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /* [+] Jan Hlavac                                                         */
 /*                                                                        */
@@ -861,6 +861,7 @@ bool Object::read_relocation()
         s.address = syms[i]->value;
         s.base = syms[i]->section->vma;
         s.type = 0;
+        s.addend = 0;
 
         all_symbols.insert(s.name);
 
@@ -956,6 +957,7 @@ bool Object::read_relocation()
         s.name = loc[i]->sym_ptr_ptr[0]->name;
         s.address = loc[i]->address;
         s.addend = loc[i]->addend;
+        s.base = 0;
         if ((s.name == BFD_ABS_SECTION_NAME) ||
             (this->symbols.find(s.name) != this->symbols.end()))
         {
