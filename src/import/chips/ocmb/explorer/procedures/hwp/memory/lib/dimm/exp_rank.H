@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,8 +52,14 @@ template <>
 class rankTraits<mss::mc_type::EXPLORER>
 {
     public:
+        // Number of DIMM's per port, based upon our attribute structure
+        // Hypothetically, 2 DIMM's per port could be supported but only one is used at this time
         static constexpr uint8_t MAX_DIMMS_PER_PORT = 2;
+
+        // Maximum number of ranks supported on each DIMM
         static constexpr uint8_t MAX_RANKS_PER_DIMM = 4;
+
+        // The cosmetic indexing jump used to go from DIMM0 to DIMM1
         static constexpr uint8_t RANK_INDEX_STEP = 4;
 
         // Note! a configuration of 2 4-rank dimms is not possible.
@@ -63,89 +69,6 @@ class rankTraits<mss::mc_type::EXPLORER>
 
         static constexpr fapi2::TargetType MEM_PORT_TARGET_TYPE = fapi2::TARGET_TYPE_MEM_PORT;
 };
-
-///
-/// @brief Return a vector of rank numbers which represent the primary rank pairs for this port
-/// @param[in] i_target port target on which to operate
-/// @param[out] o_port_ranks a vector of ranks
-/// @return FAPI2_RC_SUCCESS iff all is ok
-inline fapi2::ReturnCode primary_ranks( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
-                                        std::vector< uint64_t >& o_port_ranks )
-{
-    o_port_ranks.clear();
-    std::vector<mss::rank::info<mss::mc_type::EXPLORER>> l_rank_info_vect;
-    FAPI_TRY(mss::rank::ranks_on_port<mss::mc_type::EXPLORER>(i_target, l_rank_info_vect));
-
-    // Loop through and assemble the ranks
-    for(const auto& l_rank_info : l_rank_info_vect)
-    {
-        o_port_ranks.push_back(l_rank_info.get_port_rank());
-    }
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief Return a vector of rank numbers which represent the primary rank pairs for this dimm
-/// @param[in] i_target DIMM target on which to operate
-/// @param[out] o_port_ranks a vector of ranks
-/// @return FAPI2_RC_SUCCESS iff all is ok
-inline fapi2::ReturnCode primary_ranks( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                        std::vector< uint64_t >& o_port_ranks )
-{
-    o_port_ranks.clear();
-    std::vector<mss::rank::info<mss::mc_type::EXPLORER>> l_rank_info_vect;
-    FAPI_TRY(mss::rank::ranks_on_dimm<mss::mc_type::EXPLORER>(i_target, l_rank_info_vect));
-
-    // Loop through and assemble the ranks
-    for(const auto& l_rank_info : l_rank_info_vect)
-    {
-        o_port_ranks.push_back(l_rank_info.get_port_rank());
-    }
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief Return the *port relative position* of the DIMM which posesses this rank
-/// @param[in] i_port_rank the rank number.
-/// @return the relative position of the DIMM which contains this rank.
-inline size_t get_dimm_from_rank(const uint64_t i_port_rank)
-{
-    using TT = rankTraits<mss::mc_type::EXPLORER>;
-    return i_port_rank / TT::MAX_RANKS_PER_DIMM;
-}
-
-///
-/// @brief Return a vector of rank numbers which represent the ranks for this dimm
-/// @param[in] i_dimm_target TARGET_TYPE_DIMM
-/// @param[out] o_dimm_ranks a vector of port ranks for dimm (numbers)
-/// @return FAPI2_RC_SUCCESS iff all is ok
-/// @note Outputs the port rank numbers for this DIMM
-///
-template<>
-inline fapi2::ReturnCode ranks_on_dimm_helper<mss::mc_type::EXPLORER>(
-    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm_target,
-    std::vector<uint64_t>& o_port_ranks)
-{
-    std::vector<uint64_t> l_port_ranks;
-    std::vector<mss::rank::info<mss::mc_type::EXPLORER>> l_vect;
-
-    FAPI_TRY( mss::rank::ranks_on_dimm<mss::mc_type::EXPLORER>(i_dimm_target, l_vect) );
-
-    // Loop through and get ranks or each
-    for (const auto l_rank_info : l_vect)
-    {
-        l_port_ranks.push_back( l_rank_info.get_port_rank() );
-    }
-
-    o_port_ranks = l_port_ranks;
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
 
 ///
 /// @brief Works around any issues with swizzle on the PHY ranks - explorer/DIMM

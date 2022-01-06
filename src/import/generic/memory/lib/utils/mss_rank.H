@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -379,13 +379,91 @@ fapi_try_exit:
 /// @brief Return a vector of rank numbers which represent the ranks for this dimm
 /// @tparam MC the memory controller type
 /// @param[in] i_dimm_target TARGET_TYPE_DIMM
-/// @param[out] o_dimm_ranks a vector of port ranks for dimm (numbers)
+/// @param[out] o_port_ranks a vector of port ranks for dimm (numbers)
 /// @return FAPI2_RC_SUCCESS iff all is ok
 /// @note Outputs the port rank numbers for this DIMM
 ///
 template<mss::mc_type MC>
 fapi2::ReturnCode ranks_on_dimm_helper(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm_target,
-                                       std::vector<uint64_t>& o_dimm_ranks);
+                                       std::vector<uint64_t>& o_port_ranks)
+{
+    std::vector<uint64_t> l_port_ranks;
+    std::vector<mss::rank::info<MC>> l_vect;
+
+    FAPI_TRY( mss::rank::ranks_on_dimm<MC>(i_dimm_target, l_vect) );
+
+    // Loop through and get ranks or each
+    for (const auto l_rank_info : l_vect)
+    {
+        l_port_ranks.push_back( l_rank_info.get_port_rank() );
+    }
+
+    o_port_ranks = l_port_ranks;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Return a vector of rank numbers which represent the primary rank pairs for this port
+/// @tparam MC the memory controller type
+/// @param[in] i_target port target on which to operate
+/// @param[out] o_port_ranks a vector of ranks
+/// @return FAPI2_RC_SUCCESS iff all is ok
+template <mss::mc_type MC>
+inline fapi2::ReturnCode primary_ranks( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                        std::vector< uint64_t >& o_port_ranks )
+{
+    o_port_ranks.clear();
+    std::vector<mss::rank::info<MC>> l_rank_info_vect;
+    FAPI_TRY(mss::rank::ranks_on_port<MC>(i_target, l_rank_info_vect));
+
+    // Loop through and assemble the ranks
+    for(const auto& l_rank_info : l_rank_info_vect)
+    {
+        o_port_ranks.push_back(l_rank_info.get_port_rank());
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Return a vector of rank numbers which represent the primary rank pairs for this dimm
+/// @tparam MC the memory controller type
+/// @param[in] i_target DIMM target on which to operate
+/// @param[out] o_port_ranks a vector of ranks
+/// @return FAPI2_RC_SUCCESS iff all is ok
+template <mss::mc_type MC>
+inline fapi2::ReturnCode primary_ranks( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                        std::vector< uint64_t >& o_port_ranks )
+{
+    o_port_ranks.clear();
+    std::vector<mss::rank::info<MC>> l_rank_info_vect;
+    FAPI_TRY(mss::rank::ranks_on_dimm<MC>(i_target, l_rank_info_vect));
+
+    // Loop through and assemble the ranks
+    for(const auto& l_rank_info : l_rank_info_vect)
+    {
+        o_port_ranks.push_back(l_rank_info.get_port_rank());
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Return the *port relative position* of the DIMM which posesses this rank
+/// @tparam MC the memory controller type
+/// @param[in] i_port_rank the rank number.
+/// @return the relative position of the DIMM which contains this rank.
+///
+template <mss::mc_type MC>
+inline size_t get_dimm_from_rank(const uint64_t i_port_rank)
+{
+    using TT = rankTraits<MC>;
+    return i_port_rank / TT::RANK_INDEX_STEP;
+}
 
 } // rank
 } // mss

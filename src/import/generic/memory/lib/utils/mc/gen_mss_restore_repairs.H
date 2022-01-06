@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -808,7 +808,7 @@ fapi2::ReturnCode restore_repairs_helper(const fapi2::Target<fapi2::TARGET_TYPE_
     {
         const auto l_dimm_rank = l_rank.get_dimm_rank();
         const auto l_port_rank = l_rank.get_port_rank();
-        const auto l_dimm_idx = mss::rank::get_dimm_from_rank(l_port_rank);
+        const auto l_dimm_idx = mss::rank::get_dimm_from_rank<MC>(l_port_rank);
 
         repair_state_machine<MC, fapi2::TARGET_TYPE_DIMM> l_machine;
 
