@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -283,7 +283,7 @@ char const * topologyTypeToString ( const p10_tod_setup_tod_sel i_topologyType )
         case TOD_SECONDARY:
             return "Secondary Topology";
         default:
-            TOD_ERR_ASSERT("Unknown Topology Type");
+            TOD_ERR_ASSERT(false, "Unknown Topology Type");
             return "";
     }
 }

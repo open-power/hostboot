@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -134,7 +134,7 @@ errlHndl_t getMaxConfigParams(
         // Assert on failure getting system target
         if(nullptr == l_pTopLevel)
         {
-            TOD_ERR_ASSERT("NULL top level target found");
+            TOD_ERR_ASSERT(false, "NULL top level target found");
             break;
 
         }

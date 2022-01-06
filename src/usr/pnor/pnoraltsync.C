@@ -56,7 +56,7 @@ using PnorDD = PnorHiomapDD;
 #include "pnor_pldmdd.H"
 using PnorDD = PnorPldmDD;
 #else
-#error "No PNOR DD configured"
+static_assert(0,"No PNOR DD configured");
 #endif
 
 extern trace_desc_t* g_trac_pnor;

@@ -1020,7 +1020,7 @@ errlHndl_t ensureEepromCacheIsInSync(TARGETING::Target       * i_target,
             {
                 //Set the targets as changed since the p/n's don't match
                 HWAS::markTargetChanged(i_target);
-            )
+            }
 #else
             //No need to mark target changed here, it will be handled by eecache code
 #endif

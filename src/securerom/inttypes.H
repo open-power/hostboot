@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,7 +26,7 @@
 #define uint_fast8_t  uint8_t
 
 #ifndef BYTE_ORDER
-#error "BYTE_ORDER MUST BE DEFINED"
+static_assert(0,"BYTE_ORDER MUST BE DEFINED");
 #endif /* #ifndef BYTE_ORDER */
 
 #if BYTE_ORDER == LITTLE_ENDIAN

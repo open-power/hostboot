@@ -57,7 +57,7 @@ using PnorDD = PnorHiomapDD;
 #include "pnor_pldmdd.H"
 using PnorDD = PnorPldmDD;
 #else
-#error "No PNOR DD configured"
+static_assert(0,"No PNOR DD configured");
 #endif
 
 // Used for creating an Invalid TOC ("PNOR")

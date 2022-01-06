@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -587,7 +587,7 @@ errlHndl_t TodSvc::isMPIPL( bool& o_mpIPL )
                                TOD_IS_MPIPL,
                                TOD_TOP_LEVEL_TARGET_NOT_FOUND);
 
-            TOD_ERR_ASSERT("Error getting top level target");
+            TOD_ERR_ASSERT(false, "Error getting top level target");
             break;
         }
         if(true == l_pTopLevelTarget->getAttr<TARGETING::ATTR_IS_MPIPL_HB>())

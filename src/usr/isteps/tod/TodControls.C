@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -208,7 +208,7 @@ errlHndl_t  TodControls::buildTodDrawers(
         if (nullptr == l_pSysTarget)
         {
             //We should not be reaching here without a valid system target
-            TOD_ERR_ASSERT("buildTodDrawers: nullptr system target ");
+            TOD_ERR_ASSERT(false, "buildTodDrawers: nullptr system target ");
             break;
         }
 
@@ -250,7 +250,7 @@ errlHndl_t  TodControls::buildTodDrawers(
             iv_todConfig[i_config].iv_todDrawerList;
         if (!l_todDrawerList.empty())
         {
-            TOD_ERR_ASSERT("TOD drawer list must be empty");
+            TOD_ERR_ASSERT(false, "TOD drawer list must be empty");
             break;
         }
 
@@ -1124,13 +1124,13 @@ void  TodControls ::setMdmtOfActiveConfig(
     {
       if ( !i_mdmt )
       {
-          TOD_ERR_ASSERT("Software error input MDMT must not be nullptr");
+          TOD_ERR_ASSERT(false, "Software error input MDMT must not be nullptr");
           break;
       }
 
       if ( !i_masterDrawer )
       {
-          TOD_ERR_ASSERT("Software error input master drawer must not be "
+          TOD_ERR_ASSERT(false, "Software error input master drawer must not be "
           " nullptr");
           break;
       }
@@ -1161,13 +1161,13 @@ errlHndl_t TodControls::setMdmt(const p10_tod_setup_tod_sel i_config,
     {
       if (!i_mdmt)
       {
-          TOD_ERR_ASSERT("Software error input MDMT must not be nullptr");
+          TOD_ERR_ASSERT(false, "Software error input MDMT must not be nullptr");
           break;
       }
 
       if (!i_masterDrawer)
       {
-          TOD_ERR_ASSERT("Software error input master drawer must not be "
+          TOD_ERR_ASSERT(false, "Software error input master drawer must not be "
           " nullptr");
           break;
       }
@@ -1202,7 +1202,7 @@ bool  TodControls::isProcBlackListed (
     {
       if(!i_procTarget)
       {
-          TOD_ERR_ASSERT("Input target cannot be nullptr for "
+          TOD_ERR_ASSERT(false, "Input target cannot be nullptr for "
                   "isProcBlackListed");
           break;
       }
@@ -1212,7 +1212,7 @@ bool  TodControls::isProcBlackListed (
               ||
               ( GETTYPE(i_procTarget) != TARGETING::TYPE_PROC))
       {
-          TOD_ERR_ASSERT("Only processor target allowed as input for "
+          TOD_ERR_ASSERT(false, "Only processor target allowed as input for "
                   " isProcBlackListed ");
           break;
       }
@@ -1271,7 +1271,7 @@ errlHndl_t TodControls::buildGardedTargetsList()
         TARGETING::targetService().getTopLevelTarget(l_pSystemTarget);
         if (!l_pSystemTarget)
         {
-            TOD_ERR_ASSERT("System target could not be found");
+            TOD_ERR_ASSERT(false, "System target could not be found");
             break;
         }
 

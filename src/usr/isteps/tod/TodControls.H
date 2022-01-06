@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -609,7 +609,7 @@ private:
       {
           if ( !i_procTarget )
           {
-              TOD_ERR_ASSERT("Input target cannot be NULL for "
+              TOD_ERR_ASSERT(false, "Input target cannot be NULL for "
                       "addProcToBlackList");
           }
 
@@ -618,7 +618,7 @@ private:
                   ||
                   ( GETTYPE(i_procTarget) != TARGETING::TYPE_PROC))
           {
-              TOD_ERR_ASSERT(" Only processor target allowed as input for "
+              TOD_ERR_ASSERT(false, " Only processor target allowed as input for "
                       " addProcToBlackList");
           }
 
