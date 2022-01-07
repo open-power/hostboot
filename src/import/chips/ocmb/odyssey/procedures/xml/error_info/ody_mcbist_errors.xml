@@ -1,0 +1,292 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/ocmb/odyssey/procedures/xml/error_info/ody_mcbist_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2022                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<hwpErrors>
+
+
+  <registerFfdc>
+    <id>REG_FFDC_ODY_MEMDIAGS_FAILURE</id>
+    <scomRegister>scomt::ody::ODC_MCBIST_SCOM_MCBMR0Q</scomRegister>
+    <scomRegister>scomt::ody::ODC_MCBIST_SCOM_MCBCFGQ</scomRegister>
+    <scomRegister>scomt::ody::ODC_MCBIST_SCOM_MCB_CNTLQ</scomRegister>
+    <scomRegister>scomt::ody::ODC_MCBIST_SCOM_MCB_CNTLSTATQ</scomRegister>
+    <scomRegister>scomt::ody::ODC_MCBIST_SCOM_MCBSTATQ</scomRegister>
+    <scomRegister>scomt::ody::ODC_MCBIST_SCOM_MCBMCATQ</scomRegister>
+    <scomRegister>scomt::ody::ODC_MCBIST_SCOM_MCBPARMQ</scomRegister>
+    <scomRegister>scomt::ody::ODC_MCBIST_SCOM_MCBAGRAQ</scomRegister>
+    <scomRegister>scomt::ody::ODC_MCBIST_SCOM_MBSEC1Q</scomRegister>
+    <scomRegister>scomt::ody::ODC_MCBIST_SCOM_MBSTRQ</scomRegister>
+    <scomRegister>scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRQ_RW_WCLEAR</scomRegister>
+    <scomRegister>scomt::ody::ODC_MCBIST_SCOM_MCBAMR0A0Q</scomRegister>
+    <scomRegister>scomt::ody::ODC_MCBIST_SCOM_MCBAMR1A0Q</scomRegister>
+    <scomRegister>scomt::ody::ODC_MCBIST_SCOM_MCBAMR2A0Q</scomRegister>
+    <scomRegister>scomt::ody::ODC_MCBIST_SCOM_MCBAMR3A0Q</scomRegister>
+
+    <scomRegister>scomt::ody::ODC_MCBIST_SCOM_MCBFD0Q</scomRegister>
+    <scomRegister>scomt::ody::ODC_MCBIST_SCOM_MCBFD1Q</scomRegister>
+    <scomRegister>scomt::ody::ODC_MCBIST_SCOM_MCBFD2Q</scomRegister>
+    <scomRegister>scomt::ody::ODC_MCBIST_SCOM_MCBFD3Q</scomRegister>
+    <scomRegister>scomt::ody::ODC_MCBIST_SCOM_MCBFD4Q</scomRegister>
+    <scomRegister>scomt::ody::ODC_MCBIST_SCOM_MCBFD5Q</scomRegister>
+    <scomRegister>scomt::ody::ODC_MCBIST_SCOM_MCBFD6Q</scomRegister>
+    <scomRegister>scomt::ody::ODC_MCBIST_SCOM_MCBFD7Q</scomRegister>
+
+    <scomRegister>scomt::ody::ODC_MCBIST_SCOM_MCBSA0Q</scomRegister>
+    <scomRegister>scomt::ody::ODC_MCBIST_SCOM_MCBSA1Q</scomRegister>
+    <scomRegister>scomt::ody::ODC_MCBIST_SCOM_MCBSA2Q</scomRegister>
+    <scomRegister>scomt::ody::ODC_MCBIST_SCOM_MCBSA3Q</scomRegister>
+    <scomRegister>scomt::ody::ODC_MCBIST_SCOM_MCBEA0Q</scomRegister>
+    <scomRegister>scomt::ody::ODC_MCBIST_SCOM_MCBEA1Q</scomRegister>
+    <scomRegister>scomt::ody::ODC_MCBIST_SCOM_MCBEA2Q</scomRegister>
+    <scomRegister>scomt::ody::ODC_MCBIST_SCOM_MCBEA3Q</scomRegister>
+  </registerFfdc>
+
+  <!-- Note: error should be handled by PRD, so no deconfig desired -->
+  <hwpError>
+    <rc>RC_ODY_MEMDIAGS_COMPARE_ERROR_IN_LAST_PATTERN</rc>
+    <description>A miscompare error was caused by the last MCBIST pattern</description>
+    <ffdc>PORT</ffdc>
+    <ffdc>SUBTEST</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_ODY_MEMDIAGS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <!-- Note: error should be handled by PRD, so no deconfig desired -->
+  <hwpError>
+    <rc>RC_ODY_MEMDIAGS_ERROR_IN_LAST_PATTERN</rc>
+    <description>An error was caused by the last MCBIST pattern</description>
+    <ffdc>STATUS0</ffdc>
+    <ffdc>STATUS1</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_ODY_MEMDIAGS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <!-- Note: error should be handled by PRD, so no deconfig desired -->
+  <hwpError>
+    <rc>RC_ODY_MEMDIAGS_MCBIST_FAILED_TO_START</rc>
+    <description>The MCBIST engine failed to start its program</description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_ODY_MEMDIAGS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <!-- Note: error should be handled by PRD, so no deconfig desired -->
+  <hwpError>
+    <rc>RC_ODY_MEMDIAGS_PORT_NOT_FUNCTIONAL</rc>
+    <description>The port used in an MCBIST program is not functional</description>
+    <ffdc>RELATIVE_PORT_POSITION</ffdc>
+    <ffdc>ADDRESS</ffdc>
+    <ffdc>MC_TARGET</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_ODY_MEMDIAGS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <!-- Note: error should be handled by PRD, so no deconfig desired -->
+  <hwpError>
+    <rc>RC_ODY_MEMDIAGS_SUPERFAST_INIT_FAILED_TO_INIT</rc>
+    <description>A superfast init operation failed initialization</description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_ODY_MEMDIAGS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <!-- Note: error should be handled by PRD, so no deconfig desired -->
+  <hwpError>
+    <rc>RC_ODY_MEMDIAGS_SUPERFAST_READ_FAILED_TO_INIT</rc>
+    <description>A superfast read operation failed initialization</description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_ODY_MEMDIAGS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <!-- Note: error should be handled by PRD, so no deconfig desired -->
+  <hwpError>
+    <rc>RC_ODY_MEMDIAGS_MCBIST_FAILED_TO_STOP</rc>
+    <description>The MCBIST engine failed to stop its program</description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_ODY_MEMDIAGS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <ffdc>POLL_COUNT</ffdc>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <!-- Note: error should be handled by PRD, so no deconfig desired -->
+  <hwpError>
+    <rc>RC_ODY_MEMDIAGS_CONTINUOUS_SCRUB_FAILED_TO_INIT</rc>
+    <description>A continuous scrub operation failed initialization</description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_ODY_MEMDIAGS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <!-- Note: error should be handled by PRD, so no deconfig desired -->
+  <hwpError>
+    <rc>RC_ODY_MEMDIAGS_TARGETED_SCRUB_FAILED_TO_INIT</rc>
+    <description>A continuous scrub operation failed initialization</description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_ODY_MEMDIAGS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <!-- Note: error should be handled by PRD, so no deconfig desired -->
+  <hwpError>
+    <rc>RC_ODY_MEMDIAGS_ALREADY_AT_BOUNDARY</rc>
+    <description>A continue request asked to stop at a boundary, but we are there already</description>
+    <ffdc>MC_TARGET</ffdc>
+    <ffdc>BOUNDARY</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_ODY_MEMDIAGS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+        <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_ODY_MCBIST_TIMEOUT</rc>
+    <description>
+        MCBIST program failed to return in the time allowed
+        Software timer, MCBIST has not finished in the time allowed
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_ODY_MEMDIAGS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MC_TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>MC_TARGET</target>
+    </gard>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_ODY_MCBIST_DATA_FAIL</rc>
+    <description>
+        MCBIST program appeared to have failed, but set conflicting bits in the status register
+    </description>
+    <ffdc>STATUS_REGISTER</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_ODY_MEMDIAGS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MC_TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>MC_TARGET</target>
+    </gard>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_ODY_MCBIST_UNKNOWN_FAILURE</rc>
+    <description>MCBIST program reported a failure but no error status was found</description>
+    <ffdc>STATUS_REGISTER</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_ODY_MEMDIAGS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MC_TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>MC_TARGET</target>
+    </gard>
+  </hwpError>
+
+</hwpErrors>
