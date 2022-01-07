@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2017,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2017,2022                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -960,7 +960,7 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_DEFAULT_HB_CORE</id>
+        <id>ATTR_HB_FALLBACK_CORES</id>
         <writeable/>
         <no_export/>
         <persistency>volatile-zeroed</persistency>

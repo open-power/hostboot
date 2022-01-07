@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -122,31 +122,25 @@ void* host_gard( void *io_pArgs )
 
         for (const auto l_proc : l_procsFunc)
         {
+            ATTR_HB_FALLBACK_CORES_type l_funcCoreMask = 0x00000000;
             // for each proc, get the list of its functional non-ECO cores
             l_cores.clear();
             getNonEcoCores( l_cores,
                             l_proc,
                             true);
 
-            // if there are functional non-ECO ungarded cores
-            if (l_cores.size() > 0)
+            // for each functional, non-ECO, ungarded core
+            for (const auto l_core : l_cores)
             {
-                //guarantee l_cores is ordered by ATTR_CHIP_UNIT:
-                std::sort(l_cores.begin(), l_cores.end(), compareTargetChipUnit);
-
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"host_gard: "
-                          "the first functional non-ECO core on proc 0x%X is ATTR_CHIP_UNIT: %d",
-                          get_huid(l_proc),
-                          l_cores[0]->getAttr<ATTR_CHIP_UNIT>());
-
-                l_proc->setAttr<ATTR_DEFAULT_HB_CORE>(l_cores[0]->getAttr<ATTR_CHIP_UNIT>());
-
+                // set up the valid core mask for the proc
+                l_funcCoreMask |= (0x80000000 >> (l_core->getAttr<ATTR_CHIP_UNIT>()));
             }
-            else
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"host_gard: "
-                          "no functional ungarded non-ECO cores on proc 0x%X", get_huid(l_proc));
-            }
+
+            l_proc->setAttr<ATTR_HB_FALLBACK_CORES>(l_funcCoreMask);
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "host_gard: proc HUID 0x%X has functional core mask: 0x%8X",
+                      get_huid(l_proc), l_funcCoreMask);
+
         }
 
         // Put out some helpful messages that show which targets are usable
