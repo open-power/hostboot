@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -460,7 +460,7 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
                 // recovery, therefore do -NOT- make any modifications.
                 if(!INITSERVICE::spBaseServicesEnabled())
                 {
-                    l_errl = this->switch_sbe_sides(this->iv_currentAction, false);
+                    l_errl = this->switch_sbe_sides(this->iv_currentAction, true);
                     if(l_errl)
                     {
                         errlCommit(l_errl, SBEIO_COMP_ID);
@@ -532,15 +532,17 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
             else if(this->iv_sbeRestartMethod == SBE_RESTART_METHOD::START_CBS)
             {
                 //Increment attempt count for this side
-                //
 
-                if ((this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM) ||
-                    (this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM))
+                const bool boot_seeprom_switch_requested
+                    = (this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM
+                       || this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM);
+
+                if (boot_seeprom_switch_requested)
                 {
                     this->iv_currentSideBootAttempts++;
                 }
                 else if ((this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_BKP_MSEEPROM) ||
-                    (this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_UPD_MSEEPROM))
+                         (this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_UPD_MSEEPROM))
                 {
                     this->iv_currentSideBootAttempts_mseeprom++;
                     // increment even though we may switch sides later
@@ -557,9 +559,9 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
                     this->iv_currentAction = P10_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
                     SBE_TRACF("main_sbe_handler(): SBE reports it was never booted and we reached MAX_RESTARTS. Setting next action to be NO_RECOVERY_ACTION");
                 }
-                // If we are RESTART_CBS we want to flip the MSEEPROM always
-                // For the eBMC flow if something is requiring a restart flip
-                // the MSEEPROM to aide the best results.
+
+                // For the eBMC flow, if something is requiring a restart, we
+                // flip the [M]SEEPROM on eBMC systems to try to fix the problem.
                 //
                 // For the FSP flow, we SKIP the call to switch_sbe_sides to
                 // avoid altering the CFAM registers and MVPD.
@@ -568,7 +570,42 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
                 // recovery, therefore do -NOT- make any modifications in FSP flow.
                 if(!INITSERVICE::spBaseServicesEnabled())
                 {
-                    l_errl = this->switch_sbe_sides(P10_EXTRACT_SBE_RC::REIPL_BKP_MSEEPROM, true);
+                    /*
+                     Switching the measurement SEEPROM (MSEEPROM) side is the
+                     less risky operation compared to switching the Boot SEEPROM
+                     side, because both sides of the MSEEPROM should have
+                     exactly the same contents and its functionality shouldn't
+                     change by switching. Switching Boot SEEPROM sides on the
+                     other hand could lead to completely different behavior and
+                     expose bugs, lead to version mismatches, and maybe other
+                     bad things.
+
+                     Therefore, in this path, we switch the MSEEPROM side first,
+                     and only if that doesn't fix the problem do we switch the
+                     Boot SEEPROM side. (But if this is our last chance to boot,
+                     we'll switch the boot SEEPROM side if we haven't before,
+                     because that has a greater chance of working.)
+                    */
+
+                    const bool last_try = this->iv_currentAction == P10_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
+                    const bool already_switched_boot_sides = this->iv_switchSidesCount > 0;
+                    const bool already_switched_meas_sides = this->iv_switchSidesCount_mseeprom > 0;
+
+                    SBE_TRACF("main_sbe_handler(): Switching sides: boot_seeprom_switch_requested=%d iv_currentAction=%d "
+                              "last_try=%d already_switched_boot_sides=%d already_switched_meas_sides=%d",
+                              boot_seeprom_switch_requested, iv_currentAction,
+                              last_try, already_switched_boot_sides, already_switched_meas_sides);
+
+                    if ((already_switched_meas_sides && !already_switched_boot_sides && boot_seeprom_switch_requested)
+                        || (last_try && !already_switched_boot_sides))
+                    {
+                        l_errl = this->switch_sbe_sides(P10_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM, true);
+                    }
+                    else
+                    {
+                        l_errl = this->switch_sbe_sides(P10_EXTRACT_SBE_RC::REIPL_BKP_MSEEPROM, true);
+                    }
+
                     if(l_errl)
                     {
                         errlCommit(l_errl, SBEIO_COMP_ID);
