@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1077,8 +1077,6 @@ inline subtest_t<MC, T, TT> init_subtest()
 /// - PAUSE_AFTER_CCS_SUBTEST - don't puase after CCS subtest
 /// - FORCE_PAUSE_AFTER_ADDR - don't pause after current address
 /// - FORCE_PAUSE_AFTER_SUBTEST - no pause after subtest
-/// - ENABLE_SPEC_ATTN - disabled
-/// - ENABLE_HOST_ATTN - enabled
 ///
 template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE , typename TT = mcbistTraits<MC, T> >
 class program
@@ -1208,12 +1206,6 @@ class program
             // By default if there's an error, we stop after the errored address
             iv_config.insertFromRight<TT::CFG_PAUSE_ON_ERROR_MODE,
                                       TT::CFG_PAUSE_ON_ERROR_MODE_LEN>(end_boundary::STOP_AFTER_ADDRESS);
-
-            // All mcbist attentions are host attentions, special attention bit is already clear
-            if(TT::CFG_ENABLE_ATTN_SUPPORT == mss::states::YES)
-            {
-                iv_config.setBit<TT::CFG_ENABLE_HOST_ATTN>();
-            }
 
         }
 
@@ -2580,19 +2572,6 @@ inline fapi2::ReturnCode load_config( const fapi2::Target<T>& i_target, const mc
 
     // Copy the program's config settings - we want to modify them if we're in sim.
     fapi2::buffer<uint64_t> l_config = i_program.iv_config;
-
-    // If we're running in Cronus, there is no interrupt so any attention bits will
-    // hang something somewhere. Make sure there's nothing in this config which can
-    // turn on attention bits unless we're running in hostboot
-#ifndef __HOSTBOOT_MODULE
-
-    if(TT::CFG_ENABLE_ATTN_SUPPORT == mss::states::YES)
-    {
-        l_config.template clearBit<TT::CFG_ENABLE_HOST_ATTN>();
-        l_config.template clearBit<TT::CFG_ENABLE_SPEC_ATTN>();
-    }
-
-#endif
 
     FAPI_TRY( fapi2::putScom(i_target, TT::CFGQ_REG, l_config) );
 

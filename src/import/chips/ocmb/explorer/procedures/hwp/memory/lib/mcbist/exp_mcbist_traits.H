@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -190,8 +190,6 @@ class mcbistTraits< mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>
         // PORT_TYPE used in continuous_scrub_operation
         static constexpr fapi2::TargetType PORT_TYPE = fapi2::TARGET_TYPE_MEM_PORT;
 
-        // ATTN support
-        static constexpr mss::states CFG_ENABLE_ATTN_SUPPORT = mss::states::NO;
         static constexpr mss::states BROADCAST_CAPABLE = mss::states::NO;
 
         // Multi-ports, dimms
@@ -385,9 +383,6 @@ class mcbistTraits< mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>
             MCBIST_CFG_FORCE_PAUSE_AFTER_ADDR = EXPLR_MCBIST_MCBCFGQ_MCBIST_CFG_FORCE_PAUSE_AFTER_ADDR,
             MCBIST_CFG_FORCE_PAUSE_AFTER_SUBTEST = EXPLR_MCBIST_MCBCFGQ_MCBIST_CFG_FORCE_PAUSE_AFTER_SUBTEST,
 
-            // No ATTN in explorer
-            CFG_ENABLE_SPEC_ATTN = 0,
-            CFG_ENABLE_HOST_ATTN = 0,
             MCBIST_CFG_PAUSE_AFTER_RANK = EXPLR_MCBIST_MCBCFGQ_MCBIST_CFG_FORCE_PAUSE_AFTER_RANK,
 
             LOGGED_ERROR_ON_PORT_INDICATOR = EXPLR_MCBIST_MCBSTATQ_MCBIST_LOGGED_ERROR_ON_PORT_INDICATOR,
