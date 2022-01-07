@@ -2230,7 +2230,11 @@ errlHndl_t DeconfigGard::applyGardRecord(Target *i_pTarget,
         HWAS_MUTEX_UNLOCK(iv_mutex);
 
         // Need to set GARD_APPLIED bit for all garded targets
-        update_hwas_changed_mask(i_pTarget, HWAS_CHANGED_BIT_GARD_APPLIED);
+        // Also need to set DIAG_MASK to force diagnostics to run if the part
+        //  is unguarded later.
+        update_hwas_changed_mask(i_pTarget,
+                                 HWAS_CHANGED_BIT_GARD_APPLIED
+                                 | HWAS_CHANGED_BIT_DIAG_MASK);
 
         if(i_deconfigRule == SPEC_DECONFIG)
         {
