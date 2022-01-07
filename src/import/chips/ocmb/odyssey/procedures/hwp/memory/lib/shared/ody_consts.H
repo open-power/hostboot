@@ -62,9 +62,15 @@ enum sizes
     // This is used for targeting only (attribute arrays, target positions) so needs to be 2 for P10
     MAX_DIMM_PER_PORT = 2,
 
+    // This is the maximum number of DIMM per port that the hardware supports
+    HW_MAX_DIMM_PER_PORT = 1,
+
     // Technically this is 2 for Odyssey, but this value is used for attribute array indexing which requires 4
     // Any code that converts DIMM ranks to port ranks should use the rank API
     MAX_RANK_PER_DIMM = 4,
+
+    // This is the maximum number of main ranks per DIMM supported by the hardware
+    HW_MAX_RANK_PER_DIMM = 2,
 
     // This is used in the row repair code to determine how many sPPRs we can do. We used an artificial limit of one
     // per bank group on DDR4, but it's technically one per bank, per DRAM, so 40*16 per DIMM
