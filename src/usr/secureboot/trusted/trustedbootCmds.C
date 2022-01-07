@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -820,8 +820,11 @@ errlHndl_t tpmCmdGetCapNvIndexValidate(TpmTarget* io_target)
     TPM2_GetCapabilityIn* cmd =
         (TPM2_GetCapabilityIn*)dataBuf;
     bool foundRSAEKCert = false;
-    bool foundECCEKCert = false;
-    bool foundPlatCert = false;
+    bool foundECCP256EKCert = false;
+    bool foundECCP384EKCert = false;
+    bool foundPlatCert0 = false;
+    bool foundPlatCert1 = false;
+    bool foundPlatCert2 = false;
     bool moreData = false;
 
     TRACUCOMP( g_trac_trustedboot,
@@ -914,11 +917,20 @@ errlHndl_t tpmCmdGetCapNvIndexValidate(TpmTarget* io_target)
               case NVIDX_RSAEKCERT:
                 foundRSAEKCert = true;
                 break;
-              case NVIDX_ECCEKCERT:
-                foundECCEKCert = true;
+              case NVIDX_ECC_P256_EKCERT:
+                foundECCP256EKCert = true;
                 break;
-              case NVIDX_IBMPLATCERT:
-                foundPlatCert = true;
+              case NVIDX_ECC_P384_EKCERT:
+                foundECCP384EKCert = true;
+                break;
+              case NVIDX_IBMPLATCERT0:
+                foundPlatCert0 = true;
+                break;
+              case NVIDX_IBMPLATCERT1:
+                foundPlatCert1 = true;
+                break;
+              case NVIDX_IBMPLATCERT2:
+                foundPlatCert2 = true;
                 break;
                 // Ignore any other handles
             }
@@ -929,15 +941,24 @@ errlHndl_t tpmCmdGetCapNvIndexValidate(TpmTarget* io_target)
 
     } while ( 0 );
 
-    // Validate we found all we needed
-    if (NULL == err &&
-        (foundRSAEKCert == false || foundECCEKCert == false ||
-         foundPlatCert == false || moreData == true))
+    // Validate we found all we needed.  Note that TPMs can be provisioned with
+    // different ECC EK certificates (P256 or P384) and at least one of them is
+    // required.
+    if ((NULL == err) &&
+        (   (foundRSAEKCert == false)
+         || (   (foundECCP256EKCert == false)
+             && (foundECCP384EKCert == false))
+         || (foundPlatCert0 == false)
+         || (foundPlatCert1 == false)
+         || (foundPlatCert2 == false)
+         || moreData == true))
     {
         TRACFCOMP( g_trac_trustedboot,
                    "TPM GETCAP NVINDEX MISSING INDEX "
-                   "RSAEK(%d) ECCEK(%d) PLAT(%d) MD(%d)",
-                   foundRSAEKCert, foundECCEKCert, foundPlatCert,
+                   "RSAEK(%d) ECCP256EK(%d) ECCP384EK(%d) PLAT0(%d) PLAT1(%d) "
+                   "PLAT2(%d) MD(%d)",
+                   foundRSAEKCert, foundECCP256EKCert, foundECCP384EKCert,
+                   foundPlatCert0, foundPlatCert1, foundPlatCert2,
                    moreData);
 
         /*@
@@ -946,8 +967,8 @@ errlHndl_t tpmCmdGetCapNvIndexValidate(TpmTarget* io_target)
          * @severity         ERRL_SEV_UNRECOVERABLE
          * @moduleid         MOD_TPM_CMD_GETCAPNVINDEX
          * @userdata1[0:7]   foundRSAEKCert
-         * @userdata1[7:15]  foundECCEKCert
-         * @userdata1[16:23] foundPlatCert
+         * @userdata1[8:15]  ECC EK cert found mask (0x80/0x40 = P256/P384)
+         * @userdata1[16:23] Plat cert found mask (0x80/0x40/0x20 = cert 0/1/2)
          * @userdata1[24:31] moreData
          * @userdata1[32:63] 0
          * @devdesc          Command failure reading TPM NV indexes.
@@ -959,8 +980,10 @@ errlHndl_t tpmCmdGetCapNvIndexValidate(TpmTarget* io_target)
             RC_TPM_NVINDEX_VALIDATE_FAIL,
             TWO_UINT32_TO_UINT64(
                 FOUR_UINT8_TO_UINT32(
-                    foundRSAEKCert,foundECCEKCert,
-                    foundPlatCert,moreData),
+                    foundRSAEKCert,
+                    ((foundECCP256EKCert << 7) | (foundECCP384EKCert << 6)),
+                    ((foundPlatCert0 << 7) | (foundPlatCert1 << 6) | (foundPlatCert2 << 5)),
+                    moreData),
                 0),
             0,
             ERRORLOG::ErrlEntry::NO_SW_CALLOUT);

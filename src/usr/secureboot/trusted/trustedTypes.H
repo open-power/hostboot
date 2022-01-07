@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,9 +76,13 @@ namespace TRUSTEDBOOT
 
         PCR_SELECT_MAX = (IMPLEMENTATION_PCR+7)/8, ///< PCR selection octet max
 
-        NVIDX_RSAEKCERT = 0x01C00002,    ///< RSA EK certificate NV index
-        NVIDX_ECCEKCERT = 0x01C0000A,    ///< ECC EK certificate NV index
-        NVIDX_IBMPLATCERT = 0x01C10180,  ///< IBM Platform certificate index
+        // Certificate NV indices
+        NVIDX_RSAEKCERT = 0x01C00002,       ///< RSA EK certificate NV index
+        NVIDX_ECC_P256_EKCERT = 0x01C0000A, ///< ECC NIST-P256 EK certificate NV index
+        NVIDX_ECC_P384_EKCERT = 0x01C00016, ///< ECC NIST-P384 EK certificate NV index
+        NVIDX_IBMPLATCERT0 = 0x01C10180,    ///< IBM Platform certificate 0 NV index
+        NVIDX_IBMPLATCERT1 = 0x01C10181,    ///< IBM Platform certificate 1 NV index
+        NVIDX_IBMPLATCERT2 = 0x01C10182,    ///< IBM Platform certificate 2 NV index
     };
 
     /**
