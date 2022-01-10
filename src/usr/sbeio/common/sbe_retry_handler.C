@@ -591,18 +591,25 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
                     const bool already_switched_boot_sides = this->iv_switchSidesCount > 0;
                     const bool already_switched_meas_sides = this->iv_switchSidesCount_mseeprom > 0;
 
-                    SBE_TRACF("main_sbe_handler(): Switching sides: boot_seeprom_switch_requested=%d iv_currentAction=%d "
-                              "last_try=%d already_switched_boot_sides=%d already_switched_meas_sides=%d",
-                              boot_seeprom_switch_requested, iv_currentAction,
-                              last_try, already_switched_boot_sides, already_switched_meas_sides);
-
                     if ((already_switched_meas_sides && !already_switched_boot_sides && boot_seeprom_switch_requested)
                         || (last_try && !already_switched_boot_sides))
                     {
+                        SBE_TRACF("main_sbe_handler(): Switching boot SEEPROM sides in START_CBS path: "
+                                  "boot_seeprom_switch_requested=%d iv_currentAction=%d "
+                                  "last_try=%d already_switched_boot_sides=%d already_switched_meas_sides=%d",
+                                  boot_seeprom_switch_requested, iv_currentAction,
+                                  last_try, already_switched_boot_sides, already_switched_meas_sides);
+
                         l_errl = this->switch_sbe_sides(P10_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM, true);
                     }
-                    else
+                    else if (!already_switched_meas_sides)
                     {
+                        SBE_TRACF("main_sbe_handler(): Switching meas SEEPROM sides in START_CBS path: "
+                                  "boot_seeprom_switch_requested=%d iv_currentAction=%d "
+                                  "last_try=%d already_switched_boot_sides=%d already_switched_meas_sides=%d",
+                                  boot_seeprom_switch_requested, iv_currentAction,
+                                  last_try, already_switched_boot_sides, already_switched_meas_sides);
+
                         l_errl = this->switch_sbe_sides(P10_EXTRACT_SBE_RC::REIPL_BKP_MSEEPROM, true);
                     }
 
