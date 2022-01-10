@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2021
+# Contributors Listed Below - COPYRIGHT 2020,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -125,7 +125,9 @@ def errlud_parse_entity_path(data, start):
                         0x53: "/FC",
                         0x54: "/LPCREFCLKENDPT",
                         0x55: "/GENERIC_I2C_DEVICE",
-                        0x56: "/LAST_IN_RANGE",
+                        0x56: "/MDS_CTLR",
+                        0x57: "/DCM",
+                        0x58: "/LAST_IN_RANGE",
                       }
 
     # Entity Path Layout
