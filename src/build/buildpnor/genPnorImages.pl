@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2021
+# Contributors Listed Below - COPYRIGHT 2016,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -95,8 +95,8 @@ use constant VFS_MODULE_TABLE_MAX_SIZE => VFS_EXTENDED_MODULE_MAX
 use constant OP_SIGNING_FLAG => " --flags ";
 use constant SW_FLAG_HAS_A_HPT => 0x80000000;
 # Security bits HW flag strings
-use constant OP_BUILD_FLAG => 0x80000000;
-use constant FIPS_BUILD_FLAG => 0x40000000;
+use constant OPENPOWER_KEYS_FLAG  => 0x80000000;
+use constant ENTERPRISE_KEYS_FLAG => 0x40000000;
 # Applies to SBE image only
 use constant LAB_SECURITY_OVERRIDE_FLAG => 0x00080000;
 use constant KEY_TRANSITION_FLAG => 0x00000001;
@@ -104,9 +104,8 @@ use constant KEY_TRANSITION_FLAG => 0x00000001;
 use constant HW_KEYS_HASH_SIZE => 64;
 use constant SECURE_VERSION_SIZE => 1;
 
-# Dynamic support for choosing FSP or op-build flag type.
-# Default to OP build
-my $buildFlag = OP_BUILD_FLAG;
+# Default to signing with enterprise signing keys
+my $buildFlag = ENTERPRISE_KEYS_FLAG;
 
 # Corrupt parameter strings
 my $CORRUPT_PROTECTED = "pro";
@@ -182,11 +181,8 @@ if ($help)
 # Environment Setup, Checking, and Variable Initialization
 ################################################################################
 
-# Get the build type
-if ($buildType eq "fspbuild")
-{
-    $buildFlag = FIPS_BUILD_FLAG;
-}
+# Put any future support for dynamically choosing between enterprise or
+# OpenPOWER signing keys here
 
 # Put mode transition input into a hash and ensure a valid signing mode
 my %signMode = ( $DEVELOPMENT => 1,
