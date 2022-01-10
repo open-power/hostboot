@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2022                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -44,5 +44,10 @@
         <sbeError/>
         <rc>RC_I2C_FIFO_TIMEOUT_ERROR</rc>
         <description>I2C fifo condition error - timedout waiting for a condition</description>
+    </hwpError>
+    <hwpError>
+        <sbeError/>
+        <rc>RC_SBE_I2C_WAIT_FOR_CMD_COMP_TIMEOUT_ERROR</rc>
+        <description>I2C wait for command completion error - Timeout error</description>
     </hwpError>
 </hwpErrors>
