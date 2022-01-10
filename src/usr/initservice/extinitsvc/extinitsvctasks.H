@@ -480,6 +480,20 @@ const TaskInfo g_exttaskinfolist[]   =   {
             }
         },
 
+#ifdef CONFIG_PLDM
+        /**
+         *  @brief PLDM BIOS accessor / mutator library
+         */
+        {
+            "libbios_attr_accessors.so" ,           // taskname
+            NULL,                                   // no pointer to fn
+            {
+                INIT_TASK,                          // init only
+                EXT_IMAGE,                          // Extended Module
+            }
+        },
+#endif
+
         //  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         // NOTE: libistepdisp.so needs to always be last in this list!!
         //  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

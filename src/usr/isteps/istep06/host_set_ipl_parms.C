@@ -54,41 +54,6 @@ using namespace TARGETING;
 
 namespace ISTEP_06
 {
-#ifdef CONFIG_PLDM
-void parsePLDMBiosAttrs(ISTEP_ERROR::IStepError & io_stepError)
-{
-    using bios_attribute_parser = void(*)(std::vector<uint8_t>&,
-                                        std::vector<uint8_t>&,
-                                        ISTEP_ERROR::IStepError &);
-
-    const std::vector<bios_attribute_parser> bios_attr_parsers
-    {
-        ISTEP::parse_hb_tpm_required,
-        ISTEP::parse_hb_field_core_override,
-        ISTEP::parse_hb_memory_mirror_mode,
-        ISTEP::parse_hb_key_clear_request,
-        ISTEP::parse_hb_number_huge_pages,
-        ISTEP::parse_hb_huge_page_size,
-        ISTEP::parse_hb_memory_region_size,
-        ISTEP::parse_hb_mfg_flags,
-        ISTEP::parse_hb_hyp_switch,
-        ISTEP::parse_pvm_fw_boot_side,
-        ISTEP::parse_hb_host_usb_enablement,
-        ISTEP::parse_hb_ioadapter_enlarged_capacity,
-        ISTEP::parse_hb_inhibit_bmc_reset
-    };
-
-    std::vector<uint8_t> bios_string_table, bios_attr_table;
-    for(auto parser_fn : bios_attr_parsers)
-    {
-        // if parser_fn generates any errors it will attach them to
-        // i_stepError if neccessary and commit the log itself.
-        parser_fn(bios_string_table, bios_attr_table, io_stepError);
-    }
-
-    return;
-}
-#endif
 
 void* host_set_ipl_parms( void *io_pArgs )
 {
@@ -128,25 +93,6 @@ void* host_set_ipl_parms( void *io_pArgs )
             l_semiData.magic, l_semiData.reboot_cnt, l_semiData.mfg_term_reboot);
 
 #ifdef CONFIG_PLDM
-        const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
-        if(!sys->getAttr<ATTR_IS_MPIPL_HB>())
-        {
-            // All error logs that occur while parsing the PLDM bios attributes will be
-            // committed within the function. If the error that occurs should TI the system,
-            // then the parser should attached the errlog to the step error.
-            parsePLDMBiosAttrs(l_stepError);
-            if(!l_stepError.isNull())
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                         "host_set_ipl_parms: Error(s) occurred while parsing a PLDM BIOS Attribute that requires Hostboot to TI.");
-                break;
-            }
-        }
-        else
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "host_set_ipl_parms: MPIPL detected, using PLDM bios attrs values from previous boot");
-        }
 
         errlHndl_t errl = PLDM_PNOR::parse_rt_lid_ids();
         if(errl)
@@ -159,6 +105,7 @@ void* host_set_ipl_parms( void *io_pArgs )
 
         // Force the update of the VPD ECC data if there is a mismatch, for BMC only
         bool l_forceEccUpdateFlag = true;
+        const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
         sys->setAttr<TARGETING::ATTR_FORCE_ECC_UPDATE_ON_VALIDATION_ERROR>(l_forceEccUpdateFlag);
 
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "host_set_ipl_parms: "

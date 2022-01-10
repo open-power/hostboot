@@ -44,6 +44,7 @@
 #include <initservice/taskargs.H>
 #include <initservice/initsvcreasoncodes.H>
 #include <initservice/initsvcstructs.H>
+#include <isteps/hwpisteperror.H>
 #include "../baseinitsvc/initservice.H"
 #include "splesscommon.H"
 #include "istep_mbox_msgs.H"
@@ -277,6 +278,16 @@ private:
      */
     IStepDispatcher(const IStepDispatcher& i_right);
     IStepDispatcher& operator=(const IStepDispatcher& i_right);
+
+#ifdef CONFIG_PLDM
+    /**
+     *  @brief Read in current values of PLDM BIOS attributes from the BMC and
+     *      write them into associated targeting attributes
+     *
+     *  @param[in] io_stepError Object to track terminating errors.
+     */
+    void parsePLDMBiosAttrs(ISTEP_ERROR::IStepError& io_stepError);
+#endif
 
     /**
      * @brief Executes all ISteps
