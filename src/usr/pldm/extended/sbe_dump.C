@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021                             */
+/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,7 +49,8 @@ using namespace ERRORLOG;
 using namespace TARGETING;
 
 // @TODO RTC 247294: Delete these constants and use the ones from libpldm
-const uint16_t PLDM_OEM_IBM_SBE_MAINTENANCE_STATE = 32775;
+const uint16_t PLDM_OEM_IBM_SBE_MAINTENANCE_STATE = 32772;
+const uint16_t PLDM_OEM_IBM_SBE_SEMANTIC_ID = 32775;
 const uint16_t PLDM_OEM_IBM_SBE_HRESET_STATE = 32776;
 
 #ifndef __HOSTBOOT_RUNTIME
@@ -67,7 +68,7 @@ effecter_id_t getSbeDumpEffecterId(const Target* const i_proc)
         .findNumericEffecterId(entity_info,
                                [](pldm_numeric_effecter_value_pdr const * const numeric_effecter)
                                {
-                                   return (le16toh(numeric_effecter->effecter_semantic_id) == PLDM_OEM_IBM_SBE_MAINTENANCE_STATE);
+                                   return (le16toh(numeric_effecter->effecter_semantic_id) == PLDM_OEM_IBM_SBE_SEMANTIC_ID);
                                });
 }
 

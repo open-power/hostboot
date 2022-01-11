@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -513,7 +513,7 @@ void addSbeManagementPdrs(PdrManager& io_pdrman)
     TARGETING::getChildAffinityTargetsByState(procs, UTIL::assertGetToplevelTarget(), CLASS_NA, TYPE_PROC, UTIL_FILTER_PRESENT);
 
     // @TODO RTC 247294: Delete these constants and use the ones from libpldm
-    const uint16_t PLDM_OEM_IBM_SBE_MAINTENANCE_STATE = 32775;
+    const uint16_t PLDM_OEM_IBM_SBE_MAINTENANCE_STATE = 32772;
     const uint16_t PLDM_OEM_IBM_SBE_HRESET_STATE = 32776;
 
     enum ibm_oem_pldm_state_set_sbe_dump_state_values {
