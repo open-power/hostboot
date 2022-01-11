@@ -1196,6 +1196,26 @@ struct mcTypeTraits<mc_type::EXPLORER>
     };
 };
 
+///
+/// @brief Trait classes for mc_type - ODYSSEY specialization
+///
+template< >
+struct mcTypeTraits<mc_type::ODYSSEY>
+{
+    enum
+    {
+        MC_PER_PROC = 2,
+        MI_PER_MC = 2,
+        OMI_PER_OMIC = 2,
+        OMIC_PER_MC = 3,
+        MCC_PER_MI = 2,
+        OMI_PER_MCC = 2,
+        OCMB_PER_OMI = 1,
+        PORTS_PER_OCMB = 2,
+        DIMMS_PER_PORT = 2, // Note: not technically true, but I think we need it for our calculations
+    };
+};
+
 }// mss
 
 #endif
