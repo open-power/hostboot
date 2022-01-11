@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -250,6 +250,7 @@ errlHndl_t sendrecv_pldm_request(ResponseContainer& o_response_bytes,
         }
 
         uint8_t sleep_time_sec = 0;
+        constexpr uint8_t sleep_timeout_sec = 90;
         do
         {
             return_code = MCTP::get_next_packet();
@@ -260,8 +261,17 @@ errlHndl_t sendrecv_pldm_request(ResponseContainer& o_response_bytes,
                     constexpr uint8_t one_sec = 1;
                     constexpr uint8_t zero_nsec = 0;
                     nanosleep(one_sec, zero_nsec);
-                    constexpr uint8_t sleep_timeout_sec = 90;
                     if(++sleep_time_sec < sleep_timeout_sec) { continue; }
+                }
+                if(return_code == HBRT_RC_NO_MCTP_PACKET)
+                {
+                    PLDM_ERR("Timed out (%d seconds) waiting for next PLDM message",
+                             sleep_timeout_sec);
+                }
+                else
+                {
+                    PLDM_ERR("Unexpected Return Code: 0x%.16llX",
+                             return_code);
                 }
                 /*
                 * @errortype  ERRL_SEV_UNRECOVERABLE
@@ -285,34 +295,40 @@ errlHndl_t sendrecv_pldm_request(ResponseContainer& o_response_bytes,
             }
         }while (PLDM::get_next_response().empty());
 
+        // break if we already have an error
+        if (errl)
+        {
+            break;
+        }
+
         o_response_bytes = PLDM::get_next_response();
         PLDM::clear_next_response();
 #endif
 
-    const size_t MIN_RESP_LEN = (sizeof(pldm_msg_hdr) + 1);
-    if(o_response_bytes.size() < MIN_RESP_LEN)
-    {
-        auto hdr64 = pldmHdrToUint64(*pldm_request);
-        PLDM_ERR("The length of the response to request (0x%lx) was %d bytes when at least %d bytes was expected",
-                 hdr64, o_response_bytes.size(), MIN_RESP_LEN);
-        /*@
-        * @errortype
-        * @severity   ERRL_SEV_UNRECOVERABLE
-        * @moduleid   MOD_MAKE_PLDM_REQUEST
-        * @reasoncode RC_INVALID_LENGTH
-        * @userdata1  Actual Response Length
-        * @userdata2  Header of original pldm request
-        * @devdesc    PLDM Response from BMC is too small.
-        * @custdesc   A host failure occurred
-        */
-        errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                             MOD_MAKE_PLDM_REQUEST,
-                             RC_INVALID_LENGTH,
-                             o_response_bytes.size(),
-                             hdr64);
-        addBmcErrorCallouts(errl);
-        break;
-    }
+        const size_t MIN_RESP_LEN = (sizeof(pldm_msg_hdr) + 1);
+        if(o_response_bytes.size() < MIN_RESP_LEN)
+        {
+            auto hdr64 = pldmHdrToUint64(*pldm_request);
+            PLDM_ERR("The length of the response to request (0x%lx) was %d bytes when at least %d bytes was expected",
+                     hdr64, o_response_bytes.size(), MIN_RESP_LEN);
+            /*@
+            * @errortype
+            * @severity   ERRL_SEV_UNRECOVERABLE
+            * @moduleid   MOD_MAKE_PLDM_REQUEST
+            * @reasoncode RC_INVALID_LENGTH
+            * @userdata1  Actual Response Length
+            * @userdata2  Header of original pldm request
+            * @devdesc    PLDM Response from BMC is too small.
+            * @custdesc   A host failure occurred
+            */
+            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                 MOD_MAKE_PLDM_REQUEST,
+                                 RC_INVALID_LENGTH,
+                                 o_response_bytes.size(),
+                                 hdr64);
+            addBmcErrorCallouts(errl);
+            break;
+        }
 
     } while (false);
 
