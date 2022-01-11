@@ -172,6 +172,19 @@ runtimeInterfaces_t* rt_start(hostInterfaces_t* intf)
     // check for possible missed in-flight messages/interrupts
     rtPost->callClearPendingSbeMsgs();
 
+    // Execute any required concurrent inits we might have
+    //  do this before PM complex start in case it affects
+    //  that logic
+    if( rtPost->callDoConcurrentInits )
+    {
+        (intf->puts)("Calling callDoConcurrentInits.\n");
+        rtPost->callDoConcurrentInits();
+    }
+    else
+    {
+        (intf->puts)("callDoConcurrentInits is null.\n");
+    }
+
     // callLoadAndStartPMComplex is no-op on OPAL systems
     rtPost->callLoadAndStartPMComplex();
 

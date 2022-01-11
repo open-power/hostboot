@@ -1318,6 +1318,11 @@ struct postInitCalls_t
      */
     void (*callSetupPmicHealthCheck)();
 
+    /**
+     * @brief Perform any required concurrent inits
+     *
+     */
+    void (*callDoConcurrentInits)();
 };
 
 extern hostInterfaces_t* g_hostInterfaces;

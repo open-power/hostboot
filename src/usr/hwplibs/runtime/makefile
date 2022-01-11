@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/hwplibs/makefile $
+# $Source: src/usr/hwplibs/runtime/makefile $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017,2022
+# Contributors Listed Below - COPYRIGHT 2022
 # [+] International Business Machines Corp.
 #
 #
@@ -22,10 +22,22 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../../..
+HOSTBOOT_RUNTIME = 1
 
-SUBDIRS += nest.d
-SUBDIRS += runtime.d
+MODULE = hwplibs_rt
+
+ROOTPATH = ../../../..
+
+
+PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p10/procedures
+
+# Required includes for plat_hwp_invoker
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
+
+include ${ROOTPATH}/procedure.rules.mk
+
+OBJS += concurrent_inits.o
 
 include ${ROOTPATH}/config.mk
-

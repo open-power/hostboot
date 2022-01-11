@@ -339,7 +339,6 @@ RUNTIME_MODULES += vpd_rt        # ~/src/usr/vpd/runtime/
 RUNTIME_MODULES += xscom_rt      # ~/src/usr/xscom/runtime/
 RUNTIME_MODULES += sbeio_rt      # ~/src/usr/sbeio/runtime/
 RUNTIME_MODULES += tod_rt        # ~/src/usr/isteps/tod/runtime/ - no runtime test
-RUNTIME_MODULES += nestmemutils  # ~/src/usr/hwplibs/nest/ - no runtime test
 RUNTIME_MODULES += mss_rt        # ~/src/usr/isteps/mss/runtime/ - no runtime test
 RUNTIME_MODULES += pm_rt         # ~/src/usr/isteps/pm/runtime/
 RUNTIME_MODULES += expaccess_rt  # ~/src/usr/expaccess/runtime/
@@ -348,6 +347,7 @@ RUNTIME_MODULES += $(if $(CONFIG_HBRT_PRD),attn_rt) # ~/src/usr/diag/attn/runtim
 RUNTIME_MODULES += $(if $(CONFIG_HTMGT),htmgt_rt)   # ~/src/usr/htmgt/runtime/
 #RUNTIME_MODULES += $(if $(CONFIG_NVDIMM),nvdimm_rt)
 #RUNTIME_MODULES += p9_cpuWkup
+RUNTIME_MODULES += hwplibs_rt    # ~src/usr/hwplibs/runtime/
 
 
 # This is exported so that gcov knows the list of runtime modules to
