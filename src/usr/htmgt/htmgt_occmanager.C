@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -758,6 +758,13 @@ namespace HTMGT
                     else
                     {
                         TMGT_INF("_resetOccs: OCC load being skipped due to code update");
+
+                        // Update OCC states to RESET (vs UNKNOWN)
+                        for( const auto & occ : iv_occArray )
+                        {
+                            occ->iv_state = OCC_STATE_RESET;
+                        }
+                        iv_state = OCC_STATE_RESET;
                     }
                 }
                 else if (!err) // Reset Threshold reached and no other err
@@ -1124,7 +1131,8 @@ namespace HTMGT
         o_data[index++] = iv_targetState;
         o_data[index++] = iv_sysResetCount;
         o_data[index++] = resets_since_boot;
-        o_data[index++] = iv_mode;
+        const uint16_t modeIndex = index++;
+        o_data[modeIndex] = iv_mode;
         o_data[index++] = safeMode;
         UINT32_PUT(&o_data[index], cv_safeReturnCode);
         index += 4;
@@ -1140,6 +1148,14 @@ namespace HTMGT
             o_data[index++] = occ->iv_masterCapable;
             o_data[index++] = occ->iv_commEstablished;
             o_data[index++] = occ->iv_mode;
+            if (iv_mode != occ->iv_mode)
+            {
+                // BMC probably updated mode, use new mode
+                TMGT_INF("_getHtmgtData: OCC%d has mode 0x%02X (vs HTMGT: 0x%02X)",
+                         occ->getInstance(), occ->iv_mode, iv_mode);
+                iv_mode = occ->iv_mode;
+                o_data[modeIndex] = iv_mode;
+            }
             o_data[index++] = 0; // reserved for expansion
             o_data[index++] = 0; // reserved for expansion
             o_data[index++] = occ->iv_failed;
@@ -1488,6 +1504,12 @@ namespace HTMGT
                                                          i_skipCountIncrement,
                                                          i_skipComm,
                                                          i_reason);
+    }
+
+
+    occStateId OccManager::getState()
+    {
+        return Singleton<OccManager>::instance()._getState();
     }
 
 

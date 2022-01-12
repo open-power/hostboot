@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -285,6 +285,12 @@ namespace HTMGT
 
         check_reset_count();
 
+        if (OccManager::getState() == OCC_STATE_RESET)
+        {
+            TMGT_INF("<<processOccAttn: OCCs are in RESET state");
+            return;
+        }
+
         bool polledOneOcc = false;
         errlHndl_t err = OccManager::buildOccs();
         if (nullptr == err)
@@ -365,6 +371,12 @@ namespace HTMGT
         }
 
         check_reset_count();
+
+        if (OccManager::getState() == OCC_STATE_RESET)
+        {
+            TMGT_INF("<<processOccReset: OCCs are in RESET state");
+            return;
+        }
 
         if( i_proc )
         {

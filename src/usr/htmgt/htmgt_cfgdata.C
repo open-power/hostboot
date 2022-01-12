@@ -1389,57 +1389,6 @@ void getGPUConfigMessageData(const TargetHandle_t i_occ,
 
 } // end getGPUConfigMessageData()
 
-// Determine if the BMC will allow turbo to be used.
-// Returns true if BMC suppoted and turbo is allowed.
-//         true if BMC Unsupported
-//         false if supported and not allowed.
-//         else false
-bool bmcAllowsTurbo(Target* i_sys)
-{
-    bool turboAllowed = true;
-
-// TODO: RTC 209572 Update with IPMI alternative
-#if 0
-#ifdef CONFIG_BMC_IPMI
-    uint32_t sensorNum = UTIL::getSensorNumber(i_sys,
-                                               SENSOR_NAME_TURBO_ALLOWED);
-    // VALID IPMI sensors are 0-0xFE
-    if (sensorNum != 0xFF)
-    {
-        // Check if turbo frequency is allowed on BMC
-        SENSOR::getSensorReadingData turboSupportData;
-        SENSOR::SensorBase turboSensor(SENSOR_NAME_TURBO_ALLOWED, i_sys);
-        errlHndl_t err = turboSensor.readSensorData(turboSupportData);
-
-        if (NULL == err)
-        {
-            // 0x02 == Asserted bit (turbo frequency is allowed)
-            if ((turboSupportData.event_status & 0x02) == 0x02)
-            {
-                TMGT_INF("bmcAllowsTurbo: turbo is allowed");
-            }
-            else
-            {
-                turboAllowed = false;
-            }
-        }
-        else
-        {
-            // error reading sensor, assume turbo is allowed
-            TMGT_ERR("bmcAllowsTurbo: unable to read turbo support sensor "
-                     " from BMC, rc=0x%04X",
-                     err->reasonCode());
-            delete err;
-        }
-    }
-    // else, sensor not supported on this platform so turbo is allowed
-#endif
-#endif
-
-    return turboAllowed;
-}
-
-
 const unsigned int NUM_APSS_CHANNELS = 16;
 void getApssMessageData(uint8_t* o_data,
                         uint64_t & o_size)

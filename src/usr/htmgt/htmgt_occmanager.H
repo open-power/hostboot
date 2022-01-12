@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -137,6 +137,12 @@ namespace HTMGT
              */
             static errlHndl_t setOccState(const occStateId i_state =
                                           OCC_STATE_NO_CHANGE);
+
+
+            /**
+             * @brief Return the consolidated OCC state
+             */
+            static occStateId getState();
 
 
             /**
@@ -349,6 +355,10 @@ namespace HTMGT
 
             /* See getOccArray() above */
             std::vector<Occ*> _getOccArray() { return iv_occArray; };
+
+
+            /** See getState() above */
+            occStateId _getState() { return iv_state; };
 
 
             /* See getTargetState() above */
