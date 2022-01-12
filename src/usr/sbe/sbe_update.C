@@ -1224,11 +1224,13 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
     {
         errlHndl_t l_err(nullptr);
 
+        ///////////////////////////////////////////////////////////////////////
         /// Create variables here for ease of tracing at end of method
+        ///////////////////////////////////////////////////////////////////////
         // Cache the maximum system cores for easy access and updating
         size_t l_maxCores = P10_MAX_EC_PER_PROC;
         // The number of cores the SBE customized image is composed of.  Will be
-        // be determined via call to p10_ipl_customize
+        // determined via call to p10_ipl_customize
         uint32_t l_coreCount(0);
         // The desired number of cores, will be calculated via attribute
         // IMAGE_MINIMUM_VALID_ECS and if using fused cores
@@ -1243,8 +1245,10 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                    TARGETING::get_huid(i_target), i_sbeImgPtr, i_maxImgSize, io_imgPtr);
 
         do{
+            ///////////////////////////////////////////////////////////////////
             /// Sanity check - validate that the desired minimum of cores does not
             /// exceed the maximum cores available
+            ///////////////////////////////////////////////////////////////////
             // Get Target Service
             Target* l_sys = UTIL::assertGetToplevelTarget();
 
@@ -1278,10 +1282,13 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                                       TWO_UINT32_TO_UINT64(l_desiredMinCores,
                                                            l_maxCores),
                                       ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                l_err->collectTrace(SBE_COMP_NAME);
                 break;
             }
 
+            ///////////////////////////////////////////////////////////////////
             /// Populate SBE image with available cores from HWP call p10_ipl_customize
+            ///////////////////////////////////////////////////////////////////
             // cast OUR type of target to a FAPI type of target.
             const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
                 l_fapiTarg(i_target);
@@ -1327,9 +1334,10 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                 break;
             }
 
-
-            // Count the number cores that the p10_ipl_customize was able to gather
-            // and compare to the minimum cores desired.
+            ///////////////////////////////////////////////////////////////////
+            /// Count the number cores that the p10_ipl_customize was able to gather
+            /// and compare to the minimum cores desired.
+            ///////////////////////////////////////////////////////////////////
             l_coreCount = __builtin_popcount(l_coreMask);
             if (unlikely(l_coreCount < l_desiredMinCores))
             {
