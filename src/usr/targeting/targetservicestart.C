@@ -709,8 +709,7 @@ static void initializeAttributes(TargetService& i_targetService,
             // support HW VPD writes; for now, only FSP based systems have this
             // verified.
             #ifdef CONFIG_FSP_BUILD
-            const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
-            sys->setAttr<TARGETING::ATTR_ALLOW_EEPROM_WRITES>(true);
+            l_pTopLevel->setAttr<TARGETING::ATTR_ALLOW_EEPROM_WRITES>(true);
             #endif
 
             // Compute any values that might change based on a remap of memory
@@ -718,8 +717,6 @@ static void initializeAttributes(TargetService& i_targetService,
 
             if(!INITSERVICE::spBaseServicesEnabled())
             {
-                TARGETING::Target* l_sys = NULL;
-                TARGETING::targetService().getTopLevelTarget(l_sys);
                 getAllChips(l_chips, TYPE_PROC, false);
 
                 ATTR_PROC_FABRIC_PRESENT_GROUPS_type l_fabric_groups = 0;
@@ -745,7 +742,7 @@ static void initializeAttributes(TargetService& i_targetService,
                                 * 8)
                                 - l_groupId - 1));
                 }
-                l_sys->setAttr<ATTR_PROC_FABRIC_PRESENT_GROUPS>(l_fabric_groups);
+                l_pTopLevel->setAttr<ATTR_PROC_FABRIC_PRESENT_GROUPS>(l_fabric_groups);
 
                 //Look at the MFG_FLAGS attribute on the system target
                 //and decide if we need to update the CDM Policy attribute
@@ -754,7 +751,7 @@ static void initializeAttributes(TargetService& i_targetService,
                 {
                     TARG_INF("MNFG_NO_GARD bit is set - setting CDM_POLICIES_MANUFACTURING_DISABLED in ATTR_CDM_POLICIES");
                     TARGETING::UTIL::assertGetToplevelTarget()->setAttr<ATTR_CDM_POLICIES>(
-                        l_sys->getAttr<ATTR_CDM_POLICIES>() | CDM_POLICIES_MANUFACTURING_DISABLED);
+                        l_pTopLevel->getAttr<ATTR_CDM_POLICIES>() | CDM_POLICIES_MANUFACTURING_DISABLED);
                 }
 
             }

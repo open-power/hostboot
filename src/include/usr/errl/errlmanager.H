@@ -404,6 +404,33 @@ public:
      */
     void setFwReleaseVersion_rt();
 
+    /**
+     * @brief A wrapper around ErrlManager's _getFirstHbrtEid. Returns the
+     *        value of the first EID to be used in HBRT.
+     *
+     * @return The value of the first EID to be used in HBRT.
+     */
+    static uint32_t getFirstHbrtEid();
+
+    /**
+     * @brief A wrapper around ErrlManager's _getLastIplEid. Returns the
+     *        value of the last EID generated during IPL.
+     *
+     * @return The value of the last EID generated during IPL.
+     */
+    static uint32_t getLastIplEid();
+
+#ifndef __HOSTBOOT_RUNTIME
+    /**
+     * @brief A wrapper around ErrlManager's _setLastIplEid. Sets the
+     *        value of the last EID generated during IPL to the provided
+     *        value.
+     *
+     * @param[in] i_plid the desired value of the last EID generated during IPL
+     */
+    static void setLastIplEid(uint32_t i_eid);
+#endif
+
 protected:
     /**
      * @brief   Destructor
@@ -463,6 +490,7 @@ private:
         ERRLOG_PLID_BASE        = 0x90000000,// Hostboot Base PLID Offset
         ERRLOG_PLID_BASE_MASK   = 0x9F000000,// mask of just the id
 #endif
+        ERRLOG_HBRT_EID_BASE   = 0x80000000,// HBRT base EID
         ERRLOG_PLID_NODE_SHIFT  = 24,        // shift to put node number 0x9#
         ERRLOG_PLID_MASK        = 0x00FFFFFF,// mask to find log number
         ERRLOG_PLID_INITIAL     = 0x00800000,// min number for pre-boot
@@ -499,7 +527,6 @@ private:
       */
      void sendAckErrorlog(uint32_t i_eid);
 
-#ifndef __HOSTBOOT_RUNTIME
     /**
      * @brief Access PNOR and get the address and size of the HBEL section in
      * PNOR; sets the iv_pnorAddr, iv_maxErrlInPnor, iv_pnorOpenSlot variables;
@@ -509,7 +536,6 @@ private:
      * @return NONE.
      */
     void setupPnorInfo();
-#endif //#ifndef __HOSTBOOT_RUNTIME
 
     /**
      * @brief Create and register the error log message queue
@@ -736,7 +762,9 @@ private:
     uint32_t iv_maxErrlInPnor;  // max number of errorlogs that will fit
     uint32_t iv_pnorOpenSlot;   // current open slot available for an errorlog
     bool iv_isFSP;              // do we need to send to FSP
+    uint32_t iv_firstHbrtEid;   // The value of the first HBRT EID
 #ifndef __HOSTBOOT_RUNTIME
+    uint32_t iv_lastIplEid;     // The value of the last (highest) IPL-time EID
     bool iv_isMboxEnabled;      // are we able to send to FSP
     bool iv_nonInfoCommitted;   // Keeps track of any non-informational logs.
     bool iv_isErrlDisplayEnabled; // are we able to use the errorDisplay
@@ -833,6 +861,62 @@ private:
     date_time_t dateTimeAddSeconds(const date_time_t& i_dateTime,
                                    uint64_t i_seconds);
 
+    /**
+     * @brief Returns the value of the first EID to be used in HBRT.
+     *
+     * @return The value of the first EID to be used in HBRT.
+     */
+    uint32_t _getFirstHbrtEid();
+
+#ifndef __HOSTBOOT_RUNTIME
+    /**
+     * @brief Returns the value of the last EID that was generated during
+     *        IPL and written to PNOR.
+     *
+     * @return The value of the last EID generated during IPL
+     */
+    uint32_t _getLastIplEid();
+
+    /**
+     * @brief Sets the value of the last EID generated during IPL to the
+     *        given value.
+     *
+     * @param[in] i_eid the desired EID number
+     */
+    void _setLastIplEid(uint32_t i_eid);
+#endif
+
+    /**
+     * @brief Helper function to check whether the EID of the error log
+     *        at the specified position in PNOR matches the given EID.
+     *
+     * @param[in] i_position the position of the error log in PNOR
+     * @param[in] i_plid the EID against which to compare
+     * @return true if the EID matches; false otherwise
+     */
+    bool doesEidMatch(uint32_t i_position, uint32_t i_eid);
+
+    /**
+     * @brief A helper function to check if the EID of the error log at
+     *        the given position matches that of the last EID that was
+     *        recorded during IPL.
+     *
+     * @param[in] i_position the position of the error log in PNOR to check
+     * @return true if the EID at the requested position matches the last
+     *         EID recorded during IPL; false otherwise
+     */
+    bool isLastIplEid(uint32_t i_position);
+
+    /**
+     * @brief A helper function to check if the EID of the error log at
+     *        the given position matches that of the first EID that HBRT
+     *        will use (the highest HBRT EID found in the HBEL partition).
+     *
+     * @param[in] i_position the position of the error log in PNOR to check
+     * @return true if the EID at the requested position matches the first
+     *         EID that HBRT will use; false otherwise
+     */
+    bool isFirstHbrtEid(uint32_t i_position);
 };
 
 

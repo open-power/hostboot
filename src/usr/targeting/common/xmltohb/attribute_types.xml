@@ -3563,6 +3563,21 @@
   </attribute>
 
   <attribute>
+    <description>
+        The value of the last IPL-time EID. This attribute is used by HBRT to
+        preserve the highest IPL-time EID in PNOR.
+    </description>
+    <id>LAST_IPLTIME_EID</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <simpleType>
+      <uint32_t/>
+    </simpleType>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <description>Location code of the Fru target</description>
     <id>LOCATION_CODE</id>
     <simpleType>

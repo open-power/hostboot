@@ -84,6 +84,7 @@ ErrlManager::ErrlManager() :
 #else
         iv_isFSP(false),
 #endif
+        iv_firstHbrtEid(0),
 #ifdef CONFIG_PLDM
         iv_isBmcInterfaceEnabled(true)
 #else
@@ -124,6 +125,10 @@ ErrlManager::ErrlManager() :
         // then PLD waits are enabled.
         iv_pldWaitEnable = !iv_isFSP && !sys->getAttr<TARGETING::ATTR_DISABLE_PLD_WAIT>();
 
+        if(!iv_isFSP)
+        {
+            setupPnorInfo();
+        }
     }
     else
     {
@@ -160,6 +165,14 @@ void ErrlManager::sendMboxMsg ( errlHndl_t& io_err )
 #ifdef CONFIG_PLDM
         if (iv_isBmcInterfaceEnabled)
         {
+
+            bool l_savedToPnor = saveErrLogToPnor(io_err);
+            if(!l_savedToPnor)
+            {
+                TRACFCOMP(g_trac_errl, INFO_MRK"saveErrLogToPnor: could not save errl 0x%x",
+                          io_err->eid());
+            }
+
             TRACFCOMP(g_trac_errl,INFO_MRK"Send msg to BMC for errlogId [0x%08x]",
                       io_err->eid());
 

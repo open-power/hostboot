@@ -27,9 +27,7 @@
 #include <hwas/common/hwasCallout.H>
 #include <errl/errlreasoncodes.H>
 
-#ifndef __HOSTBOOT_RUNTIME
 #include <pnor/pnorif.H>
-#endif
 
 #include <errl/errlentry.H>
 #include <sys/mm.h>
@@ -128,7 +126,6 @@ uint32_t ErrlManager::getUniqueErrId()
     return l_logId;
 }
 
-#ifndef __HOSTBOOT_RUNTIME
 // ------------------------------------------------------------------
 // setupPnorInfo
 // ------------------------------------------------------------------
@@ -138,8 +135,12 @@ void ErrlManager::setupPnorInfo()
 
     do
     {
-        // Get HB_ERRLOG PNOR section info from PNOR RP
         PNOR::SectionInfo_t info;
+
+#if !defined(CONFIG_FSP_BUILD) || (defined(CONFIG_FSP_BUILD) && !defined(__HOSTBOOT_RUNTIME))
+        // Get HB_ERRLOG PNOR section info from PNOR RP;
+        // Only do that during IPL-time or at runtime for non-FSP systems. On
+        // FSP systems, HB doesn't have access to PNOR at runtime.
         errlHndl_t err = PNOR::getSectionInfo( PNOR::HB_ERRLOGS, info );
 
         if (err)
@@ -148,6 +149,7 @@ void ErrlManager::setupPnorInfo()
             assert(err == NULL);
             break;
         }
+#endif
 
         TRACFCOMP( g_trac_errl, INFO_MRK"setupPnorInfo sectionInfo id %d name \"%s\" size %d",
                 info.id, info.name, info.size );
@@ -163,9 +165,13 @@ void ErrlManager::setupPnorInfo()
         // so that our first save will increment and wrap correctly
         iv_pnorOpenSlot = (iv_maxErrlInPnor - 1);
 
+#ifndef __HOSTBOOT_RUNTIME
+
         // walk thru memory, finding error logs and
         // determine the highest ID within the lower POST range of EIDs
         uint32_t l_maxId = 0;
+        // If we find any HBRT EIDs, note the max EID number to pass to HBRT.
+        iv_firstHbrtEid = ERRLOG_HBRT_EID_BASE;
         for (uint32_t i = 0; i < iv_maxErrlInPnor; i++)
         {
             if (!isSlotEmpty(i))
@@ -179,7 +185,7 @@ void ErrlManager::setupPnorInfo()
                     // then grab plid instead (FSP will have put a HB plid in
                     l_id = readPlidFromFlattened(i);
                 }
-                // if this is 'my' type of plid (HB or HBRT) see if it's max
+                // if this is 'my' type of plid (HB) see if it's max
                 if (((l_id & FIRST_BYTE_ERRLOG) == ERRLOG_PLID_BASE ) &&
                     (l_id > l_maxId ) &&
                     ((l_id & ERRLOG_PLID_MASK) <= ERRLOG_PLID_POST_MAX))
@@ -190,6 +196,15 @@ void ErrlManager::setupPnorInfo()
                     // save will increment correctly
                     iv_pnorOpenSlot = i;
                 }
+
+                // Check for the largest HBRT PLID
+                if(((l_id & FIRST_BYTE_ERRLOG) == ERRLOG_HBRT_EID_BASE) &&
+                   (l_id > iv_firstHbrtEid) &&
+                   ((l_id & ERRLOG_PLID_MASK) <= ERRLOG_PLID_POST_MAX))
+                {
+                    iv_firstHbrtEid = l_id;
+                }
+
                 // also check if it's ACKed or not
                 if (!isSlotACKed(i))
                 {
@@ -279,6 +294,10 @@ void ErrlManager::setupPnorInfo()
             } // not empty
         } // for
 
+        TRACFCOMP(g_trac_errl,
+                  INFO_MRK"setupPnorInfo: the first HBRT EID is calculated to be 0x%x",
+                  iv_firstHbrtEid);
+
         // bump the current eid to 1 past the max eid found
         // Stay within the non-preboot range
         while ( !__sync_bool_compare_and_swap(&iv_currLogId, iv_currLogId,
@@ -323,11 +342,11 @@ void ErrlManager::setupPnorInfo()
                 ++it;
             }
         }
+#endif // __HOSTBOOT_RUNTIME
     } while (0);
 
     TRACFCOMP( g_trac_errl, EXIT_MRK"setupPnorInfo");
 } // setupPnorInfo
-#endif // #ifndef __HOSTBOOT_RUNTIME
 
 ///////////////////////////////////////////////////////////////////////////////
 // ErrlManager::incrementPnorOpenSlot()
@@ -342,9 +361,10 @@ bool ErrlManager::incrementPnorOpenSlot()
         {   // wrap
             iv_pnorOpenSlot = 0;
         }
-    } while (   !isSlotEmpty(iv_pnorOpenSlot) &&
-                !isSlotACKed(iv_pnorOpenSlot) &&
-                (iv_pnorOpenSlot != initialSlot));
+    } while (!isSlotEmpty(iv_pnorOpenSlot) &&
+             (!isSlotACKed(iv_pnorOpenSlot) ||
+                 (isLastIplEid(iv_pnorOpenSlot) || isFirstHbrtEid(iv_pnorOpenSlot))) &&
+             (iv_pnorOpenSlot != initialSlot));
 
     // if we got a different slot, return true; else false - no open slots
     return (iv_pnorOpenSlot != initialSlot);
@@ -400,7 +420,17 @@ bool ErrlManager::saveErrLogToPnor( errlHndl_t& io_err)
                     TRACFCOMP(g_trac_errl, ERR_MRK "Fail to flush the page %p size %d",
                             l_pnorAddr, l_errSize);
                 }
+                // Keep track of the last IPL-time EID
+                if(io_err->eid() > getLastIplEid())
+                {
+                    setLastIplEid(io_err->eid());
+                }
 #endif // #ifndef __HOSTBOOT_RUNTIME
+#ifndef CONFIG_FSP_BUILD
+                // Flush RT logs
+                PNOR::flush(PNOR::HB_ERRLOGS);
+#endif // CONFIG_FSP_BUILD
+
             }
             else
             {
@@ -510,6 +540,25 @@ bool ErrlManager::isSlotACKed(uint32_t i_position)
         (pSRC->src.word5 & ErrlSrc::ACK_BIT) ? "not ACKed" : "ACKed");
 
     return (pSRC->src.word5 & ErrlSrc::ACK_BIT) ? false : true;
+}
+
+bool ErrlManager::doesEidMatch(const uint32_t i_position, const uint32_t i_eid)
+{
+    const char* l_pnorAddr = iv_pnorAddr + (PNOR_ERROR_LENGTH * i_position);
+    const pelPrivateHeaderSection_t* l_privateHeaderSection =
+            reinterpret_cast<const pelPrivateHeaderSection_t*>(l_pnorAddr);
+
+    return (l_privateHeaderSection->eid == i_eid);
+}
+
+bool ErrlManager::isLastIplEid(const uint32_t i_position)
+{
+    return doesEidMatch(i_position, getLastIplEid());
+}
+
+bool ErrlManager::isFirstHbrtEid(const uint32_t i_position)
+{
+    return doesEidMatch(i_position, getFirstHbrtEid());
 }
 
 // setACKInFlattened()
@@ -1033,5 +1082,49 @@ errlHndl_t ErrlManager::getMarkerLidMiKeyword(size_t &io_bufferSize, char* const
 
     return l_err;
 } // ErrlManager::getMarkerLidMiKeyword
+
+uint32_t ErrlManager::_getFirstHbrtEid()
+{
+    return iv_firstHbrtEid;
+}
+
+uint32_t ErrlManager::getFirstHbrtEid()
+{
+    return ERRORLOG::theErrlManager::instance()._getFirstHbrtEid();
+}
+
+#ifndef __HOSTBOOT_RUNTIME
+uint32_t ErrlManager::_getLastIplEid()
+{
+    return iv_lastIplEid;
+}
+#endif
+
+uint32_t ErrlManager::getLastIplEid()
+{
+#ifndef __HOSTBOOT_RUNTIME
+    return ERRORLOG::theErrlManager::instance()._getLastIplEid();
+#else
+    return TARGETING::UTIL::assertGetToplevelTarget()->getAttr<TARGETING::ATTR_LAST_IPLTIME_EID>();
+#endif
+}
+
+#ifndef __HOSTBOOT_RUNTIME
+void ErrlManager::_setLastIplEid(const uint32_t i_eid)
+{
+    iv_lastIplEid = i_eid;
+}
+#endif
+
+#ifndef __HOSTBOOT_RUNTIME
+void ErrlManager::setLastIplEid(const uint32_t i_eid)
+{
+    ERRORLOG::theErrlManager::instance()._setLastIplEid(i_eid);
+    if(Util::isTargetingLoaded())
+    {
+        TARGETING::UTIL::assertGetToplevelTarget()->setAttr<TARGETING::ATTR_LAST_IPLTIME_EID>(i_eid);
+    }
+}
+#endif
 
 } // end namespace

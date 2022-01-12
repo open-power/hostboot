@@ -35,6 +35,7 @@
 #include <errl/errlmanager.H>
 #include <trace/interface.H>
 #include <errl/errlentry.H>
+#include <errl/errlmanager.H>
 #include <initservice/taskargs.H>
 #include <sys/task.h>
 #include <arch/ppc.H>
@@ -122,6 +123,8 @@ ErrlManager::ErrlManager() :
     iv_maxErrlInPnor(0),
     iv_pnorOpenSlot(0),
     iv_isFSP(true),  // queue msgs for fsp until we find we shouldn't
+    iv_firstHbrtEid(0),
+    iv_lastIplEid(0),
     iv_isMboxEnabled(false),    // assume mbox isn't ready yet..
     iv_nonInfoCommitted(false),
     iv_isErrlDisplayEnabled(false),
@@ -352,6 +355,13 @@ void ErrlManager::errlogMsgHndlr ()
                     //  do we NOT need to send the error?
                     TARGETING::Target * sys = nullptr;
                     TARGETING::targetService().getTopLevelTarget( sys );
+
+                    // Set the value of the first HBRT EID so that the HBRT logs start with
+                    // the right EID
+                    TRACFCOMP(g_trac_errl, INFO_MRK"Setting the first HBRT EID to 0x%x",
+                              ERRORLOG::ErrlManager::getFirstHbrtEid());
+                    sys->setAttr<TARGETING::ATTR_HOSTSVC_PLID>(
+                                    ERRORLOG::ErrlManager::getFirstHbrtEid());
 
                     // Cache current 'hidden error log enable' value for tracing
                     auto l_hiddenErrLogsEnableOldValue = iv_hiddenErrLogsEnable;
