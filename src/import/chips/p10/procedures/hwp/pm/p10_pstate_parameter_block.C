@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -98,8 +98,8 @@ using namespace pm_pstate_parameter_block;
                  .set_ICS_TDP_DC_##suffix(iv_attr_mvpd_data[i].ics_tdp_dc_10ma) \
                  .set_ICS_RDP_AC_##suffix(iv_attr_mvpd_data[i].ics_rdp_ac_10ma) \
                  .set_ICS_RDP_DC_##suffix(iv_attr_mvpd_data[i].ics_rdp_dc_10ma) \
-                 .set_ICS_RDP_AC_##suffix(iv_attr_mvpd_data[i].rt_tdp_ac_10ma) \
-                 .set_ICS_RDP_DC_##suffix(iv_attr_mvpd_data[i].rt_tdp_dc_10ma) \
+                 .set_IRT_RDP_AC_10MA_##suffix(iv_attr_mvpd_data[i].rt_tdp_ac_10ma) \
+                 .set_IRT_RDP_DC_10MA_##suffix(iv_attr_mvpd_data[i].rt_tdp_dc_10ma) \
                  .set_VDD_VMIN_##suffix(iv_attr_mvpd_data[i].vdd_vmin)
 
 //w => N_L (w > 7 is invalid)
