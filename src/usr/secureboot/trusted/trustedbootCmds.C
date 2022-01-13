@@ -950,7 +950,8 @@ errlHndl_t tpmCmdGetCapNvIndexValidate(TpmTarget* io_target)
              && (foundECCP384EKCert == false))
          || (foundPlatCert0 == false)
          || (foundPlatCert1 == false)
-         || (foundPlatCert2 == false)
+         // @TODO CQ:SW542165: Reenable IBM platform certificate 2 enforcement
+         // || (foundPlatCert2 == false)
          || moreData == true))
     {
         TRACFCOMP( g_trac_trustedboot,
