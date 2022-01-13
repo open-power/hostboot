@@ -3431,13 +3431,8 @@ IpVpdFacade::validateAllRecordEccData ( const TARGETING::TargetHandle_t  i_targe
         {
             l_validationError = _validateAllRecordEccData(i_target);
 
-            // If the error returned because the VPD ECC validation failed, then
-            // get next MVPD source.
-            if ( l_validationError &&
-                 ( (VPD::VPD_IPVPD_ECC_DATA_CHECK == l_validationError->moduleId()) ||
-                   (VPD::VPD_IPVPD_VERIFY_VHDR_RECORD_IS_VALID == l_validationError->moduleId()) ||
-                   (VPD::VPD_IPVPD_VERIFY_RECORD_IS_VALID == l_validationError->moduleId()) )
-               )
+            // If VPD ECC validation failed, then get next MVPD source.
+            if ( l_validationError )
             {
                 #ifndef __HOSTBOOT_RUNTIME
                     errlHndl_t l_mvpdSourceError(nullptr);
