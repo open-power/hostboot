@@ -724,8 +724,9 @@ void handleMctpAvailable(void)
         errl = PLDM::handle_next_pldm_request();
         if(errl)
         {
-            TRACFCOMP(g_trac_hbrt,
-                      "handleMctpAvailable: an error occurred while attempting to handle the next pldm request");
+            // handle_next_pldm_request will trace the proper reason
+            // No need to flag an error since it may just be informational
+            // errl will be committed soon
         }
     }
     }while(0);

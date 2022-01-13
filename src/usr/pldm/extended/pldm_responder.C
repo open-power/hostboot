@@ -92,6 +92,9 @@ struct msg_type_handler
 const msg_type_handler pldm_discovery_control_handlers[] =
 {
     { PLDM_GET_PLDM_VERSION, handleGetPldmVersionRequest },
+    { PLDM_GET_TID, handleUnsupportedCommandRequest },
+    { PLDM_GET_PLDM_TYPES, handleUnsupportedCommandRequest },
+    { PLDM_GET_PLDM_COMMANDS, handleUnsupportedCommandRequest },
 };
 
 /*** Handlers for the MSG_MONITOR_CONTROL (PLDM_MC) type ***/

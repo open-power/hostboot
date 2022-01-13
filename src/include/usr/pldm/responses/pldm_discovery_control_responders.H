@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,10 +40,16 @@ struct pldm_msg;
 namespace PLDM
 {
 
+/* Platform Level Data Model (PLDM) Base Specification
+ *
+ * https://www.dmtf.org/dsp/DSP0240
+ *
+ * See section 7 - PLDM Messaging Control and Discovery Commands
+ */
+
 /* @brief handleGetPldmVersionRequest
  *
- *        Handler for intercepting the getPLDMVersion requests. (See DSP0240 v1.0.0
- *        section 7.2 for details.)
+ *        Handler for intercepting the getPLDMVersion requests.
  *
  * @param[in] i_msgQ          Handle to the MCTP outbound message queue
  * @param[in] i_msg           getPLDMVersion request message object
@@ -53,6 +59,19 @@ namespace PLDM
 errlHndl_t handleGetPldmVersionRequest( msg_q_t i_msgQ,
                                         const pldm_msg* i_msg,
                                         size_t i_payload_len);
+
+/* @brief handleUnsupportedCommandRequest
+ *
+ *        Handler for intercepting ANY Unsupported requests.
+ *
+ * @param[in] i_msgQ          Handle to the MCTP outbound message queue
+ * @param[in] i_msg           Request message object
+ * @param[in] i_payload_len   Length of payload in i_msg
+ * @return    errlHndl_t      Error if any, otherwise nullptr.
+ */
+errlHndl_t handleUnsupportedCommandRequest( msg_q_t i_msgQ,
+                                            const pldm_msg* i_msg,
+                                            size_t i_payload_len);
 
 } // namespace PLDM
 

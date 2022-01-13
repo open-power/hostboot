@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,7 +46,7 @@ errlHndl_t handleGetPldmVersionRequest(const msg_q_t i_msgQ,
 {
     errlHndl_t l_err(nullptr);
 
-    PLDM_INF("Received a getPLDMVersion message");
+    PLDM_INF("Received a getPLDMVersion Request message");
 
     // Reply to request to avoid multiple getPLDMVersion requests.
     // Not interested in the request per se, but using the request
@@ -75,5 +75,22 @@ errlHndl_t handleGetPldmVersionRequest(const msg_q_t i_msgQ,
     return l_err;
 }
 
+errlHndl_t handleUnsupportedCommandRequest(const msg_q_t i_msgQ,
+                               const pldm_msg* const i_msg,
+                               const size_t i_payload_len)
+{
+    errlHndl_t l_err(nullptr);
+
+    /* See pldm_responder.C pldm_discovery_control_handlers */
+    /* Curent list of Handlers -> GET_TID GET_PLDM_TYPES GET_PLDM_COMMANDS */
+    PLDM_INF("Received Unsupported Command Request i_msg->hdr.type=0x%02x "
+             "i_msg->hdr.command=0x%02x i_msg->hdr.instance_id=%d",
+              i_msg->hdr.type, i_msg->hdr.command, i_msg->hdr.instance_id);
+
+    // Reply to request to indicate 'unsupported'.
+    send_cc_only_response(i_msgQ, i_msg, PLDM_ERROR_UNSUPPORTED_PLDM_CMD);
+
+    return l_err;
+}
 
 } // namespace PLDM

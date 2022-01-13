@@ -451,7 +451,7 @@ void PdrManager::AssertInvalidRange(const state_query_id_t next_state_query_id)
      * @moduleid   MOD_PDR_MANAGER
      * @reasoncode RC_INVALID_OFFSET_ID
      * @userdata1  HB_PLDM_SENSOR_EFFECTER_ID_RANGE_END
-     * @userdata2  next_state_query_id
+     * @userdata2  The Out of Range Next Query ID
      * @devdesc    Software problem, overrun state sensor/effecter IDs
      * @custdesc   A software error occurred during system boot
      */
