@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -343,13 +343,17 @@ class HdatPcia
     *      Proc target pointer. Must not be NULL (otherwise call will return an
     *      error log).  Must be a valid target from the system blueprint.
     *
+    * @param[in] i_dcmNum
+    *      DCM Number
+    *
     * @return A null error log handle if successful, else the return code
     *       pointed to by o_errlHndl.
     */
 
     errlHndl_t hdatSetCoreInfo(const uint32_t i_index,
-                                     const TARGETING::Target* i_pCoreTarget,
-                                     const TARGETING::Target* i_pProcTarget);
+                               const TARGETING::Target* i_pCoreTarget,
+                               const TARGETING::Target* i_pProcTarget,
+                               const uint8_t i_dcmNum);
 };
 
 } //namespace HDAT

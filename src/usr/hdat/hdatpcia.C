@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -210,6 +210,10 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
         l_coreThreadCount = is_fused_mode() ? l_coreThreadCount*2 : l_coreThreadCount;
         HDAT_DBG("THREAD_COUNT is 0x%x",l_coreThreadCount);
 
+        TARGETING::ATTR_LOCATION_CODE_type l_cur_location_code { };
+        TARGETING::ATTR_LOCATION_CODE_type l_last_location_code { };
+        uint8_t l_dcmNum = 0;
+
         //for each procs in the system
         TARGETING::PredicateCTM l_procFilter(CLASS_CHIP, TYPE_PROC);
         TARGETING::PredicateHwas l_pred;
@@ -231,6 +235,24 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
                 const uint8_t l_procTopologyId =
                     l_pProcTarget->getAttr<TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID>();
 
+                // Fabric Node Id needs to get set according to the DCM number
+                // that contains the processor chip
+                hdatGetLocationCode(l_pProcTarget, HDAT_SLCA_FRU_TYPE_PROC,
+                    l_cur_location_code);
+
+                // Value of index is based on the proc numbers, so here
+                // depending on the index, the first value is set and
+                // consecutive dcm values are determined from location code
+                // match result
+                if ( (index !=0) &&
+                      strcmp(l_cur_location_code, l_last_location_code)
+                   )
+                {
+                    l_dcmNum++;
+                }
+
+                strcpy(l_last_location_code, l_cur_location_code);
+
                 TARGETING::TargetHandleList l_coreList;
                 TARGETING::getNonEcoCores(l_coreList,
                                           l_pProcTarget,
@@ -248,7 +270,7 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
                         l_threadIndex < l_enabledThreads; ++l_threadIndex)
                     {
                         l_errl = hdatSetCoreInfo(index,
-                                            l_pTarget,l_pProcTarget);
+                                            l_pTarget,l_pProcTarget, l_dcmNum);
                         if(l_errl)
                         {
                             HDAT_ERR("Error [0x%08X] in call to set core info",
@@ -383,6 +405,24 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
                 const uint8_t l_procTopologyId =
                     l_pProcTarget->getAttr<TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID>();
 
+                // Fabric Node Id needs to get set according to the DCM number that
+                // contains the processor chip
+                hdatGetLocationCode(l_pProcTarget, HDAT_SLCA_FRU_TYPE_PROC,
+                    l_cur_location_code);
+
+                // Value of index is based on the proc numbers, so here
+                // depending on the index, the first value is set and
+                // consecutive dcm values are determined from location code
+                // match result
+                if ( (index !=0) &&
+                      strcmp(l_cur_location_code, l_last_location_code)
+                   )
+                {
+                    l_dcmNum++;
+                }
+
+                strcpy(l_last_location_code, l_cur_location_code);
+
                 //Get the the EQ(Quad id) targets
                 TARGETING::TargetHandleList l_eqList;
                 TARGETING::PredicateCTM
@@ -430,7 +470,7 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
                         l_procStatus = HDAT_PROC_USABLE;
 
                         l_errl = hdatSetCoreInfo(index, l_pFcTarget,
-                                                 l_pProcTarget);
+                                                 l_pProcTarget, l_dcmNum);
                         if(l_errl)
                         {
                             HDAT_ERR("Error [0x%08X] in call to set core info",
@@ -573,7 +613,8 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
 *******************************************************************************/
 errlHndl_t HdatPcia::hdatSetCoreInfo(const uint32_t i_index,
                                      const Target* i_pCoreTarget,
-                                     const Target* i_pProcTarget)
+                                     const Target* i_pProcTarget,
+                                     const uint8_t i_dcmNum)
 {
     errlHndl_t l_errl = NULL;
     do
@@ -672,13 +713,8 @@ errlHndl_t HdatPcia::hdatSetCoreInfo(const uint32_t i_index,
 
         uint32_t l_nodeOrdId = l_pNodeTarget->getAttr<ATTR_ORDINAL_ID>();
 
-        const uint8_t l_fabTopoId = i_pProcTarget->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_ID>();
-
-        //Set the Internal Drawer Node ID
-        uint8_t l_topoChipId = 0;
-        uint8_t l_topoGroupId = 0;
-        extractGroupAndChip(l_fabTopoId, l_topoGroupId, l_topoChipId);
-        iv_spPcia[i_index].hdatCoreData.pciaDrawerNodeID = l_topoGroupId;
+        //Set the Internal Drawer Node ID as DCM number
+        iv_spPcia[i_index].hdatCoreData.pciaDrawerNodeID = i_dcmNum;
 
         //get the parent node id and set that
         this->iv_spPcia[i_index].hdatCoreData.pciaDBOBID = l_nodeOrdId;
