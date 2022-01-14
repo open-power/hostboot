@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -147,12 +147,14 @@ uint64_t parsestring(const int i)
     *c = '\0';
 
     // If string is longer than 255 then dump remaining to the debug trace
-    while (g_ch != '"')
+    while ((g_ch != '"') && (g_ch != EOF))
     {
         g_ch=getc(stdin);
         DBG_TRACE("parsestring():  skipping 0x%X char -> '%c'",
                 g_ch, g_ch);
     }
+    // If EOF encountered you will see ÿ for each byte
+    // filled up to the MAX_STRING_SIZE
     DBG_TRACE("got a string: %s at addr %lX\n",
             string[i],reinterpret_cast<unsigned long>(string[i]));
 
