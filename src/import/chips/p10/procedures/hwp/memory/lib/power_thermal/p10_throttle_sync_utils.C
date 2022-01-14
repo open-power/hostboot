@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,6 +32,8 @@
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: HB
+
+// EKB-Mirror-To: hostboot_screen
 
 #include <lib/power_thermal/p10_throttle_sync_utils.H>
 #include <generic/memory/lib/utils/find.H>
@@ -101,7 +103,7 @@ fapi2::ReturnCode configure_sync_operations(const fapi2::Target<fapi2::TARGET_TY
     SET_SCOMFIR_MCMODE0_DISABLE_MC_SYNC(i_enable, l_scomData);
 
     FAPI_TRY(PUT_SCOMFIR_MCMODE0(i_target, l_scomData),
-             "Failed PUT_SCOMFIR_MCMODE0() on %s", mss::c_str(i_target));
+             "Failed: PUT_SCOMFIR_MCMODE0() on %s", mss::c_str(i_target));
 
 fapi_try_exit:
     return fapi2::current_err;
