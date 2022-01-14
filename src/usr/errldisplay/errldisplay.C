@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -607,66 +607,72 @@ void ErrLogDisplay::displayHwpf(void *data, size_t size, uint8_t i_type)
         while ( fapi2::hbfwErrLookupHwpRcFFDC( *word_buf, index, type, value,
                                                str ) )
         {
-            if( type == fapi2::HBFW_FFDC_TYPE_HWP_RC_FFDC )
+            // Enclosing the following code to remove compile warning:
+            //     note: -Wmisleading-indentation is disabled from this point
+            //         onwards, since column-tracking was disabled due to the
+            //         size of the code/headers
             {
-                const char *rc;
-                const char *desc;
-                fapi2::hbfwErrLookupHwpRc( value, rc, desc );
-                CONSOLE::displayf(CONSOLE::DEFAULT,  NULL, "  HwpReturnCode              : %s",
-                                   rc ? rc : "Unknown" );
-                CONSOLE::displayf(CONSOLE::DEFAULT,  NULL, "  FFDC                       : %s",
-                                   str ? str : "Unknown" );
-                printHex(buf, size);
-                size = 0;
-            }
-            else if( type == fapi2::HBFW_FFDC_TYPE_SCOM_FAIL )
-            {
-                uint64_t val64 = be64toh( *reinterpret_cast<uint64_t*>( buf ) );
-                CONSOLE::displayf(CONSOLE::DEFAULT,  NULL, "  Failed SCOM address        : %#016lX",
-                                   val64 );
-            }
-            else if( type == fapi2::HBFW_FFDC_TYPE_PIB_RC )
-            {
-                uint64_t val32 = be64toh( *reinterpret_cast<uint32_t*>( buf ) );
-                CONSOLE::displayf(CONSOLE::DEFAULT,  NULL, "  PIB RC                     : %#08lX",
-                                   val32 );
-            }
-            else if( type == fapi2::HBFW_FFDC_TYPE_REGISTER_SET )
-            {
-                CONSOLE::displayf(CONSOLE::DEFAULT,  NULL, "  Register FFDC              : %s",
-                                   str ? str : "Unknown" );
-            }
-            else if( type == fapi2::HBFW_FFDC_TYPE_CHIP_POSITION
-                && (size >= sizeof(uint32_t)) )
-            {
-                uint32_t val32 = be32toh( *reinterpret_cast<uint32_t*>( buf ) );
-                CONSOLE::displayf(CONSOLE::DEFAULT,  NULL, "  Chip Position              : %X",
-                                   val32 );
-                buf += sizeof(uint32_t);
-                size -= sizeof(uint32_t);
-            }
-            else if( type == fapi2::HBFW_FFDC_TYPE_CFAM_REG
-                && (size >= sizeof(uint32_t)) )
-            {
-                uint32_t val32 = be32toh( *reinterpret_cast<uint32_t*>( buf ) );
-                CONSOLE::displayf(CONSOLE::DEFAULT,  NULL, "  CFAM Register              : %s",
-                                   str ? str : "Unknown" );
-                CONSOLE::displayf(CONSOLE::DEFAULT,  NULL, "    %08X", val32 );
-                buf += sizeof(uint32_t);
-                size -= sizeof(uint32_t);
-            }
-            else if( type == fapi2::HBFW_FFDC_TYPE_SCOM_REG
-                && (size >= sizeof(uint64_t)) )
-            {
-                uint64_t val64 = be64toh( *reinterpret_cast<uint64_t*>( buf ) );
-                CONSOLE::displayf(CONSOLE::DEFAULT,  NULL, "  SCOM Register              : %s",
-                                   str ? str : "Unknown" );
-                CONSOLE::displayf(CONSOLE::DEFAULT,  NULL, "    %08llX %08llX",
-                                   (val64 >> 32) & 0xffffffff,
-                                   (val64 & 0xffffffff) );
-                buf += sizeof(uint64_t);
-                size -= sizeof(uint64_t);
-            }
+                if( type == fapi2::HBFW_FFDC_TYPE_HWP_RC_FFDC )
+                {
+                    const char *rc;
+                    const char *desc;
+                    fapi2::hbfwErrLookupHwpRc( value, rc, desc );
+                    CONSOLE::displayf(CONSOLE::DEFAULT,  NULL, "  HwpReturnCode              : %s",
+                                       rc ? rc : "Unknown" );
+                    CONSOLE::displayf(CONSOLE::DEFAULT,  NULL, "  FFDC                       : %s",
+                                       str ? str : "Unknown" );
+                    printHex(buf, size);
+                    size = 0;
+                }
+                else if( type == fapi2::HBFW_FFDC_TYPE_SCOM_FAIL )
+                {
+                    uint64_t val64 = be64toh( *reinterpret_cast<uint64_t*>( buf ) );
+                    CONSOLE::displayf(CONSOLE::DEFAULT,  NULL, "  Failed SCOM address        : %#016lX",
+                                       val64 );
+                }
+                else if( type == fapi2::HBFW_FFDC_TYPE_PIB_RC )
+                {
+                    uint64_t val32 = be64toh( *reinterpret_cast<uint32_t*>( buf ) );
+                    CONSOLE::displayf(CONSOLE::DEFAULT,  NULL, "  PIB RC                     : %#08lX",
+                                       val32 );
+                }
+                else if( type == fapi2::HBFW_FFDC_TYPE_REGISTER_SET )
+                {
+                    CONSOLE::displayf(CONSOLE::DEFAULT,  NULL, "  Register FFDC              : %s",
+                                       str ? str : "Unknown" );
+                }
+                else if( type == fapi2::HBFW_FFDC_TYPE_CHIP_POSITION
+                    && (size >= sizeof(uint32_t)) )
+                {
+                    uint32_t val32 = be32toh( *reinterpret_cast<uint32_t*>( buf ) );
+                    CONSOLE::displayf(CONSOLE::DEFAULT,  NULL, "  Chip Position              : %X",
+                                       val32 );
+                    buf += sizeof(uint32_t);
+                    size -= sizeof(uint32_t);
+                }
+                else if( type == fapi2::HBFW_FFDC_TYPE_CFAM_REG
+                    && (size >= sizeof(uint32_t)) )
+                {
+                    uint32_t val32 = be32toh( *reinterpret_cast<uint32_t*>( buf ) );
+                    CONSOLE::displayf(CONSOLE::DEFAULT,  NULL, "  CFAM Register              : %s",
+                                       str ? str : "Unknown" );
+                    CONSOLE::displayf(CONSOLE::DEFAULT,  NULL, "    %08X", val32 );
+                    buf += sizeof(uint32_t);
+                    size -= sizeof(uint32_t);
+                }
+                else if( type == fapi2::HBFW_FFDC_TYPE_SCOM_REG
+                    && (size >= sizeof(uint64_t)) )
+                {
+                    uint64_t val64 = be64toh( *reinterpret_cast<uint64_t*>( buf ) );
+                    CONSOLE::displayf(CONSOLE::DEFAULT,  NULL, "  SCOM Register              : %s",
+                                       str ? str : "Unknown" );
+                    CONSOLE::displayf(CONSOLE::DEFAULT,  NULL, "    %08llX %08llX",
+                                       (val64 >> 32) & 0xffffffff,
+                                       (val64 & 0xffffffff) );
+                    buf += sizeof(uint64_t);
+                    size -= sizeof(uint64_t);
+                }
+            } // End enclosing brackets for resolving compile warning
             index++;
         }
         break;
