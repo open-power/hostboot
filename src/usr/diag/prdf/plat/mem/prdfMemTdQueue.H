@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,9 +61,9 @@ class TdEntry
     enum TdType
     {
         VCM_EVENT = 0,       ///< A Verify Chip Mark event.
+        RRD_EVENT,           ///< A Row Repair Deploy event.
         DSD_EVENT,           ///< A DRAM Spare Deploy event.
         TPS_EVENT,           ///< A Two-Phase Scrub event.
-        RRD_EVENT,           ///< A Row Repair Deploy event.
         INVALID_EVENT = 0xf, ///< Used to denote that no event is in progress
     };
 
