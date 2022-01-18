@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,13 +31,13 @@ using namespace fapi2;
 
 constexpr uint64_t literal_1 = 1;
 constexpr uint64_t literal_0 = 0;
-constexpr uint64_t literal_3 = 3;
 constexpr uint64_t literal_5 = 5;
 constexpr uint64_t literal_0x08 = 0x08;
 constexpr uint64_t literal_4 = 4;
 constexpr uint64_t literal_0x10 = 0x10;
 constexpr uint64_t literal_0x05 = 0x05;
 constexpr uint64_t literal_2 = 2;
+constexpr uint64_t literal_3 = 3;
 constexpr uint64_t literal_6 = 6;
 constexpr uint64_t literal_7 = 7;
 constexpr uint64_t literal_8 = 8;
@@ -89,12 +89,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_AGGREGATE, TGT0, l_TGT0_ATTR_PROC_FABRIC_X_AGGREGATE));
         uint64_t l_def_LINK_X_AGGREGATE_EN = (l_TGT0_ATTR_PROC_FABRIC_X_AGGREGATE ==
                                               fapi2::ENUM_ATTR_PROC_FABRIC_X_AGGREGATE_ON);
+        fapi2::ATTR_PROC_FABRIC_R_INDIRECT_EN_Type l_TGT1_ATTR_PROC_FABRIC_R_INDIRECT_EN;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_R_INDIRECT_EN, TGT1, l_TGT1_ATTR_PROC_FABRIC_R_INDIRECT_EN));
+        uint64_t l_def_R_INDIRECT_EN = (l_TGT1_ATTR_PROC_FABRIC_R_INDIRECT_EN == fapi2::ENUM_ATTR_PROC_FABRIC_R_INDIRECT_EN_ON);
         fapi2::ATTR_PROC_FABRIC_X_LINKS_CNFG_Type l_TGT0_ATTR_PROC_FABRIC_X_LINKS_CNFG;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_LINKS_CNFG, TGT0, l_TGT0_ATTR_PROC_FABRIC_X_LINKS_CNFG));
-        uint64_t l_def_NUM_X_LINKS_CFG = l_TGT0_ATTR_PROC_FABRIC_X_LINKS_CNFG;
-        fapi2::ATTR_PROC_FABRIC_A_INDIRECT_Type l_TGT1_ATTR_PROC_FABRIC_A_INDIRECT;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_INDIRECT, TGT1, l_TGT1_ATTR_PROC_FABRIC_A_INDIRECT));
-        uint64_t l_def_A_INDIRECT_EN = (l_TGT1_ATTR_PROC_FABRIC_A_INDIRECT == fapi2::ENUM_ATTR_PROC_FABRIC_A_INDIRECT_ON);
         fapi2::ATTR_PROC_FABRIC_A_LINKS_CNFG_Type l_TGT0_ATTR_PROC_FABRIC_A_LINKS_CNFG;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_LINKS_CNFG, TGT0, l_TGT0_ATTR_PROC_FABRIC_A_LINKS_CNFG));
         uint64_t l_def_NUM_CHIPS_CFG = ((l_TGT0_ATTR_PROC_FABRIC_A_LINKS_CNFG + literal_1) *
@@ -214,7 +213,7 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 l_scom_buffer.insert<17, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_G_INDIRECT_EN_NEXT_ON );
             }
 
-            if (((l_def_A_INDIRECT_EN == literal_1) && (l_def_NUM_X_LINKS_CFG > literal_3)))
+            if ((l_def_R_INDIRECT_EN == literal_1))
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_R_INDIRECT_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<33, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_R_INDIRECT_EN_NEXT_ON );
@@ -2977,7 +2976,7 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 l_scom_buffer.insert<17, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_G_INDIRECT_EN_NEXT_ON );
             }
 
-            if (((l_def_A_INDIRECT_EN == literal_1) && (l_def_NUM_X_LINKS_CFG > literal_3)))
+            if ((l_def_R_INDIRECT_EN == literal_1))
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_R_INDIRECT_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<33, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_R_INDIRECT_EN_NEXT_ON );
@@ -5740,7 +5739,7 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 l_scom_buffer.insert<17, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_G_INDIRECT_EN_NEXT_ON );
             }
 
-            if (((l_def_A_INDIRECT_EN == literal_1) && (l_def_NUM_X_LINKS_CFG > literal_3)))
+            if ((l_def_R_INDIRECT_EN == literal_1))
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_R_INDIRECT_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<33, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_R_INDIRECT_EN_NEXT_ON );
@@ -8503,7 +8502,7 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 l_scom_buffer.insert<17, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_G_INDIRECT_EN_NEXT_ON );
             }
 
-            if (((l_def_A_INDIRECT_EN == literal_1) && (l_def_NUM_X_LINKS_CFG > literal_3)))
+            if ((l_def_R_INDIRECT_EN == literal_1))
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_R_INDIRECT_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<33, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_R_INDIRECT_EN_NEXT_ON );
@@ -11266,7 +11265,7 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 l_scom_buffer.insert<17, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_G_INDIRECT_EN_NEXT_ON );
             }
 
-            if (((l_def_A_INDIRECT_EN == literal_1) && (l_def_NUM_X_LINKS_CFG > literal_3)))
+            if ((l_def_R_INDIRECT_EN == literal_1))
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_R_INDIRECT_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<33, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_R_INDIRECT_EN_NEXT_ON );
@@ -14029,7 +14028,7 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 l_scom_buffer.insert<17, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_G_INDIRECT_EN_NEXT_ON );
             }
 
-            if (((l_def_A_INDIRECT_EN == literal_1) && (l_def_NUM_X_LINKS_CFG > literal_3)))
+            if ((l_def_R_INDIRECT_EN == literal_1))
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_R_INDIRECT_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<33, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_R_INDIRECT_EN_NEXT_ON );
@@ -16792,7 +16791,7 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 l_scom_buffer.insert<17, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_G_INDIRECT_EN_NEXT_ON );
             }
 
-            if (((l_def_A_INDIRECT_EN == literal_1) && (l_def_NUM_X_LINKS_CFG > literal_3)))
+            if ((l_def_R_INDIRECT_EN == literal_1))
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_R_INDIRECT_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<33, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_R_INDIRECT_EN_NEXT_ON );
@@ -19555,7 +19554,7 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 l_scom_buffer.insert<17, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_G_INDIRECT_EN_NEXT_ON );
             }
 
-            if (((l_def_A_INDIRECT_EN == literal_1) && (l_def_NUM_X_LINKS_CFG > literal_3)))
+            if ((l_def_R_INDIRECT_EN == literal_1))
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_R_INDIRECT_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<33, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_R_INDIRECT_EN_NEXT_ON );
@@ -22318,7 +22317,7 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 l_scom_buffer.insert<17, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_G_INDIRECT_EN_NEXT_ON );
             }
 
-            if (((l_def_A_INDIRECT_EN == literal_1) && (l_def_NUM_X_LINKS_CFG > literal_3)))
+            if ((l_def_R_INDIRECT_EN == literal_1))
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_R_INDIRECT_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<33, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_R_INDIRECT_EN_NEXT_ON );
@@ -25081,7 +25080,7 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 l_scom_buffer.insert<17, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_G_INDIRECT_EN_NEXT_ON );
             }
 
-            if (((l_def_A_INDIRECT_EN == literal_1) && (l_def_NUM_X_LINKS_CFG > literal_3)))
+            if ((l_def_R_INDIRECT_EN == literal_1))
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_R_INDIRECT_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<33, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_R_INDIRECT_EN_NEXT_ON );
@@ -27844,7 +27843,7 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 l_scom_buffer.insert<17, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_G_INDIRECT_EN_NEXT_ON );
             }
 
-            if (((l_def_A_INDIRECT_EN == literal_1) && (l_def_NUM_X_LINKS_CFG > literal_3)))
+            if ((l_def_R_INDIRECT_EN == literal_1))
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_R_INDIRECT_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<33, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_R_INDIRECT_EN_NEXT_ON );
@@ -30607,7 +30606,7 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 l_scom_buffer.insert<17, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_G_INDIRECT_EN_NEXT_ON );
             }
 
-            if (((l_def_A_INDIRECT_EN == literal_1) && (l_def_NUM_X_LINKS_CFG > literal_3)))
+            if ((l_def_R_INDIRECT_EN == literal_1))
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_R_INDIRECT_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<33, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_R_INDIRECT_EN_NEXT_ON );
@@ -33370,7 +33369,7 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 l_scom_buffer.insert<17, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_G_INDIRECT_EN_NEXT_ON );
             }
 
-            if (((l_def_A_INDIRECT_EN == literal_1) && (l_def_NUM_X_LINKS_CFG > literal_3)))
+            if ((l_def_R_INDIRECT_EN == literal_1))
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_R_INDIRECT_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<33, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_R_INDIRECT_EN_NEXT_ON );
@@ -36133,7 +36132,7 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 l_scom_buffer.insert<17, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_G_INDIRECT_EN_NEXT_ON );
             }
 
-            if (((l_def_A_INDIRECT_EN == literal_1) && (l_def_NUM_X_LINKS_CFG > literal_3)))
+            if ((l_def_R_INDIRECT_EN == literal_1))
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_R_INDIRECT_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<33, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_R_INDIRECT_EN_NEXT_ON );
@@ -38896,7 +38895,7 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 l_scom_buffer.insert<17, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_G_INDIRECT_EN_NEXT_ON );
             }
 
-            if (((l_def_A_INDIRECT_EN == literal_1) && (l_def_NUM_X_LINKS_CFG > literal_3)))
+            if ((l_def_R_INDIRECT_EN == literal_1))
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_R_INDIRECT_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<33, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_R_INDIRECT_EN_NEXT_ON );
@@ -41659,7 +41658,7 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 l_scom_buffer.insert<17, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_G_INDIRECT_EN_NEXT_ON );
             }
 
-            if (((l_def_A_INDIRECT_EN == literal_1) && (l_def_NUM_X_LINKS_CFG > literal_3)))
+            if ((l_def_R_INDIRECT_EN == literal_1))
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_R_INDIRECT_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<33, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_R_INDIRECT_EN_NEXT_ON );

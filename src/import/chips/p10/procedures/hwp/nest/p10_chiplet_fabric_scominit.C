@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -166,9 +166,71 @@ fapi2::ReturnCode p10_chiplet_fabric_scominit(
     FAPI_DBG("  i_config_internode: %d", i_config_internode);
 
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::ATTR_PROC_FABRIC_A_INDIRECT_Type l_a_indirect = 0;
+    fapi2::ATTR_PROC_FABRIC_R_INDIRECT_EN_Type l_r_indirect_en = 0;
     auto l_iohs_targets = i_target.getChildren<fapi2::TARGET_TYPE_IOHS>();
     char l_tgt_str[fapi2::MAX_ECMD_STRING_LEN];
     fapi2::ReturnCode l_rc;
+
+    // SW538816
+    // - Qualify R_INDIRECT enablement based on number of X links per-chip across entire topology
+    // - Initialize based on A_INDIRECT (calculated in p10_fbc_eff_config)
+    // - If true, disable if less than 4 X links configured on any given chip in the topology
+    //
+    // Denali, FSP-based, 2-hop
+    //   - A_INDIRECT will be false, leave R_INDIRECT as false
+    // Denali, FSP-based, 1-hop F8
+    //   - A_INDIRECT will be true if config is large enough (based on single hop attribute)
+    //   - General HB attribute context is only a single drawer, so can't simply loop over chip targets
+    ///  - Use ATTR_PROC_FABRIC_PRESENT_GROUPS to determine number of chips in entire CEC, this is especially filled by HWSV with system wide view
+    //   - Given there are no aggregate links in the topology, assuming a well formed/fully connected topology, NUM_X_LINKS on each chip should be consistent
+    //     NUM_X_LINKS = bits_set(ATTR_PROC_FABRIC_PRESENT_GROUPS)-1
+    // Rainier/Everest, BMC-based, 1-hop
+    //   - A_INDIRECT will be true if config is large enough (based on single hop attribute)
+    //   - Use set of children targets to find minimum NUM_X_LINKS value, as all chips should be reflected, and aggregate links need to be considered
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_INDIRECT, FAPI_SYSTEM, l_a_indirect));
+    l_r_indirect_en = l_a_indirect;
+
+    if (l_r_indirect_en)
+    {
+        fapi2::ATTR_PROC_EPS_TABLE_TYPE_Type l_eps_table_type;
+        uint8_t l_num_x_links = 0;
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_TABLE_TYPE, FAPI_SYSTEM, l_eps_table_type));
+
+        // Denali F8
+        if (l_eps_table_type == fapi2::ENUM_ATTR_PROC_EPS_TABLE_TYPE_EPS_TYPE_HE)
+        {
+            fapi2::ATTR_PROC_FABRIC_PRESENT_GROUPS_Type l_fabric_present_groups = 0;
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_PRESENT_GROUPS, FAPI_SYSTEM, l_fabric_present_groups));
+
+            for (uint8_t i = 0; i < 8; i++)
+            {
+                l_num_x_links += (l_fabric_present_groups & 0x01);
+                l_fabric_present_groups = (l_fabric_present_groups >> 1);
+            }
+
+            l_num_x_links = ((l_num_x_links) ? (l_num_x_links - 1) : (l_num_x_links));
+            l_r_indirect_en = (l_num_x_links >= 4);
+        }
+        // Rainier, Everest
+        else
+        {
+            for (const auto l_child : FAPI_SYSTEM.getChildren<fapi2::TARGET_TYPE_PROC_CHIP>())
+            {
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_LINKS_CNFG, l_child, l_num_x_links));
+
+                if (l_num_x_links < 4)
+                {
+                    l_r_indirect_en = false;
+                    break;
+                }
+            }
+        }
+    }
+
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_R_INDIRECT_EN, FAPI_SYSTEM, l_r_indirect_en));
 
     // apply FBC non-hotplug scom initfile
     fapi2::toString(i_target, l_tgt_str, sizeof(l_tgt_str));
