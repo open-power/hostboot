@@ -68,34 +68,6 @@ enum LidId
     INVALID_LIDID = 0xFFFFFFFF
 };
 
-//***************************************
-//* Marker Lid Section
-//  as found in file /fips1010/src/cupd/fsp/cupdUtils.H
-//***************************************
-// Marker lid structure
-typedef struct {
-    uint32_t   Version;              // This is the common marker lid structure version
-    uint32_t   MIKeyWordOffset;      // Offset from the beginning of the marker data to the MI keyWord
-    uint32_t   iSeriesMarkerOffset;  // Offset from the beginning of the marker data to the Mif level.
-} markerHeader_t;
-
-// Marker Lid MI Keyword section
-// The MI Keyword, MIKeyword[40], is the firmware release version used to set
-// the attribute ATTR_FW_RELEASE_VERSION.
-typedef struct {
-    uint32_t MIKeyWordSize;
-    char MIKeyword[40];
-    char DisrApply[3];
-    char DisrActivation[3];
-    char DisrPhyp[3];
-    char DisrPfw[3];
-    char DisrFsp[3];
-    char Phyp[3];
-    char Pfw[3];
-    char Rsv[3];
-    uint32_t ADFOffset;
-} markerMI_t;
-
 } // namespace Util
 
 class UtilLidMgr

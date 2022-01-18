@@ -367,7 +367,7 @@
       Firmware release version (e.g. "NH1010_009"), stored by error
       logs in the EH section. This value comes from MI Keyword as
       found in the Marker Lid.  See "Marker lid structure" in file
-      utillidmgr.H for further details.
+      errlmanager.H for further details.
     </description>
     <id>FW_RELEASE_VERSION</id>
     <simpleType>

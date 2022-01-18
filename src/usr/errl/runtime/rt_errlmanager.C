@@ -692,8 +692,66 @@ date_time_t ErrlManager::getCurrentDateTime()
     return ERRORLOG::theErrlManager::instance()._getCurrentDateTime();
 }
 
-} // End namespace
+void ErrlManager::setFwReleaseVersion_rt()
+{
+    errlHndl_t l_errl(nullptr);
 
+    TARGETING::ATTR_FW_RELEASE_VERSION_type fw_release_string = { };
+
+    // Get the FW release string
+    size_t l_miKeywordSize(sizeof(fw_release_string));
+    char   l_miKeyword[l_miKeywordSize] = { 0 };
+
+    l_errl = ErrlManager::getMarkerLidMiKeyword(l_miKeywordSize, l_miKeyword);
+    if (!l_errl)
+    {
+        memcpy(fw_release_string, l_miKeyword, l_miKeywordSize);
+
+        TARGETING::Target * l_sys = NULL;
+        if ( TARGETING::targetService().isInitialized() )
+        {
+            TARGETING::targetService().getTopLevelTarget( l_sys );
+        }
+        else
+        {
+            TRACFCOMP( g_trac_errl,
+                       ERR_MRK"ErrlManager::setFwReleaseVersion_rt(): TARGETING is not ready, "
+                               "unable to set the FW Release Version to %s", fw_release_string);
+
+            // If hitting this, then the call to setFwReleaseVersion_rt needs to be
+            // moved to a location in the code after when TARGETING is ready
+            assert(false, "ErrlManager::setFwReleaseVersion_rt(): TARGETING is not ready, "
+                          "unable to set the FW Release Version to %s", fw_release_string);
+        }
+
+        if (l_sys)
+        {
+            l_sys->setAttr<TARGETING::ATTR_FW_RELEASE_VERSION>(fw_release_string);
+            TRACFCOMP( g_trac_errl,
+                       INFO_MRK"ErrlManager::setFwReleaseVersion_rt(): "
+                       "FW Release Version set to %s", fw_release_string);
+        }
+        else
+        {
+            TRACFCOMP( g_trac_errl,
+                       ERR_MRK"ErrlManager::setFwReleaseVersion_rt(): TARGETING is not ready, "
+                               "unable to set the FW Release Version to %s", fw_release_string);
+
+            // If hitting this, then the call to setFwReleaseVersion_rt needs to be
+            // moved to a location in the code after when TARGETING is ready
+            assert(false, "ErrlManager::setFwReleaseVersion_rt(): TARGETING is not ready, "
+                          "unable to set the FW Release Version to %s", fw_release_string);
+        }
+    }
+    else // Received an error log from the call to ErrlManager::getMarkerLidMiKeyword
+    {
+        commitErrLog(l_errl, ERRL_COMP_ID);
+        TRACFCOMP( g_trac_errl,
+                   ERR_MRK"ErrlManager::setFwReleaseVersion_rt(): getMarkerLidMiKeyword failed");
+    }
+} // ErrlManager::setFwReleaseVersion_rt
+
+} // End namespace ERRORLOG
 
 //------------------------------------------------------------------------
 void initErrlManager(void)
@@ -701,6 +759,10 @@ void initErrlManager(void)
     // Note: rtPnor needs to be setup before this is called
     // call errlManager ctor so that we're ready and waiting for errors.
     ERRORLOG::theErrlManager::instance();
+
+    // Note: TARGETING needs to be ready before this is called
+    // Set the FW Release Version
+    ERRORLOG::theErrlManager::instance().setFwReleaseVersion_rt();
 }
 
 

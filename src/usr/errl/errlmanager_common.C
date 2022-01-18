@@ -901,12 +901,12 @@ errlHndl_t ErrlManager::getMarkerLidMiKeyword(size_t &io_bufferSize, char* const
 
         // Set up variables to read the Marker Lid Header
         uint32_t l_offset(0);
-        uint32_t l_markerLidHeaderSize = sizeof(Util::markerHeader_t);
+        uint32_t l_markerLidHeaderSize = sizeof(markerHeader_t);
 
         // Create a unique pointer for the Marker Lid Header for auto cleanup
         // and clear the memory via calloc
-        std::unique_ptr<Util::markerHeader_t, decltype(free)*> l_markerLidHeader{
-            static_cast<Util::markerHeader_t*>(calloc(l_markerLidHeaderSize, sizeof(uint8_t))),
+        std::unique_ptr<markerHeader_t, decltype(free)*> l_markerLidHeader{
+            static_cast<markerHeader_t*>(calloc(l_markerLidHeaderSize, sizeof(uint8_t))),
             free};
 
         // Get the Marker Lid Header Info
@@ -925,12 +925,12 @@ errlHndl_t ErrlManager::getMarkerLidMiKeyword(size_t &io_bufferSize, char* const
         ////////////////////////////////////////////////////////////////////////
         // Set up variables to read the MI Keyword Section
         l_offset = l_markerLidHeader->MIKeyWordOffset;
-        uint32_t l_markerMiSize = sizeof(Util::markerMI_t);
+        uint32_t l_markerMiSize = sizeof(markerMI_t);
 
         // Create a unique pointer for the MI Keyword Section for auto cleanup
         // and clear the memory via calloc
-        std::unique_ptr<Util::markerMI_t, decltype(free)*> l_markerMi{
-            static_cast<Util::markerMI_t*>(calloc(l_markerMiSize, sizeof(uint8_t))),
+        std::unique_ptr<markerMI_t, decltype(free)*> l_markerMi{
+            static_cast<markerMI_t*>(calloc(l_markerMiSize, sizeof(uint8_t))),
             free};
 
         // Get the MI keyword section from the Marker Lid

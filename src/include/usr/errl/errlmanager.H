@@ -50,6 +50,34 @@
 namespace ERRORLOG
 {
 
+//***************************************
+//* Marker Lid Section
+//  as found in file /fips1010/src/cupd/fsp/cupdUtils.H
+//***************************************
+// Marker lid structure
+typedef struct {
+    uint32_t   Version;              // This is the common marker lid structure version
+    uint32_t   MIKeyWordOffset;      // Offset from the beginning of the marker data to the MI keyWord
+    uint32_t   iSeriesMarkerOffset;  // Offset from the beginning of the marker data to the Mif level.
+} markerHeader_t;
+
+// Marker Lid MI Keyword section
+// The MI Keyword, MIKeyword[40], is the firmware release version used to set
+// the attribute ATTR_FW_RELEASE_VERSION.
+typedef struct {
+    uint32_t MIKeyWordSize;
+    char MIKeyword[40];
+    char DisrApply[3];
+    char DisrActivation[3];
+    char DisrPhyp[3];
+    char DisrPfw[3];
+    char DisrFsp[3];
+    char Phyp[3];
+    char Pfw[3];
+    char Rsv[3];
+    uint32_t ADFOffset;
+} markerMI_t;
+
 /**
  *  @brief  Global function to log an error
  *  Writes the log to PNOR where committed logs are kept.
@@ -362,6 +390,19 @@ public:
      * @return nullptr on success; non-nullptr on error.
      */
     static errlHndl_t getMarkerLidMiKeyword(size_t &io_bufferSize, char* const o_buffer);
+
+    /**
+     * @brief Set the FW Release Version Field at runtime
+     *
+     * @details This method is a runtime method that will set the FW Release Version.
+     *          Useful for when a code update changes the FW Release Version.
+     *
+     * @note This method needs to be called after TARGETING is ready, if not an
+     *       assertion will be thrown stating that 'TARGETING is not ready'.
+     *       Currently being called in the initErrlManager method which is occurring
+     *       after initialization of TARGETING.
+     */
+    void setFwReleaseVersion_rt();
 
 protected:
     /**
