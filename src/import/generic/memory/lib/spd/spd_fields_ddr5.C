@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p10/procedures/hwp/memory/p10_mss_volt.C $   */
+/* $Source: src/import/generic/memory/lib/spd/spd_fields_ddr5.C $         */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2022                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,46 +24,34 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 ///
-/// @file p10_mss_volt.C
-/// @brief Calculate and save off rail voltages
+/// @file spd_fields_ddr5.C
+/// @brief DDR5 SPD data fields forward declarations
 ///
+
 // *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
 // *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
-// *HWP Consumed by: FSP:HB
+// *HWP Consumed by: HB
+// EKB-Mirror-To: hostboot
 
-#include <p10_mss_volt.H>
+#include <generic/memory/lib/spd/spd_fields_ddr5.H>
 
-// std lib
-#include <vector>
-
-// fapi2
-#include <fapi2.H>
-
-// mss lib
-#include <generic/memory/lib/utils/find.H>
-#include <generic/memory/lib/utils/c_str.H>
-#include <generic/memory/lib/utils/voltage/gen_mss_volt.H>
-#include <generic/memory/mss_git_data_helper.H>
-
-///
-/// @brief Calculate and save off rail voltages
-/// @param[in] i_targets vector of ports (e.g., MEM_PORT)
-/// @return FAPI2_RC_SUCCESS iff ok
-///
-fapi2::ReturnCode p10_mss_volt( const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_targets )
+namespace mss
 {
-    mss::display_git_commit_info("p10_mss_volt");
+namespace spd
+{
 
-    for (const auto& l_port : i_targets)
-    {
-        FAPI_TRY( (mss::setup_voltage_rail_values<mss::mc_type::EXPLORER, mss::spd::device_type::DDR4>(l_port)),
-                  "%s Failed setup_voltage_rail_values", mss::c_str(l_port) );
-    } // port
+// These "definitions" are needed to generate linkage for the static constexprs declared in the .H because of ODR-used
 
-    FAPI_INF("End mss volt");
+// fields<DDR5, BASE_CNFG>
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::HYBRID;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::HYBRID_MEDIA;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::BASE_MODULE;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::DIE_PER_PACKAGE;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::DENSITY_PER_DIE;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::RANK_MIX;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::PACKAGE_RANKS_PER_CHANNEL;
 
-fapi_try_exit:
-    return fapi2::current_err;
-} // p10_mss_volt
+}// spd
+}// mss

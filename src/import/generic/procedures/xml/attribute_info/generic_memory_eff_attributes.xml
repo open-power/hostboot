@@ -27,7 +27,7 @@
 <!-- @file generic_memory_eff_attributes.xml -->
 <!-- @brief Calculated effective attribute definitions that are derived from SPD -->
 <!-- -->
-<!-- *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com> -->
+<!-- *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com> -->
 <!-- *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com> -->
 <!-- *HWP Team: Memory -->
 <!-- *HWP Level: 2 -->
@@ -80,7 +80,7 @@
     </description>
     <initToZero></initToZero>
     <valueType>uint8</valueType>
-    <enum> NONE = 0, NVDIMM = 1, MDS = 3</enum>
+    <enum> NONE = 0, NVDIMM = 1, MDS = 3, NVDIMM_N = 4, NVDIMM_P = 2</enum>
     <writeable/>
     <array>2</array>
     <mssAccessorName>hybrid_memory_type</mssAccessorName>

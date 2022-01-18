@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,10 @@
 #include <lib/eff_config/p10_ddimm_engine.H>
 #include <lib/eff_config/p10_ddimm_efd_engine.H>
 
+#include <lib/eff_config/p10_ddr5_base_engine.H>
+#include <lib/eff_config/p10_ddr5_ddimm_efd_engine.H>
+#include <lib/eff_config/p10_ddr5_ddimm_engine.H>
+
 namespace mss
 {
 namespace efd
@@ -50,13 +54,14 @@ namespace efd
 /// @brief Generates the EFD engine based upon the EFD type
 /// @param[in] i_target DIMM target
 /// @param[in] i_rev SPD revision
+/// @param[in] i_gen DRAM generation
 /// @param[in] i_rank_info the current rank info class
 /// @param[out] o_efd_engine shared pointer to the EFD engine in question
 /// @return fapi2::ReturnCode SUCCESS iff the procedure executes successfully
-/// @note TODO/TK can be updated in the future for different dimm types and DDR4/5
 ///
 fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                           const uint8_t i_rev,
+                          const uint8_t i_gen,
                           const mss::rank::info<mss::mc_type::EXPLORER>& i_rank_info,
                           std::shared_ptr<mss::efd::ddimm_efd_base>& o_efd_engine);
 
@@ -66,18 +71,32 @@ namespace spd
 {
 
 ///
-/// @brief Generates the SPD engines based upon the rev
+/// @brief Generates the base module SPD engine based upon the rev/DRAM generation
 /// @param[in] i_target DIMM target
 /// @param[in] i_rev SPD revision
+/// @param[in] i_gen DRAM generation
 /// @param[out] o_base_engine shared pointer to the Base cnfg engine in question
-/// @param[out] o_ddimm_engine shared pointer to the DDIMM cnfg engine in question
 /// @return fapi2::ReturnCode SUCCESS iff the procedure executes successfully
-/// @note TODO/TK can be updated in the future for different dimm types and DDR4/5
 ///
-fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                          const uint8_t i_rev,
-                          std::shared_ptr<mss::spd::base_cnfg_base>& o_base_engine,
-                          std::shared_ptr<mss::spd::ddimm_base>& o_ddimm_engine);
+fapi2::ReturnCode base_module_factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                      const uint8_t i_rev,
+                                      const uint8_t i_gen,
+                                      std::shared_ptr<mss::spd::base_cnfg_base>& o_base_engine);
+
+///
+/// @brief Generates the module specific SPD engines based upon the rev/DRAM generation/DIMM type
+/// @param[in] i_target DIMM target
+/// @param[in] i_rev SPD revision
+/// @param[in] i_gen DRAM generation
+/// @param[in] i_dimm_type DIMM type
+/// @param[out] o_module_specific_engine shared pointer to the module specific cnfg engine in question
+/// @return fapi2::ReturnCode SUCCESS iff the procedure executes successfully
+///
+fapi2::ReturnCode module_specific_factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_rev,
+        const uint8_t i_gen,
+        const uint8_t i_dimm_type,
+        std::shared_ptr<mss::spd::module_specific_base>& o_module_specific_engine);
 
 } // ns spd
 } // ns mss

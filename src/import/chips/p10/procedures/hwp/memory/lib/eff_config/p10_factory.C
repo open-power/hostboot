@@ -45,6 +45,7 @@ namespace efd
 /// @brief Generates the EFD engine based upon the EFD type
 /// @param[in] i_target DIMM target
 /// @param[in] i_rev SPD revision
+/// @param[in] i_gen DRAM generation
 /// @param[in] i_rank_info the current rank info class
 /// @param[out] o_efd_engine shared pointer to the EFD engine in question
 /// @return fapi2::ReturnCode SUCCESS iff the procedure executes successfully
@@ -52,6 +53,7 @@ namespace efd
 ///
 fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                           const uint8_t i_rev,
+                          const uint8_t i_gen,
                           const mss::rank::info<mss::mc_type::EXPLORER>& i_rank_info,
                           std::shared_ptr<mss::efd::ddimm_efd_base>& o_efd_engine)
 {
@@ -59,19 +61,48 @@ fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target
     // greater than) the latest supported, we'll decode as if it's the latest supported rev
     const uint8_t l_fallback_rev = (i_rev > mss::spd::rev::DDIMM_MAX) ? mss::spd::rev::DDIMM_MAX : i_rev;
 
-    switch (l_fallback_rev)
+    // DRAM generation is the biggest switch we have, so doing that switch first
+    switch (i_gen)
     {
-        case mss::spd::rev::V0_3:
+        case fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR4:
             {
+                // Then switch over the SPD revision
+                switch (l_fallback_rev)
+                {
+                    case mss::spd::rev::V0_3:
+                        {
 
-                o_efd_engine = std::make_shared<mss::efd::ddimm_efd_0_3>(i_target, i_rank_info);
-                return fapi2::FAPI2_RC_SUCCESS;
+                            o_efd_engine = std::make_shared<mss::efd::ddimm_efd_0_3>(i_target, i_rank_info);
+                            return fapi2::FAPI2_RC_SUCCESS;
+                            break;
+                        }
+
+                    case mss::spd::rev::V0_4:
+                        {
+                            o_efd_engine = std::make_shared<mss::efd::ddimm_efd_0_4>(i_target, i_rank_info);
+                            return fapi2::FAPI2_RC_SUCCESS;
+                            break;
+                        }
+
+                    default:
+                        {
+                            FAPI_ASSERT(false,
+                                        fapi2::MSS_INVALID_SPD_REVISION()
+                                        .set_SPD_REVISION(i_rev)
+                                        .set_DRAM_GENERATION(i_gen)
+                                        .set_FUNCTION_CODE(EFD_FACTORY)
+                                        .set_DIMM_TARGET(i_target),
+                                        "Unsupported SPD revision(0x%02x) received in EFD decoder factory for DDR%u for %s",
+                                        i_rev, 4, spd::c_str(i_target));
+                        }
+                }
+
                 break;
             }
 
-        case mss::spd::rev::V0_4:
+        case fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR5:
             {
-                o_efd_engine = std::make_shared<mss::efd::ddimm_efd_0_4>(i_target, i_rank_info);
+                o_efd_engine = std::make_shared<mss::efd::ddr5::ddimm_0_0>(i_target, i_rank_info);
                 return fapi2::FAPI2_RC_SUCCESS;
                 break;
             }
@@ -81,13 +112,15 @@ fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target
                 FAPI_ASSERT(false,
                             fapi2::MSS_INVALID_SPD_REVISION()
                             .set_SPD_REVISION(i_rev)
+                            .set_DRAM_GENERATION(i_gen)
                             .set_FUNCTION_CODE(EFD_FACTORY)
                             .set_DIMM_TARGET(i_target),
-                            "Unsupported SPD revision received in EFD decoder factory 0x%02x for %s",
-                            i_rev, spd::c_str(i_target));
+                            "Unsupported DRAM generation received in EFD decoder factory 0x%02x for %s",
+                            i_gen, spd::c_str(i_target));
             }
     }
 
+    return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -98,53 +131,205 @@ namespace spd
 {
 
 ///
-/// @brief Generates the SPD engines based upon the rev
+/// @brief Generates the base module SPD engine based upon the rev/DRAM generation
 /// @param[in] i_target DIMM target
 /// @param[in] i_rev SPD revision
+/// @param[in] i_gen DRAM generation
 /// @param[out] o_base_engine shared pointer to the Base cnfg engine in question
-/// @param[out] o_ddimm_engine shared pointer to the DDIMM cnfg engine in question
 /// @return fapi2::ReturnCode SUCCESS iff the procedure executes successfully
-/// @note TODO/TK can be updated in the future for different dimm types and DDR4/5
 ///
-fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                          const uint8_t i_rev,
-                          std::shared_ptr<mss::spd::base_cnfg_base>& o_base_engine,
-                          std::shared_ptr<mss::spd::ddimm_base>& o_ddimm_engine)
+fapi2::ReturnCode base_module_factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                      const uint8_t i_rev,
+                                      const uint8_t i_gen,
+                                      std::shared_ptr<mss::spd::base_cnfg_base>& o_base_engine)
 {
     // Poor man's fallback technique: if we receive a revision that's later than (or numerically
     // greater than) the latest supported, we'll decode as if it's the latest supported rev
     const uint8_t l_fallback_rev = (i_rev > mss::spd::rev::DDIMM_MAX) ? mss::spd::rev::DDIMM_MAX : i_rev;
 
+    // DRAM generation is the biggest switch we have, so doing that switch first
+    switch (i_gen)
+    {
+        case fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR4:
+
+            // Then switch over the SPD revision
+            switch (l_fallback_rev)
+            {
+                case mss::spd::rev::V0_3:
+                    {
+                        o_base_engine = std::make_shared<mss::spd::base_0_3>(i_target);
+                        //o_ddimm_engine = std::make_shared<mss::spd::ddimm_0_3>(i_target);
+                        return fapi2::FAPI2_RC_SUCCESS;
+                        break;
+                    }
+
+                case mss::spd::rev::V0_4:
+                    {
+                        o_base_engine = std::make_shared<mss::spd::base_0_4>(i_target);
+                        //o_ddimm_engine = std::make_shared<mss::spd::ddimm_0_4>(i_target);
+                        return fapi2::FAPI2_RC_SUCCESS;
+                        break;
+                    }
+
+                default:
+                    {
+                        FAPI_ASSERT(false,
+                                    fapi2::MSS_INVALID_SPD_REVISION()
+                                    .set_SPD_REVISION(i_rev)
+                                    .set_DRAM_GENERATION(i_gen)
+                                    .set_FUNCTION_CODE(SPD_FACTORY)
+                                    .set_DIMM_TARGET(i_target),
+                                    "Unsupported SPD revision(0x%02x) received in SPD decoder factory for DDR%u for %s",
+                                    i_rev, 4, spd::c_str(i_target));
+                        break;
+                    }
+            }
+
+            break;
+
+        case fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR5:
+            o_base_engine = std::make_shared<mss::spd::ddr5::base_0_0>(i_target);
+            return fapi2::FAPI2_RC_SUCCESS;
+            break;
+
+        default:
+            FAPI_ASSERT(false,
+                        fapi2::MSS_INVALID_SPD_REVISION()
+                        .set_SPD_REVISION(i_rev)
+                        .set_DRAM_GENERATION(i_gen)
+                        .set_FUNCTION_CODE(SPD_FACTORY)
+                        .set_DIMM_TARGET(i_target),
+                        "Unsupported DRAM generation received in SPD decoder factory 0x%02x for %s",
+                        i_gen, spd::c_str(i_target));
+            break;
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+namespace ddr4
+{
+
+///
+/// @brief Generates the DDR4 DDIMM module SPD engine based upon the SPD rev
+/// @param[in] i_target DIMM target
+/// @param[in] i_rev SPD revision
+/// @param[out] o_module_specific_engine shared pointer to the module specific cnfg engine in question
+/// @return fapi2::ReturnCode SUCCESS iff the procedure executes successfully
+///
+fapi2::ReturnCode ddimm_module_specific_factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_rev,
+        std::shared_ptr<mss::spd::module_specific_base>& o_module_specific_engine)
+{
+    // Poor man's fallback technique: if we receive a revision that's later than (or numerically
+    // greater than) the latest supported, we'll decode as if it's the latest supported rev
+    const uint8_t l_fallback_rev = (i_rev > mss::spd::rev::DDIMM_MAX) ? mss::spd::rev::DDIMM_MAX : i_rev;
+
+    // Then switch over the SPD revision
     switch (l_fallback_rev)
     {
         case mss::spd::rev::V0_3:
             {
-                o_base_engine = std::make_shared<mss::spd::base_0_3>(i_target);
-                o_ddimm_engine = std::make_shared<mss::spd::ddimm_0_3>(i_target);
+                o_module_specific_engine = std::make_shared<mss::spd::ddimm_0_3>(i_target);
                 return fapi2::FAPI2_RC_SUCCESS;
                 break;
             }
 
         case mss::spd::rev::V0_4:
             {
-                o_base_engine = std::make_shared<mss::spd::base_0_4>(i_target);
-                o_ddimm_engine = std::make_shared<mss::spd::ddimm_0_4>(i_target);
+                o_module_specific_engine = std::make_shared<mss::spd::ddimm_0_4>(i_target);
                 return fapi2::FAPI2_RC_SUCCESS;
                 break;
             }
 
         default:
             {
+                // Declarations to avoid FAPI_ASSERT compile fails
+                const uint8_t DRAM_GEN = fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR4;
+                const uint8_t DIMM_TYPE = fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_RDIMM;
                 FAPI_ASSERT(false,
-                            fapi2::MSS_INVALID_SPD_REVISION()
+                            fapi2::MSS_INVALID_SPD_REVISION_FOR_MODULE_SPECIFC()
                             .set_SPD_REVISION(i_rev)
+                            .set_DRAM_GENERATION(DRAM_GEN)
+                            .set_DIMM_TYPE(DIMM_TYPE)
                             .set_FUNCTION_CODE(SPD_FACTORY)
                             .set_DIMM_TARGET(i_target),
-                            "Unsupported SPD revision received in SPD decoder factory 0x%02x for %s",
-                            i_rev, spd::c_str(i_target));
+                            "Unsupported SPD revision(0x%02x) received in SPD decoder factory for DDR%u %sDIMM for %s",
+                            i_rev, 4, "R", spd::c_str(i_target));
+                break;
             }
     }
 
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+} // ddr4
+
+///
+/// @brief Generates the module specific SPD engines based upon the rev/DRAM generation/DIMM type
+/// @param[in] i_target DIMM target
+/// @param[in] i_rev SPD revision
+/// @param[in] i_gen DRAM generation
+/// @param[in] i_dimm_type DIMM type
+/// @param[out] o_module_specific_engine shared pointer to the module specific cnfg engine in question
+/// @return fapi2::ReturnCode SUCCESS iff the procedure executes successfully
+///
+fapi2::ReturnCode module_specific_factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_rev,
+        const uint8_t i_gen,
+        const uint8_t i_dimm_type,
+        std::shared_ptr<mss::spd::module_specific_base>& o_module_specific_engine)
+{
+
+    // DRAM generation is the biggest switch we have, so doing that switch first
+    switch (i_gen)
+    {
+        case fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR4:
+
+            switch (i_dimm_type)
+            {
+                case fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_DDIMM:
+                    return ddr4::ddimm_module_specific_factory(i_target, i_rev, o_module_specific_engine);
+                    break;
+
+                default:
+                    FAPI_ASSERT(false,
+                                fapi2::MSS_INVALID_SPD_REVISION_FOR_MODULE_SPECIFC()
+                                .set_SPD_REVISION(i_rev)
+                                .set_DRAM_GENERATION(i_gen)
+                                .set_DIMM_TYPE(i_dimm_type)
+                                .set_FUNCTION_CODE(SPD_FACTORY)
+                                .set_DIMM_TARGET(i_target),
+                                "Unsupported DIMM_TYPE(0x%02x) received in SPD decoder factory for DDR%u for %s",
+                                i_dimm_type, 4, spd::c_str(i_target));
+                    break;
+            }
+
+            break;
+
+        case fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR5:
+            o_module_specific_engine = std::make_shared<mss::spd::ddr5::ddimm_0_0>(i_target);
+            return fapi2::FAPI2_RC_SUCCESS;
+            break;
+
+        default:
+            FAPI_ASSERT(false,
+                        fapi2::MSS_INVALID_SPD_REVISION_FOR_MODULE_SPECIFC()
+                        .set_SPD_REVISION(i_rev)
+                        .set_DRAM_GENERATION(i_gen)
+                        .set_DIMM_TYPE(i_dimm_type)
+                        .set_FUNCTION_CODE(SPD_FACTORY)
+                        .set_DIMM_TARGET(i_target),
+                        "Unsupported SPD DRAM_GEN%u for SPD module specific factory for %s",
+                        i_gen, spd::c_str(i_target));
+            break;
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
     return fapi2::current_err;
 }

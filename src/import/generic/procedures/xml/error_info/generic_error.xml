@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2022                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -28,7 +28,7 @@
 <!-- @brief Error xml for generic code -->
 <!-- -->
 
-<!-- *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com> -->
+<!-- *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com> -->
 <!-- *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com> -->
 <!-- *HWP Team: Memory -->
 <!-- *HWP Level: 3 -->
@@ -587,6 +587,38 @@
       revision. Most likely a programming error.
     </description>
     <ffdc>SPD_REVISION</ffdc>
+    <ffdc>DRAM_GENERATION</ffdc>
+    <ffdc>FUNCTION_CODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>DIMM_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_SPD_REVISION_FOR_MODULE_SPECIFC</rc>
+    <description>
+      Unable to fall back SPD decoder to the highest decoded
+      revision when generating the module specific processor.
+      Most likely a programming error.
+    </description>
+    <ffdc>SPD_REVISION</ffdc>
+    <ffdc>DRAM_GENERATION</ffdc>
+    <ffdc>DIMM_TYPE</ffdc>
     <ffdc>FUNCTION_CODE</ffdc>
     <callout>
       <procedure>CODE</procedure>

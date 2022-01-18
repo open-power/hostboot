@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,15 +57,10 @@ namespace efd
 {
 
 ///
-/// @brief Class for DDIMM EFD Rev 0.3
+/// @brief Class for base EFD section of SPD - generic to all DRAM generations
 ///
-class ddimm_efd_0_3
+class base
 {
-        // From exp_data_structs.H
-        static constexpr uint8_t DRAMINIT_NUM_ADDR_DELAYS = 8;
-
-        using F = mss::efd::fields<mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>;
-
     protected:
         fapi2::Target<fapi2::TARGET_TYPE_DIMM> iv_dimm;
         fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> iv_port;
@@ -76,12 +71,12 @@ class ddimm_efd_0_3
     public:
 
         ///
-        /// @brief Construct a new DDIMM EFD rev 0.3 object
+        /// @brief Construct a new DDIMM EFD base object
         /// @param[in] i_dimm DIMM target
         /// @param[in] i_rank_info the current rank info class
         ///
-        ddimm_efd_0_3(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
-                      const mss::rank::info<mss::mc_type::EXPLORER>& i_rank_info) :
+        base(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+             const mss::rank::info<mss::mc_type::EXPLORER>& i_rank_info) :
             iv_dimm(i_dimm),
             iv_port(mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_dimm)),
             iv_ocmb(mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_dimm)),
@@ -89,9 +84,73 @@ class ddimm_efd_0_3
             iv_phy_rank(i_rank_info.get_phy_rank()) {}
 
         ///
+        /// @brief Destroy the base object
+        ///
+        virtual ~base() = default;
+
+        ///
+        /// @brief Get the spd revision
+        /// @return mss::spd::rev enum value
+        ///
+        virtual mss::spd::rev get_spd_revision() const = 0;
+
+        ///
+        /// @brief Get the DRAM generation
+        /// @return DRAM generation value
+        ///
+        virtual uint8_t get_dram_generation() const = 0;
+
+        /// @brief Process the fields for ddimm efd rev 0.4
+        ///
+        /// @param[in] i_efd EFD binary
+        /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode process(const std::vector<uint8_t>& i_efd) const = 0;
+};
+
+///
+/// @brief Class for DDIMM EFD Rev 0.3
+///
+class ddimm_efd_0_3 : public base
+{
+        // From exp_data_structs.H
+        static constexpr uint8_t DRAMINIT_NUM_ADDR_DELAYS = 8;
+
+        using F = mss::efd::fields<mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>;
+
+    public:
+
+        ///
+        /// @brief Construct a new DDIMM EFD rev 0.3 object
+        /// @param[in] i_dimm DIMM target
+        /// @param[in] i_rank_info the current rank info class
+        ///
+        ddimm_efd_0_3(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+                      const mss::rank::info<mss::mc_type::EXPLORER>& i_rank_info) :
+            base(i_dimm, i_rank_info) {}
+
+        ///
         /// @brief Destroy the ddimm_efd_0_3 object
         ///
         virtual ~ddimm_efd_0_3() = default;
+
+        ///
+        /// @brief Get the spd revision
+        /// @return mss::spd::rev enum value
+        ///
+        virtual mss::spd::rev get_spd_revision() const
+        {
+            return mss::spd::rev::V0_3;
+        }
+
+        ///
+        /// @brief Get the DRAM generation
+        /// @return DRAM generation value
+        ///
+        virtual uint8_t get_dram_generation() const
+        {
+            return fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR4;
+        }
 
         // Check functions here return true when any value is valid (0x00 through 0xFF)
 
@@ -2606,6 +2665,15 @@ class ddimm_efd_0_4 : public ddimm_efd_0_3
         virtual ~ddimm_efd_0_4() = default;
 
         ///
+        /// @brief Get the spd revision
+        /// @return mss::spd::rev enum value
+        ///
+        virtual mss::spd::rev get_spd_revision() const
+        {
+            return mss::spd::rev::V0_4;
+        }
+
+        ///
         /// @brief Traits for pmic rail current warning
         ///
         /// @param[in] i_field field
@@ -2853,7 +2921,7 @@ class ddimm_efd_0_4 : public ddimm_efd_0_3
         /// @param[in] i_efd EFD binary
         /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
         ///
-        fapi2::ReturnCode process(const std::vector<uint8_t>& i_efd) const
+        virtual fapi2::ReturnCode process(const std::vector<uint8_t>& i_efd) const
         {
             // The naming here is a bit tricky: 0.3 process will process fields
             // that originated in 0.3, but will use any field processors/traits
@@ -2874,7 +2942,7 @@ class ddimm_efd_0_4 : public ddimm_efd_0_3
 //
 // Can be updated with the earliest supported ddimm efd revision
 //
-using ddimm_efd_base = ddimm_efd_0_3;
+using ddimm_efd_base = base;
 using ddimm_efd_latest = ddimm_efd_0_4;
 
 }// efd

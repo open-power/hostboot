@@ -70,8 +70,12 @@ fapi2::ReturnCode p10_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
     {
         uint64_t l_freq = 0;
         uint32_t l_omi_freq = 0;
+        uint8_t l_dram_gen = 0;
+        uint8_t l_dimm_type = 0;
         FAPI_TRY( mss::attr::get_freq(i_target, l_freq) );
         FAPI_TRY( mss::convert_ddr_freq_to_omi_freq(i_target, l_freq, l_omi_freq));
+        FAPI_TRY( mss::attr::get_dram_gen(dimm, l_dram_gen) );
+        FAPI_TRY( mss::attr::get_dimm_type(dimm, l_dimm_type));
 
         // Get ranks via rank API
         std::vector<mss::rank::info<mss::mc_type::EXPLORER>> l_rank_infos;
@@ -83,9 +87,10 @@ fapi2::ReturnCode p10_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
             {
                 // Create the module decoder objects
                 std::shared_ptr<mss::spd::base_cnfg_base> l_base_cfg;
-                std::shared_ptr<mss::spd::ddimm_base> l_ddimm_module;
+                std::shared_ptr<mss::spd::module_specific_base> l_ddimm_module;
 
-                FAPI_TRY(mss::spd::factory(dimm, l_spd_rev, l_base_cfg, l_ddimm_module));
+                FAPI_TRY(mss::spd::base_module_factory(dimm, l_spd_rev, l_dram_gen, l_base_cfg));
+                FAPI_TRY(mss::spd::module_specific_factory(dimm, l_spd_rev, l_dram_gen, l_dimm_type, l_ddimm_module));
 
                 FAPI_TRY(l_base_cfg->process(l_raw_spd));
                 FAPI_TRY(l_ddimm_module->process(l_raw_spd));
@@ -122,7 +127,7 @@ fapi2::ReturnCode p10_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
                 // The attributes use the IBM perspective, which aligns to the DIMM rank
                 // Knowing both allows us to decode from the SPD and encode the data for the attributes
                 // The encode/decode is in accordance with fixes for JIRA355
-                FAPI_TRY(mss::efd::factory(dimm, l_spd_rev, l_rank_info, l_ddimm_efd));
+                FAPI_TRY(mss::efd::factory(dimm, l_spd_rev, l_dram_gen, l_rank_info, l_ddimm_efd));
                 FAPI_TRY(l_ddimm_efd->process(l_vpd_raw));
             }
         }

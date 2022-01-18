@@ -109,6 +109,18 @@ class base
         /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
         ///
         virtual fapi2::ReturnCode process_derived(const std::vector<uint8_t>& i_spd) const = 0;
+
+        ///
+        /// @brief Get the spd revision
+        /// @return mss::spd::rev enum value
+        ///
+        virtual mss::spd::rev get_spd_revision() const = 0;
+
+        ///
+        /// @brief Get the DRAM generation
+        /// @return attribute enumeration value for DRAM generation
+        ///
+        virtual uint8_t get_dram_generation() const = 0;
 };
 
 ///
@@ -138,6 +150,15 @@ class base_0_3 : public base
         virtual mss::spd::rev get_spd_revision() const
         {
             return mss::spd::rev::V0_3;
+        }
+
+        ///
+        /// @brief Get the DRAM generation
+        /// @return attribute enumeration value for DRAM generation
+        ///
+        virtual uint8_t get_dram_generation() const
+        {
+            return fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR4;
         }
 
         // Check functions here return true when any value is valid (0x00 through 0xFF)
@@ -1089,7 +1110,7 @@ class base_0_3 : public base
 
             l_field = l_ranks_configed;
 
-            mss::attr::set_dimm_ranks_configed(iv_dimm, l_field);
+            FAPI_TRY(mss::attr::set_dimm_ranks_configed(iv_dimm, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;

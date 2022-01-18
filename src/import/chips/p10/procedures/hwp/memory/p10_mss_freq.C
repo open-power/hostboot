@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,7 @@
 #include <generic/memory/lib/utils/freq/gen_mss_freq.H>
 #include <generic/memory/mss_git_data_helper.H>
 #include <lib/plug_rules/p10_plug_rules.H>
+#include <lib/eff_config/p10_factory.H>
 
 ///
 /// @brief Calculate and save off DIMM frequencies
@@ -71,9 +72,16 @@ fapi2::ReturnCode p10_mss_freq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
         for(const auto& d : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(p))
         {
             std::vector<uint8_t> l_raw_spd;
+            uint8_t l_spd_rev = 0;
+            uint8_t l_dram_gen = 0;
+
+            FAPI_TRY( mss::attr::get_spd_revision(p, l_spd_rev) );
+            FAPI_TRY( mss::attr::get_dram_gen(d, l_dram_gen) );
             FAPI_TRY(mss::spd::get_raw_data(d, l_raw_spd));
             {
-                std::shared_ptr<mss::spd::base_cnfg_base> l_base_cfg = std::make_shared<mss::spd::base_0_4>(d);
+                std::shared_ptr<mss::spd::base_cnfg_base> l_base_cfg;
+
+                FAPI_TRY(mss::spd::base_module_factory(d, l_spd_rev, l_dram_gen, l_base_cfg));
                 FAPI_TRY(l_base_cfg->process_data_init_fields(l_raw_spd));
             }
         }

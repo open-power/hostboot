@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,6 +51,7 @@
 #include <mss_generic_attribute_setters.H>
 #include <exp_attribute_accessors_manual.H>
 #include <lib/workarounds/exp_quad_encoded_cs_workarounds.H>
+#include <lib/eff_config/p10_module_specific_engine.H>
 
 namespace mss
 {
@@ -60,14 +61,9 @@ namespace spd
 ///
 /// @brief Class for DDIMM SPD Rev 0.3
 ///
-class ddimm_0_3
+class ddimm_0_3 : public module_specific_base
 {
         using F = mss::spd::fields<DDR4, DDIMM_MODULE>;
-
-    protected:
-        fapi2::Target<fapi2::TARGET_TYPE_DIMM> iv_dimm;
-        fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> iv_port;
-        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> iv_ocmb;
 
     public:
 
@@ -76,14 +72,39 @@ class ddimm_0_3
         /// @param[in] i_dimm DIMM target
         ///
         ddimm_0_3(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm) :
-            iv_dimm(i_dimm),
-            iv_port(mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_dimm)),
-            iv_ocmb(mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_dimm)) {}
+            module_specific_base(i_dimm) {}
 
         ///
         /// @brief Destroy the ddimm_0_3 object
         ///
         virtual ~ddimm_0_3() = default;
+
+        ///
+        /// @brief Get the spd revision
+        /// @return mss::spd::rev enum value
+        ///
+        virtual mss::spd::rev get_spd_revision() const
+        {
+            return mss::spd::rev::V0_3;
+        }
+
+        ///
+        /// @brief Get the DRAM generation
+        /// @return DRAM generation value
+        ///
+        virtual uint8_t get_dram_generation() const
+        {
+            return fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR4;
+        }
+
+        ///
+        /// @brief Get the DIMM type
+        /// @return DIMM type value
+        ///
+        virtual uint8_t get_dimm_type() const
+        {
+            return fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_DDIMM;
+        }
 
         // Check functions here return true when any value is valid (0x00 through 0xFF)
 
@@ -3647,6 +3668,15 @@ class ddimm_0_4 : public ddimm_0_3
 
         virtual ~ddimm_0_4() = default;
 
+        ///
+        /// @brief Get the spd revision
+        /// @return mss::spd::rev enum value
+        ///
+        virtual mss::spd::rev get_spd_revision() const
+        {
+            return mss::spd::rev::V0_4;
+        }
+
         // Virtual function overloads go here
 
         /// @brief Process the fields for ddimm rev 0.3
@@ -3674,7 +3704,6 @@ class ddimm_0_4 : public ddimm_0_3
 //
 // Can be updated with the earliest supported ddimm module revision
 //
-using ddimm_base = ddimm_0_3;
 using ddimm_base_latest = ddimm_0_4;
 
 } // spd

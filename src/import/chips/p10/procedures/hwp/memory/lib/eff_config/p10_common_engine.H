@@ -143,11 +143,10 @@ class common_engine
             };
 
             FAPI_TRY(get_field_spd(iv_ocmb, FIELDS::DEVICE_TYPE, i_spd, SET_DRAM_GEN, l_field));
-            FAPI_TRY(check::reserved_values(iv_ocmb, l_reserved_bits, DEVICE_TYPE, l_field) );
+            FAPI_TRY(check::reserved_values(iv_ocmb, l_reserved_bits, SET_DRAM_GEN, l_field) );
 
             FAPI_TRY(lookup_table_check(iv_dimm, DRAM_GEN_MAP, SET_DRAM_GEN, l_field, l_dram_gen),
                      "%s failed DRAM_GEN lookup check", spd::c_str(iv_dimm) );
-
             FAPI_TRY(mss::attr::set_dram_gen(iv_dimm, l_dram_gen));
 
         fapi_try_exit:

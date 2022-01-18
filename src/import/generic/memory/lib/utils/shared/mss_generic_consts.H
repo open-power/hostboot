@@ -1096,6 +1096,7 @@ enum module_params
 enum device_type
 {
     DDR4 = 0x0c,
+    DDR5 = 0x12,
 };
 
 ///
