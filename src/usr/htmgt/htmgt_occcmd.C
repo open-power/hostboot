@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,6 +28,7 @@
 #include "htmgt_occcmd.H"
 #include "htmgt_cfgdata.H"
 #include "htmgt_poll.H"
+#include "htmgt_occmanager.H"
 
 //  Targeting support
 #include <targeting/common/commontargeting.H>
@@ -380,6 +381,8 @@ namespace HTMGT
                         iv_Occ->iv_needsReset = true;
                         // Mark OCC as failed
                         iv_Occ->iv_failed = true;
+                        // Update safe mode reason (if not already set) in case they dont recover
+                        OccManager::updateSafeModeReason(io_errlHndl->reasonCode(), l_instance);
                     }
                 }
             }
@@ -398,6 +401,8 @@ namespace HTMGT
                 iv_Occ->iv_needsReset = true;
                 // Unable to communicate with OCC, mark as failed
                 iv_Occ->iv_failed = true;
+                // Update safe mode reason (if not already set) in case they dont recover
+                OccManager::updateSafeModeReason(io_errlHndl->reasonCode(), l_instance);
             }
             else
             {
@@ -436,6 +441,8 @@ namespace HTMGT
                         iv_Occ->iv_needsReset = true;
                         // Unable to communicate with OCC, mark as failed
                         iv_Occ->iv_failed = true;
+                        // Update safe mode reason (if not already set) in case they dont recover
+                        OccManager::updateSafeModeReason(io_errlHndl->reasonCode(), l_instance);
                     }
                 }
             }
