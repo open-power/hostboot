@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2022                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -780,6 +780,22 @@
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
     Increase the L2 re-request jitter for larger systems
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    FALSE = 0,
+    TRUE = 1
+  </enum>
+  <platInit/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_MRW_P1PF_MIN_CONFIDENCE_3</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Set plus1-prefetch confidence to 3 based on system type, subject to
+    code enforced core configuration limit
   </description>
   <valueType>uint8</valueType>
   <enum>

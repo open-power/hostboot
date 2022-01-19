@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1028,8 +1028,8 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
     fapi2::ATTR_CHIP_EC_FEATURE_HW550549_Type l_hw550549;
     fapi2::ATTR_CHIP_EC_FEATURE_HW555479_Type l_TGT1_ATTR_CHIP_EC_FEATURE_HW555479;
     fapi2::ATTR_CHIP_EC_FEATURE_HW573834_Type l_TGT1_ATTR_CHIP_EC_FEATURE_HW573834;
-
-
+    fapi2::ATTR_MRW_P1PF_MIN_CONFIDENCE_3_Type l_mrw_adjust_p1pf;
+    bool l_adjust_p1pf = false;
     uint64_t l_scom_data = 0;
     uint64_t l_scom_mask = 0;
 
@@ -1043,7 +1043,22 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
              "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW550549)");
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW555479, i_target, l_TGT1_ATTR_CHIP_EC_FEATURE_HW555479));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW573834, i_target, l_TGT1_ATTR_CHIP_EC_FEATURE_HW573834));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MRW_P1PF_MIN_CONFIDENCE_3, FAPI_SYSTEM, l_mrw_adjust_p1pf));
+    l_adjust_p1pf = (l_mrw_adjust_p1pf == fapi2::ENUM_ATTR_MRW_P1PF_MIN_CONFIDENCE_3_TRUE);
 
+    if (l_adjust_p1pf)
+    {
+        for (const auto& l_proc_target : FAPI_SYSTEM.getChildren<fapi2::TARGET_TYPE_PROC_CHIP>())
+        {
+            const auto l_core_targets = l_proc_target.getChildren<fapi2::TARGET_TYPE_CORE>();
+            l_adjust_p1pf = (l_core_targets.size() >= 30);
+
+            if (!l_adjust_p1pf)
+            {
+                break;
+            }
+        }
+    }
 
     //MCPERF1
     l_scom_data = 0;
@@ -1053,6 +1068,7 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
     l_scom_data |= (uint64_t) 0x12 << (64 - (10 +  7)); //MCPERF1_PF_DROP_CNT_THRESH=18
     l_scom_data |= (uint64_t)  0x1 << (64 - (21 +  1)); //MCPERF1_ENABLE_PF_DROP_CMDLIST=ON
     l_scom_data |= (uint64_t)  0x1 << (64 - (22 + 1)); //MCPERF1_ENABLE_PREFETCH_PROMOTE=ON
+    l_scom_data |= (uint64_t)  0x3 << (64 - (30 + 2)); //MCPERF1_PLUS_ONE_PREFETCH_CONFIDENCE=3
     l_scom_data |= (uint64_t) 0x0F << (64 - (38 + 5)); //MCPERF1_WBIT_SCOPE_ENABLE=0b01111
     l_scom_data |= (uint64_t)  0x0 << (64 - (43 + 1)); //MCPERF1_EN_SPEC_EDATA=OFF
     l_scom_data |= (uint64_t)  0x1 << (64 - (44 + 1)); //MCPERF1_EN_SPEC_EDATA=ON
@@ -1061,6 +1077,12 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
     l_scom_mask |= (uint64_t) 0x7F << (64 - (10 +  7)); //MCPERF1_PF_DROP_CNT_THRESH=25
     l_scom_mask |= (uint64_t)  0x1 << (64 - (21 +  1)); //MCPERF1_ENABLE_PF_DROP_CMDLIST=ON
     l_scom_mask |= (uint64_t)  0x1 << (64 - (22 + 1)); //MCPERF1_ENABLE_PREFETCH_PROMOTE=ON
+
+    if (l_adjust_p1pf)
+    {
+        l_scom_mask |= (uint64_t)  0x3 << (64 - (30 + 2)); //MCPERF1_PLUS_ONE_PREFETCH_CONFIDENCE=3
+    }
+
     l_scom_mask |= (uint64_t) 0x1F << (64 - (38 + 5)); //MCPERF1_WBIT_SCOPE_ENABLE=0b01111
     l_scom_mask |= (uint64_t)  0x1 << (64 - (43 + 1)); //MCPERF1_EN_SPEC_EDATA=OFF
     l_scom_mask |= (uint64_t)  0x1 << (64 - (44 + 1)); //MCPERF1_EN_SPEC_EDATA=ON

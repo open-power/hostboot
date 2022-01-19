@@ -40,6 +40,7 @@
 #include <p10_scom_perv.H>
 #include <p10_scom_eq.H>
 #include <p10_scom_c.H>
+#include <p10_scom_mc.H>
 #include <p10_pm_hcd_flags.h>
 #include <p10_hcd_common.H>
 #include <p10_sbe_tp_chiplet_init.H>
@@ -835,6 +836,54 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+/// @brief This function adjusts the MCPERF1 register on all functional memory controller
+///        chiplets where SWxxxxxx is applied, to change the P1 prefetch confidence dial
+///
+/// @param[iN] i_tod_node Reference to MDMT (master drawer, master TOD) node.
+/// @return FAPI2_RC_SUCCESS if no error.
+fapi2::ReturnCode apply_swxxxxxx_wa()
+{
+    const uint32_t MIN_CORES = 30;
+    bool l_apply_wa = fapi2::is_platform<fapi2::PLAT_HOSTBOOT>();
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    using namespace scomt::mc;
+
+    FAPI_DBG("Start");
+
+    if (l_apply_wa)
+    {
+        for (const auto& l_proc_target : FAPI_SYSTEM.getChildren<fapi2::TARGET_TYPE_PROC_CHIP>())
+        {
+            const auto l_core_targets = l_proc_target.getChildren<fapi2::TARGET_TYPE_CORE>();
+            l_apply_wa = (l_core_targets.size() >= MIN_CORES);
+
+            if (!l_apply_wa)
+            {
+                break;
+            }
+        }
+    }
+
+    if (l_apply_wa)
+    {
+        for (const auto& l_proc_target : FAPI_SYSTEM.getChildren<fapi2::TARGET_TYPE_PROC_CHIP>())
+        {
+            for (const auto& l_mc_target : l_proc_target.getChildren<fapi2::TARGET_TYPE_MC>())
+            {
+                fapi2::buffer<uint64_t> l_mcperf1 = 0;
+                FAPI_TRY(GET_SCOMFIR_MCPERF1(l_mc_target, l_mcperf1));
+                SET_SCOMFIR_MCPERF1_PLUS_ONE_PREFETCH_CONFIDENCE(0x3, l_mcperf1);
+                FAPI_TRY(PUT_SCOMFIR_MCPERF1(l_mc_target, l_mcperf1));
+            }
+        }
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+
 // NOTE: description in header
 fapi2::ReturnCode p10_tod_init(
     const tod_topology_node* i_tod_node,
@@ -902,6 +951,9 @@ fapi2::ReturnCode p10_tod_init(
                 fapi2::P10_TOD_INIT_SECONDARY_TOPOLOGY_ERROR()
                 .set_TARGET(*o_failingTodProc),
                 "TOD secondary topology failed!");
+
+    // apply workaround for issue SWxxxxxx
+    FAPI_TRY(apply_swxxxxxx_wa());
 
 fapi_try_exit:
     FAPI_DBG("End");
