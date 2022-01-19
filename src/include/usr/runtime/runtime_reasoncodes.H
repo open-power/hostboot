@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,6 +71,7 @@ namespace RUNTIME
         MOD_PM_RT_START_PM_COMPLEX       = 0x2D,  /**< rt_pm.C */
         MOD_PM_RT_RESET_W_REASON         = 0x2E,  /**< rt_occ.C */
         MOD_VERIFY_AND_MOVE_PAYLOAD      = 0x2F,  /**< populate_hbruntime.C */
+        MOD_LOG_GARD_EVENT               = 0x30,  /**< rt_fwnotify.C */
     };
 
     enum RuntimeReasonCode
@@ -160,7 +161,7 @@ namespace RUNTIME
         RC_SPI_DEVICE_NOT_IN_MRW       = RUNTIME_COMP_ID | 0x52,
         RC_SPI_DEVICE_DUPLICATE_IN_MRW = RUNTIME_COMP_ID | 0x53,
         RC_EXTRA_SPI_DEVICE_IN_MRW     = RUNTIME_COMP_ID | 0x54,
-
+        RC_LOG_NX_GARD_INVALID_NX_QUANTITY = RUNTIME_COMP_ID | 0x55,
     };
 
     enum UserDetailsTypes

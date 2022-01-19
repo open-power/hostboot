@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -474,7 +474,7 @@ void attrSyncRequest( void * i_data)
 
 
 /**
- *  @brief Log the gard event from PHYP/OPAL
+ *  @brief Log the gard event from PHYP
  *
  *  @param[in] i_gardEvent - The details of the gard event
  *                           @see hostInterfaces::gard_event_t for more info
@@ -498,9 +498,10 @@ void logGardEvent(const hostInterfaces::gard_event_t& i_gardEvent)
 
     do
     {
-        // Make sure the error type is valid, if not, log it
-        if ((i_gardEvent.i_error_type == hostInterfaces::HBRT_GARD_ERROR_UNKNOWN )   ||
-            (i_gardEvent.i_error_type >= hostInterfaces::HBRT_GARD_ERROR_LAST) )
+        // Make sure the error type is valid, if not, log it.
+        if ((i_gardEvent.i_error_type != hostInterfaces::HBRT_GARD_ERROR_SLB) ||
+            (i_gardEvent.i_error_type != hostInterfaces::HBRT_GARD_ERROR_TIMEFAC_FAILURE) ||
+            (i_gardEvent.i_error_type != hostInterfaces::HBRT_GARD_ERROR_NX))
         {
             TRACFCOMP(g_trac_runtime, "logGardEvent: ERROR: unknown/invalid "
                                       "error type 0x%.8X",
@@ -509,7 +510,7 @@ void logGardEvent(const hostInterfaces::gard_event_t& i_gardEvent)
             /* @
              * @errortype
              * @severity         ERRL_SEV_PREDICTIVE
-             * @moduleid         MOD_RT_FIRMWARE_NOTIFY
+             * @moduleid         MOD_LOG_GARD_EVENT
              * @reasoncode       RC_LOG_GARD_EVENT_UNKNOWN_ERROR_TYPE
              * @userdata1[0:31]  GARD error type
              * @userdata1[32:63] Processor ID
@@ -519,7 +520,7 @@ void logGardEvent(const hostInterfaces::gard_event_t& i_gardEvent)
              * @custdesc         Internal firmware error
              */
             l_err = new ErrlEntry( ERRL_SEV_PREDICTIVE,
-                                   MOD_RT_FIRMWARE_NOTIFY,
+                                   MOD_LOG_GARD_EVENT,
                                    RC_LOG_GARD_EVENT_UNKNOWN_ERROR_TYPE,
                                    TWO_UINT32_TO_UINT64(
                                         i_gardEvent.i_error_type,
@@ -533,7 +534,7 @@ void logGardEvent(const hostInterfaces::gard_event_t& i_gardEvent)
 
 
         // Get the Target associated with processor ID
-        TARGETING::TargetHandle_t l_procTarget{nullptr};
+        TARGETING::TargetHandle_t l_procTarget{nullptr}, l_gardTarget{nullptr};
         l_err = RT_TARG::getHbTarget(i_gardEvent.i_procId, l_procTarget);
         if (l_err)
         {
@@ -543,12 +544,48 @@ void logGardEvent(const hostInterfaces::gard_event_t& i_gardEvent)
                                       i_gardEvent.i_procId);
             break;
         }
+        // Set the target to guard to be the target that was just retrieved and let it be overriden if necessary
+        // depending on the error type requested.
+        l_gardTarget = l_procTarget;
+
+        // PHYP will send a PROC chip id if it wants to guard an NX unit. Need to grab the NX unit associated
+        // with the given PROC to guard that part out.
+        if (i_gardEvent.i_error_type == hostInterfaces::HBRT_GARD_ERROR_NX)
+        {
+            TARGETING::TargetHandleList l_NXChiplet;
+            getChildChiplets(l_NXChiplet, l_procTarget, TYPE_NX, false);
+            // There is only 1 NX chiplet per proc, if we didn't get it then throw an error
+            if (l_NXChiplet.size() != 1)
+            {
+                /* @
+                 * @errortype
+                 * @severity         ERRL_SEV_PREDICTIVE
+                 * @moduleid         MOD_LOG_GARD_EVENT
+                 * @reasoncode       RC_LOG_NX_GARD_INVALID_NX_QUANTITY
+                 * @userdata1[0:31]  Number of NX units found, expected 1
+                 * @userdata1[32:63] Processor ID
+                 * @devdesc          Expected to get only one NX unit for the given PROC but didn't. See userdata for
+                 *                   amount found.
+                 * @custdesc         Internal firmware error
+                 */
+                l_err = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                                      MOD_LOG_GARD_EVENT,
+                                      RC_LOG_NX_GARD_INVALID_NX_QUANTITY,
+                                      TWO_UINT32_TO_UINT64(
+                                           l_NXChiplet.size(),
+                                           i_gardEvent.i_procId),
+                                      0 /* Unused */,
+                                      ErrlEntry::ADD_SW_CALLOUT);
+                break;
+            }
+            l_gardTarget = l_NXChiplet[0];
+        }
 
         // Log the GARD event
         /* @
          * @errortype
          * @severity         ERRL_SEV_PREDICTIVE
-         * @moduleid         MOD_RT_FIRMWARE_NOTIFY
+         * @moduleid         MOD_LOG_GARD_EVENT
          * @reasoncode       RC_LOG_GARD_EVENT
          * @userdata1[0:31]  GARD error type
          * @userdata1[32:63] Processor ID
@@ -558,7 +595,7 @@ void logGardEvent(const hostInterfaces::gard_event_t& i_gardEvent)
          * @custdesc         Hardware error detected at runtime
          */
         l_err = new ErrlEntry( ERRL_SEV_PREDICTIVE,
-                               MOD_RT_FIRMWARE_NOTIFY,
+                               MOD_LOG_GARD_EVENT,
                                RC_LOG_GARD_EVENT,
                                TWO_UINT32_TO_UINT64(
                                     i_gardEvent.i_error_type,
@@ -573,9 +610,9 @@ void logGardEvent(const hostInterfaces::gard_event_t& i_gardEvent)
             l_err->plid(i_gardEvent.i_plid);
         }
 
-        // Do the actual gard
-        l_err->addHwCallout( l_procTarget, HWAS::SRCI_PRIORITY_MED,
-                             HWAS::NO_DECONFIG, HWAS::GARD_PHYP);
+        // Do the actual gard. Set as predictive to allow for resource recovery
+        l_err->addHwCallout( l_gardTarget, HWAS::SRCI_PRIORITY_MED,
+                             HWAS::NO_DECONFIG, HWAS::GARD_Predictive);
     } while(0);
 
     // Commit any error log that occurred.
