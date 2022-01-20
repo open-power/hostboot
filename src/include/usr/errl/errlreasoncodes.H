@@ -39,36 +39,39 @@ namespace ERRORLOG
     // Module IDs for ERRL component
     enum errlModuleId
     {
-        ERRL_FIRST_MODULE_ID           = 0x00,
-        ERRL_USERDATA_TEST_MOD_ID      = 0x01,
-        ERRL_TEST_MOD_ID               = 0x02,
-        ERRL_RT_TEST_MOD_ID            = 0x03,
-        ERRL_ADD_HW_CALLOUT_ID         = 0x04,
-        ERRL_COMMIT_EXTRA_LOGS_ID      = 0x05,
-        ERRL_GET_CURRENT_DATE_TIME     = 0x06,
-        ERRL_GET_MARKER_LID_MI_KEYWORD = 0x07,
+        ERRL_FIRST_MODULE_ID                    = 0x00,
+        ERRL_USERDATA_TEST_MOD_ID               = 0x01,
+        ERRL_TEST_MOD_ID                        = 0x02,
+        ERRL_RT_TEST_MOD_ID                     = 0x03,
+        ERRL_ADD_HW_CALLOUT_ID                  = 0x04,
+        ERRL_COMMIT_EXTRA_LOGS_ID               = 0x05,
+        ERRL_GET_CURRENT_DATE_TIME              = 0x06,
+        ERRL_GET_MARKER_LID_MI_KEYWORD          = 0x07,
+        ERRL_NOTIFY_HYPERVISOR_OF_RESOURCE_GARD = 0x08,
         //........
-        ERRL_LAST_MODULE_ID         = 0xFF
+        ERRL_LAST_MODULE_ID                     = 0xFF
     };
 
     // Reason codes for ERRL component
     enum errlReasonCode
     {
-        ERRL_FIRST_ERR            = ERRL_COMP_ID | 0x01,
-        ERRL_TEST_STRING_UD       = ERRL_COMP_ID | 0x02,
-        ERRL_TEST_REASON_CODE     = ERRL_COMP_ID | 0x03,
-        ERRL_TEST_ATTRIBUTE_UD    = ERRL_COMP_ID | 0x04,
-        ERRL_TEST_LOGREGISTER_UD  = ERRL_COMP_ID | 0x05,
-        ERRL_TEST_CALLOUT_UD      = ERRL_COMP_ID | 0x06,
-        ERRL_CORE_EX_TARGET_NULL  = ERRL_COMP_ID | 0x07,
-        ERRL_TEST_DUPLICATE_TRACE = ERRL_COMP_ID | 0x08,
-        ERRL_EXTRA_LOG_RC         = ERRL_COMP_ID | 0x09,
-        RC_PLDM_SEND_LOG_FAILED   = ERRL_COMP_ID | 0x0A,
-        ERRL_RT_NO_INTERFACE      = ERRL_COMP_ID | 0x0B,
+        ERRL_FIRST_ERR                      = ERRL_COMP_ID | 0x01,
+        ERRL_TEST_STRING_UD                 = ERRL_COMP_ID | 0x02,
+        ERRL_TEST_REASON_CODE               = ERRL_COMP_ID | 0x03,
+        ERRL_TEST_ATTRIBUTE_UD              = ERRL_COMP_ID | 0x04,
+        ERRL_TEST_LOGREGISTER_UD            = ERRL_COMP_ID | 0x05,
+        ERRL_TEST_CALLOUT_UD                = ERRL_COMP_ID | 0x06,
+        ERRL_CORE_EX_TARGET_NULL            = ERRL_COMP_ID | 0x07,
+        ERRL_TEST_DUPLICATE_TRACE           = ERRL_COMP_ID | 0x08,
+        ERRL_EXTRA_LOG_RC                   = ERRL_COMP_ID | 0x09,
+        RC_PLDM_SEND_LOG_FAILED             = ERRL_COMP_ID | 0x0A,
+        ERRL_RT_NO_INTERFACE                = ERRL_COMP_ID | 0x0B,
         ERRL_MARKER_LID_INVALID_BUFFER_SIZE = ERRL_COMP_ID | 0x0C,
         ERRL_MARKER_LID_INVALID_BUFFER      = ERRL_COMP_ID | 0x0D,
+        ERRL_RT_NULL_FIRMWARE_REQUEST_PTR   = ERRL_COMP_ID | 0x0E,
+        ERRL_RT_GARD_RESOURCE_ID_NOT_FOUND  = ERRL_COMP_ID | 0x0F,
         //........
-        ERRL_LAST_ERR             = ERRL_COMP_ID | 0xFF
+        ERRL_LAST_ERR                       = ERRL_COMP_ID | 0xFF
     };
 
     // Identifiers for ERRL user data subsections.

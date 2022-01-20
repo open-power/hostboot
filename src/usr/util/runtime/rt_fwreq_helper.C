@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -280,6 +280,29 @@ errlHndl_t firmware_request_helper(uint64_t i_reqLen,   void *i_req,
                 }
                 break; // END case hostInterfaces::HBRT_FW_MSG_TYPE_NVDIMM_PROTECTION:
 
+         case hostInterfaces::HBRT_FW_MSG_TYPE_INITIATE_GARD:
+             {
+                 TRACFCOMP(g_trac_runtime,
+                           ERR_MRK"FSP is doing a reset/reload, INITIATE_GARD request "
+                           "failed for errorType=%d, resourceType=%d, resourceId=%d",
+                           l_req_fw_msg->initiate_gard.errorType,
+                           l_req_fw_msg->initiate_gard.resourceType,
+                           l_req_fw_msg->initiate_gard.resourceId);
+
+                 // Pack user data 1 with Hypervisor return code and
+                 // firmware request message type
+                 l_userData1 = TWO_UINT32_TO_UINT64(rc,
+                                                    l_req_fw_msg->io_type);
+
+
+
+                 // Pack user data 2 with error type, resource type, and resource ID of target
+                 l_userData2 = TWO_UINT16_ONE_UINT32_TO_UINT64(l_req_fw_msg->initiate_gard.errorType,
+                                                               l_req_fw_msg->initiate_gard.resourceType,
+                                                               l_req_fw_msg->initiate_gard.resourceId);
+             }
+             break; // END case hostInterfaces::HBRT_FW_MSG_TYPE_INITIATE_GARD:
+
                 // There is no need for reset-reload handling for these message
                 // types.  They are either hyp-only, or they are responses.
             case hostInterfaces::HBRT_FW_MSG_TYPE_REQ_NOP:
@@ -502,7 +525,28 @@ errlHndl_t firmware_request_helper(uint64_t i_reqLen,   void *i_req,
                 }
                 break; // END case hostInterfaces::HBRT_FW_MSG_TYPE_NVDIMM_PROTECTION:
 
-            case hostInterfaces::HBRT_FW_MSG_TYPE_SPILOCK:
+             case hostInterfaces::HBRT_FW_MSG_TYPE_INITIATE_GARD:
+                 {
+                     TRACFCOMP(g_trac_runtime,
+                               ERR_MRK"INITIATE_GARD request failed for errorType=%d, "
+                               "resourceType=%d, resourceId=%d",
+                               l_req_fw_msg->initiate_gard.errorType,
+                               l_req_fw_msg->initiate_gard.resourceType,
+                               l_req_fw_msg->initiate_gard.resourceId);
+
+                     // Pack user data 1 with Hypervisor return code and
+                     // firmware request message type
+                     l_userData1 = TWO_UINT32_TO_UINT64(rc,
+                                                        l_req_fw_msg->io_type);
+
+                     // Pack user data 2 with error type, resource type, and resource ID of target
+                     l_userData2 = TWO_UINT16_ONE_UINT32_TO_UINT64(l_req_fw_msg->initiate_gard.errorType,
+                                                                   l_req_fw_msg->initiate_gard.resourceType,
+                                                                   l_req_fw_msg->initiate_gard.resourceId);
+                 }
+                 break; // END case hostInterfaces::HBRT_FW_MSG_TYPE_INITIATE_GARD:
+
+         case hostInterfaces::HBRT_FW_MSG_TYPE_SPILOCK:
                 {
                     TRACFCOMP(g_trac_runtime,
                         ERR_MRK"Failed sending SPI Lock message to PHYP."

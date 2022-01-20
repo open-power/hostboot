@@ -385,6 +385,186 @@ void ErrlManager::commitErrLog(errlHndl_t& io_err, compId_t i_committerComp )
    return;
 }
 
+namespace initiate_gard
+{
+
+using namespace TARGETING;
+using namespace ERRORLOG;
+
+/* @brief Get the resource type associated with the given target, for
+ * INITIATE_GARD firmware requests.
+ *
+ * @param[in] i_target  The target to get the resource type for.
+ * @return              The resource type, or ResourceInvalid if none.
+ */
+hostInterfaces::InitiateGardResourceType get_resource_type(TARGETING::Target* const i_target)
+{
+    hostInterfaces::InitiateGardResourceType resource_type = hostInterfaces::ResourceInvalid;
+
+    switch (i_target->getAttr<ATTR_TYPE>())
+    {
+    case TYPE_CORE:
+        resource_type = hostInterfaces::ResourceProc;
+        break;
+    case TYPE_NX:
+        resource_type = hostInterfaces::ResourceNxUnit;
+        break;
+    default:
+        break;
+    }
+
+    return resource_type;
+}
+
+// The failure value for get_resource_id(Target*)
+static const uint16_t RESOURCE_ID_INVALID = 0xFFFF;
+
+/* @brief Get the resource ID for a given target, for INITIATE_GARD firmware
+ * requests.
+ *
+ * @param[in] i_target  The target to get the resource ID for.
+ * @return              The target's resource ID, or RESOURCE_ID_INVALID if none.
+ */
+uint16_t get_resource_id(TARGETING::Target* const i_target)
+{
+    uint16_t resource_id = RESOURCE_ID_INVALID;
+
+    switch (i_target->getAttr<ATTR_TYPE>())
+    {
+    case TYPE_CORE:
+    {
+        const auto parent_fc = getImmediateParentByAffinity(i_target);
+        resource_id = parent_fc->getAttr<ATTR_ORDINAL_ID>();
+        break;
+    }
+    case TYPE_NX:
+    {
+        const auto parent_proc = getParentChip(i_target);
+
+        // This is what HDAT's PCRD section uses for the processor ID
+        resource_id = parent_proc->getAttr<ATTR_ORDINAL_ID>();
+        break;
+    }
+    default:
+        break;
+    }
+
+    return resource_id;
+}
+
+/* @brief Send a firmware request to notify the hypervisor that a resource has
+ * been guarded.
+ *
+ * @param[in] i_error   The error log that caused the guard.
+ * @param[in] i_target  The target being guarded.
+ * @return              Error, if any, otherwise nullptr.
+ */
+errlHndl_t notify_hypervisor_of_resource_gard(const errlHndl_t i_error, TARGETING::Target* const i_target)
+{
+    errlHndl_t errl = nullptr;
+
+    do
+    {
+
+    if (!g_hostInterfaces || !g_hostInterfaces->firmware_request)
+    {
+        TRACFCOMP(g_trac_errl,
+                  ERR_MRK"notify_hypervisor_of_resource_gard: "
+                  "Hypervisor firmware_request interface not linked");
+
+        /*@
+         * @errortype
+         * @severity      ERRL_SEV_INFORMATIONAL
+         * @moduleid      ERRL_NOTIFY_HYPERVISOR_OF_RESOURCE_GARD
+         * @reasoncode    ERRL_RT_NULL_FIRMWARE_REQUEST_PTR
+         * @userdata1     PLID of error log that called out the resource
+         * @userdata2     HUID of the resource
+         * @devdesc       Unable to make firmware request
+         */
+        errl = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+                             ERRL_NOTIFY_HYPERVISOR_OF_RESOURCE_GARD,
+                             ERRL_RT_NULL_FIRMWARE_REQUEST_PTR,
+                             ERRL_GETPLID_SAFE(i_error),
+                             get_huid(i_target),
+                             ErrlEntry::NO_SW_CALLOUT);
+
+        errl->addProcedureCallout(HWAS::EPUB_PRC_PHYP_CODE, HWAS::SRCI_PRIORITY_HIGH);
+
+        break;
+    }
+
+    hostInterfaces::hbrt_fw_msg req_fw_msg = { };
+
+    req_fw_msg.io_type = hostInterfaces::HBRT_FW_MSG_TYPE_INITIATE_GARD;
+    req_fw_msg.initiate_gard.errorType = hostInterfaces::FipsInitiatedGard;
+    req_fw_msg.initiate_gard.resourceType = get_resource_type(i_target);
+
+    if (req_fw_msg.initiate_gard.resourceType == hostInterfaces::ResourceInvalid)
+    {
+        TRACFCOMP(g_trac_errl,
+                  INFO_MRK"notify_hypervisor_of_resource_gard: Unknown resource type "
+                  "(PLID=0x%08x, target HUID=0x%08x, target type=%s), "
+                  "not notifying the hypervisor of gard.",
+                  ERRL_GETPLID_SAFE(i_error),
+                  get_huid(i_target),
+                  attrToString<ATTR_TYPE>(i_target->getAttr<ATTR_TYPE>()));
+        break;
+    }
+
+    req_fw_msg.initiate_gard.resourceId = get_resource_id(i_target);
+
+    if (req_fw_msg.initiate_gard.resourceId == RESOURCE_ID_INVALID)
+    {
+        TRACFCOMP(g_trac_errl,
+                  ERR_MRK"notify_hypervisor_of_resource_gard: Cannot obtain resource ID "
+                  "for target 0x%08x (PLID=0x%08x)",
+                  get_huid(i_target),
+                  ERRL_GETPLID_SAFE(i_error));
+
+        /*@
+         * @errortype
+         * @severity      ERRL_SEV_UNRECOVERABLE
+         * @moduleid      ERRL_NOTIFY_HYPERVISOR_OF_RESOURCE_GARD
+         * @reasoncode    ERRL_RT_GARD_RESOURCE_ID_NOT_FOUND
+         * @userdata1     PLID of error log that called out the resource
+         * @userdata2     HUID of the resource
+         * @devdesc       Unable to get resource ID for runtime guard, this is a code bug
+         */
+        errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                             ERRL_NOTIFY_HYPERVISOR_OF_RESOURCE_GARD,
+                             ERRL_RT_GARD_RESOURCE_ID_NOT_FOUND,
+                             ERRL_GETPLID_SAFE(i_error),
+                             get_huid(i_target),
+                             ErrlEntry::ADD_SW_CALLOUT);
+        break;
+    }
+
+    hostInterfaces::hbrt_fw_msg resp_fw_msg = { };
+    size_t resp_fw_msg_size = sizeof(resp_fw_msg);
+
+    TRACFCOMP(g_trac_errl,
+              INFO_MRK"Sending INITIATE_GARD firmware_request, "
+              "errorType = %d, resourceType = %d, resourceId = %d",
+              req_fw_msg.initiate_gard.errorType,
+              req_fw_msg.initiate_gard.resourceType,
+              req_fw_msg.initiate_gard.resourceId);
+
+    // Make the firmware_request call
+    errl = firmware_request_helper(sizeof(req_fw_msg),
+                                   &req_fw_msg,
+                                   &resp_fw_msg_size,
+                                   &resp_fw_msg);
+
+    TRACFCOMP(g_trac_errl, "INITIATE_GARD firmware_request returned %p (PLID=0x%08x)",
+              errl, ERRL_GETPLID_SAFE(errl));
+
+    } while (false);
+
+    return errl;
+}
+
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 void ErrlManager::setHwasProcessCalloutFn(HWAS::processCalloutFn i_fn)
@@ -424,23 +604,33 @@ bool rt_processCallout(errlHndl_t &io_errl,
         if ((pCalloutUD->type == HWAS::HW_CALLOUT) &&
             (pCalloutUD->gardErrorType != HWAS::GARD_NULL))
         {
-                TARGETING::Target *pTarget = NULL;
-                uint8_t * l_uData = (uint8_t *)(pCalloutUD + 1);
-                bool l_err = HWAS::retrieveTarget(l_uData, pTarget, io_errl);
+            TARGETING::Target *pTarget = NULL;
+            uint8_t * l_uData = (uint8_t *)(pCalloutUD + 1);
+            bool l_err = HWAS::retrieveTarget(l_uData, pTarget, io_errl);
 
-                if (!l_err)
+            if (!l_err)
+            {
+                errlHndl_t errl = HWAS::theDeconfigGard().platCreateGardRecord
+                    (pTarget,
+                     io_errl->eid(),
+                     pCalloutUD->gardErrorType);
+                if (errl)
                 {
-                    errlHndl_t errl = HWAS::theDeconfigGard().platCreateGardRecord
-                        (pTarget,
-                            io_errl->eid(),
-                            pCalloutUD->gardErrorType);
-                    if (errl)
-                    {
-                        TRACFCOMP( g_trac_errl, ERR_MRK
-                            "rt_processCallout: error from platCreateGardRecord");
-                        errlCommit(errl, HWAS_COMP_ID);
-                    }
+                    TRACFCOMP( g_trac_errl, ERR_MRK
+                               "rt_processCallout: error from platCreateGardRecord");
+                    errlCommit(errl, HWAS_COMP_ID);
                 }
+
+                errl = initiate_gard::notify_hypervisor_of_resource_gard(io_errl, pTarget);
+
+                if (errl)
+                {
+                    TRACFCOMP( g_trac_errl,
+                               ERR_MRK"rt_processCallout: error from notify_hypervisor_of_resource_gard (PLID=0x%08x)",
+                               ERRL_GETPLID_SAFE(errl));
+                    errlCommit(errl, HWAS_COMP_ID);
+                }
+            }
         }
     }
     return true;
@@ -521,4 +711,3 @@ struct registerInitErrlManager
 };
 
 registerInitErrlManager g_registerInitErrlManager;
-

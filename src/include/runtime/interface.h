@@ -586,6 +586,7 @@ typedef struct hostInterfaces
        HBRT_FW_MSG_TYPE_MCTP_AVAILABLE    = 14, // struct mctp_available
        HBRT_FW_MSG_TYPE_GET_ELOG_TIME     = 15, // struct dateTime
        HBRT_FW_MSG_TYPE_SPILOCK           = 16, // struct spi_lock
+       HBRT_FW_MSG_TYPE_INITIATE_GARD     = 17, // struct initiate_gard
     };
 
     // NVDIMM protection state enum
@@ -666,6 +667,21 @@ typedef struct hostInterfaces
         uint16_t     i_sub_unit_mask;  // Currently not being used
         uint16_t     i_recovery_level; // Currently not being used
     } __attribute__ ((packed));
+
+    // Enumeration for resource types for INITIATE_GARD message
+    enum InitiateGardResourceType
+    {
+        ResourceProc   = 0x00,
+        ResourceNxUnit = 0x01,
+        ResourceInvalid = 0xFF
+    };
+
+    // Enumeration for error types for INITIATE_GARD message
+    enum InitiateGardErrorTypeInitiator
+    {
+        FipsInitiatedGard = 0x00,
+        PhypInitiatedGard = 0x01
+    };
 
     struct hbrt_fw_msg   // define struct hbrt_fw_msg
     {
@@ -768,6 +784,18 @@ typedef struct hostInterfaces
              uint64_t procChipId; // ID of the processor chip that owns the spi engine
              uint8_t blockHyp; // 1=block hyp SPI access, 0=allow hyp access
           } __attribute__ ((packed)) spi_lock;
+
+           // This struct is for HBRT_FW_MSG_TYPE_INITIATE_GARD messages which
+           // is sent to the hypervisor from HBRT to request that the hypervisor
+           // migrate away from using resources when host PRD detects a problem.
+          struct
+          {
+              uint8_t  resourceType; // Type of the garded resource
+              uint8_t  errorType;    // Source of the error
+              uint16_t resourceId;   // ID of garded resource (hardware proc ID
+                                     // from HDAT PCIA for cores; processor chip ID
+                                     // from HDAT PCRD for NX units)
+          } __attribute__((packed)) initiate_gard;
 
           // This struct is sent from HBRT with
           // io_type set to HBRT_FW_MSG_HBRT_FSP_REQ or
