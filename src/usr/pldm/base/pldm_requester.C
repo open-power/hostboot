@@ -156,8 +156,11 @@ void pldmRequester::send_req_with_retry(msg_t* io_req)
     // Number of request retries = 2 (minimum)
     // Time-out waiting for a response = 5 seconds - 2*100ms (maximum wait)
     // Note: the last retry attempt needs to happen before the max wait time
+    // UPDATE: Even though the SPEC indicates max timeout is 5 sec,
+    // the DBUS timeout is 20 seconds and hence hostboot also needs to bump up
+    // to 20 seconds.
     const uint8_t MAX_ATTEMPTS = 3;  // allow for 2 retries
-    const uint64_t MAX_MS_WAIT_PER_ATTEMPT = 2 * MS_PER_SEC; // 2 seconds
+    const uint64_t MAX_MS_WAIT_PER_ATTEMPT = 20 * MS_PER_SEC; // 20 seconds
 
     // an interesting count of how many invalid responses are encountered per original msg sent
     uint32_t invalid_rsp_count = 0;

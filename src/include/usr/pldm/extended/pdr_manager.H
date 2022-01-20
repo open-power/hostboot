@@ -157,7 +157,10 @@ public:
     // This value can be given to awaitBmcPdrRepoChanged for maximum timeout wait
     // Table 5 Timing Specifications for PLDM Messages as per DSP0240 document
     // Time-out waiting for a response max = PT3min - 2*PT4max = 5 seconds - 2 * 100ms
-    static constexpr size_t TIMEOUT_MAX_MS = 5 * MS_PER_SEC - 2 * 100;
+    // UPDATE: Even though the SPEC indicates max timeout is 5 sec,
+    // the DBUS timeout is 20 seconds and hence hostboot also needs to bump up
+    // to 20 seconds.  (3 tries * 20 sec = 60 seconds)
+    static constexpr size_t TIMEOUT_MAX_MS = 60 * MS_PER_SEC;
 
     /* @brief  Wait for notification that the BMC's PDR repository has changed
      *         (i.e. some task called notifyBmcPdrRepoChanged on this object).
