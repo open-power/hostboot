@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -73,6 +73,7 @@
 #include <multicast_group_defs.H>
 #include <p10_hcd_memmap_base.H>
 #include <p10_fbc_utils.H>
+#include <p10_pm_qme_firinit.H>
 #include <p10_scom_proc_7.H>
 #include <p10_scom_proc_1.H>
 #include <p10_scom_proc_d.H>
@@ -80,6 +81,7 @@
 #include <p10_scom_eq_c.H>
 #include <p10_scom_eq_a.H>
 #include <p10_scom_eq_6.H>
+#include <p10_pm.H>
 #ifndef __PPE__
     #include <p10_tod_utils.H>
 #endif
@@ -526,6 +528,9 @@ fapi2::ReturnCode qme_init(
     FAPI_TRY( putScom( l_eq_mc_or, QME_QMCR_WO_CLEAR, l_data64) );
 
     FAPI_INF( "QME was activated successfully!!!!" );
+    FAPI_INF( "Initialising QME FIR" );
+    FAPI_TRY( p10_pm_qme_firinit( i_target, pm::PM_INIT_SOFT ),
+              "Failed To Init QME FIR" );
 
 fapi_try_exit:
     FAPI_IMP("<< qme_init");
