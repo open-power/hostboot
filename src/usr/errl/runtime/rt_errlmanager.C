@@ -403,6 +403,7 @@ hostInterfaces::InitiateGardResourceType get_resource_type(TARGETING::Target* co
 
     switch (i_target->getAttr<ATTR_TYPE>())
     {
+    case TYPE_FC:
     case TYPE_CORE:
         resource_type = hostInterfaces::ResourceProc;
         break;
@@ -431,6 +432,9 @@ uint16_t get_resource_id(TARGETING::Target* const i_target)
 
     switch (i_target->getAttr<ATTR_TYPE>())
     {
+    case TYPE_FC:
+        resource_id = i_target->getAttr<ATTR_ORDINAL_ID>();
+        break;
     case TYPE_CORE:
     {
         const auto parent_fc = getImmediateParentByAffinity(i_target);
