@@ -314,11 +314,17 @@ ifdef HOSTBOOT_PROFILE
 RUNTIME_OBJECTS += gcov.o
 endif
 
+# The order of these libraries determines the initialization order
+#  of the modules during execution.
 RUNTIME_MODULES += errl_rt       # ~/src/usr/errl/runtime/
 RUNTIME_MODULES += trace_rt      # ~/src/usr/trace/runtime/
+RUNTIME_MODULES += $(if $(CONFIG_MCTP)$(CONFIG_MCTP_TESTCASES),mctp_rt) # ~/src/usr/mctp/runtime/
+RUNTIME_MODULES += $(if $(CONFIG_PLDM)$(CONFIG_PLDM_TESTCASES),pldm_rt) # ~/src/usr/pldm/runtime/
 RUNTIME_MODULES += targeting_rt  # ~/src/usr/targeting/runtime/
 RUNTIME_MODULES += util_rt       # ~/src/usr/util/runtime/
 RUNTIME_MODULES += devicefw_rt   # ~/src/usr/devicefw/runtime/
+RUNTIME_MODULES += $(if $(CONFIG_FSP_BUILD),,pnor_rt) # ~/src/usr/pnor/runtime/
+RUNTIME_MODULES += eeprom_rt     # ~/src/usr/eeprom/runtime/
 RUNTIME_MODULES += secureboot_rt # ~/src/usr/secureboot/runtime/
 RUNTIME_MODULES += fapi2_rt      # ~/src/usr/fapi2/runtime/
 RUNTIME_MODULES += fsi_rt        # ~/src/usr/fsi/runtime/ - no runtime test
@@ -334,16 +340,12 @@ RUNTIME_MODULES += tod_rt        # ~/src/usr/isteps/tod/runtime/ - no runtime te
 RUNTIME_MODULES += nestmemutils  # ~/src/usr/hwplibs/nest/ - no runtime test
 RUNTIME_MODULES += mss_rt        # ~/src/usr/isteps/mss/runtime/ - no runtime test
 RUNTIME_MODULES += pm_rt         # ~/src/usr/isteps/pm/runtime/
-RUNTIME_MODULES += $(if $(CONFIG_FSP_BUILD),,pnor_rt) # ~/src/usr/pnor/runtime/
 RUNTIME_MODULES += expaccess_rt  # ~/src/usr/expaccess/runtime/
-RUNTIME_MODULES += eeprom_rt     # ~/src/usr/eeprom/runtime/
 RUNTIME_MODULES += $(if $(CONFIG_HBRT_PRD),prdf_rt) # ~/src/usr/diag/prdf/runtime/
 RUNTIME_MODULES += $(if $(CONFIG_HBRT_PRD),attn_rt) # ~/src/usr/diag/attn/runtime/
 RUNTIME_MODULES += $(if $(CONFIG_HTMGT),htmgt_rt)   # ~/src/usr/htmgt/runtime/
 #RUNTIME_MODULES += $(if $(CONFIG_NVDIMM),nvdimm_rt)
 #RUNTIME_MODULES += p9_cpuWkup
-RUNTIME_MODULES += $(if $(CONFIG_MCTP)$(CONFIG_MCTP_TESTCASES),mctp_rt) # ~/src/usr/mctp/runtime/
-RUNTIME_MODULES += $(if $(CONFIG_PLDM)$(CONFIG_PLDM_TESTCASES),pldm_rt) # ~/src/usr/pldm/runtime/
 
 
 # This is exported so that gcov knows the list of runtime modules to

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -343,33 +343,19 @@ errlHndl_t eepromPerformOpCache(DeviceFW::OperationType i_opType,
                    io_buffer,
                    io_buflen);
 
-#ifndef __HOSTBOOT_RUNTIME
+#if (!defined(__HOSTBOOT_RUNTIME) || (defined(__HOSTBOOT_RUNTIME) && !defined(CONFIG_FSP_BUILD)))
             // Perform flush to ensure pnor is updated
-            int rc = mm_remove_pages( FLUSH,
-                                      reinterpret_cast<void *>(l_eepromCacheVaddr + i_eepromInfo.offset),
-                                      io_buflen );
-            if( rc )
+            //  Needed during IPL and at runtime on non-FSP systems
+            l_errl = PNOR::flush(PNOR::EECACHE);
+            if( l_errl )
             {
                 TRACFCOMP(g_trac_eeprom,
-                          ERR_MRK"eepromPerformOpCache:  Error from mm_remove_pages trying for flush contents write to pnor! rc=%d",
-                          rc);
-                /*@
-                * @errortype
-                * @moduleid     EEPROM_CACHE_PERFORM_OP
-                * @reasoncode   EEPROM_FAILED_TO_FLUSH_CONTENTS
-                * @userdata1    Requested Address
-                * @userdata2    rc from mm_remove_pages
-                * @devdesc      cacheEeprom mm_remove_pages FLUSH failed
-                */
-                l_errl = new ERRORLOG::ErrlEntry(
-                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                EEPROM_CACHE_PERFORM_OP,
-                                EEPROM_FAILED_TO_FLUSH_CONTENTS,
-                                (l_eepromCacheVaddr + i_eepromInfo.offset),
-                                TO_UINT64(rc),
-                                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                          ERR_MRK"eepromPerformOpCache:  Error trying to flush contents write to pnor!");
                 l_errl->collectTrace( EEPROM_COMP_NAME );
-                break;
+
+                // There is nothing the caller can do here so just
+                // commit the log and keep going
+                errlCommit(l_errl, EEPROM_COMP_ID);                
             }
 #endif
         }

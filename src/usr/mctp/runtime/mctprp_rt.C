@@ -214,14 +214,17 @@ MctpRP::~MctpRP(void)
 
 }
 
-struct registerinitMctp
+// Force the init function to execute when the module loads.
+//   We want to do this here rather than waiting for a
+//   post-init call in rt_main because we need this support
+//   in order to initialize some of the other modules that
+//   get loaded later.
+struct initMctp
 {
-    registerinitMctp()
+    initMctp()
     {
-        // Register interface for Host to call
-        postInitCalls_t * rt_post = getPostInitCalls();
-        rt_post->callInitMctp = &init_mctp_resource_provider;
+        init_mctp_resource_provider();
     }
 };
 
-registerinitMctp g_registerinitMctp;
+initMctp g_initMctp;

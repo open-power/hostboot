@@ -1252,12 +1252,6 @@ struct postInitCalls_t
     void (*callInitPnor)();
 
     /**
-     * @brief Calls MctpRP::init which will initialize HBRT's end of
-     *        the virtual MCTP bus between HBRT and the hypervisor
-     */
-    void (*callInitMctp)();
-
-    /**
      * @brief Calls PldmRP::init which will initialize HBRT's end of
      *        the PLDM communication between HBRT and the BMC
      */

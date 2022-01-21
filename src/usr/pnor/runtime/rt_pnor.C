@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -377,6 +377,7 @@ errlHndl_t RtPnor::flush( PNOR::SectionId i_section)
 /*******Protected Methods**************/
 RtPnor::RtPnor()
 {
+    TRACFCOMP(g_trac_pnor, "RtPnor()::RtPnor()");
     iv_initialized = false;
     errlHndl_t l_err = nullptr;
     do {

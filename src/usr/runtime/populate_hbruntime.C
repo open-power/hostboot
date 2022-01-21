@@ -571,13 +571,15 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
         ALIGN_PAGE(l_hbTOC.entry[l_hbTOC.total_entries].size);
     l_hbTOC.total_entries++;
 
-    // Fill in VPD size
+#ifdef CONFIG_FSP_BUILD
+    // Fill in VPD size (only on FSP machines)
     l_hbTOC.entry[l_hbTOC.total_entries].label = Util::HBRT_MEM_LABEL_VPD;
     l_hbTOC.entry[l_hbTOC.total_entries].offset = 0;
     l_hbTOC.entry[l_hbTOC.total_entries].size = VMM_RT_VPD_SIZE;
     l_totalSectionSize +=
         ALIGN_PAGE(l_hbTOC.entry[l_hbTOC.total_entries].size);
     l_hbTOC.total_entries++;
+#endif
 
     // Fill in VPD_XXXX sizes (if there are any)
     VPD::OverrideRsvMemMap_t l_vpdOverrides;

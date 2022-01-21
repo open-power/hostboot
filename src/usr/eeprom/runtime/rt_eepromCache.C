@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,6 +74,7 @@ struct rtEecacheInit
 {
     rtEecacheInit()
     {
+        TRACFCOMP(g_trac_eeprom, ENTER_MRK" rtEecacheInit()");
         errlHndl_t l_errl = nullptr;
 
         // Add cache status for the node
@@ -84,20 +85,40 @@ struct rtEecacheInit
         // Find all the targets with VPD switches
         for (auto & l_node : l_nodeList)
         {
+            uint64_t l_eecacheSize = 0;
             uint8_t l_instance = TARGETING::AttrRP::getNodeId(l_node);
-            uint64_t vpd_size = 0;
+
+#ifdef CONFIG_FSP_BUILD
+            // On FSP platforms we use a preloaded reserved memory section
             eecacheSectionHeader* l_sectionHeader =
               reinterpret_cast<eecacheSectionHeader*>(
                   hb_get_rt_rsvd_mem(Util::HBRT_MEM_LABEL_VPD,
-                                      l_instance, vpd_size));
+                                      l_instance, l_eecacheSize));
+#else
+            // On eBMC platforms we will pull the data from PNOR directly
+            PNOR::SectionInfo_t l_sectionInfo;
+            l_errl = PNOR::getSectionInfo(PNOR::EECACHE, l_sectionInfo);
+            if(l_errl)
+            {
+                TRACFCOMP(g_trac_eeprom, "rtEecacheInit() Failed while looking up the EECACHE section in PNOR!!");
+                l_errl->collectTrace(EEPROM_COMP_NAME);
+                errlCommit (l_errl, EEPROM_COMP_ID);
+                break;
+            }
+
+            eecacheSectionHeader* l_sectionHeader =
+              reinterpret_cast<eecacheSectionHeader*>(l_sectionInfo.vaddr);
+            l_eecacheSize = l_sectionInfo.size;
+#endif
+
 
             g_eecachePnorVaddr[l_instance] = reinterpret_cast<uint64_t>(l_sectionHeader);
 
             // Check if reserved memory does not exist for this instance
-            if ((NULL == l_sectionHeader) || (0 == vpd_size))
+            if ((NULL == l_sectionHeader) || (0 == l_eecacheSize))
             {
                 TRACFCOMP(g_trac_eeprom,
-                          "rtEecacheInit(): ERROR Could not find VPD section of reserved memory for Node %d, ",
+                          "rtEecacheInit(): ERROR Could not find EECACHE section of reserved memory for Node %d, ",
                           l_instance);
                 /*@
                  *   @errortype         ERRL_SEV_UNRECOVERABLE
@@ -117,7 +138,7 @@ struct rtEecacheInit
                                        l_instance,
                                        0,
                                        ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-
+                l_errl->collectTrace(EEPROM_COMP_NAME);
                 errlCommit (l_errl, EEPROM_COMP_ID);
                 break;
 
@@ -182,6 +203,7 @@ struct rtEecacheInit
             printCurrentCachedEepromMap();
 
         }
+        TRACFCOMP(g_trac_eeprom, EXIT_MRK" rtEecacheInit()");
     }
 
 };
