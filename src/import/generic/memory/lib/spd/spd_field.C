@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,12 +43,8 @@ namespace spd
 
 // If a constexpr static data member (since C++11) is odr-used,
 // a definition at namespace scope is still required, but it cannot have an initializer.
-constexpr mss::field_t<mss::endian::LITTLE> init_fields::REVISION;
-constexpr mss::field_t<mss::endian::LITTLE> init_fields::DEVICE_TYPE;
-constexpr mss::field_t<mss::endian::LITTLE> init_fields::BASE_MODULE;
-constexpr mss::field_t<mss::endian::LITTLE> init_fields::HYBRID;
-constexpr mss::field_t<mss::endian::LITTLE> init_fields::HYBRID_MEDIA;
-constexpr mss::field_t<mss::endian::LITTLE> init_fields::REF_RAW_CARD;
+constexpr mss::field_t<mss::endian::LITTLE> common_init_fields::REVISION;
+constexpr mss::field_t<mss::endian::LITTLE> common_init_fields::DEVICE_TYPE;
 
 ///
 /// @brief Determine if the provided index is within the SPD bounds

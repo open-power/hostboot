@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,12 +47,12 @@ namespace spd
 {
 
 ///
-/// @class init_fields
-/// @brief Initial fields needed to know how to parse the SPD
+/// @class common_init_fields
+/// @brief Initial fields needed to know how to parse the SPD, common to all SPD across DRAM generations
 /// @note These are preliminary fields that need to be independently
 /// decoded from any specific DRAM generation SPEC (e.g. SPD factory)
 ///
-class init_fields
+class common_init_fields
 {
     private:
 
@@ -65,18 +65,6 @@ class init_fields
             // Byte 2
             DEVICE_TYPE_START = 0,
             DEVICE_TYPE_LEN = 8,
-
-            // Byte 3
-            HYBRID_START = 0,
-            HYBRID_LEN = 1,
-            HYBRID_MEDIA_START = 1,
-            HYBRID_MEDIA_LEN = 3,
-            BASE_MODULE_START = 4,
-            BASE_MODULE_LEN = 4,
-
-            // Byte 130
-            REF_RAW_CARD_START = 0,
-            REF_RAW_CARD_LEN = 8,
         };
 
     public:
@@ -86,10 +74,6 @@ class init_fields
         // 3rd field: Bit length
         static constexpr mss::field_t<mss::endian::LITTLE> REVISION{1, REVISION_START, REVISION_LEN};
         static constexpr mss::field_t<mss::endian::LITTLE> DEVICE_TYPE{2, DEVICE_TYPE_START, DEVICE_TYPE_LEN};
-        static constexpr mss::field_t<mss::endian::LITTLE> BASE_MODULE{3, BASE_MODULE_START, BASE_MODULE_LEN};
-        static constexpr mss::field_t<mss::endian::LITTLE> HYBRID{3, HYBRID_START, HYBRID_LEN};
-        static constexpr mss::field_t<mss::endian::LITTLE> HYBRID_MEDIA{3, HYBRID_MEDIA_START, HYBRID_MEDIA_LEN};
-        static constexpr mss::field_t<mss::endian::LITTLE> REF_RAW_CARD{130, REF_RAW_CARD_START, REF_RAW_CARD_LEN};
 };
 
 ///

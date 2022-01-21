@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,12 +61,10 @@ namespace spd
 {
 
 ///
-/// @brief Class for base module section of SPD Rev 0.3
+/// @brief Class for base module section of SPD - generic to all DRAM generations
 ///
-class base_0_3
+class base
 {
-        using F = mss::spd::fields<DDR4, BASE_CNFG>;
-
     protected:
         fapi2::Target<fapi2::TARGET_TYPE_DIMM> iv_dimm;
         fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> iv_port;
@@ -75,13 +73,58 @@ class base_0_3
     public:
 
         ///
-        /// @brief Construct a new base rev 0.3 object
+        /// @brief Construct a new base object
         /// @param[in] i_dimm DIMM target
         ///
-        base_0_3(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm) :
+        base(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm) :
             iv_dimm(i_dimm),
             iv_port(mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_dimm)),
             iv_ocmb(mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_dimm)) {}
+
+        ///
+        /// @brief Destroy the base object
+        ///
+        virtual ~base() = default;
+
+        ///
+        /// @brief Process the data init fields - these fields should be processed first
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode process_data_init_fields(const std::vector<uint8_t>& i_spd) const = 0;
+
+        ///
+        /// @brief Process the SPD fields
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode process(const std::vector<uint8_t>& i_spd) const = 0;
+
+        ///
+        /// @brief Process derived attributes (processed after all others)
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode process_derived(const std::vector<uint8_t>& i_spd) const = 0;
+};
+
+///
+/// @brief Class for base module section of SPD Rev 0.3
+///
+class base_0_3 : public base
+{
+        using F = mss::spd::fields<DDR4, BASE_CNFG>;
+
+    public:
+
+        ///
+        /// @brief Construct a new base rev 0.3 object
+        /// @param[in] i_dimm DIMM target
+        ///
+        base_0_3(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm) :  base(i_dimm) {}
 
         ///
         /// @brief Destroy the ddimm_0_3 object
@@ -98,17 +141,6 @@ class base_0_3
         }
 
         // Check functions here return true when any value is valid (0x00 through 0xFF)
-
-        ///
-        /// @brief Traits for revision
-        ///
-        /// @param[in] i_field field value
-        /// @return true/false in specified range
-        ///
-        virtual bool check_revision(const uint8_t i_field) const
-        {
-            return true;
-        }
 
         ///
         /// @brief Traits for prim signal loading
@@ -520,66 +552,6 @@ class base_0_3
             return true;
         }
 #endif
-
-        ///
-        /// @brief Set the revision field
-        ///
-        /// @param[in] i_spd SPD binary
-        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
-        ///
-        virtual fapi2::ReturnCode set_revision(const std::vector<uint8_t>& i_spd) const
-        {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::REVISION, i_spd, SET_SPD_REVISION, l_field));
-
-            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
-                                  iv_ocmb,
-                                  check_revision(l_field),
-                                  F::REVISION.get_byte(i_spd),
-                                  l_field,
-                                  SET_SPD_REVISION,
-                                  "SPD Revision"));
-
-            FAPI_TRY(mss::attr::set_spd_revision(iv_port, l_field));
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief Set the dram gen field
-        ///
-        /// @param[in] i_spd SPD binary
-        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
-        ///
-        virtual fapi2::ReturnCode set_dram_gen(const std::vector<uint8_t>& i_spd) const
-        {
-            uint8_t l_field = 0;
-            uint8_t l_dram_gen = 0;
-            // Sparsed reserved bits within valid SPD field range
-            const std::vector<uint8_t> l_reserved_bits{0x00, 0x0D};
-
-            // =========================================================
-            // DDR4 SPD Document Release 4
-            // Byte 2 (0x002): Key Byte / DRAM Device Type
-            // =========================================================
-            const std::vector< std::pair<uint8_t, uint8_t> > DRAM_GEN_MAP =
-            {
-                //{key value, dram gen}
-                {0x0C, fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR4}
-                // Other key bytes reserved or not supported
-            };
-
-            FAPI_TRY(get_field_spd(iv_ocmb, F::DEVICE_TYPE, i_spd, SET_DRAM_GEN, l_field));
-            FAPI_TRY(check::reserved_values(iv_ocmb, l_reserved_bits, DEVICE_TYPE, l_field) );
-
-            FAPI_TRY(lookup_table_check(iv_dimm, DRAM_GEN_MAP, SET_DRAM_GEN, l_field, l_dram_gen),
-                     "%s failed DRAM_GEN lookup check", spd::c_str(iv_dimm) );
-
-            FAPI_TRY(mss::attr::set_dram_gen(iv_dimm, l_dram_gen));
-
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
 
         ///
         /// @brief Set the dimm type field
@@ -2389,13 +2361,11 @@ class base_0_3
             // These fields are formerly known as the data_init_traits
             // They should be set first, as these are used for many
             // fields later on
-            FAPI_TRY(set_revision(i_spd));
             FAPI_TRY(set_dimm_ranks_cnfgd(i_spd));
             FAPI_TRY(set_host_to_ddr_speed_ratio(i_spd));
             FAPI_TRY(set_num_master_ranks_per_dimm(i_spd)); // AKA mranks
             FAPI_TRY(set_hybrid_media(i_spd));
             FAPI_TRY(set_hybrid(i_spd));
-            FAPI_TRY(set_dram_gen(i_spd));
             FAPI_TRY(set_dimm_type(i_spd));
 
             // Generic_metadata_fields
@@ -2561,7 +2531,7 @@ class base_0_4 : public base_0_3
 //
 // Can be updated with the earliest supported base cnfg revision
 //
-using base_cnfg_base = base_0_3;
+using base_cnfg_base = base;
 using base_cnfg_latest = base_0_4;
 
 } // spd

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2022                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -43,11 +43,11 @@
       ARRAY[DIMM]
       DRAM Device Type.
       Decodes SPD byte 2.
-      Generation of memory: DDR3, DDR4.
+      Generation of memory: DDR3, DDR4, DDR5
     </description>
     <initToZero></initToZero>
     <valueType>uint8</valueType>
-    <enum>EMPTY = 0, DDR3 = 1, DDR4 = 2</enum>
+    <enum>EMPTY = 0, DDR3 = 1, DDR4 = 2, DDR5 = 3</enum>
     <writeable/>
     <array>2</array>
     <mssAccessorName>dram_gen</mssAccessorName>

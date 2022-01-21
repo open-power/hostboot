@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,6 +47,7 @@
 #include <generic/memory/lib/spd/spd_fields_ddr4.H>
 #include <generic/memory/lib/spd/common/ddr4/spd_decoder_ddr4.H>
 #include <generic/memory/lib/data_engine/data_engine_utils.H>
+#include <lib/eff_config/p10_common_engine.H>
 
 namespace mss
 {
@@ -85,8 +86,12 @@ fapi2::ReturnCode get_supported_voltages<mss::mc_type::EXPLORER, mss::spd::devic
         uint8_t l_dimm_endurant = 0;
 
         const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(l_dimm);
+        mss::spd::common_engine l_engine(l_dimm);
 
         FAPI_TRY(mss::spd::get_raw_data(l_dimm, l_spd));
+
+        // TK this is totally not correct. We should setup our DRAM generation prior to setting up the voltages if it's DRAM gen specific
+        FAPI_TRY(l_engine.process(l_spd), "%s unable to process common engine SPD", mss::c_str(l_dimm));
 
         // Read nominal and endurant bits from SPD, 0 = 1.2V is not operable and endurant, 1 = 1.2 is valid
         // TK - will need to be updated for Odyssey / DDR5
