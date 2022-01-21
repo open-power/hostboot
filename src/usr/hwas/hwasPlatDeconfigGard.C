@@ -356,7 +356,8 @@ errlHndl_t DeconfigGard::platGetGardRecords(
                 else // get all records
                 {
                     o_records.push_back(l_pGardRecords[i]);
-                    HWAS_INF("platGetGardRecords: pushing back for all records");
+                    HWAS_INF("platGetGardRecords: pushing back for all records (%.8X)",
+                             get_huid(targetService().toTarget(l_pGardRecords[i].iv_targetId)));
                 }
             }
         } // for

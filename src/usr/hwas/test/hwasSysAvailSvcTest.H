@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,10 +43,6 @@
 #include <hwas/common/hwasCommon.H>
 #include <targeting/common/utilFilter.H>
 
-
-//  $$  make sure this is disabled before checking in!!
-#define DISABLE_UNIT_TESTS    1
-//$$#define DISABLE_UNIT_TESTS    0
 
 using   namespace   TARGETING;
 
@@ -127,13 +123,15 @@ public:
       *  @return True if all passes, false otherwise
       */
     bool verifyRecoveredAndRestore(TargetHandleList &i_targetHList,
-                                         TARGETING::HwasState *i_origStates)
+                                   TARGETING::HwasState *i_origStates)
     {
+        bool rc = true;
+
         for (uint32_t i=0; i < i_targetHList.size(); i++)
         {
             TARGETING::HwasState l_hwasState =
                     i_targetHList[i]->getAttr<TARGETING::ATTR_HWAS_STATE>();
-            TS_TRACE( "testVerifyResourceRecovery: After Recovery - "
+            TS_TRACE( "verifyRecoveredAndRestore: After Recovery - "
                       "HwasState fakeState: "
                       "deconf=0x%x,PO=0x%x,pres=0x%x,func=0x%x,dumpf=0x%x,"
                       "specdeconfig=0x%x",
@@ -151,14 +149,51 @@ public:
                 (l_hwasState.specdeconfig != 0) ||
                 (l_hwasState.functional != 1))
             {
-                TS_FAIL("testVerifyResourceRecovery: Incorrect resource "
-                        "recovery hwas states");
-                return false;
+                TS_INFO( "verifyRecoveredAndRestore: After Recovery - "
+                         "HwasState fakeState: "
+                         "deconf=0x%x,PO=0x%x,pres=0x%x,func=0x%x,dumpf=0x%x,"
+                         "specdeconfig=0x%x",
+                         l_hwasState.deconfiguredByEid,
+                         l_hwasState.poweredOn,
+                         l_hwasState.present,
+                         l_hwasState.functional,
+                         l_hwasState.dumpfunctional,
+                         l_hwasState.specdeconfig
+                         );
+                TS_FAIL("verifyRecoveredAndRestore: Incorrect resource "
+                        "recovery hwas states on %.8X",
+                        TARGETING::get_huid(i_targetHList[i]));
+                rc = false;
             }
+
             // Restore old state
             i_targetHList[i]->setAttr<TARGETING::ATTR_HWAS_STATE>(i_origStates[i]);
         }
-        return true;
+
+        // Verify that ATTR_PG isn't wrong anywhere
+        for (TargetIterator target = targetService().begin();
+             target != targetService().end();
+             ++target)
+        {
+            ATTR_PG_type pg = 0;
+            ATTR_PG_MVPD_type mvpd = 0;
+
+            if( target->tryGetAttr<ATTR_PG>(pg)
+                &&  target->tryGetAttr<ATTR_PG>(mvpd) )
+            {
+                if( pg != mvpd )
+                {
+                    TS_FAIL( "verifyRecoveredAndRestore: ATTR_PG is wrong for %.8X : PG=%.8X, PG_MVPD=%.8X",
+                             get_huid(*target),
+                             pg,
+                             mvpd );
+                    rc = false;
+                }
+            }
+        }
+
+
+        return rc;
     }
 
     /**
@@ -166,16 +201,6 @@ public:
      */
     void testCheckMinimumHardwareCore()
     {
-#if DISABLE_UNIT_TESTS
-
-        //  NOTE:  These tests mark targets nonfunctional and then
-        //  restore them.  Since all the unit tests run in parallel, this
-        //  may cause other tests to fail.
-        //  Do not leave this test enabled for normal operations.
-        TS_TRACE(INFO_MRK "SKIPPING:  other tests could be affected.");
-        HWAS_INF("testCheckMinimumHardwareCore: Skipped");
-#else
-
         errlHndl_t  l_errl  =   NULL;
         TS_TRACE(INFO_MRK "testCheckMinimumHardwareCore");
         HWAS_INF("testCheckMinimumHardwareCore: Started");
@@ -190,16 +215,15 @@ public:
         setTargetStates( SET_NONFUNC, l_cores, &l_origStates[0]  );
 
         // Save original Block Spec Deconfig value
-        Target * pSys;
-        targetService().getTopLevelTarget(pSys);
+        auto pNode = UTIL::getCurrentNodeTarget();
         TARGETING::ATTR_BLOCK_SPEC_DECONFIG_type l_orig_block_spec_deconfig =
-            pSys->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
+            pNode->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
 
         // If original attribute value is non-zero, clear it
         if(l_orig_block_spec_deconfig != 0)
         {
             // Clear attribute to test that checkMinimumHardware() sets it
-            pSys->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(0);
+            pNode->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(0);
         }
 
         TS_TRACE( "testCheckMinimumHardwareCore: check for minimum hardware" );
@@ -207,7 +231,7 @@ public:
         if ( l_errl )
         {
             TARGETING::ATTR_BLOCK_SPEC_DECONFIG_type l_block_spec_deconfig =
-                pSys->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
+                pNode->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
             if(l_block_spec_deconfig == 0)
             {
                 TS_FAIL("testCheckMinimumHardwareCore: Expected non-zero value "
@@ -229,9 +253,8 @@ public:
 
         TS_TRACE( "testCheckMinimumHardwareCore: restore original states");
         setTargetStates( RESTORE, l_cores, &(l_origStates[0])  );
-        pSys->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(l_orig_block_spec_deconfig);
+        pNode->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(l_orig_block_spec_deconfig);
 
-#endif
     }
 
 
@@ -240,15 +263,6 @@ public:
      */
     void testCheckMinimumHardwareDimm()
     {
-#if DISABLE_UNIT_TESTS
-        //  NOTE:  These tests mark targets nonfunctional and then
-        //  restore them.  Since all the unit tests run in parallel, this
-        //  may cause other tests to fail.
-        //  Do not leave this test enabled for normal operations.
-        TS_TRACE(INFO_MRK "SKIPPING:  other tests could be affected.");
-        HWAS_INF("testCheckMinimumHardwareDimm: Skipped");
-#else
-
         errlHndl_t  l_errl  =   NULL;
         TS_TRACE(INFO_MRK "testCheckMinimumHardwareDimm");
         HWAS_INF("testCheckMinimumHardwareDimm: Started");
@@ -264,16 +278,15 @@ public:
         setTargetStates( SET_NONFUNC, l_dimms, &(l_origStates[0])  );
 
         // Save original Block Spec Deconfig value
-        Target * pSys;
-        targetService().getTopLevelTarget(pSys);
+        auto pNode = UTIL::getCurrentNodeTarget();
         TARGETING::ATTR_BLOCK_SPEC_DECONFIG_type l_orig_block_spec_deconfig =
-            pSys->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
+            pNode->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
 
         // If original attribute value is non-zero, clear it
         if(l_orig_block_spec_deconfig != 0)
         {
             // Clear attribute to test that checkMinimumHardware() sets it
-            pSys->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(0);
+            pNode->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(0);
         }
 
         TS_TRACE( "testCheckMinimumHardwareDimm: check for minimum hardware" );
@@ -281,7 +294,7 @@ public:
         if ( l_errl )
         {
             TARGETING::ATTR_BLOCK_SPEC_DECONFIG_type l_block_spec_deconfig
-                = pSys->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
+                = pNode->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
             if(l_block_spec_deconfig == 0)
             {
                 TS_FAIL("testCheckMinimumHardwareDimm: Expected non-zero value "
@@ -302,9 +315,8 @@ public:
         }
 
         setTargetStates( RESTORE, l_dimms, &(l_origStates[0])  );
-        pSys->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(l_orig_block_spec_deconfig);
+        pNode->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(l_orig_block_spec_deconfig);
 
-#endif
     }
 
 
@@ -315,15 +327,6 @@ public:
      */
     void testCheckMinimumHardwareBoth()
     {
-#if DISABLE_UNIT_TESTS
-        //  NOTE:  These tests mark targets  nonfunctional and then
-        //  restore them.  Since all the unit tests run in parallel, this
-        //  may cause other tests to fail.
-        //  Do not leave this test enabled for normal operations.
-        TS_TRACE(INFO_MRK "SKIPPING:  other tests could be affected.");
-        HWAS_INF("testCheckMinimumHardwareBoth: Skipped");
-#else
-
         errlHndl_t  l_errl  =   NULL;
         TS_TRACE(INFO_MRK "testCheckMinimumHardwareBoth");
         HWAS_INF("testCheckMinimumHardwareBoth: Started");
@@ -347,16 +350,15 @@ public:
         setTargetStates( SET_NONFUNC, l_dimms, &(l_origDimmStates[0])  );
 
         // Save original Block Spec Deconfig value
-        Target * pSys;
-        targetService().getTopLevelTarget(pSys);
+        auto pNode = UTIL::getCurrentNodeTarget();
         TARGETING::ATTR_BLOCK_SPEC_DECONFIG_type l_orig_block_spec_deconfig =
-            pSys->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
+            pNode->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
 
         // If original attribute value is non-zero, clear it
         if(l_orig_block_spec_deconfig != 0)
         {
             // Clear attribute to test that checkMinimumHardware() sets it
-            pSys->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(0);
+            pNode->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(0);
         }
 
         TS_TRACE( "testCheckMinimumHardwareBoth: check for minimum hardware" );
@@ -364,7 +366,7 @@ public:
         if ( l_errl )
         {
             TARGETING::ATTR_BLOCK_SPEC_DECONFIG_type l_block_spec_deconfig
-                = pSys->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
+                = pNode->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
             if(l_block_spec_deconfig == 0)
             {
                 TS_FAIL("testCheckMinimumHardwareBoth: Expected non-zero value "
@@ -388,9 +390,8 @@ public:
         //  restore everything to normal.
         setTargetStates( RESTORE, l_cores, &(l_origCoreStates[0])  );
         setTargetStates( RESTORE, l_dimms, &(l_origDimmStates[0])  );
-        pSys->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(l_orig_block_spec_deconfig);
+        pNode->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(l_orig_block_spec_deconfig);
 
-#endif
     }
 
 
@@ -401,15 +402,6 @@ public:
      */
     void testCheckMinimumHardwareOneDimm()
     {
-#if DISABLE_UNIT_TESTS
-        //  NOTE:  These tests mark targets nonfunctional and then
-        //  restore them.  Since all the unit tests run in parallel, this
-        //  may cause other tests to fail.
-        //  Do not leave this test enabled for normal operations.
-        TS_TRACE(INFO_MRK "SKIPPING:  other tests could be affected.");
-        HWAS_INF("testCheckMinimumHardwareOneDimm: Skipped");
-#else
-
         errlHndl_t  l_errl  =   NULL;
         TS_TRACE(INFO_MRK "testCheckMinimumHardwareOneDimm");
         HWAS_INF("testCheckMinimumHardwareOneDimm: Started");
@@ -425,16 +417,15 @@ public:
         setTargetStates( SET_NONFUNC, l_dimms, &(l_origStates[0]), 1  );
 
         // Save original Block Spec Deconfig value
-        Target * pSys;
-        targetService().getTopLevelTarget(pSys);
+        auto pNode = UTIL::getCurrentNodeTarget();
         TARGETING::ATTR_BLOCK_SPEC_DECONFIG_type l_orig_block_spec_deconfig =
-            pSys->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
+            pNode->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
 
         // If original attribute value is non-zero, clear it
         if(l_orig_block_spec_deconfig != 0)
         {
             // Clear attribute, test that checkMinimumHardware() does NOT set it
-            pSys->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(0);
+            pNode->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(0);
         }
 
         TS_TRACE( "testCheckMinimumHardwareOneDimm: "
@@ -449,7 +440,7 @@ public:
         else
         {
             TARGETING::ATTR_BLOCK_SPEC_DECONFIG_type l_block_spec_deconfig
-                = pSys->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
+                = pNode->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
             if(l_block_spec_deconfig != 0)
             {
                 TS_FAIL("testCheckMinimumHardwareOneDimm: Expected zero value "
@@ -464,9 +455,8 @@ public:
         }
 
         setTargetStates( RESTORE, l_dimms, &(l_origStates[0]), 1  );
-        pSys->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(l_orig_block_spec_deconfig);
+        pNode->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(l_orig_block_spec_deconfig);
 
-#endif
     }
 
     /**
@@ -474,15 +464,6 @@ public:
      */
     void testVerifyResourceRecovery()
     {
-#if DISABLE_UNIT_TESTS
-        //  NOTE:  These tests mark targets nonfunctional and then
-        //  restore them.  Since all the unit tests run in parallel, this
-        //  may cause other tests to fail.
-        //  Do not leave this test enabled for normal operations.
-        TS_TRACE(INFO_MRK "SKIPPING:  other tests could be affected.");
-        HWAS_INF("testVerifyResourceRecovery: Skipped");
-#else
-
         do
         {
             errlHndl_t l_errl = NULL;
@@ -491,12 +472,12 @@ public:
 
             TargetHandleList l_cores;
             getAllChiplets(l_cores, TYPE_CORE, true );
-            TS_TRACE( "testVerifyResourceRecovery: %d functional cores",
-                      l_cores.size() );
+            TS_INFO( "testVerifyResourceRecovery: %d functional cores",
+                     l_cores.size() );
 
             // Keep track of original hwas states
             TARGETING::HwasState l_origStates[ l_cores.size() ]  ;
-            HWAS_INF("testVerifyResourceRecovery: Create predictive gard record"
+            TS_INFO("testVerifyResourceRecovery: Create predictive gard record"
                     " for all cores");
 
             for (uint32_t i=0; i < l_cores.size(); i++)
@@ -517,7 +498,7 @@ public:
 
                 // Create a GARD record for all cores
                 l_errl = theDeconfigGard().platCreateGardRecord(l_cores[i],
-                                                                0x12,
+                                                                0xF00 + i,
                                                                 GARD_Predictive);
                 if (l_errl)
                 {
@@ -532,12 +513,11 @@ public:
                 break;
             }
 
-            HWAS_INF("testVerifyResourceRecovery: Enable spec deconfig");
+            TS_INFO("testVerifyResourceRecovery: Enable spec deconfig");
 
             // Ensure gard will execute speculative deconfig
-            Target * pSys;
-            targetService().getTopLevelTarget(pSys);
-            pSys->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(0);
+            auto pNode = UTIL::getCurrentNodeTarget();
+            pNode->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(0);
 
             // Apply gard records and run resource recovery
             l_errl = theDeconfigGard().deconfigureTargetsFromGardRecordsForIpl();
@@ -549,18 +529,29 @@ public:
                 break;
             }
 
+            Target* l_pMasterProc = nullptr;
+            targetService().queryMasterProcChipTargetHandle(l_pMasterProc);
+            TargetHandleList l_cores2;
+            getNonEcoCores(l_cores2, l_pMasterProc);
+            TS_INFO("testVerifyResourceRecovery: corelist=%d",l_cores2.size());
+            for( auto acore : l_cores2 )
+            {
+                TS_INFO("%.8X",get_huid(acore));
+            }
+
+
             // Verify all cores have been "Recovered" and then restore
             // old hwas state
             if (!verifyRecoveredAndRestore(l_cores,l_origStates))
             {
                 // TS_FAIL logged in function so just exit out
-                HWAS_INF("testVerifyResourceRecovery: Verify failed");
+                TS_INFO("testVerifyResourceRecovery: Verify failed");
                 break;
             }
 
             // Verify spec deconfig is disabled (since it's already been
             // run).
-            if (pSys->getAttr<ATTR_BLOCK_SPEC_DECONFIG>() != 1)
+            if (pNode->getAttr<ATTR_BLOCK_SPEC_DECONFIG>() != 1)
             {
                 TS_FAIL("testVerifyResourceRecovery: Spec deconfig is not "
                         "disabled");
@@ -592,7 +583,7 @@ public:
             }
 
             // Reset to 0
-            pSys->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(0);
+            pNode->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(0);
 
             // Clear all gard records
             for (uint32_t i=0; i < l_cores.size(); i++)
@@ -600,11 +591,9 @@ public:
                 theDeconfigGard().clearGardRecords(l_cores[i]);
             }
         } while(0);
-#endif
     }
 
 };  // end class
 
-#undef DISABLE_UNIT_TESTS
 
 #endif

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2021
+# Contributors Listed Below - COPYRIGHT 2011,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -36,7 +36,7 @@ COMMON_TESTCASE_REL_PATHS = \
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
 
 MODULE = testhwas
-TESTS = hwas1test.H hwasGardTest.H hwasPlatErrorTest.H
+TESTS = hwas1test.H hwasGardTest.H hwasPlatErrorTest.H hwasSysAvailSvcTest.H
 TESTS += ${COMMON_TESTCASE_REL_PATHS}
 
 OBJS += attributestrings.o
