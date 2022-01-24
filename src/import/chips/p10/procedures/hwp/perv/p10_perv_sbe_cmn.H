@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -210,5 +210,11 @@ fapi2::ReturnCode p10_perv_sbe_cmn_poll_pll_lock(
 
 fapi2::ReturnCode p10_perv_sbe_cmn_switch_mux_cfam(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip, mux_type i_mux_setup);
+
+fapi2::ReturnCode p10_perv_sbe_cmn_min_active_backing_nums(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const std::vector<fapi2::Target<fapi2::TARGET_TYPE_CORE>>& i_core_functional_vector,
+    uint8_t& o_active_cores_num,
+    uint8_t& o_backing_caches_num);
 
 #endif

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1221,6 +1221,87 @@ fapi2::ReturnCode p10_perv_sbe_cmn_switch_mux_cfam(
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+/// @brief minimum number of active cores and backing num.
+//
+/// @param[in]     i_target_chip                 Reference to TARGET_TYPE_PROC_CHIP
+/// @param[in]     i_core_functional_vector      Vector of functional cores.
+/// @param[out]    o_active_cores_num            Number of active cores.
+/// @param[out]    o_backing_caches_num          Number of backing cache.
+/// @return  FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p10_perv_sbe_cmn_min_active_backing_nums(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const std::vector<fapi2::Target<fapi2::TARGET_TYPE_CORE>>& i_core_functional_vector,
+    uint8_t& o_active_cores_num,
+    uint8_t& o_backing_caches_num)
+{
+
+    FAPI_DBG("> p10_perv_sbe_cmn_min_active_backing_nums...");
+
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::ATTR_SBE_SELECT_EX_POLICY_Type l_attr_sbe_select_ex_policy;
+    fapi2::ATTR_FUSED_CORE_MODE_Type l_attr_fused_core_mode;
+    uint32_t l_eco_caches_num = 0;
+
+    uint8_t l_functional_cores_num = i_core_functional_vector.size();
+    o_active_cores_num = 0;
+    o_backing_caches_num = 0;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SBE_SELECT_EX_POLICY, FAPI_SYSTEM, l_attr_sbe_select_ex_policy),
+             "Error from FAPI_ATTR_GET (ATTR_SBE_SELECT_EX_POLICY)");
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FUSED_CORE_MODE, FAPI_SYSTEM, l_attr_fused_core_mode),
+             "Error from FAPI_ATTR_GET (ATTR_FUSED_CORE_MODE)");
+
+    for (const auto& l_core : i_core_functional_vector)
+    {
+        fapi2::ATTR_ECO_MODE_Type l_eco_mode;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ECO_MODE, l_core, l_eco_mode));
+
+        if (l_eco_mode == fapi2::ENUM_ATTR_ECO_MODE_ENABLED)
+        {
+            l_eco_caches_num++;
+        }
+    }
+
+    l_functional_cores_num -= l_eco_caches_num;
+
+    if (l_attr_sbe_select_ex_policy == fapi2::ENUM_ATTR_SBE_SELECT_EX_POLICY_CRONUS_MAX_ACTIVE)
+    {
+        o_active_cores_num = l_functional_cores_num;
+        o_backing_caches_num = 0;
+    }
+
+    else
+    {
+        // default to minset of active cores / backing caches
+        o_active_cores_num = ((l_attr_fused_core_mode == fapi2::ENUM_ATTR_FUSED_CORE_MODE_CORE_FUSED) ? (2) : (1));
+        o_backing_caches_num = 2;
+
+        if ((l_attr_sbe_select_ex_policy == fapi2::ENUM_ATTR_SBE_SELECT_EX_POLICY_HB_MAX_FOOTPRINT) ||
+            (l_attr_sbe_select_ex_policy == fapi2::ENUM_ATTR_SBE_SELECT_EX_POLICY_HB_MAX_FOOTPRINT_MAX_THREADS))
+        {
+            // maximal set of backing caches
+            // backing cache configuration can only grow in powers of 2
+            while (((o_backing_caches_num * 2) + o_active_cores_num) <=
+                   l_functional_cores_num)
+            {
+                o_backing_caches_num *= 2;
+            }
+        }
+
+        if ((l_attr_sbe_select_ex_policy == fapi2::ENUM_ATTR_SBE_SELECT_EX_POLICY_HB_MAX_THREADS) ||
+            (l_attr_sbe_select_ex_policy == fapi2::ENUM_ATTR_SBE_SELECT_EX_POLICY_HB_MAX_FOOTPRINT_MAX_THREADS))
+        {
+            // maximal set of active cores
+            o_active_cores_num = (l_functional_cores_num - o_backing_caches_num);
+        }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 
 
 #endif
