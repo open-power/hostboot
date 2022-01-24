@@ -577,13 +577,6 @@ int hbrt_update_prep(void)
     TRACFCOMP(g_trac_targeting, ENTER_MRK" hbrt_update_prep");
     errlHndl_t pError = nullptr;
 
-    // Before doing any targeting/attribute manipulation, set this system-level attribute
-    Target* l_sys = UTIL::assertGetToplevelTarget();
-    auto pm_type = PM_COMPLEX_LOAD_TYPE_RELOAD;
-    l_sys->setAttr<ATTR_PM_COMPLEX_LOAD_REQ>(pm_type);
-    TRACFCOMP(g_trac_targeting, INFO_MRK" hbrt_update_prep: set pm_type=0x%X to RELOAD", pm_type);
-
-
     // Define a structure to defer the application of the new targeting data
     //  until after we've processed every node
     typedef struct MemChunk

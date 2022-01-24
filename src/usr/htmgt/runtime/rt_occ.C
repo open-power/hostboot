@@ -178,8 +178,8 @@ namespace HTMGT
                   "reset_pm_complex_with_reason: i_reason=%d, i_chipId=%d ", i_reason, i_chipId);
 
         // Only pass in i_chipId's conversion to l_proc if it is an error scenario
-        // NOTE: have to use static_cast to avoid collision with enum HTMGT::occResetReason
-        if (i_reason == static_cast<OCC_RESET_REASON>(OCC_RESET_REASON_ERROR))
+        // NOTE: have to use '::' to avoid collision with enum HTMGT::occResetReason
+        if (i_reason == ::OCC_RESET_REASON_ERROR)
         { 
             l_errl = RT_TARG::getHbTarget(i_chipId,
                                           l_proc);
@@ -193,8 +193,8 @@ namespace HTMGT
         }
 
         // For this special case we want to make sure that the PM Complex is RE-loaded
-        // NOTE: have to use static_cast to avoid collision with enum HTMGT::occResetReason
-        if (i_reason == static_cast<OCC_RESET_REASON>(OCC_RESET_REASON_CODE_UPDATE))
+        // NOTE: have to use '::' to avoid collision with enum HTMGT::occResetReason
+        if (i_reason == ::OCC_RESET_REASON_CODE_UPDATE)
         {
             Target* l_sys = UTIL::assertGetToplevelTarget();
             auto pm_type = PM_COMPLEX_LOAD_TYPE_RELOAD;
