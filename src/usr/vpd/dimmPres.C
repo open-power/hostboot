@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -125,7 +125,7 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
         }
 
         // Is the target present?
-#if defined(CONFIG_DJVPD_READ_FROM_HW) && defined(CONFIG_SUPPORT_EEPROM_HWACCESS)
+#ifdef CONFIG_SUPPORT_EEPROM_HWACCESS
         // Check if the i2c master is present.
         // If it is not then no reason to check the DIMM which would
         // otherwise generate tons of FSI errors.
@@ -189,22 +189,7 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
             l_i2cMasterPresent = true;
         }
         while (0);
-
-        if (!l_i2cMasterPresent)
-        {
-            present = false;
-            // Invalidate the SPD in PNOR
-            err = VPD::invalidatePnorCache(i_target);
-            if (err)
-            {
-                TRACFCOMP( g_trac_spd, ERR_MRK"dimmPresenceDetect() "
-                           "Error invalidating SPD in PNOR" );
-            }
-            break;
-        }
-
-#endif // CONFIG_DJVPD_READ_FROM_HW && def(CONFIG_SUPPORT_EEPROM_HWACCESS)
-
+#endif //CONFIG_SUPPORT_EEPROM_HWACCESS
 
         // Check if the SPD is there if we are talking to real hardware
 #ifdef CONFIG_SUPPORT_EEPROM_HWACCESS
@@ -236,35 +221,6 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
                        "Dimm was found to be present." );
         }
 
-
-
-#if defined(CONFIG_DJVPD_READ_FROM_HW) && defined(CONFIG_DJVPD_READ_FROM_PNOR)
-        if( present )
-        {
-            // Check if the VPD data in the PNOR matches the SEEPROM
-            TRACUCOMP( g_trac_spd, INFO_MRK"dimmPresenceDetect() "
-                       "Check if the VPD data in the PNOR matches the SEEPROM for 0x%08X.",
-                       TARGETING::get_huid(i_target) );
-            err = VPD::ensureCacheIsInSync( i_target );
-            if( err )
-            {
-                present = false;
-                TRACFCOMP( g_trac_spd, ERR_MRK"dimmPresenceDetect() "
-                           "Error during ensureCacheIsInSync (SPD)" );
-                break;
-            }
-        }
-        else
-        {
-            // SPD is not present, invalidate the SPD in PNOR
-            err = VPD::invalidatePnorCache(i_target);
-            if (err)
-            {
-                TRACFCOMP( g_trac_spd, ERR_MRK"dimmPresenceDetect() "
-                           "Error invalidating SPD in PNOR" );
-            }
-        }
-#endif
 
         // copy present value into output buffer so caller can read it
         memcpy( io_buffer, &present, presentSz );

@@ -86,25 +86,15 @@ IpVpdFacade::IpVpdFacade(const  recordInfo* i_vpdRecords,
                          uint64_t i_recSize,
                          const  keywordInfo* i_vpdKeywords,
                          uint64_t i_keySize,
-                         PNOR::SectionId i_pnorSection,
                          mutex_t i_mutex,
                          VPD::VPD_MSG_TYPE i_vpdMsgType )
 :iv_vpdRecords(i_vpdRecords)
 ,iv_recSize(i_recSize)
 ,iv_vpdKeywords(i_vpdKeywords)
 ,iv_keySize(i_keySize)
-,iv_pnorSection(i_pnorSection)
 ,iv_mutex(i_mutex)
-,iv_cachePnorAddr(0x0)
 ,iv_vpdMsgType(i_vpdMsgType)
 {
-    iv_configInfo.vpdReadPNOR   = false;
-    iv_configInfo.vpdReadHW     = false;
-    iv_configInfo.vpdWritePNOR  = false;
-    iv_configInfo.vpdWriteHW    = false;
-    iv_vpdSectionSize           = 0;
-    iv_vpdMaxSections           = 0;
-
     TRACUCOMP(g_trac_vpd, "IpVpdFacade::IpVpdFacade> " );
 }
 
@@ -153,8 +143,6 @@ errlHndl_t IpVpdFacade::read ( TARGETING::Target * i_target,
         // Get the offset of the record requested
         err = findRecordOffset( recordName,
                                 recordOffset,
-                                iv_configInfo.vpdReadPNOR,
-                                iv_configInfo.vpdReadHW,
                                 i_target,
                                 i_args );
         if( err )
@@ -257,67 +245,27 @@ errlHndl_t IpVpdFacade::write ( TARGETING::Target * i_target,
                    INFO_MRK"IpVpdFacade::Write: Record (%s) and Keyword (%s)",
                    recordName, keywordName );
 
-        // If writes to PNOR and SEEPROM are both enabled and
-        //   the write location is not specified, then call
-        //   write() recursively for each location
-        if ( iv_configInfo.vpdWritePNOR &&
-             iv_configInfo.vpdWriteHW &&
-             ((i_args.location & VPD::LOCATION_MASK) == VPD::AUTOSELECT) )
-        {
-            input_args_t l_args = i_args;
-
-            l_args.location = VPD::SEEPROM;
-            err = write( i_target,
-                         io_buffer,
-                         io_buflen,
-                         l_args );
-            if( err )
-            {
-                break;
-            }
-
-            // PNOR needs to be loaded before we can write it
-            TARGETING::ATTR_VPD_SWITCHES_type vpdSwitches =
-                    i_target->getAttr<TARGETING::ATTR_VPD_SWITCHES>();
-            if( vpdSwitches.pnorCacheValid )
-            {
-                l_args.location = VPD::PNOR;
-                err = write( i_target,
-                             io_buffer,
-                             io_buflen,
-                             l_args );
-                if( err )
-                {
-                    break;
-                }
-            }
-        }
-        else
-        {
-            // Get the offset of the record requested
-            err = findRecordOffset( recordName,
-                                    recordOffset,
-                                    iv_configInfo.vpdWritePNOR,
-                                    iv_configInfo.vpdWriteHW,
-                                    i_target,
-                                    i_args );
-            if( err )
-            {
-                break;
-            }
-
-            // Use record offset to find/write the keyword
-            err = writeKeyword( keywordName,
-                                recordName,
+        // Get the offset of the record requested
+        err = findRecordOffset( recordName,
                                 recordOffset,
                                 i_target,
-                                io_buffer,
-                                io_buflen,
                                 i_args );
-            if( err )
-            {
-                break;
-            }
+        if( err )
+        {
+            break;
+        }
+
+        // Use record offset to find/write the keyword
+        err = writeKeyword( keywordName,
+                            recordName,
+                            recordOffset,
+                            i_target,
+                            io_buffer,
+                            io_buflen,
+                            i_args );
+        if( err )
+        {
+            break;
         }
     } while( 0 );
 
@@ -355,13 +303,11 @@ errlHndl_t IpVpdFacade::cmpEecacheToEeprom(TARGETING::Target * i_target,
     input_args_t l_cacheArgs;
     l_cacheArgs.record = i_record;
     l_cacheArgs.keyword = i_keyword;
-    l_cacheArgs.location = VPD::SEEPROM;
     l_cacheArgs.eepromSource = EEPROM::CACHE;
 
     input_args_t l_hardwareArgs;
     l_hardwareArgs.record = i_record;
     l_hardwareArgs.keyword = i_keyword;
-    l_hardwareArgs.location = VPD::SEEPROM;
     l_hardwareArgs.eepromSource = EEPROM::HARDWARE;
 
     do
@@ -449,102 +395,6 @@ errlHndl_t IpVpdFacade::cmpEecacheToEeprom(TARGETING::Target * i_target,
     return l_err;
 }
 
-// ------------------------------------------------------------------
-// IpVpdFacade::cmpPnorToSeeprom
-// ------------------------------------------------------------------
-errlHndl_t IpVpdFacade::cmpPnorToSeeprom ( TARGETING::Target * i_target,
-                                           VPD::vpdRecord i_record,
-                                           VPD::vpdKeyword i_keyword,
-                                           bool &o_match )
-{
-    errlHndl_t l_err = nullptr;
-
-    TRACSSCOMP( g_trac_vpd, ENTER_MRK"cmpPnorToSeeprom() " );
-
-    o_match = false;
-
-    input_args_t l_pnorArgs;
-    l_pnorArgs.record = i_record;
-    l_pnorArgs.keyword = i_keyword;
-    l_pnorArgs.location = VPD::PNOR;
-
-    input_args_t l_seepromArgs;
-    l_seepromArgs.record = i_record;
-    l_seepromArgs.keyword = i_keyword;
-    l_seepromArgs.location = VPD::SEEPROM;
-
-    do
-    {
-        // Get the PNOR size
-        size_t l_sizePnor = 0;
-        l_err = read( i_target,
-                      nullptr,
-                      l_sizePnor,
-                      l_pnorArgs );
-        if( l_err || (l_sizePnor == 0) )
-        {
-            // PNOR may not be loaded, ignore the error
-            delete l_err;
-            l_err = nullptr;
-            break;
-        }
-
-        // Get the PNOR data
-        uint8_t l_dataPnor[l_sizePnor];
-        l_err = read( i_target,
-                      l_dataPnor,
-                      l_sizePnor,
-                      l_pnorArgs );
-        if( l_err )
-        {
-            break;
-        }
-
-        // Get the SEEPROM size
-        size_t l_sizeSeeprom = 0;
-        l_err = read( i_target,
-                      nullptr,
-                      l_sizeSeeprom,
-                      l_seepromArgs );
-        if( l_err || (l_sizeSeeprom == 0) )
-        {
-            break;
-        }
-
-        // Get the SEEPROM data
-        uint8_t l_dataSeeprom[l_sizeSeeprom];
-        l_err = read( i_target,
-                      l_dataSeeprom,
-                      l_sizeSeeprom,
-                      l_seepromArgs );
-        if( l_err )
-        {
-            break;
-        }
-
-        // Compare the PNOR/SEEPROM size/data
-        if( l_sizePnor != l_sizeSeeprom )
-        {
-            break;
-        }
-        if( memcmp( l_dataPnor,
-                    l_dataSeeprom,
-                    l_sizePnor ) != 0 )
-        {
-            TRACFCOMP( g_trac_vpd, "cmpPnorToSeeprom found mismatch for HUID %.8X 0x%X:0x%X", TARGETING::get_huid(i_target), i_record, i_keyword );
-            TRACFBIN( g_trac_vpd, "EEPROM", l_dataSeeprom, l_sizeSeeprom );
-            TRACFBIN( g_trac_vpd, "PNOR", l_dataPnor, l_sizePnor );
-            break;
-        }
-
-        o_match = true;
-
-    } while(0);
-
-    TRACSSCOMP( g_trac_vpd, EXIT_MRK"cmpPnorToSeeprom()" );
-
-    return l_err;
-}
 
 // ------------------------------------------------------------------
 // IpVpdFacade::cmpSeepromToZero
@@ -563,7 +413,6 @@ errlHndl_t IpVpdFacade::cmpSeepromToZero ( TARGETING::Target * i_target,
     input_args_t l_seepromArgs;
     l_seepromArgs.record = i_record;
     l_seepromArgs.keyword = i_keyword;
-    l_seepromArgs.location = VPD::SEEPROM;
 
     do
     {
@@ -608,251 +457,6 @@ errlHndl_t IpVpdFacade::cmpSeepromToZero ( TARGETING::Target * i_target,
 
     return l_err;
 }
-
-/*             IPVPD PNOR FORMAT
-   |-----------------------------------------------------------|----|
-   |TOC0|TOC1|...........................................|TOC31|    |
-   |-----------------------------------------------------------|TARG0
-   |REC1DATA|.........................................|RECNDATA|64K |
-   |-----------------------------------------------------------|----|
-   |TOC0|TOC1|...........................................|TOC31|    |
-   |-----------------------------------------------------------|TARG1
-   |REC1DATA|.........................................|RECNDATA|64K |
-   |-----------------------------------------------------------|----|
-   |TOC0|TOC1|...........................................|TOC31|    |
-   |-----------------------------------------------------------|TARG2
-   |REC1DATA|.........................................|RECNDATA|64K |
-   |-----------------------------------------------------------|----|
-   ---- Till TARGN
-*/
-
-#ifndef __HOSTBOOT_RUNTIME
-// ------------------------------------------------------------------
-// IpVpdFacade::loadPnor
-// ------------------------------------------------------------------
-errlHndl_t IpVpdFacade::loadPnor ( TARGETING::Target * i_target )
-{
-    errlHndl_t err = nullptr;
-
-    TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::loadPnor()" );
-
-    // Load PNOR TOC with invalid data
-    err = invalidatePnor( i_target );
-    if( err )
-    {
-        TRACFCOMP(g_trac_vpd,
-                  "IpVpdFacade::loadPnor() Error invalidating PNOR Target %.8X",
-                  TARGETING::get_huid(i_target));
-        return err;
-    }
-
-    // Temp data for entire VPD entry
-    uint8_t* tmpVpdPtr = new uint8_t[iv_vpdSectionSize];
-
-    // Load the temp data with invalid TOC
-    uint64_t tocdata = IPVPD_TOC_INVALID_DATA;
-    for( uint32_t tocoffset = 0;
-         tocoffset < IPVPD_TOC_SIZE;
-         tocoffset += IPVPD_TOC_ENTRY_SIZE )
-    {
-        memcpy( (tmpVpdPtr + tocoffset),
-                &tocdata,
-                IPVPD_TOC_ENTRY_SIZE );
-    }
-
-    // Load PNOR cache from SEEPROM
-    // Variables starting with p=PNOR, s=SEEPROM
-
-    // Table of contents
-    tocData pTocEntry;
-    uint16_t pTocOffset = 0;
-
-    // Records
-    uint16_t sRecOffset = 0;
-    uint16_t sRecLength = 0;
-    uint16_t pRecOffset = IPVPD_TOC_SIZE;  // Records begin after TOC
-    input_args_t sRecArgs;
-    sRecArgs.location =
-              static_cast<VPD::vpdCmdTarget>(VPD::SEEPROM | VPD::USEVPD);
-
-    std::list<pt_entry> recList;
-    recList.clear();
-    err = getRecordListSeeprom( recList,
-                                i_target,
-                                sRecArgs );
-    if( err )
-    {
-        TRACFCOMP(g_trac_vpd,"IpVPdFacade::loadPnor() getRecordListSeeprom failed");
-        return err;
-    }
-
-    for ( std::list<pt_entry>::iterator it = recList.begin();
-          it != recList.end(); it++ )
-    {
-        // Copy the record name to the toc structure asciiRec
-        memcpy( pTocEntry.asciiRec,
-                (*it).record_name,
-                RECORD_BYTE_SIZE );
-
-        // Swap the bytes to match SEEPROM VPD format
-        pTocEntry.offset[0] = ((uint8_t*)(&pRecOffset))[1];
-        pTocEntry.offset[1] = ((uint8_t*)(&pRecOffset))[0];
-
-        // Just a signature after every TOC entry
-        pTocEntry.unusedByte[0] = 0x5A;
-        pTocEntry.unusedByte[1] = 0x5A;
-
-        // Write TOC to temp data
-        memcpy( (tmpVpdPtr + pTocOffset),
-                &pTocEntry,
-                IPVPD_TOC_ENTRY_SIZE );
-
-        // Byte swap fields, skip 'large resource' byte
-        sRecOffset = le16toh( (*it).record_offset ) + 1;
-        sRecLength = le16toh( (*it).record_length );
-
-        // Make sure we don't exceed our allocated space in PNOR
-        if( (pRecOffset + sRecLength) > iv_vpdSectionSize )
-        {
-            TRACFCOMP(g_trac_vpd,"IpVpdFacade::loadPnor()> The amount of "
-                                 "space required (0x%X) for the VPD cache "
-                                 "exceeds the available space (0x%X)",
-                                  pRecOffset + sRecLength,
-                                  iv_vpdSectionSize );
-            /*@
-             * @errortype
-             * @reasoncode       VPD::VPD_CACHE_SIZE_EXCEEDED
-             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid         VPD::VPD_IPVPD_LOAD_PNOR
-             * @userdata1        HUID of target chip
-             * @userdata2[00:31] Available size
-             * @userdata2[32:63] Requested size
-             * @devdesc          The amount of space required for the VPD
-             *                   cache exceeds the available space
-             * @custdesc         Fatal firmware boot error
-             */
-            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           VPD::VPD_IPVPD_LOAD_PNOR,
-                                           VPD::VPD_CACHE_SIZE_EXCEEDED,
-                                           TARGETING::get_huid(i_target),
-                                           TWO_UINT32_TO_UINT64(
-                                              iv_vpdSectionSize,
-                                              pRecOffset + sRecLength ),
-                                           true /*Add HB SW Callout*/ );
-            err->collectTrace( VPD_COMP_NAME, 256 );
-            break;
-        }
-
-        // Read record data from SEEPROM, put it into temp data
-        uint8_t* pRecPtr = tmpVpdPtr + pRecOffset;
-        err = fetchData( sRecOffset,
-                         sRecLength,
-                         pRecPtr,
-                         i_target,
-                         sRecArgs.location,
-                         (*it).record_name );
-        if( err )
-        {
-            TRACFCOMP(g_trac_vpd,"IpVpdFacade::loadPnor() Error reading record %s",(*it).record_name);
-            break;
-        }
-
-        // Increment the PNOR TOC and record offsets
-        pTocOffset += IPVPD_TOC_ENTRY_SIZE;
-        pRecOffset += sRecLength;
-    }
-
-    if( !err )
-    {
-        // Setup info needed to write PNOR
-        VPD::pnorInformation pInfo;
-        pInfo.segmentSize = iv_vpdSectionSize;
-        pInfo.maxSegments = iv_vpdMaxSections;
-        pInfo.pnorSection = iv_pnorSection;
-
-        // Write the entire PNOR entry
-        err = VPD::writePNOR( 0x0,                  // start offset
-                              pRecOffset,           // size
-                              tmpVpdPtr,            // data
-                              i_target,
-                              pInfo,
-                              iv_cachePnorAddr,
-                              &iv_mutex );
-        if( err )
-        {
-            TRACFCOMP(g_trac_vpd,"IpVpdFacade::loadPnor() Error writing PNOR VPD data");
-        }
-    }
-    else
-    {
-        // Error reading record data, invalidate the TOC
-        // Use different errl so we don't overwrite the original
-        errlHndl_t invErr = nullptr;
-        invErr = invalidatePnor( i_target );
-        if( invErr )
-        {
-            TRACFCOMP(g_trac_vpd,"IpVpdFacade::loadPnor() "
-                      "Error invalidating PNOR Target %.8X",
-                      TARGETING::get_huid(i_target));
-            delete invErr;
-            invErr = nullptr;
-        }
-    }
-
-    TRACSSCOMP( g_trac_vpd, EXIT_MRK"IpVpdFacade::loadPnor()" );
-
-    return err;
-}
-
-// ------------------------------------------------------------------
-// IpVpdFacade::invalidatePnor
-// ------------------------------------------------------------------
-errlHndl_t IpVpdFacade::invalidatePnor ( TARGETING::Target * i_target )
-{
-    errlHndl_t err = nullptr;
-
-    TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::invalidatePnor()" );
-
-    // Setup info needed to write PNOR
-    VPD::pnorInformation pInfo;
-    pInfo.segmentSize = iv_vpdSectionSize;
-    pInfo.maxSegments = iv_vpdMaxSections;
-    pInfo.pnorSection = iv_pnorSection;
-
-    // Temp data for entire TOC
-    uint8_t* tmpTocPtr = new uint8_t[IPVPD_TOC_SIZE];
-
-    // Load the temp data with invalid TOC
-    uint64_t tocdata = IPVPD_TOC_INVALID_DATA;
-    for( uint32_t tocoffset = 0;
-         tocoffset < IPVPD_TOC_SIZE;
-         tocoffset += IPVPD_TOC_ENTRY_SIZE )
-    {
-        memcpy( (tmpTocPtr + tocoffset),
-                &tocdata,
-                IPVPD_TOC_ENTRY_SIZE );
-    }
-
-    // Write the entire PNOR TOC
-    err = VPD::writePNOR( 0x0,              // start offset
-                          IPVPD_TOC_SIZE,   // size
-                          tmpTocPtr,        // data
-                          i_target,
-                          pInfo,
-                          iv_cachePnorAddr,
-                          &iv_mutex );
-    if( err )
-    {
-        TRACFCOMP(g_trac_vpd,
-                  "IpVpdFacade::invalidatePnor() Error writing PNOR TOC");
-        return err;
-    }
-
-    TRACSSCOMP( g_trac_vpd, EXIT_MRK"IpVpdFacade::invalidatePnor()" );
-
-    return err;
-}
-#endif
 
 // ------------------------------------------------------------------
 // IpVpdFacade::translateRecord
@@ -1118,122 +722,17 @@ errlHndl_t IpVpdFacade::keywordStringtoEnum ( const char * i_keyword,
 // ------------------------------------------------------------------
 errlHndl_t IpVpdFacade::findRecordOffset ( const char * i_record,
                                            uint16_t & o_offset,
-                                           bool i_rwPnorEnabled,
-                                           bool i_rwHwEnabled,
                                            TARGETING::Target * i_target,
                                            input_args_t i_args )
 {
     errlHndl_t err = nullptr;
 
-    // Look for a record override in our image unless explicitly told not to
-    if( (i_args.location & VPD::OVERRIDE_MASK) != VPD::USEVPD )
-    {
-        uint8_t* l_overridePtr = nullptr;
-        VPD::RecordTargetPair_t l_recTarg =
-          VPD::makeRecordTargetPair(i_record,i_target);
-
-        // Check if we already figured out where to get this record from
-        mutex_lock(&iv_mutex); //iv_overridePtr is not threadsafe
-        VPD::OverrideMap_t::iterator l_overItr = iv_overridePtr.find(l_recTarg);
-        if( l_overItr != iv_overridePtr.end() )
-        {
-            l_overridePtr = l_overItr->second;
-            mutex_unlock(&iv_mutex);
-        }
-        else
-        {
-            mutex_unlock(&iv_mutex);
-            // Now go see if we should be using the override and if so
-            //  where we find the right copy
-            err = checkForRecordOverride(i_record,i_target,l_overridePtr);
-            if( err )
-            {
-                TRACFCOMP( g_trac_vpd, ERR_MRK"findRecordOffset> failure calling checkForRecordOverride for %s on %.8X",
-                           i_record, get_huid(i_target) );
-                return err;
-            }
-
-            // Don't trace that record exists in PNOR if it does not
-            if (l_overridePtr != nullptr)
-            {
-                TRACFCOMP( g_trac_vpd, INFO_MRK" Record %s for target 0x%.8X exists at %p in PNOR",
-                       i_record, get_huid(i_target), l_overridePtr );
-            }
-        }
-
-        // If we have an override, the record is already pointed at directly
-        if( l_overridePtr != nullptr )
-        {
-            o_offset = 0;
-            return nullptr;
-        }
-    }
-
-    // Determine the VPD source (PNOR/SEEPROM)
-    VPD::vpdCmdTarget vpdSource = VPD::AUTOSELECT;
-    bool configError = false;
-    configError = VPD::resolveVpdSource( i_target,
-                                         i_rwPnorEnabled,
-                                         i_rwHwEnabled,
-                                         i_args.location,
-                                         vpdSource );
-    // Get the record offset
-    if ( vpdSource == VPD::PNOR )
-    {
-        err = findRecordOffsetPnor(i_record, o_offset, i_target, i_args);
-    }
-    else if ( vpdSource == VPD::SEEPROM )
-    {
-        uint16_t o_length;
-        err = findRecordOffsetSeeprom(i_record,
-                                      o_offset,
-                                      o_length,
-                                      i_target,
-                                      i_args);
-    }
-    else
-    {
-        configError = true;
-    }
-
-    if( configError )
-    {
-        TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::findRecordOffset: "
-                   "Error resolving VPD source (PNOR/SEEPROM)");
-
-        /*@
-         * @errortype
-         * @reasoncode       VPD::VPD_READ_SOURCE_UNRESOLVED
-         * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid         VPD::VPD_IPVPD_FIND_RECORD_OFFSET
-         * @userdata1[0:31]  Target HUID
-         * @userdata1[32:63] Requested VPD Source Location
-         * @userdata2[0:31]  VPD write PNOR flag
-         * @userdata2[32:63] VPD write HW flag
-         * @devdesc          Unable to resolve the VPD
-         *                   source (PNOR or SEEPROM)
-         */
-        err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                       VPD::VPD_IPVPD_FIND_RECORD_OFFSET,
-                                       VPD::VPD_READ_SOURCE_UNRESOLVED,
-                                       TWO_UINT32_TO_UINT64(
-                                            TARGETING::get_huid(i_target),
-                                            i_args.location ),
-                                       TWO_UINT32_TO_UINT64(
-                                            i_rwPnorEnabled,
-                                            i_rwHwEnabled ),
-                                       true /*Add HB SW Callout*/ );
-        VPD::UdConfigParms( i_target,
-                            i_args.record,
-                            i_args.keyword,
-                            i_args.location,
-                            iv_configInfo.vpdReadPNOR,
-                            iv_configInfo.vpdReadHW,
-                            iv_configInfo.vpdWritePNOR,
-                            iv_configInfo.vpdWriteHW
-                          ).addToLog(err);
-        err->collectTrace( VPD_COMP_NAME, 256 );
-    }
+    uint16_t o_length;
+    err = findRecordOffsetSeeprom(i_record,
+                                  o_offset,
+                                  o_length,
+                                  i_target,
+                                  i_args);
 
     return err;
 }
@@ -1282,8 +781,7 @@ bool IpVpdFacade::hasVpdPresent( TARGETING::Target * i_target,
 
         vpdPresent = recordPresent( l_recordName,
                                     recordOffset,
-                                    i_target,
-                                    VPD::USEVPD );
+                                    i_target );
 
     }while( 0 );
 
@@ -1302,8 +800,7 @@ bool IpVpdFacade::hasVpdPresent( TARGETING::Target * i_target,
 // ------------------------------------------------------------------
 bool IpVpdFacade::recordPresent( const char * i_record,
                                  uint16_t & o_offset,
-                                 TARGETING::Target * i_target,
-                                 VPD::vpdCmdTarget i_location )
+                                 TARGETING::Target * i_target )
 {
     errlHndl_t err = nullptr;
     uint64_t tmpOffset = 0x0;
@@ -1331,7 +828,6 @@ bool IpVpdFacade::recordPresent( const char * i_record,
                              RECORD_BYTE_SIZE,
                              l_record,
                              i_target,
-                             i_location,
                              i_record );
             tmpOffset += RECORD_BYTE_SIZE;
 
@@ -1349,7 +845,6 @@ bool IpVpdFacade::recordPresent( const char * i_record,
                                  RECORD_ADDR_BYTE_SIZE,
                                  &o_offset,
                                  i_target,
-                                 i_location,
                                  i_record );
                 if( err )
                 {
@@ -1373,75 +868,6 @@ bool IpVpdFacade::recordPresent( const char * i_record,
     return matchFound;
 }
 
-// ------------------------------------------------------------------
-// IpVpdFacade::findRecordOffsetPnor
-// ------------------------------------------------------------------
-errlHndl_t IpVpdFacade::findRecordOffsetPnor ( const char * i_record,
-                                               uint16_t & o_offset,
-                                               TARGETING::Target * i_target,
-                                               input_args_t i_args )
-{
-    errlHndl_t err = nullptr;
-    uint16_t offset = 0x0;
-    bool matchFound = false;
-
-    TRACSSCOMP( g_trac_vpd,
-                ENTER_MRK"IpVpdFacade::findRecordOffset()" );
-
-    matchFound = recordPresent( i_record,
-                                offset,
-                                i_target,
-                                i_args.location );
-
-    if( !matchFound )
-    {
-        TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::findRecordOffsetPnor: "
-                   "No matching Record (%s) found in TOC!",
-                   i_record );
-
-        /*@
-            * @errortype
-            * @reasoncode       VPD::VPD_RECORD_NOT_FOUND
-            * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-            * @moduleid         VPD::VPD_IPVPD_FIND_RECORD_OFFSET
-            * @userdata1        Requested Record
-            * @userdata2        Requested Keyword
-            * @devdesc          The requested record was not found in the VPD TOC.
-            */
-        err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                        VPD::VPD_IPVPD_FIND_RECORD_OFFSET,
-                                        VPD::VPD_RECORD_NOT_FOUND,
-                                        i_args.record,
-                                        i_args.keyword );
-
-        // Could be the VPD of the target wasn't set up properly
-        // -- DECONFIG so that we can possibly keep booting
-        err->addHwCallout( i_target,
-                            HWAS::SRCI_PRIORITY_HIGH,
-                            HWAS::DECONFIG,
-                            HWAS::GARD_NULL );
-        // Or FSP code didn't set up the VPD properly
-        err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
-                                    HWAS::SRCI_PRIORITY_MED);
-
-        // Or HB code didn't look for the record properly
-        err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                    HWAS::SRCI_PRIORITY_LOW);
-
-        // Add trace to the log so we know what record was being requested.
-        err->collectTrace( VPD_COMP_NAME, 256 );
-
-
-    }
-
-    // Return the offset found, after byte swapping it.
-    o_offset = le16toh( offset );
-
-    TRACSSCOMP( g_trac_vpd,
-                EXIT_MRK"IpVpdFacade::findRecordOffsetPnor()" );
-
-    return err;
-}
 
 // ------------------------------------------------------------------
 // IpVpdFacade::findRecordOffsetSeeprom
@@ -1596,115 +1022,6 @@ errlHndl_t IpVpdFacade::findRecordMetaDataSeeprom ( const char * i_record,
 
 
 // ------------------------------------------------------------------
-// IpVpdFacade::getRecordListSeeprom
-// ------------------------------------------------------------------
-errlHndl_t
-IpVpdFacade::getRecordListSeeprom ( std::list<pt_entry> & o_recList,
-                                    TARGETING::Target * i_target,
-                                    input_args_t i_args )
-{
-    errlHndl_t err = nullptr;
-
-    TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::getRecordListSeeprom()" );
-
-    // Get the VTOC record meta data
-    pt_entry vtoc_rec;  // The struct to contain the VTOC meta data
-    err = getVtocRecordMetaData(i_target, i_args, vtoc_rec);
-    if (err)
-    {
-        return err;
-    }
-
-    // Get the list of records that should be copied to pnor.
-    // The list of records for this vpd sub class will be the primary list.
-    // If the eeprom is being shared, then their might be an alternate list
-    // to also include.
-    const  recordInfo* l_primaryVpdRecords = nullptr;
-    uint64_t           l_primaryRecSize = 0;
-    const  recordInfo* l_altVpdRecords = nullptr;
-    uint64_t           l_altRecSize = 0;
-    getRecordLists(l_primaryVpdRecords,
-                   l_primaryRecSize,
-                   l_altVpdRecords,
-                   l_altRecSize);
-
-    // skip 'large resource'
-    uint16_t offset = le16toh( vtoc_rec.record_offset ) + 1;
-
-    // Create some useful variables
-    char l_buffer[256] = { 0 };
-    size_t pt_len = sizeof(l_buffer);
-    pt_entry *toc_rec(nullptr);
-
-    // Read the PT keyword(s) from the VTOC
-    for (uint16_t index = 0; index < 3; ++index)
-    {
-        pt_len = sizeof(l_buffer);
-        err = retrieveKeyword( VPD_KEYWORD_POINTER_TO_RECORD,
-                               VPD_TABLE_OF_CONTENTS_RECORD_NAME,
-                               offset,
-                               index,
-                               i_target,
-                               l_buffer,
-                               pt_len,
-                               i_args );
-        if ( err )
-        {
-            // There may be only one PT keyword
-            if ( index != 0 )
-            {
-                delete err;
-                err = nullptr;
-            }
-            break;
-        }
-
-        // Scan through the VTOC PT keyword records
-        // Copy the records to the list
-        for ( size_t vtoc_pt_offset = 0;
-              vtoc_pt_offset < pt_len;
-              vtoc_pt_offset += sizeof(pt_entry) )
-        {
-            bool l_found = false;
-            toc_rec =
-                reinterpret_cast<pt_entry*>(l_buffer + vtoc_pt_offset);
-
-            // Save record if on the list for this target
-            for ( uint32_t rec = 0; rec < l_primaryRecSize; rec++ )
-            {
-                if ( memcmp( toc_rec->record_name,
-                            l_primaryVpdRecords[rec].recordName,
-                            RECORD_BYTE_SIZE ) == 0 )
-                {
-                    o_recList.push_back(*toc_rec);
-                    l_found = true;
-                    break;
-                }
-            }
-            // if not found, check the alternate list
-            if (!l_found)
-            {
-                for ( uint32_t rec = 0; rec < l_altRecSize; rec++ )
-                {
-                    if ( memcmp( toc_rec->record_name,
-                            l_altVpdRecords[rec].recordName,
-                            RECORD_BYTE_SIZE ) == 0 )
-                    {
-                        o_recList.push_back(*toc_rec);
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    TRACSSCOMP( g_trac_vpd,EXIT_MRK"IpVpdFacade::getRecordListSeeprom()" );
-
-    return err;
-}
-
-
-// ------------------------------------------------------------------
 // IpVpdFacade::retrieveKeyword
 // ------------------------------------------------------------------
 errlHndl_t IpVpdFacade::retrieveKeyword ( const char * i_keywordName,
@@ -1803,7 +1120,6 @@ errlHndl_t IpVpdFacade::retrieveRecord( const char * i_recordName,
                          sizeof(l_size),
                          &l_size,
                          i_target,
-                         i_args.location,
                          i_recordName );
 
         if( err )
@@ -1862,7 +1178,6 @@ errlHndl_t IpVpdFacade::fetchData ( uint64_t            i_byteAddr,
                                     size_t              i_numBytes,
                                     void *              o_data,
                                     TARGETING::Target * i_target,
-                                    VPD::vpdCmdTarget   i_location,
                                     const char*         i_record )
 {
     errlHndl_t err = nullptr;
@@ -1870,9 +1185,6 @@ errlHndl_t IpVpdFacade::fetchData ( uint64_t            i_byteAddr,
     // Create an input_args struct which will default EEPROM_SOURCE
     // to EEPROM::AUTOSELECT.
     input_args_t inputArgs;
-
-    // Set the VPD location to the given location (PNOR/SEEPROM).
-    inputArgs.location = i_location;
 
     err = fetchData(i_byteAddr,
                     i_numBytes,
@@ -1896,158 +1208,19 @@ errlHndl_t IpVpdFacade::fetchData ( uint64_t i_byteAddr,
 {
     errlHndl_t err = nullptr;
 
-    // Determine the VPD source (PNOR/SEEPROM)
-    VPD::vpdCmdTarget vpdSource = VPD::AUTOSELECT;
-    bool configError = false;
-    configError = VPD::resolveVpdSource( i_target,
-                                         iv_configInfo.vpdReadPNOR,
-                                         iv_configInfo.vpdReadHW,
-                                         i_args.location,
-                                         vpdSource );
-
-    // Look for a record override in our image unless explicitly told not to
-    bool l_foundOverride = false;
-    if( (i_args.location & VPD::OVERRIDE_MASK) != VPD::USEVPD )
-    {
-        uint8_t* l_overridePtr = nullptr;
-        VPD::RecordTargetPair_t l_recTarg =
-          VPD::makeRecordTargetPair(i_record,i_target);
-
-        // At this point we can assume that the pointer is set into our
-        //  map if we need it
-        mutex_lock(&iv_mutex); //iv_overridePtr is not threadsafe
-        VPD::OverrideMap_t::iterator l_overItr = iv_overridePtr.find(l_recTarg);
-        if( l_overItr != iv_overridePtr.end() )
-        {
-            l_overridePtr = l_overItr->second;
-
-            // Just do a simple memcpy
-            if( l_overridePtr != nullptr )
-            {
-                memcpy( o_data, l_overridePtr+i_byteAddr, i_numBytes );
-                l_foundOverride = true;
-            }
-        }
-        // Automatically populate a bunch of infrastructure records that
-        //   we would never override (makes the error checks pass cleaner)
-        else if( (0 == memcmp( i_record, VPD_HEADER_RECORD_NAME, 4 ))
-                 || (0 == memcmp( i_record, VPD_TABLE_OF_CONTENTS_RECORD_NAME, 4 )) )
-        {
-            iv_overridePtr[l_recTarg] = nullptr;
-        }
-        else
-        {
-            TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::fetchData: "
-                       "iv_overridePtr is not set as expected for %s on %.8X",
-                       i_record, TARGETING::get_huid(i_target) );
-            for( auto l_over : iv_overridePtr )
-            {
-                TRACFCOMP( g_trac_vpd, "%.8X : %.8X = %p",
-                           TARGETING::get_huid((l_over.first).second),
-                           (l_over.first).first,
-                           l_over.second );
-            }
-            assert( false,
-                    "iv_overridePtr is not set inside IpVpdFacade::fetchData" );
-        }
-        mutex_unlock(&iv_mutex);
-    }
+    // Future: Could insert other data locations here, e.g. file-based
+    //    overrides or non-eeprom data sources
 
     // Get the data
-    if ( (vpdSource == VPD::PNOR) && !l_foundOverride )
-    {
-        err = fetchDataFromPnor( i_byteAddr, i_numBytes, o_data, i_target );
-    }
-    else if ( (vpdSource == VPD::SEEPROM) && !l_foundOverride )
-    {
-        err = fetchDataFromEeprom(i_byteAddr,
-                                  i_numBytes,
-                                  o_data,
-                                  i_target,
-                                  i_args.eepromSource);
-    }
-    else
-    {
-        configError = true;
-    }
-
-    if( configError && !l_foundOverride  )
-    {
-        TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::fetchData: "
-                   "Error resolving VPD source (PNOR/SEEPROM)");
-
-        /*@
-         * @errortype
-         * @reasoncode       VPD::VPD_READ_SOURCE_UNRESOLVED
-         * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid         VPD::VPD_IPVPD_FETCH_DATA
-         * @userdata1[0:31]  Target HUID
-         * @userdata1[32:63] Requested VPD Source Location
-         * @userdata2[0:31]  VPD read PNOR flag
-         * @userdata2[32:63] VPD read HW flag
-         * @devdesc          Unable to resolve the VPD
-         *                   source (PNOR or SEEPROM)
-         */
-        err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                       VPD::VPD_IPVPD_FETCH_DATA,
-                                       VPD::VPD_READ_SOURCE_UNRESOLVED,
-                                       TWO_UINT32_TO_UINT64(
-                                            TARGETING::get_huid(i_target),
-                                            i_args.location ),
-                                       TWO_UINT32_TO_UINT64(
-                                            iv_configInfo.vpdReadPNOR,
-                                            iv_configInfo.vpdReadHW ),
-                                       true /*Add HB SW Callout*/ );
-        err->collectTrace( VPD_COMP_NAME, 256 );
-    }
+    err = fetchDataFromEeprom(i_byteAddr,
+                              i_numBytes,
+                              o_data,
+                              i_target,
+                              i_args.eepromSource);
 
     return err;
 }
 
-// ------------------------------------------------------------------
-// IpVpdFacade::fetchDataFromPnor
-// ------------------------------------------------------------------
-errlHndl_t IpVpdFacade::fetchDataFromPnor ( uint64_t i_byteAddr,
-                                            size_t i_numBytes,
-                                            void * o_data,
-                                            TARGETING::Target * i_target )
-{
-    errlHndl_t err = nullptr;
-    TRACSSCOMP( g_trac_vpd,
-                ENTER_MRK"IpVpdFacade::fetchDataFromPnor(%ld, %d, . . .)",
-                i_byteAddr,
-                i_numBytes );
-    do
-    {
-#ifndef __HOSTBOOT_RUNTIME
-        // Call a function in the common VPD code
-        VPD::pnorInformation info;
-        info.segmentSize = iv_vpdSectionSize;
-        info.maxSegments = iv_vpdMaxSections;
-        info.pnorSection = iv_pnorSection;
-        err = VPD::readPNOR( i_byteAddr,
-                             i_numBytes,
-                             o_data,
-                             i_target,
-                             info,
-                             iv_cachePnorAddr,
-                             &iv_mutex );
-
-        if( err )
-        {
-            break;
-        }
-#else
-        assert( false, "IpVpdFacade::fetchDataFromPnor> No PNOR support in HBRT" );
-#endif
-
-    } while( 0 );
-
-    TRACSSCOMP( g_trac_vpd,
-                EXIT_MRK"IpVpdFacade::fetchDataFromPnor()" );
-
-    return err;
-}
 
 // ------------------------------------------------------------------
 // IpVpdFacade::fetchDataFromEeprom
@@ -2131,7 +1304,6 @@ errlHndl_t IpVpdFacade::findKeywordAddr ( const char * i_keywordName,
                          RECORD_ADDR_BYTE_SIZE,
                          &recordSize,
                          i_target,
-                         i_args.location,
                          i_recordName );
         offset += RECORD_ADDR_BYTE_SIZE;
         if( err )
@@ -2149,7 +1321,6 @@ errlHndl_t IpVpdFacade::findKeywordAddr ( const char * i_keywordName,
                          RECORD_BYTE_SIZE,
                          record,
                          i_target,
-                         i_args.location,
                          i_recordName );
 
         // If we were looking for the Record Type (RT) keyword, we are done.
@@ -2243,7 +1414,6 @@ errlHndl_t IpVpdFacade::findKeywordAddr ( const char * i_keywordName,
                              KEYWORD_BYTE_SIZE,
                              keyword,
                              i_target,
-                             i_args.location,
                              i_recordName );
             offset += KEYWORD_BYTE_SIZE;
 
@@ -2272,7 +1442,6 @@ errlHndl_t IpVpdFacade::findKeywordAddr ( const char * i_keywordName,
                              keywordLength,
                              &keywordSize,
                              i_target,
-                             i_args.location,
                              i_recordName );
             offset += keywordLength;
 
@@ -2425,118 +1594,16 @@ errlHndl_t IpVpdFacade::writeKeyword ( const char * i_keywordName,
             break;
         }
 
-        // Determine the VPD destination (PNOR/SEEPROM)
-        VPD::vpdCmdTarget vpdDest = VPD::AUTOSELECT;
-        bool configError = false;
-        configError = VPD::resolveVpdSource( i_target,
-                                             iv_configInfo.vpdWritePNOR,
-                                             iv_configInfo.vpdWriteHW,
-                                             i_args.location,
-                                             vpdDest );
-
-        // Look for a record override in our image unless explicitly told not to
-        if( (i_args.location & VPD::OVERRIDE_MASK) != VPD::USEVPD )
-        {
-            uint8_t* l_overridePtr = nullptr;
-            VPD::RecordTargetPair_t l_recTarg
-              = VPD::makeRecordTargetPair(i_recordName,i_target);
-
-            // At this point we can assume that the pointer is set into our
-            //  map if we need it
-            mutex_lock(&iv_mutex); //iv_overridePtr is not threadsafe
-            VPD::OverrideMap_t::iterator l_overItr = iv_overridePtr.find(l_recTarg);
-            if( l_overItr != iv_overridePtr.end() )
-            {
-                l_overridePtr = l_overItr->second;
-
-                // If we are using an override, we can't write to it
-                if( l_overridePtr != nullptr )
-                {
-                    uint32_t l_kw = 0;
-                    memcpy( &l_kw, i_keywordName, KEYWORD_BYTE_SIZE );
-                    /*@
-                     * @errortype
-                     * @reasoncode       VPD::VPD_CANNOT_WRITE_OVERRIDDEN_VPD
-                     * @moduleid         VPD::VPD_IPVPD_WRITE_KEYWORD
-                     * @userdata1[0:31]  Target HUID
-                     * @userdata1[32:63] <unused>
-                     * @userdata2[0:31]  VPD Record (ASCII)
-                     * @userdata2[32:63] VPD Keyword (ASCII)
-                     * @devdesc          Attempting to write to a VPD record
-                     *                   that has been overridden by firmware
-                     * @custdesc         Firmware error writing VPD
-                     */
-                    err = new ERRORLOG::ErrlEntry(
-                              ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                              VPD::VPD_IPVPD_WRITE_KEYWORD,
-                              VPD::VPD_WRITE_DEST_UNRESOLVED,
-                              TWO_UINT32_TO_UINT64(
-                                        TARGETING::get_huid(i_target),
-                                        0 ),
-                              TWO_UINT32_TO_UINT64(
-                                        l_recTarg.first,
-                                        l_kw),
-                              ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
-                    err->collectTrace( VPD_COMP_NAME, 256 );
-
-                    mutex_unlock(&iv_mutex);
-
-                    break;
-                }
-            }
-            mutex_unlock(&iv_mutex);
-        }
-
-        // Write the data
-        if ( vpdDest == VPD::PNOR )
-        {
-#ifndef __HOSTBOOT_RUNTIME
-            // Setup info needed to write to PNOR
-            VPD::pnorInformation info;
-            info.segmentSize = iv_vpdSectionSize;
-            info.maxSegments = iv_vpdMaxSections;
-            info.pnorSection = iv_pnorSection;
-
-            err = VPD::writePNOR( i_recordOffset+keywordOffset,
-                                  keywordSize,
-                                  i_buffer,
-                                  i_target,
-                                  info,
-                                  iv_cachePnorAddr,
-                                  &iv_mutex );
-            if( err )
-            {
-                break;
-            }
-
-            VPD::VpdWriteMsg_t msgdata;
-
-            msgdata.offset = i_recordOffset+keywordOffset;
-
-            err = VPD::sendMboxWriteMsg( keywordSize,
-                                         i_buffer,
-                                         i_target,
-                                         iv_vpdMsgType,
-                                         msgdata );
-            if( err )
-            {
-                break;
-            }
-#else
-            assert( false, "IpVpdFacade::writeKeyword> No PNOR support in HBRT" );
-#endif
-        }
-        else if ( vpdDest == VPD::SEEPROM )
-        {
+        // Future: Could insert other data locations here, e.g. file-based
+        //    overrides or non-eeprom data sources
 
 #ifdef __HOSTBOOT_RUNTIME
-            // In general, all writes to MVPD during HBRT are not allowed.
-            // However, allow sbeApplyVpdOverrides() to write to only MVPD CACHE
-            // if the writes to FSP and HW are disabled
-            if(EEPROM::allowVPDOverrides())
-            {
+        // In general, all writes to MVPD during HBRT are not allowed.
+        // However, allow sbeApplyVpdOverrides() to write to only MVPD CACHE
+        // if the writes to FSP and HW are disabled
+        if(EEPROM::allowVPDOverrides())
+        {
 #endif
-
             // Write directly to target's EEPROM.
             err = DeviceFW::deviceOp( DeviceFW::WRITE,
                                       i_target,
@@ -2563,80 +1630,42 @@ errlHndl_t IpVpdFacade::writeKeyword ( const char * i_keywordName,
             {
                 break;
             }
-
 #ifdef __HOSTBOOT_RUNTIME
-            } // end if(EEPROM::allowVPDOverrides()
-            else
-            {
-
-                TRACFCOMP(g_trac_vpd, ERR_MRK"IpVpdFacade::writeKeyword> No MVPD write support in HBRT");
-                VPD::RecordTargetPair_t l_recTarg
-                  = VPD::makeRecordTargetPair(i_recordName,i_target);
-                uint32_t l_kw = 0;
-                memcpy( &l_kw, i_keywordName, KEYWORD_BYTE_SIZE );
-                /*@
-                 * @errortype
-                 * @reasoncode       VPD::VPD_WRITE_MVPD_UNSUPPORTED_HBRT
-                 * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid         VPD::VPD_IPVPD_WRITE_KEYWORD
-                 * @userdata1[0:31]  Target HUID
-                 * @userdata1[32:63] Requested VPD Destination
-                 * @userdata2[0:31]  VPD Record (ASCII)
-                 * @userdata2[32:63] VPD Keyword (ASCII)
-                 * @devdesc          No MVPD write support in HBRT
-                 * @custdesc         Firmware error writing VPD
-                 */
-                err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                               VPD::VPD_IPVPD_WRITE_KEYWORD,
-                                               VPD::VPD_WRITE_MVPD_UNSUPPORTED_HBRT,
-                                               TWO_UINT32_TO_UINT64(
-                                                    TARGETING::get_huid(i_target),
-                                                    i_args.location ),
-                                               TWO_UINT32_TO_UINT64(
-                                                    l_recTarg.first,
-                                                    l_kw),
-                                               ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
-                err->collectTrace( VPD_COMP_NAME, 256 );
-                break;
-
-            }
-#endif
-
-        }
+        } // end if(EEPROM::allowVPDOverrides()
         else
         {
-            configError = true;
-        }
 
-        if( configError )
-        {
-            TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::writeKeyword: "
-                       "Error resolving VPD source (PNOR/SEEPROM)");
-
+            TRACFCOMP(g_trac_vpd, ERR_MRK"IpVpdFacade::writeKeyword> No MVPD write support in HBRT");
+            VPD::RecordTargetPair_t l_recTarg
+              = VPD::makeRecordTargetPair(i_recordName,i_target);
+            uint32_t l_kw = 0;
+            memcpy( &l_kw, i_keywordName, KEYWORD_BYTE_SIZE );
             /*@
              * @errortype
-             * @reasoncode       VPD::VPD_WRITE_DEST_UNRESOLVED
+             * @reasoncode       VPD::VPD_WRITE_MVPD_UNSUPPORTED_HBRT
              * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
              * @moduleid         VPD::VPD_IPVPD_WRITE_KEYWORD
              * @userdata1[0:31]  Target HUID
-             * @userdata1[32:63] Requested VPD Destination
-             * @userdata2[0:31]  VPD write PNOR flag
-             * @userdata2[32:63] VPD write HW flag
-             * @devdesc          Unable to resolve the VPD
-             *                   destination (PNOR or SEEPROM)
+             * @userdata1[32:63] <unused>
+             * @userdata2[0:31]  VPD Record (ASCII)
+             * @userdata2[32:63] VPD Keyword (ASCII)
+             * @devdesc          No MVPD write support in HBRT
+             * @custdesc         Firmware error writing VPD
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            VPD::VPD_IPVPD_WRITE_KEYWORD,
-                                           VPD::VPD_WRITE_DEST_UNRESOLVED,
+                                           VPD::VPD_WRITE_MVPD_UNSUPPORTED_HBRT,
                                            TWO_UINT32_TO_UINT64(
-                                                TARGETING::get_huid(i_target),
-                                                i_args.location ),
+                                                    TARGETING::get_huid(i_target),
+                                                    0 ),
                                            TWO_UINT32_TO_UINT64(
-                                                iv_configInfo.vpdWritePNOR,
-                                                iv_configInfo.vpdWriteHW ),
-                                           true /*Add HB SW Callout*/ );
+                                                    l_recTarg.first,
+                                                    l_kw),
+                                           ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
             err->collectTrace( VPD_COMP_NAME, 256 );
+            break;
         }
+#endif
     } while(0);
 
     TRACSSCOMP( g_trac_vpd,
@@ -2743,41 +1772,6 @@ bool IpVpdFacade::compareKeywordNames ( const char * keywordName1,
     return (strncmp(keywordName2, keywordName1, KEYWORD_BYTE_SIZE) == 0);
 }
 
-// ------------------------------------------------------------------
-// IpVpdFacade::setConfigFlagsHW
-// ------------------------------------------------------------------
-void IpVpdFacade::setConfigFlagsHW ( )
-{
-    // Only change configs if in PNOR caching mode
-    if( iv_configInfo.vpdReadPNOR &&
-        iv_configInfo.vpdReadHW )
-    {
-        iv_configInfo.vpdReadPNOR = false;
-        iv_configInfo.vpdReadHW = true;
-    }
-    if( iv_configInfo.vpdWritePNOR &&
-        iv_configInfo.vpdWriteHW )
-    {
-        iv_configInfo.vpdWritePNOR = false;
-        iv_configInfo.vpdWriteHW = true;
-    }
-}
-
-// Return the lists of records that should be copied to pnor.
-// The default lists to use are this object's record list and size.
-// No Alternate.
-void IpVpdFacade::getRecordLists(
-                const  recordInfo* & o_primaryVpdRecords,
-                uint64_t           & o_primaryRecSize,
-                const  recordInfo* & o_altVpdRecords,
-                uint64_t           & o_altRecSize)
-{
-    o_primaryVpdRecords = iv_vpdRecords;
-    o_primaryRecSize = iv_recSize;
-    o_altVpdRecords = nullptr;
-    o_altRecSize = 0;
-}
-
 /**
  * @brief Callback function to check for a record override
  */
@@ -2795,22 +1789,6 @@ errlHndl_t IpVpdFacade::checkForRecordOverride( const char* i_record,
     mutex_unlock(&iv_mutex);
     return nullptr;
 }
-
-#ifdef CONFIG_SECUREBOOT
-/**
- * @brief Load/unload the appropriate secure section for
- *        an overriden PNOR section
- */
-errlHndl_t IpVpdFacade::loadUnloadSecureSection( input_args_t i_args,
-                                                 TARGETING::Target* i_target,
-                                                 bool i_load,
-                                                 bool& o_loaded )
-{
-    // nothing to do by default
-    o_loaded = false;
-    return nullptr;
-}
-#endif
 
 // ------------------------------------------------------------------
 // IpVpdFacade::verifyVhdrRecordIsValid
@@ -3269,9 +2247,9 @@ IpVpdFacade::updateRecordEccData ( const TARGETING::TargetHandle_t  i_target,
             else
             {
                 TRACFCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::updateRecordEccData(): target(0x%.8X) "
-                          "i_args = record(0x%.4X), keyword(0x%.4X), location(0x%.4X), "
+                          "i_args = record(0x%.4X), keyword(0x%.4X), "
                           "eepromSource(0x%.4X).  Retrieving record meta data for record 0x%.4X.",
-                          l_targetHuid, i_args.record, i_args.keyword, i_args.location,
+                          l_targetHuid, i_args.record, i_args.keyword,
                           i_args.eepromSource, i_args.record);
 
                 // Caller did not pass in the meta data, will retrieve it.
@@ -3511,7 +2489,6 @@ IpVpdFacade::_validateAllRecordEccData ( const TARGETING::TargetHandle_t  i_targ
         input_args_t l_args;
         l_args.record = 0;    // Not needed/used, defaulting to 0
         l_args.keyword = 0;   // Not needed/used, defaulting to 0
-        l_args.location = VPD::SEEPROM;
         l_args.eepromSource = EEPROM::CACHE;
 
         // Define the VHDR record data buffer.  The constructor does not fill in the VTOC
@@ -3565,9 +2542,9 @@ IpVpdFacade::validateVhdrRecordEccData( const TARGETING::TargetHandle_t i_target
 {
     TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::validateVhdrRecordEccData(): for "
                 "record %s on target 0x%.8X; i_args = record(0x%.4X), keyword(0x%.4X), "
-                "location(0x%.4X), eepromSource(0x%.4X)",
+                "eepromSource(0x%.4X)",
                 VPD_HEADER_RECORD_NAME, TARGETING::get_huid(i_target),
-                i_args.record, i_args.keyword, i_args.location, i_args.eepromSource);
+                i_args.record, i_args.keyword, i_args.eepromSource);
 
     errlHndl_t l_err(nullptr);
 
@@ -3673,9 +2650,9 @@ IpVpdFacade::getFullVhdrRecordData ( const TARGETING::TargetHandle_t i_target,
 {
     TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::getFullVhdrRecordData(): for "
                 "record %s on target 0x%.8X; i_args = record(0x%.4X), keyword(0x%.4X), "
-                "location(0x%.4X), eepromSource(0x%.4X)",
+                "eepromSource(0x%.4X)",
                 VPD_HEADER_RECORD_NAME, TARGETING::get_huid(i_target),
-                i_args.record, i_args.keyword, i_args.location, i_args.eepromSource);
+                i_args.record, i_args.keyword, i_args.eepromSource);
 
     errlHndl_t l_err(nullptr);
 
@@ -3707,7 +2684,7 @@ IpVpdFacade::getFullVhdrRecordData ( const TARGETING::TargetHandle_t i_target,
          * @moduleid         VPD::VPD_IPVPD_FETCH_DATA
          * @userdata1[00:31] Target to find record in
          * @userdata1[32:63] Input arg: Record ID
-         * @userdata2[00:31] Input arg: Location
+         * @userdata2[00:31] <unused>
          * @userdata2[32:63] Input arg: EEEPROM SOURCE
          * @devdesc          The retrieved VPD Header Record (VHDR) is incomplete.
          * @custdesc         Firmware error with the VPD.
@@ -3719,7 +2696,7 @@ IpVpdFacade::getFullVhdrRecordData ( const TARGETING::TargetHandle_t i_target,
                                              TARGETING::get_huid(i_target),
                                              i_args.record ),
                                          TWO_UINT32_TO_UINT64(
-                                             i_args.location,
+                                             0,
                                              i_args.eepromSource ),
                                          ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
     }
@@ -3743,9 +2720,9 @@ IpVpdFacade::validateVtocRecordEccData(
 {
     TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::validateVtocRecordEccData(): for "
                 "record %s on target 0x%.8X; i_args = record(0x%.4X), keyword(0x%.4X), "
-                "location(0x%.4X), eepromSource(0x%.4X)",
+                "eepromSource(0x%.4X)",
                 VPD_TABLE_OF_CONTENTS_RECORD_NAME, TARGETING::get_huid(i_target),
-                i_args.record, i_args.keyword, i_args.location, i_args.eepromSource);
+                i_args.record, i_args.keyword, i_args.eepromSource);
 
     errlHndl_t l_err(nullptr);
 
@@ -3933,8 +2910,8 @@ IpVpdFacade::validateAllOtherRecordEccData(
 {
     TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::validateAllOtherRecordEccData(): "
                 "target(0x%.8X); i_args = record(0x%.4X), keyword(0x%.4X), "
-                "location(0x%.4X), eepromSource(0x%.4X)", TARGETING::get_huid(i_target),
-                i_args.record, i_args.keyword, i_args.location, i_args.eepromSource);
+                "eepromSource(0x%.4X)", TARGETING::get_huid(i_target),
+                i_args.record, i_args.keyword, i_args.eepromSource);
 
     errlHndl_t l_err(nullptr);
 
@@ -4157,9 +3134,9 @@ IpVpdFacade::getAllRecordMetaData (
                 const vhdr_record               &i_vhdrRecordData  )
 {
     TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::getAllRecordMetaData(): target(0x%.8X) "
-                "i_args = record(0x%.4X), keyword(0x%.4X), location(0x%.4X), "
+                "i_args = record(0x%.4X), keyword(0x%.4X), "
                 "eepromSource(0x%.4X)", TARGETING::get_huid(i_target),
-                i_args.record, i_args.keyword, i_args.location, i_args.eepromSource);
+                i_args.record, i_args.keyword, i_args.eepromSource);
 
     errlHndl_t l_err = nullptr;
 
@@ -4204,9 +3181,9 @@ IpVpdFacade::getRecordMetaData (
                 const char* const                i_recordName )
 {
     TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::getRecordMetaData(): target(0x%.8X) "
-                "i_args = record(0x%.4X), keyword(0x%.4X), location(0x%.4X), "
+                "i_args = record(0x%.4X), keyword(0x%.4X), "
                 "eepromSource(0x%.4X)", TARGETING::get_huid(i_target),
-                i_args.record, i_args.keyword, i_args.location, i_args.eepromSource);
+                i_args.record, i_args.keyword, i_args.eepromSource);
 
     errlHndl_t l_err = nullptr;
 
@@ -4276,7 +3253,7 @@ IpVpdFacade::getRecordMetaData (
              * @moduleid         VPD::VPD_IPVPD_GET_RECORD_META_DATA
              * @userdata1[00:31] Target to find record in
              * @userdata1[32:63] Input arg: Record ID
-             * @userdata2[00:31] Input arg: Location
+             * @userdata2[00:31] <unused>
              * @userdata2[32:63] Input arg: EEEPROM SOURCE
              * @devdesc          VPD record was not found.
              * @custdesc         Firmware error with the VPD.
@@ -4288,7 +3265,7 @@ IpVpdFacade::getRecordMetaData (
                                                  TARGETING::get_huid(i_target),
                                                  i_args.record ),
                                              TWO_UINT32_TO_UINT64(
-                                                 i_args.location,
+                                                 0,
                                                  i_args.eepromSource ),
                                              ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
             break;
@@ -4314,9 +3291,9 @@ IpVpdFacade::_getRecordMetaData (
                 const char* const                i_recordName )
 {
     TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::_getRecordMetaData(): target(0x%.8X); "
-                "i_args = record(0x%.4X), keyword(0x%.4X), location(0x%.4X), "
+                "i_args = record(0x%.4X), keyword(0x%.4X), "
                 "eepromSource(0x%.4X); %s %s", TARGETING::get_huid(i_target),
-                i_args.record, i_args.keyword, i_args.location, i_args.eepromSource,
+                i_args.record, i_args.keyword, i_args.eepromSource,
                 (i_recordName ? "find record" : "gather all records" ),
                 (i_recordName ? i_recordName : ""));
 

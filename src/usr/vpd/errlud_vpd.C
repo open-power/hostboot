@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -89,79 +89,6 @@ UdVpdParms::UdVpdParms( TARGETING::Target * i_target,
 
 //------------------------------------------------------------------------------
 UdVpdParms::~UdVpdParms()
-{
-
-}
-
-
-//------------------------------------------------------------------------------
-//  UdConfigParms
-//------------------------------------------------------------------------------
-UdConfigParms::UdConfigParms( TARGETING::Target * i_target,
-                              uint64_t i_record,
-                              uint64_t i_keyword,
-                              uint64_t i_location,
-                              uint64_t i_readPnor,
-                              uint64_t i_readHw,
-                              uint64_t i_writePnor,
-                              uint64_t i_writeHw )
-{
-    // Set up Ud instance variables
-    iv_CompId =VPD_COMP_ID;
-    iv_Version = 1;
-    iv_SubSection = VPD_UDT_CONFIG_PARMS;
-
-    //***** Memory Layout *****
-    // 4 bytes  : Target HUID
-    // 8 bytes  : Record
-    // 8 bytes  : Keyword
-    // 8 bytes  : Location
-    // 8 bytes  : Read PNOR Config
-    // 8 bytes  : Read HW Config
-    // 8 bytes  : Write PNOR Config
-    // 8 bytes  : Write HW Config
-
-    char * l_pBuf = reinterpret_cast<char *>(
-                          reallocUsrBuf(sizeof(uint32_t)
-                                       +sizeof(uint64_t)*7));
-    uint64_t tmp64 = 0;
-    uint32_t tmp32 = 0;
-
-    tmp32 = TARGETING::get_huid(i_target);
-    memcpy(l_pBuf, &tmp32, sizeof(tmp32));
-    l_pBuf += sizeof(tmp32);
-
-    tmp64 = i_record;
-    memcpy(l_pBuf, &tmp64, sizeof(tmp64));
-    l_pBuf += sizeof(tmp64);
-
-    tmp64 = i_keyword;
-    memcpy(l_pBuf, &tmp64, sizeof(tmp64));
-    l_pBuf += sizeof(tmp64);
-
-    tmp64 = i_location;
-    memcpy(l_pBuf, &tmp64, sizeof(tmp64));
-    l_pBuf += sizeof(tmp64);
-
-    tmp64 = i_readPnor;
-    memcpy(l_pBuf, &tmp64, sizeof(tmp64));
-    l_pBuf += sizeof(tmp64);
-
-    tmp64 = i_readHw;
-    memcpy(l_pBuf, &tmp64, sizeof(tmp64));
-    l_pBuf += sizeof(tmp64);
-
-    tmp64 = i_writePnor;
-    memcpy(l_pBuf, &tmp64, sizeof(tmp64));
-    l_pBuf += sizeof(tmp64);
-
-    tmp64 = i_writeHw;
-    memcpy(l_pBuf, &tmp64, sizeof(tmp64));
-    l_pBuf += sizeof(tmp64);
-}
-
-//------------------------------------------------------------------------------
-UdConfigParms::~UdConfigParms()
 {
 
 }

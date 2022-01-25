@@ -132,8 +132,7 @@ class SPDTest: public CxxTest::TestSuite
                 modSpecTypes_t modType = NA;
                 err = getModType(modType,
                                  theTarget,
-                                 memType,
-                                 VPD::AUTOSELECT);
+                                 memType);
                 if( err )
                 {
                     fails++;
@@ -381,8 +380,7 @@ class SPDTest: public CxxTest::TestSuite
                 modSpecTypes_t modType = NA;
                 err = getModType(modType,
                                  theTarget,
-                                 memType,
-                                 VPD::AUTOSELECT);
+                                 memType);
                 if( err )
                 {
                     fails++;
@@ -609,8 +607,7 @@ class SPDTest: public CxxTest::TestSuite
                 modSpecTypes_t modType = NA;
                 err = getModType(modType,
                                  theTarget,
-                                 memType,
-                                 VPD::AUTOSELECT);
+                                 memType);
                 if( err )
                 {
                     fails++;
@@ -1239,8 +1236,7 @@ class SPDTest: public CxxTest::TestSuite
                 modSpecTypes_t modType = NA;
                 err = getModType(modType,
                                  theTarget,
-                                 memType,
-                                 VPD::AUTOSELECT);
+                                 memType);
                 if( err )
                 {
                     fails++;
@@ -1313,8 +1309,7 @@ class SPDTest: public CxxTest::TestSuite
                                "valid for all types of modules.  IGNORE!!" );
                     err = checkModSpecificKeyword( kwdData,
                                                    memType,
-                                                   theTarget,
-                                                   VPD::AUTOSELECT );
+                                                   theTarget );
                     if( err )
                     {
                         // This keyword isn't supported with this module type
@@ -1522,8 +1517,7 @@ class SPDTest: public CxxTest::TestSuite
                 modSpecTypes_t modType = NA;
                 err = getModType(modType,
                                  theTarget,
-                                 memType,
-                                 VPD::AUTOSELECT);
+                                 memType);
                 if( err )
                 {
                     fails++;
@@ -1771,8 +1765,7 @@ class SPDTest: public CxxTest::TestSuite
                 modSpecTypes_t modType = NA;
                 err = getModType(modType,
                                  theTarget,
-                                 memType,
-                                 VPD::AUTOSELECT);
+                                 memType);
                 if( err )
                 {
                     fails++;

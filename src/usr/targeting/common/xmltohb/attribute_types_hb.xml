@@ -1958,32 +1958,6 @@
     <complexType>
       <description>VPD flags</description>
       <field>
-        <name>pnorCacheValid</name>
-        <description>Set when this target's VPD data has been loaded
-                from EEPROM into the PNOR.
-            </description>
-        <type>uint8_t</type>
-        <bits>1</bits>
-        <default>0</default>
-      </field>
-      <field>
-        <name>pnorCacheValidRT</name>
-        <description>See pnorCacheValid. Allows runtime version to be
-                set separately from common version.
-            </description>
-        <type>uint8_t</type>
-        <bits>1</bits>
-        <default>0</default>
-      </field>
-      <field>
-        <name>disableWriteToPnorRT</name>
-        <description>Set to disable write-thru to PNOR at runtime
-            </description>
-        <type>uint8_t</type>
-        <bits>1</bits>
-        <default>0</default>
-      </field>
-      <field>
         <name>vpdCollectedRemotely</name>
         <description>
           Describes if the VPD for this target that we wrote to cache
@@ -2000,7 +1974,7 @@
         <name>reserved</name>
         <description>Reserved for future expansion</description>
         <type>uint8_t</type>
-        <bits>4</bits>
+        <bits>7</bits>
         <default>0</default>
       </field>
     </complexType>

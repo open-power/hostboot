@@ -211,11 +211,6 @@
      </attribute>
 
     <attribute>
-          <id>ATTR_MEMVPD_POS</id>
-          <default>0xFF</default>
-     </attribute>
-
-    <attribute>
           <id>ATTR_MSS_MRW_THERMAL_MEMORY_POWER_LIMIT</id>
           <default>0xffffe000000006a4,0,0,0,0,0,0,0,0,0</default>
      </attribute>
@@ -641,11 +636,6 @@
     <attribute>
           <id>ATTR_PROC_EFF_FABRIC_CHIP_ID</id>
           <writeable/>
-          <no_export/>
-    </attribute>
-
-    <attribute>
-          <id>ATTR_MEMVPD_POS</id>
           <no_export/>
     </attribute>
 

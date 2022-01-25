@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -182,33 +182,6 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
         {
              mvpd_present = VPD::mvpdPresent( i_target );
         }
-
-#if defined(CONFIG_MVPD_READ_FROM_HW) && defined(CONFIG_MVPD_READ_FROM_PNOR)
-        if( mvpd_present )
-        {
-            // Check if the VPD data in the PNOR matches the SEEPROM
-            l_errl = VPD::ensureCacheIsInSync( i_target );
-            if( l_errl )
-            {
-                // Save this plid to use later
-                l_saved_plid = l_errl->plid();
-                mvpd_present = false;
-
-                TRACFCOMP(g_trac_fsi,ERR_MRK "FSI::procPresenceDetect> Error during ensureCacheIsInSync (MVPD)" );
-                errlCommit( l_errl, FSI_COMP_ID );
-            }
-        }
-        else
-        {
-            // Invalidate MVPD in the PNOR
-            l_errl = VPD::invalidatePnorCache(i_target);
-            if (l_errl)
-            {
-                TRACFCOMP( g_trac_fsi, "Error invalidating MVPD in PNOR" );
-                errlCommit( l_errl, FSI_COMP_ID );
-            }
-        }
-#endif
 
         // Finally compare the 2 methods
         if( fsi_present != mvpd_present )

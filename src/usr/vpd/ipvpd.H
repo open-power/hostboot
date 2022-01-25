@@ -55,13 +55,11 @@ class IpVpdFacade
     {
         VPD::vpdRecord        record;
         VPD::vpdKeyword       keyword;
-        VPD::vpdCmdTarget     location;
         EEPROM::EEPROM_SOURCE eepromSource;
 
         // Default constructor
         device_driver_input_args() : record(0xFFFFFFFF),
                                      keyword(0xFFFFFFFF),
-                                     location(VPD::AUTOSELECT),
                                      eepromSource(EEPROM::AUTOSELECT)
         {};
 
@@ -71,11 +69,9 @@ class IpVpdFacade
         // AUTOSELECT, setting it automatically here is done to maintain that
         // default assumption.
         device_driver_input_args(VPD::vpdRecord    i_record,
-                                 VPD::vpdKeyword   i_keyword,
-                                 VPD::vpdCmdTarget i_location)
+                                 VPD::vpdKeyword   i_keyword)
             : record(i_record),
               keyword(i_keyword),
-              location(i_location),
               eepromSource(EEPROM::AUTOSELECT)
         {};
 
@@ -111,17 +107,6 @@ class IpVpdFacade
     } recordOverrideInfo_t;
 
     /**
-     * @brief Structure defining where to read/write VPD data
-     */
-    typedef struct
-    {
-        bool vpdReadPNOR;
-        bool vpdReadHW;
-        bool vpdWritePNOR;
-        bool vpdWriteHW;
-    } configInfo;
-
-    /**
      * @brief - Data Struct for TOC Entry
      */
     struct tocData
@@ -149,9 +134,6 @@ class IpVpdFacade
      *
      * @param[in] i_keySize -        number of elements in the i_vpdKeywords array
      *
-     * @param[in] i_pnorSection -    PNOR Section containing VPD for current
-     *                               chip
-     *
      * @param[in] i_mutex -          Mutex to ensure instance variable updates
      *                               are thread safe
      *
@@ -163,7 +145,6 @@ class IpVpdFacade
                 uint64_t i_recSize,
                 const  keywordInfo* i_vpdKeywords,
                 uint64_t i_keySize,
-                PNOR::SectionId i_pnorSection,
                 mutex_t i_mutex,
                 VPD::VPD_MSG_TYPE i_vpdMsgType );
 
@@ -256,27 +237,6 @@ class IpVpdFacade
 
     /**
      * @brief This function compares the specified record/keyword
-     *      in PNOR/SEEPROM and returns the result. A mismatch
-     *      will not return an error.
-     *
-     * @param[in] i_target - Target device
-     *
-     * @param[in] i_record - Record to compare
-     *
-     * @param[in] i_keyword - Keyword to compare
-     *
-     * @param[out] o_match - Result of compare
-     *
-     * @return errlHndl_t - NULL if successful, otherwise a pointer to the
-     *       error log.
-     */
-    errlHndl_t cmpPnorToSeeprom ( TARGETING::Target * i_target,
-                                  VPD::vpdRecord i_record,
-                                  VPD::vpdKeyword i_keyword,
-                                  bool &o_match );
-
-    /**
-     * @brief This function compares the specified record/keyword
      *      in SEEPROM to zero and returns the result. A mismatch
      *      will not return an error.
      *
@@ -297,38 +257,11 @@ class IpVpdFacade
                                   bool &o_match );
 
     /**
-     * @brief This function will perform the steps required to load the
-     *      MVPD data from SEEPROM into the PNOR cache.
-     *
-     * @param[in] i_target - Target device
-     *
-     * @return errlHndl_t - NULL if successful, otherwise a pointer to the
-     *       error log.
-     */
-    errlHndl_t loadPnor ( TARGETING::Target * i_target );
-
-    /**
-     * @brief This function will perform the steps required to invalidate
-     *      the MVPD in the PNOR cache.
-     *
-     * @param[in] i_target - Target device
-     *
-     * @return errlHndl_t - NULL if successful, otherwise a pointer to the
-     *       error log.
-     */
-    errlHndl_t invalidatePnor ( TARGETING::Target * i_target );
-
-    /**
-     * @brief This function sets the config flags to use HW and not PNOR
-     */
-    void setConfigFlagsHW ( );
-
-    /**
      * @brief Retrieve the record and update the record's ECC data
      *
      * @param[in] i_target - Pointer to the PROC target where the record is located.
      * @param[in] i_args   - Device driver input args: Struct that contains the
-     *                       record ID, location of record and EEPROM source.
+     *                       record ID, and EEPROM source.
      *                       Keyword data is not used.
      * @param[in](optional) i_ptEntry - If not a nullptr then the meta data will be
      *                                  used from this parameter and therefore will not
@@ -358,22 +291,6 @@ class IpVpdFacade
      * @return errlHndl_t  - NULL if successful, otherwise a pointer to the error log.
      */
     errlHndl_t validateAllRecordEccData ( const TARGETING::TargetHandle_t  i_target );
-
-#ifdef CONFIG_SECUREBOOT
-    /**
-     * @brief Load/unload the appropriate secure section for
-     *        an overriden PNOR section
-     * @param[in] i_args    Record/keyword
-     * @param[in] i_target  Target pointer
-     * @param[in] i_load    true=load, false=unload
-     * @param[out] o_loaded true=section loaded, false=section not loaded
-     * @return Error log
-     */
-    virtual errlHndl_t loadUnloadSecureSection( input_args_t i_args,
-                                                TARGETING::Target* i_target,
-                                                bool i_load,
-                                                bool& o_loaded );
-#endif
 
     /**
      * @brief This function will translate the char* for the VPD record into
@@ -442,18 +359,12 @@ class IpVpdFacade
                                   const char *& o_keyword );
 
     /**
-     * @brief This function calls the PNOR or EEPROM version of
-     *      the findRecordOffset fuction based on the configInfo.
+     * @brief This function calls the appropriate version of
+     *      the findRecordOffset fuction.
      *
      * @param[in] i_record - String value for the record to look for.
      *
      * @param[out] o_offset - The offset where the record is located.
-     *
-     * @param[in] i_rwPnorEnabled - Config value specifying
-     *      whether PNOR reads/writes are enabled for this VPD type
-     *
-     * @param[in] i_rwHwEnabled - Config value specifying
-     *      whether SEEPROM reads/writes are enabled for this VPD type
      *
      * @param[in] i_target - The target to retrieve the data for.
      *
@@ -464,17 +375,13 @@ class IpVpdFacade
      */
     errlHndl_t findRecordOffset ( const char * i_record,
                                   uint16_t & o_offset,
-                                  bool i_rwPnorEnabled,
-                                  bool i_rwHwEnabled,
                                   TARGETING::Target * i_target,
                                   input_args_t i_args );
 
     /**
      * @brief This function searches for the VPD record and returns
-     * True if it is there, False otherwise. This function works similarly
-     * to findRecordOffsetPnor except it does not create error logs if
-     * the record was not found. This will replace some of the code in
-     * findRecordOffsetPnor
+     * True if it is there, False otherwise.  No error logs will be
+     * created for the non-present case.
      *
      * @param[in] i_record - String value for the record to look for.
      *
@@ -482,34 +389,11 @@ class IpVpdFacade
      *
      * @param[in] i_target - The target to retrieve the data for.
      *
-     * @param[in] i_location - VPD location to fetch data from (PNOR/SEEPROM)
-     *
      * @return bool - True if the record is found, False otherwise.
      */
     virtual bool recordPresent( const char * i_record,
-                        uint16_t & offset,
-                        TARGETING::Target * i_target,
-                        VPD::vpdCmdTarget i_location );
-
-    /**
-     * @brief This function will read the VPD TOC to find the offset where the
-     *      given record is located within the chunk of data.
-     *
-     * @param[in] i_record - String value for the record to look for.
-     *
-     * @param[out] o_offset - The offset where the record is located.
-     *
-     * @param[in] i_target - The target to retrieve the data for.
-     *
-     * @param[in] i_args - The input arguments.
-     *
-     * @return errHndl_t - NULL if successful, otherwise a pointer to the
-     *      error log.
-     */
-    errlHndl_t findRecordOffsetPnor ( const char * i_record,
-                                      uint16_t & o_offset,
-                                      TARGETING::Target * i_target,
-                                      input_args_t i_args );
+                                uint16_t & offset,
+                                TARGETING::Target * i_target );
 
     /**
      * @brief This function will read the VPD VTOC to find the offset where the
@@ -555,7 +439,7 @@ class IpVpdFacade
      * @param[out] o_eccOffset    - The offset of the ECC within the VPD
      * @param[out] o_eccLength    - The length of the ECC within the VPD
      * @param[in] i_target        - Target pointer
-     * @param[in] i_args          - The input arguments, key, record, location and
+     * @param[in] i_args          - The input arguments, key, record, and
      *                              the EEPROM source.
      * @return errlHndl_t - NULL if successful, otherwise a pointer to the
      *                      error log.
@@ -718,8 +602,8 @@ class IpVpdFacade
 
 
     /**
-     * @brief This function calls the PNOR or EEPROM version of
-     *           the fetchData function based on the configInfo
+     * @brief This function calls the appropriate version of
+     *           the fetchData function
      *
      * @param[in] i_byteAddr - The offset to be read.
      *
@@ -728,8 +612,6 @@ class IpVpdFacade
      * @param[out] o_data - The data buffer where the data will be placed.
      *
      * @param[in] i_target - Target device.
-     *
-     * @param[in] i_location - VPD location to fetch data from (PNOR/SEEPROM)
      *
      * @param[in] i_record - String representation of the record.
      *
@@ -740,12 +622,11 @@ class IpVpdFacade
                          size_t              i_numBytes,
                          void *              o_data,
                          TARGETING::Target * i_target,
-                         VPD::vpdCmdTarget   i_location,
                          const char*         i_record);
 
     /**
-     * @brief This function calls the PNOR or EEPROM version of
-     *           the fetchData function based on the configInfo
+     * @brief This function calls the appropriate version of
+     *           the fetchData function
      *
      * @param[in] i_byteAddr  The offset to be read.
      *
@@ -768,25 +649,6 @@ class IpVpdFacade
                          TARGETING::Target * i_target,
                          input_args_t        i_args,
                          const char*         i_record);
-
-    /**
-     * @brief This function actually reads the data from PNOR
-     *
-     * @param[in] i_byteAddr - The offset to be read.
-     *
-     * @param[in] i_numBytes - The number of bytes to read.
-     *
-     * @param[out] o_data - The data buffer where the data will be placed.
-     *
-     * @param[in] i_target - Target device.
-     *
-     * @return errHndl_t - NULL if successful, otherwise a pointer to the
-     *      error log.
-     */
-    errlHndl_t fetchDataFromPnor ( uint64_t i_byteAddr,
-                                   size_t i_numBytes,
-                                   void * o_data,
-                                   TARGETING::Target * i_target );
 
     /**
      * @brief This function actually reads the data from EEPROM
@@ -875,43 +737,6 @@ class IpVpdFacade
     errlHndl_t checkBufferSize( size_t i_bufferSize,
                                 size_t i_expectedSize,
                                 TARGETING::Target * i_target );
-    /**
-     * @brief This function returns a primary and an alternate list of records
-     *        that should be copied to pnor. The Alternate list is optional.
-     *
-     * @param[out] o_primaryVpdRecords - Pointer to array of VPD Records to use
-     *
-     * @param[out] o_primaryRecSize -    Size of o_primaryVpdRecords array
-     *
-     * @param[out] o_altVpdRecords -     Pointer to array of VPD Records to use
-     *
-     * @param[out] o_altRecSize -        Size of o_altVpdRecords array
-     *
-     */
-    virtual void getRecordLists(
-                const  recordInfo* & o_primaryVpdRecords,
-                uint64_t           & o_primaryRecSize,
-                const  recordInfo* & o_altVpdRecords,
-                uint64_t           & o_altRecSize);
-
-    /**
-     * @brief Returns the cached pnor address
-     *
-     */
-    inline static uint64_t getPnorAddr(const IpVpdFacade& x)
-    {
-        return x.iv_cachePnorAddr;
-    };
-
-    /**
-     * @brief Set the cached pnor address to the given value
-     *
-     */
-    inline void setPnorAddr(uint64_t i_pnorAddr)
-    {
-        this->iv_cachePnorAddr = i_pnorAddr;
-    };
-
 
     /**
      * @brief Callback function to check for a record override and
@@ -1018,7 +843,7 @@ class IpVpdFacade
      *
      * @param[in] i_target - Pointer to the PROC target to retrieve the VTOC record from
      * @param[in] i_args   - Device driver input args: Struct that contains the record
-     *                       ID, keyword ID, location of record and EEPROM source.
+     *                       ID, keyword ID, and EEPROM source.
      * @param[out] o_vtocRecordMetaData - Struct to contain the record meta data - record name,
      *                                    record type, record offset, record length, ecc offset
      *                                    and ecc length. The meta data returned is in big endian,
@@ -1059,7 +884,7 @@ class IpVpdFacade
      *
      * @param[in] i_target - Pointer to the PROC target to retrieve the VHDR record from.
      * @param[in] i_args   - Device driver input args: Struct that contains the record
-     *                       ID, keyword ID, location of record and EEPROM source.
+     *                       ID, keyword ID, and EEPROM source.
      *                       Record ID and keyword ID are not used and therefore not necessary.
      * @param[out] o_vhdrRecordData - The VHDR record data to be populated with the VTOC meta data
      * @return errlHndl_t  - NULL if successful, otherwise a pointer to an error log.
@@ -1077,7 +902,7 @@ class IpVpdFacade
      *
      * @param[in] i_target - Pointer to the PROC target to retrieve the VHDR record from.
      * @param[in] i_args   - Device driver input args: Struct that contains the record
-     *                       ID, keyword ID, location of record and EEPROM source.
+     *                       ID, keyword ID, and EEPROM source.
      *                       Record ID and keyword ID are not used and therefore not necessary.
      * @param[out] o_vhdrRecordData - The VHDR record data to be populated with the VTOC meta data
      * @return errlHndl_t  - NULL if successful, otherwise a pointer to an error log.
@@ -1092,7 +917,7 @@ class IpVpdFacade
      *
      * @param[in] i_target - Pointer to the PROC target to retrieve the VTOC record from.
      * @param[in] i_args   - Device driver input args: Struct that contains the record
-     *                       ID, keyword ID, location of record and EEPROM source.
+     *                       ID, keyword ID, and EEPROM source.
      *                       Record ID and keyword ID are not used and therefore not necessary.
      * @param[in] i_vhdrRecordData - The VHDR record data that contains the VTOC meta data.
      * @return errlHndl_t  - NULL if successful, otherwise a pointer to an error log.
@@ -1108,7 +933,7 @@ class IpVpdFacade
      *
      * @param[in] i_target - Pointer to the PROC target where the records are located.
      * @param[in] i_args   - Device driver input args: Struct that contains the record
-     *                       ID, keyword ID, location of record and EEPROM source.
+     *                       ID, keyword ID, and EEPROM source.
      *                       Record ID and keyword ID are not used and therefore not necessary.
      * @param[in] i_vhdrRecordData - The VHDR record data that contains the VTOC meta data.
      * @return errlHndl_t  - NULL if successful, otherwise a pointer to the error log.
@@ -1124,7 +949,7 @@ class IpVpdFacade
      *
      * @param[in] i_target - Pointer to the PROC target where the records are located.
      * @param[in] i_args   - Device driver input args: Struct that contains the record
-     *                       ID, keyword ID, location of record and EEPROM source.
+     *                       ID, keyword ID, and EEPROM source.
      *                       Record ID and keyword ID are not used and therefore not necessary.
      * @param[out] o_recordMetaDataList - The list of meta data for each record found,
      *                                    minus the VHDR and VTOC record. The meta data returned
@@ -1145,7 +970,7 @@ class IpVpdFacade
      *
      * @param[in] i_target - Pointer to the PROC target where the record is located.
      * @param[in] i_args   - Device driver input args: Struct that contains the record
-     *                       ID, keyword ID, location of record and EEPROM source.
+     *                       ID, keyword ID, and EEPROM source.
      *                       The record ID, identifies the record that the meta data
      *                       will be retrieved for. Keyword ID is not used.
      * @param[out] o_recordMetaData - Will contain the record meta data, if found, else
@@ -1170,7 +995,7 @@ class IpVpdFacade
      *
      * @param[in] i_target - Pointer to the PROC target where the records are located.
      * @param[in] i_args   - Device driver input args: Struct that contains the record
-     *                       ID, keyword ID, location of record and EEPROM source.
+     *                       ID, keyword ID, and EEPROM source.
      *                       Record ID and keyword ID are not used and therefore not necessary.
      * @param[in] i_vtocRecordMetaData - The VTOC record meta data. The VTOC record contains a
      *                                   reference to all other records. The meta data will need
@@ -1210,7 +1035,7 @@ class IpVpdFacade
      * @param[in] i_createEccDataReturnCode - The return code from calling the
      *                                        create the ECC data API.
      * @param[in] i_target  - Pointer to the PROC target where the record is located.
-     * @param[in] i_args    - Struct that contains the record ID, location of record
+     * @param[in] i_args    - Struct that contains the record ID,
      *                        and EEPROM source. Keyword data is not used.
      * @param[in] i_recordName   - Name of the record having it's ECC data validated.
      * @param[in] i_recordOffset - Offset to the record's data.
@@ -1251,7 +1076,7 @@ class IpVpdFacade
      *                                            ECC data validation API.
      * @param[in] i_target  - Pointer to the PROC target where the record is located.
      * @param[in] i_args    - Device driver input args: Struct that contains the record
-     *                        ID, keyword ID, location of record and EEPROM source.
+     *                        ID, keyword ID, and EEPROM source.
      * @param[in] i_recordName   - Name of the record having it's ECC data validated.
      * @param[in] i_recordOffset - Offset to the record's data.
      * @param[in] i_recordLength - Length of the record's data.
@@ -1355,18 +1180,6 @@ class IpVpdFacade
 
   protected: // Variables
 
-    /**
-     * @brief Indicates allocated space for each chip's VPD
-     *        data in PNOR.
-     */
-    uint64_t iv_vpdSectionSize;
-
-    /**
-     * @brief Indicates number of VPD sections in PNOR for
-     *        current type of chip
-     */
-    uint64_t iv_vpdMaxSections;
-
   public: //Used by static function
     /**
      * @brief Pointer to array of VPD Record information
@@ -1394,34 +1207,16 @@ class IpVpdFacade
     const uint64_t iv_keySize;
 
     /**
-     * @brief PNOR section enum for vpd type
-     *
-     */
-    PNOR::SectionId iv_pnorSection;
-
-    /**
      * @brief VPD Operation Mutex
      *
      */
     mutex_t iv_mutex;
 
     /**
-     * @brief cached PNOR offset for VPD
-     *
-     */
-    uint64_t iv_cachePnorAddr;
-
-    /**
-     * @brief cached PNOR offset for VPD
+     * @brief Message type for FSP VPD sync
      *
      */
     VPD::VPD_MSG_TYPE iv_vpdMsgType;
-
-    /**
-     * @brief Config defining where to read/write
-     *          VPD data
-     */
-    configInfo iv_configInfo;
 
     /**
      * @brief Used to denote if a record is being

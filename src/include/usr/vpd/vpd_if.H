@@ -39,25 +39,6 @@ namespace VPD
      * @brief typdef for vpdKeyword values
      */
     typedef uint32_t vpdKeyword;
-    /**
-     * @brief typdef for vpdCmdTarget values
-     */
-    enum vpdCmdTarget
-    {
-        AUTOSELECT         = 0x0000,
-
-        // Use our cache or read the eeprom
-        PNOR               = 0x0001,
-        SEEPROM            = 0x0002,
-        LOCATION_MASK      = 0x000F,
-
-        // Use the real vpd or a firmware override
-        USEVPD             = 0x0010,
-        USEOVERRIDE        = 0x0020,
-        OVERRIDE_MASK      = 0x00F0,
-
-        INVALID_LOCATION   = 0xFFFF,
-    };
 
     // Useful constants for some boolean parms
     constexpr bool COMPARE_TO_ATTRIBUTES = true;
@@ -123,15 +104,6 @@ namespace VPD
     bool pvpdPresent ( TARGETING::Target * i_target );
 
     /**
-     * @brief This function checks if the PNOR cache for this target is in
-     *      sync with the SEEPROM, if not it loads the PNOR cache from SEEPROM.
-     * @param[in] i_target - Target device
-     * @return errlHndl_t - NULL if successful, otherwise a pointer to the
-     *      error log.
-     */
-    errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target );
-
-    /**
      * @brief This function checks if the eeprom cache for the target is in
      *        sync with hardware and returns the result in o_isInSync.
      *
@@ -151,31 +123,6 @@ namespace VPD
                             bool i_useAttributes,
                             bool& o_isInSync,
                             bool& o_isNewPart );
-
-    /**
-     * @brief This function invalidates the VPD data in the PNOR cache.
-     * @param[in] i_target - Target device
-     * @return errlHndl_t - NULL if successful, otherwise a pointer to the
-     *      error log.
-     */
-    errlHndl_t invalidatePnorCache ( TARGETING::Target * i_target );
-
-    /**
-     * @brief This function validates targets sharing PNOR::CENTAUR_VPD cache.
-     *        Invalidate sections where all of the targets sharing a VPD_REC_NUM
-     *        are invalid. Keep the section if any target is valid.
-     * @return errlHndl_t - NULL if successful, otherwise a pointer to the
-     *      error log.
-     */
-    errlHndl_t validateSharedPnorCache( );
-
-    /**
-     * @brief This function invalidates all of the VPD data in the PNOR cache.
-     * @param[in] i_setHwOnly - Also set vars to not access VPD cache
-     * @return errlHndl_t - NULL if successful, otherwise a pointer to the
-     *      error log.
-     */
-    errlHndl_t invalidateAllPnorCaches ( bool i_setHwOnly );
 
     /**
      * @brief Structure used to specify VPD overrides for runtime
@@ -206,14 +153,13 @@ namespace VPD
      * @param[in] i_target  - Pointer to the PROC target where the record is located.
      * @param[in] i_record  - The record ID.
      * @param[in] i_keyword - The keyword ID.
-     * @param[in] i_location     - The location of the record - AUTOSELECT, SEEPROM, etc.
      * @param[in] i_eepromSource - The EEPROM source - AUTOSELECT, CACHE or HARDWARE.
      * @return errlHndl_t  - NULL if successful, otherwise a pointer to the error log.
      */
     errlHndl_t updateRecordEccData (
                    const TARGETING::TargetHandle_t  i_target,
                    uint32_t i_record,   uint32_t i_keyword,
-                   uint32_t i_location, uint32_t i_eepromSource );
+                   uint32_t i_eepromSource );
 
     /**
      * @brief Validate all the records' ECC data

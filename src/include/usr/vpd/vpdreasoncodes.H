@@ -210,9 +210,55 @@ enum UserDetailsTypes
 {
     VPD_UDT_NO_FORMAT       = 0x0,
     VPD_UDT_PARAMETERS      = 0x1,
-    VPD_UDT_CONFIG_PARMS    = 0x2,
+    VPD_UDT_CONFIG_PARMS    = 0x2, //deprecated
 };
 
-};  // end MVPD
+};  // end VPD
+
+//*****************************************************
+// SRC Graveyard
+// Contains error log descriptions for SRCs that were
+// removed from the code but we need to still provide
+// backward compatible parser logic for.
+
+/*@
+ * @errortype
+ * @reasoncode       VPD::VPD_READ_SOURCE_UNRESOLVED
+ * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+ * @moduleid         VPD::VPD_IPVPD_FIND_RECORD_OFFSET
+ * @userdata1[0:31]  Target HUID
+ * @userdata1[32:63] Requested VPD Source Location
+ * @userdata2[0:31]  VPD write PNOR flag
+ * @userdata2[32:63] VPD write HW flag
+ * @devdesc          Unable to resolve the VPD
+ *                   source (PNOR or SEEPROM)
+ * @custdesc         Firmware configuration error
+ */
+
+
+/*@
+ * @errortype
+ * @reasoncode       VPD::VPD_READ_SOURCE_UNRESOLVED
+ * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+ * @moduleid         VPD::VPD_SPD_FETCH_DATA
+ * @userdata1[0:31]  Target HUID
+ * @userdata1[32:63] Requested VPD Source Location
+ * @userdata2[0:31]  SPD read PNOR flag
+ * @userdata2[32:63] SPD read HW flag
+ * @devdesc          Unable to resolve the VPD
+ *                   source (PNOR or SEEPROM)
+ * @custdesc         Firmware configuration error
+ */
+
+/*@
+ * @errortype
+ * @moduleid     VPD_GET_VPD_LOCATION
+ * @reasoncode   VPD_BAD_REC_NUM
+ * @userdata1    Target HUID
+ * @userdata2    VPD_REC_NUM
+ * @devdesc      getVpdLocation> VPD_REC_NUM is invalid, bad MRW
+ * @custdesc     Firmware configuration error
+ */
+
 
 #endif

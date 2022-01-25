@@ -105,7 +105,6 @@ namespace MVPD
         IpVpdFacade::input_args_t args;
         args.record = ((mvpdRecord)va_arg( i_args, uint64_t ));
         args.keyword = ((mvpdKeyword)va_arg( i_args, uint64_t ));
-        args.location = ((VPD::vpdCmdTarget)va_arg( i_args, uint64_t ));
 
         TRACSSCOMP( g_trac_vpd,
                     ENTER_MRK"mvpdRead()" );
@@ -159,7 +158,6 @@ namespace MVPD
         IpVpdFacade::input_args_t args;
         args.record = ((mvpdRecord)va_arg( i_args, uint64_t ));
         args.keyword = ((mvpdKeyword)va_arg( i_args, uint64_t ));
-        args.location = ((VPD::vpdCmdTarget)va_arg( i_args, uint64_t ));
 
         TRACSSCOMP( g_trac_vpd,
                     ENTER_MRK"mvpdWrite()" );
@@ -228,7 +226,13 @@ errlHndl_t VPD::mvpdKeywordStringtoEnum(const char * i_keyword, uint32_t & o_key
 bool VPD::mvpdPresent( TARGETING::Target * i_target )
 {
     TRACSSCOMP(g_trac_vpd, ENTER_MRK"mvpdPresent()");
-#if(defined( CONFIG_MVPD_READ_FROM_HW ) && !defined( __HOSTBOOT_RUNTIME) )
+
+#ifdef __HOSTBOOT_RUNTIME
+    // In HBRT we can rely on the VPD being complete
+    return Singleton<MvpdFacade>::instance().hasVpdPresent( i_target,
+                                                            MVPD::CP00,
+                                                            MVPD::VD );
+#else
 #   if (defined (CONFIG_SUPPORT_EEPROM_CACHING) && !defined(CONFIG_SUPPORT_EEPROM_HWACCESS))
         bool present = false;
         EEPROM::eecachePresenceDetect(i_target, present);
@@ -236,10 +240,6 @@ bool VPD::mvpdPresent( TARGETING::Target * i_target )
 #   else
         return EEPROM::eepromPresence( i_target );
 #   endif
-#else
-    return Singleton<MvpdFacade>::instance().hasVpdPresent( i_target,
-                                                            MVPD::CP00,
-                                                            MVPD::VD );
 #endif
 }
 
@@ -253,37 +253,10 @@ IpVpdFacade(MVPD::mvpdRecords,
             (sizeof(MVPD::mvpdRecords)/sizeof(MVPD::mvpdRecords[0])),
             MVPD::mvpdKeywords,
             (sizeof(MVPD::mvpdKeywords)/sizeof(MVPD::mvpdKeywords[0])),
-            PNOR::MODULE_VPD,
             MVPD::g_mutex,
             VPD::VPD_WRITE_CACHE)
 {
     TRACUCOMP(g_trac_vpd, "MvpdFacade::MvpdFacade> " );
-
-#ifdef CONFIG_MVPD_READ_FROM_PNOR
-    iv_configInfo.vpdReadPNOR = true;
-#else
-    iv_configInfo.vpdReadPNOR = false;
-#endif
-#ifdef CONFIG_MVPD_READ_FROM_HW
-    iv_configInfo.vpdReadHW = true;
-#else
-    iv_configInfo.vpdReadHW = false;
-#endif
-#ifdef CONFIG_MVPD_WRITE_TO_PNOR
-    iv_configInfo.vpdWritePNOR = true;
-#else
-    iv_configInfo.vpdWritePNOR = false;
-#endif
-#ifdef CONFIG_MVPD_WRITE_TO_HW
-    iv_configInfo.vpdWriteHW = true;
-#else
-    iv_configInfo.vpdWriteHW = false;
-#endif
-
-   iv_vpdSectionSize = MVPD::SECTION_SIZE;
-
-   iv_vpdMaxSections = MVPD::MAX_SECTIONS;
-
 }
 
 MvpdFacade& MvpdFacade::getInstance()

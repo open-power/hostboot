@@ -641,21 +641,6 @@ void* host_discover_targets( void *io_pArgs )
 #endif
 
 
-#if (defined(CONFIG_MEMVPD_READ_FROM_HW)&&defined(CONFIG_MEMVPD_READ_FROM_PNOR))
-    // Now that all targets have completed presence detect and vpd access,
-    // invalidate PNOR::CENTAUR_VPD sections where all the targets sharing a
-    // VPD_REC_NUM are invalid.
-    if (nullptr == l_err) //discoverTargets worked
-    {
-        l_err = VPD::validateSharedPnorCache();
-    }
-#endif
-
-    if (l_err)
-    {
-        captureError(l_err, l_stepError, ISTEP_COMP_ID);
-    }
-
 #if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
     CONSOLE::displayf(CONSOLE::DEFAULT, "HWAS", "---------------------------------");
     CONSOLE::displayf(CONSOLE::DEFAULT, "HWAS", "PRESENT>");

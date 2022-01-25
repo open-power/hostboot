@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,46 +71,6 @@ class UdVpdParms : public ERRORLOG::ErrlUserDetails
     UdVpdParms & operator=(UdVpdParms &);
 };
 
-
-/**
- * @class UdConfigParms
- *
- * Adds VPD parameters/config information to an error log as user detail data
- */
-class UdConfigParms : public ERRORLOG::ErrlUserDetails
-{
-  public:
-    /**
-     *  @brief Constructor
-     *
-     *  @param i_target        Target being detected/acted upon
-     *  @param i_record        Record
-     *  @param i_keyword       Keyword
-     *  @param i_location      Location - PNOR/EEPROM
-     *  @param i_readPnor      Read PNOR config
-     *  @param i_readHw        Read HW config
-     *  @param i_writePnor     Write PNOR config
-     *  @param i_writeHw       Write HW config
-     */
-    UdConfigParms( TARGETING::Target * i_target,
-                   uint64_t i_record,
-                   uint64_t i_keyword,
-                   uint64_t i_location,
-                   uint64_t i_readPnor,
-                   uint64_t i_readHw,
-                   uint64_t i_writePnor,
-                   uint64_t i_writeHw );
-
-    /**
-     *  @brief Destructor
-     */
-    virtual ~UdConfigParms();
-
-  private:
-    // Disabled
-    UdConfigParms(UdConfigParms &);
-    UdConfigParms & operator=(UdConfigParms &);
-};
 
 }
 

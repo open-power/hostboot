@@ -89,7 +89,7 @@ errlHndl_t ocmbGetSPD(T::TargetHandle_t        i_target,
 
     do {
 
-        const KeywordData* entry = nullptr;
+        const SPD::KeywordData* entry = nullptr;
         l_errl = getKeywordEntry(i_keyword,
                                  i_memType,
                                  i_target,
@@ -103,7 +103,7 @@ errlHndl_t ocmbGetSPD(T::TargetHandle_t        i_target,
         if (entry == nullptr)
         {
             TRACFCOMP(g_trac_spd,
-                      ERR_MRK"KeywordData entry pointer is nullptr!");
+                      ERR_MRK"SPD::KeywordData entry pointer is nullptr!");
 
             /*@
             * @errortype
@@ -133,10 +133,9 @@ errlHndl_t ocmbGetSPD(T::TargetHandle_t        i_target,
         }
 
         // Only allow keywords supported by DDIMM
-        l_errl = checkModSpecificKeyword(*entry,
-                                         i_memType,
-                                         i_target,
-                                         VPD::SEEPROM);
+        l_errl = SPD::checkModSpecificKeyword(*entry,
+                                              i_memType,
+                                              i_target);
 
         if (l_errl != nullptr)
         {
@@ -145,11 +144,10 @@ errlHndl_t ocmbGetSPD(T::TargetHandle_t        i_target,
 
         if (entry->isSpecialCase)
         {
-            l_errl = spdSpecialCases(*entry,
-                                     io_buffer,
-                                     i_target,
-                                     i_memType,
-                                     VPD::SEEPROM);
+            l_errl = SPD::spdSpecialCases(*entry,
+                                          io_buffer,
+                                          i_target,
+                                          i_memType);
             if (l_errl != nullptr)
             {
                 break;
@@ -164,9 +162,9 @@ errlHndl_t ocmbGetSPD(T::TargetHandle_t        i_target,
         }
 
 
-        l_errl = spdCheckSize(io_buflen,
-                              entry->length,
-                              i_keyword);
+        l_errl = SPD::spdCheckSize(io_buflen,
+                                   entry->length,
+                                   i_keyword);
 
         if (l_errl != nullptr)
         {
@@ -239,30 +237,7 @@ errlHndl_t ocmbFetchData(T::TargetHandle_t    i_target,
 // ------------------------------------------------------------------
 bool isValidOcmbDimmType(const uint8_t i_dimmType)
 {
-    return ((SPD_DDR4_TYPE == i_dimmType ));
-}
-
-// ------------------------------------------------------------------
-// getMemType
-// ------------------------------------------------------------------
-errlHndl_t getMemType(uint8_t&              o_memType,
-                      T::TargetHandle_t     i_target,
-                      EEPROM::EEPROM_SOURCE i_location)
-{
-    errlHndl_t err = nullptr;
-
-    err = ocmbFetchData(i_target,
-                        MEM_TYPE_ADDR,
-                        MEM_TYPE_SZ,
-                        &o_memType,
-                        i_location);
-
-    TRACSSCOMP(g_trac_spd,
-               EXIT_MRK"SPD::getMemType() - MemType: 0x%02x, Error: %s",
-               o_memType,
-               ((err != nullptr) ? "Yes" : "No"));
-
-    return err;
+    return ((SPD::SPD_DDR4_TYPE == i_dimmType ));
 }
 
 // See above for details
@@ -283,8 +258,8 @@ errlHndl_t ocmbSPDPerformOp(DeviceFW::OperationType i_opType,
     do
     {
         // Read the Basic Memory Type
-        uint8_t memType(MEM_TYPE_INVALID);
-        errl = getMemType(memType, i_target, EEPROM::AUTOSELECT);
+        uint8_t memType(SPD::MEM_TYPE_INVALID);
+        errl = OCMB_SPD::getMemType(memType, i_target, EEPROM::AUTOSELECT);
 
         if( errl )
         {
@@ -301,7 +276,7 @@ errlHndl_t ocmbSPDPerformOp(DeviceFW::OperationType i_opType,
             // If the user wanted the Basic memory type, return this now.
             if(BASIC_MEMORY_TYPE == keyword)
             {
-                io_buflen = MEM_TYPE_SZ;
+                io_buflen = SPD::MEM_TYPE_SZ;
                 if (io_buffer != nullptr)
                 {
                     memcpy(io_buffer, &memType, io_buflen);
@@ -792,3 +767,33 @@ DEVICE_REGISTER_ROUTE(DeviceFW::READ,
 
 
 } // End of SPD namespace
+
+
+namespace OCMB_SPD
+{
+
+// ------------------------------------------------------------------
+// getMemType
+// ------------------------------------------------------------------
+errlHndl_t getMemType(uint8_t&              o_memType,
+                      T::TargetHandle_t     i_target,
+                      EEPROM::EEPROM_SOURCE i_location)
+{
+    errlHndl_t err = nullptr;
+
+    err = ocmbFetchData(i_target,
+                        SPD::MEM_TYPE_ADDR,
+                        SPD::MEM_TYPE_SZ,
+                        &o_memType,
+                        i_location);
+
+    TRACSSCOMP(g_trac_spd,
+               EXIT_MRK"SPD::getMemType() - MemType: 0x%02x, Error: %s",
+               o_memType,
+               ((err != nullptr) ? "Yes" : "No"));
+
+    return err;
+}
+
+
+}

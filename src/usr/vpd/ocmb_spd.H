@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,22 +59,6 @@ errlHndl_t ocmbGetSPD(TARGETING::TargetHandle_t        i_target,
  */
 bool isValidOcmbDimmType(const uint8_t i_dimmType);
 
-/*
- * @brief This function will read the DIMM memory type for OCMBs.
- *
- * @param[out] o_memType     - The memory type value to return.
- *
- * @param[in] i_target       - The target to read data from.
- *
- * @param[in] i_eepromSource - The EEPROM source (CACHE/HARDWARE).
- *
- * @return errlHndl_t - NULL if successful, otherwise a pointer
- *      to the error log.
- */
-errlHndl_t getMemType(uint8_t&                      o_memType,
-                      TARGETING::TargetHandle_t     i_target,
-                      EEPROM::EEPROM_SOURCE         i_eepromSource);
-
 /**
  * @param This function is a wrapper for reading the correct keyword.
  *
@@ -97,6 +81,26 @@ errlHndl_t ocmbFetchData(TARGETING::TargetHandle_t    i_target,
                          void*                        o_data,
                          EEPROM::EEPROM_SOURCE        i_location);
 
+}
+
+
+namespace OCMB_SPD
+{
+/*
+ * @brief This function will read the DIMM memory type for OCMBs.
+ *
+ * @param[out] o_memType     - The memory type value to return.
+ *
+ * @param[in] i_target       - The target to read data from.
+ *
+ * @param[in] i_eepromSource - The EEPROM source (CACHE/HARDWARE).
+ *
+ * @return errlHndl_t - NULL if successful, otherwise a pointer
+ *      to the error log.
+ */
+errlHndl_t getMemType(uint8_t&                      o_memType,
+                      TARGETING::TargetHandle_t     i_target,
+                      EEPROM::EEPROM_SOURCE         i_eepromSource);
 }
 
 #endif

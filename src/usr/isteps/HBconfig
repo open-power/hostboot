@@ -1,8 +1,3 @@
-config NO_DMI_EREPAIR
-    default y if(!MEMVPD_WRITE || !MEMVPD_READ)
-    help
-        Do not apply erepair information on the DMI bus during boot
-
 config SET_NOMINAL_PSTATE
     default n
     depends on !HTMGT

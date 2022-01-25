@@ -163,7 +163,7 @@ class vpdEccApiTest: public CxxTest::TestSuite
         void updateRecordEccDataTest ( void )
         {
             errlHndl_t l_err = VPD::updateRecordEccData( m_procTarget,
-                                    m_record, m_keyword, m_location, m_eepromSource );
+                                    m_record, m_keyword, m_eepromSource );
 
             if (l_err)
             {
@@ -186,7 +186,6 @@ class vpdEccApiTest: public CxxTest::TestSuite
             // Initialize the input arguments
             m_record = MVPD::VWML;
             m_keyword = MVPD::pdI;
-            m_location = VPD::SEEPROM;
             m_eepromSource = EEPROM::AUTOSELECT;
 
             // Initialize the random keyword data
@@ -361,7 +360,6 @@ class vpdEccApiTest: public CxxTest::TestSuite
                 IpVpdFacade::input_args_t l_args;
                 l_args.record = m_record;
                 l_args.keyword = m_keyword;
-                l_args.location = m_location;
                 l_args.eepromSource = m_eepromSource;
 
                 // Write the random data to the keyword
@@ -392,7 +390,6 @@ class vpdEccApiTest: public CxxTest::TestSuite
 
         VPD::vpdRecord        m_record;
         VPD::vpdKeyword       m_keyword;
-        VPD::vpdCmdTarget     m_location;
         EEPROM::EEPROM_SOURCE m_eepromSource;
 
         int8_t m_randomKeywordData;
