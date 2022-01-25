@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2021
+# Contributors Listed Below - COPYRIGHT 2021,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -34,6 +34,13 @@ hTable = { hashString : { 'format': formatString ,
          }
 """
 hTable = {}
+
+"""@brief Trace version of file in decimal and hex.  Must stay in sync. Modifying
+          TRACE_VERSION_DEC will also update its counterpart TRACE_VERSION_HEX,
+          keeping the two in sync.
+"""
+TRACE_VERSION_DEC = 2
+TRACE_VERSION_HEX = struct.pack('b', TRACE_VERSION_DEC)
 
 """@brief Maximum size of component name
 """
@@ -268,16 +275,19 @@ def get_pipe_trace(bf, start):
     dataStart = i + dataHeaderSize
     return dataStart, (dataStart + parsedData[3]), parsedData[5], headerStr
 
-""" Reads traces from the binary data and prints formatted traces
+""" Decodes the binary traces to a list that contains the individual traces in ASCII form
 
-@param[in] bData: bytes object holding binary trace data
-@param[in] oFile: string of output file name
-@param[in] printNumTraces: int value of number of traces from the end to print
-@returns: Return 0 on success, -1 on failure
+@param[in] bData: byte array - holds the binary trace data
+@param[in] startingPosition: int value - the starting position in the byte array to start
+                             decoding.  Useful if the binary trace data is prepended with
+                             version info or some other beginning marker.
+@returns: retVal: int value - the return code: 0 on success, -1 on failure
+          traces: list - the ASCII traces in list form
 """
-def trace_adal_print_pipe(bData, oFile, printNumTraces):
+def decode_binary_traces_to_ascii_list(bData, startingPosition):
+    retVal = 0
     traces = []
-    start = 1
+    start = startingPosition
     end = 0
     while start < len(bData) - 1:
         gpt = get_pipe_trace(bData, start)
@@ -296,29 +306,100 @@ def trace_adal_print_pipe(bData, oFile, printNumTraces):
                 start = end
             else:
                 print("Error: index passed end of data")
-                return -1
+                retVal = -1
+                break
         else:
             print("Error: header data for trace not parsed correctly "
                   "- skipping the rest of the data")
+            retVal = -1
             break
 
-    if printNumTraces == -1:
-        printNumTraces = len(traces)
+    return retVal, traces
 
+""" Takes a list of the ASCII traces and returns the traces in a single string
+
+@param[in] asciiTraceList: list - holds the ASCII Traces
+@param[in] printNumTraces: int value - the number of traces to print starting at the end.
+                                       if -1 then all traces are printed
+@return a single string containing the ASCII traces
+"""
+def convert_ascii_trace_list_to_string(asciiTraceList, printNumTraces):
+    # Initialize the return string with the header info
+    traceDataString = trace_output_get_format()
+
+    # If the number of traces is 0 then just return the header info
+    if printNumTraces == 0:
+        return traceDataString
+    # If the number of traces is -1 then retrieve all the trace data
+    elif printNumTraces == -1:
+        printNumTraces = len(asciiTraceList)
+
+    # Collect the traces limited by the number of traces given by caller
+    traceDataString += '\n'.join(asciiTraceList[-printNumTraces:]) # Get the individual traces
+    traceDataString += '\n' # Append a newline at the end of traces
+
+    return traceDataString
+
+""" Reads traces from the binary data and prints formatted traces
+
+@param[in] bData: byte array - holds the binary trace data
+@param[in] oFile: If an empty string - The ASCII traces are printed to the console
+                  If not an empty string - The ASCII traces are printed to file 'oFile'
+@param[in] startingPosition: int value - the starting position in the byte array to start
+                             decoding.  Useful if the binary trace data is prepended with
+                             version info or some other beginning marker.
+@param[in] printNumTraces: int value - the number of traces to print starting at the end.
+                                       if -1 then all traces are printed
+@returns: Return 0 on success, -1 on failure
+"""
+def trace_adal_print_pipe(bData, oFile, startingPosition, printNumTraces):
+    # Decode the binary traces within the 'binaryData' into it's ASCII equivalent
+    (retVal, asciiTracesList) = decode_binary_traces_to_ascii_list(bData, startingPosition)
+    if retVal == -1:
+        return retVal
+
+    # Get a string representation of the ASCII traces which is in list form
+    traceDataString = convert_ascii_trace_list_to_string(asciiTracesList, printNumTraces);
+
+    # Print the ASCII string based on the existence of the output file 'oFile'
     if oFile != '':
-        #Write traces to given file
+        # Write the ASCII trace data to given file
         of = open(oFile, 'w')
-        of.write(trace_output_get_format())
-        for x in traces[-printNumTraces:]:
-            of.write(x + '\n')
+        of.write(traceDataString)
         of.close()
     else:
-        #Print Traces
-        print(trace_output_get_format(), end='')
-        for x in traces[-printNumTraces:]:
-            print(x)
+        # Print the ASCII trace data out to the console
+        print(traceDataString, end='')
 
     return 0
+
+""" Translates the the trace in binary form to it's equivalent ASCII string
+
+@param[in] binaryData: byte array - holds the binary trace data
+@param[in] startingPosition: int value - the starting position in the byte array to start
+                             decoding.  Useful if the binary trace data is prepended with
+                             version info or some other beginning marker.
+@param[in] printNumTraces: int value of number of traces from the end to print
+@param[in] stringFileName: the hbotStringFile and location to it
+
+@returns: retVal: int value - the return code: 0 for success, -1 on failure
+          traceDataString: string - a single string containing the ASCII traces
+"""
+def get_trace_data_as_string(binaryData, startingPosition, printNumTraces, stringFileName):
+
+    # Default the outgoing string to ""
+    traceDataString = ""
+
+    if trace_adal_read_stringfile(stringFileName) == -1:
+        print("Error processing string file")
+        return -1, traceDataString
+
+    (retVal, asciiTracesList) = decode_binary_traces_to_ascii_list(binaryData, startingPosition)
+    if retVal == -1:
+        return retVal, traceDataString
+
+    traceDataString = convert_ascii_trace_list_to_string(asciiTracesList, printNumTraces);
+    return 0, traceDataString
 
 """ Process tracBINARY file
 
@@ -330,7 +411,8 @@ def trace_adal_print_pipe(bData, oFile, printNumTraces):
 def do_file_binary(bFile, oFile, printNumTraces):
     bf = open(bFile, "rb")
 
-    ret = trace_adal_print_pipe(bf.read(), oFile, printNumTraces)
+    startingPosition = 1; # Skip over the version info of the file which is the 1st byte
+    ret = trace_adal_print_pipe(bf.read(), oFile, startingPosition, printNumTraces)
 
     bf.close()
 
@@ -344,7 +426,7 @@ def do_file_binary(bFile, oFile, printNumTraces):
 def is_tracBINARY(bFile):
     f = open(bFile, "rb")
 
-    if f.read(1) != bytes.fromhex('02'):
+    if f.read(1) != TRACE_VERSION_HEX:
         f.close()
         return -1
     else:
