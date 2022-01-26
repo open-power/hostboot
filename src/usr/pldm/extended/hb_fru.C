@@ -82,7 +82,8 @@ const std::map<uint32_t, std::vector<uint16_t> > record_keyword_field_map {
  *                                  Fru Records related to an Entity's Record
  *                                  Set ID
  * @param[in] i_record_count        Number of records in the fru record table
- * @param[in] i_key                 FRU record ID key to search for
+ * @param[in] i_fru_record_type     FRU record type to search for
+ * @param[in] i_field_type          FRU field type to search for
  * @param[in] o_value               Null-terminated string containing the
  *                                  value associated with this record
  *
@@ -90,7 +91,8 @@ const std::map<uint32_t, std::vector<uint16_t> > record_keyword_field_map {
  */
 bool getRecordSetRecordValue(const uint8_t* const i_pldm_fru_table_buf,
                              const uint16_t i_record_count,
-                             const uint8_t i_key,
+                             const uint8_t i_fru_record_type,
+                             const uint8_t i_fru_field_type,
                              std::vector<uint8_t>& o_value)
 {
     assert( i_pldm_fru_table_buf != nullptr,
@@ -116,7 +118,8 @@ bool getRecordSetRecordValue(const uint8_t* const i_pldm_fru_table_buf,
                 reinterpret_cast<const pldm_fru_record_tlv *>(in_table_cur_ptr +
                                                               offset_of_cur_pldm_record_entry);
 
-            if(fru_tlv->type == i_key)
+            if((fru_tlv->type == i_fru_field_type)
+               && (record_data->record_type == i_fru_record_type))
             {
                 o_value.insert(o_value.begin(),
                                fru_tlv->value,
@@ -152,6 +155,7 @@ bool getRecordSetRecordValue(const uint8_t* const i_pldm_fru_table_buf,
  *                                  Fru Records related to an Entity's Record
  *                                  Set ID
  * @param[in] i_record_count        Number of records in the fru record table
+ * @param[in] i_record_type         FRU Record Type
  * @param[in] o_location_code       Null-terminated string containing the
  *                                  location code associated with this
  *                                  record
@@ -160,6 +164,7 @@ bool getRecordSetRecordValue(const uint8_t* const i_pldm_fru_table_buf,
  */
 errlHndl_t getRecordSetLocationCode(const uint8_t* const i_pldm_fru_table_buf,
                                     const uint16_t i_record_count,
+                                    const uint8_t i_record_type,
                                     std::vector<uint8_t>& o_location_code)
 {
     // Location code is a record with a single TLV that has the location code
@@ -170,6 +175,7 @@ errlHndl_t getRecordSetLocationCode(const uint8_t* const i_pldm_fru_table_buf,
 
     if(!getRecordSetRecordValue(i_pldm_fru_table_buf,
                                 i_record_count,
+                                i_record_type,
                                 LOCATION_CODE_FIELD_ID,
                                 o_location_code))
     {
@@ -506,7 +512,6 @@ errlHndl_t generate_vtoc_record(std::vector<uint8_t>& o_vtoc_buf,
     }
 
     uint8_t pt_kw_len = (sizeof(pt_entry)*i_ipz_records.size());
-
 
     // This structure represents the start of the vtoc record up to but not
     // including the value of its pt keyword.
@@ -1039,14 +1044,16 @@ errlHndl_t cacheRemoteFruVpd()
 
     enum extra_fru_data_t
     {
-        NO_EXTRA_FRU_INFO = 0,
+        NO_EXTRA_FRU_INFO   = 0,
         HAS_FW_VERSION_INFO = 1 << 0,
-        HAS_SERIAL_NUMBER = 1 << 1
+        HAS_SERIAL_NUMBER   = 1 << 1,
+        HAS_MODEL_NUMBER    = 1 << 2,
     };
 
     struct pldm_entity_to_targeting_mapping
     {
         entity_type pldm_entity_type;
+        pldm_fru_record_type fru_record_type;
         TARGETING::TYPE targeting_type;
         EEPROM::EEPROM_ROLE device_role;
         size_t max_expected_records;
@@ -1058,11 +1065,13 @@ errlHndl_t cacheRemoteFruVpd()
 
     static const pldm_entity_to_targeting_mapping pldm_entity_to_targeting_map[] = {
         { ENTITY_TYPE_BACKPLANE,
+          PLDM_FRU_RECORD_TYPE_OEM,
           TYPE_NODE,
           EEPROM::VPD_PRIMARY,
           1,
-          HAS_SERIAL_NUMBER },
+          NO_EXTRA_FRU_INFO },
         { ENTITY_TYPE_CHASSIS,
+          PLDM_FRU_RECORD_TYPE_OEM,
           TYPE_SYS,
           EEPROM::VPD_PRIMARY,
           1,
@@ -1070,21 +1079,32 @@ errlHndl_t cacheRemoteFruVpd()
           NO_CACHE_VPD,
           setAttribute<ATTR_CHASSIS_LOCATION_CODE> },
         { ENTITY_TYPE_LOGICAL_SYSTEM,
+          PLDM_FRU_RECORD_TYPE_OEM,
           TYPE_SYS,
           EEPROM::VPD_PRIMARY,
           1,
-          HAS_FW_VERSION_INFO,
+          HAS_SERIAL_NUMBER,
           NO_CACHE_VPD,
           setAttribute<ATTR_SYS_LOCATION_CODE> },
         { ENTITY_TYPE_TPM,
+          PLDM_FRU_RECORD_TYPE_OEM,
           TYPE_TPM,
           EEPROM::VPD_PRIMARY,
           1,
           HAS_SERIAL_NUMBER,
           CACHE_VPD,
           nullptr,
-          false
-        }
+          false },
+        // Needed to get system Model and Serial Number from non-OEM FRU
+        { ENTITY_TYPE_LOGICAL_SYSTEM,
+          PLDM_FRU_RECORD_TYPE_GENERAL,
+          TYPE_SYS,
+          EEPROM::VPD_PRIMARY,
+          1,
+          HAS_MODEL_NUMBER,
+          NO_CACHE_VPD,
+          nullptr,
+          false },
     };
 
     for(const auto& map_entry : pldm_entity_to_targeting_map)
@@ -1095,6 +1115,7 @@ errlHndl_t cacheRemoteFruVpd()
         if ((device_rsis.empty() && map_entry.fail_on_missing_pdr)
                 || device_rsis.size() > map_entry.max_expected_records)
         {
+
             if (!map_entry.fail_on_missing_pdr)
             {
                 // It's not required that this map entry have a pdr with which to extract data. Just move on.
@@ -1136,7 +1157,7 @@ errlHndl_t cacheRemoteFruVpd()
             uint16_t records_in_set = 0;
             std::vector<uint8_t> device_fru_records;
             PLDM::getRecordSetByIdAndType(table_ptr.get(), table_metadata.total_table_records,
-                                          device_rsi, PLDM_FRU_RECORD_TYPE_OEM,
+                                          device_rsi, map_entry.fru_record_type,
                                           device_fru_records, records_in_set);
 
             if(device_fru_records.empty() ||
@@ -1145,21 +1166,23 @@ errlHndl_t cacheRemoteFruVpd()
                 if (!map_entry.fail_on_missing_pdr)
                 {
                     // It's not required that this map entry have a pdr with which to extract data. Just move on.
-                    PLDM_INF("cacheRemoteFruVpd: Couldn't find any OEM FRU records matching record set "
-                             "id 0x%.4x entity type 0x%.02x but that's allowed, moving on.",
-                             device_rsi, map_entry.pldm_entity_type);
+                    PLDM_INF("cacheRemoteFruVpd: Couldn't find any FRU records matching record set "
+                             "id 0x%.4x entity type 0x%.02x fru record type 0x%.02x but that's "
+                             "allowed, moving on.",
+                             device_rsi, map_entry.pldm_entity_type, map_entry.fru_record_type);
                     continue;
                 }
 
-                PLDM_ERR("cacheRemoteFruVpd: Failed to find any OEM Fru records"
-                         " matching record set id 0x%.4x entity type 0x%.02x",
-                         device_rsi, map_entry.pldm_entity_type);
+                PLDM_ERR("cacheRemoteFruVpd: Failed to find any Fru records matching "
+                         "record set id 0x%.4x entity type 0x%.02x fru record type 0x%.02x",
+                         device_rsi, map_entry.pldm_entity_type, map_entry.fru_record_type);
                 /*@
-                * @errortype  ERRL_SEV_UNRECOVERABLE
-                * @moduleid   MOD_CACHE_REMOTE_FRU_VPD
-                * @reasoncode RC_INVALID_RECORD_COUNT
-                * @userdata1  record set id we are looking up
-                * @userdata2  entity type
+                * @errortype         ERRL_SEV_UNRECOVERABLE
+                * @moduleid          MOD_CACHE_REMOTE_FRU_VPD
+                * @reasoncode        RC_INVALID_RECORD_COUNT
+                * @userdata1         record set id we are looking up
+                * @userdata2[0:31]   entity type
+                * @userdata2[32:64]  fru record type
                 * @devdesc    Unable to find records associated with record
                 *             set id in fru record table
                 * @custdesc   A software error occurred during system boot
@@ -1168,66 +1191,90 @@ errlHndl_t cacheRemoteFruVpd()
                                      MOD_CACHE_REMOTE_FRU_VPD,
                                      RC_INVALID_RECORD_COUNT,
                                      device_rsi,
-                                     map_entry.pldm_entity_type,
+                                     TWO_UINT32_TO_UINT64(
+                                       map_entry.pldm_entity_type,
+                                       map_entry.fru_record_type),
                                      ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
                 addBmcErrorCallouts(errl);
                 break;
             }
 
-            // lookup the location code in the fru records associated with this RSI
-            std::vector<uint8_t> location_code;
-            errl = PLDM::getRecordSetLocationCode(device_fru_records.data(),
-                                                  records_in_set,
-                                                  location_code);
+            TargetHandle_t entity_target = nullptr;
 
-            if(errl)
+            // Only PLDM_FRU_RECORD_TYPE_OEM FRUs have location codes
+            if (map_entry.fru_record_type != PLDM_FRU_RECORD_TYPE_OEM)
             {
-                PLDM_ERR("cacheRemoteFruVpd: Failed to find location code");
-                break;
+                // Skipping location code processing, but still need to set entity_target
+                // Only supporting map_(entry.targeting_type == TYPE_SYS) at this time
+                assert(map_entry.targeting_type == TYPE_SYS, "cacheRemoteFruVpd: Expecting TYPE_SYS");
+
+                // set entity_target to system target
+                entity_target = UTIL::assertGetToplevelTarget();
+
+                PLDM_DBG("cacheRemoteFruVpd: Skipping location code processing; setting "
+                         "entity_target to 0x%.08X", get_huid(entity_target));
             }
-
-            TargetHandle_t entity_target =
-                getTargetFromLocationCode(location_code,
-                                          map_entry.targeting_type);
-
-            if(entity_target == nullptr)
+            else
             {
-                PLDM_ERR("cacheRemoteFruVpd: Failed to find target associated w/ location code found");
-                /*@
-                 * @errortype  ERRL_SEV_UNRECOVERABLE
-                 * @moduleid   MOD_CACHE_REMOTE_FRU_VPD
-                 * @reasoncode RC_INVALID_LOCATION_CODE
-                 * @userdata1  record set id we are looking up
-                 * @userdata2  entity type
-                 * @devdesc    Unable to find records associated with record
-                 *             set id in fru record table
-                 * @custdesc   A software error occurred during system boot
-                 */
-                errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                     MOD_CACHE_REMOTE_FRU_VPD,
-                                     RC_INVALID_LOCATION_CODE,
-                                     device_rsi,
-                                     map_entry.pldm_entity_type,
-                                     ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
-                addBmcErrorCallouts(errl);
-                break;
-            }
+                // lookup the location code in the fru records associated with this RSI
+                std::vector<uint8_t> location_code;
+                errl = PLDM::getRecordSetLocationCode(device_fru_records.data(),
+                                                      records_in_set,
+                                                      map_entry.fru_record_type,
+                                                      location_code);
 
-            /* Set the location code of the target if necessary */
-
-            if (map_entry.location_code_setter)
-            {
-                errl = map_entry.location_code_setter(entity_target,
-                                                      reinterpret_cast<const char*>(location_code.data()));
-
-                if (errl)
+                if(errl)
                 {
-                    PLDM_ERR("Failed to set location code attribute on %s target (HUID 0x%08x)",
-                             attrToString<ATTR_TYPE>(entity_target->getAttr<ATTR_TYPE>()),
-                             get_huid(entity_target));
+                    PLDM_ERR("cacheRemoteFruVpd: Failed to find location code");
                     break;
                 }
-            }
+
+                entity_target =
+                    getTargetFromLocationCode(location_code,
+                                              map_entry.targeting_type);
+
+                if(entity_target == nullptr)
+                {
+                    PLDM_ERR("cacheRemoteFruVpd: Failed to find target associated w/ location code found");
+                    /*@
+                     * @errortype  ERRL_SEV_UNRECOVERABLE
+                     * @moduleid   MOD_CACHE_REMOTE_FRU_VPD
+                     * @reasoncode RC_INVALID_LOCATION_CODE
+                     * @userdata1  record set id we are looking up
+                     * @userdata2  entity type
+                     * @devdesc    Unable to find records associated with record
+                     *             set id in fru record table
+                     * @custdesc   A software error occurred during system boot
+                     */
+                    errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                         MOD_CACHE_REMOTE_FRU_VPD,
+                                         RC_INVALID_LOCATION_CODE,
+                                         device_rsi,
+                                         map_entry.pldm_entity_type,
+                                         ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
+                    addBmcErrorCallouts(errl);
+                    break;
+                }
+
+                /* Set the location code of the target if necessary */
+
+                if (map_entry.location_code_setter)
+                {
+                    errl =
+                        map_entry.location_code_setter(
+                                  entity_target,
+                                  reinterpret_cast<const char*>(location_code.data()));
+
+                    if (errl)
+                    {
+                        PLDM_ERR("Failed to set location code attribute on %s target (HUID 0x%08x)",
+                                 attrToString<ATTR_TYPE>(entity_target->getAttr<ATTR_TYPE>()),
+                                 get_huid(entity_target));
+                        break;
+                    }
+                }
+            } // end of PLDM_FRU_RECORD_TYPE_OEM/location code check
+
 
             // If not in MPIPL then cache VPD if necessary.
             // It is unnecessary to cache the VPD we get from the BMC during MPIPL. We will
@@ -1264,15 +1311,17 @@ errlHndl_t cacheRemoteFruVpd()
                 entity_target->setAttr<TARGETING::ATTR_VPD_SWITCHES>(vpd_switch);
             }
 
-            /* Read and store firmware version info if necessary */
+            /* Read and store other FRU info if necessary */
 
-            const auto getrecord = [&](const uint8_t record_key, void* const buffer, const size_t bufsize,
+            const auto getrecord = [&](const uint8_t fru_record_type, const uint8_t fru_field_type,
+                                       void* const buffer, const size_t bufsize,
                                        const char* const field_name)
             {
                 std::vector<uint8_t> record_data;
                 if (getRecordSetRecordValue(device_fru_records.data(),
                                             records_in_set,
-                                            record_key,
+                                            fru_record_type,
+                                            fru_field_type,
                                             record_data))
                 {
                     memcpy(buffer,
@@ -1286,8 +1335,6 @@ errlHndl_t cacheRemoteFruVpd()
                              get_huid(entity_target));
                 }
             };
-
-            // @TODO RTC 260604: Update the PLDM_FRU_FIELD* constants below to the correct values
 
             if (map_entry.extra_fru_info & HAS_FW_VERSION_INFO)
             {
@@ -1309,7 +1356,8 @@ errlHndl_t cacheRemoteFruVpd()
 
                 memcpy(fw_release_string, l_miKeyword, l_miKeywordSize);
 
-                getrecord(PLDM_FRU_FIELD_TYPE_VERSION,
+                getrecord(map_entry.fru_record_type,
+                          PLDM_FRU_FIELD_TYPE_VERSION,
                           subsys_version_string, sizeof(subsys_version_string),
                           "subsystem version");
 
@@ -1321,11 +1369,24 @@ errlHndl_t cacheRemoteFruVpd()
             {
                 ATTR_SERIAL_NUMBER_type serial_number = { };
 
-                getrecord(PLDM_FRU_FIELD_TYPE_SN, // TODO: Verify this key value
+                getrecord(map_entry.fru_record_type,
+                          11, // Comes from "SE" offset into valid_vsys_keywords[] 
                           serial_number, sizeof(serial_number),
                           "serial number");
 
                 entity_target->setAttr<ATTR_SERIAL_NUMBER>(serial_number);
+            }
+
+            if (map_entry.extra_fru_info & HAS_MODEL_NUMBER)
+            {
+                TARGETING::ATTR_RAW_MTM_type model = {};
+
+                getrecord(map_entry.fru_record_type,
+                          PLDM_FRU_FIELD_TYPE_MODEL,
+                          model, sizeof(model),
+                          "model");
+
+                entity_target->setAttr<ATTR_RAW_MTM>(model);
             }
         }
 
@@ -1338,7 +1399,6 @@ errlHndl_t cacheRemoteFruVpd()
                      map_entry.device_role);
             break;
         }
-
     }
 
     }while(0);

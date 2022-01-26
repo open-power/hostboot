@@ -1038,7 +1038,7 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
 
     // These will go into the EH section. The real information will be gathered
     // from attributes on called-out targets, if targeting is loaded.
-    TARGETING::ATTR_SERIAL_NUMBER_type serial_number = { }; // first 4 bytes used as serial
+    TARGETING::ATTR_SERIAL_NUMBER_type serial_number = "UNKNOWN";
     TARGETING::ATTR_RAW_MTM_type mtm = "UNKNOWN";
     TARGETING::ATTR_FW_RELEASE_VERSION_type release_version = "UNKNOWN";
     TARGETING::ATTR_FW_SUBSYS_VERSION_type subsys_version = "UNKNOWN";
@@ -1061,17 +1061,13 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
             UTIL::tryGetAttributeInHierarchy<ATTR_RAW_MTM>(sys, mtm);
             UTIL::tryGetAttributeInHierarchy<ATTR_FW_RELEASE_VERSION>(sys, release_version);
             UTIL::tryGetAttributeInHierarchy<ATTR_FW_SUBSYS_VERSION>(sys, subsys_version);
-        }
-
-        if (node)
-        {
-            UTIL::tryGetAttributeInHierarchy<ATTR_SERIAL_NUMBER>(node, serial_number);
+            UTIL::tryGetAttributeInHierarchy<ATTR_SERIAL_NUMBER>(sys, serial_number);
         }
 
 #ifdef CONFIG_BUILD_FULL_PEL
         // Collect various data for the callouts present in this error for BMC since FSP historically handled that for
         // Hostboot.
-        collectCalloutDataForBMC( node);
+        collectCalloutDataForBMC(node);
 #endif
     }
     else
@@ -1085,12 +1081,8 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
     checkForDeconfigAndGard();
 
     { /* Set Extended Header info */
-        char serial_string[sizeof(mtms_t::serial)] = { };
 
-        snprintf(serial_string, sizeof(serial_string),
-                 "%.8X", *reinterpret_cast<const uint32_t*>(serial_number));
-
-        iv_Extended.setSerial(serial_string);
+        iv_Extended.setSerial(reinterpret_cast<const char*>(serial_number));
         iv_Extended.setMTM(mtm);
         iv_Extended.setFirmwareVersion(release_version);
         iv_Extended.setSubsystemVersion(subsys_version);

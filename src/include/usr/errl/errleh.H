@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -161,7 +161,9 @@ public:
      */
     void setMTM(const char* const i_mtm)
     {
-        set_errl_string(iv.mtms.mtm, i_mtm);
+        set_errl_string(iv.mtms.mtm,
+                        i_mtm,
+                        false);  // Do not add a NULL-terminating character
     }
 
     /* @brief Set the Serial Number string in the EH section
@@ -169,7 +171,9 @@ public:
      */
     void setSerial(const char* const i_serial)
     {
-        set_errl_string(iv.mtms.serial, i_serial);
+        set_errl_string(iv.mtms.serial,
+                        i_serial,
+                        false);  // Do not add a NULL-terminating character
     }
 
     /* @brief Set the Firmware Version string in the EH section
@@ -177,7 +181,9 @@ public:
      */
     void setFirmwareVersion(const char* const i_firmware)
     {
-        set_errl_string(iv.firmware, i_firmware);
+        set_errl_string(iv.firmware,
+                        i_firmware,
+                        false);  // Do not add a NULL-terminating character
     }
 
     /* @brief Set the Subsystem Version string in the EH section
@@ -185,7 +191,9 @@ public:
      */
     void setSubsystemVersion(const char* const i_subsystem)
     {
-        set_errl_string(iv.subsystem, i_subsystem);
+        set_errl_string(iv.subsystem,
+                        i_subsystem,
+                        false);  // Do not add a NULL-terminating character
     }
 
 private:
