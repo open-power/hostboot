@@ -597,6 +597,21 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_PROC_FABRIC_R_INDIRECT_EN</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Set state of PB_CFG_INDIRECT_R_EN
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    OFF = 0x0,
+    ON = 0x1
+  </enum>
+  <writeable/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_PROC_FABRIC_A_LINK_DELAY</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
