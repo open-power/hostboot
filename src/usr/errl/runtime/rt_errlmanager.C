@@ -484,6 +484,7 @@ errlHndl_t notify_hypervisor_of_resource_gard(const errlHndl_t i_error, TARGETIN
          * @userdata1     PLID of error log that called out the resource
          * @userdata2     HUID of the resource
          * @devdesc       Unable to make firmware request
+         * @custdesc      Firmware unable to send message to hypervisor at runtime
          */
         errl = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
                              ERRL_NOTIFY_HYPERVISOR_OF_RESOURCE_GARD,
@@ -533,6 +534,7 @@ errlHndl_t notify_hypervisor_of_resource_gard(const errlHndl_t i_error, TARGETIN
          * @userdata1     PLID of error log that called out the resource
          * @userdata2     HUID of the resource
          * @devdesc       Unable to get resource ID for runtime guard, this is a code bug
+         * @custdesc      Internal firmware error at runtime
          */
         errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                              ERRL_NOTIFY_HYPERVISOR_OF_RESOURCE_GARD,

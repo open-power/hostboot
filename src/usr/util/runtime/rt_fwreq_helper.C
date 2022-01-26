@@ -323,16 +323,18 @@ errlHndl_t firmware_request_helper(uint64_t i_reqLen,   void *i_req,
              * @moduleid         MOD_RT_FIRMWARE_REQUEST
              * @reasoncode       RC_FW_REQUEST_RESET_RELOAD_ERR
              * @userdata1[0:31]  Hypervisor return code
-             * @userdata1[32:63] Firmware Request type (HCODE Update) ||
+             * @userdata1[32:63] Firmware Request type (HCODE Update, Initiate gard) ||
                                  sequence number (FSP MSG) ||
                                  i2cMaster & lock operation
              * @userdata2[0:31]  SCOM address (HCODE Update) ||
                                  MBOX message type (FSP MSG) ||
-                                 chipID
+                                 chipID ||
+                                 error type + resource type (Initiate gard)
              * @userdata2[32:63] SCOM data (HCODE Update) ||
                                  Message Type (FSP MSG) ||
                                  SBE state ||
-                                 NVDIMM protection
+                                 NVDIMM protection ||
+                                 resource ID (Initiate gard)
              * @devdesc          The Firmware Request call failed
              */
             l_err = new ErrlEntry(ERRL_SEV_INFORMATIONAL,

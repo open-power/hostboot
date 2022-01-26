@@ -932,13 +932,13 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
 
         //--------------------------------------------------------------------
         static int rt_firmware_request(uint64_t i_reqLen, void *i_req,
-                             uint64_t* o_respLen, void *o_resp  )
+                             uint64_t* io_respLen, void *o_resp  )
         {
             size_t retVal = 0;
             do
             {
                if (i_req == nullptr ||
-                   o_respLen == nullptr ||
+                   io_respLen == nullptr ||
                    o_resp == nullptr)
                {
                   retVal = -EINVAL;
@@ -960,7 +960,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                      break;
                   }
 
-                  if (*o_respLen < (hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
+                  if (*io_respLen < (hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
                                    sizeof(l_resp_fw_msg->resp_generic)))
                   {
                      retVal = -EINVAL;
@@ -1004,7 +1004,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                      break;
                   }
 
-                  if (*o_respLen < (hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
+                  if (*io_respLen < (hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
                                    sizeof(l_resp_fw_msg->resp_generic)))
                   {
                      retVal = -EINVAL;
@@ -1037,14 +1037,14 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                       break;
                   }
 
-                  if (*o_respLen < (hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
+                  if (*io_respLen < (hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
                                    sizeof(l_resp_fw_msg->generic_msg)))
                   {
                      retVal = -EINVAL;
                      break;
                   }
 
-                  if (i_reqLen != *o_respLen)
+                  if (i_reqLen != *io_respLen)
                   {
                      retVal = -EINVAL;
                      break;

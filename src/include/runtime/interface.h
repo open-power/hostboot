@@ -684,6 +684,18 @@ typedef struct hostInterfaces
         PhypInitiatedGard = 0x01
     };
 
+    // This struct is for HBRT_FW_MSG_TYPE_INITIATE_GARD messages which
+    // is sent to the hypervisor from HBRT to request that the hypervisor
+    // migrate away from using resources when host PRD detects a problem.
+    struct initiate_gard_t
+    {
+        uint8_t  resourceType; // Type of the garded resource
+        uint8_t  errorType;    // Source of the error
+        uint16_t resourceId;   // ID of garded resource (hardware proc ID
+        // from HDAT PCIA for cores; processor chip ID
+        // from HDAT PCRD for NX units)
+    } __attribute__((packed));
+
     struct hbrt_fw_msg   // define struct hbrt_fw_msg
     {
        hbrt_fw_msg() { req_hcode_update = { 0 }; };  // ctor
@@ -786,17 +798,10 @@ typedef struct hostInterfaces
              uint8_t blockHyp; // 1=block hyp SPI access, 0=allow hyp access
           } __attribute__ ((packed)) spi_lock;
 
-           // This struct is for HBRT_FW_MSG_TYPE_INITIATE_GARD messages which
-           // is sent to the hypervisor from HBRT to request that the hypervisor
-           // migrate away from using resources when host PRD detects a problem.
-          struct
-          {
-              uint8_t  resourceType; // Type of the garded resource
-              uint8_t  errorType;    // Source of the error
-              uint16_t resourceId;   // ID of garded resource (hardware proc ID
-                                     // from HDAT PCIA for cores; processor chip ID
-                                     // from HDAT PCRD for NX units)
-          } __attribute__((packed)) initiate_gard;
+          // This struct is for HBRT_FW_MSG_TYPE_INITIATE_GARD messages which
+          // is sent to the hypervisor from HBRT to request that the hypervisor
+          // migrate away from using resources when host PRD detects a problem.
+          initiate_gard_t initiate_gard;
 
           // This struct is sent from HBRT with
           // io_type set to HBRT_FW_MSG_HBRT_FSP_REQ or
@@ -831,16 +836,16 @@ typedef struct hostInterfaces
     /**
      * @brief Send a request to firmware, and receive a response
      * @details
-     *   req_len bytes are sent to runtime firmware, and resp_len
+     *   i_reqLen bytes are sent to runtime firmware, and io_respLen
      *   bytes received in response.
      *
-     *   Both req and resp are allocated by the caller. If resp_len
+     *   Both i_req and o_resp are allocated by the caller. If io_respLen
      *   is not large enough to contain the full response, an error
      *   is returned.
      *
      * @param[in]  i_reqLen       length of request data
      * @param[in]  i_req          request data
-     * @param[inout] o_respLen    in: size of request data buffer
+     * @param[inout] io_respLen    in: size of request data buffer
      *                            out: length of request data
      * @param[in]  o_resp         response data
      * @return 0 on success, else RC
@@ -848,7 +853,7 @@ typedef struct hostInterfaces
      */
     int (*firmware_request)( uint64_t i_reqLen,
                              void *i_req,
-                             uint64_t* o_respLen,
+                             uint64_t* io_respLen,
                              void *o_resp );
 
     /**
