@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -192,6 +192,23 @@ void setTiAreaScratchReg()
     l_tiAreaAddr |= getHRMOR();
     writeScratchReg(MMIO_SCRATCH_TI_AREA_LOCATION, l_tiAreaAddr);
 }
+
+
+//  SPECIAL RESERVED RC_EARLY_BOOT_FAIL
+//  openbmc/openpower-hw-diags/attn/ti_handler.cpp handleHbTi
+//
+//  See SW542371 as sample for surface symptoms, etc.
+//
+//  commit 561a8a1338a6dd7110c5203893c7fa1f70eee1dc
+//
+//  Reserve default SRC (BC801B99) to be used for TI discovery issues
+//
+//  There are some cases where the SP won't be able to read a valid
+//  SRC from Hostboot's TI area.  For example, Hostboot could have
+//  died horribly and been unable to modify memory, or there could
+//  be issues reading mainstore itself.  This SRC will be used by
+//  the attention handling code as a placeholder for any case where
+//  a real SRC is not available.
 
 
 //  SRC parser comments for early boot TI failures
