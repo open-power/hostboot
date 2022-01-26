@@ -199,8 +199,6 @@ errlHndl_t getPDR(const msg_q_t i_msgQ,
         }
 
         /*@
-          * @errortype
-          * @severity   ERRL_SEV_UNRECOVERABLE
           * @moduleid   MOD_GET_PDR
           * @reasoncode RC_BAD_COMPLETION_CODE
           * @userdata1  Actual Completion Code
@@ -217,8 +215,6 @@ errlHndl_t getPDR(const msg_q_t i_msgQ,
         }
 
         /*@
-          * @errortype
-          * @severity   ERRL_SEV_UNRECOVERABLE
           * @moduleid   MOD_GET_PDR
           * @reasoncode RC_BAD_NEXT_TRANSFER_HANDLE
           * @userdata1  Actual Next Transfer Handle
@@ -236,8 +232,6 @@ errlHndl_t getPDR(const msg_q_t i_msgQ,
         }
 
         /*@
-          * @errortype
-          * @severity   ERRL_SEV_UNRECOVERABLE
           * @moduleid   MOD_GET_PDR
           * @reasoncode RC_BAD_TRANSFER_FLAG
           * @userdata1  Actual Transfer Flag
@@ -260,6 +254,25 @@ errlHndl_t getPDR(const msg_q_t i_msgQ,
 
         const auto pdr_hdr = reinterpret_cast<pldm_pdr_hdr*>(o_pdr.data.data());
         o_pdr.record_handle = le32toh(pdr_hdr->record_handle);
+        if ((io_pdr_record_handle != o_pdr.record_handle) && (io_pdr_record_handle != FIRST_PDR_HANDLE))
+        {
+            /*@
+             * @moduleid   MOD_GET_PDR_REPO
+             * @reasoncode RC_INVALID_RECORD_HANDLE
+             * @userdata1  Requested record handle
+             * @userdata2  Response record handle
+             * @devdesc    Bad data in PLDM message decode, response record handle not as expected
+             * @custdesc   Host firmware detected BMC communication error during system boot
+             */
+            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                 MOD_GET_PDR_REPO,
+                                 RC_INVALID_RECORD_HANDLE,
+                                 io_pdr_record_handle,
+                                 o_pdr.record_handle,
+                                 ErrlEntry::NO_SW_CALLOUT);
+            addBmcErrorCallouts(errl);
+            break;
+        }
 
         // Used to abort the IPL if PLDM PDRs are marked as having
         // already been seen (integrity check the getPDR flow)
@@ -288,13 +301,12 @@ errlHndl_t getPDR(const msg_q_t i_msgQ,
         if (pdr_abort)
         {
             /*@
-             * @errortype  ERRL_SEV_UNRECOVERABLE
              * @moduleid   MOD_GET_PDR_REPO
              * @reasoncode RC_DEFENSIVE_LIMIT
-             * @userdata1  o_pdr.record_handle
+             * @userdata1  Duplicate Record Handle that has already been seen
              * @userdata2  Unused
-             * @devdesc    Software problem, PLDM transaction problem
-             * @custdesc   A software error occurred during system boot
+             * @devdesc    Duplicate PLDM Record Handle from PLDM getPDR
+             * @custdesc   Host firmware detected BMC communication error during system boot
              */
             errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                  MOD_GET_PDR_REPO,
@@ -488,8 +500,6 @@ errlHndl_t sendRepositoryChangedEvent(const pldm_pdr* const i_repo,
                 }
 
               /*@
-                * @errortype
-                * @severity   ERRL_SEV_UNRECOVERABLE
                 * @moduleid   MOD_SEND_REPO_CHANGED_EVENT
                 * @reasoncode RC_BAD_COMPLETION_CODE
                 * @userdata1  Actual Completion Code
@@ -611,8 +621,6 @@ errlHndl_t sendSensorStateChangedEvent(const TARGETING::Target* const i_target,
         }
 
         /*@
-          * @errortype
-          * @severity   ERRL_SEV_UNRECOVERABLE
           * @moduleid   MOD_SEND_SENSOR_STATE_CHANGED_EVENT
           * @reasoncode RC_BAD_COMPLETION_CODE
           * @userdata1  Actual Completion Code
@@ -819,8 +827,6 @@ errlHndl_t sendSetNumericEffecterValueRequest(const effecter_id_t i_effecter_id,
     }
 
     /*@
-      * @errortype
-      * @severity   ERRL_SEV_UNRECOVERABLE
       * @moduleid   MOD_SEND_SET_NUMERIC_EFFECTER_VALUE_REQUEST
       * @reasoncode RC_BAD_COMPLETION_CODE
       * @userdata1  Actual Completion Code
@@ -914,8 +920,6 @@ errlHndl_t sendSetStateEffecterStatesRequest(
         }
 
         /*@
-          * @errortype
-          * @severity   ERRL_SEV_UNRECOVERABLE
           * @moduleid   MOD_SEND_SET_STATE_EFFECTER_STATES_REQUEST
           * @reasoncode RC_BAD_COMPLETION_CODE
           * @userdata1  Actual Completion Code
@@ -961,8 +965,6 @@ errlHndl_t sendResetRebootCountRequest()
     if (reboot_count_effecter == 0)
     {
             /*@
-             * @errortype
-             * @severity   ERRL_SEV_PREDICTIVE
              * @moduleid   MOD_RESET_REBOOT_COUNT
              * @reasoncode RC_INVALID_EFFECTER_ID
              * @userdata1  The total number of PDRs that PDR Manager is aware of.
@@ -1017,8 +1019,6 @@ errlHndl_t sendGracefulRestartRequest()
         if (sw_term_effecter_id == 0)
         {
             /*@
-             * @errortype
-             * @severity   ERRL_SEV_UNRECOVERABLE
              * @moduleid   MOD_FIND_TERMINATION_STATUS_ID
              * @reasoncode RC_INVALID_EFFECTER_ID
              * @userdata1  The total number of PDRs that PDR Manager is aware of.

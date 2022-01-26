@@ -165,6 +165,7 @@ namespace PLDM
         RC_INVALID_OFFSET_ID        = PLDM_COMP_ID | 0x37,
         RC_DEFENSIVE_LIMIT          = PLDM_COMP_ID | 0x38,
         RC_TIMEOUT                  = PLDM_COMP_ID | 0x39,
+        RC_INVALID_RECORD_HANDLE    = PLDM_COMP_ID | 0x3A,
     };
 
     /**
