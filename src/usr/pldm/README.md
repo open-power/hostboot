@@ -10,8 +10,6 @@ other supporting libraries included in [src/usr/pldm](./)  and
 [src/include/usr/pldm](../../include/usr/pldm) and about how they relate to
 the modules.
 
-- Contact : Christian Geddes (crgeddes@us.ibm.com)
-
 ## Modules
 
 ### pldm_base module [src/usr/pldm/base/makefile](base/makefile)
