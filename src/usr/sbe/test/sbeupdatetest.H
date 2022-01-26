@@ -681,11 +681,14 @@ class SBEUpdateTest: public CxxTest::TestSuite
             // Must set struct's target field
             sbeState.target = theTarget;
 
+            // Set where the SBE sandbox space is
+            sbeState.sbe_update_space_vaddr = VMM_VADDR_SBE_UPDATE;
+
             // set bad ec just for comparison to local_ec later
             sbeState.ec = 0xFF;
 
             total++;
-            err = getSbeInfoState(sbeState, VMM_VADDR_SBE_UPDATE);
+            err = getSbeInfoState(sbeState);
             if(err)
             {
                 fails++;
@@ -762,7 +765,7 @@ class SBEUpdateTest: public CxxTest::TestSuite
             }
             total++;
 
-            err = performUpdateActions(sbeState, VMM_VADDR_SBE_UPDATE);
+            err = performUpdateActions(sbeState);
             if(err)
             {
                 fails++;

@@ -90,7 +90,9 @@ namespace SBE
     /******************************************/
     /*  Enums                                 */
     /******************************************/
-    // SBE VADDR Layout
+    // Up to 8 unique 4MB spaces used for multi-threaded updating of SBEs
+    // Spaces begin at VMM_VADDR_SBE_UPDATE (see vmmconst.h)
+    // SBE VADDR Layout for each 4MB space
     // 000K - 512K  = Dest for SEEPROM SBE image
     //
     //  512K - 576K      = Ring buf1 (64K size)
@@ -212,6 +214,8 @@ namespace SBE
         uint16_t                      err_rc;
         ERRORLOG::errlSeverity_t      err_sev;
 
+        uint64_t                   sbe_update_space_vaddr;
+
         // Constructor to default certain values
         sbeTargetState_t() :
           target(NULL), target_is_master(false), ec(0x0),
@@ -219,7 +223,8 @@ namespace SBE
           customizedImage_size(0x0), customizedImage_crc(0x0),
           new_readBack_check(false),
           err_plid(0x0), err_eid(0x0), err_rc(0x0),
-          err_sev(ERRORLOG::ERRL_SEV_UNKNOWN)
+          err_sev(ERRORLOG::ERRL_SEV_UNKNOWN),
+          sbe_update_space_vaddr(0)
         {};
     };
 
@@ -267,8 +272,8 @@ class UpdateProcessorSbes : public UpdateWorkItem
       //        re-ipl and key transitioning. This is updated at the end of operator()
       std::vector<sbeTargetState_t>* iv_sbeStates;
 
-      // @brief A mutex to protect multithreaded additions to the sbeStates vector
-      static mutex_t iv_sbeStateMutex;
+      // @brief A shared static mutex to protect multithreaded additions to the sbeStates vector
+      static mutex_t cv_sbeStateMutex;
 
 
     public:
@@ -300,11 +305,10 @@ class UpdateProcessorSbes : public UpdateWorkItem
      * @brief Collects SBE Information for a specifc target
      *
      * @param[io/out] io_sbeState   Struct containing SBE State of the target
-     * @param[in] i_sbe_update_vaddr Address of start of sbe update space (allows for threading)
      *
      * @return errlHndl_t    Error log handle on failure.
      */
-    errlHndl_t getSbeInfoState(sbeTargetState_t& io_sbeState, uint64_t i_sbe_update_vaddr);
+    errlHndl_t getSbeInfoState(sbeTargetState_t& io_sbeState);
 
     /**
      * @brief Analyze and Determine Update Actions for a specific target
@@ -319,11 +323,10 @@ class UpdateProcessorSbes : public UpdateWorkItem
      * @brief Performs the Update Actions for a specific target
      *
      * @param[io/out] io_sbeState   Struct containing SBE State of the target
-     * @param[in] i_sbe_update_vaddr Address of start of sbe update space (allows for threading)
      *
      * @return errlHndl_t    Error log handle on failure.
      */
-    errlHndl_t performUpdateActions(sbeTargetState_t& io_sbeState, uint64_t i_sbe_update_vaddr);
+    errlHndl_t performUpdateActions(sbeTargetState_t& io_sbeState);
 
     /******************************************/
     /*  System Access Functions               */
@@ -464,11 +467,10 @@ class UpdateProcessorSbes : public UpdateWorkItem
      * @param[in/out] io_sbeState   Struct containing SBE State of the target
      *                              and the information to be used for updating
      *                              the SBE State of the target
-     * @param[in] i_sbe_update_vaddr Address of workspace for sbe update
      *
      * @return errlHndl_t    Error log handle on failure.
      */
-    errlHndl_t updateSeepromSide(sbeTargetState_t& io_sbeState, uint64_t i_sbe_update_vaddr);
+    errlHndl_t updateSeepromSide(sbeTargetState_t& io_sbeState);
 
     /**
      * @brief Check and Update all targets before Re-IPL Request

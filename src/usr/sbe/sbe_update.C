@@ -129,8 +129,10 @@ static bool g_restart_needed = false;
 P9_XIP_SECTION_NAMES_SBE(g_sectionNamesSbe);
 
 // Minimum memory (MB) needed for an SBE update space
+// Since update process reserves a 4MB space per thread, it was decided that
+// for every 8MB of cache available we'll do a new thread.
+// This way we should have enough cache available for background processes
 constexpr uint8_t MIN_MB_PER_SBE_IMAGE_SPACE = 8;
-
 
 
 using namespace ERRORLOG;
@@ -142,7 +144,7 @@ using namespace scomt::perv;
 namespace SBE
 {
     // initialize mutex used around access to iv_sbeStates
-    mutex_t UpdateProcessorSbes::iv_sbeStateMutex = MUTEX_INITIALIZER;
+    mutex_t UpdateProcessorSbes::cv_sbeStateMutex = MUTEX_INITIALIZER;
 
     // type used to divvy up SBE update spaces to a list of SBEs
     typedef std::map<uint64_t, std::vector<TargetHandle_t>> vaddr_sbes_map_t;
@@ -176,6 +178,7 @@ namespace SBE
     /**
      * @brief Unloads pnor sections that were used for SBE update by each thread
      * @param[in] List of loaded sections to be unloaded
+     * @return error on unload failure, else nullptr
      */
     errlHndl_t cleanupPreloadedPnorSections(const std::vector<PNOR::SectionId>& i_loadedSections);
 
@@ -278,6 +281,8 @@ namespace SBE
             /*********************************************/
             sbeState.target = procSbe;
 
+            sbeState.sbe_update_space_vaddr = iv_sbe_update_vaddr;
+
             TRACUCOMP( g_trac_sbe, "UpdateProcessorSbes(): "
                        "Main Loop: tgt=0x%X",
                        get_huid(sbeState.target) );
@@ -296,7 +301,7 @@ namespace SBE
                 sbeState.target_is_master = false;
             }
 
-            err = getSbeInfoState(sbeState, iv_sbe_update_vaddr);
+            err = getSbeInfoState(sbeState);
             if (err)
             {
                 TRACFCOMP( g_trac_sbe,
@@ -385,7 +390,7 @@ namespace SBE
                 }
                 else
                 {
-                    err = performUpdateActions(sbeState, iv_sbe_update_vaddr);
+                    err = performUpdateActions(sbeState);
                     if (err)
                     {
                         TRACFCOMP( g_trac_sbe,
@@ -441,14 +446,15 @@ namespace SBE
             INITSERVICE::sendProgressCode();
 
             // return sbeState for this target in shared iv_sbeStates vector
-            mutex_lock(&iv_sbeStateMutex);
+            mutex_lock(&cv_sbeStateMutex);
             TRACFCOMP( g_trac_sbe,
               INFO_MRK"UpdateProcessorSbes(): adding 0x%.8X target to iv_sbeStates",
               get_huid(sbeState.target) );
             // Push this sbeState onto the vector
             iv_sbeStates->push_back(sbeState);
-            mutex_unlock(&iv_sbeStateMutex);
-        }
+            mutex_unlock(&cv_sbeStateMutex);
+        } // end of processor loop
+
         err = cleanupSbeImageVmmSpace(iv_sbe_update_vaddr);
         if (err)
         {
@@ -475,6 +481,7 @@ namespace SBE
         }
         if (cSize != 0)
         {
+            // remove the trailing ", " to end the string with last HUID
             *(pStr-2) = 0;
         }
         TRACFCOMP( g_trac_sbe, EXIT_MRK"UpdateProcessorSbes(0x%llX) - SBE procs (%s) done", iv_sbe_update_vaddr, procStr);
@@ -710,7 +717,7 @@ namespace SBE
 
                 assert(0,"Thread pool failed to shutdown - rc=0x%.4X", rc);
             }
-            //end of Target for loop collecting/updating each target's SBE State
+            //end of threadpool execution, l_sbeTargetStates is now updated with each target's SBE state
 
             /**************************************************************/
             /*  Perform System Operation                                  */
@@ -832,22 +839,12 @@ namespace SBE
     {
         for (const auto& singleSpaceProcs : i_sbe_space_to_procs)
         {
-            char sbeListStr[250] = {};
             auto vProcSbes = singleSpaceProcs.second;
-            char * pStr = sbeListStr;
-            int cSize = 0;
-            cSize = sprintf( pStr, "vAddr[%llX] = ", singleSpaceProcs.first );
-            pStr += cSize;
+            TRACFCOMP(g_trac_sbe, "vAddr[%llX] being used for %d SBE(s)", singleSpaceProcs.first, vProcSbes.size());
             for (const auto & procSbe : vProcSbes)
             {
-                cSize = sprintf( pStr, "0x%.8X, ", get_huid(procSbe) );
-                pStr += cSize;
+                TRACFCOMP(g_trac_sbe, "vaddr %llX -> 0x%.8X SBE target", singleSpaceProcs.first, get_huid(procSbe));
             }
-            if (cSize != 0)
-            {
-                *(pStr-2) = 0;
-            }
-            TRACFCOMP(g_trac_sbe, "traceVaddrSbeAssignments: %s", sbeListStr);
         }
     }
 
@@ -873,7 +870,7 @@ namespace SBE
         const int min_sbes_per_space = total_sbes / numSbeImageVmmSpaces;
         int leftover_sbes = total_sbes % numSbeImageVmmSpaces;
 
-        TRACFCOMP(g_trac_sbe, "distribute_sbe_list(%d sbes) - cacheSize %d MB -> %d vmm spaces",
+        TRACFCOMP(g_trac_sbe, "distribute_sbe_list(%d sbes) - cacheSize %d MB -> max %d vmm spaces",
           i_proc_sbes.size(), l_cacheSize, numSbeImageVmmSpaces);
 
         auto pProcSbes = i_proc_sbes.begin();
@@ -2342,11 +2339,11 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
     }
 
     /////////////////////////////////////////////////////////////////////
-    errlHndl_t getSbeInfoState(sbeTargetState_t& io_sbeState, uint64_t i_sbe_update_vaddr)
+    errlHndl_t getSbeInfoState(sbeTargetState_t& io_sbeState)
     {
         TRACUCOMP( g_trac_sbe,
                    ENTER_MRK"getSbeInfoState(0x%llX): HUID=0x%.8X",
-                   i_sbe_update_vaddr, get_huid(io_sbeState.target) );
+                   io_sbeState.sbe_update_space_vaddr, get_huid(io_sbeState.target) );
 
 
         errlHndl_t err = nullptr;
@@ -2517,7 +2514,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                 static_cast<uint32_t>(sbePnorImageSize + MAX_HBBL_SIZE);
 
             // copy SBE image from PNOR to memory
-            sbeHbblImgPtr = (void*)(i_sbe_update_vaddr + SBE_HBBL_IMG_VADDR_OFFSET);
+            sbeHbblImgPtr = (void*)(io_sbeState.sbe_update_space_vaddr + SBE_HBBL_IMG_VADDR_OFFSET);
             memcpy ( sbeHbblImgPtr,
                      sbePnorPtr,
                      sbePnorImageSize);
@@ -2851,7 +2848,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
 
             // We are now done with the SBE and HBBL images in PNOR, unload
             //  them now to save memory for the other images we have to load
-            // Note: this will just decrease the in-use count
+            // Note: this will just decrease the in-use count held by Secure PNOR resource provider
             err = unloadPnorSection(PNOR::SBE_IPL);
             if (err)
             {
@@ -2925,7 +2922,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             char* l_hCodeAddr = reinterpret_cast<char*>(l_hcodePnorInfo.vaddr);
 
 
-            void * pCustomizedBfr = reinterpret_cast<void*>(i_sbe_update_vaddr);
+            void * pCustomizedBfr = reinterpret_cast<void*>(io_sbeState.sbe_update_space_vaddr);
 
             err = procCustomizeSbeImg(io_sbeState.target,
                                       l_hCodeAddr,    // HCODE in memory
@@ -2947,7 +2944,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
 
             // We are now done with the HCODE image in PNOR, unload
             //  it now to save memory.
-            // Note: this will just decrease the in-use count
+            // Note: this will just decrease the in-use count held by Secure PNOR resource provider
             err = unloadPnorSection(PNOR::HCODE);
             if (err)
             {
@@ -3414,11 +3411,11 @@ errlHndl_t getSeepromSideVersionViaChipOp(Target* i_target,
 
 
 /////////////////////////////////////////////////////////////////////
-    errlHndl_t updateSeepromSide(sbeTargetState_t& io_sbeState, uint64_t i_sbe_update_vaddr)
+    errlHndl_t updateSeepromSide(sbeTargetState_t& io_sbeState)
     {
         TRACUCOMP( g_trac_sbe,
-                   ENTER_MRK"updateSeepromSide(0x%16llX): HUID=0x%.8X, side=%d",
-                   i_sbe_update_vaddr, get_huid(io_sbeState.target),
+                   ENTER_MRK"updateSeepromSide(): HUID=0x%.8X, side=%d",
+                   get_huid(io_sbeState.target),
                    io_sbeState.seeprom_side_to_update);
 
 #ifdef CONFIG_CONSOLE
@@ -3620,13 +3617,13 @@ errlHndl_t getSeepromSideVersionViaChipOp(Target* i_target,
             /*  Update SBE with Customized Image       */
             /*******************************************/
             // The Customized Image For This Target Still Resides In
-            // The SBE Update VMM Space: i_sbe_update_vaddr
+            // The SBE Update VMM Space: io_sbeState.sbe_update_space_vaddr
 
             // Inject ECC
             // clear out back half of page block to use as temp space
             // for ECC injected SBE Image.
             rc = mm_remove_pages(RELEASE,
-                                 reinterpret_cast<void*>(i_sbe_update_vaddr + SBE_ECC_IMG_VADDR_OFFSET),
+                                 reinterpret_cast<void*>(io_sbeState.sbe_update_space_vaddr + SBE_ECC_IMG_VADDR_OFFSET),
                                  SBE_ECC_IMG_MAX_SIZE);
             if( rc )
             {
@@ -3634,7 +3631,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(Target* i_target,
                            "from mm_remove_pages : rc=%d,  HUID=0x%.8X, "
                            "ECC_VADDR=0x%.16X, eccSize=0x%.8X.",
                            rc, get_huid(io_sbeState.target),
-                           (i_sbe_update_vaddr + SBE_ECC_IMG_VADDR_OFFSET),
+                           (io_sbeState.sbe_update_space_vaddr + SBE_ECC_IMG_VADDR_OFFSET),
                            SBE_ECC_IMG_MAX_SIZE );
                 /*@
                  * @errortype
@@ -3650,7 +3647,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(Target* i_target,
                 err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                     SBE_UPDATE_SEEPROMS,
                                     SBE_REMOVE_PAGES_FOR_EC,
-                                    (i_sbe_update_vaddr + SBE_ECC_IMG_VADDR_OFFSET),
+                                    (io_sbeState.sbe_update_space_vaddr + SBE_ECC_IMG_VADDR_OFFSET),
                                     TO_UINT64(rc));
                 //Target isn't directly related to fail, but could be useful
                 // to see how far we got before failing.
@@ -3682,23 +3679,23 @@ errlHndl_t getSeepromSideVersionViaChipOp(Target* i_target,
             TRACUCOMP( g_trac_sbe, INFO_MRK"updateSeepromSide(): "
                        "SBE_VADDR=0x%.16X, ECC_VADDR=0x%.16X, size=0x%.8X, "
                        "eccSize=0x%.8X, UPDATE_END=0x%.16X, UPDATE_SIZE=0x%.8X",
-                       i_sbe_update_vaddr,
-                       (i_sbe_update_vaddr + SBE_ECC_IMG_VADDR_OFFSET),
+                       io_sbeState.sbe_update_space_vaddr,
+                       (io_sbeState.sbe_update_space_vaddr + SBE_ECC_IMG_VADDR_OFFSET),
                        sbeImgSize,
                        sbeEccImgSize,
-                       (i_sbe_update_vaddr + VMM_SBE_UPDATE_SIZE),
+                       (io_sbeState.sbe_update_space_vaddr + VMM_SBE_UPDATE_SIZE),
                        VMM_SBE_UPDATE_SIZE );
 
-            injectECC(reinterpret_cast<uint8_t*>(i_sbe_update_vaddr),
+            injectECC(reinterpret_cast<uint8_t*>(io_sbeState.sbe_update_space_vaddr),
                       sbeImgSize,
                       SBE_IMAGE_SEEPROM_ADDRESS,
                       SBE_SEEPROM_SIZE,
-                      reinterpret_cast<uint8_t*>(i_sbe_update_vaddr + SBE_ECC_IMG_VADDR_OFFSET));
+                      reinterpret_cast<uint8_t*>(io_sbeState.sbe_update_space_vaddr + SBE_ECC_IMG_VADDR_OFFSET));
 
             TRACDBIN(g_trac_sbe,"updateSeepromSide()-start of IMG - no ECC",
-                     reinterpret_cast<void*>(i_sbe_update_vaddr), 0x80);
+                     reinterpret_cast<void*>(io_sbeState.sbe_update_space_vaddr), 0x80);
             TRACDBIN(g_trac_sbe,"updateSeepromSide()-start of IMG - ECC",
-                     reinterpret_cast<void*>(i_sbe_update_vaddr + SBE_ECC_IMG_VADDR_OFFSET), 0x80);
+                     reinterpret_cast<void*>(io_sbeState.sbe_update_space_vaddr + SBE_ECC_IMG_VADDR_OFFSET), 0x80);
 
             ATTR_SBE_IS_STARTED_type l_sbeStarted =
                 io_sbeState.target->getAttr<ATTR_SBE_IS_STARTED>();
@@ -3779,7 +3776,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(Target* i_target,
             //Write image to indicated side
             dd_op_size = sbeEccImgSize;
             err = deviceWrite(io_sbeState.target,
-                              reinterpret_cast<void*>(i_sbe_update_vaddr + SBE_ECC_IMG_VADDR_OFFSET),
+                              reinterpret_cast<void*>(io_sbeState.sbe_update_space_vaddr + SBE_ECC_IMG_VADDR_OFFSET),
                               dd_op_size,
                               DEVICE_EEPROM_ADDRESS(
                                             io_sbeState.seeprom_side_to_update,
@@ -3795,8 +3792,8 @@ errlHndl_t getSeepromSideVersionViaChipOp(Target* i_target,
                            "RC=0x%X, EID=0x%lX",
                            io_sbeState.seeprom_side_to_update,
                            get_huid(io_sbeState.target),
-                           i_sbe_update_vaddr,
-                           (i_sbe_update_vaddr + SBE_ECC_IMG_VADDR_OFFSET),
+                           io_sbeState.sbe_update_space_vaddr,
+                           (io_sbeState.sbe_update_space_vaddr + SBE_ECC_IMG_VADDR_OFFSET),
                            sbeImgSize, sbeEccImgSize, SBE_IMAGE_SEEPROM_ADDRESS,
                            ERRL_GETRC_SAFE(err), ERRL_GETEID_SAFE(err));
                 break;
@@ -3841,7 +3838,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(Target* i_target,
                     }
 
                     // Compare it to the written image
-                    uint8_t l_imageCmpRc = memcmp(reinterpret_cast<void*>((i_sbe_update_vaddr + SBE_ECC_IMG_VADDR_OFFSET) + l_offset),
+                    uint8_t l_imageCmpRc = memcmp(reinterpret_cast<void*>((io_sbeState.sbe_update_space_vaddr + SBE_ECC_IMG_VADDR_OFFSET) + l_offset),
                                                   l_sbeImgCheck.data(),
                                                   l_readSize);
 
@@ -4097,7 +4094,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(Target* i_target,
                        get_huid(io_sbeState.target),
                        io_sbeState.seeprom_side_to_update);
 
-            err = updateSeepromSide(io_sbeState, i_sbe_update_vaddr);
+            err = updateSeepromSide(io_sbeState);
         }
 #endif
 
@@ -4116,7 +4113,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(Target* i_target,
                        get_huid(io_sbeState.target),
                        io_sbeState.seeprom_side_to_update);
 
-            err = updateSeepromSide(io_sbeState, i_sbe_update_vaddr);
+            err = updateSeepromSide(io_sbeState);
         }
 #endif
 
@@ -5186,7 +5183,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(Target* i_target,
     }
 
 /////////////////////////////////////////////////////////////////////
-    errlHndl_t performUpdateActions(sbeTargetState_t& io_sbeState, uint64_t i_sbe_update_vaddr)
+    errlHndl_t performUpdateActions(sbeTargetState_t& io_sbeState)
     {
         TRACUCOMP( g_trac_sbe,
                    ENTER_MRK"performUpdateActions(): HUID=0x%.8X, "
@@ -5224,7 +5221,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(Target* i_target,
                 }
 #endif
 
-                err = updateSeepromSide(io_sbeState, i_sbe_update_vaddr);
+                err = updateSeepromSide(io_sbeState);
                 if(err)
                 {
                     TRACFCOMP( g_trac_sbe, ERR_MRK"performUpdateActions() - "
@@ -5505,7 +5502,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(Target* i_target,
                 err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                     SBE_CLEANUP_SBE_VMM_SPACE,
                                     SBE_REMOVE_PAGES_FAIL,
-                                    TO_UINT64(i_vmm_vaddr),
+                                    i_vmm_vaddr,
                                     TO_UINT64(rc));
                 err->collectTrace(SBE_COMP_NAME);
                 err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
