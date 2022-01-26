@@ -157,32 +157,14 @@ errlHndl_t getPmicHlthCheckData()
                                "Call to performPsuChipOp failed, error returned for PROC HUID=0x%X "
                                "OCMB HUID=0x%X l_InstanceId=%d",
                                get_huid(l_pProc), get_huid(l_Target), l_InstanceId);
-                    if (TARGETING::areAllSrcsTerminating())
-                    {
-                        // If MFG mode add a HW Callout to flag this part, but continue to create the
-                        // Health Check Data entry to show a complete set of expected logs for OCMBs
-                        // as usual, additional data logged may aide in root cause problem determination
-                        //
-                        // Identify this OCMB for the MFG mode indicator check
-                        l_err->addHwCallout( l_Target,
-                                             HWAS::SRCI_PRIORITY_HIGH,
-                                             HWAS::DECONFIG,
-                                             HWAS::GARD_NULL);
-                    }
                     l_pmic_health_log = false;
+                    l_err->collectTrace(SBEIO_COMP_NAME);
                     errlCommit(l_err, SBEIO_COMP_ID);
 
                     // We will log the data later to show an entry for this Target even though we had
                     // a problem getting its Health Check Data so we will show an entry, otherwise it will
-                    // be a missing entry and lead to track down the why its missing versus we know its missing
-                    // due to the l_pmic_health_log flag saying we were unable to get any good data, etc.
-                }
-                else if (SBE_PRI_OPERATION_SUCCESSFUL != l_psuResponse.primaryStatus)
-                {
-                    // Check the primaryStatus bytes in the data buffer explicitly to assure we have
-                    // data that should be good for the health check data processing, otherwise flag it
-                    // to help aide problem determination when tracking down problems.
-                    l_pmic_health_log = false;
+                    // be a missing entry and lead to tracking down the why it is missing versus we know
+                    // it is missing due to the l_pmic_health_log flag saying we were unable to get any good data, etc.
                 }
 
                 uint8_t l_pmic_revision = 0;
@@ -226,8 +208,8 @@ errlHndl_t getPmicHlthCheckData()
                              * @userdata2[24:31] l_pmic_health_log <-- True if we should have non-zero addFFDC data
                              * @userdata2[32:47] l_psuResponse.primaryStatus
                              * @userdata2[48:63] l_psuResponse.secondaryStatus
-                             * @devdesc          PMIC Health Check Data Unavailable
-                             * @custdesc         PMIC Health Check Data Unavailable
+                             * @devdesc          PMIC Health Check Data Failed in Mfg Mode
+                             * @custdesc         PMIC Health Check Data Failed in Mfg Mode
                              */
                             l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_PREDICTIVE,
                                                              SBEIO_PSU_PMIC_HEALTH_CHECK,
@@ -245,15 +227,17 @@ errlHndl_t getPmicHlthCheckData()
                                                                              l_psuResponse.primaryStatus,
                                                                              l_psuResponse.secondaryStatus)));
 
-                            // If MFG mode add a HW Callout to flag this part, but continue to create the
-                            // Health Check Data entry to show a complete set of expected logs for OCMBs
-                            // as usual, additional data logged may aide in root cause problem determination
+                            // If MFG mode add a HW Callout to properly identify the location code,
+                            // but continue to create the Health Check Data entry to show a complete
+                            // set of expected logs for OCMBs as usual, additional data logged may
+                            // aide in root cause problem determination
                             //
                             // Identify this OCMB for the MFG check failure
                             l_err->addHwCallout( l_Target,
                                                  HWAS::SRCI_PRIORITY_HIGH,
-                                                 HWAS::DECONFIG,
+                                                 HWAS::NO_DECONFIG,
                                                  HWAS::GARD_NULL);
+                            l_err->collectTrace(SBEIO_COMP_NAME);
                             errlCommit(l_err, SBEIO_COMP_ID);
                         }
                     }
@@ -294,8 +278,8 @@ errlHndl_t getPmicHlthCheckData()
                  * @userdata2[24:31] l_pmic_health_log <-- True if we should have non-zero addFFDC data
                  * @userdata2[32:47] l_psuResponse.primaryStatus
                  * @userdata2[48:63] l_psuResponse.secondaryStatus
-                 * @devdesc          PMIC Health Check Data Unavailable
-                 * @custdesc         PMIC Health Check Data Unavailable
+                 * @devdesc          PMIC Health Check Data
+                 * @custdesc         PMIC Health Check Data
                  */
                 l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_INFORMATIONAL,
                                                  SBEIO_PSU_PMIC_HEALTH_CHECK,
@@ -328,6 +312,8 @@ errlHndl_t getPmicHlthCheckData()
                                 false );                     // merge
                 }
 
+                l_err->collectTrace(SBEIO_COMP_NAME);
+                l_err->updateActionFlags(ERRORLOG::ERRL_ACTIONS_CALL_HOME);
                 errlCommit(l_err, SBEIO_COMP_ID);
 
             } // end for l_Target
