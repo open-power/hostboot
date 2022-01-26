@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2021
+# Contributors Listed Below - COPYRIGHT 2014,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -123,6 +123,15 @@ build_opt=""
 # code coverage
 if [[ ! -z "${HOSTBOOT_PROFILE}" ]]; then
     build_opt="gcov"
+
+    # Adding MCTP/PLDM testcases in turn compiles MCTP and PLDM into the base
+    # image which makes it too large when code coverage instrumentation is also
+    # compiled in. Since these testcases provide only modest ROI relative to
+    # the space consumed, disable them for coverage builds.
+    # TODO RTC 297914: Re-enable testcases when more space is available in the
+    # base image
+    export CONFIG_MCTP_TESTCASES=
+    export CONFIG_PLDM_TESTCASES=
 # static analysis
 elif [[ ! -z "${HOSTBOOT_CPPCHECK}" ]]; then
     build_opt="cppcheck"
