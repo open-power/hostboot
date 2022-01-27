@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -164,7 +164,9 @@ errlHndl_t restrictECunits(
  * @param[out] o_bootable Indicate whether the system is
  *             is bootable with current configuration.
  *             if o_bootable is not nullptr an error for
- *             system unavailability will not be logged
+ *             system unavailability will not be logged.
+ *             Note that if o_bootable is null, speculative deconfigs
+ *             will be ignored.
  *
  * @return error log handle
  */

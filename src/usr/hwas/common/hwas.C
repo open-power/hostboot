@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -2093,7 +2093,15 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
             // check for at least 1 functional ec/core on Master Proc
             // Ignore ECO cores as those don't support instruction execution.
             TargetHandleList l_cores;
-            getNonEcoCores(l_cores, l_pMasterProc);
+            PredicatePostfixExpr l_checkExprFunctional;
+            PredicateCTM l_isCore(CLASS_UNIT, TYPE_CORE);
+            PredicateAttrVal<ATTR_ECO_MODE> l_isNotEcoMode(ECO_MODE_DISABLED);
+            l_checkExprFunctional.push(&l_functional);
+            l_checkExprFunctional.push(&l_isCore).And();
+            l_checkExprFunctional.push(&l_isNotEcoMode).And();
+            targetService().getAssociated(l_cores, l_pMasterProc,
+                                          TargetService::CHILD, TargetService::ALL,
+                                          &l_checkExprFunctional);
 
             HWAS_DBG( "checkMinimumHardware: %d functional cores",
                       l_cores.size() );
