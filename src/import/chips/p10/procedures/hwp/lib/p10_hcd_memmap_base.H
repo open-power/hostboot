@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,7 +47,7 @@
 /// Image Magic Numbers
 
 HCD_CONST64(CPMR_MAGIC_NUMBER,                  ULL(0x43504d525f312e30))  // CPMR_1.0
-HCD_CONST64(QME_MAGIC_NUMBER ,                  ULL(0x514d455f5f312e31))  // QME__1.1
+HCD_CONST64(QME_MAGIC_NUMBER ,                  ULL(0x514d455f5f312e32))  // QME__1.2
 
 HCD_CONST64(XPMR_MAGIC_NUMBER,                  ULL(0x58504d525f312e30))  // XPMR_1.0
 HCD_CONST64(XGPE_MAGIC_NUMBER,                  ULL(0x584750455f312e31))  // XGPE_1.1
