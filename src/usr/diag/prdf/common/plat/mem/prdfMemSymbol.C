@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,7 +47,7 @@ using namespace PARSERUTILS;
 MemSymbol::MemSymbol( TARGETING::TargetHandle_t i_trgt, const MemRank & i_rank,
                       uint8_t i_symbol ) :
     iv_trgt(i_trgt), iv_rank(i_rank), iv_symbol(i_symbol),
-    iv_pins(0), iv_isSpareDram0(false), iv_isSpareDram1(false)
+    iv_pins(1), iv_isSpareDram0(false), iv_isSpareDram1(false)
 {
     PRDF_ASSERT( nullptr != i_trgt );
     PRDF_ASSERT( TYPE_OCMB_CHIP == getTargetType(i_trgt) );
