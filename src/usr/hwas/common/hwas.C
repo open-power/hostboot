@@ -154,13 +154,17 @@ void enableHwasState(Target *i_target,
 {
     HwasState hwasState = i_target->getAttr<ATTR_HWAS_STATE>();
 
-    if (i_functional == false)
+    // Only modify the reason/eid on the initial deconfig
+    //  or if we're reverting what happened earlier
+    if( (i_functional == false)
+        || (DeconfigGard::CONFIGURED_BY_RESOURCE_RECOVERY == i_errlEid) )
     {   // record the EID as a reason that we're marking non-functional
         hwasState.deconfiguredByEid = i_errlEid;
     }
-    else
+
+    // clear speculative deconfig if we're functional now
+    if( i_functional )
     {
-        // clear speculative deconfig if we're functional now
         hwasState.specdeconfig = 0;
     }
 
