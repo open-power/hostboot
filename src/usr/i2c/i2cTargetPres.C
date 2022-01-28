@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -577,7 +577,8 @@ errlHndl_t genericI2CDevicePresencePerformOp(DeviceFW::OperationType i_opType,
         TARGETING::ATTR_REL_POS_type l_relPos
           = i_target->getAttr<TARGETING::ATTR_REL_POS>();
 
-        l_errl = FAPIWRAP::get_gpio_adc_dev_addr(l_relPos,
+        l_errl = FAPIWRAP::get_gpio_adc_dev_addr(l_parentOcmb,
+                                                 l_relPos,
                                                  l_devAddr);
         if (l_errl)
         {

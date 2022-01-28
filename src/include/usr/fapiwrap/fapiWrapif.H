@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -98,12 +98,14 @@ namespace FAPIWRAP
      *        takes in the relative position of a ADC or GPIO Expansion target (relative
      *        to its parent OCMB's chip) on a 4U DDIMM and returns the i2c device address
      *        of that target.
+     * @param[in] i_ocmbChip - Parent ocmb of the MDS we wish to find the device addres of
      * @param[in]  i_rel_pos  - The ADC or GPIO Expansion's position relative to parent OCMB
      * @param[out] o_devAddr - Returns the i2c device address
      * @return errlHndl_t - nullptr if no error, otherwise contains error
      */
-    errlHndl_t get_gpio_adc_dev_addr( const uint8_t i_rel_pos,
-                                      uint8_t& o_devAddr);
+    errlHndl_t get_gpio_adc_dev_addr(TARGETING::Target* i_ocmbChip,
+                                     const uint8_t i_rel_pos,
+                                     uint8_t& o_devAddr);
 
 }
 

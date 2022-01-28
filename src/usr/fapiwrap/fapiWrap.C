@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -197,14 +197,37 @@ namespace FAPIWRAP
 
 
     // get_gpio_adc_dev_addr
-    errlHndl_t get_gpio_adc_dev_addr( const uint8_t i_rel_pos,
-                                      uint8_t& o_devAddr)
+    errlHndl_t get_gpio_adc_dev_addr(TARGETING::Target *i_ocmbChip,
+                                     const uint8_t i_rel_pos,
+                                     uint8_t& o_devAddr)
     {
         errlHndl_t l_errl = nullptr;
 
         do{
+            if (isGeminiChip(*i_ocmbChip))
+            {
+                TRACFCOMP( g_trac_fapiwrap, ERR_MRK"get_gpio_dev_addr() "
+                           "OCMB target 0x%.8X is a Gemini Chip. No GPIOs associated "
+                           "with the Gemini Chip therefore device address not "
+                           "retrieved for target",
+                           TARGETING::get_huid(i_ocmbChip) );
+                break;
+            }
 
-            o_devAddr = get_gpio_adc_i2c_addr(i_rel_pos);
+            size_t  l_spdSize(SPD::DDIMM_DDR4_SPD_SIZE);
+            uint8_t l_spdBlob[l_spdSize];
+            l_errl = get_ddr4_spd_data(i_ocmbChip, l_spdBlob, l_spdSize);
+
+            if (l_errl)
+            {
+                TRACFCOMP( g_trac_fapiwrap, ERR_MRK"get_mds_dev_addr() "
+                           "Call to get_ddr4_spd_data failed for OCMB target 0x%.8X, "
+                           "device address not retrieved for target.",
+                           TARGETING::get_huid(i_ocmbChip) );
+                break;
+            }
+
+            o_devAddr = get_gpio_adc_i2c_addr(l_spdBlob, i_rel_pos);
 
         }while(0);
         return l_errl;
