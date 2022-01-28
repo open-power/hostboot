@@ -1,0 +1,28 @@
+#!/usr/bin/expect
+
+# Disable output
+log_user 0
+
+set password [lindex $argv 0]
+set command [lreplace $argv 0 0]
+
+spawn {*}$command
+
+expect "password:"
+send "$password\r"
+
+expect {
+    "Permission denied" {
+	puts stderr "ERROR: Username or password incorrect"
+	exit 1
+    }
+    "*" {
+	# Enable output
+	log_user 1
+	interact
+    }
+}
+
+lassign [wait] pid spawnid os_error_flag value
+
+exit $value

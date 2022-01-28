@@ -1,0 +1,239 @@
+#!/bin/bash
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/build/tools/ebmc/patch-bmc $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2022
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+# This is a convenience script for patching eBMC systems. See the
+# USAGE function for usage help.
+
+# Constants
+
+BMC_PATCH_DIRECTORY=/usr/local/share/hostfw/running/
+COPY="rsync -zP"
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+SSHPASS_SCRIPT="$SCRIPT_DIR/hb_sshpass"
+PATCHES_DIR="$PROJECT_ROOT/standalone/pnor"
+
+if [[ ! "$PROJECT_ROOT" ]] ; then
+    errlog "Must be run from inside a workon"
+    exit 1
+fi
+
+# Library functions
+
+function errlog () {
+    echo "$@" >&2
+}
+
+function checkstatus () {
+    if [[ $? -ne 0 ]] ; then
+        echo "Command failed: $1"
+        exit 1
+    fi
+}
+
+function USAGE () {
+    errlog "Usage: $0 [USERNAME@]HOSTNAME PASSWORD [OPTIONS...]"
+    errlog "    HOSTNAME         The hostname of the machine to patch, including a user name if needed"
+    errlog "    PASSWORD         SSH password for the machine to patch"
+    errlog ""
+    errlog "    OPTIONS may be one or more of the following:"
+    errlog "      HBI         Patch Hostboot Base (HBB) and extended (HBI) images"
+    errlog "      HBRT        Patch Hostboot runtime"
+    errlog "      HBD         Patch Hostboot targeting data (only use with appropriate targeting XML changes)"
+    errlog "      --nopldmd   Do not restart PLDMD on the BMC after patching"
+    errlog "      -h/--help   Display this help text and exit"
+    errlog ""
+    errlog "For example, to patch HBB, HBI and HBD on the host 'bmcmachine' with the username 'root'"
+    errlog "and password 'mypassword', run:"
+    errlog "    $0 root@bmcmachine mypassword HBI HBD"
+    exit 1
+}
+
+function SSHPASS_RC () {
+    errlog "+ Running command: $@"
+    set -o pipefail
+    # ssh will stupidly print newlines, so filter them out to clean up our output
+    $SSHPASS_SCRIPT "$PASSWORD" "$@" | { grep -v -E '^\s*$' || true; }
+    local RC=$?
+    set +o pipefail
+
+    return $RC
+}
+
+function SSHPASS () {
+    SSHPASS_RC "$@"
+    RC=$?
+
+    if [[ $RC != 0 ]] ; then
+	errlog "Remote command failed: $@"
+	exit 1
+    fi
+}
+
+function PATCH_HBI_HBB () {
+    # Copy files and create symlinks
+    SSHPASS $COPY "$PATCHES_DIR/HBI.bin" "$PATCHES_DIR/HBB.bin" "$HOSTNAME":"$BMC_PATCH_DIRECTORY"
+    SSHPASS ssh "$HOSTNAME" "cd $BMC_PATCH_DIRECTORY && ln -sf HBB.bin HBB && ln -sf HBI.bin HBI"
+    SSHPASS ssh "$HOSTNAME" "cd $BMC_PATCH_DIRECTORY && ln -sf HBB.bin $HBB.lid && ln -sf HBI.bin $HBI.lid"
+}
+
+function PATCH_HBD () {
+    # Copy files and create symlink
+    SSHPASS $COPY "$PATCHES_DIR/HBD.bin" "$HOSTNAME":"$BMC_PATCH_DIRECTORY"
+    SSHPASS ssh "$HOSTNAME" "cd $BMC_PATCH_DIRECTORY && ln -sf HBD.bin HBD && ln -sf HBD.bin $HBD.lid"
+}
+
+function PATCH_HBRT () {
+    HBRT_PATCH_DIR=hbrt_patch/
+    rm -rf $HBRT_PATCH_DIR
+    mkdir -p $HBRT_PATCH_DIR
+    cp $PROJECT_ROOT/img/hbirt.bin $HBRT_PATCH_DIR
+    echo HBRT  hbirt.bin  $HBRT_RT.lid  80d00009.lid >$HBRT_PATCH_DIR/lidnumbers.txt
+    if ! SSHPASS_RC $COPY "$HOSTNAME":/usr/local/share/hostfw/running/81e002ff.lid $HBRT_PATCH_DIR >/dev/null ; then
+	SSHPASS $COPY "$HOSTNAME":/media/hostfw/running-ro/81e002ff.lid $HBRT_PATCH_DIR
+	checkstatus "download master LID list"
+    fi
+    echo Building LIDs...
+    echo /afs/rch/usr5/dcrowell/public/bin/makelids $HBRT_PATCH_DIR
+    /afs/rch/usr5/dcrowell/public/bin/makelids $HBRT_PATCH_DIR
+    checkstatus "makelids"
+    SSHPASS $COPY $HBRT_PATCH_DIR/lids_to_patch/*.lid "$HOSTNAME":"$BMC_PATCH_DIRECTORY"
+}
+
+function RESTART_PLDMD () {
+    SSHPASS ssh "$HOSTNAME" "systemctl restart pldmd"
+}
+
+function FETCH_LID_IDS_FROM_BMC () {
+    LID_IDS=$(SSHPASS ssh "$HOSTNAME" pldmtool bios GetBIOSAttributeCurrentValueByHandle -a hb_lid_ids)
+
+    checkstatus "Fetching LIDs from BMC"
+
+    # This will set variables in the environment that correspond to
+    # each LID variable, so that e.g. we can use $HBI to get HBI's LID
+    # number.
+    set -o pipefail
+    LID_VARS=$(echo $LID_IDS | grep -o -P "(?<=Value\": )(\".+?\")" | tr ',' '\n' | tr '"' ' ' | grep -v '\.')
+    checkstatus "Evaluating LID IDs"
+    set +o pipefail
+
+
+    eval "$LID_VARS"
+}
+
+function CHECK_REPO_FOR_STANDALONE_COMMIT () {
+    # This is the change-ID for the standalone PNOR layout changes
+    # that will make a standalone build compatible with a BMC machine.
+    STANDALONE_COMMIT_CHANGE_ID=I7f9e2bfa6d30f91a9055c1a0fde73c3e207e48ea
+    git log | grep $STANDALONE_COMMIT_CHANGE_ID >/dev/null
+
+    if [[ $? -ne 0 ]] ; then
+        errlog "WARNING: Patching from standalone, but commit $STANDALONE_COMMIT_CHANGE_ID was not found in the repository."
+        errlog '         This may cause the host to crash.'
+
+        if [[ "$HB_PATCH_BMC_FORCE_PATCH" ]] ; then
+            errlog 'Continuing because HB_PATCH_BMC_FORCE_PATCH is set.'
+        else
+            errlog 'Press enter to continue. (Set the environment variable HB_PATCH_BMC_FORCE_PATCH to disable this check.)'
+            read
+        fi
+    fi
+}
+
+function SHOW_PATCHES_ON_BMC () {
+    echo 'Current patches:'
+    SSHPASS ssh "$HOSTNAME" ls -lat /usr/local/share/hostfw/running/
+}
+
+# Main
+
+if [[ $# -lt 3 ]] ; then
+    USAGE
+    exit 1
+fi
+
+HOSTNAME=$1
+PASSWORD=$2
+
+PATCH_HBI=0
+PATCH_HBRT=0
+PATCH_HBD=0
+RESTART_PLDMD=1
+
+shift 2
+
+for type in $* ; do
+    case $type in
+        HBI)
+            PATCH_HBI=1
+            ;;
+
+        HBRT)
+            PATCH_HBRT=1
+            ;;
+
+        HBD)
+            PATCH_HBD=1
+            ;;
+
+        --nopldmd)
+            RESTART_PLDMD=0
+            ;;
+
+        -h|--help)
+            USAGE
+            exit 1
+            ;;
+
+        *)
+            errlog "Unrecognized option $type"
+            exit 1
+            ;;
+    esac
+done
+
+if [[ "$MACHINE" = P10_STANDALONE ]] ; then
+    CHECK_REPO_FOR_STANDALONE_COMMIT
+fi
+
+FETCH_LID_IDS_FROM_BMC
+
+if [[ $PATCH_HBI = 1 ]] ; then
+    PATCH_HBI_HBB
+fi
+
+if [[ $PATCH_HBD = 1 ]] ; then
+    PATCH_HBD
+fi
+
+if [[ $PATCH_HBRT = 1 ]] ; then
+    PATCH_HBRT
+fi
+
+if [[ $RESTART_PLDMD = 1 ]] ; then
+    RESTART_PLDMD
+fi
+
+SHOW_PATCHES_ON_BMC
