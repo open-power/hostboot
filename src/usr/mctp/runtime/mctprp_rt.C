@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -189,6 +189,9 @@ MctpRP::MctpRP(void):
     iv_hbrtvirt(mctp_hbrtvirt_init_hbrt())
 {
     TRACFCOMP(g_trac_mctp, "MctpRP constructor entry");
+
+    mctp_set_max_message_size(iv_mctp, HOST_MAX_INCOMING_MESSAGE_ALLOCATION);
+
     // Set the receive function to be rx_message which
     // will handle the message in the RX space accordingly
     mctp_set_rx_all(iv_mctp, rx_message, NULL);
