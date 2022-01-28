@@ -1704,7 +1704,7 @@ void oppb_print(
              revle32(i_oppb->occ_complex_frequency_mhz),
              revle32(i_oppb->occ_complex_frequency_mhz));
 
-   FAPI_INF("  %-32s : 0x%04X (%3d)",
+    FAPI_INF("  %-32s : 0x%04X (%3d)",
              "Frequency UltraTurbo (MHz)",
              revle32(i_oppb->ultraturbo_freq_mhz),
              revle32(i_oppb->ultraturbo_freq_mhz));
@@ -4533,37 +4533,10 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_iddq( void )
     {
         if ( iv_iddqt.iddq_all_good_cores_off_good_caches_off_5ma[i] & 0x8000)
         {
+            FAPI_INF("IQ:  iddq_all_good_cores_off_good_caches_off_5ma[%d] set to 0 due to MSB being set)", i);
             iv_iddqt.iddq_all_good_cores_off_good_caches_off_5ma[i] = 0;
         }
     }
-    for (int i = 0; i < IDDQ_MEASUREMENTS; ++i)
-    {
-        iv_iddqt.iddq_all_good_cores_on_caches_on_5ma[i] =
-            revle16(iv_iddqt.iddq_all_good_cores_on_caches_on_5ma[i]);
-        iv_iddqt.iddq_all_good_cores_off_good_caches_off_5ma[i] =
-            revle16(iv_iddqt.iddq_all_good_cores_off_good_caches_off_5ma[i]);
-        iv_iddqt.iddq_all_good_cores_off_good_caches_on_5ma[i] =
-            revle16(iv_iddqt.iddq_all_good_cores_off_good_caches_on_5ma[i]);
-        iv_iddqt.icsq_all_good_cores_on_caches_on_5ma[i] =
-            revle16(iv_iddqt.icsq_all_good_cores_on_caches_on_5ma[i]);
-        iv_iddqt.icsq_all_good_cores_off_good_caches_off_5ma[i] =
-            revle16(iv_iddqt.icsq_all_good_cores_off_good_caches_off_5ma[i]);
-        iv_iddqt.icsq_all_good_cores_off_good_caches_on_5ma[i] =
-            revle16(iv_iddqt.icsq_all_good_cores_off_good_caches_on_5ma[i]);
-    }
-
-    for (int x = 0; x < MAXIMUM_EQ_SETS; ++x)
-    {
-        for (int i = 0; i < IDDQ_MEASUREMENTS; ++i)
-        {
-            iv_iddqt.iddq_eqs_good_cores_on_good_caches_on_5ma[x][i] =
-                revle16(iv_iddqt.iddq_eqs_good_cores_on_good_caches_on_5ma[x][i]);
-            iv_iddqt.icsq_eqs_good_cores_on_good_caches_on_5ma[x][i] =
-                revle16(iv_iddqt.icsq_eqs_good_cores_on_good_caches_on_5ma[x][i]);
-        }
-    }
-    // Put out the structure to the trace
-    iddq_print(&iv_iddqt);
 
 fapi_try_exit:
 
@@ -4636,8 +4609,8 @@ void iddq_print(IddqTable_t* i_iddqt)
 
 #define IDDQ_CURRENT_EXTRACT(_member) \
         { \
-        uint16_t _temp = (i_iddqt->_member) * CONST_5MA_1MA;     \
-        sprintf(l_buffer_str, "  %6.3f ", (double)_temp/1000);   \
+        uint16_t _temp = revle16(i_iddqt->_member) * CONST_5MA_1MA;     \
+        sprintf(l_buffer_str, "  %6.3f ", (double)_temp/1000);          \
         strcat(l_line_str, l_buffer_str); \
         }
 
