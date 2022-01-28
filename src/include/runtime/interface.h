@@ -587,7 +587,8 @@ typedef struct hostInterfaces
        HBRT_FW_MSG_TYPE_GET_ELOG_TIME     = 15, // struct dateTime
        HBRT_FW_MSG_TYPE_SPILOCK           = 16, // struct spi_lock
        HBRT_FW_MSG_TYPE_INITIATE_GARD     = 17, // struct initiate_gard_t
-       HBRT_FW_MSG_TYPE_PMIC_HEALTH_CHECK = 18, // no additional data required
+       HBRT_FW_MSG_TYPE_NVDIMM_STATS      = 18, // struct nvdimm_stats_t - not used
+       HBRT_FW_MSG_TYPE_PMIC_HEALTH_CHECK = 19, // no additional data required
        HBRT_FW_MSG_TYPE_PM_RESET_ALERT    = 20, // struct pmreset_alert_t
        HBRT_FW_MSG_TYPE_DEALLOCATE        = 21, // struct deallocate_t
        HBRT_FW_MSG_MCTP_BRIDGE_ENABLED    = 22, // struct mctp_bridge_enabled
