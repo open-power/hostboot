@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2020
+# Contributors Listed Below - COPYRIGHT 2013,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -30,8 +30,6 @@ MODULE = vpd_rt
 
 # include common objects between hostboot and runtime hostboot
 include ../vpd.mk
-# include the VPD ECC update/validate APIs for HB and runtime
-include ../vpd_ecc_api.mk
 
 # add unique object modules
 OBJS += rt_vpd.o
@@ -42,4 +40,3 @@ VPATH += ..
 CFLAGS += -iquote ../
 
 include $(ROOTPATH)/config.mk
-

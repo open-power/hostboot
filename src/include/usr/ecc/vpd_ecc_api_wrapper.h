@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/vpd/vpd_ecc_api_no_op.C $                             */
+/* $Source: src/include/usr/ecc/vpd_ecc_api_wrapper.h $                   */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2022                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,34 +23,37 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-// ------------------------------------------------------------------
-// Includes
-// ------------------------------------------------------------------
-#include "ipvpd.H"   // vpdeccCreateEcc, vpdeccCheckData
+#ifndef VPD_ECC_API_WRAPPER_H
+#define VPD_ECC_API_WRAPPER_H
 
-// ------------------------------------------------------------------
-// Global variable to determine if the ECC APIs are present and available.
-// This is the no-op version, therefore set to false
-// ------------------------------------------------------------------
-const bool g_vpd_ecc_api_present(false);
+#include <stdint.h>
 
-// ------------------------------------------------------------------
-// IpVpdFacade::vpdeccCreateEcc
-// ------------------------------------------------------------------
-int IpVpdFacade::vpdeccCreateEcc(
+extern const int g_vpd_ecc_api_present;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @brief A wrapper around the vpdecc_check_data API.
+ *
+ * See IpVpdFacade::vpdeccCreateEcc for documentation.
+ */
+int vpdeccCreateEcc_wrapper(
                 const unsigned char* i_recordData, size_t  i_recordLength,
-                unsigned char*       o_eccData,    size_t* io_eccLength)
-{
-    return 0;
-} // vpdeccCreateEcc
+                unsigned char*       o_eccData,    size_t* io_eccLength);
 
-// ------------------------------------------------------------------
-// IpVpdFacade::vpdeccCheckData
-// ------------------------------------------------------------------
-int IpVpdFacade::vpdeccCheckData(
+/**
+ * @brief A wrapper around the vpdecc_check_data API.
+ *
+ * See IpVpdFacade::vpdeccCheckData for documentation.
+ */
+int vpdeccCheckData_wrapper(
                 unsigned char*       io_recordData, size_t i_recordLength,
-                const unsigned char* i_eccData,     size_t i_eccLength)
-{
-    return 0;
-} // vpdeccCheckData
+                const unsigned char* i_eccData,     size_t i_eccLength);
 
+#ifdef __cplusplus
+}
+#endif
+
+#endif

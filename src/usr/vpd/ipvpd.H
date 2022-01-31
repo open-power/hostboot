@@ -34,14 +34,11 @@
 #include "vpd.H"
 #include <eeprom/eeprom_const.H>
 #include <vpd/ipz_vpd_consts.H>
+#include <ecc/vpd_ecc_api_wrapper.h>
 
 /** @file ipvpd.H
  *  @brief Provides base support for i/p-Series style IBM VPD
  */
-
-// Global variable to determine if the ECC APIs are present and available.
-// Defined and set in file vpd_ecc_api.C.
-extern const bool g_vpd_ecc_api_present;
 
 /**
  *  @brief  Base class for i/p-Series VPD

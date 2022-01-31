@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2021
+# Contributors Listed Below - COPYRIGHT 2013,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -35,4 +35,4 @@ OBJS += pvpd.o
 OBJS += spd.o
 OBJS += ocmb_spd.o
 OBJS += errlud_vpd.o
-
+OBJS += vpd_ecc_api_algorithms.o

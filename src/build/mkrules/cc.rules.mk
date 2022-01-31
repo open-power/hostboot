@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2020
+# Contributors Listed Below - COPYRIGHT 2013,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -143,6 +143,13 @@ $(OBJDIR)/%.o : %.S
 	@mkdir -p $(OBJDIR)
 	$(C2) "    CC         $(notdir $<)"
 	$(C1)$(CC) -c $(ASMFLAGS) $< -o $@ $(ASMINCFLAGS) $(INCFLAGS) -iquote .
+
+$(OBJDIR)/%.a : $(ARCHIVE_OBJECTS)
+	@mkdir -p $(OBJDIR)
+	$(C2) "    AR         $(notdir $@)"
+	$(C1)rm -f "$@" # Remove the file (otherwise ar will keep it if it already exists)
+	$(C1)$(AR) rcs $@ $^
+	$(C1)$(if $(STRIP_ARCHIVES), $(STRIP) --strip-debug "$@")
 
 ifdef MODULE
 $(IMGDIR)/lib$(MODULE).so : $(OBJECTS) $(ROOTPATH)/src/module.ld $(MODULE_INIT)

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,13 +39,9 @@
 #include <usr/vpd/vpd_if.H>    // VPD::validateAllRecordEccData, VPD::updateRecordEccData
 #include "../mvpd.H"           // For MvpdFacade singleton
 #include <devicefw/userif.H>   // DEVICE_MVPD_ADDRESS, deviceRead, deviceWrite
+#include <ecc/vpd_ecc_api_wrapper.h>
 
 extern trace_desc_t* g_trac_vpd;
-
-// Global variable to determine if the ECC APIs are present and available.
-// Defined and set in file vpd_ecc_api.C.
-extern const bool g_vpd_ecc_api_present;
-
 
 class vpdEccApiTest: public CxxTest::TestSuite
 {
@@ -406,4 +402,3 @@ class vpdEccApiTest: public CxxTest::TestSuite
 }; // class vpdEccApiTest
 
 #endif  // __VPD_ECC_TEST_H
-

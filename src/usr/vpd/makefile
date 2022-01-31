@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2020
+# Contributors Listed Below - COPYRIGHT 2013,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -27,8 +27,6 @@ MODULE = vpd
 
 #include common objects between hb and runtime
 include vpd.mk
-#include the VPD ECC update/validate APIs for HB and runtime
-include vpd_ecc_api.mk
 
 #include unique objects
 OBJS += vpd.o

@@ -3246,7 +3246,7 @@ IpVpdFacade::updateRecordEccData ( const TARGETING::TargetHandle_t  i_target,
     errlHndl_t  l_err(nullptr);
 
     // If the VPD ECC algorithms are present then execute code.
-    if (true == g_vpd_ecc_api_present)
+    if (g_vpd_ecc_api_present)
     {
         // Get a copy of the target huid, once, for tracing purposes
         auto l_targetHuid = TARGETING::get_huid(i_target);
@@ -3405,7 +3405,7 @@ IpVpdFacade::updateRecordEccData ( const TARGETING::TargetHandle_t  i_target,
         TRACFCOMP( g_trac_vpd, EXIT_MRK"IpVpdFacade::updateRecordEccData(): "
                                 "returning %s errors for record %s on target 0x%.8X",
                                 (l_err ? "with" : "with no"), l_recordName, l_targetHuid );
-    } // if (true == g_vpd_ecc_api_present)
+    } // if (g_vpd_ecc_api_present)
 
     return l_err;
 } // updateRecordEccData
@@ -3419,7 +3419,7 @@ IpVpdFacade::validateAllRecordEccData ( const TARGETING::TargetHandle_t  i_targe
     errlHndl_t l_validationError(nullptr);
 
     // If the VPD ECC algorithms are present then execute code.
-    if (true == g_vpd_ecc_api_present)
+    if (g_vpd_ecc_api_present)
     {
         // Get a copy of the target huid, once, for tracing purposes
         auto l_targetHuid = TARGETING::get_huid(i_target);
@@ -3491,7 +3491,7 @@ IpVpdFacade::validateAllRecordEccData ( const TARGETING::TargetHandle_t  i_targe
         TRACFCOMP( g_trac_vpd, EXIT_MRK"IpVpdFacade::validateAllRecordEccData(): "
                    "returning %s errors on target 0x%.8X",
                    (l_validationError ? "with" : "with no"), l_targetHuid );
-    } // if (true == g_vpd_ecc_api_present)
+    } // if (g_vpd_ecc_api_present)
 
     return l_validationError;
 } // validateAllRecordEccData

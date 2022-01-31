@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2020
+# Contributors Listed Below - COPYRIGHT 2013,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -37,7 +37,9 @@ CXX_RAW = $(CROSS_PREFIX)g++
 CC = $(CCACHE) $(CC_RAW)
 CXX = $(CCACHE) $(CXX_RAW)
 
+AR = $(CROSS_PREFIX)ar
 LD = $(CROSS_PREFIX)ld
+STRIP = $(CROSS_PREFIX)strip
 OBJDUMP = $(CROSS_PREFIX)objdump
 GCOV = $(CROSS_PREFIX)gcov
 

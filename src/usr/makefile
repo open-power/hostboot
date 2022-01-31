@@ -74,6 +74,7 @@ SUBDIRS += trace.d
 SUBDIRS += util.d
 SUBDIRS += vfs.d
 SUBDIRS += vpd.d
+SUBDIRS += ecc.d
 SUBDIRS += xscom.d
 SUBDIRS += xz.d
 

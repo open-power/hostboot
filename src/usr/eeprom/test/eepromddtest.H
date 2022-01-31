@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,7 @@
 #include <eeprom/eepromif.H>
 #include <targeting/common/commontargeting.H>
 #include <pnor/pnorif.H>
+#include <ecc/vpd_ecc_api_wrapper.h>
 
 #include <secureboot/service.H>
 
@@ -56,10 +57,6 @@ using namespace EEPROM;
 //#define TS_DEBUG(args...) TS_INFO(args)
 
 extern trace_desc_t* g_trac_eeprom;
-
-// Global variable to determine if the ECC APIs are present and available.
-// Defined and set in file vpd_ecc_api.C.
-extern const bool g_vpd_ecc_api_present;
 
 class EEPROMTest: public CxxTest::TestSuite
 {

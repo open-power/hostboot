@@ -220,6 +220,7 @@ my $resident_modules = {
     "libconsole.so"             => '1',
     "liberrldisplay.so"         => '1',
     "libsbeio.so"               => '1',
+    "libecc.so"                 => '1',
     "libvpd.so"                 => '1',
     "libsecureboot_trusted.so"  => '1',
     "libsecureboot_base.so"     => '1',
