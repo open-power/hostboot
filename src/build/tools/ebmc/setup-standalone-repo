@@ -1,0 +1,315 @@
+#!/bin/bash
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/build/tools/ebmc/setup-standalone-repo $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2021,2022
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+function usage ()
+{
+    echo "Usage: source ${BASH_SOURCE[0]} PACKAGE_NAME [-h|--help] [-x|--xml-only OR -n|--no-xml] [-s|--system-type e|2u|4u] [-b|--branch-name]"
+    echo "Description: This script will take the given package_name and checkout a new branch in this hostboot repo to the"
+    echo "             commit hash that is in the PNOR build."
+    echo "NOTE:        This script must run in the current environment with source (or .) preceeding the script call. Otherwise,"
+    echo "             the CONFIG_FILE environment variable cannot be updated in the user's working shell if it's incorrect."
+    echo "             This script also requires rchland tokens to access the paths where the data is at."
+    echo "Options:"
+    echo "       PACKAGE_NAME is a package name to match this hostboot repo to. ex. 1020.2204.20220126z"
+    echo "       -h|--help        Used to display this usage text"
+    echo "       -x|--xml-only    Copy system xmls into repo and nothing else. Cannot use with -n"
+    echo "       -n|--no-xml      Checkout supplied package_name and don't copy system xmls to repo. Cannot use with -x"
+    echo "       -s|--system-type Copies the system xml of the targeted system and replaces simics_P10.system.xml with it."
+    echo "                            e = Everest, 2u = Rainer 2U, 4u = Rainier 4U"
+    echo "       -b|--branch-name The branch name for the new branch created by this script. Default is package_name"
+    echo ""
+    echo "Examples:"
+    echo "       source ${BASH_SOURCE[0]} 1020.2204.20220128b"
+    echo "           Creates a new branch called 1020.2204.20220128b checked out at the matching Hostboot commit hash, "
+    echo "           copies over all system xmls from PNOR build but doesn't replace simics_P10.system.xml"
+    echo "       source ${BASH_SOURCE[0]} 1020.2204.20220128b -b ever6-level"
+    echo "           Creates new branch called ever6-level checked out at the matching Hostboot commit hash, copies over"
+    echo "           all system xmls but doesn't replace simics_P10.system.xml"
+    echo "       source ${BASH_SOURCE[0]} 1020.2204.20220128b -xs e"
+    echo "           Copies over all the system xmls from 1020.2204.20220128b and replaces simics_P10.system.xml with the"
+    echo "           Everest xml"
+    echo "       source ${BASH_SOURCE[0]} 1020.2204.20220128b -nb build-0128b"
+    echo "           Creates a new branch called build-0128b checked out at the matching Hostboot commit hash and doesn't"
+    echo "           copy over the system xmls from the PNOR build nor is simics_P10.system.xml replaced by anything."
+    return 1
+}
+
+function copy_targeting_xml ()
+{
+    echo ""
+    if [ -z "${sys_type}" ]; then
+        echo "Copying system MRWs into $PROJECT_ROOT/src/usr/targeting/common/xmltohb/ ..."
+        cp -v /afs/rchland/projects/esw/$pnor_release/Builds/$pnor_build/op-build/output/host/powerpc64le-buildroot-linux-gnu/sysroot/openpower_mrw_scratch/*_hb.mrw.xml $PROJECT_ROOT/src/usr/targeting/common/xmltohb/
+        echo ""
+        echo "Done."
+        echo "Remember to replace simics_P10.system.xml with your system's XML if you want to patch targeting."
+    else
+        echo "Copying $sys_type MRW into $PROJECT_ROOT/src/usr/targeting/common/xmltohb/ ..."
+        cp -v /afs/rchland/projects/esw/$pnor_release/Builds/$pnor_build/op-build/output/host/powerpc64le-buildroot-linux-gnu/sysroot/openpower_mrw_scratch/$sys_type*_hb.mrw.xml $PROJECT_ROOT/src/usr/targeting/common/xmltohb/
+        echo ""
+        echo "Replacing $PROJECT_ROOT/src/usr/targeting/common/xmltohb/simics_P10.system.xml with $sys_type"
+        cp -v $PROJECT_ROOT/src/usr/targeting/common/xmltohb/$sys_type*_hb.mrw.xml $PROJECT_ROOT/src/usr/targeting/common/xmltohb/simics_P10.system.xml
+    fi
+}
+
+function checkout_hostboot_level ()
+{
+    echo ""
+    echo "Checking out a new branch for $HOSTBOOT_COMMIT_HASH as $branch_name ..."
+    git fetch gerrit; git checkout -b $branch_name $HOSTBOOT_COMMIT_HASH
+}
+
+function get_standalone_changes ()
+{
+    ssh -p 29418 hostboot.gerrit gerrit query "(intopic:bmc_standalone_patching) project:hostboot (NOT status:abandoned)" --current-patch-set | grep -E 'change I|subject:'
+}
+
+function gerrit_refs ()
+{
+    ssh -p 29418 hostboot.gerrit gerrit query --current-patch-set "project:hostboot $1" | grep ref: | awk '{print $2}'
+}
+
+function gerrit_pick ()
+{
+    # $1 input is a commit or search string
+    git fetch gerrit $(gerrit_refs $1) && git cherry-pick FETCH_HEAD
+}
+
+function cherrypick_standalone_patch ()
+{
+    echo ""
+    echo "Applying standalone changes necessary for full-system eBMC patching ..."
+    standalone_patch_changes=$(get_standalone_changes)
+    # Separate the change ids from the subject lines
+    changeIds=()
+    subjects=()
+
+    i=0
+    # Internal Field Seperator needs to be updated.
+    IFS=$'\n'
+    for line in $standalone_patch_changes ; do
+        if ! ((i % 2)); then
+            changeIds+=($( echo $line | awk '{print $2}'))
+        else
+            subjects+=($( echo $line | sed "s/.*subject: //g"))
+        fi
+
+        ((i=i+1))
+    done
+
+    # Put the current git log into a private file so that its easier to grep through the current stack of commits
+    # to find if needed changes are already in the branch.
+    git log > .gitlog
+
+    i=0
+    for CHANGEID in ${changeIds[@]} ; do
+
+        if ! grep -q $CHANGEID .gitlog ; then
+            echo "PICK $CHANGEID ${subjects[$i]}"
+
+            gerrit_pick $CHANGEID
+        else
+            echo "HAVE $CHANGEID ${subjects[$i]}"
+        fi
+        ((i=i+1))
+    done
+
+    \rm .gitlog
+
+}
+
+function verify_config_file ()
+{
+    config=$(env | grep CONFIG_FILE | grep p10ebmc)
+    if [ -z "$config" ]; then
+        echo ""
+        echo "User environment variable for CONFIG_FILE not setup for standalone patching... fixing."
+        cp -v /afs/rchland/projects/esw/$pnor_release/Builds/$pnor_build/op-build/openpower/configs/hostboot/p10ebmc.config $PROJECT_ROOT/
+        export CONFIG_FILE=$PROJECT_ROOT/p10ebmc.config
+        echo $(env | grep CONFIG_FILE)
+    fi
+}
+
+###################################################################################################
+# Main
+###################################################################################################
+function main ()
+{
+    if [[ $# -lt 1 ]]; then
+        usage
+    fi
+    # This script requires the user be in a hostboot workon
+    if [[ ! "$PROJECT_ROOT" ]] ; then
+        echo "ERROR: Must be run from inside a workon"
+        return 1
+    fi
+
+    ################################################
+    ##    Command Line Arg Parsing
+    ################################################
+    package_name=$1
+    case "$package_name" in
+        "--"*)
+            usage;;
+        "-"*)
+            usage;;
+    esac
+
+    build_release=$(echo $package_name | cut -c 1-4 | awk '{print "fw"$1}')
+    echo "Build Release: $build_release"
+    pnor_build=$(sed -n 's/pnor_build: //p' < /afs/rchland/projects/esw/$build_release/Builds/$package_name/sbs-metadata/pnor_build_details.txt)
+    echo "PNOR Build: $pnor_build"
+
+    if [ -z "$pnor_build" ]; then
+        echo "ERROR: Could not find pnor build info with given package name:'$package_name'"
+        return 1
+    fi
+
+    pnor_release=$(sed -n 's/pnor_release: //p' < /afs/rchland/projects/esw/$build_release/Builds/$package_name/sbs-metadata/pnor_build_details.txt)
+    echo "PNOR Release: $pnor_release"
+
+    if [ -z "$pnor_release" ]; then
+        echo "ERROR: Could not find pnor release info with given package name:'$package_name'"
+        return 1
+    fi
+
+    HOSTBOOT_COMMIT_HASH=$(sed -n -e 's/^.*hostboot-p10-//p' < /afs/rchland.ibm.com/projects/esw/$pnor_release/Builds/$pnor_build/logs/status.html | cut -c 1-7 | head -n1)
+    echo "Hostboot commit for PNOR build: $HOSTBOOT_COMMIT_HASH"
+    if [ -z "$HOSTBOOT_COMMIT_HASH" ]; then
+        echo "ERROR: Could not find hostboot commit hash with given package name:'$package_name'"
+        return 1
+    fi
+    shift
+
+    # Change the long args to short args
+    for arg in "$@"; do
+        shift
+        case "$arg" in
+            "--help") set -- "$@" "-h" ;;
+            "--package-name") set -- "$@" "-p" ;;
+            "--xml-only") set -- "$@" "-x" ;;
+            "--no-xml") set -- "$@" "-n" ;;
+            "--system-type") set -- "$@" "-s" ;;
+            "--branch-name") set -- "$@" "-b" ;;
+            "--"*)  echo "ERROR: Invalid argument ${arg}"; usage;;
+            *) set -- "$@" "$arg"
+        esac
+    done
+
+    # Default values for optional args
+    no_xml=false
+    xml_only=false
+    sys_type=""
+    branch_name=""
+
+    # Parse through the optional args
+    OPTIND=1
+    while getopts "hb:s:xn" option
+    do
+        case "${option}" in
+            h)
+                usage
+                ;;
+            s)
+                sys_type="${OPTARG}"
+                if [ "${sys_type}" = "e" ]; then
+                    sys_type="Everest"
+                elif [ "${sys_type}" = "2u" ]; then
+                    sys_type="Rainier-2U"
+                elif [ "${sys_type}" = "4u" ]; then
+                    sys_type="Rainier-4U"
+                else
+                    echo "ERROR: Invalid system target."
+                    usage
+                fi
+                ;;
+            b)
+                branch_name="$OPTARG"
+                ;;
+            x)
+                xml_only=true
+                ;;
+            n)
+                no_xml=true
+                ;;
+            ?)
+                usage
+                ;;
+            *)
+                usage
+                ;;
+        esac
+    done
+    shift $((OPTIND-1))
+
+    if [ -z "${branch_name}" ]
+    then
+        branch_name="${package_name}"
+    fi
+
+
+    # Check for incompatible args
+    if [ "$xml_only" = true ] && [ "$no_xml" = true ]; then
+        echo "ERROR: Cannot supply both -n and -x args."
+        usage
+    fi
+
+    ################################################
+    ## Perform requested actions
+    ################################################
+    if [ "$xml_only" == false ]; then
+        checkout_hostboot_level
+        cherrypick_standalone_patch
+    fi
+
+    if [ "$no_xml" == false ]; then
+        copy_targeting_xml
+    fi
+
+    # Always double check CONFIG_FILE since this could be a source of silent pain
+    verify_config_file
+}
+
+# The user must source this script
+# otherwise it can't update the environment variable for the CONFIG_FILE
+if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
+    main $@
+else
+    echo "ERROR: This script must be sourced in order to setup the repo properly"
+    usage
+fi
+
+# Cleanup the script variables
+unset package_name
+unset pnor_release
+unset pnor_build
+unset build_release
+unset branch_name
+unset no_xml
+unset xml_only
+unset sys_type
+unset config
+unset OPTIND
