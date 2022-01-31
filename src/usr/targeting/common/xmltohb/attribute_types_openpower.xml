@@ -278,6 +278,53 @@
   </attribute>
 
   <attribute>
+    <complexType>
+      <description>
+        Matches PLDM_ENTITY_ID field descriptions.
+        WARNING: All fields are little endian.
+      </description>
+      <field>
+        <default>0x0000</default>
+        <description>
+         See PLDM_ENTITY_ID for description of field
+        </description>
+        <name>entityType</name>
+        <type>uint16_t</type>
+      </field>
+      <field>
+        <default>0x0000</default>
+        <description>
+          See PLDM_ENTITY_ID for description of field
+        </description>
+        <name>entityInstanceNumber</name>
+        <type>uint16_t</type>
+      </field>
+      <field>
+        <default>0x0000</default>
+        <description>
+          See PLDM_ENTITY_ID for description of field
+        </description>
+        <name>containerId</name>
+        <type>uint16_t</type>
+      </field>
+    </complexType>
+    <description>
+      Stores "Entity Identification Information" for a connector (socket/dimm_slot)
+      that this target uses, as defined in the "Platform Level Data Model (PLDM)
+      for Platform Monitoring and Control" specification (a.k.a. DSP0248) published
+      by the DMTF.  A value of 0x000000000000 is assumed not to be valid.  Hostboot
+      populates this attribute on platforms that support PLDM after determining
+      the final PLDM Entity Identification Information for various FRUs.
+      HDAT consumes this attribute when building the SLCA on said platforms.
+    </description>
+    <id>CONNECTOR_PLDM_ENTITY_ID_INFO</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <id>CORE_WEIGHT_TENTHS</id>
     <description>
         Weight factor (1 = 0.1) for each core DTS to calculate a core
@@ -1391,6 +1438,23 @@ ID for the sensor number returned with the elog. -->
     <persistency>non-volatile</persistency>
     <readable/>
     <no_export/>
+  </attribute>
+
+  <attribute>
+    <id>PLDM_CONNECTOR_PDRS_ENABLED</id>
+    <description>
+        Socket and dimm_slot connector pdrs are needed to report uninstalled
+        slots which are used to help identify where to plug in new parts.
+        This support connectors encompass DIMM slots and processor sockets.
+        This support is disabled by default until fully supported by all components.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
   </attribute>
 
   <attribute>

@@ -97,6 +97,9 @@
   <targetTypeExtension>
     <id>chip-processor</id>
     <attribute>
+      <id>CONNECTOR_PLDM_ENTITY_ID_INFO</id>
+    </attribute>
+    <attribute>
       <id>CURRENT_SBE_HRESET_STATUS</id>
     </attribute>
     <attribute>
@@ -210,6 +213,9 @@
 
   <targetTypeExtension>
     <id>lcard-dimm</id>
+    <attribute>
+      <id>CONNECTOR_PLDM_ENTITY_ID_INFO</id>
+    </attribute>
     <attribute>
       <id>I2C_CALLOUTS</id>
     </attribute>
@@ -358,6 +364,9 @@
     </attribute>
     <attribute>
       <id>PLDM_BIOS_ERROR_INFORMATIONAL</id>
+    </attribute>
+    <attribute>
+      <id>PLDM_CONNECTOR_PDRS_ENABLED</id>
     </attribute>
     <attribute>
       <id>PLDM_STATE_QUERY_RECORDS</id>
