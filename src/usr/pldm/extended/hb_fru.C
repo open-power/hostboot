@@ -1202,19 +1202,7 @@ errlHndl_t cacheRemoteFruVpd()
             TargetHandle_t entity_target = nullptr;
 
             // Only PLDM_FRU_RECORD_TYPE_OEM FRUs have location codes
-            if (map_entry.fru_record_type != PLDM_FRU_RECORD_TYPE_OEM)
-            {
-                // Skipping location code processing, but still need to set entity_target
-                // Only supporting map_(entry.targeting_type == TYPE_SYS) at this time
-                assert(map_entry.targeting_type == TYPE_SYS, "cacheRemoteFruVpd: Expecting TYPE_SYS");
-
-                // set entity_target to system target
-                entity_target = UTIL::assertGetToplevelTarget();
-
-                PLDM_DBG("cacheRemoteFruVpd: Skipping location code processing; setting "
-                         "entity_target to 0x%.08X", get_huid(entity_target));
-            }
-            else
+            if (map_entry.fru_record_type == PLDM_FRU_RECORD_TYPE_OEM)
             {
                 // lookup the location code in the fru records associated with this RSI
                 std::vector<uint8_t> location_code;
@@ -1273,6 +1261,18 @@ errlHndl_t cacheRemoteFruVpd()
                         break;
                     }
                 }
+            }
+            else
+            {
+                // Skipping location code processing, but still need to set entity_target
+                // Only supporting map_entry.targeting_type == TYPE_SYS) at this time
+                assert(map_entry.targeting_type == TYPE_SYS, "cacheRemoteFruVpd: Expecting TYPE_SYS");
+
+                // set entity_target to system target
+                entity_target = UTIL::assertGetToplevelTarget();
+
+                PLDM_DBG("cacheRemoteFruVpd: Skipping location code processing; setting "
+                         "entity_target to 0x%.08X", get_huid(entity_target));
             } // end of PLDM_FRU_RECORD_TYPE_OEM/location code check
 
 
@@ -1313,14 +1313,14 @@ errlHndl_t cacheRemoteFruVpd()
 
             /* Read and store other FRU info if necessary */
 
-            const auto getrecord = [&](const uint8_t fru_record_type, const uint8_t fru_field_type,
+            const auto getrecord = [&](const uint8_t fru_field_type,
                                        void* const buffer, const size_t bufsize,
                                        const char* const field_name)
             {
                 std::vector<uint8_t> record_data;
                 if (getRecordSetRecordValue(device_fru_records.data(),
                                             records_in_set,
-                                            fru_record_type,
+                                            map_entry.fru_record_type,
                                             fru_field_type,
                                             record_data))
                 {
@@ -1356,8 +1356,7 @@ errlHndl_t cacheRemoteFruVpd()
 
                 memcpy(fw_release_string, l_miKeyword, l_miKeywordSize);
 
-                getrecord(map_entry.fru_record_type,
-                          PLDM_FRU_FIELD_TYPE_VERSION,
+                getrecord(PLDM_FRU_FIELD_TYPE_VERSION,
                           subsys_version_string, sizeof(subsys_version_string),
                           "subsystem version");
 
@@ -1369,8 +1368,7 @@ errlHndl_t cacheRemoteFruVpd()
             {
                 ATTR_SERIAL_NUMBER_type serial_number = { };
 
-                getrecord(map_entry.fru_record_type,
-                          11, // Comes from "SE" offset into valid_vsys_keywords[] 
+                getrecord(PLDM::VSYS_KEYWORDS_SE,
                           serial_number, sizeof(serial_number),
                           "serial number");
 
@@ -1381,8 +1379,7 @@ errlHndl_t cacheRemoteFruVpd()
             {
                 TARGETING::ATTR_RAW_MTM_type model = {};
 
-                getrecord(map_entry.fru_record_type,
-                          PLDM_FRU_FIELD_TYPE_MODEL,
+                getrecord(PLDM_FRU_FIELD_TYPE_MODEL,
                           model, sizeof(model),
                           "model");
 

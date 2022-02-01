@@ -1017,6 +1017,7 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
     iv_User.setComponentId( i_committerComponent );
     iv_Extended.setComponentId(i_committerComponent);
     iv_ED.setComponentId( i_committerComponent );
+    iv_MT.setComponentId( i_committerComponent );
 
     setSubSystemIdBasedOnCallouts();
 
@@ -1039,7 +1040,7 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
     // These will go into the EH section. The real information will be gathered
     // from attributes on called-out targets, if targeting is loaded.
     TARGETING::ATTR_SERIAL_NUMBER_type serial_number = "UNKNOWN";
-    TARGETING::ATTR_RAW_MTM_type mtm = "UNKNOWN";
+    TARGETING::ATTR_RAW_MTM_type mtm = "UNKNOWN_"; // "_" at end to make it exactly 8 characters
     TARGETING::ATTR_FW_RELEASE_VERSION_type release_version = "UNKNOWN";
     TARGETING::ATTR_FW_SUBSYS_VERSION_type subsys_version = "UNKNOWN";
 
@@ -1080,7 +1081,7 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
     // Ensure the iv_gard and iv_deconfig bits are set correctly on the ErrlSrc member
     checkForDeconfigAndGard();
 
-    { /* Set Extended Header info */
+    { /* Set Extended Header ('EH') info */
 
         iv_Extended.setSerial(reinterpret_cast<const char*>(serial_number));
         iv_Extended.setMTM(mtm);
@@ -1098,6 +1099,13 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
         const auto pelsrchdr = reinterpret_cast<const pelSRCSection_t*>(flatsrc.data());
         iv_Extended.setSymptomId(pelsrchdr->src.srcString, &pelsrchdr->src.word2, pelsrchdr->src.wordcount - 1);
     }
+
+    { /* Set Failing Enclosure MTMS ('MT') info */
+        iv_MT.setSerial(reinterpret_cast<const char*>(serial_number));
+        iv_MT.setMTM(mtm);
+    }
+
+
 }
 
 #ifdef CONFIG_BUILD_FULL_PEL
@@ -2189,7 +2197,7 @@ void ErrlEntry::deferredDeconfigure()
 }
 
 /* @brief Convenience function to select a value for systems that need Hostboot
- *        to build a full PEL (including the EH section) or 0 for those that don't.
+ *        to build a full PEL (including the EH and MT sections) or 0 for those that don't.
  * @param[in] i_number Number to return
  * @return    size_t   The given value if this is a system that needs a full PEL,
  *                     or 0 otherwise.
@@ -2205,8 +2213,8 @@ static size_t fullPelOnly(const size_t i_number)
 }
 
 // Sections at the start of an error log (non user-defined)
-// 3 = PH, UH, PS + 2 more for full pel support (EH and ED)
-const uint8_t NON_UD_SECTION_CNT = 3 + fullPelOnly(2);
+// 3 = PH, UH, PS + 2 more for full pel support (EH, ED, and MT)
+const uint8_t NON_UD_SECTION_CNT = 3 + fullPelOnly(3);
 
 //////////////////////////////////////////////////////////////////////////////
 // for use by ErrlManager
@@ -2217,7 +2225,8 @@ uint64_t ErrlEntry::flattenedSize()
                            iv_User.flatSize() +
                            iv_Src.flatSize() +
                            fullPelOnly(iv_Extended.flatSize()) +
-                           fullPelOnly(iv_ED.flatSize());
+                           fullPelOnly(iv_ED.flatSize()) +
+                           fullPelOnly(iv_MT.flatSize());
 
     // plus the sizes of the other optional sections
 
@@ -2269,7 +2278,7 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,
 
 
         // Inform the private header how many sections there are,
-        // counting the PH, UH, PS, EH, ED, and the optionals.
+        // counting the PH, UH, PS, EH, ED, MT, and the optionals.
         const auto startingSectionCount = iv_SectionVector.size();
         auto sectionsLeft = startingSectionCount;
         if ((startingSectionCount + NON_UD_SECTION_CNT) > MAX_SECTIONS_ALLOWED)
@@ -2327,6 +2336,12 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,
         if (fullPelOnly(true))
         {
             if (!flattener(iv_ED, "ed")) break;
+        }
+        // flatten the MT extended user data section for OpenPOWER systems (the FSP
+        // adds this section for us otherwise)
+        if (fullPelOnly(true))
+        {
+            if (!flattener(iv_MT, "mt")) break;
         }
 
         // flatten the optional user-defined sections
@@ -2459,7 +2474,7 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,
             // some section was too big and didn't get flatten OR
             // there were too many sections - update the
             // section count in the PH section and re-flatten it.
-            // count is the PH, UH, PS, EH, ED and the optionals.
+            // count is the PH, UH, PS, EH, ED, MT, and the optionals.
             iv_Private.iv_sctns = NON_UD_SECTION_CNT + flattenedSections;
             if (sectionsLeft == 0)
             {
@@ -2531,6 +2546,15 @@ uint64_t ErrlEntry::unflatten( const void * i_buffer,  uint64_t i_len )
         consumed    += bytes_used;
         l_buf       += bytes_used;
         TRACDCOMP(g_trac_errl, INFO_MRK"ED section, size 0x%04X, consumed=0x%04X", bytes_used, consumed);
+    }
+
+    if (fullPelOnly(true))
+    {
+        TRACDCOMP(g_trac_errl, INFO_MRK"Unflatten MT section...");
+        bytes_used = iv_MT.unflatten(l_buf);
+        consumed    += bytes_used;
+        l_buf       += bytes_used;
+        TRACDCOMP(g_trac_errl, INFO_MRK"MT section, size 0x%04X, consumed=0x%04X", bytes_used, consumed);
     }
 
     iv_SectionVector.clear();

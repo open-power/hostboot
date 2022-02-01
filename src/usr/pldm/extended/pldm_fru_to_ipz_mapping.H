@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -93,6 +93,30 @@ const uint16_t valid_vsys_keywords[]
                   0x544E,  // TN
                   0x574E   // WN
                 };
+
+// Must match valid_vsys_keywords and PLDM FRU IPZ Keyword Mapping Doc
+enum valid_vsys_keywords_values
+{
+    VSYS_KEYWORDS_INVALID_0 = 0,
+    VSYS_KEYWORDS_INVALID_1 = 1,
+    VSYS_KEYWORDS_RT        = 2,
+    VSYS_KEYWORDS_BR        = 3,
+    VSYS_KEYWORDS_DR        = 4,
+    VSYS_KEYWORDS_FV        = 5,
+    VSYS_KEYWORDS_ID        = 6,
+    VSYS_KEYWORDS_MN        = 7,
+    VSYS_KEYWORDS_NN        = 8,
+    VSYS_KEYWORDS_RB        = 9,
+    VSYS_KEYWORDS_RG        = 10,
+    VSYS_KEYWORDS_SE        = 11,
+    VSYS_KEYWORDS_SG        = 12,
+    VSYS_KEYWORDS_SU        = 13,
+    VSYS_KEYWORDS_TM        = 14,
+    VSYS_KEYWORDS_TN        = 15,
+    VSYS_KEYWORDS_WN        = 16,
+};
+
+
 
 // Order must match PLDM FRU IPZ Keyword Mapping Doc
 const uint16_t valid_lxr0_keywords[]

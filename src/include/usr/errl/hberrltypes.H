@@ -189,7 +189,8 @@ enum errlSectionId_t
     ERRL_SID_EXTENDED_HEADER                = 0x4548, // EH user header
     ERRL_SID_PRIMARY_SRC                    = 0x5053, // PS
     ERRL_SID_USER_DEFINED                   = 0x5544, // UD user defined
-    ERRL_SID_EXTENDED_USER_DEFINED          = 0x4544  // ED user defined
+    ERRL_SID_EXTENDED_USER_DEFINED          = 0x4544, // ED user defined
+    ERRL_SID_FAILING_ENCLOSURE_MTMS         = 0x4D54, // MT user defined
 };
 
 
@@ -582,7 +583,7 @@ typedef struct peluserheadersection
 
 /**
  * @brief Structure to represent machine type/model and serial number, as used
- * in the EH section below
+ * in the EH and MT sections below
  */
 typedef struct mtms_t
 {
@@ -907,6 +908,23 @@ typedef struct pelextendeduserheadersection
     uint8_t symptom_id_length = 0;
     char symptom_id[80] = { };
 } __attribute__((packed)) pelExtendedUserHeaderSection_t;
+
+/**
+ * @brief pelFailingEnclosureMtmsSection_t
+ *
+ * A PEL structure used to flatten error logs to PEL format.
+ *
+ * This structure represents an entire Failing Enclosure MTMS (MT) PEL
+ * section. Populated by the flatten code of class ErrlMT.
+ *
+ * The component named in the section header is the committing component of the
+ * error log.
+ */
+typedef struct pelfailingenclosuremtmssection
+{
+    pelSectionHeader_t sectionheader = { };
+    mtms_t mtms = { };
+} __attribute__((packed)) pelFailingEnclosureMtmsSection_t;
 
 
 } // End namespace

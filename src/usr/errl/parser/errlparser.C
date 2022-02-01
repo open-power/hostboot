@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -514,6 +514,7 @@ bool ParseForPEL( char * i_pchNativePEL,
             break;
         case ERRL_SID_USER_DEFINED:
         case ERRL_SID_EXTENDED_USER_DEFINED:
+        case ERRL_SID_FAILING_ENCLOSURE_MTMS:
             {
                 pvoid = malloc(sectionHeader.len);
                 pelSectionHeader_t * p;

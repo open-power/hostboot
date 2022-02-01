@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,7 +64,8 @@ private:
      *
      *  @param[in,out] io_pBuffer Pointer to buffer where flat data will go.
      *  @param[in]     i_cbBuffer Count of bytes in target buffer
-     *  @return        uint64_t  The size of the flattened data in the output buffer
+     *  @return        uint64_t   The size of the flattened data in the output buffer
+     *                            or 0 if i_cbBuffer is not large enough to hold the data
      *
      */
     uint64_t flatten(  void * io_pBuffer, const uint64_t i_cbBuffer );
