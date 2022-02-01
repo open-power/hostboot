@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,7 @@
 #include <secureboot/service.H>
 #include <secureboot/containerheader.H>
 #include <kernel/console.H>
+#include <errl/errludprintk.H>
 
 using namespace VFS;
 
@@ -278,6 +279,9 @@ void VfsRp::_vfsWatcher()
              ERRORLOG::ErrlEntry::FORCE_DUMP
             );
 
+        // Add Printk Buffer for FFDC.
+        ERRORLOG::ErrlUserDetailsPrintk().addToLog(err);
+
         // Message is only saved in iv_msg for messages from the kernel
         if(iv_msg != NULL)
         {
@@ -441,6 +445,9 @@ void VfsRp::_loadUnloadMonitored(msg_t * i_msg)
              ERRORLOG::ErrlEntry::ADD_SW_CALLOUT,
              ERRORLOG::ErrlEntry::FORCE_DUMP
             );
+
+        // Add Printk Buffer for FFDC.
+        ERRORLOG::ErrlUserDetailsPrintk().addToLog(err);
 
         if(childRc != NULL) // crit elog aleady generated
         {
@@ -633,6 +640,9 @@ void VfsRp::_execMonitored(msg_t * i_msg)
              ERRORLOG::ErrlEntry::ADD_SW_CALLOUT,
              ERRORLOG::ErrlEntry::FORCE_DUMP
             );
+
+        // Add Printk Buffer for FFDC.
+        ERRORLOG::ErrlUserDetailsPrintk().addToLog(err);
 
         if(childRc != NULL) // crit elog aleady generated
         {
