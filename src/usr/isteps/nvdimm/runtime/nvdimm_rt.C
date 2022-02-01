@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1040,6 +1040,171 @@ void nvdimmSendNvStatus()
     }
 }
 
+/**
+ * @brief Collect the Lifetime Percentage from the BPM for every NDIMM
+ *        and send it to PHYP
+ */
+void nvdimm_stats( void )
+{
+    errlHndl_t l_err = nullptr;
+
+    // There are 2 unique interactions to accomplish this task.
+    // 1) PHYP calls firmware_notify(HBRT_FW_MSG_TYPE_NVDIMM_STATS) which
+    //    triggers this function call.
+    // 2) Hostboot calls firmware_request(HBRT_FW_MSG_TYPE_NVDIMM_STATS)
+    //    to send the data back to PHYP as there is no response buffer
+    //    defined as part of firmware_notify.
+
+    // Create the firmware_request request struct to send data back
+    hostInterfaces::hbrt_fw_msg l_req_msg;
+    memset(&l_req_msg, 0, sizeof(l_req_msg));  // clear it all
+    l_req_msg.io_type = hostInterfaces::HBRT_FW_MSG_TYPE_NVDIMM_STATS;
+
+    // actual msg size (one type of hbrt_fw_msg)
+    uint64_t l_req_msg_size = hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
+      sizeof(l_req_msg.nvdimm_stats);
+
+    // get the list possible nvdimm slots
+    Target* l_sys = nullptr;
+    targetService().getTopLevelTarget( l_sys );
+    assert(l_sys, "nvdimm_stats: no TopLevelTarget");
+    ATTR_MSS_MRW_NVDIMM_PLUG_RULES_type l_slots =
+      l_sys->getAttr<ATTR_MSS_MRW_NVDIMM_PLUG_RULES>();
+
+    // special value to use when there is no data
+    constexpr uint8_t NODATA = 0xEE;
+    // set all status values to uninstalled and no data
+    for( uint8_t i = 0; i < sizeof(l_req_msg.nvdimm_stats.bpmLifetime); i++ )
+    {
+        l_req_msg.nvdimm_stats.bpmLifetime[i] = NODATA;
+    }
+    for( uint8_t i = 0; i < sizeof(l_req_msg.nvdimm_stats.dimmInstalled); i++ )
+    {
+        l_req_msg.nvdimm_stats.dimmInstalled[i] = 0;
+    }
+
+    // Get the list of functional NVDIMM Targets from the system
+    TargetHandleList l_nvdimmTargetList;
+    nvdimm_getNvdimmList(l_nvdimmTargetList);
+
+    for (const auto & l_nvdimm : l_nvdimmTargetList)
+    {
+        // The index into the data structures will match the relative
+        //  position of this dimm among the complete list of possible
+        //  nvdimm slots.
+        ATTR_MSS_MRW_NVDIMM_SLOT_POSITION_type l_myslot =
+          l_nvdimm->getAttr<ATTR_MSS_MRW_NVDIMM_SLOT_POSITION>();
+        uint8_t l_mypos = 0xFF;
+        constexpr size_t l_totalbits = (sizeof(l_slots)*8);
+        // walk through each bit until we find the one for us
+        for( size_t i = 0; i<l_totalbits; i++ )
+        {
+            ATTR_MSS_MRW_NVDIMM_PLUG_RULES_type curslotbit = 1;
+            curslotbit = curslotbit << (l_totalbits-i-1);
+
+            // if bit is set then this is a valid nvdimm slot
+            if( curslotbit & l_slots )
+            {
+                if( l_mypos == 0xFF ) //first one
+                {
+                    l_mypos = 0;
+                }
+                else
+                {
+                    l_mypos++;
+                }
+            }
+
+            // jump out when we find my slot
+            if( i == l_myslot )
+            {
+                break;
+            }
+        }
+        if( l_mypos > sizeof(hostInterfaces::nvdimm_stats_t::bpmLifetime) )
+        {
+            TRACFCOMP( g_trac_nvdimm, ERR_MRK"nvdimm_stats(): Invalid dimm slot (=%d) for %.8X : SLOT_POSITION=%d, PLUG_RULES=%.16llX",
+                       l_mypos,
+                       TARGETING::get_huid(l_nvdimm),
+                       l_myslot,
+                       l_slots );
+            /*@
+             * @errortype
+             * @moduleid         NVDIMM_STATS
+             * @reasoncode       NVDIMM_INVALID_DIMM_SLOT
+             * @userdata1[0:31]  HUID of NVDIMM target
+             * @userdata1[32:47] Computed relative position
+             * @userdata1[48:63] Slot position of this dimm
+             * @userdata2        Possible nvdimm slots
+             * @devdesc          Could not compute a valid relative
+             *                   position for this NVDIMM, needed
+             *                   to fill in nvdimm_stats data.
+             * @custdesc         Software error communicating NVDIMM statistics.
+             */
+            l_err = new ErrlEntry( ERRL_SEV_PREDICTIVE,
+                                   NVDIMM_STATS,
+                                   NVDIMM_INVALID_DIMM_SLOT,
+                                   TWO_UINT32_TO_UINT64(
+                                     TARGETING::get_huid(l_nvdimm),
+                                     TWO_UINT16_TO_UINT32(l_mypos,l_myslot)
+                                   ),
+                                   l_slots,
+                                   ErrlEntry::ADD_SW_CALLOUT );
+
+            l_err->collectTrace(NVDIMM_COMP_NAME);
+
+            // Add a DIMM callout
+            l_err->addHwCallout( l_nvdimm,
+                                 HWAS::SRCI_PRIORITY_LOW,
+                                 HWAS::NO_DECONFIG,
+                                 HWAS::GARD_NULL );
+
+            // Collect the error
+            errlCommit(l_err, NVDIMM_COMP_ID);
+            continue; // move on to the next nvdimm
+        }
+
+        // Mark the nvdimm as installed
+        l_req_msg.nvdimm_stats.dimmInstalled[l_mypos] = 1;
+
+        // The lifetime percentage
+        uint8_t l_lifetimePercentage(0);
+
+        // Retrieve the Lifetime Percentage from the BPM
+        l_err = nvdimmReadReg(l_nvdimm, ES_LIFETIME, l_lifetimePercentage);
+        if (l_err)
+        {
+            TRACFCOMP( g_trac_nvdimm, ERR_MRK"nvdimm_stats(): NVDIMM(0x%.8X) failed to read the ES_LIFETIME(0x%.2X) data",
+                       get_huid(l_nvdimm),
+                       ES_LIFETIME );
+
+            l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+            l_err->collectTrace(NVDIMM_COMP_NAME);
+            errlCommit(l_err, NVDIMM_COMP_ID);
+            continue; //data already defaults to invalid
+        }
+
+        l_req_msg.nvdimm_stats.bpmLifetime[l_mypos] = l_lifetimePercentage;
+    }
+
+    // Create the firmware_request response struct to receive data
+    hostInterfaces::hbrt_fw_msg l_resp_fw_msg;
+    uint64_t l_resp_fw_msg_size = sizeof(l_resp_fw_msg);
+    memset(&l_resp_fw_msg, 0, l_resp_fw_msg_size);
+
+    // Make the firmware_request call
+    l_err = firmware_request_helper(l_req_msg_size,
+                                    &l_req_msg,
+                                    &l_resp_fw_msg_size,
+                                    &l_resp_fw_msg);
+    if (l_err)
+    {
+        TRACFCOMP( g_trac_nvdimm, ERR_MRK"nvdimm_stats(): Error sending firmware_request" );
+        l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+        l_err->collectTrace(NVDIMM_COMP_NAME);
+        errlCommit(l_err, NVDIMM_COMP_ID);
+    }
+}
 
 struct registerNvdimmRt
 {

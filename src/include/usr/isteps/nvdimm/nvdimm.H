@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,6 +26,7 @@
 #define NVDIMM_EXT_H__
 
 #include <targeting/common/util.H>
+#include <runtime/interface.h>
 
 namespace NVDIMM
 {
@@ -494,12 +495,16 @@ void nvdimmAddPage4Regs(TARGETING::Target *i_nvdimm, errlHndl_t& io_err);
  *        - Waits for the ongoing backup to complete
  *        - Disarms the trigger for draminit
  * @param i_target     nvdimm target
- *
- * @return errlHndl_t - nullptr if successful, otherwise a pointer to
- *      the error log.
  */
 void nvdimm_init(TARGETING::Target *i_nvdimm);
 
+#ifdef __HOSTBOOT_RUNTIME
+/**
+ * @brief Collect the Lifetime Percentage from the BPM for every NVDIMM
+ *        and send it to PHYP
+ */
+void nvdimm_stats( void );
+#endif
 
 }
 

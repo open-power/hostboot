@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -317,6 +317,15 @@ errlHndl_t firmware_request_helper(uint64_t i_reqLen,   void *i_req,
       // Error is not with FSP resetting and/or reloading, so log the error
       else if (rc)
       {
+          TRACFCOMP(g_trac_runtime,
+                    ERR_MRK"Error from firmware_request with io_type=%d. rc=%d",
+                    l_req_fw_msg->io_type,
+                    rc);
+          // Default user data 1 wirh Hypervisor return code
+          // and firmware request message type
+          l_userData1 = TWO_UINT32_TO_UINT64(rc,
+                                             l_req_fw_msg->io_type);
+
          if (l_err)
          {
              add_ffdc( l_err,
@@ -336,12 +345,6 @@ errlHndl_t firmware_request_helper(uint64_t i_reqLen,   void *i_req,
          {
             case hostInterfaces::HBRT_FW_MSG_TYPE_REQ_HCODE_UPDATE:
                  {
-                    // Default user data 1 wirh Hypervisor return code
-                    // and firmware request message type
-                    l_userData1 = TWO_UINT32_TO_UINT64(
-                                               rc,
-                                               l_req_fw_msg->io_type);
-
                     // Pack user data 1 with Hypervisor return code and
                     // generic response code if the response is of type
                     // "RESP_GENERIC" else leave as is
@@ -456,11 +459,6 @@ errlHndl_t firmware_request_helper(uint64_t i_reqLen,   void *i_req,
                               l_req_fw_msg->sbe_state.i_procId,
                               l_req_fw_msg->sbe_state.i_state);
 
-                    // Pack user data 1 with Hypervisor return code and
-                    // firmware request message type
-                    l_userData1 = TWO_UINT32_TO_UINT64(rc,
-                                                       l_req_fw_msg->io_type);
-
                     // Pack user data 2 with processor ID of SBE
                     // and state of the SBE
                     l_userData2 = TWO_UINT32_TO_UINT64(
@@ -479,11 +477,6 @@ errlHndl_t firmware_request_helper(uint64_t i_reqLen,   void *i_req,
                         l_req_fw_msg->sbe_state.i_state,
                         l_req_fw_msg->sbe_state.i_state?
                         "protected":"not protected");
-
-                    // Pack user data 1 with Hypervisor return code and
-                    // firmware request message type
-                    l_userData1 = TWO_UINT32_TO_UINT64(rc,
-                                                       l_req_fw_msg->io_type);
 
                     // Pack user data 2 with processor ID of NVDIMM
                     // and state of the NVDIMM

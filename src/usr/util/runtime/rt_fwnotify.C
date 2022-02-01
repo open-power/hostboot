@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1007,6 +1007,17 @@ void firmware_notify( uint64_t i_len, void *i_data )
                 logGardEvent(l_hbrt_fw_msg->gard_event);
             } // END case hostInterfaces::HBRT_FW_MSG_TYPE_GARD_EVENT:
             break;
+
+#ifdef CONFIG_NVDIMM
+            case hostInterfaces::HBRT_FW_MSG_TYPE_NVDIMM_STATS:
+            {
+                // Note - There is no data packet for the notify portion
+                //  of this function.
+
+                NVDIMM::nvdimm_stats();
+            } // END case hostInterfaces::HBRT_FW_MSG_TYPE_NVDIMM_STATS:
+            break;
+#endif
 
             default:
             {

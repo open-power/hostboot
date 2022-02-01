@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -111,6 +111,7 @@ enum nvdimmModuleId
     NVDIMM_ARM                              = 0x3D,
     CLEAR_FW_OPS_STATUS                     = 0x3E,
     NVDIMM_SECURE_ERASE_VERIFY_STATUS       = 0x3F,
+    NVDIMM_STATS                            = 0x40,
 };
 
 /**
@@ -210,6 +211,7 @@ enum nvdimmReasonCode
     NVDIMM_NOT_RUNNING_LATEST_LEVEL            = NVDIMM_COMP_ID | 0x56,   // Either running from slot 0 or level was not updated
     NVDIMM_ERASE_VERIFY_STATUS_NONZERO         = NVDIMM_COMP_ID | 0x57,
     NVDIMM_ERASE_VERIFY_RESULT_NONZERO         = NVDIMM_COMP_ID | 0x58,
+    NVDIMM_INVALID_DIMM_SLOT                   = NVDIMM_COMP_ID | 0x59,
 };
 
 enum UserDetailsTypes

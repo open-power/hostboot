@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -564,6 +564,8 @@ typedef struct hostInterfaces
        HBRT_FW_MSG_TYPE_NVDIMM_PROTECTION =  9, // struct nvdimm_protection_state
        HBRT_FW_MSG_TYPE_NVDIMM_OPERATION  = 10, // struct nvdimm_operation_t
        HBRT_FW_MSG_TYPE_GARD_EVENT        = 11, // struct gard_event_t
+       /* 12..17 reserved in future product */
+       HBRT_FW_MSG_TYPE_NVDIMM_STATS      = 18, // struct nvdimm_stats_t
     };
 
     // NVDIMM protection state enum
@@ -655,6 +657,15 @@ typedef struct hostInterfaces
         uint16_t     i_recovery_level; // Currently not being used
     } __attribute__ ((packed));
 
+    /* Return BPM stats for each NVDIMM */
+    struct nvdimm_stats_t
+    {
+        uint8_t bpmLifetime[4];    /* BPM Lifetime percentage per nvdimm,
+                                      0xEE means no data collected */
+        uint8_t dimmInstalled[4];  /* 0 for nonfunctional,
+                                      1 for functional */
+    } __attribute__ ((packed));
+
     struct hbrt_fw_msg   // define struct hbrt_fw_msg
     {
        hbrt_fw_msg() { req_hcode_update = { 0 }; };  // ctor
@@ -738,6 +749,10 @@ typedef struct hostInterfaces
           // HBRT_FW_MSG_HBRT_FSP_RESP
           // This struct sends/receives an MBox message to the FSP
           struct GenericFspMboxMessage_t generic_msg;
+
+          /* This struct is sent from HBRT to PHYP/OPAL with
+             io_type set to HBRT_FW_MSG_TYPE_NVDIMM_STATS */
+          struct nvdimm_stats_t nvdimm_stats;
 
        }; // end union
     };  // end struct hbrt_fw_msg
