@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2022                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -1349,8 +1349,8 @@
     Consumers: Hostboot firmware
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
-    <initToZero/>
+    <platInit>mrw</platInit>
+    <default>0</default>
     <group>wof</group>
   </attribute>
 
