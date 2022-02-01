@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -214,7 +214,9 @@ fapi2::ReturnCode p10_fbc_eff_config_aggregate(
     fapi2::ATTR_PROC_FABRIC_X_ADDR_DIS_Type l_x_addr_dis;
     fapi2::ATTR_PROC_FABRIC_A_ADDR_DIS_Type l_a_addr_dis;
     fapi2::ATTR_PROC_FABRIC_X_AGGREGATE_Type l_x_aggregate;
+    fapi2::ATTR_PROC_FABRIC_X_AGGREGATE_Type l_x_aggregate_check;
     fapi2::ATTR_PROC_FABRIC_A_AGGREGATE_Type l_a_aggregate;
+    fapi2::ATTR_PROC_FABRIC_A_AGGREGATE_Type l_a_aggregate_check;
 
     fapi2::ATTR_PROC_FABRIC_BROADCAST_MODE_Type l_broadcast_mode;
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
@@ -287,7 +289,7 @@ fapi2::ReturnCode p10_fbc_eff_config_aggregate(
                  l_x_rem_link_id,
                  l_x_rem_fbc_id,
                  l_x_agg_link_delay,
-                 l_x_aggregate,
+                 l_x_aggregate_check,
                  l_x_addr_dis),
              "Error from p10_fbc_eff_config_aggregate_link_setup (X)");
 
@@ -298,21 +300,27 @@ fapi2::ReturnCode p10_fbc_eff_config_aggregate(
                  l_a_rem_link_id,
                  l_a_rem_fbc_id,
                  l_a_agg_link_delay,
-                 l_a_aggregate,
+                 l_a_aggregate_check,
                  l_a_addr_dis),
              "Error from p10_fbc_eff_config_aggregate_link_setup (A)");
+
+    FAPI_ASSERT((l_x_aggregate == l_x_aggregate_check) &&
+                (l_a_aggregate == l_a_aggregate_check),
+                fapi2::P10_FBC_EFF_CONFIG_AGGREGATE_CONSISTENCY_ERR().
+                set_TARGET(i_target).
+                set_X_AGGREGATE(l_x_aggregate).
+                set_X_AGGREGATE_CHECK(l_x_aggregate_check).
+                set_A_AGGREGATE(l_a_aggregate).
+                set_A_AGGREGATE_CHECK(l_a_aggregate_check),
+                "Aggregate link calculations do not agree with current attribute state!");
 
     ////////////////////////////////////////////////////////
     // Write attributes
     ////////////////////////////////////////////////////////
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_X_ADDR_DIS, i_target, l_x_addr_dis),
              "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_X_ADDR_DIS)");
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_X_AGGREGATE, i_target, l_x_aggregate),
-             "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_X_AGGREGATE)");
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_A_ADDR_DIS, i_target, l_a_addr_dis),
              "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_A_ADDR_DIS)");
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_A_AGGREGATE, i_target, l_a_aggregate),
-             "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_A_AGGREGATE)");
 
 fapi_try_exit:
     FAPI_DBG("End");

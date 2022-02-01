@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1166,6 +1166,10 @@ fapi2::ReturnCode p10_fbc_eff_config_link_attrs(void)
     fapi2::ATTR_PROC_FABRIC_A_INDIRECT_Type l_a_indirect;
     fapi2::ATTR_CHIP_EC_FEATURE_HW543384_Type l_hw543384;
     fapi2::ATTR_HW543384_WAR_MODE_Type l_hw543384_war_mode;
+    fapi2::ATTR_PROC_FABRIC_X_LINK_DELAY_Type l_x_agg_link_delay;
+    fapi2::ATTR_PROC_FABRIC_A_LINK_DELAY_Type l_a_agg_link_delay;
+    fapi2::ATTR_PROC_FABRIC_X_ADDR_DIS_Type l_x_addr_dis;
+    fapi2::ATTR_PROC_FABRIC_A_ADDR_DIS_Type l_a_addr_dis;
     uint8_t l_num_groups = 0;
 
     for (auto l_proc_target : FAPI_SYSTEM.getChildren<fapi2::TARGET_TYPE_PROC_CHIP>())
@@ -1226,6 +1230,26 @@ fapi2::ReturnCode p10_fbc_eff_config_link_attrs(void)
 
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_A_INDIRECT, FAPI_SYSTEM, l_a_indirect),
              "Error form FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_INDIRECT)");
+
+    // initialize attributes used in aggregate link selection
+    // link delay capture -> set to maximum value
+    // address disable -> zero
+    std::fill_n(l_x_agg_link_delay, P10_FBC_UTILS_MAX_LINKS, 0xFFFFFFFF);
+    std::fill_n(l_a_agg_link_delay, P10_FBC_UTILS_MAX_LINKS, 0xFFFFFFFF);
+    std::fill_n(l_x_addr_dis, P10_FBC_UTILS_MAX_LINKS, 0x0);
+    std::fill_n(l_a_addr_dis, P10_FBC_UTILS_MAX_LINKS, 0x0);
+
+    for (auto l_proc_target : FAPI_SYSTEM.getChildren<fapi2::TARGET_TYPE_PROC_CHIP>())
+    {
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_X_LINK_DELAY, l_proc_target, l_x_agg_link_delay),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_LINK_DELAY");
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_A_LINK_DELAY, l_proc_target, l_a_agg_link_delay),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_LINK_DELAY");
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_X_ADDR_DIS, l_proc_target, l_x_addr_dis),
+                 "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_X_ADDR_DIS)");
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_A_ADDR_DIS, l_proc_target, l_a_addr_dis),
+                 "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_A_ADDR_DIS)");
+    }
 
 fapi_try_exit:
     FAPI_DBG("End");

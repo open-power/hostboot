@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2022                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -37,6 +37,24 @@
   <ffdc>LOCAL_FBC_ID</ffdc>
   <ffdc>REMOTE_FBC_ID1</ffdc>
   <ffdc>REMOTE_FBC_ID2</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_FBC_EFF_CONFIG_AGGREGATE_CONSISTENCY_ERR</rc>
+  <description>
+    Procedure: p10_fbc_eff_config_aggregate
+    X or A aggregate attribute state computed currently does not
+    match with calculations performed in this hardware procedure
+  </description>
+  <ffdc>TARGET</ffdc>
+  <ffdc>X_AGGREGATE</ffdc>
+  <ffdc>X_AGGREGATE_CHECK</ffdc>
+  <ffdc>A_AGGREGATE</ffdc>
+  <ffdc>A_AGGREGATE_CHECK</ffdc>
   <callout>
     <procedure>CODE</procedure>
     <priority>HIGH</priority>
