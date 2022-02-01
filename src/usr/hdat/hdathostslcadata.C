@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -91,14 +91,8 @@ fru_id_rid_t g_fruIDRidMap[] =
 bool getVPDCollectedStatus(TARGETING::Target *i_Target)
 {
     bool l_vpdCollectedStatus = true;
-//@TODO: RTC 149382: Method to get VPD collected status for Targets
+    l_vpdCollectedStatus = i_Target->getAttr<ATTR_HWAS_STATE>().functional;
 
-    if((i_Target->getAttr<ATTR_TYPE>() != TYPE_PCI) &&
-              (i_Target->getAttr<ATTR_TYPE>() != TYPE_SYS) &&
-              (i_Target->getAttr<ATTR_TYPE>() != TYPE_BMC))
-    {
-        l_vpdCollectedStatus = pvpdPresent(i_Target);
-    }
     return l_vpdCollectedStatus;
 }
 
