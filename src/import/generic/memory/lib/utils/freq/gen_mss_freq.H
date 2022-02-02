@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,7 +39,7 @@
 #include <generic/memory/lib/utils/pos.H>
 #include <generic/memory/lib/utils/freq/gen_mss_freq_traits.H>
 #include <generic/memory/lib/utils/find.H>
-#include <generic/memory/lib/spd/spd_utils.H>
+#include <generic/memory/lib/spd/spd_utils_ddr4.H>
 #include <generic/memory/lib/utils/freq/cas_latency.H>
 #include <generic/memory/lib/utils/freq/mss_freq_scoreboard.H>
 #include <generic/memory/lib/utils/count_dimm.H>
@@ -266,9 +266,9 @@ inline fapi2::ReturnCode spd_supported_freq(const fapi2::Target<TT::FREQ_DOMAIN_
             uint32_t l_dimm_freq = 0;
 
             FAPI_TRY(mss::spd::get_raw_data(l_dimm, l_spd));
-            FAPI_TRY( spd::get_tckmax(l_dimm, l_spd, l_tckmax_in_ps),
+            FAPI_TRY( spd::ddr4::get_tckmax(l_dimm, l_spd, l_tckmax_in_ps),
                       "%s. Failed to get tCKmax", mss::c_str(l_dimm) );
-            FAPI_TRY( spd::get_tckmin(l_dimm, l_spd, l_tck_min_in_ps),
+            FAPI_TRY( spd::ddr4::get_tckmin(l_dimm, l_spd, l_tck_min_in_ps),
                       "%s. Failed to get tCKmin", mss::c_str(l_dimm) );
 
             // Determine a proposed tCK value that is greater than or equal tCKmin

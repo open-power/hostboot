@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,7 +41,6 @@
 #include <generic/memory/lib/utils/index.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/pos.H>
-#include <generic/memory/lib/spd/spd_utils.H>
 #include <generic/memory/lib/mss_generic_attribute_getters.H>
 #include <generic/memory/lib/utils/conversions.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
@@ -51,27 +50,6 @@
 
 namespace mss
 {
-
-///
-/// @brief Algorithm to calculate SPD timings in nCK
-///
-/// @param[in] i_dimm DIMM target
-/// @param[in] i_spd SPD binary
-/// @param[in] i_timing_mtb MTB
-/// @param[in] i_timing_ftb FTB
-/// @param[in] i_function the calling function to log for FFDC
-/// @param[in] i_timing_name Name for ffdc traces
-/// @param[out] o_timing_in_nck nCK calculated timing
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
-///
-fapi2::ReturnCode calc_spd_time_in_nck(
-    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
-    const std::vector<uint8_t>& i_spd,
-    const uint32_t i_timing_mtb,
-    const int32_t i_timing_ftb,
-    const uint16_t i_function,
-    const char* i_timing_name,
-    int32_t& o_timing_in_nck);
 
 // Controller agnostic functions
 

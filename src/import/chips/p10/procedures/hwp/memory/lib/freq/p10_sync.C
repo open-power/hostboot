@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,7 +49,7 @@
 #include <generic/memory/lib/utils/assert_noexit.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/count_dimm.H>
-#include <generic/memory/lib/spd/spd_utils.H>
+#include <generic/memory/lib/spd/spd_utils_ddr4.H>
 #include <generic/memory/lib/utils/conversions.H>
 #include <generic/memory/lib/utils/freq/gen_mss_freq.H>
 #include <generic/memory/lib/utils/freq/mss_freq_scoreboard.H>

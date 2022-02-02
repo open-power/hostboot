@@ -46,7 +46,6 @@
 #include <mss_generic_attribute_setters.H>
 #include <generic/memory/lib/data_engine/data_engine.H>
 #include <mss_generic_system_attribute_getters.H>
-#include <generic/memory/lib/utils/dimm/mss_timing.H>
 #include <generic/memory/lib/spd/spd_checker.H>
 
 namespace mss

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,11 +33,13 @@
 // *HWP Level: 3
 // *HWP Consumed by: HB:FSP
 
-#include <generic/memory/lib/utils/dimm/mss_timing.H>
+#include <generic/memory/lib/utils/dimm/mss_ddr4_timing.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/dimm/ddr4/latch_wr_vref.H>
 
 namespace mss
+{
+namespace ddr4
 {
 
 ///
@@ -57,5 +59,7 @@ class tvrefdqe<mss::mc_type::EXPLORER, T>
             return 240;
         }
 };
+
+} // ddr4
 
 } // mss

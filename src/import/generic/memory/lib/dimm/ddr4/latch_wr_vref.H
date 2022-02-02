@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -110,19 +110,22 @@ fapi2::ReturnCode add_latch_wr_vref_commands( const fapi2::Target<fapi2::TARGET_
 
     // Add both to the CCS program - JEDEC step 1
     enable_vref_train_enable<MC>(l_mr_override);
-    FAPI_TRY( mrs_engine(i_target, l_mr_override, i_port_rank, mss::tvrefdqe<MC, fapi2::TARGET_TYPE_DIMM>::get(i_target),
+    FAPI_TRY( mrs_engine(i_target, l_mr_override, i_port_rank,
+                         mss::ddr4::tvrefdqe<MC, fapi2::TARGET_TYPE_DIMM>::get(i_target),
                          io_inst),
               "Error in add_latch_wr_vref_commands" );
 
     // Add both to the CCS program - JEDEC step 2
-    FAPI_TRY( mrs_engine(i_target, l_mr_override, i_port_rank, mss::tvrefdqe<MC, fapi2::TARGET_TYPE_DIMM>::get(i_target),
+    FAPI_TRY( mrs_engine(i_target, l_mr_override, i_port_rank,
+                         mss::ddr4::tvrefdqe<MC, fapi2::TARGET_TYPE_DIMM>::get(i_target),
                          io_inst),
               "Error in add_latch_wr_vref_commands" );
 
     // Hits VREFDQ train disable - putting the DRAM's back in mainline mode
     // Add both to the CCS program - JEDEC step 3
     disable_vref_train_enable<MC>(l_mr_override);
-    FAPI_TRY( mrs_engine(i_target, l_mr_override, i_port_rank, mss::tvrefdqe<MC, fapi2::TARGET_TYPE_DIMM>::get(i_target),
+    FAPI_TRY( mrs_engine(i_target, l_mr_override, i_port_rank,
+                         mss::ddr4::tvrefdqe<MC, fapi2::TARGET_TYPE_DIMM>::get(i_target),
                          io_inst),
               "Error in add_latch_wr_vref_commands" );
 

@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/generic/memory/lib/spd/spd_utils.H $               */
+/* $Source: src/import/generic/memory/lib/spd/spd_utils_ddr4.H $          */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,8 +33,8 @@
 // *HWP Level: 3
 // *HWP Consumed by: HB:FSP
 
-#ifndef _MSS_SPD_UTILS_H_
-#define _MSS_SPD_UTILS_H_
+#ifndef _MSS_SPD_UTILS_DDR4_H_
+#define _MSS_SPD_UTILS_DDR4_H_
 
 #include <fapi2.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
@@ -42,6 +42,8 @@
 namespace mss
 {
 namespace spd
+{
+namespace ddr4
 {
 
 ///
@@ -187,6 +189,29 @@ fapi2::ReturnCode get_tckmax(
     const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
     const std::vector<uint8_t>& i_spd,
     uint64_t& o_value);
+
+///
+/// @brief Algorithm to calculate SPD timings in nCK
+///
+/// @param[in] i_dimm DIMM target
+/// @param[in] i_spd SPD binary
+/// @param[in] i_timing_mtb MTB
+/// @param[in] i_timing_ftb FTB
+/// @param[in] i_function the calling function to log for FFDC
+/// @param[in] i_timing_name Name for ffdc traces
+/// @param[out] o_timing_in_nck nCK calculated timing
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode calc_time_in_nck(
+    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+    const std::vector<uint8_t>& i_spd,
+    const uint32_t i_timing_mtb,
+    const int32_t i_timing_ftb,
+    const uint16_t i_function,
+    const char* i_timing_name,
+    int32_t& o_timing_in_nck);
+
+}// ddr4
 
 }// spd
 

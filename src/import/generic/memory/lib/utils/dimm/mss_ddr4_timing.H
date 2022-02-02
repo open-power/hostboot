@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/generic/memory/lib/utils/dimm/mss_timing.H $       */
+/* $Source: src/import/generic/memory/lib/utils/dimm/mss_ddr4_timing.H $  */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,8 +24,8 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 ///
-/// @file mss_timing.H
-/// @brief Determine effective config for mss settings
+/// @file mss_ddr4_timing.H
+/// @brief Determine DDR4 timings
 ///
 // *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
 // *HWP FW Owner: Stephen Glancy <sglancy@us.ibm.com>
@@ -33,8 +33,8 @@
 // *HWP Level: 3
 // *HWP Consumed by: HB:FSP
 
-#ifndef _MSS_GEN_TIMING_H_
-#define _MSS_GEN_TIMING_H_
+#ifndef _MSS_DDR4_TIMING_H_
+#define _MSS_DDR4_TIMING_H_
 
 #include <cstdint>
 #include <fapi2.H>
@@ -42,7 +42,7 @@
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/conversions.H>
-#include <generic/memory/lib/spd/spd_utils.H>
+#include <generic/memory/lib/spd/spd_utils_ddr4.H>
 
 namespace mss
 {
@@ -78,6 +78,8 @@ enum refresh_rate : uint8_t
 };
 
 namespace spd
+{
+namespace ddr4
 {
 
 ///
@@ -156,8 +158,8 @@ inline OT ps_to_nck( const uint64_t i_freq, const OT& i_timing_in_ps, fapi2::Ret
 
     FAPI_TRY( freq_to_ps(i_freq, l_tck_in_ps),
               "Failed to convert memory frequency to a valid clock period (%d) - stopping", i_freq);
-    FAPI_TRY( calc_nck(mss::generic_ffdc_codes::PS_TO_NS_ONE_CLOCK, i_timing_in_ps, l_tck_in_ps,
-                       spd::INVERSE_DDR4_CORRECTION_FACTOR, l_temp_nck),
+    FAPI_TRY( ddr4::calc_nck(mss::generic_ffdc_codes::PS_TO_NS_ONE_CLOCK, i_timing_in_ps, l_tck_in_ps,
+                             spd::INVERSE_DDR4_CORRECTION_FACTOR, l_temp_nck),
               "Failed to clock period to nck (%d) - stopping", i_freq);
 
     return l_temp_nck;
@@ -186,7 +188,12 @@ inline OT ns_to_nck( const uint64_t i_freq, const OT& i_timing_in_ns, fapi2::Ret
     return ps_to_nck(i_freq, i_timing_in_ns * CONVERT_PS_IN_A_NS, o_rc);
 }
 
+}// ddr4
+
 }// spd
+
+namespace ddr4
+{
 
 ///
 /// @brief VREF DQ Enter time *in clocks*
@@ -449,27 +456,27 @@ static fapi2::ReturnCode tfaw_half_kb_page_helper(const fapi2::Target<T>& i_targ
     {
         // static_cast is needed for template deduction of std::max API
         case 1866:
-            o_output = std::max( 16, spd::ps_to_nck(i_freq, 17000, l_rc) );
+            o_output = std::max( 16, mss::spd::ddr4::ps_to_nck(i_freq, 17000, l_rc) );
             break;
 
         case 2133:
-            o_output = std::max( 16, spd::ps_to_nck(i_freq, 15000, l_rc) );
+            o_output = std::max( 16, mss::spd::ddr4::ps_to_nck(i_freq, 15000, l_rc) );
             break;
 
         case 2400:
-            o_output = std::max( 16, spd::ps_to_nck(i_freq, 13000, l_rc) );
+            o_output = std::max( 16, mss::spd::ddr4::ps_to_nck(i_freq, 13000, l_rc) );
             break;
 
         case 2666:
-            o_output = std::max( 16, spd::ps_to_nck(i_freq, 12000, l_rc) );
+            o_output = std::max( 16, mss::spd::ddr4::ps_to_nck(i_freq, 12000, l_rc) );
             break;
 
         case 2933:
-            o_output = std::max( 16, spd::ps_to_nck(i_freq, 10875, l_rc) );
+            o_output = std::max( 16, mss::spd::ddr4::ps_to_nck(i_freq, 10875, l_rc) );
             break;
 
         case 3200:
-            o_output = std::max( 16, spd::ps_to_nck(i_freq, 10000, l_rc) );
+            o_output = std::max( 16, mss::spd::ddr4::ps_to_nck(i_freq, 10000, l_rc) );
             break;
 
         default:
@@ -516,7 +523,7 @@ static fapi2::ReturnCode tfaw_1kb_page_helper(const fapi2::Target<T>& i_target,
     switch(i_freq)
     {
         case 1866:
-            o_output = std::max( 20, spd::ns_to_nck(i_freq, 23, l_rc) );
+            o_output = std::max( 20, mss::spd::ddr4::ns_to_nck(i_freq, 23, l_rc) );
             break;
 
         case 2133:
@@ -524,7 +531,7 @@ static fapi2::ReturnCode tfaw_1kb_page_helper(const fapi2::Target<T>& i_target,
         case 2666:
         case 2933:
         case 3200:
-            o_output = std::max( 20, spd::ns_to_nck(i_freq, 21, l_rc) );
+            o_output = std::max( 20, mss::spd::ddr4::ns_to_nck(i_freq, 21, l_rc) );
             break;
 
         default:
@@ -578,7 +585,7 @@ static fapi2::ReturnCode tfaw_2kb_page_helper(const fapi2::Target<T>& i_target,
         case 2666:
         case 2933:
         case 3200:
-            o_output = std::max( 28, spd::ns_to_nck(i_freq, 30, l_rc) );
+            o_output = std::max( 28, mss::spd::ddr4::ns_to_nck(i_freq, 30, l_rc) );
             FAPI_TRY(l_rc, "%s ns_to_nck failed", mss::c_str(i_target));
             break;
 
@@ -686,7 +693,7 @@ static fapi2::ReturnCode trrd_l_half_and_1kb_page_helper(const fapi2::Target<T>&
                          i_freq);
     }
 
-    FAPI_TRY(spd::ps_to_nck(i_freq, l_ps, l_nck));
+    FAPI_TRY(mss::spd::ddr4::ps_to_nck(i_freq, l_ps, l_nck));
     o_output = std::max( uint64_t(4), l_nck );
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -730,7 +737,7 @@ static fapi2::ReturnCode trrd_l_2kb_page_helper(const fapi2::Target<T>& i_target
         case 3200:
             {
                 uint64_t l_nck = 0;
-                FAPI_TRY(spd::ps_to_nck(i_freq, uint64_t(6400), l_nck));
+                FAPI_TRY(mss::spd::ddr4::ps_to_nck(i_freq, uint64_t(6400), l_nck));
                 o_output = std::max( uint64_t(4), l_nck );
             }
             break;
@@ -861,7 +868,7 @@ static fapi2::ReturnCode trrd_s_half_and_1kb_page_helper(const fapi2::Target<T>&
                          i_freq);
     }
 
-    FAPI_TRY(spd::ps_to_nck(i_freq, l_ps, l_nck));
+    FAPI_TRY(mss::spd::ddr4::ps_to_nck(i_freq, l_ps, l_nck));
     o_output = std::max( uint64_t(4), l_nck );
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -905,7 +912,7 @@ static fapi2::ReturnCode trrd_s_2kb_page_helper(const fapi2::Target<T>& i_target
             {
 
                 uint64_t l_nck = 0;
-                FAPI_TRY(spd::ps_to_nck(i_freq, uint64_t(5300), l_nck));
+                FAPI_TRY(mss::spd::ddr4::ps_to_nck(i_freq, uint64_t(5300), l_nck));
                 o_output = std::max( uint64_t(4), l_nck );
             }
             break;
@@ -971,6 +978,8 @@ fapi2::ReturnCode trrd_s( const fapi2::Target<T>& i_target,
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+} // ddr4
 
 } // mss
 #endif

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,7 +47,7 @@
 // mss generic lib
 #include <generic/memory/lib/utils/conversions.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
-#include <generic/memory/lib/spd/spd_utils.H>
+#include <generic/memory/lib/spd/spd_utils_ddr4.H>
 #include <generic/memory/lib/spd/spd_fields_ddr4.H>
 #include <generic/memory/lib/data_engine/data_engine_utils.H>
 #include <generic/memory/lib/utils/count_dimm.H>
@@ -266,9 +266,9 @@ class cas_latency
 
             FAPI_TRY( get_taamin(i_dimm, i_spd, l_taa_min_in_ps),
                       "%s. Failed to get tAAmin", mss::spd::c_str(i_dimm) );
-            FAPI_TRY( spd::get_tckmax(i_dimm, i_spd, l_tckmax_in_ps),
+            FAPI_TRY( spd::ddr4::get_tckmax(i_dimm, i_spd, l_tckmax_in_ps),
                       "%s. Failed to get tCKmax", mss::spd::c_str(i_dimm) );
-            FAPI_TRY( spd::get_tckmin(i_dimm, i_spd, l_tck_min_in_ps),
+            FAPI_TRY( spd::ddr4::get_tckmin(i_dimm, i_spd, l_tck_min_in_ps),
                       "%s. Failed to get tCKmin", mss::spd::c_str(i_dimm) );
 
             // Determine largest tAAmin value
@@ -567,17 +567,17 @@ class cas_latency
             // Retrieve timing parameters
             const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_dimm);
 
-            FAPI_TRY( spd::get_timebases(l_ocmb, i_spd, l_medium_timebase, l_fine_timebase),
+            FAPI_TRY( spd::ddr4::get_timebases(l_ocmb, i_spd, l_medium_timebase, l_fine_timebase),
                       "%s. Failed Failed get_timebases",  mss::spd::c_str(i_dimm) );
 
             FAPI_TRY(spd::get_field_spd(l_ocmb, F::TAA_MIN, i_spd, GET_TAAMIN, l_timing_mtb));
             FAPI_TRY(spd::get_field_spd(l_ocmb, F::OFFSET_TAA_MIN, i_spd, GET_TAAMIN, l_timing_ftb));
 
             // Calculate timing value
-            l_temp = spd::calc_timing_from_timebase(l_timing_mtb,
-                                                    l_medium_timebase,
-                                                    l_timing_ftb,
-                                                    l_fine_timebase);
+            l_temp = spd::ddr4::calc_timing_from_timebase(l_timing_mtb,
+                     l_medium_timebase,
+                     l_timing_ftb,
+                     l_fine_timebase);
 
             // Sanity check
             FAPI_ASSERT(l_temp > 0,
@@ -645,8 +645,9 @@ class cas_latency
                                            const uint64_t i_tck,
                                            uint64_t& o_cas_latency) const
         {
-            FAPI_TRY( spd::calc_nck(mss::generic_ffdc_codes::CALC_CAS_LATENCY, i_taa, i_tck, spd::INVERSE_DDR4_CORRECTION_FACTOR,
-                                    o_cas_latency) );
+            FAPI_TRY( spd::ddr4::calc_nck(mss::generic_ffdc_codes::CALC_CAS_LATENCY, i_taa, i_tck,
+                                          spd::INVERSE_DDR4_CORRECTION_FACTOR,
+                                          o_cas_latency) );
 
             FAPI_DBG("%s. tAA (ps): %d, tCK (ps): %d, CL (nck): %d",
                      mss::spd::c_str(iv_target),

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,61 +39,6 @@
 
 namespace mss
 {
-
-///
-/// @brief Algorithm to calculate SPD timings in nCK
-///
-/// @param[in] i_dimm DIMM target
-/// @param[in] i_spd SPD binary
-/// @param[in] i_timing_mtb MTB
-/// @param[in] i_timing_ftb FTB
-/// @param[in] i_function the calling function to log for FFDC
-/// @param[in] i_timing_name Name for ffdc traces
-/// @param[out] o_timing_in_nck nCK calculated timing
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
-///
-fapi2::ReturnCode calc_spd_time_in_nck(
-    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
-    const std::vector<uint8_t>& i_spd,
-    const uint32_t i_timing_mtb,
-    const int32_t i_timing_ftb,
-    const uint16_t i_function,
-    const char* i_timing_name,
-    int32_t& o_timing_in_nck)
-{
-    uint32_t l_tck_in_ps = 0;
-    uint64_t l_freq = 0;
-    FAPI_TRY( attr::get_freq(mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_dimm), l_freq) );
-    FAPI_TRY( freq_to_ps(l_freq, l_tck_in_ps),
-              "Failed to calculate clock period (tCK) for %s", spd::c_str(i_dimm) );
-
-    {
-        // Calculate the desired timing in ps
-        uint32_t l_timing_in_ps = 0;
-
-        const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_dimm);
-        uint8_t l_mtb = 0;
-        uint8_t l_ftb = 0;
-
-        FAPI_TRY( spd::get_timebases(l_ocmb, i_spd, l_mtb, l_ftb) );
-
-        FAPI_DBG("%s medium timebase (ps): %ld, fine timebase (ps): %ld, (MTB): %ld, (FTB): %ld",
-                 spd::c_str(l_ocmb), l_mtb, l_ftb, i_timing_mtb, i_timing_ftb );
-
-        l_timing_in_ps = spd::calc_timing_from_timebase(i_timing_mtb, l_mtb, i_timing_ftb, l_ftb);
-
-        // Calculate nck
-        FAPI_TRY( spd::calc_nck(i_function, l_timing_in_ps, l_tck_in_ps, spd::INVERSE_DDR4_CORRECTION_FACTOR, o_timing_in_nck),
-                  "Error in calculating %s (nCK) for target %s, with value of %d",
-                  i_timing_name, spd::c_str(l_ocmb), l_timing_in_ps );
-
-        FAPI_INF("tCK (ps): %d, %s (ps): %d, %s (nck): %d",
-                 l_tck_in_ps, i_timing_name, l_timing_in_ps, i_timing_name, o_timing_in_nck);
-    }
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
 
 namespace gen
 {
