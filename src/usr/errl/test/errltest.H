@@ -352,6 +352,7 @@ public:
         l_err->setSubSys(ERRORLOG::EPUB_UNKNOWN);
         l_err->setSrcType(ERRORLOG::SRC_ERR_INFO);
         l_err->setTermState(ERRORLOG::TERM_STATE_NO_FLAGS);
+        l_err->updateActionFlags(ERRORLOG::ERRL_ACTIONS_REPORT);
 
         if (l_err->sev() != ERRORLOG::ERRL_SEV_UNKNOWN)
         {
@@ -372,6 +373,18 @@ public:
         else if (l_err->termState() != ERRORLOG::TERM_STATE_NO_FLAGS)
         {
              TS_FAIL("testErrl2: setTermState() fails!");
+        }
+        else if (l_err->actionFlags() != ERRORLOG::ERRL_ACTIONS_REPORT)
+        {
+            TS_FAIL("testErrl2: updateActionFlags() failed to set action flags!");
+        }
+
+        // Updating action flags is additive so do one more check
+        l_err->updateActionFlags(ERRORLOG::ERRL_ACTIONS_CALL_HOME);
+        if (l_err->actionFlags() != (ERRORLOG::ERRL_ACTIONS_REPORT |
+                                     ERRORLOG::ERRL_ACTIONS_CALL_HOME))
+        {
+            TS_FAIL("testErrl2: updateActionFlags() failed to append action flags!");
         }
 
         // Delete the log

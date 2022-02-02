@@ -318,7 +318,8 @@ public:
     }
 
     /**
-     *  @brief Set the action flags based on severity
+     *  @brief Set the action flags based on severity. Note that this
+     *         is only additive and will not clear action flags
      *
      *  @param[in]  i_actions  Action flags. See errl/errltypes.H
      *
