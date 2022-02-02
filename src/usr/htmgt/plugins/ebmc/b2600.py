@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020
+# Contributors Listed Below - COPYRIGHT 2020,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -34,21 +34,22 @@ class errludP_htmgt:
         # 1 bytes   : Target State
         # 1 bytes   : System Reset Count
         # 1 bytes   : Cumulative Resets
-        # 1 bytes   : Version
+        # 1 bytes   : Mode
         # 1 bytes   : In Safe Mode?
         # 4 bytes   : Safe Mode Return Code
         # 4 bytes   : Safe Mode OCC Instance
         # Data for each OCC
         # 1 bytes   : Instance
         # 1 bytes   : State
+        # 1 bytes   : Role
         # 1 bytes   : Master Capable?
         # 1 bytes   : Comm Established?
-        # 3 bytes   : Reserved
+        # 1 bytes   : Mode
+        # 2 bytes   : Reserved
         # 1 bytes   : Failed?
         # 1 bytes   : Needs Reset?
         # 1 bytes   : Reset Reason
-        # 1 bytes   : Reset Count
-        # 1 bytes   : Reset Count WOF
+        # 1 bytes   : Reset Count WOF | Reset Count
         # 4 bytes   : Last Poll Header
 
         d = dict()
@@ -66,7 +67,7 @@ class errludP_htmgt:
         i += 1
         subd['Resets since power on']=data[i]
         i += 1
-        subd['Data Version'], i=hexConcat(data, i, i+1)
+        subd['Mode'], i=hexConcat(data, i, i+1)
 
         #Don't display if not in safe mode because the flag may not be
         #set at the time this data is added to an error log
@@ -90,8 +91,9 @@ class errludP_htmgt:
             subd2['Role'], i=hexConcat(data, i, i+1)
             subd2['Master Capable']=bool(data[i])
             i += 1
+            subd2['Mode'], i=hexConcat(data, i, i+1)
             subd2['Comm Established']=bool(data[i])
-            i += (1 + 3) #Skip over reserved bytes
+            i += (1 + 2) #Skip over reserved bytes
             subd2['Failed']=bool(data[i])
             i += 1
             subd2['Needs Reset']=bool(data[i])
@@ -123,7 +125,7 @@ class errludP_htmgt:
             else:
                 subd2['Last Poll Header'], i=hexConcat(data, i, i+4)
 
-        d[occName]=subd2
+            d[occName]=subd2
 
         jsonStr = json.dumps(d, indent = 2)
         return jsonStr

@@ -579,6 +579,28 @@ namespace HTMGT
                     ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
                 }
 
+                // Create info log indicating that the OCCs are getting reset
+                /*@
+                 * @errortype
+                 * @moduleid HTMGT_MOD_OCC_RESET
+                 * @reasoncode HTMGT_RC_OCC_RESET
+                 * @userdata1  reset reason | safe src
+                 * @userdata2  safe instance | huid
+                 * @devdesc OCCs will be reset
+                 */
+                uint32_t l_huid = 0;
+                if (i_failedOccTarget)
+                {
+                    l_huid = TARGETING::get_huid(i_failedOccTarget);
+                }
+                bldErrLog(err,
+                          HTMGT_MOD_OCC_RESET,
+                          HTMGT_RC_OCC_RESET,
+                          i_reason, cv_safeReturnCode,
+                          cv_safeOccInstance, l_huid,
+                          ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
+
                 if (false == i_skipComm)
                 {
                     // Send poll cmd to all OCCs
@@ -1109,6 +1131,8 @@ namespace HTMGT
 
     // Collect HTMGT Status Information for debug
     // NOTE: o_data is pointer to OCC_MAX_DATA_LENGTH byte buffer
+    // Error parser is in: src/usr/htmgt/plugins/ebmc/b2600.py
+    // Some tools use older parser: src/usr/htmgt/plugins/errludP_htmgt.H
     void OccManager::_getHtmgtData(uint16_t & o_length, uint8_t *o_data)
     {
         uint16_t index = 0;

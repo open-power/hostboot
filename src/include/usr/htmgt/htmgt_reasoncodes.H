@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -104,6 +104,7 @@ namespace HTMGT
         HTMGT_RC_BAD_FRU_CALLOUTS      = HTMGT_COMP_ID | 0x7D,
         HTMGT_RC_MISMATCHING_SEVERITY  = HTMGT_COMP_ID | 0x7F,
         HTMGT_RC_PCAP_CALC_COMPLETE    = HTMGT_COMP_ID | 0xB9,
+        HTMGT_RC_EXTERNAL_RESET_REQUEST = HTMGT_COMP_ID | 0xBC,
         HTMGT_RC_ENERGYSCALE_FFDC      = HTMGT_COMP_ID | 0xFD,
     };
 };

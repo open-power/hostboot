@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -75,12 +75,13 @@ namespace HTMGT
         uint8_t  role;
         uint8_t  masterCapable;
         uint8_t  commEstablished;
-        uint8_t  reserved[3];
+        uint8_t  mode;
+        uint8_t  reserved[2];
         uint8_t  failed;
         uint8_t  needsReset;
         uint8_t  resetReason;
-        uint8_t  resetCount:4;
         uint8_t  resetCountWof:4;
+        uint8_t  resetCount:4;
         uint32_t lastPollHeader;
     } __attribute__ ((__packed__));
     typedef struct occStateData occData_t;
@@ -94,13 +95,13 @@ namespace HTMGT
         uint8_t targetState;
         uint8_t sysResetCount;
         uint8_t cumulativeResets;
-        uint8_t version;
+        uint8_t mode;
         uint8_t safeMode;
         uint32_t safeReturnCode;
         uint32_t safeOccInstance;
 
         // Now add OCC specific data (for each OCC)
-        occData_t occData[4];
+        occData_t occData[8];
     } __attribute__ ((__packed__));
     typedef struct htmgtStateData htmgtStateData_t;
 
@@ -150,8 +151,7 @@ namespace HTMGT
                                      hdata->sysResetCount);
                 i_parser.PrintNumber("  Resets since power on", "%d",
                                      hdata->cumulativeResets);
-                i_parser.PrintNumber("  Data Version", "0x%02X",
-                                     hdata->version);
+                i_parser.PrintNumber("  Mode", "0x%02X", hdata->mode);
                 // Don't display if not in safe mode because the flag may not be
                 //   set at the time this data is added to an error log
                 if (hdata->safeMode)
@@ -178,6 +178,7 @@ namespace HTMGT
                                          odata->masterCapable);
                     i_parser.PrintBool(  "  Comm Established",
                                          odata->commEstablished);
+                    i_parser.PrintBool(  "  Mode", odata->mode);
                     i_parser.PrintBool(  "  Failed", odata->failed);
                     i_parser.PrintBool(  "  Needs Reset", odata->needsReset);
                     i_parser.PrintNumber("  Reset Reason", "0x%02X",

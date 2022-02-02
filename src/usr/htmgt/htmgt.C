@@ -378,8 +378,10 @@ namespace HTMGT
             return;
         }
 
+        uint8_t instance = 0;
         if( i_proc )
         {
+            instance = i_proc->getAttr<TARGETING::ATTR_POSITION>();
             TARGETING::TargetHandleList pOccs;
             getChildChiplets(pOccs, i_proc, TARGETING::TYPE_OCC);
             if (pOccs.size() > 0)
@@ -388,10 +390,13 @@ namespace HTMGT
             }
         }
 
+        // Set safe mode reason in case we end up staying in reset
+        OccManager::updateSafeModeReason(HTMGT_RC_EXTERNAL_RESET_REQUEST, instance);
+
         if(nullptr != failedOccTarget)
         {
             uint32_t huid = failedOccTarget->getAttr<TARGETING::ATTR_HUID>();
-            TMGT_INF("processOccReset(HUID=0x%08X) called", huid);
+            TMGT_INF("processOccReset(HUID=0x%08X, OCC%d) called", huid, instance);
         }
         else
         {
