@@ -41,6 +41,7 @@
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/data_engine/data_engine_utils.H>
 #include <generic/memory/lib/spd/spd_fields_ddr5.H>
+#include <generic/memory/lib/spd/spd_utils_ddr5.H>
 #include <generic/memory/lib/utils/find.H>
 
 #include <mss_generic_attribute_setters.H>

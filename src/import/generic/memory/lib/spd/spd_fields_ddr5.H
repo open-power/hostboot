@@ -32,7 +32,7 @@
 // *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
 // *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 3
+// *HWP Level: 2
 // *HWP Consumed by: HB:FSP
 
 #ifndef _MSS_SPD_FIELDS_DDR5_H_
@@ -59,8 +59,12 @@ class fields<DDR5, BASE_CNFG>
 {
     private:
 
+        // Note: Spacing out bytes a bit to hopefully reduce merge conflicts
         enum
         {
+            //////////////////////////////////////
+            //// Bytes 0-18: prior to timings
+            //////////////////////////////////////
             // Byte 3
             HYBRID_START = 0,
             HYBRID_LEN = 1,
@@ -75,6 +79,25 @@ class fields<DDR5, BASE_CNFG>
             DENSITY_PER_DIE_START = 3,
             DENSITY_PER_DIE_LEN = 5,
 
+            //////////////////////////////////////
+            //// Bytes 19-93: timings
+            //////////////////////////////////////
+            // Byte 20
+            TCK_MIN_LSB_START = 0,
+            TCK_MIN_LSB_LEN   = 8,
+            // Byte 21
+            TCK_MIN_MSB_START = 0,
+            TCK_MIN_MSB_LEN   = 8,
+            // Byte 22
+            TCK_MAX_LSB_START = 0,
+            TCK_MAX_LSB_LEN   = 8,
+            // Byte 23
+            TCK_MAX_MSB_START = 0,
+            TCK_MAX_MSB_LEN   = 8,
+
+            //////////////////////////////////////
+            //// Bytes 230-236: module information
+            //////////////////////////////////////
             // Byte 234
             RANK_MIX_START = 1,
             RANK_MIX_LEN = 1,
@@ -84,14 +107,30 @@ class fields<DDR5, BASE_CNFG>
 
     public:
 
+        // Note: Spacing out bytes a bit to hopefully reduce merge conflicts
         // 1st field: Byte number
         // 2nd field: Start bit
         // 3rd field: Bit length
+        //////////////////////////////////////
+        //// Bytes 0-18: prior to timings
+        //////////////////////////////////////
         static constexpr mss::field_t<mss::endian::LITTLE> HYBRID{3, HYBRID_START, HYBRID_LEN};
         static constexpr mss::field_t<mss::endian::LITTLE> HYBRID_MEDIA{3, HYBRID_MEDIA_START, HYBRID_MEDIA_LEN};
         static constexpr mss::field_t<mss::endian::LITTLE> BASE_MODULE{3, BASE_MODULE_START, BASE_MODULE_LEN};
         static constexpr mss::field_t<mss::endian::LITTLE> DIE_PER_PACKAGE{4, DIE_PER_PACKAGE_START, DIE_PER_PACKAGE_LEN};
         static constexpr mss::field_t<mss::endian::LITTLE> DENSITY_PER_DIE{4, DENSITY_PER_DIE_START, DENSITY_PER_DIE_LEN};
+
+        //////////////////////////////////////
+        //// Bytes 19-93: timings
+        //////////////////////////////////////
+        static constexpr mss::field_t<mss::endian::LITTLE> TCK_MIN_LSB{20, TCK_MIN_LSB_START, TCK_MIN_LSB_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> TCK_MIN_MSB{21, TCK_MIN_MSB_START, TCK_MIN_MSB_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> TCK_MAX_LSB{22, TCK_MAX_LSB_START, TCK_MAX_LSB_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> TCK_MAX_MSB{23, TCK_MAX_MSB_START, TCK_MAX_MSB_LEN};
+
+        //////////////////////////////////////
+        //// Bytes 230-236: module information
+        //////////////////////////////////////
         static constexpr mss::field_t<mss::endian::LITTLE> RANK_MIX{234, RANK_MIX_START, RANK_MIX_LEN};
         static constexpr mss::field_t<mss::endian::LITTLE> PACKAGE_RANKS_PER_CHANNEL{234, PACKAGE_RANKS_PER_CHANNEL_START, PACKAGE_RANKS_PER_CHANNEL_LEN};
 };

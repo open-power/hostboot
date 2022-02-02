@@ -31,7 +31,7 @@
 // *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
 // *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 3
+// *HWP Level: 2
 // *HWP Consumed by: HB
 // EKB-Mirror-To: hostboot
 
@@ -43,13 +43,30 @@ namespace spd
 {
 
 // These "definitions" are needed to generate linkage for the static constexprs declared in the .H because of ODR-used
-
 // fields<DDR5, BASE_CNFG>
+
+// Note: Spacing out bytes a bit to hopefully reduce merge conflicts
+//////////////////////////////////////
+//// Bytes 0-18: prior to timings
+//////////////////////////////////////
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::HYBRID;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::HYBRID_MEDIA;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::BASE_MODULE;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::DIE_PER_PACKAGE;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::DENSITY_PER_DIE;
+
+//////////////////////////////////////
+//// Bytes 19-93: timings
+//////////////////////////////////////
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::TCK_MIN_LSB;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::TCK_MIN_MSB;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::TCK_MAX_LSB;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::TCK_MAX_MSB;
+
+
+//////////////////////////////////////
+//// Bytes 230-236: module information
+//////////////////////////////////////
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::RANK_MIX;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::PACKAGE_RANKS_PER_CHANNEL;
 
