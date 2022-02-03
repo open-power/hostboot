@@ -245,23 +245,6 @@ namespace RTPM
                 break;
             }
 
-            // The PM Complex is now live, ensure that there are no
-            //  lingering special wakeups enabled
-            l_err = WAKEUP::handleSpecialWakeup( proc_target,
-                                                 WAKEUP::FORCE_DISABLE );
-            if( l_err )
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "Error disabling wakeup on %.8X",
-                           TARGETING::get_huid(proc_target) );
-                //Just commit the log as informational and keep going
-                l_err->setSev(ERRL_SEV_INFORMATIONAL);
-                l_err->collectTrace(ISTEP_COMP_NAME,1024);
-                errlCommit( l_err, RUNTIME_COMP_ID );
-                l_err = nullptr;
-                break;
-            }
-
 #ifdef CONFIG_HTMGT
             HTMGT::processOccStartStatus(true, // i_startCompleted
                                          nullptr); // failed proc

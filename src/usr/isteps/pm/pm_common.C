@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,7 @@
 #include    <sys/time.h>
 
 #include    <util/utilxipimage.H>
+#include    <scom/wakeup.H>
 
 //  targeting support
 #include    <targeting/common/commontargeting.H>
@@ -858,6 +859,23 @@ namespace HBPM
                            "HUID=0x%08X", get_huid(i_target) );
                 l_errl->collectTrace("ISTEPS_TRACE",256);
 
+                break;
+            }
+
+            // The PM Complex is now live, ensure that there are no
+            //  lingering special wakeups enabled
+            l_errl = WAKEUP::handleSpecialWakeup( i_target,
+                                                  WAKEUP::FORCE_DISABLE );
+            if( l_errl )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "Error disabling wakeup on %.8X",
+                           TARGETING::get_huid(i_target) );
+                //Just commit the log as informational and keep going
+                l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                l_errl->collectTrace(ISTEP_COMP_NAME,1024);
+                errlCommit( l_errl, RUNTIME_COMP_ID );
+                l_errl = nullptr;
                 break;
             }
 
