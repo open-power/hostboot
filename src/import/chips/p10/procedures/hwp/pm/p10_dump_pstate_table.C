@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -245,7 +245,7 @@ void gppb_print(FILE* stream, const GlobalPstateParmBlock_v1_t* gppb, uint32_t  
 
     fprintf(stream, "Safe_Frequency                     %u Khz\n", safe_frequency_khz);
 
-    for (s = 0 ; s < NUM_VPD_PTS_SET; s++)
+    for (s = 0 ; s < NUM_VPD_PTS_SET - 1; s++)
     {
         fprintf(stream, "\nVPD_Operating_Points(%s)\n", vpdOpSetStr[s]);
         fprintf(stream, "\t%-10s %-8s %-9s %-7s %-7s %-8s %-15s %-15s %-15s %-15s %-15s %-15s %-15s %-15s\n",
@@ -973,9 +973,28 @@ void dds_print(FILE* stream,
     {
         for (p = 0; p < NUM_PV_POINTS; p++)
         {
+            PoundWEntry_t ddse;
+            ddse.ddsc.value = revle64(gppb->dds[vpdPv[p]][c].ddsc.value);
             fprintf(stream, "\t%4u %13s %7lu %6lu %7lu %5lu %5lu %5lu %5lu %5lu %11lu %9lu %11lu %9lu %9lu %9lu\n",
                     c,
                     vpdPvStr[p],
+                    ddse.ddsc.fields.calb_adj,
+                    ddse.ddsc.fields.insrtn_dely,
+                    ddse.ddsc.fields.trip_offset,
+                    ddse.ddsc.fields.data0_select,
+                    ddse.ddsc.fields.data1_select,
+                    ddse.ddsc.fields.data2_select,
+                    ddse.ddsc.fields.large_droop,
+                    ddse.ddsc.fields.small_droop,
+                    ddse.ddsc.fields.slopeA_start,
+                    ddse.ddsc.fields.slopeA_end,
+                    ddse.ddsc.fields.slopeB_start,
+                    ddse.ddsc.fields.slopeB_end,
+                    ddse.ddsc.fields.slopeA_cycles,
+                    ddse.ddsc.fields.slopeB_cycles
+
+
+                    /*
                     gppb->dds[vpdPv[p]][c].ddsc.fields.calb_adj,
                     gppb->dds[vpdPv[p]][c].ddsc.fields.insrtn_dely,
                     gppb->dds[vpdPv[p]][c].ddsc.fields.trip_offset,
@@ -990,6 +1009,7 @@ void dds_print(FILE* stream,
                     gppb->dds[vpdPv[p]][c].ddsc.fields.slopeB_end,
                     gppb->dds[vpdPv[p]][c].ddsc.fields.slopeA_cycles,
                     gppb->dds[vpdPv[p]][c].ddsc.fields.slopeB_cycles
+                    */
                    );
         }
     }
