@@ -129,7 +129,7 @@ void* call_host_cbs_start(void *io_pArgs)
                           get_huid(l_cpu_target),
                           TRACE_ERR_ARGS(l_errl));
 
-                l_errl->addHwCallout(l_cpu_target, HWAS::SRCI_PRIORITY_LOW, HWAS::DELAYED_DECONFIG, HWAS::GARD_Predictive);
+                l_errl->addHwCallout(l_cpu_target, HWAS::SRCI_PRIORITY_LOW, HWAS::DELAYED_DECONFIG, HWAS::GARD_NULL);
 
                 captureError(l_errl, l_stepError, HWPF_COMP_ID, l_cpu_target);
                 continue; //Don't continue on this chip if p10_clock_test failed
