@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,10 +52,13 @@ namespace PLDM
         ENTITY_SYS_FIRMWARE = 31,
         ENTITY_TYPE_CHASSIS = 45,
         ENTITY_TYPE_BACKPLANE = 64,
+        ENTITY_TYPE_DIMM_SLOT = 65, // aka Memory Board
         ENTITY_TYPE_DIMM = 66,
         ENTITY_TYPE_PROCESSOR_MODULE = 67,
 
         ENTITY_TYPE_PROCESSOR = 135,
+
+        ENTITY_TYPE_SOCKET = 190,
 
         // Chassis-specific entities
         ENTITY_TYPE_LOGICAL_SYSTEM = 11521,

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -83,6 +83,148 @@ const unique_entity_info foreign_entity_types[] =
     { CLASS_CHIP, TYPE_TPM, ENTITY_TYPE_TPM }
 };
 
+
+/* @brief Update ATTR_CONNECTOR_PLDM_ENTITY_ID_INFO attached to child_target
+ *        with its parent socket/slot normalized information
+ * @param[in] i_child_target Target with ATTR_CONNECTOR_PLDM_ENTITY_ID_INFO
+ * @param[in] i_child_entity_info Normalized entity id information of child target
+ */
+void updateConnectorInfoAttr(Target* const i_child_target,
+                          const TARGETING::ATTR_PLDM_ENTITY_ID_INFO_type& i_child_entity_info)
+{
+    errlHndl_t errl = nullptr;
+    TARGETING::ATTR_CONNECTOR_PLDM_ENTITY_ID_INFO_type connectorInfo = { };
+    uint16_t childContainerId = le16toh(i_child_entity_info.containerId);
+    uint16_t childInstanceNum = le16toh(i_child_entity_info.entityInstanceNumber);
+    std::vector<pldm_entity> vAssocEntities = {};
+    do
+    {
+        vAssocEntities = thePdrManager().findEntityAssociationsByContainer(childContainerId);
+        if (vAssocEntities.size() == 1)
+        {
+            const pldm_entity entity = vAssocEntities[0];
+
+            // convert to host endian for comparison and tracing
+            connectorInfo.entityType = le16toh(entity.entity_type);
+            connectorInfo.entityInstanceNumber = le16toh(entity.entity_instance_num);
+            connectorInfo.containerId = le16toh(entity.entity_container_id);
+
+            // check this is an expected entity type using this container
+            if ( (connectorInfo.entityType != ENTITY_TYPE_DIMM_SLOT) &&
+                 (connectorInfo.entityType != ENTITY_TYPE_SOCKET) )
+            {
+                // need to go back another parent to find DCM socket connection
+                if (connectorInfo.entityType != ENTITY_TYPE_PROCESSOR_MODULE)
+                {
+                    PLDM_ERR("updateConnectorInfoAttr: unsupported entityType 0x%04X", connectorInfo.entityType);
+                    /*@
+                     * @moduleid   MOD_UPDATE_CONNECTOR_INFO_ATTR
+                     * @reasoncode RC_UNSUPPORTED_TYPE
+                     * @userdata1  The child Target HUID
+                     * @userdata2  Entity type
+                     * @devdesc    Unsupported entity type for connector type.  Possible BMC normalization failure.
+                     * @custdesc   A software error occurred during system boot
+                     */
+                    errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                                         MOD_UPDATE_CONNECTOR_INFO_ATTR,
+                                         RC_UNSUPPORTED_TYPE,
+                                         get_huid(i_child_target),
+                                         connectorInfo.entityType,
+                                         ErrlEntry::NO_SW_CALLOUT);
+                    addBmcErrorCallouts(errl);
+                    break;
+                }
+                vAssocEntities.clear();
+                // switch to the DCM container ID
+                PLDM_DBG("updateConnectorInfoAttr: switch to DCM container, 0x%04X, instanceNumber 0x%04X",
+                  connectorInfo.containerId, connectorInfo.entityInstanceNumber);
+                childContainerId = connectorInfo.containerId;
+                childInstanceNum = connectorInfo.entityInstanceNumber;
+                continue;
+            }
+
+            // socket or dimm_slot instance numbers should match their child entity's instance number
+            if (childInstanceNum != connectorInfo.entityInstanceNumber)
+            {
+                PLDM_ERR("updateConnectorInfoAttr: entity_instance_num mismatch (assoc = 0x%04X, child = 0x%04X)",
+                  connectorInfo.entityInstanceNumber, childInstanceNum);
+                /*@
+                 * @moduleid          MOD_UPDATE_CONNECTOR_INFO_ATTR
+                 * @reasoncode        RC_MISMATCHED_ENTITY_INSTANCE
+                 * @userdata1         The child Target HUID
+                 * @userdata2[0:31]   Parent connector entity instance number
+                 * @userdata2[32:63]  Expected child entity instance number
+                 * @devdesc    Connection entity instance number not in sync with child value
+                 * @custdesc   A software error occurred during system boot
+                 */
+                errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                                     MOD_UPDATE_CONNECTOR_INFO_ATTR,
+                                     RC_MISMATCHED_ENTITY_INSTANCE,
+                                     get_huid(i_child_target),
+                                     TWO_UINT32_TO_UINT64(
+                                        connectorInfo.entityInstanceNumber,
+                                        childInstanceNum),
+                                     ErrlEntry::NO_SW_CALLOUT);
+                addBmcErrorCallouts(errl);
+                break;
+            }
+
+            PLDM_INF("updateConnectorInfoAttr: Set CONNECTOR_PLDM_ENTITY_ID for"
+                " HUID 0x%08x (%s) to 0x%04x/0x%04x/0x%04x (entitytype/instanceNum/containerId)",
+                get_huid(i_child_target),
+                attrToString<ATTR_TYPE>(i_child_target->getAttr<ATTR_TYPE>()),
+                connectorInfo.entityType,
+                connectorInfo.entityInstanceNumber,
+                connectorInfo.containerId);
+
+            // convert to LE format
+            connectorInfo.entityType = htole16(connectorInfo.entityType);
+            connectorInfo.entityInstanceNumber = htole16(connectorInfo.entityInstanceNumber),
+            connectorInfo.containerId = htole16(connectorInfo.containerId);
+            i_child_target->setAttr<ATTR_CONNECTOR_PLDM_ENTITY_ID_INFO>(connectorInfo);
+            break;
+        }
+        else
+        {
+            PLDM_ERR("updateConnectorInfoAttr: PLDM socket or dimm_slot entity should only have 1 child, found %d", vAssocEntities.size());
+            for (const auto & pEntityId : vAssocEntities)
+            {
+                PLDM_ERR("updateConnectorInfoAttr: Entity 0x%04x/0x%04x/0x%04x (entitytype/instanceNum/containerId)",
+                   pEntityId.entity_type, pEntityId.entity_instance_num, pEntityId.entity_container_id);
+            }
+            /*@
+             * @moduleid    MOD_UPDATE_CONNECTOR_INFO_ATTR
+             * @reasoncode  RC_INVALID_RECORD_COUNT
+             * @userdata1   The child Target HUID
+             * @userdata2[0:31]   container_id searched
+             * @userdata2[32:63]  Number of association records found matching container_id
+             * @devdesc     Only one association record should be found.
+             * @custdesc    A software error occurred during system boot
+             */
+            errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                                 MOD_UPDATE_CONNECTOR_INFO_ATTR,
+                                 RC_INVALID_RECORD_COUNT,
+                                 get_huid(i_child_target),
+                                 TWO_UINT32_TO_UINT64(
+                                     childContainerId,
+                                     vAssocEntities.size()),
+                                 ErrlEntry::NO_SW_CALLOUT);
+            addBmcErrorCallouts(errl);
+
+            break;
+        }
+    } while (1);
+
+    // commit errors but continue the IPL as
+    // this will just limit LED identification of empty hw slots
+    if (errl)
+    {
+        errl->collectTrace(PLDM_COMP_NAME);
+        errlCommit(errl, PLDM_COMP_ID);
+    }
+}
+
+
 /* @brief Update the given target's PLDM_ENTITY_ID_INFO attribute
  *        with a PLDM entity ID
  *
@@ -139,7 +281,6 @@ errlHndl_t updateTargetEntityIdAttribute(Target* const i_target,
         TARGETING::ATTR_PLDM_ENTITY_ID_INFO_type         generic;
         TARGETING::ATTR_CHASSIS_PLDM_ENTITY_ID_INFO_type chassis;
         TARGETING::ATTR_SYSTEM_PLDM_ENTITY_ID_INFO_type  system;
-
     } entity_info = {
 
         // The attribute stores its values in little-endian
@@ -149,6 +290,7 @@ errlHndl_t updateTargetEntityIdAttribute(Target* const i_target,
             .containerId = static_cast<uint16_t>(htole16(ent.entity_container_id))
          }
     };
+    TARGETING::ATTR_CONNECTOR_PLDM_ENTITY_ID_INFO_type connectorInfo = { };
 
     switch(ent.entity_type)
     {
@@ -165,6 +307,11 @@ errlHndl_t updateTargetEntityIdAttribute(Target* const i_target,
             break;
         default:
             i_target->setAttr<ATTR_PLDM_ENTITY_ID_INFO>(entity_info.generic);
+            if (UTIL::assertGetToplevelTarget()->getAttr<ATTR_PLDM_CONNECTOR_PDRS_ENABLED>() &&
+                i_target->tryGetAttr<ATTR_CONNECTOR_PLDM_ENTITY_ID_INFO>(connectorInfo))
+            {
+                updateConnectorInfoAttr(i_target, entity_info.generic);
+            }
             break;
     }
 

@@ -64,15 +64,16 @@ namespace
 {
 typedef std::map<fru_record_set_id, pldm_entity> FruRecordSetMap;
 typedef std::map<TargetHandle_t, pldm_entity> SensorEntityMap;
+typedef std::map<TargetHandle_t, pldm_entity_node*> ConnectionsMap;
 
 // Allow the tree add to determine entity instance number
 constexpr uint16_t DEFAULT_TREE_ADD_ENTITY_INSTANCE_NUM = 0xFFFF;
+
 
 /* @brief Creates Entity Association and FRU record set PDRs
  *        for specified entity_type target
  *
  * @param[in/out] io_tree    opaque pointer acting as a handle to the PLDM association tree
- * @param[in/out] io_pdrman  The PDR manager to add to
  * @param[in]     i_parent   Entity node parent for this new record
  * @param[in]     i_association_type  relation with the parent (physical or logical)
  * @param[in]     i_entity_type  FRU entity type
@@ -82,7 +83,6 @@ constexpr uint16_t DEFAULT_TREE_ADD_ENTITY_INSTANCE_NUM = 0xFFFF;
  * @return pldm_entity_node* - opaque pointer to added entity in association tree
  */
 pldm_entity_node* createEntityAssociationAndFruRecordSetPdrs(pldm_entity_association_tree *io_tree,
-                                                   PdrManager& io_pdrman,
                                                    pldm_entity_node* const i_parent,
                                                    uint8_t i_association_type,
                                                    uint16_t i_entity_type,
@@ -130,10 +130,118 @@ pldm_entity_node* createEntityAssociationAndFruRecordSetPdrs(pldm_entity_associa
 
 
 
+/* @brief Setup initial values for ATTR_CONNECTOR_PLDM_ENTITY_ID_INFO
+ *
+ * @param[in] Connection entity node (SOCKET or DIMM_SLOT)
+ * @param[in] Target of what is plugged into connection, this contains the attribute
+ */
+void updateConnectorInfoAttr(pldm_entity_node * i_connection_entity_node, const TargetHandle_t i_target )
+{
+    /*
+     * Sets up entityType and containerId for these targets
+     * This attribute will be overwritten with an updated ID
+     * after hostboot fetches the normalized PDR repository from the
+     * BMC.
+     */
+    const auto entity_id = pldm_entity_extract(i_connection_entity_node);
+
+    PLDM_DBG("CONNECTOR_PLDM_ENTITY_ID_INFO: 0x%04X/0x%04X/0x%04X (entity_type, instance, container)",
+        entity_id.entity_type, entity_id.entity_instance_num, entity_id.entity_container_id);
+
+    ATTR_CONNECTOR_PLDM_ENTITY_ID_INFO_type targeting_entity_id = { };
+
+    targeting_entity_id.entityType = htole16(entity_id.entity_type);
+    targeting_entity_id.entityInstanceNumber = htole16(entity_id.entity_instance_num);
+    targeting_entity_id.containerId = htole16(entity_id.entity_container_id);
+
+    i_target->setAttr<ATTR_CONNECTOR_PLDM_ENTITY_ID_INFO>(targeting_entity_id);
+}
+
+/* @brief Creates connector (socket or dimm_slot) association pdrs for all child targets
+ *
+ * @param[in/out] io_tree     opaque pointer acting as a handle to the PLDM association tree
+ * @param[in]     i_parent    Entity node parent for these new connection records
+ * @param[in]     i_class     Class of child target being connected
+ * @param[in]     i_type      Type of child target being connected
+ * @param[in/out] io_targetConnectionMap - Map of child target to new parent connection PDR
+ */
+void createConnectorAssocPdrs(pldm_entity_association_tree *io_tree,
+                             pldm_entity_node* const i_parent,
+                             TARGETING::ATTR_CLASS_type i_class,
+                             TARGETING::TYPE i_type,
+                             ConnectionsMap &io_targetConnectionMap)
+{
+    TargetHandleList targetList;
+    entity_type l_entityTypeOfChild = ENTITY_TYPE_DIMM;
+    entity_type l_connectorEntityType = ENTITY_TYPE_DIMM_SLOT;
+    if (i_type == TYPE_PROC)
+    {
+        l_entityTypeOfChild = ENTITY_TYPE_PROCESSOR_MODULE;
+        l_connectorEntityType = ENTITY_TYPE_SOCKET;
+    }
+
+    getClassResources(targetList, i_class, i_type, UTIL_FILTER_ALL);
+
+    ATTR_CONNECTOR_PLDM_ENTITY_ID_INFO_type connector_entity_id = { };
+    do
+    {
+        // check if connectors are on these targets
+        if (targetList.empty() ||
+            !(targetList[0]->tryGetAttr<TARGETING::ATTR_CONNECTOR_PLDM_ENTITY_ID_INFO>(connector_entity_id)))
+        {
+            break;
+        }
+
+        std::sort(begin(targetList), end(targetList),
+                  [](const Target* const t1, const Target* const t2) {
+                      return t1->getAttr<ATTR_POSITION>() < t2->getAttr<ATTR_POSITION>();
+                  });
+
+        uint16_t prev_requested_entity_instance_num = 0xFFFF;
+        pldm_entity_node * prevEntityNode = nullptr;
+
+        for (const auto & l_child : targetList)
+        {
+            pldm_entity pldmEntity
+            {
+                // The entity_instance_num and entity_container_id members of
+                // this struct are filled out by
+                // pldm_entity_association_tree_add below
+                .entity_type = l_connectorEntityType
+            };
+            uint16_t requested_entity_instance_num = getEntityInstanceNumber(l_child, l_entityTypeOfChild);
+
+            // Second processor in DCM pair found.  Both processors use same DCM socket connection
+            if ((l_entityTypeOfChild == ENTITY_TYPE_PROCESSOR_MODULE) &&
+                (prev_requested_entity_instance_num == requested_entity_instance_num))
+            {
+                io_targetConnectionMap[l_child] = prevEntityNode;
+                updateConnectorInfoAttr(prevEntityNode, l_child);
+                continue;
+            }
+
+            PLDM_INF("Adding connection entity association PDR for "
+                     "entity_type 0x%04X, HUID 0x%x, req instance_num 0x%x",
+                     l_connectorEntityType, get_huid(l_child), requested_entity_instance_num);
+
+            // Add the Entity Association record to the tree (will be converted
+            // to PDRs and stored in the repo at the end)
+            prevEntityNode = pldm_entity_association_tree_add(io_tree,
+                                                              &pldmEntity,
+                                                              requested_entity_instance_num,
+                                                              i_parent,
+                                                              PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+            prev_requested_entity_instance_num = requested_entity_instance_num;
+            io_targetConnectionMap[l_child] = prevEntityNode;
+            updateConnectorInfoAttr(prevEntityNode, l_child);
+        }
+    } while (0);
+}
+
+
 /* @brief Add Entity Association and FRU record set PDRs for cores
  *
  * @param[in/out] io_tree    opaque pointer acting as a handle to the PLDM association tree
- * @param[in/out] io_pdrman  The PDR manager to add to
  * @param[in]     i_parentNodeEntity  Entity node parent for these new records
  * @param[in]     i_proc_target   Processor target to look under for cores
  * @param[in/out] io_fru_record_set_map FRU record set PDR information (used later to create these PDRs)
@@ -141,7 +249,6 @@ pldm_entity_node* createEntityAssociationAndFruRecordSetPdrs(pldm_entity_associa
  *
  */
 void addCoreEntityAssocAndRecordSetPdrs(pldm_entity_association_tree *io_tree,
-                                        PdrManager& io_pdrman,
                                         pldm_entity_node * i_parentNodeEntity,
                                         const TargetHandle_t i_proc_target,
                                         FruRecordSetMap &io_fru_record_set_map,
@@ -176,7 +283,6 @@ void addCoreEntityAssocAndRecordSetPdrs(pldm_entity_association_tree *io_tree,
 
         const auto entity_node
             = createEntityAssociationAndFruRecordSetPdrs(io_tree,
-                                                io_pdrman,
                                                 i_parentNodeEntity,
                                                 PLDM_ENTITY_ASSOCIAION_PHYSICAL,
                                                 ENTITY_TYPE_LOGICAL_PROCESSOR,
@@ -230,7 +336,10 @@ void addEntityAssociationAndFruRecordSetPdrs(PdrManager& io_pdrman, pldm_entity 
     // maps location code to DCM pldm entity
     // using vector for auto-memory cleanup
     std::map<std::vector<char>, pldm_entity_node*, cmp_str> l_dcmLocationMap;
+    ConnectionsMap l_targetConnectionMap;
     pldm_entity_node * proc_node = nullptr;
+    pldm_entity_node * parent_entity_node = nullptr;
+    bool hasConnectorPdr = false;
     for (const auto entity : fru_inventory_classes)
     {
         TargetHandleList targets;
@@ -244,24 +353,50 @@ void addEntityAssociationAndFruRecordSetPdrs(PdrManager& io_pdrman, pldm_entity 
                   [](const Target* const t1, const Target* const t2) {
                       return t1->getAttr<ATTR_POSITION>() < t2->getAttr<ATTR_POSITION>();
                   });
+        hasConnectorPdr = false;
+        if (UTIL::assertGetToplevelTarget()->getAttr<ATTR_PLDM_CONNECTOR_PDRS_ENABLED>())
+        {
+            l_targetConnectionMap.clear();
+            // create connector pdrs if necessary
+            createConnectorAssocPdrs(enttree.get(),
+                                         backplane_node,
+                                         entity.targetClass,
+                                         entity.targetType,
+                                         l_targetConnectionMap);
+            if (!l_targetConnectionMap.empty())
+            {
+                hasConnectorPdr = true;
+            }
+        }
 
         for (size_t i = 0; i < targets.size(); ++i)
         {
+            if (hasConnectorPdr)
+            {
+                // use socket/dimm_slot connection as the parent node
+                parent_entity_node = l_targetConnectionMap.at(targets[i]);
+            }
+            else
+            {
+                // default is to use the backplane as parent node
+                parent_entity_node = backplane_node;
+            }
+
             if (entity.targetType == TYPE_PROC)
             {
                 ATTR_STATIC_ABS_LOCATION_CODE_type abs_location_code { };
                 assert(UTIL::tryGetAttributeInHierarchy<ATTR_STATIC_ABS_LOCATION_CODE>(targets[i], abs_location_code),
                         "Cannot get ATTR_STATIC_ABS_LOCATION_CODE from HUID = 0x%08x", get_huid(targets[i]));
                 std::vector<char> vLocationStr(abs_location_code, abs_location_code + sizeof(abs_location_code)/sizeof(*abs_location_code));
-                pldm_entity_node* proc_parent_entity = nullptr;
+
                 auto it = l_dcmLocationMap.find(vLocationStr);
                 if (it == l_dcmLocationMap.end())
                 {
                     // no DCM yet for this processor, so create the DCM
                     PLDM_DBG("Creating DCM for HUID 0x%x, location code %s", get_huid(targets[i]), abs_location_code);
+
                     auto newDcmEntity = createEntityAssociationAndFruRecordSetPdrs(enttree.get(),
-                                                io_pdrman,
-                                                backplane_node,
+                                                parent_entity_node,
                                                 PLDM_ENTITY_ASSOCIAION_PHYSICAL,
                                                 ENTITY_TYPE_PROCESSOR_MODULE,
                                                 targets[i],
@@ -269,26 +404,29 @@ void addEntityAssociationAndFruRecordSetPdrs(PdrManager& io_pdrman, pldm_entity 
 
                     l_dcmLocationMap[vLocationStr] = newDcmEntity;
 
-                    proc_parent_entity = newDcmEntity;
+                    parent_entity_node = newDcmEntity;
+
+                    const auto entity_id = pldm_entity_extract(newDcmEntity);
+                    PLDM_DBG("DCM ENTITY: entity_type 0x%04X, entity_instance_num 0x%04X, container_id 0x%04X",
+                        entity_id.entity_type, entity_id.entity_instance_num, entity_id.entity_container_id);
                 }
                 else
                 {
                     // Second processor target found, place this under DCM
                     PLDM_DBG("Second processor HUID 0x%x found location code %s", get_huid(targets[i]), abs_location_code);
                     // it->second = DCM_NODE entity
-                    proc_parent_entity = it->second;
+                    parent_entity_node = it->second;
                 }
 
                 proc_node = createEntityAssociationAndFruRecordSetPdrs(enttree.get(),
-                                                                       io_pdrman,
-                                                                       proc_parent_entity,
+                                                                       parent_entity_node,
                                                                        PLDM_ENTITY_ASSOCIAION_PHYSICAL,
                                                                        entity.entityType,
                                                                        targets[i],
                                                                        fru_record_set_map);
 
                 // Add core entries under the processor
-                addCoreEntityAssocAndRecordSetPdrs(enttree.get(), io_pdrman, proc_node, targets[i], fru_record_set_map, core_sensor_entity_map);
+                addCoreEntityAssocAndRecordSetPdrs(enttree.get(), proc_node, targets[i], fru_record_set_map, core_sensor_entity_map);
 
                 /* Set ATTR_PLDM_ENTITY_ID_INFO on the processor so that it can
                  * be used when creating sensors/effecters on this target
@@ -297,6 +435,8 @@ void addEntityAssociationAndFruRecordSetPdrs(PdrManager& io_pdrman, pldm_entity 
                  * BMC. */
 
                 const auto entity_id = pldm_entity_extract(proc_node);
+                PLDM_DBG("PROC ENTITY: entity_type 0x%04X, entity_instance_num 0x%04X, container_id 0x%04X",
+                    entity_id.entity_type, entity_id.entity_instance_num, entity_id.entity_container_id);
 
                 ATTR_PLDM_ENTITY_ID_INFO_type targeting_entity_id = { };
 
@@ -308,14 +448,16 @@ void addEntityAssociationAndFruRecordSetPdrs(PdrManager& io_pdrman, pldm_entity 
             }
             else
             {
-                // non-proc types added to backplane
-                createEntityAssociationAndFruRecordSetPdrs(enttree.get(),
-                                                io_pdrman,
-                                                backplane_node,
+                // non-proc types (DIMM, etc...)
+                auto non_proc = createEntityAssociationAndFruRecordSetPdrs(enttree.get(),
+                                                parent_entity_node,
                                                 PLDM_ENTITY_ASSOCIAION_PHYSICAL,
                                                 entity.entityType,
                                                 targets[i],
                                                 fru_record_set_map);
+                const auto entity_id = pldm_entity_extract(non_proc);
+                PLDM_DBG("NON-PROC ENTITY: entity_type 0x%04X, entity_instance_num 0x%04X, container_id 0x%04X",
+                    entity_id.entity_type, entity_id.entity_instance_num, entity_id.entity_container_id);
             }
         }
     }

@@ -105,6 +105,7 @@ namespace PLDM
         MOD_GET_DATE_TIME                            = 0x40, // getDateTime
         MOD_PLDM_SEND_REQ_RETRY                      = 0x41, // sendReqWithRetry
         MOD_GET_STATE_SENSOR_ID                      = 0x42, // getStateSensorId
+        MOD_UPDATE_CONNECTOR_INFO_ATTR               = 0x43, // updateConnectorInfoAttr
     };
 
     enum PLDMReasonCode
@@ -168,6 +169,7 @@ namespace PLDM
         RC_TIMEOUT                  = PLDM_COMP_ID | 0x39,
         RC_INVALID_RECORD_HANDLE    = PLDM_COMP_ID | 0x3A,
         RC_NO_SENSOR                = PLDM_COMP_ID | 0x3B,
+        RC_MISMATCHED_ENTITY_INSTANCE = PLDM_COMP_ID | 0x3C,
     };
 
     /**

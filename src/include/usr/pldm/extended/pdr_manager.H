@@ -214,6 +214,16 @@ public:
     bool findEntityByFruRecordSetId(fru_record_set_id i_rsid,
                                     pldm_entity& o_entity) const;
 
+
+    /* @brief  Collect the pldm entities from all Entity Association PDRs that
+     *         are contained by the given containerId.
+     *
+     * @param[in] i_containerId  A 16-bit number that identifies the containing entity
+     *                           that the Entity Instance Number is defined relative to.
+     * @return vector            List of entities for given containerId
+     */
+    std::vector<pldm_entity> findEntityAssociationsByContainer(uint16_t i_containerId) const;
+
     /* A "state query" is either a state sensor get-request or a state effecter
      * set-request. Do NOT alter the values of this enumeration without updating
      * the handlers[] array in pdr_manager.C. */

@@ -319,6 +319,54 @@ std::vector<pdr_handle_t> PdrManager::getAllPdrHandles() const
     return pdrs;
 }
 
+std::vector<pldm_entity> PdrManager::findEntityAssociationsByContainer(const uint16_t i_containerId) const
+{
+    std::vector<pldm_entity> assocEntities;
+
+    PLDM_DBG(">> findEntityAssociationsByContainer(big endian 0x%04X)", i_containerId);
+    uint16_t leContainerId = htole16(i_containerId);
+
+    foreachPdrOfType(PLDM_PDR_ENTITY_ASSOCIATION,
+                     [&assocEntities, leContainerId]
+                     (const uint8_t* const pdr_data, const uint32_t pdr_data_size)
+                     {
+                          const auto pdr_hdr
+                              = reinterpret_cast<const pldm_pdr_hdr*>(pdr_data);
+                          const auto entity_assoc_pdr
+                              = reinterpret_cast<const pldm_pdr_entity_association*>(pdr_hdr + 1);
+                          if (entity_assoc_pdr->container_id == leContainerId)
+                          {
+                              PLDM_DBG("findEntityAssociationsByContainer(0x%04X): "
+                                  "ENTITY_ASSOC: containerId 0x%04X, association_type 0x%02X, "
+                                  "Container => entity_type 0x%04X, "
+                                  "entity_instance_num 0x%04X, container_id 0x%04X",
+                                  leContainerId,
+                                  entity_assoc_pdr->container_id,
+                                  entity_assoc_pdr->association_type,
+                                  entity_assoc_pdr->container.entity_type,
+                                  entity_assoc_pdr->container.entity_instance_num,
+                                  entity_assoc_pdr->container.entity_container_id);
+
+                              assocEntities.push_back(entity_assoc_pdr->container);
+                          }
+                          else
+                          {
+                              PLDM_DBG("findEntityAssociationsByContainer(0x%04X): "
+                                  "ID 0x%04X --> container: 0x%04X/0x%04X/0x%04X, num_children %d",
+                                  leContainerId,
+                                  entity_assoc_pdr->container_id,
+                                  entity_assoc_pdr->container.entity_type,
+                                  entity_assoc_pdr->container.entity_instance_num,
+                                  entity_assoc_pdr->container.entity_container_id,
+                                  entity_assoc_pdr->num_children);
+                          }
+                          return false; // check next pdr
+                     });
+
+    PLDM_DBG("<< findEntityAssociationsByContainer(0x%04X) - list %d", i_containerId, assocEntities.size());
+    return assocEntities;
+}
+
 
 std::vector<fru_record_set_id> PdrManager::findFruRecordSetIdsByType(const entity_type i_ent_type, const terminus_id_t i_terminus_id) const
 {
