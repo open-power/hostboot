@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2020
+# Contributors Listed Below - COPYRIGHT 2012,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -375,7 +375,7 @@ DENALI_WOFDATA_IMG = ${ENGD_WOFPATH:Fdenali_wof_data.bin}
 
 # Create list of images for each node (in node order)
 # genPnorImages will handle multiple HBD=binfile pairs
-DENALI_HBD_IMGS = HBD=${${HBFW_TARGPATH:FDENALI_node_0_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FDENALI_node_1_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FDENALI_node_2_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FDENALI_node_3_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FDENALI_SMP_WRAP_node_0_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FDENALI_2N_node_0_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FDENALI_2N_node_1_hb_targeting.bin}:P}
+DENALI_HBD_IMGS = HBD=${${HBFW_TARGPATH:FDENALI_node_0_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FDENALI_node_1_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FDENALI_node_2_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FDENALI_node_3_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FDENALI_SMP_WRAP_node_0_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FDENALI_2N_node_0_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FDENALI_2N_node_1_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FDENALI_FLAT8_node_0_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FDENALI_FLAT8_node_1_hb_targeting.bin}:P}
 
 # Input fake images
 
