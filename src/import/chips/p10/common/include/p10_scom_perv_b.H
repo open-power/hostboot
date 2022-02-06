@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -397,6 +397,29 @@ static const uint32_t XSTOP4_WAIT_CYCLES = 48;
 static const uint32_t XSTOP4_WAIT_CYCLES_LEN = 12;
 //<< [XSTOP4]
 // perv/reg00023.H
+
+//>> [OTPC_M_EXPORT_REGL_STATUS]
+static const uint64_t OTPC_M_EXPORT_REGL_STATUS = 0x00010009ull;
+
+static const uint32_t OTPC_M_EXPORT_REGL_STATUS_TP_NX_ALLOW_CRYPTO_DC = 0;
+static const uint32_t OTPC_M_EXPORT_REGL_STATUS_TP_EX_FUSE_VMX_CRYPTO_DIS_DC = 1;
+static const uint32_t OTPC_M_EXPORT_REGL_STATUS_TP_EX_EFUSE_EXTENDED_MEMORY_DISABLE_DC = 2;
+static const uint32_t OTPC_M_EXPORT_REGL_STATUS_TP_PB_FUSE_TOPOLOGY_2CHIP = 3;
+static const uint32_t OTPC_M_EXPORT_REGL_STATUS_TP_PB_FUSE_TOPOLOGY_GROUP = 4;
+static const uint32_t OTPC_M_EXPORT_REGL_STATUS_TP_PB_FUSE_TOPOLOGY_GROUP_LEN = 2;
+static const uint32_t OTPC_M_EXPORT_REGL_STATUS_TP_NP_NVLINK_DISABLE = 6;
+static const uint32_t OTPC_M_EXPORT_REGL_STATUS_OTP_PCBMS_HW_MODE_SEL_DC = 7;
+static const uint32_t OTPC_M_EXPORT_REGL_STATUS_OTP_PCBMS_FUSED_CORE_MODE_SEL0_DC = 8;
+static const uint32_t OTPC_M_EXPORT_REGL_STATUS_OTP_PCBMS_FUSED_CORE_MODE_SEL1_DC = 9;
+static const uint32_t OTPC_M_EXPORT_REGL_STATUS_TP_EX_FUSE_SMT8_CTYPE_EN_DC = 10;
+static const uint32_t OTPC_M_EXPORT_REGL_STATUS_TP_MC_ALLOW_CRYPTO_DC = 11;
+static const uint32_t OTPC_M_EXPORT_REGL_STATUS_OTP_SPIM_MEAS_SEEPROM_LOCK_DC = 12;
+static const uint32_t OTPC_M_EXPORT_REGL_STATUS_TP_PAU_POWER_HEADER_DISABLE_DC = 13;
+static const uint32_t OTPC_M_EXPORT_REGL_STATUS_TP_PAU_POWER_HEADER_DISABLE_DC_LEN = 6;
+static const uint32_t OTPC_M_EXPORT_REGL_STATUS_TP_EX_FUSE_FLOP_THROTTLE_EN_DC = 19;
+static const uint32_t OTPC_M_EXPORT_REGL_STATUS_TP_EX_FUSE_FLOP_THROTTLE_EN_DC_LEN = 2;
+//<< [OTPC_M_EXPORT_REGL_STATUS]
+// perv/reg00022.H
 
 //>>THE END<<
 
