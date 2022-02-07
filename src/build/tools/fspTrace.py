@@ -26,6 +26,47 @@
 import struct
 import sys, os
 import argparse
+from collections import namedtuple
+
+
+""" Named Tuple Definitions
+"""
+""" Version 1 Header Data Structure:
+        version      - version of the buffer data
+        headerLength - size of the header data
+        timeFlag     - meaning of timestamp entry field
+        endianFlag   - flag for big ('B') or little ('L') endian
+        compName     - the component name
+        binaryDataLength - size of buffer data, including header
+        wrapCount    - how often the buffer wrapped
+        offsetAfterLastTraceEntrySize - offset of the byte past the last entrys size
+        # The following are not part of the data structure but are helpful to cache
+        offsetToFirstTraceEntry - offset to the first entry
+        endianPythonChar - Python character that represents big ('>') or little ('<') endian
+"""
+HeaderDataV1 = namedtuple('HeaderDataV1', ['version', 'headerLength', 'timeFlag',
+                          'endianFlag', 'compName', 'binaryDataLength', 'wrapCount',
+                          'offsetAfterLastTraceEntrySize', 'offsetToFirstTraceEntry',
+                          'endianPythonChar' ])
+
+""" Version 1 Trace Entry Structure:
+        seconds    - timestamp upper part
+        useconds   - timestamp lower part
+        pid        - process/thread id
+        entrySize  - size of trace entry
+        entryType  - type of entry: xTRACE xDUMP, (un)packed
+        hash       - a value for the (format) string
+        lineNumber - source file line number of trace call
+        argsOffset - offset to trace arguments
+"""
+TraceEntryV1 = namedtuple('TraceEntryV1', ['seconds', 'useconds', 'pid', 'entrySize', 'entryType',
+                           'hash', 'lineNumber', 'argsOffset'])
+
+""" Version 2 Trace Entry Structure:
+        compStr      - the component name
+        TraceEntryV1 - Version 1 Trace Entry data
+"""
+TraceEntryV2 = namedtuple('TraceEntryV2', ['compStr', 'TraceEntryV1'])
 
 """ Dictionary to hold parsed strings from string file
 hTable = { hashString : { 'format': formatString ,
@@ -35,12 +76,10 @@ hTable = { hashString : { 'format': formatString ,
 """
 hTable = {}
 
-"""@brief Trace version of file in decimal and hex.  Must stay in sync. Modifying
-          TRACE_VERSION_DEC will also update its counterpart TRACE_VERSION_HEX,
-          keeping the two in sync.
+"""@brief Trace version of binary file/data in decimal
 """
-TRACE_VERSION_DEC = 2
-TRACE_VERSION_HEX = struct.pack('b', TRACE_VERSION_DEC)
+TRACE_VERSION1 = 1
+TRACE_VERSION2 = 2
 
 """@brief Maximum size of component name
 """
@@ -281,7 +320,7 @@ def get_pipe_trace(bf, start):
 @param[in] startingPosition: int value - the starting position in the byte array to start
                              decoding.  Useful if the binary trace data is prepended with
                              version info or some other beginning marker.
-@returns: retVal: int value - the return code: 0 on success, -1 on failure
+@returns: retVal: int value - the return code: 0 on success, non 0 on failure
           traces: list - the ASCII traces in list form
 """
 def decode_binary_traces_to_ascii_list(bData, startingPosition):
@@ -353,9 +392,9 @@ def convert_ascii_trace_list_to_string(asciiTraceList, printNumTraces):
 @returns: Return 0 on success, -1 on failure
 """
 def trace_adal_print_pipe(bData, oFile, startingPosition, printNumTraces):
-    # Decode the binary traces within the 'binaryData' into it's ASCII equivalent
+    # Decode the binary traces within the 'binaryData' into its ASCII equivalent
     (retVal, asciiTracesList) = decode_binary_traces_to_ascii_list(bData, startingPosition)
-    if retVal == -1:
+    if retVal != 0:
         return retVal
 
     # Get a string representation of the ASCII traces which is in list form
@@ -382,23 +421,41 @@ def trace_adal_print_pipe(bData, oFile, startingPosition, printNumTraces):
 @param[in] printNumTraces: int value of number of traces from the end to print
 @param[in] stringFileName: the hbotStringFile and location to it
 
-@returns: retVal: int value - the return code: 0 for success, -1 on failure
+@returns: retVal: int value - the return code: 0 for success, non 0 on failure
           traceDataString: string - a single string containing the ASCII traces
 """
-def get_trace_data_as_string(binaryData, startingPosition, printNumTraces, stringFileName):
-
+def get_binary_trace_data_as_string(binaryData, startingPosition, printNumTraces, stringFileName):
     # Default the outgoing string to ""
     traceDataString = ""
 
-    if trace_adal_read_stringfile(stringFileName) == -1:
+    # Read in the string file and store it's contents in the global hTable.
+    # The hTable will be used in function call get_format_by_hash which is in
+    # a nested call in method call process_binary_data_v1 below
+    retVal = trace_adal_read_stringfile(stringFileName)
+    if (retVal != 0):
         print("Error processing string file")
-        return -1, traceDataString
-
-    (retVal, asciiTracesList) = decode_binary_traces_to_ascii_list(binaryData, startingPosition)
-    if retVal == -1:
         return retVal, traceDataString
 
-    traceDataString = convert_ascii_trace_list_to_string(asciiTracesList, printNumTraces);
+    version = binaryData[startingPosition]
+    retVal = validate_binary_data_trace_version(version)
+    if retVal != 0:
+        print("Error processing binary file, version ", version, "is unsupported")
+        return retVal, traceDataString
+
+    if (version == TRACE_VERSION1):
+        # Process version 1 binary data
+        (retVal, traceDataString) = process_binary_data_v1(binaryData, startingPosition, printNumTraces)
+        if retVal != 0:
+            print("Error processing binary file version 1")
+            return retVal, traceDataString
+    elif (version == TRACE_VERSION2):
+        startingPosition += 1
+        (retVal, asciiTracesList) = decode_binary_traces_to_ascii_list(binaryData, startingPosition)
+        if retVal != 0:
+            print("Error processing binary file version 2")
+            return retVal, traceDataString
+        traceDataString = convert_ascii_trace_list_to_string(asciiTracesList, printNumTraces);
+
     return 0, traceDataString
 
 """ Process tracBINARY file
@@ -406,9 +463,9 @@ def get_trace_data_as_string(binaryData, startingPosition, printNumTraces, strin
 @param[in] bFile: string of binary file name
 @param[in] oFile: string of output file name
 @param[in] printNumTraces: int value of number of traces from the end to print
-@returns: Return 0 on success, -1 on failure
+@returns: Return 0 on success, non 0 on failure
 """
-def do_file_binary(bFile, oFile, printNumTraces):
+def process_binary_file_v2(bFile, oFile, printNumTraces):
     bf = open(bFile, "rb")
 
     startingPosition = 1; # Skip over the version info of the file which is the 1st byte
@@ -418,20 +475,31 @@ def do_file_binary(bFile, oFile, printNumTraces):
 
     return ret
 
-""" Check if the first byte of the binary file is "0x2" (fsp-trace version)
+""" Validate the given trace version
 
-@param[in] bFile: string of the binary file name
-@returns: Return 0 on success, -1 on failure
+@param[in] version: int value
+@returns: Return 0 on success, non 0 on failure
 """
-def is_tracBINARY(bFile):
-    f = open(bFile, "rb")
-
-    if f.read(1) != TRACE_VERSION_HEX:
-        f.close()
+def validate_binary_data_trace_version(version):
+    if ( (version != TRACE_VERSION1) and
+         (version != TRACE_VERSION2) ):
         return -1
-    else:
-        f.close()
-        return 0
+    return 0
+
+""" Validate that the trace version of binary file is a supported version
+
+@param[in] bFile: string of the path plus name to binary file.
+@returns: return value: int value - the return code: 0 on success, non 0 on failure
+          trace version: int value - the trace version, of the binary file, as an integer
+"""
+def validate_binary_file_trace_version(bFile):
+    f = open(bFile, "rb")
+    version = f.read(1)
+    version = struct.unpack('b', version)
+    retVal = validate_binary_data_trace_version(version[0])
+    f.close()
+
+    return retVal, version[0]
 
 """ Parses a line of the stringFile and adds it to the hash table
 
@@ -480,6 +548,7 @@ def parse_sf_magic_cookie(line):
 @returns: Return 0 on success, -1 on failure
 """
 def trace_adal_read_stringfile(stringFileName):
+    retVal = 0;
     with open(stringFileName) as stringFile:
         for x, line in enumerate(stringFile):
             if line.rstrip() == '': #Skip empty lines
@@ -488,13 +557,369 @@ def trace_adal_read_stringfile(stringFileName):
             if x != 0: #Parse line entry
                 parse_sf_entry_v2(line.rstrip())
             else: #Check that the stringfile is the correct version
-                if parse_sf_magic_cookie(line.rstrip()) != 2:
+                if parse_sf_magic_cookie(line.rstrip()) != TRACE_VERSION2:
                     print('Error: Unknown StringFile Version')
-                    return -1
+                    retVal = -1
+                    break
+
     stringFile.close()
+
+    return retVal
+
+
+""" Process binary file, with version 1 in the first byte of the data, and return
+    the binary trace entries, found in the file, into ASCII traces that can be either
+    written to an output file, if parameter 'outputFile' is defined, or printed
+    to the console, if parameter 'outputFile' is not defined.
+
+@param[in] binaryFile: binary file to read/process
+@param[in] outputFile: file to write ASCII traces, if defined
+@param[in] printNumTraces: an int value the specifies the number of traces
+                           from the chronological end to print. A value of -1
+                           is interpreted as to gather all traces
+@returns: Return 0 on success, non 0 on failure
+"""
+def process_binary_file_v1(binaryFile, outputFile, printNumTraces):
+    binaryFileHandle = open(binaryFile, "rb")
+
+    startingPosition = 0; # position of the first byte where the version info is located
+    # Process the binary data, contained within the binary file, and return the
+    # trace entries, within the data, as a single string.
+    (retVal, traceDataString) = process_binary_data_v1(binaryFileHandle.read(),
+                                 startingPosition, printNumTraces)
+
+    binaryFileHandle.close()
+
+    if retVal != 0:
+        return retVal
+
+    processTraceDataString(outputFile, traceDataString)
 
     return 0
 
+
+""" Process binary data, with version 1 in the first byte, and return the binary
+    trace entries, found in the data, into a single string that contains the
+    combined ASCII traces.  The number of traces, found in the string, will be
+    limited to the number of traces specified by input parameter 'printNumTraces'
+    if not -1.  A -1 value for 'printNumTraces' signifies to gather all traces.
+
+@param[in] binaryData: a byte array that contains the header and traces for version 1 data
+@param[in] dataHeaderOffset: an int value that species the offset to the version
+                             1 header info
+@param[in] printNumTraces: an int value the specifies the number of traces
+                           from the chronological end to print.  A value of -1
+                           is interpreted as to gather all traces
+@returns: return value: int value - the return code: 0 on success, non 0 on failure
+          trace data string: a string - a string composed of the traces
+"""
+def process_binary_data_v1(binaryData, dataHeaderOffset, printNumTraces):
+    # Process the header data, for version 1, and return the data found in the
+    # header as a named tuple 'HeaderDataV1'
+    (retVal, headerDataV1 ) = parse_binary_data_header_v1(binaryData, dataHeaderOffset)
+    if retVal != 0:
+        return retVal, 0
+
+    # Process the trace entries in the binary data and return the trace entry data
+    # as a list of a named tuple 'TraceEntriesV2'.  Trace entry version 2 has the
+    # same data as version 1 with the addition of the component name.
+    (retVal, traceEntriesV2 ) = parse_data_trace_entries_v1(binaryData, headerDataV1)
+
+    # Reverse the order of trace entires to get the data in chrinological order
+    traceEntriesV2.reverse()
+
+    # Translate the trace entries to ASCII representation
+    asciiTracesList = get_ascii_traces_from_trace_entry_list(binaryData, traceEntriesV2)
+
+    # Get a string representation of the ASCII traces which is in list form
+    traceDataString = convert_ascii_trace_list_to_string(asciiTracesList, printNumTraces);
+
+    return 0, traceDataString
+
+
+""" Parse the header from the binary data, with version 1 in the first byte, and
+    return the parsed data into a named tuple 'HeaderDataV1'.
+
+@param[in] binaryData: a byte array that contains the header for version 1
+@param[in] headerOffset: an int value that species the offset to the header
+@returns: return value: int value - the return code: 0 on success, non 0 on failure
+          named tuple HeaderDataV1: tuple - named tuple HeaderDataV1 composed of
+                                    the header data from the binaryData
+"""
+def parse_binary_data_header_v1(binaryData, headerOffset):
+    # Binary Trace Data Header Version 1
+    # 1 bytes : version of binary data
+    # 1 bytes : header length in bytes
+    # 1 bytes : time flag - meaning of timestamp entry field
+    # 1 bytes : endian flag for big 'B' and little 'L'
+    # 16 bytes : null terminated component name (TRACE_MAX_COMP_NAME_SIZE)
+    # 4 bytes : size of binary data including this header data
+    # 4 bytes : how often the buffer wrapped
+    # 4 bytes : offset to byte right after last trace entry which is the size of the last trace entry
+    # 8 bytes : unused in version 1 header, needed for forward compatibility with version 2.
+    headerDataSize = 1 + 1 + 1 + 1 + TRACE_MAX_COMP_NAME_SIZE + 4 + 4 + 4 + 8
+
+    offset = headerOffset
+
+    # Read the version, header length, time flag and endianess as a single byte (B) each
+    # Reading bytes therefore endianness is not a factor
+    (version, retrievedHeaderDataSize, timeFlag, endianess) = struct.unpack_from('4B', binaryData, offset)
+
+    # Confirm the binary data is version 1
+    if (version != TRACE_VERSION1):
+        print ("Error: Expected version", TRACE_VERSION1,
+               "but the binary data is version", version)
+        return -1, 0
+
+    # Confirm that header size given in the binary data is what is expectd
+    if (retrievedHeaderDataSize != headerDataSize):
+        print ("Error: Retrieved header size (", retrievedHeaderDataSize,
+               ") does not match the expected header size (", headerDataSize,
+               ").  The binary data is corrupt/incorrect" )
+        return -1, 0
+
+    # Interpret the endianess from the header to it's python equivalent character
+    endian = '>' # Assume endianess is big (>)
+    if ( endianess == ord('L') ):
+        endian = '<'
+
+    offset += 4 # advance offset to component name
+
+    compStr = ''
+    # Retrieve component name up until the max component name size, TRACE_MAX_COMP_NAME_SIZE
+    # number of bytes, has been found or when the first NULL character is encountered
+    for i, b in enumerate(binaryData[offset:]):
+        if (i == TRACE_MAX_COMP_NAME_SIZE) or (b == 0x0):
+            break
+        else:
+            compStr += chr(b)
+
+    offset += TRACE_MAX_COMP_NAME_SIZE # advance offset to 'size of binary data'
+
+    # Read the size of binary data, buffer wrap count and offset to end of data
+    # each as integers (I = 4 bytes)
+    (sizeOfBinaryData, wrapCount, offsetToLastEntrySize) = struct.unpack_from(endian + '3I', binaryData, offset)
+
+    # Confirm that the size of binary is equal to the offset to the last trace
+    # entry size.  The last entry size will be at the end of the buffer
+    if ( sizeOfBinaryData != offsetToLastEntrySize ):
+        print ("Error: The offset to the last trace entry size (", offsetToLastEntrySize,
+               ") does not equal the size of the binary data (", sizeOfBinaryData,
+               ").  The binary data is corrupt/incorrect" )
+        return -1, 0
+
+    # Get the offset to the start of the trace entries which is right after
+    # the header info
+    offsetToStartOfTraces = headerOffset + retrievedHeaderDataSize
+
+    # Cache all of the gathered data into a header tuple and hand back to caller
+    headerData = HeaderDataV1(version, retrievedHeaderDataSize, timeFlag, endianess,
+                              compStr, sizeOfBinaryData, wrapCount,
+                              offsetToLastEntrySize, offsetToStartOfTraces, endian)
+
+    return 0, headerData
+
+""" Parse the header from the binary data, with version 1 in the first byte, and
+    return the parsed data into named tuple 'HeaderDataV1'.
+
+@param[in] binaryData: a byte array that contains the trace entries for version 1
+@param[in] headerData: named tumple HeaderDataV1
+@returns: return value: int value - the return code: 0 on success, non 0 on failure
+          named tuple TraceEntriesV2 list: A list of named tuples TraceEntriesV2
+"""
+def parse_data_trace_entries_v1(binaryData, headerData):
+    """  The trace entries are in reverse chronological order with the size of the
+         trace entry at the end of the trace entry itself:
+            First Trace Entry - Last in chronological order
+            First Trace Entry Size
+            ....
+            Last Trace Entry - First in chronological order
+            Last Trace Entry Size
+
+         With the size of the trace entry after the trace entry itself, therefore
+         must read trace entries starting with the last entry's size:
+            Read last entry size
+            Read last entry
+            Read 'last - 1' entry size, using the last's entry size to get to offset
+            Read 'last - 1' entry
+            ...
+            Read first trace entry size, using the previous entry size to get this offset
+            Read first trace entry
+
+        Note:  The entry size incudes both the size of the entry and size of the entry size
+    """
+    startOffset = headerData.offsetToFirstTraceEntry
+    endOffset = headerData.offsetAfterLastTraceEntrySize
+    compStr = headerData.compName
+    endian = headerData.endianPythonChar
+
+    # Cache the size, the number of bytes that make up the trace entry size
+    traceEntryByteSize = 4
+
+    traceEntriesV2 = []
+
+    # Start with the last entry and iterate to the first entry in buffer
+    # The endOffset points to the byte right after the size of an entry
+    """
+    | 1st trace entry                |
+    |   4 bytes: seconds             |  <--- startOffset (stays constant)
+    |   ....                         |
+    |   N bytes: argument(s)         |
+    |   4 bytes: trace entry size    | <--- traceEntrySizeOffset AKA the trace entry end
+    | 1 byte : byte after entry size | <--- endOffset (gets updated on each iteration)
+    |  ......                        |
+
+    | Last - 1 trace entry           |
+    |   4 bytes: seconds             | <--- traceEntryStart (gets updated on each iteration)
+    |   ....                         |
+    |   N bytes: argument(s)         |
+    |   4 bytes: trace entry size    | <--- traceEntrySizeOffset AKA the trace entry end
+    | 1 byte : byte after entry size | <--- endOffset (gets updated on each iteration)
+    |                                |
+    | Last trace entry               |
+    |   4 bytes: seconds             | <--- traceEntryStart (gets updated on each iteration)
+    |   ....                         |
+    |   N bytes: argument(s)         |
+    |   4 bytes: trace entry size    | <--- traceEntrySizeOffset AKA the trace entry end
+    | 1 byte : byte after entry size | <--- endOffset (initial value)
+    """
+    while endOffset >  startOffset:
+        # Get the offset to the trace entry size which is 4 bytes above the endOffset
+        traceEntrySizeOffset = endOffset - traceEntryByteSize
+        # Get the size of the trace entry
+        traceEntrySize = struct.unpack_from(endian + 'I', binaryData, traceEntrySizeOffset)
+        # Get the offset to the start of the trace entry via the trace entry size
+        traceEntryStart = endOffset - traceEntrySize[0]
+
+        # Verify that the start of the entry is *not* before the start offset
+        if startOffset > traceEntryStart:
+            print ("Error: Start of trace entry(", traceEntryStart,
+                   ") precedes the start of trace buffer (", startOffset, ").")
+            return -1, traceEntriesV2
+
+        # The end of the trace is the where the trace entry size begins therefore
+        # passing traceEntrySizeOffset as the trace entry end
+        (retVal, traceEntryV1) = parse_trace_entry_header_v1(binaryData,
+                                 headerData.endianPythonChar, traceEntryStart,
+                                 traceEntrySizeOffset)
+
+        if retVal != 0:
+            return retVal, traceEntriesV2
+
+        traceEntryV2 = TraceEntryV2(compStr, traceEntryV1)
+        traceEntriesV2.append(traceEntryV2)
+        # Get the next preceding trace entry
+        endOffset = traceEntryStart
+
+    return 0, traceEntriesV2
+
+
+""" Given a list of trace entries, version 2, return a list of ASCII strings
+    translated from the trace entries.
+
+@param[in] binaryData: a byte array that contains the trace entries
+@param[in] traceEntriesV2: a list of version 2 trace entries
+@returns: traces: list of strings: a list of ASCII strings translated from
+                                   the trace entries.
+"""
+def get_ascii_traces_from_trace_entry_list(binaryData, traceEntriesV2):
+    traces = []
+    for traceEntryV2 in traceEntriesV2:
+        traceEntryV1 = traceEntryV2.TraceEntryV1
+
+        traceStr = format_trace_entry(traceEntryV2.compStr,  traceEntryV1.seconds,
+                                      traceEntryV1.useconds, traceEntryV1.pid,
+                                      traceEntryV1.lineNumber )
+
+        formatString = get_format_by_hash(str(traceEntryV1.hash))
+
+        traceStr +=  trexMyVsnprintf(binaryData, formatString, traceEntryV1.argsOffset,
+                     (traceEntryV1.argsOffset + traceEntryV1.entrySize))
+        if flags & TRACE_FILENAME:
+            traceStr += (' | ' + get_source_by_hash(str(traceEntryV1.hash)))
+
+        traces.append(traceStr)
+
+    return traces
+
+""" Parse a version 1 trace entry
+
+@param[in] binaryData: the binary data that contains the trace entry
+@param[in] endian: the endiannes that the trace entry is formatted in
+@param[in] traceEntryStart: the offset to the beginning of the trace entry
+@param[in] traceEntryEnd: the offset to the ending of the trace entry
+@returns: return value: int value - the return code: 0 on success, non 0 on failure
+          named tuple TraceEntryV1: tuple - named tuple TraceEntryV1 composed of
+                                    version 1 trace entry
+"""
+def parse_trace_entry_header_v1(binaryData, endian, traceEntryStart, traceEntryEnd):
+    # Data is in this format for each trace
+    # 4 bytes : timestamp (seconds)
+    # 4 bytes : timestamp (useconds)
+    # 4 bytes : PID
+    # 2 bytes : size of trace entry
+    # 2 bytes : entry type (xTRACE, xDUMP)
+    # 4 bytes : hash
+    # 4 bytes : line number
+    # N bytes : args
+    dataHeaderSize = 4 + 4 + 4 + 2 + 2 + 4 + 4
+
+    startOffset = traceEntryStart
+    endOffset = traceEntryEnd
+
+    if (startOffset + dataHeaderSize) > endOffset:
+        print ("Error: Trace entry buffer size (", traceEntryEnd - traceEntryStart + 1,
+               ") is not large enough to contain a version 1 trace of size (", dataHeaderSize)
+        return -1, 0
+
+    # Unpack header data: seconds ... line number (see above data format)
+    parsedData = struct.unpack_from(endian + '3I2H2I', binaryData, startOffset)
+
+    # populate a TraceEntryV1 with the gathered data plus the offset to the arguments
+    argsOffset = startOffset + dataHeaderSize
+    traceEntry = TraceEntryV1(*parsedData, argsOffset)
+
+    return 0, traceEntry
+
+
+""" Format the given data into a string
+
+@param[in] compStr: component name
+@param[in] timeSeconds: whole seconds part
+@param[in] timeUseconds: fractional seconds part
+@param[in] pid: process ID
+@param[in] lineNumber: line number of trace
+@return a formatted string of the data given
+"""
+def format_trace_entry(compStr, timeSeconds, timeUseconds, pid, lineNumber):
+    #Format header data for trace
+    headerStr = f'{timeSeconds:08}' + "." + f'{timeUseconds:09}' + "|" + f'{pid:>5}' + "|"
+    headerStr += (f'{compStr:<16}' + "|" + f'{lineNumber:>4}' + "|")
+    return headerStr
+
+
+""" Given a string, representing the trace entries, write string to a file or
+    write to a console based on the input parameter 'outputFile'.  If the
+    'outputFile' is defined then the string is written to file.  If 'outputFile'
+    is not define then string is written to console.
+
+@param[in] outputFile: file to write ASCII traces, if defined
+@param[in] traceDataString: string representing trace entries
+@return 0
+"""
+def processTraceDataString(outputFile, traceDataString):
+    # Print the ASCII string based on the existence of the output file 'outputFile'
+    if outputFile != '':
+        # Write the ASCII trace data to given file
+        outputFileHandle = open(outputFile, 'w')
+        outputFileHandle.write(traceDataString)
+        outputFileHandle.close()
+    else:
+        # Print the ASCII trace data out to the console
+        print(traceDataString, end='')
+    return 0
+
+""" main """
 if __name__ == "__main__":
     defaultStringFileName = 'img/hbotStringFile'
 
@@ -523,12 +948,24 @@ if __name__ == "__main__":
         print("Error processing string file - terminating")
         sys.exit()
 
-    #Check version of tracBINARY
-    if is_tracBINARY(args.tracBINARY) == -1:
-        print("Error incorrect version for tracBINARY - terminating")
-        sys.exit()
+    #Validate that the trace version of the supplied binary file is supported
+    (retVal, version) = validate_binary_file_trace_version(args.tracBINARY)
+    if retVal != 0:
+        print("Error processing binary file, version", version,
+               "is unsupported - terminating")
+        sys.exit(retVal)
 
-    #Process Binary file and Print Traces
-    if do_file_binary(args.tracBINARY, args.output_dir, args.tail) == -1:
-        print("Error processing binary file - terminating")
-        sys.exit()
+    if (version == TRACE_VERSION1):
+        #Process version 1 binary file
+        retVal = process_binary_file_v1(args.tracBINARY, args.output_dir, args.tail)
+        if retVal != 0:
+            print("Error processing binary file version 1 - terminating")
+            sys.exit(retVal)
+    elif (version == TRACE_VERSION2):
+        #Process version 2 binary file
+        retVal = process_binary_file_v2(args.tracBINARY, args.output_dir, args.tail)
+        if retVal != 0:
+            print("Error processing binary file version 2 - terminating")
+            sys.exit(retVal)
+
+
