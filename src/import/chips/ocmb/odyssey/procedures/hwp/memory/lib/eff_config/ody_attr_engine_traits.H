@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
+// EKB-Mirror-To: hostboot
 ///
 /// @file ody_attr_engine_traits.H
 /// @brief Trait class definitions for Odyssey attrs

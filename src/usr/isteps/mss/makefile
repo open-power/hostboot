@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2020
+# Contributors Listed Below - COPYRIGHT 2016,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -28,6 +28,7 @@ IMPORT_PATH              = ${ROOTPATH}/src/import
 PROCEDURES_PATH          = ${IMPORT_PATH}/chips/p10/procedures
 EXPLORER_PROCEDURES_PATH = ${IMPORT_PATH}/chips/ocmb/explorer/procedures
 PMIC_PROCEDURES_PATH     = ${IMPORT_PATH}/chips/ocmb/common/procedures
+ODYSSEY_PROCEDURES_PATH  = ${IMPORT_PATH}/chips/ocmb/odyssey/procedures
 
 #Add all the extra include paths
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/plat
@@ -99,6 +100,7 @@ MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/phy/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/ecc/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/inband/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/workarounds/
+MSS_LIB += ${ODYSSEY_PROCEDURES_PATH}/hwp/memory/
 
 EXTRAINCDIR += ${MSS_LIB}
 

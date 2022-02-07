@@ -47,6 +47,7 @@
 #include <generic/memory/lib/data_engine/data_engine.H>
 #include <mss_generic_system_attribute_getters.H>
 #include <generic/memory/lib/spd/spd_checker.H>
+#include <lib/eff_config/ody_attr_engine_traits.H>
 
 namespace mss
 {
@@ -305,6 +306,25 @@ class base_0_0 : public mss::spd::base
         }
 
         ///
+        /// @brief Set the dimm pos metadata field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_dimm_pos_metadata(const std::vector<uint8_t>& i_spd) const
+        {
+            uint32_t l_field = 0;
+
+            using TT = mss::dimmPosTraits<mss::mc_type::ODYSSEY>;
+            FAPI_TRY(gen::dimm_pos<TT>(iv_dimm, l_field));
+
+            FAPI_TRY(mss::attr::set_dimm_pos_metadata(iv_dimm, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
         /// @brief Set the dram gen metadata field
         ///
         /// @param[in] i_spd SPD binary
@@ -358,8 +378,7 @@ class base_0_0 : public mss::spd::base
             FAPI_TRY(set_dimm_type(i_spd));
 
             // Generic_metadata_fields
-            // TODO:ZEN:MST-1373 Create dimmPosTraits specialization for Odyssey
-            // TK FAPI_TRY(set_dimm_pos_metadata(i_spd));
+            FAPI_TRY(set_dimm_pos_metadata(i_spd));
             FAPI_TRY(set_dram_gen_metadata(i_spd));
             FAPI_TRY(set_dimm_type_metadata(i_spd));
 
