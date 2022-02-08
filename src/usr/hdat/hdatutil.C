@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -346,14 +346,6 @@ void hdatPopulateMTMAndSerialNumber()
             strncpy(l_rawMTM,reinterpret_cast<const char*>(l_vpddata),
                     l_mtmSize);
             HDAT_DBG("from deviceRead l_rawMTM=%s, l_vpddata=%s",l_rawMTM,l_vpddata);
-            for(uint8_t i=0; i<sizeof(l_rawMTM); i++)
-            {
-                if(l_rawMTM[i] == '-')
-                {
-                    l_rawMTM[i]='.';
-                    break;
-                }
-            }
 
             if(!l_pSysTarget->trySetAttr<TARGETING::ATTR_RAW_MTM>
                                                   (l_rawMTM))
