@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -325,19 +325,6 @@ class ccsTraits<mss::mc_type::EXPLORER>
 
         fapi_try_exit:
             return fapi2::current_err;
-        }
-
-
-        ///
-        /// @brief Gets the attribute for checking our rank configuration
-        /// @param[in] i_target the port target on which to operate
-        /// @param[out] o_ranks the rank data
-        /// @return SUCCESS iff the code executes successfully
-        ///
-        static fapi2::ReturnCode get_rank_config_attr(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
-                uint8_t (&o_array)[2])
-        {
-            return mss::attr::get_num_master_ranks_per_dimm(i_target, o_array);
         }
 
         ///

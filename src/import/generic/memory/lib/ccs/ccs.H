@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,6 +47,7 @@
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_memdiags.H>
 #include <generic/memory/lib/ccs/ccs_traits.H>
+#include <generic/memory/lib/mss_generic_attribute_getters.H>
 
 namespace mss
 {
@@ -145,7 +146,7 @@ class instruction_t
             const fapi2::Target<TT::PORT_TARGET_TYPE>& i_target,
             const rank_configuration i_rank_config )
         {
-            // If this instrunction is set to not update the rank, then don't update the rank
+            // If this instruction is set to not update the rank, then don't update the rank
             if(!iv_update_rank)
             {
                 return fapi2::FAPI2_RC_SUCCESS;
@@ -267,7 +268,7 @@ inline fapi2::ReturnCode get_rank_config(const fapi2::Target<TT::PORT_TARGET_TYP
 
     uint8_t l_num_master_ranks[TT::CCS_MAX_DIMM_PER_PORT] = {};
     bool l_has_rcd = false;
-    FAPI_TRY(TT::get_rank_config_attr(i_target, l_num_master_ranks));
+    FAPI_TRY(mss::attr::get_num_master_ranks_per_dimm(i_target, l_num_master_ranks));
     FAPI_TRY(TT::get_has_rcd(i_target, l_has_rcd));
 
     // We only need to check DIMM0
