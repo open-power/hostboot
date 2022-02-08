@@ -48,9 +48,10 @@ enum vpdModuleId
     // Common VPD
     VPD_WRITE_PNOR                          = 0x10,
     VPD_ENSURE_CACHE_IS_IN_SYNC             = 0x11,
-    VPD_GET_PN_AND_SN                       = 0x12,
+    VPD_GET_PN_AND_SN                       = 0x12,//deprecated
     VPD_GET_VPD_LOCATION                    = 0x13,
-    VPD_GET_CCIN                            = 0x14,
+    VPD_GET_CCIN                            = 0x14,//deprecated
+    VPD_GET_FRU_RECS_AND_KWS                = 0x15,
 
     // IPVPD
     VPD_IPVPD_TRANSLATE_RECORD              = 0x20,
@@ -192,6 +193,7 @@ enum vpdReasonCode
     VPD_BYTES_TO_WRITE_MISMATCH         = VPD_COMP_ID | 0x4C,
     VPD_INVALID_METHOD_OR_DATA_SECTION  = VPD_COMP_ID | 0x4D,
     VPD_RECORD_INVALID                  = VPD_COMP_ID | 0x4E,
+    VPD_UNSUPPORTED_FRU_PROPERTY        = VPD_COMP_ID | 0x4F,
 };
 
 

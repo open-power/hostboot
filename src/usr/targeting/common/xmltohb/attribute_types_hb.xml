@@ -339,6 +339,19 @@
   </attribute>
 
   <attribute>
+    <id>FRU_NUMBER</id>
+    <description>The FRU part number for a particular FRU target, typically comes from FN keyword of VPD</description>
+    <simpleType>
+      <uint8_t/>
+      <array>48</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
     <id>FSI_MASTER_MUTEX</id>
     <description>Mutex for FSI Master Operations</description>
     <simpleType>
@@ -1207,7 +1220,7 @@
 
   <attribute>
     <id>PART_NUMBER</id>
-    <description>The part number for a particular FRU target</description>
+    <description>The part number for a particular FRU target, typically comes from PN keyword of VPD</description>
     <simpleType>
       <uint8_t/>
       <array>48</array>
@@ -1216,10 +1229,6 @@
     <readable/>
     <writeable/>
     <hbOnly/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_PART_NUMBER</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
   </attribute>
 
   <attribute>

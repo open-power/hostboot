@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2022                        -->
 <!-- [+] Google Inc.                                                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
@@ -33,6 +33,9 @@
     <id>chip-ocmb</id>
     <attribute>
       <id>FRU_CCIN</id>
+    </attribute>
+    <attribute>
+      <id>FRU_NUMBER</id>
     </attribute>
     <attribute>
       <default>0</default>
@@ -66,6 +69,9 @@
     </attribute>
     <attribute>
       <id>FRU_CCIN</id>
+    </attribute>
+    <attribute>
+      <id>FRU_NUMBER</id>
     </attribute>
     <attribute>
       <id>FSI_MASTER_MUTEX</id>
@@ -187,6 +193,9 @@
       <id>FRU_CCIN</id>
     </attribute>
     <attribute>
+      <id>FRU_NUMBER</id>
+    </attribute>
+    <attribute>
       <id>HB_TPM_INIT_ATTEMPTED</id>
     </attribute>
     <attribute>
@@ -219,6 +228,9 @@
     <id>enc-node-power10</id>
     <attribute>
       <id>FRU_CCIN</id>
+    </attribute>
+    <attribute>
+      <id>FRU_NUMBER</id>
     </attribute>
     <attribute>
       <id>IS_SLAVE_DRAWER</id>
@@ -267,6 +279,9 @@
     </attribute>
     <attribute>
       <id>FRU_CCIN</id>
+    </attribute>
+    <attribute>
+      <id>FRU_NUMBER</id>
     </attribute>
     <attribute>
       <id>PART_NUMBER</id>

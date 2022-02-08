@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] Evan Lojewski                                                      */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
@@ -2336,31 +2336,43 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
             TRACFCOMP(g_trac_spd, "Part data size too large for attribute. Expected: %d Actual: %d"
                     "Keyword: %X",
                     expectedPNSize, l_partDataSize, l_partKeyword);
+            l_partDataSize = expectedPNSize; //truncate it
         }
-        else
+        memcpy(l_PN, l_partNumberData, l_partDataSize);
+        i_target->trySetAttr<TARGETING::ATTR_PART_NUMBER>(l_PN);
+        TRACFBIN(g_trac_spd,
+                 "                                : PART NUMBER =",
+                 l_PN, l_partDataSize);
+
+        // FRU Part Number is the same as Part Number for DIMMs
+        TARGETING::ATTR_FRU_NUMBER_type l_FN = {0};
+        size_t expectedFNSize = sizeof(l_FN);
+        if(expectedFNSize < l_partDataSize)
         {
-            memcpy(l_PN, l_partNumberData, l_partDataSize);
-            i_target->trySetAttr<TARGETING::ATTR_PART_NUMBER>(l_PN);
-            TRACFBIN(g_trac_spd,
-                     "                                : PART NUMBER =",
-                     l_PN, l_partDataSize);
+            TRACFCOMP(g_trac_spd, "Part data size too large for attribute. Expected: %d Actual: %d"
+                    "Keyword: %X, attribute will be truncated",
+                    expectedPNSize, l_partDataSize, l_partKeyword);
+            l_partDataSize = expectedFNSize; //truncate it
         }
+        memcpy(l_FN, l_partNumberData, l_partDataSize);
+        i_target->trySetAttr<TARGETING::ATTR_FRU_NUMBER>(l_FN);
+        TRACFBIN(g_trac_spd,
+                 "                                : FRU NUMBER =",
+                 l_FN, l_partDataSize);
 
         TARGETING::ATTR_SERIAL_NUMBER_type l_SN = {0};
         size_t expectedSNSize = sizeof(l_SN);
         if(expectedSNSize < l_serialDataSize)
         {
-            TRACFCOMP(g_trac_spd, "Serial data size too large for attribute. Expected: %d Actual: %d",
+            TRACFCOMP(g_trac_spd, "Serial data size too large for attribute. Expected: %d Actual: %d, attribute will be truncated",
                         expectedSNSize, l_serialDataSize);
+            l_serialDataSize = expectedSNSize; //truncate it
         }
-        else
-        {
-            memcpy(l_SN, l_serialNumberData, l_serialDataSize);
-            i_target->trySetAttr<TARGETING::ATTR_SERIAL_NUMBER>(l_SN);
-            TRACFBIN(g_trac_spd,
-                     "                                : SERIAL NUMBER =",
-                     l_SN, l_serialDataSize);
-        }
+        memcpy(l_SN, l_serialNumberData, l_serialDataSize);
+        i_target->trySetAttr<TARGETING::ATTR_SERIAL_NUMBER>(l_SN);
+        TRACFBIN(g_trac_spd,
+                 "                                : SERIAL NUMBER =",
+                 l_SN, l_serialDataSize);
 
         if (l_ccinKeyword != 0)
         {
@@ -2369,17 +2381,15 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
             if(expectedCCSize < l_ccinDataSize)
             {
                 TRACFCOMP(g_trac_spd,
-                          "CCIN data size too large for attribute. Expected: %d Actual: %d",
+                          "CCIN data size too large for attribute. Expected: %d Actual: %d, attribute will be truncated",
                           expectedCCSize, l_ccinDataSize);
+                l_ccinDataSize = expectedCCSize; //truncate it
             }
-            else
-            {
-                memcpy(&l_CC, l_ccinData, l_ccinDataSize);
-                i_target->trySetAttr<TARGETING::ATTR_FRU_CCIN>(l_CC);
-                TRACFCOMP(g_trac_spd,
-                         "                                : CCIN = %lx",
-                         l_CC);
-            }
+            memcpy(&l_CC, l_ccinData, l_ccinDataSize);
+            i_target->trySetAttr<TARGETING::ATTR_FRU_CCIN>(l_CC);
+            TRACFCOMP(g_trac_spd,
+                      "                                : CCIN = %lx",
+                      l_CC);
         }
 
     }while( 0 );

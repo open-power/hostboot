@@ -27,6 +27,7 @@
 
 #include <pnor/pnorif.H>
 #include <vpd/vpd_if.H>
+#include <vpd/ipvpdenums.H>
 #include <map>
 
 namespace VPD
@@ -286,38 +287,35 @@ bool resolveVpdSource( TARGETING::Target * i_target,
                        vpdCmdTarget& o_vpdSource );
 
 /**
- * @brief This function sets the correct record/keyword combinations
- *        for the part and serial numbers.
- * @param[in] i_target - target to get the data for
- * @param[in] i_type - type of target (PROC/DIMM/NODE/etc)
- * @param[in/out] io_record - record for target
- * @param[in/out] io_keywordPN - the part number keyword
- * @param[in/out] io_keywordSN - the serial number keyword
- *
- * @return errlHndl_t - nullptr if successful, otherwise a pointer to the
- *                error log.
+ * @brief Structure to describe the relation between a FRU property
+ *        (represented by the corresponding attribute) and the
+ *        record+keyword combination that stores it.
  */
-errlHndl_t getPnAndSnRecordAndKeywords( TARGETING::Target * i_target,
-                                        TARGETING::TYPE i_type,
-                                        vpdRecord & io_record,
-                                        vpdKeyword & io_keywordPN,
-                                        vpdKeyword & io_keywordSN );
+struct FruPropertyLocation_t
+{
+    TARGETING::ATTRIBUTE_ID name;
+    vpdRecord record;
+    vpdKeyword keyword;
+    FruPropertyLocation_t( TARGETING::ATTRIBUTE_ID i_name ) :
+      name(i_name),
+    record(IPVPD::INVALID_RECORD),
+    keyword(IPVPD::INVALID_KEYWORD) {};
+};
 
 /**
- * @brief This function sets the correct record/keyword combinations
- *        for the ccin.
+ * @brief This function returns the correct record/keyword combinations
+ *        for the requested FRU properties..
  * @param[in] i_target - target to get the data for
  * @param[in] i_type - type of target (PROC/DIMM/NODE/etc)
- * @param[in/out] io_record - record for target
- * @param[in/out] io_keywordCC - the CCIN keyword
+ * @param[in/out] io_locs - input: List of properties to fetch,
+ *                        - output: Associated records+keywords
  *
  * @return errlHndl_t - nullptr if successful, otherwise a pointer to the
  *                error log.
  */
-errlHndl_t getCcinRecordAndKeywords( TARGETING::Target * i_target,
+errlHndl_t getFruRecordsAndKeywords( TARGETING::Target * i_target,
                                      TARGETING::TYPE i_type,
-                                     vpdRecord & io_record,
-                                     vpdKeyword & io_keywordCC );
+                                     std::vector<FruPropertyLocation_t>& io_locs );
 
 /**
  * Define useful constants for VPD code

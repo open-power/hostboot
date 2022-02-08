@@ -363,11 +363,6 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
 void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
 {
     errlHndl_t l_err = nullptr;
-    vpdRecord l_recordPNSN = 0;
-    vpdRecord l_recordCC = 0;
-    vpdKeyword l_keywordPN = 0;
-    vpdKeyword l_keywordSN = 0;
-    vpdKeyword l_keywordCC = 0;
     size_t l_dataSize = 0;
 
     TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
@@ -381,329 +376,348 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
             l_ipvpd = &(Singleton<PvpdFacade>::instance());
         }
 
-        // Get the pn/sn record/keyword based on the type
-        l_err = getPnAndSnRecordAndKeywords( i_target,
-                                             l_type,
-                                             l_recordPNSN,
-                                             l_keywordPN,
-                                             l_keywordSN );
-        if( l_err )
-        {
-            TRACFCOMP(g_trac_vpd,
-                      "Error getting record/keywords for PN/SN");
-            errlCommit(l_err, VPD_COMP_ID);
-            break;
-        }
-
-        // Get the cc record/keyword based on the type
-        l_err = getCcinRecordAndKeywords( i_target,
+        // Get the pn/sn/fn/cc record/keyword based on the type
+        std::vector<FruPropertyLocation_t> l_recordsKeywords;
+        l_recordsKeywords.push_back(FruPropertyLocation_t(TARGETING::ATTR_PART_NUMBER));
+        l_recordsKeywords.push_back(FruPropertyLocation_t(TARGETING::ATTR_SERIAL_NUMBER));
+        l_recordsKeywords.push_back(FruPropertyLocation_t(TARGETING::ATTR_FRU_NUMBER));
+        l_recordsKeywords.push_back(FruPropertyLocation_t(TARGETING::ATTR_FRU_CCIN));
+        l_err = getFruRecordsAndKeywords( i_target,
                                           l_type,
-                                          l_recordCC,
-                                          l_keywordCC );
+                                          l_recordsKeywords );
         if( l_err )
         {
             TRACFCOMP(g_trac_vpd,
-                      "Error getting record/keywords for CC");
+                      "Error getting records/keywords for %.8X",
+                      TARGETING::get_huid(i_target));
             errlCommit(l_err, VPD_COMP_ID);
             break;
         }
 
-        //------------------
-        // ATTR_PART_NUMBER
-        //------------------
-
-        // Get the part number size
-        IpVpdFacade::input_args_t l_args;
-        l_args.record = l_recordPNSN;
-        l_args.keyword = l_keywordPN;
-        l_err = l_ipvpd->read( i_target,
-                               nullptr,
-                               l_dataSize,
-                               l_args );
-        if( l_err )
+        // Walk through all of the attributes we want to set
+        for( const auto& rk : l_recordsKeywords )
         {
-            TRACFCOMP(g_trac_vpd, "Error reading VPD part number size");
-            errlCommit(l_err, VPD_COMP_ID);
-            // Don't break, continue to serial number
-        }
-        else
-        {
-            // Get the part number data
-            uint8_t l_partNumberData[l_dataSize] = {};
+            // Get the keyword size
+            IpVpdFacade::input_args_t l_args;
+            l_args.record = rk.record;
+            l_args.keyword = rk.keyword;
             l_err = l_ipvpd->read( i_target,
-                                l_partNumberData,
-                                l_dataSize,
-                                l_args );
+                                   nullptr,
+                                   l_dataSize,
+                                   l_args );
             if( l_err )
             {
-                TRACFCOMP(g_trac_vpd, "Error reading VPD part number");
+                TRACFCOMP(g_trac_vpd, "Error reading VPD size for 0x%X on %.8X",
+                          rk.name,
+                          TARGETING::get_huid(i_target));
                 errlCommit(l_err, VPD_COMP_ID);
-                // Don't break, continue to serial number
+                // Don't break, continue to next value
+                continue;
             }
-            else
-            {
-                // Set the part number attribute
-                TARGETING::ATTR_PART_NUMBER_type l_partNumber = {0};
-                size_t l_attrPNSize = sizeof(l_partNumber);
-                if(l_attrPNSize < l_dataSize)
-                {
-                    TRACFCOMP(g_trac_vpd,
-                            "Part number data too large for attribute."
-                            " ATTR size: %d VPD size: %d",
-                            l_attrPNSize,
-                            l_dataSize);
-                }
-                else
-                {
-                    memcpy( l_partNumber, l_partNumberData, l_dataSize );
-                    i_target->trySetAttr
-                                <TARGETING::ATTR_PART_NUMBER>(l_partNumber);
-                }
-            }
-        }
 
-        //--------------------
-        // ATTR_SERIAL_NUMBER
-        //--------------------
-
-        // Get the serial number size
-        l_args.record = l_recordPNSN;
-        l_args.keyword = l_keywordSN;
-        l_dataSize = 0;
-        l_err = l_ipvpd->read( i_target,
-                               nullptr,
-                               l_dataSize,
-                               l_args );
-        if( l_err )
-        {
-            TRACFCOMP(g_trac_vpd, "Error reading VPD serial number size");
-            errlCommit( l_err, VPD_COMP_ID );
-            // Don't break, continue to CCIN
-        }
-        else
-        {
-            // Get the serial number data
-            uint8_t l_serialNumberData[l_dataSize] = {};
+            // Get the keyword data
+            uint8_t l_kwData[l_dataSize] = {};
             l_err = l_ipvpd->read( i_target,
-                                l_serialNumberData,
-                                l_dataSize,
-                                l_args );
+                                   l_kwData,
+                                   l_dataSize,
+                                   l_args );
             if( l_err )
             {
-                TRACFCOMP(g_trac_vpd, "Error reading VPD serial number");
-                errlCommit( l_err, VPD_COMP_ID );
-                // Don't break, continue to CCIN
+                TRACFCOMP(g_trac_vpd, "Error reading VPD data for 0x%X",
+                          rk.name);
+                errlCommit(l_err, VPD_COMP_ID);
+                // Don't break, continue to next value
+                continue;
             }
-            else
+
+            // Have to use a switch statement because everything
+            //  is templatized (don't want to use private TARGETING
+            //  calls)
+            switch(rk.name)
             {
-                // Set the serial number attribute
-                TARGETING::ATTR_SERIAL_NUMBER_type l_serialNumber = {0};
-                size_t l_attrSNSize = sizeof(l_serialNumber);
-                if(l_attrSNSize < l_dataSize)
+                case(TARGETING::ATTR_PART_NUMBER):
                 {
-                    TRACFCOMP(g_trac_vpd,
-                            "Serial number data too large for attribute."
-                            " ATTR size: %d VPD size: %d",
-                            l_attrSNSize,
-                            l_dataSize);
-                }
-                else
-                {
-                    memcpy( l_serialNumber, l_serialNumberData, l_dataSize );
+                    // Set the part number attribute
+                    TARGETING::ATTR_PART_NUMBER_type l_partNumber = {0};
+                    size_t l_attrPNSize = sizeof(l_partNumber);
+                    if(l_attrPNSize < l_dataSize)
+                    {
+                        TRACFCOMP(g_trac_vpd,
+                                  "Part number data too large for attribute. ATTR size: %d VPD size: %d, attribute will be truncated",
+                                  l_attrPNSize,
+                                  l_dataSize);
+                        l_dataSize = l_attrPNSize; //truncate it
+                    }
+                    memcpy(l_partNumber, l_kwData, l_dataSize);
                     i_target->trySetAttr
-                                <TARGETING::ATTR_SERIAL_NUMBER>(l_serialNumber);
+                      <TARGETING::ATTR_PART_NUMBER>(l_partNumber);
+                    break;
+                }
+
+                case(TARGETING::ATTR_FRU_NUMBER):
+                {
+                    // Set the fru part number attribute
+                    TARGETING::ATTR_FRU_NUMBER_type l_fruNumber = {0};
+                    size_t l_attrFNSize = sizeof(l_fruNumber);
+                    if(l_attrFNSize < l_dataSize)
+                    {
+                        TRACFCOMP(g_trac_vpd,
+                                  "FRU part number data too large for attribute. ATTR size: %d VPD size: %d, attribute will be truncated",
+                                  l_attrFNSize,
+                                  l_dataSize);
+                        l_dataSize = l_attrFNSize; //truncate it
+                    }
+                    memcpy(l_fruNumber, l_kwData, l_dataSize);
+                    i_target->trySetAttr
+                      <TARGETING::ATTR_FRU_NUMBER>(l_fruNumber);
+                    break;
+                }
+
+                case(TARGETING::ATTR_SERIAL_NUMBER):
+                {
+                    // Set the serial number attribute
+                    TARGETING::ATTR_SERIAL_NUMBER_type l_serialNumber = {0};
+                    size_t l_attrSNSize = sizeof(l_serialNumber);
+                    if(l_attrSNSize < l_dataSize)
+                    {
+                        TRACFCOMP(g_trac_vpd,
+                                  "Serial number data too large for attribute. ATTR size: %d VPD size: %d, attribute will be truncated",
+                                  l_attrSNSize,
+                                  l_dataSize);
+                        l_dataSize = l_attrSNSize; //truncate it
+                    }
+                    memcpy(l_serialNumber, l_kwData, l_dataSize);
+                    i_target->trySetAttr
+                      <TARGETING::ATTR_SERIAL_NUMBER>(l_serialNumber);
+                    break;
+                }
+
+                case(TARGETING::ATTR_FRU_CCIN):
+                {
+                    // Set the ccin attribute
+                    TARGETING::ATTR_FRU_CCIN_type l_fruCcin = 0;
+                    size_t l_attrCcinSize = sizeof(l_fruCcin);
+                    if(l_attrCcinSize < l_dataSize)
+                    {
+                        TRACFCOMP(g_trac_vpd,
+                                  "CCIN data too large for attribute. ATTR size: %d VPD size: %d, attribute will be truncated",
+                                  l_attrCcinSize,
+                                  l_dataSize);
+                        l_dataSize = l_attrCcinSize; //truncate it
+                    }
+                    memcpy(&l_fruCcin, l_kwData, l_dataSize);
+                    i_target->trySetAttr
+                      <TARGETING::ATTR_FRU_CCIN>(l_fruCcin);
+                    break;
+                }
+
+                default:
+                    // Unexpected  property returned, this should never happen
+                    TRACFCOMP(g_trac_vpd,
+                              "Attribute 0x%X not expected",
+                              rk.name);
+                    assert(false,"Unexpected attribute from fru vpd lookup");
+            }
+        }
+    }while( 0 );
+
+}
+
+// ------------------------------------------------------------------
+// getFruRecordsAndKeywords
+// ------------------------------------------------------------------
+errlHndl_t getFruRecordsAndKeywords( TARGETING::Target * i_target,
+                                     TARGETING::TYPE i_type,
+                                     std::vector<FruPropertyLocation_t>& io_locs )
+{
+    TRACSSCOMP(g_trac_vpd, ENTER_MRK"getFruRecordsAndKeywords(%.8X)",
+               TARGETING::get_huid(i_target));
+    errlHndl_t l_err = nullptr;
+
+    do{
+        // Remember any properties we can't find so we can
+        // throw an error back
+        std::vector<TARGETING::ATTRIBUTE_ID> l_badProperties;
+
+        // Processor Modules
+        if( i_type == TARGETING::TYPE_PROC )
+        {
+            for( auto& rk : io_locs )
+            {
+                switch(rk.name)
+                {
+                    case(TARGETING::ATTR_PART_NUMBER):
+                        rk.record = MVPD::VRML;
+                        rk.keyword = MVPD::PN;
+                        break;
+                    case(TARGETING::ATTR_SERIAL_NUMBER):
+                        rk.record = MVPD::VRML;
+                        rk.keyword = MVPD::SN;
+                        break;
+                    case(TARGETING::ATTR_FRU_CCIN):
+                        rk.record = MVPD::VINI;
+                        rk.keyword = MVPD::CC;
+                        break;
+                    case(TARGETING::ATTR_FRU_NUMBER):
+                        rk.record = MVPD::VINI;
+                        rk.keyword = MVPD::FN;
+                        break;
+                    default:
+                        rk.record = MVPD::MVPD_INVALID_RECORD;
+                        rk.keyword = MVPD::INVALID_MVPD_KEYWORD;
+                        l_badProperties.push_back(rk.name);
                 }
             }
         }
-
-        //---------------
-        // ATTR_FRU_CCIN
-        //---------------
-
-        // If no CCIN keyword just exit
-        if (l_keywordCC == 0)
-        {
-            break;
-        }
-
-        // Get the ccin size
-        l_args.record = l_recordCC;
-        l_args.keyword = l_keywordCC;
-        l_dataSize = 0;
-        l_err = l_ipvpd->read( i_target,
-                               nullptr,
-                               l_dataSize,
-                               l_args );
-        if( l_err )
-        {
-            TRACFCOMP(g_trac_vpd, "Error reading VPD ccin size");
-            errlCommit( l_err, VPD_COMP_ID );
-            break;
-        }
-
-        // Get the ccin data
-        uint8_t l_ccinData[l_dataSize] = {};
-        l_err = l_ipvpd->read( i_target,
-                               l_ccinData,
-                               l_dataSize,
-                               l_args );
-        if( l_err )
-        {
-            TRACFCOMP(g_trac_vpd, "Error reading VPD ccin");
-            errlCommit( l_err, VPD_COMP_ID );
-            break;
-        }
-
-        // Set the ccin attribute
-        TARGETING::ATTR_FRU_CCIN_type l_fruCcin = 0;
-        size_t l_attrCcinSize = sizeof(l_fruCcin);
-        if(l_attrCcinSize < l_dataSize)
-        {
-            TRACFCOMP(g_trac_vpd,
-                      "Ccin data too large for attribute."
-                      " ATTR size: %d VPD size: %d",
-                      l_attrCcinSize,
-                      l_dataSize);
-        }
-        else
-        {
-            memcpy( &l_fruCcin, l_ccinData, l_dataSize );
-            i_target->trySetAttr
-                        <TARGETING::ATTR_FRU_CCIN>(l_fruCcin);
-        }
-
-    }while( 0 );
-
-}
-
-// ------------------------------------------------------------------
-// getPnAndSnRecordAndKeywords
-// ------------------------------------------------------------------
-errlHndl_t getPnAndSnRecordAndKeywords( TARGETING::Target * i_target,
-                                        TARGETING::TYPE i_type,
-                                        vpdRecord & io_record,
-                                        vpdKeyword & io_keywordPN,
-                                        vpdKeyword & io_keywordSN )
-{
-    TRACFCOMP(g_trac_vpd, ENTER_MRK"getPnAndSnRecordAndKeywords()");
-    errlHndl_t l_err = nullptr;
-    do{
-
-        if( i_type == TARGETING::TYPE_PROC )
-        {
-            io_record    = MVPD::VRML;
-            io_keywordPN = MVPD::PN;
-            io_keywordSN = MVPD::SN;
-        }
+        // SPD-derived FRUs
         else if((  i_type == TARGETING::TYPE_DIMM )
                || (i_type == TARGETING::TYPE_OCMB_CHIP))
         {
-            // SPD does not have singleton instance
-            // SPD does not use record
-            if(TARGETING::UTIL::assertGetToplevelTarget()->getAttr<TARGETING::ATTR_USE_11S_SPD>())
+            auto l_use11S = TARGETING::UTIL::assertGetToplevelTarget()
+              ->getAttr<TARGETING::ATTR_USE_11S_SPD>();
+
+            for( auto& rk : io_locs )
             {
-                io_keywordPN = SPD::IBM_11S_PN;
-                io_keywordSN = SPD::IBM_11S_SN;
-            }
-            else
-            {
-                io_keywordPN = SPD::MODULE_PART_NUMBER;
-                io_keywordSN = SPD::MODULE_SERIAL_NUMBER;
+                // SPD does not use record
+                rk.record = IPVPD::INVALID_RECORD;
+
+                switch(rk.name)
+                {
+                    case(TARGETING::ATTR_PART_NUMBER):
+                    case(TARGETING::ATTR_FRU_NUMBER): //same as part number
+                        if( l_use11S ) {
+                            rk.keyword = SPD::IBM_11S_PN;
+                        } else {
+                            rk.keyword = SPD::MODULE_PART_NUMBER;
+                        }
+                        break;
+                    case(TARGETING::ATTR_SERIAL_NUMBER):
+                        if( l_use11S ) {
+                            rk.keyword = SPD::IBM_11S_SN;
+                        } else {
+                            rk.keyword = SPD::MODULE_SERIAL_NUMBER;
+                        }
+                        break;
+                    case(TARGETING::ATTR_FRU_CCIN):
+                        if( l_use11S ) {
+                            rk.keyword = SPD::IBM_11S_CC;
+                        } else {
+                            rk.keyword = SPD::INVALID_SPD_KEYWORD;
+                            l_badProperties.push_back(rk.name);
+                        }
+                        break;
+                    default:
+                        rk.keyword = SPD::INVALID_SPD_KEYWORD;
+                        l_badProperties.push_back(rk.name);
+                }
             }
         }
+        // Backplane
         else if(usePvpdFacade(i_target))
         {
-            io_record    = PVPD::VINI;
-            io_keywordPN = PVPD::PN;
-            io_keywordSN = PVPD::SN;
+            for( auto& rk : io_locs )
+            {
+                // Everything comes from the VINI
+                rk.record = PVPD::VINI;
+                switch(rk.name)
+                {
+                    case(TARGETING::ATTR_PART_NUMBER):
+                        rk.keyword = PVPD::PN;
+                        break;
+                    case(TARGETING::ATTR_SERIAL_NUMBER):
+                        rk.keyword = PVPD::SN;
+                        break;
+                    case(TARGETING::ATTR_FRU_CCIN):
+                        rk.keyword = PVPD::CC;
+                        break;
+                    case(TARGETING::ATTR_FRU_NUMBER):
+                        rk.keyword = PVPD::FN;
+                        break;
+                    default:
+                        rk.record = PVPD::PVPD_INVALID_RECORD;
+                        rk.keyword = PVPD::PVPD_INVALID_KEYWORD;
+                        l_badProperties.push_back(rk.name);
+                }
+            }
         }
         else
         {
             TRACFCOMP(g_trac_vpd,ERR_MRK
-                      "VPD::getPnAndSnRecordAndKeywords() Unexpected target type, huid=0x%X",
+                      "VPD::getFruRecordsAndKeywords() Unexpected target type, huid=0x%X",
                       TARGETING::get_huid(i_target));
             /*@
              * @errortype
-             * @moduleid     VPD_GET_PN_AND_SN
+             * @moduleid     VPD_GET_FRU_RECS_AND_KWS
              * @reasoncode   VPD_UNEXPECTED_TARGET_TYPE
              * @userdata1    Target HUID
              * @userdata2    <UNUSED>
-             * @devdesc      Unexpected target type
+             * @devdesc      Unexpected target type for FRU property
+             * @custdesc     Error in system firmware
              */
             l_err = new ERRORLOG::ErrlEntry(
-                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                    VPD_GET_PN_AND_SN,
+                                    ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                    VPD_GET_FRU_RECS_AND_KWS,
                                     VPD_UNEXPECTED_TARGET_TYPE,
                                     TO_UINT64(TARGETING::get_huid(i_target)),
                                     0x0,
                                     ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+            l_err->collectTrace("VPD",1024);
 
-        }
-    }while( 0 );
-    TRACSSCOMP(g_trac_vpd, EXIT_MRK"getPnAndSnRecordAndKeywords()");
-    return l_err;
-}
-
-// ------------------------------------------------------------------
-// getCcinRecordAndKeywords
-// ------------------------------------------------------------------
-errlHndl_t getCcinRecordAndKeywords( TARGETING::Target * i_target,
-                                     TARGETING::TYPE i_type,
-                                     vpdRecord & io_record,
-                                     vpdKeyword & io_keywordCC )
-{
-    TRACFCOMP(g_trac_vpd, ENTER_MRK"getCcinRecordAndKeywords()");
-    errlHndl_t l_err = nullptr;
-    do{
-
-        if( i_type == TARGETING::TYPE_PROC )
-        {
-            io_record    = MVPD::VINI;
-            io_keywordCC = MVPD::CC;
-        }
-        else if((  i_type == TARGETING::TYPE_DIMM )
-               || (i_type == TARGETING::TYPE_OCMB_CHIP))
-        {
-            // SPD does not have singleton instance
-            // SPD does not use record
-            if(TARGETING::UTIL::assertGetToplevelTarget()->getAttr<TARGETING::ATTR_USE_11S_SPD>())
+            // Fill in output with invalid data
+            for( auto& rk : io_locs )
             {
-                io_keywordCC = SPD::IBM_11S_CC;
+                rk.record = IPVPD::INVALID_RECORD;
+                rk.keyword = IPVPD::INVALID_KEYWORD;
             }
-            else
-            {
-                 // No CC, only in 11S
-            }
+
+            break;
         }
-        else if(usePvpdFacade(i_target))
-        {
-            io_record    = PVPD::VINI;
-            io_keywordCC = PVPD::CC;
-        }
-        else
+
+        if( !l_badProperties.empty() )
         {
             TRACFCOMP(g_trac_vpd,ERR_MRK
-                      "VPD::getCcinRecordAndKeywords() Unexpected target type, huid=0x%X",
+                      "VPD::getFruRecordsAndKeywords() Unsupported property requested, huid=0x%X",
                       TARGETING::get_huid(i_target));
+
+            // fill a couple words of data with the bad attributes
+            uint32_t l_badProps[2] = { 0 };
+            size_t i = 0;
+            for( auto bad : l_badProperties )
+            {
+                TRACFCOMP(g_trac_vpd, ERR_MRK"Bad name = 0x%X",bad);
+                if( i<2 )
+                {
+                    l_badProps[i++] = bad;
+                }
+            }
+
             /*@
              * @errortype
-             * @moduleid     VPD_GET_CCIN
-             * @reasoncode   VPD_UNEXPECTED_TARGET_TYPE
-             * @userdata1    Target HUID
-             * @userdata2    <UNUSED>
-             * @devdesc      Unexpected target type for CCIN Record/Keyword
+             * @moduleid     VPD_GET_FRU_RECS_AND_KWS
+             * @reasoncode   VPD_UNSUPPORTED_FRU_PROPERTY
+             * @userdata1[00:31]  Target HUID
+             * @userdata1[32:63]  Target Type
+             * @userdata2    First 2 bad property attributes
+             * @devdesc      Unexpected FRU property requested
+             * @custdesc     Informational warning in system firmware
              */
             l_err = new ERRORLOG::ErrlEntry(
-                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                    VPD_GET_CCIN,
-                                    VPD_UNEXPECTED_TARGET_TYPE,
-                                    TO_UINT64(TARGETING::get_huid(i_target)),
-                                    0x0,
-                                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
-
+                             ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                             VPD_GET_FRU_RECS_AND_KWS,
+                             VPD_UNSUPPORTED_FRU_PROPERTY,
+                             TWO_UINT32_TO_UINT64(TARGETING::get_huid(i_target),
+                                                  i_type),
+                             TWO_UINT32_TO_UINT64(l_badProps[0],
+                                                  l_badProps[1]),
+                             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+            l_err->collectTrace("VPD",1024);
+            errlCommit(l_err, VPD_COMP_ID);
+            // just committing log here as info because caller can deal
+            //  with the invalid record+keyword if the data is truly
+            //  required
         }
-    }while( 0 );
-    TRACSSCOMP(g_trac_vpd, EXIT_MRK"getCcinRecordAndKeywords()");
+    } while(0);
+
     return l_err;
 }
 
@@ -781,19 +795,17 @@ errlHndl_t ensureEepromCacheIsInSync(TARGETING::Target           * i_target,
 
     TRACDCOMP(g_trac_vpd, ENTER_MRK"ensureEepromCacheIsInSync() ");
 
-    vpdRecord  l_record    = 0;
-    vpdKeyword l_keywordPN = 0;
-    vpdKeyword l_keywordSN = 0;
-
     do
     {
-        // Get the correct Part and serial numbers
-        l_err = getPnAndSnRecordAndKeywords(i_target,
-                                            i_target->
-                                                getAttr<TARGETING::ATTR_TYPE>(),
-                                            l_record,
-                                            l_keywordPN,
-                                            l_keywordSN );
+        // Get the pn/sn record/keyword based on the type
+        std::vector<FruPropertyLocation_t> l_recordsKeywords;
+        l_recordsKeywords.push_back(FruPropertyLocation_t(TARGETING::ATTR_PART_NUMBER));
+        l_recordsKeywords.push_back(FruPropertyLocation_t(TARGETING::ATTR_SERIAL_NUMBER));
+        l_err = getFruRecordsAndKeywords( i_target,
+                                          i_target->
+                                              getAttr<TARGETING::ATTR_TYPE>(),
+                                          l_recordsKeywords );
+
         if( l_err )
         {
             TRACFCOMP(g_trac_vpd,
@@ -802,37 +814,28 @@ errlHndl_t ensureEepromCacheIsInSync(TARGETING::Target           * i_target,
             break;
         }
 
-        // Compare the Part Numbers in CACHE/HARDWARE
-        bool l_matchPN = false;
-        l_err = cmpEecacheToEeprom(i_target,
-                                   i_eepromType,
-                                   l_keywordPN,
-                                   l_record,
-                                   l_matchPN);
-
-        if (l_err)
+        // Loop through all of our records/keywords to compare
+        //  CACHE vs HARDWARE
+        o_isInSync = true;
+        for( auto& rk : l_recordsKeywords )
         {
-            TRACFCOMP(g_trac_vpd,ERR_MRK
-                      "VPD::ensureEepromCacheIsInSync: "
-                      "Error checking for CACHE/HARDWARE PN match");
-            break;
-        }
+            bool l_match = false;
+            l_err = cmpEecacheToEeprom(i_target,
+                                       i_eepromType,
+                                       rk.keyword,
+                                       rk.record,
+                                       l_match);
 
-        // Compare the Serial Numbers in CACHE/HARDWARE
-        bool l_matchSN = false;
-        l_err = cmpEecacheToEeprom(i_target,
-                                   i_eepromType,
-                                   l_keywordSN,
-                                   l_record,
-                                   l_matchSN);
-
-        if (l_err)
-        {
-            TRACFCOMP(g_trac_vpd, ERR_MRK
-                     "VPD::ensureEepromCacheIsInSync: Error checking for "
-                     "CACHE/HARDWARE SN match");
-            break;
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_vpd,ERR_MRK
+                          "VPD::ensureEepromCacheIsInSync: "
+                          "Error checking for CACHE/HARDWARE PN match");
+                break;
+            }
+            o_isInSync = o_isInSync && l_match;
         }
+        if( l_err ) { break; }
 
         // Check the serial number and part number of the system if the previous
         // record/key pair matched. Note that this time the record/key pairs are
@@ -844,9 +847,8 @@ errlHndl_t ensureEepromCacheIsInSync(TARGETING::Target           * i_target,
 //
 //        }
 
-        o_isInSync = (l_matchPN && l_matchSN);
-        TRACFCOMP(g_trac_vpd, "VPD::ensureEepromCacheIsInSync o_isInSync=%d HUID=0x%X l_matchPN=%d l_matchSN=%d",
-            o_isInSync, get_huid(i_target), l_matchPN, l_matchSN);
+        TRACFCOMP(g_trac_vpd, "VPD::ensureEepromCacheIsInSync o_isInSync=%d HUID=0x%X",
+                  o_isInSync, get_huid(i_target));
 
         if (i_target->getAttr<TARGETING::ATTR_EECACHE_VPD_STATE>() == TARGETING::EECACHE_VPD_STATE_VPD_NEEDS_REFRESH)
         {
@@ -901,10 +903,6 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
 
     TRACSSCOMP( g_trac_vpd, ENTER_MRK"ensureCacheIsInSync() " );
 
-    vpdRecord  l_record    = 0;
-    vpdKeyword l_keywordPN = 0;
-    vpdKeyword l_keywordSN = 0;
-
     TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
 
     IpVpdFacade* l_ipvpd = &(Singleton<MvpdFacade>::instance());
@@ -915,70 +913,59 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
 
     do
     {
-        // Get the correct Part and serial numbers
-        l_err = getPnAndSnRecordAndKeywords( i_target,
-                                             l_type,
-                                             l_record,
-                                             l_keywordPN,
-                                             l_keywordSN );
+        bool l_fullmatch = true;
+
+        // Get the pn/sn record/keyword based on the type
+        std::vector<FruPropertyLocation_t> l_recordsKeywords;
+        l_recordsKeywords.push_back(FruPropertyLocation_t(TARGETING::ATTR_PART_NUMBER));
+        l_recordsKeywords.push_back(FruPropertyLocation_t(TARGETING::ATTR_SERIAL_NUMBER));
+        l_err = getFruRecordsAndKeywords( i_target,
+                                          l_type,
+                                          l_recordsKeywords );
+
         if( l_err )
         {
-            TRACFCOMP(g_trac_vpd, "VPD::ensureCacheIsInSync: Error getting part and serial numbers");
+            TRACFCOMP(g_trac_vpd,
+                      "VPD::ensureCacheIsInSync: Error getting part and serial numbers");
             break;
         }
 
+        // Loop through all of our records/keywords to compare
+        //  CACHE vs HARDWARE
+        for( auto& rk : l_recordsKeywords )
+        {
+            bool l_match = false;
+            // Compare the Numbers in PNOR/SEEPROM
+            if( ( l_type == TARGETING::TYPE_PROC   ) ||
+                ( l_type == TARGETING::TYPE_NODE   ) ||
+                ( l_type == TARGETING::TYPE_MEMBUF ))
+            {
+                l_err = l_ipvpd->cmpPnorToSeeprom( i_target,
+                                                   rk.record,
+                                                   rk.keyword,
+                                                   l_match );
+            }
+            else if( l_type == TARGETING::TYPE_DIMM )
+            {
+                l_err = SPD::cmpPnorToSeeprom( i_target,
+                                               rk.keyword,
+                                               l_match );
+            }
+            if (l_err)
+            {
+                TRACDCOMP(g_trac_vpd,ERR_MRK"VPD::ensureCacheIsInSync: Error checking for PNOR/SEEPROM match : attr 0x%X", rk.name);
+                break;
+            }
 
-        // Compare the Part Numbers in PNOR/SEEPROM
-        bool l_matchPN = false;
-        if( ( l_type == TARGETING::TYPE_PROC   ) ||
-            ( l_type == TARGETING::TYPE_NODE   ) ||
-            ( l_type == TARGETING::TYPE_MEMBUF ))
-        {
-            l_err = l_ipvpd->cmpPnorToSeeprom( i_target,
-                                               l_record,
-                                               l_keywordPN,
-                                               l_matchPN );
+            l_fullmatch = l_fullmatch && l_match;
         }
-        else if( l_type == TARGETING::TYPE_DIMM )
-        {
-            l_err = SPD::cmpPnorToSeeprom( i_target,
-                                           l_keywordPN,
-                                           l_matchPN );
-        }
-        if (l_err)
-        {
-            TRACDCOMP(g_trac_vpd,ERR_MRK"VPD::ensureCacheIsInSync: Error checking for PNOR/SEEPROM PN match");
-            break;
-        }
-
-        // Compare the Serial Numbers in PNOR/SEEPROM
-        bool l_matchSN = false;
-        if( ( l_type == TARGETING::TYPE_PROC   ) ||
-            ( l_type == TARGETING::TYPE_NODE   ) ||
-            ( l_type == TARGETING::TYPE_MEMBUF ) )
-        {
-            l_err = l_ipvpd->cmpPnorToSeeprom( i_target,
-                                               l_record,
-                                               l_keywordSN,
-                                               l_matchSN );
-        }
-        else if( l_type == TARGETING::TYPE_DIMM )
-        {
-            l_err = SPD::cmpPnorToSeeprom( i_target,
-                                           l_keywordSN,
-                                           l_matchSN );
-        }
-        if( l_err )
-        {
-            TRACDCOMP(g_trac_vpd,ERR_MRK"VPD::ensureCacheIsInSync: Error checking for PNOR/SEEPROM SN match");
-            break;
-        }
+        if( l_err ) { break; }
 
         //Check the serial number and part number of the system if the previous
         //record/key pair matched. Note that this time the record/key pairs
         //are VSYS/SE and VSYS/TM for serial number and part number,respectively
         if(l_type == TARGETING::TYPE_NODE &&
-           (l_matchSN && l_matchPN))
+           (l_fullmatch))
         {
 
             bool l_zeroPN = false;
@@ -1023,10 +1010,11 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
             if(!l_zeroPN)
             {
                 // current pair is a guess
+                bool l_match = false;
                 l_err = l_ipvpd->cmpPnorToSeeprom(i_target,
                                                   PVPD::VSYS,
                                                   PVPD::TM,
-                                                  l_matchPN);
+                                                  l_match);
                 if(l_err)
                 {
                     TRACFCOMP(g_trac_vpd,ERR_MRK"VPD::ensureCacheIsInSync: Error"
@@ -1034,15 +1022,17 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
                     TARGETING::get_huid(i_target));
                     break;
                 }
+                l_fullmatch = l_fullmatch && l_match;
             }
 
             if(!l_zeroSN)
             {
                 // current pair is a guess
+                bool l_match = false;
                 l_err = l_ipvpd->cmpPnorToSeeprom(i_target,
                                                   PVPD::VSYS,
                                                   PVPD::SE,
-                                                  l_matchSN);
+                                                  l_match);
                 if(l_err)
                 {
                     TRACFCOMP(g_trac_vpd,ERR_MRK"VPD::ensureCacheIsInSync: Error"
@@ -1050,11 +1040,12 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
                     TARGETING::get_huid(i_target));
                     break;
                 }
+                l_fullmatch = l_fullmatch && l_match;
             }
         }
 
         // If we did not match, we need to load SEEPROM VPD data into PNOR
-        if( l_matchPN && l_matchSN )
+        if( l_fullmatch )
         {
             TRACFCOMP(g_trac_vpd,"VPD::ensureCacheIsInSync: PNOR_PN/SN == SEEPROM_PN/SN for target %.8X",TARGETING::get_huid(i_target));
         }

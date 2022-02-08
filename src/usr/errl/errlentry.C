@@ -3362,9 +3362,9 @@ void ErrlEntry::addFruCalloutDataToSrc(TARGETING::Target *            const i_ta
         // member was zero intialized so all that's necessary to follow spec is to allign the size by 4.
         l_fruco.locCodeLen = ALIGN_4(full_location_code.size());
 
-        // Part Number
-        ATTR_PART_NUMBER_type l_partnum { };
-        UTIL::tryGetAttributeInHierarchy<ATTR_PART_NUMBER>(i_target, l_partnum);
+        // FRU Part Number
+        ATTR_FRU_NUMBER_type l_partnum { };
+        UTIL::tryGetAttributeInHierarchy<ATTR_FRU_NUMBER>(i_target, l_partnum);
         // Set part number truncating as necessary.
         set_errl_string(l_fruco.partNumber,
                         reinterpret_cast<const char*>(l_partnum));
