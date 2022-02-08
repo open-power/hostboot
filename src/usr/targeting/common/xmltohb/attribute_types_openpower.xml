@@ -1459,9 +1459,7 @@ ID for the sensor number returned with the elog. -->
       <uint8_t>
         <default>0</default>
       </uint8_t>
-      <array>
-      12288
-      </array>
+      <array>12288</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>

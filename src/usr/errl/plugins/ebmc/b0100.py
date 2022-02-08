@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2021
+# Contributors Listed Below - COPYRIGHT 2020,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -262,7 +262,8 @@ class errludP_errl:
             i += sizofCalloutUD
             d['Bus Type']=hwasCallout.busTypeEnum.get(intConcat(data, i, i+4)[0],
                                                         unknownStr(data, i, i+4))
-            i += 4
+            # need to account for entire union size of 12 vs just 4 byte busTypeEnum
+            i += 12
 
             d['Target 1'], i=errludP_errl.entityPath(data, i)
             d['Target 2'], i=errludP_errl.entityPath(data, i)
@@ -331,6 +332,7 @@ class errludP_errl:
             # 1 bytes  : engine
             # 1 bytes  : port
             # 1 bytes  : address
+            # 9 bytes  : unused struct union
             # N bytes  : Target
 
             # skip over callout_ud data
@@ -339,6 +341,7 @@ class errludP_errl:
             d['Engine'], i=hexConcat(data, i, i+1)
             d['Port'], i=hexConcat(data, i, i+1)
             d['Dev Address'], i=hexConcat(data, i, i+1)
+            i+=9; # account for entire union struct size
             d['Target'], i=errludP_errl.entityPath(data, i)
 
         else:

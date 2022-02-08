@@ -2071,6 +2071,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0x56ff0f8:
+            #simpleType:uint
+            label = "PROC_FABRIC_R_INDIRECT_EN"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xc0bb633:
             #simpleType:uint
             label = "PROC_FABRIC_A_LINK_DELAY"
@@ -2148,6 +2154,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
         elif attrEnum == 0xb9dc486:
             #simpleType:uint
             label = "MRW_L2_INCREASE_JITTER"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x5da8533:
+            #simpleType:uint
+            label = "MRW_P1PF_MIN_CONFIDENCE_3"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
@@ -2702,12 +2714,6 @@ def ErrlUserDetailsParserAttribute(ver, data):
         elif attrEnum == 0x2afc21f:
             #simpleType:uint
             label = "ZERO_CORE_CHIP"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x5bb7105:
-            #simpleType:uint
-            label = "DEFAULT_HB_CORE"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
@@ -11089,9 +11095,7 @@ def ErrlUserDetailsParserAttribute(ver, data):
         elif attrEnum == 0x8f31306:
             #simpleType:uint
             label = "PLDM_STATE_QUERY_RECORDS"
-            traceEntry.append("[
-      12288
-      ]:")
+            traceEntry.append("[12288]:")
             for x in range(12288):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
@@ -11101,6 +11105,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0xb57d3ee:
+            #simpleType:uint
+            label = "PMIC_HEALTH_CHECK_TIMER"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xefeedde:
             #simpleType:uint
             label = "PMIC_READ_TIMEOUT_SEC"
