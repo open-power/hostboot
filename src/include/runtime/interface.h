@@ -586,8 +586,9 @@ typedef struct hostInterfaces
        HBRT_FW_MSG_TYPE_MCTP_AVAILABLE    = 14, // struct mctp_available
        HBRT_FW_MSG_TYPE_GET_ELOG_TIME     = 15, // struct dateTime
        HBRT_FW_MSG_TYPE_SPILOCK           = 16, // struct spi_lock
-       HBRT_FW_MSG_TYPE_INITIATE_GARD     = 17, // struct initiate_gard
+       HBRT_FW_MSG_TYPE_INITIATE_GARD     = 17, // struct initiate_gard_t
        HBRT_FW_MSG_TYPE_PMIC_HEALTH_CHECK = 18, // no additional data required
+       HBRT_FW_MSG_TYPE_PM_RESET_ALERT     = 20, // struct pmreset_alert_t
     };
 
     // NVDIMM protection state enum
@@ -696,6 +697,15 @@ typedef struct hostInterfaces
         // from HDAT PCRD for NX units)
     } __attribute__((packed));
 
+    /* This struct is for HBRT_FW_MSG_TYPE_PM_RESET_ALERT messages which
+       are sent to the hypervisor from HBRT to inform the hypervisor of
+       an impending PM Complex Reset.  The request should not return
+       until appropriate actions have been taken. */
+    struct pmreset_alert_t
+    {
+        uint32_t procId; /* processor id */
+    } __attribute__((packed));
+
     struct hbrt_fw_msg   // define struct hbrt_fw_msg
     {
        hbrt_fw_msg() { req_hcode_update = { 0 }; };  // ctor
@@ -802,6 +812,9 @@ typedef struct hostInterfaces
           // is sent to the hypervisor from HBRT to request that the hypervisor
           // migrate away from using resources when host PRD detects a problem.
           initiate_gard_t initiate_gard;
+
+          /* For HBRT_FW_MSG_TYPE_PM_RESET_ALERT */
+          pmreset_alert_t pmreset_alert;
 
           // This struct is sent from HBRT with
           // io_type set to HBRT_FW_MSG_HBRT_FSP_REQ or

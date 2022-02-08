@@ -44,7 +44,6 @@
 #include    <targeting/common/utilFilter.H>
 #include    <targeting/common/targetservice.H>
 #include    <targeting/common/mfgFlagAccessors.H>
-
 #include    <targeting/targplatutil.H>
 
 //  fapi support
@@ -89,9 +88,16 @@
 
 #include <htmgt/htmgt.H>
 
-#if defined(__HOSTBOOT_RUNTIME) && defined(CONFIG_NVDIMM)
+#ifdef __HOSTBOOT_RUNTIME
+#include <targeting/common/hbrt_target.H>
+#include <runtime/interface.h>
+#include <runtime/hbrt_utilities.H>
+
+#ifdef CONFIG_NVDIMM
 #include <isteps/nvdimm/nvdimm.H>  // notify NVDIMM protection change
 #endif
+
+#endif //__HOSTBOOT_RUNTIME
 
 // Easy macro replace for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
@@ -915,9 +921,72 @@ namespace HBPM
                 l_errl = nullptr;
             }
 
+#ifdef __HOSTBOOT_RUNTIME
+            // Inform PHYP that we are about to reset the PM complex on
+            //  this chip
+
+            // Create the firmware_request request struct
+            hostInterfaces::hbrt_fw_msg l_req_msg;
+            memset(&l_req_msg, 0, sizeof(l_req_msg));  // clear it all
+            l_req_msg.io_type = hostInterfaces::HBRT_FW_MSG_TYPE_PM_RESET_ALERT;
+
+            // Get the Proc Chip Id
+            TARGETING::rtChipId_t l_chipId = 0;
+            l_errl = TARGETING::getRtTarget(i_target, l_chipId);
+            if(l_errl)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           ERR_MRK"resetPMComplex(): getRtTarget ERROR for %.8X",
+                           TARGETING::get_huid(i_target) );
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "Sending HBRT_FW_MSG_TYPE_PM_RESET_ALERT(%d) message to phyp",
+                           l_chipId );
+
+                l_req_msg.pmreset_alert.procId = l_chipId;
+
+                // actual msg size (one type of hbrt_fw_msg)
+                uint64_t l_req_msg_size = hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
+                  sizeof(l_req_msg.pmreset_alert);
+
+                // Create the firmware_request response struct to receive data
+                hostInterfaces::hbrt_fw_msg l_resp_fw_msg;
+                uint64_t l_resp_fw_msg_size = sizeof(l_resp_fw_msg);
+                memset(&l_resp_fw_msg, 0, l_resp_fw_msg_size);
+
+                // Make the firmware_request call
+                l_errl = firmware_request_helper(l_req_msg_size,
+                                                 &l_req_msg,
+                                                 &l_resp_fw_msg_size,
+                                                 &l_resp_fw_msg);
+                if (l_errl)
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               ERR_MRK"resetPMComplex(): Error sending firmware_request" );
+
+                    //@fixme in followup commit
+                    // To avoid a coreq with the phyp build we will ignore
+                    // this error for now
+                    l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                    l_errl->collectTrace("ISTEPS_TRACE",256);
+                    errlCommit(l_errl, ISTEP_COMP_ID);
+                }
+            }
+            // commit the log and move on with the reset, it might be okay...
+            if (l_errl)
+            {
+                l_errl->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+                l_errl->collectTrace("ISTEPS_TRACE",256);
+                errlCommit(l_errl, ISTEP_COMP_ID);
+            }
+#endif
+
             //Get homer image buffer
             void* l_homerVAddr = reinterpret_cast<void*>(
                                     l_homerMapper.getHomerVirtAddr());
+
             // If this target was already reset previously by the runtime
             //  deconfig logic, then skip it.
             // ATTR_HB_INITIATED_PM_RESET set to COMPLETE signifies that this

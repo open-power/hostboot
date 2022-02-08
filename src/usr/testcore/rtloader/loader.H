@@ -1235,6 +1235,16 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
 
                   retVal = 0;  // just return 0 for testing
                }
+               else if (hostInterfaces::HBRT_FW_MSG_TYPE_PM_RESET_ALERT
+                                                   == l_req_fw_msg->io_type)
+               {
+                  l_resp_fw_msg->io_type =
+                                 hostInterfaces::HBRT_FW_MSG_TYPE_PM_RESET_ALERT;
+                  TRACFCOMP(g_trac_hbrt,
+                            "rt_firmware_request:HBRT_FW_MSG_TYPE_PM_RESET_ALERT(%d)",
+                            l_req_fw_msg->pmreset_alert.procId);
+                  retVal = 0;  // just return 0 for testing
+               }
                else
                {
                   TRACFCOMP(g_trac_hbrt,

@@ -351,6 +351,15 @@ errlHndl_t firmware_request_helper(uint64_t i_reqLen,   void *i_req,
       // Error is not with FSP resetting and/or reloading, so log the error
       else if (rc)
       {
+          TRACFCOMP(g_trac_runtime,
+                    ERR_MRK"Error from firmware_request with io_type=%d. rc=%d",
+                    l_req_fw_msg->io_type,
+                    rc);
+          // Default user data 1 wirh Hypervisor return code
+          // and firmware request message type
+          l_userData1 = TWO_UINT32_TO_UINT64(rc,
+                                             l_req_fw_msg->io_type);
+
          if (l_err)
          {
              add_ffdc( l_err,
