@@ -352,7 +352,10 @@ fapi2::ReturnCode qme_init(
         l_opitA3Data.flush<0>();
         l_pigData.insertFromRight( 0xA, QME_PIG_REQ_INT_TYPE, QME_PIG_REQ_INT_TYPE_LEN );
 
-        FAPI_TRY( putScom( l_eq_mc_or, QME_PIG_REG, l_pigData ) );
+        for( auto l_eq : l_eq_vector )
+        {
+            FAPI_TRY( putScom( l_eq, QME_PIG_REG, l_pigData ) );
+        }
 
         do
         {
