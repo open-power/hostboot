@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -82,6 +82,9 @@ CONSTEXPR uint64_t PLAT_TARGET_FILTER_EQ4         = (BIT0 >> 36);  // Pervasive 
 CONSTEXPR uint64_t PLAT_TARGET_FILTER_EQ5         = (BIT0 >> 37);  // Pervasive 37
 CONSTEXPR uint64_t PLAT_TARGET_FILTER_EQ6         = (BIT0 >> 38);  // Pervasive 38
 CONSTEXPR uint64_t PLAT_TARGET_FILTER_EQ7         = (BIT0 >> 39);  // Pervasive 39
+
+// placeholder for Odyssey compile in ekb, will fix with full support later
+CONSTEXPR uint64_t PLAT_TARGET_FILTER_MC = 0xFFFFFFFFFFFFFFFF;
 
 #undef CONSTEXPR
 
