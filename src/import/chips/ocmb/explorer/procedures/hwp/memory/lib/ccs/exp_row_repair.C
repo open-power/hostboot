@@ -45,7 +45,6 @@
 #include <lib/mcbist/exp_mcbist_traits.H>
 #include <lib/dimm/exp_rank.H>
 #include <lib/dimm/exp_kind.H>
-#include <lib/ccs/exp_bad_dq_bitmap_funcs.H>
 
 #include <generic/memory/lib/dimm/ddr4/mrs_load_ddr4.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>

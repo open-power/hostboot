@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/mcbist/exp_maint_cmds.C $ */
+/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/mcbist/ody_maint_cmds.C $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,9 +22,9 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
+// EKB-Mirror-To: hostboot
 ///
-/// @file exp_maint_cmds.C
+/// @file ody_maint_cmds.C
 /// @brief Utility functions for accessing steer muxes.
 ///
 /// *HWP HWP Owner: Geetha Pisapati <Geetha.Pisapati@ibm.com>
@@ -39,29 +39,22 @@
 //------------------------------------------------------------------------------
 
 #include <fapi2.H>
-#include <lib/shared/exp_consts.H>
-#include <lib/mc/exp_port_traits.H>
-#include <lib/mcbist/exp_maint_cmds.H>
-#include <explorer_scom_addresses.H>
-#include <explorer_scom_addresses_fld.H>
-#include <lib/dimm/exp_rank.H>
-#include <lib/mc/exp_port_traits.H>
-#include <lib/ecc/ecc_traits_explorer.H>
-#include <generic/memory/lib/utils/c_str.H>
-#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <lib/mcbist/ody_maint_cmds.H>
+#include <ody_scom_ody_odc.H>
+
 
 namespace mss
 {
 
 namespace steer
 {
-
 ///
 /// @brief Table matching spare index to last symbol
 /// @note the vector index matches the spare index and holds the symbol value
 ///       the vector index also matches the Spare values for Steer mux registers
 ///
-const std::vector<uint8_t> genSteerTraits< mss::mc_type::EXPLORER>::spare_to_symbol(
+
+const std::vector<uint8_t> genSteerTraits< mss::mc_type::ODYSSEY>::spare_to_symbol(
 {
     68,    36,    64,    32,    60,
     28,    56,    24,    52,    20,
@@ -72,45 +65,49 @@ const std::vector<uint8_t> genSteerTraits< mss::mc_type::EXPLORER>::spare_to_sym
 ///
 /// @brief Used to determine spare info for Spare0 WriteMux
 ///
-const std::vector< uint32_t > steerTraits< mss::mc_type::EXPLORER, mux_type::WRITE_MUX >::muxregs_left =
+const std::vector< uint32_t > steerTraits< mss::mc_type::ODYSSEY, mux_type::WRITE_MUX >::muxregs_left =
 {
-    EXPLR_WDF_WSPAR_CFG_STEERING_R0_LEFT,
-    EXPLR_WDF_WSPAR_CFG_STEERING_R1_LEFT,
-    EXPLR_WDF_WSPAR_CFG_STEERING_R2_LEFT,
-    EXPLR_WDF_WSPAR_CFG_STEERING_R3_LEFT,
+    scomt::ody::ODC_WDF_REGS_WSPAR_0_LEFT,
+    scomt::ody::ODC_WDF_REGS_WSPAR_1_LEFT,
+    // TODO:MST-1595 Remove cfg_steering fields for Rank 2 and 3
+    scomt::ody::ODC_WDF_REGS_WSPAR_2_LEFT,
+    scomt::ody::ODC_WDF_REGS_WSPAR_3_LEFT,
 };
 
 ///
 /// @brief Used to determine spare info for Spare1 WriteMux
 ///
-const std::vector< uint32_t > steerTraits< mss::mc_type::EXPLORER, mux_type::WRITE_MUX >::muxregs_right =
+const std::vector< uint32_t > steerTraits< mss::mc_type::ODYSSEY, mux_type::WRITE_MUX >::muxregs_right =
 {
-    EXPLR_WDF_WSPAR_CFG_STEERING_R0_RIGHT,
-    EXPLR_WDF_WSPAR_CFG_STEERING_R1_RIGHT,
-    EXPLR_WDF_WSPAR_CFG_STEERING_R2_RIGHT,
-    EXPLR_WDF_WSPAR_CFG_STEERING_R3_RIGHT,
+    scomt::ody::ODC_WDF_REGS_WSPAR_0_RIGHT,
+    scomt::ody::ODC_WDF_REGS_WSPAR_1_RIGHT,
+    // TODO:MST-1595 Remove cfg_steering fields for Rank 2 and 3
+    scomt::ody::ODC_WDF_REGS_WSPAR_2_RIGHT,
+    scomt::ody::ODC_WDF_REGS_WSPAR_3_RIGHT,
 };
 
 ///
 /// @brief Used to determine spare info for Spare0 ReadMux
 ///
-const std::vector< uint32_t > steerTraits< mss::mc_type::EXPLORER, mux_type::READ_MUX >::muxregs_left =
+const std::vector< uint32_t > steerTraits< mss::mc_type::ODYSSEY, mux_type::READ_MUX >::muxregs_left =
 {
-    EXPLR_RDF_RSPAR_CFG_STEERING_R0_LEFT,
-    EXPLR_RDF_RSPAR_CFG_STEERING_R1_LEFT,
-    EXPLR_RDF_RSPAR_CFG_STEERING_R2_LEFT,
-    EXPLR_RDF_RSPAR_CFG_STEERING_R3_LEFT,
+    scomt::ody::ODC_RDF0_SCOM_RSPAR_0_LEFT,
+    scomt::ody::ODC_RDF0_SCOM_RSPAR_1_LEFT,
+    // TODO:MST-1595 Remove cfg_steering fields for Rank 2 and 3
+    scomt::ody::ODC_RDF0_SCOM_RSPAR_2_LEFT,
+    scomt::ody::ODC_RDF0_SCOM_RSPAR_3_LEFT,
 };
 
 ///
 /// @brief Used to determine spare info for Spare1 ReadMux
 ///
-const std::vector< uint32_t > steerTraits< mss::mc_type::EXPLORER, mux_type::READ_MUX >::muxregs_right =
+const std::vector< uint32_t > steerTraits< mss::mc_type::ODYSSEY, mux_type::READ_MUX >::muxregs_right =
 {
-    EXPLR_RDF_RSPAR_CFG_STEERING_R0_RIGHT,
-    EXPLR_RDF_RSPAR_CFG_STEERING_R1_RIGHT,
-    EXPLR_RDF_RSPAR_CFG_STEERING_R2_RIGHT,
-    EXPLR_RDF_RSPAR_CFG_STEERING_R3_RIGHT,
+    scomt::ody::ODC_RDF0_SCOM_RSPAR_0_RIGHT,
+    scomt::ody::ODC_RDF0_SCOM_RSPAR_1_RIGHT,
+    // TODO:MST-1595 Remove cfg_steering fields for Rank 2 and 3
+    scomt::ody::ODC_RDF0_SCOM_RSPAR_2_RIGHT,
+    scomt::ody::ODC_RDF0_SCOM_RSPAR_3_RIGHT,
 };
 
 } // ns steer

@@ -46,7 +46,15 @@
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 #include <lib/inband/exp_fw_adapter_properties.H>
 #include <lib/phy/exp_phy_reset.H>
-#include <lib/mc/exp_port.H>
+#include <lib/exp_attribute_accessors_manual.H>
+#include <mss_generic_attribute_getters.H>
+#include <generic/memory/lib/utils/conversions.H>
+#include <mss_explorer_attribute_getters.H>
+#include <lib/mc/exp_port_traits.H>
+#include <lib/dimm/exp_rank.H>
+#include <generic/memory/lib/utils/mc/gen_mss_port.H>
+#include <generic/memory/lib/utils/mc/gen_mss_restore_repairs.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
 extern "C"
 {
@@ -83,7 +91,7 @@ extern "C"
         FAPI_TRY(mss::dimm::has_rcd<mss::mc_type::EXPLORER>(i_target, l_has_rcd));
 
         // Configure clock stabilization time
-        FAPI_TRY(mss::configure_tstab(i_target, l_has_rcd));
+        FAPI_TRY(mss::configure_tstab<mss::mc_type::EXPLORER>(i_target, l_has_rcd));
 
         for(const auto& l_port : l_port_targets)
         {

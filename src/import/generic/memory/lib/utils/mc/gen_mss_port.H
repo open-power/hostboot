@@ -47,9 +47,55 @@
 #include <generic/memory/lib/utils/mss_bad_bits.H>
 #include <generic/memory/lib/utils/mss_rank.H>
 #include <generic/memory/lib/generic_attribute_accessors_manual.H>
+#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_traits.H>
+#include <generic/memory/lib/ecc/galois.H>
+#include <generic/memory/lib/utils/mcbist/gen_maint_cmds.H>
+#include <generic/memory/lib/utils/conversions.H>
+
 
 namespace mss
 {
+///
+/// @brief Configure clock stabilization time field
+/// @tparam MC the memory controller type
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_target the OCMB target to operate on
+/// @param[in] i_has_rcd flag to signify existence of RCD on DIMM
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
+fapi2::ReturnCode configure_tstab(const fapi2::Target<T>& i_target, const bool i_has_rcd)
+{
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::buffer<uint64_t> l_reg_data = 0;
+
+    // Clock stabilization time with an RCD on the DIMM is 5us which is converted to ns
+    constexpr uint64_t TSTAB_VAL_IN_NS = 5 * CONVERT_NS_IN_A_US;
+    uint64_t l_tstab_cfg_val = 0;
+
+    // Convert the ns to cycles.
+    l_tstab_cfg_val = mss::ns_to_cycles(i_target, TSTAB_VAL_IN_NS, l_rc);
+    FAPI_TRY(l_rc, "%s ns_to_cycles failed", mss::c_str(i_target));
+
+    // Reading from the register into l_reg_data
+    FAPI_TRY(mss::getScom(i_target, TT::SRQ_MBAREFAQ, l_reg_data));
+
+
+    // tSTAB should be 5us if RCD exists, otherwise default of 0
+    l_reg_data.insertFromRight<TT::SRQ_MBAREFAQ_CFG_TSTAB,
+                               TT::SRQ_MBAREFAQ_CFG_TSTAB_LEN>
+                               (i_has_rcd ? l_tstab_cfg_val : 0);
+
+    // Writing the updated value to the regitster
+    FAPI_TRY(mss::putScom(i_target, TT::SRQ_MBAREFAQ, l_reg_data));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 
 ///
 /// @brief Reads the farb0q register
@@ -413,7 +459,33 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
-fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<T>& i_target );
+fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<T>& i_target )
+{
+
+    fapi2::buffer<uint64_t> l_data;
+
+    FAPI_TRY( mss::getScom(i_target, TT::FARB9Q_REG, l_data) );
+
+    // Set up noise window triggered calibration
+    l_data.setBit<TT::CFG_CTRLUPD_AFTER_ERR>();
+
+    // Set up periodic calibration
+    l_data.setBit<TT::CFG_MC_PER_CAL_ENABLE>();
+    l_data.insertFromRight<TT::CFG_MC_PER_CAL_INTERVAL_TB,
+                           TT::CFG_MC_PER_CAL_INTERVAL_TB_LEN>(TT::CAL_INTERVAL_TB_16384_CYCLES);
+    l_data.insertFromRight<TT::CFG_MC_PER_CAL_INTERVAL,
+                           TT::CFG_MC_PER_CAL_INTERVAL_LEN>(TT::CAL_INTERVAL_VALUE);
+    l_data.clearBit<TT::CFG_MC_PER_CAL_FIXED_RUN_LENGTH_EN>();
+    l_data.insertFromRight<TT::CFG_MC_PER_CAL_RUN_LENGTH,
+                           TT::CFG_MC_PER_CAL_RUN_LENGTH_LEN>(0);
+    l_data.insertFromRight<TT::CFG_MC_PER_CAL_CTRLUPD_MIN,
+                           TT::CFG_MC_PER_CAL_CTRLUPD_MIN_LEN>(TT::CAL_CTRLUPD_MIN_VALUE);
+
+    FAPI_TRY( mss::putScom(i_target, TT::FARB9Q_REG, l_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 
 ///
@@ -426,7 +498,18 @@ fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<T>& i_target );
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
-fapi2::ReturnCode change_force_str( const fapi2::Target<T>& i_target, const states i_state );
+fapi2::ReturnCode change_force_str( const fapi2::Target<T>& i_target, const states i_state )
+{
+    fapi2::buffer<uint64_t> l_data;
+
+    FAPI_DBG("Change force_str to %s %s", (i_state == HIGH ? "high" : "low"), mss::c_str(i_target));
+    FAPI_TRY( mss::getScom(i_target, TT::STR0Q_REG, l_data) );
+    l_data.writeBit<TT::CFG_FORCE_STR>(i_state);
+    FAPI_TRY( mss::putScom(i_target, TT::STR0Q_REG, l_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 
 ///
@@ -486,8 +569,31 @@ fapi_try_exit:
 ///
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
 fapi2::ReturnCode ecc_reg_settings_draminit_mc( const fapi2::Target<T>& i_target,
-        fapi2::buffer<uint64_t>& io_data );
+        fapi2::buffer<uint64_t>& io_data )
+{
+    fapi2::buffer<uint64_t> l_ctcr_data;
 
+    // mc_type specific settings for RECR
+    io_data.setBit<TT::RECR_ENABLE_MPE_NOISE_WINDOW>();
+    io_data.setBit<TT::RECR_RETRY_UNMARKED_ERRORS>();
+    io_data.clearBit<TT::RECR_CFG_MAINT_USE_TIMERS>();
+
+    // Set up CTCR timers to 20x4^3 (1280 clock cycles; typical read latency is 120ish, so this is about 10x)
+    // This is a preliminary guess from the design team. Also enable UE lockout window
+    // CTCR -> 51A8E00000000000
+    FAPI_TRY( mss::getScom(i_target, TT::CTCR_REG, l_ctcr_data) );
+
+    l_ctcr_data.insertFromRight<TT::CTCR_MPE_TIMER, TT::CTCR_MPE_TIMER_LEN>(TT::MPE_TIMER_SETTING);
+    l_ctcr_data.insertFromRight<TT::CTCR_MPE_TIMEBASE, TT::CTCR_MPE_TIMEBASE_LEN>(TT::MPE_TIMEBASE_SETTING);
+    l_ctcr_data.insertFromRight<TT::CTCR_UE_TIMER, TT::CTCR_UE_TIMER_LEN>(TT::UE_TIMER_SETTING);
+    l_ctcr_data.insertFromRight<TT::CTCR_UE_TIMEBASE, TT::CTCR_UE_TIMEBASE_LEN>(TT::UE_TIMEBASE_SETTING);
+    l_ctcr_data.setBit<TT::CTCR_UE_LOCKOUT_ENABLE>();
+
+    FAPI_TRY( mss::putScom(i_target, TT::CTCR_REG, l_ctcr_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 ///
 /// @brief Enable Read ECC checking
 /// @tparam MC the memory controller type
@@ -604,17 +710,6 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-/// @brief Get the attributes for the reorder queue setting
-/// @tparam MC the memory controller type
-/// @tparam T, the fapi2 target type of the target
-/// @param[in] const ref to the mc target
-/// @param[out] uint8_t& reference to store the value
-/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
-/// @note  Contains the settings for write/read reorder queue
-///
-template< mss::mc_type MC, fapi2::TargetType T >
-fapi2::ReturnCode reorder_queue_setting(const fapi2::Target<T>& i_target, uint8_t& o_value);
-
 ///
 /// @brief Resets the write/read reorder queue values - needs to be called after MCBIST execution
 /// @tparam MC the memory controller type
@@ -627,7 +722,7 @@ template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
 inline fapi2::ReturnCode reset_reorder_queue_settings(const fapi2::Target<T>& i_target)
 {
     uint8_t l_reorder_queue = 0;
-    FAPI_TRY(reorder_queue_setting<MC>(i_target, l_reorder_queue));
+    FAPI_TRY(mss::attr::get_reorder_queue_setting(i_target, l_reorder_queue));
 
     // Changes the reorder queue settings
     {

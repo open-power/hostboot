@@ -51,7 +51,6 @@
 #include <hwp_wrappers.H>
 #include <pldm/extended/pldm_watchdog.H>
 
-#include <lib/mc/exp_port.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 #include <generic/memory/lib/utils/mc/gen_mss_port.H>
 

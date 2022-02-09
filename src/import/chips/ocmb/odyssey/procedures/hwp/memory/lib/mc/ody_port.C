@@ -36,14 +36,50 @@
 
 #include <fapi2.H>
 #include <ody_scom_ody.H>
+#include <lib/shared/ody_consts.H>
+#include <lib/dimm/ody_rank.H>
 #include <generic/memory/lib/utils/mc/gen_mss_port.H>
-#include <generic/memory/lib/utils/mc/gen_mss_port_traits.H>
+#include <generic/memory/lib/utils/mc/gen_mss_restore_repairs.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <generic/memory/lib/utils/mc/gen_mss_port_traits.H>
 #include <lib/mc/ody_port_traits.H>
+#include <lib/ecc/ecc_traits_odyssey.H>
+#include <lib/mcbist/ody_mcbist_traits.H>
+#include <lib/mcbist/ody_maint_cmds.H>
+#include <mss_generic_attribute_getters.H>
+
 
 namespace mss
 {
+const std::vector<uint8_t> portTraits< mss::mc_type::ODYSSEY >::NON_SPARE_NIBBLES =
+{
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    // Byte 5 contains the spares (if they exist) for mc_type
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+};
 
+const std::vector<uint8_t> portTraits< mss::mc_type::ODYSSEY >::SPARE_NIBBLES =
+{
+    // Byte 5 contains the spares (if they exist) for mc_type
+    10,
+    11
+};
 ///
 /// @brief Configures the write reorder queue bit - Odyssey specialization
 /// @param[in] i_target the target to effect

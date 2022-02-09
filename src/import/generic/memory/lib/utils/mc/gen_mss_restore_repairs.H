@@ -48,6 +48,7 @@
 #include <generic/memory/lib/utils/mss_rank.H>
 #include <generic/memory/lib/utils/mc/gen_mss_port_traits.H>
 #include <generic/memory/lib/generic_attribute_accessors_manual.H>
+#include <generic/memory/lib/utils/mcbist/gen_maint_cmds.H>
 
 namespace mss
 {
@@ -387,7 +388,7 @@ class symbol_mark_only : public repair_state<MC, T>
             mss::repair_state<MC, T>::set_state(io_machine, new_state);
 
             uint8_t l_dimm_spare[MAX_RANK_PER_DIMM_ATTR] = {0};
-            FAPI_TRY(dimm_spare<MC>(i_target, l_dimm_spare));
+            FAPI_TRY(mss::attr::get_dimm_spare(i_target, l_dimm_spare));
 
             // For 4U - we want to mark repairs exceeded
             // Spec was written such that "4U" = DDIMM with spares = DDIMM with
@@ -686,82 +687,6 @@ inline std::vector<uint64_t> bad_dq_attr_to_vector(const uint8_t i_bad_bits, con
 
 
 ///
-/// @brief Get the number of bytes to check in restore_repairs
-/// @tparam MC the memory controller type
-/// @param[in] i_spare_support value of ATTR_DIMM_SPARE for this [DIMM][RANK] combo
-/// @return total number of bytes
-///
-template< mss::mc_type MC >
-uint64_t get_total_bytes(const uint8_t i_spare_support);
-
-///
-/// @brief Figure out if selected nibble is a non-existent spare in restore_repairs
-/// @tparam MC the memory controller type
-/// @param[in] i_spare_support value of ATTR_DIMM_SPARE for this [DIMM][RANK] combo
-/// @param[in] i_byte logical byte index
-/// @param[in] i_nibble logical nibble index
-/// @return true if selected nibble is a non-existent spare and needs to be skipped
-///
-template< mss::mc_type MC >
-bool skip_dne_spare_nibble(const uint8_t i_spare_support,
-                           const uint64_t i_byte,
-                           const size_t i_nibble);
-
-///
-/// @brief Grab a vector of non-spare nibbles
-/// @tparam MC the memory controller type
-/// @return a vector of bytes/nibbles based upon the MC type
-/// @note Vector is a pair of uint8_t's. First is byte. Second is nibble
-///
-template< mss::mc_type MC >
-void get_nonspare_nibbles(std::vector<uint8_t>& o_nonspare_nibbles);
-
-///
-/// @brief Grab a vector of non-spare nibbles
-/// @tparam MC the memory controller type
-/// @param[in] i_target A target representing a DIMM
-/// @param[in] i_rank Rank info object
-/// @param[out] o_spare_nibbles a vector of nibbles based upon the MC type
-/// @return FAPI2_RC_SUCCESS if and only if ok
-/// @note Vector is a pair of uint8_t's. First is byte. Second is nibble
-///
-template< mss::mc_type MC >
-fapi2::ReturnCode get_spare_nibbles(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                    const mss::rank::info<MC>& i_rank,
-                                    std::vector<uint8_t>& o_spare_nibbles);
-
-///
-/// @brief Deploys a spare and marks it as deployed
-/// @tparam MC the memory controller type
-/// @param[in] i_target A target representing a DIMM
-/// @param[in] i_dimm_rank The DIMM rank for this target
-/// @param[in] i_nibble_idx Index of the nibble to spare out
-/// @param[in] i_spare_nibbles a vector of bytes/nibbles for the spare nibbles
-/// @param[in,out] io_deployed_spares a vector of bytes/nibbles containing which byte/nibble is spared out
-/// @param[in] i_ignore_bad_bits Set to true to deploy spare regardless of training fails on it (default false)
-/// @return FAPI2_RC_SUCCESS if and only if ok
-/// @note Vector is a pair of uint8_t's. First is byte. Second is nibble
-///
-template< mss::mc_type MC >
-fapi2::ReturnCode deploy_spare_helper( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                       const mss::rank::info<MC>& i_dimm_rank,
-                                       const uint8_t i_nibble_idx,
-                                       const std::vector<uint8_t>& i_spare_nibbles,
-                                       std::vector<uint8_t>& io_deployed_spares,
-                                       const bool i_ignore_bad_bits = false);
-
-///
-/// @brief Undeploy the specified spare on the provided rank
-///
-/// @tparam MC MC type
-/// @param[in] i_spare spare number (0,1)
-/// @param[in] i_rank rank info object
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
-///
-template<mss::mc_type MC>
-fapi2::ReturnCode unspare(const size_t i_spare, const mss::rank::info<MC>& i_rank);
-
-///
 /// @brief Helper function to get DQ index from a deployed spare
 /// @param[in] i_spare_dq a DQ index relative to the spare nibble (0-7)
 /// @param[in] i_deployed_nibble_index index of the nibble the spare is deployed to
@@ -795,10 +720,10 @@ fapi2::ReturnCode restore_repairs_helper(const fapi2::Target<fapi2::TARGET_TYPE_
     std::vector<mss::rank::info<MC>> l_ranks;
     uint8_t l_dimm_spare[MAX_RANK_PER_DIMM_ATTR] = {0};
     std::vector<uint8_t> l_nonspare_nibbles;
-    get_nonspare_nibbles<MC>(l_nonspare_nibbles);
+    mss::steer::get_nonspare_nibbles<MC>(l_nonspare_nibbles);
 
     // gets spare availability
-    FAPI_TRY(mss::dimm_spare<MC>(i_dimm, l_dimm_spare));
+    FAPI_TRY(mss::attr::get_dimm_spare(i_dimm, l_dimm_spare));
 
     // gets all of the ranks to loop over
     FAPI_TRY(mss::rank::ranks_on_dimm<MC>(i_dimm, l_ranks));
@@ -815,9 +740,9 @@ fapi2::ReturnCode restore_repairs_helper(const fapi2::Target<fapi2::TARGET_TYPE_
         // List of byte, nibble pairs of available spares, and deployed spares
         std::vector<uint8_t> l_spare_nibbles;
         std::vector<uint8_t> l_deployed_spares;
-        FAPI_TRY(get_spare_nibbles<MC>( i_dimm,
-                                        l_rank,
-                                        l_spare_nibbles));
+        FAPI_TRY(mss::steer::get_spare_nibbles<MC>( i_dimm,
+                 l_rank,
+                 l_spare_nibbles));
 
         // Loop over nonspare nibbles
         for (const auto& l_nibble_idx : l_nonspare_nibbles)
@@ -833,12 +758,12 @@ fapi2::ReturnCode restore_repairs_helper(const fapi2::Target<fapi2::TARGET_TYPE_
             // For DIMM's that lack spares this becomes a no-op as the spare nibbles and deployed spares will be empty
             if((l_bad_dq_vector.size() >= 1) && (l_deployed_spares.size() < l_spare_nibbles.size()))
             {
-                FAPI_TRY(deploy_spare_helper<MC>(i_dimm,
-                                                 l_rank,
-                                                 l_nibble_idx,
-                                                 l_spare_nibbles,
-                                                 l_deployed_spares,
-                                                 IGNORE_BAD_BITS_ON_SPARES));
+                FAPI_TRY(mss::steer::deploy_spare_helper<MC>(i_dimm,
+                         l_rank,
+                         l_nibble_idx,
+                         l_spare_nibbles,
+                         l_deployed_spares,
+                         IGNORE_BAD_BITS_ON_SPARES));
             }
 
             // apply repairs and update repair machine state
@@ -898,15 +823,15 @@ fapi2::ReturnCode restore_repairs_helper(const fapi2::Target<fapi2::TARGET_TYPE_
             {
                 // deploy_spare_helper will always pick the next available spare,
                 // so it should skip over the currently deployed and correctly choose the next
-                FAPI_TRY(deploy_spare_helper<MC>(i_dimm,
-                                                 l_rank,
-                                                 l_nibble_idx,
-                                                 l_spare_nibbles,
-                                                 l_deployed_spares,
-                                                 IGNORE_BAD_BITS_ON_SPARES));
+                FAPI_TRY(mss::steer::deploy_spare_helper<MC>(i_dimm,
+                         l_rank,
+                         l_nibble_idx,
+                         l_spare_nibbles,
+                         l_deployed_spares,
+                         IGNORE_BAD_BITS_ON_SPARES));
 
                 // Undeploy the current spare
-                FAPI_TRY(mss::unspare(l_spare, l_rank));
+                FAPI_TRY(mss::steer::unspare<MC>(l_spare, l_rank));
 
                 // We will leave the newly undeployed spare in l_deplored_spares,
                 // to leave a record of what happened
@@ -962,7 +887,7 @@ fapi2::ReturnCode restore_repairs( const fapi2::Target<T>& i_target,
 
     for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
     {
-        FAPI_TRY( mss::get_bad_dq_bitmap<MC>(l_dimm, l_bad_bits) );
+        FAPI_TRY( mss::attr::get_bad_dq_bitmap(l_dimm, l_bad_bits) );
 
         FAPI_TRY( (restore_repairs_helper<MC>(
                        l_dimm, l_bad_bits, io_repairs_applied, io_repairs_exceeded)) );

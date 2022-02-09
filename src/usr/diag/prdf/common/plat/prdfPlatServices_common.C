@@ -293,13 +293,11 @@ void getDimmDqAttr<TYPE_MEM_PORT>( TargetHandle_t i_target,
 
     uint8_t tmpData[DQS_PER_DIMM];
 
-    /* TODO - comment out until MEM_VPD_DQ_MAP is updated to uint8_t[80]
     if ( !i_target->tryGetAttr<ATTR_MEM_VPD_DQ_MAP>(tmpData) )
     {
         PRDF_ERR( PRDF_FUNC "Failed to get ATTR_MEM_VPD_DQ_MAP" );
         PRDF_ASSERT( false );
     }
-    */
 
     memcpy( &o_dqMapPtr[0], &tmpData[0], DQS_PER_DIMM );
 
@@ -338,12 +336,12 @@ int32_t mssGetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
     TargetHandle_t memport = getConnectedChild( i_ocmb, TYPE_MEM_PORT, 0 );
     fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> fapiPort(memport);
 
-    FAPI_INVOKE_HWP( errl, mss::exp::steer::check_steering, fapiPort,
+    FAPI_INVOKE_HWP( errl, exp_check_steering, fapiPort,
                      i_rank.getMaster(), port0Spare, port1Spare );
 
     if ( nullptr != errl )
     {
-        PRDF_ERR( "[PlatServices::mssGetSteerMux] check_steering() "
+        PRDF_ERR( "[PlatServices::mssGetSteerMux] exp_check_steering() "
                   "failed. HUID: 0x%08x rank: %d",
                   getHuid(memport), i_rank.getMaster() );
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
@@ -382,12 +380,12 @@ int32_t mssSetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
                                                      i_symbol.getDram(),
                                                      isDramWidthX4(dimm) );
 
-    FAPI_INVOKE_HWP( errl, mss::exp::steer::do_steering, fapiPort,
+    FAPI_INVOKE_HWP( errl, exp_do_steering, fapiPort,
                      i_rank.getMaster(), l_dramSymbol );
 
     if ( nullptr != errl )
     {
-        PRDF_ERR( "[PlatServices::mssSetSteerMux] do_steering() "
+        PRDF_ERR( "[PlatServices::mssSetSteerMux] exp_do_steering() "
                   "failed. HUID: 0x%08x, rank: %d, symbol: %d",
                   getHuid(memport), i_rank.getMaster(), l_dramSymbol );
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );

@@ -35,11 +35,19 @@
 
 #include <fapi2.H>
 #include <exp_mss_memdiag.H>
-
 #include <lib/dimm/exp_rank.H>
-#include <lib/mc/exp_port.H>
 #include <lib/mcbist/exp_memdiags.H>
 #include <lib/mcbist/exp_mcbist_traits.H>
+#include <lib/exp_attribute_accessors_manual.H>
+#include <mss_generic_attribute_getters.H>
+#include <generic/memory/lib/utils/conversions.H>
+#include <generic/memory/lib/utils/find.H>
+#include <mss_explorer_attribute_getters.H>
+#include <lib/mc/exp_port_traits.H>
+#include <lib/shared/exp_consts.H>
+#include <generic/memory/lib/utils/mc/gen_mss_port.H>
+#include <generic/memory/lib/utils/mc/gen_mss_restore_repairs.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
 extern "C"
 {

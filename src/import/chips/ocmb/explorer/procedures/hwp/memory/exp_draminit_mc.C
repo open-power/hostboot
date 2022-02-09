@@ -33,17 +33,22 @@
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
-
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/count_dimm.H>
-
-#include <lib/mc/exp_port.H>
 #include <lib/exp_draminit_utils.H>
 #include <generic/memory/mss_git_data_helper.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 #include <lib/workarounds/exp_mds_workarounds.H>
 #include <exp_deploy_row_repairs.H>
+#include <lib/exp_attribute_accessors_manual.H>
+#include <mss_explorer_attribute_getters.H>
+#include <lib/mc/exp_port_traits.H>
+#include <lib/shared/exp_consts.H>
+#include <lib/dimm/exp_rank.H>
+#include <generic/memory/lib/utils/mc/gen_mss_port.H>
+#include <generic/memory/lib/utils/mc/gen_mss_restore_repairs.H>
+
 
 extern "C"
 {

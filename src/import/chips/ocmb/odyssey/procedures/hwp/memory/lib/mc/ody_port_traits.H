@@ -41,6 +41,7 @@
 #include <ody_scom_ody.H>
 #include <generic/memory/lib/utils/mc/gen_mss_port_traits.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <lib/shared/ody_consts.H>
 
 namespace mss
 {
@@ -63,7 +64,7 @@ class portTraits< mss::mc_type::ODYSSEY >
 
         // scom register definition
         static constexpr uint64_t MBARPC0Q_REG = scomt::ody::ODC_SRQ_MBARPC0Q;
-
+        static constexpr uint64_t SRQ_MBAREFAQ = scomt::ody::ODC_SRQ_MBAREFAQ;
         static constexpr uint64_t FARB0Q_REG = scomt::ody::ODC_SRQ_MBA_FARB0Q;
         static constexpr uint64_t FARB5Q_REG = scomt::ody::ODC_SRQ_MBA_FARB5Q;
         static constexpr uint64_t FARB6Q_REG = scomt::ody::ODC_SRQ_MBA_FARB6Q;
@@ -81,10 +82,38 @@ class portTraits< mss::mc_type::ODYSSEY >
         static constexpr uint64_t RRQ_REG = scomt::ody::ODC_SRQ_MBA_ROQ0Q;
         static constexpr uint64_t WRQ_REG = scomt::ody::ODC_SRQ_MBA_ROQ0Q;
 
+        // Note: restore repairs and our ECC logic use the MC/DFI perspective
+        // As such, our spare is located on byte 5
+        static constexpr uint64_t SPARE_DQ_BYTE = 5;
+
         // This number includes the two spare nibbles, it is compared against
         // the actual nibble index we're at
         // TODO Zen:MST-1404 Verify this for Odyssey
         static constexpr uint8_t MAX_NIBBLE_IDX = 19;
+
+
+        static constexpr uint8_t SYMBOL_ROUNDER = 4;
+
+        static const std::vector<uint8_t> NON_SPARE_NIBBLES;
+        static const std::vector<uint8_t> SPARE_NIBBLES;
+
+        // Settings: INTERVAL = 16K * 128 = 2M cycles, CTRLUPD_MIN = 128
+        static constexpr uint8_t CAL_INTERVAL_TB_16384_CYCLES = 0x02;
+        static constexpr uint16_t CAL_INTERVAL_VALUE = 0x0080;
+        static constexpr uint16_t CAL_CTRLUPD_MIN_VALUE = 0x0080;
+
+        static constexpr uint64_t MPE_TIMER_SETTING = 0b010100;
+        static constexpr uint64_t MPE_TIMEBASE_SETTING = 0b011;
+        static constexpr uint64_t UE_TIMER_SETTING = 0b010100;
+        static constexpr uint64_t UE_TIMEBASE_SETTING = 0b011;
+
+        // Delay we wait between updating the write_mux and the read_mux in program_steering_helper()
+        // 1 cycle of periodic calibration
+        static constexpr uint64_t  HW_STEERING_DELAY = (250 * mss::DELAY_1MS);
+        static constexpr uint64_t  SIM_STEERING_DELAY = (2 * mss::DELAY_100US);
+
+        static constexpr uint8_t MAX_MRANK_PER_PORT = mss::ody::MAX_MRANK_PER_PORT;
+        static constexpr uint8_t MAX_SYMBOLS_PER_PORT = mss::ody::MAX_SYMBOLS_PER_PORT;
 
         // scom register field definition
         enum
@@ -168,6 +197,9 @@ class portTraits< mss::mc_type::ODYSSEY >
             ROQ_FIFO_MODE = scomt::ody::ODC_SRQ_MBA_ROQ0Q_CFG_FIFO_MODE,
             RRQ_FIFO_MODE = scomt::ody::ODC_SRQ_MBA_ROQ0Q_CFG_FIFO_MODE,
             WRQ_FIFO_MODE = scomt::ody::ODC_SRQ_MBA_ROQ0Q_CFG_FIFO_MODE,
+
+            SRQ_MBAREFAQ_CFG_TSTAB = scomt::ody::ODC_SRQ_MBAREFAQ_CFG_TSTAB,
+            SRQ_MBAREFAQ_CFG_TSTAB_LEN = scomt::ody::ODC_SRQ_MBAREFAQ_CFG_TSTAB_LEN,
         };
 };
 

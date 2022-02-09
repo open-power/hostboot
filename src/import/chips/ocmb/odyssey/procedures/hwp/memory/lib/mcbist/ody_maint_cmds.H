@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/mcbist/exp_maint_cmds.H $ */
+/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/mcbist/ody_maint_cmds.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,30 +22,29 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
+// EKB-Mirror-To: hostboot
 ///
-/// @file exp_maint_cmds.H
+/// @file ody_maint_cmds.H
 /// @brief Utility functions for accessing steer muxes.
 ///
-/// *HWP HWP Owner: Geetha Pisapati Geetha.Pisapati@ibm.com>
+/// *HWP HWP Owner: Geetha Pisapati <Geetha.Pisapati@ibm.com>
 /// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 /// *HWP Team: Memory
 /// *HWP Level: 3
 /// *HWP Consumed by: HB:CI
 ///
 
-#ifndef _EXP_MAINT_CMDS_H
-#define _EXP_MAINT_CMDS_H
+#ifndef _ODY_MAINT_CMDS_H_
+#define _ODY_MAINT_CMDS_H_
 
 //------------------------------------------------------------------------------
 //    Includes
 //------------------------------------------------------------------------------
 
 #include <fapi2.H>
-#include <explorer_scom_addresses.H>
-#include <explorer_scom_addresses_fld.H>
-#include <lib/shared/exp_consts.H>
-#include <lib/dimm/exp_rank.H>
+#include <ody_scom_ody_odc.H>
+#include <lib/shared/ody_consts.H>
+#include <lib/dimm/ody_rank.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/mcbist/gen_maint_cmds.H>
@@ -59,10 +58,10 @@ namespace steer
 
 ///
 /// @class genSteerTraits
-/// @brief Generic Steer Traits
+/// @brief Ody Generic Steer Traits
 ///
 template<>
-class genSteerTraits< mss::mc_type::EXPLORER>
+class genSteerTraits< mss::mc_type::ODYSSEY>
 {
     public:
         static constexpr uint8_t INVALID_SYMBOL = 0xff;
@@ -74,13 +73,12 @@ class genSteerTraits< mss::mc_type::EXPLORER>
 
 ///
 /// @class steerTraits
-/// @brief Exp Steer Traits
+/// @brief Ody Steer Traits
 ///
 template<>
-class steerTraits< mss::mc_type::EXPLORER, mss::steer::mux_type::READ_MUX >
+class steerTraits< mss::mc_type::ODYSSEY, mux_type::READ_MUX >
 {
     public:
-
         static const std::vector<uint32_t> muxregs_left;
         static const std::vector<uint32_t> muxregs_right;
 
@@ -88,21 +86,21 @@ class steerTraits< mss::mc_type::EXPLORER, mss::steer::mux_type::READ_MUX >
         enum mux_registers : size_t
         {
             // Function spaces
-            MUX_REGISTER = EXPLR_RDF_RSPAR,
-            SPARE_MUX_LEN = EXPLR_RDF_RSPAR_CFG_STEERING_R0_LEFT_LEN,
+            MUX_REGISTER = scomt::ody::ODC_RDF0_SCOM_RSPAR,
+            SPARE_MUX_LEN = scomt::ody::ODC_RDF0_SCOM_RSPAR_0_LEFT_LEN,
         };
 
 };
+
 
 ///
 /// @class steerTraits
-/// @brief Exp Steer Traits
+/// @brief Ody Steer Traits
 ///
 template<>
-class steerTraits< mss::mc_type::EXPLORER, mss::steer::mux_type::WRITE_MUX >
+class steerTraits< mss::mc_type::ODYSSEY, mux_type::WRITE_MUX >
 {
     public:
-
         static const std::vector<uint32_t> muxregs_left;
         static const std::vector<uint32_t> muxregs_right;
 
@@ -110,11 +108,12 @@ class steerTraits< mss::mc_type::EXPLORER, mss::steer::mux_type::WRITE_MUX >
         enum mux_registers : size_t
         {
             // Function spaces
-            MUX_REGISTER = EXPLR_WDF_WSPAR,
-            SPARE_MUX_LEN = EXPLR_WDF_WSPAR_CFG_STEERING_R0_LEFT_LEN,
+            MUX_REGISTER = scomt::ody::ODC_WDF_REGS_WSPAR,
+            SPARE_MUX_LEN = scomt::ody::ODC_WDF_REGS_WSPAR_0_LEFT_LEN,
         };
 
 };
+
 
 } // ns steer
 

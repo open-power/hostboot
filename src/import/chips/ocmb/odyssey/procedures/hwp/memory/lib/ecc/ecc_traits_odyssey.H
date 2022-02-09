@@ -253,7 +253,7 @@ class eccTraits<mc_type::ODYSSEY, fapi2::TARGET_TYPE_MEM_PORT>
 /// @brief a collection of traits associated with the Odyssey MC ECC interface
 ///
 template<>
-class eccTraits<mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>
+class eccTraits<mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>
 {
     public:
         // MCBIST ECC registers - must be 64 bits.

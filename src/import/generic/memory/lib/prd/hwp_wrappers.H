@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,7 @@
 #include <generic/memory/lib/utils/mcbist/gen_mss_memdiags.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_traits.H>
 #include <chips/ocmb/explorer/procedures/hwp/memory/lib/mcbist/exp_mcbist_traits.H>
+#include <chips/ocmb/explorer/procedures/hwp/memory/lib/mc/exp_port_traits.H>
 
 ///
 /// @brief Memdiags stop command wrapper for Explorer
@@ -131,6 +132,35 @@ fapi2::ReturnCode exp_continue_cmd( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_
 fapi2::ReturnCode exp_restore_repairs( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                        fapi2::buffer<uint8_t>& io_repairs_applied,
                                        fapi2::buffer<uint8_t>& io_repairs_exceeded );
+
+
+///
+/// @brief Reads the steer muxes for the given rank
+/// @param[in] i_target MEM_PORT target
+/// @param[in] i_rank Rank we want to read steer mux for.
+/// @param[out] o_dram_spare0_symbol First symbol index of the DRAM fixed by the
+///                                  spare on port0 (if no steer, return 0xff)
+/// @param[out] o_dram_spare1_symbol First symbol index of the DRAM fixed by the
+///                                  spare on port1 (if no steer, return 0xff)
+/// @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+///
+fapi2::ReturnCode exp_check_steering(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                     const uint8_t i_port_rank,
+                                     uint8_t& o_dram_spare0_symbol,
+                                     uint8_t& o_dram_spare1_symbol );
+
+///
+/// @brief Set write mux, wait for periodic cal, set read mux, for the given rank.
+/// @param[in] i_target MEM PORT target
+/// @param[in] i_port_rank Rank we want to write steer mux for.
+/// @param[in] i_symbol First symbol index of the DRAM to steer around.
+/// @param[in] i_ignore_bad_bits Set to true to deploy spare regardless of training fails on it (default false)
+/// @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+///
+fapi2::ReturnCode exp_do_steering( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                   const uint8_t i_port_rank,
+                                   const uint8_t i_symbol,
+                                   const bool i_ignore_bad_bits = false );
 
 ///
 /// @brief Broadcast mode check wrapper for Explorer

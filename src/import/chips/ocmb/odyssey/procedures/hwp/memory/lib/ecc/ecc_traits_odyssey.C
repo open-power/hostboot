@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/ecc/ecc_traits_explorer.C $ */
+/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/ecc/ecc_traits_odyssey.C $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,21 +22,20 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
+// EKB-Mirror-To: hostboot
 ///
-/// @file ecc_traits_explorer.C
+/// @file ecc_traits_odyssey.C
 /// @brief Traits class for the MC ECC syndrome registers
 ///
-// *HWP HWP Owner:  Geetha Pisapati<Geetha.Pisapati@ibm.com>
+// *HWP HWP Owner:  Geetha Pisapati <Geetha.Pisapati@ibm.com>
 // *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
-#include <explorer_scom_addresses.H>
-#include <explorer_scom_addresses_fld.H>
-#include <lib/ecc/ecc_traits_explorer.H>
+#include <ody_scom_ody_odc.H>
+#include <lib/ecc/ecc_traits_odyssey.H>
 
 
 namespace mss
@@ -44,28 +43,29 @@ namespace mss
 
 // we need these declarations here in order for the linker to see the definitions
 // in the eccTraits class
-constexpr const uint64_t eccTraits<mc_type::EXPLORER, fapi2::TARGET_TYPE_MEM_PORT>::MAINLINE_NCE_REGS[];
-constexpr const uint64_t eccTraits<mc_type::EXPLORER, fapi2::TARGET_TYPE_MEM_PORT>::MAINLINE_RCE_REGS[];
-constexpr const uint64_t eccTraits<mc_type::EXPLORER, fapi2::TARGET_TYPE_MEM_PORT>::MAINLINE_MPE_REGS[];
-constexpr const uint64_t eccTraits<mc_type::EXPLORER, fapi2::TARGET_TYPE_MEM_PORT>::MAINLINE_UE_REGS[];
-constexpr const uint64_t eccTraits<mc_type::EXPLORER, fapi2::TARGET_TYPE_MEM_PORT>::MAINLINE_AUE_REGS[];
-constexpr const uint64_t eccTraits<mc_type::EXPLORER, fapi2::TARGET_TYPE_MEM_PORT>::ERROR_VECTOR_REGS[];
-constexpr const uint8_t eccTraits<mc_type::EXPLORER, fapi2::TARGET_TYPE_MEM_PORT>::symbol2galois[];
-constexpr const uint8_t eccTraits<mc_type::EXPLORER, fapi2::TARGET_TYPE_MEM_PORT>::symbol2dq[];
+constexpr const uint64_t eccTraits<mc_type::ODYSSEY, fapi2::TARGET_TYPE_MEM_PORT>::MAINLINE_NCE_REGS[];
+constexpr const uint64_t eccTraits<mc_type::ODYSSEY, fapi2::TARGET_TYPE_MEM_PORT>::MAINLINE_RCE_REGS[];
+constexpr const uint64_t eccTraits<mc_type::ODYSSEY, fapi2::TARGET_TYPE_MEM_PORT>::MAINLINE_MPE_REGS[];
+constexpr const uint64_t eccTraits<mc_type::ODYSSEY, fapi2::TARGET_TYPE_MEM_PORT>::MAINLINE_UE_REGS[];
+constexpr const uint64_t eccTraits<mc_type::ODYSSEY, fapi2::TARGET_TYPE_MEM_PORT>::MAINLINE_AUE_REGS[];
+constexpr const uint64_t eccTraits<mc_type::ODYSSEY, fapi2::TARGET_TYPE_MEM_PORT>::ERROR_VECTOR_REGS[];
+constexpr const uint8_t eccTraits<mc_type::ODYSSEY, fapi2::TARGET_TYPE_MEM_PORT>::symbol2galois[];
+constexpr const uint8_t eccTraits<mc_type::ODYSSEY, fapi2::TARGET_TYPE_MEM_PORT>::symbol2dq[];
+constexpr const uint8_t eccTraits<mc_type::ODYSSEY, fapi2::TARGET_TYPE_MEM_PORT>::symbol2dq_x8[];
 
-// Definition of the symbol error count registers for Explorer
-const std::vector< uint64_t > eccTraits<mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>::SYMBOL_COUNT_REG =
+// Definition of the symbol error count registers for Odyssey
+const std::vector< uint64_t > eccTraits<mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>::SYMBOL_COUNT_REG =
 {
-    EXPLR_MCBIST_MBSSYMEC0Q,
-    EXPLR_MCBIST_MBSSYMEC1Q,
-    EXPLR_MCBIST_MBSSYMEC2Q,
-    EXPLR_MCBIST_MBSSYMEC3Q,
-    EXPLR_MCBIST_MBSSYMEC4Q,
-    EXPLR_MCBIST_MBSSYMEC5Q,
-    EXPLR_MCBIST_MBSSYMEC6Q,
-    EXPLR_MCBIST_MBSSYMEC7Q,
-    EXPLR_MCBIST_MBSSYMEC8Q,
-    EXPLR_MCBIST_MBSSYMEC9Q,
+    scomt::ody::ODC_MCBIST_SCOM_MBSSYMEC0Q,
+    scomt::ody::ODC_MCBIST_SCOM_MBSSYMEC1Q,
+    scomt::ody::ODC_MCBIST_SCOM_MBSSYMEC2Q,
+    scomt::ody::ODC_MCBIST_SCOM_MBSSYMEC3Q,
+    scomt::ody::ODC_MCBIST_SCOM_MBSSYMEC4Q,
+    scomt::ody::ODC_MCBIST_SCOM_MBSSYMEC5Q,
+    scomt::ody::ODC_MCBIST_SCOM_MBSSYMEC6Q,
+    scomt::ody::ODC_MCBIST_SCOM_MBSSYMEC7Q,
+    scomt::ody::ODC_MCBIST_SCOM_MBSSYMEC8Q,
+    scomt::ody::ODC_MCBIST_SCOM_MBSSYMEC9Q,
 };
 
 } // close namespace mss

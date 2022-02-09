@@ -44,44 +44,6 @@
 
 namespace mss
 {
-
-///
-/// @brief Bad bit getter - Explorer specialization
-/// @param[in] i_target the fapi2 target oon which training was conducted
-/// @param[out] o_array the bad bits
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
-///
-template <>
-fapi2::ReturnCode get_bad_dq_bitmap<mss::mc_type::EXPLORER>(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        uint8_t (&o_array)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT])
-{
-    return mss::attr::get_bad_dq_bitmap(i_target, o_array);
-}
-
-///
-/// @brief Bad bit setter - Explorer specialization
-/// @param[in] i_target the fapi2 target oon which training was conducted
-/// @param[in] i_array the bad bits to append
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if bad bits can be repaired
-///
-template <>
-fapi2::ReturnCode set_bad_dq_bitmap<mss::mc_type::EXPLORER>(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        uint8_t (&i_array)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT])
-{
-    uint8_t l_current_data[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT] = {};
-
-    // Get existing bad bits data
-    FAPI_TRY(mss::attr::get_bad_dq_bitmap(i_target, l_current_data));
-
-    // Now, or the new bits and any existing bits together
-    mss::combine_bad_bits(l_current_data, i_array);
-
-    FAPI_TRY(mss::attr::set_bad_dq_bitmap(i_target, i_array));
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
 namespace exp
 {
 

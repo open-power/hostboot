@@ -340,7 +340,7 @@ fapi2::ReturnCode explorer_detailed_training_codes(const fapi2::Target<fapi2::TA
         FAPI_TRY(mss::record_bad_bits<mss::mc_type::EXPLORER>(i_target, l_interface));
 
         // Now read them back out
-        FAPI_TRY(mss::get_bad_dq_bitmap<mss::mc_type::EXPLORER>(l_dimm, l_bad_dq_array));
+        FAPI_TRY(mss::attr::get_bad_dq_bitmap(l_dimm, l_bad_dq_array));
         FAPI_TRY(populate_ffdc_dq_buffers(l_bad_dq_array, l_bad_dq_0_63, l_bad_dq_64_80));
 
         FAPI_ASSERT(false,

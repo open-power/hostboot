@@ -37,11 +37,22 @@
 #include <lib/ecc/ecc_traits_explorer.H>
 #include <lib/mcbist/exp_mcbist_traits.H>
 #include <lib/dimm/exp_rank.H>
-#include <lib/mc/exp_port.H>
 #include <lib/mcbist/exp_mcbist.H>
 #include <generic/memory/lib/utils/dimm/kind.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_memdiags.H>
+#include <lib/mcbist/exp_maint_cmds.H>
+#include <lib/exp_attribute_accessors_manual.H>
+#include <mss_generic_attribute_getters.H>
+#include <generic/memory/lib/utils/conversions.H>
+#include <generic/memory/lib/utils/find.H>
+#include <mss_explorer_attribute_getters.H>
+#include <lib/mc/exp_port_traits.H>
+#include <lib/shared/exp_consts.H>
+#include <lib/dimm/exp_rank.H>
+#include <generic/memory/lib/utils/mc/gen_mss_port.H>
+#include <generic/memory/lib/utils/mc/gen_mss_restore_repairs.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
 ///
 /// @brief Memdiags stop command wrapper for Explorer
@@ -154,6 +165,42 @@ fapi2::ReturnCode exp_restore_repairs( const fapi2::Target<fapi2::TARGET_TYPE_OC
     return mss::restore_repairs<mss::mc_type::EXPLORER>(i_target, io_repairs_applied, io_repairs_exceeded);
 }
 
+
+///
+/// @brief Reads the steer muxes for the given rank
+/// @param[in] i_target MEM_PORT target
+/// @param[in] i_rank Rank we want to read steer mux for.
+/// @param[out] o_dram_spare0_symbol First symbol index of the DRAM fixed by the
+///                                  spare on port0 (if no steer, return 0xff)
+/// @param[out] o_dram_spare1_symbol First symbol index of the DRAM fixed by the
+///                                  spare on port1 (if no steer, return 0xff)
+/// @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+///
+fapi2::ReturnCode exp_check_steering(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                     const uint8_t i_port_rank,
+                                     uint8_t& o_dram_spare0_symbol,
+                                     uint8_t& o_dram_spare1_symbol )
+{
+    return mss::steer::check_steering<mss::mc_type::EXPLORER>(i_target, i_port_rank, o_dram_spare0_symbol,
+            o_dram_spare1_symbol);
+}
+
+///
+/// @brief Set write mux, wait for periodic cal, set read mux, for the given rank.
+/// @param[in] i_target MEM PORT target
+/// @param[in] i_port_rank Rank we want to write steer mux for.
+/// @param[in] i_symbol First symbol index of the DRAM to steer around.
+/// @param[in] i_ignore_bad_bits Set to true to deploy spare regardless of training fails on it (default false)
+/// @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+///
+fapi2::ReturnCode exp_do_steering( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                   const uint8_t i_port_rank,
+                                   const uint8_t i_symbol,
+                                   const bool i_ignore_bad_bits = false )
+{
+    return mss::steer::do_steering<mss::mc_type::EXPLORER>(i_target, i_port_rank, i_symbol, i_ignore_bad_bits);
+}
+
 ///
 /// @brief Broadcast mode check wrapper for Explorer
 /// @param[in] i_target the target to effect
@@ -200,7 +247,7 @@ fapi2::ReturnCode exp_unspare(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& 
     mss::rank::info<mss::mc_type::EXPLORER> l_rank_info(i_target, i_port_rank, l_rc);
 
     FAPI_TRY(l_rc, "%s Failed to create rank::info instance for rank %d", mss::c_str(i_target), i_port_rank);
-    FAPI_TRY(mss::unspare<mss::mc_type::EXPLORER>(i_spare, l_rank_info));
+    FAPI_TRY(mss::steer::unspare<mss::mc_type::EXPLORER>(i_spare, l_rank_info));
 
 fapi_try_exit:
     return fapi2::current_err;

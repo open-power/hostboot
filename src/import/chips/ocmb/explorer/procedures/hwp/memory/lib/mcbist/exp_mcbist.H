@@ -40,17 +40,26 @@
 
 #include <explorer_scom_addresses.H>
 #include <explorer_scom_addresses_fld.H>
+#include <explorer_scom_addresses_fld_fixes.H>
 
 #include <lib/shared/exp_consts.H>
 #include <lib/ecc/ecc_traits_explorer.H>
 #include <lib/mcbist/exp_mcbist_traits.H>
-#include <lib/mc/exp_port.H>
-#include <lib/utils/mss_exp_conversions.H>
+#include <lib/exp_attribute_accessors_manual.H>
+#include <mss_generic_attribute_getters.H>
+#include <mss_explorer_attribute_getters.H>
+#include <generic/memory/lib/utils/conversions.H>
+#include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/poll.H>
 #include <generic/memory/lib/utils/memory_size.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_patterns.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_settings.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist.H>
+#include <lib/mc/exp_port_traits.H>
+#include <lib/dimm/exp_rank.H>
+#include <generic/memory/lib/utils/mc/gen_mss_port.H>
+#include <generic/memory/lib/utils/mc/gen_mss_restore_repairs.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
 namespace mss
 {

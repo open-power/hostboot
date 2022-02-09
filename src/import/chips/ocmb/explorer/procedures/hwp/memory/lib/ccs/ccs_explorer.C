@@ -27,7 +27,7 @@
 /// @file ccs_explorer.C
 /// @brief Run and manage the CCS engine
 ///
-// *HWP HWP Owner: Matthew Hickman <Matthew.Hickman@ibm.com>
+// *HWP HWP Owner: Geetha Pisapati <Geetha.Pisapati@ibm.com>
 // *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
@@ -38,8 +38,10 @@
 #include <lib/ecc/ecc_traits_explorer.H>
 #include <lib/ccs/ccs_traits_explorer.H>
 #include <generic/memory/lib/ccs/ccs.H>
+#include <generic/memory/lib/utils/conversions.H>
 #include <lib/ccs/ccs_explorer.H>
-#include <lib/utils/mss_exp_conversions.H>
+#include <mss_generic_attribute_getters.H>
+#include <generic/memory/lib/utils/find.H>
 #include <explorer_scom_addresses.H>
 #include <explorer_scom_addresses_fld.H>
 
@@ -208,7 +210,7 @@ fapi2::ReturnCode update_initial_delays<mss::mc_type::EXPLORER, fapi2::TARGET_TY
     // we use the delay we just summed from the instructions.
     if (io_program.iv_poll.iv_initial_delay == 0)
     {
-        io_program.iv_poll.iv_initial_delay = cycles_to_ns(i_target, i_delay, l_rc);
+        io_program.iv_poll.iv_initial_delay = cycles_to_ns<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target, i_delay, l_rc);
         FAPI_TRY(l_rc, "%s cycles_to_ns failed", mss::c_str(i_target));
     }
 

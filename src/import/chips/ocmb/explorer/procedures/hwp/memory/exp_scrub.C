@@ -34,7 +34,9 @@
 // *HWP Consumed by: FSP:HB
 
 #include <exp_scrub.H>
-#include <lib/utils/mss_exp_conversions.H>
+#include <mss_generic_attribute_getters.H>
+#include <generic/memory/lib/utils/conversions.H>
+#include <generic/memory/lib/utils/find.H>
 #include <lib/mcbist/exp_memdiags.H>
 
 extern "C"

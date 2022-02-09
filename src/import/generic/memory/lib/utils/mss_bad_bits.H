@@ -41,31 +41,67 @@
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
 #include <mss_generic_attribute_setters.H>
+#include <generic/memory/lib/utils/mss_rank.H>
 
 namespace mss
 {
 
 ///
-/// @brief A generic bad bits getter
-/// @tparam MC type memory controller type
-/// @param[in] i_target the fapi2 target oon which training was conducted
-/// @param[out] o_array the bad bits array
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+/// @brief Function that gets the Bad DQ Bitmap.
+/// @tparam MC the memory controller type
+/// @tparam RT the class traits for the rank
+/// @param[in]  i_rank_info Rank info to get bitmap
+/// @param[in,out] io_data Reference to data where Bad DQ bitmap is copied to
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
-template <mss::mc_type MC>
-fapi2::ReturnCode get_bad_dq_bitmap(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                    uint8_t (&o_array)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT]);
+template<mss::mc_type MC, typename RT = mss::rank::rankTraits<MC> >
+fapi2::ReturnCode get_bad_dq_bitmap( const mss::rank::info<MC>& i_rank_info,
+                                     uint8_t io_data[BAD_DQ_BYTE_COUNT])
+{
+
+    // Get the Bad DQ bitmap by querying ATTR_BAD_DQ_BITMAP.
+    // Use a heap based array to avoid large stack alloc
+    uint8_t l_dqBitmap[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT] = {};
+
+    FAPI_TRY( mss::attr::get_bad_dq_bitmap(i_rank_info.get_dimm_target(), l_dqBitmap) );
+
+    // Write contents of DQ bitmap for specific rank to io_data.
+    std::copy(std::begin(l_dqBitmap[i_rank_info.get_dimm_rank()]), std::end(l_dqBitmap[i_rank_info.get_dimm_rank()]),
+              io_data);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
-/// @brief A generic bad bits setter
-/// @tparam MC type memory controller type
-/// @param[in] i_target the fapi2 target oon which training was conducted
-/// @param[in] i_array the bad bits to set
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if bad bits can be repaired
+/// @brief Function that sets the Bad DQ Bitmap.
+/// @tparam MC the memory controller type
+/// @tparam RT the traits for the class rank
+/// @param[in] i_rank_info Rank info to get bitmap
+/// @param[in] i_data Reference to data where Bad DQ bitmap is copied to
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
-template <mss::mc_type MC>
-fapi2::ReturnCode set_bad_dq_bitmap(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                    uint8_t (&i_array)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT]);
+template<mss::mc_type MC, typename RT = mss::rank::rankTraits<MC> >
+fapi2::ReturnCode set_bad_dq_bitmap( const mss::rank::info<MC>& i_rank_info,
+                                     const uint8_t i_data[BAD_DQ_BYTE_COUNT])
+{
+    const auto& l_dimm = i_rank_info.get_dimm_target();
+
+    // Get the Bad DQ bitmap by querying ATTR_BAD_DQ_BITMAP.
+    // Use a heap based array to avoid large stack alloc
+    // Attribute is 4X10 for p10
+    uint8_t l_dqBitmap[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT] = {};
+
+    FAPI_TRY( mss::attr::get_bad_dq_bitmap(l_dimm, l_dqBitmap) );
+
+    // Add the rank bitmap to the DIMM bitmap and write the bitmap
+    std::copy(i_data, i_data + BAD_DQ_BYTE_COUNT, std::begin(l_dqBitmap[i_rank_info.get_dimm_rank()]));
+
+    FAPI_TRY( mss::attr::set_bad_dq_bitmap(l_dimm, l_dqBitmap) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief combine the two bad bits arrays into the io_bad_bits array
@@ -82,6 +118,30 @@ inline void combine_bad_bits(const uint8_t (&i_new_bad_bits)[BAD_BITS_RANKS][BAD
             io_bad_bits[l_rank][l_bad_dq_byte] |= i_new_bad_bits[l_rank][l_bad_dq_byte];
         }
     }
+}
+
+
+///
+/// @brief Bad bit updater - Generic implementation
+/// @param[in] i_target the fapi2 target oon which training was conducted
+/// @param[in] i_array the bad bits to append
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if bad bits can be repaired
+///
+inline fapi2::ReturnCode update_bad_dq_bitmap(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        uint8_t (&i_array)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT])
+{
+    uint8_t l_current_data[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT] = {};
+
+    // Get existing bad bits data
+    FAPI_TRY(mss::attr::get_bad_dq_bitmap(i_target, l_current_data));
+
+    // Now, or the new bits and any existing bits together
+    mss::combine_bad_bits(l_current_data, i_array);
+
+    FAPI_TRY(mss::attr::set_bad_dq_bitmap(i_target, i_array));
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
@@ -124,8 +184,8 @@ inline fapi2::ReturnCode record_bad_bits( const fapi2::Target<T>& i_target, cons
 
         FAPI_TRY( i_helper.record_bad_bits_interface(d, l_data) );
 
-        // Write
-        FAPI_TRY(set_bad_dq_bitmap<MC>(d, l_data));
+        // Update
+        FAPI_TRY(mss::update_bad_dq_bitmap(d, l_data));
     }
 
 fapi_try_exit:
