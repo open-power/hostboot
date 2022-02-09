@@ -595,21 +595,22 @@ class PsuSendMemConfigTest : public CxxTest::TestSuite
                         SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
                         SbePsu::SBE_MEM_CONFIG_REQ_USED_REGS,
                         SbePsu::SBE_MEM_CONFIG_RSP_USED_REGS,
-                        SbePsu::COMMAND_SUPPORT_OPTIONAL, // No error when operation is unsupported
+                        SbePsu::unsupported_command_error_severity { ERRORLOG::ERRL_SEV_PREDICTIVE },
                         &command_unsupported);
-        if (l_err)
+        if ( command_unsupported )
+        {
+            TS_FAIL("testMemConfigInfo: ERROR: SBE firmware "
+                    "does not support PSU sending Memory configuration information" );
+            errlCommit(l_err, CXXTEST_COMP_ID);
+            break;
+        }
+        else if (l_err)
         {
             TRACFCOMP( g_trac_sbeio, ERR_MRK"testMemConfigInfo: ERROR: "
                        "Call to performPsuChipOp failed, error returned" );
             TS_FAIL("testMemConfigInfo: ERROR: "
                     "Call to performPsuChipOp failed. RC 0x%.8X", l_err->reasonCode());
             errlCommit(l_err, CXXTEST_COMP_ID);
-            break;
-        }
-        else if ( command_unsupported )
-        {
-            TRACFCOMP( g_trac_sbeio, ERR_MRK"testMemConfigInfo: ERROR: SBE firmware "
-                       "does not support PSU sending Memory configuration information" );
             break;
         }
         else if (SBE_PRI_OPERATION_SUCCESSFUL != l_psuResponse.primaryStatus)

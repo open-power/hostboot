@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -77,8 +77,6 @@ namespace SBEIO
         // set up PSU command message
         l_psuCommand.cd7_SetSystemConfig_SystemFabricIdMap = i_systemConfig;
 
-        bool command_unsupported = false;
-
         errl =  SBEIO::SbePsu::getTheInstance().performPsuChipOp(
             i_procChip,
             &l_psuCommand,
@@ -86,15 +84,9 @@ namespace SBEIO
             SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
             SbePsu::SBE_SYSTEM_CONFIG_REQ_USED_REGS,
             SbePsu::SBE_SYSTEM_CONFIG_RSP_USED_REGS,
-            SbePsu::unsupported_command_error_severity { ERRORLOG::ERRL_SEV_PREDICTIVE },
-            &command_unsupported);
+            SbePsu::COMMAND_SUPPORT_OPTIONAL);
 
-        if (command_unsupported)
-        { // Traces have already been logged
-            errlCommit(errl, SBEIO_COMP_ID);
-        }
-
-        SBE_TRACD(EXIT_MRK "sendSystemConfig");
+        SBE_TRACD(EXIT_MRK "sendSystemConfig (PLID=0x%08x)", ERRL_GETPLID_SAFE(errl));
 
         return errl;
     };

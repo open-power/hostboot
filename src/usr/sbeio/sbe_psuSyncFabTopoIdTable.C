@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021                             */
+/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,7 +74,7 @@ errlHndl_t psuSendTopologyIdTable(const TargetHandle_t i_pProc,
                         SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
                         SbePsu::SBE_TOPOLOGY_TABLE_REQ_USED_REGS,
                         SbePsu::SBE_TOPOLOGY_TABLE_RSP_USED_REGS,
-                        SbePsu::COMMAND_SUPPORT_OPTIONAL, // No error when operation is unsupported
+                        SbePsu::COMMAND_SUPPORT_OPTIONAL,
                         &command_unsupported);
 
         if (l_err)
@@ -199,4 +199,3 @@ errlHndl_t psuSendTopologyIdTable( void )
 }
 
 } // namespace SBEIO
-

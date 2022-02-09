@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,8 +69,6 @@ namespace SBEIO
         l_psuCommand.cd7_stashKeyAddr_Key = i_key;
         l_psuCommand.cd7_stashKeyAddr_Value = i_value;
 
-        bool command_unsupported = false;
-
         errl =  SBEIO::SbePsu::getTheInstance().performPsuChipOp(
             i_procChip,
             &l_psuCommand,
@@ -78,14 +76,9 @@ namespace SBEIO
             SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
             SbePsu::SBE_STASH_KEY_ADDR_REQ_USED_REGS,
             SbePsu::SBE_STASH_KEY_ADDR_RSP_USED_REGS,
-            SbePsu::unsupported_command_error_severity { ERRORLOG::ERRL_SEV_INFORMATIONAL },
-            &command_unsupported);
+            SbePsu::COMMAND_SUPPORT_OPTIONAL);
 
-        if (command_unsupported)
-        { // Traces are already logged
-            errlCommit(errl, SBEIO_COMP_ID);
-        }
-        else if (errl)
+        if (errl)
         {
             if (l_psuResponse.secondaryStatus == SBE_SEC_INPUT_BUFFER_OVERFLOW)
             {

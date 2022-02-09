@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -80,21 +80,16 @@ class SbePsuCommandTest : public CxxTest::TestSuite
                                                          SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
                                                          SbePsu::SBE_READ_SEEPROM_REQ_USED_REGS,
                                                          SbePsu::SBE_READ_SEEPROM_RSP_USED_REGS,
-                                                         SbePsu::COMMAND_SUPPORT_OPTIONAL,
+                                                         SbePsu::unsupported_command_error_severity { ERRL_SEV_PREDICTIVE },
                                                          &command_was_unsupported);
-
-        if (errl)
-        {
-            TS_FAIL("test_sbeUnsupportedPsuCommand: Error returned for OPTIONAL command: "
-                    TRACE_ERR_FMT,
-                    TRACE_ERR_ARGS(errl));
-            errlCommit(errl, CXXTEST_COMP_ID);
-        }
 
         if (!command_was_unsupported)
         {
             TS_FAIL("test_sbeUnsupportedPsuCommand: command_was_supported is not set on OPTIONAL command");
         }
+
+        delete errl;
+        errl = nullptr;
 
         errl = SbePsu::getTheInstance().performPsuChipOp(
             proc,

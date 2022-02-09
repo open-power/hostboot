@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -81,7 +81,6 @@ namespace SBEIO
         l_psuCommand.cd7_readSeeprom_ReadSize        = i_readSize;
         l_psuCommand.cd7_readSeeprom_DestinationAddr = i_destAddr;
 
-
         errl =  SBEIO::SbePsu::getTheInstance().performPsuChipOp(i_target,
                                 &l_psuCommand,
                                 &l_psuResponse,
@@ -95,4 +94,3 @@ namespace SBEIO
     };
 
 } //end namespace SBEIO
-

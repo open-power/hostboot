@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -145,14 +145,13 @@ errlHndl_t getPsuSbeCapabilities(TargetHandle_t i_target)
                         SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
                         SbePsu::SBE_GET_CAPABILITIES_REQ_USED_REGS,
                         SbePsu::SBE_GET_CAPABILITIES_RSP_USED_REGS,
-                        SbePsu::unsupported_command_error_severity { ERRL_SEV_PREDICTIVE },
+                        SbePsu::COMMAND_SUPPORT_OPTIONAL,
                         &command_unsupported);
 
         // Before continuing, make sure this request is honored
 
         if (command_unsupported)
         { // Traces have already been logged
-            errlCommit(l_errl, SBEIO_COMP_ID);
             break;
         }
 

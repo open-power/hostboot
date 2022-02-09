@@ -1,3 +1,4 @@
+
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
@@ -5,7 +6,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -151,7 +152,8 @@ namespace SBEIO
         if(errl)
         {
             // Error log will have already appended SBEIO traces
-            SBE_TRACF("An error was returned from the SBE for the previous getHwReg PSU chipop, check error log");
+            SBE_TRACF("An error was returned from the SBE for the previous getHwReg PSU chipop, check error log (PLID=0x%08x)",
+                      ERRL_GETPLID_SAFE(errl));
             break;
         }
 

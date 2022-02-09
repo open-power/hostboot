@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,6 +74,7 @@
 #include <sbeio/sbeioif.H>
 #include <sbeio/sbe_utils.H>
 #include <sbeio/sbe_retry_handler.H>
+#include <sbeio/sbe_psudd.H>
 #include <sys/misc.h>
 
 #include "call_proc_build_smp.H"
@@ -504,6 +505,11 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
     errlHndl_t l_err = nullptr;
 
     do {
+
+    // Now that we've IPLed past the SBE update step, commit any errors caused
+    // by unsupported SBE PSU chipops (because now we know that an SBE update
+    // won't fix the problem).
+    SbePsu::getTheInstance().commitUnsupportedCmdErrors();
 
     // Attempt to initialize the backup TPM.
     TRUSTEDBOOT::initBackupTpm();

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,8 +71,6 @@ namespace SBEIO
 
         l_psuCommand.cd7_securityListBinDump_addr = i_addr;
 
-        bool unsupported_command = false;
-
         errl =  SBEIO::SbePsu::getTheInstance().performPsuChipOp(
             i_procChip,
             &l_psuCommand,
@@ -80,14 +78,9 @@ namespace SBEIO
             SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
             SbePsu::SBE_SECURITY_LIST_BIN_DUMP_REQ_USED_REGS,
             SbePsu::SBE_SECURITY_LIST_BIN_DUMP_RSP_USED_REGS,
-            SbePsu::unsupported_command_error_severity { ERRORLOG::ERRL_SEV_INFORMATIONAL },
-            &unsupported_command);
+            SbePsu::COMMAND_SUPPORT_OPTIONAL);
 
-        if (unsupported_command)
-        { // Traces are already logged
-            errlCommit(errl, SBEIO_COMP_ID);
-        }
-        else
+        if (errl)
         {
             SBE_TRACF(ERR_MRK "sendPsuSecurityBinDumpRequest: PSU Cmd Failed: "
                       "err rc=0x%.4X plid=0x%.8X",

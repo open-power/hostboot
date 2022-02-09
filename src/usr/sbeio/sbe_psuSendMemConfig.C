@@ -138,16 +138,15 @@ errlHndl_t getPmicHlthCheckData()
                             SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
                             SbePsu::SBE_HEALTH_CHECK_DATA_REQ_USED_REGS,
                             SbePsu::SBE_HEALTH_CHECK_DATA_RSP_USED_REGS,
-                            SbePsu::unsupported_command_error_severity { ERRORLOG::ERRL_SEV_INFORMATIONAL },
+                            SbePsu::COMMAND_SUPPORT_OPTIONAL,
                             &command_unsupported);
 
                 if ( command_unsupported )
                 {
                     // Traces have already been logged
-                    TRACFCOMP( g_trac_sbeio, ERR_MRK"getPmicHlthCheckData: ERROR: SBE firmware "
+                    TRACFCOMP( g_trac_sbeio, ERR_MRK"getPmicHlthCheckData: SBE firmware "
                                "does not support PSU getPmicHlthCheckData information for "
                                "PROC HUID=0x%X OCMB HUID=0x%X", get_huid(l_pProc), get_huid(l_Target));
-                    errlCommit(l_err, SBEIO_COMP_ID);
                     break;
                 }
 
@@ -413,8 +412,6 @@ errlHndl_t psuSendSbeMemConfig(const TargetHandle_t i_pProc)
         // Create a PSU response message
         SbePsu::psuResponse l_psuResponse;
 
-        bool command_unsupported = false;
-
         // Make the call to perform the PSU Chip Operation
         l_err = SbePsu::getTheInstance().performPsuChipOp(
                         i_pProc,
@@ -423,61 +420,16 @@ errlHndl_t psuSendSbeMemConfig(const TargetHandle_t i_pProc)
                         SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
                         SbePsu::SBE_MEM_CONFIG_REQ_USED_REGS,
                         SbePsu::SBE_MEM_CONFIG_RSP_USED_REGS,
-                        SbePsu::unsupported_command_error_severity { ERRORLOG::ERRL_SEV_INFORMATIONAL },
-                        &command_unsupported);
-        if ( command_unsupported )
-        {
-            // Traces have already been logged
-            TRACFCOMP( g_trac_sbeio, ERR_MRK"psuSendSbeMemConfig: ERROR: SBE firmware "
-                       "does not support PSU sending Memory configuration information" );
-            errlCommit(l_err, SBEIO_COMP_ID);
-            break;
-        }
+                        SbePsu::COMMAND_SUPPORT_OPTIONAL);
 
         if (l_err)
         {
+            // Traces have already been logged
             TRACFCOMP( g_trac_sbeio, ERR_MRK"psuSendSbeMemConfig: ERROR: "
                        "Call to performPsuChipOp failed, error returned" );
 
             break;
         }
-        else if (SBE_PRI_OPERATION_SUCCESSFUL != l_psuResponse.primaryStatus)
-        {
-            TRACFCOMP( g_trac_sbeio, ERR_MRK"psuSendSbeMemConfig: ERROR: "
-                       "Call to performPsuChipOp failed. Returned primary status "
-                       "(0x%.4X) and secondary status (0x%.4X)",
-                        l_psuResponse.primaryStatus,
-                        l_psuResponse.secondaryStatus);
-
-            /*@
-             * @moduleid         SBEIO_PSU
-             * @reasoncode       SBEIO_PSU_SEND
-             * @userdata1        The PROC Target HUID
-             * @userdata2[00:31] PSU response, primary status
-             * @userdata2[32:63] PSU response, secondary status
-             * @devdesc          Software problem, call to performPsuChipOp failed
-             *                   when sending Memory configuration info.
-             * @custdesc         A software error occurred during system boot
-             */
-            l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                             SBEIO_PSU,
-                                             SBEIO_PSU_SEND,
-                                             get_huid(i_pProc),
-                                             TWO_UINT32_TO_UINT64(
-                                                         l_psuResponse.primaryStatus,
-                                                         l_psuResponse.secondaryStatus ),
-                                             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
-
-            // Collect the entire command and response buffers
-            SBE_TRACFBIN("Send Memory Config full command:",
-                         &l_psuCommand, sizeof(l_psuCommand));
-            SBE_TRACFBIN("Send Memory Config full response:",
-                         &l_psuResponse, sizeof(l_psuResponse));
-
-            break;
-        }
-
-
     } while (0);
     // Free the buffer
     sbeFree(l_MemConfigAlloc);

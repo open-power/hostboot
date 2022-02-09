@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -722,10 +722,10 @@ errlHndl_t MemRegionMgr::doUnsecureMemRegionOp(regionData & i_region)
 
         // If Secureboot is not enabled, make the error from the SBE not
         // supporting Security Control Messages Control command class (which
-        // includes the Unsecure Memory Region commands) Informational
+        // includes the Unsecure Memory Region commands) predictive
         if (!SECUREBOOT::enabled())
         {
-            opUnsupportedErrorSev = { ERRORLOG::ERRL_SEV_INFORMATIONAL };
+            opUnsupportedErrorSev = { ERRORLOG::ERRL_SEV_PREDICTIVE };
         }
 
         errl =  SBEIO::SbePsu::getTheInstance().performPsuChipOp(l_tgt,

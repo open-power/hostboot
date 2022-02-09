@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -90,8 +90,7 @@ namespace SBEIO
             &l_psuResponse,
             SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
             SbePsu::SBE_QUIESCE_REQ_USED_REGS,
-            SbePsu::SBE_QUIESCE_RSP_USED_REGS,
-            SbePsu::unsupported_command_error_severity { ERRORLOG::ERRL_SEV_UNRECOVERABLE });
+            SbePsu::SBE_QUIESCE_RSP_USED_REGS);
 
         // Regardless of whether the operation was successful, assume it
         // was, in order to suppress future SBE activity like shutdown

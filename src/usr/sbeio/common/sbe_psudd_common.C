@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,7 @@
 #include <intr/interrupt.H>
 #include <errno.h>
 #include <sys/time.h>
+#include <sys/sync.h>
 #include <errl/errludprintk.H>
 #include <util/misc.H>
 #include <sbe/sbeif.H>
@@ -120,8 +121,8 @@ errlHndl_t SbePsu::performPsuChipOp(TARGETING::Target *    i_target,
         {
             SBE_TRACF(ERR_MRK"performPsuChipOp> Skipping operation because of early failure : eid=%.8X",
                       iv_earlyErrorEid);
+
             /*@
-             * @errortype
              * @moduleid        SBEIO_PSU
              * @reasoncode      SBEIO_EARLY_ERROR
              * @userdata1[00:31]       PSU command class
@@ -130,7 +131,7 @@ errlHndl_t SbePsu::performPsuChipOp(TARGETING::Target *    i_target,
              *                  previous fatal error.
              * @custdesc        Firmware error
              */
-            errl = new ErrlEntry(i_supportErrSev.error_sev,
+            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                  SBEIO_PSU,
                                  SBEIO_EARLY_ERROR,
                                  TWO_UINT32_TO_UINT64(
@@ -209,79 +210,92 @@ errlHndl_t SbePsu::performPsuChipOp(TARGETING::Target *    i_target,
         {
             o_unsupportedOp && (*o_unsupportedOp = true);
 
-            // If the caller requested that an error be created for
-            // unsupported operations, create the error here.
-            if (i_supportErrSev.error_sev != ERRL_SEV_UNKNOWN)
-            {
-                SBE_TRACF("The SBE does not support command class %d/command %d on target 0x%08x",
-                          i_pPsuRequest->commandClass,
-                          i_pPsuRequest->command,
-                          get_huid(i_target));
+            SBE_TRACF("The SBE does not support command class %d/command %d on target 0x%08x",
+                      i_pPsuRequest->commandClass,
+                      i_pPsuRequest->command,
+                      get_huid(i_target));
 
 #ifndef __HOSTBOOT_RUNTIME
-                // If support for an operation on the master processor's SBE
-                // is not optional, then update the SBE now and reboot.
-                if (i_supportErrSev.error_sev >= ERRL_SEV_UNRECOVERABLE
-                    && i_target->getAttr<ATTR_PROC_MASTER_TYPE>() == PROC_MASTER_TYPE_ACTING_MASTER)
-                {
-                    // Some callers may ignore errors if they see that the
-                    // operation was unsupported, but SBE update error are
-                    // not ignorable
-                    o_unsupportedOp && (*o_unsupportedOp = false);
+            // If support for an operation on the master processor's SBE
+            // is not optional, then update the SBE now and reboot.
+            if (i_supportErrSev.error_sev >= ERRL_SEV_UNRECOVERABLE
+                && i_target->getAttr<ATTR_PROC_MASTER_TYPE>() == PROC_MASTER_TYPE_ACTING_MASTER)
+            {
+                // Some callers may ignore errors if they see that the
+                // operation was unsupported, but SBE update error are
+                // not ignorable
+                o_unsupportedOp && (*o_unsupportedOp = false);
 
-                    // Update the SBE and reboot
-                    errl = forceSbeUpdate(i_target);
-                    if( errl )
-                    {
-                        break;
-                    }
-                    // the call above should never return without an error,
-                    // if it does, keep going so that we log an error and
-                    // do what we need to do
+                // Update the SBE and reboot
+                errl = forceSbeUpdate(i_target);
+                if( errl )
+                {
+                    break;
                 }
+                // the call above should never return without an error,
+                // if it does, keep going so that we log an error and
+                // do what we need to do
+            }
 #endif //#ifndef __HOSTBOOT_RUNTIME
 
-                /*@
-                 * @errortype
-                 * @moduleid        SBEIO_PSU
-                 * @reasoncode      SBEIO_COMMAND_NOT_SUPPORTED
-                 * @userdata1       PSU command class
-                 * @userdata2       PSU command
-                 * @devdesc         Current SBE version does not support the attempted PSU command
-                 * @custdesc        SBE version too old
-                 */
-                errl = new ErrlEntry(i_supportErrSev.error_sev,
-                                     SBEIO_PSU,
-                                     SBEIO_COMMAND_NOT_SUPPORTED,
-                                     i_pPsuRequest->commandClass,
-                                     i_pPsuRequest->command,
-                                     ErrlEntry::ADD_SW_CALLOUT);
+            // ERRL_SEV_UNKNOWN (passed via the COMMAND_SUPPORT_OPTIONAL
+            // parameter) is our marker to say we should create a predictive error
+            // and possibly log it later.
+            const bool command_support_optional = i_supportErrSev.error_sev == ERRL_SEV_UNKNOWN;
 
-                // For subsidiary processors, either the error happens
-                // before the SMP fabric is up, in which case we can't fix
-                // the problem by updating the SBE (because SBE SEEPROM
-                // accesses are blocked over FSI for being insecure), or
-                // else the error happens after the SMP fabric is up, in
-                // which case we have already updated the SBE (there are no
-                // isteps between fabric setup and the SBE update istep for
-                // subsidiary processors) and there's some serious problem
-                // on the latest version of the SBE that we possess. Either
-                // way, we have to deconfigure the processor.
-                if (i_supportErrSev.error_sev >= ERRL_SEV_UNRECOVERABLE
-                    && i_target->getAttr<ATTR_PROC_MASTER_TYPE>() != PROC_MASTER_TYPE_ACTING_MASTER)
-                {
-                    SBE_TRACF(ERR_MRK"performPsuChipOp: Deconfiguring subsidiary processor 0x%08x "
-                              " because of an unsupported SBE PSU operation on a subsidiary processor",
-                              get_huid(i_target));
+            const auto unsupported_cmd_error_sev = (command_support_optional
+                                                    ? ERRL_SEV_PREDICTIVE
+                                                    : i_supportErrSev.error_sev);
 
-                    errl->addHwCallout(i_target,
-                                       HWAS::SRCI_PRIORITY_MED,
-                                       HWAS::DELAYED_DECONFIG,
-                                       HWAS::GARD_NULL);
-                }
+            /*@
+             * @moduleid        SBEIO_PSU
+             * @reasoncode      SBEIO_COMMAND_NOT_SUPPORTED
+             * @userdata1       PSU command class
+             * @userdata2       PSU command
+             * @devdesc         Current SBE version does not support the attempted PSU command
+             * @custdesc        SBE version too old
+             */
+            errl = new ErrlEntry(unsupported_cmd_error_sev,
+                                 SBEIO_PSU,
+                                 SBEIO_COMMAND_NOT_SUPPORTED,
+                                 i_pPsuRequest->commandClass,
+                                 i_pPsuRequest->command,
+                                 ErrlEntry::ADD_SW_CALLOUT);
 
-                errl->addProcedureCallout(HWAS::EPUB_PRC_SBE_CODE,
-                                          HWAS::SRCI_PRIORITY_HIGH);
+            // For subsidiary processors, either the error happens
+            // before the SMP fabric is up, in which case we can't fix
+            // the problem by updating the SBE (because SBE SEEPROM
+            // accesses are blocked over FSI for being insecure), or
+            // else the error happens after the SMP fabric is up, in
+            // which case we have already updated the SBE (there are no
+            // isteps between fabric setup and the SBE update istep for
+            // subsidiary processors) and there's some serious problem
+            // on the latest version of the SBE that we possess. Either
+            // way, we have to deconfigure the processor.
+            if (i_supportErrSev.error_sev >= ERRL_SEV_UNRECOVERABLE
+                && i_target->getAttr<ATTR_PROC_MASTER_TYPE>() != PROC_MASTER_TYPE_ACTING_MASTER)
+            {
+                SBE_TRACF(ERR_MRK"performPsuChipOp: Deconfiguring subsidiary processor 0x%08x "
+                          " because of an unsupported SBE PSU operation on a subsidiary processor",
+                          get_huid(i_target));
+
+                errl->addHwCallout(i_target,
+                                   HWAS::SRCI_PRIORITY_MED,
+                                   HWAS::DELAYED_DECONFIG,
+                                   HWAS::GARD_NULL);
+            }
+
+            errl->addProcedureCallout(HWAS::EPUB_PRC_SBE_CODE,
+                                      HWAS::SRCI_PRIORITY_HIGH);
+
+            if (command_support_optional)
+            {
+                errl->collectTrace(SBEIO_COMP_NAME);
+
+                const auto lock = scoped_mutex_lock(iv_unsupportedCmdErrorsMutex);
+
+                iv_unsupportedCmdErrors.push_back(errl);
+                errl = nullptr;
             }
         }
     }
@@ -305,6 +319,31 @@ errlHndl_t SbePsu::performPsuChipOp(TARGETING::Target *    i_target,
     SBE_TRACD(EXIT_MRK "performPsuChipOp");
 
     return errl;
+}
+
+/**
+ * @brief  Commit any "unsupported command" errors that have accumulated
+ *         up to this point.
+ */
+void SbePsu::commitUnsupportedCmdErrors()
+{
+    SBE_TRACF(ENTER_MRK"commitUnsupportedCmdErrors");
+
+    const auto lock = scoped_mutex_lock(iv_unsupportedCmdErrorsMutex);
+
+    for (auto& errl : iv_unsupportedCmdErrors)
+    {
+        SBE_TRACF(INFO_MRK"commitUnsupportedCmdErrors: Committing error PLID=0x%08x (RC=0x%08x) "
+                  "caused by an unsupported SBE PSU Chip Operation which happened earlier in the IPL",
+                  ERRL_GETPLID_SAFE(errl),
+                  ERRL_GETRC_SAFE(errl));
+
+        errlCommit(errl, SBEIO_COMP_ID);
+    }
+
+    iv_unsupportedCmdErrors.clear();
+
+    SBE_TRACF(EXIT_MRK"commitUnsupportedCmdErrors");
 }
 
 /**
@@ -389,7 +428,6 @@ errlHndl_t SbePsu::writeRequest(TARGETING::Target * i_target,
             SBE_TRACF(ERR_MRK " Host to PSU door bell=0x%016lx",
                       l_data);
             /*@
-             * @errortype
              * @moduleid     SBEIO_PSU
              * @reasoncode   SBEIO_PSU_NOT_READY
              * @userdata1[0:15]   Reserved
@@ -657,7 +695,6 @@ errlHndl_t SbePsu::checkResponse(TARGETING::Target  * i_target,
             SBE_TRACFBIN("Full response:", o_pPsuResponse, sizeof(psuResponse));
 
             /*@
-             * @errortype
              * @moduleid     SBEIO_PSU
              * @reasoncode   SBEIO_PSU_RESPONSE_ERROR
              * @userdata1[0:31]   Indirect size or 9 for direct command
@@ -831,7 +868,6 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
             {
                 SBE_TRACF("Error: PSU Timeout and no FFDC present");
                 /*@
-                 * @errortype
                  * @moduleid    SBEIO_PSU
                  * @reasoncode  SBEIO_PSU_RESPONSE_SBE_NOT_RESPONDING
                  * @userdata1[00:15]    Primary Status in mbox4
@@ -916,7 +952,6 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
                 SBE_TRACF("Error: Timeout waiting for PSU command on %.8X",
                           TARGETING::get_huid(i_target));
                 /*@
-                 * @errortype
                  * @moduleid    SBEIO_PSU
                  * @reasoncode  SBEIO_PSU_RESPONSE_TIMEOUT
                  * @userdata1[00:15]    Primary Status in mbox4

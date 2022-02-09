@@ -1035,8 +1035,11 @@ class SbePsu
             ERRORLOG::errlSeverity_t error_sev = { };
         };
 
-        // Constant error policy instructing performPsuChipOp to not create an
-        // error when the command is not supported.
+        // Constant error policy indicating that the IPL can continue even if
+        // the command is not supported.
+        // If this error policy is used, a visible error log will be committed
+        // when it's determined that an SBE update won't fix the lack of command
+        // support.
         const static unsupported_command_error_severity COMMAND_SUPPORT_OPTIONAL;
 
         /**
@@ -1049,8 +1052,7 @@ class SbePsu
          * @param[in]  i_reqMsgs        4 bit mask telling which regs to write
          * @param[in]  i_rspMsgs        4 bit mask telling which regs to read
          * @param[in]  i_supportErrSeverity  "Operation not supported" errors will be created with the
-         *                                   given severity. COMMAND_SUPPORT_OPTIONAL means no error
-         *                                   will be created.
+         *                                   given severity.
          * @param[out] o_unsupportedOp  Whether the SBE responded with "unsupported operation"
          */
         errlHndl_t performPsuChipOp(TARGETING::Target * i_target,
@@ -1062,6 +1064,12 @@ class SbePsu
                                     unsupported_command_error_severity i_supportErrSeverity
                                         = { ERRORLOG::ERRL_SEV_UNRECOVERABLE },
                                     bool*               o_unsupportedOp = nullptr);
+
+        /**
+         * @brief  Commit any "unsupported command" errors that have accumulated
+         *         up to this point.
+         */
+        void commitUnsupportedCmdErrors();
 
         /**
          * @brief save information from an "early" error
@@ -1133,6 +1141,19 @@ class SbePsu
     //---------------------------------------------------------------------
     // Local definitions for the device driver
     //---------------------------------------------------------------------
+
+        /**
+         * @brief A list of errors caused by unsupported SBE PSU
+         * operations. These will be committed if we make it past the SBE update
+         * without rebooting (meaning that an SBE update didn't fix the
+         * problem).
+         */
+        std::vector<errlHndl_t> iv_unsupportedCmdErrors;
+
+        /**
+         * @brief Protection for access to iv_unsupportedCmdErrors.
+         */
+        mutex_t iv_unsupportedCmdErrorsMutex = MUTEX_INITIALIZER;
 
         /**
          * @brief Write FFDC package buffer - map of memory allocated
