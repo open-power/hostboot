@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,6 +74,7 @@ enum TargetFilter : uint64_t
     TARGET_FILTER_EQ5        = PlatTargetFilter::PLAT_TARGET_FILTER_EQ5,        // Pervasive 37
     TARGET_FILTER_EQ6        = PlatTargetFilter::PLAT_TARGET_FILTER_EQ6,        // Pervasive 38
     TARGET_FILTER_EQ7        = PlatTargetFilter::PLAT_TARGET_FILTER_EQ7,        // Pervasive 39
+    TARGET_FILTER_MC         = PlatTargetFilter::PLAT_TARGET_FILTER_MC,
 
     // -----------------
     // Composite filters
