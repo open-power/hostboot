@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -82,6 +82,15 @@ namespace PLDM
      */
     void logPldmMsg(const pldm_msg_hdr* const i_hdr, traffic_direction i_dir);
 #else
+
+    /**
+     *  @brief Tells PLDM whether it's waiting for a response or not
+     *
+     *  @param[in] i_waitingForResponse Whether PLDM is waiting for a response
+     *      or not
+     */
+    void set_waiting_for_response(bool i_waitingForResponse);
+
     /**
     * @brief This function is intended to be used by the MCTP resource
     *        provider when it finds a PLDM message and wants the PLDM
@@ -129,6 +138,18 @@ namespace PLDM
     * @return void
     */
     void clear_next_request(void);
+
+    /**
+     *  @brief Clears the input vector and swaps the contents of the cached
+     *      request with it.  This has the effect of transferring the request
+     *      to the given vector in O(1) complexity without having to
+     *      allocate memory, and it clears out the cached request.
+     *
+     *  @param[io/out] io_request On input, a vector to receive the cached
+     *                                request.
+     *                            On output, a vector containing the request
+     */
+    void get_and_clear_next_request(std::vector<uint8_t>& io_request);
 
     /**
     * @brief Process the next PLDM request cached by HBRT's PLDM resource

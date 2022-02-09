@@ -63,6 +63,9 @@
 #include <sys/time.h>
 #endif
 
+// See rt_fwnotify.C
+void createMctpAvailableCallback();
+
 using namespace ERRORLOG;
 
 namespace PLDM
@@ -250,6 +253,9 @@ errlHndl_t sendrecv_pldm_request(ResponseContainer& o_response_bytes,
         }
 
         uint8_t sleep_time_sec = 0;
+
+        (void)PLDM::set_waiting_for_response(true);
+
         constexpr uint8_t sleep_timeout_sec = 90;
         do
         {
@@ -294,6 +300,15 @@ errlHndl_t sendrecv_pldm_request(ResponseContainer& o_response_bytes,
                 break;
             }
         }while (PLDM::get_next_response().empty());
+
+        (void)PLDM::set_waiting_for_response(false);
+
+        // If a request message was queued while waiting for a response,
+        // ask PHyp to call into HBRT again.
+        if(!PLDM::get_next_request().empty())
+        {
+            (void)createMctpAvailableCallback();
+        }
 
         // break if we already have an error
         if (errl)

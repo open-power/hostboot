@@ -471,14 +471,17 @@ pldmResponder::pldmResponder(void) : iv_mctpOutboundMsgQ(nullptr) {}
 
 errlHndl_t PLDM::handle_next_pldm_request(void)
 {
-    auto& next_pldm_request = PLDM::get_next_request();
+    // Move the next request locally so that, during processing of an
+    // HBRT originated request/response in the request handler, if another BMC
+    // request comes in, it will not be cleared after the request handler
+    // returns.
+    std::vector<uint8_t> next_pldm_request;
+    PLDM::get_and_clear_next_request(next_pldm_request);
     assert (!next_pldm_request.empty(), "SW bug! we should never attempt to handle next pldm request if there is not one");
+
     errlHndl_t errl = handle_inbound_req(nullptr,
                                          next_pldm_request.data(),
                                          next_pldm_request.size());
-    // clear the request we attempted to handle regardless
-    // if we were successful or not
-    PLDM::clear_next_request();
     return errl;
 }
 

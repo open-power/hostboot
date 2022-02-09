@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,14 +47,29 @@ class PldmRP
       PLDM::pldmrp_rt_rc cache_next_pldm_msg(const uint8_t * i_next_msg,
                                        size_t i_len);
 
+      /**
+       *  @brief Clears the input vector and swaps the contents of the cached
+       *      request with it.  This has the effect of transferring the request
+       *      to the given vector in O(1) complexity without having to
+       *      allocate memory, and it clears out the cached request.
+       *
+       *  @param[io/out] io_request On input, a vector to receive the cached
+       *                                request.
+       *                            On output, a vector containing the request
+       */
+      void get_and_clear_next_request(std::vector<uint8_t>& io_request);
+
       // these vector members will act as a cache for a single PLDM response or
       // PLDM request. there should only be at most one of each cached at any
       // given time
       std::vector<uint8_t> iv_next_response;
       std::vector<uint8_t> iv_next_request;
 
+      // Whether PLDM is in the response loop or not
+      bool iv_waitingForResponse;
+
       // Constructor
-      PldmRP(void) {};
+      PldmRP(void) : iv_waitingForResponse(false) {};
   private:
       // Disallow copying this class.
       PldmRP& operator=(const PldmRP&) = delete;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,6 +43,11 @@ pldmrp_rt_rc PLDM::cache_next_pldm_msg(const void * const i_next_msg,
                                       i_len);
 }
 
+void PLDM::set_waiting_for_response(const bool i_waitingForResponse)
+{
+    Singleton<PldmRP>::instance().iv_waitingForResponse = i_waitingForResponse;
+}
+
 const std::vector<uint8_t> & PLDM::get_next_response(void)
 {
     return Singleton<PldmRP>::instance().iv_next_response;
@@ -61,6 +66,17 @@ const std::vector<uint8_t> & PLDM::get_next_request(void)
 void PLDM::clear_next_request(void)
 {
     Singleton<PldmRP>::instance().iv_next_request.clear();
+}
+
+void PLDM::get_and_clear_next_request(std::vector<uint8_t>& io_request)
+{
+    Singleton<PldmRP>::instance().get_and_clear_next_request(io_request);
+}
+
+void PldmRP::get_and_clear_next_request(std::vector<uint8_t>& io_request)
+{
+    io_request.clear();
+    io_request.swap(iv_next_request);
 }
 
 pldmrp_rt_rc PldmRP::cache_next_pldm_msg(const uint8_t * const i_next_msg,
@@ -86,6 +102,21 @@ pldmrp_rt_rc PldmRP::cache_next_pldm_msg(const uint8_t * const i_next_msg,
     {
         if(iv_next_request.empty())
         {
+            iv_next_request.assign(i_next_msg,
+                                   i_next_msg_end);
+        }
+        else if(iv_waitingForResponse)
+        {
+            PLDM_INF("cache_next_pldm_msg: discarding queued PLDM request "
+                     "as new one arrived while waiting for a PLDM response.");
+            PLDM_INF_BIN("Discarded PLDM message header",
+                         iv_next_request.data(),
+                         std::min(iv_next_request.size(),sizeof(pldm_msg_hdr)));
+
+            // Already have a request pending while waiting for a response
+            // and a new request came in.  That should only happen if BMC
+            // timed out a previous request and issued a new one.  In that case,
+            // throw away the existing request and replace it.
             iv_next_request.assign(i_next_msg,
                                    i_next_msg_end);
         }
