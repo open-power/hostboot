@@ -32,7 +32,7 @@
 BMC_PATCH_DIRECTORY=/usr/local/share/hostfw/running/
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 SSHPASS_SCRIPT="$SCRIPT_DIR/hb_sshpass"
-PATCHES_DIR="$PROJECT_ROOT/standalone/pnor"
+STANDALONE_COMMIT_CHANGE_ID=I7f9e2bfa6d30f91a9055c1a0fde73c3e207e48ea
 
 #User might specify a different ssh port (e.g. for simics)
 if [ -z "$SSH_PORT" ]
@@ -44,12 +44,19 @@ else
     COPY="scp -P $SSH_PORT"
 fi
 
-
-
-if [[ ! "$PROJECT_ROOT" ]] ; then
-    errlog "Must be run from inside a workon"
-    exit 1
+#User might specify a different location for patches
+if [ -z "$PATCHES_DIR" ]
+then
+    PATCHES_DIR="$PROJECT_ROOT/standalone/pnor"
+    IMG_DIR="$PROJECT_ROOT/img"
+else
+    # If PATCHES_DIR is set by user then all the data lives there
+    SCRIPT_DIR=$PATCHES_DIR
+    IMG_DIR=$PATCHES_DIR
+    PROJECT_ROOT=1
+    EXTERNAL_PATCHES=1
 fi
+echo "PATCHES_DIR=$PATCHES_DIR"
 
 # Library functions
 
@@ -65,15 +72,19 @@ function checkstatus () {
 }
 
 function USAGE () {
-    errlog "Usage: $0 [USERNAME@]HOSTNAME PASSWORD [OPTIONS...]"
+    errlog "Usage(1): $0 [USERNAME@]HOSTNAME PASSWORD [OPTIONS...]"
     errlog "    HOSTNAME         The hostname of the machine to patch, including a user name if needed"
     errlog "    PASSWORD         SSH password for the machine to patch"
+    errlog ""
+    errlog "Usage(2): $0 [EXTERNALDIR] --cponly [OPTIONS...]"
+    errlog "    EXTERNALDIR      Path to a directory to copy data files and scripts into"
     errlog ""
     errlog "    OPTIONS may be one or more of the following:"
     errlog "      HBI         Patch Hostboot Base (HBB) and extended (HBI) images"
     errlog "      HBRT        Patch Hostboot runtime"
     errlog "      HBD         Patch Hostboot targeting data (only use with appropriate targeting XML changes)"
     errlog "      --nopldmd   Do not restart PLDMD on the BMC after patching"
+    errlog "      --cponly    Copy files to an external dir instead of a BMC"
     errlog "      -h/--help   Display this help text and exit"
     errlog ""
     errlog "For example, to patch HBB, HBI and HBD on the host 'bmcmachine' with the username 'root'"
@@ -116,6 +127,10 @@ function PATCH_HBI_HBB () {
     SSHPASS $COPY "$PATCHES_DIR/HBI.bin" "$PATCHES_DIR/HBB.bin" "$HOSTNAME":"$BMC_PATCH_DIRECTORY"
     REMOTE_SUDO "cd $BMC_PATCH_DIRECTORY && ln -sf HBB.bin HBB && ln -sf HBI.bin HBI"
     REMOTE_SUDO "cd $BMC_PATCH_DIRECTORY && ln -sf HBB.bin $HBB.lid && ln -sf HBI.bin $HBI.lid"
+
+    # Copy the symbol files over for debug
+    REMOTE_SUDO "mkdir -p $BMC_PATCH_DIRECTORY/hbdebug/"
+    SSHPASS $COPY `find $IMG_DIR/hbotStringFile $IMG_DIR/*.list.bz2 $IMG_DIR/*.syms $IMG_DIR/*.bin.modinfo | grep -v _test` "$HOSTNAME":"$BMC_PATCH_DIRECTORY/hbdebug/"
 }
 
 function PATCH_HBD () {
@@ -125,11 +140,11 @@ function PATCH_HBD () {
 }
 
 function PATCH_HBRT () {
-    HBRT_PATCH_DIR=hbrt_patch/
+    HBRT_PATCH_DIR=/tmp/hbrt_patch_`date +%Y%m%H%M%S`/
     rm -rf $HBRT_PATCH_DIR
     mkdir -p $HBRT_PATCH_DIR
-    cp $PROJECT_ROOT/img/hbirt.bin $HBRT_PATCH_DIR
-    echo HBRT  hbirt.bin  $HBRT_RT.lid  80d00009.lid >$HBRT_PATCH_DIR/lidnumbers.txt
+    cp $IMG_DIR/hbirt.bin $HBRT_PATCH_DIR
+    echo "HBRT  hbirt.bin  $HBRT_RT.lid  80d00009.lid" > $HBRT_PATCH_DIR/lidnumbers.txt
     if ! SSHPASS_RC $COPY "$HOSTNAME":/usr/local/share/hostfw/running/81e002ff.lid $HBRT_PATCH_DIR >/dev/null ; then
 	SSHPASS $COPY "$HOSTNAME":/media/hostfw/running-ro/81e002ff.lid $HBRT_PATCH_DIR
 	checkstatus "download master LID list"
@@ -165,7 +180,6 @@ function FETCH_LID_IDS_FROM_BMC () {
 function CHECK_REPO_FOR_STANDALONE_COMMIT () {
     # This is the change-ID for the standalone PNOR layout changes
     # that will make a standalone build compatible with a BMC machine.
-    STANDALONE_COMMIT_CHANGE_ID=I7f9e2bfa6d30f91a9055c1a0fde73c3e207e48ea
     git log | grep $STANDALONE_COMMIT_CHANGE_ID >/dev/null
 
     if [[ $? -ne 0 ]] ; then
@@ -186,7 +200,37 @@ function SHOW_PATCHES_ON_BMC () {
     REMOTE_SUDO "ls -lat /usr/local/share/hostfw/running/"
 }
 
+function MAKE_GIT_PATCHFILES () {
+    MGP_COPYDIR=$1
+    echo "MGP_COPYDIR=$MGP_COPYDIR"
+
+    if [ -z "$EXTERNAL_PATCHES" ]
+    then
+        relcommit=`git log | grep "$STANDALONE_COMMIT_CHANGE_ID" -A2 | sed -n 's/commit //p'`
+        rm -f $MGP_COPYDIR/HB_BASE_IS__*
+
+        if [ "$relcommit" != "" ]
+        then
+            echo "Making patches based against $relcommit"
+            rm -f $MGP_COPYDIR/*.patch
+            git format-patch $relcommit --output-directory $MGP_COPYDIR/
+            touch $MGP_COPYDIR/HB_BASE_IS__$relcommit
+        else
+            echo "No base commit found, skipping patches"
+        fi
+    else
+        # if EXTERNAL_PATCHES is set, the patch files already exist so just copy them over
+        cp $PATCHES_DIR/HB_BASE_IS__* $MGP_COPYDIR/
+        cp $PATCHES_DIR/*.patch $MGP_COPYDIR/
+    fi
+}
+
 # Main
+
+if [[ ! "$PROJECT_ROOT" ]] ; then
+    errlog "Must be run from inside a workon"
+    exit 1
+fi
 
 if [[ $# -lt 3 ]] ; then
     USAGE
@@ -195,6 +239,11 @@ fi
 
 HOSTNAME=$1
 PASSWORD=$2
+
+COPY_ONLY=0
+if [[ "$PASSWORD" == --cponly ]] ; then
+    COPY_ONLY=1
+fi
 
 PATCH_HBI=0
 PATCH_HBRT=0
@@ -237,22 +286,66 @@ if [[ "$MACHINE" = P10_STANDALONE ]] ; then
     CHECK_REPO_FOR_STANDALONE_COMMIT
 fi
 
-FETCH_LID_IDS_FROM_BMC
+# Just copy files to a directory to be patched later
+if [[ $COPY_ONLY = 1 ]] ; then
+    COPYDIR=$HOSTNAME   #steal the first arg
 
-if [[ $PATCH_HBI = 1 ]] ; then
-    PATCH_HBI_HBB
+    # Data
+    SECTIONS=""
+    if [[ $PATCH_HBI = 1 ]] ; then
+        cp "$PATCHES_DIR/HBI.bin" "$PATCHES_DIR/HBB.bin" "$COPYDIR"
+        SECTIONS="$SECTIONS HBI"
+    fi
+    if [[ $PATCH_HBRT = 1 ]] ; then
+        cp "$IMG_DIR/hbirt.bin" "$COPYDIR"
+        SECTIONS="$SECTIONS HBRT"
+    fi
+    if [[ $PATCH_HBD = 1 ]] ; then
+        cp "$PATCHES_DIR/HBD.bin" "$COPYDIR"
+        SECTIONS="$SECTIONS HBD"
+    fi
+
+    # Copy all of the non-tst symbol data out there for debug
+    cp img/hbotStringFile `find img/*.list.bz2 img/*.syms img/*.bin.modinfo | grep -v _test` "$COPYDIR"
+
+    # Scripts for BMC application
+    cp "$SCRIPT_DIR/hb_sshpass" "$SCRIPT_DIR/patch-bmc" "$COPYDIR"
+
+    # Patch files to recreate
+    MAKE_GIT_PATCHFILES $COPYDIR
+
+    echo "Patches copied to $COPYDIR."
+    echo "To apply to BMC run:"
+    echo "   PATCHES_DIR=$COPYDIR $COPYDIR/patch-bmc [USERNAME@]HOSTNAME PASSWORD $SECTIONS"
+
+else   # Apply the data to the BMC
+
+   FETCH_LID_IDS_FROM_BMC
+
+   # Copy patch files over too so we know what is being patched
+   COPYDIR=/tmp/hb_patches_`date +%Y%m%H%M%S`/
+   mkdir $COPYDIR
+   MAKE_GIT_PATCHFILES $COPYDIR
+
+   if [[ $PATCH_HBI = 1 ]] ; then
+       PATCH_HBI_HBB
+   fi
+
+   if [[ $PATCH_HBD = 1 ]] ; then
+       PATCH_HBD
+   fi
+
+   if [[ $PATCH_HBRT = 1 ]] ; then
+       PATCH_HBRT
+   fi
+
+   SSHPASS $COPY "$COPYDIR"/* "$HOSTNAME":"$BMC_PATCH_DIRECTORY/hbdebug/"
+   rm $COPYDIR/*
+   rmdir $COPYDIR
+
+   if [[ $RESTART_PLDMD = 1 ]] ; then
+       RESTART_PLDMD
+   fi
+
+   SHOW_PATCHES_ON_BMC
 fi
-
-if [[ $PATCH_HBD = 1 ]] ; then
-    PATCH_HBD
-fi
-
-if [[ $PATCH_HBRT = 1 ]] ; then
-    PATCH_HBRT
-fi
-
-if [[ $RESTART_PLDMD = 1 ]] ; then
-    RESTART_PLDMD
-fi
-
-SHOW_PATCHES_ON_BMC
