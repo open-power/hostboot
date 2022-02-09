@@ -75,9 +75,11 @@ class portTraits< mss::mc_type::ODYSSEY >
         static constexpr uint64_t CTCR_REG = scomt::ody::ODC_WDF_REGS_CTCR;
         static constexpr uint64_t DSM0Q_REG = scomt::ody::ODC_SRQ_MBA_DSM0Q;
 
-        // TODO Zen:MST-1403 These regs no longer exist on Odyssey. FIFO mode may be controlled only by ROQ0Q, but not sure
-        //static constexpr uint64_t RRQ_REG = EXPLR_SRQ_MBA_RRQ0Q;
-        //static constexpr uint64_t WRQ_REG = EXPLR_SRQ_MBA_WRQ0Q;
+        // NOTE: ROQ has replaced both WRQ/RRQ
+        //       Retaining the later two for generic implementation
+        static constexpr uint64_t ROQ_REG = scomt::ody::ODC_SRQ_MBA_ROQ0Q;
+        static constexpr uint64_t RRQ_REG = scomt::ody::ODC_SRQ_MBA_ROQ0Q;
+        static constexpr uint64_t WRQ_REG = scomt::ody::ODC_SRQ_MBA_ROQ0Q;
 
         // This number includes the two spare nibbles, it is compared against
         // the actual nibble index we're at
@@ -161,9 +163,11 @@ class portTraits< mss::mc_type::ODYSSEY >
             FARB0Q_RCD_PROTECTION_TIME = scomt::ody::ODC_SRQ_MBA_FARB0Q_CFG_RCD_PROTECTION_TIME,
             FARB0Q_RCD_PROTECTION_TIME_LEN = scomt::ody::ODC_SRQ_MBA_FARB0Q_CFG_RCD_PROTECTION_TIME_LEN,
 
-            // TODO Zen:MST-1403 These regs no longer exist on Odyssey. May be replaced by ROQ0Q, but not sure
-            //RRQ_FIFO_MODE = EXPLR_SRQ_MBA_RRQ0Q_CFG_RRQ_FIFO_MODE,
-            //WRQ_FIFO_MODE = EXPLR_SRQ_MBA_WRQ0Q_CFG_WRQ_FIFO_MODE,
+            // NOTE: ROQ has replaced both WRQ/RRQ
+            //       Retaining the later two for generic implementation
+            ROQ_FIFO_MODE = scomt::ody::ODC_SRQ_MBA_ROQ0Q_CFG_FIFO_MODE,
+            RRQ_FIFO_MODE = scomt::ody::ODC_SRQ_MBA_ROQ0Q_CFG_FIFO_MODE,
+            WRQ_FIFO_MODE = scomt::ody::ODC_SRQ_MBA_ROQ0Q_CFG_FIFO_MODE,
         };
 };
 
