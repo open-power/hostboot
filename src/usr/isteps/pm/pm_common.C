@@ -965,13 +965,6 @@ namespace HBPM
                 {
                     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                                ERR_MRK"resetPMComplex(): Error sending firmware_request" );
-
-                    //@fixme in followup commit
-                    // To avoid a coreq with the phyp build we will ignore
-                    // this error for now
-                    l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-                    l_errl->collectTrace("ISTEPS_TRACE",256);
-                    errlCommit(l_errl, ISTEP_COMP_ID);
                 }
             }
             // commit the log and move on with the reset, it might be okay...
