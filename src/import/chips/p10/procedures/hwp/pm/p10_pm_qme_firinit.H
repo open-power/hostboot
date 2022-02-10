@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,7 +31,7 @@
 // *HWP Team            :   PM
 // *HWP Level           :   3
 // *HWP Consumed by     :   HS
-
+//EKB-Mirror-To: hw/ppe
 #ifndef _P10_PM_QME_FIRINIT_H_
 #define _P10_PM_QME_FIRINIT_H_
 
@@ -40,8 +40,9 @@
 //------------------------------------------------------------------------------
 #include <fapi2.H>
 #include <p10_pm.H>
-#include <p10_pm_fir_class.H>
-
+#ifndef __PPE__
+    #include <p10_pm_fir_class.H>
+#endif
 // function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p10_pm_qme_firinit_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,

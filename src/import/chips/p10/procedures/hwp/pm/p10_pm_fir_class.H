@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -297,7 +297,7 @@ PMFir<FIRTYPE_QME_LFIR, fapi2::TARGET_TYPE_EQ>::PMFir(
     iv_mask_address = iv_fir_address + EQ_MASK_INCR;
     iv_mask_and_address = iv_fir_address + EQ_MASK_WAND_INCR;
     iv_mask_or_address = iv_fir_address + EQ_MASK_WOR_INCR;
-    FAPI_DBG("EQ number = %d %08x", l_chpltNumber, iv_action0_address);
+    FAPI_DBG("EQ number = %d %08x %08x", l_chpltNumber, iv_action0_address, l_rc);
     iv_eq = i_target;
     iv_targetType = EQ_TARGET;
     iv_fir_write = false;
