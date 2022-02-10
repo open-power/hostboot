@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -83,6 +83,7 @@ enum
     QME_VER_BASE_ASCII  =   0x514d455f5f312e30ull,
     XGPE_RELOC_BASE     =   0xfff34000,
     XGPE_48K_VER        =   0x11,
+    FUSED_MODE_OFFSET   =   32,
 };
 
 /**
@@ -760,6 +761,60 @@ uint32_t copySectionToHomer( uint8_t* i_destPtr, uint8_t* i_srcPtr, ImageBuildRe
 }
 
 //------------------------------------------------------------------------------
+/**
+ * @brief   Copies partial section of hardware image to HOMER
+ * @param[in]   i_destPtr       a location in HOMER
+ * @param[in]   i_srcPtr        a location in HW Image.
+ * @param[in]   i_buildRecord   an instance of ImgSectnSumm
+ * @param[in]   i_secId         XIP Section id to be copied.
+ * @param[in]   i_ecLevel       ec level of chip
+ * @param[out]  o_ppeSection    contains section details.
+ * @note    starting from an offset copies partial section to HOMER.
+ * @return  IMG_BUILD_SUCCESS if successful, error code otherwise.
+ */
+uint32_t copyPartialSectionToHomer( uint8_t* i_destPtr, uint8_t* i_srcPtr, ImageBuildRecord & i_buildRecord, uint8_t i_secId ,
+                             uint8_t i_ecLevel, P9XipSection&   o_ppeSection, uint32_t i_offset )
+{
+    FAPI_DBG( ">> copyPartialSectionToHomer" );
+    uint32_t retCode = IMG_BUILD_SUCCESS;
+
+    do
+    {
+        o_ppeSection.iv_offset      =   0;
+        o_ppeSection.iv_size        =   0;
+
+        uint32_t rcTemp = getXipImageSectn( i_srcPtr, i_secId, UNDEFINED_IPL_IMAGE_SID, i_ecLevel, o_ppeSection );
+
+        if( rcTemp )
+        {
+            FAPI_ERR( "Failed To Get Section 0x%08X Of XIP RC 0x%08x", i_secId, rcTemp );
+            retCode = BUILD_FAIL_INVALID_SECTN;
+            break;
+        }
+
+        FAPI_DBG("o_ppeSection.iv_offset = %X, "
+                 "o_ppeSection.iv_size = %X, "
+                 "i_secId %d",
+                 o_ppeSection.iv_offset,
+                 o_ppeSection.iv_size,
+                 i_secId);
+
+        retCode    =   i_buildRecord.checkSize( o_ppeSection.iv_size );
+
+        if( retCode )
+        {
+            break;
+        }
+
+        memcpy( ( i_destPtr + i_offset ), ( i_srcPtr + o_ppeSection.iv_offset + i_offset ), 
+                ( o_ppeSection.iv_size - i_offset ) );
+    }
+    while(0);
+
+    FAPI_DBG( "<< copyPartialSectionToHomer" );
+    return retCode;
+}
+//------------------------------------------------------------------------------
 
 /**
  * @brief   builds XPMR header in the HOMER.
@@ -1307,49 +1362,68 @@ fapi2::ReturnCode buildCoreRestoreImage( void* const i_pImageIn,
                  "Failed to find Self Restore sub-image in HW Image" );
 
     pSelfRestImg = ppeSection.iv_offset + (uint8_t*) (i_pImageIn );
+    i_qmeBuildRecord.setCurrentSectn( "SELF BIN" );
 
-    if( i_imgType.selfRestoreBuild )
+    if( i_imgType.coreSprBuild )
     {
-        i_qmeBuildRecord.setCurrentSectn( "SELF BIN" );
         // first 256 bytes is expected to be zero here. It is by purpose. Just after this step,
         // we will add CPMR header in that area.
         FAPI_INF("Self Restore Image install");
         FAPI_INF("  Offset = 0x%08X, Size = 0x%08X",
                  ppeSection.iv_offset, ppeSection.iv_size);
+
         rcTemp = copySectionToHomer( i_pChipHomer->iv_cpmrRegion.iv_selfRestoreRegion.iv_CPMR_SR.iv_region,
                                      pSelfRestImg,
                                      i_qmeBuildRecord,
                                      P9_XIP_SECTION_RESTORE_SELF_SAVE_RESTORE,
                                      i_procFuncModel.getChipLevel(),
                                      ppeSection );
+    }
+    else
+    {
+        //If HOMER is in Rebuild phase, avoid touching Magic word and Fuse Mode field of CPMR.
+        //Therefore, avoiding an update of first 32B of CPMR header. This is to prevent
+        //concurrency issue found in SW540499,SW542507.
 
-        FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rcTemp ),
-                     fapi2::SELF_REST_IMG_BUILD_FAIL()
-                     .set_EC_LEVEL( i_procFuncModel.getChipLevel() )
-                     .set_MAX_ALLOWED_SIZE( rcTemp  )
-                     .set_ACTUAL_SIZE( ppeSection.iv_size )
-                     .set_IMAGE_TYPE(i_imgType.value_32),
-                     "Failed to update self restore image in HOMER" );
+        rcTemp = copyPartialSectionToHomer( i_pChipHomer->iv_cpmrRegion.iv_selfRestoreRegion.iv_CPMR_SR.iv_region,
+                                             pSelfRestImg,
+                                             i_qmeBuildRecord,
+                                             P9_XIP_SECTION_RESTORE_SELF_SAVE_RESTORE,
+                                             i_procFuncModel.getChipLevel(),
+                                             ppeSection,
+                                             FUSED_MODE_OFFSET );
 
     }
 
-    // adding CPMR header in first 256 bytes of the CPMR.
-    FAPI_INF("Overlay CPMR Header at the beginning of CPMR");
-
-    rcTemp = copySectionToHomer( i_pChipHomer->iv_cpmrRegion.iv_selfRestoreRegion.iv_CPMR_SR.iv_region,
-                                 pSelfRestImg,
-                                 i_qmeBuildRecord,
-                                 P9_XIP_SECTION_RESTORE_CPMR_HDR,
-                                 i_procFuncModel.getChipLevel(),
-                                 ppeSection );
-
     FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rcTemp ),
-                 fapi2::CPMR_HDR_BUILD_FAIL()
+                 fapi2::SELF_REST_IMG_BUILD_FAIL()
                  .set_EC_LEVEL( i_procFuncModel.getChipLevel() )
                  .set_MAX_ALLOWED_SIZE( rcTemp  )
                  .set_ACTUAL_SIZE( ppeSection.iv_size )
                  .set_IMAGE_TYPE(i_imgType.value_32),
-                 "Failed to update CPMR Header in HOMER" );
+                 "Failed to update self restore image in HOMER" );
+
+
+    // adding CPMR header in first 256 bytes of the CPMR.
+    FAPI_INF("Overlay CPMR Header at the beginning of CPMR");
+
+    if( i_imgType.coreSprBuild )
+    {  
+        rcTemp = copySectionToHomer( i_pChipHomer->iv_cpmrRegion.iv_selfRestoreRegion.iv_CPMR_SR.iv_region,
+                                     pSelfRestImg,
+                                     i_qmeBuildRecord,
+                                     P9_XIP_SECTION_RESTORE_CPMR_HDR,
+                                     i_procFuncModel.getChipLevel(),
+                                     ppeSection );
+
+        FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rcTemp ),
+                     fapi2::CPMR_HDR_BUILD_FAIL()
+                     .set_EC_LEVEL( i_procFuncModel.getChipLevel() )
+                     .set_MAX_ALLOWED_SIZE( rcTemp  )
+                     .set_ACTUAL_SIZE( ppeSection.iv_size )
+                     .set_IMAGE_TYPE(i_imgType.value_32),
+                     "Failed to update CPMR Header in HOMER" );
+    }
 
     i_qmeBuildRecord.setSection( "SELF", SELF_RESTORE_CPMR_OFFSET, SELF_SAVE_RESTORE_REGION_SIZE );
 
