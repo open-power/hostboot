@@ -867,6 +867,9 @@ void gppb_print(
     FAPI_INF("  %-26s : %1d", "wof_disable_vratio",
             i_gppb->pgpe_flags[PGPE_FLAG_WOF_DISABLE_VRATIO]);
 
+    FAPI_INF("  %-26s : %1d", "eco_count_en | eco_count",
+            i_gppb->pgpe_flags[PGPE_FLAG_ECO_COUNT]);
+
     FAPI_INF("Other Info:");
 
     FAPI_INF("  %-26s : 0x%08X", "DVFS Adjustment",
@@ -1200,6 +1203,7 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         // turn off voltage movement when the WAR MODE defect exists.
         io_globalppb->pgpe_flags[PGPE_FLAG_STATIC_VOLTAGE_ENABLE] =
                            (l_hw543384 && iv_attrs.attr_war_mode == fapi2::ENUM_ATTR_HW543384_WAR_MODE_TIE_NEST_TO_PAU) ? 1 : 0;
+        io_globalppb->pgpe_flags[PGPE_FLAG_ECO_COUNT] = 0x80 | iv_eco_count;
 
 #ifdef __HOSTBOOT_MODULE
         if (Util::isSimicsRunning())
@@ -2427,10 +2431,24 @@ fapi2::ReturnCode PlatPmPPB::vpd_init( void )
                                    "Pstate Parameter Block get_mvpd_iddq function failed");
                 fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
             }
+
+            FAPI_INF("Getting ECO core count from PG");
+            l_rc = get_mvpd_PG ();
+
+            if (l_rc)
+            {
+                FAPI_ASSERT_NOEXIT(false,
+                                   fapi2::PSTATE_PB_PG_ACCESS_ERROR(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                                   .set_CHIP_TARGET(iv_procChip)
+                                   .set_FAPI_RC(l_rc),
+                                   "Pstate Parameter Block get_mvpd_PG function failed");
+                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            }
+
         }
         else
         {
-            FAPI_INF("Skipping IQ (IDDQ) Data as WOF is disabled");
+            FAPI_INF("Skipping IQ (IDDQ) Data and PG as WOF is disabled");
             iv_wof_enabled = false;
         }
 
@@ -3462,6 +3480,68 @@ fapi_try_exit:
 
     FAPI_INF("< chk_valid_poundv");
     return fapi2::current_err;
+}
+
+///////////////////////////////////////////////////////////
+////////   get_mvpd_PG
+///////////////////////////////////////////////////////////
+fapi2::ReturnCode PlatPmPPB::get_mvpd_PG()
+{
+    FAPI_INF(">>>>>>>>> get_mvpd_poundPG");
+
+    uint8_t l_present_core_unit_pos;
+
+    auto l_core_present_vector =
+        iv_procChip.getChildren<fapi2::TARGET_TYPE_CORE>
+        (fapi2::TARGET_STATE_PRESENT);
+
+    // For each present core,set region partial good and OCC CCSR bits
+    for (auto core_present_it : l_core_present_vector)
+    {
+
+        FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS,
+                                core_present_it,
+                                l_present_core_unit_pos));
+
+        // ECO cores identifed in VPD
+
+        // PG bit definition reference:
+        //   https://ibm.box.com/s/tmt5lvsswmvp9di8zxcge8i0eljxj0jb
+        // constants reflect bit associated with c0 slice in EQ (start of contiguous
+        // 4-bit field of L3 ECO data), with data packed
+        const auto l_l3_eco_pg_start_bit = 28;
+
+        // grab perv target associated with parent EQ
+        const auto l_eq = core_present_it.getParent<fapi2::TARGET_TYPE_EQ>();
+        const auto l_perv = l_eq.getParent<fapi2::TARGET_TYPE_PERV>();
+
+        fapi2::ATTR_PG_MVPD_Type l_eq_mvpd_pg;
+        fapi2::buffer<uint32_t> l_eq_mvpd_pg_buf;
+
+        // retreive partial good information for EQ containing this core, via
+        // the associated pervasive target
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PG_MVPD, l_perv, l_eq_mvpd_pg),
+                 "Error from FAPI_ATTR_GET (ATTR_PG_MVPD)");
+
+        l_eq_mvpd_pg_buf = l_eq_mvpd_pg;
+
+        FAPI_INF("  PG : 0x%08X", l_eq_mvpd_pg_buf);
+
+        // ECO mode is enabled if L3 ECO PG bit is 0
+        if (!l_eq_mvpd_pg_buf.getBit(l_l3_eco_pg_start_bit + (l_present_core_unit_pos % 4)))
+        {
+            iv_eco_count++;
+            FAPI_INF("  EC %d is an ECO core", l_present_core_unit_pos);
+        }
+
+    }  // Present core loop
+
+fapi_try_exit:
+
+    FAPI_INF("<<<<<<<<< get_mvpd_poundPG");
+
+    return fapi2::current_err;
+
 }
 
 ///////////////////////////////////////////////////////////

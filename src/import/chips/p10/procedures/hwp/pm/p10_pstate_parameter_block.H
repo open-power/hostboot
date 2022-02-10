@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -251,7 +251,7 @@ class PlatPmPPB
             iv_reference_frequency_mhz(0), iv_reference_frequency_khz(0),
             iv_frequency_step_khz(0), iv_proc_dpll_divider(0), iv_occ_freq_mhz(0),
             iv_wov_underv_enabled(0), iv_wov_overv_enabled(0), iv_ocs_enabled(0),
-            iv_wof_throttle_enabled(0), iv_poundV_fmax_enable(true),
+            iv_wof_throttle_enabled(0), iv_poundV_fmax_enable(true), iv_eco_count(0),
             iv_dccr_value(0), iv_flmr_value(0), iv_fmmr_value(0),
             iv_wts_vddPsavFreq(0), iv_wts_vddWofBaseFreq(0), iv_wts_vddUTFreq(0), iv_wts_vddFixedFreq(0)
         {
@@ -373,6 +373,12 @@ class PlatPmPPB
         /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode get_mvpd_poundAW();
+
+        /// -----------------------------------------------------------------------
+        /// @brief Read PG data from module vpd
+        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// -----------------------------------------------------------------------
+        fapi2::ReturnCode get_mvpd_PG();
 
         /// -----------------------------------------------------------------------
         /// @brief Read #W data from module vpd
@@ -811,6 +817,7 @@ class PlatPmPPB
         uint16_t                  iv_array_vdd_mv;
         uint8_t                   iv_pdv_model_data;
         uint8_t                   iv_qrvrm_enable_flag;
+        uint8_t                   iv_eco_count;
 
         PoundVOpPoint_t           iv_operating_points[NUM_VPD_PTS_SET][NUM_PV_POINTS];
         PoundVOpPoint_t           iv_attr_mvpd_poundV_raw[NUM_PV_POINTS];

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -222,7 +222,12 @@ fapi_try_exit:
 static fapi2::ReturnCode update_ec_config(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
-    FAPI_INF("> update_ec_config...");
+
+    const uint32_t BUFFSIZE = 64;
+    char  l_proc_str[BUFFSIZE];
+    fapi2::toString(i_target, l_proc_str, BUFFSIZE);
+
+    FAPI_INF("> update_ec_config... Proc %s", l_proc_str);
 
     uint8_t l_present_core_unit_pos;
     uint8_t l_functional_core_unit_pos;
@@ -230,6 +235,8 @@ static fapi2::ReturnCode update_ec_config(
     fapi2::buffer<uint64_t> l_core_config = 0;
     fapi2::buffer<uint64_t> l_pg_config = 0;
     fapi2::buffer<uint64_t> l_eco_config = 0;
+    fapi2::buffer<uint64_t> l_eco_vpd = 0;
+    fapi2::buffer<uint64_t> l_eco_flag_vec = 0;
     uint8_t l_core_not_func = 0;
 
     auto l_core_present_vector =
@@ -283,15 +290,16 @@ static fapi2::ReturnCode update_ec_config(
                 // Clear Power Gate/DFT fence
                 FAPI_TRY(fapi2::putScom(l_eq, CPLT_CTRL5_WO_CLEAR, l_pg_config));
 
-                // Determine if an ECO core is indicated
+                // Determine if an ECO core is configured
+
                 fapi2::ATTR_ECO_MODE_Type l_attr_eco_mode;
                 FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ECO_MODE, core_functional_it, l_attr_eco_mode));
 
                 if (l_attr_eco_mode)
                 {
-                    l_eco_config.setBit(l_present_core_unit_pos);
+                    l_eco_config.setBit(l_functional_core_unit_pos);
 
-                    // Tell the QME about this cache only core
+                    // Tell the QME about this cache only core being configured
                     l_data64.flush<0>().setBit(28 + (l_present_core_unit_pos % 4));
                     FAPI_TRY(fapi2::putScom(l_eq, QME_SCRB_WO_OR, l_data64));
                 }
@@ -302,6 +310,7 @@ static fapi2::ReturnCode update_ec_config(
             {
                 l_core_not_func = 1;
             }
+
         } // Functional core loop
 
         if ( l_core_not_func )
@@ -316,6 +325,37 @@ static fapi2::ReturnCode update_ec_config(
             FAPI_TRY(fapi2::putScom(l_eq, CPLT_CTRL2_WO_CLEAR, l_pg_config));
         }
 
+        // ECO cores identifed in VPD
+
+        // PG bit definition reference:
+        //   https://ibm.box.com/s/tmt5lvsswmvp9di8zxcge8i0eljxj0jb
+        // constants reflect bit associated with c0 slice in EQ (start of contiguous
+        // 4-bit field of L3 ECO data), with data packed
+        const auto l_l3_eco_pg_start_bit = 28;
+
+        // grab perv target associated with parent EQ
+        const auto l_eq = core_present_it.getParent<fapi2::TARGET_TYPE_EQ>();
+        const auto l_perv = l_eq.getParent<fapi2::TARGET_TYPE_PERV>();
+
+        fapi2::ATTR_PG_MVPD_Type l_eq_mvpd_pg;
+        fapi2::buffer<uint32_t> l_eq_mvpd_pg_buf;
+
+        // retreive partial good information for EQ containing this core, via
+        // the associated pervasive target
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PG_MVPD, l_perv, l_eq_mvpd_pg),
+                 "Error from FAPI_ATTR_GET (ATTR_PG_MVPD)");
+
+        l_eq_mvpd_pg_buf = l_eq_mvpd_pg;
+
+        FAPI_INF("  PG : 0x%08X", l_eq_mvpd_pg_buf);
+
+        // ECO mode is enabled if L3 ECO PG bit is 0
+        if (!l_eq_mvpd_pg_buf.getBit(l_l3_eco_pg_start_bit + (l_present_core_unit_pos % 4)))
+        {
+            l_eco_vpd.setBit(l_present_core_unit_pos);
+            FAPI_INF("  EC %d is an ECO core", l_present_core_unit_pos);
+        }
+
     }  // Present core loop
 
     // Write the recalculated OCC CCSR and Flag6 for ECO cores
@@ -325,9 +365,18 @@ static fapi2::ReturnCode update_ec_config(
     FAPI_INF("  Writing OCC CCSR:  0x%16llX", l_core_config)
     FAPI_TRY(fapi2::putScom(i_target, TP_TPCHIP_OCC_OCI_OCB_CCSR_RW, l_core_config));
 
+
+    // For the normal FW case, the config ECO cores will be a strict subset of the VPD ECO cores.
+    // For Cronus, the config ECO cores can can be a superset do to config file overrides.
+    // Thus, ORing the the two gives the overall superset.
+    l_eco_flag_vec = l_eco_config | l_eco_vpd;
+
+    FAPI_INF("  VPD ECO configuration:                      0x%016llX", l_eco_config);
+    FAPI_INF("  Configured ECO configuration:               0x%016llX", l_eco_vpd);
+
     FAPI_TRY(fapi2::putScom(i_target, TP_TPCHIP_OCC_OCI_OCB_OCCFLG6_WO_CLEAR, l_data64));
-    FAPI_INF("  Writing OCC Flag 6 with ECO configuration:  0x%16llX", l_eco_config);
-    FAPI_TRY(fapi2::putScom(i_target, TP_TPCHIP_OCC_OCI_OCB_OCCFLG6_WO_OR, l_eco_config));
+    FAPI_INF("  Writing OCC Flag 6 with ECO configuration:  0x%016llX", l_eco_flag_vec);
+    FAPI_TRY(fapi2::putScom(i_target, TP_TPCHIP_OCC_OCI_OCB_OCCFLG6_WO_OR, l_eco_flag_vec));
 
 fapi_try_exit:
     FAPI_INF("<< update_ec_config...");
