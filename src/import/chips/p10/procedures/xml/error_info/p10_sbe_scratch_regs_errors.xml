@@ -130,19 +130,4 @@
   </callout>
 </hwpError>
 <!-- ******************************************************************** -->
-<hwpError>
-  <rc>RC_P10_SBE_ATTR_SETUP_FUSED_CORE_MISMATCH_ERR</rc>
-  <description>
-    Requested fused core state does not match hardware reported status
-    from export regulation control register
-  </description>
-  <ffdc>TARGET_CHIP</ffdc>
-  <ffdc>FUSED_CORE_REQ</ffdc>
-  <ffdc>FUSED_CORE_ACT</ffdc>
-  <callout>
-    <procedure>CODE</procedure>
-    <priority>HIGH</priority>
-  </callout>
-</hwpError>
-<!-- ******************************************************************** -->
 </hwpErrors>
