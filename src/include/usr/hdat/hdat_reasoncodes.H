@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -110,6 +110,11 @@ enum HDATModuleId
   MOD_TPMDATA_DESTRUCTOR       = 0x33,
   MOD_UTIL_SMP_LINK_INFO       = 0x34,
   MOD_ADD_MMIO_ADDR_RANGE      = 0x35,
+  MOD_ADD_MS_AREA_IPZ_VPD      = 0x36,
+  MOD_ADD_RAM_AREA_IPZ_VPD     = 0x37,
+  MOD_SPD_RAW_CONVERT_TO_IPZ_TYPE   = 0x38,
+  MOD_SPD_RAW_CONVERT_TO_IPZ_MODULE   = 0x39,
+  MOD_SPD_TO_IPZ_CONVERT_TEMPLATE = 0x3a,
 };
 
 
@@ -157,7 +162,12 @@ enum HDATReasonCode
     RC_INVALID_OBUS_BRICKID           = HDAT_COMP_ID | 0x1e,
     RC_INVALID_OBUS_FREQ_BUCKET       = HDAT_COMP_ID | 0x1f,
     RC_UNDEFINED_PROC_MODEL_EC        = HDAT_COMP_ID | 0x20,
-    RC_INVALID_OBUS_PLL_FREQ          = HDAT_COMP_ID | 0x21,    
+    RC_INVALID_OBUS_PLL_FREQ          = HDAT_COMP_ID | 0x21,
+    RC_OCMB_IPZ_CONVERT_FAIL          = HDAT_COMP_ID | 0x22,
+    RC_DIMM_IPZ_CONVERT_FAIL          = HDAT_COMP_ID | 0x23,
+    RC_INVALID_DIMM_TYPE              = HDAT_COMP_ID | 0x24,
+    RC_INVALID_DIMM_MODULE            = HDAT_COMP_ID | 0x25,
+    RC_SPD_IPZ_TEMPLATE_PROCESS_FAIL  = HDAT_COMP_ID | 0x26,
 };
 
 }  //namespace HDAT

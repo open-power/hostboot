@@ -1424,9 +1424,9 @@ void hdatPrintKwd(const char *i_kwd,
 }
 
 /******************************************************************************/
-// hdatGetAsciiKwdForSpd
+// hdatFetchRawSpdData
 /******************************************************************************/
-errlHndl_t hdatGetAsciiKwdForSpd(TARGETING::Target * i_target,
+errlHndl_t hdatFetchRawSpdData(TARGETING::Target * i_target,
            size_t &o_kwdSize,char* &o_kwd)
 {
 
@@ -1456,7 +1456,7 @@ errlHndl_t hdatGetAsciiKwdForSpd(TARGETING::Target * i_target,
     }while(0);
     if ( l_err )
     {
-        HDAT_DBG("hdatGetAsciiKwdForSpd : Failure on "
+        HDAT_DBG("hdatFetchRawSpdData : Failure on "
                 " keyword: 0x%04x, of size: 0x%04x ",
                 keyword,o_kwdSize);
         /*@
@@ -1464,16 +1464,21 @@ errlHndl_t hdatGetAsciiKwdForSpd(TARGETING::Target * i_target,
          * @moduleid         HDAT::MOD_UTIL_SPD_READ_FUNC
          * @reasoncode       HDAT::RC_SPD_READ_FAIL
          * @userdata1        spd keyword
-         * @devdesc          SPD read fail
-         * @custdesc         Firmware encountered an internal error
+         * @userdata2        raw spd keyword size returned
+         * @userdata3        none
+         * @userdata4        none
+         * @devdesc          Failed to fetch the raw SPD data for the dimm
+         * @custdesc         Firmware error while fetching Vital Product Data
+         *                   for memory
          */
         hdatBldErrLog(l_err,
                     MOD_UTIL_SPD_READ_FUNC,
                     RC_SPD_READ_FAIL,
-                    keyword,0,0,0,
-                    ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                    HDAT_VERSION1,
-                    true);
+                    keyword,
+                    o_kwdSize,
+                    0,
+                    0,
+                    ERRORLOG::ERRL_SEV_UNRECOVERABLE);
 
         if ( NULL != o_kwd)
         {
@@ -1482,10 +1487,364 @@ errlHndl_t hdatGetAsciiKwdForSpd(TARGETING::Target * i_target,
         }
     }
 
-    HDAT_DBG("hdatGetAsciiKwdForSpd: returning keyword size %d and data %s",
+    HDAT_DBG("hdatFetchRawSpdData: returning keyword size %d and data %s",
               o_kwdSize,o_kwd);
     return l_err;
 
+}
+
+/******************************************************************************/
+// hdatCreateSzKeyWord
+/******************************************************************************/
+uint32_t  hdatCreateSzKeyWord(const char *i_jedec_vpd_ptr)
+{
+    uint32_t  l_sdram_cap = 1;
+    uint32_t  l_pri_bus_wid = 1;
+    uint32_t  l_sdram_wid  = 1;
+    uint32_t  l_logical_ranks_per_dimm = 1;
+    uint32_t  l_tmp = 0;
+
+    uint8_t   l_primaryBusWidthByteInSPD = 0;
+    uint8_t   l_sdramCapacityByteInSPD = 0;
+    uint8_t   l_sdramDeviceWidthByteInSPD = 0;
+    uint8_t   l_packageRanksPerDimmByteInSPD = 0;
+    uint8_t   l_dieCount = 1;
+
+    do
+    {
+        l_sdramCapacityByteInSPD = SVPD_JEDEC_BYTE_4;
+        l_primaryBusWidthByteInSPD = SVPD_JEDEC_BYTE_13;
+        l_sdramDeviceWidthByteInSPD = SVPD_JEDEC_BYTE_12;
+        l_packageRanksPerDimmByteInSPD = SVPD_JEDEC_BYTE_12;
+
+        /* Calculate SDRAM capacity */
+        l_tmp = i_jedec_vpd_ptr[l_sdramCapacityByteInSPD] &
+                SVPD_JEDEC_SDRAM_CAP_MASK;
+
+        /* Make sure the bits are not Reserved */
+        if(l_tmp > SVPD_JEDEC_SDRAMCAP_RESRVD)
+        {
+            l_tmp = l_sdramCapacityByteInSPD;
+            break;
+        }
+        l_sdram_cap = (l_sdram_cap << l_tmp) *
+                SVPD_JEDEC_SDRAMCAP_MULTIPLIER;
+
+        /* Calculate Primary bus width */
+        l_tmp = i_jedec_vpd_ptr[l_primaryBusWidthByteInSPD] &
+                SVPD_JEDEC_PRI_BUS_WID_MASK;
+        if(l_tmp > SVPD_JEDEC_RESERVED_BITS)
+        {
+            l_tmp = l_primaryBusWidthByteInSPD;
+            break;
+        }
+        l_pri_bus_wid = (l_pri_bus_wid << l_tmp) *
+                SVPD_JEDEC_PRI_BUS_WID_MULTIPLIER;
+
+        /* Calculate SDRAM width */
+        l_tmp = i_jedec_vpd_ptr[l_sdramDeviceWidthByteInSPD] &
+                SVPD_JEDEC_SDRAM_WID_MASK;
+        if(l_tmp > SVPD_JEDEC_RESERVED_BITS)
+        {
+            l_tmp = l_sdramDeviceWidthByteInSPD;
+            break;
+        }
+        l_sdram_wid = (l_sdram_wid << l_tmp) *
+                SVPD_JEDEC_SDRAM_WID_MULTIPLIER;
+
+        /*
+         * Number of ranks is calculated differently for "Single load stack"
+         * (3DS) package and other packages.
+         *
+         * Logical Ranks per DIMM =
+         *      for SDP, DDP, QDP: = SPD byte 12 bits 5~3
+         *      for 3DS: = SPD byte 12 bits 5~3 times SPD byte 6 bits 6~4
+         *
+         * */
+
+        l_tmp = i_jedec_vpd_ptr[SVPD_JEDEC_BYTE_6]
+                                & SVPD_JEDEC_SIGNAL_LOADING_MASK;
+
+        if(l_tmp == SVPD_JEDEC_SINGLE_LOAD_STACK)
+        {
+            //Fetch die count
+            l_tmp = i_jedec_vpd_ptr[SVPD_JEDEC_BYTE_6]
+                                    & SVPD_JEDEC_DIE_COUNT_MASK;
+
+            l_tmp >>= SVPD_JEDEC_DIE_COUNT_RIGHT_SHIFT;
+            l_dieCount = l_tmp + 1;
+        }
+
+        /* Calculate Number of ranks */
+        l_tmp = i_jedec_vpd_ptr[l_packageRanksPerDimmByteInSPD] &
+                SVPD_JEDEC_NUM_RANKS_MASK;
+
+        l_tmp >>= SVPD_JEDEC_RESERVED_BITS;
+
+        if(l_tmp > SVPD_JEDEC_RESERVED_BITS)
+        {
+            l_tmp = l_packageRanksPerDimmByteInSPD;
+            break;
+        }
+        l_logical_ranks_per_dimm = (l_tmp + 1) * l_dieCount;
+
+        l_tmp = (l_sdram_cap/SVPD_JEDEC_PRI_BUS_WID_MULTIPLIER) *
+                (l_pri_bus_wid/l_sdram_wid) * l_logical_ranks_per_dimm;
+    }while(0);
+
+    return l_tmp;
+}
+
+/******************************************************************************/
+// hdatConvertRawSpdToIpzFormat
+/******************************************************************************/
+errlHndl_t hdatConvertRawSpdToIpzFormat(
+    const uint32_t    i_rid,
+    const size_t      i_jedec_sz,
+    char              *&i_jedec_ptr,
+    size_t            &o_fmtkwdSize,
+    char              *&o_fmtKwd)
+{
+    errlHndl_t l_err = nullptr;
+    char	 l_dr_str[SVPD_JEDEC_DR_KW_SIZE+1] = "       MB MEMORY";
+    char     l_sz_str[SVPD_JEDEC_SZ_KW_SIZE] = {'\0'};
+    bool     l_invalid_dimm = false;
+    bool     l_is_spd_template_present = true;
+    uint32_t l_spd_template_read_size =0;
+    uint32_t l_szValue = 0;
+
+    do
+    {
+        // Below code probes for the DIMM module and DIMM type from the raw SPD
+        // data. As of now the only supported format is DDR4 module with DDIMM.
+        // So if its a DDR5 module (VPD format is unknown now) or any other
+        // unknown types, we wont proceed further and return back.
+        if(i_jedec_ptr[SVPD_SPD_BYTE_THREE] == SVPD_DDIMM_MODULE_TYPE)
+        {
+            // It's a DDIMM
+            if ((i_jedec_ptr[SVPD_SPD_BYTE_TWO] == SVPD_DDR4_DEVICE_TYPE) &&
+                (0 == strncmp((char*)&i_jedec_ptr[DDIMM_SPD_BYTE_416],
+                              IBM_SPECIFIC_11S_FORMAT,SPD_SIZE_3_BYTES)))
+            {
+                // It's a DDR4 DDIMM
+                HDAT_DBG("Detected DDR4 DDIMM");
+            }
+            else if ((i_jedec_ptr[SVPD_SPD_BYTE_TWO] ==
+                      SVPD_DDR5_DEVICE_TYPE) &&
+                     (0 == strncmp((char*)&i_jedec_ptr[DDIMM_SPD_BYTE_416],
+                                IBM_SPECIFIC_11S_FORMAT,SPD_SIZE_3_BYTES)))
+            {
+                // It's a DDR5 DDIMM
+                HDAT_DBG("Detected DDR5 DDIMM, VPD format is unknown");
+                l_invalid_dimm = true;
+            }
+            else
+            {
+                HDAT_DBG("Detected an unknown DDIMM");
+                HDAT_ERR("Invalid Byte 2 value(0x%2X), Unable to "
+                         "determine DDR type for RID 0x%X.",
+                         i_jedec_ptr[SVPD_SPD_BYTE_TWO],
+                         i_rid);
+                l_invalid_dimm = true;
+            }
+            if(l_invalid_dimm == true)
+            {
+                /*@
+                 * @errortype
+                 * @refcode    LIC_REFCODE
+                 * @subsys     EPUB_FIRMWARE_SP
+                 * @reasoncode RC_INVALID_DIMM_MODULE
+                 * @moduleid   MOD_SPD_RAW_CONVERT_TO_IPZ_MODULE
+                 * @userdata1  resource id of fru
+                 * @userdata2  total raw spd keyword size
+                 * @userdata3  dimm type
+                 * @userdata4  none
+                 * @devdesc    Unable to determine the DIMM module from raw
+                 *             spd data
+                 * @custdesc   Firmware error detected for a non supported DIMM
+                 *             module while processing Vital Product Data
+                 *             for memory
+                 */
+                hdatBldErrLog(l_err,
+                      MOD_SPD_RAW_CONVERT_TO_IPZ_MODULE,   // SRC module ID
+                      RC_INVALID_DIMM_MODULE,              // SRC ext ref code
+                      i_rid,                               // SRC hex word 1
+                      i_jedec_sz,                          // SRC hex word 2
+                      i_jedec_ptr[SVPD_SPD_BYTE_THREE],    // SRC hex word 3
+                      0,                                   // SRC hex word 4
+                      ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                return l_err;
+            }
+        }
+        else
+        {
+            HDAT_ERR( "Invalid Byte 3 value(0x%2X), Unable to "
+                      "determine DIMM type for RID 0x%X.",
+                      i_jedec_ptr[SVPD_SPD_BYTE_THREE],
+                      i_rid);
+            /*@
+             * @errortype
+             * @refcode    LIC_REFCODE
+             * @subsys     EPUB_FIRMWARE_SP
+             * @reasoncode RC_INVALID_DIMM_TYPE
+             * @moduleid   MOD_SPD_RAW_CONVERT_TO_IPZ_TYPE
+             * @userdata1  resource id of fru
+             * @userdata2  total raw spd keyword size
+             * @userdata3  dimm type
+             * @userdata4  none
+             * @devdesc    Unable to determine the DIMM type from raw spd data
+             * @custdesc   Firmware error detected for a non supported DIMM
+             *             type while processing Vital Product Data for memory
+             */
+            hdatBldErrLog(l_err,
+                      MOD_SPD_RAW_CONVERT_TO_IPZ_TYPE,     // SRC module ID
+                      RC_INVALID_DIMM_TYPE,                // SRC ext ref code
+                      i_rid,                               // SRC hex word 1
+                      i_jedec_sz,                          // SRC hex word 2
+                      i_jedec_ptr[SVPD_SPD_BYTE_THREE],    // SRC hex word 3
+                      0,                                   // SRC hex word 4
+                      ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+            return l_err;
+        }
+        HDAT_DBG("i_jedec_ptr[SVPD_SPD_BYTE_TWO]=0x%x",
+            i_jedec_ptr[SVPD_SPD_BYTE_TWO]);
+        HDAT_DBG("i_jedec_ptr[SVPD_SPD_BYTE_THREE]=0x%x",
+            i_jedec_ptr[SVPD_SPD_BYTE_THREE]);
+
+        /* Synthesize SZ */
+        l_szValue = hdatCreateSzKeyWord(i_jedec_ptr);
+        sprintf(l_sz_str, "%d", l_szValue);
+        HDAT_DBG("l_sz_str = %s with size = %d",l_sz_str, sizeof(l_sz_str));
+
+        /* Synthesize DR */
+        memcpy(l_dr_str,l_sz_str,SVPD_JEDEC_SZ_KW_SIZE);
+        HDAT_DBG("l_dr_str = %s with size = %d",l_dr_str, sizeof(l_dr_str));
+
+        UtilFile l_dimmIpzFile ("spd_ipz_template.dat");
+        if ( !l_dimmIpzFile.exists())
+        {
+            HDAT_ERR("The dimm vpd ipz file template is not found");
+            l_is_spd_template_present = false;
+        }
+        else
+        {
+            l_err = l_dimmIpzFile.open("r");
+            do{
+            if (l_err)
+            {
+                HDAT_DBG("File open of spd_ipz_template.dat failed");
+                break;
+            }
+
+            o_fmtkwdSize = l_dimmIpzFile.size();
+            HDAT_DBG("o_fmtkwdSize size = %d",o_fmtkwdSize);
+            if ( o_fmtkwdSize == 0 )
+            {
+                HDAT_DBG("No templated spd data present");
+                l_err = l_dimmIpzFile.close();
+                if (l_err)
+                {
+                    HDAT_DBG("File close of spd_ipz_template.dat failed");
+                }
+                break;
+            }
+
+            o_fmtKwd = new char [o_fmtkwdSize]();
+            l_spd_template_read_size =
+                 l_dimmIpzFile.read((void *)&o_fmtKwd[0],o_fmtkwdSize);
+            if (l_spd_template_read_size == 0)
+            {
+                HDAT_DBG("File read of spd_ipz_template.dat failed");
+                break;
+            }
+            l_err = l_dimmIpzFile.close();
+            if (l_err)
+            {
+                HDAT_DBG("File close of spd_ipz_template.dat failed");
+            }
+            }while(0);
+        }
+
+        if (l_err || (l_is_spd_template_present == false) )
+        {
+            HDAT_ERR( "Error in processing spd_ipz_template.dat file for"
+                      " RID 0x%X. Size tried to read = %d",
+                      i_rid, o_fmtkwdSize);
+            /*@
+             * @errortype
+             * @refcode    LIC_REFCODE
+             * @subsys     EPUB_FIRMWARE_SP
+             * @reasoncode RC_SPD_IPZ_TEMPLATE_PROCESS_FAIL
+             * @moduleid   MOD_SPD_TO_IPZ_CONVERT_TEMPLATE
+             * @userdata1  resource id of fru
+             * @userdata2  total raw spd keyword size
+             * @userdata3  spd template size from file.read()
+             * @userdata4  spd ipz template data from file.size()
+             * @devdesc    Unable to process the spd ipz template file
+             * @custdesc   Firmware error detected while converting the Vital
+             *             Product Data for memory to IPZ format
+             */
+            hdatBldErrLog(l_err,
+                      MOD_SPD_TO_IPZ_CONVERT_TEMPLATE,     // SRC module ID
+                      RC_SPD_IPZ_TEMPLATE_PROCESS_FAIL,    // SRC ext ref code
+                      i_rid,                               // SRC hex word 1
+                      i_jedec_sz,                          // SRC hex word 2
+                      l_spd_template_read_size,            // SRC hex word 3
+                      o_fmtkwdSize,                        // SRC hex word 4
+                      ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+            return l_err;
+        }
+        /****************** Synthesize VINI Block ******************/
+
+        // Copy CC keyword
+        memcpy(reinterpret_cast<void *>(&o_fmtKwd[SVPD_CC_KW_OFFSET]),
+            &i_jedec_ptr[DDIMM_SPD_BYTE_438], SVPD_JEDEC_CC_KW_SIZE);
+
+        // Copy FN keyword
+        memcpy(reinterpret_cast<void *>(&o_fmtKwd[SVPD_FN_KW_OFFSET]),
+            &i_jedec_ptr[DDIMM_SPD_BYTE_419], SVPD_FN_KW_SIZE);
+
+        // Copy PN keyword (PN and FN values are same)
+        memcpy(reinterpret_cast<void *>(&o_fmtKwd[SVPD_PN_KW_OFFSET]),
+            &i_jedec_ptr[DDIMM_SPD_BYTE_419], SVPD_PN_KW_SIZE);
+
+        // Copy SN keyword
+        memcpy(reinterpret_cast<void *>(&o_fmtKwd[SVPD_SN_KW_OFFSET]),
+            &i_jedec_ptr[DDIMM_SPD_BYTE_426], SVPD_SN_KW_SIZE);
+
+        // Copy SZ keyword
+        memcpy(reinterpret_cast<void *>(&o_fmtKwd[SVPD_SZ_KW_OFFSET]),l_sz_str,
+            SVPD_JEDEC_SZ_KW_SIZE);
+
+        // Copy DR keyword
+        memcpy(reinterpret_cast<void *>(&o_fmtKwd[SVPD_DR_KW_OFFSET]),l_dr_str,
+            SVPD_JEDEC_DR_KW_SIZE);
+
+        /****************** Synthesize VSPD Block ******************/
+
+    	/* Synthesize #I KW of VSPD Block       */
+        /* (Copy maximum 4096 bytes of VPD for DDIMM)   */
+        memcpy(reinterpret_cast<void *>(&o_fmtKwd[SVPD_I_BLK_OFFSET]),
+            &i_jedec_ptr[0], i_jedec_sz);
+
+        /* Synthesize #A KW of VSPD Block */
+    	/* (copy 640 - 1023 bytes of VPD for DDIMM) */
+        memcpy(reinterpret_cast<void *>(&o_fmtKwd[SVPD_A_BLK_OFFSET]),
+            &i_jedec_ptr[DDIMM_SPD_EMP_OFFSET],DDIMM_SPD_EMP_SZ);
+
+        /* Synthesize #B KW of VSPD Block */
+        /* (copy 3072 - 4095 bytes of VPD for DDIMM) */
+        /* Data copy is only carried out if we get the fully supported*/
+        /* size of 4096 bytes, other wise value remains zero */
+        if (i_jedec_sz == DDIMM_SPD_SZ)
+        {
+            memcpy(reinterpret_cast<void *>(&o_fmtKwd[SVPD_B_BLK_OFFSET]),
+                &i_jedec_ptr[DDIMM_SPD_EUP_OFFSET], DDIMM_SPD_EUP_SZ);
+        }
+
+	    /********************  Done with Conversion ***********************/
+    }while(false);
+    return l_err;
 }
 
 void hdatGetTarget (const hdatSpiraDataAreas i_dataArea,

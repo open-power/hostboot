@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -156,6 +156,7 @@ public:
    *
    * @param[out] o_errlHndl  - If any errors occur, the HdatRam object
    *               is NOT constructed and errors are returned in this parameter
+   * @param[in] i_pDimmTarget - input parameter - DIMM target
    * @param[in] i_resourceId - input parameter - The FRU's resource id
    * @param[in] i_slcaIndex - input parameter - ms area slca index,
    *            if not provided then add dimms slca index
@@ -166,7 +167,7 @@ public:
    * @retval HDAT_OTHER_COMP_ERROR
    */
   HdatRam(errlHndl_t &o_errlHndl,
-         TARGETING::Target* i_target,
+         TARGETING::Target* i_pDimmTarget,
           uint32_t i_resourceId,
           uint32_t i_slcaIndex=0);
 

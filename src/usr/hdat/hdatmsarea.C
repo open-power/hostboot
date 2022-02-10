@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,36 +47,6 @@ namespace HDAT
 /* Global variables                                                           */
 /*----------------------------------------------------------------------------*/
 uint32_t HdatMsArea::cv_actualCnt;
-
-static vpdData mvpdData[] =
-{
-    { MVPD::VINI, MVPD::DR },
-    { MVPD::VINI, MVPD::FN },
-    { MVPD::VINI, MVPD::PN },
-    { MVPD::VINI, MVPD::SN },
-    { MVPD::VINI, MVPD::CC },
-//    { MVPD::VINI, MVPD::PR },
-    //{ MVPD::VINI, MVPD::SZ },
-    { MVPD::VINI, MVPD::HE },
-    { MVPD::VINI, MVPD::CT },
-    { MVPD::VINI, MVPD::HW },
- //   { MVPD::VINI, MVPD::B3 },
- //   { MVPD::VINI, MVPD::B4 },
- //   { MVPD::VINI, MVPD::B7 },
-};
-
-const HdatKeywordInfo l_mvpdKeywords[] = 
-{
-    { MVPD::DR,  "DR" },  
-    { MVPD::FN,  "FN" },  
-    { MVPD::PN,  "PN" },  
-    { MVPD::SN,  "SN" },  
-    { MVPD::CC,  "CC" },  
-    { MVPD::HE,  "HE" },  
-    { MVPD::CT,  "CT" },  
-    { MVPD::HW,  "HW" },  
-};
-
 
 /** @brief See the prologue in hdatmsarea.H
  */
@@ -136,45 +106,73 @@ HdatMsArea::HdatMsArea(errlHndl_t &o_errlHndl,
     iv_ecArrayHdr.hdatActSize   = sizeof(hdatEcLvl_t);
     l_slcaIdx = i_slcaIdx;
 
+    size_t o_rawKwdSize = 0;
+    size_t o_fmtKwdSize = 0;
+    do
+    {
+        // Get the ASCII keyword
+        char *o_rawKwd = nullptr;
+        char *o_fmtKwd = nullptr;
 
-    // If the ASCII keyword data and related info has been passed to us as a
-    // parm, use it and avoid calling into svpd.  This is an IPL performance
-    // improvement since all mainstore areas for an MCM will have the same
-    // resource id and thus the same keyword VPD.
-    if (i_kwdSize > 0)
-    {
-        l_slcaIdx = i_slcaIdx;
-        iv_kwd = new char[i_kwdSize];
-        memcpy(iv_kwd, i_kwd, i_kwdSize);
-    }
-    else
-    {
-        do
+        o_errlHndl = hdatFetchRawSpdData(i_target,o_rawKwdSize, o_rawKwd);
+        if( o_errlHndl )
         {
-            // Get the SLCA index and ASCII keyword for this resource id
-            uint32_t l_num = sizeof(mvpdData)/sizeof(mvpdData[0]);
-            size_t theSize[l_num];
-            o_errlHndl = hdatGetAsciiKwdForMvpd(i_target,iv_kwdSize,
-                                                iv_kwd,mvpdData,
-                                                l_num,theSize);
-            if( o_errlHndl ) { break; }
+            HDAT_ERR("MS Error in getting raw SPD data for OCMB with "
+            "rid  = %d", iv_fru.hdatResourceId);
+            break;
+        }
 
-            char *o_fmtKwd;
-            uint32_t o_fmtkwdSize;
-            o_errlHndl = hdatformatAsciiKwd(mvpdData , l_num , theSize, iv_kwd,
-                iv_kwdSize, o_fmtKwd, o_fmtkwdSize, l_mvpdKeywords);
-            if( o_errlHndl ) { break; }
+        o_errlHndl = hdatConvertRawSpdToIpzFormat(iv_fru.hdatResourceId,
+             o_rawKwdSize, o_rawKwd, o_fmtKwdSize, o_fmtKwd);
+        HDAT_INF("MS o_rawKwdSize = %d, o_fmtKwdSize = %d",
+            o_rawKwdSize, o_fmtKwdSize);
+        if( o_errlHndl )
+        {
+            break;
+        }
 
-            if( o_fmtKwd != NULL )
+        if( o_rawKwd != nullptr )
+        {
+            // Padding extra 8 bytes to keep data alignment similar to FSP
+            // data
+            iv_kwd = new char [o_fmtKwdSize + 8];
+            memcpy(iv_kwd,o_fmtKwd,o_fmtKwdSize);
+            iv_kwdSize = o_fmtKwdSize + 8;
+            HDAT_INF("MS iv_kwdSize = %d", iv_kwdSize);
+            if( o_fmtKwd != nullptr )
             {
-                delete[] iv_kwd;
-                //padding extra 8 bytes to keep data sync as FSP
-                iv_kwd = new char [o_fmtkwdSize + 8];
-                memcpy(iv_kwd,o_fmtKwd,o_fmtkwdSize);
-                iv_kwdSize = o_fmtkwdSize + 8;
                 delete[] o_fmtKwd;
+                o_fmtKwd = nullptr;
             }
-        }while(0);
+        }
+    }while(0);
+
+    if (o_errlHndl)
+    {
+        HDAT_ERR("MS Error in creating IPZ format keyword for OCMB with "
+            "rid  = %d", iv_fru.hdatResourceId);
+        /*@
+         * @errortype
+         * @refcode    LIC_REFCODE
+         * @subsys     EPUB_FIRMWARE_SP
+         * @reasoncode RC_OCMB_IPZ_CONVERT_FAIL
+         * @moduleid   MOD_ADD_MS_AREA_IPZ_VPD
+         * @userdata1  resource id of ocmb chip
+         * @userdata2  total raw spd keyword size of ocmb chip
+         * @userdata3  total ipz keyword size of ocmb chip
+         * @userdata4  ID number of mainstore area
+         * @devdesc    Failed trying to convert the raw spd data for ocmb chip
+         *             to IPZ format
+         * @custdesc   Firmware error processing Vital Product Data for memory
+         */
+        hdatBldErrLog(o_errlHndl,
+                      MOD_ADD_MS_AREA_IPZ_VPD,             // SRC module ID
+                      RC_OCMB_IPZ_CONVERT_FAIL,            // SRC ext ref code
+                      iv_fru.hdatResourceId,               // SRC hex word 1
+                      o_rawKwdSize,                        // SRC hex word 2
+                      o_fmtKwdSize,                        // SRC hex word 3
+                      iv_msId.hdatMsAreaId,                // SRC hex word 4
+                      ERRORLOG::ERRL_SEV_UNRECOVERABLE);
     }
 
     // Allocate space for the address range array

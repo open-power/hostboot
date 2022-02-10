@@ -1968,7 +1968,7 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
 
                                     l_err = addMsAreaFru(l_procRid,
                                                      l_procSlcaIndex,
-                                                     l_pProcTarget,
+                                                     l_pOcmbTarget,
                                                      l_index,
                                                      l_numDimms,
                                                      MAX_CHIP_EC_CNT_PER_MSAREA,

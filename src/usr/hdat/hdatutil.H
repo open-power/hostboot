@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,6 +71,112 @@ using namespace SPI;
 const uint16_t HDAT_VERSION1 = 1;
 const uint16_t HDAT_VERSION2 = 2;
 const uint16_t HDAT_VERSION3 = 3;
+
+// SPD IPZ template file (spd_ipz_template.dat) conatins the offsets for each
+// of the key words. There are pre-defined start offsets in spd_ipz_template.dat
+// file where each of the key word or the VSPD data block are being filled with
+// the values fetched from raw SPD data.
+// Caution : In future if any change occurs in the VPD format template or when a
+// need arises to add or delete keywords, then below mentioned offsets needs to
+// be re-evaluated and re-assigned to get the proper formatting of the IPZ data.
+#define SVPD_CC_KW_OFFSET                   37
+#define SVPD_FN_KW_OFFSET                   48
+#define SVPD_PN_KW_OFFSET                   58
+#define SVPD_SN_KW_OFFSET                   68
+#define SVPD_SZ_KW_OFFSET                   94
+#define SVPD_DR_KW_OFFSET                   13
+#define SVPD_I_BLK_OFFSET                   164
+#define SVPD_A_BLK_OFFSET                   4264
+#define SVPD_B_BLK_OFFSET                   5292
+
+// SPD IPZ keyword sizes
+const uint8_t  SVPD_SN_KW_SIZE = 12; /**< FRU Serial Number size */
+const uint8_t  SVPD_PN_KW_SIZE =  7; /**< FRU Part Number size */
+const uint8_t  SVPD_FN_KW_SIZE =  7; /**< FRU Fru Number size */
+const uint8_t  SVPD_JEDEC_CC_KW_SIZE = 4; /**< FRU CCIN size */
+const uint8_t  SVPD_JEDEC_SZ_KW_SIZE = 7;
+const uint8_t  SVPD_JEDEC_DR_KW_SIZE = 16;
+
+// JEDEC format specific constants
+#define SVPD_JEDEC_RESERVED                 0x08
+#define SVPD_SPD_BYTE_TWO                   2
+#define SVPD_SPD_BYTE_THREE                 3
+#define SVPD_DDIMM_MODULE_TYPE              0x0A
+#define SVPD_DDR4_DEVICE_TYPE               0x0C
+#define SVPD_DDR5_DEVICE_TYPE               0x12
+#define SVPD_JEDEC_BYTE_4                   4
+#define SVPD_JEDEC_BYTE_6                   7
+#define SVPD_JEDEC_BYTE_12                  12
+#define SVPD_JEDEC_BYTE_13                  13
+#define SVPD_JEDEC_SDRAM_CAP_MASK           0x0F
+#define SVPD_JEDEC_SDRAM_WID_MULTIPLIER     4
+#define SVPD_JEDEC_SDRAM_WID_MASK           0x07
+#define SVPD_JEDEC_NUM_RANKS_MASK           0x38
+#define SVPD_JEDEC_SDRAMCAP_RESRVD          6
+#define SVPD_JEDEC_SDRAMCAP_MULTIPLIER      256
+#define SVPD_JEDEC_PRI_BUS_WID_MULTIPLIER   8
+#define SVPD_JEDEC_PRI_BUS_WID_MASK         0x07
+#define SVPD_JEDEC_SDRAM_WID_MULTIPLIER     4
+#define SVPD_JEDEC_SDRAMCAP_RESRVD          6
+#define SVPD_JEDEC_RESERVED_BITS            3
+#define SVPD_JEDEC_DIE_COUNT_MASK           0x70
+#define SVPD_JEDEC_SINGLE_LOAD_STACK        0x02
+#define SVPD_JEDEC_SIGNAL_LOADING_MASK      0x03
+#define SVPD_JEDEC_DIE_COUNT_RIGHT_SHIFT    4
+
+// Bytes 416~445 OEM Supplemental Information
+
+// For DDIMMs supplied to IBM, IBM defines the OEM
+// supplemental information to be defines as an 11S
+// barcode. The 11S barcode is defined as a 26 Byte
+// encoding which is broken down into eight fields.
+// These fields are described in the following tables
+//
+// Please refer to the IBM 11S Barcode specification
+// for more details.
+
+// 416-418 specifies format as 11S
+#define DDIMM_SPD_BYTE_416                          416
+// 419-425 specifies the part number / FRU number
+#define DDIMM_SPD_BYTE_419                          419
+#define DDIMM_SPD_BYTE_420                          420
+#define DDIMM_SPD_BYTE_421                          421
+#define DDIMM_SPD_BYTE_422                          422
+#define DDIMM_SPD_BYTE_423                          423
+#define DDIMM_SPD_BYTE_424                          424
+#define DDIMM_SPD_BYTE_425                          425
+// 426-437 specifies the serial number
+#define DDIMM_SPD_BYTE_426                          426
+#define DDIMM_SPD_BYTE_427                          427
+#define DDIMM_SPD_BYTE_428                          428
+#define DDIMM_SPD_BYTE_429                          429
+#define DDIMM_SPD_BYTE_430                          430
+#define DDIMM_SPD_BYTE_431                          431
+#define DDIMM_SPD_BYTE_432                          432
+#define DDIMM_SPD_BYTE_433                          433
+#define DDIMM_SPD_BYTE_434                          434
+#define DDIMM_SPD_BYTE_435                          435
+#define DDIMM_SPD_BYTE_436                          436
+#define DDIMM_SPD_BYTE_437                          437
+// 438-441 specifies the CCIN
+#define DDIMM_SPD_BYTE_438                          438
+#define DDIMM_SPD_BYTE_439                          439
+#define DDIMM_SPD_BYTE_440                          440
+#define DDIMM_SPD_BYTE_441                          441
+
+// Common defines
+#define DDIMM_SPD_START_OFFSET                      0
+#define DDIMM_SPD_SZ                                4096
+#define DDIMM_SPD_EMP_OFFSET                        640
+#define DDIMM_SPD_EMP_SZ                            384
+#define DDIMM_SPD_EUP_OFFSET                        3072
+#define DDIMM_SPD_EUP_SZ                            1024
+
+// IBM specific defines
+#define IBM_SPECIFIC_DDR4_NVDIMM                    0x91
+#define IBM_SPECIFIC_11S_FORMAT                     "11S"
+#define SPD_SIZE_3_BYTES                            3
+
 #define DBG_MRK "D>"
 
 //initialize the trac buffers
@@ -516,7 +622,7 @@ errlHndl_t hdatGetPvpdFullRecord(
                        size_t i_num,size_t theSize[]);
 
 /**
- * @brief  Get the ascii keyword for  dimm
+ * @brief  Fetch the raw spd data for the dimm
  *
  * @param[in] i_pTarget input target pointer
  *
@@ -525,10 +631,40 @@ errlHndl_t hdatGetPvpdFullRecord(
  * @return errlHndl_t NULL on success
  *
  */
-errlHndl_t hdatGetAsciiKwdForSpd(
+errlHndl_t hdatFetchRawSpdData(
                            TARGETING::Target * i_target,
                            size_t&o_kwdSize,
                            char* &o_kwd);
+
+/**
+ * @brief  Create the SZ keyword for the specific DDIMM
+ *
+ * @param[in] i_jedec_vpd_ptr: Raw SPD keyword data
+ *
+ * @return the SZ keyword value (Memory size in MB)
+ *
+ */
+uint32_t hdatCreateSzKeyWord(const char *i_jedec_vpd_ptr);
+
+/**
+ * @brief  Convert the raw SPD data to IPZ formatted keyword data
+ *
+ * @param[in] i_rid: RID number of the FRU
+ * @param[in] i_jedec_sz: Raw SPD keyword data size
+ * @param[in] i_jedec_ptr: Raw SPD keyword data
+ * @param[out] o_fmtkwdSize: IPZ Formatted keyword data size
+ * @param[out] o_fmtKwd: IPZ Formatted keyword data
+ *
+ * @return errlHndl_t NULL on success
+ *
+ */
+errlHndl_t hdatConvertRawSpdToIpzFormat(
+    const uint32_t    i_rid,
+    const size_t      i_jedec_sz,
+    char              *&i_jedec_ptr,
+    size_t            &o_fmtkwdSize,
+    char              *&o_fmtKwd);
+
 /**
  * @brief Get the Max Cec nde count
  *

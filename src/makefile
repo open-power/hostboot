@@ -359,7 +359,7 @@ RUNTIME_MODULES += $(if $(CONFIG_HTMGT),htmgt_rt)   # ~/src/usr/htmgt/runtime/
 #     vpd_rt: Duplicate weak symbol errors for AttrRp singleton
 export RUNTIME_MODULES_GCOV_BLACKLIST:= vpd_rt
 
-RUNTIME_DATA_MODULES += $(if $(CONFIG_ENABLE_HDAT_IN_HOSTBOOT),pvpd_bp.dat)
+RUNTIME_DATA_MODULES += $(if $(CONFIG_ENABLE_HDAT_IN_HOSTBOOT),spd_ipz_template.dat)
 
 ifndef VPO_COMPILE
 RUNTIME_TESTCASE_MODULES += cxxtest_rt
@@ -403,7 +403,7 @@ securerom_NO_RELOCATION = 1
 # for PRDR_RULE_TABLE_TARGETS
 include ${ROOTPATH}/src/usr/diag/prdf/common/rule/prdf_rule.mk
 
-hbicore_DATA_MODULES += $(if $(CONFIG_ENABLE_HDAT_IN_HOSTBOOT),pvpd_bp.dat)
+hbicore_DATA_MODULES += $(if $(CONFIG_ENABLE_HDAT_IN_HOSTBOOT),spd_ipz_template.dat)
 hbicore_DATA_MODULES += ${prd_rule_prf_targets}
 
 hbicore_test_OBJECTS += ${hbicore_OBJECTS}
