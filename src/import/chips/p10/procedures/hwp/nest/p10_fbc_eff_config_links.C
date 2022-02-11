@@ -37,6 +37,7 @@
 #include <p10_fbc_eff_config_links.H>
 #include <p10_fbc_utils.H>
 #include <p10_build_smp.H>
+#include <p10_smp_wrap.H>
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -525,6 +526,7 @@ fapi2::ReturnCode p10_fbc_eff_config_links(
     ////////////////////////////////////////////////////////
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     auto l_iohs_targets = i_target.getChildren<fapi2::TARGET_TYPE_IOHS>();
+    bool l_smp_wrap_config;
 
     // logical link (X/A) configuration parameters; enable on local end
     fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_Type l_x_en = { 0 };
@@ -661,27 +663,35 @@ fapi2::ReturnCode p10_fbc_eff_config_links(
         }
     }
 
-    // compute aggregate mode attribute -- coherent/data-only link roles will be picked later
-    // in p10_fbc_eff_config_aggregate (after links are trained and the round trip delay values
-    // can be sampled from the HW), but the aggregate state (on/off) is needed by initfiles
-    // that execute before that step
-    FAPI_TRY(p10_fbc_eff_config_aggregate_mode_setup(i_target,
-             l_x_en,
-             ((l_broadcast_mode == fapi2::ENUM_ATTR_PROC_FABRIC_BROADCAST_MODE_1HOP_CHIP_IS_GROUP) ? (l_loc_fbc_group_id) :
-              (l_loc_fbc_chip_id)),
-             l_x_rem_link_id,
-             l_x_rem_fbc_id,
-             l_x_aggregate),
-             "Error from p10_fbc_eff_config_aggregate_mode_setup (X)");
+    // in SMP wrap mode, parallel links are trained, but only logically enabled one at a time
+    // to avoid configuring aggregate mode, or failing due to aggregate link checks, skip
+    // aggregate processing code
+    FAPI_TRY(p10_smp_wrap_mfg_mode(l_smp_wrap_config),
+             "Error from p10_smp_wrap_mfg_mode");
 
-    FAPI_TRY(p10_fbc_eff_config_aggregate_mode_setup(i_target,
-             l_a_en,
-             l_loc_fbc_group_id,
-             l_a_rem_link_id,
-             l_a_rem_fbc_id,
-             l_a_aggregate),
-             "Error from p10_fbc_eff_config_aggregate_mode_setup (A)");
+    if (!l_smp_wrap_config)
+    {
+        // compute aggregate mode attribute -- coherent/data-only link roles will be picked later
+        // in p10_fbc_eff_config_aggregate (after links are trained and the round trip delay values
+        // can be sampled from the HW), but the aggregate state (on/off) is needed by initfiles
+        // that execute before that step
+        FAPI_TRY(p10_fbc_eff_config_aggregate_mode_setup(i_target,
+                 l_x_en,
+                 ((l_broadcast_mode == fapi2::ENUM_ATTR_PROC_FABRIC_BROADCAST_MODE_1HOP_CHIP_IS_GROUP) ? (l_loc_fbc_group_id) :
+                  (l_loc_fbc_chip_id)),
+                 l_x_rem_link_id,
+                 l_x_rem_fbc_id,
+                 l_x_aggregate),
+                 "Error from p10_fbc_eff_config_aggregate_mode_setup (X)");
 
+        FAPI_TRY(p10_fbc_eff_config_aggregate_mode_setup(i_target,
+                 l_a_en,
+                 l_loc_fbc_group_id,
+                 l_a_rem_link_id,
+                 l_a_rem_fbc_id,
+                 l_a_aggregate),
+                 "Error from p10_fbc_eff_config_aggregate_mode_setup (A)");
+    }
 
     ////////////////////////////////////////////////////////
     // Write determined info into X/A link attributes
