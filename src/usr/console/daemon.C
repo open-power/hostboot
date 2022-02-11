@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -34,6 +34,8 @@
 #include <util/misc.H>
 
 extern char hbi_ImageId[];
+extern char hbi_FWId_long[];
+extern char hbi_FWId_short[];
 
 namespace CONSOLE
 {
@@ -81,8 +83,16 @@ namespace CONSOLE
                  hbi_ImageId);
         _display(banner, VUART1);
         snprintf(banner, sizeof(banner),
+                 "\n--== FW %s %s ==--\n\n",
+                 hbi_FWId_long, hbi_FWId_short);
+        _display(banner, VUART1);
+        snprintf(banner, sizeof(banner),
                  "\n\n--== Welcome to Hostboot %s Debug Trace (VUART2) ==--\n\n",
                  hbi_ImageId);
+        _display(banner, VUART2);
+        snprintf(banner, sizeof(banner),
+                 "\n--== FW %s %s Debug(VUART2) ==--\n\n",
+                 hbi_FWId_long, hbi_FWId_short);
         _display(banner, VUART2);
 
         while(1)

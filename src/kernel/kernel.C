@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,6 +54,8 @@ extern "C" void kernel_dispatch_task();
 extern void* init_main(void* unused);
 extern uint64_t kernel_other_thread_spinlock;
 extern char hbi_ImageId[];
+extern char hbi_FWId_long[];
+extern char hbi_FWId_short[];
 
 class Kernel
 {
@@ -109,6 +111,8 @@ int main()
 {
     printk("Booting %s kernel...\n", "Hostboot");
     printk("%s\n\n", hbi_ImageId);
+    printk("%s\n\n", hbi_FWId_long);
+    printk("%s\n\n", hbi_FWId_short);
     printk("CPU=%s, PIR=%ld\n",
            ProcessorCoreTypeStrings[CpuID::getCpuType()],
            static_cast<uint64_t>(getPIR()));

@@ -6,9 +6,10 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2018
+# Contributors Listed Below - COPYRIGHT 2011,2022
 # [+] Google Inc.
 # [+] International Business Machines Corp.
+# [+] YADRO
 #
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,6 +29,16 @@
 use strict;
 
 my $imageIdSym = "hbi_ImageId";
+my $imageFWIdLongSym = "hbi_FWId_long";
+my $imageFWIdShortSym = "hbi_FWId_short";
+
+# extendedImageIds indicates to process ALL imageIds (with Short and Long)
+# Currrent exception is the Hostboot Bootloader image which will
+# only have the imageId, not the Short and Long, since the SBE Update
+# flow would trigger detection of changes on each driver level.
+# SBE Update logic will ignore the Hostboot Bootloader hbi_ImageId
+# data space to skip over the allocated area reserved for the hbi_ImageId.
+my $extendedImageIds = 1;
 
 my $img = shift;
 my $src = shift;
@@ -37,26 +48,134 @@ $imgBase =~ s/.*\///;
 
 my $PREFIX = $ENV{'CROSS_PREFIX'};
 my $addressStr = `${PREFIX}nm $src -C | grep $imageIdSym | colrm 17`;
-if ($addressStr eq '')
+
+# Exit 0 since this script gets called on ALL images, so some logic must be
+# tolerant of images which do -NOT- expect these id's
+if ($addressStr eq '' || $? )
 {
+    print "addimgid IMAGE=$img imgbase=$imgBase addressStr EMPTY! SKIP this IMAGE, looking for $imageIdSym from $src\n";
     exit 0;
 }
+
+my $addressStrFWLong = `${PREFIX}nm $src -C | grep $imageFWIdLongSym | colrm 17`;
+if ($addressStrFWLong eq '' || $? )
+{
+    print "addimgid IMAGE=$img imgbase=$imgBase addressStrFWLong EMPTY! SKIP for $imageFWIdLongSym from $src\n";
+    $extendedImageIds = 0;
+}
+
+my $addressStrFWShort = `${PREFIX}nm $src -C | grep $imageFWIdShortSym | colrm 17`;
+if ($addressStrFWShort eq '' || $? )
+{
+    print "addimgid IMAGE=$img imgbase=$imgBase addressStrFWShort EMPTY! SKIP for $imageFWIdShortSym from $src\n";
+    $extendedImageIds = 0;
+}
 my $address = hex $addressStr;
+my $addressFWLong = hex $addressStrFWLong;
+# Short size limited by PEL length of 16
+my $addressFWShort = hex $addressStrFWShort;
+
+# Check the environment for the following values.
+# Standalone building normally does -NOT- seed these environment variables.
+# Op-Build will populate these environment values based on the package
+# being built, i.e. HOSTBOOT_P10, HOSTBOOT_P11
+# In this script we just pick up the general flavor of HOSTBOOT_VERSION
+# so this script can operate on -ANY- package or future package.
 my $imageId = $ENV{'HOSTBOOT_VERSION'};
+my $imageIdFWLong = $ENV{'HOSTBOOT_FW_VERSION_LONG'};
+my $imageIdFWShort = $ENV{'HOSTBOOT_FW_VERSION_SHORT'};
+
+# We do -NOT- check the $? here since we will populate based on the value of the imageId,
+# imageIdFWLong and imageIdFWShort respectively.
 if ($imageId eq '')
 {
-    $imageId = `git describe --dirty || echo Unknown-Image \`git rev-parse --short HEAD\``;
+    $imageId = `git describe --always --dirty || echo Unknown-Image \`git rev-parse --short HEAD\``;
+}
+
+if ($imageIdFWLong eq '')
+{
+    $imageIdFWLong = `echo \`git describe --always --long \` || echo Unknown `;
+}
+
+if ($imageIdFWShort eq '')
+{
+    $imageIdFWShort = `echo g\`git rev-parse --short HEAD\` || echo Unknown `;
 }
 
 chomp $imageId;
+chomp $imageIdFWLong;
+chomp $imageIdFWShort;
 $imageId = $imageId."/".$imgBase;
 
-if (($imageId =~ m/Unknown-Image/) ||  	# Couldn't find git describe tag.
-    ($imageId =~ m/dirty/) ||	 	# Find 'dirty' commit.
-    ($imageId =~ m/^.{15}-[1-9]+/))	# Found commits after a tag.
+if (($imageId =~ m/Unknown-Image/) ||  # Couldn't find git describe tag.
+    ($imageId =~ m/dirty/) ||          # Find 'dirty' commit.
+    ($imageId =~ m/^.{15}-[1-9]+/))    # Found commits after a tag.
 {
     $imageId = $imageId."/".$ENV{"USER"};
 }
 
-system("echo -n $imageId | dd of=$img conv=notrunc bs=1 seek=$address count=127");
-exit $?
+# If the symbols did -NOT- exist we have already bailed, so any errors from here
+# forward are applicable to the images being processed
+
+my $exit_code;
+my $max_value_length = 127;
+my $count_image = length($imageId);
+if ( $count_image > $max_value_length)
+{
+    $imageId = substr($imageId, 0, $max_value_length);
+}
+$count_image = length($imageId);
+$exit_code = system("echo -n $imageId | dd of=$img conv=notrunc bs=1 seek=$address count=$count_image");
+if ($exit_code != 0)
+{
+    print "addimgid PROBLEM with adding symbol=$imageIdSym to img=$img exit_code=$exit_code\n";
+    exit $exit_code;
+}
+
+if ($extendedImageIds != 1)
+{
+    print "addimgid DONE working on IMAGE=$img imgbase=$imgBase ONLY had imagdId, NO extendedImageIds\n";
+    exit 0;
+}
+else
+{
+    print "addimgid DONE working on IMAGE=$img imgbase=$imgBase for imageId\n";
+}
+
+my $count_FW_long = length($imageIdFWLong);
+my $count_FW_short = length($imageIdFWShort);
+my $max_value_length_long = 127;
+# short length determined by PEL limitation in subsys_version
+my $max_value_length_short = 15;
+
+if ( $count_FW_long > $max_value_length_long)
+{
+    $imageIdFWLong = substr($imageIdFWLong, 0, $max_value_length_long);
+}
+$count_FW_long = length($imageIdFWLong);
+
+if ( $count_FW_short > $max_value_length_short)
+{
+    $imageIdFWShort = substr($imageIdFWShort, 0, $max_value_length_short);
+}
+$count_FW_short = length($imageIdFWShort);
+
+$exit_code = system("echo -n $imageIdFWLong | dd of=$img conv=notrunc bs=1 seek=$addressFWLong count=$count_FW_long");
+if ($exit_code != 0)
+{
+    print "addimgid PROBLEM with adding symbol=$imageFWIdLongSym to img=$img exit_code=$exit_code\n";
+    exit $exit_code;
+}
+print "addimgid DONE working on IMAGE=$img imgbase=$imgBase for imageIdFWLong\n";
+
+$exit_code = system("echo -n $imageIdFWShort | dd of=$img conv=notrunc bs=1 seek=$addressFWShort count=$count_FW_short");
+if ($exit_code != 0)
+{
+    print "addimgid PROBLEM with adding symbol=$imageFWIdShortSym to img=$img exit_code=$exit_code\n";
+}
+else
+{
+    print "addimgid DONE working on IMAGE=$img imgbase=$imgBase for imageIdFWShort\n";
+}
+
+exit $exit_code

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,6 +76,8 @@
 #endif
 
 extern char hbi_ImageId;
+extern char hbi_FWId_long;
+extern char hbi_FWId_short;
 
 //  -----   namespace   SPLESS  -----------------------------------------------
 namespace   SPLESS
@@ -120,8 +122,10 @@ void* _start(void *ptr)
     //  in our kernel printk in case we only have traces to debug
     //  with.
     TRACFCOMP( g_trac_initsvc,
-               "HostbootLevel=%s, CacheSize=%dMB, HRMOR=%X",
+               "HostbootLevel=%s, FW=%s %s, CacheSize=%dMB, HRMOR=%X",
                &hbi_ImageId,
+               &hbi_FWId_long,
+               &hbi_FWId_short,
                g_BlToHbDataManager.getHbCacheSizeMb(),
                cpu_spr_value(CPU_SPR_HRMOR) );
 

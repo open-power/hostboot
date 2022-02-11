@@ -395,24 +395,6 @@
   </attribute>
 
   <attribute>
-    <description>
-      Firmware subsystem version (e.g. "b0921a2039.1010") stored by
-      error logs in the EH section. This value comes from the BMC in
-      the FRU Record Table.
-    </description>
-    <id>FW_SUBSYS_VERSION</id>
-    <simpleType>
-      <string>
-        <sizeInclNull>64</sizeInclNull>
-      </string>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <writeable/>
-    <no_export/>
-  </attribute>
-
-  <attribute>
     <id>GPIO_INFO_PHYS_PRES</id>
     <description>Information needed to address GPIO device that corresponds
                  to the Physical Presence Detect circuit</description>

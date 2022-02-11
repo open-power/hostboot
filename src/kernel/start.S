@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2021
+# Contributors Listed Below - COPYRIGHT 2010,2022
 # [+] International Business Machines Corp.
 # [+] Joel Stanley
 #
@@ -1124,3 +1124,9 @@ kernel_other_thread_spinlock:
 .global hbi_ImageId
 hbi_ImageId:
     .space 128
+.global hbi_FWId_long
+hbi_FWId_long:
+    .space 128
+.global hbi_FWId_short
+hbi_FWId_short:
+    .space 16

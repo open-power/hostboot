@@ -1339,7 +1339,6 @@ errlHndl_t cacheRemoteFruVpd()
             if (map_entry.extra_fru_info & HAS_FW_VERSION_INFO)
             {
                 ATTR_FW_RELEASE_VERSION_type fw_release_string = { };
-                ATTR_FW_SUBSYS_VERSION_type subsys_version_string = { };
 
                 // Get the FW release string
                 size_t l_miKeywordSize(sizeof(fw_release_string));
@@ -1356,12 +1355,7 @@ errlHndl_t cacheRemoteFruVpd()
 
                 memcpy(fw_release_string, l_miKeyword, l_miKeywordSize);
 
-                getrecord(PLDM_FRU_FIELD_TYPE_VERSION,
-                          subsys_version_string, sizeof(subsys_version_string),
-                          "subsystem version");
-
                 entity_target->setAttr<ATTR_FW_RELEASE_VERSION>(fw_release_string);
-                entity_target->setAttr<ATTR_FW_SUBSYS_VERSION>(subsys_version_string);
             }
 
             if (map_entry.extra_fru_info & HAS_SERIAL_NUMBER)

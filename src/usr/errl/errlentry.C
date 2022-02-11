@@ -70,6 +70,8 @@
 
 // Hostboot Image ID string
 extern char hbi_ImageId;
+extern char hbi_FWId_long;
+extern char hbi_FWId_short;
 
 using namespace ERRORLOG;
 using namespace HWAS;
@@ -743,6 +745,40 @@ void ErrlEntry::addHbBuildId()
     ErrlUserDetailsString(l_pString).addToLog(this);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// Function to add a UD section containing the Hostboot FW Long ID to the
+// current error log being committed
+void ErrlEntry::addFWLongBuildId()
+{
+    // Title string
+    const char * const l_title = "FW Long ID: ";
+    // Char[] based on title + Hostboot FW ID
+    char l_pString[strlen(l_title) + strlen(&hbi_FWId_long) + 1];
+    // Set beginning of string
+    strcpy(l_pString, l_title);
+    // Concatenate the FW Long ID
+    strcat(l_pString, &hbi_FWId_long);
+    // Create UD section and add string
+    ErrlUserDetailsString(l_pString).addToLog(this);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Function to add a UD section containing the Hostboot FW Short ID to the
+// current error log being committed
+void ErrlEntry::addFWShortBuildId()
+{
+    // Title string
+    const char * const l_title = "FW Short ID: ";
+    // Char[] based on title + Hostboot FW ID
+    char l_pString[strlen(l_title) + strlen(&hbi_FWId_short) + 1];
+    // Set beginning of string
+    strcpy(l_pString, l_title);
+    // Concatenate the FW Short ID
+    strcat(l_pString, &hbi_FWId_short);
+    // Create UD section and add string
+    ErrlUserDetailsString(l_pString).addToLog(this);
+}
+
 enum {
     SKIP_INFO_RECOVERABLE_LOGS = 0,
     ENABLE_INFORMATIONAL_LOGS =
@@ -1033,16 +1069,22 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
 
     // Add the Hostboot Build ID to the error log
     addHbBuildId();
+    // Add the FW Long ID to the error log
+    addFWLongBuildId();
+    // Add the FW Short ID to the error log
+    addFWShortBuildId();
 
     // Check to see if we should skip processing info and recoverable errors
     checkHiddenLogsEnable();
 
     // These will go into the EH section. The real information will be gathered
     // from attributes on called-out targets, if targeting is loaded.
+    //
+    // ** SPECIAL NOTE - UNKNOWN here will probably get overwritten by
+    // the EMPTY tryGetAttr below, but left here for completeness
     TARGETING::ATTR_SERIAL_NUMBER_type serial_number = "UNKNOWN";
     TARGETING::ATTR_RAW_MTM_type mtm = "UNKNOWN_"; // "_" at end to make it exactly 8 characters
     TARGETING::ATTR_FW_RELEASE_VERSION_type release_version = "UNKNOWN";
-    TARGETING::ATTR_FW_SUBSYS_VERSION_type subsys_version = "UNKNOWN";
 
     // Check to make sure targeting is initialized. If so, collect part and
     // serial numbers
@@ -1061,7 +1103,6 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
         {
             UTIL::tryGetAttributeInHierarchy<ATTR_RAW_MTM>(sys, mtm);
             UTIL::tryGetAttributeInHierarchy<ATTR_FW_RELEASE_VERSION>(sys, release_version);
-            UTIL::tryGetAttributeInHierarchy<ATTR_FW_SUBSYS_VERSION>(sys, subsys_version);
             UTIL::tryGetAttributeInHierarchy<ATTR_SERIAL_NUMBER>(sys, serial_number);
         }
 
@@ -1085,8 +1126,19 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
 
         iv_Extended.setSerial(reinterpret_cast<const char*>(serial_number));
         iv_Extended.setMTM(mtm);
+
+        if (!strcmp(release_version, "")) // EMPTY
+        {
+            // ONLY if release_version is EMPTY do we use the hbi_FWId_long,
+            // otherwise its seeded by the MI Keyword
+            // Any truncation is performed by the setFirmwareVersion,
+            // set_errl_string ultimately
+            snprintf(release_version, sizeof(release_version), &hbi_FWId_long);
+        }
         iv_Extended.setFirmwareVersion(release_version);
-        iv_Extended.setSubsystemVersion(subsys_version);
+
+        // The IMAGE will contain the valid subsys_version
+        iv_Extended.setSubsystemVersion(&hbi_FWId_short);
 
         // Flatten the SRC section (and discard the result afterwards) so that
         // we can get the SRC words for the EH section's symptom ID

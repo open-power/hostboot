@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017
+# Contributors Listed Below - COPYRIGHT 2017,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -28,10 +28,19 @@ use strict;
 use Getopt::Long;
 
 my $imageIdSym = "hbi_ImageId";
+my $imageFWIdLongSym = "hbi_FWId_long";
+my $imageFWIdShortSym = "hbi_FWId_short";
+
+# extendedImageIds indicates to process ALL imageIds (with Short and Long)
+# Currrent exception is the Hostboot Bootloader image which will
+# only have the imageId, not the Short and Long, since the SBE Update
+# flow would trigger detection of changes on each driver level.
+# SBE Update logic will ignore the Hostboot Bootloader hbi_ImageId
+# data space to skip over the allocated area reserved for the hbi_ImageId.
+my $extendedImageIds = 1;
 
 my $img = "";
 my $symsFile = "";
-
 
 sub usage
 {
@@ -54,39 +63,143 @@ usage() unless $img and $symsFile;
 #   3. now the address is in the first 8 columns, chop off the rest
 my $addressStr = `grep hbi_ImageId $symsFile  | colrm 1 2 | colrm 9`;
 
-#if the address is empty or we got a bad rc - exit
+# Exit 0 since this script gets called on ALL images, so some logic must be
+# tolerant of images which do -NOT- expect these id's
 if ($addressStr eq '' || $? )
 {
-    printf "error reading address from $symsFile";
-    exit(-1);
+    print "editimgid IMAGE=$img addressStr EMPTY! SKIP this IMAGE, looking for $imageIdSym from $symsFile\n";
+    exit 0;
 }
+my $addressStrFWLong = `grep hbi_FWId_long $symsFile  | colrm 1 2 | colrm 9`;
+if ($addressStrFWLong eq '' || $? )
+{
+    print "editimgid IMAGE=$img addressStrFWLong EMPTY! SKIP for $imageFWIdLongSym from $symsFile\n";
+    $extendedImageIds = 0;
+}
+my $addressStrFWShort = `grep hbi_FWId_short $symsFile  | colrm 1 2 | colrm 9`;
+if ($addressStrFWShort eq '' || $? )
+{
+    print "editimgid IMAGE=$img addressStrFWShort EMPTY! SKIP for $imageFWIdShortSym from $symsFile\n";
+    $extendedImageIds = 0;
+}
+
+# If the symbols did -NOT- exist we have already bailed, so any errors from here
+# forward are applicable to the images being processed
+
 my $address = hex $addressStr;
+my $addressFWLong = hex $addressStrFWLong;
+# Short size limited by PEL length of 16
+my $addressFWShort = hex $addressStrFWShort;
 
-#image id is a 128 byte field, written as a null terminated
+# SPECIAL NOTE: editimgid ONLY adds the .cfm tag to the images already built
+
+# FIRST HANDLE IMAGE ID
+
+my $exit_code;
+#imageId is a 128 byte field, written null terminated
 #string, extract all but the null terminator
-my $imageId = `dd if=$img bs=1 skip=$address count=127`;
-
+my $max_value_length = 127;
+print "editimgid working on $img with imageId $imageId";
+my $imageId = `dd if=$img bs=1 skip=$address count=$max_value_length`;
 if ($imageId eq '' || $?)
 {
-    print "error reading image id tag from $img rc=$?\n";
-    exit (-1);
+    print "editimgid error reading imageId tag from $img rc=$?\n";
+    exit $?;
 }
 
 #remove any non printable chars from the data
 $imageId =~ s/[^[:print:]]+//g;
-
 $imageId = $imageId . "/" . "cfm";
+# There is an exposure here that if the string is too long
+# we may lose the cfm portion, but this is the best we can do.
+if ( length($imageId) > $max_value_length)
+{
+   $imageId = substr($imageId, 0, $max_value_length);
+}
+my $count_image = length($imageId);
 
 #make sure we can edit the file
 my $mode = 0755;
 chmod $mode, $img;
+$exit_code = system("echo -n $imageId | dd of=$img conv=notrunc bs=1 seek=$address count=$count_image");
+if ($exit_code != 0)
+{
+    print "editimgid PROBLEM with adding symbol=$imageIdSym to img=$img exit_code=$exit_code\n";
+    exit $exit_code;
+}
 
-my $cmd = "echo -n $imageId | dd of=$img conv=notrunc bs=1 ";
+if ($extendedImageIds != 1)
+{
+    print "editimgid DONE working on symbol=$imageIdSym to img=$img ONLY had imageId, NO extendedImageIds\n";
+    exit 0;
+}
+else
+{
+    print "editimgid DONE working on symbol=$imageIdSym to img=$img for imageId\n";
+}
 
-# write back the full 127 byte field
-$cmd = $cmd . "seek=$address count=127 >& /dev/null";
+# NEXT HANDLE LONG FW VERSION
 
-system("$cmd") == 0
-          or die "Failed to update the image RC=$?";
+my $max_value_length_long = 127;
+# short length determined by PEL limitation in subsys_version
+my $max_value_length_short = 15;
 
-exit $?
+print "editimgid working on $img with imageIdFWLong $imageIdFWLong";
+my $imageIdFWLong = `dd if=$img bs=1 skip=$addressFWLong count=$max_value_length_long`;
+if ($imageIdFWLong eq '' || $?)
+{
+    print "editimgid error reading imageIdFWLong tag from $img rc=$?\n";
+    exit $?;
+}
+
+#remove any non printable chars from the data
+$imageIdFWLong =~ s/[^[:print:]]+//g;
+
+$imageIdFWLong = $imageIdFWLong . "/" . "cfm";
+# There is an exposure here that if the string is too long
+# we may lose the cfm portion, but this is the best we can do.
+if ( length($imageIdFWLong) > $max_value_length_long)
+{
+    $imageIdFWLong = substr($imageIdFWLong, 0, $max_value_length_long);
+}
+my $count_FW_long = length($imageIdFWLong);
+$exit_code = system("echo -n $imageIdFWLong | dd of=$img conv=notrunc bs=1 seek=$addressFWLong count=$count_FW_long");
+if ($exit_code != 0)
+{
+    print "editimgid PROBLEM with adding symbol=$imageFWIdLongSym to img=$img exit_code=$exit_code\n";
+    exit $exit_code;
+}
+print "editimgid DONE working on img=$img for imageIdFWLong\n";
+
+# NEXT HANDLE SHORT FW VERSION
+
+print "editimgid working on $img with imageIdFWShort $imageIdFWShort";
+my $imageIdFWShort = `dd if=$img bs=1 skip=$addressFWShort count=$max_value_length_short`;
+if ($imageIdFWShort eq '' || $?)
+{
+    print "editimgid error reading imageIdFWShort tag from $img rc=$?\n";
+    exit $?;
+}
+
+#remove any non printable chars from the data
+$imageIdFWShort =~ s/[^[:print:]]+//g;
+
+$imageIdFWShort = $imageIdFWShort . "/" . "cfm";
+# There is an exposure here that if the string is too long
+# we may lose the cfm portion, but this is the best we can do.
+if ( length($imageIdFWShort) > $max_value_length_short)
+{
+    $imageIdFWShort = substr($imageIdFWShort, 0, $max_value_length_short);
+}
+my $count_FW_short = length($imageIdFWShort);
+
+$exit_code = system("echo -n $imageIdFWShort | dd of=$img conv=notrunc bs=1 seek=$addressFWShort count=$count_FW_short");
+if ($exit_code != 0)
+{
+    print "editimgid PROBLEM with adding symbol=$imageFWIdShortSym to img=$img exit_code=$exit_code\n";
+}
+else
+{
+    print "editimgid DONE working on img=$img for imageIdFWShort\n";
+}
+exit $exit_code

@@ -1052,6 +1052,22 @@ private:
     void addHbBuildId();
 
     /**
+     * @brief Called by commit(), this function creates a
+     * user details section which contains the Hostboot
+     * FW Long FW ID and adds this to the current error log being
+     * processed.
+     */
+    void addFWLongBuildId();
+
+    /**
+     * @brief Called by commit(), this function creates a
+     * user details section which contains the Hostboot
+     * FW Short FW ID and adds this to the current error log being
+     * processed.
+     */
+    void addFWShortBuildId();
+
+    /**
      * @brief called by addHwCallout to retrieve various pieces of card
      *  and/or chip data, e.g. part number, serial number, ecid.
      *

@@ -324,9 +324,6 @@
     <attribute>
       <id>FW_RELEASE_VERSION</id>
     </attribute>
-    <attribute>
-      <id>FW_SUBSYS_VERSION</id>
-    </attribute>
   </targetTypeExtension>
 
   <targetTypeExtension>
