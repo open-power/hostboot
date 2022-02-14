@@ -1059,20 +1059,20 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
 #endif
 
         // if CLASS_ENC
-        // by definition, hostboot only has 1 node/enclosure, and we're
-        //  here, so it is functional
+        // by definition, hostboot only has 1 node/enclosure, and we're here so it's functional
         if (pTarget->getAttr<ATTR_CLASS>() == CLASS_ENC)
         {
             HWAS_DBG("pTarget %.8X - detected present",
-                pTarget->getAttr<ATTR_HUID>());
-
-        // If there is planar VPD, then don't skip the presence detect.
-        // The presence detect will log any problems and load pnor.
-#if !defined(CONFIG_HAVE_PVPD)
-            // on to the next target if there is no Planar VPD
-            pTarget_it++;
-            continue;
-#endif
+                    get_huid(pTarget));
+            // If the planar VPD was collected remotely, such as on eBMC systems via PLDM, then
+            // don't skip presence detect as it will load relevant attributes for FRU callouts.
+            if (!EEPROM::hasRemoteVpdSource(pTarget))
+            {
+                // The planar VPD wasn't collected remotely, move onto the next target. We can't access
+                // the VPD.
+                pTarget_it++;
+                continue;
+            }
         }
 
         // Cache the attribute type
@@ -1202,7 +1202,7 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
         {
             // set part and serial number attributes for current target
             // (error handling is done internally)
-            if( (l_attrType == TYPE_PROC) || (l_attrType == TYPE_NODE) )
+            if( (l_attrType == TYPE_PROC))
             {
                 VPD::setPartAndSerialNumberAttributes(pTarget);
             }
