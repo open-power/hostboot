@@ -2,7 +2,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/build/tools/fspTrace.py $
+# $Source: src/build/tools/ebmc/hostfw_trace.py $
 #
 # OpenPOWER HostBoot Project
 #
