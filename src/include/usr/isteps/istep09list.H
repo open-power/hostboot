@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -171,7 +171,7 @@ namespace   INITSERVICE
         {
                 ISTEPNAME(09,01,"proc_io_dccal_done"),
                 ISTEP_09::call_proc_io_dccal_done,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(09,02,"fabric_dl_pre_trainadv"),
