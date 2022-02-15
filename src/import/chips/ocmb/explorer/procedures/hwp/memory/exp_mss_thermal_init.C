@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,7 @@
 #include <lib/exp_mss_thermal_init_utils.H>
 #include <exp_mss_thermal_init.H>
 #include <generic/memory/lib/utils/find.H>
+#include <lib/workarounds/exp_temp_sensor_workarounds.H>
 
 extern "C"
 {
@@ -63,7 +64,9 @@ extern "C"
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
-        // Logic needs to be implemented in simics rainer - AAM
+        FAPI_TRY(mss::exp::workarounds::change_temp_sensor_usage(i_target));
+
+        // Logic needs to be implemented in simics rainier - AAM
         // Attribute is 0 == enabled, 1 == disabled (enabled by default (0), make sure the disable is not set)
         if ((l_interval_read_dis == fapi2::ENUM_ATTR_MSS_OCMB_DISABLE_THERM_INIT_READ_ENABLED))
         {

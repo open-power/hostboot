@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2022                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -800,5 +800,22 @@
     <mssAccessorName>mrw_thermal_memory_power_limit</mssAccessorName>
   </attribute>
 <!-- END DEPRECATED -->
+
+  <attribute>
+    <id>ATTR_MSS_MRW_OVERRIDE_THERM_SENSOR_USAGE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Set to ENABLED to activate a workaround for 4U DDIMMs to set thermal sensor usage from DRAM to
+      DRAM_AND_MEM_BUF_EXT, and from PMIC to MEM_BUF_EXT. Affects power management subsystem fan speed controls.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+      DISABLED = 0,
+      ENABLED = 1
+    </enum>
+    <default>DISABLED</default>
+    <platInit/>
+    <mssAccessorName>mrw_orverride_therm_sensor_usage</mssAccessorName>
+  </attribute>
 
 </attributes>
