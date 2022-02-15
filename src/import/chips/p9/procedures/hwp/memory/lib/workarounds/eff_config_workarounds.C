@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,6 +28,8 @@
 #include <lib/mss_attribute_accessors.H>
 #include <lib/workarounds/eff_config_workarounds.H>
 #include <lib/shared/mss_const.H>
+#include <lib/shared/nimbus_defaults.H>
+#include <lib/dimm/nimbus_kind.H>
 
 namespace mss
 {
@@ -626,6 +628,73 @@ fapi2::ReturnCode synchronize_broadcast_timings(const fapi2::Target<fapi2::TARGE
     FAPI_TRY((synchronize_attribute<fapi2::ATTR_EFF_DRAM_TRFC  >(l_mcss)));
 
     return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Checks if the 128GB WLO workaround is required
+/// @param[in] i_kinds vector of DIMM kinds on which to operate
+/// @param[out] io_wlo the WLO value to be updated
+///
+void update_128gb_wlo_if_needed(const std::vector<mss::dimm::kind<>>& i_kinds,
+                                uint8_t& io_wlo)
+{
+    // Single drop? no workaround needed
+    if(i_kinds.size() != 2)
+    {
+        return;
+    }
+
+    // The 128GB DIMM's only need a workaround if:
+    // 1. they're in a dual drop config
+    // 2. they're a very specific config (seen below)
+    // 3. at least one of those DIMM's is a Samsung DIMM
+    static const auto AFFECTED_DIMM  = mss::dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+                                       fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_4R,
+                                       fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_16G,
+                                       fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4,
+                                       fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4,
+                                       fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM,
+                                       fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM18,
+                                       fapi2::ENUM_ATTR_EFF_DIMM_SIZE_128GB,
+                                       fapi2::ENUM_ATTR_EFF_DRAM_MFG_ID_SAMSUNG);
+
+    // Loops through the DIMM's and looks for an equivalent config + Samsung
+    // If any of those cases are found, then the workaround is needed
+    for(const auto& l_kind : i_kinds)
+    {
+        if(l_kind.equal_config(AFFECTED_DIMM) &&
+           l_kind.iv_mfgid == AFFECTED_DIMM.iv_mfgid)
+        {
+            io_wlo += 1;
+            return;
+        }
+    }
+}
+
+///
+/// @brief Updates the WLO if the 128GB WLO workaround is required
+/// @param[in] i_target MCS target on which to operate
+/// @return SUCCESS if the code executes successfully
+/// @note synchronizes attributes across the whole MCBIST
+///
+fapi2::ReturnCode update_128gb_wlo(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target)
+{
+    // Gets the WLO attribute
+    uint8_t l_wlo[mss::PORTS_PER_MCS] = {0, 0};
+    FAPI_TRY(mss::eff_dphy_wlo(i_target, &(l_wlo[0])));
+
+    // Loops over each MCA
+    for(const auto& l_mca : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
+    {
+        const auto l_kinds = mss::dimm::kind<>::vector(mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_mca));
+        const auto l_port_index = mss::index(l_mca);
+        update_128gb_wlo_if_needed(l_kinds, l_wlo[l_port_index]);
+    }
+
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EFF_DPHY_WLO, i_target, l_wlo) );
+
 fapi_try_exit:
     return fapi2::current_err;
 }

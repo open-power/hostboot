@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -403,6 +403,9 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
 
     // Sychronizes timings to allow broadcast mode mode to be run
     FAPI_TRY(mss::workarounds::eff_config::synchronize_broadcast_timings(i_target));
+
+    // Updates WLO if needed
+    FAPI_TRY(mss::workarounds::eff_config::update_128gb_wlo(i_target));
 
 fapi_try_exit:
     return fapi2::current_err;
