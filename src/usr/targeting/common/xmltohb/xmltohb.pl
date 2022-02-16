@@ -3404,6 +3404,8 @@ sub writeAttrErrlHFile {
             my @bounds;
             if(exists $attribute->{simpleType}->{array})
             {
+                # remove any whitespace from simpleType array
+                $attribute->{simpleType}->{array} =~ s/\s+//g;
                     @bounds = split(/,/,$attribute->{simpleType}->{array});
             }
             else
