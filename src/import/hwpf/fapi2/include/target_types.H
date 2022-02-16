@@ -135,6 +135,9 @@ enum TargetType : uint64_t
                                 TARGET_TYPE_PEC    |
                                 TARGET_TYPE_PERV,
 
+    TARGET_TYPE_ANY_POZ_CHIP  = TARGET_TYPE_PROC_CHIP |
+                                TARGET_TYPE_OCMB_CHIP,
+
     // Mappings to target types found in the error xml files
     TARGET_TYPE_EX_CHIPLET    = TARGET_TYPE_EX,
     TARGET_TYPE_MBA_CHIPLET   = TARGET_TYPE_MBA,
