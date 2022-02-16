@@ -505,39 +505,56 @@ void logGardEvent(const hostInterfaces::gard_event_t& i_gardEvent)
     do
     {
         // Make sure the error type is valid, if not, log it.
-        if ((i_gardEvent.i_error_type != hostInterfaces::HBRT_GARD_ERROR_SLB) ||
-            (i_gardEvent.i_error_type != hostInterfaces::HBRT_GARD_ERROR_TIMEFAC_FAILURE) ||
-            (i_gardEvent.i_error_type != hostInterfaces::HBRT_GARD_ERROR_NX))
+        switch(i_gardEvent.i_error_type)
         {
-            TRACFCOMP(g_trac_runtime, "logGardEvent: ERROR: unknown/invalid "
-                                      "error type 0x%.8X",
-                                      i_gardEvent.i_error_type);
+        case hostInterfaces::HBRT_GARD_ERROR_SLB:
+        case hostInterfaces::HBRT_GARD_ERROR_NX:
+            {
+                // These types are supported
+                break;
+            }
+        case hostInterfaces::HBRT_GARD_ERROR_UNKNOWN:
+        case hostInterfaces::HBRT_GARD_ERROR_COMPUTATION_TEST_FAILURE:
+        case hostInterfaces::HBRT_GARD_ERROR_CHIP_TOD_FAILURE:
+        case hostInterfaces::HBRT_GARD_ERROR_TIMEFAC_FAILURE:
+        case hostInterfaces::HBRT_GARD_ERROR_PROC_RECOVERY_THRESHOLD:
+        case hostInterfaces::HBRT_GARD_ERROR_SLW:
+        case hostInterfaces::HBRT_GARD_ERROR_CAPP_UNIT:
+        case hostInterfaces::HBRT_GARD_ERROR_LAST:
+            {
+                TRACFCOMP(g_trac_runtime, "logGardEvent: ERROR: unknown/invalid "
+                                          "error type 0x%.8X",
+                                          i_gardEvent.i_error_type);
 
-            /* @
-             * @errortype
-             * @severity         ERRL_SEV_PREDICTIVE
-             * @moduleid         MOD_LOG_GARD_EVENT
-             * @reasoncode       RC_LOG_GARD_EVENT_UNKNOWN_ERROR_TYPE
-             * @userdata1[0:31]  GARD error type
-             * @userdata1[32:63] Processor ID
-             * @userdata2[0:31]  Sub unit mask
-             * @userdata2[32:63] Recovery level
-             * @devdesc          Unknown/invalid error type
-             * @custdesc         Internal firmware error
-             */
-            l_err = new ErrlEntry( ERRL_SEV_PREDICTIVE,
-                                   MOD_LOG_GARD_EVENT,
-                                   RC_LOG_GARD_EVENT_UNKNOWN_ERROR_TYPE,
-                                   TWO_UINT32_TO_UINT64(
-                                        i_gardEvent.i_error_type,
-                                        i_gardEvent.i_procId),
-                                   TWO_UINT32_TO_UINT64(
-                                        i_gardEvent.i_sub_unit_mask,
-                                        i_gardEvent.i_recovery_level),
-                                   ErrlEntry::ADD_SW_CALLOUT);
+                /* @
+                 * @errortype
+                 * @severity         ERRL_SEV_PREDICTIVE
+                 * @moduleid         MOD_LOG_GARD_EVENT
+                 * @reasoncode       RC_LOG_GARD_EVENT_UNKNOWN_ERROR_TYPE
+                 * @userdata1[0:31]  GARD error type
+                 * @userdata1[32:63] Processor ID
+                 * @userdata2[0:31]  Sub unit mask
+                 * @userdata2[32:63] Recovery level
+                 * @devdesc          Unknown/invalid error type
+                 * @custdesc         Internal firmware error
+                 */
+                l_err = new ErrlEntry( ERRL_SEV_PREDICTIVE,
+                                       MOD_LOG_GARD_EVENT,
+                                       RC_LOG_GARD_EVENT_UNKNOWN_ERROR_TYPE,
+                                       TWO_UINT32_TO_UINT64(
+                                            i_gardEvent.i_error_type,
+                                            i_gardEvent.i_procId),
+                                       TWO_UINT32_TO_UINT64(
+                                            i_gardEvent.i_sub_unit_mask,
+                                            i_gardEvent.i_recovery_level),
+                                       ErrlEntry::ADD_SW_CALLOUT);
+                break;
+            }
+        }
+        if (l_err)
+        {
             break;
         }
-
 
         // Get the Target associated with processor ID
         TARGETING::TargetHandle_t l_procTarget{nullptr}, l_gardTarget{nullptr};
