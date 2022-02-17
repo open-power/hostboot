@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -150,7 +150,8 @@ struct HB_TI_DataArea
     union {
         struct {
             uint16_t hbDumpFlag:1;        /**< Get HB dump flag */
-            uint16_t reserved1:7;
+            uint16_t hbNotVisibleFlag:1;  /**< If 1, do not post a visible PEL for this TI */
+            uint16_t reserved1:6;
             hb_terminate_source source:8; /**< Caller of the TI  */
         };
         uint16_t hostbootFlags;

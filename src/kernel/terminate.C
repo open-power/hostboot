@@ -32,6 +32,8 @@
 #include <arch/ppc.H>
 #include <arch/magic.H>
 #ifndef BOOTLOADER
+#include <initservice/initserviceif.H>
+#include <hbfw_term_rc.H>
 #include <stdint.h>
 #include <kernel/console.H>
 #include <kernel/ipc.H>
@@ -115,7 +117,61 @@ void termWriteEid(hb_terminate_source i_source, uint32_t i_eid)
     kernel_TIDataArea.type = TI_WITH_EID;
     kernel_TIDataArea.source = i_source;
     kernel_TIDataArea.eid = i_eid;
+
+    // If we're terminating with an EID, generating another error log for the TI
+    // would be redundant.
+    kernel_TIDataArea.hbNotVisibleFlag = 1;
 }
+
+#ifndef CONFIG_FSP_BUILD
+/** @brief Structure that associates SRC codes with whether or not the TI should
+ * ask for a hostboot dump, and whether it should ask for a visible error to be
+ * created.
+ */
+struct srcDumpAndLogPolicy
+{
+    uint32_t reasoncode = 0;
+    bool hbDumpFlag = false;
+    bool hbNotVisibleFlag = false;
+
+    bool operator==(const uint32_t rc) const {
+        return reasoncode == rc;
+    }
+};
+
+constexpr bool HB_DUMP_ENABLED = true;
+constexpr bool HB_DUMP_DISABLED = false;
+constexpr bool PEL_NOT_VISIBLE = true;
+constexpr bool PEL_VISIBLE = false;
+
+// Table of SRCs that deviate from the default dump/errorlog policy.
+const srcDumpAndLogPolicy special_src_policies[] =
+{
+    { HBFW::INITSERVICE::SHUTDOWN_REQUESTED_BY_FSP,          HB_DUMP_DISABLED, PEL_NOT_VISIBLE },
+    { HBFW::SECUREBOOT::RC_PHYS_PRES_WINDOW_OPENED_SHUTDOWN, HB_DUMP_DISABLED, PEL_NOT_VISIBLE },
+    { HBFW::INITSERVICE::SHUTDOWN_MFG_TERM,                  HB_DUMP_DISABLED, PEL_VISIBLE },
+    { HBFW::INITSERVICE::SHUTDOWN_KEY_TRANSITION,            HB_DUMP_DISABLED, PEL_VISIBLE },
+};
+
+/** @brief Write the hbDumpFlag and hbNotVisibleFlag in the TI area based on an SRC.
+ */
+void termWriteDumpFlags(uint16_t i_reasoncode)
+{
+    using std::begin; using std::end;
+    const auto rule = std::find(begin(special_src_policies), end(special_src_policies), i_reasoncode);
+
+    if (rule != end(special_src_policies))
+    {
+        kernel_TIDataArea.hbDumpFlag = rule->hbDumpFlag;
+        kernel_TIDataArea.hbNotVisibleFlag = rule->hbNotVisibleFlag;
+    }
+    else
+    {
+        kernel_TIDataArea.hbDumpFlag = 1;
+        kernel_TIDataArea.hbNotVisibleFlag = 0;
+    }
+}
+#endif // CONFIG_FSP_BUILD
 #endif // BOOTLOADER
 
 void termWriteSRC(hb_terminate_source i_source, uint16_t i_reasoncode,
@@ -149,6 +205,14 @@ void termWriteSRC(hb_terminate_source i_source, uint16_t i_reasoncode,
 
         // Update User Data with address of fail location
         kernel_TIDataArea.src.word6 = i_failAddr;
+
+#ifndef BOOTLOADER
+#ifndef CONFIG_FSP_BUILD
+        {
+            termWriteDumpFlags(i_reasoncode);
+        }
+#endif
+#endif
     }
 
 #ifndef BOOTLOADER
