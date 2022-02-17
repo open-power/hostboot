@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/errl/plugins/ebmc/b3100.py $
+# $Source: src/usr/errl/plugins/ebmc/b3100/b3100.py $
 #
 # OpenPOWER HostBoot Project
 #

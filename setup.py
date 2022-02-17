@@ -46,7 +46,7 @@ package_directories = {
     # Component package names must be in the form of: `udparsers.bxxxx`. Where
     # 'xxxx' is the 4 digit component ID (lowercase).
 
-    "udparsers.b0100":   "src/usr/errl/plugins/ebmc/",
+    "udparsers.b0100":   "src/usr/errl/plugins/ebmc/b0100",
     "udparsers.b0300":   "src/usr/scom/plugins/ebmc",
     "udparsers.b0500":   "src/usr/initservice/plugins/ebmc",
     "udparsers.b0700":   "src/usr/i2c/plugins/ebmc",
@@ -58,7 +58,7 @@ package_directories = {
     "udparsers.b1d00":   "src/usr/vpd/plugins/ebmc",
     "udparsers.b1e00":   "src/usr/secureboot/common/plugins/ebmc",
     "udparsers.b2600":   "src/usr/htmgt/plugins/ebmc",
-    "udparsers.b3100":   "src/usr/errl/plugins/ebmc/",
+    "udparsers.b3100":   "src/usr/errl/plugins/ebmc/b3100",
     "udparsers.b3600":   "src/usr/expaccess/plugins/ebmc",
     "udparsers.b4500":   "src/usr/spi/plugins/ebmc",
     "udparsers.be500":   "src/usr/diag/prdf/peltool/ud",
