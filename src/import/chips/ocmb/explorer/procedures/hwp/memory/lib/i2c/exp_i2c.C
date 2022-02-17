@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -292,7 +292,9 @@ fapi2::ReturnCode poll_fw_status(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
     // then return an RC specific to the FW_STATUS loop
     if (l_fw_status_rc != fapi2::FAPI2_RC_SUCCESS)
     {
+#ifndef __PPE__
         fapi2::logError(l_fw_status_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+#endif
         FAPI_ASSERT(false,
                     fapi2::MSS_EXP_FW_STATUS_POLLING_TIMEOUT().
                     set_OCMB_TARGET(i_target),
