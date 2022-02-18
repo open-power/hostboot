@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2022                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -163,6 +163,10 @@
   </entry>
   <entry>
           <name>ATTR_FUSED_CORE_PAIRED_MODE_ENABLED</name>
+          <value>0x0</value>
+  </entry>
+  <entry>
+          <name>ATTR_PROC_LCO_MODE_DISABLE</name>
           <value>0x0</value>
   </entry>
   <!-- ********************************************************************* -->

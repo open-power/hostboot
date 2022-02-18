@@ -837,6 +837,21 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_PROC_LCO_MODE_DISABLE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Disable Lateral CastOut mode in the caches
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    FALSE = 0,
+    TRUE = 1
+  </enum>
+  <platInit/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_PROC_LCO_TARGETS_COUNT</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
