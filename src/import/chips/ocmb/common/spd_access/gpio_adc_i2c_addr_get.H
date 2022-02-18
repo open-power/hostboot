@@ -58,24 +58,6 @@ constexpr uint16_t SPD_DIMM_SIZE_BYTE = 193;
 ///
 /// @brief Get the GPIO/ADC i2c address for the given REL_POS
 ///
-/// @param[in] i_rel_pos REL_POS of GENERICI2CSLAVE target (0-3)
-/// @return uint8_t I2C address of the device for the given rel pos
-///
-inline uint8_t get_gpio_adc_i2c_addr(const uint8_t i_rel_pos)
-{
-    // Out of range, just return 0. Failsafe so we don't segfault
-    // The caller is responsible for calling this with a valid ID
-    if (i_rel_pos >= GPIO_ADC_I2C_ADDR_VECTOR.size())
-    {
-        return 0;
-    }
-
-    return GPIO_ADC_I2C_ADDR_VECTOR[i_rel_pos];
-}
-
-///
-/// @brief Get the GPIO/ADC i2c address for the given REL_POS
-///
 /// @param[in] i_spd SPD binary
 /// @param[in] i_rel_pos REL_POS of GENERICI2CSLAVE target (0-3)
 /// @return uint8_t I2C address of the device for the given rel pos
