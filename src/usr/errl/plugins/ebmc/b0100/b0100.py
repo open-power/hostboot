@@ -25,11 +25,16 @@
 import json
 import socket
 import struct
+
+from udparsers.helpers.miscUtils import getLid
 from udparsers.helpers.symbols import hbSymbolTable
 import udparsers.helpers.hwasCallout as hwasCallout
 from udparsers.helpers.entityPath import errlud_parse_entity_path
 from udparsers.helpers.errludP_Helpers import (
     hexDump, memConcat, hexConcat, intConcat, findNull, strConcat, unknownStr )
+
+# Some global variables
+HBI_CORE_SYMS_LID = "81e00686.lid"
 
 class errludP_errl:
     #Generated parsers
@@ -55,26 +60,53 @@ class errludP_errl:
         jsonStr = json.dumps(d)
         return jsonStr
 
+    """ Parses the backtraces associated with component ID 0x0100
+
+    If all goes well then the backtrace address will have it's associated
+    symbol next to the address:
+        ...
+        "Backtrace": [
+            "#0 0000000000043E10 ERRORLOG::ErrlUserDetailsLogRegister::setStateLogHUID()",
+            "#1 00000000000418D0 ERRORLOG::ErrlEntry::~ErrlEntry()",
+        ...
+
+    If there is an issue with finding the LID file for the HBI core symbols, then
+    a message is outputted stating say followed by the backtrace addresses:
+        ...
+        "File not found": "81e00686.lid",
+        "Backtrace": [
+            "#0 0000000000043E10",
+            "#1 00000000000418D0",
+        ...
+
+    If there is an issue with retrieving the symbols from the LID file, then
+    a message is outputted stating say followed by the backtrace addresses:
+        ...
+        "Symbols not found in file": "/usr/local/share/hostfw/running/81e00686.lid",
+        "Backtrace": [
+            "#0 0000000000043E10",
+            "#1 00000000000418D0",
+        ...
+
+    @param[in] ver: int - the version of the data
+    @param[in] data: memoryview - the backtrace data
+    @returns: Json objects of the backtrace output
+    """
     def ErrlUserDetailsParserBackTrace(ver, data):
         d = dict()
 
-        pNfsSymFile = "/nfs/data/hbicore.syms"
-
         # Initialize the symbol table
         symTab = hbSymbolTable()
-        readRC = symTab.readSymbols(pNfsSymFile)
 
-        if readRC != 0:
-            # Not found in NFS, look in maint for symbol file
-            l_pMaintSymFile = "/maint/data/hbicore.syms"
-            readRC = symTab.readSymbols( l_pMaintSymFile )
+        # Get the hbi core symbols LID file
+        symFile = getLid(HBI_CORE_SYMS_LID)
+        if symFile == "":
+            d["File not found"]=HBI_CORE_SYMS_LID
+        else:
+            # Read the symbols from the symbols file and populate symTab
+            readRC = symTab.readSymbols(symFile)
             if readRC != 0:
-                # Not found in maint, look in pwd
-                l_pPwdSymFile = "hbicore.syms"
-                readRC = symTab.readSymbols( l_pPwdSymFile )
-                if readRC != 0:
-                    d["Symbols not found"]=l_pPwdSymFile
-                    #symTab.nearestSymbol() will return NULL because of this.
+                d["Symbols not found in file"]=symFile
 
         l_pErrlEntry = "ErrlEntry::ErrlEntry"
         l_plabel = "Backtrace"
