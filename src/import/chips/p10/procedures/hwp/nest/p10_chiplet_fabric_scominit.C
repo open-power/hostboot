@@ -43,6 +43,9 @@
 
 #include <p10_scom_proc.H>
 #include <p10_scom_pauc_9.H>
+#include <p10_scom_perv.H>
+#include <multicast_defs.H>
+#include <multicast_group_defs.H>
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -171,6 +174,53 @@ fapi2::ReturnCode p10_chiplet_fabric_scominit(
     auto l_iohs_targets = i_target.getChildren<fapi2::TARGET_TYPE_IOHS>();
     char l_tgt_str[fapi2::MAX_ECMD_STRING_LEN];
     fapi2::ReturnCode l_rc;
+
+
+    // mask attentions from chiplets which are enabled but deemed non-functional
+    // specifically added to help handle discrepancies between SBE/HB view of target functional state
+    {
+        using namespace scomt::perv;
+
+        fapi2::buffer<uint64_t> l_hw_enabled = 0;
+        fapi2::buffer<uint64_t> l_platform_functional = 0;
+        fapi2::buffer<uint64_t> l_hw_mask = 0;
+
+        // use multicast read of NET_CTRL0 to ascertain HW configured chiplets
+        const auto l_mc_all_no_tp = i_target.getMulticast<fapi2::TARGET_TYPE_PERV, fapi2::MULTICAST_BITX>
+                                    (fapi2::MCGROUP_GOOD_NO_TP);
+        FAPI_TRY(fapi2::getScom(l_mc_all_no_tp, NET_CTRL0_RW, l_hw_enabled));
+        // multicast group excludes TP, so statically OR it in
+        l_hw_enabled.setBit<1>();
+        FAPI_DBG("HW chiplet enable state: 0x%016llX", l_hw_enabled);
+
+        // query platform to determine its view of functional targets
+        for (const auto l_perv : i_target.getChildren<fapi2::TARGET_TYPE_PERV>(fapi2::TARGET_STATE_FUNCTIONAL))
+        {
+            FAPI_TRY(l_platform_functional.setBit(l_perv.getChipletNumber()));
+        }
+
+        FAPI_DBG("  Plat functional state: 0x%016llX", l_platform_functional);
+
+        // mask attentions from any chiplet which is enabled but deemed non-functional
+        l_hw_mask = l_hw_enabled & ~l_platform_functional;
+        FAPI_DBG("    HW chiplets to mask: 0x%016llX", l_hw_mask);
+
+        for (uint64_t l_chiplet = 0; l_chiplet < 64; l_chiplet++)
+        {
+            if (l_hw_mask.getBit(l_chiplet))
+            {
+                uint64_t l_chiplet_base_addr = l_chiplet << 24;
+                fapi2::buffer<uint64_t> l_mask_data;
+                l_mask_data.flush<1>();
+                FAPI_DBG("Masking chiplet ID: %02X", l_chiplet);
+                FAPI_TRY(fapi2::putScom(i_target, l_chiplet_base_addr | XSTOP_MASK_WO_OR, l_mask_data));
+                FAPI_TRY(fapi2::putScom(i_target, l_chiplet_base_addr | RECOV_MASK_WO_OR, l_mask_data));
+                FAPI_TRY(fapi2::putScom(i_target, l_chiplet_base_addr | SPATTN_MASK_WO_OR, l_mask_data));
+                FAPI_TRY(fapi2::putScom(i_target, l_chiplet_base_addr | LOCAL_XSTOP_MASK_WO_OR, l_mask_data));
+                FAPI_TRY(fapi2::putScom(i_target, l_chiplet_base_addr | HOSTATTN_MASK_WO_OR, l_mask_data));
+            }
+        }
+    }
 
     // SW538816
     // - Qualify R_INDIRECT enablement based on number of X links per-chip across entire topology
