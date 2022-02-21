@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -23,6 +23,10 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+// ----------------------------------------------
+// Includes
+// ----------------------------------------------
+
 /**
  * @file eepromdd.C
  *
@@ -31,10 +35,6 @@
  *      system via the I2C device driver
  *
  */
-
-// ----------------------------------------------
-// Includes
-// ----------------------------------------------
 
 #include <errl/errlentry.H>     // errlHndl_t
 #include <errl/errlmanager.H>
@@ -59,11 +59,6 @@ extern trace_desc_t* g_trac_eeprom;
 // Easy macro replace for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
-
-//@fixme-SW540308 - Enable visible logs for lab debug
-//Temporarily make visible logs for all failures so that we can
-//quickly find corruptions in the lab
-#define MAKE_REDUNDANT_ERRORS_VISIBLE
 
 using namespace TARGETING;
 
@@ -723,11 +718,7 @@ errlHndl_t eepromPerformOp(DeviceFW::OperationType i_opType,
             if (!errl)
             { // If we didn't fail overall, make these informational logs and
               // commit them.
-#ifdef MAKE_REDUNDANT_ERRORS_VISIBLE
-                e->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
-#else
                 e->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-#endif
             }
 
             errlCommit(e, EEPROM_COMP_ID);
@@ -750,11 +741,7 @@ errlHndl_t reloadMvpdEecacheFromNextSource( TARGETING::Target* const i_target,
     {
         // If reloadMvpdEecacheFromNextSource is successful then commit the error,
         // that precipitated the call to this API, as revovered.
-#ifdef MAKE_REDUNDANT_ERRORS_VISIBLE
-        io_triggerErrorLog->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
-#else
         io_triggerErrorLog->setSev(ERRORLOG::ERRL_SEV_RECOVERED);
-#endif
         TRACFCOMP( g_trac_eeprom, ERR_MRK"reloadMvpdEecacheFromNextSource: "
                    "The error log (%.8X) that precipitated the reloading of the MVPD EECACHE "
                    "for target 0x%.8X has module Id 0x%.2X and reason code 0x%.4X.",
