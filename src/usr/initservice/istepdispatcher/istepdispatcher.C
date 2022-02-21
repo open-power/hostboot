@@ -2665,9 +2665,10 @@ errlHndl_t IStepDispatcher::sendProgressCode(bool i_needsLock)
         }
     }
 
-    // -- Send the progress code src to the BMC
+    // -- Send the progress code src to the BMC;
+    // do not send the internal step/counter
 #ifdef CONFIG_PLDM
-    ProgressCodeSrc l_progressSrc(iv_curIStep, iv_curSubStep, internalStep-1);
+    ProgressCodeSrc l_progressSrc(iv_curIStep, iv_curSubStep, 0);
     err_pldm = l_progressSrc.sendProgressCodeToBmc();
     if (err_pldm)
     {
