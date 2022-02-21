@@ -22,6 +22,16 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
+"""
+@file b0100.py
+
+@brief This plugin will decode the error log dumps for
+       the component ID 0x0100 (ERRL_COMP_ID) and its
+       associated sub-components such as attributes,
+       back traces, etc.
+"""
+
 import json
 import socket
 import struct
@@ -62,7 +72,7 @@ class errludP_errl:
 
     """ Parses the backtraces associated with component ID 0x0100
 
-    If all goes well then the backtrace address will have it's associated
+    If all goes well then the backtrace address will have its associated
     symbol next to the address:
         ...
         "Backtrace": [
@@ -70,8 +80,8 @@ class errludP_errl:
             "#1 00000000000418D0 ERRORLOG::ErrlEntry::~ErrlEntry()",
         ...
 
-    If there is an issue with finding the LID file for the HBI core symbols, then
-    a message is outputted stating say followed by the backtrace addresses:
+    If there is an issue with finding the LID file for the HBI core symbols, then a
+    message is outputted stating "File not found" followed by the backtrace addresses:
         ...
         "File not found": "81e00686.lid",
         "Backtrace": [
@@ -79,8 +89,8 @@ class errludP_errl:
             "#1 00000000000418D0",
         ...
 
-    If there is an issue with retrieving the symbols from the LID file, then
-    a message is outputted stating say followed by the backtrace addresses:
+    If there is an issue with retrieving the symbols from the LID file, then a message
+    is outputted stating "Symbols not found in file" followed by the backtrace addresses:
         ...
         "Symbols not found in file": "/usr/local/share/hostfw/running/81e00686.lid",
         "Backtrace": [
@@ -107,6 +117,8 @@ class errludP_errl:
             readRC = symTab.readSymbols(symFile)
             if readRC != 0:
                 d["Symbols not found in file"]=symFile
+            else:
+                d["Symbol file used"] = symFile
 
         l_pErrlEntry = "ErrlEntry::ErrlEntry"
         l_plabel = "Backtrace"

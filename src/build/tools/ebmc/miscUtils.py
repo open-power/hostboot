@@ -23,6 +23,15 @@
 #
 # IBM_PROLOG_END_TAG
 
+"""
+@file miscUtils.py
+
+@brief A plugin for miscellaneous utilities/functions such as
+       finding a lid file which can be used by the other
+       tracing plugins.
+"""
+
+
 import os.path   # Used in getLid function
 
 # Global variable to hold search directories for the LIDs and in what order to search
