@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2021
+# Contributors Listed Below - COPYRIGHT 2015,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -141,5 +141,6 @@ OBJS += p10_iohs_enable_ridi.o
 OBJS += p10_enable_ridi.o
 
 OBJS+=p10_chiplet_enable_ridi.o
+OBJS += p10_smp_wrap.o
 
 include ${ROOTPATH}/config.mk
