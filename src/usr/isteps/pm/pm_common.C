@@ -921,9 +921,9 @@ namespace HBPM
                 l_errl = nullptr;
             }
 
-#ifdef __HOSTBOOT_RUNTIME
+#if defined(__HOSTBOOT_RUNTIME) && !defined(CONFIG_FSP_BUILD)
             // Inform PHYP that we are about to reset the PM complex on
-            //  this chip
+            //  this chip (BMC systems only)
 
             // Create the firmware_request request struct
             hostInterfaces::hbrt_fw_msg l_req_msg;
