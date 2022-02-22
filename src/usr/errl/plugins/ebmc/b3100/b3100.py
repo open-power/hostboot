@@ -29,7 +29,7 @@ import os.path
 # Some global variables
 BMC_PATCH_DIR = "/usr/local/share/hostfw/running"
 BMC_LID_RUNNING_DIR = "/var/lib/phosphor-software-manager/hostfw/running"
-HBOT_STRING_LID_FILE = "81e00684.lid"
+HBOT_STRING_LID_FILE = "81e00685.lid"
 
 class errludP_fipsErrl:
     # ***** Memory Layout Version 1 *****
