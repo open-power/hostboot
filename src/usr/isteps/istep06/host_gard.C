@@ -196,20 +196,14 @@ void* host_gard( void *io_pArgs )
 #endif
             }
 
-        //  check and see if we still have enough hardware to continue
-        l_err = HWAS::checkMinimumHardware();
-        if(l_err)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                ERR_MRK"host_gard: "
-                "check minimum hardware returned error; breaking out");
-            break;
-        }
-
-        // If targets are deconfigured as a result of host_gard, they are
-        // done so using the PLID as the reason for deconfiguration.  This
-        // triggers the reconfigure loop attribute to be set, which causes
-        // undesirable behavior, so we need to reset it here:
+        // If targets are deconfigured as a result of collectGard(), they
+        // are done so using the PLID as the reason for deconfiguration,
+        // which sets ATTR_RECONFIGURE_LOOP. We need to reset this here
+        // so that we do not trigger a reconfig loop at the end of this
+        // istep for applying gard records for error logs that came from
+        // prior ipls. If we do not reset this attr, this will lead to
+        // infinite reconfig loops if we fail the checkMinimumHardware()
+        // below
 
         // Read current value
         ATTR_RECONFIGURE_LOOP_type l_reconfigAttr =
@@ -220,6 +214,18 @@ void* host_gard( void *io_pArgs )
         l_pTopLevel->setAttr<ATTR_RECONFIGURE_LOOP>
                 (l_reconfigAttr);
 
+        // check and see if we still have enough hardware to continue
+        // if this checkMinimumHardware() fails then we fail the ipl.
+        // This is because collectGard() should have already attempted
+        // to Resource Recover targets so that we could still try to boot
+        l_err = HWAS::checkMinimumHardware();
+        if(l_err)
+        {
+            // collectGard() was unable to Resource Recover enough HW for HB to boot
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                ERR_MRK"host_gard: check minimum hardware returned error; breaking out");
+            break;
+        }
 
         // Send message to FSP with HUID of master core
         msg_t * core_msg = msg_allocate();

@@ -774,8 +774,7 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                         }
 
                         CONSOLE::displayf(CONSOLE::VUART1, NULL,
-                            "System Shutting Down"
-                            "To Perform Reconfiguration After %s",
+                            "System Shutting Down To Perform Reconfiguration After %s",
                             l_deconfig ? "Deconfig" : "Recoverable Error" );
                         CONSOLE::flush();
                         #endif
