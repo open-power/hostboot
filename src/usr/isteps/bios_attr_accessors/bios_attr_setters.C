@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021                             */
+/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -155,4 +155,28 @@ void set_hb_max_number_huge_pages(std::vector<uint8_t>& io_string_table,
 
     return;
 }
+
+void set_hb_effective_secure_version(std::vector<uint8_t>& io_string_table,
+                                     std::vector<uint8_t>& io_attr_table,
+                                     ISTEP_ERROR::IStepError & io_stepError)
+{
+    errlHndl_t l_errl = nullptr;
+    const auto l_sys = TARGETING::UTIL::assertGetToplevelTarget();
+    const auto l_sec_ver_num = l_sys->getAttr<ATTR_SECURE_VERSION_NUM>();
+
+    l_errl = PLDM::setEffectiveSecureVersion(io_string_table,
+                                             io_attr_table,
+                                             l_sec_ver_num);
+    if(l_errl)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+            "set_hb_effective_secure_version(): An error occurred setting hb_effective_secure_version to %ld",
+            l_sec_ver_num);
+        l_errl->collectTrace("ISTEPS_TRACE",256);
+        errlCommit( l_errl, ISTEP_COMP_ID );
+    }
+
+    return;
+}
+
 }

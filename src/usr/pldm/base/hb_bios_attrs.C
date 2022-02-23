@@ -70,6 +70,7 @@ const char PLDM_BIOS_HB_USB_ENABLEMENT_STRING[]            = "hb_host_usb_enable
 const char PLDM_BIOS_HB_MAX_NUMBER_HUGE_PAGES_STRING[]     = "hb_max_number_huge_pages";
 const char PLDM_BIOS_HB_ENLARGED_CAPACITY_STRING[]         = "hb_ioadapter_enlarged_capacity_current";
 const char PLDM_BIOS_HB_INHIBIT_BMC_RESET_STRING[]         = "hb_inhibit_bmc_reset";
+const char PLDM_BIOS_HB_EFFECTIVE_SECURE_VERSION_STRING[]  = "hb_effective_secure_version";
 
 // When power limit values change, the effect on the OCCs is immediate, so we
 // always want the most recent values here.
@@ -1761,6 +1762,17 @@ errlHndl_t setMaxNumberHugePages(std::vector<uint8_t>& io_string_table,
                                    PLDM_BIOS_HB_MAX_NUMBER_HUGE_PAGES_STRING,
                                    i_maxPages);
 }
+
+errlHndl_t setEffectiveSecureVersion(std::vector<uint8_t>& io_string_table,
+                                     std::vector<uint8_t>& io_attr_table,
+                                     uint8_t i_effSecVer)
+{
+    return setBiosIntegerAttrValue(io_string_table,
+                                   io_attr_table,
+                                   PLDM_BIOS_HB_EFFECTIVE_SECURE_VERSION_STRING,
+                                   i_effSecVer);
+}
+
 
 errlHndl_t setBiosEnumAttrValue(std::vector<uint8_t>& io_string_table,
                                 std::vector<uint8_t>& io_attr_table,

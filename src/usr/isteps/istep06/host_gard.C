@@ -62,6 +62,7 @@
 
 #ifdef CONFIG_PLDM
 #include <pldm/extended/pdr_manager.H>
+#include <isteps/bios_attr_accessors/bios_attr_setters.H>
 #endif
 
 namespace ISTEP_06
@@ -411,6 +412,12 @@ void* host_gard( void *io_pArgs )
     node_tgt->setAttr<ATTR_SECURE_VERSION_SEEPROM>(SECUREBOOT::getMinimumSecureVersion());
     // Set the same BMC-related attribute if it's present
     l_pTopLevel->trySetAttr<ATTR_SECURE_VERSION_NUM>(SECUREBOOT::getMinimumSecureVersion());
+
+#ifdef CONFIG_PLDM
+    // Notify the BMC via PLDM BIOS attribute hb_effective_secure_version.
+    std::vector<uint8_t> string_table, attr_table;
+    ISTEP::set_hb_effective_secure_version(string_table, attr_table, l_stepError);
+#endif
 
 #ifdef CONFIG_TPMDD
     // Initialize the master TPM
