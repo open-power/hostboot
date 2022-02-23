@@ -301,6 +301,26 @@ errlHndl_t platHandleClockCallout(
 
 #endif
 
+        //@TODO-RTC:299030-Real Clock Targets won't need this hack
+        // Since we don't have a real target for the clocks we won't trigger
+        // a reconfig loop automatically when a clock is marked for deconfig.
+        // To emulate that behavior we will manually set the flag that is
+        // checked at the end of each istep.
+        if( NO_DECONFIG != i_deconfigState )
+        {
+            HWAS_INF("Triggering reconfig loop for attempted clock deconfig");
+            TARGETING::Target* l_sys = TARGETING::UTIL::assertGetToplevelTarget();
+            TARGETING::ATTR_RECONFIGURE_LOOP_type l_reconfigAttr =
+              l_sys->getAttr<ATTR_RECONFIGURE_LOOP>();
+            // 'OR' values in case of multiple reasons for reconfigure
+            l_reconfigAttr |= TARGETING::RECONFIGURE_LOOP_DECONFIGURE;
+            l_sys->setAttr<ATTR_RECONFIGURE_LOOP>(l_reconfigAttr);
+        }
+        // Note: On eBMC systems this is the only way the IPL would be stopped.
+        //  On FSP systems HWSV will stop the IPL and do a reconfig loop but
+        //  there would be a race without this setting.  Hostboot would continue
+        //  IPLing so we could run additional isteps and see extra errors due to
+        //  the clock issue.
     }
 
     return pError;
