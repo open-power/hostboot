@@ -1491,23 +1491,49 @@ void forceEcFcDeconfig(const TARGETING::TargetHandle_t i_core,
                        const uint32_t i_deconfigReason)
 {
     TargetHandleList pECList;
-    TargetHandleList pFCList;
-
+    HwasState hwasState = {};
+    bool l_deconfig_by_fco = (i_deconfigReason ==
+                              HWAS::theDeconfigGard().DECONFIGURED_BY_FIELD_CORE_OVERRIDE);
     //Deconfig the EC
     enableHwasState(i_core, i_present, false, i_deconfigReason);
-    HWAS_INF("pEC   %.8X - marked %spresent, NOT functional",
-             i_core->getAttr<ATTR_HUID>(), i_present ? "" : "NOT ");
+
+    if (l_deconfig_by_fco)
+    {
+        // set functionalOverride so HB and BMC will treat as functional
+        // during reconfig loops
+        HwasState hwasState = i_core->getAttr<ATTR_HWAS_STATE>();
+        hwasState.functionalOverride = 1;
+        i_core->setAttr<ATTR_HWAS_STATE>(hwasState);
+    }
+
+    HWAS_INF("pEC HUID 0x%08X - marked %spresent, NOT functional, functionalOverride = %d ",
+             "%sset functional on BMC reboot",
+             i_core->getAttr<ATTR_HUID>(),
+             i_present ? "" : "NOT ",
+             hwasState.functionalOverride,
+             hwasState.functionalOverride ? "" : "NOT ");
 
     //Get parent FC and see if any other cores, if none, deconfig
-    auto fcType = TARGETING::TYPE_FC;
-
-    TARGETING::Target* l_fc = getParent(i_core, fcType);
+    TARGETING::Target* l_fc = getParent(i_core, TARGETING::TYPE_FC);
     getChildChiplets(pECList, l_fc, TYPE_CORE, true);
     if(pECList.size() == 0)
     {
         enableHwasState(l_fc, i_present, false, i_deconfigReason);
-        HWAS_INF("pFC   %.8X - marked %spresent, NOT functional",
-                 l_fc->getAttr<ATTR_HUID>(), i_present ? "" : "NOT ");
+        if (l_deconfig_by_fco)
+        {
+            // set functionalOverride so HB and BMC will treat as functional
+            // during reconfig loops
+            hwasState = l_fc->getAttr<ATTR_HWAS_STATE>();
+            hwasState.functionalOverride = 1;
+            l_fc->setAttr<ATTR_HWAS_STATE>(hwasState);
+        }
+
+        HWAS_INF("pFC HUID 0x%08X - marked %spresent, NOT functional functionalOverride = %d ",
+                 "%sset functional on BMC reboot",
+                 l_fc->getAttr<ATTR_HUID>(),
+                 i_present ? "" : "NOT ",
+                 hwasState.functionalOverride,
+                 hwasState.functionalOverride ? "" : "NOT ");
     }
 
 }
@@ -1674,10 +1700,10 @@ errlHndl_t restrictECunits(
                 (currentPairedECs + currentSingleECs), maxECs);
 
         // now need to find EC units that stay functional, going
-        //  across the list of units for each proc and FC we have,
-        //  until we get to the max or run out of ECs, giving
-        //  preference to paired ECs and if we are in fused mode
-        //  excluding single, non-paired ECs.
+        // across the list of units for each proc and FC we have,
+        // until we get to the max or run out of ECs, giving
+        // preference to paired ECs and if we are in fused mode
+        // excluding single, non-paired ECs.
 
         // Use as many paired ECs as we can up to maxECs
         uint32_t pairedECs_remaining =
@@ -1693,9 +1719,9 @@ errlHndl_t restrictECunits(
         // in order to avoid the situation of primary not having any cores.
         bool l_allocatedToPrimary = false;
 
-        // Each pECList has ECs for a given FC and proc.  Check each EC list to
-        //  determine if it has an EC pair or a single EC and if the remaining
-        //  count indicates the given EC from that list is to stay functional.
+        // Each pECList has ECs for a given FC and proc. Check each EC list to
+        // determine if it has an EC pair or a single EC and if the remaining
+        // count indicates the given EC from that list is to stay functional.
 
         // Cycle through the first FC of each proc, then the second FC of each
         // proc and so on as we decrement remaining ECs. We put procs as the

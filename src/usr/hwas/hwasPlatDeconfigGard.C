@@ -1162,7 +1162,6 @@ errlHndl_t DeconfigGard::platProcessFieldCoreOverride()
 
     do
     {
-        // otherwise, process and reduce cores.
         // find all functional NODE targets
         Target* pSys;
         targetService().getTopLevelTarget(pSys);
@@ -1178,7 +1177,7 @@ errlHndl_t DeconfigGard::platProcessFieldCoreOverride()
                         &nodeCheckExpr);
 
         // sort the list by ATTR_HUID to ensure that we
-        //  start at the same place each time
+        // start at the same place each time
         std::sort(pNodeList.begin(), pNodeList.end(),
                     compareTargetHuid);
 
@@ -1225,7 +1224,7 @@ errlHndl_t DeconfigGard::platProcessFieldCoreOverride()
                     CLASS_CHIP, TYPE_PROC, true);
 
             // sort the list by ATTR_HUID to ensure that we
-            //  start at the same place each time
+            // start at the same place each time
             std::sort(pProcList.begin(), pProcList.end(),
                     compareTargetHuid);
 
@@ -1252,8 +1251,8 @@ errlHndl_t DeconfigGard::platProcessFieldCoreOverride()
             } // for pProc_it
 
             // restrict the EC units; units turned off are marked
-            //  present=true, functional=false, and marked with the
-            //  appropriate deconfigure code.
+            // present=true, functional=false, and marked with the
+            // appropriate deconfigure code.
             HWAS_INF("FCO: calling restrictECunits with %d entries",
                     l_procRestrictList.size());
 
