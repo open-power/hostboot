@@ -966,12 +966,26 @@ fapi_try_exit:
 //******************************************************************************
 ReturnCode __mcLogicalToDimmDqHelper(
     const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
-    wiringData  i_wiringData, uint8_t i_ps, uint8_t i_mcPin,
+    const wiringData &  i_wiringData, uint8_t i_ps, uint8_t i_mcPin,
     uint8_t &o_dimm_dq )
 {
-    // Note: the wiring data for MEM_PORTs/OCMBs is 1-to-1, so there
-    // is no actual need to check the wiring data right now.
-    o_dimm_dq = i_mcPin;
+    // Note: The translation from logical to dimm format is specific to ISDIMMs,
+    // for non-ISDIMMs the translation should be 1-to-1. Also, technically the
+    // full translation goes from logical->c4->dimm format and the map from
+    // ATTR_MEM_VPD_DQ_MAP stored in i_wiringData only covers c4->dimm
+    // translation, however, right now the translation from logical->c4 should
+    // always be 1-to-1.
+
+    // Use the wiring data to translate from c4 to dimm dq format
+    // Note: The wiring data maps from dimm dq format to c4 format
+    for ( uint8_t bit = 0; bit < mss::exp::MAX_DQ_BITS_PER_PORT; bit++ )
+    {
+        if ( i_wiringData.memport[bit] == i_mcPin )
+        {
+            o_dimm_dq = bit;
+            break;
+        }
+    }
 
     return FAPI2_RC_SUCCESS;
 }
@@ -984,9 +998,16 @@ ReturnCode __dimmDqToMcLogicalHelper(
     wiringData  i_wiringData, uint8_t i_ps, uint8_t i_dimm_dq,
     uint8_t &o_mcPin )
 {
-    // Note: the wiring data for MEM_PORTs/OCMBs is 1-to-1, so there
-    // is no actual need to check the wiring data right now.
-    o_mcPin = i_dimm_dq;
+    // Note: The translation from logical to dimm format is specific to ISDIMMs,
+    // for non-ISDIMMs the translation should be 1-to-1. Also, technically the
+    // full translation goes from logical->c4->dimm format and the map from
+    // ATTR_MEM_VPD_DQ_MAP stored in i_wiringData only covers c4->dimm
+    // translation, however, right now the translation from logical->c4 should
+    // always be 1-to-1.
+
+    // Use the wiring data to translate from c4 to dimm dq format
+    // Note: The wiring data maps from dimm dq format to c4 format
+    o_mcPin = i_wiringData.memport[i_dimm_dq];
 
     return FAPI2_RC_SUCCESS;
 }
