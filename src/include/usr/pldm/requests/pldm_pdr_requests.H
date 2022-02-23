@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -116,7 +116,8 @@ errlHndl_t sendSensorStateChangedEvent(const TARGETING::Target* i_target,
 enum occ_state : sensor_state_t
 {
     occ_state_stopped,
-    occ_state_in_service
+    occ_state_in_service,
+    system_in_safe_mode
 };
 
 /**

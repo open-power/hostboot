@@ -934,6 +934,22 @@ namespace HTMGT
                      cv_safeReturnCode,
                      cv_safeOccInstance);
 
+        // Iterate through OCC objects to notify the BMC
+        for( const auto & occ : iv_occArray )
+        {
+            // Notify BMC that this OCC is not active and system is in safe mode
+            errlHndl_t l_err = occ->bmcSensor(false, true);
+            if( l_err )
+            {
+                TMGT_ERR("updateForSafeMode: failed setting occEnabled sensor"
+                         " for safe mode (OCC%d)",
+                         occ->getInstance());
+                l_err->collectTrace(HTMGT_COMP_NAME);
+                l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+            }
+        }
+
     } // end  OccManager::updateForSafeMode()
 
 

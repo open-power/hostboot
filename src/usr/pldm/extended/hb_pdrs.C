@@ -403,7 +403,8 @@ errlHndl_t addOccStateControlPdrs(PdrManager& io_pdrman)
         io_pdrman.addStateSensorPdr(target, entity,
                                     PLDM_STATE_SET_OPERATIONAL_RUNNING_STATUS,
                                     (enum_bit(PLDM_STATE_SET_OPERATIONAL_RUNNING_STATUS_STOPPED)
-                                     | enum_bit(PLDM_STATE_SET_OPERATIONAL_RUNNING_STATUS_IN_SERVICE)),
+                                     | enum_bit(PLDM_STATE_SET_OPERATIONAL_RUNNING_STATUS_IN_SERVICE)
+                                     | enum_bit(PLDM_STATE_SET_OPERATIONAL_RUNNING_STATUS_DORMANT)),
                                     PdrManager::STATE_QUERY_HANDLER_OCC_STATE_QUERY);
     }
 

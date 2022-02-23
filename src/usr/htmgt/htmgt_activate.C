@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -174,6 +174,7 @@ namespace HTMGT
                          occ->getInstance(),
                          i_enabled);
 
+                l_err->collectTrace(HTMGT_COMP_NAME);
                 ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
             }
         }
@@ -206,6 +207,7 @@ namespace HTMGT
             if(err)
             {
                 TMGT_ERR("getPowerLimit: An error occurred getting Power Limit from the BMC");
+                err->collectTrace(HTMGT_COMP_NAME);
                 break;
             }
             else

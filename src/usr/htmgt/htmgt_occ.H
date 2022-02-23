@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -264,10 +264,11 @@ namespace HTMGT
              * @brief Set BMC OCC enabled sensor state
              * @param i_enabled: true - OCC enabled
              *                   false - OCC disabled
+             * @param i_safe:    true if system is in safe mode
              *
              * @return error log on error
              */
-            errlHndl_t bmcSensor(const bool i_enabled);
+            errlHndl_t bmcSensor(const bool i_enabled, const bool i_safe = false);
 
 
             /**

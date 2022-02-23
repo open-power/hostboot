@@ -723,6 +723,9 @@ errlHndl_t sendOccStateChangedEvent(const TARGETING::Target* const i_occ_target,
     case occ_state_in_service:
         new_occ_state = PLDM_STATE_SET_OPERATIONAL_RUNNING_STATUS_IN_SERVICE;
         break;
+    case system_in_safe_mode:
+        new_occ_state = PLDM_STATE_SET_OPERATIONAL_RUNNING_STATUS_DORMANT;
+        break;
     default:
         assert(false, "Invalid state %d given to sendOccStateChangedEvent",
                i_new_state);

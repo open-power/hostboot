@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -430,13 +430,26 @@ namespace HTMGT
 
 
     // Notify BMC of OCC status
-    errlHndl_t Occ::bmcSensor(const bool i_enabled)
+    errlHndl_t Occ::bmcSensor(const bool i_enabled, const bool i_safe)
     {
         errlHndl_t pError = nullptr;
 #ifdef CONFIG_PLDM
-        const PLDM::occ_state new_state = ((i_enabled == true) ?
-                                           PLDM::occ_state_in_service :
-                                           PLDM::occ_state_stopped);
+        PLDM::occ_state new_state;
+        if (i_enabled == true)
+        {
+            new_state = PLDM::occ_state_in_service;
+        }
+        else
+        {
+            if (i_safe)
+            {
+                new_state = PLDM::system_in_safe_mode;
+            }
+            else
+            {
+                new_state = PLDM::occ_state_stopped;
+            }
+        }
 
         pError = PLDM::sendOccStateChangedEvent(iv_target, new_state);
 #endif
