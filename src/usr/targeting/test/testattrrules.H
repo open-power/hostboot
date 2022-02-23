@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021                             */
+/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -122,6 +122,7 @@ public:
           ATTR_MRW_HW_MIRRORING_ENABLE, //ok,written by all instances
           ATTR_FUSED_CORE_MODE_HB, //ok,unique data per instance
           ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE, //ok,explicitly synced between instances
+          ATTR_PROC_LCO_MODE_DISABLE, //ok, set by HWSV or BIOS ATTR
 
           ATTR_FW_RELEASE_VERSION, //ok,BMC only
           ATTR_RAW_MTM, //ok,BMC only
