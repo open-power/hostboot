@@ -645,8 +645,9 @@ void populate_adc_data(
 ///
 /// @param[in] i_info runtime_n_mode_telem_info struct
 /// @param[out] o_data hwp_data_ostream data stream
+/// @return fapi2::ReturnCode
 ///
-void send_struct(runtime_n_mode_telem_info& i_info, fapi2::hwp_data_ostream& o_data)
+fapi2::ReturnCode send_struct(runtime_n_mode_telem_info& i_info, fapi2::hwp_data_ostream& o_data)
 {
     // Casted to char pointer so we can increment in single bytes
     char* i_info_casted  = reinterpret_cast<char*>(&i_info);
@@ -663,15 +664,18 @@ void send_struct(runtime_n_mode_telem_info& i_info, fapi2::hwp_data_ostream& o_d
         const size_t l_bytes_to_copy = std::min(sizeof(fapi2::hwp_data_unit), sizeof(i_info) - l_byte);
 
         memcpy(&l_data_unit, i_info_casted + l_byte, l_bytes_to_copy);
-        o_data.put(l_data_unit);
+        FAPI_TRY(o_data.put(l_data_unit));
     }
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
 /// @brief Runtime N-Mode detection for 4U parts
 /// @param[in] i_ocmb_target ocmb target
 /// @param[out] o_data hwp_data_ostream of struct information
-/// @return FAPI2_RC_SUCCESS (0)
+/// @return fapi2::ReturnCode
 ///
 fapi2::ReturnCode pmic_n_mode_detect(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
@@ -692,7 +696,7 @@ fapi2::ReturnCode pmic_n_mode_detect(
     if (PMICS.empty())
     {
         l_info.iv_aggregate_error = aggregate_state::LOST;
-        send_struct(l_info, o_data);
+        FAPI_TRY(send_struct(l_info, o_data));
         return fapi2::FAPI2_RC_FALSE;
     }
 
@@ -701,67 +705,70 @@ fapi2::ReturnCode pmic_n_mode_detect(
     if (!is_4u(i_ocmb_target))
     {
         l_info.iv_aggregate_error = aggregate_state::DIMM_NOT_4U;
-        send_struct(l_info, o_data);
+        FAPI_TRY(send_struct(l_info, o_data));
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
-    // Grab the targets
-    const auto& ADC1 = GI2C_DEVICES[mss::generic_i2c_slave::ADC1];
-    const auto& ADC2 = GI2C_DEVICES[mss::generic_i2c_slave::ADC2];
-    const auto& GPIO1 = GI2C_DEVICES[mss::generic_i2c_slave::GPIO1];
-    const auto& GPIO2 = GI2C_DEVICES[mss::generic_i2c_slave::GPIO2];
+    {
+        // Grab the targets
+        const auto& ADC1 = GI2C_DEVICES[mss::generic_i2c_slave::ADC1];
+        const auto& ADC2 = GI2C_DEVICES[mss::generic_i2c_slave::ADC2];
+        const auto& GPIO1 = GI2C_DEVICES[mss::generic_i2c_slave::GPIO1];
+        const auto& GPIO2 = GI2C_DEVICES[mss::generic_i2c_slave::GPIO2];
 
-    aggregate_state l_output_state_1 = aggregate_state::N_PLUS_1;
-    aggregate_state l_output_state_2 = aggregate_state::N_PLUS_1;
+        // Start with the GPIOs
+        aggregate_state l_output_state_1 = gpio_check(GPIO1, PMICS[mss::pmic::id::PMIC0], PMICS[mss::pmic::id::PMIC1],
+                                           l_failed_pmics_1);
+        aggregate_state l_output_state_2 = gpio_check(GPIO2, PMICS[mss::pmic::id::PMIC2], PMICS[mss::pmic::id::PMIC3],
+                                           l_failed_pmics_2);
 
-    // Start with the GPIOs
-    l_output_state_1 = gpio_check(GPIO1, PMICS[mss::pmic::id::PMIC0], PMICS[mss::pmic::id::PMIC1], l_failed_pmics_1);
-    l_output_state_2 = gpio_check(GPIO2, PMICS[mss::pmic::id::PMIC2], PMICS[mss::pmic::id::PMIC3], l_failed_pmics_2);
+        get_gpio_pmic_state<PAIR0>(l_output_state_1, l_failed_pmics_1, l_failed_pmics_2);
+        get_gpio_pmic_state<PAIR1>(l_output_state_2, l_failed_pmics_1, l_failed_pmics_2);
 
-    get_gpio_pmic_state<PAIR0>(l_output_state_1, l_failed_pmics_1, l_failed_pmics_2);
-    get_gpio_pmic_state<PAIR1>(l_output_state_2, l_failed_pmics_1, l_failed_pmics_2);
+        // Choose the largest of the two states, a double N-Mode declaration here is
+        // still just only N-Mode since the two GPIOs handle a separate set of redundant pmics
+        l_state = static_cast<aggregate_state>(std::max(l_output_state_1, l_output_state_2));
 
-    // Choose the largest of the two states, a double N-Mode declaration here is
-    // still just only N-Mode since the two GPIOs handle a separate set of redundant pmics
-    l_state = static_cast<aggregate_state>(std::max(l_output_state_1, l_output_state_2));
+        l_output_state_1 = adc_check(ADC1);
+        l_output_state_2 = adc_check(ADC2);
 
-    l_output_state_1 = adc_check(ADC1);
-    l_output_state_2 = adc_check(ADC2);
+        // Pick the largest error so far
+        l_state = static_cast<aggregate_state>(std::max(l_state, l_output_state_1));
+        l_state = static_cast<aggregate_state>(std::max(l_state, l_output_state_2));
 
-    // Pick the largest error so far
-    l_state = static_cast<aggregate_state>(std::max(l_state, l_output_state_1));
-    l_state = static_cast<aggregate_state>(std::max(l_state, l_output_state_2));
+        // Now, the voltages
+        l_output_state_1 = voltage_checks(PMICS);
+        l_state = static_cast<aggregate_state>(std::max(l_state, l_output_state_1));
 
-    // Now, the voltages
-    l_output_state_1 = voltage_checks(PMICS);
-    l_state = static_cast<aggregate_state>(std::max(l_state, l_output_state_1));
+        // This numbering is using the numbering as defined in the "Redundant Power
+        // on DIMM – Functional Specification" in order to match the I2C command sequence
+        // in section 6.3.1 This differs from the numbering used in pmic_enable and in lab tools,
+        // so there is a translation between the two here
+        l_info.iv_pmic1_errors = PMICS[mss::pmic::id::PMIC0].iv_state;
+        l_info.iv_pmic2_errors = PMICS[mss::pmic::id::PMIC2].iv_state;
+        l_info.iv_pmic3_errors = PMICS[mss::pmic::id::PMIC1].iv_state;
+        l_info.iv_pmic4_errors = PMICS[mss::pmic::id::PMIC3].iv_state;
+        l_info.iv_aggregate_error = l_state;
 
-    // This numbering is using the numbering as defined in the "Redundant Power
-    // on DIMM – Functional Specification" in order to match the I2C command sequence
-    // in section 6.3.1 This differs from the numbering used in pmic_enable and in lab tools,
-    // so there is a translation between the two here
-    l_info.iv_pmic1_errors = PMICS[mss::pmic::id::PMIC0].iv_state;
-    l_info.iv_pmic2_errors = PMICS[mss::pmic::id::PMIC2].iv_state;
-    l_info.iv_pmic3_errors = PMICS[mss::pmic::id::PMIC1].iv_state;
-    l_info.iv_pmic4_errors = PMICS[mss::pmic::id::PMIC3].iv_state;
-    l_info.iv_aggregate_error = l_state;
+        // Get GPIO port states
+        populate_gpio_port_states(GPIO1, GPIO2, l_info.iv_telemetry_data);
 
-    // Get GPIO port states
-    populate_gpio_port_states(GPIO1, GPIO2, l_info.iv_telemetry_data);
+        // Similar to above, this numbering translation is using the numbering
+        // as defined in the "Redundant Power on DIMM – Functional Specification"
+        populate_pmic_data(PMICS[mss::pmic::id::PMIC0], l_info.iv_telemetry_data.iv_pmic1);
+        populate_pmic_data(PMICS[mss::pmic::id::PMIC2], l_info.iv_telemetry_data.iv_pmic2);
+        populate_pmic_data(PMICS[mss::pmic::id::PMIC1], l_info.iv_telemetry_data.iv_pmic3);
+        populate_pmic_data(PMICS[mss::pmic::id::PMIC3], l_info.iv_telemetry_data.iv_pmic4);
 
-    // Similar to above, this numbering translation is using the numbering
-    // as defined in the "Redundant Power on DIMM – Functional Specification"
-    populate_pmic_data(PMICS[mss::pmic::id::PMIC0], l_info.iv_telemetry_data.iv_pmic1);
-    populate_pmic_data(PMICS[mss::pmic::id::PMIC2], l_info.iv_telemetry_data.iv_pmic2);
-    populate_pmic_data(PMICS[mss::pmic::id::PMIC1], l_info.iv_telemetry_data.iv_pmic3);
-    populate_pmic_data(PMICS[mss::pmic::id::PMIC3], l_info.iv_telemetry_data.iv_pmic4);
+        // Finally, the ADCs
+        populate_adc_data(ADC1, mss::generic_i2c_slave::ADC1, l_info.iv_telemetry_data.iv_adc1);
+        populate_adc_data(ADC2, mss::generic_i2c_slave::ADC2, l_info.iv_telemetry_data.iv_adc2);
 
-    // Finally, the ADCs
-    populate_adc_data(ADC1, mss::generic_i2c_slave::ADC1, l_info.iv_telemetry_data.iv_adc1);
-    populate_adc_data(ADC2, mss::generic_i2c_slave::ADC2, l_info.iv_telemetry_data.iv_adc2);
+        FAPI_TRY(send_struct(l_info, o_data));
 
-    send_struct(l_info, o_data);
+        FAPI_INF(TARGTIDFORMAT " Compeleted pmic_n_mode_detect procedure", MSSTARGID(i_ocmb_target));
+    }
 
-    FAPI_INF(TARGTIDFORMAT " Compeleted pmic_n_mode_detect procedure", MSSTARGID(i_ocmb_target));
-    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
 }

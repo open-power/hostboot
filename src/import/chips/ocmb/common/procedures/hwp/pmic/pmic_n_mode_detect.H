@@ -433,8 +433,9 @@ std::vector<pmic_info> get_pmics(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
 ///
 /// @param[in] i_info runtime_n_mode_telem_info struct
 /// @param[out] o_data hwp_data_ostream data stream
+/// @return fapi2::ReturnCode
 ///
-void send_struct(runtime_n_mode_telem_info& i_info, fapi2::hwp_data_ostream& o_data);
+fapi2::ReturnCode send_struct(runtime_n_mode_telem_info& i_info, fapi2::hwp_data_ostream& o_data);
 
 extern "C"
 {
@@ -442,7 +443,7 @@ extern "C"
     /// @brief Runtime N-Mode detection for 4U parts
     /// @param[in] i_ocmb_target ocmb target
     /// @param[out] o_data hwp_data_ostream of struct information
-    /// @return FAPI2_RC_SUCCESS (0)
+    /// @return fapi2::ReturnCode
     ///
     fapi2::ReturnCode pmic_n_mode_detect(
         const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
