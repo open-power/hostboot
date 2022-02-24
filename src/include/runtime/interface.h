@@ -588,7 +588,8 @@ typedef struct hostInterfaces
        HBRT_FW_MSG_TYPE_SPILOCK           = 16, // struct spi_lock
        HBRT_FW_MSG_TYPE_INITIATE_GARD     = 17, // struct initiate_gard_t
        HBRT_FW_MSG_TYPE_PMIC_HEALTH_CHECK = 18, // no additional data required
-       HBRT_FW_MSG_TYPE_PM_RESET_ALERT     = 20, // struct pmreset_alert_t
+       HBRT_FW_MSG_TYPE_PM_RESET_ALERT    = 20, // struct pmreset_alert_t
+       HBRT_FW_MSG_TYPE_DEALLOCATE        = 21, // struct deallocate_t
     };
 
     // NVDIMM protection state enum
@@ -706,6 +707,17 @@ typedef struct hostInterfaces
         uint32_t procId; /* processor id */
     } __attribute__((packed));
 
+    // This struct is for HBRT_FW_MSG_TYPE_DEALLOCATE messages which
+    // are received from hypervisor to HBRT.  These msgs indicate
+    // resources that should be marked as deallocated in system GUI.
+    // These resources will be reported via PLDM sensor as non-functional
+    struct deallocate_t
+    {
+        uint8_t  version;      // version of this deallocate struct
+        uint8_t  resourceType; // type of deallocated resource
+        uint64_t resourceId;   // ID of deallocated resource
+    } __attribute__((packed));
+
     struct hbrt_fw_msg   // define struct hbrt_fw_msg
     {
        hbrt_fw_msg() { req_hcode_update = { 0 }; };  // ctor
@@ -815,6 +827,9 @@ typedef struct hostInterfaces
 
           /* For HBRT_FW_MSG_TYPE_PM_RESET_ALERT */
           pmreset_alert_t pmreset_alert;
+
+          // For HBRT_FW_MSG_TYPE_DEALLOCATE msgs that come from hypervisor
+          deallocate_t deallocated;
 
           // This struct is sent from HBRT with
           // io_type set to HBRT_FW_MSG_HBRT_FSP_REQ or

@@ -44,6 +44,7 @@
 #include <mctp/mctpif_rt.H>                // MCTP::get_next_packet
 #include <mctp/mctp_errl.H>                // MCTP::addBmcAndHypErrorCallouts
 #include <pldm/pldmif.H>                   // PLDM::get_next_request
+#include <pldm/extended/pdr_manager.H>     // PLDM::thePdrManager()
 #include <sys/time.h>                      // nanosleep
 #include <util/util_reasoncodes.H>
 #include <runtime/hbrt_utilities.H>        // HBRT_TRACE_NAME
@@ -478,6 +479,190 @@ void attrSyncRequest( void * i_data)
     TRACFCOMP(g_trac_runtime, EXIT_MRK"attrSyncRequest");
 }
 
+/**
+ * @brief Converts a hypervisor resource id into appropriate hostboot target
+ * @param[in] i_resourceId   Hypervisor resource id
+ * @param[in] i_resourceType Kind of resource
+ * @param[out] o_target  Hostboot target
+ * @return Error if unable to convert to hostboot target
+ */
+errlHndl_t convertToHbTarget(uint64_t i_resourceId,
+                             hostInterfaces::InitiateGardResourceType i_resourceType,
+                             TARGETING::TargetHandle_t& o_target)
+{
+    errlHndl_t l_err{nullptr};
+
+    do {
+        l_err = RT_TARG::getHbTarget(i_resourceId, o_target);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_runtime, "convertToHbTarget: Error getting "
+                                      "HB Target from resourceId 0x%0X, "
+                                      "exiting ...",
+                                      i_resourceId);
+            break;
+        }
+
+        if ((o_target->getAttr<ATTR_TYPE>() == TYPE_CORE) &&
+            (TARGETING::is_fused_mode()))
+        {
+            // If we're in fused core mode, all core IDs must
+            // match that of the parent FC
+            o_target = getParent(o_target, TYPE_FC);
+            break;
+        }
+
+        // PHYP will send a PROC chip id if it wants to guard or deallocate an NX unit.
+        // Need to grab the NX unit associated with the given PROC
+        if (i_resourceType == hostInterfaces::ResourceNxUnit)
+        {
+            TARGETING::TargetHandleList l_NXChiplet;
+            getChildChiplets(l_NXChiplet, o_target, TYPE_NX, false);
+            // There is only 1 NX chiplet per proc, if we didn't get it then throw an error
+            if (l_NXChiplet.size() != 1)
+            {
+                /*@
+                 * @moduleid         MOD_CONVERT_TO_HB_TARGET
+                 * @reasoncode       RC_INVALID_NX_QUANTITY
+                 * @userdata1[0:31]  Number of NX units found, expected 1
+                 * @userdata1[32:63] Processor ID
+                 * @devdesc          Expected to get only one NX unit for the given PROC but didn't. See userdata for
+                 *                   amount found.
+                 * @custdesc         Internal firmware error
+                 */
+                l_err = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                                      MOD_CONVERT_TO_HB_TARGET,
+                                      RC_INVALID_NX_QUANTITY,
+                                      TWO_UINT32_TO_UINT64(
+                                           l_NXChiplet.size(),
+                                           i_resourceId),
+                                      0 /* Unused */,
+                                      ErrlEntry::ADD_SW_CALLOUT);
+                break;
+            }
+            // update HB target with appropriate NX target
+            o_target = l_NXChiplet[0];
+            break;
+        }
+
+    } while (0);
+
+    return l_err;
+}
+
+#ifndef CONFIG_FSP_BUILD
+
+/**
+ * @brief Deallocate the resource and report to BMC
+ *
+ * @param[in] i_deallocated Resource identified by PHYP as deallocated
+ */
+void deallocateResource(const hostInterfaces::deallocate_t & i_deallocated)
+{
+    TRACFCOMP(g_trac_runtime,
+              ENTER_MRK"deallocateResource: version 0x%02X, type 0x%02X, id 0x%016X",
+              i_deallocated.version, i_deallocated.resourceType, i_deallocated.resourceId);
+
+    errlHndl_t l_err{nullptr};
+
+    do
+    {
+        // Get the Target associated with resourceId
+        TargetHandle_t l_deallocTarget{nullptr};
+        hostInterfaces::InitiateGardResourceType l_resourceType = hostInterfaces::ResourceProc;
+        switch (i_deallocated.resourceType)
+        {
+            case hostInterfaces::ResourceProc:
+              l_resourceType = hostInterfaces::ResourceProc;
+              break;
+            case hostInterfaces::ResourceNxUnit:
+              l_resourceType = hostInterfaces::ResourceNxUnit;
+              break;
+            default:
+              TRACFCOMP(g_trac_runtime, "deallocateResource: unexpected resource type 0x%02X", i_deallocated.resourceType);
+              l_resourceType = hostInterfaces::ResourceInvalid;
+
+              /*@
+               * @moduleid         MOD_DEALLOCATE_RESOURCE
+               * @reasoncode       RC_UNSUPPORTED_RESOURCE_TYPE
+               * @userdata1        Resource Type
+               * @userdata2        Resource ID
+               * @devdesc          Unsupported deallocated resource type
+               * @custdesc         Internal firmware error
+               */
+              l_err = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                                    MOD_DEALLOCATE_RESOURCE,
+                                    RC_UNSUPPORTED_RESOURCE_TYPE,
+                                    i_deallocated.resourceType,
+                                    i_deallocated.resourceId,
+                                    ErrlEntry::ADD_SW_CALLOUT);
+              break;
+        }
+        if (l_err)
+        {
+            break;
+        }
+
+        l_err = convertToHbTarget(i_deallocated.resourceId, l_resourceType, l_deallocTarget);
+        if (l_err)
+        {
+            break;
+        }
+
+        if (!l_deallocTarget->trySetAttr<ATTR_DEALLOCATED>(1))
+        {
+            TRACFCOMP(g_trac_runtime,
+                ERR_MRK"deallocateResource: ATTR_DEALLOCATED not found on target 0x%.8X (%s)",
+                get_huid(l_deallocTarget),
+                attrToString<ATTR_TYPE>(l_deallocTarget->getAttr<ATTR_TYPE>()));
+            /*@
+             * @moduleid         MOD_DEALLOCATE_RESOURCE
+             * @reasoncode       RC_UNSUPPORTED_TARGET
+             * @userdata1[0:31]  huid of target
+             * @userdata1[32:63] resourceType
+             * @userdata2        resourceId
+             * @devdesc          ATTR_DEALLOCATED not found on target
+             * @custdesc         Internal firmware error
+             */
+            l_err = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                                  MOD_DEALLOCATE_RESOURCE,
+                                  RC_UNSUPPORTED_TARGET,
+                                  TWO_UINT32_TO_UINT64(
+                                       TARGETING::get_huid(l_deallocTarget),
+                                       l_resourceType),
+                                  i_deallocated.resourceId,
+                                  ErrlEntry::ADD_SW_CALLOUT);
+            break;
+        }
+
+        // Only Core/FC PLDM state sensors exist
+        if (l_resourceType == hostInterfaces::ResourceProc)
+        {
+            PLDM::state_query_id_t l_sensor_id = 0x0000;
+            l_err = PLDM::thePdrManager().getStateSensorId(l_deallocTarget, l_sensor_id);
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_runtime,
+                    "deallocateResource: unable to find PLDM State Sensor for target 0x%0X",
+                    get_huid(l_deallocTarget));
+                break;
+            }
+            // alert BMC that this target is no longer functional
+            PLDM::sendFruFunctionalStateChangedEvent(l_deallocTarget, l_sensor_id, 0);
+        }
+
+    } while (0);
+
+    // Commit any error log that occurred.
+    if (l_err)
+    {
+        l_err->collectTrace(RUNTIME_COMP_NAME);
+        errlCommit(l_err, RUNTIME_COMP_ID);
+    }
+
+    TRACFCOMP(g_trac_runtime, EXIT_MRK"deallocateResource");
+}
+#endif
 
 /**
  *  @brief Log the gard event from PHYP
@@ -526,7 +711,7 @@ void logGardEvent(const hostInterfaces::gard_event_t& i_gardEvent)
                                           "error type 0x%.8X",
                                           i_gardEvent.i_error_type);
 
-                /* @
+                /*@
                  * @errortype
                  * @severity         ERRL_SEV_PREDICTIVE
                  * @moduleid         MOD_LOG_GARD_EVENT
@@ -556,56 +741,21 @@ void logGardEvent(const hostInterfaces::gard_event_t& i_gardEvent)
             break;
         }
 
-        // Get the Target associated with processor ID
-        TARGETING::TargetHandle_t l_procTarget{nullptr}, l_gardTarget{nullptr};
-        l_err = RT_TARG::getHbTarget(i_gardEvent.i_procId, l_procTarget);
-        if (l_err)
-        {
-            TRACFCOMP(g_trac_runtime, "logGardEvent: Error getting "
-                                      "HB Target from processor ID 0x%0X, "
-                                      "exiting ...",
-                                      i_gardEvent.i_procId);
-            break;
-        }
-        // Set the target to guard to be the target that was just retrieved and let it be overriden if necessary
-        // depending on the error type requested.
-        l_gardTarget = l_procTarget;
-
-        // PHYP will send a PROC chip id if it wants to guard an NX unit. Need to grab the NX unit associated
-        // with the given PROC to guard that part out.
+        // Find the hostboot target to gard
+        TARGETING::TargetHandle_t l_gardTarget{nullptr};
+        hostInterfaces::InitiateGardResourceType l_resourceType = hostInterfaces::ResourceProc;
         if (i_gardEvent.i_error_type == hostInterfaces::HBRT_GARD_ERROR_NX)
         {
-            TARGETING::TargetHandleList l_NXChiplet;
-            getChildChiplets(l_NXChiplet, l_procTarget, TYPE_NX, false);
-            // There is only 1 NX chiplet per proc, if we didn't get it then throw an error
-            if (l_NXChiplet.size() != 1)
-            {
-                /* @
-                 * @errortype
-                 * @severity         ERRL_SEV_PREDICTIVE
-                 * @moduleid         MOD_LOG_GARD_EVENT
-                 * @reasoncode       RC_LOG_NX_GARD_INVALID_NX_QUANTITY
-                 * @userdata1[0:31]  Number of NX units found, expected 1
-                 * @userdata1[32:63] Processor ID
-                 * @devdesc          Expected to get only one NX unit for the given PROC but didn't. See userdata for
-                 *                   amount found.
-                 * @custdesc         Internal firmware error
-                 */
-                l_err = new ErrlEntry(ERRL_SEV_PREDICTIVE,
-                                      MOD_LOG_GARD_EVENT,
-                                      RC_LOG_NX_GARD_INVALID_NX_QUANTITY,
-                                      TWO_UINT32_TO_UINT64(
-                                           l_NXChiplet.size(),
-                                           i_gardEvent.i_procId),
-                                      0 /* Unused */,
-                                      ErrlEntry::ADD_SW_CALLOUT);
-                break;
-            }
-            l_gardTarget = l_NXChiplet[0];
+            l_resourceType = hostInterfaces::ResourceNxUnit;
+        }
+        l_err = convertToHbTarget(i_gardEvent.i_procId, l_resourceType, l_gardTarget);
+        if (l_err)
+        {
+            break;
         }
 
         // Log the GARD event
-        /* @
+        /*@
          * @errortype
          * @severity         ERRL_SEV_PREDICTIVE
          * @moduleid         MOD_LOG_GARD_EVENT
@@ -717,7 +867,7 @@ void handleMctpAvailable(void)
 
     if(return_code)
     {
-        /* @
+        /*@
          * @errortype
          * @severity         ERRL_SEV_PREDICTIVE
          * @moduleid         MOD_RT_FIRMWARE_NOTIFY
@@ -1061,6 +1211,14 @@ void firmware_notify( uint64_t i_len, void *i_data )
                           "firmware_notify: PMIC health check callback");
 
                 handlePmicHealthCheckCallback();
+            }
+            break;
+
+            case hostInterfaces::HBRT_FW_MSG_TYPE_DEALLOCATE:
+            {
+                TRACFCOMP(g_trac_runtime,
+                          "firmware_notify: Deallocated resource");
+                deallocateResource(l_hbrt_fw_msg->deallocated);
             }
             break;
 #endif

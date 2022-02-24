@@ -358,9 +358,16 @@ errlHndl_t handleFunctionalStateSensorGetRequest(const state_sensor_callback_arg
              get_huid(i_args.i_target),
              i_args.i_req->sensor_id);
 
+    uint8_t deallocated = 0;
+#ifdef __HOSTBOOT_RUNTIME
+    if (i_args.i_target->tryGetAttr<ATTR_DEALLOCATED>(deallocated))
+    {
+        PLDM_INF("handleFunctionalStateSensorGetRequest: target 0x%08x is deallocated",
+          get_huid(i_args.i_target));
+    }
+#endif
     /* Encode and send a PLDM response to the request. */
-
-    const sensor_state_t current_state = (i_args.i_target->getAttr<ATTR_HWAS_STATE>().functional
+    const sensor_state_t current_state = ((i_args.i_target->getAttr<ATTR_HWAS_STATE>().functional && !deallocated)
                                           ? PLDM_STATE_SET_HEALTH_STATE_NORMAL
                                           : PLDM_STATE_SET_HEALTH_STATE_CRITICAL);
 

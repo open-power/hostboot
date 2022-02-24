@@ -1013,6 +1013,65 @@ void PdrManager::sendAllFruFunctionalStates() const
     } while(false);
 }
 
+errlHndl_t PdrManager::getStateSensorId(Target* const i_target, state_query_id_t &o_sensor_id)
+{
+    bool l_found_sensor{false};
+    errlHndl_t l_err{nullptr};
+
+    do
+    {
+    const auto lock = scoped_mutex_lock(iv_access_mutex);
+
+    /* Read the query handler records from the system target */
+
+    const auto sys = UTIL::assertGetToplevelTarget();
+    const auto num_records = sys->getAttr<ATTR_NUM_PLDM_STATE_QUERY_RECORDS>();
+    const auto records = readPldmStateQueryRecords(sys);
+
+    // get target huid to match
+    const auto l_target_huid = get_huid(i_target);
+
+    /* Iterate each registered target state sensor */
+    for (uint32_t i = 0; i < num_records; ++i)
+    {
+        const auto record = records[i];
+
+        if (record.state_set_id == PLDM_STATE_SET_HEALTH_STATE
+            && record.query_type == STATE_QUERY_SENSOR)
+        {
+            if (l_target_huid == record.target_huid)
+            {
+                o_sensor_id = record.query_id;
+                l_found_sensor = true;
+                break;
+            }
+        }
+    }
+
+    if (!l_found_sensor)
+    {
+        /*@
+         * @moduleid   MOD_GET_STATE_SENSOR_ID
+         * @reasoncode RC_NO_SENSOR
+         * @userdata1  target huid
+         * @userdata2  total records
+         * @devdesc    Unable to find target in ATTR_PLDM_STATE_QUERY_RECORDS
+         * @custdesc   Internal firmware error
+         */
+        l_err = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                              MOD_GET_STATE_SENSOR_ID,
+                              RC_NO_SENSOR,
+                              l_target_huid,
+                              num_records,
+                              ErrlEntry::ADD_SW_CALLOUT);
+
+    }
+
+    } while(0);
+
+    return l_err;
+}
+
 void PdrManager::addFruRecordSetPdr(const fru_record_set_id_t i_rsid,
                                     const pldm_entity& i_entity)
 {

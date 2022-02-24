@@ -622,6 +622,24 @@ static void initializeAttributes(TargetService& i_targetService,
                 l_targ->setAttr<ATTR_SPCWKUP_COUNT>(0);
             }
 
+#ifndef CONFIG_FSP_BUILD
+            // Possible deallocated: Core, FC, and NX
+            TARGETING::PredicateCTM l_fcFilter(CLASS_UNIT, TYPE_FC);
+            TARGETING::PredicateCTM l_nxFilter(CLASS_UNIT, TYPE_NX);
+            TARGETING::PredicatePostfixExpr l_deallocateTargFilter;
+            l_deallocateTargFilter.push(&l_ecFilter).push(&l_fcFilter).Or().push(&l_nxFilter).Or();
+            TargetHandleList l_deallocTargs;
+            i_targetService.getAssociated( l_deallocTargs,
+                                           l_pTopLevel,
+                                           TargetService::CHILD,
+                                           TARGETING::TargetService::ALL,
+                                           &l_deallocateTargFilter);
+            for (auto & l_targ : l_deallocTargs)
+            {
+                l_targ->setAttr<ATTR_DEALLOCATED>(0);
+            }
+#endif
+
             // HYPCOMM section is only present for master node
             if ( TARGETING::UTIL::isCurrentMasterNode() )
             {

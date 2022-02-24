@@ -372,6 +372,27 @@
   </attribute>
 
   <attribute>
+    <id>DEALLOCATED</id>
+    <description>Flag to indicate whether the target is removed
+      from service by PHYP. PHYP notifies HBRT after removing a target
+      from service and HBRT sets this flag to indicate that. While displaying
+      target state to users through BMC, deallocated targets will be shown as
+      non-functional.  A PLDM FRU functional state changed event will be sent
+      when a target is changed to deallocated and that target will be marked
+      as non-functional in its state sensor status.
+      </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <id>DIMM_ERROR_TEMP_DEG_C</id>
     <description>
         DIMM Temperature in degrees C that a DIMM overtemp error will be logged

@@ -374,6 +374,15 @@ public:
      */
     void addEntityAssociationPdrs(const pldm_entity_association_tree& i_tree, bool i_is_remote);
 
+
+    /* @brief  Finds the PLDM_STATE_SET_HEALTH_STATE sensor id associated with target
+     * @param[in] i_target      Target associated with state sensor
+     * @param[out] o_sensor_id  Sensor id
+     * @return errlHndl_t       Error if any, otherwise nullptr.
+     * @note   Locks the PDR repository.
+     */
+    errlHndl_t getStateSensorId(TARGETING::Target* i_target, state_query_id_t& o_sensor_id);
+
     /* @brief  Send information about all the functional states of the FRUs in this repository to the BMC.
      *         FRUs that have functional state are the FRUs that have state sensor PDRs for the
      *         PLDM_STATE_SET_HEALTH_STATE state set.

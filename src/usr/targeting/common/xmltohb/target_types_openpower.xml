@@ -419,6 +419,9 @@
     <!-- Processor Core : Represents smallest core for this model -->
     <id>unit-core</id>
     <attribute>
+      <id>DEALLOCATED</id>
+    </attribute>
+    <attribute>
       <id>PLDM_ENTITY_ID_INFO</id>
     </attribute>
   </targetTypeExtension>
@@ -434,7 +437,18 @@
     <!-- Fused Core : SMT8 logical core, contains 2xSMT4 cores -->
     <id>unit-fc</id>
     <attribute>
+      <id>DEALLOCATED</id>
+    </attribute>
+    <attribute>
       <id>PLDM_ENTITY_ID_INFO</id>
+    </attribute>
+  </targetTypeExtension>
+
+  <targetTypeExtension>
+    <!-- NX Accelerator Logic -->
+    <id>unit-nx</id>
+    <attribute>
+      <id>DEALLOCATED</id>
     </attribute>
   </targetTypeExtension>
 

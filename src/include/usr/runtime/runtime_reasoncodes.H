@@ -73,6 +73,8 @@ namespace RUNTIME
         MOD_VERIFY_AND_MOVE_PAYLOAD      = 0x2F,  /**< populate_hbruntime.C */
         MOD_LOG_GARD_EVENT               = 0x30,  /**< rt_fwnotify.C */
         MOD_CREATE_PMIC_HEALTH_CHECK_CALLBACK = 0x31,  /**< rt_fwnotify.C */
+        MOD_DEALLOCATE_RESOURCE          = 0x32,  /** < rt_fwnotify.C */
+        MOD_CONVERT_TO_HB_TARGET         = 0x33,  /** < rt_fwnotify.C */
     };
 
     enum RuntimeReasonCode
@@ -162,9 +164,11 @@ namespace RUNTIME
         RC_SPI_DEVICE_NOT_IN_MRW       = RUNTIME_COMP_ID | 0x52,
         RC_SPI_DEVICE_DUPLICATE_IN_MRW = RUNTIME_COMP_ID | 0x53,
         RC_EXTRA_SPI_DEVICE_IN_MRW     = RUNTIME_COMP_ID | 0x54,
-        RC_LOG_NX_GARD_INVALID_NX_QUANTITY = RUNTIME_COMP_ID | 0x55,
+        RC_INVALID_NX_QUANTITY         = RUNTIME_COMP_ID | 0x55,
         RC_HOST_CALLBACK_INTERFACE_ERR = RUNTIME_COMP_ID | 0x56,
         RC_HOST_CALLBACK_ERR           = RUNTIME_COMP_ID | 0x57,
+        RC_UNSUPPORTED_TARGET          = RUNTIME_COMP_ID | 0x58,
+        RC_UNSUPPORTED_RESOURCE_TYPE   = RUNTIME_COMP_ID | 0x59,
     };
 
     enum UserDetailsTypes
