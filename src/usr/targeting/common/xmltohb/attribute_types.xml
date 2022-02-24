@@ -2741,16 +2741,17 @@
   <attribute>
     <complexType>
       <description>
-        Structure consisting of an EID (or reason), 5 booleans, and 3 reserved
+        Structure consisting of an EID (or reason), 6 booleans, and 2 reserved
         bits
       </description>
       <field>
         <default>0</default>
-        <description>if this target was deconfigured,
-                this will be a special DECONFIGURED_BY_ enum,
-                OR it will be the errlog EID that caused it,
-                either directly or by association,
-            </description>
+        <description>
+             If this target was deconfigured,
+             this will be a special DECONFIGURED_BY_ enum,
+             OR it will be the errlog EID that caused it,
+             either directly or by association,
+        </description>
         <name>deconfiguredByEid</name>
         <type>uint32_t</type>
       </field>
@@ -2760,7 +2761,7 @@
         <description>
              0b0: Target is not powered on (is off);
              0b1: Target is powered on;
-            </description>
+        </description>
         <name>poweredOn</name>
         <type>uint8_t</type>
       </field>
@@ -2770,7 +2771,7 @@
         <description>
              0b0: Target is not present in the system;
              0b1: Target is present in the system
-            </description>
+        </description>
         <name>present</name>
         <type>uint8_t</type>
       </field>
@@ -2780,32 +2781,47 @@
         <description>
              0b0: Target is not functional;
              0b1: Target is functional
-            </description>
+        </description>
         <name>functional</name>
         <type>uint8_t</type>
       </field>
       <field>
         <bits>1</bits>
         <default>0</default>
-        <description>FSP Only, used by DUMP applet;
+        <description>
+             FSP Only, used by DUMP applet;
              0b0: target is dump capabile;
              0b1: target is not dump capabile;
-            </description>
+        </description>
         <name>dumpfunctional</name>
         <type>uint8_t</type>
       </field>
       <field>
         <bits>1</bits>
         <default>0</default>
-        <description>Set for speculative deconfig;
-             0b0: target not speculative deconfig;
+        <description>
+             Set for speculative deconfig;
+             0b0: target is not speculatively deconfigured;
              0b1: target is speculatively deconfigured;
-            </description>
+        </description>
         <name>specdeconfig</name>
         <type>uint8_t</type>
       </field>
       <field>
-        <bits>3</bits>
+        <bits>1</bits>
+        <default>0</default>
+        <description>
+             If a core was deconfigured due to Field Core Override (FCO)
+             set this bit. This is used by HB and BMC during reconfig
+             loops to treat cores deconfigured by FCO as functional.
+             0b0: leave target functional bit unchanged during reconfig loops
+             0b1: set target functional bit to 1 during reconfig loops
+        </description>
+        <name>functionalOverride</name>
+        <type>uint8_t</type>
+      </field>
+      <field>
+        <bits>2</bits>
         <default>0</default>
         <description>Reserved for future use</description>
         <name>reserved</name>
@@ -2866,7 +2882,7 @@
   <attribute>
     <complexType>
       <description>
-        Structure consisting of 5 booleans, and 3 reserved
+        Structure consisting of an EID (or reason), 6 booleans, and 2 reserved
         bits
       </description>
       <field>
@@ -2875,7 +2891,7 @@
         <description>
              0b0: Target is not powered on (is off);
              0b1: Target is powered on;
-            </description>
+        </description>
         <name>poweredOn</name>
         <type>uint8_t</type>
       </field>
@@ -2885,7 +2901,7 @@
         <description>
              0b0: Target is not present in the system;
              0b1: Target is present in the system
-            </description>
+        </description>
         <name>present</name>
         <type>uint8_t</type>
       </field>
@@ -2895,32 +2911,47 @@
         <description>
              0b0: Target is not functional;
              0b1: Target is functional
-            </description>
+        </description>
         <name>functional</name>
         <type>uint8_t</type>
       </field>
       <field>
         <bits>1</bits>
         <default>0</default>
-        <description>FSP Only, used by DUMP applet;
+        <description>
+             FSP Only, used by DUMP applet;
              0b0: target is dump capabile;
              0b1: target is not dump capabile;
-            </description>
+        </description>
         <name>dumpfunctional</name>
         <type>uint8_t</type>
       </field>
       <field>
         <bits>1</bits>
         <default>0</default>
-        <description>Set for speculative deconfig;
-             0b0: target not speculative deconfig;
+        <description>
+             Set for speculative deconfig;
+             0b0: target is not speculatively deconfigured;
              0b1: target is speculatively deconfigured;
-            </description>
+        </description>
         <name>specdeconfig</name>
         <type>uint8_t</type>
       </field>
       <field>
-        <bits>3</bits>
+        <bits>1</bits>
+        <default>0</default>
+        <description>
+             If a core was deconfigured due to Field Core Override (FCO)
+             set this bit. This is used by HB and BMC during reconfig
+             loops to treat cores deconfigured by FCO as functional.
+             0b0: leave target functional bit unchanged during reconfig loops
+             0b1: set target functional bit to 1 during reconfig loops
+        </description>
+        <name>functionalOverride</name>
+        <type>uint8_t</type>
+      </field>
+      <field>
+        <bits>2</bits>
         <default>0</default>
         <description>Reserved for future use</description>
         <name>reserved</name>
