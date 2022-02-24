@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2021
+# Contributors Listed Below - COPYRIGHT 2015,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -942,6 +942,8 @@ sub processSystem
     $targetObj->setAttribute($target,"FAPI_POS",   $sysPos);
     $targetObj->setAttribute($target,"FAPI_NAME",  $fapiName);
 
+    processMslChecks($targetObj, $target, "MSL_MFG_ALLOW");
+    processMslChecks($targetObj, $target, "MSL_FIELD_SUPPORTED");
 
     # Save this target for retrieval later when printing the xml (sub printXML)
     $targetObj->{targeting}{SYS}[$sysPos]{KEY} = $target;
@@ -2898,6 +2900,125 @@ sub calculateOrdinalId
     return ( ($nodePos * $numProcsPerNode * $numTargetsPerProc)  +
              ($procPos * $numTargetsPerProc) +
               $targetPos );
+}
+
+#--------------------------------------------------
+# @brief Processes an MSL attribute from the system MRW into an array attribute that Hostboot can better work with.
+#        The resulting array will be used along with MFG_FLAGS_MNFG_MSL_CHECK to determine which targets ought to be
+#        deconfigured based on their EC level as compared to the MSL attributes.
+#        Example:
+#           Incoming attribute values from MRW: POWER10~2.0;EXPLORER~2.1
+#           Resulting attribute value array for HB: 0x20A9,0x20,0x60D2,0x21
+#                                                     CCCC   EE   CCCC   EE
+#        C = cfam chip id
+#        E = TARGETING::ATTR_EC
+#
+# @param [in] $targetObj   - The global target object.
+# @param [in] $target      - The system target.
+# @param [in] $mslAttrName - Either MSL_MFG_ALLOW or MSL_FIELD_SUPPORTED
+#--------------------------------------------------
+sub processMslChecks
+{
+    my $targetObj     = shift;
+    my $target        = shift;
+    my $mslAttrName   = shift;
+
+    # MSL attributes are only on the SYS target.
+    targetTypeSanityCheck($targetObj, $target, "SYS");
+
+    # A map of MRW chip name to cfam chip id. If more chip names are added to the MRW then this map must be kept
+    # in sync.
+    # See src/import/chips/common/utils/chipids.H for const definitions
+    my %STRING_TO_CHIP_ID_MAP =
+    (
+        "POWER10" =>  "0x20DA",
+        "EXPLORER" => "0x60D2",
+    );
+
+    # The following hash defines the valid attribute names for $mslAttrName and the value for each valid name key is
+    # the max array size as defined in attribute_types.xml. If more space is required, then that file needs to be
+    # updated alongside this hash.
+    my %VALID_MSL_ATTR_NAMES_AND_SIZES =
+    (
+        "MSL_MFG_ALLOW" => 12,
+        "MSL_FIELD_SUPPORTED" => 12,
+    );
+
+    # Ensure only valid attribute names have been given to the function
+    if (not exists $VALID_MSL_ATTR_NAMES_AND_SIZES{$mslAttrName})
+    {
+        # Incorrect input parameter.
+        select->flush();
+        confess "\nprocessMslChecks: ERROR: Invalid attribute name \"$mslAttrName\" ".
+                "given as parameter for MSL attribute name"
+    }
+    my $MAX_ARRAY_SIZE = $VALID_MSL_ATTR_NAMES_AND_SIZES{$mslAttrName};
+
+    # The MSL arrays in Hostboot are setup such that even values are the cfam chip ids of the chips and odd values are
+    # the required EC level.
+    # However, the MRW sets up these attributes as semi-colon separated strings of the form: POWER10~2.0;EXPLORER~2.0
+    my @mslValues;
+
+    # Get the MRW data from the attribute and split by semi-colon to process each entry.
+    my $mrwMslAttr = $targetObj->getAttribute($target, $mslAttrName);
+    my @intermediateMslVals = split(/;/, $mrwMslAttr);
+
+    # Ensure that the number of MSL values doesn't exceed the array size limit from attribute_types.xml
+    #
+    # Multiply the intermediateMslVals size by 2 since each entry in that array is comprised of 2 components that go
+    # into the final attribute.
+    if ( (scalar @intermediateMslVals * 2) > $MAX_ARRAY_SIZE)
+    {
+        select->flush();
+        confess "\nprocessMslChecks: ERROR: Number of MSL values (". (scalar @intermediateMslVals * 2)
+                .") for chips exceeds the maximum array size for ". $mslAttrName ." which is ". $MAX_ARRAY_SIZE;
+    }
+
+    # An iterator used throughout the remainder of the function
+    my $i = 0;
+    foreach (@intermediateMslVals)
+    {
+        my @stringComponents = split(/~/, $_);
+        my $mrw_chip_name = $stringComponents[0];
+        my $ecLevel = $stringComponents[1];
+
+        # Check that the chip id exists in the map
+        if ( not exists $STRING_TO_CHIP_ID_MAP{$mrw_chip_name})
+        {
+            select->flush();
+            confess "\nprocessMslChecks: ERROR: Key \"$mrw_chip_name\" not found in ".
+                    "STRING_TO_CHIP_ID_MAP.\n"
+        }
+
+        $mslValues[$i] = $STRING_TO_CHIP_ID_MAP{$mrw_chip_name};
+        # Drop the . from the EC level
+        substr($ecLevel, 1, 1, "");
+        $mslValues[$i+1] = "0x" . $ecLevel;
+
+        # Increment the iterator by 2 since new entries start at every even value in the array
+        $i+=2;
+
+    }
+
+    # Form the final attribute value
+    my $mslAttr = "";
+    foreach (@mslValues)
+    {
+        $mslAttr .= $_ . ",";
+    }
+    # Fill the rest of the array with zeros. Hostboot will see this as the signal that there are no more EC levels to
+    # process.
+    while ($i < $MAX_ARRAY_SIZE)
+    {
+        $mslAttr .= "0,";
+        $i++;
+    }
+    # Clean up the trailing comma
+    $mslAttr =~ s/,$//;
+
+    # Set the attribute
+    $targetObj->setAttribute($target, $mslAttrName, $mslAttr);
+
 }
 
 ################################################################################

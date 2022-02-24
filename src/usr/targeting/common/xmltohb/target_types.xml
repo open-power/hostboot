@@ -2353,6 +2353,12 @@
       <id>MRW_DDR4_VDDR_MAX_LIMIT_POST_DRAM_INIT</id>
     </attribute>
     <attribute>
+      <id>MSL_FIELD_SUPPORTED</id>
+    </attribute>
+    <attribute>
+      <id>MSL_MFG_ALLOW</id>
+    </attribute>
+    <attribute>
       <id>MSS_VOLT_DDR4_VDDR_INTERCEPT</id>
     </attribute>
     <attribute>

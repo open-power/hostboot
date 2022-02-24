@@ -4430,6 +4430,42 @@
     <readable/>
   </attribute>
 
+  <attribute>
+    <description> An array of the supported EC levels for each chip that is allowed to ship. The size of the array
+          should only increase when the number of entries in the MRW increases.
+          The array takes the form:
+          Even Entries: cfam chip id
+          Odd Entries: Required EC level of the preceeding Target Type
+    </description>
+    <id>MSL_FIELD_SUPPORTED</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <simpleType>
+      <array>12</array>
+      <uint16_t>
+        <default>0,0,0,0,0,0,0,0,0,0,0,0</default>
+      </uint16_t>
+    </simpleType>
+  </attribute>
+
+  <attribute>
+    <description> An array of the supported EC levels for each chip that is allowed to use in MFG systems. The size of
+          the array should only increase when the number of entries in the MRW increases.
+          The array takes the form:
+          Even Entries: cfam chip id
+          Odd Entries: Required EC level of the preceeding Target Type
+    </description>
+    <id>MSL_MFG_ALLOW</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <simpleType>
+      <array>12</array>
+      <uint16_t>
+        <default>0,0,0,0,0,0,0,0,0,0,0,0</default>
+      </uint16_t>
+    </simpleType>
+  </attribute>
+
   <!--attribute>
     <id>MRW_REQUIRED_TEST</id>
     <description>An attribute to test the mrwRequired keyword</description>
