@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -250,18 +250,10 @@ errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
     uint32_t l_totalRead = 0;
     uint8_t* l_currPtr = o_file;
     do {
-    pldm_fileio_file_type pldm_bootside = PLDM_BOOT_SIDE_INVALID;
-    l_errl = get_pldm_bootside(pldm_bootside);
-    if(l_errl)
-    {
-        break;
-    }
-    assert(pldm_bootside != PLDM_BOOT_SIDE_INVALID,
-           "pldm_bootside was not set correctly");
 
     struct pldm_read_write_file_by_type_req l_req
     {
-        .file_type = pldm_bootside,
+        .file_type = PLDM_FILE_TYPE_LID_RUNNING,
         .file_handle = i_fileHandle,
         .offset = i_offset,
         .length = 0, // calculated later
@@ -568,18 +560,10 @@ errlHndl_t writeLidFileFromOffset(const uint32_t i_fileHandle,
 
     errlHndl_t errl = nullptr;
     do {
-    pldm_fileio_file_type pldm_bootside = PLDM_BOOT_SIDE_INVALID;
-    errl = get_pldm_bootside(pldm_bootside);
-    if(errl)
-    {
-        break;
-    }
-    assert(pldm_bootside != PLDM_BOOT_SIDE_INVALID,
-           "writeLidFileFromOffset: pldm_bootside was not set correctly");
 
     struct pldm_read_write_file_by_type_req request
     {
-        .file_type = pldm_bootside,
+        .file_type = PLDM_FILE_TYPE_LID_RUNNING,
         .file_handle = i_fileHandle,
         .offset = i_offset,
         .length = 0, // calculated later
