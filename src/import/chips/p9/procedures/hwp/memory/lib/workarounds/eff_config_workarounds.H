@@ -83,18 +83,33 @@ fapi2::ReturnCode synchronize_broadcast_timings(const fapi2::Target<fapi2::TARGE
 ///
 /// @brief Checks if the 128GB WLO workaround is required
 /// @param[in] i_kinds vector of DIMM kinds on which to operate
-/// @param[out] io_wlo the WLO value to be updated
+/// @return true if the workaround is needed, otherwise false
+///
+bool is_128gb_workaround_needed(const std::vector<mss::dimm::kind<>>& i_kinds);
+
+///
+/// @brief Updates the WLO if the 128GB workaround is required
+/// @param[in] i_kinds vector of DIMM kinds on which to operate
+/// @param[in,out] io_wlo the WLO value to be updated
 ///
 void update_128gb_wlo_if_needed(const std::vector<mss::dimm::kind<>>& i_kinds,
                                 uint8_t& io_wlo);
 
 ///
-/// @brief Updates the WLO if the 128GB WLO workaround is required
+/// @brief Updates the VREFDQ if the 128GB workaround is required
+/// @param[in] i_kinds vector of DIMM kinds on which to operate
+/// @param[in,out] io_vrefdq_train the WR VREF values to be updated
+///
+void update_128gb_vrefdq_if_needed(const std::vector<mss::dimm::kind<>>& i_kinds,
+                                   uint8_t (&io_vrefdq_train)[2][4]);
+
+///
+/// @brief Updates the attributes if the 128GB workaround is required
 /// @param[in] i_target MCS target on which to operate
 /// @return SUCCESS if the code executes successfully
 /// @note synchronizes attributes across the whole MCBIST
 ///
-fapi2::ReturnCode update_128gb_wlo(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target);
+fapi2::ReturnCode update_128gb_attributes(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target);
 
 } // ns eff_config
 } // ns workarounds
