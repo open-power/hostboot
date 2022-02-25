@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -75,6 +75,15 @@ p10_hcd_l3_purge(
     uint32_t                l_timeout  = 0;
 
     FAPI_INF(">>p10_hcd_l3_purge");
+
+    FAPI_DBG("Assert CINJ_LCO_DIS_CFG via L3_MISC_L3CERRS_MODE_REG1[38]");
+
+    // This register doesnt have OR/CLR interface thus RMW via unicast
+    for (auto const& l_core : i_target.getChildren<fapi2::TARGET_TYPE_CORE>())
+    {
+        FAPI_TRY( HCD_GETSCOM_C( l_core, L3_MISC_L3CERRS_MODE_REG1, l_scomData   ) );
+        FAPI_TRY( HCD_PUTSCOM_C( l_core, L3_MISC_L3CERRS_MODE_REG1, SCOM_SET(38) ) );
+    }
 
     FAPI_DBG("Assert L3_PM_LCO_DIS_CFG via PM_LCO_DIS_REG[0]");
     // This register doesnt have OR/CLR interface and having two functional bits
