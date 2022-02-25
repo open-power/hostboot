@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -162,6 +162,7 @@ bool isSMPWrapConfig();
 bool isNoGardSet();
 bool isSeepromSecurityChecksSet();
 bool isDimmSpiFlashScreenSet();
+bool isMslChecksSet();
 
 /**
  * @brief Check if a particular manufacturing flag is set
@@ -204,6 +205,7 @@ bool isSMPWrapConfig(ATTR_MFG_FLAGS_typeStdArr &i_mfgFlags);
 bool isNoGardSet(ATTR_MFG_FLAGS_typeStdArr &i_mfgFlags);
 bool isSeepromSecurityChecksSet(ATTR_MFG_FLAGS_typeStdArr &i_mfgFlags);
 bool isDimmSpiFlashScreenSet(ATTR_MFG_FLAGS_typeStdArr &i_mfgFlags);
+bool isMslChecksSet(ATTR_MFG_FLAGS_typeStdArr &i_mfgFlags);
 
 
 //##############################################################################
