@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -213,7 +213,7 @@ void* PageManager::allocatePage(size_t n, bool userspace, bool kAllowOom)
                             n, task_gettid() );
                     MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
                     KernelMisc::printkBacktrace(nullptr);
-                    task_crash();
+                    crit_assert(0);
                 }
 
                 task_yield();
