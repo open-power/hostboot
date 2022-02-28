@@ -315,6 +315,17 @@ void enableHwasState(TARGETING::Target *i_target,
                      bool i_functional,
                      uint32_t i_errlEid);
 
+/**
+ * @brief helper function to override a target's hwas state to functional if
+ *        it has functionalOverride set
+ *
+ * @param[in]   i_target     pointer to target to override hwas state
+ *
+ * @return      none
+ *
+ */
+void applyCoreFunctionalOverride(TARGETING::TargetHandle_t i_target);
+
 };   // end namespace
 
 #endif

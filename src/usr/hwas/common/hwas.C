@@ -177,6 +177,22 @@ void enableHwasState(Target *i_target,
     updateAttrPG(*i_target, hwasState.functional);
 }
 
+void applyCoreFunctionalOverride(TARGETING::TargetHandle_t i_target)
+{
+    HwasState hwasState = i_target->getAttr<ATTR_HWAS_STATE>();
+    // if functionalOverride is set, then the target was deconfigured
+    // due to Field Core Override (FCO). Set target 'functional' to
+    // re-enable for use or for FCO selection again
+    if (hwasState.functionalOverride && hwasState.present)
+    {
+        hwasState.functional = true;
+    }
+    // set to false so that the override is only applied
+    // once per time being set
+    hwasState.functionalOverride = false;
+    i_target->setAttr<ATTR_HWAS_STATE>(hwasState);
+}
+
 TargetHandleList disableExtraOcapiIohsTargets(const Target* const i_pauc)
 {
     TargetHandleList pauHandleList;
@@ -545,28 +561,25 @@ errlHndl_t HWASDiscovery::discoverTargets()
         // TODO:RTC:151617 Need to find a better way
         // to initialize the target
         TARGETING::ATTR_INIT_TO_AVAILABLE_type initToAvailable = false;
+        HwasState hwasState = target->getAttr<ATTR_HWAS_STATE>();
         if(   (target->tryGetAttr<TARGETING::ATTR_INIT_TO_AVAILABLE>(
                    initToAvailable))
            && (initToAvailable))
         {
-            HwasState hwasState          = target->getAttr<ATTR_HWAS_STATE>();
-            hwasState.deconfiguredByEid  = 0;
             hwasState.poweredOn          = true;
             hwasState.present            = true;
             hwasState.functional         = true;
-            hwasState.dumpfunctional     = false;
-            target->setAttr<ATTR_HWAS_STATE>(hwasState);
         }
         else
         {
-            HwasState hwasState          = target->getAttr<ATTR_HWAS_STATE>();
-            hwasState.deconfiguredByEid  = 0;
             hwasState.poweredOn          = false;
             hwasState.present            = false;
             hwasState.functional         = false;
-            hwasState.dumpfunctional     = false;
-            target->setAttr<ATTR_HWAS_STATE>(hwasState);
         }
+        hwasState.deconfiguredByEid  = 0;
+        hwasState.dumpfunctional     = false;
+        hwasState.functionalOverride = false;
+        target->setAttr<ATTR_HWAS_STATE>(hwasState);
     }
 
     // Assumptions and actions:
@@ -1490,7 +1503,7 @@ void forceEcFcDeconfig(const TARGETING::TargetHandle_t i_core,
                        const bool i_present,
                        const uint32_t i_deconfigReason)
 {
-    TargetHandleList pECList;
+    TargetHandleList pFCList;
     HwasState hwasState = {};
     bool l_deconfig_by_fco = (i_deconfigReason ==
                               HWAS::theDeconfigGard().DECONFIGURED_BY_FIELD_CORE_OVERRIDE);
@@ -1515,8 +1528,8 @@ void forceEcFcDeconfig(const TARGETING::TargetHandle_t i_core,
 
     //Get parent FC and see if any other cores, if none, deconfig
     TARGETING::Target* l_fc = getParent(i_core, TARGETING::TYPE_FC);
-    getChildChiplets(pECList, l_fc, TYPE_CORE, true);
-    if(pECList.size() == 0)
+    getChildChiplets(pFCList, l_fc, TYPE_CORE, true);
+    if(pFCList.size() == 0)
     {
         enableHwasState(l_fc, i_present, false, i_deconfigReason);
         if (l_deconfig_by_fco)
@@ -1528,7 +1541,7 @@ void forceEcFcDeconfig(const TARGETING::TargetHandle_t i_core,
             l_fc->setAttr<ATTR_HWAS_STATE>(hwasState);
         }
 
-        HWAS_INF("pFC HUID 0x%08X - marked %spresent, NOT functional functionalOverride = %d ",
+        HWAS_INF("pFC HUID 0x%08X - marked %spresent, NOT functional, functionalOverride = %d ",
                  "%sset functional on BMC reboot",
                  l_fc->getAttr<ATTR_HUID>(),
                  i_present ? "" : "NOT ",

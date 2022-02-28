@@ -441,7 +441,6 @@ static errlHndl_t finish_pdr_exchange()
 
 #endif // CONFIG_PLDM
 
-
 /**
  * @brief host_discover_targets istep
  */
@@ -487,8 +486,8 @@ void* host_discover_targets( void *io_pArgs )
     if (l_pTopLevel->getAttr<TARGETING::ATTR_IS_MPIPL_HB>())
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "host_discover_targets: MPIPL mode, targeting"
-                  "information has already been loaded from memory"
+                  "host_discover_targets: MPIPL mode, targeting "
+                  "information has already been loaded from memory "
                   "when the targeting service started");
         do
         {
@@ -502,6 +501,23 @@ void* host_discover_targets( void *io_pArgs )
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                           ERR_MRK"host_discover_targets: BREAK Failed to cacheEECACHEPartition");
                 break;
+            }
+
+            // if cores/fused cores were deconfigured due to Field Core
+            // Override (FCO), set target 'functional' to re-enable
+            // for use or for FCO selection again
+            // get all present Non ECO cores on the system
+            TARGETING::TargetHandleList l_cores;
+            getNonEcoCores(l_cores, nullptr, false);
+            for (auto l_core : l_cores)
+            {
+                HWAS::applyCoreFunctionalOverride(l_core);
+            }
+            // get all present Non ECO fused cores on the system
+            getNonEcoFcs(l_cores, nullptr, false);
+            for (auto l_fc : l_cores)
+            {
+                HWAS::applyCoreFunctionalOverride(l_fc);
             }
 
             // Need to ensure secondary SBE's scratch registers are
@@ -524,7 +540,7 @@ void* host_discover_targets( void *io_pArgs )
             }
 
             // Mask off the IOHS/PAUC FIRs (normally part of
-            // p10_proc_chiplet_scominit.  Make the FAPI call to
+            // p10_proc_chiplet_scominit. Make the FAPI call to
             // p10_io_iohs_firmask_save_restore
             const bool l_success = ISTEP::fapiHWPCallWrapperHandler(
                                  ISTEP::P10_IO_IOHS_FIRMASK_SAVE_RESTORE,
