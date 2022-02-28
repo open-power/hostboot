@@ -1307,7 +1307,7 @@ void markTargetChanged(TARGETING::TargetHandle_t i_target)
 //  platCheckMinimumHardware()
 //******************************************************************************
 void platCheckMinimumHardware(uint32_t & io_plid,
-                              const TARGETING::ConstTargetHandle_t i_node,
+                              const TARGETING::ConstTargetHandle_t i_nodeOrSys,
                               bool *o_bootable)
 {
     errlHndl_t l_errl = NULL;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -413,15 +413,14 @@ void hwasErrorAddTargetInfo(errlHndl_t & io_errl,
  * If io_plid is non-zero then any newly created Error Logs use io_plid
  * Else io_plid is updated with the plid used in the newly created Error Logs
  *
- * @param[io] io_plid Reference to plid.
- * @param[in] i_node  node target to restrict hw check
- * @param[out] o_bootable Indicates whether system is bootable with current
- *             configuratio, if a non NULL pointer is passed erros will not
- *             be logged if system cannot ipl and just return a true or false.
+ * @param[io]  io_plid      Reference to plid.
+ * @param[in]  i_nodeOrSys  node or system target to restrict hw check
+ * @param[out] o_bootable   Indicates whether system is bootable with current
+ *                          configuration
  */
 void platCheckMinimumHardware(uint32_t & io_plid,
-                            const TARGETING::ConstTargetHandle_t i_node = NULL,
-                            bool *o_bootable = NULL);
+                              const TARGETING::ConstTargetHandle_t i_nodeOrSys = nullptr,
+                              bool *o_bootable = nullptr);
 
 } // namespace HWAS
 

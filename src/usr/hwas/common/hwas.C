@@ -1868,12 +1868,26 @@ errlHndl_t restrictECunits(
 } // restrictECunits
 
 
+/**
+ * @brief checks if all critical resources are functional
+ *  Verifies that the system has all of it's critical resources functional.
+ *  If it does not, an error log will be created and committed indicating up
+ *  to 3 critical targets that are not functional
+ *
+ * @param[in/out]  io_commonPlid  Reference to plid.
+ * @param[in]      i_pTop         sys or node target to restrict hw check
+ * @param[in]      i_pPredFunc    pointer to predicate to check for HWAS functional
+ *                                and specdeconfig
+ *
+ * @note If io_commonPlid is non-zero then any newly created Error Logs use io_commonPlid
+ *       Else io_commonPlid is updated with the plid used in the newly created Error Logs
+ */
 void checkCriticalResources(uint32_t & io_commonPlid,
-                                  const Target * i_pTop)
+                            const Target * i_pTop,
+                            const PredicateBase* const i_pPredFunc)
 {
     errlHndl_t l_errl = nullptr;
     PredicatePostfixExpr l_customPredicate;
-    PredicateIsFunctional l_isFunctional;
 
     TargetHandleList l_plist;
 
@@ -1881,7 +1895,7 @@ void checkCriticalResources(uint32_t & io_commonPlid,
     uint8_t l_critical = 1;
     PredicateAttrVal<ATTR_RESOURCE_IS_CRITICAL> l_isCritical(l_critical);
 
-    l_customPredicate.push(&l_isFunctional).Not().push(&l_isCritical).And();
+    l_customPredicate.push(i_pPredFunc).Not().push(&l_isCritical).And();
 
     targetService().getAssociated( l_plist, i_pTop,
           TargetService::CHILD, TargetService::ALL, &l_customPredicate);
@@ -1937,8 +1951,8 @@ void checkCriticalResources(uint32_t & io_commonPlid,
                                      EPUB_PRC_FIND_DECONFIGURED_PART,
                                      SRCI_PRIORITY_HIGH);
 
-        //  if we already have an error, link this one to the earlier;
-        //  if not, set the common plid
+        // if we already have an error, link this one to the earlier;
+        // if not, set the common plid
         hwasErrorUpdatePlid(l_errl, io_commonPlid);
         errlCommit(l_errl, HWAS_COMP_ID);
         // errl is now nullptr
@@ -1947,9 +1961,8 @@ void checkCriticalResources(uint32_t & io_commonPlid,
 
 
 
-
 errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys,
-        bool *o_bootable)
+                                bool *io_bootable)
 {
     errlHndl_t l_errl = nullptr;
     HWAS_INF("checkMinimumHardware entry");
@@ -1961,14 +1974,14 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
         //  Common present and functional hardware checks.
         //*********************************************************************/
 
-        if(o_bootable)
+        if(io_bootable)
         {
-            *o_bootable = true;
+            *io_bootable = true;
         }
         PredicateHwas l_present;
         l_present.present(true);
         PredicateHwas l_functional;
-        if(o_bootable)
+        if(io_bootable)
         {
             // Speculative deconfig sets the specdeconfig to true for the target
             // in question, so we want to filter out the targets that have been
@@ -1994,9 +2007,9 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
 
             if (l_nodes.empty())
             { // no functional nodes, get out now
-                if(o_bootable)
+                if(io_bootable)
                 {
-                    *o_bootable = false;
+                    *io_bootable = false;
                     break;
                 }
 
@@ -2060,9 +2073,9 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
         {
             HWAS_ERR("Insufficient HW to continue IPL: (no master proc)");
 
-            if(o_bootable)
+            if(io_bootable)
             {
-                *o_bootable = false;
+                *io_bootable = false;
                 break;
             }
             // determine some numbers to help figure out what's up..
@@ -2140,9 +2153,9 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
             {
                 HWAS_ERR("Insufficient HW to continue IPL: (no func cores)");
 
-                if(o_bootable)
+                if(io_bootable)
                 {
-                    *o_bootable = false;
+                    *io_bootable = false;
                     break;
                 }
                 // determine some numbers to help figure out what's up..
@@ -2208,9 +2221,9 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
         {
             HWAS_ERR( "Insufficient hardware to continue IPL (func DIMM)");
 
-            if(o_bootable)
+            if(io_bootable)
             {
-                *o_bootable = false;
+                *io_bootable = false;
                 break;
             }
             // determine some numbers to help figure out what's up..
@@ -2273,9 +2286,9 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
         {
             HWAS_ERR( "Insufficient hardware to continue IPL (NX chiplets)");
 
-            if(o_bootable)
+            if(io_bootable)
             {
-                *o_bootable = false;
+                *io_bootable = false;
                 break;
             }
             TargetHandleList l_presentNXChiplets;
@@ -2325,15 +2338,15 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
         //  running on (ie, hostboot or fsp in hwsv).
         //  if there is an issue, create and commit an error, and tie it to the
         //  the rest of them with the common plid.
-        HWAS::checkCriticalResources(l_commonPlid, pTop);
-        platCheckMinimumHardware(l_commonPlid, i_nodeOrSys, o_bootable);
+        HWAS::checkCriticalResources(l_commonPlid, pTop, &l_functional);
+        platCheckMinimumHardware(l_commonPlid, pTop, io_bootable);
     }
     while (0);
 
     //  ---------------------------------------------------------------
     // if the common plid got set anywhere above, we have an error.
     //  ---------------------------------------------------------------
-    if ((l_commonPlid)&&(o_bootable == nullptr))
+    if ((l_commonPlid)&&(io_bootable == nullptr))
     {
         /*@
          * @errortype
@@ -2357,9 +2370,9 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
     }
 
     HWAS_INF("checkMinimumHardware exit - minimum hardware %s",
-            ((l_errl != nullptr)||((o_bootable!=nullptr)&&(!*o_bootable))) ?
+            ((l_errl != nullptr)||((io_bootable!=nullptr)&&(!*io_bootable))) ?
                     "NOT available" : "available");
-    if((l_errl != nullptr)||((o_bootable!=nullptr)&&(!*o_bootable)))
+    if((l_errl != nullptr)||((io_bootable!=nullptr)&&(!*io_bootable)))
     {
         // Get all node targets
         TargetHandleList l_nodelist;

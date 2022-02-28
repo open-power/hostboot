@@ -160,19 +160,24 @@ errlHndl_t restrictECunits(
  *  Error logs will also be created for each hardware module that is not
  *  running.
  *
- * @param[in] i_nodeOrSys Level of HW check node or system
- * @param[out] o_bootable Indicate whether the system is
- *             is bootable with current configuration.
- *             if o_bootable is not nullptr an error for
- *             system unavailability will not be logged.
- *             Note that if o_bootable is null, speculative deconfigs
- *             will be ignored.
+ * @param[in]     i_nodeOrSys   Level of HW check node or system
+ * @param[in/out] io_bootable
+ *                 [in]  - If io_bootable is not nullptr, an error for
+ *                         system unavailability will not be logged,
+ *                         but instead just set the value at io_bootable.
+ *                         If io_bootable is nullptr, speculative deconfigs
+ *                         will be ignored, and error logs for system
+ *                         unavailability, if any, will be logged.
+ *                 [out] - If io_bootable is not nullptr, indicate whether
+ *                         the system is bootable with current configuration.
+ *                           True  - Sufficient HW available to boot
+ *                           False - Insufficient HW available to boot
  *
- * @return error log handle
+ * @return error log handle, if any, and only if io_bootable is nullptr
  */
 errlHndl_t checkMinimumHardware(
     const TARGETING::ConstTargetHandle_t i_nodeOrSys = nullptr,
-    bool *o_bootable = nullptr);
+    bool *io_bootable = nullptr);
 
 /**
 *  @brief  Loop through processors, make sure all have the same EC level
