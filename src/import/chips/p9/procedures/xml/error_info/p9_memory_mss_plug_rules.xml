@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2022                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -534,6 +534,33 @@
           <parent>MCS_TARGET</parent>
           <childType>TARGET_TYPE_DIMM</childType>
       </childTargets>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_PLUG_RULES_128GB_VENDOR_MIXING</rc>
+    <description>
+      Vendor mixing between 128GB (16Gb, 2R, 4H, x4) DIMM is not allowed
+    </description>
+    <ffdc>VENDOR0</ffdc>
+    <ffdc>VENDOR1</ffdc>
+   <callout>
+        <procedure>MEMORY_PLUGGING_ERROR</procedure>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_TARGET1</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET1</target>
+    </deconfigure>
+    <callout>
+      <target>DIMM_TARGET0</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET0</target>
     </deconfigure>
   </hwpError>
 

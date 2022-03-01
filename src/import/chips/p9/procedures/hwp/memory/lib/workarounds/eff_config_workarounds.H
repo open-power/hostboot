@@ -112,6 +112,19 @@ void update_128gb_vrefdq_if_needed(const std::vector<mss::dimm::kind<>>& i_kinds
 fapi2::ReturnCode update_128gb_attributes(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target);
 
 } // ns eff_config
+
+namespace plug_rule
+{
+
+///
+/// @brief Ensures that there is no mixing between 128GB vendors
+/// @param[in] i_kinds vector of DIMM kinds on which to operate
+/// @return SUCCESS if the code executes successfully
+/// @note Due to a vendor sensitivity that requires workarounds, we cannot mix 128GB vendors in the same MCA
+///
+fapi2::ReturnCode no_128gb_vendor_mixing(const std::vector<mss::dimm::kind<>>& i_kinds);
+
+} // ns plug_rule
 } // ns workarounds
 } // ns mss
 #endif

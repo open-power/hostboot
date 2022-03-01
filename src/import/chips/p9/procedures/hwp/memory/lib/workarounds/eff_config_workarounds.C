@@ -747,5 +747,40 @@ fapi_try_exit:
 }
 
 } // ns eff_config
+
+namespace plug_rule
+{
+
+///
+/// @brief Ensures that there is no mixing between 128GB vendors
+/// @param[in] i_kinds vector of DIMM kinds on which to operate
+/// @return SUCCESS if the code executes successfully
+/// @note Due to a vendor sensitivity that requires workarounds, we cannot mix 128GB vendors in the same MCA
+///
+fapi2::ReturnCode no_128gb_vendor_mixing(const std::vector<mss::dimm::kind<>>& i_kinds)
+{
+    // If the 128GB workaround is not needed, then we can skip the vendor mixing checks
+    if(mss::workarounds::eff_config::is_128gb_workaround_needed(i_kinds) == false)
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Otherwise, check for the impacted configuration check the DIMM's to ensure that there is no vendor mixing
+    // Note: is_128gb_workaround_needed guarantees that there are two DIMM's plugged
+    FAPI_ASSERT(i_kinds[0].iv_mfgid == i_kinds[1].iv_mfgid,
+                fapi2::MSS_PLUG_RULES_128GB_VENDOR_MIXING()
+                .set_DIMM_TARGET0(i_kinds[0].iv_target)
+                .set_DIMM_TARGET1(i_kinds[1].iv_target)
+                .set_VENDOR0(i_kinds[0].iv_mfgid)
+                .set_VENDOR1(i_kinds[1].iv_mfgid),
+                "%s mismatch between vendors on each DIMM. DIMM0:%u DIMM1:%u",
+                mss::c_str(i_kinds[0].iv_target), i_kinds[0].iv_mfgid, i_kinds[1].iv_mfgid);
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+} // ns plug_rule
 } // ns workarounds
 } // ns mss

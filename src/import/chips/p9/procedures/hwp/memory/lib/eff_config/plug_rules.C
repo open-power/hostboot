@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,7 @@
 #include <lib/dimm/rank.H>
 #include <generic/memory/lib/utils/assert_noexit.H>
 #include <lib/eff_config/plug_rules.H>
+#include <lib/workarounds/eff_config_workarounds.H>
 
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_MCS;
@@ -945,6 +946,9 @@ fapi2::ReturnCode plug_rule::enforce_plug_rules(const fapi2::Target<fapi2::TARGE
 
     // Temporary check that xlate settings will be the same if there are two DIMM in the port
     FAPI_TRY( plug_rule::code::check_xlate_config(i_target, l_dimm_kinds) );
+
+    // Check if a workaround is needed for 128GB configs
+    FAPI_TRY( mss::workarounds::plug_rule::no_128gb_vendor_mixing(l_dimm_kinds));
 
 fapi_try_exit:
     return fapi2::current_err;
