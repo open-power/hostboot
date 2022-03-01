@@ -110,6 +110,58 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Mask MCBISTFIRQ[MCBIST_PROGRAM_COMPLETE] and return the original mask value - specialization for EXPLORER
+/// @param[in] i_target the target
+/// @param[out] o_fir_mask_save the original mask value to be restored later
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode mask_program_complete<mss::mc_type::EXPLORER>(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    fapi2::buffer<uint64_t>& o_fir_mask_save )
+{
+    using TT = mss::mcbistTraits<mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>;
+
+    fapi2::buffer<uint64_t> l_fir_mask;
+
+    // Mask the FIR
+    FAPI_TRY( mss::getScom(i_target, TT::FIRQ_MASK_REG, o_fir_mask_save) );
+    l_fir_mask = o_fir_mask_save;
+    l_fir_mask.setBit<TT::MCB_PROGRAM_COMPLETE>();
+    FAPI_TRY( mss::putScom(i_target, TT::FIRQ_MASK_REG, l_fir_mask) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Restore MCBISTFIRQ[MCBIST_PROGRAM_COMPLETE] mask value and clear the FIR - specialization for EXPLORER
+/// @param[in] i_target the target
+/// @param[in] i_fir_mask_save the original mask value to be restored
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode clear_and_restore_program_complete<mss::mc_type::EXPLORER>(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const fapi2::buffer<uint64_t>& i_fir_mask_save )
+{
+    using TT = mss::mcbistTraits<mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>;
+
+    fapi2::buffer<uint64_t> l_fir;
+
+    // Clear the FIR
+    FAPI_TRY( mss::getScom(i_target, TT::FIRQ_REG, l_fir) );
+    l_fir.clearBit<TT::MCB_PROGRAM_COMPLETE>();
+    FAPI_TRY( mss::putScom(i_target, TT::FIRQ_REG, l_fir) );
+
+    // Then restore the mask value
+    FAPI_TRY( mss::putScom(i_target, TT::FIRQ_MASK_REG, i_fir_mask_save) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 } // namespace memdiags
 
 namespace exp

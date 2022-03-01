@@ -237,6 +237,8 @@ class mcbistTraits< mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>
         static constexpr uint64_t SRERR1_REG = scomt::ody::ODC_MCBIST_SCOM_MBSEC1Q;
         static constexpr uint64_t THRESHOLD_REG = scomt::ody::ODC_MCBIST_SCOM_MBSTRQ;
         static constexpr uint64_t FIRQ_REG = scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRQ_RW_WCLEAR;
+        static constexpr uint64_t FIRQ_MASK_SET = scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRMASK_WO_OR;
+        static constexpr uint64_t FIRQ_MASK_CLEAR = scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRMASK_RW_WCLEAR;
         static constexpr uint64_t LAST_ADDR_REG = scomt::ody::ODC_MCBIST_SCOM_MCBMCATQ;
 
         static constexpr uint64_t MCBAMR0A0Q_REG = scomt::ody::ODC_MCBIST_SCOM_MCBAMR0A0Q;

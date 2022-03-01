@@ -265,6 +265,31 @@ template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
 fapi2::ReturnCode pre_scrub_settings( const fapi2::Target<T>& i_target );
 
 ///
+/// @brief Mask MCBISTFIRQ[MCBIST_PROGRAM_COMPLETE] and return the original mask value
+/// @tparam MC the mc type of the T
+/// @tparam T the fapi2::TargetType of the target
+/// @param[in] i_target the target
+/// @param[out] o_fir_mask_save the original mask value to be restored later
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template< mss::mc_type MC, fapi2::TargetType T >
+fapi2::ReturnCode mask_program_complete( const fapi2::Target<T>& i_target,
+        fapi2::buffer<uint64_t>& o_fir_mask_save);
+
+///
+/// @brief Restore MCBISTFIRQ[MCBIST_PROGRAM_COMPLETE] mask value and clear the FIR
+/// @tparam MC the mc type of the T
+/// @tparam T the fapi2::TargetType of the target
+/// @param[in] i_target the target
+/// @param[in] i_fir_mask_save the original mask value to be restored
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template< mss::mc_type MC, fapi2::TargetType T >
+fapi2::ReturnCode clear_and_restore_program_complete(
+    const fapi2::Target<T>& i_target,
+    const fapi2::buffer<uint64_t>& i_fir_mask_save );
+
+///
 /// @brief Stop the current command
 /// @tparam MC the mc type of the T
 /// @tparam T the fapi2::TargetType of the target
@@ -283,11 +308,14 @@ fapi2::ReturnCode stop( const fapi2::Target<T>& i_target )
     mss::poll_parameters l_poll_parameters;
     fapi2::buffer<uint64_t> l_status;
     fapi2::buffer<uint64_t> l_last_address;
+    fapi2::buffer<uint64_t> l_fir_mask_save;
     bool l_poll_result = false;
 
     FAPI_INF("Stopping any mcbist operations which are in progress for %s", mss::c_str(i_target));
 
-    // TODO RTC:153951 Add masking of FIR when stopping
+    // Mask MCBISTFIRQ[MCBIST_PROGRAM_COMPLETE] when stopping to avoid erroneous attentions
+    FAPI_TRY( mask_program_complete<MC>(i_target, l_fir_mask_save) );
+
     FAPI_TRY( mss::mcbist::start_stop<MC>(i_target, mss::STOP) );
 
     // Poll waiting for the engine to stop
@@ -305,6 +333,9 @@ fapi2::ReturnCode stop( const fapi2::Target<T>& i_target )
     FAPI_TRY( mss::getScom(i_target, TT::LAST_ADDR_REG, l_last_address) );
     FAPI_INF("MCBIST last address (during stop): 0x%016lx for %s",
              l_last_address, mss::c_str(i_target));
+
+    // Clear MCBISTFIRQ[MCBIST_PROGRAM_COMPLETE] and restore the mask
+    FAPI_TRY( clear_and_restore_program_complete<MC>(i_target, l_fir_mask_save) );
 
     // So we've either stopped or we timed out
     FAPI_ASSERT( l_poll_result == true,

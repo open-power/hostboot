@@ -236,6 +236,7 @@ class mcbistTraits< mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>
         static constexpr uint64_t SRERR1_REG = EXPLR_MCBIST_MBSEC1Q;
         static constexpr uint64_t THRESHOLD_REG = EXPLR_MCBIST_MBSTRQ;
         static constexpr uint64_t FIRQ_REG = EXPLR_MCBIST_MCBISTFIRQ;
+        static constexpr uint64_t FIRQ_MASK_REG = EXPLR_MCBIST_MCBISTFIRMASK;
         static constexpr uint64_t LAST_ADDR_REG = EXPLR_MCBIST_MCBMCATQ;
 
         static constexpr uint64_t MCBAMR0A0Q_REG = EXPLR_MCBIST_MCBAMR0A0Q;
