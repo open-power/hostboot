@@ -252,8 +252,8 @@ errlHndl_t getPmicHlthCheckData()
                 // this logic will handle both current implementation and any future mods
                 //
                 // Summary - We are logging all the data we can to aide analysis
-                TRACFCOMP( g_trac_sbeio, ERR_MRK"getPmicHlthCheckData: PROBLEM with "
-                           "retrieving ANY PMIC Health Check Data for "
+                TRACFCOMP( g_trac_sbeio, ERR_MRK"getPmicHlthCheckData: PMIC "
+                           "Health Check Data for "
                            "PROC HUID=0x%X OCMB HUID=0x%X "
                            "l_psuResponse.pmic_health_check_data_size=%d "
                            "l_pmic_revision=0x%X l_pmic_status=0x%X "
