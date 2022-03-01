@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -888,26 +888,16 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
 
             case START_SCRUB:
 
-                // Special MDS DDIMM handling
-                if ( PRDF::PlatServices::isMdsDimm<TYPE_OCMB_CHIP>( target ) )
+                // set stop conditions
+                stopCond.set_pause_on_mpe(mss::ON);
+                stopCond.set_pause_on_ue( mss::ON);
+                stopCond.set_pause_on_aue(mss::ON);
+                stopCond.set_nce_inter_symbol_count_enable(mss::ON);
+                stopCond.set_nce_soft_symbol_count_enable( mss::ON);
+                stopCond.set_nce_hard_symbol_count_enable( mss::ON);
+                if ( iv_globals.queryMnfgIplCeChecking() )
                 {
-                    // MDS DDIMMs will only stop on SUEs, count only hard CEs
-                    stopCond.set_pause_on_sue(mss::ON);
-                    stopCond.set_nce_hard_symbol_count_enable( mss::ON );
-                }
-                else
-                {
-                    // set stop conditions
-                    stopCond.set_pause_on_mpe(mss::ON);
-                    stopCond.set_pause_on_ue( mss::ON);
-                    stopCond.set_pause_on_aue(mss::ON);
-                    stopCond.set_nce_inter_symbol_count_enable(mss::ON);
-                    stopCond.set_nce_soft_symbol_count_enable( mss::ON);
-                    stopCond.set_nce_hard_symbol_count_enable( mss::ON);
-                    if ( iv_globals.queryMnfgIplCeChecking() )
-                    {
-                        stopCond.set_pause_on_nce_hard(mss::ON);
-                    }
+                    stopCond.set_pause_on_nce_hard(mss::ON);
                 }
 
                 FAPI_INVOKE_HWP( err, exp_sf_read, fapiOcmb,
