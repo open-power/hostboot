@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2018
+# Contributors Listed Below - COPYRIGHT 2011,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -51,6 +51,7 @@ sub main
     my $displayArg = "";  #  for -d <error log id>
     my $traceArg = "";    #  for the name of the hbot string file
     my $errlpathArg = ""; #  path to errl exe
+    my $verboseArg = ""; #  verbosity arg
 
     my %hashh = %{(shift)};
     my $temp;
@@ -72,6 +73,10 @@ sub main
         elsif( $temp eq "errl" )
         {
             $errlpathArg = " -e ".$hashh{$temp};
+        }
+        elsif( $temp eq "verbose" )
+        {
+            $verboseArg = "-v";
         }
         elsif( length($temp) eq 0  )
         {
@@ -136,7 +141,7 @@ sub main
 
 
     my $cmdLine;
-    $cmdLine = "$errlParser $tempFile $displayArg $traceArg $listArg $errlpathArg";
+    $cmdLine = "$errlParser $tempFile $displayArg $traceArg $listArg $errlpathArg $verboseArg";
     # ::userDisplay "$cmdLine\n";
     open ERRLPARSER, "$cmdLine |";
     while (my $line = <ERRLPARSER>)
@@ -161,6 +166,7 @@ sub helpInfo
                                            "all - Display all error logs in the repository."],
                     "trace=<hbotStringFile>" => ["Path to hbotStringFile"],
                     "errl=<errl exe>" => ["Path to errl executable"],
+                    "verbose" => ["Verbose output"],
                    },
         notes => ["The default behavior is to list all the committed error logs unless",
                   "requested to display a specific error log or all error logs."]

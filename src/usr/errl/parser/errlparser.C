@@ -56,6 +56,7 @@
 #include <assert.h>
 #include <string>
 #include <vector>
+#include <algorithm>
 using namespace std;
 
 #include <errl/hberrltypes.H>
@@ -103,7 +104,6 @@ Remarks:\n\
 \n\
 Developer switches:\n\
   -p -o <dirname>    Extract all as PEL binaries to output <dirname>\n\
-Contact: Monte Copeland\n\
 "
 
 
@@ -184,7 +184,31 @@ uint64_t ntohll( uint64_t i )
 
 
 
+//-------------------------------------------------------------
+// run a command and get the output back
+std::string sysexec(const char* cmd)
+{
+    char buffer[128];
+    std::string result = "";
+    FILE* pipe = popen(cmd, "r");
+    if (!pipe)
+    {
+        printf("popen() failed for '%s'\n",cmd);
+    }
+    else
+    {
+        while (fgets(buffer, sizeof buffer, pipe) != NULL)
+        {
+            result += buffer;
+        }
+        pclose(pipe);
+    }
 
+    // Strip out the newline that shows up
+    result.erase(std::remove(result.begin(), result.end(), '\n'), result.end());
+
+    return result;
+}
 
 //-------------------------------------------------------------
 // endian stuff, convert a errl storage marker in place
@@ -779,27 +803,53 @@ int main( int argc,  char *argv[] )
         exit(1);
     }
 
-    // There is a copy of FSP x86 errl tool in the simics dir.
-    if( (pszErrlTool == NULL)
-        || (-1 == stat( pszErrlTool, &statbuffer )) )
+    //--- Look for a copy of the FSP x86 errl tool
+
+    // Look for a copy in the user's PATH
+    std::string errlPATH = sysexec("which errl");
+    const char* errlFips = "/esw/fips1030/Builds/built/obj/x86.nfp/errl/nfp/tool/errl";
+
+    // 1) Use whatever the user passed in
+    if( (pszErrlTool != NULL)
+        && (0 == stat( pszErrlTool, &statbuffer )) )
+    {
+        if( fVerbose )
+        {
+            printf( "Using errl tool from cmdline\n" );
+        }
+    }
+    // 2) Look for a copy in the user's PATH
+    else if( 0 == stat( errlPATH.c_str(), &statbuffer ) )
+    {
+        pszErrlTool = errlPATH.c_str();
+        if( fVerbose )
+        {
+            printf( "Using errl tool from $PATH\n" );
+        }
+    }
+    // 3) There might be a copy of FSP x86 errl tool in the simics dir.
+    else if( 0 == stat( "./errl", &statbuffer ) )
     {
         pszErrlTool = "./errl";
-    }
-
-    rc = stat( pszErrlTool, &statbuffer );
-    if(  -1 == rc )
-    {
-        // Not found, so this one should be found for most users.
-        pszErrlTool =
-        "/esw/fips1010/Builds/built/obj/x86.nfp/errl/nfp/tool/errl";
-
-        rc = stat( pszErrlTool, &statbuffer );
-        if(  -1 == rc )
+        if( fVerbose )
         {
-            printf( "Unable to find a copy of errl, including %s.\n",
-                    pszErrlTool );
-            exit(2);
+            printf( "Using errl tool from Simics dir\n" );
         }
+    }
+    // 4) Grab the latest one from the fips build tree
+    else if( 0 == stat( errlFips, &statbuffer ) )
+    {
+        if( fVerbose )
+        {
+            printf( "Using errl tool from fips build\n" );
+        }
+        pszErrlTool = errlFips;
+    }
+    else
+    {
+        // Don't fail, user might have an alias or something that will work
+        printf( "Unable to find a copy of errl\n" );
+        pszErrlTool = "errl";
     }
 
     if( fVerbose )
