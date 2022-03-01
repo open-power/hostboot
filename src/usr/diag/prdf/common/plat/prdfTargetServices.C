@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -553,9 +553,7 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_parent, TYPE i_childType,
             }
         }
         else if ( (TYPE_OMI == parentType && TYPE_OCMB_CHIP == i_childType) ||
-                  (TYPE_OCMB_CHIP == parentType &&
-                   TYPE_MEM_PORT == i_childType) ||
-                  (TYPE_OCMB_CHIP == parentType && TYPE_MDS_CTLR == i_childType)
+                  (TYPE_OCMB_CHIP == parentType && TYPE_MEM_PORT == i_childType)
                 )
         {
             // There should only be one in the list.

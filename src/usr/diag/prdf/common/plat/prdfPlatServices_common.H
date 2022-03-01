@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -256,15 +256,6 @@ uint32_t isSpareAvailable( TARGETING::TargetHandle_t i_trgt, MemRank i_rank,
 template <TARGETING::TYPE>
 void getDimmDqAttr( TARGETING::TargetHandle_t i_target,
                     uint8_t (&io_dqMapPtr)[DQS_PER_DIMM] );
-
-/**
- * @brief  Queries the ATTR_MEM_EFF_HYBRID and ATTR_MEM_EFF_HYBRID_MEMORY_TYPE
- *         attributes to determine if a DIMM is an MDS DDIMM.
- * @param  i_target Target MEM_PORT/OCMB.
- * @return True if the target is an MDS DDIMM, false otherwise.
- */
-template<TARGETING::TYPE T>
-bool isMdsDimm( TARGETING::TargetHandle_t i_target );
 
 //##############################################################################
 //##                         TOD functions

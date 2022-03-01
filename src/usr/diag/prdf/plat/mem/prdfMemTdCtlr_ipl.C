@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,7 +32,6 @@
 // Platform includes
 #include <prdfMemEccAnalysis.H>
 #include <prdfMemMark.H>
-#include <prdfMemMds_ipl.H>
 #include <prdfMemoryMru.H>
 #include <prdfMemScrubUtils.H>
 #include <prdfMemUtils.H>
@@ -142,61 +141,6 @@ uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
 
 //------------------------------------------------------------------------------
 
-uint32_t __mdsCheckEcc( ExtensibleChip * i_chip, bool & o_errorsFound,
-                        STEP_CODE_DATA_STRUCT & io_sc )
-{
-    #define PRDF_FUNC "[__mdsCheckEcc] "
-
-    // This function is specifically for analyzing for errors after a command
-    // complete attention has been reported from an MDS DDIMM.
-
-    uint32_t o_rc = SUCCESS;
-
-    o_errorsFound = false;
-
-    // Check for write-path interface errors
-    o_rc = MDS::checkWritePathInterfaceErrors_ipl( i_chip, o_errorsFound,
-                                                   io_sc );
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "Failure from checkReadPathInterfaceErrors_ipl "
-                  "(0x%08x)", i_chip->getHuid() );
-    }
-
-    // If we found write path interface errors, there's no need to continue, as
-    // we'll have performed a predictive callout and will be stopping memdiags
-    // on this DIMM.
-    if ( o_errorsFound )
-    {
-        return o_rc;
-    }
-
-    // Check for media and interface errors independently
-
-    // Check for media errors
-    o_rc = MDS::checkMediaErrors_ipl( i_chip, o_errorsFound, io_sc );
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "Failure from checkMediaErrors_ipl (0x%08x)",
-                  i_chip->getHuid() );
-    }
-
-    // Check for read-path interface errors
-    o_rc = MDS::checkReadPathInterfaceErrors_ipl( i_chip, o_errorsFound,
-                                                  io_sc );
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "Failure from checkReadPathInterfaceErrors_ipl "
-                  "(0x%08x)", i_chip->getHuid() );
-    }
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
 template <TARGETING::TYPE T>
 bool __mnfgCeCheck( uint32_t i_eccAttns );
 
@@ -226,20 +170,6 @@ uint32_t __checkEcc( ExtensibleChip * i_chip,
 
     do
     {
-        // If we are analyzing MDS DDIMMs, call __analyzeMdsCmdComplete
-        if ( isMdsDimm<TYPE_OCMB_CHIP>(i_chip->getTrgt()) )
-        {
-            o_rc = __mdsCheckEcc( i_chip, o_errorsFound, io_sc );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "__analyzeMdsCmdComplete(0x%08x) failed",
-                          i_chip->getHuid() );
-            }
-
-            // Break out since we don't need to check the other attentions
-            break;
-        }
-
         // Check for ECC errors.
         uint32_t eccAttns = 0;
         o_rc = checkEccFirs<T>( i_chip, eccAttns );

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,20 +71,6 @@ extern int32_t analyzeIplCEStats( const TARGETING::TargetHandle_t i_trgt,
  *         the FFDC in the error log for failure details.
  */
 extern errlHndl_t startScrub( const TARGETING::TargetHandle_t i_trgt );
-
-namespace PlatServices
-{
-
-/**
- * @brief  Queries the ATTR_MEM_EFF_HYBRID and ATTR_MEM_EFF_HYBRID_MEMORY_TYPE
- *         attributes to determine if a DIMM is an MDS DDIMM.
- * @param  i_target Target MEM_PORT/OCMB.
- * @return True if the target is an MDS DDIMM, false otherwise.
- */
-template<TARGETING::TYPE T>
-extern bool isMdsDimm( TARGETING::TargetHandle_t i_target );
-
-}
 
 } // end namespace PRDF
 

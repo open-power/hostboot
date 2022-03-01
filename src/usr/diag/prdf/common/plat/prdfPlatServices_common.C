@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -313,70 +313,6 @@ void getDimmDqAttr<TYPE_OCMB_CHIP>( TargetHandle_t i_target,
     // TODO RTC 210072 - Support for multiple ports per OCMB
     TargetHandle_t memPort = getConnectedChild( i_target, TYPE_MEM_PORT, 0 );
     getDimmDqAttr<TYPE_MEM_PORT>( memPort, o_dqMapPtr );
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-bool isMdsDimm<TYPE_MEM_PORT>( TARGETING::TargetHandle_t i_memPort )
-{
-    #define PRDF_FUNC "[PlatServices::isMdsDimm<TYPE_MEM_PORT>] "
-
-    PRDF_ASSERT( nullptr != i_memPort );
-    PRDF_ASSERT( TYPE_MEM_PORT == getTargetType(i_memPort) );
-
-    bool o_mds = false;
-
-    // Get the MEM_EFF_HYBRID attribute
-    uint8_t hybrid[MAX_DIMM_PER_PORT];
-    if ( !i_memPort->tryGetAttr<ATTR_MEM_EFF_HYBRID>(hybrid) )
-    {
-        PRDF_ERR( PRDF_FUNC "tryGetAttr<ATTR_MEM_EFF_HYBRID>() failed for "
-                  "target 0x%08x", getHuid(i_memPort) );
-        PRDF_ASSERT( false );
-    }
-
-    // Get the MEM_EFF_HYBRID_MEMORY_TYPE attribute
-    uint8_t memType[MAX_DIMM_PER_PORT];
-    if ( !i_memPort->tryGetAttr<ATTR_MEM_EFF_HYBRID_MEMORY_TYPE>(memType) )
-    {
-        PRDF_ERR( PRDF_FUNC "tryGetAttr<ATTR_MEM_EFF_HYBRID_MEMORY_TYPE>() "
-                  "failed for target 0x%08x", getHuid(i_memPort) );
-        PRDF_ASSERT( false );
-    }
-
-    // Assume dimm select 0. For MDS dimms there should be only one dimm per
-    // MEM_PORT/OCMB and even if there wasn't we assume dimm types wouldn't be
-    // mixed on a single OCMB.
-    uint8_t dimmPos = 0;
-
-    // If the attributes indicate we have hybrid memory and the memory type
-    // is MDS, then we have MDS DDIMMs connected
-    if ( hybrid[dimmPos]  == fapi2::ENUM_ATTR_MEM_EFF_HYBRID_IS_HYBRID &&
-         memType[dimmPos] == fapi2::ENUM_ATTR_MEM_EFF_HYBRID_MEMORY_TYPE_MDS )
-    {
-        o_mds = true;
-    }
-
-    return o_mds;
-
-    #undef PRDF_FUNC
-}
-
-template<>
-bool isMdsDimm<TYPE_OCMB_CHIP>( TARGETING::TargetHandle_t i_ocmb )
-{
-    #define PRDF_FUNC "[PlatServices::isMdsDimm<TYPE_OCMB_CHIP>] "
-
-    PRDF_ASSERT( nullptr != i_ocmb );
-    PRDF_ASSERT( TYPE_OCMB_CHIP == getTargetType(i_ocmb) );
-
-    // Get a child DIMM to check
-    TargetHandle_t memPort = getConnectedChild( i_ocmb, TYPE_MEM_PORT, 0 );
-
-    return isMdsDimm<TYPE_MEM_PORT>(memPort);
-
-    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------

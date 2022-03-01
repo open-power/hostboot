@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2021
+# Contributors Listed Below - COPYRIGHT 2018,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -33,7 +33,6 @@ chip explorer_ocmb
 
 # Import signatures
 .include "prdfMemExtraSig.H";
-.include "prdfMemMdsExtraSig.H";
 
  #############################################################################
  #                                                                           #
