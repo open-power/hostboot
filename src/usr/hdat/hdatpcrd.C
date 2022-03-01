@@ -489,7 +489,7 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
                     (l_FullMvpdAddr+l_FullMvpdSize);
 
                 // Need to get i2c Master data correctly
-                std::vector<hdatI2cData_t> l_i2cDevEntries;
+                std::list<hdatI2cData_t> l_i2cDevEntries;
                 //TODO : RTC Story 246361 HDAT Nimbus/Cumulus model code removal
                 TARGETING::ATTR_MODEL_type  l_model = TARGETING::MODEL_POWER10;
                 l_model = l_pProcTarget->getAttr<TARGETING::ATTR_MODEL>();

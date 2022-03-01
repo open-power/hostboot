@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -291,7 +291,7 @@ struct DeviceInfo_t
  * @return <none>
  */
 void getDeviceInfo( TARGETING::Target* i_i2cMaster,
-                    std::vector<DeviceInfo_t>& o_deviceInfo );
+                    std::list<DeviceInfo_t>& o_deviceInfo );
 
 
 /**

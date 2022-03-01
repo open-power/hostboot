@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -504,6 +504,65 @@ class STLTest : public CxxTest::TestSuite
                 }
             }
 
+        }
+
+        void testListSort()
+        {
+            TS_INFO(ENTER_MRK"testListSort");
+
+            std::vector<int> vecs[] = {
+                { },                        // empty
+                { 3 },                      // single-element
+                { 1, 2, 3, 4, 5, 6, 7, 8 }, // pre-sorted
+                { 8, 7, 6, 5, 4, 3, 2, 1 }, // descending
+                { 4, 3, 9, 2, 3, 3, 1, 7 }, // mixed
+                { 6, 7, 8, 9, 1, 2, 3, 4 }, // left half has all the bigger elements
+                { 1, 2, 3, 4, 4, 3, 2, 1 }, // triangle
+                { 4, 4, 4, 4, 4, 4, 4, 4 }, // duplicates
+                { 3, 0, 1, 2, 9, 8, 4    }, // odd number of elements
+            };
+
+            int testcase = 1;
+            for (auto& vec : vecs)
+            {
+                std::list<int> l(vec.begin(), vec.end());
+
+                l.sort();
+
+                const size_t count = l.size();
+
+                if (count != vec.size())
+                {
+                    TS_FAIL("testListSort testcase %d: vector has %d elems, "
+                            "sorted list has %d",
+                            testcase, vec.size(), l.size());
+                    ++testcase;
+                    continue;
+                }
+
+                std::sort(begin(vec), end(vec));
+
+                auto vecit = begin(vec);
+                auto listit = begin(l);
+                size_t i = 0;
+
+                while (i < count)
+                {
+                    if (*vecit != *listit)
+                    {
+                        TS_FAIL("testListSort testcase %d: at position %d, vector has %d, list has %d",
+                                testcase, i, *vecit, *listit);
+                    }
+
+                    ++vecit;
+                    ++listit;
+                    ++i;
+                }
+
+                ++testcase;
+            }
+
+            TS_INFO(EXIT_MRK"testListSort");
         }
 
         void testInitListCompile()

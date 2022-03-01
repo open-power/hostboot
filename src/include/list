@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -446,7 +446,6 @@ namespace std
      * <li> rend() </li>
      * <li> unique() </li>
      * <li> merge() </li>
-     * <li> sort() </li>
      * </ul>
      */
     template<typename T>
@@ -1013,18 +1012,23 @@ namespace std
                 /**
                  * Sort the elements in the list from lower to higher
                  * @pre Container element objects must implement operator<.
-                 * @note Not Implemented
                  */
-                void sort();
+                void sort()
+                {
+                    return sort([](const auto& x, const auto& y) { return x < y; });
+                }
 
                 /**
                  * Sort the elements in the list from lower to higher using compare function
                  * @param Compare function that takes two values the same type as contained in the
                  * list; returns true if first arg goes before second arg, otherwise false.
-                 * @note Not Implemented.
                  */
                 template <class Compare>
-                    void sort (Compare comp);
+                void sort (Compare&& comp)
+                {
+                    iterator b = begin();
+                    __sort(b, end(), comp);
+                }
 
                 /**
                  * Reverse the order of the elements in the list.
@@ -1041,6 +1045,97 @@ namespace std
                 }
 
 
+        private:
+
+            /* @brief Implementation method for sort().
+             *        Sorts a given range according to a comparator function.
+             *
+             * @param[in/out] begin  Beginning of range to sort
+             * @param[in]     end    End of range to sort
+             * @param[in]     c      Comparator
+             */
+            template<class Compare>
+            static void __sort(iterator& begin, iterator end, Compare& c)
+            {
+                iterator mid = __sort_split(begin, end);
+
+                if (mid == end)
+                {
+                    return;
+                }
+
+                __sort(begin, mid, c);
+                __sort(mid, end, c);
+
+                __sort_merge(begin, mid, end, c);
+            }
+
+            /* @brief Implementation method for sort().
+             *        Merges two sorted ranges and preserves sorted order. On
+             *        exit, begin points to the new beginning of the range.
+             *
+             * @param[in/out] begin  Beginning of the first section of the range.
+             * @param[in]     mid    The beginning of the second section of the range
+             *                       (and end of the first section of the range).
+             * @param[in]     end    The end of the range.
+             */
+            template<typename Compare>
+            static void __sort_merge(iterator& begin,
+                                     const iterator mid,
+                                     const iterator end,
+                                     Compare& c)
+            {
+                iterator lhs = begin, rhs = mid;
+
+                while (lhs != end && lhs != rhs && rhs != end)
+                {
+                    if (c(*lhs, *rhs))
+                    {
+                        ++lhs;
+                    }
+                    else
+                    {
+                        auto next = rhs;
+                        ++next;
+
+                        rhs.iv_node->unlink();
+                        rhs.iv_node->link(*(lhs.iv_node));
+
+                        if (begin == lhs)
+                        {
+                            begin = rhs;
+                        }
+
+                        rhs = next;
+                    }
+                }
+            }
+
+            /* @brief Implementation method for sort().
+             *        Find the midpoint of a range.
+             *
+             * @param[in] begin  The beginning of the range.
+             * @param[in] end    The end of the range.
+             */
+            static iterator __sort_split(iterator begin, iterator end)
+            {
+                iterator mid = begin;
+
+                while (begin != end)
+                {
+                    ++mid;
+                    ++begin;
+
+                    if (begin == end)
+                    {
+                        break;
+                    }
+
+                    ++begin;
+                }
+
+                return mid;
+            }
         };
 };
 

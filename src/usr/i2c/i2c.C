@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -56,6 +56,7 @@
 #include <secureboot/service.H>
 #include <eeprom/eepromif.H>
 #include <hwas/common/hwas.H>  // HwasState
+#include <list>
 #include <algorithm>
 #include <xscom/xscomreasoncodes.H>
 #include <errl/errludlogregister.H>
@@ -5417,23 +5418,23 @@ bool byI2cDeviceOrder(
 //******************************************************************************
 // removeI2CDeviceDuplicates
 //******************************************************************************
-void removeI2cDeviceDuplicates(std::vector<DeviceInfo_t>& io_deviceInfo)
+void removeI2cDeviceDuplicates(std::list<DeviceInfo_t>& io_deviceInfo)
 {
-    std::vector<DeviceInfo_t> l_unique_deviceInfo;
+    std::list<DeviceInfo_t> l_unique_deviceInfo;
 
     // Begin by sorting the list
     // Order I2C devices by chip, engine, port, address, slave port
-    std::sort(io_deviceInfo.begin(), io_deviceInfo.end(),
-        byI2cDeviceOrder);
+    io_deviceInfo.sort(byI2cDeviceOrder);
 
     // Build up new unique list (thus removing duplicates)
     if (io_deviceInfo.size() > 1)
     {
         auto currentItr = io_deviceInfo.begin();
-        auto nextItr = currentItr + 1;
+        auto nextItr = currentItr;
+        nextItr++;
 
         do {
-            if (nextItr != io_deviceInfo.end() && (currentItr != nullptr))
+            if (nextItr != io_deviceInfo.end())
             {
                 if (areI2cDevicesLogicallyEqual(*currentItr, *nextItr))
                 {
@@ -5447,21 +5448,15 @@ void removeI2cDeviceDuplicates(std::vector<DeviceInfo_t>& io_deviceInfo)
                 else
                 {
                     // Save currentItr as nextItr isn't the same logical device
-                    if (currentItr != nullptr)
-                    {
-                        l_unique_deviceInfo.push_back(*currentItr);
-                    }
+                    l_unique_deviceInfo.push_back(*currentItr);
                     currentItr = nextItr;
                 }
             }
             else
             {
                 // Save currentItr if pointing at something valid
-                if (currentItr != nullptr)
-                {
-                    l_unique_deviceInfo.push_back(*currentItr);
-                    currentItr = nextItr;
-                }
+                l_unique_deviceInfo.push_back(*currentItr);
+                currentItr = nextItr;
             }
 
             if (nextItr != io_deviceInfo.end())
@@ -5480,7 +5475,7 @@ void removeI2cDeviceDuplicates(std::vector<DeviceInfo_t>& io_deviceInfo)
  * needs to know about
  */
 void getDeviceInfo( TARGETING::Target* i_i2cMaster,
-                    std::vector<DeviceInfo_t>& o_deviceInfo )
+                    std::list<DeviceInfo_t>& o_deviceInfo )
 {
     TRACFCOMP(g_trac_i2c,"getDeviceInfo>>");
 

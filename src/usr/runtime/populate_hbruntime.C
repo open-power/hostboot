@@ -2972,7 +2972,7 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
     std::vector<HDAT::i2cLinkId_t> l_linkIds;
 
     // obtain a list of i2c targets
-    std::vector<I2C::DeviceInfo_t> l_i2cTargetList;
+    std::list<I2C::DeviceInfo_t> l_i2cTargetList;
     I2C::getDeviceInfo(mproc, l_i2cTargetList);
     auto i2cDevItr = l_i2cTargetList.begin();
     while(i2cDevItr != l_i2cTargetList.end())

@@ -57,6 +57,7 @@
 #include <i2c/i2cif.H>
 #include <targeting/common/hbrt_target.H>
 #include <spi/spi.H>
+#include <list>
 
 using namespace MVPD;
 using namespace PVPD;
@@ -308,7 +309,7 @@ struct hdatEcLvl_t
 /** @brief Structure defination for an entry in Proc Chip ec level array */
 struct hdatProcEcLvlElement_t
 {
-    hdatEcLvl_t hdatEcLvl;  
+    hdatEcLvl_t hdatEcLvl;
     uint64_t    hdatEcid[2]; // Proc ECID
 } __attribute__ ((packed));
 
@@ -778,7 +779,7 @@ errlHndl_t hdatGetFullEepromVpd ( TARGETING::Target * i_target,
 *******************************************************************************/
 void hdatGetI2cDeviceInfo(TARGETING::Target* i_pTarget,
     TARGETING::ATTR_MODEL_type  i_model,
-    std::vector<hdatI2cData_t>&o_i2cDevEntries);
+    std::list<hdatI2cData_t>&o_i2cDevEntries);
 
 /*******************************************************************************
  * hdatGetSMPLinkInfo

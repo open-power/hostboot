@@ -2075,21 +2075,20 @@ bool byNodeProcAffinity(
 void hdatGetI2cDeviceInfo(
     TARGETING::Target*          i_pTarget,
     TARGETING::ATTR_MODEL_type  i_model,
-    std::vector<hdatI2cData_t>& o_i2cDevEntries)
+    std::list<hdatI2cData_t>& o_i2cDevEntries)
 {
     HDAT_ENTER();
 
     // This vector is expensive to construct, so initialize it once and then
     // cache it for future uses.
-    static const std::vector<DeviceInfo_t> deviceInfo =
+    static const std::list<DeviceInfo_t> deviceInfo =
         ([] {
-            std::vector<DeviceInfo_t> devinfo;
+            std::list<DeviceInfo_t> devinfo;
             getDeviceInfo(nullptr, devinfo);
 
             // Order by node ordinal ID, processor position, I2C master target
             // pointer
-            std::sort(devinfo.begin(), devinfo.end(),
-                      byNodeProcAffinity);
+            devinfo.sort(byNodeProcAffinity);
 
             return devinfo;
         })();
@@ -2113,8 +2112,8 @@ void hdatGetI2cDeviceInfo(
             };
             uint32_t val;          ///< Allow access to the raw value
         } linkId = { {
-            .node=static_cast<uint8_t>(deviceInfo[0].assocNode),
-            .proc=static_cast<uint8_t>(deviceInfo[0].assocProc),
+            .node=static_cast<uint8_t>(deviceInfo.front().assocNode),
+            .proc=static_cast<uint8_t>(deviceInfo.front().assocProc),
             .instance=0 }
         };
 

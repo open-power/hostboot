@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -384,7 +384,7 @@ class I2CTestIPL : public CxxTest::TestSuite
         {
             TRACFCOMP(g_trac_i2c, ENTER_MRK"test_getDeviceInfo");
 
-            std::vector<I2C::DeviceInfo_t> l_deviceInfo;
+            std::list<I2C::DeviceInfo_t> l_deviceInfo;
 
             // Loop through every chip
             TARGETING::TargetHandleList allchips;
@@ -394,7 +394,7 @@ class I2CTestIPL : public CxxTest::TestSuite
                 getDeviceInfo( tgt, l_deviceInfo);
             }
 
-            std::vector<I2C::DeviceInfo_t>::const_iterator devInfo_iter;
+            decltype(l_deviceInfo)::const_iterator devInfo_iter;
             for(devInfo_iter = l_deviceInfo.begin();
                 devInfo_iter != l_deviceInfo.end();
                 devInfo_iter++)
