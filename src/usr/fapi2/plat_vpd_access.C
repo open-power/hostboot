@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,7 +49,8 @@ fapi2::ReturnCode platGetVPD(
          VPDInfo<fapi2::TARGET_TYPE_OCMB_CHIP>&       io_vpdInfo,
          uint8_t* const o_blob)
 {
-    FAPI_DBG("platGetVPD(OCMB): enter");
+    FAPI_DBG("platGetVPD<OCMB>(%s): enter",
+             getFapiName(i_ocmbFapi2Target));
 
     fapi2::ReturnCode l_rc{fapi2::FAPI2_RC_SUCCESS};
 
@@ -68,9 +69,10 @@ fapi2::ReturnCode platGetVPD(
                                                         l_ocmbTarget);
         if (l_errl)
         {
-            FAPI_ERR("platGetVPD(OCMB): Error from getTargetingTarget");
+            FAPI_ERR("platGetVPD<OCMB>: Error from getTargetingTarget");
             break; //return with error
         }
+        FAPI_DBG("platGetVPD<OCMB> : target=%.8X",TARGETING::get_huid(l_ocmbTarget));
 
         // Retrieve the EFD data or the EFD data size if o_blob is NULL
         if (fapi2::EFD == io_vpdInfo.iv_vpd_type)
@@ -90,7 +92,7 @@ fapi2::ReturnCode platGetVPD(
             // extract the EFD data, so return error.
             if (l_errl)
             {
-                FAPI_ERR("platGetVPD(OCMB): Error from trying to read ENTIRE SPD from 0x%.08X ",
+                FAPI_ERR("platGetVPD<OCMB>: Error from trying to read ENTIRE SPD from 0x%.08X ",
                          TARGETING::get_huid(l_ocmbTarget));
                 break;
             }
@@ -106,7 +108,7 @@ fapi2::ReturnCode platGetVPD(
                            l_spdBufferSize );
             if (l_rc)
             {
-                FAPI_ERR("platGetVPD(OCMB): Error returned from ddimm_get_efd called on target 0x%.08X",
+                FAPI_ERR("platGetVPD<OCMB>: Error returned from ddimm_get_efd called on target 0x%.08X",
                          TARGETING::get_huid(l_ocmbTarget));
             }
         }  // end if (fapi2::EFD == io_vpdInfo.iv_vpd_type)
@@ -144,7 +146,7 @@ fapi2::ReturnCode platGetVPD(
         addErrlPtrToReturnCode(l_rc, l_errl);
     }
 
-    FAPI_DBG("platGetVPD(OCMB): exiting with %s",
+    FAPI_DBG("platGetVPD<OCMB>: exiting with %s",
              ( (l_rc == fapi2::FAPI2_RC_SUCCESS) ?
                "no errors" : "errors" ));
 

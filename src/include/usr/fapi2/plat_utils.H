@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -125,6 +125,23 @@ void getChildTargetsForCDG(
              const uint8_t i_childPort,
              const uint8_t i_childNum,
              TARGETING::TargetHandleList & o_childTargets);
+
+///
+/// @brief Wrapper for toString to handle dynamic memory without a
+///        memory leak.  This should not be used by most callers,
+///        use getFapiName() macro instead.
+///
+/// @param[i] i_target FAPI2 Target
+/// @return char vector with fapi name
+std::vector<char> _getFapiName( const fapi2::Target<fapi2::TARGET_TYPE_ALL>& i_target );
+
+///
+/// @brief Wrapper for _getFapiName to hide vector to char* conversion
+///
+/// @param[i] i_target FAPI2 Target
+/// @return char* with fapi name
+#define getFapiName( _target ) (_getFapiName(_target).data())
+
 
 } // End namespace fapi2
 

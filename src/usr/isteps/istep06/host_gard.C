@@ -174,9 +174,10 @@ void* host_gard( void *io_pArgs )
         {
             auto l_type = l_data.first;
             auto l_val = l_data.second;
-            //Only want to display procs, dimms, and cores
+            //Only want to display procs, ocmbs, dimms, and cores
             if((l_type != TYPE_DIMM) &&
                (l_type != TYPE_PROC) &&
+               (l_type != TYPE_OCMB_CHIP) &&
                (l_type != TYPE_CORE))
             {
                 continue;

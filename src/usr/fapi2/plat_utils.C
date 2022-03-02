@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1235,5 +1235,14 @@ void hwpResetGlobals(void)
     g_platErrList.clear();
 }
 
+///
+/// @brief Wrapper for toString to handle dynamic memory
+std::vector<char> _getFapiName( const fapi2::Target<fapi2::TARGET_TYPE_ALL>& i_target )
+{
+    TARGETING::ATTR_FAPI_NAME_type l_targName = {0};
+    fapi2::toString(i_target, l_targName, sizeof(l_targName));
+    std::vector<char> output(l_targName,l_targName+sizeof(l_targName));
+    return output;
+}
 
 } //end namespace

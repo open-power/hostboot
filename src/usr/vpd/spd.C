@@ -286,8 +286,8 @@ errlHndl_t spdGetKeywordValue ( DeviceFW::OperationType i_opType,
     VPD::vpdCmdTarget location = (VPD::vpdCmdTarget)va_arg( i_args, uint64_t );
 
     TRACSSCOMP( g_trac_spd,
-                ENTER_MRK"spdGetKeywordValue(), io_buflen: %d, keyword: 0x%04x",
-                io_buflen, keyword );
+                ENTER_MRK"spdGetKeywordValue(%.8X), io_buflen: %d, keyword: 0x%04x",
+                TARGETING::get_huid(i_target), io_buflen, keyword );
 
     do
     {

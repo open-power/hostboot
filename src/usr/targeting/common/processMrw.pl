@@ -106,13 +106,13 @@ my %MAX_INST_PER_PARENT =
     MCC       => 2, # Number of MCCs per MI
     OMI       => 2, # Number of OMIs per MCC/OMIC (has two parents 'a nuclear family')
     OCMB_CHIP => 1, # Number of OCMB_CHIPs per OMI
-    MDS_CTLR  => 1, # Number of MDS_CTLRs per DIMM/logical OCMB
-    PMIC      => 4, # Number of PMICs per DIMM/logical OCMB.  Adjusted for future
+    MDS_CTLR  => 1, # Number of MDS_CTLRs per OCMB
+    PMIC      => 4, # Number of PMICs per OCMB.  Adjusted for future
                     # systems.  Meaning, the current system may not have this many.
-    GENERIC_I2C_DEVICE  => 4, # Number of GENERIC_I2C_DEVICEs per DIMM/logical OCMB.
+    GENERIC_I2C_DEVICE  => 4, # Number of GENERIC_I2C_DEVICEs per OCMB.
                               # Max of 4, but not all DIMMs will have these.
-    MEM_PORT  => 1, # Number of MEM_PORTs per OCMB
-    DIMM      => 1, # Number of DIMMs per MEM_PORT
+    MEM_PORT  => 2, # Number of MEM_PORTs per OCMB
+    DIMM      => 2, # Number of DIMMs per MEM_PORT
 
     OMIC      => 2, # Number of OMICs per MC
 
@@ -337,6 +337,9 @@ sub main
 
     # Write the results of processing the targets to an XML file
     writeResultsToXml($targetObj);
+
+    # Uncomment this to get a print-out of the DIMM components
+    #extractDimmData($targetObj);
 }
 
 ################################################################################
@@ -1164,19 +1167,32 @@ sub processDdimmAndChildren
     my $targetObj = shift;
     my $target    = shift;
 
+    my $path = $targetObj->getAttribute($target,"INSTANCE_PATH");
+    my $name = $targetObj->getInstanceName($target);
+    print "processDdimmAndChildren($name,$path)\n"  if $targetObj->{debug};
+
     # Some sanity checks.  Make sure we are processing the correct target type
     # and make sure the target's parent has been processed.
     my $type = targetTypeSanityCheck($targetObj, $target, "DIMM");
     validateParentHasBeenProcessed($targetObj, $target, "NODE");
 
-    # The DDIMMs are behind the DDIMM conectors, a one to one relationship.
+    # ** Note about DIMM targets in MRW vs TARGETING **
+    # The TARGETING model does not include the actual DDIMM card FRU.  Inside
+    # this model the DIMM target represents the logical DRAM on the card or
+    # a physically separate ISDIMM installed separate from the OCMB.  However,
+    # the MRW does model the physical packaging.  Since the script is both
+    # consuming data from the MRW's physical DIMM and producing data for
+    # TARGETING's logical DIMM one needs to be acutely aware of the context
+    # for any attribute being referenced.
+
+    # The DDIMMs are behind the DDIMM connectors, a one to one relationship.
     # Get the DDIMM's ID from the parent DDIMM connector's position.
     my $dimmId = $targetObj->getAttribute($targetObj->getTargetParent($target), "POSITION");
 
     my $ddimmAffinity = "ERR";
     my $ddimmPosPerParent = "ERR";
     my $procPosRelativeToNode = "ERR";
-    my $omiId = 0;
+    my $omiIdPerProc = 0;
 
     # Find connections for target (DIMM) of bus type ("OMI"), ignore
     # connections FROM this target ("") but find connections TO this target(1).
@@ -1241,7 +1257,7 @@ sub processDdimmAndChildren
             $mi_num = $targets[MI_INDEX]   % getMaxInstPerParent("MI");
             $mcc_num = $targets[MCC_INDEX] % getMaxInstPerParent("MCC");
             $omi_num = $targets[OMI_INDEX] % getMaxInstPerParent("OMI");
-            $omiId = $targets[OMI_INDEX];
+            $omiIdPerProc = $targets[OMI_INDEX];
 
             # The values for these are 0
             # NOTE: Going on the assumption that 1 OCMB per DDIMM with
@@ -1258,9 +1274,20 @@ sub processDdimmAndChildren
         } # end foreach my $conn (@{$conn->{CONN}})
     } # end if ($conn ne "")
 
+    # Make a temporary attribute to remember the logical position of the DDIMM
+    #  based on the OMI logic.  This will be used to process the downstream
+    #  children.
+    my $ddimmOmiPosPerNode = (getMaxInstPerProc("OMI") * $procPosRelativeToNode)
+                                 + $omiIdPerProc;
+    $targetObj->setAttribute($target, "TEMP_DDIMM_OMI_POS_PER_NODE", $ddimmOmiPosPerNode);
+    print "-TEMP_DDIMM_OMI_POS_PER_NODE=$ddimmOmiPosPerNode\n"  if $targetObj->{debug};
+
     # The DIMM position is not based on the DIMM's parent but on the OMI that it is associated with
-    my $dimmPosPerNode =   $omiId
-                         + (getMaxInstPerProc("DIMM") * $procPosRelativeToNode);
+    my $dimmPosPerNode = (getMaxInstPerProc("DIMM") * $procPosRelativeToNode)
+                         + ($omiIdPerProc
+                            * getMaxInstPerParent("OCMB_CHIP")
+                            * getMaxInstPerParent("MEM_PORT")
+                            * getMaxInstPerParent("DIMM"));
 
     # Get some useful info from the DDIMM parent's SYS and NODE and targets
     my $sysParent = $targetObj->findParentByType($target, "SYS");
@@ -1280,10 +1307,8 @@ sub processDdimmAndChildren
     my $staticAbsLocationCode = getStaticAbsLocationCode($targetObj, $target);
     $targetObj->setAttribute($target, "STATIC_ABS_LOCATION_CODE", $staticAbsLocationCode);
 
-    # In the future, to support planar configs, where there will be 2 DIMMs behind
-    # a mem port. Therefore the DIMM position will need to be an offset of 2.
-    # Hard code the offset for now.
-    my $dimmFapiPosition = $dimmPosPerNode * 2;
+    # FAPI position is the same as the position we use everywhere else.
+    my $dimmFapiPosition = $dimmPosPerNode;
 
     # Get the FAPI_NAME by using the data gathered above.
     my $dimmFapiName = $targetObj->getFapiName($type, $nodeParentPos, $dimmFapiPosition);
@@ -1294,15 +1319,14 @@ sub processDdimmAndChildren
     my $ddimmPhysical = $nodeParentPhysical . "/dimm-" . $dimmId;
 
     ## Now that we collected all the data we need, set some target attributes
-    # The HUID needs to match the FAP_POS, in terms of being a multiple of 2,
-    # just as the FAPI_POS.
-    $targetObj->setHuid($target, $sysParentPos, $nodeParentPos, $dimmPosPerNode * 2);
+    # The HUID needs to match the FAPI_POS
+    $targetObj->setHuid($target, $sysParentPos, $nodeParentPos, $dimmFapiPosition);
     $targetObj->setAttribute($target, "POSITION",      $dimmId);
     $targetObj->setAttribute($target, "ORDINAL_ID",    $dimmPosPerSystem);
     $targetObj->setAttribute($target, "FAPI_POS",      $dimmFapiPosition);
     $targetObj->setAttribute($target, "FAPI_NAME",     $dimmFapiName);
     $targetObj->setAttribute($target, "FAPINAME_NODE", $nodeParentPos);
-    $targetObj->setAttribute($target, "FAPINAME_POS", $dimmFapiPosition);
+    $targetObj->setAttribute($target, "FAPINAME_POS",  $dimmFapiPosition);
     $targetObj->setAttribute($target, "REL_POS",       $ddimmPosPerParent);
     $targetObj->setAttribute($target, "AFFINITY_PATH", $ddimmAffinity);
     $targetObj->setAttribute($target, "PHYS_PATH",     $ddimmPhysical);
@@ -1340,7 +1364,7 @@ sub processDdimmAndChildren
         }
         elsif ($childType eq "OCMB_CHIP")
         {
-            processOcmbChipAndChildren($targetObj, $child, $dimmId, $dimmPosPerNode);
+            processOcmbChipAndChildren($targetObj, $child, $dimmId);
             $foundOcmb = true;
         }
         elsif (($childTargetType eq "chip-PCA9554") ||
@@ -1377,6 +1401,10 @@ sub processDdimmAndChildren
     # NOTE: No check for GENERIC_I2C_DEVICES and MDS_CTLR because some
     #       ddimms/systems won't have them
 
+    # Get rid of the temporary attribute so it doesn't show up in the
+    #  final parsed xml.
+    $targetObj->deleteAttribute($target, "TEMP_DDIMM_OMI_POS_PER_NODE");
+
 } # end sub processDdimmAndChildren
 
 #--------------------------------------------------
@@ -1394,14 +1422,22 @@ sub processPmic
     my $target    = shift;
     my $dimmId    = shift;
 
+    my $path = $targetObj->getAttribute($target,"INSTANCE_PATH");
+    my $name = $targetObj->getInstanceName($target);
+    print "processPmic($name,$path,$dimmId)\n  if $targetObj->{debug}";
     # Some sanity checks.  Make sure we are processing the correct target type
     # and make sure the target's parent has been processed.
     my $targetType = targetTypeSanityCheck($targetObj, $target, "PMIC");
     validateParentHasBeenProcessed($targetObj, $target);
 
+    # 1 OCMB per DDIMM so compute the number of my type per OCMB
+    my $maxPerOcmb = getMaxInstPerParent($targetType);
+
     # Set the PMIC's attributes HUID, POSITION, FAPI_POS, FAPI_NAME, FAPINAME_NODE,
     # FAPINAME_POS, ORDINAL_ID, REL_POS, AFFINITY_PATH and PHYS_PATH.
-    setCommonAttributesForTargetsAssociatedWithDdimm($targetObj, $target, $dimmId, $targetType);
+    setCommonAttributesForTargetsAssociatedWithDdimm($targetObj, $target,
+                                                     $dimmId, $targetType,
+                                                     $maxPerOcmb);
 
     # Set the FAPI_I2C_CONTROL_INFO attribute
     setFapi2AttributeForDdimmI2cDevices($targetObj, $target, $targetType);
@@ -1416,6 +1452,7 @@ sub processPmic
     # Save this target for retrieval later when printing the xml (sub printXML)
     $targetObj->{targeting}{SYS}[$sysParentPos]{NODES}[$nodeParentPos]
                 {PMICS}[$pmicPosPerSystem]{KEY} = $target;
+    print "*** Saving SYS-$sysParentPos/NODES-$nodeParentPos/PMICS-$pmicPosPerSystem\n"  if $targetObj->{debug};
 
     # Mark this target as processed
     markTargetAsProcessed($targetObj, $target);
@@ -1435,6 +1472,10 @@ sub processGenericI2cDevice
     my $targetObj = shift;
     my $target    = shift;
     my $dimmId    = shift;
+
+    my $path = $targetObj->getAttribute($target,"INSTANCE_PATH");
+    my $name = $targetObj->getInstanceName($target);
+    print "processGenericI2cDevice($name,$path,$dimmId)\n"  if $targetObj->{debug};
 
     # Some sanity checks.  Make sure we are processing the correct target type
     # and make sure the target's parent has been processed.
@@ -1466,9 +1507,14 @@ sub processGenericI2cDevice
 
     $targetObj->setAttribute($target, "I2C_DEV_TYPE", $i2cDevType);
 
+    # 1 OCMB per DDIMM so compute the number of my type per OCMB
+    my $maxPerOcmb = getMaxInstPerParent($targetType);
+
     # Set the GENERIC_I2C_DEVICES's attributes HUID, POSITION, FAPI_POS, FAPI_NAME,
     # FAPINAME_NODE, FAPINAME_POS, ORDINAL_ID, REL_POS, AFFINITY_PATH and PHYS_PATH.
-    setCommonAttributesForTargetsAssociatedWithDdimm($targetObj, $target, $dimmId, $targetType);
+    setCommonAttributesForTargetsAssociatedWithDdimm($targetObj, $target,
+                                                     $dimmId, $targetType,
+                                                     $maxPerOcmb);
 
     # Until CLASS is removed from MRW, rewrite it here
     $targetObj->setAttribute($target, "CLASS",     "ASIC");
@@ -1486,6 +1532,7 @@ sub processGenericI2cDevice
     # Save this target for retrieval later when printing the xml (sub printXML)
     $targetObj->{targeting}{SYS}[$sysParentPos]{NODES}[$nodeParentPos]
                 {GENERIC_I2C_DEVICE}[$posPerSystem]{KEY} = $target;
+    print "*** Saving SYS-$sysParentPos/NODES-$nodeParentPos/GI2C-$posPerSystem\n"  if $targetObj->{debug};
 
     # Mark this target as processed
     markTargetAsProcessed($targetObj, $target);
@@ -1511,9 +1558,14 @@ sub processMdsCtlr
     my $targetType = targetTypeSanityCheck($targetObj, $target, "MDS_CTLR");
     validateParentHasBeenProcessed($targetObj, $target);
 
+    # 1 OCMB per DDIMM so compute the number of my type per OCMB
+    my $maxPerOcmb = getMaxInstPerParent($targetType);
+
     # Set the MDS_CTLR's attributes HUID, POSITION, FAPI_POS, FAPI_NAME, FAPINAME_NODE,
     # FAPINAME_POS, ORDINAL_ID, REL_POS, AFFINITY_PATH and PHYS_PATH.
-    setCommonAttributesForTargetsAssociatedWithDdimm($targetObj, $target, $dimmId, $targetType);
+    setCommonAttributesForTargetsAssociatedWithDdimm($targetObj, $target,
+                                                     $dimmId, $targetType,
+                                                     $maxPerOcmb);
 
     # Set the FAPI_I2C_CONTROL_INFO attribute
     setFapi2AttributeForDdimmI2cDevices($targetObj, $target, $targetType);
@@ -1538,27 +1590,35 @@ sub processMdsCtlr
 #
 # @pre DIMM targets need to be processed beforehand
 #
-# @param[in] $targetObj - The global target object blob
-# @param[in] $target    - The OCMB_CHIP target
-# @param[in] $ocmbId    - The OCMB_CHIP target's ID, derived from the DIMM's ID
-# @param[in] $ocmbPosPerNode - The OCMB position per NODE, derived from the
-#                              DIMM's position per NODE.
+# @param[in] $targetObj  - The global target object blob
+# @param[in] $target     - The OCMB_CHIP target
+# @param[in] $ocmbPhysId - The OCMB_CHIP target's ID, derived from the DIMM's ID
 #--------------------------------------------------
 sub processOcmbChipAndChildren
 {
     my $targetObj        = shift;
     my $target           = shift;
-    my $ocmbId           = shift;
-    my $ocmbPosPerNode   = shift;
+    my $ocmbPhysId       = shift;
+
+    my $path = $targetObj->getAttribute($target,"INSTANCE_PATH");
+    my $name = $targetObj->getInstanceName($target);
+    print "processOcmbChipAndChildren($name,$path,ocmbPhysId=$ocmbPhysId)\n"  if $targetObj->{debug};
 
     # Some sanity checks.  Make sure we are processing the correct target type
     # and make sure the target's parent has been processed.
     my $type = targetTypeSanityCheck($targetObj, $target, "OCMB_CHIP");
     validateParentHasBeenProcessed($targetObj, $target);
 
+    # OCMB's logical position matches the OMI-derived position of the DDIMM
+    my $ddimmParent = $targetObj->findParentByType($target, "DIMM");
+    my $ocmbPosPerNode = $targetObj->getAttribute($ddimmParent, "TEMP_DDIMM_OMI_POS_PER_NODE");
+    print "-ocmbPosPerNode=$ocmbPosPerNode\n"  if $targetObj->{debug};
+
     # Set the OCMB's attributes HUID, POSITION, FAPI_POS, FAPI_NAME, FAPINAME_NODE,
     # FAPINAME_POS, ORDINAL_ID, AFFINITY_PATH and PHYS_PATH.
-    setCommonAttributesForTargetsAssociatedWithDdimm($targetObj, $target, $ocmbId, $type);
+    setCommonAttributesForTargetsAssociatedWithDdimm($targetObj, $target,
+                                                     $ocmbPhysId, $type,
+                                                     1); #1 OCMB per DDIMM
 
     my $staticAbsoluteLocationCode = getStaticAbsLocationCode($targetObj, $target);
     $targetObj->setAttribute($target, "STATIC_ABS_LOCATION_CODE", $staticAbsoluteLocationCode);
@@ -1576,6 +1636,7 @@ sub processOcmbChipAndChildren
     # Save this target for retrieval later when printing the xml (sub printXML)
     $targetObj->{targeting}{SYS}[$sysParentPos]{NODES}[$nodeParentPos]
                 {OCMB_CHIPS}[$ocmbPosPerNode]{KEY} = $target;
+    print "*** Saving SYS-$sysParentPos/NODES-$nodeParentPos/OCMB_CHIPS-$ocmbPosPerNode\n"  if $targetObj->{debug};
 
     # Mark this target as processed
     markTargetAsProcessed($targetObj, $target);
@@ -1619,6 +1680,9 @@ sub processMemPort
 {
     my $targetObj         = shift;
     my $target            = shift;
+    my $path = $targetObj->getAttribute($target,"INSTANCE_PATH");
+    my $name = $targetObj->getInstanceName($target);
+    print "processMemPort($name,$path)\n"  if $targetObj->{debug};
 
     # Some sanity checks.  Make sure we are processing the correct target type
     # and make sure the target's parent has been processed.
@@ -1639,15 +1703,17 @@ sub processMemPort
     # FAPI_POS, per system. IE, the FAPI_POS is an increasing sequential
     # number, starting at 0, and ending with the last MEM_PORT for the system
     # (target type SYS).
-    my $memPortPosPerSystem = $targetObj->getAttribute($ocmbParent, "FAPI_POS");
+    my $memPortPosPerSystem = $targetObj->getAttribute($ocmbParent, "FAPI_POS")
+                              * getMaxInstPerParent($type);
+                              # will add relative position here when needed
 
-    # One memport per OCMB means that the position matches the parent
-    my $memPortPosPerNode = $ocmbParentPos;
+    # Only one memport per OCMB is in the xml but we are reserving space for 2
+    # instances per OCMB.  (Eventually we will need to pull a relative position
+    # from somewhere but not available yet.)
+    my $memPortPosPerNode = $ocmbParentPos * getMaxInstPerParent($type);
 
-    # Use the MEM_PORT's position per system to calculate the MEM_PORT's
-    # position per parent.  This is done by taking the modulo of the MEM_PORT's
-    # position per system against the maximum instance per parent.
-    my $memPortPosPerParent = $memPortPosPerSystem % getMaxInstPerParent($type);
+    # Until we really support multiple ports behind a OCMB, just hardcode to zero
+    my $memPortPosPerParent = 0;
 
     # Get the FAPI_NAME by using the data gathered above.
     my $memPortFapiName = $targetObj->getFapiName($type, $nodeParentPos, $ocmbParentPos, $memPortPosPerParent);
@@ -1670,7 +1736,8 @@ sub processMemPort
 
     # Save this target for retrieval later when printing the xml (sub printXML)
     $targetObj->{targeting}{SYS}[$sysParentPos]{NODES}[$nodeParentPos]
-                {MEM_PORTS}[$memPortPosPerSystem]{KEY} = $target;
+                {MEM_PORTS}[$memPortPosPerNode]{KEY} = $target;
+    print "*** Saving SYS-$sysParentPos/NODES-$nodeParentPos/MEM_PORTS-$memPortPosPerNode\n"  if $targetObj->{debug};
 
     # Mark this target as processed
     markTargetAsProcessed($targetObj, $target);
@@ -1914,15 +1981,21 @@ sub processTpm
 #
 # @param[in] $targetObj  - The global target object blob
 # @param[in] $target     - The target to set said attributes from above
-# @param[in] $parentId   - The parent's ID, used to calculate the target's ID
+# @param[in] $parentId   - The physical ID of the DDIMM parent relative to node
 # @param[in] $targetType - The type of the target
+# @param[in] $maxPerDdimm - Max instances of this target type per DDIMM
 #--------------------------------------------------
 sub setCommonAttributesForTargetsAssociatedWithDdimm
 {
     my $targetObj  = shift;
     my $target     = shift;
-    my $parentId   = shift;
+    my $ddimmId   = shift;
     my $targetType = shift;
+    my $maxPerDdimm = shift;
+
+    my $path = $targetObj->getAttribute($target,"INSTANCE_PATH");
+    my $name = $targetObj->getInstanceName($target);
+    print "-setCommonAttributesForTargetsAssociatedWithDdimm($name,$path,ddimmId=$ddimmId,type=$targetType,maxPerDdimm=$maxPerDdimm)\n" if $targetObj->{debug};
 
     # Get some useful data from the target parent's SYS, NODE and DDIMM targets
     my $sysParent = $targetObj->findParentByType($target, "SYS");
@@ -1931,7 +2004,7 @@ sub setCommonAttributesForTargetsAssociatedWithDdimm
     my $nodeParentPos = $targetObj->getAttribute($nodeParent, "ORDINAL_ID");
     my $nodeParentPhysical = $targetObj->getAttribute($nodeParent, "PHYS_PATH");
     my $ddimmParent = $targetObj->findParentByType($target, "DIMM");
-    my $ddimmParentPos = $targetObj->getAttribute($ddimmParent, "ORDINAL_ID");
+    my $omiPosPerNode = $targetObj->getAttribute($ddimmParent, "TEMP_DDIMM_OMI_POS_PER_NODE");
 
     # Get the instance name and extract the integral info from the name
     # if it has one.  The integral info is the target instance position.
@@ -1959,19 +2032,16 @@ sub setCommonAttributesForTargetsAssociatedWithDdimm
         }
     }
 
-    # Cache the targets's maximum instance per parent (DDIMM) for quick reference
-    my $maxTargetPerDdimm = getMaxInstPerParent($targetType);
-
     # Do a quick sanity check.  Make sure the target instance position is less
     # than the maximum allowed based on a 0-based instance position.
-    if ($targetInstancePos >= $maxTargetPerDdimm )
+    if ($targetInstancePos >= $maxPerDdimm )
     {
         select()->flush(); # flush buffer before spewing out error message
         die "\nsetCommonAttributesForTargetsAssociatedWithDdimm: ERROR: " .
             "The $targetType" . "'s instance position " .
             "($targetInstancePos), extracted from instance name " .
             "\"$targetInstanceName\", exceeds or is equal to the maximum $targetType " .
-            "per DIMM (" . $maxTargetPerDdimm . "). Error" ;
+            "per DIMM (" . $maxPerDdimm . "). Error" ;
     }
 
     ### Calculate the target's position per system (SYS)
@@ -1988,19 +2058,20 @@ sub setCommonAttributesForTargetsAssociatedWithDdimm
     ## To calculate the 'target's position per system', take the target's parent
     ## DDIMM position, multiply it by the maximum targets per DDIMM then add
     ## the target's instance position:
-    my $targetPosPerSystem = ($ddimmParentPos * $maxTargetPerDdimm) + $targetInstancePos;
-
-    ## Calculate the target's position per NODE
-    # To calculate the 'target's position per NODE', take the maximum number of
-    # DIMM's per PROC, multiply it by the maximum number of PROC's per NODE multipled
-    # by the maximum targets per DDIMM.
-    my $totalMaxTargetPerNode = getMaxInstPerProc("DIMM") * getMaxInstPerParent("PROC") * $maxTargetPerDdimm;
-    # Mod that number with the system wide number to get target position per NODE
-    my $targetPosPerNode = $targetPosPerSystem % $totalMaxTargetPerNode;
+    my $targetPosPerNode = ($omiPosPerNode * $maxPerDdimm) + $targetInstancePos;
 
     # The target's ID is just a multiple of the parent's ID plus the target's
     # position relative to the parent.
-    my $targetId = ($parentId * $maxTargetPerDdimm) + $targetInstancePos;
+    my $targetId = ($ddimmId * $maxPerDdimm) + $targetInstancePos;
+
+    # To find the system-wide number, take THING's per PROC,
+    #   multiplied by the maximum number of PROC's per NODE,
+    #   multiplied by node position,
+    #   then add the node-scoped instance value.
+    my $targetPosPerSystem = (getMaxInstPerProc($targetType)
+                              * getMaxInstPerParent("PROC")
+                              * $nodeParentPos)
+                             + $targetPosPerNode;
 
     # Get the FAPI_NAME by using the data gathered above
     my $targetFapiName = $targetObj->getFapiName($targetType, $nodeParentPos, $targetPosPerNode);
@@ -2041,6 +2112,10 @@ sub setCommonAttributesForTargetsAssociatedWithDdimm
     # Set the PHYS_PATH using the parent NODE as a basis
     my $targetPhysical = $nodeParentPhysical . "/" . $targetPathName . "-" . $targetId;
     $targetObj->setAttribute($target, "PHYS_PATH",     $targetPhysical);
+
+    print "--POSITION=$targetId, FAPI_POS=$targetPosPerSystem, FAPI_NAME=$targetFapiName\n"  if $targetObj->{debug};
+    print "--PHYS_PATH=$targetPhysical\n"  if $targetObj->{debug};
+    print "--AFFINITY_PATH=$targetAffinity\n"  if $targetObj->{debug};
 } # end sub setCommonAttributesForTargetsAssociatedWithDdimm
 
 sub iterateOverChiplets

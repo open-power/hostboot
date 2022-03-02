@@ -51,7 +51,7 @@ fapi2::ReturnCode getSPD(
                         uint8_t *  o_blob,
                         size_t& o_size)
 {
-    FAPI_DBG(ENTER_MRK "getSPD");
+    FAPI_DBG(ENTER_MRK "getSPD(%s)",getFapiName(i_pTarget));
 
     errlHndl_t l_errl  = nullptr;
     fapi2::ReturnCode  l_rc;

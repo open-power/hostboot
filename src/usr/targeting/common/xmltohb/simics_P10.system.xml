@@ -41,8 +41,8 @@
      *             Each MCC unit has 2 OMI Units (A total of 16 per chip)
      *                 OMI Units are special as they have two parents (MCC + OMIC)
      *                 Each OMI unit connects to 1 OCMB chip
-     *                     Each OCMB unit contains 1 MEM_PORT unit
-     *                         Each MEM_PORT unit connects to 1 logical DIMM
+     *                     Each OCMB unit contains 2 MEM_PORT units (space to handle Odyssey)
+     *                         Each MEM_PORT unit connects to 2 logical DIMMs (space for dual-drop)
      *                     Each OCMB has logical relationship with 2 PMICs for 2U DDIMMs
      *                         and 4 PMICS for 4U DDIMMs;
      *                     Each OCMB on a 4U DDIMM (only) has logcial relationships with
@@ -65,9 +65,9 @@
 
      * DDIMM Components
      *
-     * Each DDIMM contains 1 OCMB_CHIP
-     *     Each OCMB_CHIP has 1 MEM_PORT
-     *         Each MEM_PORT is connected to 1 DIMM
+     * Each DDR4 DDIMM contains 1 OCMB_CHIP
+     *     Each OCMB_CHIP has 1 MEM_PORT (+1 in reserve for DDR5)
+     *         Each MEM_PORT is connected to 1 DIMM (+1 in reserve for dual-drop)
      *     Each OCMB_CHIP is connected to 2 PMICs for 2U DDIMMs (4 PMICS for 4U DDIMMs)
      *     Each OCMB Chip on 4U DDIMMs is conencted to 2 ADCs and 2 GPIO Expanders
 
@@ -19108,7 +19108,8 @@
 
 <!-- ===================================================================== -->
 <!-- MEMPORT Units -->
-<!-- 1 per OCMB_CHIP, a total of 16 -->
+<!-- actual = 1 per OCMB_CHIP, a total of 16 -->
+<!-- reserved space = 2 per OCMB_CHIP, a total of 32 -->
 <!-- ===================================================================== -->
 <targetInstance>
     <id>sys0node0ocmb0memport0</id>
@@ -19148,7 +19149,7 @@
     <type>unit-mem_port</type>
     <attribute>
         <id>HUID</id>
-        <default>0x004C0001</default>
+        <default>0x004C0002</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -19164,11 +19165,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>ocmb.mp:k0:n0:s0:p00:c01</default>
+        <default>ocmb.mp:k0:n0:s0:p01:c00</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>1</default>
+        <default>2</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -19181,7 +19182,7 @@
     <type>unit-mem_port</type>
     <attribute>
         <id>HUID</id>
-        <default>0x004C0002</default>
+        <default>0x004C0004</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -19197,11 +19198,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>ocmb.mp:k0:n0:s0:p00:c02</default>
+        <default>ocmb.mp:k0:n0:s0:p02:c00</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>2</default>
+        <default>4</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -19214,7 +19215,7 @@
     <type>unit-mem_port</type>
     <attribute>
         <id>HUID</id>
-        <default>0x004C0003</default>
+        <default>0x004C0006</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -19230,11 +19231,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>ocmb.mp:k0:n0:s0:p00:c03</default>
+        <default>ocmb.mp:k0:n0:s0:p03:c00</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>3</default>
+        <default>6</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -19247,7 +19248,7 @@
     <type>unit-mem_port</type>
     <attribute>
         <id>HUID</id>
-        <default>0x004C0004</default>
+        <default>0x004C0008</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -19263,11 +19264,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>ocmb.mp:k0:n0:s0:p00:c04</default>
+        <default>ocmb.mp:k0:n0:s0:p04:c00</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>4</default>
+        <default>8</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -19280,7 +19281,7 @@
     <type>unit-mem_port</type>
     <attribute>
         <id>HUID</id>
-        <default>0x004C0005</default>
+        <default>0x004C000A</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -19296,11 +19297,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>ocmb.mp:k0:n0:s0:p00:c05</default>
+        <default>ocmb.mp:k0:n0:s0:p05:c00</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>5</default>
+        <default>10</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -19313,7 +19314,7 @@
     <type>unit-mem_port</type>
     <attribute>
         <id>HUID</id>
-        <default>0x004C0006</default>
+        <default>0x004C000C</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -19329,11 +19330,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>ocmb.mp:k0:n0:s0:p00:c06</default>
+        <default>ocmb.mp:k0:n0:s0:p06:c00</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>6</default>
+        <default>12</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -19346,7 +19347,7 @@
     <type>unit-mem_port</type>
     <attribute>
         <id>HUID</id>
-        <default>0x004C0007</default>
+        <default>0x004C000E</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -19362,11 +19363,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>ocmb.mp:k0:n0:s0:p00:c07</default>
+        <default>ocmb.mp:k0:n0:s0:p07:c00</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>7</default>
+        <default>14</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -19379,7 +19380,7 @@
     <type>unit-mem_port</type>
     <attribute>
         <id>HUID</id>
-        <default>0x004C0008</default>
+        <default>0x004C0010</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -19395,11 +19396,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>ocmb.mp:k0:n0:s0:p00:c08</default>
+        <default>ocmb.mp:k0:n0:s0:p08:c00</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>8</default>
+        <default>16</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -19412,7 +19413,7 @@
     <type>unit-mem_port</type>
     <attribute>
         <id>HUID</id>
-        <default>0x004C0009</default>
+        <default>0x004C0012</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -19428,11 +19429,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>ocmb.mp:k0:n0:s0:p00:c09</default>
+        <default>ocmb.mp:k0:n0:s0:p09:c00</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>9</default>
+        <default>18</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -19445,7 +19446,7 @@
     <type>unit-mem_port</type>
     <attribute>
         <id>HUID</id>
-        <default>0x004C000A</default>
+        <default>0x004C0014</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -19461,11 +19462,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>ocmb.mp:k0:n0:s0:p00:c10</default>
+        <default>ocmb.mp:k0:n0:s0:p10:c00</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>10</default>
+        <default>20</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -19478,7 +19479,7 @@
     <type>unit-mem_port</type>
     <attribute>
         <id>HUID</id>
-        <default>0x004C000B</default>
+        <default>0x004C0016</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -19494,11 +19495,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>ocmb.mp:k0:n0:s0:p00:c11</default>
+        <default>ocmb.mp:k0:n0:s0:p11:c00</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>11</default>
+        <default>22</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -19511,7 +19512,7 @@
     <type>unit-mem_port</type>
     <attribute>
         <id>HUID</id>
-        <default>0x004C000C</default>
+        <default>0x004C0018</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -19527,11 +19528,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>ocmb.mp:k0:n0:s0:p00:c12</default>
+        <default>ocmb.mp:k0:n0:s0:p12:c00</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>12</default>
+        <default>24</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -19544,7 +19545,7 @@
     <type>unit-mem_port</type>
     <attribute>
         <id>HUID</id>
-        <default>0x004C000D</default>
+        <default>0x004C001A</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -19560,11 +19561,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>ocmb.mp:k0:n0:s0:p00:c13</default>
+        <default>ocmb.mp:k0:n0:s0:p13:c00</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>13</default>
+        <default>26</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -19577,7 +19578,7 @@
     <type>unit-mem_port</type>
     <attribute>
         <id>HUID</id>
-        <default>0x004C000F</default>
+        <default>0x004C001C</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -19593,11 +19594,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>ocmb.mp:k0:n0:s0:p00:c14</default>
+        <default>ocmb.mp:k0:n0:s0:p14:c00</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>14</default>
+        <default>28</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -19610,7 +19611,7 @@
     <type>unit-mem_port</type>
     <attribute>
         <id>HUID</id>
-        <default>0x004C000F</default>
+        <default>0x004C001E</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -19626,11 +19627,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>ocmb.mp:k0:n0:s0:p00:c15</default>
+        <default>ocmb.mp:k0:n0:s0:p15:c00</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>15</default>
+        <default>30</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -19641,7 +19642,8 @@
 
 <!-- ===================================================================== -->
 <!-- DIMM Units -->
-<!-- 1 per MEM_PORT, a total of 16 per proc -->
+<!-- actual = 1 per MEM_PORT, a total of 16 per proc -->
+<!-- reserved space = 2 per MEM_PORT, a total of 64 per proc -->
 <!-- ===================================================================== -->
 <targetInstance>
     <id>sys0node0dimm0</id>
@@ -19705,7 +19707,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x00030001</default>
+        <default>0x00030004</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -19713,11 +19715,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p01</default>
+        <default>dimm:k0:n0:s0:p04</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>1</default>
+        <default>4</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -19762,7 +19764,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x00030002</default>
+        <default>0x00030008</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -19770,11 +19772,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p02</default>
+        <default>dimm:k0:n0:s0:p08</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>2</default>
+        <default>8</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -19817,7 +19819,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x00030003</default>
+        <default>0x0003000C</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -19825,11 +19827,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p03</default>
+        <default>dimm:k0:n0:s0:p12</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>3</default>
+        <default>12</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -19872,7 +19874,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x00030004</default>
+        <default>0x00030010</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -19880,11 +19882,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p04</default>
+        <default>dimm:k0:n0:s0:p16</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>4</default>
+        <default>16</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -19927,7 +19929,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x00030005</default>
+        <default>0x00030014</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -19935,11 +19937,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p05</default>
+        <default>dimm:k0:n0:s0:p20</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>5</default>
+        <default>20</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -19982,7 +19984,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x00030006</default>
+        <default>0x00030018</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -19990,11 +19992,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p06</default>
+        <default>dimm:k0:n0:s0:p24</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>6</default>
+        <default>24</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -20037,7 +20039,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x00030007</default>
+        <default>0x0003001C</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -20045,11 +20047,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p07</default>
+        <default>dimm:k0:n0:s0:p28</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>7</default>
+        <default>28</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -20092,7 +20094,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x00030008</default>
+        <default>0x00030020</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -20100,11 +20102,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p08</default>
+        <default>dimm:k0:n0:s0:p32</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>8</default>
+        <default>32</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -20147,7 +20149,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x00030009</default>
+        <default>0x00030024</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -20155,11 +20157,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p09</default>
+        <default>dimm:k0:n0:s0:p36</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>9</default>
+        <default>36</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -20202,7 +20204,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x0003000A</default>
+        <default>0x00030028</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -20210,11 +20212,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p10</default>
+        <default>dimm:k0:n0:s0:p40</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>10</default>
+        <default>40</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -20257,7 +20259,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x0003000B</default>
+        <default>0x0003002C</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -20265,11 +20267,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p11</default>
+        <default>dimm:k0:n0:s0:p44</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>11</default>
+        <default>44</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -20312,7 +20314,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x0003000C</default>
+        <default>0x00030030</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -20320,11 +20322,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p12</default>
+        <default>dimm:k0:n0:s0:p48</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>12</default>
+        <default>48</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -20367,7 +20369,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x0003000D</default>
+        <default>0x00030034</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -20375,11 +20377,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p13</default>
+        <default>dimm:k0:n0:s0:p52</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>13</default>
+        <default>52</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -20422,7 +20424,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x0003000E</default>
+        <default>0x00030038</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -20430,11 +20432,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p14</default>
+        <default>dimm:k0:n0:s0:p56</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>14</default>
+        <default>56</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -20477,7 +20479,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x0003000F</default>
+        <default>0x0003003C</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -20485,11 +20487,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p15</default>
+        <default>dimm:k0:n0:s0:p60</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>15</default>
+        <default>60</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -23313,7 +23315,7 @@
     <type>unit-mem_port</type>
     <attribute>
         <id>HUID</id>
-        <default>0x004C0010</default>
+        <default>0x004C0020</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -23329,11 +23331,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>ocmb.mp:k0:n0:s0:p01:c00</default>
+        <default>ocmb.mp:k0:n0:s0:p16:c00</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>16</default>
+        <default>32</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -23698,7 +23700,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x00030010</default>
+        <default>0x00030040</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -23706,11 +23708,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p16</default>
+        <default>dimm:k0:n0:s0:p64</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>16</default>
+        <default>64</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -23805,7 +23807,7 @@
     <type>unit-mem_port</type>
     <attribute>
         <id>HUID</id>
-        <default>0x004C0011</default>
+        <default>0x004C0022</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -23821,11 +23823,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>ocmb.mp:k0:n0:s0:p01:c00</default>
+        <default>ocmb.mp:k0:n0:s0:p17:c00</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>17</default>
+        <default>34</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -24190,7 +24192,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x00030011</default>
+        <default>0x00030044</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -24198,11 +24200,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p17</default>
+        <default>dimm:k0:n0:s0:p68</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>17</default>
+        <default>68</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -24297,7 +24299,7 @@
     <type>unit-mem_port</type>
     <attribute>
         <id>HUID</id>
-        <default>0x004C0012</default>
+        <default>0x004C0024</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -24313,11 +24315,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>ocmb.mp:k0:n0:s0:p01:c00</default>
+        <default>ocmb.mp:k0:n0:s0:p18:c00</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>18</default>
+        <default>26</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -24682,7 +24684,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x00030012</default>
+        <default>0x00030048</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -24690,11 +24692,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p18</default>
+        <default>dimm:k0:n0:s0:p72</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>18</default>
+        <default>72</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -24789,7 +24791,7 @@
     <type>unit-mem_port</type>
     <attribute>
         <id>HUID</id>
-        <default>0x004C0013</default>
+        <default>0x004C0026</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -24805,11 +24807,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>ocmb.mp:k0:n0:s0:p01:c00</default>
+        <default>ocmb.mp:k0:n0:s0:p19:c00</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>19</default>
+        <default>38</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -25174,7 +25176,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x00030013</default>
+        <default>0x0003004C</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -25182,11 +25184,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p19</default>
+        <default>dimm:k0:n0:s0:p76</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>19</default>
+        <default>76</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -25281,7 +25283,7 @@
     <type>unit-mem_port</type>
     <attribute>
         <id>HUID</id>
-        <default>0x004C0014</default>
+        <default>0x004C0028</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -25297,11 +25299,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>ocmb.mp:k0:n0:s0:p01:c00</default>
+        <default>ocmb.mp:k0:n0:s0:p20:c00</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>20</default>
+        <default>40</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -25666,7 +25668,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x00030014</default>
+        <default>0x00030050</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -25674,11 +25676,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p20</default>
+        <default>dimm:k0:n0:s0:p80</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>20</default>
+        <default>80</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -25773,7 +25775,7 @@
     <type>unit-mem_port</type>
     <attribute>
         <id>HUID</id>
-        <default>0x004C0015</default>
+        <default>0x004C002A</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -25789,11 +25791,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>ocmb.mp:k0:n0:s0:p01:c00</default>
+        <default>ocmb.mp:k0:n0:s0:p21:c00</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>21</default>
+        <default>42</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -26158,7 +26160,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x00030015</default>
+        <default>0x00030054</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -26166,11 +26168,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p21</default>
+        <default>dimm:k0:n0:s0:p84</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>21</default>
+        <default>84</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -26265,7 +26267,7 @@
     <type>unit-mem_port</type>
     <attribute>
         <id>HUID</id>
-        <default>0x004C0016</default>
+        <default>0x004C002C</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -26281,11 +26283,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>ocmb.mp:k0:n0:s0:p01:c00</default>
+        <default>ocmb.mp:k0:n0:s0:p22:c00</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>22</default>
+        <default>44</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -26650,7 +26652,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x00030016</default>
+        <default>0x00030058</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -26658,11 +26660,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p22</default>
+        <default>dimm:k0:n0:s0:p88</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>22</default>
+        <default>88</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -26757,7 +26759,7 @@
     <type>unit-mem_port</type>
     <attribute>
         <id>HUID</id>
-        <default>0x004C0017</default>
+        <default>0x004C002E</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -26773,11 +26775,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>ocmb.mp:k0:n0:s0:p01:c00</default>
+        <default>ocmb.mp:k0:n0:s0:p23:c00</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>23</default>
+        <default>46</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -27142,7 +27144,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x00030017</default>
+        <default>0x0003005C</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -27150,11 +27152,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p23</default>
+        <default>dimm:k0:n0:s0:p92</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>23</default>
+        <default>92</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -27249,7 +27251,7 @@
     <type>unit-mem_port</type>
     <attribute>
         <id>HUID</id>
-        <default>0x004C0018</default>
+        <default>0x004C0030</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -27265,11 +27267,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>ocmb.mp:k0:n0:s0:p01:c00</default>
+        <default>ocmb.mp:k0:n0:s0:p24:c00</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>24</default>
+        <default>48</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -27634,7 +27636,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x00030018</default>
+        <default>0x00030060</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -27642,11 +27644,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p24</default>
+        <default>dimm:k0:n0:s0:p96</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>24</default>
+        <default>96</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -27742,7 +27744,7 @@
     <type>unit-mem_port</type>
     <attribute>
         <id>HUID</id>
-        <default>0x004C0019</default>
+        <default>0x004C0032</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -27758,11 +27760,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>ocmb.mp:k0:n0:s0:p01:c00</default>
+        <default>ocmb.mp:k0:n0:s0:p25:c00</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>25</default>
+        <default>50</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -27859,7 +27861,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x00030019</default>
+        <default>0x00030064</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -27867,11 +27869,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p25</default>
+        <default>dimm:k0:n0:s0:p100</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>25</default>
+        <default>100</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -27968,7 +27970,7 @@
     <type>unit-mem_port</type>
     <attribute>
         <id>HUID</id>
-        <default>0x004C001A</default>
+        <default>0x004C0034</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -27984,11 +27986,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>ocmb.mp:k0:n0:s0:p01:c00</default>
+        <default>ocmb.mp:k0:n0:s0:p26:c00</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>26</default>
+        <default>52</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -28085,7 +28087,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x0003001A</default>
+        <default>0x00030068</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -28093,11 +28095,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p26</default>
+        <default>dimm:k0:n0:s0:p104</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>26</default>
+        <default>104</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -28194,7 +28196,7 @@
     <type>unit-mem_port</type>
     <attribute>
         <id>HUID</id>
-        <default>0x004C001B</default>
+        <default>0x004C0036</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -28210,11 +28212,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>ocmb.mp:k0:n0:s0:p01:c00</default>
+        <default>ocmb.mp:k0:n0:s0:p27:c00</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>27</default>
+        <default>54</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -28311,7 +28313,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x0003001B</default>
+        <default>0x0003006C</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -28319,11 +28321,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p27</default>
+        <default>dimm:k0:n0:s0:p108</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>27</default>
+        <default>108</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -28420,7 +28422,7 @@
     <type>unit-mem_port</type>
     <attribute>
         <id>HUID</id>
-        <default>0x004C001C</default>
+        <default>0x004C0038</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -28436,11 +28438,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>ocmb.mp:k0:n0:s0:p01:c00</default>
+        <default>ocmb.mp:k0:n0:s0:p28:c00</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>28</default>
+        <default>56</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -28537,7 +28539,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x0003001C</default>
+        <default>0x00030070</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -28545,11 +28547,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p28</default>
+        <default>dimm:k0:n0:s0:p112</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>28</default>
+        <default>112</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -28646,7 +28648,7 @@
     <type>unit-mem_port</type>
     <attribute>
         <id>HUID</id>
-        <default>0x004C001D</default>
+        <default>0x004C003A</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -28662,11 +28664,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>ocmb.mp:k0:n0:s0:p01:c00</default>
+        <default>ocmb.mp:k0:n0:s0:p29:c00</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>29</default>
+        <default>58</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -28763,7 +28765,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x0003001D</default>
+        <default>0x00030074</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -28771,11 +28773,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p29</default>
+        <default>dimm:k0:n0:s0:p116</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>29</default>
+        <default>116</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -28872,7 +28874,7 @@
     <type>unit-mem_port</type>
     <attribute>
         <id>HUID</id>
-        <default>0x004C001E</default>
+        <default>0x004C003C</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -28888,11 +28890,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>ocmb.mp:k0:n0:s0:p01:c00</default>
+        <default>ocmb.mp:k0:n0:s0:p30:c00</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>30</default>
+        <default>60</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -28989,7 +28991,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x0003001E</default>
+        <default>0x00030078</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -28997,11 +28999,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p30</default>
+        <default>dimm:k0:n0:s0:p120</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>30</default>
+        <default>120</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -29098,7 +29100,7 @@
     <type>unit-mem_port</type>
     <attribute>
         <id>HUID</id>
-        <default>0x004C001F</default>
+        <default>0x004C003E</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -29114,11 +29116,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>ocmb.mp:k0:n0:s0:p01:c00</default>
+        <default>ocmb.mp:k0:n0:s0:p31:c00</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>31</default>
+        <default>62</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -29215,7 +29217,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x0003001F</default>
+        <default>0x0003007C</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -29223,11 +29225,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p31</default>
+        <default>dimm:k0:n0:s0:p124</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>31</default>
+        <default>124</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>

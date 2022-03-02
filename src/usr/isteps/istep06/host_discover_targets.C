@@ -642,9 +642,10 @@ void* host_discover_targets( void *io_pArgs )
     {
         uint8_t l_type = itr->first;
         auto l_val = itr->second;
-        //Only want to display procs, dimms, and cores
+        //Only want to display procs, ocmbs, dimms, and cores
         if((l_type != TARGETING::TYPE_DIMM) &&
            (l_type != TARGETING::TYPE_PROC) &&
+           (l_type != TARGETING::TYPE_OCMB_CHIP) &&
            (l_type != TARGETING::TYPE_CORE))
         {
             continue;

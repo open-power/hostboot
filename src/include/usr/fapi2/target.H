@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -870,7 +870,11 @@ inline void toString(const Target<T, M, V>& i_target, char* io_buffer, size_t i_
     const TARGETING::Target * l_platTarget =
                           static_cast<const TARGETING::Target*>(i_target.get());
 
-    if(!l_platTarget->tryGetAttr<TARGETING::ATTR_FAPI_NAME>(l_nameString))
+    if( nullptr == l_platTarget )
+    {
+        snprintf(io_buffer,i_bsize,"null_target");
+    }
+    else if(!l_platTarget->tryGetAttr<TARGETING::ATTR_FAPI_NAME>(l_nameString))
     {
       FAPI_ERR("ERROR: Can not read FAPI_NAME attribute");
       snprintf(io_buffer, i_bsize, "Target 0x%lx/0x%x", l_platTarget, T);
