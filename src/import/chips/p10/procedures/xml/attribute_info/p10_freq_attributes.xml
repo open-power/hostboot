@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2022                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -191,7 +191,7 @@
   <valueType>uint32</valueType>
   <enum>
     1333 = 1333,
-    1467 = 1467,
+    1466 = 1466,
     1600 = 1600,
     2000 = 2000
   </enum>
