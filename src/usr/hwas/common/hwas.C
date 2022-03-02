@@ -39,6 +39,7 @@
 #include <stdint.h>
 #include <algorithm>
 #include <map>
+#include <vector>
 #include <stdio.h> // sprintf
 
 #ifdef __HOSTBOOT_MODULE
@@ -515,8 +516,6 @@ errlHndl_t discoverGenericI2cDeviceTargetsAndEnable(const Target &i_sysTarget)
  */
 static void deconfigureBussesWithNullPeer()
 {
-    using namespace TARGETING;
-
     const auto sys = UTIL::assertGetToplevelTarget();
 
     TargetHandleList smpgroups;
@@ -537,6 +536,210 @@ static void deconfigureBussesWithNullPeer()
         }
     }
 }
+
+#if defined(__HOSTBOOT_MODULE) && !defined(CONFIG_FSP_BUILD)
+template <typename Iterator, typename T>
+static constexpr bool find(Iterator begin, const Iterator end, const T& value)
+{
+    while(begin != end)
+    {
+        if (*begin == value)
+        {
+            return true;
+        }
+        ++begin;
+    }
+    return false;
+}
+/*
+ * @brief Checks all chips in the system against the MRW established Minimum Ship Level (MSL) EC levels for the given
+ *        chip. If it finds a chip with an EC level not in the list in the MRW then an unrecoverable error will be
+ *        created and committed.
+ *
+ * @param[in] i_mslArray    One of two possible arrays based on the template arg. Either an array of values for
+ *                          ATTR_MSL_MFG_ALLOW or ATTR_MSL_FIELD_SUPPORTED.
+ *
+ * @return   errlHndl_t     An error if any EC mismatches occurred that points to all errors that occurred.
+ *                          Otherwise, nullptr.
+ */
+template<const ATTRIBUTE_ID A>
+errlHndl_t validateEcMslLevels(typename AttributeTraits<A>::TypeStdArr i_mslArray)
+{
+    HWAS_INF(ENTER_MRK"validateEcMslLevels");
+    ///////////////////////////////////////////////////////////////////////////
+    // Compile time assertions about the input data
+    ///////////////////////////////////////////////////////////////////////////
+    static constexpr std::array<ATTRIBUTE_ID, 2> VALID_ATTRIBUTE_IDS =
+    {
+        ATTR_MSL_MFG_ALLOW,
+        ATTR_MSL_FIELD_SUPPORTED,
+    };
+    // The above list are the only acceptable attributes that can be passed into this function. So the following
+    // assert verifies the template arg given is in that list.
+    static_assert(find(VALID_ATTRIBUTE_IDS.begin(), VALID_ATTRIBUTE_IDS.end(), A),
+                  "validateEcMslLevels cannot be called with given ATTRIBUTE_ID");
+    // The reason the array must be even is because its expected that the data is of the form given by mslEntry_t below.
+    // So if there were an array with an odd number of elements passed in then either the iv_chipId or iv_ecLevel member
+    // would be missing when this logic lays the struct down overtop the i_mslArray.
+    static_assert(std::size(i_mslArray) % 2 == 0,
+                  "validateEcMslLevels requires input array to have an even size to "
+                  "hold assumptions about data format.");
+    ///////////////////////////////////////////////////////////////////////////
+
+    typedef uint16_t chipId_t;
+    typedef uint16_t ecLevel_t;
+    struct mslEntry_t
+    {
+        chipId_t iv_chipId;
+        ecLevel_t iv_ecLevel;
+    };
+
+    uint32_t commonPlid = 0;
+    errlHndl_t error = nullptr;
+    size_t numberOfInvalidChips = 0;
+
+    do {
+
+        // @TODO RTC 251152 Remove this if statement once all system MRWs are updated.
+        if (i_mslArray.empty() || i_mslArray[0] == 0)
+        {
+            // The MRW didn't have any MSL EC levels to check against.
+            HWAS_INF("validateEcMslLevels: MSL Array was found to be empty. Skipping MSL_CHECK verification.");
+            break;
+        }
+
+        // Walk the MSL_CHECK array and add each entry to the map.
+        std::map<chipId_t, std::vector<ecLevel_t>> ecLevel_map;
+        auto it = i_mslArray.begin();
+        while (it != i_mslArray.cend())
+        {
+            const mslEntry_t * const entry = reinterpret_cast<mslEntry_t *>(it);
+            if (entry->iv_chipId == 0)
+            {
+                // No more entries to process
+                break;
+            }
+            ecLevel_map[entry->iv_chipId].push_back(entry->iv_ecLevel);
+            // Move to the start of the next entry
+            std::advance(it, 2);
+        }
+
+        // Get a list of all chips in the system. For each one, if it has a chip id in the EC level map then its EC
+        // level must be one of the specified EC levels from the map.
+        TargetHandleList chips;
+        getAllChips(chips, TYPE_NA);
+        for (const auto chip : chips)
+        {
+            // Get chip id
+            ATTR_CHIP_ID_type chipId = 0;
+            ATTR_EC_type ecLevel = 0;
+            if ( !chip->tryGetAttr<ATTR_CHIP_ID>(chipId) ||
+                 !chip->tryGetAttr<ATTR_EC>(ecLevel) )
+            {
+                // Chip doesn't have the necessary attributes, go to the next one.
+                continue;
+            }
+
+            // See if this chip has a chip id in the map.
+            if (ecLevel_map.find(chipId) != ecLevel_map.end())
+            {
+                // Compare EC level to each level in map.
+                const std::vector<ecLevel_t> & validEcLevels = ecLevel_map[chipId];
+                bool matchFound = false;
+                for (const auto level : validEcLevels)
+                {
+                    if (ecLevel == level)
+                    {
+                        // A match was found in the MRW, break out.
+                        matchFound = true;
+                        break;
+                    }
+                }
+                if ( !matchFound )
+                {
+                    HWAS_INF("validateEcMslLevels: Couldn't find a valid EC level in the MSL_CHECK array for "
+                             "HUID 0x%.08X with EC level of 0x%.02X", get_huid(chip), ecLevel);
+                    /*@
+                      * @errortype
+                      * @severity           ERRL_SEV_UNRECOVERABLE
+                      * @moduleid           MOD_VALIDATE_EC_MSL_LEVELS
+                      * @reasoncode         RC_EC_MISMATCH
+                      * @devdesc            Found a chip which has an EC level that is not in the MSL list from the MRW
+                      * @custdesc           An incompatible chip level was found in the system.
+                      * @userdata1[00:31]   HUID of the chip
+                      * @userdata1[32:63]   EC level of the chip
+                      * @userdata2          Unused
+                      */
+                    error = hwasError(ERRL_SEV_UNRECOVERABLE,
+                                      MOD_VALIDATE_EC_MSL_LEVELS,
+                                      RC_EC_MISMATCH,
+                                      TWO_UINT32_TO_UINT64(get_huid(chip), ecLevel),
+                                      0);
+                    platHwasErrorAddHWCallout(error,
+                                              chip,
+                                              SRCI_PRIORITY_HIGH,
+                                              DECONFIG,
+                                              GARD_NULL);
+                    // If an error occurred before then link this one to the earlier one.
+                    hwasErrorUpdatePlid(error, commonPlid);
+                    errlCommit(error, HWAS_COMP_ID);
+                    numberOfInvalidChips++;
+                    // Move onto the next chip.
+                    continue;
+                }
+            }
+            else
+            {
+                // Chip ID not present in MRW list. Move on to the next chip.
+                continue;
+            }
+        }
+    } while(0);
+
+    if (commonPlid != 0)
+    {
+        /*@
+          * @errortype
+          * @severity           ERRL_SEV_UNRECOVERABLE
+          * @moduleid           MOD_VALIDATE_EC_MSL_LEVELS
+          * @reasoncode         RC_FAILED_MSL_EC_VALIDATION
+          * @devdesc            One or more chips had an unsupported EC level compared to the given MRW values.
+          * @custdesc           One or more incompatible chip levels were found in the system.
+          * @userdata1[00:63]   Number of failing chips
+          * @userdata2[00:31]   MSL_CHECK MNFG flag state 1=set,0=unset
+          * @userdata2[32:63]   Unused
+          */
+        error = hwasError(ERRL_SEV_UNRECOVERABLE,
+                          MOD_VALIDATE_EC_MSL_LEVELS,
+                          RC_FAILED_MSL_EC_VALIDATION,
+                          numberOfInvalidChips,
+                          TWO_UINT32_TO_UINT64(isMslChecksSet() ? 1 : 0, 0));
+        hwasErrorUpdatePlid(error, commonPlid);
+    }
+
+    return error;
+
+}
+
+// Wrapper function to call the correct version of the templated validateEcMslLevels function based on the MSL_CHECKS
+// manufacturing flag
+errlHndl_t validateEcMslLevels()
+{
+    const Target* sys = UTIL::assertGetToplevelTarget();
+    errlHndl_t error = nullptr;
+
+    // Check MNFG flag
+    if (TARGETING::isMslChecksSet())
+    {
+        error = validateEcMslLevels<ATTR_MSL_MFG_ALLOW>(sys->getAttrAsStdArr<ATTR_MSL_MFG_ALLOW>());
+    }
+    else
+    {
+        error = validateEcMslLevels<ATTR_MSL_FIELD_SUPPORTED>(sys->getAttrAsStdArr<ATTR_MSL_FIELD_SUPPORTED>());
+    }
+    return error;
+}
+#endif // defined __HOSTBOOT_MODULE not defined CONFIG_FSP_BUILD
 
 errlHndl_t discoverTargets()
 {
@@ -913,6 +1116,17 @@ errlHndl_t HWASDiscovery::discoverTargets()
         {
             break;
         }
+
+#if defined(__HOSTBOOT_MODULE) && !defined(CONFIG_FSP_BUILD)
+        // Check all CHIP targets in the system to ensure that they have an EC level that matches with one of
+        // what the MRW provides. What levels are valid are given by the state of MFG_FLAGS_MNFG_MSL_CHECK.
+        errl = validateEcMslLevels();
+        if (errl)
+        {
+            HWAS_ERR("discoverTargets: validateEcMslLevels failed");
+            break;
+        }
+#endif
 
         //Check all of the secondary processor's EC levels to ensure they match master
         //processor's EC level.

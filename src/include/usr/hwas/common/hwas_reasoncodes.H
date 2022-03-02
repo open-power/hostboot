@@ -47,6 +47,7 @@ namespace HWAS
         MOD_OCMB_IDEC_PHASE_2                   = 0x10,
         MOD_OCMB_TRANSLATE_SPD_IDEC             = 0x11,
         MOD_DECONFIG_TARGETS_FROM_GARD_AND_VPD  = 0x12,
+        MOD_VALIDATE_EC_MSL_LEVELS              = 0x13,
     };
 
     enum HwasReasonCode
@@ -93,7 +94,7 @@ namespace HWAS
         RC_HB_SBE_DECONFIG_MISMATCH              = HWAS_COMP_ID | 0x24,
         RC_HB_SBE_DECONFIG_MISMATCHES_EXIST      = HWAS_COMP_ID | 0x25,
         RC_SYSAVAIL_SBE_NOT_ENOUGH_BACKING_CACHE = HWAS_COMP_ID | 0x26,
-
+        RC_FAILED_MSL_EC_VALIDATION              = HWAS_COMP_ID | 0x27,
     };
 
     enum HwasPlatUserDetailsTypes
