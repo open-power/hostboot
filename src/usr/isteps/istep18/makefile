@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2021
+# Contributors Listed Below - COPYRIGHT 2016,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -48,6 +48,7 @@ EXTRAINCDIR += ${P10_PROCEDURES_PATH}/memory
 EXTRAINCDIR += ${SRC_IMPORT_PATH}/chips/ocmb/explorer/procedures/hwp/memory
 EXTRAINCDIR += ${SRC_IMPORT_PATH}/chips/ocmb/explorer/procedures/hwp/memory/lib
 EXTRAINCDIR += ${SRC_IMPORT_PATH}/chips/ocmb/explorer/common/include
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/
 EXTRAINCDIR += ${SRC_IMPORT_PATH}
 EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/istep18
 

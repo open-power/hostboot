@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2021
+# Contributors Listed Below - COPYRIGHT 2015,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -56,6 +56,8 @@ EXTRAINCDIR += ${EXPLORER_HWP_PATH}/lib/inband/
 EXTRAINCDIR += ${EXPLORER_HWP_PATH}/lib/shared/
 EXTRAINCDIR += ${EXPLORER_COMMON_PATH}/include/
 EXTRAINCDIR += ${P10_PROCEDURE_PATH}/initfiles/
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/generic/memory/lib/
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/
 
 # Add the sub step object files
 OBJS += call_mss_memdiag.o
