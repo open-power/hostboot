@@ -85,9 +85,9 @@ const uint16_t HDAT_VERSION3 = 3;
 #define SVPD_SN_KW_OFFSET                   68
 #define SVPD_SZ_KW_OFFSET                   94
 #define SVPD_DR_KW_OFFSET                   13
-#define SVPD_I_BLK_OFFSET                   164
-#define SVPD_A_BLK_OFFSET                   4264
-#define SVPD_B_BLK_OFFSET                   5292
+#define SVPD_I_BLK_OFFSET                   166
+#define SVPD_A_BLK_OFFSET                   4266
+#define SVPD_B_BLK_OFFSET                   5294
 
 // SPD IPZ keyword sizes
 const uint8_t  SVPD_SN_KW_SIZE = 12; /**< FRU Serial Number size */
