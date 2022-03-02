@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -109,6 +109,8 @@ namespace Bootloader
         RC_TPM_PCR_EXTEND_FAIL     = HBBL_COMP_ID | 0x25,  /**< TPM PCR extend failed */
         RC_SPI_RESET_FAIL          = HBBL_COMP_ID | 0x26,  /**< Failed to reset SPI enging */
         RC_SPI_CLR_ERR_FAIL        = HBBL_COMP_ID | 0x27,  /**< Failed to clear SPI status errors */
+        //termination_rc
+        RC_BAD_PROTECTED_SIZE_LEN  = HBBL_COMP_ID | 0x28,  /**< Protected Size of HBB is too large */
 
         RC_TPM_INITIALIZE          = 0x100, /**< Special TPM RC that signals if TPM's been initialized already */
 

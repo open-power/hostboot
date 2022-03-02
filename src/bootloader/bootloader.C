@@ -72,6 +72,11 @@ extern char bootloader_end_address;
 const uint64_t XSCOM_BAR_MASK = 0xFF000003FFFFFFFFULL;
 const uint64_t LPC_BAR_MASK = 0xFF000000FFFFFFFFULL;
 
+
+// Offset into the secure header of the hash and size of protected payload
+const uint16_t CONTENT_HASH_OFFSET = 1085;
+const uint16_t CONTENT_PROTECTED_SIZE_OFFSET = CONTENT_HASH_OFFSET - 8;
+
 namespace Bootloader{
 
     /**
@@ -277,7 +282,6 @@ namespace Bootloader{
      *
      * @param[in] i_pContainer  Void pointer to effective address
      *                          of container
-     * NOTE : no-op if Config Secureboot not enabled.
      *
      * @return N/A
      */
@@ -291,6 +295,44 @@ namespace Bootloader{
         if (!g_blData->blToHbData.secureAccessBit)
         {
             BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_SAB_UNSET);
+
+            // In non-secure mode the following will happen:
+            // 1) Assume that the Container starts with a secureboot header
+            // 2) Measure the container from after the secureboot header until the end
+            //    - Use the "protected size" value in the secure header for the measurement
+            //    - This ensures that we are measuring (and eventually extending to the TPM)
+            //      EXACTLY what is being loaded on the system
+            // 3) Put the hash value from that measurement into the secureboot header
+            //    - The call_rom_SHA512() function below accomplishes tasks 2 and 3 at the same time
+
+            // Set startAddr to SHA512_HASH_FUNCTION_OFFSET ROM_verify() function at an offset of Secure ROM
+            uint64_t l_rom_SHA512_startAddr =
+                reinterpret_cast<const uint64_t>(g_blData->blToHbData.secureRom)
+                + g_blData->blToHbData.branchtableOffset
+                + SHA512_HASH_FUNCTION_OFFSET;
+
+            // In non-secure mode must skip past the secure header at the start of the container
+            uint8_t* l_pContainer = reinterpret_cast<uint8_t*>(const_cast<void*>(i_pContainer));
+            uint8_t* l_blob_addr = l_pContainer + PAGE_SIZE;
+
+            // While the protected size section in the secure header is 8 bytes/uint64_t,
+            // the hash function takes in a uint32_t
+            uint64_t l_protectedSize_u64 = 0;
+            memcpy(&l_protectedSize_u64,
+                   l_pContainer + CONTENT_PROTECTED_SIZE_OFFSET,
+                   sizeof(l_protectedSize_u64));
+            uint32_t l_protectedSize = l_protectedSize_u64;
+
+            // Location of hash of the "protected payload" into the secure header
+            // - This location is used for extending the hash to the TPM
+            uint64_t l_hash = reinterpret_cast<uint64_t>(i_pContainer) +
+                                  CONTENT_HASH_OFFSET;
+
+            call_rom_SHA512(reinterpret_cast<void*>(l_rom_SHA512_startAddr),
+                            l_blob_addr,
+                            l_protectedSize,
+                            reinterpret_cast<SHA512_t*>(l_hash));
+
         }
         // Terminate if a valid securerom is not present
         else if ( !g_blData->secureRomValid )
@@ -495,7 +537,7 @@ namespace Bootloader{
 
         return l_rc;
     }
-#endif
+#endif // end of NOT CONFIG_VPO_COMPILE
 
     /** Bootloader main function to work with and start HBB.
      *
@@ -597,6 +639,7 @@ namespace Bootloader{
             bool l_hbbEcc =
                 ( g_blData->bl_hbbSection.integrity == FFS_INTEG_ECC_PROTECT);
 
+            // workingLength will be larger than l_hbbLength if ECC exists
             uint32_t workingLength= (l_hbbEcc) ?
                 (l_hbbLength * LENGTH_W_ECC)/LENGTH_WO_ECC : l_hbbLength;
 
@@ -679,7 +722,46 @@ namespace Bootloader{
                 // Get Key-Addr Mapping from SBE HBBL communication area
                 setKeyAddrMapData(l_src_addr);
 
+
+
 #ifndef CONFIG_VPO_COMPILE // No secureboot in VPO - no need to verify
+
+                // Only copy protected size amount as designated in the secure header
+                // Perform a sanity check that the protected size value is within realistic limits
+                // before verifying the protected payload since the value in the header is untrusted
+                uint64_t l_protectedSize = 0;
+                memcpy(&l_protectedSize,
+                       reinterpret_cast<uint8_t*>(l_src_addr) + CONTENT_PROTECTED_SIZE_OFFSET,
+                       sizeof(l_protectedSize));
+
+                // Check that protectedSize length is not too large
+                if((l_protectedSize > (MEGABYTE-WORDSIZE)) ||
+                   (l_protectedSize > l_hbbLength))
+                {
+                    BOOTLOADER_TRACE(BTLDR_TRC_BAD_PROTECTED_SIZE_LEN);
+                    /*@
+                     * @errortype
+                     * @moduleid         Bootloader::MOD_BOOTLOADER_MAIN
+                     * @reasoncode       Bootloader::RC_BAD_PROTECTED_SIZE_LEN
+                     * @userdata1[0:15]  TI_WITH_SRC
+                     * @userdata1[16:31] TI_BOOTLOADER
+                     * @userdata1[32:63] Failing address = 0
+                     * @userdata2[0:31]  Protected Size Length from Secure Header
+                     * @userdata2[32:63] Length of data from TOC (bytes)
+                     * @errorInfo[0:31]  Max space available (bytes)
+                     * @devdesc  Not enough memory to load boot firmware
+                     * @custdesc Failed to load boot firmware
+                     */
+                    bl_terminate(
+                        MOD_BOOTLOADER_MAIN,
+                        RC_BAD_PROTECTED_SIZE_LEN,
+                        l_protectedSize,
+                        l_hbbLength,
+                        true,
+                        0,
+                        (MEGABYTE-WORDSIZE));
+                }
+
                 // ROM verification of HBB image
                 verifyContainer(l_src_addr);
 
@@ -687,9 +769,8 @@ namespace Bootloader{
                 // Grab the HBB content signature hash out of the secureboot
                 // header and extended into TPM
 
-                // Current offset of the hash of protected payload into the
+                // Current offset of the hash of protected payload in the
                 // secure header
-                const uint16_t CONTENT_HASH_OFFSET = 1085;
                 uint8_t* l_hash = reinterpret_cast<uint8_t*>(l_src_addr) +
                                   CONTENT_HASH_OFFSET;
 
@@ -713,18 +794,14 @@ namespace Bootloader{
                 if (isEnforcedSecureSection(PNOR::HB_BASE_CODE))
                 {
                     l_src_addr += PAGE_SIZE/sizeof(uint64_t);
-                    l_hbbLength -= PAGE_SIZE;
                 }
 
-#endif // CONFIG_VPO_COMPILE
+#endif // end of NOT CONFIG_VPO_COMPILE
 
                 // Copy HBB image into address where it executes
-                for(uint32_t i = 0;
-                    i < l_hbbLength / sizeof(uint64_t);
-                    i++)
-                {
-                    l_dest_addr[i] = l_src_addr[i];
-                }
+                memcpy(l_dest_addr,
+                       l_src_addr,
+                       l_protectedSize);
                 BOOTLOADER_TRACE(BTLDR_TRC_MAIN_COPY_HBB_DONE);
 
                 //Set core scratch 3 to say hbb image is starting
@@ -763,7 +840,7 @@ namespace Bootloader{
             // Note getHBBSection should have TI'd so won't get here
             BOOTLOADER_TRACE_W_BRK(BTLDR_TRC_MAIN_GETHBBSECTION_FAIL);
         }
-#endif
+#endif // end of NOT CONFIG_VPO_COMPILE
 
         return 0;
     }

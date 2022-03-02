@@ -87,6 +87,9 @@ enum BootloaderTraces
     /** Bootloader main working length too big */
     BTLDR_TRC_BAD_WORK_LEN                   = 0x1C,
 
+    /** Bootloader Protected Size of HBB is too big */
+    BTLDR_TRC_BAD_PROTECTED_SIZE_LEN         = 0x1D,
+
     /** Bootloader handleMMIO started */
     BTLDR_TRC_HANDLEMMIO_START               = 0x20,
 

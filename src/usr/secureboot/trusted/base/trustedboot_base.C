@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -373,7 +373,7 @@ errlHndl_t extendPnorSectionHash(
         break;
     }
 
-    TRACDCOMP(g_trac_trustedboot, ENTER_MRK " extendPnorSectionHash for "
+    TRACUCOMP(g_trac_trustedboot, ENTER_MRK " extendPnorSectionHash for "
         "section: %s",sectionInfo.name);
 
     const size_t protectedSize = i_conHdr.payloadTextSize();
@@ -420,7 +420,12 @@ errlHndl_t extendPnorSectionHash(
     bool sendAsync = true;
     const TpmTarget* pTpm = nullptr;
 
-    if (SECUREBOOT::enabled())
+
+    // NOTE: HB_BASE_CODE is a special case:
+    // - HBBL strips ECC and remeasures the HBB code before loading it into memory
+    // - It puts the hash of this measurement into the secureheader (ie, payloadTextHash)
+    // - By going down the secure path here, this hash will be extended into the TPM
+    if (SECUREBOOT::enabled() || (i_sec == PNOR::HB_BASE_CODE))
     {
         // If secureboot is enabled, use protected hash in header
         pError = TRUSTEDBOOT::pcrExtend(pnorHashPcr,
@@ -488,7 +493,7 @@ errlHndl_t extendPnorSectionHash(
 
     } while(0);
 
-    TRACDCOMP(g_trac_trustedboot, EXIT_MRK " extendPnorSectionHash");
+    TRACUCOMP(g_trac_trustedboot, EXIT_MRK " extendPnorSectionHash");
 
 #endif
 
@@ -501,7 +506,7 @@ errlHndl_t extendBaseImage()
 
 #ifdef CONFIG_TPMDD
 
-    TRACDCOMP(g_trac_trustedboot, ENTER_MRK " extendBaseImage()");
+    TRACUCOMP(g_trac_trustedboot, ENTER_MRK " extendBaseImage()");
 
     do {
 
@@ -539,27 +544,10 @@ errlHndl_t extendBaseImage()
         break;
     }
 
-    // TPM extension of PNOR sections operates differently when SecureMode is
-    // enabled/disabled.  Provide all possible info and let TPM code handle
-    // the logic
-    PNOR::SectionInfo_t l_info;
-    pError = getSectionInfo(PNOR::HB_BASE_CODE, l_info);
-    if(pError)
-    {
-        TRACFCOMP(g_trac_trustedboot, ERR_MRK "Failed in call to "
-            "getSectionInfo for HBB section");
-        break;
-    }
-
-    if(l_info.vaddr == 0)
-    {
-        assert(false,"BUG! In extendBaseImage(), HBB virtual address was 0");
-    }
-
-    const void* pHbbVa = reinterpret_cast<const void*>(l_info.vaddr);
-
-    TRACDBIN(g_trac_trustedboot,"PNOR Base Code",pHbbVa,
-             TRUSTEDBOOT::DEFAULT_BIN_TRACE_SIZE);
+    // HBBL puts the Hash of HBB into the header for both secure and non-secure mode,
+    // so can pass nullptr into extendPnorSectionHash()'s i_vaddr parameter -
+    // the hbbContainerHeader is enough
+    const void* pHbbVa = nullptr;
 
     // Extend the HBB measurement to the TPM
     pError = extendPnorSectionHash(
@@ -576,7 +564,7 @@ errlHndl_t extendBaseImage()
 
     } while(0);
 
-    TRACDCOMP(g_trac_trustedboot, EXIT_MRK " extendBaseImage()");
+    TRACUCOMP(g_trac_trustedboot, EXIT_MRK " extendBaseImage()");
 
 #endif
 
