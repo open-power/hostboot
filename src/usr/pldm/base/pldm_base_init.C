@@ -186,6 +186,16 @@ void base_init(errlHndl_t& o_errl)
         ERRORLOG::errlCommit(o_errl, PLDM_COMP_ID);
         /* Give ErrlManager a chance to handle committed log */
         task_yield();
+        /*@
+         * @moduleid         MOD_BASE_INIT
+         * @reasoncode       RC_BASE_INIT_FAIL
+         * @userdata1        unused
+         * @userdata2        unused
+         * @devdesc          Since HB failed to init PLDM error logs will not
+         *                   make it to BMC. Shutting down and forcing BMC to
+         *                   dump HB
+         * @custdesc         Internal firmware error
+         */
         INITSERVICE::doShutdown(RC_BASE_INIT_FAIL);
         assert(false, "pldm_base_init: should never return from doShutdown");
     }
