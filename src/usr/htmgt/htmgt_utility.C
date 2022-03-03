@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,7 +58,6 @@ namespace HTMGT
                  " %08X, sev: 0x%02X, fw:%c",
                  i_modid, i_rc, i_data1, i_data2, i_data3, i_data4,
                  i_sev, i_addFwCallout?'y':'n');
-        // TODO RTC 124739 - RAS review what logs need fw callout
 
         if (NULL == io_err)
         {

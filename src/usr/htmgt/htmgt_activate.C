@@ -212,7 +212,7 @@ namespace HTMGT
             }
             else
             {
-                TMGT_INF("getPowerLimit: active %d limit 0x%X", active, limit);
+                TMGT_INF("getPowerLimit: active=%c, limit=%dW", active?'y':'n', limit);
             }
 #endif
 
@@ -220,7 +220,7 @@ namespace HTMGT
             {
                 //Make sure this value is between the min & max allowed
                 bool is_redundant;
-                min = sys->getAttr<ATTR_MIN_POWER_CAP_WATTS>();
+                min = sys->getAttr<ATTR_SOFT_MIN_POWER_CAP_WATTS>();
                 max = getMaxPowerCap(sys, is_redundant);
                 if ((limit != 0) && (limit < min))
                 {
@@ -271,7 +271,7 @@ namespace HTMGT
                 data[0] = limit >> 8;
                 data[1] = limit & 0xFF;
 
-                TMGT_INF("sendOccUserPowerCap: Sending power cap %dW to OCC %d",
+                TMGT_INF("sendOccUserPowerCap: Sending power cap %dW to OCC%d",
                          limit, occ->getInstance());
                 if (limit > 0)
                 {

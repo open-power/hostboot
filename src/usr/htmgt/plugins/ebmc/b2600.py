@@ -23,7 +23,32 @@
 #
 # IBM_PROLOG_END_TAG
 import json
-from udparsers.helpers.errludP_Helpers import hexConcat, memConcat, intConcat
+from udparsers.helpers.errludP_Helpers import hexConcat, memConcat, intConcat, hexDump
+
+# ###################################################
+# Used to convert attention types to readable string
+# ###################################################
+def occCmdToStr(i_type):
+
+    cmdTypes = { "00": "POLL",
+                  "12": "CLEAR_ELOG",
+                  "20": "SET_MODE_AND_STATE",
+                  "21": "SET_CONFIG_DATA",
+                  "22": "SET_POWER_CAP",
+                  "25": "RESET_PREP",
+                  "30": "SEND_AMBIENT",
+                  "40": "DEBUG_PASSTHROUGH",
+                  "41": "AME_PASSTHROUGH",
+                  "42": "GET_FIELD_DEBUG_DATA",
+                  "53": "MFG_TEST" }
+
+    cmdTypeStr = "Unknown " + i_type
+
+    if i_type.lower() in cmdTypes:
+        cmdTypeStr = "0x" + i_type + " " + cmdTypes[i_type.lower()]
+
+    return cmdTypeStr
+
 
 class errludP_htmgt:
     def UdParserHtmgtData(ver, data):
@@ -91,9 +116,10 @@ class errludP_htmgt:
             subd2['Role'], i=hexConcat(data, i, i+1)
             subd2['Master Capable']=bool(data[i])
             i += 1
-            subd2['Mode'], i=hexConcat(data, i, i+1)
             subd2['Comm Established']=bool(data[i])
-            i += (1 + 2) #Skip over reserved bytes
+            i += 1
+            subd2['Mode'], i=hexConcat(data, i, i+1)
+            subd2['reserved'], i=hexConcat(data, i, i+2)
             subd2['Failed']=bool(data[i])
             i += 1
             subd2['Needs Reset']=bool(data[i])
@@ -130,9 +156,68 @@ class errludP_htmgt:
         jsonStr = json.dumps(d, indent = 2)
         return jsonStr
 
+    def UdParserOCCCmd(ver, data):
+        d = dict()
+        subd = dict()
+        i = 0
+        #numOccs = data[i]
+        #i += 1
+        subd['Sequence'], i=hexConcat(data, i, i+1)
+        cmd, i=memConcat(data, i, i+1)
+        subd['OCC Command String'] = occCmdToStr(cmd)
+        subd['Data Length'], i=hexConcat(data, i, i+2)
+        while i < len(data):
+            subd['0x%0*X'%(4,i)], i=hexConcat(data, i, i+16)
+
+        d['OCC Command']=subd
+        jsonStr = json.dumps(d, indent = 2)
+        return jsonStr
+
+
+    def UdParserOCCRsp(ver, data):
+        d = dict()
+        subd = dict()
+        i = 0
+        #numOccs = data[i]
+        #i += 1
+        subd['Sequence'], i=hexConcat(data, i, i+1)
+        cmd, i=memConcat(data, i, i+1)
+        subd['OCC Command String'] = occCmdToStr(cmd)
+        subd['Rsp Status'], i=hexConcat(data, i, i+1)
+        subd['Data Length'], i=hexConcat(data, i, i+2)
+        if (cmd == 0):
+            status, _= intConcat(data, i, i+2)
+            if (status & 0x00ff) != 0:
+                statusString, i= hexConcat(data, i, i+2)
+                statusString += " -"
+                if (status & 0x0080):
+                    statusString += " Throttle-ProcOverTemp"
+                if (status & 0x0040):
+                    statusString += " Throttle-Power"
+                if (status & 0x0020):
+                    statusString += " MemThrot-OverTemp"
+                if (status & 0x0010):
+                    statusString += " QuickPowerDrop"
+                if (status & 0x0008):
+                    statusString +=  " Throttle-VddOverTemp"
+                subd['Status']=statusString
+            else:
+                subd['Status'], i=hexConcat(data, i, i+2)
+        while i < len(data):
+            subd['0x%0*X'%(4,i)], i=hexConcat(data, i, i+16)
+
+        d['OCC Response']=subd
+        jsonStr = json.dumps(d, indent = 2)
+        return jsonStr
+
+
 #Dictionary with parser functions for each subtype
 #Values are from tmgtElogSubsecTypes in src/usr/htmgt/htmgt_utility.H
-tmgtElogSubsecTypes = { 16: "UdParserHtmgtData" }
+tmgtElogSubsecTypes = {
+        13: "UdParserOCCCmd",
+        14: "UdParserOCCRsp",
+        16: "UdParserHtmgtData"
+        }
 
 def parseUDToJson(subType, ver, data):
     args = (ver, data)

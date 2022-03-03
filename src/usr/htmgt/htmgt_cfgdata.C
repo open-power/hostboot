@@ -268,12 +268,36 @@ namespace HTMGT
                     if (OccManager::occNeedsReset())
                     {
                         TMGT_ERR("sendOccConfigData(): OCCs need to be reset");
+                        // No reason to keep sending config data for this OCC
+                        break;
                     }
 
                 } // for each config format
                 occ->invalidateHomer();
 
+                if (OccManager::occNeedsReset())
+                {
+                    // All OCCs are going to be reset so no need to continue
+                    break;
+                }
+
             } // for each OCC
+        }
+
+        if ((nullptr == l_err) && (OccManager::occNeedsReset()))
+        {
+            /*@
+             * @errortype
+             * @reasoncode HTMGT_RC_OCC_UNEXPECTED_STATE
+             * @moduleid  HTMGT_MOD_SEND_OCC_CONFIG
+             * @userdata1 requested config format
+             * @devdesc Failed to send all required config data
+             */
+            bldErrLog(l_err,
+                      HTMGT_MOD_SEND_OCC_CONFIG,
+                      HTMGT_RC_OCC_UNEXPECTED_STATE,
+                      i_requestedFormat, 0, 0, 0,
+                      ERRORLOG::ERRL_SEV_INFORMATIONAL);
         }
 
         return l_err;
@@ -982,8 +1006,7 @@ void getSystemConfigMessageData(const Occ &i_occ,
     index += 4;
 
     // processor frequency sensor id
-    ++SensorID1; // TODO - get correct sensor
-    memcpy(&o_data[index], &SensorID1, 4);
+    memset(&o_data[index], 0, 4);
     index += 4;
 
     //Next 12*4 bytes are for core sensors.

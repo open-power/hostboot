@@ -343,12 +343,12 @@ namespace HTMGT
                 l_dataSize = OCC_TRACE_BUFFER_SIZE;
             }
 
-            // Add trace buffer to error log
-            io_errl->addFFDC( HTMGT_COMP_ID,
+            // Add OCC trace buffer to error log
+            io_errl->addFFDC( OCCC_COMP_ID,
                               l_sramData,
                               l_dataSize,
-                              1, //version
-                              SUBSEC_ADDITIONAL_SRC );
+                              4, //version
+                              0x02 );
 #ifdef CONFIG_CONSOLE_OUTPUT_OCC_COMM
                     char header[64];
                     sprintf(header, "OCC Trace 0x%08X: (0x%04X bytes)",
@@ -455,94 +455,6 @@ namespace HTMGT
 #endif
         return pError;
     }
-
-
-    // Set power mode on master OCC
-    errlHndl_t Occ::setMode(const uint8_t i_mode,
-                            const uint16_t i_freq)
-    {
-        errlHndl_t l_err = nullptr;
-
-        if (OCC_ROLE_MASTER == iv_role)
-        {
-            const uint8_t l_cmdData[] =
-            {
-                0x30, // version
-                0x00, // state
-                i_mode,
-                uint8_t(i_freq >> 8), // frequency for FFO or SFP
-                uint8_t(i_freq & 0xFF),
-                0x00  // reserved
-            };
-
-            if (i_mode == POWERMODE_FFO)
-            {
-                TMGT_INF("setMode: Setting Fixed Frequency Override (%d MHz)",
-                         i_freq);
-            }
-            else if (i_mode == POWERMODE_SFP)
-            {
-                TMGT_INF("setMode: Setting Static Frequency Point (0x%04X)",
-                         i_freq);
-            }
-            else
-            {
-                TMGT_INF("setMode: Setting power mode 0x%02X", i_mode);
-            }
-            OccCmd cmd(this, OCC_CMD_SET_STATE,
-                       sizeof(l_cmdData), l_cmdData);
-            l_err = cmd.sendOccCmd();
-            if (l_err != nullptr)
-            {
-                TMGT_ERR("setMode: Failed to set OCC%d mode to 0x%04X, "
-                         "rc=0x%04X", iv_instance, i_mode, l_err->reasonCode());
-            }
-            else
-            {
-                if (OCC_RC_SUCCESS != cmd.getRspStatus())
-                {
-                    TMGT_ERR("setmode: Set OCC%d mode failed"
-                             " with OCC status 0x%02X",
-                             iv_instance, cmd.getRspStatus());
-                    /*@
-                     * @errortype
-                     * @moduleid HTMGT_MOD_SET_MODE
-                     * @reasoncode HTMGT_RC_OCC_CMD_FAIL
-                     * @userdata1[0-31] OCC instance
-                     * @userdata1[32-63] Requested mode
-                     * @userdata2[0-31] OCC response status
-                     * @userdata2[32-63] current OCC state
-                     * @devdesc Set of OCC mode failed
-                     */
-                    bldErrLog(l_err, HTMGT_MOD_SET_MODE,
-                              HTMGT_RC_OCC_CMD_FAIL,
-                              iv_instance, i_mode,
-                              cmd.getRspStatus(), iv_state,
-                              ERRORLOG::ERRL_SEV_INFORMATIONAL);
-                }
-            }
-        }
-        else
-        {
-            TMGT_ERR("setMode: Mode only allowed to be set on master OCC");
-            /*@
-             * @errortype
-             * @moduleid HTMGT_MOD_SET_MODE
-             * @reasoncode HTMGT_RC_INTERNAL_ERROR
-             * @userdata1  OCC instance
-             * @userdata2  Requested mode
-             * @devdesc Set mode only allowed on master OCC
-             */
-            bldErrLog(l_err, HTMGT_MOD_SET_MODE,
-                      HTMGT_RC_INTERNAL_ERROR,
-                      0, iv_instance, 0, i_mode,
-                      ERRORLOG::ERRL_SEV_INFORMATIONAL);
-        }
-
-        return l_err;
-
-    } // end Occ::setMode()
-
 
 
 } // end namespace

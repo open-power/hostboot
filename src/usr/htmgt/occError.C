@@ -51,7 +51,6 @@ namespace HTMGT
 
         // Loop through the occPriorityXlate until we find a priority or
         // reach the end of the struct.
-        // TODO RTC 124739 - convert to use lower_bound
         while (l_index < OCC_SRCI_PRIORITY_XLATE_SIZE)
         {
             //If the priority matches then return the SRC.
@@ -74,7 +73,6 @@ namespace HTMGT
     {
         bool l_found = false;
 
-        // TODO RTC 124739 - convert to use lower_bound
         for (uint16_t l_index = 0 ; l_index < TMGT_MAX_COMP_IDS ; l_index++)
         {
             if (i_compId == tmgt_compXlateTable[l_index].compId)

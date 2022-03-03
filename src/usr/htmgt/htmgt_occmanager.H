@@ -280,18 +280,6 @@ namespace HTMGT
 
 
             /**
-             * @brief Set the system power mode.  Command will
-             *        go to the master OCC.
-             *
-             * @param[in]  i_mode   Desired Power Mode
-             * @param[in]  i_freq   Desired frequency for FFO or SFP mode
-             *
-             * @return NULL on success, or error handle on failure
-             */
-            static errlHndl_t setMode(const uint8_t  i_mode,
-                                      const uint16_t i_freq = 0);
-
-            /**
              * @brief Query the Mode and functions of the system
              *
              * @param[out] o_length Length of data returned in o_data
@@ -331,6 +319,7 @@ namespace HTMGT
             powerMode               iv_mode;
             uint16_t                iv_freqPoint; // for FFO/SFP
             bool                    iv_occsAreRunning;
+            bool                    iv_needsReset;
 
 
             /**
@@ -443,10 +432,6 @@ namespace HTMGT
             /** See validateOccsPresent() above */
             uint8_t _validateOccsPresent(const uint8_t i_present,
                                          const uint8_t i_instance);
-
-            /** See setMode() above */
-            errlHndl_t _setMode(const uint8_t  i_mode,
-                                const uint16_t i_freq = 0);
 
             /** See queryModeAndFunction() above */
             errlHndl_t _queryModeAndFunction(uint16_t & o_length, uint8_t *o_data);

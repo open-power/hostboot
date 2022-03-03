@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -88,14 +88,16 @@ namespace HTMGT
                     errlHndl_t poll_err=l_occ->pollForErrors(i_flushAllErrors);
                     if (poll_err != nullptr)
                     {
-                        if (l_err == nullptr)
+                        if (l_first_err == nullptr)
                         {
                             // Only return 1st error (continue to poll others)
-                            l_err = poll_err;
+                            l_first_err = poll_err;
                             poll_err = nullptr;
                         }
                         else
                         {
+                            // Link PLID to first error
+                            l_err->plid(l_first_err->plid());
                             ERRORLOG::errlCommit(poll_err, HTMGT_COMP_ID);
                         }
                     }

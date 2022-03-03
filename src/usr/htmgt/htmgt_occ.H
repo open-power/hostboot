@@ -360,19 +360,6 @@ namespace HTMGT
             void invalidateHomer();
 
 
-            /**
-             * @brief Set the mode of the OCC.
-             *        This is only allowed on the master OCC
-             *
-             * @param[in]  i_mode   Desired power mode
-             * @param[in]  i_freq   Frequency for FFO or SFP modes
-             *
-             * @return NULL on success, or error handle on failure
-             */
-            errlHndl_t setMode(const uint8_t i_mode,
-                               const uint16_t i_freq = 0);
-
-
         private:   // functions
 
             /**

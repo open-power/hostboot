@@ -98,8 +98,6 @@ namespace HTMGT
                             }
 
 #ifdef __HOSTBOOT_RUNTIME
-                            // TODO RTC 124738  Final solution TBD
-                            //  Perhapse POLL scom 0x6a214 until bit 31 is set?
                             nanosleep(1,0);
 #endif
 
@@ -107,20 +105,29 @@ namespace HTMGT
                             TMGT_INF("Send initial poll to all OCCs to"
                                      " establish comm");
                             l_err = OccManager::sendOccPoll();
-                            if (l_err)
+                            if (OccManager::occNeedsReset())
                             {
-                                if (OccManager::occNeedsReset())
+                                if (l_err == nullptr)
                                 {
-                                    // No need to continue if reset is required
-                                    TMGT_ERR("processOccStartStatus(): "
-                                            "OCCs need to be reset");
-                                    break;
+                                    /*@
+                                     * @errortype
+                                     * @reasoncode HTMGT_RC_OCC_UNEXPECTED_STATE
+                                     * @moduleid  HTMGT_MOD_LOAD_START_STATUS
+                                     * @devdesc OCC needs reset after initial poll
+                                     */
+                                    bldErrLog(l_err,
+                                              HTMGT_MOD_LOAD_START_STATUS,
+                                              HTMGT_RC_OCC_UNEXPECTED_STATE,
+                                              0, 0, 0, 1,
+                                              ERRORLOG::ERRL_SEV_INFORMATIONAL);
                                 }
-                                else
-                                {
-                                    // Continue even if failed (will be retried)
-                                    ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
-                                }
+                                // No need to continue if reset is required
+                                break;
+                            }
+                            else if (l_err)
+                            {
+                                // Continue even if polls failed (will retried)
+                                ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
                             }
                             skip_comm = false;
 
@@ -142,6 +149,16 @@ namespace HTMGT
                             l_err = waitForOccState();
                             if ( l_err )
                             {
+                                break;
+                            }
+
+                            if (OccManager::occNeedsReset())
+                            {
+                                bldErrLog(l_err,
+                                          HTMGT_MOD_LOAD_START_STATUS,
+                                          HTMGT_RC_OCC_UNEXPECTED_STATE,
+                                          0, 0, 0, 0,
+                                          ERRORLOG::ERRL_SEV_INFORMATIONAL);
                                 break;
                             }
 
@@ -929,51 +946,16 @@ namespace HTMGT
 
 
                     case PASSTHRU_SET_MODE:
-                        if ((i_cmdLength == 2) || (i_cmdLength == 4))
-                        {
-                            const uint8_t mode = i_cmdData[1];
-                            uint16_t freq = 0;
-                            if (IS_VALID_MODE(mode))
-                            {
-                                if ((mode == POWERMODE_SFP) ||
-                                    (mode == POWERMODE_FFO))
-                                {
-                                    if (i_cmdLength == 4)
-                                    {
-                                        freq = UINT16_GET(&i_cmdData[2]);
-                                        TMGT_INF("passThruCommand: Set mode %d "
-                                                 "(0x%04X / %d)",
-                                                 mode, freq, freq);
-                                        err = OccManager::setMode(mode, freq);
-                                    }
-                                    else
-                                    {
-                                        TMGT_ERR("passThruCommand: Set mode %d "
-                                                 "requires 4 bytes (not %d)",
-                                                 mode, i_cmdLength);
-                                        failingSrc = HTMGT_RC_INVALID_LENGTH;
-                                    }
-                                }
-                                else
-                                {
-                                    TMGT_INF("passThruCommand: Set mode %d",
-                                             mode);
-                                    err = OccManager::setMode(mode);
-                                }
-                            }
-                            else
-                            {
-                                TMGT_ERR("passThruCommand: Invalid mode %d",
-                                         mode);
-                                failingSrc = HTMGT_RC_INVALID_DATA;
-                            }
-                        }
-                        else
-                        {
-                            TMGT_ERR("passThruCommand: Set mode %d "
-                                     "requires 2 bytes (not %d)", i_cmdLength);
-                            failingSrc = HTMGT_RC_INVALID_LENGTH;
-                        }
+                        TMGT_ERR("passThruCommand: Set Mode not supported");
+                        /*@
+                         * @errortype
+                         * @reasoncode   HTMGT_RC_NO_SUPPORT
+                         * @moduleid     HTMGT_MOD_PASS_THRU
+                         * @userdata1    command data[0-7]
+                         * @userdata2    command data length
+                         * @devdesc      SET_MODE not supported (use BMC)
+                         */
+                        failingSrc = HTMGT_RC_NO_SUPPORT;
                         break;
 
 

@@ -56,7 +56,8 @@ namespace HTMGT
         iv_state(OCC_STATE_UNKNOWN),
         iv_targetState(OCC_STATE_ACTIVE),
         iv_sysResetCount(0),
-        iv_occsAreRunning(false)
+        iv_occsAreRunning(false),
+        iv_needsReset(false)
     {
     }
 
@@ -71,6 +72,7 @@ namespace HTMGT
     void OccManager::_removeAllOccs()
     {
         iv_occsAreRunning = false;
+        iv_needsReset = false;
         iv_occMaster = nullptr;
         if (iv_occArray.size() > 0)
         {
@@ -267,7 +269,7 @@ namespace HTMGT
             errlHndl_t err2 = setOccEnabledSensors(false);
             if (err2)
             {
-                TMGT_ERR("_buildOccs: Set OCC enabled sensors to false failed");
+                TMGT_ERR("_buildOccs: Set OCC enabled sensors to false");
                 ERRORLOG::errlCommit(err2, HTMGT_COMP_ID);
             }
 
@@ -522,14 +524,7 @@ namespace HTMGT
                                          "CHARACTERIZATION state");
                         }
 
-                        // TODO - Remove default in RTC 209567
-                        if (iv_occMaster->getMode() == POWERMODE_UNKNOWN)
-                        {
-                            // Set default mode
-                            TMGT_INF("_setOccState: Setting power mode to "
-                                     "Maximum Performance (default)");
-                            l_err = _setMode(POWERMODE_MAX_PERF, 0);
-                        }
+                        // The mode will get sent by the BMC
                     }
                 }
             }
@@ -574,7 +569,7 @@ namespace HTMGT
                 err = setOccEnabledSensors(false); // Set OCC sensor to inactive
                 if( err )
                 {
-                    TMGT_ERR("_resetOccs: Set OCC enabled sensors to false failed");
+                    TMGT_ERR("_resetOccs: Set OCC enabled sensors to false");
                     // log and continue
                     ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
                 }
@@ -754,6 +749,7 @@ namespace HTMGT
                         // After OCC has been reset, clear internal flags
                         occ->postResetClear();
                     }
+                    iv_needsReset = false;
 
                     // Don't restart OCC's on CODE UPDATE
                     if(i_reason != HTMGT::OCC_RESET_REASON_CODE_UPDATE )
@@ -967,6 +963,7 @@ namespace HTMGT
             uint8_t retryCount = 0;
             bool throttleErrors = false;
 
+            TMGT_INF("_waitForOccCheckpoint: Waiting for all OCC checkpoints");
             for( const auto & occ : iv_occArray )
             {
                 bool occReady = false;
@@ -1049,41 +1046,76 @@ namespace HTMGT
                 {
                     TMGT_CONSOLE("Final OCC%d Checkpoint NOT reached (0x%04X)",
                                  occ->getInstance(), lastCheckpoint);
-                    TMGT_ERR("_waitForOccCheckpoint OCC%d still NOT ready! "
+                    TMGT_ERR("_waitForOccCheckpoint: OCC%d still NOT ready! "
                              "(last checkpoint=0x%04X)",
                              occ->getInstance(), lastCheckpoint);
-                    errlHndl_t l_err = nullptr;
-                    /*@
-                     * @errortype
-                     * @moduleid HTMGT_MOD_WAIT_FOR_CHECKPOINT
-                     * @reasoncode HTMGT_RC_OCC_NOT_READY
-                     * @userdata1 OCC instance
-                     * @userdata2 last OCC checkpoint
-                     * @devdesc Set of OCC state failed
-                     */
-                    bldErrLog(l_err, HTMGT_MOD_WAIT_FOR_CHECKPOINT,
-                              HTMGT_RC_OCC_NOT_READY,
-                              0, occ->getInstance(), 0, lastCheckpoint,
-                              ERRORLOG::ERRL_SEV_PREDICTIVE);
 
-                    occ->collectCheckpointScomData( l_err );
-                    occ->addOccTrace( l_err );
-
-                    if (nullptr == checkpointElog)
+                    // Clear OCC enabled sensors (to stop BMC comm)
+                    errlHndl_t l_err = setOccEnabledSensors(false);
+                    if (l_err)
                     {
-                        // return the first elog
-                        checkpointElog = l_err;
-                        l_err = nullptr;
+                        TMGT_ERR("_waitForOccCheckpoint: Set OCC enabled sensors to false");
+                        ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+                    }
+
+                    // Attempt poll anyway (no flush errors)
+                    l_err = _sendOccPoll(false, occ->getTarget());
+                    if (l_err == nullptr)
+                    {
+                        TMGT_CONSOLE("Poll of OCC%d was successful",
+                                     occ->getInstance());
+                        TMGT_INF("_waitForOccCheckpoint: Poll of OCC%d was successful",
+                                 occ->getInstance());
                     }
                     else
                     {
-                        ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+                        TMGT_ERR("_waitForOccCheckpoint: Poll of OCC%d also "
+                                 "failed with 0x%04X", occ->getInstance(),
+                                 l_err->reasonCode());
+                        // Ignore error (since checkpoint was not reached)
+                        delete l_err;
+                        l_err = nullptr;
+
+                        // Mark OCC as failed (so correct reset count gets incremented)
+                        occ->failed(true);
+
+                        /*@
+                         * @errortype
+                         * @moduleid HTMGT_MOD_WAIT_FOR_CHECKPOINT
+                         * @reasoncode HTMGT_RC_OCC_NOT_READY
+                         * @userdata1 OCC instance
+                         * @userdata2 last OCC checkpoint
+                         * @devdesc Set of OCC state failed
+                         */
+                        bldErrLog(l_err, HTMGT_MOD_WAIT_FOR_CHECKPOINT,
+                                  HTMGT_RC_OCC_NOT_READY,
+                                  0, occ->getInstance(), 0, lastCheckpoint,
+                                  ERRORLOG::ERRL_SEV_PREDICTIVE);
+
+                        // Update safe mode reason if not already set
+                        _updateSafeModeReason(l_err->reasonCode(), occ->getInstance());
+
+                        occ->collectCheckpointScomData( l_err );
+                        occ->addOccTrace( l_err );
+
+                        if (nullptr == checkpointElog)
+                        {
+                            // return the first elog
+                            checkpointElog = l_err;
+                            l_err = nullptr;
+                        }
+                        else
+                        {
+                            ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+                        }
+                        TMGT_ERR("waitForOccCheckpoint OCC%d still NOT ready!",
+                                 occ->getInstance());
+
+                        // No need to check other OCCs
+                        break;
                     }
-                    TMGT_ERR("waitForOccCheckpoint OCC%d still NOT ready!",
-                             occ->getInstance());
-                    break;
                 }
-            }
+            } // for each OCC
         }
 #endif
         return checkpointElog;
@@ -1113,18 +1145,19 @@ namespace HTMGT
 
     bool OccManager::_occNeedsReset()
     {
-        bool needsReset = false;
-
-        for( const auto & occ : iv_occArray )
+        if (iv_needsReset == false)
         {
-            if (occ->needsReset() || occ->needsWofReset())
+            for( const auto & occ : iv_occArray )
             {
-                needsReset = true;
-                break;
+                if (occ->needsReset() || occ->needsWofReset())
+                {
+                    iv_needsReset = true;
+                    break;
+                }
             }
         }
 
-        return needsReset;
+        return iv_needsReset;
     }
 
     // Return true if any OCC has been marked as failed
@@ -1338,100 +1371,6 @@ namespace HTMGT
     }
 
 
-    errlHndl_t OccManager::_setMode(const uint8_t  i_mode,
-                                    const uint16_t i_freq)
-    {
-        errlHndl_t l_err = nullptr;
-
-        if (nullptr != iv_occMaster)
-        {
-            // map HOMER for this OCC
-            TARGETING::Target* procTarget = nullptr;
-            procTarget = TARGETING::
-                getImmediateParentByAffinity(iv_occMaster->getTarget());
-            HBPM::ScopedHomerMapper l_mapper(procTarget);
-            l_err = l_mapper.map();
-            if (nullptr == l_err)
-            {
-                iv_occMaster->setHomerAddr(l_mapper.getHomerVirtAddr());
-                l_err = iv_occMaster->setMode(i_mode, i_freq);
-                if (nullptr == l_err)
-                {
-                    // Send poll to query state/mode of all OCCs
-                    // and flush any errors reported by the OCCs
-                    l_err = sendOccPoll(true);
-                    if (l_err)
-                    {
-                        TMGT_ERR("_setMode: Poll all OCCs failed");
-                        ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
-                    }
-
-                    // Make sure all OCCs went to requested mode
-                    for( const auto & occ : iv_occArray )
-                    {
-                        if (occ->getMode() != i_mode)
-                        {
-                            TMGT_ERR("_setMode: OCC%d is not in mode "
-                                     "0x%02X", occ->getInstance(), i_mode);
-                            iv_mode = POWERMODE_UNKNOWN;
-                            /*@
-                             * @errortype
-                             * @moduleid HTMGT_MOD_OCCMGR_SET_MODE
-                             * @reasoncode HTMGT_RC_OCC_UNEXPECTED_MODE
-                             * @userdata1[0-31]  OCC mode
-                             * @userdata1[32-47] requested mode
-                             * @userdata1[48-63] SFP/FFO freq point
-                             * @userdata2[0-31]  OCC state
-                             * @userdata2[32-63] OCC instance
-                             * @devdesc Mismatched OCC mode
-                             */
-                            bldErrLog(l_err, HTMGT_MOD_OCCMGR_SET_MODE,
-                                      HTMGT_RC_OCC_UNEXPECTED_MODE,
-                                      occ->getMode(),
-                                      (i_mode << 16) | (i_freq),
-                                      occ->getState(),
-                                      occ->getInstance(),
-                                      ERRORLOG::ERRL_SEV_INFORMATIONAL);
-                            break;
-                        }
-                    }
-
-                    TMGT_INF("_setMode: All OCCs are in mode 0x%02X", i_mode);
-                    iv_mode = (powerMode)i_mode;
-                    iv_freqPoint = i_freq;
-                }
-                iv_occMaster->invalidateHomer();
-            }
-            else
-            {
-                // Unable to send resetPrep command to this OCC,
-                // just commit and proceed with reset
-                TMGT_ERR("_setMode: Unable to get HOMER virtual"
-                         " address for OCC%d (rc=0x%04X)",
-                         iv_occMaster->getInstance(), l_err->reasonCode());
-                l_err->collectTrace(HTMGT_COMP_NAME);
-            }
-        }
-        else
-        {
-            /*@
-             * @errortype
-             * @moduleid HTMGT_MOD_OCCMGR_SET_MODE
-             * @reasoncode HTMGT_RC_INTERNAL_ERROR
-             * @devdesc Master OCC is not defined
-             * @userdata1  requested power mode
-             * @userdata2  requested frequency for SPF or FFO
-             */
-            bldErrLog(l_err, HTMGT_MOD_OCCMGR_SET_MODE,
-                      HTMGT_RC_INTERNAL_ERROR,
-                      i_mode, i_freq, 0, 0,
-                      ERRORLOG::ERRL_SEV_INFORMATIONAL);
-        }
-
-        return l_err;
-    }
-
-
     // Collect Mode and Function Capabilities
     // NOTE: o_data is pointer to OCC_MAX_DATA_LENGTH byte buffer
     errlHndl_t OccManager::_queryModeAndFunction(uint16_t & o_length,
@@ -1613,12 +1552,6 @@ namespace HTMGT
     {
         return Singleton<OccManager>::instance()._validateOccsPresent(i_present,
                                                                     i_instance);
-    }
-
-    errlHndl_t OccManager::setMode(const uint8_t  i_mode,
-                                   const uint16_t i_freq)
-    {
-        return Singleton<OccManager>::instance()._setMode(i_mode, i_freq);
     }
 
     errlHndl_t OccManager::queryModeAndFunction(uint16_t & o_length, uint8_t *o_data)

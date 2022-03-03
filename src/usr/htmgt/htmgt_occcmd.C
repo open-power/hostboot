@@ -315,7 +315,6 @@ namespace HTMGT
                     rsp_status_string(iv_OccRsp.returnStatus));
         }
 
-        // TODO RTC 124739 - refactor/optimize trace strings
         TMGT_INF("OCC%d rsp status=0x%02X%s, length=0x%04X",
                  l_instance, iv_OccRsp.returnStatus,
                  l_rsp_status_string, iv_OccRsp.dataLength);
@@ -843,7 +842,6 @@ namespace HTMGT
                 {
                     TMGT_INF("handleOccException: truncating length to 4K");
                     exceptionLength = 4*KILOBYTE;
-                    // TODO RTC 124739 - HB elogs are only 4K
                 }
 
                 TMGT_BIN("OCC Exception Data (up to 64 bytes)",
