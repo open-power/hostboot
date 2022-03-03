@@ -663,7 +663,10 @@ namespace SBE
 
             // Remove any chips that do not have powerbus up yet as
             // it is required for update to work
-            std::remove_if(procList.begin(), procList.end(), isChipPowerbusOff);
+            procList.erase(
+                std::remove_if(procList.begin(), procList.end(), isChipPowerbusOff),
+                procList.end() );
+
             if (procList.size() == 0)
             {
                 TRACFCOMP(g_trac_sbe, "No processor has powerbus up yet");
