@@ -63,15 +63,24 @@ function copy_targeting_xml ()
     if [ -z "${sys_type}" ]; then
         echo "Copying system MRWs into $PROJECT_ROOT/src/usr/targeting/common/xmltohb/ ..."
         cp -v /afs/rchland/projects/esw/$pnor_release/Builds/$pnor_build/op-build/output/host/powerpc64le-buildroot-linux-gnu/sysroot/openpower_mrw_scratch/*_hb.mrw.xml $PROJECT_ROOT/src/usr/targeting/common/xmltohb/
+        if [ $? -ne 0 ]; then
+            return $?
+        fi
         echo ""
         echo "Done."
         echo "Remember to replace simics_P10.system.xml with your system's XML if you want to patch targeting."
     else
         echo "Copying $sys_type MRW into $PROJECT_ROOT/src/usr/targeting/common/xmltohb/ ..."
         cp -v /afs/rchland/projects/esw/$pnor_release/Builds/$pnor_build/op-build/output/host/powerpc64le-buildroot-linux-gnu/sysroot/openpower_mrw_scratch/$sys_type*_hb.mrw.xml $PROJECT_ROOT/src/usr/targeting/common/xmltohb/
+        if [ $? -ne 0 ]; then
+            return $?
+        fi
         echo ""
         echo "Replacing $PROJECT_ROOT/src/usr/targeting/common/xmltohb/simics_P10.system.xml with $sys_type"
         cp -v $PROJECT_ROOT/src/usr/targeting/common/xmltohb/$sys_type*_hb.mrw.xml $PROJECT_ROOT/src/usr/targeting/common/xmltohb/simics_P10.system.xml
+        if [ $? -ne 0 ]; then
+            return $?
+        fi
     fi
 }
 
@@ -79,23 +88,35 @@ function checkout_hostboot_level ()
 {
     echo ""
     echo "Checking out a new branch for $HOSTBOOT_COMMIT_HASH as $branch_name ..."
-    git fetch gerrit; git checkout -b $branch_name $HOSTBOOT_COMMIT_HASH
+    git fetch gerrit && git checkout -b $branch_name $HOSTBOOT_COMMIT_HASH
+    if [ $? -ne 0 ]; then
+        return $?
+    fi
 }
 
 function get_standalone_changes ()
 {
     ssh -p 29418 hostboot.gerrit gerrit query "(intopic:bmc_standalone_patching) project:hostboot (NOT status:abandoned)" --current-patch-set | grep -E 'change I|subject:'
+    if [ $? -ne 0 ]; then
+        return $?
+    fi
 }
 
 function gerrit_refs ()
 {
     ssh -p 29418 hostboot.gerrit gerrit query --current-patch-set "project:hostboot $1" | grep ref: | awk '{print $2}'
+    if [ $? -ne 0 ]; then
+        return $?
+    fi
 }
 
 function gerrit_pick ()
 {
     # $1 input is a commit or search string
     git fetch gerrit $(gerrit_refs $1) && git cherry-pick FETCH_HEAD
+    if [ $? -ne 0 ]; then
+        return $?
+    fi
 }
 
 function cherrypick_standalone_patch ()
@@ -103,6 +124,10 @@ function cherrypick_standalone_patch ()
     echo ""
     echo "Applying standalone changes necessary for full-system eBMC patching ..."
     standalone_patch_changes=$(get_standalone_changes)
+    if [ -z "$standalone_patch_changes" ]; then
+        # Couldn't find the standalone patch commit
+        return 1
+    fi
     # Separate the change ids from the subject lines
     changeIds=()
     subjects=()
@@ -131,6 +156,10 @@ function cherrypick_standalone_patch ()
             echo "PICK $CHANGEID ${subjects[$i]}"
 
             gerrit_pick $CHANGEID
+            if [ $? -ne 0 ]; then
+                \rm .gitlog
+                return $?
+            fi
         else
             echo "HAVE $CHANGEID ${subjects[$i]}"
         fi
@@ -160,6 +189,7 @@ function main ()
 {
     if [[ $# -lt 1 ]]; then
         usage
+        return 1
     fi
     # This script requires the user be in a hostboot workon
     if [[ ! "$PROJECT_ROOT" ]] ; then
@@ -173,9 +203,11 @@ function main ()
     package_name=$1
     case "$package_name" in
         "--"*)
-            usage;;
+            usage
+            return 1;;
         "-"*)
-            usage;;
+            usage
+            return 1;;
     esac
 
     build_release=$(echo $package_name | cut -c 1-4 | awk '{print "fw"$1}')
@@ -214,7 +246,7 @@ function main ()
             "--no-xml") set -- "$@" "-n" ;;
             "--system-type") set -- "$@" "-s" ;;
             "--branch-name") set -- "$@" "-b" ;;
-            "--"*)  echo "ERROR: Invalid argument ${arg}"; usage;;
+            "--"*)  echo "ERROR: Invalid argument ${arg}"; usage; return 1;;
             *) set -- "$@" "$arg"
         esac
     done
@@ -232,6 +264,7 @@ function main ()
         case "${option}" in
             h)
                 usage
+                return 0
                 ;;
             s)
                 sys_type="${OPTARG}"
@@ -244,6 +277,7 @@ function main ()
                 else
                     echo "ERROR: Invalid system target."
                     usage
+                    return 1
                 fi
                 ;;
             b)
@@ -257,9 +291,11 @@ function main ()
                 ;;
             ?)
                 usage
+                return 1
                 ;;
             *)
                 usage
+                return 1
                 ;;
         esac
     done
@@ -270,11 +306,11 @@ function main ()
         branch_name="${package_name}"
     fi
 
-
     # Check for incompatible args
     if [ "$xml_only" = true ] && [ "$no_xml" = true ]; then
         echo "ERROR: Cannot supply both -n and -x args."
         usage
+        return 1
     fi
 
     ################################################
@@ -282,11 +318,23 @@ function main ()
     ################################################
     if [ "$xml_only" == false ]; then
         checkout_hostboot_level
+        if [ $? -ne 0 ]; then
+            echo "ERROR: Couldn't checkout the hostboot level. See above messages for more info."
+            return $?
+        fi
         cherrypick_standalone_patch
+        if [ $? -ne 0 ]; then
+            echo "ERROR: Couldn't cherry pick the required patch. See above messages for more info."
+            return $?
+        fi
     fi
 
     if [ "$no_xml" == false ]; then
         copy_targeting_xml
+        if [ $? -ne 0 ]; then
+            echo "ERROR: Couldn't copy over targeting xml files. See above messages for more info."
+            return $?
+        fi
     fi
 
     # Always double check CONFIG_FILE since this could be a source of silent pain
