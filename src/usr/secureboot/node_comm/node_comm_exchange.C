@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -412,7 +412,7 @@ errlHndl_t nodeCommGenQuoteResponse(const QuoteRequestBlob* const i_request,
         // Case 1
         if(l_tpmRequired)
         {
-            /* @
+            /*@
              * @errortype
              * @reasoncode RC_NC_BAD_REQUESTER_TPM
              * @moduleid   MOD_NC_GEN_QUOTE_RESPONSE
@@ -446,7 +446,7 @@ errlHndl_t nodeCommGenQuoteResponse(const QuoteRequestBlob* const i_request,
         TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenQuoteResponse: Invalid requesting node eye catcher received: 0x%x", i_request->EyeCatcher);
         if(l_tpmRequired)
         {
-            /* @
+            /*@
              * @errortype
              * @reasoncode RC_NC_BAD_REQUESTER_EYE_CATCH
              * @moduleid   MOD_NC_GEN_QUOTE_RESPONSE
@@ -810,7 +810,7 @@ errlHndl_t nodeCommProcessQuote(uint8_t* const i_quote,
             // Secondary node sent bad data and TPM is required - return an error and
             // the IPL should be terminated
 
-            /* @
+            /*@
              * @errortype
              * @reasoncode RC_NC_BAD_QUOTE
              * @moduleid   MOD_NC_PROCESS_QUOTE
@@ -1594,7 +1594,7 @@ errlHndl_t exchangeNoncesMultithreaded(const std::vector<iohs_instances_t>& i_io
         else
         {
             // TPM is not required, mark the error as informational and commit
-            TRACFCOMP(g_trac_nc,INFO_MRK"exchangeNoncesMultithreaded: TPM is not required, changing EID 0x%x's severity to Informational and committing the error log.",                                                                                                                                          
+            TRACFCOMP(g_trac_nc,INFO_MRK"exchangeNoncesMultithreaded: TPM is not required, changing EID 0x%x's severity to Informational and committing the error log.",
                       l_errl->eid());
             l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
             errlCommit(l_errl, SECURE_COMP_ID);

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -104,7 +104,7 @@ int apply_attr_override(uint8_t* i_data,
         TRACFCOMP(g_trac_targeting, "apply_attr_override: skipping override"
             " due to SECUREBOOT enablement");
 
-        /* @
+        /*@
          * @errortype
          * @moduleid     TARG_APPLY_ATTR_OVER
          * @reasoncode   TARG_RC_APPLY_ATTR_OVER_NOT_ALLOWED
