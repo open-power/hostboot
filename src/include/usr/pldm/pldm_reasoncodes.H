@@ -107,6 +107,7 @@ namespace PLDM
         MOD_GET_STATE_SENSOR_ID                      = 0x42, // getStateSensorId
         MOD_UPDATE_CONNECTOR_INFO_ATTR               = 0x43, // updateConnectorInfoAttr
         MOD_BASE_INIT                                = 0x44, // base_init
+        MOD_GET_LATERAL_CAST_OUT_MODE                = 0x45, // getLateralCastOutMode
     };
 
     enum PLDMReasonCode

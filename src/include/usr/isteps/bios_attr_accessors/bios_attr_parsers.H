@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021                             */
+/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,6 +44,21 @@ class IStepError;
 
 namespace ISTEP
 {
+/**
+ * @brief Retrieve the Lateral Cast Out (LCO) mode from the BMC BIOS and set the system
+ *        attribute ATTR_PROC_LCO_MODE_DISABLE to the retrieved value, if no error occurred.
+ *        If an error occurs retrieving the BMC BIOS, then the attribute is left as is.
+ *
+ * @param[in,out] io_string_table   See brief in file hb_bios_attrs.H.
+ * @param[in,out] io_attr_table     See brief in file hb_bios_attrs.H.
+ * @param[in,out] io_stepError      If an error occurs which require a TI it can be attached
+ *                                  to this IstepError log.
+ * @return void
+ */
+void parse_hb_lateral_cast_out_mode(std::vector<uint8_t>& io_string_table,
+                                    std::vector<uint8_t>& io_attr_table,
+                                    ISTEP_ERROR::IStepError & io_stepError);
+
 /**
  * @brief Retrieve the TPM Required Policy from the BMC BIOS and set the system
  *        attribute ATTR_TPM_REQUIRED to the retrieved value, if no error occurred.

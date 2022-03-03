@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021                             */
+/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,6 +50,40 @@ using namespace TARGETING;
 
 namespace ISTEP
 {
+
+void parse_hb_lateral_cast_out_mode(std::vector<uint8_t>& io_string_table,
+                                    std::vector<uint8_t>& io_attr_table,
+                                    ISTEP_ERROR::IStepError & io_stepError)
+{
+    // Create a variable to hold the retrieved LCO value from the BMC BIOS
+    ATTR_PROC_LCO_MODE_DISABLE_type l_lcoMode(0);
+
+    // Cache a handle to the system target
+    const auto l_sys = UTIL::assertGetToplevelTarget();
+
+    // Get the LCO from the BMC BIOS
+    errlHndl_t l_errl = PLDM::getLateralCastOutMode(io_string_table, io_attr_table, l_lcoMode);
+
+    if ( unlikely(l_errl != nullptr) )
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                   "parse_hb_lateral_cast_out_mode(): An error occurred getting the "
+                   "Lateral Cast Out(LCO) mode from the BMC BIOS. Leaving the LCO for "
+                   "the system as is, with value %d (0 = LCO enabled, 1 = LCO disabled).",
+                   l_sys->getAttr<ATTR_PROC_LCO_MODE_DISABLE>() );
+        l_errl->collectTrace("ISTEPS_TRACE",256);
+        errlCommit( l_errl, ISTEP_COMP_ID );
+    }
+    else
+    {
+        l_sys->setAttr<ATTR_PROC_LCO_MODE_DISABLE>(l_lcoMode);
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
+                   "parse_hb_lateral_cast_out_mode(): Set LCO mode to %d "
+                   "(0 = LCO enabled, 1 = LCO disabled).",
+                   l_sys->getAttr<ATTR_PROC_LCO_MODE_DISABLE>() );
+    }
+} // parse_hb_lateral_cast_out_mode
 
 void parse_hb_tpm_required(std::vector<uint8_t>& io_string_table,
                            std::vector<uint8_t>& io_attr_table,

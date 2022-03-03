@@ -71,6 +71,7 @@ const char PLDM_BIOS_HB_MAX_NUMBER_HUGE_PAGES_STRING[]     = "hb_max_number_huge
 const char PLDM_BIOS_HB_ENLARGED_CAPACITY_STRING[]         = "hb_ioadapter_enlarged_capacity_current";
 const char PLDM_BIOS_HB_INHIBIT_BMC_RESET_STRING[]         = "hb_inhibit_bmc_reset";
 const char PLDM_BIOS_HB_EFFECTIVE_SECURE_VERSION_STRING[]  = "hb_effective_secure_version";
+const char PLDM_BIOS_HB_LATERAL_CAST_OUT_MODE_STRING[]     = "hb_lateral_cast_out_mode_current";
 
 // When power limit values change, the effect on the OCCs is immediate, so we
 // always want the most recent values here.
@@ -147,6 +148,9 @@ const std::vector<const char*> POSSIBLE_TPM_REQUIRED_STRINGS = {PLDM_BIOS_TPM_RE
 
 const std::vector<const char*> POSSIBLE_INHIBIT_BMC_RESET_STRINGS = { PLDM_BIOS_NOINHIBIT_STRING,
                                                                       PLDM_BIOS_INHIBIT_STRING };
+
+const std::vector<const char*> POSSIBLE_HB_LATERAL_CAST_OUT_MODE_STRINGS = {PLDM_BIOS_ENABLED_STRING,
+                                                                            PLDM_BIOS_DISABLED_STRING};
 
 constexpr uint8_t PLDM_BIOS_STRING_TYPE_ASCII = 0x1;
 constexpr uint8_t PLDM_BIOS_STRING_TYPE_HEX = 0x2;
@@ -770,6 +774,67 @@ errlHndl_t getDecodedEnumAttr(std::vector<uint8_t>& io_string_table,
 
     return l_errl;
 }
+
+// getLateralCastOutMode
+errlHndl_t getLateralCastOutMode(std::vector<uint8_t>& io_string_table,
+                                  std::vector<uint8_t>& io_attr_table,
+                                  TARGETING::ATTR_PROC_LCO_MODE_DISABLE_type &o_lcoMode)
+{
+    errlHndl_t errl = nullptr;
+
+    do{
+        std::vector<char>decoded_value;
+        errl = getDecodedEnumAttr(io_string_table,
+                                  io_attr_table,
+                                  PLDM_BIOS_HB_LATERAL_CAST_OUT_MODE_STRING,
+                                  POSSIBLE_HB_LATERAL_CAST_OUT_MODE_STRINGS,
+                                  decoded_value);
+        if(errl)
+        {
+            PLDM_ERR("getLateralCastOutMode(): Failed to lookup value for %s",
+                     PLDM_BIOS_HB_LATERAL_CAST_OUT_MODE_STRING);
+            break;
+        }
+
+        if(strncmp(decoded_value.data(), PLDM_BIOS_DISABLED_STRING, decoded_value.size()) == 0)
+        {
+            PLDM_INF("getLateralCastOutMode(): Lateral cast out is disabled by the BMC!");
+            o_lcoMode = TARGETING::PROC_LCO_MODE_DISABLE_TRUE;
+        }
+        else if(strncmp(decoded_value.data(), PLDM_BIOS_ENABLED_STRING, decoded_value.size()) == 0)
+        {
+            PLDM_INF("getLateralCastOutMode(): Lateral cast out is enabled by the BMC!");
+            o_lcoMode = TARGETING::PROC_LCO_MODE_DISABLE_FALSE;
+        }
+        else
+        {
+            // print the entire buffer
+            PLDM_INF_BIN("getLateralCastOutMode(): Unexpected string : ",
+                         decoded_value.data(), decoded_value.size());
+            /*@
+              * @errortype
+              * @severity   ERRL_SEV_UNRECOVERABLE
+              * @moduleid   MOD_GET_LATERAL_CAST_OUT_MODE
+              * @reasoncode RC_UNSUPPORTED_TYPE
+              * @userdata1  Unused
+              * @userdata2  Unused
+              * @devdesc    Software problem, incorrect data from BMC
+              * @custdesc   A software error occurred during system boot
+              */
+            errl = new ErrlEntry( ERRL_SEV_UNRECOVERABLE,
+                                  MOD_GET_LATERAL_CAST_OUT_MODE,
+                                  RC_UNSUPPORTED_TYPE,
+                                  0,
+                                  0,
+                                  ErrlEntry::NO_SW_CALLOUT);
+            ErrlUserDetailsString(PLDM_BIOS_HB_LATERAL_CAST_OUT_MODE_STRING).addToLog(errl);
+            ErrlUserDetailsString(decoded_value.data()).addToLog(errl);
+            addBmcErrorCallouts(errl);
+            break;
+        }
+    } while(0);
+    return errl;
+} // getLateralCastOutMode
 
 errlHndl_t getDebugConsoleEnabled(std::vector<uint8_t>& io_string_table,
                                   std::vector<uint8_t>& io_attr_table,

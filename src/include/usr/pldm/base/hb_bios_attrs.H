@@ -60,6 +60,24 @@ namespace PLDM
     constexpr uint8_t LMB_SIZE_ENCODE_128MB = 0x3;
     constexpr uint8_t LMB_SIZE_ENCODE_256MB = 0x4;
 
+    /** @brief Retrieve the Lateral Cast Out (LCO) mode from the BMC BIOS
+    *
+    * @details This method retrieves the LCO mode from the BMC BIOS via the PLDM interface.
+    *          * A value of 0 means the LCO is enabled
+    *          * A value of 1 (or any other value than 0) means the LCO is disabled
+    *
+    * @param[in,out] io_string_table  See brief at the top of this file.
+    * @param[in,out] io_attr_table    See brief at the top of this file.
+    * @param[out] o_lcoMode           If no error occurred then will contain the value
+    *                                 of the LCO mode from the BMC BIOS.
+    *                                 If error, then the parameter is left as is.
+    *
+    * @return Error if failed to retrieve the LCO mode, otherwise nullptr on success
+    */
+    errlHndl_t getLateralCastOutMode( std::vector<uint8_t>& io_string_table,
+                                      std::vector<uint8_t>& io_attr_table,
+                                      TARGETING::ATTR_PROC_LCO_MODE_DISABLE_type &o_lcoMode);
+
     /** @brief Retrieve the current value of the hb_hyp_switch
     *          PLDM bios attribute and return the value converted
     *          to a ATTR_PAYLOAD_KIND enum.
