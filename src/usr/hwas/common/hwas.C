@@ -1881,13 +1881,18 @@ errlHndl_t restrictECunits(
  * @param[in]      i_pTop         sys or node target to restrict hw check
  * @param[in]      i_pPredFunc    pointer to predicate to check for HWAS functional
  *                                and specdeconfig
+ * @param[in/out]  io_bootable    whether the system is bootable after checking
+ *                                for critical resources. If this param is
+ *                                passed in this function, the error log for
+ *                                missing critical parts won't be created
  *
  * @note If io_commonPlid is non-zero then any newly created Error Logs use io_commonPlid
  *       Else io_commonPlid is updated with the plid used in the newly created Error Logs
  */
 void checkCriticalResources(uint32_t & io_commonPlid,
                             const Target * i_pTop,
-                            const PredicateBase* const i_pPredFunc)
+                            const PredicateBase* const i_pPredFunc,
+                            bool* io_bootable = nullptr)
 {
     errlHndl_t l_errl = nullptr;
     PredicatePostfixExpr l_customPredicate;
@@ -1903,10 +1908,24 @@ void checkCriticalResources(uint32_t & io_commonPlid,
     targetService().getAssociated( l_plist, i_pTop,
           TargetService::CHILD, TargetService::ALL, &l_customPredicate);
 
+    do {
     //if this list has ANYTHING then something critical has been deconfigured
     if(l_plist.size())
     {
         HWAS_ERR("Insufficient HW to continue IPL: (critical resource not functional)");
+
+        // the system is not bootable if a critical resource is missing
+        if(io_bootable)
+        {
+            *io_bootable = false;
+            // Due to the structure of minimum HW check calls, this function
+            // can be called multiple times in the same path, generating error
+            // logs every time it's called. We don't want to generate extra
+            // error logs if we're just interested if the system is bootable
+            // in current HW configuration.
+            break;
+        }
+
         /*@
          * @errortype
          * @severity          ERRL_SEV_UNRECOVERABLE
@@ -1960,6 +1979,8 @@ void checkCriticalResources(uint32_t & io_commonPlid,
         errlCommit(l_errl, HWAS_COMP_ID);
         // errl is now nullptr
     }
+    }
+    while(0);
 }
 
 
@@ -2341,7 +2362,7 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
         //  running on (ie, hostboot or fsp in hwsv).
         //  if there is an issue, create and commit an error, and tie it to the
         //  the rest of them with the common plid.
-        HWAS::checkCriticalResources(l_commonPlid, pTop, &l_functional);
+        HWAS::checkCriticalResources(l_commonPlid, pTop, &l_functional, io_bootable);
         platCheckMinimumHardware(l_commonPlid, pTop, io_bootable);
     }
     while (0);
