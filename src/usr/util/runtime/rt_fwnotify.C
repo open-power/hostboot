@@ -493,6 +493,13 @@ errlHndl_t convertToHbTarget(uint64_t i_resourceId,
     errlHndl_t l_err{nullptr};
 
     do {
+        if (i_resourceType == hostInterfaces::ResourceProc)
+        {
+            TRACDCOMP(g_trac_runtime,
+                "convertToHbTarget: core type resource id (0x%llX -> 0x%llX)",
+                i_resourceId, i_resourceId | HBRT_CORE_TYPE );
+            i_resourceId |= HBRT_CORE_TYPE;
+        }
         l_err = RT_TARG::getHbTarget(i_resourceId, o_target);
         if (l_err)
         {
