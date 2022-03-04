@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -170,58 +170,6 @@ inline fapi2::ReturnCode dram_gen(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& 
                 .set_DIMM_TARGET(i_target),
                 "Invalid DRAM gen recieved (%d) for %s",
                 i_dram_gen, spd::c_str(i_target));
-
-    return fapi2::FAPI2_RC_SUCCESS;
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief Helper function to test if a DIMM type is valid
-/// @param[in] i_dimm_type the DIMM type from SPD
-/// @return true if this DIMM type is valid, else false
-///
-static inline bool is_dimm_type_valid(const uint8_t i_dimm_type)
-{
-    bool l_result = false;
-
-    switch(i_dimm_type)
-    {
-        case RDIMM:
-        case LRDIMM:
-        case DDIMM:
-        case SORDIMM:
-        case MINIRDIMM:
-            l_result = true;
-            break;
-
-        default:
-            l_result = false;
-            break;
-    }
-
-    return l_result;
-}
-
-///
-/// @brief Checks for valid DIMM type
-/// @param[in] i_target the DIMM target
-/// @param[in] i_dram_gen the DIMM type from SPD
-/// @param[in] i_func_code mss ffdc code
-/// @return FAPI2_RC_SUCCESS iff okay
-///
-inline fapi2::ReturnCode dimm_type(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                   const uint8_t i_dimm_type,
-                                   const generic_ffdc_codes i_func_code)
-{
-    FAPI_ASSERT(is_dimm_type_valid(i_dimm_type),
-                fapi2::MSS_INVALID_DIMM_TYPE()
-                .set_DIMM_TYPE(i_dimm_type)
-                .set_FUNCTION(i_func_code)
-                .set_DIMM_TARGET(i_target),
-                "Invalid DIMM type recieved (%d) for %s",
-                i_dimm_type, DDIMM, spd::c_str(i_target));
 
     return fapi2::FAPI2_RC_SUCCESS;
 
