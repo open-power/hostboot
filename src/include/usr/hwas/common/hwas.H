@@ -279,22 +279,6 @@ void calculateEffectiveEC();
  */
 errlHndl_t markDisabledMcas();
 
-/*
- * @WARNING: Deprecated. Hostboot code no longer uses PROC_MEM_TO_USE and this
- *           function is a no-op.
- *
- * @brief: This function calls check_for_missing_memory and set
- *         ATTR_PROC_MEM_TO_USE to the processor that we should use
- *         in case of missing memory behind master proc
- *
- * @note:  Only applicable for PHYP based system
- *
- * @param[in]: i_node: Node target to operate on
- *
- * @retval: error log handle
- */
-errlHndl_t update_proc_mem_to_use(const TARGETING::Target* i_node);
-
 /**
  * @brief       simple helper fn to get and set hwas state to poweredOn,
  *                  present, functional and then execute any secondary

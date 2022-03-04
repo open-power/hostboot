@@ -257,16 +257,6 @@ uint8_t getTopologyId (TargetHandle_t i_proc)
     return i_proc->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_ID>();
 }
 
-errlHndl_t update_proc_mem_to_use (const Target* i_node)
-{
-    // NOTE: This function has been deprecated. Hostboot uses ATTR_PROC_FABRIC_TOPOLOGY_ID and
-    // ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID to determine memory configuration.
-    //
-    // HWSV still calls this function and so it must remain until they delete the call.
-    // See hwsvHostSvcUtil.C
-    return nullptr;
-}
-
 /**
  * @brief Do presence detect on only MUX targets and enable HWAS state
  *
