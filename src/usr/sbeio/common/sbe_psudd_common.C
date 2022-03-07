@@ -493,18 +493,18 @@ errlHndl_t SbePsu::writeRequest(TARGETING::Target * i_target,
         }
         if (errl) break;
 
-        //notify PSU command is ready
-        l_data = SBE_DOORBELL;
-        errl = writeScom(i_target,PSU_SBE_DOORBELL_REG_OR,&l_data);
-        if (errl) break;
-
 #ifdef __HOSTBOOT_RUNTIME
-        // Set all the interrup mask bits at runtime
+        // Set all the interrupt mask bits at runtime
         // else PHYP may see the interrupt and clear the register
         l_data = HOST_MASK_BITS;
         errl = writeScom(i_target,PSU_HOST_DOORBELL_REG_OR,&l_data);
         if (errl) break;
 #endif
+
+        //notify PSU command is ready
+        l_data = SBE_DOORBELL;
+        errl = writeScom(i_target,PSU_SBE_DOORBELL_REG_OR,&l_data);
+        if (errl) break;
 
     }
     while (0);
