@@ -2546,6 +2546,9 @@
     <id>sys-sys-power10</id>
     <parent>sys</parent>
     <attribute>
+      <id>HB_MIN_BACKING_CACHE_FC</id>
+    </attribute>
+    <attribute>
       <default>POWER10</default>
       <id>MODEL</id>
     </attribute>

@@ -2286,6 +2286,32 @@
   </attribute>
 
   <attribute>
+    <id>HB_MIN_BACKING_CACHE_FC</id>
+    <description>
+        Number of Fused Cores needed to satisfy minimum backing cache requirement.
+        To be valid Backing Cache Fused Cores (BCFC), a FC must have 2 non-ECO core
+        children. This is because while HW initialization allows for individual
+        cores, the SBE will only select paired non-ECO cores as backing cache. BCFC
+        core children may be in either functional or functionalOverride HWAS_STATE.
+        Cores set as functionalOverride are done so during Field Core Override (FCO)
+        which leaves them in a state where their cache is still enabled and can be
+        used in BCFCs.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <!-- TODO: RTC 292551
+        change to 2 once default simics configs for FSP and BMC systems is
+        changed to enable more backing cache
+        -->
+        <default>1</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <description>
         The amount of mainstore that PHYP needs to preserve per node
         during MPIPL.
