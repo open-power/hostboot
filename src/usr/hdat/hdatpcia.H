@@ -57,6 +57,7 @@ namespace HDAT
 const uint16_t HDAT_PCIA_VERSION    = 0x01;
 const char HDAT_PCIA_STRUCT_NAME[7] = "SPPCIA";
 const uint32_t HDAT_PROC_STAT_MASK  = 0xC0000000;
+const uint8_t  HDAT_DEAD_CORE_MODE_ENABLED = 1;
 
 // Bits in the proc/exist flags for PCIA data
  #define HDAT_EXIST_FLAGS_MASK_FOR_PCIA  0xD0FF0000

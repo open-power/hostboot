@@ -266,6 +266,20 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
                     uint32_t l_coreNum =
                             l_pTarget->getAttr<TARGETING::ATTR_CHIP_UNIT>();
 
+                    // If DEAD core mode is enabled, then PHYP won't
+                    // be using those cores, and explicitly setting the
+                    // core status as unusable and pass the data to hypervisor
+                    // without filtering it
+                    if (l_pTarget != NULL)
+                    {
+                        if(l_pTarget->getAttr<
+                              TARGETING::ATTR_DEAD_CORE_MODE>() ==
+                              HDAT_DEAD_CORE_MODE_ENABLED)
+                        {
+                            l_procStatus = HDAT_PROC_NOT_USABLE;
+                        }
+                    }
+
                     for ( uint32_t l_threadIndex=0;
                         l_threadIndex < l_enabledThreads; ++l_threadIndex)
                     {
@@ -468,6 +482,68 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
 
                         //Resetting the proc status
                         l_procStatus = HDAT_PROC_USABLE;
+
+                        //Get the the core targets
+                        TARGETING::TargetHandleList l_coreList;
+                        TARGETING::PredicateCTM
+                            l_coreFilter(TARGETING::CLASS_UNIT,
+                                TARGETING::TYPE_CORE);
+
+                        //Check the presence of cores
+                        TARGETING::PredicateHwas l_predCorePresent;
+                        l_predCorePresent.present(true);
+
+                        TARGETING::PredicatePostfixExpr l_presentCore;
+                        l_presentCore.push(&l_coreFilter).
+                        push(&l_predCorePresent).And();
+
+                        TARGETING::targetService().getAssociated(
+                            l_coreList,
+                            l_pFcTarget,
+                            TARGETING::TargetService::CHILD,
+                            TARGETING::TargetService::ALL,
+                            &l_presentCore);
+
+                        if (l_coreList.size() > 0)
+                        {
+                            TARGETING::Target* l_pCoreTarget1 = l_coreList[0];
+                            TARGETING::Target* l_pCoreTarget2 = l_coreList[1];
+                            bool l_core1_dead = false;
+                            bool l_core2_dead = false;
+
+                            // If DEAD core mode is enabled, then PHYP won't
+                            // be using those cores, and explicitly setting the
+                            // FC status as unusable and pass the data to
+                            // hypervisor without filtering it
+
+                            if (l_pCoreTarget1 != NULL)
+                            {
+                                if(l_pCoreTarget1->getAttr<
+                                   TARGETING::ATTR_DEAD_CORE_MODE>() ==
+                                   HDAT_DEAD_CORE_MODE_ENABLED)
+                                {
+                                    l_core1_dead = true;
+                                }
+                            }
+
+                            if (l_pCoreTarget2 != NULL)
+                            {
+                                if(l_pCoreTarget2->getAttr<
+                                   TARGETING::ATTR_DEAD_CORE_MODE>() ==
+                                   HDAT_DEAD_CORE_MODE_ENABLED)
+                                {
+                                    l_core2_dead = true;
+                                }
+                            }
+
+                            // If any one of the core under FC is dead, making
+                            // that FC as unusable
+                            if (l_core1_dead == true || l_core2_dead == true)
+                            {
+                                l_procStatus = HDAT_PROC_NOT_USABLE;
+                            }
+
+                        }
 
                         l_errl = hdatSetCoreInfo(index, l_pFcTarget,
                                                  l_pProcTarget, l_dcmNum);
