@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -89,6 +89,13 @@ sbeAllocationHandle_t sbeMalloc(const size_t i_bytes)
     }
 
     // Return a handle so we can free() the buffer later
+    uint64_t l_rt_mask = 0x7fffffffffffffff;
+    // Leading MSB (bit 0) of the address is not really part
+    // of the address, but the bit is used by the core logic
+    // to indicate "no address translation" required.
+    // Mask out the MSB since HWP's only look at 56 bits
+    // P10_FBC_UTILS_FBC_MAX_ADDRESS from p10_fbc_utils.H
+    l_psuMemoryPhys = l_psuMemoryPhys & l_rt_mask;
     return {
         l_psuMemoryVirt,
         reinterpret_cast<uint64_t>(l_psuMemoryVirt),
