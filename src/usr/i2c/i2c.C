@@ -4296,7 +4296,7 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
                            "Not seeing SCL (%d) high "
                            "after %d ns of polling (max=%d). "
                            "Full status register = 0x%.16llX. "
-                           "Inhibiting sending slave stop to e%/p%, "
+                           "Inhibiting sending slave stop to e/p=%d/%d, "
                            "for HUID 0x%08X.",
                            status_reg.scl_input_level,
                            delay_ns,
