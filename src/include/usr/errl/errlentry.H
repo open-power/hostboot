@@ -63,6 +63,7 @@
 #include <hbotcompid.H>
 #include <targeting/common/target.H>
 #include <attributeenums.H>
+#include <sys/sync.h>
 
 namespace ERRORLOGDISPLAY
 {
@@ -78,6 +79,9 @@ typedef ERRORLOG::ErrlEntry* errlHndl_t;
 
 namespace ERRORLOG
 {
+
+// A mutex to guard the map of error log severities
+static mutex_t g_sevMapMutex = MUTEX_INITIALIZER;
 
 /*****************************************************************************/
 // Forward class declarations

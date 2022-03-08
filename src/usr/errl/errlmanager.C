@@ -849,8 +849,13 @@ void ErrlManager::commitErrLog(errlHndl_t& io_err, compId_t i_committerComp )
             break;
         }
 
+        // Lock the severity map mutex to prevent multiple threads from
+        // attempting to access the map simultaneously
+        mutex_lock(&g_sevMapMutex);
+        const char* l_sevString = errl_sev_str_map.at(io_err->sev());
+        mutex_unlock(&g_sevMapMutex);
         TRACFCOMP(g_trac_errl, "commitErrLog() called by %.4X for eid=%.8x, Reasoncode=%.4X, Sev=%s",
-                  i_committerComp, io_err->eid(), io_err->reasonCode(), errl_sev_str_map.at(io_err->sev()) );
+                  i_committerComp, io_err->eid(), io_err->reasonCode(), l_sevString );
 
         if ( (io_err->sev() != ERRORLOG::ERRL_SEV_INFORMATIONAL) &&
              (io_err->sev() != ERRORLOG::ERRL_SEV_RECOVERED) )

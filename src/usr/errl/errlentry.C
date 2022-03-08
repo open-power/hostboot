@@ -216,10 +216,15 @@ ErrlEntry::ErrlEntry(const errlSeverity_t i_sev,
     iv_skipShowingLog(true),
     iv_doHbDump(i_hbDump)
 {
+    // Lock the severity map mutex to prevent multiple threads from
+    // attempting to access the map simultaneously
+    mutex_lock(&g_sevMapMutex);
+    const char* l_sevString = errl_sev_str_map.at(i_sev);
+    mutex_unlock(&g_sevMapMutex);
     #ifdef CONFIG_ERRL_ENTRY_TRACE
-    TRACFCOMP( g_trac_errl, ERR_MRK"Error created : PLID=%.8X, EID=%.8X, RC=%.4X, Mod=%.2X, Userdata=%.16llX %.16llX, Sev=%s", plid(), eid(), i_reasonCode, i_modId, i_user1, i_user2, errl_sev_str_map.at(i_sev) );
+    TRACFCOMP( g_trac_errl, ERR_MRK"Error created : PLID=%.8X, EID=%.8X, RC=%.4X, Mod=%.2X, Userdata=%.16llX %.16llX, Sev=%s", plid(), eid(), i_reasonCode, i_modId, i_user1, i_user2, l_sevString );
     #else
-    TRACDCOMP( g_trac_errl, ERR_MRK"Error created : PLID=%.8X, EID=%.8X, RC=%.4X, Mod=%.2X, Userdata=%.16llX %.16llX, Sev=%s", plid(), eid(), i_reasonCode, i_modId, i_user1, i_user2, errl_sev_str_map.at(i_sev) );
+    TRACDCOMP( g_trac_errl, ERR_MRK"Error created : PLID=%.8X, EID=%.8X, RC=%.4X, Mod=%.2X, Userdata=%.16llX %.16llX, Sev=%s", plid(), eid(), i_reasonCode, i_modId, i_user1, i_user2, l_sevString );
     #endif
     // Collect the Backtrace and add it to the error log
     iv_pBackTrace = new ErrlUserDetailsBackTrace();
