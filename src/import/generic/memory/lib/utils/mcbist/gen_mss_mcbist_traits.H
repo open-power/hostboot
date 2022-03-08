@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,6 +60,13 @@ class mcbistMCTraits;
 ///
 template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE>
 class mcbistTraits;
+
+///
+/// @class mcbist_address_map_MCTraits
+/// @brief A collection of address mapping traits with MCBIST engine or hardware
+///
+template< mss::mc_type MC >
+class mcbist_address_map_MCTraits;
 
 }// mss
 #endif

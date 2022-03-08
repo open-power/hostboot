@@ -241,5 +241,453 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Get the address of mrank 0 buffer
+/// @return Address of mrank 0 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_mrank0_bit()
+{
+    return iv_addr_map0;
+}
+
+///
+/// @brief Get the address of mrank0 buffer when in 5D mode
+/// @return Address of mrank0 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_mrank0_bit_5d()
+{
+    return iv_addr_map0;
+}
+
+///
+/// @brief Get the address of mrank1 buffer
+/// @return Address of mrank1 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_mrank1_bit()
+{
+    return iv_addr_map0;
+}
+
+///
+/// @brief Get the address of mrank1 buffer when in 5D mode
+/// @return Address of mrank1 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_mrank1_bit_5d()
+{
+    return iv_addr_map0;
+}
+
+///
+/// @brief Get the address of mrank2 buffer when in 5D mode
+/// @return Address of mrank2 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_mrank2_bit_5d()
+{
+    return iv_addr_map0;
+}
+
+///
+/// @brief Get the address of srank0 buffer
+/// @return Address of mrank0 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_srank0_bit()
+{
+    return iv_addr_map0;
+}
+
+///
+/// @brief Get the address of srank1 buffer
+/// @return Address of srank1 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_srank1_bit()
+{
+    return iv_addr_map0;
+}
+
+///
+/// @brief Get the address of srank2 buffer
+/// @return Address of srank2 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_srank2_bit()
+{
+    return iv_addr_map0;
+}
+
+///
+/// @brief Get the address of bank2 buffer
+/// @return Address of bank2 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_bank2_bit()
+{
+    return iv_addr_map0;
+}
+
+///
+/// @brief Get the address of bank1 buffer
+/// @return Address of bank1 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_bank1_bit()
+{
+    return iv_addr_map0;
+}
+
+///
+/// @brief Get the address of bank 0 buffer
+/// @return Address of bank 0 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_bank0_bit()
+{
+    return iv_addr_map0;
+}
+
+///
+/// @brief Get the address of bank group1 buffer
+/// @return Address of bank group1 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_bank_group1_bit()
+{
+    return iv_addr_map1;
+}
+
+///
+/// @brief Get the address of bank group0 buffer
+/// @return Address of bank group0 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_bank_group0_bit()
+{
+    return iv_addr_map1;
+}
+
+///
+/// @brief Get the address of row17 buffer
+/// @return Address of row17 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_row17_bit()
+{
+    return iv_addr_map1;
+}
+
+///
+/// @brief Get the address of row16 buffer
+/// @return Address of row16 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_row16_bit()
+{
+    return iv_addr_map1;
+}
+
+///
+/// @brief Get the address of row15 buffer
+/// @return Address of row15 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_row15_bit()
+{
+    return iv_addr_map1;
+}
+
+///
+/// @brief Get the address of row14 buffer
+/// @return Address of row14 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_row14_bit()
+{
+    return iv_addr_map1;
+}
+
+///
+/// @brief Get the address of row13 buffer
+/// @return Address of row13 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_row13_bit()
+{
+    return iv_addr_map1;
+}
+
+///
+/// @brief Get the address of row12 buffer
+/// @return Address of row12 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_row12_bit()
+{
+    return iv_addr_map1;
+}
+
+///
+/// @brief Get the address of row11 buffer
+/// @return Address of row11 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_row11_bit()
+{
+    return iv_addr_map1;
+}
+
+///
+/// @brief Get the address of row10 buffer
+/// @return Address of row10 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_row10_bit()
+{
+    return iv_addr_map1;
+}
+
+///
+/// @brief Get the address of row9 buffer
+/// @return Address of row9 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_row9_bit()
+{
+    return iv_addr_map2;
+}
+
+///
+/// @brief Get the address of row8 buffer
+/// @return Address of row8 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_row8_bit()
+{
+    return iv_addr_map2;
+}
+
+///
+/// @brief Get the address of row7 buffer
+/// @return Address of row7 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_row7_bit()
+{
+    return iv_addr_map2;
+}
+
+///
+/// @brief Get the address of row6 buffer
+/// @return Address of row6 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_row6_bit()
+{
+    return iv_addr_map2;
+}
+
+///
+/// @brief Get the address of row5 buffer
+/// @return Address of row5 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_row5_bit()
+{
+    return iv_addr_map2;
+}
+
+///
+/// @brief Get the address of row4 buffer
+/// @return Address of row4 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_row4_bit()
+{
+    return iv_addr_map2;
+}
+
+///
+/// @brief Get the address of row3 buffer
+/// @return Address of row3 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_row3_bit()
+{
+    return iv_addr_map2;
+}
+
+///
+/// @brief Get the address of row2 buffer
+/// @return Address of row2 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_row2_bit()
+{
+    return iv_addr_map2;
+}
+
+///
+/// @brief Get the address of row1 buffer
+/// @return Address of row1 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_row1_bit()
+{
+    return iv_addr_map2;
+}
+
+///
+/// @brief Get the address of row0 buffer
+/// @return Address of row0 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_row0_bit()
+{
+    return iv_addr_map2;
+}
+
+///
+/// @brief Get the address of col9 buffer
+/// @return Address of col9 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_col9_bit()
+{
+    return iv_addr_map3;
+}
+
+///
+/// @brief Get the address of col8 buffer
+/// @return Address of col8 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_col8_bit()
+{
+    return iv_addr_map3;
+}
+
+///
+/// @brief Get the address of col7 buffer
+/// @return Address of col7 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_col7_bit()
+{
+    return iv_addr_map3;
+}
+
+///
+/// @brief Get the address of col6 buffer
+/// @return Address of col6 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_col6_bit()
+{
+    return iv_addr_map3;
+}
+
+///
+/// @brief Get the address of col5 buffer
+/// @return Address of col5 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_col5_bit()
+{
+    return iv_addr_map3;
+}
+
+///
+/// @brief Get the address of col4 buffer
+/// @return Address of col4 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_col4_bit()
+{
+    return iv_addr_map3;
+}
+
+///
+/// @brief Get the address of col3 buffer
+/// @return Address of col3 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_col3_bit()
+{
+    return iv_addr_map3;
+}
+
+///
+/// @brief Get the address of col2 buffer
+/// @return Address of col2 fapi2 buffer
+///
+template <>
+fapi2::buffer<uint64_t>& program<mss::mc_type::EXPLORER>::get_addr_map_col2_bit()
+{
+    return iv_addr_map3;
+}
+
+///
+/// @brief Change the BANK2 address mapping
+/// @param[in] i_bitmap BANK2 bit map in the address counter
+/// @note Assumes data is right-aligned
+///
+template <>
+void program<mss::mc_type::EXPLORER>::change_bank2_bit( const uint64_t i_bitmap )
+{
+    using TT = mcbistTraits<mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>;
+    iv_addr_map0.insertFromRight<TT::CFG_AMAP_BANK2, TT::CFG_AMAP_BANK2_LEN>(i_bitmap);
+    return;
+}
+
+///
+/// @brief Change the DIMM select in the address mapping
+/// @param[in] i_bitmap DIMM select bit map in the address counter
+/// @note Assumes data is right-aligned
+///
+template <>
+void program<mss::mc_type::EXPLORER>::change_dimm_select_bit( const uint64_t i_bitmap )
+{
+    using TT = mcbistTraits<mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>;
+    iv_addr_map0.insertFromRight<TT::CFG_AMAP_DIMM_SELECT, TT::CFG_AMAP_DIMM_SELECT_LEN>(i_bitmap);
+    return;
+}
+
+///
+/// @brief Change the COL10 address mapping
+/// @param[in] i_bitmap COL10 bit map in the address counter
+/// @note Assumes data is right-aligned
+///
+template <>
+void program<mss::mc_type::EXPLORER>::change_col10_bit( const uint64_t i_bitmap )
+{
+    return;
+}
+
+/// @brief Change the ROQ address mapping
+/// @param[in] i_bitmap ROQ bit map in the address counter
+/// @note Assumes data is right-aligned
+///
+template <>
+void program<mss::mc_type::EXPLORER>::change_roq_bit( const uint64_t i_bitmap )
+{
+    return;
+}
+
+///
+/// @brief Change the BANK_GROUP2 address mapping
+/// @param[in] i_bitmap BANK_GROUP2 bit map in the address counter
+/// @note Assumes data is right-aligned
+///
+template <>
+void program<mss::mc_type::EXPLORER>::change_bank_group2_bit( const uint64_t i_bitmap )
+{
+    return;
+}
+
 } // namespace mcbist
 } // namespace mss
