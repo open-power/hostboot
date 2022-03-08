@@ -493,12 +493,21 @@ errlHndl_t convertToHbTarget(uint64_t i_resourceId,
     errlHndl_t l_err{nullptr};
 
     do {
+        // convert i_resourceId into a HBRT_HYP_ID so getHbTarget() will work
+        // PHYP passes in ORDINAL_ID so need to add appropriate HBRT_TYPE
         if (i_resourceType == hostInterfaces::ResourceProc)
         {
             TRACDCOMP(g_trac_runtime,
                 "convertToHbTarget: core type resource id (0x%llX -> 0x%llX)",
                 i_resourceId, i_resourceId | HBRT_CORE_TYPE );
             i_resourceId |= HBRT_CORE_TYPE;
+        }
+        else if (i_resourceType == hostInterfaces::ResourceNxUnit)
+        {
+            TRACDCOMP(g_trac_runtime,
+                "convertToHbTarget: processor (nx parent) type resource id (0x%llX -> 0x%llX)",
+                i_resourceId, i_resourceId | HBRT_PROC_TYPE );
+            i_resourceId |= HBRT_PROC_TYPE;
         }
         l_err = RT_TARG::getHbTarget(i_resourceId, o_target);
         if (l_err)
