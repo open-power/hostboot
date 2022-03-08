@@ -441,139 +441,136 @@ fapi2::ReturnCode p10_load_rtrim_override(
     FAPI_DBG("FW VERSION 0: %04X", l_fw_ver_0);
     FAPI_DBG("FW VERSION 1: %04X", l_fw_ver_1);
 
-    if ((l_fw_ver_0 == FW_VER_0_OCT_2020) && (l_fw_ver_1 == FW_VER_1_OCT_2020))
+    for (auto l_phb_target : i_target.getChildren<fapi2::TARGET_TYPE_PHB>())
     {
-        for (auto l_phb_target : i_target.getChildren<fapi2::TARGET_TYPE_PHB>())
-        {
 
-            // Cronus only
+        // Cronus only
 #if !defined(__PPE__) && !defined(__HOSTBOOT_MODULE)
-            // Skip if PHB target is not enabled
-            bool l_phbEnabled = false;
-            FAPI_TRY(isPHBEnabled(l_phb_target, l_phbEnabled),
-                     "Error returned from isPHBEnabled()");
+        // Skip if PHB target is not enabled
+        bool l_phbEnabled = false;
+        FAPI_TRY(isPHBEnabled(l_phb_target, l_phbEnabled),
+                 "Error returned from isPHBEnabled()");
 
-            if (!l_phbEnabled)
-            {
-                FAPI_DBG("PHB is disabled, skip Reset.");
-                continue;
-            }
+        if (!l_phbEnabled)
+        {
+            FAPI_DBG("PHB is disabled, skip Reset.");
+            continue;
+        }
 
 #endif
-            l_data = 0;
-            //Take ETU out of reset to acess PHB PCI - Core Reset Register
-            FAPI_DBG("  ETU is in reset. Taking it out of reset");
-            FAPI_TRY(PREP_REGS_PHBRESET_REG(l_phb_target),
-                     "Error from PREP_REGS_PHBRESET_REG");
-            CLEAR_REGS_PHBRESET_REG_PE_ETU_RESET(l_data);
-            FAPI_TRY(PUT_REGS_PHBRESET_REG(l_phb_target, l_data),
-                     "Error from PUT_REGS_PHBRESET_REG");
+        l_data = 0;
+        //Take ETU out of reset to acess PHB PCI - Core Reset Register
+        FAPI_DBG("  ETU is in reset. Taking it out of reset");
+        FAPI_TRY(PREP_REGS_PHBRESET_REG(l_phb_target),
+                 "Error from PREP_REGS_PHBRESET_REG");
+        CLEAR_REGS_PHBRESET_REG_PE_ETU_RESET(l_data);
+        FAPI_TRY(PUT_REGS_PHBRESET_REG(l_phb_target, l_data),
+                 "Error from PUT_REGS_PHBRESET_REG");
 
-            l_data = 0;
-            //This will deassert reset for the PCI CFG core only.
-            FAPI_TRY(p10_phb_hv_access(l_phb_target, PHB_CORE_RESET_REGISTER, true, false, l_data),
-                     "Error from p10_phb_hv_access: Deactivate PHB_CORE_RESET_REGISTER (Read)");
-            l_data.clearBit<PHB_HV_1A10_CFG_CORE_RESET_BIT>();
-            FAPI_DBG("  Value to be written to %016lX -  %016lX", PHB_CORE_RESET_REGISTER, l_data());
-            FAPI_TRY(p10_phb_hv_access(l_phb_target, PHB_CORE_RESET_REGISTER, false, false, l_data),
-                     "Error from p10_phb_hv_access: Deactivate PHB_CORE_RESET_REGISTER (Write)");
-
-
-            l_data = 0;
-            //This will deassert reset for the PDL + PTL + PBL + PIPE_RESET.
-            FAPI_TRY(p10_phb_hv_access(l_phb_target, PHB_CORE_RESET_REGISTER, true, false, l_data),
-                     "Error from p10_phb_hv_access: Deactivate PHB_CORE_RESET_REGISTER (Read)");
-            l_data.clearBit<PHB_HV_1A10_PDL_PTL_RESET_BIT>();
-            l_data.clearBit<PHB_HV_1A10_PBL_RESET_BIT>();
-            l_data.setBit<PHB_HV_1A10_PIPE_RESETN_BIT>();
-            FAPI_DBG("  Value to be written to %016lX -  %016lX", PHB_CORE_RESET_REGISTER, l_data());
-            FAPI_TRY(p10_phb_hv_access(l_phb_target, PHB_CORE_RESET_REGISTER, false, false, l_data),
-                     "Error from p10_phb_hv_access: Deactivate PHB_CORE_RESET_REGISTER (Write)");
+        l_data = 0;
+        //This will deassert reset for the PCI CFG core only.
+        FAPI_TRY(p10_phb_hv_access(l_phb_target, PHB_CORE_RESET_REGISTER, true, false, l_data),
+                 "Error from p10_phb_hv_access: Deactivate PHB_CORE_RESET_REGISTER (Read)");
+        l_data.clearBit<PHB_HV_1A10_CFG_CORE_RESET_BIT>();
+        FAPI_DBG("  Value to be written to %016lX -  %016lX", PHB_CORE_RESET_REGISTER, l_data());
+        FAPI_TRY(p10_phb_hv_access(l_phb_target, PHB_CORE_RESET_REGISTER, false, false, l_data),
+                 "Error from p10_phb_hv_access: Deactivate PHB_CORE_RESET_REGISTER (Write)");
 
 
-            //Read PCIE - DLP Training Control Register to check for DL_PGRESET to be deasserted
-            l_poll_counter = 0; //Reset poll counter
+        l_data = 0;
+        //This will deassert reset for the PDL + PTL + PBL + PIPE_RESET.
+        FAPI_TRY(p10_phb_hv_access(l_phb_target, PHB_CORE_RESET_REGISTER, true, false, l_data),
+                 "Error from p10_phb_hv_access: Deactivate PHB_CORE_RESET_REGISTER (Read)");
+        l_data.clearBit<PHB_HV_1A10_PDL_PTL_RESET_BIT>();
+        l_data.clearBit<PHB_HV_1A10_PBL_RESET_BIT>();
+        l_data.setBit<PHB_HV_1A10_PIPE_RESETN_BIT>();
+        FAPI_DBG("  Value to be written to %016lX -  %016lX", PHB_CORE_RESET_REGISTER, l_data());
+        FAPI_TRY(p10_phb_hv_access(l_phb_target, PHB_CORE_RESET_REGISTER, false, false, l_data),
+                 "Error from p10_phb_hv_access: Deactivate PHB_CORE_RESET_REGISTER (Write)");
 
-            while (l_poll_counter < MAX_NUM_POLLS)
-            {
-                l_poll_counter++;
-                FAPI_TRY(fapi2::delay(NANO_SEC_DELAY, SIM_CYC_DELAY), "fapiDelay error.");
 
-                l_data = 0;
-                FAPI_TRY(p10_phb_hv_access(l_phb_target, PHB_DLP_TRAINING_CTRL_REGISTER, true, false, l_data),
-                         "Error from p10_phb_hv_access: PHB_DLP_TRAINING_CTRL_REGISTER (Read)");
+        //Read PCIE - DLP Training Control Register to check for DL_PGRESET to be deasserted
+        l_poll_counter = 0; //Reset poll counter
 
-                FAPI_DBG("PHB%i: PHB_DLP_TRAINING_CTRL_REGISTER %#lx", l_phb_target, l_data());
-
-                //Check DL_PGRESET is deasserted
-                if (!(l_data.getBit(PHB_HV_1A40_TL_EC10_DL_PGRESET)))
-                {
-                    FAPI_DBG("  DL_PGRESET completed reset to complete %016lX -  %016lX", PHB_DLP_TRAINING_CTRL_REGISTER, l_data());
-                    FAPI_DBG("  End polling for DL_PGRESET to become deasserted");
-                    break;
-                }
-            }
-
-            FAPI_DBG("  DL_PGRESET status (poll counter = %d).", l_poll_counter);
-
-            FAPI_ASSERT(l_poll_counter < MAX_NUM_POLLS,
-                        fapi2::P10_DL_PGRESET_STUCK()
-                        .set_TARGET(l_phb_target)
-                        .set_PHB_ADDR(PHB_DLP_TRAINING_CTRL_REGISTER)
-                        .set_PHB_DATA(l_data),
-                        "PHB%i: DL_PGRESET did not clear.", l_phb_target);
-
-        }
-
-        // Write CReg overrides through the CR Parallel Interface.
-        // Note: This overrides is required to be done after ext_ld_done and lane_reset is de-asserted.
-        // Loop through all configured PECs
-        for (auto l_pec_target : i_target.getChildren<fapi2::TARGET_TYPE_PEC>())
+        while (l_poll_counter < MAX_NUM_POLLS)
         {
-            for (uint8_t i = 0; i < NUM_OF_INSTANCES ; i++)
+            l_poll_counter++;
+            FAPI_TRY(fapi2::delay(NANO_SEC_DELAY, SIM_CYC_DELAY), "fapiDelay error.");
+
+            l_data = 0;
+            FAPI_TRY(p10_phb_hv_access(l_phb_target, PHB_DLP_TRAINING_CTRL_REGISTER, true, false, l_data),
+                     "Error from p10_phb_hv_access: PHB_DLP_TRAINING_CTRL_REGISTER (Read)");
+
+            FAPI_DBG("PHB%i: PHB_DLP_TRAINING_CTRL_REGISTER %#lx", l_phb_target, l_data());
+
+            //Check DL_PGRESET is deasserted
+            if (!(l_data.getBit(PHB_HV_1A40_TL_EC10_DL_PGRESET)))
             {
-                //Only to be applied with firmware version
-                //  0x0178, 0x2002
-                //  0x0179, 0x00D2
-                //Change RTRIM setting to reflect short channels for better AFE performance.
-                //Needs to be set after a toggle of lane_reset.
-                l_data = 0;
-                FAPI_TRY(fapi2::getScom(l_pec_target, RAWLANEAONN_DIG_AFE_RTRIM[i] , l_data),
-                         "Error from getScom 0x%.16llX", RAWLANEAONN_DIG_AFE_RTRIM[i]);
-                l_data.insertFromRight(AFE_RTRIM_VAL, AFE_RTRIM_START, AFE_RTRIM_LEN);
-                FAPI_DBG("RAWLANEAONN_DIG_AFE_RTRIM 0x%.0x", l_data);
-                FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEAONN_DIG_AFE_RTRIM[i] , l_data),
-                         "Error from putScom 0x%.16llX", RAWLANEAONN_DIG_AFE_RTRIM[i]);
+                FAPI_DBG("  DL_PGRESET completed reset to complete %016lX -  %016lX", PHB_DLP_TRAINING_CTRL_REGISTER, l_data());
+                FAPI_DBG("  End polling for DL_PGRESET to become deasserted");
+                break;
             }
         }
 
+        FAPI_DBG("  DL_PGRESET status (poll counter = %d).", l_poll_counter);
 
-        for (auto l_phb_target : i_target.getChildren<fapi2::TARGET_TYPE_PHB>())
+        FAPI_ASSERT(l_poll_counter < MAX_NUM_POLLS,
+                    fapi2::P10_DL_PGRESET_STUCK()
+                    .set_TARGET(l_phb_target)
+                    .set_PHB_ADDR(PHB_DLP_TRAINING_CTRL_REGISTER)
+                    .set_PHB_DATA(l_data),
+                    "PHB%i: DL_PGRESET did not clear.", l_phb_target);
+
+    }
+
+    // Write CReg overrides through the CR Parallel Interface.
+    // Note: This overrides is required to be done after ext_ld_done and lane_reset is de-asserted.
+    // Loop through all configured PECs
+    for (auto l_pec_target : i_target.getChildren<fapi2::TARGET_TYPE_PEC>())
+    {
+        for (uint8_t i = 0; i < NUM_OF_INSTANCES ; i++)
         {
-            // Cronus only
+            //Only to be applied with firmware version
+            //  0x0178, 0x2002
+            //  0x0179, 0x00D2
+            //Change RTRIM setting to reflect short channels for better AFE performance.
+            //Needs to be set after a toggle of lane_reset.
+            l_data = 0;
+            FAPI_TRY(fapi2::getScom(l_pec_target, RAWLANEAONN_DIG_AFE_RTRIM[i] , l_data),
+                     "Error from getScom 0x%.16llX", RAWLANEAONN_DIG_AFE_RTRIM[i]);
+            l_data.insertFromRight(AFE_RTRIM_VAL, AFE_RTRIM_START, AFE_RTRIM_LEN);
+            FAPI_DBG("RAWLANEAONN_DIG_AFE_RTRIM 0x%.0x", l_data);
+            FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEAONN_DIG_AFE_RTRIM[i] , l_data),
+                     "Error from putScom 0x%.16llX", RAWLANEAONN_DIG_AFE_RTRIM[i]);
+        }
+    }
+
+
+    for (auto l_phb_target : i_target.getChildren<fapi2::TARGET_TYPE_PHB>())
+    {
+        // Cronus only
 #if !defined(__PPE__) && !defined(__HOSTBOOT_MODULE)
-            // Skip if PHB target is not enabled
-            bool l_phbEnabled = false;
-            FAPI_TRY(isPHBEnabled(l_phb_target, l_phbEnabled),
-                     "Error returned from isPHBEnabled()");
+        // Skip if PHB target is not enabled
+        bool l_phbEnabled = false;
+        FAPI_TRY(isPHBEnabled(l_phb_target, l_phbEnabled),
+                 "Error returned from isPHBEnabled()");
 
-            if (!l_phbEnabled)
-            {
-                FAPI_DBG("PHB is disabled, skip Reset.");
-                continue;
-            }
+        if (!l_phbEnabled)
+        {
+            FAPI_DBG("PHB is disabled, skip Reset.");
+            continue;
+        }
 
 #endif
 
-            l_data = 0;
-            //Put ETU into reset
-            FAPI_DBG("  Put ETU back into reset.");
-            FAPI_TRY(PREP_REGS_PHBRESET_REG(l_phb_target),
-                     "Error from PREP_REGS_PHBRESET_REG");
-            SET_REGS_PHBRESET_REG_PE_ETU_RESET(l_data);
-            FAPI_TRY(PUT_REGS_PHBRESET_REG(l_phb_target, l_data),
-                     "Error from PUT_REGS_PHBRESET_REG");
-        }
+        l_data = 0;
+        //Put ETU into reset
+        FAPI_DBG("  Put ETU back into reset.");
+        FAPI_TRY(PREP_REGS_PHBRESET_REG(l_phb_target),
+                 "Error from PREP_REGS_PHBRESET_REG");
+        SET_REGS_PHBRESET_REG_PE_ETU_RESET(l_data);
+        FAPI_TRY(PUT_REGS_PHBRESET_REG(l_phb_target, l_data),
+                 "Error from PUT_REGS_PHBRESET_REG");
     }
 
 fapi_try_exit:
