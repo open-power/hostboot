@@ -102,17 +102,18 @@ bool is_4u(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target)
 /// @param[in] i_gpio GPIO Expander target
 /// @param[in,out] io_pmic1 PMIC1/3 pmic_info class including target / state info
 /// @param[in,out] io_pmic2 PMIC2/4 pmic_info class including target / state info
-/// @return aggregate_state N mode state according to validation check pass
+/// @param[in,out] io_failed_pmics Bit map of failed PMICS on a GPIO
+/// @return aggregate_state N mode state according to the status of GPIO and ADC only
 ///
 aggregate_state gpio_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio,
                            pmic_info& io_pmic1,
-                           pmic_info& io_pmic2)
+                           pmic_info& io_pmic2,
+                           fapi2::buffer<uint8_t>& io_failed_pmics)
 {
     FAPI_INF(TARGTIDFORMAT " Performing GPIO N-Mode Detection", MSSTARGID(i_gpio));
 
     aggregate_state l_state = aggregate_state::N_PLUS_1;
 
-    uint8_t l_failed_pmics = 0;
     fapi2::buffer<uint8_t> l_reg;
 
     // I2C read failing here would cause a fail for the check on 56-59,
@@ -128,9 +129,11 @@ aggregate_state gpio_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAV
 
     FAPI_DBG(TARGTIDFORMAT " GPIO INPUT_PORT_REG data: 0x%02X", MSSTARGID(i_gpio), l_reg);
 
-    // If all are not 1, declare n-mode
-    l_failed_pmics += !(l_reg.getBit<mss::gpio::fields::INPUT_PORT_REG_PMIC_PAIR0>());
-    l_failed_pmics += !(l_reg.getBit<mss::gpio::fields::INPUT_PORT_REG_PMIC_PAIR1>());
+    // The 2 pimcs on each GPIO are from a different pair. So in order to declare a
+    // PMIC pair as lost, we will need to check both the pmics in a pair. This logic sets a fail
+    // for one of the pmics in a pair
+    io_failed_pmics.writeBit<PAIR0>(!l_reg.getBit<mss::gpio::fields::INPUT_PORT_REG_PMIC_PAIR0>());
+    io_failed_pmics.writeBit<PAIR1>(!l_reg.getBit<mss::gpio::fields::INPUT_PORT_REG_PMIC_PAIR1>());
 
     if (!l_reg.getBit<mss::gpio::fields::INPUT_PORT_REG_PMIC_PAIR0>())
     {
@@ -143,9 +146,6 @@ aggregate_state gpio_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAV
         FAPI_INF(TARGTIDFORMAT " Secondary PMIC PWR_NOT_GOOD", MSSTARGID(i_gpio));
         io_pmic2.iv_state |= PWR_NOT_GOOD;
     }
-
-    // Cast that back to l_state, 1 part dead == N_MODE, 2 == LOST
-    l_state = static_cast<aggregate_state>(l_failed_pmics);
 
     // Check ADC_ALERT bit and declare n-mode if it is not set
     if (!l_reg.getBit<mss::gpio::fields::INPUT_PORT_REG_FAULT_N>())
@@ -679,6 +679,9 @@ fapi2::ReturnCode pmic_n_mode_detect(
 {
     FAPI_INF(TARGTIDFORMAT " Running pmic_n_mode_detect HWP", MSSTARGID(i_ocmb_target));
 
+    fapi2::buffer<uint8_t> l_failed_pmics_1;
+    fapi2::buffer<uint8_t> l_failed_pmics_2;
+
     runtime_n_mode_telem_info l_info;
     aggregate_state l_state = aggregate_state::N_PLUS_1;
 
@@ -712,8 +715,11 @@ fapi2::ReturnCode pmic_n_mode_detect(
     aggregate_state l_output_state_2 = aggregate_state::N_PLUS_1;
 
     // Start with the GPIOs
-    l_output_state_1 = gpio_check(GPIO1, PMICS[mss::pmic::id::PMIC0], PMICS[mss::pmic::id::PMIC1]);
-    l_output_state_2 = gpio_check(GPIO2, PMICS[mss::pmic::id::PMIC2], PMICS[mss::pmic::id::PMIC3]);
+    l_output_state_1 = gpio_check(GPIO1, PMICS[mss::pmic::id::PMIC0], PMICS[mss::pmic::id::PMIC1], l_failed_pmics_1);
+    l_output_state_2 = gpio_check(GPIO2, PMICS[mss::pmic::id::PMIC2], PMICS[mss::pmic::id::PMIC3], l_failed_pmics_2);
+
+    get_gpio_pmic_state<PAIR0>(l_output_state_1, l_failed_pmics_1, l_failed_pmics_2);
+    get_gpio_pmic_state<PAIR1>(l_output_state_2, l_failed_pmics_1, l_failed_pmics_2);
 
     // Choose the largest of the two states, a double N-Mode declaration here is
     // still just only N-Mode since the two GPIOs handle a separate set of redundant pmics
