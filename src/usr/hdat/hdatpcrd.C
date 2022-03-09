@@ -49,18 +49,42 @@ extern trace_desc_t *g_trac_hdat;
  */
 vpdData procVpdData[] =
 {
-    { MVPD::VINI, MVPD::RT },
-    { MVPD::VINI, MVPD::DR },
-    { MVPD::VINI, MVPD::CC },
-    { MVPD::VINI, MVPD::FN },
- };
+    { MVPD::VINI, MVPD::RT }, // Size 4
+    { MVPD::VINI, MVPD::DR }, // Size 16
+    { MVPD::VINI, MVPD::VZ }, // Size 2
+    { MVPD::VINI, MVPD::CC }, // Size 4
+    { MVPD::VINI, MVPD::CE }, // Size 1
+    { MVPD::VINI, MVPD::FN }, // Size 7
+    { MVPD::VINI, MVPD::PN }, // Size 7
+    { MVPD::VINI, MVPD::SN }, // Size 12
+    { MVPD::VINI, MVPD::PR }, // Size 8
+    { MVPD::VINI, MVPD::HE }, // Size 4
+    { MVPD::VINI, MVPD::CT }, // Size 4
+    { MVPD::VINI, MVPD::HW }, // Size 2
+    { MVPD::VINI, MVPD::B3 }, // Size 6
+    { MVPD::VINI, MVPD::B4 }, // Size 1
+    { MVPD::VINI, MVPD::B7 }, // Size 12
+    { MVPD::VINI, MVPD::VN }, // Size 16
+};
 
 const HdatKeywordInfo l_mvpdKeywords[] =
 {
     { MVPD::RT, "RT" },
     { MVPD::DR, "DR" },
+    { MVPD::VZ, "VZ" },
     { MVPD::CC, "CC" },
+    { MVPD::CE, "CE" },
     { MVPD::FN, "FN" },
+    { MVPD::PN, "PN" },
+    { MVPD::SN, "SN" },
+    { MVPD::PR, "PR" },
+    { MVPD::HE, "HE" },
+    { MVPD::CT, "CT" },
+    { MVPD::HW, "HW" },
+    { MVPD::B3, "B3" },
+    { MVPD::B4, "B4" },
+    { MVPD::B7, "B7" },
+    { MVPD::VN, "VN" },
 };
 
 /*******************************************************************************
@@ -150,8 +174,23 @@ HdatPcrd::HdatPcrd(errlHndl_t &o_errlHndl, const hdatMsAddr_t &i_msAddr)
                + sizeof(hdatHDIFDataArray_t) + sizeof(hdatProcEcLvlElement_t)
                + sizeof(hdatHDIFVersionedDataArray_t)
                + (sizeof(hdatSpiDevData_t) * HDAT_PCRD_MAX_SPI_DEV)
+               + sizeof(hdatHDIFVersionedDataArray_t)
+               + (sizeof(hdatEepromPartData_t) * HDAT_PCRD_MAX_EEPROM_PART)
                );
-     HDAT_DBG("iv_spPcrdEntrySize for one pcrd=0x%x",iv_spPcrdEntrySize);
+
+    // The PCRD structure is a fixed size and has boundary of 128 bytes
+    // so padding by 128 boundary.
+    uint32_t l_rem=0, l_pad=0;
+    l_rem=0; l_pad=0;
+    l_rem = iv_spPcrdEntrySize % 128;
+    l_pad = l_rem ? (128 - l_rem ) : 0;
+
+    // Padding is allocated for size of PCRD entry. If it was
+    // smaller than 128 bytes, then you may need to bump it up
+    // Note : This will be the size of each of the PCRD entries
+    iv_spPcrdEntrySize = iv_spPcrdEntrySize + l_pad;
+    HDAT_INF("iv_spPcrdEntrySize for one pcrd = 0x%x l_pad=%d",
+        iv_spPcrdEntrySize, l_pad);
 
     // Allocate space for each CHIP -- will use max amount to start
     uint64_t l_base_addr = ((uint64_t) i_msAddr.hi << 32) | i_msAddr.lo;
@@ -814,18 +853,7 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
             }
             index++;
 
-            // The PCRD structure is a fixed size and has boundary of 128 bytes
-            // so padding by 128 boundary.
-            uint32_t l_rem=0, l_pad=0;
-            l_rem=0; l_pad=0;
-            l_rem = this->iv_spPcrd->hdatHdr.hdatSize % 128;
-            l_pad = l_rem ? (128 - l_rem ) : 0;
-
-            l_addr += this->iv_spPcrd->hdatHdr.hdatSize;
-
-            // padding is allocated for size of PCRD entry. If it was
-            // smaller than 128 bytes, then you may need to bump it up
-            l_addr += l_pad;
+            l_addr += iv_spPcrdEntrySize;
             this->iv_spPcrd = reinterpret_cast<hdatSpPcrd_t *>(l_addr);
             HDAT_DBG("at the end of for loop iv_spPcrd=0x%08X",this->iv_spPcrd);
         }
@@ -835,7 +863,7 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
         o_size = (o_size / o_count);
 
     }while(0);
-    HDAT_DBG("number of pcrd entries=0x%x,size=0x%x",o_count,o_size);
+    HDAT_INF("number of pcrd entries=0x%x,size=0x%x",o_count,o_size);
 
     HDAT_EXIT();
     return l_errl;

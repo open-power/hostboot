@@ -1930,15 +1930,20 @@ errlHndl_t hdatformatAsciiKwd(const struct vpdData i_fetchVpd[],
     HDAT_ENTER();
     HDAT_DBG("entered hdatformatAsciiKwd with theSize=0x%x",theSize);
 
+    // Pad Filler (PF) Total Size (6) = Keyword length (2) + Size (1) + Data (3)
+    uint8_t l_padFillerTotalSize = 6;
+
     // i_kwdSize - data size
     // (i_num* sizeof(uint8_t)) - individual datat size
     // (2 * sizeof(uint8_t)) - 0x78, 0x84
     // sizeof(uint16_t) = total data size in size
     // (i_num* 2) - keyword size
+    // l_padFillerTotalSize - Pad Filler(PF) total size
     o_fmtkwdSize = i_kwdSize + (i_num* sizeof(uint8_t)) +
-                    (2 * sizeof(uint8_t)) + sizeof(uint16_t) + (i_num* 2);
+                    (2 * sizeof(uint8_t)) + sizeof(uint16_t) + (i_num* 2) +
+                     l_padFillerTotalSize;
 
-    o_fmtKwd = new char[o_fmtkwdSize];
+    o_fmtKwd = new char[o_fmtkwdSize]();
     //Tag for start of the section
     uint8_t l_initial = 0x84;
     uint16_t l_kwdSize = o_fmtkwdSize - sizeof(uint16_t) - (2*sizeof(uint8_t));
@@ -1973,9 +1978,29 @@ errlHndl_t hdatformatAsciiKwd(const struct vpdData i_fetchVpd[],
             ptr += theSize[curCmd];
         }
    }
-    //End start tag of the section
-   uint8_t l_end= 0x78;
-   memcpy(reinterpret_cast<void *>(o_fmtKwd +l_loc),&l_end,sizeof(uint8_t));
+
+   // Add the PF keyword which is common with all VPD records
+   memcpy(reinterpret_cast<void *>(o_fmtKwd + l_loc), "PF",2);
+   l_loc += 2;
+
+   // PF length is set as 3 and values will be all zeroes
+   uint8_t l_pfLength = 3;
+   memcpy(reinterpret_cast<void *>(o_fmtKwd + l_loc),&l_pfLength,
+          sizeof(uint8_t));
+   l_loc += sizeof(uint8_t);
+
+   // Skipping zero values
+   l_loc += l_pfLength;
+
+   // End tag of the section
+   uint8_t l_recordEnd= 0x78;
+   memcpy(reinterpret_cast<void *>(o_fmtKwd +l_loc),
+       &l_recordEnd,sizeof(uint8_t));
+   l_loc +=sizeof(uint8_t);
+
+   // VPD end indication
+   uint8_t l_vpdEnd= 0x00;
+   memcpy(reinterpret_cast<void *>(o_fmtKwd +l_loc),&l_vpdEnd,sizeof(uint8_t));
    l_loc +=sizeof(uint8_t);
 
    HDAT_EXIT();

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -142,6 +142,10 @@ namespace MVPD
         { pdP, "#P" },
         { pdS, "#S" },
         { MK,  "MK" },
+        { B3,  "B3" },
+        { B4,  "B4" },
+        { B7,  "B7" },
+        { VN,  "VN" },
 
         // -------------------------------------------------------------------
         // DO NOT USE!!  This is for test purposes ONLY!
