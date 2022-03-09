@@ -96,6 +96,14 @@ void update_128gb_wlo_if_needed(const std::vector<mss::dimm::kind<>>& i_kinds,
                                 uint8_t& io_wlo);
 
 ///
+/// @brief Disables WRITE_CTR_2D_VREF if the 128GB workaround is required
+/// @param[in] i_kinds vector of DIMM kinds on which to operate
+/// @param[in,out] io_cal_steps the calibration steps from the attribute
+///
+void update_128gb_cal_steps_if_needed(const std::vector<mss::dimm::kind<>>& i_kinds,
+                                      uint32_t& io_cal_steps);
+
+///
 /// @brief Updates the VREFDQ if the 128GB workaround is required
 /// @param[in] i_kinds vector of DIMM kinds on which to operate
 /// @param[in,out] io_vrefdq_train the WR VREF values to be updated

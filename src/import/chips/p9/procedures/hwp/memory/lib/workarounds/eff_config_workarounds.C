@@ -689,6 +689,22 @@ void update_128gb_wlo_if_needed(const std::vector<mss::dimm::kind<>>& i_kinds,
 }
 
 ///
+/// @brief Disables WRITE_CTR_2D_VREF if the 128GB workaround is required
+/// @param[in] i_kinds vector of DIMM kinds on which to operate
+/// @param[in,out] io_cal_steps the calibration steps from the attribute
+///
+void update_128gb_cal_steps_if_needed(const std::vector<mss::dimm::kind<>>& i_kinds,
+                                      uint32_t& io_cal_steps)
+{
+    if(is_128gb_workaround_needed(i_kinds) == true)
+    {
+        fapi2::buffer<uint32_t> l_buffer(io_cal_steps);
+        l_buffer.clearBit<mss::cal_steps::WRITE_CTR_2D_VREF>();
+        io_cal_steps = l_buffer;
+    }
+}
+
+///
 /// @brief Updates the VREFDQ if the 128GB workaround is required
 /// @param[in] i_kinds vector of DIMM kinds on which to operate
 /// @param[in,out] io_vrefdq_train the WR VREF values to be updated
@@ -698,19 +714,15 @@ void update_128gb_vrefdq_if_needed(const std::vector<mss::dimm::kind<>>& i_kinds
 {
     if(is_128gb_workaround_needed(i_kinds) == true)
     {
-        constexpr uint8_t DECREASE_VALUE = 10;
+        constexpr uint8_t OVERRIDE_VALUE = 0x1a;
 
         // Loops through and updates the VREFDQ
         for(uint8_t l_dimm = 0; l_dimm < mss::MAX_DIMM_PER_PORT; ++l_dimm)
         {
             for(uint8_t l_rank = 0; l_rank < mss::MAX_RANK_PER_DIMM; ++l_rank)
             {
-                const auto l_value = io_vrefdq_train[l_dimm][l_rank];
-
-                // If the value is less than our decrease value, just set it to 0
-                // This handles cases of 0's (no update needed) and too low to update in one go
-                // Otherwise, subtract by the decrease value
-                io_vrefdq_train[l_dimm][l_rank] = (l_value < DECREASE_VALUE) ? 0 : l_value - DECREASE_VALUE;
+                // If there is a value here, override it to our new requested WR VREF value
+                io_vrefdq_train[l_dimm][l_rank] = (io_vrefdq_train[l_dimm][l_rank] == 0) ? 0 : OVERRIDE_VALUE;
             }
         }
     }
@@ -724,10 +736,12 @@ void update_128gb_vrefdq_if_needed(const std::vector<mss::dimm::kind<>>& i_kinds
 ///
 fapi2::ReturnCode update_128gb_attributes(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target)
 {
-    // Gets the WLO attribute
+    // Gets the attributes
     uint8_t l_wlo[mss::PORTS_PER_MCS] = {0, 0};
+    uint32_t l_training_steps[mss::PORTS_PER_MCS] = {0, 0};
     uint8_t l_vref_dq[mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT][mss::MAX_RANK_PER_DIMM] = {};
     FAPI_TRY(mss::eff_dphy_wlo(i_target, &(l_wlo[0])));
+    FAPI_TRY(mss::cal_step_enable(i_target, &(l_training_steps[0])));
     FAPI_TRY(mss::eff_vref_dq_train_value(i_target, &(l_vref_dq[0][0][0])));
 
     // Loops over each MCA
@@ -736,10 +750,12 @@ fapi2::ReturnCode update_128gb_attributes(const fapi2::Target<fapi2::TARGET_TYPE
         const auto l_kinds = mss::dimm::kind<>::vector(mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_mca));
         const auto l_port_index = mss::index(l_mca);
         update_128gb_wlo_if_needed(l_kinds, l_wlo[l_port_index]);
+        update_128gb_cal_steps_if_needed(l_kinds, l_training_steps[l_port_index]);
         update_128gb_vrefdq_if_needed(l_kinds, l_vref_dq[l_port_index]);
     }
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EFF_DPHY_WLO, i_target, l_wlo) );
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_CAL_STEP_ENABLE, i_target, l_training_steps) );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_VREF_DQ_TRAIN_VALUE, i_target, l_vref_dq) );
 
 fapi_try_exit:
