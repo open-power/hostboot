@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -196,6 +196,13 @@ void AttributeTank::setAttribute(const uint32_t i_attrId,
                                  const void * i_pVal)
 {
     TARG_MUTEX_LOCK(iv_mutex);
+
+    TRACDCOMP(g_trac_targeting, "AttributeTank::setAttribute - Setting Override for Attribute ID: 0x%X, "
+                                "Target Type: 0x%X",
+                                i_attrId,
+                                i_targetType);
+    TRACDBIN(g_trac_targeting, "AttributeTank::setAttribute - Attribute Data",
+                                reinterpret_cast<const uint8_t*>(i_pVal), i_valSize);
 
     // Search for an existing matching attribute
     bool l_found = false;

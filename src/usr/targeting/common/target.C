@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -679,6 +679,13 @@ void Target::getAttrTankTargetPosData(uint16_t & o_pos,
                     }
                     break;
                 }
+                case(TYPE_SYS):
+                {
+                    o_pos = AttributeTank::ATTR_POS_NA;
+                    o_unitPos = AttributeTank::ATTR_UNIT_POS_NA;
+                    o_node = AttributeTank::ATTR_NODE_NA;
+                    break;
+                }
                 case(TYPE_XBUS):
                 case(TYPE_ABUS):
                 case(TYPE_OBUS):
@@ -688,7 +695,6 @@ void Target::getAttrTankTargetPosData(uint16_t & o_pos,
                 case(TYPE_L4):
                 case(TYPE_NPU):
                 case(TYPE_SMPGROUP):
-                case(TYPE_SYS):
                 case(TYPE_PCI):
                 case(TYPE_OSC):
                 case(TYPE_TODCLK):

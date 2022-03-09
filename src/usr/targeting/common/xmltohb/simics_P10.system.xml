@@ -259,6 +259,14 @@
           <id>PMIC_HEALTH_CHECK_TIMER</id>
           <default>0xFFFFFFFF</default><!-- Disabled -->
     </attribute>
+    <attribute>
+          <id>MSL_MFG_ALLOW</id>
+          <default>0x20A9,0x20,0x60D2,0x20</default>
+    </attribute>
+    <attribute>
+          <id>MSL_FIELD_SUPPORTED</id>
+          <default>0x20DA,0x20,0x60D2,0x20,0,0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>

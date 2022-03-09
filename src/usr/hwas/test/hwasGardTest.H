@@ -47,6 +47,9 @@
 #include <hwas/hwasPlat.H>
 #include <initservice/mboxRegs.H>
 
+#include <targeting/common/mfgFlagAccessors.H>
+#include <chipids.H>
+#include <targeting/common/attributeTank.H>
 // The defines below are here to modify mostly during
 // code development and debug to easily turn off and on
 // the various tests to isolate any problems that may
@@ -645,6 +648,152 @@ public:
 
         return result;
 
+    }
+
+    void cleanupMslTest(errlHndl_t errl)
+    {
+        delete errl;
+
+        TargetHandleList chips;
+        getAllChips(chips, TYPE_NA);
+        for (const auto chip: chips)
+        {
+            update_hwas_changed_mask(chip);
+        }
+        errl = collectGard();
+        if (errl)
+        {
+            TS_FAIL("testMslEcLevelChecks: Error from collectGard");
+            errlCommit(errl, CXXTEST_COMP_ID);
+        }
+        theDeconfigGard().clearDeconfigureRecords(nullptr);
+        errl = theDeconfigGard().clearGardRecords(nullptr);
+        if (errl)
+        {
+            TS_FAIL("testMslEcLevelChecks: Couldn't clear gard records.");
+            errlCommit(errl, CXXTEST_COMP_ID);
+        }
+    }
+
+    template<const ATTRIBUTE_ID A>
+    void runMslTests(std::vector<std::vector<uint16_t>> & i_mslTests, bool errorExpected)
+    {
+        typename AttributeTraits<A>::TypeStdArr attrOverrideArray;
+        HWAS::HWASDiscovery hwasDiscovery;
+        errlHndl_t err = nullptr;
+
+        size_t testNum = 0;
+        for (const auto test : i_mslTests)
+        {
+            TS_INFO("testMslEcLevelChecks: Executing Test %d. Errors are %sexpected",
+                    ++testNum,
+                    errorExpected ? "" : "NOT ");
+            attrOverrideArray.fill(0);
+            std::copy(test.begin(), test.end(), attrOverrideArray.begin());
+
+            TARGETING::Target::theTargOverrideAttrTank().setAttribute(
+                    A,
+                    TYPE_SYS,
+                    AttributeTank::ATTR_POS_NA,
+                    AttributeTank::ATTR_UNIT_POS_NA,
+                    AttributeTank::ATTR_NODE_NA,
+                    0,
+                    sizeof(attrOverrideArray),
+                    &attrOverrideArray);
+
+            err = hwasDiscovery.discoverTargets();
+            if (errorExpected && err == nullptr)
+            {
+                TS_FAIL("Expected an error when  EC level "
+                        "doesn't match what the installed PROC chips have.");
+            }
+            if (!errorExpected && err != nullptr)
+            {
+                TS_FAIL("Unexpected error")
+            }
+            // Error is expected, though there are committed errors pointing out what chips didn't match the invalid
+            // level.
+            cleanupMslTest(err);
+        }
+    }
+
+    void testMslEcLevelChecks()
+    {
+        // There are two attributes to be tested for the MSL checks. MSL_MFG_ALLOW and MSL_FIELD_SUPPORTED.
+        // They can diverge from each other so it's not an error if they don't contain the same info.
+        TS_INFO("testMslEcLevelChecks: Started");
+        do{
+
+            const bool ERROR_EXPECTED = true, ERROR_UNEXPECTED = false;
+            std::vector<std::vector<uint16_t>> negativeTests =
+            {
+                // Test 1: System PROC chip(s) don't match given MRW value. Done by setting invalid EC Level value.
+                {POWER_CHIPID::P10_16, 0xFFFF},
+                // Test 2: System EXPLORER OCMB chip(s) don't match given MRW value. Done by setting invalid EC Level
+                //         value.
+                {POWER_CHIPID::EXPLORER_16, 0xFFFF},
+                // Test 3: The MRW has no given values
+                // @TODO RTC 251152 Enable when empty arrays aren't supported
+                //{0,0},
+            };
+            std::vector<std::vector<uint16_t>> positiveTests =
+            {
+                // Test 1: System PROC chips match at least 1 provided MRW value. Note, checking for mixing is beyond
+                //         scope of MSL checks logic.
+                {POWER_CHIPID::P10_16, 0x20, POWER_CHIPID::P10_16, 0x11},
+                // Test 2: System EXPLORER OCMB chips match at least 1 provided MRW value. Note, checking for mixing is
+                //         beyond scope of MSL checks logic.
+                {POWER_CHIPID::EXPLORER_16, 0x20, POWER_CHIPID::EXPLORER_16, 0x11},
+            };
+
+            // Get the original value of the mfg flag
+            bool mfgFlagSet = isMslChecksSet();
+            saveSystemState();
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            // Test ATTR_MSL_MFG_ALLOW
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            // First batch of tests are with mfg flag set.
+            setMfgFlag(TARGETING::MFG_FLAGS_MNFG_MSL_CHECK);
+
+            TS_INFO("testMslEcLevelChecks: Begin negative testing for ATTR_MSL_MFG_ALLOW.");
+            runMslTests<ATTR_MSL_MFG_ALLOW>(negativeTests, ERROR_EXPECTED);
+            TS_INFO("testMslEcLevelChecks: Begin positive testing for ATTR_MSL_MFG_ALLOW.");
+            runMslTests<ATTR_MSL_MFG_ALLOW>(positiveTests, ERROR_UNEXPECTED);
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            // Test ATTR_MSL_FIELD_SUPPORTED
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            clearMfgFlag(TARGETING::MFG_FLAGS_MNFG_MSL_CHECK);
+
+            TS_INFO("testMslEcLevelChecks: Begin negative testing for ATTR_MSL_FIELD_SUPPORTED.");
+            runMslTests<ATTR_MSL_FIELD_SUPPORTED>(negativeTests, ERROR_EXPECTED);
+            TS_INFO("testMslEcLevelChecks: Begin positive testing for ATTR_MSL_FIELD_SUPPORTED.");
+            runMslTests<ATTR_MSL_FIELD_SUPPORTED>(positiveTests, ERROR_UNEXPECTED);
+
+            restoreSystemState();
+            // Make sure the gards were cleaned up.
+            errlHndl_t err = checkGardState();
+            if (err)
+            {
+                TS_FAIL("Unexpected error from checkGardState()");
+            }
+
+            // Restore original MFG flag value
+            if (!mfgFlagSet)
+            {
+                clearMfgFlag(TARGETING::MFG_FLAGS_MNFG_MSL_CHECK);
+            }
+            else
+            {
+                setMfgFlag(TARGETING::MFG_FLAGS_MNFG_MSL_CHECK);
+            }
+            // Clear the overrides
+            TARGETING::Target::theTargOverrideAttrTank().clearAllAttributes(AttributeTank::NODE_FILTER_NONE,
+                                                                            AttributeTank::ATTR_NODE_NA);
+
+            TS_INFO("testMslEcLevelChecks: Success");
+        } while(0);
     }
 
     void testSaveRestoreState()
