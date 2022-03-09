@@ -71,6 +71,15 @@ enum pmic_state : uint8_t
     ALL_GOOD           = 0b00000000,
 };
 
+///
+/// @brief PMIC pair uint8_t bitmap
+///
+enum pmic_pair : uint8_t
+{
+    PAIR0       = 0,
+    PAIR1       = 1,
+};
+
 typedef fapi2::ReturnCode (*pmic_n_mode_detect_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
     fapi2::hwp_data_ostream&);
@@ -313,11 +322,38 @@ bool is_4u(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target);
 /// @param[in] i_gpio GPIO Expander target
 /// @param[in,out] io_pmic1 PMIC1/3 pmic_info class including target / state info
 /// @param[in,out] io_pmic2 PMIC2/4 pmic_info class including target / state info
-/// @return aggregate_state N mode state according to validation check pass
+/// @return aggregate_state N mode state according to the status of GPIO and ADC only
 ///
 aggregate_state gpio_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio,
                            pmic_info& io_pmic1,
                            pmic_info& io_pmic2);
+
+///
+/// @brief Get the gpio pmic state for each pair
+///
+/// @param[in,out] aggregate_state N mode state according to validation check pass
+/// @param[in] i_failed_pmics_1 bit map of failing pmics from GPIO1
+/// @param[in] i_failed_pmics_2 bit map of failing pmics from GPIO2
+///
+template <pmic_pair PAIR>
+void get_gpio_pmic_state( aggregate_state& io_output_state,
+                          const fapi2::buffer<uint8_t>& i_failed_pmics_1,
+                          const fapi2::buffer<uint8_t>& i_failed_pmics_2)
+{
+    // If GPIO itself failed then keep the state as is i.e. GI2C_I2C_FAIL
+    if (io_output_state != GI2C_I2C_FAIL)
+    {
+        // 1 part dead == N_MODE, 2 == LOST
+        if (i_failed_pmics_1.getBit<PAIR>() && i_failed_pmics_2.getBit<PAIR>())
+        {
+            io_output_state = LOST;
+        }
+        else if (i_failed_pmics_1.getBit<PAIR>() || i_failed_pmics_2.getBit<PAIR>())
+        {
+            io_output_state = N_MODE;
+        }
+    }
+}
 
 ///
 /// @brief Check the ADC device for EVENT_FLAG
