@@ -619,6 +619,9 @@ errlHndl_t validateEcMslLevels(typename AttributeTraits<A>::TypeStdArr i_mslArra
                 // No more entries to process
                 break;
             }
+            HWAS_DBG("validateEcMslLevels: Adding Chip Id 0x%04X with EC Level 0x%02X to MRW list.",
+                     entry->iv_chipId,
+                     entry->iv_ecLevel);
             ecLevel_map[entry->iv_chipId].push_back(entry->iv_ecLevel);
             // Move to the start of the next entry
             std::advance(it, 2);
@@ -636,6 +639,10 @@ errlHndl_t validateEcMslLevels(typename AttributeTraits<A>::TypeStdArr i_mslArra
             if ( !chip->tryGetAttr<ATTR_CHIP_ID>(chipId) ||
                  !chip->tryGetAttr<ATTR_EC>(ecLevel) )
             {
+                HWAS_DBG("validateEcMslLevels: chip[%.08X] has CHIP_ID? %d, has EC? %d",
+                         get_huid(chip),
+                         chip->tryGetAttr<ATTR_CHIP_ID>(chipId),
+                         chip->tryGetAttr<ATTR_EC>(ecLevel));
                 // Chip doesn't have the necessary attributes, go to the next one.
                 continue;
             }
@@ -657,7 +664,7 @@ errlHndl_t validateEcMslLevels(typename AttributeTraits<A>::TypeStdArr i_mslArra
                 }
                 if ( !matchFound )
                 {
-                    HWAS_INF("validateEcMslLevels: Couldn't find a valid EC level in the MSL_CHECK array for "
+                    HWAS_ERR("validateEcMslLevels: Couldn't find a valid EC level in the MSL_CHECK array for "
                              "HUID 0x%.08X with EC level of 0x%.02X", get_huid(chip), ecLevel);
                     /*@
                       * @errortype
@@ -691,6 +698,9 @@ errlHndl_t validateEcMslLevels(typename AttributeTraits<A>::TypeStdArr i_mslArra
             else
             {
                 // Chip ID not present in MRW list. Move on to the next chip.
+                HWAS_DBG("validateEcMslLevels: Chip 0x%08X, ID 0x%04X, was not in the MRW list",
+                         get_huid(chip),
+                         chipId);
                 continue;
             }
         }

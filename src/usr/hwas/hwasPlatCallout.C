@@ -212,9 +212,14 @@ errlHndl_t platHandleHWCallout(
             // the boot
             if (!hwasState.functional || l_skipDeconfig)
             {
-                HWAS_ERR("master proc deconfigured - Shutdown due to plid 0x%X",
+#ifdef CONFIG_COMPILE_CXXTEST_HOOKS
+                HWAS_INF("boot proc deconfigured as part of testcase execution. Skipping shutdown and allowing testcase"
+                         " to handle");
+#else
+                HWAS_ERR("boot proc deconfigured - Shutdown due to plid 0x%X",
                         io_errl->eid());
                 INITSERVICE::doShutdown(io_errl->eid(), true);
+#endif
             }
         }
     } // PLD
