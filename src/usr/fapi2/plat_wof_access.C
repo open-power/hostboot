@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -281,17 +281,8 @@ fapi2::ReturnCode platParseWOFTables(TARGETING::Target* i_procTarg, uint8_t* o_w
     do
     {
         // Check override image
-
         bool l_didFindOverride = false;
-        // Temporary workaround for SW532696, RTC 250794 will address missing WOFDATA binary
-        if( INITSERVICE::spBaseServicesEnabled() )
-        {
-            l_errl = getOverrideWofTable(i_procTarg, o_wofData, l_didFindOverride);
-        }
-        else
-        {
-            FAPI_INF("platParseWOFTables: NON-FSP SKIPPED looking for WOF table in PNOR/LID");
-        }
+        l_errl = getOverrideWofTable(i_procTarg, o_wofData, l_didFindOverride);
 
         if (l_didFindOverride && l_errl == nullptr)
         {
