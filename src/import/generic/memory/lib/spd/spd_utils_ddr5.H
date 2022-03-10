@@ -39,6 +39,7 @@
 
 #include <fapi2.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <generic/memory/lib/utils/num.H>
 
 namespace mss
 {
@@ -88,6 +89,91 @@ fapi2::ReturnCode get_tckmax(
     uint64_t& o_value);
 
 ///
+/// @brief Round a timing value to even, per Jedec timing spec
+/// @tparam T input type
+/// @tparam OT output type
+/// @param[in] i_function the calling function to log for FFDC
+/// @param[in] i_timing_in_ps timing parameter in ps
+/// @param[out] o_val_in_ps the end calculation in ps
+/// @return FAPI2_RC_SUCCESS iff okay
+/// @note implements functionality labeled as "EVEN" in DDR5 CL algorithm pseudocode
+///
+template<typename T, typename OT>
+inline fapi2::ReturnCode round_to_even(const uint16_t i_function,
+                                       const T& i_timing_in_ps,
+                                       OT& o_val_in_ps)
+{
+    // Round up to the next higher even value in T, then check for overflow
+    const T l_val_in_ps = mss::is_odd(i_timing_in_ps) ? i_timing_in_ps + 1 : i_timing_in_ps;
+
+    FAPI_ASSERT( l_val_in_ps != 0,
+                 fapi2::MSS_OVERFLOW_WHEN_ROUNDING_TO_EVEN().
+                 set_TIMING_PS(i_timing_in_ps).
+                 set_FUNCTION(i_function),
+                 "Overflow occured rounding to even. Returned data is %d", l_val_in_ps);
+
+    // Convert to OT then check for invalid cast
+    o_val_in_ps = l_val_in_ps;
+
+    FAPI_ASSERT( static_cast<T>(o_val_in_ps) == l_val_in_ps,
+                 fapi2::MSS_INVALID_CAST_WHEN_ROUNDING().
+                 set_TIMING_PS(i_timing_in_ps).
+                 set_CORRECTION_FACTOR(0).
+                 set_FUNCTION(i_function),
+                 "Overflow occured rounding to even. Returned data is %d", o_val_in_ps);
+
+    // If we don't assert, we don't know what's in current_err ...
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Implements JEDEC rounding algorithm on timing values in ps
+/// @tparam T input type
+/// @tparam OT output type
+/// @param[in] i_function the calling function to log for FFDC
+/// @param[in] i_timing_in_ps timing parameter in ps
+/// @param[out] o_val_in_ps the end calculation in ps
+/// @return FAPI2_RC_SUCCESS iff okay
+/// @note implements functionality labeled as "RA" in DDR5 CL algorithm pseudocode
+///
+template<typename T, typename OT>
+inline fapi2::ReturnCode corrected_ps_per_jedec(const uint16_t i_function,
+        const T& i_timing_in_ps,
+        OT& o_val_in_ps)
+{
+    // Aka 0.30% -> JEDEC multiplies by 1000 to keep all math using integers
+    constexpr T CORRECTION_FACTOR = 3;
+    constexpr T ROUNDING_FACTOR = 997;
+    constexpr T SCALING = 1000;
+
+    const T l_initial_calc  = i_timing_in_ps * ROUNDING_FACTOR;
+    const T l_result        = l_initial_calc / SCALING;
+    o_val_in_ps = l_result;
+
+    FAPI_ASSERT( i_timing_in_ps == (l_initial_calc / ROUNDING_FACTOR),
+                 fapi2::MSS_INVALID_CAST_WHEN_ROUNDING().
+                 set_TIMING_PS(i_timing_in_ps).
+                 set_CORRECTION_FACTOR(CORRECTION_FACTOR).
+                 set_FUNCTION(i_function),
+                 "Overflow occured on intial calculation. Returned data is %d", o_val_in_ps);
+    FAPI_ASSERT( static_cast<T>(o_val_in_ps) == l_result,
+                 fapi2::MSS_INVALID_CAST_WHEN_ROUNDING().
+                 set_TIMING_PS(i_timing_in_ps).
+                 set_CORRECTION_FACTOR(CORRECTION_FACTOR).
+                 set_FUNCTION(i_function),
+                 "Overflow occured. Returned data is %d", o_val_in_ps);
+
+    // If we don't assert, we don't know what's in current_err ...
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Returns clock cycles based on input application period
 /// @tparam T input type
 /// @tparam OT output type
@@ -96,7 +182,7 @@ fapi2::ReturnCode get_tckmax(
 /// @param[in] i_tck_in_ps  clock period in ps
 /// @param[out] o_value_nck the end calculation in nck
 /// @return FAPI2_RC_SUCCESS iff okay
-/// @note DDR4 SPD Contents Rounding Algorithm
+/// @note DDR5 SPD Contents Rounding Algorithm
 /// @note Item 2220.46
 ///
 template<typename T, typename OT>

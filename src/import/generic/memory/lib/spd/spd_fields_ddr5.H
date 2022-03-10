@@ -95,6 +95,31 @@ class fields<DDR5, BASE_CNFG>
             TCK_MAX_MSB_START = 0,
             TCK_MAX_MSB_LEN   = 8,
 
+            // Byte 24-28
+            CAS_BYTE_1_START = 0,
+            CAS_BYTE_1_LEN = 8,
+            CAS_BYTE_2_START = 0,
+            CAS_BYTE_2_LEN = 8,
+            CAS_BYTE_3_START = 0,
+            CAS_BYTE_3_LEN = 8,
+            CAS_BYTE_4_START = 0,
+            CAS_BYTE_4_LEN = 8,
+            CAS_BYTE_5_START = 0,
+            CAS_BYTE_5_LEN = 8,
+
+            // Byte 30
+            TAA_MIN_LSB_START = 0,
+            TAA_MIN_LSB_LEN   = 8,
+            // Byte 31
+            TAA_MIN_MSB_START = 0,
+            TAA_MIN_MSB_LEN   = 8,
+            // Byte 32
+            TRCD_MIN_LSB_START = 0,
+            TRCD_MIN_LSB_LEN   = 8,
+            // Byte 33
+            TRCD_MIN_MSB_START = 0,
+            TRCD_MIN_MSB_LEN   = 8,
+
             //////////////////////////////////////
             //// Bytes 230-236: module information
             //////////////////////////////////////
@@ -127,6 +152,16 @@ class fields<DDR5, BASE_CNFG>
         static constexpr mss::field_t<mss::endian::LITTLE> TCK_MIN_MSB{21, TCK_MIN_MSB_START, TCK_MIN_MSB_LEN};
         static constexpr mss::field_t<mss::endian::LITTLE> TCK_MAX_LSB{22, TCK_MAX_LSB_START, TCK_MAX_LSB_LEN};
         static constexpr mss::field_t<mss::endian::LITTLE> TCK_MAX_MSB{23, TCK_MAX_MSB_START, TCK_MAX_MSB_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> CL_FIRST_BYTE{24, CAS_BYTE_1_START, CAS_BYTE_1_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> CL_SECOND_BYTE{25, CAS_BYTE_2_START, CAS_BYTE_2_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> CL_THIRD_BYTE{26, CAS_BYTE_3_START, CAS_BYTE_3_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> CL_FOURTH_BYTE{27, CAS_BYTE_4_START, CAS_BYTE_4_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> CL_FIFTH_BYTE{28, CAS_BYTE_5_START, CAS_BYTE_5_LEN};
+
+        static constexpr mss::field_t<mss::endian::LITTLE> TAA_MIN_LSB{30, TAA_MIN_LSB_START, TAA_MIN_LSB_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> TAA_MIN_MSB{31, TAA_MIN_MSB_START, TAA_MIN_MSB_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> TRCD_MIN_LSB{32, TRCD_MIN_LSB_START, TRCD_MIN_LSB_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> TRCD_MIN_MSB{33, TRCD_MIN_MSB_START, TRCD_MIN_MSB_LEN};
 
         //////////////////////////////////////
         //// Bytes 230-236: module information

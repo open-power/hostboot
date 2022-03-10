@@ -941,7 +941,7 @@ class base_0_3 : public base
         {
             uint32_t l_field = 0;
 
-            FAPI_TRY(mss::gen::get_supported_cas_latencies(iv_dimm, i_spd, get_spd_revision(), l_field))
+            FAPI_TRY(mss::gen::ddr4::get_supported_cas_latencies(iv_dimm, i_spd, get_spd_revision(), l_field))
 
             FAPI_TRY(mss::attr::set_exp_spd_cl_supported(iv_port, l_field));
         fapi_try_exit:

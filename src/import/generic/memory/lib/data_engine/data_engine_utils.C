@@ -43,8 +43,11 @@ namespace mss
 namespace gen
 {
 
+namespace ddr4
+{
+
 ///
-/// @brief Get the supported cas latencies as calculated from SPD fields and dimm type
+/// @brief Get the supported cas latencies as calculated from SPD fields and dimm type (DDR4 version)
 ///
 /// @param[in] i_dimm DIMM target
 /// @param[in] i_spd spd binary
@@ -89,7 +92,7 @@ fapi2::ReturnCode get_supported_cas_latencies(
         // Check for a valid value, and that reserved bit is not set
         // We return Byte 23 arbitrarily as the failed byte, but any byte (20 - 23) would work
         // This rev 1.0 does not apply to DDIMM 1.0 - so make sure we are not a ddimm
-        const size_t MAX_VALID_VAL = mss::gen::get_max_valid_cl_val(i_rev, l_dimm_type);
+        const size_t MAX_VALID_VAL = mss::gen::ddr4::get_max_valid_cl_val(i_rev, l_dimm_type);
 
         constexpr uint64_t DATA_START_OFFSET  = 32;
         constexpr uint64_t RESERVED_BIT = DATA_START_OFFSET + 1;
@@ -115,6 +118,72 @@ fapi2::ReturnCode get_supported_cas_latencies(
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+} // ns ddr4
+
+namespace ddr5
+{
+
+///
+/// @brief Get the supported cas latencies as calculated from SPD fields and dimm type (DDR5 version)
+///
+/// @param[in] i_dimm DIMM target
+/// @param[in] i_spd spd binary
+/// @param[in] i_rev spd revision
+/// @param[out] o_field supported CL field
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode get_supported_cas_latencies(
+    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+    const std::vector<uint8_t>& i_spd,
+    const mss::spd::rev i_rev,
+    uint64_t& o_field)
+{
+    using F = mss::spd::fields<mss::spd::device_type::DDR5, mss::spd::module_params::BASE_CNFG>;
+
+    o_field = 0;
+
+    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_dimm);
+    uint8_t l_first_raw_byte = 0;
+    uint8_t l_sec_raw_byte = 0;
+    uint8_t l_third_raw_byte = 0;
+    uint8_t l_fourth_raw_byte = 0;
+    uint8_t l_fifth_raw_byte = 0;
+    uint8_t l_dimm_type = 0;
+
+    FAPI_TRY(mss::spd::get_field_spd(l_ocmb, F::CL_FIRST_BYTE, i_spd, SET_SPD_CL_SUPPORTED, l_first_raw_byte));
+    FAPI_TRY(mss::spd::get_field_spd(l_ocmb, F::CL_SECOND_BYTE, i_spd, SET_SPD_CL_SUPPORTED, l_sec_raw_byte));
+    FAPI_TRY(mss::spd::get_field_spd(l_ocmb, F::CL_THIRD_BYTE, i_spd, SET_SPD_CL_SUPPORTED, l_third_raw_byte));
+    FAPI_TRY(mss::spd::get_field_spd(l_ocmb, F::CL_FOURTH_BYTE, i_spd, SET_SPD_CL_SUPPORTED, l_fourth_raw_byte));
+    FAPI_TRY(mss::spd::get_field_spd(l_ocmb, F::CL_FIFTH_BYTE, i_spd, SET_SPD_CL_SUPPORTED, l_fifth_raw_byte));
+
+    FAPI_TRY(mss::attr::get_dimm_type(i_dimm, l_dimm_type));
+
+    {
+        // Buffers used for bit manipulation
+        // Combine Bytes to create bitmap - right aligned
+        fapi2::buffer<uint64_t> l_buffer;
+        right_aligned_insert(l_buffer,
+                             l_fifth_raw_byte,
+                             l_fourth_raw_byte,
+                             l_third_raw_byte,
+                             l_sec_raw_byte,
+                             l_first_raw_byte);
+
+        // For DDR5 all bits are valid in the CAS latencies supported bytes
+        // so no range checking is needed
+        o_field = uint64_t(l_buffer);
+
+        FAPI_INF("%s. CAS latencies supported (bitmap): 0x%010X",
+                 spd::c_str(i_dimm),
+                 o_field);
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+} // ns ddr5
 
 } // ns gen
 

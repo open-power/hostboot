@@ -202,6 +202,98 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_FREQ_DDR5_FAILED_TO_FIND_SUPPORTED_CL</rc>
+    <description>
+      Desired CAS latency isn't supported in the common CAS latency bin retrieved from SPD.
+    </description>
+    <ffdc>COMMON_CLS</ffdc>
+    <ffdc>TAA</ffdc>
+    <ffdc>TRCD</ffdc>
+    <ffdc>TCK</ffdc>
+    <ffdc>MC_TYPE</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <childTargets>
+          <parent>PORT_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+       <childTargets>
+          <parent>PORT_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+    </deconfigure>
+    <gard>
+       <childTargets>
+          <parent>PORT_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+    </gard>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>PORT_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_FREQ_DDR5_COMPUTED_ZERO_TCK_STD</rc>
+    <description>
+      Dutring CAS latency computation, tCKstd value of zero was computed, likely due to a problem with the SPD.
+    </description>
+    <ffdc>TCK_MIN</ffdc>
+    <ffdc>MC_TYPE</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <childTargets>
+          <parent>PORT_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+       <childTargets>
+          <parent>PORT_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+    </deconfigure>
+    <gard>
+       <childTargets>
+          <parent>PORT_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+    </gard>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>PORT_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_OVERFLOW_WHEN_ROUNDING_TO_EVEN</rc>
+    <description>Overflow when rounding a timing value to the next larger even value</description>
+    <ffdc>TIMING_PS</ffdc>
+    <ffdc>FUNCTION</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_FREQ_INDEX_TOO_LARGE</rc>
     <description>Error calculating the index into max_freq array</description>
     <ffdc>INDEX</ffdc>
@@ -331,6 +423,18 @@
         <hwid>VPD_PART</hwid>
         <refTarget>TARGET</refTarget>
       </hw>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_CAST_WHEN_ROUNDING</rc>
+    <description>Invalid cast or calculation for corrected_ps_per_jedec</description>
+    <ffdc>TIMING_PS</ffdc>
+    <ffdc>CORRECTION_FACTOR</ffdc>
+    <ffdc>FUNCTION</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
   </hwpError>

@@ -46,6 +46,7 @@
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/buffer_ops.H>
 #include <generic/memory/lib/spd/spd_fields_ddr4.H>
+#include <generic/memory/lib/spd/spd_fields_ddr5.H>
 #include <fapi2_spd_access.H>
 
 namespace mss
@@ -186,19 +187,6 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Get the max valid cas latency
-///
-/// @param[in] i_rev SPD revision
-/// @param[in] i_dimm_type DIMM type
-/// @return uint32_t max valid CL val
-///
-static inline uint32_t get_max_valid_cl_val(const uint8_t i_rev, const uint8_t i_dimm_type)
-{
-    return (i_rev == mss::spd::rev::V1_0 && (i_dimm_type != fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_DDIMM))
-           ? 0x0003FFFF : 0xBFFFFFFF;
-}
-
-///
 /// @brief Align the READ_PREAMBLE and WRITE_PREAMBLE to the si attribute bitmap
 ///
 /// @param[in] i_read_pramble read preamble value
@@ -249,8 +237,24 @@ static inline uint8_t align_odt_field_to_attr(const uint8_t i_value)
     return l_value;
 }
 
+namespace ddr4
+{
+
 ///
-/// @brief Get the supported cas latencies as calculated from SPD fields and dimm type
+/// @brief Get the max valid cas latency
+///
+/// @param[in] i_rev SPD revision
+/// @param[in] i_dimm_type DIMM type
+/// @return uint32_t max valid CL val
+///
+static inline uint32_t get_max_valid_cl_val(const uint8_t i_rev, const uint8_t i_dimm_type)
+{
+    return (i_rev == mss::spd::rev::V1_0 && (i_dimm_type != fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_DDIMM))
+           ? 0x0003FFFF : 0xBFFFFFFF;
+}
+
+///
+/// @brief Get the supported cas latencies as calculated from SPD fields and dimm type (DDR4 version)
 ///
 /// @param[in] i_dimm DIMM target
 /// @param[in] i_spd spd binary
@@ -263,6 +267,28 @@ fapi2::ReturnCode get_supported_cas_latencies(
     const std::vector<uint8_t>& i_spd,
     const mss::spd::rev i_rev,
     uint32_t& o_field);
+
+} // namespace ddr4
+
+namespace ddr5
+{
+
+///
+/// @brief Get the supported cas latencies as calculated from SPD fields and dimm type (DDR5 version)
+///
+/// @param[in] i_dimm DIMM target
+/// @param[in] i_spd spd binary
+/// @param[in] i_rev spd revision
+/// @param[out] o_field supported CL field
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode get_supported_cas_latencies(
+    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+    const std::vector<uint8_t>& i_spd,
+    const mss::spd::rev i_rev,
+    uint64_t& o_field);
+
+} // namespace ddr5
 
 } // namespace gen
 

@@ -62,7 +62,16 @@ constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::TCK_MIN_LSB
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::TCK_MIN_MSB;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::TCK_MAX_LSB;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::TCK_MAX_MSB;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::CL_FIRST_BYTE;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::CL_SECOND_BYTE;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::CL_THIRD_BYTE;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::CL_FOURTH_BYTE;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::CL_FIFTH_BYTE;
 
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::TAA_MIN_LSB;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::TAA_MIN_MSB;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::TRCD_MIN_LSB;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::TRCD_MIN_MSB;
 
 //////////////////////////////////////
 //// Bytes 230-236: module information
