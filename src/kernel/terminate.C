@@ -40,6 +40,7 @@
 
 #include <builtins.h>
 #include <kernel/kernel_reasoncodes.H>
+#include <pldm/pldm_reasoncodes.H>
 #endif // BOOTLOADER
 
 extern "C" void p9_force_attn() NO_RETURN;
@@ -151,6 +152,8 @@ const srcDumpAndLogPolicy special_src_policies[] =
     { HBFW::SECUREBOOT::RC_PHYS_PRES_WINDOW_OPENED_SHUTDOWN, HB_DUMP_DISABLED, PEL_NOT_VISIBLE },
     { HBFW::INITSERVICE::SHUTDOWN_MFG_TERM,                  HB_DUMP_DISABLED, PEL_VISIBLE },
     { HBFW::INITSERVICE::SHUTDOWN_KEY_TRANSITION,            HB_DUMP_DISABLED, PEL_VISIBLE },
+    { PLDM::RC_RESET_DETECTED_SHUTDOWN,                      HB_DUMP_DISABLED, PEL_NOT_VISIBLE },
+    { PLDM::RC_REQ_FAILED_SHUTDOWN,                          HB_DUMP_DISABLED, PEL_NOT_VISIBLE },
 };
 
 /** @brief Write the hbDumpFlag and hbNotVisibleFlag in the TI area based on an SRC.

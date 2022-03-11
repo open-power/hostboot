@@ -108,6 +108,9 @@ namespace PLDM
         MOD_UPDATE_CONNECTOR_INFO_ATTR               = 0x43, // updateConnectorInfoAttr
         MOD_BASE_INIT                                = 0x44, // base_init
         MOD_GET_LATERAL_CAST_OUT_MODE                = 0x45, // getLateralCastOutMode
+        MOD_WAIT_HOST_INITIATED_SHUTDOWN             = 0x46, // waitForHostInitiatedShutdown
+        MOD_WAIT_BMC_INITIATED_SHUTDOWN              = 0x47, // waitForBmcInitiatedShutdown
+        MOD_GET_PLDM_VERSION_REQ                     = 0x48, // handleGetPldmVersionRequest
     };
 
     enum PLDMReasonCode
@@ -172,6 +175,8 @@ namespace PLDM
         RC_INVALID_RECORD_HANDLE      = PLDM_COMP_ID | 0x3A,
         RC_NO_SENSOR                  = PLDM_COMP_ID | 0x3B,
         RC_MISMATCHED_ENTITY_INSTANCE = PLDM_COMP_ID | 0x3C,
+        RC_RESET_DETECTED_SHUTDOWN    = PLDM_COMP_ID | 0x3D,
+        RC_REQ_FAILED_SHUTDOWN        = PLDM_COMP_ID | 0x3E,
     };
 
     /**

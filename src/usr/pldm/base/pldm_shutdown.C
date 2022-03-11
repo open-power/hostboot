@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021                             */
+/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -135,7 +135,16 @@ void* wait_for_host_initiated_shutdown(void* const i_args)
 
         // This call to doShutdown will just update the "worst shutdown status"
         // so that we don't completely lose the error.
-        INITSERVICE::doShutdown(SHUTDOWN_STATUS_PLDM_REQUEST_FAILED, true /* background shutdown */);
+
+        /*@
+         * @moduleid         MOD_WAIT_HOST_INITIATED_SHUTDOWN
+         * @reasoncode       RC_REQ_FAILED_SHUTDOWN
+         * @userdata1        unused
+         * @userdata2        unused
+         * @devdesc          Unable to set PLDM shutdown effecter for graceful shutdown.
+         * @custdesc         Internal firmware error
+         */
+        INITSERVICE::doShutdown(RC_REQ_FAILED_SHUTDOWN|SHUTDOWN_PRIORITY_FAIL, true /* background shutdown */);
     }
 
     msg_respond(args->msgq.get(), msg);
@@ -183,7 +192,15 @@ void* wait_for_bmc_initiated_shutdown(void* const i_args)
 
         // This call to doShutdown will just update the "worst shutdown status"
         // so that we don't completely lose the error.
-        INITSERVICE::doShutdown(SHUTDOWN_STATUS_PLDM_REQUEST_FAILED, true /* background shutdown */);
+        /*@
+         * @moduleid         MOD_WAIT_BMC_INITIATED_SHUTDOWN
+         * @reasoncode       RC_REQ_FAILED_SHUTDOWN
+         * @userdata1        unused
+         * @userdata2        unused
+         * @devdesc          Unable to send PLDM graceful shutdown notification event.
+         * @custdesc         Internal firmware error
+         */
+        INITSERVICE::doShutdown(RC_REQ_FAILED_SHUTDOWN|SHUTDOWN_PRIORITY_FAIL, true /* background shutdown */);
     }
 
     msg_respond(args->msgq.get(), msg);

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -72,12 +72,13 @@ enum ShutdownStatus
 {
     SHUTDOWN_STATUS_GOOD                = 0x01230000,
     SHUTDOWN_STATUS_UT_FAILED           = 0x01230001,
-    SHUTDOWN_STATUS_ISTEP_FAILED        = 0x01230002,
-    SHUTDOWN_STATUS_EXTINITSVC_FAILED   = 0x01230003,
-    SHUTDOWN_STATUS_INITSVC_FAILED      = 0x01230004,
-    SHUTDOWN_STATUS_PLDM_REQUEST_FAILED = 0x01230005,
-    SHUTDOWN_STATUS_PLDM_RESET_DETECTED = 0x01230006,
 };
+
+/**
+ * Shutdown priority
+ * Priority OR'd with ReasonCode in doShutdown()
+ */
+const uint64_t SHUTDOWN_PRIORITY_FAIL  = 0x000000000FFF0000;
 
 /**
  * @enum WinkleScopes

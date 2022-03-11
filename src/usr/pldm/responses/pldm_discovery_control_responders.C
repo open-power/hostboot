@@ -68,7 +68,16 @@ errlHndl_t handleGetPldmVersionRequest(const msg_q_t i_msgQ,
         // Resetting the sequencing will cause issues for HB which are hard to
         // recover from, so instead of attempting recovery, HB will shut down.
         bool l_runInBackground(true);
-        INITSERVICE::doShutdown(SHUTDOWN_STATUS_PLDM_RESET_DETECTED, l_runInBackground);
+        /*@
+         * @moduleid         MOD_GET_PLDM_VERSION_REQ
+         * @reasoncode       RC_RESET_DETECTED_SHUTDOWN
+         * @userdata1        unused
+         * @userdata2        unused
+         * @devdesc          Received a getPLDMVersion request which indicates
+         *                   PLDM daemon restarted/reloaded
+         * @custdesc         Internal firmware error
+         */
+        INITSERVICE::doShutdown(RC_RESET_DETECTED_SHUTDOWN|SHUTDOWN_PRIORITY_FAIL, l_runInBackground);
     }
 #endif
 
