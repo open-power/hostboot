@@ -109,7 +109,7 @@ flags = 0
 parse_errors = []
 
 """ Takes the given error and adds it to the gathered list of errors
-@param[in] error: A printable error string
+@param[in] error: A printable string of error messages
 """
 def capture_error(error):
     parse_errors.append(error)
@@ -120,6 +120,29 @@ def capture_error(error):
 """
 def get_captured_errors_as_string():
     return '\n'.join(parse_errors)
+
+"""@brief A global list to consolidate warnings encountered while parsing trace entries
+"""
+parse_warnings = []
+
+""" Takes the given warning and adds it to the gathered list of warnings
+@param[in] error: A printable string of warnings messages
+"""
+def capture_warning(warning):
+    parse_warnings.append(warning)
+
+"""@brief String to be displayed when buffer is empty
+"""
+BUFFER_EMPTY_STRING = "Buffer is empty."
+
+
+""" Takes the warnings, that were encountered, that are contained within the
+    parse_warnings list and produces a printable string
+@returns: a string: Encountered warnings coalesced into a single string
+"""
+def get_captured_warnings_as_string():
+    return '\n'.join(parse_warnings)
+
 
 """ Creates string of the header for trace output
 
@@ -148,7 +171,6 @@ def trace_output_get_format():
 """
 def trexMyVsnprintf(bData, fstring, vparms_start, vparms_end):
     argnum = 0
-    longflag = False
     parsedArgs = []
 
     vparms_size = vparms_end - vparms_start
@@ -175,6 +197,7 @@ def trexMyVsnprintf(bData, fstring, vparms_start, vparms_end):
             continue
 
         #check for format characters following '%'
+        longflag = False
         while(1):
             if fstring[i] == 'l':
                 longflag = True
@@ -254,8 +277,9 @@ def trexMyVsnprintf(bData, fstring, vparms_start, vparms_end):
             j += 4
             i += 1
         else:
-            # TODO: Create a warnings list?
-            print("Warning: unsupported format specifier in trace found: ", fstring[i])
+            capture_warning("Warning: unsupported format specifier in trace found '" + fstring[i] + "' :")
+            capture_warning(fstring)
+            i += 1
             return ''
 
         argnum += 1
@@ -395,7 +419,8 @@ def convert_ascii_trace_list_to_string(asciiTraceList, printNumTraces):
     traceDataString = trace_output_get_format()
 
     # If the number of traces is 0 then just return the header info
-    if printNumTraces == 0:
+    if printNumTraces == 0 or len(asciiTraceList) == 0:
+        traceDataString += (BUFFER_EMPTY_STRING + "\n")
         return traceDataString
     # If the number of traces is -1 then retrieve all the trace data
     elif printNumTraces == -1:
@@ -441,7 +466,9 @@ def trace_adal_print_pipe(bData, oFile, startingPosition, printNumTraces):
 @param[in] stringFileName: the hbotStringFile and location to it
 
 @returns: retVal: int value - the return code: 0 for success, non 0 on failure
-          traceDataString: string - a single string containing the ASCII traces
+          traceDataString: string - if retVal is 0: a string containing the ASCII traces
+                                    if retVal is not 0: a string containing error messages
+          warningMessages: string - a string with warning messages if any encountered
 """
 def get_binary_trace_data_as_string(binaryData, startingPosition, printNumTraces, stringFileName):
     # Default the outgoing string to ""
@@ -453,29 +480,29 @@ def get_binary_trace_data_as_string(binaryData, startingPosition, printNumTraces
     retVal = trace_adal_read_stringfile(stringFileName)
     if retVal != 0:
         capture_error("Error processing string file: " + stringFileName)
-        return retVal, get_captured_errors_as_string()
+        return retVal, get_captured_errors_as_string(), get_captured_warnings_as_string()
 
     version = binaryData[startingPosition]
     retVal = validate_binary_data_trace_version(version)
     if retVal != 0:
         capture_error("Error processing binary data, version " + str(version) + " is unsupported")
-        return retVal, get_captured_errors_as_string()
+        return retVal, get_captured_errors_as_string(), get_captured_warnings_as_string()
 
     if (version == TRACE_VERSION1):
         # Process version 1 binary data
         retVal, traceDataString = process_binary_data_v1(binaryData, startingPosition, printNumTraces)
         if retVal != 0:
             capture_error("Error processing binary data version 1 ")
-            return retVal, get_captured_errors_as_string()
+            return retVal, get_captured_errors_as_string(), get_captured_warnings_as_string()
     elif (version == TRACE_VERSION2):
         startingPosition += 1
         (retVal, asciiTracesList) = decode_binary_traces_to_ascii_list(binaryData, startingPosition)
         if retVal != 0:
             capture_error("Error processing binary file version 2")
-            return retVal, get_captured_errors_as_string()
+            return retVal, get_captured_errors_as_string(), get_captured_warnings_as_string()
         traceDataString = convert_ascii_trace_list_to_string(asciiTracesList, printNumTraces);
 
-    return 0, traceDataString
+    return 0, traceDataString, get_captured_warnings_as_string()
 
 """ Process tracBINARY file
 
@@ -559,8 +586,8 @@ def parse_sf_entry_v2 (line):
                                'source': splitStr[2]}
         return 0
     else:
-        # TODO: Create a warnings list?
-        print("Warning: Line was formatted incorrectly - Skipping")
+        capture_warning("Warning: Line was formatted incorrectly - Skipping:")
+        capture_warning(line)
         return -1
 
 """ Parses the first line of hbotStringFile to get version number
@@ -972,6 +999,9 @@ def processTraceDataString(outputFile, traceDataString):
         try:
             # Write the ASCII trace data to given file
             with open(outputFile, 'w') as outputFileHandle:
+                if len(get_captured_warnings_as_string()):
+                    outputFileHandle.write(get_captured_warnings_as_string())
+                    outputFileHandle.write("\n")
                 outputFileHandle.write(traceDataString)
         except IOError as err:
             retVal = err.errno
@@ -981,6 +1011,8 @@ def processTraceDataString(outputFile, traceDataString):
             capture_error (str(err))
     else:
         # Print the ASCII trace data out to the console
+        if len(get_captured_warnings_as_string()):
+            print(get_captured_warnings_as_string())
         print(traceDataString, end='')
 
     return retVal

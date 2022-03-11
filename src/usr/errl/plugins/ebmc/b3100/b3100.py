@@ -51,10 +51,12 @@ class errludP_fipsErrl:
     # 1 byte        : Version info
     # N bytes       : HB traces
 
-    """ Converts the binary data into lines of printable strings.  Each string
-        representing 16 bytes of data or less.  The lines are broken into 2 columns
-        with the left column displaying the binary data and the right column displaying
-        the ASCII value if printable. See example below.
+    """ Converts the binary data into lines of printable strings.  Each line is
+        representing 16 bytes of the binary data or less.  A line is composed of 2 columns.
+        A left column displaying the binary data, as readable ASCII, and
+        a right column displaying any printable ASCII chars within the binary data
+        and any non-printable ASCII chars are represented as '.'.
+        See example below.
 
     Example:
         01 28 00 42 50 52 44 46  00 00 00 00 00 00 00 00  |  .(.BPRDF........
@@ -131,6 +133,7 @@ class errludP_fipsErrl:
 
         # Import the API that will be used to take the data and parse it out
         from udparsers.helpers.hostfw_trace import get_binary_trace_data_as_string
+        from udparsers.helpers.hostfw_trace import BUFFER_EMPTY_STRING
 
         # Create a dictionary to hold the trace output
         d = dict()
@@ -139,6 +142,7 @@ class errludP_fipsErrl:
         stringFile = getLid(HBOT_STRING_LID_FILE)
         if stringFile == "":
             d["File not found"]=HBOT_STRING_LID_FILE
+            d["Issue with Data"]="Data is unparseable without file"
             d["Data"] = errludP_fipsErrl.convertDataToList(data)
             jsonStr = json.dumps(d)
             return jsonStr
@@ -147,8 +151,8 @@ class errludP_fipsErrl:
 
         startingPosition = 0     # start at the version info
         printNumberOfTraces = -1 # -1 means to get all traces
-        (retVal, traceDataString) = get_binary_trace_data_as_string(data, startingPosition,
-                                    printNumberOfTraces, stringFile)
+        retVal, traceDataString, warningMessages = get_binary_trace_data_as_string(data,
+                                    startingPosition, printNumberOfTraces, stringFile)
 
         # If the data string ends with a newline, "\n", then remove it.
         # Removing the newline sets up the data string for the split
@@ -163,9 +167,20 @@ class errludP_fipsErrl:
         # errors encountered
         if retVal != 0:
             d["Errors"] = traces
+            d["Issue with Data"] = "Data is unparseable with errors"
             d["Data"] = errludP_fipsErrl.convertDataToList(data)
-        else: # else return the paresed data
-            d["Data"] = traces
+        else: # else return the parsed data
+            if (len(warningMessages)):
+                # Remove newline at end of string if it exists
+                if warningMessages[-1] == "\n":
+                    warningMessages = warningMessages[:-1]
+                warnings = warningMessages.split("\n")
+                d["Warnings"] = warnings
+            if traces[-1] == BUFFER_EMPTY_STRING:
+                d["Issue with Data"] = BUFFER_EMPTY_STRING + " Data has no parseable traces"
+                d["Data"] = errludP_fipsErrl.convertDataToList(data)
+            else:
+                d["Data"] = traces
 
         jsonStr = json.dumps(d)
         return jsonStr
