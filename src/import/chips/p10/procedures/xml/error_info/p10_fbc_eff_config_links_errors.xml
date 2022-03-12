@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2022                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -74,6 +74,22 @@
   <ffdc>IOLINK_A_UNIT_NUM</ffdc>
   <ffdc>IOLINK_B_UNIT_NUM</ffdc>
   <ffdc>IOLINK_COUNT</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_FBC_EFF_CONFIG_LINKS_REMOTE_LINK_ID_ERR</rc>
+  <description>
+    Procedure: p10_fbc_eff_config_links
+    Unable to determine remote FBC link ID
+  </description>
+  <ffdc>LOCAL_TARGET</ffdc>
+  <ffdc>LOCAL_LINK_ID</ffdc>
+  <ffdc>LOCAL_SUBLINK</ffdc>
+  <ffdc>REMOTE_SUBLINK</ffdc>
   <callout>
     <procedure>CODE</procedure>
     <priority>HIGH</priority>

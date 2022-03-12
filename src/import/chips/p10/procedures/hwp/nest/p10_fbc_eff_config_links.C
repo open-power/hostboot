@@ -448,18 +448,11 @@ fapi2::ReturnCode p10_fbc_eff_config_links_query_endp(
             // expect it to be valid based on logic in p10_fbc_eff_config_links_query_link_en()
             fapi2::Target<fapi2::TARGET_TYPE_IOLINK> l_rem_sublink_target;
             fapi2::Target<fapi2::TARGET_TYPE_IOHS> l_rem_target;
+            fapi2::ATTR_IOHS_LINK_SPLIT_Type l_rem_split;
             FAPI_TRY(l_loc_sublinks[l_loc_link_id].getOtherEnd(l_rem_sublink_target),
                      "Error from getOtherEnd");
             l_rem_target = l_rem_sublink_target.getParent<fapi2::TARGET_TYPE_IOHS>();
             l_rem_proc_target = l_rem_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
-
-            // obtain remote link id
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_rem_target, o_rem_link_id[l_loc_link_id]),
-                     "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
-
-            // obtain remote link id
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_rem_target, o_rem_link_id[l_loc_link_id]),
-                     "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
 
             // verify that remote link end is also enabled, otherwise assert that
             // local link is also not enabled. avoid directly qualifying the local link
@@ -474,8 +467,45 @@ fapi2::ReturnCode p10_fbc_eff_config_links_query_endp(
                          l_rem_bus_width),
                      "Error from p10_fbc_eff_config_links_query_link_en (remote)");
 
+            // obtain remote link id
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_SPLIT, l_rem_target, l_rem_split),
+                     "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_SPLIT)");
+
+            if (l_rem_split == fapi2::ENUM_ATTR_IOHS_LINK_SPLIT_FALSE)
+            {
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_rem_target, o_rem_link_id[l_loc_link_id]),
+                         "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+            }
+            else
+            {
+                bool l_found = false;
+
+                for (uint8_t idx = 0; idx < P10_FBC_UTILS_MAX_LINKS; idx++)
+                {
+                    if ((l_rem_link_en[idx] != fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE) &&
+                        (l_rem_sublinks[idx] == l_rem_sublink_target))
+                    {
+                        o_rem_link_id[l_loc_link_id] = idx;
+                        l_found = true;
+                        break;
+                    }
+                }
+
+                // error if no match is found
+                FAPI_ASSERT(l_found,
+                            fapi2::P10_FBC_EFF_CONFIG_LINKS_REMOTE_LINK_ID_ERR().
+                            set_LOCAL_TARGET(i_loc_target).
+                            set_LOCAL_LINK_ID(l_loc_link_id).
+                            set_LOCAL_SUBLINK(l_loc_sublinks[l_loc_link_id]).
+                            set_REMOTE_SUBLINK(l_rem_sublink_target),
+                            "Unable to determine remote FBC link ID!");
+            }
+
             if(l_rem_link_en[o_rem_link_id[l_loc_link_id]] == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE)
             {
+                char l_target_str[fapi2::MAX_ECMD_STRING_LEN];
+                fapi2::toString(i_loc_target, l_target_str, sizeof(l_target_str));
+                FAPI_INF("link %d skipped on %s", l_loc_link_id, l_target_str);
                 o_loc_link_en[l_loc_link_id] = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE;
                 continue;
             }
