@@ -30,10 +30,21 @@
 # Constants
 
 BMC_PATCH_DIRECTORY=/usr/local/share/hostfw/running/
-COPY="rsync -zP --rsync-path=sudo\${IFS}rsync"
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 SSHPASS_SCRIPT="$SCRIPT_DIR/hb_sshpass"
 PATCHES_DIR="$PROJECT_ROOT/standalone/pnor"
+
+#User might specify a different ssh port (e.g. for simics)
+if [ -z "$SSH_PORT" ]
+then
+    SSH_CMD="ssh"
+    COPY="rsync -zP --rsync-path=sudo\${IFS}rsync"
+else
+    SSH_CMD="ssh -p $SSH_PORT"
+    COPY="scp -P $SSH_PORT"
+fi
+
+
 
 if [[ ! "$PROJECT_ROOT" ]] ; then
     errlog "Must be run from inside a workon"
@@ -68,6 +79,9 @@ function USAGE () {
     errlog "For example, to patch HBB, HBI and HBD on the host 'bmcmachine' with the username 'root'"
     errlog "and password 'mypassword', run:"
     errlog "    $0 root@bmcmachine mypassword HBI HBD"
+    errlog ""
+    errlog "    Environment Variables:"
+    errlog "      SSH_PORT    Set to value of non-standard (22) ssh port to use  [optional]"
     exit 1
 }
 
@@ -94,7 +108,7 @@ function SSHPASS () {
 
 function REMOTE_SUDO () {
     CMD=$1
-    SSHPASS ssh "$HOSTNAME" sudo bash -c "\"$CMD\""
+    SSHPASS $SSH_CMD "$HOSTNAME" sudo bash -c "\"$CMD\""
 }
 
 function PATCH_HBI_HBB () {
