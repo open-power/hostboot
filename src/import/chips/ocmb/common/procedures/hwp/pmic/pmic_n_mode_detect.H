@@ -322,11 +322,13 @@ bool is_4u(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target);
 /// @param[in] i_gpio GPIO Expander target
 /// @param[in,out] io_pmic1 PMIC1/3 pmic_info class including target / state info
 /// @param[in,out] io_pmic2 PMIC2/4 pmic_info class including target / state info
+/// @param[in,out] io_failed_pmics Bit map of failed PMICS on a GPIO
 /// @return aggregate_state N mode state according to the status of GPIO and ADC only
 ///
 aggregate_state gpio_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio,
                            pmic_info& io_pmic1,
-                           pmic_info& io_pmic2);
+                           pmic_info& io_pmic2,
+                           fapi2::buffer<uint8_t>& io_failed_pmics);
 
 ///
 /// @brief Get the gpio pmic state for each pair
