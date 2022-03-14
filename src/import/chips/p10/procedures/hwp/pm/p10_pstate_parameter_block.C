@@ -2380,6 +2380,14 @@ fapi2::ReturnCode PlatPmPPB::vpd_init( void )
         //Compute fmax, ceil freq
         FAPI_TRY(pm_set_frequency(),
                 "pm_set_frequency function failed");;
+        FAPI_INF("Getting ECO core count from PG");
+        l_rc = get_mvpd_PG ();
+
+        if (l_rc)
+        {
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+        }
+
 
         //Read #V data
         FAPI_TRY(get_mvpd_poundV(),
@@ -3139,6 +3147,37 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
                 disable_dds();
             }
         }
+        for (int i = 0; i < NUM_PV_POINTS; i++)
+        {
+            if (iv_eco_count)
+            {
+                //idd_tdp_ac_10ma
+                FAPI_IMP("ECO count %d",iv_eco_count);
+                FAPI_IMP("Raw freq %08x (%d)",iv_attr_mvpd_poundV_raw[i].frequency_mhz,iv_attr_mvpd_poundV_raw[i].frequency_mhz);
+                FAPI_IMP("RAW VDD %08x (%d)",iv_attr_mvpd_poundV_raw[i].vdd_mv,iv_attr_mvpd_poundV_raw[i].vdd_mv);
+                FAPI_IMP("RAW IDD AC %08x (%d)",iv_attr_mvpd_poundV_raw[i].idd_tdp_ac_10ma,iv_attr_mvpd_poundV_raw[i].idd_tdp_ac_10ma);
+
+                // Compute V^1.3 using a best-fit equation
+                // (V^1.3) = (21374 * (voltage in 100uV) - 50615296)>>10
+                //
+                uint32_t vdd_calc = (21374 * iv_attr_mvpd_poundV_raw[i].vdd_mv * 10 );
+
+                uint32_t pow_val =  vdd_calc > 50615296 ? ((vdd_calc - 50615296) >> 10) : 0;
+
+                FAPI_INF("pow_val %d",pow_val);
+
+
+                double eco_ac_adj = (double)((double)iv_eco_count * 0.08 * (double)iv_attr_mvpd_poundV_raw[i].frequency_mhz * 
+                        (double)pow_val) / 10000;
+                FAPI_IMP(" eco_ac_adj %5.2f ",eco_ac_adj);
+
+                iv_attr_mvpd_poundV_raw[i].idd_tdp_ac_10ma = (double)iv_attr_mvpd_poundV_raw[i].idd_tdp_ac_10ma + (double)eco_ac_adj;
+                FAPI_IMP("RAW IDD AC + ECO %08x (%d)",iv_attr_mvpd_poundV_raw[i].idd_tdp_ac_10ma,iv_attr_mvpd_poundV_raw[i].idd_tdp_ac_10ma);
+                FAPI_INF("#V data = 0x%04X  %-6d", iv_attr_mvpd_poundV_raw[i].idd_tdp_ac_10ma,
+                        iv_attr_mvpd_poundV_raw[i].idd_tdp_ac_10ma);
+            }
+        }
+
     }
     while(0);
 
