@@ -67,16 +67,13 @@ namespace fir
 {
 
 ///
-/// @brief Small class to hold a FIR register
+/// @brief Small class to hold Explorer, P10 and previous generations FIR register
 /// @tparam R the FIR register
 /// @tparam RT the type traits for this register (derived)
 ///
 template<uint64_t R, typename RT = mss::firTraits<R>>
 class reg
 {
-    private:
-        fapi2::Target<RT::T> iv_target;
-
     public:
 
         ///
@@ -296,7 +293,7 @@ class reg
         }
 
     private:
-
+        fapi2::Target<RT::T> iv_target;
         fapi2::buffer<uint64_t> iv_mask;
         fapi2::buffer<uint64_t> iv_action0;
         fapi2::buffer<uint64_t> iv_action1;
@@ -344,6 +341,231 @@ class reg
             return *this;
         }
 
+
+};
+
+///
+/// @brief Small class to hold a Odyssey and P11 style FIR register
+/// @tparam R the FIR register
+/// @tparam RT the type traits for this register (derived)
+///
+template<uint64_t R, typename RT = mss::firTraits2<R>>
+class reg2
+{
+    public:
+
+        ///
+        /// @brief fir::reg constructor
+        /// @param[in] i_target representing the fapi2::Target used to scom register R
+        ///
+        reg2( const fapi2::Target<RT::T>& i_target):
+            iv_target(i_target)
+        {
+        }
+
+        ///
+        /// @brief Clear FIR bits
+        /// @tparam B the ordinal number of the bit in question
+        /// @return FAPI2_RC_SUCCESS iff ok
+        ///
+        template< uint64_t B >
+        inline fapi2::ReturnCode clear() const
+        {
+            fapi2::buffer<uint64_t> l_clear;
+            l_clear.setBit<B>();
+            FAPI_TRY( mss::putScom(iv_target, RT::FIR_CLEAR, l_clear) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Clear the entire register of FIR bits
+        /// @return FAPI2_RC_SUCCESS iff ok
+        ///
+        inline fapi2::ReturnCode clear() const
+        {
+            return mss::putScom(iv_target, RT::FIR_CLEAR, 0xFFFFFFFFFFFFFFFF);
+        }
+
+        // Magic patterns in these functions are (Action0, Action1, Action2, Mask)
+
+        ///
+        /// @brief Setup Checkstop register
+        /// @tparam B the ordinal number of the bit in question
+        /// @tparam C the bit count, defaults to 1
+        /// @return fir::reg reference suitable for chaining
+        ///
+        template< uint64_t B, uint64_t C = 1 >
+        inline fir::reg2<R>& checkstop()
+        {
+            iv_xstop.setBit<B, C>();
+            iv_mask_clear.setBit<B, C>();
+            return *this;
+        }
+
+        ///
+        /// @brief Setup Checkstop register without affecting mask
+        /// @tparam B the ordinal number of the bit in question
+        /// @tparam C the bit count, defaults to 1
+        /// @return fir::reg reference suitable for chaining
+        ///
+        template< uint64_t B, uint64_t C = 1 >
+        inline fir::reg2<R>& checkstop_nomask()
+        {
+            iv_xstop.setBit<B, C>();
+            return *this;
+        }
+
+        ///
+        /// @brief Setup Recoverable Error register
+        /// @tparam B the ordinal number of the bit in question
+        /// @tparam C the bit count, defaults to 1
+        /// @return fir::reg reference suitable for chaining
+        ///
+        template< uint64_t B, uint64_t C = 1 >
+        inline fir::reg2<R>& recoverable_error()
+        {
+            iv_recov.setBit<B, C>();
+            iv_mask_clear.setBit<B, C>();
+            return *this;
+        }
+
+        ///
+        /// @brief Setup Attention register
+        /// @tparam B the ordinal number of the bit in question
+        /// @tparam C the bit count, defaults to 1
+        /// @return fir::reg reference suitable for chaining
+        ///
+        template< uint64_t B, uint64_t C = 1 >
+        inline fir::reg2<R>& attention()
+        {
+            iv_attn.setBit<B, C>();
+            iv_mask_clear.setBit<B, C>();
+            return *this;
+        }
+
+        ///
+        /// @brief Setup Local checkstop register
+        /// @tparam B the ordinal number of the bit in question
+        /// @tparam C the bit count, defaults to 1
+        /// @return fir::reg reference suitable for chaining
+        ///
+        template< uint64_t B, uint64_t C = 1 >
+        inline fir::reg2<R>& local_checkstop()
+        {
+            iv_lxstop.setBit<B, C>();
+            iv_mask_clear.setBit<B, C>();
+            return *this;
+        }
+
+        ///
+        /// @brief Setup Masked
+        /// @tparam B the ordinal number of the bit in question
+        /// @tparam C the bit count, defaults to 1
+        /// @return FAPI2_RC_SUCCESS iff ok
+        ///
+        template< uint64_t B, uint64_t C = 1 >
+        inline fapi2::ReturnCode masked()
+        {
+            return this->remask<B, C>();
+        }
+
+        ///
+        /// @brief Setup Masked by updating MASK_SET register
+        /// @tparam B the ordinal number of the bit in question
+        /// @tparam C the bit count, defaults to 1
+        /// @return FAPI2_RC_SUCCESS iff ok
+        ///
+        template< uint64_t B, uint64_t C = 1 >
+        inline fapi2::ReturnCode remask()
+        {
+            fapi2::buffer<uint64_t> l_set;
+            l_set.setBit<B>();
+            FAPI_TRY( mss::putScom(iv_target, RT::MASK_SET, l_set) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Write action0, action1 and mask for this register
+        /// @return fapi2::FAPI2_RC_SUCCESS iff ok
+        ///
+        inline fapi2::ReturnCode write() const
+        {
+            FAPI_TRY( mss::putScom(iv_target, RT::MASK_CLEAR, iv_mask_clear) );
+            FAPI_TRY( mss::putScom(iv_target, RT::ATTN,      iv_attn) );
+            FAPI_TRY( mss::putScom(iv_target, RT::LXSTOP,    iv_lxstop) );
+            FAPI_TRY( mss::putScom(iv_target, RT::RECOV,     iv_recov) );
+            FAPI_TRY( mss::putScom(iv_target, RT::XSTOP,     iv_xstop) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Return FIR reg address
+        /// @return FIR reg address
+        ///
+        inline uint64_t get_address() const
+        {
+            return RT::FIR_CLEAR;
+        }
+
+        ///
+        /// @brief Return mask value
+        /// @return FIR mask register value
+        ///
+        fapi2::buffer<uint64_t> get_mask() const
+        {
+            return iv_mask_clear;
+        }
+
+        ///
+        /// @brief Return attn value
+        /// @return FIR attention register value
+        ///
+        fapi2::buffer<uint64_t> get_attn() const
+        {
+            return iv_attn;
+        }
+
+        ///
+        /// @brief Return lxstop value
+        /// @return FIR local checkstop register value
+        ///
+        fapi2::buffer<uint64_t> get_lxstop() const
+        {
+            return iv_lxstop;
+        }
+
+        ///
+        /// @brief Return recov value
+        /// @return FIR recoverable register value
+        ///
+        fapi2::buffer<uint64_t> get_recov() const
+        {
+            return iv_recov;
+        }
+
+        ///
+        /// @brief Return xstop value
+        /// @return FIR checkstop register value
+        ///
+        fapi2::buffer<uint64_t> get_xstop() const
+        {
+            return iv_xstop;
+        }
+
+    private:
+
+        fapi2::Target<RT::T> iv_target;
+        fapi2::buffer<uint64_t> iv_mask_clear;
+        fapi2::buffer<uint64_t> iv_attn;
+        fapi2::buffer<uint64_t> iv_lxstop;
+        fapi2::buffer<uint64_t> iv_recov;
+        fapi2::buffer<uint64_t> iv_xstop;
 
 };
 
