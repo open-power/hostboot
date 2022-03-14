@@ -29290,6 +29290,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/tpm-0</default>
     </attribute>
+    <attribute><!-- No SP so skip any crosschecking -->
+        <id>FOUND_PRESENT_BY_SP</id>
+        <default>SKIP</default>
+    </attribute>
     <attribute>
         <id>HUID</id>
         <default>0x00310000</default>

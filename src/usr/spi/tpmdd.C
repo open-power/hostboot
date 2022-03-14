@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -663,29 +663,30 @@ errlHndl_t tpmPresenceDetect(DeviceFW::OperationType i_opType,
                                         TO_UINT64(io_buflen),
                                         true /*SW error*/);
         io_buflen = 0;
-    } else {
-        if (!INITSERVICE::spBaseServicesEnabled() && !Util::isSimicsRunning())
+    }
+    else
+    {
+        if( !INITSERVICE::spBaseServicesEnabled() )
         {
             // For BMC, TPM VPD is collected remotely and given to Hostboot.
             auto foundPresentBySp = TARGETING::FOUND_PRESENT_BY_SP_MISSING;
             if (EEPROM::hasRemoteVpdSource(i_target))
             {
+                // BMC gave us data so remember that
                 foundPresentBySp = TARGETING::FOUND_PRESENT_BY_SP_FOUND;
-                // FSP sets PN/SN so if there isn't one then set it here.
+                // Use the data we have to set the PN/SN attributes
                 VPD::setPartAndSerialNumberAttributes(i_target);
             }
-            i_target->setAttr<TARGETING::ATTR_FOUND_PRESENT_BY_SP>(foundPresentBySp);
 
+            // There could be a non-FSP system without remote TPM data so check
+            // to be sure (e.g. standalone simics).
+            if( TARGETING::FOUND_PRESENT_BY_SP_SKIP
+                != i_target->getAttr<TARGETING::ATTR_FOUND_PRESENT_BY_SP>() )
+            {
+                i_target->setAttr<TARGETING::ATTR_FOUND_PRESENT_BY_SP>(foundPresentBySp);
+            }
         }
-        else
-        {
-            // Clear the EECACHE entry for the TPM by requesting a non-present eeprom be cached.
-            // Since the BMC didn't give VPD for the TPM we don't want old VPD laying around.
-            std::vector<uint8_t> empty_vector;
-            EEPROM::cacheEepromBuffer(i_target,
-                                      false,
-                                      empty_vector);
-        }
+        // Hostboot has no TPM VPD on FSP boxes
 
         bool present = tpmPresence (i_target);
 
