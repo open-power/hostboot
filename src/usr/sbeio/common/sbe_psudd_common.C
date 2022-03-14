@@ -853,8 +853,13 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
 
                 l_addr++;
             }
-            // Add the doorbell reg
+
+            // Add the SBE doorbell reg
             l_regsFFDC.addData(DEVICE_SCOM_ADDRESS(PSU_SBE_DOORBELL_REG_RW));
+
+            // Add the host doorbell reg
+            l_regsFFDC.addData(DEVICE_SCOM_ADDRESS(PSU_HOST_DOORBELL_REG_RW));
+
             // Add the TP LOCAL FIR (includes SBE vital attentions)
             l_regsFFDC.addData(DEVICE_SCOM_ADDRESS(0x01040100));
 
