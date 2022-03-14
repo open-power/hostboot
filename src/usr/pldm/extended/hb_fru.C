@@ -762,7 +762,7 @@ errlHndl_t generate_ipz_formatted_vpd(const uint8_t* const i_pldm_fru_table_buf,
                 if(fru_tlv->type < RT_FIELD_TYPE ||
                    fru_tlv->type >= record_keywords.size())
                 {
-                    PLDM_ERR("generate_ipz_formatted_vpd: Unsupported PLDM Fru Record Field Type %u for record 0x%04x found",
+                    PLDM_ERR("generate_ipz_formatted_vpd: Unsupported PLDM Fru Record Field Type %u for record 0x%08x found",
                              fru_tlv->type, record_name)
                     /*@
                     * @errortype  ERRL_SEV_UNRECOVERABLE
@@ -804,7 +804,7 @@ errlHndl_t generate_ipz_formatted_vpd(const uint8_t* const i_pldm_fru_table_buf,
 
             if(is_ipz_record && !is_known_ipz_record)
             {
-                PLDM_INF("BMC sent us the IPZ record 0x%.08x which Hostboot does not know how to process, skipping it");
+                PLDM_INF("BMC sent us the IPZ record 0x%.08x which Hostboot does not know how to process, skipping it", record_name);
             }
 
             // increment the offset_of_cur_pldm_record_entry variable by the total size of

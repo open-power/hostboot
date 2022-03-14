@@ -1062,7 +1062,7 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
         // by definition, hostboot only has 1 node/enclosure, and we're here so it's functional
         if (pTarget->getAttr<ATTR_CLASS>() == CLASS_ENC)
         {
-            HWAS_DBG("pTarget %.8X - detected present",
+            HWAS_INF("pTarget %.8X - detected present - ENC",
                     get_huid(pTarget));
             // If the planar VPD was collected remotely, such as on eBMC systems via PLDM, then
             // don't skip presence detect as it will load relevant attributes for FRU callouts.
@@ -1083,7 +1083,7 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
         //  by default
         if ((l_attrType == TYPE_SP) || (l_attrType ==  TYPE_BMC))
         {
-            HWAS_DBG("pTarget %.8X - detected present",
+            HWAS_INF("pTarget %.8X - detected present - SP",
                 pTarget->getAttr<ATTR_HUID>());
             pTarget_it++;
             continue;
