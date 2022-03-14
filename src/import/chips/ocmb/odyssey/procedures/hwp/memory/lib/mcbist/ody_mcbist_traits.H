@@ -524,6 +524,10 @@ class mcbistTraits< mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>
             CFG_TRAP_CE_ENABLE = scomt::ody::ODC_RDF0_SCOM_MCBCM_TRAP_CE_ENABLE,
             CFG_TRAP_UE_ENABLE = scomt::ody::ODC_RDF0_SCOM_MCBCM_TRAP_UE_ENABLE,
             CFG_TRAP_MPE_ENABLE = scomt::ody::ODC_RDF0_SCOM_MCBCM_TRAP_MPE_ENABLE,
+            MCBCM_COMPARE_MASK = scomt::ody::ODC_RDF0_SCOM_MCBCM_HALF_COMPARE_MASK,
+            MCBCM_COMPARE_MASK_LEN = scomt::ody::ODC_RDF0_SCOM_MCBCM_HALF_COMPARE_MASK_LEN,
+            MCBCM2_COMPARE_MASK = scomt::ody::ODC_RDF0_SCOM_MCBCM2_MCBCM2_MCBIST_HALF_COMPARE_MASK,
+            MCBCM2_COMPARE_MASK_LEN = scomt::ody::ODC_RDF0_SCOM_MCBCM2_MCBCM2_MCBIST_HALF_COMPARE_MASK_LEN,
 
             CFG_DGEN_RNDD_SEED0 = scomt::ody::ODC_MCBIST_SCOM_MCBRDS0Q_SEED0,
             CFG_DGEN_RNDD_SEED0_LEN = scomt::ody::ODC_MCBIST_SCOM_MCBRDS0Q_SEED0_LEN,
@@ -572,7 +576,6 @@ class mcbistTraits< mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>
             MBSTRQ_CFG_MCE_HARD_SYMBOL_COUNT_ENABLE = scomt::ody::ODC_MCBIST_SCOM_MBSTRQ_CFG_MCE_HARD_SYMBOL_COUNT_ENABLE,
 
             // Bit mapping for MCBIST error log control data
-            // TODO:ZEN-MST1390 Add MCBIST data/address trap processing
             ERROR_LOG_SUBTEST = 0,
             ERROR_LOG_SUBTEST_LEN = 5,
             ERROR_LOG_SUBCMD = 5,
@@ -613,18 +616,8 @@ class mcbistTraits< mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>
 
         };
 
-        // MCBIST error log related registers
-        // TODO:ZEN-MST1390 Add MCBIST data/address trap processing
-        static constexpr uint64_t RD_BUF_CTL_REG = 0;
-        static constexpr uint64_t RD_BUF_DATA_REG = 0;
-        static constexpr uint64_t RD_BUF_ECC_REG = 0;
-
         enum
         {
-            // Register field constants
-            RB_ADDRESS = 0,
-            RB_ADDRESS_LEN = 0,
-            RB_AUTOINC = 0,
 
             // Other constants
             NUM_COMPARE_LOG_ENTRIES = 64,
@@ -653,8 +646,10 @@ class mcbistTraits< mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_MEM_PORT>
 {
     public:
         // MCBIST error log related registers
-        // TODO:ZEN-MST1390 Add MCBIST data/address trap processing
-        static constexpr uint64_t ERROR_LOG_PTR_REG = 0; // Has one reg per RDF, so needs API updates
+        static constexpr uint64_t ERROR_LOG_PTR_REG = scomt::ody::ODC_RDF0_CNTL_ELPR;
+        static constexpr uint64_t RMW_WRT_BUF_CTL_REG = scomt::ody::ODC_WDF_REGS_AACR;
+        static constexpr uint64_t RMW_WRT_BUF_DATA_REG = scomt::ody::ODC_WDF_REGS_AADR;
+        static constexpr uint64_t RMW_WRT_BUF_ECC_REG = scomt::ody::ODC_WDF_REGS_AAER;
 
         static constexpr uint64_t XLTATE0 = scomt::ody::ODC_SRQ_MBXLT0;
         static constexpr uint64_t XLTATE1 = scomt::ody::ODC_SRQ_MBXLT1;
@@ -663,10 +658,11 @@ class mcbistTraits< mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_MEM_PORT>
         enum
         {
             // Register field constants
-            // TODO:ZEN-MST1390 Add MCBIST data/address trap processing
-            ERROR_LOG_PTR = 0,
-            ERROR_LOG_PTR_LEN = 0,
-            ERROR_LOG_FULL = 0,
+            ERROR_LOG_PTR = scomt::ody::ODC_RDF0_CNTL_ELPR_POINTER,
+            ERROR_LOG_PTR_LEN = scomt::ody::ODC_RDF0_CNTL_ELPR_POINTER_LEN,
+            ERROR_LOG_FULL = scomt::ody::ODC_RDF0_CNTL_ELPR_FULL,
+            RMW_WRT_BUFFER_SEL = 0,
+            RMW_WRT_ADDRESS = 0,
 
             // TODO:ZEN-MST1459 Create ody_lab_mcbist_wrap
             XLTATE_SLOT0_VALID = 0,

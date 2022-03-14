@@ -40,6 +40,7 @@
 
 #include <explorer_scom_addresses.H>
 #include <explorer_scom_addresses_fld.H>
+#include <explorer_scom_addresses_fld_fixes.H>
 
 #include <lib/shared/exp_consts.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
@@ -515,6 +516,10 @@ class mcbistTraits< mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>
             CFG_TRAP_CE_ENABLE = EXPLR_RDF_MCBCM_MCBIST_TRAP_CE_ENABLE,
             CFG_TRAP_UE_ENABLE = EXPLR_RDF_MCBCM_MCBIST_TRAP_UE_ENABLE,
             CFG_TRAP_MPE_ENABLE = EXPLR_RDF_MCBCM_MCBIST_TRAP_MPE_ENABLE,
+            MCBCM_COMPARE_MASK = EXPLR_RDF_MCBCM_MCBIST_HALF_COMPARE_MASK,
+            MCBCM_COMPARE_MASK_LEN = EXPLR_RDF_MCBCM_MCBIST_HALF_COMPARE_MASK_LEN,
+            MCBCM2_COMPARE_MASK = EXPLR_RDF_MCBCM2_MCBIST_HALF_COMPARE_MASK,
+            MCBCM2_COMPARE_MASK_LEN = EXPLR_RDF_MCBCM2_MCBIST_HALF_COMPARE_MASK_LEN,
 
             CFG_DGEN_RNDD_SEED0 = EXPLR_MCBIST_MCBRDS0Q_DGEN_RNDD_SEED0,
             CFG_DGEN_RNDD_SEED0_LEN = EXPLR_MCBIST_MCBRDS0Q_DGEN_RNDD_SEED0_LEN,
