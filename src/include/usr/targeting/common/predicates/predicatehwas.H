@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -97,7 +97,7 @@ class PredicateHwas : public PredicateBase
          *
          *  @return Reference to the predicate, for chaining
          */
-         PredicateHwas& poweredOn(const bool i_poweredOn);
+         PredicateHwas& poweredOn(bool i_poweredOn);
 
         /**
          *  @brief Configure predicate to look for the given present state
@@ -106,7 +106,7 @@ class PredicateHwas : public PredicateBase
          *
          *  @return Reference to the predicate, for chaining
          */
-         PredicateHwas& present(const bool i_present);
+         PredicateHwas& present(bool i_present);
 
         /**
          *  @brief Configure predicate to look for the given functional state
@@ -115,37 +115,47 @@ class PredicateHwas : public PredicateBase
          *
          *  @return Reference to the predicate, for chaining
          */
-         PredicateHwas& functional(const bool i_functional);
+         PredicateHwas& functional(bool i_functional);
+
+        /**
+         *  @brief Configure predicate to look for the given functional
+         *         override state
+         *
+         *  @param[in] i_functionalOverride Desired functional override state
+         *
+         *  @return Reference to the predicate, for chaining
+         */
+         PredicateHwas& functionalOverride(bool i_functionalOverride);
 
         /**
          *  @brief Configure predicate to look for the given dump functional
-         *      state
+         *         state
          *
          *  @param[in] i_dumpFunctional Desired dump functional state
          *
          *  @return Reference to the predicate, for chaining
          */
-         PredicateHwas& dumpFunctional(const bool i_dumpFunctional);
+         PredicateHwas& dumpFunctional(bool i_dumpFunctional);
 
          /**
           *  @brief Configure predicate to look for the given speculative
-          *  deconfig state
+          *         deconfig state
           *
           *  @param[in] i_specdeconfig Desired speculative deconfig state
           *
           *  @return Reference to the predicate, for chaining
           */
-         PredicateHwas& specdeconfig(const bool i_specdeconfig);
+         PredicateHwas& specdeconfig(bool i_specdeconfig);
 
          /**
           *  @brief Configure predicate to look for the given deconfig by
-          *  error log id or enum value
+          *         error log id or enum value
           *
           *  @param[in] i_eid Desired value of deconfig by EID
           *
           *  @return Reference to the predicate, for chaining
           */
-         PredicateHwas& deconfiguredByEid(const uint32_t i_eid);
+         PredicateHwas& deconfiguredByEid(uint32_t i_eid);
 
         /**
          *  @brief Returns whether target matches the desired HWAS state
@@ -236,6 +246,18 @@ inline PredicateHwas& PredicateHwas::functional(
 {
     iv_desired.attribute.functional = i_functional;
     iv_valid.attribute.functional = true;
+    return *this;
+}
+
+//******************************************************************************
+// PredicateHwas::functionalOverride
+//******************************************************************************
+
+inline PredicateHwas& PredicateHwas::functionalOverride(
+    const bool i_functionalOverride)
+{
+    iv_desired.attribute.functionalOverride = i_functionalOverride;
+    iv_valid.attribute.functionalOverride = true;
     return *this;
 }
 

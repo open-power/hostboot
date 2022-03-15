@@ -1504,7 +1504,7 @@ void forceEcFcDeconfig(const TARGETING::TargetHandle_t i_core,
     {
         // set functionalOverride so HB and BMC will treat as functional
         // during reconfig loops
-        HwasState hwasState = i_core->getAttr<ATTR_HWAS_STATE>();
+        hwasState = i_core->getAttr<ATTR_HWAS_STATE>();
         hwasState.functionalOverride = 1;
         i_core->setAttr<ATTR_HWAS_STATE>(hwasState);
     }
