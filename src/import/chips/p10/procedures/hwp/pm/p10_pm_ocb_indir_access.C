@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -138,21 +138,21 @@ fapi2::ReturnCode p10_pm_ocb_indir_access_internal(
         case ocb::OCB_CHAN0:
             l_OCBAR_address   = TP_TPCHIP_OCC_OCI_OCB_PIB_OCBAR0;
             l_OCBDR_address   = TP_TPCHIP_OCC_OCI_OCB_PIB_OCBDR0;
-            l_OCBCSR_address  = TP_TPCHIP_OCC_OCI_OCB_PIB_OCBCSR3_RO;
+            l_OCBCSR_address  = TP_TPCHIP_OCC_OCI_OCB_PIB_OCBCSR0_RO;
             l_OCBSHCS_address = TP_TPCHIP_OCC_OCI_OCB_OCBSHCS0;
             break;
 
         case ocb::OCB_CHAN1:
             l_OCBAR_address   = TP_TPCHIP_OCC_OCI_OCB_PIB_OCBAR1;
             l_OCBDR_address   = TP_TPCHIP_OCC_OCI_OCB_PIB_OCBDR1;
-            l_OCBCSR_address  = TP_TPCHIP_OCC_OCI_OCB_PIB_OCBCSR3_RO;
+            l_OCBCSR_address  = TP_TPCHIP_OCC_OCI_OCB_PIB_OCBCSR1_RO;
             l_OCBSHCS_address = TP_TPCHIP_OCC_OCI_OCB_OCBSHCS1;
             break;
 
         case ocb::OCB_CHAN2:
             l_OCBAR_address   = TP_TPCHIP_OCC_OCI_OCB_PIB_OCBAR2;
             l_OCBDR_address   = TP_TPCHIP_OCC_OCI_OCB_PIB_OCBDR2;
-            l_OCBCSR_address  = TP_TPCHIP_OCC_OCI_OCB_PIB_OCBCSR3_RO;
+            l_OCBCSR_address  = TP_TPCHIP_OCC_OCI_OCB_PIB_OCBCSR2_RO;
             l_OCBSHCS_address = TP_TPCHIP_OCC_OCI_OCB_OCBSHCS2;
             break;
 
@@ -281,6 +281,7 @@ fapi2::ReturnCode p10_pm_ocb_indir_access_internal(
         // the channel data register
         for(uint32_t l_index = 0; l_index < l_words_to_access; l_index++)
         {
+            fapi2::ReturnCode l_rc;
             getDataFromBuffer(i_useByteBuf, &io_ocb_buffer[l_index], l_data64());
 
             /* The data read is done via this getscom operation.
@@ -290,8 +291,53 @@ fapi2::ReturnCode p10_pm_ocb_indir_access_internal(
             // @TODO RTC 173286 - FAPI2:  FAPI_TRY (or surrogate name)
             //                    that allows access to the return code for
             //                    HWP reactionFAPI_TRY(fapi2::getScom(i_target, l_OCBAR_address, l_data64));
-            FAPI_TRY(fapi2::putScom(i_target, l_OCBDR_address, l_data64),
-                     "ERROR:Failed to complete write to channel data register");
+
+            l_rc = fapi2::putScom(i_target, l_OCBDR_address, l_data64);
+
+            if (l_rc)
+            {
+                switch ( i_ocb_chan )
+                {
+                    case ocb::OCB_CHAN0:
+                        FAPI_ASSERT(false,
+                                    fapi2::PM_OCB0_PUT_DATA_ERROR().
+                                    set_CHANNEL(i_ocb_chan).
+                                    set_DATA_SIZE(i_ocb_req_length).
+                                    set_TARGET(i_target),
+                                    "Get access to channel register failed");
+                        break;
+
+                    case ocb::OCB_CHAN1:
+                        FAPI_ASSERT(false,
+                                    fapi2::PM_OCB1_PUT_DATA_ERROR().
+                                    set_CHANNEL(i_ocb_chan).
+                                    set_DATA_SIZE(i_ocb_req_length).
+                                    set_TARGET(i_target),
+                                    "Get access to channel register failed");
+                        break;
+
+                    case ocb::OCB_CHAN2:
+                        FAPI_ASSERT(false,
+                                    fapi2::PM_OCB2_PUT_DATA_ERROR().
+                                    set_CHANNEL(i_ocb_chan).
+                                    set_DATA_SIZE(i_ocb_req_length).
+                                    set_TARGET(i_target),
+                                    "Get access to channel register failed");
+                        break;
+
+                    case ocb::OCB_CHAN3:
+                        FAPI_ASSERT(false,
+                                    fapi2::PM_OCB3_PUT_DATA_ERROR().
+                                    set_CHANNEL(i_ocb_chan).
+                                    set_DATA_SIZE(i_ocb_req_length).
+                                    set_TARGET(i_target),
+                                    "Get access to channel register failed");
+                        break;
+                }
+
+                goto fapi_try_exit;
+            } //end of l_rc
+
             o_ocb_act_length++;
             FAPI_DBG("data(64 bits): 0x%016lX written to channel data register",
                      io_ocb_buffer[l_index]);
@@ -327,8 +373,6 @@ fapi2::ReturnCode p10_pm_ocb_indir_access_internal(
             if (l_rc)
             {
                 FAPI_ERR("OCBDR%d getscom error;  rc = 0x%08X", i_ocb_chan, (uint32_t)l_rc);
-#ifndef __HOSTBOOT_MODULE
-// Cronus FFDC
 #define FFDCREG(_m_addr, _m_string) \
     FAPI_TRY(fapi2::getScom(i_target, _m_addr, l_data64)); \
     FAPI_ERR("%-10s %d: 0x%016lX", #_m_string, l_data64);
@@ -395,7 +439,6 @@ fapi2::ReturnCode p10_pm_ocb_indir_access_internal(
                 FFDCREG(l_OCBLWSR_address, OCBLWSR);
                 FFDCREG(l_OCBESR_address , OCBESR);
                 FFDCREG(TP_TPCHIP_OCC_OCI_ARB_OCB_PIB_OEAR,  OEAR);
-#else
 //              May want this to be a callback to gather the above registers
 //              and add to an error log.
 
@@ -438,7 +481,6 @@ fapi2::ReturnCode p10_pm_ocb_indir_access_internal(
                         break;
                 }
 
-#endif
                 goto fapi_try_exit;
             }
 
@@ -459,6 +501,7 @@ fapi2::ReturnCode p10_pm_ocb_indir_access_internal(
     }
 
 fapi_try_exit:
+
     FAPI_DBG("< p10_pm_ocb_indir_access...");
     return fapi2::current_err;
 

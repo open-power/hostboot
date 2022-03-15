@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2022                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -238,6 +238,114 @@
     Indicates that a fail occured reading the OCB data register as part of a
     channel GET operation.  Such a fail can occur due to channel setup or use
     issues (i.e.underflow) or secondary failures to a SCOM access (eg address
+    issue going to the OCC SRAM).
+    </description>
+    <ffdc>CHANNEL</ffdc>
+    <ffdc>DATA_SIZE</ffdc>
+    <ffdc>TARGET</ffdc>
+    <collectRegisterFfdc>
+      <id>OCB_CHANNEL3_FFDC_REGISTERS</id>
+      <target>TARGET</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+    </hwpError>
+    <!-- ******************************************************************* -->
+    <hwpError>
+    <sbeError/>
+    <rc>RC_PM_OCB0_PUT_DATA_ERROR</rc>
+    <description>
+    Indicates that a fail occured writing the OCB data register as part of a
+    channel PUT operation.  Such a fail can occur due to channel setup or use
+    issues (i.e.overflow) or secondary failures to a SCOM access (eg address
+    issue going to the OCC SRAM).
+    </description>
+    <ffdc>CHANNEL</ffdc>
+    <ffdc>DATA_SIZE</ffdc>
+    <ffdc>TARGET</ffdc>
+    <collectRegisterFfdc>
+      <id>OCB_CHANNEL0_FFDC_REGISTERS</id>
+      <target>TARGET</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+    </hwpError>
+    <!-- ******************************************************************* -->
+    <hwpError>
+    <sbeError/>
+    <rc>RC_PM_OCB1_PUT_DATA_ERROR</rc>
+    <description>
+    Indicates that a fail occured writing the OCB data register as part of a
+    channel PUT operation.  Such a fail can occur due to channel setup or use
+    issues (i.e.overflow) or secondary failures to a SCOM access (eg address
+    issue going to the OCC SRAM).
+    </description>
+    <ffdc>CHANNEL</ffdc>
+    <ffdc>DATA_SIZE</ffdc>
+    <ffdc>TARGET</ffdc>
+    <collectRegisterFfdc>
+      <id>OCB_CHANNEL1_FFDC_REGISTERS</id>
+      <target>TARGET</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+    </hwpError>
+    <!-- ******************************************************************* -->
+    <hwpError>
+    <sbeError/>
+    <rc>RC_PM_OCB2_PUT_DATA_ERROR</rc>
+    <description>
+    Indicates that a fail occured writing the OCB data register as part of a
+    channel PUT operation.  Such a fail can occur due to channel setup or use
+    issues (i.e.overflow) or secondary failures to a SCOM access (eg address
+    issue going to the OCC SRAM).
+    </description>
+    <ffdc>CHANNEL</ffdc>
+    <ffdc>DATA_SIZE</ffdc>
+    <ffdc>TARGET</ffdc>
+    <collectRegisterFfdc>
+      <id>OCB_CHANNEL2_FFDC_REGISTERS</id>
+      <target>TARGET</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+    </hwpError>
+    <!-- ******************************************************************* -->
+    <hwpError>
+    <sbeError/>
+    <rc>RC_PM_OCB3_PUT_DATA_ERROR</rc>
+    <description>
+    Indicates that a fail occured writing the OCB data register as part of a
+    channel PUT operation.  Such a fail can occur due to channel setup or use
+    issues (i.e.overflow) or secondary failures to a SCOM access (eg address
     issue going to the OCC SRAM).
     </description>
     <ffdc>CHANNEL</ffdc>
