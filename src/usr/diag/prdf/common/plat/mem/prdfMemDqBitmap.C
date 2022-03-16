@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -107,9 +107,7 @@ uint32_t MemDqBitmap::setDq( uint8_t i_dq, uint8_t i_portSlct )
 
     do
     {
-        uint8_t maxDqs = ( TYPE_OCMB_CHIP == getTargetType(iv_trgt) )
-                         ? OCMB_DQS_PER_DIMM : DQS_PER_DIMM ;
-        if ( maxDqs <= i_dq )
+        if ( DQS_PER_DIMM <= i_dq )
         {
             PRDF_ERR( PRDF_FUNC "Invalid parameter: i_dq=%d", i_dq );
             o_rc = FAIL; break;

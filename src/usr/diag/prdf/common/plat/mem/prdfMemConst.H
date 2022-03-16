@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,8 +41,7 @@ enum
     MASTER_RANKS_PER_PORT = DIMM_SLCT_PER_PORT * MASTER_RANKS_PER_DIMM_SLCT,
 
     SYMBOLS_PER_RANK  = 72,
-    DQS_PER_DIMM      = 72,
-    OCMB_DQS_PER_DIMM = 80,
+    DQS_PER_DIMM = 80,
 
     OCMB_SPARE_DQ_START = 40,
 

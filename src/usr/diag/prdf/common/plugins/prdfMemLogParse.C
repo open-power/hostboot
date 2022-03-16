@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,25 +59,9 @@ using namespace TARGETING;
 // Support functions for looking up DRAM site locations
 //##############################################################################
 
-// Returns the DQ site index 0-71, or 72-79 if spared to DRAM
+// Returns the DQ site index 0:79, 40:47 if spared to DRAM
 template<TARGETING::TYPE T>
-uint8_t transDramSpare( uint8_t i_dq, bool i_isDramSpared )
-{
-    uint8_t dqIdx = i_dq;
-
-    if ( i_isDramSpared )
-    {
-        // The DRAM spare indexes are 72-79, so adjust this DQ to match.
-        dqIdx = DQS_PER_DIMM + (i_dq % DQS_PER_BYTE);
-    }
-
-    return dqIdx;
-}
-
-template
-uint8_t transDramSpare<TYPE_MBA>( uint8_t i_dq, bool i_isDramSpared );
-template
-uint8_t transDramSpare<TYPE_MCA>( uint8_t i_dq, bool i_isDramSpared );
+uint8_t transDramSpare( uint8_t i_dq, bool i_isDramSpared );
 
 template<>
 uint8_t transDramSpare<TYPE_OCMB_CHIP>( uint8_t i_dq, bool i_isDramSpared )

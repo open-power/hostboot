@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,7 +45,7 @@ namespace PARSERUTILS
 template<>
 uint8_t symbol2Dq<TARGETING::TYPE_OCMB_CHIP>( uint8_t i_symbol )
 {
-    uint8_t dq = OCMB_DQS_PER_DIMM;
+    uint8_t dq = DQS_PER_DIMM;
 
     static const uint8_t symbol2dq[] =
     {
@@ -102,7 +102,7 @@ uint8_t dq2Symbol( uint8_t i_dq, uint8_t i_ps )
         43, 42, 41, 40, 11, 10,  9,  8, // dqs 72-80
     };
 
-    if ( OCMB_DQS_PER_DIMM > i_dq )
+    if ( DQS_PER_DIMM > i_dq )
     {
         symbol = dq2symbol[i_dq];
     }

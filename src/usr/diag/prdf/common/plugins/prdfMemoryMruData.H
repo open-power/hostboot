@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -138,9 +138,7 @@ struct ExtendedData
                                    ///< 0=otherwise. Needed just in case there
                                    ///< was a failure to gather extended data.
     uint32_t   reserved       :21; ///< Future use / nice boundary
-    uint8_t    dqMapping[DQS_PER_DIMM]; ///< Centaur DQ to DIMM DQ mapping
-                                        ///< (only used when the MemoryMru
-                                        ///< contains a single IS DIMM callout).
+    uint8_t    dqMapping[DQS_PER_DIMM]; ///< DQ to DIMM DQ mapping
 
     /** Default contructor */
     ExtendedData() :

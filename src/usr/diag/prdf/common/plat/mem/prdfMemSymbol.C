@@ -144,7 +144,7 @@ MemSymbol MemSymbol::fromSparedSymbol( TARGETING::TargetHandle_t i_trgt,
 
 uint8_t MemSymbol::getDq() const
 {
-    uint8_t dq = OCMB_DQS_PER_DIMM;
+    uint8_t dq = DQS_PER_DIMM;
     TYPE trgtType = getTargetType( iv_trgt );
 
     if ( TYPE_OCMB_CHIP == trgtType )
