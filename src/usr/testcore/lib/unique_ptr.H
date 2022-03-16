@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,6 +76,9 @@ public:
             unique_ptr<practice_struct[]> i(new practice_struct[10] { {1}, {2}, {3}, {4}, {5},
                                                                       {6}, {7}, {8}, {9}, {10} });
             unique_ptr<practice_struct> h;
+            const unique_ptr<practice_struct[]> m(new practice_struct[1] { });
+            const unique_ptr<const practice_struct[]> m2(new const practice_struct[1] { });
+
             h = std::move(c);
 
             // Try custom deleter with function pointer
@@ -123,12 +126,15 @@ public:
                 TS_FAIL("Array access through unique_ptr returned incorrect value (expected 4)");
             }
 
-            if (practice_struct::instance_count != 14)
+            if (practice_struct::instance_count != 16)
             {
                 TS_FAIL("testUniquePtr: unique_ptr constructed an incorrect number of objects. "
                         "Remaining object count is %d",
                         practice_struct::instance_count);
             }
+
+            m[0].x = 0; // write through const pointer to mutable data
+            m2[0].x; // read through const pointer to const data
         }
 
         if (practice_struct::instance_count != 0)

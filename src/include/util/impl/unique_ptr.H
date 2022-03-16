@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -402,8 +402,22 @@ namespace std
              * @return        Value of T::operator[](i)
              */
             template<typename Index, typename X = T>
-            typename enable_if<is_array<X>::value, decltype(declval<X>()[declval<Index>()])>::type
+            typename enable_if<is_array<X>::value, decltype(declval<X>()[declval<Index>()])>::type&
             operator[](const Index i)
+            {
+                return iv_ptr[i];
+            }
+
+            /* @brief Index operator for unique_ptr<T[]>.
+             *
+             * operator[] is not callable on a unique_ptr to non-array types.
+             *
+             * @param[in] i   Index into the array
+             * @return        Value of T::operator[](i)
+             */
+            template<typename Index, typename X = T>
+            typename enable_if<is_array<X>::value, decltype(declval<X>()[declval<Index>()])>::type&
+            operator[](const Index i) const
             {
                 return iv_ptr[i];
             }
