@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -676,24 +676,28 @@ ReturnCode __badDqBitmapGetHelperAttrs(
                     uint8_t &o_ps )
 {
     // Get the MEM_PORT target
+    /* TODO - comment out until MEM_VPD_DQ_MAP is updated to uint8_t[80]
     Target<TARGET_TYPE_MEM_PORT> l_fapiMemPort =
         i_fapiDimm.getParent<TARGET_TYPE_MEM_PORT>();
 
     // In the P10 case, the translation attribute exists on the MEM_PORT
     // target so there's no need to know the port select, so just set it to 0.
     o_ps = 0;
-
+    */
     // Get the DQ to DIMM Connector DQ Wiring attribute.
 
     // memset to avoid known syntax issue with previous compiler
     // versions and ensure zero initialized array.
     memset( o_wiringData.memport, 0, sizeof(o_wiringData.memport) );
 
+    /* TODO - comment out until MEM_VPD_DQ_MAP is updated to uint8_t[80]
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_VPD_DQ_MAP, l_fapiMemPort,
                             o_wiringData.memport) );
 
 fapi_try_exit:
     return fapi2::current_err;
+    */
+    return FAPI2_RC_SUCCESS;
 }
 
 //******************************************************************************
