@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -91,7 +91,7 @@ constexpr uint32_t GEMINI       = 0x060DC000;
 constexpr uint32_t NIMBUS_16       = 0x20D1;
 constexpr uint32_t CUMULUS_16      = 0x20D4;
 constexpr uint32_t AXONE_16        = 0x20D9;
-constexpr uint32_t P10_16          = 0x20A9;
+constexpr uint32_t P10_16          = 0x20DA;
 constexpr uint32_t CENTAUR_16      = 0x6039;
 constexpr uint32_t EXPLORER_16     = 0x60D2;
 constexpr uint32_t GEMINI_16       = 0x60DC;
