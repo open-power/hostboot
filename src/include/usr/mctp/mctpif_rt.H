@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,10 +60,7 @@ namespace MCTP
     *                            (there should be no overlap)
     *
     */
-    // TODO https://github.com/openbmc/libmctp/issues/4
-    // this should be a const reference but requires changes
-    // to core interface
-    int send_message(byte_vector_t& i_mctp_payload);
+    int send_message(const byte_vector_t& i_mctp_payload);
 }
 
 #endif

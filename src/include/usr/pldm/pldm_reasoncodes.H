@@ -111,6 +111,7 @@ namespace PLDM
         MOD_WAIT_HOST_INITIATED_SHUTDOWN             = 0x46, // waitForHostInitiatedShutdown
         MOD_WAIT_BMC_INITIATED_SHUTDOWN              = 0x47, // waitForBmcInitiatedShutdown
         MOD_GET_PLDM_VERSION_REQ                     = 0x48, // handleGetPldmVersionRequest
+        MOD_MAKE_PLDM_REQUEST_RUNTIME                = 0x49, // sendrecv_pldm_request (runtime)
     };
 
     enum PLDMReasonCode

@@ -53,7 +53,6 @@
 // System headers
 #include <sys/time.h>
 
-
 using namespace PLDM;
 using namespace ERRORLOG;
 

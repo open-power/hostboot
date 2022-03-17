@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,10 +50,7 @@ class MctpRP
       *                           interface.h or from libmctp_rc.h
       *                           (there should be no overlap)
       */
-      // TODO https://github.com/openbmc/libmctp/issues/4
-      // this should be a const reference but requires changes
-      // to core interface
-      int send_message(MCTP::byte_vector_t& i_mctp_payload);
+      int send_message(const MCTP::byte_vector_t& i_mctp_payload);
 
       /**
       * @brief Perform MCTP_RECEIVE fw_request to get the next MCTP packet
