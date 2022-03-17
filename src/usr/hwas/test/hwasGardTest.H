@@ -733,8 +733,7 @@ public:
                 //         value.
                 {POWER_CHIPID::EXPLORER_16, 0xFFFF},
                 // Test 3: The MRW has no given values
-                // @TODO RTC 251152 Enable when empty arrays aren't supported
-                //{0,0},
+                {0,0},
             };
             std::vector<std::vector<uint16_t>> positiveTests =
             {
