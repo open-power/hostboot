@@ -62,7 +62,7 @@ namespace MCTP
         return Singleton<MctpRP>::instance().get_next_packet();
     }
 
-    int send_message(byte_vector_t& i_mctp_payload)
+    int send_message(const byte_vector_t& i_mctp_payload)
     {
         return Singleton<MctpRP>::instance().send_message(i_mctp_payload);
     }
@@ -75,7 +75,7 @@ int MctpRP::get_next_packet(void)
     return mctp_hbrtvirt_rx_start(iv_hbrtvirt);
 }
 
-int MctpRP::send_message(byte_vector_t& i_mctp_payload)
+int MctpRP::send_message(const byte_vector_t& i_mctp_payload)
 {
     TRACDBIN(g_trac_mctp,
              "sending mctp payload: ",
@@ -84,7 +84,9 @@ int MctpRP::send_message(byte_vector_t& i_mctp_payload)
 
     int rc = mctp_message_tx(iv_mctp,
                              BMC_EID,
-                             i_mctp_payload.data(),
+                             // TODO https://github.com/openbmc/libmctp/issues/4
+                             // remove const_cast
+                             const_cast<uint8_t*>(i_mctp_payload.data()),
                              i_mctp_payload.size());
 
     return rc;

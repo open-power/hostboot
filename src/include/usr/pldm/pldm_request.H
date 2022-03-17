@@ -142,6 +142,32 @@ inline void sendrecv_pldm_request_assign_response_container(std::vector<uint8_t>
     io_response_container.assign(io_data.get(), io_data.get() + i_data_length);
 }
 
+#ifdef __HOSTBOOT_RUNTIME
+/* @brief sendrecv_pldm_request_impl
+ *        Implementation function for sendrecv_pldm_request
+ *
+ * @param[in] i_msg        The outgoing PLDM message
+ * @param[out] o_response  The PLDM response
+ * @return errlHndl_t      Error if any, otherwise nullptr
+ */
+errlHndl_t sendrecv_pldm_request_impl(const std::vector<uint8_t>& i_msg,
+                                      std::vector<uint8_t>& o_response);
+#else
+/* @brief sendrecv_pldm_request_impl
+ *        Implementation function for sendrecv_pldm_request
+ *
+ * @param[in] i_msgQ              Handle to the PLDM outgoing-request message queue
+ * @param[in] i_msg               The outgoing PLDM message
+ * @param[out] o_response         The PLDM response
+ * @param[out] o_response_length  The length of o_response in bytes
+ * @return errlHndl_t             Error if any, otherwise nullptr
+ */
+errlHndl_t sendrecv_pldm_request_impl(msg_q_t i_msgQ,
+                                      const std::vector<uint8_t>& i_msg,
+                                      std::unique_ptr<uint8_t, decltype(&free)>& o_response,
+                                      size_t& o_response_length);
+#endif
+
 /* @brief sendrecv_pldm_request
  *
  *        Encode and send a PLDM request with a fixed-size payload section and a
@@ -174,185 +200,41 @@ errlHndl_t sendrecv_pldm_request(ResponseContainer& o_response_bytes,
 
     pldm_msg* const pldm_request = &msgbuf->pldm_message;
 
-    do
+    const int encoder_rc = i_encoder(i_args...,
+                                     pldm_request,
+                                     MsgSize + i_payload_size);
+
+    assert(encoder_rc == PLDM_SUCCESS,
+           "PLDM message encoder at address %p failed with code %d",
+           i_encoder,
+           encoder_rc);
+
+#ifdef __HOSTBOOT_RUNTIME
+    PLDM::set_waiting_for_response(true);
+    setMctpBridgeState(hostInterfaces::MCTP_BRIDGE_ENABLED);
+
+    errl = sendrecv_pldm_request_impl(msgbuf_bytes, o_response_bytes);
+
+    setMctpBridgeState(hostInterfaces::MCTP_BRIDGE_DISABLED);
+    PLDM::set_waiting_for_response(false);
+
+    // If a request message was queued while waiting for a response,
+    // ask PHyp to call into HBRT again.
+    if (!PLDM::get_next_request().empty())
     {
-        {
-            const int encoder_rc = i_encoder(i_args...,
-                                             pldm_request,
-                                             MsgSize + i_payload_size);
-
-            assert(encoder_rc == PLDM_SUCCESS,
-                   "PLDM message encoder at address %p failed with code %d",
-                   i_encoder,
-                   encoder_rc);
-        }
-
-#ifndef __HOSTBOOT_RUNTIME
-        const std::unique_ptr<msg_t, decltype(&msg_free)> msg { msg_allocate(), msg_free };
-        msg->data[0] = msgbuf_bytes.size();
-        msg->extra_data = msgbuf_bytes.data();
-
-        // Place message on the queue and wait for a response
-        const int return_code = msg_sendrecv(i_msgQ, msg.get());
-
-        if (return_code)
-        {
-            const uint64_t request_hdr_data = pldmHdrToUint64(*pldm_request);
-            /*
-            * @errortype  ERRL_SEV_UNRECOVERABLE
-            * @moduleid   MOD_MAKE_PLDM_REQUEST
-            * @reasoncode RC_SENDRECV_FAIL
-            * @userdata1  Return code returned by msg_sendrecv
-            * @userdata2  Header of pldm request
-            * @devdesc    Software problem, failed to decode PLDM message
-            * @custdesc   A software error occurred during system boot
-            */
-            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                  MOD_MAKE_PLDM_REQUEST,
-                                  RC_SENDRECV_FAIL,
-                                  return_code,
-                                  request_hdr_data,
-                                  ErrlEntry::ADD_SW_CALLOUT);
-            errl->collectTrace(PLDM_COMP_NAME);
-            break;
-        }
-        else if (msg.get()->data[1] != REQ_SUCCESS)
-        {
-            errl = reinterpret_cast<errlHndl_t>(msg.get()->extra_data);
-            msg->extra_data = nullptr;
-            break;
-        }
-
-        // we own the memory pointed to by msg->extra_data
-        std::unique_ptr<uint8_t, decltype(&free)>
-            extra_data(static_cast<uint8_t*>(msg->extra_data), free);
-
-        sendrecv_pldm_request_assign_response_container(o_response_bytes, extra_data, msg->data[0]);
+        createMctpAvailableCallback();
+    }
 #else
-        // Make sure mctp bridge is enabled
-        setMctpBridgeState(hostInterfaces::MCTP_BRIDGE_ENABLED);
+    std::unique_ptr<uint8_t, decltype(&free)> response(nullptr, free);
+    size_t response_length = 0;
 
-        int return_code = MCTP::send_message(msgbuf_bytes);
+    errl = sendrecv_pldm_request_impl(i_msgQ, msgbuf_bytes, response, response_length);
 
-        if(return_code)
-        {
-            /*
-            * @errortype  ERRL_SEV_UNRECOVERABLE
-            * @moduleid   MOD_MAKE_PLDM_REQUEST
-            * @reasoncode RC_SEND_FAIL
-            * @userdata1  Return code returned by MCTP::send_message
-            * @userdata2  Header of pldm request
-            * @devdesc    Software problem, failed to decode PLDM message
-            * @custdesc   A software error occurred during host/bmc
-            *             communication
-            */
-            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                  MOD_MAKE_PLDM_REQUEST,
-                                  RC_SEND_FAIL,
-                                  return_code,
-                                  pldmHdrToUint64(*pldm_request),
-                                  ErrlEntry::NO_SW_CALLOUT);
-            addBmcAndHypErrorCallouts(errl);
-            break;
-        }
-
-        uint8_t sleep_time_sec = 0;
-
-        (void)PLDM::set_waiting_for_response(true);
-
-        constexpr uint8_t sleep_timeout_sec = 90;
-        do
-        {
-            return_code = MCTP::get_next_packet();
-            if(return_code)
-            {
-                if(return_code == HBRT_RC_NO_MCTP_PACKET)
-                {
-                    constexpr uint8_t one_sec = 1;
-                    constexpr uint8_t zero_nsec = 0;
-                    nanosleep(one_sec, zero_nsec);
-                    if(++sleep_time_sec < sleep_timeout_sec) { continue; }
-                }
-                if(return_code == HBRT_RC_NO_MCTP_PACKET)
-                {
-                    PLDM_ERR("Timed out (%d seconds) waiting for next PLDM message",
-                             sleep_timeout_sec);
-                }
-                else
-                {
-                    PLDM_ERR("Unexpected Return Code: 0x%.16llX",
-                             return_code);
-                }
-                /*
-                * @errortype  ERRL_SEV_UNRECOVERABLE
-                * @moduleid   MOD_MAKE_PLDM_REQUEST
-                * @reasoncode RC_RECV_FAIL
-                * @userdata1  Return code returned by MCTP::get_next_packet
-                * @userdata2  Header of pldm request
-                * @devdesc    Software problem, failed to get next PLDM message
-                * @custdesc   A software error occurred during host/bmc
-                *             communication
-                */
-                errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                      MOD_MAKE_PLDM_REQUEST,
-                                      RC_RECV_FAIL,
-                                      return_code,
-                                      pldmHdrToUint64(*pldm_request),
-                                      ErrlEntry::NO_SW_CALLOUT);
-
-                addBmcAndHypErrorCallouts(errl);
-                break;
-            }
-        }while (PLDM::get_next_response().empty());
-
-        // Make sure mctp bridge is disabled
-        setMctpBridgeState(hostInterfaces::MCTP_BRIDGE_DISABLED);
-
-        (void)PLDM::set_waiting_for_response(false);
-
-        // If a request message was queued while waiting for a response,
-        // ask PHyp to call into HBRT again.
-        if(!PLDM::get_next_request().empty())
-        {
-            (void)createMctpAvailableCallback();
-        }
-
-        // break if we already have an error
-        if (errl)
-        {
-            break;
-        }
-
-        o_response_bytes = PLDM::get_next_response();
-        PLDM::clear_next_response();
+    if (!errl)
+    {
+        sendrecv_pldm_request_assign_response_container(o_response_bytes, response, response_length);
+    }
 #endif
-
-        const size_t MIN_RESP_LEN = (sizeof(pldm_msg_hdr) + 1);
-        if(o_response_bytes.size() < MIN_RESP_LEN)
-        {
-            auto hdr64 = pldmHdrToUint64(*pldm_request);
-            PLDM_ERR("The length of the response to request (0x%lx) was %d bytes when at least %d bytes was expected",
-                     hdr64, o_response_bytes.size(), MIN_RESP_LEN);
-            /*@
-            * @errortype
-            * @severity   ERRL_SEV_UNRECOVERABLE
-            * @moduleid   MOD_MAKE_PLDM_REQUEST
-            * @reasoncode RC_INVALID_LENGTH
-            * @userdata1  Actual Response Length
-            * @userdata2  Header of original pldm request
-            * @devdesc    PLDM Response from BMC is too small.
-            * @custdesc   A host failure occurred
-            */
-            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                 MOD_MAKE_PLDM_REQUEST,
-                                 RC_INVALID_LENGTH,
-                                 o_response_bytes.size(),
-                                 hdr64);
-            addBmcErrorCallouts(errl);
-            break;
-        }
-
-    } while (false);
 
     return errl;
 }
