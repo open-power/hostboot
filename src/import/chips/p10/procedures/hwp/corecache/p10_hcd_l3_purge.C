@@ -76,6 +76,10 @@ p10_hcd_l3_purge(
 
     FAPI_INF(">>p10_hcd_l3_purge");
 
+// we need to skip this when update_ec_state procedure calls this
+// as it passes unicast target and we fail here, so this pices of code
+// is taken care in update_ec_state procedure
+#ifndef __HOSTBOOT_MODULE
     FAPI_DBG("Assert CINJ_LCO_DIS_CFG via L3_MISC_L3CERRS_MODE_REG1[38]");
 
     // This register doesnt have OR/CLR interface thus RMW via unicast
@@ -84,6 +88,8 @@ p10_hcd_l3_purge(
         FAPI_TRY( HCD_GETSCOM_C( l_core, L3_MISC_L3CERRS_MODE_REG1, l_scomData   ) );
         FAPI_TRY( HCD_PUTSCOM_C( l_core, L3_MISC_L3CERRS_MODE_REG1, SCOM_SET(38) ) );
     }
+
+#endif
 
     FAPI_DBG("Assert L3_PM_LCO_DIS_CFG via PM_LCO_DIS_REG[0]");
     // This register doesnt have OR/CLR interface and having two functional bits
