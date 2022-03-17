@@ -600,11 +600,26 @@ errlHndl_t validateEcMslLevels(typename AttributeTraits<A>::TypeStdArr i_mslArra
 
     do {
 
-        // @TODO RTC 251152 Remove this if statement once all system MRWs are updated.
         if (i_mslArray.empty() || i_mslArray[0] == 0)
         {
             // The MRW didn't have any MSL EC levels to check against.
-            HWAS_INF("validateEcMslLevels: MSL Array was found to be empty. Skipping MSL_CHECK verification.");
+            HWAS_ERR("validateEcMslLevels: MRW MSL Array was found to be empty.");
+            /*@
+              * @errortype
+              * @severity           ERRL_SEV_UNRECOVERABLE
+              * @moduleid           MOD_VALIDATE_EC_MSL_LEVELS
+              * @reasoncode         RC_EMPTY_MRW_MSL_ARRAY
+              * @devdesc            The MRW provided MSL values array was found to be empty.
+              * @custdesc           Firmware was unable to verify system chip levels
+              * @userdata1[00:31]   MSL_CHECK MNFG flag state 1=set,0=unset
+              * @userdata1[32:63]   Unused
+              */
+            error = hwasError(ERRL_SEV_UNRECOVERABLE,
+                              MOD_VALIDATE_EC_MSL_LEVELS,
+                              RC_EMPTY_MRW_MSL_ARRAY,
+                              TWO_UINT32_TO_UINT64(isMslChecksSet() ? 1 : 0, 0),
+                              0);
+
             break;
         }
 
@@ -652,17 +667,8 @@ errlHndl_t validateEcMslLevels(typename AttributeTraits<A>::TypeStdArr i_mslArra
             {
                 // Compare EC level to each level in map.
                 const std::vector<ecLevel_t> & validEcLevels = ecLevel_map[chipId];
-                bool matchFound = false;
-                for (const auto level : validEcLevels)
-                {
-                    if (ecLevel == level)
-                    {
-                        // A match was found in the MRW, break out.
-                        matchFound = true;
-                        break;
-                    }
-                }
-                if ( !matchFound )
+                auto ecLevelIt = std::find(validEcLevels.begin(), validEcLevels.end(), ecLevel);
+                if (ecLevelIt == validEcLevels.end())
                 {
                     HWAS_ERR("validateEcMslLevels: Couldn't find a valid EC level in the MSL_CHECK array for "
                              "HUID 0x%.08X with EC level of 0x%.02X", get_huid(chip), ecLevel);
@@ -725,8 +731,10 @@ errlHndl_t validateEcMslLevels(typename AttributeTraits<A>::TypeStdArr i_mslArra
                           numberOfInvalidChips,
                           TWO_UINT32_TO_UINT64(isMslChecksSet() ? 1 : 0, 0));
         hwasErrorUpdatePlid(error, commonPlid);
+        error->collectTrace(HWAS_COMP_NAME);
     }
 
+    HWAS_INF(EXIT_MRK"validateEcMslLevels");
     return error;
 
 }

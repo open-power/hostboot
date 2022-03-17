@@ -95,6 +95,7 @@ namespace HWAS
         RC_HB_SBE_DECONFIG_MISMATCHES_EXIST      = HWAS_COMP_ID | 0x25,
         RC_SYSAVAIL_SBE_NOT_ENOUGH_BACKING_CACHE = HWAS_COMP_ID | 0x26,
         RC_FAILED_MSL_EC_VALIDATION              = HWAS_COMP_ID | 0x27,
+        RC_EMPTY_MRW_MSL_ARRAY                   = HWAS_COMP_ID | 0x28,
     };
 
     enum HwasPlatUserDetailsTypes
