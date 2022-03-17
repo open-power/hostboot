@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2022                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -50,18 +50,50 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <rc>RC_SBE_DEBUG_REGISTERS</rc>
+    <description>
+    Debug data collected when SBE is not responding, but not halted
+    </description>
+    <ffdc>CBS_CS</ffdc>
+    <ffdc>CBS_TR</ffdc>
+    <ffdc>CBS_EL</ffdc>
+    <ffdc>CBS_ENVSTAT</ffdc>
+    <ffdc>CBS_TR_HIST</ffdc>
+    <ffdc>CBS_EL_HIST</ffdc>
+    <ffdc>SB_CS</ffdc>
+    <ffdc>SB_MSG</ffdc>
+    <ffdc>CBS_STAT</ffdc>
+    <ffdc>ROOT_CTRL0</ffdc>
+    <ffdc>ROOT_CTRL1</ffdc>
+    <ffdc>ROOT_CTRL2</ffdc>
+    <ffdc>ROOT_CTRL3</ffdc>
+    <ffdc>ROOT_CTRL4</ffdc>
+    <ffdc>ROOT_CTRL5</ffdc>
+    <ffdc>ROOT_CTRL6</ffdc>
+    <ffdc>ROOT_CTRL7</ffdc>
+    <ffdc>ROOT_CTRL8</ffdc>
+    <ffdc>SBL_SCRATCH_REGISTER_1</ffdc>
+    <ffdc>SBL_SCRATCH_REGISTER_2</ffdc>
+    <ffdc>SBL_SCRATCH_REGISTER_3</ffdc>
+    <ffdc>SBL_SCRATCH_REGISTER_4</ffdc>
+    <ffdc>SBL_SCRATCH_REGISTER_5</ffdc>
+    <ffdc>SBL_SCRATCH_REGISTER_6</ffdc>
+    <ffdc>SBL_SCRATCH_REGISTER_7</ffdc>
+    <ffdc>SBL_SCRATCH_REGISTER_8</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
     <rc>RC_EXTRACT_SBE_RC_RUNNING</rc>
+    <ffdc>IS_CFAM_SUPPORTED</ffdc>
     <description>
     SBE engine is in running state, but an error was raised by external FW code.
     Action:Retrigger IPL or HRESET [RESTART_SBE]
     </description>
-    <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectFfdc>p10_collect_sbe_debug_registers, PROC_CHIP_TARGET, IS_CFAM_SUPPORTED</collectFfdc>
     <collectRegisterFfdc><id>PIBMEM_REGISTERS</id>                <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>SBE_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>MIB_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>SBE_IPL_SCRATCH_REGISTERS       </id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>FSI2PIB_STATUS                  </id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <callout>
       <procedure>CODE</procedure>

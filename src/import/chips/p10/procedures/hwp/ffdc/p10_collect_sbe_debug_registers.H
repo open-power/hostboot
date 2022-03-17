@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p10/procedures/hwp/ffdc/ffdc_includes.H $    */
+/* $Source: src/import/chips/p10/procedures/hwp/ffdc/p10_collect_sbe_debug_registers.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,26 +22,35 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+//------------------------------------------------------------------------------
+/// @file  p10_extract_sbe_rc.H
 ///
-/// @file ffdc_includes.H
-/// @brief Main file used to export all include files for FFDC procedures
-///
+/// @brief Check for errors on the SBE, OTPROM, PIBMEM & SEEPROM
+//------------------------------------------------------------------------------
+// *HWP HW Owner        : Sandeep Korrapati <sakorrap@in.ibm.com>
+// *HWP HW Backup Owner : Srinivas V Naga <srinivan@in.ibm.com>
+// *HWP FW Owner        : Raja Das <rajadas2@in.ibm.com>
+// *HWP Team            : Perv
+// *HWP Level           : 3
+// *HWP Consumed by     : FSP:HB
+//------------------------------------------------------------------------------
+// EKB-Mirror-To: hostboot
+// EKB-Mirror-To: hwsv
 
-#ifndef __FFDC_INCLUDES_H
-#define __FFDC_INCLUDES_H
+#ifndef _P10_COLLECT_SBE_DEB_REG_H_
+#define _P10_COLLECT_SBE_DEB_REG_H_
 
-// Add any other FFDC procedures with #include
+#include <fapi2.H>
 
-// Don't do explorer log collection on FSP side
-#ifndef FIPSODE
+typedef fapi2::ReturnCode (*p10_collect_sbe_debug_registers_FP_t)(
+    const fapi2::ffdc_t&, const fapi2::ffdc_t&, fapi2::ReturnCode&);
 
-    // needed for collectFfdc to work for adding Explorer log data
-    #include <exp_collect_explorer_active_log.H>
-    #include <exp_collect_explorer_saved_A_log.H>
-    #include <exp_collect_explorer_saved_B_log.H>
-
-#endif
-
-#include <p10_collect_sbe_debug_registers.H>
+extern "C"
+{
+    fapi2::ReturnCode p10_collect_sbe_debug_registers(
+        const fapi2::ffdc_t& i_target,
+        const fapi2::ffdc_t& i_is_cfam_supported,
+        fapi2::ReturnCode& o_rc);
+}
 
 #endif

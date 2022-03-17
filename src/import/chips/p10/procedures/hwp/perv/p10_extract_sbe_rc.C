@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -220,6 +220,9 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
     uint32_t spi_config_val = 0;
     uint32_t SPRG0   = 272;
 
+    // Variable which will be used in collect ffdc.
+    uint8_t l_isCfamSupported = 0;
+
 #ifndef __HOSTBOOT_RUNTIME
     fapi2::buffer<uint32_t> l_rcs_sense_reg = 0;
     fapi2::ATTR_CP_REFCLOCK_SELECT_Type l_cp_refclck_select;
@@ -237,18 +240,22 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
     //-- Validating Usecase
     if(!l_is_HB_module && i_set_sdb)
     {
+        l_isCfamSupported = 1;
         FAPI_INF("p10_extract_sbe_rc : UseCase = SP");
     }
     else if(l_is_HB_module && !i_set_sdb)
     {
+        l_isCfamSupported = 0;
         FAPI_INF("p10_extract_sbe_rc : UseCase = MASTER_HB or SLAVE_HB_AFTER_SMP");
     }
     else if(l_is_HB_module && i_set_sdb)
     {
+        l_isCfamSupported = 1;
         FAPI_INF("p10_extract_sbe_rc : UseCase = SLAVE_HB_BEFORE_SMP");
     }
     else if (i_unsecure_mode)
     {
+        l_isCfamSupported = 1;
         FAPI_INF("p10_extract_sbe_rc : Running on a UNSECURE mode chip");
     }
     else
@@ -281,6 +288,8 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
         }
     }
 
+#else
+    l_isCfamSupported = false;
 #endif
 
 #ifndef __HOSTBOOT_MODULE
@@ -327,7 +336,9 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
         l_ppe_halt_state  = false;
         o_return_action = P10_EXTRACT_SBE_RC::RESTART_SBE;
         FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_RUNNING()
-                    .set_TARGET_CHIP(i_target_chip), "SBE is in running state");
+                    .set_PROC_CHIP_TARGET(i_target_chip)
+                    .set_IS_CFAM_SUPPORTED(l_isCfamSupported),
+                    "SBE is in running state");
     }
 
     if(l_ppe_halt_state)
@@ -1813,4 +1824,272 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
 fapi_try_exit:
     return fapi2::current_err;
 
+}
+
+// Collect SBE debug registers via SCOM access when HB_RUNTIME, via CFAM access otherwise
+fapi2::ReturnCode p10_collect_sbe_debug_registers(
+    const fapi2::ffdc_t& i_target,
+    const fapi2::ffdc_t& i_is_cfam_supported,
+    fapi2::ReturnCode& o_rc)
+{
+    using namespace scomt::proc;
+    using namespace scomt::perv;
+    FAPI_INF("p10_collect_sbe_debug_registers : Exiting ...");
+
+    fapi2::buffer<uint32_t> l_data32_cbs_cs(0);
+    fapi2::buffer<uint32_t> l_data32_cbs_tr(0);
+    fapi2::buffer<uint32_t> l_data32_cbs_el(0);
+    fapi2::buffer<uint32_t> l_data32_cbs_envstat(0);
+    fapi2::buffer<uint32_t> l_data32_cbs_tr_hist(0);
+    fapi2::buffer<uint32_t> l_data32_cbs_el_hist(0);
+    fapi2::buffer<uint32_t> l_data32_sb_cs(0);
+    fapi2::buffer<uint32_t> l_data32_sb_msg(0);
+    fapi2::buffer<uint32_t> l_data32_cbs_stat(0);
+
+    fapi2::buffer<uint32_t> l_data32_scratch_reg_1(0);
+    fapi2::buffer<uint32_t> l_data32_scratch_reg_2(0);
+    fapi2::buffer<uint32_t> l_data32_scratch_reg_3(0);
+    fapi2::buffer<uint32_t> l_data32_scratch_reg_4(0);
+    fapi2::buffer<uint32_t> l_data32_scratch_reg_5(0);
+    fapi2::buffer<uint32_t> l_data32_scratch_reg_6(0);
+    fapi2::buffer<uint32_t> l_data32_scratch_reg_7(0);
+    fapi2::buffer<uint32_t> l_data32_scratch_reg_8(0);
+
+    fapi2::buffer<uint32_t> l_data32_root_ctrl0(0);
+    fapi2::buffer<uint32_t> l_data32_root_ctrl1(0);
+    fapi2::buffer<uint32_t> l_data32_root_ctrl2(0);
+    fapi2::buffer<uint32_t> l_data32_root_ctrl3(0);
+    fapi2::buffer<uint32_t> l_data32_root_ctrl4(0);
+    fapi2::buffer<uint32_t> l_data32_root_ctrl5(0);
+    fapi2::buffer<uint32_t> l_data32_root_ctrl6(0);
+    fapi2::buffer<uint32_t> l_data32_root_ctrl7(0);
+    fapi2::buffer<uint32_t> l_data32_root_ctrl8(0);
+
+    fapi2::ffdc_t CBS_CS;
+    fapi2::ffdc_t CBS_TR;
+    fapi2::ffdc_t CBS_EL;
+    fapi2::ffdc_t CBS_ENVSTAT;
+    fapi2::ffdc_t CBS_TR_HIST;
+    fapi2::ffdc_t CBS_EL_HIST;
+    fapi2::ffdc_t SB_CS;
+    fapi2::ffdc_t SB_MSG;
+    fapi2::ffdc_t CBS_STAT;
+    fapi2::ffdc_t SBL_SCRATCH_REGISTER_1;
+    fapi2::ffdc_t SBL_SCRATCH_REGISTER_2;
+    fapi2::ffdc_t SBL_SCRATCH_REGISTER_3;
+    fapi2::ffdc_t SBL_SCRATCH_REGISTER_4;
+    fapi2::ffdc_t SBL_SCRATCH_REGISTER_5;
+    fapi2::ffdc_t SBL_SCRATCH_REGISTER_6;
+    fapi2::ffdc_t SBL_SCRATCH_REGISTER_7;
+    fapi2::ffdc_t SBL_SCRATCH_REGISTER_8;
+    fapi2::ffdc_t ROOT_CTRL0;
+    fapi2::ffdc_t ROOT_CTRL1;
+    fapi2::ffdc_t ROOT_CTRL2;
+    fapi2::ffdc_t ROOT_CTRL3;
+    fapi2::ffdc_t ROOT_CTRL4;
+    fapi2::ffdc_t ROOT_CTRL5;
+    fapi2::ffdc_t ROOT_CTRL6;
+    fapi2::ffdc_t ROOT_CTRL7;
+    fapi2::ffdc_t ROOT_CTRL8;
+
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> i_target_chip =
+        *(reinterpret_cast<const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> *>
+          (i_target.ptr()));
+    uint8_t l_cfamSupported = *(reinterpret_cast<const uint8_t*>(i_is_cfam_supported.ptr()));
+
+    if(l_cfamSupported != 0)
+    {
+        //SCOM PATH
+        fapi2::buffer<uint64_t> l_scom_data(0);
+
+        FAPI_TRY(getScom(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_CS,
+                         l_scom_data));
+        l_data32_cbs_cs.insertFromRight<0, 32>(l_scom_data);
+        FAPI_TRY(getScom(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_TR_RO,
+                         l_scom_data));
+        l_data32_cbs_tr.insertFromRight<0, 32>(l_scom_data);
+        FAPI_TRY(getScom(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_EL,
+                         l_scom_data));
+        l_data32_cbs_el.insertFromRight<0, 32>(l_scom_data);
+        FAPI_TRY(getScom(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_ENVSTAT_RO,
+                         l_scom_data));
+        l_data32_cbs_envstat.insertFromRight<0, 32>(l_scom_data);
+        FAPI_TRY(getScom(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_TR_HIST,
+                         l_scom_data));
+        l_data32_cbs_tr_hist.insertFromRight<0, 32>(l_scom_data);
+        FAPI_TRY(getScom(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_EL_HIST,
+                         l_scom_data));
+        l_data32_cbs_el_hist.insertFromRight<0, 32>(l_scom_data);
+        FAPI_TRY(getScom(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SB_CS, l_scom_data));
+        l_data32_sb_cs.insertFromRight<0, 32>(l_scom_data);
+        FAPI_TRY(getScom(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SB_MSG,
+                         l_scom_data));
+        l_data32_sb_msg.insertFromRight<0, 32>(l_scom_data);
+        FAPI_TRY(getScom(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_STAT_RO,
+                         l_scom_data));
+        l_data32_cbs_stat.insertFromRight<0, 32>(l_scom_data);
+
+
+        FAPI_TRY(getScom(i_target_chip, FSXCOMP_FSXLOG_SCRATCH_REGISTER_1_RW, l_scom_data));
+        l_data32_scratch_reg_1.insertFromRight<0, 32>(l_scom_data);
+        FAPI_TRY(getScom(i_target_chip, FSXCOMP_FSXLOG_SCRATCH_REGISTER_2_RW, l_scom_data));
+        l_data32_scratch_reg_2.insertFromRight<0, 32>(l_scom_data);
+        FAPI_TRY(getScom(i_target_chip, FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RW, l_scom_data));
+        l_data32_scratch_reg_3.insertFromRight<0, 32>(l_scom_data);
+        FAPI_TRY(getScom(i_target_chip, FSXCOMP_FSXLOG_SCRATCH_REGISTER_4_RW, l_scom_data));
+        l_data32_scratch_reg_4.insertFromRight<0, 32>(l_scom_data);
+        FAPI_TRY(getScom(i_target_chip, FSXCOMP_FSXLOG_SCRATCH_REGISTER_5_RW, l_scom_data));
+        l_data32_scratch_reg_5.insertFromRight<0, 32>(l_scom_data);
+        FAPI_TRY(getScom(i_target_chip, FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_RW, l_scom_data));
+        l_data32_scratch_reg_6.insertFromRight<0, 32>(l_scom_data);
+        FAPI_TRY(getScom(i_target_chip, FSXCOMP_FSXLOG_SCRATCH_REGISTER_7_RW, l_scom_data));
+        l_data32_scratch_reg_7.insertFromRight<0, 32>(l_scom_data);
+        FAPI_TRY(getScom(i_target_chip, FSXCOMP_FSXLOG_SCRATCH_REGISTER_8_RW, l_scom_data));
+        l_data32_scratch_reg_8.insertFromRight<0, 32>(l_scom_data);
+
+        FAPI_TRY(getScom(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_RW,
+                         l_scom_data));
+        l_data32_root_ctrl0.insertFromRight<0, 32>(l_scom_data);
+        FAPI_TRY(getScom(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL1_RW,
+                         l_scom_data));
+        l_data32_root_ctrl1.insertFromRight<0, 32>(l_scom_data);
+        FAPI_TRY(getScom(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL2_RW,
+                         l_scom_data));
+        l_data32_root_ctrl2.insertFromRight<0, 32>(l_scom_data);
+        FAPI_TRY(getScom(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL3_RW,
+                         l_scom_data));
+        l_data32_root_ctrl3.insertFromRight<0, 32>(l_scom_data);
+        FAPI_TRY(getScom(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL4_RW,
+                         l_scom_data));
+        l_data32_root_ctrl4.insertFromRight<0, 32>(l_scom_data);
+        FAPI_TRY(getScom(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL5_RW,
+                         l_scom_data));
+        l_data32_root_ctrl5.insertFromRight<0, 32>(l_scom_data);
+        FAPI_TRY(getScom(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL6_RW,
+                         l_scom_data));
+        l_data32_root_ctrl6.insertFromRight<0, 32>(l_scom_data);
+        FAPI_TRY(getScom(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL7_RW,
+                         l_scom_data));
+        l_data32_root_ctrl7.insertFromRight<0, 32>(l_scom_data);
+        FAPI_TRY(getScom(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL8_RW,
+                         l_scom_data));
+        l_data32_root_ctrl8.insertFromRight<0, 32>(l_scom_data);
+    }
+    else
+    {
+        //CFAM PATH
+        FAPI_TRY(getCfamRegister(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_CS_FSI, l_data32_cbs_cs));
+        FAPI_TRY(getCfamRegister(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_TR_FSI, l_data32_cbs_tr));
+        FAPI_TRY(getCfamRegister(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_EL_FSI, l_data32_cbs_el));
+        FAPI_TRY(getCfamRegister(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_ENVSTAT_FSI, l_data32_cbs_envstat));
+        FAPI_TRY(getCfamRegister(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_TR_HIST_FSI, l_data32_cbs_tr_hist));
+        FAPI_TRY(getCfamRegister(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_EL_HIST_FSI, l_data32_cbs_el_hist));
+        FAPI_TRY(getCfamRegister(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SB_CS_FSI, l_data32_sb_cs));
+        FAPI_TRY(getCfamRegister(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SB_MSG_FSI, l_data32_sb_msg));
+        FAPI_TRY(getCfamRegister(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_STAT_FSI, l_data32_cbs_stat));
+
+        FAPI_TRY(getCfamRegister(i_target_chip, FSXCOMP_FSXLOG_SCRATCH_REGISTER_1_FSI, l_data32_scratch_reg_1));
+        FAPI_TRY(getCfamRegister(i_target_chip, FSXCOMP_FSXLOG_SCRATCH_REGISTER_2_FSI, l_data32_scratch_reg_2));
+        FAPI_TRY(getCfamRegister(i_target_chip, FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI, l_data32_scratch_reg_3));
+        FAPI_TRY(getCfamRegister(i_target_chip, FSXCOMP_FSXLOG_SCRATCH_REGISTER_4_FSI, l_data32_scratch_reg_4));
+        FAPI_TRY(getCfamRegister(i_target_chip, FSXCOMP_FSXLOG_SCRATCH_REGISTER_5_FSI, l_data32_scratch_reg_5));
+        FAPI_TRY(getCfamRegister(i_target_chip, FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_FSI, l_data32_scratch_reg_6));
+        FAPI_TRY(getCfamRegister(i_target_chip, FSXCOMP_FSXLOG_SCRATCH_REGISTER_7_FSI, l_data32_scratch_reg_7));
+        FAPI_TRY(getCfamRegister(i_target_chip, FSXCOMP_FSXLOG_SCRATCH_REGISTER_8_FSI, l_data32_scratch_reg_8));
+
+        FAPI_TRY(getCfamRegister(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_FSI, l_data32_root_ctrl0));
+        FAPI_TRY(getCfamRegister(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL1_FSI, l_data32_root_ctrl1));
+        FAPI_TRY(getCfamRegister(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, l_data32_root_ctrl2));
+        FAPI_TRY(getCfamRegister(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL3_FSI, l_data32_root_ctrl3));
+        FAPI_TRY(getCfamRegister(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL4_FSI, l_data32_root_ctrl4));
+        FAPI_TRY(getCfamRegister(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL5_FSI, l_data32_root_ctrl5));
+        FAPI_TRY(getCfamRegister(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL6_FSI, l_data32_root_ctrl6));
+        FAPI_TRY(getCfamRegister(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, l_data32_root_ctrl7));
+        FAPI_TRY(getCfamRegister(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL8_FSI, l_data32_root_ctrl8));
+    }
+
+    CBS_CS.ptr() = static_cast<void*>(&l_data32_cbs_cs);
+    CBS_CS.size() = sizeof(l_data32_cbs_cs);
+
+    CBS_TR.ptr() = static_cast<void*>(&l_data32_cbs_tr);
+    CBS_TR.size() = sizeof(l_data32_cbs_tr);
+
+    CBS_EL.ptr() = static_cast<void*>(&l_data32_cbs_el);
+    CBS_EL.size() = sizeof(l_data32_cbs_el);
+
+    CBS_ENVSTAT.ptr() = static_cast<void*>(&l_data32_cbs_envstat);
+    CBS_ENVSTAT.size() = sizeof(l_data32_cbs_envstat);
+
+    CBS_TR_HIST.ptr() = static_cast<void*>(&l_data32_cbs_tr_hist);
+    CBS_TR_HIST.size() = sizeof(l_data32_cbs_tr_hist);
+
+    CBS_EL_HIST.ptr() = static_cast<void*>(&l_data32_cbs_el_hist);
+    CBS_EL_HIST.size() = sizeof(l_data32_cbs_el_hist);
+
+    SB_CS.ptr() = static_cast<void*>(&l_data32_sb_cs);
+    SB_CS.size() = sizeof(l_data32_sb_cs);
+
+    SB_MSG.ptr() = static_cast<void*>(&l_data32_sb_msg);
+    SB_MSG.size() = sizeof(l_data32_sb_msg);
+
+    CBS_STAT.ptr() = static_cast<void*>(&l_data32_cbs_stat);
+    CBS_STAT.size() = sizeof(l_data32_cbs_stat);
+
+    SBL_SCRATCH_REGISTER_1.ptr() = static_cast<void*>(&l_data32_scratch_reg_1);
+    SBL_SCRATCH_REGISTER_1.size() = sizeof(l_data32_scratch_reg_1);
+
+    SBL_SCRATCH_REGISTER_2.ptr() = static_cast<void*>(&l_data32_scratch_reg_2);
+    SBL_SCRATCH_REGISTER_2.size() = sizeof(l_data32_scratch_reg_2);
+
+    SBL_SCRATCH_REGISTER_3.ptr() = static_cast<void*>(&l_data32_scratch_reg_3);
+    SBL_SCRATCH_REGISTER_3.size() = sizeof(l_data32_scratch_reg_3);
+
+    SBL_SCRATCH_REGISTER_4.ptr() = static_cast<void*>(&l_data32_scratch_reg_4);
+    SBL_SCRATCH_REGISTER_4.size() = sizeof(l_data32_scratch_reg_4);
+
+    SBL_SCRATCH_REGISTER_5.ptr() = static_cast<void*>(&l_data32_scratch_reg_5);
+    SBL_SCRATCH_REGISTER_5.size() = sizeof(l_data32_scratch_reg_5);
+
+    SBL_SCRATCH_REGISTER_6.ptr() = static_cast<void*>(&l_data32_scratch_reg_6);
+    SBL_SCRATCH_REGISTER_6.size() = sizeof(l_data32_scratch_reg_6);
+
+    SBL_SCRATCH_REGISTER_7.ptr() = static_cast<void*>(&l_data32_scratch_reg_7);
+    SBL_SCRATCH_REGISTER_7.size() = sizeof(l_data32_scratch_reg_7);
+
+    SBL_SCRATCH_REGISTER_8.ptr() = static_cast<void*>(&l_data32_scratch_reg_8);
+    SBL_SCRATCH_REGISTER_8.size() = sizeof(l_data32_scratch_reg_8);
+
+    ROOT_CTRL0.ptr() = static_cast<void*>(&l_data32_root_ctrl0);
+    ROOT_CTRL0.size() = sizeof(l_data32_root_ctrl0);
+
+    ROOT_CTRL1.ptr() = static_cast<void*>(&l_data32_root_ctrl1);
+    ROOT_CTRL1.size() = sizeof(l_data32_root_ctrl1);
+
+    ROOT_CTRL2.ptr() = static_cast<void*>(&l_data32_root_ctrl2);
+    ROOT_CTRL2.size() = sizeof(l_data32_root_ctrl2);
+
+    ROOT_CTRL3.ptr() = static_cast<void*>(&l_data32_root_ctrl3);
+    ROOT_CTRL3.size() = sizeof(l_data32_root_ctrl3);
+
+    ROOT_CTRL4.ptr() = static_cast<void*>(&l_data32_root_ctrl4);
+    ROOT_CTRL4.size() = sizeof(l_data32_root_ctrl4);
+
+    ROOT_CTRL5.ptr() = static_cast<void*>(&l_data32_root_ctrl5);
+    ROOT_CTRL5.size() = sizeof(l_data32_root_ctrl5);
+
+    ROOT_CTRL6.ptr() = static_cast<void*>(&l_data32_root_ctrl6);
+    ROOT_CTRL6.size() = sizeof(l_data32_root_ctrl6);
+
+    ROOT_CTRL7.ptr() = static_cast<void*>(&l_data32_root_ctrl7);
+    ROOT_CTRL7.size() = sizeof(l_data32_root_ctrl7);
+
+    ROOT_CTRL8.ptr() = static_cast<void*>(&l_data32_root_ctrl8);
+    ROOT_CTRL8.size() = sizeof(l_data32_root_ctrl8);
+
+    FAPI_ADD_INFO_TO_HWP_ERROR (o_rc, RC_SBE_DEBUG_REGISTERS);
+
+    FAPI_INF("p10_collect_sbe_debug_registers : Exiting ...");
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
