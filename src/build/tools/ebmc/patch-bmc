@@ -30,7 +30,7 @@
 # Constants
 
 BMC_PATCH_DIRECTORY=/usr/local/share/hostfw/running/
-COPY="rsync -zP"
+COPY="rsync -zP --rsync-path=sudo\${IFS}rsync"
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 SSHPASS_SCRIPT="$SCRIPT_DIR/hb_sshpass"
 PATCHES_DIR="$PROJECT_ROOT/standalone/pnor"
@@ -92,17 +92,22 @@ function SSHPASS () {
     fi
 }
 
+function REMOTE_SUDO () {
+    CMD=$1
+    SSHPASS ssh "$HOSTNAME" sudo bash -c "\"$CMD\""
+}
+
 function PATCH_HBI_HBB () {
     # Copy files and create symlinks
     SSHPASS $COPY "$PATCHES_DIR/HBI.bin" "$PATCHES_DIR/HBB.bin" "$HOSTNAME":"$BMC_PATCH_DIRECTORY"
-    SSHPASS ssh "$HOSTNAME" "cd $BMC_PATCH_DIRECTORY && ln -sf HBB.bin HBB && ln -sf HBI.bin HBI"
-    SSHPASS ssh "$HOSTNAME" "cd $BMC_PATCH_DIRECTORY && ln -sf HBB.bin $HBB.lid && ln -sf HBI.bin $HBI.lid"
+    REMOTE_SUDO "cd $BMC_PATCH_DIRECTORY && ln -sf HBB.bin HBB && ln -sf HBI.bin HBI"
+    REMOTE_SUDO "cd $BMC_PATCH_DIRECTORY && ln -sf HBB.bin $HBB.lid && ln -sf HBI.bin $HBI.lid"
 }
 
 function PATCH_HBD () {
     # Copy files and create symlink
     SSHPASS $COPY "$PATCHES_DIR/HBD.bin" "$HOSTNAME":"$BMC_PATCH_DIRECTORY"
-    SSHPASS ssh "$HOSTNAME" "cd $BMC_PATCH_DIRECTORY && ln -sf HBD.bin HBD && ln -sf HBD.bin $HBD.lid"
+    REMOTE_SUDO "cd $BMC_PATCH_DIRECTORY && ln -sf HBD.bin HBD && ln -sf HBD.bin $HBD.lid"
 }
 
 function PATCH_HBRT () {
@@ -123,11 +128,11 @@ function PATCH_HBRT () {
 }
 
 function RESTART_PLDMD () {
-    SSHPASS ssh "$HOSTNAME" "systemctl restart pldmd"
+    REMOTE_SUDO "systemctl restart pldmd"
 }
 
 function FETCH_LID_IDS_FROM_BMC () {
-    LID_IDS=$(SSHPASS ssh "$HOSTNAME" pldmtool bios GetBIOSAttributeCurrentValueByHandle -a hb_lid_ids)
+    LID_IDS=$(REMOTE_SUDO "pldmtool bios GetBIOSAttributeCurrentValueByHandle -a hb_lid_ids")
 
     checkstatus "Fetching LIDs from BMC"
 
@@ -164,7 +169,7 @@ function CHECK_REPO_FOR_STANDALONE_COMMIT () {
 
 function SHOW_PATCHES_ON_BMC () {
     echo 'Current patches:'
-    SSHPASS ssh "$HOSTNAME" ls -lat /usr/local/share/hostfw/running/
+    REMOTE_SUDO "ls -lat /usr/local/share/hostfw/running/"
 }
 
 # Main
