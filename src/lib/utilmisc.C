@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,8 +28,7 @@
 namespace Util
 {
 
-bool isSimics() __attribute__((alias("__isSimicsRunning")));
-extern "C" bool __isSimicsRunning() NEVER_INLINE;
+bool __isSimicsRunning() NEVER_INLINE;
 
 bool __isSimicsRunning()
 {
@@ -40,12 +39,11 @@ bool __isSimicsRunning()
 
 bool isSimicsRunning()
 {
-    static bool simics = isSimics();
+    static bool simics = __isSimicsRunning();
     return simics;
 }
 
 
-bool isQmeModelEnabled() __attribute__((alias("__isQmeEnabled")));
 extern "C" bool __isQmeEnabled() NEVER_INLINE;
 
 bool __isQmeEnabled()
@@ -58,7 +56,7 @@ bool __isQmeEnabled()
 bool requiresSecondaryCoreWorkaround()
 {
     static const auto required =
-        isSimicsRunning() && !isQmeModelEnabled();
+        isSimicsRunning() && !__isQmeEnabled();
     return required;
 }
 
@@ -86,10 +84,14 @@ void setIsConsoleStarted()
     g_isConsoleStarted = true;
 }
 
-bool isMultiprocSupported() __attribute__((alias("__isMultiprocSupported")));
 extern "C" bool __isMultiprocSupported() NEVER_INLINE;
 
 bool __isMultiprocSupported()
+{
+    return MAGIC_INST_CHECK_FEATURE(MAGIC_FEATURE__MULTIPROC);
+}
+
+bool isMultiprocSupported()
 {
     bool multiprocSupport = true;
 
@@ -98,7 +100,7 @@ bool __isMultiprocSupported()
 #else
     if (isSimicsRunning())
     {
-        multiprocSupport = MAGIC_INST_CHECK_FEATURE(MAGIC_FEATURE__MULTIPROC);
+        multiprocSupport = __isMultiprocSupported();
     }
 #endif
 
