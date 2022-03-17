@@ -430,6 +430,12 @@ fapi2::ReturnCode powerdown_deconfigured_cl2_l3(
                 if (!l_l3_clock_State)
                 {
                     FAPI_TRY(p10_hcd_chtm_purge(i_core_target));
+
+                    FAPI_IMP("Assert CINJ_LCO_DIS_CFG via L3_MISC_L3CERRS_MODE_REG1[38]");
+                    FAPI_TRY(fapi2::getScom(i_core_target, L3_MISC_L3CERRS_MODE_REG1, l_data));
+                    l_data.setBit(38);
+                    FAPI_TRY(fapi2::putScom(i_core_target, L3_MISC_L3CERRS_MODE_REG1, l_data));
+
                     FAPI_TRY(p10_hcd_l3_purge(i_core_target));
                     FAPI_TRY(p10_hcd_powerbus_purge(i_core_target));
                     FAPI_TRY(p10_hcd_cache_stopclocks(i_core_target));
