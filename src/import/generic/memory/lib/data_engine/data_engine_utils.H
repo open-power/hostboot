@@ -296,13 +296,47 @@ namespace spd
 {
 
 ///
+/// @brief Retrieve SPD data from DIMM
+/// @param[in] i_target the DIMM target
+/// @param[out] o_spd reference to std::vector
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode get_raw_data_dimm(
+    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+    std::vector<uint8_t>& o_spd);
+
+///
+/// @brief Retrieve module specific portion of SPD data from planar config
+/// @param[in] i_target the OCMB_CHIP target
+/// @param[out] o_spd reference to std::vector
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode get_raw_data_planar(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    std::vector<uint8_t>& o_spd);
+
+///
+/// @brief Combine module specific and ISDIMM SPD data for planar config
+/// @param[in] i_planar_spd module-specific SPD from planar
+/// @param[in] i_isdimm_spd SPD from ISDIMM
+/// @param[out] o_spd reference to std::vector of combined SPD, like we would get from a DDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+void combine_planar_spd(
+    const std::vector<uint8_t>& i_planar_spd,
+    const std::vector<uint8_t>& i_isdimm_spd,
+    std::vector<uint8_t>& o_spd);
+
+///
 /// @brief Retrieve SPD data
 /// @param[in] i_target the DIMM target
+/// @param[in] i_is_planar the value of ATTR_MEM_MRW_IS_PLANAR
 /// @param[out] o_spd reference to std::vector
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
 fapi2::ReturnCode get_raw_data(
     const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+    const uint8_t i_is_planar,
     std::vector<uint8_t>& o_spd);
 
 }

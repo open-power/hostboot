@@ -258,14 +258,18 @@ inline fapi2::ReturnCode spd_supported_freq(const fapi2::Target<TT::FREQ_DOMAIN_
     {
         for ( const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_port) )
         {
+            const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(l_dimm);
             std::vector<uint8_t> l_spd;
+            uint8_t l_is_planar = 0;
 
             const auto l_port_pos = mss::relative_pos<TT::FREQ_DOMAIN_TARGET_TYPE>(l_port);
             uint64_t l_tckmax_in_ps = 0;
             uint64_t l_tck_min_in_ps = 0;
             uint32_t l_dimm_freq = 0;
 
-            FAPI_TRY(mss::spd::get_raw_data(l_dimm, l_spd));
+            FAPI_TRY( mss::attr::get_mem_mrw_is_planar(l_ocmb, l_is_planar) );
+
+            FAPI_TRY(mss::spd::get_raw_data(l_dimm, l_is_planar, l_spd));
             FAPI_TRY( spd::ddr4::get_tckmax(l_dimm, l_spd, l_tckmax_in_ps),
                       "%s. Failed to get tCKmax", mss::c_str(l_dimm) );
             FAPI_TRY( spd::ddr4::get_tckmin(l_dimm, l_spd, l_tck_min_in_ps),

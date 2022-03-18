@@ -84,11 +84,13 @@ fapi2::ReturnCode get_supported_voltages<mss::mc_type::EXPLORER, mss::spd::devic
         std::vector<uint8_t> l_spd;
         uint8_t l_dimm_nominal = 0;
         uint8_t l_dimm_endurant = 0;
+        uint8_t l_is_planar = 0;
 
         const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(l_dimm);
         mss::spd::common_engine l_engine(l_dimm);
 
-        FAPI_TRY(mss::spd::get_raw_data(l_dimm, l_spd));
+        FAPI_TRY( mss::attr::get_mem_mrw_is_planar(l_ocmb, l_is_planar) );
+        FAPI_TRY(mss::spd::get_raw_data(l_dimm, l_is_planar, l_spd));
 
         // TK this is totally not correct. We should setup our DRAM generation prior to setting up the voltages if it's DRAM gen specific
         FAPI_TRY(l_engine.process(l_spd), "%s unable to process common engine SPD", mss::c_str(l_dimm));

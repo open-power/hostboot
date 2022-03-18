@@ -71,13 +71,16 @@ fapi2::ReturnCode p10_mss_freq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
     {
         for(const auto& d : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(p))
         {
+            const auto l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(d);
             std::vector<uint8_t> l_raw_spd;
             uint8_t l_spd_rev = 0;
             uint8_t l_dram_gen = 0;
+            uint8_t l_is_planar = 0;
 
+            FAPI_TRY( mss::attr::get_mem_mrw_is_planar(l_ocmb, l_is_planar) );
             FAPI_TRY( mss::attr::get_spd_revision(p, l_spd_rev) );
             FAPI_TRY( mss::attr::get_dram_gen(d, l_dram_gen) );
-            FAPI_TRY(mss::spd::get_raw_data(d, l_raw_spd));
+            FAPI_TRY(mss::spd::get_raw_data(d, l_is_planar, l_raw_spd));
             {
                 std::shared_ptr<mss::spd::base_cnfg_base> l_base_cfg;
 

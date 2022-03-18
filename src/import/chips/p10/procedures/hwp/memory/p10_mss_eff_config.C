@@ -63,6 +63,7 @@ fapi2::ReturnCode p10_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
     mss::display_git_commit_info("p10_mss_eff_config");
 
     uint8_t l_spd_rev = 0;
+    const auto l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
 
     FAPI_TRY( mss::attr::get_spd_revision(i_target, l_spd_rev) );
 
@@ -72,10 +73,12 @@ fapi2::ReturnCode p10_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
         uint32_t l_omi_freq = 0;
         uint8_t l_dram_gen = 0;
         uint8_t l_dimm_type = 0;
+        uint8_t l_is_planar = 0;
         FAPI_TRY( mss::attr::get_freq(i_target, l_freq) );
         FAPI_TRY( mss::convert_ddr_freq_to_omi_freq(i_target, l_freq, l_omi_freq));
         FAPI_TRY( mss::attr::get_dram_gen(dimm, l_dram_gen) );
         FAPI_TRY( mss::attr::get_dimm_type(dimm, l_dimm_type));
+        FAPI_TRY( mss::attr::get_mem_mrw_is_planar(l_ocmb, l_is_planar) );
 
         // Get ranks via rank API
         std::vector<mss::rank::info<mss::mc_type::EXPLORER>> l_rank_infos;
@@ -83,7 +86,9 @@ fapi2::ReturnCode p10_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
         // We run the base module + the DDIMM module first as our rank API needs to know if we are in quad encoded CS mode or not
         {
             std::vector<uint8_t> l_raw_spd;
-            FAPI_TRY(mss::spd::get_raw_data(dimm, l_raw_spd));
+
+            FAPI_TRY(mss::spd::get_raw_data(dimm, l_is_planar, l_raw_spd));
+
             {
                 // Create the module decoder objects
                 std::shared_ptr<mss::spd::base_cnfg_base> l_base_cfg;
@@ -107,7 +112,6 @@ fapi2::ReturnCode p10_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
             std::shared_ptr<mss::efd::ddimm_efd_base> l_ddimm_efd;
 
             // Get EFD size
-            const auto l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
             fapi2::MemVpdData_t l_vpd_type(fapi2::MemVpdData::EFD);
             fapi2::VPDInfo<fapi2::TARGET_TYPE_OCMB_CHIP> l_vpd_info(l_vpd_type);
 

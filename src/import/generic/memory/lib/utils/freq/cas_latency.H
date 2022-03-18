@@ -53,6 +53,7 @@
 #include <generic/memory/lib/spd/spd_fields_ddr5.H>
 #include <generic/memory/lib/data_engine/data_engine_utils.H>
 #include <generic/memory/lib/utils/count_dimm.H>
+#include <mss_generic_system_attribute_getters.H>
 
 namespace mss
 {
@@ -205,8 +206,13 @@ class cas_latency<mss::mc_type::EXPLORER>
 
             for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
             {
+                const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(l_dimm);
+                uint8_t l_is_planar = 0;
                 std::vector<uint8_t> l_spd;
-                FAPI_TRY(mss::spd::get_raw_data(l_dimm, l_spd));
+
+                FAPI_TRY( mss::attr::get_mem_mrw_is_planar(l_ocmb, l_is_planar) );
+
+                FAPI_TRY(mss::spd::get_raw_data(l_dimm, l_is_planar, l_spd));
                 FAPI_TRY(cas_latency_ctr_helper(l_dimm, l_spd));
             } // per dimm
 
@@ -881,8 +887,13 @@ class cas_latency<mss::mc_type::ODYSSEY>
 
             for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
             {
+                const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(l_dimm);
+                uint8_t l_is_planar = 0;
                 std::vector<uint8_t> l_spd;
-                FAPI_TRY(mss::spd::get_raw_data(l_dimm, l_spd));
+
+                FAPI_TRY( mss::attr::get_mem_mrw_is_planar(l_ocmb, l_is_planar) );
+
+                FAPI_TRY(mss::spd::get_raw_data(l_dimm, l_is_planar, l_spd));
                 FAPI_TRY(cas_latency_ctr_helper(l_dimm, l_spd));
             } // per dimm
 

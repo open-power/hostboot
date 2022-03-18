@@ -34,6 +34,7 @@
 // *HWP Consumed by: CI
 // EKB-Mirror-To: hostboot
 
+#include <vpd_access.H>
 #include <generic/memory/lib/data_engine/data_engine_utils.H>
 #include <generic/memory/lib/spd/spd_field.H>
 
@@ -191,12 +192,12 @@ namespace spd
 {
 
 ///
-/// @brief Retrieve SPD data
+/// @brief Retrieve SPD data from DIMM
 /// @param[in] i_target the DIMM target
 /// @param[out] o_spd reference to std::vector
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode get_raw_data(
+fapi2::ReturnCode get_raw_data_dimm(
     const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
     std::vector<uint8_t>& o_spd)
 {
@@ -214,6 +215,108 @@ fapi2::ReturnCode get_raw_data(
     // Retrieve SPD data content
     FAPI_TRY( fapi2::getSPD(i_target, o_spd.data(), l_size),
               "%s. Failed to retrieve SPD data", spd::c_str(i_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Retrieve module specific portion of SPD data from planar config
+/// @param[in] i_target the OCMB_CHIP target
+/// @param[out] o_spd reference to std::vector
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode get_raw_data_planar(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    std::vector<uint8_t>& o_spd)
+{
+    // Get SPD size
+    fapi2::MemVpdData_t l_vpd_type(fapi2::MemVpdData::BUFFER);
+    fapi2::VPDInfo<fapi2::TARGET_TYPE_OCMB_CHIP> l_vpd_info(l_vpd_type);
+
+    FAPI_TRY( fapi2::getVPD(i_target, l_vpd_info, nullptr),
+              "%s failed getting VPD size from getVPD", spd::c_str(i_target) );
+
+    // Reassign container size with the retrieved size
+    // Arbitrarily set the data to zero since it will be overwritten
+    o_spd.assign(l_vpd_info.iv_size, 0);
+
+    // Get SPD data
+    FAPI_TRY( fapi2::getVPD(i_target, l_vpd_info, o_spd.data()),
+              "%s. Failed to retrieve SPD data", spd::c_str(i_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Combine module specific and ISDIMM SPD data for planar config
+/// @param[in] i_planar_spd module-specific SPD from planar
+/// @param[in] i_isdimm_spd SPD from ISDIMM
+/// @param[out] o_spd reference to std::vector of combined SPD, like we would get from a DDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+void combine_planar_spd(
+    const std::vector<uint8_t>& i_planar_spd,
+    const std::vector<uint8_t>& i_isdimm_spd,
+    std::vector<uint8_t>& o_spd)
+{
+    // Note: These constants are only valid for DDR4
+    constexpr uint64_t BASE_CONFIG_NUM_BYTES = 128;
+    constexpr uint64_t MODULE_CONFIG_NUM_BYTES = 64;
+    constexpr uint64_t BASE_PLUS_MODULE_NUM_BYTES = BASE_CONFIG_NUM_BYTES + MODULE_CONFIG_NUM_BYTES;
+
+    o_spd.clear();
+    o_spd.resize(i_planar_spd.size());
+
+    // Copy base config content
+    std::copy(i_isdimm_spd.begin(),
+              i_isdimm_spd.begin() + BASE_CONFIG_NUM_BYTES,
+              o_spd.begin());
+
+    // Copy ISDIMM module specific content
+    std::copy(i_isdimm_spd.begin() + BASE_CONFIG_NUM_BYTES,
+              i_isdimm_spd.begin() + BASE_PLUS_MODULE_NUM_BYTES,
+              o_spd.begin() + BASE_CONFIG_NUM_BYTES);
+
+    // Copy planar (DDIMM) module specific content
+    std::copy(i_planar_spd.begin() + BASE_PLUS_MODULE_NUM_BYTES,
+              i_planar_spd.end(),
+              o_spd.begin() + BASE_PLUS_MODULE_NUM_BYTES);
+}
+
+///
+/// @brief Retrieve SPD data
+/// @param[in] i_target the DIMM target
+/// @param[in] i_is_planar the value of ATTR_MEM_MRW_IS_PLANAR
+/// @param[out] o_spd reference to std::vector
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode get_raw_data(
+    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+    const uint8_t i_is_planar,
+    std::vector<uint8_t>& o_spd)
+{
+    if (i_is_planar == fapi2::ENUM_ATTR_MEM_MRW_IS_PLANAR_FALSE)
+    {
+        FAPI_TRY(mss::spd::get_raw_data_dimm(i_target, o_spd));
+    }
+    else
+    {
+        // For planar config, we need to read the SPD from both the DIMM and planar then combine
+        const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
+        std::vector<uint8_t> l_isdimm_spd;
+        std::vector<uint8_t> l_planar_vpd;
+
+        // First read the ISDIMM SPD
+        FAPI_TRY(mss::spd::get_raw_data_dimm(i_target, l_isdimm_spd));
+
+        // Next read the planar VPD
+        FAPI_TRY(mss::spd::get_raw_data_planar(l_ocmb, l_planar_vpd));
+
+        // Then combine them into a single blob like we get from a DDIMM
+        mss::spd::combine_planar_spd(l_planar_vpd, l_isdimm_spd, o_spd);
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
