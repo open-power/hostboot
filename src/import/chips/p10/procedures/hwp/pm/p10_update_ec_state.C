@@ -375,6 +375,16 @@ fapi2::ReturnCode powerdown_deconfigured_cl2_l3(
         FAPI_TRY(fapi2::putScom(l_eq_target, CPLT_CTRL3_WO_OR, l_pscom_pg_config));
         FAPI_TRY(fapi2::putScom(l_eq_target, CPLT_CTRL2_WO_OR, l_pscom_pg_config));
 
+        //There is a chance of this core is activated during istep 4, and in
+        //istep 4 spwu is asserted, so we need to deassert before QME boots
+        FAPI_TRY(fapi2::getScom(i_core_target, QME_SPWU_OTR, l_data));
+
+        if (l_data.getBit(0))
+        {
+            l_data.flush<0>();
+            FAPI_TRY(fapi2::putScom(i_core_target, QME_SPWU_OTR, l_data));
+        }
+
         //verify L3/core clocks are on
         FAPI_TRY(GET_CLOCK_STAT_SL(l_eq_target, l_data));
 
