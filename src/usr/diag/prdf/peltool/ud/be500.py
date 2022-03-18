@@ -238,8 +238,7 @@ def symbol2Dq(symbol, dramSpared):
 # Used to parse an input memory mru callout into the input dictionary
 # ###################################################
 
-
-def parseMemMruCallout(mruCallout, prefix, d):
+def parseMemMruCallout(mruCallout, prefix, d, dqMap=None):
 
     # We have a MemMRU, parse the 32 bits of the callout
     # autopep8: off
@@ -275,6 +274,13 @@ def parseMemMruCallout(mruCallout, prefix, d):
         d[prefix]['Symbol'] = symbol
         d[prefix]['Pins'] = pins
         d[prefix]['Dram Spared'] = "Yes" if (dramSpared == 1) else "No"
+
+        # Translate the DQ to DIMM format if a dqMap was provided.
+        if dqMap is not None and dramSpared == 0:
+            for dimmDq, c4Dq in dqMap.items():
+                if c4Dq == dq:
+                    dq = dimmDq
+
         d[prefix]['DQ'] = dq
 
 # ###################################################
@@ -1226,13 +1232,38 @@ class errludP_prdf:
         i = 0
 
         # Parse the extended Memory Mru data
-        mruCallout, i = intConcat(data, i, i+4)
-        otherData, i = intConcat(data, i, i+1)
-        parseMemMruCallout(mruCallout, "Extended Mem Mru", d)
+        # Extended Mem Mru Format:
+        # 32-bits:  Mem Mru Callout
+        # 1-bit:    isBufDimm flag
+        # 1-bit:    isX4Dram flag
+        # 1-bit:    isValid flag
+        # 5-bits:   Reserved
+        # 640-bits: Mem VPD DQ Mapping
+
+        mruCallout, i=intConcat(data, i, i+4)
+
+        # Parse all the additional data, 3 flags and the DQ mapping
+        otherData, i=intConcat(data, i, i+1)
+
         isBufDimm = (otherData >> 7) & 0x1
-        isX4Dram = (otherData >> 6) & 0x1
-        isValid = (otherData >> 5) & 0x1
+        isX4Dram  = (otherData >> 6) & 0x1
+        isValid   = (otherData >> 5) & 0x1
+        reserved  = otherData & 0x1F
+
+        d["Extended Mem Mru"] = OrderedDict()
         d["Extended Mem Mru"]["isX4Dram"] = "Yes" if (isX4Dram == 1) else "No"
+
+        # Parse the DQ Mapping
+        dqMapString = ''
+        dqMap = OrderedDict()
+        for mapKey in range(80):
+            dqMapping, i=intConcat(data, i, i+1)
+            dqMapString += str(dqMapping) + ' '
+            dqMap[mapKey] = dqMapping
+
+        d["Extended Mem Mru"]["Mem VPD Dq Mapping"] = dqMapString
+
+        parseMemMruCallout(mruCallout, "Extended Mem Mru", d, dqMap)
 
         return json.dumps(d)
 

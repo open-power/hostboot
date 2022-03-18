@@ -38,79 +38,86 @@ import udparsers.be500.be500
 
 class TestUserDataParser(unittest.TestCase):
 
-    def testExtMruData(self):
-        testData = bytearray.fromhex('800047086000')
-        mv = memoryview(testData)
+    def testExtMruData( self ):
+        testData = bytearray.fromhex( '8401440860000102060405090708030A0B0C0D0E'
+                                      '0F101112131415161718191A1B1C1D1E1F202122'
+                                      '232425262728292A2B2C2D2E2F30313233343536'
+                                      '3738393A3B3C3D3E3F404142434445464748494A'
+                                      '4B4C4D4E4F50' )
+        mv = memoryview( testData )
 
-        parser = udparsers.be500.be500.errludP_prdf()
-        testStr = parser.UdParserPrdfMruData(mv)
-        jsonOut = json.loads(testStr)
+        testStr = udparsers.be500.be500.parseUDToJson( 62, 1, mv )
+        jsonOut = json.loads( testStr )
 
         print(json.dumps(jsonOut, indent=4))
 
         emm = 'Extended Mem Mru'
-        self.assertEqual(jsonOut[emm]['Node Pos'], 0)
-        self.assertEqual(jsonOut[emm]['Proc Pos'], 0)
-        self.assertEqual(jsonOut[emm]['Component Pos'], 0)
-        self.assertEqual(jsonOut[emm]['Primary Rank'], 0)
-        self.assertEqual(jsonOut[emm]['Secondary Rank'], 0)
-        self.assertEqual(jsonOut[emm]['Symbol'], 71)
-        self.assertEqual(jsonOut[emm]['Pins'], 0)
-        self.assertEqual(jsonOut[emm]['Dram Spared'], 'No')
-        self.assertEqual(jsonOut[emm]['DQ'], 0)
-        self.assertEqual(jsonOut[emm]['isX4Dram'], 'Yes')
+        self.assertEqual( jsonOut[emm]['Node Pos'], 0 )
+        self.assertEqual( jsonOut[emm]['Proc Pos'], 0 )
+        self.assertEqual( jsonOut[emm]['Component Pos'], 16 )
+        self.assertEqual( jsonOut[emm]['Primary Rank'], 1 )
+        self.assertEqual( jsonOut[emm]['Secondary Rank'], 0 )
+        self.assertEqual( jsonOut[emm]['Symbol'], 68 )
+        self.assertEqual( jsonOut[emm]['Pins'], 0 )
+        self.assertEqual( jsonOut[emm]['Dram Spared'], 'No' )
+        self.assertEqual( jsonOut[emm]['DQ'], 9 )
+        self.assertEqual( jsonOut[emm]['isX4Dram'], 'Yes' )
+        self.assertEqual( jsonOut[emm]['Mem VPD Dq Mapping'], '0 1 2 6 4 5 9 7 '
+            '8 3 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 '
+            '30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 '
+            '52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 '
+            '74 75 76 77 78 79 ' )
 
-    def testPfaDataParser(self):
+    def testPfaDataParser( self ):
         testData = bytearray.fromhex(
             '4D53202044554D5040000000004B0000000310018280006F00000000050500FC000000'
             '018000470802040000000001004B0000FFFF001300')
         mv = memoryview(testData)
 
-        parser = udparsers.be500.be500.errludP_prdf()
-        testStr = parser.UdParserPrdfPfaData(mv)
+        testStr = udparsers.be500.be500.parseUDToJson( 51, 1, mv )
 
-        jsonOut = json.loads(testStr)
+        jsonOut = json.loads( testStr )
 
-        print(json.dumps(jsonOut, indent=4))
+        print ( json.dumps(jsonOut, indent=4) )
 
-        self.assertEqual(jsonOut['DUMP Content'], '0x40000000')
-        self.assertEqual(jsonOut['DUMP HUID'], '0x004b0000')
-        self.assertEqual(jsonOut['ERRL Actions'], '0x0003')
-        self.assertEqual(jsonOut['ERRL Severity'], 'RECOVERED')
-        self.assertEqual(jsonOut['Service Action Counter'], '0x01')
-        self.assertEqual(jsonOut['SDC Flags']['DUMP'], 'True')
-        self.assertEqual(jsonOut['SDC Flags']['UERE'], 'False')
-        self.assertEqual(jsonOut['SDC Flags']['SUE'], 'False')
-        self.assertEqual(jsonOut['SDC Flags']['AT_THRESHOLD'], 'False')
-        self.assertEqual(jsonOut['SDC Flags']['DEGRADED'], 'False')
-        self.assertEqual(jsonOut['SDC Flags']['SERVICE_CALL'], 'False')
-        self.assertEqual(jsonOut['SDC Flags']['TRACKIT'], 'True')
-        self.assertEqual(jsonOut['SDC Flags']['TERMINATE'], 'False')
-        self.assertEqual(jsonOut['SDC Flags']['LOGIT'], 'True')
-        self.assertEqual(jsonOut['SDC Flags']['MEM_CHNL_FAIL'], 'False')
-        self.assertEqual(jsonOut['SDC Flags']['PROC_CORE_CS'], 'False')
-        self.assertEqual(jsonOut['SDC Flags']['USING_SAVED_SDC'], 'False')
-        self.assertEqual(jsonOut['SDC Flags']['LAST_CORE_TERM'], 'False')
-        self.assertEqual(jsonOut['SDC Flags']['DEFER_DECONFIG'], 'False')
-        self.assertEqual(jsonOut['SDC Flags']['SECONDARY_ERROR'], 'False')
-        self.assertEqual(jsonOut['Error Count'], 0)
-        self.assertEqual(jsonOut['Error Threshold'], 0)
-        self.assertEqual(jsonOut['Primary Attn Type'], 'HOST_ATTN')
-        self.assertEqual(jsonOut['Secondary Attn Type'], 'HOST_ATTN')
-        self.assertEqual(jsonOut['PRD GARD Error Type'], 'NoGard')
-        self.assertEqual(jsonOut['PRD MRU List'], 1)
-        self.assertEqual(jsonOut['MRU #0']['Priority'], 'MED_A')
-        self.assertEqual(jsonOut['MRU #0']['Type'], 'MemoryMru')
-        self.assertEqual(jsonOut['MRU #0']['Gard State'], 'NoGard')
-        self.assertEqual(jsonOut['MRU #0']['Node Pos'], 0)
-        self.assertEqual(jsonOut['MRU #0']['Proc Pos'], 0)
-        self.assertEqual(jsonOut['MRU #0']['Component Pos'], 0)
-        self.assertEqual(jsonOut['MRU #0']['Primary Rank'], 0)
-        self.assertEqual(jsonOut['MRU #0']['Secondary Rank'], 0)
-        self.assertEqual(jsonOut['MRU #0']['Symbol'], 71)
-        self.assertEqual(jsonOut['MRU #0']['Pins'], 0)
-        self.assertEqual(jsonOut['MRU #0']['Dram Spared'], 'No')
-        self.assertEqual(jsonOut['MRU #0']['DQ'], 0)
+        self.assertEqual( jsonOut['DUMP Content'], '0x40000000' )
+        self.assertEqual( jsonOut['DUMP HUID'], '0x004b0000' )
+        self.assertEqual( jsonOut['ERRL Actions'], '0x0003' )
+        self.assertEqual( jsonOut['ERRL Severity'], 'RECOVERED' )
+        self.assertEqual( jsonOut['Service Action Counter'], '0x01' )
+        self.assertEqual( jsonOut['SDC Flags']['DUMP'], 'True' )
+        self.assertEqual( jsonOut['SDC Flags']['UERE'], 'False' )
+        self.assertEqual( jsonOut['SDC Flags']['SUE'], 'False' )
+        self.assertEqual( jsonOut['SDC Flags']['AT_THRESHOLD'], 'False' )
+        self.assertEqual( jsonOut['SDC Flags']['DEGRADED'], 'False' )
+        self.assertEqual( jsonOut['SDC Flags']['SERVICE_CALL'], 'False' )
+        self.assertEqual( jsonOut['SDC Flags']['TRACKIT'], 'True' )
+        self.assertEqual( jsonOut['SDC Flags']['TERMINATE'], 'False' )
+        self.assertEqual( jsonOut['SDC Flags']['LOGIT'], 'True' )
+        self.assertEqual( jsonOut['SDC Flags']['MEM_CHNL_FAIL'], 'False' )
+        self.assertEqual( jsonOut['SDC Flags']['PROC_CORE_CS'], 'False' )
+        self.assertEqual( jsonOut['SDC Flags']['USING_SAVED_SDC'], 'False' )
+        self.assertEqual( jsonOut['SDC Flags']['LAST_CORE_TERM'], 'False' )
+        self.assertEqual( jsonOut['SDC Flags']['DEFER_DECONFIG'], 'False' )
+        self.assertEqual( jsonOut['SDC Flags']['SECONDARY_ERROR'], 'False' )
+        self.assertEqual( jsonOut['Error Count'], 0 )
+        self.assertEqual( jsonOut['Error Threshold'], 0 )
+        self.assertEqual( jsonOut['Primary Attn Type'], 'HOST_ATTN' )
+        self.assertEqual( jsonOut['Secondary Attn Type'], 'HOST_ATTN' )
+        self.assertEqual( jsonOut['PRD GARD Error Type'], 'NoGard' )
+        self.assertEqual( jsonOut['PRD MRU List'], 1 )
+        self.assertEqual( jsonOut['MRU #0']['Priority'], 'MED_A' )
+        self.assertEqual( jsonOut['MRU #0']['Type'], 'MemoryMru' )
+        self.assertEqual( jsonOut['MRU #0']['Gard State'], 'NoGard' )
+        self.assertEqual( jsonOut['MRU #0']['Node Pos'], 0 )
+        self.assertEqual( jsonOut['MRU #0']['Proc Pos'], 0 )
+        self.assertEqual( jsonOut['MRU #0']['Component Pos'], 0 )
+        self.assertEqual( jsonOut['MRU #0']['Primary Rank'], 0 )
+        self.assertEqual( jsonOut['MRU #0']['Secondary Rank'], 0 )
+        self.assertEqual( jsonOut['MRU #0']['Symbol'], 71 )
+        self.assertEqual( jsonOut['MRU #0']['Pins'], 0 )
+        self.assertEqual( jsonOut['MRU #0']['Dram Spared'], 'No' )
+        self.assertEqual( jsonOut['MRU #0']['DQ'], 0 )
         msl = 'Multi-Signature List'
         hexSig = '0x004b0000 0xffff0013'
         self.assertEqual(jsonOut[msl]['Count'], 1)

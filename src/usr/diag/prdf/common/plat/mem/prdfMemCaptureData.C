@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -117,6 +117,10 @@ void addExtMemMruData( const MemoryMru & i_memMru, errlHndl_t io_errl )
     bsb.setFieldJustify( curPos,  1, extMemMru.isBufDimm ); curPos+= 1;
     bsb.setFieldJustify( curPos,  1, extMemMru.isX4Dram  ); curPos+= 1;
     bsb.setFieldJustify( curPos,  1, extMemMru.isValid   ); curPos+= 1;
+
+    // Have 5 reserved bits to put the DQ mapping on the byte line for ease of
+    // parsing
+    bsb.setFieldJustify( curPos, 5, 0 ); curPos+=5;
 
     for ( uint8_t i = 0; i < sizeof(extMemMru.dqMapping); i++ )
     {

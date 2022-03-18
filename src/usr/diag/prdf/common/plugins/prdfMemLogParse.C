@@ -231,8 +231,25 @@ void addDramSiteString( const MemoryMruData::ExtendedData & i_extMemMru,
     char tmp[DATA_SIZE] = { '\0' };
     strcat( io_data, "DQ:" );
 
+    uint8_t dimmDq = dqIdx;
+
+    // If the DQ is not spared, translate to DIMM DQ format
+
+    if ( !mm.s.dramSpared )
+    {
+        // Note: The dqMapping maps from dimm dq format to c4 format
+        for ( uint8_t dq = 0; dq < DQS_PER_DIMM; dq++ )
+        {
+            if ( i_extMemMru.dqMapping[dq] == dqIdx )
+            {
+                dimmDq = dq;
+                break;
+            }
+        }
+    }
+
     // DQs for OCMB have a 1-to-1 mapping
-    snprintf( tmp, DATA_SIZE, "%d", dqIdx );
+    snprintf( tmp, DATA_SIZE, "%d", dimmDq );
 
     strcat( io_data, tmp );
 }
