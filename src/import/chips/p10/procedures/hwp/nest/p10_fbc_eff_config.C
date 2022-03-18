@@ -1272,14 +1272,28 @@ fapi2::ReturnCode p10_fbc_eff_config_lco_attrs(void)
         fapi2::ATTR_PROC_LCO_TARGETS_VECTOR_Type l_lco_targets = {0};
         fapi2::ATTR_PROC_LCO_TARGETS_MIN_Type l_lco_min = {0};
         fapi2::ATTR_PROC_LCO_TARGETS_MIN_Type l_lco_min_threshold = {0};
+        fapi2::ATTR_PROC_LCO_MODE_SETUP_Type l_lco_mode_setup = 0;
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_LCO_MODE_SETUP, FAPI_SYSTEM, l_lco_mode_setup),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_LCO_MODE_SETUP)");
 
         // lco_targets_count: number of valid L3 targets
         // lco_targets_vector: enable only valid L3s
         for (auto& l_core : l_target.getChildren<fapi2::TARGET_TYPE_CORE>())
         {
             fapi2::ATTR_CHIP_UNIT_POS_Type l_core_id;
+            fapi2::ATTR_ECO_MODE_Type l_eco_mode;
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_core, l_core_id),
                      "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ECO_MODE, l_core, l_eco_mode),
+                     "Error from FAPI_ATTR_GET (ATTR_ECO_MODE)");
+
+            if ((l_lco_mode_setup == fapi2::ENUM_ATTR_PROC_LCO_MODE_SETUP_ECO_ONLY) &&
+                (l_eco_mode == fapi2::ENUM_ATTR_ECO_MODE_DISABLED))
+            {
+                // do not include this target in LCO targets
+                continue;
+            }
 
             l_lco_count[fapi2::ENUM_ATTR_PROC_LCO_TARGETS_COUNT_CHIP]++;
             l_lco_targets[fapi2::ENUM_ATTR_PROC_LCO_TARGETS_VECTOR_CHIP] |= (0x1 << (31 - l_core_id));

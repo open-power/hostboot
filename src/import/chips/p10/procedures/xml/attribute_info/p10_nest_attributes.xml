@@ -852,6 +852,23 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_PROC_LCO_MODE_SETUP</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Controls lateral castout target set formation.
+    ALL: all cores included in LCO target set
+    ECO_ONLY: only ECO cores included in LCO target set
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    ECO_ONLY = 0,
+    ALL = 1
+  </enum>
+  <platInit>mrw</platInit>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_PROC_LCO_TARGETS_COUNT</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
