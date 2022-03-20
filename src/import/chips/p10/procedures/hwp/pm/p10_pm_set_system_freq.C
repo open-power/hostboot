@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -96,11 +96,9 @@ fapi2::ReturnCode pm_set_frequency(
     uint32_t l_vpd_ut_freq =0;
     uint32_t l_part_freq = 0;
     uint32_t l_psav_freq = 0;
-    uint32_t l_wofbase_freq = 0;
     uint32_t l_pstate0_freq = 0;
     uint8_t  l_sys_pdv_mode = 0;
     uint16_t l_tmp_psav_freq = 0;
-    uint16_t l_tmp_wofbase_freq = 0;
     uint16_t l_part_running_freq = 0;
     bool l_wof_state = i_wof_state;
 
@@ -272,17 +270,14 @@ fapi2::ReturnCode pm_set_frequency(
             l_ut_freq       = bias_adjust_mhz(htobe16(l_poundV_data.other_info.VddUTCoreFreq),
                                               attr_freq_bias_0p5pct);
 
-            l_wofbase_freq  = bias_adjust_mhz(htobe16(l_poundV_data.other_info.VddTdpWofCoreFreq),
-                                              attr_freq_bias_0p5pct);
-
             l_psav_freq     = bias_adjust_mhz(htobe16(l_poundV_data.other_info.VddPsavCoreFreq),
                                               attr_freq_bias_0p5pct);
 
             l_part_freq    = bias_adjust_mhz(htobe16(l_poundV_data.other_info.FxdFreqMdeCoreFreq),
                                               attr_freq_bias_0p5pct);
 
-            FAPI_INF("VPD CF[7]=%04d, fmax_freq=%04d, ut_freq=%04d  wofbase_freq=%04d, psav_freq=%04d ",
-                   l_pstate0_freq, l_fmax_freq, l_ut_freq, l_wofbase_freq, l_psav_freq);
+            FAPI_INF("VPD CF[7]=%04d, fmax_freq=%04d, ut_freq=%04d  psav_freq=%04d ",
+                   l_pstate0_freq, l_fmax_freq, l_ut_freq, l_psav_freq);
 
             if (l_vpd_ut_freq > l_sys_compat_freq_mhz)
             {
@@ -376,10 +371,6 @@ fapi2::ReturnCode pm_set_frequency(
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_CEILING_MHZ,
                         l_proc_target, l_ceil_freq_mhz));
 
-
-
-
-
             //Compute floor freq
             if (!l_tmp_psav_freq)
             {
@@ -431,28 +422,6 @@ fapi2::ReturnCode pm_set_frequency(
                 b_dd1_floor = true;
             }
 
-
-            // Compute WOFBase (minumim across chips)
-            if (l_wofbase_freq > l_tmp_wofbase_freq &&
-                    l_tmp_wofbase_freq == 0)
-            {
-                l_tmp_wofbase_freq = l_wofbase_freq;
-            }
-            else
-            {
-                if (l_wofbase_freq != l_tmp_wofbase_freq)
-                {
-                    FAPI_INF("Present System WOF Base freq %04d is not equal to this chip's WOF Base Freq %04d",
-                            l_tmp_wofbase_freq, l_wofbase_freq);
-                    // This does not produce an error log as the system will operate ok
-                    // for this case.
-                }
-
-                if ( l_wofbase_freq < l_tmp_wofbase_freq)
-                {
-                    l_tmp_wofbase_freq = l_wofbase_freq;
-                }
-            }
             //Compute Fixed Frequency (minumim across chips)
             if (l_part_freq > l_part_running_freq &&
                     l_part_running_freq == 0)
@@ -477,13 +446,10 @@ fapi2::ReturnCode pm_set_frequency(
 
             FAPI_INF("Running Computed ceiling frequency:   %04d (0x%04x)", l_sys_freq_core_ceil_mhz, l_sys_freq_core_ceil_mhz);
             FAPI_INF("Running Computed floor frequency:     %04d (0x%04x)", l_floor_freq_mhz, l_floor_freq_mhz);
-            FAPI_INF("Running Computed wofbase frequency:   %04d (0x%04x)", l_tmp_wofbase_freq, l_tmp_wofbase_freq);
             FAPI_INF("Running Computed fixed frequency:     %04d (0x%04x)", l_part_running_freq, l_part_running_freq);
 
         } //end of proc list
         l_part_freq = l_part_running_freq;
-        l_wofbase_freq = l_tmp_wofbase_freq;
-
 
         // Now clip things with system overrides
         // ATTR_FREQ_SYSTEM_CORE_CEIL_MHZ_OVERRIDE --> Lab
@@ -567,8 +533,6 @@ fapi2::ReturnCode pm_set_frequency(
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ,     i_sys_target, l_sys_pstate0_freq_mhz));
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_COMPAT_FREQ_MHZ,      i_sys_target, l_sys_compat_freq_mhz));
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_NOMINAL_FREQ_MHZ,            i_sys_target, l_part_freq));
-        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_WOFBASE_FREQ_MHZ,            i_sys_target, l_wofbase_freq));
-
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ,i_sys_target, l_sys_freq_core_ceil_mhz));
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ,  i_sys_target, l_floor_freq_mhz));
 
@@ -612,13 +576,12 @@ fapi2::ReturnCode pm_set_wofbase_frequency(
     do
     {
 
-
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOFBASE_FREQ_MHZ,
                         i_sys_target, l_wofbase_freq));
 
         if ( l_wofbase_freq )
         {
-            FAPI_INF("WOFBASE %x, is already set",l_wofbase_freq);
+            FAPI_INF("WOFBASE of %x is already set",l_wofbase_freq);
             break;
         }
         // Find Pstate 0 across the processor chips depending on the mode (FMax or UT)
@@ -694,10 +657,7 @@ fapi2::ReturnCode pm_set_wofbase_frequency(
                         attr_freq_bias_0p5pct),
                     "Error from FAPI_ATTR_GET for attribute ATTR_FREQ_BIAS");
 
-
-            l_wofbase_freq  = bias_adjust_mhz(htobe16(l_poundV_data.other_info.VddTdpWofCoreFreq),
-                    attr_freq_bias_0p5pct);
-
+            l_wofbase_freq  = htobe16(l_poundV_data.other_info.VddTdpWofCoreFreq);
 
             FAPI_INF("wofbase_freq=%04d",l_wofbase_freq);
 
@@ -722,10 +682,11 @@ fapi2::ReturnCode pm_set_wofbase_frequency(
                     l_tmp_wofbase_freq = l_wofbase_freq;
                 }
             }
-            FAPI_INF("Running Computed wofbase frequency:   %04d (0x%04x)", l_tmp_wofbase_freq, l_tmp_wofbase_freq);
+            FAPI_INF("Running Computed WOFBASE frequency:   %04d (0x%04x)", l_tmp_wofbase_freq, l_tmp_wofbase_freq);
         } //end of proc list
         l_wofbase_freq = l_tmp_wofbase_freq;
 
+        FAPI_INF("WOFBASE frequency:   %04d (0x%04x)", l_wofbase_freq, l_wofbase_freq);
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_WOFBASE_FREQ_MHZ,i_sys_target, l_wofbase_freq));
     }
     while(0);
