@@ -61,6 +61,7 @@
 #include <mctp/mctpif_rt.H>
 #include <runtime/interface.h>
 #include <sys/time.h>
+#include <util/runtime/rt_fwreq_helper.H>
 #endif
 
 // See rt_fwnotify.C
@@ -228,6 +229,9 @@ errlHndl_t sendrecv_pldm_request(ResponseContainer& o_response_bytes,
 
         sendrecv_pldm_request_assign_response_container(o_response_bytes, extra_data, msg->data[0]);
 #else
+        // Make sure mctp bridge is enabled
+        setMctpBridgeState(hostInterfaces::MCTP_BRIDGE_ENABLED);
+
         int return_code = MCTP::send_message(msgbuf_bytes);
 
         if(return_code)
@@ -300,6 +304,9 @@ errlHndl_t sendrecv_pldm_request(ResponseContainer& o_response_bytes,
                 break;
             }
         }while (PLDM::get_next_response().empty());
+
+        // Make sure mctp bridge is disabled
+        setMctpBridgeState(hostInterfaces::MCTP_BRIDGE_DISABLED);
 
         (void)PLDM::set_waiting_for_response(false);
 

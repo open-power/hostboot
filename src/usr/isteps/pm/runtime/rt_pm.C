@@ -37,7 +37,7 @@
 #include <htmgt/htmgt.H>
 
 #include <runtime/interface.h>        // g_hostInterfaces
-#include <runtime/rt_fwreq_helper.H>  // firmware_request_helper
+#include <util/runtime/rt_fwreq_helper.H>  // firmware_request_helper
 #include <runtime/runtime_reasoncodes.H>
 
 #include <initservice/isteps_trace.H>
@@ -614,8 +614,8 @@ namespace RTPM
         registerPm()
         {
             runtimeInterfaces_t * rt_intf = getRuntimeInterfaces();
-            rt_intf->load_pm_complex = &load_pm_complex;
-            rt_intf->start_pm_complex = &start_pm_complex;
+            rt_intf->load_pm_complex = DISABLE_MCTP_WRAPPER(load_pm_complex);
+            rt_intf->start_pm_complex = DISABLE_MCTP_WRAPPER(start_pm_complex);
 
 #ifdef CONFIG_FSP_BUILD
             // reset_pm_complex interface only used on FSP systems

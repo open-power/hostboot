@@ -45,6 +45,7 @@
 #include <map>
 #include <util/memoize.H>
 #include <util/runtime/util_rt.H>
+#include <util/runtime/rt_fwreq_helper.H>
 #include <util/utillidmgr.H>
 #include <util/utillidpnor.H>
 #include <sys/internode.h>
@@ -797,7 +798,8 @@ int hbrt_update_prep(void)
         {
             // Register interface for Host to call
             runtimeInterfaces_t * rt_intf = getRuntimeInterfaces();
-            rt_intf->prepare_hbrt_update = &hbrt_update_prep;
+            rt_intf->prepare_hbrt_update =
+                                    DISABLE_MCTP_WRAPPER(hbrt_update_prep);
         }
     };
 

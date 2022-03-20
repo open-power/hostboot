@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,7 +25,8 @@
 #ifndef __RUNTIME_FWREQ_HELPER_H
 #define __RUNTIME_FWREQ_HELPER_H
 
-#include <errl/errlentry.H>  // errlHndl_t
+#include <errl/errlentry.H>     // errlHndl_t
+#include <runtime/interface.h>  // hostInterfaces
 
 /**
  * @brief This is a wrapper function for the
@@ -55,6 +56,78 @@ firmware_request_helper(uint64_t i_reqLen,
                         uint64_t* o_respLen,
                         void *o_resp);
 
+#if (defined(CONFIG_MCTP) || defined(CONFIG_MCTP_TESTCASES))
+/**
+ *  @brief Send the HBRT_FW_MSG_MCTP_BRIDGE_ENABLED message.
+ *
+ *  @param[in] i_mctpBridgeState new state - enable / disable
+ *
+ *  @param[in] i_resetMctpDepthCounter true = force recursive depth count to 1.
+ *             Used when exiting from HBRT->PHYP and enabling the bridge. The
+ *             next PHYP->HBRT entry will disable the bridge and decrement
+ *             the counter so it is 0 at start of HBRT execution. Only allowed
+ *             with i_mctpBridgeState = MCTP_BRIDGE_ENABLED.
+ *
+ *  @return void
+ **/
+void setMctpBridgeState(hostInterfaces::MCTP_BRIDGE_STATE_t i_mctpBridgeState,
+                        const bool i_resetMctpDepthCounter = false);
+#endif
 
+// Template to wrap the runtimeInterfaces_t function pointers -> hb function
+// connections. Adds MCTP_BRIDGE_DISABLE / MCTP_BRIDGE_ENABLE around all
+// of the hb functions. Disabling the bridge prevents additional mctp
+// traffic from flooding the queues while hb is handling the current request.
+template<typename F>
+struct wrap_function;
+
+template<typename Ret, typename... Args>
+struct wrap_function<Ret(Args...)>
+{
+    template<Ret(*original)(Args...)>
+    static Ret wrapped(Args... args)
+    {
+        // wrap_begin_here
+#if (defined(CONFIG_MCTP) || defined(CONFIG_MCTP_TESTCASES))
+        setMctpBridgeState(hostInterfaces::MCTP_BRIDGE_DISABLED);
+#endif
+
+        Ret r = original(args...);
+
+#if (defined(CONFIG_MCTP) || defined(CONFIG_MCTP_TESTCASES))
+        // true = force g_MctpDepthCounter to 1 before returning control to phyp
+        setMctpBridgeState(hostInterfaces::MCTP_BRIDGE_ENABLED, true);
+#endif
+        // wrap_end_here
+
+        return r;
+    }
+};
+
+// Same template to handle hb functions with no return value
+template<typename... Args>
+struct wrap_function<void(Args...)>
+{
+    template<void(*original)(Args...)>
+    static void wrapped(Args... args)
+    {
+        // wrap_begin_here
+#if (defined(CONFIG_MCTP) || defined(CONFIG_MCTP_TESTCASES))
+        setMctpBridgeState(hostInterfaces::MCTP_BRIDGE_DISABLED);
+#endif
+
+        original(args...);
+
+#if (defined(CONFIG_MCTP) || defined(CONFIG_MCTP_TESTCASES))
+        // true = force g_MctpDepthCounter to 1 before returning control to phyp
+        setMctpBridgeState(hostInterfaces::MCTP_BRIDGE_ENABLED, true);
+#endif
+        // wrap_end_here
+    }
+};
+
+// Macro to simplify the runtimeInterfaces_t function pointer to
+// hb function connection
+#define DISABLE_MCTP_WRAPPER(X) wrap_function<decltype(X)>::wrapped<X>
 
 #endif   // __RUNTIME_FWREQ_HELPER_H

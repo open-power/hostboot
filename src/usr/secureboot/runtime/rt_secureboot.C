@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/targetservice.H>
 #include <devicefw/userif.H>
+#include <util/runtime/rt_fwreq_helper.H>
 
 extern trace_desc_t* g_trac_hbrt;
 
@@ -148,7 +149,7 @@ struct registerSecurebootRt
     {
         auto pRtIntf = getRuntimeInterfaces();
 #ifdef CONFIG_SECUREBOOT
-        pRtIntf->verify_container = &verify_container;
+        pRtIntf->verify_container = DISABLE_MCTP_WRAPPER(verify_container);
 #else
         pRtIntf->verify_container = nullptr;
 #endif

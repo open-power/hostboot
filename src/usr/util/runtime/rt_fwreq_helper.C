@@ -28,6 +28,7 @@
 #include <runtime/runtime_reasoncodes.H>  // MOD_RT_FIRMWARE_REQUEST, etc
 #include <errl/errlmanager.H>             // errlCommit
 #include <targeting/common/targetUtil.H>  // makeAttribute
+#include <arch/magic.H>
 
 using namespace ERRORLOG;
 using namespace RUNTIME;
@@ -1003,3 +1004,111 @@ errlHndl_t sendAttributes(const std::vector<TARGETING::AttributeTank::Attribute>
 
     return l_err;
 }
+
+#if (defined(CONFIG_MCTP) || defined(CONFIG_MCTP_TESTCASES))
+uint32_t g_MctpDepthCounter = 0;
+
+/**
+ *  @brief Send the HBRT_FW_MSG_MCTP_BRIDGE_ENABLED message
+ *
+ *  @param[in] i_mctpBridgeState new state - enable / disable
+ *
+ *  @param[in] i_resetMctpDepthCounter true = force mctp depth counter to 1
+ *
+ *  @return void
+ **/
+void setMctpBridgeState(hostInterfaces::MCTP_BRIDGE_STATE_t i_mctpBridgeState,
+                        const bool i_resetMctpDepthCounter)
+{
+    errlHndl_t errl = nullptr;
+
+    do
+    {
+        // Update the MCTP depth counter.
+        // It is possible to have nested MCTP bridge enables. Committing an
+        // error when the bridge is already enabled, for example. Using a depth
+        // counter will ensure that the bridge is only disabled after exiting
+        // the final recursive enable/disable pair. Functions enabling the
+        // bridge before returning control to PHYP can force a counter reset.
+        if (i_resetMctpDepthCounter)
+        {
+            TRACFCOMP(g_trac_runtime,
+                      "setMctpBridgeState Force MCTP depth counter = 1");
+
+            // Force only allowed when enabling bridge and returning contol
+            // from hbrt to phyp
+            assert(i_mctpBridgeState == hostInterfaces::MCTP_BRIDGE_ENABLED,
+                   "setMctpBridgeState: Forced reset of depth counter only allowed when enabling the bridge");
+
+            g_MctpDepthCounter = 1;
+        }
+        else
+        {
+            switch (i_mctpBridgeState)
+            {
+                case hostInterfaces::MCTP_BRIDGE_ENABLED:
+                    g_MctpDepthCounter++;
+                    TRACFCOMP(g_trac_runtime,
+                              "Inc MCTP depth counter = %d",g_MctpDepthCounter);
+                    assert(g_MctpDepthCounter != 0,
+                           "setMctpBridgeState: MCTP depth counter exceeded max value");
+                    break;
+                case hostInterfaces::MCTP_BRIDGE_DISABLED:
+                    if (g_MctpDepthCounter == 0)
+                    {
+                        MAGIC_INSTRUCTION(MAGIC_BREAK);
+                    }
+                    assert(g_MctpDepthCounter > 0,
+                           "setMctpBridgeState: MCTP depth counter < 0");
+                    g_MctpDepthCounter--;
+                    TRACFCOMP(g_trac_runtime,
+                              "Dec MCTP depth counter = %d",g_MctpDepthCounter);
+                    break;
+            }
+
+            // Non-zero depth count indicates recursive enables are still being
+            // handled so do not disable the bridge yet
+            if ((i_mctpBridgeState == hostInterfaces::MCTP_BRIDGE_DISABLED) &&
+                (g_MctpDepthCounter != 0))
+            {
+                break;
+            }
+
+            // Depth count > 1 indicates the bridge is already enabled so do
+            // not need to enable it again
+            if ((i_mctpBridgeState == hostInterfaces::MCTP_BRIDGE_ENABLED) &&
+                (g_MctpDepthCounter > 1))
+            {
+                break;
+            }
+        }
+
+        // Generate the fw request cmd
+        hostInterfaces::hbrt_fw_msg l_req_fw_msg = { };
+        size_t l_req_fw_msg_size = sizeof(l_req_fw_msg);
+
+        // Populate the firmware_request request struct with given data
+        l_req_fw_msg.io_type = hostInterfaces::HBRT_FW_MSG_MCTP_BRIDGE_ENABLED;
+        l_req_fw_msg.mctp_bridge_enabled.mctp_bridge_state = i_mctpBridgeState;
+
+        // Set up the response
+        hostInterfaces::hbrt_fw_msg l_rsp_fw_msg = { };
+        size_t l_rsp_fw_msg_size = sizeof(l_rsp_fw_msg);
+
+        // Make the firmware_request call
+        errl = firmware_request_helper(l_req_fw_msg_size,
+                                    &l_req_fw_msg,
+                                    &l_rsp_fw_msg_size,
+                                    &l_rsp_fw_msg);
+        if(errl)
+        {
+            // Not committing this error since the commit process will again
+            // attempt to set the MCTP bridge state, resulting in an infinite
+            // error loop, so just assert
+            assert(false, "setMctpBridgeState: failed sending hbrt_fw_msg");
+        }
+
+    } while(0);
+}
+#endif
+

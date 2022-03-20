@@ -47,6 +47,7 @@
 #include <isteps/nvdimm/nvdimm.H>  // notify NVDIMM protection change
 #endif
 #include <util/utillidmgr.H>
+#include <util/runtime/rt_fwreq_helper.H>
 
 //See rt_sbeio.C
 namespace RT_SBEIO
@@ -1658,11 +1659,13 @@ int hbrtCommand( int argc,
 
 };
 
+
 struct registerCmds
 {
     registerCmds()
     {
-        getRuntimeInterfaces()->run_command = &Util::hbrtCommand;
+        getRuntimeInterfaces()->run_command =
+                                    DISABLE_MCTP_WRAPPER(Util::hbrtCommand);
     }
 };
 

@@ -34,6 +34,7 @@
 #include <util/singleton.H>
 #include <stdio.h>
 #include <util/align.H>
+#include <util/runtime/rt_fwreq_helper.H>
 
 // Address of the first writable page, initialized by the linker.
 extern void* data_load_address;
@@ -206,6 +207,9 @@ runtimeInterfaces_t* rt_start(hostInterfaces_t* intf)
 
     // do any version mismatch fixups
     rt_version_fixup();
+
+    // this should always be the last post init function called
+    rtPost->callLastPostInit();
 
     (intf->puts)("rt_start complete....\n");
 

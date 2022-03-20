@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,6 +26,7 @@
 #include <limits.h>
 #include <hbotcompid.H>
 #include <runtime/interface.h>
+#include <util/runtime/rt_fwreq_helper.H>
 
 #include <kernel/console.H>
 #include <vfs/vfs.H>

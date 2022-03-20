@@ -37,6 +37,7 @@
 #include <errl/errlmanager.H>
 #include <errl/errlreasoncodes.H>
 #include <devicefw/userif.H>
+#include <util/runtime/rt_fwreq_helper.H>
 
 //  targeting support
 #include    <targeting/translateTarget.H>
@@ -743,7 +744,8 @@ namespace RT_SBEIO
         registerSbeio()
         {
             runtimeInterfaces_t * rt_intf = getRuntimeInterfaces();
-            rt_intf->sbe_message_passing = &process_sbe_msg;
+            rt_intf->sbe_message_passing =
+                                    DISABLE_MCTP_WRAPPER(process_sbe_msg);
 
             TargetHandleList procChips;
             getAllChips(procChips, TYPE_PROC, true);

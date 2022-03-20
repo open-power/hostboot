@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,6 +53,7 @@
 #include <mctp/mctpif_rt.H>
 #include <runtime/interface.h>
 #include <sys/time.h>
+#include <util/runtime/rt_fwreq_helper.H>
 #endif
 
 using namespace ERRORLOG;
@@ -211,6 +212,9 @@ errlHndl_t send_pldm_response(const msg_q_t i_msgQ,
         msg->extra_data = nullptr;
     }
 #else
+    // Make sure mctp bridge is enabled
+    setMctpBridgeState(hostInterfaces::MCTP_BRIDGE_ENABLED);
+
     // trim the buffer canary
     response_alloc.resize(response_alloc.size()-sizeof(buffer_canary));
     int return_code = MCTP::send_message(response_alloc);
@@ -234,6 +238,10 @@ errlHndl_t send_pldm_response(const msg_q_t i_msgQ,
                              ErrlEntry::NO_SW_CALLOUT);
         addBmcAndHypErrorCallouts(errl);
     }
+
+    // Make sure mctp bridge is disabled
+    setMctpBridgeState(hostInterfaces::MCTP_BRIDGE_DISABLED);
+
 #endif
 
     return errl;
