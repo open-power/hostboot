@@ -35,6 +35,7 @@
 #include <targeting/common/targreasoncodes.H>
 #include <devicefw/userif.H>
 #include <util/runtime/util_rt.H>
+#include <util/runtime/rt_fwreq_helper.H>
 #include <sys/internode.h>
 
 
@@ -195,7 +196,9 @@ struct registerTargRT
     registerTargRT()
     {
         runtimeInterfaces_t * rt_intf = getRuntimeInterfaces();
-        rt_intf->apply_attr_override = &apply_attr_override;
+        rt_intf->apply_attr_override =
+                                DISABLE_MCTP_WRAPPER(apply_attr_override);
+
         postInitCalls_t * rt_post = getPostInitCalls();
         rt_post->callApplyTempOverrides = &applyTempOverrides;
     }

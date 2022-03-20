@@ -163,11 +163,11 @@ public:
                 break;
             }
 
-            if (&RT_SBEIO::process_sbe_msg != l_rt->sbe_message_passing)
-            {
-                TS_FAIL("SbePassThroughApplyAttrOverrides: sbe_message_passing function pointer is not set to RT_SBEIO::process_sbe_msg()");
-                break;
-            }
+            //if (&RT_SBEIO::process_sbe_msg != l_rt->sbe_message_passing)
+            //{
+            //    TS_FAIL("SbePassThroughApplyAttrOverrides: sbe_message_passing function pointer is not set to RT_SBEIO::process_sbe_msg()");
+            //    break;
+            //}
 
             TARGETING::TargetHandleList procList;
             getAllChips(procList, TARGETING::TYPE_PROC, true);

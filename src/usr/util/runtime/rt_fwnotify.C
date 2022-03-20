@@ -809,6 +809,7 @@ void logGardEvent(const hostInterfaces::gard_event_t& i_gardEvent)
 
     TRACFCOMP(g_trac_runtime, EXIT_MRK"logGardEvent")
 }
+
 #if (defined(CONFIG_MCTP) || defined(CONFIG_MCTP_TESTCASES))
 /**
  *  @brief Handle the next PLDM request if we have one cached, otherwise
@@ -826,11 +827,19 @@ void handleMctpAvailable(void)
     // handle it
     if(!next_pldm_request.empty())
     {
+        // Received all mctp packets for this message,
+        // ok to disable the bridge
+        setMctpBridgeState(hostInterfaces::MCTP_BRIDGE_DISABLED);
+
         errl = PLDM::handle_next_pldm_request();
         if(errl)
         {
             errlCommit(errl, RUNTIME_COMP_ID);
         }
+
+        // Re-enable the bridge
+        setMctpBridgeState(hostInterfaces::MCTP_BRIDGE_ENABLED);
+
         break;
     }
 
@@ -904,6 +913,10 @@ void handleMctpAvailable(void)
     }
     else
     {
+        // Received all mctp packets for this message,
+        // ok to disable the bridge
+        setMctpBridgeState(hostInterfaces::MCTP_BRIDGE_DISABLED);
+
         errl = PLDM::handle_next_pldm_request();
         if(errl)
         {
@@ -911,6 +924,9 @@ void handleMctpAvailable(void)
             // No need to flag an error since it may just be informational
             // errl will be committed soon
         }
+
+        // Re-enable the bridge
+        setMctpBridgeState(hostInterfaces::MCTP_BRIDGE_ENABLED);
     }
     }while(0);
 
@@ -1190,6 +1206,16 @@ void firmware_notify( uint64_t i_len, void *i_data )
         hostInterfaces::hbrt_fw_msg* l_hbrt_fw_msg =
                        static_cast<hostInterfaces::hbrt_fw_msg*>(i_data);
 
+#if (defined(CONFIG_MCTP) || defined(CONFIG_MCTP_TESTCASES))
+        // MCTP available is a special case, do not disable the bridge
+        if (l_hbrt_fw_msg->io_type !=
+                    hostInterfaces::HBRT_FW_MSG_TYPE_MCTP_AVAILABLE)
+        {
+            // Make sure mctp bridge is disabled
+            setMctpBridgeState(hostInterfaces::MCTP_BRIDGE_DISABLED);
+        }
+#endif
+
         switch (l_hbrt_fw_msg->io_type)
         {
             case hostInterfaces::HBRT_FW_MSG_HBRT_FSP_REQ:
@@ -1347,20 +1373,43 @@ void firmware_notify( uint64_t i_len, void *i_data )
        errlCommit(l_err, RUNTIME_COMP_ID);
     }
 
+#if (defined(CONFIG_MCTP) || defined(CONFIG_MCTP_TESTCASES))
+    // Make sure the bridge is enabled
+    // true = force g_MctpDepthCounter to 1 before returning control to phyp
+    setMctpBridgeState(hostInterfaces::MCTP_BRIDGE_ENABLED, true);
+#endif
+
    TRACFCOMP(g_trac_hbrt, EXIT_MRK"firmware_notify");
 };
+
+
+/**
+ * @brief Last postInitCalls_t function called in the rt_main.C::rt_start()
+ *
+ */
+void lastPostInit()
+{
+#if (defined(CONFIG_MCTP) || defined(CONFIG_MCTP_TESTCASES))
+    // mctp bridge disabled by default, enable now
+    // true = force g_MctpDepthCounter to 1 before returning control to phyp
+    setMctpBridgeState(hostInterfaces::MCTP_BRIDGE_ENABLED, true);
+#endif
+}
 
 
 struct registerFwNotify
 {
     registerFwNotify()
     {
+        // Don't call the MCTP wrapper here, HBRT_FW_MSG_TYPE_MCTP_AVAILABLE
+        // needs the bridge enabled, so handle it inside the function
         getRuntimeInterfaces()->firmware_notify = &firmware_notify;
 
-#ifndef CONFIG_FSP_BUILD
         postInitCalls_t* rt_postInits = getPostInitCalls();
+#ifndef CONFIG_FSP_BUILD
         rt_postInits->callSetupPmicHealthCheck = &setupPmicHealthCheck;
 #endif
+        rt_postInits->callLastPostInit = &lastPostInit;
     }
 };
 

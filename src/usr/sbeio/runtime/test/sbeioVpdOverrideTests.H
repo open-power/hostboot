@@ -810,11 +810,11 @@ private:
                 break;
             }
 
-            if (&RT_SBEIO::process_sbe_msg != l_rt->sbe_message_passing)
-            {
-                TS_FAIL("invokeSBEMessagePassing: sbe_message_passing function pointer is not set to RT_SBEIO::process_sbe_msg()");
-                break;
-            }
+            //if (&RT_SBEIO::process_sbe_msg != l_rt->sbe_message_passing)
+            //{
+            //    TS_FAIL("invokeSBEMessagePassing: sbe_message_passing function pointer is not set to RT_SBEIO::process_sbe_msg()");
+            //    break;
+            //}
 
             //#################################################################
             // Step B - Ensure that another SBE pass-through is not in progress

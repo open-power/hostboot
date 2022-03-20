@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,6 +50,7 @@
 #include <util/utillidpnor.H>
 #include <pnor/pnor_reasoncodes.H>
 #include <targeting/common/mfgFlagAccessors.H>
+#include <util/runtime/rt_fwreq_helper.H>
 
 extern trace_desc_t* g_trac_hbrt;
 
@@ -437,7 +438,7 @@ struct registerLidMgr
     registerLidMgr()
     {
         runtimeInterfaces_t * rt_intf = getRuntimeInterfaces();
-        rt_intf->get_lid_list = &UtilLidMgr::getLidList;
+        rt_intf->get_lid_list = DISABLE_MCTP_WRAPPER(UtilLidMgr::getLidList);
     }
 };
 

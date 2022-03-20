@@ -111,11 +111,11 @@ class AttnCheckForRtAttentionsTest : public CxxTest::TestSuite
                     TS_FAIL("Not able to get run time interface object");
                     break;
                 }
-                else if (&ATTN_RT::handleAttns != rt_intf->handle_attns)
-                {
-                    TS_FAIL("AttnCheckForRtAttentionsTest: handle_attns function pointer is not set to ATTN_RT::handleAttns()");
-                    break;
-                }
+                //else if (&ATTN_RT::handleAttns != rt_intf->handle_attns)
+                //{
+                //    TS_FAIL("AttnCheckForRtAttentionsTest: handle_attns function pointer is not set to ATTN_RT::handleAttns()");
+                //    break;
+                //}
                 int32_t rc = ATTN_RT::handleAttns(chipId, 0, 0);
 
                 if( 0 != rc  )

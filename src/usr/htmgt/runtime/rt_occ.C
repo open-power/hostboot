@@ -31,6 +31,7 @@
 #include    <targeting/runtime/rt_targeting.H>
 #include    <targeting/translateTarget.H>
 #include    <runtime/runtime_reasoncodes.H>
+#include    <util/runtime/rt_fwreq_helper.H>
 #include    <map>
 
 using namespace TARGETING;
@@ -180,7 +181,7 @@ namespace HTMGT
         // Only pass in i_chipId's conversion to l_proc if it is an error scenario
         // NOTE: have to use '::' to avoid collision with enum HTMGT::occResetReason
         if (i_reason == ::OCC_RESET_REASON_ERROR)
-        { 
+        {
             l_errl = RT_TARG::getHbTarget(i_chipId,
                                           l_proc);
             if(l_errl)
@@ -257,12 +258,16 @@ namespace HTMGT
         registerOcc()
         {
             runtimeInterfaces_t * rt_intf = getRuntimeInterfaces();
-            rt_intf->process_occ_error  = &process_occ_error;
-            rt_intf->process_occ_reset  = &process_occ_reset;
-            rt_intf->enable_occ_actuation  = &enable_occ_actuation;
-            rt_intf->mfg_htmgt_pass_thru = &htmgt_pass_thru;
+            rt_intf->process_occ_error =
+                            DISABLE_MCTP_WRAPPER(process_occ_error);
+            rt_intf->process_occ_reset =
+                            DISABLE_MCTP_WRAPPER(process_occ_reset);
+            rt_intf->enable_occ_actuation =
+                            DISABLE_MCTP_WRAPPER(enable_occ_actuation);
+            rt_intf->mfg_htmgt_pass_thru =
+                            DISABLE_MCTP_WRAPPER(htmgt_pass_thru);
             rt_intf->reset_pm_complex_with_reason =
-                    &reset_pm_complex_with_reason;
+                            DISABLE_MCTP_WRAPPER(reset_pm_complex_with_reason);
         }
     };
 

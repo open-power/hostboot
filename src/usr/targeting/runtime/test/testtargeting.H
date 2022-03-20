@@ -203,11 +203,11 @@ class TargetingTestSuite : public CxxTest::TestSuite
                     TS_FAIL("runtimeInterfaces->apply_attr_override not set");
                     break;
                 }
-                if (&RT_TARG::apply_attr_override != rt_intf->apply_attr_override)
-                {
-                    TS_FAIL("testApplyAttrOverrides: apply_attr_override function pointer is not set to RT_TARG::apply_attr_override()");
-                    break;
-                }
+                //if (&RT_TARG::apply_attr_override != rt_intf->apply_attr_override)
+                //{
+                //    TS_FAIL("testApplyAttrOverrides: apply_attr_override function pointer is not set to RT_TARG::apply_attr_override()");
+                //    break;
+                //}
 
                 // Get the initial value of the test attribute
                 uint8_t l_attrVal =

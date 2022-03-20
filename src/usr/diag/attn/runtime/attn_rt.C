@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,7 @@
 #include <errl/errlmanager.H>
 #include <errno.h>
 #include <prdf/common/prdfMain_common.H>
+#include <util/runtime/rt_fwreq_helper.H>
 
 #include <p10_io_iohs_firmask_save_restore.H>
 #include <fapi2/target.H>              // fapi2::Target
@@ -261,10 +262,10 @@ namespace ATTN_RT
                 return;
             }
 
-            rt_intf->enable_attns      = &enableAttns;
-            rt_intf->disable_attns     = &disableAttns;
-            rt_intf->handle_attns      = &handleAttns;
-            rt_intf->get_ipoll_events  = &getIpollEvents;
+            rt_intf->enable_attns = DISABLE_MCTP_WRAPPER(enableAttns);
+            rt_intf->disable_attns = DISABLE_MCTP_WRAPPER(disableAttns);
+            rt_intf->handle_attns = DISABLE_MCTP_WRAPPER(handleAttns);
+            rt_intf->get_ipoll_events = DISABLE_MCTP_WRAPPER(getIpollEvents);
         }
     };
 

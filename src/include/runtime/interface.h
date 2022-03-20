@@ -590,6 +590,7 @@ typedef struct hostInterfaces
        HBRT_FW_MSG_TYPE_PMIC_HEALTH_CHECK = 18, // no additional data required
        HBRT_FW_MSG_TYPE_PM_RESET_ALERT    = 20, // struct pmreset_alert_t
        HBRT_FW_MSG_TYPE_DEALLOCATE        = 21, // struct deallocate_t
+       HBRT_FW_MSG_MCTP_BRIDGE_ENABLED    = 22, // struct mctp_bridge_enabled
     };
 
     // NVDIMM protection state enum
@@ -718,6 +719,13 @@ typedef struct hostInterfaces
         uint64_t resourceId;   // ID of deallocated resource
     } __attribute__((packed));
 
+    // Enumeration for HBRT_FW_MSG_MCTP_BRIDGE_ENABLED messages
+    enum MCTP_BRIDGE_STATE_t: uint8_t
+    {
+        MCTP_BRIDGE_DISABLED = 0x0,
+        MCTP_BRIDGE_ENABLED  = 0x1,
+    };
+
     struct hbrt_fw_msg   // define struct hbrt_fw_msg
     {
        hbrt_fw_msg() { req_hcode_update = { 0 }; };  // ctor
@@ -810,6 +818,13 @@ typedef struct hostInterfaces
           {
             uint8_t   receive_data[1];
           } __attribute__ ((packed)) mctp_receive;
+
+          // This struct for HBRT_FW_MSG_MCTP_BRIDGE_ENABLED which
+          // is sent to the hypervisor from HBRT
+          struct
+          {
+              MCTP_BRIDGE_STATE_t mctp_bridge_state; // 0=disable, 1=enable
+          } __attribute__ ((packed)) mctp_bridge_enabled;
 
           // This struct for HBRT_FW_MSG_TYPE_SPILOCK which
           // is sent to the hypervisor from HBRT
@@ -1338,6 +1353,13 @@ struct postInitCalls_t
      *
      */
     void (*callDoConcurrentInits)();
+
+    /**
+     * @brief Any remaining functions that must be called
+     *        at the end of post init
+     *
+     */
+    void (*callLastPostInit)();
 };
 
 extern hostInterfaces_t* g_hostInterfaces;
