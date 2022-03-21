@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/phy/ody_draminit_procedure.C $ */
+/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/phy/ody_draminit_utils.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -24,9 +24,8 @@
 /* IBM_PROLOG_END_TAG                                                     */
 // EKB-Mirror-To: hostboot
 ///
-/// @file ody_draminit_procedure.C
-/// @brief Odyssey draminit procedure
-/// @note Using a separate file as simulation might need a different draminit procedure for now
+/// @file ody_draminit_utils.H
+/// @brief Odyssey PHY draminit utility functions
 ///
 // *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
@@ -34,74 +33,35 @@
 // *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
+#ifndef _ODY_DRAMINIT_UTILS_H_
+#define _ODY_DRAMINIT_UTILS_H_
+
 #include <fapi2.H>
-
-#include <generic/memory/lib/utils/find.H>
-
-#include <lib/phy/ody_draminit_utils.H>
-#include <lib/phy/ody_phy_utils.H>
 
 namespace mss
 {
 namespace ody
 {
+namespace phy
+{
 
 ///
-/// @brief Runs draminit
+/// @brief Starts the firmware draminit training
 /// @param[in] i_target the target on which to operate
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
-/// @note Assumes PHY init has already been run
+/// @note Assumes that the firmware binaries and data structures are loaded appropriately
 ///
-fapi2::ReturnCode draminit(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
-{
-    // 1. Loads the IMEM Memory (instructions)
-    // TODO:ZEN:MST-1561 Create code to load IMEM, DMEM, and message block onto Synopsys PHY
-
-    // 2. Loads the DMEM Memory (data)
-    // TODO:ZEN:MST-1561 Create code to load IMEM, DMEM, and message block onto Synopsys PHY
-
-    // 3. Configures and loads the message block
-    // TODO:ZEN:MST-1561 Create code to load IMEM, DMEM, and message block onto Synopsys PHY
-
-    // 4. Starts training
-    FAPI_TRY(mss::ody::phy::start_training(i_target));
-
-    // 5. Processes and handles training messages (aka poll for completion)
-    // TODO:ZEN:MST-1542 Add base code and control for Synopsys mailbox interaction
-
-    // 6. Cleans up after training
-    FAPI_TRY(mss::ody::phy::cleanup_training(i_target));
-
-    // 7. Read the data structure and set attributes
-    // TODO:ZEN:MST-1567 Create code to process data from the Synopsys message block
-
-    // 8. Error handling
-    // TODO:ZEN:MST-1568 Add Odyssey draminit error processing
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
+fapi2::ReturnCode start_training(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target);
 
 ///
-/// @brief Runs draminit
+/// @brief Cleans up from the firmware draminit training
 /// @param[in] i_target the target on which to operate
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
-/// @note Assumes PHY init has already been run
+/// @note puts the processor into a stall state
 ///
-fapi2::ReturnCode draminit(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
-{
-    for(const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
-    {
-        // Note: This will need to be updated to allow training to fail on one port but continue on the second
-        FAPI_TRY(draminit(l_port));
-    }
+fapi2::ReturnCode cleanup_training(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target);
 
-    // Blame FIRs and unmask FIRs (done on the OCMB chip level)
-    // TODO:ZEN:MST-1530 Specialize unmask::after_draminit_training for Odyssey
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
+} // namespace phy
 } // namespace ody
 } // namespace mss
+#endif
