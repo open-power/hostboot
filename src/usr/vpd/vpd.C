@@ -367,7 +367,8 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
 
     TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
 
-    TRACSSCOMP(g_trac_vpd, ENTER_MRK"vpd.C::setPartAndSerialNumberAttributes");
+    TRACSSCOMP(g_trac_vpd, ENTER_MRK"vpd.C::setPartAndSerialNumberAttributes(%.8X)",
+              TARGETING::get_huid(i_target));
     do
     {
         IpVpdFacade * l_ipvpd = &(Singleton<MvpdFacade>::instance());
@@ -782,18 +783,132 @@ errlHndl_t cmpEecacheToEeprom(TARGETING::Target *            i_target,
     return l_err;
 }
 
+/**
+ * @brief This function compares the specified record/keyword in
+ *        CACHE/HARDWARE by calling the correct function based on the
+ *        target's eeprom content type and returns the result.  A mismatch
+ *        will not return an error.
+ *
+ * @param[in]  i_target     Target device
+ *
+ * @param[in]  i_eepromType Eeprom content type for the target.
+ *
+ * @param[in]  i_property   Record/Keyword to compare
+ *
+ * @param[out] o_match      Result of compare
+ *
+ * @return errlHndl_t       nullptr if successful, otherwise a pointer to the
+ *                          error log.
+ */
+errlHndl_t cmpEecacheToAttributes(TARGETING::Target *            i_target,
+                                  TARGETING::EEPROM_CONTENT_TYPE i_eepromType,
+                                  FruPropertyLocation_t&         i_property,
+                                  bool&                          o_match)
+{
+    errlHndl_t l_err = nullptr;
+
+    do {
+        size_t l_size = 0;
+        l_err = deviceRead(i_target, nullptr, l_size,
+                           DEVICE_VPD_ADDRESS(i_property.record,
+                                              i_property.keyword));
+        if(l_err)
+        {
+            break;
+        }
+        uint8_t l_vpd[l_size];
+        l_err = deviceRead(i_target, l_vpd, l_size,
+                           DEVICE_VPD_ADDRESS(i_property.record,
+                                              i_property.keyword));
+        if(l_err)
+        {
+            break;
+        }
+
+        if( i_property.name == TARGETING::ATTR_SERIAL_NUMBER )
+        {
+            TARGETING::ATTR_SERIAL_NUMBER_type l_attr;
+            assert( i_target->tryGetAttr<TARGETING::ATTR_SERIAL_NUMBER>(l_attr),
+                    "Cannot get ATTR_SERIAL_NUMBER from target 0x%08x",
+                    get_huid(i_target));
+            if( memcmp( l_vpd, &l_attr,
+                        std::min(sizeof(l_attr),sizeof(l_vpd)) ) )
+            {
+                TRACFCOMP( g_trac_vpd, "VPD::cmpEecacheToAttributes found SN mismatch for HUID %.8X 0x%X:0x%X", TARGETING::get_huid(i_target), i_property.record, i_property.keyword );
+                TRACFBIN( g_trac_vpd, "ATTRIBUTE", l_attr, sizeof(l_attr) );
+                TRACFBIN( g_trac_vpd, "CACHE", l_vpd, sizeof(l_vpd) );
+            }
+            else
+            {
+                o_match = true;
+            }
+        }
+        else if( i_property.name == TARGETING::ATTR_PART_NUMBER )
+        {
+            TARGETING::ATTR_PART_NUMBER_type l_attr;
+            assert( i_target->tryGetAttr<TARGETING::ATTR_PART_NUMBER>(l_attr),
+                    "Cannot get ATTR_PART_NUMBER from target 0x%08x",
+                    get_huid(i_target));
+            if( memcmp( l_vpd, &l_attr,
+                        std::min(sizeof(l_attr),sizeof(l_vpd)) ) )
+            {
+                TRACFCOMP( g_trac_vpd, "VPD::cmpEecacheToAttributes found PN mismatch for HUID %.8X 0x%X:0x%X", TARGETING::get_huid(i_target), i_property.record, i_property.keyword );
+                TRACFBIN( g_trac_vpd, "ATTRIBUTE", l_attr, sizeof(l_attr) );
+                TRACFBIN( g_trac_vpd, "CACHE", l_vpd, sizeof(l_vpd) );
+            }
+            else
+            {
+                o_match = true;
+            }
+        }
+        else
+        {
+            TRACFCOMP( g_trac_vpd, "VPD::cmpEecacheToAttributes> Unrecognized keyword/attribute 0x%X",
+                       i_property.name );
+            /*@
+             * @errortype
+             * @moduleid     VPD_CMP_EECACHE_TO_ATTRIBUTES
+             * @reasoncode   VPD_UNSUPPORTED_FRU_PROPERTY
+             * @userdata1[00:31]  Target HUID
+             * @userdata1[32:63]  Target Type
+             * @userdata2[00:31]  Bad property
+             * @userdata2[32:63]  unused
+             * @devdesc      Unexpected FRU property requested
+             * @custdesc     Firmware error
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                                            ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                            VPD_CMP_EECACHE_TO_ATTRIBUTES,
+                                            VPD_UNSUPPORTED_FRU_PROPERTY,
+                                            TWO_UINT32_TO_UINT64(
+                                                TARGETING::get_huid(i_target),
+                                                i_target->getAttr<TARGETING::ATTR_TYPE>()),
+                                            TWO_UINT32_TO_UINT64(i_property.name,
+                                                0),
+                                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+            l_err->collectTrace("VPD",1024);
+            break;
+        }
+        //FIXME: optimize above
+
+    } while(0);
+
+    return l_err;
+}
 
 // ------------------------------------------------------------------
 // ensureEepromCacheIsInSync
 // ------------------------------------------------------------------
-errlHndl_t ensureEepromCacheIsInSync(TARGETING::Target           * i_target,
-                                  TARGETING::EEPROM_CONTENT_TYPE   i_eepromType,
-                                  bool                           & o_isInSync,
-                                  bool                           & o_isNewPart)
+errlHndl_t ensureEepromCacheIsInSync(TARGETING::Target       * i_target,
+                              TARGETING::EEPROM_CONTENT_TYPE   i_eepromType,
+                              bool                             i_useAttributes,
+                              bool                           & o_isInSync,
+                              bool                           & o_isNewPart)
 {
     errlHndl_t l_err = nullptr;
 
-    TRACDCOMP(g_trac_vpd, ENTER_MRK"ensureEepromCacheIsInSync() ");
+    TRACFCOMP(g_trac_vpd, ENTER_MRK"ensureEepromCacheIsInSync(%.8X) ",
+              TARGETING::get_huid(i_target));
 
     do
     {
@@ -815,24 +930,48 @@ errlHndl_t ensureEepromCacheIsInSync(TARGETING::Target           * i_target,
         }
 
         // Loop through all of our records/keywords to compare
-        //  CACHE vs HARDWARE
+        //  CACHE vs HARDWARE/ATTRIBUTES
         o_isInSync = true;
         for( auto& rk : l_recordsKeywords )
         {
             bool l_match = false;
-            l_err = cmpEecacheToEeprom(i_target,
-                                       i_eepromType,
-                                       rk.keyword,
-                                       rk.record,
-                                       l_match);
 
-            if (l_err)
+
+            // Use attributes as the basis
+            if( COMPARE_TO_ATTRIBUTES == i_useAttributes )
             {
-                TRACFCOMP(g_trac_vpd,ERR_MRK
-                          "VPD::ensureEepromCacheIsInSync: "
-                          "Error checking for CACHE/HARDWARE PN match");
-                break;
+                l_err = cmpEecacheToAttributes(i_target,
+                                               i_eepromType,
+                                               rk,
+                                               l_match);
+                if (l_err)
+                {
+                    TRACFCOMP(g_trac_vpd,ERR_MRK
+                              "VPD::ensureEepromCacheIsInSync: "
+                              "Error checking for CACHE/ATTRIBUTE match for rec=%d,kw=%d",
+                              rk.record, rk.keyword);
+                    break;
+                }
             }
+            // Compare cache vs eeprom
+            else
+            {
+                l_err = cmpEecacheToEeprom(i_target,
+                                           i_eepromType,
+                                           rk.keyword,
+                                           rk.record,
+                                           l_match);
+
+                if (l_err)
+                {
+                    TRACFCOMP(g_trac_vpd,ERR_MRK
+                              "VPD::ensureEepromCacheIsInSync: "
+                              "Error checking for CACHE/HARDWARE match for rec=%d,kw=%d",
+                              rk.record, rk.keyword);
+                    break;
+                }
+            }
+
             o_isInSync = o_isInSync && l_match;
         }
         if( l_err ) { break; }
@@ -889,7 +1028,8 @@ errlHndl_t ensureEepromCacheIsInSync(TARGETING::Target           * i_target,
 
     } while(0);
 
-    TRACDCOMP(g_trac_vpd, EXIT_MRK"ensureEepromCacheIsInSync()");
+    TRACFCOMP(g_trac_vpd, EXIT_MRK"ensureEepromCacheIsInSync(o_isInSync=%d,o_isNewPart=%d)",
+              o_isInSync,o_isNewPart);
 
     return l_err;
 }

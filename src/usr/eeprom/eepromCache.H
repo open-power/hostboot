@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -250,12 +250,18 @@ bool hasEepromChanged(const eepromRecordHeader & i_eepromRecordHeader);
 void setEepromChanged(const eepromRecordHeader & i_eepromRecordHeader);
 
 
+// Useful constants for some boolean parms
+constexpr bool COMPARE_TO_ATTRIBUTES = true;
+constexpr bool COMPARE_TO_EEPROM = false;
+
 /**
  * @brief Checks if eeprom is in sync with hw based on vpd
  *        or matching master role eeprom
  * @param[in] - target checking
  * @param[in] - eeprom record to check
  * @param[in] - eeprom role
+ * @param[in] - true: Compare eecache vs attributes,
+ *              false: Compare eecache vs eeprom
  * @param[out] - true if record is in-sync, else false
  * @param[out] - false if EECACHE_VPD_STATE_VPD_NEEDS_REFRESH
  * @return  error log if failure found
@@ -263,6 +269,7 @@ void setEepromChanged(const eepromRecordHeader & i_eepromRecordHeader);
 errlHndl_t isEepromInSync(TARGETING::Target * i_target,
                           const eepromRecordHeader& i_eepromRecordHeader,
                           EEPROM::EEPROM_ROLE i_eepromType,
+                          bool i_useAttributes,
                           bool & o_isInSync,
                           bool & o_isNewPart);
 
@@ -374,6 +381,36 @@ errlHndl_t updateEecacheContents(TARGETING::Target*          i_target,
                                  size_t              const   i_eepromBuflen,
                                  eepromRecordHeader  const & i_recordHeader,
                                  bool                        i_newPart = EECACHE_NEW_PART);
+
+/* @brief     Updates the eeprom cache entry's contents based on an input
+ *            buffer with all of the data.  This only updates the data and
+ *            does not apply any other logic based on the data changing, e.g.
+ *            marking the target as changed indicating a new part was installed.
+ *
+ * @param[in]   i_target       Target associated with the eeprom record. Used
+ *                             only for tracing purposes.
+ *
+ * @param[in]   i_eepromType   Describes which EEPROM associated to the target
+ *                             that is being requested to be updated,
+ *                             PRIMARY, BACKUP, etc.
+ *
+ * @param[in]   i_eepromBuffer A buffer containing data to load into EECACHE or
+ *                             nullptr. If nullptr, HW lookup for data will be
+ *                             attempted.
+ *
+ * @param[in]   i_eepromBuflen Length of i_eepromBuffer. If i_eepromBuffer is
+ *                             nullptr then this should be 0.
+ *
+ * @param[in]  i_recordHeader The complete eeprom record header to be used to
+ *                            update the contents in EECACHE.
+ *
+ * @return  errlHndl_t
+ */
+errlHndl_t updateEecacheContentsFromBuffer(TARGETING::Target*          i_target,
+                                           EEPROM::EEPROM_ROLE const   i_eepromType,
+                                           void        const * const   i_eepromBuffer,
+                                           size_t              const   i_eepromBuflen,
+                                           eepromRecordHeader  const & i_recordHeader);
 
 #else
 /**

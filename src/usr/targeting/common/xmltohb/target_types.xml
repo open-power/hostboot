@@ -1261,6 +1261,9 @@
       <id>DECONFIG_GARDABLE</id>
     </attribute>
     <attribute>
+      <id>EECACHE_VPD_STATE</id>
+    </attribute>
+    <attribute>
       <default>
         <field>
           <value>0xFF</value>

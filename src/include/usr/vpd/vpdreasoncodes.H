@@ -52,6 +52,8 @@ enum vpdModuleId
     VPD_GET_VPD_LOCATION                    = 0x13,
     VPD_GET_CCIN                            = 0x14,//deprecated
     VPD_GET_FRU_RECS_AND_KWS                = 0x15,
+    VPD_ENSURE_EEPROM_CACHE_IS_IN_SYNC      = 0x16,
+    VPD_CMP_EECACHE_TO_ATTRIBUTES           = 0x17,
 
     // IPVPD
     VPD_IPVPD_TRANSLATE_RECORD              = 0x20,

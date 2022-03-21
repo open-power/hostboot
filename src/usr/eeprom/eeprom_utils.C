@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1174,6 +1174,8 @@ errlHndl_t cacheEepromBuffer(TARGETING::Target * const i_target,
                              const std::vector<uint8_t>& i_eeprom_data)
 {
     errlHndl_t errl = nullptr;
+    TRACFCOMP(g_trac_eeprom, ENTER_MRK"cacheEepromBuffer():target=%.8X",
+              TARGETING::get_huid(i_target));
 
     TARGETING::EepromVpdPrimaryInfo eepromData;
     TARGETING::SpiEepromVpdPrimaryInfo spiEepromData;
@@ -1193,6 +1195,8 @@ errlHndl_t cacheEepromBuffer(TARGETING::Target * const i_target,
                                                       EEPROM::VPD_AUTO));
     }
 
+    TRACFCOMP(g_trac_eeprom, EXIT_MRK"cacheEepromBuffer():target=%.8X",
+              TARGETING::get_huid(i_target));
     return errl;
 }
 

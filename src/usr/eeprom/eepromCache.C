@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -356,52 +356,15 @@ errlHndl_t updateEecacheContents(TARGETING::Target*          i_target,
         }
         else
         {
-            TRACFCOMP(g_trac_eeprom,
-                    "updateEecacheContents(): "
-                    "copying from buffer : huid 0x%.08X "
-                    " eeprom length 0x%.08X  eecache vaddr %p" ,
-                    get_huid(i_target), i_eepromBuflen, l_internalSectionAddr);
-
-            if (i_eepromBuflen > l_eepromLen)
+            l_errl = updateEecacheContentsFromBuffer(i_target,
+                                                     i_eepromType,
+                                                     i_eepromBuffer,
+                                                     i_eepromBuflen,
+                                                     i_recordHeader);
+            if( l_errl )
             {
-                TRACFCOMP(g_trac_eeprom, "updateEecacheContents(): eeprom buflen %d > eeprom length %d",
-                       i_eepromBuflen,
-                       l_eepromLen);
-                /*@
-                 * @errortype   ERRL_SEV_UNRECOVERABLE
-                 * @moduleid    EEPROM_UPDATE_EECACHE_CONTENTS
-                 * @reasoncode  EEPROM_UPDATE_BUFFER_MISMATCH
-                 * @userdata1[0:31]  HUID of Master
-                 * @userdata1[32:39] Port (or 0xFF)
-                 * @userdata1[40:47] Engine
-                 * @userdata1[48:55] devAddr    (or byte 0 offset_KB)
-                 * @userdata1[56:63] mux_select (or byte 1 offset_KB)
-                 * @userdata2[0:31]  i_eepromBuflen
-                 * @userdata2[32:63] l_eepromLen
-                 * @devdesc   Size of data in l_eepromLen is not matching requester
-                 * @custdesc  Improper handling of Vital Product Data by boot firmware
-                 */
-
-                l_errl = new ERRORLOG::ErrlEntry(
-                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                    EEPROM_UPDATE_EECACHE_CONTENTS,
-                    EEPROM_UPDATE_BUFFER_MISMATCH,
-                    getEepromHeaderUserData(i_recordHeader),
-                    TWO_UINT32_TO_UINT64(TO_UINT32(i_eepromBuflen),
-                                         TO_UINT32(l_eepromLen)),
-                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-                l_errl->collectTrace(EEPROM_COMP_NAME, 256);
                 break;
             }
-
-            // copy in the new buffer
-            memcpy(l_internalSectionAddr, i_eepromBuffer ,  i_eepromBuflen);
-
-            // clear out the remaining space in the cache entry
-            memset((static_cast<uint8_t *>(l_internalSectionAddr)
-                    + i_eepromBuflen),
-                    0xFF,
-                    l_eepromLen - i_eepromBuflen);
         }
 
         // Flush the page to make sure it gets to the PNOR
@@ -830,6 +793,10 @@ errlHndl_t checkForEecacheEntryUpdate(
         bool                       & o_isNewPart)
 {
     errlHndl_t l_errl = nullptr;
+    TRACFCOMP(g_trac_eeprom,ENTER_MRK"checkForEecacheEntryUpdate(%.8X,i_eepromBuffer=%p,i_present=%d)",
+              TARGETING::get_huid(i_target),
+              i_eepromBuffer,
+              i_present);
 
     o_updateContents = true;
     o_updateHeader = true;
@@ -848,8 +815,11 @@ errlHndl_t checkForEecacheEntryUpdate(
             if(i_eepromBuffer == nullptr)
             {
                 l_isInSync = true;
-                l_errl = isEepromInSync(i_target, *i_recordFromPnor,
-                                    i_eepromType, l_isInSync, o_isNewPart);
+                l_errl = isEepromInSync(i_target,
+                                        *i_recordFromPnor,
+                                        i_eepromType,
+                                        COMPARE_TO_EEPROM,
+                                        l_isInSync, o_isNewPart);
                 if (l_errl != nullptr)
                 {
                     break;
@@ -857,6 +827,9 @@ errlHndl_t checkForEecacheEntryUpdate(
             }
             else
             {
+                // We can't know yet if the part is new or not so assume no
+                o_isNewPart = false;
+
                 auto l_eepromCacheAddr = lookupEepromCacheAddr(*i_recordFromPnor);
 
                 // if we found a matching record header above this should never happen
@@ -886,15 +859,44 @@ errlHndl_t checkForEecacheEntryUpdate(
                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
                     l_errl->collectTrace(EEPROM_COMP_NAME, 256);
                     break;
-               }
-               // if we were given a buffer do a memcmp
-               // between the cached copy and the provided buffer
-               if(memcmp(reinterpret_cast<void *>(l_eepromCacheAddr),
-                         i_eepromBuffer,
-                         i_eepromBuflen) == 0)
-                  {
+                }
+
+                // If we were given a buffer we need to read the current data
+                // from the cache now in order to compare it later.  We'll save
+                // the data into the same attributes that are already used for
+                // regular access.
+                VPD::setPartAndSerialNumberAttributes(i_target);
+                TARGETING::ATTR_SERIAL_NUMBER_type l_sn;
+                assert( i_target->tryGetAttr<TARGETING::ATTR_SERIAL_NUMBER>(l_sn),
+                        "Cannot get ATTR_SERIAL_NUMBER from target 0x%08x",
+                        get_huid(i_target));
+                TRACDBIN( g_trac_eeprom, "SN=", &l_sn, sizeof(l_sn) );
+                TARGETING::ATTR_PART_NUMBER_type l_pn;
+                assert( i_target->tryGetAttr<TARGETING::ATTR_PART_NUMBER>(l_pn),
+                        "Cannot get ATTR_PART_NUMBER from target 0x%08x",
+                        get_huid(i_target));
+                TRACDBIN( g_trac_eeprom, "PN=", &l_pn, sizeof(l_pn) );
+
+                // Next update the data in the cache with the content of our
+                // buffer if it isn't exactly the same already.
+                if(memcmp(reinterpret_cast<void *>(l_eepromCacheAddr),
+                          i_eepromBuffer,
+                          i_eepromBuflen) == 0)
+                {
+                    // The data we have exactly matches the data from the BMC
+                    // so there is nothing else we need to do.
                     l_isInSync = true;
-                  }
+                }
+                else
+                {
+                    TRACFCOMP( g_trac_eeprom, "checkForEecacheEntryUpdate(): %.8X is not in sync, need to update cache",
+                               TARGETING::get_huid(i_target) );
+                    TRACDBIN( g_trac_eeprom, "EECACHE Contents",
+                              reinterpret_cast<void *>(l_eepromCacheAddr), i_eepromBuflen );
+                    TRACDBIN( g_trac_eeprom, "Buffer Contents",
+                              i_eepromBuffer, i_eepromBuflen );
+                    o_updateContents = true;
+                }
             }
 
             if(l_isInSync)
@@ -910,7 +912,7 @@ errlHndl_t checkForEecacheEntryUpdate(
                         TARGETING::get_huid(i_target), i_eepromType);
             }
         }
-        else
+        else //!i_present
         {
             char* l_pathstring = i_target->getAttr<TARGETING::ATTR_PHYS_PATH>().toString();
             CONSOLE::displayf(CONSOLE::DEFAULT, NULL,"Detected part removal : %.8X (%s)",
@@ -1011,6 +1013,8 @@ errlHndl_t checkForEecacheEntryUpdate(
     }
     } while(0);
 
+    TRACFCOMP(g_trac_eeprom,EXIT_MRK"checkForEecacheEntryUpdate() : o_updateContents=%d, o_updateHeader=%d, o_isNewPart=%d",
+              o_updateContents, o_updateHeader,o_isNewPart );
     return l_errl;
 }
 
@@ -1060,7 +1064,7 @@ errlHndl_t updateExistingEecacheEntry(
         eepromRecordHeader * const & io_recordFromPnorToUpdate,
         bool                 const   i_normal_update)
 {
-    errlHndl_t errl = nullptr;
+    errlHndl_t l_err = nullptr;
 
     // Initially assume we will want to update both the entry in the header
     // as well as the contents in the body of the EECACHE section
@@ -1098,7 +1102,7 @@ errlHndl_t updateExistingEecacheEntry(
 
         // Check to see if an update is necessary to the header, contents, both,
         // or neither.
-        errl = checkForEecacheEntryUpdate(i_target,
+        l_err = checkForEecacheEntryUpdate(i_target,
                                           i_present,
                                           i_eepromType,
                                           i_eepromBuffer,
@@ -1107,29 +1111,107 @@ errlHndl_t updateExistingEecacheEntry(
                                           l_updateContents,
                                           l_updateHeader,
                                           l_isNewPart);
-        if (errl)
+        if (l_err)
         {
             break;
         }
 
-        if (l_updateContents)
+        // If we are operating on a buffer we need to do a bit more to determine
+        // when we really have a new part or not.
+        if( i_eepromBuffer       //using a buffer, not eeprom
+            && l_updateContents  //buffer was not an exact match
+            && !l_isNewPart )    //not obviously new, e.g. invalid cache
         {
-            errl = updateEecacheContents(i_target,
+            // The data from the BMC could be different from what we
+            // have in our cache for a few reasons, not all of them
+            // actually indicate a part change.
+            // 1) It is actually a new part with a unique SN+PN. To
+            //    detect this we need to push the data into our cache
+            //    so that we can use VPD accessors to read it out.
+            // 2) The BMC started sending more data up.  The BMC only
+            //    sends a subset of the data from the VPD EEPROM up
+            //    via PLDM.  That subset could change at any time. If
+            //    that happens, we always want to update our cached
+            //    data so that we have access to the new data.
+            // 3) The BMC reordered the data in the PLDM messages.
+            //    There is no explicit ordering enforced for records
+            //    or keywords so the overall content could change at
+            //    any time.  We don't need to update our cached copy
+            //    in this case but doing it won't hurt anything.
+            TRACFCOMP( g_trac_eeprom, "updateExistingEecacheEntry(): %.8X is not in sync, updating cache",
+                       TARGETING::get_huid(i_target) );
+            TRACDBIN( g_trac_eeprom, "EECACHE Contents",
+                      reinterpret_cast<void *>(l_eepromCacheAddr), i_eepromBuflen );
+            TRACDBIN( g_trac_eeprom, "Buffer Contents",
+                      i_eepromBuffer, i_eepromBuflen );
+            l_err = updateEecacheContentsFromBuffer(i_target,
+                                                    i_eepromType,
+                                                    i_eepromBuffer,
+                                                    i_eepromBuflen,
+                                                    *io_recordFromPnorToUpdate);
+            if( l_err )
+            {
+                TRACFCOMP( g_trac_eeprom, "updateExistingEecacheEntry(): Error copying buffer into cache for %.8X",
+                           TARGETING::get_huid(i_target) );
+                l_err->collectTrace(EEPROM_COMP_NAME, 256);
+                break;
+            }
+
+            // Finally, compare the stored (attribute) SN/PN data
+            // to what is now in the cache.
+            bool l_isInSync = true;
+            l_err = isEepromInSync(i_target,
+                                   *io_recordFromPnorToUpdate,
+                                   i_eepromType,
+                                   COMPARE_TO_ATTRIBUTES,
+                                   l_isInSync,
+                                   l_isNewPart);
+            if (l_err != nullptr)
+            {
+                break;
+            }
+
+            // Set mark_target_changed and cached_copy_valid
+            // Since we have copied stuff in the cache is valid, and been updated.
+            // Even if this is a replacement ( cached_copy_valid was already 1) we
+            // must set mark_target_changed so just always update the header
+            if( (l_isNewPart == EECACHE_NEW_PART)
+                || (!l_isInSync) )
+            {
+                char* l_pathstring = i_target->getAttr<TARGETING::ATTR_PHYS_PATH>().toString();
+                CONSOLE::displayf(CONSOLE::DEFAULT, NULL,"Detected new part : %.8X (%s)",
+                                  TARGETING::get_huid(i_target),
+                                  l_pathstring);
+                free(l_pathstring);
+
+                setEepromChanged(l_completeRecordHeader);
+
+                if (l_completeRecordHeader.completeRecord.master_eeprom)
+                {
+                    // We have updated the cache entry, this indicates we have found a
+                    // "new" part. Mark the target as changed in hwas.
+                    HWAS::markTargetChanged(i_target);
+                }
+            }
+        }
+        else if (l_updateContents)
+        {
+            l_err = updateEecacheContents(i_target,
                                          i_eepromType,
                                          i_eepromBuffer,
                                          i_eepromBuflen,
                                          l_completeRecordHeader,
                                          l_isNewPart);
-            if (errl)
+            if (l_err)
             {
                 break;
             }
         }
         if (l_updateHeader)
         {
-            errl = updateEecacheHeader(l_completeRecordHeader,
+            l_err = updateEecacheHeader(l_completeRecordHeader,
                                        io_recordFromPnorToUpdate);
-            if (errl)
+            if (l_err)
             {
                 break;
             }
@@ -1138,7 +1220,7 @@ errlHndl_t updateExistingEecacheEntry(
 
     } while(0);
 
-    return errl;
+    return l_err;
 }
 
 /*
@@ -2347,10 +2429,12 @@ errlHndl_t eecachePresenceDetect(TARGETING::Target* i_target,
 errlHndl_t isEepromInSync(TARGETING::Target * i_target,
                           const eepromRecordHeader& i_eepromRecordHeader,
                           EEPROM::EEPROM_ROLE i_eepromType,
+                          bool i_useAttributes,
                           bool & o_isInSync,
                           bool & o_isNewPart)
 {
     errlHndl_t l_errl = nullptr;
+
     if (i_eepromRecordHeader.completeRecord.master_eeprom)
     {
         // Create namespace alias for targeting to reduce number of
@@ -2390,11 +2474,13 @@ errlHndl_t isEepromInSync(TARGETING::Target * i_target,
 
         l_errl = VPD::ensureEepromCacheIsInSync(i_target,
                                                 l_eepromContentType,
+                                                i_useAttributes,
                                                 o_isInSync,
                                                 o_isNewPart);
     }
     else
     {
+        TRACFCOMP(g_trac_eeprom,"isEepromInSync-nonmaster");
         // Check if this matches master
         bool valid = false;
         bool changed = false;
@@ -2406,7 +2492,7 @@ errlHndl_t isEepromInSync(TARGETING::Target * i_target,
             if ((changed != hasEepromChanged(i_eepromRecordHeader)) ||
             (valid != i_eepromRecordHeader.completeRecord.cached_copy_valid))
             {
-                TRACSSCOMP( g_trac_eeprom,
+                TRACFCOMP( g_trac_eeprom,
                   "isEepromInSync() Eeprom w/ Role %d is not in sync."
                   " Master role %d/%d vs current role %d/%d (valid/changed)",
                   i_eepromType, valid, changed,
@@ -2416,6 +2502,10 @@ errlHndl_t isEepromInSync(TARGETING::Target * i_target,
             }
         }
     }
+
+    TRACFCOMP(g_trac_eeprom,"isEepromInSync(%.8X,o_isInSync=%d)",
+              TARGETING::get_huid(i_target),
+              o_isInSync);
     return l_errl;
 }
 
@@ -2538,5 +2628,94 @@ errlHndl_t clearEecache(eecacheSectionHeader * i_eecacheSectionHeaderPtr,
     return l_errl;
 }
 
+errlHndl_t updateEecacheContentsFromBuffer(TARGETING::Target*          i_target,
+                                           EEPROM::EEPROM_ROLE const   i_eepromType,
+                                           void        const * const   i_eepromBuffer,
+                                           size_t              const   i_eepromBuflen,
+                                           eepromRecordHeader  const & i_recordHeader)
+{
+    errlHndl_t l_errl = nullptr;
 
+    do {
+        eecacheSectionHeader* l_eecacheSectionHeader = getEecachePnorVaddr();
+
+        // Size of the eeprom contents.
+        size_t  l_eepromLen = i_recordHeader.completeRecord.cache_copy_size
+          * KILOBYTE;
+
+        // Skip the last 8 bytes of MVPD for Proc targets. MVPD borders Keystore,
+        // and Keystore is read-protected on SPI engine 2. There is a HW bug where
+        // we can't read the last byte leading up to the border of the Keystore
+        // partition, so we need to read less than the full size of MVPD. We're
+        // reading 8 bytes less because SPI reading logic rounds the sizes up to
+        // 8 bytes.
+        if((i_eepromType == EEPROM::VPD_PRIMARY || i_eepromType == EEPROM::VPD_AUTO)
+           && i_target->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_PROC)
+        {
+            l_eepromLen = l_eepromLen - 8;
+        }
+
+        // Where in PNOR to write the eeprom contents.
+        void * l_internalSectionAddr =
+          reinterpret_cast<uint8_t *>(l_eecacheSectionHeader)
+          + i_recordHeader.completeRecord.internal_offset;
+
+        TRACFCOMP(g_trac_eeprom,
+                  "updateEecacheContentsFromBuffer(): "
+                  "copying from buffer : huid 0x%.08X "
+                  " eeprom length 0x%.08X  eecache vaddr %p" ,
+                  get_huid(i_target), i_eepromBuflen, l_internalSectionAddr);
+
+        if (i_eepromBuflen > l_eepromLen)
+        {
+            TRACFCOMP(g_trac_eeprom, "updateEecacheContentsFromBuffer(): eeprom buflen %d > eeprom length %d",
+                      i_eepromBuflen,
+                      l_eepromLen);
+            /*@
+             * @errortype   ERRL_SEV_UNRECOVERABLE
+             * @moduleid    EEPROM_UPDATE_EECACHE_CONTENTS
+             * @reasoncode  EEPROM_UPDATE_BUFFER_MISMATCH
+             * @userdata1[0:31]  HUID of Master
+             * @userdata1[32:39] Port (or 0xFF)
+             * @userdata1[40:47] Engine
+             * @userdata1[48:55] devAddr    (or byte 0 offset_KB)
+             * @userdata1[56:63] mux_select (or byte 1 offset_KB)
+             * @userdata2[0:31]  i_eepromBuflen
+             * @userdata2[32:63] l_eepromLen
+             * @devdesc   Size of data in l_eepromLen is not matching requester
+             * @custdesc  Improper handling of Vital Product Data by boot firmware
+             */
+
+            l_errl = new ERRORLOG::ErrlEntry(
+                                             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                             EEPROM_UPDATE_EECACHE_CONTENTS,
+                                             EEPROM_UPDATE_BUFFER_MISMATCH,
+                                             getEepromHeaderUserData(i_recordHeader),
+                                             TWO_UINT32_TO_UINT64(TO_UINT32(i_eepromBuflen),
+                                                                  TO_UINT32(l_eepromLen)),
+                                             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            l_errl->collectTrace(EEPROM_COMP_NAME, 256);
+            break;
+        }
+
+        // copy in the new buffer
+        memcpy(l_internalSectionAddr, i_eepromBuffer ,  i_eepromBuflen);
+
+        // clear out the remaining space in the cache entry
+        memset((static_cast<uint8_t *>(l_internalSectionAddr)
+                + i_eepromBuflen),
+               0xFF,
+               l_eepromLen - i_eepromBuflen);
+
+        // Flush the page to make sure it gets to the PNOR
+        l_errl = flushToPnor(l_internalSectionAddr, l_eepromLen);
+        if(l_errl)
+        {
+            TRACFCOMP(g_trac_eeprom, ERR_MRK"updateEecacheContentsFromBuffer(): Failed to flush write to PNOR");
+            break;
+        }
+    } while(0);
+
+    return l_errl;
+}
 } // namespace EEPROM
