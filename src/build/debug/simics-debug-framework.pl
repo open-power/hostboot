@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2020
+# Contributors Listed Below - COPYRIGHT 2011,2022
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -160,12 +160,12 @@ sub getImgPath
 # @sub getSymsMode
 #
 # Return whether we should use symbol files or pointers from memory.
-#   "usefile" : Only use the symbol files
 #
 sub getSymsMode
 {
-    # We're always running from a build of some sort in simics
-    return "usefile";
+    # Try to use the in-memory data if possible since that will be
+    # more accurate if we're patching things.
+    return "default";
 }
 
 # Tool location override.
