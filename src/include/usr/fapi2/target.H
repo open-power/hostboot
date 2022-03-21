@@ -586,8 +586,13 @@ inline std::vector<Target<K_CHILD, M, V> >
           ? TARGETING::UTIL_FILTER_FUNCTIONAL
           : TARGETING::UTIL_FILTER_ALL;
 
-        // For any top-level target, we will use PRESENT for !functional
+        // Select everything regardless of the present state
+        bool l_selectAll = (i_state == fapi2::TARGET_STATE_ALL) ? true : false;
+
+        // For any top-level target, we will use PRESENT for !functional.
+        // Do not overwrite the state if all parts are requested.
         if( !l_functional &&
+            !l_selectAll &&
             ( (K_CHILD == fapi2::TARGET_TYPE_DIMM)
               || (K_CHILD == fapi2::TARGET_TYPE_PROC_CHIP)
               || (K_CHILD == fapi2::TARGET_TYPE_PMIC)

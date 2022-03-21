@@ -386,7 +386,14 @@ errlHndl_t DeconfigGard::platCreateGardRecord(
                 i_pTarget->getAttr<ATTR_DECONFIG_GARDABLE>();
         const uint8_t lPresent =
                 i_pTarget->getAttr<ATTR_HWAS_STATE>().present;
-        if (!lDeconfigGardable || !lPresent)
+        // Do not create GARD records for non-present targets
+        if(!lPresent)
+        {
+            HWAS_ERR("Target is not present. Will not create a GARD record");
+            break;
+        }
+
+        if (!lDeconfigGardable)
         {
             // Target is not GARDable. Commit an error
             HWAS_ERR("Target not GARDable");
@@ -396,11 +403,10 @@ errlHndl_t DeconfigGard::platCreateGardRecord(
              * @moduleid     HWAS::MOD_PLAT_DECONFIG_GARD
              * @reasoncode   HWAS::RC_TARGET_NOT_GARDABLE
              * @devdesc      Attempt to create a GARD Record for a target that
-             *               is not GARDable
-             *               (not DECONFIG_GARDABLE or not present)
+             *               is not DECONFIG_GARDABLE
              * @custdesc     A problem occurred during the IPL of the system.
              *               Attempt to create a deconfiguration record for a
-             *               target that is not deconfigurable or not present.
+             *               target that is not deconfigurable.
              * @userdata1    HUID of input target // GARD errlog EID
              * @userdata2    ATTR_DECONFIG_GARDABLE // ATTR_HWAS_STATE.present
              */

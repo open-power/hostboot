@@ -3297,8 +3297,9 @@ void DeconfigGard::_createDeconfigureRecord(
         }
     }
 
-    // didn't find a match
-    if (l_itr == iv_deconfigureRecords.end())
+    // didn't find a match and the target is present
+    if (l_itr == iv_deconfigureRecords.end() &&
+        i_target.getAttr<TARGETING::ATTR_HWAS_STATE>().present)
     {
         // Create a DeconfigureRecord
         HWAS_INF("Creating a Deconfigure Record");
