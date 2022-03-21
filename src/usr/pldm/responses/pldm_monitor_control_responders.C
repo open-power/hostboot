@@ -801,6 +801,7 @@ errlHndl_t handleSetEventReceiverRequest(const msg_q_t i_msgQ,
 
 errlHndl_t handleAttributeBackedSensorGetRequest(const state_sensor_callback_args& i_args)
 {
+    errlHndl_t errl = nullptr;
     PLDM_ENTER("handleAttributeBackedSensorGetRequest");
 
     uint16_t attr_data = 0;
@@ -809,7 +810,24 @@ errlHndl_t handleAttributeBackedSensorGetRequest(const state_sensor_callback_arg
            "Cannot read attribute 0x%08x on target 0x%08x",
            i_args.i_userdata, get_huid(i_args.i_target));
 
-    const errlHndl_t errl = sendStateSensorGetRequestResponse(i_args.i_msgQ, i_args.i_msg, PLDM_SENSOR_NORMAL, attr_data);
+    // An exception to using attribute value.
+    // Phyp and HB each have a sensor for BOOT_PROGRESS_STATE and the
+    // BMC has requested that HB return PLDM_ERROR at runtime
+    // so they can distinguish what sensor to use for the current
+    // BOOT_PROGRESS state
+    bool responseSent = false;
+    if (i_args.i_userdata == ATTR_BOOT_PROGRESS_STATE)
+    {
+#ifdef __HOSTBOOT_RUNTIME
+        responseSent = true;
+        PLDM_INF("handleAttributeBackedSensorGetRequest: BOOT_PROGRESS request at RT.  Return PLDM_ERROR status");
+        send_cc_only_response(i_args.i_msgQ, i_args.i_msg, PLDM_ERROR);
+#endif
+    }
+    if (!responseSent)
+    {
+        errl = sendStateSensorGetRequestResponse(i_args.i_msgQ, i_args.i_msg, PLDM_SENSOR_NORMAL, attr_data);
+    }
 
     PLDM_EXIT("handleAttributeBackedSensorGetRequest");
 
