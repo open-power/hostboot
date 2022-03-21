@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020
+# Contributors Listed Below - COPYRIGHT 2020,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -68,6 +68,7 @@ class errludP_i2c:
         subd['Port'], i=memConcat(data, i, i+1)
         subd['Engine'], i=memConcat(data, i, i+1)
         subd['Device Address'], i=memConcat(data, i, i+8)
+        subd['Flag: skip mode setup'], i=memConcat(data, i, i+1)
         subd['Flag: with stop'], i=memConcat(data, i, i+1)
         subd['Flag: read not write'], i=memConcat(data, i, i+1)
         subd['Bus Speed (kbits/sec)'], i=memConcat(data, i, i+8)
