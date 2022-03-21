@@ -38,7 +38,7 @@
 #define _GEN_MSS_MEMDIAGS_H_
 
 #include <fapi2.H>
-#include <generic/memory/lib/mss_generic_system_attribute_getters.H>
+#include <mss_generic_system_attribute_getters.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_address.H>

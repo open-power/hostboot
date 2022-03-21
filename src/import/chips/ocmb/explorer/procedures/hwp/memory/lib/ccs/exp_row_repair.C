@@ -51,7 +51,7 @@
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 #include <mss_generic_attribute_getters.H>
 #include <mss_explorer_attribute_getters.H>
-#include <generic/memory/lib/mss_generic_system_attribute_getters.H>
+#include <mss_generic_system_attribute_getters.H>
 
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/find.H>

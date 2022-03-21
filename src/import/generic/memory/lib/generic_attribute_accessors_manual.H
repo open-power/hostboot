@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,7 +37,7 @@
 #define GEN_ATTR_ACCESS_MANUAL_H_
 
 #include <fapi2.H>
-#include <generic/memory/lib/mss_generic_system_attribute_getters.H>
+#include <mss_generic_system_attribute_getters.H>
 
 namespace mss
 {

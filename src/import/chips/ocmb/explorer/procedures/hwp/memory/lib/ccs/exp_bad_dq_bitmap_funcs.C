@@ -43,8 +43,8 @@
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/mss_rank.H>
-#include <generic/memory/lib/mss_generic_attribute_getters.H>
-#include <generic/memory/lib/mss_generic_attribute_setters.H>
+#include <mss_generic_attribute_getters.H>
+#include <mss_generic_attribute_setters.H>
 #include <lib/ccs/exp_bad_dq_bitmap_funcs.H>
 
 namespace mss

@@ -38,7 +38,7 @@
 #define _GEN_MSS_PORT_H_
 
 #include <fapi2.H>
-#include <generic/memory/lib/mss_generic_attribute_getters.H>
+#include <mss_generic_attribute_getters.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/mc/gen_mss_port_traits.H>
 #include <generic/memory/lib/utils/scom.H>

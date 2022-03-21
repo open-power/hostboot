@@ -39,7 +39,7 @@
 #include <mss_generic_attribute_getters.H>
 #include <mss_explorer_attribute_getters.H>
 #include <mss_explorer_attribute_setters.H>
-#include <generic/memory/lib/mss_generic_system_attribute_getters.H>
+#include <mss_generic_system_attribute_getters.H>
 
 namespace mss
 {

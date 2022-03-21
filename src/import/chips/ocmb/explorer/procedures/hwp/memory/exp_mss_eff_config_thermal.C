@@ -45,8 +45,8 @@
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/dimm/kind.H>
 #include <generic/memory/lib/utils/count_dimm.H>
-#include <generic/memory/lib/mss_generic_attribute_getters.H>
-#include <generic/memory/lib/mss_generic_system_attribute_getters.H>
+#include <mss_generic_attribute_getters.H>
+#include <mss_generic_system_attribute_getters.H>
 #include <lib/plug_rules/exp_plug_rules.H>
 
 extern "C"

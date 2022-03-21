@@ -38,8 +38,8 @@
 #include <exp_data_structs.H>
 #include <generic/memory/lib/utils/mss_bad_bits.H>
 #include <generic/memory/lib/utils/endian_utils.H>
-#include <generic/memory/lib/mss_generic_attribute_setters.H>
-#include <generic/memory/lib/mss_generic_attribute_getters.H>
+#include <mss_generic_attribute_setters.H>
+#include <mss_generic_attribute_getters.H>
 #include <exp_train_handler.H>
 
 namespace mss

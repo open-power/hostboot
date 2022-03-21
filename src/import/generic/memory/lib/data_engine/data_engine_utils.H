@@ -41,7 +41,7 @@
 #include <generic/memory/lib/utils/index.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/pos.H>
-#include <generic/memory/lib/mss_generic_attribute_getters.H>
+#include <mss_generic_attribute_getters.H>
 #include <generic/memory/lib/utils/conversions.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/buffer_ops.H>

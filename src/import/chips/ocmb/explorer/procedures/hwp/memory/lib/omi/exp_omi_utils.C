@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,9 +37,9 @@
 #include <lib/omi/exp_omi_utils.H>
 #include <lib/shared/exp_consts.H>
 #include <lib/i2c/exp_i2c_fields.H>
-#include <generic/memory/lib/mss_generic_attribute_getters.H>
+#include <mss_generic_attribute_getters.H>
 #include <mss_explorer_attribute_getters.H>
-#include <generic/memory/lib/mss_generic_system_attribute_getters.H>
+#include <mss_generic_system_attribute_getters.H>
 #include <generic/memory/lib/utils/mss_log_utils.H>
 #include <lib/shared/exp_consts.H>
 #include <p10_scom_omi_a.H>

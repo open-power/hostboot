@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,8 +49,8 @@
 #include <generic/memory/lib/utils/fir/gen_mss_fir.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/find.H>
-#include <lib/mss_p10_attribute_getters.H>
-#include <generic/memory/lib/mss_generic_attribute_getters.H>
+#include <mss_p10_attribute_getters.H>
+#include <mss_generic_attribute_getters.H>
 #include <generic/memory/lib/generic_attribute_accessors_manual.H>
 
 namespace scomt

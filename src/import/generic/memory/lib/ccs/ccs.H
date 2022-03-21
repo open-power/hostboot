@@ -47,7 +47,7 @@
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_memdiags.H>
 #include <generic/memory/lib/ccs/ccs_traits.H>
-#include <generic/memory/lib/mss_generic_attribute_getters.H>
+#include <mss_generic_attribute_getters.H>
 
 namespace mss
 {

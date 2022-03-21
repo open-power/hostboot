@@ -40,7 +40,7 @@
 #include <lib/ccs/ccs_traits_explorer.H>
 #include <generic/memory/lib/dimm/ddr4/mrs_load_ddr4.H>
 #include <generic/memory/lib/dimm/ddr4/mrs04.H>
-#include <generic/memory/lib/mss_generic_system_attribute_getters.H>
+#include <mss_generic_system_attribute_getters.H>
 
 namespace mss
 {

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,7 +47,7 @@
 #include <generic/memory/lib/dimm/ddr4/mrs_load_ddr4.H>
 #include <generic/memory/lib/utils/mc/gen_mss_port_traits.H>
 #include <generic/memory/lib/utils/mss_rank.H>
-#include <generic/memory/lib/mss_generic_system_attribute_getters.H>
+#include <mss_generic_system_attribute_getters.H>
 
 namespace mss
 {

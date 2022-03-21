@@ -41,14 +41,13 @@
 #include <lib/workarounds/exp_omi_workarounds.H>
 #include <lib/i2c/exp_i2c.H>
 #include <generic/memory/mss_git_data_helper.H>
-#include <generic/memory/lib/mss_generic_attribute_getters.H>
-#include <generic/memory/lib/mss_generic_system_attribute_getters.H>
+#include <mss_generic_attribute_getters.H>
+#include <mss_generic_system_attribute_getters.H>
 #include <generic/memory/lib/generic_attribute_accessors_manual.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
-#include <mss_generic_system_attribute_getters.H>
-#include <lib/mss_p10_attribute_getters.H>
+#include <mss_p10_attribute_getters.H>
 #include <mss_explorer_attribute_setters.H>
 #include <lib/i2c/exp_i2c_fields.H>
 #include <p10_io_omi_prbs.H>
