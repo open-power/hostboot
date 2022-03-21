@@ -75,6 +75,7 @@ namespace DeviceFW
         MMIO,         // Memory Mapped I/O
         IDEC,         // Read and set EC and CHIPID values
         EEPROM_CACHE, // Read EEPROM over I2C and write to PNOR
+        VPD,          // Generic VPD access
         LAST_ACCESS_TYPE,
     };
 
@@ -250,6 +251,28 @@ namespace DeviceFW
      */
     #define DEVICE_DVPD_FORCE_ADDRESS( i_record, i_keyword, i_location )\
         DeviceFW::DVPD, static_cast<uint64_t>(( i_record )),\
+            static_cast<uint64_t>(( i_keyword )),\
+            static_cast<uint64_t>(( i_location ))
+
+    /**
+     * Construct the device addressing parameters for the VPD device ops.
+     * @param[in] i_record - The enumeration of the VPD record to access.
+     * @param[in] i_keyword - The enumeration of the VPD keyword, located
+     *      within the i_record Record to access.
+     */
+    #define DEVICE_VPD_ADDRESS( i_record, i_keyword )\
+        DEVICE_VPD_FORCE_ADDRESS( i_record, i_keyword, VPD::AUTOSELECT )
+
+    /**
+     * Construct the device addressing parameters for the VPD device ops.
+     * @param[in] i_record - The enumeration of the VPD record to access.
+     * @param[in] i_keyword - The enumeration of the VPD keyword, located
+     *      within the i_record Record to access.
+     * @param[in] i_location - The location of the data (PNOR/SEEPROM)
+            see vpd_if.H
+     */
+    #define DEVICE_VPD_FORCE_ADDRESS( i_record, i_keyword, i_location )\
+        DeviceFW::VPD, static_cast<uint64_t>(( i_record )),\
             static_cast<uint64_t>(( i_keyword )),\
             static_cast<uint64_t>(( i_location ))
 

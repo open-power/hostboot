@@ -189,6 +189,22 @@ namespace PVPD
                            DeviceFW::PVPD,
                            TARGETING::TYPE_TPM,
                            pvpdWrite );
+    DEVICE_REGISTER_ROUTE( DeviceFW::READ,
+                           DeviceFW::VPD,
+                           TARGETING::TYPE_NODE,
+                           pvpdRead );
+    DEVICE_REGISTER_ROUTE( DeviceFW::WRITE,
+                           DeviceFW::VPD,
+                           TARGETING::TYPE_NODE,
+                           pvpdWrite );
+    DEVICE_REGISTER_ROUTE( DeviceFW::READ,
+                           DeviceFW::VPD,
+                           TARGETING::TYPE_TPM,
+                           pvpdRead );
+    DEVICE_REGISTER_ROUTE( DeviceFW::WRITE,
+                           DeviceFW::VPD,
+                           TARGETING::TYPE_TPM,
+                           pvpdWrite );
 
 }; // end namespace PVPD
 
@@ -227,6 +243,8 @@ errlHndl_t nodePresenceDetect(DeviceFW::OperationType i_opType,
 {
     errlHndl_t l_errl = NULL;
     bool pvpd_present = true;
+    TRACFCOMP(g_trac_vpd,ENTER_MRK"nodePresenceDetect(%.8X)",
+              TARGETING::get_huid(i_target));
 
     if (unlikely(io_buflen < sizeof(bool)))
     {
@@ -294,6 +312,8 @@ errlHndl_t nodePresenceDetect(DeviceFW::OperationType i_opType,
     memcpy(io_buffer, &pvpd_present, sizeof(pvpd_present));
     io_buflen = sizeof(pvpd_present);
 
+    TRACFCOMP(g_trac_vpd,EXIT_MRK"nodePresenceDetect(%.8X)",
+              TARGETING::get_huid(i_target));
     return l_errl;
 }
 

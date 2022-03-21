@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1016,6 +1016,392 @@ class MVPDTest: public CxxTest::TestSuite
                        "testMvpdCheckStructOrder - %d fails",
                        fails );
         }
+
+
+        /**
+         * @brief This function will test MVPD reads using the
+         *        generic VPD driver interface.
+         */
+        void testMvpdReadGeneric ( void )
+        {
+            errlHndl_t err = NULL;
+            uint64_t cmds = 0x0;
+            uint64_t fails = 0x0;
+            uint64_t theRecord = 0x0;
+            uint64_t theKeyword = 0x0;
+
+            TRACFCOMP( g_trac_vpd,
+                       ENTER_MRK"testMvpdReadGeneric()" );
+
+            do
+            {
+                TARGETING::Target * theTarget = getFunctionalProcTarget();
+                if(theTarget == NULL)
+                {
+                    TS_FAIL("testMvpdReadGeneric() - No Functional Targets found!");
+                    break;
+                }
+
+                uint8_t * theData = NULL;
+                size_t theSize = 0;
+                const uint32_t numCmds = sizeof(mvpdData)/sizeof(mvpdData[0]);
+                for( uint32_t curCmd = 0; curCmd < numCmds; curCmd++ )
+                {
+                    cmds++;
+                    theRecord = (uint64_t)mvpdData[curCmd].record;
+                    theKeyword = (uint64_t)mvpdData[curCmd].keyword;
+                    err = deviceRead( theTarget,
+                                      NULL,
+                                      theSize,
+                                      DEVICE_VPD_ADDRESS( theRecord,
+                                                           theKeyword ) );
+
+                    if( err )
+                    {
+                        fails++;
+                        TRACFCOMP( g_trac_vpd,
+                                   ERR_MRK"testMvpdReadGeneric() - failure reading "
+                                   "keyword size!!  rec: 0x%04x, kwd: 0x%04x",
+                                   theRecord,
+                                   theKeyword );
+                        TS_FAIL("testMvpdReadGeneric() -Failure reading keyword size!");
+                        errlCommit( err,
+                                    VPD_COMP_ID );
+                        continue;
+                    }
+
+                    theData = static_cast<uint8_t*>(malloc( theSize ));
+                    // Read record/keyword pair
+                    err = deviceRead( theTarget,
+                                      theData,
+                                      theSize,
+                                      DEVICE_VPD_ADDRESS( theRecord,
+                                                           theKeyword ) );
+
+                    if( err )
+                    {
+                        fails++;
+                        TRACFCOMP( g_trac_vpd,
+                                   ERR_MRK"testMvpdReadGeneric() - Failure on Record: "
+                                   "0x%04x, keyword: 0x%04x, of size: 0x%04x "
+                                   "- test %d",
+                                   theRecord,
+                                   theKeyword,
+                                   theSize, curCmd );
+                        TS_FAIL( "testMvpdReadGeneric() - Failure during MVPD read!" );
+                        errlCommit( err,
+                                    VPD_COMP_ID );
+
+                        // Free the data
+                        if( NULL != theData )
+                        {
+                            free( theData );
+                            theData = NULL;
+                        }
+                        continue;
+                    }
+
+                    TRACDCOMP( g_trac_vpd,
+                               INFO_MRK"testMvpdReadGeneric Results:" );
+                    for( uint32_t i = 0; i < theSize; i++ )
+                    {
+                        TRACDCOMP( g_trac_vpd,
+                                   INFO_MRK"   Byte[%d]: 0x%02x",
+                                   i, theData[i] );
+                    }
+
+                    // Free the data
+                    if( NULL != theData )
+                    {
+                        free( theData );
+                        theData = NULL;
+                    }
+                }
+            } while( 0 );
+
+            TRACFCOMP( g_trac_vpd,
+                       "testMvpdReadGeneric - %d/%d fails",
+                       fails, cmds );
+        }
+
+        /**
+         * @brief This function will test MVPD writes using the
+         *        generic VPD driver interface.
+         */
+        void testMvpdWriteGeneric ( void )
+        {
+            auto l_record  = MVPD::VWML;
+            auto l_keyword = MVPD::pdI;
+
+            errlHndl_t err = NULL;
+            uint64_t cmds = 0x0;
+            uint64_t fails = 0x0;
+            uint8_t* testData = NULL;
+            uint8_t* origData = NULL;
+            uint8_t* verifyData = NULL;
+
+            TRACFCOMP( g_trac_vpd,
+                       ENTER_MRK"testMvpdWriteGeneric()" );
+
+            do
+            {
+                TARGETING::Target * theTarget = getFunctionalProcTarget();
+                if(theTarget == NULL)
+                {
+                    TS_FAIL("testMvpdWriteGeneric() - No Functional Targets found!");
+                    break;
+                }
+
+                // first figure out how big the keyword is
+                cmds++;
+                size_t theSize = 0;
+                err = deviceRead( theTarget,
+                                  testData,
+                                  theSize,
+                                  DEVICE_VPD_ADDRESS(l_record, l_keyword) );
+                if( err )
+                {
+                    fails++;
+                    TRACFCOMP( g_trac_vpd,
+                               ERR_MRK"testMvpdWriteGeneric() - failure getting size of VWML/#I, RC=%.4X",
+                               err->reasonCode() );
+                    TS_FAIL( "testMvpdWriteGeneric() - Failure calling deviceRead!" );
+                    errlCommit( err,
+                                VPD_COMP_ID );
+                    continue;
+                }
+
+                // save off the original data
+                origData = new uint8_t[theSize];
+                cmds++;
+                err = deviceRead( theTarget,
+                                  origData,
+                                  theSize,
+                                  DEVICE_VPD_ADDRESS(l_record, l_keyword) );
+                if( err )
+                {
+                    fails++;
+                    TRACFCOMP( g_trac_vpd,
+                               ERR_MRK"testMvpdWriteGeneric() - failure reading VWML/#I, RC=%.4X",
+                               err->reasonCode() );
+                    TS_FAIL( "testMvpdWriteGeneric() - Failure calling deviceRead!" );
+                    errlCommit( err,
+                                VPD_COMP_ID );
+                    continue;
+                }
+                TRACFBIN( g_trac_vpd, "testMvpdWriteGeneric() - orig=",
+                          origData, theSize );
+
+                // fill it up with some dummy data
+                testData = new uint8_t[theSize];
+                for( size_t x=0; x<theSize; x++ )
+                {
+                    testData[x] = x;
+                }
+
+                // write the new data in
+                cmds++;
+                err = deviceWrite( theTarget,
+                                   testData,
+                                   theSize,
+                                   DEVICE_VPD_ADDRESS(l_record, l_keyword) );
+
+                if( err )
+                {
+#ifndef __HOSTBOOT_RUNTIME
+                    fails++;
+                    TRACFCOMP( g_trac_vpd,
+                               ERR_MRK"testMvpdWriteGeneric() - failure writing VWML/#I, RC=%.4X",
+                               err->reasonCode() );
+                    TS_FAIL( "testMvpdWriteGeneric() - Failure calling deviceWrite!" );
+                    errlCommit( err,
+                                VPD_COMP_ID );
+                    continue;
+#else
+                    TRACFCOMP( g_trac_vpd, "testMvpdWriteGeneric() - GOOD PATH Expected err from deviceWrite, -NOT- supported in HBRT");
+                    delete err;
+                    err = NULL;
+#endif
+                }
+                else
+                {
+                    // no err so make sure its proper
+#ifdef __HOSTBOOT_RUNTIME
+                    fails++;
+                    TRACFCOMP( g_trac_vpd, "testMvpdWriteGeneric() - Expected err from deviceWrite in HBRT");
+                    TS_FAIL( "testMvpdWriteGeneric() - Unexpected, we should have received err from HBRT from calling deviceWrite!" );
+                    continue;
+#else
+                    TRACFCOMP( g_trac_vpd, "testMvpdWriteGeneric() - GOOD PATH results from deviceWrite");
+#endif
+                }
+
+                // verify the data got written
+                cmds++;
+                verifyData = new uint8_t[theSize];
+                err = deviceRead( theTarget,
+                                  verifyData,
+                                  theSize,
+                                  DEVICE_VPD_ADDRESS(l_record, l_keyword) );
+                if( err )
+                {
+                    fails++;
+                    TRACFCOMP( g_trac_vpd,
+                               ERR_MRK"testMvpdWriteGeneric() - failure reading VWML/#I to verify, RC=%.4X",
+                               err->reasonCode() );
+                    TS_FAIL( "testMvpdWriteGeneric() - Failure calling deviceRead!" );
+                    errlCommit( err,
+                                VPD_COMP_ID );
+                    continue;
+                }
+                TRACFBIN( g_trac_vpd, "testMvpdWriteGeneric() - verify=",
+                          verifyData, theSize );
+
+                // compare what we read to what we wrote
+#ifndef __HOSTBOOT_RUNTIME
+                if( memcmp( testData, verifyData, theSize ) )
+                {
+                    fails++;
+                    TS_FAIL( "testMvpdWriteGeneric - Data mismatch!" );
+                }
+#else
+                if( memcmp( testData, verifyData, theSize ) )
+                {
+                    TS_INFO( "testMvpdWriteGeneric - Data mismatch! Expected since MVPD Writes during HBRT -NOT- supported" );
+                }
+
+#endif
+                TRACFBIN( g_trac_vpd, "testMvpdWriteGeneric() - wrote=",
+                          testData, theSize );
+                TRACFBIN( g_trac_vpd, "testMvpdWriteGeneric() - read=",
+                          verifyData, theSize );
+
+                // put the original data back to be a good citizen
+                cmds++;
+                err = deviceWrite( theTarget,
+                                   origData,
+                                   theSize,
+                                   DEVICE_VPD_ADDRESS(l_record, l_keyword) );
+                if( err )
+                {
+#ifndef __HOSTBOOT_RUNTIME
+                    fails++;
+                    TRACFCOMP( g_trac_vpd,
+                               ERR_MRK"testMvpdWriteGeneric() - failure writing original data back into VWML/#I, RC=%.4X",
+                               err->reasonCode() );
+                    TS_FAIL( "testMvpdWriteGeneric() - Failure calling deviceRead!" );
+                    errlCommit( err,
+                                VPD_COMP_ID );
+                    continue;
+#else
+                    TRACFCOMP( g_trac_vpd, "testMvpdWriteGeneric() - GOOD PATH Expected err from deviceWrite original data, -NOT- supported in HBRT");
+                    delete err;
+                    err = NULL;
+#endif
+                }
+                else
+                {
+                    // no err so make sure its proper
+#ifdef __HOSTBOOT_RUNTIME
+                    fails++;
+                    TRACFCOMP( g_trac_vpd, "testMvpdWriteGeneric() - Expected err from deviceWrite in HBRT");
+                    TS_FAIL( "testMvpdWriteGeneric() - Unexpected, we should have received err from HBRT from calling deviceWrite!" );
+                    continue;
+#else
+                    TRACFCOMP( g_trac_vpd, "testMvpdWriteGeneric() - GOOD PATH results from deviceWrite original data");
+#endif
+                }
+            } while( 0 );
+
+            if( NULL != testData )
+            {
+                delete[] testData;
+                testData = NULL;
+            }
+
+            if( NULL != origData )
+            {
+                delete[] origData;
+                origData = NULL;
+            }
+
+            if( NULL != verifyData )
+            {
+                delete[] verifyData;
+                verifyData = NULL;
+            }
+
+            if( cmds == 0 )
+            {
+                TS_FAIL( "testMvpdWriteGeneric - No tests ran, something is wrong..." );
+            }
+
+            TRACFCOMP( g_trac_vpd,
+                       "testMvpdWriteGeneric - %d/%d fails",
+                       fails, cmds );
+        }
+
+        /**
+         * @brief This function will test that an error is generated when a
+         *      record is passed in that cannot be found in the structure
+         *      that defines the Records string representation.
+         */
+        void testMvpdInvalidRecordGeneric ( void )
+        {
+            errlHndl_t err = NULL;
+            uint64_t cmds = 0x0;
+            uint64_t fails = 0x0;
+
+            TRACFCOMP( g_trac_vpd,
+                       ENTER_MRK"testMvpdInvalidRecordGeneric()" );
+
+            do
+            {
+                TARGETING::Target * theTarget = getFunctionalProcTarget();
+                if(theTarget == NULL)
+                {
+                    TS_FAIL("testMvpdInvalidRecordGeneric() - No Functional Targets found!");
+                    break;
+                }
+
+                size_t theSize = 1;
+                uint8_t * theData = new uint8_t[theSize];
+
+                cmds++;
+                err = deviceRead( theTarget,
+                                  theData,
+                                  theSize,
+                                  DEVICE_VPD_ADDRESS( MVPD::MVPD_LAST_RECORD,
+                                                       MVPD::pdR ) );
+
+                if( NULL == err )
+                {
+                    fails++;
+                    TS_FAIL( "testMvpdInvalidRecordGeneric() - Error expected with "
+                             "record of type MVPD_LAST_RECORD (0x%04x), but "
+                             "no error returned!",
+                             MVPD::MVPD_LAST_RECORD );
+                }
+                else
+                {
+                    delete err;
+                    err = NULL;
+                }
+
+                if( NULL != theData )
+                {
+                    delete theData;
+                    theData = NULL;
+                }
+            } while( 0 );
+
+            TRACFCOMP( g_trac_vpd,
+                       "testMvpdInvalidRecordGeneric - %d/%d fails",
+                       fails, cmds );
+        }
+
+
 };
+
 
 #endif

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -198,6 +198,14 @@ namespace MVPD
                            mvpdRead );
     DEVICE_REGISTER_ROUTE( DeviceFW::WRITE,
                            DeviceFW::MVPD,
+                           TARGETING::TYPE_PROC,
+                           mvpdWrite );
+    DEVICE_REGISTER_ROUTE( DeviceFW::READ,
+                           DeviceFW::VPD,
+                           TARGETING::TYPE_PROC,
+                           mvpdRead );
+    DEVICE_REGISTER_ROUTE( DeviceFW::WRITE,
+                           DeviceFW::VPD,
                            TARGETING::TYPE_PROC,
                            mvpdWrite );
 

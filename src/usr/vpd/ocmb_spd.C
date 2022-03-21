@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -760,5 +760,32 @@ errlHndl_t ddimmParkEeprom(TARGETING::TargetHandle_t i_target)
 
     return l_errhdl;
 }
+
+// Also want to register against the Generic VPD driver, but we need a
+//  wrapper to handle the extra "record" argument
+errlHndl_t ocmbSPDPerformOp_generic ( DeviceFW::OperationType i_opType,
+                                      TARGETING::Target * i_target,
+                                      void * io_buffer,
+                                      size_t & io_buflen,
+                                      int64_t i_accessType,
+                                      va_list i_args )
+{
+    //first arg is a record that we ignore
+    uint64_t l_record = va_arg( i_args, uint64_t );
+    assert( l_record == SPD::NO_RECORD );
+
+    //i_args is modified by va_arg so just pass it directly in
+    return ocmbSPDPerformOp(i_opType,
+                            i_target,
+                            io_buffer,
+                            io_buflen,
+                            i_accessType,
+                            i_args);
+}
+DEVICE_REGISTER_ROUTE(DeviceFW::READ,
+                      DeviceFW::VPD,
+                      T::TYPE_OCMB_CHIP,
+                      ocmbSPDPerformOp_generic );
+
 
 } // End of SPD namespace

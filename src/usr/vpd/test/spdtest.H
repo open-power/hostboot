@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -273,7 +273,7 @@ class SPDTest: public CxxTest::TestSuite
                                            DEVICE_SPD_ADDRESS( keyword ) );
                         if (theData != nullptr)
                         {
-                            delete theData;
+                            free( theData );
                             theData = nullptr;
                         }
                         if (err == nullptr)
@@ -532,19 +532,19 @@ class SPDTest: public CxxTest::TestSuite
 
             if( nullptr != testData )
             {
-                delete testData;
+                free( testData );
                 testData = nullptr;
             }
 
             if( nullptr != origData )
             {
-                delete origData;
+                free( origData );
                 origData = nullptr;
             }
 
             if( nullptr != verifyData )
             {
-                delete verifyData;
+                free( verifyData );
                 verifyData = nullptr;
             }
 
@@ -769,19 +769,19 @@ class SPDTest: public CxxTest::TestSuite
 
             if( nullptr != testData )
             {
-                delete testData;
+                free( testData );
                 testData = nullptr;
             }
 
             if( nullptr != origData )
             {
-                delete origData;
+                free( origData );
                 origData = nullptr;
             }
 
             if( nullptr != verifyData )
             {
-                delete verifyData;
+                free( verifyData );
                 verifyData = nullptr;
             }
 
@@ -1092,7 +1092,7 @@ class SPDTest: public CxxTest::TestSuite
                 // clean up the data
                 if( nullptr != theData )
                 {
-                    delete theData;
+                    free( theData );
                     theData = nullptr;
                 }
                 if( nullptr == err )
@@ -1156,7 +1156,7 @@ class SPDTest: public CxxTest::TestSuite
                 // clean up the data
                 if( nullptr != theData )
                 {
-                    delete theData;
+                    free( theData );
                     theData = nullptr;
                 }
 
@@ -1468,6 +1468,493 @@ class SPDTest: public CxxTest::TestSuite
                        EXIT_MRK"testspdDDR4TableOrder() - fails: %d",
                        fails );
         }
+
+        /**
+         * @brief This test reads all of the keywords for all of the
+         *      DIMMs found using the generic VPD driver interface.
+         */
+        void testSpdReadGeneric ( void )
+        {
+            errlHndl_t err = nullptr;
+            uint64_t cmds = 0x0;
+            uint64_t fails = 0x0;
+            uint8_t * theData = nullptr;
+
+            TRACFCOMP( g_trac_spd,
+                       ENTER_MRK"testSpdReadGeneric() DIMM" );
+
+            do
+            {
+                TARGETING::Target * theTarget = nullptr;
+
+                // Get DIMM Targets
+                TargetHandleList dimmList;
+                getDIMMTargets( dimmList );
+
+                if( ( 0 == dimmList.size() ) ||
+                    ( nullptr == dimmList[0] ) )
+                {
+                    TRACFCOMP( g_trac_spd,
+                               "testSpdReadGeneric - No DIMMs found!" );
+                    break;
+                }
+
+                // Operate on first DIMM.
+                theTarget = dimmList[0];
+                size_t theSize = 0;
+                bool writeable = false;
+                uint32_t entry = 0x0;
+
+                // Get the DDR revision
+                uint8_t memType = 0x0;
+                err = getMemType( theTarget,
+                                  memType );
+                if( err )
+                {
+                    fails++;
+                    TS_FAIL("testSpdReadGeneric- Failure reading Basic memory type!" );
+                    errlCommit( err,
+                                VPD_COMP_ID );
+                    break;
+                }
+
+                // Get the module type.
+                modSpecTypes_t modType = NA;
+                err = getModType(modType,
+                                 theTarget,
+                                 memType,
+                                 VPD::AUTOSELECT);
+                if( err )
+                {
+                    fails++;
+                    TS_FAIL("testSpdReadGeneric- Failure reading memory module type!");
+                    errlCommit( err,
+                                VPD_COMP_ID );
+                    break;
+                }
+
+
+                for( uint64_t keyword = SPD::SPD_FIRST_NORM_KEYWORD;
+                     keyword <= SPD::SPD_LAST_NORM_KEYWORD; keyword++ )
+                {
+                    cmds++;
+                    writeable = false;
+                    if( nullptr != theData )
+                    {
+                        free( theData );
+                        theData = nullptr;
+                    }
+
+                    // Get the required size of the buffer
+                    theSize = 0;
+                    if( SPD_DDR4_TYPE == memType )
+                    {
+                        size_t dataSize = (modType == DDIMM)
+                            ? (sizeof(ddr4DDIMMData)/sizeof(ddr4DDIMMData[0]))
+                            : (sizeof(ddr4Data)/sizeof(ddr4Data[0]));
+
+                        for( entry = 0;
+                             entry < dataSize;
+                             entry++ )
+                        {
+                            if (modType == DDIMM)
+                            {
+                                if( keyword == ddr4DDIMMData[entry].keyword )
+                                {
+                                    theSize = ddr4DDIMMData[entry].length;
+                                    writeable = ddr4DDIMMData[entry].writable;
+                                    break;
+                                }
+                            }
+                            else
+                            {
+                                if( keyword == ddr4Data[entry].keyword )
+                                {
+                                    theSize = ddr4Data[entry].length;
+                                    writeable = ddr4Data[entry].writable;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if( 0 == theSize )
+                    {
+                        // memType not supported or Keyword not supported on
+                        // this memType
+                        cmds--;
+                        continue;
+                    }
+
+                    // Allocate the buffer
+                    theData = static_cast<uint8_t*>(malloc( theSize ));
+
+                    err = deviceRead( theTarget,
+                                      theData,
+                                      theSize,
+                                      DEVICE_VPD_ADDRESS( SPD::NO_RECORD, keyword ) );
+
+                    if( err )
+                    {
+                        fails++;
+                        TS_FAIL( "testSpdReadGeneric - Failure on keyword: %04x",
+                                 keyword );
+                        errlCommit( err,
+                                    VPD_COMP_ID );
+                        continue;
+                    }
+
+                    // Read was successful, print out the data read
+                    if (theSize == 1)
+                    {
+                        TRACFCOMP( g_trac_spd,
+                                   "testSpdReadGeneric - kwd: 0x%04x, val: 0x%02x, size: 1",
+                                   keyword, theData[0] );
+                    }
+                    else if (theSize == 2)
+                    {
+                        TRACFCOMP( g_trac_spd,
+                                   "testSpdReadGeneric - kwd: 0x%04x, val: 0x%04x, size: 2",
+                                   keyword,
+                                   reinterpret_cast<uint16_t *>(theData)[0] );
+                    }
+                    else if (theSize == 3)
+                    {
+                        TRACFCOMP( g_trac_spd,
+                                   "testSpdReadGeneric - kwd: 0x%04x, val: 0x%02x%02x%02x, size: 3",
+                                   keyword, theData[0], theData[1], theData[2],
+                                   theSize );
+                    }
+                    else
+                    {
+                        // For 4 bytes or larger, just print the first 4 bytes
+                        TRACFCOMP( g_trac_spd,
+                                   "testSpdReadGeneric - kwd: 0x%04x, val: 0x%08x, size: %d",
+                                   keyword,
+                                   reinterpret_cast<uint32_t *>(theData)[0],
+                                   theSize );
+                    }
+
+                    if (writeable)
+                    {
+                        // Currently only the following two keywords are writeable
+                        // other tests will explicitly do writes to validate these two
+                        if ((keyword == SPD::DIMM_BAD_DQ_DATA) ||
+                            (keyword == SPD::EXPLORER_FW_VERSION))
+                        {
+                            TS_INFO( "testSpdReadGeneric - CONFIRMED PASS on keyword: %04x, "
+                                     "NORM keyword table defines as WRITEABLE",
+                                     keyword );
+                        }
+                        else
+                        {
+                            fails++;
+                            TS_FAIL("testSpdReadGeneric NORM keyword=%04x table defines as "
+                                    "WRITEABLE but should only be READABLE", keyword);
+                        }
+
+                    }
+                    else
+                    {
+                        // Keyword is -NOT- writeable, so attempt the write which should fail
+                        err = deviceWrite( theTarget,
+                                           theData,
+                                           theSize,
+                                           DEVICE_VPD_ADDRESS( SPD::NO_RECORD, keyword ) );
+                        if (theData != nullptr)
+                        {
+                            free(theData);
+                            theData = nullptr;
+                        }
+                        if (err == nullptr)
+                        {
+                            fails++;
+                            TS_FAIL("testSpdReadGeneric We should have failed writing "
+                                    "to a READ ONLY keyword=0x%X", keyword);
+                            break;
+                        }
+                        else
+                        {
+                            if ( ERRL_GETRC_SAFE(err) != VPD::VPD_KEYWORD_NOT_WRITABLE)
+                            {
+                                fails++;
+                                TS_FAIL("testSpdReadGeneric BAD RESULT - We DID -NOT- FAIL writing "
+                                    "as expected to a READ ONLY keyword=0x%X RC=0x%X", keyword,
+                                    ERRL_GETRC_SAFE(err));
+                                break;
+                            }
+                            else
+                            {
+                                TS_INFO("testSpdReadGeneric GOOD RESULT - We DID FAIL writing "
+                                    "to a READ ONLY keyword=0x%X RC=0x%X", keyword,
+                                    ERRL_GETRC_SAFE(err));
+                                delete err;
+                                err = nullptr;
+                            }
+                        }
+                    }
+                } // end for
+
+                if( err )
+                {
+                    break;
+                }
+            } while( 0 );
+
+            if( nullptr != theData )
+            {
+                free( theData );
+                theData = nullptr;
+            }
+
+            if( cmds == 0 )
+            {
+                TRACFCOMP(g_trac_spd,
+                          "testSpdReadGeneric - No tests ran, something is wrong..." );
+            }
+
+            TRACFCOMP( g_trac_spd,
+                       "testSpdReadGeneric - %d/%d fails",
+                       fails, cmds );
+        }
+
+        /**
+         * @brief Test a SPD Write EXPLORER_FW_VERSION using Generic VPD.
+         */
+        void testSpdWriteFWGeneric ( void )
+        {
+            errlHndl_t err = nullptr;
+            uint64_t cmds = 0x0;
+            uint64_t fails = 0x0;
+            uint8_t * testData = nullptr;
+            uint8_t * origData = nullptr;
+            uint8_t * verifyData = nullptr;
+
+            TS_INFO("testSpdWriteFWGeneric Entry");
+
+            do
+            {
+                TARGETING::Target * theTarget = nullptr;
+
+                // Get DIMM Targets
+                TargetHandleList dimmList;
+                getDIMMTargets( dimmList );
+
+                TS_INFO( "testSpdWriteFWGeneric dimmList.size()=%d", dimmList.size() );
+                if( ( 0 == dimmList.size() ) ||
+                    ( nullptr == dimmList[0] ) )
+                {
+                    TS_FAIL("testSpdWriteFWGeneric - No DIMMs found! Why not?");
+                    break;
+                }
+
+                // Operate on first DIMM
+                cmds++;
+                theTarget = dimmList[0];
+                size_t theSize = 0;
+
+                // Get Memory Type
+                uint8_t memType = 0x0;
+                err = getMemType( theTarget,
+                                  memType );
+
+                if( err )
+                {
+                    fails++;
+                    TS_FAIL( "testSpdWriteFWGeneric - failed to read memtype!" );
+                    errlCommit( err,
+                                VPD_COMP_ID );
+                    break;
+                }
+
+                // Get the module type.
+                modSpecTypes_t modType = NA;
+                err = getModType(modType,
+                                 theTarget,
+                                 memType,
+                                 VPD::AUTOSELECT);
+                if( err )
+                {
+                    fails++;
+                    TS_FAIL("testSpdWriteFWGeneric- Failure reading memory module type!");
+                    errlCommit( err,
+                                VPD_COMP_ID );
+                    break;
+                }
+
+                // Get the size
+                if( SPD_DDR4_TYPE == memType )
+                {
+                    size_t dataSize = (modType == DDIMM)
+                        ? (sizeof(ddr4DDIMMData)/sizeof(ddr4DDIMMData[0]))
+                        : (sizeof(ddr4Data)/sizeof(ddr4Data[0]));
+
+                    for( uint32_t entry = 0;
+                         entry < dataSize;
+                         entry++ )
+                    {
+                        if (modType == DDIMM)
+                        {
+                            if( SPD::EXPLORER_FW_VERSION == ddr4DDIMMData[entry].keyword )
+                            {
+                                theSize = ddr4DDIMMData[entry].length;
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            if( SPD::EXPLORER_FW_VERSION == ddr4Data[entry].keyword )
+                            {
+                                theSize = ddr4Data[entry].length;
+                                break;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    fails++;
+                    TS_FAIL( "testSpdWriteFWGeneric - Unsupported memory type: 0x%04x", memType );
+                    errlCommit( err, VPD_COMP_ID);
+                    break;
+                }
+
+                if( 0 == theSize )
+                {
+                    // memType or Keyword not supported
+                    TS_INFO("testSpdWriteFWGeneric memType Keyword not supported, but we tried...");
+                    cmds++;
+                    break;
+                }
+
+                // Allocate data buffer
+                origData = static_cast<uint8_t*>(malloc( theSize ));
+
+                // Read the data out first
+                err = deviceRead( theTarget,
+                                  origData,
+                                  theSize,
+                                  DEVICE_VPD_ADDRESS( SPD::NO_RECORD, EXPLORER_FW_VERSION ) );
+                TRACFBIN( g_trac_spd, "testSpdWriteFWGeneric ORIGINAL EXPLORER_FW_VERSION read=",
+                            origData, theSize );
+
+                if( err )
+                {
+                    fails++;
+                    TS_FAIL( "testSpdWriteFWGeneric - failed to read ORIGINAL EXPLORER_FW_VERSION!" );
+                    errlCommit( err,
+                                VPD_COMP_ID );
+                    break;
+                }
+
+                // fill it up with some dummy data
+                testData = static_cast<uint8_t*>(malloc( theSize ));
+                for( size_t x=0; x<theSize; x++ )
+                {
+                    testData[x] = x;
+                }
+
+                // Write the test data in
+                err = deviceWrite( theTarget,
+                                   testData,
+                                   theSize,
+                                   DEVICE_VPD_ADDRESS( SPD::NO_RECORD, EXPLORER_FW_VERSION ) );
+
+                if( err )
+                {
+                    fails++;
+                    TS_FAIL( "testSpdWriteFWGeneric - Error writing data to EXPLORER_FW_VERSION" );
+                    break;
+                }
+
+                // Read the data out again to check it
+                verifyData = static_cast<uint8_t*>(malloc( theSize ));
+                err = deviceRead( theTarget,
+                                  verifyData,
+                                  theSize,
+                                  DEVICE_VPD_ADDRESS( SPD::NO_RECORD, EXPLORER_FW_VERSION ) );
+                TRACFBIN( g_trac_spd, "testSpdWriteFWGeneric TEST DATA EXPLORER_FW_VERSION data read=",
+                            verifyData, theSize );
+
+                if( err )
+                {
+                    fails++;
+                    TS_FAIL( "testSpdWriteFWGeneric - failed to read TEST DATA for EXPLORER_FW_VERSION!" );
+                    errlCommit( err,
+                                VPD_COMP_ID );
+                    break;
+                }
+
+                if( memcmp( testData, verifyData, theSize ) )
+                {
+                    fails++;
+                    TS_FAIL( "testSpdWriteFWGeneric - PROBLEM DIMM EXPLORER_FW_VERSION "
+                             "data does not match what we wrote!" );
+                    TRACFBIN( g_trac_spd, "PROBLEM EXPLORER_FW_VERSION MISMATCH wrote=",
+                                testData, theSize );
+                    TRACFBIN( g_trac_spd, "PROBLEM EXPLORER_FW_VERSION MISMATCH read=",
+                                verifyData, theSize );
+                }
+                else
+                {
+                    TS_INFO( "testSpdWriteFWGeneric - CONFIRMED DIMM EXPLORER_FW_VERSION "
+                             "data written successfully!" );
+                    TRACFBIN( g_trac_spd, "CONFIRMED EXPLORER_FW_VERSION wrote=",
+                                testData, theSize );
+                    TRACFBIN( g_trac_spd, "CONFIRMED EXPLORER_FW_VERSION read=",
+                                verifyData, theSize );
+                }
+
+                // put the original data back to be a good citizen
+                err = deviceWrite( theTarget,
+                                   origData,
+                                   theSize,
+                                   DEVICE_VPD_ADDRESS( SPD::NO_RECORD, EXPLORER_FW_VERSION ) );
+                TS_INFO( "testSpdWriteFWGeneric - deviceWrite Restoring ORIGINAL "
+                         "DIMM EXPLORER_FW_VERSION" );
+
+                if( err )
+                {
+                    fails++;
+                    TS_FAIL( "testSpdWriteFWGeneric - Error writing original data back to "
+                             "DIMM EXPLORER_FW_VERSION data, things may be corrupted!");
+                    break;
+                }
+                else
+                {
+                    TS_INFO("testSpdWriteFWGeneric - Successfully restored original "
+                            "DIMM EXPLORER_FW_VERSION theSize=0x%X", theSize);
+                }
+
+
+            } while( 0 );
+
+            if( nullptr != testData )
+            {
+                free(testData);
+                testData = nullptr;
+            }
+
+            if( nullptr != origData )
+            {
+                free(origData);
+                origData = nullptr;
+            }
+
+            if( nullptr != verifyData )
+            {
+                free(verifyData);
+                verifyData = nullptr;
+            }
+
+            if( cmds == 0 )
+            {
+                TS_FAIL("testSpdWriteFWGeneric - No tests ran, something is wrong...");
+            }
+
+            TS_INFO("testSpdWriteFWGeneric Exit - %d/%d fails", fails, cmds);
+        }
+
 };
 
 #endif

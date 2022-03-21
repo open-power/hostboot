@@ -26,6 +26,7 @@
 #define __SPDENUMS_H
 
 #include <mbox/mbox_queues.H>
+#include <vpd/ipvpdenums.H> //just for INVALID_RECORD
 
 namespace SPD
 {
@@ -370,6 +371,9 @@ enum
     // This keyword should be last in the list
     // Invalid Keyword
     INVALID_SPD_KEYWORD                 = 0xFFFF,
+
+    // Used to populate record argument in generic VPD interface
+    NO_RECORD = IPVPD::INVALID_RECORD,
 };
 
 enum

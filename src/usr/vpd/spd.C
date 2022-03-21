@@ -2918,4 +2918,55 @@ void setConfigFlagsHW ( )
 }
 
 
+// In addtion to the regular SPD driver, we also want to register against
+//  the Generic VPD driver.  We need a wrapper to handle the extra "record"
+//  argument though.
+errlHndl_t spdGetKeywordValue_generic ( DeviceFW::OperationType i_opType,
+                                        TARGETING::Target * i_target,
+                                        void * io_buffer,
+                                        size_t & io_buflen,
+                                        int64_t i_accessType,
+                                        va_list i_args )
+{
+    //first arg is a record that we ignore
+    uint64_t l_record = va_arg( i_args, uint64_t );
+    assert( l_record == SPD::NO_RECORD );
+
+    //i_args is modified by va_arg so just pass it directly in
+    return spdGetKeywordValue(i_opType,
+                              i_target,
+                              io_buffer,
+                              io_buflen,
+                              i_accessType,
+                              i_args);
+}
+DEVICE_REGISTER_ROUTE( DeviceFW::READ,
+                       DeviceFW::VPD,
+                       TARGETING::TYPE_DIMM,
+                       spdGetKeywordValue_generic );
+
+errlHndl_t spdWriteKeywordValue_generic ( DeviceFW::OperationType i_opType,
+                                          TARGETING::Target * i_target,
+                                          void * io_buffer,
+                                          size_t & io_buflen,
+                                          int64_t i_accessType,
+                                          va_list i_args )
+{
+    //first arg is a record that we ignore
+    uint64_t l_record = va_arg( i_args, uint64_t );
+    assert( l_record == SPD::NO_RECORD );
+
+    //i_args is modified by va_arg so just pass it directly in
+    return spdWriteKeywordValue(i_opType,
+                                i_target,
+                                io_buffer,
+                                io_buflen,
+                                i_accessType,
+                                i_args);
+}
+DEVICE_REGISTER_ROUTE( DeviceFW::WRITE,
+                       DeviceFW::VPD,
+                       TARGETING::TYPE_DIMM,
+                       spdWriteKeywordValue_generic );
+
 }; // end namespace SPD
