@@ -120,9 +120,11 @@ errlHndl_t PNOR::clearSection(PNOR::SectionId i_section)
 /**
  * @brief  Write the data for a given section into PNOR
  */
-errlHndl_t PNOR::flush( PNOR::SectionId i_section)
+errlHndl_t PNOR::flush( PNOR::SectionId i_section,
+                        void* const i_vaddr,
+                        const size_t i_num_pages)
 {
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
     do {
         PNOR::SectionInfo_t l_info;
         l_err = getSectionInfo(i_section, l_info);
@@ -132,17 +134,30 @@ errlHndl_t PNOR::flush( PNOR::SectionId i_section)
                     " secId: %d", (int)i_section);
             break;
         }
-        uint8_t* l_vaddr = reinterpret_cast<uint8_t*>(l_info.vaddr);
+        uint8_t* l_section_vaddr = reinterpret_cast<uint8_t*>(l_info.vaddr);
+        uint8_t* const l_start_flush_vaddr = reinterpret_cast<uint8_t*>(ALIGN_PAGE_DOWN(reinterpret_cast<uintptr_t>(i_vaddr)));
+        uint64_t flush_byte_size = l_info.size;
+
+        if (l_section_vaddr <= l_start_flush_vaddr && l_start_flush_vaddr < l_section_vaddr + l_info.size)
+        {
+            const size_t start_flush_byte_offset = l_start_flush_vaddr - l_section_vaddr;
+            const size_t remaining_bytes = l_info.size - start_flush_byte_offset;
+            l_section_vaddr = l_start_flush_vaddr;
+            flush_byte_size = (i_num_pages
+                               ? std::min(i_num_pages * PAGE_SIZE, remaining_bytes)
+                               : remaining_bytes);
+        }
+
         #ifdef CONFIG_SECUREBOOT
         if (l_info.secure)
         {
             // subtract 2 deltas to get the PNOR unsecured address
-            l_vaddr = l_vaddr
+            l_section_vaddr = l_section_vaddr
                - VMM_VADDR_SPNOR_DELTA
                - VMM_VADDR_SPNOR_DELTA;
         }
         #endif
-        int l_rc = mm_remove_pages (RELEASE, l_vaddr, l_info.size);
+        const int l_rc = mm_remove_pages (RELEASE, l_section_vaddr, flush_byte_size);
         if (l_rc)
         {
             TRACFCOMP(g_trac_pnor, "PNOR::flush: mm_remove_pages errored,"

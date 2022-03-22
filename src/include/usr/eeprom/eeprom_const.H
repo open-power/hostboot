@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -161,11 +161,28 @@ union eepromRecordHeader
         uint32_t internal_offset;   // Offset from start of EECACHE section where cached data exists
                                     // This variable is used in src/build/simics/eecache-gen.py to
                                     // create empty header entries for a prebuilt EECACHE
-        uint8_t  cached_copy_valid : 1,   // This bit is set when we think the contents of the
-                                          // cache is valid.
-        master_eeprom              : 1,   // This bit marks this record as the master one (i.e. look at this one for change)
-        unused                     : 6;
+        union
+        {
+            uint8_t flags;
 
+            struct
+            {
+                uint8_t  cached_copy_valid : 1,   // This bit is set when we think the contents of the
+                                                  // cache is valid.
+                master_eeprom              : 1,   // This bit marks this record as the master one (i.e. look at this one for change)
+                pnor_write_in_progress     : 1,   // Whether a write to the backing PNOR storage is
+                                                  // in progress.
+                                                  // This bit is set at the beginning of a PNOR flush
+                                                  // and cleared at the end of the flush. If this
+                                                  // bit is set at the beginning of an IPL, it means
+                                                  // that the EECACHE is partially written and may
+                                                  // be corrupted; in that case we should delete
+                                                  // the EECACHE entry and reload all the data
+                                                  // from backing storage. (Used at IPL-time or
+                                                  // on BMC systems at runtime only).
+                unused                     : 5;
+            };
+        };
     } PACKED completeRecord;
 
     struct uniqueRecord

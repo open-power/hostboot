@@ -66,9 +66,11 @@ errlHndl_t PNOR::getSectionInfo( PNOR::SectionId i_section,
 /**
  * @brief  Write the data for a given section into PNOR
  */
-errlHndl_t PNOR::flush( PNOR::SectionId i_section)
+errlHndl_t PNOR::flush (const PNOR::SectionId i_section,
+                        void* const i_vaddr,
+                        const size_t i_num_pages)
 {
-    return Singleton<RtPnor>::instance().flush(i_section);
+    return Singleton<RtPnor>::instance().flush(i_section, i_vaddr, i_num_pages);
 }
 
 /**
@@ -281,7 +283,9 @@ errlHndl_t RtPnor::getSectionInfo(PNOR::SectionId i_section,
 }
 
 /**************************************************************/
-errlHndl_t RtPnor::flush( PNOR::SectionId i_section)
+errlHndl_t RtPnor::flush (const PNOR::SectionId i_section,
+                          void* i_vaddr,
+                          const size_t i_num_pages)
 {
     TRACFCOMP(g_trac_pnor, ENTER_MRK"RtPnor::flush");
     errlHndl_t l_err = nullptr;
@@ -335,6 +339,22 @@ errlHndl_t RtPnor::flush( PNOR::SectionId i_section)
         PnorAddrPair_t l_addrPair = l_it->second;
         uint8_t* l_pWorking = reinterpret_cast<uint8_t*>(l_addrPair.first);
         uint8_t* l_pClean   = reinterpret_cast<uint8_t*>(l_addrPair.second);
+        uint8_t* const l_pWorkingEnd = l_pWorking + l_sizeBytes;
+        size_t starting_page_index = 0;
+        size_t max_pages_to_flush = UINT64_MAX;
+
+        // Round start address down to nearest page
+        i_vaddr = reinterpret_cast<uint8_t*>(ALIGN_PAGE_DOWN(reinterpret_cast<uintptr_t>(i_vaddr)));
+
+        // Adjust working and clean pointers to start where the user requested
+        if (i_vaddr && l_pWorking <= i_vaddr && i_vaddr < l_pWorking + l_sizeBytes)
+        {
+            const size_t starting_offset = static_cast<uint8_t*>(i_vaddr) - l_pWorking;
+            l_pWorking += starting_offset;
+            l_pClean += starting_offset;
+            starting_page_index = starting_offset / PAGE_SIZE;
+            max_pages_to_flush = i_num_pages ? i_num_pages : UINT64_MAX;
+        }
 
         //ecc
         bool l_ecc = (iv_TOC[i_section].integrity&FFS_INTEG_ECC_PROTECT) ?
@@ -343,14 +363,17 @@ errlHndl_t RtPnor::flush( PNOR::SectionId i_section)
         //find the diff between each pointer
         //write back to pnor what doesn't match
         TRACFCOMP(g_trac_pnor, "finding diff between working and clean copy...");
-        for (uint64_t i = 0; i < (l_sizeBytes/PAGESIZE); i++)
+        for (size_t page_index = starting_page_index;
+             l_pWorking < l_pWorkingEnd
+                 && page_index - starting_page_index < max_pages_to_flush;
+             ++page_index)
         {
             if (0 != memcmp(l_pWorking, l_pClean, PAGESIZE))
             {
                 TRACFCOMP(g_trac_pnor, "RtPnor::flush: page %d is different,"
-                        " writing back to pnor", i);
+                        " writing back to pnor", page_index);
                 l_err = writeToDevice(iv_masterProcId, i_section,
-                                      i*PAGESIZE,PAGESIZE, l_ecc, l_pWorking);
+                                      page_index*PAGESIZE,PAGESIZE, l_ecc, l_pWorking);
                 if (l_err)
                 {
                     TRACFCOMP(g_trac_pnor, "RtPnor::flush: writeToDevice failed");

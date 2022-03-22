@@ -812,7 +812,14 @@ errlHndl_t checkForEecacheEntryUpdate(
         bool l_isInSync = false;
         if (i_present)
         {
-            if(i_eepromBuffer == nullptr)
+            if (i_recordFromPnor->completeRecord.pnor_write_in_progress)
+            {
+                TRACFCOMP(g_trac_eeprom,
+                          "checkForEecacheEntryUpdate(): EECACHE entry for target 0x%08x was "
+                          "found to have been partially written; refreshing cache contents",
+                          get_huid(i_target));
+            }
+            else if(i_eepromBuffer == nullptr)
             {
                 l_isInSync = true;
                 l_errl = isEepromInSync(i_target,
@@ -1205,6 +1212,25 @@ errlHndl_t updateExistingEecacheEntry(
             if (l_err)
             {
                 break;
+            }
+
+            // If we updated the contents of the EECACHE entry from the backing
+            // store and overwrote the old contents, then clear the "write in
+            // progress" flag because we're no longer concerned about the
+            // partial write to the old EECACHE contents that must have happened
+            // earlier.
+            if (io_recordFromPnorToUpdate->completeRecord.pnor_write_in_progress)
+            {
+                CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "Partial EECACHE write detected on 0x%08x; refreshing content",
+                                  get_huid(i_target));
+
+                io_recordFromPnorToUpdate->completeRecord.pnor_write_in_progress = 0;
+                l_err = flushToPnor(io_recordFromPnorToUpdate, sizeof(eepromRecordHeader));
+
+                if (l_err)
+                {
+                    break;
+                }
             }
         }
         if (l_updateHeader)
