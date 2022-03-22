@@ -71,7 +71,11 @@ using namespace TARGETING;
 
 const uint32_t EMPTY_GARD_RECORDID = 0xFFFFFFFF;
 
-#if !defined(__HOSTBOOT_RUNTIME) || defined(CONFIG_FILE_XFER_VIA_PLDM)
+#if !defined(__HOSTBOOT_RUNTIME) || !defined(CONFIG_FSP_BUILD)
+#define FLUSH_PNOR
+#endif
+
+#ifdef FLUSH_PNOR
 /**
  * @brief Guard PNOR section info, obtained once for efficiency
  */
@@ -922,6 +926,8 @@ errlHndl_t _GardRecordIdSetup( void *&io_platDeconfigGard)
 
                 l_hbDeconfigGard->iv_GardVersion = HWAS::DeconfigGard::CURRENT_GARD_VERSION_LAYOUT;
                 l_pGardRecordsBinary->iv_version = HWAS::DeconfigGard::CURRENT_GARD_VERSION_LAYOUT;
+                l_pGardRecordsBinary->iv_flags = HWAS::DeconfigGard::GARD_FLAGS_DEFAULT;
+                memset(l_pGardRecordsBinary->iv_padding, 0xFF, sizeof(l_pGardRecordsBinary->iv_padding));
                 memcpy(l_pGardRecordsBinary->iv_magicNumber, "GUARDREC",
                     sizeof(l_pGardRecordsBinary->iv_magicNumber));
                 HWAS_INF("_GardRecordIdSetup: CASE DEFAULT l_hbDeconfigGard->iv_GardVersion=0x%X",
@@ -950,25 +956,224 @@ errlHndl_t _GardRecordIdSetup( void *&io_platDeconfigGard)
     return l_pErr;
 }
 
+#ifdef FLUSH_PNOR
+#ifdef __HOSTBOOT_RUNTIME
+errlHndl_t _flush(void* const i_addr, const size_t i_length)
+{
+    return PNOR::flush(PNOR::GUARD_DATA, i_addr, ALIGN_PAGE(i_length) / PAGE_SIZE);
+}
+#else
+errlHndl_t _flush(void* const i_addr, const size_t i_length)
+{
+    errlHndl_t errl = nullptr;
+
+    const int l_rc = mm_remove_pages(FLUSH, i_addr, i_length);
+
+    if (l_rc)
+    {
+        /*@
+         * @moduleid         HWAS::MOD_PLAT_DECONFIG_GARD
+         * @reasoncode       HWAS::RC_PNOR_ACCESS_FAILED
+         * @userdata1[0:31]  Return code from mm_remove_pages
+         * @userdata2[32:63] Number of bytes to flush
+         * @userdata2        PNOR address to flush
+         * @devdesc          Problem flushing GUARD data to PNOR
+         * @custdesc         An error occurred during the IPL of the system
+         */
+        errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                             HWAS::MOD_PLAT_DECONFIG_GARD,
+                             HWAS::RC_PNOR_ACCESS_FAILED,
+                             TWO_UINT32_TO_UINT64(l_rc, i_length),
+                             reinterpret_cast<uint64_t>(i_addr),
+                             ErrlEntry::ADD_SW_CALLOUT);
+
+        HWAS_ERR("_flush: mm_remove_pages(FLUSH, %p, %d) returned %d (PLID=0x%08x)",
+                 i_addr, i_length, l_rc, ERRL_GETPLID_SAFE(errl));
+    }
+
+    return errl;
+}
+#endif // #else (#ifdef __HOSTBOOT_RUNTIME)
+
+/* @brief Set the PNOR_WRITE_IN_PROGRESS flag in the GUARD PNOR partition header.
+ *
+ *        Flushes the page containing the PNOR write-in-progress bit so that if
+ *        any subsequent content writes fail, this mark will be left to indicate
+ *        possible corruption. If this function returns an error, the caller
+ *        should not perform any content writes. The bit should be cleared after
+ *        the content writes succeed.
+ *
+ * @param[in/out] io_gard_records_header   The GUARD PNOR partition header.
+ * @param[in] i_write_in_progress          Whether a write is in progress.
+ * @return errlHndl_t                      Error if any, otherwise nullptr.
+ */
+errlHndl_t setGuardWriteInProgress(DeconfigGard::GardRecordsBinary& io_gard_records_header,
+                                   const DeconfigGard::GardFlagPnorWriteInProgress i_write_in_progress)
+{
+    errlHndl_t errl = nullptr;
+
+    const auto current_value = io_gard_records_header.iv_flags & DeconfigGard::GARD_FLAG_MASK_PNOR_WRITE_IN_PROGRESS;
+
+    if (current_value != i_write_in_progress)
+    {
+        io_gard_records_header.iv_flags =
+            ((io_gard_records_header.iv_flags & ~DeconfigGard::GARD_FLAG_MASK_PNOR_WRITE_IN_PROGRESS)
+             | i_write_in_progress);
+
+        errl = _flush(&io_gard_records_header.iv_flags, sizeof(io_gard_records_header.iv_flags));
+
+        if (errl)
+        {
+            HWAS_ERR("setGuardWriteInProgress: Error trying to flush to pnor (i_write_in_progress=%d)!",
+                     i_write_in_progress);
+            errl->collectTrace("HWAS_I");
+        }
+    }
+
+    return errl;
+}
+
+#if defined(__HOSTBOOT_RUNTIME) && !defined(CONFIG_FSP_BUILD)
+/* @brief Check whether a PNOR write was interrupted. This check happens only at
+ *        runtime, and only once, before we have read or written any guard
+ *        data. If this returns true, it means that a PNOR write failed partway
+ *        through, and then the HBRT adjunct was rebooted so that we lost the
+ *        in-memory cache of the consistent GUARD partition data, so that we
+ *        can't recover the partition by writing our version to PNOR. If this
+ *        happens, we can't trust anything in PNOR, so we disable writing to it
+ *        completely. The PNOR_WRITE_IN_PROGRESS flag will stay set, so that on
+ *        the next full IPL, the service processor will clear the GUARD
+ *        partition and start over.
+ *
+ *        The reason we only do this check once at the beginning of HBRT's
+ *        lifetime is that if a PNOR write fails, we still have a consistent
+ *        in-memory copy of the data that we can write to PNOR if the service
+ *        processor corrects itself and can handle the writes. The problem only
+ *        arises when a PNOR write fails and then the HBRT adjunct is rebooted
+ *        and we lose the in-memory copy.
+ *
+ * @param[in] i_gard_header  The GUARD partition header.
+ * @return    bool           Whether the GUARD PNOR partition data is corrupted.
+ */
+bool runtime_check_pnor_corruption(const DeconfigGard::GardRecordsBinary& i_gard_header)
+{
+    static bool pnor_corrupted = false;
+    static bool have_checked_pnor_corrupted = false;
+
+    if (!have_checked_pnor_corrupted)
+    {
+        have_checked_pnor_corrupted = true;
+
+        if ((i_gard_header.iv_flags & DeconfigGard::GARD_FLAG_MASK_PNOR_WRITE_IN_PROGRESS)
+            == DeconfigGard::GARD_FLAG_PNOR_WRITE_IS_IN_PROGRESS)
+        {
+            pnor_corrupted = true;
+
+            /*@
+             *@moduleid    HWAS::MOD_PLAT_DECONFIG_GARD
+             *@reasoncode  HWAS::RC_RT_POSSIBLE_PNOR_CORRUPTION
+             *@userdata1   The flags byte of the GUARD PNOR partition header
+             *@userdata2   none
+             *@devdesc     Detected corruption in the GUARD partition during HBRT start.  No guard records will be created.
+             *@custdesc    Data corruption detected in firmware persistent deconfiguration area, some deconfiguration data will be lost
+             */
+            errlHndl_t errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                                            HWAS::MOD_PLAT_DECONFIG_GARD,
+                                            HWAS::RC_RT_POSSIBLE_PNOR_CORRUPTION,
+                                            i_gard_header.iv_flags,
+                                            0,
+                                            ErrlEntry::ADD_SW_CALLOUT);
+
+            HWAS_ERR("Disabling GUARD_DATA PNOR flush; data was corrupted on HBRT start. This means that "
+                     "the HBRT adjunct was restarted after a PLDM PNOR write failed and we have lost "
+                     "our consistent in-memory version of the data. The service processor should clear "
+                     "the GUARD partition on the next IPL.");
+
+            errl->collectTrace("HWAS_I");
+
+            errlCommit(errl, HWAS_COMP_ID);
+        }
+    }
+
+    return pnor_corrupted;
+}
+#endif
+#endif // #ifdef FLUSH_PNOR
 
 void _flush(void *i_addr)
 {
-#ifndef __HOSTBOOT_RUNTIME
+#ifdef FLUSH_PNOR
+    static mutex_t flush_mutex = MUTEX_INITIALIZER;
+    const auto lock = scoped_mutex_lock(flush_mutex);
+
     HWAS_DBG("_flush: flushing GARD in PNOR: addr=%p sizeof(DeconfigGard::GardRecord)=0x%X", i_addr, sizeof(DeconfigGard::GardRecord));
-    int l_rc = mm_remove_pages(FLUSH, i_addr,
-                sizeof(DeconfigGard::GardRecord));
-    if (l_rc)
+
+    errlHndl_t errl = nullptr;
+
+    do
     {
-        HWAS_ERR("_flush: mm_remove_pages(FLUSH,%p,%d) returned %d",
-                i_addr, sizeof(DeconfigGard::GardRecord),l_rc);
+
+    PNOR::SectionInfo_t section_info = { };
+    errl = getGardSectionInfo(section_info);
+
+    if (errl)
+    {
+        HWAS_ERR("Failed to get PNOR partition info for GUARD_DATA, PLID=0x%08x", ERRL_GETPLID_SAFE(errl));
+        break;
     }
-#elif defined (CONFIG_FILE_XFER_VIA_PLDM)
-    HWAS_DBG("_flush: flushing all GARD in PNOR addr=%p", i_addr);
-    PNOR::flush(PNOR::GUARD_DATA);
+
+    const auto gard_records_header = reinterpret_cast<DeconfigGard::GardRecordsBinary*>(section_info.vaddr);
+
+#if defined(__HOSTBOOT_RUNTIME) && !defined(CONFIG_FSP_BUILD)
+    // If HBRT starts up and the PNOR partition is already corrupted, don't try
+    // to write to it.
+    if (runtime_check_pnor_corruption(*gard_records_header))
+    {
+        break;
+    }
 #endif
+
+    // Set the pnor-write-in-progress flag to true, then flush the contents of
+    // the whole partition to PNOR, then clear the write-in-progress flag. If
+    // any flush fails, the write-in-progress flag will not be cleared to
+    // indicate to the service processor on the next IPL that the GUARD data may
+    // be corrupt and it should discard its contents.
+
+    errl = setGuardWriteInProgress(*gard_records_header, DeconfigGard::GARD_FLAG_PNOR_WRITE_IS_IN_PROGRESS);
+
+    if (errl)
+    { // If this fails, we don't want to write the contents because we weren't
+      // able to indicate that a PNOR write is in progress.
+        break;
+    }
+
+#ifdef __HOSTBOOT_RUNTIME
+    errl = _flush(nullptr, 0); // flush the whole PNOR partition at runtime
+#else
+    errl = _flush(i_addr, sizeof(DeconfigGard::GardRecord));
+#endif
+
+    if (errl)
+    { // If this fails, don't clear the "pnor write in progress" bit because the
+      // data could have been partially written and therefore have corrupted the
+      // PNOR partition data.
+        HWAS_ERR("_flush: failed to flush GARD in PNOR addr=%p (PLID=0x%08x)",
+                 i_addr, ERRL_GETPLID_SAFE(errl));
+        break;
+    }
+
+    errl = setGuardWriteInProgress(*gard_records_header, DeconfigGard::GARD_FLAG_PNOR_WRITE_NOT_IN_PROGRESS);
+
+    } while (false);
+
+    if (errl)
+    {
+        errlCommit(errl, HWAS_COMP_ID);
+    }
+#endif // #ifdef FLUSH_PNOR
 }
 
-#if !defined(__HOSTBOOT_RUNTIME) || defined(CONFIG_FILE_XFER_VIA_PLDM)
+#ifdef FLUSH_PNOR
 errlHndl_t getGardSectionInfo(PNOR::SectionInfo_t& o_sectionInfo)
 {
     errlHndl_t l_errl = NULL;
@@ -1018,7 +1223,7 @@ errlHndl_t getGardSectionInfo(PNOR::SectionInfo_t& o_sectionInfo)
 
     return l_errl;
 }
-#endif //ifdef CONFIG_FILE_XFER_VIA_PLDM
+#endif
 
 /**
  * @brief This will perform any post-deconfig operations,
