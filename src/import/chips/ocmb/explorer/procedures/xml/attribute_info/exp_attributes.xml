@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2022                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -24,10 +24,10 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 
 <!-- -->
-<!-- @file memory_attributes.xml -->
-<!-- @brief Attribute xml for memory attributes -->
+<!-- @file exp_attributes.xml -->
+<!-- @brief Attribute xml for explorer attributes -->
 <!-- -->
-<!-- *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com> -->
+<!-- *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com> -->
 <!-- *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com> -->
 <!-- *HWP Team: Memory -->
 <!-- *HWP Level: 2 -->
