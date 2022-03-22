@@ -161,11 +161,19 @@ bool isInhibitedSection(const uint32_t i_section);
  * @brief  Write the data back from hostboot memory to PNOR of a given section
  *         of PNOR
  *
- * @param[in] i_section  PNOR section
+ * @param[in] i_section   PNOR section
+ * @param[in] i_vaddr     Virtual address to start flushing at.
+ *                        If null, flush the entire section.
+ * @param[in] i_num_pages The number of pages to flush, starting
+ *                        at i_vaddr. Ignored if i_vaddr is null.
+ *                        If i_num_pages is 0, flush all the pages
+ *                        at and after i_vaddr.
  *
  * @return errlHndl_t  Error log if request was invalid
  */
-errlHndl_t flush (SectionId i_section);
+errlHndl_t flush (SectionId i_section,
+                  void* i_vaddr = nullptr,
+                  size_t i_num_pages = 0);
 
 /**
  * @brief checks and fixes correctable ECC errors in the PNOR

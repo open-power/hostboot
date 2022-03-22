@@ -27,6 +27,7 @@
 #include <eeprom/eepromif.H>
 #include <eeprom/eepromddreasoncodes.H>
 #include <errl/errludtarget.H>
+#include <sys/sync.h>
 
 #ifdef __HOSTBOOT_RUNTIME
 #include <targeting/attrrp.H>
@@ -175,6 +176,50 @@ errlHndl_t buildEepromRecordHeader(TARGETING::Target * i_target,
     return l_errl;
 }
 
+// We only need to flush PNOR at IPL-time and at runtime on eBMC-based machines
+#if (!defined(__HOSTBOOT_RUNTIME) || (defined(__HOSTBOOT_RUNTIME) && !defined(CONFIG_FSP_BUILD)))
+#define FLUSH_PNOR
+#endif
+
+#ifdef FLUSH_PNOR
+/* @brief Set the pnor_write_in_progress bit in the EEPROM record header.
+ *
+ *        Flushes the page containing the PNOR write-in-progress bit so that if
+ *        any subsequent content writes fail, this mark will be left to indicate
+ *        possible corruption. If this function returns an error, the caller
+ *        should not perform any content writes. The bit should be cleared after
+ *        the content writes succeed.
+ *
+ * @param[in/out] io_eeprom_record_header  The EEPROM record header being written.
+ * @param[in] i_write_in_progress          Whether a write is in progress.
+ * @return errlHndl_t                      Error if any, otherwise nullptr.
+ */
+errlHndl_t setPnorWriteInProgress(eepromRecordHeader& io_eeprom_record_header,
+                                  const bool i_write_in_progress)
+{
+    errlHndl_t errl = nullptr;
+    const int newvalue = i_write_in_progress ? 1 : 0;
+
+    if (newvalue != io_eeprom_record_header.completeRecord.pnor_write_in_progress)
+    {
+        io_eeprom_record_header.completeRecord.pnor_write_in_progress = newvalue;
+
+        errl = PNOR::flush(PNOR::EECACHE,
+                           &io_eeprom_record_header.completeRecord.flags,
+                           1);
+
+        if (errl)
+        {
+            TRACFCOMP(g_trac_eeprom,
+                      ERR_MRK"setPnorWriteInProgress: Error trying to flush to pnor!");
+            errl->collectTrace(EEPROM_COMP_NAME);
+        }
+    }
+
+    return errl;
+}
+#endif
+
 errlHndl_t eepromPerformOpCache(DeviceFW::OperationType i_opType,
                                 TARGETING::Target * i_target,
                                 void *  io_buffer,
@@ -243,7 +288,9 @@ errlHndl_t eepromPerformOpCache(DeviceFW::OperationType i_opType,
             break;
         }
 
-        if(!reinterpret_cast<const eepromRecordHeader *>(l_eepromHeaderVaddr)->completeRecord.cached_copy_valid)
+        const auto eeprom_record_hdr = reinterpret_cast<eepromRecordHeader *>(l_eepromHeaderVaddr);
+
+        if(!eeprom_record_hdr->completeRecord.cached_copy_valid)
         {
             // If we hit this path it is likely this is an ancillary role that we failed to
             // read HW for but the primary entry associated with it was successful. Typically
@@ -339,14 +386,32 @@ errlHndl_t eepromPerformOpCache(DeviceFW::OperationType i_opType,
         }
         else if(i_opType == DeviceFW::WRITE)
         {
+#ifndef __HOSTBOOT_RUNTIME
+            static mutex_t pnor_write_mutex = MUTEX_INITIALIZER;
+
+            // Lock a mutex so that we don't get any race conditions around setting/clearing
+            // the PNOR header flags and writing the content
+            const auto lock = scoped_mutex_lock(pnor_write_mutex);
+#endif
+
             memcpy(reinterpret_cast<void *>(l_eepromCacheVaddr + i_eepromInfo.offset),
                    io_buffer,
                    io_buflen);
 
-#if (!defined(__HOSTBOOT_RUNTIME) || (defined(__HOSTBOOT_RUNTIME) && !defined(CONFIG_FSP_BUILD)))
+#ifdef FLUSH_PNOR
+            l_errl = setPnorWriteInProgress(*eeprom_record_hdr, true);
+
+            if (l_errl)
+            {
+                errlCommit(l_errl, EEPROM_COMP_ID);
+                break; // don't perform content writes if we failed to set the
+                       // write-in-progress bit, to make the whole operation "atomic".
+            }
+
             // Perform flush to ensure pnor is updated
             //  Needed during IPL and at runtime on non-FSP systems
             l_errl = PNOR::flush(PNOR::EECACHE);
+
             if( l_errl )
             {
                 TRACFCOMP(g_trac_eeprom,
@@ -355,7 +420,23 @@ errlHndl_t eepromPerformOpCache(DeviceFW::OperationType i_opType,
 
                 // There is nothing the caller can do here so just
                 // commit the log and keep going
-                errlCommit(l_errl, EEPROM_COMP_ID);                
+                errlCommit(l_errl, EEPROM_COMP_ID);
+                break; // don't clear the write-in-progress bit if the writes
+                       // failed. Next IPL we'll discard the EECACHE and reload
+                       // it from hardware.
+            }
+
+            // If we succeeded in writing the content data, clear the
+            // write-in-progress flag to let everyone know the data in EECACHE
+            // is consistent. If this fails, we'll just refresh the EECACHE on
+            // the next IPL. Bit of a waste of time but not a huge deal for the
+            // atomicity guarantees we get in exchange.
+            l_errl = setPnorWriteInProgress(*eeprom_record_hdr, false);
+
+            if (l_errl)
+            {
+                errlCommit(l_errl, EEPROM_COMP_ID);
+                break;
             }
 #endif
         }
