@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,6 +63,8 @@ namespace HWAS
         RC_CLEAN_GARD_RECORDS               = HWAS_COMP_ID | 0x8E,
         RC_PRESENCE_MISMATCH_SP             = HWAS_COMP_ID | 0x8F,
         RC_PRESENCE_MISMATCH_HB             = HWAS_COMP_ID | 0x90,
+        RC_PNOR_ACCESS_FAILED               = HWAS_COMP_ID | 0x91,
+        RC_RT_POSSIBLE_PNOR_CORRUPTION      = HWAS_COMP_ID | 0x92,
     };
 
 };

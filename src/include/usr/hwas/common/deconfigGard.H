@@ -340,11 +340,45 @@ public:
     typedef std::vector<GardRecord> GardRecords_t;
     typedef struct GardRecord GardRecord;
 
+    /* @brief  Bitmask definitions for the GardRecordsBinary::iv_flags variable
+     */
+    enum GardFlags : uint8_t
+    {
+        GARD_FLAG_MASK_PNOR_WRITE_IN_PROGRESS = 0x01, // Bit 7: This bit is 0 if
+                                                      // a PNOR write is in
+                                                      // progress, 1 otherwise.
+                                                      // If the service
+                                                      // processor sees this set
+                                                      // to 0 at the beginning
+                                                      // of an IPL, it means
+                                                      // that a PNOR write was
+                                                      // interrupted and the
+                                                      // data may be corrupt, so
+                                                      // it should clear the
+                                                      // GUARD partition and not
+                                                      // process its contents.
+
+        GARD_FLAGS_DEFAULT               = 0xFF  // The value of
+                                                 // GardRecordsBinary::iv_flags
+                                                 // when the GUARD partition is
+                                                 // freshly initialized.
+    };
+
+    /* @brief  Values to be used with the GARD_FLAG_MASK_PNOR_WRITE_IN_PROGRESS
+     *         mask
+     */
+    enum GardFlagPnorWriteInProgress : uint8_t
+    {
+        GARD_FLAG_PNOR_WRITE_IS_IN_PROGRESS  = 0x00,
+        GARD_FLAG_PNOR_WRITE_NOT_IN_PROGRESS = 0x01
+    };
+
     struct GardRecordsBinary
     {
         uint8_t               iv_magicNumber[8]; // magicNumber = GUARDREC
         uint8_t               iv_version;        // Gard records version
-        uint8_t               iv_padding[7];
+        uint8_t               iv_flags;          // Gard flags (see the GardFlags enumeration)
+        uint8_t               iv_padding[6];
         GardRecord            iv_gardRecords[0];  // 128 bytes each - List of gard records
     } PACKED;
 
