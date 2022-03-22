@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,7 +51,7 @@ HCD_CONST(OCC_SRAM_BASE_ADDR,                   0xFFF00000)
 HCD_CONST(GPE0_SRAM_BASE_ADDR,                  0xFFF01000)
 HCD_CONST(GPE1_SRAM_BASE_ADDR,                  0xFFF10000)
 HCD_CONST(PGPE_SRAM_BASE_ADDR,                  0xFFF20000)
-HCD_CONST(XGPE_SRAM_BASE_ADDR,                  0xFFF30000)
+HCD_CONST(XGPE_SRAM_BASE_ADDR,                  0xFFF34000)
 HCD_CONST(OCC_SRAM_SIZE,                        ONE_MB)
 HCD_CONST(OCC_SRAM_END_ADDR,                   ( OCC_SRAM_BASE_ADDR + OCC_SRAM_SIZE))
 
