@@ -51,6 +51,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/memory/
 EXTRAINCDIR += ${ROOTPATH}/src/import/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/sbe/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/p10/procedures/hwp/memory/
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/p10/procedures/hwp/memory/lib/
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/generic/memory/lib/
 
 OBJS += call_proc_build_smp.o
 OBJS += call_host_sbe_update.o
