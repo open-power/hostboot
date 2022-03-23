@@ -142,7 +142,7 @@ class errludP_errl:
         return jsonStr
 
     def ErrlUserDetailsParserLogRegister(ver, data):
-        d=dict()
+        d = dict()
         i = 0
         # Values below are from AccessType enum in src/include/usr/devicefw/userif.H
         # and AccessType_DriverOnly enum in src/include/usr/devicefw/driverif.H
@@ -168,7 +168,7 @@ class errludP_errl:
 
         subDictLabel = 0
         while i < (len(data) - 4):
-            subd = dict()
+            subd = dict() #Dictionary to hold data for each Target
 
             if (intConcat(data, i, i+4)[0] == 0xFFFFFFFF):
                 subd['LogRegister']= "Target: MASTER_PROCESSOR_CHIP_TARGET_SENTINEL"
@@ -176,9 +176,13 @@ class errludP_errl:
             else:
                 targetHUID, i=hexConcat(data, i, i+4)
                 subd['LogRegister']="Target: HUID = " + targetHUID
-            count = data[i]
+
+            count = data[i] #number of registers to dump
             i += 1
+
             for x in range(count):
+                regSubd = dict() #Dictionary to hold data for each register
+
                 accessValue = data[i]
                 i += 1
                 unknown = "Unknown " + str(accessValue) + " - not logged"
@@ -188,7 +192,7 @@ class errludP_errl:
                 if decodeStr is None:
                     decodeStr = AccessType_DriverOnly.get(accessValue, unknown)
 
-                subd["AccessType"]=decodeStr
+                regSubd["AccessType"]=decodeStr
 
                 numArgs = -1
                 addrParams = []
@@ -228,15 +232,17 @@ class errludP_errl:
 
                 if numArgs != -1:
                     for y in range(numArgs):
-                        subd[addrParams[y]], i=hexConcat(data, i, i+8)
+                        regSubd[addrParams[y]], i=hexConcat(data, i, i+8)
 
                     registerDataSize, i=intConcat(data, i, i+1)
-                    subd['Register data']='size: ' + f'0x{registerDataSize:x}' + ' bytes'
-                    subd['Hex Dump']=hexDump(data, i, i+registerDataSize)
+                    regSubd['Register data']='size: ' + f'0x{registerDataSize:x}' + ' bytes'
+                    regSubd['Hex Dump']=hexDump(data, i, i+registerDataSize)
                     i += registerDataSize
 
-                d[str(subDictLabel)]=subd
-                subDictLabel += 1
+                subd[str(x)]=regSubd
+
+            d[str(subDictLabel)]=subd
+            subDictLabel += 1
 
 
         jsonStr = json.dumps(d)
