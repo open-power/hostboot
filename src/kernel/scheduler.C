@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2010,2022                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -87,8 +89,10 @@ void Scheduler::setNextRunnable()
         t = static_cast<Runqueue_t*>(cpu->scheduler_extra)->remove();
     }
 
-    // Check for ready task in global run-queue.
-    if (NULL == t)
+    // Check for ready task in global run-queue.  Only try the remove
+    // if there is something in the queue to prevent excessive lock
+    // contention
+    if ((NULL == t) && iv_taskList.size())
     {
         t = iv_taskList.remove();
     }
