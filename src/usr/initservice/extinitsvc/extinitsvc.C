@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -150,7 +150,7 @@ errlHndl_t executeUnitTests ( void )
 
 errlHndl_t ExtInitSvc::executeUnitTests ( void )
 {
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
 
     TRACDCOMP( g_trac_initsvc,
                ENTER_MRK"executeUnitTests()" );
@@ -175,7 +175,7 @@ errlHndl_t ExtInitSvc::executeUnitTests ( void )
             printk( "CxxTest entry.\n" );
 
             //  Pass it a set of args so we can wait on the barrier
-            errlHndl_t l_cxxerrl = NULL;
+            errlHndl_t l_cxxerrl = nullptr;
             const INITSERVICE::TaskInfo *l_pcxxtask = &cxxTestTask;
 
             TRACFCOMP( g_trac_initsvc,
@@ -185,7 +185,7 @@ errlHndl_t ExtInitSvc::executeUnitTests ( void )
             INITSERVICE::InitService &is
                 = INITSERVICE::InitService::getTheInstance();
             l_cxxerrl = is.startTask( l_pcxxtask,
-                                      NULL );
+                                      nullptr );
 
             // process any errorlogs from cxxtestexec (not sure there are any...)
             if ( l_cxxerrl )
@@ -194,8 +194,8 @@ errlHndl_t ExtInitSvc::executeUnitTests ( void )
                 //  committed.  initservice should do the shutdown.
                 TRACFCOMP( g_trac_initsvc,
                            "CxxTest: ERROR: return to host_start_payload istep "
-                           "with errlog %p",
-                           l_cxxerrl );
+                           "with errlog 0x%X",
+                           l_cxxerrl->plid() );
 
                 err = l_cxxerrl;
                 break;
@@ -222,9 +222,9 @@ errlHndl_t ExtInitSvc::executeUnitTests ( void )
                                         0 );
 
                 TRACFCOMP( g_trac_initsvc,
-                           "CxxTest ERROR:  %d failed tests, build errlog %p.",
+                           "CxxTest ERROR:  %d failed tests, build errlog 0x%X.",
                            CxxTest::g_FailedTests,
-                           l_cxxerrl );
+                           l_cxxerrl->plid() );
 
                 //  end the task and pass the errorlog to initservice to be
                 //  committed.  initservice should do the shutdown.
