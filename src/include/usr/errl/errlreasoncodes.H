@@ -98,6 +98,12 @@ namespace ERRORLOG
     {
         ERRL_UDT_STRING_SET_VER_1 = 0x01,
     };
+
+    // Identifiers for ERRL UD callout subsection versions
+    enum errlUDCAlloutDataSubsectionVersion
+    {
+        ERRL_UDT_CALLOUT_BASE_VER = 0x01,
+    };
 };
 
 #endif

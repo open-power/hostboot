@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,7 @@
 #include <targeting/common/targetservice.H>
 #include <targeting/common/util.H>
 #include <targeting/common/trace.H>
+#include <util/crc32.H>
 
 namespace ERRORLOG
 {
@@ -53,7 +54,7 @@ ErrlUserDetailsCallout::ErrlUserDetailsCallout(
 
     // Set up ErrlUserDetails instance variables
     iv_CompId = ERRL_COMP_ID;
-    iv_Version = 1;
+    iv_Version = ERRL_UDT_CALLOUT_BASE_VER;
     iv_SubSection = ERRL_UDT_CALLOUT;
 
     uint32_t pDataLength = sizeof(HWAS::callout_ud_t) + i_targetDataLength;
@@ -67,6 +68,8 @@ ErrlUserDetailsCallout::ErrlUserDetailsCallout(
     pData->clkDeconfigState = i_deconfigState;
     pData->clkGardErrorType = i_gardErrorType;
     memcpy(pData + 1, i_pTargetData, i_targetDataLength);
+
+    iv_UDCalloutHash = Util::crc32_calc(pData, pDataLength);
 
     TRACDCOMP(g_trac_errl, "ClockCallout exit; pDataLength %d", pDataLength);
 
@@ -86,7 +89,7 @@ ErrlUserDetailsCallout::ErrlUserDetailsCallout(
 
     // Set up ErrlUserDetails instance variables
     iv_CompId = ERRL_COMP_ID;
-    iv_Version = 1;
+    iv_Version = ERRL_UDT_CALLOUT_BASE_VER;
     iv_SubSection = ERRL_UDT_CALLOUT;
 
     uint32_t pDataLength = sizeof(HWAS::callout_ud_t) + i_targetDataLength;
@@ -100,6 +103,8 @@ ErrlUserDetailsCallout::ErrlUserDetailsCallout(
     pData->partDeconfigState = i_deconfigState;
     pData->partGardErrorType = i_gardErrorType;
     memcpy(pData + 1, i_pTargetData, i_targetDataLength);
+
+    iv_UDCalloutHash = Util::crc32_calc(pData, pDataLength);
 
     TRACDCOMP(g_trac_errl, "PartCallout exit; pDataLength %d", pDataLength);
 
@@ -121,7 +126,7 @@ ErrlUserDetailsCallout::ErrlUserDetailsCallout(
 
     // Set up ErrlUserDetails instance variables
     iv_CompId = ERRL_COMP_ID;
-    iv_Version = 1;
+    iv_Version = ERRL_UDT_CALLOUT_BASE_VER;
     iv_SubSection = ERRL_UDT_CALLOUT;
 
     uint32_t pDataLength = sizeof(HWAS::callout_ud_t) +
@@ -136,6 +141,8 @@ ErrlUserDetailsCallout::ErrlUserDetailsCallout(
     char * l_ptr = (char *)(++pData);
     memcpy(l_ptr, i_pTarget1Data, i_target1DataLength);
     memcpy(l_ptr + i_target1DataLength, i_pTarget2Data, i_target2DataLength);
+
+    iv_UDCalloutHash = Util::crc32_calc(pData, pDataLength);
 
     TRACDCOMP(g_trac_errl, "BusCallout exit; pDataLength %d", pDataLength);
 
@@ -154,7 +161,7 @@ ErrlUserDetailsCallout::ErrlUserDetailsCallout(
 
     // Set up ErrlUserDetails instance variables
     iv_CompId = ERRL_COMP_ID;
-    iv_Version = 1;
+    iv_Version = ERRL_UDT_CALLOUT_BASE_VER;
     iv_SubSection = ERRL_UDT_CALLOUT;
 
     //iv_merge = false; // use the default of false
@@ -175,6 +182,8 @@ ErrlUserDetailsCallout::ErrlUserDetailsCallout(
     pData->gardErrorType = i_gardErrorType;
     memcpy(pData + 1, i_pTargetData, i_targetDataLength);
 
+    iv_UDCalloutHash = Util::crc32_calc(pData, pDataLength);
+
     TRACDCOMP(g_trac_errl, "HWCallout exit; pDataLength %d", pDataLength);
 
 } // Hardware callout
@@ -190,7 +199,7 @@ ErrlUserDetailsCallout::ErrlUserDetailsCallout(
 
     // Set up ErrlUserDetails instance variables
     iv_CompId = ERRL_COMP_ID;
-    iv_Version = 1;
+    iv_Version = ERRL_UDT_CALLOUT_BASE_VER;
     iv_SubSection = ERRL_UDT_CALLOUT;
 
     //iv_merge = false; // use the default of false
@@ -203,6 +212,8 @@ ErrlUserDetailsCallout::ErrlUserDetailsCallout(
     pData->flag = HWAS::FLAG_NONE;
     pData->procedure = i_procedure;
     pData->priority = i_priority;
+
+    iv_UDCalloutHash = Util::crc32_calc(pData, sizeof(HWAS::callout_ud_t));
 
     TRACDCOMP(g_trac_errl, "Procedure Callout exit");
 
@@ -218,7 +229,7 @@ ErrlUserDetailsCallout::ErrlUserDetailsCallout(const uint32_t i_sensorID,
 
     // Set up ErrlUserDetails instance variables
     iv_CompId = ERRL_COMP_ID;
-    iv_Version = 1;
+    iv_Version = ERRL_UDT_CALLOUT_BASE_VER;
     iv_SubSection = ERRL_UDT_CALLOUT;
 
     HWAS::callout_ud_t *pData;
@@ -230,6 +241,8 @@ ErrlUserDetailsCallout::ErrlUserDetailsCallout(const uint32_t i_sensorID,
     pData->priority = i_priority;
     pData->sensorId = i_sensorID;
     pData->sensorType = i_sensorType;
+
+    iv_UDCalloutHash = Util::crc32_calc(pData, sizeof(HWAS::callout_ud_t));
 
     TRACDCOMP(g_trac_errl, "Sensor Callout exit");
 } // Sensor callout
@@ -250,7 +263,7 @@ ErrlUserDetailsCallout::ErrlUserDetailsCallout(
 
     // Set up ErrUserDetails instance variables
     iv_CompId = ERRL_COMP_ID;
-    iv_Version =1;
+    iv_Version = ERRL_UDT_CALLOUT_BASE_VER;
     iv_SubSection = ERRL_UDT_CALLOUT;
 
     uint32_t pDataLength = sizeof(HWAS::callout_ud_t) + i_targDataLen;
@@ -266,8 +279,15 @@ ErrlUserDetailsCallout::ErrlUserDetailsCallout(
 
     memcpy(pData + 1, i_pTargData, i_targDataLen);
 
+    iv_UDCalloutHash = Util::crc32_calc(pData, pDataLength);
+
     TRACDCOMP(g_trac_errl, "I2c Device Callout exit");
 } // I2c Device Callout
+
+uint32_t ErrlUserDetailsCallout::getUDCalloutHash() const
+{
+    return iv_UDCalloutHash;
+}
 
 } // namespace ERRORRLOG
 

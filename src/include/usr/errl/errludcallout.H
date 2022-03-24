@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -203,6 +203,15 @@ private:
     ErrlUserDetailsCallout(const ErrlUserDetailsCallout &);
     ErrlUserDetailsCallout & operator=(const ErrlUserDetailsCallout &);
 
+    // The hash of the binary User Detail section (used to find duplicates)
+    uint32_t iv_UDCalloutHash;
+
+    /**
+     * @brief Returns the computed hash of the User Data Callout section
+     *
+     * @return The hash of the User Data Callout section
+     */
+    uint32_t getUDCalloutHash() const;
 };
 
 }

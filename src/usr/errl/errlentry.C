@@ -67,6 +67,7 @@
 #include <limits.h>
 
 #include <util/utillidmgr.H>
+#include <util/crc32.H>
 
 // Hostboot Image ID string
 extern char hbi_ImageId;
@@ -284,6 +285,20 @@ ErrlUD * ErrlEntry::addFFDC(const compId_t i_compId,
                       i_compId, i_ffdcVer,
                       i_ffdcSubSect, i_merge == true ? "DO" : "NO" );
 
+        if(i_ffdcSubSect == ERRL_UDT_CALLOUT &&
+           i_ffdcVer == ERRL_UDT_CALLOUT_BASE_VER)
+        {
+            // Hash the incoming data section to test it against other hashes we've
+            // already seen to prevent duplicate data to appear in the error logs.
+            uint32_t l_dataHash = Util::crc32_calc(i_dataPtr, i_ffdcLen);
+
+            // Save the hash of the section. Whenever a callout is added in the
+            // future, that callout will be checked against this vector of hashes
+            // and callouts with matching hashes will be filtered out (they are
+            // duplicates).
+            iv_UDDataHashes.push_back(l_dataHash);
+        }
+
         // if we're to try to merge, AND there's at least 1 section
         if ((i_merge) && (iv_SectionVector.size() > 0))
         {   // look at the last one to see if it's a match or not.
@@ -324,6 +339,12 @@ ErrlUD * ErrlEntry::addFFDC(const compId_t i_compId,
     }
 
     return l_ffdcSection;
+}
+
+bool ErrlEntry::isUDHashDuplicate(const uint32_t i_hash)
+{
+    const auto l_duplicateItr = std::find(begin(iv_UDDataHashes), end(iv_UDDataHashes), i_hash);
+    return (l_duplicateItr != iv_UDDataHashes.end());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -459,6 +480,18 @@ void getTargData( const TARGETING::Target *i_target,
     }
 }
 
+void ErrlEntry::addCallout(ErrlUserDetailsCallout* i_callout)
+{
+    if(!this->isUDHashDuplicate(i_callout->getUDCalloutHash()))
+    {
+        i_callout->addToLog(this);
+    }
+    else
+    {
+        TRACFCOMP(g_trac_errl, INFO_MRK"addCallout: Dropping duplicate callout");
+    }
+}
+
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 void ErrlEntry::addClockCallout(const TARGETING::Target *i_target,
@@ -475,8 +508,10 @@ void ErrlEntry::addClockCallout(const TARGETING::Target *i_target,
     TARGETING::EntityPath* ep = nullptr;
     getTargData( i_target, ep, pData, size );
 
-    ErrlUserDetailsCallout( pData, size, i_clockType,
-            i_priority, i_deconfigState, i_gardErrorType).addToLog(this);
+    ErrlUserDetailsCallout l_callout ( pData, size, i_clockType,
+            i_priority, i_deconfigState, i_gardErrorType);
+
+    addCallout(&l_callout);
 
     if( ep )
     {
@@ -492,7 +527,9 @@ void ErrlEntry::addSensorCallout(const uint32_t i_sensorID,
     TRACFCOMP(g_trac_errl, ENTER_MRK"addSensorCallout(0x%X, %d, 0x%x)",
                 i_sensorID, i_sensorType, i_priority);
 
-    ErrlUserDetailsCallout(i_sensorID, i_sensorType, i_priority).addToLog(this);
+    ErrlUserDetailsCallout l_callout(i_sensorID, i_sensorType, i_priority);
+
+    addCallout(&l_callout);
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -512,8 +549,10 @@ void ErrlEntry::addPartCallout(const TARGETING::Target *i_target,
     TARGETING::EntityPath* ep = nullptr;
     getTargData( i_target, ep, pData, size );
 
-    ErrlUserDetailsCallout( pData, size, i_partType,
-            i_priority, i_deconfigState, i_gardErrorType).addToLog(this);
+    ErrlUserDetailsCallout l_callout( pData, size, i_partType,
+            i_priority, i_deconfigState, i_gardErrorType);
+
+    addCallout(&l_callout);
 
     if( ep )
     {
@@ -543,8 +582,10 @@ void ErrlEntry::addBusCallout(const TARGETING::Target *i_target_endp1,
     getTargData( i_target_endp2, ep2, pData2, size2 );
 
 
-    ErrlUserDetailsCallout( pData1, size1, pData2, size2, i_busType,
-                            i_priority, i_flag).addToLog(this);
+    ErrlUserDetailsCallout l_callout( pData1, size1, pData2, size2, i_busType,
+                            i_priority, i_flag);
+
+    addCallout(&l_callout);
 
     if( ep1 )
     {
@@ -592,14 +633,14 @@ void ErrlEntry::addBusCallout(const TARGETING::EntityPath & i_target_endp1,
           (TARGETING::EntityPath::MAX_PATH_ELEMENTS - i_target_endp2.size()) *
           sizeof(TARGETING::EntityPath::PathElement);
 
-        ErrlUserDetailsCallout(&i_target_endp1,
-                               size1,
-                               &i_target_endp2,
-                               size2,
-                               i_busType,
-                               i_priority,
-                               i_flag).addToLog(this);
-
+        ErrlUserDetailsCallout l_callout(&i_target_endp1,
+                                         size1,
+                                         &i_target_endp2,
+                                         size2,
+                                         i_busType,
+                                         i_priority,
+                                         i_flag);
+        addCallout(&l_callout);
     }
     else
     {
@@ -663,9 +704,10 @@ void ErrlEntry::addHwCallout(const TARGETING::Target *i_target,
             l_deconfigState = HWAS::DECONFIG;
         }
 
-        ErrlUserDetailsCallout(
+        ErrlUserDetailsCallout l_callout(
                 &HWAS::TARGET_IS_SENTINEL, sizeof(HWAS::TARGET_IS_SENTINEL),
-                i_priority, l_deconfigState, i_gardErrorType).addToLog(this);
+                i_priority, l_deconfigState, i_gardErrorType);
+        addCallout(&l_callout);
     }
     else
     {   // we got a non MASTER_SENTINEL target, therefore the targeting
@@ -706,8 +748,9 @@ void ErrlEntry::addHwCallout(const TARGETING::Target *i_target,
         }
 #endif //#ifndef __HOSTBOOT_RUNTIME
 
-        ErrlUserDetailsCallout(&ep, size1,
-                i_priority, l_deconfigState, i_gardErrorType).addToLog(this);
+        ErrlUserDetailsCallout l_callout(&ep, size1,
+                i_priority, l_deconfigState, i_gardErrorType);
+        addCallout(&l_callout);
 
     }
 } // addHwCallout
@@ -726,7 +769,8 @@ void ErrlEntry::addProcedureCallout(const HWAS::epubProcedureID i_procedure,
                 i_procedure, i_priority);
     #endif
 
-    ErrlUserDetailsCallout(i_procedure, i_priority).addToLog(this);
+    ErrlUserDetailsCallout l_callout(i_procedure, i_priority);
+    addCallout(&l_callout);
 
 } // addProcedureCallout
 
@@ -3272,8 +3316,9 @@ void ErrlEntry::addI2cDeviceCallout(const TARGETING::Target *i_i2cMaster,
     getTargData( i_i2cMaster, ep, pData, size );
 
 
-    ErrlUserDetailsCallout(pData, size,
-            i_engine, i_port, i_address, i_priority).addToLog(this);
+    ErrlUserDetailsCallout l_callout(pData, size,
+            i_engine, i_port, i_address, i_priority);
+    addCallout(&l_callout);
 
     if (ep)
     {
