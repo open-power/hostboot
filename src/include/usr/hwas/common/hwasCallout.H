@@ -140,12 +140,18 @@ enum epubProcedureID
     EPUB_PRC_MULTINODE_CHECKSTOP    = 0x3D,
     ///< Possible checkstop caused communication problem between drawers.
 
+    // Only used on FSP systems
+#if defined(CONFIG_FSP_BUILD) || !defined(CONFIG_BUILD_FULL_PEL)
     EPUB_PRC_POWER_ERROR            = 0x3F,
     ///< Problem is related to the power subsystem
+#endif
 
+    // Only used on FSP systems
+#if defined(CONFIG_FSP_BUILD) || !defined(CONFIG_BUILD_FULL_PEL)
     EPUB_PRC_PERFORMANCE_DEGRADED   = 0x4D,
     ///< System is running in a degraded performance mode,
     ///<   Look for previous errors for possible reasons
+#endif
 
     EPUB_PRC_MEMORY_UE              = 0x4F,
     ///< Unrecoverable memory error occurred
@@ -157,8 +163,11 @@ enum epubProcedureID
     EPUB_PRC_TOD_CLOCK_ERR          = 0x56,
     ///< Problem is related to the TOD clock
 
+    // Only used on FSP systems
+#if defined(CONFIG_FSP_BUILD) || !defined(CONFIG_BUILD_FULL_PEL)
     EPUB_PRC_COOLING_SYSTEM_ERR     = 0x5C,
     ///< Problem is related to the cooling subsystem
+#endif
 
     EPUB_PRC_FW_VERIFICATION_ERR    = 0x5D,
     ///< Verification of one or more firmware images failed,

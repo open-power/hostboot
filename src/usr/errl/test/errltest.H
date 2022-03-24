@@ -107,14 +107,17 @@ public:
             case(EPUB_PRC_MEMBUS_ERROR           ):
             case(EPUB_PRC_EIBUS_ERROR            ):
             case(EPUB_PRC_MULTINODE_CHECKSTOP    ):
-            case(EPUB_PRC_POWER_ERROR            ):
-            case(EPUB_PRC_PERFORMANCE_DEGRADED   ):
             case(EPUB_PRC_MEMORY_UE              ):
             case(EPUB_PRC_HB_CODE                ):
             case(EPUB_PRC_TOD_CLOCK_ERR          ):
-            case(EPUB_PRC_COOLING_SYSTEM_ERR     ):
             case(EPUB_PRC_FW_VERIFICATION_ERR    ):
             case(EPUB_PRC_SBE_CODE               ):
+            // Below callouts are not supported on BMC systems
+#ifdef CONFIG_FSP_BUILD
+            case(EPUB_PRC_POWER_ERROR            ):
+            case(EPUB_PRC_PERFORMANCE_DEGRADED   ):
+            case(EPUB_PRC_COOLING_SYSTEM_ERR     ):
+#endif
             {
                 // If a new enum is added to the above list to overcome a compile failure then a corresponding HBxxxxx
                 // needs to be created for EPUB_TO_ISOLATION_PROCEDURE. See errlentry.C for that map.

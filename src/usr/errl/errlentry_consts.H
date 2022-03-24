@@ -60,12 +60,16 @@ const epubProcToSub_t PROCEDURE_TO_SUBSYS_TABLE[] =
     { EPUB_PRC_EIBUS_ERROR            , EPUB_CEC_HDW_SUBSYS         },
     { EPUB_PRC_MULTINODE_CHECKSTOP    , EPUB_CEC_HDW_SUBSYS         },
     { EPUB_PRC_MEMORY_UE              , EPUB_MEMORY_SUBSYS          },
-    { EPUB_PRC_POWER_ERROR            , EPUB_POWER_SUBSYS           },
-    { EPUB_PRC_PERFORMANCE_DEGRADED   , EPUB_MISC_SUBSYS            },
     { EPUB_PRC_HB_CODE                , EPUB_FIRMWARE_HOSTBOOT      },
     { EPUB_PRC_TOD_CLOCK_ERR          , EPUB_CEC_HDW_SUBSYS         },
-    { EPUB_PRC_COOLING_SYSTEM_ERR     , EPUB_MISC_SUBSYS            },
     { EPUB_PRC_FW_VERIFICATION_ERR    , EPUB_FIRMWARE_SUBSYS        },
+
+    // Below callouts are not supported on BMC systems
+#ifdef CONFIG_FSP_BUILD
+    { EPUB_PRC_POWER_ERROR            , EPUB_POWER_SUBSYS           },
+    { EPUB_PRC_COOLING_SYSTEM_ERR     , EPUB_MISC_SUBSYS            },
+    { EPUB_PRC_PERFORMANCE_DEGRADED   , EPUB_MISC_SUBSYS            },
+#endif
 };
 
 struct epubTargetTypeToSub_t

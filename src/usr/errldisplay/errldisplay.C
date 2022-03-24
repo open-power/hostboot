@@ -380,14 +380,17 @@ case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Procedure        
                     case_PROCEDURE(EPUB_PRC_PROC_XYZ_BUS)
                     case_PROCEDURE(EPUB_PRC_MEMBUS_ERROR)
                     case_PROCEDURE(EPUB_PRC_EIBUS_ERROR)
-                    case_PROCEDURE(EPUB_PRC_POWER_ERROR)
                     case_PROCEDURE(EPUB_PRC_MEMORY_UE)
-                    case_PROCEDURE(EPUB_PRC_PERFORMANCE_DEGRADED)
                     case_PROCEDURE(EPUB_PRC_HB_CODE)
                     case_PROCEDURE(EPUB_PRC_TOD_CLOCK_ERR)
-                    case_PROCEDURE(EPUB_PRC_COOLING_SYSTEM_ERR)
                     case_PROCEDURE(EPUB_PRC_FW_VERIFICATION_ERR)
                     case_PROCEDURE(EPUB_PRC_SBE_CODE)
+// Below callouts are not supported on BMC systems
+#ifdef CONFIG_FSP_BUILD
+                    case_PROCEDURE(EPUB_PRC_POWER_ERROR)
+                    case_PROCEDURE(EPUB_PRC_PERFORMANCE_DEGRADED)
+                    case_PROCEDURE(EPUB_PRC_COOLING_SYSTEM_ERR)
+#endif
                     default:
                         CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Procedure                  : UNKNOWN: 0x%X",
                                           callout->procedure);
