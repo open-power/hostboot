@@ -35,7 +35,7 @@
 // ----------------------------------------------
 #include <string.h>
 #include <sys/time.h>
-
+#include <array>
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
@@ -3205,6 +3205,98 @@ errlHndl_t i2cReadStatusReg ( TARGETING::Target * i_target,
     return err;
 } // end i2cReadStatusReg
 
+/**
+ *  @brief Returns the FSI address required to access a given FSI I2C engine 0
+ *      register
+ *
+ *  @param[in] i_reg I2C engine register to determine FSI address for
+ *
+ *  @return uint64_t FSI address associated with the given I2C engine register
+ */
+inline uint64_t i2cRegToFsiAddr(const i2c_reg_offset_t i_reg)
+{
+    // I2C register FSI addresses are at 1-byte offsets, so need to multiply the
+    // i_reg offset by 4 since each I2C register is 4 bytes long.
+    return (I2C_FSI_MASTER_BASE_ADDR + (i_reg * 4));
+}
+
+/**
+ *  @brief Returns the SCOM address required to access a given I2C engine
+ *      register
+ *
+ *  @param[in] i_reg I2C engine register to determine SCOM address for
+ *  @param[in] i_args Standard arguments used to initiate an I2C transaction
+ *
+ *  @return uint64_t SCOM address associated with the given I2C engine register
+ */
+inline uint64_t i2cRegToScomAddr(const i2c_reg_offset_t i_reg,
+                                 const misc_args_t&     i_args)
+{
+    return (  (I2C_HOST_MASTER_BASE_ADDR)
+            + (i_args.engine * P10_ENGINE_SCOM_OFFSET)
+            + (i_reg));
+}
+
+/**
+ *  @brief Appends curated I2C FFDC registers to an error log
+ *
+ *  @param[in] i_pProc Processor target acting as I2C master
+ *  @param[in] i_args  Standard arguments used to initiate the failed I2C
+ *      transaction for which FFDC is being gathered
+ *  @param[in/out] io_pError On input, the error log to append FFDC to
+ *                           On output, the same log, but now with register FFDC
+ */
+void addI2cFfdcToErrl(const TARGETING::Target* const i_pProc,
+                      const misc_args_t&             i_args,
+                            errlHndl_t&              io_pErr)
+{
+    do {
+
+    if (io_pErr == nullptr)
+    {
+        // io_pErr cannot be nullptr
+        TRACFCOMP(g_trac_i2c, ERR_MRK
+                  "addI2cFfdcToErrl: io_pErr was nullptr. Skipping adding "
+                  "additional I2C engine FFDC");
+        break;
+    }
+
+    assert(i_pProc != nullptr,"Processor target was nullptr");
+    assert(i_pProc->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_PROC,
+           "Input target was not of type processor");
+
+    // Array of I2c engine registers to collect data from.  Note: intentionally
+    // omitted FIFO register since reading it will pull data out of the FIFO
+    const std::array<i2c_reg_offset_t,7> i2cRegs = {
+        (I2C_REG_COMMAND          ),
+        (I2C_REG_MODE             ),
+        (I2C_REG_INTMASK          ),
+        (I2C_REG_INTERRUPT        ),
+        (I2C_REG_STATUS           ),
+        (I2C_REG_EXTENDED_STATUS  ),
+        (I2CM_PORT_BUSY_REGISTER  )
+    };
+
+    ERRORLOG::ErrlUserDetailsLogRegister i2cRegsFfdc(i_pProc);
+
+    for (const auto& i2cReg : i2cRegs)
+    {
+       if(i_args.switches.useHostI2C)
+       {
+           i2cRegsFfdc.addData(DEVICE_SCOM_ADDRESS(i2cRegToScomAddr(i2cReg,i_args)));
+       }
+       else // Only other avenue is FSI
+       {
+           i2cRegsFfdc.addData(DEVICE_FSI_ADDRESS(i2cRegToFsiAddr(i2cReg)));
+       }
+    }
+
+    i2cRegsFfdc.addToLog(io_pErr);
+
+    } while(0);
+
+} // End addI2cFfdcToErrl
+
 // ------------------------------------------------------------------
 // i2cCheckForErrors
 // ------------------------------------------------------------------
@@ -3421,7 +3513,7 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
 
             break;
         }
-        else if( busArbiLostFound )
+        else if(busArbiLostFound)
         {
             TRACFCOMP( g_trac_i2c,
             ERR_MRK"i2cCheckForErrors() - Bus Arbitration Lost (only error) on %.8X"
@@ -3468,6 +3560,12 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
         }
 
     } while( 0 );
+
+    if(err)
+    {
+        // Add extended I2C engine FFDC to diagnose errors.
+        addI2cFfdcToErrl(i_target,i_args,err);
+    }
 
     TRACUCOMP( g_trac_i2c,
                EXIT_MRK"i2cCheckForErrors()" );
@@ -5241,8 +5339,7 @@ errlHndl_t i2cRegisterOp ( DeviceFW::OperationType i_opType,
         // Calculate Register Address and data size based on access type
         if ( i_args.switches.useHostI2C == 1 )
         {
-            op_addr = I2C_HOST_MASTER_BASE_ADDR + i_reg +
-                        (i_args.engine * P10_ENGINE_SCOM_OFFSET);
+            op_addr = i2cRegToScomAddr(i_reg,i_args);
             op_size=8;
 
             TRACUCOMP( g_trac_i2c,
@@ -5258,9 +5355,7 @@ errlHndl_t i2cRegisterOp ( DeviceFW::OperationType i_opType,
 
         else // i_args.switches.useFsiI2C == 1
         {
-            // FSI addresses are at 1-byte offsets, so need to multiply the
-            // i_reg offset by 4 since each I2C register is 4 bytes long.
-            op_addr = I2C_FSI_MASTER_BASE_ADDR + ( i_reg * 4 );
+            op_addr = i2cRegToFsiAddr(i_reg);
 
             if ( i_reg == I2C_REG_FIFO )
             {
@@ -5301,23 +5396,21 @@ errlHndl_t i2cRegisterOp ( DeviceFW::OperationType i_opType,
                           "Adding I2C Lock Registers to FFDC",
                           err->reasonCode());
 
-                // Possibly caused by an atomic lock so grab registers that might show that
+                // Possibly caused by an atomic lock so grab registers that
+                // might show that
                 ERRORLOG::ErrlUserDetailsLogRegister l_scom_data(i_target);
 
                 // I2C Status Register
-                l_scom_data.addData(DEVICE_SCOM_ADDRESS(I2C_HOST_MASTER_BASE_ADDR +
-                                                        I2C_REG_STATUS +
-                                                        (i_args.engine * P10_ENGINE_SCOM_OFFSET)));
+                l_scom_data.addData(DEVICE_SCOM_ADDRESS(
+                    i2cRegToScomAddr(I2C_REG_STATUS,i_args)));
 
                 // I2C CC Protect Mode Register
-                l_scom_data.addData(DEVICE_SCOM_ADDRESS(I2C_HOST_MASTER_BASE_ADDR +
-                                                        I2C_REG_CC_PROTECT_MODE +
-                                                        (i_args.engine * P10_ENGINE_SCOM_OFFSET)));
+                l_scom_data.addData(DEVICE_SCOM_ADDRESS(
+                    i2cRegToScomAddr(I2C_REG_CC_PROTECT_MODE,i_args)));
 
                 // I2C Atomic Lock Register
-                l_scom_data.addData(DEVICE_SCOM_ADDRESS(I2C_HOST_MASTER_BASE_ADDR +
-                                                        I2C_REG_ATOMIC_LOCK +
-                                                        (i_args.engine * P10_ENGINE_SCOM_OFFSET)));
+                l_scom_data.addData(DEVICE_SCOM_ADDRESS(
+                    i2cRegToScomAddr(I2C_REG_ATOMIC_LOCK,i_args)));
 
                 // Add the above registers to the error log
                 l_scom_data.addToLog(err);
