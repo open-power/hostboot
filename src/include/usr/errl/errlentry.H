@@ -88,6 +88,7 @@ static mutex_t g_sevMapMutex = MUTEX_INITIALIZER;
 /*****************************************************************************/
 class ErrlManager;
 class ErrlUserDetailsBackTrace;
+class ErrlUserDetailsCallout;
 
 /**
  *  @brief      Host Boot Error log entry class.
@@ -917,7 +918,22 @@ public:
      */
     static std::vector<target_callout> getTargetCallouts(const char* i_callout_list);
 
+    /* @brief Checks whether the given hash exists in the vector of hashed
+     *         User Details sections
+     *
+     * @param[in] i_hash The hash to find in the list of hashes seen so far
+     * @return true if hash was found; false otherwise
+     */
+    bool isUDHashDuplicate(uint32_t i_hash);
+
 private:
+
+    /* @brief Checks whether the provided callout already exists in the list
+     *        of callouts and adds the callout to the error log if it's unique
+     *
+     * param[in] i_callout The callout to add to the error log
+     */
+    void addCallout(ErrlUserDetailsCallout* i_callout);
 
      /**
      *  @brief Set the failing subsystem ID in the error log
@@ -1247,6 +1263,9 @@ private:
 
     // maximum possible size of error log to send
     static uint32_t iv_maxSize;
+
+    // vector used to remove duplicate User Detail callout sections
+    std::vector<uint32_t>iv_UDDataHashes;
 };
 
 
