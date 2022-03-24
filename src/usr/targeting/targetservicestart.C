@@ -722,13 +722,7 @@ static void initializeAttributes(TargetService& i_targetService,
         else
         {
             l_pTopLevel->setAttr<ATTR_IS_MPIPL_HB>(0);
-
-            // TODO RTC 269891: Remove this block of code when all platforms
-            // support HW VPD writes; for now, only FSP based systems have this
-            // verified.
-            #ifdef CONFIG_FSP_BUILD
             l_pTopLevel->setAttr<TARGETING::ATTR_ALLOW_EEPROM_WRITES>(true);
-            #endif
 
             // Compute any values that might change based on a remap of memory
             adjustMemoryMap(i_targetService);
