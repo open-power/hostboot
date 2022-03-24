@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,10 +37,10 @@ namespace std
         { typedef typename std::remove_reference<T>::type* type; };
 
     template <typename T> struct add_lvalue_reference
-        { typedef typename std::remove_reference<T>::type& type; };
+        { typedef T& type; };
 
     template <typename T> struct add_rvalue_reference
-        { typedef typename std::remove_reference<T>::type&& type; };
+        { typedef T&& type; };
 }
 
 #endif

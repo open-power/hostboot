@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -47,6 +47,10 @@
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/trace.H>
 #include "unittest.H"
+
+#if !defined(CONFIG_FSP_BUILD) && !defined(fips)
+#include <targeting/common/predicates/predicatelogic.H>
+#endif
 
 namespace TARGETING {
 extern void dumpAllAttributes(TARG_TD_t,uint32_t);
@@ -1151,6 +1155,70 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
 #endif
 
         TARG_TS_TRACE(EXIT_MRK "testPredicatePostfixExpr" );
+    }
+
+    void testHwasPredicateLogicOperators()
+    {
+#if !defined(CONFIG_FSP_BUILD) && !defined(fips)
+        using namespace TARGETING::PREDICATE_LOGIC_OPERATORS;
+
+        Target* l_pTopLevel = UTIL::assertGetToplevelTarget();
+
+        PredicateCTM l_sysClass(CLASS_SYS);
+        PredicateCTM l_sysType(CLASS_NA,TYPE_SYS);
+        PredicateCTM l_power10Model(CLASS_NA,TYPE_NA,MODEL_POWER10);
+
+        {
+            PredicatePostfixExpr logic_expr;
+            logic_expr <<= l_sysClass && l_sysType && l_power10Model;
+
+            PredicatePostfixExpr rpn_expr;
+            rpn_expr.push(&l_sysClass).push(&l_sysType).And();
+            rpn_expr.push(&l_power10Model).And();
+
+            if (logic_expr(l_pTopLevel) != rpn_expr(l_pTopLevel))
+            {
+                TARG_TS_FAIL("testHwasPredicateLogicOperators(1): Operator expression is different than "
+                             "RPN expression: %d != %d",
+                             logic_expr(l_pTopLevel), rpn_expr(l_pTopLevel));
+            }
+        }
+
+        {
+            PredicatePostfixExpr logic_expr;
+            logic_expr <<= !(l_sysClass && l_sysType && l_power10Model);
+
+            PredicatePostfixExpr rpn_expr;
+            rpn_expr.push(&l_sysClass).push(&l_sysType).And();
+            rpn_expr.push(&l_power10Model).And();
+            rpn_expr.Not();
+
+            if (logic_expr(l_pTopLevel) != rpn_expr(l_pTopLevel))
+            {
+                TARG_TS_FAIL("testHwasPredicateLogicOperators(2): Operator expression is different than "
+                             "RPN expression: %d != %d",
+                             logic_expr(l_pTopLevel), rpn_expr(l_pTopLevel));
+            }
+        }
+
+        {
+            PredicatePostfixExpr logic_expr;
+            logic_expr <<= !(l_sysClass && l_sysType && l_power10Model) || l_sysClass;
+
+            PredicatePostfixExpr rpn_expr;
+            rpn_expr.push(&l_sysClass).push(&l_sysType).And();
+            rpn_expr.push(&l_power10Model).And();
+            rpn_expr.Not();
+            rpn_expr.push(&l_sysClass).Or();
+
+            if (logic_expr(l_pTopLevel) != rpn_expr(l_pTopLevel))
+            {
+                TARG_TS_FAIL("testHwasPredicateLogicOperators(3): Operator expression is different than "
+                             "RPN expression: %d != %d",
+                             logic_expr(l_pTopLevel), rpn_expr(l_pTopLevel));
+            }
+        }
+#endif
     }
 
     void testTargetIterator()
