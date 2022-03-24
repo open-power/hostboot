@@ -111,9 +111,6 @@ EXTRAINCDIR += ${MSS_LIB}
 include ${ROOTPATH}/src/build/mkrules/script.rules.mk
 include ${ROOTPATH}/src/build/mkrules/verbose.rules.mk
 
-#MSS_GENERIC_PATH := $(IMPORT_PATH)/generic/memory/lib
-#MSS_GENERIC_INCLUDES := $(shell find $(MSS_GENERIC_PATH) -type d)
-
 # Generate generic_system_accessors header file
 GENERATED = generic_system_accessors
 COMMAND = gen_accessors.pl
@@ -126,7 +123,7 @@ SOURCES += $(IMPORT_PATH)/hwpf/fapi2/xml/attribute_info/system_attributes.xml
 SOURCES += $(IMPORT_PATH)/generic/procedures/xml/attribute_info/generic_memory_mrw_attributes.xml
 SOURCES += $(IMPORT_PATH)/chips/p10/procedures/xml/attribute_info/p10_freq_attributes.xml
 CLEAN_TARGETS += ${$(GENERATED)_PATH}/mss_generic_system_attribute_getters.H
-CLEAN_TARGETS += ${$(GENERATED)_PATH}/generic_system_accessors.built
+CLEAN_TARGETS += ${$(GENERATED)_PATH}/.generic_system_accessors.built
 
 define generic_system_accessors_RUN
 		$(C1) mkdir $$($(GENERATED)_PATH) -p
@@ -138,7 +135,7 @@ $(call BUILD_GENERATED)
 
 
 # Generate generic_memory_accessors header file
-GENERATED += generic_accessors
+GENERATED = generic_accessors
 COMMAND = gen_accessors.pl
 $(GENERATED)_COMMAND_PATH = $(IMPORT_PATH)/generic/memory/tools/
 
@@ -164,7 +161,7 @@ $(call BUILD_GENERATED)
 
 
 # Generate explorer_memory_accessors header file
-GENERATED += gen_exp_accessors
+GENERATED = gen_exp_accessors
 COMMAND = gen_accessors.pl
 $(GENERATED)_COMMAND_PATH = $(IMPORT_PATH)/generic/memory/tools/
 
@@ -186,7 +183,7 @@ $(call BUILD_GENERATED)
 
 
 ## Generate mss_p10 header file
-GENERATED += gen_p10_accessors
+GENERATED = gen_p10_accessors
 COMMAND = gen_accessors.pl
 $(GENERATED)_COMMAND_PATH = $(IMPORT_PATH)/generic/memory/tools/
 
@@ -210,7 +207,7 @@ $(call BUILD_GENERATED)
 
 
 ## Generate pmic_accessors header file
-GENERATED += gen_pmic_accessors
+GENERATED = gen_pmic_accessors
 COMMAND = gen_accessors.pl
 $(GENERATED)_COMMAND_PATH = $(IMPORT_PATH)/generic/memory/tools/
 
