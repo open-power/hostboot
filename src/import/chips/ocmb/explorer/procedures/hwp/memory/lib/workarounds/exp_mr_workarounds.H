@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,8 +64,18 @@ fapi2::ReturnCode update_lpasr(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 /// @note Unit test helper
 ///
-fapi2::ReturnCode updates_mode_registers_helper(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
-        std::vector<ccs::instruction_t<mss::mc_type::EXPLORER>>& o_instructions);
+fapi2::ReturnCode updates_mr2_helper(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                     std::vector<ccs::instruction_t<mss::mc_type::EXPLORER>>& o_instructions);
+
+///
+/// @brief Helper that adds the MR4 commands
+/// @param[in] i_target port target on which to operate
+/// @param[out] o_instructions CCS instructions
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+/// @note Unit test helper
+///
+fapi2::ReturnCode updates_mr4_helper(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                     std::vector<ccs::instruction_t<mss::mc_type::EXPLORER>>& o_instructions);
 
 ///
 /// @brief Updates MR2 to have the proper CWL value if the workaround is needed
