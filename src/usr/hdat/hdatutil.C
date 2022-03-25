@@ -334,15 +334,14 @@ void hdatPopulateMTMAndSerialNumber()
 
     if(l_errl == NULL)
     {
-        uint8_t l_vpddata[l_vpdSize];
-
+        uint8_t l_vpddata[l_vpdSize+1] = {0};
         l_errl = deviceRead(l_nodeTarget, l_vpddata, l_vpdSize,
                 DEVICE_PVPD_ADDRESS( PVPD::VSYS, PVPD::TM ));
 
         if(l_errl == NULL)
         {
             const uint8_t l_mtmSize= 0x08;
-            //phyp would requre just 8 character of MTM
+            //phyp would require just 8 characters of MTM
             strncpy(l_rawMTM,reinterpret_cast<const char*>(l_vpddata),
                     l_mtmSize);
             HDAT_DBG("from deviceRead l_rawMTM=%s, l_vpddata=%s",l_rawMTM,l_vpddata);
@@ -379,7 +378,7 @@ void hdatPopulateMTMAndSerialNumber()
 
     if(l_errl == NULL)
     {
-        uint8_t l_vpddata[l_vpdSize];
+        uint8_t l_vpddata[l_vpdSize+1] = {0};
 
         l_errl = deviceRead(l_nodeTarget, l_vpddata, l_vpdSize,
                 DEVICE_PVPD_ADDRESS( PVPD::VSYS, PVPD::SE ));
@@ -387,7 +386,7 @@ void hdatPopulateMTMAndSerialNumber()
         if(l_errl == NULL)
         {
             const uint8_t l_serialSize = 0x07;
-            //phyp would requre just 7 character of serial number
+            //phyp would require just 7 character of serial number
             strncpy(reinterpret_cast<char *>(l_serialNumber),
                     reinterpret_cast<const char*>(l_vpddata),l_serialSize);
             HDAT_DBG("from deviceRead l_serialNumber=%s and l_vpddata=%s",
@@ -711,7 +710,7 @@ errlHndl_t hdatGetAsciiKwdForPvpd(TARGETING::Target * i_target,
         ////////
         o_kwdSize = totSize;
 
-        o_kwd = new char[totSize]();
+        o_kwd = new char[totSize+1]();
         HDAT_DBG("vini kwd Size=0x%x, numViniKwds=0x%x",viniSize,numViniKwds);
         uint16_t tmpVINISize = viniSize + numViniKwds * 1 + numViniKwds * 2;
         HDAT_DBG("VINI SIZE=0x%x",tmpVINISize);
@@ -732,7 +731,8 @@ errlHndl_t hdatGetAsciiKwdForPvpd(TARGETING::Target * i_target,
                 HDAT_DBG("theSize[curCmd] is 0");
                 continue;
             }
-            theData = new uint8_t [theSize[curCmd]];
+            // allocate extra byte for null-termation
+            theData = new uint8_t [theSize[curCmd]+1]();
 
             HDAT_DBG("hdatGetAsciiKwdForPvpd: reading %dth keyword of size %d",
                       curCmd,theSize[curCmd]);
@@ -897,7 +897,7 @@ errlHndl_t hdatGetPvpdFullRecord(TARGETING::Target * i_target,
         //o_kwd = new char[o_kwdSize + l_wholeTagSize ];
         size_t remSize = (o_kwdSize + l_wholeTagSize) % 4 + 32;
         totSize = o_kwdSize + l_wholeTagSize + remSize;
-        o_kwd = new char[totSize]();
+        o_kwd = new char[totSize+1]();
         ////
 
         uint32_t loc = 0;
@@ -1052,7 +1052,7 @@ errlHndl_t hdatGetAsciiKwdForMvpd(TARGETING::Target * i_target,
         HDAT_DBG("allocating total key word size %d",
                   o_kwdSize);
         //o_kwd = static_cast<char *>(malloc( o_kwdSize));
-        o_kwd = new char[o_kwdSize];
+        o_kwd = new char[o_kwdSize+1]();
 
         uint32_t loc = 0;
         for( uint32_t curCmd = 0; curCmd < i_num; curCmd++ )
@@ -1060,8 +1060,9 @@ errlHndl_t hdatGetAsciiKwdForMvpd(TARGETING::Target * i_target,
             theRecord = (uint64_t)i_fetchVpd[curCmd].record;
             theKeyword = (uint64_t)i_fetchVpd[curCmd].keyword;
 
-            //theData = static_cast<uint8_t*>(malloc( theSize[curCmd] ));
-            theData = new uint8_t [theSize[curCmd]];
+            //theData = static_cast<uint8_t*>(malloc( theSize[curCmd]+1));
+            // allow extra byte for null-termination
+            theData = new uint8_t [theSize[curCmd]+1]();
 
             HDAT_DBG("reading %dth keyword of size %d",
                       curCmd,theSize[curCmd]);
@@ -1197,7 +1198,8 @@ errlHndl_t hdatGetMvpdFullRecord(TARGETING::Target * i_target,
         {
             theRecord = (uint64_t)i_fetchVpd[curRec].record;
 
-            theData = new uint8_t [theSize[curRec]];
+            // allocate extra byte for null-termination
+            theData = new uint8_t [theSize[curRec]+1]();
 
             HDAT_DBG("reading %dth Record of size %d",
                       curRec,theSize[curRec]);
@@ -1606,7 +1608,7 @@ errlHndl_t hdatConvertRawSpdToIpzFormat(
     char              *&o_fmtKwd)
 {
     errlHndl_t l_err = nullptr;
-    char	 l_dr_str[SVPD_JEDEC_DR_KW_SIZE+1] = "       MB MEMORY";
+    char     l_dr_str[SVPD_JEDEC_DR_KW_SIZE+1] = "       MB MEMORY";
     char     l_sz_str[SVPD_JEDEC_SZ_KW_SIZE] = {'\0'};
     bool     l_invalid_dimm = false;
     bool     l_is_spd_template_present = true;
@@ -1822,13 +1824,13 @@ errlHndl_t hdatConvertRawSpdToIpzFormat(
 
         /****************** Synthesize VSPD Block ******************/
 
-    	/* Synthesize #I KW of VSPD Block       */
+        /* Synthesize #I KW of VSPD Block       */
         /* (Copy maximum 4096 bytes of VPD for DDIMM)   */
         memcpy(reinterpret_cast<void *>(&o_fmtKwd[SVPD_I_BLK_OFFSET]),
             &i_jedec_ptr[0], i_jedec_sz);
 
         /* Synthesize #A KW of VSPD Block */
-    	/* (copy 640 - 1023 bytes of VPD for DDIMM) */
+        /* (copy 640 - 1023 bytes of VPD for DDIMM) */
         memcpy(reinterpret_cast<void *>(&o_fmtKwd[SVPD_A_BLK_OFFSET]),
             &i_jedec_ptr[DDIMM_SPD_EMP_OFFSET],DDIMM_SPD_EMP_SZ);
 
@@ -1842,7 +1844,7 @@ errlHndl_t hdatConvertRawSpdToIpzFormat(
                 &i_jedec_ptr[DDIMM_SPD_EUP_OFFSET], DDIMM_SPD_EUP_SZ);
         }
 
-	    /********************  Done with Conversion ***********************/
+      /********************  Done with Conversion ***********************/
     }while(false);
     return l_err;
 }
