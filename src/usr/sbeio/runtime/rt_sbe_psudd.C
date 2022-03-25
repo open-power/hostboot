@@ -64,6 +64,9 @@ namespace SBEIO
 {
 sbeAllocationHandle_t sbeMalloc(const size_t i_bytes)
 {
+    // Make sure SbePsu is constructed
+    SbePsu::getTheInstance();
+
     // Make sure we didn't exceed our reserved space
     if( i_bytes > SbePsu::MAX_HBRT_PSU_OP_SIZE_BYTES )
     {

@@ -1103,10 +1103,6 @@ void handlePmicHealthCheckCallback(void)
 
     do
     {
-        // PMIC health check uses the SBE PSU interface,
-        // make sure it is constructed
-        SbePsu::getTheInstance();
-
         // Call function to create a PEL with PMIC telemetry data from the SBE.
         // This info PEL will be committed inside the health check function.
         // The error returned indicates a problem with the health check, commit it.
