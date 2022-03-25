@@ -115,19 +115,9 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 /// @note Unit test helper
 ///
-fapi2::ReturnCode updates_mode_registers_helper(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
-        std::vector<ccs::instruction_t<mss::mc_type::EXPLORER>>& o_instructions)
+fapi2::ReturnCode updates_mr2_helper(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                     std::vector<ccs::instruction_t<mss::mc_type::EXPLORER>>& o_instructions)
 {
-    // The PHY puts us into self time refresh mode prior
-    // We need to exit self time refresh mode by holding the CKE high
-    // The time for this is tXPR = tRFC(min) + 10 ns
-    // This is 560ns -> 746 clocks. rounded up to 750 for saftey
-    constexpr uint16_t TXPR_SAFE_MARGIN = 750;
-
-    o_instructions.clear();
-
-    o_instructions.push_back(mss::ccs::des_command<mss::mc_type::EXPLORER>(TXPR_SAFE_MARGIN));
-
     for(const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
     {
         fapi2::ReturnCode l_mrs_rc = fapi2::FAPI2_RC_SUCCESS;
@@ -153,7 +143,49 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Updates MR2 to have the proper CWL value if the workaround is needed
+/// @brief Helper that adds the MR4 commands
+/// @param[in] i_target port target on which to operate
+/// @param[out] o_instructions CCS instructions
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+/// @note Unit test helper
+///
+fapi2::ReturnCode updates_mr4_helper(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                     std::vector<ccs::instruction_t<mss::mc_type::EXPLORER>>& o_instructions)
+{
+    // The PHY puts us into self time refresh mode prior
+    // We need to exit self time refresh mode by holding the CKE high
+    // The time for this is tXPR = tRFC(min) + 10 ns
+    // This is 560ns -> 746 clocks. rounded up to 750 for saftey
+    constexpr uint16_t TXPR_SAFE_MARGIN = 750;
+
+    o_instructions.push_back(mss::ccs::des_command<mss::mc_type::EXPLORER>(TXPR_SAFE_MARGIN));
+
+    for(const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
+    {
+        fapi2::ReturnCode l_mrs_rc = fapi2::FAPI2_RC_SUCCESS;
+        mss::ddr4::mrs04_data<mss::mc_type::EXPLORER> l_data(l_dimm, l_mrs_rc);
+
+        std::vector<mss::rank::info<mss::mc_type::EXPLORER>> l_ranks;
+        FAPI_TRY(mss::rank::ranks_on_dimm(l_dimm, l_ranks));
+        FAPI_TRY(l_mrs_rc);
+
+        // Loops through all ranks on this DIMM and adds them to the CCS instructions to execute
+        for(const auto& l_rank_info : l_ranks)
+        {
+            FAPI_TRY(mss::mrs_engine( l_dimm,
+                                      l_data,
+                                      l_rank_info.get_port_rank(),
+                                      mrsTraits<mss::mc_type::EXPLORER>::mrs_tmod(i_target),
+                                      o_instructions ));
+        }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Updates mode registers with any needed workaround values
 /// @param[in] i_target port target on which to operate
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 /// @note This is the second part of the CCS 2666 write workaround
@@ -164,15 +196,7 @@ fapi2::ReturnCode updates_mode_registers(const fapi2::Target<fapi2::TARGET_TYPE_
 {
     bool l_2666_update_is_needed = false;
     bool l_lpasr_update_is_needed = false;
-
-    FAPI_TRY(is_ccs_2666_write_needed(i_target, l_2666_update_is_needed));
-    FAPI_TRY(update_lpasr(i_target, l_lpasr_update_is_needed));
-
-    // If the workarounds are not needed, skip MRS write
-    if ((l_2666_update_is_needed == false) && (l_lpasr_update_is_needed == false))
-    {
-        return fapi2::FAPI2_RC_SUCCESS;
-    }
+    mss::ccs::program<mss::mc_type::EXPLORER> l_program;
 
     // Configure the CCS engine. Since this is a chunk of MCBIST logic, we don't want
     // to do it for every port. If we ever break this code out so f/w can call draminit
@@ -181,18 +205,30 @@ fapi2::ReturnCode updates_mode_registers(const fapi2::Target<fapi2::TARGET_TYPE_
     FAPI_TRY(mss::ccs::configure_mode(mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target)),
              "%s failed to configure ccs mode register", mss::c_str(i_target));
 
-    // Update the CWL and/or LPASR to the workaround value
+    // Update the TEMP_REFRESH_MODE and TEMP_REFRESH_RANGE to the workaround value
     {
-        mss::ccs::program<mss::mc_type::EXPLORER> l_program;
+        FAPI_INF("%s Updating values in MR4", mss::c_str(i_target));
 
         // Adds the instructions
-        FAPI_TRY(updates_mode_registers_helper(i_target, l_program.iv_instructions));
-
-        // Executes the CCS commands
-        FAPI_TRY(mss::ccs::execute<mss::mc_type::EXPLORER>(mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target),
-                 l_program,
-                 i_target));
+        FAPI_TRY(updates_mr4_helper(i_target, l_program.iv_instructions));
     }
+
+    FAPI_TRY(is_ccs_2666_write_needed(i_target, l_2666_update_is_needed));
+    FAPI_TRY(update_lpasr(i_target, l_lpasr_update_is_needed));
+
+    // Update the CWL and/or LPASR to the workaround value if either of these workarounds are needed
+    if (l_2666_update_is_needed  || l_lpasr_update_is_needed)
+    {
+        FAPI_INF("%s Updating values in MR2", mss::c_str(i_target));
+
+        // Adds the instructions
+        FAPI_TRY(updates_mr2_helper(i_target, l_program.iv_instructions));
+    }
+
+    // Executes the CCS commands
+    FAPI_TRY(mss::ccs::execute<mss::mc_type::EXPLORER>(mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target),
+             l_program,
+             i_target));
 
 fapi_try_exit:
     return fapi2::current_err;
