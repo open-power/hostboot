@@ -28,4 +28,5 @@ $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/common/include)
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/procedures/hwp/nest)
 lib$(PROCEDURE)_DEPLIBS+=p10_fbc_utils
 lib$(PROCEDURE)_DEPLIBS+=p10_pm_qme_firinit
+lib$(PROCEDURE)_COMMONFLAGS+=-Wno-misleading-indentation
 $(call BUILD_PROCEDURE)
