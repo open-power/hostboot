@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -496,6 +496,10 @@ fapi2::ReturnCode p10_smp_link_firs_dl(
         FAPI_DBG("Setting DLP ECC Correctable FIR to masked for MFG test");
         SET_DLP_FIR_MASK_REG_0_SL_ECC_CORRECTABLE_MASK(1, l_mask_value);
         SET_DLP_FIR_MASK_REG_1_SL_ECC_CORRECTABLE_MASK(1, l_mask_value);
+
+        FAPI_DBG("Setting DLP ECC UE FIR to masked for MFG test");
+        SET_DLP_FIR_MASK_REG_0_SL_ECC_UE_MASK(1, l_mask_value);
+        SET_DLP_FIR_MASK_REG_1_SL_ECC_UE_MASK(1, l_mask_value);
     }
 
     FAPI_TRY(PUT_DLP_FIR_MASK_REG_RW(i_iohs_target, l_mask_value),
