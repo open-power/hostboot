@@ -403,6 +403,17 @@ fapi2::ReturnCode powerdown_deconfigured_cl2_l3(
         }
         else
         {
+            //There is a chance of this core is activated during istep 4, and in
+            //istep 4 spwu is asserted, so we need to deassert before QME boots
+            FAPI_TRY(fapi2::getScom(i_core_target, QME_SPWU_OTR, l_data));
+
+            if (l_data.getBit(0))
+            {
+                l_data.flush<0>();
+                FAPI_TRY(fapi2::putScom(i_core_target, QME_SPWU_OTR, l_data));
+            }
+
+
             //Verify core is powered on
             //If core is powered on
             //  then if core(ECl2) clocks are on
@@ -412,6 +423,7 @@ fapi2::ReturnCode powerdown_deconfigured_cl2_l3(
             //  Power off the core and L3
             if( l_cl2_pfet_sense)
             {
+
                 if (!l_core_clock_State)
                 {
                     FAPI_TRY(p10_hcd_l2_purge(i_core_target));
