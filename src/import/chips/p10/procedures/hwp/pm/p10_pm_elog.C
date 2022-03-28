@@ -118,9 +118,12 @@ fapi2::ReturnCode assertElogEntry (
     elogEntry.dw0.value = i_elog_entry;
     *o_perv_chiplet_id = 0;
 
-    FAPI_DBG (">> assertElogEntry: Entry 0x%08x%08x Src 0x%02X Local %d",
-              elogEntry.dw0.words.high_order, elogEntry.dw0.words.low_order,
-              elogEntry.dw0.fields.errlog_src, i_local);
+    FAPI_DBG (">> assertElogEntry-Id %d Src 0x%02X Len %d Addr 0x%08X Local %d",
+              elogEntry.dw0.fields.errlog_id,
+              elogEntry.dw0.fields.errlog_src,
+              elogEntry.dw0.fields.errlog_len,
+              elogEntry.dw0.fields.errlog_addr,
+              i_local);
 
     switch (elogEntry.dw0.fields.errlog_src)
     {
@@ -160,10 +163,10 @@ fapi2::ReturnCode assertElogEntry (
     for (idx = 0; idx < elogTbl.dw0.fields.total_log_slots; ++idx)
     {
         FAPI_DBG ("From SRAM 0x%08X%08X vs I/P 0x%08X%08X",
-                  elogTbl.elog[idx].dw0.words.high_order,
-                  elogTbl.elog[idx].dw0.words.low_order,
-                  elogEntry.dw0.words.high_order,
-                  elogEntry.dw0.words.low_order);
+                  htobe32(elogTbl.elog[idx].dw0.words.high_order),
+                  htobe32(elogTbl.elog[idx].dw0.words.low_order),
+                  htobe32(elogEntry.dw0.words.high_order),
+                  htobe32(elogEntry.dw0.words.low_order));
 
         if (elogTbl.elog[idx].dw0.value == elogEntry.dw0.value)
         {
@@ -186,11 +189,11 @@ fapi2::ReturnCode assertElogEntry (
                   .set_LOCAL (i_local)
                   .set_ENTRIES (idx),
                   "Elog Entry 0x%08X%08X not found!",
-                  (uint32_t) i_elog_entry,
-                  (uint32_t) (i_elog_entry >> 32) );
+                  htobe32(elogEntry.dw0.words.high_order),
+                  htobe32( elogEntry.dw0.words.low_order));
 
 fapi_try_exit:
-    FAPI_DBG ("<< assertElogEntry");
+    FAPI_DBG ("<< assertElogEntry @0x%08X", (o_sram_addr) ? (*o_sram_addr) : 0);
     return fapi2::current_err;
 }
 
@@ -435,8 +438,8 @@ fapi2::ReturnCode p10_pm_elog_read (
     uint32_t bytes = 0;
     uint8_t mode = 0x60; // OCC Normal Read, OCB Channel 3
 
-    FAPI_DBG (">> p10_pm_elog_read: Entry 0x%08x%08x Offset %d Len %d Local %d",
-              (uint32_t)(i_elog_entry >> 32), (uint32_t)i_elog_entry,
+    FAPI_DBG (">> p10_pm_elog_read: Entry 0x%016lx Offset %d Len %d Local %d",
+              i_elog_entry,
               i_offset, i_len, i_local);
 
     FAPI_TRY ( assertElogEntry(
@@ -449,8 +452,8 @@ fapi2::ReturnCode p10_pm_elog_read (
     // Found the error entry in table
     hcode_elog_entry_t elogEntry;
     elogEntry.dw0.value = i_elog_entry;
-    addr = elogEntry.dw0.fields.errlog_addr;
-    bytes = elogEntry.dw0.fields.errlog_len;
+    addr = htobe32(elogEntry.dw0.fields.errlog_addr);
+    bytes = htobe16(elogEntry.dw0.fields.errlog_len);
 
     FAPI_DBG ("ELog Addr: 0x%08X Elog Len: %d", addr, bytes);
 
