@@ -1256,6 +1256,105 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+/// @brief Determine LCO target setup policy based on platform attribute state
+///        and core configuration of selected chip
+/// @param[in]  i_target     Input chip target
+/// @param[out] o_eco_only   True=Include ECO targets in LCO target set only
+///                          False=Include all core targets in LCO target set
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code
+fapi2::ReturnCode p10_fbc_eff_config_lco_policy(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    bool& o_eco_only)
+{
+    FAPI_DBG("Start");
+
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::ATTR_PROC_LCO_MODE_SETUP_Type l_lco_mode_setup = 0;
+    fapi2::ATTR_PROC_LCO_MODE_SETUP_ADAPTIVE_N_Type l_adaptive_n = 0;
+    fapi2::ATTR_PROC_LCO_MODE_SETUP_ADAPTIVE_D_Type l_adaptive_d = 0;
+    uint8_t l_total_l3s = 0;
+    uint8_t l_eco_l3s = 0;
+    o_eco_only = false;
+
+    // read and process policy attributes
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_LCO_MODE_SETUP, FAPI_SYSTEM, l_lco_mode_setup),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_LCO_MODE_SETUP)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_LCO_MODE_SETUP_ADAPTIVE_N, FAPI_SYSTEM, l_adaptive_n),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_LCO_MODE_SETUP_ADAPTIVE_N)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_LCO_MODE_SETUP_ADAPTIVE_D, FAPI_SYSTEM, l_adaptive_d),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_LCO_MODE_SETUP_ADAPTIVE_D)");
+
+    FAPI_ASSERT(l_adaptive_n != 0 &&
+                l_adaptive_d != 0 &&
+                (l_adaptive_d >= l_adaptive_n),
+                fapi2::P10_FBC_EFF_CONFIG_LCO_MODE_SETUP_ADAPTIVE_ATTR_ERR()
+                .set_ADAPTIVE_N(l_adaptive_n)
+                .set_ADAPTIVE_D(l_adaptive_d),
+                "Invalid value or relationship for ATTR_PROC_LCO_MODE_SETUP_ADAPTIVE_[NP] attribute values!");
+
+    switch (l_lco_mode_setup)
+    {
+        case fapi2::ENUM_ATTR_PROC_LCO_MODE_SETUP_ALL:
+            o_eco_only = false;
+            break;
+
+        case fapi2::ENUM_ATTR_PROC_LCO_MODE_SETUP_ECO_ONLY:
+            o_eco_only = true;
+            break;
+
+        case fapi2::ENUM_ATTR_PROC_LCO_MODE_SETUP_ADAPTIVE:
+
+            // ratio/percentage of ECO cores to total cores will determine policy
+            // if (# ECO / #L3) >= (ADAPTIVE_N / ADAPTIVE_D)
+            for (auto& l_core : i_target.getChildren<fapi2::TARGET_TYPE_CORE>())
+            {
+                l_total_l3s++;
+                fapi2::ATTR_ECO_MODE_Type l_eco_mode;
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ECO_MODE, l_core, l_eco_mode),
+                         "Error from FAPI_ATTR_GET (ATTR_ECO_MODE)");
+
+                if (l_eco_mode == fapi2::ENUM_ATTR_ECO_MODE_ENABLED)
+                {
+                    l_eco_l3s++;
+                }
+            }
+
+            FAPI_DBG("Total L3s: %d, Total ECO L3s: %d",
+                     l_total_l3s, l_eco_l3s);
+
+            if (l_total_l3s != 0)
+            {
+                uint32_t l_thresh = l_adaptive_n;
+                uint32_t l_act = (l_eco_l3s * l_adaptive_d) / l_total_l3s;
+
+                if (l_act >= l_thresh)
+                {
+                    o_eco_only = true;
+                }
+                else
+                {
+                    o_eco_only = false;
+                }
+
+                FAPI_DBG("Act: %d, Thresh: %d, ECO only: %d",
+                         l_act, l_thresh, (o_eco_only) ? (1) : (0));
+            }
+
+            break;
+
+        default:
+            FAPI_ASSERT(false,
+                        fapi2::P10_FBC_EFF_CONFIG_LCO_MODE_SETUP_ATTR_ERR()
+                        .set_TARGET(i_target)
+                        .set_LCO_MODE_SETUP(l_lco_mode_setup),
+                        "Unsupported enum for ATTR_PROC_LCO_MODE_SETUP!");
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
 ///
 /// @brief Initialize attributes related to LCO configuration
 /// @return fapi2::ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
@@ -1272,10 +1371,10 @@ fapi2::ReturnCode p10_fbc_eff_config_lco_attrs(void)
         fapi2::ATTR_PROC_LCO_TARGETS_VECTOR_Type l_lco_targets = {0};
         fapi2::ATTR_PROC_LCO_TARGETS_MIN_Type l_lco_min = {0};
         fapi2::ATTR_PROC_LCO_TARGETS_MIN_Type l_lco_min_threshold = {0};
-        fapi2::ATTR_PROC_LCO_MODE_SETUP_Type l_lco_mode_setup = 0;
+        bool l_eco_only = false;
 
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_LCO_MODE_SETUP, FAPI_SYSTEM, l_lco_mode_setup),
-                 "Error from FAPI_ATTR_GET (ATTR_PROC_LCO_MODE_SETUP)");
+        FAPI_TRY(p10_fbc_eff_config_lco_policy(l_target, l_eco_only),
+                 "Error from p10_fbc_eff_config_lco_policy");
 
         // lco_targets_count: number of valid L3 targets
         // lco_targets_vector: enable only valid L3s
@@ -1288,7 +1387,7 @@ fapi2::ReturnCode p10_fbc_eff_config_lco_attrs(void)
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ECO_MODE, l_core, l_eco_mode),
                      "Error from FAPI_ATTR_GET (ATTR_ECO_MODE)");
 
-            if ((l_lco_mode_setup == fapi2::ENUM_ATTR_PROC_LCO_MODE_SETUP_ECO_ONLY) &&
+            if (l_eco_only &&
                 (l_eco_mode == fapi2::ENUM_ATTR_ECO_MODE_DISABLED))
             {
                 // do not include this target in LCO targets

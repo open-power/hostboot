@@ -857,15 +857,49 @@
   <description>
     Controls lateral castout target set formation.
     ALL: all cores included in LCO target set
+    ADAPTIVE: base target set selection on percentage of ECO cores relative
+              to all functional L3s.  If the percentage of ECO cores is
+              greater than or equal to ATTR_PROC_LCO_MODE_SETUP_ADAPTIVE_N /
+              ATTR_PROC_LCO_MODE_SETUP_ADAPTIVE_D, restrict LCO target set to
+              ECO cores only.  Else, use all cores.
     ECO_ONLY: only ECO cores included in LCO target set
   </description>
   <valueType>uint8</valueType>
   <enum>
-    ECO_ONLY = 0,
-    ALL = 1
+    ADAPTIVE = 0,
+    ALL = 1,
+    ECO_ONLY = 2
   </enum>
   <platInit>mrw</platInit>
   <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_LCO_MODE_SETUP_ADAPTIVE_N</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Controls lateral castout target set formation, when ATTR_PROC_LCO_MODE_SETUP
+    specifies ADAPTIVE mode.
+    Specifies the numerator of the ECO core threshold percentage required to
+    restrict the LCO target set to ECO cores only
+  </description>
+  <valueType>uint32</valueType>
+  <platInit>mrw</platInit>
+  <default>333</default>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_LCO_MODE_SETUP_ADAPTIVE_D</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Controls lateral castout target set formation, when ATTR_PROC_LCO_MODE_SETUP
+    specifies ADAPTIVE mode.
+    Specifies the denominator of the ECO core threshold percentage required to
+    restrict the LCO target set to ECO cores only
+  </description>
+  <valueType>uint32</valueType>
+  <platInit>mrw</platInit>
+  <default>1000</default>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>

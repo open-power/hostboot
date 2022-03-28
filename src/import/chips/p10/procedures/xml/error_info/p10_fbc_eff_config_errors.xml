@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2022                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -113,6 +113,33 @@
   </description>
   <ffdc>FREQ_CORE_FLOOR</ffdc>
   <ffdc>FREQ_CORE_CEILING</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_FBC_EFF_CONFIG_LCO_MODE_SETUP_ADAPTIVE_ATTR_ERR</rc>
+  <description>
+    Invalid absolute or relative value for ATTR_PROC_LCO_MODE_SETUP_ADAPTIVE_N
+    or ATTR_PROC_LCO_MODE_SETUP_ADAPTIVE_D attributes
+  </description>
+  <ffdc>ADAPTIVE_N</ffdc>
+  <ffdc>ADAPTIVE_D</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_FBC_EFF_CONFIG_LCO_MODE_SETUP_ATTR_ERR</rc>
+  <description>
+    Unsupported enum for ATTR_PROC_LCO_MODE_SETUP attribute
+  </description>
+  <ffdc>TARGET</ffdc>
+  <ffdc>LCO_MODE_SETUP</ffdc>
   <callout>
     <procedure>CODE</procedure>
     <priority>HIGH</priority>
