@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -2848,7 +2848,7 @@ void getAttachedDimms(
 {
     FAPI_DBG("Start");
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_DIMM>> l_dimm_targets =
-                i_target.template getChildren<fapi2::TARGET_TYPE_DIMM>();
+                i_target.template getChildren<fapi2::TARGET_TYPE_DIMM>(fapi2::TARGET_STATE_ALL);
 
     o_dimm_targets.insert(o_dimm_targets.end(),
                           l_dimm_targets.begin(),
@@ -2864,7 +2864,7 @@ void getAttachedDimms(
 {
     FAPI_DBG("Start");
 
-    for (auto l_ocmb_target : i_target.template getChildren<fapi2::TARGET_TYPE_OCMB_CHIP>())
+    for (auto l_ocmb_target : i_target.template getChildren<fapi2::TARGET_TYPE_OCMB_CHIP>(fapi2::TARGET_STATE_ALL))
     {
         getAttachedDimms<fapi2::TARGET_TYPE_OCMB_CHIP>(l_ocmb_target, o_dimm_targets);
     }
@@ -2880,7 +2880,7 @@ void getAttachedDimms(
 {
     FAPI_DBG("Start");
 
-    for (auto l_omi_target : i_target.template getChildren<fapi2::TARGET_TYPE_OMI>())
+    for (auto l_omi_target : i_target.template getChildren<fapi2::TARGET_TYPE_OMI>(fapi2::TARGET_STATE_ALL))
     {
         getAttachedDimms<fapi2::TARGET_TYPE_OMI>(l_omi_target, o_dimm_targets);
     }
