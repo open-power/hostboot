@@ -188,7 +188,7 @@ fapi2::ReturnCode exp_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OCM
     mss::exp::i2c::boot_config_setup(l_cmd_data);
 
     // Finally, make sure fw_status is good
-    FAPI_TRY(mss::exp::i2c::poll_fw_status(i_target, mss::common_timings::DELAY_1MS, 100, l_fw_status_data));
+    FAPI_TRY(mss::exp::i2c::poll_fw_status(i_target, mss::common_timings::DELAY_1MS, 20, l_fw_status_data));
     FAPI_TRY(mss::exp::i2c::check::boot_config(i_target, l_cmd_data, l_fw_status_data));
 
     // Training done bit
