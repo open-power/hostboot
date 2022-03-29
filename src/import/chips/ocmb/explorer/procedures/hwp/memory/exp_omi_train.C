@@ -95,7 +95,7 @@ extern "C"
             if (!l_ocmb_is_explorer)
             {
                 // Gemini should return success code
-                FAPI_TRY(mss::exp::i2c::poll_fw_status(i_target, mss::DELAY_1MS, 100, l_rsp_data));
+                FAPI_TRY(mss::exp::i2c::poll_fw_status(i_target, mss::DELAY_1MS, 20, l_rsp_data));
                 FAPI_TRY(mss::exp::i2c::check::boot_config(i_target, l_cmd_data, l_rsp_data));
             }
 

@@ -117,7 +117,7 @@ extern "C"
         {
             FAPI_TRY(mss::exp::omi::ffe_setup(i_target, l_ffe_setup_data));
             FAPI_TRY(mss::exp::i2c::send_ffe_settings(i_target, l_ffe_setup_data));
-            FAPI_TRY(mss::exp::i2c::poll_fw_status(i_target, mss::DELAY_1MS, 100, l_fw_status_data));
+            FAPI_TRY(mss::exp::i2c::poll_fw_status(i_target, mss::DELAY_1MS, 20, l_fw_status_data));
             FAPI_TRY(mss::exp::i2c::check::command_result(i_target, mss::exp::i2c::FW_TWI_FFE_SETTINGS, l_ffe_setup_data,
                      l_fw_status_data));
         }

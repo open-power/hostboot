@@ -427,7 +427,7 @@ fapi2::ReturnCode poll_abort(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& 
     // Now poll again until BUSY state goes away
     // note the assertion parameters mean assert if we remain in the BUSY state after polling
     // and don't assert if we get a non-success status (which is ok since we're purposely aborting the command)
-    FAPI_TRY(mss::exp::i2c::poll_fw_status(i_target, mss::common_timings::DELAY_1MS, 100, l_rsp_data));
+    FAPI_TRY(mss::exp::i2c::poll_fw_status(i_target, mss::common_timings::DELAY_1MS, 20, l_rsp_data));
 
     // Check that Explorer is not still in FW_BUSY state
     FAPI_TRY(mss::exp::i2c::capture_status(i_target, l_rsp_data, l_fw_status_data));

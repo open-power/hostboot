@@ -300,7 +300,7 @@ fapi2::ReturnCode override_cdr_bw_i2c(
     FAPI_TRY(fapi2::putI2c(i_target, l_i2c_data));
 
     // Check status
-    FAPI_TRY(mss::exp::i2c::poll_fw_status(i_target, mss::DELAY_1MS, 100, l_fw_status_data));
+    FAPI_TRY(mss::exp::i2c::poll_fw_status(i_target, mss::DELAY_1MS, 20, l_fw_status_data));
     FAPI_TRY(mss::exp::i2c::check::command_result(i_target, mss::exp::i2c::FW_CDR_BANDWIDTH_SET,
              l_i2c_data, l_fw_status_data));
 
@@ -374,7 +374,7 @@ fapi2::ReturnCode override_cdr_offset(
     FAPI_TRY(fapi2::putI2c(i_target, l_i2c_data));
 
     // Check status
-    FAPI_TRY(mss::exp::i2c::poll_fw_status(i_target, mss::DELAY_1MS, 100, l_fw_status_data));
+    FAPI_TRY(mss::exp::i2c::poll_fw_status(i_target, mss::DELAY_1MS, 20, l_fw_status_data));
     FAPI_TRY(mss::exp::i2c::check::command_result(i_target, mss::exp::i2c::FW_CDR_OFFSET_FROM_CAL_SET,
              l_i2c_data, l_fw_status_data));
 

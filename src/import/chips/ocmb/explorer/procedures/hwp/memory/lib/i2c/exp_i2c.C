@@ -549,7 +549,7 @@ fapi2::ReturnCode fw_reg_write(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
              i_addr, mss::fapi_pos(i_target));
 
     // Check status of operation
-    FAPI_TRY(poll_fw_status(i_target, DELAY_1MS, 100, l_data));
+    FAPI_TRY(poll_fw_status(i_target, DELAY_1MS, 20, l_data));
     FAPI_TRY(check::command_result(i_target, FW_REG_WRITE, l_cmd_vector, l_data),
              "Invalid Status after FW_REG_WRITE operation to 0x%.8X on OCMB w/ fapiPos = 0x%.8X",
              i_addr, mss::fapi_pos(i_target));
@@ -601,7 +601,7 @@ fapi2::ReturnCode fw_reg_read(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
              i_addr, mss::fapi_pos(i_target));
 
     // Check i2c status after operation
-    FAPI_TRY(poll_fw_status(i_target, DELAY_1MS, 100, l_data));
+    FAPI_TRY(poll_fw_status(i_target, DELAY_1MS, 20, l_data));
     FAPI_TRY(check::command_result(i_target, FW_REG_ADDR_LATCH, l_cmd_vector, l_data),
              "Invalid Status after FW_REG_ADDR_LATCH operation to 0x%.8X on OCMB w/ fapiPos = 0x%.8X",
              i_addr, mss::fapi_pos(i_target));
@@ -647,7 +647,7 @@ fapi2::ReturnCode fw_reg_read(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
                   FW_REG_ADDR_LATCH_SIZE, l_byte_vector[0] );
 
     // Check i2c status after operation
-    FAPI_TRY(poll_fw_status(i_target, DELAY_1MS, 100, l_data));
+    FAPI_TRY(poll_fw_status(i_target, DELAY_1MS, 20, l_data));
     FAPI_TRY(check::command_result(i_target, FW_REG_READ, l_cmd_vector, l_data),
              "Invalid Status after FW_REG_READ operation to 0x%.8X on OCMB w/ fapiPos = 0x%.8X",
              i_addr, mss::fapi_pos(i_target));
