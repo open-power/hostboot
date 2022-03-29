@@ -401,6 +401,19 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
             HDAT_DBG("iv_spPcrd->hdatFruId.hdatResourceId=0x%8X",
                        iv_spPcrd->hdatFruId.hdatResourceId);
 
+            uint32_t l_tpmSlcaIdx = 0xFFFFFFFF;
+            TARGETING::TargetHandleList l_tpmList;
+            getAllChips(l_tpmList,TARGETING::TYPE_TPM,false);
+            if(l_tpmList.size() > 0)
+            {
+                TARGETING::Target *l_pTpmTarget = l_tpmList[0];
+                l_tpmSlcaIdx = l_pTpmTarget->getAttr<ATTR_SLCA_INDEX>();
+                HDAT_DBG("l_tpmSlcaIdx=0x%8X",l_tpmSlcaIdx);
+            }
+
+            // Assert if more than one TPM detected in the system
+            assert(l_tpmList.size() <= 1,"More than one TPM detected");
+
             if (HDAT_PROC_NOT_INSTALLED == (HDAT_PROC_STAT_BITS &
                     this->iv_spPcrd->hdatChipData.hdatPcrdStatusFlags))
             {
@@ -788,6 +801,25 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
                 //copy data from vector to data ptr
                 std::copy(l_spiDevEntries.begin(),
                     l_spiDevEntries.end(), l_spiDevPcrdDataPtr);
+
+                // Update the SLCA indexes for the particular proc
+                for (uint8_t l_idx = 0;l_idx < l_spiDevPcrdHdrPtr->hdatArrayCnt;
+                     l_idx++)
+                {
+                    if (l_spiDevPcrdDataPtr[l_idx].hdatSpiDevPurp ==
+                        static_cast<uint8_t>
+                        (spiSlaveDevice::slaveDevicePurpose_t::TPM)
+                       )
+                    {
+                        l_spiDevPcrdDataPtr[l_idx].hdatSpiSlcaIndex =
+                            static_cast<uint16_t>(l_tpmSlcaIdx);
+                    }
+                    else
+                    {
+                        l_spiDevPcrdDataPtr[l_idx].hdatSpiSlcaIndex =
+                            this->iv_spPcrd->hdatFruId.hdatSlcaIdx;
+                    }
+                }
             }
             else
             {

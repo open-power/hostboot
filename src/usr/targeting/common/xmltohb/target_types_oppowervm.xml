@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2022                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -86,6 +86,16 @@
     <attribute>
       <id>SLCA_RID</id>
       <default>0x00001000</default>
+    </attribute>
+  </targetTypeExtension>
+
+  <targetTypeExtension>
+    <id>chip-tpm-cectpm</id>
+    <attribute>
+      <id>SLCA_INDEX</id>
+    </attribute>
+    <attribute>
+      <id>SLCA_RID</id>
     </attribute>
   </targetTypeExtension>
 

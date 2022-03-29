@@ -71,6 +71,7 @@ fru_id_rid_t g_fruIDRidMap[] =
     {0xD000 , "MS"},
     {0xA000 , "VV"},
     {0x1400 , "RI"},
+    {0x4900 , "IP"}, // TPM
 };
 
 
@@ -420,13 +421,16 @@ static void hdatAddNodeToSLCATable(TARGETING::Target *i_Target,
     TARGETING::PredicateCTM l_dimmFilter(TARGETING::CLASS_LOGICAL_CARD,
                                              TARGETING::TYPE_DIMM);
 
+    TARGETING::PredicateCTM l_tpmFilter(TARGETING::CLASS_CHIP,
+                                        TARGETING::TYPE_TPM);
+
     TARGETING::PredicatePostfixExpr l_presentChildren;
     l_presentChildren.push(&l_procFilter).push(&l_memFilter).Or().
                      push(&l_pciFilter).Or().push(&l_psFilter).Or().
                      push(&l_fanFilter).Or().push(&l_uartFilter).Or().
                      push(&l_usbFilter).Or().push(&l_ethFilter).Or().
                      push(&l_vrmFilter).Or().push(&l_dimmFilter).Or().
-                     push(&l_predHwas).And();
+                     push(&l_tpmFilter).Or().push(&l_predHwas).And();
 
     TARGETING::TargetHandleList l_childList;
 
@@ -483,6 +487,10 @@ static void hdatAddNodeToSLCATable(TARGETING::Target *i_Target,
 
                 case TYPE_DIMM:
                     l_hdatFRUType = HDAT_SLCA_FRU_TYPE_DIMM;
+                break;
+
+                case TYPE_TPM:
+                    l_hdatFRUType = HDAT_SLCA_FRU_TYPE_TPM;
                 break;
 
                 case TYPE_PCI:

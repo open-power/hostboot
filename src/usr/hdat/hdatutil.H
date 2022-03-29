@@ -389,6 +389,7 @@ enum HDAT_FRUType_t
      HDAT_SLCA_FRU_TYPE_DIMM    = 0x11,
      HDAT_SLCA_FRU_TYPE_VV      = 0x12,
      HDAT_SLCA_FRU_TYPE_RI      = 0x13,
+     HDAT_SLCA_FRU_TYPE_TPM     = 0x14,
      HDAT_SLCA_FRU_TYPE_UNKNOWN = 0xFF,
 };
 
