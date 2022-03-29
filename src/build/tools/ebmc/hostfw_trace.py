@@ -103,6 +103,10 @@ TRACE_MAX_ARGS = 8
 TRACE_FILENAME = 32
 flags = 0
 
+"""@brief Trace identification flag
+"""
+TRACE_COMP_TRACE = 0x434F # Identifies trace as a component trace (printf): 0x434F = "CO"
+TRACE_FIELDBIN = 0x4644 # a binary trace of type field (non-debug): x4644 = "FD"
 
 """@brief A global list to consolidate errors encountered while parsing trace entries
 """
@@ -699,14 +703,14 @@ def process_binary_file_v1(binaryFile, outputFile, printNumTraces):
 def process_binary_data_v1(binaryData, dataHeaderOffset, printNumTraces):
     # Process the header data, for version 1, and return the data found in the
     # header as a named tuple 'HeaderDataV1'
-    (retVal, headerDataV1 ) = parse_binary_data_header_v1(binaryData, dataHeaderOffset)
+    retVal, headerDataV1 = parse_binary_data_header_v1(binaryData, dataHeaderOffset)
     if retVal != 0:
         return retVal, 0
 
     # Process the trace entries in the binary data and return the trace entry data
     # as a list of a named tuple 'TraceEntriesV2'.  Trace entry version 2 has the
     # same data as version 1 with the addition of the component name.
-    (retVal, traceEntriesV2 ) = parse_data_trace_entries_v1(binaryData, headerDataV1)
+    retVal, traceEntriesV2 = parse_data_trace_entries_v1(binaryData, headerDataV1)
     if retVal != 0:
         return retVal, 0
 
@@ -714,7 +718,9 @@ def process_binary_data_v1(binaryData, dataHeaderOffset, printNumTraces):
     traceEntriesV2.reverse()
 
     # Translate the trace entries to ASCII representation
-    asciiTracesList = get_ascii_traces_from_trace_entry_list(binaryData, traceEntriesV2)
+    retVal, asciiTracesList = get_ascii_traces_from_trace_entry_list(binaryData, traceEntriesV2)
+    if retVal != 0:
+        return retVal, 0
 
     # Get a string representation of the ASCII traces which is in list form
     traceDataString = convert_ascii_trace_list_to_string(asciiTracesList, printNumTraces);
@@ -904,8 +910,8 @@ def parse_data_trace_entries_v1(binaryData, headerData):
 
 @param[in] binaryData: a byte array that contains the trace entries
 @param[in] traceEntriesV2: a list of version 2 trace entries
-@returns: traces: list of strings: a list of ASCII strings translated from
-                                   the trace entries.
+@returns: return value: int value - the return code: 0 on success, non 0 on failure
+          traces: list of strings: a list of ASCII strings translated from the trace entries.
 """
 def get_ascii_traces_from_trace_entry_list(binaryData, traceEntriesV2):
     traces = []
@@ -917,15 +923,99 @@ def get_ascii_traces_from_trace_entry_list(binaryData, traceEntriesV2):
                                       traceEntryV1.lineNumber )
 
         formatString = get_format_by_hash(str(traceEntryV1.hash))
+        if traceEntryV1.entryType == TRACE_COMP_TRACE:
+            traceStr +=  trexMyVsnprintf(binaryData, formatString, traceEntryV1.argsOffset,
+                         (traceEntryV1.argsOffset + traceEntryV1.entrySize))
+            if flags & TRACE_FILENAME:
+                traceStr += (' | ' + get_source_by_hash(str(traceEntryV1.hash)))
+            traces.append(traceStr)
+        elif traceEntryV1.entryType == TRACE_FIELDBIN:
+            traceStr2 =  traceStr + trexMyVsnprintf(binaryData, formatString, traceEntryV1.argsOffset,
+                                   (traceEntryV1.argsOffset + traceEntryV1.entrySize))
 
-        traceStr +=  trexMyVsnprintf(binaryData, formatString, traceEntryV1.argsOffset,
-                     (traceEntryV1.argsOffset + traceEntryV1.entrySize))
-        if flags & TRACE_FILENAME:
-            traceStr += (' | ' + get_source_by_hash(str(traceEntryV1.hash)))
+            traces.append(traceStr2)
+            hexStrings = data_to_hexstring(binaryData, traceEntryV1.argsOffset,
+                                          (traceEntryV1.argsOffset + traceEntryV1.entrySize) );
+            for hexString in hexStrings:
+                hexTrace = traceStr + hexString
+                traces.append(hexTrace)
+        else:
+            capture_error("Error: entry type " + str(traceEntryV1.entryType) +
+                          " not recognized")
+            return -1, traces
 
-        traces.append(traceStr)
+    return 0, traces
 
-    return traces
+
+""" Converts binary data into lines of printable strings.  Each line is representing
+    16 bytes of the binary data or less.  A line is composed of 3 columns.
+    A left column displaying the offset into the data, a middle column displaying
+    the binary data, as readable ASCII, and a right column displaying any printable
+    ASCII chars within the binary data and any non-printable ASCII chars are
+    represented as '.'.
+    See example below.
+    Example:
+        ~[0x0000] 82993DCB 46F51938 68567C7E 0C32BCCA     *..=.F..8hV|~.2..*
+        ~[0x0010] ED6F0EE6 9AE01210 5D21666A 6DE9A091     *.o......]!fjm...*
+
+@param[in] binaryData: a byte array that contains the trace entries and data associated with
+@param[in] startOfData: an integer offset to the beginning of the binary data of a trace entry
+@param[in] endOfData:   an integer offset to one past the end of the binary data of a trace entry
+@returns: hex string traces: a list of printable strings representing the binary data
+"""
+def data_to_hexstring(binaryData, startOfData, endOfData):
+    lastAsciiChar = 127 # The value of the last ASCII character
+    hexStrings = [] # Will contain the printable strings that will be returned back
+    lineCount = 0   # Keeps track of the offset into the data
+    dataPart = ""   # Will hold the printable hex values of the data
+    asciiPart = ""  # Will hold the printable ASCII values of the data or "." if not printable
+    # Iterate thru the data, decoding each byte
+    start = startOfData
+    while start < endOfData:
+        byte = binaryData[start]
+        # Convert the data to its equivalent printable hex value
+        dataPart += '%.2X' % byte
+        # Convert the data to it's equivalent printable ASCII value or "."
+        if byte <= lastAsciiChar:
+            dataChar = chr(byte)
+            if dataChar.isprintable():
+                asciiPart += dataChar
+            else:
+                asciiPart += "."
+        else:
+            asciiPart += "."
+
+        lineCount += 1
+
+        # If 4 bytes have been seen, then add an extra blank, " ", as separation
+        if lineCount % 4 == 0:
+            dataPart += " "
+
+        # If 16 bytes have been seen, then append the ASCII part and add to list
+        if lineCount % 16 == 0:
+            # Get the line number the 16 bytes are aligned with, starting at 0
+            lineNumber = "~[" + '0x{0:0{1}X}'.format(lineCount - 16, 4) + "] "
+            dataPart += "    *" + asciiPart + "*"
+            hexStrings.append(lineNumber + dataPart)
+            dataPart = ""
+            asciiPart = ""
+        start += 1
+
+    # If the data did not land on a 16 byte boundary, then pad the data part
+    while (lineCount % 16) != 0:
+        lineCount += 1
+        dataPart+= "  "
+        if lineCount % 4 == 0:
+            dataPart+= " "
+
+        if lineCount % 16 == 0:
+            # Get the line number the 16 bytes are aligned with, starting at 0
+            lineNumber = "~[" + '0x{0:0{1}X}'.format(lineCount - 16,4) + "] "
+            dataPart += "    *" + asciiPart + "*"
+            hexStrings.append(lineNumber + dataPart)
+
+    return hexStrings
+
 
 """ Parse a version 1 trace entry
 
