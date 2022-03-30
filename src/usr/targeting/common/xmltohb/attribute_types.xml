@@ -2299,11 +2299,7 @@
     </description>
     <simpleType>
       <uint8_t>
-        <!-- TODO: RTC 292551
-        change to 2 once default simics configs for FSP and BMC systems is
-        changed to enable more backing cache
-        -->
-        <default>1</default>
+        <default>2</default>
       </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
