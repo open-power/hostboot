@@ -127,7 +127,7 @@ CLEAN_TARGETS += ${$(GENERATED)_PATH}/.generic_system_accessors.built
 
 define generic_system_accessors_RUN
 		$(C1) mkdir $$($(GENERATED)_PATH) -p
-		$(C1) $$< --system=P10 --output-dir=$$($(GENERATED)_PATH) --output-file-prefix=$$($(GENERATED)_FILE_PREFIX) $$(filter-out $$<,$$^)
+		$(C1) perl -I$(IMPORT_PATH)/generic/memory/tools/ $$< --system=P10 --output-dir=$$($(GENERATED)_PATH) --output-file-prefix=$$($(GENERATED)_FILE_PREFIX) $$(filter-out $$<,$$^)
 endef
 
 $(call BUILD_GENERATED)
@@ -153,7 +153,7 @@ CLEAN_TARGETS += ${$(GENERATED)_PATH}/.generic_accessors.built
 
 define generic_accessors_RUN
 		$(C1) mkdir $$($(GENERATED)_PATH) -p
-		$(C1) $$< --system=P10 --output-dir=$$($(GENERATED)_PATH) --output-file-prefix=$$($(GENERATED)_FILE_PREFIX) $$(filter-out $$<,$$^)
+		$(C1) perl -I$(IMPORT_PATH)/generic/memory/tools/ $$< --system=P10 --output-dir=$$($(GENERATED)_PATH) --output-file-prefix=$$($(GENERATED)_FILE_PREFIX) $$(filter-out $$<,$$^)
 endef
 
 $(call BUILD_GENERATED)
@@ -176,7 +176,7 @@ CLEAN_TARGETS += ${$(GENERATED)_PATH}/.gen_exp_accessors.built
 
 define gen_exp_accessors_RUN
 		$(C1) mkdir $$($(GENERATED)_PATH) -p
-		$(C1) $$< --system=P10 --output-dir=$$($(GENERATED)_PATH) --output-file-prefix=$$($(GENERATED)_FILE_PREFIX) $$(filter-out $$<,$$^)
+		$(C1) perl -I$(IMPORT_PATH)/generic/memory/tools/ $$< --system=P10 --output-dir=$$($(GENERATED)_PATH) --output-file-prefix=$$($(GENERATED)_FILE_PREFIX) $$(filter-out $$<,$$^)
 endef
 $(call BUILD_GENERATED)
 ##
@@ -200,7 +200,7 @@ CLEAN_TARGETS += ${$(GENERATED)_PATH}/.gen_p10_accessors.built
 
 define gen_p10_accessors_RUN
 		$(C1) mkdir $$($(GENERATED)_PATH) -p
-		$(C1) $$< --system=P10 --output-dir=$$($(GENERATED)_PATH) --output-file-prefix=$$($(GENERATED)_FILE_PREFIX) $$(filter-out $$<,$$^)
+		$(C1) perl -I$(IMPORT_PATH)/generic/memory/tools/ $$< --system=P10 --output-dir=$$($(GENERATED)_PATH) --output-file-prefix=$$($(GENERATED)_FILE_PREFIX) $$(filter-out $$<,$$^)
 endef
 $(call BUILD_GENERATED)
 ##
@@ -223,7 +223,7 @@ CLEAN_TARGETS += ${$(GENERATED)_PATH}/.gen_pmic_accessors.built
 
 define gen_pmic_accessors_RUN
 		$(C1) mkdir $$($(GENERATED)_PATH) -p
-		$(C1) $$< --system=P10 --output-dir=$$($(GENERATED)_PATH) --output-file-prefix=$$($(GENERATED)_FILE_PREFIX) $$(filter-out $$<,$$^)
+		$(C1) perl -I$(IMPORT_PATH)/generic/memory/tools/ $$< --system=P10 --output-dir=$$($(GENERATED)_PATH) --output-file-prefix=$$($(GENERATED)_FILE_PREFIX) $$(filter-out $$<,$$^)
 endef
 $(call BUILD_GENERATED)
 ##
