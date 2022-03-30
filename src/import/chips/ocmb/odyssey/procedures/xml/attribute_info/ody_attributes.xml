@@ -57,4 +57,32 @@
         <writeable/>
         <mssAccessorName>ody_draminit_verbosity</mssAccessorName>
     </attribute>
+
+    <attribute>
+        <id>ATTR_PHY_GET_MAIL_TIMEOUT</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Timeout (in msec) polling for get_mail during
+            ody draminit training. Default is 20000msec.
+        </description>
+        <valueType>uint16</valueType>
+        <default>20000</default>
+        <platInit/>
+        <mrwHide/>
+        <mssAccessorName>phy_get_mail_timeout</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_DRAMINIT_TRAINING_TIMEOUT</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Timeout (in msec) for polling completion of
+            ody draminit training. Default is 20000msec.
+        </description>
+        <valueType>uint16</valueType>
+        <default>20000</default>
+        <platInit/>
+        <mrwHide/>
+        <mssAccessorName>draminit_training_timeout</mssAccessorName>
+    </attribute>
 </attributes>
