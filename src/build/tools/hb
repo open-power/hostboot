@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2021
+# Contributors Listed Below - COPYRIGHT 2011,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -587,11 +587,6 @@ hb_startsimics()
             STARTSIMCMD+=(sbe_boot_mem=pibmem)
         fi
 
-        if [ "$HOSTBOOT_PROFILE" ] ; then
-            export SIMICS_MORECACHE=1
-            STARTSIMCMD+=(num_cores_per_chip=8)
-        fi
-
         # If '-nre' was passed in as a flag, then do not vexec
         # also, if $POOL is defined, this indicates are already in
         # a vexec shell so do not vexec
@@ -609,7 +604,9 @@ hb_startsimics()
 
         # For GCOV, tell simics to enable the larger backing cache.
         if [ "$HOSTBOOT_PROFILE" ] ; then
+            # enable more cores for 16MB backing cache
             export SIMICS_MORECACHE=1
+            STARTSIMCMD+=(num_cores_per_chip=8)
         fi
 
         # Create a file (simcmd) to run under vexec

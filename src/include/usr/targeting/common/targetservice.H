@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,11 +65,25 @@ namespace TARGETING
          *
          *  Returns the top level (usually system) target. If there is no top
          *  level target, an assertion failure is triggered. Caller does not
-         *  need to check for a NULL top level target
+         *  need to check for a nullptr top level target
          *
-         *  @returns  The top level target, never NULL.
+         *  @returns  The top level target, never nullptr.
          */
         Target* assertGetToplevelTarget();
+
+        /**
+         *  @brief Returns a bit string of the targets that match the given predicate
+         *
+         *  @param[in] i_targetList, list of targets to generate a bit string for
+         *  @param[in] i_pPredicate, predicate used to determine if a bit should be
+         *                           set for a target in the bit string.
+         *
+         *  @returns a uint32_t representing i_targetList as a bit string based off of
+         *           i_pPredicate. The bits set will be based on the target's ATTR_CHIP_UNIT
+         *           with the leftmost/MSB corresponding to ATTR_CHIP_UNIT 0
+         */
+        uint32_t targetListToBitString(const TargetHandleList& i_targetList,
+                                       const PredicateBase* i_pPredicate = nullptr);
     }; // namespace Util
 };
 

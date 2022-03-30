@@ -8,18 +8,24 @@
 # Check if the user requested extra backing cache. If so, write the scratch
 # registers to enable them.
 
+
+# Enable scratch register 5
+$scratch = (read-device-offset $hb_masterproc.cfam_cmp.fsi2host_mbox.pib_regs 0x3f0 8 -b)
+write-device-offset $hb_masterproc.cfam_cmp.fsi2host_mbox.pib_regs 0x3f0 ($scratch | 0x08000000_00000000) 8 -b
+
+# Set scratch register 5's sbeSelectExPolicy to HB_MAX_FOOTPRINT
+$scratch = (read-device-offset $hb_masterproc.cfam_cmp.fsi2host_mbox.pib_regs 0x3c0 8 -b)
+$scratch = (($scratch & ~0x0e000000_00000000) | 0x04000000_00000000)
+write-device-offset $hb_masterproc.cfam_cmp.fsi2host_mbox.pib_regs 0x3c0 $scratch 8 -b
+
 if ($morecache) {
     echo "Enabling extra backing caches"
 
-    # Enable scratch registers 1 and 5
+    # Enable scratch registers 1
     $scratch = (read-device-offset $hb_masterproc.cfam_cmp.fsi2host_mbox.pib_regs 0x3f0 8 -b)
-    write-device-offset $hb_masterproc.cfam_cmp.fsi2host_mbox.pib_regs 0x3f0 ($scratch | 0x88000000_00000000) 8 -b
+    write-device-offset $hb_masterproc.cfam_cmp.fsi2host_mbox.pib_regs 0x3f0 ($scratch | 0x80000000_00000000) 8 -b
 
     # Write scratch register 1 to enable 12 cores
     write-device-offset $hb_masterproc.cfam_cmp.fsi2host_mbox.pib_regs 0x380 0x000fffff_ffffffff 8 -b
 
-    # Set scratch register 5's sbeSelectExPolicy to HB_MAX_FOOTPRINT
-    $scratch = (read-device-offset $hb_masterproc.cfam_cmp.fsi2host_mbox.pib_regs 0x3c0 8 -b)
-    $scratch = (($scratch & ~0x0e000000_00000000) | 0x04000000_00000000)
-    write-device-offset $hb_masterproc.cfam_cmp.fsi2host_mbox.pib_regs 0x3c0 $scratch 8 -b
 }

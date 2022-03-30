@@ -43,8 +43,14 @@
 
 #ifdef __HOSTBOOT_MODULE
 #include <initservice/initserviceif.H>
+#include <initservice/istepdispatcherif.H>
+#include <initservice/initsvcreasoncodes.H>
 #include <targeting/common/mfgFlagAccessors.H>
+#include <sbe/sbeif.H>
+#include <kernel/bltohbdatamgr.H> // CacheSize
+#include <util/misc.H>            // isSimicsRunning
 #endif
+
 
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
@@ -2030,14 +2036,15 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
                 TargetService::CHILD, TargetService::IMMEDIATE, &l_nodeFilter );
 
             if (l_nodes.empty())
-            { // no functional nodes, get out now
+            {
+                HWAS_ERR("Insufficient HW to continue IPL: (no func nodes)");
+
                 if(io_bootable)
                 {
                     *io_bootable = false;
                     break;
                 }
 
-                HWAS_ERR("Insufficient HW to continue IPL: (no func nodes)");
                 /*@
                  * @errortype
                  * @severity          ERRL_SEV_UNRECOVERABLE
@@ -2069,13 +2076,13 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
             // top level has at least 1 node - and it's our node.
             pTop = l_nodes[0];
 
-            HWAS_INF("checkMinimumHardware: i_nodeOrSys = nullptr, using %.8X",
+            HWAS_INF("checkMinimumHardware: i_nodeOrSys = nullptr, using 0x%08X",
                     get_huid(pTop));
         }
         else
         {
             pTop = const_cast<Target *>(i_nodeOrSys);
-            HWAS_INF("checkMinimumHardware: i_nodeOrSys %.8X",
+            HWAS_INF("checkMinimumHardware: i_nodeOrSys 0x%08X",
                     get_huid(pTop));
         }
 
@@ -2156,26 +2163,175 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
         }
         else
         {
-            // we have a Master Proc and it's functional
-            // check for at least 1 functional ec/core on Master Proc
-            // Ignore ECO cores as those don't support instruction execution.
-            TargetHandleList l_cores;
-            PredicatePostfixExpr l_checkExprFunctional;
+        // don't do core check in HWSV. Common HWAS code in HWSV is not aware of util/misc.H for isSimicsRunning()
+        // which is needed to let FSP simics pass the core checks with the simics default core enabelment.
+        // When HB runs checkMinimumHardware(), then core checks will be preformed and Resourse Recovery will be
+        // triggered as necessary, setting BLOCK_SPEC_DECONFIG for HWSV to skip applying gard records
+#ifdef __HOSTBOOT_MODULE
+            // if simics is running, set cache FCs to the minimum provided by default
+            // simics setup. Otherwise, we are running on HW so use the ATTR val from xml
+            const uint8_t min_num_backing_FCs = Util::isSimicsRunning() ? 1 :
+                                                UTIL::assertGetToplevelTarget()->getAttr<TARGETING::ATTR_HB_MIN_BACKING_CACHE_FC>();
+            bool enough_cores_to_boot = true;
+
+            // get all functional FCs and FCs deconfigured due to FCO
+            PredicateHwas l_deconfig_by_fco;
+            l_deconfig_by_fco.functionalOverride(true);
+            TargetHandleList l_all_fused_cores;
+            PredicatePostfixExpr l_testPred;
+            PredicateCTM l_isFC(CLASS_UNIT, TYPE_FC);
+            // (is FC && functional) || (is FC && deconfigured by FCO)
+            l_testPred.push(&l_functional);
+            l_testPred.push(&l_isFC).And();
+            l_testPred.push(&l_deconfig_by_fco);
+            l_testPred.push(&l_isFC).And().Or();
+            targetService().getAssociated(l_all_fused_cores, l_pMasterProc,
+                                          TargetService::CHILD, TargetService::ALL,
+                                          &l_testPred);
+
+            // predicate to filter the above FCs furthur based on their core children
+            PredicatePostfixExpr l_checkExprFunctionalNonECOCores;
             PredicateCTM l_isCore(CLASS_UNIT, TYPE_CORE);
             PredicateAttrVal<ATTR_ECO_MODE> l_isNotEcoMode(ECO_MODE_DISABLED);
-            l_checkExprFunctional.push(&l_functional);
-            l_checkExprFunctional.push(&l_isCore).And();
-            l_checkExprFunctional.push(&l_isNotEcoMode).And();
-            targetService().getAssociated(l_cores, l_pMasterProc,
-                                          TargetService::CHILD, TargetService::ALL,
-                                          &l_checkExprFunctional);
+            // (is core && functional && !ECO-mode) || (is core && deconfig by FCO)
+            l_checkExprFunctionalNonECOCores.push(&l_functional);
+            l_checkExprFunctionalNonECOCores.push(&l_isCore).And();
+            l_checkExprFunctionalNonECOCores.push(&l_isNotEcoMode).And();
+            l_checkExprFunctionalNonECOCores.push(&l_deconfig_by_fco);
+            l_checkExprFunctionalNonECOCores.push(&l_isCore).And().Or();
 
-            HWAS_DBG( "checkMinimumHardware: %d functional cores",
-                      l_cores.size() );
+            bool unpairedFCFound = false;
+            // remove FCs that do not have 2 functional non-ECO core children
+            l_all_fused_cores.erase(
+                std::remove_if(l_all_fused_cores.begin(), l_all_fused_cores.end(), [&l_checkExprFunctionalNonECOCores, &unpairedFCFound](TargetHandle_t i_fc_target){
+                    TargetHandleList l_child_cores;
 
-            if (l_cores.empty())
+                    targetService().getAssociated(l_child_cores, i_fc_target,
+                                                  TargetService::CHILD, TargetService::ALL,
+                                                  &l_checkExprFunctionalNonECOCores);
+                    if (!unpairedFCFound && l_child_cores.size() == 1)
+                    {
+                        // found an FC with only one core
+                        // if the core is functional (ie not l_deconfig_by_fco),
+                        // then we can use it as the executable core for systems not in FC mode
+                        unpairedFCFound = l_child_cores[0]->getAttr<ATTR_HWAS_STATE>().functional;
+                    }
+                    return l_child_cores.size() < 2;
+                }),
+                l_all_fused_cores.end());
+
+            HWAS_INF("checkMinimumHardware: %d functional and functionalOverride non-ECO FCs found", l_all_fused_cores.size());
+
+            uint8_t FCO_and_Func_FC_size = l_all_fused_cores.size();
+            uint8_t l_valid_cache_FCs = 0;
+            if (is_fused_mode())
             {
-                HWAS_ERR("Insufficient HW to continue IPL: (no func cores)");
+                // at this point, if l_all_fused_cores is non empty, then there is at least 1 functional FC for execution
+                // this is because FCO will never deconfigure cores/FCs below 0.
+                // this leaves the rest of the FCs as valid backing cache candidates
+                // otherwise if the list is empty, then it was due to gard record application
+                l_valid_cache_FCs = FCO_and_Func_FC_size > 0 ? (FCO_and_Func_FC_size - 1) : 0;
+
+                // check that we have enough backing cache FCs after counting one for execution
+                enough_cores_to_boot = l_valid_cache_FCs >= min_num_backing_FCs;
+            }
+            else
+            {
+                // if a FC with one functional core was found, then it can be used as the executable core
+                // otherwise, one of the FCs still in the list must be used for execution
+                // if a FC with one functional core was NOT found, there is at least 1 functional FC for
+                // execution left in the list if it is non-empty. This is because FCO will never deconfigure
+                // cores/FCs below 0.
+                // otherwise if the list is empty, then it was due to gard record application
+                l_valid_cache_FCs = (unpairedFCFound || FCO_and_Func_FC_size == 0) ? FCO_and_Func_FC_size : (FCO_and_Func_FC_size - 1);
+
+                // verify there are enough FCs to satify backing cache requirement,
+                // and at least 1 more FC to execute on
+                enough_cores_to_boot = ( (unpairedFCFound) || (FCO_and_Func_FC_size > 0)) &&
+                                       (l_valid_cache_FCs >= min_num_backing_FCs);
+            }
+
+            HWAS_INF("checkMinimumHardware: enough_cores_to_boot = %s", enough_cores_to_boot ? "TRUE" : "FALSE");
+            HWAS_INF("checkMinimumHardware: %d valid cache FCs >= %d needed : %s",
+                     l_valid_cache_FCs,
+                     min_num_backing_FCs,
+                     l_valid_cache_FCs >= min_num_backing_FCs ? "TRUE" : "FALSE");
+
+        #ifdef __HOSTBOOT_MODULE
+            uint8_t cur_hb_cache = g_BlToHbDataManager.getHbCacheSizeMb();
+            uint8_t min_hb_cache = min_num_backing_FCs * NUM_MB_CACHE_PER_FC;
+
+            // if HB found enough cores to satisfy our backing cache requirements
+            // but SBE did not report enough cache was available
+            //    Don't run during MPIPL
+            if(!(UTIL::assertGetToplevelTarget()->getAttr<ATTR_IS_MPIPL_HB>()) && enough_cores_to_boot && (cur_hb_cache < min_hb_cache))
+            {
+                // then there is a mismatch between SBE and HB, attempt SBE update to get back in sync
+                HWAS_ERR("checkMinimumHardware: SBE reported only %dMB of backing cache, HB found enough FCs (%d) for %dMB of cache",
+                         cur_hb_cache,
+                         l_valid_cache_FCs,
+                         l_valid_cache_FCs * NUM_MB_CACHE_PER_FC);
+
+                HWAS_ERR("checkMinimumHardware: trigger SBE update to sync valid cores with SBE");
+                l_errl = SBE::updateProcessorSbeSeeproms();
+
+                if (l_errl)
+                {
+                    // got an error performing SBE update
+                    HWAS_ERR("checkMinimumHardware: Error calling updateProcessorSbeSeeproms"
+                              TRACE_ERR_FMT,
+                              TRACE_ERR_ARGS(l_errl));
+                    hwasErrorUpdatePlid(l_errl, l_commonPlid);
+                    errlCommit(l_errl, HWAS_COMP_ID);
+                }
+                else
+                {
+                    // no error but no mismatch found, create an informational log
+                    HWAS_ERR("checkMinimumHardware: updateProcessorSbeSeeproms returned without an error on processor 0x%08X",
+                             get_huid(l_pMasterProc));
+
+                    /*@
+                     * @moduleid          MOD_CHECK_MIN_HW
+                     * @reasoncode        RC_SYSAVAIL_SBE_NOT_ENOUGH_BACKING_CACHE
+                     * @userdata1[00:31]         HUID of master proc
+                     * @userdata1[32:63]         minimum required backing cache in MB
+                     * @userdata2[00:31]         available cache provided from SBE in MB
+                     * @userdata2[32:63]         available cache found by HB in MB
+                     * @devdesc           Failed to update the SBE after SBE did not report
+                     *                    enough available backing cache but HB found enough
+                     *                    cores to satisfy the requirment
+                     * @custdesc          A problem occurred during the IPL of the
+                     *                    system: Not enough cache enabled
+                     */
+                    l_errl = hwasError(ERRL_SEV_INFORMATIONAL,
+                                       MOD_CHECK_MIN_HW,
+                                       RC_SYSAVAIL_SBE_NOT_ENOUGH_BACKING_CACHE,
+                                       (static_cast<uint64_t>(get_huid(l_pMasterProc)) << 32) | min_hb_cache,
+                                       (static_cast<uint64_t>(cur_hb_cache) << 32) | (l_valid_cache_FCs * NUM_MB_CACHE_PER_FC)
+                                      );
+
+                    // if we already have an error, link this one to the earlier;
+                    // if not, set the common plid
+                    hwasErrorUpdatePlid(l_errl, l_commonPlid);
+                    l_errl->collectTrace(SBE_COMP_NAME);
+                    l_errl->collectTrace(SBEIO_COMP_NAME);
+                    errlCommit(l_errl, HWAS_COMP_ID);
+
+                    // Explicitly force a devtree sync because we don't currently
+                    // go through a shutdown when we send a reboot request
+                    TARGETING::AttrRP::syncAllAttributesToSP();
+
+                    // Initiate a graceful power cycle
+                    HWAS_INF("checkMinimumHardware(): reconfig loop for backing cache adjustment");
+                    INITSERVICE::requestReboot("backing cache adjustment");
+                }
+
+            }
+        #endif // inner __HOSTBOOT_MODULE
+
+            if (!enough_cores_to_boot)
+            {
+                HWAS_ERR("Insufficient HW to continue IPL: (not enough func cores to satisfy backing cache requirment)");
 
                 if(io_bootable)
                 {
@@ -2183,53 +2339,88 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
                     break;
                 }
                 // determine some numbers to help figure out what's up..
-                PredicateCTM l_ec(CLASS_UNIT, TYPE_CORE);
-                TargetHandleList l_plist;
 
+                // get present cores
+                TargetHandleList l_pres_cores;
                 PredicatePostfixExpr l_checkExprPresent;
-                l_checkExprPresent.push(&l_ec).push(&l_present).And();
-                targetService().getAssociated(l_plist, l_pMasterProc,
+                l_checkExprPresent.push(&l_isCore).push(&l_present).And();
+                targetService().getAssociated(l_pres_cores, l_pMasterProc,
                         TargetService::CHILD, TargetService::ALL,
                         &l_checkExprPresent);
-                uint32_t ecs_present = l_plist.size();
+
+                // functional core predicate
+                // Ignore ECO cores as those don't support instruction execution.
+                PredicatePostfixExpr l_checkExprFunctionalcore;
+                PredicateCTM l_isCore(CLASS_UNIT, TYPE_CORE);
+                PredicateAttrVal<ATTR_ECO_MODE> l_isNotEcoMode(ECO_MODE_DISABLED);
+                l_checkExprFunctionalcore.push(&l_functional);
+                l_checkExprFunctionalcore.push(&l_isCore).And();
+                l_checkExprFunctionalcore.push(&l_isNotEcoMode).And();
+
+                // functional ECO core predicate
+                PredicatePostfixExpr l_checkExprECOcore;
+                PredicateAttrVal<ATTR_ECO_MODE> l_isEcoMode(ECO_MODE_ENABLED);
+                l_checkExprECOcore.push(&l_functional);
+                l_checkExprECOcore.push(&l_isCore).And();
+                l_checkExprECOcore.push(&l_isEcoMode).And();
+
+                // Field Core Override predicate
+                PredicatePostfixExpr l_checkExprFCOcore;
+                l_checkExprFCOcore.push(&l_isCore);
+                l_checkExprFCOcore.push(&l_deconfig_by_fco).And();
+
+                uint32_t bitStringPresCores = UTIL::targetListToBitString(l_pres_cores);
+                uint32_t bitStringFuncCores = UTIL::targetListToBitString(l_pres_cores, &l_checkExprFunctionalcore);
+                uint32_t bitStringECOCores  = UTIL::targetListToBitString(l_pres_cores, &l_checkExprECOcore);
+                uint32_t bitStringFCOCores  = UTIL::targetListToBitString(l_pres_cores, &l_checkExprFCOcore);
+                HWAS_ERR("checkMinimumHardware: present cores:    0x%08X", bitStringPresCores);
+                HWAS_ERR("checkMinimumHardware: functional cores: 0x%08X", bitStringFuncCores);
+                HWAS_ERR("checkMinimumHardware: ECO cores:        0x%08X", bitStringECOCores);
+                HWAS_ERR("checkMinimumHardware: FCO cores:        0x%08X", bitStringFCOCores);
 
                 /*@
                  * @errortype
                  * @severity          ERRL_SEV_UNRECOVERABLE
                  * @moduleid          MOD_CHECK_MIN_HW
                  * @reasoncode        RC_SYSAVAIL_NO_CORES_FUNC
-                 * @devdesc           checkMinimumHardware found no functional
-                 *                    processor cores on the master proc
+                 * @devdesc           checkMinimumHardware did not find enough cores
+                 *                    for execution and backing cache on the master proc
                  * @custdesc          A problem occurred during the IPL of the
                  *                    system: No functional processor cores
                  *                    were found on the master processor.
-                 * @userdata1[00:31]  HUID of node
-                 * @userdata1[32:63]  HUID of master proc
-                 * @userdata2[00:31]  number of present, non-functional cores
+                 * @userdata1[00:31]  bitstring of present cores
+                 * @userdata1[32:63]  bitstring of present, functional non-ECO cores
+                 * @userdata2[00:31]  bitstring of present, functional ECO cores
+                 * @userdata2[32:63]  bitstring of present, FCO cores
+
                  */
-                const uint64_t userdata1 =
-                    (static_cast<uint64_t>(get_huid(pTop)) << 32) |
-                    get_huid(l_pMasterProc);
-                const uint64_t userdata2 =
-                    (static_cast<uint64_t>(ecs_present) << 32);
                 l_errl = hwasError(ERRL_SEV_UNRECOVERABLE,
-                                    MOD_CHECK_MIN_HW,
-                                    RC_SYSAVAIL_NO_CORES_FUNC,
-                                    userdata1, userdata2);
+                                   MOD_CHECK_MIN_HW,
+                                   RC_SYSAVAIL_NO_CORES_FUNC,
+                                   (static_cast<uint64_t>(bitStringPresCores) << 32) | bitStringFuncCores,
+                                   (static_cast<uint64_t>(bitStringECOCores) << 32)  | bitStringFCOCores
+                                  );
 
-                //  call out the procedure to find the deconfigured part.
-                hwasErrorAddProcedureCallout( l_errl,
-                                              EPUB_PRC_FIND_DECONFIGURED_PART,
-                                              SRCI_PRIORITY_HIGH );
+                platHwasErrorAddHWCallout(l_errl,
+                                          l_pMasterProc,
+                                          SRCI_PRIORITY_LOW,
+                                          NO_DECONFIG,
+                                          GARD_NULL);
 
-                //  if we already have an error, link this one to the earlier;
-                //  if not, set the common plid
+                // call out the procedure to find the deconfigured part.
+                hwasErrorAddProcedureCallout(l_errl,
+                                             EPUB_PRC_FIND_DECONFIGURED_PART,
+                                             SRCI_PRIORITY_HIGH);
+
+                // if we already have an error, link this one to the earlier;
+                // if not, set the common plid
                 hwasErrorUpdatePlid( l_errl, l_commonPlid );
                 errlCommit(l_errl, HWAS_COMP_ID);
                 // errl is now nullptr
-            } // if no cores
-        }
+            } // if not enough backing cache cores
+#endif // outer __HOSTBOOT_MODULE
 
+        }
         //  check here for functional dimms
         TargetHandleList l_dimms;
         PredicateCTM l_dimm(CLASS_LOGICAL_CARD, TYPE_DIMM);

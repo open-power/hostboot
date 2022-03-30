@@ -3592,39 +3592,39 @@ public:
                         l_records.size());
                 break;
             }
-            // find an fc unit that we can play with
+            // find an dimm that we can play with
 
             Target* pSys = UTIL::assertGetToplevelTarget();
 
-            PredicateCTM predFc(CLASS_UNIT, TYPE_FC);
+            PredicateCTM predDimm(CLASS_NA, TYPE_DIMM);
             PredicateHwas predFunctional;
             predFunctional.poweredOn(true).present(true).functional(true);
             PredicatePostfixExpr checkExpr;
-            checkExpr.push(&predFc).push(&predFunctional).And();
+            checkExpr.push(&predDimm).push(&predFunctional).And();
 
-            TargetHandleList pFcList;
-            targetService().getAssociated( pFcList, pSys,
+            TargetHandleList pDimmList;
+            targetService().getAssociated( pDimmList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
-            TS_INFO("testGard6: pFcList.size()=%d", pFcList.size());
-            if (pFcList.empty())
+            TS_INFO("testGard6: pDimmList.size()=%d", pDimmList.size());
+            if (pDimmList.empty())
             {
-                TS_WARN("testGard6: SKIPPING empty pFcList CLASS_UNIT, TYPE_FC");
+                TS_WARN("testGard6: SKIPPING empty pDimmList CLASS_NA, TYPE_DIMM");
                 break;
             }
 
-            TargetHandle_t l_target = *pFcList.begin();
-            TS_INFO("testGard6: Working with HUID=0x%X TYPE_FC", get_huid(l_target));
+            TargetHandle_t l_target = *pDimmList.begin();
+            TS_INFO("testGard6: Working with HUID=0x%X TYPE_DIMM", get_huid(l_target));
 
             //This test assumes the target chosen is not deemed a replacement target,
             //   this distinction is important because gard records for targets that
-            //   are then found to be replaced are ignore, and we do not want that for
+            //   are then found to be replaced are ignored, and we do not want that for
             //   these tests. So set the HWAS_CHANGED_BIT_GARD to force this target
             //   to not be seen as a replacement target
             clear_hwas_changed_bit(l_target, HWAS_CHANGED_BIT_GARD);
 
             // create GARD record, call 'doGard' step and confirm target is
-            //  deconfigured
+            // deconfigured
             l_pErr = theDeconfigGard().
                     platCreateGardRecord(l_target, 0x12, GARD_Void);
             if (l_pErr)
@@ -3640,6 +3640,7 @@ public:
                 TS_FAIL("testGard6: Error from getGardRecords");
                 break;
             }
+
             TS_INFO("testGard6: l_records.size()=%d should be 1 for doGard setup", l_records.size());
             if (l_records.size() != 1)
             {
@@ -3662,7 +3663,9 @@ public:
                 TS_FAIL("testGard6: Error from getGardRecords 2");
                 break;
             }
-            TS_INFO("testGard6: POST collectGard l_records.size()=%d should be 1 for doGard setup", l_records.size());
+
+            TS_INFO("testGard6: POST collectGard l_records.size()=%d should be 2 for doGard setup (Persistent Gard + Ephemeral Gard)",
+                    l_records.size());
             HwasState l_state = l_target->getAttr<ATTR_HWAS_STATE>();
             TS_INFO("testGard6: l_state=0x%X", l_state);
             if (l_records.size() != 2)
@@ -3685,7 +3688,7 @@ public:
             l_target->setAttr<ATTR_HWAS_STATE>(l_state);
 
             // emulate HCDB - target changed, call collectGard and confirm
-            //  GARD record is gone and target is functional
+            // GARD record is gone and target is functional
             update_hwas_changed_mask(l_target);
             l_pErr = collectGard();
             if (l_pErr)
@@ -4055,7 +4058,7 @@ public:
 #endif
     }
 
-    /**
+     /**
      *  @brief Test create GARD record, call collect GARD to confirm targets
      *      are deconfigured, set changed bit ala HCDB, reprocess GARD to
      *      confirm GARD record is deleted.
@@ -4076,7 +4079,6 @@ public:
             l_pErr = theDeconfigGard().getGardRecords(nullptr, l_records);
             if (l_pErr)
             {
-                errlCommit(l_pErr,CXXTEST_COMP_ID);
                 TS_FAIL("testGard9: Error from getGardRecords");
                 break;
             }
@@ -4103,29 +4105,29 @@ public:
                                        static_cast<HWAS_CHANGED_BIT>(l_mask));
             } // for
 
-            // find an fc unit that we can play with
+            // find a DIMM unit that we can play with
             Target* pSys = UTIL::assertGetToplevelTarget();
             auto pNode = UTIL::getCurrentNodeTarget();
 
-            PredicateCTM predFc(CLASS_UNIT, TYPE_FC);
+            PredicateCTM predFc(CLASS_NA, TYPE_DIMM);
             PredicateHwas predFunctional;
             predFunctional.poweredOn(true).present(true).functional(true);
             PredicatePostfixExpr checkExpr;
             checkExpr.push(&predFc).push(&predFunctional).And();
 
-            TargetHandleList pFcList;
-            targetService().getAssociated( pFcList, pSys,
+            TargetHandleList pDimmList;
+            targetService().getAssociated( pDimmList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
-            TS_INFO("testGard9: pFcList.size=%d", pFcList.size());
-            if (pFcList.empty())
+            TS_INFO("testGard9: pDimmList.size=%d", pDimmList.size());
+            if (pDimmList.empty())
             {
-                TS_WARN("testGard9: SKIPPING empty pFcList CLASS_UNIT, TYPE_FC");
+                TS_WARN("testGard9: SKIPPING empty pDimmList CLASS_UNIT, TYPE_DIMM");
                 break;
             }
 
-            TargetHandle_t l_target = *pFcList.begin();
-            TS_INFO("testGard9: Working with HUID=0x%X TYPE_FC", get_huid(l_target));
+            TargetHandle_t l_target = *pDimmList.begin();
+            TS_INFO("testGard9: Working with HUID=0x%X TYPE_DIMM", get_huid(l_target));
 
             // Save ATTR_BLOCK_SPEC_DECONFIG value
             TARGETING::ATTR_BLOCK_SPEC_DECONFIG_type l_orig_block_spec_deconfig
@@ -4139,7 +4141,7 @@ public:
             // create GARD record, call 'doGard' step and confirm target is
             //  deconfigured
             l_pErr = theDeconfigGard().
-                    platCreateGardRecord(l_target, 0x12, GARD_Predictive);
+                     platCreateGardRecord(l_target, 0x12, GARD_Predictive);
             if (l_pErr)
             {
                 TS_FAIL("testGard9: Error from platCreateGardRecord");
@@ -4147,9 +4149,10 @@ public:
             }
 
             l_pErr = theDeconfigGard().getGardRecords(nullptr, l_records);
+            TS_INFO("testGard9: Working with HUID=0x%X TYPE_DIMM", get_huid(l_target));
+
             if (l_pErr)
             {
-                errlCommit(l_pErr,CXXTEST_COMP_ID);
                 TS_FAIL("testGard9: Error from getGardRecords");
                 break;
             }
@@ -4188,7 +4191,7 @@ public:
             l_target->setAttr<ATTR_HWAS_STATE>(l_state);
 
             // call collectGard and confirm Block speculative deconfigs stays
-            //  set and target stays functional
+            // set and target stays functional
             l_pErr = collectGard();
             if (l_pErr)
             {
@@ -4214,7 +4217,7 @@ public:
             }
 
             // emulate HCDB - target changed, call collectGard and confirm Block
-            //  speculative deconfigs is cleared and target is deconfigured
+            // speculative deconfigs is cleared and target is recovered/functional
             update_hwas_changed_mask(l_target);
             l_pErr = collectGard();
             if (l_pErr)
@@ -4229,6 +4232,20 @@ public:
             {
                 TS_FAIL("testGard9: block spec deconfig NOT cleared, is %d",
                         l_block_spec_deconfig);
+                break;
+            }
+
+            l_pErr = theDeconfigGard().getGardRecords(l_target, l_records);
+            if (l_pErr)
+            {
+                TS_FAIL("testGard9: Error from getGardRecords");
+                break;
+            }
+
+            if (l_records.size() != 0)
+            {
+                TS_FAIL("testGard9: should be 0 records; instead found %d record(s)",
+                        l_records.size());
                 break;
             }
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,39 +59,41 @@ namespace HWAS
         //  The first is a blanket error that will be returned to the caller,
         //      further errors will be committed in the routine.
         //termination_rc
-        RC_SYSAVAIL_INSUFFICIENT_HW             = HWAS_COMP_ID | 0x04,
-        RC_SYSAVAIL_NO_CORES_FUNC               = HWAS_COMP_ID | 0x05,
-        RC_SYSAVAIL_NO_MEMORY_FUNC              = HWAS_COMP_ID | 0x06,
-        RC_SYSAVAIL_NO_PROCS_FUNC               = HWAS_COMP_ID | 0x07,
-        RC_SYSAVAIL_NO_NODES_FUNC               = HWAS_COMP_ID | 0x08,
-        RC_SYSAVAIL_NO_MEMBUFS_FUNC             = HWAS_COMP_ID | 0x09,
-        RC_RESOURCE_RECOVERED                   = HWAS_COMP_ID | 0x0A,
-        RC_SYSAVAIL_MISSING_CRITICAL_RESOURCE   = HWAS_COMP_ID | 0x0B,
-        RC_SYSAVAIL_NO_MCAS_FUNC                = HWAS_COMP_ID | 0x0C,
-        RC_SYSAVAIL_NO_NX_FUNC                  = HWAS_COMP_ID | 0x0E,
-        RC_EC_MISMATCH                          = HWAS_COMP_ID | 0x0F,
-        RC_FAILED_EC_VALIDATION                 = HWAS_COMP_ID | 0x10,
-        RC_INVALID_PARAM                        = HWAS_COMP_ID | 0x11,
-        RC_NOT_AT_RUNTIME                       = HWAS_COMP_ID | 0x12,
-        RC_NULL_TARGET                          = HWAS_COMP_ID | 0x13,
-        RC_ONLY_TWO_OBUS_SHOULD_BE_CONFIGURED   = HWAS_COMP_ID | 0x14,
-        RC_NO_UPDATE_WHEN_MEM_MISSING           = HWAS_COMP_ID | 0x15,
-        RC_NO_PG_LOGIC                          = HWAS_COMP_ID | 0x16,
-        RC_SYSAVAIL_NO_OCMBS_FUNC               = HWAS_COMP_ID | 0x17,
-        RC_SYSAVAIL_NO_MEMORY_PRESENT           = HWAS_COMP_ID | 0x18,
-        RC_PG_INDEX_INVALID                     = HWAS_COMP_ID | 0x19,
-        RC_PARTIAL_GOOD_INFORMATION             = HWAS_COMP_ID | 0x1A,
-        RC_FORCED_COMPAT_INVALID_LEVEL          = HWAS_COMP_ID | 0x1B,
-        RC_FORCED_NATIVE_INVALID_MIXED_EC       = HWAS_COMP_ID | 0x1C,
-        RC_FORCED_NATIVE_OF_INCOMPATIBLE_RISK   = HWAS_COMP_ID | 0x1D,
-        RC_PARTIAL_GOOD_MISSING_TARGET          = HWAS_COMP_ID | 0x1E,
-        RC_OCMB_SPD_REVISION_MISMATCH           = HWAS_COMP_ID | 0x1F,
-        RC_OCMB_UNEXPECTED_IDEC                 = HWAS_COMP_ID | 0x20,
-        RC_OCMB_UNKNOWN_CHIP_TYPE               = HWAS_COMP_ID | 0x21,
-        RC_OCMB_INTERFACE_TYPE_MISMATCH         = HWAS_COMP_ID | 0x22,
-        RC_OCMB_CHIP_ID_MISMATCH                = HWAS_COMP_ID | 0x23,
-        RC_HB_SBE_DECONFIG_MISMATCH             = HWAS_COMP_ID | 0x24,
-        RC_HB_SBE_DECONFIG_MISMATCHES_EXIST     = HWAS_COMP_ID | 0x25,
+        RC_SYSAVAIL_INSUFFICIENT_HW              = HWAS_COMP_ID | 0x04,
+        RC_SYSAVAIL_NO_CORES_FUNC                = HWAS_COMP_ID | 0x05,
+        RC_SYSAVAIL_NO_MEMORY_FUNC               = HWAS_COMP_ID | 0x06,
+        RC_SYSAVAIL_NO_PROCS_FUNC                = HWAS_COMP_ID | 0x07,
+        RC_SYSAVAIL_NO_NODES_FUNC                = HWAS_COMP_ID | 0x08,
+        RC_SYSAVAIL_NO_MEMBUFS_FUNC              = HWAS_COMP_ID | 0x09,
+        RC_RESOURCE_RECOVERED                    = HWAS_COMP_ID | 0x0A,
+        RC_SYSAVAIL_MISSING_CRITICAL_RESOURCE    = HWAS_COMP_ID | 0x0B,
+        RC_SYSAVAIL_NO_MCAS_FUNC                 = HWAS_COMP_ID | 0x0C,
+        RC_SYSAVAIL_NO_NX_FUNC                   = HWAS_COMP_ID | 0x0E,
+        RC_EC_MISMATCH                           = HWAS_COMP_ID | 0x0F,
+        RC_FAILED_EC_VALIDATION                  = HWAS_COMP_ID | 0x10,
+        RC_INVALID_PARAM                         = HWAS_COMP_ID | 0x11,
+        RC_NOT_AT_RUNTIME                        = HWAS_COMP_ID | 0x12,
+        RC_NULL_TARGET                           = HWAS_COMP_ID | 0x13,
+        RC_ONLY_TWO_OBUS_SHOULD_BE_CONFIGURED    = HWAS_COMP_ID | 0x14,
+        RC_NO_UPDATE_WHEN_MEM_MISSING            = HWAS_COMP_ID | 0x15,
+        RC_NO_PG_LOGIC                           = HWAS_COMP_ID | 0x16,
+        RC_SYSAVAIL_NO_OCMBS_FUNC                = HWAS_COMP_ID | 0x17,
+        RC_SYSAVAIL_NO_MEMORY_PRESENT            = HWAS_COMP_ID | 0x18,
+        RC_PG_INDEX_INVALID                      = HWAS_COMP_ID | 0x19,
+        RC_PARTIAL_GOOD_INFORMATION              = HWAS_COMP_ID | 0x1A,
+        RC_FORCED_COMPAT_INVALID_LEVEL           = HWAS_COMP_ID | 0x1B,
+        RC_FORCED_NATIVE_INVALID_MIXED_EC        = HWAS_COMP_ID | 0x1C,
+        RC_FORCED_NATIVE_OF_INCOMPATIBLE_RISK    = HWAS_COMP_ID | 0x1D,
+        RC_PARTIAL_GOOD_MISSING_TARGET           = HWAS_COMP_ID | 0x1E,
+        RC_OCMB_SPD_REVISION_MISMATCH            = HWAS_COMP_ID | 0x1F,
+        RC_OCMB_UNEXPECTED_IDEC                  = HWAS_COMP_ID | 0x20,
+        RC_OCMB_UNKNOWN_CHIP_TYPE                = HWAS_COMP_ID | 0x21,
+        RC_OCMB_INTERFACE_TYPE_MISMATCH          = HWAS_COMP_ID | 0x22,
+        RC_OCMB_CHIP_ID_MISMATCH                 = HWAS_COMP_ID | 0x23,
+        RC_HB_SBE_DECONFIG_MISMATCH              = HWAS_COMP_ID | 0x24,
+        RC_HB_SBE_DECONFIG_MISMATCHES_EXIST      = HWAS_COMP_ID | 0x25,
+        RC_SYSAVAIL_SBE_NOT_ENOUGH_BACKING_CACHE = HWAS_COMP_ID | 0x26,
+
     };
 
     enum HwasPlatUserDetailsTypes

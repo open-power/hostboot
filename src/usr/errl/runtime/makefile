@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2020
+# Contributors Listed Below - COPYRIGHT 2013,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -34,6 +34,7 @@ include ../errl.mk
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/pm
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc

@@ -122,6 +122,12 @@ errlHndl_t initHardware();
 #define NUM_FC_PER_EQ     2
 #define NUM_FC_PER_CHIP   (NUM_FC_PER_EQ * NUM_EQ_PER_CHIP)
 
+// Maximum MB of cache for a FC
+#define NUM_CORE_PER_FC        2
+#define NUM_MB_CACHE_PER_CORE  4
+#define NUM_MB_CACHE_PER_FC    (NUM_CORE_PER_FC * NUM_MB_CACHE_PER_CORE)
+
+
 // structure used to store proc information for EC restrict processing
 typedef struct {
     TARGETING::TargetHandle_t target;      // proc target

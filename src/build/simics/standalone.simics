@@ -52,17 +52,17 @@ if ($hostboot_profile == FALSE) {
     } else {
         if( $found_custom_eecache == 1 ) {
             echo "    - Using custom eecache found in custom_eecache.bin"
-        } else {      
+        } else {
             if ($standalone_test_dd1 == TRUE) {
                 $eccPreloadName = "eecache_prebuilt.bin.ecc"
             } else {
                 $eccPreloadName = "eecache_prebuilt_dd2.bin.ecc"
             }
-            try {                
+            try {
                 $eccPreload = (lookup-file $eccPreloadName)
             } except {
                 echo "**** Unable to find "+$eccPreloadName+" - booting with blank EECACHE ****"
-                $eccPreload = $eccPreloadName 
+                $eccPreload = $eccPreloadName
             }
         }
         # NOTE must change offset if PNOR layout changes EECACHE offsets
@@ -88,7 +88,13 @@ if ($hostboot_profile == FALSE) {
 # We only do this if code coverage is not enabled, because we rely on
 # being able to use more backing caches for code coverage data.
 
+
+# Read scratch register 1 to see if more cores were enabled for backing cache
+$scratch1orig = (read-device-offset $hb_masterproc.cfam_cmp.fsi2host_mbox.pib_regs 0x380 4 -b)
+
 if ($hostboot_profile == FALSE) {
+
+
   # Standalone has 1 DCM
   foreach $dcm in [0] {
     # Always 2 procs per DCM
@@ -116,9 +122,13 @@ if ($hostboot_profile == FALSE) {
       }
 
       # Invert the polarity of the scratch register (0 = functional)
-      $scratch1 = (~$scratch1) & 0xFFFFFFFF
+      if ($scratch1orig == 0) {
+           $scratch1 = (~$scratch1) & 0xFFFFFFFF
+      } else {
+           $scratch1 = (~$scratch1) & $scratch1orig
+      }
 
-      echo "SBE Scratch Register 1 is set to "
+      echo "PROC["+$procnum+"]: SBE Scratch Register 1 is set to "
       print -x $scratch1
 
       # Write value to SBE scratch register 1

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -97,7 +97,8 @@ void test_fapi2GetChildren()
             numTests++;
             if(l_actualSize != l_expectedSize)
             {
-                TS_FAIL("test_fapi2GetChildren:: OMIs per MC mismatch");
+                TS_FAIL("test_fapi2GetChildren:: OMIs per MC mismatch, actual = %d, expected %d",
+                        l_actualSize, l_expectedSize);
                 numFails++;
                 break;
             }
@@ -112,7 +113,8 @@ void test_fapi2GetChildren()
         numTests++;
         if(l_actualSize != l_expectedSize)
         {
-            TS_FAIL("test_fapi2GetChildren:: present cores per proc mismatch");
+            TS_FAIL("test_fapi2GetChildren:: present cores per proc mismatch, actual = %d, expected %d",
+                    l_actualSize, l_expectedSize);
             numFails++;
             break;
         }
@@ -127,7 +129,9 @@ void test_fapi2GetChildren()
         numTests++;
         if(l_actualSize != l_expectedSize)
         {
-            TS_FAIL("test_fapi2GetChildren:: functional cores per proc mismatch");
+            TS_FAIL("test_fapi2GetChildren:: functional cores per proc mismatch, actual = %d, expected %d",
+                    l_actualSize, l_expectedSize
+            );
             numFails++;
             break;
         }
@@ -146,7 +150,8 @@ void test_fapi2GetChildren()
             numTests++;
             if(l_actualSize != l_expectedSize)
             {
-                TS_FAIL("test_fapi2GetChildren:: OMIs per proc mismatch");
+                TS_FAIL("test_fapi2GetChildren:: OMIs per proc mismatch, actual = %d, expected %d",
+                        l_actualSize, l_expectedSize);
                 numFails++;
                 break;
             }
@@ -163,8 +168,8 @@ void test_fapi2GetChildren()
             numTests++;
             if(l_actualSize != l_expectedSize)
             {
-                TS_FAIL("test_fapi2GetChildren:: # OMIs foound for MCC is %d and not %d",
-                         l_actualSize, l_expectedSize);
+                TS_FAIL("test_fapi2GetChildren:: # OMIs found for MCC is %d and not %d",
+                        l_actualSize, l_expectedSize);
                 numFails++;
                 break;
             }
@@ -199,7 +204,8 @@ void test_fapi2GetChildren()
             numTests++;
             if(l_actualSize != l_expectedSize)
             {
-                TS_FAIL("test_fapi2GetChildren:: OCMBs per proc mismatch");
+                TS_FAIL("test_fapi2GetChildren:: OCMBs per proc mismatch, actual = %d, expected %d",
+                        l_actualSize, l_expectedSize);
                 numFails++;
                 break;
             }
@@ -217,7 +223,8 @@ void test_fapi2GetChildren()
             numTests++;
             if(l_actualSize != l_expectedSize)
             {
-                TS_FAIL("test_fapi2GetChildren:: MEM_PORTs per proc mismatch");
+                TS_FAIL("test_fapi2GetChildren:: MEM_PORTs per proc mismatch, actual = %d, expected %d",
+                        l_actualSize, l_expectedSize);
                 numFails++;
                 break;
             }
@@ -237,9 +244,8 @@ void test_fapi2GetChildren()
             numTests++;
             if(l_actualSize != l_expectedSize)
             {
-                TS_FAIL("test_fapi2GetChildren:: OMICs per PAUC mismatch. "
-                        "Expected %d, returned %d",
-                        l_expectedSize, l_actualSize);
+                TS_FAIL("test_fapi2GetChildren:: OMICs per PAUC mismatch, actual = %d, expected %d",
+                        l_actualSize, l_expectedSize);
                 numFails++;
                 break;
             }
@@ -253,9 +259,8 @@ void test_fapi2GetChildren()
             numTests++;
             if(l_actualSize != l_expectedSize)
             {
-                TS_FAIL("test_fapi2GetChildren:: IOHSs per PAUC mismatch. "
-                        "Expected %d, returned %d",
-                        l_expectedSize, l_actualSize);
+                TS_FAIL("test_fapi2GetChildren:: IOHSs per PAUC mismatch, actual = %d, expected %d",
+                        l_actualSize, l_expectedSize);
                 numFails++;
                 break;
             }
@@ -270,9 +275,8 @@ void test_fapi2GetChildren()
 
             if (l_actualSize != l_expectedSize)
             {
-                TS_FAIL("test_fapi2GetChildren:: IOLINKs per IOHS mismatch. "
-                        "Expected %d, returned %d",
-                        l_expectedSize, l_actualSize);
+                TS_FAIL("test_fapi2GetChildren:: IOLINKs per IOHS mismatch, actual = %d, expected %d",
+                        l_actualSize, l_expectedSize);
                 numFails++;
                 break;
             }
@@ -288,7 +292,8 @@ void test_fapi2GetChildren()
         numTests++;
         if(l_actualSize != l_expectedSize)
         {
-            TS_FAIL("test_fapi2GetChildren:: cores per FC mismatch");
+            TS_FAIL("test_fapi2GetChildren:: cores per FC mismatch, actual = %d, expected %d",
+                    l_actualSize, l_expectedSize);
             numFails++;
             break;
         }
@@ -303,7 +308,8 @@ void test_fapi2GetChildren()
         numTests++;
         if(l_actualSize != l_expectedSize)
         {
-            TS_FAIL("test_fapi2GetChildren:: cores per EQ mismatch");
+            TS_FAIL("test_fapi2GetChildren:: cores per EQ mismatch, actual = %d, expected %d",
+                    l_actualSize, l_expectedSize);
             numFails++;
             break;
         }
@@ -319,7 +325,8 @@ void test_fapi2GetChildren()
         numTests++;
         if(l_actualSize != l_expectedSize)
         {
-            TS_FAIL("test_fapi2GetChildren:: FCs per proc mismatch");
+            TS_FAIL("test_fapi2GetChildren:: FCs per proc mismatch, actual = %d, expected %d",
+                    l_actualSize, l_expectedSize);
             numFails++;
             break;
         }
