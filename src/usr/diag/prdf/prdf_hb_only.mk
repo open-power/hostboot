@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2021
+# Contributors Listed Below - COPYRIGHT 2013,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -222,7 +222,6 @@ prd_obj_no_sim += exp_deploy_row_repairs.o
 prd_obj_no_sim += exp_row_repair.o
 prd_obj_no_sim += ccs_explorer.o
 prd_obj_no_sim += exp_mrs04.o
-prd_obj_no_sim += exp_bad_dq_bitmap_funcs.o
 prd_obj_no_sim += exp_fir.o
 prd_obj_no_sim += mrs_load_ddr4_explorer.o
 prd_obj_no_sim += p10_rcs_transient_check.o
