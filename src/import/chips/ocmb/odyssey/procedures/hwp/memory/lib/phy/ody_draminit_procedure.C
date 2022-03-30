@@ -40,6 +40,7 @@
 
 #include <lib/phy/ody_draminit_utils.H>
 #include <lib/phy/ody_phy_utils.H>
+#include <mss_odyssey_attribute_getters.H>
 
 namespace mss
 {
@@ -54,6 +55,9 @@ namespace ody
 ///
 fapi2::ReturnCode draminit(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
 {
+    fapi2::ATTR_DRAMINIT_TRAINING_TIMEOUT_Type l_poll_count;
+    FAPI_TRY(mss::attr::get_draminit_training_timeout(i_target , l_poll_count));
+
     // 1. Loads the IMEM Memory (instructions)
     // TODO:ZEN:MST-1561 Create code to load IMEM, DMEM, and message block onto Synopsys PHY
 
@@ -63,11 +67,12 @@ fapi2::ReturnCode draminit(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_t
     // 3. Configures and loads the message block
     // TODO:ZEN:MST-1561 Create code to load IMEM, DMEM, and message block onto Synopsys PHY
 
-    // 4. Starts training
+    // 4. Initialize mailbox protocol and start training
+    FAPI_TRY(mss::ody::phy::init_mailbox_protocol(i_target));
     FAPI_TRY(mss::ody::phy::start_training(i_target));
 
     // 5. Processes and handles training messages (aka poll for completion)
-    // TODO:ZEN:MST-1542 Add base code and control for Synopsys mailbox interaction
+    FAPI_TRY (mss::ody::phy::poll_for_completion(i_target, l_poll_count));
 
     // 6. Cleans up after training
     FAPI_TRY(mss::ody::phy::cleanup_training(i_target));

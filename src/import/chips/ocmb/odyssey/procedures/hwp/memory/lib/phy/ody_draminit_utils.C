@@ -36,10 +36,16 @@
 #include <fapi2.H>
 
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <generic/memory/lib/utils/mss_generic_check.H>
+#include <generic/memory/lib/utils/poll.H>
+#include <ody_scom_mp_apbonly0.H>
+#include <ody_scom_mp_drtub0.H>
+#include <mss_odyssey_attribute_getters.H>
 
 // TODO:ZEN:MST-1571 Update Odyssey PHY registers when the official values are merged into the EKB
 #include <lib/phy/ody_draminit_utils.H>
 #include <lib/phy/ody_phy_utils.H>
+#include <ody_consts.H>
 
 namespace mss
 {
@@ -57,6 +63,215 @@ constexpr uint64_t MIRCORESET_STALLTOMICRO = 60;
 constexpr uint64_t MIRCORESET_RESETTOMICRO = 63;
 
 constexpr uint64_t CALZAP_CALZAP     = 63;
+
+///
+/// @brief Initializes the protocol for mailbox interaction
+/// @param[in] i_target the target on which to operate
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode init_mailbox_protocol(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
+{
+    // Protocol initialization is writing 1 to following 2 registers.
+    FAPI_TRY(fapi2::putScom(i_target, scomt::mp::DWC_DDRPHYA_APBONLY0_DCTWRITEPROT, PROTOCOL_INIT));
+    FAPI_TRY(fapi2::putScom(i_target, scomt::mp::DWC_DDRPHYA_DRTUB0_UCTWRITEPROT, PROTOCOL_INIT));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Get the message passed through the mailbox protocol
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_mode 16 bit or 32 bit to read major message or streaming & SMBus messages
+/// @param[in] i_mailbox_poll_count poll count for reading UCT_PROT_SHADOW.
+/// @param[out] o_mail message read from the mailbox protocol.
+/// note: mode is set in the calling function. mail is returned based on that.
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode get_mail (const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                            const uint8_t i_mode,
+                            const uint64_t i_mailbox_poll_count,
+                            fapi2::buffer<uint64_t>& o_mail)
+{
+    FAPI_TRY(poll_for_message_available(i_target, i_mailbox_poll_count));
+    FAPI_TRY(read_message(i_target, i_mode, o_mail));
+    FAPI_TRY(acknowledge_mail(i_target, i_mailbox_poll_count));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Poll for mail to be available
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_mailbox_poll_count poll count for reading UCT_PROT_SHADOW.
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode poll_for_message_available(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const uint64_t i_mailbox_poll_count)
+{
+    fapi2::buffer<uint64_t> l_data;
+    mss::poll_parameters l_poll_params(DELAY_10NS,
+                                       200,
+                                       mss::DELAY_1MS,
+                                       200,
+                                       i_mailbox_poll_count);
+
+    // Poll for getting 0 at UctWriteProtShadow.
+    bool l_poll_return = mss::poll(i_target, l_poll_params, [&i_target]()->bool
+    {
+        fapi2::buffer<uint64_t> l_data = 0xFF;
+        FAPI_TRY(fapi2::getScom(i_target, scomt::mp::DWC_DDRPHYA_APBONLY0_UCTSHADOWREGS, l_data));
+        return MESSAGE_AVAILABLE == l_data;
+
+    fapi_try_exit:
+        FAPI_ERR("mss::poll() hit an error in mss::getScom");
+        return false;
+    });
+    // following FAPI_TRY to preserve the scom failure in lambda.
+    FAPI_TRY(fapi2::current_err);
+    FAPI_ASSERT(l_poll_return,
+                fapi2::ODY_GET_MAIL_FAILURE().
+                set_PORT_TARGET(i_target),
+                TARGTIDFORMAT " poll for getting mail timed out during DRAM training", TARGTID);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief reads the message after it is available
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_mode 16 bit or 32 bit to read major message or streaming & SMBus messages
+/// @param[out] o_mail message read from the mailbox protocol.
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode read_message(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                               const uint8_t i_mode,
+                               fapi2::buffer<uint64_t>& o_mail)
+{
+    FAPI_TRY(fapi2::getScom(i_target, scomt::mp::DWC_DDRPHYA_APBONLY0_UCTWRITEONLYSHADOW, o_mail));
+
+    if ( STREAMING_SMBUS_MSG_MODE == i_mode)
+    {
+        fapi2::buffer<uint64_t> l_data;
+        FAPI_TRY(fapi2::getScom(i_target, scomt::mp::DWC_DDRPHYA_APBONLY0_UCTDATWRITEONLYSHADOW, l_data));
+        o_mail = (o_mail << 16 ) | l_data;
+    }
+
+    // Writing 0 to DctWriteProt.
+    FAPI_TRY(fapi2::putScom(i_target, scomt::mp::DWC_DDRPHYA_APBONLY0_DCTWRITEPROT, RECEPTION_ACK));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+///
+/// @brief Acknowledges that mail is received
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_mailbox_poll_count poll count for reading UCT_PROT_SHADOW.
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode acknowledge_mail(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                   const uint64_t i_mailbox_poll_count)
+{
+    bool l_poll_return;
+    mss::poll_parameters l_poll_params(DELAY_10NS,
+                                       200,
+                                       mss::DELAY_1MS,
+                                       200,
+                                       i_mailbox_poll_count);
+
+    // Poll for getting 0 at UctWriteProtShadow.
+    l_poll_return = mss::poll(i_target, l_poll_params, [i_target]()->bool
+    {
+        fapi2::buffer<uint64_t> l_data;
+        FAPI_TRY(fapi2::getScom(i_target, scomt::mp::DWC_DDRPHYA_APBONLY0_UCTSHADOWREGS, l_data));
+        return ACK_MESSAGE == l_data;
+
+    fapi_try_exit:
+        FAPI_ERR("mss::poll() hit an error in mss::getScom");
+        return false;
+    });
+    // following FAPI_TRY to preserve the scom failure in lambda.
+    FAPI_TRY(fapi2::current_err);
+    FAPI_ASSERT( l_poll_return,
+                 fapi2::ODY_GET_MAIL_FAILURE().
+                 set_PORT_TARGET(i_target),
+                 TARGTIDFORMAT " poll for getting mail acknowledgement timed out while getting message through mailbox", TARGTID);
+
+    // Writing 1 here completes the mail reading process.
+    FAPI_TRY(fapi2::putScom(i_target, scomt::mp::DWC_DDRPHYA_APBONLY0_DCTWRITEPROT, ACK_MESSAGE));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Polls the mail until completion message is received
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_training_poll_count poll count for getting mail.
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode poll_for_completion(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                      const uint64_t i_training_poll_count )
+{
+    mss::poll_parameters l_poll_params(DELAY_10NS,
+                                       200,
+                                       mss::DELAY_1MS,
+                                       200,
+                                       i_training_poll_count);
+    fapi2::buffer<uint64_t> l_mail;
+    bool l_poll_return ;
+    fapi2::ATTR_PHY_GET_MAIL_TIMEOUT_Type l_mailbox_poll_count;
+    FAPI_TRY(mss::attr::get_phy_get_mail_timeout(i_target , l_mailbox_poll_count));
+    l_poll_return = mss::poll(i_target, l_poll_params, [&i_target, &l_mailbox_poll_count, &l_mail]()->bool
+    {
+        uint8_t l_mode = MAJOR_MSG_MODE; // 16 bit mode to read major message.
+        // check the message content.
+        FAPI_TRY(mss::ody::phy::get_mail(i_target, l_mode, l_mailbox_poll_count, l_mail));
+
+        if (STREAMING_MSG == l_mail)
+        {
+            ;
+            //decode streaming messages.
+            //TODO : ZEN-MST-1588 Add APIs for Decoding streaming messages and handling SMBus messages from mailbox protocol
+        }
+        else if (SMBUS_MSG == l_mail)
+        {
+            ;
+            // handle SMBus messages.
+            //TODO : ZEN-MST-1588 Add APIs for Decoding streaming messages and handling SMBus messages from mailbox protocol
+        }
+        FAPI_TRY(fapi2::delay(mss::DELAY_1MS, 200));
+        // return true if mail content is either successful completion or failed completion.
+        return check_for_completion(l_mail);
+    fapi_try_exit:
+        FAPI_ERR("mss::poll() hit an error in mss::getScom");
+        return false;
+    });
+    // following FAPI_TRY to preserve the scom failure in lambda.
+    FAPI_TRY(fapi2::current_err);
+
+    FAPI_ASSERT(l_poll_return,
+                fapi2::ODY_DRAMINIT_TRAINING_FAILURE().
+                set_PORT_TARGET(i_target).
+                set_mail(l_mail),
+                TARGTIDFORMAT " poll for draminit training completion timed out", TARGTID);
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+}
+
+///
+/// @brief Checks the completion condition for training
+/// @param[in] i_mail mail content to check for completion
+/// @return True if mail content is same as one of the completion values , false otherwise
+///
+bool check_for_completion(const fapi2::buffer<uint64_t>& i_mail)
+{
+    return ((SUCCESSFUL_COMPLETION == i_mail) || (FAILED_COMPLETION == i_mail));
+}
 
 ///
 /// @brief Starts the firmware draminit training
