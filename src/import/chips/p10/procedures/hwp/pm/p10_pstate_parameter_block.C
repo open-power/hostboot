@@ -153,7 +153,9 @@ using namespace pm_pstate_parameter_block;
 char const* vpdSetStr[] = VPD_PT_SET_STR;
 char const* ddsFieldStr[] = POUNDW_DDS_FIELDS_STR;
 char const* region_names[] = VPD_OP_SLOPES_REGION_ORDER_STR;
-
+double mod(double a);
+double power(double x,int y);
+double root(double num, int r);
 using namespace pm_pstate_parameter_block;
 
 ///////////////////////////////////////////////////////////
@@ -3158,18 +3160,25 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
                 FAPI_IMP("RAW IDD AC %08x (%d)",iv_attr_mvpd_poundV_raw[i].idd_tdp_ac_10ma,iv_attr_mvpd_poundV_raw[i].idd_tdp_ac_10ma);
 
                 // Compute V^1.3 using a best-fit equation
-                // (V^1.3) = (21374 * (voltage in 100uV) - 50615296)>>10
-                //
-                uint32_t vdd_calc = (21374 * iv_attr_mvpd_poundV_raw[i].vdd_mv * 10 );
+                //THe power(V,1.3) is computes as follows:
+                //      1. Convert VPD vdd mv to V
+                //      2. compute vdd value to the pow of 4
+                //      3. Take the cube root of the pow_val (this will be same as pow(V,1.3))
+                double vdd_in_volts = (double)((double)iv_attr_mvpd_poundV_raw[i].vdd_mv/(double)1000);  // Step 1
+                FAPI_INF("vdd_in_volts %f",vdd_in_volts);
+                double pow_val = 1;
 
-                uint32_t pow_val =  vdd_calc > 50615296 ? ((vdd_calc - 50615296) >> 10) : 0;
+                pow_val =  power(vdd_in_volts,4); //Step 2
 
-                FAPI_INF("pow_val %d",pow_val);
+                double cube_val = root(pow_val,3); //Step 3
 
+                FAPI_INF("pow_val %f",pow_val);
+                FAPI_INF("cube_val %f",cube_val);
 
                 double eco_ac_adj = (double)((double)iv_eco_count * 0.08 * (double)iv_attr_mvpd_poundV_raw[i].frequency_mhz * 
-                        (double)pow_val) / 10000;
-                FAPI_IMP(" eco_ac_adj %5.2f ",eco_ac_adj);
+                        (double)cube_val) / 1000;   
+
+                FAPI_IMP(" eco_ac_adj %f ",eco_ac_adj);
 
                 iv_attr_mvpd_poundV_raw[i].idd_tdp_ac_10ma = (double)iv_attr_mvpd_poundV_raw[i].idd_tdp_ac_10ma + (double)eco_ac_adj;
                 FAPI_IMP("RAW IDD AC + ECO %08x (%d)",iv_attr_mvpd_poundV_raw[i].idd_tdp_ac_10ma,iv_attr_mvpd_poundV_raw[i].idd_tdp_ac_10ma);
@@ -3191,6 +3200,65 @@ fapi_try_exit:
     FAPI_INF("<<<<<<<<< get_mvpd_poundV");
     return fapi2::current_err;
 }
+
+double mod(double a)
+{
+    if(a < 0)
+    {
+        return (-a);
+    }
+    else
+    {
+        return (a);
+    }
+}
+double power(double x,int y)
+{
+    double result = 1;
+    for( ; y != 0; y--)
+    {
+        result *= x;
+    }
+    return result;
+}
+
+double root(double num, int r)
+{
+    double lb = 0, ub = num, mid;
+    if(r < 0)
+    {
+        num = 1/num;
+    }
+    if(num > 0 && num < 1)
+    {
+        lb = num;
+        ub = 1;
+    }
+
+    int n;
+    for(n = 0; n < 20; n++)
+    {
+        mid = (lb + ub)/2;
+        if(power (mid, mod(r)) > num)
+        {
+            ub = mid;
+        }
+        else
+        {
+            double pwr = power (mid, mod(r));
+            if(pwr < num)
+            {
+                lb = mid;
+            }
+            else
+            {
+                return mid;
+            }
+        }
+    }
+    return mid;
+}
+
 
 ///////////////////////////////////////////////////////////
 ////////   chk_valid_poundv
