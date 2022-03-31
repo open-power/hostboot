@@ -334,7 +334,8 @@ errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
         // We need to stop reading the file and return (without error).
         if(io_numBytesToRead == 0 && l_resp.completion_code == PLDM_DATA_OUT_OF_RANGE)
         {
-            PLDM_DBG("getLidFileFromOffset: PLDM_DATA_OUT_OF_RANGE EOF condition encountered");
+            PLDM_INF("getLidFileFromOffset: PLDM_DATA_OUT_OF_RANGE EOF condition encountered for file 0x%08X",
+                     i_fileHandle);
             if(l_errl)
             {
                 delete l_errl;
@@ -363,7 +364,7 @@ errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
 
         if(l_resp.length == 0)
         {
-            PLDM_DBG("getLidFileFromOffset: BMC returned size 0 for file handle 0x%08x at offset 0x%08x",
+            PLDM_INF("getLidFileFromOffset: BMC returned size 0 for file handle 0x%08x at offset 0x%08x",
                      i_fileHandle, l_req.offset);
             break;
         }
@@ -381,8 +382,13 @@ errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
         }
         else if(l_resp.length != l_req.length)
         {
-            PLDM_DBG("getLidFileFromOffset: BMC returned length 0x%08x of file read; requested length was 0x%08x. That indicates End Of File (total length: 0x%08x).",
-                     l_resp.length, l_req.length, l_totalRead);
+            // This may be perfectly okay but just in case it isn't trace it out
+            if( io_numBytesToRead != 0 ) //0=infinite, i.e. user doesn't know size
+            {
+                 // user thought they knew the size
+                PLDM_DBG("getLidFileFromOffset: BMC returned length 0x%08x for read of file 0x%08x; requested length was 0x%08x. That indicates End Of File (total length: 0x%08x, buffer length: 0x%08x).",
+                         l_resp.length, i_fileHandle, l_req.length, l_totalRead, io_numBytesToRead);
+            }
             break;
         }
         else if((MAX_TRANSFER_SIZE_BYTES > (io_numBytesToRead - l_totalRead)) &&
