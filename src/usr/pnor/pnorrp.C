@@ -1530,6 +1530,7 @@ errlHndl_t PnorRP::readFromDevice( uint64_t i_offset,
         }
 
         // get the data from the PNOR DD
+        size_t read_size_request = read_size;
         l_errhdl = DeviceFW::deviceRead(pnor_target,
                                         data_to_read,
                                         read_size,
@@ -1538,6 +1539,13 @@ errlHndl_t PnorRP::readFromDevice( uint64_t i_offset,
         {
             TRACFCOMP(g_trac_pnor, "PnorRP::readFromDevice> Error from device : RC=%X", l_errhdl->reasonCode() );
             break;
+        }
+
+        if( read_size_request != read_size )
+        {
+            TRACFCOMP(g_trac_pnor, "PnorRP::readFromDevice> Got back less data than we expected : request=%d, actual=%d; filling remainder with FF", read_size_request, read_size );
+            // force the remainder to look lize erased PNOR
+            memset( (char*)data_to_read+read_size, 0xFF, read_size_request-read_size );
         }
 
         // remove the ECC data
