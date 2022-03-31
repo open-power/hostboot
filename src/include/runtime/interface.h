@@ -591,6 +591,7 @@ typedef struct hostInterfaces
        HBRT_FW_MSG_TYPE_PM_RESET_ALERT    = 20, // struct pmreset_alert_t
        HBRT_FW_MSG_TYPE_DEALLOCATE        = 21, // struct deallocate_t
        HBRT_FW_MSG_MCTP_BRIDGE_ENABLED    = 22, // struct mctp_bridge_enabled
+       HBRT_FW_MSG_TYPE_LOAD_START_PMC    = 23, // No additional data required
     };
 
     // NVDIMM protection state enum
@@ -1341,6 +1342,13 @@ struct postInitCalls_t
      *         this flow.
      */
     void (*callLoadAndStartPMComplex)();
+
+    /** @brief Initiates callback from PHYP into HBRT for load and starting
+     *         the Power Management Complex (PMC) using the host_callback
+     *         interface function. Callback will be made to the firmware_notify
+     *         function.
+     */
+    void (*callSetupPMCLoadStartCallback)();
 
     /** @brief Initiates callback from PHYP into HBRT for PMIC health check
      *         using the host_callback interface function. Callback will be
