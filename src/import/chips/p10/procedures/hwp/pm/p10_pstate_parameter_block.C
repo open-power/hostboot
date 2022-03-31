@@ -3149,6 +3149,7 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
                 disable_dds();
             }
         }
+
         for (int i = 0; i < NUM_PV_POINTS; i++)
         {
             if (iv_eco_count)
@@ -3159,11 +3160,11 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
                 FAPI_IMP("RAW VDD %08x (%d)",iv_attr_mvpd_poundV_raw[i].vdd_mv,iv_attr_mvpd_poundV_raw[i].vdd_mv);
                 FAPI_IMP("RAW IDD AC %08x (%d)",iv_attr_mvpd_poundV_raw[i].idd_tdp_ac_10ma,iv_attr_mvpd_poundV_raw[i].idd_tdp_ac_10ma);
 
-                // Compute V^1.3 using a best-fit equation
-                //THe power(V,1.3) is computes as follows:
+                // THe power(V,1.3) is computes as follows:
                 //      1. Convert VPD vdd mv to V
                 //      2. compute vdd value to the pow of 4
-                //      3. Take the cube root of the pow_val (this will be same as pow(V,1.3))
+                //      3. Take the cube root of the pow_val (this will be same as pow(V,1.3)
+                //      4. Convert to 10mA to correct the current
                 double vdd_in_volts = (double)((double)iv_attr_mvpd_poundV_raw[i].vdd_mv/(double)1000);  // Step 1
                 FAPI_INF("vdd_in_volts %f",vdd_in_volts);
                 double pow_val = 1;
@@ -3175,12 +3176,12 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
                 FAPI_INF("pow_val %f",pow_val);
                 FAPI_INF("cube_val %f",cube_val);
 
-                double eco_ac_adj = (double)((double)iv_eco_count * 0.08 * (double)iv_attr_mvpd_poundV_raw[i].frequency_mhz * 
-                        (double)cube_val) / 1000;   
+                double eco_ac_adj_a = (double)((double)iv_eco_count * 0.08 * (double)iv_attr_mvpd_poundV_raw[i].frequency_mhz *
+                        (double)cube_val) / 1000;
 
-                FAPI_IMP(" eco_ac_adj %f ",eco_ac_adj);
+                FAPI_IMP("eco_ac_adj_a %f ",eco_ac_adj_a);
 
-                iv_attr_mvpd_poundV_raw[i].idd_tdp_ac_10ma = (double)iv_attr_mvpd_poundV_raw[i].idd_tdp_ac_10ma + (double)eco_ac_adj;
+                iv_attr_mvpd_poundV_raw[i].idd_tdp_ac_10ma = (double)iv_attr_mvpd_poundV_raw[i].idd_tdp_ac_10ma + (double)(eco_ac_adj_a*100);
                 FAPI_IMP("RAW IDD AC + ECO %08x (%d)",iv_attr_mvpd_poundV_raw[i].idd_tdp_ac_10ma,iv_attr_mvpd_poundV_raw[i].idd_tdp_ac_10ma);
                 FAPI_INF("#V data = 0x%04X  %-6d", iv_attr_mvpd_poundV_raw[i].idd_tdp_ac_10ma,
                         iv_attr_mvpd_poundV_raw[i].idd_tdp_ac_10ma);
@@ -3239,21 +3240,18 @@ double root(double num, int r)
     for(n = 0; n < 20; n++)
     {
         mid = (lb + ub)/2;
-        if(power (mid, mod(r)) > num)
+        double pwr = power (mid, mod(r));
+        if(pwr > num)
         {
             ub = mid;
         }
+        else if(pwr < num)
+        {
+            lb = mid;
+        }
         else
         {
-            double pwr = power (mid, mod(r));
-            if(pwr < num)
-            {
-                lb = mid;
-            }
-            else
-            {
-                return mid;
-            }
+            return mid;
         }
     }
     return mid;
