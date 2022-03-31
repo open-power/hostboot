@@ -75,6 +75,7 @@ namespace RUNTIME
         MOD_CREATE_PMIC_HEALTH_CHECK_CALLBACK = 0x31,  /**< rt_fwnotify.C */
         MOD_DEALLOCATE_RESOURCE          = 0x32,  /** < rt_fwnotify.C */
         MOD_CONVERT_TO_HB_TARGET         = 0x33,  /** < rt_fwnotify.C */
+        MOD_CREATE_PMC_LOAD_START_CALLBACK   = 0x34,  /**< rt_fwnotify.C */
     };
 
     enum RuntimeReasonCode

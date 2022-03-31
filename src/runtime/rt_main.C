@@ -186,10 +186,10 @@ runtimeInterfaces_t* rt_start(hostInterfaces_t* intf)
         (intf->puts)("callDoConcurrentInits is null.\n");
     }
 
-    // callLoadAndStartPMComplex is no-op on OPAL systems
-    rtPost->callLoadAndStartPMComplex();
-
 #ifndef CONFIG_FSP_BUILD
+    // set up the Power Management Complex (PMC) load and start callback to HBRT
+    rtPost->callSetupPMCLoadStartCallback();
+
     // set up PHYP callback to HBRT
     rtPost->callSetupPmicHealthCheck();
 #endif

@@ -63,6 +63,16 @@ const uint32_t HOST_CALLBACK_TIMER_DISABLED = 0xFFFFFFFF;
 const uint32_t HOST_CALLBACK_TIMER_ONE_SECOND = MS_PER_SEC;
 
 /**
+ * @brief Declare a prototype for the Power Management Complex (PMC) load and
+ *        start method because it is not declared in any header.  The linker
+ *        will find the definition.
+ **/
+namespace RTPM
+{
+    void load_and_start_pm_complex();
+}
+
+/**
  * @brief The lower and upper bounds for the sequence ID.
  **/
 const uint16_t SEQ_ID_MIN = 0x0000;
@@ -1167,6 +1177,133 @@ void setupPmicHealthCheck()
         errlCommit(l_err, RUNTIME_COMP_ID);
     }
 }
+
+/**
+ *  @brief Create the callback into HBRT for the Power Management Complex (PMC)
+ *         to load and start.
+ *
+ *         The reason for this callback, is because the PHYP has a time limit for when
+ *         HBRT must respond, when doing an operation, in the init phase.
+ *         Unfortunately the PMC load and start operation can exceed this time limit
+ *         and has exceeded this time limit causing the PHYP to assume the HBRT is dead.
+ *         In lieu of updating the time limit, creating a callback to execute the PMC
+ *         load and start post init thereby avoiding the PHYP time limit altogether.
+ *
+ *  @return errlHndl_t - nullptr if no error
+ **/
+errlHndl_t createPMCLoadStartCallback()
+{
+    errlHndl_t l_err = nullptr;
+
+    do {
+        // Check the interface
+        if ( g_hostInterfaces == nullptr ||
+           ( g_hostInterfaces->host_callback == nullptr ) )
+        {
+            TRACFCOMP(g_trac_runtime, ERR_MRK"createPMCLoadStartCallback: "
+                                             "host_callback interface not linked");
+            /*@
+             * @errortype
+             * @moduleid         MOD_CREATE_PMC_LOAD_START_CALLBACK
+             * @reasoncode       RC_HOST_CALLBACK_INTERFACE_ERR
+             * @userdata1        <unused>
+             * @userdata2        <unused>
+             * @devdesc          Host callback interface not linked
+             * @custdesc         Internal firmware error
+             */
+            l_err = new ErrlEntry( ERRL_SEV_UNRECOVERABLE,
+                                   MOD_CREATE_PMC_LOAD_START_CALLBACK,
+                                   RC_HOST_CALLBACK_INTERFACE_ERR,
+                                   0,
+                                   0,
+                                   ErrlEntry::ADD_SW_CALLOUT);
+            l_err->collectTrace(RUNTIME_COMP_NAME, 256);
+            break;
+        }
+
+        // Set the size and create the firmware message - boilerplate code
+        size_t l_msg_size = hostInterfaces::HBRT_FW_MSG_BASE_SIZE;
+        uint8_t l_msg_buf[l_msg_size] = {0};
+
+        hostInterfaces::hbrt_fw_msg* l_fw_msg =
+            reinterpret_cast<hostInterfaces::hbrt_fw_msg *>(l_msg_buf);
+
+        // Set the type of the message that identifies this callback
+        // For this callback it is HBRT_FW_MSG_TYPE_LOAD_START_PMC
+        l_fw_msg->io_type = hostInterfaces::HBRT_FW_MSG_TYPE_LOAD_START_PMC;
+
+        // Ask host interface to invoke the callback at the specified time
+        const uint64_t l_host_callback_timer = HOST_CALLBACK_TIMER_ONE_SECOND;
+
+        int l_rc = g_hostInterfaces->host_callback( l_host_callback_timer,
+                                                    l_msg_size,
+                                                    reinterpret_cast<void*>(l_fw_msg) );
+
+        if (l_rc)
+        {
+            TRACFCOMP( g_trac_hbrt, ERR_MRK
+                "createPMCLoadStartCallback: host_callback failed. "
+                "rc 0x%X, wait time in milliseconds %d, message size %d",
+                l_rc, l_host_callback_timer, l_msg_size );
+
+            // Convert rc to error log
+            /*@
+             * @errortype
+             * @moduleid         MOD_CREATE_PMC_LOAD_START_CALLBACK
+             * @reasoncode       RC_HOST_CALLBACK_ERR
+             * @userdata1        Hypervisor return code
+             * @userdata2[0:31]  Callback timer in milliseconds
+             * @userdata2[32:63] Callback message size
+             * @devdesc          Host Callback failed
+             * @custdesc         Internal firmware error
+             */
+            l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                             MOD_CREATE_PMC_LOAD_START_CALLBACK,
+                                             RC_HOST_CALLBACK_ERR,
+                                             l_rc,
+                                             TWO_UINT32_TO_UINT64(
+                                                    l_host_callback_timer,
+                                                    l_msg_size),
+                                             ErrlEntry::ADD_SW_CALLOUT );
+
+            l_err->collectTrace(RUNTIME_COMP_NAME, 256);
+            break;
+        }
+    } while (0);
+
+    return l_err;
+} // createPMCLoadStartCallback
+
+/**
+ *  @brief Create the callback into HBRT for the Power Management Complex (PMC)
+ *         to load and start.
+ *
+ *  @return errlHndl_t - nullptr if no error
+ **/
+void setupPMCLoadStartCallback()
+{
+    errlHndl_t l_err = nullptr;
+
+    // Create the PMC load and start call back
+    l_err = createPMCLoadStartCallback();
+    if (l_err)
+    {
+        TRACFCOMP(g_trac_hbrt,
+                  "setupPMCLoadStartCallback: Call to createPMCLoadStartCallback failed");
+        errlCommit(l_err, RUNTIME_COMP_ID);
+    }
+} // setupPMCLoadStartCallback
+
+/**
+ *  @brief Handle the Power Management Complex (PMC) callback to perform
+ *         the loading and starting of the PMC
+ *
+ *  @return void
+ **/
+void handlePMCLoadStartCallback()
+{
+    RTPM::load_and_start_pm_complex();
+}
 #endif
 
 /**
@@ -1318,7 +1455,15 @@ void firmware_notify( uint64_t i_len, void *i_data )
                 deallocateResource(l_hbrt_fw_msg->deallocated);
             }
             break;
-#endif
+
+            case hostInterfaces::HBRT_FW_MSG_TYPE_LOAD_START_PMC:
+            {
+                TRACFCOMP(g_trac_runtime,
+                          "firmware_notify: Load and start the Power Management Complex");
+                handlePMCLoadStartCallback();
+            }
+            break;
+#endif // #ifndef CONFIG_FSP_BUILD
 
             default:
             {
@@ -1408,6 +1553,7 @@ struct registerFwNotify
         postInitCalls_t* rt_postInits = getPostInitCalls();
 #ifndef CONFIG_FSP_BUILD
         rt_postInits->callSetupPmicHealthCheck = &setupPmicHealthCheck;
+        rt_postInits->callSetupPMCLoadStartCallback = &setupPMCLoadStartCallback;
 #endif
         rt_postInits->callLastPostInit = &lastPostInit;
     }
