@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2021
+# Contributors Listed Below - COPYRIGHT 2020,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -1067,12 +1067,16 @@ class errludP_prdf:
         sdcTrackit  = (sdcFlags >> 25) & 0x1
         sdcTerm     = (sdcFlags >> 24) & 0x1
         sdcLogit    = (sdcFlags >> 23) & 0x1
-        sdcChnlFail = (sdcFlags >> 22) & 0x1
-        sdcCoreCs   = (sdcFlags >> 21) & 0x1
-        sdcSavedSdc = (sdcFlags >> 20) & 0x1
-        sdcLastCore = (sdcFlags >> 19) & 0x1
-        sdcDeferDe  = (sdcFlags >> 18) & 0x1
-        sdcSecErr   = (sdcFlags >> 17) & 0x1
+        # FYI, one deprecated entry was removed. To make the parser compatible
+        # with older or newer error logs, this bit must remain a hole (i.e. it
+        # can be reused, but subsequent data must remain in the bit positions
+        # that they are currently in).
+        sdcChnlFail = (sdcFlags >> 21) & 0x1
+        sdcCoreCs   = (sdcFlags >> 20) & 0x1
+        sdcSavedSdc = (sdcFlags >> 19) & 0x1
+        sdcLastCore = (sdcFlags >> 18) & 0x1
+        sdcDeferDe  = (sdcFlags >> 17) & 0x1
+        sdcSecErr   = (sdcFlags >> 16) & 0x1
         d['SDC Flags'] = OrderedDict()
         d['SDC Flags']['DUMP']            = "True" if (sdcDump     == 1) else "False"
         d['SDC Flags']['UERE']            = "True" if (sdcUere     == 1) else "False"
@@ -1131,7 +1135,9 @@ class errludP_prdf:
                 parseMemMruCallout(mruCallout, mruWithNum, d)
             else:
                 # Add the information in the MRU to the dictionary
-                d[mruWithNum]['Mru Callout'] = hex(mruCallout)
+                # Pad the bitmap with 0s to 8 hex characters (32 bits)
+                formatMru = '0x{0:08x}'.format(mruCallout)
+                d[mruWithNum]['Mru Callout'] = formatMru
 
         # Signature list section  (get decimal type number)
         sigListCount, i=intConcat(data, i, i+4)
