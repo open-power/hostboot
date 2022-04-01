@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2021
+# Contributors Listed Below - COPYRIGHT 2021,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -112,6 +112,50 @@ class TestUserDataParser( unittest.TestCase ):
         hexSig = '0x004b0000 0xffff0013'
         self.assertEqual( jsonOut[msl]['Count'], 1 )
         self.assertEqual( jsonOut[msl][hexSig], 'Maintenance HARD CTE' )
+
+    def testPfaDataParser2( self ):
+        testData = bytearray.fromhex(
+        '4D53202044554D5040000000004B000000032009DEA1F4F0000100010202E680000000'
+        '01004B00000105E60000000000' )
+        mv = memoryview( testData )
+
+        parser = udparsers.be500.be500.errludP_prdf()
+        testStr = parser.UdParserPrdfPfaData( mv )
+
+        jsonOut = json.loads( testStr )
+
+        print ( json.dumps(jsonOut, indent=4) )
+
+        self.assertEqual( jsonOut['DUMP Content'], '0x40000000' )
+        self.assertEqual( jsonOut['DUMP HUID'], '0x004b0000' )
+        self.assertEqual( jsonOut['ERRL Actions'], '0x0003' )
+        self.assertEqual( jsonOut['ERRL Severity'], 'PREDICTIVE' )
+        self.assertEqual( jsonOut['Service Action Counter'], '0x09' )
+        self.assertEqual( jsonOut['SDC Flags']['DUMP'], 'True' )
+        self.assertEqual( jsonOut['SDC Flags']['UERE'], 'True' )
+        self.assertEqual( jsonOut['SDC Flags']['SUE'], 'False' )
+        self.assertEqual( jsonOut['SDC Flags']['AT_THRESHOLD'], 'True' )
+        self.assertEqual( jsonOut['SDC Flags']['DEGRADED'], 'True' )
+        self.assertEqual( jsonOut['SDC Flags']['SERVICE_CALL'], 'True' )
+        self.assertEqual( jsonOut['SDC Flags']['TRACKIT'], 'True' )
+        self.assertEqual( jsonOut['SDC Flags']['TERMINATE'], 'False' )
+        self.assertEqual( jsonOut['SDC Flags']['LOGIT'], 'True' )
+        self.assertEqual( jsonOut['SDC Flags']['MEM_CHNL_FAIL'], 'True' )
+        self.assertEqual( jsonOut['SDC Flags']['PROC_CORE_CS'], 'False' )
+        self.assertEqual( jsonOut['SDC Flags']['USING_SAVED_SDC'], 'False' )
+        self.assertEqual( jsonOut['SDC Flags']['LAST_CORE_TERM'], 'False' )
+        self.assertEqual( jsonOut['SDC Flags']['DEFER_DECONFIG'], 'False' )
+        self.assertEqual( jsonOut['SDC Flags']['SECONDARY_ERROR'], 'True' )
+        self.assertEqual( jsonOut['Error Count'], 1 )
+        self.assertEqual( jsonOut['Error Threshold'], 1 )
+        self.assertEqual( jsonOut['Primary Attn Type'], 'UNIT_CS' )
+        self.assertEqual( jsonOut['Secondary Attn Type'], 'UNIT_CS' )
+        self.assertEqual( jsonOut['PRD GARD Error Type'], 'Predictive' )
+        self.assertEqual( jsonOut['PRD MRU List'], 1 )
+        self.assertEqual( jsonOut['MRU #0']['Priority'], 'MED' )
+        self.assertEqual( jsonOut['MRU #0']['Type'], 'HUID' )
+        self.assertEqual( jsonOut['MRU #0']['Gard State'], 'Predictive' )
+        self.assertEqual( jsonOut['MRU #0']['Mru Callout'], '0x004b0000' )
 
     def testCaptureDataParser( self ):
         testData = bytearray.fromhex(
@@ -684,6 +728,7 @@ if __name__ == '__main__':
     test = TestUserDataParser()
     test.testExtMruData()
     test.testPfaDataParser()
+    test.testPfaDataParser2()
     test.testCaptureDataParser()
     test.testCaptureDataParserUeTable()
     test.testCaptureDataParserRowRepairData()
