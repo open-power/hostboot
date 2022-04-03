@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,7 +33,7 @@
 static const uint64_t DYN_MAGIC_FEATURE = 0x44594e4645415453; //'DYNFEATS'
 static const uint64_t DYN_MAGIC_SERVICE = 0x44594e5345525653; //'DYNSERVS'
 
-#define MAX_DYN_FEATURES   44
+#define MAX_DYN_FEATURES   45
 #define NUM_OF_64_BITS_SET 1
 
 typedef struct
@@ -182,6 +182,7 @@ enum DYN_FEATURES
     REVERT_DD1_SYS_XSTOP                              = 41,
     FBC_ONEHOP                                        = 42,
     CORE_ERR_INJ                                      = 43,
+    FAVOR_AGGRESSIVE_PREFETCH                         = 44,
 };
 
 enum DYN_SERVICES

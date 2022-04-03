@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -597,6 +597,7 @@ add_plat_features_rt(
     fapi2::ATTR_SYSTEM_MMA_POWERON_DISABLE_Type l_attr_system_mma_poweron_disable;
     fapi2::ATTR_MRW_L2_INCREASE_JITTER_Type l_attr_mrw_l2_increase_jitter;
     fapi2::ATTR_CONTAINED_IPL_TYPE_Type l_attr_contained_ipl_type;
+    fapi2::ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH_Type l_attr_proc_favor_aggressive_prefetch;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SMF_CONFIG,
                            i_target_sys,
@@ -614,6 +615,10 @@ add_plat_features_rt(
                            i_target_sys,
                            l_attr_contained_ipl_type));
 
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH,
+                           i_target_sys,
+                           l_attr_proc_favor_aggressive_prefetch));
+
     if (l_attr_smf_config == fapi2::ENUM_ATTR_SMF_CONFIG_ENABLED)
     {
         FAPI_TRY(set_bit(i_bvec, UV_INITS, "UV_INITS"));
@@ -630,6 +635,11 @@ add_plat_features_rt(
         if (l_attr_mrw_l2_increase_jitter == fapi2::ENUM_ATTR_MRW_L2_INCREASE_JITTER_TRUE)
         {
             FAPI_TRY(set_bit(i_bvec, L2RC_HIGH_JITTER, "L2RC_HIGH_JITTER"));
+        }
+
+        if (l_attr_proc_favor_aggressive_prefetch == fapi2::ENUM_ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH_TRUE)
+        {
+            FAPI_TRY(set_bit(i_bvec, FAVOR_AGGRESSIVE_PREFETCH, "FAVOR_AGGRESSIVE_PREFETCH"));
         }
 
         // by default, escalate core->system checkstop in Cronus

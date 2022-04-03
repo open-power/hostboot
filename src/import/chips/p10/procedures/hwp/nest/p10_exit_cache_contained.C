@@ -547,6 +547,7 @@ p10_exit_cache_contained_run_mcc_initfile_xscom(
     fapi2::ATTR_PROC_EPS_READ_CYCLES_T2_Type l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T2;
     fapi2::ATTR_SYS_DISABLE_MCU_TIMEOUTS_Type l_TGT1_ATTR_SYS_DISABLE_MCU_TIMEOUTS;
     fapi2::ATTR_SYS_DISABLE_HWFM_Type l_TGT1_ATTR_SYS_DISABLE_HWFM;
+    fapi2::ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH_Type l_TGT1_ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH;
     fapi2::ATTR_CHIP_EC_FEATURE_HW548941_Type l_TGT2_ATTR_CHIP_EC_FEATURE_HW548941;
     fapi2::ATTR_CHIP_EC_FEATURE_HW555009_Type l_TGT2_ATTR_CHIP_EC_FEATURE_HW555009;
     fapi2::ATTR_CHIP_EC_FEATURE_HW555479_Type l_TGT2_ATTR_CHIP_EC_FEATURE_HW555479;
@@ -562,6 +563,8 @@ p10_exit_cache_contained_run_mcc_initfile_xscom(
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T2, FAPI_SYSTEM, l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T2));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYS_DISABLE_MCU_TIMEOUTS, FAPI_SYSTEM, l_TGT1_ATTR_SYS_DISABLE_MCU_TIMEOUTS));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYS_DISABLE_HWFM, FAPI_SYSTEM, l_TGT1_ATTR_SYS_DISABLE_HWFM));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH, FAPI_SYSTEM,
+                           l_TGT1_ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_mcc_target, l_unit_num),
              "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW548941, i_target, l_TGT2_ATTR_CHIP_EC_FEATURE_HW548941));
@@ -772,7 +775,15 @@ p10_exit_cache_contained_run_mcc_initfile_xscom(
         l_scom_data |= (uint64_t)  0x1 << (64 - (33 + 1)); //ATTR_CHIP_EC_FEATURE_HW548941
     }
 
-    l_scom_data |= (uint64_t)  0x1 << (64 - ( 2 + 1));
+    if (l_TGT1_ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH)
+    {
+        l_scom_data |= (uint64_t)  0x0 << (64 - ( 2 + 1));
+    }
+    else
+    {
+        l_scom_data |= (uint64_t)  0x1 << (64 - ( 2 + 1));
+    }
+
     l_scom_data |= (uint64_t)  0x3 << (64 - (15 + 4));
     l_scom_data |= (uint64_t)  0xF << (64 - (19 + 4));
     l_scom_data |= (uint64_t)  0xF << (64 - (23 + 4));
@@ -803,10 +814,19 @@ p10_exit_cache_contained_run_mcc_initfile_xscom(
     //ATCL_CL_CLSCOM_MCAMOC
     l_scom_data = 0;
     l_scom_mask = 0;
+
     //data
-    l_scom_data |= (uint64_t)  0x2   << (64 - ( 1 +  2)); //MCAMOC_FORCE_PF_DROP0=ON
+    if (l_TGT1_ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH)
+    {
+        l_scom_data |= (uint64_t)  0x0   << (64 - ( 1 +  2)); //MCAMOC_FORCE_PF_DROP0=OFF
+    }
+    else
+    {
+        l_scom_data |= (uint64_t)  0x2   << (64 - ( 1 +  2)); //MCAMOC_FORCE_PF_DROP0=ON
+    }
+
     //mask
-    l_scom_mask |= (uint64_t)  0x3   << (64 - ( 1 +  2)); //MCAMOC_FORCE_PF_DROP0=ON
+    l_scom_mask |= (uint64_t)  0x3   << (64 - ( 1 +  2)); //MCAMOC_FORCE_PF_DROP0
 
     FAPI_TRY(p10_gen_xscom_init(
                  i_target,
@@ -1028,6 +1048,7 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
     fapi2::ATTR_CHIP_EC_FEATURE_HW550549_Type l_hw550549;
     fapi2::ATTR_CHIP_EC_FEATURE_HW555479_Type l_TGT1_ATTR_CHIP_EC_FEATURE_HW555479;
     fapi2::ATTR_CHIP_EC_FEATURE_HW573834_Type l_TGT1_ATTR_CHIP_EC_FEATURE_HW573834;
+    fapi2::ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH_Type l_TGT1_ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH;
     fapi2::ATTR_MRW_P1PF_MIN_CONFIDENCE_3_Type l_mrw_adjust_p1pf;
     bool l_adjust_p1pf = false;
     uint64_t l_scom_data = 0;
@@ -1043,6 +1064,8 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
              "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW550549)");
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW555479, i_target, l_TGT1_ATTR_CHIP_EC_FEATURE_HW555479));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW573834, i_target, l_TGT1_ATTR_CHIP_EC_FEATURE_HW573834));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH, FAPI_SYSTEM,
+                           l_TGT1_ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MRW_P1PF_MIN_CONFIDENCE_3, FAPI_SYSTEM, l_mrw_adjust_p1pf));
     l_adjust_p1pf = (l_mrw_adjust_p1pf == fapi2::ENUM_ATTR_MRW_P1PF_MIN_CONFIDENCE_3_TRUE);
 
@@ -1065,20 +1088,50 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
     l_scom_mask = 0;
     //data
     l_scom_data |= (uint64_t)  0x0 << (64 - ( 0 + 1)); //MCPERF1_DISABLE_FASTPATH=OFF
-    l_scom_data |= (uint64_t) 0x12 << (64 - (10 +  7)); //MCPERF1_PF_DROP_CNT_THRESH=18
-    l_scom_data |= (uint64_t)  0x1 << (64 - (21 +  1)); //MCPERF1_ENABLE_PF_DROP_CMDLIST=ON
+
+    if (l_TGT1_ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH)
+    {
+        l_scom_data |= (uint64_t)  0xF << (64 - ( 6 + 4)); //MCPERF1_CONFIDENCE_LEVEL_MASK=0b1111
+    }
+
+    l_scom_data |= (uint64_t) 0x12 << (64 - (10 + 7)); //MCPERF1_PF_DROP_CNT_THRESH=18
+
+    if (l_TGT1_ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH)
+    {
+        l_scom_data |= (uint64_t)  0x0 << (64 - (21 + 1)); //MCPERF1_ENABLE_PF_DROP_CMDLIST=OFF
+    }
+    else
+    {
+        l_scom_data |= (uint64_t)  0x1 << (64 - (21 + 1)); //MCPERF1_ENABLE_PF_DROP_CMDLIST=ON
+    }
+
     l_scom_data |= (uint64_t)  0x1 << (64 - (22 + 1)); //MCPERF1_ENABLE_PREFETCH_PROMOTE=ON
-    l_scom_data |= (uint64_t)  0x3 << (64 - (30 + 2)); //MCPERF1_PLUS_ONE_PREFETCH_CONFIDENCE=3
+
+    if (l_TGT1_ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH)
+    {
+        l_scom_data |= (uint64_t)  0x0 << (64 - (30 + 2)); //MCPERF1_PLUS_ONE_PREFETCH_CONFIDENCE=0b00
+    }
+    else
+    {
+        l_scom_data |= (uint64_t)  0x3 << (64 - (30 + 2)); //MCPERF1_PLUS_ONE_PREFETCH_CONFIDENCE=3
+    }
+
     l_scom_data |= (uint64_t) 0x0F << (64 - (38 + 5)); //MCPERF1_WBIT_SCOPE_ENABLE=0b01111
     l_scom_data |= (uint64_t)  0x0 << (64 - (43 + 1)); //MCPERF1_EN_SPEC_EDATA=OFF
     l_scom_data |= (uint64_t)  0x1 << (64 - (44 + 1)); //MCPERF1_EN_SPEC_EDATA=ON
     //mask
     l_scom_mask |= (uint64_t)  0x1 << (64 - ( 0 + 1)); //MCPERF1_DISABLE_FASTPATH=OFF
-    l_scom_mask |= (uint64_t) 0x7F << (64 - (10 +  7)); //MCPERF1_PF_DROP_CNT_THRESH=25
-    l_scom_mask |= (uint64_t)  0x1 << (64 - (21 +  1)); //MCPERF1_ENABLE_PF_DROP_CMDLIST=ON
+
+    if (l_TGT1_ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH)
+    {
+        l_scom_mask |= (uint64_t)  0xF << (64 - ( 6 + 4)); //MCPERF1_CONFIDENCE_LEVEL_MASK=0b1111
+    }
+
+    l_scom_mask |= (uint64_t) 0x7F << (64 - (10 + 7)); //MCPERF1_PF_DROP_CNT_THRESH=25
+    l_scom_mask |= (uint64_t)  0x1 << (64 - (21 + 1)); //MCPERF1_ENABLE_PF_DROP_CMDLIST
     l_scom_mask |= (uint64_t)  0x1 << (64 - (22 + 1)); //MCPERF1_ENABLE_PREFETCH_PROMOTE=ON
 
-    if (l_adjust_p1pf)
+    if (l_adjust_p1pf || l_TGT1_ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH)
     {
         l_scom_mask |= (uint64_t)  0x3 << (64 - (30 + 2)); //MCPERF1_PLUS_ONE_PREFETCH_CONFIDENCE=3
     }
@@ -1123,17 +1176,35 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
     //MCMODE1
     l_scom_data = 0;
     l_scom_mask = 0;
+
     //data
-    l_scom_data |= (uint64_t) 0x1     << (64 - ( 8 +  1)); //MCMODE1_EN_BLOCK_PF_RD_IN_FLIGHT=ON
+    if (l_TGT1_ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH)
+    {
+        l_scom_data |= (uint64_t) 0x0     << (64 - ( 8 +  1)); //MCMODE1_EN_BLOCK_PF_RD_IN_FLIGHT=OFF
+    }
+    else
+    {
+        l_scom_data |= (uint64_t) 0x1     << (64 - ( 8 +  1)); //MCMODE1_EN_BLOCK_PF_RD_IN_FLIGHT=ON
+    }
+
     l_scom_data |= (uint64_t) 0x1     << (64 - ( 9 +  1)); //MCMODE1_EN_EPF_CL_LIMIT=ON
     l_scom_data |= (uint64_t) 0x0     << (64 - (32 +  1)); //MCMODE1_DISABLE_ALL_SPEC_OPS=OFF
-    l_scom_data |= (uint64_t) 0x10040 << (64 - (33 + 19)); //MCMODE1_DISABLE_SPEC_OP=0x10040
+
+    if (l_TGT1_ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH)
+    {
+        l_scom_data |= (uint64_t) 0x00040 << (64 - (33 + 19)); //MCMODE1_DISABLE_SPEC_OP=0x00040
+    }
+    else
+    {
+        l_scom_data |= (uint64_t) 0x10040 << (64 - (33 + 19)); //MCMODE1_DISABLE_SPEC_OP=0x10040
+    }
+
     l_scom_data |= (uint64_t) 0x0     << (64 - (61 +  1)); //MCMODE1_DISABLE_FP_COMMAND_BYPASS=OFF
     //mask
-    l_scom_mask |= (uint64_t) 0x1     << (64 - ( 8 +  1)); //MCMODE1_EN_BLOCK_PF_RD_IN_FLIGHT=ON
+    l_scom_mask |= (uint64_t) 0x1     << (64 - ( 8 +  1)); //MCMODE1_EN_BLOCK_PF_RD_IN_FLIGHT
     l_scom_mask |= (uint64_t) 0x1     << (64 - ( 9 +  1)); //MCMODE1_EN_EPF_CL_LIMIT=ON
     l_scom_mask |= (uint64_t) 0x1     << (64 - (32 +  1)); //MCMODE1_DISABLE_ALL_SPEC_OPS=OFF
-    l_scom_mask |= (uint64_t) 0x7FFFF << (64 - (33 + 19)); //MCMODE1_DISABLE_SPEC_OP=0x00040
+    l_scom_mask |= (uint64_t) 0x7FFFF << (64 - (33 + 19)); //MCMODE1_DISABLE_SPEC_OP
     l_scom_mask |= (uint64_t) 0x1     << (64 - (61 +  1)); //MCMODE1_DISABLE_FP_COMMAND_BYPASS=OFF
 
     FAPI_TRY(p10_gen_xscom_init(
