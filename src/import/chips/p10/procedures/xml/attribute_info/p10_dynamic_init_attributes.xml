@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2020,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2020,2022                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -46,7 +46,7 @@
      Number of dynamic init features.
     </description>
     <valueType>uint64</valueType>
-    <default>44</default>
+    <default>45</default>
     <writeable/>
     <persistRuntime/>
   </attribute>

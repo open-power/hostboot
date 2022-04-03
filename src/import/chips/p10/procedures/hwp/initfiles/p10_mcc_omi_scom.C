@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,6 +62,8 @@ fapi2::ReturnCode p10_mcc_omi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& 
         fapi2::ATTR_NAME_Type l_chip_id;
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, TGT2, l_chip_id));
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, TGT2, l_chip_ec));
+        fapi2::ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH_Type l_TGT1_ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH, TGT1, l_TGT1_ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH));
         fapi2::ATTR_PROC_EPS_READ_CYCLES_T0_Type l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T0;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T0, TGT1, l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T0));
         uint64_t l_def_MC_EPSILON_CFG_T0 = ((l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T0 + literal_6) / literal_4);
@@ -106,6 +108,23 @@ fapi2::ReturnCode p10_mcc_omi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& 
             l_scom_buffer.insert<40, 2, 62, uint64_t>(literal_0b10 );
             l_scom_buffer.insert<42, 2, 62, uint64_t>(literal_0b10 );
             FAPI_TRY(fapi2::putScom(TGT0, 0xc010c24ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0xc010c25ull, l_scom_buffer ));
+
+            if ((l_TGT1_ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH == fapi2::ENUM_ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH_TRUE))
+            {
+                constexpr auto l_MCP_CHAN0_ATCL_CL_CLSCOM_MCAMOC_FORCE_PF_DROP0_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 63, uint64_t>(l_MCP_CHAN0_ATCL_CL_CLSCOM_MCAMOC_FORCE_PF_DROP0_OFF );
+            }
+
+            if ((l_TGT1_ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH == fapi2::ENUM_ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH_TRUE))
+            {
+                constexpr auto l_MCP_CHAN0_ATCL_CL_CLSCOM_MCAMOC_FORCE_PF_DROP1_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 63, uint64_t>(l_MCP_CHAN0_ATCL_CL_CLSCOM_MCAMOC_FORCE_PF_DROP1_OFF );
+            }
+
+            FAPI_TRY(fapi2::putScom(TGT0, 0xc010c25ull, l_scom_buffer));
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0xc010c26ull, l_scom_buffer ));
