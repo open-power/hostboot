@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -217,9 +217,16 @@ namespace fapi2
         uint64_t mcastGrp1ScomAddr = 0xF0001;
         uint64_t mcastBitSelectAddr = 0xF0008;
         TARGETING::TargetHandleList l_children, o_list;
+        TARGETING::Target* l_hbTarg = i_target; //force a cast operator
+
+        // Before doing anything, make sure the target we have is a valid type
+        // to be a multicast base
+        assert( TARGETING::TYPE_PROC == l_hbTarg->getAttr<TARGETING::ATTR_TYPE>(),
+                "getMulticastChildren: Unsupported multicast type 0x%X used",
+                l_hbTarg->getAttr<TARGETING::ATTR_TYPE>() );
 
         uint64_t l_writeData = 0;
-        l_errl = deviceWrite(i_target, &l_writeData, l_size, DEVICE_SCOM_ADDRESS(mcastBitSelectAddr));
+        l_errl = deviceWrite(l_hbTarg, &l_writeData, l_size, DEVICE_SCOM_ADDRESS(mcastBitSelectAddr));
         if (l_errl)
         {
             FAPI_ERR("getMulticastChildren: Error from deviceWrite");
@@ -246,7 +253,7 @@ namespace fapi2
 
             // This function contains two scoms so not necessarily thread safe
             // Each individual scom is protected, but not the greater operation
-            l_errl = deviceRead(i_target, static_cast<void *>(&l_buffer), l_size,
+            l_errl = deviceRead(l_hbTarg, static_cast<void *>(&l_buffer), l_size,
                 DEVICE_SCOM_ADDRESS(mcastGrp1ScomAddr));
 
             if (l_errl)
@@ -257,7 +264,7 @@ namespace fapi2
             else
             {
                 assert(l_size == sizeof(l_buffer), "size of buffer changed after deviceRead");
-                getChildChiplets(l_children, i_target, i_child, false);
+                getChildChiplets(l_children, l_hbTarg, i_child, false);
                 for (auto& l_tar : l_children)
                 {
                     // Get each pervasive parent
