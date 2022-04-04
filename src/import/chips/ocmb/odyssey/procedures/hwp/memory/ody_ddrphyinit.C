@@ -30,11 +30,19 @@
 // *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
 // *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
+
+#include <generic/memory/lib/utils/find.H>
+
+#include <generic/memory/lib/utils/c_str.H>
+#include <generic/memory/lib/utils/mss_generic_check.H>
+
 #include <ody_ddrphyinit.H>
+
+#include <lib/phy/ody_ddrphy_phyinit_config.H>
 
 extern "C"
 {
@@ -45,8 +53,17 @@ extern "C"
 ///
     fapi2::ReturnCode ody_ddrphyinit(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
     {
+
+        for(const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
+        {
+            // Runs all steps of PHY init
+            FAPI_TRY(run_phy_init(l_port), TARGTIDFORMAT "failed init_phy_config", TARGTID);
+        }
+
         return fapi2::FAPI2_RC_SUCCESS;
 
+    fapi_try_exit:
+        return fapi2::current_err;
     }
 
 }// extern C
