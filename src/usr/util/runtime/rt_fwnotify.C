@@ -937,6 +937,14 @@ void handleMctpAvailable(void)
 
         // Re-enable the bridge
         setMctpBridgeState(hostInterfaces::MCTP_BRIDGE_ENABLED);
+
+        // If a new response comes in while handling a new inbound request,
+        // by definition that is a timed out response we gave up on earlier,
+        // so throw it away
+        if (!PLDM::get_next_response().empty())
+        {
+            PLDM::clear_next_response();
+        }
     }
     }while(0);
 
