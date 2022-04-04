@@ -89,5 +89,5 @@ setup(
     packages        = package_directories.keys(),
     package_dir     = package_directories,
     package_data    = package_data,
-    scripts         = ['src/build/debug/hb-memdump.sh'],
+    scripts         = ['src/build/debug/hb-memdump.sh','src/build/trace/tracelite/weave.py'],
 )
