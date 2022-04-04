@@ -7,6 +7,7 @@
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2022                             */
 /* [+] International Business Machines Corp.                              */
+/* [+] Synopsys, Inc.                                                     */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -123,4 +124,29 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
                                    const user_input_basic_t& i_user_input_basic,
                                    const user_input_advanced_t& i_user_input_advanced,
                                    const user_input_dram_config_t& i_user_input_dram_config);
+
+///
+/// @brief Initializes all of the PHY init structures
+/// @param[in] i_target - the memory port on which to operate
+/// @param[in,out] io_user_input_basic - Synopsys basic user input structure
+/// @param[in,out] io_user_input_advanced - Synopsys advanced user input structure
+/// @param[in,out] io_user_input_dram_config - DRAM configuration inputs needed for PHY init (MRS/RCW)
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+/// @note Currently, hardcoding these structures for simulation purposes
+/// TODO:ZEN:MST-1591 Convert PY init structures to be initialized from attributes
+///
+fapi2::ReturnCode init_phy_structs( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                    user_input_basic_t& io_user_input_basic,
+                                    user_input_advanced_t& io_user_input_advanced,
+                                    user_input_dram_config_t& io_user_input_dram_config);
+
+///
+/// @brief Runs PHY init on a specific port
+/// @param[in] i_target - the memory port on which to operate
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+/// @note Using a helper function here so we can get accurate target trace
+/// TRGTID uses i_target in a macro and we want the port target (not i_target)
+///
+fapi2::ReturnCode run_phy_init( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target);
+
 #endif
