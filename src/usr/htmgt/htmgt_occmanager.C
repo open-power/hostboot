@@ -57,7 +57,8 @@ namespace HTMGT
         iv_targetState(OCC_STATE_ACTIVE),
         iv_sysResetCount(0),
         iv_occsAreRunning(false),
-        iv_needsReset(false)
+        iv_needsReset(false),
+        iv_occsStarted(false)
     {
     }
 
@@ -272,6 +273,9 @@ namespace HTMGT
                 TMGT_ERR("_buildOccs: Set OCC enabled sensors to false");
                 ERRORLOG::errlCommit(err2, HTMGT_COMP_ID);
             }
+
+            // Ignore OCC attns until next StartStatus
+            iv_occsStarted = false;
 
             // Reset all OCCs
             TMGT_INF("_buildOccs: Calling HBPM::resetPMAll");
@@ -708,6 +712,9 @@ namespace HTMGT
                                 ATTR_CUMULATIVE_PMCOMPLEX_RESET_COUNT>(count);
                         }
                     }
+
+                    // Ignore OCC attns until next StartStatus
+                    iv_occsStarted = false;
 
                     // Reset all OCCs
                     TMGT_INF("_resetOccs: Calling HBPM::resetPMAll");
@@ -1567,6 +1574,16 @@ namespace HTMGT
     void OccManager::setOccsAreRunning(const bool i_running)
     {
         return Singleton<OccManager>::instance()._setOccsAreRunning(i_running);
+    }
+
+    bool OccManager::getOccsStarted()
+    {
+        return Singleton<OccManager>::instance()._getOccsStarted();
+    }
+
+    void OccManager::setOccsStarted(const bool i_started)
+    {
+        return Singleton<OccManager>::instance()._setOccsStarted(i_started);
     }
 
 } // end namespace

@@ -298,7 +298,6 @@ namespace HTMGT
              */
             static bool occsAreRunning();
 
-
             /**
              * @brief Set flag indicating the OCCs status
              *
@@ -306,6 +305,20 @@ namespace HTMGT
              */
             static void setOccsAreRunning(const bool i_running);
 
+
+            /**
+             * @brief Check if the OCCs have been started
+             *
+             * @return true if the OCCs were started, else false
+             */
+            static bool getOccsStarted();
+
+            /**
+             * @brief Set flag indicating if the OCCs were started
+             *
+             * @param[in] i_started set to true if OCCs were started, else false
+             */
+            static void setOccsStarted(const bool i_started);
 
         private:
 
@@ -320,6 +333,7 @@ namespace HTMGT
             uint16_t                iv_freqPoint; // for FFO/SFP
             bool                    iv_occsAreRunning;
             bool                    iv_needsReset;
+            bool                    iv_occsStarted;
 
 
             /**
@@ -442,6 +456,13 @@ namespace HTMGT
             /** See setOccsAreRunning() above */
             void _setOccsAreRunning(const bool i_running)
             { iv_occsAreRunning = i_running; };
+
+            /* See getOccsStarted() above */
+            uint8_t _getOccsStarted() { return iv_occsStarted; };
+
+            /** See setOccsStarted() above */
+            void _setOccsStarted(const bool i_started)
+            { iv_occsStarted = i_started; };
     };
 
     typedef Singleton<OccManager> occMgr;

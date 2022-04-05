@@ -80,6 +80,9 @@ namespace HTMGT
         {
             if (i_startCompleted)
             {
+                // Start listening for OCC atts
+                OccManager::setOccsStarted(true);
+
                 // Query functional OCCs (OCCs have just been started)
                 l_err = OccManager::buildOccs(true);
                 if (nullptr == l_err)
@@ -262,6 +265,9 @@ namespace HTMGT
         }
         else
         {
+            // Ignore OCC attns until next StartStatus
+            OccManager::setOccsStarted(false);
+
             TMGT_INF("processOccStartStatus: Skipping start of OCCS due to "
                      "internal flags 0x%08X", get_int_flags());
             // Reset all OCCs
@@ -297,6 +303,13 @@ namespace HTMGT
            sys->tryGetAttr<TARGETING::ATTR_HTMGT_SAFEMODE>(safeMode) &&
            safeMode)
         {
+            return;
+        }
+
+        if (!OccManager::getOccsStarted())
+        {
+            // OCCs have not been started, so ignore call
+            TMGT_INF("<<processOccAttn: OCCs have not been started yet");
             return;
         }
 
