@@ -1160,6 +1160,21 @@ void cacheEepromVpd(TARGETING::Target * i_target, bool i_present)
                 errlCommit(errl, EEPROM_COMP_ID);
             }
         }
+        else if( controllerTarget->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_BMC )
+        {
+            TRACFCOMP(g_trac_eeprom, "cacheEepromVpd(): We expected VPD from the BMC but we didn't get any, clearing out EECACHE entry for target 0x%.8X.",
+                      TARGETING::get_huid(i_target));
+            std::vector<uint8_t> l_emptyBuffer;
+            errl = EEPROM::cacheEepromBuffer( i_target,
+                                              false /*not present*/,
+                                              l_emptyBuffer );
+            if (errl != nullptr)
+            {
+                TRACFCOMP(g_trac_eeprom,"pTarget %.8X - failed to cache empty buffer",
+                          i_target->getAttr<TARGETING::ATTR_HUID>());
+                errlCommit(errl, EEPROM_COMP_ID);
+            }
+        }
         else
         {
             TRACFCOMP(g_trac_eeprom, "cacheEepromVpd(): Skipping reading EEPROM(s) for target 0x%.8X since the SPI/I2C "
