@@ -575,6 +575,11 @@ void ErrlManager::setACKInFlattened(uint32_t i_position)
         i_position, pSRC->src.word5,
         (pSRC->src.word5 & ErrlSrc::ACK_BIT) ? "not ACKed" : "ACKed");
 
+#ifndef CONFIG_FSP_BUILD
+    // Flush logs
+    PNOR::flush(PNOR::HB_ERRLOGS);
+#endif // CONFIG_FSP_BUILD
+
     return;
 }
 
@@ -680,11 +685,8 @@ bool ErrlManager::sendErrLogToBmc(errlHndl_t &io_err, bool i_isPrevBootErr)
         }
         else
         {
-            l_errlSentAndAckd = true;
-#ifndef __HOSTBOOT_RUNTIME
             // Set ACK bit in PNOR to identify this log as having been sent to BMC
             l_errlSentAndAckd = ackErrLogInPnor(io_err->eid());
-#endif
         }
 
     } while (0);
