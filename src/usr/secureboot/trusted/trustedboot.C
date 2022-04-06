@@ -2612,18 +2612,9 @@ bool isTpmRequired()
     bool retVal = false;
     do
     {
-        // TPM always required in simics
-        if(Util::isSimicsRunning())
-        {
-            retVal = true;
-        }
-        else
-        {
-            // On HW, use ATTR_TPM_REQUIRED
-            TARGETING::Target* pTopLevel =
-                TARGETING::UTIL::assertGetToplevelTarget();
-            retVal = pTopLevel->getAttr<TARGETING::ATTR_TPM_REQUIRED>();
-        }
+        TARGETING::Target* pTopLevel =
+          TARGETING::UTIL::assertGetToplevelTarget();
+        retVal = pTopLevel->getAttr<TARGETING::ATTR_TPM_REQUIRED>();
 
         TRACUCOMP( g_trac_trustedboot, "isTpmRequired: Using ATTR_TPM_REQUIRED:"
                    " retVal=%d",
