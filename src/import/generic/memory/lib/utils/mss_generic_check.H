@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,7 +51,7 @@
     //Macro -- PPE doesn't want to include generic_consts.H
     // so we'll define it here directly
     #define TARGTIDFORMAT "%s"
-    #define TARGTID spd::c_str(i_target)
+    #define TARGTID mss::spd::c_str(i_target)
 #endif
 
 namespace mss
