@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2022                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -34,6 +34,26 @@
      <ffdc>HW_DELAY</ffdc>
      <callout>
        <procedure>CODE</procedure>
+       <priority>HIGH</priority>
+     </callout>
+     </hwpError>
+   <!-- ******************************************************************** -->
+   <hwpError>
+     <sbeError/>
+     <rc>RC_P10_PCI_REFCLOCK_ERR</rc>
+     <description>First SCOM attempted into PCI chiplet failed</description>
+     <ffdc>TARGET</ffdc>
+     <ffdc>CHIPLET_NUM</ffdc>
+     <ffdc>CLOCK_MUX</ffdc>
+     <callout>
+       <target>TARGET</target>
+       <priority>HIGH</priority>
+     </callout>
+     <callout>
+       <hw>
+         <hwid>PCI_REF_CLOCK</hwid>
+         <refTarget>TARGET</refTarget>
+       </hw>
        <priority>HIGH</priority>
      </callout>
      </hwpError>
