@@ -46,6 +46,7 @@ namespace efd
 /// @param[in] i_target DIMM target
 /// @param[in] i_rev SPD revision
 /// @param[in] i_gen DRAM generation
+/// @param[in] i_planar planar config flag (from ATTR_MEM_MRW_IS_PLANAR)
 /// @param[in] i_rank_info the current rank info class
 /// @param[out] o_efd_engine shared pointer to the EFD engine in question
 /// @return fapi2::ReturnCode SUCCESS iff the procedure executes successfully
@@ -54,6 +55,7 @@ namespace efd
 fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                           const uint8_t i_rev,
                           const uint8_t i_gen,
+                          const uint8_t i_planar,
                           const mss::rank::info<mss::mc_type::EXPLORER>& i_rank_info,
                           std::shared_ptr<mss::efd::ddimm_efd_base>& o_efd_engine)
 {
@@ -66,35 +68,64 @@ fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target
     {
         case fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR4:
             {
-                // Then switch over the SPD revision
-                switch (l_fallback_rev)
+                if (i_planar == fapi2::ENUM_ATTR_MEM_MRW_IS_PLANAR_FALSE)
                 {
-                    case mss::spd::rev::V0_3:
-                        {
+                    // Then switch over the SPD revision
+                    switch (l_fallback_rev)
+                    {
+                        case mss::spd::rev::V0_3:
+                            {
 
-                            o_efd_engine = std::make_shared<mss::efd::ddimm_efd_0_3>(i_target, i_rank_info);
-                            return fapi2::FAPI2_RC_SUCCESS;
-                            break;
-                        }
+                                o_efd_engine = std::make_shared<mss::efd::ddimm_efd_0_3>(i_target, i_rank_info);
+                                return fapi2::FAPI2_RC_SUCCESS;
+                                break;
+                            }
 
-                    case mss::spd::rev::V0_4:
-                        {
-                            o_efd_engine = std::make_shared<mss::efd::ddimm_efd_0_4>(i_target, i_rank_info);
-                            return fapi2::FAPI2_RC_SUCCESS;
-                            break;
-                        }
+                        case mss::spd::rev::V0_4:
+                            {
+                                o_efd_engine = std::make_shared<mss::efd::ddimm_efd_0_4>(i_target, i_rank_info);
+                                return fapi2::FAPI2_RC_SUCCESS;
+                                break;
+                            }
 
-                    default:
-                        {
-                            FAPI_ASSERT(false,
-                                        fapi2::MSS_INVALID_SPD_REVISION()
-                                        .set_SPD_REVISION(i_rev)
-                                        .set_DRAM_GENERATION(i_gen)
-                                        .set_FUNCTION_CODE(EFD_FACTORY)
-                                        .set_DIMM_TARGET(i_target),
-                                        "Unsupported SPD revision(0x%02x) received in EFD decoder factory for DDR%u for %s",
-                                        i_rev, 4, spd::c_str(i_target));
-                        }
+                        default:
+                            {
+                                FAPI_ASSERT(false,
+                                            fapi2::MSS_INVALID_SPD_REVISION()
+                                            .set_SPD_REVISION(i_rev)
+                                            .set_DRAM_GENERATION(i_gen)
+                                            .set_IS_PLANAR(i_planar)
+                                            .set_FUNCTION_CODE(EFD_FACTORY)
+                                            .set_DIMM_TARGET(i_target),
+                                            "Unsupported SPD revision(0x%02x) received in %s EFD decoder factory for DDR%u for %s",
+                                            i_rev, "DDIMM", 4, spd::c_str(i_target));
+                            }
+                    }
+                }
+                else
+                {
+                    switch (l_fallback_rev)
+                    {
+                        case mss::spd::rev::V0_4:
+                            {
+                                o_efd_engine = std::make_shared<mss::efd::planar_rdimm_efd_0_4>(i_target, i_rank_info);
+                                return fapi2::FAPI2_RC_SUCCESS;
+                                break;
+                            }
+
+                        default:
+                            {
+                                FAPI_ASSERT(false,
+                                            fapi2::MSS_INVALID_SPD_REVISION()
+                                            .set_SPD_REVISION(i_rev)
+                                            .set_DRAM_GENERATION(i_gen)
+                                            .set_IS_PLANAR(i_planar)
+                                            .set_FUNCTION_CODE(EFD_FACTORY)
+                                            .set_DIMM_TARGET(i_target),
+                                            "Unsupported SPD revision(0x%02x) received in %s EFD decoder factory for DDR%u for %s",
+                                            i_rev, "Planar", 4, spd::c_str(i_target));
+                            }
+                    }
                 }
 
                 break;
@@ -113,6 +144,7 @@ fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target
                             fapi2::MSS_INVALID_SPD_REVISION()
                             .set_SPD_REVISION(i_rev)
                             .set_DRAM_GENERATION(i_gen)
+                            .set_IS_PLANAR(i_planar)
                             .set_FUNCTION_CODE(EFD_FACTORY)
                             .set_DIMM_TARGET(i_target),
                             "Unsupported DRAM generation received in EFD decoder factory 0x%02x for %s",
@@ -248,6 +280,54 @@ fapi2::ReturnCode ddimm_module_specific_factory(const fapi2::Target<fapi2::TARGE
             {
                 // Declarations to avoid FAPI_ASSERT compile fails
                 const uint8_t DRAM_GEN = fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR4;
+                const uint8_t DIMM_TYPE = fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_DDIMM;
+                FAPI_ASSERT(false,
+                            fapi2::MSS_INVALID_SPD_REVISION_FOR_MODULE_SPECIFC()
+                            .set_SPD_REVISION(i_rev)
+                            .set_DRAM_GENERATION(DRAM_GEN)
+                            .set_DIMM_TYPE(DIMM_TYPE)
+                            .set_FUNCTION_CODE(SPD_FACTORY)
+                            .set_DIMM_TARGET(i_target),
+                            "Unsupported SPD revision(0x%02x) received in SPD decoder factory for DDR%u %sDIMM for %s",
+                            i_rev, 4, "D", spd::c_str(i_target));
+                break;
+            }
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Generates the DDR4 planar config RDIMM module SPD engine based upon the SPD rev
+/// @param[in] i_target DIMM target
+/// @param[in] i_rev SPD revision
+/// @param[out] o_module_specific_engine shared pointer to the module specific cnfg engine in question
+/// @return fapi2::ReturnCode SUCCESS iff the procedure executes successfully
+///
+fapi2::ReturnCode planar_rdimm_module_specific_factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_rev,
+        std::shared_ptr<mss::spd::module_specific_base>& o_module_specific_engine)
+{
+    // Poor man's fallback technique: if we receive a revision that's later than (or numerically
+    // greater than) the latest supported, we'll decode as if it's the latest supported rev
+    const uint8_t l_fallback_rev = (i_rev > mss::spd::rev::RDIMM_MAX) ? mss::spd::rev::RDIMM_MAX : i_rev;
+
+    // Then switch over the SPD revision
+    switch (l_fallback_rev)
+    {
+        case mss::spd::rev::V1_1:
+            {
+                o_module_specific_engine = std::make_shared<mss::spd::planar_rdimm_ddr4_1_1>(i_target);
+                return fapi2::FAPI2_RC_SUCCESS;
+                break;
+            }
+
+        default:
+            {
+                // Declarations to avoid FAPI_ASSERT compile fails
+                const uint8_t DRAM_GEN = fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR4;
                 const uint8_t DIMM_TYPE = fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_RDIMM;
                 FAPI_ASSERT(false,
                             fapi2::MSS_INVALID_SPD_REVISION_FOR_MODULE_SPECIFC()
@@ -294,6 +374,10 @@ fapi2::ReturnCode module_specific_factory(const fapi2::Target<fapi2::TARGET_TYPE
             {
                 case fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_DDIMM:
                     return ddr4::ddimm_module_specific_factory(i_target, i_rev, o_module_specific_engine);
+                    break;
+
+                case fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_RDIMM:
+                    return ddr4::planar_rdimm_module_specific_factory(i_target, i_rev, o_module_specific_engine);
                     break;
 
                 default:

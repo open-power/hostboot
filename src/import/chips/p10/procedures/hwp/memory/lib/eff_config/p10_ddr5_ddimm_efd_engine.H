@@ -111,6 +111,17 @@ class ddimm_0_0 : public mss::efd::base
             // This will need to be filled in. It's just a skeleton code now
             return fapi2::FAPI2_RC_SUCCESS;
         }
+
+        ///
+        /// @brief Process any overrides from the base SPD (planar support)
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode process_overrides(const std::vector<uint8_t>& i_spd) const
+        {
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
 };
 
 }// ddr5

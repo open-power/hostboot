@@ -692,6 +692,7 @@
     </description>
     <ffdc>SPD_REVISION</ffdc>
     <ffdc>DRAM_GENERATION</ffdc>
+    <ffdc>IS_PLANAR</ffdc>
     <ffdc>FUNCTION_CODE</ffdc>
     <callout>
       <procedure>CODE</procedure>

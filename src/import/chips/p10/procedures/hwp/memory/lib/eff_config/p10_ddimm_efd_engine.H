@@ -106,6 +106,14 @@ class base
         /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
         ///
         virtual fapi2::ReturnCode process(const std::vector<uint8_t>& i_efd) const = 0;
+
+        ///
+        /// @brief Process any overrides from the base SPD (planar support)
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode process_overrides(const std::vector<uint8_t>& i_spd) const = 0;
 };
 
 ///
@@ -779,6 +787,18 @@ class ddimm_efd_0_3 : public base
 
         fapi_try_exit:
             return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the rcd dic field for planar config
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        /// @note This is not used for DDIMM
+        ///
+        virtual fapi2::ReturnCode set_rcd_dic_planar(const std::vector<uint8_t>& i_spd) const
+        {
+            return fapi2::FAPI2_RC_SUCCESS;
         }
 
         ///
@@ -2639,6 +2659,17 @@ class ddimm_efd_0_3 : public base
 
         fapi_try_exit:
             return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Process any overrides from the base SPD (planar support)
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode process_overrides(const std::vector<uint8_t>& i_spd) const
+        {
+            return fapi2::FAPI2_RC_SUCCESS;
         }
 };
 

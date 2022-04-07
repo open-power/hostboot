@@ -265,6 +265,9 @@ void combine_planar_spd(
     constexpr uint64_t BASE_CONFIG_NUM_BYTES = 128;
     constexpr uint64_t MODULE_CONFIG_NUM_BYTES = 64;
     constexpr uint64_t BASE_PLUS_MODULE_NUM_BYTES = BASE_CONFIG_NUM_BYTES + MODULE_CONFIG_NUM_BYTES;
+    constexpr uint64_t MODULE_SUPPLIER_DATA_START = 320;
+    constexpr uint64_t MODULE_SUPPLIER_DATA_LEN = 64;
+    constexpr uint64_t MODULE_SUPPLIER_DATA_END = MODULE_SUPPLIER_DATA_START + MODULE_SUPPLIER_DATA_LEN;
 
     o_spd.clear();
     o_spd.resize(i_planar_spd.size());
@@ -283,6 +286,11 @@ void combine_planar_spd(
     std::copy(i_planar_spd.begin() + BASE_PLUS_MODULE_NUM_BYTES,
               i_planar_spd.end(),
               o_spd.begin() + BASE_PLUS_MODULE_NUM_BYTES);
+
+    // Copy ISDIMM module supplier data
+    std::copy(i_isdimm_spd.begin() + MODULE_SUPPLIER_DATA_START,
+              i_isdimm_spd.begin() + MODULE_SUPPLIER_DATA_END,
+              o_spd.begin() + MODULE_SUPPLIER_DATA_START);
 }
 
 ///

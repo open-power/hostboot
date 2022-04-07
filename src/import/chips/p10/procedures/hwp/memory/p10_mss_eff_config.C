@@ -74,6 +74,7 @@ fapi2::ReturnCode p10_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
         uint8_t l_dram_gen = 0;
         uint8_t l_dimm_type = 0;
         uint8_t l_is_planar = 0;
+        std::vector<uint8_t> l_raw_spd;
         FAPI_TRY( mss::attr::get_freq(i_target, l_freq) );
         FAPI_TRY( mss::convert_ddr_freq_to_omi_freq(i_target, l_freq, l_omi_freq));
         FAPI_TRY( mss::attr::get_dram_gen(dimm, l_dram_gen) );
@@ -85,8 +86,6 @@ fapi2::ReturnCode p10_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
 
         // We run the base module + the DDIMM module first as our rank API needs to know if we are in quad encoded CS mode or not
         {
-            std::vector<uint8_t> l_raw_spd;
-
             FAPI_TRY(mss::spd::get_raw_data(dimm, l_is_planar, l_raw_spd));
 
             {
@@ -131,8 +130,9 @@ fapi2::ReturnCode p10_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
                 // The attributes use the IBM perspective, which aligns to the DIMM rank
                 // Knowing both allows us to decode from the SPD and encode the data for the attributes
                 // The encode/decode is in accordance with fixes for JIRA355
-                FAPI_TRY(mss::efd::factory(dimm, l_spd_rev, l_dram_gen, l_rank_info, l_ddimm_efd));
+                FAPI_TRY(mss::efd::factory(dimm, l_spd_rev, l_dram_gen, l_is_planar, l_rank_info, l_ddimm_efd));
                 FAPI_TRY(l_ddimm_efd->process(l_vpd_raw));
+                FAPI_TRY(l_ddimm_efd->process_overrides(l_raw_spd));
             }
         }
     }// dimm

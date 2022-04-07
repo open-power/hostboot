@@ -39,7 +39,9 @@
 #include <fapi2.H>
 #include <lib/eff_config/p10_base_engine.H>
 #include <lib/eff_config/p10_ddimm_engine.H>
+#include <lib/eff_config/p10_planar_rdimm_engine.H>
 #include <lib/eff_config/p10_ddimm_efd_engine.H>
+#include <lib/eff_config/p10_planar_rdimm_efd_engine.H>
 
 #include <lib/eff_config/p10_ddr5_base_engine.H>
 #include <lib/eff_config/p10_ddr5_ddimm_efd_engine.H>
@@ -55,6 +57,7 @@ namespace efd
 /// @param[in] i_target DIMM target
 /// @param[in] i_rev SPD revision
 /// @param[in] i_gen DRAM generation
+/// @param[in] i_planar planar config flag (from ATTR_MEM_MRW_IS_PLANAR)
 /// @param[in] i_rank_info the current rank info class
 /// @param[out] o_efd_engine shared pointer to the EFD engine in question
 /// @return fapi2::ReturnCode SUCCESS iff the procedure executes successfully
@@ -62,6 +65,7 @@ namespace efd
 fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                           const uint8_t i_rev,
                           const uint8_t i_gen,
+                          const uint8_t i_planar,
                           const mss::rank::info<mss::mc_type::EXPLORER>& i_rank_info,
                           std::shared_ptr<mss::efd::ddimm_efd_base>& o_efd_engine);
 
