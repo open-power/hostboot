@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2020
+# Contributors Listed Below - COPYRIGHT 2015,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -24,8 +24,8 @@
 #
 # IBM_PROLOG_END_TAG
 
-# @file shmoo_2d_plot.pl
-# @brief Calls the 2D plotting information
+# @file gen_accessors.pl
+# @brief Calls the memory attribute accessor generator
 #
 # *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
 # *HWP HWP Backup : Stephen Glancy <sglancy@us.ibm.com>
@@ -36,39 +36,6 @@
 
 use strict;
 use warnings;
-
-# Gets the directory where the perl script is stored
-# This allows the user to use a relative instead of a direct path for the include
-my $pwd;
-
-BEGIN
-{
-    # Some scripts needs the directory the script was called from, save that here
-    #This keeps the directory intact.
-    my $callingPwd = "";
-    chomp( $callingPwd = `cd .;pwd` );
-
-    # Now do the rest
-    my @tempArr = split( /\/+/, $0 );
-    pop(@tempArr);    # The script name
-    my $LIST_SEPARATOR = "/";    # Make it so the array below separates on / instead of space
-                                 #If it starts with a ., it's being called with relative path
-    if ( substr( $0, 0, 1 ) ne "/" )
-    {
-        $pwd = $callingPwd;                # Get where I got called from
-        $pwd = $pwd . "/" . "@tempArr";    # Now use the relative to find out where the script is
-    }
-    else
-    {                                      # Absolute path
-        $pwd = "@tempArr";
-    }
-    $LIST_SEPARATOR = " ";                 # Reset
-    chomp( $pwd = `cd $pwd;pwd` );         # Get to where this script resides
-}
-
-use lib "$pwd";
-use lib $ENV{PROJECT_ROOT} . "/generic/memory/tools";               # EKB Path
-use lib $ENV{PROJECT_ROOT} . "/src/import/generic/memory/tools";    # Hostboot Path
 
 use English;
 use Carp qw( croak );
