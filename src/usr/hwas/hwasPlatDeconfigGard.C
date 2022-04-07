@@ -825,12 +825,18 @@ errlHndl_t _GardRecordIdSetup( void *&io_platDeconfigGard)
             reinterpret_cast<DeconfigGard::GardRecordsBinary *> (l_section.vaddr);
 
         l_hbDeconfigGard->iv_pGardRecords =
-            reinterpret_cast<DeconfigGard::GardRecord *> (&l_pGardRecordsBinary->iv_gardRecords);
-        HWAS_INF("_GardRecordIdSetup: PNOR vaddr=%p size=%d GardRecord size=0x%X",
+            reinterpret_cast<DeconfigGard::GardRecord *> (&(l_pGardRecordsBinary->iv_gardRecords));
+        HWAS_INF("_GardRecordIdSetup: PNOR vaddr=%p, size=%d, GardRecord size=0x%X",
             l_section.vaddr, l_section.size, sizeof(DeconfigGard::GardRecord));
 
-        l_hbDeconfigGard->iv_maxGardRecords = l_section.size /
-                sizeof(DeconfigGard::GardRecord);
+        HWAS_INF_BIN("_GardRecordIdSetup:l_pGardRecordsBinary header BINARY DUMP",
+            l_pGardRecordsBinary, sizeof(DeconfigGard::GardRecordsBinary) );
+
+        // exclude the size of header info of GardRecordsBinary
+        l_hbDeconfigGard->iv_maxGardRecords =
+            (l_section.size - sizeof(DeconfigGard::GardRecordsBinary)) /
+            sizeof(DeconfigGard::GardRecord);
+
         l_hbDeconfigGard->iv_nextGardRecordId = 0;
 
         // Figure out the next GARD Record ID to use
@@ -838,9 +844,6 @@ errlHndl_t _GardRecordIdSetup( void *&io_platDeconfigGard)
         const uint32_t l_maxGardRecords = l_hbDeconfigGard->iv_maxGardRecords;
         DeconfigGard::GardRecord *l_pGardRecords =
                 (DeconfigGard::GardRecord *)l_hbDeconfigGard->iv_pGardRecords;
-        HWAS_INF_BIN("_GardRecordIdSetup:l_pGardRecords BINARY DUMP",
-            l_pGardRecords,
-            128);
 
         for (uint32_t i = 0; i < l_maxGardRecords; i++)
         {
@@ -936,7 +939,7 @@ errlHndl_t _GardRecordIdSetup( void *&io_platDeconfigGard)
         }
         HWAS_INF("_GardRecordIdSetup: SETUP BINARY set to l_pGardRecordsBinary->iv_version=0x%X",
             l_pGardRecordsBinary->iv_version);
-        HWAS_INF("_GardRecordIdSetup: GARD setup MEMORY iv_Gardversion 0x%X iv_maxGardRecords %d iv_nextGardRecordId %d l_numGardRecords %d",
+        HWAS_INF("_GardRecordIdSetup: GARD setup MEMORY iv_Gardversion 0x%X, iv_maxGardRecords %d, iv_nextGardRecordId %d, l_numGardRecords %d",
                  l_hbDeconfigGard->iv_GardVersion,
                  l_hbDeconfigGard->iv_maxGardRecords,
                  l_hbDeconfigGard->iv_nextGardRecordId,
