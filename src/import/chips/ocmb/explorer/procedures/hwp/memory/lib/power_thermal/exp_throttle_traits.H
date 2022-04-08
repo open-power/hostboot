@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,7 +65,7 @@ class throttle_traits<mss::mc_type::EXPLORER>
         // Traits values
         //////////////////////////////////////////////////////////////
         // MIN_UTIL is  in c%
-        static const uint64_t MIN_UTIL = 2500;
+        static const uint64_t MIN_UTIL = 1000;
         // IDLE_UTIL is  in c%
         static const uint64_t IDLE_UTIL = 0;
         // Minimum throttle allowed for the port and or slot. If we set to 0, we brick the port
