@@ -197,7 +197,7 @@ class SPDTest: public CxxTest::TestSuite
                     }
 
                     // Allocate the buffer
-                    theData = static_cast<uint8_t*>(malloc( theSize ));
+                    theData = static_cast<uint8_t*>(calloc( theSize,sizeof(uint8_t) ));
 
                     err = deviceRead( theTarget,
                                       theData,
@@ -438,7 +438,7 @@ class SPDTest: public CxxTest::TestSuite
                 }
 
                 // Allocate data buffer
-                origData = static_cast<uint8_t*>(malloc( theSize ));
+                origData = static_cast<uint8_t*>(calloc( theSize,sizeof(uint8_t) ));
 
                 // Read the data out first
                 err = deviceRead( theTarget,
@@ -457,7 +457,7 @@ class SPDTest: public CxxTest::TestSuite
                 }
 
                 // fill it up with some dummy data
-                testData = static_cast<uint8_t*>(malloc( theSize ));
+                testData = static_cast<uint8_t*>(calloc( theSize,sizeof(uint8_t) ));
                 for( size_t x=0; x<theSize; x++ )
                 {
                     testData[x] = x;
@@ -477,7 +477,7 @@ class SPDTest: public CxxTest::TestSuite
                 }
 
                 // Read the data out again to check it
-                verifyData = static_cast<uint8_t*>(malloc( theSize ));
+                verifyData = static_cast<uint8_t*>(calloc( theSize,sizeof(uint8_t) ));
                 err = deviceRead( theTarget,
                                   verifyData,
                                   theSize,
@@ -666,7 +666,7 @@ class SPDTest: public CxxTest::TestSuite
                 }
 
                 // Allocate data buffer
-                origData = static_cast<uint8_t*>(malloc( theSize ));
+                origData = static_cast<uint8_t*>(calloc( theSize,sizeof(uint8_t) ));
 
                 // Read the data out first
                 err = deviceRead( theTarget,
@@ -686,7 +686,7 @@ class SPDTest: public CxxTest::TestSuite
                 }
 
                 // fill it up with some dummy data
-                testData = static_cast<uint8_t*>(malloc( theSize ));
+                testData = static_cast<uint8_t*>(calloc( theSize,sizeof(uint8_t) ));
                 for( size_t x=0; x<theSize; x++ )
                 {
                     testData[x] = x;
@@ -706,7 +706,7 @@ class SPDTest: public CxxTest::TestSuite
                 }
 
                 // Read the data out again to check it
-                verifyData = static_cast<uint8_t*>(malloc( theSize ));
+                verifyData = static_cast<uint8_t*>(calloc( theSize,sizeof(uint8_t) ));
                 err = deviceRead( theTarget,
                                   verifyData,
                                   theSize,
@@ -1080,7 +1080,7 @@ class SPDTest: public CxxTest::TestSuite
                 theTarget = dimmList[0];
                 //If theData is nullptr, deviceRead will return the size
                 // need to give this an arbitrary size so test is still valid
-                uint8_t * theData = static_cast<uint8_t*>(malloc( 0x1 ));
+                uint8_t * theData = static_cast<uint8_t*>(calloc( 1,sizeof(uint8_t) ));
                 size_t theSize = 0x0;   // Invalid size of 0x0
 
                 cmds++;
@@ -1144,7 +1144,7 @@ class SPDTest: public CxxTest::TestSuite
                 // Test on first DIMM only.
                 theTarget = dimmList[0];
                 size_t theSize = 0x10;
-                uint8_t * theData = static_cast<uint8_t*>(malloc( theSize ));
+                uint8_t * theData = static_cast<uint8_t*>(calloc( theSize,sizeof(uint8_t) ));
 
                 cmds++;
                 // This fails since SPD_FIRST_NORM_KEYWORD is not writable
@@ -1325,7 +1325,7 @@ class SPDTest: public CxxTest::TestSuite
                     }
 
                     // Allocate the buffer
-                    theData = static_cast<uint8_t*>(malloc( theSize ));
+                    theData = static_cast<uint8_t*>(calloc( theSize,sizeof(uint8_t) ));
                     err = deviceRead( theTarget,
                                       theData,
                                       theSize,
@@ -1587,7 +1587,7 @@ class SPDTest: public CxxTest::TestSuite
                     }
 
                     // Allocate the buffer
-                    theData = static_cast<uint8_t*>(malloc( theSize ));
+                    theData = static_cast<uint8_t*>(calloc( theSize,sizeof(uint8_t) ));
 
                     err = deviceRead( theTarget,
                                       theData,
@@ -1828,7 +1828,7 @@ class SPDTest: public CxxTest::TestSuite
                 }
 
                 // Allocate data buffer
-                origData = static_cast<uint8_t*>(malloc( theSize ));
+                origData = static_cast<uint8_t*>(calloc( theSize,sizeof(uint8_t) ));
 
                 // Read the data out first
                 err = deviceRead( theTarget,
@@ -1848,7 +1848,7 @@ class SPDTest: public CxxTest::TestSuite
                 }
 
                 // fill it up with some dummy data
-                testData = static_cast<uint8_t*>(malloc( theSize ));
+                testData = static_cast<uint8_t*>(calloc( theSize,sizeof(uint8_t) ));
                 for( size_t x=0; x<theSize; x++ )
                 {
                     testData[x] = x;
@@ -1868,7 +1868,7 @@ class SPDTest: public CxxTest::TestSuite
                 }
 
                 // Read the data out again to check it
-                verifyData = static_cast<uint8_t*>(malloc( theSize ));
+                verifyData = static_cast<uint8_t*>(calloc( theSize,sizeof(uint8_t) ));
                 err = deviceRead( theTarget,
                                   verifyData,
                                   theSize,

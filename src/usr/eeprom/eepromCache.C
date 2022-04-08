@@ -873,16 +873,15 @@ errlHndl_t checkForEecacheEntryUpdate(
                 // the data into the same attributes that are already used for
                 // regular access.
                 VPD::setPartAndSerialNumberAttributes(i_target);
-                TARGETING::ATTR_SERIAL_NUMBER_type l_sn;
-                assert( i_target->tryGetAttr<TARGETING::ATTR_SERIAL_NUMBER>(l_sn),
-                        "Cannot get ATTR_SERIAL_NUMBER from target 0x%08x",
-                        get_huid(i_target));
-                TRACDBIN( g_trac_eeprom, "SN=", &l_sn, sizeof(l_sn) );
-                TARGETING::ATTR_PART_NUMBER_type l_pn;
-                assert( i_target->tryGetAttr<TARGETING::ATTR_PART_NUMBER>(l_pn),
-                        "Cannot get ATTR_PART_NUMBER from target 0x%08x",
-                        get_huid(i_target));
-                TRACDBIN( g_trac_eeprom, "PN=", &l_pn, sizeof(l_pn) );
+
+                //Explicitly checking TRAC_DEBUG_OUT instead of using TRACDBIN
+                //below to avoid unused variable error
+#ifdef TRAC_DEBUG_OUT
+                auto l_sn = i_target->getAttrAsStdArr<TARGETING::ATTR_SERIAL_NUMBER>();
+                TRACFBIN( g_trac_eeprom, "SN=", l_sn.data(), sizeof(l_sn) );
+                auto l_pn = i_target->getAttrAsStdArr<TARGETING::ATTR_PART_NUMBER>();
+                TRACFBIN( g_trac_eeprom, "PN=", l_pn.data(), sizeof(l_pn) );
+#endif
 
                 // Next update the data in the cache with the content of our
                 // buffer if it isn't exactly the same already.
@@ -1190,6 +1189,7 @@ errlHndl_t updateExistingEecacheEntry(
                                   TARGETING::get_huid(i_target),
                                   l_pathstring);
                 free(l_pathstring);
+                l_pathstring = nullptr;
 
                 setEepromChanged(l_completeRecordHeader);
 

@@ -2918,7 +2918,7 @@ void setConfigFlagsHW ( )
 }
 
 
-// In addtion to the regular SPD driver, we also want to register against
+// In addition to the regular SPD driver, we also want to register against
 //  the Generic VPD driver.  We need a wrapper to handle the extra "record"
 //  argument though.
 errlHndl_t spdGetKeywordValue_generic ( DeviceFW::OperationType i_opType,

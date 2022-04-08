@@ -185,9 +185,9 @@ void getProcTargets( TargetHandleList & o_procList )
 {
     // Get top level system target
     TARGETING::TargetService & tS = TARGETING::targetService();
-    TARGETING::Target * sysTarget = NULL;
+    TARGETING::Target * sysTarget = nullptr;
     tS.getTopLevelTarget( sysTarget );
-    assert( sysTarget != NULL );
+    assert( sysTarget != nullptr );
 
     // Get a Proc Target
     TARGETING::PredicateCTM predProc( TARGETING::CLASS_CHIP,
@@ -207,7 +207,7 @@ void getProcTargets( TargetHandleList & o_procList )
 
 TARGETING::Target* getFunctionalProcTarget()
 {
-    TARGETING::Target * theTarget = NULL;
+    TARGETING::Target * theTarget = nullptr;
     TRACDCOMP( g_trac_vpd,
                "getFunctionalProcTarget() - Finding a processor" );
 
@@ -217,9 +217,9 @@ TARGETING::Target* getFunctionalProcTarget()
         getProcTargets( procList );
 
         if( ( 0 == procList.size() ) ||
-            ( NULL == procList[0] ) )
+            ( nullptr == procList[0] ) )
         {
-            continue;  // add continue because have no Proc targets
+            break;  // add break because have no Proc targets
         }
 
         for(uint32_t i=0; i<procList.size(); i++)
@@ -247,7 +247,7 @@ class MVPDTest: public CxxTest::TestSuite
          */
         void testMvpdRead ( void )
         {
-            errlHndl_t err = NULL;
+            errlHndl_t err = nullptr;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
             uint64_t theRecord = 0x0;
@@ -259,22 +259,22 @@ class MVPDTest: public CxxTest::TestSuite
             do
             {
                 TARGETING::Target * theTarget = getFunctionalProcTarget();
-                if(theTarget == NULL)
+                if(theTarget == nullptr)
                 {
                     TS_FAIL("testMvpdRead() - No Functional Targets found!");
                     break;
                 }
 
-                uint8_t * theData = NULL;
+                uint8_t * theData = nullptr;
                 size_t theSize = 0;
                 const uint32_t numCmds = sizeof(mvpdData)/sizeof(mvpdData[0]);
                 for( uint32_t curCmd = 0; curCmd < numCmds; curCmd++ )
                 {
                     cmds++;
-                    theRecord = (uint64_t)mvpdData[curCmd].record;
-                    theKeyword = (uint64_t)mvpdData[curCmd].keyword;
+                    theRecord = static_cast<uint64_t>(mvpdData[curCmd].record);
+                    theKeyword = static_cast<uint64_t>(mvpdData[curCmd].keyword);
                     err = deviceRead( theTarget,
-                                      NULL,
+                                      nullptr,
                                       theSize,
                                       DEVICE_MVPD_ADDRESS( theRecord,
                                                            theKeyword ) );
@@ -316,34 +316,30 @@ class MVPDTest: public CxxTest::TestSuite
                                     VPD_COMP_ID );
 
                         // Free the data
-                        if( NULL != theData )
+                        if( nullptr != theData )
                         {
                             free( theData );
-                            theData = NULL;
+                            theData = nullptr;
                         }
                         continue;
                     }
 
-                    TRACDCOMP( g_trac_vpd,
-                               INFO_MRK"testMvpdRead Results:" );
-                    for( uint32_t i = 0; i < theSize; i++ )
-                    {
-                        TRACDCOMP( g_trac_vpd,
-                                   INFO_MRK"   Byte[%d]: 0x%02x",
-                                   i, theData[i] );
-                    }
+                    TRACDBIN( g_trac_vpd,
+                              INFO_MRK"testMvpdRead Results:",
+                              theData,
+                              theSize );
 
                     // Free the data
-                    if( NULL != theData )
+                    if( nullptr != theData )
                     {
                         free( theData );
-                        theData = NULL;
+                        theData = nullptr;
                     }
                 }
             } while( 0 );
 
             TRACFCOMP( g_trac_vpd,
-                       "testMvpdRead - %d/%d fails",
+                       EXIT_MRK"testMvpdRead - %d/%d fails",
                        fails, cmds );
         }
 
@@ -352,7 +348,7 @@ class MVPDTest: public CxxTest::TestSuite
          */
         void testMvpdReadRecords ( void )
         {
-            errlHndl_t err = NULL;
+            errlHndl_t err = nullptr;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
             uint64_t theRecord = 0x0;
@@ -363,22 +359,22 @@ class MVPDTest: public CxxTest::TestSuite
             do
             {
                 TARGETING::Target * theTarget = getFunctionalProcTarget();
-                if(theTarget == NULL)
+                if(theTarget == nullptr)
                 {
                     TS_FAIL("testMvpdReadRecords() - No Functional Targets found!");
                     break;
                 }
 
-                uint8_t * theData = NULL;
+                uint8_t * theData = nullptr;
                 size_t theSize = 0;
                 const uint32_t numCmds =
                               sizeof(mvpdRecordData)/sizeof(mvpdRecordData[0]);
                 for( uint32_t curCmd = 0; curCmd < numCmds; curCmd++ )
                 {
                     cmds++;
-                    theRecord = (uint64_t)mvpdRecordData[curCmd];
+                    theRecord = static_cast<uint64_t>(mvpdRecordData[curCmd]);
                     err = deviceRead( theTarget,
-                                      NULL,
+                                      nullptr,
                                       theSize,
                                       DEVICE_MVPD_ADDRESS( theRecord,
                                                         MVPD::FULL_RECORD ));
@@ -430,34 +426,30 @@ class MVPDTest: public CxxTest::TestSuite
                                     VPD_COMP_ID );
 
                         // Free the data
-                        if( NULL != theData )
+                        if( nullptr != theData )
                         {
                             free( theData );
-                            theData = NULL;
+                            theData = nullptr;
                         }
                         continue;
                     }
 
-                    TRACDCOMP( g_trac_vpd,
-                               INFO_MRK"testMvpdRead Results:" );
-                    for( uint32_t i = 0; i < theSize; i++ )
-                    {
-                        TRACDCOMP( g_trac_vpd,
-                                   INFO_MRK"   Byte[%d]: 0x%02x",
-                                   i, theData[i] );
-                    }
+                    TRACDBIN( g_trac_vpd,
+                              INFO_MRK"testMvpdReadRecords Results:",
+                              theData,
+                              theSize );
 
                     // Free the data
-                    if( NULL != theData )
+                    if( nullptr != theData )
                     {
                         free( theData );
-                        theData = NULL;
+                        theData = nullptr;
                     }
                 }
             } while( 0 );
 
             TRACFCOMP( g_trac_vpd,
-                       "testMvpdReadRecords - %d/%d fails",
+                       EXIT_MRK"testMvpdReadRecords - %d/%d fails",
                        fails, cmds );
         }
 
@@ -470,12 +462,12 @@ class MVPDTest: public CxxTest::TestSuite
             auto l_record  = MVPD::VWML;
             auto l_keyword = MVPD::pdI;
 
-            errlHndl_t err = NULL;
+            errlHndl_t err = nullptr;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
-            uint8_t* testData = NULL;
-            uint8_t* origData = NULL;
-            uint8_t* verifyData = NULL;
+            uint8_t* testData = nullptr;
+            uint8_t* origData = nullptr;
+            uint8_t* verifyData = nullptr;
 
             TRACFCOMP( g_trac_vpd,
                        ENTER_MRK"testMvpdWrite()" );
@@ -483,7 +475,7 @@ class MVPDTest: public CxxTest::TestSuite
             do
             {
                 TARGETING::Target * theTarget = getFunctionalProcTarget();
-                if(theTarget == NULL)
+                if(theTarget == nullptr)
                 {
                     TS_FAIL("testMvpdWrite() - No Functional Targets found!");
                     break;
@@ -505,11 +497,11 @@ class MVPDTest: public CxxTest::TestSuite
                     TS_FAIL( "testMvpdWrite() - Failure calling deviceRead!" );
                     errlCommit( err,
                                 VPD_COMP_ID );
-                    continue;
+                    break;
                 }
 
                 // save off the original data
-                origData = new uint8_t[theSize];
+                origData = new uint8_t[theSize]();
                 cmds++;
                 err = deviceRead( theTarget,
                                   origData,
@@ -524,13 +516,13 @@ class MVPDTest: public CxxTest::TestSuite
                     TS_FAIL( "testMvpdWrite() - Failure calling deviceRead!" );
                     errlCommit( err,
                                 VPD_COMP_ID );
-                    continue;
+                    break;
                 }
                 TRACFBIN( g_trac_vpd, "testMvpdWrite() - orig=",
                           origData, theSize );
 
                 // fill it up with some dummy data
-                testData = new uint8_t[theSize];
+                testData = new uint8_t[theSize]();
                 for( size_t x=0; x<theSize; x++ )
                 {
                     testData[x] = x;
@@ -553,11 +545,11 @@ class MVPDTest: public CxxTest::TestSuite
                     TS_FAIL( "testMvpdWrite() - Failure calling deviceWrite!" );
                     errlCommit( err,
                                 VPD_COMP_ID );
-                    continue;
+                    break;
 #else
-                TRACFCOMP( g_trac_vpd, "testMvpdWrite() - GOOD PATH Expected err from deviceWrite, -NOT- supported in HBRT");
-                delete err;
-                err = NULL;
+                    TRACFCOMP( g_trac_vpd, "testMvpdWrite() - GOOD PATH Expected err from deviceWrite, -NOT- supported in HBRT");
+                    delete err;
+                    err = nullptr;
 #endif
                 }
                 else
@@ -567,7 +559,7 @@ class MVPDTest: public CxxTest::TestSuite
                     fails++;
                     TRACFCOMP( g_trac_vpd, "testMvpdWrite() - Expected err from deviceWrite in HBRT");
                     TS_FAIL( "testMvpdWrite() - Unexpected, we should have received err from HBRT from calling deviceWrite!" );
-                    continue;
+                    break;
 #else
                     TRACFCOMP( g_trac_vpd, "testMvpdWrite() - GOOD PATH results from deviceWrite");
 #endif
@@ -575,7 +567,7 @@ class MVPDTest: public CxxTest::TestSuite
 
                 // verify the data got written
                 cmds++;
-                verifyData = new uint8_t[theSize];
+                verifyData = new uint8_t[theSize]();
                 err = deviceRead( theTarget,
                                   verifyData,
                                   theSize,
@@ -589,7 +581,7 @@ class MVPDTest: public CxxTest::TestSuite
                     TS_FAIL( "testMvpdWrite() - Failure calling deviceRead!" );
                     errlCommit( err,
                                 VPD_COMP_ID );
-                    continue;
+                    break;
                 }
                 TRACFBIN( g_trac_vpd, "testMvpdWrite() - verify=",
                           verifyData, theSize );
@@ -629,11 +621,11 @@ class MVPDTest: public CxxTest::TestSuite
                     TS_FAIL( "testMvpdWrite() - Failure calling deviceRead!" );
                     errlCommit( err,
                                 VPD_COMP_ID );
-                    continue;
+                    break;
 #else
-                TRACFCOMP( g_trac_vpd, "testMvpdWrite() - GOOD PATH Expected err from deviceWrite original data, -NOT- supported in HBRT");
-                delete err;
-                err = NULL;
+                    TRACFCOMP( g_trac_vpd, "testMvpdWrite() - GOOD PATH Expected err from deviceWrite original data, -NOT- supported in HBRT");
+                    delete err;
+                    err = nullptr;
 #endif
                 }
                 else
@@ -643,29 +635,29 @@ class MVPDTest: public CxxTest::TestSuite
                     fails++;
                     TRACFCOMP( g_trac_vpd, "testMvpdWrite() - Expected err from deviceWrite in HBRT");
                     TS_FAIL( "testMvpdWrite() - Unexpected, we should have received err from HBRT from calling deviceWrite!" );
-                    continue;
+                    break;
 #else
                     TRACFCOMP( g_trac_vpd, "testMvpdWrite() - GOOD PATH results from deviceWrite original data");
 #endif
                 }
             } while( 0 );
 
-            if( NULL != testData )
+            if( nullptr != testData )
             {
                 delete[] testData;
-                testData = NULL;
+                testData = nullptr;
             }
 
-            if( NULL != origData )
+            if( nullptr != origData )
             {
                 delete[] origData;
-                origData = NULL;
+                origData = nullptr;
             }
 
-            if( NULL != verifyData )
+            if( nullptr != verifyData )
             {
                 delete[] verifyData;
-                verifyData = NULL;
+                verifyData = nullptr;
             }
 
             if( cmds == 0 )
@@ -674,7 +666,7 @@ class MVPDTest: public CxxTest::TestSuite
             }
 
             TRACFCOMP( g_trac_vpd,
-                       "testMvpdWrite - %d/%d fails",
+                       EXIT_MRK"testMvpdWrite - %d/%d fails",
                        fails, cmds );
         }
 
@@ -685,7 +677,7 @@ class MVPDTest: public CxxTest::TestSuite
          */
         void testMvpdInvalidRecord ( void )
         {
-            errlHndl_t err = NULL;
+            errlHndl_t err = nullptr;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
 
@@ -695,14 +687,14 @@ class MVPDTest: public CxxTest::TestSuite
             do
             {
                 TARGETING::Target * theTarget = getFunctionalProcTarget();
-                if(theTarget == NULL)
+                if(theTarget == nullptr)
                 {
                     TS_FAIL("testMvpdInvalidRecord() - No Functional Targets found!");
                     break;
                 }
 
                 size_t theSize = 1;
-                uint8_t * theData = new uint8_t[theSize];
+                uint8_t * theData = new uint8_t[theSize]();
 
                 cmds++;
                 err = deviceRead( theTarget,
@@ -711,7 +703,7 @@ class MVPDTest: public CxxTest::TestSuite
                                   DEVICE_MVPD_ADDRESS( MVPD::MVPD_LAST_RECORD,
                                                        MVPD::pdR ) );
 
-                if( NULL == err )
+                if( nullptr == err )
                 {
                     fails++;
                     TS_FAIL( "testMvpdInvalidRecord() - Error expected with "
@@ -722,18 +714,18 @@ class MVPDTest: public CxxTest::TestSuite
                 else
                 {
                     delete err;
-                    err = NULL;
+                    err = nullptr;
                 }
 
-                if( NULL != theData )
+                if( nullptr != theData )
                 {
                     delete theData;
-                    theData = NULL;
+                    theData = nullptr;
                 }
             } while( 0 );
 
             TRACFCOMP( g_trac_vpd,
-                       "testMvpdInvalidRecord - %d/%d fails",
+                       EXIT_MRK"testMvpdInvalidRecord - %d/%d fails",
                        fails, cmds );
         }
 
@@ -743,7 +735,7 @@ class MVPDTest: public CxxTest::TestSuite
          */
         void testMvpdMissingRecord ( void )
         {
-            errlHndl_t err = NULL;
+            errlHndl_t err = nullptr;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
 
@@ -753,14 +745,14 @@ class MVPDTest: public CxxTest::TestSuite
             do
             {
                 TARGETING::Target * theTarget = getFunctionalProcTarget();
-                if(theTarget == NULL)
+                if(theTarget == nullptr)
                 {
                     TS_FAIL("testMvpdMissingRecord() - No Functional Targets found!");
                     break;
                 }
 
                 size_t theSize = 1;
-                uint8_t * theData = new uint8_t[theSize];
+                uint8_t * theData = new uint8_t[theSize]();
 
                 cmds++;
                 err = deviceRead( theTarget,
@@ -769,7 +761,7 @@ class MVPDTest: public CxxTest::TestSuite
                                   DEVICE_MVPD_ADDRESS( MVPD::MVPD_TEST_RECORD,
                                                        MVPD::pdR ) );
 
-                if( NULL == err )
+                if( nullptr == err )
                 {
                     fails++;
                     TS_FAIL( "testMvpdMissingRecord() - ");
@@ -777,18 +769,18 @@ class MVPDTest: public CxxTest::TestSuite
                 else
                 {
                     delete err;
-                    err = NULL;
+                    err = nullptr;
                 }
 
-                if( NULL != theData )
+                if( nullptr != theData )
                 {
                     delete theData;
-                    theData = NULL;
+                    theData = nullptr;
                 }
             } while( 0 );
 
             TRACFCOMP( g_trac_vpd,
-                       "testMvpdMissingRecord - %d/%d fails",
+                       EXIT_MRK"testMvpdMissingRecord - %d/%d fails",
                        fails, cmds );
         }
 
@@ -798,7 +790,7 @@ class MVPDTest: public CxxTest::TestSuite
          */
         void testMvpdMissingKeyword ( void )
         {
-            errlHndl_t err = NULL;
+            errlHndl_t err = nullptr;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
 
@@ -808,14 +800,14 @@ class MVPDTest: public CxxTest::TestSuite
             do
             {
                 TARGETING::Target * theTarget = getFunctionalProcTarget();
-                if(theTarget == NULL)
+                if(theTarget == nullptr)
                 {
                     TS_FAIL("testMvpdMissingKeyword() - No Functional Targets found!");
                     break;
                 }
 
                 size_t theSize = 1;
-                uint8_t * theData = new uint8_t[theSize];
+                uint8_t * theData = new uint8_t[theSize]();
 
                 cmds++;
                 err = deviceRead(theTarget,
@@ -824,7 +816,7 @@ class MVPDTest: public CxxTest::TestSuite
                                  DEVICE_MVPD_ADDRESS(MVPD::MVPD_FIRST_RECORD,
                                                      MVPD::MVPD_TEST_KEYWORD));
 
-                if( NULL == err )
+                if( nullptr == err )
                 {
                     fails++;
                     TS_FAIL("testMvpdMissingKeyword() - Expected error from "
@@ -833,18 +825,18 @@ class MVPDTest: public CxxTest::TestSuite
                 else
                 {
                     delete err;
-                    err = NULL;
+                    err = nullptr;
                 }
 
-                if( NULL != theData )
+                if( nullptr != theData )
                 {
                     delete theData;
-                    theData = NULL;
+                    theData = nullptr;
                 }
             } while( 0 );
 
             TRACFCOMP( g_trac_vpd,
-                       "testMvpdMissingKeyword - %d/%d fails",
+                       EXIT_MRK"testMvpdMissingKeyword - %d/%d fails",
                        fails, cmds );
         }
 
@@ -855,7 +847,7 @@ class MVPDTest: public CxxTest::TestSuite
          */
         void testMvpdInvalidKeyword ( void )
         {
-            errlHndl_t err = NULL;
+            errlHndl_t err = nullptr;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
 
@@ -865,14 +857,14 @@ class MVPDTest: public CxxTest::TestSuite
             do
             {
                 TARGETING::Target * theTarget = getFunctionalProcTarget();
-                if(theTarget == NULL)
+                if(theTarget == nullptr)
                 {
                     TS_FAIL("testMvpdInvalidKeyword() - No Functional Targets found!");
                     break;
                 }
 
                 size_t theSize = 1;
-                uint8_t * theData = new uint8_t[theSize];
+                uint8_t * theData = new uint8_t[theSize]();
 
                 cmds++;
                 err = deviceRead(theTarget,
@@ -881,7 +873,7 @@ class MVPDTest: public CxxTest::TestSuite
                                  DEVICE_MVPD_ADDRESS(MVPD::CRP0,
                                                      MVPD::MVPD_LAST_KEYWORD));
 
-                if( NULL == err )
+                if( nullptr == err )
                 {
                     fails++;
                     TS_FAIL( "testMvpdInvalidKeyword() - Error expected with "
@@ -892,18 +884,18 @@ class MVPDTest: public CxxTest::TestSuite
                 else
                 {
                     delete err;
-                    err = NULL;
+                    err = nullptr;
                 }
 
-                if( NULL != theData )
+                if( nullptr != theData )
                 {
                     delete theData;
-                    theData = NULL;
+                    theData = nullptr;
                 }
             } while( 0 );
 
             TRACFCOMP( g_trac_vpd,
-                       "testMvpdInvalidKeyword - %d/%d fails",
+                       EXIT_MRK"testMvpdInvalidKeyword - %d/%d fails",
                        fails, cmds );
         }
 
@@ -914,7 +906,7 @@ class MVPDTest: public CxxTest::TestSuite
          */
         void testMvpdInvalidBufferSize ( void )
         {
-            errlHndl_t err = NULL;
+            errlHndl_t err = nullptr;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
 
@@ -924,13 +916,13 @@ class MVPDTest: public CxxTest::TestSuite
             do
             {
                 TARGETING::Target * theTarget = getFunctionalProcTarget();
-                if(theTarget == NULL)
+                if(theTarget == nullptr)
                 {
                     TS_FAIL("testMvpdInvalidBufferSize() - No Functional Targets found!");
                     break;
                 }
 
-                uint8_t * theData = new uint8_t[1];
+                uint8_t * theData = new uint8_t[1]();
                 size_t theSize = 0;
 
                 cmds++;
@@ -940,7 +932,7 @@ class MVPDTest: public CxxTest::TestSuite
                                   DEVICE_MVPD_ADDRESS( MVPD::CRP0,
                                                        MVPD::DD ) );
 
-                if( NULL == err )
+                if( nullptr == err )
                 {
                     fails++;
                     TS_FAIL( "testMvpdInvalidBufferSize() - Error was expected "
@@ -949,18 +941,18 @@ class MVPDTest: public CxxTest::TestSuite
                 else
                 {
                     delete err;
-                    err = NULL;
+                    err = nullptr;
                 }
 
-                if( NULL != theData )
+                if( nullptr != theData )
                 {
                     delete theData;
-                    theData = NULL;
+                    theData = nullptr;
                 }
             } while( 0 );
 
             TRACFCOMP( g_trac_vpd,
-                       "testMvpdInvalidBufferSize - %d/%d fails",
+                       EXIT_MRK"testMvpdInvalidBufferSize - %d/%d fails",
                        fails, cmds );
         }
 
@@ -1013,7 +1005,7 @@ class MVPDTest: public CxxTest::TestSuite
             }
 
             TRACFCOMP( g_trac_vpd,
-                       "testMvpdCheckStructOrder - %d fails",
+                       EXIT_MRK"testMvpdCheckStructOrder - %d fails",
                        fails );
         }
 
@@ -1024,7 +1016,7 @@ class MVPDTest: public CxxTest::TestSuite
          */
         void testMvpdReadGeneric ( void )
         {
-            errlHndl_t err = NULL;
+            errlHndl_t err = nullptr;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
             uint64_t theRecord = 0x0;
@@ -1036,22 +1028,22 @@ class MVPDTest: public CxxTest::TestSuite
             do
             {
                 TARGETING::Target * theTarget = getFunctionalProcTarget();
-                if(theTarget == NULL)
+                if(theTarget == nullptr)
                 {
                     TS_FAIL("testMvpdReadGeneric() - No Functional Targets found!");
                     break;
                 }
 
-                uint8_t * theData = NULL;
+                uint8_t * theData = nullptr;
                 size_t theSize = 0;
                 const uint32_t numCmds = sizeof(mvpdData)/sizeof(mvpdData[0]);
                 for( uint32_t curCmd = 0; curCmd < numCmds; curCmd++ )
                 {
                     cmds++;
-                    theRecord = (uint64_t)mvpdData[curCmd].record;
-                    theKeyword = (uint64_t)mvpdData[curCmd].keyword;
+                    theRecord = static_cast<uint64_t>(mvpdData[curCmd].record);
+                    theKeyword = static_cast<uint64_t>(mvpdData[curCmd].keyword);
                     err = deviceRead( theTarget,
-                                      NULL,
+                                      nullptr,
                                       theSize,
                                       DEVICE_VPD_ADDRESS( theRecord,
                                                            theKeyword ) );
@@ -1093,34 +1085,30 @@ class MVPDTest: public CxxTest::TestSuite
                                     VPD_COMP_ID );
 
                         // Free the data
-                        if( NULL != theData )
+                        if( nullptr != theData )
                         {
                             free( theData );
-                            theData = NULL;
+                            theData = nullptr;
                         }
                         continue;
                     }
 
-                    TRACDCOMP( g_trac_vpd,
-                               INFO_MRK"testMvpdReadGeneric Results:" );
-                    for( uint32_t i = 0; i < theSize; i++ )
-                    {
-                        TRACDCOMP( g_trac_vpd,
-                                   INFO_MRK"   Byte[%d]: 0x%02x",
-                                   i, theData[i] );
-                    }
+                    TRACDBIN( g_trac_vpd,
+                              INFO_MRK"testMvpdReadGeneric Results:",
+                              theData,
+                              theSize );
 
                     // Free the data
-                    if( NULL != theData )
+                    if( nullptr != theData )
                     {
                         free( theData );
-                        theData = NULL;
+                        theData = nullptr;
                     }
                 }
             } while( 0 );
 
             TRACFCOMP( g_trac_vpd,
-                       "testMvpdReadGeneric - %d/%d fails",
+                       EXIT_MRK"testMvpdReadGeneric - %d/%d fails",
                        fails, cmds );
         }
 
@@ -1133,12 +1121,12 @@ class MVPDTest: public CxxTest::TestSuite
             auto l_record  = MVPD::VWML;
             auto l_keyword = MVPD::pdI;
 
-            errlHndl_t err = NULL;
+            errlHndl_t err = nullptr;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
-            uint8_t* testData = NULL;
-            uint8_t* origData = NULL;
-            uint8_t* verifyData = NULL;
+            uint8_t* testData = nullptr;
+            uint8_t* origData = nullptr;
+            uint8_t* verifyData = nullptr;
 
             TRACFCOMP( g_trac_vpd,
                        ENTER_MRK"testMvpdWriteGeneric()" );
@@ -1146,7 +1134,7 @@ class MVPDTest: public CxxTest::TestSuite
             do
             {
                 TARGETING::Target * theTarget = getFunctionalProcTarget();
-                if(theTarget == NULL)
+                if(theTarget == nullptr)
                 {
                     TS_FAIL("testMvpdWriteGeneric() - No Functional Targets found!");
                     break;
@@ -1168,11 +1156,11 @@ class MVPDTest: public CxxTest::TestSuite
                     TS_FAIL( "testMvpdWriteGeneric() - Failure calling deviceRead!" );
                     errlCommit( err,
                                 VPD_COMP_ID );
-                    continue;
+                    break;
                 }
 
                 // save off the original data
-                origData = new uint8_t[theSize];
+                origData = new uint8_t[theSize]();
                 cmds++;
                 err = deviceRead( theTarget,
                                   origData,
@@ -1187,13 +1175,13 @@ class MVPDTest: public CxxTest::TestSuite
                     TS_FAIL( "testMvpdWriteGeneric() - Failure calling deviceRead!" );
                     errlCommit( err,
                                 VPD_COMP_ID );
-                    continue;
+                    break;
                 }
                 TRACFBIN( g_trac_vpd, "testMvpdWriteGeneric() - orig=",
                           origData, theSize );
 
                 // fill it up with some dummy data
-                testData = new uint8_t[theSize];
+                testData = new uint8_t[theSize]();
                 for( size_t x=0; x<theSize; x++ )
                 {
                     testData[x] = x;
@@ -1216,11 +1204,11 @@ class MVPDTest: public CxxTest::TestSuite
                     TS_FAIL( "testMvpdWriteGeneric() - Failure calling deviceWrite!" );
                     errlCommit( err,
                                 VPD_COMP_ID );
-                    continue;
+                    break;
 #else
                     TRACFCOMP( g_trac_vpd, "testMvpdWriteGeneric() - GOOD PATH Expected err from deviceWrite, -NOT- supported in HBRT");
                     delete err;
-                    err = NULL;
+                    err = nullptr;
 #endif
                 }
                 else
@@ -1230,7 +1218,7 @@ class MVPDTest: public CxxTest::TestSuite
                     fails++;
                     TRACFCOMP( g_trac_vpd, "testMvpdWriteGeneric() - Expected err from deviceWrite in HBRT");
                     TS_FAIL( "testMvpdWriteGeneric() - Unexpected, we should have received err from HBRT from calling deviceWrite!" );
-                    continue;
+                    break;
 #else
                     TRACFCOMP( g_trac_vpd, "testMvpdWriteGeneric() - GOOD PATH results from deviceWrite");
 #endif
@@ -1238,7 +1226,7 @@ class MVPDTest: public CxxTest::TestSuite
 
                 // verify the data got written
                 cmds++;
-                verifyData = new uint8_t[theSize];
+                verifyData = new uint8_t[theSize]();
                 err = deviceRead( theTarget,
                                   verifyData,
                                   theSize,
@@ -1252,7 +1240,7 @@ class MVPDTest: public CxxTest::TestSuite
                     TS_FAIL( "testMvpdWriteGeneric() - Failure calling deviceRead!" );
                     errlCommit( err,
                                 VPD_COMP_ID );
-                    continue;
+                    break;
                 }
                 TRACFBIN( g_trac_vpd, "testMvpdWriteGeneric() - verify=",
                           verifyData, theSize );
@@ -1292,11 +1280,11 @@ class MVPDTest: public CxxTest::TestSuite
                     TS_FAIL( "testMvpdWriteGeneric() - Failure calling deviceRead!" );
                     errlCommit( err,
                                 VPD_COMP_ID );
-                    continue;
+                    break;
 #else
                     TRACFCOMP( g_trac_vpd, "testMvpdWriteGeneric() - GOOD PATH Expected err from deviceWrite original data, -NOT- supported in HBRT");
                     delete err;
-                    err = NULL;
+                    err = nullptr;
 #endif
                 }
                 else
@@ -1306,29 +1294,29 @@ class MVPDTest: public CxxTest::TestSuite
                     fails++;
                     TRACFCOMP( g_trac_vpd, "testMvpdWriteGeneric() - Expected err from deviceWrite in HBRT");
                     TS_FAIL( "testMvpdWriteGeneric() - Unexpected, we should have received err from HBRT from calling deviceWrite!" );
-                    continue;
+                    break;
 #else
                     TRACFCOMP( g_trac_vpd, "testMvpdWriteGeneric() - GOOD PATH results from deviceWrite original data");
 #endif
                 }
             } while( 0 );
 
-            if( NULL != testData )
+            if( nullptr != testData )
             {
                 delete[] testData;
-                testData = NULL;
+                testData = nullptr;
             }
 
-            if( NULL != origData )
+            if( nullptr != origData )
             {
                 delete[] origData;
-                origData = NULL;
+                origData = nullptr;
             }
 
-            if( NULL != verifyData )
+            if( nullptr != verifyData )
             {
                 delete[] verifyData;
-                verifyData = NULL;
+                verifyData = nullptr;
             }
 
             if( cmds == 0 )
@@ -1337,7 +1325,7 @@ class MVPDTest: public CxxTest::TestSuite
             }
 
             TRACFCOMP( g_trac_vpd,
-                       "testMvpdWriteGeneric - %d/%d fails",
+                       EXIT_MRK"testMvpdWriteGeneric - %d/%d fails",
                        fails, cmds );
         }
 
@@ -1348,7 +1336,7 @@ class MVPDTest: public CxxTest::TestSuite
          */
         void testMvpdInvalidRecordGeneric ( void )
         {
-            errlHndl_t err = NULL;
+            errlHndl_t err = nullptr;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
 
@@ -1358,14 +1346,14 @@ class MVPDTest: public CxxTest::TestSuite
             do
             {
                 TARGETING::Target * theTarget = getFunctionalProcTarget();
-                if(theTarget == NULL)
+                if(theTarget == nullptr)
                 {
                     TS_FAIL("testMvpdInvalidRecordGeneric() - No Functional Targets found!");
                     break;
                 }
 
                 size_t theSize = 1;
-                uint8_t * theData = new uint8_t[theSize];
+                uint8_t * theData = new uint8_t[theSize]();
 
                 cmds++;
                 err = deviceRead( theTarget,
@@ -1374,7 +1362,7 @@ class MVPDTest: public CxxTest::TestSuite
                                   DEVICE_VPD_ADDRESS( MVPD::MVPD_LAST_RECORD,
                                                        MVPD::pdR ) );
 
-                if( NULL == err )
+                if( nullptr == err )
                 {
                     fails++;
                     TS_FAIL( "testMvpdInvalidRecordGeneric() - Error expected with "
@@ -1385,18 +1373,18 @@ class MVPDTest: public CxxTest::TestSuite
                 else
                 {
                     delete err;
-                    err = NULL;
+                    err = nullptr;
                 }
 
-                if( NULL != theData )
+                if( nullptr != theData )
                 {
                     delete theData;
-                    theData = NULL;
+                    theData = nullptr;
                 }
             } while( 0 );
 
             TRACFCOMP( g_trac_vpd,
-                       "testMvpdInvalidRecordGeneric - %d/%d fails",
+                       EXIT_MRK"testMvpdInvalidRecordGeneric - %d/%d fails",
                        fails, cmds );
         }
 

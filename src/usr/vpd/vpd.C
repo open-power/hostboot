@@ -827,15 +827,12 @@ errlHndl_t cmpEecacheToAttributes(TARGETING::Target *            i_target,
 
         if( i_property.name == TARGETING::ATTR_SERIAL_NUMBER )
         {
-            TARGETING::ATTR_SERIAL_NUMBER_type l_attr;
-            assert( i_target->tryGetAttr<TARGETING::ATTR_SERIAL_NUMBER>(l_attr),
-                    "Cannot get ATTR_SERIAL_NUMBER from target 0x%08x",
-                    get_huid(i_target));
+            auto l_attr = i_target->getAttrAsStdArr<TARGETING::ATTR_SERIAL_NUMBER>();
             if( memcmp( l_vpd, &l_attr,
                         std::min(sizeof(l_attr),sizeof(l_vpd)) ) )
             {
                 TRACFCOMP( g_trac_vpd, "VPD::cmpEecacheToAttributes found SN mismatch for HUID %.8X 0x%X:0x%X", TARGETING::get_huid(i_target), i_property.record, i_property.keyword );
-                TRACFBIN( g_trac_vpd, "ATTRIBUTE", l_attr, sizeof(l_attr) );
+                TRACFBIN( g_trac_vpd, "ATTRIBUTE", l_attr.data(), sizeof(l_attr) );
                 TRACFBIN( g_trac_vpd, "CACHE", l_vpd, sizeof(l_vpd) );
             }
             else
@@ -845,15 +842,12 @@ errlHndl_t cmpEecacheToAttributes(TARGETING::Target *            i_target,
         }
         else if( i_property.name == TARGETING::ATTR_PART_NUMBER )
         {
-            TARGETING::ATTR_PART_NUMBER_type l_attr;
-            assert( i_target->tryGetAttr<TARGETING::ATTR_PART_NUMBER>(l_attr),
-                    "Cannot get ATTR_PART_NUMBER from target 0x%08x",
-                    get_huid(i_target));
+            auto l_attr = i_target->getAttrAsStdArr<TARGETING::ATTR_PART_NUMBER>();
             if( memcmp( l_vpd, &l_attr,
                         std::min(sizeof(l_attr),sizeof(l_vpd)) ) )
             {
                 TRACFCOMP( g_trac_vpd, "VPD::cmpEecacheToAttributes found PN mismatch for HUID %.8X 0x%X:0x%X", TARGETING::get_huid(i_target), i_property.record, i_property.keyword );
-                TRACFBIN( g_trac_vpd, "ATTRIBUTE", l_attr, sizeof(l_attr) );
+                TRACFBIN( g_trac_vpd, "ATTRIBUTE", l_attr.data(), sizeof(l_attr) );
                 TRACFBIN( g_trac_vpd, "CACHE", l_vpd, sizeof(l_vpd) );
             }
             else
@@ -889,7 +883,7 @@ errlHndl_t cmpEecacheToAttributes(TARGETING::Target *            i_target,
             l_err->collectTrace("VPD",1024);
             break;
         }
-        //FIXME: optimize above
+        // Could optimize above with templates but for just 2 attributes the ROI is low
 
     } while(0);
 
