@@ -636,7 +636,7 @@ enum test_type
     TEST_RR = 42,
     TEST_RF = 43,
     W_ONLY_INFINITE_RAND = 44,
-    MCB_2D_CUP_SEQ = 45,
+    MCB_2D_CUP_FIX = 45,
     MCB_2D_CUP_RAND = 46,
     SHMOO_STRESS_INFINITE = 47,
     HYNIX_1_COL = 48,
