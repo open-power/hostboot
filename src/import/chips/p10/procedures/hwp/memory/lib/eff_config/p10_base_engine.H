@@ -2355,8 +2355,8 @@ class base_0_3 : public base
                 // refresh specification (across all number of ranks and frequencies) observed
                 // during lab power/thermal tests.
 
-                FAPI_INF("%s adjusting tREFI calculation by 99%, calculated tREFI (nck): %lu, adjusted tREFI (nck): %lu,",
-                         spd::c_str(iv_dimm), l_trefi_in_nck, l_trefi_in_nck * PERCENT_ADJUST);
+                FAPI_INF("%s adjusting tREFI calculation by 99%%, calculated tREFI (nck): %lu, adjusted tREFI (nck): %lu,",
+                         spd::c_str(iv_dimm), l_trefi_in_nck, static_cast<uint64_t>(l_trefi_in_nck * PERCENT_ADJUST));
 
                 // The compiler does this under the covers but just to be explicit on intent:
                 // Floating point arithmetic and truncation of result saved to an unsigned integer
