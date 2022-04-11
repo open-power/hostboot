@@ -755,17 +755,6 @@ static void initializeAttributes(TargetService& i_targetService,
                                 - l_groupId - 1));
                 }
                 l_pTopLevel->setAttr<ATTR_PROC_FABRIC_PRESENT_GROUPS>(l_fabric_groups);
-
-                //Look at the MFG_FLAGS attribute on the system target
-                //and decide if we need to update the CDM Policy attribute
-                //to ignore all gards.
-                if(isNoGardSet())
-                {
-                    TARG_INF("MNFG_NO_GARD bit is set - setting CDM_POLICIES_MANUFACTURING_DISABLED in ATTR_CDM_POLICIES");
-                    TARGETING::UTIL::assertGetToplevelTarget()->setAttr<ATTR_CDM_POLICIES>(
-                        l_pTopLevel->getAttr<ATTR_CDM_POLICIES>() | CDM_POLICIES_MANUFACTURING_DISABLED);
-                }
-
             }
         }
 
