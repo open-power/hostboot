@@ -78,6 +78,7 @@
 #include <pldm/base/hb_bios_attrs.H>
 #include <pldm/extended/pldm_watchdog.H>
 #include <isteps/bios_attr_accessors/bios_attr_parsers.H>
+#include <targeting/common/mfgFlagAccessors.H>
 #endif
 
 #include <initservice/bootconfigif.H>
@@ -336,6 +337,17 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
                               "Hostboot to TI.");
                     err = l_stepError.getErrorHandle();
                     break;
+                }
+
+                //Look at the MFG_FLAGS attribute on the system target
+                //and decide if we need to update the CDM Policy attribute
+                //to ignore all gards.
+                if (TARGETING::isNoGardSet())
+                {
+                    TRACFCOMP(g_trac_initsvc, INFO_MRK
+                            "MNFG_NO_GARD bit is set - setting CDM_POLICIES_MANUFACTURING_DISABLED in ATTR_CDM_POLICIES");
+                    sys->setAttr<TARGETING::ATTR_CDM_POLICIES>(
+                            l_pTopLevelTarget->getAttr<TARGETING::ATTR_CDM_POLICIES>() | TARGETING::CDM_POLICIES_MANUFACTURING_DISABLED);
                 }
             }
             else
