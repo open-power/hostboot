@@ -138,6 +138,62 @@ enum errlManagerNeeds
 
 const uint64_t MIN_PLD_WAIT_TIME_SEC = 10;
 
+/**
+* @brief Helper function to convert a uint8_t decimal to BCD (Binary Coded
+*        Decimal) format.
+*
+* @param[in] dec the uint8_t value to be converted to BCD format
+* @return The BCD-formatted input value
+*/
+uint8_t dec2bcd8(uint8_t dec);
+
+/**
+* @brief Helper function to convert a uint16_t decimal to BCD (Binary Coded
+*        Decimal) format.
+*
+* @param[in] dec the uint16_t value to be converted to BCD format
+* @return The BCD-formatted input value
+*/
+uint16_t dec2bcd16(uint16_t dec);
+
+/**
+* @brief Helper function to convert a BCD (Binary Coded Decimal) input to
+*        uint8_t.
+*
+* @param[in] bcd the BCD value to be converted to uint8_t
+* @return The uint8_t value
+*/
+uint8_t bcd2dec8(uint8_t bcd);
+
+/**
+* @brief Helper function to convert BCD (Binary Coded Decimal) input to
+*        uint16_t.
+*
+* @param[in] bcd the BCD value to be converted to uint16_t
+* @return The uint16_t value
+*/
+uint16_t bcd2dec16(uint16_t bcd);
+
+/**
+ * @brief Converts the input date/time structure to a raw BCD-formatted
+ *        uint64_t value in the format: 0xYYYYMMDDHHMMSS00.
+ *
+ * @param[in] i_dateTime the input date/time structure to covert
+ * @return The raw BCD-formatted date/time in the format:
+ *         0xYYYYMMDDHHMMSS00
+ */
+uint64_t dateTimeToRawBCD(const date_time_t& i_dateTime);
+
+/**
+ * @brief Converts the input raw BCD-formatted time in format
+ *        0xYYYYMMDDHHMMSS00 to a date_time_t structure. The function
+ *        performs a conversion from BCD to decimal as part of the
+ *        translation.
+ *
+ * @param[in] i_dateTimeBCD the input date/time in BCD format
+ * @return The formatted date_time_t structure
+*/
+date_time_t rawBCDToDateTime(uint64_t i_dateTimeBCD);
 
 /*****************************************************************************/
 // Forward class declarations
@@ -331,27 +387,6 @@ public:
      * @param[in] i_dateTime the current date/time value
      */
     static void setBaseDateTime(const date_time_t& i_dateTime);
-
-    /**
-     * @brief Converts the input date/time structure to a raw BCD-formatted
-     *        uint64_t value in the format: 0xYYYYMMDDHHMMSS00.
-     *
-     * @param[in] i_dateTime the input date/time structure to covert
-     * @return The raw BCD-formatted date/time in the format:
-     *         0xYYYYMMDDHHMMSS00
-     */
-    uint64_t _dateTimeToRawBCD(const date_time_t& i_dateTime);
-
-    /**
-     * @brief A wrapper around ErrlManager's _dateTimeToRawBCD member
-     *        function. Converts the input date/time in BCD format to
-     *        a raw BCD uint64_t.
-     *
-     * @param[in] i_dateTime the input date/time structure to covert
-     * @return The raw BCD-formatted date/time in the format:
-     *         0xYYYYMMDDHHMMSS00
-     */
-    static uint64_t dateTimeToRawBCD(const date_time_t& i_dateTime);
 
     /**
      * @brief Retrieve the MI keyword from the Marker LID.
@@ -928,6 +963,7 @@ private:
      *         EID that HBRT will use; false otherwise
      */
     bool isFirstHbrtEid(uint32_t i_position);
+
 };
 
 
