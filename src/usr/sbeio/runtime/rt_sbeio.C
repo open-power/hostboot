@@ -47,6 +47,14 @@
 //  mailbox register definitions
 #include <initservice/mboxRegs.H>
 
+namespace HTMGT
+{
+    int htmgt_pass_thru (uint16_t   i_cmdLength,
+                         uint8_t *  i_cmdData,
+                         uint16_t * o_rspLength,
+                         uint8_t *  o_rspData);
+}
+
 using namespace TARGETING;
 using namespace ERRORLOG;
 using namespace SBE_MSG;
@@ -683,70 +691,10 @@ namespace RT_SBEIO
         errlHndl_t errl = nullptr;
         uint16_t l_rspDataSize = 0;
 
-        runtimeInterfaces_t *rt_intf = getRuntimeInterfaces();
-
-        // Check runtime interface pointer
-        if(nullptr == rt_intf)
-        {
-            TRACFCOMP(g_trac_sbeio, ERR_MRK"htmgt_pass_thru_wrapper: NULL "
-                      "runtime interface pointer from getRuntimeInterfaces");
-
-            /*@
-             * @errortype
-             * @moduleid     SBEIO::SBEIO_RUNTIME
-             * @reasoncode   SBEIO::SBEIO_RT_NO_INTERFACE_POINTER
-             * @userdata1    Processor HUID
-             * @userdata2    Reserved
-             *
-             * @devdesc      SBEIO RT Process Pass-through command Runtime
-             *                Interface pointer not set.
-             * @custdesc     Firmware error communicating with boot device
-             */
-            errl = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
-                                 SBEIO::SBEIO_RUNTIME,
-                                 SBEIO::SBEIO_RT_NO_INTERFACE_POINTER,
-                                 get_huid(i_procTgt),
-                                 0);
-
-            errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                      HWAS::SRCI_PRIORITY_HIGH);
-            errl->collectTrace(SBEIO_COMP_NAME);
-        }
-        // Check runtime interface function pointer
-        else if(nullptr == rt_intf->mfg_htmgt_pass_thru)
-        {
-            TRACFCOMP(g_trac_sbeio, ERR_MRK"htmgt_pass_thru_wrapper: function "
-                      "pointer for mfg_htmgt_pass_thru not set");
-
-            /*@
-             * @errortype
-             * @moduleid     SBEIO::SBEIO_RUNTIME
-             * @reasoncode   SBEIO::SBEIO_RT_NO_INTERFACE_FUNCTION
-             * @userdata1    Processor HUID
-             * @userdata2    Reserved
-             *
-             * @devdesc      SBEIO RT Process Pass-through command Runtime
-             *                Interface function pointer not set.
-             * @custdesc     Firmware error communicating with boot device
-             */
-            errl = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
-                                 SBEIO::SBEIO_RUNTIME,
-                                 SBEIO::SBEIO_RT_NO_INTERFACE_FUNCTION,
-                                 get_huid(i_procTgt),
-                                 0);
-
-            errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                      HWAS::SRCI_PRIORITY_HIGH);
-            errl->collectTrace(SBEIO_COMP_NAME);
-        }
-        else
-        {
-            *o_rspStatus = rt_intf->mfg_htmgt_pass_thru(i_reqDataSize,
-                                                        i_reqData,
-                                                        &l_rspDataSize,
-                                                        o_rspData);
-        }
-
+        *o_rspStatus = HTMGT::htmgt_pass_thru(i_reqDataSize,
+                                              i_reqData,
+                                              &l_rspDataSize,
+                                              o_rspData);
         *o_rspDataSize = l_rspDataSize;
 
         return errl;

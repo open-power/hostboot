@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,12 @@
 #include <util/runtime/util_rt.H>
 #include <targeting/attrrp.H>
 #include <targeting/targplatreasoncodes.H>
+
+namespace RT_TARG
+{
+    int apply_attr_override(uint8_t* i_data,
+                            size_t i_size );
+}
 
 #define MEMCMPPTR(addr, offset) \
         reinterpret_cast<void*>(reinterpret_cast<uint64_t>(addr) + offset)
@@ -195,6 +201,11 @@ class TargetingTestSuite : public CxxTest::TestSuite
                 if( rt_intf->apply_attr_override == NULL )
                 {
                     TS_FAIL("runtimeInterfaces->apply_attr_override not set");
+                    break;
+                }
+                if (&RT_TARG::apply_attr_override != rt_intf->apply_attr_override)
+                {
+                    TS_FAIL("testApplyAttrOverrides: apply_attr_override function pointer is not set to RT_TARG::apply_attr_override()");
                     break;
                 }
 

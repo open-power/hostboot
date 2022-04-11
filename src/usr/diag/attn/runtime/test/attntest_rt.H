@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,6 +29,16 @@
 #include <runtime/interface.h>
 #include <targeting/common/commontargeting.H>
 #include "../../common/attntrace.H"
+
+//See attn_rt.C
+namespace ATTN_RT
+{
+    int handleAttns(uint64_t i_proc,
+                    uint64_t i_ipollStatus,
+                    uint64_t i_ipollMask);
+
+    uint64_t getIpollEvents( void );
+}
 
 class AttnTestRT: public CxxTest::TestSuite
 {
@@ -69,22 +79,30 @@ class AttnTestRT: public CxxTest::TestSuite
         {
             TS_FAIL("AttnTestRT: handle_attns not set");
         }
+        else if (&ATTN_RT::handleAttns != rt_intf->handle_attns)
+        {
+            TS_FAIL("testAttnRtIntf: handle_attns function pointer is not set to ATTN_RT::handleAttns()");
+        }
         else
         {
             // just pass in some params for now
-            int rc = rt_intf->handle_attns(NULL, 0, 0);
-            ATTN_SLOW("handle_attns returned rc: %d", rc);
+            int rc = ATTN_RT::handleAttns(NULL, 0, 0);
+            ATTN_SLOW("ATTN_RT::handleAttns returned rc: %d", rc);
         }
 
         if (NULL == rt_intf->get_ipoll_events)
         {
             TS_FAIL("AttnTestRT: get_ipoll_events not set");
         }
+        else if (&ATTN_RT::getIpollEvents != rt_intf->get_ipoll_events)
+        {
+            TS_FAIL("testAttnRtIntf: get_ipoll_events function pointer is not set to ATTN_RT::getIpollEvents()");
+        }
         else
         {
             // just pass in some params for now
-            uint64_t l_bits = rt_intf->get_ipoll_events();
-            ATTN_SLOW("get_ipoll_events returned: %llx", l_bits);
+            uint64_t l_bits = ATTN_RT::getIpollEvents();
+            ATTN_SLOW("ATTN_RT::getIpollEvents returned: %llx", l_bits);
         }
 
         ATTN_SLOW(EXIT_MRK"AttnTestRT::testAttnRtIntf");

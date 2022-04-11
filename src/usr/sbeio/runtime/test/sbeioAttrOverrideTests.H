@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,12 @@
 
 #include <string.h>
 #include <stdio.h>
+
+//See rt_sbeio.C
+namespace RT_SBEIO
+{
+    int process_sbe_msg(uint32_t i_procChipId);
+}
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -154,6 +160,12 @@ public:
                         "has not been set.");
 
                 result = false;
+                break;
+            }
+
+            if (&RT_SBEIO::process_sbe_msg != l_rt->sbe_message_passing)
+            {
+                TS_FAIL("SbePassThroughApplyAttrOverrides: sbe_message_passing function pointer is not set to RT_SBEIO::process_sbe_msg()");
                 break;
             }
 
@@ -318,12 +330,12 @@ public:
             // Step 7 - Invoke sbe_message_passing
             //#############################################
 
-            int rc = l_rt->sbe_message_passing(l_chipId);
+            int rc = RT_SBEIO::process_sbe_msg(l_chipId);
 
             if(0 != rc)
             {
                 TS_FAIL("SbePassThroughApplyAttrOverrides: "
-                        "sbe_message_passing failed. rc: %d",
+                        "RT_SBEIO::process_sbe_msg failed. rc: %d",
                          rc
                        );
                 result = false;
