@@ -729,12 +729,12 @@ date_time_t ErrlManager::_getCurrentDateTime()
 
     hostInterfaces::dateTime* l_bcdTime = reinterpret_cast<hostInterfaces::dateTime*>(&l_response);
 
-    l_result.format.year = l_bcdTime->year;
-    l_result.format.month = l_bcdTime->month;
-    l_result.format.day = l_bcdTime->day;
-    l_result.format.hour = l_bcdTime->hour;
-    l_result.format.minute = l_bcdTime->minute;
-    l_result.format.second = l_bcdTime->second;
+    l_result.format.year = bcd2dec16(l_bcdTime->year);
+    l_result.format.month = bcd2dec8(l_bcdTime->month);
+    l_result.format.day = bcd2dec8(l_bcdTime->day);
+    l_result.format.hour = bcd2dec8(l_bcdTime->hour);
+    l_result.format.minute = bcd2dec8(l_bcdTime->minute);
+    l_result.format.second = bcd2dec8(l_bcdTime->second);
 
     } while(0);
 

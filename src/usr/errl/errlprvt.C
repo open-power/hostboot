@@ -115,20 +115,12 @@ uint64_t ErrlPrvt::flatten( void * o_pBuffer, const uint64_t i_cbBuffer )
         }
 
         // Set the ErrlPrvt instance data items.
-#ifndef __HOSTBOOT_RUNTIME
         // Since Hostboot needs to add elapsed seconds to the base date time
         // it gets from BMC, we need to convert the resulting timestamp from
         // decimal to raw BCD format here to display it correctly in the error
         // log.
-        p->creationTime   = ErrlManager::dateTimeToRawBCD(iv_created.date_time);
-        p->commitTime     = ErrlManager::dateTimeToRawBCD(iv_committed.date_time);
-#else
-        // Runtime code asks for the BCD date/time directly (it does not need to
-        // do any calculations on the date time it receives from PHYP), so we
-        // don't need to convert the value here for runtime.
-        p->creationTime   = iv_created.date_time.value;
-        p->commitTime     = iv_committed.date_time.value;
-#endif
+        p->creationTime   = dateTimeToRawBCD(iv_created.date_time);
+        p->commitTime     = dateTimeToRawBCD(iv_committed.date_time);
         p->creatorId      = iv_cid;
         p->sectionCount   = iv_sctns;
         p->plid           = iv_plid;
@@ -148,9 +140,8 @@ uint64_t ErrlPrvt::unflatten( const void * i_buf )
         static_cast<const pelPrivateHeaderSection_t *>(i_buf);
 
     iv_header.unflatten(&(p->sectionheader));
-
-    iv_created.date_time.value    = p->creationTime;
-    iv_committed.date_time.value  = p->commitTime;
+    iv_created.date_time = rawBCDToDateTime(p->creationTime);
+    iv_committed.date_time = rawBCDToDateTime(p->commitTime);
     iv_cid                       = p->creatorId;
     iv_sctns                     = p->sectionCount;
     iv_plid                      = p->plid;
