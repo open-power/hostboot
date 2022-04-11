@@ -107,7 +107,11 @@ void PNOR::getPnorInfo( PnorInfo_t& o_pnorInfo )
 #else
     o_pnorInfo.flashSize = 64*MEGABYTE;
 #endif
+}
 
+bool PNOR::isPnorInitialized()
+{
+    return Singleton<RtPnor>::instance().isPnorInitialized();
 }
 
 #ifdef CONFIG_FILE_XFER_VIA_PLDM
@@ -116,8 +120,6 @@ const std::array<uint32_t, PNOR::NUM_SECTIONS>& PNOR::getLidIds()
     return Singleton<RtPnor>::instance().get_lid_ids();
 }
 #endif
-
-/****************Public Methods***************************/
 
 uint64_t RtPnor::iv_masterProcId = RUNTIME::HBRT_HYP_ID_UNKNOWN;
 
@@ -129,18 +131,21 @@ void RtPnor::init(errlHndl_t &io_taskRetErrl)
 {
     TRACFCOMP(g_trac_pnor, ENTER_MRK"RtPnor::init()");
 
-    Singleton<RtPnor>::instance().setInitialized(true);
+    Singleton<RtPnor>::instance().setInitialized();
+
+    // Send down any error logs that were committed and saved before PNOR was
+    // initialized.
+    errlHndl_t errl = nullptr;
+    ERRORLOG::errlCommit(errl, 0);
 
     TRACFCOMP(g_trac_pnor, EXIT_MRK"RtPnor::init()");
 }
 
-/**************************************************************/
-void RtPnor::setInitialized(bool i_initialized)
+void RtPnor::setInitialized()
 {
-  iv_initialized = i_initialized;
+    iv_initialized = true;
 }
 
-/**************************************************************/
 errlHndl_t RtPnor::getSectionInfo(PNOR::SectionId i_section,
                               PNOR::SectionInfo_t& o_info)
 {
@@ -282,7 +287,6 @@ errlHndl_t RtPnor::getSectionInfo(PNOR::SectionId i_section,
     return l_err;
 }
 
-/**************************************************************/
 errlHndl_t RtPnor::flush (const PNOR::SectionId i_section,
                           void* i_vaddr,
                           const size_t i_num_pages)
@@ -397,10 +401,11 @@ errlHndl_t RtPnor::flush (const PNOR::SectionId i_section,
     TRACFCOMP(g_trac_pnor, EXIT_MRK"RtPnor::flush");
     return l_err;
 }
-/*******Protected Methods**************/
-RtPnor::RtPnor()
+
+void RtPnor::instance_init()
 {
-    TRACFCOMP(g_trac_pnor, "RtPnor()::RtPnor()");
+    TRACFCOMP(g_trac_pnor, ENTER_MRK"RtPnor::instance_init");
+
     iv_initialized = false;
     errlHndl_t l_err = nullptr;
     do {
@@ -446,14 +451,26 @@ RtPnor::RtPnor()
     {
         errlCommit(l_err, PNOR_COMP_ID);
     }
+
+    TRACFCOMP(g_trac_pnor, EXIT_MRK"RtPnor::instance_init");
 }
 
-/*************************/
+RtPnor::RtPnor()
+{
+    // Explicitly initialize the PNOR trace buffer before any member functions
+    // use it. (The initialization will only execute once regardless of how many
+    // RtPnor objects are constructed.)
+    TRAC_INIT(&g_trac_pnor, PNOR_COMP_NAME, 4*KILOBYTE, TRACE::BUFFER_SLOW);
+
+    TRACFCOMP(g_trac_pnor, ENTER_MRK"RtPnor::RtPnor()");
+
+    TRACFCOMP(g_trac_pnor, EXIT_MRK"RtPnor::RtPnor()");
+}
+
 RtPnor::~RtPnor()
 {
 }
 
-/*******************Private Methods*********************/
 #ifndef CONFIG_FILE_XFER_VIA_PLDM
 errlHndl_t RtPnor::readFromDeviceOpal(uint64_t i_procId,
                                       PNOR::SectionId i_section,
@@ -941,7 +958,6 @@ errlHndl_t RtPnor::readFromDevice (uint64_t i_procId,
     return l_err;
 }
 
-/*********************************************************************/
 errlHndl_t RtPnor::writeToDevice( uint64_t i_procId,
                                   PNOR::SectionId i_section,
                                   uint64_t i_offset,
@@ -963,7 +979,6 @@ errlHndl_t RtPnor::writeToDevice( uint64_t i_procId,
     return l_err;
 }
 
-/*****************************************************************/
 errlHndl_t RtPnor::readTOC ()
 {
     TRACFCOMP(g_trac_pnor, ENTER_MRK"RtPnor::readTOC" );
@@ -1006,12 +1021,11 @@ errlHndl_t RtPnor::readTOC ()
     return l_err;
 }
 
-/***********************************************************/
 RtPnor& RtPnor::getInstance()
 {
     return Singleton<RtPnor>::instance();
 }
-/***********************************************************/
+
 errlHndl_t RtPnor::getSideInfo( PNOR::SideId i_side,
                                 PNOR::SideInfo_t& o_info)
 {
@@ -1200,6 +1214,8 @@ struct registerinitPnor
         // Register interface for Host to call
         postInitCalls_t * rt_post = getPostInitCalls();
         rt_post->callInitPnor = &initPnor;
+
+        Singleton<RtPnor>::instance().instance_init();
     }
 };
 

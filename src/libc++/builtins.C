@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,6 +29,11 @@
 #include <arch/ppc.H>
 #include <util/locked/list.H>
 #include <sys/sync.h>
+
+#ifdef __HOSTBOOT_RUNTIME
+#include <assert.h>
+#include <builtins.h>
+#endif
 
 void* operator new(size_t s)
 {
@@ -71,6 +76,19 @@ void operator delete[](void* p, size_t)
 }
 #endif // bl_builtins_C
 
+enum CXA_GUARD_LOCK_VALUE : uint32_t
+{
+    UNINITIALIZED = 0,
+    LOCKED = 1,
+    UNLOCKED_AND_INITIALIZED = 2
+};
+
+enum CXA_GUARD_ACTION : int
+{
+    DO_NOT_RUN_CONSTRUCTOR = 0,
+    RUN_CONSTRUCTOR = 1,
+};
+
 extern "C" int __cxa_guard_acquire(volatile uint64_t* gv)
 {
     // States:
@@ -79,18 +97,30 @@ extern "C" int __cxa_guard_acquire(volatile uint64_t* gv)
     //     2 -> unlocked and initialized
 
     uint32_t v = __sync_val_compare_and_swap((volatile uint32_t*)gv, 0, 1);
-    if (v == 0)
-	return 1;
-    if (v == 2)
-	return 0;
+    if (v == UNINITIALIZED)
+        return RUN_CONSTRUCTOR;
+    if (v == UNLOCKED_AND_INITIALIZED)
+        return DO_NOT_RUN_CONSTRUCTOR;
+
+#ifdef __HOSTBOOT_RUNTIME
+    // Hostboot runtime is single-threaded. If we go to initialize a local
+    // static variable and see that it's already in the "locked" state, it means
+    // that this thread is already initializing the object and we must have
+    // entered this path recursively. Trying to acquire the lock again will
+    // result in a deadlock; so instead, we assert here to fail faster. The C++
+    // standard specifies that if the initialization of a local static variable
+    // is entered recursively, the behavior is undefined, so we are permitted to
+    // do whatever we want here.
+    crit_assert(false);
+#endif
 
     // Wait for peer thread to perform initialization (state 2).
-    while(2 != *(volatile uint32_t*)gv);
+    while(UNLOCKED_AND_INITIALIZED != *(volatile uint32_t*)gv);
 
     // Instruction barrier to ensure value is set before later loads execute.
     isync();
 
-    return 0;
+    return DO_NOT_RUN_CONSTRUCTOR;
 }
 
 extern "C" void __cxa_guard_release(volatile uint64_t* gv)
@@ -176,5 +206,3 @@ extern "C" int __cxa_atexit(void (*i_dtor)(void*),
     return 0;
 }
 #endif // bl_builtins_C
-
-

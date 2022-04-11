@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -55,7 +55,13 @@
 
 // Trace definition
 trace_desc_t* g_trac_pnor = NULL;
+
+#ifndef __HOSTBOOT_RUNTIME
+// If this is IPL time code, initialize the trace buffer as normal. If this is
+// runtime code, we need to ensure that this is initialized before the RtPnor
+// instance, so we explicitly sequence the initialization ourselves in rt_pnor.C
 TRAC_INIT(&g_trac_pnor, PNOR_COMP_NAME, 4*KILOBYTE, TRACE::BUFFER_SLOW); //4K
+#endif
 
 // Easy macro replace for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)

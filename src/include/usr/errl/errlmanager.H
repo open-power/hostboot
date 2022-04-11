@@ -431,6 +431,13 @@ public:
     static void setLastIplEid(uint32_t i_eid);
 #endif
 
+#ifdef __HOSTBOOT_RUNTIME
+    /* @brief Set up the ErrlManager instance. This must be called before the
+     * ErrlManager is used.
+     */
+    void setup();
+#endif
+
 protected:
     /**
      * @brief   Destructor

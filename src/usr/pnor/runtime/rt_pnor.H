@@ -113,9 +113,9 @@ class RtPnor
 
         /**
          * @brief  Accessor function for iv_initialized.
-         *         true = RtPnor::init() finished successfully
          */
-        void setInitialized(bool i_initialized);
+        void setInitialized();
+
 #ifdef CONFIG_FILE_XFER_VIA_PLDM
         /**
         * @brief Return a const ref to the iv_ipltime_lid std:array
@@ -126,6 +126,12 @@ class RtPnor
             return this->iv_ipltime_lid_ids;
         }
 #endif
+
+       /* @brief Initialize the RtPnor instance by reading the table of
+        * contents, parsing LIDs, etc. Any errors that occur in this function
+        * will be committed.
+        */
+        void instance_init();
 
     protected:
        /**

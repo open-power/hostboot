@@ -73,7 +73,7 @@ bool rt_processCallout(errlHndl_t &io_errl,
 ErrlManager::ErrlManager() :
         iv_currLogId(0),
         iv_baseNodeId(ERRLOG_PLID_BASE_MASK),
-        iv_pnorReadyForErrorLogs(true),
+        iv_pnorReadyForErrorLogs(false),
         iv_pStorage(NULL),
         iv_hwasProcessCalloutFn(NULL),
         iv_pnorAddr(NULL),
@@ -92,7 +92,6 @@ ErrlManager::ErrlManager() :
 #endif
 {
     TRACFCOMP( g_trac_errl, ENTER_MRK "ErrlManager::ErrlManager constructor." );
-    //Note - There is no PNOR access inside HBRT
 
     iv_hwasProcessCalloutFn = rt_processCallout;
 
@@ -108,7 +107,8 @@ ErrlManager::ErrlManager() :
                                 "TARGETING is ready..." );
 
     }
-    if(sys)
+
+    if (sys)
     {
         iv_currLogId = sys->getAttr<TARGETING::ATTR_HOSTSVC_PLID>();
         TRACFCOMP( g_trac_errl,"Initial Error Log ID = %.8X", iv_currLogId );
@@ -124,11 +124,6 @@ ErrlManager::ErrlManager() :
         // specifically disabled via the attribute ATTR_DISABLE_PLD_WAIT,
         // then PLD waits are enabled.
         iv_pldWaitEnable = !iv_isFSP && !sys->getAttr<TARGETING::ATTR_DISABLE_PLD_WAIT>();
-
-        if(!iv_isFSP)
-        {
-            setupPnorInfo();
-        }
     }
     else
     {
@@ -142,6 +137,18 @@ ErrlManager::ErrlManager() :
     }
 
     TRACFCOMP( g_trac_errl, EXIT_MRK "ErrlManager::ErrlManager constructor." );
+}
+
+void ErrlManager::setup()
+{
+    TRACFCOMP( g_trac_errl, ENTER_MRK"ErrlManager::setup" );
+
+    if (TARGETING::targetService().isInitialized() && !iv_isFSP)
+    {
+        setupPnorInfo();
+    }
+
+    TRACFCOMP( g_trac_errl, EXIT_MRK"ErrlManager::setup" );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -773,7 +780,7 @@ void initErrlManager(void)
 {
     // Note: rtPnor needs to be setup before this is called
     // call errlManager ctor so that we're ready and waiting for errors.
-    ERRORLOG::theErrlManager::instance();
+    ERRORLOG::theErrlManager::instance().setup();
 
     // Note: TARGETING needs to be ready before this is called
     // Set the FW Release Version
