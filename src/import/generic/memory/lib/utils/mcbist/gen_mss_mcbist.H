@@ -1210,257 +1210,15 @@ class program
         }
 
         ///
-        /// @brief Get the address of mrank 0 buffer
-        /// @return Address of mrank 0 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_mrank0_bit();
-
-        ///
-        /// @brief Get the address of mrank0 buffer when in 5D mode
-        /// @return Address of mrank0 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_mrank0_bit_5d();
-
-        ///
-        /// @brief Get the address of mrank1 buffer
-        /// @return Address of mrank1 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_mrank1_bit();
-
-        ///
-        /// @brief Get the address of mrank1 buffer when in 5D mode
-        /// @return Address of mrank1 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_mrank1_bit_5d();
-
-        ///
-        /// @brief Get the address of mrank2 buffer when in 5D mode
-        /// @return Address of mrank2 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_mrank2_bit_5d();
-
-        ///
-        /// @brief Get the address of srank0 buffer
-        /// @return Address of mrank0 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_srank0_bit();
-
-        ///
-        /// @brief Get the address of srank1 buffer
-        /// @return Address of srank1 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_srank1_bit();
-
-        ///
-        /// @brief Get the address of srank2 buffer
-        /// @return Address of srank2 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_srank2_bit();
-
-        ///
-        /// @brief Get the address of bank2 buffer
-        /// @return Address of bank2 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_bank2_bit();
-
-        ///
-        /// @brief Get the address of bank1 buffer
-        /// @return Address of bank1 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_bank1_bit();
-
-        ///
-        /// @brief Get the address of bank 0 buffer
-        /// @return Address of bank 0 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_bank0_bit();
-
-        // No wrapper function to get address of BANK_GROUP2 buffer is added
-        // because Explorer does not support BANK_GROUP2. The required function for
-        // Odyssey is added in ody_mcbist.C
-
-        ///
-        /// @brief Get the address of bank group1 buffer
-        /// @return Address of bank group1 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_bank_group1_bit();
-
-        ///
-        /// @brief Get the address of bank group0 buffer
-        /// @return Address of bank group0 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_bank_group0_bit();
-
-        ///
-        /// @brief Get the address of row17 buffer
-        /// @return Address of row17 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_row17_bit();
-
-        ///
-        /// @brief Get the address of row16 buffer
-        /// @return Address of row16 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_row16_bit();
-
-        ///
-        /// @brief Get the address of row15 buffer
-        /// @return Address of row15 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_row15_bit();
-
-        ///
-        /// @brief Get the address of row14 buffer
-        /// @return Address of row14 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_row14_bit();
-
-        ///
-        /// @brief Get the address of row13 buffer
-        /// @return Address of row13 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_row13_bit();
-
-        ///
-        /// @brief Get the address of row12 buffer
-        /// @return Address of row12 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_row12_bit();
-
-        ///
-        /// @brief Get the address of row11 buffer
-        /// @return Address of row11 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_row11_bit();
-
-        ///
-        /// @brief Get the address of row10 buffer
-        /// @return Address of row10 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_row10_bit();
-
-        ///
-        /// @brief Get the address of row9 buffer
-        /// @return Address of row9 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_row9_bit();
-
-        ///
-        /// @brief Get the address of row8 buffer
-        /// @return Address of row8 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_row8_bit();
-
-        ///
-        /// @brief Get the address of row7 buffer
-        /// @return Address of row7 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_row7_bit();
-
-        ///
-        /// @brief Get the address of row6 buffer
-        /// @return Address of row6 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_row6_bit();
-
-        ///
-        /// @brief Get the address of row5 buffer
-        /// @return Address of row5 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_row5_bit();
-
-        ///
-        /// @brief Get the address of row4 buffer
-        /// @return Address of row4 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_row4_bit();
-
-        ///
-        /// @brief Get the address of row3 buffer
-        /// @return Address of row3 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_row3_bit();
-
-        ///
-        /// @brief Get the address of row2 buffer
-        /// @return Address of row2 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_row2_bit();
-
-        ///
-        /// @brief Get the address of row1 buffer
-        /// @return Address of row1 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_row1_bit();
-
-        ///
-        /// @brief Get the address of row0 buffer
-        /// @return Address of row0 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_row0_bit();
-
-        // No wrapper function to get address of COL10 buffer is added
-        // because Explorer does not support COL10. The required function for
-        // Odyssey is added in ody_mcbist.C
-
-        ///
-        /// @brief Get the address of col9 buffer
-        /// @return Address of col9 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_col9_bit();
-
-        ///
-        /// @brief Get the address of col8 buffer
-        /// @return Address of col8 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_col8_bit();
-
-        ///
-        /// @brief Get the address of col7 buffer
-        /// @return Address of col7 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_col7_bit();
-
-        ///
-        /// @brief Get the address of col6 buffer
-        /// @return Address of col6 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_col6_bit();
-
-        ///
-        /// @brief Get the address of col5 buffer
-        /// @return Address of col5 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_col5_bit();
-
-        ///
-        /// @brief Get the address of col4 buffer
-        /// @return Address of col4 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_col4_bit();
-
-        ///
-        /// @brief Get the address of col3 buffer
-        /// @return Address of col3 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_col3_bit();
-
-        ///
-        /// @brief Get the address of col2 buffer
-        /// @return Address of col2 fapi2 buffer
-        ///
-        fapi2::buffer<uint64_t>& get_addr_map_col2_bit();
-
-        // No wrapper function to get address of ROQ buffer is added
-        // because Explorer does not support ROQ. The required function for
-        // Odyssey is added in ody_mcbist.C
-
-        ///
         /// @brief Change the DIMM select in the address mapping
         /// @param[in] i_bitmap DIMM select bit map in the address counter
         /// @note Assumes data is right-aligned
         ///
-        void change_dimm_select_bit( const uint64_t i_bitmap );
+        inline void change_dimm_select_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map0.insertFromRight<TT::CFG_AMAP_DIMM_SELECT, TT::CFG_AMAP_DIMM_SELECT_LEN>(i_bitmap);
+            return;
+        }
 
         ///
         /// @brief Change the MRANK0 address mapping when not in 5D mode
@@ -1469,8 +1227,7 @@ class program
         ///
         inline void change_mrank0_bit( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_mrank0_bit();
-            l_buffer.insertFromRight<TT::CFG_AMAP_MRANK0, TT::CFG_AMAP_MRANK0_LEN>(i_bitmap);
+            iv_addr_map0.insertFromRight<TT::CFG_AMAP_MRANK0, TT::CFG_AMAP_MRANK0_LEN>(i_bitmap);
             return;
         }
 
@@ -1481,8 +1238,7 @@ class program
         ///
         inline void change_mrank0_bit_5d( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_mrank0_bit_5d();
-            l_buffer.insertFromRight<TT::CFG_AMAP_SRANK0, TT::CFG_AMAP_SRANK0_LEN>(i_bitmap);
+            iv_addr_map0.insertFromRight<TT::CFG_AMAP_SRANK0, TT::CFG_AMAP_SRANK0_LEN>(i_bitmap);
             return;
         }
 
@@ -1493,8 +1249,7 @@ class program
         ///
         inline void change_mrank1_bit( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_mrank1_bit();
-            l_buffer.insertFromRight<TT::CFG_AMAP_MRANK1, TT::CFG_AMAP_MRANK1_LEN>(i_bitmap);
+            iv_addr_map0.insertFromRight<TT::CFG_AMAP_MRANK1, TT::CFG_AMAP_MRANK1_LEN>(i_bitmap);
             return;
         }
 
@@ -1505,8 +1260,7 @@ class program
         ///
         inline void change_mrank1_bit_5d( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_mrank1_bit_5d();
-            l_buffer.insertFromRight<TT::CFG_AMAP_SRANK1, TT::CFG_AMAP_SRANK1_LEN>(i_bitmap);
+            iv_addr_map0.insertFromRight<TT::CFG_AMAP_SRANK1, TT::CFG_AMAP_SRANK1_LEN>(i_bitmap);
             return;
         }
 
@@ -1517,8 +1271,7 @@ class program
         ///
         inline void change_mrank2_bit_5d( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_mrank2_bit_5d();
-            l_buffer.insertFromRight<TT::CFG_AMAP_SRANK2, TT::CFG_AMAP_SRANK2_LEN>(i_bitmap);
+            iv_addr_map0.insertFromRight<TT::CFG_AMAP_SRANK2, TT::CFG_AMAP_SRANK2_LEN>(i_bitmap);
             return;
         }
 
@@ -1529,8 +1282,7 @@ class program
         ///
         inline void change_srank0_bit( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_srank0_bit();
-            l_buffer.insertFromRight<TT::CFG_AMAP_SRANK0, TT::CFG_AMAP_SRANK0_LEN>(i_bitmap);
+            iv_addr_map0.insertFromRight<TT::CFG_AMAP_SRANK0, TT::CFG_AMAP_SRANK0_LEN>(i_bitmap);
             return;
         }
 
@@ -1541,8 +1293,7 @@ class program
         ///
         inline void change_srank1_bit( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_srank1_bit();
-            l_buffer.insertFromRight<TT::CFG_AMAP_SRANK1, TT::CFG_AMAP_SRANK1_LEN>(i_bitmap);
+            iv_addr_map0.insertFromRight<TT::CFG_AMAP_SRANK1, TT::CFG_AMAP_SRANK1_LEN>(i_bitmap);
             return;
         }
 
@@ -1553,8 +1304,7 @@ class program
         ///
         inline void change_srank2_bit( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_srank2_bit();
-            l_buffer.insertFromRight<TT::CFG_AMAP_SRANK2, TT::CFG_AMAP_SRANK2_LEN>(i_bitmap);
+            iv_addr_map0.insertFromRight<TT::CFG_AMAP_SRANK2, TT::CFG_AMAP_SRANK2_LEN>(i_bitmap);
             return;
         }
 
@@ -1563,7 +1313,11 @@ class program
         /// @param[in] i_bitmap BANK2 bit map in the address counter
         /// @note Assumes data is right-aligned
         ///
-        void change_bank2_bit( const uint64_t i_bitmap );
+        inline void change_bank2_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map0.insertFromRight<TT::CFG_AMAP_BANK2, TT::CFG_AMAP_BANK2_LEN>(i_bitmap);
+            return;
+        }
 
         ///
         /// @brief Change the BANK1 address mapping
@@ -1572,8 +1326,7 @@ class program
         ///
         inline void change_bank1_bit( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_bank1_bit();
-            l_buffer.insertFromRight<TT::CFG_AMAP_BANK1, TT::CFG_AMAP_BANK1_LEN>(i_bitmap);
+            iv_addr_map0.insertFromRight<TT::CFG_AMAP_BANK1, TT::CFG_AMAP_BANK1_LEN>(i_bitmap);
             return;
         }
 
@@ -1584,23 +1337,9 @@ class program
         ///
         inline void change_bank0_bit( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_bank0_bit();
-            l_buffer.insertFromRight<TT::CFG_AMAP_BANK0, TT::CFG_AMAP_BANK0_LEN>(i_bitmap);
+            iv_addr_map0.insertFromRight<TT::CFG_AMAP_BANK0, TT::CFG_AMAP_BANK0_LEN>(i_bitmap);
             return;
         }
-
-        /// @brief Change the ROQ address mapping
-        /// @param[in] i_bitmap ROQ bit map in the address counter
-        /// @note Assumes data is right-aligned
-        ///
-        void change_roq_bit( const uint64_t i_bitmap );
-
-        ///
-        /// @brief Change the BANK_GROUP2 address mapping
-        /// @param[in] i_bitmap BANK_GROUP2 bit map in the address counter
-        /// @note Assumes data is right-aligned
-        ///
-        void change_bank_group2_bit( const uint64_t i_bitmap );
 
         ///
         /// @brief Change the BANK_GROUP1 address mapping
@@ -1609,8 +1348,7 @@ class program
         ///
         inline void change_bank_group1_bit( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_bank_group1_bit();
-            l_buffer.insertFromRight<TT::CFG_AMAP_BANK_GROUP1, TT::CFG_AMAP_BANK_GROUP1_LEN>(i_bitmap);
+            iv_addr_map1.insertFromRight<TT::CFG_AMAP_BANK_GROUP1, TT::CFG_AMAP_BANK_GROUP1_LEN>(i_bitmap);
             return;
         }
 
@@ -1621,8 +1359,7 @@ class program
         ///
         inline void change_bank_group0_bit( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_bank_group0_bit();
-            l_buffer.insertFromRight<TT::CFG_AMAP_BANK_GROUP0, TT::CFG_AMAP_BANK_GROUP0_LEN>(i_bitmap);
+            iv_addr_map1.insertFromRight<TT::CFG_AMAP_BANK_GROUP0, TT::CFG_AMAP_BANK_GROUP0_LEN>(i_bitmap);
             return;
         }
 
@@ -1633,8 +1370,7 @@ class program
         ///
         inline void change_row17_bit( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_row17_bit();
-            l_buffer.insertFromRight<TT::CFG_AMAP_ROW17, TT::CFG_AMAP_ROW17_LEN>(i_bitmap);
+            iv_addr_map1.insertFromRight<TT::CFG_AMAP_ROW17, TT::CFG_AMAP_ROW17_LEN>(i_bitmap);
             return;
         }
 
@@ -1645,8 +1381,7 @@ class program
         ///
         inline void change_row16_bit( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_row16_bit();
-            l_buffer.insertFromRight<TT::CFG_AMAP_ROW16, TT::CFG_AMAP_ROW16_LEN>(i_bitmap);
+            iv_addr_map1.insertFromRight<TT::CFG_AMAP_ROW16, TT::CFG_AMAP_ROW16_LEN>(i_bitmap);
             return;
         }
 
@@ -1657,8 +1392,7 @@ class program
         ///
         inline void change_row15_bit( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_row15_bit();
-            l_buffer.insertFromRight<TT::CFG_AMAP_ROW15, TT::CFG_AMAP_ROW15_LEN>(i_bitmap);
+            iv_addr_map1.insertFromRight<TT::CFG_AMAP_ROW15, TT::CFG_AMAP_ROW15_LEN>(i_bitmap);
             return;
         }
 
@@ -1669,8 +1403,7 @@ class program
         ///
         inline void change_row14_bit( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_row14_bit();
-            l_buffer.insertFromRight<TT::CFG_AMAP_ROW14, TT::CFG_AMAP_ROW14_LEN>(i_bitmap);
+            iv_addr_map1.insertFromRight<TT::CFG_AMAP_ROW14, TT::CFG_AMAP_ROW14_LEN>(i_bitmap);
             return;
         }
 
@@ -1682,8 +1415,7 @@ class program
         ///
         inline void change_row13_bit( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_row13_bit();
-            l_buffer.insertFromRight<TT::CFG_AMAP_ROW13, TT::CFG_AMAP_ROW13_LEN>(i_bitmap);
+            iv_addr_map1.insertFromRight<TT::CFG_AMAP_ROW13, TT::CFG_AMAP_ROW13_LEN>(i_bitmap);
             return;
         }
 
@@ -1694,8 +1426,8 @@ class program
         ///
         inline void change_row12_bit( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_row12_bit();
-            l_buffer.insertFromRight<TT::CFG_AMAP_ROW12, TT::CFG_AMAP_ROW12_LEN>(i_bitmap);
+            // CFG_AMAP_ROW12     = MCBIST_MCBAMR1A0Q_CFG_AMAP_ROW12     ,
+            iv_addr_map1.insertFromRight<TT::CFG_AMAP_ROW12, TT::CFG_AMAP_ROW12_LEN>(i_bitmap);
             return;
         }
 
@@ -1706,8 +1438,7 @@ class program
         ///
         inline void change_row11_bit( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_row11_bit();
-            l_buffer.insertFromRight<TT::CFG_AMAP_ROW11, TT::CFG_AMAP_ROW11_LEN>(i_bitmap);
+            iv_addr_map1.insertFromRight<TT::CFG_AMAP_ROW11, TT::CFG_AMAP_ROW11_LEN>(i_bitmap);
             return;
         }
 
@@ -1718,8 +1449,7 @@ class program
         ///
         inline void change_row10_bit( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_row10_bit();
-            l_buffer.insertFromRight<TT::CFG_AMAP_ROW10, TT::CFG_AMAP_ROW10_LEN>(i_bitmap);
+            iv_addr_map1.insertFromRight<TT::CFG_AMAP_ROW10, TT::CFG_AMAP_ROW10_LEN>(i_bitmap);
             return;
         }
 
@@ -1730,8 +1460,7 @@ class program
         ///
         inline void change_row9_bit( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_row9_bit();
-            l_buffer.insertFromRight<TT::CFG_AMAP_ROW9, TT::CFG_AMAP_ROW9_LEN>(i_bitmap);
+            iv_addr_map2.insertFromRight<TT::CFG_AMAP_ROW9, TT::CFG_AMAP_ROW9_LEN>(i_bitmap);
             return;
         }
 
@@ -1742,8 +1471,7 @@ class program
         ///
         inline void change_row8_bit( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_row8_bit();
-            l_buffer.insertFromRight<TT::CFG_AMAP_ROW8, TT::CFG_AMAP_ROW8_LEN>(i_bitmap);
+            iv_addr_map2.insertFromRight<TT::CFG_AMAP_ROW8, TT::CFG_AMAP_ROW8_LEN>(i_bitmap);
             return;
         }
 
@@ -1754,8 +1482,7 @@ class program
         ///
         inline void change_row7_bit( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_row7_bit();
-            l_buffer.insertFromRight<TT::CFG_AMAP_ROW7, TT::CFG_AMAP_ROW7_LEN>(i_bitmap);
+            iv_addr_map2.insertFromRight<TT::CFG_AMAP_ROW7, TT::CFG_AMAP_ROW7_LEN>(i_bitmap);
             return;
         }
 
@@ -1766,8 +1493,7 @@ class program
         ///
         inline void change_row6_bit( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_row6_bit();
-            l_buffer.insertFromRight<TT::CFG_AMAP_ROW6, TT::CFG_AMAP_ROW6_LEN>(i_bitmap);
+            iv_addr_map2.insertFromRight<TT::CFG_AMAP_ROW6, TT::CFG_AMAP_ROW6_LEN>(i_bitmap);
             return;
         }
 
@@ -1778,8 +1504,7 @@ class program
         ///
         inline void change_row5_bit( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_row5_bit();
-            l_buffer.insertFromRight<TT::CFG_AMAP_ROW5, TT::CFG_AMAP_ROW5_LEN>(i_bitmap);
+            iv_addr_map2.insertFromRight<TT::CFG_AMAP_ROW5, TT::CFG_AMAP_ROW5_LEN>(i_bitmap);
             return;
         }
 
@@ -1790,8 +1515,7 @@ class program
         ///
         inline void change_row4_bit( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_row4_bit();
-            l_buffer.insertFromRight<TT::CFG_AMAP_ROW4, TT::CFG_AMAP_ROW4_LEN>(i_bitmap);
+            iv_addr_map2.insertFromRight<TT::CFG_AMAP_ROW4, TT::CFG_AMAP_ROW4_LEN>(i_bitmap);
             return;
         }
 
@@ -1802,8 +1526,7 @@ class program
         ///
         inline void change_row3_bit( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_row3_bit();
-            l_buffer.insertFromRight<TT::CFG_AMAP_ROW3, TT::CFG_AMAP_ROW3_LEN>(i_bitmap);
+            iv_addr_map2.insertFromRight<TT::CFG_AMAP_ROW3, TT::CFG_AMAP_ROW3_LEN>(i_bitmap);
             return;
         }
 
@@ -1814,8 +1537,7 @@ class program
         ///
         inline void change_row2_bit( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_row2_bit();
-            l_buffer.insertFromRight<TT::CFG_AMAP_ROW2, TT::CFG_AMAP_ROW2_LEN>(i_bitmap);
+            iv_addr_map2.insertFromRight<TT::CFG_AMAP_ROW2, TT::CFG_AMAP_ROW2_LEN>(i_bitmap);
             return;
         }
 
@@ -1826,8 +1548,7 @@ class program
         ///
         inline void change_row1_bit( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_row1_bit();
-            l_buffer.insertFromRight<TT::CFG_AMAP_ROW1, TT::CFG_AMAP_ROW1_LEN>(i_bitmap);
+            iv_addr_map2.insertFromRight<TT::CFG_AMAP_ROW1, TT::CFG_AMAP_ROW1_LEN>(i_bitmap);
             return;
         }
 
@@ -1838,17 +1559,9 @@ class program
         ///
         inline void change_row0_bit( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_row0_bit();
-            l_buffer.insertFromRight<TT::CFG_AMAP_ROW0, TT::CFG_AMAP_ROW0_LEN>(i_bitmap);
+            iv_addr_map2.insertFromRight<TT::CFG_AMAP_ROW0, TT::CFG_AMAP_ROW0_LEN>(i_bitmap);
             return;
         }
-
-        ///
-        /// @brief Change the COL10 address mapping
-        /// @param[in] i_bitmap COL10 bit map in the address counter
-        /// @note Assumes data is right-aligned
-        ///
-        void change_col10_bit( const uint64_t i_bitmap );
 
         ///
         /// @brief Change the COL9 address mapping
@@ -1857,8 +1570,7 @@ class program
         ///
         inline void change_col9_bit( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_col9_bit();
-            l_buffer.insertFromRight<TT::CFG_AMAP_COL9, TT::CFG_AMAP_COL9_LEN>(i_bitmap);
+            iv_addr_map3.insertFromRight<TT::CFG_AMAP_COL9, TT::CFG_AMAP_COL9_LEN>(i_bitmap);
             return;
         }
 
@@ -1869,8 +1581,7 @@ class program
         ///
         inline void change_col8_bit( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_col8_bit();
-            l_buffer.insertFromRight<TT::CFG_AMAP_COL8, TT::CFG_AMAP_COL8_LEN>(i_bitmap);
+            iv_addr_map3.insertFromRight<TT::CFG_AMAP_COL8, TT::CFG_AMAP_COL8_LEN>(i_bitmap);
             return;
         }
 
@@ -1881,8 +1592,7 @@ class program
         ///
         inline void change_col7_bit( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_col7_bit();
-            l_buffer.insertFromRight<TT::CFG_AMAP_COL7, TT::CFG_AMAP_COL7_LEN>(i_bitmap);
+            iv_addr_map3.insertFromRight<TT::CFG_AMAP_COL7, TT::CFG_AMAP_COL7_LEN>(i_bitmap);
             return;
         }
 
@@ -1893,8 +1603,7 @@ class program
         ///
         inline void change_col6_bit( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_col6_bit();
-            l_buffer.insertFromRight<TT::CFG_AMAP_COL6, TT::CFG_AMAP_COL6_LEN>(i_bitmap);
+            iv_addr_map3.insertFromRight<TT::CFG_AMAP_COL6, TT::CFG_AMAP_COL6_LEN>(i_bitmap);
             return;
         }
 
@@ -1904,8 +1613,7 @@ class program
         ///
         inline void change_col5_bit( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_col5_bit();
-            l_buffer.insertFromRight<TT::CFG_AMAP_COL5, TT::CFG_AMAP_COL5_LEN>(i_bitmap);
+            iv_addr_map3.insertFromRight<TT::CFG_AMAP_COL5, TT::CFG_AMAP_COL5_LEN>(i_bitmap);
             return;
         }
 
@@ -1915,8 +1623,7 @@ class program
         ///
         inline void change_col4_bit( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_col4_bit();
-            l_buffer.insertFromRight<TT::CFG_AMAP_COL4, TT::CFG_AMAP_COL4_LEN>(i_bitmap);
+            iv_addr_map3.insertFromRight<TT::CFG_AMAP_COL4, TT::CFG_AMAP_COL4_LEN>(i_bitmap);
             return;
         }
 
@@ -1926,8 +1633,7 @@ class program
         ///
         inline void change_col3_bit( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_col3_bit();
-            l_buffer.insertFromRight<TT::CFG_AMAP_COL3, TT::CFG_AMAP_COL3_LEN>(i_bitmap);
+            iv_addr_map3.insertFromRight<TT::CFG_AMAP_COL3, TT::CFG_AMAP_COL3_LEN>(i_bitmap);
             return;
         }
 
@@ -1937,8 +1643,7 @@ class program
         ///
         inline void change_col2_bit( const uint64_t i_bitmap )
         {
-            fapi2::buffer<uint64_t>& l_buffer = this->get_addr_map_col2_bit();
-            l_buffer.insertFromRight<TT::CFG_AMAP_COL2, TT::CFG_AMAP_COL2_LEN>(i_bitmap);
+            iv_addr_map3.insertFromRight<TT::CFG_AMAP_COL2, TT::CFG_AMAP_COL2_LEN>(i_bitmap);
             return;
         }
 
