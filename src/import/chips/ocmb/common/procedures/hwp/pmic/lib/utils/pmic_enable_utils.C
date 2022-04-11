@@ -1814,17 +1814,78 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+namespace workarounds
+{
+
+///
+/// @brief Override ADC1 registers for DDIMM's with PMIC redundancy but no VDDR1 rail
+/// @param[in] i_has_no_vddr1 true if the card is a has PMIC redundancy but no VDDR1 rail, which needs this workaround
+/// @param[in] i_reg the register that is being set
+/// @param[in] i_setting the original setting for this register
+/// @return The register setting, overwritten if needed for effected registers
+///
+uint8_t override_adc1_regs_for_no_vddr1( const bool i_has_no_vddr1, const uint8_t i_reg, const uint8_t i_setting)
+{
+    // Has a VDDR1 rail? return the passed in setting
+    if(!i_has_no_vddr1)
+    {
+        return i_setting;
+    }
+
+    // Check if this is the AUTO_SEQ_CH_SEL register
+    if(i_reg == ADC_REGS::AUTO_SEQ_CH_SEL )
+    {
+        // If so, ensure that the VDDR1 rail is disabled - it does not exist
+        return ADC_FIELDS::AUTO_SEQ_CH_SEL_NO_VDDR1_RAIL;
+    }
+
+    // Check if this is the ALERT_CH_SEL register
+    if(i_reg == ADC_REGS::ALERT_CH_SEL)
+    {
+        return ADC_FIELDS::ALERT_CH_SEL_ADC1_NO_VDDR1_RAIL_LOCAL_VOLT_ALERT;
+    }
+
+    // Otherwise, no change needed
+    return i_setting;
+}
+
+///
+/// @brief Checks if this card does not have a VDDR1 rail
+/// @param[in] i_ocmb_target OCMB parent target
+/// @param[out] o_has_no_vddr1 true if the card is a has PMIC redundancy but no VDDR1 rail
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode check_for_no_vddr1_rail( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> i_ocmb_target,
+        bool& o_has_no_vddr1)
+{
+    o_has_no_vddr1 = false;
+    uint8_t l_vddr1_rail_sequence = 0;
+
+    // Grabs if this card has a VDDR1 rail (SWA+B are mapped together for VDDR1 on PMIC0)
+    FAPI_TRY(mss::attr::get_pmic0_swa_sequence_order(i_ocmb_target, l_vddr1_rail_sequence));
+
+    // If the sequence order value is 0 on SWA, then there is no VDDR1
+    o_has_no_vddr1 = l_vddr1_rail_sequence == 0;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+} // ns workarounds
+
 ///
 /// @brief Setup ADC1
 ///
 /// @param[in] i_adc ADC1
+/// @param[in] i_has_no_vddr1 true if the card is a has PMIC redundancy but no VDDR1 rail, which needs this workaround
 /// @return fapi2::ReturnCode
 ///
-fapi2::ReturnCode setup_adc1(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_adc)
+fapi2::ReturnCode setup_adc1(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_adc, const bool i_has_no_vddr1)
 {
     for (const auto& l_pair : ADC1_CH_INIT)
     {
-        const fapi2::buffer<uint8_t> l_data(l_pair.second);
+        const fapi2::buffer<uint8_t> l_data = workarounds::override_adc1_regs_for_no_vddr1(i_has_no_vddr1, l_pair.first,
+                                              l_pair.second);
         FAPI_TRY(mss::pmic::i2c::reg_write(i_adc, l_pair.first, l_data));
     }
 
@@ -2830,6 +2891,7 @@ fapi2::ReturnCode enable_with_redundancy(const fapi2::Target<fapi2::TARGET_TYPE_
 
     fapi2::buffer<uint8_t> l_reg_contents;
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+    bool l_has_no_vddr1 = false;
 
     // Grab the targets as a struct, if they exist
     target_info_redundancy l_target_info(i_ocmb_target, l_rc);
@@ -2838,6 +2900,9 @@ fapi2::ReturnCode enable_with_redundancy(const fapi2::Target<fapi2::TARGET_TYPE_
     // Then we can't properly enable
     FAPI_TRY(l_rc, "Unusable PMIC/GENERICI2CSLAVE child target configuration found from %s",
              mss::c_str(i_ocmb_target));
+
+    // Grabs data to see if a workaround needs to be run below
+    FAPI_TRY(workarounds::check_for_no_vddr1_rail(i_ocmb_target, l_has_no_vddr1));
 
     {
         // We can loop on these to pick out the PMIC, connected GPIO, and input port bit to use later
@@ -2861,7 +2926,7 @@ fapi2::ReturnCode enable_with_redundancy(const fapi2::Target<fapi2::TARGET_TYPE_
         FAPI_TRY(mss::pmic::redundancy_vr_enable_kickoff(l_target_info, l_enable_loop_fields));
 
         // Next, set up the ADC devices post-enable
-        FAPI_TRY(setup_adc1(l_target_info.iv_adc1));
+        FAPI_TRY(setup_adc1(l_target_info.iv_adc1, l_has_no_vddr1));
         FAPI_TRY(setup_adc2(l_target_info.iv_adc2));
 
         // Now, check that the PMICs were enabled properly. If any don't report on that are expected

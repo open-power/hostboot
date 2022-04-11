@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -466,7 +466,9 @@ enum fields
     SEQUENCE_CFG_CHANNEL_SEQUENCING                     = 0x11,
     SEQUENCE_CFG_AUTO_SEQUENCE                          = 0x01,
     AUTO_SEQ_CH_SEL_ALL_AUTO_SEQUENCING                 = 0xFF,
+    AUTO_SEQ_CH_SEL_NO_VDDR1_RAIL                       = 0x7C,
     ALERT_CH_SEL_ADC1_LOCAL_VOLTAGES_ALERT              = 0xBE,
+    ALERT_CH_SEL_ADC1_NO_VDDR1_RAIL_LOCAL_VOLT_ALERT    = 0x3C,
     ALERT_CH_SEL_ADC2_LOCAL_VOLTAGES_ALERT              = 0xAC,
     ALERT_PIN_CFG_ACTIVE_HIGH                           = 0x00,
     OPMODE_CFG_AUTONOMOUS                               = 0x31,
