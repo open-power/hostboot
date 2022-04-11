@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,6 +40,14 @@
 #include <runtime/interface.h>
 #include <targeting/runtime/rt_targeting.H>
 #include <targeting/common/targetservice.H>
+
+//See attn_rt.C
+namespace ATTN_RT
+{
+    int handleAttns(uint64_t i_proc,
+                    uint64_t i_ipollStatus,
+                    uint64_t i_ipollMask);
+}
 
 using namespace ATTN;
 using namespace TARGETING;
@@ -103,7 +111,12 @@ class AttnCheckForRtAttentionsTest : public CxxTest::TestSuite
                     TS_FAIL("Not able to get run time interface object");
                     break;
                 }
-                int32_t rc = rt_intf->handle_attns(chipId, 0, 0);
+                else if (&ATTN_RT::handleAttns != rt_intf->handle_attns)
+                {
+                    TS_FAIL("AttnCheckForRtAttentionsTest: handle_attns function pointer is not set to ATTN_RT::handleAttns()");
+                    break;
+                }
+                int32_t rc = ATTN_RT::handleAttns(chipId, 0, 0);
 
                 if( 0 != rc  )
                 {

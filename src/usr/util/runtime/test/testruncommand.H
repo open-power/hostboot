@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,6 +29,16 @@
 #include <stdio.h>
 #include "utilbase.H"
 
+//See rt_cmds.C
+namespace Util
+{
+int hbrtCommand( int argc,
+                 const char** argv,
+                 char** o_outString );
+}
+//Use a macro for easy function name changes
+#define RUN_COMMAND Util::hbrtCommand
+
 class RunCommandTest : public CxxTest::TestSuite
 {
   public:
@@ -46,7 +56,13 @@ class RunCommandTest : public CxxTest::TestSuite
 
         char* outstr = NULL;
 
-        int rc = (getRuntimeInterfaces()->run_command)( argc, argv, &outstr );
+        if (&Util::hbrtCommand != getRuntimeInterfaces()->run_command)
+        {
+            TS_FAIL("testRunCommand: run_command function pointer is not set to Util::hbrtCommand()");
+            return;
+        }
+
+        int rc = RUN_COMMAND( argc, argv, &outstr );
 
         TRACFCOMP( Util::g_util_trace, "testRunCommand> rc=%d :: %s",
                                         rc, outstr == NULL ? "null" : outstr );
@@ -73,7 +89,7 @@ class RunCommandTest : public CxxTest::TestSuite
     {
         int rc = 0;
 
-        rc = (getRuntimeInterfaces()->run_command)( 0, NULL, NULL );
+        rc = RUN_COMMAND( 0, NULL, NULL );
         if( rc )
         {
             TS_FAIL( "testRunCommandBad> Error from no args" );
@@ -96,7 +112,7 @@ class RunCommandTest : public CxxTest::TestSuite
         const char* argv[] = { arg0, arg1, arg2, arg3 };
 
         // do a read
-        rc = (getRuntimeInterfaces()->run_command)( 3, argv, &outstr );
+        rc = RUN_COMMAND( 3, argv, &outstr );
         if( rc )
         {
             TS_FAIL( "testRunCommandScom1> rc=%d", rc );
@@ -107,7 +123,7 @@ class RunCommandTest : public CxxTest::TestSuite
 
         // do a write
         memcpy( arg0, "putscom", 8 );
-        rc = (getRuntimeInterfaces()->run_command)( 4, argv, &outstr );
+        rc = RUN_COMMAND( 4, argv, &outstr );
         if( rc )
         {
             TS_FAIL( "testRunCommandScom2> rc=%d", rc );
@@ -118,7 +134,7 @@ class RunCommandTest : public CxxTest::TestSuite
 
         // read again to check data (in trace only)
         memcpy( arg0, "getscom", 8 );
-        rc = (getRuntimeInterfaces()->run_command)( 3, argv, &outstr );
+        rc = RUN_COMMAND( 3, argv, &outstr );
         if( rc )
         {
             TS_FAIL( "testRunCommandScom3> rc=%d", rc );
@@ -142,7 +158,7 @@ class RunCommandTest : public CxxTest::TestSuite
         const char* argv[] = { arg0 };
 
         // do a read
-        rc = (getRuntimeInterfaces()->run_command)( 1, argv, &outstr );
+        rc = RUN_COMMAND( 1, argv, &outstr );
         if( rc )
         {
             TS_FAIL( "testRunCommandReadHbrtVersion> rc=%d", rc );

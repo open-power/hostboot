@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,15 @@
 #include <pnor/pnor_reasoncodes.H>
 #include "../../../pnor/pnor_utils.H"
 
+//See rt_secureboot.C
+namespace SECUREBOOT
+{
+int verify_container(
+    const void*  i_pContainer,
+    const void*  i_pHwKeyHash,
+    const size_t i_hwKeyHashSize);
+}
+
 class SecurebootRtTestSuite: public CxxTest::TestSuite
 {
     public:
@@ -81,12 +90,17 @@ class SecurebootRtTestSuite: public CxxTest::TestSuite
             break;
         }
 
+        if (&SECUREBOOT::verify_container != pRtIntf->verify_container)
+        {
+            TS_FAIL("testVerifyContainer: verify_container function pointer is not set to SECUREBOOT::verify_container()");
+            break;
+        }
+
         // If secureboot is compiled in, perform various API tests
 
         // TODO: RTC 156485 For now, function is a no op; add real tests here
         // when verify_container is fully implemented
-        auto rc = pRtIntf->verify_container(
-            nullptr,nullptr,0);
+        auto rc = SECUREBOOT::verify_container(nullptr,nullptr,0);
         if(rc != 0)
         {
             TS_FAIL("testVerifyContainer: expected verify_container to succeed "

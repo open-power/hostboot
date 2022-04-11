@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,6 +61,12 @@
 
 #include <string.h>
 #include <stdio.h>
+
+//See rt_sbeio.C
+namespace RT_SBEIO
+{
+    int process_sbe_msg(uint32_t i_procChipId);
+}
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -803,13 +809,10 @@ private:
                 result = -1;
                 break;
             }
-            else if(not l_rt->sbe_message_passing)
-            {
-                TS_FAIL("SbePassThroughApplyVpdOverrides: "
-                        "sbe_message_passing runtime interface "
-                        "has not been set.");
 
-                result = -1;
+            if (&RT_SBEIO::process_sbe_msg != l_rt->sbe_message_passing)
+            {
+                TS_FAIL("invokeSBEMessagePassing: sbe_message_passing function pointer is not set to RT_SBEIO::process_sbe_msg()");
                 break;
             }
 
@@ -928,16 +931,16 @@ private:
             }
 
             //#############################################
-            // Step G - Invoke sbe_message_passing
+            // Step G - Invoke process_sbe_msg
             //#############################################
 
             // the rc from the sbe_msg_passing is the reasoncode of the errorlog
             // that was created in sbeApplyVpdOverrides, 0 if no error was created
-            result = l_rt->sbe_message_passing(i_chipId);
+            result = RT_SBEIO::process_sbe_msg(i_chipId);
             if(0 != result)
             {
                 TS_INFO("SbePassThroughApplyVpdOverrides: "
-                        "sbe_message_passing failed. rc: 0x%X",
+                        "process_sbe_msg failed. rc: 0x%X",
                          result);
                 break;
             }

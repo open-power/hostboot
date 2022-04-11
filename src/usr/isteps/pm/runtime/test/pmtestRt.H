@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,13 +50,22 @@
 #include <util/misc.H>
 #include <arch/magic.H>
 
+//See rt_pm.C
+namespace RTPM
+{
+    int load_pm_complex( uint64_t i_chip,
+                         uint64_t i_homer_addr,
+                         uint64_t i_occ_common_addr,
+                         uint32_t i_mode );
+    int start_pm_complex( uint64_t i_chip );
+}
+
 //trace
 namespace ISTEPS_TRACE
 {
 extern trace_desc_t* g_trac_isteps_trace;
 }
 
-using namespace RTPM;
 using namespace HBPM;
 using namespace TARGETING;
 using namespace CxxTest;
@@ -112,31 +121,41 @@ class PMTest : public CxxTest::TestSuite
         TS_INFO("testLoadAndStartOcc: OCC common addr: 0x%016lx; HOMER addr: 0x%016lx",
                 l_occCommonAddr, l_homerAddr);
 
-        runtimeInterfaces_t* l_rtInterfaces = getRuntimeInterfaces();
-
-        if(l_rtInterfaces->load_pm_complex == nullptr)
+        if(getRuntimeInterfaces()->load_pm_complex == nullptr)
         {
             TS_FAIL("testLoadAndStartOcc: no load_pm_complex interface found!");
             break;
         }
 
-        l_rc = l_rtInterfaces->load_pm_complex(l_chipId,
-                                               l_homerAddr,
-                                               l_occCommonAddr,
-                                               HBRT_PM_LOAD);
+        if (&RTPM::load_pm_complex != getRuntimeInterfaces()->load_pm_complex)
+        {
+            TS_FAIL("testLoadAndStartOcc: verify_container function pointer is not set to SECUREBOOT::verify_container()");
+            break;
+        }
+
+        l_rc = RTPM::load_pm_complex(l_chipId,
+                                     l_homerAddr,
+                                     l_occCommonAddr,
+                                     HBRT_PM_LOAD);
         if(l_rc)
         {
             TS_FAIL("testLoadAndStartOcc: Could not load OCC; RC: %d", l_rc);
             break;
         }
 
-        if(l_rtInterfaces->start_pm_complex == nullptr)
+        if(getRuntimeInterfaces()->start_pm_complex == nullptr)
         {
             TS_FAIL("testLoadAndStartOcc:no start_pm_complex interface found!");
             break;
         }
 
-        l_rc = l_rtInterfaces->start_pm_complex(l_chipId);
+        if (&RTPM::start_pm_complex != getRuntimeInterfaces()->start_pm_complex)
+        {
+            TS_FAIL("testLoadAndStartOcc: verify_container function pointer is not set to SECUREBOOT::verify_container()");
+            break;
+        }
+
+        l_rc = RTPM::start_pm_complex(l_chipId);
         if(l_rc)
         {
             TS_FAIL("testLoadAndStartOcc: Could not start OCC; RC: %d", l_rc);

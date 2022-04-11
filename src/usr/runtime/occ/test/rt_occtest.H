@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,9 @@
 #include <vmmconst.h>
 #include <sys/mm.h>
 #include <util/utillidmgr.H>
+
+//See utillidmgr_rt.C
+const uint32_t * UtilLidMgr::getLidList(size_t * o_num);
 
 class OccTest: public CxxTest::TestSuite
 {
@@ -86,14 +89,14 @@ class OccTest: public CxxTest::TestSuite
         if(rt_intf && rt_intf->get_lid_list)
         {
             size_t size = 0;
-            const uint32_t * list = rt_intf->get_lid_list(&size);
+            const uint32_t * list = UtilLidMgr::getLidList(&size);
             if(size > 1)
             {
-                TS_FAIL("runtimeInterfaces->get_lid_list empty list");
+                TS_FAIL("UtilLidMgr::getLidList empty list");
             }
             else if (list[0] != Util::OCC_LIDID)
             {
-                TS_FAIL("runtimeInterface->get_lid_list missing OCCLID");
+                TS_FAIL("UtilLidMgr::getLidList missing OCCLID");
             }
         }
 

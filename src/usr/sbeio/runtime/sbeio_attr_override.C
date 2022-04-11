@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,6 +26,13 @@
 
 #include <runtime/interface.h>
 #include <sbeio/sbeioreasoncodes.H>
+
+//See attrPlatOverride_rt.C
+namespace RT_TARG
+{
+    int apply_attr_override(uint8_t* i_data,
+                            size_t i_size );
+}
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -50,72 +57,8 @@ errlHndl_t sbeApplyAttrOverrides(
     {
         *o_rspDataSize = 0; //No return data
 
-        runtimeInterfaces_t *rt_intf = getRuntimeInterfaces();
-
-        if(nullptr == rt_intf)
-        {
-           TRACFCOMP( g_trac_sbeio,
-                      ERR_MRK"sbeApplyAttrOverrides: "
-                      "Unable to get runtime interfaces."
-                    );
-
-           /*@
-            * @errortype
-            * @moduleid     SBEIO::SBEIO_RUNTIME_ATTR_OVERRIDE
-            * @reasoncode   SBEIO::SBEIO_RT_NO_INTERFACE_POINTER
-            * @userdata1    Processor HUID
-            * @userdata2    Reserved
-            *
-            * @devdesc      SBEIO RT Process Pass-through command RuntimeRT
-            *                Interface pointer not set.
-            * @custdesc     Firmware error communicating with boot device
-            */
-            errl = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
-                                 SBEIO::SBEIO_RUNTIME_ATTR_OVERRIDE,
-                                 SBEIO::SBEIO_RT_NO_INTERFACE_POINTER,
-                                 get_huid(i_procTgt),
-                                 0
-                                 );
-
-            errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                      HWAS::SRCI_PRIORITY_HIGH);
-
-            errl->collectTrace(SBEIO_COMP_NAME);
-            break;
-        }
-        else if(nullptr == rt_intf->apply_attr_override)
-        {
-            TRACFCOMP( g_trac_sbeio,
-                       ERR_MRK"sbeApplyAttrOverrides: "
-                       "Function pointer to apply_attr_override not set."
-                     );
-            /*@
-            * @errortype
-            * @moduleid     SBEIO::SBEIO_RUNTIME_ATTR_OVERRIDE
-            * @reasoncode   SBEIO::SBEIO_RT_NO_APPLY_ATTR_FUNCTION
-            * @userdata1    Processor HUID
-            * @userdata2    Reserved
-            *
-            * @devdesc      SBEIO RT Process Pass-through command RuntimeRT
-            *               Interface pointer for apply_attr_override not set.
-            * @custdesc     Firmware error communicating with boot device
-            */
-            errl = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
-                                 SBEIO::SBEIO_RUNTIME_ATTR_OVERRIDE,
-                                 SBEIO::SBEIO_RT_NO_APPLY_ATTR_FUNCTION,
-                                 get_huid(i_procTgt),
-                                 0
-                                 );
-
-            errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                     HWAS::SRCI_PRIORITY_HIGH);
-
-            errl->collectTrace(SBEIO_COMP_NAME);
-            break;
-        }
-
         //apply_attr_override will take care of handling errors it encounters.
-        *o_rspStatus = rt_intf->apply_attr_override(i_reqData, i_reqDataSize);
+        *o_rspStatus = RT_TARG::apply_attr_override(i_reqData, i_reqDataSize);
     }
     while(0);
 

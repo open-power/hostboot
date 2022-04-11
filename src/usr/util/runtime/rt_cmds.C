@@ -48,6 +48,27 @@
 #endif
 #include <util/utillidmgr.H>
 
+//See rt_sbeio.C
+namespace RT_SBEIO
+{
+    int process_sbe_msg(uint32_t i_procChipId);
+}
+
+//See rt_targeting.C
+namespace RT_TARG
+{
+    int hbrt_update_prep(void);
+}
+
+#ifdef CONFIG_HTMGT
+//See rt_occ.C
+namespace HTMGT
+{
+    int reset_pm_complex_with_reason(const OCC_RESET_REASON i_reason,
+                                     const uint64_t i_chipId);
+}
+#endif
+
 // A flag, that when defined, will include interfaces: writevpd, getscom and putscom
 // Comment out to exclude said interfaces
 #define INCLUDE_LAB_ONLY_INTERFACES 1
@@ -705,16 +726,7 @@ void cmd_sbemsg( char*& o_output,
 
     do
     {
-        // Get the runtime interface object
-        runtimeInterfaces_t *l_rt_intf = getRuntimeInterfaces();
-        if(nullptr == l_rt_intf)
-        {
-            rc = -2;
-            sprintf( o_output, "Not able to get run time interface object");
-            return;
-        }
-
-        rc = l_rt_intf->sbe_message_passing(i_chipId);
+        rc = RT_SBEIO::process_sbe_msg(i_chipId);
         if(0 != rc)
         {
             sprintf( o_output, "Unexpected return from RT SBE message passing. "
@@ -941,16 +953,7 @@ void cmd_hbrt_update(char*& o_output)
 
     do
     {
-        // Get the runtime interface object
-        runtimeInterfaces_t *l_rt_intf = getRuntimeInterfaces();
-        if(nullptr == l_rt_intf)
-        {
-            rc = -2;
-            sprintf( o_output, "Not able to get run time interface object");
-            return;
-        }
-
-        rc = l_rt_intf->prepare_hbrt_update();
+        rc = RT_TARG::hbrt_update_prep();
         if(0 != rc)
         {
             sprintf( o_output, "Unexpected return from RT prepare HBRT update. "
@@ -1544,6 +1547,7 @@ int hbrtCommand( int argc,
             sprintf(*l_output, "ERROR: getcaps");
         }
     }
+#ifdef CONFIG_HTMGT
     else if( !strcmp( argv[0], "resetPmComplexWithReason" ) )
     {
         // resetPmComplexWithReason [<OCC_RESET_REASON>] [<chipId>]
@@ -1577,19 +1581,10 @@ int hbrtCommand( int argc,
             strcat( *l_output, tmpstr );
             UTIL_FT("::%s",*l_output);
 
-            // Get the runtime interface object
-            runtimeInterfaces_t *l_rt_intf = getRuntimeInterfaces();
-            if(nullptr == l_rt_intf)
-            {
-                sprintf( *l_output, "Not able to get run time interface object for resetPmComplexWithReason");
-            }
-            else
-            {
-                rc = l_rt_intf->reset_pm_complex_with_reason(
+            rc = HTMGT::reset_pm_complex_with_reason(
                          static_cast<OCC_RESET_REASON>(occ_reset_reason),
                          chipId);
-                sprintf(*l_output, "back from resetPmComplexWithReason> rc=%d", rc);
-            }
+            sprintf(*l_output, "back from resetPmComplexWithReason> rc=%d", rc);
             UTIL_FT("::%s",*l_output);
         }
         else
@@ -1599,6 +1594,7 @@ int hbrtCommand( int argc,
                      "ERROR: resetPmComplexWithReason [0x<OCC_RESET_REASON>] [0x<chipId>]\n");
         }
     }
+#endif
     else
     {
         *l_output = new char[50+100*12];
@@ -1645,9 +1641,10 @@ int hbrtCommand( int argc,
         strcat( *l_output, l_tmpstr );
         sprintf( l_tmpstr, "getcaps\n");
         strcat( *l_output, l_tmpstr );
+#ifdef CONFIG_HTMGT
         sprintf( l_tmpstr, "resetPmComplexWithReason [0x<OCC_RESET_REASON>] [0x<chipId>]\n");
         strcat( *l_output, l_tmpstr );
-
+#endif
     }
 
     if( l_traceOut && (*l_output != NULL) )
