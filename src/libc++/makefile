@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2019
+# Contributors Listed Below - COPYRIGHT 2010,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -26,6 +26,9 @@ ROOTPATH = ../..
 
 HOSTBOOT_PROFILE_ARTIFACT=
 
+EXTRAINCDIR = ${ROOTPATH}/src/include/usr
+
 OBJS += builtins.o
+OBJS += rt_builtins.o
 
 include ${ROOTPATH}/config.mk

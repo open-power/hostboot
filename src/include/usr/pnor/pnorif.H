@@ -324,6 +324,13 @@ void readAndClearCounter( uint32_t i_threshold,
 const std::array<uint32_t, PNOR::NUM_SECTIONS>& getLidIds();
 #endif
 
+#ifdef __HOSTBOOT_RUNTIME
+/**
+* @brief Whether PNOR is initialized yet.
+*/
+bool isPnorInitialized();
+#endif
+
 } // PNOR
 
 #endif

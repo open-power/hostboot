@@ -57,12 +57,59 @@ const uint32_t PNOR_ERROR_LENGTH = 4096;
 const uint32_t EMPTY_ERRLOG_IN_PNOR = 0xFFFFFFFF;
 const uint32_t FIRST_BYTE_ERRLOG = 0xF0000000;
 
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-// Global function (not a method on an object) to commit the error log.
-void errlCommit(errlHndl_t& io_err, compId_t i_committerComp )
+/* @brief Structure to record the arguments to errlCommit, so that it can be
+ * re-invoked later if called too early.
+ *
+ */
+struct errlCommitRecord
 {
-    ERRORLOG::theErrlManager::instance().commitErrLog(io_err, i_committerComp );
+    errlHndl_t errl;
+    compId_t committerComp;
+};
+
+void errlCommit(errlHndl_t& io_err, const compId_t i_committerComp)
+{
+    do
+    {
+
+#if defined(__HOSTBOOT_RUNTIME) && defined(CONFIG_FILE_XFER_VIA_PLDM)
+    // Committing an error at runtime requires PNOR access. If an error log is
+    // committed before PNOR is available, queue it up to be committed later.
+
+    static std::vector<errlCommitRecord> early_error_logs;
+
+    if (PNOR::isPnorInitialized())
+    { // If PNOR is initialized and we've saved error logs to commit later,
+      // commit them now.
+        if (!early_error_logs.empty())
+        {
+            // Move the storage to a local variable so that the static vector is
+            // empty and we don't enter this path multiple times if we commit an
+            // error in the error commit code. This will also cause the storage
+            // to be deallocated when we're done here.
+            const std::vector<errlCommitRecord> recs = move(early_error_logs);
+
+            auto& theErrlManager = ERRORLOG::theErrlManager::instance();
+
+            for (auto record : recs)
+            {
+                theErrlManager.commitErrLog(record.errl, record.committerComp);
+            }
+        }
+    }
+    else
+    { // If PNOR isn't initialized, we can't commit errors yet. Save the error
+      // for committing later.
+        early_error_logs.push_back({ io_err, i_committerComp });
+        io_err = nullptr;
+        break;
+    }
+#endif
+
+    ERRORLOG::theErrlManager::instance().commitErrLog(io_err, i_committerComp);
+
+    } while (false);
+
     return;
 }
 
