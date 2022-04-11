@@ -763,13 +763,37 @@ fapi2::ReturnCode enable_1u_2u(
 ///
 fapi2::ReturnCode adc_min_vltg_read(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> i_ocmb_target);
 
+namespace workarounds
+{
+
+///
+/// @brief Override ADC1 registers for DDIMM's with PMIC redundancy but no VDDR1 rail
+/// @param[in] i_has_no_vddr1 true if the card is a has PMIC redundancy but no VDDR1 rail, which needs this workaround
+/// @param[in] i_reg the register that is being set
+/// @param[in] i_setting the original setting for this register
+/// @return The register setting, overwritten if needed for effected registers
+///
+uint8_t override_adc1_regs_for_no_vddr1( const bool i_has_no_vddr1, const uint8_t i_reg, const uint8_t i_setting);
+
+///
+/// @brief Checks if this card does not have a VDDR1 rail
+/// @param[in] i_ocmb_target OCMB parent target
+/// @param[out] o_has_no_vddr1 true if the card is a has PMIC redundancy but no VDDR1 rail
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode check_for_no_vddr1_rail( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> i_ocmb_target,
+        bool& o_has_no_vddr1);
+
+} // ns workarounds
+
 ///
 /// @brief Setup ADC1
 ///
 /// @param[in] i_adc ADC1
+/// @param[in] i_has_no_vddr1 true if the card is a has PMIC redundancy but no VDDR1 rail, which needs this workaround
 /// @return fapi2::ReturnCode
 ///
-fapi2::ReturnCode setup_adc1(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_adc);
+fapi2::ReturnCode setup_adc1(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_adc, const bool i_has_no_vddr1);
 
 ///
 /// @brief Setup ADC2
