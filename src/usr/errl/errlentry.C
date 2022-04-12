@@ -285,6 +285,14 @@ ErrlUD * ErrlEntry::addFFDC(const compId_t i_compId,
                       i_compId, i_ffdcVer,
                       i_ffdcSubSect, i_merge == true ? "DO" : "NO" );
 
+        // Record the hash of the data of a callout with the same/current FFDC
+        // version so that when another callout is added, the hash of the new
+        // callout can be compared to the other hashes we've seen so far and any
+        // duplicates can be removed. This ensures all callouts in the error logs
+        // are unique. Only UD callout sub-sections are applicable here; we check
+        // the FFDC version because different versions may treat the underlying
+        // data differently, so the same binary data may have a different meaning
+        // under different version.
         if(i_ffdcSubSect == ERRL_UDT_CALLOUT &&
            i_ffdcVer == ERRL_UDT_CALLOUT_BASE_VER)
         {
