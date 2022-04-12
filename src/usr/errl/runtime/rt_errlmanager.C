@@ -32,6 +32,7 @@
 #include <sys/time.h>
 #include <stdlib.h>
 #include <string.h>
+#include <memory>
 #include <runtime/interface.h>   // g_hostInterfaces
 #include <util/runtime/rt_fwreq_helper.H>  // firmware_request_helper
 #include <targeting/common/targetservice.H>
@@ -84,14 +85,13 @@ ErrlManager::ErrlManager() :
 #else
         iv_isFSP(false),
 #endif
-        iv_firstHbrtEid(0),
-#ifdef CONFIG_PLDM
-        iv_isBmcInterfaceEnabled(true)
-#else
-        iv_isBmcInterfaceEnabled(false)
-#endif
+        iv_firstHbrtEid(0)
 {
     TRACFCOMP( g_trac_errl, ENTER_MRK "ErrlManager::ErrlManager constructor." );
+
+#ifdef CONFIG_PLDM
+    enableBmcInterface();
+#endif
 
     iv_hwasProcessCalloutFn = rt_processCallout;
 
@@ -170,8 +170,40 @@ void ErrlManager::sendMboxMsg ( errlHndl_t& io_err )
     do
     {
 #ifdef CONFIG_PLDM
-        if (iv_isBmcInterfaceEnabled)
+        if (isBmcInterfaceEnabled())
         {
+            // Disable the BMC interface so that if an error gets committed in
+            // the error commit path (such as for persistent PLDM issues), we
+            // avoid infinite recursion.
+            //
+            // This has to happen pre-emptively here (e.g. we can't wait to
+            // actually detect a PLDM error from within the commit code) because
+            // the infinite recursion may happen before any errors are actually
+            // returned to the caller.
+            //
+            // Since the infinite recursion is prevented here, if an error
+            // occurs in the error path and the code wants to permanently
+            // disable the PLDM error log path, it will itself execute the
+            // disableBmcInterface() function, which will cancel out our
+            // enableBmcInterface() call below, and the BMC PLDM error path will
+            // remain disabled.
+            TRACFCOMP(g_trac_errl, "Temporarily disabling BMC interface for recursive errors");
+
+            disableBmcInterface();
+
+            auto re_enable = hbstd::scope_exit([this]() {
+                    enableBmcInterface();
+                    if (isBmcInterfaceEnabled())
+                    {
+                        TRACFCOMP(g_trac_errl,
+                                  "Re-enabling BMC interface after successful error commit");
+                    }
+                    else
+                    {
+                        TRACFCOMP(g_trac_errl,
+                                  "BMC interface remains disabled due to error while committing error");
+                    }
+                });
 
             bool l_savedToPnor = saveErrLogToPnor(io_err);
             if(!l_savedToPnor)

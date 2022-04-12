@@ -304,7 +304,7 @@ void ErrlManager::setupPnorInfo()
                             // skip it, go to the next one
                             continue;
                         }
-                        if (iv_isBmcInterfaceEnabled)
+                        if (isBmcInterfaceEnabled())
                         {
                             // send log to BMC and mark as previous boot error
                             bool sentSuccessful = sendErrLogToBmc(err, true);
@@ -711,8 +711,8 @@ bool ErrlManager::sendErrLogToBmc(errlHndl_t &io_err, bool i_isPrevBootErr)
                 "PLDM::sendErrLog() failed with eid=0x%.8X rc=0x%04X so stopping BMC PLDM error logging",
                 l_errl->eid(), l_errl->reasonCode() );
 
-            // stop sending error logs down to PLDM
-            iv_isBmcInterfaceEnabled = false;
+            // stop sending error logs down via PLDM
+            disableBmcInterface();
 
 #ifndef __HOSTBOOT_RUNTIME
             // save off these trace variables

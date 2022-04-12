@@ -128,8 +128,7 @@ ErrlManager::ErrlManager() :
     iv_isMboxEnabled(false),    // assume mbox isn't ready yet..
     iv_nonInfoCommitted(false),
     iv_isErrlDisplayEnabled(false),
-    iv_pldWaitEnable(true), // error on the side of caution and default to waitings
-    iv_isBmcInterfaceEnabled(false)    // assume bmc interface isn't ready yet..
+    iv_pldWaitEnable(true) // error on the side of caution and default to waitings
 {
     TRACFCOMP( g_trac_errl, ENTER_MRK "ErrlManager::ErrlManager constructor" );
 
@@ -506,7 +505,7 @@ void ErrlManager::errlogMsgHndlr ()
                 {
 #ifdef CONFIG_PLDM
                     // BMC interface is up and running now.
-                    iv_isBmcInterfaceEnabled = true;
+                    enableBmcInterface();
 
                     // if we can now send msgs, do it.
                     // if errors came in before BMC interface was ready,
@@ -641,7 +640,7 @@ void ErrlManager::errlogMsgHndlr ()
                     }
 
 #ifdef CONFIG_PLDM
-                    if (iv_isBmcInterfaceEnabled)
+                    if (isBmcInterfaceEnabled())
                     {
                         // send to BMC
                         sendErrLogToBmc(l_err);
