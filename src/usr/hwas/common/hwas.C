@@ -1729,7 +1729,7 @@ void forceEcFcDeconfig(const TARGETING::TargetHandle_t i_core,
         i_core->setAttr<ATTR_HWAS_STATE>(hwasState);
     }
 
-    HWAS_INF("pEC HUID 0x%08X - marked %spresent, NOT functional, functionalOverride = %d ",
+    HWAS_INF("pEC HUID 0x%08X - marked %spresent, NOT functional, functionalOverride = %d "
              "%sset functional on BMC reboot",
              i_core->getAttr<ATTR_HUID>(),
              i_present ? "" : "NOT ",
@@ -1751,7 +1751,7 @@ void forceEcFcDeconfig(const TARGETING::TargetHandle_t i_core,
             l_fc->setAttr<ATTR_HWAS_STATE>(hwasState);
         }
 
-        HWAS_INF("pFC HUID 0x%08X - marked %spresent, NOT functional, functionalOverride = %d ",
+        HWAS_INF("pFC HUID 0x%08X - marked %spresent, NOT functional, functionalOverride = %d "
                  "%sset functional on BMC reboot",
                  l_fc->getAttr<ATTR_HUID>(),
                  i_present ? "" : "NOT ",
