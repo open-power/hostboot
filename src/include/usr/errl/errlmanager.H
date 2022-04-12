@@ -777,7 +777,11 @@ private:
     bool iv_isErrlDisplayEnabled; // are we able to use the errorDisplay
 #endif //#ifndef __HOSTBOOT_RUNTIME
     bool iv_pldWaitEnable; // should we wait for SP to check for PLD errors?
-    bool iv_isBmcInterfaceEnabled;  // are we able to send to BMC
+    int64_t iv_isBmcInterfaceEnabled;  // > 0 means we are able to send to BMC
+
+    bool isBmcInterfaceEnabled() const { return iv_isBmcInterfaceEnabled > 0; }
+    void enableBmcInterface() { iv_isBmcInterfaceEnabled++; }
+    void disableBmcInterface() { iv_isBmcInterfaceEnabled--; }
 
     // Errl flags which represent processing needed by the errl
     // represented as a bit field (8 bits)
