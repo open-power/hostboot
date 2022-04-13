@@ -58,4 +58,19 @@
     </deconfigure>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_ODY_DRAMINIT_SMBUS_SYNC_MSG_NOT_FOUND</rc>
+    <description>A Synopsys SMBus message was not followed by the sync message. This should be marked as recovered</description>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>SYNOPSYS_MESSAGE</ffdc>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+        <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
 </hwpErrors>
