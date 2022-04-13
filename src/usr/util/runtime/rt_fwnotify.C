@@ -949,64 +949,6 @@ void handleMctpAvailable(void)
 
 #ifndef CONFIG_FSP_BUILD
 
-#if (defined(CONFIG_MCTP) || defined(CONFIG_MCTP_TESTCASES))
-
-/**
- *  @brief Create a callback which will kick off processing of an inbound
- *      MCTP request (originating from a remote client, like BMC)/
- **/
-void createMctpAvailableCallback()
-{
-    do {
-
-    // Check the interface
-    if( g_hostInterfaces == nullptr ||
-      ( g_hostInterfaces->host_callback == nullptr ) )
-    {
-        // Normally HBRT does not tolerate errors, unless it's loaded on a
-        // system where the firmware notify interface doesn't exist (lab
-        // scenario only)
-        TRACFCOMP(g_trac_runtime, ERR_MRK
-                  "createMctpAvailableCallback: Host callback interface not "
-                  "linked; not queueing PLDM request callback.");
-        break;
-    }
-
-    const size_t msgSize = hostInterfaces::HBRT_FW_MSG_BASE_SIZE;
-    uint8_t pMsgBuf[msgSize] = {0};
-
-    hostInterfaces::hbrt_fw_msg* const pFwMsg =
-        reinterpret_cast<hostInterfaces::hbrt_fw_msg*>(pMsgBuf);
-    pFwMsg->io_type = hostInterfaces::HBRT_FW_MSG_TYPE_MCTP_AVAILABLE;
-
-    // Ask host interface to invoke the callback as soon as possible
-    const uint64_t timeInMs = 1;
-    const int rc = g_hostInterfaces->host_callback(
-                                           timeInMs,
-                                           msgSize,
-                                           reinterpret_cast<void*>(pFwMsg));
-    if(rc)
-    {
-        // HBRT does not tolerate failures to register a callback in the MCTP
-        // flow, since they will create major disruptions in dispatching
-        // requests.  Further, any attempt to log errors in the MCTP
-        // communication core may lead to out of control recursion.  Therefore,
-        // crash HBRT if this ever fails.
-        TRACFCOMP( g_trac_hbrt, ERR_MRK
-            "createMctpAvailableCallback: host_callback failed, asserting. "
-            "rc = %d, timeInMs=%llu, msgSize = %llu.",
-            rc,timeInMs,msgSize);
-        assert(rc==0,"createMctpAvailableCallback: host_callback failed, "
-            "asserting. rc = %d, timeInMs=%llu, msgSize = %llu.",
-            rc,timeInMs,msgSize);
-        break;
-    }
-
-    } while (0);
-}
-
-#endif
-
 /**
  *  @brief Create the callback into HBRT for the PMIC health check
  *

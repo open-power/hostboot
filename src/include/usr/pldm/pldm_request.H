@@ -64,8 +64,6 @@
 #include <util/runtime/rt_fwreq_helper.H>
 #endif
 
-// See rt_fwnotify.C
-void createMctpAvailableCallback();
 
 using namespace ERRORLOG;
 
@@ -219,10 +217,19 @@ errlHndl_t sendrecv_pldm_request(ResponseContainer& o_response_bytes,
     PLDM::set_waiting_for_response(false);
 
     // If a request message was queued while waiting for a response,
-    // ask PHyp to call into HBRT again.
-    if (!PLDM::get_next_request().empty())
+    // clear out that request as HBRT will never do a host_callback
+    // for incoming MCTP packets that we aren't ready to handle.
+    // Hostboot will rely on BMC to send the requests again.
+    // Doing a PLDM host callback on a non-empty next request has
+    // caused an mctp queue overrun
+    const std::vector<uint8_t>& skipReqMsg = PLDM::get_next_request();
+    if(!skipReqMsg.empty())
     {
-        createMctpAvailableCallback();
+        PLDM_INF("sendrecv_pldm_request: discarding queued PLDM request as "
+          "new one arrived while hostboot was busy handling another request.");
+        PLDM_INF_BIN("Discarded PLDM request msg header",
+            skipReqMsg.data(), std::min(skipReqMsg.size(), sizeof(pldm_msg_hdr)));
+        PLDM::clear_next_request();
     }
 #else
     std::unique_ptr<uint8_t, decltype(&free)> response(nullptr, free);
