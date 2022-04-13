@@ -36,6 +36,7 @@
 #include <fapi2.H>
 
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
 #include <generic/memory/lib/utils/poll.H>
 #include <ody_scom_mp_apbonly0.H>
@@ -233,15 +234,13 @@ fapi2::ReturnCode poll_for_completion(const fapi2::Target<fapi2::TARGET_TYPE_MEM
 
         if (STREAMING_MSG == l_mail)
         {
-            ;
-            //decode streaming messages.
-            //TODO : ZEN-MST-1588 Add APIs for Decoding streaming messages and handling SMBus messages from mailbox protocol
+            // Decodes and prints streaming messages
+            FAPI_TRY(process_streaming_message(i_target));
         }
         else if (SMBUS_MSG == l_mail)
         {
-            ;
-            // handle SMBus messages.
-            //TODO : ZEN-MST-1588 Add APIs for Decoding streaming messages and handling SMBus messages from mailbox protocol
+            // Processes and handles the SMBus messages including sending out the RCW over i2c
+            FAPI_TRY(process_smbus_message(i_target));
         }
         FAPI_TRY(fapi2::delay(mss::DELAY_1MS, 200));
         // return true if mail content is either successful completion or failed completion.
@@ -2138,6 +2137,109 @@ fapi2::ReturnCode configure_dram_train_message_block(const fapi2::Target<fapi2::
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
+/// @brief Processes a streaming message from the mailbox protocol
+/// @param[in] i_target the target on which to operate
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode process_streaming_message(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
+{
+    constexpr uint64_t STRING_INDEX     = 32;
+    constexpr uint64_t STRING_INDEX_LEN = 32;
+    constexpr uint64_t DATA             = 32;
+    constexpr uint64_t DATA_LEN         = 32;
+    constexpr uint64_t NUM_DATA         = 48;
+    constexpr uint64_t NUM_DATA_LEN     = 16;
+
+    // Grabbing a streaming message should be almost instantaneous
+    // Only using a loop count of 1 (1 ms) to hopefully allow draminit to run quickly
+    constexpr uint64_t LOOP_COUNT = 1;
+    fapi2::buffer<uint64_t> l_mail;
+    uint32_t l_string_index = 0;
+    uint16_t l_num_data = 0;
+
+    // Streaming messages use the 32-bit mode
+    FAPI_TRY(mss::ody::phy::get_mail(i_target, STREAMING_SMBUS_MSG_MODE, LOOP_COUNT, l_mail));
+
+    // Each streaming message is at least 32-bits
+    // The first message is a 32-bit string index
+    // The right most 16 bits contain the number of additional pieces of data to grab
+    // Processing out this information here
+    l_mail.extractToRight<STRING_INDEX, STRING_INDEX_LEN>(l_string_index)
+    .extractToRight<NUM_DATA, NUM_DATA_LEN>(l_num_data);
+
+    // Print out the message's "string index" to use to decode the string
+    FAPI_INF(TARGTIDFORMAT " Message string index: 0x%08x has %u more data pieces for decode", TARGTID, l_string_index,
+             l_num_data);
+
+    // Print out the data pieces that are included in the string index
+    // Each piece of data is another 32-bit mode mailbox interaction
+    for(uint16_t l_num = 0; l_num < l_num_data; ++l_num)
+    {
+        uint32_t l_data = 0;
+        FAPI_TRY(mss::ody::phy::get_mail(i_target, STREAMING_SMBUS_MSG_MODE, LOOP_COUNT, l_mail));
+
+        // Grab the data
+        l_mail.extractToRight<DATA, DATA_LEN>(l_data);
+
+        // Print the data
+        // The data can be post processed using the Synopsys .strings file (not including here as it could be size prohibitive)
+        FAPI_INF(TARGTIDFORMAT " message data %5u: 0x%08x", TARGTID, l_num, l_data);
+    }
+
+    FAPI_INF(TARGTIDFORMAT " End of message", TARGTID);
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+}
+
+///
+/// @brief Processes an SMBus message request (aka runs an RCW via i2c)
+/// @param[in] i_target the target on which to operate
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+/// @note This function only handles the message interface for right now
+/// TODO:ZEN:MST-1541 Add DDR5 RCW writes using i2c when SMBus message is received
+///
+fapi2::ReturnCode process_smbus_message(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
+{
+    // Grabbing an SMBUS message should be relatively quick
+    // Only using a loop count of 10 (10 ms) to hopefully allow draminit to run quickly
+    constexpr uint64_t LOOP_COUNT = 10;
+
+    fapi2::buffer<uint64_t> l_mail;
+
+    // SMBus messages (containing data) use the 32 bit interface
+    FAPI_TRY(mss::ody::phy::get_mail(i_target, STREAMING_SMBUS_MSG_MODE, LOOP_COUNT, l_mail));
+
+    {
+        // Process the mail data into the RCW format
+        const rcw_id l_rcw_info(l_mail);
+
+        FAPI_INF(TARGTIDFORMAT " RCW info. Channel id: 0x%x, DIMM id: 0x%x, RCW id: 0x%02x, RCW page: 0x%02x, RCW val: 0x%02x",
+                 TARGTID, l_rcw_info.iv_channel_id, l_rcw_info.iv_dimm_id, l_rcw_info.iv_rcw_id, l_rcw_info.iv_rcw_page,
+                 l_rcw_info.iv_rcw_val);
+
+        // Send the RCW: Note: we cannot do this yet see the below TODO
+        // TODO:ZEN:MST-1541 Add DDR5 RCW writes using i2c when SMBus message is received
+    }
+
+    // Look for the SMBus complete message (only 16 bits!)
+    FAPI_TRY(mss::ody::phy::get_mail(i_target, MAJOR_MSG_MODE, LOOP_COUNT, l_mail));
+
+    // If we do not get the SMBus complete message, assert but log the error as recovered
+    // We might be able to continue, but this is definitely weird
+    // Note: uint16_t is ok for the print as the mail is only 16bits
+    FAPI_ASSERT(l_mail == SMBUS_SYNC,
+                fapi2::ODY_DRAMINIT_SMBUS_SYNC_MSG_NOT_FOUND(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                .set_PORT_TARGET(i_target)
+                .set_SYNOPSYS_MESSAGE(l_mail),
+                TARGTIDFORMAT " sees a message of 0x%x instead of 0x51 (SMBUS_SYNC)", TARGTID, uint16_t(l_mail));
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///

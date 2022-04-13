@@ -48,6 +48,60 @@ namespace phy
 {
 
 ///
+/// @class rcw_id
+/// @brief Contains information for RCW's as processed from the SMBus messages
+///
+struct rcw_id
+{
+    // Note: the comments show the Synopsys mappings
+    // The IBM data starts at bit 32 and increases from there
+    // So a Synopsys mapping of 31:28 will be an IBM mapping of 32:35
+    enum bit_mappings
+    {
+        CHANNEL_ID     = 32, // Synopsys 31:28
+        CHANNEL_ID_LEN = 4,
+        DIMM_ID        = 36, // Synopsys 27:24
+        DIMM_ID_LEN    = 4,
+        RCW_ID         = 40, // Synopsys 23:16
+        RCW_ID_LEN     = 8,
+        RCW_PAGE       = 48, // Synopsys 15: 8
+        RCW_PAGE_LEN   = 8,
+        RCW_VAL        = 56, // Synopsys  7: 0
+        RCW_VAL_LEN    = 8,
+    };
+
+    rcw_id() = delete;
+
+    ///
+    /// @brief Reads in and processes the SMBus formatted message
+    ///
+    rcw_id(const fapi2::buffer<uint64_t>& i_mail) :
+        iv_channel_id(0),
+        iv_dimm_id(0),
+        iv_rcw_id(0),
+        iv_rcw_page(0),
+        iv_rcw_val(0)
+    {
+        i_mail.extractToRight<CHANNEL_ID, CHANNEL_ID_LEN>(iv_channel_id)
+        .extractToRight<DIMM_ID, DIMM_ID_LEN>(iv_dimm_id)
+        .extractToRight<RCW_ID, RCW_ID_LEN>(iv_rcw_id)
+        .extractToRight<RCW_PAGE, RCW_PAGE_LEN>(iv_rcw_page)
+        .extractToRight<RCW_VAL, RCW_VAL_LEN>(iv_rcw_val);
+    }
+
+    ///
+    /// @brief rcw_id default destructor
+    ///
+    ~rcw_id() = default;
+
+    uint8_t iv_channel_id = 0;
+    uint8_t iv_dimm_id = 0;
+    uint8_t iv_rcw_id = 0;
+    uint8_t iv_rcw_page = 0;
+    uint8_t iv_rcw_val = 0;
+};
+
+///
 /// @brief Initializes the protocol for mailbox interaction
 /// @param[in] i_target the target on which to operate
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
@@ -123,6 +177,22 @@ fapi2::ReturnCode configure_dram_train_message_block(const fapi2::Target<fapi2::
         PMU_SMB_DDR5U_1D_t& o_struct);
 
 ///
+/// @brief Processes a streaming message from the mailbox protocol
+/// @param[in] i_target the target on which to operate
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode process_streaming_message(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target);
+
+///
+/// @brief Processes an SMBus message request (aka runs an RCW via i2c)
+/// @param[in] i_target the target on which to operate
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+/// @note This function only handles the message interface for right now
+/// TODO:ZEN:MST-1541 Add DDR5 RCW writes using i2c when SMBus message is received
+///
+fapi2::ReturnCode process_smbus_message(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target);
+
+///
 /// @brief Starts the firmware draminit training
 /// @param[in] i_target the target on which to operate
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
@@ -158,6 +228,7 @@ enum mailbox_consts
     FAILED_COMPLETION = 0xFF,
     STREAMING_MSG = 0x08,
     SMBUS_MSG = 0x50,
+    SMBUS_SYNC = 0x51,
 
     // Mode for reading major message vs streaming msg/SMBus msg
     MAJOR_MSG_MODE = 16,
