@@ -24,10 +24,10 @@
 /* IBM_PROLOG_END_TAG                                                     */
 ///
 /// @file ody_draminit_utils_ut.C
-/// @brief Draminit utility unit tests
+/// @brief Draminit utility procedures unit tests
 ///
 // *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
-// *HWP FW Owner: Geetha Pisipati <Geetha.Pisapati@ibm.com>
+// *HWP FW Owner: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 2
 // *HWP Consumed by: CI
@@ -40,7 +40,8 @@
 #include <lib/phy/ody_draminit_utils.H>
 #include <ody_scom_mp_apbonly0.H>
 #include <ody_scom_mp_mastr_b0.H>
-
+#include <generic/memory/lib/utils/count_dimm.H>
+#include <lib/phy/ody_draminit_utils.H>
 
 namespace mss
 {
@@ -85,6 +86,16 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
         });
     }
 
+    GIVEN("SMBus to RCW decoding")
+    {
+        const fapi2::buffer<uint64_t> l_data(0xffffffff12345678);
+        const mss::ody::phy::rcw_id l_rcw_info(l_data);
+        REQUIRE(l_rcw_info.iv_channel_id == 0x01);
+        REQUIRE(l_rcw_info.iv_dimm_id == 0x02);
+        REQUIRE(l_rcw_info.iv_rcw_id == 0x34);
+        REQUIRE(l_rcw_info.iv_rcw_page == 0x56);
+        REQUIRE(l_rcw_info.iv_rcw_val == 0x78);
+    }
 } // scenario
 
 } // end ns test
