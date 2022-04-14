@@ -2335,6 +2335,17 @@ errlHndl_t cacheEECACHEPartition()
     // A pointer to the top of EECACHE partition.
     eecacheSectionHeader* l_eecacheSectionHeader =
             reinterpret_cast<eecacheSectionHeader*>(g_eecachePnorVaddr);
+
+    // In MPIPL, the EECACHE should not be empty/invalid
+    if(TARGETING::UTIL::assertGetToplevelTarget()->getAttr<TARGETING::ATTR_IS_MPIPL_HB>())
+    {
+        l_errl = isEecacheEmpty(l_eecacheSectionHeader);
+        if(l_errl)
+        {
+            break;
+        }
+    }
+
     // The record header we want to push into the global eecache map
     eepromRecordHeader* l_pRecordHeader = nullptr;
     eepromRecordHeader l_recordToAdd {};

@@ -108,6 +108,12 @@ struct rtEecacheInit
 
             eecacheSectionHeader* l_sectionHeader =
               reinterpret_cast<eecacheSectionHeader*>(l_sectionInfo.vaddr);
+            l_errl = isEecacheEmpty(l_sectionHeader);
+            if(l_errl)
+            {
+                errlCommit(l_errl, EEPROM_COMP_ID);
+                assert(false, "rtEecacheInit: EECACHE was found to be invalid");
+            }
             l_eecacheSize = l_sectionInfo.size;
 #endif
 
