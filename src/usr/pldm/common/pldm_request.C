@@ -35,15 +35,15 @@ using namespace PLDM;
 
 /* @brief  Check the next incoming MCTP packet and see whether it's a response
  *         to the request we sent. If there is no response available at the time
- *         and io_seconds_remaining is 0, create an error log for the
- *         timeout. If there is time remaining, sleep for 1 second instead.
+ *         and io_ms_remaining is 0, create an error log for the timeout.
+ *         If there is time remaining, sleep for 1 millisecond instead.
  *
  * @param[in]     i_pldm_request        The PLDM request that we are waiting on a response for
- * @param[in/out] io_seconds_remaining  The number of seconds remaining before timing out
+ * @param[in/out] io_ms_remaining       The number of milliseconds remaining before timing out
  * @return        errlHndl_t            Error on timeout, nullptr otherwise
  */
 errlHndl_t check_pldm_response(const pldm_msg* const i_pldm_request,
-                               int& io_seconds_remaining)
+                               int& io_ms_remaining)
 {
     errlHndl_t errl = nullptr;
 
@@ -53,13 +53,13 @@ errlHndl_t check_pldm_response(const pldm_msg* const i_pldm_request,
 
     if (return_code)
     {
-        if (return_code == HBRT_RC_NO_MCTP_PACKET && io_seconds_remaining > 0)
+        if (return_code == HBRT_RC_NO_MCTP_PACKET && io_ms_remaining > 0)
         {
-            const uint8_t one_sec = 1;
-            const uint8_t zero_nsec = 0;
-            nanosleep(one_sec, zero_nsec);
+            const uint64_t sec = 0;
+            const uint64_t nsec = 1 * NS_PER_MSEC;
+            nanosleep(sec, nsec);
 
-            io_seconds_remaining--;
+            io_ms_remaining--;
         }
         else
         {
@@ -180,7 +180,7 @@ errlHndl_t PLDM::sendrecv_pldm_request_impl(const std::vector<uint8_t>& i_msg,
                 break;
             }
 
-            int sleep_time_sec = 90;
+            int sleep_time_ms = 90 * MS_PER_SEC;
 
             do
             {
@@ -189,7 +189,7 @@ errlHndl_t PLDM::sendrecv_pldm_request_impl(const std::vector<uint8_t>& i_msg,
                 // duplicate requests appropriately if for some reason they
                 // received our first request and acted on it, but we did not
                 // receive their first response.
-                errl = check_pldm_response(pldm_request, sleep_time_sec);
+                errl = check_pldm_response(pldm_request, sleep_time_ms);
             } while (!errl && PLDM::get_next_response().empty());
         }
 
