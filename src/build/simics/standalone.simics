@@ -225,3 +225,37 @@ if ($standalone_test_dd1 == TRUE) {
 foreach $fsis in (list-objects -all fsi_slave_t3_v6) {
     $fsis->enforce_lbo = FALSE
 }
+
+if($fused_core == TRUE) {
+echo "Configuring standalone model istep 3.17 fused core workaround"
+
+# The goal of this logic is to pass an SBE check in istep 3.17 which
+# ensures that the TP_OTP_SCOM_FUSED_CORE_MODE bit (bit 22) from the
+# "PERV CONTROL 0" register (SCOM 0x5001A) is equal to the
+# EXPORT_STATUS_TP_EX_FUSE_SMT8_CTYPE_EN_DC bit (bit 10) from the "Export
+# regulation control" register (SCOM 0x10009).  In fused mode, both of these
+# bits must be set.  The reason this is not needed in a combined simulation
+# is that the BMC/FSP sets everything up correctly at the correct times.
+
+# Set TP_OTP_SCOM_FUSED_CORE_MODE bit (bit 22) in the "SET function of PERV
+# CONTROL 0" register (SCOM 0x5012A).  Doing so bitwise ORs that bit into the
+# real "PERV CONTROL 0" register (SCOM 0x5001A), and when that register is
+# written, SIMICS copies that register's TP_OTP_SCOM_FUSED_CORE_MODE bit to the
+# EXPORT_STATUS_TP_EX_FUSE_SMT8_CTYPE_EN_DC bit (bit 10) of the "Export
+# regulation control" register (SCOM 0x10009) so that SBE will read the fuse as
+# requiring fused core mode.
+write-device-offset $hb_masterproc.cfam_cmp.fsi2host_mbox.pib_regs 0x12a<<4 0x00000200_00000000 8 -b
+
+# Then, set the TP_OTP_SCOM_FUSED_CORE_MODE bit (bit 22) in the "COPY PERV
+# CONTROL COPY 0" register (SCOM 0x5011A).  This is required because at CBS
+# start, which occurs -AFTER- standaone.simics runs, SIMICS copies this register
+# wholesale into the "PERV CONTROL 0" register (SCOM 0x5001A), and we need
+# the TP_OTP_SCOM_FUSED_CORE_MODE bit to have the same value as that of the
+# EXPORT_STATUS_TP_EX_FUSE_SMT8_CTYPE_EN_DC bit from the "Export regulation
+# control" register as discussed above, so that, in istep 3.17, SBE will
+# see both bits equal and not fail the boot.
+$pervControlCopy0 = (read-device-offset $hb_masterproc.cfam_cmp.fsi2host_mbox.pib_regs 0x11a<<4 8 -b)
+$pervControlCopy0 = ($pervControlCopy0  | 0x00000200_00000000)
+write-device-offset $hb_masterproc.cfam_cmp.fsi2host_mbox.pib_regs 0x11a<<4 $pervControlCopy0 8 -b
+}
+
