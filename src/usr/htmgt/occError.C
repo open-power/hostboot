@@ -254,8 +254,8 @@ namespace HTMGT
                      * @subsys EPUB_FIRMWARE_SP
                      * @reasoncode HTMGT_RC_BAD_FRU_CALLOUTS
                      * @moduleid HTMGT_MODID_PROCESS_ELOG
-                     * @userdata1[0-15]  OCC elog id
-                     * @userdata1[16-31] Bad callout index
+                     * @userdata1[0:15]  OCC elog id
+                     * @userdata1[16:31] Bad callout index
                      * @devdesc Bad FRU data received in OCC error log
                      */
                     bldErrLog(err2, HTMGT_MODID_PROCESS_ELOG,
@@ -279,8 +279,8 @@ namespace HTMGT
                          * @subsys EPUB_FIRMWARE_SP
                          * @reasoncode HTMGT_RC_MISMATCHING_SEVERITY
                          * @moduleid HTMGT_MODID_PROCESS_ELOG
-                         * @userdata1[0-15]  OCC elog id
-                         * @userdata1[16-31] OCC severity
+                         * @userdata1[0:15]  OCC elog id
+                         * @userdata1[16:31] OCC severity
                          * @devdesc No FRU callouts found for non-info OCC Error
                          */
                         bldErrLog(err2, HTMGT_MODID_PROCESS_ELOG,

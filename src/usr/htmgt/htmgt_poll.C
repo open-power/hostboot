@@ -334,10 +334,10 @@ namespace HTMGT
                      * @errortype
                      * @reasoncode HTMGT_RC_DUPLICATE_CHIP_ID
                      * @moduleid  HTMGT_MOD_OCC_POLL
-                     * @userdata1[0-15] OCC instance
-                     * @userdata1[16-31] response OCC present
-                     * @userdata2[0-15] duplicate OCC instance
-                     * @userdata2[16-31] response status byte
+                     * @userdata1[0:15] OCC instance
+                     * @userdata1[16:31] response OCC present
+                     * @userdata2[0:15] duplicate OCC instance
+                     * @userdata2[16:31] response status byte
                      * @devdesc Invalid OCC present data in POLL response
                      */
                     bldErrLog(l_err, HTMGT_MOD_OCC_POLL,
@@ -374,10 +374,10 @@ namespace HTMGT
                      * @errortype
                      * @reasoncode HTMGT_RC_INVALID_ROLE
                      * @moduleid  HTMGT_MOD_OCC_POLL
-                     * @userdata1[0-15] OCC instance
-                     * @userdata[16-31] response state
-                     * @userdata2[0-15] expected role
-                     * @userdata2[16-31] response status byte
+                     * @userdata1[0:15] OCC instance
+                     * @userdata[16:31] response state
+                     * @userdata2[0:15] expected role
+                     * @userdata2[16:31] response status byte
                      * @devdesc Invalid role is POLL response
                      */
                     bldErrLog(l_err, HTMGT_MOD_OCC_POLL,
