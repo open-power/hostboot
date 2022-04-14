@@ -56,6 +56,13 @@ namespace phy
 fapi2::ReturnCode configure_phy_scom_access(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
         const mss::states i_state);
 
+///
+/// @brief Converts from a Synopsys register address to an IBM register address
+/// @param[in] i_synopsys_addr the Synopsys register address to convert
+/// @return The IBM register address converted from
+///
+uint64_t convert_synopsys_to_ibm_reg_addr( const uint64_t i_synopsys_addr);
+
 } // namespace phy
 } // namespace ody
 } // namespace mss

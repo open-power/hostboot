@@ -59,17 +59,28 @@ fapi2::ReturnCode configure_phy_scom_access(const fapi2::Target<fapi2::TARGET_TY
     // TODO:ZEN:MST-1571 Update Odyssey PHY registers when the official values are merged into the EKB
     // For now using the Synopsys register location documentation
     constexpr uint64_t MICROCONTMUXSEL = 0x000d0000;
+    const uint64_t MICROCONTMUXSEL_IBM = convert_synopsys_to_ibm_reg_addr(MICROCONTMUXSEL);
     constexpr uint64_t MICROCONTMUXSEL_MICROCONTMUXSEL = 63;
 
     fapi2::buffer<uint64_t> l_data;
-    FAPI_TRY(fapi2::getScom(i_target, MICROCONTMUXSEL, l_data));
+    FAPI_TRY(fapi2::getScom(i_target, MICROCONTMUXSEL_IBM, l_data));
 
     l_data.writeBit<MICROCONTMUXSEL_MICROCONTMUXSEL>(i_state);
 
-    FAPI_TRY(fapi2::putScom(i_target, MICROCONTMUXSEL, l_data));
+    FAPI_TRY(fapi2::putScom(i_target, MICROCONTMUXSEL_IBM, l_data));
 
 fapi_try_exit:
     return fapi2::current_err;
+}
+
+///
+/// @brief Converts from a Synopsys register address to an IBM register address
+/// @param[in] i_synopsys_addr the Synopsys register address to convert
+/// @return The IBM register address converted from
+///
+uint64_t convert_synopsys_to_ibm_reg_addr( const uint64_t i_synopsys_addr)
+{
+    return static_cast<uint64_t>((i_synopsys_addr << 32) | 0x800000000801303f);
 }
 
 } // namespace phy

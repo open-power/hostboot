@@ -66,6 +66,9 @@ constexpr uint64_t CALZAP_CALZAP     = 63;
 ///
 fapi2::ReturnCode start_training(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
 {
+    // TODO:ZEN:MST-1571 Update Odyssey PHY registers when the official values are merged into the EKB
+    const uint64_t MIRCORESET_IBM = convert_synopsys_to_ibm_reg_addr(MIRCORESET);
+
     // Per the Synopsys documentation, to start the training, there is a latching sequence
     // 1. Configure the PHY to allow training access (wait 40 cycles)
     // 2. Reset and stall the processor (gets it into a base state but does not start it)
@@ -81,15 +84,15 @@ fapi2::ReturnCode start_training(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
 
     // 2. Reset and stall the processor (gets it into a base state but does not start it)
     l_data.setBit<MIRCORESET_STALLTOMICRO>().setBit<MIRCORESET_RESETTOMICRO>();
-    FAPI_TRY(fapi2::putScom(i_target, MIRCORESET, l_data));
+    FAPI_TRY(fapi2::putScom(i_target, MIRCORESET_IBM, l_data));
 
     // 3. Stall the processor (releases reset but does not start it)
     l_data.flush<0>().setBit<MIRCORESET_STALLTOMICRO>();
-    FAPI_TRY(fapi2::putScom(i_target, MIRCORESET, l_data));
+    FAPI_TRY(fapi2::putScom(i_target, MIRCORESET_IBM, l_data));
 
     // 4. Start training (release stall/reset)
     l_data.flush<0>();
-    FAPI_TRY(fapi2::putScom(i_target, MIRCORESET, l_data));
+    FAPI_TRY(fapi2::putScom(i_target, MIRCORESET_IBM, l_data));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -103,6 +106,10 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode cleanup_training(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
 {
+    // TODO:ZEN:MST-1571 Update Odyssey PHY registers when the official values are merged into the EKB
+    const uint64_t MIRCORESET_IBM = convert_synopsys_to_ibm_reg_addr(MIRCORESET);
+    const uint64_t CALZAP_IBM = convert_synopsys_to_ibm_reg_addr(CALZAP);
+
     // Per the Synopsys documentation, to cleanup after the training:
     // 1. Stop the processor (stall it)
     // 2. Reset the calibration engines to their initial state (cal Zap!)
@@ -110,11 +117,11 @@ fapi2::ReturnCode cleanup_training(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
 
     // 1. Stop the processor (stall it)
     l_data.setBit<MIRCORESET_STALLTOMICRO>();
-    FAPI_TRY(fapi2::putScom(i_target, MIRCORESET, l_data));
+    FAPI_TRY(fapi2::putScom(i_target, MIRCORESET_IBM, l_data));
 
     // 2. Reset the calibration engines to their initial state (cal Zap!)
     l_data.flush<0>().setBit<CALZAP_CALZAP>();
-    FAPI_TRY(fapi2::putScom(i_target, CALZAP, l_data));
+    FAPI_TRY(fapi2::putScom(i_target, CALZAP_IBM, l_data));
 
 fapi_try_exit:
     return fapi2::current_err;

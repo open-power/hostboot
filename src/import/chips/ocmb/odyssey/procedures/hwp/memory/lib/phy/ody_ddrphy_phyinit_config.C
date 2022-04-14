@@ -48,6 +48,7 @@
 #include <lib/phy/ody_ddrphy_phyinit_structs.H>
 #include <lib/phy/ody_ddrphy_phyinit_config.H>
 #include <lib/phy/ody_ddrphy_csr_defines.H>
+#include <lib/phy/ody_phy_utils.H>
 
 #include <stdlib.h>
 #include <math.h>
@@ -387,7 +388,7 @@ fapi2::ReturnCode dwc_ddrphy_phyinit_userCustom_io_write16(const fapi2::Target<f
         const int i_data)
 {
     fapi2::buffer<uint64_t> l_data(i_data);
-    const uint64_t IBM_ADDR = (i_addr << 32) | 0x800000000801303f;
+    const uint64_t IBM_ADDR = mss::ody::phy::convert_synopsys_to_ibm_reg_addr(i_addr);
     return fapi2::putScom(i_target, IBM_ADDR, l_data);
 }
 
