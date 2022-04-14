@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -534,7 +534,7 @@ class SecureRomManagerTest : public CxxTest::TestSuite
                     {
                         TS_FAIL("SecureRomManagerTest::test_verifyContainer: "
                             "Expected SECUREBOOT::verifyComponentId to fail with "
-                            "reason code of 0x%04X and module ID of 0x%02, but "
+                            "reason code of 0x%04X and module ID of 0x%02X, but "
                             "failed with reason code of 0x%04X and module ID "
                             "of 0x%02X.  Actual component ID was [%s], "
                             "reference component ID was [%s]",
