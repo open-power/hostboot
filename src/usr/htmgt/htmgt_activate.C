@@ -114,9 +114,9 @@ namespace HTMGT
              * @errortype
              * @reasoncode HTMGT_RC_OCC_NOT_READY
              * @moduleid HTMGT_MOD_WAIT_FOR_OCC_READY
-             * @userdata1[0-15] OCC instance
-             * @userdata1[16-31] poll attempts
-             * @userdata2[0-15] target ready bit
+             * @userdata1[0:15] OCC instance
+             * @userdata1[16:31] poll attempts
+             * @userdata2[0:15] target ready bit
              * @devdesc OCC not ready for target state
              */
             bldErrLog(l_err, HTMGT_MOD_WAIT_FOR_OCC_READY,

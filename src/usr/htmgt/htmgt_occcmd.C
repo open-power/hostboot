@@ -852,10 +852,10 @@ namespace HTMGT
                      * @errortype
                      * @reasoncode HTMGT_RC_INTERNAL_ERROR
                      * @moduleid HTMGT_MOD_HANLDE_OCC_EXCEPTION
-                     * @userdata1[0-31] rsp status
-                     * @userdata1[32-63] exception data length
-                     * @userdata2[0-31] OCC instance
-                     * @userdata2[32-63] exception data
+                     * @userdata1[0:31] rsp status
+                     * @userdata1[32:63] exception data length
+                     * @userdata2[0:31] OCC instance
+                     * @userdata2[32:63] exception data
                      * @devdesc OCC reported exception
                      */
                     errlHndl_t l_excErr = NULL;
@@ -1021,10 +1021,10 @@ namespace HTMGT
              * @subsys EPUB_FIRMWARE_SP
              * @reasoncode HTMGT_RC_TIMEOUT
              * @moduleid HTMGT_MOD_WRITE_OCC_CMD
-             * @userdata1[0-15] command
-             * @userdata1[16-31] read timeout
-             * @userdata2[0-15] response sequence number
-             * @userdata2[16-31] response status
+             * @userdata1[0:15] command
+             * @userdata1[16:31] read timeout
+             * @userdata2[0:15] response sequence number
+             * @userdata2[16:31] response status
              * @devdesc Timeout waiting for OCC response
              */
             bldErrLog(l_err, HTMGT_MOD_WRITE_OCC_CMD, HTMGT_RC_TIMEOUT,
@@ -1174,10 +1174,10 @@ namespace HTMGT
                  * @errortype
                  * @reasoncode HTMGT_RC_SEND_FAIL
                  * @moduleid HTMGT_MOD_PARSE_OCC_RSP
-                 * @userdata1[0-15] response length
-                 * @userdata1[16-31] response buffer[0-3]
-                 * @userdata2[0-15] response buffer[4-7]
-                 * @userdata2[16-31]
+                 * @userdata1[0:15] response length
+                 * @userdata1[16:31] response buffer[0-3]
+                 * @userdata2[0:15] response buffer[4-7]
+                 * @userdata2[16:31]
                  * @devdesc Invalid response length received
                  */
                 bldErrLog(l_errlHndl, HTMGT_MOD_PARSE_OCC_RSP,
@@ -1259,8 +1259,8 @@ namespace HTMGT
                          * @errortype
                          * @reasoncode HTMGT_RC_OCC_CMD_FAIL
                          * @moduleid HTMGT_MOD_CHECK_OCC_RSP
-                         * @userdata1[0-15] OCC command type
-                         * @userdata1[16-31] response data length
+                         * @userdata1[0:15] OCC command type
+                         * @userdata1[16:31] response data length
                          * @devdesc Invalid length in OCC response
                          */
                         bldErrLog(l_errlHndl, HTMGT_MOD_CHECK_OCC_RSP,

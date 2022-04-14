@@ -772,11 +772,25 @@ foreach my $file (@filesToParse)
 
             # Create the Python version of the data entry code for this error
             my $pythonDataEntryCode = "            0x$rcValue$modIdValue: {    \"devdesc\": \"$desc\",\n"
-                                    . "                          \"moduleid\": \"$modId\",\n"
-                                    . "                        \"reasoncode\": \"$rc\",\n"
-                                    . "                         \"userdata1\": \"$userDataTextOnly[0]\",\n"
-                                    . "                         \"userdata2\": \"$userDataTextOnly[1]\",\n"
-                                    . "                      },\n";
+                                    . "                           \"moduleid\": \"$modId\",\n"
+                                    . "                           \"reasoncode\": \"$rc\",\n";
+            # Add all userdata sections to the python file. Note that there may be more than two sections,
+            # since userdata1 or userdata2 could have sub-sections.
+            foreach my $udString(@userData)
+            {
+                # The format of the string is "userdata1/2[bits]", "description". There is a comma
+                # between the two fields. There may be commas in the description field as well,
+                # but we need to ignore those, so split the string into just two using the first
+                # comma.
+                my ($userDetailsFormat, $detailsString) = split(",", $udString, 2);
+                # Add spaces so that the lines align with the above format
+                $pythonDataEntryCode = $pythonDataEntryCode . "                           ";
+                $pythonDataEntryCode = $pythonDataEntryCode . $userDetailsFormat;
+                $pythonDataEntryCode = $pythonDataEntryCode . ": ";
+                $pythonDataEntryCode = $pythonDataEntryCode . $detailsString;
+                $pythonDataEntryCode = $pythonDataEntryCode . ",\n";
+            }
+            $pythonDataEntryCode = $pythonDataEntryCode . "                      },\n";
 
             # The component value is the first two characters of the 4 character rc
             my $compValue = $rcValue;
