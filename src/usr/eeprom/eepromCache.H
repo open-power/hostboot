@@ -494,6 +494,14 @@ errlHndl_t eecachePresenceDetect(TARGETING::Target* i_target,
                                  bool& o_present);
 #endif
 
+/**
+ * @brief Checks the header of the EECACHE partition to determine if the partition
+ *        is empty or invalid.
+ *
+ * @param[in] i_header The pointer to the header of the EECACHE partition
+ * @return nullptr if EECACHE is valid; an error log otherwise
+ */
+errlHndl_t isEecacheEmpty(const eecacheSectionHeader* const i_header);
 }
 
 #endif // namespace  EEPROM

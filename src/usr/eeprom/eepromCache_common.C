@@ -475,4 +475,30 @@ errlHndl_t eepromPerformOpCache(DeviceFW::OperationType i_opType,
 
     return l_errl;
 }
+
+errlHndl_t isEecacheEmpty(const eecacheSectionHeader* const i_header)
+{
+    errlHndl_t l_errl = nullptr;
+    if(i_header->end_of_cache == UNSET_INTERNAL_OFFSET_VALUE ||
+       i_header->end_of_cache == END_OF_CACHE_PTR_EMPTY)
+    {
+        /*@
+         * @errortype
+         * @moduleid   EEPROM_IS_EECACHE_EMPTY
+         * @reasoncode EEPROM_EECACHE_IS_EMPTY
+         * @userdata1  The pointer to the end of EECACHE
+         * @userdata2  The version of EECACHE
+         * @devdesc    EECACHE PNOR partition is empty or invalid
+         * @custdesc   Firmware error occurred during the boot
+         */
+        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                         EEPROM_IS_EECACHE_EMPTY,
+                                         EEPROM_EECACHE_IS_EMPTY,
+                                         i_header->end_of_cache,
+                                         i_header->version,
+                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+    }
+    return l_errl;
 }
+
+} // namespace EEPROM

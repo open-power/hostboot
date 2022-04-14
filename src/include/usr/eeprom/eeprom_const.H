@@ -41,6 +41,7 @@ constexpr uint8_t EEPROM_MAX_RETRIES = 2;
 constexpr uint32_t UNSET_INTERNAL_OFFSET_VALUE = 0xFFFFFFFF;
 constexpr uint32_t UNSET_END_OF_CACHE_VALUE = UNSET_INTERNAL_OFFSET_VALUE;
 constexpr uint8_t  NUM_BYTE_UNIQUE_ID = 13;
+constexpr uint32_t END_OF_CACHE_PTR_EMPTY = 0x00000000;
 // Note: If any of these max eeprom counts are changed here, also change them in
 // src/build/tools/eecache_editor.pl and src/build/simics/eecache-gen.py
 constexpr uint8_t  MAX_EEPROMS_VERSION_1 = 50;
