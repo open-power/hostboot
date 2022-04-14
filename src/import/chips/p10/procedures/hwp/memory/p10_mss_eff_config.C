@@ -37,6 +37,7 @@
 #include <p10_mss_eff_config.H>
 #include <lib/ecc/ecc_traits_explorer.H>
 #include <lib/dimm/exp_rank.H>
+#include <lib/eff_config/p10_spd_utils.H>
 #include <generic/memory/lib/utils/mss_rank.H>
 #include <generic/memory/lib/data_engine/data_engine.H>
 #include <generic/memory/lib/utils/find.H>
@@ -63,26 +64,20 @@ fapi2::ReturnCode p10_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
     mss::display_git_commit_info("p10_mss_eff_config");
 
     uint8_t l_spd_rev = 0;
+    uint8_t l_is_planar = 0;
     const auto l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
 
     FAPI_TRY( mss::attr::get_spd_revision(i_target, l_spd_rev) );
+    FAPI_TRY( mss::attr::get_mem_mrw_is_planar(l_ocmb, l_is_planar) );
 
     for(const auto& dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
     {
-        uint64_t l_freq = 0;
-        uint32_t l_omi_freq = 0;
         uint8_t l_dram_gen = 0;
         uint8_t l_dimm_type = 0;
-        uint8_t l_is_planar = 0;
         std::vector<uint8_t> l_raw_spd;
-        FAPI_TRY( mss::attr::get_freq(i_target, l_freq) );
-        FAPI_TRY( mss::convert_ddr_freq_to_omi_freq(i_target, l_freq, l_omi_freq));
+
         FAPI_TRY( mss::attr::get_dram_gen(dimm, l_dram_gen) );
         FAPI_TRY( mss::attr::get_dimm_type(dimm, l_dimm_type));
-        FAPI_TRY( mss::attr::get_mem_mrw_is_planar(l_ocmb, l_is_planar) );
-
-        // Get ranks via rank API
-        std::vector<mss::rank::info<mss::mc_type::EXPLORER>> l_rank_infos;
 
         // We run the base module + the DDIMM module first as our rank API needs to know if we are in quad encoded CS mode or not
         {
@@ -101,6 +96,21 @@ fapi2::ReturnCode p10_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
                 FAPI_TRY(l_base_cfg->process_derived(l_raw_spd));
             }
         }
+    }// dimm
+
+    for(const auto& dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
+    {
+        std::vector<uint8_t> l_raw_spd;
+        uint64_t l_freq = 0;
+        uint32_t l_omi_freq = 0;
+        uint8_t l_dram_gen = 0;
+        std::vector<mss::rank::info<mss::mc_type::EXPLORER>> l_rank_infos;
+
+        FAPI_TRY( mss::attr::get_freq(i_target, l_freq) );
+        FAPI_TRY( mss::convert_ddr_freq_to_omi_freq(i_target, l_freq, l_omi_freq));
+        FAPI_TRY( mss::attr::get_dram_gen(dimm, l_dram_gen) );
+
+        FAPI_TRY(mss::spd::get_raw_data(dimm, l_is_planar, l_raw_spd));
 
         // Make sure to run ranks_on_dimm AFTER the base and DDIMM module data has been processed!
         // This is so we handle the decoding of the ranks properly
@@ -114,9 +124,13 @@ fapi2::ReturnCode p10_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
             fapi2::MemVpdData_t l_vpd_type(fapi2::MemVpdData::EFD);
             fapi2::VPDInfo<fapi2::TARGET_TYPE_OCMB_CHIP> l_vpd_info(l_vpd_type);
 
-            // Our EFD is stored in terms of our PHY ranks
+            // Our EFD is stored in terms of our PHY ranks (and DIMM config for planar)
             l_vpd_info.iv_rank = l_rank_info.get_phy_rank();
             l_vpd_info.iv_omi_freq_mhz = l_omi_freq;
+
+            // Add planar EFD lookup info if we need it
+            FAPI_TRY(mss::spd::ddr4::add_planar_efd_info(dimm, l_is_planar, l_vpd_info));
+
             FAPI_TRY( fapi2::getVPD(l_ocmb, l_vpd_info, nullptr), "failed getting VPD size from getVPD" );
 
             // Get EFD data

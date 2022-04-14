@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,6 +54,13 @@
 // Offset to the memory type (DDR4, etc) of the DDIMM.
 // size is 1 byte: address 2
 const size_t SPD_MEM_TYPE_ADDR = 2;
+// Offset to the module type (RDIMM, DDIMM, planar, etc)
+// size is 1 byte: address 3
+const size_t SPD_MODULE_TYPE_ADDR = 3;
+// Mask of the base module type within the module type byte
+const size_t SPD_BASE_MODULE_TYPE_MASK = 0x0F;
+// Value of the base module type for a planar DIMM config
+const size_t SPD_PLANAR_VALUE = 0x0C;
 // Offset to the SPD's DMB manufacturer ID
 // See SPD_DDR4_EXPECTED_DMB_MFG_ID below for the expected value for DDR4
 // size is 2 bytes; address 198 - 199
@@ -75,6 +82,12 @@ const size_t SPD_EFD_MEMORY_SPACE_SIZE_ADDR = 285;
 // Bits 0 - 4: Valid values are 0 - 5; 0=1K, 1=2KB, 2=4KB, 3=8KB, 4=16KB, 5=32KB
 const uint8_t SPD_EFD_MEMORY_SPACE_SIZE_MASK = 0x0F;
 const uint8_t SPD_EFD_MEMORY_SPACE_SIZE_MAX_VALUE = 0x05;
+// This changes on planar SPD:
+// Bits 0 - 6: EFD memory space in KB; 0=0KB, 1=1KB, 2=2KB, ... 127=127KB
+// If bit 7 is set, it adds and additional 512 bytes to the size
+const uint8_t SPD_PLANAR_EFD_MEMORY_SPACE_SIZE_MASK = 0x7F;
+const uint8_t SPD_PLANAR_EFD_MEMORY_SPACE_SIZE_ADDER_MASK = 0x80;
+const size_t SPD_PLANAR_EFD_MEMORY_SPACE_SIZE_ADDER = 512;
 // Offset to the number of all EFDs that is contained in the EFD memory space.
 // The value at this offset is how many EFDs exists within the EFD memory space.
 // size is 2 bytes; address 286 to 287
@@ -145,6 +158,13 @@ const size_t EFD_DDR4_FREQUENCY_ADDR = 0;
 // Offset to the DDR4's master rank data within an individual EFD
 // size is 1 byte: address 2
 const size_t EFD_DDR4_MASTER_RANK_ADDR = 2;
+// Offset to the DDR4's Channel supported data within an individual EFD
+// size is 1 byte: address 15
+// Only used on planar SPD
+const size_t EFD_DDR4_CHANNEL_SUPPORT_ADDR = 3;
+// Offset to the DDR4's Dimms supported data within an individual EFD
+// size is 1 byte: address 7
+const size_t EFD_DDR4_DIMM_SUPPORTED_ADDR = 7;
 
 /// SPD - DDR4 expected values
 // SPD type for DDR4 as found in SPD byte 2
@@ -204,6 +224,13 @@ enum DDR_MASTER_RANK : uint8_t
     DDR_MR_BIT_MASK_1 = 0x02,
     DDR_MR_BIT_MASK_2 = 0x04,
     DDR_MR_BIT_MASK_3 = 0x08,
+
+    // For planar systems, bit 0 is the number of DIMMs under the MC
+    DDR_DROPS_BIT      = 0,
+
+    // For planar systems, bits 1:3 is the total number of master ranks under the MC
+    DDR_TOTAL_MR_START = 1,
+    DDR_TOTAL_MR_LEN   = 3,
 };
 
 ///
@@ -250,6 +277,17 @@ uint16_t check_valid_dmb_revision(const uint16_t i_mfg_id, const uint8_t i_dmb_r
                 (i_dmb_revision == SPD_DDR4_EXPECTED_DMB_REVISION_A1_MICROCHIP) ||
                 (i_dmb_revision == SPD_DDR4_EXPECTED_DMB_REVISION_B0_MICROCHIP));
     }
+}
+
+///
+/// @brief Checks if the SPD is for a planar config
+///
+/// @param[in] i_module_type Module Type (byte 3) from SPD
+/// @return true if planar config, false otherwise
+///
+bool is_planar_config(const uint8_t i_module_type)
+{
+    return ((i_module_type & SPD_BASE_MODULE_TYPE_MASK) == SPD_PLANAR_VALUE);
 }
 
 /// Local utilities
@@ -337,21 +375,33 @@ uint8_t ddrMasterRankToBitMask(const uint64_t i_masterRank)
 
 // @brief Calculate the EFD memory space size using the exponential factor
 //
-// @param[in]  i_exponentialFactor, the memory space 1KB exponential factor
+// @param[in]  i_efdMemorySpaceByte, the memory space byte from the SPD
+// @param[in]  i_isPlanarConfig, true if SPD is for a planar config
 // @return the calculated memory space size or 0 if error
-uint64_t calculateEfdMemorySpaceSize(const uint8_t i_exponentialFactor)
+uint64_t calculateEfdMemorySpaceSize(const uint8_t i_efdMemorySpaceByte,
+                                     const bool i_isPlanarConfig)
 {
-    // The exponential factor is the exponent in the power of 2 equation -
-    // 2^i_exponentialFactor.  '2^i_exponentialFactor' is how many 1KB memory
-    // blocks the EFD contains.  To get the full size of the EFD, multiply
-    // 2^i_exponentialFactor by 1KB (EFD_EXPONENTIAL_BLOCK_MEMORY_SIZE).
-
     uint64_t retVal = 0;
 
-    if (i_exponentialFactor <= SPD_EFD_MEMORY_SPACE_SIZE_MAX_VALUE)
+    if (i_isPlanarConfig)
     {
-        // 1 << i_exponentialFactor - a quick way to do a power of 2
-        retVal = EFD_EXPONENTIAL_BLOCK_MEMORY_SIZE * (1 << i_exponentialFactor);
+        retVal = EFD_EXPONENTIAL_BLOCK_MEMORY_SIZE * (i_efdMemorySpaceByte & SPD_PLANAR_EFD_MEMORY_SPACE_SIZE_MASK);
+        retVal += (i_efdMemorySpaceByte & SPD_PLANAR_EFD_MEMORY_SPACE_SIZE_ADDER_MASK) ?
+                  SPD_PLANAR_EFD_MEMORY_SPACE_SIZE_ADDER : 0;
+    }
+    else
+    {
+        uint8_t l_exponentialFactor = i_efdMemorySpaceByte & SPD_EFD_MEMORY_SPACE_SIZE_MASK;
+        // The exponential factor is the exponent in the power of 2 equation -
+        // 2^i_exponentialFactor.  '2^i_exponentialFactor' is how many 1KB memory
+        // blocks the EFD contains.  To get the full size of the EFD, multiply
+        // 2^i_exponentialFactor by 1KB (EFD_EXPONENTIAL_BLOCK_MEMORY_SIZE).
+
+        if (l_exponentialFactor <= SPD_EFD_MEMORY_SPACE_SIZE_MAX_VALUE)
+        {
+            // 1 << i_exponentialFactor - a quick way to do a power of 2
+            retVal = EFD_EXPONENTIAL_BLOCK_MEMORY_SIZE * (1 << l_exponentialFactor);
+        }
     }
 
     return retVal;
@@ -542,8 +592,8 @@ extern "C"
         // Convert to the actual size of the EFD's memory space.
         // The EFD memory space size's exponential factor is 8 bytes.
         l_efdMemorySpaceSize = calculateEfdMemorySpaceSize(
-                                   i_spdBuffer[SPD_EFD_MEMORY_SPACE_SIZE_ADDR] &
-                                   SPD_EFD_MEMORY_SPACE_SIZE_MASK);
+                                   i_spdBuffer[SPD_EFD_MEMORY_SPACE_SIZE_ADDR],
+                                   is_planar_config(i_spdBuffer[SPD_MODULE_TYPE_ADDR]));
 
         FAPI_DBG ("ddr4_get_efd: EFD memory space size factor = %d, "
                   "converted to EFD memory space size = %d ",
@@ -895,14 +945,38 @@ extern "C"
             // Swap endianess to host format.
             l_efdFreqMask = le16toh(l_efdFreqMask);
 
-            // If the 'is implemented flag' is true for the EFD, AND if the EFD
-            // frequency mask contains the frequency mask we are looking for AND
-            // the EFD master rank bitmap includes the master rank we are looking for
+            bool l_is_planar = is_planar_config(i_spdBuffer[SPD_MODULE_TYPE_ADDR]);
+            uint32_t l_ocmb_pos = 0;
+            uint8_t l_slot_supp_flag = 0;
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_FAPI_POS, i_ocmbFapi2Target, l_ocmb_pos) );
+
+            // For planar EFD byte 15, processor slot supported is bit 0/1/2/3 = OCMB_CHIP position 7/6/5/4
+            l_slot_supp_flag = 1 << l_ocmb_pos;
+
+            // If the 'is implemented flag' is true for the EFD,
+            // AND if the EFD frequency mask contains the frequency mask we are looking for
+            // AND the EFD master rank bitmap includes the master rank we are looking for
+            // AND if we're on a planar config:
+            //     if the EFD slot supported flag is set for the OCMB_CHIP's position
+            //     if the EFD DIMM count supported matches our DIMM config
+            //     if the EFD total ranks on DIMM0+DIMM1 matches our DIMM config
+            //     if the EFD DIMM type supported matches our DIMM config
             // then copy the EFD block for the caller.
+            // TODO: Zen:MST-1690 Add in part/revision specific lookup if we need it
+            const fapi2::buffer<uint8_t> l_efd_ddr4_master_rank(l_efdDataNptr[EFD_DDR4_MASTER_RANK_ADDR]);
+            const uint8_t l_total_dimms_supported = (l_efd_ddr4_master_rank.getBit<DDR_DROPS_BIT>()) ? 2 : 1;
+            uint8_t l_total_ranks_supported = 0;
+            l_efd_ddr4_master_rank.extractToRight<DDR_TOTAL_MR_START, DDR_TOTAL_MR_LEN>(l_total_ranks_supported);
+
             if ( (l_efdMetaDataNptr[SPD_EFD_META_DATA_EFD_BYTE_3_OFFSET] &
                   SPD_EFD_META_DATA_EFD_IS_IMPLEMENTED_MASK) &&
                  (l_efdFreqMask & l_freqMask)                               &&
-                 (l_efdDataNptr[EFD_DDR4_MASTER_RANK_ADDR] & l_rankMask) )
+                 (l_efdDataNptr[EFD_DDR4_MASTER_RANK_ADDR] & l_rankMask) &&
+                 ( !l_is_planar ||
+                   ( (l_efdDataNptr[EFD_DDR4_CHANNEL_SUPPORT_ADDR] & l_slot_supp_flag) &&
+                     (l_total_dimms_supported == io_vpdInfo.iv_dimm_count) &&
+                     (l_total_ranks_supported == (io_vpdInfo.iv_total_ranks_dimm0 + io_vpdInfo.iv_total_ranks_dimm1)) &&
+                     (l_efdDataNptr[EFD_DDR4_DIMM_SUPPORTED_ADDR] == io_vpdInfo.iv_dimm_type) ) ) )
             {
                 // io_vpdInfo.iv_size and EFD block size compatibility
                 // have been verified above
@@ -928,6 +1002,16 @@ extern "C"
                           io_vpdInfo.iv_rank, l_rankMask,
                           l_efdSize);
 
+                if (l_is_planar)
+                {
+                    FAPI_INF ("ddr4_get_efd: EFD[%d] block also matched planar fields "
+                              "total ranks on DIMM0 %d, total ranks on DIMM1 %d, "
+                              "Channel number %d, DIMM count %d, and type 0x%02X",
+                              ii,
+                              io_vpdInfo.iv_total_ranks_dimm0, io_vpdInfo.iv_total_ranks_dimm1,
+                              l_ocmb_pos, io_vpdInfo.iv_dimm_count, io_vpdInfo.iv_dimm_type);
+                }
+
                 break; // exit stage left, we are done
             }  // end if ((l_efdMetaDataNptr[SPD_EFD_META_DATA_EFD_ ...
 
@@ -944,6 +1028,14 @@ extern "C"
                         SPD_EFD_META_DATA_EFD_IS_IMPLEMENTED_MASK)
                        ? "true" : "false" ) );
 
+            if (l_is_planar)
+            {
+                FAPI_INF ("ddr4_get_efd: and planar fields "
+                          "total ranks on DIMM0 %d, total ranks on DIMM1 %d, "
+                          "Channel number %d, DIMM count %d, and type 0x%02X (supported type = 0x%02X)",
+                          io_vpdInfo.iv_total_ranks_dimm0, io_vpdInfo.iv_total_ranks_dimm1,
+                          l_ocmb_pos, io_vpdInfo.iv_dimm_count, io_vpdInfo.iv_dimm_type, l_efdDataNptr[EFD_DDR4_DIMM_SUPPORTED_ADDR]);
+            }
         }  // end for (; ii < l_efdCount; ++ii)
 
         if (ii >= l_efdCount)

@@ -129,6 +129,9 @@ class VPDInfo<TARGET_TYPE_OCMB_CHIP>
         uint8_t iv_dmb_revision; // buffer revision
         uint8_t iv_ddr_mode;     // DDR4 or DDR5
 
+        // *** NEW INPUT DATA FOR PLANAR EFD ***
+        // Note: these fields only need to be set in planar applications
+        // and are at the end of this class for backward compatibility
 
         // total number of DIMMs attached
         uint64_t iv_dimm_count;

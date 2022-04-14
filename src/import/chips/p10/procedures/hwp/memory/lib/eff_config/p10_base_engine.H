@@ -2391,6 +2391,7 @@ class base_0_3 : public base
             FAPI_TRY(set_hybrid_media(i_spd));
             FAPI_TRY(set_hybrid(i_spd));
             FAPI_TRY(set_dimm_type(i_spd));
+            FAPI_TRY(set_prim_stack_type(i_spd));
 
             // Generic_metadata_fields
             FAPI_TRY(set_dimm_pos_metadata(i_spd));
@@ -2463,7 +2464,6 @@ class base_0_3 : public base
             FAPI_TRY(set_sdram_density(i_spd));
             FAPI_TRY(set_col_addr_bits(i_spd));
             FAPI_TRY(set_row_addr_bits(i_spd));
-            FAPI_TRY(set_prim_stack_type(i_spd));
             FAPI_TRY(set_prim_die_count(i_spd));
             FAPI_TRY(set_sdram_width(i_spd));
             FAPI_TRY(set_bus_width(i_spd));

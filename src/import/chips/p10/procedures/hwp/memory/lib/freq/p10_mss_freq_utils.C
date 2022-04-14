@@ -44,6 +44,7 @@
 #include <lib/freq/p10_freq_traits.H>
 #include <lib/shared/p10_consts.H>
 #include <lib/freq/p10_sync.H>
+#include <lib/eff_config/p10_spd_utils.H>
 
 // Generic libraries
 #include <mss_generic_attribute_getters.H>
@@ -265,11 +266,20 @@ fapi2::ReturnCode check_freq_support_vpd<mss::proc_type::PROC_P10>( const fapi2:
 
     const auto& l_vpd_target = mss::find_target<TT::VPD_TARGET_TYPE>(i_target);
     uint32_t l_omi_freq = 0;
+    uint8_t l_is_planar = 0;
 
     l_vpd_info.iv_is_config_ffdc_enabled = false;
 
     FAPI_TRY(convert_ddr_freq_to_omi_freq(i_target, i_proposed_freq, l_omi_freq));
     l_vpd_info.iv_omi_freq_mhz = l_omi_freq;
+
+    // Add planar EFD lookup info if we need it
+    FAPI_TRY( mss::attr::get_mem_mrw_is_planar(l_vpd_target, l_is_planar) );
+
+    for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
+    {
+        FAPI_TRY(mss::spd::ddr4::add_planar_efd_info(l_dimm, l_is_planar, l_vpd_info));
+    }
 
     // DDIMM SPD can contain different SI settings for each master rank.
     // To determine which frequencies are supported, we have to check for each valid
