@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -232,7 +232,7 @@ class ThreadPoolTest: public CxxTest::TestSuite
             errlHndl_t l_errl = l_threadPool.shutdown();
             if(l_errl)
             {
-                TS_FAIL("testChildRCGoodTask: an unexpected error log (EID 0x%.8%x) returned from the thread pool", l_errl->eid());
+                TS_FAIL("testChildRCGoodTask: an unexpected error log (EID 0x%.8x) returned from the thread pool", l_errl->eid());
                 errlCommit(l_errl, CXXTEST_COMP_ID);
                 break;
             }
