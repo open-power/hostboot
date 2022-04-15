@@ -53,6 +53,9 @@ hbotTable = { hashString : { 'format': formatString = formatted trace string
 """
 hbotTable = {}
 
+""" Global lid location of hbotStringFile """
+HBOT_STRING_LID_FILE = "81e00685.lid"
+
 """ Trace version of binary file/data in decimal
 """
 TRACE_VERSION2 = 2
@@ -467,25 +470,54 @@ def inputloop(exitOnError):
        sys.stdout.flush()
 
 
+def print_full_usage():
+    print("\n==================================================================")
+    print("usage: cat traceFile | weave.py [-s hbotStringFile] [-d debugFile]\n")
+    print("If debugFile is specified, the parsing will stop on first parsing error\n")
+    print("On eBMC system:\n")
+    print("  tail -F /var/log/obmc-console1.log | weave.py\n")
+    print("  Note: hbotStringFile is in lid, currently 81e00685.lid, on eBMC system")
+    print("        Also need to enable trace_lite tracing via bios attribute hb_debug_console\n")
+    print("Not on eBMC system:")
+    print("  -s hbotStringFile is a required parameter\n")
+    print("==================================================================\n")
+
+
 """
 Main function that takes in hbotStringFile and starts translating trace-lite traces
 """
 if __name__ == "__main__":
-    args = sys.argv[1:]
+    import argparse
     exitOnError = False
-    if (len(args) < 1):
-        print("usage: cat traceFile | weave.py hbotStringFile [debugFile]\n")
-        print("On eBMC system:\n")
-        print("  tail -F /var/log/obmc/var/log/obmc-console1.log | weave.py /media/hostfw/running/81e00685.lid\n")
-        print("  Note: hbotStringFile is in lid, currently 81e00685.lid, on eBMC system")
-        print("        Also need to enable trace_lite tracing via bios attribute hb_debug_console\n")
-        print("  If debugFile is specified, the parsing will stop on first parsing error\n")
+
+
+    parser = argparse.ArgumentParser(description='Tool to weave trace_lite trace entries into human-readable text',
+                                     epilog='On eBMC system: \n  Enable trace_lite via hb_debug_console bios attribute\n   tail -F /var/log/obmc/var/ | weave.py')
+    parser.add_argument('-s', dest='hbotStringFile', metavar='hbotStringFile', type=str, required=False, help='eBMC will use 81e00685.lid by default, otherwise this must be specified')
+    parser.add_argument('-d', dest='debugFile', metavar='debugFile',type=str, required=False, help='Logs debug traces to this file and parsing will stop on error')
+    args = parser.parse_args()
+
+    if (args.hbotStringFile):
+        read_stringfile(args.hbotStringFile)
+    else:
+        try:
+          from udparsers.helpers.miscUtils import getLid
+
+          # Get the LID file for the HB string file
+          stringFile = getLid(HBOT_STRING_LID_FILE)
+          if stringFile == "":
+              sys.stderr.write("ERROR: unable to locate "+HBOT_STRING_LID_FILE+"\n");
+              sys.exit(1)
+          else:
+              read_stringfile(stringFile)
+        except ImportError:
+            sys.stderr.write("ERROR: no getLid module, unable to locate hbotStringFile\n")
+            print_full_usage()
         sys.exit(1)
 
-    read_stringfile(args[0])
 
-    if (len(args) > 1):
-        G_debugFile = args[1]
+   if (args.debugFile):
+        G_debugFile = args.debugFile
         G_debugFd = open(G_debugFile, "w")
         exitOnError = True
 
