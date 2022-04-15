@@ -1728,7 +1728,7 @@ sub processMemPort
     $targetObj->setAttribute($target, "FAPI_POS",      $memPortPosPerSystem);
     $targetObj->setAttribute($target, "FAPI_NAME",     $memPortFapiName);
     $targetObj->setAttribute($target, "FAPINAME_NODE", $nodeParentPos);
-    $targetObj->setAttribute($target, "FAPINAME_POS",  $memPortPosPerNode);
+    $targetObj->setAttribute($target, "FAPINAME_POS",  $ocmbParentPos);
     $targetObj->setAttribute($target, "FAPINAME_UNIT", $memPortPosPerParent);
     $targetObj->setAttribute($target, "REL_POS",       $memPortPosPerParent);
     $targetObj->setAttribute($target, "AFFINITY_PATH", $memPortAffinity);
