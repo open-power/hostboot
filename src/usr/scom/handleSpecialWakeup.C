@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -362,29 +362,6 @@ errlHndl_t callWakeupHwp(TARGETING::Target* i_target,
         TRACFCOMP( g_trac_scom,ERR_MRK
                    "Attempting to force disable special wakeup on %.8X with SPCWKUP_COUNT=%d",
                    TARGETING::get_huid(i_target), l_count);
-        /*@
-         * @errortype
-         * @moduleid         SCOM_CALL_WAKEUP_HWP
-         * @reasoncode       SCOM_UNEXPECTED_FORCE_WAKEUP
-         * @userdata1        Target HUID
-         * @userdata2[0:31]  Wakeup Enable
-         * @userdata2[32:63] Wakeup Count (ATTR_SPCWKUP_COUNT)
-         * @devdesc          Unexpectedly forcing wakeup off when the counter
-         *                   is non-zero, implies a bug in the code flow.
-         * @custdesc         Internal firmware error.
-         */
-        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                         SCOM_CALL_WAKEUP_HWP,
-                                         SCOM_UNEXPECTED_FORCE_WAKEUP,
-                                         get_huid(i_target),
-                                         TWO_UINT32_TO_UINT64(
-                                                    i_enable, l_count),
-                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
-        l_errl->collectTrace(HBRT_TRACE_NAME,1024);
-        l_errl->collectTrace(FAPI2_COMP_NAME,512);
-        l_errl->collectTrace(ISTEP_TRACE_NAME,512);
-
-        errlCommit( l_errl, RUNTIME_COMP_ID );
     }
 
     // Only call the HWP if 0-->1 or 1-->0 or if it is a force
