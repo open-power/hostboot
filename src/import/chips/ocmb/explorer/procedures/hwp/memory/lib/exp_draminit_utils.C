@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -962,31 +962,32 @@ fapi2::ReturnCode print_phy_params(
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .RcdDic[%u]              = %u, // %s", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.RcdDic[l_pstate],
+            FAPI_LAB("  .RcdDic[%u]              = 0x%04X, // %s", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.RcdDic[l_pstate],
                      mss::c_str(i_target));
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .RcdVoltageCtrl[%u]      = %u, // %s", l_pstate,
+            FAPI_LAB("  .RcdVoltageCtrl[%u]      = 0x%04X, // %s", l_pstate,
                      i_phy_params.iv_user_msdg_upto_ver397559.RcdVoltageCtrl[l_pstate], mss::c_str(i_target));
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .RcdIBTCtrl[%u]          = %u, // %s", l_pstate,
+            FAPI_LAB("  .RcdIBTCtrl[%u]          = 0x%04X, // %s", l_pstate,
                      i_phy_params.iv_user_msdg_upto_ver397559.RcdIBTCtrl[l_pstate], mss::c_str(i_target));
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .RcdDBDic[%u]            = %u, // %s", l_pstate,
+            FAPI_LAB("  .RcdDBDic[%u]            = 0x%04X, // %s", l_pstate,
                      i_phy_params.iv_user_msdg_upto_ver397559.RcdDBDic[l_pstate], mss::c_str(i_target));
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .RcdSlewRate[%u]         = %u, // %s", l_pstate,
+            FAPI_LAB("  .RcdSlewRate[%u]         = 0x%04X, // %s", l_pstate,
                      i_phy_params.iv_user_msdg_upto_ver397559.RcdSlewRate[l_pstate], mss::c_str(i_target));
         }
 
@@ -1019,13 +1020,13 @@ fapi2::ReturnCode print_phy_params(
 
         if(is_new_fw_msdg_supported(l_fw_version))
         {
-            FAPI_LAB("  .F1RC1x      = %u, // %s", i_phy_params.F1RC1x, mss::c_str(i_target));
-            FAPI_LAB("  .F1RC2x      = %u, // %s", i_phy_params.F1RC2x, mss::c_str(i_target));
-            FAPI_LAB("  .F1RC3x      = %u, // %s", i_phy_params.F1RC3x, mss::c_str(i_target));
-            FAPI_LAB("  .F1RC4x      = %u, // %s", i_phy_params.F1RC4x, mss::c_str(i_target));
-            FAPI_LAB("  .F1RC5x      = %u, // %s", i_phy_params.F1RC5x, mss::c_str(i_target));
-            FAPI_LAB("  .F1RC6x      = %u, // %s", i_phy_params.F1RC6x, mss::c_str(i_target));
-            FAPI_LAB("  .F1RC7x      = %u, // %s", i_phy_params.F1RC7x, mss::c_str(i_target));
+            FAPI_LAB("  .F1RC1x      = 0x%02x, // %s", i_phy_params.F1RC1x, mss::c_str(i_target));
+            FAPI_LAB("  .F1RC2x      = 0x%02x, // %s", i_phy_params.F1RC2x, mss::c_str(i_target));
+            FAPI_LAB("  .F1RC3x      = 0x%02x, // %s", i_phy_params.F1RC3x, mss::c_str(i_target));
+            FAPI_LAB("  .F1RC4x      = 0x%02x, // %s", i_phy_params.F1RC4x, mss::c_str(i_target));
+            FAPI_LAB("  .F1RC5x      = 0x%02x, // %s", i_phy_params.F1RC5x, mss::c_str(i_target));
+            FAPI_LAB("  .F1RC6x      = 0x%02x, // %s", i_phy_params.F1RC6x, mss::c_str(i_target));
+            FAPI_LAB("  .F1RC7x      = 0x%02x, // %s", i_phy_params.F1RC7x, mss::c_str(i_target));
         }
 
         FAPI_LAB("};");
