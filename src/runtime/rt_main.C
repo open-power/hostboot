@@ -34,7 +34,6 @@
 #include <util/singleton.H>
 #include <stdio.h>
 #include <util/align.H>
-#include <util/runtime/rt_fwreq_helper.H>
 
 // Address of the first writable page, initialized by the linker.
 extern void* data_load_address;

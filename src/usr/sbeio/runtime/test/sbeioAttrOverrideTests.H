@@ -143,32 +143,6 @@ public:
             // Step 1 - Get Chip ID
             //#############################################
 
-            //get runtime interfaces
-            runtimeInterfaces_t* l_rt = getRuntimeInterfaces();
-            if(nullptr == l_rt)
-            {
-                TS_FAIL("SbePassThroughApplyAttrOverrides: "
-                        "Unable to get runtime interfaces.");
-
-                result = false;
-                break;
-            }
-            else if(not l_rt->sbe_message_passing)
-            {
-                TS_FAIL("SbePassThroughApplyAttrOverrides: "
-                        "sbe_message_passing runtime interface "
-                        "has not been set.");
-
-                result = false;
-                break;
-            }
-
-            //if (&RT_SBEIO::process_sbe_msg != l_rt->sbe_message_passing)
-            //{
-            //    TS_FAIL("SbePassThroughApplyAttrOverrides: sbe_message_passing function pointer is not set to RT_SBEIO::process_sbe_msg()");
-            //    break;
-            //}
-
             TARGETING::TargetHandleList procList;
             getAllChips(procList, TARGETING::TYPE_PROC, true);
 
@@ -330,6 +304,26 @@ public:
             // Step 7 - Invoke sbe_message_passing
             //#############################################
 
+            // Check the sbe_message_passing runtime interface connection
+            // but do not use it when testing the process_sbe_msg function
+            runtimeInterfaces_t* l_rt = getRuntimeInterfaces();
+            if(nullptr == l_rt)
+            {
+                TS_FAIL("SbePassThroughApplyAttrOverrides: "
+                        "Unable to get runtime interfaces.");
+
+                result = false;
+                break;
+            }
+            else if(not l_rt->sbe_message_passing)
+            {
+                TS_FAIL("SbePassThroughApplyAttrOverrides: "
+                        "sbe_message_passing runtime interface "
+                        "has not been set.");
+
+                result = false;
+                break;
+            }
             int rc = RT_SBEIO::process_sbe_msg(l_chipId);
 
             if(0 != rc)

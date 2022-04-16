@@ -121,18 +121,13 @@ class PMTest : public CxxTest::TestSuite
         TS_INFO("testLoadAndStartOcc: OCC common addr: 0x%016lx; HOMER addr: 0x%016lx",
                 l_occCommonAddr, l_homerAddr);
 
+        // Check the load_pm_complex runtime interface connection
+        // but do not use it when testing the load_pm_complex function
         if(getRuntimeInterfaces()->load_pm_complex == nullptr)
         {
             TS_FAIL("testLoadAndStartOcc: no load_pm_complex interface found!");
             break;
         }
-
-        //if (&RTPM::load_pm_complex != getRuntimeInterfaces()->load_pm_complex)
-        //{
-        //    TS_FAIL("testLoadAndStartOcc: verify_container function pointer is not set to SECUREBOOT::verify_container()");
-        //    break;
-        //}
-
         l_rc = RTPM::load_pm_complex(l_chipId,
                                      l_homerAddr,
                                      l_occCommonAddr,
@@ -143,18 +138,13 @@ class PMTest : public CxxTest::TestSuite
             break;
         }
 
+        // Check the start_pm_complex runtime interface connection
+        // but do not use it when testing the start_pm_complex function
         if(getRuntimeInterfaces()->start_pm_complex == nullptr)
         {
             TS_FAIL("testLoadAndStartOcc:no start_pm_complex interface found!");
             break;
         }
-
-        //if (&RTPM::start_pm_complex != getRuntimeInterfaces()->start_pm_complex)
-        //{
-        //    TS_FAIL("testLoadAndStartOcc: verify_container function pointer is not set to SECUREBOOT::verify_container()");
-        //    break;
-        //}
-
         l_rc = RTPM::start_pm_complex(l_chipId);
         if(l_rc)
         {

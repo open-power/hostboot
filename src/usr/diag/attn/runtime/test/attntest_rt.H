@@ -33,6 +33,10 @@
 //See attn_rt.C
 namespace ATTN_RT
 {
+    int enableAttns(void);
+
+    int disableAttns(void);
+
     int handleAttns(uint64_t i_proc,
                     uint64_t i_ipollStatus,
                     uint64_t i_ipollMask);
@@ -55,55 +59,42 @@ class AttnTestRT: public CxxTest::TestSuite
             return;
         }
 
+        // Check the enable_attns runtime interface connection
+        // but do not use it when testing the enableAttns function
         if (NULL == rt_intf->enable_attns)
         {
             TS_FAIL("AttnTestRT: enable_attns not set");
         }
-        else
-        {
-            int rc = rt_intf->enable_attns();
-            ATTN_SLOW("enable_attns returned rc: %d", rc);
-        }
+        int rc = ATTN_RT::enableAttns();
+        ATTN_SLOW("enableAttns returned rc: %d", rc);
 
+        // Check the disable_attns runtime interface connection
+        // but do not use it when testing the disableAttns function
         if (NULL == rt_intf->disable_attns)
         {
             TS_FAIL("AttnTestRT: disable_attns not set");
         }
-        else
-        {
-            int rc = rt_intf->disable_attns();
-            ATTN_SLOW("disable_attns returned rc: %d", rc);
-        }
+        rc = ATTN_RT::disableAttns();
+        ATTN_SLOW("disableAttns returned rc: %d", rc);
 
+        // Check the handle_attns runtime interface connection
+        // but do not use it when testing the handleAttns function
         if (NULL == rt_intf->handle_attns)
         {
             TS_FAIL("AttnTestRT: handle_attns not set");
         }
-        //else if (&ATTN_RT::handleAttns != rt_intf->handle_attns)
-        //{
-        //    TS_FAIL("testAttnRtIntf: handle_attns function pointer is not set to ATTN_RT::handleAttns()");
-        //}
-        else
-        {
-            // just pass in some params for now
-            int rc = ATTN_RT::handleAttns(NULL, 0, 0);
-            ATTN_SLOW("ATTN_RT::handleAttns returned rc: %d", rc);
-        }
+        // just pass in some params for now
+        rc = ATTN_RT::handleAttns(NULL, 0, 0);
+        ATTN_SLOW("ATTN_RT::handleAttns returned rc: %d", rc);
 
+        // Check the get_ipoll_events runtime interface connection
+        // but do not use it when testing the getIpollEvents function
         if (NULL == rt_intf->get_ipoll_events)
         {
             TS_FAIL("AttnTestRT: get_ipoll_events not set");
         }
-        //else if (&ATTN_RT::getIpollEvents != rt_intf->get_ipoll_events)
-        //{
-        //    TS_FAIL("testAttnRtIntf: get_ipoll_events function pointer is not set to ATTN_RT::getIpollEvents()");
-        //}
-        else
-        {
-            // just pass in some params for now
-            uint64_t l_bits = ATTN_RT::getIpollEvents();
-            ATTN_SLOW("ATTN_RT::getIpollEvents returned: %llx", l_bits);
-        }
+        uint64_t l_bits = ATTN_RT::getIpollEvents();
+        ATTN_SLOW("ATTN_RT::getIpollEvents returned: %llx", l_bits);
 
         ATTN_SLOW(EXIT_MRK"AttnTestRT::testAttnRtIntf");
     }

@@ -56,11 +56,19 @@ class RunCommandTest : public CxxTest::TestSuite
 
         char* outstr = NULL;
 
-        //if (&Util::hbrtCommand != getRuntimeInterfaces()->run_command)
-        //{
-        //    TS_FAIL("testRunCommand: run_command function pointer is not set to Util::hbrtCommand()");
-        //    return;
-        //}
+        // Check the run_command runtime interface connection
+        // but do not use it when testing the hbrtCommand function
+        runtimeInterfaces_t* rt_intf = getRuntimeInterfaces();
+        if (NULL == rt_intf)
+        {
+            TS_FAIL("testRunCommand: runtimeIntfaces not set");
+            return;
+        }
+        if (NULL == rt_intf->run_command)
+        {
+            TS_FAIL("testRunCommand: run_command not set");
+            return;
+        }
 
         int rc = RUN_COMMAND( argc, argv, &outstr );
 

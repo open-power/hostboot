@@ -26,7 +26,6 @@
 #include <limits.h>
 #include <hbotcompid.H>
 #include <runtime/interface.h>
-#include <util/runtime/rt_fwreq_helper.H>
 
 #include <kernel/console.H>
 #include <vfs/vfs.H>

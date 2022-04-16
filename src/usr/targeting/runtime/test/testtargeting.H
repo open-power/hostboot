@@ -191,7 +191,7 @@ class TargetingTestSuite : public CxxTest::TestSuite
 
             do
             {
-                // Get the address of the runtime apply overrides function
+                // Check the apply_attr_override runtime interface connection
                 runtimeInterfaces_t* rt_intf = getRuntimeInterfaces();
                 if(rt_intf == NULL)
                 {
@@ -203,11 +203,6 @@ class TargetingTestSuite : public CxxTest::TestSuite
                     TS_FAIL("runtimeInterfaces->apply_attr_override not set");
                     break;
                 }
-                //if (&RT_TARG::apply_attr_override != rt_intf->apply_attr_override)
-                //{
-                //    TS_FAIL("testApplyAttrOverrides: apply_attr_override function pointer is not set to RT_TARG::apply_attr_override()");
-                //    break;
-                //}
 
                 // Get the initial value of the test attribute
                 uint8_t l_attrVal =
@@ -259,8 +254,9 @@ class TargetingTestSuite : public CxxTest::TestSuite
                 l_pAttrOverSec->iv_layer = AttributeTank::TANK_LAYER_TERM;
                 l_pAttrOverSec->iv_size = 0;
                 l_tmpIndex += sizeof(AttrOverrideSection);
-                // call runtime override attributes
-                int rc = rt_intf->apply_attr_override(
+                // call apply_attr_override
+                // but do not use the runtime interface function
+                int rc = RT_TARG::apply_attr_override(
                                     l_pAttrOverrideBlob,
                                     l_tmpIndex);
                 if (rc)
