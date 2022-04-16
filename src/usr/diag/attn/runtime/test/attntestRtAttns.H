@@ -105,17 +105,20 @@ class AttnCheckForRtAttentionsTest : public CxxTest::TestSuite
 
                 prd.setExpectedAttn( expAttn);
 
+                // Check handle_attns runtime interface connection
                 runtimeInterfaces_t * rt_intf = getRuntimeInterfaces();
                 if( NULL == rt_intf )
                 {
                     TS_FAIL("Not able to get run time interface object");
                     break;
                 }
-                //else if (&ATTN_RT::handleAttns != rt_intf->handle_attns)
-                //{
-                //    TS_FAIL("AttnCheckForRtAttentionsTest: handle_attns function pointer is not set to ATTN_RT::handleAttns()");
-                //    break;
-                //}
+                else if (NULL == rt_intf->handle_attns)
+                {
+                    TS_FAIL("AttnCheckForRtAttentionsTest: handle_attns function pointer is not set");
+                    break;
+                }
+
+                // handleAttns: do not use the runtime interface function
                 int32_t rc = ATTN_RT::handleAttns(chipId, 0, 0);
 
                 if( 0 != rc  )

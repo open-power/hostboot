@@ -83,6 +83,7 @@ class SecurebootRtTestSuite: public CxxTest::TestSuite
 
 #else
 
+        // Check the verify_container runtime interface connection
         if (nullptr == pRtIntf->verify_container)
         {
             TS_FAIL("testVerifyContainer: verify_container function pointer "
@@ -90,16 +91,11 @@ class SecurebootRtTestSuite: public CxxTest::TestSuite
             break;
         }
 
-        //if (&SECUREBOOT::verify_container != pRtIntf->verify_container)
-        //{
-        //    TS_FAIL("testVerifyContainer: verify_container function pointer is not set to SECUREBOOT::verify_container()");
-        //    break;
-        //}
-
         // If secureboot is compiled in, perform various API tests
 
         // TODO: RTC 156485 For now, function is a no op; add real tests here
         // when verify_container is fully implemented
+        // Do not use the runtime interface function for test
         auto rc = SECUREBOOT::verify_container(nullptr,nullptr,0);
         if(rc != 0)
         {

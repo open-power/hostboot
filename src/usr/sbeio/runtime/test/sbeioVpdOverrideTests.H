@@ -800,6 +800,7 @@ private:
             // Step A - get runtime interfaces for sbe_msg_passing
             //#################################################################
 
+            // Check the sbe_message_passing runtime interface connection
             runtimeInterfaces_t* l_rt = getRuntimeInterfaces();
             if(nullptr == l_rt)
             {
@@ -809,12 +810,15 @@ private:
                 result = -1;
                 break;
             }
+            else if(nullptr == l_rt->sbe_message_passing)
+            {
+                TS_FAIL("SbePassThroughApplyVpdOverrides: "
+                        "sbe_message_passing runtime interface "
+                        "has not been set.");
 
-            //if (&RT_SBEIO::process_sbe_msg != l_rt->sbe_message_passing)
-            //{
-            //    TS_FAIL("invokeSBEMessagePassing: sbe_message_passing function pointer is not set to RT_SBEIO::process_sbe_msg()");
-            //    break;
-            //}
+                result = -1;
+                break;
+            }
 
             //#################################################################
             // Step B - Ensure that another SBE pass-through is not in progress
@@ -935,7 +939,8 @@ private:
             //#############################################
 
             // the rc from the sbe_msg_passing is the reasoncode of the errorlog
-            // that was created in sbeApplyVpdOverrides, 0 if no error was created
+            // that was created in sbeApplyVpdOverrides, 0 if no error was created,
+            // do not use the runtime interface function when testing
             result = RT_SBEIO::process_sbe_msg(i_chipId);
             if(0 != result)
             {
