@@ -2275,6 +2275,23 @@ errlHndl_t DeconfigGard::applyGardRecord(Target *i_pTarget,
             {
                 HWAS_ERR("platCreateGardRecord returned an error creating a Deconfig Gard record for %.8X",
                          get_huid(i_pTarget));
+                // if the error was caused by the gard record repository being full,
+                // reset RECONFIGURE_LOOP_DECONFIGURE bit, so that we do not trigger
+                // a reconfig loop at the end of the istep for any gard records applied
+                // for error logs that came from prior ipls. If we do not reset this
+                // attr, this will lead to infinite reconfig loops at the end of the
+                // istep
+                if (l_pErr->reasonCode() == HWAS::RC_GARD_REPOSITORY_FULL)
+                {
+                    Target* l_pTopLevel = UTIL::assertGetToplevelTarget();
+                    ATTR_RECONFIGURE_LOOP_type l_reconfigAttr =
+                        l_pTopLevel->getAttr<ATTR_RECONFIGURE_LOOP>();
+                    // Turn off deconfigure bit
+                    l_reconfigAttr &= ~RECONFIGURE_LOOP_DECONFIGURE;
+                    // Write back to attribute
+                    l_pTopLevel->setAttr<ATTR_RECONFIGURE_LOOP>(l_reconfigAttr);
+                }
+
                 break;
             }
         }
@@ -2753,6 +2770,7 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
 
         if (l_pErr)
         {
+            HWAS_ERR("Error occured when applying Unrecoverable Guard records");
             break;
         }
 
@@ -2779,8 +2797,7 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
             clearBlockSpecDeconfigForUngardedTargets(l_block_spec_deconfig);
         if (l_pErr)
         {
-            HWAS_ERR("clearBlockSpecDeconfigForUngardedTargets returned an "
-                     "error");
+            HWAS_ERR("clearBlockSpecDeconfigForUngardedTargets returned an error");
             break;
         }
 
@@ -2921,6 +2938,7 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
 
         if(l_pErr)
         {
+            HWAS_ERR("Error occured when applying Recoverable Guard records");
             break;
         }
 
