@@ -402,62 +402,19 @@ void* host_gard( void *io_pArgs )
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "host_gard: proc HUID 0x%X has functional core mask: 0x%8X",
                       get_huid(l_proc), l_funcCoreMask);
-
         }
-
-        // Put out some helpful messages that show which targets are usable
-        typedef struct { uint64_t x[4]; } posbits_t; //256 bits
-        std::map<TARGETING::TYPE,posbits_t> l_funcData;
-        for (auto target : targetService())
-        {
-            if (!(target->getAttr<ATTR_HWAS_STATE>().functional))
-            {
-                continue;
-            }
-            TYPE l_type =target->getAttr<ATTR_TYPE>();
-            ATTR_ORDINAL_ID_type l_pos = 0;
-            if( target->tryGetAttr<ATTR_ORDINAL_ID>(l_pos) )
-            {
-                if( l_funcData.find(l_type) == l_funcData.end() )
-                {
-                    posbits_t newentry = {};
-                    l_funcData[l_type] = newentry;
-                }
-                if( l_pos < 255 )
-                {
-                    l_funcData[l_type].x[l_pos/64] |= (0x8000000000000000 >> (l_pos%64));
-                }
-            }
-        }
-
-        EntityPath l_epath;
-        for( auto l_data : l_funcData)
-        {
-            auto l_type = l_data.first;
-            auto l_val = l_data.second;
-            //Only want to display procs, ocmbs, dimms, and cores
-            if((l_type != TYPE_DIMM) &&
-               (l_type != TYPE_PROC) &&
-               (l_type != TYPE_OCMB_CHIP) &&
-               (l_type != TYPE_CORE))
-            {
-                continue;
-            }
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "FUNCTIONAL> %s[%.2X]=%.16llX%.16llX%.16llX%.16llX",
-                      l_epath.pathElementTypeAsString(l_type),
-                      l_type,
-                      l_val.x[0],l_val.x[1],l_val.x[2],l_val.x[3]);
 
 #if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
-            CONSOLE::displayf(CONSOLE::DEFAULT, "HWAS", "FUNCTIONAL> %s[%.2X]=%.16llX%.16llX",
-                l_epath.pathElementTypeAsString(l_data.first),
-                                                l_type,
-                                                l_val.x[0],l_val.x[1] );
-            CONSOLE::displayf(CONSOLE::DEFAULT, "HWAS", "                     %.16llX%.16llX",
-                                                l_val.x[2],l_val.x[3] );
+        CONSOLE::displayf(CONSOLE::DEFAULT, "HWAS", "---------------------------------");
+        CONSOLE::displayf(CONSOLE::DEFAULT, "HWAS", "FUNCTIONAL>");
 #endif
-            }
+        // display func targ bit mask to console and trace
+        TARGETING::PredicateIsFunctional l_isFunctional;
+        TARGETING::UTIL::displayProcChildrenBitmasks(&l_isFunctional);
+
+#if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
+        CONSOLE::displayf(CONSOLE::DEFAULT, "HWAS", "---------------------------------");
+#endif
 
         // If targets are deconfigured as a result of collectGard(), they
         // are done so using the PLID as the reason for deconfiguration,
