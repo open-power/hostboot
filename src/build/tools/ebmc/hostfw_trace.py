@@ -168,26 +168,27 @@ def trace_output_get_format():
 
 @param[in] bData: bytes object of the binary data
 @param[in] fstring: string of format string for current trace
+@param[in] fsource: file from which the format string originates from
 @param[in] vparms_start: starting index of current trace args
 @param[in] vparms_end: ending index of current trace args
 @returns: a string with the values put into to the format string
           or an empty string if error
 """
-def trexMyVsnprintf(bData, fstring, vparms_start, vparms_end):
+def trexMyVsnprintf(bData, fstring, fsource, vparms_start, vparms_end):
     argnum = 0
     parsedArgs = []
 
     vparms_size = vparms_end - vparms_start
     i = 0 #used to iterate through format string
     j = vparms_start #used to iterate through binary arg data
-    unsuportedFormatChars = 'hjzt'
-    charstring = "-+0123456789#lLw. 'Ihjzt"
+    unsupportedSubSpecifiers = 'hjzt'
+    formatSubSpecifiers = "-+0123456789#lLw. 'Ihjzt"
 
     while i < len(fstring):
         if argnum > TRACE_MAX_ARGS:
             break
 
-        #check for '%'
+        # check for '%' to find the first argument specifier
         if fstring[i] != '%':
             i += 1
             continue
@@ -200,7 +201,10 @@ def trexMyVsnprintf(bData, fstring, vparms_start, vparms_end):
             i += 1
             continue
 
-        #check for format characters following '%'
+
+        # Check for supported format characters following the '%' which are sub-specifiers
+        # such as flags (-+#0), precision (.num) and length (l, ll, L).
+        # Also check for unsupported format characters such as the length specifiers hjzt.
         longflag = False
         while(1):
             if fstring[i] == 'l':
@@ -209,10 +213,10 @@ def trexMyVsnprintf(bData, fstring, vparms_start, vparms_end):
             elif fstring[i] == 'L':
                 longflag = True
                 i += 1
-            elif unsuportedFormatChars.find(fstring[i]) != -1: #Unsupported char found
+            elif unsupportedSubSpecifiers.find(fstring[i]) != -1: #Unsupported char found
                 #Remove char from format string
                 fstring = fstring[0 : i : ] + fstring[i + 1 : :]
-            elif charstring.find(fstring[i]) == -1: #not found
+            elif formatSubSpecifiers.find(fstring[i]) == -1: #not found
                 break
             else:
                 i += 1 #skip optional char
@@ -231,10 +235,21 @@ def trexMyVsnprintf(bData, fstring, vparms_start, vparms_end):
                     else:
                         break
 
-                unpackStr = str(nullCharIndx - j) + 's'
+                numberOfChars = nullCharIndx - j
+                unpackStr = str(numberOfChars) + 's'
                 #Unpack a string (nullCharIndx - j) bytes long from bData starting at offset j
                 #and add string to parsed arguments list
-                parsedArgs.append(struct.unpack_from(unpackStr, bData, j)[0].decode('UTF-8'))
+                try:
+                    parsedArgs.append(struct.unpack_from(unpackStr, bData, j)[0].decode('UTF-8'))
+                except Exception as err:
+                    parsedArgs.append("[[PARSE ERROR]]")
+                    capture_warning("Issue with parsing argument "
+                                     + str(argnum + 1)
+                                     + " with data \'0x"
+                                     + data_to_hexstring2(bData, j, j+ numberOfChars)
+                                     + "\' for:" )
+                    capture_warning("  string: " + fstring)
+                    capture_warning("  source: " + fsource)
 
                 #make sure index is increased by a multiple of 4
                 strLen = nullCharIndx - strStartIndx
@@ -390,12 +405,13 @@ def decode_binary_traces_to_ascii_list(bData, startingPosition):
             end = gpt[1]
             #make sure index isn't passed end of data
             if end <= len(bData):
-                #get format string
-                fstring = get_format_by_hash(str(gpt[2]))
+                #get format string and source
+                formatString = get_format_by_hash(str(gpt[2]))
+                formatSource = get_source_by_hash(str(gpt[2]))
                 #Format full trace
-                trace = gpt[3] + trexMyVsnprintf(bData, fstring, gpt[0], end)
+                trace = gpt[3] + trexMyVsnprintf(bData, formatString, formatSource, gpt[0], end)
                 if flags & TRACE_FILENAME:
-                    trace += (' | ' + get_source_by_hash(str(gpt[2])))
+                    trace += (' | ' + formatSource)
                 #Add it to list of traces
                 traces.append(trace)
                 start = end
@@ -923,14 +939,15 @@ def get_ascii_traces_from_trace_entry_list(binaryData, traceEntriesV2):
                                       traceEntryV1.lineNumber )
 
         formatString = get_format_by_hash(str(traceEntryV1.hash))
+        sourceString = get_source_by_hash(str(traceEntryV1.hash))
         if traceEntryV1.entryType == TRACE_COMP_TRACE:
-            traceStr +=  trexMyVsnprintf(binaryData, formatString, traceEntryV1.argsOffset,
+            traceStr +=  trexMyVsnprintf(binaryData, formatString, sourceString, traceEntryV1.argsOffset,
                          (traceEntryV1.argsOffset + traceEntryV1.entrySize))
             if flags & TRACE_FILENAME:
                 traceStr += (' | ' + get_source_by_hash(str(traceEntryV1.hash)))
             traces.append(traceStr)
         elif traceEntryV1.entryType == TRACE_FIELDBIN:
-            traceStr2 =  traceStr + trexMyVsnprintf(binaryData, formatString, traceEntryV1.argsOffset,
+            traceStr2 =  traceStr + trexMyVsnprintf(binaryData, formatString, sourceString, traceEntryV1.argsOffset,
                                    (traceEntryV1.argsOffset + traceEntryV1.entrySize))
 
             traces.append(traceStr2)
@@ -1015,6 +1032,24 @@ def data_to_hexstring(binaryData, startOfData, endOfData):
             hexStrings.append(lineNumber + dataPart)
 
     return hexStrings
+
+""" Convert a array of binary data into a string of printable hex values
+
+@param[in] binaryData: a byte array that contains the binary data to be converted to ASCII
+@param[in] startOfData: an integer offset to the beginning of the binary data
+@param[in] endOfData:   an integer offset to one past the end of the binary data
+@returns: hex string: a printable string representing the binary data
+"""
+def data_to_hexstring2(binaryData, startOfData, endOfData):
+    hexString = ""   # Will hold the printable hex values of the data
+    # Iterate thru the data, decoding each byte
+    start = startOfData
+    while start < endOfData:
+        # Convert the data to its equivalent printable hex value
+        hexString += '%.2X' % binaryData[start]
+        start += 1
+
+    return hexString
 
 
 """ Parse a version 1 trace entry
