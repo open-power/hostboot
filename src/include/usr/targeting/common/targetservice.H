@@ -79,11 +79,44 @@ namespace TARGETING
          *                           set for a target in the bit string.
          *
          *  @returns a uint32_t representing i_targetList as a bit string based off of
-         *           i_pPredicate. The bits set will be based on the target's ATTR_CHIP_UNIT
-         *           with the leftmost/MSB corresponding to ATTR_CHIP_UNIT 0
+         *           i_pPredicate. The bits set will be based on the target's ATTR_CHIP_UNIT,
+         *           ATTR_POSITION with the leftmost/MSB corresponding to CHIP_UNIT/POSITION 0
          */
+        template<const ATTRIBUTE_ID A>
         uint32_t targetListToBitString(const TargetHandleList& i_targetList,
-                                       const PredicateBase* i_pPredicate = nullptr);
+                                       const PredicateBase* i_pPredicate = nullptr)
+         {
+            uint32_t l_targetBitString = 0x00000000;
+
+            do {
+
+            if (i_targetList.empty())
+            {
+                break;
+            }
+
+            for (const auto l_target : i_targetList)
+            {
+                if ((!i_pPredicate) || (*i_pPredicate)(l_target))
+                {
+                    l_targetBitString |= (0x80000000 >> (l_target->getAttr<A>()));
+                }
+            }
+
+            } while (0);
+
+            return l_targetBitString;
+        }
+
+        /**
+         *  @brief Displays the bit string of the targets under each Proc that match
+         *         the given i_pPredicate
+         *
+         *  @param[in] i_pPredicate, predicate used to determine if a bit should be
+         *                           set for a target in the bit string.
+         */
+        void displayProcChildrenBitmasks(const PredicateBase* const i_pPredicate);
+
     }; // namespace Util
 };
 
@@ -243,8 +276,6 @@ class TargetService
             PAUC_PARENT,        ///< The result target should be a PAUC target
             MAX_ASSOCIATION_TYPES, ///< Number of types, must always be last
         };
-
-    public:
 
         /**
          *  @brief Construct the target service
@@ -479,6 +510,27 @@ class TargetService
          */
         Target* toTarget(
             const EntityPath& i_entityPath) const;
+
+        /**
+         *  @brief returns the count for the number of possible targets found
+         *         of type i_targetType for the current system config
+         *
+         *  @param[in] i_targetType, the target TYPE to count
+         *
+         *  @note getMaxNumTargets implements a pre-check for an
+         *        already existing cached result to improve performance.
+         *        The memoize utility will check its cache and if
+         *        a value already exists for the key (in this case
+         *        the target TYPE) memoize will return the already
+         *        calculated number of targets. If the memoize cache
+         *        does not contain a match, then a subsequent call
+         *        will be made to _memoizeTargetCount to count the
+         *        targets. _memoizeTargetCount may be an expensive
+         *        lookup, searching the full target model.
+         *
+         *  @returns count of all possible i_targetType targets on the system
+         */
+        size_t getMaxNumTargets(TYPE i_targetType);
 
         /**
          *  @brief Returns the master processor chip target handle
@@ -1205,6 +1257,23 @@ class TargetService
          *  @retval zero success, non-zero failure
          */
         static int _memoizeTarget(EntityPath, Target*& o_target);
+
+        /**
+         *  @brief gets all the possible targets associated with a target
+         *         TYPE, counts them, and returns the value calculated
+         *
+         *  @note This internal call is needed to match the semantics of the
+         *        memoize call invocation.
+         *
+         *  @param[in]  i_targetType the TYPE of target to count
+         *
+         *  @param[out] o_count the number of targets of i_targetType
+         *                      possible in the current system config
+         *
+         *  @return int, indicates success or failure
+         *  @retval zero success, non-zero failure
+         */
+        static int _memoizeTargetCount( TYPE i_targetType, size_t & o_count);
 
         // Instance variables
         bool        iv_initialized; ///< Is service initialized or not

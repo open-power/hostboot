@@ -51,6 +51,7 @@
 #include <targeting/targplatutil.H>
 #include <targeting/targplatreasoncodes.H>
 #include <attributetraits.H>
+#include <attributestrings.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/util.H>
 #include <memoize.H>
@@ -64,9 +65,32 @@
 #include <mutexattributes.H>
 #include <sys/task.h>
 #include <sys/misc.h>
+
+// Console
+#include <console/uartif.H>
+#include <console/consoleif.H>
 #endif
 
 #undef EXTRA_SANITY_CHECKING
+
+// display macros
+#define FORMAT_WIDTH_2 2
+#define FORMAT_WIDTH_4 4
+#define FORMAT_WIDTH_8 8
+#define FORMAT_WIDTH_16 16
+#define STRINGIFY(x) #x
+
+// builds a format string like "%10s=%08llX" or "%10s=%016llX"
+#define BUILD_FORMAT_STRING2(num1, num2) STRINGIFY(%10s=%0##num1##llX %s=%0##num2##llX)
+
+#define TRACE_TARGET_INFO(name1, bits1, width1, name2, bits2, width2)   \
+            TARG_INF(BUILD_FORMAT_STRING2(width1, width2),              \
+                     name1, bits1, name2, bits2)                        \
+
+#define CONSOLE_TARGET_INFO(name1, bits1, width1, name2, bits2, width2) \
+            CONSOLE::displayf(CONSOLE::DEFAULT, "TARG",                 \
+                              BUILD_FORMAT_STRING2(width1, width2),     \
+                              name1, bits1, name2, bits2)               \
 
 //******************************************************************************
 // Utility functions
@@ -93,30 +117,162 @@ namespace TARGETING
         };
 
         /**
-         *  @brief Returns a bit string of the targets that match the given predicate
+         *  @brief Returns the max number of targets of TYPE i_targType that could be found
+         *         under a proc on the current system configuration
          *
-         *  @param[in] i_targetList, list of targets to generate a bit string for
+         *  @param[in] i_targetType, the target TYPE to get the count of
+         *
+         *  @returns count of possible TYPE i_targetType targets under a proc
+         *  @note    returns 0 for TYPEs that are not a CHILD of TYPE_PROC;
+         *           ie TYPE_SYS, TYPE_NODE, TYPE_PROC
+         */
+        size_t maxNumTargetsPerProc(const TYPE i_targType)
+        {
+            if (i_targType == TYPE_SYS  ||
+                i_targType == TYPE_NODE ||
+                i_targType == TYPE_PROC )
+            {
+                return 0;
+            }
+            return (targetService().getMaxNumTargets(i_targType)/targetService().getMaxNumTargets(TYPE_PROC));
+        }
+
+        /**
+         *  @brief Displays the bit string of the targets under each Proc that match
+         *         the given i_pPredicate
+         *
          *  @param[in] i_pPredicate, predicate used to determine if a bit should be
          *                           set for a target in the bit string.
-         *
-         *  @returns a uint32_t representing i_targetList as a bit string based off of
-         *           i_pPredicate. The bits set will be based on the target's ATTR_CHIP_UNIT
-         *           with the leftmost/MSB corresponding to ATTR_CHIP_UNIT 0
          */
-        uint32_t targetListToBitString(const TargetHandleList& i_targetList,
-                                       const PredicateBase* const i_pPredicate)
+        void displayProcChildrenBitmasks(const PredicateBase* const i_pPredicate)
         {
-            uint32_t l_targetBitString = 0x00000000;
-            for (const auto l_target : i_targetList)
+            /* Example Output:
+             *
+             * |TARG|PROCS=C0000000
+             * |TARG|PROC[00]:
+             * |TARG|      CORE=F0000000 DIMM=FF00000000000000
+             * |TARG|     CACHE=F0000000 OCMB=FF00
+             * |TARG|PROC[01]:
+             * |TARG|      CORE=F0000000 DIMM=0000000000000000
+             * |TARG|     CACHE=F0000000 OCMB=0000
+             *      etc.
+             */
+
+            struct targetMetadata_t {
+                const char * name;
+                size_t bitStringSizeBits; // number of bits in bitString needed for display
+                uint64_t numPerProc;
+                uint64_t bitString;
+            };
+
+            typedef std::map<TARGETING::TYPE, targetMetadata_t> targetData_t;
+            std::map<ATTR_ORDINAL_ID_type, targetData_t > l_procChildTargsMap;
+
+            targetData_t procChildData = {
+                {TYPE_DIMM,      {"DIMM",  64, maxNumTargetsPerProc(TYPE_DIMM), 0}},
+                {TYPE_OCMB_CHIP, {"OCMB",  16, maxNumTargetsPerProc(TYPE_OCMB_CHIP), 0}},
+                {TYPE_CORE,      {"CORE",  32, maxNumTargetsPerProc(TYPE_CORE), 0}},
+                {TYPE_L3,        {"CACHE", 32, maxNumTargetsPerProc(TYPE_CORE), 0}}
+                // use TYPE_L3 as a placeholder for tracking functional CORE cache
+            };
+
+            // quick check to make sure there aren't more targets then we can handle for displaying
+            for (auto pair: procChildData)
             {
-                if ((!i_pPredicate) || (*i_pPredicate)(l_target))
-                {
-                    l_targetBitString |= (0x80000000 >> (l_target->getAttr<ATTR_CHIP_UNIT>()));
-                }
+                TARG_ASSERT(pair.second.numPerProc <= 64, "Update displayProcChildrenBitmasks() to display more that 64 targets of one type per PROC");
             }
 
-            return l_targetBitString;
+            // build the predicate to get the proc children to to display
+            TargetHandleList l_proc_children;
+            PredicatePostfixExpr l_procChildrenPred;
+            PredicateCTM l_isDimm(CLASS_NA, TYPE_DIMM);
+            PredicateCTM l_isOcmb(CLASS_NA, TYPE_OCMB_CHIP);
+            PredicateCTM l_isCore(CLASS_NA, TYPE_CORE);
+            l_procChildrenPred.push(&l_isDimm)
+                              .push(&l_isOcmb).Or()
+                              .push(&l_isCore).Or()
+                              .push(i_pPredicate).And();
+
+            TargetHandleList l_procsPres;
+            getAllChips(l_procsPres,
+                        TYPE_PROC,
+                        false);
+
+            for (auto l_currentProc : l_procsPres)
+            {
+                targetData_t l_targetData = procChildData;
+
+                targetService().getAssociated(l_proc_children, l_currentProc,
+                                TargetService::CHILD_BY_AFFINITY, TargetService::ALL,
+                                &l_procChildrenPred);
+
+                for (auto l_procChild : l_proc_children)
+                {
+                    TYPE l_type = l_procChild->getAttr<ATTR_TYPE>();
+
+                    // check if the target is an ECO small core
+                    if ( (l_type == TYPE_CORE) &&
+                         (l_procChild->getAttr<ATTR_ECO_MODE>() == ECO_MODE_ENABLED) )
+                    {
+                        l_type = TYPE_L3;
+                    }
+
+                    ATTR_ORDINAL_ID_type l_pos = 0;
+                    if( l_procChild->tryGetAttr<ATTR_ORDINAL_ID>(l_pos) )
+                    {
+                        // get position relative to proc
+                        l_pos = l_pos % l_targetData[l_type].numPerProc;
+
+                        // shift the bits marked into the lower end of bitString (if applicable)
+                        // to reduce the amount of trailing 0's in the number displayed later
+                        l_targetData[l_type].bitString |= (0x8000000000000000 >> (l_pos + (64 - (l_targetData[l_type].bitStringSizeBits))));
+                    }
+                }
+
+                // update the the cache list for l_targetData to
+                // include the cache from non-ECO cores as well
+                l_targetData[TYPE_L3].bitString |= l_targetData[TYPE_CORE].bitString;
+
+                l_procChildTargsMap[l_currentProc->getAttr<ATTR_ORDINAL_ID>()] = l_targetData;
+            }
+
+            // display proc bit string
+            TARG_INF("PROCS=%X", targetListToBitString<ATTR_POSITION>(l_procsPres, i_pPredicate));
+
+        #if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
+            CONSOLE::displayf(CONSOLE::DEFAULT, "TARG", "PROCS=%.8X",
+                              targetListToBitString<ATTR_POSITION>(l_procsPres, i_pPredicate));
+        #endif
+
+            // display the info for each proc
+            for( auto l_procData : l_procChildTargsMap)
+            {
+                // proc num
+                ATTR_ORDINAL_ID_type l_procNum = l_procData.first;
+                TARG_INF("PROC[%02d]:", l_procNum);
+
+                targetData_t l_childData = l_procData.second;
+                // display the child info
+                TRACE_TARGET_INFO(l_childData[TYPE_CORE].name,      l_childData[TYPE_CORE].bitString, FORMAT_WIDTH_8,
+                                  l_childData[TYPE_DIMM].name,      l_childData[TYPE_DIMM].bitString, FORMAT_WIDTH_16);
+                TRACE_TARGET_INFO(l_childData[TYPE_L3].name,        l_childData[TYPE_L3].bitString, FORMAT_WIDTH_8,
+                                  l_childData[TYPE_OCMB_CHIP].name, l_childData[TYPE_OCMB_CHIP].bitString, FORMAT_WIDTH_4);
+
+
+            #if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
+                // proc num
+                CONSOLE::displayf(CONSOLE::DEFAULT, "TARG", "PROC[%02d]:", l_procNum);
+
+                // display the child info
+                CONSOLE_TARGET_INFO(l_childData[TYPE_CORE].name,      l_childData[TYPE_CORE].bitString, FORMAT_WIDTH_8,
+                                    l_childData[TYPE_DIMM].name,      l_childData[TYPE_DIMM].bitString, FORMAT_WIDTH_16);
+                CONSOLE_TARGET_INFO(l_childData[TYPE_L3].name,        l_childData[TYPE_L3].bitString, FORMAT_WIDTH_8,
+                                    l_childData[TYPE_OCMB_CHIP].name, l_childData[TYPE_OCMB_CHIP].bitString, FORMAT_WIDTH_4);
+            #endif
+            }
+
         }
+
     }; // namespace Util
 };
 
@@ -762,7 +918,7 @@ void TargetService::exists(
 }
 
 //******************************************************************************
-// TargetService::toTarget
+// TargetService::_toTarget
 //******************************************************************************
 
 Target* TargetService::_toTarget(
@@ -867,6 +1023,33 @@ Target* TargetService::toTarget(
     TargetService::_memoizeTarget(i_entityPath, o_target);
 #endif
     return o_target;
+}
+
+//******************************************************************************
+// TargetService::_memoizeTargetCount
+//******************************************************************************
+int TargetService::_memoizeTargetCount( const TYPE i_targetType, size_t & o_count)
+{
+    TargetHandleList l_allTargetsByType;
+    PredicateCTM l_isTargetType(CLASS_NA, i_targetType);
+
+    targetService().getAssociated(l_allTargetsByType, UTIL::assertGetToplevelTarget(),
+                    TargetService::CHILD_BY_AFFINITY, TargetService::ALL,
+                    &l_isTargetType);
+
+    o_count = l_allTargetsByType.size();
+    return 0;
+}
+
+//******************************************************************************
+// TargetService::getMaxNumTargets
+//******************************************************************************
+size_t TargetService::getMaxNumTargets(const TYPE i_targetType)
+{
+    size_t o_count = 0;
+    Util::Memoize::memoize<int>(TargetService::_memoizeTargetCount, i_targetType, o_count);
+
+    return o_count;
 }
 
 //******************************************************************************

@@ -656,63 +656,17 @@ void* host_discover_targets( void *io_pArgs )
         captureError(l_err, l_stepError, ISTEP_COMP_ID);
     }
 
-    // Put out some helpful messages that show which targets we actually found
-    typedef struct { uint64_t x[4]; } posbits_t; //256 bits
-    std::map<TARGETING::TYPE,posbits_t> l_presData;
-    for (TARGETING::TargetIterator target = TARGETING::targetService().begin();
-         target != TARGETING::targetService().end();
-         ++target)
-    {
-        if (!(target->getAttr<TARGETING::ATTR_HWAS_STATE>().present))
-        {
-            continue;
-        }
-        TARGETING::TYPE l_type = target->getAttr<TARGETING::ATTR_TYPE>();
-        TARGETING::ATTR_ORDINAL_ID_type l_pos = 0;
-        if( target->tryGetAttr<TARGETING::ATTR_ORDINAL_ID>(l_pos) )
-        {
-            if( l_presData.find(l_type) == l_presData.end() )
-            {
-                posbits_t newentry = {};
-                l_presData[l_type] = newentry;
-            }
-            if( l_pos < 255 )
-            {
-                l_presData[l_type].x[l_pos/64] |= (0x8000000000000000 >> (l_pos%64));
-            }
-        }
-    }
-
-    TARGETING::EntityPath l_epath; //use EntityPath's translation functions
-    for( std::map<TARGETING::TYPE,posbits_t>::iterator itr = l_presData.begin();
-         itr != l_presData.end();
-         ++itr )
-    {
-        uint8_t l_type = itr->first;
-        auto l_val = itr->second;
-        //Only want to display procs, ocmbs, dimms, and cores
-        if((l_type != TARGETING::TYPE_DIMM) &&
-           (l_type != TARGETING::TYPE_PROC) &&
-           (l_type != TARGETING::TYPE_OCMB_CHIP) &&
-           (l_type != TARGETING::TYPE_CORE))
-        {
-            continue;
-        }
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "PRESENT> %s[%.2X]=%.16llX%.16llX%.16llX%.16llX",
-                l_epath.pathElementTypeAsString(itr->first),
-                                                l_type,
-                                                l_val.x[0],l_val.x[1],
-                                                l_val.x[2],l_val.x[3]);
 #if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
-        CONSOLE::displayf(CONSOLE::DEFAULT, "HWAS", "PRESENT> %s[%.2X]=%.16llX%.16llX",
-                l_epath.pathElementTypeAsString(itr->first),
-                                                l_type,
-                                                l_val.x[0],l_val.x[1] );
-        CONSOLE::displayf(CONSOLE::DEFAULT, "HWAS", "                  %.16llX%.16llX",
-                                                l_val.x[2],l_val.x[3] );
+    CONSOLE::displayf(CONSOLE::DEFAULT, "HWAS", "---------------------------------");
+    CONSOLE::displayf(CONSOLE::DEFAULT, "HWAS", "PRESENT>");
 #endif
-    }
+    TARGETING::PredicateHwas l_isPresent;
+    l_isPresent.present(true);
+
+    TARGETING::UTIL::displayProcChildrenBitmasks(&l_isPresent);
+#if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
+    CONSOLE::displayf(CONSOLE::DEFAULT, "HWAS", "---------------------------------");
+#endif
 
     // Force a sync to the BMC if there were any new parts
     //  This will give the BMC a more accurate view of things in case

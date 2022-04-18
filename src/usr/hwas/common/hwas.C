@@ -2601,10 +2601,10 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
                 l_checkExprFCOcore.push(&l_isCore);
                 l_checkExprFCOcore.push(&l_deconfig_by_fco).And();
 
-                uint32_t bitStringPresCores = UTIL::targetListToBitString(l_pres_cores);
-                uint32_t bitStringFuncCores = UTIL::targetListToBitString(l_pres_cores, &l_checkExprFunctionalcore);
-                uint32_t bitStringECOCores  = UTIL::targetListToBitString(l_pres_cores, &l_checkExprECOcore);
-                uint32_t bitStringFCOCores  = UTIL::targetListToBitString(l_pres_cores, &l_checkExprFCOcore);
+                uint32_t bitStringPresCores = UTIL::targetListToBitString<ATTR_CHIP_UNIT>(l_pres_cores);
+                uint32_t bitStringFuncCores = UTIL::targetListToBitString<ATTR_CHIP_UNIT>(l_pres_cores, &l_checkExprFunctionalcore);
+                uint32_t bitStringECOCores  = UTIL::targetListToBitString<ATTR_CHIP_UNIT>(l_pres_cores, &l_checkExprECOcore);
+                uint32_t bitStringFCOCores  = UTIL::targetListToBitString<ATTR_CHIP_UNIT>(l_pres_cores, &l_checkExprFCOcore);
                 HWAS_ERR("checkMinimumHardware: present cores:    0x%08X", bitStringPresCores);
                 HWAS_ERR("checkMinimumHardware: functional cores: 0x%08X", bitStringFuncCores);
                 HWAS_ERR("checkMinimumHardware: ECO cores:        0x%08X", bitStringECOCores);
