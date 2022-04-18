@@ -622,10 +622,6 @@ namespace RTPM
             rt_intf->reset_pm_complex = &reset_pm_complex;
 #endif
 
-            postInitCalls_t* rt_postInits = getPostInitCalls();
-            rt_postInits->callLoadAndStartPMComplex =
-                    &load_and_start_pm_complex;
-
             // If we already loaded OCC during the IPL we need to fix up
             //  the virtual address because we're now not using virtual
             //  memory

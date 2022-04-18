@@ -1337,13 +1337,6 @@ struct postInitCalls_t
      */
     void (*callCommitRsvdTraceBufErrl)();
 
-    /** @brief Loads and starts PM Complex. PHYP is iterrogated
-     *         for the HOMER/OCC Common physical addresses at which PM complex is to be
-     *         loaded. The OCC startup status is checked after OCC is started as part of
-     *         this flow.
-     */
-    void (*callLoadAndStartPMComplex)();
-
     /** @brief Initiates callback from PHYP into HBRT for load and starting
      *         the Power Management Complex (PMC) using the host_callback
      *         interface function. Callback will be made to the firmware_notify
