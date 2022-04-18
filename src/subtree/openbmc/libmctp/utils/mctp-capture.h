@@ -5,6 +5,7 @@
 
 #include "config.h"
 
+#include "compiler.h"
 #include "libmctp.h"
 
 #include <sys/types.h>
@@ -18,8 +19,6 @@ typedef void pcap_dumper_t;
 
 #define CAPTURE_LINKTYPE_FIRST	147
 #define CAPTURE_LINKTYPE_LAST	162
-
-#define __unused __attribute__((unused))
 
 struct capture {
 	const char	*path;

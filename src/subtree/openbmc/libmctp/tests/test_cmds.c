@@ -2,13 +2,14 @@
 
 #include "test-utils.h"
 
+#include "compiler.h"
+#include "libmctp.h"
+#include "libmctp-alloc.h"
+#include "libmctp-cmds.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-
-#include <libmctp.h>
-#include <libmctp-alloc.h>
-#include <libmctp-cmds.h>
 
 #ifdef NDEBUG
 #undef NDEBUG
@@ -30,9 +31,9 @@ struct callback_data {
 	};
 };
 
-#define __unused __attribute__((unused))
-
 static void control_message_transport_callback(mctp_eid_t src __unused,
+					       bool tag_owner __unused,
+					       uint8_t msg_tag __unused,
 					       void *data, void *buf,
 					       size_t len __unused)
 {

@@ -19,6 +19,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "compiler.h"
 #include "libmctp-alloc.h"
 #include "libmctp-log.h"
 #include "range.h"
@@ -31,8 +32,6 @@
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
 #endif
 
-#define __unused __attribute__((unused))
-
 #define MAX_PAYLOAD_SIZE 50000
 
 struct pktbuf {
@@ -43,17 +42,21 @@ struct pktbuf {
 struct test_params {
 	bool seen;
 	size_t message_size;
+	uint8_t msg_tag;
+	bool tag_owner;
 };
 
-static void rx_message(uint8_t eid __unused, void *data, void *msg __unused,
-		       size_t len)
+static void rx_message(uint8_t eid __unused, bool tag_owner, uint8_t msg_tag,
+		       void *data, void *msg __unused, size_t len)
 {
 	struct test_params *param = (struct test_params *)data;
 
-	mctp_prdebug("MCTP message received: len %zd", len);
+	mctp_prdebug("MCTP message received: len %zd, tag %u", len, msg_tag);
 
 	param->seen = true;
 	param->message_size = len;
+	param->msg_tag = msg_tag;
+	param->tag_owner = tag_owner;
 }
 
 static uint8_t get_sequence()
@@ -442,6 +445,92 @@ static void mctp_core_test_exhaust_context_buffers()
 	mctp_destroy(mctp);
 }
 
+static void mctp_core_test_rx_with_tag()
+{
+	struct mctp *mctp = NULL;
+	struct mctp_binding_test *binding = NULL;
+	struct test_params test_param;
+	static uint8_t test_payload[MCTP_BTU];
+	uint8_t tag = get_tag();
+	struct pktbuf pktbuf;
+	uint8_t flags_seq_tag;
+
+	memset(test_payload, 0, sizeof(test_payload));
+	test_param.seen = false;
+	test_param.message_size = 0;
+	test_param.msg_tag = 0;
+	test_param.tag_owner = false;
+
+	mctp_test_stack_init(&mctp, &binding, TEST_DEST_EID);
+	mctp_set_rx_all(mctp, rx_message, &test_param);
+	memset(&pktbuf, 0, sizeof(pktbuf));
+	pktbuf.hdr.dest = TEST_DEST_EID;
+	pktbuf.hdr.src = TEST_SRC_EID;
+
+	/* Set tag and tag owner fields for a recieve packet */
+	flags_seq_tag = MCTP_HDR_FLAG_SOM | MCTP_HDR_FLAG_EOM |
+			(1 << MCTP_HDR_TO_SHIFT) | tag;
+	receive_one_fragment(binding, test_payload, MCTP_BTU, flags_seq_tag,
+			     &pktbuf);
+
+	assert(test_param.seen);
+	assert(test_param.message_size == (MCTP_BTU));
+	assert(test_param.msg_tag == tag);
+	assert(test_param.tag_owner);
+
+	mctp_binding_test_destroy(binding);
+	mctp_destroy(mctp);
+}
+
+static void mctp_core_test_rx_with_tag_multifragment()
+{
+	struct mctp *mctp = NULL;
+	struct mctp_binding_test *binding = NULL;
+	struct test_params test_param;
+	static uint8_t test_payload[MCTP_BTU];
+	uint8_t tag = get_tag();
+	struct pktbuf pktbuf;
+	uint8_t flags_seq_tag;
+
+	memset(test_payload, 0, sizeof(test_payload));
+	test_param.seen = false;
+	test_param.message_size = 0;
+	test_param.msg_tag = 0;
+	test_param.tag_owner = false;
+
+	mctp_test_stack_init(&mctp, &binding, TEST_DEST_EID);
+	mctp_set_rx_all(mctp, rx_message, &test_param);
+	memset(&pktbuf, 0, sizeof(pktbuf));
+	pktbuf.hdr.dest = TEST_DEST_EID;
+	pktbuf.hdr.src = TEST_SRC_EID;
+
+	/* Set tag and tag owner fields for a 3 fragment packet */
+	flags_seq_tag = MCTP_HDR_FLAG_SOM |
+			(get_sequence() << MCTP_HDR_SEQ_SHIFT) |
+			(1 << MCTP_HDR_TO_SHIFT) | tag;
+	receive_one_fragment(binding, test_payload, MCTP_BTU, flags_seq_tag,
+			     &pktbuf);
+
+	flags_seq_tag = (get_sequence() << MCTP_HDR_SEQ_SHIFT) |
+			(1 << MCTP_HDR_TO_SHIFT) | tag;
+	receive_one_fragment(binding, test_payload, MCTP_BTU, flags_seq_tag,
+			     &pktbuf);
+
+	flags_seq_tag = MCTP_HDR_FLAG_EOM |
+			(get_sequence() << MCTP_HDR_SEQ_SHIFT) |
+			(1 << MCTP_HDR_TO_SHIFT) | tag;
+	receive_one_fragment(binding, test_payload, MCTP_BTU, flags_seq_tag,
+			     &pktbuf);
+
+	assert(test_param.seen);
+	assert(test_param.message_size == (3 * MCTP_BTU));
+	assert(test_param.msg_tag == tag);
+	assert(test_param.tag_owner);
+
+	mctp_binding_test_destroy(binding);
+	mctp_destroy(mctp);
+}
+
 /* clang-format off */
 #define TEST_CASE(test) { #test, test }
 static const struct {
@@ -456,6 +545,8 @@ static const struct {
 	TEST_CASE(mctp_core_test_receive_bigger_end_fragment),
 	TEST_CASE(mctp_core_test_drop_large_fragments),
 	TEST_CASE(mctp_core_test_exhaust_context_buffers),
+	TEST_CASE(mctp_core_test_rx_with_tag),
+	TEST_CASE(mctp_core_test_rx_with_tag_multifragment),
 };
 /* clang-format on */
 

@@ -110,7 +110,7 @@ methods:
  2. as a set of sources to be included into the containing project (either
     imported, or as a git subtree/submodule)
 
-For (1), you can use the top-level makefile to produce `libmtcp.a`.
+For (1), you can use the top-level makefile to produce `libmctp.a`.
 
 For (2), the `Makefile.inc` file provides the minimum set of dependencies to
 either build libmctp.a, or just the actual object files (`LIBMCTP_OBS`), which

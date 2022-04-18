@@ -1,6 +1,6 @@
 # Initialization
 AC_PREREQ([2.69])
-AC_INIT([libmctp], 0.10, [https://github.com/openbmc/libmctp/issues])
+AC_INIT([libmctp], 0.11, [https://github.com/openbmc/libmctp/issues])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIRS([m4])
 AM_INIT_AUTOMAKE([subdir-objects -Wall -Werror -Wno-portability foreign dist-xz])

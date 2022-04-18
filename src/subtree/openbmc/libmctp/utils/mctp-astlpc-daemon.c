@@ -28,11 +28,12 @@ static void tx_message(struct ctx *ctx, mctp_eid_t eid, void *msg, size_t len)
 	type = len > 0 ? *(uint8_t *)(msg) : 0x00;
 
 	fprintf(stderr, "TX: dest EID 0x%02x: %zd bytes, first byte [0x%02x]\n",
-			eid, len, type);
-	mctp_message_tx(ctx->mctp, eid, msg, len);
+		eid, len, type);
+	mctp_message_tx(ctx->mctp, eid, 0, MCTP_MESSAGE_TO_SRC, msg, len);
 }
 
-static void rx_message(uint8_t eid, void *data, void *msg, size_t len)
+static void rx_message(uint8_t eid, uint8_t msg_tag, bool tag_owner, void *data,
+		       void *msg, size_t len)
 {
 	struct ctx *ctx = data;
 	uint8_t type;

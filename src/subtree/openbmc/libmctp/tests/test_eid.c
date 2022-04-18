@@ -5,10 +5,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <libmctp.h>
-
+#include "compiler.h"
+#include "libmctp.h"
 #include "test-utils.h"
-
 
 struct test_ctx {
 	struct mctp			*mctp;
@@ -17,7 +16,9 @@ struct test_ctx {
 	mctp_eid_t			src_eid;
 };
 
-static void test_rx(uint8_t eid, void *data, void *msg, size_t len)
+static void
+test_rx(uint8_t eid, bool tag_owner __unused, uint8_t msg_tag __unused,
+	void *data, void *msg __unused, size_t len __unused)
 {
 	struct test_ctx *ctx = data;
 

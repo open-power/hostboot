@@ -1,5 +1,9 @@
 /* SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later */
 
+#include "compiler.h"
+#include "libmctp.h"
+#include "libmctp-serial.h"
+
 #include <assert.h>
 #include <err.h>
 #include <stdio.h>
@@ -8,14 +12,17 @@
 #include <sys/poll.h>
 #include <sys/socket.h>
 
-#include "libmctp.h"
-#include "libmctp-serial.h"
-
-static void rx_message(uint8_t eid, void *data, void *msg, size_t len)
+static void
+rx_message(uint8_t eid __unused, bool tag_owner __unused,
+	   uint8_t msg_tag __unused, void *data __unused, void *msg, size_t len)
 {
-	(void)eid;
-	(void)data;
-	write(STDOUT_FILENO, msg, len);
+	ssize_t rc;
+
+	rc = write(STDOUT_FILENO, msg, len);
+	if (rc < 0)
+		warn("Write failed");
+	else if ((size_t)rc < len)
+		warnx("Short write of length %zd, requested %zd", rc, len);
 }
 
 int main(void)

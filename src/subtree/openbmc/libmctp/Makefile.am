@@ -23,6 +23,7 @@ systemdsystemunit_DATA = \
 endif
 
 bin_PROGRAMS = utils/mctp-demux-daemon
+noinst_PROGRAMS = utils/mctp-in utils/mctp-pipe
 utils_mctp_demux_daemon_SOURCES = utils/mctp-demux-daemon.c
 if HAVE_PCAP
 utils_mctp_demux_daemon_SOURCES += utils/mctp-capture.c

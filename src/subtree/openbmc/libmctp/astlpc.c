@@ -1353,7 +1353,7 @@ struct mctp_binding_astlpc *mctp_astlpc_init_fileio(void)
 struct mctp_binding_astlpc * __attribute__((const))
 	mctp_astlpc_init_fileio(void)
 {
-	// Missing support for file IO
+	astlpc_prerr(astlpc, "Missing support for file IO");
 	return NULL;
 }
 

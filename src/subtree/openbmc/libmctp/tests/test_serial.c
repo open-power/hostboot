@@ -6,6 +6,7 @@
 #include "config.h"
 #endif
 
+#include "compiler.h"
 #include "libmctp-log.h"
 #include "libmctp-serial.h"
 
@@ -42,22 +43,25 @@ static int mctp_binding_serial_pipe_tx(void *data, void *buf, size_t len)
 uint8_t mctp_msg_src[2 * MCTP_BTU];
 
 static bool seen;
+static bool received_tag_owner;
+static uint8_t received_msg_tag;
 
-#define __unused __attribute__((unused))
-
-static void rx_message(uint8_t eid __unused, void *data __unused, void *msg,
-		       size_t len)
+static void rx_message(uint8_t eid __unused, bool tag_owner, uint8_t msg_tag,
+		       void *data __unused, void *msg, size_t len)
 {
 	uint8_t type;
 
 	type = *(uint8_t *)msg;
 
-	mctp_prdebug("MCTP message received: len %zd, type %d", len, type);
+	mctp_prdebug("MCTP message received: len %zd, type %d, tag %d", len,
+		     type, msg_tag);
 
 	assert(sizeof(mctp_msg_src) == len);
 	assert(!memcmp(mctp_msg_src, msg, len));
 
 	seen = true;
+	received_msg_tag = msg_tag;
+	received_tag_owner = tag_owner;
 }
 
 struct serial_test {
@@ -71,6 +75,8 @@ int main(void)
 
 	struct mctp_binding_serial_pipe *a;
 	struct mctp_binding_serial_pipe *b;
+	uint8_t msg_tag = 2;
+	bool tag_owner = false;
 	int p[2][2];
 	int rc;
 
@@ -110,14 +116,19 @@ int main(void)
 	mctp_serial_set_tx_fn(b->serial, mctp_binding_serial_pipe_tx, a);
 	mctp_register_bus(scenario[1].mctp, mctp_binding_serial_core(b->serial), 9);
 
-	/* Transmit a message from A to B */
-	rc = mctp_message_tx(scenario[0].mctp, 9, mctp_msg_src, sizeof(mctp_msg_src));
+	/* Transmit a message from A to B, with message tag */
+	rc = mctp_message_tx(scenario[0].mctp, 9, tag_owner, msg_tag,
+			     mctp_msg_src, sizeof(mctp_msg_src));
 	assert(rc == 0);
 
 	/* Read the message at B from A */
 	seen = false;
+	received_tag_owner = true;
+	received_msg_tag = 0;
 	mctp_serial_read(b->serial);
 	assert(seen);
+	assert(received_tag_owner == tag_owner);
+	assert(received_msg_tag == msg_tag);
 
 	mctp_serial_destroy(scenario[1].binding.serial);
 	mctp_destroy(scenario[1].mctp);
