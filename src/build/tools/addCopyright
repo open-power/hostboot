@@ -31,14 +31,8 @@
 # Date: Fri Mar 19 17:40:32 2010 UTC                                          #
 #                                                                             #
 # addCopyright will automatically insert appropriate copyright statements     #
-# in source files following the IBM copyright guidelines (and templates)      #
+# in source files following the IBM copyright guidelines                      #
 # referenced below :                                                          #
-#   FSP ClearCase Architecture                                                #
-#   Version 1.9                                                               #
-#   10/12/2010                                                                #
-#   Editor: Alan Hlava                                                        #
-#                                                                             #
-#   Section 3.14.1 of the above doc has templates for different files         #
 #                                                                             #
 #   NOTE: FSP uses the phrase "OCO Source materials" in their copyright       #
 #           block, which is classified as 'p1' .  We will use the same        #
@@ -98,6 +92,7 @@ use constant GOOGLE => 'Google Inc.';
 use constant INSPUR => 'Inspur Power Systems Corp.';
 use constant SUPERMICRO => 'Super Micro Computer, Inc.';
 use constant YADRO => 'YADRO';
+use constant SYNOPSYS => 'Synopsys, Inc.';
 
 # Create mapping for git contrubitors to companies
 my %fileContributorsCompany = (
@@ -108,6 +103,7 @@ my %fileContributorsCompany = (
     "inspur.com" => INSPUR,
     "supermicro.com" => SUPERMICRO,
     "yadro.com" => YADRO,
+    "Synopsys" => SYNOPSYS,
 );
 
 #------------------------------------------------------------------------------
