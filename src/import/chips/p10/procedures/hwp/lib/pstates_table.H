@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,9 +47,11 @@
 /// Block content.
 
 #define MAX_PSTATE_TABLE_ENTRIES        128
+#define MAX_PSTATE_TABLE_ENTRIES_V2     150  // (4400-2000)/16.667 = 144
 #define MAX_VRATIO_VINDEX_TABLE_ENTRIES 299
 #define GEN_PSTATES_TBL_MAGIC           0x50535441424c3030ULL //PSTABL00 (last two ASCII characters indicate version number)
 #define GEN_PSTATES_TBL_MAGIC_V1        0x50535441424c3031ULL //PSTABL00 (last two ASCII characters indicate version number)
+#define GEN_PSTATES_TBL_MAGIC_V2        0x50535442 //PSTB -- note: this is different that "PSTA" used for the base and V1
 
 #ifndef __ASSEMBLER__
 #ifdef __cplusplus
@@ -160,6 +162,42 @@ typedef struct
     GlobalPstateParmBlock_v1_t globalppb;
 } GeneratedPstateInfo_v1_t;
 
+typedef struct
+{
+
+    /// Magic Number
+    uint32_t magic;   // ASCII: "PSTB"
+    uint16_t padding;
+    uint16_t table_entries;  // filled in with
+
+    /// The fastest frequency - after biases have been applied
+    uint32_t pstate0_frequency_khz;
+
+    /// Highest Pstate Number => slowest Pstate generated
+    uint32_t highest_pstate;
+
+    /// Generated table with system paramters included but without biases
+    PstateTable_t raw_pstates[MAX_PSTATE_TABLE_ENTRIES_V2];
+
+    /// Generated table with system paramters and biases
+    /// Note: if all bias attributes are 0, this content will be the same
+    /// as the raw_pstates content.
+    PstateTable_t biased_pstates[MAX_PSTATE_TABLE_ENTRIES_V2];
+
+    ///Generate table with vratio and vindex for all
+    ///combinations of activeCores and sortCores
+    VRatioVIndexTable_t vratio_vindex[MAX_VRATIO_VINDEX_TABLE_ENTRIES];
+
+#ifndef __PPE_PLAT
+    hcodeImageBuild::PgpeHeader_t pgpe_header;
+#else
+    ///PGPE Header
+    PgpeHeader_t pgpe_header;
+#endif
+
+    // PGPE content
+    GlobalPstateParmBlock_v1_t globalppb;
+} GeneratedPstateInfo_v2_t;
 
 #ifdef __cplusplus
 } // end extern C
