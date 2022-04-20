@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -251,6 +251,9 @@ union occ_sensor_id_t
     {
         SENSOR_TYPE_CORE = 0xC0,
         SENSOR_TYPE_DIMM = 0xD0,
+        SENSOR_TYPE_PROC = 0xE0,
+        SENSOR_TYPE_VRM  = 0xE1,
+        SENSOR_TYPE_NODE = 0xF0,
         SENSOR_TYPE_UNKNOWN = 0xFF
     };
 } PACKED;
@@ -317,6 +320,23 @@ uint32_t getSensorNumber(const TARGETING::Target* i_pTarget,
     case TYPE_DIMM:
         sensor_type = occ_sensor_id_t::SENSOR_TYPE_DIMM;
         break;
+    case TYPE_PROC:
+        sensor_type = occ_sensor_id_t::SENSOR_TYPE_PROC;
+        if(i_name == SENSOR_NAME_VRM_VDD_FAULT ||
+           i_name == SENSOR_NAME_VRM_VDD_TEMP)
+        {
+            // VRM fault - the correct target is a VRM
+            sensor_type = occ_sensor_id_t::SENSOR_TYPE_VRM;
+        }
+        break;
+    case TYPE_NODE:
+        if(i_name == SENSOR_NAME_BACKPLANE_FAULT ||
+           i_name == SENSOR_NAME_APSS_FAULT)
+        {
+            // Backplane fault - the correct target is a node
+            sensor_type = occ_sensor_id_t::SENSOR_TYPE_NODE;
+            break;
+        }
     default:
         TRACFCOMP(g_trac_targeting,
                   "getSensorNumber(0x%08x, %d): Unknown target type %s (%d)",
@@ -382,6 +402,15 @@ TARGETING::Target * getSensorTarget(const uint32_t i_sensorNumber,
     case occ_sensor_id_t::SENSOR_TYPE_DIMM:
         get_parent_type = TARGETING::TYPE_OCMB_CHIP;
         getClassResources(candidates, CLASS_NA, TARGETING::TYPE_DIMM, UTIL_FILTER_PRESENT);
+        break;
+    case occ_sensor_id_t::SENSOR_TYPE_NODE:
+        getClassResources(candidates, CLASS_NA, TARGETING::TYPE_NODE, UTIL_FILTER_PRESENT);
+        break;
+    case occ_sensor_id_t::SENSOR_TYPE_VRM:
+        // TODO RTC: 304217
+        break;
+    case occ_sensor_id_t::SENSOR_TYPE_PROC:
+        candidates.push_back(const_cast<Target*>(getParentChip(i_occ)));
         break;
     default:
         TRACFCOMP(g_trac_targeting,

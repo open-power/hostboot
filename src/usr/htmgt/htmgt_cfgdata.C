@@ -1045,12 +1045,12 @@ void getSystemConfigMessageData(const Occ &i_occ,
     index += 4;
 
     //Format 21 - VRM VDD Callout Sensor ID
-    SensorID1 = UTIL::getSensorNumber(node, SENSOR_NAME_VRM_VDD_FAULT);
+    SensorID1 = UTIL::getSensorNumber(proc, SENSOR_NAME_VRM_VDD_FAULT);
     memcpy(&o_data[index], &SensorID1, 4);
     index += 4;
 
     //Format 21 - VRM VDD Temperature Sensor ID
-    SensorID1 = UTIL::getSensorNumber(node, SENSOR_NAME_VRM_VDD_TEMP);
+    SensorID1 = UTIL::getSensorNumber(proc, SENSOR_NAME_VRM_VDD_TEMP);
     memcpy(&o_data[index], &SensorID1, 4);
     index += 4;
 
