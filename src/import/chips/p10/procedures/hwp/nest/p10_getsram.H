@@ -73,7 +73,13 @@ extern "C" {
 ///                                              0b011: OCB_CHAN2
 ///                                              0b100: OCB_CHAN3
 ///                                              Default to OCB_CHAN3 otherwise.
-///                                    bits 5:7  Reserved
+///                                    bits 5    OCB-PBA Interleaved Mode:
+///                                              Read OCC SRAM (Normal Mode) and write to mainstore
+///                                              memory (via PBA) in an interleaved, stream mode,
+///                                              via common channel 3
+///                                              0b0: Inactive, regular usage of getSram
+///                                              0b1: Active, special case of getSram in SBE Dump
+///                                    bits 6:7  Reserved
 ///                               PCIe: bit 0:   0 = io_top_0; 1 = io_top_1
 ///                                     bit 1:   0 = PHY0; 1 = PHY1
 ///                                     bits 2:7 Reserved

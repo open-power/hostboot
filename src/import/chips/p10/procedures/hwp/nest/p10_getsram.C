@@ -149,6 +149,9 @@ fapi2::ReturnCode p10_getsram(
         // Get OCB channel (bits 2:4 of i_mode)
         ocb::PM_OCB_CHAN_NUM l_ocbChan = getOcbChanNum(i_mode);
 
+        FAPI_TRY (p10_ocb_handlePbaContext(i_target, i_mode, true), // save context
+                  "Error in p10_ocb_handlePbaContext: save");
+
         // Setup Circular/Linear depending on mode
         if (l_occMode == OCB_MODE_CIRCULAR)
         {
@@ -184,6 +187,10 @@ fapi2::ReturnCode p10_getsram(
                   l_bytesRead,
                   o_data));
         FAPI_DBG("p10_getsram: p10_pm_ocb_indir_access - Bytes read %u", l_bytesRead);
+
+        FAPI_TRY (p10_ocb_handlePbaContext(i_target, i_mode, false), // restore context
+                  "Error in p10_ocb_handlePbaContext: restore");
+
         goto fapi_try_exit;
     }
 
