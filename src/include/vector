@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -546,6 +546,19 @@ namespace std
                 }
 
                 /**
+                 * Add element to the back of the container using move construction
+                 * @param[in] x rvalue reference to object used to create new element
+                 * @pre none
+                 * @post All previously obtained iterators are invalid.
+                 */
+                __attribute__ ((always_inline))
+                void push_back(T&& x)
+                {
+                    reserve(size() + 1);
+                    new (iv_finish++) T(std::move(x));
+                }
+
+                /**
                  * Remove the last element in the container
                  * @return nothing
                  * @pre size() > 0
@@ -672,6 +685,28 @@ namespace std
             private:
 
                 /**
+                 * Move constructs elements into raw storage
+                 * @param[in] first iterator of first element to copy
+                 * @pararm[in] last iterator of last element + 1 to copy
+                 * @param[in] destination iterator of destination
+                 * @post elements moved
+                 */
+                template <class InputIterator, class OutputIterator>
+                    OutputIterator
+                    ctor_move(InputIterator first,
+                              InputIterator last,
+                              OutputIterator destination)
+                    {
+                        while(first != last)
+                        {
+                            new (destination) T(std::move(*first));
+                            ++destination;
+                            ++first;
+                        }
+                        return(destination);
+                    }
+
+                /**
                  * Copy constructs elements into raw storage
                  * @param[in] first iterator of first element to copy
                  * @pararm[in] last iterator of last element + 1 to copy
@@ -716,7 +751,7 @@ namespace std
                     }
 
                 /**
-                 * fill by copy construct ino raw storage
+                 * fill by copy construct into raw storage
                  * @param[in] first itertor fo first element
                  * @param[in] last iterator to last element + 1
                  * @param[in] value to use to fill
@@ -828,7 +863,7 @@ void std::vector<T>::reserve(size_type n)
         }
         else
         {
-            iterator newFinish = ctor_copy(iv_start, iv_finish, newStart);
+            iterator newFinish = ctor_move(iv_start, iv_finish, newStart);
             clear();
             iv_finish = newFinish;
             free_storage(iv_start);
