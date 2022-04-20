@@ -7,6 +7,7 @@
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2022                             */
 /* [+] International Business Machines Corp.                              */
+/* [+] Synopsys, Inc.                                                     */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -23,10 +24,12 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // EKB-Mirror-To: hostboot
+
 ///
 /// @file ody_snps_dram_train_msg_blk.H
 /// @brief Odyssey DRAM Training Message block strucure
 ///
+
 // *HWP HWP Owner: Geetha Pisapati <Geetha.Pisapati@ibm.com>
 // *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
