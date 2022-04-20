@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,7 +65,7 @@ template< mss::mc_type MC, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 inline fapi2::ReturnCode read( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
     const auto& l_mc_target = mss::find_target<eccMCTraits<MC>::MC_TARGET_TYPE>(i_target);
-    const auto& l_port_pos = mss::relative_pos<eccMCTraits<MC>::MC_TARGET_TYPE>(i_target);
+    const auto& l_port_pos = mss::relative_pos<MC, eccMCTraits<MC>::MC_TARGET_TYPE>(i_target);
 
     FAPI_TRY( mss::getScom(l_mc_target, (TT::MAINLINE_UE_REGS[l_port_pos]), o_data) );
     FAPI_INF("read: 0x%016lx", o_data);
@@ -86,7 +86,7 @@ template< mss::mc_type MC, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 inline fapi2::ReturnCode write( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
     const auto& l_mc_target = mss::find_target<eccMCTraits<MC>::MC_TARGET_TYPE>(i_target);
-    const auto& l_port_pos = mss::relative_pos<eccMCTraits<MC>::MC_TARGET_TYPE>(i_target);
+    const auto& l_port_pos = mss::relative_pos<MC, eccMCTraits<MC>::MC_TARGET_TYPE>(i_target);
 
     FAPI_TRY( mss::putScom(l_mc_target, (TT::MAINLINE_UE_REGS[l_port_pos]), i_data) );
     FAPI_INF("write: 0x%016lx", i_data);

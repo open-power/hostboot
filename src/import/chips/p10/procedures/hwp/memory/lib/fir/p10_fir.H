@@ -145,7 +145,7 @@ void subchannel_config(const fapi2::Target<T>& i_target,
 
     for (const auto& l_omi : mss::find_targets<fapi2::TARGET_TYPE_OMI>(i_target))
     {
-        const auto l_omi_pos = mss::relative_pos<fapi2::TARGET_TYPE_OMIC>(l_omi);
+        const auto l_omi_pos = mss::relative_pos<mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OMIC>(l_omi);
 
         if (l_omi_pos == 0)
         {

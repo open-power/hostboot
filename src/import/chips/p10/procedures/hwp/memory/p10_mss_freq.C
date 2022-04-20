@@ -95,7 +95,8 @@ fapi2::ReturnCode p10_mss_freq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
               "Failed enforce_plug_rules for %s", mss::c_str(i_target) );
 
     // Set frequency attributes
-    FAPI_TRY(mss::generate_freq<mss::proc_type::PROC_P10>(i_target));
+    // TODO: MST-1439: Add DDR5 support
+    FAPI_TRY((mss::generate_freq<mss::mc_type::EXPLORER, mss::proc_type::PROC_P10>(i_target)));
 
 fapi_try_exit:
     return fapi2::current_err;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,9 +45,9 @@ namespace mss
 ///
 template<>
 posTraits<fapi2::TARGET_TYPE_DIMM>::pos_type
-relative_pos<fapi2::TARGET_TYPE_MEM_PORT>(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+relative_pos<mc_type::EXPLORER, fapi2::TARGET_TYPE_MEM_PORT>(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
 {
-    typedef mcTypeTraits<mc_type::EXPLORER> TT;
+    typedef mcTypeTraits<mss::mc_type::EXPLORER> TT;
     return pos(i_target) % TT::DIMMS_PER_PORT;
 }
 
@@ -58,10 +58,11 @@ relative_pos<fapi2::TARGET_TYPE_MEM_PORT>(const fapi2::Target<fapi2::TARGET_TYPE
 ///
 template<>
 posTraits<fapi2::TARGET_TYPE_DIMM>::pos_type
-relative_pos<fapi2::TARGET_TYPE_OCMB_CHIP>(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+relative_pos<mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
 {
-    typedef mcTypeTraits<mc_type::EXPLORER> TT;
-    return pos(i_target) % (TT::DIMMS_PER_PORT * TT::PORTS_PER_OCMB);
+    typedef mcTypeTraits<mss::mc_type::EXPLORER> TT;
+    return pos(i_target) % (TT::DIMMS_PER_PORT *
+                            TT::PORTS_PER_OCMB);
 }
 
 ///
@@ -71,11 +72,13 @@ relative_pos<fapi2::TARGET_TYPE_OCMB_CHIP>(const fapi2::Target<fapi2::TARGET_TYP
 ///
 template<>
 posTraits<fapi2::TARGET_TYPE_MEM_PORT>::pos_type
-relative_pos<fapi2::TARGET_TYPE_OCMB_CHIP>(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
+relative_pos<mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
+        i_target)
 {
-    typedef mcTypeTraits<mc_type::EXPLORER> TT;
+    typedef mcTypeTraits<mss::mc_type::EXPLORER> TT;
     return pos(i_target) % TT::PORTS_PER_OCMB;
 }
+
 
 ///
 /// @brief Return an MEM_PORT's relative position from itself
@@ -84,7 +87,7 @@ relative_pos<fapi2::TARGET_TYPE_OCMB_CHIP>(const fapi2::Target<fapi2::TARGET_TYP
 ///
 template<>
 posTraits<fapi2::TARGET_TYPE_MEM_PORT>::pos_type
-relative_pos<fapi2::TARGET_TYPE_MEM_PORT>(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
+relative_pos<mc_type::EXPLORER, fapi2::TARGET_TYPE_MEM_PORT>(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
 {
     return 0;
 }
@@ -96,10 +99,13 @@ relative_pos<fapi2::TARGET_TYPE_MEM_PORT>(const fapi2::Target<fapi2::TARGET_TYPE
 ///
 template<>
 posTraits<fapi2::TARGET_TYPE_MEM_PORT>::pos_type
-relative_pos<fapi2::TARGET_TYPE_PROC_CHIP>(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
+relative_pos<mc_type::EXPLORER, fapi2::TARGET_TYPE_PROC_CHIP>(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
+        i_target)
 {
-    typedef mcTypeTraits<mc_type::EXPLORER> TT;
-    return fapi_pos(i_target) % (TT::PORTS_PER_OCMB * TT::OCMB_PER_OMI * TT::OMI_PER_MCC * TT::MCC_PER_MI *
+    typedef mcTypeTraits<mss::mc_type::EXPLORER> TT;
+    return fapi_pos(i_target) % (TT::PORTS_PER_OCMB *
+                                 TT::OCMB_PER_OMI * TT::OMI_PER_MCC *
+                                 TT::MCC_PER_MI *
                                  TT::MI_PER_MC * TT::MC_PER_PROC);
 }
 
@@ -110,10 +116,12 @@ relative_pos<fapi2::TARGET_TYPE_PROC_CHIP>(const fapi2::Target<fapi2::TARGET_TYP
 ///
 template<>
 posTraits<fapi2::TARGET_TYPE_OCMB_CHIP>::pos_type
-relative_pos<fapi2::TARGET_TYPE_PROC_CHIP>(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+relative_pos<mc_type::EXPLORER, fapi2::TARGET_TYPE_PROC_CHIP>(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
+        i_target)
 {
-    typedef mcTypeTraits<mc_type::EXPLORER> TT;
-    return fapi_pos(i_target) % (TT::OCMB_PER_OMI * TT::OMI_PER_MCC * TT::MCC_PER_MI *
+    typedef mcTypeTraits<mss::mc_type::EXPLORER> TT;
+    return fapi_pos(i_target) % (TT::OCMB_PER_OMI *
+                                 TT::OMI_PER_MCC * TT::MCC_PER_MI *
                                  TT::MI_PER_MC * TT::MC_PER_PROC);
 }
 
@@ -125,9 +133,9 @@ relative_pos<fapi2::TARGET_TYPE_PROC_CHIP>(const fapi2::Target<fapi2::TARGET_TYP
 ///
 template<>
 posTraits<fapi2::TARGET_TYPE_OMIC>::pos_type
-relative_pos<fapi2::TARGET_TYPE_MC>(const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target)
+relative_pos<mc_type::EXPLORER, fapi2::TARGET_TYPE_MC>(const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target)
 {
-    typedef mcTypeTraits<mc_type::EXPLORER> TT;
+    typedef mcTypeTraits<mss::mc_type::EXPLORER> TT;
     return pos(i_target) % TT::OMIC_PER_MC;
 }
 
@@ -139,9 +147,9 @@ relative_pos<fapi2::TARGET_TYPE_MC>(const fapi2::Target<fapi2::TARGET_TYPE_OMIC>
 ///
 template<>
 posTraits<fapi2::TARGET_TYPE_OMI>::pos_type
-relative_pos<fapi2::TARGET_TYPE_OMIC>(const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_target)
+relative_pos<mc_type::EXPLORER, fapi2::TARGET_TYPE_OMIC>(const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_target)
 {
-    typedef mcTypeTraits<mc_type::EXPLORER> TT;
+    typedef mcTypeTraits<mss::mc_type::EXPLORER> TT;
     return pos(i_target) % TT::OMI_PER_OMIC;
 }
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -316,6 +316,7 @@ class freq_scoreboard
         ///
         /// @brief Resolve frequency scoreboard by deconfiguring any non-conforming ports
         /// and return a list of the supported frequencies
+        /// @tparam MC mss::mc_type memory controller type
         /// @tparam P mss::proc_type on which to operate
         /// @tparam TT Traits associated with the processor type
         /// @param[in] i_target MCBIST target
@@ -325,7 +326,7 @@ class freq_scoreboard
         /// @param[out] o_freqs vector of frequencies supported by all ports
         /// @return FAPI2_RC_SUCCESS if successful
         ///
-        template<mss::proc_type P, typename TT = mss::frequency_traits<P>>
+        template<mss::mc_type MC, mss::proc_type P, typename TT = mss::frequency_traits<P>>
         fapi2::ReturnCode resolve(const fapi2::Target<TT::FREQ_DOMAIN_TARGET_TYPE>& i_target,
                                   const std::vector<std::vector<uint32_t>>& i_vpd_supported_freqs,
                                   std::vector<uint8_t>& o_deconfigured,
@@ -374,10 +375,11 @@ class freq_scoreboard
                                                i_vpd_supported_freqs));
 
             // Now find and deconfigure all ports that don't support our selected frequency
-            FAPI_TRY(deconfigure_ports<P>(i_target, l_ports, l_best_freq_index, o_deconfigured, o_deconfigured_targets));
+            FAPI_TRY((deconfigure_ports<MC, P>(i_target, l_ports, l_best_freq_index, o_deconfigured, o_deconfigured_targets)));
 
             // Now find all the frequencies supported by the ports that are left over
-            FAPI_TRY(this->template resolve<P>(i_target, i_vpd_supported_freqs, o_deconfigured, o_deconfigured_targets, o_freqs));
+            FAPI_TRY((this->template resolve<MC, P>(i_target, i_vpd_supported_freqs, o_deconfigured, o_deconfigured_targets,
+                                                    o_freqs)));
 
 #ifndef __HOSTBOOT_MODULE
 
@@ -471,6 +473,7 @@ class freq_scoreboard
 
         ///
         /// @brief Counts the common port frequencies
+        /// @tparam MC mss::mc_type memory controller type
         /// @tparam P mss::proc_type on which to operate
         /// @tparam TT Traits associated with the processor type
         /// @param[in] i_target frequency domain target
@@ -480,7 +483,7 @@ class freq_scoreboard
         /// @param[out] o_deconfigured_targets vector of deconfigured targets
         /// @return FAPI2_RC_SUCCESS iff ok
         ///
-        template<mss::proc_type P, typename TT = mss::frequency_traits<P>>
+        template<mss::mc_type MC, mss::proc_type P, typename TT = mss::frequency_traits<P>>
         fapi2::ReturnCode deconfigure_ports(const fapi2::Target<TT::FREQ_DOMAIN_TARGET_TYPE>& i_target,
                                             const std::vector<fapi2::Target<TT::PORT_TARGET_TYPE>>& i_ports,
                                             const uint64_t i_best_freq_index,
@@ -497,7 +500,7 @@ class freq_scoreboard
                                                     i_ports.end(),
                                                     [l_pos]( const fapi2::Target<TT::PORT_TARGET_TYPE>& i_rhs) -> bool
                 {
-                    return (mss::relative_pos<TT::FREQ_DOMAIN_TARGET_TYPE>(i_rhs) == l_pos);
+                    return (mss::relative_pos<MC, TT::FREQ_DOMAIN_TARGET_TYPE>(i_rhs) == l_pos);
                 });
 
                 // If we didn't find an port for a given position, there wasn't one configured there
@@ -552,6 +555,7 @@ fapi2::ReturnCode limit_freq_by_processor(const fapi2::Target<TT::FREQ_DOMAIN_TA
 
 ///
 /// @brief Update supported frequency scoreboard according to MRW/config limits
+/// @tparam MC mss::mc_type memory controller type
 /// @tparam P mss::proc_type on which to operate
 /// @tparam TT Traits associated with the processor type
 /// @param[in] i_target target for which to get the DIMM configs
@@ -561,7 +565,7 @@ fapi2::ReturnCode limit_freq_by_processor(const fapi2::Target<TT::FREQ_DOMAIN_TA
 /// @note This helper allows us to use the attributes for the main path but
 /// have a path for testing
 ///
-template<mss::proc_type P, typename TT = mss::frequency_traits<P>>
+template<mss::mc_type MC, mss::proc_type P, typename TT = mss::frequency_traits<P>>
 inline fapi2::ReturnCode limit_freq_by_mrw(const fapi2::Target<TT::FREQ_DOMAIN_TARGET_TYPE>& i_target,
         const std::vector<uint32_t>& i_max_mrw_freqs,
         freq_scoreboard& io_scoreboard)
@@ -595,7 +599,7 @@ inline fapi2::ReturnCode limit_freq_by_mrw(const fapi2::Target<TT::FREQ_DOMAIN_T
 
     for( const auto& p : mss::find_targets<TT::PORT_TARGET_TYPE>(i_target) )
     {
-        const auto l_port_pos = mss::relative_pos<TT::FREQ_DOMAIN_TARGET_TYPE>(p);
+        const auto l_port_pos = mss::relative_pos<MC, TT::FREQ_DOMAIN_TARGET_TYPE>(p);
         const auto l_dimms = mss::find_targets<fapi2::TARGET_TYPE_DIMM>(p);
         const uint64_t l_dimms_on_port = l_dimms.size();
 
@@ -666,6 +670,7 @@ fapi_try_exit:
 
 ///
 /// @brief Update supported frequency scoreboard according to VPD limits
+/// @tparam MC mss::mc_type memory controller type
 /// @tparam P mss::proc_type on which to operate
 /// @tparam TT Traits associated with the processor type
 /// @param[in] i_target MCBIST target for which to get the DIMM configs
@@ -675,7 +680,7 @@ fapi_try_exit:
 /// @note This helper allows us to use the attributes for the main path but
 /// have a path for testing
 ///
-template<mss::proc_type P, typename TT = mss::frequency_traits<P>>
+template<mss::mc_type MC, mss::proc_type P, typename TT = mss::frequency_traits<P>>
 fapi2::ReturnCode limit_freq_by_vpd(const fapi2::Target<TT::FREQ_DOMAIN_TARGET_TYPE>& i_target,
                                     const std::vector<std::vector<uint32_t>>& i_hw_freqs,
                                     freq_scoreboard& io_scoreboard)
@@ -690,7 +695,7 @@ fapi2::ReturnCode limit_freq_by_vpd(const fapi2::Target<TT::FREQ_DOMAIN_TARGET_T
 
     for( const auto& p : mss::find_targets<TT::PORT_TARGET_TYPE>(i_target) )
     {
-        const auto l_port_pos = mss::relative_pos<TT::FREQ_DOMAIN_TARGET_TYPE>(p);
+        const auto l_port_pos = mss::relative_pos<MC, TT::FREQ_DOMAIN_TARGET_TYPE>(p);
         const auto& l_port_freqs = i_hw_freqs[l_port_pos];
 
         // This is the list of supported frequencies for VPD
@@ -720,6 +725,7 @@ fapi_try_exit:
 
 ///
 /// @brief Update supported frequency scoreboard according to SPD limits
+/// @tparam MC mss::mc_type memory controller type
 /// @tparam P mss::proc_type on which to operate
 /// @tparam TT Traits associated with the processor type
 /// @param[in] i_target target for which to get the DIMM configs
@@ -729,14 +735,14 @@ fapi_try_exit:
 /// @note This helper allows us to use the attributes for the main path but
 /// have a path for testing
 ///
-template<mss::proc_type P, typename TT = mss::frequency_traits<P>>
+template<mss::mc_type MC, mss::proc_type P, typename TT = mss::frequency_traits<P>>
 fapi2::ReturnCode limit_freq_by_spd(const fapi2::Target<TT::FREQ_DOMAIN_TARGET_TYPE>& i_target,
                                     const std::vector<uint32_t>& i_hw_freqs,
                                     freq_scoreboard& io_scoreboard)
 {
     for( const auto& p : mss::find_targets<TT::PORT_TARGET_TYPE>(i_target) )
     {
-        const auto l_port_pos = mss::relative_pos<TT::FREQ_DOMAIN_TARGET_TYPE>(p);
+        const auto l_port_pos = mss::relative_pos<MC, TT::FREQ_DOMAIN_TARGET_TYPE>(p);
 
         // Remove any frequencies that aren't in this port's list from the scoreboard
         io_scoreboard.remove_freqs_above_limit(l_port_pos, i_hw_freqs);

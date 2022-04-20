@@ -303,7 +303,7 @@ inline fapi2::ReturnCode get_rank_config(const fapi2::Target<TT::MC_TARGET_TYPE>
     {
         rank_configuration l_config;
         FAPI_TRY(get_rank_config<MC>(l_port, l_config));
-        o_rank_config[mss::relative_pos<TT::MC_TARGET_TYPE>(l_port)] = l_config;
+        o_rank_config[mss::relative_pos<MC, TT::MC_TARGET_TYPE>(l_port)] = l_config;
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -1327,7 +1327,7 @@ static inline fapi2::ReturnCode setup_ccs_instructions( const fapi2::Target<T>& 
     uint8_t l_current_cke = 0;
 
     // Grab port index and first inst
-    const auto l_port_index = mss::relative_pos<T>(i_port);
+    const auto l_port_index = mss::relative_pos<MC, T>(i_port);
     ccs::instruction_t<MC> l_des = ccs::des_command<MC>();
 
     std::vector<rank_configuration> l_rank_configs;
@@ -1421,7 +1421,7 @@ static inline fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
         // Kick off the CCS engine - per port. No broadcast mode for CCS (per Shelton 9/23/15)
         for (const auto& p : i_ports)
         {
-            const auto l_port_index = mss::relative_pos<T>(p);
+            const auto l_port_index = mss::relative_pos<MC, T>(p);
 
             // Run ccs instruction setup
             FAPI_TRY( setup_ccs_instructions<MC>(i_target, l_inst_iter, io_program, p),
@@ -1490,7 +1490,7 @@ static inline fapi2::ReturnCode execute_via_mcbist( const fapi2::Target<T>& i_ta
     // Setup CCS per port
     for (const auto& p : i_ports)
     {
-        const auto l_port_index = mss::relative_pos<T>(p);
+        const auto l_port_index = mss::relative_pos<MC, T>(p);
 
         // Run ccs instruction setup
         FAPI_TRY( setup_ccs_instructions<MC>(i_target, l_inst_iter, io_program, p),

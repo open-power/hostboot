@@ -326,7 +326,7 @@ fapi2::ReturnCode limit_freq_by_processor<mss::proc_type::PROC_P10>(
     // from the scoreboard
     for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
     {
-        const auto l_port_pos = mss::relative_pos<fapi2::TARGET_TYPE_PROC_CHIP>(l_port);
+        const auto l_port_pos = mss::relative_pos<mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_PROC_CHIP>(l_port);
 
         std::vector<uint64_t> l_converted_omi_freqs;
         const std::vector<uint64_t> l_P10_OMI_FREQ_DD1{P10_OMI_FREQS[0]};

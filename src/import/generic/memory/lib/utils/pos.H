@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -172,12 +172,13 @@ fapi_try_exit:
 
 ///
 /// @brief Return a target's relative position from a fapi2 target
+/// @tparam MC mss::mc_type memory controller type
 /// @tparam R the fapi2::TargetType we want the position relative to
 /// @tparam T the fapi2::TargetType
 /// @param[in] i_target a target representing the target in question
 /// @return The position relative to chiplet R
 ///
-template< fapi2::TargetType R, fapi2::TargetType T, typename TT = posTraits<T> >
+template< mss::mc_type MC, fapi2::TargetType R, fapi2::TargetType T, typename TT = posTraits<T>, typename MT = mcTypeTraits<MC> >
 typename TT::pos_type relative_pos(const fapi2::Target<T>& i_target);
 
 ///
@@ -224,5 +225,5 @@ inline void sort_targets_by_pos(std::vector<fapi2::Target<T>>& io_targets)
     });
 }
 
-}
+} //mss
 #endif

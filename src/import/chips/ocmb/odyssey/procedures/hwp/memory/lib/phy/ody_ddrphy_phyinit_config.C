@@ -50,6 +50,7 @@
 #include <lib/phy/ody_ddrphy_phyinit_config.H>
 #include <lib/phy/ody_ddrphy_csr_defines.H>
 #include <lib/phy/ody_phy_utils.H>
+#include <lib/phy/ody_phy_reset.H>
 
 #include <stdlib.h>
 #include <math.h>
@@ -3403,8 +3404,8 @@ fapi2::ReturnCode run_phy_init( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>
     user_input_advanced_t l_user_input_advanced;
     user_input_dram_config_t l_user_input_dram_config;
 
-    // TODO:ZEN:MST-1572 Create code to perform PHY reset for Odyssey
-
+    // Perform PHY reset for Odyssey
+    FAPI_TRY(mss::ody::phy::reset(i_target));
 
     // Configure the structure values
     FAPI_TRY(init_phy_structs(i_target,

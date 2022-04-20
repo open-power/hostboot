@@ -57,20 +57,21 @@ namespace mss
 
 ///
 /// @brief Determine if a thing is functional
+/// @tparam MC mss::mc_type memory controller type
 /// @tparam I, the type of the item we want to check for
 /// @tparam P, the type of the parent which holds the things of interest
 /// @param[in] i_target the parent containing the thing we're looking for
 /// @param[in] i_rel_pos the relative position of the item of interest.
 /// @return bool true iff the thing at i_rel_pos is noted as functional
 ///
-template< fapi2::TargetType I, fapi2::TargetType P >
+template< mss::mc_type MC, fapi2::TargetType I, fapi2::TargetType P >
 inline bool is_functional( const fapi2::Target<P>& i_target, const uint64_t i_rel_pos )
 {
     // Not sure of a good way to do this ... we get all the functional
     // children of the parent and look for our relative position ...
     for (const auto& i : i_target.template getChildren<I>(fapi2::TARGET_STATE_FUNCTIONAL))
     {
-        if (mss::template relative_pos<P>(i) == i_rel_pos)
+        if (relative_pos<MC, P>(i) == i_rel_pos)
         {
             return true;
         }
@@ -152,7 +153,7 @@ fapi2::ReturnCode sf_init( const fapi2::Target<T>& i_target, const uint64_t i_pa
                 mss::mcbist::subtest_t<MC> l_fw_subtest =
                     mss::mcbist::write_subtest<MC>();
 
-                l_fw_subtest.enable_port(mss::relative_pos<T>(p));
+                l_fw_subtest.enable_port(mss::relative_pos<MC, T>(p));
                 l_fw_subtest.change_addr_sel(l_rank_address_pair);
                 l_fw_subtest.enable_dimm(mss::rank::get_dimm_from_rank<MC>(*r));
                 l_program.iv_subtests.push_back(l_fw_subtest);
@@ -167,7 +168,7 @@ fapi2::ReturnCode sf_init( const fapi2::Target<T>& i_target, const uint64_t i_pa
                 mss::mcbist::subtest_t<MC> l_fr_subtest =
                     mss::mcbist::read_subtest<MC>();
 
-                l_fr_subtest.enable_port(mss::relative_pos<T>(p));
+                l_fr_subtest.enable_port(mss::relative_pos<MC, T>(p));
                 l_fr_subtest.change_addr_sel(l_rank_address_pair);
                 l_fr_subtest.enable_dimm(mss::rank::get_dimm_from_rank<MC>(*r));
                 l_program.iv_subtests.push_back(l_fr_subtest);
@@ -190,7 +191,7 @@ fapi2::ReturnCode sf_init( const fapi2::Target<T>& i_target, const uint64_t i_pa
         // Just one port for now. Per Shelton we need to set this in maint address mode
         // even tho we specify the port/dimm in the subtest.
         fapi2::buffer<uint8_t> l_port;
-        l_port.setBit(mss::relative_pos<T>(p));
+        l_port.setBit(mss::relative_pos<MC, T>(p));
         l_program.select_ports(l_port >> 4);
 
         // Kick it off, wait for a result
@@ -537,13 +538,13 @@ inline fapi2::ReturnCode operation<MC, T, TT>::single_port_init()
     const uint64_t l_dimm_number = iv_const.iv_start_address.get_dimm();
 
     // Make sure the specificed port is functional
-    FAPI_ASSERT( mss::is_functional<TT::PORT_TYPE>(iv_target, l_relative_port_number),
-                 ET::memdiags_port_not_functional()
-                 .set_RELATIVE_PORT_POSITION(l_relative_port_number)
-                 .set_ADDRESS( uint64_t(iv_const.iv_start_address) )
-                 .set_MC_TARGET(iv_target),
-                 "Port with relative postion %d is not functional for %s",
-                 l_relative_port_number, mss::c_str(iv_target));
+    FAPI_ASSERT(( mss::is_functional<MC, TT::PORT_TYPE>(iv_target, l_relative_port_number)),
+                ET::memdiags_port_not_functional()
+                .set_RELATIVE_PORT_POSITION(l_relative_port_number)
+                .set_ADDRESS( uint64_t(iv_const.iv_start_address) )
+                .set_MC_TARGET(iv_target),
+                "Port with relative postion %d is not functional for %s",
+                l_relative_port_number, mss::c_str(iv_target));
 
     // No broadcast mode for this one
     // Push on a read subtest
@@ -790,7 +791,7 @@ continuous_scrub_operation<MC, T, TT>::continuous_scrub_operation(
             // Don't destroy the subtest passed in, copy it
             auto l_subtest = operation<MC>::iv_subtest;
 
-            l_subtest.enable_port(mss::relative_pos<T>(p));
+            l_subtest.enable_port(mss::relative_pos<MC, T>(p));
             l_subtest.enable_dimm(mss::index(d));
             operation<MC>::iv_program.iv_subtests.push_back(l_subtest);
             FAPI_INF("adding scrub subtest for %s (dimm %d) ( 0x%04x)", mss::c_str(d), mss::index(d), l_subtest);
