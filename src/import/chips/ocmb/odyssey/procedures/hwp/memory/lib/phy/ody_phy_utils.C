@@ -83,6 +83,20 @@ uint64_t convert_synopsys_to_ibm_reg_addr( const uint64_t i_synopsys_addr)
     return static_cast<uint64_t>((i_synopsys_addr << 32) | 0x800000000801303f);
 }
 
+///
+/// @brief Loads two contiguous 8-bit fields into the DMEM register format
+/// @param[in] i_even_field field at the even byte offset
+/// @param[in] i_odd_field field at the odd byte offset
+/// @param[in,out] io_data the register data
+///
+void load_dmem_8bit_fields( const uint8_t i_even_field, const uint8_t i_odd_field, fapi2::buffer<uint64_t>& io_data)
+{
+    constexpr uint64_t ODD_DATA = 48;
+    constexpr uint64_t EVEN_DATA = 56;
+    io_data.insertFromRight<ODD_DATA, BITS_PER_BYTE>(i_odd_field)
+    .insertFromRight<EVEN_DATA, BITS_PER_BYTE>(i_even_field);
+}
+
 } // namespace phy
 } // namespace ody
 } // namespace mss
