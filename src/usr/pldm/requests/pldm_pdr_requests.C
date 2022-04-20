@@ -37,12 +37,13 @@
 // Error logs
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
+#include <errl/errludattribute.H>
 
 // Console display
 #include <console/consoleif.H>
 
 // Targeting
-#include <targeting/targplatutil.H>
+#include <targeting/targplatutil.H> //assertGetToplevelTarget
 #include <targeting/common/targetservice.H>
 
 // IPC
@@ -68,6 +69,8 @@
 #include <pldm/pldm_trace.H>
 #include <pldm/pldm_util.H>
 #include "pldm_request_utils.H"
+
+using namespace TARGETING;
 
 namespace
 {
@@ -520,12 +523,14 @@ errlHndl_t sendRepositoryChangedEvent(const pldm_pdr* const i_repo,
         } while (false);
     }
 
+    addPdrCounts(errl);
+
     PLDM_EXIT("sendRepositoryChangedEvent");
 
     return errl;
 }
 
-errlHndl_t sendSensorStateChangedEvent(const TARGETING::Target* const i_target,
+errlHndl_t sendSensorStateChangedEvent(const Target* const i_target,
                                        const uint16_t i_state_set_id,
                                        const sensor_id_t i_sensor_id,
                                        const uint8_t i_sensor_offset,
@@ -535,7 +540,7 @@ errlHndl_t sendSensorStateChangedEvent(const TARGETING::Target* const i_target,
                                        i_sensor_state, thePdrManager().hostbootTerminusId());
 }
 
-errlHndl_t sendSensorStateChangedEvent(const TARGETING::Target* const i_target,
+errlHndl_t sendSensorStateChangedEvent(const Target* const i_target,
                                        const uint16_t i_state_set_id,
                                        const sensor_id_t i_sensor_id,
                                        const uint8_t i_sensor_offset,
@@ -638,6 +643,8 @@ errlHndl_t sendSensorStateChangedEvent(const TARGETING::Target* const i_target,
         PLDM_INF("Sent Sensor State Changed Event successfully");
     } while (false);
 
+    addPdrCounts(errl);
+
     PLDM_EXIT("sendSensorStateChangedEvent");
 
     return errl;
@@ -678,6 +685,7 @@ void sendProgressStateChangeEvent(const pldm_state_set_boot_progress_state_value
             i_boot_state, get_huid(l_node));
         l_errl->collectTrace(PLDM_COMP_NAME);
         l_errl->collectTrace(ISTEP_COMP_NAME);
+        addPdrCounts(l_errl);
         ERRORLOG::errlCommit(l_errl, PLDM_COMP_ID);
     }
 
@@ -686,7 +694,7 @@ void sendProgressStateChangeEvent(const pldm_state_set_boot_progress_state_value
 }
 
 
-errlHndl_t sendOccStateChangedEvent(const TARGETING::Target* const i_occ_target,
+errlHndl_t sendOccStateChangedEvent(const Target* const i_occ_target,
                                     const occ_state i_new_state)
 {
     using namespace TARGETING;
@@ -735,7 +743,7 @@ errlHndl_t sendOccStateChangedEvent(const TARGETING::Target* const i_occ_target,
                                        sensor_id, OCC_STATE_SENSOR_INDEX, new_occ_state);
 }
 
-errlHndl_t sendFruFunctionalStateChangedEvent(const TARGETING::Target* const i_target,
+errlHndl_t sendFruFunctionalStateChangedEvent(const Target* const i_target,
                                               const state_query_id_t i_sensor_id,
                                               const bool i_functional)
 {
@@ -847,6 +855,8 @@ errlHndl_t sendSetNumericEffecterValueRequest(const effecter_id_t i_effecter_id,
 
     } while (false);
 
+    addPdrCounts(errl);
+
     PLDM_EXIT("sendSetNumericEffecterValueRequest");
 
     return errl;
@@ -938,6 +948,7 @@ errlHndl_t sendSetStateEffecterStatesRequest(
             break;
         }
     } while (false);
+    addPdrCounts(errl);
 
     PLDM_EXIT("sendSetStateEffecterStatesRequest");
 
@@ -950,11 +961,11 @@ errlHndl_t sendResetRebootCountRequest()
     errlHndl_t errl = nullptr;
     do {
 
-    TARGETING::Target* system = TARGETING::UTIL::assertGetToplevelTarget();
+    Target* system = UTIL::assertGetToplevelTarget();
 
     // The effecter attached to the Logical System pldm entity
     pldm_entity chassis_entity =
-        targeting_to_pldm_entity_id(system->getAttr<TARGETING::ATTR_SYSTEM_PLDM_ENTITY_ID_INFO>());
+        targeting_to_pldm_entity_id(system->getAttr<ATTR_SYSTEM_PLDM_ENTITY_ID_INFO>());
 
     // This is effectively the unique id for this PDR. Since other PDRs aren't allowed to have this base unit
     const uint8_t PLDM_BASE_UNIT_RETRIES = 72;
@@ -995,6 +1006,8 @@ errlHndl_t sendResetRebootCountRequest()
     }
 
     } while(0);
+
+    addPdrCounts(errl);
 
     PLDM_EXIT("sendResetRebootCountRequest()");
     return errl;
@@ -1046,6 +1059,8 @@ errlHndl_t sendGracefulRestartRequest()
         errl = sendSetStateEffecterStatesRequest(sw_term_effecter_id, fields_to_set);
     } while (false);
 
+    // Add BMC/HB PDR counts to defect if present
+    addPdrCounts(errl);
     return errl;
 }
 

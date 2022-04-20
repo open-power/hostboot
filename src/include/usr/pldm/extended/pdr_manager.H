@@ -173,6 +173,12 @@ public:
      *       will return immediately, even on subsequent invocations.
      */
     errlHndl_t awaitBmcPdrRepoChanged(size_t i_timeout_ms = TIMEOUT_MAX_MS);
+
+    /* @brief Checks whether the Hostboot Terminus Locator PDR exists in the current repository
+     * @return error if HB terminus locator is NOT found, else nullptr
+     */
+    errlHndl_t checkForHbTerminusLocator();
+
 #endif
 
     /* @brief  Iterate the PDR repository and invoke a callback for each PDR of

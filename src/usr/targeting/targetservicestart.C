@@ -514,6 +514,10 @@ static void initializeAttributes(TargetService& i_targetService,
             l_pTopLevel->setAttr<ATTR_ATTN_CHK_ALL_PROCS>(1);
             l_pTopLevel->setAttr<ATTR_HALT_ON_BMC_PLDM_RESET>(0);
 
+#ifndef CONFIG_FSP_BUILD
+            l_pTopLevel->setAttr<ATTR_PLDM_BMC_PDR_COUNT>(0);
+            l_pTopLevel->setAttr<ATTR_PLDM_HB_PDR_COUNT>(0);
+#endif
             //Clear out PM MALF and FFDC enabled attributes
             l_pTopLevel->setAttr<ATTR_PM_MALF_ALERT_ENABLE> (0x0);
             l_pTopLevel->setAttr<ATTR_PM_RESET_FFDC_ENABLE> (0x0);
