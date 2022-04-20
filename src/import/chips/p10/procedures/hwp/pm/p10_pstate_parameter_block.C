@@ -355,7 +355,7 @@ void gppb_print(
 
     s = VPD_PT_SET_RAW;
 
-    FAPI_INF("Operating Points(Raw):     Freq(MHz)         VDD(mV)       IDTAC(10mA)     IDTDC(10mA)     IDRAC(10mA)     IDRDC(10mA)");
+    FAPI_INF("Operating Points(Raw):     Freq(MHz)         VDD(mV)       IDTAC(10mA)     IDTDC(10mA)     IDRAC(10mA)     IDRDC(10mA)     Pstate");
     for (uint32_t i = 0; i < NUM_OP_POINTS; i++)
     {
         strcpy(l_buffer,"");
@@ -379,6 +379,9 @@ void gppb_print(
 
         HEX_DEC_STR(l_buffer,
                 revle32(i_gppb->operating_points_set[s][i].idd_rdp_dc_10ma));
+
+        HEX_DEC_STR(l_buffer,
+                i_gppb->operating_points_set[s][i].pstate);
 
         FAPI_INF("%s", l_buffer);
     }
@@ -435,7 +438,7 @@ void gppb_print(
 
     s = VPD_PT_SET_BIASED;
 
-    FAPI_INF("Operating Points(Biased):  Freq(MHz)         VDD(mV)       IDTAC(10mA)     IDTDC(10mA)     IDRAC(10mA)     IDRDC(10mA)");
+    FAPI_INF("Operating Points(Biased):  Freq(MHz)         VDD(mV)       IDTAC(10mA)     IDTDC(10mA)     IDRAC(10mA)     IDRDC(10mA)     Pstate");
     for (uint32_t i = 0; i < NUM_OP_POINTS; i++)
     {
         strcpy(l_buffer,"");
@@ -459,6 +462,9 @@ void gppb_print(
 
         HEX_DEC_STR(l_buffer,
                 revle32(i_gppb->operating_points_set[s][i].idd_rdp_dc_10ma));
+
+        HEX_DEC_STR(l_buffer,
+                i_gppb->operating_points_set[s][i].pstate);
 
         FAPI_INF("%s", l_buffer);
     }
@@ -1532,7 +1538,7 @@ void oppb_print(
     FAPI_INF("OCC Pstate Parameter Block - %s", l_buffer);
     FAPI_INF("---------------------------------------------------------------------------------------");
 
-    FAPI_INF("Operating Points(biased):  Freq(MHz)     VDD(mV)       IDTAC(10mA)     IDTDC(10mA)     IDRAC(10mA)     IDRDC(10mA)");
+    FAPI_INF("Operating Points(biased):  Freq(MHz)     VDD(mV)       IDTAC(10mA)     IDTDC(10mA)     IDRAC(10mA)     IDRDC(10mA)     Pstate");
     for (uint32_t i = 0; i < NUM_OP_POINTS; i++)
     {
         strcpy(l_buffer,"");
@@ -1551,6 +1557,8 @@ void oppb_print(
                 revle32(i_oppb->operating_points[i].idd_rdp_ac_10ma));
         HEX_DEC_STR(l_buffer,
                 revle32(i_oppb->operating_points[i].idd_rdp_dc_10ma));
+        HEX_DEC_STR(l_buffer,
+                i_oppb->operating_points[i].pstate);
         FAPI_INF("%s", l_buffer);
     }
 
@@ -2785,8 +2793,11 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
         //Update pstate for all points
         for (uint32_t i = 0; i < NUM_PV_POINTS; i++)
         {
-            iv_attr_mvpd_poundV_raw[i].pstate = (iv_reference_frequency_mhz  -
-            iv_attr_mvpd_poundV_raw[i].frequency_mhz) * 1000 / (iv_frequency_step_khz);
+
+            Pstate l_ps;
+
+            freq2pState((iv_attr_mvpd_poundV_raw[i].frequency_mhz*1000), &l_ps, ROUND_NEAR);
+            iv_attr_mvpd_poundV_raw[i].pstate = l_ps;
 
             FAPI_INF("CF[%d] Raw Frequency: 0x%04x (%04d) PSTATE 0x%02x (%03d)",
                         i,
@@ -5711,7 +5722,7 @@ void PlatPmPPB::pState2freq (const Pstate i_pstate,
     // ----------------------------------
     // compute the frequency for a given Pstate
     // ----------------------------------
-    *o_freq_khz = (iv_reference_frequency_khz - (i_pstate * iv_frequency_step_khz)) + 1000;
+    *o_freq_khz = (iv_reference_frequency_khz - (i_pstate * iv_frequency_step_khz));
 
     FAPI_DBG("pState2freq: pstate = %d; o_freq_khz = %u (0x%X)",
                 i_pstate,  *o_freq_khz, *o_freq_khz);
@@ -5810,6 +5821,9 @@ void PlatPmPPB::compute_PStateV_I_slope(
                         vpdSetStr[pt_set], region_names[region],
                         revle16(o_gppb->poundv_slopes.ps_voltage_slopes[rails][pt_set][region]),
                         revle16(o_gppb->poundv_slopes.ps_voltage_slopes[rails][pt_set][region]));
+                FAPI_DBG("%s ps_voltage_slopes   [%s][%s]  %d mV max %d mV min %d ps max %d ps min",
+                        vlt_str[rails], vpdSetStr[pt_set], region_names[region],
+                        l_voltage_mv_max, l_voltage_mv_min, l_pstate_max,l_pstate_min);
 
                 //Voltage inverted slopes
                 //Calculate inverted slopes
