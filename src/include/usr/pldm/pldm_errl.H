@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,7 +33,9 @@
 
 #include <errl/errlentry.H>
 #include <errl/errludstring.H>
+#include <errl/errludattribute.H>
 #include <openbmc/pldm/libpldm/base.h>
+#include <targeting/common/targetservice.H>
 
 using namespace ERRORLOG;
 
@@ -91,6 +93,25 @@ inline void addBmcAndHypErrorCallouts(const errlHndl_t i_errl)
     i_errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                 HWAS::SRCI_PRIORITY_LOW);
 }
+
+#ifndef CONFIG_FSP_BUILD
+/* @brief addPdrCounts
+ *
+ *        Add the current count of PDRs sent to BMC and received from BMC
+ *        into to the error log.
+ *
+ * @param[in] i_errl  Error log to modify
+ */
+inline void addPdrCounts(const errlHndl_t i_errl)
+{
+    if (i_errl != nullptr)
+    {
+        const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
+        ErrlUserDetailsAttribute(sys,TARGETING::ATTR_PLDM_BMC_PDR_COUNT).addToLog(i_errl);
+        ErrlUserDetailsAttribute(sys,TARGETING::ATTR_PLDM_HB_PDR_COUNT).addToLog(i_errl);
+    }
+}
+#endif
 
 /**
  * @brief Cast raw binary data to a pldm_msg_hdr struct and return the 'type' member

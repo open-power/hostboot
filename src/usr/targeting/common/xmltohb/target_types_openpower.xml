@@ -366,7 +366,13 @@
       <id>PLDM_BIOS_ERROR_INFORMATIONAL</id>
     </attribute>
     <attribute>
+      <id>PLDM_BMC_PDR_COUNT</id>
+    </attribute>
+    <attribute>
       <id>PLDM_CONNECTOR_PDRS_ENABLED</id>
+    </attribute>
+    <attribute>
+      <id>PLDM_HB_PDR_COUNT</id>
     </attribute>
     <attribute>
       <id>PLDM_STATE_QUERY_RECORDS</id>

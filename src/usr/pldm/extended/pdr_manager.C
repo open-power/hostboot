@@ -48,6 +48,7 @@
 #include <sys/msg.h>
 #include <util/misc.H>
 
+
 #include <targeting/common/targetservice.H>
 
 using namespace PLDM;
@@ -157,13 +158,11 @@ bool PdrManager::findPdr(pdr_handle_t& io_record_handle,
 /* @brief Find a Terminus Locator PDR associated with Hostboot
  *
  * @param[in] i_repo  The PDR repository to search
- * @param[in] i_lock  Reference to a lock on PDR repository. The
- *                    caller must have exclusive access to the PDR
- *                    repository prior to calling this function.
+ *
  * @return The pointer to the Terminus Locator PDR structure if
  *         it is found in the PDR repo, or nullptr if not found
  */
-pldm_terminus_locator_pdr* findHBTerminusLocatorPdr(const pldm_pdr* i_repo, const mutex_lock_t& i_lock);
+pldm_terminus_locator_pdr* findHBTerminusLocatorPdr(const pldm_pdr* i_repo);
 
 errlHndl_t PdrManager::invalidateHBTerminusLocatorPdr()
 {
@@ -174,7 +173,7 @@ errlHndl_t PdrManager::invalidateHBTerminusLocatorPdr()
     // the operations on the PDR repo
     {
     const auto lock = scoped_mutex_lock(iv_access_mutex);
-    pldm_terminus_locator_pdr* l_terminus_locator_pdr = findHBTerminusLocatorPdr(iv_pdr_repo.get(), lock);
+    pldm_terminus_locator_pdr* l_terminus_locator_pdr = findHBTerminusLocatorPdr(iv_pdr_repo.get());
     if(!l_terminus_locator_pdr)
     {
         /*@
@@ -190,6 +189,7 @@ errlHndl_t PdrManager::invalidateHBTerminusLocatorPdr()
                                0,
                                0,
                                ErrlEntry::ADD_SW_CALLOUT);
+        addPdrCounts(l_errl);
     }
     else
     {
@@ -208,7 +208,7 @@ errlHndl_t PdrManager::invalidateHBTerminusLocatorPdr()
     return l_errl;
 }
 
-pldm_terminus_locator_pdr* findHBTerminusLocatorPdr(const pldm_pdr* const i_repo, const mutex_lock_t& i_lock)
+pldm_terminus_locator_pdr* findHBTerminusLocatorPdr(const pldm_pdr* const i_repo)
 {
     const pldm_pdr_record* l_curr_record = nullptr;
     pldm_terminus_locator_pdr* l_hb_pdr = nullptr;
@@ -236,6 +236,40 @@ pldm_terminus_locator_pdr* findHBTerminusLocatorPdr(const pldm_pdr* const i_repo
     } while(l_curr_record);
     return l_hb_pdr;
 }
+
+#ifndef __HOSTBOOT_RUNTIME
+errlHndl_t PdrManager::checkForHbTerminusLocator()
+{
+    // Grab a temp scope to lock the PDR mutex for the duration of
+    // the operations on the PDR repo
+    errlHndl_t l_errl = nullptr;
+
+    const auto lock = scoped_mutex_lock(iv_access_mutex);
+    pldm_terminus_locator_pdr* l_terminus_locator_pdr = findHBTerminusLocatorPdr(iv_pdr_repo.get());
+    if (!l_terminus_locator_pdr)
+    {
+        const auto sys = UTIL::assertGetToplevelTarget();
+
+        /*@
+         * @errortype
+         * @moduleid   MOD_CHECK_FOR_HB_TERMINUS_LOCATOR
+         * @reasoncode RC_TERM_LOCATOR_NOT_FOUND
+         * @userdata1  Count of BMC/HB PDRs
+         * @userdata2  Count of HB PDRs
+         * @devdesc    Could not find Terminus Locator PDR in the PDR repo
+         * @custdesc   A software error occurred during system boot
+         */
+        l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                               MOD_CHECK_FOR_HB_TERMINUS_LOCATOR,
+                               RC_TERM_LOCATOR_NOT_FOUND,
+                               sys->getAttr<ATTR_PLDM_BMC_PDR_COUNT>(),
+                               sys->getAttr<ATTR_PLDM_HB_PDR_COUNT>(),
+                               ErrlEntry::ADD_SW_CALLOUT);
+    }
+
+    return l_errl;
+}
+#endif
 
 bool PdrManager::entity_id_component_equal(const uint16_t i_haystack, const uint16_t i_needle)
 {
@@ -798,7 +832,7 @@ state_query_handler_t get_state_handler(PdrManager::state_query_handler_id_t i_i
 }
 
 errlHndl_t invoke_state_effecter_handler(const PdrManager::state_query_handler_id_t i_handler_id,
-                                         TARGETING::Target* const i_target,
+                                         Target* const i_target,
                                          const msg_q_t i_msgq,
                                          const pldm_msg* const i_msg,
                                          const size_t i_msgsize,
@@ -823,7 +857,7 @@ errlHndl_t invoke_state_effecter_handler(const PdrManager::state_query_handler_i
 }
 
 errlHndl_t invoke_state_sensor_handler(const PdrManager::state_query_handler_id_t i_handler_id,
-                                       TARGETING::Target* const i_target,
+                                       Target* const i_target,
                                        const msg_q_t i_msgq,
                                        const pldm_msg* const i_msg,
                                        const size_t i_msgsize,
@@ -1002,7 +1036,7 @@ std::vector<PdrManager::pldm_state_query_record_t> PdrManager::getHostStateQuery
 
 state_query_id_t PdrManager::getHostStateQueryIdForStateSet(const state_query_type_t i_state_query_type,
                                                             const uint16_t i_state_set_id,
-                                                            const TARGETING::Target* const i_target)
+                                                            const Target* const i_target)
 {
     state_query_id_t query_id = 0;
 
@@ -1200,6 +1234,8 @@ errlHndl_t PdrManager::notifyBmcPdrRepoChanged()
                              rc,
                              0,
                              ErrlEntry::ADD_SW_CALLOUT);
+        addPdrCounts(errl);
+
         // If the queue is nullptr, that means that we've already completed the
         // PDR exchange and we are not expecting any PDR sync messages. Reduce
         // the severity of the error.
@@ -1207,6 +1243,7 @@ errlHndl_t PdrManager::notifyBmcPdrRepoChanged()
         {
             errl->setSev(ERRL_SEV_INFORMATIONAL);
         }
+
     }
 
     return errl;
@@ -1249,6 +1286,7 @@ errlHndl_t PdrManager::awaitBmcPdrRepoChanged(const size_t i_timeout_ms)
                                  l_timeout_ms,
                                  ErrlEntry::NO_SW_CALLOUT);
             addBmcErrorCallouts(errl);
+            addPdrCounts(errl);
         }
         else
         {
@@ -1286,7 +1324,7 @@ errlHndl_t PdrManager::awaitBmcPdrRepoChanged(const size_t i_timeout_ms)
                              0,
                              0,
                              ErrlEntry::ADD_SW_CALLOUT);
-
+        addPdrCounts(errl);
     }
 
     return errl;

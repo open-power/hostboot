@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -92,6 +92,7 @@ namespace ISTEP
         MOD_MONITOR_SBE_HALT                              = 0x3D,
         MOD_BIOS_ATTR_PARSERS                             = 0x3F,
         MOD_BIOS_ATTR_SETTERS                             = 0x40,
+        MOD_FINISH_PDR_EXCHANGE                           = 0x41,
     };
 
     /**
@@ -195,6 +196,7 @@ namespace ISTEP
         RC_INVALID_BOOTSIDE                      = ISTEP_COMP_ID | 0x6B,
         RC_UNHALTED_SBE                          = ISTEP_COMP_ID | 0x6C,
         RC_INVALID_HUGE_PAGE_SIZE                = ISTEP_COMP_ID | 0x6D,
+        RC_TOO_SMALL_BMC_PDR_COUNT               = ISTEP_COMP_ID | 0x6E,
     };
 
 };

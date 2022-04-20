@@ -59,6 +59,7 @@
 #include <pldm/extended/pldm_entity_ids.H>
 #include <pldm/extended/sbe_dump.H>
 #include <pldm/requests/pldm_pdr_requests.H>
+#include <pldm/pldm_errl.H>
 #endif
 #include <fapi2/plat_hwp_invoker.H>
 #include <fapi2/target.H>
@@ -301,6 +302,8 @@ static errlHndl_t fetch_remote_pdrs()
             break;
         }
 
+        sys->setAttr<TARGETING::ATTR_PLDM_BMC_PDR_COUNT>(PLDM::thePdrManager().pdrCount());
+
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "Added %llu remote PDRs to PDR manager",
                   PLDM::thePdrManager().pdrCount());
@@ -368,6 +371,8 @@ static errlHndl_t exchange_pdrs()
                   hb_pdr_handles.size(),
                   lowest_handle);
 
+        TARGETING::UTIL::assertGetToplevelTarget()->setAttr<TARGETING::ATTR_PLDM_HB_PDR_COUNT>(hb_pdr_handles.size());
+
         l_err = PLDM::thePdrManager().sendPdrRepositoryChangeEvent({ lowest_handle });
 
         if (l_err)
@@ -399,11 +404,10 @@ static errlHndl_t finish_pdr_exchange()
                   "Awaiting PDR Repository Changed notification from the BMC");
 
         l_err = PLDM::thePdrManager().awaitBmcPdrRepoChanged(PLDM::PdrManager::TIMEOUT_MAX_MS);
-
         if (l_err)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      ERR_MRK"Failed to wait on PDR repository update event from BMC");
+                      ERR_MRK"Failed while waiting for PDR repository update event from BMC");
             break;
         }
 
@@ -415,11 +419,55 @@ static errlHndl_t finish_pdr_exchange()
         PLDM::thePdrManager().resetPdrs();
 
         l_err = PLDM::thePdrManager().addRemotePdrs();
-
         if (l_err)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       ERR_MRK"Failed to re-add remote PDRs to PDR manager");
+            break;
+        }
+
+        const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
+
+        // Verify BMC returned at least previous BMC count + HB count
+        if ( (sys->getAttr<TARGETING::ATTR_PLDM_HB_PDR_COUNT>() +
+             sys->getAttr<TARGETING::ATTR_PLDM_BMC_PDR_COUNT>()) >
+             PLDM::thePdrManager().pdrCount() )
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  ERR_MRK"Current BMC pdr count %d is less than previous BMC count %d + HB count %d",
+                  PLDM::thePdrManager().pdrCount(),
+                  sys->getAttr<TARGETING::ATTR_PLDM_BMC_PDR_COUNT>(),
+                  sys->getAttr<TARGETING::ATTR_PLDM_HB_PDR_COUNT>());
+            /*@
+             * @errortype
+             * @moduleid   ISTEP::MOD_FINISH_PDR_EXCHANGE
+             * @reasoncode ISTEP::RC_TOO_SMALL_BMC_PDR_COUNT
+             * @userdata1  Current BMC PDR count (should includes HB PDRs)
+             * @userdata2[0:31]  BMC PDR count before HB pdr exchange
+             * @userdata2[32:63] Hostboot PDR count sent to BMC
+             * @devdesc    BMC returned less PDRs than previous BMC + HB PDRs
+             * @custdesc   A software error occurred during system boot
+             */
+            l_err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                  ISTEP::MOD_FINISH_PDR_EXCHANGE,
+                                  ISTEP::RC_TOO_SMALL_BMC_PDR_COUNT,
+                                  PLDM::thePdrManager().pdrCount(),
+                                  TWO_UINT32_TO_UINT64(
+                                  sys->getAttr<TARGETING::ATTR_PLDM_BMC_PDR_COUNT>(),
+                                  sys->getAttr<TARGETING::ATTR_PLDM_HB_PDR_COUNT>()),
+                                  ErrlEntry::NO_SW_CALLOUT);
+            PLDM::addBmcErrorCallouts(l_err);
+            break;
+        }
+        // now update BMC PDR count to latest count which includes HB PDRs
+        sys->setAttr<TARGETING::ATTR_PLDM_BMC_PDR_COUNT>(PLDM::thePdrManager().pdrCount());
+
+        // Verify HB Terminus Locator PDR exists in repo
+        l_err = PLDM::thePdrManager().checkForHbTerminusLocator();
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                ERR_MRK"Failed to find HB Terminus Locator in PDR repo");
             break;
         }
 
