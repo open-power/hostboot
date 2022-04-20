@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,7 +35,10 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
+#include <p10_scom_proc.H>
 #include <p10_getputsram_utils.H>
+
+using namespace scomt::proc;
 
 ocb::PM_OCB_CHAN_NUM getOcbChanNum(const uint8_t i_mode)
 {
@@ -68,4 +71,48 @@ ocb::PM_OCB_CHAN_NUM getOcbChanNum(const uint8_t i_mode)
 
     FAPI_DBG("Exiting getOcbChanNum: OCB channel %d", l_ocbChan);
     return l_ocbChan;
+}
+
+bool is_OCB_PBA_InterleavedMode (const uint8_t i_mode)
+{
+    bool l_isInterleaved = false;
+    uint8_t l_occMode = (i_mode >> MODE_OCC_ACCESS_MODE_BIT_SHIFT) & 0x3;
+
+    // Only one specific use-case in P10 is SBE MPIPL Dump which
+    // uses OCB channel 3 for both SRAM read and memory write
+    // in an interleaved manner in normal/linear mode
+    if ((l_occMode != OCB_MODE_CIRCULAR) &&
+        (ocb::PM_OCB_CHAN_NUM::OCB_CHAN3 == getOcbChanNum(i_mode)) &&
+        ((i_mode >> MODE_OCB_PBA_INTERLEAVED_SHIFT) & 0x01))
+    {
+        l_isInterleaved = true;
+    }
+
+    return l_isInterleaved;
+}
+
+
+fapi2::ReturnCode p10_ocb_handlePbaContext (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+        const uint8_t i_mode,
+        const bool    i_save )
+{
+    FAPI_DBG(">> p10_ocb_handlePbaContext: %s", (i_save) ? "save" : "restore");
+    static fapi2::buffer<uint64_t> l_ocbar3;
+
+    if (is_OCB_PBA_InterleavedMode (i_mode))
+    {
+        if (i_save)
+        {
+            FAPI_TRY (fapi2::getScom(i_target, TP_TPCHIP_OCC_OCI_OCB_PIB_OCBAR3, l_ocbar3));
+        }
+        else
+        {
+            FAPI_TRY (fapi2::putScom(i_target, TP_TPCHIP_OCC_OCI_OCB_PIB_OCBAR3, l_ocbar3));
+            l_ocbar3.flush<0>();
+        }
+    }
+
+fapi_try_exit:
+    FAPI_DBG("<< p10_ocb_handlePbaContext");
+    return fapi2::current_err;
 }
