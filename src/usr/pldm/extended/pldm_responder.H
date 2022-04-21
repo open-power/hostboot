@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,13 @@
 
 #include <sys/msg.h>
 #include <errl/errlentry.H>
+#include <pldm/pldmif.H>
+#include <mctp/mctp_message_types.H>
+
+struct pldm_msg;
+
+namespace PLDM
+{
 
 class pldmResponder
 {
@@ -65,11 +72,17 @@ class pldmResponder
   private:
 
       //Private Member Variables
-      msg_q_t     iv_mctpOutboundMsgQ; // mctp outbound rsp/req msgQ
+      MCTP::mctp_outbound_msgq_t iv_mctpOutboundMsgQ; // mctp outbound rsp/req msgQ
 
       // Disallow copying this class.
       pldmResponder& operator=(const pldmResponder&);
       pldmResponder(const pldmResponder&);
 };
+
+/* @brief The type of incoming PLDM request handler functions.
+ */
+using pldm_msg_responder_t = errlHndl_t(*)(MCTP::mctp_outbound_msgq_t, const pldm_mctp_message&);
+
+}
 
 #endif /* PLDMRESPONDER_H */

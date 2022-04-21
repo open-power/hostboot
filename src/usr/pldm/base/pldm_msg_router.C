@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,21 +44,20 @@
 // From src/usr/pldm/extern/
 #include <base.h>
 
-using namespace ERRORLOG;
+#include "pldm_msg_queues.H"
 
-extern msg_q_t g_inboundPldmRspMsgQ;  // pldm inbound response msgQ
-extern msg_q_t g_inboundPldmReqMsgQ;  // pldm inbound request msgQ
+using namespace ERRORLOG;
 
 namespace PLDM {
 
-errlHndl_t routeInboundMsg(const uint8_t* const i_msg, const size_t i_len)
+errlHndl_t routeInboundMsg(const pldm_mctp_message_view i_req)
 {
-    assert(i_msg != nullptr, "PLDM::routeInboundMsg nullptr passed for i_msg");
+    assert(i_req.pldm_msg_no_own != nullptr, "PLDM::routeInboundMsg nullptr passed for i_msg");
     errlHndl_t errl = nullptr;
 
     do {
 
-    if(i_len < sizeof(pldm_msg_hdr))
+    if (i_req.pldm_msg_size < sizeof(pldm_msg_hdr))
     {
         /*@errorlog
         * @errortype   ERRL_SEV_PREDICTIVE
@@ -72,7 +71,7 @@ errlHndl_t routeInboundMsg(const uint8_t* const i_msg, const size_t i_len)
         errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
                              MOD_ROUTE_MESSAGES,
                              RC_INVALID_LENGTH,
-                             i_len,
+                             i_req.pldm_msg_size,
                              sizeof(pldm_msg_hdr),
                              ErrlEntry::NO_SW_CALLOUT);
 
@@ -80,67 +79,29 @@ errlHndl_t routeInboundMsg(const uint8_t* const i_msg, const size_t i_len)
         break;
     }
 
-    msg_t*  l_msg = msg_allocate();
-    msg_q_t l_msgQ = nullptr;
+    Util::unipipe<pldm_mctp_message>* l_msgQ = nullptr;
 
-    const pldm_msg_hdr * l_pldm_hdr =
-            reinterpret_cast<const pldm_msg_hdr *>(i_msg);
+    const pldm_msg_hdr* const l_pldm_hdr = &i_req.pldm_msg_no_own->hdr;
 
-    // set the message type to be the pldm msg type
-    l_msg->type = l_pldm_hdr->type;
-
-    // set data[0] to be the length of the msg payload in extra_data
-    l_msg->data[0] = i_len;
-
-    // allocate a buffer which will be free'd by recipient of this msg
-    l_msg->extra_data = calloc(l_msg->data[0], 1);
-
-    memcpy(l_msg->extra_data,
-           l_pldm_hdr,
-           l_msg->data[0]);
+    // Make a copy of the incoming message so that we own the memory and can
+    // send it to the appropriate queue.
+    auto req_copy = std::make_unique<pldm_mctp_message>(i_req);
 
     // If pldm msg header tells us its a request, route to inbound
     // request queue, else route to inbound response queue
     if (l_pldm_hdr->request)
     {
-        assert(g_inboundPldmReqMsgQ != nullptr, "pldm inbound request message queue is set to nullptr");
-        l_msgQ = g_inboundPldmReqMsgQ;
+        assert(g_inboundPldmReqMsgQ.queue() != nullptr, "pldm inbound request message queue is set to nullptr");
+        l_msgQ = &g_inboundPldmReqMsgQ;
     }
     else
     {
-        assert(g_inboundPldmRspMsgQ != nullptr, "pldm inbound response message queue is set to nullptr");
-        l_msgQ = g_inboundPldmRspMsgQ;
+        assert(g_inboundPldmRspMsgQ.queue() != nullptr, "pldm inbound response message queue is set to nullptr");
+        l_msgQ = &g_inboundPldmRspMsgQ;
     }
 
     // No need to wait for a reply, just send the message on and return
-    const int rc = msg_send(l_msgQ, l_msg);
-
-    if(rc)
-    {
-        PLDM_ERR("routeInboundMsg: Failed sending a message to msg_q %p", l_msgQ);
-
-        /*@errorlog
-        * @errortype   ERRL_SEV_PREDICTIVE
-        * @moduleid    MOD_ROUTE_MESSAGES
-        * @reasoncode  RC_SEND_FAIL
-        * @userdata1   rc from msg_send
-        * @userdata2   ptr to message as uint64_t
-        * @devdesc     Error sending message to PLDM message q
-        * @custdesc    A problem occurred during the IPL of the system
-        */
-        errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
-                              MOD_ROUTE_MESSAGES,
-                              RC_SEND_FAIL,
-                              rc,
-                              reinterpret_cast<uint64_t>(l_msg),
-                              ErrlEntry::ADD_SW_CALLOUT);
-        errl->collectTrace(PLDM_COMP_NAME);
-        free(l_msg->extra_data);
-        l_msg->extra_data = nullptr;
-        msg_free(l_msg);
-        l_msg = nullptr;
-        break;
-    }
+    l_msgQ->send(move(req_copy));
 
     }while(0);
 

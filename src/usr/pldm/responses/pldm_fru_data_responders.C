@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -534,9 +534,8 @@ void FruRecordTable::loadFruRecords(Target* const i_target,
 namespace PLDM
 {
 
-errlHndl_t handleGetFruRecordTableMetadataRequest(const msg_q_t i_msgQ,
-                                                  const pldm_msg* const i_msg,
-                                                  const size_t i_payload_len)
+errlHndl_t handleGetFruRecordTableMetadataRequest(const MCTP::mctp_outbound_msgq_t i_msgQ,
+                                                  const pldm_mctp_message& i_msg)
 {
     PLDM_ENTER("handleGetFruRecordTableMetadataRequest");
 
@@ -549,9 +548,10 @@ errlHndl_t handleGetFruRecordTableMetadataRequest(const msg_q_t i_msgQ,
     const errlHndl_t errl =
         send_pldm_response<PLDM_GET_FRU_RECORD_TABLE_METADATA_RESP_BYTES>
         (i_msgQ,
+         i_msg,
          encode_get_fru_record_table_metadata_resp,
          PLDM_RESPONSE_EMPTY_PAYLOAD_SIZE,
-         i_msg->hdr.instance_id,
+         i_msg.pldm()->hdr.instance_id,
          PLDM_SUCCESS,
          SUPPORTED_FRU_VERSION_MAJOR,
          SUPPORTED_FRU_VERSION_MINOR,
@@ -571,9 +571,8 @@ errlHndl_t handleGetFruRecordTableMetadataRequest(const msg_q_t i_msgQ,
     return errl;
 }
 
-errlHndl_t handleGetFruRecordTableRequest(const msg_q_t i_msgQ,
-                                          const pldm_msg* const i_msg,
-                                          const size_t i_payload_len)
+errlHndl_t handleGetFruRecordTableRequest(const MCTP::mctp_outbound_msgq_t i_msgQ,
+                                          const pldm_mctp_message& i_msg)
 {
     PLDM_ENTER("handleGetFruRecordTableRequest");
 
@@ -587,9 +586,10 @@ errlHndl_t handleGetFruRecordTableRequest(const msg_q_t i_msgQ,
     const errlHndl_t errl =
         send_pldm_response<PLDM_GET_FRU_RECORD_TABLE_MIN_RESP_BYTES>
         (i_msgQ,
+         i_msg,
          encode_get_fru_record_table_resp_hb,
          table.recordDataByteSize(),
-         i_msg->hdr.instance_id,
+         i_msg.pldm()->hdr.instance_id,
          PLDM_SUCCESS,
          0, // No next transfer handle
          PLDM_START_AND_END,

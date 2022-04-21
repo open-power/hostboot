@@ -79,14 +79,11 @@ namespace
 
 /** Types and tables for message handler lookup **/
 
-using msg_handler = errlHndl_t(*)(msg_q_t, const pldm_msg*, size_t);
-
 struct msg_type_handler
 {
     uint8_t command;
-    msg_handler handler;
+    pldm_msg_responder_t handler;
 };
-
 
 /*** Handlers for the MSG_CONTROL_DISCOVERY (pldm_const.H - enum msgq_msg_t) type ***/
 const msg_type_handler pldm_discovery_control_handlers[] =
@@ -176,10 +173,10 @@ void addPldmMsgSection(errlHndl_t & io_errl, const void *i_msg, const size_t i_m
  *        Dispatches incoming PLDM requests according to their contents.
  *
  * @param[in] i_msgQ      MCTP message queue handle
- * @param[in] i_msg       PLDM message handle
+ * @param[in] i_msg       PLDM message
  * @return    errlHndl_t  Error if any, otherwise nullptr.
  */
-errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const void* i_msg, const size_t i_msg_len)
+errlHndl_t handle_inbound_req(MCTP::mctp_outbound_msgq_t i_msgQ, const pldm_mctp_message& i_msg)
 {
     PLDM_INF("Handling inbound PLDM request");
 
@@ -187,10 +184,10 @@ errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const void* i_msg, const siz
 
     do
     {
-        if (i_msg_len < sizeof(pldm_msg_hdr))
+        if (i_msg.pldm_data.size() < sizeof(pldm_msg_hdr))
         {
             PLDM_INF("PLDM request shorter than PLDM header size (%u < %u)",
-                     static_cast<uint32_t>(i_msg_len),
+                     static_cast<uint32_t>(i_msg.pldm_data.size()),
                      static_cast<uint32_t>(sizeof(pldm_msg_hdr)));
 
             /*@
@@ -205,7 +202,7 @@ errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const void* i_msg, const siz
             errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                  MOD_HANDLE_INBOUND_REQ,
                                  RC_INVALID_LENGTH,
-                                 i_msg_len,
+                                 i_msg.pldm_data.size(),
                                  sizeof(pldm_msg_hdr),
                                  ErrlEntry::NO_SW_CALLOUT);
 
@@ -213,19 +210,18 @@ errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const void* i_msg, const siz
             break;
         }
 
-        const pldm_msg* const pldm_message = reinterpret_cast<const pldm_msg* const>(i_msg);
+        const pldm_msg* const pldm_message = i_msg.pldm();
 
         // Will contain first 8 bytes of msg (first 3 are just header)
         uint64_t response_hdr_data = 0;
-        if (i_msg_len >= sizeof(response_hdr_data))
+        if (i_msg.pldm_data.size() >= sizeof(response_hdr_data))
         {
-            memcpy(&response_hdr_data, i_msg, sizeof(response_hdr_data));
+            memcpy(&response_hdr_data, pldm_message, sizeof(response_hdr_data));
         }
         else
         {
-            memcpy(&response_hdr_data, i_msg, i_msg_len);
+            memcpy(&response_hdr_data, pldm_message, i_msg.pldm_data.size());
         }
-        const size_t payload_len = i_msg_len - sizeof(pldm_msg_hdr);
 
         /* Lookup the message category in the first-level dispatch table to get
          * the second-level dispatch table */
@@ -243,7 +239,7 @@ errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const void* i_msg, const siz
             PLDM_INF("handle_inbound_req PLDM_ERROR_NOT_READY RC_INVALID_MSG_CATEGORY=%d",
                      category);
 
-            send_cc_only_response(i_msgQ, pldm_message, PLDM_ERROR_NOT_READY);
+            send_cc_only_response(i_msgQ, i_msg, PLDM_ERROR_NOT_READY);
 
             /*@
              * @errortype  ERRL_SEV_INFORMATIONAL
@@ -263,7 +259,7 @@ errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const void* i_msg, const siz
 
             addBmcErrorCallouts(errl);
             // Add PLDM msg to error for debug
-            addPldmMsgSection(errl, i_msg, i_msg_len);
+            addPldmMsgSection(errl, pldm_message, i_msg.pldm_data.size());
             break;
         }
 
@@ -280,7 +276,7 @@ errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const void* i_msg, const siz
                 PLDM_INF("Failed to unpack PLDM request header (rc = %d)",
                          rc);
 
-                send_cc_only_response(i_msgQ, pldm_message, PLDM_ERROR_INVALID_DATA);
+                send_cc_only_response(i_msgQ, i_msg, PLDM_ERROR_INVALID_DATA);
 
                 /*@
                  * @errortype  ERRL_SEV_UNRECOVERABLE
@@ -300,7 +296,7 @@ errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const void* i_msg, const siz
 
                 addBmcErrorCallouts(errl);
                 // Add PLDM msg to error for debug
-                addPldmMsgSection(errl, i_msg, i_msg_len);
+                addPldmMsgSection(errl, pldm_message, i_msg.pldm_data.size());
                 break;
             }
         }
@@ -312,7 +308,7 @@ errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const void* i_msg, const siz
                      PLDM_REQUEST,
                      header_info.msg_type);
 
-            send_cc_only_response(i_msgQ, pldm_message, PLDM_ERROR);
+            send_cc_only_response(i_msgQ, i_msg, PLDM_ERROR);
 
             /*@
              * @errortype  ERRL_SEV_UNRECOVERABLE
@@ -330,7 +326,7 @@ errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const void* i_msg, const siz
                                  response_hdr_data,
                                  ErrlEntry::ADD_SW_CALLOUT);
             // Add PLDM msg to error for debug
-            addPldmMsgSection(errl, i_msg, i_msg_len);
+            addPldmMsgSection(errl, pldm_message, i_msg.pldm_data.size());
             break;
         }
 
@@ -350,7 +346,7 @@ errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const void* i_msg, const siz
             PLDM_INF("handle_inbound_req PLDM_ERROR_NOT_READY RC_INVALID_COMMAND category=%d pldm_command=%d",
                      category, pldm_command);
 
-            send_cc_only_response(i_msgQ, pldm_message, PLDM_ERROR_NOT_READY);
+            send_cc_only_response(i_msgQ, i_msg, PLDM_ERROR_NOT_READY);
 
             /*@
              * @errortype  ERRL_SEV_INFORMATIONAL
@@ -369,13 +365,13 @@ errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const void* i_msg, const siz
                                  ErrlEntry::NO_SW_CALLOUT);
             addBmcErrorCallouts(errl);
             // Add PLDM msg to error for debug
-            addPldmMsgSection(errl, i_msg, i_msg_len);
+            addPldmMsgSection(errl, pldm_message, i_msg.pldm_data.size());
             break;
         }
 
         if(!Util::isTargetingLoaded())
         {
-            send_cc_only_response(i_msgQ, pldm_message, PLDM_ERROR_NOT_READY);
+            send_cc_only_response(i_msgQ, i_msg, PLDM_ERROR_NOT_READY);
             PLDM_INF("handle_inbound_req PLDM_ERROR_NOT_READY IGNORING "
                      "category=%d pldm_command=%d, TARGETING -NOT- loaded, "
                      "probably stray from previous boot or intended for PHYP at runtime",
@@ -398,7 +394,7 @@ errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const void* i_msg, const siz
                                  ErrlEntry::NO_SW_CALLOUT);
             addBmcErrorCallouts(errl);
             // Add PLDM msg to error for debug
-            addPldmMsgSection(errl, i_msg, i_msg_len);
+            addPldmMsgSection(errl, pldm_message, i_msg.pldm_data.size());
             break;
         }
 
@@ -406,7 +402,7 @@ errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const void* i_msg, const siz
         PLDM_INF("Invoking handler for category %d, message type %d, instance %d",
                  category, pldm_command, header_info.instance);
 
-        errl = handler->handler(i_msgQ, pldm_message, payload_len);
+        errl = handler->handler(i_msgQ, i_msg);
     } while (false);
 
     return errl;
@@ -417,23 +413,15 @@ errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const void* i_msg, const siz
 #ifndef __HOSTBOOT_RUNTIME
 /* pldmResponder class implementation */
 
-extern msg_q_t g_inboundPldmReqMsgQ;  // pldm inbound request msgQ
-
 extern const char* VFS_ROOT_MSG_MCTP_OUT;
 
 void pldmResponder::handle_inbound_req_messages(void)
 {
     while(1)
     {
-        const std::unique_ptr<msg_t, decltype(&msg_free)> msg
-        {
-            msg_wait(g_inboundPldmReqMsgQ),
-            msg_free
-        };
+        const auto msg = g_inboundPldmReqMsgQ.wait();
 
-        errlHndl_t errl = handle_inbound_req(iv_mctpOutboundMsgQ,
-                                             msg->extra_data,
-                                             msg->data[0]);
+        errlHndl_t errl = handle_inbound_req(iv_mctpOutboundMsgQ, *msg.get());
 
         if (errl)
         {
@@ -450,9 +438,9 @@ void pldmResponder::init(void)
 
     // Resolve the pointer to the MCTP outbound message queue
     // MCTP gets initialized first so its safe to assume the queue is initialized
-    iv_mctpOutboundMsgQ = msg_q_resolve(VFS_ROOT_MSG_MCTP_OUT);
+    iv_mctpOutboundMsgQ.queue(msg_q_resolve(VFS_ROOT_MSG_MCTP_OUT));
 
-    assert(iv_mctpOutboundMsgQ != nullptr,
+    assert(iv_mctpOutboundMsgQ.queue() != nullptr,
            "pldmResponder: VFS_ROOT_MSG_MCTP_OUT resolved to be nullptr, we "
            "expected it to be registered during mctp init");
 
@@ -474,14 +462,11 @@ errlHndl_t PLDM::handle_next_pldm_request(void)
     // HBRT originated request/response in the request handler, if another BMC
     // request comes in, it will not be cleared after the request handler
     // returns.
-    std::vector<uint8_t> next_pldm_request;
-    PLDM::get_and_clear_next_request(next_pldm_request);
-    assert (!next_pldm_request.empty(), "SW bug! we should never attempt to handle next pldm request if there is not one");
+    auto next_pldm_request = PLDM::get_and_clear_next_request();
+    assert(!next_pldm_request.empty(),
+           "SW bug! we should never attempt to handle next pldm request if there is not one");
 
-    errlHndl_t errl = handle_inbound_req(nullptr,
-                                         next_pldm_request.data(),
-                                         next_pldm_request.size());
-    return errl;
+    return handle_inbound_req({ nullptr }, std::move(next_pldm_request));
 }
 
 #endif

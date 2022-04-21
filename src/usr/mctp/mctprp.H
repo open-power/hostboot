@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,11 +26,12 @@
 #define MCTPRP_H
 
 // System Headers
-#include <sys/msg.h>
 #include <sys/sync.h>
+
 // Userspace Headers
 #include <errl/errlentry.H>
 #include <mctp/mctp_const.H>
+#include <mctp/mctp_message_types.H>
 
 class MctpRP
 {
@@ -76,21 +77,17 @@ class MctpRP
 
       // Constructor
       MctpRP(void);
-  private:
 
-      // Private Member Functions
+      MctpRP& operator=(const MctpRP&) = delete;
+      MctpRP(const MctpRP&) = delete;
+  private:
       void _init(void);       // See public "init" function above
 
-      // Private Member Variables
-      struct mctp_binding_astlpc *iv_astlpc;   // ptr to astlpc binding struct
-      struct mctp *iv_mctp;                    // ptr to struct that has business logic
-      msg_q_t     iv_outboundMsgQ;             // MCTP outbound messages
-      mutex_t     iv_mutex;                    // Mutex to protect calls to functions that access
-                                               // the tx_queue and/or write the IDR register
-
-      // Disallow copying this class.
-      MctpRP& operator=(const MctpRP&);
-      MctpRP(const MctpRP&);
+      MCTP::mctp_outbound_msgq_t iv_outboundMsgQ; // Queue for MCTP outbound messages.
+      struct mctp_binding_astlpc *iv_astlpc;      // ptr to astlpc binding struct.
+      struct mctp *iv_mctp;                       // ptr to struct that has business logic.
+      mutex_t iv_mutex;                           // Mutex to protect calls to functions that access.
+                                                  // the tx_queue and/or write the IDR register.
 };
 
 #endif //MCTP_H

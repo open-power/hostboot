@@ -770,20 +770,18 @@ void PdrManager::addTerminusLocatorPDR()
                  PDR_IS_NOT_REMOTE);
 }
 
-errlHndl_t PdrManager::setStateEffecterStates(const msg_q_t i_msgQ,
-                                              const pldm_msg* const i_msg,
-                                              const size_t i_payload_len,
+errlHndl_t PdrManager::setStateEffecterStates(const MCTP::mctp_outbound_msgq_t i_msgQ,
+                                              const pldm_mctp_message& i_msg,
                                               const pldm_set_state_effecter_states_req* const i_req)
 {
-    return handleStateQueryRequest(STATE_QUERY_EFFECTER, i_req->effecter_id, i_msgQ, i_msg, i_payload_len, i_req);
+    return handleStateQueryRequest(STATE_QUERY_EFFECTER, i_req->effecter_id, i_msgQ, i_msg, i_req);
 }
 
-errlHndl_t PdrManager::getStateSensorReadings(const msg_q_t i_msgQ,
-                                              const pldm_msg* const i_msg,
-                                              const size_t i_payload_len,
+errlHndl_t PdrManager::getStateSensorReadings(const MCTP::mctp_outbound_msgq_t i_msgQ,
+                                              const pldm_mctp_message& i_msg,
                                               const pldm_get_state_sensor_readings_req* const i_req)
 {
-    return handleStateQueryRequest(STATE_QUERY_SENSOR, i_req->sensor_id, i_msgQ, i_msg, i_payload_len, i_req);
+    return handleStateQueryRequest(STATE_QUERY_SENSOR, i_req->sensor_id, i_msgQ, i_msg, i_req);
 }
 
 namespace
@@ -832,10 +830,9 @@ state_query_handler_t get_state_handler(PdrManager::state_query_handler_id_t i_i
 }
 
 errlHndl_t invoke_state_effecter_handler(const PdrManager::state_query_handler_id_t i_handler_id,
-                                         Target* const i_target,
-                                         const msg_q_t i_msgq,
-                                         const pldm_msg* const i_msg,
-                                         const size_t i_msgsize,
+                                         TARGETING::Target* const i_target,
+                                         const MCTP::mctp_outbound_msgq_t i_msgq,
+                                         const pldm_mctp_message& i_msg,
                                          const pldm_set_state_effecter_states_req& i_req,
                                          const uint64_t i_userdata)
 {
@@ -848,8 +845,7 @@ errlHndl_t invoke_state_effecter_handler(const PdrManager::state_query_handler_i
     state_effecter_callback_args args;
     args.i_target = i_target;
     args.i_msgQ = i_msgq;
-    args.i_msg = i_msg;
-    args.i_payload_len = i_msgsize;
+    args.i_msg = &i_msg;
     args.i_userdata = i_userdata;
     args.i_req = &i_req;
 
@@ -857,10 +853,9 @@ errlHndl_t invoke_state_effecter_handler(const PdrManager::state_query_handler_i
 }
 
 errlHndl_t invoke_state_sensor_handler(const PdrManager::state_query_handler_id_t i_handler_id,
-                                       Target* const i_target,
-                                       const msg_q_t i_msgq,
-                                       const pldm_msg* const i_msg,
-                                       const size_t i_msgsize,
+                                       TARGETING::Target* const i_target,
+                                       const MCTP::mctp_outbound_msgq_t i_msgq,
+                                       const pldm_mctp_message& i_msg,
                                        const pldm_get_state_sensor_readings_req& i_req,
                                        const uint64_t i_userdata)
 {
@@ -873,8 +868,7 @@ errlHndl_t invoke_state_sensor_handler(const PdrManager::state_query_handler_id_
     state_sensor_callback_args args;
     args.i_target = i_target;
     args.i_msgQ = i_msgq;
-    args.i_msg = i_msg;
-    args.i_payload_len = i_msgsize;
+    args.i_msg = &i_msg;
     args.i_userdata = i_userdata;
     args.i_req = &i_req;
 
@@ -885,9 +879,8 @@ errlHndl_t invoke_state_sensor_handler(const PdrManager::state_query_handler_id_
 
 errlHndl_t PdrManager::handleStateQueryRequest(const state_query_type_t i_querytype,
                                                const state_query_id_t i_query_id,
-                                               const msg_q_t i_msgQ,
-                                               const pldm_msg* const i_msg,
-                                               const size_t i_payload_len,
+                                               const MCTP::mctp_outbound_msgq_t i_msgQ,
+                                               const pldm_mctp_message& i_msg,
                                                const void* const i_req)
 {
     PLDM_INF(ENTER_MRK"handleStateQueryRequest: query type: %d, query ID: %d", i_querytype, i_query_id);
@@ -981,7 +974,7 @@ errlHndl_t PdrManager::handleStateQueryRequest(const state_query_type_t i_queryt
     if (i_querytype == STATE_QUERY_EFFECTER)
     {
         errl = invoke_state_effecter_handler(static_cast<state_query_handler_id_t>(handler_function_id),
-                                             handler_target, i_msgQ, i_msg, i_payload_len,
+                                             handler_target, i_msgQ, i_msg,
                                              *static_cast<const pldm_set_state_effecter_states_req*>(i_req),
                                              callback_userdata);
         break;
@@ -989,7 +982,7 @@ errlHndl_t PdrManager::handleStateQueryRequest(const state_query_type_t i_queryt
     else if (i_querytype == STATE_QUERY_SENSOR)
     {
         errl = invoke_state_sensor_handler(static_cast<state_query_handler_id_t>(handler_function_id),
-                                           handler_target, i_msgQ, i_msg, i_payload_len,
+                                           handler_target, i_msgQ, i_msg,
                                            *static_cast<const pldm_get_state_sensor_readings_req*>(i_req),
                                            callback_userdata);
         break;

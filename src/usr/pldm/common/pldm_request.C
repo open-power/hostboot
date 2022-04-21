@@ -98,7 +98,7 @@ errlHndl_t check_pldm_response(const pldm_msg* const i_pldm_request,
 
         if (!response.empty())
         {
-            const auto response_msg = reinterpret_cast<const pldm_msg*>(response.data());
+            const auto response_msg = response.pldm();
 
             // If we get a response to some other request, ignore the response and
             // keep looking for the instance ID we were told to expect.
@@ -120,7 +120,7 @@ timespec_t operator-(timespec_t lhs, timespec_t rhs)
     return { lhs.tv_sec - rhs.tv_sec, lhs.tv_nsec - rhs.tv_nsec };
 }
 
-errlHndl_t PLDM::sendrecv_pldm_request_impl(const std::vector<uint8_t>& i_msg,
+errlHndl_t PLDM::sendrecv_pldm_request_impl(MCTP::outgoing_mctp_msg* const msgbuf,
                                             std::vector<uint8_t>& o_response_bytes)
 {
     errlHndl_t errl = nullptr;
@@ -130,11 +130,9 @@ errlHndl_t PLDM::sendrecv_pldm_request_impl(const std::vector<uint8_t>& i_msg,
 
     do
     {
+        const auto pldm_request = reinterpret_cast<pldm_msg*>(msgbuf->data);
 
-        const auto msgbuf = reinterpret_cast<const mctp_pldm_msg<0>*>(i_msg.data());
-        const pldm_msg* const pldm_request = &msgbuf->pldm_message;
-
-        const_cast<pldm_msg*>(pldm_request)->hdr.instance_id = instance_id;
+        pldm_request->hdr.instance_id = instance_id;
 
         // This function needs to be reentrant; do this now in case the below
         // code causes a PLDM request to be sent.
@@ -147,9 +145,9 @@ errlHndl_t PLDM::sendrecv_pldm_request_impl(const std::vector<uint8_t>& i_msg,
         // Try to send the PLDM message, retry if it times out. The
         // difference between a retry and a real message send is that a retry
         // uses the same sequence ID as any retried messages.
-        const int retries = 9;
+        const int tries = 9;
 
-        for (int attempt = 0; PLDM::get_next_response().empty() && attempt < retries; ++attempt)
+        for (int attempt = 0; PLDM::get_next_response().empty() && attempt < tries; ++attempt)
         {
             if (errl)
             { // ignore errors from previous tries if we're going to try again
@@ -159,7 +157,7 @@ errlHndl_t PLDM::sendrecv_pldm_request_impl(const std::vector<uint8_t>& i_msg,
                 errl = nullptr;
             }
 
-            const int return_code = MCTP::send_message(i_msg);
+            const int return_code = MCTP::send_message(msgbuf);
 
             if (return_code)
             {
@@ -221,9 +219,9 @@ errlHndl_t PLDM::sendrecv_pldm_request_impl(const std::vector<uint8_t>& i_msg,
             break;
         }
 
-        o_response_bytes = move(PLDM::get_next_response());
+        const auto response = PLDM::get_and_clear_next_response();
 
-        PLDM::clear_next_response();
+        o_response_bytes = move(response.pldm_data);
 
         const size_t MIN_RESP_LEN = sizeof(pldm_msg_hdr) + 1;
         if (o_response_bytes.size() < MIN_RESP_LEN)
@@ -254,66 +252,33 @@ errlHndl_t PLDM::sendrecv_pldm_request_impl(const std::vector<uint8_t>& i_msg,
 
 #else
 
-errlHndl_t PLDM::sendrecv_pldm_request_impl(const msg_q_t i_msgQ,
-                                            const std::vector<uint8_t>& i_msg,
-                                            std::unique_ptr<uint8_t, decltype(&free)>& o_response,
-                                            size_t& o_response_length)
+errlHndl_t PLDM::sendrecv_pldm_request_impl(pldm_outbound_req_msgq_t i_msgQ,
+                                            std::unique_ptr<MCTP::outgoing_mctp_msg> i_msg,
+                                            std::vector<uint8_t>& o_response_pldm_body)
 {
     errlHndl_t errl = nullptr;
 
     do
     {
-        const std::unique_ptr<msg_t, decltype(&msg_free)> msg { msg_allocate(), msg_free };
-        msg->data[0] = i_msg.size();
-        msg->extra_data = const_cast<uint8_t*>(i_msg.data());
-
         // Place message on the queue and wait for a response
-        const int return_code = msg_sendrecv(i_msgQ, msg.get());
+        const auto response = i_msgQ.sendrecv(move(i_msg));
 
-        const auto msgbuf = reinterpret_cast<const mctp_pldm_msg<0>*>(i_msg.data());
-        const pldm_msg* const pldm_request = &(msgbuf->pldm_message);
-
-        if (return_code)
+        if (response->error)
         {
-            const uint64_t request_hdr_data = pldmHdrToUint64(*pldm_request);
-            /*@
-             * @moduleid   MOD_MAKE_PLDM_REQUEST
-             * @reasoncode RC_SENDRECV_FAIL
-             * @userdata1  Return code returned by msg_sendrecv
-             * @userdata2  Header of pldm request
-             * @devdesc    Software problem, failed to decode PLDM message
-             * @custdesc   A software error occurred during system boot
-             */
-            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                 MOD_MAKE_PLDM_REQUEST,
-                                 RC_SENDRECV_FAIL,
-                                 return_code,
-                                 request_hdr_data,
-                                 ErrlEntry::ADD_SW_CALLOUT);
-
-            PLDM_ERR("sendrecv_pldm_request_impl: msg_sendrecv failed (rc=%d, PLID=0x%08x)",
-                     return_code, ERRL_GETPLID_SAFE(errl));
-
-            errl->collectTrace(PLDM_COMP_NAME);
-            break;
-        }
-        else if (msg->data[1] != REQ_SUCCESS)
-        {
-            errl = reinterpret_cast<errlHndl_t>(msg->extra_data);
-            msg->extra_data = nullptr;
+            errl = response->error;
+            response->error = nullptr; // transfer ownership
             break;
         }
 
         // we own the memory pointed to by msg->extra_data
-        o_response.reset(static_cast<uint8_t*>(msg->extra_data));
-        o_response_length = msg->data[0];
+        o_response_pldm_body = move(response->response.pldm_data);
 
         const size_t MIN_RESP_LEN = sizeof(pldm_msg_hdr) + 1;
-        if (o_response_length < MIN_RESP_LEN)
+        if (o_response_pldm_body.size() < MIN_RESP_LEN)
         {
-            auto hdr64 = pldmHdrToUint64(*reinterpret_cast<pldm_msg*>(o_response.get()));
+            auto hdr64 = pldmHdrToUint64(*reinterpret_cast<pldm_msg*>(o_response_pldm_body.data()));
             PLDM_ERR("The length of the response to request (0x%lx) was %d bytes when at least %d bytes was expected",
-                     hdr64, o_response_length, MIN_RESP_LEN);
+                     hdr64, o_response_pldm_body.size(), MIN_RESP_LEN);
 
             /*@
              * @moduleid   MOD_MAKE_PLDM_REQUEST
@@ -326,7 +291,7 @@ errlHndl_t PLDM::sendrecv_pldm_request_impl(const msg_q_t i_msgQ,
             errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                  MOD_MAKE_PLDM_REQUEST,
                                  RC_INVALID_LENGTH,
-                                 o_response_length,
+                                 o_response_pldm_body.size(),
                                  hdr64);
             addBmcErrorCallouts(errl);
             break;

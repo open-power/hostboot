@@ -34,6 +34,8 @@
 
 #include <sys/msg.h>        // msg_q_t
 #include <errl/errlentry.H> // errlHndl_t
+#include <pldm/pldmif.H>
+#include <mctp/mctp_message_types.H>
 
 struct pldm_msg;
 
@@ -53,12 +55,10 @@ namespace PLDM
  *
  * @param[in] i_msgQ          Handle to the MCTP outbound message queue
  * @param[in] i_msg           getPLDMVersion request message object
- * @param[in] i_payload_len   Length of payload in i_msg
  * @return    errlHndl_t      Error if any, otherwise nullptr.
  */
-errlHndl_t handleGetPldmVersionRequest( msg_q_t i_msgQ,
-                                        const pldm_msg* i_msg,
-                                        size_t i_payload_len);
+errlHndl_t handleGetPldmVersionRequest(MCTP::mctp_outbound_msgq_t i_msgQ,
+                                       const pldm_mctp_message& i_msg);
 
 /* @brief handleUnsupportedCommandRequest
  *
@@ -66,12 +66,10 @@ errlHndl_t handleGetPldmVersionRequest( msg_q_t i_msgQ,
  *
  * @param[in] i_msgQ          Handle to the MCTP outbound message queue
  * @param[in] i_msg           Request message object
- * @param[in] i_payload_len   Length of payload in i_msg
  * @return    errlHndl_t      Error if any, otherwise nullptr.
  */
-errlHndl_t handleUnsupportedCommandRequest( msg_q_t i_msgQ,
-                                            const pldm_msg* i_msg,
-                                            size_t i_payload_len);
+errlHndl_t handleUnsupportedCommandRequest(MCTP::mctp_outbound_msgq_t i_msgQ,
+                                           const pldm_mctp_message& i_msg);
 
 } // namespace PLDM
 

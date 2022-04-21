@@ -347,14 +347,12 @@ public:
      *
      * @param[in] i_msgQ         Handle to the PLDM message queue.
      * @param[in] i_msg          Pointer to the PLDM message.
-     * @param[in] i_payload_len  Length of the PLDM message.
      * @param[in] i_req          Decoded PLDM request.
      * @return errlHndl_t        Error if any, otherwise nullptr.
      * @note                     Locks the PDR repository.
      */
-    errlHndl_t setStateEffecterStates(msg_q_t i_msgQ,
-                                      const pldm_msg* i_msg,
-                                      size_t i_payload_len,
+    errlHndl_t setStateEffecterStates(MCTP::mctp_outbound_msgq_t i_msgQ,
+                                      const pldm_mctp_message& i_msg,
                                       const pldm_set_state_effecter_states_req* i_req);
 
     /* @brief  Handle a GetStateSensorReadings command and send a response.
@@ -364,14 +362,12 @@ public:
      *
      * @param[in] i_msgQ         Handle to the PLDM message queue.
      * @param[in] i_msg          Pointer to the PLDM message.
-     * @param[in] i_payload_len  Length of the PLDM message.
      * @param[in] i_req          Decoded PLDM request.
      * @return errlHndl_t        Error if any, otherwise nullptr.
      * @note                     Locks the PDR repository.
      */
-    errlHndl_t getStateSensorReadings(msg_q_t i_msgQ,
-                                      const pldm_msg* i_msg,
-                                      size_t i_payload_len,
+    errlHndl_t getStateSensorReadings(MCTP::mctp_outbound_msgq_t i_msgQ,
+                                      const pldm_mctp_message& i_msg,
                                       const pldm_get_state_sensor_readings_req* i_req);
 
     /* @brief  Add a FRU Record Set PDR to the repository.
@@ -615,7 +611,6 @@ private:
      * @param[in] i_query_id     Sensor/effecter ID.
      * @param[in] i_msgQ         Handle to the PLDM message queue.
      * @param[in] i_msg          PLDM message.
-     * @param[in] i_payload_len  PLDM message length.
      * @param[in] i_req          Decoded PLDM message. Must point to a pldm_get_state_sensor_readings_req
      *                           if i_querytype is STATE_QUERY_SENSOR, or pldm_set_state_effecter_states_req
      *                           if i_querytype is STATE_QUERY_EFFECTER.
@@ -623,9 +618,8 @@ private:
      */
     errlHndl_t handleStateQueryRequest(state_query_type_t i_querytype,
                                        state_query_id_t i_query_id,
-                                       msg_q_t i_msgQ,
-                                       const pldm_msg* i_msg,
-                                       size_t i_payload_len,
+                                       MCTP::mctp_outbound_msgq_t i_msgQ,
+                                       const pldm_mctp_message& i_msg,
                                        const void* i_req);
 
     // For testcases

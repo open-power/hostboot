@@ -42,7 +42,7 @@ class MctpRP
       friend class Singleton<MctpRP>;
       /**
       * @brief Send a MCTP payload using the mctp binding
-      * @param[in] i_mctp_payload vector of bytes that contains mctp
+      * @param[in] i_msg          Message that contains mctp
       *                           payload that needs to be sent.
       *                           See DSP0236 v1.0.0 Figure 4
       *
@@ -50,7 +50,7 @@ class MctpRP
       *                           interface.h or from libmctp_rc.h
       *                           (there should be no overlap)
       */
-      int send_message(const MCTP::byte_vector_t& i_mctp_payload);
+      int send_message(const MCTP::outgoing_mctp_msg* i_msg);
 
       /**
       * @brief Perform MCTP_RECEIVE fw_request to get the next MCTP packet

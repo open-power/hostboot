@@ -319,7 +319,7 @@ void* handleInvokeDceRequest_task(void*)
 errlHndl_t handleInvokeDceRequest(const state_effecter_callback_args& i_args)
 {
     CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "DCE: Responding to PLDM request");
-    send_cc_only_response(i_args.i_msgQ, i_args.i_msg, PLDM_SUCCESS);
+    send_cc_only_response(i_args.i_msgQ, *i_args.i_msg, PLDM_SUCCESS);
 
 #ifndef __HOSTBOOT_RUNTIME
     if (SECUREBOOT::enabled() == false)

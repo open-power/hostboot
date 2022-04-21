@@ -34,6 +34,8 @@
 
 #include <sys/msg.h>
 #include <errl/errlentry.H>
+#include <mctp/mctp_message_types.H>
+#include <pldm/pldmif.H>
 
 struct pldm_msg;
 struct pldm_get_state_sensor_readings_req;
@@ -49,10 +51,9 @@ namespace PLDM
  *
  * @param[in] i_msgQ         Handle to the MCTP outbound response message queue
  * @param[in] i_msg          getPDR request message object
- * @param[in] i_payload_len  Length of PLDM message payload
  * @return    errlHndl_t     Error if any, otherwise nullptr.
  */
-errlHndl_t handleGetPdrRequest(msg_q_t i_msgQ, const pldm_msg* i_msg, size_t i_payload_len);
+errlHndl_t handleGetPdrRequest(MCTP::mctp_outbound_msgq_t i_msgQ, const pldm_mctp_message& i_msg);
 
 /* @brief handlePdrRepoChangeEventRequest
  *
@@ -61,12 +62,10 @@ errlHndl_t handleGetPdrRequest(msg_q_t i_msgQ, const pldm_msg* i_msg, size_t i_p
  *
  * @param[in] i_msgQ         Handle to MCTP outbound request message queue
  * @param[in] i_msg          The PLDM message received
- * @param[in] i_payload_len  Length of PLDM message payload
  * @return errlHndl_t        Error if any, otherwise nullptr.
  */
-errlHndl_t handlePdrRepoChangeEventRequest(msg_q_t i_msgQ,
-                                           const pldm_msg* i_msg,
-                                           size_t i_payload_len);
+errlHndl_t handlePdrRepoChangeEventRequest(MCTP::mctp_outbound_msgq_t i_msgQ,
+                                           const pldm_mctp_message& i_msg);
 
 /* @brief handleSetStateEffecterStatesRequest
  *
@@ -75,24 +74,20 @@ errlHndl_t handlePdrRepoChangeEventRequest(msg_q_t i_msgQ,
  *
  * @param[in] i_msgQ         Handle to MCTP outbound request message queue
  * @param[in] i_msg          The PLDM message received
- * @param[in] i_payload_len  Length of PLDM message payload
  * @return errlHndl_t        Error if any, otherwise nullptr.
  */
-errlHndl_t handleSetStateEffecterStatesRequest(msg_q_t i_msgQ,
-                                               const pldm_msg* i_msg,
-                                               size_t i_payload_len);
+errlHndl_t handleSetStateEffecterStatesRequest(MCTP::mctp_outbound_msgq_t i_msgQ,
+                                               const pldm_mctp_message& i_msg);
 
 /* @brief Handler for Get State Sensor Readings requests. (See DSP0248 v1.2.0
  *        section 20.2 for details.)
  *
  * @param[in] i_msgQ         Handle to MCTP outbound request message queue
  * @param[in] i_msg          The PLDM message received
- * @param[in] i_payload_len  Length of PLDM message payload
  * @return errlHndl_t        Error if any, otherwise nullptr.
  */
-errlHndl_t handleGetStateSensorReadingsRequest(msg_q_t i_msgQ,
-                                               const pldm_msg* i_msg,
-                                               size_t i_payload_len);
+errlHndl_t handleGetStateSensorReadingsRequest(MCTP::mctp_outbound_msgq_t i_msgQ,
+                                               const pldm_mctp_message& i_msg);
 
 /* @brief Common arguments to all state sensor/effecter handler callbacks.
  */
@@ -101,9 +96,9 @@ struct state_query_handler_callback_args
     // Target that the effecter/sensor is related to.
     TARGETING::Target* i_target = nullptr;
     // The PLDM message queue.
-    msg_q_t i_msgQ = nullptr;
-    // The raw PLDM message.
-    const pldm_msg* i_msg = nullptr;
+    MCTP::mctp_outbound_msgq_t i_msgQ = nullptr;
+    // The PLDM message.
+    const pldm_mctp_message* i_msg = nullptr;
     // The payload length of the raw PLDM message.
     size_t i_payload_len = 0;
     // Arbitrary data for the callback.
@@ -182,12 +177,10 @@ errlHndl_t handleSbeHresetRequest(const state_effecter_callback_args& i_args);
  *
  * @param[in] i_msgQ         Handle to MCTP outbound request message queue
  * @param[in] i_msg          The PLDM message received
- * @param[in] i_payload_len  Length of PLDM message payload
  * @return errlHndl_t        Error if any, otherwise nullptr.
  */
-errlHndl_t handleSetEventReceiverRequest(msg_q_t i_msgQ,
-                                         const pldm_msg* i_msg,
-                                         size_t i_payload_len);
+errlHndl_t handleSetEventReceiverRequest(MCTP::mctp_outbound_msgq_t i_msgQ,
+                                         const pldm_mctp_message& i_msg);
 
 /* @brief Handler for Set State Effecter requests for DCE invocation.
  *

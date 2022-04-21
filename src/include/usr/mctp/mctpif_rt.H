@@ -47,20 +47,17 @@ namespace MCTP
     * @brief Packetize the payload passed to us into MCTP packets and send
     *        them to the BMC using the hypervsior as a virtual bridge
     *
-    * @param[in] i_mctp_payload  Byte vector containing the complete MCTP
+    * @param[in] i_msg           Byte vector containing the complete MCTP
     *                            message payload. If this message exceeds the
     *                            max MCTP packet size, the MCTP core logic will
-    *                            packetize the message. It is expected that the
-    *                            first byte of this buffer is set to the
-    *                            correct message type prior to being passed to
-    *                            this function
+    *                            packetize the message.
     *
     * @return int                Return Code which will either be from
     *                            interface.h or from libmctp_rc.h
     *                            (there should be no overlap)
     *
     */
-    int send_message(const byte_vector_t& i_mctp_payload);
+    int send_message(const outgoing_mctp_msg* i_msg);
 }
 
 #endif

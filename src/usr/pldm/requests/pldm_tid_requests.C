@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021                             */
+/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,16 +62,10 @@ errlHndl_t getTID()
 
     do {
     std::vector<uint8_t>l_responseBytes;
-#ifndef __HOSTBOOT_RUNTIME
-    const msg_q_t l_msgQ = msg_q_resolve(VFS_ROOT_MSG_PLDM_REQ_OUT);
-    assert(l_msgQ, "getTID: PLDM message queue not found!");
-#else
-    const msg_q_t l_msgQ = nullptr;
-#endif
 
     // Get TID doesn't have any payload, so effectively it's 0 size
     l_errl = sendrecv_pldm_request<0>(l_responseBytes,
-                                      l_msgQ,
+                                      g_outboundPldmReqMsgQ,
                                       encode_get_tid_req_hb,
                                       DEFAULT_INSTANCE_ID);
     if(l_errl)

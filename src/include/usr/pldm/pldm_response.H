@@ -98,17 +98,20 @@ inline const size_t replace_payload_length_placeholder(const size_t i_payload_le
  *        Represents an MCTP IPC message structure for a PLDM response message
  *        with a fixed-size payload header (and optional variable-size payload
  *        body, which is allocated "after the end" of the struct).
+ *
+ *        This structure MUST be a Plain-Old Data (POD) type because of the way
+ *        it is allocated and deallocated.
  */
 template<size_t PayloadHeaderSize>
 struct pldm_response_t
 {
-    decltype(MCTP::MCTP_MSG_TYPE_PLDM) mctp_msg_type = 0;
+    MCTP::outgoing_mctp_msg mctp_msg;
 
     pldm_msg pldm_message { };
 
     // Any variable-length information will be positioned after this member
     uint8_t pldm_payload[PayloadHeaderSize - sizeof(pldm_msg::payload)];
-};
+} PACKED;
 
 // Special value for send_pldm_response indicating an empty variable-size
 // payload portion.
@@ -119,13 +122,15 @@ const size_t PLDM_RESPONSE_EMPTY_PAYLOAD_SIZE = 0;
  *        Encodes a PLDM response message and sends it on the given message queue.
  *
  * @param[in] i_msgQ            Handle to outgoing MCTP message queue
+ * @param[in] i_msg             The message that is being responded to
  * @param[in] i_encoder         PLDM message encoder function
  * @param[in] i_payload_size    Size of message payload
  * @param[in] i_args...         Arguments to i_encoder
  * @return    errlHndl_t        Error if any, otherwise nullptr.
  */
 template<size_t PayloadHeaderSize, typename Encoder, typename... Args>
-errlHndl_t send_pldm_response(const msg_q_t i_msgQ,
+errlHndl_t send_pldm_response(const MCTP::mctp_outbound_msgq_t i_msgQ,
+                              const pldm_mctp_message& i_msg,
                               const Encoder i_encoder,
                               const size_t i_payload_size,
                               Args... i_args)
@@ -137,22 +142,25 @@ errlHndl_t send_pldm_response(const msg_q_t i_msgQ,
     // accidental buffer overflows from the message encoder functions.
     const uint64_t buffer_canary = 0x0BADF00DDEADBEEFull;
 
-    const size_t mctp_message_size =
-        sizeof(response_t)
-        + i_payload_size;
+    const size_t mctp_message_size = sizeof(response_t) + i_payload_size;
 
     // Allocate enough space for the message and the canary, then store the
     // canary at the end of the message. After the encoder runs, check the
     // canary to make sure that it didn't get overwritten, and if it did, we
     // have detected an overflow and we assert.
-    std::vector<uint8_t> response_alloc(mctp_message_size + sizeof(buffer_canary));
-    response_alloc[0] = MCTP::MCTP_MSG_TYPE_PLDM;
+    std::unique_ptr<MCTP::outgoing_mctp_msg> response_alloc {
+        reinterpret_cast<MCTP::outgoing_mctp_msg*>(new uint8_t[mctp_message_size + sizeof(buffer_canary)])
+    };
 
-    memcpy(&response_alloc[mctp_message_size],
+    memcpy(reinterpret_cast<uint8_t*>(response_alloc.get()) + mctp_message_size,
            &buffer_canary,
            sizeof(buffer_canary));
 
-    const auto response = reinterpret_cast<response_t*>(response_alloc.data());
+    const auto response = reinterpret_cast<response_t*>(response_alloc.get());
+    response->mctp_msg.data_size = sizeof(response_t::pldm_message) + sizeof(response_t::pldm_payload) + i_payload_size;
+    response->mctp_msg.hdr.tag_owner = i_msg.mctp_tag_owner;
+    response->mctp_msg.hdr.msg_tag = i_msg.mctp_msg_tag;
+    response->mctp_msg.hdr.mctp_msg_type = MCTP::MCTP_MSG_TYPE_PLDM;
 
     {
         const int rc = i_encoder(replace_payload_length_placeholder(i_payload_size, i_args)...,
@@ -167,7 +175,7 @@ errlHndl_t send_pldm_response(const msg_q_t i_msgQ,
         uint64_t real_canary = 0;
 
         memcpy(&real_canary,
-               &response_alloc[mctp_message_size],
+               reinterpret_cast<uint8_t*>(response_alloc.get()) + mctp_message_size,
                sizeof(real_canary));
 
         assert(buffer_canary == real_canary,
@@ -175,53 +183,18 @@ errlHndl_t send_pldm_response(const msg_q_t i_msgQ,
                i_encoder);
     }
 
-
 #ifndef __HOSTBOOT_RUNTIME
-    std::unique_ptr<msg_t, decltype(&msg_free)> msg(msg_allocate(), msg_free);
-
-    msg->type = MCTP::MSG_SEND_PLDM;
-    msg->data[0] = mctp_message_size;
-    msg->extra_data = response;
-
-    {
-        const int rc = msg_sendrecv(i_msgQ, msg.get());
-
-        if (rc != 0)
-        {
-            /*
-             * @errortype  ERRL_SEV_UNRECOVERABLE
-             * @moduleid   MOD_SEND_PLDM_RESPONSE
-             * @reasoncode RC_SEND_FAIL
-             * @userdata1  RC returned from message send routine
-             * @userdata2  PLDM response message encoder function
-             * @devdesc    Software problem, failed to send PLDM IPC message
-             * @custdesc   A software error occurred during system boot
-             */
-            errl = new ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                 MOD_SEND_PLDM_RESPONSE,
-                                 RC_SEND_FAIL,
-                                 rc,
-                                 reinterpret_cast<uint64_t>(i_encoder),
-                                 ErrlEntry::ADD_SW_CALLOUT);
-        }
-        else if (msg->data[1] != REQ_SUCCESS)
-        {
-            errl = reinterpret_cast<errlHndl_t>(msg->extra_data);
-        }
-
-        msg->extra_data = nullptr;
-    }
+    errl = i_msgQ.sendrecv(move(response_alloc))->errl.release();
 #else
     // Make sure mctp bridge is enabled
     setMctpBridgeState(hostInterfaces::MCTP_BRIDGE_ENABLED);
 
     // trim the buffer canary
-    response_alloc.resize(response_alloc.size()-sizeof(buffer_canary));
-    int return_code = MCTP::send_message(response_alloc);
+    const int return_code = MCTP::send_message(response_alloc.get());
 
-    if(return_code)
+    if (return_code)
     {
-        /*
+        /*@
         * @errortype  ERRL_SEV_UNRECOVERABLE
         * @moduleid   MOD_SEND_PLDM_RESPONSE
         * @reasoncode RC_SEND_FAIL
@@ -241,7 +214,6 @@ errlHndl_t send_pldm_response(const msg_q_t i_msgQ,
 
     // Make sure mctp bridge is disabled
     setMctpBridgeState(hostInterfaces::MCTP_BRIDGE_DISABLED);
-
 #endif
 
     return errl;
@@ -305,11 +277,11 @@ errlHndl_t decode_pldm_request(const Decoder i_decoder,
  *        completion code.
  *
  * @param[in] i_msgQ  Handle to the MCTP outgoing response queue
- * @param[in] i_msg   Message to respond to
+ * @param[in] i_req   Message to respond to
  * @param[in] i_cc    Completion code
  */
-inline void send_cc_only_response(const msg_q_t i_msgQ,
-                                  const pldm_msg* const i_msg,
+inline void send_cc_only_response(const MCTP::mctp_outbound_msgq_t i_msgQ,
+                                  const pldm_mctp_message& i_req,
                                   const uint8_t i_cc)
 {
     static const int PLDM_CC_ONLY_RESP_BYTES = 1;
@@ -317,11 +289,12 @@ inline void send_cc_only_response(const msg_q_t i_msgQ,
     errlHndl_t errl =
         send_pldm_response<PLDM_CC_ONLY_RESP_BYTES>
         (i_msgQ,
+         i_req,
          encode_cc_only_resp,
          0, // No variable-size payload
-         i_msg->hdr.instance_id,
-         i_msg->hdr.type,
-         i_msg->hdr.command,
+         i_req.pldm()->hdr.instance_id,
+         i_req.pldm()->hdr.type,
+         i_req.pldm()->hdr.command,
          i_cc);
 
     if (errl)

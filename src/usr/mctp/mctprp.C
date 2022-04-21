@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -187,17 +187,15 @@ static void * poll_kcs_status_task(void*)
     return nullptr;
 }
 
-static void rx_message(uint8_t i_eid, void * i_data, void *i_msg, size_t i_len)
+static void rx_message(uint8_t i_eid, bool i_tag_owner, uint8_t i_msg_tag, void * i_data, void *i_msg, size_t i_len)
 {
-   TRACDBIN(g_trac_mctp, "mctp rx_message:", i_msg, i_len);
-
    uint8_t * l_pByteBuffer = reinterpret_cast<uint8_t *>(i_msg);
 
    // First byte of the msg should be the MCTP payload type.
    // For now we only support PLDM over MCTP
    switch(*l_pByteBuffer)
    {
-      case MCTP_MSG_TYPE_PLDM :
+      case MCTP_MSG_TYPE_PLDM:
       {
           auto msg_byte_ptr = reinterpret_cast<uint8_t *>(i_msg);
           auto pldm_hdr_ptr =
@@ -205,15 +203,22 @@ static void rx_message(uint8_t i_eid, void * i_data, void *i_msg, size_t i_len)
                     msg_byte_ptr + sizeof(MCTP::MCTP_MSG_TYPE_PLDM));
           PLDM::logPldmMsg(pldm_hdr_ptr, PLDM::INBOUND);
           errlHndl_t errl = nullptr;
-          // Offset into sizeof(MCTP::MCTP_MSG_TYPE_PLDM) MCTP packet payload
-          // as where PLDM message begins. (see DSP0236 v1.3.0 figure 4)
-          // Also update the len param to account for this offset
-          errl = PLDM::routeInboundMsg(
-                            ( msg_byte_ptr +
-                              sizeof(MCTP::MCTP_MSG_TYPE_PLDM)),
-                            (i_len - sizeof(MCTP::MCTP_MSG_TYPE_PLDM)));
 
-          if(errl)
+          const PLDM::pldm_mctp_message_view msg
+          {
+              .mctp_tag_owner = i_tag_owner,
+              .mctp_msg_tag = i_msg_tag,
+
+              // Offset into sizeof(MCTP::MCTP_MSG_TYPE_PLDM) MCTP packet payload
+              // as where PLDM message begins. (see DSP0236 v1.3.0 figure 4)
+              // Also update the len param to account for this offset
+              .pldm_msg_no_own = reinterpret_cast<pldm_msg*>(msg_byte_ptr + sizeof(MCTP::MCTP_MSG_TYPE_PLDM)),
+              .pldm_msg_size = i_len - sizeof(MCTP::MCTP_MSG_TYPE_PLDM)
+          };
+
+          errl = PLDM::routeInboundMsg(msg);
+
+          if (errl)
           {
               TRACFBIN(g_trac_mctp,
                        "mctp rx_message: error occurred attempting to process the PLDM message"
@@ -281,58 +286,62 @@ void MctpRP::handle_outbound_messages(void)
 
     while(1)
     {
-        msg_t* msg = msg_wait(iv_outboundMsgQ);
+        std::unique_ptr<outgoing_mctp_msg> msg;
 
-        switch(msg->type)
+        auto handle = iv_outboundMsgQ.wait(msg);
+
+        switch (msg->hdr.mctp_msg_type)
         {
           // Send a message
-          case MSG_SEND_PLDM:
+          case MCTP_MSG_TYPE_PLDM:
           {
-              auto extra_data_byte_ptr = reinterpret_cast<uint8_t*>(msg->extra_data);
-              // The first byte of MCTP payload describes the contents
-              // of the payload. Set first byte to be TYPE_PLDM (0x01)
-              // so BMC knows to route the MCTP message to it's PLDM driver.
-              *extra_data_byte_ptr = MCTP_MSG_TYPE_PLDM;
               TRACDBIN(g_trac_mctp, "pldm message : ",
-                       msg->extra_data , msg->data[0]);
+                       &msg->hdr.mctp_msg_type, msg->data_size + sizeof(msg->hdr.mctp_msg_type));
 
-              int rc = 0;
+              errlHndl_t errl = nullptr;
+
 #ifdef CONFIG_MCTP
-              auto pldm_hdr_ptr =
-                reinterpret_cast<pldm_msg_hdr *>(
-                    extra_data_byte_ptr + sizeof(MCTP::MCTP_MSG_TYPE_PLDM));
-              mutex_lock(&iv_mutex);
-              PLDM::logPldmMsg(pldm_hdr_ptr, PLDM::OUTBOUND);
-              rc = mctp_message_tx(iv_mctp, BMC_EID,
-                                   msg->extra_data, msg->data[0]);
-              mutex_unlock(&iv_mutex);
+              int rc = 0;
+              const auto pldm_hdr_ptr = reinterpret_cast<pldm_msg_hdr*>(msg->data);
 
-              if(rc)
+              {
+                  const auto lock = scoped_mutex_lock(iv_mutex);
+
+                  PLDM::logPldmMsg(pldm_hdr_ptr, PLDM::OUTBOUND);
+
+                  TRACDBIN(g_trac_mctp, "Calling mctp_message_tx with : ",
+                           &msg->hdr.mctp_msg_type, msg->data_size + sizeof(msg->hdr.mctp_msg_type));
+
+                  rc = mctp_message_tx(iv_mctp, BMC_EID,
+                                       msg->hdr.tag_owner, msg->hdr.msg_tag,
+                                       &msg->hdr.mctp_msg_type, msg->data_size + sizeof(msg->hdr.mctp_msg_type));
+              }
+
+              if (rc)
               {
                   TRACFCOMP(g_trac_mctp,
                             "MSG_SEND_PLDM failed during mctp_message_tx rc = 0x%x."
                             " This likely means hostboot tried to send a message at"
                             " the wrong time.",
                             rc);
-                  // first 8 bytes of MCTP payload
-                  const uint64_t mctp_payload =
-                          *reinterpret_cast<uint64_t*>(msg->extra_data);
+
+                  // Get first 8 bytes of MCTP payload
+                  const uint64_t mctp_payload = *reinterpret_cast<uint64_t*>(&msg->hdr.mctp_msg_type);
+
                   /*@
-                  * @errortype
-                  * @severity   ERRL_SEV_UNRECOVERABLE
-                  * @moduleid   MOD_HANDLE_OUTBOUND
-                  * @reasoncode RC_SEND_PLDM_FAIL
-                  * @userdata1  Return code returned by MCTP core logic
-                  * @userdata2  First 8 bytes of MCTP payload
-                  * @devdesc    Software problem while sending pldm message
-                  * @custdesc   A software error occured during system boot
-                  */
-                  errlHndl_t errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                        MOD_HANDLE_OUTBOUND,
-                                        RC_SEND_PLDM_FAIL,
-                                        rc,
-                                        mctp_payload,
-                                        ErrlEntry::NO_SW_CALLOUT);
+                   *@moduleid   MOD_HANDLE_OUTBOUND
+                   *@reasoncode RC_SEND_PLDM_FAIL
+                   *@userdata1  Return code returned by MCTP core logic
+                   *@userdata2  First 8 bytes of MCTP payload
+                   *@devdesc    Software problem while sending pldm message
+                   *@custdesc   A software error occured during system boot
+                   */
+                  errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                       MOD_HANDLE_OUTBOUND,
+                                       RC_SEND_PLDM_FAIL,
+                                       rc,
+                                       mctp_payload,
+                                       ErrlEntry::NO_SW_CALLOUT);
                   errl->collectTrace(MCTP_COMP_NAME);
                   errl->collectTrace(PLDM_COMP_NAME);
 
@@ -346,22 +355,27 @@ void MctpRP::handle_outbound_messages(void)
 
                   // PLDM message msg originator must clean up original buffer
                   // in extra_data
-                  msg->extra_data = errl;
-                  errl = nullptr;
-                  msg->data[1] = rc;
               }
 #endif
-              rc = msg_respond(iv_outboundMsgQ, msg);
-              assert(rc == 0,
-                     "Failed attempting to respond to MSG_SEND_PLDM message got rc %d",
-                     rc);
+
+              // Here we send back any error that may have occurred, and we also
+              // transfer ownership of the original message back to the
+              // sender. This allows them to resend the message if needed,
+              // without making copies.
+              auto result = std::make_unique<mctp_outbound_result>(
+                  mctp_outbound_result { std::unique_ptr<ERRORLOG::ErrlEntry> { errl }, move(msg) }
+              );
+              errl = nullptr; // ownership transfered to result
+
+              iv_outboundMsgQ.respond(move(handle), std::move(result));
+
               break;
           }
           default:
               // just mark a trace and move on with our lives
               TRACFCOMP(g_trac_mctp,
                         "Received am outbound MCTP message with a payload type 0x%.02x we do not know how to handle",
-                        msg->type);
+                        msg->hdr.mctp_msg_type);
               break;
         }
     }
@@ -452,7 +466,8 @@ void MctpRP::_init(void)
     iv_astlpc = mctp_astlpc_init(MCTP_BINDING_ASTLPC_MODE_HOST, desired_mtu,
                                  mctp_bar, &astlpc_hostboot_ops, nullptr);
 #endif
-    msg_q_register(iv_outboundMsgQ, VFS_ROOT_MSG_MCTP_OUT);
+    msg_q_register(iv_outboundMsgQ.queue(), VFS_ROOT_MSG_MCTP_OUT);
+
     task_create(handle_outbound_messages_task, nullptr);
 
     TRACFCOMP(g_trac_mctp, "MctpRP::_init exit");
@@ -463,7 +478,6 @@ void MctpRP::_init(void)
 MctpRP::MctpRP(void):
     iv_astlpc(nullptr),
     iv_mctp(mctp_init()),
-    iv_outboundMsgQ(msg_q_create()),
     iv_mutex(MUTEX_INITIALIZER)
 {
 }

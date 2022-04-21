@@ -63,11 +63,9 @@ errlHndl_t getDateTime(date_time_t& o_dateTime)
 
     do {
     std::vector<uint8_t>l_responseBytes;
-    const msg_q_t l_msgQ = MSG_Q_RESOLVE("getDateTime",
-                                         VFS_ROOT_MSG_PLDM_REQ_OUT);
 
     l_errl = sendrecv_pldm_request<0>(l_responseBytes,
-                                      l_msgQ,
+                                      g_outboundPldmReqMsgQ,
                                       encode_get_datetime_req_hb,
                                       DEFAULT_INSTANCE_ID);
     if(l_errl)

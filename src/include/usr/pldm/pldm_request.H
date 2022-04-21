@@ -77,11 +77,14 @@ constexpr uint8_t DEFAULT_INSTANCE_ID = 0x00;
 
 /* @brief Represents a PLDM message (with a payload) that will be sent
  *        through the PLDM message queue to the MCTP stack.
+ *
+ * @note  The outgoing_mctp_msg member is used by the MCTP stack to route the
+ *        MCTP packet.
  */
 template<size_t MsgSize>
-struct mctp_pldm_msg
+struct pldm_mctp_msgbuf
 {
-    decltype(MCTP::MCTP_MSG_TYPE_PLDM) mctp_message = 0;
+    MCTP::outgoing_mctp_msg mctp_msg;
 
     pldm_msg pldm_message { };
 
@@ -95,75 +98,46 @@ struct mctp_pldm_msg
  *
  */
 template<>
-struct mctp_pldm_msg<1>
+struct pldm_mctp_msgbuf<1>
 {
-    decltype(MCTP::MCTP_MSG_TYPE_PLDM) mctp_message = 0;
+    MCTP::outgoing_mctp_msg mctp_msg;
 
     pldm_msg pldm_message { };
 } __attribute__((packed));
 
 /* @brief Represents a PLDM message, without a payload, that will be sent
  *        through the PLDM message queue to the MCTP stack.
- *
- * @note  In this case, we will pass an extra byte ( sizeof(pldm_msg::payload) )
- *        down to the MCTP layer. The MCTP layer will put this on the LPC bus
- *        and it will get propagated to the BMC. This is okay because for
- *        commands with no PLDM message payload the BMC will ignore the size and
- *        just look at the first 3 bytes that make up the header.
  */
 template<>
-struct mctp_pldm_msg<0>
+struct pldm_mctp_msgbuf<0>
 {
-    decltype(MCTP::MCTP_MSG_TYPE_PLDM) mctp_message = 0;
+    MCTP::outgoing_mctp_msg mctp_msg;
 
     pldm_msg pldm_message { };
 } __attribute__((packed));
-
-/* @brief  Assign the contents of a memory region to the given vector.
- *         This is a public interface meant to be overloaded by callers of
- *         sendrecv_pldm_request to customize memory management.
- *
- * param[in/out] io_response_container  The container to insert data into.
- * param[in/out] io_data                The data to insert.
- * param[in]     i_data_length          The length of the data in io_data.
- *
- * @note Callers of sendrecv_pldm_request who use a custom ResponseContainer can
- *       overload this function to customize how data is owned and
- *       deallocated. This function should either copy the data from io_data
- *       into the container, or else take ownership of the data directly and
- *       call io_data.release().
- */
-inline void sendrecv_pldm_request_assign_response_container(std::vector<uint8_t>& io_response_container,
-                                                            std::unique_ptr<uint8_t, decltype(&free)>& io_data,
-                                                            const size_t i_data_length)
-{
-    io_response_container.assign(io_data.get(), io_data.get() + i_data_length);
-}
 
 #ifdef __HOSTBOOT_RUNTIME
 /* @brief sendrecv_pldm_request_impl
  *        Implementation function for sendrecv_pldm_request
  *
- * @param[in] i_msg        The outgoing PLDM message
- * @param[out] o_response  The PLDM response
- * @return errlHndl_t      Error if any, otherwise nullptr
+ * @param[in] i_msg                  The outgoing PLDM message
+ * @param[out] o_response_pldm_body  The PLDM response
+ * @return errlHndl_t                Error if any, otherwise nullptr
  */
-errlHndl_t sendrecv_pldm_request_impl(const std::vector<uint8_t>& i_msg,
-                                      std::vector<uint8_t>& o_response);
+errlHndl_t sendrecv_pldm_request_impl(MCTP::outgoing_mctp_msg* i_msg,
+                                      std::vector<uint8_t>& o_response_pldm_body);
 #else
 /* @brief sendrecv_pldm_request_impl
  *        Implementation function for sendrecv_pldm_request
  *
- * @param[in] i_msgQ              Handle to the PLDM outgoing-request message queue
- * @param[in] i_msg               The outgoing PLDM message
- * @param[out] o_response         The PLDM response
- * @param[out] o_response_length  The length of o_response in bytes
- * @return errlHndl_t             Error if any, otherwise nullptr
+ * @param[in] i_msgQ                 Handle to the PLDM outgoing-request message queue
+ * @param[in] i_msg                  The outgoing PLDM message
+ * @param[out] o_response_pldm_body  The PLDM response
+ * @return errlHndl_t                Error if any, otherwise nullptr
  */
-errlHndl_t sendrecv_pldm_request_impl(msg_q_t i_msgQ,
-                                      const std::vector<uint8_t>& i_msg,
-                                      std::unique_ptr<uint8_t, decltype(&free)>& o_response,
-                                      size_t& o_response_length);
+errlHndl_t sendrecv_pldm_request_impl(pldm_outbound_req_msgq_t i_msgQ,
+                                      std::unique_ptr<MCTP::outgoing_mctp_msg> i_msg,
+                                      std::vector<uint8_t>& o_response_pldm_body);
 #endif
 
 /* @brief sendrecv_pldm_request
@@ -172,7 +146,7 @@ errlHndl_t sendrecv_pldm_request_impl(msg_q_t i_msgQ,
  *        subsequent variable-size payload section to the BMC, and then receive
  *        a reply.
  *
- * @param[out] o_response_bytes  Array of bytes of the response from the BMC
+ * @param[out] o_response_body   Array of bytes of the response from the BMC
  * @param[in] i_payload_size     Length of the variable length payload
  * @param[in] i_msgQ             Handle to the outgoing PLDM request message queue
  * @param[in] i_encoder          Message encoder function
@@ -180,23 +154,31 @@ errlHndl_t sendrecv_pldm_request_impl(msg_q_t i_msgQ,
  *                               pldm_msg* and payload size.
  * @return errlHndl_t            Error if any, otherwise nullptr.
  */
-template<size_t MsgSize, typename ResponseContainer, typename Encoder, typename... Args>
-errlHndl_t sendrecv_pldm_request(ResponseContainer& o_response_bytes,
+template<size_t MsgSize, typename Encoder, typename... Args>
+errlHndl_t sendrecv_pldm_request(std::vector<uint8_t>& o_response_body,
                                  const size_t i_payload_size,
-                                 const msg_q_t i_msgQ,
+                                 pldm_outbound_req_msgq_t i_msgQ,
                                  const Encoder i_encoder,
                                  Args... i_args)
 {
+    using pldm_mctp_msgbuf_t = pldm_mctp_msgbuf<MsgSize>;
+
     errlHndl_t errl = nullptr;
-    o_response_bytes.clear();
+    o_response_body.clear();
 
-    std::vector<uint8_t> msgbuf_bytes(sizeof(mctp_pldm_msg<MsgSize>) + i_payload_size);
+    const size_t total_buffer_size = sizeof(pldm_mctp_msgbuf_t) + i_payload_size;
 
-    const auto msgbuf = reinterpret_cast<mctp_pldm_msg<MsgSize>*>(msgbuf_bytes.data());
+    std::unique_ptr<MCTP::outgoing_mctp_msg> msgbuf {
+        reinterpret_cast<MCTP::outgoing_mctp_msg*>(new uint8_t[total_buffer_size])
+    };
 
-    msgbuf_bytes[0] = MCTP::MCTP_MSG_TYPE_PLDM;
+    msgbuf->data_size = total_buffer_size - sizeof(pldm_mctp_msgbuf_t::mctp_msg);
+    msgbuf->hdr.tag_owner = false; // Hostboot doesn't send tags
+    msgbuf->hdr.msg_tag = 0;       // itself; they only matter when
+                                   // sending replies to the BMC.
+    msgbuf->hdr.mctp_msg_type = MCTP::MCTP_MSG_TYPE_PLDM;
 
-    pldm_msg* const pldm_request = &msgbuf->pldm_message;
+    const auto pldm_request = reinterpret_cast<pldm_msg*>(msgbuf->data);
 
     const int encoder_rc = i_encoder(i_args...,
                                      pldm_request,
@@ -211,7 +193,7 @@ errlHndl_t sendrecv_pldm_request(ResponseContainer& o_response_bytes,
     PLDM::set_waiting_for_response(true);
     setMctpBridgeState(hostInterfaces::MCTP_BRIDGE_ENABLED);
 
-    errl = sendrecv_pldm_request_impl(msgbuf_bytes, o_response_bytes);
+    errl = sendrecv_pldm_request_impl(msgbuf.get(), o_response_body);
 
     setMctpBridgeState(hostInterfaces::MCTP_BRIDGE_DISABLED);
     PLDM::set_waiting_for_response(false);
@@ -222,25 +204,19 @@ errlHndl_t sendrecv_pldm_request(ResponseContainer& o_response_bytes,
     // Hostboot will rely on BMC to send the requests again.
     // Doing a PLDM host callback on a non-empty next request has
     // caused an mctp queue overrun
-    const std::vector<uint8_t>& skipReqMsg = PLDM::get_next_request();
-    if(!skipReqMsg.empty())
+    const auto& skipReqMsg = PLDM::get_next_request();
+
+    if (!skipReqMsg.empty())
     {
         PLDM_INF("sendrecv_pldm_request: discarding queued PLDM request as "
-          "new one arrived while hostboot was busy handling another request.");
+                 "new one arrived while hostboot was busy handling another request.");
         PLDM_INF_BIN("Discarded PLDM request msg header",
-            skipReqMsg.data(), std::min(skipReqMsg.size(), sizeof(pldm_msg_hdr)));
+                     skipReqMsg.pldm_data.data(),
+                     std::min(skipReqMsg.pldm_data.size(), sizeof(pldm_msg_hdr)));
         PLDM::clear_next_request();
     }
 #else
-    std::unique_ptr<uint8_t, decltype(&free)> response(nullptr, free);
-    size_t response_length = 0;
-
-    errl = sendrecv_pldm_request_impl(i_msgQ, msgbuf_bytes, response, response_length);
-
-    if (!errl)
-    {
-        sendrecv_pldm_request_assign_response_container(o_response_bytes, response, response_length);
-    }
+    errl = sendrecv_pldm_request_impl(i_msgQ, move(msgbuf), o_response_body);
 #endif
 
     return errl;
@@ -252,7 +228,7 @@ errlHndl_t sendrecv_pldm_request(ResponseContainer& o_response_bytes,
  *        subsequent variable-size payload section to the BMC, and then receive
  *        a reply.
  *
- * @param[out] o_response_bytes  Array of bytes of the response from the BMC
+ * @param[out] o_response_body   Array of bytes of the response from the BMC
  * @param[in] i_payload_bytes    Variable-length payload for the message
  * @param[in] i_msgQ             Handle to the outgoing PLDM request message queue
  * @param[in] i_encoder          Message encoder function
@@ -260,14 +236,14 @@ errlHndl_t sendrecv_pldm_request(ResponseContainer& o_response_bytes,
  *                               pldm_msg* and payload size.
  * @return errlHndl_t            Error if any, otherwise nullptr.
  */
-template<size_t MsgSize, typename ResponseContainer, typename Encoder, typename... Args>
-errlHndl_t sendrecv_pldm_request(ResponseContainer& o_response_bytes,
+template<size_t MsgSize, typename Encoder, typename... Args>
+errlHndl_t sendrecv_pldm_request(std::vector<uint8_t>& o_response_body,
                                  const std::vector<uint8_t>& i_payload_bytes,
-                                 const msg_q_t i_msgQ,
+                                 const pldm_outbound_req_msgq_t i_msgQ,
                                  const Encoder i_encoder,
                                  Args... i_args)
 {
-    return sendrecv_pldm_request<MsgSize>(o_response_bytes,
+    return sendrecv_pldm_request<MsgSize>(o_response_body,
                                           i_payload_bytes.size(),
                                           i_msgQ,
                                           i_encoder,
@@ -284,7 +260,7 @@ errlHndl_t sendrecv_pldm_request(ResponseContainer& o_response_bytes,
  *
  * Runtime parameters:
  *
- * @param[out] o_response_bytes  The bytes of the response. Cleared before
+ * @param[out] o_response_body   The bytes of the response. Cleared before
  *                               storing response (i.e. does not concatenate).
  * @param[in]  i_msgQ            The PLDM message queue.
  * @param[in]  i_encoder         The function to encode the PLDM request with
@@ -297,13 +273,13 @@ errlHndl_t sendrecv_pldm_request(ResponseContainer& o_response_bytes,
  *
  * @note                         If message encoding fails, assert triggers.
  */
-template<size_t MsgSize, typename ResponseContainer, typename Encoder, typename... Args>
-errlHndl_t sendrecv_pldm_request(ResponseContainer& o_response_bytes,
-                                 const msg_q_t i_msgQ,
+template<size_t MsgSize, typename Encoder, typename... Args>
+errlHndl_t sendrecv_pldm_request(std::vector<uint8_t>& o_response_body,
+                                 const pldm_outbound_req_msgq_t i_msgQ,
                                  const Encoder i_encoder,
                                  Args... i_args)
 {
-    return sendrecv_pldm_request<MsgSize>(o_response_bytes,
+    return sendrecv_pldm_request<MsgSize>(o_response_body,
                                           std::vector<uint8_t> { }, // Empty variable-size payload
                                           // portion (this does not make any
                                           // dynamic allocation at runtime)

@@ -37,6 +37,7 @@
 // PLDM
 #include <pldm/base/pldm_shutdown.H>
 #include <pldm/pldm_reasoncodes.H>
+#include <pldm/pldmif.H>
 #include <pldm/pldm_trace.H>
 #include <pldm/pldm_const.H>
 #include <pldm/pldm_util.H>
@@ -70,10 +71,6 @@ struct shutdown_args
     // The message queue that Initservice will send us a message on, indicating
     // that the memory page flushing is complete.
     std::unique_ptr<void, decltype(&msg_q_destroy)> msgq;
-
-    // The PLDM message queue that we will use to send the BMC the
-    // shutdown-complete notification.
-    msg_q_t pldm_msg_q = nullptr;
 
     // Hostboot's terminus ID. Obtained from the PDR Manager, which code lives
     // in the extended image, and so we have to fetch it and store here before
@@ -231,13 +228,10 @@ void PLDM::requestSoftPowerOff(const poweroff_initiator_t i_initiator)
     // notify the BMC, so create an error and shutdown with an error code.
     if (shutdown_sensor_id != 0 && bmc_chassisoff_effecter_id != 0)
     {
-        const msg_q_t msgQ = MSG_Q_RESOLVE("PLDM::requestSoftPowerOff", VFS_ROOT_MSG_PLDM_REQ_OUT);
-
         // The shutdown task will take ownership of this pointer.
         const auto args = new shutdown_args
         {
             .msgq { msg_q_create(), msg_q_destroy },
-            .pldm_msg_q = msgQ,
             .hb_terminus_id = thePdrManager().hostbootTerminusId(),
             .shutdown_sensor_id = shutdown_sensor_id,
             .chassisoff_effecter_id = bmc_chassisoff_effecter_id

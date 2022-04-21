@@ -33,6 +33,21 @@
 #ifndef PLDMREQUESTER_H
 #define PLDMREQUESTER_H
 
+#include <memory>
+
+#include <mctp/mctp_message_types.H>
+#include <pldm/pldmif.H>
+
+namespace PLDM
+{
+struct pldm_mctp_response;
+}
+
+namespace MCTP
+{
+struct outgoing_mctp_msg;
+}
+
 #include <sys/msg.h>
 class pldmRequester
 {
@@ -72,9 +87,9 @@ class pldmRequester
      *
      * @return true if matching response found, false otherwise
      */
-    bool wait_for_matching_response(msg_t* io_req,
-                                    uint64_t i_max_timeout_milliseconds,
-                                    uint32_t & o_bad_rsp_count);
+    std::unique_ptr<PLDM::pldm_mctp_message> wait_for_matching_response(const MCTP::outgoing_mctp_msg& i_req,
+                                                                        uint64_t i_max_timeout_milliseconds,
+                                                                        uint32_t & o_bad_rsp_count);
 
     /**
      * @brief Send a PLDM request message and attempt retry if necessary
@@ -88,13 +103,13 @@ class pldmRequester
      *                  On return, data[0] and extra_data will be updated to a response
      *                             data[1] = REQ_FAILED, if an error log is in extra_data field
      */
-    void send_req_with_retry(msg_t* io_req);
+    PLDM::pldm_mctp_response send_req_with_retry(std::unique_ptr<MCTP::outgoing_mctp_msg> i_req);
 
 
   private:
 
       //Private Member Variables
-      msg_q_t iv_mctpOutboundMsgQ; // mctp outbound rsp/req msgQ
+      MCTP::mctp_outbound_msgq_t iv_mctpOutboundMsgQ; // mctp outbound rsp/req msgQ
 
       // Disallow copying this class.
       pldmRequester& operator=(const pldmRequester&);

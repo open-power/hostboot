@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021                             */
+/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,9 +60,6 @@ errlHndl_t resetWatchdogTimer()
     }
 
 #ifndef __HOSTBOOT_RUNTIME // No watchdog resets from HB at runtime
-    const msg_q_t l_msgQ = msg_q_resolve(VFS_ROOT_MSG_PLDM_REQ_OUT);
-    assert(l_msgQ, "resetWatchdogTimer: PLDM message queue not found!");
-
     // Sequence number increments monotonically and indicates to the BMC if
     // it missed a heartbeat or not.
     static uint8_t l_sequenceNumber = 0;
@@ -81,7 +78,7 @@ errlHndl_t resetWatchdogTimer()
     l_errl = sendrecv_pldm_request<PLDM_PLATFORM_EVENT_MESSAGE_MIN_REQ_BYTES>(
                 l_responseBytes,
                 sizeof(l_heartbeatElapsedData),
-                l_msgQ,
+                g_outboundPldmReqMsgQ,
                 encode_platform_event_message_req,
                 DEFAULT_INSTANCE_ID,
                 PLDM_PLATFORM_EVENT_MESSAGE_FORMAT_VERSION,

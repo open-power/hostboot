@@ -33,9 +33,12 @@
  */
 
 #include <cstddef>
+#include <vector>
 #include <openbmc/pldm/libpldm/base.h>
 #include <errl/errlentry.H>
 #include <pldm/pldm_const.H>
+#include <mctp/mctp_message_types.H>
+#include <util/typed_msg.H>
 
 namespace PLDM
 {
@@ -45,20 +48,94 @@ namespace PLDM
         OUTBOUND /* Going to the BMC */
     };
 
+    /* @brief Contains information necessary to respond to an incoming PLDM
+     *        request. This structure does NOT own the memory pointed to by
+     *        pldm_msg_no_own.
+     */
+    struct pldm_mctp_message_view
+    {
+        bool mctp_tag_owner = false;
+        uint8_t mctp_msg_tag = 0;
+        const pldm_msg* pldm_msg_no_own = nullptr;
+        size_t pldm_msg_size;
+    };
+
+    /* @brief Contains information necessary to respond to an incoming PLDM
+     *        request.
+     */
+    struct pldm_mctp_message
+    {
+        pldm_mctp_message(const pldm_mctp_message_view i_view)
+            : mctp_tag_owner(i_view.mctp_tag_owner),
+              mctp_msg_tag(i_view.mctp_msg_tag),
+              pldm_data(reinterpret_cast<const uint8_t*>(i_view.pldm_msg_no_own),
+                        reinterpret_cast<const uint8_t*>(i_view.pldm_msg_no_own) + i_view.pldm_msg_size)
+        { }
+
+        pldm_mctp_message(const bool i_mctp_tag_owner,
+                          const uint8_t i_mctp_msg_tag,
+                          std::vector<uint8_t> i_pldm_data)
+            : mctp_tag_owner(i_mctp_tag_owner),
+              mctp_msg_tag(i_mctp_msg_tag),
+              pldm_data(move(i_pldm_data))
+        { }
+
+        pldm_mctp_message(const pldm_mctp_message&) = delete;
+        pldm_mctp_message(pldm_mctp_message&&) = default;
+
+        void operator=(const pldm_mctp_message&) = delete;
+        pldm_mctp_message& operator=(pldm_mctp_message&&) = default;
+
+        bool mctp_tag_owner = false;
+        uint8_t mctp_msg_tag = 0;
+        std::vector<uint8_t> pldm_data;
+
+        /* @brief Interpret the data member as a PLDM message. */
+        const pldm_msg* pldm() const
+        {
+            return reinterpret_cast<const pldm_msg*>(pldm_data.data());
+        }
+
+        /* @brief Get the size of the PLDM payload, not including the PLDM
+         *        header. */
+        size_t payload_size() const
+        {
+            return pldm_data.size() - sizeof(pldm_msg_hdr);
+        }
+
+        /* @brief Whether this structure contains a message or not. */
+        bool empty() const
+        {
+            return pldm_data.empty();
+        }
+    };
+
+    /* The response to a PLDM-send message. */
+    struct pldm_mctp_response
+    {
+        errlHndl_t error;
+        pldm_mctp_message response;
+    };
+
+    using pldm_inbound_rsp_msgq_t = Util::unipipe<pldm_mctp_message>;
+    using pldm_inbound_req_msgq_t = Util::unipipe<pldm_mctp_message>;
+    using pldm_outbound_req_msgq_t = Util::bipipe<MCTP::outgoing_mctp_msg, pldm_mctp_response>;
+
 #ifndef __HOSTBOOT_RUNTIME
+    extern pldm_inbound_rsp_msgq_t g_inboundPldmRspMsgQ;  // pldm inbound response msgQ
+    extern pldm_inbound_req_msgq_t g_inboundPldmReqMsgQ;  // pldm inbound request msgQ
+    extern pldm_outbound_req_msgq_t g_outboundPldmReqMsgQ;  // pldm outbound request msgQ
+
     /**
     * @brief This function is intended to be used by the MCTP resource
     *        provider when they find a PLDM message and want the PLDM
     *        resource provider to handle it
     *
-    * @param[in] i_msg  A ptr to PLDM message, no change of memory ownership.
-    *                   Note that this func will assert is i_msg is nullptr.
-    * @param[in] i_len  Length of buffer containing PLDM message,
-                        i_len must be >= sizeof(pldm_msg_hdr).
+    * @param[in] i_req  The inbound PLDM message.
     *
     * @return errHndl_t   nullptr unless error occurs
     */
-    errlHndl_t routeInboundMsg(const uint8_t * i_msg, size_t i_len);
+    errlHndl_t routeInboundMsg(pldm_mctp_message_view i_req);
 
     // Callback type given to registerShutdownCallback
     using shutdown_callback_t = void(*)(void*);
@@ -82,6 +159,10 @@ namespace PLDM
     void logPldmMsg(const pldm_msg_hdr* const i_hdr, traffic_direction i_dir);
 
 #else
+    // These are dummy queues that aren't actually used by runtime code.
+    const pldm_inbound_rsp_msgq_t g_inboundPldmRspMsgQ(nullptr);  // pldm inbound response msgQ
+    const pldm_inbound_req_msgq_t g_inboundPldmReqMsgQ(nullptr);  // pldm inbound request msgQ
+    const pldm_outbound_req_msgq_t g_outboundPldmReqMsgQ(nullptr);  // pldm outbound request msgQ
 
     /**
      *  @brief Tells PLDM whether it's waiting for a response or not
@@ -98,12 +179,10 @@ namespace PLDM
     *
     * @param[in] i_next_msg  Buffer containing the next PLDM message found by
     *                        MCTP that we want to attempt to cache at PLDM layer
-    * @param[in] i_len       Length of i_next_msg buffer
     *
     * @return pldmrp_rt_rc HBRT PLDM resource provider return code (see pldmrp_rt.H)
     */
-    pldmrp_rt_rc cache_next_pldm_msg(const void * i_next_msg,
-                                     size_t i_len);
+    pldmrp_rt_rc cache_next_pldm_msg(PLDM::pldm_mctp_message i_next_msg);
 
     /**
     * @brief This function will return the PLDM response, if there is one,
@@ -112,7 +191,7 @@ namespace PLDM
     * @return std::vector<uint8_t> Vector containing the next cached PLDM
     *                              response if there is one
     */
-    const std::vector<uint8_t> & get_next_response(void);
+    const pldm_mctp_message& get_next_response();
 
     /**
     * @brief Clear the byte vector containing the cached pldm response in the PLDM
@@ -120,7 +199,7 @@ namespace PLDM
     *
     * @return void
     */
-    void clear_next_response(void);
+    void clear_next_response();
 
     /**
     * @brief This function will return the PLDM request, if there is one,
@@ -129,7 +208,7 @@ namespace PLDM
     * @return std::vector<uint8_t> Vector containing the next cached PLDM
     *                              request if there is one
     */
-    const std::vector<uint8_t> & get_next_request(void);
+    const pldm_mctp_message& get_next_request();
 
     /**
     * @brief Clear the byte vector containing the cached pldm request in the PLDM
@@ -137,19 +216,21 @@ namespace PLDM
     *
     * @return void
     */
-    void clear_next_request(void);
+    void clear_next_request();
 
     /**
-     *  @brief Clears the input vector and swaps the contents of the cached
-     *      request with it.  This has the effect of transferring the request
-     *      to the given vector in O(1) complexity without having to
-     *      allocate memory, and it clears out the cached request.
+     *  @brief Get the next incoming PLDM request and clear the cached copy.
      *
-     *  @param[io/out] io_request On input, a vector to receive the cached
-     *                                request.
-     *                            On output, a vector containing the request
+     *  @return  The next incoming PLDM request.
      */
-    void get_and_clear_next_request(std::vector<uint8_t>& io_request);
+    pldm_mctp_message get_and_clear_next_request();
+
+    /**
+     *  @brief Get the next incoming PLDM response and clear the cached copy.
+     *
+     *  @return  The next incoming PLDM response.
+     */
+    pldm_mctp_message get_and_clear_next_response();
 
     /**
     * @brief Process the next PLDM request cached by HBRT's PLDM resource
@@ -157,7 +238,7 @@ namespace PLDM
     *
     * @return errHndl_t   nullptr unless error occurs
     */
-    errlHndl_t handle_next_pldm_request(void);
+    errlHndl_t handle_next_pldm_request();
 #endif
 
     /**

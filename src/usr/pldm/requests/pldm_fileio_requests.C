@@ -68,17 +68,10 @@ errlHndl_t getFileTable(std::vector<uint8_t>& o_table)
 
     std::vector<uint8_t>l_responseBytes;
 
-#ifndef __HOSTBOOT_RUNTIME
-    const msg_q_t l_msgQ = msg_q_resolve(VFS_ROOT_MSG_PLDM_REQ_OUT);
-    assert(l_msgQ, "getFileTable: message queue not found!");
-#else
-    const msg_q_t l_msgQ = nullptr;
-#endif
-
     do {
     l_errl = sendrecv_pldm_request<PLDM_GET_FILE_TABLE_REQ_BYTES>(
                 l_responseBytes,
-                l_msgQ,
+                g_outboundPldmReqMsgQ,
                 encode_get_file_table_req,
                 DEFAULT_INSTANCE_ID,
                 l_fileTableReq.transfer_handle,
@@ -198,45 +191,6 @@ errlHndl_t getLidFile(const uint32_t i_fileHandle,
     return l_errl;
 }
 
-#ifndef __HOSTBOOT_RUNTIME
-
-/* @brief Simple structure to be used with sendrecv_pldm_request that avoids
- *        making unnecessary copies of response data.
- */
-struct copyless_pldm_response
-{
-    std::unique_ptr<uint8_t, decltype(&free)> iv_data;
-    size_t iv_data_length = 0;
-
-    void clear()
-    {
-        iv_data = nullptr;
-        iv_data_length = 0;
-    }
-
-    size_t size() const
-    {
-        return iv_data_length;
-    }
-
-    const uint8_t* data() const
-    {
-        return iv_data.get();
-    }
-};
-
-/* @brief Assign ownership of PLDM response data to a copyless PLDM response structure.
- */
-void sendrecv_pldm_request_assign_response_container(copyless_pldm_response& io_response_container,
-                                                     std::unique_ptr<uint8_t, decltype(&free)>& io_data,
-                                                     const size_t i_data_length)
-{
-    io_response_container.iv_data = std::move(io_data);
-    io_response_container.iv_data_length = i_data_length;
-}
-
-#endif
-
 errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
                                 const uint32_t i_offset,
                                 uint32_t& io_numBytesToRead,
@@ -284,21 +238,14 @@ errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
              l_numTransfers, io_numBytesToRead);
 
 
-#ifdef __HOSTBOOT_RUNTIME
     std::vector<uint8_t> l_responseBytes;
-    const msg_q_t l_msgQ = nullptr;
-#else
-    copyless_pldm_response l_responseBytes;
-    const msg_q_t l_msgQ = msg_q_resolve(VFS_ROOT_MSG_PLDM_REQ_OUT);
-    assert(l_msgQ, "getLidFileFromOffset: message queue not found!");
-#endif
 
     for(size_t i = 0; i < l_numTransfers; ++i)
     {
         l_req.offset = i_offset + (i * MAX_TRANSFER_SIZE_BYTES);
         l_errl = sendrecv_pldm_request<PLDM_RW_FILE_BY_TYPE_REQ_BYTES>(
                     l_responseBytes,
-                    l_msgQ,
+                    g_outboundPldmReqMsgQ,
                     encode_rw_file_by_type_req,
                     DEFAULT_INSTANCE_ID,
                     PLDM_READ_FILE_BY_TYPE,

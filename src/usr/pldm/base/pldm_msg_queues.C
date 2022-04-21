@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,6 +26,8 @@
 // VFS_ROOT_MSG_PLDM_REQ_OUT
 #include <sys/vfs.h>
 #include "pldm_msg_queues.H"
+#include <pldm/pldmif.H>
+#include <util/typed_msg.H>
 
 /**
  * @file pldm_msg_queues.C
@@ -40,26 +42,26 @@
 extern const char* VFS_ROOT_MSG_PLDM_REQ_IN;
 extern const char* VFS_ROOT_MSG_PLDM_RSP_IN;
 
-// Create global message queues which will be used throughout the
-// pldm_base module
-msg_q_t g_outboundPldmReqMsgQ = msg_q_create(); // pldm outbound request msgQ
-msg_q_t g_inboundPldmRspMsgQ  = msg_q_create(); // pldm inbound response msgQ
-msg_q_t g_inboundPldmReqMsgQ  = msg_q_create(); // pldm inbound request msgQ
-
 namespace PLDM
 {
+
+// Create global message queues which will be used throughout the
+// pldm_base module
+pldm_inbound_rsp_msgq_t g_inboundPldmRspMsgQ;
+pldm_inbound_req_msgq_t g_inboundPldmReqMsgQ;
+pldm_outbound_req_msgq_t g_outboundPldmReqMsgQ;
 
 void registerPldmMsgQs(void)
 {
     // PLDM extended module will need to be able to resolve these queues
     // so register them
-    msg_q_register(g_inboundPldmReqMsgQ, VFS_ROOT_MSG_PLDM_REQ_IN);
-    msg_q_register(g_outboundPldmReqMsgQ, VFS_ROOT_MSG_PLDM_REQ_OUT);
+    msg_q_register(g_inboundPldmReqMsgQ.queue(), VFS_ROOT_MSG_PLDM_REQ_IN);
+    msg_q_register(g_outboundPldmReqMsgQ.queue(), VFS_ROOT_MSG_PLDM_REQ_OUT);
 
     // Also register the inbound PLDM response queues for any test code that might
     // want to lookup the inbound response q to simulate inbound responses
     // coming from the bmc.
-    msg_q_register(g_inboundPldmRspMsgQ, VFS_ROOT_MSG_PLDM_RSP_IN);
+    msg_q_register(g_inboundPldmRspMsgQ.queue(), VFS_ROOT_MSG_PLDM_RSP_IN);
 }
 
 }

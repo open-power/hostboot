@@ -78,9 +78,8 @@ using namespace TARGETING;
 namespace PLDM
 {
 
-errlHndl_t handleGetPdrRequest(const msg_q_t i_msgQ,
-                               const pldm_msg* const i_msg,
-                               const size_t i_payload_len)
+errlHndl_t handleGetPdrRequest(const MCTP::mctp_outbound_msgq_t i_msgQ,
+                               const pldm_mctp_message& i_msg)
 {
     PLDM_ENTER("handleGetPdrRequest");
 
@@ -94,8 +93,8 @@ errlHndl_t handleGetPdrRequest(const msg_q_t i_msgQ,
     {
         {
             const int rc =
-                decode_get_pdr_req(i_msg,
-                                   i_payload_len,
+                decode_get_pdr_req(i_msg.pldm(),
+                                   i_msg.payload_size(),
                                    &pdr_req.record_handle,
                                    &pdr_req.data_transfer_handle,
                                    &pdr_req.transfer_op_flag,
@@ -187,9 +186,10 @@ errlHndl_t handleGetPdrRequest(const msg_q_t i_msgQ,
     errl =
         send_pldm_response<PLDM_GET_PDR_MIN_RESP_BYTES>
         (i_msgQ,
+         i_msg,
          encode_get_pdr_resp,
          response_pdr_size,
-         i_msg->hdr.instance_id,
+         i_msg.pldm()->hdr.instance_id,
          pldm_response_code,
          next_record_handle,
          0, // No remaining data
@@ -214,9 +214,8 @@ errlHndl_t handleGetPdrRequest(const msg_q_t i_msgQ,
     return errl;
 }
 
-errlHndl_t handlePdrRepoChangeEventRequest(const msg_q_t i_msgQ,
-                                           const pldm_msg* const i_msg,
-                                           const size_t i_payload_len)
+errlHndl_t handlePdrRepoChangeEventRequest(const MCTP::mctp_outbound_msgq_t i_msgQ,
+                                           const pldm_mctp_message& i_msg)
 {
     PLDM_ENTER("handlePdrRepoChangeEventRequest");
 
@@ -239,8 +238,8 @@ errlHndl_t handlePdrRepoChangeEventRequest(const msg_q_t i_msgQ,
 
         errl = decode_pldm_request
             (decode_platform_event_message_req,
-             i_msg,
-             i_payload_len,
+             i_msg.pldm(),
+             i_msg.payload_size(),
              &format_version,
              &tid,
              &event_class,
@@ -288,9 +287,10 @@ errlHndl_t handlePdrRepoChangeEventRequest(const msg_q_t i_msgQ,
         errl =
             send_pldm_response<PLDM_PLATFORM_EVENT_MESSAGE_RESP_BYTES>
             (i_msgQ,
+             i_msg,
              encode_platform_event_message_resp,
              0, // No payload after the header
-             i_msg->hdr.instance_id,
+             i_msg.pldm()->hdr.instance_id,
              response_code,
              PLDM_EVENT_NO_LOGGING);
 
@@ -328,8 +328,8 @@ errlHndl_t handlePdrRepoChangeEventRequest(const msg_q_t i_msgQ,
  * @param[in] i_sensor_state              The state value of the sensor.
  * @return errlHndl_t                     Error if any, otherwise nullptr.
  */
-static errlHndl_t sendStateSensorGetRequestResponse(const msg_q_t i_msgQ,
-                                                    const pldm_msg* const i_msg,
+static errlHndl_t sendStateSensorGetRequestResponse(const MCTP::mctp_outbound_msgq_t i_msgQ,
+                                                    const pldm_mctp_message& i_msg,
                                                     const pldm_sensor_present_state i_sensor_operational_state,
                                                     const sensor_state_t i_sensor_state)
 {
@@ -344,9 +344,10 @@ static errlHndl_t sendStateSensorGetRequestResponse(const msg_q_t i_msgQ,
     return
         send_pldm_response<PLDM_GET_STATE_SENSOR_READINGS_MIN_RESP_BYTES>
         (i_msgQ,
+         i_msg,
          encode_get_state_sensor_readings_resp,
          sizeof(sensor_state),
-         i_msg->hdr.instance_id,
+         i_msg.pldm()->hdr.instance_id,
          PLDM_SUCCESS,
          1, // sensor count of 1
          &sensor_state);
@@ -371,7 +372,7 @@ errlHndl_t handleFunctionalStateSensorGetRequest(const state_sensor_callback_arg
                                           ? PLDM_STATE_SET_HEALTH_STATE_NORMAL
                                           : PLDM_STATE_SET_HEALTH_STATE_CRITICAL);
 
-    const errlHndl_t errl = sendStateSensorGetRequestResponse(i_args.i_msgQ, i_args.i_msg, PLDM_SENSOR_NORMAL, current_state);
+    const errlHndl_t errl = sendStateSensorGetRequestResponse(i_args.i_msgQ, *i_args.i_msg, PLDM_SENSOR_NORMAL, current_state);
 
     PLDM_INF(EXIT_MRK"handleFunctionalStateSensorGetRequest (errl = %p)", errl);
 
@@ -390,7 +391,7 @@ errlHndl_t handleGracefulShutdownSensorGetRequest(const state_sensor_callback_ar
                                           : PLDM_SW_TERM_NORMAL);
 #endif
 
-    const errlHndl_t errl = sendStateSensorGetRequestResponse(i_args.i_msgQ, i_args.i_msg, PLDM_SENSOR_NORMAL, current_state);
+    const errlHndl_t errl = sendStateSensorGetRequestResponse(i_args.i_msgQ, *i_args.i_msg, PLDM_SENSOR_NORMAL, current_state);
 
     PLDM_INF(EXIT_MRK"handleGracefulShutdownSensorGetRequest");
 
@@ -422,12 +423,14 @@ errlHndl_t handleOccStateSensorGetRequest(const state_sensor_callback_args& i_ar
         }
     }
 
-    const errlHndl_t errl = sendStateSensorGetRequestResponse(i_args.i_msgQ, i_args.i_msg, PLDM_SENSOR_NORMAL, current_state);
     PLDM_INF(EXIT_MRK"handleOccStateSensorGetRequest returning %d", current_state);
+
+    const errlHndl_t errl = sendStateSensorGetRequestResponse(i_args.i_msgQ, *i_args.i_msg, PLDM_SENSOR_NORMAL, current_state);
 #else
     // The OCC state cannot be read until runtime.
-    const errlHndl_t errl = sendStateSensorGetRequestResponse(i_args.i_msgQ, i_args.i_msg, PLDM_SENSOR_UNKNOWN, 0);
     PLDM_INF(EXIT_MRK"handleOccStateSensorGetRequest returning UNKNOWN");
+
+    const errlHndl_t errl = sendStateSensorGetRequestResponse(i_args.i_msgQ, *i_args.i_msg, PLDM_SENSOR_UNKNOWN, 0);
 #endif
 
 
@@ -443,7 +446,7 @@ errlHndl_t handleGracefulShutdownRequest(const state_effecter_callback_args& i_a
 #ifdef __HOSTBOOT_RUNTIME
     PLDM_ERR("handleGracefulShutdownRequest: PLDM_ERROR_NOT_READY Received graceful "
              "shutdown request while at runtime, returning PLDM_ERROR_NOT_READY to BMC.");
-    send_cc_only_response(i_args.i_msgQ, i_args.i_msg, PLDM_ERROR_NOT_READY);
+    send_cc_only_response(i_args.i_msgQ, *i_args.i_msg, PLDM_ERROR_NOT_READY);
 
     /*@
      * @errortype  ERRL_SEV_UNRECOVERABLE
@@ -462,7 +465,7 @@ errlHndl_t handleGracefulShutdownRequest(const state_effecter_callback_args& i_a
     addBmcErrorCallouts(errl);
 #else
     PLDM_INF("handleGracefulShutdownRequest: Received graceful shutdown request");
-    send_cc_only_response(i_args.i_msgQ, i_args.i_msg, PLDM_SUCCESS);
+    send_cc_only_response(i_args.i_msgQ, *i_args.i_msg, PLDM_SUCCESS);
 
     PLDM::requestSoftPowerOff(PLDM::POWEROFF_BMC_INITIATED);
 #endif
@@ -566,9 +569,10 @@ errlHndl_t handleOccSetStateEffecterRequest(const state_effecter_callback_args& 
         errl =
             send_pldm_response<PLDM_SET_STATE_EFFECTER_STATES_RESP_BYTES>
             (i_args.i_msgQ,
+             *i_args.i_msg,
              encode_set_state_effecter_states_resp,
              0, // No payload after the header
-             i_args.i_msg->hdr.instance_id,
+             i_args.i_msg->pldm()->hdr.instance_id,
              response_code);
 
         if (errl)
@@ -592,9 +596,8 @@ errlHndl_t handleOccSetStateEffecterRequest(const state_effecter_callback_args& 
     return errl;
 }
 
-errlHndl_t handleSetStateEffecterStatesRequest(const msg_q_t i_msgQ,
-                                               const pldm_msg* const i_msg,
-                                               const size_t i_payload_len)
+errlHndl_t handleSetStateEffecterStatesRequest(const MCTP::mctp_outbound_msgq_t i_msgQ,
+                                               const pldm_mctp_message& i_msg)
 {
     PLDM_ENTER("handleSetStateEffecterStatesRequest");
 
@@ -607,8 +610,8 @@ errlHndl_t handleSetStateEffecterStatesRequest(const msg_q_t i_msgQ,
     do
     {
         errl = decode_pldm_request(decode_set_state_effecter_states_req,
-                                   i_msg,
-                                   i_payload_len,
+                                   i_msg.pldm(),
+                                   i_msg.payload_size(),
                                    &req.effecter_id,
                                    &req.comp_effecter_count,
                                    req.field);
@@ -622,7 +625,7 @@ errlHndl_t handleSetStateEffecterStatesRequest(const msg_q_t i_msgQ,
 
         /* Have the PDR manager invoke the appropriate callback handler. */
 
-        errl = thePdrManager().setStateEffecterStates(i_msgQ, i_msg, i_payload_len, &req);
+        errl = thePdrManager().setStateEffecterStates(i_msgQ, i_msg, &req);
     } while (false);
 
     PLDM_EXIT("handleSetStateEffecterStatesRequest");
@@ -630,9 +633,8 @@ errlHndl_t handleSetStateEffecterStatesRequest(const msg_q_t i_msgQ,
     return errl;
 }
 
-errlHndl_t handleGetStateSensorReadingsRequest(const msg_q_t i_msgQ,
-                                               const pldm_msg* const i_msg,
-                                               const size_t i_payload_len)
+errlHndl_t handleGetStateSensorReadingsRequest(const MCTP::mctp_outbound_msgq_t i_msgQ,
+                                               const pldm_mctp_message& i_msg)
 {
     PLDM_ENTER("handleGetStateSensorReadingsRequest");
 
@@ -645,8 +647,8 @@ errlHndl_t handleGetStateSensorReadingsRequest(const msg_q_t i_msgQ,
         pldm_get_state_sensor_readings_req req = { };
 
         errl = decode_pldm_request(decode_get_state_sensor_readings_req,
-                                   i_msg,
-                                   i_payload_len,
+                                   i_msg.pldm(),
+                                   i_msg.payload_size(),
                                    &req.sensor_id,
                                    &req.sensor_rearm,
                                    &req.reserved);
@@ -660,7 +662,7 @@ errlHndl_t handleGetStateSensorReadingsRequest(const msg_q_t i_msgQ,
 
         /* Have the PDR manager invoke the appropriate callback handler. */
 
-        errl = thePdrManager().getStateSensorReadings(i_msgQ, i_msg, i_payload_len, &req);
+        errl = thePdrManager().getStateSensorReadings(i_msgQ, i_msg, &req);
     } while (false);
 
     PLDM_EXIT("handleGetStateSensorReadingsRequest");
@@ -668,9 +670,8 @@ errlHndl_t handleGetStateSensorReadingsRequest(const msg_q_t i_msgQ,
     return errl;
 }
 
-errlHndl_t handleSetEventReceiverRequest(const msg_q_t i_msgQ,
-                                         const pldm_msg* const i_msg,
-                                         const size_t i_payload_len)
+errlHndl_t handleSetEventReceiverRequest(const MCTP::mctp_outbound_msgq_t i_msgQ,
+                                         const pldm_mctp_message& i_msg)
 {
     PLDM_ENTER("handleSetEventReceiverRequest");
     errlHndl_t l_errl = nullptr;
@@ -686,8 +687,8 @@ errlHndl_t handleSetEventReceiverRequest(const msg_q_t i_msgQ,
 
     l_errl = decode_pldm_request(
                 decode_set_event_receiver_req,
-                i_msg,
-                i_payload_len,
+                i_msg.pldm(),
+                i_msg.payload_size(),
                 &l_event_message_global_enable,
                 &l_transport_protocol_type,
                 &l_event_receiver_address_info,
@@ -776,9 +777,10 @@ errlHndl_t handleSetEventReceiverRequest(const msg_q_t i_msgQ,
     do {
     l_errl = send_pldm_response<PLDM_SET_EVENT_RECEIVER_RESP_BYTES>(
                 i_msgQ,
+                i_msg,
                 encode_set_event_receiver_resp,
                 0, // no payload size
-                i_msg->hdr.instance_id,
+                i_msg.pldm()->hdr.instance_id,
                 l_response_code);
     if(l_errl)
     {
@@ -832,12 +834,12 @@ errlHndl_t handleAttributeBackedSensorGetRequest(const state_sensor_callback_arg
 #ifdef __HOSTBOOT_RUNTIME
         responseSent = true;
         PLDM_INF("handleAttributeBackedSensorGetRequest: BOOT_PROGRESS request at RT.  Return PLDM_ERROR status");
-        send_cc_only_response(i_args.i_msgQ, i_args.i_msg, PLDM_ERROR);
+        send_cc_only_response(i_args.i_msgQ, *i_args.i_msg, PLDM_ERROR);
 #endif
     }
     if (!responseSent)
     {
-        errl = sendStateSensorGetRequestResponse(i_args.i_msgQ, i_args.i_msg, PLDM_SENSOR_NORMAL, attr_data);
+        errl = sendStateSensorGetRequestResponse(i_args.i_msgQ, *i_args.i_msg, PLDM_SENSOR_NORMAL, attr_data);
     }
 
     PLDM_EXIT("handleAttributeBackedSensorGetRequest");
@@ -882,11 +884,11 @@ errlHndl_t handleSbeHresetRequest(const state_effecter_callback_args& i_args)
                              ErrlEntry::NO_SW_CALLOUT);
         addBmcErrorCallouts(errl);
 
-        send_cc_only_response(i_args.i_msgQ, i_args.i_msg, PLDM_ERROR_NOT_READY);
+        send_cc_only_response(i_args.i_msgQ, *i_args.i_msg, PLDM_ERROR_NOT_READY);
         break;
     }
 
-    send_cc_only_response(i_args.i_msgQ, i_args.i_msg, PLDM_SUCCESS);
+    send_cc_only_response(i_args.i_msgQ, *i_args.i_msg, PLDM_SUCCESS);
 
     using namespace SBEIO;
 
@@ -935,11 +937,11 @@ errlHndl_t handleSbeHresetRequest(const state_effecter_callback_args& i_args)
                              ErrlEntry::NO_SW_CALLOUT);
         addBmcErrorCallouts(errl);
 
-        send_cc_only_response(i_args.i_msgQ, i_args.i_msg, PLDM_ERROR_NOT_READY);
+        send_cc_only_response(i_args.i_msgQ, *i_args.i_msg, PLDM_ERROR_NOT_READY);
     }
     else
     {
-        send_cc_only_response(i_args.i_msgQ, i_args.i_msg, PLDM_SUCCESS);
+        send_cc_only_response(i_args.i_msgQ, *i_args.i_msg, PLDM_SUCCESS);
     }
 
     return errl;

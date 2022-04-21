@@ -62,9 +62,9 @@ namespace MCTP
         return Singleton<MctpRP>::instance().get_next_packet();
     }
 
-    int send_message(const byte_vector_t& i_mctp_payload)
+    int send_message(const outgoing_mctp_msg* const i_msg)
     {
-        return Singleton<MctpRP>::instance().send_message(i_mctp_payload);
+        return Singleton<MctpRP>::instance().send_message(i_msg);
     }
 }
 
@@ -75,42 +75,53 @@ int MctpRP::get_next_packet(void)
     return mctp_hbrtvirt_rx_start(iv_hbrtvirt);
 }
 
-int MctpRP::send_message(const byte_vector_t& i_mctp_payload)
+int MctpRP::send_message(const outgoing_mctp_msg* const i_msg)
 {
+    const void* const mctp_msg = &i_msg->hdr.mctp_msg_type; // The mctp_msg_type member is the
+                                                            // beginning of the structure that libmctp
+                                                            // expects us to provide (1 byte msg type
+                                                            // followed by message contents).
+
+    const size_t mctp_msg_len = i_msg->data_size + sizeof(i_msg->hdr.mctp_msg_type);
+
     TRACDBIN(g_trac_mctp,
              "sending mctp payload: ",
-             i_mctp_payload.data(),
-             i_mctp_payload.size());
+             mctp_msg,
+             mctp_msg_len);
 
-    int rc = mctp_message_tx(iv_mctp,
-                             BMC_EID,
-                             // TODO https://github.com/openbmc/libmctp/issues/4
-                             // remove const_cast
-                             const_cast<uint8_t*>(i_mctp_payload.data()),
-                             i_mctp_payload.size());
-
-    return rc;
+    return mctp_message_tx(iv_mctp,
+                           BMC_EID,
+                           i_msg->hdr.tag_owner,
+                           i_msg->hdr.msg_tag,
+                           // TODO https://github.com/openbmc/libmctp/issues/4
+                           // remove const_cast
+                           const_cast<void*>(mctp_msg),
+                           mctp_msg_len);
 }
 
-static void rx_message(uint8_t i_eid, void * i_data,
-                       void * i_msg, size_t i_len)
+static void rx_message(uint8_t i_eid, bool i_tag_owner, uint8_t i_msg_tag,
+                       void * i_data, void * i_msg, size_t i_len)
 {
    TRACDBIN(g_trac_mctp, "mctp rx_message:", i_msg, i_len);
 
-   auto msg_bytes = static_cast<const uint8_t *const>(i_msg);
+   const auto msg_bytes = static_cast<const uint8_t*>(i_msg);
 
    // First byte of the msg should be the MCTP payload type.
    // For now we only support PLDM over MCTP
-   switch(*msg_bytes)
+   switch (*msg_bytes)
    {
-      case MCTP_MSG_TYPE_PLDM :
+      case MCTP_MSG_TYPE_PLDM:
       {
+          std::vector<uint8_t> pldm_msg_data(msg_bytes + sizeof(MCTP::message_type),
+                                             msg_bytes + i_len);
+
+          PLDM::pldm_mctp_message req(i_tag_owner, i_msg_tag, move(pldm_msg_data));
+
           // Skip first byte of the MCTP payload which has the payload type.
           // The PLDM layer is unaware of this byte.
-          PLDM::pldmrp_rt_rc rc =
-              PLDM::cache_next_pldm_msg(msg_bytes + sizeof(MCTP::message_type),
-                                        i_len - sizeof(MCTP::message_type));
-          if(rc)
+          const PLDM::pldmrp_rt_rc rc = PLDM::cache_next_pldm_msg(std::move(req));
+
+          if (rc)
           {
               uint64_t request_hdr_data = 0;
               if(rc != PLDM::RC_INVALID_MESSAGE_LEN)
@@ -144,7 +155,7 @@ static void rx_message(uint8_t i_eid, void * i_data,
           }
           break;
       }
-      default :
+      default:
       {
           TRACFCOMP(g_trac_mctp,
                     "Warning! Received a MCTP message with a payload type %u from eid %u we do not know how to handle, it will be ignored",

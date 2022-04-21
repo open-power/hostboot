@@ -844,8 +844,8 @@ void handleMctpAvailable(void)
                   "handleMctpAvailable: discarding unexpectedly queued PLDM "
                   "request");
         TRACFBIN(g_trac_hbrt,"Discarded PLDM request msg header",
-            next_pldm_request.data(), std::min(next_pldm_request.size(),
-            sizeof(pldm_msg_hdr)));
+            next_pldm_request.pldm_data.data(), std::min(next_pldm_request.pldm_data.size(),
+                                                         sizeof(pldm_msg_hdr)));
         PLDM::clear_next_request();
     }
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,6 +30,12 @@
  *        register all of the messages queues associated with PLDM
  */
 
+#ifndef PLDM_MSG_QUEUES_H
+#define PLDM_MSG_QUEUES_H
+
+#include <util/typed_msg.H>
+#include <pldm/pldmif.H>
+
 namespace PLDM
 {
 /*
@@ -42,4 +48,10 @@ namespace PLDM
 */
 void registerPldmMsgQs(void);
 
+extern Util::unipipe<pldm_mctp_message> g_inboundPldmRspMsgQ; // pldm inbound response msgQ
+extern Util::unipipe<pldm_mctp_message> g_inboundPldmReqMsgQ; // pldm inbound request msgQ
+extern Util::bipipe<MCTP::outgoing_mctp_msg, pldm_mctp_response> g_outboundPldmReqMsgQ; // pldm outbound request msgQ
+
 }
+
+#endif

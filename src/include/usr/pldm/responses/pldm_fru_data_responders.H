@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,12 +59,10 @@ namespace PLDM
  *
  * @param[in] i_msgQ          Handle to the MCTP outbound message queue
  * @param[in] i_msg           getFruRecordTableMetadata request message object
- * @param[in] i_payload_len   Length of payload in i_msg
  * @return    errlHndl_t      Error if any, otherwise nullptr.
  */
-errlHndl_t handleGetFruRecordTableMetadataRequest(msg_q_t i_msgQ,
-                                                  const pldm_msg* i_msg,
-                                                  size_t i_payload_len);
+errlHndl_t handleGetFruRecordTableMetadataRequest(MCTP::mctp_outbound_msgq_t i_msgQ,
+                                                  const pldm_mctp_message& i_msg);
 
 /* @brief handleGetFruRecordTableRequest
  *
@@ -73,12 +71,10 @@ errlHndl_t handleGetFruRecordTableMetadataRequest(msg_q_t i_msgQ,
  *
  * @param[in] i_msgQ          Handle to the MCTP outbound message queue
  * @param[in] i_msg           getFruRecordTable request message object
- * @param[in] i_payload_len   Length of payload in i_msg
  * @return    errlHndl_t      Error if any, otherwise nullptr.
  */
-errlHndl_t handleGetFruRecordTableRequest(msg_q_t i_msgQ,
-                                          const pldm_msg* i_msg,
-                                          size_t i_payload_len);
+errlHndl_t handleGetFruRecordTableRequest(MCTP::mctp_outbound_msgq_t i_msgQ,
+                                          const pldm_mctp_message& i_msg);
 
 }
 

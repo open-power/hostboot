@@ -49,9 +49,6 @@
 // IPC
 #include <sys/msg.h>
 
-// VFS_ROOT_MSG_PLDM_REQ_OUT
-#include <sys/vfs.h>
-
 // libpldm headers from pldm subtree
 #include <openbmc/pldm/libpldm/platform.h>
 #include <openbmc/pldm/libpldm/pdr.h>
@@ -103,7 +100,7 @@ struct pdr
  *                proper handling.
  * @return Error if any, otherwise nullptr.
  */
-errlHndl_t getPDR(const msg_q_t i_msgQ,
+errlHndl_t getPDR(const PLDM::pldm_outbound_req_msgq_t i_msgQ,
                   pdr_handle_t& io_pdr_record_handle,
                   pdr& o_pdr,
                   std::map< pdr_handle_t, uint32_t > &io_pdr_usage_map)
@@ -333,8 +330,6 @@ errlHndl_t getPDR(const msg_q_t i_msgQ,
  */
 errlHndl_t getAllPdrs(std::vector<pdr>& o_pdrs)
 {
-    const msg_q_t msgQ = MSG_Q_RESOLVE("getAllPdrs", VFS_ROOT_MSG_PLDM_REQ_OUT);
-
     pdr_handle_t pdr_handle = FIRST_PDR_HANDLE; // getPDR updates this for us
     errlHndl_t errl = nullptr;
     std::map< pdr_handle_t, uint32_t > pdr_usage_map;
@@ -346,7 +341,7 @@ errlHndl_t getAllPdrs(std::vector<pdr>& o_pdrs)
         // Current implementation uses the same pdr_usage_map to track uniqueness.
         // If in the future callers of getPDR do -NOT- wish to abort on duplicates,
         // the pdr_usage_map should be cleared prior to invocation.
-        errl = getPDR(msgQ, pdr_handle, result_pdr, pdr_usage_map);
+        errl = getPDR(g_outboundPldmReqMsgQ, pdr_handle, result_pdr, pdr_usage_map);
 
         if (errl)
         {
@@ -466,8 +461,6 @@ errlHndl_t sendRepositoryChangedEvent(const pldm_pdr* const i_repo,
         do
         {
             {
-                const msg_q_t msgQ = MSG_Q_RESOLVE("sendRepositoryChangedEvent", VFS_ROOT_MSG_PLDM_REQ_OUT);
-
                 std::vector<uint8_t> response_bytes;
 
                 // Value from DSP0248 section 16.6
@@ -476,7 +469,7 @@ errlHndl_t sendRepositoryChangedEvent(const pldm_pdr* const i_repo,
                 errl = sendrecv_pldm_request<PLDM_PLATFORM_EVENT_MESSAGE_MIN_REQ_BYTES>
                     (response_bytes,
                      event_data_bytes,
-                     msgQ,
+                     g_outboundPldmReqMsgQ,
                      encode_platform_event_message_req,
                      DEFAULT_INSTANCE_ID,
                      DSP0248_V1_2_0_PLATFORM_EVENT_FORMAT_VERSION,
@@ -593,9 +586,6 @@ errlHndl_t sendSensorStateChangedEvent(const Target* const i_target,
 
     do
     {
-        const msg_q_t msgQ = MSG_Q_RESOLVE("sendSensorStateChangedEvent",
-                                           VFS_ROOT_MSG_PLDM_REQ_OUT);
-
         std::vector<uint8_t> response_bytes;
 
         // Value from DSP0248 section 16.6
@@ -604,7 +594,7 @@ errlHndl_t sendSensorStateChangedEvent(const Target* const i_target,
         errl = sendrecv_pldm_request<PLDM_PLATFORM_EVENT_MESSAGE_MIN_REQ_BYTES>
             (response_bytes,
              event_data_bytes,
-             msgQ,
+             g_outboundPldmReqMsgQ,
              encode_platform_event_message_req,
              DEFAULT_INSTANCE_ID,
              DSP0248_V1_2_0_PLATFORM_EVENT_FORMAT_VERSION,
@@ -787,9 +777,6 @@ errlHndl_t sendSetNumericEffecterValueRequest(const effecter_id_t i_effecter_id,
     do
     {
 
-    const msg_q_t msgQ = MSG_Q_RESOLVE("sendSetNumericEffecterValueRequest",
-                                       VFS_ROOT_MSG_PLDM_REQ_OUT);
-
     void* effecter_value_ptr = nullptr;
 
     uint8_t effecter_value_8 = i_effecter_value;
@@ -819,7 +806,7 @@ errlHndl_t sendSetNumericEffecterValueRequest(const effecter_id_t i_effecter_id,
     errl = sendrecv_pldm_request<PLDM_SET_NUMERIC_EFFECTER_VALUE_MIN_REQ_BYTES>
         (response_bytes,
          i_value_size - 1, // PLDM_SET_NUMERIC_EFFECTER_VALUE_MIN_REQ_BYTES already includes space for 1 byte, so subtract 1 here
-         msgQ,
+         g_outboundPldmReqMsgQ,
          encode_set_numeric_effecter_value_req,
          DEFAULT_INSTANCE_ID, // let the PLDM service fill this in
          i_effecter_id,
@@ -912,14 +899,13 @@ errlHndl_t sendSetStateEffecterStatesRequest(
     do
     {
         /* Make the effecter state request */
-        const msg_q_t msgQ = MSG_Q_RESOLVE("sendSetStateEffecterStatesRequest",
-                                          VFS_ROOT_MSG_PLDM_REQ_OUT);
+
         std::vector<uint8_t> response_bytes;
 
         errl =
             sendrecv_pldm_request<PLDM_SET_STATE_EFFECTER_STATES_REQ_BYTES> (
               response_bytes,
-              msgQ,
+              g_outboundPldmReqMsgQ,
               encode_set_state_effecter_states_req,
               DEFAULT_INSTANCE_ID, // 0x00
               effecter_req.effecter_id,

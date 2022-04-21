@@ -32,9 +32,6 @@
 #include <vector>
 #include <sys/msg.h>
 
-// VFS_ROOT_MSG_PLDM_REQ_OUT
-#include <sys/vfs.h>
-
 // non-pldm /include headers
 #include <mctp/mctp_message_types.H>
 
@@ -62,8 +59,6 @@ errlHndl_t getBiosTable(const pldm_bios_table_types i_type,
 {
     PLDM_ENTER("getBiosTable type = 0x%08x", i_type);
 
-    const msg_q_t msgQ = MSG_Q_RESOLVE("PLDM::getBiosTable", VFS_ROOT_MSG_PLDM_REQ_OUT);
-
     pldm_get_bios_table_req  bios_table_req
     {
         .transfer_handle = 0, // (0 if transfer op is FIRSTPART)
@@ -85,7 +80,7 @@ errlHndl_t getBiosTable(const pldm_bios_table_types i_type,
             errl =
               sendrecv_pldm_request<PLDM_GET_BIOS_TABLE_REQ_BYTES> (
                   response_bytes,
-                  msgQ,
+                  g_outboundPldmReqMsgQ,
                   encode_get_bios_table_req,
                   DEFAULT_INSTANCE_ID,
                   bios_table_req.transfer_handle,
@@ -204,7 +199,6 @@ errlHndl_t getBiosAttrFromHandle(const bios_handle_t i_bios_attr_handle,
     PLDM_ENTER("getBiosAttrFromHandle");
     PLDM_DBG("Making request for Bios Attr 0x%08x from the BMC", i_bios_attr_handle);
 
-    const msg_q_t msgQ = MSG_Q_RESOLVE("PLDM::getBiosAttrFromHandle", VFS_ROOT_MSG_PLDM_REQ_OUT);
     variable_field attribute_data { };
     errlHndl_t errl = nullptr;
 
@@ -227,7 +221,7 @@ errlHndl_t getBiosAttrFromHandle(const bios_handle_t i_bios_attr_handle,
             errl =
               sendrecv_pldm_request<PLDM_GET_BIOS_ATTR_CURR_VAL_BY_HANDLE_REQ_BYTES> (
                   response_bytes,
-                  msgQ,
+                  g_outboundPldmReqMsgQ,
                   encode_get_bios_attribute_current_value_by_handle_req,
                   DEFAULT_INSTANCE_ID,
                   bios_attr_req.transfer_handle,
@@ -365,7 +359,6 @@ errlHndl_t setBiosAttrByHandle(const bios_handle_t i_attribute_handle,
 {
     PLDM_ENTER("setBiosAttrByHandle(handle=0x%08x)", i_attribute_handle);
 
-    const msg_q_t msgQ = MSG_Q_RESOLVE("PLDM::setBiosAttrByHandle", VFS_ROOT_MSG_PLDM_REQ_OUT);
     errlHndl_t errl = nullptr;
 
     do
@@ -395,7 +388,7 @@ errlHndl_t setBiosAttrByHandle(const bios_handle_t i_attribute_handle,
         sendrecv_pldm_request<PLDM_SET_BIOS_ATTR_CURR_VAL_MIN_REQ_BYTES>(
             response_bytes,
             attribute_description,
-            msgQ,
+            g_outboundPldmReqMsgQ,
             encode_set_bios_attribute_current_value_req,
             DEFAULT_INSTANCE_ID,
             req_header.transfer_handle,

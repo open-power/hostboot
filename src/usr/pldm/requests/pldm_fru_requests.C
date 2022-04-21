@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -68,19 +68,11 @@ errlHndl_t getFruRecordTableMetaData(pldm_get_fru_record_table_metadata_resp & o
 
     PLDM_ENTER("Enter getFruRecordTableMetaData");
 
-#ifndef __HOSTBOOT_RUNTIME
-    msg_q_t msgQ = msg_q_resolve(VFS_ROOT_MSG_PLDM_REQ_OUT);
-    assert(msgQ != nullptr,
-            "Bug! PLDM Req Out Message queue did not resolve properly!");
-#else
-    msg_q_t msgQ = nullptr;
-#endif
-
     std::vector<uint8_t> response_bytes;
 
     errl = sendrecv_pldm_request<PLDM_GET_FRU_RECORD_TABLE_METADATA_REQ_BYTES>(
                       response_bytes,
-                      msgQ,
+                      g_outboundPldmReqMsgQ,
                       encode_get_fru_record_table_metadata_req,
                       DEFAULT_INSTANCE_ID);
 
@@ -187,19 +179,12 @@ errlHndl_t getFruRecordTable(const size_t i_table_buffer_len,
 
     PLDM_ENTER("Enter getFruRecordTable buflen 0x%.08x",
                 i_table_buffer_len);
-#ifndef __HOSTBOOT_RUNTIME
-    msg_q_t msgQ = msg_q_resolve(VFS_ROOT_MSG_PLDM_REQ_OUT);
-    assert(msgQ != nullptr,
-            "Bug! PLDM Req Out Message queue did not resolve properly!");
-#else
-    msg_q_t msgQ = nullptr;
-#endif
 
     std::vector<uint8_t> response_bytes;
 
     errl = sendrecv_pldm_request<PLDM_GET_FRU_RECORD_TABLE_REQ_BYTES>(
         response_bytes,
-        msgQ,
+        g_outboundPldmReqMsgQ,
         encode_get_fru_record_table_req,
         DEFAULT_INSTANCE_ID,
         PLDM::INITIAL_TRANS_HNDL,

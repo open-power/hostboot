@@ -40,9 +40,8 @@
 namespace PLDM
 {
 
-errlHndl_t handleGetPldmVersionRequest(const msg_q_t i_msgQ,
-                                       const pldm_msg* const i_msg,
-                                       const size_t i_payload_len)
+errlHndl_t handleGetPldmVersionRequest(const MCTP::mctp_outbound_msgq_t i_msgQ,
+                                       const pldm_mctp_message& i_msg)
 {
     errlHndl_t l_err(nullptr);
 
@@ -84,9 +83,8 @@ errlHndl_t handleGetPldmVersionRequest(const msg_q_t i_msgQ,
     return l_err;
 }
 
-errlHndl_t handleUnsupportedCommandRequest(const msg_q_t i_msgQ,
-                               const pldm_msg* const i_msg,
-                               const size_t i_payload_len)
+errlHndl_t handleUnsupportedCommandRequest(const MCTP::mctp_outbound_msgq_t i_msgQ,
+                                           const pldm_mctp_message& i_msg)
 {
     errlHndl_t l_err(nullptr);
 
@@ -94,7 +92,7 @@ errlHndl_t handleUnsupportedCommandRequest(const msg_q_t i_msgQ,
     /* Curent list of Handlers -> GET_TID GET_PLDM_TYPES GET_PLDM_COMMANDS */
     PLDM_INF("Received Unsupported Command Request i_msg->hdr.type=0x%02x "
              "i_msg->hdr.command=0x%02x i_msg->hdr.instance_id=%d",
-              i_msg->hdr.type, i_msg->hdr.command, i_msg->hdr.instance_id);
+             i_msg.pldm()->hdr.type, i_msg.pldm()->hdr.command, i_msg.pldm()->hdr.instance_id);
 
     // Reply to request to indicate 'unsupported'.
     send_cc_only_response(i_msgQ, i_msg, PLDM_ERROR_UNSUPPORTED_PLDM_CMD);
