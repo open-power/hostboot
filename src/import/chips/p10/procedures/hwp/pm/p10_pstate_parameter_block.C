@@ -869,8 +869,9 @@ void gppb_print(
     FAPI_INF("  %-26s : %1d", "wof_disable_vratio",
             i_gppb->pgpe_flags[PGPE_FLAG_WOF_DISABLE_VRATIO]);
 
-    FAPI_INF("  %-26s : %1d", "eco_count_en | eco_count",
-            i_gppb->pgpe_flags[PGPE_FLAG_ECO_COUNT]);
+    FAPI_INF("  %-26s : 0x%2X (eco_count_en | eco_count) -> count = %d", "eco_count",
+            i_gppb->pgpe_flags[PGPE_FLAG_ECO_COUNT],  
+            (i_gppb->pgpe_flags[PGPE_FLAG_ECO_COUNT] & 0x7F));
 
     FAPI_INF("Other Info:");
 
@@ -2382,14 +2383,17 @@ fapi2::ReturnCode PlatPmPPB::vpd_init( void )
         //Compute fmax, ceil freq
         FAPI_TRY(pm_set_frequency(),
                 "pm_set_frequency function failed");;
+
         FAPI_INF("Getting ECO core count from PG");
         l_rc = get_mvpd_PG ();
-
         if (l_rc)
         {
-            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            FAPI_ASSERT(false,
+                        fapi2::PSTATE_PB_PG_ACCESS_ERROR(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                        .set_CHIP_TARGET(iv_procChip)
+                        .set_FAPI_RC(l_rc),
+                        "Pstate Parameter Block get_mvpd_PG function failed");
         }
-
 
         //Read #V data
         FAPI_TRY(get_mvpd_poundV(),
@@ -2428,7 +2432,6 @@ fapi2::ReturnCode PlatPmPPB::vpd_init( void )
         // if wof is disabled.. don't call IQ function
         if (is_wof_enabled())
         {
-
             FAPI_INF("Getting IQ (IDDQ) Data");
             l_rc = get_mvpd_iddq ();
 
@@ -2441,20 +2444,6 @@ fapi2::ReturnCode PlatPmPPB::vpd_init( void )
                                    "Pstate Parameter Block get_mvpd_iddq function failed");
                 fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
             }
-
-            FAPI_INF("Getting ECO core count from PG");
-            l_rc = get_mvpd_PG ();
-
-            if (l_rc)
-            {
-                FAPI_ASSERT_NOEXIT(false,
-                                   fapi2::PSTATE_PB_PG_ACCESS_ERROR(fapi2::FAPI2_ERRL_SEV_RECOVERED)
-                                   .set_CHIP_TARGET(iv_procChip)
-                                   .set_FAPI_RC(l_rc),
-                                   "Pstate Parameter Block get_mvpd_PG function failed");
-                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-            }
-
         }
         else
         {
@@ -3594,6 +3583,8 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_PG()
 {
     FAPI_INF(">>>>>>>>> get_mvpd_poundPG");
 
+    iv_eco_count = 0;
+
     uint8_t l_present_core_unit_pos;
 
     auto l_core_present_vector =
@@ -3642,7 +3633,7 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_PG()
     }  // Present core loop
 
 fapi_try_exit:
-
+    FAPI_INF("ECO count = %d", iv_eco_count);
     FAPI_INF("<<<<<<<<< get_mvpd_poundPG");
 
     return fapi2::current_err;
