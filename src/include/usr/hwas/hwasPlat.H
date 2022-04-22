@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,15 @@
 
 namespace HWAS
 {
+
+/**
+ * @brief Collect all(both) HWAS trace buffers
+ * @param[in] i_errhdl  Error log handle
+ * @param[in] i_size    Number of bytes to save,
+ *                      default to a KILOBYTE
+ */
+void collectHwasTraces( errlHndl_t i_errhdl,
+                        const size_t i_size = KILOBYTE );
 
 /**
 @brief Help in verifying that HB and SBE deconfig match

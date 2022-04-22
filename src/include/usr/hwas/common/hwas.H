@@ -111,8 +111,6 @@ errlHndl_t discoverTargets();
  */
 errlHndl_t initHardware();
 
-
-
 // Maximum number of EXs per proc
 #define NUM_EX_PER_EQ     2
 #define NUM_EQ_PER_CHIP   8
