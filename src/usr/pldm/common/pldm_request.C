@@ -35,15 +35,15 @@ using namespace PLDM;
 
 /* @brief  Check the next incoming MCTP packet and see whether it's a response
  *         to the request we sent. If there is no response available at the time
- *         and io_ms_remaining is 0, create an error log for the timeout.
- *         If there is time remaining, sleep for 1 millisecond instead.
+ *         and i_last_chance is true, create an error log for the timeout.
+ *         If i_last_chance is false, sleep for 10 milliseconds instead.
  *
  * @param[in]     i_pldm_request        The PLDM request that we are waiting on a response for
- * @param[in/out] io_ms_remaining       The number of milliseconds remaining before timing out
+ * @param[in]     i_last_chance         The number of milliseconds remaining before timing out
  * @return        errlHndl_t            Error on timeout, nullptr otherwise
  */
 errlHndl_t check_pldm_response(const pldm_msg* const i_pldm_request,
-                               int& io_ms_remaining)
+                               const bool i_last_chance)
 {
     errlHndl_t errl = nullptr;
 
@@ -53,13 +53,14 @@ errlHndl_t check_pldm_response(const pldm_msg* const i_pldm_request,
 
     if (return_code)
     {
-        if (return_code == HBRT_RC_NO_MCTP_PACKET && io_ms_remaining > 0)
+        if (return_code == HBRT_RC_NO_MCTP_PACKET && !i_last_chance)
         {
             const uint64_t sec = 0;
-            const uint64_t nsec = 1 * NS_PER_MSEC;
+            const uint64_t nsec = 10 * NS_PER_MSEC; // 10 milliseconds is the
+                                                    // minimum supported wait
+                                                    // time for hypervisor
+                                                    // adjuncts
             nanosleep(sec, nsec);
-
-            io_ms_remaining--;
         }
         else
         {
@@ -114,6 +115,11 @@ errlHndl_t check_pldm_response(const pldm_msg* const i_pldm_request,
     return errl;
 }
 
+timespec_t operator-(timespec_t lhs, timespec_t rhs)
+{
+    return { lhs.tv_sec - rhs.tv_sec, lhs.tv_nsec - rhs.tv_nsec };
+}
+
 errlHndl_t PLDM::sendrecv_pldm_request_impl(const std::vector<uint8_t>& i_msg,
                                             std::vector<uint8_t>& o_response_bytes)
 {
@@ -141,7 +147,7 @@ errlHndl_t PLDM::sendrecv_pldm_request_impl(const std::vector<uint8_t>& i_msg,
         // Try to send the PLDM message at least once, at most twice. The
         // difference between a retry and a real message send is that a retry
         // uses the same sequence ID as any retried messages.
-        const int retries = 2;
+        const int retries = 3;
 
         for (int attempt = 0; PLDM::get_next_response().empty() && attempt < retries; ++attempt)
         {
@@ -180,17 +186,33 @@ errlHndl_t PLDM::sendrecv_pldm_request_impl(const std::vector<uint8_t>& i_msg,
                 break;
             }
 
-            int sleep_time_ms = 90 * MS_PER_SEC;
+            const uint64_t timeout_seconds = 90;
+            timespec_t starttime = { }, now = { };
+
+            assert(clock_gettime(CLOCK_MONOTONIC, &starttime) == 0);
+
+            PLDM_INF("Started polling at %d", starttime.tv_sec);
+
+            uint64_t pollcount = 0;
 
             do
             {
+                assert(clock_gettime(CLOCK_MONOTONIC, &now) == 0);
+
                 // Note that if this is a retry, we are sending the request
                 // using the same instance ID. This allows the BMC to handle
                 // duplicate requests appropriately if for some reason they
                 // received our first request and acted on it, but we did not
                 // receive their first response.
-                errl = check_pldm_response(pldm_request, sleep_time_ms);
+                errl = check_pldm_response(pldm_request,
+                                           (now - starttime).tv_sec > timeout_seconds);
+
+                ++pollcount;
             } while (!errl && PLDM::get_next_response().empty());
+
+            PLDM_INF("Stopped polling at %d, took %d seconds, polled %d times", now.tv_sec,
+                     (now - starttime).tv_sec,
+                     pollcount);
         }
 
         // break if we encounter an error
