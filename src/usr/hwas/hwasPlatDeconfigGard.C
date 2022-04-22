@@ -66,11 +66,20 @@
 #include <../usr/secureboot/trusted/trustedbootUtils.H>
 #endif
 
+#define HWAS_90_PERCENT_OF(num) ((num * 9) / 10)
+
 namespace HWAS
 {
 
 using namespace HWAS::COMMON;
 using namespace TARGETING;
+
+void collectHwasTraces( errlHndl_t i_errhdl,
+                        const size_t i_size )
+{
+    i_errhdl->collectTrace("HWAS",   i_size);
+    i_errhdl->collectTrace("HWAS_I", i_size);
+}
 
 const uint32_t EMPTY_GARD_RECORDID = 0xFFFFFFFF;
 
@@ -659,37 +668,73 @@ errlHndl_t DeconfigGard::platCreateGardRecord(
             break;
         }
 
-        if (!l_pRecord)
+        if ( (!l_pRecord) ||
+             ((l_hbDeconfigGard->iv_nextGardRecordId) >= (HWAS_90_PERCENT_OF(l_hbDeconfigGard->iv_maxGardRecords))) )
         {
-            HWAS_ERR("GARD Record Repository full");
+            errlSeverity_t l_sev = ERRORLOG::ERRL_SEV_PREDICTIVE;
+            if ((l_hbDeconfigGard->iv_nextGardRecordId < l_hbDeconfigGard->iv_maxGardRecords) && (l_pRecord))
+            {
+                HWAS_ERR("GARD Record Repository over 90%% full: iv_nextGardRecordId = %d, iv_maxGardRecords = %d",
+                         l_hbDeconfigGard->iv_nextGardRecordId, l_hbDeconfigGard->iv_maxGardRecords);
+            }
+            else // (l_hbDeconfigGard->iv_nextGardRecordId >= l_hbDeconfigGard->iv_maxGardRecords) || (!l_pRecord)
+            {
+                l_sev = ERRORLOG::ERRL_SEV_UNRECOVERABLE;
+                HWAS_ERR("GARD Record Repository full");
+            }
 
-            // TODO RTC 96397
-            // Hostboot will only write GARD Records to PNOR when it is the
-            // gardRecordMaster. An error will be logged if GARD Record storage
-            // exceeds 90% and the GARD Record will not be written if full. The
-            // error will have a new procedure callout requesting that the
-            // machine be serviced. Right now, this error log has no callouts.
+            static bool l_firstPredictiveError = true;
+            // only create 1 predictive error log
+            if ((l_sev == ERRORLOG::ERRL_SEV_UNRECOVERABLE) || l_firstPredictiveError)
+            {
+                /*@
+                 * @moduleid     HWAS::MOD_PLAT_DECONFIG_GARD
+                 * @reasoncode   HWAS::RC_GARD_REPOSITORY_FULL
+                 *
+                 * @userdata1[00:31]    HUID of input target
+                 * @userdata1[32:63]    GARD errlog EID
+                 * @userdata2[00:31]    iv_nextGardRecordId
+                 * @userdata2[32:63]    iv_maxGardRecords
+                 *
+                 * @devdesc      Attempt to create a GARD Record and the GARD
+                 *               Repository is full
+                 * @custdesc     A problem occurred during the IPL of the system.
+                 *               Attempt to create a deconfiguration record for a
+                 *               target, but the deconfiguration repository is full.
+                 */
+                l_pErr = new ERRORLOG::ErrlEntry(l_sev,
+                                                 HWAS::MOD_PLAT_DECONFIG_GARD,
+                                                 HWAS::RC_GARD_REPOSITORY_FULL,
+                                                 TWO_UINT32_TO_UINT64(get_huid(i_pTarget),
+                                                                      i_errlEid),
+                                                 TWO_UINT32_TO_UINT64(l_hbDeconfigGard->iv_nextGardRecordId,
+                                                                      l_hbDeconfigGard->iv_maxGardRecords));
 
-            /*@
-             * @errortype
-             * @moduleid     HWAS::MOD_PLAT_DECONFIG_GARD
-             * @reasoncode   HWAS::RC_GARD_REPOSITORY_FULL
-             * @devdesc      Attempt to create a GARD Record and the GARD
-             *               Repository is full
-             * @custdesc     A problem occurred during the IPL of the system.
-             *               Attempt to create a deconfiguration record for a
-             *               target, but the deconfiguration repository is full.
-             * @userdata1    HUID of input target // GARD errlog EID
-             */
-            const uint64_t userdata1 =
-                (static_cast<uint64_t> (get_huid(i_pTarget)) << 32) |
-                i_errlEid;
-            l_pErr = new ERRORLOG::ErrlEntry(
-                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                HWAS::MOD_PLAT_DECONFIG_GARD,
-                HWAS::RC_GARD_REPOSITORY_FULL,
-                userdata1);
-            break;
+                l_pErr->addProcedureCallout(HWAS::EPUB_PRC_FIND_DECONFIGURED_PART,
+                                            HWAS::SRCI_PRIORITY_HIGH);
+
+                l_pErr->addProcedureCallout(HWAS::EPUB_PRC_LVL_SUPP,
+                                            HWAS::SRCI_PRIORITY_MED);
+
+                HWAS::collectHwasTraces(l_pErr);
+
+                if (l_sev == ERRORLOG::ERRL_SEV_PREDICTIVE)
+                {
+                      errlCommit(l_pErr, HWAS_COMP_ID);
+                      l_firstPredictiveError = false;
+                     // continue on as there is still space to add the guard record
+                }
+                else
+                {
+                    // otherwise the guard repo is full,
+                    // break out and pass error log to caller
+                    break;
+                }
+
+            }
+
+
+
         }
 
         HWAS_INF("platCreateGardRecord: iv_GardVersion=0x%X", l_hbDeconfigGard->iv_GardVersion);

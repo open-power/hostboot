@@ -89,25 +89,13 @@ RegisterHWASFunctions registerHWASFunctions;
 
 using   namespace   TARGETING;
 
-/**
- * @brief Collect all(both) HWAS trace buffers
- * @param[in] i_errhdl  Error log handle
- * @param[in] i_size  Number of bytes to save
- */
-void collectHwasTraces( errlHndl_t i_errhdl,
-                        const uint64_t i_size = KILOBYTE )
-{
-    i_errhdl->collectTrace("HWAS", i_size);
-    i_errhdl->collectTrace("HWAS_I", i_size);
-}
-
 //******************************************************************************
 // platReadIDEC function
 //******************************************************************************
 errlHndl_t platReadIDEC(const TargetHandle_t &i_target)
 {
     // Call over to the target-specific layer since every chip can have
-    //  unique registers
+    // unique registers
     size_t sz = 0;
     errlHndl_t errl = nullptr;
 
@@ -119,8 +107,6 @@ errlHndl_t platReadIDEC(const TargetHandle_t &i_target)
                                  sz,
                                  DEVICE_IDEC_ADDRESS(),
                                  Phase1);
-
-
     return errl;
 }
 
