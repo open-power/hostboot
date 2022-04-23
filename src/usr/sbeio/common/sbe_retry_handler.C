@@ -247,6 +247,7 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
                           get_huid(iv_proc), iv_masterErrorLogPLID);
                 dump_errl->collectTrace("ISTEPS_TRACE");
                 dump_errl->collectTrace(SBEIO_COMP_NAME);
+                dump_errl->plid(iv_masterErrorLogPLID);
                 errlCommit(dump_errl, SBEIO_COMP_ID);
             }
 #endif
@@ -819,6 +820,13 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
                     this->iv_currentSideBootAttempts_mseeprom++;
                     ++this->iv_boot_restart_count;
                 }
+                else // catch all other cases, i.e. REIPL_BKP_BMSEEPROM and any other future proofing
+                {
+                    // bumping the counters prevent infinite loops to make sure we have an exit path
+                    this->iv_currentSideBootAttempts++;
+                    this->iv_currentSideBootAttempts_mseeprom++;
+                    ++this->iv_boot_restart_count;
+                }
 
                 if (this->iv_boot_restart_count > MAX_RESTARTS)
                 {
@@ -828,7 +836,6 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
 
                 SBE_TRACF("Invoking p10_sbe_hreset HWP on processor %.8X", get_huid(iv_proc));
 
-                // For now we only use HRESET during runtime
                 FAPI_INVOKE_HWP( l_errl,
                                  p10_sbe_hreset,
                                  l_fapi2_proc_target );
@@ -892,20 +899,24 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
             // to determine why we have failed, if the sbeBooted is true
             if ((this->iv_sbeRegister.currState != SBE_STATE_RUNTIME) && (this->iv_sbeRegister.sbeBooted))
             {
-                this->sbe_run_extract_rc();
+                if (!i_sbeHalted)
+                {
+                    this->sbe_run_extract_rc();
 
 #if !defined(__HOSTBOOT_RUNTIME) && defined(CONFIG_PLDM)
-                errlHndl_t dump_errl = PLDM::dumpSbe(iv_proc, iv_masterErrorLogPLID);
+                    errlHndl_t dump_errl = PLDM::dumpSbe(iv_proc, iv_masterErrorLogPLID);
 
-                if (dump_errl)
-                {
-                    SBE_TRACF("main_sbe_handler(2): SBE dump failed for processor 0x%08x, PLID 0x%08x",
-                              get_huid(iv_proc), iv_masterErrorLogPLID);
-                    dump_errl->collectTrace("ISTEPS_TRACE");
-                    dump_errl->collectTrace(SBEIO_COMP_NAME);
-                    errlCommit(dump_errl, SBEIO_COMP_ID);
-                }
+                    if (dump_errl)
+                    {
+                        SBE_TRACF("main_sbe_handler(2): SBE dump failed for processor 0x%08x, PLID 0x%08x",
+                                  get_huid(iv_proc), iv_masterErrorLogPLID);
+                        dump_errl->collectTrace("ISTEPS_TRACE");
+                        dump_errl->collectTrace(SBEIO_COMP_NAME);
+                        dump_errl->plid(iv_masterErrorLogPLID);
+                        errlCommit(dump_errl, SBEIO_COMP_ID);
+                    }
 #endif
+                }
             }
 
         } while( (this->iv_sbeRegister).currState != SBE_STATE_RUNTIME );

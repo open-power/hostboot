@@ -80,6 +80,11 @@
 #include "call_proc_build_smp.H"
 #include "monitor_sbe_halt.H"
 
+// PLDM
+#if defined(CONFIG_PLDM)
+#include <pldm/extended/sbe_dump.H>
+#endif
+
 using   namespace   ISTEP_ERROR;
 using   namespace   ISTEP;
 using   namespace   TARGETING;
@@ -407,6 +412,22 @@ void recoverSBE( Target * i_secProc, IStepError & io_StepError )
                               HWAS::SRCI_PRIORITY_HIGH,
                               HWAS::DELAYED_DECONFIG,
                               HWAS::GARD_NULL );
+#if defined(CONFIG_PLDM)
+        // Associate the PLID of the l_errl to the dump_errl
+        errlHndl_t dump_errl = PLDM::dumpSbe(i_secProc, l_errl->plid());
+        if (dump_errl)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                  ERR_MRK"recoverSBE(): Failed to request SBE dump for PROC=0x%.8X which did NOT reach runtime",
+                  get_huid(i_secProc));
+            dump_errl->collectTrace("ISTEPS_TRACE", 256);
+            dump_errl->collectTrace(SBEIO_COMP_NAME);
+            dump_errl->plid(l_errl->plid());
+            errlCommit(dump_errl, ISTEP_COMP_ID);
+        }
+#endif
+        // captureError will commit l_errl which makes pulling the plid unable to dereference
+        // if captureError comes before the usage of the l_errl->plid()
         captureError(l_errl, io_StepError, ISTEP_COMP_ID, i_secProc);
     }
 
