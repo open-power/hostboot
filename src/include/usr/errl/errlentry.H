@@ -693,6 +693,30 @@ public:
                                    i_deconfigState = HWAS::NO_DECONFIG,
                        const HWAS::GARD_ErrorType
                                    i_gardErrorType = HWAS::GARD_NULL);
+
+    enum voltage_type : uint8_t
+    {
+        VDD = 0,
+        VCS = 1,
+        VDN = 2,
+        VIO = 3,
+    };
+
+    /**
+     *  @brief Add a VRM part callout
+     *
+     *  @param[in]  i_target        The hardware target that owns this part
+     *  @param[in]  i_vrmType       The voltage type for the VRM (VDD, VCS, VDN, VIO)
+     *                              VDD = 0, VCS = 1, VDN = 2, VIO = 3. may create
+     *                              enum for this later
+     *  @param[in]  i_priority      The priority of the callout
+     *
+     *  @return void
+     */
+    void addVrmCallout(const TARGETING::Target *i_target,
+                       const voltage_type i_vrmType,
+                       const HWAS::callOutPriority i_priority);
+
     /**
      *  @brief Add a part callout.
      *  The i_target is used to identify the associated target. This target

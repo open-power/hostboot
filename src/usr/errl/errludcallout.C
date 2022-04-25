@@ -76,6 +76,21 @@ ErrlUserDetailsCallout::ErrlUserDetailsCallout(
 } // Clock callout
 
 //------------------------------------------------------------------------------
+// VRM callout
+/*
+ErrlUserDetailsCallout::ErrlUserDetailsCallout(
+        const voltage_type i_vrmType,
+        const void *i_pTargetData,
+        uint32_t i_targetDataLength,
+        const HWAS::partTypeEnum i_partType,
+        const HWAS::callOutPriority i_priority,
+        const HWAS::DeconfigEnum i_deconfigState,
+        const HWAS::GARD_ErrorType i_gardErrorType)
+{
+    // TODO: add stuff
+}*/
+
+//------------------------------------------------------------------------------
 // Part callout
 ErrlUserDetailsCallout::ErrlUserDetailsCallout(
         const void *i_pTargetData,
