@@ -144,10 +144,10 @@ errlHndl_t PLDM::sendrecv_pldm_request_impl(const std::vector<uint8_t>& i_msg,
         PLDM::clear_next_response(); // This should already be empty, but we
                                      // clear it here just to make sure.
 
-        // Try to send the PLDM message at least once, at most twice. The
+        // Try to send the PLDM message, retry if it times out. The
         // difference between a retry and a real message send is that a retry
         // uses the same sequence ID as any retried messages.
-        const int retries = 3;
+        const int retries = 9;
 
         for (int attempt = 0; PLDM::get_next_response().empty() && attempt < retries; ++attempt)
         {
@@ -186,7 +186,7 @@ errlHndl_t PLDM::sendrecv_pldm_request_impl(const std::vector<uint8_t>& i_msg,
                 break;
             }
 
-            const uint64_t timeout_seconds = 90;
+            const uint64_t timeout_seconds = 30;
             timespec_t starttime = { }, now = { };
 
             assert(clock_gettime(CLOCK_MONOTONIC, &starttime) == 0);
