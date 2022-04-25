@@ -293,11 +293,13 @@ void getDimmDqAttr<TYPE_MEM_PORT>( TargetHandle_t i_target,
 
     uint8_t tmpData[DQS_PER_DIMM];
 
+    /* TODO - comment out until MEM_VPD_DQ_MAP is updated to uint8_t[80]
     if ( !i_target->tryGetAttr<ATTR_MEM_VPD_DQ_MAP>(tmpData) )
     {
         PRDF_ERR( PRDF_FUNC "Failed to get ATTR_MEM_VPD_DQ_MAP" );
         PRDF_ASSERT( false );
     }
+    */
 
     memcpy( &o_dqMapPtr[0], &tmpData[0], DQS_PER_DIMM );
 
