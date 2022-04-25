@@ -55,6 +55,7 @@
 #include <pldm/extended/pdr_manager.H>
 #include <pldm/requests/pldm_fru_requests.H>
 #include <pldm/pldm_trace.H>
+#include <pldm/pldmif.H>
 
 // libpldm subtree headers
 #include <openbmc/pldm/libpldm/fru.h>
@@ -1393,6 +1394,10 @@ errlHndl_t cacheRemoteFruVpd()
     }
 
     }while(0);
+
+    // checks for PLDM error and adds flight recorder data to log
+    addPldmFrData(errl);
+
     PLDM_EXIT("cacheRemoteFruVpd");
     return errl;
 }

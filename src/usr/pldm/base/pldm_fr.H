@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021                             */
+/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,9 +33,10 @@
 #define PLDMFR_H
 
 #include <openbmc/pldm/libpldm/base.h>
+#include <pldm/pldmif.H>
+#include <sys/sync.h> // mutex_t
 
 #define FLIGHT_RECORDER_MAX 250
-enum traffic_direction : uint8_t;
 
 /* PLDM Responses have a 1-byte completion code following
    the standard pldm_msg_hdr. We will store this completion_code
@@ -63,7 +64,31 @@ class pldmFR
         */
         void logMsg(const pldm_msg_hdr* const& i_hdr, PLDM::traffic_direction& i_dir);
 
+        /**
+         * @brief Dump out PLDM request hdrs from oldest->newest for logging PLDM activity
+         *        Will just dump out filled in entries.
+         *
+         * @param[in] i_dir The direction of the PLDM message:
+         *                  - INBOUND:  BMC requests coming into HB
+         *                  - OUTBOUND: HB requests going out to BMC
+         * @param[out] o_frData  Ordered flight recorder data for specified requests
+         */
+        void dumpRequestFr(PLDM::traffic_direction i_dir, std::vector<pldm_msg_hdr>& o_frData);
+
+        /**
+         * @brief Dump out PLDM response hdrs from oldest->newest for logging PLDM activity
+         *        Will just dump out filled in entries.
+         *
+         * @param[in] i_dir The direction of the PLDM message:
+         *                  - INBOUND:  BMC responses coming into HB
+         *                  - OUTBOUND: HB responses going out to BMC
+         * @param[out] o_frData  Ordered flight recorder data for specified responses
+         */
+        void dumpResponseFr(PLDM::traffic_direction i_dir, std::vector<pldm_rsp_hdr>& o_frData);
+
     private:
+        /* mutex to make sure data isn't changing when dumping data */
+        mutex_t iv_frMutex;
         /* Max number of "flights" we will record in each flight recorder array*/
         size_t iv_frMax;
         /* Record of HB->BMC PLDM requests */

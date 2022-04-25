@@ -189,6 +189,12 @@ namespace PLDM
         // no parsers for these two, just raw hex dump of data
         PLDM_UDT_MSG_INCOMPLETE_DATA = 0x01, // partial msg data (first 2K bytes)
         PLDM_UDT_MSG_DATA            = 0x02, // full msg data
+
+        // flight recorder logs
+        PLDM_UDT_FR_INBOUND_REQUESTS   = 0x03, // Inbound BMC->HB request flight recorder log
+        PLDM_UDT_FR_OUTBOUND_REQUESTS  = 0x04, // Outbound HB->BMC request flight recorder log
+        PLDM_UDT_FR_INBOUND_RESPONSES  = 0x05, // Inbound BMC->HB response flight recorder log
+        PLDM_UDT_FR_OUTBOUND_RESPONSES = 0x06, // Outbound HB->BMC response flight recorder log
     };
 }
 #endif

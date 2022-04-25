@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -180,6 +180,9 @@ errlHndl_t getBiosTable(const pldm_bios_table_types i_type,
 
     } while(false);
 
+    // checks for PLDM error and adds flight recorder data to log
+    addPldmFrData(errl);
+
     PLDM_EXIT("getBiosTable");
 
     return errl;
@@ -347,6 +350,7 @@ errlHndl_t getBiosAttrFromHandle(const bios_handle_t i_bios_attr_handle,
         char message[40] = { };
         snprintf(message, sizeof(message), "Attribute handle: %d", i_bios_attr_handle);
         ErrlUserDetailsString(message).addToLog(errl);
+        addPldmFrData(errl);
     }
 
     PLDM_EXIT("getBiosAttrFromHandle");
@@ -465,6 +469,7 @@ errlHndl_t setBiosAttrByHandle(const bios_handle_t i_attribute_handle,
         snprintf(message, sizeof(message), "Attribute handle: %d; attribute type: %d; value size: %d",
                  i_attribute_handle, i_attribute_type, i_attribute_size);
         ErrlUserDetailsString(message).addToLog(errl);
+        addPldmFrData(errl);
     }
 
     PLDM_EXIT("setBiosAttrByHandle (errl = %p)", errl);

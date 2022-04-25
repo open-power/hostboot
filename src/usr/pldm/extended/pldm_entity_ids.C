@@ -403,6 +403,7 @@ errlHndl_t PLDM::assignTargetEntityIds()
                                  ErrlEntry::ADD_SW_CALLOUT);
 
             addBmcErrorCallouts(errl);
+            addPldmFrData(errl);
             errlCommit(errl, PLDM_COMP_ID);
             continue;
         }
@@ -475,6 +476,9 @@ errlHndl_t PLDM::assignTargetEntityIds()
     }
 
     } while (false);
+
+    // checks for PLDM error and adds flight recorder data to log
+    addPldmFrData(errl);
 
     PLDM_EXIT("assignTargetEntityIds");
 

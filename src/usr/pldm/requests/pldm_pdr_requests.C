@@ -383,6 +383,9 @@ errlHndl_t getRemotePdrRepository(pldm_pdr* const io_repo)
         }
     }
 
+    // checks for PLDM error and adds flight recorder data to log
+    addPldmFrData(errl);
+
     return errl;
 }
 
@@ -525,6 +528,9 @@ errlHndl_t sendRepositoryChangedEvent(const pldm_pdr* const i_repo,
 
     addPdrCounts(errl);
 
+    // checks for PLDM error and adds flight recorder data to log
+    addPldmFrData(errl);
+
     PLDM_EXIT("sendRepositoryChangedEvent");
 
     return errl;
@@ -644,6 +650,9 @@ errlHndl_t sendSensorStateChangedEvent(const Target* const i_target,
     } while (false);
 
     addPdrCounts(errl);
+
+    // checks for PLDM error and adds flight recorder data to log
+    addPldmFrData(errl);
 
     PLDM_EXIT("sendSensorStateChangedEvent");
 
@@ -857,6 +866,9 @@ errlHndl_t sendSetNumericEffecterValueRequest(const effecter_id_t i_effecter_id,
 
     addPdrCounts(errl);
 
+    // checks for PLDM error and adds flight recorder data to log
+    addPldmFrData(errl);
+
     PLDM_EXIT("sendSetNumericEffecterValueRequest");
 
     return errl;
@@ -950,6 +962,9 @@ errlHndl_t sendSetStateEffecterStatesRequest(
     } while (false);
     addPdrCounts(errl);
 
+    // checks for PLDM error and adds flight recorder data to log
+    addPldmFrData(errl);
+
     PLDM_EXIT("sendSetStateEffecterStatesRequest");
 
     return errl;
@@ -1009,6 +1024,9 @@ errlHndl_t sendResetRebootCountRequest()
 
     addPdrCounts(errl);
 
+    // checks for PLDM error and adds flight recorder data to log
+    addPldmFrData(errl);
+
     PLDM_EXIT("sendResetRebootCountRequest()");
     return errl;
 }
@@ -1051,6 +1069,7 @@ errlHndl_t sendGracefulRestartRequest()
                                                       PLDM_STATE_SET_SW_TERMINATION_STATUS),
                                  ErrlEntry::ADD_SW_CALLOUT);
             addBmcErrorCallouts(errl);
+            addPldmFrData(errl);
             break;
         }
 

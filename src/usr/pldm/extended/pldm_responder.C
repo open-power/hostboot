@@ -438,7 +438,7 @@ void pldmResponder::handle_inbound_req_messages(void)
         if (errl)
         {
             PLDM_INF("handle_inbound_req returned an error");
-
+            addPldmFrData(errl);
             errlCommit(errl, PLDM_COMP_ID);
         }
     }

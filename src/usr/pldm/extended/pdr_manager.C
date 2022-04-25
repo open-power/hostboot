@@ -1327,6 +1327,9 @@ errlHndl_t PdrManager::awaitBmcPdrRepoChanged(const size_t i_timeout_ms)
         addPdrCounts(errl);
     }
 
+    // checks for PLDM error and adds flight recorder data to log
+    addPldmFrData(errl);
+
     return errl;
 }
 

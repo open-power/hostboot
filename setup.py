@@ -61,6 +61,7 @@ package_directories = {
     "udparsers.b3100":   "src/usr/errl/plugins/ebmc/b3100",
     "udparsers.b3600":   "src/usr/expaccess/plugins/ebmc",
     "udparsers.b4500":   "src/usr/spi/plugins/ebmc",
+    "udparsers.b4700":   "src/usr/pldm/plugins/ebmc",
     "udparsers.be500":   "src/usr/diag/prdf/peltool/ud",
     "udparsers.helpers": "src/build/tools/ebmc",
 

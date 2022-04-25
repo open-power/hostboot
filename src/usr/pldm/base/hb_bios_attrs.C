@@ -42,6 +42,7 @@
 #include <pldm/pldm_errl.H>
 #include <pldm/pldm_reasoncodes.H>
 #include <pldm/pldm_trace.H>
+#include <pldm/pldmif.H>
 
 // support for string user details sections
 #include <errl/errludstring.H>
@@ -457,6 +458,9 @@ errlHndl_t getCurrentAttrValue(const char *i_attr_string,
 
   }while(0);
 
+  // checks for PLDM error and adds flight recorder data to log
+  addPldmFrData(errl);
+
   return errl;
 }
 
@@ -591,6 +595,9 @@ errlHndl_t lookupEnumAttrValuesInStringTable(const std::vector<uint8_t>& i_strin
     }
 
     }while(0);
+    // checks for PLDM error and adds flight recorder data to log
+    addPldmFrData(errl);
+
     PLDM_EXIT("lookupAttrValueInStringTable");
     return errl;
 }
@@ -712,6 +719,7 @@ errlHndl_t systemEnumAttrLookup(std::vector<uint8_t>& io_string_table,
                              ErrlEntry::NO_SW_CALLOUT);
         ErrlUserDetailsString(i_attr_string).addToLog(errl);
         addBmcErrorCallouts(errl);
+        addPldmFrData(errl);
         break;
     }
     o_cur_val_string_entry = cur_val_string_entries[0];
@@ -830,9 +838,11 @@ errlHndl_t getLateralCastOutMode(std::vector<uint8_t>& io_string_table,
             ErrlUserDetailsString(PLDM_BIOS_HB_LATERAL_CAST_OUT_MODE_STRING).addToLog(errl);
             ErrlUserDetailsString(decoded_value.data()).addToLog(errl);
             addBmcErrorCallouts(errl);
+            addPldmFrData(errl);
             break;
         }
     } while(0);
+
     return errl;
 } // getLateralCastOutMode
 
@@ -889,6 +899,7 @@ errlHndl_t getDebugConsoleEnabled(std::vector<uint8_t>& io_string_table,
         ErrlUserDetailsString(PLDM_BIOS_HB_DEBUG_CONSOLE_STRING).addToLog(errl);
         ErrlUserDetailsString(decoded_value.data()).addToLog(errl);
         addBmcErrorCallouts(errl);
+        addPldmFrData(errl);
         break;
     }
 
@@ -1134,6 +1145,7 @@ errlHndl_t getLmbSize(
         ErrlUserDetailsString(PLDM_BIOS_HB_LMB_SIZE_STRING).addToLog(errl);
         ErrlUserDetailsString(decoded_value.data()).addToLog(errl);
         addBmcErrorCallouts(errl);
+        addPldmFrData(errl);
         break;
     }
 
@@ -1415,6 +1427,7 @@ errlHndl_t getLidIds(std::vector<uint8_t>& io_string_table,
                              ErrlEntry::NO_SW_CALLOUT);
         ErrlUserDetailsString(PLDM_BIOS_HB_LID_IDS_STRING).addToLog(errl);
         addBmcErrorCallouts(errl);
+        addPldmFrData(errl);
         break;
     }
     }while(0);
@@ -1479,6 +1492,7 @@ errlHndl_t getMfgFlags(std::vector<uint8_t>& io_string_table,
                              ErrlEntry::NO_SW_CALLOUT);
         ErrlUserDetailsString(PLDM_BIOS_HB_MFG_FLAGS_STRING).addToLog(errl);
         addBmcErrorCallouts(errl);
+        addPldmFrData(errl);
         break;
     }
 
@@ -1505,6 +1519,7 @@ errlHndl_t getMfgFlags(std::vector<uint8_t>& io_string_table,
                              ErrlEntry::NO_SW_CALLOUT);
         ErrlUserDetailsString(PLDM_BIOS_HB_MFG_FLAGS_STRING).addToLog(errl);
         addBmcErrorCallouts(errl);
+        addPldmFrData(errl);
         break;
     }
 
@@ -1585,6 +1600,7 @@ errlHndl_t getUsbEnablement(
         ErrlUserDetailsString(PLDM_BIOS_HB_USB_ENABLEMENT_STRING).addToLog(errl);
         ErrlUserDetailsString(decoded_value.data()).addToLog(errl);
         addBmcErrorCallouts(errl);
+        addPldmFrData(errl);
         break;
     }
 
@@ -1651,6 +1667,7 @@ errlHndl_t getMirrorMemory(
         ErrlUserDetailsString(PLDM_BIOS_HB_MIRROR_MEMORY_STRING).addToLog(errl);
         ErrlUserDetailsString(decoded_value.data()).addToLog(errl);
         addBmcErrorCallouts(errl);
+        addPldmFrData(errl);
         break;
     }
 
@@ -1724,6 +1741,7 @@ errlHndl_t getKeyClearRequest(std::vector<uint8_t>& io_string_table,
         ErrlUserDetailsString(PLDM_BIOS_HB_KEY_CLEAR_REQUEST_STRING).addToLog(errl);
         ErrlUserDetailsString(decoded_value.data()).addToLog(errl);
         addBmcErrorCallouts(errl);
+        addPldmFrData(errl);
         break;
     }
 
@@ -1795,6 +1813,7 @@ errlHndl_t setBiosIntegerAttrValue(std::vector<uint8_t>& io_string_table,
                              i_attr_value,
                              ErrlEntry::NO_SW_CALLOUT);
         addBmcErrorCallouts(errl);
+        addPldmFrData(errl);
         break;
     }
 
@@ -1937,6 +1956,7 @@ errlHndl_t setBiosEnumAttrValue(std::vector<uint8_t>& io_string_table,
                              *reinterpret_cast<const uint64_t *>(i_attr_enum_value_string),
                              ErrlEntry::NO_SW_CALLOUT);
         addBmcErrorCallouts(errl);
+        addPldmFrData(errl);
         break;
     }
 
@@ -2031,6 +2051,7 @@ errlHndl_t getPowerLimit(bool &o_powerLimitEnable,
         ErrlUserDetailsString(PLDM_BIOS_HB_POWER_LIMIT_ENABLE_STRING).addToLog(errl);
         ErrlUserDetailsString(decoded_value.data()).addToLog(errl);
         addBmcErrorCallouts(errl);
+        addPldmFrData(errl);
         break;
     }
 
@@ -2117,6 +2138,7 @@ errlHndl_t getTpmRequiredPolicy(
         ErrlUserDetailsString(PLDM_BIOS_HB_TPM_REQUIRED_POLICY_STRING).addToLog(errl);
         ErrlUserDetailsString(decoded_value.data()).addToLog(errl);
         addBmcErrorCallouts(errl);
+        addPldmFrData(errl);
         break;
     }
 
@@ -2173,6 +2195,7 @@ errlHndl_t getSecVerLockinEnabled(std::vector<uint8_t>& io_string_table,
         ErrlUserDetailsString(PLDM_BIOS_HB_SEC_VER_LOCKIN_SUPPORTED_STRING).addToLog(l_errl);
         ErrlUserDetailsString(l_decodedValue.data()).addToLog(l_errl);
         addBmcErrorCallouts(l_errl);
+        addPldmFrData(l_errl);
         break;
     }
 
@@ -2353,6 +2376,7 @@ errlHndl_t getInhibitBmcResetValue(std::vector<uint8_t>& io_string_table,
         ErrlUserDetailsString(PLDM_BIOS_HB_INHIBIT_BMC_RESET_STRING).addToLog(errl);
         ErrlUserDetailsString(decoded_value.data()).addToLog(errl);
         addBmcErrorCallouts(errl);
+        addPldmFrData(errl);
         o_inhibitResets = false;
         break;
     }

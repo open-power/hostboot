@@ -834,6 +834,9 @@ errlHndl_t addHostbootPdrs(PdrManager& io_pdrman)
 
     io_pdrman.addTerminusLocatorPDR();
 
+    // checks for PLDM error and adds flight recorder data to log
+    addPldmFrData(errl);
+
     PLDM_EXIT("addHostbootPdrs completed %s error", errl ? "with" : "without");
 
     return errl;

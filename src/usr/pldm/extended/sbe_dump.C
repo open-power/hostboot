@@ -230,6 +230,9 @@ errlHndl_t PLDM::dumpSbe(Target* const i_proc, const uint32_t i_plid)
 
     } while (false);
 
+    // checks for PLDM error and adds flight recorder data to log
+    addPldmFrData(errl);
+
     PLDM_EXIT("dumpSbe(0x%08x, 0x%08x) = 0x%08x",
               get_huid(i_proc), i_plid, ERRL_GETPLID_SAFE(errl));
 

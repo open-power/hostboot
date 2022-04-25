@@ -38,5 +38,6 @@ OBJS += pldm_requester.o
 OBJS += pldm_msg_timeout.o
 OBJS += pldm_shutdown.o
 OBJS += pldm_fr.o
+OBJS += errlud_pldm.o
 
 include ${ROOTPATH}/config.mk

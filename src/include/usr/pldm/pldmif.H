@@ -39,6 +39,12 @@
 
 namespace PLDM
 {
+    enum traffic_direction : uint8_t
+    {
+        INBOUND, /* Coming from the BMC */
+        OUTBOUND /* Going to the BMC */
+    };
+
 #ifndef __HOSTBOOT_RUNTIME
     /**
     * @brief This function is intended to be used by the MCTP resource
@@ -63,13 +69,6 @@ namespace PLDM
      */
     void registerShutdownCallback(shutdown_callback_t i_handler, void* i_context);
 
-
-    enum traffic_direction : uint8_t
-    {
-        INBOUND, /* Coming from the BMC */
-        OUTBOUND /* Going to the BMC */
-    };
-
     /**
      * @brief Log a given PLDM message in the appropriate PLDM flight recorder log
      *        based upon the information in the header of the PLDM message and
@@ -81,6 +80,7 @@ namespace PLDM
      *                   - OUTBOUND if message is going to the BMC
      */
     void logPldmMsg(const pldm_msg_hdr* const i_hdr, traffic_direction i_dir);
+
 #else
 
     /**
@@ -169,5 +169,12 @@ namespace PLDM
     * @return uint64_t      3 byte pldm message header as a uint64_t (left aligned)
     */
     uint64_t pldmHdrToUint64(const pldm_msg& i_pldmMsg);
+
+    /**
+     * @brief Add all 4 flight recorder sections to error log
+     * @note  This will only work at IPL time, do-nothing at runtime
+     * @param[in] io_errl Error log for fr sections
+     */
+    void addPldmFrData(const errlHndl_t i_errl);
 }
 #endif
