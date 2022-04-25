@@ -85,6 +85,8 @@ fapi2::ReturnCode clear_atomic_lock(
     const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_core_target,
     const uint32_t i_lockId);
 
+fapi2::ReturnCode clear_spwu_done(
+    const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_core_target);
 fapi2::ReturnCode set_atomic_lock(
     const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_core_target,
     uint32_t& o_lockId);
@@ -405,13 +407,12 @@ fapi2::ReturnCode powerdown_deconfigured_cl2_l3(
         {
             //There is a chance of this core is activated during istep 4, and in
             //istep 4 spwu is asserted, so we need to deassert before QME boots
-            FAPI_TRY(fapi2::getScom(i_core_target, QME_SPWU_OTR, l_data));
+            //
+            //Also in core unit checkstop case,spwu can be asserted for the
+            //deconfigured cores , so we need to deassert by looking at the
+            //other SPWU registers
 
-            if (l_data.getBit(0))
-            {
-                l_data.flush<0>();
-                FAPI_TRY(fapi2::putScom(i_core_target, QME_SPWU_OTR, l_data));
-            }
+            FAPI_TRY(clear_spwu_done(i_core_target));
 
 
             //Verify core is powered on
@@ -570,5 +571,24 @@ fapi2::ReturnCode clear_atomic_lock(
 
 fapi_try_exit:
     FAPI_INF("< p10_check_core_clock_power_state...");
+    return fapi2::current_err;
+}
+
+
+fapi2::ReturnCode clear_spwu_done(
+    const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_core_target)
+{
+    fapi2::buffer<uint64_t> l_data = 0;
+    //There is a chance of this core is activated during istep 4, and in
+    //istep 4 spwu is asserted, so we need to deassert before QME boots
+    l_data.flush<0>();
+    FAPI_TRY(fapi2::putScom(i_core_target, QME_SPWU_OTR, l_data));
+    FAPI_TRY(fapi2::putScom(i_core_target, QME_SPWU_HYP, l_data));
+    FAPI_TRY(fapi2::putScom(i_core_target, QME_SPWU_FSP, l_data));
+    FAPI_TRY(fapi2::putScom(i_core_target, QME_SPWU_OCC, l_data));
+
+
+fapi_try_exit:
+    FAPI_INF("< clear_spw_done...");
     return fapi2::current_err;
 }
