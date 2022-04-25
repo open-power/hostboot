@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,10 @@
 #include <pldm/pldm_trace.H>
 #include "pldm_utils.H"
 #include <cstring>
+
+#ifndef __HOSTBOOT_RUNTIME
+#include "../base/errlud_pldm.H"
+#endif
 
 namespace PLDM
 {
@@ -90,6 +94,26 @@ errlHndl_t get_pldm_bootside(pldm_fileio_file_type &o_boot_side)
     o_boot_side = pldm_bootside;
     } while(0);
     return errl;
+}
+
+void addPldmFrData(const errlHndl_t i_errl)
+{
+    #ifndef __HOSTBOOT_RUNTIME
+    if (i_errl)
+    {
+        // It seems like we will end up with multiple calls into this function
+        // if we fail at a lower level and bubble up.  We will keep the first
+        // version that was inserted and ignore further requests.
+        auto udSections = i_errl->getUDSections(PLDM_COMP_ID, PLDM::PLDM_UDT_FR_INBOUND_REQUESTS);
+        if (udSections.size() == 0)
+        {
+            UdPldmFrInRequestParameters().addToLog(i_errl);
+            UdPldmFrOutRequestParameters().addToLog(i_errl);
+            UdPldmFrInResponseParameters().addToLog(i_errl);
+            UdPldmFrOutResponseParameters().addToLog(i_errl);
+        }
+    }
+    #endif
 }
 
 }

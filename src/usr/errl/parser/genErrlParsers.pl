@@ -82,6 +82,7 @@ my $genFilesPath = $base."/obj/genfiles";
 my $hbfwTermRcFile = $genFilesPath."/hbfw_term_rc.H";
 my $srcFileName = $genFilesPath."/srcListing";
 my $errlTypes = $compIncPath."/errl/hberrltypes.H";
+my @justBmcPlugins = ("src/usr/pldm/plugins");
 #------------------------------------------------------------------------------
 # Call subroutines to populate the following arrays:
 # - @reasonCodeFiles   (The list of files to parse through for reason codes)
@@ -1578,7 +1579,20 @@ sub getPluginDirsToParse
         {
             if ($dirEntryPath =~ /plugins/)
             {
-                push(@pluginDirsToParse, $dirEntryPath);
+                # Exclude plugin directories with just eBMC parsers
+                my $skipDir = 0;
+                foreach my $bmcOnlyPlugin (@justBmcPlugins)
+                {
+                    if ($dirEntryPath =~ $bmcOnlyPlugin)
+                    {
+                        $skipDir = 1;
+                        last;
+                    }
+                }
+                if (!$skipDir)
+                {
+                    push(@pluginDirsToParse, $dirEntryPath);
+                }
             }
             else
             {

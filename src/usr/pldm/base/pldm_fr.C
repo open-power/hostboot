@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021                             */
+/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,8 +32,10 @@ void PLDM::logPldmMsg(const pldm_msg_hdr* const i_hdr, PLDM::traffic_direction i
     Singleton<pldmFR>::instance().logMsg(i_hdr, i_dir);
 }
 
+
 pldmFR::pldmFR(void)
 {
+    iv_frMutex = MUTEX_INITIALIZER;
     iv_frMax = FLIGHT_RECORDER_MAX;
     for(size_t i = 0; i < iv_frMax; i++)
     {
@@ -87,6 +89,9 @@ void pldmFR::logMsg(const pldm_msg_hdr* const &i_hdr, PLDM::traffic_direction &i
     size_t* fr_index_ptr = nullptr;
     void * fr_next_entry_ptr = nullptr;
 
+    // Lock a mutex so that we don't have to worry about returning invalid trace data
+    const auto lock = scoped_mutex_lock(iv_frMutex);
+
     if(i_hdr->request)
     {
         entry_size = sizeof(pldm_msg_hdr);
@@ -109,5 +114,82 @@ void pldmFR::logMsg(const pldm_msg_hdr* const &i_hdr, PLDM::traffic_direction &i
     if((*fr_index_ptr)++ >= (iv_frMax-1))
     {
         *fr_index_ptr = 0;
+    }
+}
+
+/**
+ * @brief Helper function for flight recorder (fr) dump
+ *        Dumps fr data into o_frData from oldest to newest
+ *        T = pldm_msg_hdr or pldm_rsp_hdr type
+ * @param[in] i_frPtr Pointer to particular flight recorder array
+ * @param[in] i_frMaxSize Maximum size of flight recorder
+ * @param[in] i_frIndex Current index into fr array for next data entry
+ * @param[out] o_frData fr data from oldest to newest
+ */
+template<typename T>
+void dumpEitherFr(T * i_frPtr, size_t i_frMaxSize, size_t i_frIndex, std::vector<T>& o_frData)
+{
+    o_frData.clear();
+
+    T blankType = {0};
+
+    // check if next entry is blank (no looping yet)
+    if (!memcmp(&(i_frPtr[i_frIndex]), &blankType, sizeof(T)))
+    {
+        o_frData.insert( o_frData.end(),
+                         i_frPtr,
+                         &(i_frPtr[i_frIndex]) );
+    }
+    else
+    {
+        if (i_frIndex+1 >= i_frMaxSize)
+        {
+            o_frData.push_back(i_frPtr[i_frIndex]);
+            o_frData.insert( o_frData.end(),
+                             i_frPtr,
+                             &(i_frPtr[i_frIndex]) );
+        }
+        else
+        {
+            o_frData.insert( o_frData.end(),
+                             &(i_frPtr[i_frIndex]),
+                             &(i_frPtr[i_frMaxSize]) );
+            if (i_frIndex > 0)
+            {
+                o_frData.insert( o_frData.end(),
+                                 i_frPtr,
+                                 &(i_frPtr[i_frIndex]) );
+            }
+        }
+    }
+}
+
+void pldmFR::dumpRequestFr(const PLDM::traffic_direction i_dir, std::vector<pldm_msg_hdr>& o_frData)
+{
+    // Lock a mutex so that we don't have to worry about returning invalid trace data
+    const auto lock = scoped_mutex_lock(iv_frMutex);
+
+    if (i_dir == PLDM::INBOUND)
+    {
+        dumpEitherFr(iv_inReq_fr, iv_frMax, iv_inReq_fr_index, o_frData);
+    }
+    else
+    {
+        dumpEitherFr(iv_outReq_fr, iv_frMax, iv_outReq_fr_index, o_frData);
+    }
+}
+
+void pldmFR::dumpResponseFr(PLDM::traffic_direction i_dir, std::vector<pldm_rsp_hdr>& o_frData)
+{
+    // Lock a mutex so that we don't have to worry about returning invalid trace data
+    const auto lock = scoped_mutex_lock(iv_frMutex);
+
+    if (i_dir == PLDM::INBOUND)
+    {
+        dumpEitherFr(iv_inRsp_fr, iv_frMax, iv_inRsp_fr_index, o_frData);
+    }
+    else
+    {
+        dumpEitherFr(iv_outRsp_fr, iv_frMax, iv_outRsp_fr_index, o_frData);
     }
 }
