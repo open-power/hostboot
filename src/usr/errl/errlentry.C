@@ -541,6 +541,14 @@ void ErrlEntry::addSensorCallout(const uint32_t i_sensorID,
 }
 
 ////////////////////////////////////////////////////////////////////////////
+void ErrlEntry::addVrmCallout(const TARGETING::Target *i_target,
+                              const voltage_type i_vrmType,
+                              const HWAS::callOutPriority i_priority)
+{
+    // TODO: call ErrlUserDetailsCallout
+}
+
+////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 void ErrlEntry::addPartCallout(const TARGETING::Target *i_target,
                         const HWAS::partTypeEnum i_partType,
