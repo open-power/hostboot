@@ -22,3 +22,6 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+PROCEDURE=odyssey_scom
+lib$(PROCEDURE)_COMMONFLAGS+=-fno-var-tracking-assignments
+$(call BUILD_PROCEDURE)

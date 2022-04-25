@@ -22,8 +22,7 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-
-
+# EKB-Mirror-To: hostboot
 
 -include 00ody_common.mk
 

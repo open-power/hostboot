@@ -22,6 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+// EKB-Mirror-To: hostboot
 
 ///
 /// @file ody_scominit.C
@@ -30,10 +31,18 @@
 // *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
 // *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 2
 // *HWP Consumed by: Memory
 
 #include <fapi2.H>
+
+#ifndef __PPE__
+    #include <generic/memory/lib/utils/c_str.H>
+    #include <generic/memory/mss_git_data_helper.H>
+#endif
+
+#include <generic/memory/lib/utils/mss_generic_check.H>
+#include <odyssey_scom.H>
 #include <ody_scominit.H>
 
 extern "C"
@@ -45,6 +54,17 @@ extern "C"
     ///
     fapi2::ReturnCode ody_scominit( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
     {
-        return fapi2::FAPI2_RC_SUCCESS;
+#ifndef __PPE__
+        mss::display_git_commit_info("ody_scominit");
+#endif
+
+        fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+        FAPI_INF( TARGTIDFORMAT " running odyssey.scom.initfile", TARGTID);
+        FAPI_EXEC_HWP(l_rc, odyssey_scom, i_target);
+        FAPI_TRY(l_rc, TARGTIDFORMAT " error from odyssey.scom.initfile", TARGTID);
+
+    fapi_try_exit:
+        FAPI_INF("End MSS SCOM init");
+        return fapi2::current_err;
     }
 }
