@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -45,23 +47,23 @@ namespace HWAS
 
 // Debug traces (go into fast trace buffer that can wrap often)
 #define HWAS_DBG(_fmt_, _args_...) \
-    TRACDCOMP(g_trac_dbg_hwas, TRACE_FILENAME _fmt_, ##_args_)
+    TRACDCOMP(HWAS::g_trac_dbg_hwas, TRACE_FILENAME _fmt_, ##_args_)
 
 #define HWAS_DBG_BIN(_str_, _addr_, _len_) \
-    TRACDBIN(g_trac_dbg_hwas, TRACE_FILENAME _str_, _addr_, _len_)
+    TRACDBIN(HWAS::g_trac_dbg_hwas, TRACE_FILENAME _str_, _addr_, _len_)
 
 // Information traces (go into slow trace buffer that should not wrap often)
 #define HWAS_INF(_fmt_, _args_...) \
-    TRACFCOMP(g_trac_imp_hwas, INFO_MRK TRACE_FILENAME _fmt_, ##_args_)
+    TRACFCOMP(HWAS::g_trac_imp_hwas, INFO_MRK TRACE_FILENAME _fmt_, ##_args_)
 
 #define HWAS_INF_BIN(_str_, _addr_, _len_) \
-    TRACFBIN(g_trac_imp_hwas, INFO_MRK TRACE_FILENAME _str_, _addr_, _len_)
+    TRACFBIN(HWAS::g_trac_imp_hwas, INFO_MRK TRACE_FILENAME _str_, _addr_, _len_)
 
 // Error traces (go into slow trace buffer that should not wrap often)
 #define HWAS_ERR(_fmt_, _args_...) \
-    TRACFCOMP(g_trac_imp_hwas, ERR_MRK TRACE_FILENAME _fmt_, ##_args_)
+    TRACFCOMP(HWAS::g_trac_imp_hwas, ERR_MRK TRACE_FILENAME _fmt_, ##_args_)
 
 #define HWAS_ERR_BIN(_str_, _addr_, _len_) \
-    TRACFBIN(g_trac_imp_hwas, ERR_MRK TRACE_FILENAME _str_, _addr_, _len_)
+    TRACFBIN(HWAS::g_trac_imp_hwas, ERR_MRK TRACE_FILENAME _str_, _addr_, _len_)
 
 #endif // HWASPLATTRACE_H_
