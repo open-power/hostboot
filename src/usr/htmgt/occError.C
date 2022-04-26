@@ -449,9 +449,16 @@ namespace HTMGT
                 TARGETING::UTIL::getSensorTarget(sensor, iv_target);
             if (nullptr != target)
             {
-                io_errlHndl->addHwCallout(target, i_priority,
-                                          HWAS::NO_DECONFIG,
-                                          HWAS::GARD_NULL);
+                if(sensor == TARGETING::UTIL::occ_sensor_id_t::SENSOR_TYPE_VRM)
+                {
+                    io_errlHndl->addVrmCallout(target, ERRORLOG::ErrlEntry::VDD, i_priority);
+                }
+                else
+                {
+                    io_errlHndl->addHwCallout(target, i_priority,
+                                              HWAS::NO_DECONFIG,
+                                              HWAS::GARD_NULL);
+                }
                 io_callout_num++;
             }
             else

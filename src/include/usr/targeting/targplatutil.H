@@ -56,6 +56,30 @@ namespace TARGETING
 
 namespace UTIL
 {
+
+/* @brief Structure of OCC sensor IDs.
+ */
+union occ_sensor_id_t
+{
+    uint32_t encoded = 0;
+    struct
+    {
+        uint8_t sensor_type;
+        uint8_t reserved;
+        uint16_t entity_id;
+    } PACKED;
+
+    enum sensor_type_t : uint8_t
+    {
+        SENSOR_TYPE_CORE = 0xC0,
+        SENSOR_TYPE_DIMM = 0xD0,
+        SENSOR_TYPE_PROC = 0xE0,
+        SENSOR_TYPE_VRM  = 0xE1,
+        SENSOR_TYPE_NODE = 0xF0,
+        SENSOR_TYPE_UNKNOWN = 0xFF
+    };
+} PACKED;
+
 /**
  * @brief Dumps to simics the values of each attribute on the target
  *        with the given HUID, or else iterates all targets in the
