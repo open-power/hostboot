@@ -34,7 +34,10 @@
 #include <hwas/common/hwasCommon.H>
 #include <hwas/common/hwasCallout.H>
 #include <hwas/common/deconfigGard.H>
+#include <hwas/common/fieldCoreOverride.H>
 #include <hwas/hwasPlat.H>
+
+#include <targeting/namedtarget.H>
 
 #include <devicefw/driverif.H>
 #include <initservice/taskargs.H>
@@ -1409,12 +1412,29 @@ void DeconfigGard::platPostDeconfigureTarget(
 #endif  // __HOSTBOOT_RUNTIME
 }
 
+#ifndef __HOSTBOOT_RUNTIME
+void performFcoDeconfigs(const FCO::fcoRestrictMetadata_t & i_fcoData)
+{
+    for (const auto & procData : i_fcoData.procFcoMetadataList)
+    {
+        // Work through the deconfigs of the COREs
+        for (const auto & coreData : procData->coreCandidateList)
+        {
+            // Note, FCs have child roll-up allowed. So, deconfiguring the children will deconfig the FC.
+            if (coreData->markedForFcoDeconfig)
+            {
+                FCO::setHwasStateForFcoDeconfig(*coreData->target);
+            }
+        }
+    }
+}
+#endif
 /******************************************************************************/
 // platProcessFieldCoreOverride
 /******************************************************************************/
 errlHndl_t DeconfigGard::platProcessFieldCoreOverride()
 {
-    errlHndl_t l_pErr = NULL;
+    errlHndl_t error = NULL;
 
 #ifndef __HOSTBOOT_RUNTIME
     HWAS_DBG("Process Field Core Override FCO: platProcessFieldCoreOverride");
@@ -1440,26 +1460,37 @@ errlHndl_t DeconfigGard::platProcessFieldCoreOverride()
         std::sort(pNodeList.begin(), pNodeList.end(),
                     compareTargetHuid);
 
+        // If the node list is ever more than 1 then the FCO value will need to be divided across the nodes.
+        assert(pNodeList.size() == 1, "platProcessFieldCoreOverride(): Node list size != 1. This function must be updated to account for multi-node!");
         // for each of the nodes
-        for (TargetHandleList::const_iterator
-                pNode_it = pNodeList.begin();
-                pNode_it != pNodeList.end();
-                ++pNode_it
-            )
+        for (const auto & pNode : pNodeList)
         {
-            const TargetHandle_t pNode = *pNode_it;
+            FCO::fcoRestrictMetadata_t fcoData;
+            // Determine the boot processor and boot core, these cannot be elminated by the FCO algorithm.
+            TargetHandle_t bootProc = nullptr;
+            error = targetService().queryMasterProcChipTargetHandle(bootProc, pNode);
+            if (error)
+            {
+                HWAS_ERR("Error from queryMasterProcChipTargetHandle");
+                break;
+            }
+            const Target* bootCore = getBootCore(false /* dont care about functional state */);
 
             // Get FCO value
-            uint32_t l_fco(0);
-            l_pErr = platGetFCO(pNode, l_fco);
-            if (l_pErr)
+            uint32_t fco(0);
+            error = platGetFCO(pNode, fco);
+            if (error)
             {
                 HWAS_ERR("Error from platGetFCO");
                 break;
             }
 
+            // Save the FCO value for this node. No need for modification of this value here. It's handled internally by
+            // the applyFieldCoreOverrides() algorithm.
+            fcoData.fcoValue = fco;
+
             // FCO of 0 means no overrides for this node
-            if (l_fco == 0)
+            if (fco == 0)
             {
                 HWAS_INF("FCO: node %.8X: no overrides, done.",
                         get_huid(pNode));
@@ -1467,14 +1498,13 @@ errlHndl_t DeconfigGard::platProcessFieldCoreOverride()
             }
             else if (is_fused_mode())
             {
-                l_fco += l_fco;
-                HWAS_INF("FCO: node %.8X: Doubling EC count in fused_mode. "
-                         "l_fco=0x%X", get_huid(pNode), l_fco);
+                HWAS_INF("FCO: node %.8X: fused_mode detected, FCO value %d will be doubled during processing. "
+                         "fco=0x%X", get_huid(pNode), fco);
             }
             else
             {
                 HWAS_INF("FCO: node %.8X: value %d",
-                         get_huid(pNode), l_fco);
+                         get_huid(pNode), fco);
             }
 
             // find all functional child PROC targets
@@ -1482,50 +1512,96 @@ errlHndl_t DeconfigGard::platProcessFieldCoreOverride()
             getChildAffinityTargets(pProcList, pNode,
                     CLASS_CHIP, TYPE_PROC, true);
 
-            // sort the list by ATTR_HUID to ensure that we
-            // start at the same place each time
-            std::sort(pProcList.begin(), pProcList.end(),
-                    compareTargetHuid);
-
-            // create list for restrictECunits() function
-            procRestrict_t l_procEntry;
-            std::vector <procRestrict_t> l_procRestrictList;
-            for (TargetHandleList::const_iterator
-                    pProc_it = pProcList.begin();
-                    pProc_it != pProcList.end();
-                    ++pProc_it
-                )
+            // Walk through the procs on this node and gather metadata about them for applyFieldCoreOverrides()
+            for (const auto & pProc : pProcList)
             {
-                const TargetHandle_t pProc = *pProc_it;
-
-                // save info so that we can
-                //  restrict the number of EC units
                 HWAS_DBG("pProc %.8X - pushing to proclist",
                     get_huid(pProc));
-                l_procEntry.target = pProc;
-                l_procEntry.group = 0;
-                l_procEntry.procs = pProcList.size();
-                l_procEntry.maxECs = l_fco;
-                l_procRestrictList.push_back(l_procEntry);
-            } // for pProc_it
 
-            // restrict the EC units; units turned off are marked
-            // present=true, functional=false, and marked with the
-            // appropriate deconfigure code.
-            HWAS_INF("FCO: calling restrictECunits with %d entries",
-                    l_procRestrictList.size());
+                std::unique_ptr<FCO::procFcoMetadata_t> procEntry = std::make_unique<FCO::procFcoMetadata_t>();
+                procEntry->target = pProc;
+                procEntry->isBootProc = (pProc == bootProc);
+                // Get the functional NON-ECO cores for this proc, these are the candidates for the FCO algorithm to use
+                // to meet the given FCO value.
+                if (TARGETING::is_fused_mode())
+                {
+                    // Have to get the FCs for this proc and then populate the core list with
+                    // its children to associate the core siblings together.
+                    TargetHandleList fcList;
+                    getNonEcoFcs(fcList, pProc);
 
-            l_pErr = restrictECunits(l_procRestrictList,
-                                     DECONFIGURED_BY_FIELD_CORE_OVERRIDE);
-            if (l_pErr)
-            {
-                break;
+                    for (const auto & pFc : fcList)
+                    {
+                        TargetHandleList coreChildrenList;
+                        getChildChiplets(coreChildrenList, pFc, TARGETING::TYPE_CORE, true);
+                        assert(coreChildrenList.size() == 2,
+                               "FCO: A fused core had an unexpected number of children=%d",
+                               coreChildrenList.size());
+                        // There are two child cores per FC, they need to be associated to one another.
+                        std::unique_ptr<FCO::coreFcoMetadata_t> core = std::make_unique<FCO::coreFcoMetadata_t>(),
+                            coreSibling = std::make_unique<FCO::coreFcoMetadata_t>();
+
+                        core->target = coreChildrenList[0];
+                        coreSibling->target = coreChildrenList[1];
+
+                        core->chipUnit = core->target->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+                        coreSibling->chipUnit = coreSibling->target->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+
+                        // If either core in this FC is the boot core then both are considered to be the boot core for
+                        // the algorithm's purposes.
+                        bool isBootFc = ((bootCore == core->target) || (bootCore == coreSibling->target));
+                        core->isBootCore = isBootFc;
+                        coreSibling->isBootCore = isBootFc;
+
+                        core->fcSiblingCore = coreSibling.get();
+                        coreSibling->fcSiblingCore = core.get();
+
+                        procEntry->coreCandidateList.push_back(std::move(core));
+                        procEntry->coreCandidateList.push_back(std::move(coreSibling));
+                    }
+                }
+                else
+                {
+                    TargetHandleList coreList;
+                    getNonEcoCores(coreList, pProc);
+                    for (const auto & pCore : coreList)
+                    {
+                        // Create the shared resource pointer.
+                        std::unique_ptr<FCO::coreFcoMetadata_t> core = std::make_unique<FCO::coreFcoMetadata_t>();
+
+                        // Fill in the struct data
+                        core->target = pCore;
+                        core->chipUnit = core->target->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+                        core->isBootCore = (bootCore == core->target);
+                        // Small cores don't have FC sibling cores
+                        core->fcSiblingCore = nullptr;
+
+                        // Add it to the list for this proc.
+                        procEntry->coreCandidateList.push_back(std::move(core));
+                    }
+                }
+
+                // Cache the starting size of the core list. This will be updated regularly during the FCO algorithm.
+                procEntry->availableCores = procEntry->coreCandidateList.size();
+
+                // Add this entry to the list
+                fcoData.procFcoMetadataList.push_back(std::move(procEntry));
             }
+
+            // Apply the FCO algorithm, afterward the deconfigs can be done.
+            HWAS_INF("FCO: calling applyFieldCoreOverrides() with %d entries",
+                    fcoData.procFcoMetadataList.size());
+            FCO::applyFieldCoreOverrides(fcoData);
+
+            // Perform the actual deconfigs. Units turned off are marked present=true, functional=false, and marked with
+            // the appropriate deconfigure code.
+            performFcoDeconfigs(fcoData);
+
         } // for pNode_it
     }
     while (0);
 #endif  // #ifndef __HOSTBOOT_RUNTIME
-    return l_pErr;
+    return error;
 } // platProcessFieldCoreOverride
 
 //*****************************************************************************

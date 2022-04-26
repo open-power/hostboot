@@ -125,6 +125,7 @@ errlHndl_t initHardware();
 #define NUM_MB_CACHE_PER_CORE  4
 #define NUM_MB_CACHE_PER_FC    (NUM_CORE_PER_FC * NUM_MB_CACHE_PER_CORE)
 
+#define NUM_CORE_PER_CHIP (NUM_CORE_PER_FC * NUM_FC_PER_CHIP)
 
 // structure used to store proc information for EC restrict processing
 typedef struct {
