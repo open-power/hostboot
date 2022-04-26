@@ -349,6 +349,13 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
                     sys->setAttr<TARGETING::ATTR_CDM_POLICIES>(
                             l_pTopLevelTarget->getAttr<TARGETING::ATTR_CDM_POLICIES>() | TARGETING::CDM_POLICIES_MANUFACTURING_DISABLED);
                 }
+                else
+                {
+                    TRACFCOMP(g_trac_initsvc, INFO_MRK
+                            "MNFG_NO_GARD bit is not set - clearing CDM_POLICIES_MANUFACTURING_DISABLED in ATTR_CDM_POLICIES");
+                    sys->setAttr<TARGETING::ATTR_CDM_POLICIES>(
+                            l_pTopLevelTarget->getAttr<TARGETING::ATTR_CDM_POLICIES>() & ~TARGETING::CDM_POLICIES_MANUFACTURING_DISABLED);
+                }
             }
             else
             {
