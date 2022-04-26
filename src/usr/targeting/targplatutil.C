@@ -235,29 +235,6 @@ uint8_t getCurrentNodePhysId(void)
 }
 #endif
 
-/* @brief Structure of OCC sensor IDs.
- */
-union occ_sensor_id_t
-{
-    uint32_t encoded = 0;
-    struct
-    {
-        uint8_t sensor_type;
-        uint8_t reserved;
-        uint16_t entity_id;
-    } PACKED;
-
-    enum sensor_type_t : uint8_t
-    {
-        SENSOR_TYPE_CORE = 0xC0,
-        SENSOR_TYPE_DIMM = 0xD0,
-        SENSOR_TYPE_PROC = 0xE0,
-        SENSOR_TYPE_VRM  = 0xE1,
-        SENSOR_TYPE_NODE = 0xF0,
-        SENSOR_TYPE_UNKNOWN = 0xFF
-    };
-} PACKED;
-
 // return the sensor number from the passed in target
 uint32_t getSensorNumber(const TARGETING::Target* i_pTarget,
                          TARGETING::SENSOR_NAME i_name)
@@ -407,8 +384,7 @@ TARGETING::Target * getSensorTarget(const uint32_t i_sensorNumber,
         getClassResources(candidates, CLASS_NA, TARGETING::TYPE_NODE, UTIL_FILTER_PRESENT);
         break;
     case occ_sensor_id_t::SENSOR_TYPE_VRM:
-        // TODO RTC: 304217
-        break;
+        // VRM fault - return a proc target
     case occ_sensor_id_t::SENSOR_TYPE_PROC:
         candidates.push_back(const_cast<Target*>(getParentChip(i_occ)));
         break;
