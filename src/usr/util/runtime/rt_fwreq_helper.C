@@ -1048,7 +1048,7 @@ void setMctpBridgeState(hostInterfaces::MCTP_BRIDGE_STATE_t i_mctpBridgeState,
             {
                 case hostInterfaces::MCTP_BRIDGE_ENABLED:
                     g_MctpDepthCounter++;
-                    TRACFCOMP(g_trac_runtime,
+                    TRACDCOMP(g_trac_runtime,
                               "Inc MCTP depth counter = %d",g_MctpDepthCounter);
                     assert(g_MctpDepthCounter != 0,
                            "setMctpBridgeState: MCTP depth counter exceeded max value");
@@ -1061,7 +1061,7 @@ void setMctpBridgeState(hostInterfaces::MCTP_BRIDGE_STATE_t i_mctpBridgeState,
                     assert(g_MctpDepthCounter > 0,
                            "setMctpBridgeState: MCTP depth counter < 0");
                     g_MctpDepthCounter--;
-                    TRACFCOMP(g_trac_runtime,
+                    TRACDCOMP(g_trac_runtime,
                               "Dec MCTP depth counter = %d",g_MctpDepthCounter);
                     break;
             }
