@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -221,7 +221,7 @@ void* call_host_secure_rng(void* const io_pArgs)
                     l_err->collectTrace(ISTEP_COMP_NAME);
                     errlCommit(l_err, HWPF_COMP_ID);
                 }
-                else // all good so set attribute to skip engine B/C diagnostic resets during MPIPL
+                else // all good so set attribute to skip engine B/C/E diagnostic resets during MPIPL
                 {
                     TARGETING::ATTR_I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_B_type l_engine_B_inhibit =
                         l_cpu_target->getAttr<TARGETING::ATTR_I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_B>();
@@ -241,6 +241,15 @@ void* call_host_secure_rng(void* const io_pArgs)
                     l_engine_C_inhibit = l_cpu_target->getAttr<TARGETING::ATTR_I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_C>();
                     TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_host_secure_rng: DIAG MODE RESET "
                         "SET Engine C=%d", l_engine_C_inhibit);
+
+                    TARGETING::ATTR_I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_E_type l_engine_E_inhibit =
+                        l_cpu_target->getAttr<TARGETING::ATTR_I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_E>();
+                    TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_host_secure_rng: DIAG MODE RESET "
+                        "GET Engine E=%d", l_engine_E_inhibit);
+                    l_cpu_target->setAttr<TARGETING::ATTR_I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_E>(0x1);
+                    l_engine_E_inhibit = l_cpu_target->getAttr<TARGETING::ATTR_I2C_INHIBIT_DIAGNOSTIC_RESET_ENGINE_E>();
+                    TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_host_secure_rng: DIAG MODE RESET "
+                        "SET Engine E=%d", l_engine_E_inhibit);
                 }
             } // end SECUREBOOT::enabled
 #endif

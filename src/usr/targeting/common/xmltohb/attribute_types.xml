@@ -3083,11 +3083,9 @@
       1 = Disables diagnostic resets
     </description>
     <simpleType>
-      <uint8_t>
-        <default>0x1</default>
-      </uint8_t>
+      <uint8_t/>
     </simpleType>
-    <persistency>volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
   </attribute>
@@ -3148,9 +3146,7 @@
       1 = Disables diagnostic resets
     </description>
     <simpleType>
-      <uint8_t>
-        <default>0x0</default>
-      </uint8_t>
+      <uint8_t/>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -3169,11 +3165,9 @@
       1 = Disables diagnostic resets
     </description>
     <simpleType>
-      <uint8_t>
-        <default>0x1</default>
-      </uint8_t>
+      <uint8_t/>
     </simpleType>
-    <persistency>volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
   </attribute>
