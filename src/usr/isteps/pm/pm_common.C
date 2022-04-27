@@ -1188,6 +1188,12 @@ namespace HBPM
                 l_commonPhysAddr = l_sys->
                         getAttr<TARGETING::ATTR_OCC_COMMON_AREA_PHYS_ADDR>();
 
+                // During IPL the ATTR_HOMER_HCODE_LOADED is volatile-zeroed
+                // During MPIPL targetservicestarts.C initializeAttributes will clear ATTR_HOMER_HCODE_LOADED
+                // We explicitly clear here for any other invocations
+                l_procChip->setAttr<ATTR_HOMER_HCODE_LOADED>(
+                    HBPM::HCODE_NOT_LOADED);
+
                 l_errl = loadPMComplex(l_procChip,
                                        l_homerPhysAddr,
                                        l_commonPhysAddr,
@@ -1209,6 +1215,13 @@ namespace HBPM
                                "start PM complex failed!" );
                     o_failTarget = l_procChip;
                     break;
+                }
+                else
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "loadAndStartPMAll PROC=0x%X HOMER_HCODE_LOADED=true",
+                        get_huid(l_procChip));
+                    l_procChip->setAttr<ATTR_HOMER_HCODE_LOADED>(
+                        HBPM::HCODE_LOADED);
                 }
             }
 
