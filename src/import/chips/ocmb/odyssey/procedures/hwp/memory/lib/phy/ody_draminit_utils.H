@@ -37,7 +37,6 @@
 #define _ODY_DRAMINIT_UTILS_H_
 
 #include <fapi2.H>
-
 #include <lib/phy/ody_snps_dram_train_msg_blk.H>
 
 namespace mss
@@ -239,6 +238,16 @@ enum mailbox_consts
     RECEPTION_ACK = 0,
     ACK_MESSAGE = 1,
 };
+
+/// @brief Prints the fields from the message block structure
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_msg_blk message block structure
+/// @return None
+///
+void display_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                       const _PMU_SMB_DDR5_1D_t& i_msg_block);
+
+
 
 } // namespace phy
 } // namespace ody

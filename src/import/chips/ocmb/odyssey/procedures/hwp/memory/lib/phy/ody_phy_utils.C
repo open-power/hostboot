@@ -35,8 +35,7 @@
 
 #include <fapi2.H>
 
-#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
-
+#include <generic/memory/lib/utils/mss_generic_check.H>
 #include <lib/phy/ody_phy_utils.H>
 // TODO:ZEN:MST-1571 Update Odyssey PHY registers when the official values are merged into the EKB
 
