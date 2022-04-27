@@ -175,17 +175,7 @@ namespace RTPM
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            ERR_MRK"load_pm_complex: "
                            "load PM complex failed!" );
-                proc_target->setAttr<ATTR_HOMER_HCODE_LOADED>(
-                    HBPM::HCODE_NOT_LOADED);
                 break;
-            }
-            else
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "load_pm_complex: "
-                           "load PM complex successfully." );
-                proc_target->setAttr<ATTR_HOMER_HCODE_LOADED>(
-                    HBPM::HCODE_LOADED);
             }
 
         } while(0);
