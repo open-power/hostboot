@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,6 +25,7 @@
 #include <bootloader/bootloader.H>
 #include <bootloader/hbblreasoncodes.H>
 #include <bootloader/bl_console.H>
+#include <bootloader/bl_xscom.H>
 #include <arch/ppc.H>
 #include <stddef.h>
 
@@ -190,5 +191,88 @@ void kernel_hype_exception()
                  true,
                  exception);
 }
+
+
+namespace Bootloader
+{
+
+
+/**
+  * @brief Forces a checkstop when LPC Error(s) are seen such that PRD
+  *        can appropriately handle the callout
+  *
+  * @return - void, since this function should theoretically not return
+  */
+void bl_forceCheckstopOnLpcErrors()
+{
+    // When LPC errors are seen force a checkstop with this signature:
+    // "EQ_L2_FIR[13] - NCU timed out waiting for powerbus to return data"
+    // PRD running on the BMC or FSP will then recognize this specific checkstop and
+    // handle the callout appropriately
+    // NOTE: No console trace because LPC bus can't be trusted
+    BOOTLOADER_TRACE(BTLDR_TRC_LPC_ERR_FORCE_XSTOP);
+
+    const uint64_t data_all_clear    = 0x0000000000000000ull;
+    const uint64_t data_all_set      = 0xFFFFFFFFFFFFFFFFull;
+    const uint64_t data_clear_bit_13 = 0xFFFBFFFFFFFFFFFFull;
+    const uint64_t data_set_bit_13   = 0x0004000000000000ull;
+
+    // Using multicast scoms since we don't know what core HBBL is running on
+    const uint64_t L2_FIR_MASK_REG_MULTICAST_SCOM_WOR  = 0x6E02F005ull;
+    const uint64_t L2_FIR_MASK_REG_MULTICAST_SCOM_WAND = 0x6E02F004ull;
+    const uint64_t L2_FIR_ACTION0_REG_MULTICAST_SCOM   = 0x6E02F006ull;
+    const uint64_t L2_FIR_ACTION1_REG_MULTICAST_SCOM   = 0x6E02F007ull;
+    const uint64_t L2_FIR_REG_MULTICAST_SCOM_WOR       = 0x6E02F002ull;
+
+    const size_t NUM_OPS = 5; // See 5 steps below
+    uint64_t data_array[NUM_OPS];
+    uint64_t addr_array[NUM_OPS];
+    size_t scomSize = sizeof(uint64_t);
+
+    // 1) write-OR L2 FIR MASK to disable everything
+    data_array[0] = data_all_set;
+    addr_array[0] = L2_FIR_MASK_REG_MULTICAST_SCOM_WOR;
+
+    // Steps 2 and 3 will set ACTION0 and ACTION1 registers such that the EQ_L2_FIR[13]
+    // FIR bit will cause a checkstop
+    // 2) write ACTION0 to zero (thus clearing bit 13)
+    data_array[1] = data_all_clear;
+    addr_array[1] = L2_FIR_ACTION0_REG_MULTICAST_SCOM;
+
+    // 3) write ACTION1 to zero (this clearing bit 13)
+    data_array[2] = data_all_clear;
+    addr_array[2] = L2_FIR_ACTION1_REG_MULTICAST_SCOM;
+
+    // 4) write-AND L2 FIR MASK to clear bit 13 to just allow this 1 attention through
+    data_array[3] = data_clear_bit_13;
+    addr_array[3] = L2_FIR_MASK_REG_MULTICAST_SCOM_WAND;
+
+    // 5) write-OR FIR bit 13 to trigger the checkstop
+    data_array[4] = data_set_bit_13;
+    addr_array[4] = L2_FIR_REG_MULTICAST_SCOM_WOR;
+
+    for (size_t i = 0; i < NUM_OPS; i++)
+    {
+        Bootloader::hbblReasonCode rc = XSCOM::xscomPerformOp(DeviceFW::WRITE,
+                                   &data_array[i],
+                                   scomSize,
+                                   addr_array[i]);
+
+        // Ignore rc because best hope is that we can still properly cause the checkstop
+        // NOTE: need this block otherwise compiler thinks rc is unused
+        if(rc)
+        {
+          rc = Bootloader::RC_NO_ERROR;
+        }
+    }
+
+    // At this point the system should checkstop, but just return back
+    // into the existing fail path if it doesn't
+    return;
+
+} // end of bl_forceCheckstopOnOpbMasterTimeout()
+
+
+} // end of namespace BOOTLOADER
 
 #undef bl_terminate_C

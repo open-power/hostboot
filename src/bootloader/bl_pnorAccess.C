@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -220,6 +220,13 @@ void bl_pnorAccess::findTOC(uint64_t i_lpcBar, PNOR::SectionData_t * o_TOC,
         // Check Error Condition
         if (*l_val & LPC::OPB_ERROR_MASK)
         {
+            // New priority is to force a specific checkstop so that PRD can
+            // handle the callout
+            Bootloader::bl_forceCheckstopOnLpcErrors();
+
+            // Shouldn't return back from forcing a checkstop, but if so, just
+            // follow the previous error path here
+
             //PNOR error found
             o_errCode = PNOR::LPC_ERR;
             BOOTLOADER_TRACE(BTLDR_TRC_PA_FINDTOC_TOC1_LPC_ERR);

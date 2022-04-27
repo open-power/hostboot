@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -388,6 +388,136 @@ uint64_t get_lpc_virtual_bar( void )
     LpcDD l_LpcDD = Singleton<LpcDD>::instance();
     return (l_LpcDD.getLPCBaseAddr() - l_LpcDD.getLPCStartAddr());
 }
+
+
+/**
+ * @brief Forces a checkstop when LPC Error(s) are seen such that PRD
+ *        can appropriately handle the callout
+ *
+ * @return - void, since this function should theoretically not return
+ */
+void lpcForceCheckstopOnLpcErrors()
+{
+    // When LPC Error(s) are seen force a checkstop with this signature:
+    // "EQ_L2_FIR[13] - NCU timed out waiting for powerbus to return data"
+    // PRD running on the BMC (or the FSP) will then recognize this specific checkstop and handle
+    // the callout appropriately
+
+    TRACFCOMP(g_trac_lpc,"LPC::lpcForceCheckstopOnLpcErrors() Setting L2 FIR MASK to only "
+              "allow bit13 through; setting ACTION0 and ACTION1 to all zeroes; then setting "
+              "bit 13 in L3 FIR to force a checkstop");
+
+    errlHndl_t l_err = nullptr;
+
+    // Assume this function is called before targeting is up so use SENTINEL
+    // (if targeting is already up, the LPC Xscom method should be used)
+    TARGETING::Target* l_proc = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
+
+    const uint64_t data_all_clear    = 0x0000000000000000ull;
+    const uint64_t data_all_set      = 0xFFFFFFFFFFFFFFFFull;
+    const uint64_t data_clear_bit_13 = 0xFFFBFFFFFFFFFFFFull;
+    const uint64_t data_set_bit_13   = 0x0004000000000000ull;
+
+    // Using multicast scoms since we (1) have the processor target showing this fail
+    // and (2) we can set this up on all cores, rather than just the boot core
+    const uint64_t L2_FIR_MASK_REG_MULTICAST_SCOM_WOR  = 0x6E02F005ull;
+    const uint64_t L2_FIR_MASK_REG_MULTICAST_SCOM_WAND = 0x6E02F004ull;
+    const uint64_t L2_FIR_ACTION0_REG_MULTICAST_SCOM   = 0x6E02F006ull;
+    const uint64_t L2_FIR_ACTION1_REG_MULTICAST_SCOM   = 0x6E02F007ull;
+    const uint64_t L2_FIR_REG_MULTICAST_SCOM_WOR       = 0x6E02F002ull;
+
+
+    // 1) write-OR L2 FIR MASK to disable everything
+    uint64_t data = 0;
+    size_t scomSize = sizeof(data);
+
+    data = data_all_set;
+    l_err = DeviceFW::deviceWrite(
+                 l_proc,
+                 &data,
+                 scomSize,
+                 DEVICE_SCOM_ADDRESS(L2_FIR_MASK_REG_MULTICAST_SCOM_WOR));
+    if (l_err)
+    {
+        // Set the error to predictive, add trace, commit the log, but keep going in the
+        // hope that we can still properly cause the checkstop
+        l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+        l_err->collectTrace(LPC_COMP_NAME);
+        ERRORLOG::errlCommit(l_err, LPC_COMP_ID);
+    }
+
+    // Steps 2 and 3 will set ACTION0 and ACTION1 registers such that the EQ_L2_FIR[13]
+    // FIR bit will cause a checkstop
+    // 2) write ACTION0 to zero (thus clearing bit 13)
+    data = data_all_clear;
+    l_err = DeviceFW::deviceWrite(
+                 l_proc,
+                 &data,
+                 scomSize,
+                 DEVICE_SCOM_ADDRESS(L2_FIR_ACTION0_REG_MULTICAST_SCOM));
+    if (l_err)
+    {
+        // Set the error to predictive, add trace, commit the log, but keep going in the
+        // hope that we can still properly cause the checkstop
+        l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+        l_err->collectTrace(LPC_COMP_NAME);
+        ERRORLOG::errlCommit(l_err, LPC_COMP_ID);
+    }
+
+    // 3) write ACTION1 to zero (this clearing bit 13)
+    data = data_all_clear;
+    l_err = DeviceFW::deviceWrite(
+                 l_proc,
+                 &data,
+                 scomSize,
+                 DEVICE_SCOM_ADDRESS(L2_FIR_ACTION1_REG_MULTICAST_SCOM));
+    if (l_err)
+    {
+        // Set the error to predictive, add trace, commit the log, but keep going in the
+        // hope that we can still properly cause the checkstop
+        l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+        l_err->collectTrace(LPC_COMP_NAME);
+        ERRORLOG::errlCommit(l_err, LPC_COMP_ID);
+    }
+
+    // 4) write-AND L2 FIR MASK to clear bit 13 to just allow this 1 attention through
+    data = data_clear_bit_13;
+    l_err = DeviceFW::deviceWrite(
+                 l_proc,
+                 &data,
+                 scomSize,
+                 DEVICE_SCOM_ADDRESS(L2_FIR_MASK_REG_MULTICAST_SCOM_WAND));
+    if (l_err)
+    {
+        // Set the error to predictive, add trace, commit the log, but keep going in the
+        // hope that we can still properly cause the checkstop
+        l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+        l_err->collectTrace(LPC_COMP_NAME);
+        ERRORLOG::errlCommit(l_err, LPC_COMP_ID);
+    }
+
+    // 5) write-OR FIR bit 13 to trigger checkstop
+    data = data_set_bit_13;
+    l_err = DeviceFW::deviceWrite(
+                 l_proc,
+                 &data,
+                 scomSize,
+                 DEVICE_SCOM_ADDRESS(L2_FIR_REG_MULTICAST_SCOM_WOR));
+    if (l_err)
+    {
+        // Set the error to predictive, add trace, commit the log, but keep going in the
+        // hope that we can still properly cause the checkstop
+        l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+        l_err->collectTrace(LPC_COMP_NAME);
+        ERRORLOG::errlCommit(l_err, LPC_COMP_ID);
+    }
+
+    // At this point the system should checkstop, but just return back
+    // into the existing fail path if it doesn't
+    return;
+}
+
+
 
 }; //namespace LPC
 
@@ -1187,6 +1317,13 @@ errlHndl_t LpcDD::checkForLpcErrors()
         {
             TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::checkForLpcErrors> Error found in OPB Master Status Register: 0x%8X",opbm_err_union.data32);
             computeOpbmErrSev(opbm_err_union, l_opbmResetLevel);
+
+            // New priority is to force a specific checkstop so that PRD can
+            // handle the callout
+            LPC::lpcForceCheckstopOnLpcErrors();
+
+            // Shouldn't return back from forcing a checkstop, but if so, just
+            // follow the previous error path here
 
             if(l_opbmResetLevel != RESET_CLEAR)
             {
