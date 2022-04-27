@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -204,6 +204,9 @@ enum BootloaderTraces
 
     /** Bootloader PNOR Access findTOC handleMMIO LPC ERR returned */
     BTLDR_TRC_PA_FINDTOC_TOC1_LPC_ERR        = 0xFD,
+
+    /** Bootloader LPC Error(s) converted to System Checkstop */
+    BTLDR_TRC_LPC_ERR_FORCE_XSTOP    = 0xFE,
 };
 
 #ifndef BOOTLOADER_TRACE

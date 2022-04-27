@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -137,6 +137,13 @@ bool checkForLpcErrors()
 
     if (opbm_err_union.data32 != 0)
     {
+        // New priority is to force a specific checkstop so that PRD can
+        // handle the callout
+        Bootloader::bl_forceCheckstopOnLpcErrors();
+
+        // Shouldn't return back from forcing a checkstop, but if so, just
+        // follow the previous error path here
+
         computeOpbmErrSev(opbm_err_union, l_opbmResetLevel);
 
         if (l_opbmResetLevel != RESET_CLEAR)

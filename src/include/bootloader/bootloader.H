@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -205,6 +205,15 @@ namespace Bootloader{
                            uint32_t i_size,
                            MMIOLoadStoreSizes i_ld_st_size,
                            MMIOReadWrite i_opcode);
+
+     /**
+      * @brief Forces a checkstop when LPC Error(s) are seen such that PRD
+      *        can appropriately handle the callout
+      *
+      * @return - void, since this function should theoretically not return
+      */
+    void bl_forceCheckstopOnLpcErrors();
+
 
     /** @enum HbbLengths
      *  @brief List of HBB lengths.
