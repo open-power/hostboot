@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -80,7 +80,7 @@ fapi2::ReturnCode p10_omi_setup( const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i
     // Terminate downstream PRBS23 pattern
     if (l_is_apollo == fapi2::ENUM_ATTR_MSS_IS_APOLLO_FALSE)
     {
-        for (const auto& l_omi_target : i_target.getChildren<fapi2::TARGET_TYPE_OMI>())
+        for (const auto& l_omi_target : i_target.getChildren<fapi2::TARGET_TYPE_OMI>(fapi2::TARGET_STATE_FUNCTIONAL))
         {
             FAPI_TRY(p10_io_omi_prbs(mss::find_target<fapi2::TARGET_TYPE_OMI>(l_omi_target), false));
         }

@@ -172,7 +172,7 @@ fapi2::ReturnCode enforce_pre_freq(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
     }
 
     // Check mds plug rules
-    for(const auto& l_mcc : i_target.getChildren<fapi2::TARGET_TYPE_MCC>() )
+    for(const auto& l_mcc : i_target.getChildren<fapi2::TARGET_TYPE_MCC>(fapi2::TARGET_STATE_FUNCTIONAL) )
     {
         // Check for MDS/non-MDS dimm mixing
         FAPI_TRY( mss::plug_rule::check_mds(l_mcc) );

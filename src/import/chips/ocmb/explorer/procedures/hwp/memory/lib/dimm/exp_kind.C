@@ -160,10 +160,10 @@ fapi2::ReturnCode is_mds<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TAR
     o_is_mds = false;
 
     // Find and loop over omi targets
-    for (const auto& l_omi : i_target.getChildren<fapi2::TARGET_TYPE_OMI>())
+    for (const auto& l_omi : i_target.getChildren<fapi2::TARGET_TYPE_OMI>(fapi2::TARGET_STATE_FUNCTIONAL))
     {
         // Find and loop over ocmb targets, checking for MDS dimms on each
-        for (const auto& l_ocmb : l_omi.getChildren<fapi2::TARGET_TYPE_OCMB_CHIP>())
+        for (const auto& l_ocmb : l_omi.getChildren<fapi2::TARGET_TYPE_OCMB_CHIP>(fapi2::TARGET_STATE_FUNCTIONAL))
         {
             bool l_current_ocmb_mds = false;
             FAPI_TRY(is_mds<mss::mc_type::EXPLORER>(l_ocmb, l_current_ocmb_mds));

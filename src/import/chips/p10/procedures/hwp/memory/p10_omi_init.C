@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -121,7 +121,7 @@ fapi2::ReturnCode p10_omi_init_enable_lol(const fapi2::Target<fapi2::TARGET_TYPE
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_OMI>> l_omi_targets;
     fapi2::ATTR_CHIP_UNIT_POS_Type l_omi_pos;
 
-    l_omi_targets = i_target.getChildren<fapi2::TARGET_TYPE_OMI>();
+    l_omi_targets = i_target.getChildren<fapi2::TARGET_TYPE_OMI>(fapi2::TARGET_STATE_FUNCTIONAL);
 
     FAPI_TRY(scomt::mcc::GET_USTL_USTLCFG(i_target, l_data));
 
