@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -85,6 +85,17 @@ I2cDevInfos::I2cDevInfos()
         {
             TARGETING::ATTR_I2C_CONTROL_INFO_type u;
             if (l_tgt->tryGetAttr<TARGETING::ATTR_I2C_CONTROL_INFO>(u))
+            {
+                // String literal is used for comparison below, must stay sync'd
+                iv_i2cdvs.push_back({u.i2cMasterPath, u.engine, u.port,
+                                     u.devAddr, 0,
+                                     EEPROM::INVALID_CHIP_TYPE, l_tgt,
+                                     getDepth(l_tgt)});
+            }
+        }
+        {
+            TARGETING::ATTR_FAPI_I2C_CONTROL_INFO_type u;
+            if (l_tgt->tryGetAttr<TARGETING::ATTR_FAPI_I2C_CONTROL_INFO>(u))
             {
                 // String literal is used for comparison below, must stay sync'd
                 iv_i2cdvs.push_back({u.i2cMasterPath, u.engine, u.port,
