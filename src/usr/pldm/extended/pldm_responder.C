@@ -403,9 +403,8 @@ errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const void* i_msg, const siz
         }
 
         /* Invoke the handler and return any error */
-
-        PLDM_INF("Invoking handler for category %d message type %d",
-                 category, pldm_command);
+        PLDM_INF("Invoking handler for category %d, message type %d, instance %d",
+                 category, pldm_command, header_info.instance);
 
         errl = handler->handler(i_msgQ, pldm_message, payload_len);
     } while (false);
