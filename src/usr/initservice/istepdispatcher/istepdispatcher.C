@@ -72,6 +72,7 @@
 #include <lpc/lpcif.H>
 #include <istep18/establish_system_smp.H>
 #include <arch/magic.H>
+#include <util/utiltime.H>
 
 #ifdef CONFIG_PLDM
 #include <pldm/requests/pldm_pdr_requests.H>
@@ -2640,10 +2641,24 @@ errlHndl_t IStepDispatcher::sendProgressCode(bool i_needsLock)
     //--- Display step on serial console
     if ((iv_curIStep != lastIstep) || (iv_curSubStep != lastSubstep))
     {
+        auto l_time = Util::getCurrentDateTime();
+        char l_timestring[50] = {0};
+        if( l_time.format.year != 0 )
+        {
+            snprintf( l_timestring, sizeof(l_timestring),
+                      "%.04d/%.02d/%.02d %.02d:%.02d:%.02d|",
+                      l_time.format.year,
+                      l_time.format.month,
+                      l_time.format.day,
+                      l_time.format.hour,
+                      l_time.format.minute,
+                      l_time.format.second );
+        }
         const TaskInfo *taskinfo = findTaskInfo(iv_curIStep, iv_curSubStep);
-        CONSOLE::displayf(CONSOLE::VUART1, NULL, "ISTEP %2d.%2d - %s",
-                     iv_curIStep, iv_curSubStep,
-                     taskinfo && taskinfo->taskname ? taskinfo->taskname : "");
+        CONSOLE::displayf(CONSOLE::VUART1, NULL, "%sISTEP %2d.%2d - %s",
+                          l_timestring,
+                          iv_curIStep, iv_curSubStep,
+                          taskinfo && taskinfo->taskname ? taskinfo->taskname : "");
         CONSOLE::flush();
     }
 #endif

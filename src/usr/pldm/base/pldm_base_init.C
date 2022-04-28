@@ -48,6 +48,7 @@
 #include <pldm/base/hb_bios_attrs.H>
 #include <pldm/pldm_trace.H>
 #include <initservice/initserviceif.H>
+#include <util/utiltime.H>
 
 using namespace PLDM;
 
@@ -139,14 +140,14 @@ void base_init(errlHndl_t& o_errl)
     }
 
     // Fetch the current date/time from the BMC and seed it into
-    // ErrlManager for error log timestamps.
+    // Util to be used elsewhere, e.g. for error logs.
     date_time_t l_currentTime{};
     o_errl = getDateTime(l_currentTime);
     if(o_errl)
     {
         break;
     }
-    ERRORLOG::ErrlManager::setBaseDateTime(l_currentTime);
+    Util::setBaseDateTime(l_currentTime);
 
     // We don't want to keep these vectors around any longer than we have
     // to so put them in their own scope along with the call that needs them

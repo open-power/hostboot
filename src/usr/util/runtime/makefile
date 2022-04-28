@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2020
+# Contributors Listed Below - COPYRIGHT 2013,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -57,6 +57,8 @@ OBJS += utilxipimage.o
 OBJS += utilcommonattr.o
 OBJS += rt_fwnotify.o
 OBJS += rt_fwreq_helper.o
+OBJS += rt_utiltime.o
+OBJS += utiltime_common.o
 
 SUBDIRS += test.d
 

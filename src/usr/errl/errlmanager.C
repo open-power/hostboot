@@ -63,14 +63,15 @@ namespace ERRORLOG
 // Declared in errlentry.C
 extern std::map<uint8_t, const char *> errl_sev_str_map;
 
-extern trace_desc_t* g_trac_errl;
-
 // Store error logs in this memory buffer in L3 RAM.
 char* g_ErrlStorage = new char[ ERRL_STORAGE_SIZE ];
 
 // Allow Hidden error logs to be shown by default
 uint8_t ErrlManager::iv_hiddenErrLogsEnable =
             TARGETING::HIDDEN_ERRLOGS_ENABLE_ALLOW_ALL_LOGS;
+
+extern trace_desc_t* g_trac_errl;
+
 
 /**
 * @brief
@@ -1153,119 +1154,6 @@ bool ErrlManager::_updateErrlListIter(ErrlListItr_t & io_it)
         ++io_it;
     }
     return l_removed;
-}
-
-base_time_t ErrlManager::_getBaseDateTime()
-{
-    return iv_baseDateTime;
-}
-
-base_time_t ErrlManager::getBaseDateTime()
-{
-    return ERRORLOG::theErrlManager::instance()._getBaseDateTime();
-}
-
-void ErrlManager::_setBaseDateTime(const date_time_t& i_dateTime)
-{
-    iv_baseDateTime.date_time.value = i_dateTime.value;
-    iv_baseDateTime.timebase = getTB();
-}
-
-void ErrlManager::setBaseDateTime(const date_time_t& i_dateTime)
-{
-    ERRORLOG::theErrlManager::instance()._setBaseDateTime(i_dateTime);
-}
-
-date_time_t ErrlManager::dateTimeAddSeconds(const date_time_t& i_dateTime,
-                                            const uint64_t i_seconds)
-{
-    date_time_t l_result{};
-    const uint32_t SECONDS_IN_HOUR = 3600;
-    const uint8_t SECONDS_IN_MINUTE = 60;
-    const uint8_t MINUTES_IN_HOUR  = 60;
-    const uint8_t HOURS_IN_DAY = 24;
-    const uint8_t DAYS_IN_MONTH[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-    const uint8_t MONTH_OF_FEB = 2;
-    const uint8_t MONTHS_IN_YEAR = 12;
-
-    uint8_t l_hours = i_seconds / SECONDS_IN_HOUR;
-    uint8_t l_minutes = (i_seconds - (l_hours * SECONDS_IN_HOUR)) /
-                        SECONDS_IN_MINUTE;
-    uint8_t l_seconds = i_seconds - (l_hours * SECONDS_IN_HOUR) -
-                                    (l_minutes * SECONDS_IN_MINUTE);
-
-    l_result.format.second = l_seconds + i_dateTime.format.second;
-    if(l_result.format.second >= SECONDS_IN_MINUTE)
-    {
-        l_minutes++;
-        l_result.format.second -= SECONDS_IN_MINUTE;
-    }
-
-    l_result.format.minute = l_minutes + i_dateTime.format.minute;
-    if(l_result.format.minute >= MINUTES_IN_HOUR)
-    {
-        l_hours++;
-        l_result.format.minute -= MINUTES_IN_HOUR;
-    }
-
-    l_result.format.hour = l_hours + i_dateTime.format.hour;
-    if(l_result.format.hour >= HOURS_IN_DAY)
-    {
-        l_result.format.day = (i_dateTime.format.day +
-                             (l_result.format.hour / HOURS_IN_DAY));
-        l_result.format.hour -= ((l_result.format.hour / HOURS_IN_DAY) *
-                                 HOURS_IN_DAY);
-        l_result.format.month = i_dateTime.format.month;
-        l_result.format.year = i_dateTime.format.year;
-
-        uint8_t l_daysInMonth = DAYS_IN_MONTH[i_dateTime.format.month - 1];
-
-        // Take leap years into account
-        if((l_result.format.month == MONTH_OF_FEB) &&
-            ((l_result.format.year % 4 == 0 && l_result.format.year % 100 != 0) ||
-             (l_result.format.year % 400 == 0)))
-        {
-            l_daysInMonth++;
-        }
-
-        if(l_result.format.day > l_daysInMonth)
-        {
-            l_result.format.day -= l_daysInMonth;
-            l_result.format.month = i_dateTime.format.month + 1;
-            if(l_result.format.month > MONTHS_IN_YEAR)
-            {
-                l_result.format.year = i_dateTime.format.year + 1;
-                l_result.format.month -= MONTHS_IN_YEAR;
-            }
-        }
-    }
-    else
-    {
-        l_result.format.day = i_dateTime.format.day;
-        l_result.format.month = i_dateTime.format.month;
-        l_result.format.year = i_dateTime.format.year;
-    }
-    return l_result;
-}
-
-date_time_t ErrlManager::_getCurrentDateTime()
-{
-    base_time_t l_baseTime = getBaseDateTime();
-    uint64_t l_currentTimebase = getTB();
-
-    uint64_t l_secondsElapsed = 0;
-    uint64_t l_nsElapsed = 0;
-    TimeManager::convertTicksToSec(l_currentTimebase - l_baseTime.timebase,
-                                   l_secondsElapsed, l_nsElapsed);
-    date_time_t l_currentDateTime = dateTimeAddSeconds(l_baseTime.date_time,
-                                                       l_secondsElapsed);
-
-    return l_currentDateTime;
-}
-
-date_time_t ErrlManager::getCurrentDateTime()
-{
-    return ERRORLOG::theErrlManager::instance()._getCurrentDateTime();
 }
 
 } // End namespace
