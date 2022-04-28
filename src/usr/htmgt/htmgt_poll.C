@@ -97,7 +97,7 @@ namespace HTMGT
                         else
                         {
                             // Link PLID to first error
-                            l_err->plid(l_first_err->plid());
+                            poll_err->plid(l_first_err->plid());
                             ERRORLOG::errlCommit(poll_err, HTMGT_COMP_ID);
                         }
                     }
