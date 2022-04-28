@@ -833,24 +833,20 @@ void handleMctpAvailable(void)
 
     do{
     auto& next_pldm_request = PLDM::get_next_request();
-    // if we have a complete pldm request waiting for us then
-    // handle it
+
+    // if we have a complete PLDM request already queued, that is an unexpected
+    // case since a response to a much earlier message could *appear* to be the
+    // response to a just-arrived message.  In this case, discard the message
+    // and attempt to get the next one.
     if(!next_pldm_request.empty())
     {
-        // Received all mctp packets for this message,
-        // ok to disable the bridge
-        setMctpBridgeState(hostInterfaces::MCTP_BRIDGE_DISABLED);
-
-        errl = PLDM::handle_next_pldm_request();
-        if(errl)
-        {
-            errlCommit(errl, RUNTIME_COMP_ID);
-        }
-
-        // Re-enable the bridge
-        setMctpBridgeState(hostInterfaces::MCTP_BRIDGE_ENABLED);
-
-        break;
+        TRACFCOMP(g_trac_hbrt,ERR_MRK
+                  "handleMctpAvailable: discarding unexpectedly queued PLDM "
+                  "request");
+        TRACFBIN(g_trac_hbrt,"Discarded PLDM request msg header",
+            next_pldm_request.data(), std::min(next_pldm_request.size(),
+            sizeof(pldm_msg_hdr)));
+        PLDM::clear_next_request();
     }
 
     int return_code = MCTP::get_next_packet();
