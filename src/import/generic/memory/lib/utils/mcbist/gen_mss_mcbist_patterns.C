@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -95,7 +95,7 @@ const std::vector< pattern > patterns =
 /// Vector of 24b random data seeds
 const std::vector< random24_data_seed > random24_data_seeds =
 {
-    // 24 Bit Pattern index 0 (Pattern 1 is this inverted)
+    // 24 Bit Pattern index 0 Matches user input defaults
     {   {0x010203},
         {0x040506},
         {0x070809},
@@ -108,6 +108,7 @@ const std::vector< random24_data_seed > random24_data_seeds =
     },
 
 };
+
 
 /// Vector of 24b random data seed mappings
 //  Not sure how many mapping we will want, for now it should be sufficient to

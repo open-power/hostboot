@@ -2021,6 +2021,7 @@ class program
             return l_data_rotate;
         }
 
+
         ///
         /// @brief Change the data seed mode value
         /// @param[in] i_data_seed_mode
@@ -3580,8 +3581,6 @@ inline fapi2::ReturnCode load_maint_pattern( const fapi2::Target<T>& i_target, c
 {
     return load_maint_pattern<MC>(i_target, i_program.iv_pattern);
 }
-
-
 ///
 /// @brief Load MCBIST 24b random data seeds given a pattern index
 /// @tparam MC the mc type of the T
@@ -3603,7 +3602,8 @@ fapi2::ReturnCode load_random24b_seeds( const fapi2::Target<T>& i_target,
     // Init the fapi2 return code
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
-    const uint64_t l_random_addr0 = TT::RANDOM_DATA_SEED0;
+    const uint64_t l_random_addr0 =
+        TT::RANDOM_DATA_SEED0;
     const uint64_t l_random_addr1 = TT::RANDOM_DATA_SEED1;
     uint64_t l_index = 0;
     uint64_t l_map_index = 0;
@@ -3655,7 +3655,6 @@ fapi2::ReturnCode load_random24b_seeds( const fapi2::Target<T>& i_target,
             {
                 l_map_offset = TT::CFG_DGEN_RNDD_DATA_MAPPING + (l_map_index * RANDOM24_SEED_MAP_FIELD_LEN);
                 FAPI_TRY(l_mcbrsd1q.insertFromRight(l_map, l_map_offset, RANDOM24_SEED_MAP_FIELD_LEN));
-                FAPI_INF("Loading 24b random seed map index %ld  for %s", l_map_index, mss::c_str(i_target));
                 FAPI_ASSERT( l_map_index < mss::mcbist::MAX_NUM_RANDOM24_MAPS,
                              fapi2::MSS_MEMDIAGS_INVALID_PATTERN_INDEX().
                              set_INDEX(l_map_index).
@@ -3664,6 +3663,7 @@ fapi2::ReturnCode load_random24b_seeds( const fapi2::Target<T>& i_target,
                 ++l_map_index;
             }
 
+            FAPI_INF("Loading 24b random seed 2 w/map  0x%016lx for %s", l_mcbrsd1q, mss::c_str(i_target));
             FAPI_TRY( fapi2::putScom(i_target, l_random_addr1, l_mcbrsd1q) );
         }
 
@@ -3682,6 +3682,7 @@ fapi_try_exit:
 
 
 
+
 ///
 /// @brief Load MCBIST 24b Random data seeds given a pattern index
 /// @tparam MC the mc type of the T
@@ -3696,6 +3697,7 @@ template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, 
 inline fapi2::ReturnCode load_random24b_seeds( const fapi2::Target<T>& i_target, uint64_t i_data_seed,
         uint64_t i_seed_map )
 {
+
     if ((NO_RANDOM24_SEEDS != i_data_seed) && (NO_RANDOM24_SEED_MAP != i_seed_map))
     {
         bool l_invert = false;
