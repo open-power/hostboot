@@ -65,6 +65,7 @@
 #include "errlentry_consts.H"
 #include <util/misc.H>
 #include <limits.h>
+#include <util/utiltime.H>
 
 #include <util/utillidmgr.H>
 #include <util/crc32.H>
@@ -1106,9 +1107,9 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
     using namespace TARGETING;
 
     iv_Private.iv_committed.timebase = getTB();
-    iv_Private.iv_committed.date_time = ERRORLOG::ErrlManager::getCurrentDateTime();
+    iv_Private.iv_committed.date_time = Util::getCurrentDateTime();
 #ifdef __HOSTBOOT_RUNTIME
-    iv_Private.iv_created.date_time = ERRORLOG::ErrlManager::getCurrentDateTime();
+    iv_Private.iv_created.date_time = Util::getCurrentDateTime();
 #endif
 
     // User/Extended headers contain the component ID of the committer.

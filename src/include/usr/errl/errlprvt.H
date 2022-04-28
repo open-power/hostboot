@@ -117,7 +117,9 @@ private:
     ErrlSctnHdr	iv_header;    // section header for any/all sections
 
     // The errl parser expects the timestamp data to be
-    // represented in BCD format: 0xYYYYDDMMHHMMSS00
+    // represented in BCD format: 0xYYYYDDMMHHMMSS00.
+    // However, we will store the time in a normal time structure
+    // that is not BCD-encoded for easier general usage.
     base_time_t iv_created;
     base_time_t iv_committed;
     uint8_t     iv_cid;       // Creator 'B' (enum errlCreator)

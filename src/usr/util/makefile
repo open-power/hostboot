@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2019
+# Contributors Listed Below - COPYRIGHT 2012,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -42,6 +42,11 @@ OBJS += utilrsvdmem.o
 OBJS += utilxipimage.o
 OBJS += utilmclmgr.o
 OBJS += utilcommonattr.o
+
+# We need this logic to be available very early so we will
+# include it in libpldm instead of here.
+#OBJS += utiltime.o
+#OBJS += utiltime_common.o
 
 SUBDIRS += test.d
 SUBDIRS += runtime.d

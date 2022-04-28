@@ -138,63 +138,6 @@ enum errlManagerNeeds
 
 const uint64_t MIN_PLD_WAIT_TIME_SEC = 10;
 
-/**
-* @brief Helper function to convert a uint8_t decimal to BCD (Binary Coded
-*        Decimal) format.
-*
-* @param[in] dec the uint8_t value to be converted to BCD format
-* @return The BCD-formatted input value
-*/
-uint8_t dec2bcd8(uint8_t dec);
-
-/**
-* @brief Helper function to convert a uint16_t decimal to BCD (Binary Coded
-*        Decimal) format.
-*
-* @param[in] dec the uint16_t value to be converted to BCD format
-* @return The BCD-formatted input value
-*/
-uint16_t dec2bcd16(uint16_t dec);
-
-/**
-* @brief Helper function to convert a BCD (Binary Coded Decimal) input to
-*        uint8_t.
-*
-* @param[in] bcd the BCD value to be converted to uint8_t
-* @return The uint8_t value
-*/
-uint8_t bcd2dec8(uint8_t bcd);
-
-/**
-* @brief Helper function to convert BCD (Binary Coded Decimal) input to
-*        uint16_t.
-*
-* @param[in] bcd the BCD value to be converted to uint16_t
-* @return The uint16_t value
-*/
-uint16_t bcd2dec16(uint16_t bcd);
-
-/**
- * @brief Converts the input date/time structure to a raw BCD-formatted
- *        uint64_t value in the format: 0xYYYYMMDDHHMMSS00.
- *
- * @param[in] i_dateTime the input date/time structure to covert
- * @return The raw BCD-formatted date/time in the format:
- *         0xYYYYMMDDHHMMSS00
- */
-uint64_t dateTimeToRawBCD(const date_time_t& i_dateTime);
-
-/**
- * @brief Converts the input raw BCD-formatted time in format
- *        0xYYYYMMDDHHMMSS00 to a date_time_t structure. The function
- *        performs a conversion from BCD to decimal as part of the
- *        translation.
- *
- * @param[in] i_dateTimeBCD the input date/time in BCD format
- * @return The formatted date_time_t structure
-*/
-date_time_t rawBCDToDateTime(uint64_t i_dateTimeBCD);
-
 /*****************************************************************************/
 // Forward class declarations
 /*****************************************************************************/
@@ -334,59 +277,6 @@ public:
      *          what is currently set in ATTR_HIDDEN_ERRLOGS_ENABLE
      */
     static uint8_t iv_hiddenErrLogsEnable;
-
-    /**
-     * @brief Returns the base date/time structure populated when the
-     *        daemon started. The base date/time values can be used to
-     *        calculate current date/time based on the number of clock
-     *        ticks that have elapsed.
-     *
-     * @return The base date/time structure
-     */
-    base_time_t _getBaseDateTime();
-
-    /**
-     * @brief A wrapper around the ErrlManager's _getBaseDateTime member
-     *        function. Returns the base date/time.
-     *
-     * @return The base date/time structure
-     */
-    static base_time_t getBaseDateTime();
-
-    /**
-     * @brief Returns the current calculated date/time.
-     *        The current date/time is the base date/time (calculated at the
-     *        time this daemon started) plus the number of ticks that have
-     *        elapsed since converted to seconds.
-     *
-     * @return The current date/time
-     */
-    date_time_t _getCurrentDateTime();
-
-    /**
-     * @brief A wrapper around ErrlManager's _getCurrentDateTime member
-     *        function. Returns the current date/time.
-     *
-     * @return The current date/time
-     */
-    static date_time_t getCurrentDateTime();
-
-    /**
-     * @brief Sets the member date/time structure to the date/time passed in.
-     *        The timebase member of the structure is set to the current
-     *        timebase at the time of the call of this function.
-     *
-     * @param[in] i_dateTime the current date/time value
-     */
-    void _setBaseDateTime(const date_time_t& i_dateTime);
-
-    /**
-     * @brief A wrapper around ErrlManager's _setBaseDateTime member function.
-     *        Sets the current date/time of the ErrlManager.
-     *
-     * @param[in] i_dateTime the current date/time value
-     */
-    static void setBaseDateTime(const date_time_t& i_dateTime);
 
     /**
      * @brief Retrieve the MI keyword from the Marker LID.
@@ -896,16 +786,6 @@ private:
 
     base_time_t iv_baseDateTime; // The base/reference date/time taken at the
                                  // time this daemon starts
-
-    /**
-     * @brief Adds seconds to the provided date/time
-     *
-     * @param[in] i_dateTime the current date/time
-     * @param[in] i_seconds the number of seconds to add to the date/time
-     * @return The new date/time
-     */
-    date_time_t dateTimeAddSeconds(const date_time_t& i_dateTime,
-                                   uint64_t i_seconds);
 
     /**
      * @brief Returns the value of the first EID to be used in HBRT.

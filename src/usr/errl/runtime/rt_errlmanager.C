@@ -719,58 +719,6 @@ bool rt_processCallout(errlHndl_t &io_errl,
     return true;
 }
 
-date_time_t ErrlManager::_getCurrentDateTime()
-{
-    date_time_t l_result{};
-
-    errlHndl_t l_errl = nullptr;
-
-    do {
-    if((nullptr == g_hostInterfaces) ||
-       (nullptr == g_hostInterfaces->firmware_request))
-    {
-        TRACFCOMP(g_trac_errl, ERR_MRK"_getCurrentDateTime: firmware_request interface not found");
-        break;
-    }
-
-    hostInterfaces::hbrt_fw_msg l_request{};
-    size_t l_requestSize = sizeof(l_request);
-    l_request.io_type = hostInterfaces::HBRT_FW_MSG_TYPE_GET_ELOG_TIME;
-
-    hostInterfaces::hbrt_fw_msg l_response{};
-    size_t l_responseSize = sizeof(l_response);
-
-    l_errl = firmware_request_helper(l_requestSize,
-                                     &l_request,
-                                     &l_responseSize,
-                                     &l_response);
-    if(l_errl)
-    {
-        TRACFCOMP(g_trac_errl, ERR_MRK"_getCurrentDateTime: firmware_request_helper returned an error; deleting the error and continuing");
-        delete l_errl;
-        l_errl = nullptr;
-        break;
-    }
-
-    hostInterfaces::dateTime* l_bcdTime = reinterpret_cast<hostInterfaces::dateTime*>(&l_response);
-
-    l_result.format.year = bcd2dec16(l_bcdTime->year);
-    l_result.format.month = bcd2dec8(l_bcdTime->month);
-    l_result.format.day = bcd2dec8(l_bcdTime->day);
-    l_result.format.hour = bcd2dec8(l_bcdTime->hour);
-    l_result.format.minute = bcd2dec8(l_bcdTime->minute);
-    l_result.format.second = bcd2dec8(l_bcdTime->second);
-
-    } while(0);
-
-    return l_result;
-}
-
-date_time_t ErrlManager::getCurrentDateTime()
-{
-    return ERRORLOG::theErrlManager::instance()._getCurrentDateTime();
-}
-
 void ErrlManager::setFwReleaseVersion_rt()
 {
     errlHndl_t l_errl(nullptr);

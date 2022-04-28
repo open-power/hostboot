@@ -1176,55 +1176,5 @@ void ErrlManager::setLastIplEid(const uint32_t i_eid)
 }
 #endif
 
-uint64_t dateTimeToRawBCD(const date_time_t& i_dateTime)
-{
-    uint64_t l_result = 0;
-
-    uint64_t l_year = dec2bcd16(i_dateTime.format.year);
-    uint64_t l_month = dec2bcd8(i_dateTime.format.month);
-    uint64_t l_day = dec2bcd8(i_dateTime.format.day);
-    uint64_t l_hour = dec2bcd8(i_dateTime.format.hour);
-    uint64_t l_minute = dec2bcd8(i_dateTime.format.minute);
-    uint64_t l_second = dec2bcd8(i_dateTime.format.second);
-
-    l_result = (l_year << 48) | (l_month << 40) | (l_day << 32) |
-                 (l_hour << 24) | (l_minute << 16) | (l_second << 8);
-
-    return l_result;
-}
-
-date_time_t rawBCDToDateTime(const uint64_t i_dateTimeBCD)
-{
-    date_time_t l_result {};
-    l_result.format.year = bcd2dec16(i_dateTimeBCD >> 48);
-    l_result.format.month = bcd2dec8((i_dateTimeBCD & 0x0000FF0000000000) >> 40);
-    l_result.format.day = bcd2dec8((i_dateTimeBCD & 0x000000FF00000000) >> 32);
-    l_result.format.hour = bcd2dec8((i_dateTimeBCD & 0x00000000FF000000) >> 24);
-    l_result.format.minute = bcd2dec8((i_dateTimeBCD & 0x0000000000FF0000) >> 16);
-    l_result.format.second = bcd2dec8((i_dateTimeBCD & 0x000000000000FF00) >> 8);
-    return l_result;
-}
-
-uint8_t dec2bcd8(uint8_t dec)
-{
-    uint8_t bcd = (dec % 10) | ((dec / 10) << 4);
-    return bcd;
-}
-
-uint16_t dec2bcd16(uint16_t dec)
-{
-    return dec2bcd8(dec % 100) | (dec2bcd8(dec / 100) << 8);
-}
-
-uint8_t bcd2dec8(uint8_t bcd)
-{
-    uint8_t dec = ((bcd >> 4) * 10) + (bcd & 0x0f);
-    return dec;
-}
-
-uint16_t bcd2dec16(uint16_t bcd)
-{
-    return (bcd2dec8(bcd >> 8) * 100) + bcd2dec8(bcd & 0xff);
-}
 
 } // end namespace

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2016
+# Contributors Listed Below - COPYRIGHT 2011,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -30,6 +30,12 @@ include errl.mk
 
 OBJS += errlmanager.o
 OBJS += errludprintk.o
+
+# We need this logic to be available very early so we will
+# include it in here instead of libutil that is loaded later.
+VPATH += ${ROOTPATH}/src/usr/util/
+OBJS += utiltime.o
+OBJS += utiltime_common.o
 
 SUBDIRS += test.d
 SUBDIRS += parser.d

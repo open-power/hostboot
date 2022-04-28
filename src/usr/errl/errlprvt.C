@@ -38,6 +38,7 @@
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <arch/ppc.H>
+#include <util/utiltime.H>
 
 
 namespace ERRORLOG
@@ -71,7 +72,7 @@ ErrlPrvt::ErrlPrvt( compId_t  i_CreatorCompId ) :
     iv_created.timebase = getTB();
 #ifndef __HOSTBOOT_RUNTIME
     // At runtime, the created timestamp will be populated at the time of commit
-    iv_created.date_time = ERRORLOG::ErrlManager::getCurrentDateTime();
+    iv_created.date_time = Util::getCurrentDateTime();
 #endif
 
 }
@@ -119,8 +120,8 @@ uint64_t ErrlPrvt::flatten( void * o_pBuffer, const uint64_t i_cbBuffer )
         // it gets from BMC, we need to convert the resulting timestamp from
         // decimal to raw BCD format here to display it correctly in the error
         // log.
-        p->creationTime   = dateTimeToRawBCD(iv_created.date_time);
-        p->commitTime     = dateTimeToRawBCD(iv_committed.date_time);
+        p->creationTime   = Util::dateTimeToRawBCD(iv_created.date_time);
+        p->commitTime     = Util::dateTimeToRawBCD(iv_committed.date_time);
         p->creatorId      = iv_cid;
         p->sectionCount   = iv_sctns;
         p->plid           = iv_plid;
@@ -140,8 +141,8 @@ uint64_t ErrlPrvt::unflatten( const void * i_buf )
         static_cast<const pelPrivateHeaderSection_t *>(i_buf);
 
     iv_header.unflatten(&(p->sectionheader));
-    iv_created.date_time = rawBCDToDateTime(p->creationTime);
-    iv_committed.date_time = rawBCDToDateTime(p->commitTime);
+    iv_created.date_time = Util::rawBCDToDateTime(p->creationTime);
+    iv_committed.date_time = Util::rawBCDToDateTime(p->commitTime);
     iv_cid                       = p->creatorId;
     iv_sctns                     = p->sectionCount;
     iv_plid                      = p->plid;

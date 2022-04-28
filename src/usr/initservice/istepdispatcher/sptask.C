@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -165,7 +165,7 @@ void handleIstep( SPLessCmd & io_cmd, msg_q_t i_sendQ,
     l_pMsg->extra_data  =   NULL;
 
 #ifdef CONFIG_CONSOLE_OUTPUT_PROGRESS
-    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "ISTEP %2d.%2d", io_cmd.istep, io_cmd.substep);
+    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "ISTEP %2d.%2d (external request)", io_cmd.istep, io_cmd.substep);
     CONSOLE::flush();
 #endif
     TRACFCOMP( g_trac_initsvc,
