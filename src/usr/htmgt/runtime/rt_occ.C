@@ -174,6 +174,18 @@ namespace HTMGT
         errlHndl_t l_errl = nullptr;
         TARGETING::Target* l_proc = nullptr;
 
+
+        // If the system is in safemode then ignore request to reset OCCs
+        TARGETING::Target* sys = nullptr;
+        TARGETING::targetService().getTopLevelTarget(sys);
+        uint8_t safeMode = 0;
+        if(sys &&
+            sys->tryGetAttr<TARGETING::ATTR_HTMGT_SAFEMODE>(safeMode) &&
+            safeMode)
+            {
+                return l_rc;
+            }
+
         do{
         TRACFCOMP(g_trac_hbrt,ENTER_MRK
                   "reset_pm_complex_with_reason: i_reason=%d, i_chipId=%d ", i_reason, i_chipId);

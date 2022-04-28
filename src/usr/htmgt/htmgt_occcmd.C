@@ -732,8 +732,8 @@ namespace HTMGT
                 {
                     TMGT_INF("waitForOccRsp: OCC%d rsp (rsp length=%d)",
                              iv_Occ->iv_instance, rspLength);
-                    TMGT_BIN("waitForOccRsp: OCC rsp data (up to 300 bytes)",
-                             rspBuffer, std::min(rspLength, (uint16_t)300));
+                    TMGT_BIN("waitForOccRsp: OCC rsp data (up to 40 bytes)",
+                             rspBuffer, std::min(rspLength, (uint16_t)40));
                 }
                 l_time_expired = false;
                 break;
@@ -1367,4 +1367,3 @@ namespace HTMGT
 
 
 }
-
