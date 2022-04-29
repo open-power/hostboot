@@ -1632,28 +1632,7 @@ fapi_try_exit:
 /// @note used to set throttle window (N throttles  / M clocks)
 ///
 template<mss::mc_type MC, fapi2::TargetType T, typename TT = throttle_traits<MC>>
-fapi2::ReturnCode set_safemode_throttles(const fapi2::Target<T>& i_target)
-{
-    fapi2::buffer<uint64_t> l_data;
-    fapi2::ATTR_MSS_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT_Type l_throttle_per_port = 0;
-    fapi2::ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS_Type l_throttle_denominator = 0;
-
-    FAPI_TRY(mss::attr::get_mrw_mem_m_dram_clocks(l_throttle_denominator));
-    FAPI_TRY(mss::attr::get_mrw_safemode_mem_throttled_n_commands_per_port(l_throttle_per_port));
-
-    FAPI_TRY(fapi2::getScom(i_target, TT::FARB4Q_REG, l_data));
-
-    l_data.insertFromRight<TT::EMERGENCY_M, TT::EMERGENCY_M_LEN>(l_throttle_denominator);
-    l_data.insertFromRight<TT::EMERGENCY_N, TT::EMERGENCY_N_LEN>(l_throttle_per_port);
-
-    FAPI_TRY(fapi2::putScom(i_target, TT::FARB4Q_REG, l_data));
-
-    return fapi2::FAPI2_RC_SUCCESS;
-
-fapi_try_exit:
-    FAPI_ERR("%s Error setting safemode throttles", mss::c_str(i_target));
-    return fapi2::current_err;
-}
+fapi2::ReturnCode set_safemode_throttles(const fapi2::Target<T>& i_target);
 
 ///
 /// @brief safemode throttle values defined from MRW attributes
