@@ -456,8 +456,33 @@ hostInterfaces::InitiateGardResourceType get_resource_type(TARGETING::Target* co
     switch (i_target->getAttr<ATTR_TYPE>())
     {
     case TYPE_FC:
+        {
+            // Only allow the gard if the cores in the FC are NOT ECO cores
+            // We should NOT get called for already deconfigured/non-functional FC's
+            // but to be safe get ALL in case things change in the future
+            TARGETING::TargetHandleList targetList;
+            getChildChiplets(targetList, i_target, TYPE_CORE, false);
+            bool l_fc_valid = true;
+            for ( const auto coreTarget : targetList )
+            {
+                if (coreTarget->getAttr<ATTR_ECO_MODE>() == ECO_MODE_ENABLED)
+                {
+                    l_fc_valid = false;
+                    break;
+                }
+            }
+            if (l_fc_valid)
+            {
+                resource_type = hostInterfaces::ResourceProc;
+            }
+            break;
+        }
     case TYPE_CORE:
-        resource_type = hostInterfaces::ResourceProc;
+        // Only allow the gard if the core is NOT an ECO core
+        if (i_target->getAttr<ATTR_ECO_MODE>() == ECO_MODE_DISABLED)
+        {
+            resource_type = hostInterfaces::ResourceProc;
+        }
         break;
     case TYPE_NX:
         resource_type = hostInterfaces::ResourceNxUnit;
