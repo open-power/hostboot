@@ -48,6 +48,7 @@
 
 #ifdef __HOSTBOOT_MODULE
 #include <errl/errlmanager.H>
+#include <targeting/common/DCMUtils.H>
 #if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
 #include <console/consoleif.H>
 #endif
@@ -425,6 +426,16 @@ void DeconfigGard::_deconfigureByAssoc(
         {
             pTempList.push_back(l_parentPervChild);
         }
+    }
+    else if (l_targetType == TYPE_PROC)
+    {
+        #ifdef __HOSTBOOT_MODULE
+            // Get the IO SCM chip associated with target if system is a Dual Chip Module
+            DCMUtils l_dcmUtils;
+            auto l_ioScmChip = l_dcmUtils.getAssociatedIoScmChip(&i_target);
+            // If an IO SCM chip was found then put on list of targets to be deconfigured
+            if (l_ioScmChip) { pTempList.push_back(l_ioScmChip); };
+        #endif
     }
 
     // Append the temporary list to the child list

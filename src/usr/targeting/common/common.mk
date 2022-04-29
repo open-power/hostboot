@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2020
+# Contributors Listed Below - COPYRIGHT 2011,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -61,6 +61,7 @@ OTHER_OBJS += utilFilter.o
 OTHER_OBJS += attributeTank.o
 OTHER_OBJS += mapattrmetadata.o
 OTHER_OBJS += mfgFlagAccessors.o
+OTHER_OBJS += DCMUtils.o
 
 # Common
 COMMON_TARGETING_OBJS += ${TARGET_OBJS}
