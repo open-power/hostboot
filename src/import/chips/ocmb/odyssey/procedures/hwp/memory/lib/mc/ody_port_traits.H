@@ -112,7 +112,8 @@ class portTraits< mss::mc_type::ODYSSEY >
         static constexpr uint64_t  HW_STEERING_DELAY = (250 * mss::DELAY_1MS);
         static constexpr uint64_t  SIM_STEERING_DELAY = (2 * mss::DELAY_100US);
 
-        static constexpr uint8_t MAX_MRANK_PER_PORT = mss::ody::MAX_MRANK_PER_PORT;
+        // Odyssey has 2 maximum ranks in HW
+        static constexpr uint8_t MAX_MRANK_PER_PORT = mss::ody::HW_MAX_MRANK_PER_PORT;
         static constexpr uint8_t MAX_SYMBOLS_PER_PORT = mss::ody::MAX_SYMBOLS_PER_PORT;
 
         // scom register field definition

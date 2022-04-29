@@ -69,9 +69,6 @@ const std::vector< uint32_t > steerTraits< mss::mc_type::ODYSSEY, mux_type::WRIT
 {
     scomt::ody::ODC_WDF_REGS_WSPAR_0_LEFT,
     scomt::ody::ODC_WDF_REGS_WSPAR_1_LEFT,
-    // TODO:MST-1595 Remove cfg_steering fields for Rank 2 and 3
-    scomt::ody::ODC_WDF_REGS_WSPAR_2_LEFT,
-    scomt::ody::ODC_WDF_REGS_WSPAR_3_LEFT,
 };
 
 ///
@@ -81,9 +78,6 @@ const std::vector< uint32_t > steerTraits< mss::mc_type::ODYSSEY, mux_type::WRIT
 {
     scomt::ody::ODC_WDF_REGS_WSPAR_0_RIGHT,
     scomt::ody::ODC_WDF_REGS_WSPAR_1_RIGHT,
-    // TODO:MST-1595 Remove cfg_steering fields for Rank 2 and 3
-    scomt::ody::ODC_WDF_REGS_WSPAR_2_RIGHT,
-    scomt::ody::ODC_WDF_REGS_WSPAR_3_RIGHT,
 };
 
 ///
@@ -93,9 +87,6 @@ const std::vector< uint32_t > steerTraits< mss::mc_type::ODYSSEY, mux_type::READ
 {
     scomt::ody::ODC_RDF0_SCOM_RSPAR_0_LEFT,
     scomt::ody::ODC_RDF0_SCOM_RSPAR_1_LEFT,
-    // TODO:MST-1595 Remove cfg_steering fields for Rank 2 and 3
-    scomt::ody::ODC_RDF0_SCOM_RSPAR_2_LEFT,
-    scomt::ody::ODC_RDF0_SCOM_RSPAR_3_LEFT,
 };
 
 ///
@@ -105,9 +96,6 @@ const std::vector< uint32_t > steerTraits< mss::mc_type::ODYSSEY, mux_type::READ
 {
     scomt::ody::ODC_RDF0_SCOM_RSPAR_0_RIGHT,
     scomt::ody::ODC_RDF0_SCOM_RSPAR_1_RIGHT,
-    // TODO:MST-1595 Remove cfg_steering fields for Rank 2 and 3
-    scomt::ody::ODC_RDF0_SCOM_RSPAR_2_RIGHT,
-    scomt::ody::ODC_RDF0_SCOM_RSPAR_3_RIGHT,
 };
 
 } // ns steer
