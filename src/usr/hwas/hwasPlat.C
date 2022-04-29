@@ -1177,14 +1177,31 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
             if(!Util::isSimicsRunning())
             {
                 HWAS_DBG( "Call SPD::checkCRC on %.8X", TARGETING::get_huid(pTarget) );
-                errl = SPD::checkCRC( pTarget, SPD::CHECK );
+
+                bool vpd_read_failed = false;
+
+                errl = SPD::checkCRC( pTarget, SPD::CHECK, EEPROM::AUTOSELECT, &vpd_read_failed );
+
                 if (errl)
                 {
-                    // commit the error but remove all deconfig/gard
-                    errl->removeGardAndDeconfigure();
-                    errlCommit(errl, HWAS_COMP_ID);
-                    // SPD is busted so mark the part as not present
-                    present = false;
+                    if (vpd_read_failed)
+                    { // If the VPD read failed, it means we failed to read the
+                      // VPD contents into EECACHE earlier which already created
+                      // a log, so we delete this one to avoid repeat logs.
+                        HWAS_INF("Deleting error 0x%08x, VPD read error was already logged",
+                                 ERRL_GETPLID_SAFE(errl));
+
+                        delete errl;
+                        errl = nullptr;
+                    }
+                    else
+                    {
+                        // commit the error but remove all deconfig/gard
+                        errl->removeGardAndDeconfigure();
+                        errlCommit(errl, HWAS_COMP_ID);
+                        // SPD is busted so mark the part as not present
+                        present = false;
+                    }
                 }
             }
             else

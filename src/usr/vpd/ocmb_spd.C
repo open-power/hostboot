@@ -421,7 +421,8 @@ uint16_t jedec_Crc16( const uint8_t *i_ptr, size_t i_count )
  */
 errlHndl_t checkCRC( T::TargetHandle_t i_target,
                      enum CRCMODE_t i_mode,
-                     EEPROM::EEPROM_SOURCE i_location )
+                     EEPROM::EEPROM_SOURCE i_location,
+                     bool* const o_missing_vpd)
 {
     errlHndl_t l_errl = nullptr;
     TRACDCOMP( g_trac_spd, "Start checkCRC on %.8X", T::get_huid(i_target) );
@@ -466,6 +467,8 @@ errlHndl_t checkCRC( T::TargetHandle_t i_target,
         {
             TRACFCOMP( g_trac_spd,
                       "Error fetching SPD for CRC verification" );
+
+            o_missing_vpd && (*o_missing_vpd = true);
 
             break;
         }

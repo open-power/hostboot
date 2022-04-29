@@ -264,11 +264,15 @@ namespace SPD
      *      CHECK_AND_FIX : Rewrite any CRC that miscompares, also
      *                      commit visible log
      * @param[in] i_location - Read from cache or hardware
+     * @param[out] o_missing_vpd - Whether the error returned was due to missing VPD
+     *                             rather than to a CRC or other error. If null,
+     *                             this parameter is ignored.
      * @return Error log
      */
     errlHndl_t checkCRC( TARGETING::TargetHandle_t i_target,
                          enum CRCMODE_t i_mode,
-                         EEPROM::EEPROM_SOURCE i_location = EEPROM::AUTOSELECT );
+                         EEPROM::EEPROM_SOURCE i_location = EEPROM::AUTOSELECT,
+                         bool* o_missing_vpd = nullptr);
 
     /**
      * @brief Forcibly write our cached SPD data out to the hardware
