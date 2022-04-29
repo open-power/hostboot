@@ -385,10 +385,10 @@ while [ $(($modsstarted)) -lt 1 -o $(($modsstarted)) -ne $(($modscompleted)) ]; 
     fi
 
     if [[ -z "${HOSTBOOT_PROFILE}" ]]; then
-        loop_timeout=300
+        loop_timeout=400
     else
         # Increase timeout for code coverage
-        loop_timeout=600
+        loop_timeout=800
     fi
 
     if [ "$loopcount" -ge "$loop_timeout" ];   then
