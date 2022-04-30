@@ -503,8 +503,14 @@ fapi2::ReturnCode qme_init(
         for (auto& eq : l_eq_vector)
         {
             FAPI_TRY( getScom( eq, QME_SCOM_XIDBGPRO, l_xsr ) );
+            uint32_t iar = l_xsr; //second word of XIDBGPRO is IAR
 
-            if( l_xsr.getBit<XSR_HALTED_STATE>() == 1 )
+            //As we are trying to find the right QME that failed to boot, we
+            //need to make sure QME has booted and failed in that process. So we
+            //need to verify IAR value , which should be non-zero in that case.
+            //If IAR is 0 and still XSR bit 0 is set means that QME hasn't
+            //attempted to boot and it cores are not configured.
+            if( l_xsr.getBit<XSR_HALTED_STATE>() == 1  && iar )
             {
                 fapi2::ATTR_CHIP_UNIT_POS_Type eq_pos;
                 FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
