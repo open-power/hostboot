@@ -485,6 +485,13 @@ errlHndl_t doForm0IndirectScom(DeviceFW::OperationType i_opType,
             // Turn the read bit off.
             l_io_buffer = l_io_buffer & 0x7FFFFFFFFFFFFFFF;
 
+            // use the chip-specific mutex attribute
+            l_mutex =
+              i_target->getHbMutexAttr<TARGETING::ATTR_SCOM_IND_MUTEX>();
+
+            mutex_lock(l_mutex);
+            need_unlock = true;
+
             // Now perform the op requested using the
             // local io_buffer with the indirect addr imbedded.
             l_err = doScomOp(i_opType,
@@ -536,6 +543,9 @@ errlHndl_t doForm0IndirectScom(DeviceFW::OperationType i_opType,
                 elapsed_indScom_time_ns += 10000;
 
             }while ( elapsed_indScom_time_ns <= MAX_INDSCOM_TIMEOUT_NS);
+
+            mutex_unlock(l_mutex);
+            need_unlock = false;
 
             if (l_err) { break; }
 
