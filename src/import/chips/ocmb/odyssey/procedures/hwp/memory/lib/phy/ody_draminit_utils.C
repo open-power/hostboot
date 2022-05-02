@@ -46,6 +46,7 @@
 #include <lib/phy/ody_draminit_utils.H>
 #include <lib/phy/ody_phy_utils.H>
 #include <ody_consts.H>
+#include <ody_scom_mp_apbonly0.H>
 
 namespace mss
 {
@@ -2180,6 +2181,19 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Stops the ARC processor
+/// @param[in] i_target the target on which to operate
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode stall_arc_processor(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
+{
+    // Stops training (aka stalls the ARC processor)
+    fapi2::buffer<uint64_t> l_data;
+    l_data.setBit<scomt::mp::DWC_DDRPHYA_APBONLY0_MICRORESET_STALLTOMICRO>();
+    return fapi2::putScom(i_target, scomt::mp::DWC_DDRPHYA_APBONLY0_MICRORESET, l_data);
+}
+
+///
 /// @brief Cleans up from the firmware draminit training
 /// @param[in] i_target the target on which to operate
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
@@ -2188,7 +2202,6 @@ fapi_try_exit:
 fapi2::ReturnCode cleanup_training(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
 {
     // TODO:ZEN:MST-1571 Update Odyssey PHY registers when the official values are merged into the EKB
-    const uint64_t MIRCORESET_IBM = convert_synopsys_to_ibm_reg_addr(MIRCORESET);
     const uint64_t CALZAP_IBM = convert_synopsys_to_ibm_reg_addr(CALZAP);
 
     // Per the Synopsys documentation, to cleanup after the training:
@@ -2197,8 +2210,7 @@ fapi2::ReturnCode cleanup_training(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
     fapi2::buffer<uint64_t> l_data;
 
     // 1. Stop the processor (stall it)
-    l_data.setBit<MIRCORESET_STALLTOMICRO>();
-    FAPI_TRY(fapi2::putScom(i_target, MIRCORESET_IBM, l_data));
+    FAPI_TRY(stall_arc_processor(i_target));
 
     // 2. Reset the calibration engines to their initial state (cal Zap!)
     l_data.flush<0>().setBit<CALZAP_CALZAP>();

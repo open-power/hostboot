@@ -131,6 +131,13 @@ fapi2::ReturnCode configure_dram_train_message_block(const fapi2::Target<fapi2::
 fapi2::ReturnCode start_training(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target);
 
 ///
+/// @brief Stops the ARC processor
+/// @param[in] i_target the target on which to operate
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode stall_arc_processor(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target);
+
+///
 /// @brief Cleans up from the firmware draminit training
 /// @param[in] i_target the target on which to operate
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
