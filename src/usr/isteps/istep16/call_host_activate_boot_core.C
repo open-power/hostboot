@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,7 +35,8 @@
 #include <sys/task.h>
 #include <sys/mmio.h>
 #include <arch/ppc.H>
-
+#include <pldm/requests/pldm_datetime_requests.H>
+#include <util/utiltime.H>
 
 //targeting support
 #include <targeting/namedtarget.H>
@@ -64,6 +65,29 @@ using namespace ISTEP_ERROR;
 
 namespace ISTEP_16
 {
+
+/**
+ * @brief Reestablish the base timestamp value
+ */
+void resetBaseTime( void )
+{
+#ifdef CONFIG_PLDM
+    // Fetch the current date/time from the BMC
+    date_time_t l_currentTime{};
+    errlHndl_t l_errl = PLDM::getDateTime(l_currentTime);
+    if(l_errl)
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "call_host_activate_boot_core saw PLDM::getDateTime() error");
+        errlCommit( l_errl, ISTEP_COMP_ID );
+    }
+    else
+    {
+        // Save the value to be used later
+        Util::setBaseDateTime(l_currentTime);
+    }
+#endif
+}
 
 void* call_host_activate_boot_core(void* const io_pArgs)
 {
@@ -390,6 +414,11 @@ void* call_host_activate_boot_core(void* const io_pArgs)
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "stopDeadmanLoop SUCCESS");
         }
+
+        // While the bootcore is stopped we don't have any elapsed timebase
+        // so we will get a little out of sync with the real time that we
+        // cached earlier.  We will reset the base time to start over fresh.
+        resetBaseTime();
 
         //Re-enable the mailbox
         l_attempt_mbox_resume = false; // no need to attempt this again below
