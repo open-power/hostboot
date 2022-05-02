@@ -1,0 +1,70 @@
+#!/bin/bash
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/build/tools/update-submodule $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2022
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+# update-submodule
+#
+# Script for updating ekb/ppe submodules
+
+if [[ $# -lt 1 || $# -gt 2 ]] ; then
+    echo "Usage: $0 SUBMODULE_DIR [BRANCH]"
+    echo "    SUBMODULE_DIR   The directory containing the submodule (e.g. src/build/tools/extern/ekb)"
+    echo "    BRANCH [opt]    The branch to pull (e.g. master-p10). Defaults to master."
+    exit 1
+fi
+
+set -e
+
+SUBMODULE_DIR=$1
+BRANCH=$2
+
+if [[ ! "$BRANCH" ]] ; then
+    BRANCH=master
+fi
+
+cd "$SUBMODULE_DIR"
+
+if [[ ! -f .git ]] ; then
+    echo ".git does not exist in submodule directory $SUBMODULE_DIR"
+    exit 1
+fi
+
+echo "Discarding changes in $(pwd), press enter to continue, Ctrl+C to abort"
+
+read
+
+set -x
+
+git reset --hard
+git clean -fxd
+git checkout "$BRANCH"
+git reset --hard origin/"$BRANCH"
+git pull
+
+cd -
+
+git add "$SUBMODULE_DIR"
+
+git commit -m "Update submodule $SUBMODULE_DIR"
