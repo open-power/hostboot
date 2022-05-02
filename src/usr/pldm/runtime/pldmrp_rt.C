@@ -32,6 +32,7 @@
 #include <runtime/interface.h>
 #include <pldm/extended/pdr_manager.H>
 #include <pldm/extended/sbe_dump.H>
+#include <util/utiltime.H>
 
 using namespace PLDM;
 
@@ -107,8 +108,9 @@ pldmrp_rt_rc PldmRP::cache_next_pldm_msg(const uint8_t * const i_next_msg,
         }
         else if(iv_waitingForResponse)
         {
-            PLDM_INF("cache_next_pldm_msg: discarding queued PLDM request "
-                     "as new one arrived while waiting for a PLDM response.");
+            PLDM_INF("%s> cache_next_pldm_msg: discarding queued PLDM request "
+                     "as new one arrived while waiting for a PLDM response.",
+                     Util::dateToString(Util::getCurrentDateTime()).data());
             PLDM_INF_BIN("Discarded PLDM message header",
                          iv_next_request.data(),
                          std::min(iv_next_request.size(),sizeof(pldm_msg_hdr)));
