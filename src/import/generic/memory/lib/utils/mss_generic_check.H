@@ -39,19 +39,33 @@
 #include <fapi2.H>
 
 #ifdef __PPE__
-    //Macro -- PPE doesn't want to include generic_consts.H
-    // so we'll define it here directly
-    #define TARGTIDFORMAT "0x%08X"
-    #define TARGTID i_target.get()
+
+//Macro -- PPE doesn't want to include generic_consts.H
+// so we'll define it here directly
+#define TARGTIDFORMAT "0x%08X"
+#define TARGTID i_target.get()
+
+// Macro for printing 64-bit values on PPE - use this instead of %016LX
+// Note that the PPE version of the formatter requires two VARGS in the trace
+#define UINT64FORMAT "0x%08X%08X"
+#define UINT64_VALUE(_val_) \
+    static_cast<uint32_t>((_val_ & 0xFFFFFFFF00000000) >> 32), static_cast<uint32_t>(_val_ & 0x00000000FFFFFFFF)
 
 #else
-    #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
-    #include <generic/memory/lib/utils/scom.H>
-    #include <generic/memory/lib/utils/c_str.H>
-    //Macro -- PPE doesn't want to include generic_consts.H
-    // so we'll define it here directly
-    #define TARGTIDFORMAT "%s"
-    #define TARGTID mss::spd::c_str(i_target)
+
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <generic/memory/lib/utils/scom.H>
+#include <generic/memory/lib/utils/c_str.H>
+//Macro -- PPE doesn't want to include generic_consts.H
+// so we'll define it here directly
+#define TARGTIDFORMAT "%s"
+#define TARGTID mss::spd::c_str(i_target)
+
+// Macro for printing 64-bit values on PPE (Cronus mode) - use this instead of %016LX
+#define UINT64FORMAT "0x%016LX"
+#define UINT64_VALUE(_val_) \
+    _val_
+
 #endif
 
 namespace mss
