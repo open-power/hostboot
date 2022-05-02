@@ -85,6 +85,7 @@ OBJS += p10_set_fsi_gp_shadow.o
 OBJS += p10_start_cbs.o
 OBJS += p10_clock_test.o
 OBJS += p10_clock_test_cmn.o
+OBJS += p10_setup_ref_clock.o
 
 # proc_fbc_eff_config
 OBJS += p10_fbc_eff_config.o
