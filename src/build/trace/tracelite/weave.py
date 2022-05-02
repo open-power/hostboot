@@ -65,8 +65,8 @@ TRACE_VERSION2 = 2
 """
 def DBG_TRACE(dbgStr):
     if (G_debugFile):
-      x = dbgStr.strip()
-      G_debugFd.write(x+"\n")
+        x = dbgStr.strip()
+        G_debugFd.write(x+"\n")
 
 
 """ Counts the number of %arguments in format string
@@ -492,7 +492,7 @@ if __name__ == "__main__":
 
 
     parser = argparse.ArgumentParser(description='Tool to weave trace_lite trace entries into human-readable text',
-                                     epilog='On eBMC system: \n  Enable trace_lite via hb_debug_console bios attribute\n   tail -F /var/log/obmc/var/ | weave.py')
+                                     epilog='On eBMC system: Enable trace_lite via hb_debug_console bios attribute, then `tail -F /var/log/obmc-console1.log | weave.py`')
     parser.add_argument('-s', dest='hbotStringFile', metavar='hbotStringFile', type=str, required=False, help='eBMC will use 81e00685.lid by default, otherwise this must be specified')
     parser.add_argument('-d', dest='debugFile', metavar='debugFile',type=str, required=False, help='Logs debug traces to this file and parsing will stop on error')
     args = parser.parse_args()
@@ -513,13 +513,15 @@ if __name__ == "__main__":
         except ImportError:
             sys.stderr.write("ERROR: no getLid module, unable to locate hbotStringFile\n")
             print_full_usage()
-        sys.exit(1)
+            sys.exit(2)
 
 
-   if (args.debugFile):
+    if (args.debugFile):
         G_debugFile = args.debugFile
         G_debugFd = open(G_debugFile, "w")
         exitOnError = True
 
+    DBG_TRACE("Beginning inputloop...\n")
     inputloop(exitOnError)
+    DBG_TRACE("inputloop done\n")
     sys.exit(0)
