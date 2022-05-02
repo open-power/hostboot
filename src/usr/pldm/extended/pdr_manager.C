@@ -1200,6 +1200,13 @@ errlHndl_t PdrManager::notifyBmcPdrRepoChanged()
                              rc,
                              0,
                              ErrlEntry::ADD_SW_CALLOUT);
+        // If the queue is nullptr, that means that we've already completed the
+        // PDR exchange and we are not expecting any PDR sync messages. Reduce
+        // the severity of the error.
+        if(notify_q == nullptr)
+        {
+            errl->setSev(ERRL_SEV_INFORMATIONAL);
+        }
     }
 
     return errl;
