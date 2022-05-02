@@ -28,6 +28,7 @@
  */
 
 #include <pldm/pldm_request.H>
+#include <util/utiltime.H>
 
 using namespace PLDM;
 
@@ -66,7 +67,8 @@ errlHndl_t check_pldm_response(const pldm_msg* const i_pldm_request,
         {
             if (return_code == HBRT_RC_NO_MCTP_PACKET)
             {
-                PLDM_ERR("Timed out waiting for next PLDM message");
+                PLDM_ERR("%s> Timed out waiting for next PLDM message",
+                   Util::dateToString(Util::getCurrentDateTime()).data());
             }
             else
             {
