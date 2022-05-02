@@ -1,0 +1,58 @@
+#!/bin/sh
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/build/tools/ebmc/enable-simics-bmc-ssh $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2022
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+# $1 = ssh alias to use for access
+# $2 = hostname of simics server
+# $3 = ssh port of simics guest
+
+# Help Test
+helptext="Usage:  enable-simics-bmc-ssh <ssh alias> <simics hostname> <remapped ssh port>"
+
+if [ -z $1 ] || [ -z $2 ] || [ -z $3 ]
+then
+ echo $helptext
+ exit 1
+fi
+
+CONFIGNAME=~/.ssh/simics.$1.ssh.config
+
+# First make sure the hook is in my ~/.ssh/config file
+if ! grep -q "Include simics.*.ssh.config" ~/.ssh/config ; then
+   echo "ERROR: You must add 'Include simics.*.ssh.config' as the first line of your ~/.ssh/config"
+   exit 1
+fi
+
+echo "# Simics hack for $1" > $CONFIGNAME
+echo "Host simics.rainier2" >> $CONFIGNAME
+echo "          Hostname $2" >> $CONFIGNAME
+echo "          Port $3" >> $CONFIGNAME
+echo "          AFSTokenPassing no" >> $CONFIGNAME
+echo "          User service" >> $CONFIGNAME
+chmod 700 $CONFIGNAME
+
+echo "Use 'simics.$1' as the hostname for your simics session"
+echo "You can remove $CONFIGNAME when you are done"
+
