@@ -72,3 +72,9 @@ rules defined in pgLogic.C.
 - If no functional child found, then deconfigure the parent target and then call
   _deconfigureByAssoc passing the parent target.  Need to account for possible non-like
   children that need to be deconfigured under the parent target.
+
+# [Field Core Override](fco-readme.md)
+
+Field Core Override (FCO) is a core reduction algorithm that takes a given FCO value and applies it system wide such
+that afterward there are only FCO value number of cores left functional for execution. See the readme of that file for
+more detail.
