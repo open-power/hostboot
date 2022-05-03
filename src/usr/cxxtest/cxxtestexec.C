@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -158,9 +158,11 @@ void    cxxinit( errlHndl_t    &io_taskRetErrl )
                CxxTest::g_ModulesStarted );
 
     //  wait for all the launched tasks to finish
+    //  Add condition to exit the loop if a task crashes
+    //  so we can stop the tests to expedite results
+    bool l_all_good = true;
     for (std::vector<cxxtask_t>::iterator t = tasks.begin();
-         t != tasks.end();
-         ++t)
+         (t != tasks.end() && l_all_good); ++ t)
     {
         int status = 0;
         task_wait_tid(t->tid, &status, NULL);
@@ -169,6 +171,7 @@ void    cxxinit( errlHndl_t    &io_taskRetErrl )
         {
             TRACFCOMP( g_trac_cxxtest, "Task %d (%s) crashed with status %d.",
                        t->tid, t->module, status );
+            l_all_good = false;
             if(CxxTest::g_FailedTests < CxxTest::CXXTEST_FAIL_LIST_SIZE)
             {
                 CxxTest::CxxTestFailedEntry *l_failedEntry =
@@ -196,7 +199,7 @@ void    cxxinit( errlHndl_t    &io_taskRetErrl )
     // Now, run all serial testcases. These can have adverse effects on the parallel tests and should be run
     // after they finish.
     for(std::vector<const char *>::const_iterator i = serial_module_list.begin();
-        i != serial_module_list.end(); ++i)
+        ((i != serial_module_list.end()) && l_all_good); ++i)
     {
         __sync_add_and_fetch(&CxxTest::g_ModulesStarted, 1);
 
@@ -226,6 +229,7 @@ void    cxxinit( errlHndl_t    &io_taskRetErrl )
         {
             TRACFCOMP( g_trac_cxxtest, "Task %d crashed with status %d.",
                        tidrc, status );
+            l_all_good = false;
             if(CxxTest::g_FailedTests < CxxTest::CXXTEST_FAIL_LIST_SIZE)
             {
                 CxxTest::CxxTestFailedEntry *l_failedEntry =

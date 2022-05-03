@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -452,7 +452,7 @@ errlHndl_t SbePsu::allocateFFDCBuffer(TARGETING::Target * i_target)
 #ifdef CONFIG_COMPILE_CXXTEST_HOOKS
 void SbePsu::ignoreInterrupts(bool i_ignore)
 {
-    SBE_TRACF("ignoreInterrupts=%d", i_ignore);
+    SBE_TRACF("CXXTEST setting ignoreInterrupts=%d, look for a match to make sure in sync", i_ignore);
     iv_ignoreInterrupts = i_ignore;
 }
 #endif //#ifdef CONFIG_COMPILE_CXXTEST_HOOKS
