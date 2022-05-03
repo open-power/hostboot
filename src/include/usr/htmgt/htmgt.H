@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -143,13 +143,15 @@ namespace HTMGT
                                uint8_t *  o_rspData);
 
     /**
-     * @brief Check if OCCs are active/running
+     * @brief Check if specified OCC is active/running
      *
      * @note  Used by PLDM code if BMC asks for OCC sensor status
      *
+     * @param[in]  i_proc  Proc target
+     *
      * @returns true if running, else false
      */
-    bool occsAreRunning();
+    bool isOccRunning(TARGETING::Target * i_proc);
 }
 
 #endif // HTMGT_H

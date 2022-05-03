@@ -1011,8 +1011,26 @@ namespace HTMGT
 
     } // end passThruCommand()
 
-    bool occsAreRunning()
+    bool isOccRunning(TARGETING::Target * i_proc)
     {
-        return OccManager::occsAreRunning();
+        bool isRunning = false;
+
+        if (OccManager::occNeedsReset() == false)
+        {
+            uint8_t occInstance = i_proc->getAttr<TARGETING::ATTR_POSITION>();
+            Occ *occPtr = OccManager::getOcc(occInstance);
+            if (occPtr != nullptr)
+            {
+                const occStateId occState = occPtr->getState();
+                if( (occState == OCC_STATE_OBSERVATION) ||
+                    (occState == OCC_STATE_ACTIVE) ||
+                    (occState == OCC_STATE_CHARACTERIZATION) )
+                {
+                    isRunning = true;
+                }
+            }
+        }
+
+        return isRunning;
     }
 }
