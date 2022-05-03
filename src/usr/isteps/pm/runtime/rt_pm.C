@@ -573,6 +573,16 @@ namespace RTPM
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                           INFO_MRK"load_and_start_pm_complex: skipping (re)load due to pm_type=0x%X",
                           pm_type);
+                if (pm_type == PM_COMPLEX_LOAD_TYPE_SKIP_FIRST_LOAD)
+                {
+                    // Simulate that we have loaded (SKIP_FIRST_LOAD set in reset_pm_complex_with_reason)
+                    // This would only be hit if the reset_pm_complex_with_reason set to SKIP_FIRST_LOAD
+                    // which would mean that HBRT is NOW attempting its very FIRST (re)-start and there
+                    // had been a code update in flight.
+                    l_sys->setAttr<ATTR_PM_COMPLEX_LOAD_REQ>(PM_COMPLEX_LOAD_TYPE_LOAD);
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        INFO_MRK"load_and_start_pm_complex: SET to LOAD ATTR_PM_COMPLEX_LOAD_REQ (originally from SKIP_FIRST_LOAD");
+                }
             }
         }
 

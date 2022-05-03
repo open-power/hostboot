@@ -1394,6 +1394,13 @@
       <name>DO_NOT_LOAD</name>
       <value>0x2</value>
     </enumerator>
+    <enumerator>
+      <description>
+        Skip first load of the PM Complex
+      </description>
+      <name>SKIP_FIRST_LOAD</name>
+      <value>0x3</value>
+    </enumerator>
   </enumerationType>
 
   <attribute>
