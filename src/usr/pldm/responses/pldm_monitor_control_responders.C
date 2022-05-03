@@ -408,17 +408,28 @@ errlHndl_t handleOccStateSensorGetRequest(const state_sensor_callback_args& i_ar
     /* Encode and send a PLDM response to the request. */
 
 #ifdef __HOSTBOOT_RUNTIME
-    const sensor_state_t current_state = ( HTMGT::occsAreRunning()
-                                          ? PLDM_STATE_SET_OPERATIONAL_RUNNING_STATUS_IN_SERVICE
-                                          : PLDM_STATE_SET_OPERATIONAL_RUNNING_STATUS_STOPPED);
+
+    sensor_state_t current_state = PLDM_STATE_SET_OPERATIONAL_RUNNING_STATUS_IN_SERVICE;
+    if (!HTMGT::isOccRunning(i_occ_proc))
+    {
+        if(UTIL::assertGetToplevelTarget()->getAttr<ATTR_HTMGT_SAFEMODE>())
+        {
+            current_state = PLDM_STATE_SET_OPERATIONAL_RUNNING_STATUS_DORMANT;
+        }
+        else
+        {
+            current_state = PLDM_STATE_SET_OPERATIONAL_RUNNING_STATUS_STOPPED;
+        }
+    }
 
     const errlHndl_t errl = sendStateSensorGetRequestResponse(i_args.i_msgQ, i_args.i_msg, PLDM_SENSOR_NORMAL, current_state);
+    PLDM_INF(EXIT_MRK"handleOccStateSensorGetRequest returning %d", current_state);
 #else
     // The OCC state cannot be read until runtime.
     const errlHndl_t errl = sendStateSensorGetRequestResponse(i_args.i_msgQ, i_args.i_msg, PLDM_SENSOR_UNKNOWN, 0);
+    PLDM_INF(EXIT_MRK"handleOccStateSensorGetRequest returning UNKNOWN");
 #endif
 
-    PLDM_INF(EXIT_MRK"handleOccStateSensorGetRequest");
 
     return errl;
 }
