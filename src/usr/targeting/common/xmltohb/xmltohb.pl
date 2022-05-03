@@ -2888,26 +2888,38 @@ sub writeTraitFileTraits {
             # In addition, add a default invalid value to traits definition for
             # uint8_t ... uint64_t, int8_t ... int64_t
             print $outFile "#if __cplusplus >= 201103L \n";
+            my $qualifiers = "static constexpr";
 
-            if ($type eq "uint8_t" or $type eq "int8_t") {
-                print $outFile "        ", $type," ", $attribute->{id},"_INVALID = 0xFF;\n";
+            if ($isEnumerationType)
+            {
+                if ($attribute->{id}=~m/^TYPE$/)
+                {
+                    # special case for TYPE attr because in pldm_fru.C
+                    # its size is restricted to 7 bits
+                    print $outFile "        $qualifiers uint32_t $attribute->{id}_INVALID = 0x7F;\n";
+                }
+                else
+                {
+                    # otherwise, use default 32 bit sizing for enums
+                    print $outFile "        $qualifiers uint32_t $attribute->{id}_INVALID = 0xFFFFFFFF;\n";
+                }
             }
-            elsif ($type eq "uint16_t" or $type eq "int16_t") {
-                print $outFile "        ", $type," ", $attribute->{id},"_INVALID = 0xFFFF;\n";
-            }
-            elsif ($type eq "uint32_t" or $type eq "int32_t") {
-                print $outFile "        ", $type," ", $attribute->{id},"_INVALID = 0xFFFFFFFF;\n";
-            }
-            elsif ($type eq "int64_t") {
-                print $outFile "        ", $type," ", $attribute->{id},
-                               "_INVALID = 0xFFFFFFFFFFFFFFFFLL;\n";
-            }
-            elsif ($type eq "uint64_t") {
-                print $outFile "        ", $type," ", $attribute->{id},
-                               "_INVALID = 0xFFFFFFFFFFFFFFFFULL;\n";
-            }
-            elsif ($isEnumerationType) {
-                print $outFile "        uint32_t ", $attribute->{id},"_INVALID = 0xFFFFFFFF;\n";
+            else
+            {
+                my ($unsigned, $sizeInBytes) = ($type =~ /(u*)int(\d+)/);
+                # skip non-integer types
+                if ($type=~m/int/)
+                {
+                    $sizeInBytes /= 8; # convert number of bits to number of bytes
+                    my $suffix = "";
+                    if ($sizeInBytes >= 8)
+                    {
+                        # if attr type is 8 bytes large,
+                        # append a suffix
+                        $suffix = uc($unsigned)."LL";
+                    }
+                    print $outFile "        $qualifiers $type $attribute->{id}_INVALID = 0x", ("FF" x $sizeInBytes), "$suffix;\n";
+                }
             }
 
             # Append typedef for std::array if attr holds array value
