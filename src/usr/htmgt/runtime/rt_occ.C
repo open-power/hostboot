@@ -190,6 +190,19 @@ namespace HTMGT
         TRACFCOMP(g_trac_hbrt,ENTER_MRK
                   "reset_pm_complex_with_reason: i_reason=%d, i_chipId=%d ", i_reason, i_chipId);
 
+        // If a code update is started early, it is possible for PHYP to call
+        // reset_pm_complex_with_reason before HBRT has even started for the first time,
+        // so flag the PM_COMPLEX_LOAD_REQ to indicate to SKIP_FIRST_LOAD
+        // (which will be handled in load_and_start_pm_complex).
+        Target* l_sys = UTIL::assertGetToplevelTarget();
+        if ((l_sys->getAttr<ATTR_PM_COMPLEX_LOAD_REQ>()) == PM_COMPLEX_LOAD_TYPE_LOAD)
+        {
+            l_sys->setAttr<ATTR_PM_COMPLEX_LOAD_REQ>(PM_COMPLEX_LOAD_TYPE_SKIP_FIRST_LOAD);
+            TRACFCOMP(g_trac_hbrt, "reset_pm_complex_with_reason SET to SKIP_FIRST_LOAD ATTR_PM_COMPLEX_LOAD_REQ=0x%X",
+                l_sys->getAttr<ATTR_PM_COMPLEX_LOAD_REQ>());
+            break;
+        }
+
         // Only pass in i_chipId's conversion to l_proc if it is an error scenario
         // NOTE: have to use '::' to avoid collision with enum HTMGT::occResetReason
         if (i_reason == ::OCC_RESET_REASON_ERROR)
@@ -203,17 +216,6 @@ namespace HTMGT
                 errlCommit(l_errl, RUNTIME_COMP_ID);
                 break;
             }
-        }
-
-        // For this special case we want to make sure that the PM Complex is RE-loaded
-        // NOTE: have to use '::' to avoid collision with enum HTMGT::occResetReason
-        if (i_reason == ::OCC_RESET_REASON_CODE_UPDATE)
-        {
-            Target* l_sys = UTIL::assertGetToplevelTarget();
-            auto pm_type = PM_COMPLEX_LOAD_TYPE_RELOAD;
-            l_sys->setAttr<ATTR_PM_COMPLEX_LOAD_REQ>(pm_type);
-            TRACFCOMP(g_trac_hbrt, INFO_MRK
-                      "reset_pm_complex_with_reason: set pm_type=0x%X to RELOAD", pm_type);
         }
 
         occResetReason l_resetReason = HTMGT::OCC_RESET_REASON_NONE;
@@ -255,6 +257,19 @@ namespace HTMGT
             errlCommit(l_errl, RUNTIME_COMP_ID);
             break;
         }
+
+        // ONLY -AFTER- the resetOccs successfully completes do we flag the PM_COMPLEX_LOAD_REQ
+        // For this special case we want to make sure that the PM Complex is RE-loaded
+        // NOTE: have to use '::' to avoid collision with enum HTMGT::occResetReason
+        if (i_reason == ::OCC_RESET_REASON_CODE_UPDATE)
+        {
+            Target* l_sys = UTIL::assertGetToplevelTarget();
+            auto pm_type = PM_COMPLEX_LOAD_TYPE_RELOAD;
+            l_sys->setAttr<ATTR_PM_COMPLEX_LOAD_REQ>(pm_type);
+            TRACFCOMP(g_trac_hbrt, INFO_MRK
+                      "reset_pm_complex_with_reason: SET to RELOAD ATTR_PM_COMPLEX_LOAD_REQ=0x%X", pm_type);
+        }
+
         }while(0);
 #endif
 
