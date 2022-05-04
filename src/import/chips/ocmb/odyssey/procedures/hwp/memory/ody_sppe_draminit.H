@@ -50,6 +50,5 @@ extern "C"
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
     fapi2::ReturnCode ody_sppe_draminit(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
-
 }// extern C
 #endif
