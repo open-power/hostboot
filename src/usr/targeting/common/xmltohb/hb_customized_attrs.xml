@@ -88,6 +88,13 @@
 	<writeable/>
     </attribute>
 
+    <!-- Value will come from BIOS/ASM -->
+    <attribute>
+        <id>ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH</id>
+        <no_export/>
+        <writeable/>
+    </attribute>
+
      <attribute>
           <id>ATTR_PG_MVPD</id>
           <default>0xFFFFFFFF</default>

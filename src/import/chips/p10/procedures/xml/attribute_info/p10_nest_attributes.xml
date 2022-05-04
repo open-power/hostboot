@@ -837,6 +837,21 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Adjust core, cache, memory controller dials to favor agressive prefetch
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    FALSE = 0,
+    TRUE = 1
+  </enum>
+  <platInit/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_PROC_LCO_MODE_DISABLE</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
