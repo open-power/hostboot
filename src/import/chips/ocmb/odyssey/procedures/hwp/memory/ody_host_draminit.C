@@ -35,6 +35,7 @@
 
 #include <fapi2.H>
 #include <ody_host_draminit.H>
+#include <generic/memory/mss_git_data_helper.H>
 extern "C"
 {
 ///
@@ -44,6 +45,9 @@ extern "C"
 ///
     fapi2::ReturnCode ody_host_draminit(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
     {
+        mss::display_git_commit_info("ody_host_draminit");
+
+        // TODO:ZEN:MST-1620 Add in chip ops call for draminit
         return fapi2::FAPI2_RC_SUCCESS;
 
     }

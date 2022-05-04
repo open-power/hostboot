@@ -30,11 +30,13 @@
 // *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
 // *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
 #include <ody_sppe_draminit.H>
+#include <lib/phy/ody_draminit_procedure.H>
+#include <generic/memory/mss_git_data_helper.H>
 extern "C"
 {
 ///
@@ -44,7 +46,9 @@ extern "C"
 ///
     fapi2::ReturnCode ody_sppe_draminit(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
     {
-        return fapi2::FAPI2_RC_SUCCESS;
+        mss::display_git_commit_info("ody_sppe_draminit");
+
+        return mss::ody::draminit(i_target);
 
     }
 
