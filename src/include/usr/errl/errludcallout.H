@@ -105,6 +105,21 @@ private:
                        const HWAS::DeconfigEnum i_deconfigState,
                        const HWAS::GARD_ErrorType i_gardErrorType);
 
+    /**
+     * @brief Construct a vrm callout user details section
+     *
+     * @param[in]   i_pTargetData       The processor that failed to communicate with the VRM
+     * @param[in]   i_targetDataLength  Length, in bytes, of i_pTargetData
+     * @param[in]   i_vrmType           Voltage type enum
+     * @param[in]   i_priority          Priority of the callout
+     *
+     * @return void
+     */
+    ErrlUserDetailsCallout(
+                        const void *i_pTargetData,
+                        uint32_t i_targetDataLength,
+                        const HWAS::voltageTypeEnum i_vrmType,
+                        const HWAS::callOutPriority i_priority);
 
     /**
      *  @brief Construct a bus callout user detail

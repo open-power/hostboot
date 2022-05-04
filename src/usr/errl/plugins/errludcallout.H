@@ -347,9 +347,17 @@ case HWAS::_type: i_parser.PrintString( "Sensor Type", #_type); break;
 #undef case_SENSOR_TYPE
                 break;
             }
+            case HWAS::VRM_CALLOUT:
+            {
+                i_parser.PrintString( "Callout type", "VRM Callout");
+
+                i_parser.PrintNumber( "VRM Type", "0x%X",
+                                    ntohl(pData->voltageType));
+                break;
+            }
             default:
                 // Assert at compile time if there is a new unhandled callout type added to the enum in Hostboot.
-                static_assert(HWAS::LAST_CALLOUT == HWAS::I2C_DEVICE_CALLOUT,
+                static_assert(HWAS::LAST_CALLOUT == HWAS::VRM_CALLOUT,
                               "New callout type needs to be handled in errludcallout");
                 // The 'type' is a byte so use ".2X" to just print out a single byte.
                 // Also 'type' is a byte, no need to do ntohl or ntohs ... it is a byte

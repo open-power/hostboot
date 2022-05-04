@@ -36,7 +36,8 @@ calloutType = {        "HW_CALLOUT":  0x01,
                     "CLOCK_CALLOUT":  0x04,
                      "PART_CALLOUT":  0x05,
                    "SENSOR_CALLOUT":  0x06,
-               "I2C_DEVICE_CALLOUT":  0x07  }
+               "I2C_DEVICE_CALLOUT":  0x07,
+                      "VRM_CALLOUT":  0x08 }
 
 DeconfigEnum    = { 0: "NO_DECONFIG",
                     1: "DECONFIG",
@@ -105,6 +106,11 @@ clockTypeEnum   = { 1: "TODCLK_TYPE",
                     9: "OSCREFCLK1_TYPE",
                     10: "OSCPCICLK0_TYPE",
                     11: "OSCPCICLK1_TYPE" }
+
+voltageTypeEnum = { 0: "VDD",
+                    1: "VCS",
+                    2: "VDN",
+                    3: "VIO" }
 
 partTypeEnum    = { 0: "NO_PART_TYPE",
                     1: "FLASH_CONTROLLER_PART_TYPE",

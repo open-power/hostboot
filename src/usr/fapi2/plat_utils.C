@@ -239,7 +239,8 @@ HWAS::partTypeEnum xlatePartHwCallout(
             l_part = HWAS::GPIO_EXPANDER_PART_TYPE;
             break;
         case HwCallouts::SPIVID_SLAVE_PART:
-            l_part = HWAS::SPIVID_SLAVE_PART_TYPE;
+            // TODO: update this for FAPI layer changes
+            //l_part = HWAS::SPIVID_SLAVE_PART_TYPE;
             break;
         case HwCallouts::TOD_CLOCK:
             l_part = HWAS::TOD_CLOCK;
@@ -540,6 +541,7 @@ void processEIHwCallouts(const ErrorInfo & i_errInfo,
                   (l_hw == HwCallouts::GPIO_EXPANDER_PART) ||
                   (l_hw == HwCallouts::SPIVID_SLAVE_PART) )
         {
+            // TODO: update this for FAPI layer changes
             HWAS::partTypeEnum l_part =
                 xlatePartHwCallout((*itr)->iv_hw);
 

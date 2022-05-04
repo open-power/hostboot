@@ -478,7 +478,7 @@ namespace HTMGT
             {
                 if(sensor == TARGETING::UTIL::occ_sensor_id_t::SENSOR_TYPE_VRM)
                 {
-                    io_errlHndl->addVrmCallout(target, ERRORLOG::ErrlEntry::VDD, i_priority);
+                    io_errlHndl->addVrmCallout(target, HWAS::VDD, i_priority);
                 }
                 else
                 {

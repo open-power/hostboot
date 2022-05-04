@@ -77,18 +77,33 @@ ErrlUserDetailsCallout::ErrlUserDetailsCallout(
 
 //------------------------------------------------------------------------------
 // VRM callout
-/*
 ErrlUserDetailsCallout::ErrlUserDetailsCallout(
-        const voltage_type i_vrmType,
         const void *i_pTargetData,
         uint32_t i_targetDataLength,
-        const HWAS::partTypeEnum i_partType,
-        const HWAS::callOutPriority i_priority,
-        const HWAS::DeconfigEnum i_deconfigState,
-        const HWAS::GARD_ErrorType i_gardErrorType)
+        const HWAS::voltageTypeEnum i_vrmType,
+        const HWAS::callOutPriority i_priority)
 {
-    // TODO: add stuff
-}*/
+    TRACDCOMP(g_trac_errl, "VRMCallout entry");
+
+    // Set up ErrlUserDetails instance variables
+    iv_CompId = ERRL_COMP_ID;
+    iv_Version = ERRL_UDT_CALLOUT_BASE_VER;
+    iv_SubSection = ERRL_UDT_CALLOUT;
+
+    uint32_t pDataLength = sizeof(HWAS::callout_ud_t) + i_targetDataLength;
+    HWAS::callout_ud_t *pData;
+    pData = reinterpret_cast<HWAS::callout_ud_t *>
+        (reallocUsrBuf(pDataLength));
+    pData->type = HWAS::VRM_CALLOUT;
+    pData->flag = HWAS::FLAG_NONE;
+    pData->voltageType = i_vrmType;
+    pData->priority = i_priority;
+    memcpy(pData + 1, i_pTargetData, i_targetDataLength);
+
+    iv_UDCalloutHash = Util::crc32_calc(pData, pDataLength);
+
+    TRACDCOMP(g_trac_errl, "VRMCallout exit; pDataLength %d", pDataLength);
+} // VRM Callout
 
 //------------------------------------------------------------------------------
 // Part callout
