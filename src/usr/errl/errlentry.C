@@ -70,6 +70,8 @@
 #include <util/utillidmgr.H>
 #include <util/crc32.H>
 
+#include <pldm/extended/hb_fru.H>
+
 // Hostboot Image ID string
 extern char hbi_ImageId;
 extern char hbi_FWId_long;
@@ -78,6 +80,7 @@ extern char hbi_FWId_short;
 using namespace ERRORLOG;
 using namespace HWAS;
 using namespace TARGETING;
+using namespace PLDM;
 
 namespace ERRORLOG
 {
@@ -543,11 +546,42 @@ void ErrlEntry::addSensorCallout(const uint32_t i_sensorID,
 
 ////////////////////////////////////////////////////////////////////////////
 void ErrlEntry::addVrmCallout(const TARGETING::Target *i_target,
-                              const voltage_type i_vrmType,
+                              const HWAS::voltageTypeEnum i_vrmType,
                               const HWAS::callOutPriority i_priority)
 {
-    // TODO: call ErrlUserDetailsCallout
-}
+    TRACFCOMP(g_trac_errl, ENTER_MRK"addVrmCallout(0x%.8x, %d, 0x%x)",
+            get_huid(i_target), i_vrmType, i_priority);
+
+#ifdef CONFIG_FSP_BUILD
+
+    // On FSP platforms, FSP itself adds the real FRU callouts to the log, but
+    // Hostboot needs to communicate the legacy callout format for it to do so.
+    addPartCallout(i_target,
+                   HWAS::SPIVID_SLAVE_PART_TYPE,
+                   i_priority,
+                   HWAS::NO_DECONFIG,
+                   HWAS::GARD_NULL);
+
+#else // eBMC platforms use VRM callouts
+
+    const void* pData = nullptr;
+    uint32_t size = 0;
+    TARGETING::EntityPath* ep = nullptr;
+    getTargData(i_target, ep, pData, size);
+
+    ErrlUserDetailsCallout l_callout(pData, size, i_vrmType, i_priority);
+
+    addCallout(&l_callout);
+
+    if (ep)
+    {
+        delete ep;
+        ep = nullptr;
+    }
+
+#endif
+
+} // addVrmCallout
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
@@ -1636,6 +1670,7 @@ void ErrlEntry::collectCalloutDataForBMC(TARGETING::Target* const i_node)
                     bool l_err = HWAS::retrieveTarget(l_uData,
                                                       l_target,
                                                       this);
+
                     switch (l_ud->partType)
                     {
                         case(HWAS::PNOR_PART_TYPE):
@@ -1680,11 +1715,6 @@ void ErrlEntry::collectCalloutDataForBMC(TARGETING::Target* const i_node)
                             }
                             break;
                         }
-                        case(HWAS::SPIVID_SLAVE_PART_TYPE):
-                        {
-                            //@TODO RTC-288617: Handle
-                            break;
-                        }
                         case(HWAS::TOD_CLOCK):
                         case(HWAS::MEM_REF_CLOCK):
                         case(HWAS::PROC_REF_CLOCK):
@@ -1705,6 +1735,7 @@ void ErrlEntry::collectCalloutDataForBMC(TARGETING::Target* const i_node)
                         case(HWAS::BPM_PART_TYPE):
                         case(HWAS::SPI_DUMP_PART_TYPE):
                         case(HWAS::GPIO_EXPANDER_PART_TYPE):
+                        case(HWAS::SPIVID_SLAVE_PART_TYPE):
                         {
                             // Not supported, assert if Simics. So that they can be updated by error creators.
                             TRACFCOMP(g_trac_errl, ERR_MRK"ErrlEntry::collectCalloutDataForBMC(): "
@@ -1734,6 +1765,74 @@ void ErrlEntry::collectCalloutDataForBMC(TARGETING::Target* const i_node)
                         assert(false, "Sensor Callouts are not supported.");
                     }
 
+                    break;
+                }
+                case(HWAS::VRM_CALLOUT):
+                {
+                    // Try to get the target associated with this user detail section.
+                    uint8_t * l_uData = reinterpret_cast<uint8_t *>(l_ud + 1);
+                    Target * l_target = nullptr;
+                    bool l_err = HWAS::retrieveTarget(l_uData,
+                                                      l_target,
+                                                      this);
+
+                    if (!l_err)
+                    {
+                        // Get the BUS_RAIL_LOCATION_MAP to find the location code of the
+                        // VRM then get the LOCATION_PN_SN_CCIN_MAP to find the associated
+                        // PN/SN/CCIN
+                        auto l_bus_rail_loc = l_target->getAttrAsStdArr<ATTR_BUS_RAIL_LOCATION_MAP>();
+
+                        bus_rail_loc_map* vrmLocation = reinterpret_cast<bus_rail_loc_map*>(l_bus_rail_loc.data());
+
+                        // The voltage type input is the index into the map
+                        auto l_vrm = l_target->getAttrAsStdArr<ATTR_LOCATION_PN_SN_CCIN_MAP>();
+
+                        loc_pn_sn_ccin_map* fruInfo = reinterpret_cast<loc_pn_sn_ccin_map*>(l_vrm.data());
+                        uint8_t l_records_in_map = sizeof(l_vrm)/sizeof(loc_pn_sn_ccin_map);
+
+                        static_assert(sizeof(l_vrm) % sizeof(loc_pn_sn_ccin_map) == 0,
+                                "Size of loc_pn_sn_ccin_map must divide evenly into ATTR_LOCATION_PN_SN_CCIN_MAP");
+
+                        uint8_t fruOffset = 0;
+                        bool found_fru = false;
+                        while (fruOffset < l_records_in_map)
+                        {
+                            // Found the matching location code so pull out PN/SN/CCIN
+                            if (strcmp(fruInfo[fruOffset].location, vrmLocation[l_ud->voltageType].location) == 0)
+                            {
+                                found_fru = true;
+                                // Copy out PN/SN/CCIN and null terminate
+                                char pn_dest[VRM_PN_SIZE + 1] = {0};
+                                char sn_dest[VRM_SN_SIZE + 1] = {0};
+                                char ccin_dest[VRM_CCIN_SIZE + 1] = {0};
+                                memcpy(pn_dest, fruInfo[fruOffset].pn, VRM_PN_SIZE);
+                                memcpy(sn_dest, fruInfo[fruOffset].sn, VRM_SN_SIZE);
+                                memcpy(ccin_dest, fruInfo[fruOffset].ccin, VRM_CCIN_SIZE);
+                                addFruCalloutDataToSrc(pn_dest,
+                                                       ccin_dest,
+                                                       sn_dest,
+                                                       fruInfo[fruOffset].location,
+                                                       i_node,
+                                                       l_ud->priority,
+                                                       FAILING_COMP_TYPE_NORMAL_HW);
+                            }
+
+                            fruOffset++;
+                        }
+
+                        if (!found_fru)
+                        {
+                            TRACFCOMP(g_trac_errl, "ErrlEntry::collectCalloutDataForBMC() - "
+                                                   "VRM_CALLOUT did not find matching FRU "
+                                                   "with voltage type: %d", l_ud->voltageType);
+                        }
+                    }
+                    else
+                    {
+                        TRACFCOMP(g_trac_errl, "ErrlEntry::collectCalloutDataForBMC() - "
+                                               "VRM_CALLOUT Error retrieving target");
+                    }
                     break;
                 }
             }
@@ -1952,6 +2051,14 @@ void ErrlEntry::setSubSystemIdBasedOnCallouts()
                     "callout to I2C Device", pData->type);
 
             iv_User.setSubSys(EPUB_CEC_HDW_I2C_DEVS);
+        }
+        else if (pData->type == HWAS::VRM_CALLOUT)
+        {
+            TRACFCOMP(g_trac_errl, INFO_MRK
+                      "setting subsystem for type 0x%x "
+                      "(callout to VRM device)", pData->type);
+
+            iv_User.setSubSys(EPUB_POWER_SUBSYS);
         }
         else
         {
@@ -3448,10 +3555,14 @@ void ErrlEntry::addUDSection( ErrlUD* i_section)
 }
 
 #ifdef CONFIG_BUILD_FULL_PEL
-void ErrlEntry::addFruCalloutDataToSrc(TARGETING::Target *            const i_target,
-                                       callOutPriority                const i_priority,
-                                       fruIdentitySubstructFlags      const i_compType,
-                                       epubProcedureID                const i_procedure_id)
+void ErrlEntry::addFruCalloutDataToSrc(const char*                  i_fru,
+                                       const char*                  i_ccin,
+                                       const char*                  i_serial,
+                                       const char*                  i_location,
+                                       TARGETING::Target *          const i_target,
+                                       callOutPriority              const i_priority,
+                                       fruIdentitySubstructFlags    const i_compType,
+                                       epubProcedureID              const i_procedure_id)
 {
     using namespace TARGETING;
 
@@ -3496,15 +3607,22 @@ void ErrlEntry::addFruCalloutDataToSrc(TARGETING::Target *            const i_ta
         {
             ATTR_STATIC_ABS_LOCATION_CODE_type static_abs_location_code { };
 
-            // ATTR_STATIC_ABS_LOCATION_CODE is a null terminated string and the max number of chars is defined by
-            // ATTR_STATIC_ABS_LOCATION_CODE_max_chars. The maximum size for the location code according to the PEL
-            // spec is PEL_LOC_CODE_SIZE which is also a null terminated string. So,
-            // ATTR_STATIC_ABS_LOCATION_CODE_max_chars must be less than PEL_LOC_CODE_SIZE to account for the null
-            // terminator.
-            static_assert(ATTR_STATIC_ABS_LOCATION_CODE_max_chars < PEL_LOC_CODE_SIZE,
-                         "ATTR_STATIC_ABS_LOCATION_CODE is too large to fit inside FRU callout location code section.");
+            if (i_location != nullptr)
+            {
+                strcpy(static_abs_location_code, i_location);
+            }
+            else
+            {
+                // ATTR_STATIC_ABS_LOCATION_CODE is a null terminated string and the max number of chars is defined by
+                // ATTR_STATIC_ABS_LOCATION_CODE_max_chars. The maximum size for the location code according to the PEL
+                // spec is PEL_LOC_CODE_SIZE which is also a null terminated string. So,
+                // ATTR_STATIC_ABS_LOCATION_CODE_max_chars must be less than PEL_LOC_CODE_SIZE to account for the null
+                // terminator.
+                static_assert(ATTR_STATIC_ABS_LOCATION_CODE_max_chars < PEL_LOC_CODE_SIZE,
+                            "ATTR_STATIC_ABS_LOCATION_CODE is too large to fit inside FRU callout location code section.");
 
-            UTIL::tryGetAttributeInHierarchy<ATTR_STATIC_ABS_LOCATION_CODE>(i_target, static_abs_location_code);
+                UTIL::tryGetAttributeInHierarchy<ATTR_STATIC_ABS_LOCATION_CODE>(i_target, static_abs_location_code);
+            }
 
             full_location_code.insert(end(full_location_code),
                                       static_abs_location_code,
@@ -3524,26 +3642,20 @@ void ErrlEntry::addFruCalloutDataToSrc(TARGETING::Target *            const i_ta
         l_fruco.locCodeLen = ALIGN_4(full_location_code.size());
 
         // FRU Part Number
-        ATTR_FRU_NUMBER_type l_partnum { };
-        UTIL::tryGetAttributeInHierarchy<ATTR_FRU_NUMBER>(i_target, l_partnum);
         // Set part number truncating as necessary.
         set_errl_string(l_fruco.partNumber,
-                        reinterpret_cast<const char*>(l_partnum));
+                        i_fru);
 
         // CCIN
-        ATTR_FRU_CCIN_type l_ccin { };
-        UTIL::tryGetAttributeInHierarchy<ATTR_FRU_CCIN>(i_target, l_ccin);
         // Set CCIN truncating as necessary.
         set_errl_string(l_fruco.ccin,
-                        reinterpret_cast<const char*>(&l_ccin),
+                        i_ccin,
                         false);
 
         // Serial Number
-        ATTR_SERIAL_NUMBER_type l_serialnumber { };
-        UTIL::tryGetAttributeInHierarchy<ATTR_SERIAL_NUMBER>(i_target, l_serialnumber);
         // Set serial number truncating as necessary.
         set_errl_string(l_fruco.serialNumber,
-                        reinterpret_cast<const char*>(l_serialnumber),
+                        i_serial,
                         false);
 
         // Type
@@ -3614,6 +3726,29 @@ void ErrlEntry::addFruCalloutDataToSrc(TARGETING::Target *            const i_ta
         break;
     }
     } // switch(i_compType)
+}
+
+void ErrlEntry::addFruCalloutDataToSrc(TARGETING::Target *          const i_target,
+                                       callOutPriority              const i_priority,
+                                       fruIdentitySubstructFlags    const i_compType,
+                                       epubProcedureID              const i_procedure_id)
+{
+    // FRU Part Number
+    ATTR_FRU_NUMBER_type l_partnum { };
+    UTIL::tryGetAttributeInHierarchy<ATTR_FRU_NUMBER>(i_target, l_partnum);
+
+    // CCIN
+    ATTR_FRU_CCIN_type l_ccin { };
+    UTIL::tryGetAttributeInHierarchy<ATTR_FRU_CCIN>(i_target, l_ccin);
+
+    // Serial Number
+    ATTR_SERIAL_NUMBER_type l_serialnumber { };
+    UTIL::tryGetAttributeInHierarchy<ATTR_SERIAL_NUMBER>(i_target, l_serialnumber);
+
+    addFruCalloutDataToSrc(reinterpret_cast<const char*>(l_partnum),
+                           reinterpret_cast<const char*>(&l_ccin),
+                           reinterpret_cast<const char*>(l_serialnumber), nullptr,
+                           i_target, i_priority, i_compType, i_procedure_id);
 }
 #endif
 

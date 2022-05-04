@@ -694,14 +694,6 @@ public:
                        const HWAS::GARD_ErrorType
                                    i_gardErrorType = HWAS::GARD_NULL);
 
-    enum voltage_type : uint8_t
-    {
-        VDD = 0,
-        VCS = 1,
-        VDN = 2,
-        VIO = 3,
-    };
-
     /**
      *  @brief Add a VRM part callout
      *
@@ -714,7 +706,7 @@ public:
      *  @return void
      */
     void addVrmCallout(const TARGETING::Target *i_target,
-                       const voltage_type i_vrmType,
+                       const HWAS::voltageTypeEnum i_vrmType,
                        const HWAS::callOutPriority i_priority);
 
     /**
@@ -1149,6 +1141,27 @@ private:
      * @param[in]    i_node       The node target. Used to fill in some of the callout types if they are present.
      */
     void collectCalloutDataForBMC(TARGETING::Target* const i_node);
+
+    /**
+     * @brief Save FRU callout data to vector
+     *
+     * @param[in]   i_fru           The FRU part number, null terminated string
+     * @param[in]   i_ccin          The FRU CCIN number, null terminated string
+     * @param[in]   i_serial        The FRU serial number, null terminated string
+     * @param[in]   i_location      The static location code, null terminated string
+     * @param[in]   i_target        The target of the callout
+     * @param[in]   i_priority      The priority of the callout
+     * @param[in]   i_compType      The component type of the callout as a bitmask
+     * @param[in]   i_procedure_id  The procedure id to use if needed. Default EPUB_PRC_NONE
+     */
+    void addFruCalloutDataToSrc(const char*                 i_fru,
+                                const char*                 i_ccin,
+                                const char*                 i_serial,
+                                const char*                 i_location,
+                                TARGETING::Target*          const i_target,
+                                HWAS::callOutPriority       const i_priority,
+                                fruIdentitySubstructFlags   const i_compType,
+                                HWAS::epubProcedureID       const i_procedure_id = HWAS::EPUB_PRC_NONE);
 
     /**
      * @brief Save FRU callout data to vector

@@ -200,6 +200,14 @@ enum busTypeEnum
     OMI_BUS_TYPE    = 8,
 };
 
+enum voltageTypeEnum
+{
+    VDD = 0,
+    VCS = 1,
+    VDN = 2,
+    VIO = 3,
+};
+
 // Used by Hostboot code where real clock targets do not exist
 enum clockTypeEnum
 {
@@ -269,7 +277,8 @@ enum calloutType : uint8_t
     PART_CALLOUT       = 0x05,
     SENSOR_CALLOUT     = 0x06,
     I2C_DEVICE_CALLOUT = 0x07,
-    LAST_CALLOUT = I2C_DEVICE_CALLOUT,
+    VRM_CALLOUT        = 0x08,
+    LAST_CALLOUT = VRM_CALLOUT,
 };
 typedef calloutType CalloutType_t;
 
@@ -331,6 +340,12 @@ typedef struct callout_ud
             uint8_t        engine;
             uint8_t        port;
             uint8_t        address;
+            // one Target will follow
+        };
+        struct { // type == VRM_CALOUT
+            voltageTypeEnum     voltageType;    // uint32_t
+            // uint32 - unused
+            // uint32 - unused
             // one Target will follow
         };
     }; // union

@@ -302,7 +302,6 @@ case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Part Type        
                     case_PART_TYPE(VPD_PART_TYPE)
                     case_PART_TYPE(LPC_SLAVE_PART_TYPE)
                     case_PART_TYPE(GPIO_EXPANDER_PART_TYPE)
-                    case_PART_TYPE(SPIVID_SLAVE_PART_TYPE)
                     case_PART_TYPE(TOD_CLOCK)
                     case_PART_TYPE(MEM_REF_CLOCK)
                     case_PART_TYPE(PROC_REF_CLOCK)
@@ -426,9 +425,25 @@ case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Sensor Type      
 
                 break;
 
+              case HWAS::VRM_CALLOUT:
+                CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Callout type               : VRM Callout");
+                switch (callout->voltageType)
+                {
+#define case_VOLTAGE_TYPE(_type) \
+case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Voltage Type               : %s", #_type); break;
+                    case_VOLTAGE_TYPE(VDD)
+                    case_VOLTAGE_TYPE(VCS)
+                    case_VOLTAGE_TYPE(VDN)
+                    case_VOLTAGE_TYPE(VIO)
+                    default:
+                        CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Voltage Type                 : UNKNOWN 0x%X",
+                                          callout->voltageType);
+                }
+                break;
+
             default:
                 // Assert at compile time if there is a new unhandled callout type added to the enum in hostboot
-                static_assert(HWAS::LAST_CALLOUT == HWAS::I2C_DEVICE_CALLOUT,
+                static_assert(HWAS::LAST_CALLOUT == HWAS::VRM_CALLOUT,
                               "New callout type needs to be handled in processCallout");
                 CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Callout type               : UNKNOWN: 0x%X",
                                   callout->type);

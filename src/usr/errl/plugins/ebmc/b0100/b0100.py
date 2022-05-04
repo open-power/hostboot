@@ -406,6 +406,23 @@ class errludP_errl:
             i+=9; # account for entire union struct size
             d['Target'], i=errludP_errl.entityPath(data, i)
 
+        # HWAS::VRM_CALLOUT
+        elif cType == hwasCallout.calloutType.get("VRM_CALLOUT"):
+            # Data layout following callout_ud data
+            # 4 bytes  :  vrmType
+            # N bytes  :  Target
+
+            # skip over callout_ud data
+            i += sizofCalloutUD
+            d['Callout Type']="VRM Callout"
+            d['VRM Type']=hwasCallout.voltageTypeEnum.get(intConcat(data, i, i+4)[0],
+                                                          unknownStr(data, i, i+4))
+
+            # Account for entire union struct size
+            i += 12
+
+            d['Target'], i=errludP_errl.entityPath(data, i);
+
         else:
             d['Callout type']='UNKNOWN: ' + hex(cType)
 
