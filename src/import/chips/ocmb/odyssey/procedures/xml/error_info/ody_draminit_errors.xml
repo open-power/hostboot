@@ -73,4 +73,64 @@
     </callout>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_ODY_DRAMINIT_START_DATA_PTR_NULL</rc>
+    <description>
+      Checks that the pointer to the starting location
+      of a PHY firmware binary file is not null
+    </description>
+    <ffdc>TARGET</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+        <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_ODY_DRAMINIT_MEM_ADDR_RANGE_OUT_OF_BOUNDS</rc>
+    <description>
+      Check to see if the imem/dmem start address and size
+      will fit in the address boundaries
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>MEM_TYPE</ffdc>
+    <ffdc>START_ADDR</ffdc>
+    <ffdc>END_ADDR</ffdc>
+    <ffdc>IMAGE_ST_ADDR</ffdc>
+    <ffdc>IMAGE_SIZE</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_ODY_DRAMINIT_OFFSET_UNSUPPORTED</rc>
+    <description>
+     OFFSET in memory PHY FW image block must be even
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>MEM_TYPE</ffdc>
+    <ffdc>START_ADDR</ffdc>
+    <ffdc>END_ADDR</ffdc>
+    <ffdc>IMAGE_ST_ADDR</ffdc>
+    <ffdc>IMAGE_SIZE</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
 </hwpErrors>
