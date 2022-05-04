@@ -663,7 +663,7 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
                 {
                     ck_anib = 1;
                 }
-                // TK this is for UDIMM ONLY. Add in an && noting "only do this if we do NOT have an RCD"
+                // TODO:ZEN:MST-1585 Add in UDIMM vs RDIMM switches into the PHY init code
                 else if((anib == 7 || anib == 8) && i_user_input_basic.NumAnib == 14)
                 {
                     ck_anib = 1;
@@ -3370,9 +3370,9 @@ fapi2::ReturnCode init_phy_structs( const fapi2::Target<fapi2::TARGET_TYPE_MEM_P
     // DRAM input structure
     // Values taken from dwc_ddrphy_phyinit_initStruct.C
     {
-        io_user_input_dram_config.MR0_A0 = 0x00;
-        io_user_input_dram_config.MR2_A0 = 0x00;
-        io_user_input_dram_config.MR8_A0 = 0x10;
+        io_user_input_dram_config.MR0_A0 = 0x24;
+        io_user_input_dram_config.MR2_A0 = 0x90;
+        io_user_input_dram_config.MR8_A0 = 0x08;
         io_user_input_dram_config.MR50_A0 = 0x00;
         io_user_input_dram_config.PhyVref = 0x40;
         io_user_input_dram_config.X16Present = 0x00;

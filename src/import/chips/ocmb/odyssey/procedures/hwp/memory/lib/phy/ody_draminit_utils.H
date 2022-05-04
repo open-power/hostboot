@@ -38,6 +38,8 @@
 
 #include <fapi2.H>
 
+#include <lib/phy/ody_snps_dram_train_msg_blk.H>
+
 namespace mss
 {
 namespace ody
@@ -110,6 +112,15 @@ fapi2::ReturnCode poll_for_completion(const fapi2::Target<fapi2::TARGET_TYPE_MEM
 /// @return True if mail content is same as one of the completion values , false otherwise
 ///
 bool check_for_completion(const fapi2::buffer<uint64_t>& i_mail);
+
+///
+/// @brief Configures the DRAM training message block
+/// @param[in] i_target the memory port on which to operate
+/// @param[out] o_struct the message block
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode configure_dram_train_message_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        PMU_SMB_DDR5U_1D_t& o_struct);
 
 ///
 /// @brief Starts the firmware draminit training
