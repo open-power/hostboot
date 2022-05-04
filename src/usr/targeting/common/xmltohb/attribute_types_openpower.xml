@@ -1492,6 +1492,7 @@ ID for the sensor number returned with the elog. -->
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <no_export/>
   </attribute>
 
   <attribute>
