@@ -1848,7 +1848,7 @@ sub writeStringImplementationFileStrings {
 
                 foreach my $enumerator (@{$enumerationType->{enumerator}})
                 {
-                    print $outFile "        case ", $attribute->{id}, "_",
+                    print $outFile "        case ", $attribute->{simpleType}->{enumeration}->{id}, "_",
                         $enumerator->{name},":\n";
                     print $outFile "            return \"",
                         $enumerator->{name},"\";\n";
@@ -1857,7 +1857,7 @@ sub writeStringImplementationFileStrings {
                 # add case for INVALIDs
                 if($does_not_have_invalid and not($enumerationType->{id}=~m/^TYPE$/))
                 {
-                    print $outFile "        case ", $attribute->{id}, "_INVALID:\n";
+                    print $outFile "        case ", $attribute->{simpleType}->{enumeration}->{id}, "_INVALID:\n";
                     print $outFile "            return \"INVALID\";\n";
                 }
 
@@ -2790,9 +2790,9 @@ sub writeTraitFileTraits {
                 if(exists $simpleTypeProperties->{$typeName})
                 {
                     if(    $simpleTypeProperties->{$typeName}{typeName}
-                        eq "XMLTOHB_USE_PARENT_ATTR_ID")
+                        eq "XMLTOHB_USE_PARENT_ATTR_ENUMERATION_ID")
                     {
-                        $type = $attribute->{id};
+                        $type = $attribute->{simpleType}->{enumeration}->{id};
                         $isEnumerationType = 1;
                     }
                     else
@@ -5407,7 +5407,7 @@ sub simpleTypeProperties {
     $typesHoH{"uint16_t"}    = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint16_t"                   , bytes => 2, bits => 16, default => \&defaultZero  , alignment => 1, specialPolicies =>\&null,           packfmt =>\&pack2byte};
     $typesHoH{"uint32_t"}    = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint32_t"                   , bytes => 4, bits => 32, default => \&defaultZero  , alignment => 1, specialPolicies =>\&null,           packfmt =>\&pack4byte};
     $typesHoH{"uint64_t"}    = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint64_t"                   , bytes => 8, bits => 64, default => \&defaultZero  , alignment => 1, specialPolicies =>\&null,           packfmt =>\&pack8byte};
-    $typesHoH{"enumeration"} = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 0, typeName => "XMLTOHB_USE_PARENT_ATTR_ID" , bytes => 0, bits => 0 , default => \&defaultEnum  , alignment => 1, specialPolicies =>\&null,           packfmt => "packEnumeration"};
+    $typesHoH{"enumeration"} = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 0, typeName => "XMLTOHB_USE_PARENT_ATTR_ENUMERATION_ID" , bytes => 0, bits => 0 , default => \&defaultEnum  , alignment => 1, specialPolicies =>\&null,           packfmt => "packEnumeration"};
     $typesHoH{"hbmutex"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 0, typeName => "mutex_t*"                   , bytes => 24, bits => 192, default => \&defaultZero  , alignment => 8, specialPolicies =>\&enforceHbMutex, packfmt =>\&packMutex};
     $typesHoH{"hbrecursivemutex"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 0, typeName => "mutex_t*"                   , bytes => 24, bits => 192, default => \&defaultZero  , alignment => 8, specialPolicies =>\&enforceHbMutex, packfmt =>\&packMutex};
     $typesHoH{"Target_t"}    = { supportsArray => 0, canBeHex => 1, complexTypeSupport => 0, typeName => "TARGETING::Target*"         , bytes => 8, bits => 64, default => \&defaultZero  , alignment => 8, specialPolicies =>\&null,           packfmt =>\&pack8byte};
@@ -5857,7 +5857,7 @@ sub enumNameToValue {
         my $enumerationName = $enumeration->{id};
 
         print STDOUT $enumeration;
-        croak("Could not convert enumerator name \"$enumeratorName\"into "
+        croak("Could not convert enumerator name \"$enumeratorName\" into "
             . "enumerator value in \"$enumerationName\".");
     }
 
