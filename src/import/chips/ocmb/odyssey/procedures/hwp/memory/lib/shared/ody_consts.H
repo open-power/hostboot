@@ -219,6 +219,16 @@ enum generic_consts
     SPARE_DQ_BYTE = 5,
 };
 
+///
+/// @brief phy mem_types
+///
+enum phy_mem_types
+{
+    DMEM = 0,
+    IMEM = 1,
+};
+
+
 } // namespace ody
 
 } // namespace mss
