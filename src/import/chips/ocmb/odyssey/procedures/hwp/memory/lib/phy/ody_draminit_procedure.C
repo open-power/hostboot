@@ -41,6 +41,7 @@
 #include <lib/phy/ody_draminit_utils.H>
 #include <lib/phy/ody_phy_utils.H>
 #include <mss_odyssey_attribute_getters.H>
+#include <lib/phy/ody_draminit_procedure.H>
 
 namespace mss
 {
