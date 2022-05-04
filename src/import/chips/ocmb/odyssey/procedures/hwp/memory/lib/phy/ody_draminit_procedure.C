@@ -56,17 +56,21 @@ namespace ody
 ///
 fapi2::ReturnCode draminit(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
 {
+
+    // Create the stucture to configure
+    PMU_SMB_DDR5U_1D_t l_msg_block_response;
+
     fapi2::ATTR_DRAMINIT_TRAINING_TIMEOUT_Type l_poll_count;
     FAPI_TRY(mss::attr::get_draminit_training_timeout(i_target , l_poll_count));
 
-    // 1. Loads the IMEM Memory (instructions)
-    // TODO:ZEN:MST-1561 Create code to load IMEM, DMEM, and message block onto Synopsys PHY
+    // 1. Loads the IMEM Memory (instructions) onto Synopsys PHY
+    // It is being done in ody_load_imem.C
 
-    // 2. Loads the DMEM Memory (data)
-    // TODO:ZEN:MST-1561 Create code to load IMEM, DMEM, and message block onto Synopsys PHY
+    // 2. Loads the DMEM Memory (data) onto Synopsys PHY
+    // It is being done in ody_load_dmem.C
 
-    // 3. Configures and loads the message block
-    // TODO:ZEN:MST-1561 Create code to load IMEM, DMEM, and message block onto Synopsys PHY
+    // 3. Configures and loads the message block onto Synopsys PHY
+    FAPI_TRY(mss::ody::phy::configure_and_load_dram_train_message_block(i_target));
 
     // 4. Initialize mailbox protocol and start training
     FAPI_TRY(mss::ody::phy::init_mailbox_protocol(i_target));
@@ -78,8 +82,11 @@ fapi2::ReturnCode draminit(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_t
     // 6. Cleans up after training
     FAPI_TRY(mss::ody::phy::cleanup_training(i_target));
 
-    // 7. Read the data structure and set attributes
-    // TODO:ZEN:MST-1567 Create code to process data from the Synopsys message block
+    // 7a. Read the data from the message block structure
+    FAPI_TRY(mss::ody::phy::read_msg_block(i_target, l_msg_block_response))
+
+    // 7b. Load attibutes with the message block contents
+    // TODO:ZEN:MST-1647
 
     // 8. Error handling
     // TODO:ZEN:MST-1568 Add Odyssey draminit error processing

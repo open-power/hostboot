@@ -39,6 +39,7 @@
 #include <fapi2.H>
 #include <lib/phy/ody_snps_dram_train_msg_blk.H>
 
+
 namespace mss
 {
 namespace ody
@@ -99,6 +100,21 @@ struct rcw_id
     uint8_t iv_rcw_page = 0;
     uint8_t iv_rcw_val = 0;
 };
+
+///
+/// @brief Loads binary into registers
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_start_addr start address of  imem/dmem binary to be read through istream
+/// @param[in] i_data_start data pointer  of imem/dmem
+/// @param[in] i_mem_size size of the dmem/imem istream to be trasferred per loop
+/// @param[in] i_mem_total_size total size of the dmem/imem istream
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode load_mem_bin_data(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                    const uint32_t i_start_addr,
+                                    uint8_t* i_data_start,
+                                    const uint32_t i_mem_size,
+                                    const uint32_t i_mem_total_size);
 
 ///
 /// @brief Initializes the protocol for mailbox interaction
@@ -176,6 +192,14 @@ fapi2::ReturnCode configure_dram_train_message_block(const fapi2::Target<fapi2::
         PMU_SMB_DDR5U_1D_t& o_struct);
 
 ///
+/// @brief Configure and load the msg block on to snps phy
+/// @param[in] i_target the target on which to operate
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode configure_and_load_dram_train_message_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
+        i_target);
+
+///
 /// @brief Processes a streaming message from the mailbox protocol
 /// @param[in] i_target the target on which to operate
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
@@ -238,6 +262,40 @@ enum mailbox_consts
     RECEPTION_ACK = 0,
     ACK_MESSAGE = 1,
 };
+
+///
+/// @brief Calculates the end addr of IMEM/DMEM image
+/// @param[in] i_start_addr starting address of the image
+/// @param[in] i_size size that needs to transferred at a time
+/// @return uint32_t calculated end address
+///
+uint32_t calculate_image_end_addr(const uint32_t i_start_addr, const uint32_t i_size);
+
+///
+/// @brief Helper function to ody_load_dmem()
+/// @param[in] i_target the ocmb chip target
+/// @param[in] i_dmem_data dmem data image
+/// @param[in] i_dmem_size size that needs to transferred at a time
+/// @param[in] i_dmem_offset address offset of this chunk within the dmem image(in bytes)
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode ody_load_dmem_helper(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                       uint8_t* const i_dmem_data,
+                                       const uint32_t i_dmem_size,
+                                       const uint32_t i_dmem_offset);
+
+///
+/// @brief Helper function to ody_load_imem()
+/// @param[in] i_target the ocmb chip target
+/// @param[in] i_imem_data imem data image
+/// @param[in] i_imem_size size that needs to transferred at a time
+/// @param[in] i_imem_offset address offset of this chunk within the imem image(in bytes)
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode ody_load_imem_helper(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                       uint8_t* const i_imem_data,
+                                       const uint32_t i_imem_size,
+                                       const uint32_t i_imem_offset);
 
 ///
 /// @brief Loads the message block into the DMEM

@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/phy/ody_draminit_procedure.H $ */
+/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/memory/ody_load_imem.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,43 +24,42 @@
 /* IBM_PROLOG_END_TAG                                                     */
 // EKB-Mirror-To: hostboot
 ///
-/// @file ody_draminit_procedure.H
-/// @brief Odyssey draminit procedure
-/// @note Using a separate file as simulation might need a different draminit procedure for now
+/// @file ody_load_imem.H
+/// @brief Loads the imem image to the phy
 ///
-// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP HWP Owner: Geetha Pisapati <Geetha.Pisapati@ibm.com>
 // *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
-#ifndef _ODY_DRAMINIT_PROCEDURE_H_
-#define _ODY_DRAMINIT_PROCEDURE_H_
 
 #include <fapi2.H>
 
-namespace mss
+#ifndef _ODY_LOAD_IMEM_H_
+#define _ODY_LOAD_IMEM_H_
+
+// Required for Cronus
+typedef fapi2::ReturnCode (*ody_load_imem_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
+        uint8_t* const i_imem_data,
+        const uint32_t i_imem_size,
+        const uint32_t i_imem_offset);
+
+extern "C"
 {
-namespace ody
-{
 
+//
+/// @brief Runs the dram initialization on the SPPE
+/// @param[in] i_target the ocmb chip target
+/// @param[in] i_imem_data imem data image
+/// @param[in] i_imem_size size that needs to transferred at a time
+/// @param[in] i_imem_offset address offset of this chunk within the imem image(in bytes)
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
-/// @brief Runs draminit
-/// @param[in] i_target the target on which to operate
-/// @return fapi2::FAPI2_RC_SUCCESS iff successful
-/// @note Assumes PHY init has already been run
-///
-fapi2::ReturnCode draminit(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target);
+    fapi2::ReturnCode ody_load_imem(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                    uint8_t* const i_imem_data,
+                                    const uint32_t i_imem_size,
+                                    const uint32_t i_imem_offset);
+}
 
-///
-/// @brief Runs draminit
-/// @param[in] i_target the target on which to operate
-/// @return fapi2::FAPI2_RC_SUCCESS iff successful
-/// @note Assumes PHY init has already been run
-///
-fapi2::ReturnCode draminit(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
-
-
-} // namespace ody
-} // namespace mss
 #endif

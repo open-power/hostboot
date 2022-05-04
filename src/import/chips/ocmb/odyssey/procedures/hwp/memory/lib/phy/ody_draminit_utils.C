@@ -35,6 +35,7 @@
 
 #include <fapi2.H>
 
+#include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
@@ -43,11 +44,15 @@
 #include <ody_scom_mp_mastr_b0.H>
 #include <ody_scom_mp_drtub0.H>
 #include <mss_odyssey_attribute_getters.H>
-
-
 #include <lib/phy/ody_draminit_utils.H>
 #include <lib/phy/ody_phy_utils.H>
 #include <ody_consts.H>
+#include <generic/memory/lib/utils/num.H>
+
+#ifndef __PPE__
+    // Included for progress / time left reporting (Cronus only)
+    #include <ctime>
+#endif
 
 namespace mss
 {
@@ -272,6 +277,7 @@ bool check_for_completion(const fapi2::buffer<uint64_t>& i_mail)
 fapi2::ReturnCode configure_dram_train_message_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
         PMU_SMB_DDR5U_1D_t& o_struct)
 {
+
     // Note: this is currently configured to match the simulation environment
     // Note: the MR's are moved to their separate section just for clarity
     // Note: some variables are listed as output only. Just setting these to 0 for safety (as the constructor does not intialize them)
@@ -2191,6 +2197,116 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Configure and load the msg block on to snps phy
+/// @param[in] i_target the target on which to operate
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode configure_and_load_dram_train_message_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
+        i_target)
+{
+
+    // Create the stucture to configure
+    PMU_SMB_DDR5U_1D_t l_msg_block_to_cnfg_and_load;
+
+    // Configure the message block structure
+    FAPI_TRY(configure_dram_train_message_block(i_target, l_msg_block_to_cnfg_and_load));
+
+    // Load the message block on to snps phy
+    FAPI_TRY(load_msg_block(i_target, l_msg_block_to_cnfg_and_load))
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Loads binary into registers
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_start_addr start address of  imem/dmem binary
+/// @param[in] i_data_start data pointer  of imem/dmem
+/// @param[in] i_mem_size size of the dmem/imem istream to be trasferred per loop
+/// @param[in] i_mem_total_size total size of the dmem/imem
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode load_mem_bin_data(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                    const uint32_t i_start_addr,
+                                    uint8_t* const i_data_start,
+                                    const uint32_t i_mem_size,
+                                    const uint32_t i_mem_total_size)
+{
+    // Get all the mem port targets
+    const auto& l_port_targets = mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
+
+    uint64_t l_curr_addr = i_start_addr;
+    uint32_t l_bytes_copied = 0;
+    uint8_t* l_curr_byte = i_data_start;
+
+#ifndef __PPE__
+    constexpr uint64_t SECONDS_PER_MINUTE = 60;
+    uint32_t l_progress_pct = 0;
+    // Passing in a nullptr gets us the current time
+    const auto l_start_time = time(nullptr);
+#endif
+    FAPI_ASSERT(i_data_start != NULL,
+                fapi2::ODY_DRAMINIT_START_DATA_PTR_NULL().
+                set_TARGET(i_target),
+                TARGTIDFORMAT  " The start address is NULL.", TARGTID);
+
+    while(l_bytes_copied < i_mem_size)
+    {
+        // Local buffer for getting data from registers
+        fapi2::buffer<uint64_t> l_buffer;
+
+        // Copy the last 8(56-63) bits of data
+        l_buffer.insertFromRight < 64 - BITS_PER_BYTE, BITS_PER_BYTE > (*l_curr_byte);
+        l_bytes_copied++;
+        l_curr_byte++;
+
+        if (l_bytes_copied < i_mem_size)
+        {
+            // Copy the next 8(48-55) bits of data
+            l_buffer.insertFromRight < 64 - 2 * BITS_PER_BYTE, BITS_PER_BYTE > (*l_curr_byte);
+            l_bytes_copied++;
+            l_curr_byte++;
+        }
+
+        // Write l_buffer to the register
+        for(const auto& l_port : l_port_targets)
+        {
+            FAPI_TRY(putScom(l_port, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(l_curr_addr), l_buffer));
+            l_curr_addr += 1;
+        }
+
+#ifndef __PPE__
+        {
+            // Report progress at 1% intervals (only in Cronus)
+            // Percentage of the number of bytes copied so far
+            uint32_t l_new_progress_pct = 100 * (l_bytes_copied) / i_mem_total_size;
+
+            // Calculate the time progress
+            const auto l_current_time = time(nullptr);
+            const auto l_elapsed_time = difftime(l_current_time, l_start_time);
+            const uint32_t l_predicted_total_time = 100 * l_elapsed_time /
+                                                    ((l_new_progress_pct < 1) ? 1 : l_new_progress_pct);
+            const auto l_remaining_time = static_cast<uint64_t>(l_predicted_total_time - l_elapsed_time);
+            const auto l_remaining_minutes = l_remaining_time / SECONDS_PER_MINUTE;
+
+            if (l_progress_pct != l_new_progress_pct)
+            {
+                FAPI_INF(TARGTIDFORMAT " Percent copied so far: %d%% (about %d minutes remaining)",
+                         TARGTID, l_new_progress_pct, l_remaining_minutes);
+            }
+
+            l_progress_pct = l_new_progress_pct;
+        }
+#endif
+
+    } // end while
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Processes an SMBus message request (aka runs an RCW via i2c)
 /// @param[in] i_target the target on which to operate
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
@@ -2313,7 +2429,129 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Loads the message block values into the PHY(DMEM regs)
+/// @brief Calculates the end addr of IMEM/DMEM image
+/// @param[in] i_start_addr starting address of the image
+/// @param[in] i_size size that needs to transferred at a time
+/// @return uint32_t calculated end address
+///
+uint32_t calculate_image_end_addr(const uint32_t i_start_addr, const uint32_t i_size)
+{
+    return (i_start_addr + (i_size / 2) + (i_size % 2) - 1);
+}
+
+///
+/// @brief Helper function to ody_load_dmem()
+/// @param[in] i_target the ocmb chip target
+/// @param[in] i_dmem_data dmem data image
+/// @param[in] i_dmem_size size that needs to transferred at a time
+/// @param[in] i_dmem_offset address offset of this chunk within the dmem image(in bytes)
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode ody_load_dmem_helper(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                       uint8_t* const i_dmem_data,
+                                       const uint32_t i_dmem_size,
+                                       const uint32_t i_dmem_offset)
+{
+    constexpr uint8_t DMEM = mss::ody::phy_mem_types::DMEM;
+    constexpr uint64_t DMEM_ST_ADDR = 0x58000;
+    const uint32_t l_start_addr = (i_dmem_offset / 2) + DMEM_ST_ADDR;
+    constexpr uint64_t DMEM_END_ADDR = 0x60000;
+    constexpr size_t MAX_IMAGE_SIZE = 65536;
+
+    // Get the end address
+    const auto l_end_addr = mss::ody::phy::calculate_image_end_addr(l_start_addr, i_dmem_size);
+
+    // OFFSET check
+    FAPI_ASSERT(!is_odd(i_dmem_offset),
+                fapi2::ODY_DRAMINIT_OFFSET_UNSUPPORTED()
+                .set_TARGET(i_target)
+                .set_MEM_TYPE(DMEM)
+                .set_START_ADDR(DMEM_ST_ADDR)
+                .set_END_ADDR(DMEM_END_ADDR)
+                .set_IMAGE_ST_ADDR(l_start_addr)
+                .set_IMAGE_SIZE(i_dmem_size),
+                TARGTIDFORMAT " DMEM offset(0x%04x) not supported. Offset cannot be odd", TARGTID, i_dmem_offset);
+
+    // ADDR check
+    FAPI_ASSERT(l_start_addr >= DMEM_ST_ADDR && l_end_addr < DMEM_END_ADDR,
+                fapi2::ODY_DRAMINIT_MEM_ADDR_RANGE_OUT_OF_BOUNDS()
+                .set_TARGET(i_target)
+                .set_MEM_TYPE(DMEM)
+                .set_START_ADDR(DMEM_ST_ADDR)
+                .set_END_ADDR(DMEM_END_ADDR)
+                .set_IMAGE_ST_ADDR(l_start_addr)
+                .set_IMAGE_SIZE(i_dmem_size),
+                TARGTIDFORMAT " DMEM start address(0x%08x) or size(0x%04x) puts image out of range in phy.", TARGTID,
+                l_start_addr, i_dmem_size);
+
+    return mss::ody::phy::load_mem_bin_data(i_target,
+                                            l_start_addr,
+                                            i_dmem_data,
+                                            i_dmem_size,
+                                            MAX_IMAGE_SIZE);
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Helper function to ody_load_imem()
+/// @param[in] i_target the ocmb chip target
+/// @param[in] i_imem_data imem data image
+/// @param[in] i_imem_size size that needs to transferred at a time
+/// @param[in] i_imem_offset address offset of this chunk within the imem image(in bytes)
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode ody_load_imem_helper(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                       uint8_t* const i_imem_data,
+                                       const uint32_t i_imem_size,
+                                       const uint32_t i_imem_offset)
+{
+    constexpr uint8_t IMEM = mss::ody::phy_mem_types::IMEM;
+    constexpr uint64_t IMEM_ST_ADDR = 0x50000;
+    const uint32_t l_start_addr = (i_imem_offset / 2) + IMEM_ST_ADDR;
+    constexpr uint64_t IMEM_END_ADDR = 0x58000;
+    // This is an estimation based on the size of the first IMEM
+    // we got from Synopsys
+    constexpr size_t MAX_IMAGE_SIZE = 53076;
+
+    // Get the end address
+    const auto l_end_addr = mss::ody::phy::calculate_image_end_addr(l_start_addr, i_imem_size);
+
+    // OFFSET check
+    FAPI_ASSERT(!is_odd(i_imem_offset),
+                fapi2::ODY_DRAMINIT_OFFSET_UNSUPPORTED()
+                .set_TARGET(i_target)
+                .set_MEM_TYPE(IMEM)
+                .set_START_ADDR(IMEM_ST_ADDR)
+                .set_END_ADDR(IMEM_END_ADDR)
+                .set_IMAGE_ST_ADDR(l_start_addr)
+                .set_IMAGE_SIZE(i_imem_size),
+                TARGTIDFORMAT " IMEM offset(0x%04x) not supported. Offset cannot be odd.", TARGTID, i_imem_offset);
+
+    // ADDR check
+    FAPI_ASSERT(l_start_addr >= IMEM_ST_ADDR && l_end_addr < IMEM_END_ADDR,
+                fapi2::ODY_DRAMINIT_MEM_ADDR_RANGE_OUT_OF_BOUNDS()
+                .set_TARGET(i_target)
+                .set_MEM_TYPE(IMEM)
+                .set_START_ADDR(IMEM_ST_ADDR)
+                .set_END_ADDR(IMEM_END_ADDR)
+                .set_IMAGE_ST_ADDR(l_start_addr)
+                .set_IMAGE_SIZE(i_imem_size),
+                TARGTIDFORMAT " IMEM start address(0x%08x) or size(0x%04x) puts image out of range in phy.", TARGTID, l_start_addr,
+                i_imem_size);
+
+    return mss::ody::phy::load_mem_bin_data(i_target,
+                                            l_start_addr,
+                                            i_imem_data,
+                                            i_imem_size,
+                                            MAX_IMAGE_SIZE);
+fapi_try_exit:
+    return fapi2::current_err;
+
+}
+
+///
+/// @brief Loads the message block values into the DMEM regs
 /// @param[in] i_target the memory port on which to operate
 /// @param[in] i_struct the message block
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
