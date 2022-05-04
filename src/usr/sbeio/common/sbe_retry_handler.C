@@ -67,6 +67,7 @@
 #include <plat_utils.H>
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
+#include <targeting/targplatutil.H>
 
 // FAPI2 Infrastructure
 #include <fapi2.H>
@@ -410,8 +411,18 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
                                                      SBEIO_RECONFIG_WITH_CLOCK_GUARD,
                                                      P10_EXTRACT_SBE_RC::RECONFIG_WITH_CLOCK_GARD,
                                                      TARGETING::get_huid(iv_proc));
-                    l_errl->addClockCallout(iv_proc, HWAS::OSCREFCLK_TYPE, HWAS::SRCI_PRIORITY_HIGH);
-                    l_errl->addHwCallout(iv_proc, HWAS::SRCI_PRIORITY_MED, HWAS::DELAYED_DECONFIG, HWAS::GARD_NULL);
+
+
+
+                    if (iv_clock_error_handler)
+                    {
+                        iv_clock_error_handler(l_errl, iv_proc, HWAS::OSCREFCLK_TYPE);
+                    }
+                    else
+                    {
+                        l_errl->addClockCallout(iv_proc, HWAS::OSCREFCLK_TYPE, HWAS::SRCI_PRIORITY_HIGH);
+                        l_errl->addHwCallout(iv_proc, HWAS::SRCI_PRIORITY_MED, HWAS::DELAYED_DECONFIG, HWAS::GARD_NULL);
+                    }
                 }
 
                 l_errl->collectTrace("ISTEPS_TRACE", 256);
@@ -1015,7 +1026,7 @@ bool SbeRetryHandler::sbe_run_extract_msg_reg()
         SBE_TRACF("WARNING: sbe_run_extract_msg_reg completed without error for proc 0x%.8X .  "
                     "However, there was asyncFFDC found though so we will run the FFDC parser",
                   TARGETING::get_huid(iv_proc));
-        // The SBE has responded to an asyncronus request that hostboot
+        // The SBE has responded to an asynchronous request that hostboot
         // made with FFDC indicating an error has occurred.
         // This should be the path we hit when we are waiting to see
         // if the sbe boots
@@ -1339,6 +1350,8 @@ void SbeRetryHandler::sbe_get_ffdc_handler()
                     // If we created an error successfully we must now commit it
                     if(l_sbeHwpfErr)
                     {
+                        bool l_redundant_clock_failure_handling_needed = false;
+                        HWAS::clockTypeEnum l_clock_failure_type = { };
 
                         // Iterate over user details sections of the error log to check for UD
                         // callouts from the HWPF component
@@ -1346,17 +1359,32 @@ void SbeRetryHandler::sbe_get_ffdc_handler()
                         for(const auto l_callout : l_sbeHwpfErr->getUDSections(ERRL_COMP_ID,
                                                                                 ERRORLOG::ERRL_UDT_CALLOUT) )
                         {
+                            const auto l_ud = reinterpret_cast<HWAS::callout_ud_t*>(l_callout);
+
+                            if (l_ud->type == HWAS::CLOCK_CALLOUT)
+                            {
+                                // we delay the clock failure handling until the
+                                // end because the code may add callouts, and we
+                                // don't want to modify the callout list while
+                                // we're iterating it.
+                                l_redundant_clock_failure_handling_needed = true;
+                                l_clock_failure_type = l_ud->clockType;
+                            }
+
                             // IF the callout has a gard associated with it we need to do a reconfig loop
-                            if((reinterpret_cast<HWAS::callout_ud_t*>(l_callout)->type == HWAS::HW_CALLOUT &&
-                                reinterpret_cast<HWAS::callout_ud_t*>(l_callout)->gardErrorType != HWAS::GARD_NULL) ||
-                               (reinterpret_cast<HWAS::callout_ud_t*>(l_callout)->type == HWAS::CLOCK_CALLOUT &&
-                                reinterpret_cast<HWAS::callout_ud_t*>(l_callout)->clkGardErrorType != HWAS::GARD_NULL) ||
-                               (reinterpret_cast<HWAS::callout_ud_t*>(l_callout)->type == HWAS::PART_CALLOUT &&
-                                reinterpret_cast<HWAS::callout_ud_t*>(l_callout)->partGardErrorType != HWAS::GARD_NULL))
+                            if((l_ud->type == HWAS::HW_CALLOUT && l_ud->gardErrorType != HWAS::GARD_NULL) ||
+                               (l_ud->type == HWAS::CLOCK_CALLOUT && l_ud->clkGardErrorType != HWAS::GARD_NULL) ||
+                               (l_ud->type == HWAS::PART_CALLOUT && l_ud->partGardErrorType != HWAS::GARD_NULL))
                             {
                                 l_reconfigRequired = true;
                             }
                         }
+
+                        if (l_redundant_clock_failure_handling_needed && iv_clock_error_handler)
+                        {
+                            iv_clock_error_handler(l_sbeHwpfErr, iv_proc, l_clock_failure_type);
+                        }
+
                         // Set the PLID of the error log to master PLID
                         // if the master PLID is set
                         updatePlids(l_sbeHwpfErr);

@@ -128,7 +128,8 @@ public:
           ATTR_FW_RELEASE_VERSION, //ok,BMC only
           ATTR_RAW_MTM, //ok,BMC only
 #ifdef CONFIG_INCLUDE_XML_OPENPOWER
-          ATTR_SYSTEM_BRAND_NAME //ok,BMC only
+          ATTR_SYSTEM_BRAND_NAME, //ok,BMC only
+          ATTR_SYS_CLOCK_DECONFIG_STATE, //ok,BMC only
 #endif
       };
 

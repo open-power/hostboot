@@ -2091,6 +2091,68 @@ ID for the sensor number returned with the elog. -->
   </attribute>
 
   <attribute>
+    <id>SYS_CLOCK_DECONFIG_STATE</id>
+    <description>
+      The state of the system clocks. This attribute is set by
+      Hostboot and read by the BMC on reconfig loops so that it can
+      tell which clocks are functional. See the enumeration
+      SYS_CLOCK_DECONFIG_STATE for the possible values of this
+      attribute.
+    </description>
+    <simpleType>
+      <enumeration>
+        <id>SYS_CLOCK_DECONFIG_STATE</id>
+        <default>NO_DECONFIG</default>
+      </enumeration>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <enumerationType>
+    <id>SYS_CLOCK_DECONFIG_STATE</id>
+    <description>The functional state of the system oscillators.</description>
+    <enumerator>
+      <name>NO_DECONFIG</name>
+      <value>0</value>
+    </enumerator>
+    <enumerator>
+      <name>A_DECONFIG</name>
+      <value>1</value>
+    </enumerator>
+    <enumerator>
+      <name>B_DECONFIG</name>
+      <value>2</value>
+    </enumerator>
+    <enumerator>
+      <name>ALL_DECONFIG</name>
+      <value>3</value>
+    </enumerator>
+  </enumerationType>
+
+  <attribute>
+    <id>SYS_CLOCK_DECONFIG_STATE_INITIAL</id>
+    <description>
+      The state of the system clocks. This attribute is set by
+      Hostboot and read by Hostboot. This attribute is set once at the
+      beginning of the IPL to the value of
+      ATTR_SYS_CLOCK_DECONFIG_STATE and not modified again. See the
+      SYS_CLOCK_DECONFIG_STATE for more information. This attribute
+      exists so that multiple "unknown" clock callouts are idempotent.
+    </description>
+    <simpleType>
+      <enumeration>
+        <id>SYS_CLOCK_DECONFIG_STATE</id>
+        <default>NO_DECONFIG</default>
+      </enumeration>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
     <id>VDD_CURRENT_OVERFLOW_WORKAROUND_ENABLE</id>
     <description>
         Used to enable Vdd current overflow worakaround.

@@ -191,6 +191,30 @@ class SbeRetryHandler
          */
         void main_sbe_handler(bool i_sbeHalted = false);
 
+        /* @brief The type of clock error handlers. See setClockErrorHandler.
+         *
+         * The signature is:
+         *
+         * void clock_error_handler_t(errlHndl_t i_errl, Target* i_proc, clockTypeEnum i_clock_callout_type)
+         *
+         * @param[in] i_errl                The error log calling out the clock error.
+         * @param[in] i_proc                The processor on which the SBE operation failed.
+         * @param[in] i_clock_callout_type  The clock that was called out in the error.
+         */
+        using clock_error_handler_t = void(*)(errlHndl_t, TARGETING::Target*, HWAS::clockTypeEnum);
+
+        /**
+         * @brief Set the clock error handler. The clock error handler will be
+         * called whenever the SBE retry handler detects that an SBE failed to start
+         * because of a clock error.
+         *
+         * @param[in] i_error_handler  Error handler.
+         */
+        void setClockErrorHandler(const clock_error_handler_t i_error_handler)
+        {
+            iv_clock_error_handler = i_error_handler;
+        }
+
 #ifdef CONFIG_COMPILE_CXXTEST_HOOKS
         inline void setSBETestMode(SBE_FORCED_TEST_PATH i_sbeTestMode)
         {
@@ -199,6 +223,12 @@ class SbeRetryHandler
 #endif
 
     private:
+        /**
+         * @brief  This variable holds the current clock error handler. See
+         *         setClockErrorHandler for more info.
+         */
+        clock_error_handler_t iv_clock_error_handler = nullptr;
+
 #ifndef __HOSTBOOT_RUNTIME
         /**
          * @brief  This function will look at the SBE status register and decide

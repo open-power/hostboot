@@ -2205,21 +2205,20 @@ void ErrlEntry::processCallout()
             ERRORLOG::theErrlManager::instance().getHwasProcessCalloutFn();
     if (pFn != NULL)
     {
-        // look thru the errlog for any Callout UserDetail sections
-        for(std::vector<ErrlUD*>::const_iterator it = iv_SectionVector.begin();
-                it != iv_SectionVector.end();
-                it++ )
+        // Look through the errlog for any Callout UserDetail sections.
+        // (We mustn't use iterators pointing to the underlying iv_SectionVector
+        // itself here because the callout handlers themselves may add elements
+        // to the vector, which would invalidate the iterators and cause
+        // undefined behavior.)
+        for (void* const v_callout : getUDSections(ERRL_COMP_ID, ERRL_UDT_CALLOUT))
         {
-            // if this is a CALLOUT
-            if ((ERRL_COMP_ID     == (*it)->iv_header.iv_compId) &&
-                (1                == (*it)->iv_header.iv_ver) &&
-                (ERRL_UDT_CALLOUT == (*it)->iv_header.iv_sst))
-            {
-                // call HWAS to have this processed
-                errlHndl_t l_errl = this;
-                (*pFn)(l_errl,(*it)->iv_pData, (*it)->iv_Size, false);
-                assert((this == l_errl), "processCallout changed the errl");
-            }
+            const auto callout = reinterpret_cast<HWAS::callout_ud_t*>(v_callout);
+
+            // call HWAS to have this processed
+            errlHndl_t l_errl = this;
+            pFn(l_errl, reinterpret_cast<uint8_t*>(callout), sizeof(*callout), false);
+
+            assert(this == l_errl, "processCallout changed the errl");
         } // for each SectionVector
     } // if HWAS module loaded
     else

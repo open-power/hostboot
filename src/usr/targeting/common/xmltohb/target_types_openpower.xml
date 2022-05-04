@@ -411,6 +411,12 @@
       <id>SYSTEM_PLDM_ENTITY_ID_INFO</id>
     </attribute>
     <attribute>
+      <id>SYS_CLOCK_DECONFIG_STATE</id>
+    </attribute>
+    <attribute>
+      <id>SYS_CLOCK_DECONFIG_STATE_INITIAL</id>
+    </attribute>
+    <attribute>
       <id>VRM_VDD_DVFS_TEMP_DEG_C</id>
     </attribute>
     <attribute>

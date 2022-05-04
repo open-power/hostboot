@@ -34,15 +34,13 @@
 #include <hwas/common/deconfigGard.H>
 #include <hwas/hwasPlat.H>
 #include <initservice/initserviceif.H>
+#include <targeting/targplatutil.H>
 
 using namespace TARGETING;
 
 namespace HWAS
 {
 
-//******************************************************************************
-// platHandleProcedureCallout
-//******************************************************************************
 errlHndl_t platHandleProcedureCallout(
         errlHndl_t &io_errl,
         epubProcedureID i_procedure,
@@ -59,9 +57,6 @@ errlHndl_t platHandleProcedureCallout(
     return errl;
 }
 
-//******************************************************************************
-// platHandleHWCallout
-//******************************************************************************
 errlHndl_t platHandleHWCallout(
         TARGETING::Target *i_pTarget,
         callOutPriority i_priority,
@@ -227,9 +222,6 @@ errlHndl_t platHandleHWCallout(
     return errl;
 }
 
-//******************************************************************************
-// platHandleAddBusCallout
-//******************************************************************************
 errlHndl_t platHandleAddBusCallout( HWAS::busCallout_t &io_busCallout,
                                     errlHndl_t &io_errl)
 {
@@ -244,9 +236,6 @@ errlHndl_t platHandleAddBusCallout( HWAS::busCallout_t &io_busCallout,
     return errl;
 }
 
-//******************************************************************************
-// platHandleI2cDeviceCallout
-//******************************************************************************
 errlHndl_t platHandleI2cDeviceCallout(
         TARGETING::Target *i_i2cMaster,
         uint8_t i_engine,
@@ -261,41 +250,25 @@ errlHndl_t platHandleI2cDeviceCallout(
     return errl;
 }
 
-//******************************************************************************
-// platHandleClockCallout
-//******************************************************************************
 errlHndl_t platHandleClockCallout(
-        TARGETING::Target *i_pTarget,
-        clockTypeEnum i_clockType,
-        callOutPriority i_priority,
+        TARGETING::Target* const i_pTarget,
+        const clockTypeEnum i_clockType,
+        const callOutPriority i_priority,
         errlHndl_t &io_errl,
-        DeconfigEnum i_deconfigState,
-        GARD_ErrorType i_gardErrorType)
+        const DeconfigEnum i_deconfigState,
+        const GARD_ErrorType i_gardErrorType)
 {
     // WARNING:
     // this hostboot code should not change io_errl, unless the caller of the
     // processCallouts() function also changes, as today it (errlentry.C) calls
     // from the errlEntry object
 
-    errlHndl_t pError = NULL;
-
-    if ((io_errl->sev()) == (ERRORLOG::ERRL_SEV_INFORMATIONAL))
-    {
-        HWAS_INF("Error log is informational - skipping clock callouts");
-    }
-    else
-    {
-#ifdef CONFIG_PLDM
-
-    // @TODO RTC 295271: Support PLDM clock callouts
-
-#endif
-
+    if (io_errl->sev() != ERRORLOG::ERRL_SEV_INFORMATIONAL)
+    { // Don't do anything when the error is just informational
 #ifdef CONFIG_CLOCK_DECONFIGS_FATAL
-
         // If clock deconfigs are considered fatal, and deconfig requested, then
         // call doShutdown
-        if(i_deconfigState == HWAS::DECONFIG)
+        if(i_deconfigState == DECONFIG)
         {
             HWAS_INF(
                 "Clock deconfiguration considered fatal, requesting "
@@ -303,10 +276,8 @@ errlHndl_t platHandleClockCallout(
                 io_errl->eid());
             INITSERVICE::doShutdown(io_errl->eid(), true);
         }
-
 #endif
 
-        //@TODO-RTC:299030-Real Clock Targets won't need this hack
         // Since we don't have a real target for the clocks we won't trigger
         // a reconfig loop automatically when a clock is marked for deconfig.
         // To emulate that behavior we will manually set the flag that is
@@ -316,7 +287,7 @@ errlHndl_t platHandleClockCallout(
             HWAS_INF("Triggering reconfig loop for attempted clock deconfig");
             TARGETING::Target* l_sys = TARGETING::UTIL::assertGetToplevelTarget();
             TARGETING::ATTR_RECONFIGURE_LOOP_type l_reconfigAttr =
-              l_sys->getAttr<ATTR_RECONFIGURE_LOOP>();
+                l_sys->getAttr<ATTR_RECONFIGURE_LOOP>();
             // 'OR' values in case of multiple reasons for reconfigure
             l_reconfigAttr |= TARGETING::RECONFIGURE_LOOP_DECONFIGURE;
             l_sys->setAttr<ATTR_RECONFIGURE_LOOP>(l_reconfigAttr);
@@ -328,12 +299,9 @@ errlHndl_t platHandleClockCallout(
         //  the clock issue.
     }
 
-    return pError;
+    return nullptr;
 }
 
-//******************************************************************************
-// platHandleClockCallout
-//******************************************************************************
 errlHndl_t platHandlePartCallout(
         TARGETING::Target *i_pTarget,
         partTypeEnum i_partType,

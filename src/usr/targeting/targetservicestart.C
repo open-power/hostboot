@@ -79,6 +79,7 @@
 #include "../runtime/hdatstructs.H"
 #include <console/consoleif.H>
 #include <isteps/pm/pm_common_ext.H>
+#include <attribute_ids.H>
 
 #include <targeting/common/associationmanager.H>
 
@@ -351,6 +352,7 @@ static void checkProcessorTargeting(TargetService& i_targetService)
     #undef TARG_FN
 }
 
+#ifndef CONFIG_FSP_BUILD
 /* @brief Set the CP_REFCLOCK_SELECT attribute on the given processor using the
  *        value in SBE Mailbox Scratch Register 6 (used by p10_clock_test).
  *
@@ -365,6 +367,48 @@ void set_cp_refclock_select_attribute(Target* const i_proc,
     i_proc->setAttr<ATTR_CP_REFCLOCK_SELECT>(scratch.masterSlaveNodeChipSel.cp_refclock_select);
 }
 
+/* @brief Set the ATTR_SYS_CLOCK_DECONFIG_STATE and
+ *        ATTR_SYS_CLOCK_DECONFIG_STATE_INITIAL attributes on the system target
+ *        to the appropriate values based on the CP_REFCLOCK_SELECT SBE scratch
+ *        register.
+ *
+ * @param[in] i_regs  The SBE scratch registers.
+ */
+void set_sys_clock_deconfig_state_attribute(const TARGETING::ATTR_MASTER_MBOX_SCRATCH_typeStdArr& i_regs)
+{
+    INITSERVICE::SPLESS::MboxScratch6_t scratch { };
+    scratch.data32 = i_regs[scratch.REG_IDX];
+
+    ATTR_SYS_CLOCK_DECONFIG_STATE_type clock_deconfig_state = SYS_CLOCK_DECONFIG_STATE_NO_DECONFIG;
+
+    switch (scratch.masterSlaveNodeChipSel.cp_refclock_select)
+    {
+    case fapi2::ENUM_ATTR_CP_REFCLOCK_SELECT_OSC0:
+        // If the BMC is telling us to use OSC0, it means OSC1 is dead.
+        clock_deconfig_state = SYS_CLOCK_DECONFIG_STATE_B_DECONFIG;
+        break;
+    case fapi2::ENUM_ATTR_CP_REFCLOCK_SELECT_OSC1:
+        // If the BMC is telling us to use OSC1, it means OSC0 is dead.
+        clock_deconfig_state = SYS_CLOCK_DECONFIG_STATE_A_DECONFIG;
+        break;
+    case fapi2::ENUM_ATTR_CP_REFCLOCK_SELECT_BOTH_OSC0:
+    case fapi2::ENUM_ATTR_CP_REFCLOCK_SELECT_BOTH_OSC1:       // Enterprise systems only
+    case fapi2::ENUM_ATTR_CP_REFCLOCK_SELECT_BOTH_OSC0_NORED: // Enterprise systems only
+    case fapi2::ENUM_ATTR_CP_REFCLOCK_SELECT_BOTH_OSC1_NORED: // Enterprise systems only
+        // "Both" means both oscillators are good.
+        clock_deconfig_state = SYS_CLOCK_DECONFIG_STATE_NO_DECONFIG;
+        break;
+    }
+
+    const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
+
+    TARG_INF("Setting ATTR_SYS_CLOCK_DECONFIG_STATE[_INITIAL] to %d", clock_deconfig_state);
+
+    sys->setAttr<ATTR_SYS_CLOCK_DECONFIG_STATE>(clock_deconfig_state);
+    sys->setAttr<ATTR_SYS_CLOCK_DECONFIG_STATE_INITIAL>(clock_deconfig_state);
+}
+#endif
+
 /*
  * @brief Initialize any attributes that need to be set early on
  */
@@ -373,7 +417,7 @@ static void initializeAttributes(TargetService& i_targetService,
                                  bool i_istepMode,
                                  const ATTR_MASTER_MBOX_SCRATCH_typeStdArr& i_masterScratch)
 {
-    #define TARG_FN "initializeAttributes()...)"
+    #define TARG_FN "initializeAttributes()..."
     TARG_ENTER();
 
     Target* l_pTopLevel = NULL;
@@ -470,12 +514,12 @@ static void initializeAttributes(TargetService& i_targetService,
         getAllChips(l_allProcChips, TYPE_PROC, false);
         for(auto l_chip : l_allProcChips)
         {
-            if (!INITSERVICE::spBaseServicesEnabled())
-            {
-                // The FSP will already have set this attribute on enterprise systems,
-                // so we only do this calculation on eBMC-based systems.
-                set_cp_refclock_select_attribute(l_chip, i_masterScratch);
-            }
+#ifndef CONFIG_FSP_BUILD
+            // The FSP will already have set this attribute on enterprise systems,
+            // so we only do this calculation on eBMC-based systems.
+            set_cp_refclock_select_attribute(l_chip, i_masterScratch);
+            set_sys_clock_deconfig_state_attribute(i_masterScratch);
+#endif
 
             // value for master set above
             if( l_chip == l_pMasterProcChip )

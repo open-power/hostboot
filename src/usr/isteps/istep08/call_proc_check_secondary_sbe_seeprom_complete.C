@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,6 +58,15 @@ using namespace SBEIO;
 
 namespace ISTEP_08
 {
+
+#ifndef CONFIG_FSP_BUILD
+/* @brief Handles errors that call out clocks during SBE operations.
+ *        See call_host_cbs_start.C for documentation.
+ */
+void deconfigure_redundant_clock(errlHndl_t i_errl,
+                                 Target* const i_proc,
+                                 const HWAS::clockTypeEnum i_clock_callout_type);
+#endif
 
 //******************************************************************************
 // call_proc_check_secondary_sbe_seeprom_complete function
@@ -123,6 +132,12 @@ void* call_proc_check_secondary_sbe_seeprom_complete( void *io_pArgs )
                         SbeRetryHandler::SBE_RESTART_METHOD::START_CBS,
                         EMPTY_PLID,
                         IS_INITIAL_POWERON);
+
+#ifndef CONFIG_FSP_BUILD
+        // For BMC-based machines, we want to handle redundant clock errors
+        // ourselves.
+        l_SBEobj.setClockErrorHandler(deconfigure_redundant_clock);
+#endif
 
         // Poll for SBE boot complete
         l_SBEobj.main_sbe_handler();
