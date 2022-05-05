@@ -3281,10 +3281,11 @@ fapi2::ReturnCode init_phy_structs( const fapi2::Target<fapi2::TARGET_TYPE_MEM_P
         io_user_input_advanced.IsHighVDD                 = 0x0001;
         io_user_input_advanced.DisablePmuEcc            = 0x0000;
 
-        io_user_input_advanced.DisDynAdrTri[0]          = 0x0000;
-        io_user_input_advanced.DisDynAdrTri[1]          = 0x0000;
-        io_user_input_advanced.DisDynAdrTri[2]          = 0x0000;
-        io_user_input_advanced.DisDynAdrTri[3]          = 0x0000;
+        // Per solvnet, set to a 1 for disable
+        io_user_input_advanced.DisDynAdrTri[0]          = 0x0001;
+        io_user_input_advanced.DisDynAdrTri[1]          = 0x0001;
+        io_user_input_advanced.DisDynAdrTri[2]          = 0x0001;
+        io_user_input_advanced.DisDynAdrTri[3]          = 0x0001;
 
         io_user_input_advanced.PhyMstrTrainInterval[0]  = 0x0000;
         io_user_input_advanced.PhyMstrTrainInterval[1]  = 0x0000;
