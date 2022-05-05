@@ -190,7 +190,6 @@ errlHndl_t getPmicHlthCheckData()
                 if ((l_pmic_status == SbePsu::SBE_N_MODE) || (l_pmic_status == SbePsu::SBE_LOST) ||
                    (l_pmic_status == SbePsu::SBE_GI2C_FAIL) || (l_pmic_status == SbePsu::SBE_DIMM_NOT_4U))
                 {
-                    l_pmic_health_log = false; // flag PMIC Health Check Data to aide in problem determination
                     if (l_pmic_status != SbePsu::SBE_DIMM_NOT_4U)
                     {
                         // Produce a visible log in Mfg Mode for failed health check
@@ -237,6 +236,15 @@ errlHndl_t getPmicHlthCheckData()
                                                  HWAS::NO_DECONFIG,
                                                  HWAS::GARD_NULL);
                             l_err->collectTrace(SBEIO_COMP_NAME);
+                            if (l_psuResponse.pmic_health_check_data_size > 0)
+                            {
+                                l_err->addFFDC( SBEIO_COMP_ID,
+                                            l_alignedMemHandle.dataPtr,
+                                            l_psuResponse.pmic_health_check_data_size,
+                                            1,                           // Version
+                                            ERRORLOG::ERRL_UDT_NOFORMAT, // parser ignores data
+                                            false );                     // merge
+                            }
                             errlCommit(l_err, SBEIO_COMP_ID);
                         }
                     }
