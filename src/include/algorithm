@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -118,7 +118,7 @@ namespace std
      */
     template <class T>
         inline void
-        swap(T& a, T&b )
+        swap(T& a, T& b )
     {
         T tmp(std::move(a));
         a = std::move(b);
