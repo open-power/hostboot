@@ -321,6 +321,7 @@ namespace std
              */
             void swap(unique_ptr& other)
             {
+                using std::swap;
                 swap(iv_ptr, other.iv_ptr);
                 swap(get_deleter(), other.get_deleter());
             }
