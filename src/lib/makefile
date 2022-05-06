@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2019
+# Contributors Listed Below - COPYRIGHT 2010,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -54,6 +54,8 @@ OBJS += tls.o
 OBJS += errno.o
 OBJS += tlsrt.o
 
+OBJS += random.o
+OBJS += rand.o
 # Don't care about instrumenting basic library functions
 HOSTBOOT_PROFILE_ARTIFACT=
 

@@ -407,6 +407,8 @@ hbicore_DATA_MODULES += $(if $(CONFIG_ENABLE_HDAT_IN_HOSTBOOT),spd_ipz_template.
 hbicore_DATA_MODULES += ${prd_rule_prf_targets}
 
 hbicore_test_OBJECTS += ${hbicore_OBJECTS}
+hbicore_test_OBJECTS += random.o
+hbicore_test_OBJECTS += rand.o
 hbicore_test_MODULES += ${hbicore_MODULES}
 hbicore_test_EXTENDED_MODULES += ${hbicore_EXTENDED_MODULES}
 hbicore_test_EXTENDED_MODULES += ${TESTCASE_MODULES}
