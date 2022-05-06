@@ -1424,7 +1424,7 @@ sub processPmic
 
     my $path = $targetObj->getAttribute($target,"INSTANCE_PATH");
     my $name = $targetObj->getInstanceName($target);
-    print "processPmic($name,$path,$dimmId)\n  if $targetObj->{debug}";
+    print "processPmic($name,$path,$dimmId)\n"  if $targetObj->{debug};
     # Some sanity checks.  Make sure we are processing the correct target type
     # and make sure the target's parent has been processed.
     my $targetType = targetTypeSanityCheck($targetObj, $target, "PMIC");
