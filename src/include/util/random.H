@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/attn/ipl/test/attntest.H $                       */
+/* $Source: src/include/util/random.H $                                   */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2022                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,49 +22,33 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __TEST_ATTNTEST_H
-#define __TEST_ATTNTEST_H
+
+#ifndef __RANDOM_H
+#define __RANDOM_H
+
+#include <stdint.h>
 
 /**
- * @file attntest.H
- *
- * @brief HBATTN test utility function declarations.
+ * @file interface for random int generation. NOTE: Can only be used in simics
  */
-
-#include "../../common/attnfwd.H"
-#include <map>
-#include "util/random.H"
-
-namespace ATTN
-{
-
-class FakePresenter;
-struct AttnDataSwo;
-struct AttnDataEq;
-class FakeSystem;
-class FakeReg;
-class FakeSource;
-class InjectSink;
 
 /**
- * @brief AttnDataMap
+ * @brief randint Generate random integer between bounds.
  *
- * AttnData as key map template.
+ * @param[in] i_min The minimum bound.
+ * @param[in] i_max The maximum bound.
+ *
+ * @return uint64_t Generated random integer.
  */
-template <typename T>
-    class AttnDataMap :
-        public std::map<PRDF::AttnData, T, AttnDataSwo>
-    {
-
-    };
+uint64_t randint(uint64_t i_min, uint64_t i_max);
 
 /**
- * @brief getRandomAttentionType
+ * @brief generate_random Issue a magic instruction
+ *        with a hap callback that fetches a random
+ *        number from the simics host.
  *
- * Obtain a random attention type.
- *
- * @return The generated attention type.
+ * @return uint64_t Random integer from simics host.
  */
-PRDF::ATTENTION_VALUE_TYPE getRandomAttentionType();
-}
+extern "C" uint64_t generate_random();
+
 #endif
