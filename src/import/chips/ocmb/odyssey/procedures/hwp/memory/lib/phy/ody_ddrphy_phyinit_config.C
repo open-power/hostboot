@@ -394,8 +394,12 @@ fapi2::ReturnCode dwc_ddrphy_phyinit_userCustom_io_write16(const fapi2::Target<f
 
     // Prints out the Synopsys style for the register accesses
     // Note: this is added to facilitate with simulation and debugging
-    FAPI_LAB("dwc_ddrphy_apb_wr(32'h%x,16'h%x); // " TARGTIDFORMAT " IBM ADDR:0x%016lx, IBM data:0x%016lx", i_addr, i_data,
-             TARGTID, IBM_ADDR, uint64_t(l_data));
+    // Need to split trace to limit variables per trace message to <= 4
+    FAPI_LAB("dwc_ddrphy_apb_wr(32'h%x,16'h%x); // " TARGTIDFORMAT, i_addr, i_data, TARGTID);
+    FAPI_LAB("                                  // " TARGTIDFORMAT " IBM ADDR:" UINT64FORMAT, TARGTID,
+             UINT64_VALUE(IBM_ADDR));
+    FAPI_LAB("                                  // " TARGTIDFORMAT " IBM data:" UINT64FORMAT, TARGTID,
+             UINT64_VALUE(uint64_t(l_data)));
 
     return fapi2::putScom(i_target, IBM_ADDR, l_data);
 }
