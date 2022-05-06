@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -138,6 +138,18 @@ const uint64_t OCBLWSBRn[4]    = {TP_TPCHIP_OCC_OCI_OCB_OCBLWSBR0,
                                   TP_TPCHIP_OCC_OCI_OCB_OCBLWSBR3
                                  };
 
+const uint64_t PBA_BARs[4] =    {TP_TPBR_PBA_PBAO_PBABAR0,
+                                 TP_TPBR_PBA_PBAO_PBABAR1,
+                                 TP_TPBR_PBA_PBAO_PBABAR2,
+                                 TP_TPBR_PBA_PBAO_PBABAR3
+                                };
+
+const uint64_t PBA_BARMSKs[4] = {TP_TPBR_PBA_PBAO_PBABARMSK0,
+                                 TP_TPBR_PBA_PBAO_PBABARMSK1,
+                                 TP_TPBR_PBA_PBAO_PBABARMSK2,
+                                 TP_TPBR_PBA_PBAO_PBABARMSK3
+                                };
+
 //------------------------------------------------------------------------------
 //  Function prototypes
 //------------------------------------------------------------------------------
@@ -216,6 +228,7 @@ fapi2::ReturnCode p10_pm_ocb_init(
     const ocb::PM_OCB_CHAN_OUFLOW i_ocb_ouflow_en,
     const ocb::PM_OCB_ITPTYPE     i_ocb_itp_type)
 {
+
     FAPI_INF("> p10_pm_ocb_init");
 
     // -------------------------------------------------------------------------
@@ -238,7 +251,25 @@ fapi2::ReturnCode p10_pm_ocb_init(
     // -------------------------------------------------------------------------
     else if (i_mode == pm::PM_SETUP_ALL || i_mode == pm::PM_SETUP_PIB)
     {
-        FAPI_INF("  Setup OCB Indirect Channel %d ", i_ocb_chan);
+
+        //-------- Start Debug Content
+        // Read PBABAR 0 to check for 0s as HOMER should be established when this
+        // HWP is executed
+        //
+        fapi2::buffer<uint64_t> l_bar64;
+        FAPI_TRY(fapi2::getScom(i_target, PBA_BARs[0], l_bar64),
+                 "PBA_BAR Putscom failed for channel 0x%llX", 0);
+        FAPI_INF("PBABAR%d  address: 0x%016llX", 0, l_bar64);
+
+        // PBABAR0 should be non-zero under FW when this HWP is called
+        if ( ! l_bar64 )
+        {
+            FAPI_ERR("ERROR: PBABAR0 not set");
+        }
+
+        //-------- End Debug Content
+
+        FAPI_DBG("Setup OCB Indirect Channel %d ", i_ocb_chan);
         ocb::PM_OCB_CHAN_REG l_upd_reg = ocb::OCB_UPD_PIB_REG;
 
         if (i_mode == pm::PM_SETUP_ALL)
@@ -275,7 +306,7 @@ fapi2::ReturnCode pm_ocb_setup(
     const ocb::PM_OCB_CHAN_OUFLOW i_ocb_ouflow_en,
     const ocb::PM_OCB_ITPTYPE     i_ocb_itp_type)
 {
-    FAPI_INF(">> pm_ocb_setup");
+    FAPI_DBG(">> pm_ocb_setup");
 
     uint32_t l_ocbase = 0x0;
     fapi2::buffer<uint64_t> l_mask_or(0);
@@ -447,30 +478,26 @@ fapi2::ReturnCode pm_ocb_setup(
     // -------------------------------------------------------------------------
     // Print Channel Configuration Info
     // -------------------------------------------------------------------------
-    FAPI_INF("OCB Channel Configuration                            ");
-    FAPI_INF("  channel number             => %d ", i_ocb_chan);
-    FAPI_INF("  channel type               => %d ", i_ocb_type);
+    FAPI_INF("OCB Config: ch %d  type %d  addr 0x%08X  ", i_ocb_chan, i_ocb_type, i_ocb_bar);
 
     if ((i_ocb_type == ocb::OCB_TYPE_PUSHQ) ||
         (i_ocb_type == ocb::OCB_TYPE_PULLQ))
     {
-        FAPI_INF("  queue length               => %d ", i_ocb_q_len);
-        FAPI_INF("  interrupt type             => %d ", i_ocb_itp_type);
+        FAPI_INF("OCB Config: queue length %d int type %d  ", i_ocb_q_len, i_ocb_itp_type);
 
         if (i_ocb_type == ocb::OCB_TYPE_PUSHQ)
         {
-            FAPI_INF("  push write overflow enable => %d ", i_ocb_ouflow_en);
+            FAPI_INF("OCB Config: push write overflow enable %d ", i_ocb_ouflow_en);
         }
         else
         {
-            FAPI_INF("  pull write underflow enable => %d ", i_ocb_ouflow_en);
+            FAPI_INF("OCB Config: pull write underflow enable %d ", i_ocb_ouflow_en);
         }
     }
 
-    FAPI_INF("  channel base address       => 0x%08X ", i_ocb_bar);
 
 fapi_try_exit:
-    FAPI_INF("<< pm_ocb_setup");
+    FAPI_DBG("<< pm_ocb_setup");
     return fapi2::current_err;
 }
 

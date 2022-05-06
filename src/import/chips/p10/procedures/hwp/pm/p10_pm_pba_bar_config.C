@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -205,6 +205,7 @@ fapi2::ReturnCode p10_pm_pba_bar_config (
 
     FAPI_TRY(fapi2::putScom(i_target, PBA_BARs[i_index], l_bar64),
              "PBA_BAR Putscom failed for channel 0x%llX", i_index);
+    FAPI_INF("pba_bar: %d  address: 0x%016llX", i_index, l_bar64);
 
     // Compute and write the mask based on passed region size.
 
@@ -218,14 +219,14 @@ fapi2::ReturnCode p10_pm_pba_bar_config (
     if (i_pba_bar_size != 0)
     {
         l_work_size = PowerOf2Roundedup(i_pba_bar_size);
-        FAPI_INF("i_pba_bar_size: 0x%016llX.  Final work_size: 0x%016llX",
+        FAPI_INF("pba_bar_size: 0x%016llX.  Final work_size: 0x%016llX",
                  i_pba_bar_size, l_work_size);
     }
     else
     {
         // If bar_size==0, treat as if ==1. Otherwize, range will max out to 2TB
         l_work_size = PowerOf2Roundedup(1ull);
-        FAPI_INF("i_pba_bar_size: 0x%016llX but treated as if bar_size=1. "
+        FAPI_INF("pba_bar_size: 0x%016llX but treated as if bar_size=1. "
                  "Final work_size: 0x%016llX", i_pba_bar_size, l_work_size);
     }
 
