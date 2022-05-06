@@ -36,6 +36,7 @@ COMMON_TESTCASE_REL_PATHS = \
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/
 
+
 MODULE = testhwas
 TESTS = hwas1test.H hwasGardTest.H hwasPlatErrorTest.H hwasSysAvailSvcTest.H
 TESTS += ${COMMON_TESTCASE_REL_PATHS}

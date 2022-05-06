@@ -157,5 +157,18 @@ void applyFieldCoreOverrides(fcoRestrictMetadata_t& io_fcoData);
  */
 void setHwasStateForFcoDeconfig(TARGETING::Target & i_target);
 
+/* @brief sets the HWAS state and Attr PG info for the given core target
+ *
+ * @param[in] coreFcoMetadata_t  A reference to the metadata structure which must have a valid target pointer.
+ */
+void deconfigCoreByFco(coreFcoMetadata_t & i_core);
+
+/* @brief sets the HWAS state and Attr PG info for the given core and its FC sibling
+ *
+ * @param[in] coreFcoMetadata_t  A reference to the metadata structure which must have valid target and fcSiblingCore
+ *                               pointers.
+ */
+void deconfigFcByFco(coreFcoMetadata_t & i_core);
+
 }
 #endif
