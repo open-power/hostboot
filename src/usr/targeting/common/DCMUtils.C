@@ -23,6 +23,16 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
+/**
+ * @file DCMUtils.C
+ *
+ * @brief Implements the DCM (Dual Chip Module) utilities
+ *
+ * Utilities to pair PROCs with IO SCM chips and returning the IO SCM chip which
+ * is currently used to deconfigure.  Also utilities to print it the paired PROCs
+ * of the system for debugging and testing purposes.
+ */
+
 #ifdef __HOSTBOOT_MODULE
 
 #include <targeting/common/DCMUtils.H>
@@ -70,37 +80,42 @@ TargetHandle_t DCMUtils::getAssociatedIoScmChip(TargetHandle_t i_procTarget)
     TRACFCOMP(g_trac_targeting, ENTER_MRK"getAssociatedIoScmChip(): for PROC HUID 0x%.8x",
                                 l_procTargetHuid);
 
-    TargetHandle_t l_ioScmChip(nullptr);
-    uint32_t l_ioScmChipHuid(0);
+    TargetHandle_t l_ioScmChip(nullptr); //Will populate with IO SCM chip if found for i_procTarget
+    ATTR_HUID_type l_ioScmChipHuid(0);   //Used for tracing purposes
 
-    // Confirm that the system is a dual chip.
-    if (isSystemDCM())
+    // Grouping is done via the PROCs location code
+    auto l_locationCodeProc = i_procTarget->getAttrAsStdArr<ATTR_STATIC_ABS_LOCATION_CODE>();
+
+    // Get a list of all PROCs, functional or not
+    TargetHandleList l_allProcs;
+    bool l_functional = false;
+    getAllChips(l_allProcs, TYPE_PROC, l_functional);
+
+
+    // Iterate over the PROC list, grouping pairs
+    for (auto & l_proc : l_allProcs)
     {
-        // Iterate over the map of DCM pairs and retrieve the IO SCM chip of
-        // PROC target 'i_procTarget' if the target is not an IO SCM chip itself.
-        // If the target is an IO SCM chip, then nothing is retrieved.
-        for (const auto & l_pairData: iv_mapDcmPairs)
+        // Grouping is done via the PROCs location code
+        auto l_locationCodeIoScm = l_proc->getAttrAsStdArr<ATTR_STATIC_ABS_LOCATION_CODE>();
+        if ((l_proc != i_procTarget) && (l_locationCodeProc == l_locationCodeIoScm))
         {
-            if (l_procTargetHuid == l_pairData.second.iv_procTargetHuid)
+            // Find the number of present cores for the PROC
+            TargetHandleList l_coreList;
+            getCoreChiplets(l_coreList, UTIL_FILTER_CORE_ALL,
+                            UTIL_FILTER_PRESENT, l_proc);
+            if (!l_coreList.size())
             {
-                l_ioScmChip = l_pairData.second.iv_ioScmChip;
-                l_ioScmChipHuid = l_pairData.second.iv_ioScmChipHuid;
+                l_ioScmChip = l_proc;
+                l_ioScmChipHuid = l_proc->getAttr<ATTR_HUID>();
 
                 TRACFCOMP(g_trac_targeting,
                           INFO_MRK"getAssociatedIoScmChip(): found associated IO SCM "
                                   "chip HUID 0x%.8x that is paired with PROC HUID 0x%.8x",
-                                   l_pairData.second.iv_ioScmChipHuid, l_procTargetHuid);
-
-
+                                   l_ioScmChipHuid, l_procTargetHuid);
                 break;
             }
-        } // for (const auto & l_pairData: iv_mapDcmPairs)
-    }
-    else
-    {
-        TRACFCOMP(g_trac_targeting, INFO_MRK"getAssociatedIoScmChip(): System is not a Dual Chip, "
-                  "no paired IO SCM associated with PROC HUID 0x%.8x", l_procTargetHuid);
-    }
+        }
+    } // for (const auto l_proc : l_allProcs)
 
     if (l_ioScmChipHuid)
     {
@@ -110,8 +125,9 @@ TargetHandle_t DCMUtils::getAssociatedIoScmChip(TargetHandle_t i_procTarget)
     }
     else
     {
-        TRACFCOMP(g_trac_targeting, EXIT_MRK"getAssociatedIoScmChip(): PROC HUID 0x%.8x",
-                                    l_procTargetHuid);
+        TRACFCOMP(g_trac_targeting, EXIT_MRK"getAssociatedIoScmChip(): no IO SCM "
+                  "chip associated with PROC HUID 0x%.8x, returning nullptr",
+                   l_procTargetHuid);
     }
 
     return l_ioScmChip;
@@ -162,14 +178,18 @@ void DCMUtils::determineSystemIsDCM()
                   l_procHuid, l_locationCode.data(), l_coreList.size());
     } // for (const auto l_proc : l_allProcs)
 
-    // Iterate over map, if an item in the map is not paired then the system is
-    // not a Dual Chip Module system.  If all items are paired then the system
+    // Iterate over map, if any item in the map is paired then the system is
     // a Dual Chip Module system.
     if (!iv_mapDcmPairs.empty())
     {
-        iv_isSystemDCM = true;
         for (const auto & pairedData: iv_mapDcmPairs)
-        { iv_isSystemDCM &= pairedData.second.iv_isPaired; }
+        {
+            iv_isSystemDCM = pairedData.second.iv_isPaired;
+            if (iv_isSystemDCM)
+            {
+                break;
+            }
+        }
     }
 
     iv_isInitialized = true;
@@ -225,7 +245,7 @@ void DCMUtils::dumpDcmPairs()
 /*****************************************************************************/
 // Dump PROC target HWAS state data and number of cores
 /*****************************************************************************/
-void DCMUtils::dumpProcTarget(const dcmProcsPairs_t &i_dcmProcPair)
+void DCMUtils::dumpProcTarget(const dcmProcsPairs_t &i_dcmProcPair) const
 {
     const auto l_state = i_dcmProcPair.iv_procTarget->getAttr<ATTR_HWAS_STATE>();
 
@@ -239,7 +259,7 @@ void DCMUtils::dumpProcTarget(const dcmProcsPairs_t &i_dcmProcPair)
 /*****************************************************************************/
 // Dump IO SCM chip HWAS state data and number of cores
 /*****************************************************************************/
-void DCMUtils::dumpIoScmChip(const dcmProcsPairs_t &i_dcmProcPair)
+void DCMUtils::dumpIoScmChip(const dcmProcsPairs_t &i_dcmProcPair) const
 {
     const auto l_state = i_dcmProcPair.iv_ioScmChip->getAttr<ATTR_HWAS_STATE>();
 

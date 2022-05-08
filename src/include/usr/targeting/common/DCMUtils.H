@@ -47,19 +47,19 @@ class DCMUtils
         /**
          *  @brief Default Constructor
          *
-         *  Constructor only initializes internals variables, does not do any
+         *  Constructor only initializes internal variables, does not do any
          *  actual work.
          */
         DCMUtils();
 
         /**
          * @brief Will determine if the system is a Dual Chip Module system or not.
-         *        The system is considered a Dual Chip Module if all PROCs are paired.
-         *        Pairing is based on the location code of the PROCs.
+         *        The system is considered a Dual Chip Module if any PROC is paired
+         *        with another other PROC via the location code of the PROCs.
          *
          * @note Will populate the class with paired data if not done so.
          *
-         * @return: true if all PROCs have a pair, false otherwise
+         * @return: true if any PROC has a pair, false otherwise
          */
         bool isSystemDCM();
 
@@ -101,7 +101,7 @@ class DCMUtils
     private:
         /**
          * @brief This method will inspect each PROC and pair each PROC based on the
-         *        PROC's location code. If all PROCs are paired then the system is
+         *        PROC's location code. If any PROC is paired then the system is
          *        considered a dual chip module system. This will populate the class
          *        with the found paired PROCs.
          */
@@ -131,7 +131,7 @@ class DCMUtils
              * @param[in] i_nCores The number of present cores i_target contains
              * @param[in] i_procHuid The HUID of i_target
              */
-            void addTarget(Target* i_target, const int32_t i_nCores, const uint32_t i_procHuid)
+            void addTarget(Target* i_target, const size_t i_nCores, const uint32_t i_procHuid)
             {
                 // If the number of cores is not 0 then the target is a PROC target,
                 // If the number of cores *is* 0 then the target is an IO Chip
@@ -157,12 +157,12 @@ class DCMUtils
          *
          * @param[in] i_dcmProcPair a struct containing useful info about the targets
          */
-        void dumpProcTarget(const dcmProcsPairs_t &i_dcmProcPair);
-        void dumpIoScmChip(const dcmProcsPairs_t &i_dcmProcPair);
+        void dumpProcTarget(const dcmProcsPairs_t &i_dcmProcPair) const;
+        void dumpIoScmChip(const dcmProcsPairs_t &i_dcmProcPair) const;
 
         // True if system has been searched for pairs, false otherwise
         bool iv_isInitialized;
-        // True if all PROCs are paired, false otherwise
+        // True if any PROCs are paired, false otherwise
         bool iv_isSystemDCM;
 
         // A mapping of the PROC/IO SCM pair data to their common location code
