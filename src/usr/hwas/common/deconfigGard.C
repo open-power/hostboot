@@ -2192,6 +2192,66 @@ errlHndl_t clearGardByType(const GARD_ErrorType i_type)
     return theDeconfigGard().clearGardRecordsByType(i_type);
 }
 
+/**
+ * @brief rollup resource recovery
+ *        Currently supports rollup of core target to parent FC.
+ *        Checks if child cores are resource recovered, and then will
+ *        mark parent FC as resource recovered too.
+ * @param[in] target
+ */
+void rollupResourceRecovery(Target * i_target)
+{
+    TYPE target_type = i_target->getAttr<ATTR_TYPE>();
+    if (target_type == TYPE_CORE)
+    {
+        // grab parent FC
+        TargetHandleList pParentFcList;
+        getParentAffinityTargetsByState(pParentFcList, i_target,
+                        CLASS_UNIT, TYPE_FC, UTIL_FILTER_ALL);
+        HWAS_ASSERT((pParentFcList.size() == 1),
+                "HWAS rollupResourceRecovery: pParentFcList != 1");
+        Target *l_parentFC = pParentFcList[0];
+
+        HwasState fc_state = l_parentFC->getAttr<ATTR_HWAS_STATE>();
+        if (fc_state.functional &&
+            fc_state.deconfiguredByEid != DeconfigGard::CONFIGURED_BY_RESOURCE_RECOVERY)
+        {
+            bool coreRecovered = true;
+
+            TargetHandleList pFCList;
+            // find functional core children
+            getChildChiplets(pFCList, l_parentFC, TYPE_CORE, true);
+            for (const auto l_core : pFCList)
+            {
+                HwasState core_state = l_core->getAttr<ATTR_HWAS_STATE>();
+                if (core_state.deconfiguredByEid == DeconfigGard::CONFIGURED_BY_RESOURCE_RECOVERY)
+                {
+                    if (is_fused_mode())
+                    {
+                        // any core recovered rolls up to FC if in fused mode
+                        coreRecovered = true;
+                        break;
+                    }
+                }
+                else
+                {
+                    // non-fused mode - any functional core not resource recovered means FC parent is not recovered
+                    // fused mode - could still recover FC if other functional core is resource recovered
+                    coreRecovered = false;
+                }
+            }
+            if (coreRecovered)
+            {
+                HWAS_INF("rollupResourceRecovery: marking parent FC 0x%08X recovered",
+                        TARGETING::get_huid(l_parentFC));
+                fc_state.deconfiguredByEid =
+                        DeconfigGard::CONFIGURED_BY_RESOURCE_RECOVERY;
+                l_parentFC->setAttr<TARGETING::ATTR_HWAS_STATE>(fc_state);
+            }
+        }
+    }
+}
+
 //******************************************************************************
 errlHndl_t DeconfigGard::applyGardRecord(Target *i_pTarget,
         GardRecord &i_gardRecord,
@@ -2630,11 +2690,12 @@ errlHndl_t DeconfigGard::updateSpecDeconfigTargetStates(
                     l_pTarget->getAttr<TARGETING::ATTR_HWAS_STATE>();
             if(l_hwasState.functional)
             {
-                HWAS_INF("Found GARDED target 0x%08X is functional, set state",
+                HWAS_INF("Found GARDED target 0x%08X is functional, marking as Resource Recovered",
                         TARGETING::get_huid(l_pTarget));
                 l_hwasState.deconfiguredByEid =
                         DeconfigGard::CONFIGURED_BY_RESOURCE_RECOVERY;
                 l_pTarget->setAttr<TARGETING::ATTR_HWAS_STATE>(l_hwasState);
+                rollupResourceRecovery(l_pTarget);
             }
         }
     }while (0);
@@ -3006,6 +3067,9 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
                                  l_state.present,
                                  l_state.functional,
                                  CONFIGURED_BY_RESOURCE_RECOVERY );
+
+                // if supported type, rollup resource recovery to parent target
+                rollupResourceRecovery(*l_sdIter);
 
                 //Mark parent node as resource recovered
                 PredicateCTM predNode(CLASS_ENC, TYPE_NODE);
