@@ -130,16 +130,6 @@ fapi2::ReturnCode verify_ec_hw_state(
 {
     do
     {
-        //this doesn't need to be called for mpipl
-        fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-        fapi2::ATTR_IS_MPIPL_Type l_mpipl;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_MPIPL, FAPI_SYSTEM, l_mpipl));
-
-        if (l_mpipl)
-        {
-            break;
-        }
-
         FAPI_INF (">>verify_hw_state");
         uint8_t l_core_unit_pos;
 
