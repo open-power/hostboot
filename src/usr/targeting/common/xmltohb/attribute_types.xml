@@ -167,10 +167,12 @@
   </attribute>
 
   <attribute>
-    <description>Block speculative deconfig in reconfig loop.
+    <description>Block speculative deconfig from guard records during IPL.
         Flags when speculative deconfigurations should not be done for
-        predictive gard records on a reconfig loop IPL due to out of
-        hardware condition on prior IPL.
+        predictive gard records on during IPL due to out of hardware
+        condition on prior IPL.  Note that this setting will survive
+        reboots and persist until something changes, e.g. a part is
+        replaced or guard is cleared.
         0 = Allow speculative deconfiguration
         1 = Block speculative deconfiguration
         </description>
@@ -5352,6 +5354,20 @@
         <default>0</default>
       </uint16_t>
     </simpleType>
+  </attribute>
+
+  <attribute>
+    <description>
+        Override normal reconfig loop behavior to fail the boot on
+        a deconfig instead of triggering a reconfig loop (reboot)..
+    </description>
+    <id>NO_RECONFIG_ON_DECONFIG</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <writeable/>
   </attribute>
 
   <attribute>

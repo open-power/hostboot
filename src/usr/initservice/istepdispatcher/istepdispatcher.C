@@ -1934,11 +1934,25 @@ void IStepDispatcher::requestReboot(const char* i_reason)
     }
 #endif
 
-    if(l_istepMode)
+    // Check if we want to override the normal reconfig behavior if
+    //  this was caused only by a deconfig
+    auto l_sys = TARGETING::UTIL::assertGetToplevelTarget();
+    auto l_reconfigAttr = l_sys->getAttr<TARGETING::ATTR_RECONFIGURE_LOOP>();
+    auto l_noReconfig = l_sys->getAttr<TARGETING::ATTR_NO_RECONFIG_ON_DECONFIG>();
+
+    if( (l_reconfigAttr == TARGETING::RECONFIGURE_LOOP_DECONFIGURE)
+        && l_noReconfig )
     {
-#ifdef CONFIG_CONSOLE
+        TRACFCOMP(g_trac_initsvc,"requestReboot(): Blocking reconfig loop for deconfig due to ATTR_NO_RECONFIG_ON_DECONFIG");
+        CONSOLE::displayf(CONSOLE::VUART1, NULL, "Reboot prevented due to ATTR_NO_RECONFIG_ON_DECONFIG.");
+
+        // Do not issue a reboot - just shut HB down
+        shutdownDuringIpl();
+    }
+    else if(l_istepMode)
+    {
         CONSOLE::displayf(CONSOLE::VUART1, NULL, "Reboot prevented in istep mode. Shutting down instead");
-#endif
+
         // Do not issue a reboot - just shut HB down
         shutdownDuringIpl();
     }
@@ -2817,25 +2831,42 @@ bool IStepDispatcher::checkReconfig(const uint8_t i_curIstep,
               ENTER_MRK"IStepDispatcher::checkReconfig(): istep %d.%d",
               i_curIstep, i_curSubstep);
 
-    //@TODO-RTC:158411 for Cumulus support reconfig logic needs to be updated
     // Software reconfig loop happens in istep 7 only.
-    // The rest of the isteps should result in TI path for scale-out systems
+    // The rest of the isteps will result in TI path
     if( (i_curIstep == SW_RECONFIG_START_STEP)
-            && (i_curSubstep >= SW_RECONFIG_START_SUBSTEP ) )
+        && (i_curSubstep >= SW_RECONFIG_START_SUBSTEP ) )
     {
         TRACDCOMP(g_trac_initsvc, "checkReconfig(): SW RECONFIGURE is ON at istep %d.%d",
-           i_curIstep, i_curSubstep);
+                  i_curIstep, i_curSubstep);
         doReconfigure = true;
         o_newIstep = SW_RECONFIG_START_STEP;
         o_newSubstep = SW_RECONFIG_START_SUBSTEP;
-    }else
-     {
+    }
+    else
+    {
         //remember that TI will be requested for all other steps outside
-        //software reconfig istep 7 in NIMBUS for scale-out systems
-     }
+        //software reconfig
+    }
 
-     TRACDCOMP(g_trac_initsvc,
-       EXIT_MRK"IStepDispatcher::checkReconfig: new istep/substep: %d %d.%d",
+    if( doReconfigure )
+    {
+        // Check if we want to override the normal reconfig behavior if
+        //  this was caused only by a deconfig
+        auto l_sys = TARGETING::UTIL::assertGetToplevelTarget();
+        auto l_reconfigAttr = l_sys->getAttr<TARGETING::ATTR_RECONFIGURE_LOOP>();
+        if( l_reconfigAttr == TARGETING::RECONFIGURE_LOOP_DECONFIGURE )
+        {
+            auto l_noReconfig = l_sys->getAttr<TARGETING::ATTR_NO_RECONFIG_ON_DECONFIG>();
+            if( l_noReconfig )
+            {
+                TRACFCOMP(g_trac_initsvc,"checkReconfig(): Blocking reconfig loop for deconfig due to ATTR_NO_RECONFIG_ON_DECONFIG");
+                doReconfigure = false;
+            }
+        }
+    }
+
+    TRACDCOMP(g_trac_initsvc,
+              EXIT_MRK"IStepDispatcher::checkReconfig: new istep/substep: %d %d.%d",
               doReconfigure, o_newIstep, o_newSubstep);
 
     return doReconfigure;

@@ -2389,6 +2389,9 @@
       <id>NEST_PLL_FREQ_LIST</id>
     </attribute>
     <attribute>
+      <id>NO_RECONFIG_ON_DECONFIG</id>
+    </attribute>
+    <attribute>
       <id>NUMERIC_POD_TYPE_TEST</id>
     </attribute>
     <attribute>
