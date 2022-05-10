@@ -115,10 +115,10 @@ const uint32_t TOTAL_NUM_SLOTS = 25;
     //          PROC0_NUM_SLOT_ENTRY_INFO : PROC1_NUM_SLOT_ENTRY_INFO;
 
 //each PHB lane size
-const uint32_t NUM_OF_LANES_PER_PHB = 
+const uint32_t NUM_OF_LANES_PER_PHB =
        sizeof(TARGETING::ATTR_PROC_PCIE_LANE_EQUALIZATION_GEN3_type)/2;
 
-static_assert( NUM_OF_LANES_PER_PHB == 
+static_assert( NUM_OF_LANES_PER_PHB ==
     sizeof(TARGETING::ATTR_PROC_PCIE_LANE_EQUALIZATION_GEN3_type)/2,
       "no. of lanes per PHB should be 16");
 
@@ -407,7 +407,7 @@ uint8_t * HdatIoHubFru::setIOHub(uint8_t * io_virt_addr,
     {
         l_hdatHubEntry->hdatIoHubId =
                                   this->iv_hubArray[l_cnt].hdatIoHubId;
-        l_hdatHubEntry->hdatMaxPCIeLinkSpeed = 
+        l_hdatHubEntry->hdatMaxPCIeLinkSpeed =
                                   this->iv_hubArray[l_cnt].hdatMaxPCIeLinkSpeed;
         l_hdatHubEntry->hdatModuleId =
                                   this->iv_hubArray[l_cnt].hdatModuleId;
@@ -516,7 +516,7 @@ uint8_t * HdatIoHubFru::setIOHub(uint8_t * io_virt_addr,
                         (iv_hdatSlotMapEntryArrayHdr.hdatArrayCnt));
             io_virt_addr += sizeof(hdatSlotEntryInfo_t) *
                           (iv_hdatSlotMapEntryArrayHdr.hdatArrayCnt);
-        
+
             HDAT_ADD_PAD(io_virt_addr);
         }
     }
@@ -626,7 +626,7 @@ errlHndl_t HdatIoHubFru::hdatGetDaughterInfoFromTarget(
         o_DaughterRids.push_back(dummy_slca_rid);
         o_targetList.insert(o_targetList.end(),l_list.begin(),l_list.end());
         dummy_slca_rid++;
-        HDAT_DBG("o_targetList.size()=%d",o_targetList.size()); 
+        HDAT_DBG("o_targetList.size()=%d",o_targetList.size());
 
         //@TODO: RTC 148660 add the loop to fetch the pci slot and card
     }while(0);
@@ -881,7 +881,7 @@ errlHndl_t HdatIoHubFru::bldSlotMapInfoStruct(/*uint32_t i_numProc,*/int i_iohub
     l_pSysTarget->tryGetAttr<TARGETING::ATTR_SYSTEM_TYPE> (l_systemType);
 
     do{
-        const char HDAT_IOSLOT_STRUCT_NAME[] = "IOSLOT";   
+        const char HDAT_IOSLOT_STRUCT_NAME[] = "IOSLOT";
         const uint16_t HDAT_SLOTMAP_INFO_VER = 0x0020;
 
         iv_hdatSlotMapAreaPtr = reinterpret_cast<hdatSlotMapArea_t *>(calloc(
@@ -891,9 +891,9 @@ errlHndl_t HdatIoHubFru::bldSlotMapInfoStruct(/*uint32_t i_numProc,*/int i_iohub
                         reinterpret_cast<hdatSlotEntryInfo_t *>(calloc(
                             HDAT_MAX_SLOT_PER_HUB, sizeof(hdatSlotEntryInfo_t)));
 
-    
+
         HdatHdif *l_SlotMap = new HdatHdif(l_errlHndl,HDAT_IOSLOT_STRUCT_NAME,
-                                           HDAT_SLOT_MAP_LAST, 0, 0, 
+                                           HDAT_SLOT_MAP_LAST, 0, 0,
                                            HDAT_SLOTMAP_INFO_VER);
         if(l_errlHndl == NULL)
         {
@@ -919,7 +919,7 @@ errlHndl_t HdatIoHubFru::bldSlotMapInfoStruct(/*uint32_t i_numProc,*/int i_iohub
         }
         iv_slotMapInfoSize = l_SlotMap->size();
         l_SlotMap->print();
-                        
+
         this->addChild(HDAT_SLOT_MAP_INFO, iv_slotMapInfoSize ,1);
         iv_slotMapInfoObjs.push_back(*l_SlotMap);
     }while(0);
@@ -1056,7 +1056,7 @@ errlHndl_t HdatIoHubFru::hdatGetSlotMapTableAreas(/*uint32_t i_numProc,*/
             }
         }
 
-        iv_hdatSlotMapAreaArrayHdr = { sizeof(hdatHDIFDataArray_t), 
+        iv_hdatSlotMapAreaArrayHdr = { sizeof(hdatHDIFDataArray_t),
            arrayCount,
            sizeof(hdatSlotMapArea_t), sizeof(hdatSlotMapArea_t) };
 
@@ -1071,7 +1071,7 @@ errlHndl_t HdatIoHubFru::hdatGetSlotMapTableAreas(/*uint32_t i_numProc,*/
                 (hdatSlotMapAreasEverest + startIndex),
             sizeof(hdatSlotMapArea_t)*iv_hdatSlotMapAreaArrayHdr.hdatArrayCnt);
         }
-        auto toPrintSlotMap= 
+        auto toPrintSlotMap=
                  reinterpret_cast<hdatSlotMapArea_t *>(iv_hdatSlotMapAreaPtr);
         for(size_t i=0; i<iv_hdatSlotMapAreaArrayHdr.hdatArrayCnt;i++)
         {
@@ -1216,9 +1216,9 @@ errlHndl_t HdatIoHubFru::hdatGetSlotMapEntryInfos(/*uint32_t i_numProc,*/
                         break;
             }
         }
-        iv_hdatSlotMapEntryArrayHdr = { sizeof(hdatHDIFDataArray_t), 
+        iv_hdatSlotMapEntryArrayHdr = { sizeof(hdatHDIFDataArray_t),
                           arrayCount,
-                          sizeof(hdatSlotEntryInfo_t), 
+                          sizeof(hdatSlotEntryInfo_t),
                           sizeof(hdatSlotEntryInfo_t) };
         if(strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE)) //Rainier
         {
@@ -1237,9 +1237,9 @@ errlHndl_t HdatIoHubFru::hdatGetSlotMapEntryInfos(/*uint32_t i_numProc,*/
     }
     HDAT_EXIT();
     return l_errlHndl;
-}   
+}
 
-                                     
+
 
 
 /******************************************************************************/
@@ -1334,7 +1334,7 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
             //io1
             //check if there is any attribute for finding SCM vs DCM
             //in fsp this is checked by comparing the fru id. if same
-            //then add a new hubentry in hub array otherwise create a 
+            //then add a new hubentry in hub array otherwise create a
             //new HdatIoHubFru object
 
             // Procs under DCM shares the same location code. This logic
@@ -1360,7 +1360,7 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
             else
             {
                 HDAT_DBG("adding to existing fruData");
-                //once the vector is created then l_hub will be added to the 
+                //once the vector is created then l_hub will be added to the
                 //end of the last fruData object in the vector
             }
 
@@ -1372,8 +1372,8 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
             size_t lastElem = hdatIoHubFrus.size() - 1;
             HDAT_DBG("setting l_hub->hdatIoHubId");
             hdatHubEntry_t *l_hub = reinterpret_cast<hdatHubEntry_t *>
-                (reinterpret_cast<char *>(hdatIoHubFrus[lastElem]->iv_hubArray) 
-                + hdatIoHubFrus[lastElem]->iv_hubArrayHdr.hdatArrayCnt * 
+                (reinterpret_cast<char *>(hdatIoHubFrus[lastElem]->iv_hubArray)
+                + hdatIoHubFrus[lastElem]->iv_hubArrayHdr.hdatArrayCnt *
                 sizeof(hdatHubEntry_t));
 
             // Save information about the I/O chip
@@ -1387,7 +1387,7 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
             {
                 l_hub->hdatFlags = HDAT_HUB_NOT_USABLE;
             }
-            if(hdatIoHubFrus[lastElem]->iv_hubStatus != 0)    
+            if(hdatIoHubFrus[lastElem]->iv_hubStatus != 0)
             {
                 // Replace status bits in hdatFlags with iv_hdatStatus
                 l_hub->hdatFlags &= ~HDAT_HUB_STATUS_MASK;
@@ -1428,6 +1428,7 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
             l_hub->hdatMemMapVersion = 3;
 
             TARGETING::PredicateHwas l_predHwasFunc;
+            l_predHwasFunc.functional(true);
             TARGETING::PredicateCTM l_pecPredicate (TARGETING::CLASS_UNIT,
                                                     TARGETING::TYPE_PEC);
             TARGETING::PredicatePostfixExpr l_funcPec;
@@ -1492,9 +1493,9 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
                                                     TARGETING::TYPE_PHB);
             TARGETING::PredicatePostfixExpr l_funcPhb;
             l_funcPhb.push(&l_phbPredicate).push(&l_predHwasFunc).And();
-            
+
             TARGETING::TargetHandleList l_phbList;
-            
+
             TARGETING::targetService().getAssociated(l_phbList, l_pProcTarget,
                        TARGETING::TargetService::CHILD,
                        TARGETING::TargetService::ALL,
@@ -1547,7 +1548,7 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
         {
             //build the daughter structure
             HDAT_DBG("calling bldDaughterStruct");
-            l_err = 
+            l_err =
                fruData->bldDaughterStruct(fruData->iv_hubArrayHdr.hdatArrayCnt);
             if ( l_err )
             {
@@ -1559,9 +1560,9 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
             //how to know SCM vs DCM
             //build the slot map info structure
             //Creating slot map info once using the fruData count
-            l_err = 
+            l_err =
                 fruData->bldSlotMapInfoStruct(++l_slotMapIndex,
-                    true);//taking DCM by default 
+                    true);//taking DCM by default
             if ( l_err )
             {
                 HDAT_ERR("error in building Slot map info structure");
@@ -1666,7 +1667,7 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
              delete hdatIoHubFrus[i];
          }
          hdatIoHubFrus.clear();
-         
+
 
     }while(0);
 
