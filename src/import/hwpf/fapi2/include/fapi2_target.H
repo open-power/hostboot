@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -525,7 +525,8 @@ class Target
         {
             // C++ does not allow partial specialization of class member functions (please prove me wrong!),
             // so we need to use this static assertion instead. On the upside, the error message is much clearer ;)
-            static_assert((K == TARGET_TYPE_PROC_CHIP), "Parent target must be the proc chip");
+            static_assert((K & TARGET_TYPE_MULTICAST_CHIP) != 0,
+                          "Parent target must be part of TARGET_TYPE_MULTICAST_CHIP");
             static_assert((T & TARGET_TYPE_MULTICASTABLE) != 0,
                           "Requested target type must be part of TARGET_TYPE_MULTICASTABLE");
             static_assert(bitCount<T>::count == 1,

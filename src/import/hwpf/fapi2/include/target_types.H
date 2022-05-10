@@ -135,6 +135,9 @@ enum TargetType : uint64_t
                                 TARGET_TYPE_PEC    |
                                 TARGET_TYPE_PERV,
 
+    TARGET_TYPE_MULTICAST_CHIP = TARGET_TYPE_PROC_CHIP  |
+                                 TARGET_TYPE_OCMB_CHIP,
+
     TARGET_TYPE_ANY_POZ_CHIP  = TARGET_TYPE_PROC_CHIP |
                                 TARGET_TYPE_OCMB_CHIP,
 

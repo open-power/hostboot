@@ -98,8 +98,8 @@ inline OpModes getOpMode(void);
 /// If the hardware supports a "broadcast" group, that must also be mapped
 /// explicitly via this function - platforms are not expected to map the
 /// broadcast group implicitly.
-template< MulticastType M, typename V >
-inline ReturnCode setMulticastGroupMap(const Target<TARGET_TYPE_PROC_CHIP, M, V>& i_chip,
+template< TargetType K, MulticastType M, typename V >
+inline ReturnCode setMulticastGroupMap(const Target<K, M, V>& i_chip,
                                        const std::vector< MulticastGroupMapping >& i_mappings);
 
 //--------------------------------------------------------------------------
