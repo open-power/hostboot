@@ -2153,6 +2153,19 @@ ID for the sensor number returned with the elog. -->
   </attribute>
 
   <attribute>
+    <id>SYS_CLOCK_INTEGRATED_SPARES</id>
+    <description>
+      Whether the system has redundant clocks that can be configured
+      as integrated spares (1 means yes, 0 means no).
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
     <id>VDD_CURRENT_OVERFLOW_WORKAROUND_ENABLE</id>
     <description>
         Used to enable Vdd current overflow worakaround.

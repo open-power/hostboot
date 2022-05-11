@@ -417,6 +417,9 @@
       <id>SYS_CLOCK_DECONFIG_STATE_INITIAL</id>
     </attribute>
     <attribute>
+      <id>SYS_CLOCK_INTEGRATED_SPARES</id>
+    </attribute>
+    <attribute>
       <id>VRM_VDD_DVFS_TEMP_DEG_C</id>
     </attribute>
     <attribute>
