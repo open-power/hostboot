@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -381,7 +381,7 @@ errlHndl_t NvdimmInstalledImage::updateImage(NvdimmLidImage * i_lidImage)
             TRACFCOMP(g_trac_nvdimm_upd,ERR_MRK"updateImage: "
                 "NV controller is busy (0x%08X) for NVDIMM 0x%.8X",
                 l_status.whole, TARGETING::get_huid(iv_dimm));
-            /*
+            /*@
              *@errortype
              *@moduleid         UPDATE_IMAGE
              *@reasoncode       NVDIMM_OPERATION_IN_PROGRESS
@@ -549,7 +549,7 @@ errlHndl_t NvdimmInstalledImage::updateImage(NvdimmLidImage * i_lidImage)
                 "NVDIMM 0x%.8X: data checksums mismatch (calc host: 0x%X "
                 "and nv: 0x%X) for first part (header + SMART signature)",
                 TARGETING::get_huid(iv_dimm), hostCksm, nvCksm);
-            /*
+            /*@
              *@errortype
              *@moduleid         UPDATE_IMAGE
              *@reasoncode       NVDIMM_CHECKSUM_ERROR
@@ -765,7 +765,7 @@ errlHndl_t NvdimmInstalledImage::updateImageData(NvdimmLidImage * i_lidImage)
         }
         if (fw_img_total_regions == 0)
         {
-            /*
+            /*@
              *@errortype
              *@moduleid         UPDATE_IMAGE_DATA
              *@reasoncode       NVDIMM_ZERO_TOTAL_REGIONS
@@ -918,7 +918,7 @@ errlHndl_t NvdimmInstalledImage::updateImageData(NvdimmLidImage * i_lidImage)
                     "(calc host: 0x%X and nv: 0x%X)",
                     region, TARGETING::get_huid(iv_dimm), hostCksm, nvCksm);
 
-                /*
+                /*@
                  *@errortype
                  *@moduleid         UPDATE_IMAGE_DATA
                  *@reasoncode       NVDIMM_CHECKSUM_ERROR
@@ -989,7 +989,7 @@ errlHndl_t NvdimmInstalledImage::changeFwUpdateMode(fw_update_mode i_mode)
                       ((i_mode == FW_UPDATE_MODE_DISABLED) &&
                        (opStatus.fw_ops_update_mode == 0))) )
                 {
-                    /*
+                    /*@
                      *@errortype
                      *@moduleid         CHANGE_FW_UPDATE_MODE
                      *@reasoncode       NVDIMM_UPDATE_MODE_UNCHANGED
@@ -1066,7 +1066,7 @@ errlHndl_t NvdimmInstalledImage::waitFwOpsBlockReceived()
 
     if (!blockReceived && !l_err)
     {
-        /*
+        /*@
          *@errortype
          *@moduleid         WAIT_FW_OPS_BLOCK_RECEIVED
          *@reasoncode       NVDIMM_BLOCK_NOT_RECEIVED
@@ -1145,7 +1145,7 @@ errlHndl_t NvdimmInstalledImage::waitFwOpsComplete()
 
         if (!opsComplete && !l_err)
         {
-            /*
+            /*@
              *@errortype
              *@moduleid         WAIT_FW_OPS_COMPLETE
              *@reasoncode       NVDIMM_FW_OPS_IN_PROGRESS_TIMEOUT
@@ -1317,7 +1317,7 @@ errlHndl_t NvdimmInstalledImage::byteRegionBlockTransfer(const uint8_t * i_data,
             }
             if (blocks_per_region > max_blocks_per_region)
             {
-                /*
+                /*@
                  *@errortype
                  *@moduleid         BYTE_REGION_BLOCK_TRANSFER
                  *@reasoncode       NVDIMM_DATA_SIZE_TOO_LARGE
@@ -1352,7 +1352,7 @@ errlHndl_t NvdimmInstalledImage::byteRegionBlockTransfer(const uint8_t * i_data,
 
         if (i_data_size > (BYTES_PER_BLOCK*blocks_per_region))
         {
-            /*
+            /*@
              *@errortype
              *@moduleid         BYTE_REGION_BLOCK_TRANSFER
              *@reasoncode       NVDIMM_DATA_SIZE_INVALID
@@ -1516,7 +1516,7 @@ errlHndl_t NvdimmInstalledImage::validateFwHeader()
                 l_err = isFwOpsSuccess(opsSuccessful);
                 if (!l_err && !opsSuccessful)
                 {
-                    /*
+                    /*@
                      *@errortype
                      *@moduleid         VALIDATE_FW_HEADER
                      *@reasoncode       NVDIMM_FW_OPS_NOT_SUCCESSFUL
@@ -1565,7 +1565,7 @@ errlHndl_t NvdimmInstalledImage::commitFwRegion()
                 l_err = isFwOpsSuccess(opsSuccessful);
                 if (!l_err && !opsSuccessful)
                 {
-                    /*
+                    /*@
                      *@errortype
                      *@moduleid         COMMIT_FW_REGION
                      *@reasoncode       NVDIMM_FW_OPS_NOT_SUCCESSFUL
@@ -1615,7 +1615,7 @@ errlHndl_t NvdimmInstalledImage::clearFwDataBlock()
             l_err = isFwOpsSuccess(ops_success);
             if (!l_err && !ops_success)
             {
-                /*
+                /*@
                  *@errortype
                  *@moduleid         CLEAR_FW_DATA_BLOCK
                  *@reasoncode       NVDIMM_FW_OPS_NOT_SUCCESSFUL
@@ -1664,7 +1664,7 @@ errlHndl_t NvdimmInstalledImage::validateFwImage()
                 // create an error if operation not successful
                 if (!l_err && !opsSuccessful)
                 {
-                    /*
+                    /*@
                      *@errortype
                      *@moduleid         VALIDATE_FW_IMAGE
                      *@reasoncode       NVDIMM_FW_OPS_NOT_SUCCESSFUL
@@ -1870,7 +1870,7 @@ bool NvdimmsUpdate::runUpdate(void)
             TRACFCOMP(g_trac_nvdimm_upd, "NvdimmsUpdate::runUpdate() - unknown "
                 "nvdimm[%X] installed type 0x%04X, skipping update",
                 TARGETING::get_huid(l_nvdimm), l_installed_type);
-            /*
+            /*@
              *@errortype
              *@reasoncode       NVDIMM_UNSUPPORTED_NVDIMM_TYPE
              *@moduleid         NVDIMM_RUN_UPDATE
@@ -2056,7 +2056,7 @@ errlHndl_t NvdimmsUpdate::isUpdateNeeded(bool & o_update_needed,
                     "isUpdateNeeded(): non-updatable SMART NVDIMM 0x%.8X "
                     "(0x%04X)",
                     TARGETING::get_huid(l_dimm), le16toh(curVersion));
-                /*
+                /*@
                  *@errortype
                  *@reasoncode       NVDIMM_UPDATE_NOT_SUPPORTED
                  *@moduleid         NVDIMM_IS_UPDATE_NEEDED

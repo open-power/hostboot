@@ -195,14 +195,14 @@ errlHndl_t send_pldm_response(const MCTP::mctp_outbound_msgq_t i_msgQ,
     if (return_code)
     {
         /*@
-        * @errortype  ERRL_SEV_UNRECOVERABLE
-        * @moduleid   MOD_SEND_PLDM_RESPONSE
-        * @reasoncode RC_SEND_FAIL
-        * @userdata1  Return code returned by MCTP::send_message
-        * @userdata2  Header of pldm request
-        * @devdesc    Software problem, failed to send PLDM resp over MCTP
-        * @custdesc   A software error occurred during system runtime
-        */
+         * @errortype  ERRL_SEV_UNRECOVERABLE
+         * @moduleid   MOD_SEND_PLDM_RESPONSE
+         * @reasoncode RC_SEND_FAIL
+         * @userdata1  Return code returned by MCTP::send_message
+         * @userdata2  Header of pldm request
+         * @devdesc    Software problem, failed to send PLDM resp over MCTP
+         * @custdesc   A software error occurred during system runtime
+         */
         errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                              MOD_SEND_PLDM_RESPONSE,
                              RC_SEND_FAIL,
@@ -249,7 +249,7 @@ errlHndl_t decode_pldm_request(const Decoder i_decoder,
 
         const uint64_t response_hdr_data = pldmHdrToUint64(*i_msg);
 
-        /*
+        /*@
          * @errortype  ERRL_SEV_UNRECOVERABLE
          * @moduleid   MOD_SEND_PLDM_RESPONSE
          * @reasoncode RC_MSG_DECODE_FAIL

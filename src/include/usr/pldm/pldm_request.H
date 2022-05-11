@@ -317,15 +317,15 @@ errlHndl_t decode_pldm_response(const Decoder i_decoder,
     {
         const uint64_t response_hdr_data = pldmHdrToUint64(*pldm_response);
 
-        /*
-          * @errortype  ERRL_SEV_UNRECOVERABLE
-          * @moduleid   MOD_DECODE_RESPONSE
-          * @reasoncode RC_MSG_DECODE_FAIL
-          * @userdata1  RC returned from decode function
-          * @userdata2  PLDM Header
-          * @devdesc    Software problem, failed to decode PLDM message
-          * @custdesc   A software error occurred during system boot
-          */
+        /*@
+         * @errortype  ERRL_SEV_UNRECOVERABLE
+         * @moduleid   MOD_DECODE_RESPONSE
+         * @reasoncode RC_MSG_DECODE_FAIL
+         * @userdata1  RC returned from decode function
+         * @userdata2  PLDM Header
+         * @devdesc    Software problem, failed to decode PLDM message
+         * @custdesc   A software error occurred during system boot
+         */
         errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                               MOD_DECODE_RESPONSE,
                               RC_MSG_DECODE_FAIL,
