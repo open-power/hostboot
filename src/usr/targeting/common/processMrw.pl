@@ -3885,6 +3885,7 @@ sub processSmpX
         # Create some useful variables to help w/sorting out the configuration
         my $defaultConfig = "d";
         my $wrapConfig    = "w";
+        my $denaliFlat8   = "f";
         my $config = $defaultConfig;
 
         if ($targetObj->isBusConnBusAttrDefined($busConnection, "CONFIG_APPLY"))
@@ -3907,26 +3908,30 @@ sub processSmpX
         # X-bus connection. It can currently take the following values.
         # "w" - This connection is applicable only in wrap config
         # "d" - This connection is applicable in default config (non-wrap mode).
+        # "f" - This is for the Denali Flat 8, checked for in the 'elsif' statement below
         # If CONFIG_APPLY does not match the system configuration we are
         # running for, then mark the peers null.
         # For example, in wrap config, CONFIG_APPLY is expected to have "w"
         # If "w" is not there, then we skip the connection and mark peers
         # as NULL
+        my $nullifyFlag = true;  # default to true unless a valid config flag found
         if (($systemConfig eq $wrapConfig && $config =~ /$wrapConfig/) ||
            ($systemConfig ne $wrapConfig && $config =~ /$defaultConfig/))
         {
             # Don't nullify the configuration attributes
-            my $nullifyFlag = false;
-            setCommonBusConfigAttributes($targetObj, $target, $parentTarget,
-                                         $busConnection, $nullifyFlag);
+            $nullifyFlag = false;
         }
-        else
+        # The check for Denali Flat 8 ("f") config flag
+        elsif ( ((!defined $systemConfig) || ($systemConfig eq "")) &&
+                ($config eq $denaliFlat8)                                )
         {
-            # Nullify the configuration attributes
-            my $nullifyFlag = true;
-            setCommonBusConfigAttributes($targetObj, $target, $parentTarget,
-                                         $busConnection, $nullifyFlag);
-        } # end (($system_config eq $wrapConfig ...
+            # Don't nullify the configuration attributes
+            $nullifyFlag = false;
+        }
+
+        # Set the bus based on the config flag or nullify the bus based on the nullify flag
+        setCommonBusConfigAttributes($targetObj, $target, $parentTarget,
+                                     $busConnection, $nullifyFlag);
     } # end if ($busConnection ne "")
 } # end sub processSmpX
 
@@ -3953,10 +3958,11 @@ sub processSmpA
         ## Ascertain the configuration
         # Create some useful variables to help w/sorting out the configuration
         my $applyConfiguration = 0;
-        my $twoNode   = "2";
-        my $threeNode = "3";
-        my $fourNode  = "4";
-        my $config    = "";
+        my $twoNode     = "2";
+        my $threeNode   = "3";
+        my $fourNode    = "4";
+        my $denaliFlat8 = "f";
+        my $config      = "";
 
         # Iterate thru the bus connections, searching for the bus connection
         # that is associated with the system configuration, option '-c'
@@ -3980,6 +3986,7 @@ sub processSmpA
             # for each A-bus connection. For eg.,
             # "2,3,4" - This connection is applicable in 2,3 and 4 node config
             # "w" - This connection is applicable only in wrap config
+            # "f" - This is for the Denali Flat 8
             # "2" - This connection is applicable only in 2 node config
             # "4" - This connection is applicable only in 4 node config
             # The below logic looks for these values (w, 2, 3, and 4) and decides
@@ -4004,6 +4011,13 @@ sub processSmpA
                     # therefore apply configuration.
                     $applyConfiguration = 1;
                 }
+                # Check for the Denali Flat 8 ("f") config flag
+                elsif ($config eq $denaliFlat8)
+                {
+                    # MRW configuration is for a Denali Flat 8 system,
+                    # therefore apply configuration.
+                    $applyConfiguration = 1;
+                }
             }
             elsif ($config =~ /$systemConfig/)
             {
@@ -4018,8 +4032,7 @@ sub processSmpA
                 $applyConfiguration = 0;
             }
 
-            # If this bus connection's CONFIG_APPLY matches the system
-            # configuration, then exit 'for' loop
+            # If a valid configuration has been found then exit 'for' loop
             if ($applyConfiguration == 1)
             {
                 last;
