@@ -861,10 +861,12 @@
       to be set via attribute override.
     </description>
     <id>DISABLE_PLD_WAIT</id>
-    <persistency>volatile-zeroed</persistency>
+    <persistency>volatile</persistency>
     <readable/>
     <simpleType>
-      <uint8_t/>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
     </simpleType>
     <no_export/>
   </attribute>

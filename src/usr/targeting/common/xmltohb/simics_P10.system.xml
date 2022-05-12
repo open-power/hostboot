@@ -114,6 +114,10 @@
         <default>1</default>
     </attribute>
     <attribute>
+        <id>DISABLE_PLD_WAIT</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>k0</default>
     </attribute>
