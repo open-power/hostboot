@@ -713,7 +713,7 @@ errlHndl_t DeconfigGard::platCreateGardRecord(
                 l_pErr->addProcedureCallout(HWAS::EPUB_PRC_FIND_DECONFIGURED_PART,
                                             HWAS::SRCI_PRIORITY_HIGH);
 
-                l_pErr->addProcedureCallout(HWAS::EPUB_PRC_PROCPATH,
+                l_pErr->addProcedureCallout(HWAS::EPUB_PRC_LVL_SUPP,
                                             HWAS::SRCI_PRIORITY_MED);
 
                 HWAS::collectHwasTraces(l_pErr);
