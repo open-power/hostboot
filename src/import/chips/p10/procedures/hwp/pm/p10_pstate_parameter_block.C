@@ -2031,11 +2031,9 @@ void PlatPmPPB::attr_init( void )
 
     SET_DEFAULT(attr_wov_overv_step_incr_pct, 5);
     SET_DEFAULT(attr_wov_overv_step_decr_pct, 5);
-    SET_DEFAULT(attr_wov_overv_max_pct, 30);
     SET_DEFAULT(attr_wov_overv_vmax_mv, 1275);
     SET_DEFAULT(attr_wov_underv_step_incr_pct, 5);
     SET_DEFAULT(attr_wov_underv_step_decr_pct, 5);
-    SET_DEFAULT(attr_wov_underv_max_pct, 100);
 
 #define SET_FLOOR(_attr_name, _attr_default) \
     if (iv_attrs._attr_name < _attr_default) \
