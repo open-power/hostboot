@@ -4531,7 +4531,7 @@ errlHndl_t getPayloadAttnAreaAddr(uint64_t& o_payloadTiAddr)
 errlHndl_t verifyAndMovePayload(const bool i_payloadAlreadyVerified)
 {
     TRACFCOMP( g_trac_runtime,
-               ENTER_MRK"verifyAndMovePayload()" );
+               ENTER_MRK"verifyAndMovePayload() i_payloadAlreadyVerified=%d", i_payloadAlreadyVerified);
 
     errlHndl_t l_err = nullptr;
     void * payload_tmp_virt_addr = nullptr;
@@ -4637,11 +4637,13 @@ errlHndl_t verifyAndMovePayload(const bool i_payloadAlreadyVerified)
         }
         else
         {
-            TRACDCOMP( g_trac_runtime,"verifyAndMovePayload() "
+            TRACFCOMP( g_trac_runtime,"verifyAndMovePayload() "
                     "Verifying PAYLOAD: physAddr=0x%.16llX, virtAddr=0x%.16llX",
                     payload_tmp_phys_addr, payload_tmp_virt_addr );
 
             // Verify Container
+            // payload_tmp_virt_addr is the hostboot MCL_TMP_ADDR space which is untouched
+            // by the manageSingleComponent decompression data management
             l_err = SECUREBOOT::verifyContainer(payload_tmp_virt_addr);
             if (l_err)
             {
@@ -4720,15 +4722,26 @@ errlHndl_t verifyAndMovePayload(const bool i_payloadAlreadyVerified)
         break;
     }
 
-    TRACFCOMP( g_trac_runtime,
-                "verifyAndMovePayload(): Copy PAYLOAD from 0x%.16llX (va="
-                "0x%llX) to PAYLOAD_BASE = 0x%.16llX (va=0x%llX), size=0x%llX",
-                payload_tmp_phys_addr, payload_tmp_virt_addr, payloadBase,
-                payloadBase_virt_addr, payload_size);
+    // For eBMC manageSingleComponent decompresses and moves PHYP lids
+    // to PHYP mainstore in host_load_payload
+    // So only move the PHYP PAYLOAD here if not eBMC
 
-    memcpy (payloadBase_virt_addr,
-            payload_tmp_virt_addr,
-            payload_size);
+    if(INITSERVICE::spBaseServicesEnabled())
+    {
+        TRACFCOMP( g_trac_runtime,
+                    "verifyAndMovePayload(): Copy PAYLOAD from 0x%.16llX (va="
+                    "0x%llX) to PAYLOAD_BASE = 0x%.16llX (va=0x%llX), size=0x%llX",
+                    payload_tmp_phys_addr, payload_tmp_virt_addr, payloadBase,
+                    payloadBase_virt_addr, payload_size);
+
+        memcpy (payloadBase_virt_addr,
+                payload_tmp_virt_addr,
+                payload_size);
+    }
+    else
+    {
+        TRACFCOMP(g_trac_runtime, "verifyAndMovePayload(): eBMC PAYLOAD moved previously");
+    }
 
     // Do not zero out first LMB on MPIPL or it will mess up PHYP.
     // This is generally done to clean up after any memory encryption

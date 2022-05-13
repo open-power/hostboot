@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -70,7 +70,7 @@ void* call_host_load_payload (void *io_pArgs)
     errlHndl_t  l_err  =   NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               ENTER_MRK"call_host_load_payload entry" );
+               ENTER_MRK"call_host_load_payload entry");
 
     do
     {
@@ -127,11 +127,33 @@ void* call_host_load_payload (void *io_pArgs)
                 break;
             }
 
+
+            // This interrogates the MCL_TMP_ADDR lid space and directly decompresses
+            // the lids to PHYP mainstore
+            // Scope of the PHYP processSingleComponent MUST remain for this
+            // manageSingleComponent to operate on the properly cached info
+            l_err = l_mcl.manageSingleComponent(MCL::g_PowervmCompId,
+                                             MCL::g_PowervmCompInfo,
+                                             true);
+            if (l_err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                          "call_host_load_payload: unable to uncompress and move payloadBase");
+                break;
+            }
+
             // On eBMC systems, move the PAYLOAD to the final location.
             // We need to do that here and not in istep 21 so that HDAT can be
             // built correctly.
+            // If the PAYLOAD had compressed lids, the decompression happens above
+            // in manageSingleComponent for PHYP where the decompressed lids are also
+            // copied to PHYP mainstore
             if(!INITSERVICE::spBaseServicesEnabled())
             {
+                // For eBMC verifyAndMovePayload does NOT manage the MCL_TMP_ADDR space for PHYP lids
+                // manageSingleComponent manages the lid decompressions and movement
+                // to PHYP mainstore
+                // This is ifdef'd in CONFIG_LOAD_LIDS_VIA_PLDM flow here
                 l_err = RUNTIME::verifyAndMovePayload(true);
                 if(l_err)
                 {

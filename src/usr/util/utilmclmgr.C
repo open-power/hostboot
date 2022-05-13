@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,8 @@
 #include <limits.h>
 #include <util/utiltce.H>
 #include <runtime/runtime.H>
+#include <xz/xz.h>
+#include <arch/magic.H>
 
 namespace MCL
 {
@@ -57,6 +59,101 @@ void compIdToString(const ComponentID i_compId, CompIdString o_compIdStr)
     memcpy(o_compIdStr,
            i_compId.data(),
            sizeof(ComponentID));
+}
+
+errlHndl_t decompressLid(const uint8_t * const i_buffer, uint8_t * io_buffer,
+                     const uint64_t i_size, uint64_t& io_size)
+{
+    errlHndl_t l_errl = nullptr;
+
+    do {
+    struct xz_buf b = {0};
+    struct xz_dec *s = nullptr;
+    enum xz_ret ret = XZ_OK;
+    xz_crc32_init();
+    s = xz_dec_init(XZ_SINGLE, 0);
+    if (s == nullptr)
+    {
+        UTIL_FT(ERR_MRK"Util::decompressLid XZ Embedded failed initialization i_size=0x%X (%d) io_size=0x%X (%d)",
+            i_size, i_size, io_size, io_size);
+        /*@
+         * @moduleid          Util::UTIL_DECOMPRESS_LID
+         * @reasoncode        Util::UTIL_DECOMPRESS_FAIL_INIT
+         * @userdata1         i_size Size of the input data to decompress
+         * @userdata2         io_size Size of the output buffer passed in
+         * @devdesc           Problem with XZ compression initialization
+         * @custdesc          Firmware Error
+         */
+        l_errl = new ERRORLOG::ErrlEntry(
+                       ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                       Util::UTIL_DECOMPRESS_LID,
+                       Util::UTIL_DECOMPRESS_FAIL_INIT,
+                       i_size,
+                       io_size,
+                       ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        l_errl->collectTrace(UTIL_COMP_NAME);
+        break;
+    }
+
+    b.in = i_buffer;
+    b.in_pos = 0;
+    b.in_size = i_size;
+    b.out = io_buffer;
+    b.out_pos = 0;
+    b.out_size = io_size;
+
+    ret = xz_dec_run(s, &b);
+    if (ret != XZ_STREAM_END)
+    {
+        UTIL_FT(ERR_MRK"Util::decompressLid XZ Embedded failed xz_dec_run ret=%d i_size=0x%X (%d)",
+            ret, i_size, i_size);
+        /*@
+         * @moduleid          Util::UTIL_DECOMPRESS_LID
+         * @reasoncode        Util::UTIL_DECOMPRESS_FAILED
+         * @userdata1         ret XZ decompression return code
+         * @userdata2         i_size Size of the input data to decompress
+         * @devdesc           Problem with XZ decompression
+         * @custdesc          Firmware Error
+         */
+        l_errl = new ERRORLOG::ErrlEntry(
+                       ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                       Util::UTIL_DECOMPRESS_LID,
+                       Util::UTIL_DECOMPRESS_FAILED,
+                       ret,
+                       i_size,
+                       ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        l_errl->collectTrace(UTIL_COMP_NAME);
+        break;
+
+    }
+
+    if (b.out_pos == 0)
+    {
+        UTIL_FT(ERR_MRK"Util::decompressLid XZ Embedded failed EMPTY i_size=0x%X (%d) io_size=0x%X (%d)",
+            i_size, i_size, io_size, io_size);
+        /*@
+         * @moduleid          Util::UTIL_DECOMPRESS_LID
+         * @reasoncode        Util::UTIL_DECOMPRESS_EMPTY
+         * @userdata1         i_size Size of the input data to decompress
+         * @userdata2         io_size Size of the output buffer passed in
+         * @devdesc           Decompressed LID is unexpectedly empty
+         * @custdesc          Firmware Error
+         */
+        l_errl = new ERRORLOG::ErrlEntry(
+                       ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                       Util::UTIL_DECOMPRESS_LID,
+                       Util::UTIL_DECOMPRESS_EMPTY,
+                       i_size,
+                       io_size,
+                       ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        l_errl->collectTrace(UTIL_COMP_NAME);
+        break;
+    }
+    io_size = b.out_pos;
+    xz_dec_end(s);
+
+    } while(0);
+    return l_errl;
 }
 
 uint64_t compIdToInt(const ComponentID i_compId)
@@ -140,7 +237,7 @@ MasterContainerLidMgr::~MasterContainerLidMgr()
 
 void MasterContainerLidMgr::initMcl(const void* i_pMcl, const size_t i_mclSize)
 {
-    UTIL_DT(ENTER_MRK"MasterContainerLidMgr::initMcl");
+    UTIL_DT(ENTER_MRK"MasterContainerLidMgr::initMcl i_pMcl=0x%X i_mclSize=0x%X", i_pMcl, i_mclSize);
 
     errlHndl_t l_errl = nullptr;
 
@@ -359,6 +456,90 @@ void MasterContainerLidMgr::printCompInfoCache()
 #endif
 }
 
+errlHndl_t MasterContainerLidMgr::manageSingleComponent(
+    const ComponentID& i_compId,
+          CompInfo&    o_info,
+    const bool i_forceProcessPhyp)
+{
+    errlHndl_t l_errl = nullptr;
+    const CompInfo empty;
+    o_info = empty;
+
+    do {
+
+    // Current implementation only handles PHYP
+    if (i_compId != g_PowervmCompId)
+    {
+        UTIL_FT(ERR_MRK"MasterContainerLidMgr::manageSingleComponent: Unsupported Component (first 8 bytes) i_compId=0x%016llx",
+            compIdToInt(i_compId));
+        /*@
+         * @moduleid          Util::UTIL_MCL_MANAGE_SINGLE
+         * @reasoncode        Util::UTIL_MCL_MANAGE_NOT_SUPPORTED
+         * @userdata1         i_compId
+         * @userdata2         Unused
+         * @devdesc           Unsupported Component
+         * @custdesc          Firmware Error
+         */
+        l_errl = new ERRORLOG::ErrlEntry(
+                       ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                       Util::UTIL_MCL_MANAGE_SINGLE,
+                       Util::UTIL_MCL_MANAGE_NOT_SUPPORTED,
+                       compIdToInt(i_compId),
+                       0,
+                       ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        l_errl->collectTrace(UTIL_COMP_NAME);
+        break;
+    }
+
+    auto compInfoPairItr = iv_compInfoCache.find(i_compId);
+    if(compInfoPairItr != iv_compInfoCache.end())
+    {
+        // Cache component ID string
+        compIdToString(compInfoPairItr->first, iv_curCompIdStr);
+
+        // today we only manage PHYP constructs, future may add, etc
+        l_errl = managePhypComponent(compInfoPairItr->first,
+                                  compInfoPairItr->second);
+        if (l_errl)
+        {
+            UTIL_FT(ERR_MRK "MasterContainerLidMgr::manageSingleComponent: "
+                "managePhypComponent failed for component ID %s",
+                iv_curCompIdStr);
+            break;
+        }
+
+        // Tell caller what was uncompressed
+        o_info = compInfoPairItr->second;
+    }
+    else
+    {
+        UTIL_FT(ERR_MRK "MasterContainerLidMgr::manageSingleComponent: "
+                "Could not find component 0x%016llX (1st 8 bytes) in MCL",
+                compIdToInt(i_compId));
+        /*@
+         * @moduleid          Util::UTIL_MCL_MANAGE_SINGLE
+         * @reasoncode        Util::UTIL_LIDMGR_INVAL_COMP
+         * @userdata1         Component ID (truncated to 8 bytes)
+         * @userdata2         Unused
+         * @devdesc           Unsupported Component
+         * @custdesc          Firmware load error
+         */
+        l_errl = new ERRORLOG::ErrlEntry(
+                       ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                       Util::UTIL_MCL_MANAGE_SINGLE,
+                       Util::UTIL_LIDMGR_INVAL_COMP,
+                       compIdToInt(i_compId),
+                       0,
+                       ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        l_errl->collectTrace(UTIL_COMP_NAME);
+        break;
+    }
+
+    } while(0);
+
+    return l_errl;
+}
+
 errlHndl_t MasterContainerLidMgr::processSingleComponent(
     const ComponentID& i_compId,
           CompInfo&    o_info,
@@ -464,13 +645,40 @@ errlHndl_t MasterContainerLidMgr::processComponents()
     return l_errl;
 }
 
+errlHndl_t MasterContainerLidMgr::managePhypComponent(
+    const ComponentID& i_compId,
+          CompInfo&    io_compInfo)
+{
+    UTIL_FT(ENTER_MRK"MasterContainerLidMgr::managePhypComponent %s iv_loadOnly=%d",
+            iv_curCompIdStr, iv_loadOnly);
+
+    errlHndl_t l_errl = nullptr;
+    do {
+    size_t l_reportedSize = 0;
+    l_errl = managePhypLids(io_compInfo, l_reportedSize);
+    if (l_errl)
+    {
+        UTIL_FT(ERR_MRK"MasterContainerLidMgr::managePhypComponent - failed for componentId %s",
+                iv_curCompIdStr);
+        break;
+    }
+
+    UTIL_FT("MasterContainerLidMgr::managePhypComponent l_reportedSize=0x%X", l_reportedSize);
+
+    } while(0);
+
+    UTIL_FT(EXIT_MRK"MasterContainerLidMgr::managePhypComponent");
+
+    return l_errl;
+}
+
 errlHndl_t MasterContainerLidMgr::processComponent(
     const ComponentID& i_compId,
           CompInfo&    io_compInfo,
     const bool         i_forceProcessPhyp)
 {
-    UTIL_FT(ENTER_MRK"MasterContainerLidMgr::processComponent %s",
-            iv_curCompIdStr);
+    UTIL_FT(ENTER_MRK"MasterContainerLidMgr::processComponent %s i_forceProcessPhyp=%d iv_loadOnly=%d",
+            iv_curCompIdStr, i_forceProcessPhyp, iv_loadOnly);
 
     errlHndl_t l_errl = nullptr;
     do {
@@ -628,17 +836,168 @@ errlHndl_t MasterContainerLidMgr::processComponent(
     return l_errl;
 }
 
+errlHndl_t MasterContainerLidMgr::managePhypLids(CompInfo& io_compInfo,
+                                                 size_t& o_totalSize)
+{
+    // Handles decompression to PHYP mainstore payload base
+    UTIL_FT(ENTER_MRK"MasterContainerLidMgr::managePhypLids");
+    errlHndl_t l_errl = nullptr;
+
+    do {
+    o_totalSize = 0;
+    void * payloadBase_virt_addr = nullptr;
+    uint64_t payload_size = MCL_TMP_SIZE;
+    const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
+    uint64_t payloadBase = sys->getAttr<TARGETING::ATTR_PAYLOAD_BASE>();
+    payloadBase = payloadBase * MEGABYTE;
+
+    const uint64_t mapSize = std::max(RUNTIME::getLMBSizeInMB() * MEGABYTE,
+                                      payload_size);
+
+    payloadBase_virt_addr = mm_block_map(
+                               reinterpret_cast<void*>(payloadBase),
+                               mapSize);
+
+    if (payloadBase_virt_addr == nullptr)
+    {
+        UTIL_FT(ERR_MRK"MasterContainerLidMgr::managePhypLids Fail from mm_block_map mapSize=0x%X payloadBase=0x%X",
+                mapSize, payloadBase);
+        /*@
+         * @moduleid          Util::UTIL_MCL_MANAGE_PHYP
+         * @reasoncode        Util::UTIL_MM_BLOCK_MAP_FAILED
+         * @userdata1         Physical address being mapped
+         * @userdata2         mapSize
+         * @devdesc           Error calling mm_block_map
+         * @custdesc          Firmware Error
+         */
+        l_errl = new ERRORLOG::ErrlEntry(
+                       ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                       Util::UTIL_MCL_MANAGE_PHYP,
+                       Util::UTIL_MM_BLOCK_MAP_FAILED,
+                       payloadBase,
+                       mapSize,
+                       ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        l_errl->collectTrace(UTIL_COMP_NAME);
+        break;
+    }
+
+    auto payloadBase_virt_addr_ptr = reinterpret_cast<uint8_t*>(payloadBase_virt_addr);
+    memset(payloadBase_virt_addr_ptr, 0, payload_size);
+    uint64_t l_payloadBase_remaining_size = payload_size;
+    bool l_firstLid = true;
+
+    for (auto & lidInfo : io_compInfo.lidIds)
+    {
+        const uint8_t HEADER_MAGIC[]= { 0xFD, '7', 'z', 'X', 'Z', 0x00 };
+        const uint8_t * i_buffer = reinterpret_cast<uint8_t *>(lidInfo.vAddr);
+        bool l_XZ_compressed = (0 == memcmp(i_buffer, HEADER_MAGIC, sizeof(HEADER_MAGIC)));
+        // uncompressedPayloadSize is the buffer size which the decompression will be expanded to
+
+        uint64_t i_size = lidInfo.size;
+        uint64_t io_size = l_payloadBase_remaining_size;
+        uint8_t * o_buffer = payloadBase_virt_addr_ptr;
+
+        // first lid will always be skipped over for PHYP
+        // payloadBase gets NO modifications from the l_firstLid
+        // payloadBase does NOT contain the first lid (the PHYP header lid, 80d00020.lid)
+        if ((l_XZ_compressed) && (!l_firstLid))
+        {
+            l_errl = decompressLid(i_buffer, o_buffer,
+                            i_size, io_size);
+            if (l_errl)
+            {
+                break;
+            }
+            UTIL_FT("MasterContainerLidMgr::managePhypLids lidInfo.id=0x%X ORIGINAL compressed=0x%X (%d) NEW uncompressed=0x%X (%d)",
+                lidInfo.id, i_size, i_size, io_size, io_size);
+
+        }
+        else
+        {
+            UTIL_FT("MasterContainerLidMgr::managePhypLids lidInfo.id=0x%X ORIGINAL uncompressed=0x%X (%d) NO CHANGE",
+                lidInfo.id, i_size, i_size);
+            io_size = i_size; // common io_size to use for later handling
+            // This path is NO XZ compresssion, so just copy to payloadBase MAINSTORE
+            // l_firstLid is skipped and not handled or accounted for
+            if (!l_firstLid)
+            {
+                const uint32_t BLOCK_SIZE = 4096;
+                for (uint32_t i = 0; i < i_size; i += BLOCK_SIZE)
+                {
+                    memcpy(reinterpret_cast<void*>(o_buffer + i),
+                           const_cast<uint8_t *>(i_buffer + i),
+                           std::min( (static_cast<uint32_t>(i_size) - i), BLOCK_SIZE) );
+                }
+            }
+        }
+
+        if (!l_firstLid)
+        {
+            payloadBase_virt_addr_ptr += io_size;
+        }
+        else
+        {
+            // We should always SKIP the first lid getting copied to PHYP mainstore
+            l_firstLid = false;
+        }
+
+        if (io_size >= l_payloadBase_remaining_size)
+        {
+            l_payloadBase_remaining_size = 0;
+        }
+        else
+        {
+            l_payloadBase_remaining_size -= io_size;
+        }
+        o_totalSize += io_size; //new uncompressed size
+    }   // for each lid
+
+    if (payloadBase_virt_addr != nullptr)
+    {
+        int l_mm_rc = mm_block_unmap(payloadBase_virt_addr);
+        if(l_mm_rc != 0)
+        {
+            UTIL_FT(ERR_MRK"MasterContainerLidMgr::managePhypLids Fail from mm_block_unmap rc=%d payloadBase_virt_addr=0x%X",
+                    l_mm_rc, payloadBase_virt_addr);
+            /*@
+             * @moduleid          Util::UTIL_MCL_MANAGE_PHYP
+             * @reasoncode        Util::UTIL_MM_BLOCK_UNMAP_FAILED
+             * @userdata1         Address being removed
+             * @userdata2         rc from mm_block_unmap
+             * @devdesc           Error calling mm_block_unmap
+             * @custdesc          Firmware Error
+             */
+            l_errl = new ERRORLOG::ErrlEntry(
+                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                           Util::UTIL_MCL_MANAGE_PHYP,
+                           Util::UTIL_MM_BLOCK_UNMAP_FAILED,
+                           reinterpret_cast<uint64_t>(payloadBase_virt_addr),
+                           l_mm_rc,
+                           ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            l_errl->collectTrace(UTIL_COMP_NAME);
+            break;
+        }
+        payloadBase_virt_addr = nullptr;
+    }
+
+    } while(0);
+
+    return l_errl;
+
+}
+
 errlHndl_t MasterContainerLidMgr::loadLids(CompInfo& io_compInfo,
                                            size_t& o_totalSize,
                                            const bool i_skipPhypComp)
 {
-    UTIL_DT(ENTER_MRK"MasterContainerLidMgr::loadLids");
+    UTIL_FT(ENTER_MRK"MasterContainerLidMgr::loadLids i_skipPhypComp=%d", i_skipPhypComp);
     errlHndl_t l_errl = nullptr;
 
     // Force total size to zero
     o_totalSize = 0;
     // Pointer to mainstore memory temp space
     uint8_t* l_pLidVaddr = reinterpret_cast<uint8_t*>(iv_pVaddr);
+    //  ^^ Can be EITHER BASE OR TMP
     // Remaining size to load lids into
     size_t l_remainSize = iv_maxSize;
 
@@ -707,7 +1066,7 @@ errlHndl_t MasterContainerLidMgr::loadLids(CompInfo& io_compInfo,
         o_totalSize += lidInfo.size;
     }
 
-    UTIL_DT(EXIT_MRK"MasterContainerLidMgr::loadLids");
+    UTIL_FT(EXIT_MRK"MasterContainerLidMgr::loadLids");
 
     return l_errl;
 }

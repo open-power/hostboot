@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -249,6 +249,24 @@ typedef std::map<ComponentID, CompInfo> CompInfoMap;
 void compIdToString(const ComponentID i_compId, CompIdString o_compIdStr);
 
 /**
+ * @brief Perform XZ decompression and copy to caller space
+ *
+ * @param[in]      i_buffer - Buffer containing compressed lid
+ * @param[in/out]  io_buffer - Buffer that will contain decompressed lid
+ * @param[in]      i_size - Size of the compressed lid
+ * @param[in/out]  io_size -
+ *                 On input reflects the size of io_buffer
+ *                 On output reflects the size of the decompressed lid
+ *
+ * @return errlHndl_t Error log handle
+ * @retval nullptr    Success
+ * @retval !nullptr   Error; Error log handle points to valid error log
+ */
+
+errlHndl_t decompressLid(const uint8_t * i_buffer, uint8_t * io_buffer,
+                     uint64_t i_size, uint64_t& io_size);
+
+/**
  * @brief Convert/truncate Component ID to a uint64_t
  *        Helpful for FFDC
  *
@@ -319,6 +337,35 @@ class MasterContainerLidMgr
      *  @retval !nullptr   Error; Error log handle points to valid error log
      */
     errlHndl_t processSingleComponent(
+        const ComponentID&           i_compId,
+              CompInfo&              o_info,
+              bool                   i_forceProcessPhyp = false);
+
+    /**
+     *  @brief Manages a single, named component from the MCL.
+     *         Directs the call to manageComponent and subsequently
+     *         will get routed to the proper component management
+     *         routine(s).
+     *
+     *         manageSingleComponent allows custom logic to be applied
+     *         for a particular component(s) handling/use cases.
+     *
+     *  @param[in] i_compId Component ID to manage
+     *  @param[out] o_info  Original information (LID ID, size, virtual address, etc.)
+     *      for component that was operated on
+     *
+     *  @param[in] i_forceProcessPhyp the flag to force processing of the PHYP
+     *             component. False by default.
+     *
+     *  @note: The container will go out of scope if another container is loaded
+     *      or the MCL manager goes out of scope.
+     *
+     *  @return errlHndl_t Error log handle
+     *  @retval nullptr    Success
+     *  @retval !nullptr   Error; Error log handle points to valid error log
+     */
+
+    errlHndl_t manageSingleComponent(
         const ComponentID&           i_compId,
               CompInfo&              o_info,
               bool                   i_forceProcessPhyp = false);
@@ -440,6 +487,26 @@ class MasterContainerLidMgr
                                 bool i_forceProcessPhyp = false);
 
     /**
+     * @brief Manages a single, named component from the MCL
+     *      (this case is for PHYP lid management).
+     *
+     *      Walks the CompInfo previously cached to determine if
+     *      the lid header represents an XZ compressed lid.
+     *
+     *      If XZ compression is indicated in the lid header
+     *      (the lid resides in hostboot temporary memory, MCL_TMP_ADDR)
+     *      then performs direct decompression to mainstore memory for PHYP.
+     *
+     * @param[in]     i_compId - Component Id
+     * @param[in/out] io_compInfo - Info of component to process
+     *
+     * @return Error handle if error
+     */
+
+    errlHndl_t managePhypComponent(const ComponentID& i_compId,
+                                CompInfo& io_compInfo);
+
+    /**
      * @brief Load all lids associated with a Component into contiguous memory
      *        NOTE: updates the lid sizes in CompInfo
      *
@@ -451,6 +518,18 @@ class MasterContainerLidMgr
      */
     errlHndl_t loadLids(CompInfo& io_compInfo, size_t& o_totalSize,
                         bool i_isPhypComp);
+
+    /**
+     * @brief Decompress lids associated with a Component into mainstore memory
+     *        NOTE: NO updates are made to lid sizes in CompInfo
+     *
+     * @param[in] io_compInfo - Info of component to process
+     * @param[out] o_totalSize - Reported size of all lids post decompression
+     *
+     * @return Error handle if error
+     */
+
+    errlHndl_t managePhypLids(CompInfo& io_compInfo, size_t& o_totalSize);
 
     /**
      * @brief Verify and Extend Component
