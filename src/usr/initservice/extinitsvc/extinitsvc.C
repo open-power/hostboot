@@ -213,6 +213,7 @@ errlHndl_t ExtInitSvc::executeUnitTests ( void )
                  *  @userdata1      number of failed tests
                  *  @userdata2      <UNUSED>
                  *  @devdesc        One or more CxxTest Unit Tests failed.
+                 *  @custdesc       An internal firmware error occurred
                  */
                 l_cxxerrl = new ERRORLOG::ErrlEntry(
                                         ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,

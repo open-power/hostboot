@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -85,6 +85,7 @@ errlHndl_t FakePrd::callPrd(const AttentionList & i_attentions)
          * @userdata1        Input attention list size
          * @userdata2        Expected attention list size
          * @devdesc          ATTN test case failed
+         * @custdesc         An internal firmware error occurred
          */
 
          err = new ErrlEntry(

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -179,6 +179,7 @@ namespace CONSOLE
                      * @moduleid    CONSOLE::MOD_CONSOLE_UART_PUTC
                      * @reasoncode  CONSOLE::RC_INVALID_DATA
                      * @devdesc     Unexpected data from LPC-UART interface.
+                     * @custdesc    An internal firmware error occurred
                      */
                     l_errl = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_PREDICTIVE,
@@ -198,6 +199,7 @@ namespace CONSOLE
                      * @moduleid    CONSOLE::MOD_CONSOLE_UART_PUTC
                      * @reasoncode  CONSOLE::RC_TIMEOUT
                      * @devdesc     Timeout from LPC-UART interface.
+                     * @custdesc    An internal firmware error occurred
                      */
                     l_errl = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_PREDICTIVE,

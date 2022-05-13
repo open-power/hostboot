@@ -166,6 +166,7 @@ errlHndl_t  InitService::checkNLoadModule( const TaskInfo *i_ptask ) const
              *                  module needed to load a function or task.
              *                  UserDetails will contain the name of the
              *                  function or task.
+             *  @custdesc       An internal firmware error occurred
              */
             const bool hbSwError = true;
             l_errl = new ERRORLOG::ErrlEntry(
@@ -263,7 +264,7 @@ errlHndl_t InitService::startTask(
              *  @userdata2      task id or task return code
              *
              *  @devdesc        Initialization Service failed to start a task.
-             *
+             *  @custdesc       An internal firmware error occurred
              */
             const bool hbSwError = true;
             l_errl = new ERRORLOG::ErrlEntry(
@@ -302,6 +303,7 @@ errlHndl_t InitService::startTask(
              *
              *  @devdesc        Initialization Service launched a task and
              *                  the task returned an error.
+             *  @custdesc       An internal firmware error occurred
              *
              */
             const bool hbSwError = true;
@@ -403,6 +405,7 @@ errlHndl_t InitService::executeFn(
              *  @devdesc        Initialization Service attempted to start a
              *                  function within a module but the function
              *                  failed to launch
+             *  @custdesc       An internal firmware error occurred
              */
             const bool hbSwError = true;
             l_errl = new ERRORLOG::ErrlEntry(
@@ -435,7 +438,7 @@ errlHndl_t InitService::executeFn(
              *  @userdata2      returned status from task
              *
              *  @devdesc        Initialization Service launched a function and the task returned an error.
-             *
+             *  @custdesc       An internal firmware error occurred
              *
              */
             const bool hbSwError = true;
@@ -1295,6 +1298,7 @@ void InitService::_doShutdown(uint64_t i_status,
              * @userdata2       0
              *
              * @devdesc         Could not FLUSH virtual memory.
+             * @custdesc        An internal firmware error occurred
              *
              */
             const bool hbSwError = true;

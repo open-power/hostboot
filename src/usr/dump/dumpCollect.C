@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -400,6 +400,7 @@ errlHndl_t copyArchitectedRegs(void)
              * @userdata1    Table address returned
              * @userdata2    Table size returned
              * @devdesc      Invalid address and size returned from HDAT
+             * @custdesc     An internal firmware error occurred
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             DUMP_ARCH_REGS,
@@ -518,6 +519,7 @@ errlHndl_t copyArchitectedRegs(void)
                  * @userdata2    Structure version supported by HB
                  * @devdesc      Mismatch between the version of structure
                  *               supported by both SBE and HB.
+                 * @custdesc     An internal firmware error occurred
                  *
                  */
                 l_err = new ERRORLOG::ErrlEntry(
@@ -803,6 +805,7 @@ errlHndl_t copyArchitectedRegs(void)
              * @userdata1    VA of Destination Array Address for PDAT
              * @userdata2    rc value from unmap
              * @devdesc      Cannot unmap the PDAT Destinatin Array Addr
+             * @custdesc     An internal firmware error occurred
              */
             l_err = new ERRORLOG::ErrlEntry(
                                   ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -832,6 +835,7 @@ errlHndl_t copyArchitectedRegs(void)
              * @userdata1    VA address of Source Array Address for PDAT
              * @userdata2    rc value from unmap
              * @devdesc      Cannot unmap the PDAT Source Array Address
+             * @custdesc     An internal firmware error occurred
              */
             l_err = new ERRORLOG::ErrlEntry(
                                   ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -1195,6 +1199,7 @@ errlHndl_t copySrcToDest(dumpEntry *srcTableEntry,
                          * @userdata2    Index into the MDST table
                          * @devdesc      MDDT table is not big enough to
                          *               hold all src entries
+                         * @custdesc     An internal firmware error occurred
                          */
                         l_err = new ERRORLOG::ErrlEntry(
                                               ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -1261,6 +1266,7 @@ errlHndl_t copySrcToDest(dumpEntry *srcTableEntry,
                          * @userdata2    Index into the MDST table
                          * @devdesc      MDDT table is not big enough to
                          *               hold all src entries
+                         * @custdesc     An internal firmware error occurred
                          */
                         l_err = new ERRORLOG::ErrlEntry(
                                               ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -1365,6 +1371,7 @@ errlHndl_t copySrcToDest(dumpEntry *srcTableEntry,
                  * @userdata2    max entries allowed given space allocated
                  * @devdesc      MDRT table is not big enough to hold all
                  *               entries
+                 * @custdesc     An internal firmware error occurred
                  */
                 l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                 DUMP_COLLECT,
@@ -1406,6 +1413,7 @@ errlHndl_t copySrcToDest(dumpEntry *srcTableEntry,
              * @userdata2    Size of Page Aligned Source Table Entry
              * @devdesc      MDST table entry with page aligned is
              *               greater than 32GB
+             * @custdesc     An internal firmware error occurred
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             DUMP_COLLECT,
@@ -1429,6 +1437,7 @@ errlHndl_t copySrcToDest(dumpEntry *srcTableEntry,
              * @userdata2    Size of Page Aligned Destination Table Entry
              * @devdesc      MDDT table entry with page aligned is
              *               greater than 32GB
+             * @custdesc     An internal firmware error occurred
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             DUMP_COLLECT,
@@ -1603,6 +1612,7 @@ errlHndl_t copySrcToDest(dumpEntry *srcTableEntry,
              * @userdata1    Address returned
              * @userdata2    Table type Requested
              * @devdesc      Invalid address and size returned from HDAT
+             * @custdesc     An internal firmware error occurred
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             DUMP_COLLECT,
@@ -1673,6 +1683,7 @@ errlHndl_t copySrcToDest(dumpEntry *srcTableEntry,
                      * @userdata1    Address returned
                      * @userdata2    Table type Requested
                      * @devdesc      Invalid address and size returned from HDAT
+                     * @custdesc     An internal firmware error occurred
                      */
                     l_err =
                       new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,

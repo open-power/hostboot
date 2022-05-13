@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -89,6 +89,7 @@ namespace DeviceFW
                      *
                      *  @devdesc         A double registration was attempted
                      *                   with the routing framework.
+                     *  @custdesc        An internal firmware error occurred
                      */
                     errlHndl_t l_errl =
                       new ErrlEntry(ERRL_SEV_INFORMATIONAL,
@@ -178,6 +179,7 @@ namespace DeviceFW
              *  @userdata2      AccessType
              *
              *  @devdesc        A device driver operation on a NULL target.
+             *  @custdesc       An internal firmware error occurred
              */
             l_errl = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
                                    DEVFW_MOD_ASSOCIATOR,
@@ -239,6 +241,7 @@ namespace DeviceFW
              *
              *  @devdesc        A device driver operation was attempted for
              *                  which no driver has been registered.
+             *  @custdesc       An internal firmware error occurred
              */
             l_errl = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
                                    DEVFW_MOD_ASSOCIATOR,
