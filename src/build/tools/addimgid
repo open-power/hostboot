@@ -105,6 +105,15 @@ if ($imageIdFWShort eq '')
 chomp $imageId;
 chomp $imageIdFWLong;
 chomp $imageIdFWShort;
+
+if ($imgBase =~ /hbicore(_test)?\.bin/)
+{
+    my $extimg = $img;
+    $extimg =~ s/\.bin/_extended\.bin/;
+    my $imghash = substr(`cat $img $extimg | sha1sum`, 0, 8);
+    $imageId = "$imageId-sha1:$imghash";
+}
+
 $imageId = $imageId."/".$imgBase;
 
 if (($imageId =~ m/Unknown-Image/) ||  # Couldn't find git describe tag.
