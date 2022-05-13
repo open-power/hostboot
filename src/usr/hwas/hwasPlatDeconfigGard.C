@@ -1420,10 +1420,17 @@ void performFcoDeconfigs(const FCO::fcoRestrictMetadata_t & i_fcoData)
         // Work through the deconfigs of the COREs
         for (const auto & coreData : procData->coreCandidateList)
         {
-            // Note, FCs have child roll-up allowed. So, deconfiguring the children will deconfig the FC.
             if (coreData->markedForFcoDeconfig)
             {
                 FCO::setHwasStateForFcoDeconfig(*coreData->target);
+                // If the FC doesn't have children anymore then have to manually deconfig it
+                TARGETING::Target * fcParent = getParent(coreData->target, TARGETING::TYPE_FC);
+                TARGETING::TargetHandleList fcChildren;
+                getChildChiplets(fcChildren, fcParent, TARGETING::TYPE_CORE, true);
+                if (fcChildren.size() == 0)
+                {
+                        FCO::setHwasStateForFcoDeconfig(*fcParent);
+                }
             }
         }
     }
