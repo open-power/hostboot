@@ -68,6 +68,267 @@
 namespace ISTEP_06
 {
 
+/**
+ * @brief Determine if there is a valid boot core and take appropriate
+ *        actions if there isn't.  Also will send a message to FSP if
+ *        we find one.        
+ */
+errlHndl_t establish_boot_core( void )
+{
+    errlHndl_t l_err;
+    using namespace TARGETING;
+
+    do {
+        Target* l_pTopLevel = UTIL::assertGetToplevelTarget();
+        ATTR_RECONFIGURE_LOOP_type l_reconfigAttr =
+          l_pTopLevel->getAttr<ATTR_RECONFIGURE_LOOP>();
+
+        const Target* l_bootCore = getBootCore( );
+
+        if (l_bootCore == nullptr)
+        {
+            Target* l_bootproc = nullptr;
+            TARGETING::targetService().masterProcChipTargetHandle( l_bootproc );
+
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK"host_gard: "
+                       "No functional bootCore Found on %.8X.",
+                       TARGETING::get_huid(l_bootproc) );
+
+            // gather some data for FFDC
+            TargetHandleList l_coresFunc;
+            TargetHandleList l_coresPresent;
+            if( l_bootproc )
+            {
+                getNonEcoCores( l_coresFunc,
+                                l_bootproc,
+                                true );
+
+                getNonEcoCores( l_coresPresent,
+                                l_bootproc,
+                                false );
+            }
+
+            PIR_t l_pir = PIR_t(task_getcpuid());
+
+            // Check if we have a target but it just isn't functional
+            l_bootCore = getBootCore( false );
+            if( l_bootCore == nullptr )
+            {
+                // This indicates that we are running on a physical thread that
+                //  we don't think exists.  The most likely scenario is a
+                //  mismatch between our interpretation of the PG data in the
+                //  module and what the SBE has programmed into it.  We can
+                //  try to fix the problem by forcing a SBE update.
+
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK"host_gard: Calling updateProcessorSbeSeeproms to reconcile core list..." );
+                l_err = SBE::updateProcessorSbeSeeproms();
+                if(l_err)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "host_gard: Error calling updateProcessorSbeSeeproms"
+                              TRACE_ERR_FMT,
+                              TRACE_ERR_ARGS(l_err));
+                    break;
+                }
+                else
+                {
+                    // This implies that there is not a mismatch but we are still wrong
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              ERR_MRK"host_gard: updateProcessorSbeSeeproms returned "
+                              "without an error on processor 0x%08X",
+                              TARGETING::get_huid(l_bootproc));
+
+                    /*@
+                     * @errortype
+                     * @moduleid     ISTEP::MOD_HOST_GARD
+                     * @reasoncode   ISTEP::RC_SBE_UPDATE_UNEXPECTEDLY_FAILED
+                     * @devdesc      Failed to update the SBE after missing bootcore
+                     * @custdesc     Firmware error is preventing IPL.
+                     * @userdata1[00:31]  Boot processor HUID
+                     * @userdata1[32:63]  Current PIR
+                     * @userdata2[00:15]  Number of present cores
+                     * @userdata2[16:31]  Number of functional cores
+                     * @userdata2[32:63]  HUID of present boot core (if found)
+                     */
+                    l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                  ISTEP::MOD_HOST_GARD,
+                                  ISTEP::RC_SBE_UPDATE_UNEXPECTEDLY_FAILED,
+                                  TWO_UINT32_TO_UINT64(
+                                      TARGETING::get_huid(l_bootproc),
+                                      l_pir.word),
+                                  TWO_UINT32_TO_UINT64(
+                                      TWO_UINT16_TO_UINT32(
+                                          l_coresPresent.size(),
+                                          l_coresFunc.size()),
+                                  TARGETING::get_huid(l_bootCore)));
+                    // seems like a bug somewhere
+                    l_err->addProcedureCallout( HWAS::EPUB_PRC_SP_CODE,
+                                                HWAS::SRCI_PRIORITY_HIGH );
+                    // knock out the failing proc in case it is the cause
+                    if( l_bootproc )
+                    {
+                        l_err->addHwCallout(l_bootproc,
+                                            HWAS::SRCI_PRIORITY_LOW,
+                                            HWAS::DELAYED_DECONFIG,
+                                            HWAS::GARD_NULL);
+                    }
+
+                    l_err->collectTrace(TARG_COMP_NAME);
+                    l_err->collectTrace(ISTEP_COMP_NAME);
+                    break;
+                }
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "Found a present bootcore at %.8X",
+                           TARGETING::get_huid(l_bootCore) );
+
+                // Look for any other core that we could use instead
+                uint32_t l_replacementHuid = 0;
+                for( auto l_core : l_coresPresent )
+                {
+                    auto l_hwas = l_core->getAttr<ATTR_HWAS_STATE>();
+                    // We can use any functional core
+                    if( l_hwas.functional )
+                    {
+                        l_replacementHuid = TARGETING::get_huid(l_core);
+                        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                                   "Found a viable bootcore at %.8X (functional)",
+                                   TARGETING::get_huid(l_bootCore) );
+                        break;
+                    }
+                    else if( l_hwas.deconfiguredByEid ==
+                             HWAS::DeconfigGard::DECONFIGURED_BY_FIELD_CORE_OVERRIDE )
+                    {
+                        l_replacementHuid = TARGETING::get_huid(l_core);
+                        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                                   "Found a viable bootcore at %.8X (FCO)",
+                                   TARGETING::get_huid(l_bootCore) );
+                        break;
+                    }
+                }
+
+                if( l_replacementHuid )
+                {
+                    /*@
+                     * @errortype
+                     * @severity          ERRL_SEV_INFORMATIONAL
+                     * @moduleid          ISTEP::MOD_HOST_GARD
+                     * @reasoncode        ISTEP::RC_BOOT_CORE_REPLACEMENT
+                     * @devdesc           Original bootcore is not functional
+                     *                    but we found a viable replacement.
+                     *                    Forcing a reconfig loop to boot from
+                     *                    the new core.
+                     * @custdesc          Informational firmware IPL message.
+                     * @userdata1[00:31]  Original boot core HUID
+                     * @userdata1[32:63]  Current PIR
+                     * @userdata2[00:15]  Number of present cores
+                     * @userdata2[16:31]  Number of functional cores
+                     * @userdata2[32:63]  HUID of replacement boot core
+                     */
+                    l_err = new ERRORLOG::ErrlEntry
+                      (ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                       ISTEP::MOD_HOST_GARD,
+                       ISTEP::RC_BOOT_CORE_REPLACEMENT,
+                       TWO_UINT32_TO_UINT64(
+                           TARGETING::get_huid(l_bootCore),
+                           l_pir.word),
+                       TWO_UINT32_TO_UINT64(
+                           TWO_UINT16_TO_UINT32(
+                               l_coresPresent.size(),
+                               l_coresFunc.size()),
+                           l_replacementHuid));
+
+                    // Force a reconfig loop so the SP picks up our current
+                    //  HWAS_STATE and chooses a better boot core.
+                    l_reconfigAttr |= RECONFIGURE_LOOP_DECONFIGURE;
+                    l_pTopLevel->setAttr<ATTR_RECONFIGURE_LOOP>(l_reconfigAttr);
+
+                    l_err->collectTrace(TARG_COMP_NAME);
+                    l_err->collectTrace(ISTEP_COMP_NAME);
+
+                    // Commit this info log for debug
+                    errlCommit(l_err, ISTEP_COMP_ID);
+                }
+                else
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               "Could not find a valid bootcore replacement" );
+                }
+            }
+
+            // If there isn't a reconfig loop triggered, we need to just fail
+            if( !(l_reconfigAttr & RECONFIGURE_LOOP_DECONFIGURE) )
+            {
+                /*@
+                 * @errortype
+                 * @severity          ERRL_SEV_CRITICAL_SYS_TERM
+                 * @moduleid          ISTEP::MOD_HOST_GARD
+                 * @reasoncode        ISTEP::RC_BOOT_CORE_NULL
+                 * @devdesc           Could not find a functional boot core.
+                 * @custdesc          Firmware error is preventing IPL.
+                 * @userdata1[00:31]  Boot processor HUID
+                 * @userdata1[32:63]  Current PIR
+                 * @userdata2[00:15]  Number of present cores
+                 * @userdata2[16:31]  Number of functional cores
+                 * @userdata2[32:63]  HUID of present boot core (if found)
+                 */
+                l_err = new ERRORLOG::ErrlEntry
+                  (ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+                   ISTEP::MOD_HOST_GARD,
+                   ISTEP::RC_BOOT_CORE_NULL,
+                   TWO_UINT32_TO_UINT64(
+                       TARGETING::get_huid(l_bootproc),
+                       l_pir.word),
+                   TWO_UINT32_TO_UINT64(
+                       TWO_UINT16_TO_UINT32(l_coresPresent.size(),
+                           l_coresFunc.size()),
+                       TARGETING::get_huid(l_bootCore)));
+
+                // seems like a bug somewhere
+                l_err->addProcedureCallout( HWAS::EPUB_PRC_SP_CODE,
+                                            HWAS::SRCI_PRIORITY_HIGH );
+                // knock out the failing proc in case it is the cause
+                if( l_bootproc )
+                {
+                    l_err->addHwCallout(l_bootproc,
+                                        HWAS::SRCI_PRIORITY_LOW,
+                                        HWAS::DELAYED_DECONFIG,
+                                        HWAS::GARD_NULL);
+                }
+
+                l_err->collectTrace(TARG_COMP_NAME);
+                l_err->collectTrace(ISTEP_COMP_NAME);
+                break;
+            }
+        }
+
+        // Send message to FSP with HUID of boot core if we found one
+        msg_t * core_msg = msg_allocate();
+        core_msg->type = SBE::MSG_IPL_MASTER_CORE;
+        core_msg->data[0] = get_huid(l_bootCore);
+        core_msg->extra_data = NULL;
+
+        //data[1] is unused
+        core_msg->data[1] = 0;
+
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"host_gard: "
+                  "Sending MSG_MASTER_CORE message with HUID %08x",
+                  core_msg->data[0]);
+        l_err = MBOX::send(MBOX::IPL_SERVICE_QUEUE,core_msg);
+        if (l_err)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK"host_gard: "
+                       "MBOX::send failed sending Master Core message");
+            msg_free(core_msg);
+            break;
+        }
+    } while(0);
+
+    return l_err;
+}
+
 void* host_gard( void *io_pArgs )
 {
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_gard entry" );
@@ -229,168 +490,12 @@ void* host_gard( void *io_pArgs )
             break;
         }
 
-        // Send message to FSP with HUID of master core
-        msg_t * core_msg = msg_allocate();
-        core_msg->type = SBE::MSG_IPL_MASTER_CORE;
-        const Target* l_bootCore = getBootCore( );
-
-        if (l_bootCore == nullptr)
+        // Determine if there is a valid boot core and take appropriate
+        // actions if there isn't.  Also will send a message to FSP if
+        // we find one.
+        l_err = establish_boot_core();
+        if(l_err)
         {
-            Target* l_bootproc = nullptr;
-            TARGETING::targetService().masterProcChipTargetHandle( l_bootproc );
-
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK"host_gard: "
-                 "No functional bootCore Found on %.8X.",
-                       TARGETING::get_huid(l_bootproc) );
-
-            // gather some data for FFDC
-            TargetHandleList l_coresFunc;
-            TargetHandleList l_coresPresent;
-            if( l_bootproc )
-            {
-                getNonEcoCores( l_coresFunc,
-                                l_bootproc,
-                                true );
-
-                getNonEcoCores( l_coresPresent,
-                                l_bootproc,
-                                false );
-            }
-
-            PIR_t l_pir = PIR_t(task_getcpuid());
-
-            // Check if we have a target but it just isn't functional
-            l_bootCore = getBootCore( false );
-            if( l_bootCore == nullptr )
-            {
-                // This indicates that we are running on a physical thread that
-                //  we don't think exists.  The most likely scenario is a
-                //  mismatch between our interpretation of the PG data in the
-                //  module and what the SBE has programmed into it.  We can
-                //  try to fix the problem by forcing a SBE update.
-
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK"host_gard: Calling updateProcessorSbeSeeproms to reconcile core list..." );
-                l_err = SBE::updateProcessorSbeSeeproms();
-                if(l_err)
-                {
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                              "host_gard: Error calling updateProcessorSbeSeeproms"
-                              TRACE_ERR_FMT,
-                              TRACE_ERR_ARGS(l_err));
-                    break;
-                }
-                else
-                {
-                    // This implies that there is not a mismatch but we are still wrong
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                              ERR_MRK"host_gard: updateProcessorSbeSeeproms returned "
-                              "without an error on processor 0x%08X",
-                              TARGETING::get_huid(l_bootproc));
-
-                    /*@
-                     * @errortype
-                     * @moduleid     ISTEP::MOD_HOST_GARD
-                     * @reasoncode   ISTEP::RC_SBE_UPDATE_UNEXPECTEDLY_FAILED
-                     * @devdesc      Failed to update the SBE after missing bootcore
-                     * @custdesc     Firmware error is preventing IPL.
-                     * @userdata1[00:31]  Boot processor HUID
-                     * @userdata1[32:63]  Current PIR
-                     * @userdata2[00:15]  Number of present cores
-                     * @userdata2[16:31]  Number of functional cores
-                     * @userdata2[32:63]  HUID of present boot core (if found)
-                     */
-                    l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                          ISTEP::MOD_HOST_GARD,
-                                          ISTEP::RC_SBE_UPDATE_UNEXPECTEDLY_FAILED,
-                                          TWO_UINT32_TO_UINT64(
-                                              TARGETING::get_huid(l_bootproc),
-                                              l_pir.word),
-                                          TWO_UINT32_TO_UINT64(
-                                              TWO_UINT16_TO_UINT32(l_coresPresent.size(),
-                                                l_coresFunc.size()),
-                                              TARGETING::get_huid(l_bootCore)));
-                    // seems like a bug somewhere
-                    l_err->addProcedureCallout( HWAS::EPUB_PRC_SP_CODE,
-                                                HWAS::SRCI_PRIORITY_HIGH );
-                    // knock out the failing proc in case it is the cause
-                    if( l_bootproc )
-                    {
-                        l_err->addHwCallout(l_bootproc,
-                                            HWAS::SRCI_PRIORITY_LOW,
-                                            HWAS::DELAYED_DECONFIG,
-                                            HWAS::GARD_NULL);
-                    }
-
-                    l_err->collectTrace(TARG_COMP_NAME);
-                    l_err->collectTrace(ISTEP_COMP_NAME);
-                    break;
-                }
-            }
-            else
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "Found a present bootcore at %.8X",
-                           TARGETING::get_huid(l_bootCore) );
-            }
-
-            /*@
-             * @errortype
-             * @severity          ERRL_SEV_CRITICAL_SYS_TERM
-             * @moduleid          ISTEP::MOD_HOST_GARD
-             * @reasoncode        ISTEP::RC_MASTER_CORE_NULL
-             * @devdesc           Could not find a functional boot core.
-             * @custdesc          Firmware error is preventing IPL.
-             * @userdata1[00:31]  Boot processor HUID
-             * @userdata1[32:63]  Current PIR
-             * @userdata2[00:15]  Number of present cores
-             * @userdata2[16:31]  Number of functional cores
-             * @userdata2[32:63]  HUID of present boot core (if found)
-             */
-            l_err = new ERRORLOG::ErrlEntry
-              (ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
-               ISTEP::MOD_HOST_GARD,
-               ISTEP::RC_MASTER_CORE_NULL,
-               TWO_UINT32_TO_UINT64(
-                   TARGETING::get_huid(l_bootproc),
-                   l_pir.word),
-               TWO_UINT32_TO_UINT64(
-                    TWO_UINT16_TO_UINT32(l_coresPresent.size(),
-                                         l_coresFunc.size()),
-                    TARGETING::get_huid(l_bootCore)));
-
-            // seems like a bug somewhere
-            l_err->addProcedureCallout( HWAS::EPUB_PRC_SP_CODE,
-                                        HWAS::SRCI_PRIORITY_HIGH );
-            // knock out the failing proc in case it is the cause
-            if( l_bootproc )
-            {
-                l_err->addHwCallout(l_bootproc,
-                                    HWAS::SRCI_PRIORITY_LOW,
-                                    HWAS::DELAYED_DECONFIG,
-                                    HWAS::GARD_NULL);
-            }
-
-            l_err->collectTrace(TARG_COMP_NAME);
-            l_err->collectTrace(ISTEP_COMP_NAME);
-            break;
-        }
-
-        core_msg->data[0] = get_huid(l_bootCore);
-        core_msg->extra_data = NULL;
-
-        //data[1] is unused
-        core_msg->data[1] = 0;
-
-
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"host_gard: "
-              "Sending MSG_MASTER_CORE message with HUID %08x",
-              core_msg->data[0]);
-        l_err = MBOX::send(MBOX::IPL_SERVICE_QUEUE,core_msg);
-        if (l_err)
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK"host_gard: "
-                       "MBOX::send failed sending Master Core message");
-            msg_free(core_msg);
             break;
         }
 

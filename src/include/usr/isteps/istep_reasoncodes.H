@@ -116,7 +116,7 @@ namespace ISTEP
         RC_INVALID_ATTR_VALUE                    = ISTEP_COMP_ID | 0x0D,
         RC_INVALID_CONFIGURATION                 = ISTEP_COMP_ID | 0x0E,
         RC_INVALID_PCIE_IOP_LANE_CONFIG          = ISTEP_COMP_ID | 0x0F,
-        RC_MASTER_CORE_NULL                      = ISTEP_COMP_ID | 0x10,
+        RC_BOOT_CORE_NULL                        = ISTEP_COMP_ID | 0x10,
         RC_MIXED_PBUS_CONNECTION                 = ISTEP_COMP_ID | 0x11,
         RC_SAME_CHIP_PBUS_CONNECTION             = ISTEP_COMP_ID | 0x12,
         RC_CONFLICT_PBUS_CONNECTION              = ISTEP_COMP_ID | 0x13,
@@ -197,6 +197,7 @@ namespace ISTEP
         RC_UNHALTED_SBE                          = ISTEP_COMP_ID | 0x6C,
         RC_INVALID_HUGE_PAGE_SIZE                = ISTEP_COMP_ID | 0x6D,
         RC_TOO_SMALL_BMC_PDR_COUNT               = ISTEP_COMP_ID | 0x6E,
+        RC_BOOT_CORE_REPLACEMENT                 = ISTEP_COMP_ID | 0x6F,
     };
 
 };
