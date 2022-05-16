@@ -422,6 +422,14 @@ inline bool isNonMasterNodeSystemTarget(const Target* const i_pSysTarget)
 void getMasterNodeTarget(Target*& o_masterNodeTarget);
 
 /**
+ * @brief Returns the Node Target handle of the Master node in the
+ * system. Asserts if the master node target is null.
+ *
+ * @return The master node target. Guaranteed not to be null.
+ */
+Target* assertGetMasterNodeTarget();
+
+/**
  *  @brief Returns whether Hostboot subsystem is capable of selecting a node to
  *      act as a master node, whose system target is synchronized to other nodes
  *

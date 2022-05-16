@@ -178,6 +178,14 @@ void createTracingError(
     return;
 }
 
+Target* assertGetMasterNodeTarget()
+{
+    Target* node = nullptr;
+    getMasterNodeTarget(node);
+    assert(node, "Cannot get master node target!");
+    return node;
+}
+
 void getMasterNodeTarget(Target*& o_masterNodeTarget)
 {
     Target* masterNodeTarget = NULL;
