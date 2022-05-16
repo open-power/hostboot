@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -149,7 +149,7 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
 
         TRACFCOMP( g_fapiImpTd, "Core Mode = %d, Fuseblow = %d, Option = %d",
                    l_coreMode, l_isFuseBlown, l_option );
-        CONSOLE::displayf(CONSOLE::DEFAULT,  nullptr, "SMT=%d, Fuse=%d\n", l_coreMode, l_isFuseBlown );
+        CONSOLE::displayf(CONSOLE::DEFAULT,  nullptr, "SMT=%d, Fuse=%d", l_coreMode, l_isFuseBlown);
 
         // -----------------------------------
         // Activate threads on the master core
@@ -159,6 +159,7 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
         task_affinity_pin();
         task_affinity_migrate_to_master(); //just in case...
         uint64_t cpuid = task_getcpuid();
+        CONSOLE::displayf(CONSOLE::DEFAULT,  nullptr, "BootThread=%d", cpuid);
 
         // Now that the checkstop handler is running (or we don't have one),
         //  setup the machine check code to trigger a checkstop for UE
