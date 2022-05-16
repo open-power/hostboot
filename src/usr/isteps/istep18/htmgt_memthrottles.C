@@ -88,7 +88,7 @@ errlHndl_t call_utils_to_throttle(std::vector <fapi2::Target<fapi2::
     // Convert to 1/100 % units for the HWP
     uint32_t util_hundredth_percent = i_util * 100;
 
-    // Update input attributes for specified targets
+    // Loop through all OBMC chip targets and set inputs
     for(const auto & l_fapi_target : i_fapi_target_list)
     {
         // Query the functional PORTs for this OCMB
@@ -98,6 +98,7 @@ errlHndl_t call_utils_to_throttle(std::vector <fapi2::Target<fapi2::
                                 CLASS_UNIT, TYPE_MEM_PORT);
         for(const auto & l_portTarget : port_list)
         {
+            // Update HWP input attribute with target utilization
             if (!l_portTarget->trySetAttr<ATTR_EXP_DATABUS_UTIL>(util_hundredth_percent))
             {
                 TMGT_ERR("call_utils_to_throttle: failed to set EXP_DATABUS_UTIL");
@@ -161,27 +162,24 @@ errlHndl_t call_utils_to_throttle(std::vector <fapi2::Target<fapi2::
  * Calculate throttles for over-temperture
  *
  * @param[in] i_fapi_target_list - list of FAPI OCMB targets
- * @param[in] i_utilization - Minimum utilization value required
  * @param[in] i_efficiency - the regulator efficiency (percent)
  */
 errlHndl_t memPowerThrottleOT(
        std::vector < fapi2::Target< fapi2::TARGET_TYPE_OCMB_CHIP>> i_fapi_target_list,
-                                   const uint8_t i_utilization,
                                    const uint8_t i_efficiency)
 {
     errlHndl_t err = nullptr;
+    TMGT_INF("memPowerThrottleOT: Calculating safe mode/OT throttles");
 
-    TMGT_INF("memPowerThrottleOT: utilization: %d percent",
-             i_utilization);
-
-    err = call_utils_to_throttle(i_fapi_target_list, i_utilization);
+    // Passing 0 for the utilization will calculate the
+    //   safe mode / over-temperature throttles.
+    err = call_utils_to_throttle(i_fapi_target_list, 0);
     if (nullptr == err)
     {
         uint32_t ot_mem_power = 0;
         for(const auto & ocmb_fapi_target : i_fapi_target_list)
         {
             bool attr_failure = false;
-            // Read HWP outputs:
             uint32_t l_power[2] = {0};
             uint16_t l_slot[HTMGT_MAX_SLOT_PER_OCMB_PORT] = {0};
 
@@ -205,6 +203,8 @@ errlHndl_t memPowerThrottleOT(
                     attr_failure = true;
                     l_port_unit = 0;
                 }
+
+                // Read HWP outputs:
                 if (!l_portTarget->tryGetAttr<ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_SLOT>
                     (l_slot[l_port_unit]))
                 {
@@ -247,9 +247,10 @@ errlHndl_t memPowerThrottleOT(
             } // for each port
             if (err) break;
 
-            // Update MCS data (to be sent to OCC)
+            // Update memory table (config data to be sent to OCC)
+            //   The data is stored in attributes under each OCMB chip target
             TARGETING::TargetHandleList proc_targets;
-            // Get functional parent proc
+            // Get functional parent proc (to get OCC instance)
             getParentAffinityTargets(proc_targets, ocmb_target, CLASS_CHIP, TYPE_PROC);
             if (proc_targets.size() > 0)
             {
@@ -258,7 +259,7 @@ errlHndl_t memPowerThrottleOT(
                 const uint8_t occ_instance =
                     proc_target->getAttr<TARGETING::ATTR_POSITION>();
 
-                // OCMB instance comes from the parents OMI target
+                // OCMB instance/position comes from the parents OMI target
                 uint8_t l_ocmb_pos = 0xFF;
                 TARGETING::Target * omi_target = getImmediateParentByAffinity(ocmb_target);
                 if (omi_target != nullptr)
@@ -278,6 +279,7 @@ errlHndl_t memPowerThrottleOT(
                          occ_instance, l_ocmb_pos, l_slot[0], l_slot[1],
                          l_power[0], l_power[1]);
 
+                // Update memory table attributes (to send to OCC)
                 if (!ocmb_target->trySetAttr<ATTR_OT_MIN_N_PER_SLOT>(l_slot))
                 {
                     TMGT_ERR("memPowerThrottleOT: Failed to set OT_MIN_N_PER_SLOT");
@@ -360,7 +362,7 @@ errlHndl_t call_bulk_pwr_throttles(
 {
     errlHndl_t err = nullptr;
 
-    // Update input attributes for specified targets
+    // Loop through all OBMC chip targets and set inputs
     for(const auto & l_fapi_target : i_fapi_target_list)
     {
         // Update input attributes for specified targets
@@ -372,8 +374,10 @@ errlHndl_t call_bulk_pwr_throttles(
         TargetHandleList port_list;
         getChildAffinityTargets(port_list, ocmb_target,
                                 CLASS_UNIT, TYPE_MEM_PORT);
+        // Loop through all Memory ports targets and set inputs
         for(const auto & l_portTarget : port_list)
         {
+            // Update HWP input attribute with target power
             if (!l_portTarget->trySetAttr<ATTR_EXP_MEM_WATT_TARGET>(l_watt_targets))
             {
                 TMGT_ERR("call_bulk_pwr_throttles: failed to set EXP_MEM_WATT_TARGET");
@@ -435,12 +439,10 @@ errlHndl_t call_bulk_pwr_throttles(
  * Calculate throttles for when system has redundant power (N+1 mode)
  *
  * @param[in] i_fapi_target_list - list of FAPI OCMB targets
- * @param[in] i_utilization - Minimum utilization value required
  * @param[in] i_efficiency - the regulator efficiency (percent)
  */
 errlHndl_t memPowerThrottleRedPower(
          std::vector <fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>> i_fapi_target_list,
-                              const uint8_t i_utilization,
                               const uint8_t i_efficiency)
 {
     errlHndl_t err = nullptr;
@@ -476,7 +478,6 @@ errlHndl_t memPowerThrottleRedPower(
         for(auto & ocmb_fapi_target : i_fapi_target_list)
         {
             bool attr_failure = false;
-            // Read HWP output parms:
             uint32_t l_power[2] = {0};
             uint16_t l_slot[HTMGT_MAX_SLOT_PER_OCMB_PORT] = {0};
             uint16_t l_port[HTMGT_MAX_SLOT_PER_OCMB_PORT] = {0};
@@ -488,7 +489,7 @@ errlHndl_t memPowerThrottleRedPower(
                                     CLASS_UNIT, TYPE_MEM_PORT);
             for (const auto & l_portTarget : port_list)
             {
-                uint8_t l_port_unit;
+                uint8_t l_port_unit = 0xFF;
                 if (!l_portTarget->tryGetAttr<ATTR_CHIP_UNIT>(l_port_unit))
                 {
                     TMGT_ERR("memPowerThrottleRedPower: failed to read CHIP_UNIT");
@@ -501,6 +502,8 @@ errlHndl_t memPowerThrottleRedPower(
                     attr_failure = true;
                     l_port_unit = 0;
                 }
+
+                // Read HWP outputs:
                 if (!l_portTarget->tryGetAttr<ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_SLOT>
                     (l_slot[l_port_unit]))
                 {
@@ -551,10 +554,11 @@ errlHndl_t memPowerThrottleRedPower(
             // Calculate memory power at min throttles
             tot_mem_power_cw += l_power[0] + l_power[1];
 
-            // Update OCMB data (to be sent to OCC)
-            // Get functional parent processor
+            // Update memory table (config data to be sent to OCC)
+            //   The data is stored in attributes under each OCMB chip target
             TARGETING::TargetHandleList proc_targets;
-            getParentAffinityTargets (proc_targets, ocmb_target, CLASS_CHIP, TYPE_PROC);
+            // Get functional parent proc (to get OCC instance)
+            getParentAffinityTargets(proc_targets, ocmb_target, CLASS_CHIP, TYPE_PROC);
             if (proc_targets.size() > 0)
             {
                 ConstTargetHandle_t proc_target = proc_targets[0];
@@ -562,10 +566,9 @@ errlHndl_t memPowerThrottleRedPower(
                 const uint8_t occ_instance =
                     proc_target->getAttr<TARGETING::ATTR_POSITION>();
 
-                // OCMB instance comes from the parents OMI target
+                // OCMB instance/position comes from the parents OMI target
                 uint8_t l_ocmb_pos = 0xFF;
-                TARGETING::Target * omi_target =
-                    getImmediateParentByAffinity(ocmb_target);
+                TARGETING::Target * omi_target = getImmediateParentByAffinity(ocmb_target);
                 if (omi_target != nullptr)
                 {
                     // get relative OCMB per processor
@@ -583,6 +586,7 @@ errlHndl_t memPowerThrottleRedPower(
                          occ_instance, l_ocmb_pos, l_slot[0], l_slot[1],
                          l_port[0], l_port[1], l_power[0], l_power[1]);
 
+                // Update memory table attributes (to send to OCC)
                 if (!ocmb_target->trySetAttr<ATTR_N_PLUS_ONE_N_PER_SLOT>(l_slot))
                 {
                     TMGT_ERR("memPowerThrottleRedPower: Failed to set "
@@ -662,6 +666,7 @@ errlHndl_t memPowerThrottleRedPower(
 //
 errlHndl_t calcMemThrottles()
 {
+    errlHndl_t err = nullptr;
     Target* sys = UTIL::assertGetToplevelTarget();
     unsigned int ocmb_count = 0;
 
@@ -672,33 +677,14 @@ errlHndl_t calcMemThrottles()
     }
     TMGT_INF(">>calcMemThrottles");
 
-    uint8_t min_utilization =
-        sys->getAttr<ATTR_MIN_MEM_UTILIZATION_THROTTLING>();
-    if (min_utilization == 0)
-    {
-        // Use SAFEMODE utilization
-        min_utilization = sys->getAttr
-            <ATTR_MSS_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT>();
-        TMGT_INF("MIN_MEM_UTILIZATION_THROTTLING is 0, so reading "
-                 "ATTR_MSS_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT:"
-                 " %d", min_utilization);
-        if (min_utilization == 0)
-        {
-            // Use hardcoded utilization
-            min_utilization = 10;
-            TMGT_ERR("ATTR_MSS_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT"
-                     " is 0!  Using %d", min_utilization);
-        }
-    }
-    const uint8_t efficiency =
-        sys->getAttr<ATTR_REGULATOR_EFFICIENCY_FACTOR>();
-    TMGT_INF("calcMemThrottles: Using min utilization=%d, efficiency=%d"
-             " percent", min_utilization, efficiency);
+    const uint8_t efficiency = sys->getAttr<ATTR_REGULATOR_EFFICIENCY_FACTOR>();
+    TMGT_INF("calcMemThrottles: efficiency=%d percent", efficiency);
 
-    // Create a FAPI Target list for HWP
-    std::vector < fapi2::Target< fapi2::TARGET_TYPE_OCMB_CHIP>> l_fapi_target_list;
+    // Create a FAPI Target list of all OCMB chips for all processors
+    std::vector < fapi2::Target
+        < fapi2::TARGET_TYPE_OCMB_CHIP>> l_full_fapi_target_list;
 
-    // Get functional processor chips)
+    // Get all functional processor chips
     TARGETING::TargetHandleList proc_list;
     getAllChips(proc_list, TARGETING::TYPE_PROC, true);
     for(const auto & proc_target : proc_list)
@@ -707,12 +693,15 @@ errlHndl_t calcMemThrottles()
         ATTR_POSITION_type proc_unit = proc_target->getAttr
             <TARGETING::ATTR_POSITION>();
 
+        // Create a FAPI Target list of OCMB chips for this processor
+        std::vector < fapi2::Target
+            < fapi2::TARGET_TYPE_OCMB_CHIP>> l_fapi_targets_this_proc;
+
         // Get functional OCMBs associated with this processor
         TargetHandleList ocmb_list;
         getChildAffinityTargets(ocmb_list, proc_target, CLASS_CHIP, TYPE_OCMB_CHIP);
         TMGT_INF("calcMemThrottles: proc%d HUID:0x%08X / %d functional OCMB_CHIPs",
                  proc_unit, proc_huid, ocmb_list.size());
-
         for(const auto & ocmb_target : ocmb_list)
         {
             uint32_t ocmb_huid = get_huid(ocmb_target);
@@ -729,43 +718,45 @@ errlHndl_t calcMemThrottles()
                 TMGT_ERR("calcMemThrottles: Unable to find OCMB's parent for HUID 0x%08X",
                          ocmb_huid);
             }
-            // Query the functional PORTs for this OCMB
+
+            // Convert to FAPI target and add to list
+            fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapiTarget(ocmb_target);
+            l_fapi_targets_this_proc.push_back(l_fapiTarget);
+
+            // Query the functional PORTs for this OCMB (for trace)
             TARGETING::TargetHandleList port_list;
             getChildAffinityTargetsByState(port_list, ocmb_target, CLASS_UNIT,
                                            TYPE_MEM_PORT, UTIL_FILTER_FUNCTIONAL);
-            // Convert to FAPI target and add to list
-            fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapiTarget(ocmb_target);
-            l_fapi_target_list.push_back(l_fapiTarget);
-            // Grab the name of the target
+            // Read the name of the target (for trace)
             TARGETING::ATTR_FAPI_NAME_type l_ocmbName = {0};
             fapi2::toString(l_fapiTarget, l_ocmbName, sizeof(l_ocmbName));
-
             TMGT_INF("calcMemThrottles: OCC%d, OCMB%d HUID:0x%08X / %d"
                      " functional PORTs - %s",
                      proc_unit, l_ocmb_pos, ocmb_huid, port_list.size(), l_ocmbName);
             ++ocmb_count;
-        }
-    }
+        } // for each ocmb
+
+        //Calculate Throttle settings for Over Temperature/Safe Mode
+        //(must be run with OCMB chips under a single processor)
+        err = memPowerThrottleOT(l_fapi_targets_this_proc, efficiency);
+        if (nullptr != err) break;
+
+        // Add the OCMB targets under this proc to the full list of all targets
+        l_full_fapi_target_list.insert(l_full_fapi_target_list.end(),
+                                       l_fapi_targets_this_proc.begin(),
+                                       l_fapi_targets_this_proc.end());
+    } // for each proc
 
     TMGT_INF("calcMemThrottles: Total of %d PROCs and %d functional OBMCs",
              proc_list.size(), ocmb_count);
 
-    errlHndl_t err = nullptr;
-    do
+    if (nullptr == err)
     {
-        //Calculate Throttle settings for Over Temperature
-        err = memPowerThrottleOT(l_fapi_target_list,
-                                 min_utilization,
-                                 efficiency);
-        if (nullptr != err) break;
-
         //Calculate Throttle settings when system has redundant power (N+1)
-        err = memPowerThrottleRedPower(l_fapi_target_list,
-                                       min_utilization,
+        //Run across all OCMB chips in a node
+        err = memPowerThrottleRedPower(l_full_fapi_target_list,
                                        efficiency);
-        if (nullptr != err) break;
-
-    } while(0);
+    }
 
     if (err)
     {
