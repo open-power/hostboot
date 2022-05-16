@@ -73,6 +73,8 @@ fapi2::ReturnCode reset(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_targ
     constexpr uint32_t CPLT_CONF1_DDR_PWROKIN[NUM_OF_PORTS] = {6, 7};
     constexpr uint32_t CPLT_CONF1_DDR_APBRESETn[NUM_OF_PORTS] = {14, 15};
 
+    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
+
     // Get the memport relative position
     // The relative_pos() only returns 0 or 1 for this type of function
     // to decide whether to use port0 or port1
@@ -84,8 +86,7 @@ fapi2::ReturnCode reset(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_targ
     // To set Reset=1:
     // Write a '1' to CPLT_CONF1_REG_SET to set the bit
     FAPI_TRY(l_buffer.setBit(CPLT_CONF1_DDR_RESET[l_rel_pos]));
-    FAPI_TRY(fapi2::putScom(i_target, CPLT_CONF1_REG_SET, l_buffer));
-
+    FAPI_TRY(fapi2::putScom(l_ocmb, CPLT_CONF1_REG_SET, l_buffer));
     l_buffer.flush<0>();
 
     // 4. Wait a minimum of 8 cycles.
@@ -94,8 +95,7 @@ fapi2::ReturnCode reset(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_targ
     // 5. Drive PwrOkIn to 1. Once the PwrOkIn is asserted (and Reset is still asserted),
     //    DfiClk synchronously switches to any legal input frequency.
     FAPI_TRY(l_buffer.setBit(CPLT_CONF1_DDR_PWROKIN[l_rel_pos]));
-    FAPI_TRY(fapi2::putScom(i_target, CPLT_CONF1_REG_SET, l_buffer));
-
+    FAPI_TRY(fapi2::putScom(l_ocmb, CPLT_CONF1_REG_SET, l_buffer));
     l_buffer.flush<0>();
 
     // 6. Wait a minimum of 64 cycles which is the reset period for phy
@@ -103,8 +103,7 @@ fapi2::ReturnCode reset(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_targ
 
     // 7. Drive Reset to 0. Note: All DFI and APB inputs must be driven at valid reset states before the deassertion of Reset.
     FAPI_TRY(l_buffer.setBit(CPLT_CONF1_DDR_RESET[l_rel_pos]));
-    FAPI_TRY(fapi2::putScom(i_target, CPLT_CONF1_REG_CLEAR, l_buffer));
-
+    FAPI_TRY(fapi2::putScom(l_ocmb, CPLT_CONF1_REG_CLEAR, l_buffer));
     l_buffer.flush<0>();
 
     // 8. Wait a minimum of 1 Cycle.
@@ -112,8 +111,7 @@ fapi2::ReturnCode reset(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_targ
 
     // 9. Drive PRESETn_APB to 1 to de-assert reset on the ABP bus.
     FAPI_TRY(l_buffer.setBit(CPLT_CONF1_DDR_APBRESETn[l_rel_pos]));
-    FAPI_TRY(fapi2::putScom(i_target, CPLT_CONF1_REG_SET, l_buffer));
-
+    FAPI_TRY(fapi2::putScom(l_ocmb, CPLT_CONF1_REG_SET, l_buffer));
     l_buffer.flush<0>();
 
     //10. The PHY is now in the reset state and is ready to accept APB transactions.
