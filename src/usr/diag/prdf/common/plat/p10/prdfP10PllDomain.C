@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2003,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2003,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -118,6 +118,36 @@ bool PllDomain::Query(ATTENTION_TYPE i_attnType)
 
     return atAttn;
 }
+
+//------------------------------------------------------------------------------
+
+// Helper function for RCS/PLL clock callouts. For systems where the clocks are
+// configured as integrated spares (like redundant clocks, but the customer is
+// unaware the spare exists), we will prevent a service action and log the
+// error as recovered. If the system runs out of functional clocks, the
+// checkstop analysis code will make the appropriate serviceable log.
+//
+// Important:
+// ServiceDataCollector::setPredictive() still needs to be called before calling
+// this helper function. This ensures that the AT_THRESHOLD flag is set, which
+// mask the attenions at the end of analysis to prevent flooding of attentions.
+void __clearServiceCallForIntegratedSpare(STEP_CODE_DATA_STRUCT& io_sc)
+{
+    #ifndef CONFIG_FSP_BUILD // eBMC systems only
+
+    // Clear the service call flag if manufacturing thresholds are NOT enabled
+    // and if the system is configured with integrated spares.
+    if (!mfgMode() &&
+        (1 == getSystemTarget()->getAttr<ATTR_SYS_CLOCK_INTEGRATED_SPARES>()))
+    {
+        PRDF_INF("Service actions disabled in integrated spare mode");
+        io_sc.service_data->clearServiceCall();
+    }
+
+    #endif
+}
+
+//------------------------------------------------------------------------------
 
 int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
                            ATTENTION_TYPE attentionType)
@@ -243,6 +273,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
             {
                 // Make a predictive callout.
                 io_sc.service_data->setPredictive();
+                __clearServiceCallForIntegratedSpare(io_sc);
 
                 // Ensure these attentions are masked later.
                 maskErrTypes[chip].set(PllErrTypes::RCS_OSC_ERROR_0);
@@ -296,6 +327,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
             {
                 // Make a predictive callout.
                 io_sc.service_data->setPredictive();
+                __clearServiceCallForIntegratedSpare(io_sc);
 
                 // Ensure these attentions are masked later.
                 maskErrTypes[chip].set(PllErrTypes::RCS_OSC_ERROR_1);
@@ -409,6 +441,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
             {
                 // Make a predictive callout.
                 io_sc.service_data->setPredictive();
+                __clearServiceCallForIntegratedSpare(io_sc);
 
                 // Ensure these attentions are masked later.
                 maskErrTypes[chip].set(PllErrTypes::PLL_UNLOCK_0);
@@ -445,6 +478,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
             {
                 // Make a predictive callout.
                 io_sc.service_data->setPredictive();
+                __clearServiceCallForIntegratedSpare(io_sc);
 
                 // Ensure these attentions are masked later.
                 maskErrTypes[chip].set(PllErrTypes::PLL_UNLOCK_1);
