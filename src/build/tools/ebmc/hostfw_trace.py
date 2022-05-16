@@ -107,6 +107,7 @@ flags = 0
 """
 TRACE_COMP_TRACE = 0x434F # Identifies trace as a component trace (printf): 0x434F = "CO"
 TRACE_FIELDBIN = 0x4644 # a binary trace of type field (non-debug): x4644 = "FD"
+TRACE_FIELDTRACE = 0x4654 # Field Trace - "FT"
 
 """@brief A global list to consolidate errors encountered while parsing trace entries
 """
@@ -940,7 +941,7 @@ def get_ascii_traces_from_trace_entry_list(binaryData, traceEntriesV2):
 
         formatString = get_format_by_hash(str(traceEntryV1.hash))
         sourceString = get_source_by_hash(str(traceEntryV1.hash))
-        if traceEntryV1.entryType == TRACE_COMP_TRACE:
+        if (traceEntryV1.entryType == TRACE_COMP_TRACE) or (traceEntryV1.entryType == TRACE_FIELDTRACE):
             traceStr +=  trexMyVsnprintf(binaryData, formatString, sourceString, traceEntryV1.argsOffset,
                          (traceEntryV1.argsOffset + traceEntryV1.entrySize))
             if flags & TRACE_FILENAME:
