@@ -53,8 +53,6 @@ namespace HTMGT
     uint8_t g_cmd = 0;
     uint8_t g_seq = 0;
 
-    const uint16_t MAX_FFDC = 512;
-
     const uint8_t OCC_COMM_ESTABLISHED_CHECKPOINT[2] = { 0x0E, 0xFF };
 
     struct occCircBufferCmd_t
@@ -557,7 +555,7 @@ namespace HTMGT
             {
                 l_errlHndl->addFFDC(HTMGT_COMP_ID,
                                     iv_OccCmd.cmdData,
-                                    std::min(iv_OccCmd.dataLength, MAX_FFDC),
+                                    iv_OccCmd.dataLength,
                                     1,  // version
                                     SUBSEC_OCC_CMD_DATA);
             }
@@ -866,8 +864,7 @@ namespace HTMGT
                               ERRORLOG::ERRL_SEV_UNRECOVERABLE);
                     l_excErr->addFFDC(OCCC_COMP_ID,
                                       sramRspPtr,
-                                      std::min(exceptionLength,
-                                      (uint32_t)MAX_FFDC),
+                                      exceptionLength,
                                       1,  // version
                                       exceptionType); // subsection
 #ifdef CONFIG_CONSOLE_OUTPUT_OCC_COMM
@@ -1205,7 +1202,7 @@ namespace HTMGT
             // Add full OCC response to user details
             l_errlHndl->addFFDC(HTMGT_COMP_ID,
                                 rspBuffer,
-                                std::min(rspLen, MAX_FFDC),
+                                rspLen,
                                 1,  // version
                                 SUBSEC_OCC_RSP_DATA);
         }
@@ -1356,7 +1353,7 @@ namespace HTMGT
             // Add OCC response data to user details
             l_errlHndl->addFFDC(HTMGT_COMP_ID,
                                 iv_OccRsp.rspData,
-                                std::min(iv_OccRsp.dataLength,MAX_FFDC),
+                                iv_OccRsp.dataLength,
                                 1,  // version
                                 SUBSEC_OCC_RSP_DATA);
         }

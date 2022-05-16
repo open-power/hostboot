@@ -559,9 +559,8 @@ namespace HTMGT
                 TMGT_ERR("elogProcessActions: OCC%d requested a WOF reset",
                          iv_instance);
 
-                // We compare against one less than the threshold because the
-                // WOF reset count doesn't get incremented until the resetPrep
-                if (iv_wofResetCount < (WOF_RESET_COUNT_THRESHOLD-1))
+                // WOF reset count gets incremented after the resetPrep
+                if (iv_wofResetCount < WOF_RESET_COUNT_THRESHOLD)
                 {
                     if (! isMfgFlagSet(TARGETING::
                                        MFG_FLAGS_MNFG_ENERGYSCALE_SPECIAL_POLICIES))

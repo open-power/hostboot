@@ -195,8 +195,7 @@ namespace HTMGT
         bool atThreshold = false;
 
         // Send resetPrep command
-        uint8_t cmdData[2];
-        cmdData[0] = OCC_RESET_CMD_VERSION;
+        uint8_t cmdData[2] = { OCC_RESET_CMD_VERSION, OCC_RESET_FAIL_THIS_OCC };
 
         TMGT_INF("resetPrep: OCC%d (failed=%c, reset count=%d)"
                  " reset reason=0x%x",
@@ -205,31 +204,10 @@ namespace HTMGT
                  iv_resetCount,
                  iv_resetReason);
 
-        if(iv_failed)
-        {
-            cmdData[1] = OCC_RESET_FAIL_THIS_OCC;
-            ++iv_resetCount;
-            TMGT_INF("resetPrep: OCC%d failed, incrementing reset count to %d",
-                     iv_instance, iv_resetCount);
-            if(iv_resetCount > OCC_RESET_COUNT_THRESHOLD)
-            {
-                atThreshold = true;
-            }
-        }
-        else if( iv_needsWofReset ) //If WOF reset, increment count
-        {
-            iv_wofResetCount++;
-            TMGT_INF("resetPrep(): WOF reset requested. Reset Count = %d",
-                     iv_wofResetCount );
-        }
-        else if(iv_resetReason == HTMGT::OCC_RESET_REASON_CODE_UPDATE ||
-                iv_resetReason == HTMGT::OCC_RESET_REASON_CANCEL_CODE_UPDATE)
+        if((iv_resetReason == HTMGT::OCC_RESET_REASON_CODE_UPDATE) ||
+           (iv_resetReason == HTMGT::OCC_RESET_REASON_CANCEL_CODE_UPDATE))
         {
             cmdData[1] = OCC_RESET_NON_FAILURE;
-        }
-        else
-        {
-            cmdData[1] = OCC_RESET_FAIL_THIS_OCC;
         }
 
         if (iv_commEstablished)
@@ -254,6 +232,24 @@ namespace HTMGT
             }
         }
         // else comm to OCC has not been established yet
+
+        // After flushing errors, increment reset counts
+        if(iv_failed)
+        {
+            ++iv_resetCount;
+            TMGT_INF("resetPrep: OCC%d failed, incrementing reset count to %d",
+                     iv_instance, iv_resetCount);
+            if(iv_resetCount > OCC_RESET_COUNT_THRESHOLD)
+            {
+                atThreshold = true;
+            }
+        }
+        else if( iv_needsWofReset ) //If WOF reset, increment count
+        {
+            iv_wofResetCount++;
+            TMGT_INF("resetPrep(): WOF reset requested. Reset Count = %d",
+                     iv_wofResetCount );
+        }
 
         return atThreshold;
     }
