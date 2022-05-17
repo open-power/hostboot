@@ -379,8 +379,9 @@ void printSystem(const systemList_t & i_list)
                 bitString |= (0x80000000 >> (pCore->chipUnit));
             }
         }
-        TS_INFO("%sProc[%d] FuncCores: 0x%08X",
+        TS_INFO("%sProc[%d] FuncCores[%d]: 0x%08X",
                 pProc->isBootProc ? "B " : "  ",
+                pProc->availableCores,
                 procId++,
                 bitString);
     }
@@ -391,8 +392,9 @@ void printSystem(const systemBitStringList_t & i_list)
     size_t procId = 0;
     for (const auto & bitString : i_list)
     {
-        TS_INFO("Proc[%d] FuncCores: 0x%08X",
+        TS_INFO("Proc[%d] FuncCores[%d]: 0x%08X",
                 procId++,
+                __builtin_popcount(bitString),
                 bitString);
     }
 }
@@ -463,18 +465,52 @@ systemList_t buildSystem(FCO::fcoRestrictMetadata_t & o_fcoData,
     return systemList;
 }
 
-// Helper function for testFieldCoreOverrides to reset the system to a fully configured state
-void resetSystem(FCO::fcoRestrictMetadata_t & i_fcoList)
+/*
+ * @brief Takes in a system and uses the bit string list provided as a way to configure PROCs and CORES based on that
+ *        list.  This is useful to recreate a chaos generated system for debug or to include in the
+ *        testFieldCoreOverrides function as a baseline testcases.
+ *
+ * @param[in]   systemBitStringList_t  A list of bitstrings NUM_CHIP_PER_SYSTEM long where each bitstring represents a
+ *                                     single proc's cores.
+ *
+ * @param[out]  systemList_t           A system list which was already built to be fully configured so that this
+ *                                     function can knock out PROCs/COREs to replicate the system defined by the input
+ *                                     systemBitStringList_t.
+ */
+void buildSystem(const systemBitStringList_t & i_bitStrings, systemList_t & o_sysList)
 {
-    i_fcoList.fcoValue = 0;
-    for (const auto & pProc : i_fcoList.procFcoMetadataList)
+    size_t procIndex = 0;
+    for (const auto & bitString : i_bitStrings)
     {
-        pProc->availableCores = NUM_CORE_PER_CHIP;
-        for (auto & pCore : pProc->coreCandidateList)
+        FCO::procFcoMetadata_t & proc = *o_sysList[procIndex].first;
+
+        // Reset the available cores
+        proc.availableCores = __builtin_popcount(bitString);
+
+        // Configure each core as given in the bit string
+        for (auto & pCore : o_sysList[procIndex].second)
         {
-            pCore->markedForFcoDeconfig = false;
+            if (((0x80000000UL >> (pCore->chipUnit)) & bitString))
+            {
+                // The bit is set, meaning it is configured.
+                pCore->markedForFcoDeconfig = false;
+            }
+            else
+            {
+                // The bit is unset meaning it's deconfigured. Simulate this by setting markedForFcoDeconfig and
+                // decrementing the available core count.
+                pCore->markedForFcoDeconfig = true;
+            }
         }
+        ++procIndex;
     }
+}
+
+
+// A wrapper for buildSystem to clearly state the intent of the call to the reader.
+void resetSystem(const systemBitStringList_t & i_originalSystemBits, systemList_t & o_sysList)
+{
+    buildSystem(i_originalSystemBits, o_sysList);
 }
 
 // A chaos generator which will deconfigure a random number of PROCs and CORE/FCs in the FCO data structure to simulate
@@ -1184,6 +1220,19 @@ public:
         // system configuration.
         systemList_t sysList = buildSystem(fcoList, NUM_CHIP_PER_SYSTEM, bootProc, bootCoreOptions[0]);
 
+        // These are the various system configurations to run this test suite against. If additional system configs
+        // are desired they should always be added prior to the last fully configured system because the test suite
+        // assumes the final system config is for the chaos generator which requires a fully configured system.
+        const std::vector<systemBitStringList_t> systemConfigOptions =
+        {
+            // First system to test is a fully configured one.
+            systemBitStringList_t(NUM_CHIP_PER_SYSTEM, UINT32_MAX),
+
+            // The last system in the test should always be fully configured because this system
+            // is used as the basis for the chaos generator to work off of.
+            systemBitStringList_t(NUM_CHIP_PER_SYSTEM, UINT32_MAX)
+        };
+
         // Test Fused and Normal Core modes
         for (size_t testFusedMode = 0; testFusedMode < 2; ++testFusedMode)
         {
@@ -1225,8 +1274,21 @@ public:
                                      : (NUM_CORE_PER_CHIP * NUM_CHIP_PER_SYSTEM);
 
             // For Normal and Fused modes we want to test fully configured systems and chaotic systems.
-            for (size_t testWithChaos = 0; testWithChaos < 2; ++testWithChaos)
+            for (size_t systemConfigIndex = 0; systemConfigIndex < systemConfigOptions.size(); ++systemConfigIndex)
             {
+                // The last test are the chaos generated configs.
+                bool isChaosTest = (systemConfigIndex == (systemConfigOptions.size() - 1));
+                // The original system config before FCO was applied.
+                systemBitStringList_t sysBitStrings = systemConfigOptions[systemConfigIndex];
+                // How many cores the system began with.
+                size_t originalNumCores = 0;
+                for (const auto & bits : sysBitStrings)
+                {
+                    originalNumCores += __builtin_popcount(bits);
+                }
+
+                buildSystem(sysBitStrings, sysList);
+
                 // Check a handful of boot core options to verify FCO doesn't deconfig the boot core/fc.
                 for (size_t bootCoreIndex = 0; bootCoreIndex < bootCoreOptions.size(); ++bootCoreIndex)
                 {
@@ -1237,25 +1299,21 @@ public:
                                       : 0;
 
                     TS_INFO("testFieldCoreOverrides(): FCO CHAOS=%d BOOT P=%d C=%d",
-                            testWithChaos,
+                            isChaosTest,
                             bootProc,
                             currentBootCore);
 
                     for (size_t fcoValue = 0; fcoValue <= maxFcoValue; ++fcoValue)
                     {
                         fcoList.fcoValue = fcoValue;
-                        // What the system looked like before FCO
-                        systemBitStringList_t sysBitStrings(NUM_CHIP_PER_SYSTEM, UINT32_MAX);
-                        // How many cores the system began with.
-                        size_t originalNumCores = NUM_CHIP_PER_SYSTEM * NUM_CORE_PER_CHIP;
-                        if (testWithChaos > 0)
+                        if (isChaosTest)
                         {
                             sysBitStrings = injectChaosIntoSystem(sysList);
                             // Recount the cores since we don't know how many are left.
                             originalNumCores = 0;
-                            for (const auto & pProc : fcoList.procFcoMetadataList)
+                            for (const auto & bits : sysBitStrings)
                             {
-                                originalNumCores += pProc->availableCores;
+                                originalNumCores += __builtin_popcount(bits);
                             }
                         }
 
@@ -1264,7 +1322,7 @@ public:
                         bool testPassed = verifyFieldCoreOverrides(fcoValue,
                                                                    fcoList,
                                                                    originalNumCores,
-                                                                   (testWithChaos > 0) ? true : false);
+                                                                   isChaosTest);
                         if (!testPassed)
                         {
                             // Print out the system before applying FCO
@@ -1276,8 +1334,9 @@ public:
                             // Don't break, allow all tests to run. Just because one failed doesn't mean they'll all
                             // fail or will fail in the same way.
                         }
-
-                        resetSystem(fcoList);
+                        // reset the system using the original system config since chaos tests can mess with
+                        // sysBitStrings.
+                        resetSystem(systemConfigOptions[systemConfigIndex], sysList);
                     } // end for each FCO val
 
                     // Setup next boot core(s)
@@ -9525,6 +9584,7 @@ public:
 
         TS_INFO("testDeconfigureNMMU: Ended");
     }};
+
 
 #undef DISABLE_UNIT_TESTS
 #undef DISABLE_MBA_UNIT_TESTS
