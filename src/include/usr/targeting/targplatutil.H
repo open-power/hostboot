@@ -502,6 +502,17 @@ errlHndl_t check_proc0_memory_config();
  */
 const AttrMetadataMapper& getMapMetadataForAllAttributes();
 
+/**
+ * @brief Returns the name of the attribute in string format
+ *
+ * @param[in] i_attrId the attribute ID to convert to string
+ * @param[in] i_rwOnly whether to return the name of RW
+ *            attribute only (nullptr will be returned for
+ *            non-RW attributes)
+ * @return The string name of the attribute
+ */
+const char* getAttrName(const ATTRIBUTE_ID i_attrId, bool i_rwOnly = false);
+
 } // End namespace TARGETING::UTIL
 
 } // End namespace TARGETING

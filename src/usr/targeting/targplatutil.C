@@ -59,6 +59,9 @@
 // MMIO constants
 #include <arch/memorymap.H>
 
+// Attribute ID to string name map
+#include <targAttrIdToName.H>
+
 namespace TARGETING
 {
 
@@ -770,6 +773,26 @@ int getPrimaryNodeNumber( void )
 const AttrMetadataMapper& getMapMetadataForAllAttributes()
 {
     return theMapAttrMetadata::instance().getMapMetadataForAllAttributes();
+}
+
+const char* getAttrName(const ATTRIBUTE_ID i_attrId, bool i_rwOnly)
+{
+    const char* ret = nullptr;
+
+    // The map may be found in obj/genfiles/targAttrIdToName.H
+    const std::map<uint32_t, const char*>* l_mapPtr = &g_attrIdToNameMap;
+
+    if(i_rwOnly)
+    {
+        l_mapPtr = &g_rwAttrIdToNameMap;
+    }
+
+    if (l_mapPtr->count(i_attrId) > 0)
+    {
+        ret = l_mapPtr->at(i_attrId);
+    }
+
+    return ret;
 }
 
 #undef TARG_NAMESPACE

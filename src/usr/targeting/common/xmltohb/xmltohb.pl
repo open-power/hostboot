@@ -311,11 +311,13 @@ if( !($cfgSrcOutputDir =~ "none") )
     writeTargAttrMap($attributes, $targAttrFile);
     close $targAttrFile;
 
-    open(ATTR_ID_MAP_FILE,">$cfgSrcOutputDir"."targRwAttrIdToName.H")
+    open(ATTR_ID_MAP_FILE,">$cfgSrcOutputDir"."targAttrIdToName.H")
       or croak("Target Attribute ID to Name map file: \"$cfgSrcOutputDir"
-        . "targRwAttrIdToName.H\" could not be opened.");
+        . "targAttrIdToName.H\" could not be opened.");
     my $targAttrIdNameFile = *ATTR_ID_MAP_FILE;
-    writeAttrIdNameMap($attributes, $targAttrIdNameFile);
+    writeAttrIdNameFileHeader($targAttrIdNameFile);
+    writeAttrIdNameMap($attributes, $targAttrIdNameFile, 1); # RW-only attr map
+    writeAttrIdNameMap($attributes, $targAttrIdNameFile, 0); # All attr map
     close $targAttrIdNameFile;
 
     open(MUTEX_ATTR_FILE, ">$cfgSrcOutputDir"."mutexattributes.H")
@@ -473,6 +475,15 @@ if( !($cfgSrcOutputDir =~ "none") )
     writeAttrSizeMapCFile($attributes,$attrSizeMapCFile);
     writeAttrSizeMapCFileFooter($attrSizeMapCFile);
     close $attrSizeMapCFile;
+
+    open(ATTR_SIZES_H_FILE, ">$cfgSrcOutputDir"."attrsizesdata.H")
+      or croak ("Attribute size file: \"$cfgSrcOutputDir"
+        . "attrsizesdata.H\" could not be opened.");
+    my $attrSizesDataFile = *ATTR_SIZES_H_FILE;
+    writeAttrSizesFileHeader($attrSizesDataFile);
+    writeAttrSizesFileBody($attributes, $attrSizesDataFile);
+    writeAttrSizesFileFooter($attrSizesDataFile);
+    close $attrSizesDataFile;
 }
 
 use constant ATTRID => 0;
@@ -2379,6 +2390,185 @@ print $outFile <<VERBATIM;
 VERBATIM
 }
 
+sub writeAttrSizesFileHeader
+{
+    my ($outFile) = @_;
+
+print $outFile <<VERBATIM;
+
+#ifndef TARG_ATTR_SIZES
+#define TARG_ATTR_SIZES
+
+#include <stdint.h>
+#include <map>
+#include <vector>
+
+/**
+ * \@file attrsizesdata.H
+ *
+ * \@brief The file contains the data structure that holds the sizes and types
+ *         of different attributes. Attributes represented as arrays also have
+ *         dimensions associated with the array.
+ */
+
+namespace TARGETING
+{
+
+enum ATTR_DATA_TYPE
+{
+    UINT8_T_TYPE,
+    INT8_T_TYPE,
+    UINT16_T_TYPE,
+    INT16_T_TYPE,
+    UINT32_T_TYPE,
+    INT32_T_TYPE,
+    UINT64_T_TYPE,
+    INT64_T_TYPE
+};
+
+enum ATTR_DATA_SIZE
+{
+    UINT8_T_SIZE = sizeof(uint8_t),
+    INT8_T_SIZE = sizeof(int8_t),
+    UINT16_T_SIZE = sizeof(uint16_t),
+    INT16_T_SIZE = sizeof(int16_t),
+    UINT32_T_SIZE = sizeof(uint32_t),
+    INT32_T_SIZE = sizeof(int32_t),
+    UINT64_T_SIZE = sizeof(uint64_t),
+    INT64_T_SIZE = sizeof(int64_t)
+};
+
+typedef struct
+{
+    ATTR_DATA_TYPE dataType;
+    ATTR_DATA_SIZE dataSize;
+    bool isArray;
+    std::vector<uint16_t>dimensions;
+} attrSizeData_t;
+
+constexpr bool ARRAY = true;
+constexpr bool NOT_ARRAY = false;
+
+// Map format:
+// attr hash: {attr data type, attr data size, array or not, array dimensions}
+static std::map<uint32_t, attrSizeData_t>g_attrSizesMap =
+{
+VERBATIM
+
+}
+
+sub getAttrDataTypeSize
+{
+    my ($attribute) = @_;
+    my $dataTypeStr = "";
+    my $dataSizeStr = "";
+
+    if(exists $attribute->{simpleType}->{uint8_t})
+    {
+        $dataSizeStr = "UINT8_T_SIZE";
+        $dataTypeStr = "UINT8_T_TYPE";
+    }
+    elsif(exists $attribute->{simpleType}->{int8_t})
+    {
+        $dataSizeStr = "INT8_T_SIZE";
+        $dataTypeStr = "INT8_T_TYPE";
+    }
+    elsif(exists $attribute->{simpleType}->{uint16_t})
+    {
+        $dataSizeStr = "UINT16_T_SIZE";
+        $dataTypeStr = "UINT16_T_TYPE";
+    }
+    elsif(exists $attribute->{simpleType}->{int16_t})
+    {
+        $dataSizeStr = "INT16_T_SIZE";
+        $dataTypeStr = "INT16_T_TYPE";
+    }
+    elsif(exists $attribute->{simpleType}->{uint32_t})
+    {
+        $dataSizeStr = "UINT32_T_SIZE";
+        $dataTypeStr = "UINT32_T_TYPE";
+    }
+    elsif(exists $attribute->{simpleType}->{int32_t})
+    {
+        $dataSizeStr = "INT32_T_SIZE";
+        $dataTypeStr = "INT32_T_TYPE";
+    }
+    elsif(exists $attribute->{simpleType}->{uint64_t})
+    {
+        $dataSizeStr = "UINT64_T_SIZE";
+        $dataTypeStr = "UINT64_T_TYPE";
+    }
+    elsif(exists $attribute->{simpleType}->{int64_t})
+    {
+        $dataSizeStr = "INT64_T_SIZE";
+        $dataTypeStr = "INT64_T_TYPE";
+    }
+    return ($dataTypeStr, $dataSizeStr);
+}
+
+sub isSimpleNumericAttribute
+{
+    my ($attribute) = @_;
+
+    return ( (exists $attribute->{simpleType}) and
+             ( exists $attribute->{simpleType}->{uint8_t} or
+               exists $attribute->{simpleType}->{int8_t} or
+               exists $attribute->{simpleType}->{uint16_t} or
+               exists $attribute->{simpleType}->{int16_t} or
+               exists $attribute->{simpleType}->{uint32_t} or
+               exists $attribute->{simpleType}->{int32_t} or
+               exists $attribute->{simpleType}->{uint64_t} or
+               exists $attribute->{simpleType}->{int64_t}));
+}
+
+sub writeAttrSizesFileBody
+{
+    my ($attributes, $outFile) = @_;
+
+    foreach my $attribute (@{$attributes->{attribute}})
+    {
+        # Only process simple-type attribute types
+        if(isSimpleNumericAttribute($attribute))
+        {
+            my $dimensionsString = "";
+            my $attrHash = getAttributeIdHashStr($attribute->{id});
+            my $isArray = exists $attribute->{simpleType}->{array};
+            # If it's an array, populate the array dimensions
+            if($isArray)
+            {
+                my @arrayDimensions = split(/,/,$attribute->{simpleType}->{array});
+                foreach my $dimension (@arrayDimensions)
+                {
+                    $dimensionsString = $dimensionsString . "$dimension, ";
+                }
+                # Remove the last trailing space and comma after the last dimension
+                chop($dimensionsString);
+                chop($dimensionsString);
+            }
+
+            # Write map entry. The format is { hash, {dataType, isArray, {dimensions}}
+            # Note that even though ARRAY and NOT_ARRAY are strings here, they translate
+            # to bools in the code (see the const definition at the start of file).
+            my $isArrayStr = $isArray ? "ARRAY" : "NOT_ARRAY";
+            my ($dataTypeStr, $dataSizeStr) = getAttrDataTypeSize($attribute);
+            print $outFile "    {0x$attrHash, {$dataTypeStr, $dataSizeStr, $isArrayStr, {$dimensionsString}}},\n";
+        }
+    }
+}
+
+sub writeAttrSizesFileFooter
+{
+    my ($outFile) = @_;
+
+print $outFile <<VERBATIM;
+}; // end of map
+
+} // namespace TARGETING
+#endif // #ifndef TARG_ATTR_SIZES
+
+VERBATIM
+}
+
 ###############################################################################
 # Writes code to populate Attribute Data Map
 ###############################################################################
@@ -2397,15 +2587,7 @@ sub writeTargAttrMap {
 
 
         # Only (initially) support attributes with simple integer types
-        if ((exists $attribute->{simpleType}) &&
-            ((exists $attribute->{simpleType}->{uint8_t})  ||
-             (exists $attribute->{simpleType}->{uint16_t}) ||
-             (exists $attribute->{simpleType}->{uint32_t}) ||
-             (exists $attribute->{simpleType}->{uint64_t}) ||
-             (exists $attribute->{simpleType}->{int8_t})   ||
-             (exists $attribute->{simpleType}->{int16_t})  ||
-             (exists $attribute->{simpleType}->{int32_t})  ||
-             (exists $attribute->{simpleType}->{int64_t})))
+        if (isSimpleNumericAttribute($attribute))
         {
 
 
@@ -2468,23 +2650,43 @@ sub writeTargAttrMap {
 }
 
 ###############################################################################
-# Writes code to populate Attribute ID to Attribute Name Map File
+# Writes code to populate the header of the Attribute Name Map File
 ###############################################################################
-sub writeAttrIdNameMap {
-    my($attributes,$outFile) = @_;
-
-    my $attributeIdEnum = getAttributeIdEnumeration($attributes);
+sub writeAttrIdNameFileHeader
+{
+    my ($outFile) = @_;
 
     # file description
     print $outFile "// Attribute ID -> Attribute Name Map File\n";
-    print $outFile "// Only includes writeable attributes\n\n";
 
     # includes
     print $outFile "#include <map>\n\n";
+}
+
+
+###############################################################################
+# Writes code to populate Attribute ID to Attribute Name Map File
+###############################################################################
+sub writeAttrIdNameMap
+{
+    my($attributes,$outFile,$rwOnly) = @_;
+
+    my $attributeIdEnum = getAttributeIdEnumeration($attributes);
+    my $mapName = "g_attrIdToNameMap";
+
+    if($rwOnly)
+    {
+        print $outFile "// g_rwAttrIdToNameMap only includes writeable attributes\n\n";
+        $mapName = "g_rwAttrIdToNameMap";
+    }
+    else
+    {
+        print $outFile "// g_attrIdToNameMap includes all attributes\n\n";
+    }
 
     # attribute id -> attribute info map
     print $outFile
-        "const static std::map<uint32_t,const char*>g_attrIdToNameMap = {\n";
+        "const static std::map<uint32_t,const char*>$mapName = {\n";
 
     # loop through every attribute
     foreach my $attribute
@@ -2492,7 +2694,8 @@ sub writeAttrIdNameMap {
     {
 
         # Only want to add writeable attr
-        if (!(exists $attribute->{writeable}))
+        if ($rwOnly and
+            !(exists $attribute->{writeable}))
         {
             next;
         }
@@ -2521,7 +2724,7 @@ sub writeAttrIdNameMap {
     }
 
     # end of map
-    print $outFile "};\n";
+    print $outFile "};\n\n";
 }
 
 sub writeMutexFileHeader {
@@ -3103,17 +3306,7 @@ sub writeAttrErrlCFile {
         }
         # signed and unsigned ints
 
-        elsif(exists $attribute->{simpleType} &&
-              ( (exists $attribute->{simpleType}->{uint8_t}) ||
-                (exists $attribute->{simpleType}->{uint16_t}) ||
-                (exists $attribute->{simpleType}->{uint32_t}) ||
-                (exists $attribute->{simpleType}->{uint64_t}) ||
-                (exists $attribute->{simpleType}->{int8_t}) ||
-                (exists $attribute->{simpleType}->{int16_t}) ||
-                (exists $attribute->{simpleType}->{int32_t}) ||
-                (exists $attribute->{simpleType}->{int64_t})
-              )
-             )
+        elsif(isSimpleNumericAttribute($attribute))
         {
             print $outFile "        case (ATTR_",$attribute->{id},"): { //simpleType:uint, :int...\n";
             print $outFile "            //TRACDCOMP( g_trac_errl, \"ErrlUserDetailsAttribute: ",$attribute->{id}," entry\");\n";
@@ -3395,17 +3588,7 @@ sub writeAttrErrlHFile {
             print $outFilePY "            pass #complexType - skipping\n";
         }
         # unsigned ints dump as hex, signed as decimals
-        elsif(exists $attribute->{simpleType} &&
-              ( (exists $attribute->{simpleType}->{uint8_t}) ||
-                (exists $attribute->{simpleType}->{uint16_t}) ||
-                (exists $attribute->{simpleType}->{uint32_t}) ||
-                (exists $attribute->{simpleType}->{uint64_t}) ||
-                (exists $attribute->{simpleType}->{int8_t}) ||
-                (exists $attribute->{simpleType}->{int16_t}) ||
-                (exists $attribute->{simpleType}->{int32_t}) ||
-                (exists $attribute->{simpleType}->{int64_t})
-              )
-             )
+        elsif(isSimpleNumericAttribute($attribute))
         {
             print $outFile "              //simpleType:uint\n";
             print $outFile "              pLabel = \"",$attribute->{id},"\";\n";
@@ -3697,15 +3880,7 @@ sub writeAttrInfoCsvFile {
     foreach my $attribute (@{$attributes->{attribute}})
     {
         # Only (initially) support attributes with simple integer types
-        if ((exists $attribute->{simpleType}) &&
-            ((exists $attribute->{simpleType}->{uint8_t})  ||
-             (exists $attribute->{simpleType}->{uint16_t}) ||
-             (exists $attribute->{simpleType}->{uint32_t}) ||
-             (exists $attribute->{simpleType}->{uint64_t}) ||
-             (exists $attribute->{simpleType}->{int8_t})   ||
-             (exists $attribute->{simpleType}->{int16_t})  ||
-             (exists $attribute->{simpleType}->{int32_t})  ||
-             (exists $attribute->{simpleType}->{int64_t})))
+        if (isSimpleNumericAttribute($attribute))
         {
             my $fapiId = "NO-FAPI-ID";
 

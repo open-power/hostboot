@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,7 +44,7 @@
 #include <targeting/targplatutil.H>
 
 // Attribute id and attribute info map
-#include <targRwAttrIdToName.H>
+#include <targAttrIdToName.H>
 
 using namespace TARGETING;
 
@@ -142,28 +142,6 @@ void handleDtreeError(const int i_rc,
 
         ERRORLOG::errlCommit(l_err, DEVTREE_COMP_ID);
     }
-}
-
-
-/**
- * @brief Function to get attribute name from attribute ID map
- *        Map is found in obj/genfiles/targRwAttrIdToName.H
- *        Only includes writeable attributes
- *
- * @param[in]   i_attrId    Attribute ID
- *
- * @return  const char*     Name
- */
-const char* getAttrInfo(const ATTRIBUTE_ID i_attrId)
-{
-    const char* ret = nullptr;
-
-    if (g_attrIdToNameMap.count(i_attrId) > 0)
-    {
-        ret = g_attrIdToNameMap.at(i_attrId);
-    }
-
-    return ret;
 }
 
 
@@ -414,7 +392,8 @@ bool devtreeSyncAttrs( void )
                 // Get attribute name from generated map file
                 // The map only includes writeable attributes
                 // so if the attribute name was not found continue on
-                const char* l_attrName = getAttrInfo(*l_attributeId);
+                const char* l_attrName = UTIL::getAttrName(*l_attributeId,
+                                                           true); //RW attr only
                 if (l_attrName == nullptr)
                 {
                     TRACDCOMP( g_trac_devtree,
