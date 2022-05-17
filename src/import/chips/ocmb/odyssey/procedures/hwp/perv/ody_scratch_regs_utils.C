@@ -1,0 +1,65 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/perv/ody_scratch_regs_utils.C $ */
+/*                                                                        */
+/* OpenPOWER HostBoot Project                                             */
+/*                                                                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
+/*                                                                        */
+/* Licensed under the Apache License, Version 2.0 (the "License");        */
+/* you may not use this file except in compliance with the License.       */
+/* You may obtain a copy of the License at                                */
+/*                                                                        */
+/*     http://www.apache.org/licenses/LICENSE-2.0                         */
+/*                                                                        */
+/* Unless required by applicable law or agreed to in writing, software    */
+/* distributed under the License is distributed on an "AS IS" BASIS,      */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        */
+/* implied. See the License for the specific language governing           */
+/* permissions and limitations under the License.                         */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+//------------------------------------------------------------------------------
+/// @file  ody_scratch_regs_utils.C
+/// @brief Project specific utility functions to support Odyssey scratch
+///        register setup
+//------------------------------------------------------------------------------
+// *HWP HW Maintainer   : Anusha Reddy (anusrang@in.ibm.com)
+// *HWP FW Maintainer   : Raja Das (rajadas2@in.ibm.com)
+//------------------------------------------------------------------------------
+
+#include <ody_scratch_regs_utils.H>
+
+fapi2::ReturnCode ody_scratch_regs_get_pll_bucket(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    fapi2::ATTR_OCMB_PLL_BUCKET_Type& o_pll_bucket)
+{
+    FAPI_DBG("Start");
+
+#if 0
+    // RTC: 279640 TODO: translate host side PLL bucket definition into OCMB/Odyssey side bucket
+    fapi2::Target<fapi2::TARGET_TYPE_OMI> l_omi_target;
+    fapi2::Target<fapi2::TARGET_TYPE_MC> l_mc_target;
+    fapi2::ATTR_CHIP_UNIT_POS_Type l_mc_unit_pos;
+    fapi2::ATTR_MC_PLL_BUCKET_Type l_host_mc_pll_bucket;
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_host_target;
+
+    o_pll_bucket = 0;
+
+    FAPI_TRY(i_target.getOtherEnd(l_omi_target));
+    l_mc_target = l_omi_target.getParent<fapi2::TARGET_TYPE_MI>();
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_mc_target, l_mc_unit_pos));
+    l_host_target = l_omi_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MC_PLL_BUCKET, l_host_target, l_host_mc_pll_bucket));
+    o_pll_bucket = l_host_mc_pll_bucket[l_mc_unit_pos];
+
+#endif
+    o_pll_bucket = 0;
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
