@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2022                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -210,7 +210,7 @@
 <!-- ********************************************************************** -->
 <attribute>
   <id>ATTR_IO_TANK_PLL_BYPASS</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <targetType>TARGET_TYPE_PROC_CHIP,TARGET_TYPE_OCMB_CHIP</targetType>
   <description>
     Skip locking sequence and check for lock of IO PLLs
   </description>
@@ -352,7 +352,7 @@
 <!-- ********************************************************************** -->
 <attribute>
   <id>ATTR_CLOCKSTOP_ON_XSTOP</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <targetType>TARGET_TYPE_PROC_CHIP,TARGET_TYPE_OCMB_CHIP</targetType>
   <description>
   Set up the chip so that all chiplet clocks are
   automatically stopped in case of a checkstop. Possible enum values:

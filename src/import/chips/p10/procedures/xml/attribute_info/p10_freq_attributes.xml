@@ -348,7 +348,7 @@
 <!-- ********************************************************************** -->
 <attribute>
   <id>ATTR_SPI_BUS_DIV_REF</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <targetType>TARGET_TYPE_PROC_CHIP,TARGET_TYPE_OCMB_CHIP</targetType>
   <description>
     Ref clock SPI bus divider consumed by code running out of OTPROM
     bits  0:11 - clock divider; fSPI = fPAU / 8 / (divider + 1); minimum allowed value is 4

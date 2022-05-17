@@ -79,6 +79,7 @@ class ScomRegister : public fapi2::buffer<uint64_t>
         {
             return fapi2::putScom(i_target, ADDRESS, *this);
         }
+        static const uint64_t addr = ADDRESS;
 
     protected:
         template <uint32_t FORBIDDEN_MASK>
@@ -134,6 +135,7 @@ class CfamRegister : public fapi2::buffer<uint32_t>
         {
             return fapi2::putCfamRegister(i_target, ADDRESS, *this);
         }
+        static const uint32_t addr = ADDRESS;
 
     protected:
         template <uint32_t FORBIDDEN_MASK>
