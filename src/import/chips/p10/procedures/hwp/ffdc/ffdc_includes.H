@@ -42,6 +42,4 @@
 
 #endif
 
-#include <p10_collect_sbe_debug_registers.H>
-
 #endif
