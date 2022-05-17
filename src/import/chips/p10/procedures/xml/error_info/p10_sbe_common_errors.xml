@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2022                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -40,6 +40,18 @@
        <cfamRegister>scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_STAT_FSI</cfamRegister>
     </registerFfdc>
     <registerFfdc>
+       <id>CBS_STATUS_REGISTERS_SCOM</id>
+       <scomRegister>scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_CS</scomRegister>
+       <scomRegister>scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_TR_RO</scomRegister>
+       <scomRegister>scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_EL</scomRegister>
+       <scomRegister>scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_ENVSTAT_RO</scomRegister>
+       <scomRegister>scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_TR_HIST</scomRegister>
+       <scomRegister>scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_EL_HIST</scomRegister>
+       <scomRegister>scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SB_CS</scomRegister>
+       <scomRegister>scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SB_MSG</scomRegister>
+       <scomRegister>scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_STAT_RO</scomRegister>
+    </registerFfdc>
+    <registerFfdc>
        <id>ROOT_CTRL_REGISTERS_CFAM</id>
        <cfamRegister>scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_FSI</cfamRegister>
        <cfamRegister>scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL1_FSI</cfamRegister>
@@ -50,6 +62,18 @@
        <cfamRegister>scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL6_FSI</cfamRegister>
        <cfamRegister>scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL7_FSI</cfamRegister>
        <cfamRegister>scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL8_FSI</cfamRegister>
+    </registerFfdc>
+    <registerFfdc>
+       <id>ROOT_CTRL_REGISTERS_SCOM</id>
+       <scomRegister>scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_RW</scomRegister>
+       <scomRegister>scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL1_RW</scomRegister>
+       <scomRegister>scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL2_RW</scomRegister>
+       <scomRegister>scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL3_RW</scomRegister>
+       <scomRegister>scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL4_RW</scomRegister>
+       <scomRegister>scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL5_RW</scomRegister>
+       <scomRegister>scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL6_RW</scomRegister>
+       <scomRegister>scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL7_RW</scomRegister>
+       <scomRegister>scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL8_RW</scomRegister>
     </registerFfdc>
     <registerFfdc>
        <id>PERV_CTRL_REGISTERS_CFAM</id>
@@ -197,6 +221,17 @@
         <cfamRegister> scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_FSI</cfamRegister>
         <cfamRegister> scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_7_FSI</cfamRegister>
         <cfamRegister> scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_8_FSI</cfamRegister>
+    </registerFfdc>
+    <registerFfdc>
+        <id>SBE_IPL_SCRATCH_REGISTERS_SCOM</id>
+        <scomRegister> scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_1_RW</scomRegister>
+        <scomRegister> scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_2_RW</scomRegister>
+        <scomRegister> scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RW</scomRegister>
+        <scomRegister> scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_4_RW</scomRegister>
+        <scomRegister> scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_5_RW</scomRegister>
+        <scomRegister> scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_RW</scomRegister>
+        <scomRegister> scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_7_RW</scomRegister>
+        <scomRegister> scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_8_RW</scomRegister>
     </registerFfdc>
    <!-- ******************************************************************** -->
     <hwpError>
