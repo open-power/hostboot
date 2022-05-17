@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -95,7 +95,7 @@ namespace LPC
         /* Keyboard Controller Style (KCS) status register address
          * (provided by hypervisor team)
          */
-        KCS2_STATUS_REG =        0xCA9,
+        KCS2_STATUS_REG =        0xCAC,
 
         /* Serial IRQ number for KCS interface
          * (provided by hypervisor team)
