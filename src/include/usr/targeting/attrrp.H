@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -514,6 +514,14 @@ class AttrRP
          * @return nullptr on success; non-nullptr on error.
          */
         static errlHndl_t mergeAttributes();
+
+        /**
+         * @brief Dumps all of the Hostboot attributes and their values to a
+         * lid file using PLDM
+         *
+         * @return nullptr on success; non-nullptr on error.
+         */
+        static errlHndl_t dumpAttrs();
 
 #else
         /**

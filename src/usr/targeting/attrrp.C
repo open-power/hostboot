@@ -45,6 +45,7 @@
 #include <targeting/attrrp.H>
 #include <targeting/common/trace.H>
 #include <targeting/common/attributeTank.H>
+#include <targeting/targplatutil.H>
 #include <initservice/initserviceif.H>
 #include <util/align.H>
 #include <util/utilrsvdmem.H>
@@ -59,6 +60,9 @@
 #include <fapi2/plat_hwp_invoker.H>
 #include <sbeio/sbeioif.H>
 #include <util/crc32.H>
+#include <pldm/requests/pldm_fileio_requests.H>
+#include <util/utillidmgr.H>
+#include <attrsizesdata.H>
 
 using namespace INITSERVICE;
 using namespace ERRORLOG;
@@ -2087,6 +2091,344 @@ namespace TARGETING
 #endif
 
         TRACFCOMP(g_trac_targeting, EXIT_MRK"AttrRP::updatePreservedAttrSection");
+        return l_errl;
+    }
+
+
+    /**
+     * @brief Helper function to format the input value of the attribute according
+     *        to its data size. The formatted value is appended to the vector.
+     *        The vector is never cleared in this function.
+     *
+     * @param[in] i_dataType the data type of the attribute value (used to format
+     *            the value correctly)
+     * @param[in] i_attrValuePtr the pointer to the value of the attribute
+     * @param[out] o_attrValue the vector where the formatted value would be
+     *             appended.
+     */
+    void formatAttributeValue(ATTR_DATA_TYPE i_dataType, void* i_attrValuePtr, std::vector<char>& o_attrValue)
+    {
+        char l_formattedValue[50]{};
+        switch (i_dataType)
+        {
+            case UINT8_T_TYPE:
+            case INT8_T_TYPE:
+            {
+                sprintf(l_formattedValue, " 0x%02x\n", *(reinterpret_cast<uint8_t*>(i_attrValuePtr)));
+                break;
+            }
+            case UINT16_T_TYPE:
+            case INT16_T_TYPE:
+            {
+                sprintf(l_formattedValue, " 0x%04x\n", *(reinterpret_cast<uint16_t*>(i_attrValuePtr)));
+                break;
+            }
+            case UINT32_T_TYPE:
+            case INT32_T_TYPE:
+            {
+                sprintf(l_formattedValue, " 0x%08x\n", *(reinterpret_cast<uint32_t*>(i_attrValuePtr)));
+                break;
+            }
+            case UINT64_T_TYPE:
+            case INT64_T_TYPE:
+            {
+                sprintf(l_formattedValue, " 0x%016lx\n", *(reinterpret_cast<uint64_t*>(i_attrValuePtr)));
+                break;
+            }
+        }
+        o_attrValue.insert(o_attrValue.end(), l_formattedValue, l_formattedValue + strlen(l_formattedValue));
+    }
+
+    /**
+     * @brief Helper function to convert an enum data type to string
+     *
+     * @param[in] i_dataType the enum data type to be converted
+     * @return the string representation of the input data type. "BAD" if the
+     *         data type is unknown.
+     */
+    const char* formatAttributeSize(ATTR_DATA_TYPE i_dataType)
+    {
+        switch(i_dataType)
+        {
+            case UINT8_T_TYPE:
+            {
+                return "u8";
+                break;
+            }
+            case INT8_T_TYPE:
+            {
+                return "s8";
+                break;
+            }
+            case UINT16_T_TYPE:
+            {
+                return "u16";
+                break;
+            }
+            case INT16_T_TYPE:
+            {
+                return "s16";
+                break;
+            }
+            case UINT32_T_TYPE:
+            {
+                return "u32";
+                break;
+            }
+            case INT32_T_TYPE:
+            {
+                return "s32";
+                break;
+            }
+            case UINT64_T_TYPE:
+            {
+                return "u64";
+                break;
+            }
+            case INT64_T_TYPE:
+            {
+                return "s64";
+                break;
+            }
+            default:
+            {
+                return "BAD";
+                break;
+            }
+        }
+    }
+
+    /**
+     * @brief Helper function to dump the value of an array attribute.
+     *        The format of an array attribute dump is this:
+     *
+     *        ATTR_NAME[0] attr_type[arraySize] attr_value[0]
+     *        ATTR_NAME[1] attr_type[arraySize] attr_value[1]
+     *        ATTR_NAME[2] attr_type[arraySize] attr_value[2]
+     *        ...
+     *        ATTR_NAME[arraySize-1] attr_type[arraySize] attr_value[arraySize-1]
+     *
+     *        2-D example format:
+     *        ATTR_NAME[outerIndex][innerIndex] size[arraySize] value
+     *
+     *        The data is appended to the output vector. The vector is not
+     *        cleared.
+     *
+     * @param[in] i_attrName the string representation of the attribute name
+     *            (ATTR_NAME in example above).
+     * @param[in] i_dataType the simple type of the attribute (attr_type above)
+     * @param[in] i_dataSize the size of the data type of the attribute (uint8_t,
+     *            uint16_t, etc.)
+     * @param[in] i_arrDimensions the vector of the array dimensions. Example:
+     *            a 2x3 array would have 2 entries in the dimensions vector: 2,3
+     *            a 3x4x5 would be a vector consisting of 3,4,5
+     * @param[in] i_attrValuePtr the pointer to the value of this array attribute
+     * @param[out] o_attrValue the vector to be populated with the string
+     *             representation of the attribute value.
+     */
+    void formatArrayAttrValue(const char* const i_attrName,
+                              ATTR_DATA_TYPE i_dataType,
+                              ATTR_DATA_SIZE i_dataSize,
+                              const std::vector<uint16_t>& i_arrDimensions,
+                              void* i_attrValuePtr,
+                              std::vector<char>& o_attrValue)
+    {
+        uint8_t* l_attrValuePtr = reinterpret_cast<uint8_t*>(i_attrValuePtr);
+        // Get the string representation of the attribute data size
+        const char* l_attrSizeStr = formatAttributeSize(i_dataType);
+
+        if(i_arrDimensions.size() == 1) // One-dimensional array
+        {
+            // Format ATTR_NAME[arrIndex] size[arrSize] value
+            for(size_t i = 0; i < i_arrDimensions[0]; ++i)
+            {
+                char l_attrNameFormatted[200]{};
+                sprintf(l_attrNameFormatted, "%s[%d] %s[%d]", i_attrName, i, l_attrSizeStr, i_arrDimensions[0]);
+                // Insert the formatted attribute name
+                o_attrValue.insert(o_attrValue.end(), l_attrNameFormatted, l_attrNameFormatted + strlen(l_attrNameFormatted));
+                // Insert the formatted attribute value
+                formatAttributeValue(i_dataType, l_attrValuePtr, o_attrValue);
+                l_attrValuePtr += i_dataSize;
+            }
+        }
+        else if(i_arrDimensions.size() == 2) // Two-dimensional array
+        {
+            // Format ATTR_NAME[outerIndex][innerIndex] size[arrSize] value
+            for(size_t i = 0; i < i_arrDimensions[0]; ++i)
+            {
+                for(size_t j = 0; j < i_arrDimensions[1]; ++j)
+                {
+                    char l_attrNameFormatted[200]{};
+                    sprintf(l_attrNameFormatted, "%s[%d][%d] %s[%d]", i_attrName, i, j, l_attrSizeStr, i_arrDimensions[0] * i_arrDimensions[1]);
+                    // Insert the formatted attribute name
+                    o_attrValue.insert(o_attrValue.end(), l_attrNameFormatted, l_attrNameFormatted + strlen(l_attrNameFormatted));
+                    // Insert the formatted attribute value
+                    formatAttributeValue(i_dataType, l_attrValuePtr, o_attrValue);
+                    l_attrValuePtr += i_dataSize;
+                }
+            }
+        }
+        else if(i_arrDimensions.size() == 3) // Three-dimensional array
+        {
+            // Format ATTR_NAME[index1][index2][index3] size[arrSize] value
+            for(size_t i = 0; i < i_arrDimensions[0]; ++i)
+            {
+                for(size_t j = 0; j < i_arrDimensions[1]; ++j)
+                {
+                    for(size_t t = 0; t < i_arrDimensions[2]; ++t)
+                    {
+                        char l_attrNameFormatted[200]{};
+                        sprintf(l_attrNameFormatted, "%s[%d][%d][%d] %s[%d]",
+                                i_attrName, i, j, t,
+                                l_attrSizeStr,
+                                i_arrDimensions[0] * i_arrDimensions[1] * i_arrDimensions[2]);
+                        // Insert the formatted attribute name
+                        o_attrValue.insert(o_attrValue.end(), l_attrNameFormatted, l_attrNameFormatted + strlen(l_attrNameFormatted));
+                        // Insert the formatted attribute value
+                        formatAttributeValue(i_dataType, l_attrValuePtr, o_attrValue);
+                        l_attrValuePtr += i_dataSize;
+                    }
+                }
+            }
+        }
+        else
+        {
+#ifdef CONFIG_CONSOLE
+            CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "Could not process attribute %s of dimensions %d",
+                              i_attrName,
+                              i_arrDimensions.size());
+#endif
+            TRACFCOMP(g_trac_targeting, WARN_MRK"formatArrayAttrValue: Attribute %s of %d dimensions could not be processed",
+                      i_attrName,
+                      i_arrDimensions.size());
+        }
+    }
+
+    /**
+     * @brief Helper function to fetch the given attribute value from memory
+     *        and format it into a vector of chars so it can be written out
+     *        to a file. The attribute value is appended to the vector. The
+     *        output vector does not get cleared by this function.
+     *
+     * @param[in] i_attrValuePtr the pointer to the value of the given attribute
+     *            (cannot be nullptr)
+     * @param[in] i_attrId the numerical ID (hash) of the attribute
+     * @param[out] o_attrValue the vector that will contain the string representation
+     *             of the attribute value. The string will be appended to this
+     *             vector.
+     */
+    void getAttrValueFromMem(void* i_attrValuePtr, ATTRIBUTE_ID i_attrId, std::vector<char>& o_attrValue)
+    {
+        do {
+
+        // Get the string representation of the attribute name
+        const char* l_attrNamePtr = UTIL::getAttrName(i_attrId);
+        if(l_attrNamePtr == nullptr)
+        {
+            // We don't want to dump the attr value if we can't get the attr
+            // name as a string
+            TRACFCOMP(g_trac_targeting, WARN_MRK"Could not find a string name for attr ID 0x%x", i_attrId);
+            break;
+        }
+
+        // Find the size and the simple data type of this attr in the map
+        if(g_attrSizesMap.find(i_attrId) != g_attrSizesMap.end())
+        {
+            if(g_attrSizesMap[i_attrId].isArray)
+            {
+                // Arrays are handled differently than single-value attrs
+                formatArrayAttrValue(l_attrNamePtr,
+                                     g_attrSizesMap[i_attrId].dataType,
+                                     g_attrSizesMap[i_attrId].dataSize,
+                                     g_attrSizesMap[i_attrId].dimensions,
+                                     i_attrValuePtr,
+                                     o_attrValue);
+            }
+            else
+            {
+                // Format single-value attribute
+                char l_formattedAttrStr[200]{};
+                sprintf(l_formattedAttrStr, "%s %s", l_attrNamePtr, formatAttributeSize(g_attrSizesMap[i_attrId].dataType));
+                o_attrValue.insert(o_attrValue.end(), l_formattedAttrStr, l_formattedAttrStr + strlen(l_formattedAttrStr));
+                formatAttributeValue(g_attrSizesMap[i_attrId].dataType, i_attrValuePtr, o_attrValue);
+            }
+        }
+        else
+        {
+            // The attribute is not in the map - we don't know its data type
+            // or size. Mark it as 0xBAD in the dump
+            char l_badValueString[200]{};
+            sprintf(l_badValueString, "%s 0xBAD\n", l_attrNamePtr);
+            o_attrValue.insert(o_attrValue.end(), l_badValueString, l_badValueString + strlen(l_badValueString));
+        }
+        }while(0);
+    }
+
+    errlHndl_t AttrRP::dumpAttrs()
+    {
+        errlHndl_t l_errl = nullptr;
+#ifdef CONFIG_PLDM
+        CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "dumpAttrs: Dumping attributes via PLDM to LID 0x%x", Util::ATTR_DUMP_LIDID);
+        TargetRangeFilter l_allTargets(targetService().begin(),
+                                    targetService().end(),
+                                    nullptr);
+        size_t l_writeOffset = 0;
+        // Walk through all targets and dump all of the attributes
+        for(; l_allTargets; ++l_allTargets)
+        {
+            CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "dumpAttrs: Dumping attributes for target 0x%x", l_allTargets->getAttr<ATTR_HUID>());
+
+            // A text vector representing target and all its attributes in
+            // readable format
+            std::vector<char>l_targetAttributes;
+            ATTRIBUTE_ID* l_attrIdArr = nullptr;
+            AbstractPointer<void>* l_attrAddressesArr = nullptr;
+            uint32_t l_attrCnt = targetService().getTargetAttributes(*l_allTargets,
+                                                                    &TARG_GET_SINGLETON(theAttrRP),
+                                                                    l_attrIdArr,
+                                                                    l_attrAddressesArr);
+            // First part of the output format is the "target = <FAPI target>"
+            // string.
+            TARGETING::ATTR_FAPI_NAME_type l_nameString = {0};
+            l_allTargets->tryGetAttr<ATTR_FAPI_NAME>(l_nameString);
+            char l_str[200] {};
+            sprintf(l_str, "target = %s\n", l_nameString);
+            l_targetAttributes.insert(l_targetAttributes.end(), l_str, l_str + strlen(l_str));
+
+            // Following is a dump of each attribute and its value
+            for(uint32_t l_attrNum =  0; l_attrNum < l_attrCnt; ++l_attrNum)
+            {
+                ATTRIBUTE_ID* l_attrId = l_attrIdArr + l_attrNum;
+                void* l_attrAddr = nullptr;
+                l_allTargets->_getAttrPtr(*l_attrId,
+                                        &TARG_GET_SINGLETON(theAttrRP),
+                                        l_attrIdArr,
+                                        l_attrAddressesArr,
+                                        l_attrAddr);
+                if(l_attrAddr)
+                {
+                    // Format the attribute value if we found the attr
+                    getAttrValueFromMem(l_attrAddr, *l_attrId, l_targetAttributes);
+                }
+            }
+            // Newline to separate targets
+            l_targetAttributes.push_back('\n');
+
+            // Write the attrs for this target to the lid file
+            uint32_t l_size = l_targetAttributes.size();
+            l_errl = PLDM::writeLidFileFromOffset(Util::ATTR_DUMP_LIDID,
+                                                  l_writeOffset,
+                                                  l_size,
+                                                  reinterpret_cast<uint8_t*>(l_targetAttributes.data()));
+            if(l_errl)
+            {
+                TRACFCOMP(g_trac_targeting, ERR_MRK"AttrRP::dumpAttrs: Could not write to lid file");
+                break;
+            }
+            l_writeOffset += l_size;
+        }
+        CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "dumpAttrs: Done.");
+#endif
         return l_errl;
     }
 };
