@@ -77,6 +77,10 @@ package_directories = {
     # modules, or if there are any general utilities needed.
 
     "pel.prd": "src/usr/diag/prdf/peltool/common",
+
+    # creator id + callouts = callouts for that subsystem
+    # b = hostboot
+    "calloutparsers.bcallouts": "src/usr/errl/plugins/ebmc/procedures",
 }
 
 package_data = {
