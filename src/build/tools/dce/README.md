@@ -93,7 +93,7 @@ automatically skip rebuilding the DCE code if it isn't necessary.
 DCE code can be run at nearly any time that Hostboot IPL code can process PLDM requests, but it's convenient to
 pause the IPL at some point somehow (either by using the `istep` command or else by patching the machine to hang
 the IPL manually). The machine must be booted past the PDR exchange (i.e. near the end of istep 6) for the machine
-to respond to DCE requests.
+to respond to DCE requests. Make sure that secure mode is disabled before IPLing.
 
 ### Step 3: Copy the LID to the BMC and run it
 
@@ -226,6 +226,11 @@ There are certain features of C++ that DCE code does not support:
    You can turn all traces in the file into SOL console messages by putting this code below all the header include
    directives in your DCE source file:
 
+```cpp
+#undef TRACFCOMP
+#define TRACFCOMP(X, ...) CONSOLE::displayf(CONSOLE::DEFAULT, NULL, __VA_ARGS__);
+```
+
 3. Singletons
 
    To use the Singleton class, or any class with static member variables in inline functions, you must provide a
@@ -233,10 +238,14 @@ There are certain features of C++ that DCE code does not support:
 
        void* __dso_handle;
 
-```cpp
-#undef TRACFCOMP
-#define TRACFCOMP(X, ...) CONSOLE::displayf(CONSOLE::DEFAULT, NULL, __VA_ARGS__);
-```
+4. Accessing data in unloaded modules
+
+   Be careful about accessing Hostboot functions and data that are resident in modules that may be unloaded
+   when you invoke your DCE script. For example, to call a function defined in libsbeio.so, that module
+   must be loaded. You can do this either by istepping to a step that loads your module and invoking your module
+   at that time, or else using the VFS module loader directly:
+
+       VFS::module_load("libsbeio.so");
 
 ## Implementation details
 

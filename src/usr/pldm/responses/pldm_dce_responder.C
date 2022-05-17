@@ -42,6 +42,7 @@
 #include <arch/ppc.H>
 #include <sys/task.h>
 
+extern char hbi_ImageId[];
 
 using namespace ERRORLOG;
 using namespace TARGETING;
@@ -76,6 +77,9 @@ struct lid_header
     uint64_t entrypoint_offset;
     uint64_t toc_offset;
     uint64_t env_offset;
+
+    // This is to be compared with hbi_ImageId to check for binary compatibility
+    char version[128];
 
     uint64_t num_relocs;
     reloc relocs[1];
@@ -132,6 +136,16 @@ uint8_t* perform_relocs(lid_header* const header)
     }
 
     return data;
+}
+
+/* @brief Check LID compatibility.
+ *
+ * @param[in] header  Pointer to LID data.
+ * @return    bool    True if the binary is NOT compatible, false otherwise.
+ */
+bool check_binary_compatibility(const lid_header* const header)
+{
+    return strcmp(header->version, hbi_ImageId) != 0;
 }
 
 /* @brief The task that actually calls into the DCE binary.
@@ -252,6 +266,18 @@ void* handleInvokeDceRequest_task(void*)
 
     const auto header = reinterpret_cast<lid_header*>(lid_contents.data());
 
+    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, " - DCE: Checking binary compatibility");
+
+    if (check_binary_compatibility(header))
+    {
+        CONSOLE::displayf(CONSOLE::DEFAULT, NULL,
+                          " - DCE: Error: the given LID was built against HBI version %s, but the "
+                          "running version is %s. DCE code must be built against exactly the "
+                          "version of HBI that it will be executed with; otherwise, it will likely crash.",
+                          header->version, hbi_ImageId);
+        break;
+    }
+
     CONSOLE::displayf(CONSOLE::DEFAULT, NULL, " - DCE: Performing relocations");
 
     uint8_t* const elf = perform_relocs(header);
@@ -302,9 +328,9 @@ void* handleInvokeDceRequest_task(void*)
 
     mm_set_permission(lid_contents.data(), lid_contents.size(), WRITABLE);
 
-    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "DCE: Finished");
-
     } while (0);
+
+    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "DCE: Finished");
 
     delete errl;
     errl = nullptr;

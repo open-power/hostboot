@@ -109,6 +109,10 @@ def find_hb_data_symbol_addr(symname, nohalt=False):
 #      3: 0000000000000000     0 NOTYPE  GLOBAL DEFAULT  UND strcpy
 def find_lib_symbol_addr(symname):
     symname, offset = get_symbol_and_offset_from_expression(symname)
+
+    if 'Singleton' in symname:
+        raise Exception('Singletons are always linked to HB[I]')
+
     entry = grep(' ' + symname + '$', libsyms)[0]
     defined = column(entry, 6)
 
@@ -171,46 +175,46 @@ def perform_addr64_reloc(relocaddr, word_addr):
 
 def perform_r_ppc64_jmp_slot_reloc(relocaddr, symbol):
     try:
-        desc_addr = find_hb_fn_symbol_addr(symbol)
+        desc_addr = find_lib_symbol_addr(symbol)
     except Exception as e:
         try:
-            desc_addr = find_lib_symbol_addr(symbol)
+            desc_addr = find_hb_fn_symbol_addr(symbol)
         except Exception as e:
             print(e)
             print('[E] Undefined symbol: ' + symbol)
             sys.exit(1)
 
-        debugout('[I] Adding dynamic relocation for direct function call '  + symbol + ' at ' + hex(relocaddr) + ' to the descriptor at offset ' + hex(desc_addr))
+        debugout('[I] Performing relocation for direct function call ' + symbol + ' at ' + hex(relocaddr) + ' to the descriptor at ' + hex(desc_addr))
 
-        add_dynamic_relocation(relocaddr, desc_addr, RELOC_TYPE_DESCRIPTOR)
+        perform_descriptor_reloc(relocaddr, desc_addr)
         return
 
-    debugout('[I] Performing relocation for direct function call ' + symbol + ' at ' + hex(relocaddr) + ' to the descriptor at ' + hex(desc_addr))
+    debugout('[I] Adding dynamic relocation for direct function call '  + symbol + ' at ' + hex(relocaddr) + ' to the descriptor at offset ' + hex(desc_addr))
 
-    perform_descriptor_reloc(relocaddr, desc_addr)
+    add_dynamic_relocation(relocaddr, desc_addr, RELOC_TYPE_DESCRIPTOR)
 
 def perform_r_ppc64_addr64_reloc(relocaddr, symbol):
     try:
-        sym_addr = find_hb_fn_symbol_addr(symbol)
+        sym_addr = find_lib_symbol_addr(symbol)
     except Exception as e2:
         try:
-            sym_addr = find_lib_symbol_addr(symbol)
+            sym_addr = find_hb_fn_symbol_addr(symbol)
         except Exception as e:
             print(e)
             print('[E] Undefined symbol: ' + symbol)
             sys.exit(1)
 
-        debugout('[I] Adding dynamic relocation for 64-bit address reference ' + symbol + ' at ' + hex(relocaddr) + ' to the offset ' + hex(sym_addr))
+        if sym_addr == 0:
+            sym_addr = find_hb_data_symbol_addr(symbol)
 
-        add_dynamic_relocation(relocaddr, sym_addr, RELOC_TYPE_ADDR64)
+        debugout('[I] Performing relocation for 64-bit address reference ' + symbol + ' at ' + hex(relocaddr) + ' to the address ' + hex(sym_addr))
+
+        perform_addr64_reloc(relocaddr, sym_addr)
         return
 
-    if sym_addr == 0:
-        sym_addr = find_hb_data_symbol_addr(symbol)
+    debugout('[I] Adding dynamic relocation for 64-bit address reference ' + symbol + ' at ' + hex(relocaddr) + ' to the offset ' + hex(sym_addr))
 
-    debugout('[I] Performing relocation for 64-bit address reference ' + symbol + ' at ' + hex(relocaddr) + ' to the address ' + hex(sym_addr))
-
-    perform_addr64_reloc(relocaddr, sym_addr)
+    add_dynamic_relocation(relocaddr, sym_addr, RELOC_TYPE_ADDR64)
 
 def perform_r_ppc64_relative_reloc(relocaddr, addr):
     match = re.search('0x([0-9a-fA-F]+)$', addr)
@@ -249,6 +253,11 @@ def finalize_output():
     # Write the entry file descriptor
     outfile = open(infilename + '.lid', 'wb')
     outfile.write(get_entry_descriptor())
+
+    # Find and write the HBI image version to the LID
+    hbi_imageid = file_bytes(hbicorefile, find_hb_data_symbol_addr('hbi_ImageId'), 128)
+    print('[I] hbi_ImageId = ' + struct.unpack('128s', hbi_imageid)[0])
+    outfile.write(hbi_imageid)
 
     # Write dynamic relocations
     outfile.write(struct.pack('>Q', len(dynamic_relocs)))

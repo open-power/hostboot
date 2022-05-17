@@ -29,6 +29,21 @@
 # This script makes a PLDM request to Hostboot to request the DCE LID
 # from the BMC and execute it.
 
+SECURE_ACCESS_BIT_MASK=0x08000000
+CFAM=$(getcfam -quiet pu 2801 | awk '{print $(NF)}')
+SECURE_MODE=$((CFAM & SECURE_ACCESS_BIT_MASK))
+
+if [[ $((SECURE_MODE)) -ne 0 ]] ; then
+    echo 'Error: Secure mode must be disabled to use DCE.'
+    echo 'Set the DISABLE_SECURITY attribute to 1 with the following command and re-IPL to run DCE scripts:'
+    echo
+    echo '  attributes write k0 ATTR_DISABLE_SECURITY 1'
+    echo
+    exit 1
+fi
+
+# 2 is the terminus ID that created the effecter PDR we're looking for (2 is hostboot's TID).
+# 45 is the type of the "System" target.
 # 0x7dce is the DCE state set ID from the Hostboot PDR creation code.
 EFFECTER_ID=$(busctl call xyz.openbmc_project.PLDM /xyz/openbmc_project/pldm xyz.openbmc_project.PLDM.PDR FindStateEffecterPDR yqq 2 45 0x7dce | awk '{print int(256 * $17 + $16)}')
 
