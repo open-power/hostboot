@@ -516,6 +516,7 @@ void test_fapi2GetChildren()
         * @userdata2          Parent HUID
         * @devdesc            Invalid amount of child cores found
         *                     on a proc
+        * @custdesc           An internal firmware error occurred
         */
         l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                         fapi2::MOD_FAPI2_PLAT_GET_CHILDREN_TEST,
@@ -671,6 +672,7 @@ void test_fapi2GetChildrenFilter()
     //     * @userdata2          Parent HUID
     //     * @devdesc            Invalid amount of child cores found
     //     *                     on a proc
+    //     * @custdesc           An internal firmware error occurred
     //     */
     //     l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
     //                                     fapi2::MOD_FAPI2_PLAT_GET_CHILDREN_FILTER_TEST,

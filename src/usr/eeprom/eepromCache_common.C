@@ -89,6 +89,7 @@ errlHndl_t buildEepromRecordHeader(TARGETING::Target * i_target,
             * @userdata1    HUID of target we want to cache
             * @userdata2    Type of EEPROM we are caching
             * @devdesc      buildEepromRecordHeader invalid master target
+            * @custdesc     An internal firmware error occurred
             */
             l_errl = new ERRORLOG::ErrlEntry(
                             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -119,6 +120,7 @@ errlHndl_t buildEepromRecordHeader(TARGETING::Target * i_target,
                 * @userdata1    HUID of target we want to cache
                 * @userdata2    Type of EEPROM we are caching
                 * @devdesc      buildEepromRecordHeader invalid mux target
+                * @custdesc     An internal firmware error occurred
                 */
                 l_errl = new ERRORLOG::ErrlEntry(
                                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,

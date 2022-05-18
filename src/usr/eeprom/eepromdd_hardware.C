@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1324,6 +1324,7 @@ errlHndl_t eepromI2cWrite ( TARGETING::Target * i_target,
              * @userdata1      HUID of target
              * @userdata2      Chip to Access
              * @devdesc        I2C write page size is zero.
+             * @custdesc       An internal firmware error occurred
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            EEPROM_WRITE,

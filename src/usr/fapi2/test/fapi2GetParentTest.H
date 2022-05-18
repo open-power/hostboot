@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -280,6 +280,7 @@ void test_fapi2GetParent()
                 * @devdesc           Could not find the parent PERV of this
                 *                    unit target or the pervasive did not
                 *                    map to expected PROC
+                * @custdesc          An internal firmware error occurred
                 */
                 l_err = new ERRORLOG::ErrlEntry(
                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,

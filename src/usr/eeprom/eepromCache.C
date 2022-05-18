@@ -1818,6 +1818,7 @@ errlHndl_t setIsValidCacheEntry(const eepromRecordHeader& i_eepromRecordHeader, 
               * @userdata2[0:31]  size of eeprom
               * @userdata2[32:63] access type
               * @devdesc      invalidateCache failed to find cache in map
+              * @custdesc     An internal firmware error occurred
               */
               l_errl = new ERRORLOG::ErrlEntry(
                               ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -1851,6 +1852,7 @@ errlHndl_t setIsValidCacheEntry(const eepromRecordHeader& i_eepromRecordHeader, 
               * @userdata2[0:31]  size of eeprom
               * @userdata2[32:63] access type
               * @devdesc      invalidateCache failed to find cache in pnor
+              * @custdesc     An internal firmware error occurred
               */
               l_errl = new ERRORLOG::ErrlEntry(
                               ERRORLOG::ERRL_SEV_UNRECOVERABLE,

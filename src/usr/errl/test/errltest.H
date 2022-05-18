@@ -167,6 +167,7 @@ public:
              * @moduleid    ERRORLOG::ERRL_TEST_MOD_ID
              * @devdesc     Errl test. Error with non-decoded string
              *              and lots of trace buffers.
+             * @custdesc    An internal firmware error occurred
              */
 
             // Create an error log

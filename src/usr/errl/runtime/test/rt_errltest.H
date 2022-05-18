@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -109,6 +109,7 @@ public:
              * @moduleid    ERRORLOG::ERRL_RT_TEST_MOD_ID
              * @devdesc     Errl test. Error with non-decoded string
              *              and lots of trace buffers.
+             * @custdesc    An internal firmware error occurred
              */
 
             // Create an error log

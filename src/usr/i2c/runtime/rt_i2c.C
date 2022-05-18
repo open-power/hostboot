@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -136,6 +136,7 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
             * @userdata2[0:31]  Operation Type
             * @userdata2[32:64] Target
             * @devdesc      I2C offset length is invalid
+            * @custdesc     An internal firmware error occurred
             */
             err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
                                           RT_I2C_PERFORM_OP,
@@ -270,6 +271,7 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
              * @userdata2[32:47] Master Engine
              * @userdata2[48:63] Slave Device Address
              * @devdesc          Invalid operation type.
+             * @custdesc         An internal firmware error occurred
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            I2C_PERFORM_OP,
@@ -294,6 +296,7 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
              * @userdata1    0
              * @userdata2    Op type
              * @devdesc      I2C read/write interface not linked.
+             * @custdesc     An internal firmware error occurred
              */
             err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
                                           I2C_PERFORM_OP,

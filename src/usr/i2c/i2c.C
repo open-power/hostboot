@@ -454,6 +454,7 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
                  * @userdata2       <UNUSED>
                  * @devdesc         I2C master encountered an error while
                  *                  trying to unlock the eepromPage
+                 * @custdesc        There is a problem accessing the vital product data.
                  */
                 err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                I2C_PERFORM_OP,
@@ -721,6 +722,7 @@ errlHndl_t i2cChooseEepromPage(TARGETING::Target * i_target,
              * @userdata2       Requested Page
              * @devdesc         There was a request for an invalid
              *                  EEPROM page
+             * @custdesc        An internal firmware error occurred
              */
             l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                              I2C_CHOOSE_EEPROM_PAGE,
@@ -779,6 +781,7 @@ errlHndl_t i2cPageSwitchOp( DeviceFW::OperationType i_opType,
              * @userdata2      <UNUSED>
              * @devdesc        Master Sentinel chip was used as a target for an
              *                 I2C operation.  This is not permitted.
+             * @custdesc       An internal firmware error occurred
              */
             l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            I2C_PAGE_SWITCH_OP,
@@ -816,6 +819,7 @@ errlHndl_t i2cPageSwitchOp( DeviceFW::OperationType i_opType,
                  * @userdata2      <UNUSED>
                  * @devdesc        There was an error retrieving the EEPROM page
                  *                 mutex for this i2c master engine
+                 * @custdesc       An internal firmware error occurred
                  */
                 l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                  I2C_PAGE_SWITCH_OP,
@@ -1081,6 +1085,7 @@ bool i2cPageUnlockOp( TARGETING::Target * i_target,
              * @userdata2      <UNUSED>
              * @devdesc        There was an error retrieving the EEPROM page
              *                 mutex for this i2c master engine
+             * @custdesc       An internal firmware error occurred
              */
             l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                              I2C_PERFORM_OP,
@@ -1373,6 +1378,7 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
              * @userdata2      <UNUSED>
              * @devdesc        Master Sentinel chip was used as a target for an
              *                 I2C operation.  This is not permitted.
+             * @custdesc       An internal firmware error occurred
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            I2C_PERFORM_OP,
@@ -2162,6 +2168,7 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
              * @userdata2[32:47] Master Engine
              * @userdata2[48:63] Slave Device Address
              * @devdesc          Invalid operation type.
+             * @custdesc         An internal firmware error occurred
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            I2C_PERFORM_OP,
@@ -2611,6 +2618,8 @@ errlHndl_t i2cRead ( TARGETING::Target * i_target,
                      * @userdata2[32:47] Bus Speed
                      * @userdata2[48:63] Bit Rate Devisor
                      * @devdesc          Timed out waiting for data in FIFO to read
+                     * @custdesc         There is a problem accessing the vital product data
+                     *                   or another device
                      */
                     err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                    I2C_READ,
@@ -3120,6 +3129,8 @@ errlHndl_t i2cWaitForCmdComp ( TARGETING::Target * i_target,
                  * @userdata2[32:47] Bus Speed
                  * @userdata2[48:63] Bit Rate Devisor
                  * @devdesc          Timed out waiting for command complete.
+                 * @custdesc         There is a problem accessing the vital product data
+                 *                   or another device
                  */
                 err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                I2C_WAIT_FOR_CMD_COMP,
@@ -3649,7 +3660,9 @@ errlHndl_t i2cWaitForFifoSpace ( TARGETING::Target * i_target,
                  * @userdata2[16:31] Slave Device Address
                  * @userdata2[32:47] Bus Speed
                  * @userdata2[48:63] Bit Rate Devisor
-                 * @devdesc        Timed out waiting for space to write into FIFO.
+                 * @devdesc          Timed out waiting for space to write into FIFO.
+                 * @custdesc         There is a problem accessing the vital product data
+                 *                   or another device
                  */
                 err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                I2C_WRITE,

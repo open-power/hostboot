@@ -1326,6 +1326,7 @@ void DeconfigGard::platPostDeconfigureTarget(
           * @userdata1        HUID of target
           * @userdata2        none
           * @devdesc          Post de-configuration of target failed
+          * @custdesc         An internal firmware error occurred
           */
          l_err= new ErrlEntry(ERRL_SEV_INFORMATIONAL,
                               HWAS::MOD_PLAT_DECONFIG_GARD,
@@ -1362,6 +1363,7 @@ void DeconfigGard::platPostDeconfigureTarget(
           * @userdata1        HUID of target
           * @userdata2        none
           * @devdesc          Post de-configuration of target failed
+          * @custdesc         An internal firmware error occurred
           */
          l_err= new ErrlEntry(ERRL_SEV_INFORMATIONAL,
                               HWAS::MOD_PLAT_DECONFIG_GARD,

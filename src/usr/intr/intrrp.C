@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -715,6 +715,7 @@ errlHndl_t IntrRp::resetIntUnit(intr_hdlr_t* i_proc)
                 // @userdata2       XIVE Powerbus Scom Register Data
                 //
                 // @devdesc         Timeout waiting for Powerbus to Quiesce
+                // @custdesc        Internal processor error discovered by boot firmware
                 //
                 l_err = new ERRORLOG::ErrlEntry
                       (
@@ -1118,6 +1119,7 @@ void IntrRp::msgHandler()
                          * @userdata2       PIR
                          * @devdesc         Error encountered routing IPC
                          *                  message
+                         * @custdesc        An internal firmware error occurred
                          */
                         l_err = new ERRORLOG::ErrlEntry
                             (
@@ -1479,6 +1481,7 @@ errlHndl_t IntrRp::sendPsiHbEOI(intr_hdlr_t* i_proc, uint64_t& i_intSource)
          * @userdata1       Value read from EOI load
          * @userdata2       Interrupt Source to issue EOI to
          * @devdesc         Unexpected RC from issuing PSIHB EOI store
+         * @custdesc        Internal processor error discovered by boot firmware
          */
         l_err = new ERRORLOG::ErrlEntry
               (
@@ -1543,6 +1546,7 @@ errlHndl_t IntrRp::sendXiveEOI(uint64_t& i_intSource, PIR_t& i_pir)
                      * @userdata1       RC from msg_send command
                      * @devdesc         Error encountered sending coalesce
                      *                  message to INTRP
+                     * @custdesc        An internal firmware error occurred
                      */
                     l_err = new ERRORLOG::ErrlEntry
                           (
@@ -1596,6 +1600,7 @@ errlHndl_t IntrRp::sendEOI(uint64_t& i_intSource, PIR_t& i_pir)
             * @userdata2       Input PIR
             * @devdesc         Error encountered searching for a
             *                  proc to send EOI to
+            * @custdesc        An internal firmware error occurred
             */
             l_err = new ERRORLOG::ErrlEntry
                   (
@@ -1885,6 +1890,7 @@ errlHndl_t IntrRp::unmaskInterruptSource(uint8_t l_intr_source,
                 * @userdata1[32:63]  Interrupt Source Number
                 * @userdata2       MMIO Read Value for unmasking
                 * @devdesc         Error unmasking interrupt source
+                * @custdesc        An internal firmware error occurred
                 */
             l_err = new ERRORLOG::ErrlEntry
                   (
@@ -2133,6 +2139,7 @@ errlHndl_t IntrRp::registerInterruptXISR(msg_q_t i_msgQ,
              * @userdata2       0
              *
              * @devdesc         Interrupt type already registered
+             * @custdesc        An internal firmware error occurred
              *
              */
             err = new ERRORLOG::ErrlEntry
@@ -2541,6 +2548,7 @@ errlHndl_t syncNodesError(void * i_p, uint64_t i_len)
      * @userdata1    physical address
      * @userdata2    Block size requested
      * @devdesc      Error mapping in memory
+     * @custdesc     An internal firmware error occurred
      */
     return new ERRORLOG::ErrlEntry
         (
@@ -2787,6 +2795,7 @@ errlHndl_t  IntrRp::initializeMpiplSyncArea()
          * @userdata1    physical address
          * @userdata2    Size
          * @devdesc      Error mapping in memory
+         * @custdesc     An internal firmware error occurred
          */
         err = new ERRORLOG::ErrlEntry
             (
@@ -2838,6 +2847,7 @@ errlHndl_t  IntrRp::addHbNodeToMpiplSyncArea(uint64_t i_hbNode)
          * @userdata1    physical address
          * @userdata2    Size
          * @devdesc      Error mapping in memory
+         * @custdesc     An internal firmware error occurred
          */
         err = new ERRORLOG::ErrlEntry
             (
@@ -2899,6 +2909,7 @@ errlHndl_t INTR::registerMsgQ(msg_q_t i_msgQ,
          * @userdata2       0
          *
          * @devdesc         Interrupt resource provider not initialized yet.
+         * @custdesc        An internal firmware error occurred
          *
          */
         err = new ERRORLOG::ErrlEntry
@@ -2979,6 +2990,7 @@ errlHndl_t INTR::enableExternalInterrupts()
          * @userdata2       0
          *
          * @devdesc         Interrupt resource provider not initialized yet.
+         * @custdesc        An internal firmware error occurred
          *
          */
         err = new ERRORLOG::ErrlEntry
@@ -3021,6 +3033,7 @@ errlHndl_t INTR::disableExternalInterrupts()
          * @userdata2       0
          *
          * @devdesc         Interrupt resource provider not initialized yet.
+         * @custdesc        An internal firmware error occurred
          *
          */
         err = new ERRORLOG::ErrlEntry
@@ -3344,6 +3357,7 @@ errlHndl_t INTR::addHbNode(uint64_t i_hbNode)
          * @userdata2       hbNode to add
          *
          * @devdesc         Interrupt resource provider not initialized yet.
+         * @custdesc        An internal firmware error occurred
          *
          */
         err = new ERRORLOG::ErrlEntry
@@ -3434,6 +3448,7 @@ errlHndl_t INTR::enablePsiIntr(TARGETING::Target * i_target)
          * @userdata2       0
          *
          * @devdesc         Interrupt resource provider not initialized yet.
+         * @custdesc        An internal firmware error occurred
          *
          */
         err = new ERRORLOG::ErrlEntry

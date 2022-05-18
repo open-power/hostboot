@@ -451,6 +451,7 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
                  * @userdata1        EEPROM Chip
                  * @userdata2        HUID of target
                  * @devdesc          Invalid EEPROM chip to access
+                 * @custdesc         An internal firmware error occurred
                  */
                 err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            EEPROM_READATTRIBUTES,
@@ -485,6 +486,7 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
                  * @userdata1        HUID of target
                  * @userdata2        EEPROM chip
                  * @devdesc          EEPROM attribute was not found
+                 * @custdesc         An internal firmware error occurred
                  */
                 err = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -555,6 +557,7 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
                      * @userdata1        HUID of target
                      * @userdata2        Byte Address Offset
                      * @devdesc          Invalid address offset size
+                     * @custdesc         An internal firmware error occurred
                      */
                     err = new ERRORLOG::ErrlEntry(
                                         ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -695,6 +698,7 @@ errlHndl_t eepromGetMasterTarget ( TARGETING::Target * i_target,
              * @userdata1[32:63] HUID of target
              * @userdata2        Compressed Entity Path
              * @devdesc          I2C master entity path doesn't exist.
+             * @custdesc         An internal firmware error occurred
              */
             err = new ERRORLOG::ErrlEntry(
                                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -755,6 +759,7 @@ errlHndl_t eepromGetMasterTarget ( TARGETING::Target * i_target,
              * @userdata1[32:63] HUID of target
              * @userdata2        Compressed Entity Path
              * @devdesc          Master path target is null.
+             * @custdesc         An internal firmware error occurred
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            EEPROM_GET_MASTERTARGET,

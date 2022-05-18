@@ -136,6 +136,7 @@ errlHndl_t resolveSource(Target * i_target,
         * @userdata1[56:63] muxSelect of eeprom slave (or byte 1 offset_KB)
         * @userdata2[0:31]  size of eeprom
         * @devdesc      resolveSource failed to find cache in map during runtime
+        * @custdesc     An internal firmware error occurred
         */
         err = new ERRORLOG::ErrlEntry(
                         ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -692,6 +693,7 @@ errlHndl_t eepromPerformOp(DeviceFW::OperationType i_opType,
          * @userdata2[0:31]  EEPROM role
          * @userdata2[32:63] EEPROM source
          * @devdesc          No functional EEPROM source available
+         * @custdesc         There is a problem accessing the vital product data or another device
          */
         errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                        EEPROM_PERFORM_OP,
@@ -875,6 +877,7 @@ errlHndl_t reloadMvpdEecacheFromNextSource( TARGETING::Target* const i_target)
          * @userdata1        Mask from ATTR_EEPROM_VPD_ACCESSIBILITY
          * @userdata2        HUID of target
          * @devdesc          No functional EEPROM source available
+         * @custdesc         There is a problem accessing the vital product data or another device
          */
         errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                              EEPROM_DISABLE_NEXT_MVPD_SOURCE,

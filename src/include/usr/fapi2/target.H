@@ -799,6 +799,7 @@ Target<T_SELF, M, V>::getOtherEnd(fapi2::Target<T, M, V>& o_target,
         * @userdata1[32:63]   Unused
         * @userdata2          Unused
         * @devdesc            Unable to resolve other end of bus
+        * @custdesc           An internal firmware error occurred
         */
         l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                       fapi2::MOD_FAPI2_PLAT_GET_OTHER_END,
@@ -823,6 +824,7 @@ Target<T_SELF, M, V>::getOtherEnd(fapi2::Target<T, M, V>& o_target,
         * @userdata1[32:63]   Unused
         * @userdata2          Unused
         * @devdesc            Unable to resolve other end of bus
+        * @custdesc           An internal firmware error occurred
         */
         l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                       fapi2::MOD_FAPI2_PLAT_GET_OTHER_END,
