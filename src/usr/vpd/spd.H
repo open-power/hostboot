@@ -56,9 +56,9 @@ enum
     MEM_TYPE_INVALID = 0x0,
     MEM_TYPE_ADDR = 0x2,
     MEM_TYPE_SZ = 0x1,
-    SPD_DDR3_TYPE = SPD::MEM_DDR3,   // SPD type for DDR3 as found in SPD byte 2
-    SPD_DDR4_TYPE = SPD::MEM_DDR4,   // SPD type for DDR4 as found in SPD byte 2
-    SPD_DDR5_TYPE = 0x12,            // SPD type for DDR5 as found in SPD byte 2
+    SPD_DDR3_TYPE = SPD::MEM_DDR3,       // SPD type for DDR3 as found in SPD byte 2
+    SPD_DDR4_TYPE = SPD::MEM_DDR4,       // SPD type for DDR4 as found in SPD byte 2
+    SPD_DDR5_TYPE = 0x12,                // SPD type for DDR5 as found in SPD byte 2
     SPD_DDR3_SIZE = SPD::DDR3_SPD_SIZE,  // SPD size for DDR3, 256 bytes
     SPD_DDR4_SIZE = SPD::DDR4_SPD_SIZE,  // SPD size for DDR4, 512 bytes
     SPD_DDR5_SIZE = 1024,
@@ -88,6 +88,7 @@ enum
     MOD_TYPE_DDR4_SO_RDIMM   = 0x08,
     MOD_TYPE_DDR4_SO_UDIMM   = 0x09,
     MOD_TYPE_DDIMM           = 0x0A,
+    MOD_TYPE_PLANAR          = 0x0B,
     MOD_TYPE_MDS_DDIMM       = 0xBA,
 
     DIMM_SPD_SECTION_SIZE = 0x200,  // Size each DIMM SPD section
@@ -106,6 +107,7 @@ typedef enum
     CMM       = 0x04, // Clocked Memory Modules
     LRMM      = 0x08, // Load Reduction Memory Modules
     DDIMM     = 0x10, // Differential DIMM
+    PLANAR    = 0x20, // Planar EEPROM
     ALL       = 0xFFFF,
 } modSpecTypes_t;
 
@@ -118,7 +120,7 @@ struct KeywordData
 {
     uint16_t keyword;   // SPD keyword this data corresponds to
     uint16_t offset;    // Byte offset in the SPD data
-    uint16_t length;     // Number of bytes to retrieve
+    uint16_t length;    // Number of bytes to retrieve
     uint8_t bitMask;    // Bit mask, if non-zero it is used to mask off bits.
                         // This applies to only byte0 in a non special case
     uint8_t shift;      // Used for fields < 1 byte to right justify all values.
@@ -131,25 +133,25 @@ struct KeywordData
 /**
  * @brief This function is used to read SPD keywords from collected
  *      SPD data for the given target
-*
-* @param[in] i_opType - Operation Type - See DeviceFW::OperationType in
-*       driververif.H
-*
-* @param[in] i_target - DIMM Target device
-*
-* @param [in/out] io_buffer - Pointer to the data that was read from
-*       the target device.
-*
-* @param [in/out] io_buflen - Length of the buffer to be read
-*       from the target.  This value should indicate the size of the
-*       io_buffer parameter that has been allocated.  Being returned it will
-*       indicate the number of valid bytes in the buffer being returned.
-*
-* @param [in] i_accessType - Access Type - See DeviceFW::AccessType in
-*       usrif.H
-*
-* @param [in] i_args - This is an argument list for the device driver
-*       framework.
+ *
+ * @param[in] i_opType - Operation Type - See DeviceFW::OperationType in
+ *       driververif.H
+ *
+ * @param[in] i_target - DIMM Target device
+ *
+ * @param [in/out] io_buffer - Pointer to the data that was read from
+ *       the target device.
+ *
+ * @param [in/out] io_buflen - Length of the buffer to be read
+ *       from the target.  This value should indicate the size of the
+ *       io_buffer parameter that has been allocated.  Being returned it will
+ *       indicate the number of valid bytes in the buffer being returned.
+ *
+ * @param [in] i_accessType - Access Type - See DeviceFW::AccessType in
+ *       usrif.H
+ *
+ * @param [in] i_args - This is an argument list for the device driver
+ *       framework.
  *
  * @return errlHndl_t - NULL if successful, otherwise a pointer to the
  *      error log.
@@ -163,25 +165,25 @@ errlHndl_t spdGetKeywordValue ( DeviceFW::OperationType i_opType,
 
 /**
  * @brief This function is used to write SPD keyword values.
-*
-* @param[in] i_opType - Operation Type - See DeviceFW::OperationType in
-*       driververif.H
-*
-* @param[in] i_target - DIMM Target device
-*
-* @param [in/out] io_buffer - Pointer to the data that will contain data
-*       to be written to the device.
-*
-* @param [in/out] io_buflen - Length of the buffer to be written
-*       to the target.  This value should indicate the size of the
-*       io_buffer parameter that has been allocated.  Being returned it will
-*       indicate the number of valid bytes written to the target.
-*
-* @param [in] i_accessType - Access Type - See DeviceFW::AccessType in
-*       usrif.H
-*
-* @param [in] i_args - This is an argument list for the device driver
-*       framework.
+ *
+ * @param[in] i_opType - Operation Type - See DeviceFW::OperationType in
+ *       driververif.H
+ *
+ * @param[in] i_target - DIMM Target device
+ *
+ * @param [in/out] io_buffer - Pointer to the data that will contain data
+ *       to be written to the device.
+ *
+ * @param [in/out] io_buflen - Length of the buffer to be written
+ *       to the target.  This value should indicate the size of the
+ *       io_buffer parameter that has been allocated.  Being returned it will
+ *       indicate the number of valid bytes written to the target.
+ *
+ * @param [in] i_accessType - Access Type - See DeviceFW::AccessType in
+ *       usrif.H
+ *
+ * @param [in] i_args - This is an argument list for the device driver
+ *       framework.
  *
  * @return errlHndl_t - NULL if successful, otherwise a pointer to the
  *      error log.

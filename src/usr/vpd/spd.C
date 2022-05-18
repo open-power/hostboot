@@ -51,8 +51,8 @@
 #include "spdDDR3.H"
 #include "spdDDR4.H"
 #include "spdDDR4_DDIMM.H"
+#include "spd_planar.H"
 #include "errlud_vpd.H"
-#include "ocmb_spd.H"
 #include <targeting/targplatutil.H>     // assertGetToplevelTarget
 
 // ----------------------------------------------
@@ -63,9 +63,9 @@ TRAC_INIT( & g_trac_spd, "SPD", KILOBYTE );
 
 // ------------------------
 // Macros for unit testing
-//#define TRACUCOMP(args...)  TRACFCOMP(args)
+// #define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
-//#define TRACSSCOMP(args...)  TRACFCOMP(args)
+// #define TRACSSCOMP(args...)  TRACFCOMP(args)
 #define TRACSSCOMP(args...)
 
 
@@ -1155,13 +1155,33 @@ errlHndl_t fetchDataFromEepromType(uint64_t i_byteAddr,
                             o_data,
                             i_target);
     }
-    else if (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_DDIMM)
+    else if (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_DDIMM ||
+             i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_PLANAR_OCMB_SPD)
     {
         errl = ocmbFetchData(i_target,
                              i_byteAddr,
                              i_numBytes,
                              o_data,
                              EEPROM::AUTOSELECT);
+    }
+    else
+    {
+        /*@
+         * @moduleid         VPD::VPD_FETCH_DATA_EEPROM_TYPE
+         * @reasoncode       VPD::VPD_UNSUPPORTED_EEPROM_TYPE
+         * @userdata1        Unsupported EEPROM type
+         * @userdata2        HUID of target to read the EEPROM data for
+         * @devdesc          The type EEPROM to read for the given target
+         *                   is not supported.
+         * @custdesc         A problem occurred during the IPL
+         *                   of the system.
+         */
+        errl = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                       VPD::VPD_FETCH_DATA_EEPROM_TYPE,
+                                       VPD::VPD_UNSUPPORTED_EEPROM_TYPE,
+                                       i_eepromType,
+                                       get_huid(i_target),
+                                       ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
     }
 
     return errl;
@@ -1509,14 +1529,11 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
                        "appropriate scenario!" );
 
             TRACFCOMP( g_trac_spd, ERR_MRK
-                       "  Mem Type: 0x%04x, Mod Type: 0x%04x, Keyword: 0x%04x",
-                       i_memType,
-                       modType,
-                       i_kwdData.keyword );
+                       "Mem Type: 0x%04X, Mod Type: 0x%04X, Keyword: 0x%04X",
+                       i_memType, modType, i_kwdData.keyword );
 
             uint32_t udUpper32 = TWO_UINT16_TO_UINT32(modType, i_memType);
-            uint32_t udLower32 = TWO_UINT16_TO_UINT32(i_kwdData.keyword,
-                    i_kwdData.modSpec);
+            uint32_t udLower32 = TWO_UINT16_TO_UINT32(i_kwdData.keyword, i_kwdData.modSpec);
             uint64_t userdata1 = TWO_UINT32_TO_UINT64(udUpper32, udLower32);
 
             /*@
@@ -1581,9 +1598,8 @@ errlHndl_t getMemType(uint8_t             & o_memType,
                         i_eepromSource);
 
     TRACUCOMP( g_trac_spd,
-               EXIT_MRK"SPD::getMemType() - MemType: 0x%02x, Error: %s",
-               o_memType,
-               ((NULL == err) ? "No" : "Yes") );
+               EXIT_MRK"SPD::getMemType() - MemType: 0x%02X, Error: %s",
+               o_memType, ((NULL == err) ? "No" : "Yes") );
 
     return err;
 }
@@ -1663,8 +1679,7 @@ errlHndl_t getModType ( modSpecTypes_t & o_modType,
 
     if (err)
     {
-        TRACFCOMP( g_trac_spd,
-                   ERR_MRK"SPD::getModType() - Error querying ModType" );
+        TRACFCOMP( g_trac_spd, ERR_MRK "SPD::getModType() - Error querying ModType");
     }
     else
     {
@@ -1719,12 +1734,15 @@ errlHndl_t getModType ( modSpecTypes_t & o_modType,
             {
                 o_modType = DDIMM;
             }
+            else if (MOD_TYPE_PLANAR == modTypeVal)
+            {
+                o_modType = PLANAR;
+            }
         }
 
         if (o_modType == NA)
         {
-            TRACFCOMP( g_trac_spd,
-                       ERR_MRK"Module type 0x%02x unrecognized", modTypeVal );
+            TRACFCOMP( g_trac_spd, ERR_MRK"Module type 0x%02X unrecognized", modTypeVal );
 
             /*@
              * @errortype
@@ -1749,14 +1767,13 @@ errlHndl_t getModType ( modSpecTypes_t & o_modType,
         else
         {
             TRACUCOMP( g_trac_spd,
-                       "SPD::getModType() - Val: 0x%02x, ModType: 0x%02x",
+                       "SPD::getModType() - Val: 0x%02X, ModType: 0x%02X",
                        modTypeVal, o_modType);
         }
     }
 
     return err;
 }
-
 
 // ------------------------------------------------------------------
 // getKeywordEntry
@@ -1788,6 +1805,11 @@ errlHndl_t getKeywordEntry ( VPD::vpdKeyword i_keyword,
                 arraySize = (sizeof(ddr4DDIMMData)/sizeof(ddr4DDIMMData[0]));
                 kwdData = ddr4DDIMMData;
             }
+            else if (modType == PLANAR)
+            {
+                arraySize = (sizeof(planarEepromData)/sizeof(planarEepromData[0]));
+                kwdData = planarEepromData;
+            }
             else
             {
                 arraySize = (sizeof(ddr4Data)/sizeof(ddr4Data[0]));
@@ -1796,8 +1818,7 @@ errlHndl_t getKeywordEntry ( VPD::vpdKeyword i_keyword,
         }
         else
         {
-            TRACFCOMP( g_trac_spd,
-                       ERR_MRK"Unsupported DDRx Revision (0x%04x)",
+            TRACFCOMP( g_trac_spd, ERR_MRK"Unsupported DDRx Revision (0x%04X)",
                        i_memType );
 
             /*@
@@ -1845,8 +1866,7 @@ errlHndl_t getKeywordEntry ( VPD::vpdKeyword i_keyword,
         if( ( entry == &kwdData[arraySize] ) ||
             ( i_keyword != entry->keyword ) )
         {
-            TRACFCOMP( g_trac_spd,
-                       ERR_MRK"No matching keyword entry found!" );
+            TRACFCOMP( g_trac_spd, ERR_MRK"No matching keyword entry found!" );
 
             /*@
              * @errortype
@@ -1887,7 +1907,7 @@ errlHndl_t getKeywordEntry ( VPD::vpdKeyword i_keyword,
 // ------------------------------------------------------------------
 void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
 {
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
 
     //Default to standard VPD Location for DDIMM SPD SN/PN
     VPD::vpdKeyword l_partKeyword = SPD::MODULE_PART_NUMBER;
@@ -1910,18 +1930,18 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
                             i_target );
         if( l_err )
         {
-            TRACDCOMP(g_trac_spd, ERR_MRK"spd.C::setPartAndSerialNumberAttributes(): Error after getMemType");
+            TRACFCOMP(g_trac_spd, ERR_MRK"spd.C::setPartAndSerialNumberAttributes(): Error after getMemType");
             break;
         }
 
         if (false == isValidDimmType(l_memType) )
         {
-            TRACDCOMP(g_trac_spd, ERR_MRK"spd.C::setPartAndSerialNumberAttributes(): Unknown memType");
+            TRACFCOMP(g_trac_spd, ERR_MRK"spd.C::setPartAndSerialNumberAttributes(): Unknown memType");
             break;
         }
 
         // Get the keyword sizes
-        const KeywordData* entry = NULL;
+        const KeywordData* entry = nullptr;
         l_err = getKeywordEntry( l_partKeyword,
                                  l_memType,
                                  i_target,
@@ -1932,7 +1952,7 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
         }
         size_t l_partDataSize = entry->length;
 
-        entry = NULL;
+        entry = nullptr;
         l_err = getKeywordEntry( l_serialKeyword,
                                  l_memType,
                                  i_target,
@@ -1946,7 +1966,7 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
         size_t l_ccinDataSize = 0;
         if (l_ccinKeyword != 0)
         {
-            entry = NULL;
+            entry = nullptr;
             l_err = getKeywordEntry( l_ccinKeyword,
                                      l_memType,
                                      i_target,
@@ -1971,7 +1991,7 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
                              l_memType );
         if( l_err )
         {
-            TRACDCOMP(g_trac_spd, ERR_MRK"spd.C::setPartAndSerialNumberAttributes(): Error after spdGetValue-> PART_NUMBER");
+            TRACFCOMP(g_trac_spd, ERR_MRK"spd.C::setPartAndSerialNumberAttributes(): Error after spdGetValue-> PART_NUMBER");
             break;
         }
 
@@ -2001,8 +2021,8 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
                 break;
             }
         }
-        TRACFCOMP(g_trac_spd,
-            "setPartAndSerialNumberAttributes: HUID=%lx", get_huid(i_target));
+
+        TRACFCOMP(g_trac_spd, "setPartAndSerialNumberAttributes: HUID=0x%08X", get_huid(i_target));
 
         // Set the attributes
         TARGETING::ATTR_PART_NUMBER_type l_PN = {0};
@@ -2064,7 +2084,7 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
             memcpy(&l_CC, l_ccinData, l_ccinDataSize);
             i_target->trySetAttr<TARGETING::ATTR_FRU_CCIN>(l_CC);
             TRACFCOMP(g_trac_spd,
-                      "                                : CCIN = %lx",
+                      "                                : CCIN = %lX",
                       l_CC);
         }
 

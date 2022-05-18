@@ -38,7 +38,7 @@
 
 extern trace_desc_t * g_trac_spd;
 
-//#define TRACSSCOMP(args...)  TRACFCOMP(args)
+// #define TRACSSCOMP(args...)  TRACFCOMP(args)
 #define TRACSSCOMP(args...)
 
 // Namespace alias for targeting
@@ -102,8 +102,7 @@ errlHndl_t ocmbGetSPD(T::TargetHandle_t        i_target,
         // Check to be sure entry is not nullptr.
         if (entry == nullptr)
         {
-            TRACFCOMP(g_trac_spd,
-                      ERR_MRK"SPD::KeywordData entry pointer is nullptr!");
+            TRACFCOMP(g_trac_spd, ERR_MRK"SPD::KeywordData entry pointer is nullptr!");
 
             /*@
             * @errortype
@@ -197,14 +196,13 @@ errlHndl_t ocmbFetchData(T::TargetHandle_t    i_target,
                         uint64_t              i_byteAddr,
                         size_t                i_numBytes,
                         void*                 o_data,
-                        EEPROM::EEPROM_SOURCE i_location)
+                        EEPROM::EEPROM_SOURCE i_eepromSource)
 {
     errlHndl_t err = nullptr;
 
-    TRACSSCOMP(g_trac_spd,
-               ENTER_MRK"ocmbFetchData()"
-               " i_byteAddr = 0x%x i_numBytes = %d i_location = 0x%x",
-               i_byteAddr, i_numBytes, i_location);
+    TRACSSCOMP(g_trac_spd, ENTER_MRK"ocmbFetchData() "
+               "i_byteAddr = 0x%X i_numBytes = %d i_eepromSource = 0x%X",
+               i_byteAddr, i_numBytes, i_eepromSource);
 
     do
     {
@@ -215,11 +213,10 @@ errlHndl_t ocmbFetchData(T::TargetHandle_t    i_target,
                                  i_numBytes,
                                  DEVICE_EEPROM_ADDRESS(EEPROM::VPD_PRIMARY,
                                                        i_byteAddr,
-                                                       i_location));
+                                                       i_eepromSource));
         if( err )
         {
-            TRACFCOMP(g_trac_spd,
-                      ERR_MRK"ocmbFetchData(): failing out of deviceOp");
+            TRACFCOMP(g_trac_spd, ERR_MRK"ocmbFetchData(): failing out of deviceOp");
             break;
         }
 
@@ -251,8 +248,7 @@ errlHndl_t ocmbSPDPerformOp(DeviceFW::OperationType i_opType,
     errlHndl_t errl = nullptr;
     const uint64_t keyword = va_arg(i_args, uint64_t);
 
-    TRACSSCOMP(g_trac_spd,
-               ENTER_MRK"ocmbSPDPerformOP(), io_buflen: %d, keyword: 0x%04x",
+    TRACSSCOMP(g_trac_spd, ENTER_MRK" ocmbSPDPerformOP(), io_buflen: %d, keyword: 0x%04X",
                io_buflen, keyword );
 
     do
@@ -266,9 +262,7 @@ errlHndl_t ocmbSPDPerformOp(DeviceFW::OperationType i_opType,
             break;
         }
 
-        TRACSSCOMP(g_trac_spd,
-                   INFO_MRK"Mem Type: %04x",
-                   memType);
+        TRACSSCOMP(g_trac_spd, INFO_MRK"Mem Type: 0x%04X", memType);
 
         // Check the Basic Memory Type
         if (isValidOcmbDimmType(memType))
@@ -299,11 +293,8 @@ errlHndl_t ocmbSPDPerformOp(DeviceFW::OperationType i_opType,
         }
         else
         {
-            TRACFCOMP(g_trac_spd,
-                      ERR_MRK"Invalid Basic Memory Type (0x%04x), "
-                      "target huid = 0x%x",
-                      memType,
-                      T::get_huid(i_target));
+            TRACFCOMP(g_trac_spd, ERR_MRK"Invalid Basic Memory Type (0x%04X), target huid = 0x%08X",
+                      memType, T::get_huid(i_target));
 
             /*@
             * @errlortype
@@ -351,8 +342,7 @@ errlHndl_t ocmbSPDPerformOp(DeviceFW::OperationType i_opType,
             .addToLog(errl);
     }
 
-    TRACSSCOMP(g_trac_spd,
-               EXIT_MRK"ocmbSPDPerformOP(): returning %s errors",
+    TRACSSCOMP(g_trac_spd, EXIT_MRK" ocmbSPDPerformOP(): returning %s errors",
                (errl ? "with" : "with no") );
 
     return errl;

@@ -345,11 +345,8 @@
           <id>devAddr</id>
         </field>
         <field>
-          <!--Since enum values cannot be used as default values in
-                  a complexType, this is a workaround to set the value to the
-                  corresponding enum value.-->
-          <!--value>DDIMM</value-->
-          <value>0x4</value>
+          <!--value>INVALID</value-->
+          <value>0xFFFFFFFF</value>
           <id>eepromContentType</id>
         </field>
         <field>
@@ -1281,7 +1278,7 @@
           <!--Since enum values cannot be used as default values in
                   a complexType, this is a workaround to set the value to the
                   corresponding enum value.-->
-          <!--value>DDIMM</value-->
+          <!--value>RAW</value-->
           <value>0x0</value>
           <id>eepromContentType</id>
         </field>

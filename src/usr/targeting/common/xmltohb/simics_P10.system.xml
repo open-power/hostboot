@@ -13910,6 +13910,7 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
     <attribute>
@@ -13976,6 +13977,7 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
     <attribute>
@@ -14040,6 +14042,7 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
     <attribute>
@@ -14104,6 +14107,7 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
     <attribute>
@@ -14168,6 +14172,7 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
     <attribute>
@@ -14232,6 +14237,7 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
     <attribute>
@@ -14296,6 +14302,7 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
     <attribute>
@@ -14360,6 +14367,7 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
     <attribute>
@@ -14428,6 +14436,7 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>20</value></field>
             <field><id>writePageSize</id><value>32</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
     <attribute>
@@ -14492,6 +14501,7 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>20</value></field>
             <field><id>writePageSize</id><value>32</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
     <attribute>
@@ -14556,6 +14566,7 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>20</value></field>
             <field><id>writePageSize</id><value>32</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
     <attribute>
@@ -14620,6 +14631,7 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>20</value></field>
             <field><id>writePageSize</id><value>32</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
     <attribute>
@@ -14684,6 +14696,7 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>20</value></field>
             <field><id>writePageSize</id><value>32</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
     <attribute>
@@ -14748,6 +14761,7 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>20</value></field>
             <field><id>writePageSize</id><value>32</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
     <attribute>
@@ -14812,6 +14826,7 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>20</value></field>
             <field><id>writePageSize</id><value>32</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
     <attribute>
@@ -14876,6 +14891,7 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>20</value></field>
             <field><id>writePageSize</id><value>32</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
     <attribute>
@@ -23350,6 +23366,7 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -23842,6 +23859,7 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -24334,6 +24352,7 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -24826,6 +24845,7 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -25318,6 +25338,7 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -25810,6 +25831,7 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -26302,6 +26324,7 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -26794,6 +26817,7 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -27286,6 +27310,7 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -27779,6 +27804,7 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -28005,6 +28031,7 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -28231,6 +28258,7 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -28457,6 +28485,7 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -28683,6 +28712,7 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -28909,6 +28939,7 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -29135,6 +29166,7 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
 </targetInstance>

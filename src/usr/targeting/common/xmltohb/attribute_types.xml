@@ -1062,6 +1062,10 @@
       <name>KEYSTORE</name>
       <value>8</value>
     </enumerator>
+    <enumerator>
+      <name>PLANAR_OCMB_SPD</name>
+      <value>9</value>
+    </enumerator>
     <id>EEPROM_CONTENT_TYPE</id>
   </enumerationType>
 

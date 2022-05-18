@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -95,7 +95,7 @@ const KeywordData ddr4Data[] =
     { SDRAM_THERMAL_REFRESH_OPTIONS,    0x08,   0x01,   0x00,   0x00, false, false, ALL },
     { MODULE_THERMAL_SENSOR,            0x0e,   0x01,   0x00,   0x00, false, false, ALL },
     { THERMAL_SENSOR_PRESENT,           0x0e,   0x01,   0x80,   0x07, false, false, ALL },
-    { SDRAM_DEVICE_TYPE       ,         0x06,   0x01,   0x80,   0x07, false, false, ALL },
+    { SDRAM_DEVICE_TYPE,                0x06,   0x01,   0x80,   0x07, false, false, ALL },
     { SDRAM_DIE_COUNT,                  0x06,   0x01,   0x70,   0x04, false, false, ALL },
     { SDRAM_DEVICE_TYPE_SIGNAL_LOADING, 0x06,   0x01,   0x03,   0x00, false, false, ALL },
     { TCKMIN_FINE_OFFSET,               0x7d,   0x01,   0x00,   0x00, false, false, ALL },
@@ -186,7 +186,7 @@ const KeywordData ddr4Data[] =
     { LRMM_ODT_RTT_PARK_2400_3200,      0x9a,   0x01,   0x00,   0x00, false, false, LRMM },
     { RMM_CRC,                          0xff,   0x02,   0x00,   0x00, true,  false, RMM },
     { LRMM_CRC,                         0xff,   0x02,   0x00,   0x00, true,  false, LRMM },
-    { ENTIRE_SPD,                       0x00,  0x200,   0x00,   0x00, false, false,  ALL },
+    { ENTIRE_SPD,                       0x00,  0x200,   0x00,   0x00, false, false, ALL },
     //---------------------------------------------------------------------------------------
 };
 

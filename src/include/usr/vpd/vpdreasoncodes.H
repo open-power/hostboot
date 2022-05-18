@@ -54,6 +54,7 @@ enum vpdModuleId
     VPD_GET_FRU_RECS_AND_KWS                = 0x15,
     VPD_ENSURE_EEPROM_CACHE_IS_IN_SYNC      = 0x16,
     VPD_CMP_EECACHE_TO_ATTRIBUTES           = 0x17,
+    VPD_FETCH_DATA_EEPROM_TYPE              = 0x18,
 
     // IPVPD
     VPD_IPVPD_TRANSLATE_RECORD              = 0x20,
@@ -75,7 +76,6 @@ enum vpdModuleId
     VPD_IPVPD_GET_RECORD_META_DATA          = 0x38,
     VPD_IPVPD_VERIFY_VHDR_RECORD_IS_VALID   = 0x39,
     VPD_IPVPD_VERIFY_RECORD_IS_VALID        = 0x3a,
-
 
     // PVPD
     VPD_PVPD_PRESENCEDETECT                 = 0x50,
@@ -196,6 +196,7 @@ enum vpdReasonCode
     VPD_INVALID_METHOD_OR_DATA_SECTION  = VPD_COMP_ID | 0x4D,
     VPD_RECORD_INVALID                  = VPD_COMP_ID | 0x4E,
     VPD_UNSUPPORTED_FRU_PROPERTY        = VPD_COMP_ID | 0x4F,
+    VPD_UNSUPPORTED_EEPROM_TYPE         = VPD_COMP_ID | 0x50,
 };
 
 

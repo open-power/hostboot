@@ -44,6 +44,7 @@
 #include "../spdDDR3.H"
 #include "../spdDDR4.H"
 #include "../spdDDR4_DDIMM.H"
+#include "../spd_planar.H"
 #include "../spd.H"
 
 extern trace_desc_t* g_trac_spd;
@@ -1408,8 +1409,7 @@ class SPDTest: public CxxTest::TestSuite
             uint64_t prevKeyword = 0x0;
             uint64_t fails = 0x0;
 
-            TRACFCOMP( g_trac_spd,
-                       ENTER_MRK"testspdDDR3TableOrder()" );
+            TRACFCOMP( g_trac_spd, ENTER_MRK"testspdDDR3TableOrder()" );
 
             for( uint32_t entry = 0;
                  entry < (sizeof(ddr3Data)/sizeof(ddr3Data[0]));
@@ -1418,8 +1418,8 @@ class SPDTest: public CxxTest::TestSuite
                 if( !(ddr3Data[entry].keyword >= prevKeyword) )
                 {
                     fails++;
-                    TS_FAIL( "testspdDDR3TableOrder - DDR3 table out of order!  Cur kwd: "
-                             "0x%04x, Pre kwd: 0x%04x",
+                    TS_FAIL( "testspdDDR3TableOrder - DDR3 table out of order! Cur kwd: "
+                             "0x%04X, Pre kwd: 0x%04X",
                              ddr3Data[entry].keyword,
                              prevKeyword );
                 }
@@ -1441,8 +1441,7 @@ class SPDTest: public CxxTest::TestSuite
             uint64_t prevKeyword = 0x0;
             uint64_t fails = 0x0;
 
-            TRACFCOMP( g_trac_spd,
-                       ENTER_MRK"testspdDDR4TableOrder()" );
+            TRACFCOMP( g_trac_spd, ENTER_MRK"testspdDDR4TableOrder()" );
 
             for( uint32_t entry = 0;
                  entry < (sizeof(ddr4Data)/sizeof(ddr4Data[0]));
@@ -1451,8 +1450,8 @@ class SPDTest: public CxxTest::TestSuite
                 if( !(ddr4Data[entry].keyword >= prevKeyword) )
                 {
                     fails++;
-                    TS_FAIL( "testspdDDR4TableOrder - DDR4 table out of order!  Cur kwd: "
-                             "0x%04x, Pre kwd: 0x%04x",
+                    TS_FAIL( "testspdDDR4TableOrder - DDR4 table out of order! Cur kwd: "
+                             "0x%04X, Pre kwd: 0x%04X",
                              ddr4Data[entry].keyword,
                              prevKeyword );
                 }
@@ -1461,6 +1460,38 @@ class SPDTest: public CxxTest::TestSuite
 
             TRACFCOMP( g_trac_spd,
                        EXIT_MRK"testspdDDR4TableOrder() - fails: %d",
+                       fails );
+        }
+
+        /**
+         * @brief This test will ensure that the Planar lookup table is in a
+         *        sorted order, according to the keyword enumeration, to enable
+         *        the search algorithm to work correctly.
+         */
+        void testspdPlanarTableOrder ( void )
+        {
+            uint64_t prevKeyword = 0x0;
+            uint64_t fails = 0x0;
+
+            TRACFCOMP( g_trac_spd, ENTER_MRK"testspdPlanarTableOrder()" );
+
+            for( uint32_t entry = 0;
+                 entry < (sizeof(planarEepromData)/sizeof(planarEepromData[0]));
+                 entry++ )
+            {
+                if( !(planarEepromData[entry].keyword >= prevKeyword) )
+                {
+                    fails++;
+                    TS_FAIL( "testspdPlanarTableOrder - Planar table out of order! Cur kwd: "
+                             "0x%04X, Pre kwd: 0x%04X",
+                             planarEepromData[entry].keyword,
+                             prevKeyword );
+                }
+                prevKeyword = planarEepromData[entry].keyword;
+            }
+
+            TRACFCOMP( g_trac_spd,
+                       EXIT_MRK"testspdPlanarTableOrder() - fails: %d",
                        fails );
         }
 

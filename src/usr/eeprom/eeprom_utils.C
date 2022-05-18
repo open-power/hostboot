@@ -40,7 +40,7 @@ trace_desc_t* g_trac_eeprom = NULL;
 TRAC_INIT( & g_trac_eeprom, EEPROM_COMP_NAME, KILOBYTE );
 
 // Easy macro replace for unit testing
-//#define TRACUCOMP(args...)  TRACFCOMP(args)
+// #define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
 
 namespace EEPROM
@@ -96,7 +96,7 @@ bool eepromPresence ( TARGETING::Target * i_target )
         if(hasRemoteVpdSource(i_target))
         {
             TRACFCOMP(g_trac_eeprom,
-                     "eepromPresence: Found that VPD for 0x%8x was remotely sourced this IPL, assuming present",
+                     "eepromPresence: Found that VPD for 0x%08X was remotely sourced this IPL, assuming present",
                      TARGETING::get_huid(i_target));
             l_present = true;
             break;
@@ -130,7 +130,7 @@ bool eepromPresence ( TARGETING::Target * i_target )
             if( ! FSI::isSlavePresent(l_eepromMasterTarget) )
             {
                 TRACDCOMP( g_trac_eeprom,
-                           "eepromPresence> FSI::isSlavePresent returned false for eeprom Master Target %.08X",
+                           "eepromPresence> FSI::isSlavePresent returned false for eeprom Master Target 0x%08X",
                            TARGETING::get_huid(l_eepromMasterTarget) );
                 l_present = false;
                 break;
@@ -572,15 +572,14 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
                     break;
             }
 
-            TRACUCOMP(g_trac_eeprom,"eepromReadAttributes() I2C tgt=0x%X, %d/%d/0x%X "
-              "devSize_KB=0x%X, aS=%d (%d)",
+            TRACUCOMP(g_trac_eeprom,"eepromReadAttributes() I2C HUID=0x%X, port/engine/devAddr = "
+              "%d/%d/0x%X, devSize_KB=0x%X, byteAddrOffset=%d",
               TARGETING::get_huid(i_target),
               io_eepromAddr.accessAddr.i2c_addr.port,
               io_eepromAddr.accessAddr.i2c_addr.engine,
               io_eepromAddr.accessAddr.i2c_addr.devAddr,
               io_eepromAddr.devSize_KB,
-              io_eepromAddr.accessAddr.i2c_addr.addrSize,
-              eepromData.byteAddrOffset);
+              io_eepromAddr.accessAddr.i2c_addr.addrSize);
 
             // Printing mux info separately, if combined, nothing is displayed
             char* l_muxPath = io_eepromAddr.accessAddr.i2c_addr.i2cMuxPath.toString();
@@ -1149,8 +1148,8 @@ void cacheEepromVpd(TARGETING::Target * i_target, bool i_present)
            && (controllerTarget->getAttr<TARGETING::ATTR_TYPE>() != TARGETING::TYPE_BMC)
            && (controllerTarget->getAttr<TARGETING::ATTR_TYPE>() != TARGETING::TYPE_SYS))
         {
-            TRACFCOMP(g_trac_eeprom, "cacheEepromVpd(): Reading EEPROMs for target 0x%.8X, eeprom cache = %d VPD_AUTO, "
-                                     "target present = %d , eeprom type = %d, controller target = 0x%.8X",
+            TRACFCOMP(g_trac_eeprom, "cacheEepromVpd(): Reading EEPROMs for target 0x%.8X, eeprom type = %d EEPROM_CACHE, "
+                                     "target present = %d, eeprom cache = %d VPD_AUTO, controller target = 0x%.8X",
                       TARGETING::get_huid(i_target), DEVICE_CACHE_EEPROM_ADDRESS(i_present, EEPROM::VPD_AUTO),
                       TARGETING::get_huid(controllerTarget));
 
