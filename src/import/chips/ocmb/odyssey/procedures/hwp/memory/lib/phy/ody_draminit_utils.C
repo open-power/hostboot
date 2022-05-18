@@ -413,8 +413,12 @@ fapi2::ReturnCode configure_dram_train_message_block(const fapi2::Target<fapi2::
     o_struct.VrefDac_Margin_B3        = 0;
     o_struct.TxDqDly_Margin_B3        = 0;
     o_struct.DeviceVref_Margin_B3     = 0;
-    o_struct.WL_ADJ_START     = 0x00;
-    o_struct.WL_ADJ_END       = 0x00;
+    // WL_ADJ_START and WL_ADJ_END should be set according to the DDR5 spec, section 4.21.4
+    // for our hard codes, we have tWPRE=2
+    //  WL_ADJ_START = -0.75 tCK from table 110, and there are 128 fine steps per clock in the PHY, so use 3*128/4
+    o_struct.WL_ADJ_START     = 0x0060;
+    //  WL_ADJ_END = 1.25 tCK from table 110, and there are 128 fine steps per clock in the PHY, so use 5*128/4
+    o_struct.WL_ADJ_END       = 0x00A0;
     o_struct.RCW00_ChA_D0     = 0;
     o_struct.RCW01_ChA_D0     = 0;
     o_struct.RCW02_ChA_D0     = 0;
