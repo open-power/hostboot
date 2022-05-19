@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,7 +45,7 @@ class Console : public Util::ConsoleBufferInterface
     int putc(int);
         size_t operator()(int c) { return putc(c); };
 
-    enum { BUFFER_SIZE = 1024 * 20 };
+    enum { BUFFER_SIZE = 1024 * 36 };
 
     protected:
     Console();
