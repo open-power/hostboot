@@ -2229,7 +2229,7 @@ namespace TARGETING
     void formatArrayAttrValue(const char* const i_attrName,
                               ATTR_DATA_TYPE i_dataType,
                               ATTR_DATA_SIZE i_dataSize,
-                              const std::vector<uint16_t>& i_arrDimensions,
+                              const std::vector<uint32_t>& i_arrDimensions,
                               void* i_attrValuePtr,
                               std::vector<char>& o_attrValue)
     {
@@ -2348,18 +2348,22 @@ namespace TARGETING
             {
                 // Format single-value attribute
                 char l_formattedAttrStr[200]{};
-                sprintf(l_formattedAttrStr, "%s %s", l_attrNamePtr, formatAttributeSize(g_attrSizesMap[i_attrId].dataType));
+                sprintf(l_formattedAttrStr, "%s    %s   ", l_attrNamePtr, formatAttributeSize(g_attrSizesMap[i_attrId].dataType));
                 o_attrValue.insert(o_attrValue.end(), l_formattedAttrStr, l_formattedAttrStr + strlen(l_formattedAttrStr));
                 formatAttributeValue(g_attrSizesMap[i_attrId].dataType, i_attrValuePtr, o_attrValue);
             }
         }
         else
         {
-            // The attribute is not in the map - we don't know its data type
-            // or size. Mark it as 0xBAD in the dump
-            char l_badValueString[200]{};
-            sprintf(l_badValueString, "%s 0xBAD\n", l_attrNamePtr);
-            o_attrValue.insert(o_attrValue.end(), l_badValueString, l_badValueString + strlen(l_badValueString));
+            // The attribute is not in the map - we don't know its data type. It
+            // could be a complexType or an enum. Treat is as an array of bytes
+            std::vector<uint32_t>l_dimensions{attrSizeLookup(i_attrId) / UINT8_T_SIZE};
+            formatArrayAttrValue(l_attrNamePtr,
+                                 UINT8_T_TYPE,
+                                 UINT8_T_SIZE,
+                                 l_dimensions,
+                                 i_attrValuePtr,
+                                 o_attrValue);
         }
         }while(0);
     }
@@ -2409,6 +2413,26 @@ namespace TARGETING
                 {
                     // Format the attribute value if we found the attr
                     getAttrValueFromMem(l_attrAddr, *l_attrId, l_targetAttributes);
+                }
+
+                // TODO CQ: SW550893 This if statement needs to be removed once
+                // the defect is resolved. Currently there are PLDM timeouts
+                // when we attempt to write large chunks of data via PLDM file
+                // io. This workaround chops those up into page-size chunks,
+                // which alleviates the problem (page-size was chosen experimentally).
+                if(l_targetAttributes.size() >= 4096)
+                {
+                    uint32_t l_size = l_targetAttributes.size();
+                    l_errl = PLDM::writeLidFileFromOffset(Util::ATTR_DUMP_LIDID,
+                                                          l_writeOffset,
+                                                          l_size,
+                                                          reinterpret_cast<uint8_t*>(l_targetAttributes.data()));
+                    if(l_errl)
+                    {
+                        errlCommit(l_errl, ISTEP_COMP_ID);
+                    }
+                    l_writeOffset += l_size;
+                    l_targetAttributes.clear();
                 }
             }
             // Newline to separate targets

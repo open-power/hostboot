@@ -2443,7 +2443,7 @@ typedef struct
     ATTR_DATA_TYPE dataType;
     ATTR_DATA_SIZE dataSize;
     bool isArray;
-    std::vector<uint16_t>dimensions;
+    std::vector<uint32_t>dimensions;
 } attrSizeData_t;
 
 constexpr bool ARRAY = true;
