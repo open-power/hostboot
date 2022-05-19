@@ -214,6 +214,7 @@ uint16_t hdatAddSLCAEntry( TARGETING::Target *i_Target,
     TARGETING::PldmEntityIdInfo pldmEntityId = {0};
     TARGETING::SystemPldmEntityIdInfo sypldmEntityId = {0};
     TARGETING::ChassisPldmEntityIdInfo chaspldmEntityId = {0};
+    TARGETING::ConnectorPldmEntityIdInfo conPldmEntityId = {0};
     TARGETING::Target *l_pSystemTarget = UTIL::assertGetToplevelTarget();
     if(i_frutype == HDAT_SLCA_FRU_TYPE_SV ||
         i_frutype == HDAT_SLCA_FRU_TYPE_VV)
@@ -235,43 +236,61 @@ uint16_t hdatAddSLCAEntry( TARGETING::Target *i_Target,
 
         }
     }
-     else if(i_frutype == HDAT_SLCA_FRU_TYPE_EV)
-     {
-         if(!(l_pSystemTarget->tryGetAttr<TARGETING::ATTR_CHASSIS_PLDM_ENTITY_ID_INFO>
-                              (chaspldmEntityId)))
-         {
-             HDAT_ERR("error reading PLDM_ENTITY_ID_INFO for EV");
-         }
-         else
-         {
-             HDAT_DBG("fetched PLDM ENTITY ID for CHASSIS");
-             l_hdatslcaentry.pldm_entity_id.entityType =
-                                 chaspldmEntityId.entityType;
-             l_hdatslcaentry.pldm_entity_id.entityInstanceNumber =
-                                 chaspldmEntityId.entityInstanceNumber;
-             l_hdatslcaentry.pldm_entity_id.containerId =
-                                 chaspldmEntityId.containerId;
-         }
-     }
-     else
-     {
-         if(!(i_Target->tryGetAttr<TARGETING::ATTR_PLDM_ENTITY_ID_INFO>
-             (reinterpret_cast<TARGETING::ATTR_PLDM_ENTITY_ID_INFO_type&>
-                         (pldmEntityId))))
-         {
-             HDAT_ERR("error reading PLDM_ENTITY_ID_INFO");
-         }
-         else
-         {
-             HDAT_DBG("fetched PLDM ENTITY ID");
-             l_hdatslcaentry.pldm_entity_id.entityType =
-                               pldmEntityId.entityType;
-             l_hdatslcaentry.pldm_entity_id.entityInstanceNumber =
-                               pldmEntityId.entityInstanceNumber;
-             l_hdatslcaentry.pldm_entity_id.containerId =
-                               pldmEntityId.containerId;
-         }
-     }
+    else if(i_frutype == HDAT_SLCA_FRU_TYPE_EV)
+    {
+        if(!(l_pSystemTarget->tryGetAttr<TARGETING::ATTR_CHASSIS_PLDM_ENTITY_ID_INFO>
+                             (chaspldmEntityId)))
+        {
+            HDAT_ERR("error reading PLDM_ENTITY_ID_INFO for EV");
+        }
+        else
+        {
+            HDAT_DBG("fetched PLDM ENTITY ID for CHASSIS");
+            l_hdatslcaentry.pldm_entity_id.entityType =
+                                chaspldmEntityId.entityType;
+            l_hdatslcaentry.pldm_entity_id.entityInstanceNumber =
+                                chaspldmEntityId.entityInstanceNumber;
+            l_hdatslcaentry.pldm_entity_id.containerId =
+                                chaspldmEntityId.containerId;
+        }
+    }
+    else if( (l_pSystemTarget->getAttr<
+              TARGETING::ATTR_PLDM_CONNECTOR_PDRS_ENABLED>())
+             &&
+             ( (i_frutype == HDAT_SLCA_FRU_TYPE_DIMM) ||
+               (i_frutype == HDAT_SLCA_FRU_TYPE_PROC)
+             )
+           )
+    {
+        conPldmEntityId =
+        i_Target->getAttr<TARGETING::ATTR_CONNECTOR_PLDM_ENTITY_ID_INFO>();
+        HDAT_DBG("fetched PLDM ENTITY ID for Connector");
+        l_hdatslcaentry.pldm_entity_id.entityType =
+                            conPldmEntityId.entityType;
+        l_hdatslcaentry.pldm_entity_id.entityInstanceNumber =
+                            conPldmEntityId.entityInstanceNumber;
+        l_hdatslcaentry.pldm_entity_id.containerId =
+                            conPldmEntityId.containerId;
+    }
+    else
+    {
+        if(!(i_Target->tryGetAttr<TARGETING::ATTR_PLDM_ENTITY_ID_INFO>
+            (reinterpret_cast<TARGETING::ATTR_PLDM_ENTITY_ID_INFO_type&>
+                        (pldmEntityId))))
+        {
+            HDAT_ERR("error reading PLDM_ENTITY_ID_INFO");
+        }
+        else
+        {
+            HDAT_DBG("fetched PLDM ENTITY ID");
+            l_hdatslcaentry.pldm_entity_id.entityType =
+                              pldmEntityId.entityType;
+            l_hdatslcaentry.pldm_entity_id.entityInstanceNumber =
+                              pldmEntityId.entityInstanceNumber;
+            l_hdatslcaentry.pldm_entity_id.containerId =
+                              pldmEntityId.containerId;
+        }
+    }
 
      HDAT_DBG("fetched PLDM ENTITY ID as 0x%x, 0x%x, 0x%x",
               l_hdatslcaentry.pldm_entity_id.entityType,
@@ -364,6 +383,8 @@ static void hdatAddNodeToSLCATable(TARGETING::Target *i_Target,
     char     l_nodeLocCode[64] = {0};
     uint16_t l_slcaEntryIndex = 0;
 
+    TARGETING::Target *l_pSystemTarget = UTIL::assertGetToplevelTarget();
+
     l_slcaEntryIndex = hdatAddSLCAEntry(i_Target, HDAT_SLCA_FRU_TYPE_BP,
                                         i_slcaParentIndex,
                                         o_hdatslca);
@@ -425,20 +446,54 @@ static void hdatAddNodeToSLCATable(TARGETING::Target *i_Target,
                                         TARGETING::TYPE_TPM);
 
     TARGETING::PredicatePostfixExpr l_presentChildren;
-    l_presentChildren.push(&l_procFilter).push(&l_memFilter).Or().
+    TARGETING::PredicatePostfixExpr l_fullProcDimm;
+    TARGETING::TargetHandleList l_childList;
+
+    //TODO : RTC Story 311075
+    //Need to refine the SLCA table filter
+    if (!l_pSystemTarget->getAttr<
+              TARGETING::ATTR_PLDM_CONNECTOR_PDRS_ENABLED>())
+    {
+        l_presentChildren.push(&l_procFilter).push(&l_memFilter).Or().
                      push(&l_pciFilter).Or().push(&l_psFilter).Or().
                      push(&l_fanFilter).Or().push(&l_uartFilter).Or().
                      push(&l_usbFilter).Or().push(&l_ethFilter).Or().
                      push(&l_vrmFilter).Or().push(&l_dimmFilter).Or().
                      push(&l_tpmFilter).Or().push(&l_predHwas).And();
 
-    TARGETING::TargetHandleList l_childList;
-
-    //Get all children of this node
-    TARGETING::targetService().
+         //Get all children of this node
+         TARGETING::targetService().
                   getAssociated(l_childList, i_Target,
                           TARGETING::TargetService::CHILD,
                           TARGETING::TargetService::ALL, &l_presentChildren);
+    }
+    else
+    {
+        TARGETING::TargetHandleList l_fullProcDimmChildList;
+
+        // Get the present list except for proc and dimm
+        l_presentChildren.push(&l_memFilter).
+                     push(&l_pciFilter).Or().push(&l_psFilter).Or().
+                     push(&l_fanFilter).Or().push(&l_uartFilter).Or().
+                     push(&l_usbFilter).Or().push(&l_ethFilter).Or().
+                     push(&l_vrmFilter).Or().push(&l_tpmFilter).Or().
+                     push(&l_predHwas).And();
+        TARGETING::targetService().
+                  getAssociated(l_childList, i_Target,
+                          TARGETING::TargetService::CHILD,
+                          TARGETING::TargetService::ALL, &l_presentChildren);
+
+        // Get the full list of proc and dimm
+        l_fullProcDimm.push(&l_procFilter).push(&l_dimmFilter).Or();
+        TARGETING::targetService().
+                  getAssociated(l_fullProcDimmChildList, i_Target,
+                          TARGETING::TargetService::CHILD,
+                          TARGETING::TargetService::ALL, &l_fullProcDimm);
+
+        // Combine both the lists
+        std::copy(l_fullProcDimmChildList.begin(),l_fullProcDimmChildList.end(),
+                          std::back_inserter(l_childList));
+    }
 
     for (TargetHandleList::const_iterator pTarget_it = l_childList.begin();
                 pTarget_it != l_childList.end();
