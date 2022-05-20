@@ -40,14 +40,14 @@
 #include <generic/memory/lib/utils/mss_generic_check.H>
 #include <generic/memory/lib/utils/poll.H>
 #include <ody_scom_mp_apbonly0.H>
+#include <ody_scom_mp_mastr_b0.H>
 #include <ody_scom_mp_drtub0.H>
 #include <mss_odyssey_attribute_getters.H>
 
-// TODO:ZEN:MST-1571 Update Odyssey PHY registers when the official values are merged into the EKB
+
 #include <lib/phy/ody_draminit_utils.H>
 #include <lib/phy/ody_phy_utils.H>
 #include <ody_consts.H>
-#include <ody_scom_mp_apbonly0.H>
 
 namespace mss
 {
@@ -55,16 +55,6 @@ namespace ody
 {
 namespace phy
 {
-
-// TODO:ZEN:MST-1571 Update Odyssey PHY registers when the official values are merged into the EKB
-// For now using the Synopsys register location documentation
-constexpr uint64_t MIRCORESET = 0x000d0099;
-constexpr uint64_t CALZAP = 0x00020089;
-
-constexpr uint64_t MIRCORESET_STALLTOMICRO = 60;
-constexpr uint64_t MIRCORESET_RESETTOMICRO = 63;
-
-constexpr uint64_t CALZAP_CALZAP = 63;
 
 ///
 /// @brief Initializes the protocol for mailbox interaction
@@ -2254,8 +2244,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode start_training(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
 {
-    // TODO:ZEN:MST-1571 Update Odyssey PHY registers when the official values are merged into the EKB
-    const uint64_t MIRCORESET_IBM     = convert_synopsys_to_ibm_reg_addr(MIRCORESET);
 
     // Per the Synopsys documentation, to start the training, there is a latching sequence
     // 1. Configure the PHY to allow training access (wait 40 cycles)
@@ -2271,16 +2259,16 @@ fapi2::ReturnCode start_training(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
     FAPI_TRY( fapi2::delay( 100, 40) );
 
     // 2. Reset and stall the processor (gets it into a base state but does not start it)
-    l_data.setBit<MIRCORESET_STALLTOMICRO>().setBit<MIRCORESET_RESETTOMICRO>();
-    FAPI_TRY(fapi2::putScom(i_target, MIRCORESET_IBM, l_data));
+    l_data.setBit<scomt::mp::DWC_DDRPHYA_APBONLY0_MICRORESET_STALLTOMICRO>().setBit<scomt::mp::DWC_DDRPHYA_APBONLY0_MICRORESET_RESETTOMICRO>();
+    FAPI_TRY(fapi2::putScom(i_target, scomt::mp::DWC_DDRPHYA_APBONLY0_MICRORESET, l_data));
 
     // 3. Stall the processor (releases reset but does not start it)
-    l_data.flush<0>().setBit<MIRCORESET_STALLTOMICRO>();
-    FAPI_TRY(fapi2::putScom(i_target, MIRCORESET_IBM, l_data));
+    l_data.flush<0>().setBit<scomt::mp::DWC_DDRPHYA_APBONLY0_MICRORESET_STALLTOMICRO>();
+    FAPI_TRY(fapi2::putScom(i_target, scomt::mp::DWC_DDRPHYA_APBONLY0_MICRORESET, l_data));
 
     // 4. Start training (release stall/reset)
     l_data.flush<0>();
-    FAPI_TRY(fapi2::putScom(i_target, MIRCORESET_IBM, l_data));
+    FAPI_TRY(fapi2::putScom(i_target, scomt::mp::DWC_DDRPHYA_APBONLY0_MICRORESET, l_data));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -2307,8 +2295,6 @@ fapi2::ReturnCode stall_arc_processor(const fapi2::Target<fapi2::TARGET_TYPE_MEM
 ///
 fapi2::ReturnCode cleanup_training(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
 {
-    // TODO:ZEN:MST-1571 Update Odyssey PHY registers when the official values are merged into the EKB
-    const uint64_t CALZAP_IBM     = convert_synopsys_to_ibm_reg_addr(CALZAP);
 
     // Per the Synopsys documentation, to cleanup after the training:
     // 1. Stop the processor (stall it)
@@ -2319,8 +2305,8 @@ fapi2::ReturnCode cleanup_training(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
     FAPI_TRY(stall_arc_processor(i_target));
 
     // 2. Reset the calibration engines to their initial state (cal Zap!)
-    l_data.flush<0>().setBit<CALZAP_CALZAP>();
-    FAPI_TRY(fapi2::putScom(i_target, CALZAP_IBM, l_data));
+    l_data.flush<0>().setBit<scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_CALZAP_CALZAP>();
+    FAPI_TRY(fapi2::putScom(i_target, scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_CALZAP, l_data));
 
 fapi_try_exit:
     return fapi2::current_err;

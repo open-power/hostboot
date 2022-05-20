@@ -37,7 +37,7 @@
 
 #include <generic/memory/lib/utils/mss_generic_check.H>
 #include <lib/phy/ody_phy_utils.H>
-// TODO:ZEN:MST-1571 Update Odyssey PHY registers when the official values are merged into the EKB
+#include <ody_scom_mp_apbonly0.H>
 
 namespace mss
 {
@@ -55,18 +55,11 @@ namespace phy
 fapi2::ReturnCode configure_phy_scom_access(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
         const mss::states i_state)
 {
-    // TODO:ZEN:MST-1571 Update Odyssey PHY registers when the official values are merged into the EKB
-    // For now using the Synopsys register location documentation
-    constexpr uint64_t MICROCONTMUXSEL = 0x000d0000;
-    const uint64_t MICROCONTMUXSEL_IBM = convert_synopsys_to_ibm_reg_addr(MICROCONTMUXSEL);
-    constexpr uint64_t MICROCONTMUXSEL_MICROCONTMUXSEL = 63;
-
     fapi2::buffer<uint64_t> l_data;
-    FAPI_TRY(fapi2::getScom(i_target, MICROCONTMUXSEL_IBM, l_data));
+    FAPI_TRY(fapi2::getScom(i_target, scomt::mp::DWC_DDRPHYA_APBONLY0_MICROCONTMUXSEL, l_data));
 
-    l_data.writeBit<MICROCONTMUXSEL_MICROCONTMUXSEL>(i_state);
-
-    FAPI_TRY(fapi2::putScom(i_target, MICROCONTMUXSEL_IBM, l_data));
+    l_data.writeBit<scomt::mp::DWC_DDRPHYA_APBONLY0_MICROCONTMUXSEL_MICROCONTMUXSEL>(i_state);
+    FAPI_TRY(fapi2::putScom(i_target, scomt::mp::DWC_DDRPHYA_APBONLY0_MICROCONTMUXSEL, l_data));
 
 fapi_try_exit:
     return fapi2::current_err;
