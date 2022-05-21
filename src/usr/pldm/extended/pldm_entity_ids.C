@@ -83,6 +83,67 @@ const unique_entity_info foreign_entity_types[] =
     { CLASS_CHIP, TYPE_TPM, ENTITY_TYPE_TPM }
 };
 
+const unique_entity_info hb_connector_info_attr_types[] =
+{
+    { CLASS_LOGICAL_CARD, TYPE_DIMM, ENTITY_TYPE_DIMM_SLOT },
+    { CLASS_CHIP,         TYPE_PROC, ENTITY_TYPE_SOCKET },
+};
+
+/**
+ * @brief Update all connector target's ATTR_CONNECTOR_PLDM_ENTITY_ID_INFO
+ *        containerId to that of the backplane
+ * @param[in] i_backplane_containerId containerId of backplane
+ */
+void updateConnectorInfoAttr(const uint16_t i_backplane_containerId)
+{
+    // This variable is to prevent setting ATTR_CONNECTOR_PLDM_ENTITY_ID_INFO
+    // multiple times to the same backplane value
+    static uint16_t l_backplane_container = 0xFFFF;
+
+    PLDM_DBG(">> updateConnectorInfoAttr(0x%04X)", i_backplane_containerId);
+    ATTR_CONNECTOR_PLDM_ENTITY_ID_INFO_type targeting_entity_id = { };
+
+    TargetHandleList connector_targets;
+
+    if (i_backplane_containerId != l_backplane_container)
+    {
+        for (const auto& connector_info : hb_connector_info_attr_types)
+        {
+            // grab all targets of ATTR_TYPE
+            getClassResources(connector_targets, connector_info.target_class, connector_info.target_type, UTIL_FILTER_ALL);
+
+            for (const auto& connector_target : connector_targets)
+            {
+                targeting_entity_id = connector_target->getAttr<ATTR_CONNECTOR_PLDM_ENTITY_ID_INFO>();
+                PLDM_DBG("updateConnectorInfoAttr(backplaneId): Found target 0x%08x -> 0x%04x/0x%04x/0x%04x (entitytype/instanceNum/containerId)",
+                    get_huid(connector_target),
+                    targeting_entity_id.entityType,
+                    targeting_entity_id.entityInstanceNumber,
+                    targeting_entity_id.containerId);
+                if (targeting_entity_id.containerId != i_backplane_containerId)
+                {
+                    targeting_entity_id.containerId = i_backplane_containerId;
+                    PLDM_INF("updateConnectorInfoAttr(backplaneId): Set CONNECTOR_PLDM_ENTITY_ID for"
+                        " HUID 0x%08x to 0x%04x/0x%04x/0x%04x (entitytype/instanceNum/containerId)",
+                        get_huid(connector_target),
+                        targeting_entity_id.entityType,
+                        targeting_entity_id.entityInstanceNumber,
+                        targeting_entity_id.containerId);
+                    connector_target->setAttr<ATTR_CONNECTOR_PLDM_ENTITY_ID_INFO>(targeting_entity_id);
+                }
+                else
+                {
+                    PLDM_DBG("updateConnectorInfoAttr(backplaneId): Skip setting HUID 0x%08X "
+                        "CONNECTOR_PLDM_ENTITY_ID as its containerId (0x%04x) already is set correctly",
+                        get_huid(connector_target),
+                        targeting_entity_id.containerId);
+                }
+            }
+        }
+        l_backplane_container = i_backplane_containerId;
+    }
+    PLDM_DBG("<< updateConnectorInfoAttr(0x%04X)", i_backplane_containerId);
+}
 
 /* @brief Update ATTR_CONNECTOR_PLDM_ENTITY_ID_INFO attached to child_target
  *        with its parent socket/slot normalized information
@@ -136,7 +197,7 @@ void updateConnectorInfoAttr(Target* const i_child_target,
                 }
                 vAssocEntities.clear();
                 // switch to the DCM container ID
-                PLDM_DBG("updateConnectorInfoAttr: switch to DCM container, 0x%04X, instanceNumber 0x%04X",
+                PLDM_DBG("updateConnectorInfoAttr: switch to DCM container 0x%04X, instanceNumber 0x%04X",
                   connectorInfo.containerId, connectorInfo.entityInstanceNumber);
                 childContainerId = connectorInfo.containerId;
                 childInstanceNum = connectorInfo.entityInstanceNumber;
@@ -182,6 +243,9 @@ void updateConnectorInfoAttr(Target* const i_child_target,
             connectorInfo.entityInstanceNumber = htole16(connectorInfo.entityInstanceNumber),
             connectorInfo.containerId = htole16(connectorInfo.containerId);
             i_child_target->setAttr<ATTR_CONNECTOR_PLDM_ENTITY_ID_INFO>(connectorInfo);
+
+            // now update all socket types to same container (backplane)
+            updateConnectorInfoAttr(connectorInfo.containerId);
             break;
         }
         else
@@ -298,11 +362,17 @@ errlHndl_t updateTargetEntityIdAttribute(Target* const i_target,
         // attributes (with the same format as PLDM_ENTITY_ID_INFO) that reside
         // on the system target
         case ENTITY_TYPE_LOGICAL_SYSTEM:
-            PLDM_INF("Writing logical system PLDM entity ID info");
+            PLDM_INF("Writing logical system PLDM entity ID info: 0x%04x/0x%04x/0x%04x (entitytype/instanceNum/containerId)",
+                entity_info.system.entityType,
+                entity_info.system.entityInstanceNumber,
+                entity_info.system.containerId);
             i_target->setAttr<ATTR_SYSTEM_PLDM_ENTITY_ID_INFO>(entity_info.system);
             break;
         case ENTITY_TYPE_CHASSIS:
-            PLDM_INF("Writing chassis PLDM entity ID info");
+            PLDM_INF("Writing chassis PLDM entity ID info: 0x%04x/0x%04x/0x%04x (entitytype/instanceNum/containerId)",
+                entity_info.chassis.entityType,
+                entity_info.chassis.entityInstanceNumber,
+                entity_info.chassis.containerId);
             i_target->setAttr<ATTR_CHASSIS_PLDM_ENTITY_ID_INFO>(entity_info.chassis);
             break;
         default:
