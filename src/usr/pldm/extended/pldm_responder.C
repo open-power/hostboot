@@ -60,11 +60,13 @@
 #include <base.h>
 #include <platform.h>
 #include <fru.h>
+#include <file_io.h>
 
 // Message handler headers
 #include <pldm/responses/pldm_discovery_control_responders.H>
 #include <pldm/responses/pldm_monitor_control_responders.H>
 #include <pldm/responses/pldm_fru_data_responders.H>
+#include <pldm/responses/pldm_oem_responders.H>
 
 // Hostboot utils
 #include <util/misc.H>
@@ -113,6 +115,13 @@ const msg_type_handler pldm_fru_data_handlers[] =
     { PLDM_GET_FRU_RECORD_TABLE, handleGetFruRecordTableRequest }
 };
 
+/*** Handlers for the MSG_OEM type ***/
+
+const msg_type_handler pldm_oem_handlers[] =
+{
+    { PLDM_GET_ATTR_DUMP, handleGetPldmAttrDumpRequest }
+};
+
 /*** Top-level table of handler tables ***/
 
 struct msg_category
@@ -129,7 +138,9 @@ const msg_category pldm_message_categories[] =
     { PLDM::MSG_MONITOR_CONTROL, pldm_monitor_control_handlers,
                                  std::size(pldm_monitor_control_handlers) },
     { PLDM::MSG_FRU_DATA,        pldm_fru_data_handlers,
-                                 std::size(pldm_fru_data_handlers) }
+                                 std::size(pldm_fru_data_handlers) },
+    { PLDM::MSG_OEM,             pldm_oem_handlers,
+                                 std::size(pldm_oem_handlers) }
 };
 
 #ifndef __HOSTBOOT_RUNTIME

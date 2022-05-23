@@ -24,6 +24,7 @@ enum pldm_fileio_commands {
 	PLDM_READ_FILE_BY_TYPE = 0xB,
 	PLDM_WRITE_FILE_BY_TYPE = 0xC,
 	PLDM_FILE_ACK = 0xD,
+	PLDM_GET_ATTR_DUMP = 0xE,
 };
 
 /** @brief PLDM Command specific codes

@@ -81,6 +81,7 @@ PLDM_EXTENDED_COMMON_OBJS += pldm_monitor_control_responders.o
 PLDM_EXTENDED_COMMON_OBJS += pldm_dce_responder.o
 PLDM_EXTENDED_COMMON_OBJS += pldm_discovery_control_responders.o
 PLDM_EXTENDED_COMMON_OBJS += sbe_dump.o
+PLDM_EXTENDED_COMMON_OBJS += pldm_oem_responders.o
 
 # add these paths to VPATH so compiler knows
 # where to find the .C/.c files we need
