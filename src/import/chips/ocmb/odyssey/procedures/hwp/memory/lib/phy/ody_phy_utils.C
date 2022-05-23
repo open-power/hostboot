@@ -155,6 +155,7 @@ fapi_try_exit:
 fapi2::ReturnCode read_dmem_field( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target, const uint64_t i_addr,
                                    uint32_t& o_field)
 {
+    constexpr uint64_t SYNOPSYS_ADDR_INCREMENT = 0x0000000100000000;
     constexpr uint64_t SYNOPSYS_DATA = 48;
     constexpr uint64_t DATA_16B_LEN = 16;
     o_field = 0;
@@ -164,7 +165,7 @@ fapi2::ReturnCode read_dmem_field( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
     l_data.extractToRight<SYNOPSYS_DATA, DATA_16B_LEN>(o_field);
     o_field <<= DATA_16B_LEN;
 
-    FAPI_TRY(fapi2::getScom(i_target, i_addr + 1, l_data));
+    FAPI_TRY(fapi2::getScom(i_target, i_addr + SYNOPSYS_ADDR_INCREMENT, l_data));
     l_data.extractToRight<SYNOPSYS_DATA, DATA_16B_LEN>(o_field);
 
 fapi_try_exit:
@@ -181,6 +182,7 @@ fapi_try_exit:
 fapi2::ReturnCode read_dmem_field( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target, const uint64_t i_addr,
                                    uint64_t& o_field)
 {
+    constexpr uint64_t SYNOPSYS_ADDR_INCREMENT = 0x0000000100000000;
     constexpr uint64_t SYNOPSYS_DATA = 48;
     constexpr uint64_t DATA_16B_LEN = 16;
     o_field = 0;
@@ -190,15 +192,15 @@ fapi2::ReturnCode read_dmem_field( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
     l_data.extractToRight<SYNOPSYS_DATA, DATA_16B_LEN>(o_field);
     o_field <<= DATA_16B_LEN;
 
-    FAPI_TRY(fapi2::getScom(i_target, i_addr + 1, l_data));
+    FAPI_TRY(fapi2::getScom(i_target, i_addr + SYNOPSYS_ADDR_INCREMENT, l_data));
     l_data.extractToRight<SYNOPSYS_DATA, DATA_16B_LEN>(o_field);
     o_field <<= DATA_16B_LEN;
 
-    FAPI_TRY(fapi2::getScom(i_target, i_addr + 2, l_data));
+    FAPI_TRY(fapi2::getScom(i_target, i_addr + 2 * SYNOPSYS_ADDR_INCREMENT, l_data));
     l_data.extractToRight<SYNOPSYS_DATA, DATA_16B_LEN>(o_field);
     o_field <<= DATA_16B_LEN;
 
-    FAPI_TRY(fapi2::getScom(i_target, i_addr + 3, l_data));
+    FAPI_TRY(fapi2::getScom(i_target, i_addr + 3 * SYNOPSYS_ADDR_INCREMENT, l_data));
     l_data.extractToRight<SYNOPSYS_DATA, DATA_16B_LEN>(o_field);
 
 fapi_try_exit:
