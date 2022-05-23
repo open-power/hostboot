@@ -43,6 +43,7 @@
 #include <errl/errludlogregister.H>
 #include <isteps/pm/pm_common_ext.H>
 #include <pldm/requests/pldm_pdr_requests.H>
+#include <isteps/pm/scopedHomerMapper.H>
 
 namespace HTMGT
 {
@@ -189,13 +190,10 @@ namespace HTMGT
 
 
     // Reset OCC
-    bool Occ::resetPrep()
+    bool Occ::resetPrep(bool i_skipComm)
     {
         errlHndl_t err = nullptr;
         bool atThreshold = false;
-
-        // Send resetPrep command
-        uint8_t cmdData[2] = { OCC_RESET_CMD_VERSION, OCC_RESET_FAIL_THIS_OCC };
 
         TMGT_INF("resetPrep: OCC%d (failed=%c, reset count=%d)"
                  " reset reason=0x%x",
@@ -204,36 +202,61 @@ namespace HTMGT
                  iv_resetCount,
                  iv_resetReason);
 
-        if((iv_resetReason == HTMGT::OCC_RESET_REASON_CODE_UPDATE) ||
-           (iv_resetReason == HTMGT::OCC_RESET_REASON_CANCEL_CODE_UPDATE))
+        if (iv_commEstablished && (i_skipComm == false))
         {
-            cmdData[1] = OCC_RESET_NON_FAILURE;
-        }
-
-        if (iv_commEstablished)
-        {
-            OccCmd cmd(this, OCC_CMD_RESET_PREP, sizeof(cmdData), cmdData);
-            err = cmd.sendOccCmd();
-            if(err)
+            // map HOMER for this OCC (for resetPrep command)
+            TARGETING::Target* procTarget = nullptr;
+            procTarget = TARGETING::
+                getImmediateParentByAffinity(iv_target);
+            HBPM::ScopedHomerMapper l_mapper(procTarget);
+            err = l_mapper.map();
+            if (nullptr == err)
             {
-                // log error and keep going
-                TMGT_ERR("OCC::resetPrep: OCC%d resetPrep failed, rc=0x%04x",
-                         iv_instance,
-                         err->reasonCode());
+                // Send resetPrep command
+                uint8_t cmdData[2] = { OCC_RESET_CMD_VERSION, OCC_RESET_FAIL_THIS_OCC };
+                if((iv_resetReason == HTMGT::OCC_RESET_REASON_CODE_UPDATE) ||
+                   (iv_resetReason == HTMGT::OCC_RESET_REASON_CANCEL_CODE_UPDATE))
+                {
+                    cmdData[1] = OCC_RESET_NON_FAILURE;
+                }
 
-                ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
+                setHomerAddr(l_mapper.getHomerVirtAddr());
+
+                OccCmd cmd(this, OCC_CMD_RESET_PREP, sizeof(cmdData), cmdData);
+                err = cmd.sendOccCmd();
+                if(err)
+                {
+                    // log error and keep going
+                    TMGT_ERR("OCC::resetPrep: OCC%d resetPrep failed, rc=0x%04x",
+                             iv_instance,
+                             err->reasonCode());
+
+                    ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
+                }
+
+                // poll and flush error logs from OCC - Check Ex return code
+                err = pollForErrors(true);
+                if(err)
+                {
+                    ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
+                }
+
+                invalidateHomer();
             }
-
-            // poll and flush error logs from OCC - Check Ex return code
-            err = pollForErrors(true);
-            if(err)
+            else
             {
+                // Unable to send resetPrep command to this OCC,
+                // just commit and proceed with reset
+                TMGT_ERR("resetPrep: Unable to get HOMER virtual"
+                         " address for OCC%d (rc=0x%04X)",
+                         iv_instance, err->reasonCode());
+                err->collectTrace(HTMGT_COMP_NAME);
                 ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
             }
         }
         // else comm to OCC has not been established yet
 
-        // After flushing errors, increment reset counts
+        // Increment reset count (if failed)
         if(iv_failed)
         {
             ++iv_resetCount;

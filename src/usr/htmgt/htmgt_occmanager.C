@@ -630,37 +630,13 @@ namespace HTMGT
                         }
                     }
 
-                    if (false == i_skipComm)
+                    // Send ResetPrep command, poll to flush errors and
+                    // and increment reset count if needed.
+                    if(occ->resetPrep(i_skipComm))
                     {
-                        // map HOMER for this OCC (for resetPrep command)
-                        TARGETING::Target* procTarget = nullptr;
-                        procTarget = TARGETING::
-                            getImmediateParentByAffinity(occ->getTarget());
-                        HBPM::ScopedHomerMapper l_mapper(procTarget);
-                        err = l_mapper.map();
-                        if (nullptr == err)
-                        {
-                            occ->setHomerAddr(l_mapper.getHomerVirtAddr());
-
-                            // Send reset prep cmd to each OCCs
-                            if(occ->resetPrep())
-                            {
-                                atThreshold = true;
-                            }
-
-                            occ->invalidateHomer();
-                        }
-                        else
-                        {
-                            // Unable to send resetPrep command to this OCC,
-                            // just commit and proceed with reset
-                            TMGT_ERR("_resetOccs: Unable to get HOMER virtual"
-                                     " address for OCC%d (rc=0x%04X)",
-                                     occ->getInstance(), err->reasonCode());
-                            err->collectTrace(HTMGT_COMP_NAME);
-                            ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
-                        }
+                        atThreshold = true;
                     }
+
                     // If we need a WOF reset, skip system count increment
                     if( occ->needsWofReset() )
                     {
