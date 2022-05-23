@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,7 +69,7 @@ void gpioPca9551SetReigsterHelper(const PCA9551_LEDS_t i_led,
    // Adjust values for LEDs 4 to 7 to match calculations below for LEDs 0 to 3
    if (i_led > PCA9551_LED3)
    {
-       l_led = l_led / PCA9551_LED_SETTINGS_DIVISOR;
+       l_led = l_led >> PCA9551_LED_SETTINGS_SHIFT_BITS;
    }
    TRACUCOMP(g_trac_gpio, "gpioPca9551SetReigsterHelper: "
              "i_led=0x%.2X, l_led=0x%.2X, l_mask=0x%.2X, "

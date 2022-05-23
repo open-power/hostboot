@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -141,8 +141,9 @@ errlHndl_t detectPhysPresence(void)
          * @userdata2        ATTR_GPIO_INFO_PHYS_PRES hash value
          * @devdesc          Master processor target did not have
          *                   ATTR_GPIO_INFO_PHYS_PRES associated with it
-         * @custdesc         A problem occurred during the IPL
-         *                   of the system.
+         * @custdesc         Security related error implicating host firmware
+         *                   occurred during system boot.
+
          */
         err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                             MOD_DETECT_PHYS_PRES,
@@ -559,6 +560,41 @@ errlHndl_t handlePhysPresenceWindow(void)
                "failed.  "
                TRACE_ERR_FMT,
                TRACE_ERR_ARGS(err));
+        break;
+    }
+
+    // Get the attribute with the needed GPIO information
+    if (mproc->tryGetAttr<ATTR_GPIO_INFO_PHYS_PRES>(gpioInfo))
+    {
+        SB_INF("handlePhysPresenceWindow: gpioInfo: proc=0x%08X, "
+               "e%d/p%d/devAddr=0x%02X, windowOpenPin=pin #%d, physPresPin=pin #%d",
+               get_huid(mproc),
+               gpioInfo.engine, gpioInfo.port, gpioInfo.devAddr,
+               gpioInfo.windowOpenPin, gpioInfo.physicalPresencePin);
+    }
+    else
+    {
+        SB_ERR("handlePhysPresenceWindow: couldn't find ATTR_GPIO_INFO_PHYS_PRES "
+               "attribute on proc 0x%.08X", get_huid(mproc));
+
+        /*@
+         * @errortype
+         * @reasoncode RC_PHYS_PRES_ATTR_NOT_FOUND
+         * @severity   ERRL_SEV_UNRECOVERABLE
+         * @moduleid   MOD_HANDLE_PHYS_PRES_WINDOW
+         * @userdata1  HUID of primary processor target
+         * @userdata2  ATTR_GPIO_INFO_PHYS_PRES attribute hash value
+         * @devdesc    Primary processor target did not have the
+         *             ATTR_GPIO_INFO_PHYS_PRES attribute associated with it
+         * @custdesc   Security related error implicating host firmware occurred
+         *             during system boot.
+         */
+        err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                            MOD_HANDLE_PHYS_PRES_WINDOW,
+                            RC_PHYS_PRES_ATTR_NOT_FOUND,
+                            get_huid(mproc),
+                            ATTR_GPIO_INFO_PHYS_PRES,
+                            ErrlEntry::ADD_SW_CALLOUT);
         break;
     }
 
