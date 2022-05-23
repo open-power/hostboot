@@ -254,10 +254,15 @@ namespace HTMGT
 
 
             /**
-             * @brief Prepare this OCC for reset
+             * @brief Prepare this OCC for reset by sending ResetPrep
+             *        command to the OCC and poll for errors and then
+             *        increment the reset count as required.
+             *
+             * @param[in] i_skipComm - true, dont send reset prep/poll
+             *
              * @return return true if at threshold otherwise false
              */
-            bool resetPrep();
+            bool resetPrep(bool i_skipComm = false);
 
 
             /**
