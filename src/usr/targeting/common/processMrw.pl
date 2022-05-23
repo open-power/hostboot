@@ -3361,6 +3361,8 @@ sub postProcessProcessor
     # it's only valid on the primary and alt-primary proc.
     # It will only get called on the active primary processor during the IPL.
 
+    # NOTE: MRWs will override the default window open and physical presence
+    # pin values as needed, so do not force them here
     $targetObj->setAttributeField($target,"GPIO_INFO_PHYS_PRES",
         "i2cMasterPath",$path);
     $targetObj->setAttributeField($target,"GPIO_INFO_PHYS_PRES",
@@ -3369,10 +3371,6 @@ sub postProcessProcessor
         "devAddr","0xC0");
     $targetObj->setAttributeField($target,"GPIO_INFO_PHYS_PRES",
         "engine","2");
-    $targetObj->setAttributeField($target,"GPIO_INFO_PHYS_PRES",
-        "windowOpenPin","0");
-    $targetObj->setAttributeField($target,"GPIO_INFO_PHYS_PRES",
-        "physicalPresencePin","1");
     $targetObj->setAttributeField($target,"GPIO_INFO_PHYS_PRES",
         "i2cMuxBusSelector","0xFF");
     $targetObj->setAttributeField($target,"GPIO_INFO_PHYS_PRES",

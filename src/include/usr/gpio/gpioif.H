@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -107,12 +107,14 @@ enum PCA9551_Constants_t : uint8_t
     // LEDs in the output settings register (ie, 2 bits at a time)
     PCA9551_LED_SETTINGS_MASK_SHIFT_AMOUNT = 0x02,
 
-    // LED Divider: While the INPUT register can contain all 8 LED values
+    // LED settings shift: While the INPUT register can contain all 8 LED values
     // (since each value is represented by one bit), the SETTINGS registers
     // (PCA9551_REGISTER_LS0 and PCA9551_REGISTER_LS1) can only cover 4 LEDs
     // each since each setting requires 2 bits.
-    // This divisor takes LEDs 4 to 7 and makes them look like LEDs 0 to 3
-    PCA9551_LED_SETTINGS_DIVISOR = 0x80,
+    // This constant takes LEDs 4 to 7 and makes them look like LEDs 0 to 3 by
+    // shifting the left-most nibble of the LED byte to the right-most
+    // nibble.
+    PCA9551_LED_SETTINGS_SHIFT_BITS = 4,
 };
 
 /**
