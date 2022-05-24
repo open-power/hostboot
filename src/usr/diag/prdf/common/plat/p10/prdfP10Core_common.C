@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -294,24 +294,30 @@ int32_t analyzeNeighborCore_UCS(ExtensibleChip* i_chip,
 
     // Then, check if there are any unit checkstop attentions on the other core.
     SCAN_COMM_REGISTER_CLASS* fir  = neighbor->getRegister("EQ_CORE_FIR");
+    SCAN_COMM_REGISTER_CLASS* wof  = neighbor->getRegister("EQ_CORE_FIR_WOF");
     SCAN_COMM_REGISTER_CLASS* mask = neighbor->getRegister("EQ_CORE_FIR_MASK");
     SCAN_COMM_REGISTER_CLASS* act0 = neighbor->getRegister("EQ_CORE_FIR_ACT0");
     SCAN_COMM_REGISTER_CLASS* act1 = neighbor->getRegister("EQ_CORE_FIR_ACT1");
 
-    if (SUCCESS != (fir->Read() | mask->Read() | act0->Read() | act1->Read()))
+    if (SUCCESS != (fir->Read() | wof->Read() | mask->Read() |
+                    act0->Read() | act1->Read()))
     {
         PRDF_ERR("analyzeNeighborCore_UCS(0x%08x) read failure",
                  i_chip->getHuid());
         return PRD_SCANCOM_FAILURE;
     }
 
-    // Ignore bit 57 because it says there are unit CS attentions on this core
-    // and it could send us in an infinite loop.
-    if (0 == ( fir->GetBitFieldJustified( 0, 64) &
-              ~mask->GetBitFieldJustified(0, 64) & // not masked
-               act0->GetBitFieldJustified(0, 64) & // act0=1
-               act1->GetBitFieldJustified(0, 64) & // act1=1
-              ~0x0000000000000040ll))              // bit 57 is not set
+    // - We have seen in the field that unit checkstop attentions may only
+    //   report via the WOF if there is a system checkstop attention present. So
+    //   check both the FIR and WOF.
+    // - Ignore bit 57 because it says there is a unit CS attention on this core
+    //   and it could send us in an infinite loop.
+    if (0 == ((fir->GetBitFieldJustified( 0, 64) |
+               wof->GetBitFieldJustified( 0, 64)) & // FIR or WOF
+              ~mask->GetBitFieldJustified(0, 64)  & // not masked
+               act0->GetBitFieldJustified(0, 64)  & // act0=1
+               act1->GetBitFieldJustified(0, 64)  & // act1=1
+              ~0x0000000000000040ll))               // bit 57 is not set
     {
         // There are no active unit CS attentions. This would be a bug because
         // this FIR should only fire if there was an attention. Return saying
