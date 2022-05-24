@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2021
+# Contributors Listed Below - COPYRIGHT 2020,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -791,7 +791,10 @@ rule rEQ_CORE_FIR
   RECOVERABLE:
     EQ_CORE_FIR_WOF & ~EQ_CORE_FIR_MASK & ~EQ_CORE_FIR_ACT0 &  EQ_CORE_FIR_ACT1;
   UNIT_CS:
-    EQ_CORE_FIR & ~EQ_CORE_FIR_MASK &  EQ_CORE_FIR_ACT0 &  EQ_CORE_FIR_ACT1;
+    # We have seen in the field that unit checkstop attentions may only report
+    # via the WOF if there is a system checkstop attention present. So check
+    # both the FIR and WOF.
+    (EQ_CORE_FIR | EQ_CORE_FIR_WOF) & ~EQ_CORE_FIR_MASK & EQ_CORE_FIR_ACT0 &  EQ_CORE_FIR_ACT1;
 };
 
 group gEQ_CORE_FIR
