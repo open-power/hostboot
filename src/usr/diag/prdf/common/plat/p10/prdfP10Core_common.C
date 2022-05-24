@@ -312,12 +312,14 @@ int32_t analyzeNeighborCore_UCS(ExtensibleChip* i_chip,
     //   check both the FIR and WOF.
     // - Ignore bit 57 because it says there is a unit CS attention on this core
     //   and it could send us in an infinite loop.
+    // - Ignore bit 60 because it says there is a unit CS attentions on the
+    //   neighbor core and is redundant.
     if (0 == ((fir->GetBitFieldJustified( 0, 64) |
                wof->GetBitFieldJustified( 0, 64)) & // FIR or WOF
               ~mask->GetBitFieldJustified(0, 64)  & // not masked
                act0->GetBitFieldJustified(0, 64)  & // act0=1
                act1->GetBitFieldJustified(0, 64)  & // act1=1
-              ~0x0000000000000040ll))               // bit 57 is not set
+              ~0x0000000000000048ll))               // bit 57 or 60 are not set
     {
         // There are no active unit CS attentions. This would be a bug because
         // this FIR should only fire if there was an attention. Return saying
