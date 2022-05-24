@@ -239,6 +239,28 @@ enum mailbox_consts
     ACK_MESSAGE = 1,
 };
 
+///
+/// @brief Loads the message block into the DMEM
+/// @param[in] i_target the memory port on which to operate
+/// @param[in] io_struct the message block
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+/// @note Only loads the "input" fields
+///
+fapi2::ReturnCode load_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                 const _PMU_SMB_DDR5_1D_t& io_struct);
+
+///
+/// @brief Reads the message block from the DMEM
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_struct the message block
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+/// @note Only loads the "output" fields
+/// @note The guts of this function is auto-generated using gen_dmem_func.py
+///       located in the ekb-lab/ody/mem/tools
+///
+fapi2::ReturnCode read_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                 _PMU_SMB_DDR5_1D_t& io_struct);
+
 /// @brief Prints the fields from the message block structure
 /// @param[in] i_target the target on which to operate
 /// @param[in] i_msg_blk message block structure

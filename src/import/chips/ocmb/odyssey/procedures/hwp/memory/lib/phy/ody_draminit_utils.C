@@ -2312,6 +2312,4006 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Loads the message block values into the DMEM regs
+/// @param[in] i_target the memory port on which to operate
+/// @param[in] io_struct the message block
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+/// @note Only loads the "input" fields
+///
+fapi2::ReturnCode load_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                 const _PMU_SMB_DDR5_1D_t& io_struct)
+{
+    constexpr uint64_t SYNOPSYS_DATA = 48;
+    constexpr uint64_t DATA_16B_LEN = 16;
+    fapi2::buffer<uint64_t> l_data;
+
+    load_dmem_8bit_fields(io_struct.AdvTrainOpt, io_struct.MsgMisc, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58000), l_data));
+
+    load_dmem_8bit_fields(io_struct.Pstate, io_struct.PllBypassEn, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58002), l_data));
+
+    l_data.insertFromRight<SYNOPSYS_DATA, DATA_16B_LEN>(io_struct.DRAMFreq);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58003), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW05_next, io_struct.RCW06_next, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58004), l_data));
+
+    load_dmem_8bit_fields(io_struct.RXEN_ADJ, io_struct.RX2D_DFE_Misc, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58005), l_data));
+
+    load_dmem_8bit_fields(io_struct.PhyVref, io_struct.D5Misc, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58006), l_data));
+
+    load_dmem_8bit_fields(io_struct.WL_ADJ, io_struct.CsTestFail, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58007), l_data));
+
+    l_data.insertFromRight<SYNOPSYS_DATA, DATA_16B_LEN>(io_struct.SequenceCtrl);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58008), l_data));
+
+    load_dmem_8bit_fields(io_struct.HdtCtrl, io_struct.PhyCfg, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58009), l_data));
+
+    load_dmem_8bit_fields(io_struct.DFIMRLMargin, io_struct.X16Present, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5800b), l_data));
+
+    load_dmem_8bit_fields(io_struct.UseBroadcastMR, io_struct.D5Quickboot, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5800c), l_data));
+
+    load_dmem_8bit_fields(io_struct.DisabledDbyte, io_struct.CATrainOpt, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5800d), l_data));
+
+    load_dmem_8bit_fields(io_struct.TX2D_DFE_Misc, io_struct.RX2D_TrainOpt, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5800e), l_data));
+
+    load_dmem_8bit_fields(io_struct.TX2D_TrainOpt, io_struct.Share2DVrefResult, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5800f), l_data));
+
+    load_dmem_8bit_fields(io_struct.MRE_MIN_PULSE, io_struct.DWL_MIN_PULSE, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58010), l_data));
+
+    l_data.insertFromRight<SYNOPSYS_DATA, DATA_16B_LEN>(io_struct.PhyConfigOverride);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58011), l_data));
+
+    load_dmem_8bit_fields(io_struct.EnabledDQsChA, io_struct.CsPresentChA, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58012), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR0_A0, io_struct.MR2_A0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5802f), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3_A0, io_struct.MR4_A0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58030), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR5_A0, io_struct.MR6_A0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58031), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR32_A0_next, io_struct.MR8_A0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58032), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR32_ORG_A0_next, io_struct.MR10_A0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58033), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR11_A0, io_struct.MR12_A0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58034), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR13_A0, io_struct.MR14_A0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58035), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR15_A0, io_struct.MR111_A0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58036), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR32_A0, io_struct.MR33_A0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58037), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR34_A0, io_struct.MR35_A0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58038), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR32_ORG_A0, io_struct.MR37_A0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58039), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR38_A0, io_struct.MR39_A0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5803a), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR33_ORG_A0, io_struct.MR11_A0_next, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5803b), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR12_A0_next, io_struct.MR13_A0_next, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5803c), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR33_ORG_A0_next, io_struct.MR33_A0_next, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5803f), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR50_A0, io_struct.MR51_A0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58040), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR52_A0, io_struct.DFE_GainBias_A0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58041), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR0_A1, io_struct.MR2_A1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58042), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3_A1, io_struct.MR4_A1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58043), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR5_A1, io_struct.MR6_A1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58044), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR32_A1_next, io_struct.MR8_A1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58045), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR32_ORG_A1_next, io_struct.MR10_A1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58046), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR11_A1, io_struct.MR12_A1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58047), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR13_A1, io_struct.MR14_A1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58048), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR15_A1, io_struct.MR111_A1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58049), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR32_A1, io_struct.MR33_A1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5804a), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR34_A1, io_struct.MR35_A1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5804b), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR32_ORG_A1, io_struct.MR37_A1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5804c), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR38_A1, io_struct.MR39_A1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5804d), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR33_ORG_A1, io_struct.MR11_A1_next, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5804e), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR12_A1_next, io_struct.MR13_A1_next, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5804f), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR33_ORG_A1_next, io_struct.MR33_A1_next, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58052), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR50_A1, io_struct.MR51_A1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58053), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR52_A1, io_struct.DFE_GainBias_A1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58054), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR0_A2, io_struct.MR2_A2, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58055), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3_A2, io_struct.MR4_A2, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58056), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR5_A2, io_struct.MR6_A2, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58057), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR32_A2_next, io_struct.MR8_A2, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58058), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR32_ORG_A2_next, io_struct.MR10_A2, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58059), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR11_A2, io_struct.MR12_A2, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5805a), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR13_A2, io_struct.MR14_A2, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5805b), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR15_A2, io_struct.MR111_A2, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5805c), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR32_A2, io_struct.MR33_A2, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5805d), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR34_A2, io_struct.MR35_A2, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5805e), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR32_ORG_A2, io_struct.MR37_A2, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5805f), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR38_A2, io_struct.MR39_A2, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58060), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR33_ORG_A2, io_struct.MR11_A2_next, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58061), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR12_A2_next, io_struct.MR13_A2_next, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58062), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR33_ORG_A2_next, io_struct.MR33_A2_next, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58065), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR50_A2, io_struct.MR51_A2, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58066), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR52_A2, io_struct.DFE_GainBias_A2, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58067), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR0_A3, io_struct.MR2_A3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58068), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3_A3, io_struct.MR4_A3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58069), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR5_A3, io_struct.MR6_A3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5806a), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR32_A3_next, io_struct.MR8_A3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5806b), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR32_ORG_A3_next, io_struct.MR10_A3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5806c), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR11_A3, io_struct.MR12_A3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5806d), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR13_A3, io_struct.MR14_A3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5806e), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR15_A3, io_struct.MR111_A3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5806f), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR32_A3, io_struct.MR33_A3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58070), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR34_A3, io_struct.MR35_A3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58071), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR32_ORG_A3, io_struct.MR37_A3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58072), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR38_A3, io_struct.MR39_A3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58073), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR33_ORG_A3, io_struct.MR11_A3_next, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58074), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR12_A3_next, io_struct.MR13_A3_next, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58075), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR33_ORG_A3_next, io_struct.MR33_A3_next, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58078), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR50_A3, io_struct.MR51_A3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58079), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR52_A3, io_struct.DFE_GainBias_A3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5807a), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW04_next, io_struct.BCW05_next, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5807d), l_data));
+
+    load_dmem_8bit_fields(io_struct.WR_RD_RTT_PARK_A0, io_struct.WR_RD_RTT_PARK_A1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5807e), l_data));
+
+    load_dmem_8bit_fields(io_struct.WR_RD_RTT_PARK_A2, io_struct.WR_RD_RTT_PARK_A3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5807f), l_data));
+
+    load_dmem_8bit_fields(io_struct.EnabledDQsChB, io_struct.CsPresentChB, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58088), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR0_B0, io_struct.MR2_B0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580a5), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3_B0, io_struct.MR4_B0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580a6), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR5_B0, io_struct.MR6_B0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580a7), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR32_B0_next, io_struct.MR8_B0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580a8), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR32_ORG_B0_next, io_struct.MR10_B0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580a9), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR11_B0, io_struct.MR12_B0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580aa), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR13_B0, io_struct.MR14_B0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580ab), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR15_B0, io_struct.MR111_B0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580ac), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR32_B0, io_struct.MR33_B0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580ad), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR34_B0, io_struct.MR35_B0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580ae), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR32_ORG_B0, io_struct.MR37_B0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580af), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR38_B0, io_struct.MR39_B0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580b0), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR33_ORG_B0, io_struct.MR11_B0_next, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580b1), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR12_B0_next, io_struct.MR13_B0_next, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580b2), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR33_ORG_B0_next, io_struct.MR33_B0_next, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580b5), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR50_B0, io_struct.MR51_B0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580b6), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR52_B0, io_struct.DFE_GainBias_B0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580b7), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR0_B1, io_struct.MR2_B1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580b8), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3_B1, io_struct.MR4_B1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580b9), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR5_B1, io_struct.MR6_B1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580ba), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR32_B1_next, io_struct.MR8_B1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580bb), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR32_ORG_B1_next, io_struct.MR10_B1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580bc), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR11_B1, io_struct.MR12_B1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580bd), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR13_B1, io_struct.MR14_B1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580be), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR15_B1, io_struct.MR111_B1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580bf), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR32_B1, io_struct.MR33_B1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580c0), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR34_B1, io_struct.MR35_B1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580c1), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR32_ORG_B1, io_struct.MR37_B1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580c2), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR38_B1, io_struct.MR39_B1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580c3), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR33_ORG_B1, io_struct.MR11_B1_next, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580c4), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR12_B1_next, io_struct.MR13_B1_next, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580c5), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR33_ORG_B1_next, io_struct.MR33_B1_next, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580c8), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR50_B1, io_struct.MR51_B1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580c9), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR52_B1, io_struct.DFE_GainBias_B1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580ca), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR0_B2, io_struct.MR2_B2, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580cb), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3_B2, io_struct.MR4_B2, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580cc), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR5_B2, io_struct.MR6_B2, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580cd), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR32_B2_next, io_struct.MR8_B2, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580ce), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR32_ORG_B2_next, io_struct.MR10_B2, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580cf), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR11_B2, io_struct.MR12_B2, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580d0), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR13_B2, io_struct.MR14_B2, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580d1), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR15_B2, io_struct.MR111_B2, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580d2), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR32_B2, io_struct.MR33_B2, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580d3), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR34_B2, io_struct.MR35_B2, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580d4), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR32_ORG_B2, io_struct.MR37_B2, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580d5), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR38_B2, io_struct.MR39_B2, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580d6), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR33_ORG_B2, io_struct.MR11_B2_next, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580d7), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR12_B2_next, io_struct.MR13_B2_next, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580d8), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR33_ORG_B2_next, io_struct.MR33_B2_next, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580db), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR50_B2, io_struct.MR51_B2, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580dc), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR52_B2, io_struct.DFE_GainBias_B2, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580dd), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR0_B3, io_struct.MR2_B3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580de), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3_B3, io_struct.MR4_B3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580df), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR5_B3, io_struct.MR6_B3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580e0), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR32_B3_next, io_struct.MR8_B3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580e1), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR32_ORG_B3_next, io_struct.MR10_B3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580e2), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR11_B3, io_struct.MR12_B3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580e3), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR13_B3, io_struct.MR14_B3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580e4), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR15_B3, io_struct.MR111_B3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580e5), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR32_B3, io_struct.MR33_B3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580e6), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR34_B3, io_struct.MR35_B3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580e7), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR32_ORG_B3, io_struct.MR37_B3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580e8), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR38_B3, io_struct.MR39_B3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580e9), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR33_ORG_B3, io_struct.MR11_B3_next, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580ea), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR12_B3_next, io_struct.MR13_B3_next, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580eb), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR33_ORG_B3_next, io_struct.MR33_B3_next, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580ee), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR50_B3, io_struct.MR51_B3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580ef), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR52_B3, io_struct.DFE_GainBias_B3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580f0), l_data));
+
+    load_dmem_8bit_fields(io_struct.WR_RD_RTT_PARK_B0, io_struct.WR_RD_RTT_PARK_B1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580f4), l_data));
+
+    load_dmem_8bit_fields(io_struct.WR_RD_RTT_PARK_B2, io_struct.WR_RD_RTT_PARK_B3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580f5), l_data));
+
+    l_data.insertFromRight<SYNOPSYS_DATA, DATA_16B_LEN>(io_struct.WL_ADJ_START);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580fe), l_data));
+
+    l_data.insertFromRight<SYNOPSYS_DATA, DATA_16B_LEN>(io_struct.WL_ADJ_END);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580ff), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW00_ChA_D0, io_struct.RCW01_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58100), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW02_ChA_D0, io_struct.RCW03_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58101), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW04_ChA_D0, io_struct.RCW05_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58102), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW06_ChA_D0, io_struct.RCW07_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58103), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW08_ChA_D0, io_struct.RCW09_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58104), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW0A_ChA_D0, io_struct.RCW0B_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58105), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW0C_ChA_D0, io_struct.RCW0D_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58106), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW0E_ChA_D0, io_struct.RCW0F_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58107), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW10_ChA_D0, io_struct.RCW11_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58108), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW12_ChA_D0, io_struct.RCW13_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58109), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW14_ChA_D0, io_struct.RCW15_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5810a), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW16_ChA_D0, io_struct.RCW17_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5810b), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW18_ChA_D0, io_struct.RCW19_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5810c), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW1A_ChA_D0, io_struct.RCW1B_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5810d), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW1C_ChA_D0, io_struct.RCW1D_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5810e), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW1E_ChA_D0, io_struct.RCW1F_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5810f), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW20_ChA_D0, io_struct.RCW21_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58110), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW22_ChA_D0, io_struct.RCW23_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58111), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW24_ChA_D0, io_struct.RCW25_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58112), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW26_ChA_D0, io_struct.RCW27_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58113), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW28_ChA_D0, io_struct.RCW29_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58114), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW2A_ChA_D0, io_struct.RCW2B_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58115), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW2C_ChA_D0, io_struct.RCW2D_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58116), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW2E_ChA_D0, io_struct.RCW2F_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58117), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW30_ChA_D0, io_struct.RCW31_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58118), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW32_ChA_D0, io_struct.RCW33_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58119), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW34_ChA_D0, io_struct.RCW35_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5811a), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW36_ChA_D0, io_struct.RCW37_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5811b), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW38_ChA_D0, io_struct.RCW39_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5811c), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW3A_ChA_D0, io_struct.RCW3B_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5811d), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW3C_ChA_D0, io_struct.RCW3D_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5811e), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW3E_ChA_D0, io_struct.RCW3F_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5811f), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW40_ChA_D0, io_struct.RCW41_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58120), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW42_ChA_D0, io_struct.RCW43_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58121), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW44_ChA_D0, io_struct.RCW45_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58122), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW46_ChA_D0, io_struct.RCW47_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58123), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW48_ChA_D0, io_struct.RCW49_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58124), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW4A_ChA_D0, io_struct.RCW4B_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58125), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW4C_ChA_D0, io_struct.RCW4D_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58126), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW4E_ChA_D0, io_struct.RCW4F_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58127), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW50_ChA_D0, io_struct.RCW51_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58128), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW52_ChA_D0, io_struct.RCW53_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58129), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW54_ChA_D0, io_struct.RCW55_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5812a), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW56_ChA_D0, io_struct.RCW57_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5812b), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW58_ChA_D0, io_struct.RCW59_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5812c), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW5A_ChA_D0, io_struct.RCW5B_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5812d), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW5C_ChA_D0, io_struct.RCW5D_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5812e), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW5E_ChA_D0, io_struct.RCW5F_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5812f), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW60_ChA_D0, io_struct.RCW61_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58130), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW62_ChA_D0, io_struct.RCW63_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58131), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW64_ChA_D0, io_struct.RCW65_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58132), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW66_ChA_D0, io_struct.RCW67_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58133), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW68_ChA_D0, io_struct.RCW69_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58134), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW6A_ChA_D0, io_struct.RCW6B_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58135), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW6C_ChA_D0, io_struct.RCW6D_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58136), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW6E_ChA_D0, io_struct.RCW6F_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58137), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW70_ChA_D0, io_struct.RCW71_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58138), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW72_ChA_D0, io_struct.RCW73_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58139), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW74_ChA_D0, io_struct.RCW75_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5813a), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW76_ChA_D0, io_struct.RCW77_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5813b), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW78_ChA_D0, io_struct.RCW79_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5813c), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW7A_ChA_D0, io_struct.RCW7B_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5813d), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW7C_ChA_D0, io_struct.RCW7D_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5813e), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW7E_ChA_D0, io_struct.RCW7F_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5813f), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW00_ChA_D0, io_struct.BCW01_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58140), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW02_ChA_D0, io_struct.BCW03_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58141), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW04_ChA_D0, io_struct.BCW05_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58142), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW06_ChA_D0, io_struct.BCW07_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58143), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW08_ChA_D0, io_struct.BCW09_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58144), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW0A_ChA_D0, io_struct.BCW0B_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58145), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW0C_ChA_D0, io_struct.BCW0D_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58146), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW0E_ChA_D0, io_struct.BCW0F_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58147), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW10_ChA_D0, io_struct.BCW11_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58148), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW12_ChA_D0, io_struct.BCW13_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58149), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW14_ChA_D0, io_struct.BCW15_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5814a), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW16_ChA_D0, io_struct.BCW17_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5814b), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW18_ChA_D0, io_struct.BCW19_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5814c), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW1A_ChA_D0, io_struct.BCW1B_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5814d), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW1C_ChA_D0, io_struct.BCW1D_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5814e), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW1E_ChA_D0, io_struct.BCW1F_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5814f), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW20_ChA_D0, io_struct.BCW21_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58150), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW22_ChA_D0, io_struct.BCW23_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58151), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW24_ChA_D0, io_struct.BCW25_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58152), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW26_ChA_D0, io_struct.BCW27_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58153), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW28_ChA_D0, io_struct.BCW29_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58154), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW2A_ChA_D0, io_struct.BCW2B_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58155), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW2C_ChA_D0, io_struct.BCW2D_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58156), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW2E_ChA_D0, io_struct.BCW2F_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58157), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW30_ChA_D0, io_struct.BCW31_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58158), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW32_ChA_D0, io_struct.BCW33_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58159), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW34_ChA_D0, io_struct.BCW35_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5815a), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW36_ChA_D0, io_struct.BCW37_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5815b), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW38_ChA_D0, io_struct.BCW39_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5815c), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW3A_ChA_D0, io_struct.BCW3B_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5815d), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW3C_ChA_D0, io_struct.BCW3D_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5815e), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW3E_ChA_D0, io_struct.BCW3F_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5815f), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW40_ChA_D0, io_struct.BCW41_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58160), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW42_ChA_D0, io_struct.BCW43_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58161), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW44_ChA_D0, io_struct.BCW45_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58162), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW46_ChA_D0, io_struct.BCW47_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58163), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW48_ChA_D0, io_struct.BCW49_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58164), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW4A_ChA_D0, io_struct.BCW4B_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58165), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW4C_ChA_D0, io_struct.BCW4D_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58166), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW4E_ChA_D0, io_struct.BCW4F_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58167), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW50_ChA_D0, io_struct.BCW51_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58168), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW52_ChA_D0, io_struct.BCW53_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58169), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW54_ChA_D0, io_struct.BCW55_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5816a), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW56_ChA_D0, io_struct.BCW57_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5816b), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW58_ChA_D0, io_struct.BCW59_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5816c), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW5A_ChA_D0, io_struct.BCW5B_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5816d), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW5C_ChA_D0, io_struct.BCW5D_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5816e), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW5E_ChA_D0, io_struct.BCW5F_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5816f), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW60_ChA_D0, io_struct.BCW61_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58170), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW62_ChA_D0, io_struct.BCW63_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58171), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW64_ChA_D0, io_struct.BCW65_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58172), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW66_ChA_D0, io_struct.BCW67_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58173), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW68_ChA_D0, io_struct.BCW69_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58174), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW6A_ChA_D0, io_struct.BCW6B_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58175), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW6C_ChA_D0, io_struct.BCW6D_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58176), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW6E_ChA_D0, io_struct.BCW6F_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58177), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW70_ChA_D0, io_struct.BCW71_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58178), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW72_ChA_D0, io_struct.BCW73_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58179), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW74_ChA_D0, io_struct.BCW75_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5817a), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW76_ChA_D0, io_struct.BCW77_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5817b), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW78_ChA_D0, io_struct.BCW79_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5817c), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW7A_ChA_D0, io_struct.BCW7B_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5817d), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW7C_ChA_D0, io_struct.BCW7D_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5817e), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW7E_ChA_D0, io_struct.BCW7F_ChA_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5817f), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW00_ChA_D1, io_struct.RCW01_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58180), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW02_ChA_D1, io_struct.RCW03_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58181), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW04_ChA_D1, io_struct.RCW05_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58182), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW06_ChA_D1, io_struct.RCW07_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58183), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW08_ChA_D1, io_struct.RCW09_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58184), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW0A_ChA_D1, io_struct.RCW0B_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58185), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW0C_ChA_D1, io_struct.RCW0D_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58186), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW0E_ChA_D1, io_struct.RCW0F_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58187), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW10_ChA_D1, io_struct.RCW11_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58188), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW12_ChA_D1, io_struct.RCW13_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58189), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW14_ChA_D1, io_struct.RCW15_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5818a), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW16_ChA_D1, io_struct.RCW17_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5818b), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW18_ChA_D1, io_struct.RCW19_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5818c), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW1A_ChA_D1, io_struct.RCW1B_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5818d), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW1C_ChA_D1, io_struct.RCW1D_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5818e), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW1E_ChA_D1, io_struct.RCW1F_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5818f), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW20_ChA_D1, io_struct.RCW21_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58190), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW22_ChA_D1, io_struct.RCW23_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58191), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW24_ChA_D1, io_struct.RCW25_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58192), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW26_ChA_D1, io_struct.RCW27_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58193), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW28_ChA_D1, io_struct.RCW29_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58194), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW2A_ChA_D1, io_struct.RCW2B_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58195), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW2C_ChA_D1, io_struct.RCW2D_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58196), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW2E_ChA_D1, io_struct.RCW2F_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58197), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW30_ChA_D1, io_struct.RCW31_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58198), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW32_ChA_D1, io_struct.RCW33_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58199), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW34_ChA_D1, io_struct.RCW35_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5819a), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW36_ChA_D1, io_struct.RCW37_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5819b), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW38_ChA_D1, io_struct.RCW39_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5819c), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW3A_ChA_D1, io_struct.RCW3B_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5819d), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW3C_ChA_D1, io_struct.RCW3D_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5819e), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW3E_ChA_D1, io_struct.RCW3F_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5819f), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW40_ChA_D1, io_struct.RCW41_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581a0), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW42_ChA_D1, io_struct.RCW43_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581a1), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW44_ChA_D1, io_struct.RCW45_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581a2), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW46_ChA_D1, io_struct.RCW47_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581a3), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW48_ChA_D1, io_struct.RCW49_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581a4), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW4A_ChA_D1, io_struct.RCW4B_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581a5), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW4C_ChA_D1, io_struct.RCW4D_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581a6), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW4E_ChA_D1, io_struct.RCW4F_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581a7), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW50_ChA_D1, io_struct.RCW51_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581a8), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW52_ChA_D1, io_struct.RCW53_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581a9), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW54_ChA_D1, io_struct.RCW55_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581aa), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW56_ChA_D1, io_struct.RCW57_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581ab), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW58_ChA_D1, io_struct.RCW59_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581ac), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW5A_ChA_D1, io_struct.RCW5B_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581ad), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW5C_ChA_D1, io_struct.RCW5D_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581ae), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW5E_ChA_D1, io_struct.RCW5F_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581af), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW60_ChA_D1, io_struct.RCW61_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581b0), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW62_ChA_D1, io_struct.RCW63_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581b1), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW64_ChA_D1, io_struct.RCW65_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581b2), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW66_ChA_D1, io_struct.RCW67_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581b3), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW68_ChA_D1, io_struct.RCW69_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581b4), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW6A_ChA_D1, io_struct.RCW6B_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581b5), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW6C_ChA_D1, io_struct.RCW6D_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581b6), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW6E_ChA_D1, io_struct.RCW6F_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581b7), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW70_ChA_D1, io_struct.RCW71_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581b8), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW72_ChA_D1, io_struct.RCW73_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581b9), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW74_ChA_D1, io_struct.RCW75_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581ba), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW76_ChA_D1, io_struct.RCW77_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581bb), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW78_ChA_D1, io_struct.RCW79_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581bc), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW7A_ChA_D1, io_struct.RCW7B_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581bd), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW7C_ChA_D1, io_struct.RCW7D_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581be), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW7E_ChA_D1, io_struct.RCW7F_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581bf), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW00_ChA_D1, io_struct.BCW01_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581c0), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW02_ChA_D1, io_struct.BCW03_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581c1), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW04_ChA_D1, io_struct.BCW05_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581c2), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW06_ChA_D1, io_struct.BCW07_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581c3), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW08_ChA_D1, io_struct.BCW09_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581c4), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW0A_ChA_D1, io_struct.BCW0B_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581c5), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW0C_ChA_D1, io_struct.BCW0D_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581c6), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW0E_ChA_D1, io_struct.BCW0F_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581c7), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW10_ChA_D1, io_struct.BCW11_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581c8), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW12_ChA_D1, io_struct.BCW13_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581c9), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW14_ChA_D1, io_struct.BCW15_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581ca), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW16_ChA_D1, io_struct.BCW17_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581cb), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW18_ChA_D1, io_struct.BCW19_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581cc), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW1A_ChA_D1, io_struct.BCW1B_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581cd), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW1C_ChA_D1, io_struct.BCW1D_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581ce), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW1E_ChA_D1, io_struct.BCW1F_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581cf), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW20_ChA_D1, io_struct.BCW21_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581d0), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW22_ChA_D1, io_struct.BCW23_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581d1), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW24_ChA_D1, io_struct.BCW25_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581d2), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW26_ChA_D1, io_struct.BCW27_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581d3), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW28_ChA_D1, io_struct.BCW29_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581d4), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW2A_ChA_D1, io_struct.BCW2B_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581d5), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW2C_ChA_D1, io_struct.BCW2D_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581d6), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW2E_ChA_D1, io_struct.BCW2F_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581d7), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW30_ChA_D1, io_struct.BCW31_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581d8), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW32_ChA_D1, io_struct.BCW33_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581d9), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW34_ChA_D1, io_struct.BCW35_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581da), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW36_ChA_D1, io_struct.BCW37_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581db), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW38_ChA_D1, io_struct.BCW39_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581dc), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW3A_ChA_D1, io_struct.BCW3B_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581dd), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW3C_ChA_D1, io_struct.BCW3D_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581de), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW3E_ChA_D1, io_struct.BCW3F_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581df), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW40_ChA_D1, io_struct.BCW41_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581e0), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW42_ChA_D1, io_struct.BCW43_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581e1), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW44_ChA_D1, io_struct.BCW45_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581e2), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW46_ChA_D1, io_struct.BCW47_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581e3), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW48_ChA_D1, io_struct.BCW49_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581e4), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW4A_ChA_D1, io_struct.BCW4B_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581e5), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW4C_ChA_D1, io_struct.BCW4D_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581e6), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW4E_ChA_D1, io_struct.BCW4F_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581e7), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW50_ChA_D1, io_struct.BCW51_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581e8), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW52_ChA_D1, io_struct.BCW53_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581e9), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW54_ChA_D1, io_struct.BCW55_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581ea), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW56_ChA_D1, io_struct.BCW57_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581eb), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW58_ChA_D1, io_struct.BCW59_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581ec), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW5A_ChA_D1, io_struct.BCW5B_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581ed), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW5C_ChA_D1, io_struct.BCW5D_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581ee), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW5E_ChA_D1, io_struct.BCW5F_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581ef), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW60_ChA_D1, io_struct.BCW61_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581f0), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW62_ChA_D1, io_struct.BCW63_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581f1), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW64_ChA_D1, io_struct.BCW65_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581f2), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW66_ChA_D1, io_struct.BCW67_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581f3), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW68_ChA_D1, io_struct.BCW69_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581f4), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW6A_ChA_D1, io_struct.BCW6B_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581f5), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW6C_ChA_D1, io_struct.BCW6D_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581f6), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW6E_ChA_D1, io_struct.BCW6F_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581f7), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW70_ChA_D1, io_struct.BCW71_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581f8), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW72_ChA_D1, io_struct.BCW73_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581f9), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW74_ChA_D1, io_struct.BCW75_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581fa), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW76_ChA_D1, io_struct.BCW77_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581fb), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW78_ChA_D1, io_struct.BCW79_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581fc), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW7A_ChA_D1, io_struct.BCW7B_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581fd), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW7C_ChA_D1, io_struct.BCW7D_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581fe), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW7E_ChA_D1, io_struct.BCW7F_ChA_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581ff), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW00_ChB_D0, io_struct.RCW01_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58200), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW02_ChB_D0, io_struct.RCW03_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58201), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW04_ChB_D0, io_struct.RCW05_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58202), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW06_ChB_D0, io_struct.RCW07_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58203), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW08_ChB_D0, io_struct.RCW09_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58204), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW0A_ChB_D0, io_struct.RCW0B_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58205), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW0C_ChB_D0, io_struct.RCW0D_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58206), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW0E_ChB_D0, io_struct.RCW0F_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58207), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW10_ChB_D0, io_struct.RCW11_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58208), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW12_ChB_D0, io_struct.RCW13_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58209), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW14_ChB_D0, io_struct.RCW15_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5820a), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW16_ChB_D0, io_struct.RCW17_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5820b), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW18_ChB_D0, io_struct.RCW19_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5820c), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW1A_ChB_D0, io_struct.RCW1B_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5820d), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW1C_ChB_D0, io_struct.RCW1D_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5820e), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW1E_ChB_D0, io_struct.RCW1F_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5820f), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW20_ChB_D0, io_struct.RCW21_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58210), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW22_ChB_D0, io_struct.RCW23_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58211), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW24_ChB_D0, io_struct.RCW25_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58212), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW26_ChB_D0, io_struct.RCW27_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58213), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW28_ChB_D0, io_struct.RCW29_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58214), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW2A_ChB_D0, io_struct.RCW2B_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58215), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW2C_ChB_D0, io_struct.RCW2D_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58216), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW2E_ChB_D0, io_struct.RCW2F_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58217), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW30_ChB_D0, io_struct.RCW31_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58218), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW32_ChB_D0, io_struct.RCW33_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58219), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW34_ChB_D0, io_struct.RCW35_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5821a), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW36_ChB_D0, io_struct.RCW37_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5821b), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW38_ChB_D0, io_struct.RCW39_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5821c), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW3A_ChB_D0, io_struct.RCW3B_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5821d), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW3C_ChB_D0, io_struct.RCW3D_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5821e), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW3E_ChB_D0, io_struct.RCW3F_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5821f), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW40_ChB_D0, io_struct.RCW41_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58220), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW42_ChB_D0, io_struct.RCW43_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58221), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW44_ChB_D0, io_struct.RCW45_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58222), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW46_ChB_D0, io_struct.RCW47_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58223), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW48_ChB_D0, io_struct.RCW49_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58224), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW4A_ChB_D0, io_struct.RCW4B_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58225), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW4C_ChB_D0, io_struct.RCW4D_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58226), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW4E_ChB_D0, io_struct.RCW4F_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58227), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW50_ChB_D0, io_struct.RCW51_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58228), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW52_ChB_D0, io_struct.RCW53_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58229), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW54_ChB_D0, io_struct.RCW55_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5822a), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW56_ChB_D0, io_struct.RCW57_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5822b), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW58_ChB_D0, io_struct.RCW59_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5822c), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW5A_ChB_D0, io_struct.RCW5B_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5822d), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW5C_ChB_D0, io_struct.RCW5D_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5822e), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW5E_ChB_D0, io_struct.RCW5F_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5822f), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW60_ChB_D0, io_struct.RCW61_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58230), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW62_ChB_D0, io_struct.RCW63_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58231), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW64_ChB_D0, io_struct.RCW65_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58232), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW66_ChB_D0, io_struct.RCW67_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58233), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW68_ChB_D0, io_struct.RCW69_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58234), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW6A_ChB_D0, io_struct.RCW6B_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58235), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW6C_ChB_D0, io_struct.RCW6D_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58236), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW6E_ChB_D0, io_struct.RCW6F_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58237), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW70_ChB_D0, io_struct.RCW71_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58238), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW72_ChB_D0, io_struct.RCW73_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58239), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW74_ChB_D0, io_struct.RCW75_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5823a), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW76_ChB_D0, io_struct.RCW77_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5823b), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW78_ChB_D0, io_struct.RCW79_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5823c), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW7A_ChB_D0, io_struct.RCW7B_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5823d), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW7C_ChB_D0, io_struct.RCW7D_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5823e), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW7E_ChB_D0, io_struct.RCW7F_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5823f), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW00_ChB_D0, io_struct.BCW01_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58240), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW02_ChB_D0, io_struct.BCW03_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58241), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW04_ChB_D0, io_struct.BCW05_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58242), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW06_ChB_D0, io_struct.BCW07_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58243), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW08_ChB_D0, io_struct.BCW09_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58244), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW0A_ChB_D0, io_struct.BCW0B_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58245), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW0C_ChB_D0, io_struct.BCW0D_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58246), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW0E_ChB_D0, io_struct.BCW0F_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58247), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW10_ChB_D0, io_struct.BCW11_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58248), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW12_ChB_D0, io_struct.BCW13_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58249), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW14_ChB_D0, io_struct.BCW15_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5824a), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW16_ChB_D0, io_struct.BCW17_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5824b), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW18_ChB_D0, io_struct.BCW19_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5824c), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW1A_ChB_D0, io_struct.BCW1B_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5824d), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW1C_ChB_D0, io_struct.BCW1D_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5824e), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW1E_ChB_D0, io_struct.BCW1F_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5824f), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW20_ChB_D0, io_struct.BCW21_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58250), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW22_ChB_D0, io_struct.BCW23_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58251), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW24_ChB_D0, io_struct.BCW25_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58252), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW26_ChB_D0, io_struct.BCW27_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58253), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW28_ChB_D0, io_struct.BCW29_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58254), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW2A_ChB_D0, io_struct.BCW2B_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58255), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW2C_ChB_D0, io_struct.BCW2D_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58256), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW2E_ChB_D0, io_struct.BCW2F_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58257), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW30_ChB_D0, io_struct.BCW31_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58258), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW32_ChB_D0, io_struct.BCW33_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58259), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW34_ChB_D0, io_struct.BCW35_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5825a), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW36_ChB_D0, io_struct.BCW37_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5825b), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW38_ChB_D0, io_struct.BCW39_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5825c), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW3A_ChB_D0, io_struct.BCW3B_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5825d), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW3C_ChB_D0, io_struct.BCW3D_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5825e), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW3E_ChB_D0, io_struct.BCW3F_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5825f), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW40_ChB_D0, io_struct.BCW41_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58260), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW42_ChB_D0, io_struct.BCW43_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58261), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW44_ChB_D0, io_struct.BCW45_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58262), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW46_ChB_D0, io_struct.BCW47_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58263), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW48_ChB_D0, io_struct.BCW49_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58264), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW4A_ChB_D0, io_struct.BCW4B_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58265), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW4C_ChB_D0, io_struct.BCW4D_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58266), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW4E_ChB_D0, io_struct.BCW4F_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58267), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW50_ChB_D0, io_struct.BCW51_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58268), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW52_ChB_D0, io_struct.BCW53_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58269), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW54_ChB_D0, io_struct.BCW55_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5826a), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW56_ChB_D0, io_struct.BCW57_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5826b), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW58_ChB_D0, io_struct.BCW59_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5826c), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW5A_ChB_D0, io_struct.BCW5B_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5826d), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW5C_ChB_D0, io_struct.BCW5D_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5826e), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW5E_ChB_D0, io_struct.BCW5F_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5826f), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW60_ChB_D0, io_struct.BCW61_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58270), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW62_ChB_D0, io_struct.BCW63_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58271), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW64_ChB_D0, io_struct.BCW65_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58272), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW66_ChB_D0, io_struct.BCW67_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58273), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW68_ChB_D0, io_struct.BCW69_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58274), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW6A_ChB_D0, io_struct.BCW6B_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58275), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW6C_ChB_D0, io_struct.BCW6D_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58276), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW6E_ChB_D0, io_struct.BCW6F_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58277), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW70_ChB_D0, io_struct.BCW71_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58278), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW72_ChB_D0, io_struct.BCW73_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58279), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW74_ChB_D0, io_struct.BCW75_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5827a), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW76_ChB_D0, io_struct.BCW77_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5827b), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW78_ChB_D0, io_struct.BCW79_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5827c), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW7A_ChB_D0, io_struct.BCW7B_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5827d), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW7C_ChB_D0, io_struct.BCW7D_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5827e), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW7E_ChB_D0, io_struct.BCW7F_ChB_D0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5827f), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW00_ChB_D1, io_struct.RCW01_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58280), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW02_ChB_D1, io_struct.RCW03_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58281), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW04_ChB_D1, io_struct.RCW05_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58282), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW06_ChB_D1, io_struct.RCW07_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58283), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW08_ChB_D1, io_struct.RCW09_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58284), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW0A_ChB_D1, io_struct.RCW0B_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58285), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW0C_ChB_D1, io_struct.RCW0D_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58286), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW0E_ChB_D1, io_struct.RCW0F_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58287), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW10_ChB_D1, io_struct.RCW11_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58288), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW12_ChB_D1, io_struct.RCW13_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58289), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW14_ChB_D1, io_struct.RCW15_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5828a), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW16_ChB_D1, io_struct.RCW17_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5828b), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW18_ChB_D1, io_struct.RCW19_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5828c), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW1A_ChB_D1, io_struct.RCW1B_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5828d), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW1C_ChB_D1, io_struct.RCW1D_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5828e), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW1E_ChB_D1, io_struct.RCW1F_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5828f), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW20_ChB_D1, io_struct.RCW21_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58290), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW22_ChB_D1, io_struct.RCW23_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58291), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW24_ChB_D1, io_struct.RCW25_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58292), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW26_ChB_D1, io_struct.RCW27_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58293), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW28_ChB_D1, io_struct.RCW29_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58294), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW2A_ChB_D1, io_struct.RCW2B_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58295), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW2C_ChB_D1, io_struct.RCW2D_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58296), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW2E_ChB_D1, io_struct.RCW2F_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58297), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW30_ChB_D1, io_struct.RCW31_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58298), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW32_ChB_D1, io_struct.RCW33_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58299), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW34_ChB_D1, io_struct.RCW35_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5829a), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW36_ChB_D1, io_struct.RCW37_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5829b), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW38_ChB_D1, io_struct.RCW39_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5829c), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW3A_ChB_D1, io_struct.RCW3B_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5829d), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW3C_ChB_D1, io_struct.RCW3D_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5829e), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW3E_ChB_D1, io_struct.RCW3F_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5829f), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW40_ChB_D1, io_struct.RCW41_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582a0), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW42_ChB_D1, io_struct.RCW43_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582a1), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW44_ChB_D1, io_struct.RCW45_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582a2), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW46_ChB_D1, io_struct.RCW47_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582a3), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW48_ChB_D1, io_struct.RCW49_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582a4), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW4A_ChB_D1, io_struct.RCW4B_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582a5), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW4C_ChB_D1, io_struct.RCW4D_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582a6), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW4E_ChB_D1, io_struct.RCW4F_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582a7), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW50_ChB_D1, io_struct.RCW51_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582a8), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW52_ChB_D1, io_struct.RCW53_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582a9), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW54_ChB_D1, io_struct.RCW55_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582aa), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW56_ChB_D1, io_struct.RCW57_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582ab), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW58_ChB_D1, io_struct.RCW59_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582ac), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW5A_ChB_D1, io_struct.RCW5B_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582ad), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW5C_ChB_D1, io_struct.RCW5D_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582ae), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW5E_ChB_D1, io_struct.RCW5F_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582af), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW60_ChB_D1, io_struct.RCW61_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582b0), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW62_ChB_D1, io_struct.RCW63_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582b1), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW64_ChB_D1, io_struct.RCW65_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582b2), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW66_ChB_D1, io_struct.RCW67_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582b3), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW68_ChB_D1, io_struct.RCW69_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582b4), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW6A_ChB_D1, io_struct.RCW6B_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582b5), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW6C_ChB_D1, io_struct.RCW6D_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582b6), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW6E_ChB_D1, io_struct.RCW6F_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582b7), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW70_ChB_D1, io_struct.RCW71_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582b8), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW72_ChB_D1, io_struct.RCW73_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582b9), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW74_ChB_D1, io_struct.RCW75_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582ba), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW76_ChB_D1, io_struct.RCW77_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582bb), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW78_ChB_D1, io_struct.RCW79_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582bc), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW7A_ChB_D1, io_struct.RCW7B_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582bd), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW7C_ChB_D1, io_struct.RCW7D_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582be), l_data));
+
+    load_dmem_8bit_fields(io_struct.RCW7E_ChB_D1, io_struct.RCW7F_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582bf), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW00_ChB_D1, io_struct.BCW01_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582c0), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW02_ChB_D1, io_struct.BCW03_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582c1), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW04_ChB_D1, io_struct.BCW05_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582c2), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW06_ChB_D1, io_struct.BCW07_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582c3), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW08_ChB_D1, io_struct.BCW09_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582c4), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW0A_ChB_D1, io_struct.BCW0B_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582c5), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW0C_ChB_D1, io_struct.BCW0D_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582c6), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW0E_ChB_D1, io_struct.BCW0F_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582c7), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW10_ChB_D1, io_struct.BCW11_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582c8), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW12_ChB_D1, io_struct.BCW13_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582c9), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW14_ChB_D1, io_struct.BCW15_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582ca), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW16_ChB_D1, io_struct.BCW17_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582cb), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW18_ChB_D1, io_struct.BCW19_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582cc), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW1A_ChB_D1, io_struct.BCW1B_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582cd), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW1C_ChB_D1, io_struct.BCW1D_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582ce), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW1E_ChB_D1, io_struct.BCW1F_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582cf), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW20_ChB_D1, io_struct.BCW21_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582d0), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW22_ChB_D1, io_struct.BCW23_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582d1), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW24_ChB_D1, io_struct.BCW25_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582d2), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW26_ChB_D1, io_struct.BCW27_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582d3), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW28_ChB_D1, io_struct.BCW29_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582d4), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW2A_ChB_D1, io_struct.BCW2B_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582d5), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW2C_ChB_D1, io_struct.BCW2D_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582d6), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW2E_ChB_D1, io_struct.BCW2F_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582d7), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW30_ChB_D1, io_struct.BCW31_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582d8), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW32_ChB_D1, io_struct.BCW33_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582d9), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW34_ChB_D1, io_struct.BCW35_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582da), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW36_ChB_D1, io_struct.BCW37_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582db), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW38_ChB_D1, io_struct.BCW39_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582dc), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW3A_ChB_D1, io_struct.BCW3B_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582dd), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW3C_ChB_D1, io_struct.BCW3D_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582de), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW3E_ChB_D1, io_struct.BCW3F_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582df), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW40_ChB_D1, io_struct.BCW41_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582e0), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW42_ChB_D1, io_struct.BCW43_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582e1), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW44_ChB_D1, io_struct.BCW45_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582e2), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW46_ChB_D1, io_struct.BCW47_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582e3), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW48_ChB_D1, io_struct.BCW49_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582e4), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW4A_ChB_D1, io_struct.BCW4B_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582e5), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW4C_ChB_D1, io_struct.BCW4D_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582e6), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW4E_ChB_D1, io_struct.BCW4F_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582e7), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW50_ChB_D1, io_struct.BCW51_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582e8), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW52_ChB_D1, io_struct.BCW53_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582e9), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW54_ChB_D1, io_struct.BCW55_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582ea), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW56_ChB_D1, io_struct.BCW57_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582eb), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW58_ChB_D1, io_struct.BCW59_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582ec), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW5A_ChB_D1, io_struct.BCW5B_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582ed), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW5C_ChB_D1, io_struct.BCW5D_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582ee), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW5E_ChB_D1, io_struct.BCW5F_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582ef), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW60_ChB_D1, io_struct.BCW61_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582f0), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW62_ChB_D1, io_struct.BCW63_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582f1), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW64_ChB_D1, io_struct.BCW65_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582f2), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW66_ChB_D1, io_struct.BCW67_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582f3), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW68_ChB_D1, io_struct.BCW69_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582f4), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW6A_ChB_D1, io_struct.BCW6B_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582f5), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW6C_ChB_D1, io_struct.BCW6D_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582f6), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW6E_ChB_D1, io_struct.BCW6F_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582f7), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW70_ChB_D1, io_struct.BCW71_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582f8), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW72_ChB_D1, io_struct.BCW73_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582f9), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW74_ChB_D1, io_struct.BCW75_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582fa), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW76_ChB_D1, io_struct.BCW77_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582fb), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW78_ChB_D1, io_struct.BCW79_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582fc), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW7A_ChB_D1, io_struct.BCW7B_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582fd), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW7C_ChB_D1, io_struct.BCW7D_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582fe), l_data));
+
+    load_dmem_8bit_fields(io_struct.BCW7E_ChB_D1, io_struct.BCW7F_ChB_D1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582ff), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR0Nib0, io_struct.VrefDqR0Nib1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58300), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR0Nib2, io_struct.VrefDqR0Nib3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58301), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR0Nib4, io_struct.VrefDqR0Nib5, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58302), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR0Nib6, io_struct.VrefDqR0Nib7, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58303), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR0Nib8, io_struct.VrefDqR0Nib9, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58304), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR0Nib10, io_struct.VrefDqR0Nib11, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58305), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR0Nib12, io_struct.VrefDqR0Nib13, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58306), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR0Nib14, io_struct.VrefDqR0Nib15, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58307), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR0Nib16, io_struct.VrefDqR0Nib17, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58308), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR0Nib18, io_struct.VrefDqR0Nib19, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58309), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR1Nib0, io_struct.VrefDqR1Nib1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5830a), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR1Nib2, io_struct.VrefDqR1Nib3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5830b), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR1Nib4, io_struct.VrefDqR1Nib5, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5830c), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR1Nib6, io_struct.VrefDqR1Nib7, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5830d), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR1Nib8, io_struct.VrefDqR1Nib9, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5830e), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR1Nib10, io_struct.VrefDqR1Nib11, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5830f), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR1Nib12, io_struct.VrefDqR1Nib13, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58310), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR1Nib14, io_struct.VrefDqR1Nib15, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58311), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR1Nib16, io_struct.VrefDqR1Nib17, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58312), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR1Nib18, io_struct.VrefDqR1Nib19, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58313), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR2Nib0, io_struct.VrefDqR2Nib1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58314), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR2Nib2, io_struct.VrefDqR2Nib3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58315), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR2Nib4, io_struct.VrefDqR2Nib5, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58316), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR2Nib6, io_struct.VrefDqR2Nib7, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58317), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR2Nib8, io_struct.VrefDqR2Nib9, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58318), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR2Nib10, io_struct.VrefDqR2Nib11, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58319), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR2Nib12, io_struct.VrefDqR2Nib13, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5831a), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR2Nib14, io_struct.VrefDqR2Nib15, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5831b), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR2Nib16, io_struct.VrefDqR2Nib17, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5831c), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR2Nib18, io_struct.VrefDqR2Nib19, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5831d), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR3Nib0, io_struct.VrefDqR3Nib1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5831e), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR3Nib2, io_struct.VrefDqR3Nib3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5831f), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR3Nib4, io_struct.VrefDqR3Nib5, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58320), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR3Nib6, io_struct.VrefDqR3Nib7, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58321), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR3Nib8, io_struct.VrefDqR3Nib9, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58322), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR3Nib10, io_struct.VrefDqR3Nib11, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58323), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR3Nib12, io_struct.VrefDqR3Nib13, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58324), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR3Nib14, io_struct.VrefDqR3Nib15, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58325), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR3Nib16, io_struct.VrefDqR3Nib17, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58326), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefDqR3Nib18, io_struct.VrefDqR3Nib19, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58327), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R0Nib0, io_struct.MR3R0Nib1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58328), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R0Nib2, io_struct.MR3R0Nib3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58329), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R0Nib4, io_struct.MR3R0Nib5, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5832a), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R0Nib6, io_struct.MR3R0Nib7, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5832b), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R0Nib8, io_struct.MR3R0Nib9, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5832c), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R0Nib10, io_struct.MR3R0Nib11, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5832d), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R0Nib12, io_struct.MR3R0Nib13, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5832e), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R0Nib14, io_struct.MR3R0Nib15, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5832f), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R0Nib16, io_struct.MR3R0Nib17, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58330), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R0Nib18, io_struct.MR3R0Nib19, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58331), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R1Nib0, io_struct.MR3R1Nib1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58332), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R1Nib2, io_struct.MR3R1Nib3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58333), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R1Nib4, io_struct.MR3R1Nib5, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58334), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R1Nib6, io_struct.MR3R1Nib7, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58335), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R1Nib8, io_struct.MR3R1Nib9, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58336), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R1Nib10, io_struct.MR3R1Nib11, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58337), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R1Nib12, io_struct.MR3R1Nib13, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58338), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R1Nib14, io_struct.MR3R1Nib15, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58339), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R1Nib16, io_struct.MR3R1Nib17, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5833a), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R1Nib18, io_struct.MR3R1Nib19, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5833b), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R2Nib0, io_struct.MR3R2Nib1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5833c), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R2Nib2, io_struct.MR3R2Nib3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5833d), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R2Nib4, io_struct.MR3R2Nib5, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5833e), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R2Nib6, io_struct.MR3R2Nib7, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5833f), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R2Nib8, io_struct.MR3R2Nib9, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58340), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R2Nib10, io_struct.MR3R2Nib11, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58341), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R2Nib12, io_struct.MR3R2Nib13, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58342), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R2Nib14, io_struct.MR3R2Nib15, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58343), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R2Nib16, io_struct.MR3R2Nib17, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58344), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R2Nib18, io_struct.MR3R2Nib19, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58345), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R3Nib0, io_struct.MR3R3Nib1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58346), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R3Nib2, io_struct.MR3R3Nib3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58347), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R3Nib4, io_struct.MR3R3Nib5, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58348), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R3Nib6, io_struct.MR3R3Nib7, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58349), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R3Nib8, io_struct.MR3R3Nib9, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5834a), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R3Nib10, io_struct.MR3R3Nib11, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5834b), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R3Nib12, io_struct.MR3R3Nib13, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5834c), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R3Nib14, io_struct.MR3R3Nib15, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5834d), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R3Nib16, io_struct.MR3R3Nib17, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5834e), l_data));
+
+    load_dmem_8bit_fields(io_struct.MR3R3Nib18, io_struct.MR3R3Nib19, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5834f), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR0Nib0, io_struct.VrefCSR0Nib1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58350), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR0Nib2, io_struct.VrefCSR0Nib3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58351), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR0Nib4, io_struct.VrefCSR0Nib5, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58352), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR0Nib6, io_struct.VrefCSR0Nib7, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58353), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR0Nib8, io_struct.VrefCSR0Nib9, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58354), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR0Nib10, io_struct.VrefCSR0Nib11, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58355), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR0Nib12, io_struct.VrefCSR0Nib13, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58356), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR0Nib14, io_struct.VrefCSR0Nib15, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58357), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR0Nib16, io_struct.VrefCSR0Nib17, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58358), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR0Nib18, io_struct.VrefCSR0Nib19, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58359), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR1Nib0, io_struct.VrefCSR1Nib1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5835a), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR1Nib2, io_struct.VrefCSR1Nib3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5835b), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR1Nib4, io_struct.VrefCSR1Nib5, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5835c), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR1Nib6, io_struct.VrefCSR1Nib7, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5835d), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR1Nib8, io_struct.VrefCSR1Nib9, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5835e), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR1Nib10, io_struct.VrefCSR1Nib11, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5835f), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR1Nib12, io_struct.VrefCSR1Nib13, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58360), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR1Nib14, io_struct.VrefCSR1Nib15, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58361), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR1Nib16, io_struct.VrefCSR1Nib17, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58362), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR1Nib18, io_struct.VrefCSR1Nib19, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58363), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR2Nib0, io_struct.VrefCSR2Nib1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58364), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR2Nib2, io_struct.VrefCSR2Nib3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58365), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR2Nib4, io_struct.VrefCSR2Nib5, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58366), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR2Nib6, io_struct.VrefCSR2Nib7, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58367), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR2Nib8, io_struct.VrefCSR2Nib9, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58368), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR2Nib10, io_struct.VrefCSR2Nib11, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58369), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR2Nib12, io_struct.VrefCSR2Nib13, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5836a), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR2Nib14, io_struct.VrefCSR2Nib15, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5836b), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR2Nib16, io_struct.VrefCSR2Nib17, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5836c), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR2Nib18, io_struct.VrefCSR2Nib19, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5836d), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR3Nib0, io_struct.VrefCSR3Nib1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5836e), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR3Nib2, io_struct.VrefCSR3Nib3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5836f), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR3Nib4, io_struct.VrefCSR3Nib5, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58370), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR3Nib6, io_struct.VrefCSR3Nib7, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58371), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR3Nib8, io_struct.VrefCSR3Nib9, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58372), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR3Nib10, io_struct.VrefCSR3Nib11, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58373), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR3Nib12, io_struct.VrefCSR3Nib13, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58374), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR3Nib14, io_struct.VrefCSR3Nib15, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58375), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR3Nib16, io_struct.VrefCSR3Nib17, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58376), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCSR3Nib18, io_struct.VrefCSR3Nib19, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58377), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR0Nib0, io_struct.VrefCAR0Nib1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58378), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR0Nib2, io_struct.VrefCAR0Nib3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58379), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR0Nib4, io_struct.VrefCAR0Nib5, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5837a), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR0Nib6, io_struct.VrefCAR0Nib7, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5837b), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR0Nib8, io_struct.VrefCAR0Nib9, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5837c), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR0Nib10, io_struct.VrefCAR0Nib11, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5837d), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR0Nib12, io_struct.VrefCAR0Nib13, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5837e), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR0Nib14, io_struct.VrefCAR0Nib15, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5837f), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR0Nib16, io_struct.VrefCAR0Nib17, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58380), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR0Nib18, io_struct.VrefCAR0Nib19, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58381), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR1Nib0, io_struct.VrefCAR1Nib1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58382), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR1Nib2, io_struct.VrefCAR1Nib3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58383), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR1Nib4, io_struct.VrefCAR1Nib5, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58384), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR1Nib6, io_struct.VrefCAR1Nib7, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58385), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR1Nib8, io_struct.VrefCAR1Nib9, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58386), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR1Nib10, io_struct.VrefCAR1Nib11, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58387), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR1Nib12, io_struct.VrefCAR1Nib13, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58388), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR1Nib14, io_struct.VrefCAR1Nib15, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58389), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR1Nib16, io_struct.VrefCAR1Nib17, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5838a), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR1Nib18, io_struct.VrefCAR1Nib19, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5838b), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR2Nib0, io_struct.VrefCAR2Nib1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5838c), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR2Nib2, io_struct.VrefCAR2Nib3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5838d), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR2Nib4, io_struct.VrefCAR2Nib5, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5838e), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR2Nib6, io_struct.VrefCAR2Nib7, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5838f), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR2Nib8, io_struct.VrefCAR2Nib9, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58390), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR2Nib10, io_struct.VrefCAR2Nib11, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58391), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR2Nib12, io_struct.VrefCAR2Nib13, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58392), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR2Nib14, io_struct.VrefCAR2Nib15, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58393), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR2Nib16, io_struct.VrefCAR2Nib17, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58394), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR2Nib18, io_struct.VrefCAR2Nib19, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58395), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR3Nib0, io_struct.VrefCAR3Nib1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58396), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR3Nib2, io_struct.VrefCAR3Nib3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58397), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR3Nib4, io_struct.VrefCAR3Nib5, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58398), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR3Nib6, io_struct.VrefCAR3Nib7, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58399), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR3Nib8, io_struct.VrefCAR3Nib9, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5839a), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR3Nib10, io_struct.VrefCAR3Nib11, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5839b), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR3Nib12, io_struct.VrefCAR3Nib13, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5839c), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR3Nib14, io_struct.VrefCAR3Nib15, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5839d), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR3Nib16, io_struct.VrefCAR3Nib17, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5839e), l_data));
+
+    load_dmem_8bit_fields(io_struct.VrefCAR3Nib18, io_struct.VrefCAR3Nib19, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5839f), l_data));
+
+    load_dmem_8bit_fields(io_struct.DisabledDB0LaneR0, io_struct.DisabledDB1LaneR0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583a0), l_data));
+
+    load_dmem_8bit_fields(io_struct.DisabledDB2LaneR0, io_struct.DisabledDB3LaneR0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583a1), l_data));
+
+    load_dmem_8bit_fields(io_struct.DisabledDB4LaneR0, io_struct.DisabledDB5LaneR0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583a2), l_data));
+
+    load_dmem_8bit_fields(io_struct.DisabledDB6LaneR0, io_struct.DisabledDB7LaneR0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583a3), l_data));
+
+    load_dmem_8bit_fields(io_struct.DisabledDB8LaneR0, io_struct.DisabledDB9LaneR0, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583a4), l_data));
+
+    load_dmem_8bit_fields(io_struct.DisabledDB0LaneR1, io_struct.DisabledDB1LaneR1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583a5), l_data));
+
+    load_dmem_8bit_fields(io_struct.DisabledDB2LaneR1, io_struct.DisabledDB3LaneR1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583a6), l_data));
+
+    load_dmem_8bit_fields(io_struct.DisabledDB4LaneR1, io_struct.DisabledDB5LaneR1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583a7), l_data));
+
+    load_dmem_8bit_fields(io_struct.DisabledDB6LaneR1, io_struct.DisabledDB7LaneR1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583a8), l_data));
+
+    load_dmem_8bit_fields(io_struct.DisabledDB8LaneR1, io_struct.DisabledDB9LaneR1, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583a9), l_data));
+
+    load_dmem_8bit_fields(io_struct.DisabledDB0LaneR2, io_struct.DisabledDB1LaneR2, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583aa), l_data));
+
+    load_dmem_8bit_fields(io_struct.DisabledDB2LaneR2, io_struct.DisabledDB3LaneR2, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583ab), l_data));
+
+    load_dmem_8bit_fields(io_struct.DisabledDB4LaneR2, io_struct.DisabledDB5LaneR2, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583ac), l_data));
+
+    load_dmem_8bit_fields(io_struct.DisabledDB6LaneR2, io_struct.DisabledDB7LaneR2, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583ad), l_data));
+
+    load_dmem_8bit_fields(io_struct.DisabledDB8LaneR2, io_struct.DisabledDB9LaneR2, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583ae), l_data));
+
+    load_dmem_8bit_fields(io_struct.DisabledDB0LaneR3, io_struct.DisabledDB1LaneR3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583af), l_data));
+
+    load_dmem_8bit_fields(io_struct.DisabledDB2LaneR3, io_struct.DisabledDB3LaneR3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583b0), l_data));
+
+    load_dmem_8bit_fields(io_struct.DisabledDB4LaneR3, io_struct.DisabledDB5LaneR3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583b1), l_data));
+
+    load_dmem_8bit_fields(io_struct.DisabledDB6LaneR3, io_struct.DisabledDB7LaneR3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583b2), l_data));
+
+    load_dmem_8bit_fields(io_struct.DisabledDB8LaneR3, io_struct.DisabledDB9LaneR3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583b3), l_data));
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+}
+
+///
+/// @brief Reads the DMEM regs and updates the message block values
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_struct the message block
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+/// @note Only loads the "output" fields into the msg block
+/// @note The guts of this function is auto-generated using gen_dmem_func.py
+///       located in the ekb-lab/ody/mem/tools
+///
+fapi2::ReturnCode read_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                 _PMU_SMB_DDR5_1D_t& io_struct)
+{
+    // Packed variables cannot be passed by reference
+    // As such, we have to use temp variables here
+    uint8_t l_temp8_even = 0;
+    uint8_t l_temp8_odd = 0;
+    uint16_t l_temp16 = 0;
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58001),
+                             l_temp16));
+    io_struct.PmuRevision = l_temp16; // uint16_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58007),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CsTestFail = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5800a),
+                             l_temp16));
+    io_struct.ResultAddrOffset = l_temp16; // uint16_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58013),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChA_RR_3_2 = l_temp8_even; // int8_t
+    io_struct.CDD_ChA_RR_3_1 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58014),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChA_RR_3_0 = l_temp8_even; // int8_t
+    io_struct.CDD_ChA_RR_2_3 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58015),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChA_RR_2_1 = l_temp8_even; // int8_t
+    io_struct.CDD_ChA_RR_2_0 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58016),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChA_RR_1_3 = l_temp8_even; // int8_t
+    io_struct.CDD_ChA_RR_1_2 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58017),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChA_RR_1_0 = l_temp8_even; // int8_t
+    io_struct.CDD_ChA_RR_0_3 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58018),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChA_RR_0_2 = l_temp8_even; // int8_t
+    io_struct.CDD_ChA_RR_0_1 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58019),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChA_RW_3_3 = l_temp8_even; // int8_t
+    io_struct.CDD_ChA_RW_3_2 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5801a),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChA_RW_3_1 = l_temp8_even; // int8_t
+    io_struct.CDD_ChA_RW_3_0 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5801b),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChA_RW_2_3 = l_temp8_even; // int8_t
+    io_struct.CDD_ChA_RW_2_2 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5801c),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChA_RW_2_1 = l_temp8_even; // int8_t
+    io_struct.CDD_ChA_RW_2_0 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5801d),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChA_RW_1_3 = l_temp8_even; // int8_t
+    io_struct.CDD_ChA_RW_1_2 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5801e),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChA_RW_1_1 = l_temp8_even; // int8_t
+    io_struct.CDD_ChA_RW_1_0 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5801f),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChA_RW_0_3 = l_temp8_even; // int8_t
+    io_struct.CDD_ChA_RW_0_2 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58020),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChA_RW_0_1 = l_temp8_even; // int8_t
+    io_struct.CDD_ChA_RW_0_0 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58021),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChA_WR_3_3 = l_temp8_even; // int8_t
+    io_struct.CDD_ChA_WR_3_2 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58022),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChA_WR_3_1 = l_temp8_even; // int8_t
+    io_struct.CDD_ChA_WR_3_0 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58023),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChA_WR_2_3 = l_temp8_even; // int8_t
+    io_struct.CDD_ChA_WR_2_2 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58024),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChA_WR_2_1 = l_temp8_even; // int8_t
+    io_struct.CDD_ChA_WR_2_0 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58025),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChA_WR_1_3 = l_temp8_even; // int8_t
+    io_struct.CDD_ChA_WR_1_2 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58026),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChA_WR_1_1 = l_temp8_even; // int8_t
+    io_struct.CDD_ChA_WR_1_0 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58027),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChA_WR_0_3 = l_temp8_even; // int8_t
+    io_struct.CDD_ChA_WR_0_2 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58028),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChA_WR_0_1 = l_temp8_even; // int8_t
+    io_struct.CDD_ChA_WR_0_0 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58029),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChA_WW_3_2 = l_temp8_even; // int8_t
+    io_struct.CDD_ChA_WW_3_1 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5802a),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChA_WW_3_0 = l_temp8_even; // int8_t
+    io_struct.CDD_ChA_WW_2_3 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5802b),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChA_WW_2_1 = l_temp8_even; // int8_t
+    io_struct.CDD_ChA_WW_2_0 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5802c),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChA_WW_1_3 = l_temp8_even; // int8_t
+    io_struct.CDD_ChA_WW_1_2 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5802d),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChA_WW_1_0 = l_temp8_even; // int8_t
+    io_struct.CDD_ChA_WW_0_3 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5802e),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChA_WW_0_2 = l_temp8_even; // int8_t
+    io_struct.CDD_ChA_WW_0_1 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5803d),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CS_Dly_Margin_A0 = l_temp8_even; // uint8_t
+    io_struct.CS_Vref_Margin_A0 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5803e),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CA_Dly_Margin_A0 = l_temp8_even; // uint8_t
+    io_struct.CA_Vref_Margin_A0 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58050),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CS_Dly_Margin_A1 = l_temp8_even; // uint8_t
+    io_struct.CS_Vref_Margin_A1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58051),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CA_Dly_Margin_A1 = l_temp8_even; // uint8_t
+    io_struct.CA_Vref_Margin_A1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58063),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CS_Dly_Margin_A2 = l_temp8_even; // uint8_t
+    io_struct.CS_Vref_Margin_A2 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58064),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CA_Dly_Margin_A2 = l_temp8_even; // uint8_t
+    io_struct.CA_Vref_Margin_A2 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58076),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CS_Dly_Margin_A3 = l_temp8_even; // uint8_t
+    io_struct.CS_Vref_Margin_A3 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58077),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CA_Dly_Margin_A3 = l_temp8_even; // uint8_t
+    io_struct.CA_Vref_Margin_A3 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58080),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.RxClkDly_Margin_A0 = l_temp8_even; // uint8_t
+    io_struct.VrefDac_Margin_A0 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58081),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.TxDqDly_Margin_A0 = l_temp8_even; // uint8_t
+    io_struct.DeviceVref_Margin_A0 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58082),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.RxClkDly_Margin_A1 = l_temp8_even; // uint8_t
+    io_struct.VrefDac_Margin_A1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58083),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.TxDqDly_Margin_A1 = l_temp8_even; // uint8_t
+    io_struct.DeviceVref_Margin_A1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58084),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.RxClkDly_Margin_A2 = l_temp8_even; // uint8_t
+    io_struct.VrefDac_Margin_A2 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58085),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.TxDqDly_Margin_A2 = l_temp8_even; // uint8_t
+    io_struct.DeviceVref_Margin_A2 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58086),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.RxClkDly_Margin_A3 = l_temp8_even; // uint8_t
+    io_struct.VrefDac_Margin_A3 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58087),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.TxDqDly_Margin_A3 = l_temp8_even; // uint8_t
+    io_struct.DeviceVref_Margin_A3 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58089),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChB_RR_3_2 = l_temp8_even; // int8_t
+    io_struct.CDD_ChB_RR_3_1 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5808a),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChB_RR_3_0 = l_temp8_even; // int8_t
+    io_struct.CDD_ChB_RR_2_3 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5808b),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChB_RR_2_1 = l_temp8_even; // int8_t
+    io_struct.CDD_ChB_RR_2_0 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5808c),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChB_RR_1_3 = l_temp8_even; // int8_t
+    io_struct.CDD_ChB_RR_1_2 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5808d),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChB_RR_1_0 = l_temp8_even; // int8_t
+    io_struct.CDD_ChB_RR_0_3 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5808e),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChB_RR_0_2 = l_temp8_even; // int8_t
+    io_struct.CDD_ChB_RR_0_1 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5808f),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChB_RW_3_3 = l_temp8_even; // int8_t
+    io_struct.CDD_ChB_RW_3_2 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58090),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChB_RW_3_1 = l_temp8_even; // int8_t
+    io_struct.CDD_ChB_RW_3_0 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58091),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChB_RW_2_3 = l_temp8_even; // int8_t
+    io_struct.CDD_ChB_RW_2_2 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58092),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChB_RW_2_1 = l_temp8_even; // int8_t
+    io_struct.CDD_ChB_RW_2_0 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58093),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChB_RW_1_3 = l_temp8_even; // int8_t
+    io_struct.CDD_ChB_RW_1_2 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58094),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChB_RW_1_1 = l_temp8_even; // int8_t
+    io_struct.CDD_ChB_RW_1_0 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58095),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChB_RW_0_3 = l_temp8_even; // int8_t
+    io_struct.CDD_ChB_RW_0_2 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58096),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChB_RW_0_1 = l_temp8_even; // int8_t
+    io_struct.CDD_ChB_RW_0_0 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58097),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChB_WR_3_3 = l_temp8_even; // int8_t
+    io_struct.CDD_ChB_WR_3_2 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58098),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChB_WR_3_1 = l_temp8_even; // int8_t
+    io_struct.CDD_ChB_WR_3_0 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58099),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChB_WR_2_3 = l_temp8_even; // int8_t
+    io_struct.CDD_ChB_WR_2_2 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5809a),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChB_WR_2_1 = l_temp8_even; // int8_t
+    io_struct.CDD_ChB_WR_2_0 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5809b),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChB_WR_1_3 = l_temp8_even; // int8_t
+    io_struct.CDD_ChB_WR_1_2 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5809c),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChB_WR_1_1 = l_temp8_even; // int8_t
+    io_struct.CDD_ChB_WR_1_0 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5809d),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChB_WR_0_3 = l_temp8_even; // int8_t
+    io_struct.CDD_ChB_WR_0_2 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5809e),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChB_WR_0_1 = l_temp8_even; // int8_t
+    io_struct.CDD_ChB_WR_0_0 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5809f),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChB_WW_3_2 = l_temp8_even; // int8_t
+    io_struct.CDD_ChB_WW_3_1 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580a0),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChB_WW_3_0 = l_temp8_even; // int8_t
+    io_struct.CDD_ChB_WW_2_3 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580a1),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChB_WW_2_1 = l_temp8_even; // int8_t
+    io_struct.CDD_ChB_WW_2_0 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580a2),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChB_WW_1_3 = l_temp8_even; // int8_t
+    io_struct.CDD_ChB_WW_1_2 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580a3),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChB_WW_1_0 = l_temp8_even; // int8_t
+    io_struct.CDD_ChB_WW_0_3 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580a4),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CDD_ChB_WW_0_2 = l_temp8_even; // int8_t
+    io_struct.CDD_ChB_WW_0_1 = l_temp8_odd; // int8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580b3),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CS_Dly_Margin_B0 = l_temp8_even; // uint8_t
+    io_struct.CS_Vref_Margin_B0 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580b4),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CA_Dly_Margin_B0 = l_temp8_even; // uint8_t
+    io_struct.CA_Vref_Margin_B0 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580c6),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CS_Dly_Margin_B1 = l_temp8_even; // uint8_t
+    io_struct.CS_Vref_Margin_B1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580c7),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CA_Dly_Margin_B1 = l_temp8_even; // uint8_t
+    io_struct.CA_Vref_Margin_B1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580d9),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CS_Dly_Margin_B2 = l_temp8_even; // uint8_t
+    io_struct.CS_Vref_Margin_B2 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580da),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CA_Dly_Margin_B2 = l_temp8_even; // uint8_t
+    io_struct.CA_Vref_Margin_B2 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580ec),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CS_Dly_Margin_B3 = l_temp8_even; // uint8_t
+    io_struct.CS_Vref_Margin_B3 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580ed),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.CA_Dly_Margin_B3 = l_temp8_even; // uint8_t
+    io_struct.CA_Vref_Margin_B3 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580f6),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.RxClkDly_Margin_B0 = l_temp8_even; // uint8_t
+    io_struct.VrefDac_Margin_B0 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580f7),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.TxDqDly_Margin_B0 = l_temp8_even; // uint8_t
+    io_struct.DeviceVref_Margin_B0 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580f8),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.RxClkDly_Margin_B1 = l_temp8_even; // uint8_t
+    io_struct.VrefDac_Margin_B1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580f9),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.TxDqDly_Margin_B1 = l_temp8_even; // uint8_t
+    io_struct.DeviceVref_Margin_B1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580fa),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.RxClkDly_Margin_B2 = l_temp8_even; // uint8_t
+    io_struct.VrefDac_Margin_B2 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580fb),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.TxDqDly_Margin_B2 = l_temp8_even; // uint8_t
+    io_struct.DeviceVref_Margin_B2 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580fc),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.RxClkDly_Margin_B3 = l_temp8_even; // uint8_t
+    io_struct.VrefDac_Margin_B3 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580fd),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.TxDqDly_Margin_B3 = l_temp8_even; // uint8_t
+    io_struct.DeviceVref_Margin_B3 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58300),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR0Nib0 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR0Nib1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58301),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR0Nib2 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR0Nib3 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58302),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR0Nib4 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR0Nib5 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58303),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR0Nib6 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR0Nib7 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58304),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR0Nib8 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR0Nib9 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58305),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR0Nib10 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR0Nib11 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58306),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR0Nib12 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR0Nib13 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58307),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR0Nib14 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR0Nib15 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58308),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR0Nib16 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR0Nib17 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58309),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR0Nib18 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR0Nib19 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5830a),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR1Nib0 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR1Nib1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5830b),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR1Nib2 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR1Nib3 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5830c),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR1Nib4 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR1Nib5 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5830d),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR1Nib6 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR1Nib7 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5830e),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR1Nib8 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR1Nib9 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5830f),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR1Nib10 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR1Nib11 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58310),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR1Nib12 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR1Nib13 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58311),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR1Nib14 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR1Nib15 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58312),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR1Nib16 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR1Nib17 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58313),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR1Nib18 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR1Nib19 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58314),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR2Nib0 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR2Nib1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58315),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR2Nib2 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR2Nib3 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58316),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR2Nib4 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR2Nib5 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58317),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR2Nib6 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR2Nib7 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58318),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR2Nib8 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR2Nib9 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58319),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR2Nib10 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR2Nib11 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5831a),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR2Nib12 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR2Nib13 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5831b),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR2Nib14 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR2Nib15 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5831c),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR2Nib16 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR2Nib17 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5831d),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR2Nib18 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR2Nib19 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5831e),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR3Nib0 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR3Nib1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5831f),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR3Nib2 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR3Nib3 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58320),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR3Nib4 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR3Nib5 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58321),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR3Nib6 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR3Nib7 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58322),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR3Nib8 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR3Nib9 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58323),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR3Nib10 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR3Nib11 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58324),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR3Nib12 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR3Nib13 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58325),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR3Nib14 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR3Nib15 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58326),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR3Nib16 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR3Nib17 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58327),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefDqR3Nib18 = l_temp8_even; // uint8_t
+    io_struct.VrefDqR3Nib19 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58328),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R0Nib0 = l_temp8_even; // uint8_t
+    io_struct.MR3R0Nib1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58329),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R0Nib2 = l_temp8_even; // uint8_t
+    io_struct.MR3R0Nib3 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5832a),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R0Nib4 = l_temp8_even; // uint8_t
+    io_struct.MR3R0Nib5 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5832b),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R0Nib6 = l_temp8_even; // uint8_t
+    io_struct.MR3R0Nib7 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5832c),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R0Nib8 = l_temp8_even; // uint8_t
+    io_struct.MR3R0Nib9 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5832d),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R0Nib10 = l_temp8_even; // uint8_t
+    io_struct.MR3R0Nib11 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5832e),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R0Nib12 = l_temp8_even; // uint8_t
+    io_struct.MR3R0Nib13 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5832f),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R0Nib14 = l_temp8_even; // uint8_t
+    io_struct.MR3R0Nib15 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58330),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R0Nib16 = l_temp8_even; // uint8_t
+    io_struct.MR3R0Nib17 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58331),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R0Nib18 = l_temp8_even; // uint8_t
+    io_struct.MR3R0Nib19 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58332),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R1Nib0 = l_temp8_even; // uint8_t
+    io_struct.MR3R1Nib1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58333),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R1Nib2 = l_temp8_even; // uint8_t
+    io_struct.MR3R1Nib3 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58334),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R1Nib4 = l_temp8_even; // uint8_t
+    io_struct.MR3R1Nib5 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58335),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R1Nib6 = l_temp8_even; // uint8_t
+    io_struct.MR3R1Nib7 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58336),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R1Nib8 = l_temp8_even; // uint8_t
+    io_struct.MR3R1Nib9 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58337),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R1Nib10 = l_temp8_even; // uint8_t
+    io_struct.MR3R1Nib11 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58338),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R1Nib12 = l_temp8_even; // uint8_t
+    io_struct.MR3R1Nib13 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58339),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R1Nib14 = l_temp8_even; // uint8_t
+    io_struct.MR3R1Nib15 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5833a),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R1Nib16 = l_temp8_even; // uint8_t
+    io_struct.MR3R1Nib17 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5833b),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R1Nib18 = l_temp8_even; // uint8_t
+    io_struct.MR3R1Nib19 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5833c),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R2Nib0 = l_temp8_even; // uint8_t
+    io_struct.MR3R2Nib1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5833d),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R2Nib2 = l_temp8_even; // uint8_t
+    io_struct.MR3R2Nib3 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5833e),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R2Nib4 = l_temp8_even; // uint8_t
+    io_struct.MR3R2Nib5 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5833f),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R2Nib6 = l_temp8_even; // uint8_t
+    io_struct.MR3R2Nib7 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58340),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R2Nib8 = l_temp8_even; // uint8_t
+    io_struct.MR3R2Nib9 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58341),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R2Nib10 = l_temp8_even; // uint8_t
+    io_struct.MR3R2Nib11 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58342),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R2Nib12 = l_temp8_even; // uint8_t
+    io_struct.MR3R2Nib13 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58343),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R2Nib14 = l_temp8_even; // uint8_t
+    io_struct.MR3R2Nib15 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58344),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R2Nib16 = l_temp8_even; // uint8_t
+    io_struct.MR3R2Nib17 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58345),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R2Nib18 = l_temp8_even; // uint8_t
+    io_struct.MR3R2Nib19 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58346),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R3Nib0 = l_temp8_even; // uint8_t
+    io_struct.MR3R3Nib1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58347),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R3Nib2 = l_temp8_even; // uint8_t
+    io_struct.MR3R3Nib3 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58348),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R3Nib4 = l_temp8_even; // uint8_t
+    io_struct.MR3R3Nib5 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58349),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R3Nib6 = l_temp8_even; // uint8_t
+    io_struct.MR3R3Nib7 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5834a),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R3Nib8 = l_temp8_even; // uint8_t
+    io_struct.MR3R3Nib9 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5834b),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R3Nib10 = l_temp8_even; // uint8_t
+    io_struct.MR3R3Nib11 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5834c),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R3Nib12 = l_temp8_even; // uint8_t
+    io_struct.MR3R3Nib13 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5834d),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R3Nib14 = l_temp8_even; // uint8_t
+    io_struct.MR3R3Nib15 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5834e),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R3Nib16 = l_temp8_even; // uint8_t
+    io_struct.MR3R3Nib17 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5834f),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.MR3R3Nib18 = l_temp8_even; // uint8_t
+    io_struct.MR3R3Nib19 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58350),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR0Nib0 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR0Nib1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58351),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR0Nib2 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR0Nib3 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58352),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR0Nib4 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR0Nib5 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58353),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR0Nib6 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR0Nib7 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58354),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR0Nib8 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR0Nib9 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58355),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR0Nib10 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR0Nib11 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58356),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR0Nib12 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR0Nib13 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58357),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR0Nib14 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR0Nib15 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58358),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR0Nib16 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR0Nib17 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58359),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR0Nib18 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR0Nib19 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5835a),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR1Nib0 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR1Nib1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5835b),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR1Nib2 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR1Nib3 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5835c),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR1Nib4 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR1Nib5 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5835d),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR1Nib6 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR1Nib7 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5835e),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR1Nib8 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR1Nib9 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5835f),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR1Nib10 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR1Nib11 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58360),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR1Nib12 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR1Nib13 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58361),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR1Nib14 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR1Nib15 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58362),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR1Nib16 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR1Nib17 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58363),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR1Nib18 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR1Nib19 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58364),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR2Nib0 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR2Nib1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58365),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR2Nib2 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR2Nib3 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58366),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR2Nib4 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR2Nib5 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58367),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR2Nib6 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR2Nib7 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58368),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR2Nib8 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR2Nib9 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58369),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR2Nib10 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR2Nib11 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5836a),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR2Nib12 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR2Nib13 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5836b),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR2Nib14 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR2Nib15 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5836c),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR2Nib16 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR2Nib17 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5836d),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR2Nib18 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR2Nib19 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5836e),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR3Nib0 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR3Nib1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5836f),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR3Nib2 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR3Nib3 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58370),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR3Nib4 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR3Nib5 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58371),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR3Nib6 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR3Nib7 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58372),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR3Nib8 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR3Nib9 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58373),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR3Nib10 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR3Nib11 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58374),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR3Nib12 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR3Nib13 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58375),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR3Nib14 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR3Nib15 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58376),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR3Nib16 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR3Nib17 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58377),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCSR3Nib18 = l_temp8_even; // uint8_t
+    io_struct.VrefCSR3Nib19 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58378),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR0Nib0 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR0Nib1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58379),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR0Nib2 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR0Nib3 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5837a),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR0Nib4 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR0Nib5 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5837b),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR0Nib6 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR0Nib7 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5837c),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR0Nib8 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR0Nib9 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5837d),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR0Nib10 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR0Nib11 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5837e),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR0Nib12 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR0Nib13 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5837f),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR0Nib14 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR0Nib15 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58380),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR0Nib16 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR0Nib17 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58381),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR0Nib18 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR0Nib19 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58382),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR1Nib0 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR1Nib1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58383),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR1Nib2 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR1Nib3 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58384),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR1Nib4 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR1Nib5 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58385),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR1Nib6 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR1Nib7 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58386),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR1Nib8 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR1Nib9 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58387),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR1Nib10 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR1Nib11 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58388),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR1Nib12 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR1Nib13 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58389),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR1Nib14 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR1Nib15 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5838a),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR1Nib16 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR1Nib17 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5838b),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR1Nib18 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR1Nib19 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5838c),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR2Nib0 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR2Nib1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5838d),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR2Nib2 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR2Nib3 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5838e),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR2Nib4 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR2Nib5 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5838f),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR2Nib6 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR2Nib7 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58390),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR2Nib8 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR2Nib9 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58391),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR2Nib10 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR2Nib11 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58392),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR2Nib12 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR2Nib13 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58393),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR2Nib14 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR2Nib15 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58394),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR2Nib16 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR2Nib17 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58395),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR2Nib18 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR2Nib19 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58396),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR3Nib0 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR3Nib1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58397),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR3Nib2 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR3Nib3 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58398),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR3Nib4 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR3Nib5 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58399),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR3Nib6 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR3Nib7 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5839a),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR3Nib8 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR3Nib9 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5839b),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR3Nib10 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR3Nib11 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5839c),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR3Nib12 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR3Nib13 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5839d),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR3Nib14 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR3Nib15 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5839e),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR3Nib16 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR3Nib17 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5839f),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.VrefCAR3Nib18 = l_temp8_even; // uint8_t
+    io_struct.VrefCAR3Nib19 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583a0),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.DisabledDB0LaneR0 = l_temp8_even; // uint8_t
+    io_struct.DisabledDB1LaneR0 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583a1),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.DisabledDB2LaneR0 = l_temp8_even; // uint8_t
+    io_struct.DisabledDB3LaneR0 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583a2),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.DisabledDB4LaneR0 = l_temp8_even; // uint8_t
+    io_struct.DisabledDB5LaneR0 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583a3),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.DisabledDB6LaneR0 = l_temp8_even; // uint8_t
+    io_struct.DisabledDB7LaneR0 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583a4),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.DisabledDB8LaneR0 = l_temp8_even; // uint8_t
+    io_struct.DisabledDB9LaneR0 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583a5),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.DisabledDB0LaneR1 = l_temp8_even; // uint8_t
+    io_struct.DisabledDB1LaneR1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583a6),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.DisabledDB2LaneR1 = l_temp8_even; // uint8_t
+    io_struct.DisabledDB3LaneR1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583a7),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.DisabledDB4LaneR1 = l_temp8_even; // uint8_t
+    io_struct.DisabledDB5LaneR1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583a8),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.DisabledDB6LaneR1 = l_temp8_even; // uint8_t
+    io_struct.DisabledDB7LaneR1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583a9),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.DisabledDB8LaneR1 = l_temp8_even; // uint8_t
+    io_struct.DisabledDB9LaneR1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583aa),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.DisabledDB0LaneR2 = l_temp8_even; // uint8_t
+    io_struct.DisabledDB1LaneR2 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583ab),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.DisabledDB2LaneR2 = l_temp8_even; // uint8_t
+    io_struct.DisabledDB3LaneR2 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583ac),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.DisabledDB4LaneR2 = l_temp8_even; // uint8_t
+    io_struct.DisabledDB5LaneR2 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583ad),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.DisabledDB6LaneR2 = l_temp8_even; // uint8_t
+    io_struct.DisabledDB7LaneR2 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583ae),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.DisabledDB8LaneR2 = l_temp8_even; // uint8_t
+    io_struct.DisabledDB9LaneR2 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583af),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.DisabledDB0LaneR3 = l_temp8_even; // uint8_t
+    io_struct.DisabledDB1LaneR3 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583b0),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.DisabledDB2LaneR3 = l_temp8_even; // uint8_t
+    io_struct.DisabledDB3LaneR3 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583b1),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.DisabledDB4LaneR3 = l_temp8_even; // uint8_t
+    io_struct.DisabledDB5LaneR3 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583b2),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.DisabledDB6LaneR3 = l_temp8_even; // uint8_t
+    io_struct.DisabledDB7LaneR3 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583b3),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.DisabledDB8LaneR3 = l_temp8_even; // uint8_t
+    io_struct.DisabledDB9LaneR3 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583b4),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.QCS_Dly_Margin_A0 = l_temp8_even; // uint8_t
+    io_struct.QCA_Dly_Margin_A0 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583b5),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.QCS_Dly_Margin_A1 = l_temp8_even; // uint8_t
+    io_struct.QCA_Dly_Margin_A1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583b6),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.QCS_Dly_Margin_A2 = l_temp8_even; // uint8_t
+    io_struct.QCA_Dly_Margin_A2 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583b7),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.QCS_Dly_Margin_A3 = l_temp8_even; // uint8_t
+    io_struct.QCA_Dly_Margin_A3 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583b8),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.QCS_Dly_Margin_B0 = l_temp8_even; // uint8_t
+    io_struct.QCA_Dly_Margin_B0 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583b9),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.QCS_Dly_Margin_B1 = l_temp8_even; // uint8_t
+    io_struct.QCA_Dly_Margin_B1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583ba),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.QCS_Dly_Margin_B2 = l_temp8_even; // uint8_t
+    io_struct.QCA_Dly_Margin_B2 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583bb),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.QCS_Dly_Margin_B3 = l_temp8_even; // uint8_t
+    io_struct.QCA_Dly_Margin_B3 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583bc),
+                             l_temp16));
+    io_struct.PmuInternalRev0 = l_temp16; // uint16_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583bd),
+                             l_temp16));
+    io_struct.PmuInternalRev1 = l_temp16; // uint16_t
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 /// @brief Prints the fields from the message block structure
 /// @param[in] i_target the target on which to operate
 /// @param[in] i_msg_blk message block structure
@@ -2354,62 +6354,62 @@ void display_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_targe
     FAPI_INF("  .PhyConfigOverride    = 0x%04x; // " TARGTIDFORMAT, i_msg_block.PhyConfigOverride, TARGTID);
     FAPI_INF("  .EnabledDQsChA        = 0x%02x; // " TARGTIDFORMAT, i_msg_block.EnabledDQsChA, TARGTID);
     FAPI_INF("  .CsPresentChA         = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CsPresentChA, TARGTID);
-    FAPI_INF("  .CDD_ChA_RR_3_2       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RR_3_2, TARGTID);
-    FAPI_INF("  .CDD_ChA_RR_3_1       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RR_3_1, TARGTID);
-    FAPI_INF("  .CDD_ChA_RR_3_0       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RR_3_0, TARGTID);
-    FAPI_INF("  .CDD_ChA_RR_2_3       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RR_2_3, TARGTID);
-    FAPI_INF("  .CDD_ChA_RR_2_1       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RR_2_1, TARGTID);
-    FAPI_INF("  .CDD_ChA_RR_2_0       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RR_2_0, TARGTID);
-    FAPI_INF("  .CDD_ChA_RR_1_3       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RR_1_3, TARGTID);
-    FAPI_INF("  .CDD_ChA_RR_1_2       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RR_1_2, TARGTID);
-    FAPI_INF("  .CDD_ChA_RR_1_0       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RR_1_0, TARGTID);
-    FAPI_INF("  .CDD_ChA_RR_0_3       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RR_0_3, TARGTID);
-    FAPI_INF("  .CDD_ChA_RR_0_2       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RR_0_2, TARGTID);
-    FAPI_INF("  .CDD_ChA_RR_0_1       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RR_0_1, TARGTID);
-    FAPI_INF("  .CDD_ChA_RW_3_3       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RW_3_3, TARGTID);
-    FAPI_INF("  .CDD_ChA_RW_3_2       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RW_3_2, TARGTID);
-    FAPI_INF("  .CDD_ChA_RW_3_1       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RW_3_1, TARGTID);
-    FAPI_INF("  .CDD_ChA_RW_3_0       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RW_3_0, TARGTID);
-    FAPI_INF("  .CDD_ChA_RW_2_3       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RW_2_3, TARGTID);
-    FAPI_INF("  .CDD_ChA_RW_2_2       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RW_2_2, TARGTID);
-    FAPI_INF("  .CDD_ChA_RW_2_1       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RW_2_1, TARGTID);
-    FAPI_INF("  .CDD_ChA_RW_2_0       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RW_2_0, TARGTID);
-    FAPI_INF("  .CDD_ChA_RW_1_3       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RW_1_3, TARGTID);
-    FAPI_INF("  .CDD_ChA_RW_1_2       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RW_1_2, TARGTID);
-    FAPI_INF("  .CDD_ChA_RW_1_1       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RW_1_1, TARGTID);
-    FAPI_INF("  .CDD_ChA_RW_1_0       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RW_1_0, TARGTID);
-    FAPI_INF("  .CDD_ChA_RW_0_3       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RW_0_3, TARGTID);
-    FAPI_INF("  .CDD_ChA_RW_0_2       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RW_0_2, TARGTID);
-    FAPI_INF("  .CDD_ChA_RW_0_1       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RW_0_1, TARGTID);
-    FAPI_INF("  .CDD_ChA_RW_0_0       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RW_0_0, TARGTID);
-    FAPI_INF("  .CDD_ChA_WR_3_3       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WR_3_3, TARGTID);
-    FAPI_INF("  .CDD_ChA_WR_3_2       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WR_3_2, TARGTID);
-    FAPI_INF("  .CDD_ChA_WR_3_1       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WR_3_1, TARGTID);
-    FAPI_INF("  .CDD_ChA_WR_3_0       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WR_3_0, TARGTID);
-    FAPI_INF("  .CDD_ChA_WR_2_3       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WR_2_3, TARGTID);
-    FAPI_INF("  .CDD_ChA_WR_2_2       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WR_2_2, TARGTID);
-    FAPI_INF("  .CDD_ChA_WR_2_1       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WR_2_1, TARGTID);
-    FAPI_INF("  .CDD_ChA_WR_2_0       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WR_2_0, TARGTID);
-    FAPI_INF("  .CDD_ChA_WR_1_3       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WR_1_3, TARGTID);
-    FAPI_INF("  .CDD_ChA_WR_1_2       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WR_1_2, TARGTID);
-    FAPI_INF("  .CDD_ChA_WR_1_1       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WR_1_1, TARGTID);
-    FAPI_INF("  .CDD_ChA_WR_1_0       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WR_1_0, TARGTID);
-    FAPI_INF("  .CDD_ChA_WR_0_3       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WR_0_3, TARGTID);
-    FAPI_INF("  .CDD_ChA_WR_0_2       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WR_0_2, TARGTID);
-    FAPI_INF("  .CDD_ChA_WR_0_1       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WR_0_1, TARGTID);
-    FAPI_INF("  .CDD_ChA_WR_0_0       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WR_0_0, TARGTID);
-    FAPI_INF("  .CDD_ChA_WW_3_2       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WW_3_2, TARGTID);
-    FAPI_INF("  .CDD_ChA_WW_3_1       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WW_3_1, TARGTID);
-    FAPI_INF("  .CDD_ChA_WW_3_0       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WW_3_0, TARGTID);
-    FAPI_INF("  .CDD_ChA_WW_2_3       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WW_2_3, TARGTID);
-    FAPI_INF("  .CDD_ChA_WW_2_1       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WW_2_1, TARGTID);
-    FAPI_INF("  .CDD_ChA_WW_2_0       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WW_2_0, TARGTID);
-    FAPI_INF("  .CDD_ChA_WW_1_3       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WW_1_3, TARGTID);
-    FAPI_INF("  .CDD_ChA_WW_1_2       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WW_1_2, TARGTID);
-    FAPI_INF("  .CDD_ChA_WW_1_0       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WW_1_0, TARGTID);
-    FAPI_INF("  .CDD_ChA_WW_0_3       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WW_0_3, TARGTID);
-    FAPI_INF("  .CDD_ChA_WW_0_2       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WW_0_2, TARGTID);
-    FAPI_INF("  .CDD_ChA_WW_0_1       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WW_0_1, TARGTID);
+    FAPI_INF("  .CDD_ChA_RR_3_2       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RR_3_2, TARGTID);
+    FAPI_INF("  .CDD_ChA_RR_3_1       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RR_3_1, TARGTID);
+    FAPI_INF("  .CDD_ChA_RR_3_0       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RR_3_0, TARGTID);
+    FAPI_INF("  .CDD_ChA_RR_2_3       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RR_2_3, TARGTID);
+    FAPI_INF("  .CDD_ChA_RR_2_1       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RR_2_1, TARGTID);
+    FAPI_INF("  .CDD_ChA_RR_2_0       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RR_2_0, TARGTID);
+    FAPI_INF("  .CDD_ChA_RR_1_3       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RR_1_3, TARGTID);
+    FAPI_INF("  .CDD_ChA_RR_1_2       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RR_1_2, TARGTID);
+    FAPI_INF("  .CDD_ChA_RR_1_0       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RR_1_0, TARGTID);
+    FAPI_INF("  .CDD_ChA_RR_0_3       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RR_0_3, TARGTID);
+    FAPI_INF("  .CDD_ChA_RR_0_2       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RR_0_2, TARGTID);
+    FAPI_INF("  .CDD_ChA_RR_0_1       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RR_0_1, TARGTID);
+    FAPI_INF("  .CDD_ChA_RW_3_3       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RW_3_3, TARGTID);
+    FAPI_INF("  .CDD_ChA_RW_3_2       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RW_3_2, TARGTID);
+    FAPI_INF("  .CDD_ChA_RW_3_1       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RW_3_1, TARGTID);
+    FAPI_INF("  .CDD_ChA_RW_3_0       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RW_3_0, TARGTID);
+    FAPI_INF("  .CDD_ChA_RW_2_3       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RW_2_3, TARGTID);
+    FAPI_INF("  .CDD_ChA_RW_2_2       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RW_2_2, TARGTID);
+    FAPI_INF("  .CDD_ChA_RW_2_1       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RW_2_1, TARGTID);
+    FAPI_INF("  .CDD_ChA_RW_2_0       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RW_2_0, TARGTID);
+    FAPI_INF("  .CDD_ChA_RW_1_3       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RW_1_3, TARGTID);
+    FAPI_INF("  .CDD_ChA_RW_1_2       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RW_1_2, TARGTID);
+    FAPI_INF("  .CDD_ChA_RW_1_1       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RW_1_1, TARGTID);
+    FAPI_INF("  .CDD_ChA_RW_1_0       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RW_1_0, TARGTID);
+    FAPI_INF("  .CDD_ChA_RW_0_3       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RW_0_3, TARGTID);
+    FAPI_INF("  .CDD_ChA_RW_0_2       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RW_0_2, TARGTID);
+    FAPI_INF("  .CDD_ChA_RW_0_1       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RW_0_1, TARGTID);
+    FAPI_INF("  .CDD_ChA_RW_0_0       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_RW_0_0, TARGTID);
+    FAPI_INF("  .CDD_ChA_WR_3_3       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WR_3_3, TARGTID);
+    FAPI_INF("  .CDD_ChA_WR_3_2       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WR_3_2, TARGTID);
+    FAPI_INF("  .CDD_ChA_WR_3_1       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WR_3_1, TARGTID);
+    FAPI_INF("  .CDD_ChA_WR_3_0       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WR_3_0, TARGTID);
+    FAPI_INF("  .CDD_ChA_WR_2_3       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WR_2_3, TARGTID);
+    FAPI_INF("  .CDD_ChA_WR_2_2       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WR_2_2, TARGTID);
+    FAPI_INF("  .CDD_ChA_WR_2_1       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WR_2_1, TARGTID);
+    FAPI_INF("  .CDD_ChA_WR_2_0       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WR_2_0, TARGTID);
+    FAPI_INF("  .CDD_ChA_WR_1_3       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WR_1_3, TARGTID);
+    FAPI_INF("  .CDD_ChA_WR_1_2       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WR_1_2, TARGTID);
+    FAPI_INF("  .CDD_ChA_WR_1_1       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WR_1_1, TARGTID);
+    FAPI_INF("  .CDD_ChA_WR_1_0       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WR_1_0, TARGTID);
+    FAPI_INF("  .CDD_ChA_WR_0_3       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WR_0_3, TARGTID);
+    FAPI_INF("  .CDD_ChA_WR_0_2       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WR_0_2, TARGTID);
+    FAPI_INF("  .CDD_ChA_WR_0_1       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WR_0_1, TARGTID);
+    FAPI_INF("  .CDD_ChA_WR_0_0       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WR_0_0, TARGTID);
+    FAPI_INF("  .CDD_ChA_WW_3_2       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WW_3_2, TARGTID);
+    FAPI_INF("  .CDD_ChA_WW_3_1       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WW_3_1, TARGTID);
+    FAPI_INF("  .CDD_ChA_WW_3_0       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WW_3_0, TARGTID);
+    FAPI_INF("  .CDD_ChA_WW_2_3       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WW_2_3, TARGTID);
+    FAPI_INF("  .CDD_ChA_WW_2_1       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WW_2_1, TARGTID);
+    FAPI_INF("  .CDD_ChA_WW_2_0       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WW_2_0, TARGTID);
+    FAPI_INF("  .CDD_ChA_WW_1_3       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WW_1_3, TARGTID);
+    FAPI_INF("  .CDD_ChA_WW_1_2       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WW_1_2, TARGTID);
+    FAPI_INF("  .CDD_ChA_WW_1_0       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WW_1_0, TARGTID);
+    FAPI_INF("  .CDD_ChA_WW_0_3       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WW_0_3, TARGTID);
+    FAPI_INF("  .CDD_ChA_WW_0_2       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WW_0_2, TARGTID);
+    FAPI_INF("  .CDD_ChA_WW_0_1       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChA_WW_0_1, TARGTID);
     FAPI_INF("  .MR0_A0               = 0x%02x; // " TARGTIDFORMAT, i_msg_block.MR0_A0, TARGTID);
     FAPI_INF("  .MR2_A0               = 0x%02x; // " TARGTIDFORMAT, i_msg_block.MR2_A0, TARGTID);
     FAPI_INF("  .MR3_A0               = 0x%02x; // " TARGTIDFORMAT, i_msg_block.MR3_A0, TARGTID);
@@ -2590,62 +6590,62 @@ void display_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_targe
     FAPI_INF("  .DeviceVref_Margin_A3 = 0x%02x; // " TARGTIDFORMAT, i_msg_block.DeviceVref_Margin_A3, TARGTID);
     FAPI_INF("  .EnabledDQsChB        = 0x%02x; // " TARGTIDFORMAT, i_msg_block.EnabledDQsChB, TARGTID);
     FAPI_INF("  .CsPresentChB         = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CsPresentChB, TARGTID);
-    FAPI_INF("  .CDD_ChB_RR_3_2       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RR_3_2, TARGTID);
-    FAPI_INF("  .CDD_ChB_RR_3_1       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RR_3_1, TARGTID);
-    FAPI_INF("  .CDD_ChB_RR_3_0       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RR_3_0, TARGTID);
-    FAPI_INF("  .CDD_ChB_RR_2_3       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RR_2_3, TARGTID);
-    FAPI_INF("  .CDD_ChB_RR_2_1       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RR_2_1, TARGTID);
-    FAPI_INF("  .CDD_ChB_RR_2_0       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RR_2_0, TARGTID);
-    FAPI_INF("  .CDD_ChB_RR_1_3       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RR_1_3, TARGTID);
-    FAPI_INF("  .CDD_ChB_RR_1_2       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RR_1_2, TARGTID);
-    FAPI_INF("  .CDD_ChB_RR_1_0       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RR_1_0, TARGTID);
-    FAPI_INF("  .CDD_ChB_RR_0_3       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RR_0_3, TARGTID);
-    FAPI_INF("  .CDD_ChB_RR_0_2       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RR_0_2, TARGTID);
-    FAPI_INF("  .CDD_ChB_RR_0_1       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RR_0_1, TARGTID);
-    FAPI_INF("  .CDD_ChB_RW_3_3       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RW_3_3, TARGTID);
-    FAPI_INF("  .CDD_ChB_RW_3_2       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RW_3_2, TARGTID);
-    FAPI_INF("  .CDD_ChB_RW_3_1       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RW_3_1, TARGTID);
-    FAPI_INF("  .CDD_ChB_RW_3_0       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RW_3_0, TARGTID);
-    FAPI_INF("  .CDD_ChB_RW_2_3       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RW_2_3, TARGTID);
-    FAPI_INF("  .CDD_ChB_RW_2_2       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RW_2_2, TARGTID);
-    FAPI_INF("  .CDD_ChB_RW_2_1       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RW_2_1, TARGTID);
-    FAPI_INF("  .CDD_ChB_RW_2_0       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RW_2_0, TARGTID);
-    FAPI_INF("  .CDD_ChB_RW_1_3       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RW_1_3, TARGTID);
-    FAPI_INF("  .CDD_ChB_RW_1_2       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RW_1_2, TARGTID);
-    FAPI_INF("  .CDD_ChB_RW_1_1       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RW_1_1, TARGTID);
-    FAPI_INF("  .CDD_ChB_RW_1_0       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RW_1_0, TARGTID);
-    FAPI_INF("  .CDD_ChB_RW_0_3       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RW_0_3, TARGTID);
-    FAPI_INF("  .CDD_ChB_RW_0_2       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RW_0_2, TARGTID);
-    FAPI_INF("  .CDD_ChB_RW_0_1       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RW_0_1, TARGTID);
-    FAPI_INF("  .CDD_ChB_RW_0_0       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RW_0_0, TARGTID);
-    FAPI_INF("  .CDD_ChB_WR_3_3       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WR_3_3, TARGTID);
-    FAPI_INF("  .CDD_ChB_WR_3_2       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WR_3_2, TARGTID);
-    FAPI_INF("  .CDD_ChB_WR_3_1       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WR_3_1, TARGTID);
-    FAPI_INF("  .CDD_ChB_WR_3_0       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WR_3_0, TARGTID);
-    FAPI_INF("  .CDD_ChB_WR_2_3       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WR_2_3, TARGTID);
-    FAPI_INF("  .CDD_ChB_WR_2_2       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WR_2_2, TARGTID);
-    FAPI_INF("  .CDD_ChB_WR_2_1       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WR_2_1, TARGTID);
-    FAPI_INF("  .CDD_ChB_WR_2_0       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WR_2_0, TARGTID);
-    FAPI_INF("  .CDD_ChB_WR_1_3       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WR_1_3, TARGTID);
-    FAPI_INF("  .CDD_ChB_WR_1_2       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WR_1_2, TARGTID);
-    FAPI_INF("  .CDD_ChB_WR_1_1       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WR_1_1, TARGTID);
-    FAPI_INF("  .CDD_ChB_WR_1_0       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WR_1_0, TARGTID);
-    FAPI_INF("  .CDD_ChB_WR_0_3       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WR_0_3, TARGTID);
-    FAPI_INF("  .CDD_ChB_WR_0_2       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WR_0_2, TARGTID);
-    FAPI_INF("  .CDD_ChB_WR_0_1       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WR_0_1, TARGTID);
-    FAPI_INF("  .CDD_ChB_WR_0_0       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WR_0_0, TARGTID);
-    FAPI_INF("  .CDD_ChB_WW_3_2       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WW_3_2, TARGTID);
-    FAPI_INF("  .CDD_ChB_WW_3_1       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WW_3_1, TARGTID);
-    FAPI_INF("  .CDD_ChB_WW_3_0       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WW_3_0, TARGTID);
-    FAPI_INF("  .CDD_ChB_WW_2_3       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WW_2_3, TARGTID);
-    FAPI_INF("  .CDD_ChB_WW_2_1       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WW_2_1, TARGTID);
-    FAPI_INF("  .CDD_ChB_WW_2_0       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WW_2_0, TARGTID);
-    FAPI_INF("  .CDD_ChB_WW_1_3       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WW_1_3, TARGTID);
-    FAPI_INF("  .CDD_ChB_WW_1_2       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WW_1_2, TARGTID);
-    FAPI_INF("  .CDD_ChB_WW_1_0       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WW_1_0, TARGTID);
-    FAPI_INF("  .CDD_ChB_WW_0_3       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WW_0_3, TARGTID);
-    FAPI_INF("  .CDD_ChB_WW_0_2       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WW_0_2, TARGTID);
-    FAPI_INF("  .CDD_ChB_WW_0_1       = 0x%02x; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WW_0_1, TARGTID);
+    FAPI_INF("  .CDD_ChB_RR_3_2       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RR_3_2, TARGTID);
+    FAPI_INF("  .CDD_ChB_RR_3_1       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RR_3_1, TARGTID);
+    FAPI_INF("  .CDD_ChB_RR_3_0       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RR_3_0, TARGTID);
+    FAPI_INF("  .CDD_ChB_RR_2_3       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RR_2_3, TARGTID);
+    FAPI_INF("  .CDD_ChB_RR_2_1       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RR_2_1, TARGTID);
+    FAPI_INF("  .CDD_ChB_RR_2_0       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RR_2_0, TARGTID);
+    FAPI_INF("  .CDD_ChB_RR_1_3       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RR_1_3, TARGTID);
+    FAPI_INF("  .CDD_ChB_RR_1_2       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RR_1_2, TARGTID);
+    FAPI_INF("  .CDD_ChB_RR_1_0       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RR_1_0, TARGTID);
+    FAPI_INF("  .CDD_ChB_RR_0_3       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RR_0_3, TARGTID);
+    FAPI_INF("  .CDD_ChB_RR_0_2       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RR_0_2, TARGTID);
+    FAPI_INF("  .CDD_ChB_RR_0_1       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RR_0_1, TARGTID);
+    FAPI_INF("  .CDD_ChB_RW_3_3       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RW_3_3, TARGTID);
+    FAPI_INF("  .CDD_ChB_RW_3_2       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RW_3_2, TARGTID);
+    FAPI_INF("  .CDD_ChB_RW_3_1       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RW_3_1, TARGTID);
+    FAPI_INF("  .CDD_ChB_RW_3_0       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RW_3_0, TARGTID);
+    FAPI_INF("  .CDD_ChB_RW_2_3       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RW_2_3, TARGTID);
+    FAPI_INF("  .CDD_ChB_RW_2_2       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RW_2_2, TARGTID);
+    FAPI_INF("  .CDD_ChB_RW_2_1       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RW_2_1, TARGTID);
+    FAPI_INF("  .CDD_ChB_RW_2_0       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RW_2_0, TARGTID);
+    FAPI_INF("  .CDD_ChB_RW_1_3       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RW_1_3, TARGTID);
+    FAPI_INF("  .CDD_ChB_RW_1_2       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RW_1_2, TARGTID);
+    FAPI_INF("  .CDD_ChB_RW_1_1       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RW_1_1, TARGTID);
+    FAPI_INF("  .CDD_ChB_RW_1_0       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RW_1_0, TARGTID);
+    FAPI_INF("  .CDD_ChB_RW_0_3       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RW_0_3, TARGTID);
+    FAPI_INF("  .CDD_ChB_RW_0_2       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RW_0_2, TARGTID);
+    FAPI_INF("  .CDD_ChB_RW_0_1       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RW_0_1, TARGTID);
+    FAPI_INF("  .CDD_ChB_RW_0_0       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_RW_0_0, TARGTID);
+    FAPI_INF("  .CDD_ChB_WR_3_3       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WR_3_3, TARGTID);
+    FAPI_INF("  .CDD_ChB_WR_3_2       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WR_3_2, TARGTID);
+    FAPI_INF("  .CDD_ChB_WR_3_1       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WR_3_1, TARGTID);
+    FAPI_INF("  .CDD_ChB_WR_3_0       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WR_3_0, TARGTID);
+    FAPI_INF("  .CDD_ChB_WR_2_3       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WR_2_3, TARGTID);
+    FAPI_INF("  .CDD_ChB_WR_2_2       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WR_2_2, TARGTID);
+    FAPI_INF("  .CDD_ChB_WR_2_1       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WR_2_1, TARGTID);
+    FAPI_INF("  .CDD_ChB_WR_2_0       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WR_2_0, TARGTID);
+    FAPI_INF("  .CDD_ChB_WR_1_3       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WR_1_3, TARGTID);
+    FAPI_INF("  .CDD_ChB_WR_1_2       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WR_1_2, TARGTID);
+    FAPI_INF("  .CDD_ChB_WR_1_1       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WR_1_1, TARGTID);
+    FAPI_INF("  .CDD_ChB_WR_1_0       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WR_1_0, TARGTID);
+    FAPI_INF("  .CDD_ChB_WR_0_3       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WR_0_3, TARGTID);
+    FAPI_INF("  .CDD_ChB_WR_0_2       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WR_0_2, TARGTID);
+    FAPI_INF("  .CDD_ChB_WR_0_1       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WR_0_1, TARGTID);
+    FAPI_INF("  .CDD_ChB_WR_0_0       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WR_0_0, TARGTID);
+    FAPI_INF("  .CDD_ChB_WW_3_2       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WW_3_2, TARGTID);
+    FAPI_INF("  .CDD_ChB_WW_3_1       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WW_3_1, TARGTID);
+    FAPI_INF("  .CDD_ChB_WW_3_0       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WW_3_0, TARGTID);
+    FAPI_INF("  .CDD_ChB_WW_2_3       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WW_2_3, TARGTID);
+    FAPI_INF("  .CDD_ChB_WW_2_1       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WW_2_1, TARGTID);
+    FAPI_INF("  .CDD_ChB_WW_2_0       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WW_2_0, TARGTID);
+    FAPI_INF("  .CDD_ChB_WW_1_3       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WW_1_3, TARGTID);
+    FAPI_INF("  .CDD_ChB_WW_1_2       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WW_1_2, TARGTID);
+    FAPI_INF("  .CDD_ChB_WW_1_0       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WW_1_0, TARGTID);
+    FAPI_INF("  .CDD_ChB_WW_0_3       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WW_0_3, TARGTID);
+    FAPI_INF("  .CDD_ChB_WW_0_2       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WW_0_2, TARGTID);
+    FAPI_INF("  .CDD_ChB_WW_0_1       = %d; // " TARGTIDFORMAT, i_msg_block.CDD_ChB_WW_0_1, TARGTID);
     FAPI_INF("  .MR0_B0               = 0x%02x; // " TARGTIDFORMAT, i_msg_block.MR0_B0, TARGTID);
     FAPI_INF("  .MR2_B0               = 0x%02x; // " TARGTIDFORMAT, i_msg_block.MR2_B0, TARGTID);
     FAPI_INF("  .MR3_B0               = 0x%02x; // " TARGTIDFORMAT, i_msg_block.MR3_B0, TARGTID);
