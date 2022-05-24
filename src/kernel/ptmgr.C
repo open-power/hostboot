@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,9 +27,11 @@
 #include <util/singleton.H>
 #include <kernel/console.H>
 #include <kernel/segmentmgr.H>
+#include <kernel/taskmgr.H>
 #include <arch/ppc.H>
 #include <assert.h>
 #include <util/align.H>
+#include <sys/misc.h>
 
 //#define Dprintk(...) printkd(args...)
 #define Dprintk(args...)
@@ -320,17 +322,37 @@ void PageTableManager::flush( void )
  */
 PageTableManager::PageTableManager( bool i_userSpace )
 : ivTABLE(NULL)
+,ivIdleTaskFunction(0)
+,ivIdleTaskPN(0)
 {
+    uint64_t l_hrmor = 0;
     if( i_userSpace )
     {
         ivTABLE = new char[getSize()];
         printk( "** PageTableManager running in USER_SPACE : ivTABLE = %p**\n", ivTABLE );
+        l_hrmor = cpu_spr_value(CPU_SPR_HRMOR);
     }
     else
     {
         printkd( "Page Table is at 0x%.16lX : 0x%.16lX\n",
                  getAddress(), getAddress() + getSize() );
+        l_hrmor = getHRMOR();
     }
+
+    // Find the relative address of the branch into idleTaskLoop
+    uint64_t* idle_jump = reinterpret_cast<uint64_t*>(TaskManager::idleTaskLoop);
+    // The actual address of the function itself is the data at that
+    ///address.
+    //000000000001c260 <TaskManager::idleTaskLoop(void*)>:
+    //  39077    1c260    0001c260:   00 00 00 00     .long 0x0
+    //  39078    1c264    0001c264:   00 01 2b 60     .long 0x12b60  <<< here
+    ivIdleTaskFunction = *idle_jump;
+
+    // Compute the physical page number of the idleTaskLoop
+    ivIdleTaskPN = (ALIGN_PAGE_DOWN(ivIdleTaskFunction)/PAGESIZE); //relative page
+    ivIdleTaskPN |= (l_hrmor/PAGESIZE); //offset by HRMOR to get real page
+    printk("IdleTask @0x%lX, PN=%lX\n",
+           ivIdleTaskFunction, ivIdleTaskPN);
 
     //initialize the table to be invalid
     invalidatePT();
@@ -1028,13 +1050,30 @@ PageTableManager::PageTableEntry*
     PageTableManager::findOldPTE( uint64_t i_ptegAddr )
 {
     // Order of preference for PTE slots to steal:
+    // 0) Never take the PTE for the idle task
     // 1) PTE with highest use count (LRU==SW[2:3])
     // 2) Lowest PTE with the highest use count
     PageTableEntry* pte = (PageTableEntry*)i_ptegAddr;
     PageTableEntry* old_pte = pte;
     for( uint64_t x = 0; x < 8; x++ )
     {
-        if( pte->LRU > old_pte->LRU )
+        // Note: Checking 2 pages to cover the (very unlikely) scenario where
+        //  the idle function happens to cross 2 pages.  There is no
+        //  real harm to pinning a second page even if not needed since
+        //  it is also part of the base image so there is no good reason
+        //  to page it out.
+
+        // Choose any other page over the idle task
+        if( (old_pte->PN == ivIdleTaskPN)
+            || (old_pte->PN == (ivIdleTaskPN+1)) )
+        {
+            old_pte = pte;
+        }
+        // Choose the least recently used page to replace, but
+        // never choose the idle task
+        else if( (pte->LRU > old_pte->LRU)
+                 && !((pte->PN == ivIdleTaskPN)
+                      || (pte->PN == (ivIdleTaskPN+1))) )
         {
             old_pte = pte;
         }

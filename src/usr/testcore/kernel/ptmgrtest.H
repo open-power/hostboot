@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -226,6 +228,148 @@ class ptmgrtest : public CxxTest::TestSuite
         delete ptmgr;
 
         TS_TRACE( "ptmgrtest::test_addEntry> fails=%d/%d", fails, total );
+    }
+
+    /**
+     *  1) Initialize a local Page Table
+     *  2) Add the idle task's PTE
+     *  3) Add some PTEs that match the idle task's PTEG
+     *  4) Verify the PTE we just added is in the Page Table
+     *  5) Verify idle PTE is still in the Page Table
+     */
+    void test_pinIdle( void )
+    {
+        TS_INFO( ">> ptmgrtest::test_pinIdle <<" );
+        uint64_t fails = 0;
+        uint64_t total = 0;
+        uint64_t status = 0;
+        uint64_t pn = 0;
+
+        // 1) Initialize the Page Table
+        PageTableManager* ptmgr = new PageTableManager(true);
+
+        // 2) Add the idle task's PTE
+        TS_INFO("Adding Idle va=%X pn=%X", ptmgr->ivIdleTaskFunction, ptmgr->ivIdleTaskPN );
+        ptmgr->_addEntry( ptmgr->ivIdleTaskFunction, ptmgr->ivIdleTaskPN, EXECUTABLE );
+
+        // Verify the PTE we just added is in the Page Table
+        status = ptmgr->_getStatus( ptmgr->ivIdleTaskFunction, pn );
+        if( !(status & PageTableManager::PTE_PRESENT) )
+        {
+            TS_FAIL( "ptmgrtest::test_pinIdle> ERROR1 : idle entry not found" );
+            fails++;
+        }
+        else if( (status & PageTableManager::PTE_VALID)
+                 && (pn == ptmgr->ivIdleTaskPN) )
+        {
+            PASS_TRACE( "ptmgrtest::test_pinIdle> PASS1 : 0x%.16lX", ptmgr->ivIdleTaskFunction );
+
+            PageTableManager::PageTableEntry* pte = ptmgr->findPTE(ptmgr->ivIdleTaskFunction);
+            uint64_t va = ptmgr->getVirtAddrFromPTE(pte);
+            if( va != (ptmgr->ivIdleTaskFunction - ptmgr->ivIdleTaskFunction%4096) )
+            {
+                TS_FAIL( "ptmgrtest::test_pinIdle> ERROR2 : Idle VA doesn't match expected" );
+                TS_INFO( "Exp=%.16lX, Act=%.16lX", ptmgr->ivIdleTaskFunction, va );
+                fails++;
+            }
+            total++;
+
+            // force the idle task PTE to a high LRU to make it a good
+            // target to steal
+            pte->LRU = 0b11;
+        }
+        else
+        {
+            TS_FAIL( "ptmgrtest::test_pinIdle> ERROR3 : unknown error adding idle PTE" );
+            TS_INFO( "Addr=%.16lX, Status=%.16lX", ptmgr->ivIdleTaskFunction, status );
+            fails++;
+        }
+
+
+        // 3) Add some PTEs that match the idle task's PTEG
+        for( uint64_t x = 1; x < 10; x++ )
+        {
+            // PTEs repeat at 1 TB and 8 MB boundaries
+            uint64_t offsets[2] = { x*TERABYTE, x*8*MEGABYTE };
+            for( uint64_t v = 0; v < 2; v++ )
+            {
+                uint64_t x_va = ptmgr->ivIdleTaskFunction | offsets[v];
+                uint64_t x_pn = x*100+v;
+                TS_INFO("Adding va=%X pn=%X", x_va, x_pn );
+                ptmgr->_addEntry( x_va, x_pn, WRITABLE );
+
+                // 4) Verify the PTE we just added is in the Page Table
+                status = ptmgr->_getStatus( x_va, pn );
+                if( !(status & PageTableManager::PTE_PRESENT) )
+                {
+                    TS_FAIL( "ptmgrtest::test_pinIdle> ERROR4 : entry not found" );
+                    TS_INFO( "Addr=%.16lX, Status=%.16lX", x_va, status );
+                    fails++;
+                }
+                else if( (status & PageTableManager::PTE_VALID)
+                         && (pn == x_pn) )
+                {
+                    PASS_TRACE( "ptmgrtest::test_pinIdle> PASS2 : 0x%.16lX", x_va );
+
+                    PageTableManager::PageTableEntry* pte = ptmgr->findPTE(x_va);
+                    uint64_t va = ptmgr->getVirtAddrFromPTE(pte);
+                    if( va != (x_va - x_va%4096) )
+                    {
+                        TS_FAIL( "ptmgrtest::test_pinIdle> ERROR5 : VA doesn't match expected" );
+                        TS_INFO( "Exp=%.16lX, Act=%.16lX", x_va, va );
+                        fails++;
+                    }
+                    total++;
+                }
+                else
+                {
+                    TS_FAIL( "ptmgrtest::test_pinIdle> ERROR6 : unknown error" );
+                    TS_INFO( "Addr=%.16lX, Status=%.16lX, PN=0x%lX", x_va, status, pn );
+                    fails++;
+                }
+                total++;
+            }
+        }
+
+        // 5) Verify idle PTE is still in the Page Table
+        //PRINT_PT;
+        status = ptmgr->_getStatus( ptmgr->ivIdleTaskFunction, pn );
+        if( !(status & PageTableManager::PTE_PRESENT) )
+        {
+            TS_FAIL( "ptmgrtest::test_pinIdle> ERROR7 : idle entry not found" );
+            fails++;
+        }
+        else if( (status & PageTableManager::PTE_VALID)
+                 && (pn == ptmgr->ivIdleTaskPN) )
+        {
+            PASS_TRACE( "ptmgrtest::test_pinIdle> PASS3 : 0x%.16lX", ptmgr->ivIdleTaskFunction );
+
+            PageTableManager::PageTableEntry* pte = ptmgr->findPTE(ptmgr->ivIdleTaskFunction);
+            uint64_t va = ptmgr->getVirtAddrFromPTE(pte);
+            if( va != (ptmgr->ivIdleTaskFunction - ptmgr->ivIdleTaskFunction%4096) )
+            {
+                TS_FAIL( "ptmgrtest::test_pinIdle> ERROR8 : Idle VA doesn't match expected" );
+                TS_INFO( "Exp=%.16lX, Act=%.16lX", ptmgr->ivIdleTaskFunction, va );
+                fails++;
+            }
+            total++;
+
+            // force the idle task PTE to a high LRU to make it a good
+            // target to steal
+            pte->LRU = 0b11;
+        }
+        else
+        {
+            TS_FAIL( "ptmgrtest::test_pinIdle> ERROR9 : unknown error adding idle PTE" );
+            TS_INFO( "Addr=%.16lX, Status=%.16lX", ptmgr->ivIdleTaskFunction, status );
+            fails++;
+        }
+
+
+        // delete our local table
+        delete ptmgr;
+
+        TS_INFO( "ptmgrtest::test_pinIdle> fails=%d/%d", fails, total );
     }
 
     /**

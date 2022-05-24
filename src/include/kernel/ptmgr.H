@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -291,6 +291,19 @@ class PageTableManager
         PTEG_SIZE_BYTES = (sizeof(PageTableEntry)*8),  /**< Size of PTE Group in bytes */
 
     };
+
+    /**
+     * Relative address of idle task loop function
+     */
+    uint64_t ivIdleTaskFunction;
+
+    /**
+     * Physical page that contains the idle task loop function
+     * - Because idleTaskLoop is part of the base image we know that
+     *   the physical memory for it will remain resident at all times
+     *   and never move.
+     */
+    uint64_t ivIdleTaskPN;
 
     /**
      * @brief  Return the hash value of the VA
