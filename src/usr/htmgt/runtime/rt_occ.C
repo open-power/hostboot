@@ -33,6 +33,7 @@
 #include    <runtime/runtime_reasoncodes.H>
 #include    <util/runtime/rt_fwreq_helper.H>
 #include    <map>
+#include    <targeting/common/utilFilter.H>
 
 using namespace TARGETING;
 extern trace_desc_t* g_trac_hbrt;
@@ -165,6 +166,78 @@ namespace HTMGT
         return rc;
     }
 
+
+    void alert_phyp()
+    {
+#if defined(__HOSTBOOT_RUNTIME) && !defined(CONFIG_FSP_BUILD)
+        errlHndl_t l_errl = nullptr;
+
+        TargetHandleList l_procChips;
+        getAllChips(l_procChips, TYPE_PROC, true);
+
+        TRACFCOMP(g_trac_hbrt, "alert_phyp: %d proc(s) found",
+                  l_procChips.size());
+
+        for (const auto & l_procChip: l_procChips)
+        {
+            // Inform PHYP that we are about to reset the PM complex on
+            //  this chip (BMC systems only)
+
+            // Create the firmware_request request struct
+            hostInterfaces::hbrt_fw_msg l_req_msg;
+            memset(&l_req_msg, 0, sizeof(l_req_msg));  // clear it all
+            l_req_msg.io_type = hostInterfaces::HBRT_FW_MSG_TYPE_PM_RESET_ALERT;
+
+            // Get the Proc Chip Id
+            TARGETING::rtChipId_t l_chipId = 0;
+            l_errl = TARGETING::getRtTarget(l_procChip, l_chipId);
+            if(l_errl)
+            {
+                TRACFCOMP(g_trac_hbrt,
+                          ERR_MRK"alert_phyp: getRtTarget ERROR for %.8X",
+                          TARGETING::get_huid(l_procChip) );
+            }
+            else
+            {
+                TRACFCOMP(g_trac_hbrt, "alert_phyp: Sending "
+                          "HBRT_FW_MSG_TYPE_PM_RESET_ALERT(%d) message to phyp",
+                          l_chipId );
+
+                l_req_msg.pmreset_alert.procId = l_chipId;
+
+                // actual msg size (one type of hbrt_fw_msg)
+                uint64_t l_req_msg_size = hostInterfaces::HBRT_FW_MSG_BASE_SIZE+
+                    sizeof(l_req_msg.pmreset_alert);
+
+                // Create the firmware_request response struct to receive data
+                hostInterfaces::hbrt_fw_msg l_resp_fw_msg;
+                uint64_t l_resp_fw_msg_size = sizeof(l_resp_fw_msg);
+                memset(&l_resp_fw_msg, 0, l_resp_fw_msg_size);
+
+                // Make the firmware_request call
+                l_errl = firmware_request_helper(l_req_msg_size,
+                                                 &l_req_msg,
+                                                 &l_resp_fw_msg_size,
+                                                 &l_resp_fw_msg);
+                if (l_errl)
+                {
+                    TRACFCOMP(g_trac_hbrt, ERR_MRK"alert_phyp: firmware_request"
+                              " failed w/rc=0x%04X", l_errl->reasonCode());
+                }
+            }
+
+            // commit the log and continue
+            if (l_errl)
+            {
+                l_errl->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+                l_errl->collectTrace("HTMGT");
+                errlCommit(l_errl, ISTEP_COMP_ID);
+            }
+        }
+#endif
+    }
+
+
     //------------------------------------------------------------------------
     int reset_pm_complex_with_reason(const OCC_RESET_REASON i_reason,
                                      const uint64_t i_chipId)
@@ -174,88 +247,91 @@ namespace HTMGT
         errlHndl_t l_errl = nullptr;
         TARGETING::Target* l_proc = nullptr;
 
-
-        // If the system is in safemode then ignore request to reset OCCs
-        TARGETING::Target* sys = nullptr;
-        TARGETING::targetService().getTopLevelTarget(sys);
-        uint8_t safeMode = 0;
-        if(sys &&
-            sys->tryGetAttr<TARGETING::ATTR_HTMGT_SAFEMODE>(safeMode) &&
-            safeMode)
-            {
-                return l_rc;
-            }
+        TRACFCOMP(g_trac_hbrt,ENTER_MRK
+                  "reset_pm_complex_with_reason: i_reason=%d, i_chipId=%d ",
+                  i_reason, i_chipId);
 
         do{
-        TRACFCOMP(g_trac_hbrt,ENTER_MRK
-                  "reset_pm_complex_with_reason: i_reason=%d, i_chipId=%d ", i_reason, i_chipId);
 
-        // If a code update is started early, it is possible for PHYP to call
-        // reset_pm_complex_with_reason before HBRT has even started for the first time,
-        // so flag the PM_COMPLEX_LOAD_REQ to indicate to SKIP_FIRST_LOAD
-        // (which will be handled in load_and_start_pm_complex).
+        // If the system is in safemode then ignore request to reset OCCs
         Target* l_sys = UTIL::assertGetToplevelTarget();
-        if ((l_sys->getAttr<ATTR_PM_COMPLEX_LOAD_REQ>()) == PM_COMPLEX_LOAD_TYPE_LOAD)
+        uint8_t safeMode = 0;
+        if(!l_sys->tryGetAttr<TARGETING::ATTR_HTMGT_SAFEMODE>(safeMode) ||
+           !safeMode)
         {
-            l_sys->setAttr<ATTR_PM_COMPLEX_LOAD_REQ>(PM_COMPLEX_LOAD_TYPE_SKIP_FIRST_LOAD);
-            TRACFCOMP(g_trac_hbrt, "reset_pm_complex_with_reason SET to SKIP_FIRST_LOAD ATTR_PM_COMPLEX_LOAD_REQ=0x%X",
-                l_sys->getAttr<ATTR_PM_COMPLEX_LOAD_REQ>());
-            break;
-        }
+            // If a code update is started early, it is possible for PHYP to call
+            // reset_pm_complex_with_reason before HBRT has even started for the first time,
+            // so flag the PM_COMPLEX_LOAD_REQ to indicate to SKIP_FIRST_LOAD
+            // (which will be handled in load_and_start_pm_complex).
+            if ((l_sys->getAttr<ATTR_PM_COMPLEX_LOAD_REQ>()) == PM_COMPLEX_LOAD_TYPE_LOAD)
+            {
+                l_sys->setAttr<ATTR_PM_COMPLEX_LOAD_REQ>(PM_COMPLEX_LOAD_TYPE_SKIP_FIRST_LOAD);
+                TRACFCOMP(g_trac_hbrt, "reset_pm_complex_with_reason SET to "
+                          "SKIP_FIRST_LOAD ATTR_PM_COMPLEX_LOAD_REQ=0x%X",
+                          l_sys->getAttr<ATTR_PM_COMPLEX_LOAD_REQ>());
+                break;
+            }
 
-        // Only pass in i_chipId's conversion to l_proc if it is an error scenario
-        // NOTE: have to use '::' to avoid collision with enum HTMGT::occResetReason
-        if (i_reason == ::OCC_RESET_REASON_ERROR)
-        {
-            l_errl = RT_TARG::getHbTarget(i_chipId,
-                                          l_proc);
+            // Only pass in i_chipId's conversion to l_proc if it is an error scenario
+            // NOTE: have to use '::' to avoid collision with enum HTMGT::occResetReason
+            if (i_reason == ::OCC_RESET_REASON_ERROR)
+            {
+                l_errl = RT_TARG::getHbTarget(i_chipId,
+                                              l_proc);
+                if(l_errl)
+                {
+                    TRACFCOMP(g_trac_hbrt,ERR_MRK"Could not get TARGETING::Target* for chip ID 0x%08lx!", i_chipId);
+                    l_rc = ERRL_GETRC_SAFE(l_errl);
+                    errlCommit(l_errl, RUNTIME_COMP_ID);
+                    break;
+                }
+            }
+
+            occResetReason l_resetReason = HTMGT::OCC_RESET_REASON_NONE;
+            auto l_mappedReason = g_PMComplexResetReasonMap.find(i_reason);
+            if(l_mappedReason == g_PMComplexResetReasonMap.end())
+            {
+                TRACFCOMP(g_trac_hbrt, ERR_MRK"Could not map OCC reset reason 0x%08x for chip ID 0x%08x",
+                          i_reason, i_chipId);
+                /*@
+                 * @errortype
+                 * @moduleid   RUNTIME::MOD_PM_RT_RESET_W_REASON
+                 * @reasoncode RUNTIME::RC_COULD_NOT_MAP_RESET_REASON
+                 * @userdata1  Input OCC reason code
+                 * @userdata2  Chip ID of the input chip
+                 * @devdesc    Could not map OCC reset reason from PHYP to HTMGT
+                 * @custdesc   A failure occurred during runtime
+                 */
+                l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                 RUNTIME::MOD_PM_RT_RESET_W_REASON,
+                                                 RUNTIME::RC_COULD_NOT_MAP_RESET_REASON,
+                                                 i_reason,
+                                                 i_chipId);
+                l_rc = ERRL_GETRC_SAFE(l_errl);
+                errlCommit(l_errl, RUNTIME_COMP_ID);
+                break;
+            }
+            else
+            {
+                l_resetReason = l_mappedReason->second;
+            }
+
+            l_errl = OccManager::resetOccs(l_proc,
+                                           false, //i_skipCountIncrement
+                                           false, //i_skipComm
+                                           l_resetReason);
             if(l_errl)
             {
-                TRACFCOMP(g_trac_hbrt,ERR_MRK"Could not get TARGETING::Target* for chip ID 0x%08lx!", i_chipId);
                 l_rc = ERRL_GETRC_SAFE(l_errl);
                 errlCommit(l_errl, RUNTIME_COMP_ID);
                 break;
             }
         }
-
-        occResetReason l_resetReason = HTMGT::OCC_RESET_REASON_NONE;
-        auto l_mappedReason = g_PMComplexResetReasonMap.find(i_reason);
-        if(l_mappedReason == g_PMComplexResetReasonMap.end())
+        else // system is in safe mode (already in reset)
         {
-            TRACFCOMP(g_trac_hbrt, ERR_MRK"Could not map OCC reset reason 0x%08x for chip ID 0x%08x",
-                      i_reason, i_chipId);
-            /*@
-            * @errortype
-            * @moduleid   RUNTIME::MOD_PM_RT_RESET_W_REASON
-            * @reasoncode RUNTIME::RC_COULD_NOT_MAP_RESET_REASON
-            * @userdata1  Input OCC reason code
-            * @userdata2  Chip ID of the input chip
-            * @devdesc    Could not map OCC reset reason from PHYP to HTMGT
-            * @custdesc   A failure occurred during runtime
-            */
-            l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                             RUNTIME::MOD_PM_RT_RESET_W_REASON,
-                                             RUNTIME::RC_COULD_NOT_MAP_RESET_REASON,
-                                             i_reason,
-                                             i_chipId);
-            l_rc = ERRL_GETRC_SAFE(l_errl);
-            errlCommit(l_errl, RUNTIME_COMP_ID);
-            break;
-        }
-        else
-        {
-            l_resetReason = l_mappedReason->second;
-        }
-
-        l_errl = OccManager::resetOccs(l_proc,
-                                       false, //i_skipCountIncrement
-                                       false, //i_skipComm
-                                       l_resetReason);
-        if(l_errl)
-        {
-            l_rc = ERRL_GETRC_SAFE(l_errl);
-            errlCommit(l_errl, RUNTIME_COMP_ID);
-            break;
+            TRACFCOMP(g_trac_hbrt, "reset_pm_complex_with_reason: System is in safe mode. "
+                      "Alert PHYP that we would normally reset the PM complex");
+            alert_phyp();
         }
 
         // ONLY -AFTER- the resetOccs successfully completes do we flag the PM_COMPLEX_LOAD_REQ
