@@ -135,6 +135,7 @@ if [[ ! -z "${HOSTBOOT_PROFILE}" ]]; then
 # static analysis
 elif [[ ! -z "${HOSTBOOT_CPPCHECK}" ]]; then
     build_opt="cppcheck"
+    CONFIG_FILE=${PROJECT_ROOT}/src/build/configs/cppcheck.config
     COMPILE_ONLY=1
 # vpo
 elif [[ ! -z "${VPO_COMPILE}" ]]; then
