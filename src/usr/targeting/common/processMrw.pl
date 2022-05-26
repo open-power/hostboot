@@ -3151,6 +3151,8 @@ sub postProcessProcessor
     my $targetObj = shift;
     my $target    = shift;
 
+    populateVrmLocationCodes($targetObj, $target);
+
     # Some sanity checks.  Make sure we are processing the correct target type
     # and make sure the target has been already processed.
     my $targetType = targetTypeSanityCheck($targetObj, $target, "PROC");
@@ -4454,6 +4456,85 @@ sub processFsi
                     $type,$cmfsi,$proc_path,$fsi_link,$flip_port,$altfsiswitch);
     }
 } # end sub processFsi
+
+# @function populateVrmLocationCodes
+#
+# @brief Populates attribute BUS_RAIL_LOCATION_MAP by locating
+#        a proc's VRM location codes and mapping them to the correct
+#        AVS bus/rail numbers for that proc
+#
+# @param[in]    $targetObj  Global target object (required)
+# @param[in]    $target     The proc target (required)
+#
+# @return void
+sub populateVrmLocationCodes
+{
+    my $targetObj   = shift; # Top Hierarchy of targeting structure
+    my $target      = shift; # Processor
+
+    my $busRail = $targetObj->getAttribute($target, "AVSBUS_RAIL");
+    my @busRailArray = split(/,/,$busRail);
+
+    my $busNum = $targetObj->getAttribute($target, "AVSBUS_BUSNUM");
+    my @busNumArray = split(/,/,$busNum);
+
+    my @busRailLoc;
+
+    # Processor has child avs[0-2]-master target
+    # Cross the bus to the destination VRM
+    foreach my $child (@{$targetObj->getTargetChildren($target)})
+    {
+        my $childBusType = $targetObj->getAttribute($child, "BUS_TYPE");
+        if ($childBusType eq "AVS")
+        {
+            my $busDest = $targetObj->getConnectionDestination($child, 0);
+
+            if ($busDest ne "")
+            {
+                my $busConn = $targetObj->getTargetParent($targetObj->getTargetParent($busDest));
+
+                # Location code attribute will be an array of structs.
+                # The struct definition can be seen in attribute_types.xml
+                # The CHIP_UNIT of the AVS bus target is the bus number
+                my $locCode = getStaticAbsLocationCode($targetObj, $busConn);
+                my $busNum = $targetObj->getAttribute($child, "CHIP_UNIT");
+
+                my @locAscii = map { ord } split //, $locCode;
+
+                # Location is 50 bytes so pad the rest with ascii 0 (NULL)
+                for my $i (scalar(@locAscii)..49) {
+                    push(@locAscii, 0);
+                }
+
+                my $i = 0;
+                for my $busArrayNum (@busNumArray)
+                {
+                    if (hex($busArrayNum) == $busNum)
+                    {
+                        my $railNum = hex($busRailArray[$i]);
+                        push(@busRailLoc, $busNum);
+                        push(@busRailLoc, $railNum);
+                        push(@busRailLoc, @locAscii);
+                    }
+
+                    $i++;
+                }
+            }
+        }
+    }
+
+    #Convert array into a comma separated string
+    my $loc_map = "";
+    foreach my $i (@busRailLoc)
+    {
+        $loc_map .= "$i,";
+    }
+
+    #remove the last comma
+    $loc_map =~ s/.$//;
+
+    $targetObj->setAttribute($target, "BUS_RAIL_LOCATION_MAP", $loc_map);
+} # end sub getLocationCodes
 
 #--------------------------------------------------
 # I2C

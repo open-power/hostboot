@@ -187,6 +187,30 @@
   </attribute>
 
   <attribute>
+    <description>
+        Used to map a bus# and rail# to a location code for VRM callouts.
+        Mapping will be an array of structs encoded as an integer array.
+        Each proc will have at most 4 structs because there are at most 4
+        VRMs defined in the MRW and each VRM is controlled by a unique
+        bus/rail combination.
+
+        The struct is defined in hb_fru.C as bus_rail_loc_map and will
+        look like:
+        uint8_t bus#
+        uint8_t rail#
+        char location[50]
+    </description>
+    <id>BUS_RAIL_LOCATION_MAP</id>
+    <persistency>volatile</persistency>
+    <readable/>
+    <simpleType>
+      <array>208</array>
+      <uint8_t/>
+    </simpleType>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <id>CALCULATED_MAX_SYS_POWER_EXCLUDING_GPUS</id>
     <description>
         HTMGT calculates the total non-GPU maximum power in W when the
@@ -979,6 +1003,27 @@ ID for the sensor number returned with the elog. -->
     <persistency>volatile-zeroed</persistency>
     <writeable/>
     <readable/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
+    <description>
+        Used to map location code to part number, serial number, and ccin.
+        Mapping will be just an array of unsigned bytes. Location code value
+        will take 50 bytes, part number will take 7 bytes, serial number will
+        take 12 bytes, and ccin will take 4 bytes for a total of 73 bytes per
+        location code mapping. There is a maximum of 2 VRM location codes per
+        PROC so we will store a total of 146 bytes for this attribute. The
+        struct is defined in hb_fru.C as loc_pn_sn_ccin_map
+    </description>
+    <id>LOCATION_PN_SN_CCIN_MAP</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <simpleType>
+      <array>146</array>
+      <uint8_t/>
+    </simpleType>
+    <writeable/>
     <no_export/>
   </attribute>
 
