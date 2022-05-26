@@ -7948,6 +7948,10 @@
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>FRU_PATH</id>
+        <default>L:P0-S0_N0_PROC0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -8000,6 +8004,10 @@
     <attribute>
         <id>REL_POS</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>FRU_PATH</id>
+        <default>L:P0-S0_N0_PROC0</default>
     </attribute>
 </targetInstance>
 
@@ -8324,6 +8332,10 @@
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>FRU_PATH</id>
+        <default>L:P0-S0_N0_PROC0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -8376,6 +8388,10 @@
     <attribute>
         <id>REL_POS</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>FRU_PATH</id>
+        <default>L:P0-S0_N0_PROC0</default>
     </attribute>
 </targetInstance>
 
@@ -8612,6 +8628,10 @@
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>FRU_PATH</id>
+        <default>L:P0-S0_N0_PROC1</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -8664,6 +8684,10 @@
     <attribute>
         <id>REL_POS</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>FRU_PATH</id>
+        <default>L:P0-S0_N0_PROC1</default>
     </attribute>
 </targetInstance>
 
@@ -8898,6 +8922,10 @@
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>FRU_PATH</id>
+        <default>L:P0-S0_N0_PROC1</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -8950,6 +8978,10 @@
     <attribute>
         <id>REL_POS</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>FRU_PATH</id>
+        <default>L:P0-S0_N0_PROC1</default>
     </attribute>
 </targetInstance>
 

@@ -1415,6 +1415,16 @@ public:
         GARD_ErrorType  gard_type;
     };
 
+    // common data used to fill in bus callouts
+    struct bus_callout_data
+    {
+        Target *          target;
+        EntityPath        target_phys;
+        EntityPath        target_peer;
+        callOutPriority   priority;
+        HWAS::busTypeEnum bus_type;
+    };
+
     // plain-text consts used in code below for readability
     const bool EXPECT_DECONFIG    = true,  EXPECT_GARD    = true,
                EXPECT_NO_DECONFIG = false, EXPECT_NO_GARD = false;
@@ -1428,13 +1438,20 @@ public:
       EXPECT_COUNT = 3,
     };
 
+    // Expectation data enums
+    enum bus_expectation_enum
+    {
+      BUS_PROC_EXPECT  = 0, // index used in test case logic
+      BUS_COUNT        = 1, // count of how many we anticipate handling at a single time
+    };
+
     struct expectation_data
     {
-        Target *       target;  // The target who associated callouts will be checked
-        bool           expect_deconfig; // do we expect the target callout to have deconfig?
-        bool           expect_gard; // do we expect the target callout to have gard?
+        Target *       target;            // The target who associated callouts will be checked
+        bool           expect_deconfig;   // do we expect the target callout to have deconfig?
+        bool           expect_gard;       // do we expect the target callout to have gard?
         DeconfigEnum   expected_deconfig; // The exact expected deconfig type
-        GARD_ErrorType expected_gard; // The exact expected gard type
+        GARD_ErrorType expected_gard;     // The exact expected gard type
     };
 
     // Used for testSetGardType and testSetDeconfigState to verify their respective functions
@@ -1589,6 +1606,38 @@ public:
         }
     };
 
+
+    /**
+     *  @brief Reset a vector of bus_exception_data
+     *
+     *  @param[in,out]  io_expectations  Vector of expectation_data structs
+     *  @param[in]      i_callout bus_callout_data to seed the expectations
+     *
+     *  @return void
+     */
+    void resetBusExpectations (vector<expectation_data> &io_expectations,
+                            const bus_callout_data i_callout)
+    {
+        // We want to test out both SOURCE and DESTINATION sides for BUS_CALLOUT
+        // Some have DESTINATIONS, some do NOT
+        if ( TARGETING::targetService().toTarget(i_callout.target_peer) == nullptr )
+        {
+            TS_INFO("resetBusExpectation target_peer NULLPTR so use TARGET=0x%X", get_huid(i_callout.target));
+            io_expectations[BUS_PROC_EXPECT].target = i_callout.target;
+        }
+        else
+        {
+            io_expectations[BUS_PROC_EXPECT].target = TARGETING::targetService().toTarget(i_callout.target_peer);
+            TS_INFO("resetBusExpectation target_peer=0x%X on TARGET=0x%X",
+                get_huid( TARGETING::targetService().toTarget(i_callout.target_peer)), get_huid(i_callout.target));
+        }
+
+        io_expectations[BUS_PROC_EXPECT].expect_deconfig = EXPECT_NO_DECONFIG;
+        io_expectations[BUS_PROC_EXPECT].expect_gard = EXPECT_NO_GARD;
+        io_expectations[BUS_PROC_EXPECT].expected_deconfig = NO_DECONFIG;
+        io_expectations[BUS_PROC_EXPECT].expected_gard = GARD_NULL;
+    };
+
     /**
      *  @brief Reset a vector of exception_data with size 3 back to the initial
      *  expected results of querying callouts after applying the callouts
@@ -1640,6 +1689,75 @@ public:
         io_expectations[DIMM_EXPECT].expected_deconfig = DECONFIG;
         // makeCalloutVector adds a callout with this gard. Match it here or tests will fail
         io_expectations[DIMM_EXPECT].expected_gard = GARD_NULL;
+    };
+
+    /**
+     *  @brief Build a vector of bus_callout_data structs that can be used
+     *  to create consistent callouts for an errorlog for test purposes
+     *
+     *  Current logic only pulls the bus_callouts for IOHS targets,
+     *  future work may extend the basic support for other bus callouts.
+     *
+     *  The proc->backplane->ocmb omi bus is probably the most expressive
+     *  since it crosses three distinct FRUs (future suggestion on test coverages, etc.)
+     *
+     *  @param[in]  i_proc The proc target we will use for the callouts
+     *
+     *  @return a vector containing bus_callout_data to be used for unit tests
+     */
+    std::vector<bus_callout_data> makeBusCalloutVector(Target * const i_proc)
+    {
+        assert(i_proc->getAttr<ATTR_TYPE>() == TYPE_PROC, "Expected a proc target but didn't get one.");
+        TS_INFO(ENTER_MRK"makeBusCalloutVector i_proc HUID=0x%X", get_huid(i_proc));
+
+        std::vector<bus_callout_data> bus_callouts;
+
+        // Logic on what to add to bus_callouts is up to tester
+        // This is a basic loop to create bus callouts
+        // Future work may extend this base support, etc.
+        TARGETING::TargetHandleList l_iohsTargetList;
+        TARGETING::getChildChiplets( l_iohsTargetList,
+                                     i_proc,
+                                     TARGETING::TYPE_IOHS,
+                                     false);
+        for (const auto & l_iohsTgt : l_iohsTargetList)
+        {
+            TS_INFO("makeBusCalloutVector IOHS=0x%X", get_huid(l_iohsTgt));
+            TARGETING::Target* l_paucParent = TARGETING::getImmediateParentByAffinity(l_iohsTgt);
+            TargetHandleList l_busTargetList;
+            getChildChiplets(l_busTargetList, l_paucParent, TYPE_IOHS, false);
+            for (const auto & l_busTgt : l_busTargetList)
+            {
+                TargetHandleList l_smpGroupTargetList;
+                getChildAffinityTargets(l_smpGroupTargetList,
+                                        l_busTgt,
+                                        CLASS_UNIT,
+                                        TYPE_SMPGROUP,
+                                        false);
+                for (auto l_smpGroup : l_smpGroupTargetList)
+                {
+                    TS_INFO("makeBusCalloutVector IOHS l_busTgt=0x%X l_smpGroup=0x%X", get_huid(l_busTgt), get_huid(l_smpGroup));
+                    bus_callout_data bus_callout = { };
+                    bus_callout.target = l_smpGroup;
+                    bus_callout.target_phys = l_smpGroup->getAttr<ATTR_PHYS_PATH>();
+                    bus_callout.target_peer = l_smpGroup->getAttr<ATTR_PEER_PATH>();
+                    const char* l_tmpstring_phys = bus_callout.target_phys.toString();
+                    const char* l_tmpstring_peer = bus_callout.target_peer.toString();
+                    TS_INFO("makeBusCalloutVector bus_callout.target_phys=%s", l_tmpstring_phys);
+                    TS_INFO("makeBusCalloutVector bus_callout.target_peer=%s", l_tmpstring_peer);
+                    free((void*)(l_tmpstring_phys));
+                    free((void*)(l_tmpstring_peer));
+                    l_tmpstring_phys = nullptr;
+                    l_tmpstring_peer = nullptr;
+                    bus_callout.priority = HWAS::SRCI_PRIORITY_HIGH;
+                    bus_callout.bus_type = HWAS::X_BUS_TYPE;
+                    bus_callouts.push_back(bus_callout);
+                } // end l_smpGroup
+            } // end l_busTgt
+        } // end l_iohsTgt
+
+        TS_INFO(EXIT_MRK"makeBusCalloutVector i_proc HUID=0x%X", get_huid(i_proc));
+        return bus_callouts;
     };
 
     /**
@@ -1695,6 +1813,64 @@ public:
                                 0x1234567890,
                                 0x9876543210 );
     };
+
+    void testQueryBusCallouts(void)
+    {
+        /*
+         * The purpose of this test is to verify that the function queryCallouts is returning a valid set of
+         * callout_search_criteria flags in a byte.
+         *
+         * To exploit this test more fully, the simics_P10.system.xml needs to represent the proper expected attributes,
+         * such as NODE/PROC0/PROC1 STATIC_ABS_LOCATION_CODE, FRU_PATH for the targets desired to be tested,
+         * and any additional customizations to interrogate the desired test matrix.
+         *
+         * Known limitation in standalone test environment are the unintended collision with test_addHbPdrs where
+         * the existence of the STATIC_ABS_LOCATION_CODE for NODE/PROC0/PROC1 can cause test_pldm_pdr.H
+         * to crash (libtestpldm_extended.so (pdr.C) with assert (node != NULL).
+         *
+         * The current implementation does NOT deconfigure or gard, so should not introduce any undesired state
+         * changes affecting other possible parallel tests.
+         *
+         */
+        TS_INFO(ENTER_MRK"testQueryBusCallouts");
+        do{
+            Target *proc = nullptr, *ocmb = nullptr, *dimm = nullptr;
+            ErrlEntry *errl = nullptr;
+
+            // Get a proc to test with (only using a PROC for now)
+            if(getTestTargets(proc,ocmb, dimm))
+            {
+                TS_INFO("testQueryBusCallouts Failed to find test targets! See previous TS_FAIL traces");
+                break;
+            }
+
+            const auto callouts = makeBusCalloutVector(proc);
+            vector<expectation_data> expectations(BUS_COUNT);
+
+            // Start fresh
+            resetError(errl);
+
+            for(const auto & callout : callouts)
+            {
+                resetBusExpectations(expectations, callout);
+                errl->addBusCallout(callout.target_phys,
+                        callout.target_peer,
+                        callout.bus_type,
+                        callout.priority);
+                checkExpectations(expectations, errl);
+                // Future work may queryCallouts AFTER errlCommit to check
+                // if the collectFruPathCalloutDataForBMC
+                // properly calls out the proper priority, etc to
+                // validate the expectations since there is POST
+                // processing done in errlCommit to alter errl
+                errlCommit(errl, CXXTEST_COMP_ID);
+                resetError(errl);
+            }
+
+        }while(0);
+        TS_INFO(EXIT_MRK"testQueryBusCallouts");
+    }
+
 
     // Note that errlUserDetailsTarget is tested in the targeting unit test
     void testQueryCallouts(void)

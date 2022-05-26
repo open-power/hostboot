@@ -365,6 +365,14 @@ typedef struct
 /**
  *  @brief retrieveTarget will convert the EntityPath to a Target
  *
+ *         Special usage for bus callouts, calling retrieveTarget
+ *         back to back will bump the io_uData and allow the
+ *         secondary call to retrieve the destination side of the
+ *         bus callout (so first invocation to retrieveTarget for
+ *         a bus callout retrieves the source side, second call
+ *         using the bumped io_uData pointer will access the
+ *         destination side of the bus callout user details data).
+ *
  *  @param[in]  io_uData pointer to the userdetail data
  *  @param[in]  o_pTarget target that is found
  *  @param[in]  io_errl Error log handle reference

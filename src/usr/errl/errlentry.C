@@ -166,10 +166,10 @@ static constexpr std::array<epubProcedureToIsolationProcedure_t, 23> EPUB_TO_ISO
     { EPUB_PRC_NO_VPD_FOR_FRU         , "HB00010"}, // map to EPUB_PRC_LVL_SUPP
     { EPUB_PRC_MEMORY_PLUGGING_ERROR  , "HB00022"}, // FSPSP34
     { EPUB_PRC_FSI_PATH               , "HB0002D"}, // FSPSP45
-    { EPUB_PRC_PROC_AB_BUS            , "HB00037"}, // map to EPUB_PRC_EIBUS_ERROR
-    { EPUB_PRC_PROC_XYZ_BUS           , "HB00037"}, // map to EPUB_PRC_EIBUS_ERROR
-    { EPUB_PRC_MEMBUS_ERROR           , "HB00037"}, // map to EPUB_PRC_EIBUS_ERROR
-    { EPUB_PRC_EIBUS_ERROR            , "HB00037"}, // FSPSP55
+    { EPUB_PRC_PROC_AB_BUS            , "HB00055"}, // FSPSP55 deprecated so map to code error
+    { EPUB_PRC_PROC_XYZ_BUS           , "HB00055"}, // FSPSP55 deprecated so map to code error
+    { EPUB_PRC_MEMBUS_ERROR           , "HB00055"}, // FSPSP55 deprecated so map to code error
+    { EPUB_PRC_EIBUS_ERROR            , "HB00055"}, // FSPSP55 deprecated so map to code error
     { EPUB_PRC_MULTINODE_CHECKSTOP    , "HB00010"}, // FSPSP61, n/a for P10 ebmc
     { EPUB_PRC_MEMORY_UE              , "HB0004F"}, // FSPSP79
     { EPUB_PRC_HB_CODE                , "HB00055"}, // FSPSP85
@@ -1410,22 +1410,33 @@ void ErrlEntry::collectFruPathCalloutDataForBMC(HWAS::callout_ud_t* i_ud)
     uint8_t* l_uData = reinterpret_cast<uint8_t *>(i_ud + 1);
     Target* targets[2] = { };
 
+    TRACFCOMP(g_trac_errl, ENTER_MRK"collectFruPathCalloutDataForBMC PLID=0x%X EID=0x%X", plid(), eid());
     bool l_err = HWAS::retrieveTarget(l_uData, targets[0], this);
 
     if (l_err)
     {
-        TRACFCOMP(g_trac_errl, ERR_MRK"collectFruPathCalloutDataForBMC: Getting source bus from callout failed (plid = 0x%08x)",
-                  plid());
+        TRACFCOMP(g_trac_errl, ERR_MRK"collectFruPathCalloutDataForBMC: Getting SOURCE bus from callout failed "
+                  "(plid = 0x%08x), WILL NOT have FRU data", plid());
         break;
+    }
+    else
+    {
+        TRACFCOMP(g_trac_errl, ERR_MRK"collectFruPathCalloutDataForBMC: Retrieved SOURCE bus from callout "
+                  "(plid = 0x%08x) HUID=0x%X", plid(), get_huid(targets[0]));
     }
 
     l_err = HWAS::retrieveTarget(l_uData, targets[1], this);
 
     if (l_err)
     {
-        TRACFCOMP(g_trac_errl, ERR_MRK"collectFruPathCalloutDataForBMC: Getting destination bus from callout failed (plid = 0x%08x)",
-                  plid());
+        TRACFCOMP(g_trac_errl, ERR_MRK"collectFruPathCalloutDataForBMC: Getting DESTINATION bus from callout failed "
+                  "(plid = 0x%08x), WILL NOT have FRU data", plid());
         break;
+    }
+    else
+    {
+        TRACFCOMP(g_trac_errl, ERR_MRK"collectFruPathCalloutDataForBMC: Retrieved DESTINATION bus from callout "
+                  "(plid = 0x%08x) HUID=0x%X", plid(), get_huid(targets[1]));
     }
 
     /* Parse and collect the FRU callouts from the bus targets */
@@ -1439,6 +1450,8 @@ void ErrlEntry::collectFruPathCalloutDataForBMC(HWAS::callout_ud_t* i_ud)
         if (target->tryGetAttr<ATTR_FRU_PATH>(fru_path))
         {
             const auto target_callouts = getTargetCallouts(fru_path);
+            TRACFCOMP(g_trac_errl, "collectFruPathCalloutDataForBMC WORKING on PLID=0x%X EID=0x%X HUID=0x%X fru_path=%s",
+                        plid(), eid(), get_huid(target), fru_path);
 
             callouts.insert(end(callouts), begin(target_callouts), end(target_callouts));
         }
@@ -1452,16 +1465,27 @@ void ErrlEntry::collectFruPathCalloutDataForBMC(HWAS::callout_ud_t* i_ud)
     {
         for (const auto callout : callouts)
         {
-            TRACFCOMP(g_trac_errl, INFO_MRK"collectFruPathCalloutDataForBMC(plid=0x%08x): Calling out 0x%08x with priority %d",
-                      plid(), get_huid(callout.target), i_ud->priority);
-
-            addFruCalloutDataToSrc(callout.target, i_ud->priority, FAILING_COMP_TYPE_NORMAL_HW, i_ud->procedure);
+            TRACFCOMP(g_trac_errl, INFO_MRK"collectFruPathCalloutDataForBMC(plid=0x%08x): Calling out "
+                      "0x%08x with PRIMARY priority %d (FRU priority %d)",
+                      plid(), get_huid(callout.target), i_ud->priority, callout.priority);
+            // FRU callouts cannot be higher priority than the addBusCallout level of priority
+            if (callout.priority >= i_ud->priority)
+            {
+                addFruCalloutDataToSrc(callout.target, i_ud->priority, FAILING_COMP_TYPE_NORMAL_HW, i_ud->procedure);
+            }
+            else
+            {
+                addFruCalloutDataToSrc(callout.target, callout.priority, FAILING_COMP_TYPE_NORMAL_HW, i_ud->procedure);
+            }
         }
     }
     else
     {
         // If we don't get any targets in the FRU path to call out, fall back to
         // calling out the two targets in the userdata directly.
+        TRACFCOMP(g_trac_errl, INFO_MRK"collectFruPathCalloutDataForBMC(plid=0x%08x): Calling out "
+                  "0x%08x and 0x%08x PRIMARY priority %d (No FRU callouts)",
+                  plid(), get_huid(targets[0]), get_huid(targets[1]), i_ud->priority);
         addFruCalloutDataToSrc(targets[0], i_ud->priority, FAILING_COMP_TYPE_NORMAL_HW, i_ud->procedure);
         addFruCalloutDataToSrc(targets[1], i_ud->priority, FAILING_COMP_TYPE_NORMAL_HW, i_ud->procedure);
     }
@@ -2756,10 +2780,13 @@ uint8_t ErrlEntry::queryCallouts(TARGETING::Target         * const i_target,
         if (section->compId() == ERRL_COMP_ID && section->subSect() == ERRORLOG::ERRL_UDT_CALLOUT)
         {
             const auto callout_ud = reinterpret_cast<HWAS::callout_ud_t*>(section->iv_pData);
-            // Looking at hwasCallout.H only the HW, CLOCK, and PART Callouts will have a target
+            // Review hwasCallout.H for callouts which will have a target
             // entry that follows the UDT callout entry
+            // Special considerations for BUS_CALLOUT, be sure to interrogate on a per
+            // target basis since bus callouts will have two targets, etc.
             if (callout_ud->type == HWAS::HW_CALLOUT ||
                 callout_ud->type == HWAS::CLOCK_CALLOUT ||
+                callout_ud->type == HWAS::BUS_CALLOUT ||
                 callout_ud->type == HWAS::PART_CALLOUT)
             {
                 TARGETING::Target * target_found = nullptr;
@@ -2818,6 +2845,25 @@ uint8_t ErrlEntry::queryCallouts(TARGETING::Target         * const i_target,
 
                     // Do not exit loop in case there are multiple callouts
                     // for the same target type.
+                }
+                else
+                {
+                    // Since we have already checked the SOURCE side of the BUS_CALLOUT above
+                    // this ELSE branch will use the secondary call to retrieveTarget to
+                    // get the DESTINATION side of the BUS_CALLOUT, so we may still find
+                    // the callers desired target
+                    if(callout_ud->type == HWAS::BUS_CALLOUT)
+                    {
+                        TARGETING::Target * dest_target_found = nullptr;
+                        bool l_err = HWAS::retrieveTarget(target_ptr, dest_target_found, this);
+                        if (!l_err)
+                        {
+                            if (i_target == dest_target_found)
+                            {
+                                criteria_matched |= TARGET_MATCH;
+                            }
+                        }
+                    }
                 }
             }
         }
