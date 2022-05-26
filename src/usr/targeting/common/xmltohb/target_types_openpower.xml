@@ -97,6 +97,9 @@
   <targetTypeExtension>
     <id>chip-processor</id>
     <attribute>
+      <id>BUS_RAIL_LOCATION_MAP</id>
+    </attribute>
+    <attribute>
       <id>CONNECTOR_PLDM_ENTITY_ID_INFO</id>
     </attribute>
     <attribute>
@@ -141,6 +144,9 @@
     <attribute>
       <id>IPMI_INSTANCE</id>
       <default>0xFF</default>
+    </attribute>
+    <attribute>
+      <id>LOCATION_PN_SN_CCIN_MAP</id>
     </attribute>
     <attribute>
       <id>PLDM_ENTITY_ID_INFO</id>
