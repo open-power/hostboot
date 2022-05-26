@@ -27,7 +27,7 @@
 function usage ()
 {
     echo "Usage: source ${BASH_SOURCE[0]} PACKAGE_NAME [-h|--help] [-x|--xml-only OR -n|--no-xml] [-s|--system-type e|2u|4u] [-b|--branch-name]"
-    echo "Description: This script will take the given package_name and checkout a new branch in this hostboot repo to the"
+    echo "Description: This script will take the given PACKAGE_NAME and checkout a new branch in this hostboot repo to the"
     echo "             commit hash that is in the PNOR build."
     echo "NOTE:        This script must run in the current environment with source (or .) preceeding the script call. Otherwise,"
     echo "             the CONFIG_FILE environment variable cannot be updated in the user's working shell if it's incorrect."
@@ -35,24 +35,23 @@ function usage ()
     echo "Options:"
     echo "       PACKAGE_NAME is a package name to match this hostboot repo to. ex. 1020.2204.20220126z"
     echo "       -h|--help        Used to display this usage text"
-    echo "       -x|--xml-only    Copy system xmls into repo and nothing else. Cannot use with -n"
-    echo "       -n|--no-xml      Checkout supplied package_name and don't copy system xmls to repo. Cannot use with -x"
+    echo "       -x|--xml-only    Copy system xmls into repo and won't perform any setup actions on the repo. Cannot use with -n"
+    echo "       -n|--no-xml      Checkout supplied PACKAGE_NAME and perform setup actions but don't copy system xmls to repo. Cannot use with -x"
     echo "       -s|--system-type Copies the system xml of the targeted system and replaces simics_P10.system.xml with it."
     echo "                            e = Everest, 2u = Rainer 2U, 4u = Rainier 4U"
-    echo "       -b|--branch-name The branch name for the new branch created by this script. Default is package_name"
+    echo "       -b|--branch-name The branch name for the new branch created by this script. Default is PACKAGE_NAME"
     echo ""
     echo "Examples:"
     echo "       source ${BASH_SOURCE[0]} 1020.2204.20220128b"
     echo "           Creates a new branch called 1020.2204.20220128b checked out at the matching Hostboot commit hash, "
-    echo "           copies over all system xmls from PNOR build but doesn't replace simics_P10.system.xml"
+    echo "           copies over all system xmls from PNOR build, and modifies the CONFIG_FILE env var but doesn't replace simics_P10.system.xml"
     echo "       source ${BASH_SOURCE[0]} 1020.2204.20220128b -b ever6-level"
     echo "           Creates new branch called ever6-level checked out at the matching Hostboot commit hash, copies over"
-    echo "           all system xmls but doesn't replace simics_P10.system.xml"
+    echo "           all system xmls and modifies the CONFIG_FILE env var but doesn't replace simics_P10.system.xml"
     echo "       source ${BASH_SOURCE[0]} 1020.2204.20220128b -xs e"
-    echo "           Copies over all the system xmls from 1020.2204.20220128b and replaces simics_P10.system.xml with the"
-    echo "           Everest xml"
+    echo "           Copies over the Everest system xml from 1020.2204.20220128b and replaces simics_P10.system.xml with it and does not modify CONFIG_FILE env var"
     echo "       source ${BASH_SOURCE[0]} 1020.2204.20220128b -nb build-0128b"
-    echo "           Creates a new branch called build-0128b checked out at the matching Hostboot commit hash and doesn't"
+    echo "           Creates a new branch called build-0128b checked out at the matching Hostboot commit hash and modifies the CONFIG_FILE env var but doesn't"
     echo "           copy over the system xmls from the PNOR build nor is simics_P10.system.xml replaced by anything."
     return 1
 }
@@ -337,8 +336,9 @@ function main ()
         fi
     fi
 
-    # Always double check CONFIG_FILE since this could be a source of silent pain
-    verify_config_file
+    if [ "$xml_only" == false ]; then
+        verify_config_file
+    fi
 }
 
 # The user must source this script
