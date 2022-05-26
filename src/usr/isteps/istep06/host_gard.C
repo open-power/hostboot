@@ -71,7 +71,7 @@ namespace ISTEP_06
 /**
  * @brief Determine if there is a valid boot core and take appropriate
  *        actions if there isn't.  Also will send a message to FSP if
- *        we find one.        
+ *        we find one.
  */
 errlHndl_t establish_boot_core( void )
 {
@@ -345,19 +345,19 @@ void* host_gard( void *io_pArgs )
                       "host_gard: MPIPL mode");
 
             PredicateCTM l_coreFilter(CLASS_UNIT, TYPE_CORE);
-            PredicateCTM l_exFilter(CLASS_UNIT, TYPE_EX);
+            PredicateCTM l_fcFilter(CLASS_UNIT, TYPE_FC);
             PredicateCTM l_eqFilter(CLASS_UNIT, TYPE_EQ);
 
-            PredicatePostfixExpr l_coreExEq;
-            l_coreExEq.push(&l_coreFilter)
-                      .push(&l_exFilter)
+            PredicatePostfixExpr l_coreFcEq;
+            l_coreFcEq.push(&l_coreFilter)
+                      .push(&l_fcFilter)
                       .push(&l_eqFilter).Or().Or();
 
-            l_err = HWAS::collectGard(&l_coreExEq);
+            l_err = HWAS::collectGard(&l_coreFcEq);
             if(l_err)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"host_gard: "
-                          "collectGard for core, EX, or EQ targets returned "
+                          "collectGard for core, FC, or EQ targets returned "
                           "error; breaking out");
                 break;
             }
