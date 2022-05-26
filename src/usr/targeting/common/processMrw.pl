@@ -42,8 +42,16 @@ use FindBin qw($RealBin);
 use FindBin qw($RealScript);
 use lib "$RealBin";
 
-use BusFruCallouts;
+# for perl 5.26, the cwd is no longer added by default to
+# perl's @INC env, so need to forcibly add it to find
+# Targets.pm.
+# This set of statements will add the parent dir of this
+# script to @INC.
+use Cwd qw( abs_path );
+use File::Basename qw( dirname );
+use lib dirname(abs_path($0));
 use Targets;
+use BusFruCallouts;
 
 ################################################################################
 # Define some global constants/variables
