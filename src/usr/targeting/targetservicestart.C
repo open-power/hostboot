@@ -656,17 +656,13 @@ static void initializeAttributes(TargetService& i_targetService,
                 membuf->setAttr<ATTR_IBSCOM_VIRTUAL_ADDR>(0);
             }
 
-            TARGETING::PredicateCTM l_eqFilter(CLASS_UNIT, TYPE_EQ);
-            TARGETING::PredicateCTM l_exFilter(CLASS_UNIT, TYPE_EX);
             TARGETING::PredicateCTM l_ecFilter(CLASS_UNIT, TYPE_CORE);
-            TARGETING::PredicatePostfixExpr l_wakeupTargFilter;
-            l_wakeupTargFilter.push(&l_eqFilter).push(&l_exFilter).Or().push(&l_ecFilter).Or();
             TargetHandleList l_wakeupTargs;
             i_targetService.getAssociated( l_wakeupTargs,
                                            l_pTopLevel,
                                            TargetService::CHILD_BY_AFFINITY,
                                            TARGETING::TargetService::ALL,
-                                           &l_wakeupTargFilter);
+                                           &l_ecFilter);
             for (auto & l_targ : l_wakeupTargs)
             {
                 l_targ->setAttr<ATTR_SPCWKUP_COUNT>(0);
