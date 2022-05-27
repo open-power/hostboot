@@ -286,7 +286,7 @@ namespace HTMGT
                     l_addProcCallout = true;
                 }
 
-                if ((numCallouts == 0) ||
+                if ((numCallouts == 0) &&
                     (severity != ERRORLOG::ERRL_SEV_INFORMATIONAL))
                 {
                     if (i_source == OCC_ERRSRC_405)
