@@ -1020,24 +1020,37 @@ namespace HTMGT
 
     } // end passThruCommand()
 
+    // Called by PLDM to get OCC enabled status for the BMC
     bool isOccRunning(TARGETING::Target * i_proc)
     {
         bool isRunning = false;
 
-        if (OccManager::occNeedsReset() == false)
+        // If hostboot gets restarted, HTMGT will not have been called
+        // so need to call buildOccs (no-op if objects already exist)
+        errlHndl_t err = OccManager::buildOccs(false, false);
+        if (nullptr == err)
         {
-            uint8_t occInstance = i_proc->getAttr<TARGETING::ATTR_POSITION>();
-            Occ *occPtr = OccManager::getOcc(occInstance);
-            if (occPtr != nullptr)
+            // check if the OCCs are actually running
+            if (OccManager::occNeedsReset() == false)
             {
-                const occStateId occState = occPtr->getState();
-                if( (occState == OCC_STATE_OBSERVATION) ||
-                    (occState == OCC_STATE_ACTIVE) ||
-                    (occState == OCC_STATE_CHARACTERIZATION) )
+                uint8_t occInstance = i_proc->getAttr<TARGETING::ATTR_POSITION>();
+                Occ *occPtr = OccManager::getOcc(occInstance);
+                if (occPtr != nullptr)
                 {
-                    isRunning = true;
+                    const occStateId occState = occPtr->getState();
+                    if( (occState == OCC_STATE_OBSERVATION) ||
+                        (occState == OCC_STATE_ACTIVE) ||
+                        (occState == OCC_STATE_CHARACTERIZATION) )
+                    {
+                        isRunning = true;
+                    }
                 }
             }
+        }
+        else
+        {
+            // OCCs not started yet
+            delete err;
         }
 
         return isRunning;
