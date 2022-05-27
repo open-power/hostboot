@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,7 @@
 // Error logging
 #include <errl/errlentry.H>              // errlHndl_t
 #include <isteps/hwpisteperror.H>        // IStepError, getErrorHandle
+#include <istepHelperFuncs.H>            // captureError
 
 // Runtime Support
 #include <runtime/runtime.H>             // RUNTIME::useRelocatedPayloadAddr
@@ -52,6 +53,10 @@
 #include <targeting/targplatutil.H>
 #include <targeting/common/targetservice.H>
 #include <mbox/ipc_msg_types.H>
+
+//HWP Invoker
+#include    <fapi2/plat_hwp_invoker.H>
+#include    <p10_setup_evid.H>
 
 /******************************************************************************/
 // namespace shortcuts
@@ -75,15 +80,60 @@ void sendDumpMboxMsg(const DUMP::DUMP_MSG_TYPE i_msgType);
  */
 void* call_host_mpipl_service (void *)
 {
+    IStepError  l_stepError;
+    errlHndl_t l_errl = nullptr;
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                ENTER_MRK"call_host_mpipl_service" );
+
+    TARGETING::TargetHandleList l_procList;
+    if (TARGETING::UTIL::assertGetToplevelTarget()
+          ->getAttr<TARGETING::ATTR_IS_MPIPL_HB>())
+    {
+        // During MPIPL flows the SBE will have executed HWP's before
+        // triggering the reset on MPIPL (to provide extra margin for the
+        // P10 SPI Chip select issue).
+        //
+        // The following code will lower the voltage back to the configured
+        // values contained in the attributes.
+
+        getAllChips(l_procList,
+                    TYPE_PROC,
+                    true); // return functional procs
+
+        // Iterate over the found procs and call p10_setup_evid to APPLY
+        for( const auto & l_procTarget : l_procList )
+        {
+            const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+                        l_fapiProcTarget( l_procTarget );
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "call_host_mpipl_service Running p10_setup_evid HWP PROC=0x%X",
+                      get_huid(l_procTarget));
+            FAPI_INVOKE_HWP(l_errl,
+                            p10_setup_evid,
+                            l_fapiProcTarget,
+                            APPLY_VOLTAGE_SETTINGS);
+            if (l_errl)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "call_host_mpipl_service Error running p10_setup_evid on processor target %.8X"
+                          TRACE_ERR_FMT,
+                          get_huid(l_procTarget),
+                          TRACE_ERR_ARGS(l_errl));
+                // Capture error and continue
+                captureError(l_errl, l_stepError, HWPF_COMP_ID, l_procTarget);
+            }
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "call_host_mpipl_service Done with p10_setup_evid HWP PROC=0x%X",
+                       get_huid(l_procTarget));
+        } // Processor Loop
+    } // end MPIPL
 
     runDumpCalls();
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                EXIT_MRK"call_host_mpipl_service, returning");
 
-    return nullptr;
+    return l_stepError.getErrorHandle();
 }  // call_host_mpipl_service
 
 /**
