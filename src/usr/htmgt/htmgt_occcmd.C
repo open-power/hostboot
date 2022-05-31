@@ -857,11 +857,18 @@ namespace HTMGT
                      * @devdesc OCC reported exception
                      */
                     errlHndl_t l_excErr = NULL;
+                    ERRORLOG::errlSeverity_t severity =
+                        ERRORLOG::ERRL_SEV_INFORMATIONAL;
+                    if (OCC_RESET_COUNT_THRESHOLD == iv_Occ->iv_resetCount)
+                    {
+                        // commit as unrecoverable if will end up in safe mode
+                        severity = ERRORLOG::ERRL_SEV_UNRECOVERABLE;
+                    }
                     bldErrLog(l_excErr, HTMGT_MOD_HANLDE_OCC_EXCEPTION,
                               (htmgtReasonCode)(OCCC_COMP_ID | exceptionType),
                               exceptionType, exceptionDataLength,
                               iv_Occ->iv_instance, UINT32_GET(&sramRspPtr[5]),
-                              ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                              severity);
                     l_excErr->addFFDC(OCCC_COMP_ID,
                                       sramRspPtr,
                                       exceptionLength,
