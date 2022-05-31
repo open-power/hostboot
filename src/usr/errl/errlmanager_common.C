@@ -389,7 +389,7 @@ void ErrlManager::setupPnorInfo()
                 ++it;
             }
         }
-#endif // __HOSTBOOT_RUNTIME
+#endif // #ifndef __HOSTBOOT_RUNTIME
     } while (0);
 
     TRACFCOMP( g_trac_errl, EXIT_MRK"setupPnorInfo");
