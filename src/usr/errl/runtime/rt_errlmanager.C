@@ -74,7 +74,7 @@ bool rt_processCallout(errlHndl_t &io_errl,
 ErrlManager::ErrlManager() :
         iv_currLogId(0),
         iv_baseNodeId(ERRLOG_PLID_BASE_MASK),
-        iv_pnorReadyForErrorLogs(false),
+        iv_pnorReadyForErrorLogs(true),
         iv_pStorage(NULL),
         iv_hwasProcessCalloutFn(NULL),
         iv_pnorAddr(NULL),
