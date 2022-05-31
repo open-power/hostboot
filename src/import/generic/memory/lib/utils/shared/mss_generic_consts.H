@@ -1217,6 +1217,21 @@ struct mcTypeTraits<mc_type::ODYSSEY>
     };
 };
 
+namespace ddr5
+{
+
+
+///
+/// @brief DDR5 mode register attribute array values
+///
+enum mr
+{
+    ATTR_RANKS = 4,
+    ATTR_DRAM  = 20,
+};
+
+}
+
 }// mss
 
 #endif

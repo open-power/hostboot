@@ -38,21 +38,329 @@
 
 <hwpErrors>
 
+<!-- Generic MR errors -->
+
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR_BAD_DRAM</rc>
+    <description>
+       A bad DRAM latency was passed to an MR
+    </description>
+    <ffdc>MAX</ffdc>
+    <ffdc>DRAM</ffdc>
+    <ffdc>MR</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
+
 <!-- MR0 errors -->
+
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR0_BAD_CAS_LATENCY</rc>
+    <description>
+       A bad CAS latency was passed to MR0
+    </description>
+    <ffdc>CAS_LATENCY</ffdc>
+    <ffdc>MAX_CAS_LATENCY</ffdc>
+    <ffdc>MIN_CAS_LATENCY</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR0_BAD_BURST_LENGTH</rc>
+    <description>
+       A bad burst length was passed to MR0
+    </description>
+    <ffdc>BURST_LENGTH</ffdc>
+    <ffdc>MAX_BURST_LENGTH</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
 
 <!-- MR2 errors -->
 
 <!-- MR3 errors -->
 
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR3_BAD_CYCLE_ALIGN</rc>
+    <description>
+       A bad cycle alignment value was passed to MR3
+    </description>
+    <ffdc>MAX</ffdc>
+    <ffdc>VALUE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
+
 <!-- MR4 errors -->
+
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR4_BAD_TRFC_MODE</rc>
+    <description>
+       A bad TRFC mode was passed into MR4
+    </description>
+    <ffdc>VALUE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR4_BAD_MIN_REFRESH_RATE</rc>
+    <description>
+       A bad minimum refresh rate was passed into MR4
+    </description>
+    <ffdc>MIN_REFRESH_RATE</ffdc>
+    <ffdc>WIDE_RANGE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
 
 <!-- MR5 errors -->
 
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR5_DRV_IMP_ATTR_VALUE</rc>
+    <description>
+       A bad drive impedance value was passed to MR5
+    </description>
+    <ffdc>VALUE</ffdc>
+    <ffdc>DIMM_RANK</ffdc>
+    <ffdc>IS_PULL_UP</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR5_DRV_IMP_FIELD_VALUE</rc>
+    <description>
+       A bad drive impedance field value was passed by MR5
+    </description>
+    <ffdc>FIELD</ffdc>
+    <ffdc>DIMM_RANK</ffdc>
+    <ffdc>IS_PULL_UP</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
+
 <!-- MR6 errors -->
+
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR6_WR_RECOVERY_ATTR_VALUE</rc>
+    <description>
+       A bad drive WR recovery value was passed to MR6
+    </description>
+    <ffdc>VALUE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR6_WR_RECOVERY_FIELD_VALUE</rc>
+    <description>
+       A bad drive WR recovery value was passed by MR6
+    </description>
+    <ffdc>FIELD</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR6_TRTP_ATTR_VALUE</rc>
+    <description>
+       A bad tRTP value was passed to MR6
+    </description>
+    <ffdc>VALUE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR6_TRTP_FIELD_VALUE</rc>
+    <description>
+       A bad tRTP field value was passed by MR6
+    </description>
+    <ffdc>FIELD</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
 
 <!-- MR8 errors -->
 
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR8_WR_PREAMBLE_ATTR_VALUE</rc>
+    <description>
+       A bad drive WR preamble value was passed to MR8
+    </description>
+    <ffdc>VALUE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR8_RD_PREAMBLE_ATTR_VALUE</rc>
+    <description>
+       A bad drive RD preamble value was passed to MR8
+    </description>
+    <ffdc>VALUE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR8_WR_PREAMBLE_FIELD_VALUE</rc>
+    <description>
+       A bad drive WR preamble value was passed by MR8
+    </description>
+    <ffdc>FIELD</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR8_RD_PREAMBLE_FIELD_VALUE</rc>
+    <description>
+       A bad drive RD preamble value was passed by MR8
+    </description>
+    <ffdc>FIELD</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
 
 <!-- MR10 errors -->
 
