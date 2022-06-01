@@ -222,9 +222,6 @@
       <id>IPL_ATTRIBUTES</id>
     </attribute>
     <attribute>
-      <id>LMB_SIZE</id>
-    </attribute>
-    <attribute>
       <id>MAX_HSL_OPTICONNECT_CONNECTIONS</id>
     </attribute>
     <attribute>

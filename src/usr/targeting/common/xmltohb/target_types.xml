@@ -2292,6 +2292,9 @@
       <id>LAST_IPLTIME_EID</id>
     </attribute>
     <attribute>
+      <id>LMB_SIZE</id>
+    </attribute>
+    <attribute>
       <default>0x0006030000000000</default>
       <id>LPC_BUS_ADDR</id>
     </attribute>

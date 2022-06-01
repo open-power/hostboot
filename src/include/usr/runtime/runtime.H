@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -481,22 +481,27 @@ errlHndl_t verifyAndMovePayload(bool i_payloadAlreadyVerified = false);
  */
 inline uint64_t getLMBSizeInMB()
 {
-    // Default to 256 MB for non-pldm system
-    uint64_t ret = 256;
+    uint64_t ret = 0;
 
-    // @TODO RTC 258716: Make HB aware of FSP LMB size
-
-#ifdef CONFIG_PLDM
+    // Attribute should be set by either FSP (via directly setting the shared attribute)
+    // or BMC (via pldm/bios attribute support)
     const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
     const auto lmb_size = sys->getAttr<TARGETING::ATTR_LMB_SIZE>();
 
-    // Attribute is encoded size (0-4)
-    // 0 -> 16MB, 1 -> 32MB, 2 -> 64MB, 3 -> 128MB, 4 -> 256MB
+    // Attribute is encoded size:
+    // 0x00 = 16 meg LMB
+    // 0x01 = 32 meg LMB
+    // 0x02 = 64 meg LMB
+    // 0x03 = 128 meg LMB
+    // 0x04 = 256 meg LMB
+    // 0x05 = 512 meg LMB
+    // 0x06 = 1024 meg LMB
+    // 0x07 = 2048 meg LMB
+    // 0x08 = 4096 meg LMB
+    //
     // Decode the attribute into MB
     // ex: 2^^4 = 16, 16 *16 = 256
     ret = pow(2, lmb_size) * 16;
-
-#endif // CONFIG_PLDM
 
     return ret;
 }

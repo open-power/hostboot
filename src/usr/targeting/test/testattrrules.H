@@ -111,6 +111,7 @@ public:
           ATTR_PAYLOAD_IN_MIRROR_MEM, //ok,set by HWSV
           ATTR_EFFECTIVE_EC, //ok,set by HWSV
           ATTR_KEY_CLEAR_REQUEST, //ok,set by HWSV
+          ATTR_LMB_SIZE, //ok, set by HWSV
           ATTR_PAYLOAD_KIND, //ok,written by HWSV
           ATTR_WOF_TABLE_LID_NUMBER, //ok,written by HWSV
           ATTR_TPM_REQUIRED, //ok,written by HWSV

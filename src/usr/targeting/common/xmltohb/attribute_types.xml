@@ -3598,6 +3598,32 @@
   </attribute>
 
   <attribute>
+    <description>
+       Logical Memory Block Size (LMB)
+       Encoded Size:
+       - 0x00 = 16 meg LMB
+       - 0x01 = 32 meg LMB
+       - 0x02 = 64 meg LMB
+       - 0x03 = 128 meg LMB
+       - 0x04 = 256 meg LMB (default)
+       - 0x05 = 512 meg LMB
+       - 0x06 = 1024 meg LMB
+       - 0x07 = 2048 meg LMB
+       - 0x08 = 4096 meg LMB
+    </description>
+    <id>LMB_SIZE</id>
+    <simpleType>
+      <uint8_t>
+        <default>0x04</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <description>Location code of the Fru target</description>
     <id>LOCATION_CODE</id>
     <simpleType>

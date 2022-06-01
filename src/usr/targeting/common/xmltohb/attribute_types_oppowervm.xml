@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2022                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -397,19 +397,6 @@
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-  </attribute>
-
-  <attribute>
-    <id>LMB_SIZE</id>
-    <description>
-       Logical Memory Block Size
-    </description>
-    <simpleType>
-      <uint8_t/>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
   </attribute>
 
   <attribute>
