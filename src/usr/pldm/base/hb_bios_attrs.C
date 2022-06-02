@@ -96,6 +96,9 @@ const char PLDM_BIOS_ENABLED_STRING[]          = "Enabled";
 const char PLDM_BIOS_DISABLED_STRING[]         = "Disabled";
 const char PLDM_BIOS_128_MB_STRING[]           = "128MB";
 const char PLDM_BIOS_256_MB_STRING[]           = "256MB";
+const char PLDM_BIOS_1024_MB_STRING[]          = "1024MB";
+const char PLDM_BIOS_2048_MB_STRING[]          = "2048MB";
+const char PLDM_BIOS_4096_MB_STRING[]          = "4096MB";
 const char PLDM_BIOS_PERM_STRING[]             = "Perm";
 const char PLDM_BIOS_TEMP_STRING[]             = "Temp";
 const char PLDM_BIOS_TPM_REQUIRED_STRING[]     = "Required";
@@ -1121,6 +1124,21 @@ errlHndl_t getLmbSize(
     {
         PLDM_INF("Memory region size set to 256MB by the BMC");
         o_lmbSize = LMB_SIZE_ENCODE_256MB;
+    }
+    else if(strncmp(decoded_value.data(), PLDM_BIOS_1024_MB_STRING, decoded_value.size()) == 0)
+    {
+        PLDM_INF("Memory region size set to 1024MB by the BMC");
+        o_lmbSize = LMB_SIZE_ENCODE_1024MB;
+    }
+    else if(strncmp(decoded_value.data(), PLDM_BIOS_2048_MB_STRING, decoded_value.size()) == 0)
+    {
+        PLDM_INF("Memory region size set to 2048MB by the BMC");
+        o_lmbSize = LMB_SIZE_ENCODE_2048MB;
+    }
+    else if(strncmp(decoded_value.data(), PLDM_BIOS_4096_MB_STRING, decoded_value.size()) == 0)
+    {
+        PLDM_INF("Memory region size set to 4096MB by the BMC");
+        o_lmbSize = LMB_SIZE_ENCODE_4096MB;
     }
     else
     {

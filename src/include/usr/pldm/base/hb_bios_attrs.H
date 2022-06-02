@@ -57,8 +57,12 @@
 
 namespace PLDM
 {
+    // Encoded values of LMB Size - Only supported sizes are listed
     constexpr uint8_t LMB_SIZE_ENCODE_128MB = 0x3;
     constexpr uint8_t LMB_SIZE_ENCODE_256MB = 0x4;
+    constexpr uint8_t LMB_SIZE_ENCODE_1024MB = 0x6;
+    constexpr uint8_t LMB_SIZE_ENCODE_2048MB = 0x7;
+    constexpr uint8_t LMB_SIZE_ENCODE_4096MB = 0x8;
 
     /** @brief Retrieve the Lateral Cast Out (LCO) mode from the BMC BIOS
     *
