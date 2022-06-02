@@ -194,6 +194,53 @@ that you actually do have access to the data, you can read it like any other dat
 
     #define private public
 
+### Using multiple code files
+
+If you are developing code where you don't want all of it to be in the same file you can make multiple .c++ files to
+compile along with the main .c++ file which has the dce entrypoint function in it. To do this, simply create the
+separate code normally in any number of additional files with the extension .c++ then you can include the prototypes in
+.h++ files in main .c++ file.
+
+When you are ready to compile, either create a new env var named DCE_EXTRA_FILES with the list of the .c++ and h++ files
+you created or declare it on the command line along with the make invocation.
+
+For example, here are the multiple files contents:
+
+test.c++
+```cpp
+#include <console/consoleif.H>
+
+void hey()
+{
+    CONSOLE::displayf(CONSOLE::DEFAULT, NULL,
+            "Hello World");
+}
+```
+
+test.h++
+```cpp
+void hey(void);
+```
+
+foo.c++
+```cpp
+#include "test.h++"
+
+extern "C" int _start()
+{
+    hey();
+    return 0;
+}
+```
+
+and on the command line, you would type:
+
+```bash
+DCE_EXTRA_FILES="test.c++ test.h++" make foo.dce.lid
+```
+
+You can now copy the resulting lid onto the system and invoke it with the script as normal.
+
 ## Restrictions
 
 There are certain features of C++ that DCE code does not support:

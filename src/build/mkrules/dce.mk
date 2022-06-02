@@ -23,8 +23,8 @@
 #
 # IBM_PROLOG_END_TAG
 
-%.dce.lid: %.c++ $(PROJECT_ROOT)/img/hbicore.list.bz2
-	$(ROOTPATH)/src/build/tools/dce/dce-compile "$<" -o $@.intermediate $(INCFLAGS)
+%.dce.lid: %.c++ $(DCE_EXTRA_FILES) $(PROJECT_ROOT)/img/hbicore.list.bz2
+	$(ROOTPATH)/src/build/tools/dce/dce-compile "$<" $(filter %.c++, $(DCE_EXTRA_FILES)) -o $@.intermediate $(INCFLAGS)
 	$(ROOTPATH)/src/build/tools/dce/preplib.py $@.intermediate
 	mv $@.intermediate.lid $@
 	@echo Copy $@ to the BMC
