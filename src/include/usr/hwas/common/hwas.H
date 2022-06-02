@@ -140,8 +140,7 @@ typedef struct {
  *
  *  This routine will walk through the procs in the list, and turn EC
  *  units to not functional if the number of units is larger than the max
- *  given. This is used for PG keyword and Field Core Override (FCO)
- *  processing.
+ *  given. This is used for PG keyword processing.
  *
  * @param[in] i_procRestrict   vector of procRestrict entries
  * @param[in] i_deconfigReason   DECONFIGURED_BY_ enum or 0

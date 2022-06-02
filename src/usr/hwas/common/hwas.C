@@ -1787,6 +1787,9 @@ errlHndl_t restrictECunits(
     errlHndl_t errl = nullptr;
     TargetHandle_t l_primaryProcTarget = nullptr;
 
+    // NOTE: This function used to handle Field Core Override but that functionality has been replaced by
+    //       applyFieldCoreOverrides(). This function should not be called for FCO as it has bugs which were
+    //       fixed in applyFieldCoreOverrides(). @TODO Remove the FCO portions of logic from this function.
     do {
 
     errl = targetService().queryMasterProcChipTargetHandle(l_primaryProcTarget);
