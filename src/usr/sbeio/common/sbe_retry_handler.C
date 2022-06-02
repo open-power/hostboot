@@ -330,12 +330,13 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
             // Important things to remember, we only want to attempt a single side
             // a maxiumum of 2 times, and also we only want to switch sides once
 
-            SBE_TRACF("main_sbe_handler(): iv_sbeRegister.currState: %d , "
+            SBE_TRACF("main_sbe_handler(%.8X): iv_sbeRegister.currState: %d , "
                         "iv_currentSBEState: 0x%X ,"
                         "iv_currentSideBootAttempts: %d , "
                         "iv_currentAction: %d , "
-                        "iv_currentSideBootAttempts_mseeprom: %d",
+                        "iv_currentSideBootAttempts_mseeprom: %d , "
                         "bootside=%d , measurementside=%d",
+                        TARGETING::get_huid(this->iv_proc),
                         this->iv_sbeRegister.currState,
                         this->iv_currentSBEState,
                         this->iv_currentSideBootAttempts,
@@ -448,13 +449,16 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
             // RESTART_SBE is the path that considers same side REIPL which is a special case
             // on initialPowerOn and bestEffortCheck flows.
             if((this->iv_currentAction ==
-                            P10_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM ||
-                this->iv_currentAction ==
-                            P10_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM ||
-                this->iv_currentAction ==
-                            P10_EXTRACT_SBE_RC::REIPL_BKP_MSEEPROM ||
-                this->iv_currentAction ==
-                            P10_EXTRACT_SBE_RC::REIPL_UPD_MSEEPROM))
+                            P10_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM) ||
+               (this->iv_currentAction ==
+                            P10_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM) ||
+               (this->iv_currentAction ==
+                            P10_EXTRACT_SBE_RC::REIPL_BKP_MSEEPROM) ||
+               (this->iv_currentAction ==
+                            P10_EXTRACT_SBE_RC::REIPL_UPD_MSEEPROM) ||
+               (this->iv_currentAction ==
+                            P10_EXTRACT_SBE_RC::REIPL_BKP_BMSEEPROM)
+               )
             {
                 // We cannot switch sides and perform an hreset if the seeprom's
                 // versions do not match. If this happens, log an error and stop
@@ -498,13 +502,23 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
                         break;
                     }
                 }
-                if( ((this->iv_switchSidesCount >= MAX_SWITCH_SIDE_COUNT) &&
-                    ((this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM) ||
-                        (this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM)) ) ||
-                    ((this->iv_switchSidesCount_mseeprom >= MAX_SWITCH_SIDE_COUNT) &&
-                    ((this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_BKP_MSEEPROM) ||
-                        (this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_UPD_MSEEPROM)) ) )
+
+                SBE_TRACF("main_sbe_handler(): iv_switchSidesCount=%d, iv_switchSidesCount_mseeprom=%d",
+                          iv_switchSidesCount,
+                          iv_switchSidesCount_mseeprom);
+                if( ( (this->iv_switchSidesCount >= MAX_SWITCH_SIDE_COUNT) &&
+                      ((this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM)
+                       || (this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM)
+                       || (this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_BKP_BMSEEPROM)) )
+                    ||
+                    ( (this->iv_switchSidesCount_mseeprom >= MAX_SWITCH_SIDE_COUNT) &&
+                      ((this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_BKP_MSEEPROM)
+                       || (this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_UPD_MSEEPROM)
+                       || (this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_BKP_BMSEEPROM)) )
+                   )
                 {
+                    SBE_TRACF("main_sbe_handler(): Exhausted the number of side switch attempts on %.8X",
+                              TARGETING::get_huid(iv_proc));
                     /*@
                     * @errortype  ERRL_SEV_PREDICTIVE
                     * @moduleid   SBEIO_EXTRACT_RC_HANDLER

@@ -230,10 +230,30 @@ void* call_proc_check_secondary_sbe_seeprom_complete( void *io_pArgs )
             * @custdesc   Processor Error
             */
             l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                            MOD_CHECK_SECONDARY_SBE_SEEPROM_COMPLETE,
-                                            RC_FAILED_TO_BOOT_SBE,
-                                            get_huid(l_cpu_target),
-                                            0);
+                                   MOD_CHECK_SECONDARY_SBE_SEEPROM_COMPLETE,
+                                   RC_FAILED_TO_BOOT_SBE,
+                                   get_huid(l_cpu_target),
+                                   0);
+            // There should already be an explicit error committed
+            l_errl->addProcedureCallout(HWAS::EPUB_PRC_SUE_PREVERROR ,
+                                        HWAS::SRCI_PRIORITY_HIGH);
+            // Most of the time the SBE error itself or the retry code
+            //  will deconfigure the proc, but there are cases where
+            //  that doesn't happen.  We want to make sure we can
+            //  keep booting for a single proc failure so we will force
+            //  the proc to be deconfigured if nothing else has happened.
+            auto l_deconfig = HWAS::NO_DECONFIG;
+            auto l_reconfigloop = TARGETING::UTIL::assertGetToplevelTarget()
+              ->getAttr<ATTR_RECONFIGURE_LOOP>();
+            if( l_reconfigloop == 0 ) // No deconfigs or other triggers yet
+            {
+                l_deconfig = HWAS::DELAYED_DECONFIG;
+            }
+            l_errl->addHwCallout(l_cpu_target,
+                                 HWAS::SRCI_PRIORITY_LOW,
+                                 l_deconfig,
+                                 HWAS::GARD_NULL);
+
             // Add all the scratch regs that we set as FFDC
             //  (read as FSI since these are non-boot procs)
             ERRORLOG::ErrlUserDetailsLogRegister l_scratchregs(l_cpu_target);
