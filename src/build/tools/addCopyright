@@ -676,7 +676,7 @@ sub checkCopyrightBlock
             close($licenseHndl);
 
             print STDOUT "\nERROR> Prolog not correct for $filename.\n";
-            print STDOUT "To fix run: git show --pretty=\"format:\" --name-only | xargs addCopyright update\n";
+            print STDOUT "To fix run: git show --pretty=\"format:\" --name-only | xargs -n 1 -P \$(nproc) addCopyright update\n";
             print STDOUT "\nDiff:\n";
             print STDOUT `diff $blockFile $licenseFile`;
             my $relLicensePath = $LicenseFile;
@@ -1217,4 +1217,3 @@ sub getFileContributors
     }
     return %fileContributors;
 }
-
