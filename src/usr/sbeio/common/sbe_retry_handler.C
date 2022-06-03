@@ -230,9 +230,11 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
         }
 
         // if the sbe is not halted, run extract_rc
-        // NOTE: any asyncFFDC should have previously been caught in the call to
-        // sbe_run_extract_msg_reg above
-        if(!i_sbeHalted)
+        // NOTE: If we have any asyncFFDC it would have previously been
+        //  collected in the call to sbe_run_extract_msg_reg above. In
+        //  this case we don't want to run extract_rc as that logic
+        //  assumes a dead or hung SBE.
+        if(!i_sbeHalted && !((this->iv_sbeRegister).asyncFFDC))
         {
             SBE_TRACF("main_sbe_handler(sides:b=%d,m=%d): No async ffdc found and sbe isn't explicitly halted, running p10_sbe_extract_rc.", l_bootside, l_mside);
             // Call the function that runs extract_rc, this needs to run to determine
@@ -255,9 +257,15 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
         }
         // If we are halted then set the current action to be "restart sbe"
         // (the restart handler should already be initialized with with the HRESET reason)
-        else
+        else if( i_sbeHalted )
         {
             SBE_TRACF("main_sbe_handler(): SBE is halted. Setting action to be RESTART_SBE");
+            this->iv_currentAction = P10_EXTRACT_SBE_RC::RESTART_SBE;
+        }
+        // If we have async FFDC then set the current action to be "restart sbe"
+        else if( iv_sbeRegister.asyncFFDC )
+        {
+            SBE_TRACF("main_sbe_handler(): SBE has async FFDC. Setting action to be RESTART_SBE");
             this->iv_currentAction = P10_EXTRACT_SBE_RC::RESTART_SBE;
         }
 
@@ -924,7 +932,7 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
             // to determine why we have failed, if the sbeBooted is true
             if ((this->iv_sbeRegister.currState != SBE_STATE_RUNTIME) && (this->iv_sbeRegister.sbeBooted))
             {
-                if (!i_sbeHalted)
+                if(!i_sbeHalted && !((this->iv_sbeRegister).asyncFFDC))
                 {
                     this->sbe_run_extract_rc();
 
@@ -941,6 +949,15 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
                         errlCommit(dump_errl, SBEIO_COMP_ID);
                     }
 #endif
+                }
+                else
+                {
+                    SBE_TRACF("main_sbe_handler: Skipping extract_rc call because we have asyncFFDC");
+
+                    // Note this call is important, if this is not called we could end up in a
+                    // endless loop because this enforces MAX_SWITCH_SIDE_COUNT and MAX_SIDE_BOOT_ATTEMPTS
+                    this->iv_currentAction = P10_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
+                    this->bestEffortCheck();
                 }
             }
 
