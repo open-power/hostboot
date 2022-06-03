@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -133,13 +133,7 @@ namespace Bootloader{
                 break;
         }
 
-        // Copy values for MMIO BARs
-        g_blData->blToHbData.xscomBAR =
-            ((l_blConfigData->xscomBAR & XSCOM_BAR_MASK) == 0) ?
-                l_blConfigData->xscomBAR :
-                MMIO_GROUP0_CHIP0_XSCOM_BASE_ADDR;
-
-        /* lpcBAR already copied in main() */
+        /* lpcBAR and xscomBAR already copied in main() */
 
         // Only set rest of BlToHbData if SecureROM is valid
         if ( secureRomInfoValid(l_pSecRomInfo) )
@@ -539,10 +533,17 @@ namespace Bootloader{
         // Copy SBE BL shared data into BL HB shared data
         const auto l_blConfigData = reinterpret_cast<BootloaderConfigData_t *>(
                                                               SBE_HB_COMM_ADDR);
+
+        // Copy values for MMIO BARs
         g_blData->blToHbData.lpcBAR
             = ((l_blConfigData->lpcBAR & LPC_BAR_MASK) == 0)
             ? l_blConfigData->lpcBAR
             : MMIO_GROUP0_CHIP0_LPC_BASE_ADDR;
+
+        g_blData->blToHbData.xscomBAR =
+            ((l_blConfigData->xscomBAR & XSCOM_BAR_MASK) == 0) ?
+                l_blConfigData->xscomBAR :
+                MMIO_GROUP0_CHIP0_XSCOM_BASE_ADDR;
 
         g_blData->blToHbData.tpmRc = 0;
         g_blData->blToHbData.tdpSource = TDP_BIT_UNSET;
