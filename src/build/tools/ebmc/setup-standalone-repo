@@ -95,7 +95,7 @@ function checkout_hostboot_level ()
 
 function get_standalone_changes ()
 {
-    ssh -p 29418 hostboot.gerrit gerrit query "(intopic:bmc_standalone_patching) project:hostboot (NOT status:abandoned)" --current-patch-set | grep -E 'change I|subject:'
+    ssh -p 29418 hostboot.gerrit gerrit query "(intopic:bmc_standalone_patching) project:hostboot" --current-patch-set | grep -E 'change I|subject:'
     if [ $? -ne 0 ]; then
         return $?
     fi
