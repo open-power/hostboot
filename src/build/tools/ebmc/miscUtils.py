@@ -33,11 +33,23 @@
 
 
 import os.path   # Used in getLid function
+import os
+import site
 
 # Global variable to hold search directories for the LIDs and in what order to search
-LID_SEARCH_DIRS = [ "/usr/local/share/hostfw/running",     # The BMC patch directory
+# Listed in order of priority, i.e. HOSTBOOT_TRACE_DIR takes highest priority if found, etc.
+LID_SEARCH_DIRS = [ os.getenv('HOSTBOOT_TRACE_DIR'),                    # ENV VAR OVERRIDE
+                    os.path.join(site.USER_BASE, 'hostboot_data'),      # data_files exported from Hostboot
+                    "/usr/local/share/hostfw/running",                  # The BMC patch directory
                     "/var/lib/phosphor-software-manager/hostfw/running" # The BMC running directory
                   ]
+
+# lid_dict is used to allow either lid names or raw file names to be found
+# Users using HOSTBOOT_TRACE_DIR may opt for just copying from development builds, etc.
+lid_dict = {
+    "81e00685.lid" : "hbotStringFile",
+    "81e00686.lid" : "hbicore.syms",
+}
 
 """ Searches the directories in the list 'LID_SEARCH_DIRS' for the given
     input LID file name, lidFileName.
@@ -55,9 +67,17 @@ def getLid(lidFileName):
 
     # Retrieve the LID from the search path, if found
     for path in LID_SEARCH_DIRS:
-        if os.path.exists(path + '/' + lidFileName):
-            lidFileNameWithPath = path + '/' + lidFileName
-            break
+
+        if path: # if ENV VAR does not exist we get None, so need to validate first
+            primary_lid = os.path.join(path, lidFileName)
+            alternate_file = os.path.join(path, lid_dict[lidFileName])
+            if os.path.exists(primary_lid):
+                lidFileNameWithPath = primary_lid
+                break
+            else:
+                if os.path.exists(alternate_file):
+                    lidFileNameWithPath = alternate_file
+                    break
 
     return lidFileNameWithPath
 

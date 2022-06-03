@@ -28,6 +28,23 @@ import os
  Setuptools is an open source package.
  Documentation on setuptools can be found on the web.
 
+ Hostboot Usages:
+
+ Command to run from Hostboot repo:
+   python3 setup.py bdist_wheel
+
+   dist/Hostboot-0.1-py3-none-any.whl will be produced.
+
+   If desired, export PELTOOL_VERSION can be defined
+   to customize the version before running setup.py
+     export PELTOOL_VERSION=6.7.1006
+
+ To install the Hostboot wheel:
+   pip3 install --user Hostboot-0.1.py3-non-any.whl
+
+ If necessary, setup the environment before starting:
+   scl enable rh-python36 "bash"
+
 """
 from setuptools import setup
 
@@ -95,5 +112,7 @@ setup(
     packages        = package_directories.keys(),
     package_dir     = package_directories,
     package_data    = package_data,
+    data_files      = [( 'hostboot_data', ['img/hbotStringFile']),
+                       ( 'hostboot_data', ['img/hbicore.syms'])],
     scripts         = ['src/build/debug/hb-memdump.sh','src/build/trace/tracelite/weave.py'],
 )
