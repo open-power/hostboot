@@ -808,7 +808,7 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                 }
             }
 
-#ifdef CONFIG_BMC_PLDM
+#ifdef CONFIG_PLDM
             if(l_manufacturingMode &&
                 (ERRORLOG::ErrlManager::errlCommittedThisBoot()))
             {
