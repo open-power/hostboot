@@ -149,6 +149,19 @@ def get_captured_warnings_as_string():
     return '\n'.join(parse_warnings)
 
 
+""" Reset the global variables.  These global variables are not being cleared
+    when being called by the peltool which can lead to errors and warnings being
+    propagated to a buffer without any issues.  This can lead to confusion.
+    Not resetting the hash table, hTable, that holds the strings file.  In this case
+    it is advantageous to not reload the data as it is very time consuming and
+    the data is constant.
+"""
+def reset_global_vars():
+    flags = 0
+    parse_errors.clear()
+    parse_warnings.clear()
+
+
 """ Creates string of the header for trace output
 
 @returns: a string of the formatted header
@@ -492,6 +505,10 @@ def trace_adal_print_pipe(bData, oFile, startingPosition, printNumTraces):
           warningMessages: string - a string with warning messages if any encountered
 """
 def get_binary_trace_data_as_string(binaryData, startingPosition, printNumTraces, stringFileName):
+    # Reset the global variables.  Because they don't always get cleared with
+    # subsequent calls to this API and can lead to undesired results.
+    reset_global_vars()
+
     # Default the outgoing string to ""
     traceDataString = ""
 
