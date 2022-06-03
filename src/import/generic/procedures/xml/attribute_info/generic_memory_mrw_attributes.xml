@@ -337,6 +337,9 @@
       ZZ uses normal mode.
       From JEDEC DDR4 Spec 1716.78C from 07-2016
       Page 47 Table 4.9.1
+      
+      Note: DDR5 will use either the NORMAL or DDR5_FINE enum values
+      For DDR5, MR4's settings are set based upon the values of this attribute 
     </description>
     <valueType>uint8</valueType>
     <enum>
@@ -344,7 +347,8 @@
       FIXED_2X = 1,
       FIXED_4X = 2,
       FLY_2X = 5,
-      FLY_4X = 6
+      FLY_4X = 6,
+      DDR5_FINE = 7
     </enum>
     <platInit/>
     <default>NORMAL</default>

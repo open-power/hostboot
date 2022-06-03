@@ -27,28 +27,191 @@
 <attributes>
 
 <!-- MR0 attributes -->
-
-
+  <attribute>
+    <id>ATTR_MEM_BURST_LENGTH</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DRAM burst length
+      Note: OTF in the enums stands for On The Fly. Acronym is used to correspond with JEDEC
+    </description>
+    <mssUnits> nck </mssUnits>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum>BL16 = 0, BC8_OTF = 1, BL32 = 2, BL32_OTF = 3</enum>
+    <writeable/>
+    <mssAccessorName>burst_length</mssAccessorName>
+  </attribute>
 
 <!-- MR2 attributes -->
+  <attribute>
+    <id>ATTR_MEM_MPSM</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DRAM Max Power Saving Mode
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 0, ENABLE = 1</enum>
+    <writeable/>
+    <mssAccessorName>mpsm</mssAccessorName>
+  </attribute>
 
+  <attribute>
+    <id>ATTR_MEM_CS_ASSERT_IN_MPC</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DRAM Chip Select assertion mode for MPC commands
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum>MULTI_CYCLE = 0, SINGLE_CYCLE = 1</enum>
+    <writeable/>
+    <mssAccessorName>cs_assert_in_mpc</mssAccessorName>
+  </attribute>
 
+  <attribute>
+    <id>ATTR_MEM_DEVICE15_MPSM</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DRAM Setting for device 15's Max Power Saving Mode
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 0, ENABLE = 1</enum>
+    <writeable/>
+    <mssAccessorName>device15_mpsm</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_INTERNAL_WR_TIMING_MODE</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DRAM setting to enable or disable internal WR timing offsets
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 0, ENABLE = 1</enum>
+    <writeable/>
+    <mssAccessorName>internal_wr_timing_mode</mssAccessorName>
+  </attribute>
 
 <!-- MR3 attributes -->
-
-
+  <attribute>
+    <id>ATTR_MEM_WL_INTERNAL_CYCLE_ALIGNMENT</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Internal WR cycle alignment 0  ->   0 tck
+                                 0xf -> -15 tck
+      Includes values on a per-Rank, per-DRAM (nibble)
+      ARRAY[DIMM][RANK][DRAM]
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <array>2 4 20</array>
+    <mssAccessorName>wl_internal_cycle_alignment</mssAccessorName>
+  </attribute>
 
 <!-- MR4 attributes -->
-
-
+  <attribute>
+    <id>ATTR_MEM_REF_INTERVAL_RATE_INDIC</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Minimum refresh rate supported
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssAccessorName>ref_rate_indic</mssAccessorName>
+  </attribute>
 
 <!-- MR5 attributes -->
+  <attribute>
+    <id>ATTR_DRAM_PU_DRV_IMP</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DRAM pull up drive impedance
+      ARRAY[DIMM][RANK]
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <enum>OHM_34 = 34, OHM_40 = 40, OHM_48 = 48</enum>
+    <mssUnits> Ohms </mssUnits>
+    <array>2 4</array>
+    <mssAccessorName>dram_pu_drv_imp</mssAccessorName>
+  </attribute>
 
-
+  <attribute>
+    <id>ATTR_DRAM_PD_DRV_IMP</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DRAM pull down drive impedance
+      ARRAY[DIMM][RANK]
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <enum>OHM_34 = 34, OHM_40 = 40, OHM_48 = 48</enum>
+    <mssUnits> Ohms </mssUnits>
+    <array>2 4</array>
+    <mssAccessorName>dram_pd_drv_imp</mssAccessorName>
+  </attribute>
 
 <!-- MR8 attributes -->
+<!-- Note: there is a combined RD/WR preamble attr in ddr4 -->
+<!--     The values are 100% different, so i chose to make a new one -->
+  <attribute>
+    <id>ATTR_DDR5_DRAM_RD_PREAMBLE</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      RD Preamble settings
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <enum>TCK1 = 0, TCK2_OPT1 = 1, TCK2_OPT2 = 2, TCK3 = 3, TCK4 = 4</enum>
+    <mssAccessorName>ddr5_dram_rd_preamble</mssAccessorName>
+  </attribute>
 
+  <attribute>
+    <id>ATTR_DDR5_DRAM_WR_PREAMBLE</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      WR Preamble settings
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <enum>TCK2 = 1, TCK3 = 2, TCK4 = 3</enum>
+    <mssAccessorName>ddr5_dram_wr_preamble</mssAccessorName>
+  </attribute>
 
+  <attribute>
+    <id>ATTR_DDR5_DRAM_RD_POSTAMBLE</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      RD Postamble settings
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <enum>TCK0P5 = 0, TCK1P5 = 1</enum>
+    <mssAccessorName>ddr5_dram_rd_postamble</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_DDR5_DRAM_WR_POSTAMBLE</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      WR Postamble settings
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <enum>TCK0P5 = 0, TCK1P5 = 1</enum>
+    <mssAccessorName>ddr5_dram_wr_postamble</mssAccessorName>
+  </attribute>
 
 <!-- MR10 attributes -->
 
