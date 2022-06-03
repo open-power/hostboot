@@ -1,0 +1,119 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/generic/procedures/xml/error_info/generic_ddr5_mr_error.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2022                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- EKB-Mirror-To: hostboot -->
+
+<!-- -->
+<!-- @file generic_ddr5_mr_error.xml -->
+<!-- @brief Error xml for DDR5 mode registers code -->
+<!-- -->
+
+<!-- *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com> -->
+<!-- *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com> -->
+<!-- *HWP Team: Memory -->
+<!-- *HWP Level: 3 -->
+<!-- *HWP Consumed by: HB:FSP -->
+<!-- -->
+
+<hwpErrors>
+
+<!-- MR0 errors -->
+
+<!-- MR2 errors -->
+
+<!-- MR3 errors -->
+
+<!-- MR4 errors -->
+
+<!-- MR5 errors -->
+
+<!-- MR6 errors -->
+
+<!-- MR8 errors -->
+
+
+
+<!-- MR10 errors -->
+
+
+
+<!-- MR11 errors -->
+
+
+
+<!-- MR12 errors -->
+
+
+
+<!-- MR14 errors -->
+
+
+
+<!-- MR15 errors -->
+
+
+
+<!-- MR32 errors -->
+
+
+
+<!-- MR33 errors -->
+
+
+
+<!-- MR34 errors -->
+
+
+
+<!-- MR35 errors -->
+
+
+
+<!-- MR37 errors -->
+
+
+
+<!-- MR38 errors -->
+
+
+
+<!-- MR39 errors -->
+
+
+
+<!-- MR50 errors -->
+
+
+
+<!-- MR51 errors -->
+
+
+
+<!-- MR52 errors -->
+
+
+
+<!-- MR111 errors -->
+
+</hwpErrors>
