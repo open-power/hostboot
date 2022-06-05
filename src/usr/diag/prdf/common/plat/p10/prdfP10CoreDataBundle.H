@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,8 +52,7 @@ class P10CoreDataBundle : public DataBundle
      * @param i_coreChip The core chip.
      */
     explicit P10CoreDataBundle( ExtensibleChip * i_coreChip ) :
-        iv_L2LDCount(0), iv_L3LDCount(0), iv_prevMember(0xFFFF),
-        iv_coreChip(i_coreChip)
+        iv_L2LDCount(0), iv_L3LDCount(0), iv_coreChip(i_coreChip)
     {
         // Set up thresholds for line deletes.
         iv_L2CETable = new LineDelete::PrdfCacheCETable(
@@ -79,10 +78,6 @@ class P10CoreDataBundle : public DataBundle
     // Current counts for L3 line deletes.
     uint8_t  iv_L3LDCount;
     LineDelete::PrdfCacheCETable * iv_L3CETable;
-
-    // Previously-deleted member data for detecting L3 multi-bitline fails
-    uint16_t iv_prevMember;
-    Timer    iv_blfTimeout;
 
   private:
     ExtensibleChip * iv_coreChip;  ///< This core chip
