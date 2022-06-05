@@ -650,8 +650,6 @@ int32_t L3CE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 
     do
     {
-        uint16_t curMem = 0xFFFF;
-
         p10_l3err_extract_err_data errorAddr =
             { L3ERR_CE_UE, 0, 0, 0, 0, 0 };
 
@@ -673,28 +671,6 @@ int32_t L3CE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
         ldcrffdc.L3errBank    = errorAddr.bank;
         ldcrffdc.L3errSynCol  = errorAddr.syndrome_col;
         ldcrffdc.L3errAddress = errorAddr.real_address_46_57;
-
-        curMem = errorAddr.member;
-
-        // Check for multi-bitline fail
-        Timer curTime = io_sc.service_data->GetTOE();
-        uint16_t prvMem = l_bundle->iv_prevMember;
-
-        if ( prvMem != 0xFFFF && // we have data saved from a previous LD
-             l_bundle->iv_blfTimeout > curTime && // the timer has not expired
-             prvMem != curMem ) // the current fail is on a different bitline
-        {
-            // We have multiple bit lines failing within a 24 hour period
-            // Make this predictive
-            PRDF_INF("[L3CE] HUID: 0x%08x Multi-bitline fail detected", huid);
-            io_sc.service_data->SetErrorSig(PRDFSIG_P10CORE_L3CE_MBF_FAIL);
-            io_sc.service_data->setPredictive();
-            break; // nothing more to do
-        }
-
-        // Update saved bitline data
-        l_bundle->iv_prevMember = curMem;
-        l_bundle->iv_blfTimeout = curTime + Timer::SEC_IN_DAY;
 
         // Increment the CE count and determine if a line delete is needed.
         // IMPORTANT: Yes, we are actually passing the line delete count as the
