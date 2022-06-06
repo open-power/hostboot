@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2021
+# Contributors Listed Below - COPYRIGHT 2010,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -65,6 +65,12 @@ else
         export FAKEROOT=${FAKEROOT:-/opt/rh/devtoolset-8/root}
         export HOST_PREFIX=${HOST_PREFIX:-${FAKEROOT}/usr/bin/}
         export PATH=${FAKEROOT}/usr/bin:${PATH}
+    elif [[ $RED_HAT_DIST == "rh8" ]]; then
+        export RH8_BUILD=1
+        export JAILCMD=""
+        export HOST_BINUTILS_DIR=/opt/mcp/shared/host-binutils-2.31.1/
+        export HOST_PREFIX=/usr/bin/
+        export PATH=/usr/bin:${PATH}
     elif [[ $RED_HAT_DIST == "rh6" ]]; then
         export FAKEROOT=${FAKEROOT:-/opt/mcp/shared/powerpc64-gcc-20150516}
         export HOST_PREFIX=${HOST_PREFIX:-${FAKEROOT}/wrappers/x86_64-pc-linux-gnu-}
