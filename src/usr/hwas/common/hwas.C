@@ -2729,6 +2729,24 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
         HWAS_DBG( "checkMinimumHardware: %d NX chiplets",
                   l_functionalNXChiplets.size());
 
+        // PHYP doesn't acknowledge the NX in the non-core proc in the ioSCM
+        //  so we need to remove them from the list
+        for (auto nx = l_functionalNXChiplets.begin(); nx != l_functionalNXChiplets.end();)
+        {
+            auto proc = getParentChip(*nx);
+            TargetHandleList l_coreList;
+            getCoreChiplets(l_coreList, UTIL_FILTER_CORE_ALL,
+                            UTIL_FILTER_PRESENT, const_cast<Target*>(proc));
+            if (!l_coreList.size())
+            {
+                nx = l_functionalNXChiplets.erase(nx);
+            }
+            else
+            {
+                ++nx;
+            }
+        }
+
         if (l_functionalNXChiplets.empty())
         {
             HWAS_ERR( "Insufficient hardware to continue IPL (NX chiplets)");
