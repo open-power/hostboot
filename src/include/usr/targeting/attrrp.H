@@ -517,9 +517,9 @@ class AttrRP
 
         /**
          * @brief Dumps all of the Hostboot attributes and their values to a
-         * lid file using PLDM
+         * lid file (ATTR_DUMP_LIDID)
          *
-         * @return nullptr on success; non-nullptr on error.
+         * @return nullptr on success; valid error log on error.
          */
         static errlHndl_t dumpAttrs();
 

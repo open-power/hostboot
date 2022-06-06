@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2020
+# Contributors Listed Below - COPYRIGHT 2011,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -59,6 +59,8 @@ HOSTBOOT_SPECIFIC_OBJS += ${DEBUG_OBJS}
 HOSTBOOT_SPECIFIC_OBJS += ${HOSTBOOT_RT_IPL_COMMON_OBJS}
 HOSTBOOT_SPECIFIC_OBJS += namedtarget.o
 HOSTBOOT_SPECIFIC_OBJS += attrcheck_errl.o
+HOSTBOOT_SPECIFIC_OBJS += attrsizesdata.o
+HOSTBOOT_SPECIFIC_OBJS += targAttrIdToName.o
 OBJS += persistrwattrcheck.o
 
 

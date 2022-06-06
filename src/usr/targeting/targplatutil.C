@@ -62,11 +62,16 @@
 // Attribute ID to string name map
 #include <targAttrIdToName.H>
 
+// mutex
+#include <sys/sync.h>
+
 namespace TARGETING
 {
 
 namespace UTIL
 {
+
+mutex_t g_attrNamesMapMutex = MUTEX_INITIALIZER;
 
 void dumpHBAttrs(const uint32_t i_huid)
 {
@@ -775,25 +780,30 @@ const AttrMetadataMapper& getMapMetadataForAllAttributes()
     return theMapAttrMetadata::instance().getMapMetadataForAllAttributes();
 }
 
-const char* getAttrName(const ATTRIBUTE_ID i_attrId, bool i_rwOnly)
+#ifndef __HOSTBOOT_RUNTIME
+const char* getAttrName(const ATTRIBUTE_ID i_attrId, const bool i_rwOnly)
 {
     const char* ret = nullptr;
 
-    // The map may be found in obj/genfiles/targAttrIdToName.H
-    const std::map<uint32_t, const char*>* l_mapPtr = &g_attrIdToNameMap;
+    // The maps may be found in obj/genfiles/targAttrIdToName.H/C
 
-    if(i_rwOnly)
+    mutex_lock(&g_attrNamesMapMutex);
+    // Check the RW first
+    if(g_rwAttrIdToNameMap.count(i_attrId) > 0)
     {
-        l_mapPtr = &g_rwAttrIdToNameMap;
+        ret = g_rwAttrIdToNameMap.at(i_attrId);
     }
-
-    if (l_mapPtr->count(i_attrId) > 0)
+    // Didn't find the attr in RW-only; check the non-RW map
+    if(!i_rwOnly &&
+       (g_nonRwAttrIdToNameMap.count(i_attrId) > 0))
     {
-        ret = l_mapPtr->at(i_attrId);
+        ret = g_nonRwAttrIdToNameMap.at(i_attrId);
     }
+    mutex_unlock(&g_attrNamesMapMutex);
 
     return ret;
 }
+#endif
 
 #undef TARG_NAMESPACE
 #undef TARG_CLASS

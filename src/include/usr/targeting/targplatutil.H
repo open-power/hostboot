@@ -511,7 +511,7 @@ const AttrMetadataMapper& getMapMetadataForAllAttributes();
  *            non-RW attributes)
  * @return The string name of the attribute
  */
-const char* getAttrName(const ATTRIBUTE_ID i_attrId, bool i_rwOnly = false);
+const char* getAttrName(ATTRIBUTE_ID i_attrId, bool i_rwOnly = false);
 
 } // End namespace TARGETING::UTIL
 

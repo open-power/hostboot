@@ -311,14 +311,20 @@ if( !($cfgSrcOutputDir =~ "none") )
     writeTargAttrMap($attributes, $targAttrFile);
     close $targAttrFile;
 
-    open(ATTR_ID_MAP_FILE,">$cfgSrcOutputDir"."targAttrIdToName.H")
-      or croak("Target Attribute ID to Name map file: \"$cfgSrcOutputDir"
+    open(ATTR_ID_MAP_H_FILE,">$cfgSrcOutputDir"."targAttrIdToName.H")
+      or croak("Target Attribute ID to Name map H file: \"$cfgSrcOutputDir"
         . "targAttrIdToName.H\" could not be opened.");
-    my $targAttrIdNameFile = *ATTR_ID_MAP_FILE;
-    writeAttrIdNameFileHeader($targAttrIdNameFile);
-    writeAttrIdNameMap($attributes, $targAttrIdNameFile, 1); # RW-only attr map
-    writeAttrIdNameMap($attributes, $targAttrIdNameFile, 0); # All attr map
-    close $targAttrIdNameFile;
+    my $targAttrIdNameHFile = *ATTR_ID_MAP_H_FILE;
+    writeAttrIdNameHFile($targAttrIdNameHFile);
+    open(ATTR_ID_MAP_C_FILE,">$cfgSrcOutputDir"."targAttrIdToName.C")
+      or croak("Target Attribute ID to Name map C file: \"$cfgSrcOutputDir"
+        . "targAttrIdToName.C\" could not be opened.");
+    my $targAttrIdNameCFile = *ATTR_ID_MAP_C_FILE;
+    wirteAttrIdNameCFileHeader($targAttrIdNameCFile);
+    writeAttrIdNameMap($attributes, $targAttrIdNameCFile, 1); # RW-only attr map
+    writeAttrIdNameMap($attributes, $targAttrIdNameCFile, 0); # All attr map
+    close $targAttrIdNameHFile;
+    close $targAttrIdNameCFile;
 
     open(MUTEX_ATTR_FILE, ">$cfgSrcOutputDir"."mutexattributes.H")
       or croak ("Mutex Attribute file: \"$cfgSrcOutputDir"
@@ -479,11 +485,15 @@ if( !($cfgSrcOutputDir =~ "none") )
     open(ATTR_SIZES_H_FILE, ">$cfgSrcOutputDir"."attrsizesdata.H")
       or croak ("Attribute size file: \"$cfgSrcOutputDir"
         . "attrsizesdata.H\" could not be opened.");
-    my $attrSizesDataFile = *ATTR_SIZES_H_FILE;
-    writeAttrSizesFileHeader($attrSizesDataFile);
-    writeAttrSizesFileBody($attributes, $attrSizesDataFile);
-    writeAttrSizesFileFooter($attrSizesDataFile);
-    close $attrSizesDataFile;
+    my $attrSizesDataHFile = *ATTR_SIZES_H_FILE;
+    writeAttrSizesHFile($attrSizesDataHFile);
+    open(ATTR_SIZES_C_FILE, ">$cfgSrcOutputDir"."attrsizesdata.C")
+      or croak ("Attribute size file: \"$cfgSrcOutputDir"
+        . "attrsizesdata.C\" could not be opened.");
+    my $attrSizesDataCFile = *ATTR_SIZES_C_FILE;
+    writeAttrSizesCFile($attributes, $attrSizesDataCFile, "attrsizesdata.H");
+    close $attrSizesDataHFile;
+    close $attrSizesDataCFile;
 }
 
 use constant ATTRID => 0;
@@ -2390,7 +2400,7 @@ print $outFile <<VERBATIM;
 VERBATIM
 }
 
-sub writeAttrSizesFileHeader
+sub writeAttrSizesHFile
 {
     my ($outFile) = @_;
 
@@ -2451,8 +2461,10 @@ constexpr bool NOT_ARRAY = false;
 
 // Map format:
 // attr hash: {attr data type, attr data size, array or not, array dimensions}
-static std::map<uint32_t, attrSizeData_t>g_attrSizesMap =
-{
+extern std::map<uint32_t, attrSizeData_t>g_attrSizesMap;
+
+} // namespace TARGETING
+#endif // #ifndef TARG_ATTR_SIZES
 VERBATIM
 
 }
@@ -2521,9 +2533,19 @@ sub isSimpleNumericAttribute
                exists $attribute->{simpleType}->{int64_t}));
 }
 
-sub writeAttrSizesFileBody
+sub writeAttrSizesCFile
 {
-    my ($attributes, $outFile) = @_;
+    my ($attributes, $outFile, $hFileName) = @_;
+
+    print $outFile <<VERBATIM;
+#include <$hFileName>
+
+namespace TARGETING
+{
+
+std::map<uint32_t, attrSizeData_t>g_attrSizesMap =
+{
+VERBATIM
 
     foreach my $attribute (@{$attributes->{attribute}})
     {
@@ -2554,19 +2576,8 @@ sub writeAttrSizesFileBody
             print $outFile "    {0x$attrHash, {$dataTypeStr, $dataSizeStr, $isArrayStr, {$dimensionsString}}},\n";
         }
     }
-}
-
-sub writeAttrSizesFileFooter
-{
-    my ($outFile) = @_;
-
-print $outFile <<VERBATIM;
-}; // end of map
-
-} // namespace TARGETING
-#endif // #ifndef TARG_ATTR_SIZES
-
-VERBATIM
+    print $outFile "}; // end of map\n";
+    print $outFile "} // end namespace TARGETING\n";
 }
 
 ###############################################################################
@@ -2650,9 +2661,9 @@ sub writeTargAttrMap {
 }
 
 ###############################################################################
-# Writes code to populate the header of the Attribute Name Map File
+# Writes code to populate the header of the Attribute Name Map H File
 ###############################################################################
-sub writeAttrIdNameFileHeader
+sub writeAttrIdNameHFile
 {
     my ($outFile) = @_;
 
@@ -2661,8 +2672,20 @@ sub writeAttrIdNameFileHeader
 
     # includes
     print $outFile "#include <map>\n\n";
+
+    print $outFile "extern const std::map<uint32_t,const char*>g_nonRwAttrIdToNameMap;\n";
+    print $outFile "extern const std::map<uint32_t,const char*>g_rwAttrIdToNameMap;\n";
 }
 
+###############################################################################
+# Writes code to populate the header of the Attribute Name Map C File
+###############################################################################
+sub wirteAttrIdNameCFileHeader
+{
+    my ($outFile) = @_;
+
+    print $outFile "#include <targAttrIdToName.H>\n\n";
+}
 
 ###############################################################################
 # Writes code to populate Attribute ID to Attribute Name Map File
@@ -2672,7 +2695,7 @@ sub writeAttrIdNameMap
     my($attributes,$outFile,$rwOnly) = @_;
 
     my $attributeIdEnum = getAttributeIdEnumeration($attributes);
-    my $mapName = "g_attrIdToNameMap";
+    my $mapName = "g_nonRwAttrIdToNameMap";
 
     if($rwOnly)
     {
@@ -2681,21 +2704,25 @@ sub writeAttrIdNameMap
     }
     else
     {
-        print $outFile "// g_attrIdToNameMap includes all attributes\n\n";
+        print $outFile "// g_nonRwAttrIdToNameMap includes non-RW attributes\n\n";
     }
 
     # attribute id -> attribute info map
     print $outFile
-        "const static std::map<uint32_t,const char*>$mapName = {\n";
+        "const std::map<uint32_t,const char*>$mapName = {\n";
 
     # loop through every attribute
     foreach my $attribute
         (sort { $a->{id} cmp $b->{id} } @{$attributes->{attribute}})
     {
 
-        # Only want to add writeable attr
-        if ($rwOnly and
-            !(exists $attribute->{writeable}))
+        # Only want to add writeable attr for RW-only map and all others
+        # (non-RW) for the non-RW map
+        if ( ($rwOnly and
+             !(exists $attribute->{writeable}))
+            or
+             (!$rwOnly and
+              (exists $attribute->{writeable})))
         {
             next;
         }
