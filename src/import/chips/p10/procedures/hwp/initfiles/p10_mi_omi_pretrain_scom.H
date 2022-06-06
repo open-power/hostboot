@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,14 +33,14 @@
 
 typedef fapi2::ReturnCode (*p10_mi_omi_pretrain_scom_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_MI>&,
         const fapi2::Target<fapi2::TARGET_TYPE_OMI>&, const fapi2::Target<fapi2::TARGET_TYPE_MCC>&,
-        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>&);
+        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>&, const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
 
 extern "C"
 {
 
     fapi2::ReturnCode p10_mi_omi_pretrain_scom(const fapi2::Target<fapi2::TARGET_TYPE_MI>& TGT0,
             const fapi2::Target<fapi2::TARGET_TYPE_OMI>& TGT1, const fapi2::Target<fapi2::TARGET_TYPE_MCC>& TGT2,
-            const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT3);
+            const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT3, const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT4);
 
 }
 

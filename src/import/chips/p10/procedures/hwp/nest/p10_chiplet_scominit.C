@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -172,7 +172,7 @@ fapi2::ReturnCode p10_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PR
                 fapi2::toString(l_omi_target, l_tgt_str, sizeof(l_tgt_str));
 
                 FAPI_DBG("Invoking p10.mi.omi.pretrain.scom.initfile on target %s...", l_tgt_str);
-                FAPI_EXEC_HWP(l_rc, p10_mi_omi_pretrain_scom, l_mi_target, l_omi_target, l_mcc_target, FAPI_SYSTEM);
+                FAPI_EXEC_HWP(l_rc, p10_mi_omi_pretrain_scom, l_mi_target, l_omi_target, l_mcc_target, FAPI_SYSTEM, i_target);
                 FAPI_TRY(l_rc, "Error from p10.mi.omi.pretrain.scom.initfile");
             }
         }

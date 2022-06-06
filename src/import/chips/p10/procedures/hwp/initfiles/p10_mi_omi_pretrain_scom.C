@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,19 +29,26 @@
 
 using namespace fapi2;
 
+constexpr uint64_t literal_1 = 1;
 constexpr uint64_t literal_0 = 0;
 constexpr uint64_t literal_2 = 2;
 constexpr uint64_t literal_0b1 = 0b1;
-constexpr uint64_t literal_1 = 1;
 constexpr uint64_t literal_0xFFFF = 0xFFFF;
 constexpr uint64_t literal_112 = 112;
 constexpr uint64_t literal_0x7 = 0x7;
 
 fapi2::ReturnCode p10_mi_omi_pretrain_scom(const fapi2::Target<fapi2::TARGET_TYPE_MI>& TGT0,
         const fapi2::Target<fapi2::TARGET_TYPE_OMI>& TGT1, const fapi2::Target<fapi2::TARGET_TYPE_MCC>& TGT2,
-        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT3)
+        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT3, const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT4)
 {
     {
+        fapi2::ATTR_EC_Type   l_chip_ec;
+        fapi2::ATTR_NAME_Type l_chip_id;
+        FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, TGT4, l_chip_id));
+        FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, TGT4, l_chip_ec));
+        fapi2::ATTR_CHIP_EC_FEATURE_SW550353_MEMCNTL_Type l_TGT4_ATTR_CHIP_EC_FEATURE_SW550353_MEMCNTL;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_SW550353_MEMCNTL, TGT4,
+                               l_TGT4_ATTR_CHIP_EC_FEATURE_SW550353_MEMCNTL));
         fapi2::ATTR_CHIP_UNIT_POS_Type l_TGT1_ATTR_CHIP_UNIT_POS;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, TGT1, l_TGT1_ATTR_CHIP_UNIT_POS));
         uint64_t l_def_OMI_POSITION = (l_TGT1_ATTR_CHIP_UNIT_POS % literal_2);
@@ -51,6 +58,36 @@ fapi2::ReturnCode p10_mi_omi_pretrain_scom(const fapi2::Target<fapi2::TARGET_TYP
         fapi2::ATTR_SYS_DISABLE_MCU_TIMEOUTS_Type l_TGT3_ATTR_SYS_DISABLE_MCU_TIMEOUTS;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYS_DISABLE_MCU_TIMEOUTS, TGT3, l_TGT3_ATTR_SYS_DISABLE_MCU_TIMEOUTS));
         fapi2::buffer<uint64_t> l_scom_buffer;
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0xc010c11ull, l_scom_buffer ));
+
+            if ((l_TGT4_ATTR_CHIP_EC_FEATURE_SW550353_MEMCNTL == literal_1))
+            {
+                l_scom_buffer.insert<2, 1, 63, uint64_t>(literal_0 );
+            }
+
+            if ((l_TGT4_ATTR_CHIP_EC_FEATURE_SW550353_MEMCNTL == literal_1))
+            {
+                l_scom_buffer.insert<8, 1, 63, uint64_t>(literal_0 );
+            }
+
+            if ((l_TGT4_ATTR_CHIP_EC_FEATURE_SW550353_MEMCNTL == literal_1))
+            {
+                l_scom_buffer.insert<9, 1, 63, uint64_t>(literal_0 );
+            }
+
+            if ((l_TGT4_ATTR_CHIP_EC_FEATURE_SW550353_MEMCNTL == literal_1))
+            {
+                l_scom_buffer.insert<10, 1, 63, uint64_t>(literal_0 );
+            }
+
+            if ((l_TGT4_ATTR_CHIP_EC_FEATURE_SW550353_MEMCNTL == literal_1))
+            {
+                l_scom_buffer.insert<12, 1, 63, uint64_t>(literal_1 );
+            }
+
+            FAPI_TRY(fapi2::putScom(TGT0, 0xc010c11ull, l_scom_buffer));
+        }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0xc010c13ull, l_scom_buffer ));
 
