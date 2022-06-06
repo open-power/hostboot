@@ -1048,6 +1048,8 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
     fapi2::ATTR_CHIP_EC_FEATURE_HW550549_Type l_hw550549;
     fapi2::ATTR_CHIP_EC_FEATURE_HW555479_Type l_TGT1_ATTR_CHIP_EC_FEATURE_HW555479;
     fapi2::ATTR_CHIP_EC_FEATURE_HW573834_Type l_TGT1_ATTR_CHIP_EC_FEATURE_HW573834;
+    fapi2::ATTR_CHIP_EC_FEATURE_SW550353_MEMCNTL_Type
+    l_TGT1_ATTR_CHIP_EC_FEATURE_SW550353_MEMCNTL;
     fapi2::ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH_Type l_TGT1_ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH;
     fapi2::ATTR_MRW_P1PF_MIN_CONFIDENCE_3_Type l_mrw_adjust_p1pf;
     bool l_adjust_p1pf = false;
@@ -1068,6 +1070,8 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
                            l_TGT1_ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MRW_P1PF_MIN_CONFIDENCE_3, FAPI_SYSTEM, l_mrw_adjust_p1pf));
     l_adjust_p1pf = (l_mrw_adjust_p1pf == fapi2::ENUM_ATTR_MRW_P1PF_MIN_CONFIDENCE_3_TRUE);
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_SW550353_MEMCNTL, i_target,
+                           l_TGT1_ATTR_CHIP_EC_FEATURE_SW550353_MEMCNTL));
 
     if (l_adjust_p1pf)
     {
@@ -1159,6 +1163,22 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
     {
         l_scom_data |= (uint64_t) 0x1 << (64 - (36 + 1));
     }
+
+    if (l_TGT1_ATTR_CHIP_EC_FEATURE_SW550353_MEMCNTL)
+    {
+        //l_scom_data |= (uint64_t) 0x1 << (64 - ( 2 + 1));   MCMODE0_ENABLE_CENTAUR_PERFMON_COMMAND - Skipped because handled by default
+        l_scom_data |= (uint64_t) 0x1 << (64 - ( 8 + 1));   //MCMODE0_ENABLE_EMERGENCY_THROTTLE
+        l_scom_data |= (uint64_t) 0x1 << (64 - ( 9 + 1));   //MCMODE0_ENABLE_CENTAUR_CHECKSTOP_COMMAND
+        l_scom_data |= (uint64_t) 0x1 << (64 - (10 + 1));   //MCMODE0_ENABLE_CENTAUR_TRACESTOP_COMMAND
+        //l_scom_data |= (uint64_t) 0x0 << (12 - (10 + 1));   MCMODE0_DISABLE_MC_SYNC - Skipped because handled by Memory Throttle/Sync Procedure
+
+        //l_scom_mask |= (uint64_t) 0x1 << (64 - ( 2 + 1));   MCMODE0_ENABLE_CENTAUR_PERFMON_COMMAND - Skipped because handled by default
+        l_scom_mask |= (uint64_t) 0x1 << (64 - ( 8 + 1));   //MCMODE0_ENABLE_EMERGENCY_THROTTLE
+        l_scom_mask |= (uint64_t) 0x1 << (64 - ( 9 + 1));   //MCMODE0_ENABLE_CENTAUR_CHECKSTOP_COMMAND
+        l_scom_mask |= (uint64_t) 0x1 << (64 - (10 + 1));   //MCMODE0_ENABLE_CENTAUR_TRACESTOP_COMMAND
+        //l_scom_mask |= (uint64_t) 0x1 << (12 - (10 + 1));   MCMODE0_DISABLE_MC_SYNC - Skipped because handled by Memory Throttle/Sync Procedure
+    }
+
 
     //mask
     l_scom_mask |= (uint64_t) 0x1 << (64 - ( 2 + 1));

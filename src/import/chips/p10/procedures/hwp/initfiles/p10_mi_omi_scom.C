@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,10 +31,11 @@ using namespace fapi2;
 
 constexpr uint64_t literal_0b1 = 0b1;
 constexpr uint64_t literal_0b01111 = 0b01111;
+constexpr uint64_t literal_1 = 1;
+constexpr uint64_t literal_0 = 0;
 constexpr uint64_t literal_0b0001 = 0b0001;
 constexpr uint64_t literal_0b0000000000000000000 = 0b0000000000000000000;
 constexpr uint64_t literal_0b1111111111111111111 = 0b1111111111111111111;
-constexpr uint64_t literal_0 = 0;
 constexpr uint64_t literal_0xFFFF = 0xFFFF;
 constexpr uint64_t literal_112 = 112;
 constexpr uint64_t literal_0x7 = 0x7;
@@ -48,6 +49,9 @@ fapi2::ReturnCode p10_mi_omi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MI>& TG
         fapi2::ATTR_NAME_Type l_chip_id;
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, TGT2, l_chip_id));
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, TGT2, l_chip_ec));
+        fapi2::ATTR_CHIP_EC_FEATURE_SW550353_MEMCNTL_Type l_TGT2_ATTR_CHIP_EC_FEATURE_SW550353_MEMCNTL;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_SW550353_MEMCNTL, TGT2,
+                               l_TGT2_ATTR_CHIP_EC_FEATURE_SW550353_MEMCNTL));
         fapi2::ATTR_MEM_MIRROR_PLACEMENT_POLICY_Type l_TGT1_ATTR_MEM_MIRROR_PLACEMENT_POLICY;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_MIRROR_PLACEMENT_POLICY, TGT1, l_TGT1_ATTR_MEM_MIRROR_PLACEMENT_POLICY));
         fapi2::ATTR_PROC_MEMORY_ENCRYPTION_ENABLED_Type l_TGT2_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED;
@@ -69,6 +73,26 @@ fapi2::ReturnCode p10_mi_omi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MI>& TG
 
             constexpr auto l_MCP_PBI01_SCOMFIR_MCMODE0_ENABLE_CENTAUR_PERFMON_COMMAND_ON = 0x1;
             l_scom_buffer.insert<2, 1, 63, uint64_t>(l_MCP_PBI01_SCOMFIR_MCMODE0_ENABLE_CENTAUR_PERFMON_COMMAND_ON );
+
+            if ((l_TGT2_ATTR_CHIP_EC_FEATURE_SW550353_MEMCNTL == literal_1))
+            {
+                l_scom_buffer.insert<8, 1, 63, uint64_t>(literal_1 );
+            }
+
+            if ((l_TGT2_ATTR_CHIP_EC_FEATURE_SW550353_MEMCNTL == literal_1))
+            {
+                l_scom_buffer.insert<9, 1, 63, uint64_t>(literal_1 );
+            }
+
+            if ((l_TGT2_ATTR_CHIP_EC_FEATURE_SW550353_MEMCNTL == literal_1))
+            {
+                l_scom_buffer.insert<10, 1, 63, uint64_t>(literal_1 );
+            }
+
+            if ((l_TGT2_ATTR_CHIP_EC_FEATURE_SW550353_MEMCNTL == literal_1))
+            {
+                l_scom_buffer.insert<12, 1, 63, uint64_t>(literal_0 );
+            }
 
             if ((l_TGT1_ATTR_MEM_MIRROR_PLACEMENT_POLICY == fapi2::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED))
             {
