@@ -1,0 +1,171 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/generic/procedures/xml/attribute_info/generic_memory_ddr5_eff_attributes.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2022                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- EKB-Mirror-To: hostboot -->
+
+<!-- -->
+<!-- @file generic_memory_ddr5_eff_attributes.xml -->
+<!-- @brief Calculated effective attribute definitions that are derived from DDR5 SPD -->
+<!-- -->
+<!-- *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com> -->
+<!-- *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com> -->
+<!-- *HWP Team: Memory -->
+<!-- *HWP Level: 2 -->
+<!-- *HWP Consumed by: HB:FSP -->
+<!-- -->
+
+<attributes>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_DDR5_TX_SLEW_RISE_DQ</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Pull-up slew rate control for DBYTE transmitter.
+      Valid values are 0-255
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssAccessorName>ddr5_tx_slew_rise_dq</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_DDR5_TX_SLEW_FALL_DQ</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Pull-down slew rate control for DBYTE transmitter.
+      Valid values are 0-255
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssAccessorName>ddr5_tx_slew_fall_dq</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_DDR5_TX_SLEW_RISE_AC</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Pull-up slew rate control for CAC transmitters.
+      Valid values are 0-255
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssAccessorName>ddr5_tx_slew_rise_ac</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_DDR5_TX_SLEW_FALL_AC</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Pull-down slew rate control for CAC transmitters.
+      Valid values are 0-255
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssAccessorName>ddr5_tx_slew_fall_ac</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_DDR5_TX_SLEW_RISE_CK</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Pull-up slew rate control for clock.
+      Valid values are 0-255
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssAccessorName>ddr5_tx_slew_rise_ck</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_DDR5_TX_SLEW_FALL_CK</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Pull-down slew rate control for clock.
+      Valid values are 0-255
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssAccessorName>ddr5_tx_slew_fall_ck</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_DDR5_REDUNDANT_CS_EN</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Enable redundant CS for UDIMM.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssAccessorName>ddr5_redundant_cs_en</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_DDR5_RXEN_ADJ</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Offset to apply at the end of RxEn training (in fine steps).
+      Signed value: if bit 0 == '1' value is negative
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssAccessorName>ddr5_rxen_adj</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_DDR5_WL_ADJ_START</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Offset to apply before internal WL (in fine steps).
+      WL_ADJ_START is subtracted from the TxDqsDly value found after
+      external WL, to be used as the starting point for internal WL.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssAccessorName>ddr5_wl_adj_start</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_DDR5_WL_ADJ_END</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Offset to apply after internal WL (in fine steps).
+      WL_ADJ_END is added to the TxDqsDly value found after
+      internal WL, to be used as the final value.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssAccessorName>ddr5_wl_adj_end</mssAccessorName>
+  </attribute>
+
+</attributes>
