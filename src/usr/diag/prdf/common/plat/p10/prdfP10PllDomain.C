@@ -121,6 +121,7 @@ bool PllDomain::Query(ATTENTION_TYPE i_attnType)
 
 //------------------------------------------------------------------------------
 
+#ifdef __HOSTBOOT_MODULE
 // Helper function for RCS/PLL clock callouts. For systems where the clocks are
 // configured as integrated spares (like redundant clocks, but the customer is
 // unaware the spare exists), we will prevent a service action and log the
@@ -146,6 +147,7 @@ void __clearServiceCallForIntegratedSpare(STEP_CODE_DATA_STRUCT& io_sc)
 
     #endif
 }
+#endif
 
 //------------------------------------------------------------------------------
 
