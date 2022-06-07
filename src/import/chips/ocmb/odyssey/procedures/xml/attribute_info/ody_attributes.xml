@@ -85,4 +85,700 @@
         <mrwHide/>
         <mssAccessorName>draminit_training_timeout</mssAccessorName>
     </attribute>
+
+    <!-- phyinit structure inputs section below -->
+
+    <attribute>
+        <id>ATTR_MEM_EFF_ARDPTRINITVAL</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Initial pointer separation for the free-running FIFOs in the
+            DBYTE and ACX4 macros, in units of UI. Legal values are 0-10.
+        </description>
+        <valueType>uint8</valueType>
+        <default>3</default>
+        <writeable/>
+        <mssAccessorName>ardptrinitval</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_ARDPTRINITVALOVR</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Set this to 1 if the ARdPtrInitVal should be overriden via
+            userInput.
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            NO_OVERRIDE = 0,
+            OVERRIDE    = 1
+        </enum>
+        <default>NO_OVERRIDE</default>
+        <writeable/>
+        <mssAccessorName>ardptrinitvalovr</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_DIS_PTRINITCLR_TXTRACKING</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Whether to disable PtrInit from clearing the TxTrkState csr
+            during skip retrain.
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            DO_NOT_CLEAR     = 0,
+            CLEAR_TXTRKSTATE = 1
+        </enum>
+        <default>DO_NOT_CLEAR</default>
+        <writeable/>
+        <mssAccessorName>dis_ptrinitclr_txtracking</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_EXTCALRESVAL</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Indicates value of impedance calibration pull-down resistor
+            connected to BP_ZN pin of the Odyssey PHY.
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            40_OHM  = 40,
+            120_OHM = 120,
+            240_OHM = 240
+        </enum>
+        <default>240_OHM</default>
+        <writeable/>
+        <mssAccessorName>extcalresval</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_MEMALERTEN</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Indicate how the ERR/ALERT signal (which communicates feedback
+            such as an address/command parity error) should be accommodated.
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            DISABLE = 0,
+            ENABLE  = 1
+        </enum>
+        <default>DISABLE</default>
+        <writeable/>
+        <mssAccessorName>memalerten</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_PHY_MSTRTRAIN_INTERVAL</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Time between the end of one training step and the start of the
+            next. It is the max expected time from dfi_init_complete
+            asserted to tdfi_phymstr_ack asserted.
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            DISABLE          = 0,
+            524288_MEMCLK    = 1,
+            1048576_MEMCLK   = 2,
+            2097152_MEMCLK   = 3,
+            4194304_MEMCLK   = 4,
+            8388608_MEMCLK   = 5,
+            16777216_MEMCLK  = 6,
+            33554432_MEMCLK  = 7,
+            67108864_MEMCLK  = 8,
+            134217728_MEMCLK = 9,
+            268435456_MEMCLK = 10,
+            8192_MEMCLK      = 14
+        </enum>
+        <default>DISABLE</default>
+        <writeable/>
+        <mssAccessorName>phy_mstrtrain_interval</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_PHY_MSTRMAXREQTOACK</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Max time from tdfi_phymstr_req asserted to tdfi_phymstr_ack
+            asserted.
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            DISABLE     = 0,
+            512_MEMCLK  = 1,
+            1024_MEMCLK = 2,
+            2048_MEMCLK = 3,
+            4096_MEMCLK = 4,
+            8192_MEMCLK = 5
+        </enum>
+        <default>DISABLE</default>
+        <writeable/>
+        <mssAccessorName>phy_mstrmaxreqtoack</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_PHY_MSTRCTRLMODE</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Phy Master Control Mode
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            INITIATE_BY_TIMER       = 0,
+            INITIATE_BY_DFI_CTRLMSG = 1
+        </enum>
+        <default>INITIATE_BY_TIMER</default>
+        <writeable/>
+        <mssAccessorName>phy_mstrctrlmode</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_PHY_CALINTERVAL</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            The interval between successive PHY impedance calibrations.
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            CONTINUOUS = 0,
+            13_US      = 1,
+            100_US     = 2,
+            1_MS       = 3,
+            2_MS       = 4,
+            3_MS       = 5,
+            4_MS       = 6,
+            8_MS       = 7,
+            10_MS      = 8,
+            20_MS      = 9
+        </enum>
+        <default>3_MS</default>
+        <writeable/>
+        <mssAccessorName>phy_calinterval</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_PHY_CALONCE</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Selects the behaviour of CSR CalRun. CALINTERVAL
+            causes calibration to be initiated at the CALINTERVAL
+            interval. CALRUN causes it to be run once each time
+            CALRUN transitions from 0 to 1.
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            CALINTERVAL = 0,
+            CALRUN      = 1
+        </enum>
+        <default>CALINTERVAL</default>
+        <writeable/>
+        <mssAccessorName>phy_calonce</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_IS_HIGHVDD</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            When VDD=0.9V nominal, set this to 1'b1, otherwise set
+            to 1'b0. This input is used to program TxSlewRate[8] and
+            ATxSlewRate[9].
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            NOT_0P9_VDD = 0,
+            0P9_VDD     = 1
+        </enum>
+        <default>0P9_VDD</default>
+        <writeable/>
+        <mssAccessorName>phy_is_highvdd</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_EN_TDQS2DQ_TRACKING</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Enable tracking of tDQS2DQ.
+            Array[RANK]
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            DISABLE = 0,
+            ENABLE  = 1
+        </enum>
+        <default>DISABLE</default>
+        <writeable/>
+        <array>4</array>
+        <mssAccessorName>phy_en_tdqs2dq_tracking</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_DQS_OSC_RUNTIME_SEL</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            DQS oscillator interval timer (in MEMCLK).
+            Must match the value programmed to the MR for DQS
+            oscillator interval timer.
+        </description>
+        <valueType>uint16</valueType>
+        <enum>
+            256_MEMCLK  = 256,
+            512_MEMCLK  = 512,
+            1024_MEMCLK = 1024,
+            2048_MEMCLK = 2048,
+            4096_MEMCLK = 4096,
+            8192_MEMCLK = 8192,
+        </enum>
+        <default>256_MEMCLK</default>
+        <writeable/>
+        <mssAccessorName>phy_dqs_osc_runtime_sel</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_EN_RXDQS_TRACKING</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Enable tracking of the incoming read DQS to modify the
+            read gate timing.
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            DISABLE = 0,
+            ENABLE  = 1
+        </enum>
+        <default>DISABLE</default>
+        <writeable/>
+        <mssAccessorName>phy_en_rxdqs_tracking</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_DISABLE_PMU_ECC</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Disables ARC Microcontroller ECC.
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            ENABLE  = 0,
+            DISABLE = 1
+        </enum>
+        <default>ENABLE</default>
+        <writeable/>
+        <mssAccessorName>phy_disable_pmu_ecc</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_ENABLE_MALERT_ASYNC</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Enables Async Path from MALERT_N to dfi_alert_n.
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            DISABLE = 0,
+            ENABLE  = 1
+        </enum>
+        <default>DISABLE</default>
+        <writeable/>
+        <mssAccessorName>phy_enable_malert_async</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_ALERT_RECOV_ENABLE</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Enables logic that disables/resets RxTracking during
+            an Alert.
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            DISABLE = 0,
+            ENABLE  = 1
+        </enum>
+        <default>DISABLE</default>
+        <writeable/>
+        <mssAccessorName>phy_alert_recov_enable</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_RST_RXTRK_STATE</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Controls Async Path from MALERT_N to dfi_alert_n.
+            Controls whether an alert will SUSPEND RxTracking until
+            the next ctrlupd or an alert will RESET RxTracking state
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            SUSPEND = 0,
+            RESET   = 1
+        </enum>
+        <default>SUSPEND</default>
+        <writeable/>
+        <mssAccessorName>phy_rst_rxtrk_state</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_SIM_TDQS2DQ</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            DQ to DQS offset (tDQS2DQ, in integer number of ps) for sim.
+        </description>
+        <valueType>uint16</valueType>
+        <default>0</default>
+        <writeable/>
+        <mssAccessorName>sim_tdqs2dq</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_SIM_TDQSCK</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            DRAM DQS device delay value (tDQSCK, in integer number of ps)
+            for sim.
+        </description>
+        <valueType>uint16</valueType>
+        <default>0</default>
+        <writeable/>
+        <mssAccessorName>sim_tdqsck</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_SIM_TSTAOFF</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            RCD clock delay (integer number of ps) for sim.
+        </description>
+        <valueType>uint16</valueType>
+        <default>0</default>
+        <writeable/>
+        <mssAccessorName>sim_tstaoff</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_SIM_TPDM</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            LRDIMM data buffer delay (in integer number of ps) for sim.
+        </description>
+        <valueType>uint16</valueType>
+        <default>0</default>
+        <writeable/>
+        <mssAccessorName>sim_tpdm</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_SIM_TCASL_OVERRIDE</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Disables automatically calculating userInputSim->tCASL_add
+            (for sim).
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            OVERRIDE    = 0,
+            NO_OVERRIDE = 1
+        </enum>
+        <default>NO_OVERRIDE</default>
+        <writeable/>
+        <mssAccessorName>sim_tcasl_override</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_SIM_TCASL_ADD</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            CAS latency added value for sim mode.
+            userInputSim->tCASL_add (for sim).
+            Valid only if ATTR_ODY_SIM_TCASL_OVERRIDE is set.
+            Array[RANK]
+        </description>
+        <valueType>uint16</valueType>
+        <default>0</default>
+        <array>4</array>
+        <writeable/>
+        <mssAccessorName>sim_tcasl_add</mssAccessorName>
+    </attribute>
+
+    <!-- end phyinit structure inputs section -->
+
+    <!-- draminit structure (message block) inputs section below -->
+
+    <attribute>
+        <id>ATTR_ODY_ADV_TRAIN_OPT</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Advanced training options for DDR5 training.
+            AdvTrainOpt[7:0] in the message block structure.
+        </description>
+        <valueType>uint8</valueType>
+        <default>0</default>
+        <writeable/>
+        <mssAccessorName>phy_adv_train_opt</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_MSG_MISC</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Misc training options for DDR5 training.
+            MsgMisc[7:0] in the message block structure.
+        </description>
+        <valueType>uint8</valueType>
+        <default>0</default>
+        <writeable/>
+        <mssAccessorName>phy_msg_misc</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_PLL_BYPASS_EN</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Select if the PHY uses PLL bypass.
+            PllBypassEn in the message block structure.
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            USE_PHY_PLL  = 0,
+            PLL_BYPASSED = 1
+        </enum>
+        <default>USE_PHY_PLL</default>
+        <writeable/>
+        <mssAccessorName>phy_pll_bypass_en</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_RX2D_DFE_MISC</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Extra option for RX2D when DFE is set.
+            RX2D_DFE_Misc in the message block structure.
+        </description>
+        <valueType>uint8</valueType>
+        <default>0</default>
+        <writeable/>
+        <mssAccessorName>phy_rx2d_dfe_misc</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_D5MISC</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            DFI options for DDR5 training.
+            D5Misc in the message block structure.
+        </description>
+        <valueType>uint8</valueType>
+        <default>0x41</default>
+        <writeable/>
+        <mssAccessorName>phy_d5misc</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_WL_ADJ</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Offset to apply at the end of Write-Leveling (in fine steps).
+            Signed value: if bit 0 == '1' value is negative.
+        </description>
+        <valueType>uint8</valueType>
+        <default>0</default>
+        <writeable/>
+        <mssAccessorName>phy_wl_adj</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_SEQUENCE_CTRL</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Training step enables for DDR5 training.
+            SequenceCtrl in the message block structure.
+            Note that RCD_CSCA is only valid for RDIMM and will
+            be disabled by the procedures on a UDIMM.
+        </description>
+        <valueType>uint16</valueType>
+        <default>0xFFFF</default>
+        <writeable/>
+        <mssAccessorName>phy_sequence_ctrl</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_PHY_CFG</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            PHY config settings for DDR5 training.
+            PhyCfg in the message block structure.
+        </description>
+        <valueType>uint8</valueType>
+        <default>0x3D</default>
+        <writeable/>
+        <mssAccessorName>phy_cfg</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_PHY_DFIMRL_MARGIN</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Margin added to the smallest passing trained DFI Max Read
+            Latency value, in units of DFI clocks. Recommended to be
+            >= 1.
+            DFIMRLMargin in the message block structure.
+        </description>
+        <valueType>uint8</valueType>
+        <default>0x01</default>
+        <writeable/>
+        <mssAccessorName>dfimrl_margin</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_PHY_USE_BROADCAST_MR</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Set whether or not per rank MR values are used.
+            UseBroadcastMR in the message block structure.
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            USE_PER_RANK_VALUES  = 0,
+            USE_BROADCAST_VALUES = 1
+        </enum>
+        <default>USE_PER_RANK_VALUES</default>
+        <writeable/>
+        <mssAccessorName>phy_use_broadcast_mr</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_PHY_DISABLED_DBYTE</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Bitmap to indicate which Dbytes are not connected (for DByte
+            0 to 7). Set DisabledDbyte[i] to 1 to specify that DByte i
+            does not need to be trained (DByte 8 and 9 can be disabled
+            via EnabledDQs setting).
+            DisabledDbyte in the message block structure.
+        </description>
+        <valueType>uint8</valueType>
+        <default>0x00</default>
+        <writeable/>
+        <mssAccessorName>disabled_dbyte</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_PHY_CA_TRAIN_OPTIONS</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            CA training options (bit 0 on the left):
+            [7] Enable RDIMM/LRDIMM 2D CA training (UDIMM: RFU, must be zero)
+            [6] Enable RDIMM/LRDIMM CA DFE training (UDIMM: RFU, must be zero)
+            [4:5] step size for CS and CA training: 0 -> 1, 1 -> 2, 2 -> 4, 3 -> 8
+            [3] Set to 1 to Skip CA13 during CA training
+            [2] Enable RDIMM/LRDIMM 2D CS training (UDIMM: RFU, must be zero)
+            [1] RFU, must be zero
+            [0] Use multiple patterns during CA training
+            CATrainOpt in the message block structure.
+        </description>
+        <valueType>uint8</valueType>
+        <default>0x80</default>
+        <writeable/>
+        <mssAccessorName>ca_train_options</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_PHY_TX2D_DFE_MISC</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            TX2D DFE training options (bit 0 on the left):
+            [6:7] Number of TAP to train, minus one
+            [4:5] Delta to use when iterating TAP BiasStep from min to max
+            [2:3] StepSize used for Voltage, 2^StepSize will be used
+            [0:1] StepSize used for Delay, 2^StepSize will be used
+            TX2D_DFE_Misc in the message block structure.
+        </description>
+        <valueType>uint8</valueType>
+        <default>0x01</default>
+        <writeable/>
+        <mssAccessorName>tx2d_dfe_misc</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_PHY_RX2D_TRAIN_OPT</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            RX2D training options (bit 0 on the left):
+            [7] Set to 1 to run rx2D with DFE
+            [5:6] Voltage Step Size (2^n)
+            [3:4] Delay Step Size (2^n)
+            [2] Voltage Step Size Multiplier
+            [1] Delay Step Size Multiplier
+            [0] RFU, must be zero
+            RX2D_TrainOpt in the message block structure.
+        </description>
+        <valueType>uint8</valueType>
+        <default>0x01</default>
+        <writeable/>
+        <mssAccessorName>rx2d_train_opt</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_PHY_TX2D_TRAIN_OPT</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            TX2D training options (bit 0 on the left):
+            [7] Set to 1 to run tx2D with DFE
+            [5:6] Voltage Step Size (2^n)
+            [3:4] Delay Step Size (2^n)
+            [2] Voltage Step Size Multiplier
+            [1] Delay Step Size Multiplier
+            [0] RFU, must be zero
+            TX2D_TrainOpt in the message block structure.
+        </description>
+        <valueType>uint8</valueType>
+        <default>0x01</default>
+        <writeable/>
+        <mssAccessorName>tx2d_train_opt</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_PHY_CONFIG_OVERRIDE</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Override for PhyConfig CSR, or set to 0 to use the
+            CSR value.
+            PhyConfigOverride in the message block structure.
+        </description>
+        <valueType>uint16</valueType>
+        <default>0x0000</default>
+        <writeable/>
+        <mssAccessorName>phy_config_override</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_PHY_ENABLED_DQ_CHA</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Total number of DQ bits enabled in PHY Channel A.
+            EnabledDQsChA in the message block structure.
+        </description>
+        <valueType>uint8</valueType>
+        <default>0x00</default>
+        <writeable/>
+        <mssAccessorName>phy_enabled_dq_cha</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_PHY_ENABLED_DQ_CHB</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Total number of DQ bits enabled in PHY Channel B.
+            EnabledDQsChB in the message block structure.
+        </description>
+        <valueType>uint8</valueType>
+        <default>0x00</default>
+        <writeable/>
+        <mssAccessorName>phy_enabled_dq_chb</mssAccessorName>
+    </attribute>
+
+    <!-- end draminit structure (message block) inputs section -->
+
 </attributes>
