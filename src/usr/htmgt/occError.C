@@ -190,6 +190,8 @@ namespace HTMGT
                 // Add callout information
                 const uint8_t l_max_callouts = l_occElog->maxCallouts;
                 bool l_bad_fru_data = false;
+                bool l_sensor_callout_found = false;
+                bool l_sensor_callout_invalid = true;
                 uint8_t numCallouts = 0;
                 uint8_t calloutIndex = 0;
                 while (calloutIndex < l_max_callouts)
@@ -198,6 +200,10 @@ namespace HTMGT
                         l_occElog->callout[calloutIndex];
                     if (callout.type != 0)
                     {
+                        if (callout.type == OCC_CALLOUT_TYPE_SENSOR)
+                        {
+                            l_sensor_callout_found = true;
+                        }
                         HWAS::callOutPriority priority;
                         bool l_success = true;
                         l_success = elogXlateSrciPriority(callout.priority,
@@ -208,7 +214,15 @@ namespace HTMGT
                                                        priority,
                                                        callout,
                                                        numCallouts);
-                            if (l_success == false)
+                            if (l_success)
+                            {
+                                if (callout.type == OCC_CALLOUT_TYPE_SENSOR)
+                                {
+                                    // Got at least one good sensor callout
+                                    l_sensor_callout_invalid = false;
+                                }
+                            }
+                            else
                             {
                                 l_bad_fru_data = true;
                             }
@@ -264,8 +278,15 @@ namespace HTMGT
                               ERRORLOG::ERRL_SEV_INFORMATIONAL);
                     ERRORLOG::errlCommit(err2, HTMGT_COMP_ID);
                 }
-                // Check callout number and severity
-                if ((numCallouts == 0) &&
+
+                bool l_addProcCallout = false;
+                if (l_sensor_callout_found && l_sensor_callout_invalid)
+                {
+                    // OCC called out sensor, but no valid sensors found so add proc callout
+                    l_addProcCallout = true;
+                }
+
+                if ((numCallouts == 0) ||
                     (severity != ERRORLOG::ERRL_SEV_INFORMATIONAL))
                 {
                     if (i_source == OCC_ERRSRC_405)
@@ -291,16 +312,22 @@ namespace HTMGT
                     }
                     else
                     {
-                        // Add Processor callout for PGPE/XGPE/QME
-                        TMGT_ERR("occProcessElog: Adding processor callout for"
-                                 " OCC%d", iv_instance);
-                        TARGETING::ConstTargetHandle_t l_proc_target =
-                            TARGETING::getParentChip(iv_target);
-                        l_errlHndl->addHwCallout(l_proc_target,
-                                                 HWAS::SRCI_PRIORITY_MED,
-                                                 HWAS::NO_DECONFIG,
-                                                 HWAS::GARD_NULL);
+                        // Add processor callout for PM code logs with not callout
+                        l_addProcCallout = true;
                     }
+                }
+
+                if (l_addProcCallout)
+                {
+                    // Add Processor callout for PGPE/XGPE/QME
+                    TMGT_ERR("occProcessElog: Adding processor callout for"
+                             " OCC%d", iv_instance);
+                    TARGETING::ConstTargetHandle_t l_proc_target =
+                        TARGETING::getParentChip(iv_target);
+                    l_errlHndl->addHwCallout(l_proc_target,
+                                             HWAS::SRCI_PRIORITY_MED,
+                                             HWAS::NO_DECONFIG,
+                                             HWAS::GARD_NULL);
                 }
 
                 if (int_flags_set(FLAG_HALT_ON_OCC_SRC))
@@ -465,6 +492,7 @@ namespace HTMGT
             {
                 TMGT_ERR("elogAddCallout: Unable to find target for "
                          "sensor 0x%04X", sensor);
+                l_success = false;
             }
         }
         else if (i_callout.type == OCC_CALLOUT_TYPE_COMPONENT_ID)
