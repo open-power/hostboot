@@ -1034,10 +1034,8 @@ errlHndl_t cacheRemoteFruVpd()
        alignment */
     const auto fru_table_len = ALIGN_4(table_metadata.fru_table_length + sizeof(uint32_t));
 
-    std::unique_ptr<uint8_t, decltype(&free)>
-        table_ptr(static_cast<uint8_t*>(malloc(fru_table_len)), free);
-
-    errl = getFruRecordTable(fru_table_len, table_ptr.get() );
+    std::vector<uint8_t> fru_table;
+    errl = getFruRecordTable(fru_table_len, fru_table);
     if(errl) { break; }
 
     static const bool CACHE_VPD = true;
@@ -1157,9 +1155,12 @@ errlHndl_t cacheRemoteFruVpd()
         {
             uint16_t records_in_set = 0;
             std::vector<uint8_t> device_fru_records;
-            PLDM::getRecordSetByIdAndType(table_ptr.get(), table_metadata.total_table_records,
-                                          device_rsi, map_entry.fru_record_type,
-                                          device_fru_records, records_in_set);
+            PLDM::getRecordSetByIdAndType(fru_table.data(),
+                                          table_metadata.total_table_records,
+                                          device_rsi,
+                                          map_entry.fru_record_type,
+                                          device_fru_records,
+                                          records_in_set);
 
             if(device_fru_records.empty() ||
                records_in_set == 0)

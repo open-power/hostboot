@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,6 +71,6 @@ errlHndl_t getFruRecordTableMetaData(
  * @return returns error log if error occurs, otherwise returns nullptr
  */
 errlHndl_t getFruRecordTable(size_t i_table_buffer_len,
-                             uint8_t* o_table_buffer);
+                             std::vector<uint8_t>& o_table_buffer);
 }
 #endif
