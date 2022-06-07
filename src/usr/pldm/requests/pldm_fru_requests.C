@@ -171,7 +171,7 @@ errlHndl_t getFruRecordTableMetaData(pldm_get_fru_record_table_metadata_resp & o
 }
 
 errlHndl_t getFruRecordTable(const size_t i_table_buffer_len,
-                             uint8_t * o_table_buffer)
+                             std::vector<uint8_t>& o_table_buffer)
 {
     errlHndl_t errl = nullptr;
     do
@@ -196,6 +196,9 @@ errlHndl_t getFruRecordTable(const size_t i_table_buffer_len,
         break;
     }
 
+    o_table_buffer.clear();
+    o_table_buffer.resize(response_bytes.size());
+
     pldm_get_fru_record_table_resp response = { };
     size_t table_data_len = 0;
 
@@ -205,7 +208,7 @@ errlHndl_t getFruRecordTable(const size_t i_table_buffer_len,
                              &response.completion_code,
                              &response.next_data_transfer_handle,
                              &response.transfer_flag,
-                             o_table_buffer,
+                             o_table_buffer.data(),
                              &table_data_len);
 
     if(errl)
@@ -213,6 +216,8 @@ errlHndl_t getFruRecordTable(const size_t i_table_buffer_len,
         PLDM_ERR("decode_get_fru_record_table_resp failed see error log");
         break;
     }
+
+    o_table_buffer.resize(table_data_len);
 
     /*@
       * @errortype
@@ -290,8 +295,9 @@ errlHndl_t getFruRecordTable(const size_t i_table_buffer_len,
 
     /* Calculate the CRC32 on the table data excluding the last 4 bytes which
        contains the CRC32 we will compare our result against.*/
-    auto actual_crc = crc32(o_table_buffer, table_data_len - 4);
-    auto expected_crc = le32toh(*reinterpret_cast<uint32_t *>(o_table_buffer + table_data_len - 4));
+    const auto actual_crc = crc32(o_table_buffer.data(), table_data_len - 4);
+    const auto expected_crc =
+        le32toh(*reinterpret_cast<uint32_t *>(o_table_buffer.data() + table_data_len - 4));
 
     /*@
       * @errortype
@@ -311,7 +317,9 @@ errlHndl_t getFruRecordTable(const size_t i_table_buffer_len,
         break;
     }
 
-    TRACFBIN( PLDM::g_trac_pldm,"Table Buffer:", o_table_buffer, i_table_buffer_len);
+    TRACFBIN(PLDM::g_trac_pldm,"Table Buffer:",
+             o_table_buffer.data(),
+             o_table_buffer.size());
 
     }while(0);
 
