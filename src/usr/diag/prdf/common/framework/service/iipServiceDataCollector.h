@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -94,6 +94,9 @@ PRDF_GARD_POLICY_MAP_END
 #include <prdfExtensibleChip.H>
 #include <iipstep.h>
 
+#include <memory>
+#include <prdfBufferStream.H>
+
 namespace PRDF
 {
 
@@ -138,6 +141,62 @@ struct SignatureList
 };
 
 typedef std::vector<SignatureList> PRDF_SIGNATURES;
+
+#ifdef __HOSTBOOT_MODULE
+using errlsubsec_t = ERRORLOG::errlsubsec_t;
+using errlver_t = ERRORLOG::errlver_t;
+#endif
+
+/**
+ * @brief Container class for FFDC data structures. This extends the
+ *        BufferWriteStream class by managing the buffer in memory.
+ */
+class FfdcBuffer : public BufferWriteStream
+{
+  public:
+    /**
+     * @brief Constructor from components.
+     * @param i_subsection PEL user data subsection ID.
+     * @param i_version    PEL user data subsection version.
+     * @param i_bufferSize The buffer size (in bytes).
+     * @post  Users should check good() to ensure the buffer is valid.
+     */
+    FfdcBuffer(errlsubsec_t i_subsection, errlver_t i_version,
+               size_t i_bufferSize) :
+        BufferWriteStream{new uint8_t[i_bufferSize], i_bufferSize},
+        iv_subsection(i_subsection), iv_version(i_version)
+    {
+        memset(iv_buffer, 0x00, i_bufferSize);
+    }
+
+    /** @brief Destructor. */
+    ~FfdcBuffer()
+    {
+        // Even though this is a parent class variable, we need to delete it
+        // since the data was allocated in this constructor.
+        delete[] iv_buffer;
+    }
+
+    /** @brief Copy constructor. */
+    FfdcBuffer(const FfdcBuffer&) = delete;
+
+    /** @brief Assignment operator. */
+    FfdcBuffer& operator=(const FfdcBuffer&) = delete;
+
+  private:
+    /** PEL user data subsection ID. */
+    errlsubsec_t iv_subsection;
+
+    /** PEL user data subsection version. */
+    errlver_t iv_version;
+
+  public:
+    /**
+     * @brief Adds the FFDC data to the given log.
+     * @param i_errl The target PEL (error log).
+     */
+    void log(errlHndl_t i_errl) const;
+};
 
 //--------------------------------------------------------------------
 //  Forward References
@@ -342,6 +401,14 @@ public:
      * @Return TraceArray Data
      */
     CaptureData & getTraceArrayData() {return iv_traceArrayData;}
+
+    /**
+     * @brief Get access to the FFDC list.
+     */
+    std::vector<std::shared_ptr<FfdcBuffer>>& getFfdc()
+    {
+        return iv_ffdc;
+    }
 
   /**
    Add a mru to the Callout list
@@ -780,6 +847,9 @@ private:  // Data
 
   ErrorSignature     error_signature;
   CaptureData        captureData;
+
+    /** A list of data structures containing FFDC for an error log. */
+    std::vector<std::shared_ptr<FfdcBuffer>> iv_ffdc;
 
   // This is used to hold L2/L3/NX trace array data.
   // We need to separate this out from above scom
