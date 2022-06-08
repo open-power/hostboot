@@ -75,6 +75,15 @@ namespace HTMGT
         {
             check_reset_count();
         }
+        else
+        {
+            // OCCs were started, so clear Safe Mode
+            TMGT_INF("processOccStartStatus: System was in Safe Mode, but OCCs "
+                     "were started.  Clearing Safe Mode");
+            safeMode = 0;
+            sys->setAttr<TARGETING::ATTR_HTMGT_SAFEMODE>(safeMode);
+            OccManager::clearResetCounts();
+        }
 
         if (false == int_flags_set(FLAG_HOLD_OCCS_IN_RESET))
         {
