@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,8 @@
 #include <prdfPlatServices.H>
 #include <prdfTrace.H>
 #undef prdfServiceDataCollector_C
+
+#include <prdfErrlUtil.H>
 
 using namespace TARGETING;
 
@@ -120,6 +122,13 @@ inline TARGETING::TargetHandle_t buffer_getTarget( const uint8_t *&ptr )
 }
 
 #endif // ifndef __HOSTBOOT_MODULE
+
+//------------------------------------------------------------------------------
+
+void FfdcBuffer::log(errlHndl_t i_errl) const
+{
+    PRDF_ADD_FFDC(i_errl, iv_buffer, iv_bufferSize, iv_version, iv_subsection);
+}
 
 //------------------------------------------------------------------------------
 

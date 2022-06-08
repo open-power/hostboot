@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -630,6 +630,12 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     {
         AddCapData( io_sdc.GetCaptureData(),    iv_errl );
         AddCapData( io_sdc.getTraceArrayData(), iv_errl );
+    }
+
+    // Add any addition FFDC to the log.
+    for (const auto& ffdc : io_sdc.getFfdc())
+    {
+        ffdc->log(iv_errl);
     }
 
     //**************************************************************************
