@@ -59,19 +59,11 @@
 // MMIO constants
 #include <arch/memorymap.H>
 
-// Attribute ID to string name map
-#include <targAttrIdToName.H>
-
-// mutex
-#include <sys/sync.h>
-
 namespace TARGETING
 {
 
 namespace UTIL
 {
-
-mutex_t g_attrNamesMapMutex = MUTEX_INITIALIZER;
 
 void dumpHBAttrs(const uint32_t i_huid)
 {
@@ -779,31 +771,6 @@ const AttrMetadataMapper& getMapMetadataForAllAttributes()
 {
     return theMapAttrMetadata::instance().getMapMetadataForAllAttributes();
 }
-
-#ifndef __HOSTBOOT_RUNTIME
-const char* getAttrName(const ATTRIBUTE_ID i_attrId, const bool i_rwOnly)
-{
-    const char* ret = nullptr;
-
-    // The maps may be found in obj/genfiles/targAttrIdToName.H/C
-
-    mutex_lock(&g_attrNamesMapMutex);
-    // Check the RW first
-    if(g_rwAttrIdToNameMap.count(i_attrId) > 0)
-    {
-        ret = g_rwAttrIdToNameMap.at(i_attrId);
-    }
-    // Didn't find the attr in RW-only; check the non-RW map
-    if(!i_rwOnly &&
-       (g_nonRwAttrIdToNameMap.count(i_attrId) > 0))
-    {
-        ret = g_nonRwAttrIdToNameMap.at(i_attrId);
-    }
-    mutex_unlock(&g_attrNamesMapMutex);
-
-    return ret;
-}
-#endif
 
 #undef TARG_NAMESPACE
 #undef TARG_CLASS

@@ -52,6 +52,7 @@ struct AttrRP_Section;
 // These constexprs are used by editPagePermissions function
 constexpr uint32_t DEFAULT_PERMISSIONS = 0xFFFFFFFF;
 constexpr uint8_t ALL_SECTION_TYPES = 0xFF;
+constexpr uint8_t MAX_ATTR_STR_LEN = 200;
 
 #ifdef __HOSTBOOT_RUNTIME
 /**
@@ -515,14 +516,6 @@ class AttrRP
          */
         static errlHndl_t mergeAttributes();
 
-        /**
-         * @brief Dumps all of the Hostboot attributes and their values to a
-         * lid file (ATTR_DUMP_LIDID)
-         *
-         * @return nullptr on success; valid error log on error.
-         */
-        static errlHndl_t dumpAttrs();
-
 #else
         /**
          *  @brief Get count of nodes handled by attribute resource provider.
@@ -534,6 +527,14 @@ class AttrRP
             return iv_nodeContainer.size();
         }
 #endif
+
+        /**
+         * @brief Dumps all of the Hostboot attributes and their values to a
+         * lid file (ATTR_DUMP_LIDID)
+         *
+         * @return nullptr on success; valid error log on error.
+         */
+        static errlHndl_t dumpAttrs();
 
     protected:
 

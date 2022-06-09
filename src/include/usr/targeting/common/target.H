@@ -971,9 +971,7 @@ class Target
                                                               uint8_t);
 #endif
 
-#ifndef __HOSTBOOT_RUNTIME
         friend class AttrRP;
-#endif
 
         friend bool fapi2::
                     platAttrSvc::

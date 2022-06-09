@@ -358,6 +358,17 @@ ERRORLOG::ErrlEntry* parseAttrMetadataSection(section_metadata_mem_layout_t cons
  */
 ERRORLOG::ErrlEntry* parseRWAttributeData(rw_attr_section_t const* i_rwAttributePtr,
                                           huid_rw_attrs_map& o_parsedData);
+
+/**
+ * @brief Returns the name of the attribute in string format
+ *
+ * @param[in] i_attrId the attribute ID to convert to string
+ * @param[in] i_rwOnly whether to return the name of RW
+ *            attribute only (nullptr will be returned for
+ *            non-RW attributes)
+ * @return The string name of the attribute
+ */
+const char* getAttrName(ATTRIBUTE_ID i_attrId, bool i_rwOnly = false);
 #endif
 
 

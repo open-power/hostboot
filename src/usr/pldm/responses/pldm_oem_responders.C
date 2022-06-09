@@ -47,13 +47,11 @@ errlHndl_t handleGetPldmAttrDumpRequest(const MCTP::mctp_outbound_msgq_t i_msgQ,
     // complete dumping the attributes
     send_cc_only_response(i_msgQ, i_msg, PLDM_SUCCESS);
 
-#ifndef __HOSTBOOT_RUNTIME
     l_errl = TARGETING::AttrRP::dumpAttrs();
     if(l_errl)
     {
         PLDM_ERR("handleGetPldmAttrDumpRequest: Could not dump HB attributes");
     }
-#endif
 
     return l_errl;
 }

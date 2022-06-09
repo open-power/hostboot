@@ -320,7 +320,7 @@ if( !($cfgSrcOutputDir =~ "none") )
       or croak("Target Attribute ID to Name map C file: \"$cfgSrcOutputDir"
         . "targAttrIdToName.C\" could not be opened.");
     my $targAttrIdNameCFile = *ATTR_ID_MAP_C_FILE;
-    wirteAttrIdNameCFileHeader($targAttrIdNameCFile);
+    writeAttrIdNameCFileHeader($targAttrIdNameCFile);
     writeAttrIdNameMap($attributes, $targAttrIdNameCFile, 1); # RW-only attr map
     writeAttrIdNameMap($attributes, $targAttrIdNameCFile, 0); # All attr map
     close $targAttrIdNameHFile;
@@ -2383,7 +2383,20 @@ sub writeEnumFileAttrEnums {
     }
 }
 
-
+################################################################################
+# Helper function to count the number of simple numeric attributes
+################################################################################
+sub getAttrSizesArrLength {
+    my $attributeCount = 0;
+    foreach my $attribute (@{$attributes->{attribute}})
+    {
+        if(isSimpleNumericAttribute($attribute))
+        {
+            $attributeCount++;
+        }
+    }
+    return $attributeCount;
+}
 
 ################################################################################
 # Writes the enum file footer
@@ -2404,14 +2417,15 @@ sub writeAttrSizesHFile
 {
     my ($outFile) = @_;
 
+    my $numEntries = getAttrSizesArrLength();
 print $outFile <<VERBATIM;
 
 #ifndef TARG_ATTR_SIZES
 #define TARG_ATTR_SIZES
 
 #include <stdint.h>
-#include <map>
 #include <vector>
+#include <array>
 
 /**
  * \@file attrsizesdata.H
@@ -2450,18 +2464,20 @@ enum ATTR_DATA_SIZE
 
 typedef struct
 {
+    uint32_t attrHash;
     ATTR_DATA_TYPE dataType;
     ATTR_DATA_SIZE dataSize;
     bool isArray;
     std::vector<uint32_t>dimensions;
+
 } attrSizeData_t;
 
 constexpr bool ARRAY = true;
 constexpr bool NOT_ARRAY = false;
 
-// Map format:
-// attr hash: {attr data type, attr data size, array or not, array dimensions}
-extern std::map<uint32_t, attrSizeData_t>g_attrSizesMap;
+// Array format:
+// {attr hash, attr data type, attr data size, array or not, array dimensions}
+extern const std::array<attrSizeData_t, $numEntries>g_attrSizesArr;
 
 } // namespace TARGETING
 #endif // #ifndef TARG_ATTR_SIZES
@@ -2537,17 +2553,20 @@ sub writeAttrSizesCFile
 {
     my ($attributes, $outFile, $hFileName) = @_;
 
+    my $numEntries = getAttrSizesArrLength();
+
     print $outFile <<VERBATIM;
 #include <$hFileName>
 
 namespace TARGETING
 {
 
-std::map<uint32_t, attrSizeData_t>g_attrSizesMap =
-{
+const std::array<attrSizeData_t, $numEntries>g_attrSizesArr =
+{{
 VERBATIM
 
-    foreach my $attribute (@{$attributes->{attribute}})
+    # Sort the attributes by hash value for ease of search later
+    foreach my $attribute ( sort { getAttributeIdHashStr($a->{id}) cmp getAttributeIdHashStr($b->{id}) } @{$attributes->{attribute}})
     {
         # Only process simple-type attribute types
         if(isSimpleNumericAttribute($attribute))
@@ -2568,15 +2587,15 @@ VERBATIM
                 chop($dimensionsString);
             }
 
-            # Write map entry. The format is { hash, {dataType, isArray, {dimensions}}
+            # Write array entry. The format is { hash, dataType, isArray, {dimensions}}
             # Note that even though ARRAY and NOT_ARRAY are strings here, they translate
             # to bools in the code (see the const definition at the start of file).
             my $isArrayStr = $isArray ? "ARRAY" : "NOT_ARRAY";
             my ($dataTypeStr, $dataSizeStr) = getAttrDataTypeSize($attribute);
-            print $outFile "    {0x$attrHash, {$dataTypeStr, $dataSizeStr, $isArrayStr, {$dimensionsString}}},\n";
+            print $outFile "    {0x$attrHash, $dataTypeStr, $dataSizeStr, $isArrayStr, {$dimensionsString}},\n";
         }
     }
-    print $outFile "}; // end of map\n";
+    print $outFile "}}; // end of array\n";
     print $outFile "} // end namespace TARGETING\n";
 }
 
@@ -2680,7 +2699,7 @@ sub writeAttrIdNameHFile
 ###############################################################################
 # Writes code to populate the header of the Attribute Name Map C File
 ###############################################################################
-sub wirteAttrIdNameCFileHeader
+sub writeAttrIdNameCFileHeader
 {
     my ($outFile) = @_;
 

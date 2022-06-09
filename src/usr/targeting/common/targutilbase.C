@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,9 +24,20 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #include <targeting/common/targetservice.H>
 
+#ifdef __HOSTBOOT_MODULE
+// Attribute ID to string name map
+#include <targAttrIdToName.H>
+
+// mutex
+#include <sys/sync.h>
+#endif
+
 namespace TARGETING
 {
 
+#ifdef __HOSTBOOT_MODULE
+mutex_t g_attrNamesMapMutex = MUTEX_INITIALIZER;
+#endif
 
 // master sentinel defined here to make available before targeting is up
 Target* const MASTER_PROCESSOR_CHIP_TARGET_SENTINEL
@@ -55,5 +66,30 @@ uint32_t get_huid( const Target* i_target )
     }
     return huid;
 }
+
+#ifdef __HOSTBOOT_MODULE
+const char* getAttrName(const ATTRIBUTE_ID i_attrId, const bool i_rwOnly)
+{
+    const char* ret = nullptr;
+
+    // The maps may be found in obj/genfiles/targAttrIdToName.H/C
+
+    mutex_lock(&g_attrNamesMapMutex);
+    // Check the RW first
+    if(g_rwAttrIdToNameMap.count(i_attrId) > 0)
+    {
+        ret = g_rwAttrIdToNameMap.at(i_attrId);
+    }
+    // Didn't find the attr in RW-only; check the non-RW map
+    if(!i_rwOnly &&
+       (g_nonRwAttrIdToNameMap.count(i_attrId) > 0))
+    {
+        ret = g_nonRwAttrIdToNameMap.at(i_attrId);
+    }
+    mutex_unlock(&g_attrNamesMapMutex);
+
+    return ret;
+}
+#endif
 
 }; // namespace TARGETING

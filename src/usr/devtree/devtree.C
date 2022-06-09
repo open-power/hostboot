@@ -392,8 +392,8 @@ bool devtreeSyncAttrs( void )
                 // Get attribute name from generated map file
                 // The map only includes writeable attributes
                 // so if the attribute name was not found continue on
-                const char* l_attrName = UTIL::getAttrName(*l_attributeId,
-                                                           true); //RW attr only
+                const char* l_attrName = getAttrName(*l_attributeId,
+                                                     true); //RW attr only
                 if (l_attrName == nullptr)
                 {
                     TRACDCOMP( g_trac_devtree,
