@@ -45,6 +45,10 @@ from udparsers.helpers.errludP_Helpers import (
 
 # Some global variables
 HBI_CORE_SYMS_LID = "81e00686.lid"
+# Global Symbol Table to perserve the symbol table between calls
+symTab = hbSymbolTable()
+# Global variable to indicate that the symbol table has already been initialized
+isSymTabInitialized = 0
 
 class errludP_errl:
     #Generated parsers
@@ -105,18 +109,26 @@ class errludP_errl:
     def ErrlUserDetailsParserBackTrace(ver, data):
         d = dict()
 
-        # Initialize the symbol table
-        symTab = hbSymbolTable()
+        # Declare global variable symTab and isSymTabInitialized
+        # to use global and not make a local
+        global symTab
+        global isSymTabInitialized
 
         # Get the hbi core symbols LID file
         symFile = getLid(HBI_CORE_SYMS_LID)
         if symFile == "":
             d["File not found"]=HBI_CORE_SYMS_LID
         else:
-            # Read the symbols from the symbols file and populate symTab
-            readRC = symTab.readSymbols(symFile)
-            if readRC != 0:
-                d["Symbols not found in file"]=symFile
+            # If the symbol table has not been initialized then
+            # initialze and mark as such
+            if isSymTabInitialized == 0:
+                # Read the symbols from the symbols file and populate symTab
+                readRC = symTab.readSymbols(symFile)
+                if readRC != 0:
+                    d["Symbols not found in file"]=symFile
+                else:
+                    d["Symbol file used"] = symFile
+                    isSymTabInitialized = 1
             else:
                 d["Symbol file used"] = symFile
 

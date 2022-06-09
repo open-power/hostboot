@@ -85,6 +85,27 @@ hTable = { hashString : { 'format': formatString ,
 """
 hTable = {}
 
+
+""" The name of the string file that hTable is currently populated with.
+    Used to determine if the hTable is populated with the current string file
+    and if not, then need to process the string file, gather its hash string
+    data, save it to the hTable and update this variable to the string file's name.
+"""
+hTableStringFileName = ""
+
+
+""" Dictionary to hold a list of the hashed parsed strings from a string file.
+    Used to hold the hash strings of the string file HB and/or the string
+    file SBE.  Could hold others in the future.
+hTableList = { fileName:  hashString : { 'format': formatString ,
+                                         'source': sourceString },
+                          ...
+               ...
+             }
+"""
+hTableList = { }
+
+
 """@brief Trace version of binary file/data in decimal
 """
 TRACE_VERSION1 = 1
@@ -150,13 +171,14 @@ def get_captured_warnings_as_string():
 
 
 """ Reset the global variables.  These global variables are not being cleared
-    when being called by the peltool which can lead to errors and warnings being
-    propagated to a buffer without any issues.  This can lead to confusion.
+    when being called which can lead to errors and warnings being propagated to a
+    buffer, being decoded, that did not have issues.  This can lead to confusion.
     Not resetting the hash table, hTable, that holds the strings file.  In this case
     it is advantageous to not reload the data as it is very time consuming and
     the data is constant.
 """
 def reset_global_vars():
+    global flags
     flags = 0
     parse_errors.clear()
     parse_warnings.clear()
@@ -649,13 +671,13 @@ def parse_sf_magic_cookie(line):
 
 """ Reads in the string file to check version and parse entries
 
-@param[in] stringFileName: string of string file name
+@param[in] fullyQualifiedStringFileName: string - absolute path to file and name of file
 @returns: Return 0 on success, non 0 on failure
 """
-def trace_adal_read_stringfile(stringFileName):
+def _trace_adal_read_stringfile(fullyQualifiedStringFileName):
     retVal = 0;
     try:
-        with open(stringFileName) as stringFile:
+        with open(fullyQualifiedStringFileName) as stringFile:
             for x, line in enumerate(stringFile):
                 if line.rstrip() == '': #Skip empty lines
                     continue
@@ -683,6 +705,82 @@ def trace_adal_read_stringfile(stringFileName):
     if retVal == 0 and not hTable:
         capture_error("Error: String file has no parsable data.")
         retVal = -1
+
+    return retVal
+
+
+""" Save the contents of the file into the global hash table list
+    for future retrieval so it does NOT need to be parsed every time this file
+    is encountered.
+
+@param[in] fullyQualifiedStringFileName: string - absolute path to file and name of file
+"""
+def saveToHashTableList(fullyQualifiedStringFileName):
+    # Remove the directories leading to file and extract the file name
+    fileName = os.path.basename(fullyQualifiedStringFileName)
+
+    # Declare global hTableStringFileName and hTableList to use global and not make a local
+    global hTableList
+    global hTableStringFileName
+
+    # Deep copy the contents of the global hash and store it in the global hash list
+    hTableList[fileName] = hTable.copy()
+    hTableStringFileName = fileName
+
+
+""" Reads in the string file to check version and parse entries
+
+@param[in] fullyQualifiedStringFileName: string - absolute path to file and name of file
+@returns: Return 0 if global hash table, hTable, contains the data from the file
+          Return non 0 if hTable does not contain the data from the file
+"""
+def getFromHashTableList(fullyQualifiedStringFileName):
+    # Remove the directories leading to file and extract the file name
+    fileName = os.path.basename(fullyQualifiedStringFileName)
+
+    # Declare global hTableStringFileName to use global and not make a local
+    global hTableStringFileName
+
+    # If current hash string file is the same as the file name then the global
+    # hash table, hTable, is already populated with string file's data.
+    # Nothing needs to be done
+    if hTableStringFileName == fileName:
+        return 0
+
+    # If current hash string file is not the same as the file name
+    # then check the global hash list to see if this file has already
+    # been encountered and the data for it is stored. If so, then populate
+    # the global hash table, hTable, with said file name's data.
+    l_hTable = hTableList.get(fileName)
+    if l_hTable is not None:
+        # The hash info for file has been found,
+        # Copy the contents to the global hash table
+        global hTable
+        hTable = l_hTable.copy()
+        hTableStringFileName = fileName
+        return 0
+
+    # The file name's data is not stored, return -1 indicating this
+    return -1
+
+""" Reads in the string file and parse it's content's into the global
+    hash table, hTable, and global hash table list, hTableList, if first time
+    encountering file.  If file has already been encountered, then copy
+    contents of file from the hash table list into the global hash table if it
+    not currently there.
+
+@param[in] fullyQualifiedStringFileName: string - absolute path to file and name of file
+@returns: Return 0 on success, non 0 on failure
+"""
+def trace_adal_read_stringfile(fullyQualifiedStringFileName):
+    retVal = getFromHashTableList(fullyQualifiedStringFileName)
+    # If unable to get the hash info for file then need to create
+    if retVal != 0:
+        retVal = _trace_adal_read_stringfile(fullyQualifiedStringFileName)
+        # If reading in the string file was successful
+        # then save the info for future use
+        if retVal == 0:
+            saveToHashTableList(fullyQualifiedStringFileName)
 
     return retVal
 
