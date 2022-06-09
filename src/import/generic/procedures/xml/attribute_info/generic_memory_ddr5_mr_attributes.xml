@@ -214,24 +214,154 @@
   </attribute>
 
 <!-- MR10 attributes -->
-
-
+  <attribute>
+    <id>ATTR_DDR5_DRAM_WR_VREFDQ</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DRAM WR VREF DQ value. Decodes are noted in MR10 in the DDR5 JEDEC spec
+      ARRAY[DIMM][RANK][DRAM]
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <array>2 4 20</array>
+    <mssAccessorName>ddr5_dram_wr_vrefdq</mssAccessorName>
+  </attribute>
 
 <!-- MR11 attributes -->
-
-
+  <attribute>
+    <id>ATTR_DDR5_DRAM_VREFCA</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DRAM VREF CA value. Decodes are noted in MR11 in the DDR5 JEDEC spec
+      ARRAY[DIMM][RANK][DRAM]
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <array>2 4 20</array>
+    <mssAccessorName>ddr5_dram_vrefca</mssAccessorName>
+  </attribute>
 
 <!-- MR12 attributes -->
-
-
+  <attribute>
+    <id>ATTR_DDR5_DRAM_VREFCS</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DRAM VREF CS value. Decodes are noted in MR11 in the DDR5 JEDEC spec
+      ARRAY[DIMM][RANK][DRAM]
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <array>2 4 20</array>
+    <mssAccessorName>ddr5_dram_vrefcs</mssAccessorName>
+  </attribute>
 
 <!-- MR14 attributes -->
+  <attribute>
+    <id>ATTR_DDR5_DRAM_ECS_MODE</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DRAM Error Check Scrub operation mode
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <enum>DISABLED = 0, ENABLED = 1</enum>
+    <mssAccessorName>ddr5_dram_ecs_mode</mssAccessorName>
+  </attribute>
 
+  <attribute>
+    <id>ATTR_DDR5_DRAM_ECS_RESET_COUNTER</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DRAM Error Check Scrub reset counter mode
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <enum>NORMAL = 0, RESET = 1</enum>
+    <mssAccessorName>ddr5_dram_ecs_reset_counter</mssAccessorName>
+  </attribute>
 
+  <attribute>
+    <id>ATTR_DDR5_DRAM_ECS_COUNT_MODE</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DRAM Error Check Scrub count mode: Rows or Code words
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <enum>ROWS = 0, CODE_WORDS = 1</enum>
+    <mssAccessorName>ddr5_dram_ecs_count_mode</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_DDR5_DRAM_ECS_SRANK_SELECT</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DRAM Error Check Scrub which rank to select. Should be 0 for non-3DS parts
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssAccessorName>ddr5_dram_ecs_srank_select</mssAccessorName>
+  </attribute>
 
 <!-- MR15 attributes -->
+  <attribute>
+    <id>ATTR_DDR5_DRAM_ECS_THRESHOLD_COUNT</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DRAM Error Check Scrub Error Threshold Count
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <enum>DISABLED = 0, ENABLED = 1</enum>
+    <mssAccessorName>ddr5_dram_ecs_threshold_count</mssAccessorName>
+  </attribute>
 
+  <attribute>
+    <id>ATTR_DDR5_DRAM_ECS_IN_SELF_REFRESH</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DRAM Error Check Scrub mode while in self refresh
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <enum>DISABLED = 0, ENABLED = 1</enum>
+    <mssAccessorName>ddr5_dram_ecs_in_self_refresh</mssAccessorName>
+  </attribute>
 
+  <attribute>
+    <id>ATTR_DDR5_DRAM_ECS_WRITEBACK</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DRAM Error Check Scrub writeback mode: allowed or suppressed
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <enum>ALLOWED = 0, SUPRESSED = 1</enum>
+    <mssAccessorName>ddr5_dram_ecs_writeback</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_DDR5_DRAM_ECS_X4_WRITES</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DRAM Error Check Scrub RMW mode
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <enum>ALLOWED = 0, SUPRESSED = 1</enum>
+    <mssAccessorName>ddr5_dram_ecs_x4_writes</mssAccessorName>
+  </attribute>
 
 <!-- MR32 attributes -->
 
