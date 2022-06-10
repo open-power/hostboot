@@ -512,16 +512,17 @@ class TestUserDataParser(unittest.TestCase):
         print(json.dumps(jsonOut, indent=4))
 
         cd = 'Capture Data'
-        l3 = 'L3_LD_COLRPR_FFDC'
+        l3 = 'L3_LD_FFDC'
         self.assertEqual(jsonOut[cd][l3]['L3 LD Counts'], 1)
         self.assertEqual(jsonOut[cd][l3]['L3 LD Max Allowed'], 6)
-        self.assertEqual(jsonOut[cd][l3]['L3 CR Max Allowed'], 0)
-        self.assertEqual(jsonOut[cd][l3]['L3 CR Present'], 0)
-        self.assertEqual(jsonOut[cd][l3]['L3 Error Member'], 3)
-        self.assertEqual(jsonOut[cd][l3]['L3 Error DW'], 0)
-        self.assertEqual(jsonOut[cd][l3]['L3 Error Bank'], 1)
-        self.assertEqual(jsonOut[cd][l3]['L3 Error Syndrome Col'], 65)
-        self.assertEqual(jsonOut[cd][l3]['L3 Error Address'], 34)
+        self.assertEqual(
+            jsonOut[cd][l3]['L3 Error Member'], "0x03 (or possibly 0x0b)")
+        self.assertEqual(jsonOut[cd][l3]['L3 Error DW'], "0x00")
+        self.assertEqual(jsonOut[cd][l3]['L3 Error Bank'],
+                         "0x01 (or possibly 0x03)")
+        self.assertEqual(jsonOut[cd][l3]['L3 Error CL Half'], "unknown")
+        self.assertEqual(jsonOut[cd][l3]['L3 Error Syndrome Col'], "0x41")
+        self.assertEqual(jsonOut[cd][l3]['L3 Error Address'], "0x0022")
 
     def testUncompressCaptureData(self):
 
@@ -726,6 +727,68 @@ class TestUserDataParser(unittest.TestCase):
         testData = '0x0200000001800000'
         self.assertEqual(jsonOut[cd][r][huid][reg], testData)
 
+    def testUdL2LineDeleteFfdc(self):
+        testData = bytearray.fromhex('01030F000300060107000101DD02EE00')
+        mv = memoryview(testData)
+
+        testStr = udparsers.be500.be500.parseUDToJson(70, 1, mv)
+
+        jsonOut = json.loads(testStr)
+
+        print(json.dumps(jsonOut, indent=4))
+
+        self.assertEqual(json.dumps(jsonOut, indent=4), """{
+    "L2 Line Delete Data": {
+        "Target": {
+            "node": 1,
+            "proc": 3,
+            "core": 15
+        },
+        "Line Delete Count": 3,
+        "Max Line Deletes": 6,
+        "Error Data": {
+            "Type": "UE",
+            "Member": "0x07",
+            "DW": "0x00",
+            "Bank": "0x01",
+            "Back of 2to1 Next Cycle": true,
+            "Syndrome Col": "0xdd",
+            "Address": "0x02ee"
+        }
+    }
+}""")
+
+    def testUdL3LineDeleteFfdc(self):
+        testData = bytearray.fromhex('01030F000300060009010301DD0EEE00')
+        mv = memoryview(testData)
+
+        testStr = udparsers.be500.be500.parseUDToJson(71, 1, mv)
+
+        jsonOut = json.loads(testStr)
+
+        print(json.dumps(jsonOut, indent=4))
+
+        self.assertEqual(json.dumps(jsonOut, indent=4), """{
+    "L3 Line Delete Data": {
+        "Target": {
+            "node": 1,
+            "proc": 3,
+            "core": 15
+        },
+        "Line Delete Count": 3,
+        "Max Line Deletes": 6,
+        "Error Data": {
+            "Type": "CE",
+            "Member": "0x09",
+            "DW": "0x01",
+            "Bank": "0x03",
+            "CL Half": "0x01",
+            "Syndrome Col": "0xdd",
+            "Address": "0x0eee"
+        }
+    }
+}""")
+
 
 if __name__ == '__main__':
     test = TestUserDataParser()
@@ -739,3 +802,5 @@ if __name__ == '__main__':
     test.testCaptureDataParserL3LDFFDC()
     test.testUncompressCaptureData()
     test.testUncompressCaptureDataRegsParse()
+    test.testUdL2LineDeleteFfdc()
+    test.testUdL3LineDeleteFfdc()

@@ -1236,6 +1236,90 @@ class errludP_prdf:
 
         return json.dumps(d)
 
+    def UdL2LineDeleteFfdc(ver: int, data: memoryview) -> str:
+        i = 0
+        nodePos,      i = intConcat(data, i, i+1)
+        procPos,      i = intConcat(data, i, i+1)
+        corePos,      i = intConcat(data, i, i+1)
+        ldCount,      i = intConcat(data, i, i+2)
+        ldMax,        i = intConcat(data, i, i+2)
+        ce_ue,        i = intConcat(data, i, i+1)
+        member,       i = hexConcat(data, i, i+1)
+        dw,           i = hexConcat(data, i, i+1)
+        bank,         i = hexConcat(data, i, i+1)
+        nextcycle,    i = intConcat(data, i, i+1)
+        syndrome_col, i = hexConcat(data, i, i+1)
+        addr,         i = hexConcat(data, i, i+2)
+
+        errType = "CE" if 0 == ce_ue else "UE" if 1 == ce_ue else "CE/UE"
+
+        d = {
+            "L2 Line Delete Data": {
+                "Target": {
+                    "node": nodePos,
+                    "proc": procPos,
+                    "core": corePos,
+                },
+
+                "Line Delete Count": ldCount,
+                "Max Line Deletes":  ldMax,
+
+                "Error Data": {
+                    "Type":                    errType,
+                    "Member":                  member,
+                    "DW":                      dw,
+                    "Bank":                    bank,
+                    "Back of 2to1 Next Cycle": (0 != nextcycle),
+                    "Syndrome Col":            syndrome_col,
+                    "Address":                 addr,
+                }
+            }
+        }
+
+        return json.dumps(d)
+
+    def UdL3LineDeleteFfdc(ver: int, data: memoryview) -> str:
+        i = 0
+        nodePos,      i = intConcat(data, i, i+1)
+        procPos,      i = intConcat(data, i, i+1)
+        corePos,      i = intConcat(data, i, i+1)
+        ldCount,      i = intConcat(data, i, i+2)
+        ldMax,        i = intConcat(data, i, i+2)
+        ce_ue,        i = intConcat(data, i, i+1)
+        member,       i = hexConcat(data, i, i+1)
+        dw,           i = hexConcat(data, i, i+1)
+        bank,         i = hexConcat(data, i, i+1)
+        cl_half,      i = hexConcat(data, i, i+1)
+        syndrome_col, i = hexConcat(data, i, i+1)
+        addr,         i = hexConcat(data, i, i+2)
+
+        errType = "CE" if 0 == ce_ue else "UE" if 1 == ce_ue else "CE/UE"
+
+        d = {
+            "L3 Line Delete Data": {
+                "Target": {
+                    "node": nodePos,
+                    "proc": procPos,
+                    "core": corePos,
+                },
+
+                "Line Delete Count": ldCount,
+                "Max Line Deletes":  ldMax,
+
+                "Error Data": {
+                    "Type":         errType,
+                    "Member":       member,
+                    "DW":           dw,
+                    "Bank":         bank,
+                    "CL Half":      cl_half,
+                    "Syndrome Col": syndrome_col,
+                    "Address":      addr,
+                }
+            }
+        }
+
+        return json.dumps(d)
+
 
 # Dictionary with parser functions for each subtype
 # Values are from ErrlSubsect enum in:
@@ -1245,6 +1329,8 @@ UserDetailsTypes = {
     10: "UdParserPrdfString",
     51: "UdParserPrdfPfaData",
     62: "UdParserPrdfMruData",
+    70: "UdL2LineDeleteFfdc",
+    71: "UdL3LineDeleteFfdc",
 }
 
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -68,6 +68,11 @@ enum ErrlSubsect
     ErrlCapData_1    = 1,
     ErrlMruData      = 62, // For the 80 byte centaur DQ pin map
     ErrlString       = 10,
+
+    // The reason for the subsystem numbering above is lost. Starting new user
+    // data sections for FFDC at 70.
+    ErrlL2LineDeleteFfdc = 70,
+    ErrlL3LineDeleteFfdc = 71,
 };
 
 struct MsDumpStruct

@@ -134,7 +134,7 @@ class BufferReadStream : public BufferStream
      * @post  Users should check good() to ensure there was not a request beyond
      *        the buffer size.
      */
-    void read(void* o_data, size_t i_size)
+    void read(void* const o_data, size_t i_size)
     {
         // Check for buffer overflow.
         if ((iv_currentIndex + i_size) <= iv_bufferSize)
@@ -256,7 +256,7 @@ class BufferWriteStream : public BufferStream
      * @post  Users should check good() to ensure there was not a request beyond
      *        the buffer size.
      */
-    void write(void* i_data, size_t i_size)
+    void write(const void* const i_data, size_t i_size)
     {
         // Check for buffer overflow.
         if ((iv_currentIndex + i_size) <= iv_bufferSize)

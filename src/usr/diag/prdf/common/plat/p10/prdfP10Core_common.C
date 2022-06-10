@@ -404,6 +404,111 @@ void addL3LdCrFfdc( ExtensibleChip * i_coreChip, STEP_CODE_DATA_STRUCT & io_sc,
             Util::hashString(LD_CR_FFDC::L3TITLE), bs );
 }
 
+#ifdef __HOSTBOOT_RUNTIME
+/**
+ * @brief Adds L2 Line Delete FFDC to an SDC.
+ * @param i_chip  A core chip.
+ * @param io_sc   Step code data struct.
+ * @param i_count The current line delete count.
+ * @param i_addr  The error address struct returned from the trace arrays.
+ */
+void addL2LineDeleteFfdc(ExtensibleChip* i_chip, STEP_CODE_DATA_STRUCT& io_sc,
+                   uint16_t i_count, const p10_l2err_extract_err_data& i_addr)
+{
+    // Allocate memory space for the FFDC. See data below for buffer size.
+    auto ffdc = std::make_shared<FfdcBuffer>(ErrlL2LineDeleteFfdc,
+                                             ErrlVer1, 15);
+
+    // Try to avoid using HUID in PEL parser so get target positions.
+    auto core = i_chip->getTrgt();
+    uint8_t nodePos = getTargetPosition(getConnectedParent(core, TYPE_NODE));
+    uint8_t procPos = getTargetPosition(getConnectedParent(core, TYPE_PROC));
+    uint8_t corePos = getTargetPosition(core);
+
+    // Will need the maximum number of allowed line deletes.
+    uint16_t maxLineDeleteAllowed = mfgMode()
+        ? getSystemTarget()->getAttr<ATTR_MNFG_TH_L2_LINE_DELETES>()
+        : getSystemTarget()->getAttr<ATTR_FIELD_TH_L2_LINE_DELETES>();
+
+    // Stream everything into the FFDC data buffer.
+    (*ffdc) << nodePos                                              // 1 byte
+            << procPos                                              // 1 byte
+            << corePos                                              // 1 byte
+            << i_count                                              // 2 bytes
+            << maxLineDeleteAllowed                                 // 2 bytes
+            << static_cast<uint8_t>(i_addr.ce_ue)                   // 1 byte
+            << i_addr.member                                        // 1 byte
+            << i_addr.dw                                            // 1 byte
+            << i_addr.bank                                          // 1 byte
+            << static_cast<uint8_t>(i_addr.back_of_2to1_nextcycle)  // 1 byte
+            << i_addr.syndrome_col                                  // 1 byte
+            << i_addr.real_address_47_56;                           // 2 bytes
+                                                            // total: 15 bytes
+
+    if (!ffdc->good())
+    {
+        PRDF_ERR("[addL2LineDeleteFfdc] Buffer state bad. Data may be "
+                 "incomplete.");
+    }
+
+    // Add the data to the SDC regardless if the buffer state is bad so that we
+    // have something to use for debug.
+    io_sc.service_data->getFfdc().push_back(ffdc);
+}
+#endif
+
+#ifdef __HOSTBOOT_RUNTIME
+/**
+ * @brief Adds L3 Line Delete FFDC to an SDC.
+ * @param i_chip  A core chip.
+ * @param io_sc   Step code data struct.
+ * @param i_count The current line delete count.
+ * @param i_addr  The error address struct returned from the trace arrays.
+ */
+void addL3LineDeleteFfdc(ExtensibleChip* i_chip, STEP_CODE_DATA_STRUCT& io_sc,
+                   uint16_t i_count, const p10_l3err_extract_err_data& i_addr)
+{
+    // Allocate memory space for the FFDC. See data below for buffer size.
+    auto ffdc = std::make_shared<FfdcBuffer>(ErrlL3LineDeleteFfdc,
+                                             ErrlVer1, 15);
+
+    // Try to avoid using HUID in PEL parser so get target positions.
+    auto core = i_chip->getTrgt();
+    uint8_t nodePos = getTargetPosition(getConnectedParent(core, TYPE_NODE));
+    uint8_t procPos = getTargetPosition(getConnectedParent(core, TYPE_PROC));
+    uint8_t corePos = getTargetPosition(core);
+
+    // Will need the maximum number of allowed line deletes.
+    uint16_t maxLineDeleteAllowed = mfgMode()
+        ? getSystemTarget()->getAttr<ATTR_MNFG_TH_L3_LINE_DELETES>()
+        : getSystemTarget()->getAttr<ATTR_FIELD_TH_L3_LINE_DELETES>();
+
+    // Stream everything into the FFDC data buffer.
+    (*ffdc) << nodePos                              // 1 byte
+            << procPos                              // 1 byte
+            << corePos                              // 1 byte
+            << i_count                              // 2 bytes
+            << maxLineDeleteAllowed                 // 2 bytes
+            << static_cast<uint8_t>(i_addr.ce_ue)   // 1 byte
+            << i_addr.member                        // 1 byte
+            << i_addr.dw                            // 1 byte
+            << i_addr.bank                          // 1 byte
+            << i_addr.cl_half                       // 1 byte
+            << i_addr.syndrome_col                  // 1 byte
+            << i_addr.real_address_46_57;           // 2 bytes
+                                            // total: 15 bytes
+
+    if (!ffdc->good())
+    {
+        PRDF_ERR("[addL3LineDeleteFfdc] Buffer state bad. Data may be "
+                 "incomplete.");
+    }
+
+    // Add the data to the SDC regardless if the buffer state is bad so that we
+    // have something to use for debug.
+    io_sc.service_data->getFfdc().push_back(ffdc);
+}
+#endif
 
 /**
  * @brief  Handle an L2 UE
@@ -413,11 +518,10 @@ void addL3LdCrFfdc( ExtensibleChip * i_coreChip, STEP_CODE_DATA_STRUCT & io_sc,
  */
 int32_t L2UE( ExtensibleChip * i_coreChip, STEP_CODE_DATA_STRUCT & io_sc )
 {
+    #ifdef __HOSTBOOT_RUNTIME
 
-#ifdef __HOSTBOOT_RUNTIME
     int32_t l_rc = SUCCESS;
-    p10_l2err_extract_err_data errorAddr =
-        { L2ERR_CE_UE, 0, 0, 0, 0, 0, 0 };
+    p10_l2err_extract_err_data errorAddr{};
 
     // Get failing location from trace array
     l_rc = extractL2Err( i_coreChip->getTrgt(), false, errorAddr );
@@ -447,9 +551,11 @@ int32_t L2UE( ExtensibleChip * i_coreChip, STEP_CODE_DATA_STRUCT & io_sc )
     ldcrffdc.L2errBack2to1  = errorAddr.back_of_2to1_nextcycle;
     ldcrffdc.L2errSynCol    = errorAddr.syndrome_col;
     ldcrffdc.L2errAddress   = errorAddr.real_address_47_56;
-    addL2LdCrFfdc( i_coreChip, io_sc, ldcrffdc );
 
-#endif
+    // Finally, add the FFDC to the SDC.
+    addL2LineDeleteFfdc(i_coreChip, io_sc, l_bundle->iv_L2LDCount, errorAddr);
+
+    #endif
 
     return SUCCESS;
 }
@@ -463,10 +569,10 @@ PRDF_PLUGIN_DEFINE( p10_core, L2UE );
  */
 int32_t L3UE( ExtensibleChip * i_coreChip, STEP_CODE_DATA_STRUCT & io_sc )
 {
+    #ifdef __HOSTBOOT_RUNTIME
 
-#ifdef __HOSTBOOT_RUNTIME
     int32_t l_rc = SUCCESS;
-    p10_l3err_extract_err_data errorAddr = { L3ERR_CE_UE, 0, 0, 0, 0, 0 };
+    p10_l3err_extract_err_data errorAddr{};
 
     // Get failing location from trace array
     l_rc = extractL3Err( i_coreChip->getTrgt(), false, errorAddr );
@@ -494,9 +600,11 @@ int32_t L3UE( ExtensibleChip * i_coreChip, STEP_CODE_DATA_STRUCT & io_sc )
     ldcrffdc.L3errBank    = errorAddr.bank;
     ldcrffdc.L3errSynCol  = errorAddr.syndrome_col;
     ldcrffdc.L3errAddress = errorAddr.real_address_46_57;
-    addL3LdCrFfdc( i_coreChip, io_sc, ldcrffdc );
 
-#endif
+    // Finally, add the FFDC to the SDC.
+    addL3LineDeleteFfdc(i_coreChip, io_sc, l_bundle->iv_L3LDCount, errorAddr);
+
+    #endif
 
     return SUCCESS;
 }
@@ -516,6 +624,8 @@ int32_t L2CE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
     auto trgt = i_chip->getTrgt();
     auto huid = i_chip->getHuid();
 
+    p10_l2err_extract_err_data errorAddr{};
+
     // FFDC will be collected throughout function and added to SDC at the end.
     LD_CR_FFDC::L2LdCrFfdc ldcrffdc;
 
@@ -528,9 +638,6 @@ int32_t L2CE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 
     do
     {
-        p10_l2err_extract_err_data errorAddr =
-            { L2ERR_CE_UE, 0, 0, 0, 0, 0, 0 };
-
         // Get failing location from trace array
         if (SUCCESS != extractL2Err(trgt, true, errorAddr))
         {
@@ -599,7 +706,7 @@ int32_t L2CE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
     ldcrffdc.L2LDcnt = l_bundle->iv_L2LDCount;
 
     // Finally, add the FFDC to the SDC.
-    addL2LdCrFfdc(i_chip, io_sc, ldcrffdc);
+    addL2LineDeleteFfdc(i_chip, io_sc, l_bundle->iv_L2LDCount, errorAddr);
 
     #endif // __HOSTBOOT_RUNTIME
 
@@ -622,6 +729,8 @@ int32_t L3CE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
     auto trgt = i_chip->getTrgt();
     auto huid = i_chip->getHuid();
 
+    p10_l3err_extract_err_data errorAddr{};
+
     // FFDC will be collected throughout function and added to SDC at the end.
     LD_CR_FFDC::L3LdCrFfdc ldcrffdc;
 
@@ -634,9 +743,6 @@ int32_t L3CE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 
     do
     {
-        p10_l3err_extract_err_data errorAddr =
-            { L3ERR_CE_UE, 0, 0, 0, 0, 0 };
-
         // Get failing location from trace array
         if (SUCCESS != extractL3Err(trgt, true, errorAddr))
         {
@@ -703,7 +809,7 @@ int32_t L3CE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
     ldcrffdc.L3LDcnt = l_bundle->iv_L3LDCount;
 
     // Finally, add the FFDC to the SDC.
-    addL3LdCrFfdc(i_chip, io_sc, ldcrffdc);
+    addL3LineDeleteFfdc(i_chip, io_sc, l_bundle->iv_L2LDCount, errorAddr);
 
     #endif // __HOSTBOOT_RUNTIME
 

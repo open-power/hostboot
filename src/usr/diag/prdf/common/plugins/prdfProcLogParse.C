@@ -39,6 +39,8 @@
 #include <vector>
 #include <string>
 
+#include <prdfBufferStream.H>
+
 namespace PRDF
 {
 
@@ -339,6 +341,124 @@ bool parseL3LdCrFfdc( uint8_t * i_buffer, uint32_t i_buflen,
     }
 
     return o_rc;
+}
+
+//------------------------------------------------------------------------------
+
+bool parseL2LineDeleteFfdc(void* i_buffer, uint32_t i_buflen,
+                           ErrlUsrParser& i_parser, errlver_t)
+{
+    i_parser.PrintBlank();
+    i_parser.PrintHeading("L2 Line Delete Data");
+    i_parser.PrintBlank();
+
+    BufferReadStream ffdc{i_buffer, i_buflen};
+
+    if (ffdc.good())
+    {
+        uint8_t nodePos = 0, procPos = 0, corePos = 0;
+        uint16_t ldCount = 0, ldMax = 0;
+        uint8_t ce_ue = 0, member = 0, dw = 0, bank = 0;
+        uint8_t nextcycle = 0, syndrome_col= 0;
+        uint16_t addr = 0;
+
+        ffdc >> nodePos         // 1 byte
+             >> procPos         // 1 byte
+             >> corePos         // 1 byte
+             >> ldCount         // 2 bytes
+             >> ldMax           // 2 bytes
+             >> ce_ue           // 1 byte
+             >> member          // 1 byte
+             >> dw              // 1 byte
+             >> bank            // 1 byte
+             >> nextcycle       // 1 byte
+             >> syndrome_col    // 1 byte
+             >> addr;           // 2 bytes
+                        // total: 15 bytes
+
+        char target[DATA_SIZE];
+        snprintf(target, DATA_SIZE, "node %d proc %d core %d",
+                 nodePos, procPos, corePos);
+
+        i_parser.PrintString("Target", target);
+
+        i_parser.PrintNumber("Line Delete Count", "%d", ldCount);
+        i_parser.PrintNumber("Max Line Deletes",  "%d", ldMax);
+
+        i_parser.PrintString("Error Data", "" );
+
+        i_parser.PrintString("  Type",
+            (0 == ce_ue) ? "CE" : ((1 == ce_ue) ? "UE" : "CE/UE"));
+
+        i_parser.PrintNumber("  Member",       "0x%02x", member);
+        i_parser.PrintNumber("  DW",           "0x%02x", dw);
+        i_parser.PrintNumber("  Bank",         "0x%02x", bank);
+        i_parser.PrintBool(  "  Back of 2to1 Next Cycle", (0 != nextcycle));
+        i_parser.PrintNumber("  Syndrome Col", "0x%02x", syndrome_col);
+        i_parser.PrintNumber("  Address",      "0x%04x", addr);
+    }
+
+//    return ffdc.good(); // false will trigger a hex dump
+    return false; // TODO: eventually will remove, but keeping for debug.
+}
+
+//------------------------------------------------------------------------------
+
+bool parseL3LineDeleteFfdc(void* i_buffer, uint32_t i_buflen,
+                           ErrlUsrParser& i_parser, errlver_t)
+{
+    i_parser.PrintBlank();
+    i_parser.PrintHeading("L3 Line Delete Data");
+    i_parser.PrintBlank();
+
+    BufferReadStream ffdc{i_buffer, i_buflen};
+
+    if (ffdc.good())
+    {
+        uint8_t nodePos = 0, procPos = 0, corePos = 0;
+        uint16_t ldCount = 0, ldMax = 0;
+        uint8_t ce_ue = 0, member = 0, dw = 0, bank = 0;
+        uint8_t cl_half = 0, syndrome_col= 0;
+        uint16_t addr = 0;
+
+        ffdc >> nodePos         // 1 byte
+             >> procPos         // 1 byte
+             >> corePos         // 1 byte
+             >> ldCount         // 2 bytes
+             >> ldMax           // 2 bytes
+             >> ce_ue           // 1 byte
+             >> member          // 1 byte
+             >> dw              // 1 byte
+             >> bank            // 1 byte
+             >> cl_half         // 1 byte
+             >> syndrome_col    // 1 byte
+             >> addr;           // 2 bytes
+                        // total: 15 bytes
+
+        char target[DATA_SIZE];
+        snprintf(target, DATA_SIZE, "node %d proc %d core %d",
+                 nodePos, procPos, corePos);
+
+        i_parser.PrintString("Target", target);
+
+        i_parser.PrintNumber("Line Delete Count", "%d", ldCount);
+        i_parser.PrintNumber("Max Line Deletes",  "%d", ldMax);
+
+        i_parser.PrintString("Error Data", "" );
+
+        i_parser.PrintString("  Type",
+            (0 == ce_ue) ? "CE" : ((1 == ce_ue) ? "UE" : "CE/UE"));
+
+        i_parser.PrintNumber("  Member",       "0x%02x", member);
+        i_parser.PrintNumber("  DW",           "0x%02x", dw);
+        i_parser.PrintNumber("  Bank",         "0x%02x", bank);
+        i_parser.PrintNumber("  CL Half",      "0x%02x", cl_half);
+        i_parser.PrintNumber("  Syndrome Col", "0x%02x", syndrome_col);
+        i_parser.PrintNumber("  Address",      "0x%04x", addr);
+    }
+
+//    return ffdc.good(); // false will trigger a hex dump
+    return false; // TODO: eventually will remove, but keeping for debug.
 }
 
 #if defined(PRDF_HOSTBOOT_ERRL_PLUGIN) || defined(PRDF_FSP_ERRL_PLUGIN)
