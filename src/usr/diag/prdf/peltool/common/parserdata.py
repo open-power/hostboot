@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2021
+# Contributors Listed Below - COPYRIGHT 2021,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -31,6 +31,7 @@ import re
 import pel.prd.sigdata
 import pel.prd.regdata
 
+
 class SignatureData:
     """
     The human readable output for signature descriptions are stored in JSON data
@@ -51,7 +52,6 @@ class SignatureData:
                 data = json.load(fp)
 
             self._data[data["target_type"]] = data
-
 
     def parseSignature(self, chipId: str, chipSig: str) -> str:
 
@@ -74,6 +74,7 @@ class SignatureData:
 
         return signature
 
+
 class RegisterData:
     """
     The human readable output for signature descriptions are stored in JSON data
@@ -95,7 +96,6 @@ class RegisterData:
 
             self._data[data["target_type"]] = data
 
-
     def parseRegister(self, chipId: str, regId: str) -> dict:
 
         # convert the input chipId to int and back to a hex string to prevent
@@ -109,12 +109,11 @@ class RegisterData:
         chipType = hexId.lower()
         hashReg = '0x' + regId.lower()
 
-        register = { 'name': 'Undefined Register Hash',
-                     'address': hashReg }
+        register = {'name': 'Undefined Register Hash',
+                    'address': hashReg}
 
         if chipType in self._data:
             if hashReg in self._data[chipType]:
                 register = self._data[chipType][hashReg]
 
         return register
-
