@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,6 +74,26 @@ bool parseL2LdCrFfdc( uint8_t * i_buffer, uint32_t i_buflen,
  */
 bool parseL3LdCrFfdc( uint8_t * i_buffer, uint32_t i_buflen,
                       ErrlUsrParser & i_parser );
+
+/**
+ * @brief Parses the L2 Line Delete user data section.
+ * @param i_buffer  The data buffer.
+ * @param i_buflen  The buffer length.
+ * @param i_parser  The error log parser.
+ * @param i_version Data version for this user data section.
+ */
+bool parseL2LineDeleteFfdc(void* i_buffer, uint32_t i_buflen,
+                           ErrlUsrParser& i_parser, errlver_t i_version);
+
+/**
+ * @brief Parses the L3 Line Delete user data section.
+ * @param i_buffer  The data buffer.
+ * @param i_buflen  The buffer length.
+ * @param i_parser  The error log parser.
+ * @param i_version Data version for this user data section.
+ */
+bool parseL3LineDeleteFfdc(void* i_buffer, uint32_t i_buflen,
+                           ErrlUsrParser& i_parser, errlver_t i_version);
 
 #if defined(PRDF_HOSTBOOT_ERRL_PLUGIN) || defined(PRDF_FSP_ERRL_PLUGIN)
 } // end namespace FSP/HOSTBOOT

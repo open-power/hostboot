@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -871,6 +871,14 @@ bool logDataParse( ErrlUsrParser & i_parser, void * i_buffer,
 
         case ErrlMruData:
             rc = parseExtMemMru( i_buffer, i_buflen, i_parser );
+            break;
+
+        case ErrlL2LineDeleteFfdc:
+            rc = parseL2LineDeleteFfdc(i_buffer, i_buflen, i_parser, i_ver);
+            break;
+
+        case ErrlL3LineDeleteFfdc:
+            rc = parseL3LineDeleteFfdc(i_buffer, i_buflen, i_parser, i_ver);
             break;
 
         default:
