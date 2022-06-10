@@ -117,12 +117,49 @@
     <id>ATTR_MEM_REF_INTERVAL_RATE_INDIC</id>
     <targetType>TARGET_TYPE_MEM_PORT</targetType>
     <description>
-      Minimum refresh rate supported
+      Refresh rate indicator
     </description>
     <initToZero></initToZero>
     <valueType>uint8</valueType>
     <writeable/>
     <mssAccessorName>ref_rate_indic</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_DDR5_MIN_REF_RATE</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Minimum refresh rate supported. Decodings are noted in the DDR5 spec
+    </description>
+    <default>1</default>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssAccessorName>ddr5_min_ref_rate</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_REF_WIDE_RANGE</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Indicates refresh wide range support
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum>UNSUPPORTED = 0, SUPPORTED = 1</enum>
+    <writeable/>
+    <mssAccessorName>ddr5_ref_wide_range</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_DDR5_REF_TUF</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DDR5 temperature update flag
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssAccessorName>ddr5_ref_tuf</mssAccessorName>
   </attribute>
 
 <!-- MR5 attributes -->
@@ -140,6 +177,19 @@
     <mssUnits> Ohms </mssUnits>
     <array>2 4</array>
     <mssAccessorName>dram_pu_drv_imp</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_DDR5_DRAM_TEST_MODE</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Notes if the DRAM supports test mode
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum>UNSUPPORTED = 0, SUPPORTED = 1</enum>
+    <writeable/>
+    <mssAccessorName>ddr5_dram_test_mode</mssAccessorName>
   </attribute>
 
   <attribute>
