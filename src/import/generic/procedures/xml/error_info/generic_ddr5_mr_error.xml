@@ -364,23 +364,142 @@
 
 <!-- MR10 errors -->
 
-
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR10_BAD_VREFDQ</rc>
+    <description>
+       A bad cycle VREFDQ was passed to MR10
+    </description>
+    <ffdc>MAX</ffdc>
+    <ffdc>VALUE</ffdc>
+    <ffdc>RANK</ffdc>
+    <ffdc>DRAM</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
 
 <!-- MR11 errors -->
 
-
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR11_BAD_VREFCA</rc>
+    <description>
+       A bad cycle VREFCA was passed to MR11
+    </description>
+    <ffdc>MAX</ffdc>
+    <ffdc>VALUE</ffdc>
+    <ffdc>RANK</ffdc>
+    <ffdc>DRAM</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
 
 <!-- MR12 errors -->
 
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR12_BAD_VREFCS</rc>
+    <description>
+       A bad cycle VREFDQ was passed to MR12
+    </description>
+    <ffdc>MAX</ffdc>
+    <ffdc>VALUE</ffdc>
+    <ffdc>RANK</ffdc>
+    <ffdc>DRAM</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
 
+<!-- MR13 errors -->
+
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR13_BAD_TCCD_L</rc>
+    <description>
+       A bad TCCD_L was passed to MR13
+    </description>
+    <ffdc>MAX</ffdc>
+    <ffdc>MIN</ffdc>
+    <ffdc>TCCD_L</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
 
 <!-- MR14 errors -->
 
-
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR14_BAD_ECS_CID</rc>
+    <description>
+       A bad CID was passed to MR14
+    </description>
+    <ffdc>MAX</ffdc>
+    <ffdc>CID</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
 
 <!-- MR15 errors -->
 
-
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR15_ECS_ERROR_THRESHOLD</rc>
+    <description>
+       A bad ECS error threshold was passed to MR15
+    </description>
+    <ffdc>MAX</ffdc>
+    <ffdc>THRESHOLD</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
 
 <!-- MR32 errors -->
 

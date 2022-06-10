@@ -370,7 +370,8 @@
     <initToZero></initToZero>
     <valueType>uint8</valueType>
     <writeable/>
-    <enum>DISABLED = 0, ENABLED = 1</enum>
+    <!-- Count => attributes -->
+    <enum>4 = 0, 16 = 1, 64 = 2, 256 = 3, 1024 = 4, 4096 = 5</enum>
     <mssAccessorName>ddr5_dram_ecs_threshold_count</mssAccessorName>
   </attribute>
 
