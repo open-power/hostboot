@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,7 +42,7 @@ namespace PLDM {
 // 128k of memory, which will have enough space to accomodate PLDM headers
 // that are not part of the actual payload without fragmenting the memory
 // too much.
-const uint32_t MAX_TRANSFER_SIZE_BYTES = 127 * KILOBYTE + 1;
+const uint32_t MAX_TRANSFER_SIZE_BYTES = 15 * KILOBYTE + 1;
 
 /**
  * @brief Requests a File Table containing the list of files available and
