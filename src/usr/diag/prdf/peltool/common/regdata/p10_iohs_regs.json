@@ -54,6 +54,11 @@
         "description": "P10 IOHS DLP LINK1 TRANSMIT LANE CONTROL",
         "name": "IOHS_DLP_LINK1_TX_LANE_CONTROL"
     },
+    "0x3c6d": {
+        "address": "0x000000001801100a",
+        "description": "P10 IOHS DLP OLL Config Register",
+        "name": "IOHS_DLP_CONFIG"
+    },
     "0x4990": {
         "address": "0x0000000018011022",
         "description": "P10 IOHS DLP LINK0 SYNDROME CAPTURE",
@@ -63,6 +68,16 @@
         "address": "0x0000000018011023",
         "description": "P10 IOHS DLP LINK1 SYNDROME CAPTURE",
         "name": "IOHS_DLP_LINK1_SYN_CAPTURE"
+    },
+    "0x4d1a": {
+        "address": "0x000000001801100d",
+        "description": "P10 IOHS DLP PHY Secondary Config Register",
+        "name": "IOHS_DLP_SEC_CONFIG"
+    },
+    "0x58c6": {
+        "address": "0x0000000018011014",
+        "description": "P10 IOHS DLP LINK0 INFORMATION REG",
+        "name": "IOHS_DLP_LINK0_INFO"
     },
     "0x58ca": {
         "address": "0x0000000018011015",
@@ -129,11 +144,6 @@
         "description": "P10 IOHS DLP LINK1 ERROR STATUS",
         "name": "IOHS_DLP_LINK1_ERROR_STATUS"
     },
-    "0xa08b": {
-        "address": "0x0000000018011014",
-        "description": "P10 IOHS DLP LINK0 INFORMATION REG",
-        "name": "IOHS_DLP_LINK0_INFO_REG"
-    },
     "0xa71e": {
         "address": "0x0000000018011028",
         "description": "P10 IOHS DLP PLL Status Register",
@@ -188,6 +198,11 @@
         "address": "0x0000000018040000",
         "description": "IOHS Chiplet Checkstop FIR",
         "name": "IOHS_CHIPLET_CS_FIR"
+    },
+    "0xf030": {
+        "address": "0x000000001801100b",
+        "description": "P10 IOHS DLP OLL Config Register",
+        "name": "IOHS_DLP_CONTROL"
     },
     "0xf70c": {
         "address": "0x0000000018011001",

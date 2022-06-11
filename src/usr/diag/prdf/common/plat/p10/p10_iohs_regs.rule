@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2021
+# Contributors Listed Below - COPYRIGHT 2020,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -42,10 +42,31 @@
         capture     group default;
     };
 
+    register IOHS_DLP_CONFIG
+    {
+        name        "P10 IOHS DLP OLL Config Register";
+        scomaddr    0x1801100A;
+        capture     group smp_ffdc;
+    };
+
+    register IOHS_DLP_CONTROL
+    {
+        name        "P10 IOHS DLP OLL Config Register";
+        scomaddr    0x1801100B;
+        capture     group smp_ffdc;
+    };
+
     register IOHS_DLP_PHY_CONFIG
     {
         name        "P10 IOHS DLP PHY Config Register";
         scomaddr    0x1801100C;
+        capture     group smp_ffdc;
+    };
+
+    register IOHS_DLP_SEC_CONFIG
+    {
+        name        "P10 IOHS DLP PHY Secondary Config Register";
+        scomaddr    0x1801100D;
         capture     group smp_ffdc;
     };
 
@@ -84,7 +105,7 @@
         capture     group smp_ffdc_l1;
     };
 
-    register IOHS_DLP_LINK0_INFO_REG
+    register IOHS_DLP_LINK0_INFO
     {
         name        "P10 IOHS DLP LINK0 INFORMATION REG";
         scomaddr    0x18011014;

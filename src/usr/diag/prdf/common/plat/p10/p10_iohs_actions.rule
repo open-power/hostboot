@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2021
+# Contributors Listed Below - COPYRIGHT 2020,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -23,17 +23,24 @@
 #
 # IBM_PROLOG_END_TAG
 
+actionclass analyze_IOHS_DLP_FIR_SMP
+{
+    # The hardware team wanted these register captured for more than just
+    # attentions that call out an SMP bus. So we'll capture them for any
+    # attentions coming from the IOHS_DLP_FIR (in SMP mode).
+    capture(smp_ffdc);
+    capture(smp_ffdc_l0);
+    capture(smp_ffdc_l1);
+    analyze(gIOHS_DLP_FIR_SMP);
+};
+
 actionclass smp_callout_l0
 {
-    capture(smp_ffdc_l0);
-    capture(smp_ffdc);
     funccall("smp_callout_l0");
 };
 
 actionclass smp_callout_l1
 {
-    capture(smp_ffdc_l1);
-    capture(smp_ffdc);
     funccall("smp_callout_l1");
 };
 

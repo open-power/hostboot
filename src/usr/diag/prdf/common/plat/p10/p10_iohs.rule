@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2021
+# Contributors Listed Below - COPYRIGHT 2020,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -673,7 +673,7 @@ group gIOHS_DLP_FIR
     /** IOHS_DLP_PHY_CONFIG[63]
      *  Attention from IOHS_DLP_FIR in SMP mode
      */
-    (rIOHS_DLP_PHY_CONFIG, bit(63)) ? analyze(gIOHS_DLP_FIR_SMP);
+    (rIOHS_DLP_PHY_CONFIG, bit(63)) ? analyze_IOHS_DLP_FIR_SMP;
 };
 
 ################################################################################
