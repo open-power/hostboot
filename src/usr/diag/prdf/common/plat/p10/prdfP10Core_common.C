@@ -371,14 +371,6 @@ void addL2LdCrFfdc( ExtensibleChip * i_coreChip, STEP_CODE_DATA_STRUCT & io_sc,
     memset( data, 0x00, sz_maxData );
     memcpy( &data, &i_LdCrFfdc, sz_maxData);
 
-    // Fix endianness issues with non PPC machines.
-#if( __BYTE_ORDER == __LITTLE_ENDIAN )
-
-    for ( uint32_t i = 0; i < (sz_maxData/sz_word); i++ )
-        ((CPU_WORD*)data)[i] = htonl(((CPU_WORD*)data)[i]);
-
-#endif
-
     // Add data to capture data.
     BitString  bs( sz_maxData*8, (CPU_WORD *) &data );
     cd.Add( i_coreChip->getTrgt(),
@@ -405,14 +397,6 @@ void addL3LdCrFfdc( ExtensibleChip * i_coreChip, STEP_CODE_DATA_STRUCT & io_sc,
     uint8_t data[sz_maxData];
     memset( data, 0x00, sz_maxData );
     memcpy( &data, &i_LdCrFfdc, sz_maxData);
-
-    // Fix endianness issues with non PPC machines.
-#if( __BYTE_ORDER == __LITTLE_ENDIAN )
-
-    for ( uint32_t i = 0; i < (sz_maxData/sz_word); i++ )
-        ((CPU_WORD*)data)[i] = htonl(((CPU_WORD*)data)[i]);
-
-#endif
 
     // Add data to capture data.
     BitString bs( sz_maxData*8, (CPU_WORD *) &data );
