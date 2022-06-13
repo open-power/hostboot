@@ -77,29 +77,12 @@ errlHndl_t platHandleHWCallout(
     errlHndl_t errl = nullptr;
 
 #ifdef CONFIG_RECALL_DECONFIG_ON_RECONFIG
-    ATTR_BLOCK_SPEC_DECONFIG_type l_block_spec_deconfig = isBlockSpecDeconfigSetOnAnyNode();
+    GARD_ErrorType gardDeconfig = getEphmeralGardRecordType();
+#endif
 
-    GARD_ErrorType gardDeconfig = GARD_Reconfig;
-    // For eBMC systems, if we are in block speculative deconfig mode,
-    // set the GARD_ErrorType to Sticky to treat deconfigs as
-    // unrecoverable gards on the next reconfig loop,
-    // otherwise set as normal GARD_Reconfig
-    if (!INITSERVICE::spBaseServicesEnabled() && l_block_spec_deconfig)
-    {
-        HWAS_DBG("setting GARD_Sticky_deconfig for the Deconfig Gard");
-        gardDeconfig = GARD_Sticky_deconfig;
-    }
-    else
-    {
-        HWAS_DBG("setting GARD_Reconfig for the Deconfig Gard");
-    }
-
-    HWAS_INF("HW callout; pTarget HUID 0x%8X, gardErrorType 0x%X, deconfigState 0x%X, ATTR_BLOCK_SPEC_DECONFIG=%d",
-            TARGETING::get_huid(i_pTarget), i_gardErrorType, i_deconfigState, l_block_spec_deconfig);
-#else
     HWAS_INF("HW callout; pTarget HUID 0x%8X, gardErrorType 0x%X, deconfigState 0x%X",
             TARGETING::get_huid(i_pTarget), i_gardErrorType, i_deconfigState);
-#endif
+
     // grab the bootproc target to use below
     TARGETING::Target* l_masterProc = nullptr;
     TARGETING::targetService().masterProcChipTargetHandle(l_masterProc);

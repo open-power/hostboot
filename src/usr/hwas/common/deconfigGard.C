@@ -2271,20 +2271,17 @@ errlHndl_t DeconfigGard::applyGardRecord(Target *i_pTarget,
         }
 
 #ifdef __HOSTBOOT_MODULE
-        // only create deconfig gard records for BMC systems
+        // only create Ephemeral gard records for BMC systems
         if(!INITSERVICE::spBaseServicesEnabled())
         {
-            // if ATTR_BLOCK_SPEC_DECONFIG is set for any node, make the gard type GARD_Sticky_deconfig,
-            // otherwise set to GARD_Reconfig
-            GARD_ErrorType gardDeconfig = isBlockSpecDeconfigSetOnAnyNode() ? GARD_Sticky_deconfig : GARD_Reconfig;
-            HWAS_INF("call platCreateGardRecord to create a deconfig record for the garded target %.8X",
+            HWAS_INF("call platCreateGardRecord to create an Ephemeral record for the garded target %.8X",
                      get_huid(i_pTarget));
             l_pErr = HWAS::theDeconfigGard().platCreateGardRecord(i_pTarget,
                                                                   l_errlogEid,
-                                                                  gardDeconfig);
+                                                                  getEphmeralGardRecordType());
             if (l_pErr)
             {
-                HWAS_ERR("platCreateGardRecord returned an error creating a Deconfig Gard record for %.8X",
+                HWAS_ERR("platCreateGardRecord returned an error creating a Ephemeral Gard record for %.8X",
                          get_huid(i_pTarget));
                 // if the error was caused by the gard record repository being full,
                 // reset RECONFIGURE_LOOP_DECONFIGURE bit, so that we do not trigger
