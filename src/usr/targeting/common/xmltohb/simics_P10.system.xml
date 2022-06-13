@@ -486,16 +486,6 @@
          <default>0</default>
     </attribute>
     <attribute>
-         <id>SCOM_SWITCHES</id>
-         <default>
-             <field><id>reserved</id><value>0</value></field>
-             <field><id>useFsiScom</id><value>0</value></field>
-             <field><id>useInbandScom</id><value>0</value></field>
-             <field><id>useSbeScom</id><value>1</value></field>
-             <field><id>useXscom</id><value>0</value></field>
-         </default>
-    </attribute>
-    <attribute>
         <id>PBAX_CHIPID</id>
         <default>0x1</default>
     </attribute>

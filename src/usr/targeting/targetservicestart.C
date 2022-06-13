@@ -552,6 +552,16 @@ static void initializeAttributes(TargetService& i_targetService,
 
                 l_chip->setAttr<ATTR_TPM_SPI_BUS_DIV>(l_updated_tpm_spi_attr);
             }
+
+            // Secondary procs should default to raw FSI scoms (except in mpipl)
+            if( !i_isMpipl )
+            {
+                ScomSwitches l_switches = l_chip->getAttr<ATTR_SCOM_SWITCHES>();
+                l_switches.useXscom = 0;
+                l_switches.useFsiScom = 1;
+                l_switches.useSbeScom = 0;
+                l_chip->setAttr<ATTR_SCOM_SWITCHES>(l_switches);
+            }
         }
 
 

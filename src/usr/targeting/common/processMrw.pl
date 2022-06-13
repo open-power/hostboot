@@ -3309,10 +3309,6 @@ sub postProcessProcessor
           $targetObj->setAttribute($target, "FSI_MASTER_TYPE",    "NO_MASTER");
         }
         $targetObj->setAttribute($target, "FSI_SLAVE_CASCADE",  "0");
-        $targetObj->setAttributeField($target, "SCOM_SWITCHES", "useSbeScom",
-            "1");
-        $targetObj->setAttributeField($target, "SCOM_SWITCHES", "useFsiScom",
-            "0");
     }
     else
     {
@@ -3320,21 +3316,10 @@ sub postProcessProcessor
         {
           $targetObj->setAttribute($target, "ALTFSI_MASTER_CHIP", "physical:sys-0");
         }
-        $targetObj->setAttributeField($target, "SCOM_SWITCHES", "useSbeScom",
-            "0");
-        $targetObj->setAttributeField($target, "SCOM_SWITCHES", "useFsiScom",
-            "1");
     }
 
     ## Update bus speeds"
     processI2cSpeeds($targetObj,$target);
-
-    ## these are hardcoded because code sets them properly
-    $targetObj->setAttributeField($target, "SCOM_SWITCHES", "reserved",   "0");
-    $targetObj->setAttributeField($target, "SCOM_SWITCHES", "useInbandScom",
-        "0");
-    $targetObj->setAttributeField($target, "SCOM_SWITCHES", "useXscom", "0");
-    $targetObj->setAttributeField($target, "SCOM_SWITCHES", "useI2cScom","0");
 
     ## Default effective fabric topology ID to match default fabric topology
     ## ID.  The value will be adjusted based on presence detection later.
