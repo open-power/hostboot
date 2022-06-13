@@ -909,6 +909,10 @@ class errludP_prdf:
                         junk, i = memConcat(buf, i, i+junkLength)
 
                 elif (hexId == hashString("L2_LD_COLRPR_FFDC")):
+                    # NOTE: This data has been deprecated and moved to it's own
+                    #       user data section. However, the parser must remain
+                    #       for legacy logs.
+
                     # Keep track of the length of the data we've parsed
                     parsedLength = 0
 
@@ -930,8 +934,8 @@ class errludP_prdf:
 
                     # autopep8: off
                     l2reserved1    = (l2FFDC >> 48) & 0xff
-                    l2CRPresent    = (l2FFDC >> 44) & 0xf
-                    l2CRMaxAllowed = (l2FFDC >> 40) & 0xf
+                    l2CRPresent    = (l2FFDC >> 44) & 0xf # not used in P10
+                    l2CRMaxAllowed = (l2FFDC >> 40) & 0xf # not used in P10
                     l2LDMaxAllowed = (l2FFDC >> 36) & 0xf
                     l2LDcount      = (l2FFDC >> 32) & 0xf
                     l2reserved2    = (l2FFDC >> 26) & 0x3f
@@ -943,18 +947,18 @@ class errludP_prdf:
                     l2errMember    = l2FFDC & 0x7
                     # autopep8: on
 
-                    l2 = 'L2_LD_COLRPR_FFDC'
+                    # autopep8: off
+                    l2 = 'L2_LD_FFDC'
                     d[cd][l2] = OrderedDict()
-                    d[cd][l2]['L2 LD Counts'] = l2LDcount
-                    d[cd][l2]['L2 LD Max Allowed'] = l2LDMaxAllowed
-                    d[cd][l2]['L2 CR Max Allowed'] = l2CRMaxAllowed
-                    d[cd][l2]['L2 CR Present'] = l2CRPresent
-                    d[cd][l2]['L2 Error Member'] = l2errMember
-                    d[cd][l2]['L2 Error DW'] = l2errDW
-                    d[cd][l2]['L2 Error Bank'] = l2errBank
-                    d[cd][l2]['L2 Error Back of 2to1 Next Cycle'] = l2errBack2to1
-                    d[cd][l2]['L2 Error Syndrome Col'] = l2errSynCol
-                    d[cd][l2]['L2 Error Address'] = l2errAddress
+                    d[cd][l2]['L2 LD Counts']           = l2LDcount
+                    d[cd][l2]['L2 LD Max Allowed']      = l2LDMaxAllowed
+                    d[cd][l2]['L2 Error Member']        = '0x%02x' % l2errMember
+                    d[cd][l2]['L2 Error DW']            = '0x%02x' % l2errDW
+                    d[cd][l2]['L2 Error Bank']          = '0x%02x' % l2errBank
+                    d[cd][l2]['L2 Error Back of 2to1 Next Cycle'] = (0 != l2errBack2to1)
+                    d[cd][l2]['L2 Error Syndrome Col']  = '0x%02x' % l2errSynCol
+                    d[cd][l2]['L2 Error Address']       = '0x%04x' % l2errAddress
+                    # autopep8: on
 
                     # Collect any extra junk data at the end just in case
                     junkLength = dataLength - parsedLength
@@ -962,6 +966,10 @@ class errludP_prdf:
                         junk, i = memConcat(buf, i, i+junkLength)
 
                 elif (hexId == hashString("L3_LD_COLRPR_FFDC")):
+                    # NOTE: This data has been deprecated and moved to it's own
+                    #       user data section. However, the parser must remain
+                    #       for legacy logs.
+
                     # Keep track of the length of the data we've parsed
                     parsedLength = 0
 
@@ -983,9 +991,9 @@ class errludP_prdf:
 
                     # autopep8: off
                     l3reserved1    = (l3FFDC >> 56) & 0xff
-                    l3errDataOut   = (l3FFDC >> 48) & 0xff
-                    l3CRPresent    = (l3FFDC >> 44) & 0xf
-                    l3CRMaxAllowed = (l3FFDC >> 40) & 0xf
+                    l3errDataOut   = (l3FFDC >> 48) & 0xff # not used in P10
+                    l3CRPresent    = (l3FFDC >> 44) & 0xf  # not used in P10
+                    l3CRMaxAllowed = (l3FFDC >> 40) & 0xf  # not used in P10
                     l3LDMaxAllowed = (l3FFDC >> 36) & 0xf
                     l3LDcount      = (l3FFDC >> 32) & 0xf
                     l3reserved2    = (l3FFDC >> 27) & 0x1f
@@ -996,17 +1004,32 @@ class errludP_prdf:
                     l3errMember    = l3FFDC & 0x7
                     # autopep8: on
 
-                    l3 = 'L3_LD_COLRPR_FFDC'
+                    # NOTE: This is where the data is broken, which prompted
+                    #       the new user data section.
+
+                    # Member is a 3-bit field and should be 4.
+                    tmp_member = '0x%02x (or possibly 0x%02x)' % (
+                        l3errMember, l3errMember + 8)
+
+                    # Bank is a 1-bit field and should be 2.
+                    tmp_bank = '0x%02x (or possibly 0x%02x)' % (
+                        l3errBank, l3errBank + 2)
+
+                    # CL half does not exist in data.
+                    tmp_cl_half = 'unknown'
+
+                    # autopep8: off
+                    l3 = 'L3_LD_FFDC'
                     d[cd][l3] = OrderedDict()
-                    d[cd][l3]['L3 LD Counts'] = l3LDcount
-                    d[cd][l3]['L3 LD Max Allowed'] = l3LDMaxAllowed
-                    d[cd][l3]['L3 CR Max Allowed'] = l3CRMaxAllowed
-                    d[cd][l3]['L3 CR Present'] = l3CRPresent
-                    d[cd][l3]['L3 Error Member'] = l3errMember
-                    d[cd][l3]['L3 Error DW'] = l3errDW
-                    d[cd][l3]['L3 Error Bank'] = l3errBank
-                    d[cd][l3]['L3 Error Syndrome Col'] = l3errSynCol
-                    d[cd][l3]['L3 Error Address'] = l3errAddress
+                    d[cd][l3]['L3 LD Counts']           = l3LDcount
+                    d[cd][l3]['L3 LD Max Allowed']      = l3LDMaxAllowed
+                    d[cd][l3]['L3 Error Member']        = tmp_member
+                    d[cd][l3]['L3 Error DW']            = '0x%02x' % l3errDW
+                    d[cd][l3]['L3 Error Bank']          = tmp_bank
+                    d[cd][l3]['L3 Error CL Half']       = tmp_cl_half
+                    d[cd][l3]['L3 Error Syndrome Col']  = '0x%02x' % l3errSynCol
+                    d[cd][l3]['L3 Error Address']       = '0x%04x' % l3errAddress
+                    # autopep8: on
 
                     # Collect any extra junk data at the end just in case
                     junkLength = dataLength - parsedLength

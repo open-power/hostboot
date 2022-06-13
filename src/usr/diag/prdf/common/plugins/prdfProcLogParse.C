@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -220,10 +220,12 @@ bool parseTodFfdcData(  uint8_t * i_buffer, uint32_t i_buflen,
 bool parseL2LdCrFfdc( uint8_t * i_buffer, uint32_t i_buflen,
                       ErrlUsrParser & i_parser )
 {
+    // NOTE: This data has been deprecated and moved to it's own user data
+    //       section. However, the parser must remain for legacy logs.
+
     bool o_rc = true;
 
-    const char * lines = "---------------------------------------------";
-    i_parser.PrintString( LD_CR_FFDC::L2TITLE, lines );
+    i_parser.PrintString( " L2_LD_FFDC", "" );
 
     do
     {
@@ -232,28 +234,30 @@ bool parseL2LdCrFfdc( uint8_t * i_buffer, uint32_t i_buflen,
         if ( i_buflen < sizeof(LD_CR_FFDC::L2LdCrFfdc) )
             { o_rc = false; break; }
 
-        LD_CR_FFDC::L2LdCrFfdc ldcrffdc;
-        memcpy( &ldcrffdc, i_buffer, sizeof(LD_CR_FFDC::L2LdCrFfdc));
+        // NOTE: Do not memcpy this data to the L3 LD struct. It does not work
+        //       properly with PPC data and an x86 parser. Instead, assume the
+        //       data is always in PPC format and extract the data manually.
 
-        i_parser.PrintNumber( "   L2 LD Counts", "%d", ldcrffdc.L2LDcnt );
-        i_parser.PrintNumber( "   L2 LD Max Allowed", "%d",
-                                              ldcrffdc.L2LDMaxAllowed );
-        i_parser.PrintNumber( "   L2 CR Max Allowed", "%d",
-                                              ldcrffdc.L2CRMaxAllowed );
-        i_parser.PrintNumber( "   L2 CR Present", "%d",
-                                              ldcrffdc.L2CRPresent );
+        // Bytes 0 and 1 are reserved
+        // Byte 2 is for column repair which is not used in P10.
+        uint8_t ldMaxAllowed =  (i_buffer[3] & 0xf0) >> 4;
+        uint8_t ldCount      =   i_buffer[3] & 0x0f;
+        uint16_t addr        = ((i_buffer[4] & 0x03) << 8) | i_buffer[5];
+        uint8_t col          =   i_buffer[6];
+        bool nextCycle       = ((i_buffer[7] & 0x80) != 0);
+        uint8_t bank         =  (i_buffer[7] & 0x40) >> 6;
+        uint8_t dw           =  (i_buffer[7] & 0x38) >> 3;
+        uint8_t member       =   i_buffer[7] & 0x07;
 
-        i_parser.PrintNumber( "   L2 Error Member", "%d",
-                                               ldcrffdc.L2errMember );
-        i_parser.PrintNumber( "   L2 Error DW", "%d", ldcrffdc.L2errDW );
-        i_parser.PrintNumber( "   L2 Error Bank", "%d",
-                                               ldcrffdc.L2errBank );
-        i_parser.PrintBool(   "   L2 Error Back of 2to1 Next Cycle",
-                                               0 != ldcrffdc.L2errBack2to1 );
-        i_parser.PrintNumber( "   L2 Error Syndrome Col", "%d",
-                                               ldcrffdc.L2errSynCol );
-        i_parser.PrintNumber( "   L2 Error Address", "%d",
-                                               ldcrffdc.L2errAddress );
+        i_parser.PrintNumber("   L2 LD Counts",      "%d", ldCount);
+        i_parser.PrintNumber("   L2 LD Max Allowed", "%d", ldMaxAllowed);
+
+        i_parser.PrintNumber("   L2 Error Member",       "0x%02x", member);
+        i_parser.PrintNumber("   L2 Error DW",           "0x%02x", dw);
+        i_parser.PrintNumber("   L2 Error Bank",         "0x%02x", bank);
+        i_parser.PrintBool(  "   L2 Error Back of 2to1 Next Cycle", nextCycle);
+        i_parser.PrintNumber("   L2 Error Syndrome Col", "0x%02x", col);
+        i_parser.PrintNumber("   L2 Error Address",      "0x%04x", addr);
 
     } while (0);
 
@@ -270,10 +274,12 @@ bool parseL2LdCrFfdc( uint8_t * i_buffer, uint32_t i_buflen,
 bool parseL3LdCrFfdc( uint8_t * i_buffer, uint32_t i_buflen,
                       ErrlUsrParser & i_parser )
 {
+    // NOTE: This data has been deprecated and moved to it's own user data
+    //       section. However, the parser must remain for legacy logs.
+
     bool o_rc = true;
 
-    const char * lines = "---------------------------------------------";
-    i_parser.PrintString( LD_CR_FFDC::L3TITLE, lines );
+    i_parser.PrintString( " L3_LD_FFDC", "" );
 
     do
     {
@@ -282,25 +288,49 @@ bool parseL3LdCrFfdc( uint8_t * i_buffer, uint32_t i_buflen,
         if ( i_buflen < sizeof(LD_CR_FFDC::L3LdCrFfdc) )
             { o_rc = false; break; }
 
-        LD_CR_FFDC::L3LdCrFfdc ldcrffdc;
-        memcpy( &ldcrffdc, i_buffer, sizeof(LD_CR_FFDC::L3LdCrFfdc));
+        // NOTE: Do not memcpy this data to the L3 LD struct. It does not work
+        //       properly with PPC data and an x86 parser. Instead, assume the
+        //       data is always in PPC format and extract the data manually.
 
-        i_parser.PrintNumber( "   L3 LD Counts", "%d", ldcrffdc.L3LDcnt );
-        i_parser.PrintNumber( "   L3 LD Max Allowed", "%d",
-                                                ldcrffdc.L3LDMaxAllowed );
-        i_parser.PrintNumber( "   L3 CR Max Allowed", "%d",
-                                                ldcrffdc.L3CRMaxAllowed );
-        i_parser.PrintNumber( "   L3 CR Present", "%d",
-                                                ldcrffdc.L3CRPresent );
+        // Bytes 0 and 1 are reserved
+        // Byte 2 is for column repair which is not used in P10.
+        uint8_t ldMaxAllowed =  (i_buffer[3] & 0xf0) >> 4;
+        uint8_t ldCount      =   i_buffer[3] & 0x0f;
+        uint16_t addr        = ((i_buffer[4] & 0x07) << 9) |
+                               ( i_buffer[5]         << 1) |
+                               ((i_buffer[6] & 0x80) >> 7);
+        uint8_t col          = ((i_buffer[6] & 0x7f) << 1) |
+                               ((i_buffer[7] & 0x80) >> 7);
+        uint8_t bank         =  (i_buffer[7] & 0x40) >> 6;
+        uint8_t dw           =  (i_buffer[7] & 0x38) >> 3;
+        uint8_t member       =   i_buffer[7] & 0x07;
 
-        i_parser.PrintNumber( "   L3 Error Member", "%d",
-                                                ldcrffdc.L3errMember );
-        i_parser.PrintNumber( "   L3 Error DW", "%d", ldcrffdc.L3errDW );
-        i_parser.PrintNumber( "   L3 Error Bank", "%d", ldcrffdc.L3errBank );
-        i_parser.PrintNumber( "   L3 Error Syndrome Col", "%d",
-                                                ldcrffdc.L3errSynCol );
-        i_parser.PrintNumber( "   L3 Error Address", "%d",
-                                                ldcrffdc.L3errAddress );
+        // NOTE: This is where the data is broken, which prompted
+        //       the new user data section.
+
+        // Member is a 3-bit field and should be 4.
+        char tmp_member[DATA_SIZE]  = "";
+        snprintf(tmp_member,  DATA_SIZE, "0x%02x (or possibly 0x%02x)",
+                 member, member + 8);
+
+        // Bank is a 1-bit field and should be 2.
+        char tmp_bank[DATA_SIZE]  = "";
+        snprintf(tmp_bank,  DATA_SIZE, "0x%02x (or possibly 0x%02x)",
+                 bank, bank + 2);
+
+        // CL half does not exist in data.
+        const char* tmp_cl_half = "unknown";
+
+        i_parser.PrintNumber("   L3 LD Counts",      "%d", ldCount );
+        i_parser.PrintNumber("   L3 LD Max Allowed", "%d", ldMaxAllowed );
+
+        i_parser.PrintString("   L3 Error Member",                 tmp_member);
+        i_parser.PrintNumber("   L3 Error DW",           "0x%02x", dw);
+        i_parser.PrintString("   L3 Error Bank",                   tmp_bank);
+        i_parser.PrintString("   L3 Error CL Half",                tmp_cl_half);
+        i_parser.PrintNumber("   L3 Error Syndrome Col", "0x%02x", col);
+        i_parser.PrintNumber("   L3 Error Address",      "0x%04x", addr);
+
     } while (0);
 
     if ( !o_rc && i_buffer )
