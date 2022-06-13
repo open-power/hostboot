@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -42,6 +42,11 @@
 #include <hwas/common/hwasCallout.H>
 #include <hwas/common/hwas_reasoncodes.H>
 #include <targeting/common/attributes.H>
+#include <attributetraits.H>
+
+#ifdef __HOSTBOOT_MODULE
+#include <initservice/initserviceif.H>
+#endif
 
 namespace HWAS
 {
@@ -107,6 +112,29 @@ bool retrieveTarget(uint8_t * & io_uData,
     }
     return l_err;
 }
+
+#ifdef __HOSTBOOT_MODULE
+GARD_ErrorType getEphmeralGardRecordType()
+{
+    TARGETING::ATTR_BLOCK_SPEC_DECONFIG_type l_block_spec_deconfig = isBlockSpecDeconfigSetOnAnyNode();
+
+    GARD_ErrorType ephemeralGuardType = GARD_Reconfig;
+    // For eBMC systems, if we are in block speculative deconfig mode,
+    // set the GARD_ErrorType to Sticky to treat deconfigs as
+    // unrecoverable gards on the next reconfig loop,
+    // otherwise set as normal GARD_Reconfig
+    if (!INITSERVICE::spBaseServicesEnabled() && l_block_spec_deconfig)
+    {
+        HWAS_DBG("setting GARD_Sticky_deconfig for the Ephemeral Guard");
+        ephemeralGuardType = GARD_Sticky_deconfig;
+    }
+    else
+    {
+        HWAS_DBG("setting GARD_Reconfig for the Ephemeral Guard");
+    }
+    return ephemeralGuardType;
+}
+#endif
 
 #ifndef __HOSTBOOT_RUNTIME
 void processCallout(errlHndl_t &io_errl,

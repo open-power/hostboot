@@ -419,6 +419,15 @@ errlHndl_t platHandleProcedureCallout(errlHndl_t &io_errl,
         callOutPriority i_priority);
 
 /**
+ * @brief helper function to determine what the type of an Ephemeral Guard should
+ *        be based off ATTR_BLOCK_SPEC_DECONFIG
+ *
+ * @return GARD_ErrorType   GARD_Sticky_deconfig if ATTR_BLOCK_SPEC_DECONFIG == 1,
+ *                          GARD_Reconfig otherwise
+ */
+GARD_ErrorType getEphmeralGardRecordType();
+
+/**
  * @brief platform specific code to handle a hardware callout that has been
  *  found in an errlog
  *

@@ -37,6 +37,7 @@
 #include <util/runtime/rt_fwreq_helper.H>  // firmware_request_helper
 #include <targeting/common/targetservice.H>
 #include <hwas/common/deconfigGard.H>
+#include <hwas/common/hwasCallout.H> // getEphmeralGardRecordType()
 #include <initservice/initserviceif.H> // spBaseServiceEnabled()
 #include <errl/errlreasoncodes.H>
 
@@ -673,7 +674,7 @@ bool rt_processCallout(errlHndl_t &io_errl,
             TRACFCOMP( g_trac_errl, ERR_MRK
                        "Runtime HW_CALLOUT errorlog with DELAYED_DECONFIG or "
                        "DECONFIG not allowed! Changed to NO_DECONFIG. "
-                       "plid: 0x%X. Deconfig State: 0x%x", io_errl->plid(),
+                       "plid: 0x%X. Deconfig State: 0x%X", io_errl->plid(),
                        pCalloutUD->deconfigState);
         }
 
@@ -687,7 +688,7 @@ bool rt_processCallout(errlHndl_t &io_errl,
         if ((pCalloutUD->type == HWAS::HW_CALLOUT) &&
             (pCalloutUD->gardErrorType != HWAS::GARD_NULL))
         {
-            TARGETING::Target *pTarget = NULL;
+            TARGETING::Target *pTarget = nullptr;
             uint8_t * l_uData = (uint8_t *)(pCalloutUD + 1);
             bool l_err = HWAS::retrieveTarget(l_uData, pTarget, io_errl);
 
@@ -697,11 +698,30 @@ bool rt_processCallout(errlHndl_t &io_errl,
                     (pTarget,
                      io_errl->eid(),
                      pCalloutUD->gardErrorType);
+
                 if (errl)
                 {
                     TRACFCOMP( g_trac_errl, ERR_MRK
-                               "rt_processCallout: error from platCreateGardRecord");
+                               "rt_processCallout: error from platCreateGardRecord for Peristent Guard Record 0x%X",
+                               pCalloutUD->gardErrorType);
                     errlCommit(errl, HWAS_COMP_ID);
+                }
+
+                // Ehpemeral Guard Records only supported on BMC systems
+                if (!INITSERVICE::spBaseServicesEnabled())
+                {
+                    errl = HWAS::theDeconfigGard().platCreateGardRecord
+                        (pTarget,
+                         io_errl->eid(),
+                         HWAS::getEphmeralGardRecordType());
+
+                    if (errl)
+                    {
+                        TRACFCOMP( g_trac_errl, ERR_MRK
+                                   "rt_processCallout: error from platCreateGardRecord for Ephemeral Guard Record 0x%X",
+                                   HWAS::getEphmeralGardRecordType() );
+                        errlCommit(errl, HWAS_COMP_ID);
+                    }
                 }
 
                 errl = initiate_gard::notify_hypervisor_of_resource_gard(io_errl, pTarget);
@@ -709,7 +729,7 @@ bool rt_processCallout(errlHndl_t &io_errl,
                 if (errl)
                 {
                     TRACFCOMP( g_trac_errl,
-                               ERR_MRK"rt_processCallout: error from notify_hypervisor_of_resource_gard (PLID=0x%08x)",
+                               ERR_MRK"rt_processCallout: error from notify_hypervisor_of_resource_gard (PLID=0x%08X)",
                                ERRL_GETPLID_SAFE(errl));
                     errlCommit(errl, HWAS_COMP_ID);
                 }
