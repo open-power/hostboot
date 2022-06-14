@@ -1,0 +1,121 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/ocmb/odyssey/procedures/xml/error_info/ody_phyinit_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2023                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<hwpErrors>
+
+  <hwpError>
+    <rc>RC_ODY_PHYINIT_INVALID_DBYTENUMBER</rc>
+    <description>Ody phyinit invalid Dbyte number.</description>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>DBYTENUMBER</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_ODY_PHYINIT_INVALID_CONFIGURATION</rc>
+    <description>Ody phyinit invalid configuration.</description>
+    <ffdc>NUMACTIVEDBYTEDFI0</ffdc>
+    <ffdc>NUMACTIVEDBYTEDFI1</ffdc>
+    <ffdc>NUMDBYTE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_ODY_PHYINIT_INVALID_WRITE_PREAMBLE</rc>
+    <description>Ody phyinit invalid value for Write Preamble Settings.</description>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>WRPRE</ffdc>
+    <ffdc>MR8A0</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_ODY_PHYINIT_INVALID_WRITE_POSTAMBLE</rc>
+    <description>Ody phyinit invalid value for Write Postamble Settings.</description>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>WRPOST</ffdc>
+    <ffdc>MR8A0</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_ODY_PHYINIT_INVALID_PREAMBLE_CTRL</rc>
+    <description>Ody phyinit invalid preamble control.</description>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>PREAMBLECTRL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+
+</hwpErrors>
