@@ -350,60 +350,6 @@ PRDF_PLUGIN_DEFINE(p10_core, analyzeNeighborCore_UCS);
 // all on the same address, which is what allows us to get away with this
 // simpler design.
 
-/**
- * @brief Adds L2 Line Delete/Column Repair FFDC to an SDC.
- * @param i_coreChip A core chip.
- * @param io_sc      Step code data struct.
- */
-void addL2LdCrFfdc( ExtensibleChip * i_coreChip, STEP_CODE_DATA_STRUCT & io_sc,
-                    LD_CR_FFDC::L2LdCrFfdc & i_LdCrFfdc )
-{
-    CaptureData & cd = io_sc.service_data->GetCaptureData();
-
-    static const size_t sz_word = sizeof(CPU_WORD);
-
-    // Get the maximum capture data size and
-    // adjust the size for endianness.
-    static const size_t sz_maxData =
-        ((sizeof(LD_CR_FFDC::L2LdCrFfdc) + sz_word-1) / sz_word) * sz_word;
-
-    uint8_t data[sz_maxData];
-    memset( data, 0x00, sz_maxData );
-    memcpy( &data, &i_LdCrFfdc, sz_maxData);
-
-    // Add data to capture data.
-    BitString  bs( sz_maxData*8, (CPU_WORD *) &data );
-    cd.Add( i_coreChip->getTrgt(),
-            Util::hashString(LD_CR_FFDC::L2TITLE), bs );
-}
-
-/**
- * @brief Adds L3 Line Delete/Column Repair FFDC to an SDC.
- * @param i_coreChip A core chip.
- * @param io_sc      Step code data struct.
- */
-void addL3LdCrFfdc( ExtensibleChip * i_coreChip, STEP_CODE_DATA_STRUCT & io_sc,
-                    LD_CR_FFDC::L3LdCrFfdc & i_LdCrFfdc )
-{
-    CaptureData & cd = io_sc.service_data->GetCaptureData();
-
-    static const size_t sz_word = sizeof(CPU_WORD);
-
-    // Get the maximum capture data size and
-    // adjust the size for endianness.
-    static const size_t sz_maxData =
-        ((sizeof(LD_CR_FFDC::L3LdCrFfdc) + sz_word-1) / sz_word) * sz_word;
-
-    uint8_t data[sz_maxData];
-    memset( data, 0x00, sz_maxData );
-    memcpy( &data, &i_LdCrFfdc, sz_maxData);
-
-    // Add data to capture data.
-    BitString bs( sz_maxData*8, (CPU_WORD *) &data );
-    cd.Add( i_coreChip->getTrgt(),
-            Util::hashString(LD_CR_FFDC::L3TITLE), bs );
-}
-
 #ifdef __HOSTBOOT_RUNTIME
 /**
  * @brief Adds L2 Line Delete FFDC to an SDC.
@@ -548,15 +494,6 @@ int32_t L2UE( ExtensibleChip * i_coreChip, STEP_CODE_DATA_STRUCT & io_sc )
     P10CoreDataBundle * l_bundle = getCoreDataBundle(i_coreChip);
     l_bundle->iv_L2LDCount++;
 
-    LD_CR_FFDC::L2LdCrFfdc ldcrffdc;
-    ldcrffdc.L2LDcnt        = l_bundle->iv_L2LDCount;
-    ldcrffdc.L2errMember    = errorAddr.member;
-    ldcrffdc.L2errDW        = errorAddr.dw;
-    ldcrffdc.L2errBank      = errorAddr.bank;
-    ldcrffdc.L2errBack2to1  = errorAddr.back_of_2to1_nextcycle;
-    ldcrffdc.L2errSynCol    = errorAddr.syndrome_col;
-    ldcrffdc.L2errAddress   = errorAddr.real_address_47_56;
-
     // Finally, add the FFDC to the SDC.
     addL2LineDeleteFfdc(i_coreChip, io_sc, l_bundle->iv_L2LDCount, errorAddr);
 
@@ -592,14 +529,6 @@ int32_t L3UE( ExtensibleChip * i_coreChip, STEP_CODE_DATA_STRUCT & io_sc )
     P10CoreDataBundle * l_bundle = getCoreDataBundle(i_coreChip);
     l_bundle->iv_L3LDCount++;
 
-    LD_CR_FFDC::L3LdCrFfdc ldcrffdc;
-    ldcrffdc.L3LDcnt      = l_bundle->iv_L3LDCount;
-    ldcrffdc.L3errMember  = errorAddr.member;
-    ldcrffdc.L3errDW      = errorAddr.dw;
-    ldcrffdc.L3errBank    = errorAddr.bank;
-    ldcrffdc.L3errSynCol  = errorAddr.syndrome_col;
-    ldcrffdc.L3errAddress = errorAddr.real_address_46_57;
-
     // Finally, add the FFDC to the SDC.
     addL3LineDeleteFfdc(i_coreChip, io_sc, l_bundle->iv_L3LDCount, errorAddr);
 
@@ -625,15 +554,10 @@ int32_t L2CE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 
     p10_l2err_extract_err_data errorAddr{};
 
-    // FFDC will be collected throughout function and added to SDC at the end.
-    LD_CR_FFDC::L2LdCrFfdc ldcrffdc;
-
-    // Get the maximum number of line deletes allowed and add to FFDC.
+    // Get the maximum number of line deletes allowed.
     uint16_t l_maxLineDelAllowed = mfgMode()
                 ? getSystemTarget()->getAttr<ATTR_MNFG_TH_L2_LINE_DELETES>()
                 : getSystemTarget()->getAttr<ATTR_FIELD_TH_L2_LINE_DELETES>();
-
-    ldcrffdc.L2LDMaxAllowed = l_maxLineDelAllowed;
 
     do
     {
@@ -643,13 +567,6 @@ int32_t L2CE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
             PRDF_ERR("[L2CE] HUID: 0x%08x extractL2Err failed", huid);
             break;
         }
-
-        ldcrffdc.L2errMember   = errorAddr.member;
-        ldcrffdc.L2errDW       = errorAddr.dw;
-        ldcrffdc.L2errBank     = errorAddr.bank;
-        ldcrffdc.L2errBack2to1 = errorAddr.back_of_2to1_nextcycle;
-        ldcrffdc.L2errSynCol   = errorAddr.syndrome_col;
-        ldcrffdc.L2errAddress  = errorAddr.real_address_47_56;
 
         // Increment the CE count and determine if a line delete is needed.
         // IMPORTANT: Yes, we are actually passing the line delete count as the
@@ -693,10 +610,6 @@ int32_t L2CE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 
     } while(0);
 
-    // The line delete count may, or may not, have been updated. Regardless, add
-    // the latest value to the FFDC.
-    ldcrffdc.L2LDcnt = l_bundle->iv_L2LDCount;
-
     // Finally, add the FFDC to the SDC.
     addL2LineDeleteFfdc(i_chip, io_sc, l_bundle->iv_L2LDCount, errorAddr);
 
@@ -723,15 +636,10 @@ int32_t L3CE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 
     p10_l3err_extract_err_data errorAddr{};
 
-    // FFDC will be collected throughout function and added to SDC at the end.
-    LD_CR_FFDC::L3LdCrFfdc ldcrffdc;
-
-    // Get the maximum number of line deletes allowed and add to FFDC.
+    // Get the maximum number of line deletes allowed.
     uint16_t l_maxLineDelAllowed = mfgMode()
                 ? getSystemTarget()->getAttr<ATTR_MNFG_TH_L3_LINE_DELETES>()
                 : getSystemTarget()->getAttr<ATTR_FIELD_TH_L3_LINE_DELETES>();
-
-    ldcrffdc.L3LDMaxAllowed = l_maxLineDelAllowed;
 
     do
     {
@@ -741,12 +649,6 @@ int32_t L3CE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
             PRDF_ERR("[L3CE] HUID: 0x%08x extractL3Err failed", huid);
             break;
         }
-
-        ldcrffdc.L3errMember  = errorAddr.member;
-        ldcrffdc.L3errDW      = errorAddr.dw;
-        ldcrffdc.L3errBank    = errorAddr.bank;
-        ldcrffdc.L3errSynCol  = errorAddr.syndrome_col;
-        ldcrffdc.L3errAddress = errorAddr.real_address_46_57;
 
         // Increment the CE count and determine if a line delete is needed.
         // IMPORTANT: Yes, we are actually passing the line delete count as the
@@ -789,10 +691,6 @@ int32_t L3CE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
         }
 
     } while(0);
-
-    // The line delete count may, or may not, have been updated. Regardless, add
-    // the latest value to the FFDC.
-    ldcrffdc.L3LDcnt = l_bundle->iv_L3LDCount;
 
     // Finally, add the FFDC to the SDC.
     addL3LineDeleteFfdc(i_chip, io_sc, l_bundle->iv_L2LDCount, errorAddr);
