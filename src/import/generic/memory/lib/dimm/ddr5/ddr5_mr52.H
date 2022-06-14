@@ -1,0 +1,196 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/import/generic/memory/lib/dimm/ddr5/ddr5_mr52.H $         */
+/*                                                                        */
+/* OpenPOWER HostBoot Project                                             */
+/*                                                                        */
+/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
+/*                                                                        */
+/* Licensed under the Apache License, Version 2.0 (the "License");        */
+/* you may not use this file except in compliance with the License.       */
+/* You may obtain a copy of the License at                                */
+/*                                                                        */
+/*     http://www.apache.org/licenses/LICENSE-2.0                         */
+/*                                                                        */
+/* Unless required by applicable law or agreed to in writing, software    */
+/* distributed under the License is distributed on an "AS IS" BASIS,      */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        */
+/* implied. See the License for the specific language governing           */
+/* permissions and limitations under the License.                         */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// EKB-Mirror-To: hostboot
+
+///
+/// @file ddr5_mr52.H
+/// @brief Run and manage the DDR5 MR52 loading
+///
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: FSP:HB
+
+#ifndef _GENERIC_DDR5_MR52_H_
+#define _GENERIC_DDR5_MR52_H_
+
+#include <fapi2.H>
+
+#include <mss_generic_attribute_getters.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <generic/memory/lib/utils/c_str.H>
+#include <generic/memory/lib/utils/mss_rank.H>
+#include <generic/memory/lib/utils/mss_generic_check.H>
+#include <generic/memory/lib/utils/num.H>
+
+namespace mss
+{
+
+namespace ddr5
+{
+
+///
+/// @brief Data structure for DDR5 MR52
+/// @tparam MC the memory controller type
+///
+template<mss::mc_type MC>
+class mr52_data
+{
+    public:
+        // Needed as we need to know what MR for the CCS instruction created by the lab tooling
+        static constexpr uint64_t iv_mr = 52;
+
+        ///
+        /// @brief mr52_data ctor
+        /// @param[in] a fapi2::TARGET_TYPE_DIMM target
+        /// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+        ///
+        mr52_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc )
+        {
+            const auto& l_port = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
+
+            FAPI_TRY(mss::attr::get_ddr5_wr_crc_autodisable_window(l_port, iv_wr_crc_autodisable_window),
+                     "Error in ddr5::mr52_data()");
+
+            o_rc = fapi2::FAPI2_RC_SUCCESS;
+            return;
+        fapi_try_exit:
+            o_rc = fapi2::current_err;
+            FAPI_ERR(TARGTIDFORMAT " unable to get attributes for ddr5::mr52", TARGTID);
+            return;
+        }
+
+        ///
+        /// @brief Default constructor
+        /// @note Default constructor is defined to allow for the use of STL data structures
+        ///
+        mr52_data() = default;
+
+
+        ///
+        /// @brief Checks the WR CRC window value
+        /// @param[in] a fapi2::TARGET_TYPE_DIMM target
+        /// @param[in] i_value the WR CRC window value to check
+        /// @return FAPI2_RC_SUCCESS if and only if ok
+        ///
+        fapi2::ReturnCode check_window(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, const uint8_t i_value) const
+        {
+            constexpr uint8_t MAX = 0b01111111;
+            FAPI_ASSERT( (i_value <= MAX),
+                         fapi2::MSS_DDR5_MR52_BAD_WR_CRC_WINDOW()
+                         .set_DIMM_IN_ERROR(i_target)
+                         .set_VALUE(i_value),
+                         TARGTIDFORMAT " DDR5 MR52. Bad WR CRC window input: %u <= %u", TARGTID, i_value, MAX);
+
+            return fapi2::FAPI2_RC_SUCCESS;
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Assembles the MR based upon the passed in rank info and DRAM number
+        /// @param[in] i_rank_info the rank information class
+        /// @param[out] o_mr_data the mode register OP data in [7:0] format
+        /// @param[in] i_dram_number the DRAM number - not used for MR51
+        /// @return FAPI2_RC_SUCCESS if and only if ok
+        /// @note DRAM number is not used for MR51 but is kept to keep the interface common across all MR
+        ///
+        fapi2::ReturnCode assemble_data(const mss::rank::info<MC>& i_rank_info,
+                                        uint8_t& o_mr_data,
+                                        const uint8_t i_dram_number = 0) const
+        {
+            fapi2::buffer<uint8_t> l_data;
+
+            FAPI_TRY(check_window(i_rank_info.get_dimm_target(), iv_wr_crc_autodisable_window));
+
+            l_data. template insertFromRight<WINDOW, WINDOW_LEN>(iv_wr_crc_autodisable_window);
+
+            o_mr_data = l_data;
+
+            return fapi2::FAPI2_RC_SUCCESS;
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Displays the information that makes up the MR
+        /// @param[in] i_rank_info the rank on which to operate
+        /// @param[in] i_dram_number the DRAM on which to operate - not used for MR51 but included to keep the API common
+        /// @return FAPI2_RC_SUCCESS if and only if ok
+        ///
+        fapi2::ReturnCode display(const mss::rank::info<MC>& i_rank_info, const uint8_t i_dram_number = 0) const
+        {
+            this->display(i_rank_info.get_dimm_target());
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Reads in the MR information into this data class
+        /// @param[in] i_rank_info the rank on which to operate - unused for MR51 but keeping to match existing API
+        /// @param[in] i_mr_data the mode register OP data in [7:0] format
+        /// @param[in] i_dram_number the DRAM on which to operate - not used for MR51 but included to keep the API common
+        /// @return FAPI2_RC_SUCCESS if and only if ok
+        /// @note This can be used for decoding mode register reads
+        ///
+        fapi2::ReturnCode read_from_data(const mss::rank::info<MC>& i_rank_info,
+                                         const uint8_t i_mr_data,
+                                         const uint8_t i_dram_number = 0)
+        {
+            const fapi2::buffer<uint8_t> l_data(i_mr_data);
+
+            iv_wr_crc_autodisable_window = 0;
+            l_data. template extractToRight<WINDOW, WINDOW_LEN>(iv_wr_crc_autodisable_window);
+
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        enum
+        {
+            WINDOW = 1,
+            WINDOW_LEN = 7,
+        };
+
+        uint8_t iv_wr_crc_autodisable_window = 0;
+
+    private:
+
+        ///
+        /// @brief Displays the information that makes up the MR
+        /// @param[in] a fapi2::TARGET_TYPE_DIMM target
+        ///
+        void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target) const
+        {
+            FAPI_INF(TARGTIDFORMAT " DDR5 MR51. WR CRC auto-disable window: %u.",
+                     TARGTID, iv_wr_crc_autodisable_window);
+        }
+
+};
+
+} // ns ddr5
+
+} // ns mss
+
+#endif

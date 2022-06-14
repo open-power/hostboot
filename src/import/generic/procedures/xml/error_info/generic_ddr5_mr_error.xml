@@ -535,11 +535,47 @@
 
 <!-- MR51 errors -->
 
-
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR51_BAD_WR_CRC_THRESHOLD</rc>
+    <description>
+       A bad WR CRC threshold value was passed to MR51
+    </description>
+    <ffdc>MAX</ffdc>
+    <ffdc>VALUE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
 
 <!-- MR52 errors -->
 
-
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR52_BAD_WR_CRC_WINDOW</rc>
+    <description>
+       A bad WR CRC window value was passed to MR52
+    </description>
+    <ffdc>MAX</ffdc>
+    <ffdc>VALUE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
 
 <!-- MR111 errors -->
 
