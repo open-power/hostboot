@@ -45,7 +45,6 @@
 
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
-
 #include <lib/phy/ody_ddrphy_phyinit_structs.H>
 #include <lib/phy/ody_ddrphy_phyinit_config.H>
 #include <lib/phy/ody_ddrphy_csr_defines.H>
@@ -55,37 +54,6 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
-
-///
-/// @param[in] Svrty the severity of the assert
-/// @param[in] fmt the data format to print
-/// @param[in] ... the variable arguments to pass in
-/// @note This function should be replaced with IBM asserts
-///
-// TODO:ZEN:MST-1584 Update PHY init synopsys asserts to use IBM's assert methodology
-void dwc_ddrphy_phyinit_assert (int Svrty, const char* fmt, ...)
-{
-#if 0
-    char* PreStr;
-    PreStr = (Svrty == 0) ? "[Error]" : "[Warning]";
-    va_list argptr;
-
-    va_start(argptr, fmt);
-    vprintf(PreStr, argptr);
-    vprintf(fmt, argptr);
-    va_end(argptr);
-
-    if (Svrty == 0)
-    {
-        exit(EXIT_FAILURE);
-    }
-    else
-    {
-        return;
-    }
-
-#endif
-}
 
 ///
 /// @brief Maps from drive strength in Ohms to the register value
@@ -188,41 +156,52 @@ int dwc_ddrphy_phyinit_mapDrvStren (const int DrvStren_ohm)
 
 ///
 /// @brief Checks if a dbyte is disabled
+/// @param[in] i_target - the memory port on which to operate
 /// @param[in] i_user_input_basic - Synopsys basic user input structure
 /// @param[in] i_user_input_dram_config - DRAM configuration inputs needed for PHY init (MRS/RCW)
 /// @param[in] DbyteNumber the Dbyte to check to see if it is disabled
+/// @param[out] o_rc fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 /// @return 0 if enabled, 1 if disabled
 ///
-int dwc_ddrphy_phyinit_IsDbyteDisabled(const user_input_basic_t& i_user_input_basic,
-                                       const user_input_dram_config_t& i_user_input_dram_config,
-                                       const int DbyteNumber)
+int dwc_ddrphy_phyinit_IsDbyteDisabled( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                        const user_input_basic_t& i_user_input_basic,
+                                        const user_input_dram_config_t& i_user_input_dram_config,
+                                        const int DbyteNumber,
+                                        fapi2::ReturnCode& o_rc)
 {
-
-    if (DbyteNumber < 0)
-    {
-        // TODO:ZEN:MST-1584 Update PHY init synopsys asserts to use IBM's assert methodology
-        dwc_ddrphy_phyinit_assert (0, "// [dwc_ddrphy_phyinit_IsDbyteDisabled] invalid DbyteNumber %d.\n", DbyteNumber);
-        return 1;
-    }
-
     int DisableDbyte;
     DisableDbyte = 0; // default assume Dbyte is Enabled.
 
     int nad0 = i_user_input_basic.NumActiveDbyteDfi0;
     int nad1 = i_user_input_basic.NumActiveDbyteDfi1;
 
-    if (nad0 + nad1 > i_user_input_basic.NumDbyte)
-    {
-        // TODO:ZEN:MST-1584 Update PHY init synopsys asserts to use IBM's assert methodology
-        dwc_ddrphy_phyinit_assert (0,
-                                   "// [dwc_ddrphy_phyinit_IsDbyteDisabled] invalid PHY configuration:NumActiveDbyteDfi0(%d)+NumActiveDbyteDfi1(%d)>NumDbytes(%d).\n",
-                                   nad0, nad1, i_user_input_basic.NumDbyte);
-    }
-
-    // Implements Section 1.3 of Pub Databook
-
     // DfiMode is 5 if 2 channel but only Dfi0 is connected and using more than half the dbyte.
     int isDfiMode5 = 0;
+
+    // DDR5 BYTE Mapping variables.
+    int db_first0 = 100; // Chan 0 first Dbyte num
+    int db_last0  = 100; // Chan 0 last Dbyte num (excluded ECC)
+    int db_ecc0   = 100; // Chan 0 ECC Dbyte num
+    int db_first1 = 100; // Chan 1 first Dbyte num
+    int db_last1  = 100; // Chan 1 last Dbyte num (excluded ECC)
+    int db_ecc1   = 100; // Chan 1 ECC Dbyte num
+
+    FAPI_ASSERT(DbyteNumber >= 0,
+                fapi2::ODY_PHYINIT_INVALID_DBYTENUMBER().
+                set_PORT_TARGET(i_target).
+                set_DBYTENUMBER(DbyteNumber),
+                TARGTIDFORMAT " invalid DbyteNumber %d", TARGTID, DbyteNumber);
+
+    FAPI_ASSERT((nad0 + nad1) <= i_user_input_basic.NumDbyte,
+                fapi2::ODY_PHYINIT_INVALID_CONFIGURATION().
+                set_PORT_TARGET(i_target).
+                set_NUMACTIVEDBYTEDFI0(nad0).
+                set_NUMACTIVEDBYTEDFI1(nad1).
+                set_NUMDBYTE(i_user_input_basic.NumDbyte),
+                TARGTIDFORMAT " invalid PHY configuration:NumActiveDbyteDfi0(%d)+NumActiveDbyteDfi1(%d)>NumDbytes(%d).\n",
+                TARGTID, nad0, nad1, i_user_input_basic.NumDbyte);
+
+    // Implements Section 1.3 of Pub Databook
 
     if ((i_user_input_basic.Dfi1Exists == 1) &&
         (i_user_input_basic.NumActiveDbyteDfi1 == 0) &&
@@ -245,13 +224,6 @@ int dwc_ddrphy_phyinit_IsDbyteDisabled(const user_input_basic_t& i_user_input_ba
     // DfiMode == 5:
     //       channel-0 : 0,1,2,3,4,...
     // ##############################################
-
-    int db_first0 = 100; // Chan 0 first Dbyte num
-    int db_last0  = 100; // Chan 0 last Dbyte num (excluded ECC)
-    int db_ecc0   = 100; // Chan 0 ECC Dbyte num
-    int db_first1 = 100; // Chan 1 first Dbyte num
-    int db_last1  = 100; // Chan 1 last Dbyte num (excluded ECC)
-    int db_ecc1   = 100; // Chan 1 ECC Dbyte num
 
     if (i_user_input_basic.NumDbyte > 6)
     {
@@ -325,7 +297,11 @@ int dwc_ddrphy_phyinit_IsDbyteDisabled(const user_input_basic_t& i_user_input_ba
     }
 
     // Qualify results against MessageBlock
+    o_rc = fapi2::FAPI2_RC_SUCCESS;
+    return DisableDbyte;
 
+fapi_try_exit:
+    o_rc = fapi2::current_err;
     return DisableDbyte;
 }
 
@@ -1320,11 +1296,13 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
                     break;
 
                 default:
-                    // TODO:ZEN:MST-1584 Update PHY init synopsys asserts to use IBM's assert methodology
-                    dwc_ddrphy_phyinit_assert(0,
-                                              TARGTIDFORMAT
-                                              " //// [phyinit_C_initPhyConfig] Pstate=%d, Invalid value for Write Preamble Settings - MR8[4:3] = %d. Valid range is 1 - 3. (MR8 = %d)",
-                                              TARGTID, pstate, WrPre, i_user_input_dram_config.MR8_A0);
+                    FAPI_ASSERT(false,
+                                fapi2::ODY_PHYINIT_INVALID_WRITE_PREAMBLE().
+                                set_PORT_TARGET(i_target).
+                                set_WRPRE(WrPre).
+                                set_MR8A0(i_user_input_dram_config.MR8_A0),
+                                TARGTIDFORMAT " Pstate=%d, Invalid value for Write Preamble Settings - MR8[4:3] = %d. Valid range is 1 - 3. (MR8 = %x)",
+                                TARGTID, pstate, WrPre, i_user_input_dram_config.MR8_A0);
             }
 
             DqsPreamblePattern = (EnTxDqsPreamblePattern << csr_EnTxDqsPreamblePattern_LSB) | (TxDqsPreamblePattern <<
@@ -1359,12 +1337,14 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
                     break;
 
                 default:
-                    // TODO:ZEN:MST-1584 Update PHY init synopsys asserts to use IBM's assert methodology
-                    dwc_ddrphy_phyinit_assert(0,
-                                              TARGTIDFORMAT
-                                              " //// [phyinit_C_initPhyConfig] Pstate=%d, Invalid value for Write Postamble Settings - MR8[7:7] = %d. Valid range is 0 - 1.",
-                                              TARGTID,
-                                              pstate, WrPost);
+                    FAPI_ASSERT(false,
+                                fapi2::ODY_PHYINIT_INVALID_WRITE_POSTAMBLE().
+                                set_PORT_TARGET(i_target).
+                                set_WRPOST(WrPost).
+                                set_MR8A0(i_user_input_dram_config.MR8_A0),
+                                TARGTIDFORMAT
+                                " Pstate=%d, Invalid value for Write Postamble Settings - MR8[7:7] = %d. Valid range is 0 - 1. (MR8 = %x)",
+                                TARGTID, pstate, WrPost, i_user_input_dram_config.MR8_A0);
             }
 
             DqsPostamblePattern = (EnTxDqsPostamblePattern << csr_EnTxDqsPostamblePattern_LSB) |
@@ -1415,12 +1395,12 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
                     break;
 
                 default:
-                    // TODO:ZEN:MST-1584 Update PHY init synopsys asserts to use IBM's assert methodology
-                    dwc_ddrphy_phyinit_assert(0,
-                                              TARGTIDFORMAT
-                                              " //// [phyinit_C_initPhyConfig] Invalid value for userInputAdvanced.D5TxDqPreambleCtrl[%d] = %d. Valid range is 0 - 4.",
-                                              TARGTID, pstate,
-                                              i_user_input_advanced.D5TxDqPreambleCtrl[pstate]);
+                    FAPI_ASSERT(false,
+                                fapi2::ODY_PHYINIT_INVALID_PREAMBLE_CTRL().
+                                set_PORT_TARGET(i_target).
+                                set_PREAMBLECTRL(i_user_input_advanced.D5TxDqPreambleCtrl[pstate]),
+                                TARGTIDFORMAT " Invalid value for userInputAdvanced.D5TxDqPreambleCtrl[%d] = %d. Valid range is 0 - 4.",
+                                TARGTID, pstate, i_user_input_advanced.D5TxDqPreambleCtrl[pstate]);
             }
 
             DmPreamblePattern = (EnTxDqPreamblePattern << csr_EnTxDmPreamblePattern_LSB) | (TxDqPreamblePattern <<
@@ -2310,20 +2290,23 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
         regData1 = (0x1ff << csr_PowerDownRcvr_LSB | 0x1 << csr_PowerDownRcvrDqs_LSB | 0x1 << csr_RxPadStandbyEn_LSB) ;
         unsigned int PowerDownDBI; // turn off Rx of DBI lane and enabled standby power saving on rxdq and rxdqs
         PowerDownDBI = (0x100 << csr_PowerDownRcvr_LSB | csr_RxPadStandbyEn_MASK) ;
+        fapi2::ReturnCode l_rc;
 
         // Implements Section 1.3 of Pub Databook
         for (byte = 0; byte < i_user_input_basic.NumDbyte; byte++) // for each dbyte
         {
             c_addr = byte << 12;
 
-            if (dwc_ddrphy_phyinit_IsDbyteDisabled(i_user_input_basic, i_user_input_dram_config, byte))
+            if (dwc_ddrphy_phyinit_IsDbyteDisabled(i_target, i_user_input_basic, i_user_input_dram_config, byte, l_rc))
             {
+                FAPI_TRY(l_rc);
                 FAPI_DBG (TARGTIDFORMAT " //// [phyinit_C_initPhyConfig] Disabling DBYTE %d", TARGTID, byte);
                 FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (c_addr | tDBYTE | csr_DbyteMiscMode_ADDR), regData));
                 FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (c_addr | tDBYTE | csr_DqDqsRcvCntrl1_ADDR), regData1));
             }
             else
             {
+                FAPI_TRY(l_rc);
 
                 // DBI is not available for DDR5
                 if ( (i_user_input_basic.DramDataWidth[0] != 4 ) &&

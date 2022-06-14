@@ -47,15 +47,6 @@
 #include <lib/phy/ody_ddrphy_phyinit_structs.H>
 
 ///
-/// @param[in] Svrty the severity of the assert
-/// @param[in] fmt the data format to print
-/// @param[in] ... the variable arguments to pass in
-/// @note This function should be replaced with IBM asserts
-///
-// TODO:ZEN:MST-1584 Update PHY init synopsys asserts to use IBM's assert methodology
-void dwc_ddrphy_phyinit_assert (int Svrty, const char* fmt, ...);
-
-///
 /// @brief Maps from drive strength in Ohms to the register value
 /// @param[in] DrvStren_ohm drive strength in ohms
 /// @return The register setting to be used
@@ -67,11 +58,14 @@ int dwc_ddrphy_phyinit_mapDrvStren (const float DrvStren_ohm);
 /// @param[in] i_user_input_basic - Synopsys basic user input structure
 /// @param[in] i_user_input_dram_config - DRAM configuration inputs needed for PHY init (MRS/RCW)
 /// @param[in] DbyteNumber the Dbyte to check to see if it is disabled
+/// @param[out] o_rc fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 /// @return 0 if enabled, 1 if disabled
 ///
-int dwc_ddrphy_phyinit_IsDbyteDisabled(const user_input_basic_t& i_user_input_basic,
+int dwc_ddrphy_phyinit_IsDbyteDisabled(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                       const user_input_basic_t& i_user_input_basic,
                                        const user_input_dram_config_t& i_user_input_dram_config,
-                                       const int DbyteNumber);
+                                       const int DbyteNumber,
+                                       fapi2::ReturnCode& o_rc);
 
 ///
 /// @brief Checks if 2T timing is needed for this configuration
