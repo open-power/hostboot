@@ -33,6 +33,8 @@
 #include <cstdlib>
 #include <map>
 #include <memory>
+#include <cstring>
+#include <stdio.h>
 #include <string.h>
 #include <util/align.H>
 
@@ -59,6 +61,13 @@
 
 // libpldm subtree headers
 #include <openbmc/pldm/libpldm/fru.h>
+
+// getAllChips
+#include <targeting/common/utilFilter.H>
+
+#include <targeting/common/trace.H>
+
+#include <console/consoleif.H>
 
 using namespace ERRORLOG;
 
@@ -212,6 +221,151 @@ errlHndl_t getRecordSetLocationCode(const uint8_t* const i_pldm_fru_table_buf,
     }
 
     return errl;
+}
+
+/* @brief Verify if a string ends with another string
+ *
+ * @param[in] str       The string to search in (must be null terminated)
+ * @param[in] suffix    The string to search for (must be null terminated)
+ * @return              false if no match, true otherwise
+ */
+bool locationEndsWith(const char *str, const char *suffix)
+{
+    bool retVal = false;
+    if (str && suffix)
+    {
+        size_t lenstr = strlen(str);
+        size_t lensuffix = strlen(suffix);
+
+        if (lensuffix <= lenstr)
+        {
+            if (strncmp(str + lenstr - lensuffix, suffix, lensuffix) == 0)
+            {
+                retVal = true;
+            }
+        }
+    }
+
+    return retVal;
+}
+
+/**
+ *  @brief Given a complete fru record table's set of records, filter the
+ *         set of records for a given location code.
+ *         See https://www.dmtf.org/standards/pmci for references
+ *
+ *  @param[in] i_pldm_fru_table_buf   Pointer to a buffer which contains data
+ *                                    defined in Table 7 of DSP0257 v1.0.0
+ *  @param[in] i_record_count         Number of records in the fru record table
+ *  @param[in] i_location_code        The location code the caller  would like
+ *                                    the records returned to have
+ *  @param[out] o_rsi                 Record Set ID associated with the found
+ *                                    location code
+ *  @param[out] o_found               Determines if a record is found or not with
+ *                                    the requested location code
+ *  @return void
+ */
+void getRecordSetByLocationCode(const uint8_t* i_pldm_fru_table_buf,
+                                const uint16_t i_record_count,
+                                const char* i_location_code,
+                                uint16_t& o_rsi,
+                                bool& o_found)
+{
+    PLDM_ENTER("getRecordSetByLocationCode: i_pldm_fru_table_buf = %p  i_location_code = 0x%s",
+               i_pldm_fru_table_buf,
+               i_location_code);
+
+    assert(i_pldm_fru_table_buf != nullptr,
+           "getRecordSetByLocationCode: i_pldm_fru_table_buf is a nullptr!");
+
+    o_rsi = 0;
+    o_found = false;
+
+    // Loop through all of the records looking for the ones that match i_location_code
+    for (uint16_t record = 0; record < i_record_count; record++)
+    {
+        const pldm_fru_record_data_format *record_data =
+            reinterpret_cast<const pldm_fru_record_data_format *>(i_pldm_fru_table_buf);
+
+        // We need to keep a running total of the size of the record as we process
+        // the entries in the record because the size of each entry is variable.
+        // Start the record size count at the offset of the TLVs.
+        // (TLV == Type, Length, Value .. see fru.h for details)
+        size_t record_size = offsetof(pldm_fru_record_data_format, tlvs);
+
+        // Iterate through the TLVs contained in this record, read the
+        // length from each TLV and add it to the record_size along with
+        // the size of the T and L (type and length) of the TLV struct.
+        for (uint8_t tlv = 0; tlv < record_data->num_fru_fields; tlv++)
+        {
+            const pldm_fru_record_tlv *fru_tlv =
+                reinterpret_cast<const pldm_fru_record_tlv *>(i_pldm_fru_table_buf +
+                                                              record_size);
+            // Look for the location code i_location_code
+            record_size += (offsetof(pldm_fru_record_tlv, value) +
+                            fru_tlv->length);
+
+            if (fru_tlv->type == LOCATION_CODE_FIELD_ID &&
+                    record_data->record_type == PLDM_FRU_RECORD_TYPE_OEM)
+            {
+                char l_locationCodeNullTerm[PEL_LOC_CODE_SIZE];
+                memset(l_locationCodeNullTerm, 0, sizeof(l_locationCodeNullTerm));
+                const char* l_location_code = reinterpret_cast<const char*>(fru_tlv->value);
+
+                // Length + 1 check to account for null terminator
+                if ((static_cast<size_t>(fru_tlv->length) + 1) > sizeof(l_locationCodeNullTerm))
+                {
+                    errlHndl_t errl = nullptr;
+
+                    PLDM_ERR("cacheRemoteFruVpd: getRecordSetByLocationCode found "
+                        "a location code TLV with length greater than the maximum "
+                        "allowed size");
+
+                    /*@
+                     * @errortype   ERRL_SEV_PREDICTIVE
+                     * @moduleid    MOD_CACHE_REMOTE_FRU_VPD
+                     * @reasoncode  RC_INVALID_LENGTH
+                     * @userdata1   Fru record TLV length
+                     * @userdata2   Size of location code buffer
+                     * @devdesc     Location code length found from the FRU Record Table
+                     *              exceeds the maximum size set for the location code
+                     * @custdesc    A software error occurred during system boot
+                     */
+                    errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                                         MOD_CACHE_REMOTE_FRU_VPD,
+                                         RC_INVALID_LENGTH,
+                                         fru_tlv->length,
+                                         sizeof(l_locationCodeNullTerm),
+                                         ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
+                    addBmcErrorCallouts(errl);
+                    errlCommit(errl, PLDM_COMP_ID);
+                    continue;
+                }
+
+                memcpy(l_locationCodeNullTerm, l_location_code, fru_tlv->length);
+
+                // Match the ending of the location code string with
+                // the input location code
+                if (locationEndsWith(l_locationCodeNullTerm, i_location_code))
+                {
+                    o_rsi = record_data->record_set_id;
+                    o_found = true;
+                    break;
+                }
+            }
+        }
+
+        if (o_found)
+        {
+            break;
+        }
+
+        // increment ptr to input fru table by record size
+        // so we are ready to process the next record
+        i_pldm_fru_table_buf += record_size;
+    }
+
+    PLDM_EXIT("getRecordSetByLocationCode: found: %d, rsi if found: %d", o_found, o_rsi);
 }
 
 /**
@@ -1014,6 +1168,143 @@ errlHndl_t setAttribute(TARGETING::Target* const i_target, const char* const i_v
     return errl;
 }
 
+/**
+ * @brief Parse through a PLDM-styled Fru Record Table and grab a specific
+ *        record's specific keyword data
+ *
+ * @param[in]   i_pldm_fru_table_buf    Ptr to PLDM-styled FRU record table
+ * @param[in]   i_pldm_fru_record_count Number of records in
+ *                                      i_pldm_fru_table_buf
+ * @param[in]   i_record_name           Name of record (VINI, VSYS, etc)
+ * @param[in]   i_keyword               Field type keyword
+ * @param[out]  o_kwdata                Output value matching a specific record/keyword
+ *                                      This output is cleared at the start of the function
+ *
+ * @return bool                         True if the record was found, false otherwise
+ */
+bool get_vpd_kw_from_recordset(const uint8_t* i_pldm_fru_table_buf,
+                               const uint16_t i_pldm_fru_record_count,
+                               const valid_records i_record_name,
+                               const uint8_t i_keyword,
+                               std::vector<uint8_t>& o_kwdata)
+{
+    PLDM_ENTER("get_vpd_kw_from_recordset i_pldm_fru_table_buf = %p i_pldm_fru_record_count = %d",
+            i_pldm_fru_table_buf,
+            i_pldm_fru_record_count);
+
+    assert(i_pldm_fru_table_buf != nullptr,
+            "get_vpd_kw_from_recordset passed a nullptr");
+
+    o_kwdata.clear();
+
+    // Loop through all of the pldm records in i_pldm_fru_table_buf.
+    bool found_kw = false;
+    for (uint16_t record = 0; record < i_pldm_fru_record_count; record++)
+    {
+        const pldm_fru_record_data_format *record_data =
+            reinterpret_cast<const pldm_fru_record_data_format *>(i_pldm_fru_table_buf);
+
+        // We must keep a running total of the size of the record as we process
+        // the entries because the size of each entry is a variable.
+        // Start the record size count at the offset at of the TLVs.
+        // (TLV == Type, Length, Value .. see fru.h for details)
+        size_t offset_of_cur_pldm_record_entry = offsetof(pldm_fru_record_data_format, tlvs);
+
+        // we are not sure yet if the PLDM Fru record contains IPZ data or not
+        // so for now be safe and assume it's not IPZ data
+        bool is_known_ipz_record = false;
+
+        uint32_t record_name = 0;
+
+        // Walk through the TLVs in this PLDM Fru Record
+        // NOTE: as we iterate through the TLVs below offset_of_cur_pldm_record_entry can be
+        // viewed as the offset of the current TLV from the start of the PLDM Fru Record
+        for (uint8_t tlv = 0; tlv < record_data->num_fru_fields; tlv++)
+        {
+            const pldm_fru_record_tlv *fru_tlv =
+                reinterpret_cast<const pldm_fru_record_tlv *>(i_pldm_fru_table_buf +
+                                                              offset_of_cur_pldm_record_entry);
+
+            // increment the offset_of_cur_pldm_record_entry variable by the total size of
+            // this TLV. Important that this must be done to preserve the record offset
+            offset_of_cur_pldm_record_entry += (offsetof(pldm_fru_record_tlv, value) +
+                                                fru_tlv->length);
+
+            // Must be OEM fru record type to check for RT keywords
+            if (record_data->record_type != PLDM_FRU_RECORD_TYPE_OEM)
+            {
+                continue;
+            }
+
+            // Following value is from the PLDM_FRU_IPZ_Keyword_Mapping doc
+            // RT keyword is first TLV for IPZ records
+            constexpr uint8_t RT_KEYWORD_FIELD_ID = 2;
+            // The RT keyword mapping is the same for each IPZ VPD record.
+            // The RT keyword tells us what the IPZ VPD record is.
+            // We need to keep track of the RT keyword's value so we know
+            // what the other fru record entry's FIELD_IDs represent
+            if (fru_tlv->type == RT_KEYWORD_FIELD_ID)
+            {
+                assert(RECORD_BYTE_SIZE == fru_tlv->length,
+                        "get_vpd_kw_from_recordset: unexpected field length 0x%.02x or RT keyword",
+                        fru_tlv->length);
+                record_name = *reinterpret_cast<const uint32_t *>(fru_tlv->value);
+                PLDM_INF("get_vpd_kw_from_recordset: found record 0x%.08x", record_name);
+            }
+
+            is_known_ipz_record = (record_keyword_field_map.find(record_name) !=
+                                   record_keyword_field_map.end());
+
+            // Continue if we're not dealing with a known IPZ record
+            // or if the VPD Record name does not match the one we're looking for
+            if (!is_known_ipz_record || record_name != i_record_name)
+            {
+                continue;
+            }
+
+            // Check if the TLV type matches the keyword we're looking for
+            if (fru_tlv->type == i_keyword)
+            {
+                o_kwdata.insert(o_kwdata.begin(),
+                                fru_tlv->value,
+                                fru_tlv->value + fru_tlv->length);
+
+                // PLDM FRU Record Fields of type string are not null terminated
+                // (see DSP0257 1.0.0 sectionn 7.4
+                o_kwdata.push_back('\0');
+                found_kw = true;
+                break;
+            }
+        }
+
+        if (found_kw)
+        {
+            break;
+        }
+
+        // Increment the i_pldm_fru_table_buf by offset_of_cur_pldm_record_entry
+        // now that we have completed processing the TLVs. Do this regardless
+        // of whether or not the fru record was IPZ data in order to get to the
+        // next pldm fru record if there is one.
+        i_pldm_fru_table_buf += offset_of_cur_pldm_record_entry;
+    }
+
+    return found_kw;
+}
+
+/* @brief Pop last element in vector and copy the vector contents to a pointer
+ *
+ * @param[in] i_vector   Vector to copy elements from
+ * @param[in] i_location Pointer to copy into
+ * @return void
+ */
+void popAndCopy(std::vector<uint8_t>& i_vector,
+                uint8_t* i_location)
+{
+    i_vector.pop_back();
+    std::copy(i_vector.begin(), i_vector.end(), i_location);
+}
+
 using location_code_setter_t = errlHndl_t(*)(TARGETING::Target*, const char*);
 
 // see hb_fru.H for doxygen
@@ -1106,6 +1397,175 @@ errlHndl_t cacheRemoteFruVpd()
           false },
     };
 
+    // Grab the proc attribute BUS_RAIL_LOCATION_MAP and grab the
+    // attribute fields to get the location codes
+    TargetHandleList l_procTargetList;
+    getAllChips(l_procTargetList, TYPE_PROC, false);
+
+    // Loop through all  proc chips
+    for (const auto & curproc: l_procTargetList)
+    {
+        auto l_bus_rail_loc = curproc->getAttrAsStdArr<ATTR_BUS_RAIL_LOCATION_MAP>();
+
+        // Attribute storing VRM location codes
+        bus_rail_loc_map* vrmLocation = reinterpret_cast<bus_rail_loc_map*>(l_bus_rail_loc.data());
+        uint16_t l_rsi = 0;
+        uint8_t l_records_in_map = sizeof(l_bus_rail_loc)/sizeof(bus_rail_loc_map);
+
+        static_assert(sizeof(l_bus_rail_loc) % sizeof(bus_rail_loc_map) == 0,
+                "Size of bus_rail_loc_map must divide evenly into ATTR_BUS_RAIL_LOCATION_MAP");
+
+        ATTR_LOCATION_PN_SN_CCIN_MAP_typeStdArr final_attr;
+
+        // Attribute to write into for mapping location codes to part#/serial#/ccin
+        loc_pn_sn_ccin_map* fruInfo = reinterpret_cast<loc_pn_sn_ccin_map*>(final_attr.data());
+
+        std::vector<uint16_t> unique_rsis;
+
+        // Clear out attribute on MPIPL in case of lingering data
+        TARGETING::Target* l_pTopLevel = TARGETING::UTIL::assertGetToplevelTarget();
+        if (l_pTopLevel->getAttr<TARGETING::ATTR_IS_MPIPL_HB>())
+        {
+            curproc->setAttrFromStdArr<ATTR_LOCATION_PN_SN_CCIN_MAP>({});
+        }
+
+        // Loop through every map entry in ATTR_BUS_RAIL_LOCATION_MAP and
+        // get all VRM location codes
+        uint8_t vrmOffset = 0;
+        uint8_t fruOffset = 0;
+        while (vrmOffset < l_records_in_map)
+        {
+            if (strlen(vrmLocation[vrmOffset].location) != 0)
+            {
+                // Get the unique RSIs associated with the VRM location code entry
+                bool l_found = false;
+                PLDM::getRecordSetByLocationCode(fru_table.data(), table_metadata.total_table_records,
+                    vrmLocation[vrmOffset].location, l_rsi, l_found);
+
+                if (l_found && std::find(unique_rsis.begin(), unique_rsis.end(), l_rsi) == unique_rsis.end())
+                {
+                    strncpy(fruInfo[fruOffset].location, vrmLocation[vrmOffset].location, VRM_LOCATION_SIZE);
+                    unique_rsis.push_back(l_rsi);
+                    fruOffset++;
+                }
+            }
+
+            vrmOffset++;
+        }
+
+        for (size_t i = 0; i < unique_rsis.size(); i++)
+        {
+            uint16_t l_rsi = unique_rsis[i];
+
+            std::vector<uint8_t> l_pn, l_sn, l_ccin;
+
+            // Use the found location code RSI to find all RSI in the FRU record table
+            // The RSI expected as input should be in little endian
+            uint16_t records_in_set = 0;
+            std::vector<uint8_t> device_fru_records;
+            PLDM::getRecordSetByIdAndType(fru_table.data(), table_metadata.total_table_records,
+                le16toh(l_rsi), PLDM_FRU_RECORD_TYPE_OEM, device_fru_records, records_in_set);
+
+            if (records_in_set > 0)
+            {
+                // Check for +1 of size because the vectors returned are null terminated
+                if (!get_vpd_kw_from_recordset(device_fru_records.data(),
+                                               records_in_set,
+                                               VINI,
+                                               PN_FIELD_ID,
+                                               l_pn) ||
+                    l_pn.size() != VRM_PN_SIZE + 1)
+                {
+                    PLDM_ERR("cacheRemoteFruVpd: getRecordSetRecordValue failed to get part number");
+
+                    /*@
+                     * @errortype   ERRL_SEV_PREDICTIVE
+                     * @moduleid    MOD_CACHE_REMOTE_FRU_VPD
+                     * @reasoncode  RC_PN_NOT_FOUND
+                     * @userdata1   Record Set Index
+                     * @userdata2   Size of part number vector
+                     * @devdesc     Part number from BMC was not found from the FRU Record Table
+                     * @custdesc    A software error occurred during system boot
+                     */
+                    errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                                         MOD_CACHE_REMOTE_FRU_VPD,
+                                         RC_PN_NOT_FOUND,
+                                         l_rsi,
+                                         l_pn.size(),
+                                         ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
+                    addBmcErrorCallouts(errl);
+                    errlCommit(errl, PLDM_COMP_ID);
+                }
+
+                if (!get_vpd_kw_from_recordset(device_fru_records.data(),
+                                               records_in_set,
+                                               VINI,
+                                               SN_FIELD_ID,
+                                               l_sn) ||
+                    l_sn.size() != VRM_SN_SIZE + 1)
+                {
+                    PLDM_ERR("cacheRemoteFruVpd: getRecordSetRecordValue failed to get serial number");
+
+                    /*@
+                     * @errortype   ERRL_SEV_PREDICTIVE
+                     * @moduleid    MOD_CACHE_REMOTE_FRU_VPD
+                     * @reasoncode  RC_SN_NOT_FOUND
+                     * @userdata1   Record Set Index
+                     * @userdata2   Size of serial number vector
+                     * @devdesc     Serial number from BMC was not found from the FRU Record Table
+                     * @custdesc    A software error occurred during system boot
+                     */
+                    errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                                         MOD_CACHE_REMOTE_FRU_VPD,
+                                         RC_SN_NOT_FOUND,
+                                         l_rsi,
+                                         l_sn.size(),
+                                         ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
+                    addBmcErrorCallouts(errl);
+                    errlCommit(errl, PLDM_COMP_ID);
+                }
+
+                if (!get_vpd_kw_from_recordset(device_fru_records.data(),
+                                               records_in_set,
+                                               VINI,
+                                               CCIN_FIELD_ID,
+                                               l_ccin) ||
+                         l_ccin.size() != VRM_CCIN_SIZE + 1)
+                {
+                    PLDM_ERR("cacheRemoteFruVpd: getRecordSetRecordValue failed to get ccin");
+
+                    /*@
+                     * @errortype   ERRL_SEV_PREDICTIVE
+                     * @moduleid    MOD_CACHE_REMOTE_FRU_VPD
+                     * @reasoncode  RC_CCIN_NOT_FOUND
+                     * @userdata1   Record Set Index
+                     * @userdata2   Size of ccin vector
+                     * @devdesc     CCIN from BMC was not found from the FRU Record Table
+                     * @custdesc    A software error occurred during system boot
+                     */
+                    errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                                         MOD_CACHE_REMOTE_FRU_VPD,
+                                         RC_CCIN_NOT_FOUND,
+                                         l_rsi,
+                                         l_ccin.size(),
+                                         ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
+                    addBmcErrorCallouts(errl);
+                    errlCommit(errl, PLDM_COMP_ID);
+                }
+
+                // Store the found pn/sn/ccin values in their respective
+                // struct values. Pop the end of the vector because it
+                // is null terminated and ATTR_LOCATION_PN_SN_CCIN_MAP
+                // expects no null termination
+                popAndCopy(l_pn, &fruInfo[i].pn[0]);
+                popAndCopy(l_sn, &fruInfo[i].sn[0]);
+                popAndCopy(l_ccin, &fruInfo[i].ccin[0]);
+            }
+        }
+
+        curproc->setAttrFromStdArr<ATTR_LOCATION_PN_SN_CCIN_MAP>(final_attr);
+    }
+
     for(const auto& map_entry : pldm_entity_to_targeting_map)
     {
          auto device_rsis
@@ -1155,12 +1615,9 @@ errlHndl_t cacheRemoteFruVpd()
         {
             uint16_t records_in_set = 0;
             std::vector<uint8_t> device_fru_records;
-            PLDM::getRecordSetByIdAndType(fru_table.data(),
-                                          table_metadata.total_table_records,
-                                          device_rsi,
-                                          map_entry.fru_record_type,
-                                          device_fru_records,
-                                          records_in_set);
+            PLDM::getRecordSetByIdAndType(fru_table.data(), table_metadata.total_table_records,
+                                          device_rsi, map_entry.fru_record_type,
+                                          device_fru_records, records_in_set);
 
             if(device_fru_records.empty() ||
                records_in_set == 0)

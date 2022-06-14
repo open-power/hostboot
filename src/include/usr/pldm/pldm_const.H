@@ -70,6 +70,27 @@ namespace PLDM
         ENTITY_TYPE_LOGICAL_PROCESSOR = ENTITY_TYPE_LOGICAL_MARKER | ENTITY_TYPE_PROCESSOR,
     };
 
+    // Attribute sizes associated with VRM callouts
+    // These values must stay consistent with the sizes
+    // found in attribute_types_openpower.xml for
+    // attribute LOCATION_PN_SN_CCIN_MAP
+    enum vrm_callout_attr_sizes : uint16_t
+    {
+        VRM_CCIN_SIZE       = 4,
+        VRM_PN_SIZE         = 7,
+        VRM_SN_SIZE         = 12,
+        VRM_LOCATION_SIZE   = 50
+    };
+
+    // Field Types of the Fru Record Table associated with VRM callouts
+    enum vrm_field_ids : uint16_t
+    {
+        CCIN_FIELD_ID           = 6,
+        PN_FIELD_ID             = 15,
+        SN_FIELD_ID             = 16,
+        LOCATION_CODE_FIELD_ID  = 254
+    };
+
     // These are the different types of PLDM message types we can expect
     // See DSP0245 v1.2.0 Table 1
     // When the MCTP layer creates a message to send to either inbound rsp
