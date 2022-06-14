@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -235,6 +235,9 @@ namespace LD_CR_FFDC
     static const char * const L2TITLE = "L2_LD_COLRPR_FFDC";
     static const char * const L3TITLE = "L3_LD_COLRPR_FFDC";
 
+    // NOTE: This structure has been deprecated and a new user data section has
+    //       been created for for the line delete data. This is only kept around
+    //       because we need to support parsing data from older drivers.
     struct L2LdCrFfdc
     {
 #if __BYTE_ORDER == __LITTLE_ENDIAN
@@ -281,6 +284,9 @@ namespace LD_CR_FFDC
 
     };
 
+    // NOTE: This structure has been deprecated and a new user data section has
+    //       been created for for the line delete data. This is only kept around
+    //       because we need to support parsing data from older drivers.
     struct L3LdCrFfdc
     {
 #if __BYTE_ORDER == __LITTLE_ENDIAN
