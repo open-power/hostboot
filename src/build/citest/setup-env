@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2019
+# Contributors Listed Below - COPYRIGHT 2014,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -37,20 +37,23 @@ echo "MACHINE IS $MACHINE"
 
 if [ "$CHIP" == "P10" ];
 then
-    export PNOR=p10.pnor
     export CONFIG_FILE=src/build/configs/simics_p10.config
     export MACHINE=p10_standalone
+elif [ "$CHIP" == "BONITO" ];
+then
+    export CONFIG_FILE=src/build/configs/simics_p10.config
+    export MACHINE=bonito
 elif [ "$CHIP" == "FSPBUILD" ];
 then
     export PNOR=ZZ.pnor
     export CONFIG_FILE=src/build/configs/fsprelease.config
-    export MACHINE=NIMBUS
+    export MACHINE=nimbus
 elif [ "$CHIP" == "VPO" ];
 then
     export CONFIG_FILE=src/build/vpo/vpo.config
     export FAKEPNOR=p10.pnor
     export VPO_COMPILE=1
-    export MACHINE=P10_STANDALONE
+    export MACHINE=p10_standalone
     export HB_STANDALONE=1
 fi
 

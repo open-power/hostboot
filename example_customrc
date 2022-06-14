@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2021
+# Contributors Listed Below - COPYRIGHT 2021,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -29,12 +29,16 @@
 export HB_SKIP_GEN_HCODE=1
 
 ##### HB Standalone #####
-export MACHINE=P10_STANDALONE   # Case matters
+export MACHINE=p10_standalone
 export CONFIG_FILE=src/build/configs/simics_p10.config
-export PNOR=p10.pnor      # Case matters
 export HB_STANDALONE=1
 
-# looks like I might need this:
+###### Bonito Standalone #####
+#export MACHINE=bonito
+#export CONFIG_FILE=src/build/configs/simics_p10.config
+#export HB_STANDALONE=1
+
+# Sandbox setup vars
 export SANDBOXROOT=/esw/user/nfs/`whoami`/sandbox/p10/
 export SANDBOXBASE=$SANDBOXROOT
 export SBXROOT=$SANDBOXROOT
@@ -50,5 +54,4 @@ export SANDBOXNAME=p10r_1
 #export CONFIG_FILE=src/build/configs/fsprelease.config
 #export MACHINE=DENALI
 #export HB_STANDALONE=1
-#export PNOR=denali.pnor
 

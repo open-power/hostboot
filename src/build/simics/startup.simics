@@ -218,7 +218,7 @@ try {
     echo "Multiproc Enablement = "+$hb_multiproc
 } except {
     #default to 2proc for standalone config
-    if ($machine_name == "p10_standalone") {
+    if ($machine_name == "p10_standalone" or $machine_name == "bonito") {
         $hb_multiproc = 1
     } else {
         $hb_multiproc = 0
@@ -263,7 +263,7 @@ run-command-file (lookup-file -query ($hb_script_location + "/morecache.simics")
 #
 # Always trigger our specific command files last
 #
-if($machine_name == "p10_standalone") {
+if($machine_name == "p10_standalone" or $machine_name == "bonito") {
     run-command-file (lookup-file -query ($hb_script_location + "/standalone.simics"))
 } else {
     run-command-file (lookup-file -query ($hb_script_location + "/combined.simics"))

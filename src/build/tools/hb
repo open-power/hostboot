@@ -345,7 +345,7 @@ hb_prime()
          fi
     fi
 
-echo "Calling hbDistribute --hb-standalone "
+    echo "Calling hbDistribute --hb-standalone "
     hbDistribute --hb-standalone $*
 
     if [[ $PNOR_LAYOUT_SELECTED == "FSP" ]] && [[ -n "${HB_NFS_DIR}"  ]]; then
@@ -470,7 +470,6 @@ hb_simsetup()
         EECACHE_PREBUILT=`eval echo $(cat ${PROJECT_ROOT}/src/build/citest/etc/eecache_prebuilt_dd2)`
         echo "cp ${EECACHE_PREBUILT} ${STANDALONE_SIMICS}/eecache_prebuilt_dd2.bin.ecc"
         cp ${EECACHE_PREBUILT} ${STANDALONE_SIMICS}/eecache_prebuilt_dd2.bin.ecc
-
         exit 0
 
     fi
@@ -483,7 +482,6 @@ hb_simsetup()
 
 hb_startsimics()
 {
-
     export_key_variables
 
     # Dynamically check config file if secureboot enabled build occurred and
