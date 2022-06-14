@@ -415,6 +415,12 @@ void addL3LdCrFfdc( ExtensibleChip * i_coreChip, STEP_CODE_DATA_STRUCT & io_sc,
 void addL2LineDeleteFfdc(ExtensibleChip* i_chip, STEP_CODE_DATA_STRUCT& io_sc,
                    uint16_t i_count, const p10_l2err_extract_err_data& i_addr)
 {
+    PRDF_TRAC("L2 cache error: HUID=0x%08x ce_ue=0x%x member=0x%x dw=0x%x "
+              "bank=0x%x back_of_2to1_nextcycle=0x%x syndrome_col=0x%x "
+              "addr=0x%x", i_chip->getHuid(), i_addr.ce_ue, i_addr.member,
+              i_addr.dw, i_addr.bank, i_addr.back_of_2to1_nextcycle,
+              i_addr.syndrome_col, i_addr.real_address_47_56);
+
     // Allocate memory space for the FFDC. See data below for buffer size.
     auto ffdc = std::make_shared<FfdcBuffer>(ErrlL2LineDeleteFfdc,
                                              ErrlVer1, 15);
@@ -468,6 +474,12 @@ void addL2LineDeleteFfdc(ExtensibleChip* i_chip, STEP_CODE_DATA_STRUCT& io_sc,
 void addL3LineDeleteFfdc(ExtensibleChip* i_chip, STEP_CODE_DATA_STRUCT& io_sc,
                    uint16_t i_count, const p10_l3err_extract_err_data& i_addr)
 {
+    PRDF_TRAC("L3 cache error: HUID=0x%08x ce_ue=0x%x member=0x%x dw=0x%x "
+              "bank=0x%x cl_half=0x%x syndrome_col=0x%x addr=0x%x",
+              i_chip->getHuid(), i_addr.ce_ue, i_addr.member, i_addr.dw,
+              i_addr.bank, i_addr.cl_half, i_addr.syndrome_col,
+              i_addr.real_address_46_57);
+
     // Allocate memory space for the FFDC. See data below for buffer size.
     auto ffdc = std::make_shared<FfdcBuffer>(ErrlL3LineDeleteFfdc,
                                              ErrlVer1, 15);
@@ -532,13 +544,6 @@ int32_t L2UE( ExtensibleChip * i_coreChip, STEP_CODE_DATA_STRUCT & io_sc )
         return SUCCESS;
     }
 
-    PRDF_TRAC( "[L2UE] HUID: 0x%08x Error data: member=%d dw=%d "
-               "bank=%d back_of_2to1_nextcycle=%d syndrome_col=%x "
-               "addr=%x",
-               i_coreChip->getHuid(), errorAddr.member, errorAddr.dw,
-               errorAddr.bank, errorAddr.back_of_2to1_nextcycle,
-               errorAddr.syndrome_col, errorAddr.real_address_47_56 );
-
     // Add L2 FFDC
     P10CoreDataBundle * l_bundle = getCoreDataBundle(i_coreChip);
     l_bundle->iv_L2LDCount++;
@@ -582,12 +587,6 @@ int32_t L3UE( ExtensibleChip * i_coreChip, STEP_CODE_DATA_STRUCT & io_sc )
                   i_coreChip->getHuid());
         return SUCCESS;
     }
-
-    PRDF_TRAC( "[L3UE] HUID: 0x%08x Error data: member=%d dw=%d "
-               "bank=%d syndrome_col=%x addr=%x",
-               i_coreChip->getHuid(), errorAddr.member, errorAddr.dw,
-               errorAddr.bank, errorAddr.syndrome_col,
-               errorAddr.real_address_46_57 );
 
     // Add L3 FFDC
     P10CoreDataBundle * l_bundle = getCoreDataBundle(i_coreChip);
@@ -644,13 +643,6 @@ int32_t L2CE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
             PRDF_ERR("[L2CE] HUID: 0x%08x extractL2Err failed", huid);
             break;
         }
-
-        PRDF_TRAC( "[L2CE] HUID: 0x%08x Error data: member=%d dw=%d "
-                   "bank=%d back_of_2to1_nextcycle=%d syndrome_col=%x "
-                   "addr=%x",
-                   huid, errorAddr.member, errorAddr.dw,
-                   errorAddr.bank, errorAddr.back_of_2to1_nextcycle,
-                   errorAddr.syndrome_col, errorAddr.real_address_47_56 );
 
         ldcrffdc.L2errMember   = errorAddr.member;
         ldcrffdc.L2errDW       = errorAddr.dw;
@@ -749,12 +741,6 @@ int32_t L3CE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
             PRDF_ERR("[L3CE] HUID: 0x%08x extractL3Err failed", huid);
             break;
         }
-
-        PRDF_TRAC( "[L3CE] HUID: 0x%08x Error data: member=%d dw=%d "
-                   "bank=%d syndrome_col=%x addr=%x",
-                   huid, errorAddr.member, errorAddr.dw,
-                   errorAddr.bank, errorAddr.syndrome_col,
-                   errorAddr.real_address_46_57 );
 
         ldcrffdc.L3errMember  = errorAddr.member;
         ldcrffdc.L3errDW      = errorAddr.dw;
