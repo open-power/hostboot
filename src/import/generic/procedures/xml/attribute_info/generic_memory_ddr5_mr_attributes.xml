@@ -415,32 +415,198 @@
   </attribute>
 
 <!-- MR32 attributes -->
+  <attribute>
+    <id>ATTR_DDR5_DRAM_CK_ODT</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DDR5 clock ODT value.
+      ARRAY[DIMM][RANK][STRAP]
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint16</valueType>
+    <writeable/>
+    <array>2 4 2</array>
+    <mssUnits>ohm</mssUnits>
+    <enum>DISABLE = 0, OHM480 = 480, OHM240 = 240, OHM120 = 120, OHM80 = 80, OHM60 = 60, OHM40 = 40</enum>
+    <mssAccessorName>ddr5_dram_ck_odt</mssAccessorName>
+  </attribute>
 
-
+  <attribute>
+    <id>ATTR_DDR5_DRAM_CS_ODT</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DDR5 chip select ODT value.
+      ARRAY[DIMM][RANK][STRAP]
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint16</valueType>
+    <writeable/>
+    <array>2 4 2</array>
+    <mssUnits>ohm</mssUnits>
+    <enum>DISABLE = 0, OHM480 = 480, OHM240 = 240, OHM120 = 120, OHM80 = 80, OHM60 = 60, OHM40 = 40</enum>
+    <mssAccessorName>ddr5_dram_cs_odt</mssAccessorName>
+  </attribute>
 
 <!-- MR33 attributes -->
+  <attribute>
+    <id>ATTR_DDR5_DRAM_CA_ODT</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DDR5 clock ODT value.
+      ARRAY[DIMM][RANK][STRAP]
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint16</valueType>
+    <writeable/>
+    <array>2 4 2</array>
+    <mssUnits>ohm</mssUnits>
+    <enum>DISABLE = 0, OHM480 = 480, OHM240 = 240, OHM120 = 120, OHM80 = 80, OHM60 = 60, OHM40 = 40</enum>
+    <mssAccessorName>ddr5_dram_ca_odt</mssAccessorName>
+  </attribute>
 
-
+  <attribute>
+    <id>ATTR_DDR5_DRAM_DQS_RTT_PARK</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DRAM DQS RTT Park Termination Resistance in Ohms.
+      ARRAY[DIMM][RANK][STRAP]
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <enum>DISABLE = 0, OHM34 = 34, OHM40 = 40, OHM48 = 48, OHM60 = 60, OHM80 = 80, OHM120 = 120, OHM240 = 240</enum>
+    <mssUnits>ohm</mssUnits>
+    <mssAccessorName>ddr5_dram_dqs_rtt_park</mssAccessorName>
+    <array>2 4 2</array>
+  </attribute>
 
 <!-- MR34 attributes -->
 
-
-
 <!-- MR35 attributes -->
+  <attribute>
+    <id>ATTR_DDR5_DRAM_RTT_NOM_WR</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DRAM RTT NOM for writes Termination Resistance in Ohms.
+      ARRAY[DIMM][RANK]
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <enum>DISABLE = 0, OHM34 = 34, OHM40 = 40, OHM48 = 48, OHM60 = 60, OHM80 = 80, OHM120 = 120, OHM240 = 240</enum>
+    <mssUnits>ohm</mssUnits>
+    <mssAccessorName>ddr5_dram_rtt_nom_wr</mssAccessorName>
+    <array>2 4</array>
+  </attribute>
 
-
+  <attribute>
+    <id>ATTR_DDR5_DRAM_RTT_NOM_RD</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DRAM RTT NOM for reads Termination Resistance in Ohms.
+      ARRAY[DIMM][RANK]
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <enum>DISABLE = 0, OHM34 = 34, OHM40 = 40, OHM48 = 48, OHM60 = 60, OHM80 = 80, OHM120 = 120, OHM240 = 240</enum>
+    <mssUnits>ohm</mssUnits>
+    <mssAccessorName>ddr5_dram_rtt_nom_rd</mssAccessorName>
+    <array>2 4</array>
+  </attribute>
 
 <!-- MR37 attributes -->
+  <attribute>
+    <id>ATTR_DDR5_DRAM_ODTLON_WR</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DDR5 DRAM ODTon timing for writes
+      ARRAY[DIMM][RANK]
+    </description>
+    <initToZero></initToZero>
+    <valueType>int8</valueType>
+    <writeable/>
+    <mssUnits>clocks</mssUnits>
+    <mssAccessorName>ddr5_dram_odtlon_wr</mssAccessorName>
+    <array>2 4</array>
+  </attribute>
 
-
+  <attribute>
+    <id>ATTR_DDR5_DRAM_ODTLOFF_WR</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DDR5 DRAM ODToff timing for writes
+      ARRAY[DIMM][RANK]
+    </description>
+    <initToZero></initToZero>
+    <valueType>int8</valueType>
+    <writeable/>
+    <mssUnits>clocks</mssUnits>
+    <mssAccessorName>ddr5_dram_odtloff_wr</mssAccessorName>
+    <array>2 4</array>
+  </attribute>
 
 <!-- MR38 attributes -->
+  <attribute>
+    <id>ATTR_DDR5_DRAM_ODTLON_WR_NT</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DDR5 DRAM ODTon non-targetted termination timing for writes
+      ARRAY[DIMM][RANK]
+    </description>
+    <initToZero></initToZero>
+    <valueType>int8</valueType>
+    <writeable/>
+    <mssUnits>clocks</mssUnits>
+    <mssAccessorName>ddr5_dram_odtlon_wr_nt</mssAccessorName>
+    <array>2 4</array>
+  </attribute>
 
-
+  <attribute>
+    <id>ATTR_DDR5_DRAM_ODTLOFF_WR_NT</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DDR5 DRAM ODToff non-targetted termination timing for writes
+      ARRAY[DIMM][RANK]
+    </description>
+    <initToZero></initToZero>
+    <valueType>int8</valueType>
+    <writeable/>
+    <mssUnits>clocks</mssUnits>
+    <mssAccessorName>ddr5_dram_odtloff_wr_nt</mssAccessorName>
+    <array>2 4</array>
+  </attribute>
 
 <!-- MR39 attributes -->
+  <attribute>
+    <id>ATTR_DDR5_DRAM_ODTLON_RD_NT</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DDR5 DRAM ODTon non-targetted termination timing for read
+      ARRAY[DIMM][RANK]
+    </description>
+    <initToZero></initToZero>
+    <valueType>int8</valueType>
+    <writeable/>
+    <mssUnits>clocks</mssUnits>
+    <mssAccessorName>ddr5_dram_odtlon_rd_nt</mssAccessorName>
+    <array>2 4</array>
+  </attribute>
 
-
+  <attribute>
+    <id>ATTR_DDR5_DRAM_ODTLOFF_RD_NT</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DDR5 DRAM ODToff non-targetted termination timing for read
+      ARRAY[DIMM][RANK]
+    </description>
+    <initToZero></initToZero>
+    <valueType>int8</valueType>
+    <writeable/>
+    <mssUnits>clocks</mssUnits>
+    <mssAccessorName>ddr5_dram_odtloff_rd_nt</mssAccessorName>
+    <array>2 4</array>
+  </attribute>
 
 <!-- MR50 attributes -->
   <attribute>
