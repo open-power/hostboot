@@ -39,8 +39,10 @@
 
 #include <fapi2.H>
 #include <mss_generic_system_attribute_getters.H>
+#include <mss_generic_attribute_getters.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist.H>
+#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_traits.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_address.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_patterns.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_settings.H>
@@ -251,8 +253,23 @@ using mss::mcbist::NO_PATTERN;
 /// @param[in] i_target the memory controller target
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
-fapi2::ReturnCode pre_maint_read_settings( const fapi2::Target<T>& i_target );
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = mss::portTraits<MC> >
+fapi2::ReturnCode pre_maint_read_settings( const fapi2::Target<T>&
+        i_target )
+{
+    fapi2::buffer<uint64_t> l_data;
+
+    // Set up
+    FAPI_TRY( mss::getScom(i_target, TT::ECC_REG, l_data) );
+
+    l_data.setBit<TT::RECR_MBSECCQ_MAINT_NO_RETRY_UE>();
+    l_data.setBit<TT::RECR_MBSECCQ_MAINT_NO_RETRY_MPE>();
+
+    FAPI_TRY( mss::putScom(i_target, TT::ECC_REG, l_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Set up memory controller specific settings for pre-scrub
@@ -262,25 +279,41 @@ fapi2::ReturnCode pre_maint_read_settings( const fapi2::Target<T>& i_target );
 /// @param[in] i_target the memory controller target
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
-fapi2::ReturnCode pre_scrub_settings( const fapi2::Target<T>& i_target );
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = mss::portTraits<MC> >
+fapi2::ReturnCode pre_scrub_settings( const fapi2::Target<T>&
+                                      i_target )
+{
+    fapi2::buffer<uint64_t> l_data;
+
+    // Set up
+    FAPI_TRY( mss::getScom(i_target, TT::ECC_REG, l_data) );
+
+    l_data.clearBit<TT::RECR_MBSECCQ_MAINT_NO_RETRY_UE>();
+    l_data.clearBit<TT::RECR_MBSECCQ_MAINT_NO_RETRY_MPE>();
+
+    FAPI_TRY( mss::putScom(i_target, TT::ECC_REG, l_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Mask MCBISTFIRQ[MCBIST_PROGRAM_COMPLETE] and return the original mask value
 /// @tparam MC the mc type of the T
-/// @tparam T the fapi2::TargetType of the target
+/// @tparam T fapi2::TargetType of the MCBIST engine
 /// @param[in] i_target the target
 /// @param[out] o_fir_mask_save the original mask value to be restored later
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template< mss::mc_type MC, fapi2::TargetType T >
-fapi2::ReturnCode mask_program_complete( const fapi2::Target<T>& i_target,
-        fapi2::buffer<uint64_t>& o_fir_mask_save);
+fapi2::ReturnCode mask_program_complete(
+    const fapi2::Target<T>& i_target,
+    fapi2::buffer<uint64_t>& o_fir_mask_save );
 
 ///
 /// @brief Restore MCBISTFIRQ[MCBIST_PROGRAM_COMPLETE] mask value and clear the FIR
 /// @tparam MC the mc type of the T
-/// @tparam T the fapi2::TargetType of the target
+/// @tparam T fapi2::TargetType of the MCBIST engine
 /// @param[in] i_target the target
 /// @param[in] i_fir_mask_save the original mask value to be restored
 /// @return FAPI2_RC_SUCCESS iff ok
@@ -428,7 +461,10 @@ class operation
         /// in subclassed constructores more easily.
         /// @return FAPI2_RC_SUCCESS iff everything ok
         ///
-        fapi2::ReturnCode multi_port_init_internal();
+        fapi2::ReturnCode multi_port_init_internal()
+        {
+            return single_port_init();
+        }
 
 
         ///
@@ -1398,6 +1434,70 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Process the result from the mcbist sf_read subtest after memdiags
+/// @tparam MC the mc type of the T
+/// @tparam T fapi2::TargetType of the MCBIST engine
+/// @param[in] i_target OCMB target for traces
+/// @param[in] l_fail_behavior_attr
+/// @param[in,out] io_rc ReturnCode from sf_read
+/// @return fapi2::ReturnCode
+///
+template< mss::mc_type MC, fapi2::TargetType T >
+fapi2::ReturnCode process_subtest_result(const fapi2::Target<T>& i_target,
+        const uint8_t l_fail_behavior_attr,
+        fapi2::ReturnCode& io_rc)
+{
+    // Check RC
+    if ((l_fail_behavior_attr == fapi2::ENUM_ATTR_MSS_POST_MEMDIAGS_READ_SUBTEST_FAIL_BEHAVIOR_TRACE)
+        && (io_rc != fapi2::FAPI2_RC_SUCCESS))
+    {
+        // Trace + Bad RC: Log as recovered, return success, set io_rc back to success
+        FAPI_ERR("%s Error code 0x%08lx from post-memdiags mcbist read subtest", mss::c_str(i_target), uint32_t(io_rc));
+        fapi2::logError(io_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+
+        io_rc = fapi2::FAPI2_RC_SUCCESS;
+
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Else, we will just try the RC as-is
+    FAPI_TRY(io_rc, "%s Error from post-memdiags mcbist read subtest", mss::c_str(i_target));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform a read only mcbist subtest at the end of memdiags
+/// @tparam MC the mc type of the T
+/// @tparam T fapi2::TargetType of the MCBIST engine
+/// @param[in] i_target OCMB Chip
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error
+///
+template< mss::mc_type MC, fapi2::TargetType T >
+fapi2::ReturnCode perform_read_only_subtest(const fapi2::Target<T>& i_target)
+{
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+    uint8_t l_fail_behavior = 0;
+
+    auto l_stop_conditions = mss::mcbist::stop_conditions<MC>();
+
+    // Pause on unrecoverable error
+    l_stop_conditions.set_pause_on_ue(mss::ON);
+
+    // sf_read will run, poll for completion and return result ReturnCode
+    l_rc = mss::memdiags::sf_read<MC>(i_target, l_stop_conditions);
+
+    // Get fail behavior attr and process the result
+    FAPI_TRY(mss::attr::get_post_memdiags_read_subtest(i_target, l_fail_behavior));
+    FAPI_TRY(mss::memdiags::process_subtest_result<MC>(i_target, l_fail_behavior, l_rc));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 } // namespace memdiags
 

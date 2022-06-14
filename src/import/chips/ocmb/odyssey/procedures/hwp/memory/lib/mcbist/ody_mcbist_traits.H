@@ -180,7 +180,7 @@ class mcbistMCTraits< mss::mc_type::ODYSSEY>
 
 ///
 /// @class mcbistTraits
-/// @brief a collection of traits associated with the Explorer MCBIST engine or hardware
+/// @brief a collection of traits associated with the Odyssey MCBIST engine or hardware
 ///
 template<>
 class mcbistTraits< mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>
@@ -351,7 +351,7 @@ class mcbistTraits< mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>
             MIN_GAP_TIMEBASE_BLIND_STEER = scomt::ody::ODC_MCBIST_SCOM_MCBPARMQ_CFG_MIN_GAP_TIMEBASE_BLIND_STEER,
             RANDCMD_WGT = scomt::ody::ODC_MCBIST_SCOM_MCBPARMQ_CFG_RANDCMD_WGT,
             RANDCMD_WGT_LEN = scomt::ody::ODC_MCBIST_SCOM_MCBPARMQ_CFG_RANDCMD_WGT_LEN,
-            // No clock monitor for explorer
+            // No clock monitor for odyssey
             // CLOCK_MONITOR_EN
             EN_RANDCMD_GAP = scomt::ody::ODC_MCBIST_SCOM_MCBPARMQ_CFG_EN_RANDCMD_GAP,
             RANDGAP_WGT = scomt::ody::ODC_MCBIST_SCOM_MCBPARMQ_CFG_RANDGAP_WGT,
@@ -364,7 +364,7 @@ class mcbistTraits< mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>
             ADDR_COUNTER_MODE_LEN = scomt::ody::ODC_MCBIST_SCOM_MCBAGRAQ_CFG_ADDR_COUNTER_MODE_LEN,
             MAINT_ADDR_MODE_EN = scomt::ody::ODC_MCBIST_SCOM_MCBAGRAQ_CFG_MAINT_ADDR_MODE_EN,
 
-            // No broadcast in explorer due to only one port per MCBIST
+            // No broadcast in odyssey due to only one port per MCBIST
             //MAINT_BROADCAST_MODE_EN
             MAINT_DETECT_SRANK_BOUNDARIES = scomt::ody::ODC_MCBIST_SCOM_MCBAGRAQ_CFG_MAINT_DETECT_SRANK_BOUNDARIES,
 
@@ -606,10 +606,10 @@ class mcbistTraits< mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>
 
 ///
 /// @class mcbistTraits
-/// @brief a collection of traits associated with the Explorer MEM_PORT
+/// @brief a collection of traits associated with the Odyssey MEM_PORT
 ///
 template<>
-class mcbistTraits< mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_MEM_PORT>
+class mcbistTraits< mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_MEM_PORT>
 {
     public:
         // MCBIST error log related registers
@@ -636,11 +636,12 @@ class mcbistTraits< mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_MEM_PORT>
             ERROR_LOG_FULL = 0,
             RMW_WRT_BUFFER_SEL = 0,
             RMW_WRT_ADDRESS = 0,
-            RMW_WRT_ADDRESS_LEN = 0,
+            // TODO:ZEN-MST1390 Add MCBIST data/address trap processing
+            RMW_WRT_ADDRESS_LEN = 1,
             RMW_WRT_AUTOINC = 0,
             RMW_WRT_ECCGEN = 0,
 
-            // TODO:ZEN-MST1395 Add Odyssey MCBIST address mapping traits
+            // TODO:ZEN-MST1459 Create ody_lab_mcbist_wrap
             XLTATE_SLOT0_VALID = 0,
             XLTATE_SLOT1_VALID = 0,
 

@@ -41,6 +41,27 @@
 namespace mss
 {
 
+///
+/// @brief Gets the attribute for freq
+/// @param[in] const ref to the target
+/// @param[out] uint64_t& reference to store the value
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
+/// @note  Frequency of this memory channel in MT/s (Mega Transfers per second)
+///
+template<>
+fapi2::ReturnCode freq<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    uint64_t& o_value)
+{
+    for (const auto l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
+    {
+        return attr::get_freq(l_port, o_value);
+    }
+
+    o_value = 0;
+    return fapi2::FAPI2_RC_FALSE;
+}
+
 const std::pair<uint64_t, uint64_t> mcbistTraits<mss::mc_type::ODYSSEY>::address_pairs[] =
 {
     { START_ADDRESS_0, END_ADDRESS_0 },

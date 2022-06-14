@@ -559,4 +559,39 @@
     <mssAccessorName>row_repair_data</mssAccessorName>
   </attribute>
 
+  <attribute>
+        <id>ATTR_MSS_POST_MEMDIAGS_READ_SUBTEST</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            Whether to run post-memdiags read-only subtest
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            DISABLE = 0,
+            ENABLE = 1
+        </enum>
+        <default>ENABLE</default>
+        <platInit/>
+        <overrideOnly/>
+        <mssAccessorName>post_memdiags_read_subtest</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_POST_MEMDIAGS_READ_SUBTEST_FAIL_BEHAVIOR</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            Behvaior to perform if read subtest post-memdiags does not get a good result.
+            EXIT = fapi_try_exit out with error code
+            TRACE = FAPI_ERR that test failed, return success code
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            EXIT = 0,
+            TRACE = 1
+        </enum>
+        <default>EXIT</default>
+        <platInit/>
+        <overrideOnly/>
+        <mssAccessorName>post_memdiags_read_subtest_fail_behavior</mssAccessorName>
+    </attribute>
 </attributes>

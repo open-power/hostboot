@@ -52,6 +52,7 @@
 #include <mss_explorer_attribute_getters.H>
 #include <mss_generic_system_attribute_getters.H>
 
+#include <generic/memory/lib/utils/mcbist/gen_mss_memdiags.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/mss_buffer_utils.H>

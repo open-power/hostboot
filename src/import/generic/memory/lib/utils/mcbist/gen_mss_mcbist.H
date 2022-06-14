@@ -3471,7 +3471,7 @@ inline fapi2::ReturnCode load_pattern( const fapi2::Target<T>& i_target, const m
 /// @note this overload disappears when we have real patterns.
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mss::mcbistTraits<MC, T> >
 fapi2::ReturnCode load_maint_pattern( const fapi2::Target<T>& i_target, const pattern& i_pattern, const bool i_invert )
 {
     // The scom registers are in the port target. PT: port traits
@@ -3489,6 +3489,7 @@ fapi2::ReturnCode load_maint_pattern( const fapi2::Target<T>& i_target, const pa
     // Setup the array address
     // enable the auto increment bit
     // set ecc mode bit on
+    // TODO:ZEN-MST1390 Add MCBIST data/address trap processing
     l_aacr
     .template writeBit<PT::RMW_WRT_BUFFER_SEL>(mss::states::OFF)
     .template insertFromRight<PT::RMW_WRT_ADDRESS, PT::RMW_WRT_ADDRESS_LEN>(PT::MAINT_DATA_INDEX_START)
@@ -3547,7 +3548,7 @@ fapi_try_exit:
 /// @param[in] i_index the pattern index
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mss::mcbistTraits<MC, T> >
 inline fapi2::ReturnCode load_maint_pattern( const fapi2::Target<T>& i_target, uint64_t i_pattern )
 {
     if (NO_PATTERN != i_pattern)
@@ -3574,7 +3575,7 @@ fapi_try_exit:
 /// @param[in] i_program the mcbist::program
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mss::mcbistTraits<MC, T> >
 inline fapi2::ReturnCode load_maint_pattern( const fapi2::Target<T>& i_target, const mcbist::program<MC>& i_program )
 {
     return load_maint_pattern<MC>(i_target, i_program.iv_pattern);

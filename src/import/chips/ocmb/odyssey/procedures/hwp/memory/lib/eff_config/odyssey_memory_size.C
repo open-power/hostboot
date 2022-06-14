@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/mcbist/exp_memdiags.H $ */
+/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/eff_config/odyssey_memory_size.C $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,56 +22,46 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+// EKB-Mirror-To: hostboot
 
 ///
-/// @file exp_memdiags.H
-/// @brief API for memory diagnostics
+/// @file odyssey_memory_size.C
+/// @brief Return the effective memory size behind a target
 ///
-// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
-// *HWP HWP Backup: Marc Gollub <gollub@us.ibm.com>
+// *HWP HWP Owner: Sneha Kadam <sneha.kadam1@ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: HB:FSP
-//
-
-#ifndef _MSS_EXP_MEMDIAGS_H_
-#define _MSS_EXP_MEMDIAGS_H_
 
 #include <fapi2.H>
 
-#include <lib/shared/exp_consts.H>
-#include <lib/mcbist/exp_mcbist.H>
-#include <generic/memory/lib/utils/mcbist/gen_mss_memdiags.H>
+#include <lib/shared/ody_consts.H>
+#include <mss_generic_attribute_getters.H>
+#include <generic/memory/lib/utils/memory_size.H>
 
 namespace mss
 {
 
-namespace memdiags
+///
+/// @brief Return the total memory size behind a DIMM target
+/// @param[in] i_target the DIMM target
+/// @param[out] o_size the size of memory in GB behind the target
+/// @return FAPI2_RC_SUCCESS if ok
+/// @note The purpose of this specialization is to bridge the gap between different accessor functions
+///
+template<>
+fapi2::ReturnCode eff_memory_size<mss::mc_type::ODYSSEY>(
+    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+    uint64_t& o_size )
 {
+    uint32_t l_size = 0;
+    o_size = 0;
+    FAPI_TRY( mss::attr::get_dimm_size(i_target, l_size) );
+    o_size = l_size;
 
-///
-/// @brief Mask MCBISTFIRQ[MCBIST_PROGRAM_COMPLETE] and return the original mask value - specialization for Explorer
-/// @param[in] i_target the target
-/// @param[out] o_fir_mask_save the original mask value to be restored later
-/// @return FAPI2_RC_SUCCESS iff ok
-///
-template<>
-fapi2::ReturnCode mask_program_complete<mss::mc_type::EXPLORER>(
-    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-    fapi2::buffer<uint64_t>& o_fir_mask_save );
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
-///
-/// @brief Restore MCBISTFIRQ[MCBIST_PROGRAM_COMPLETE] mask value and clear the FIR - specialization for Explorer
-/// @param[in] i_target the target
-/// @param[in] i_fir_mask_save the original mask value to be restored
-/// @return FAPI2_RC_SUCCESS iff ok
-///
-template<>
-fapi2::ReturnCode clear_and_restore_program_complete<mss::mc_type::EXPLORER>(
-    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-    const fapi2::buffer<uint64_t>& i_fir_mask_save );
-
-} // memdiags
-} // mss
-
-#endif
+} // ns mss
