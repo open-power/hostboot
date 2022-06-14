@@ -442,16 +442,70 @@
 
 
 <!-- MR50 attributes -->
+  <attribute>
+    <id>ATTR_MEM_DDR5_WR_CRC_ERR_STATUS</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DDR5 DRAM's Write CRC error status
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum>CLEAR = 0, ERROR = 1</enum>
+    <writeable/>
+    <mssAccessorName>ddr5_wr_crc_err_status</mssAccessorName>
+  </attribute>
 
+  <attribute>
+    <id>ATTR_MEM_DDR5_WR_CRC_AUTODISABLE_ENABLE</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DDR5 DRAM's Write CRC auto-disable enable
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 0, ENABLE = 1</enum>
+    <writeable/>
+    <mssAccessorName>ddr5_wr_crc_autodisable_enable</mssAccessorName>
+  </attribute>
 
+  <attribute>
+    <id>ATTR_MEM_DDR5_WR_CRC_AUTODISABLE_STATUS</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DDR5 DRAM's Write CRC auto-disable status
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum>NOT_TRIGGERED = 0, TRIGGERED = 1</enum>
+    <writeable/>
+    <mssAccessorName>ddr5_wr_crc_autodisable_status</mssAccessorName>
+  </attribute>
 
 <!-- MR51 attributes -->
-
-
+  <attribute>
+    <id>ATTR_MEM_DDR5_WR_CRC_AUTODISABLE_THRESHOLD</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DDR5 DRAM's Write CRC auto-disable threshold
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssAccessorName>ddr5_wr_crc_autodisable_threshold</mssAccessorName>
+  </attribute>
 
 <!-- MR52 attributes -->
-
-
+  <attribute>
+    <id>ATTR_MEM_DDR5_WR_CRC_AUTODISABLE_WINDOW</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DDR5 DRAM's Write CRC auto-disable window
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssAccessorName>ddr5_wr_crc_autodisable_window</mssAccessorName>
+  </attribute>
 
 <!-- MR111 attributes -->
 

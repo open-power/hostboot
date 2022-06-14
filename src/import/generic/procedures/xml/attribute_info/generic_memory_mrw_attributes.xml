@@ -463,6 +463,17 @@
     <mssAccessorName>mrw_dram_write_crc</mssAccessorName>
   </attribute>
 
+ <attribute>
+    <id>ATTR_MSS_MRW_DDR5_DRAM_READ_CRC</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description> Enables DRAM Read CRC</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <enum> DISABLE = 0, ENABLE = 1 </enum>
+    <default> 0  </default>
+    <mssAccessorName>mrw_ddr5_dram_read_crc</mssAccessorName>
+  </attribute>
+
   <attribute>
     <id>ATTR_MSS_MRW_TEMP_REFRESH_MODE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
