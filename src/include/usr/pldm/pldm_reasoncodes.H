@@ -179,6 +179,9 @@ namespace PLDM
         RC_MISMATCHED_ENTITY_INSTANCE = PLDM_COMP_ID | 0x3C,
         RC_RESET_DETECTED_SHUTDOWN    = PLDM_COMP_ID | 0x3D,
         RC_REQ_FAILED_SHUTDOWN        = PLDM_COMP_ID | 0x3E,
+        RC_PN_NOT_FOUND               = PLDM_COMP_ID | 0x3F,
+        RC_SN_NOT_FOUND               = PLDM_COMP_ID | 0x40,
+        RC_CCIN_NOT_FOUND             = PLDM_COMP_ID | 0x41,
     };
 
     /**

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,23 @@
 
 namespace PLDM
 {
+
+// Struct used to map ATTR_BUS_RAIL_LOCATION_MAP
+// Must match the sizes found in attribute_types_openpower.xml
+struct bus_rail_loc_map {
+    uint8_t bus;
+    uint8_t rail;
+    char location[VRM_LOCATION_SIZE];
+} __attribute__((packed));
+
+// Struct used to map ATTR_LOCATION_PN_SN_CCIN_MAP
+// Must match the sizes found in attribute_types_openpower.xml
+struct loc_pn_sn_ccin_map {
+    char location[VRM_LOCATION_SIZE];
+    uint8_t pn[VRM_PN_SIZE];
+    uint8_t sn[VRM_SN_SIZE];
+    uint8_t ccin[VRM_CCIN_SIZE];
+} __attribute__((packed));
 
 /**
  * @brief Utility function that will perform PLDM operations necessary to lookup
