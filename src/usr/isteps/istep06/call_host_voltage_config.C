@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,7 @@
 #include <devicefw/userif.H>
 #include <fapi2.H>
 #include <fapi2/plat_hwp_invoker.H>
+#include <isteps/bios_attr_accessors/bios_attr_setters.H>
 
 //Targeting
 #include    <targeting/common/commontargeting.H>
@@ -129,7 +130,7 @@ void* call_host_voltage_config( void *io_pArgs )
 
         // ####################################################################
         //TODO RTC:244307 Revisit if other HWP's need to be called to Validate
-        //                Volatge Settings
+        //                Voltage Settings
         // ###################################################################
     } while( 0 );
 
@@ -142,6 +143,13 @@ void* call_host_voltage_config( void *io_pArgs )
         errlCommit( l_err, ISTEP_COMP_ID );
 
     }
+
+#ifdef CONFIG_PLDM
+    // Notify the BMC via PLDM BIOS attributes hb_cap_freq_mhz_min/max
+    std::vector<uint8_t> string_table, attr_table;
+    ISTEP::set_hb_cap_freq_mhz_min_max(string_table, attr_table, l_stepError);
+#endif
+
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_voltage_config exit" );
 

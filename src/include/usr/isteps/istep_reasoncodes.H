@@ -198,6 +198,7 @@ namespace ISTEP
         RC_INVALID_HUGE_PAGE_SIZE                = ISTEP_COMP_ID | 0x6D,
         RC_TOO_SMALL_BMC_PDR_COUNT               = ISTEP_COMP_ID | 0x6E,
         RC_BOOT_CORE_REPLACEMENT                 = ISTEP_COMP_ID | 0x6F,
+        RC_REQUESTED_FREQ_OUTSIDE_BOUNDARY       = ISTEP_COMP_ID | 0x70,
     };
 
 };

@@ -74,4 +74,18 @@ void set_hb_effective_secure_version(std::vector<uint8_t>& io_string_table,
                                      std::vector<uint8_t>& io_attr_table,
                                      ISTEP_ERROR::IStepError & io_stepError);
 
+
+/**
+ * @brief Sets hb_cap_freq_mhz_min and hb_cap_freq_mhz_max to the
+ *        current values of ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ and
+ *        ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ respectively.
+ * @param[in,out] io_string_table   See brief in file hb_bios_attrs.H.
+ * @param[in,out] io_attr_table     See brief in file hb_bios_attrs.H.
+ * @param[in,out] io_stepError      If an error occurs which require a TI it can
+ *                                  be attached to this IstepError log.
+ * @return void
+ */
+void set_hb_cap_freq_mhz_min_max(std::vector<uint8_t>& io_string_table,
+                                 std::vector<uint8_t>& io_attr_table,
+                                 ISTEP_ERROR::IStepError & io_stepError);
 }

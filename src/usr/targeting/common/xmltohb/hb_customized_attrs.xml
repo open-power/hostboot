@@ -85,7 +85,7 @@
     <attribute>
         <id>ATTR_DYNAMIC_INIT_MODE_VEC</id>
         <no_export/>
-	<writeable/>
+    <writeable/>
     </attribute>
 
      <attribute>
@@ -969,6 +969,12 @@
         <no_export/>
         <persistency>volatile-zeroed</persistency>
     </attribute>
+
+    <attribute>
+         <!-- Support for HANA CAP -->
+         <id>ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ_OVERRIDE</id>
+         <writeable/>
+     </attribute>
 
     <!-- =====================================================================
      End of customizations definitions

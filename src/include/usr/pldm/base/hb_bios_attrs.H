@@ -424,7 +424,62 @@ namespace PLDM
                                        std::vector<uint8_t>& io_attr_table,
                                        bool &o_inhibitResets);
 
+    /**
+     * @brief Set PLDM BIOS hb_cap_freq_mhz_max attr to new value
+     *
+     * @param[in,out] io_string_table     See brief at the top of this file.
+     * @param[in,out] io_attr_table       See brief at the top of this file.
+     * @param[in]     i_max_freq          New max frequency (MHZ)
+     *
+     * @return Error if any, otherwise nullptr.
+     */
+    errlHndl_t setCapFreqMhzMax(std::vector<uint8_t>& io_string_table,
+                                std::vector<uint8_t>& io_attr_table,
+                                uint64_t i_max_freq);
 
+    /**
+     * @brief Set PLDM BIOS hb_cap_freq_mhz_min attr to new value
+     *
+     * @param[in,out] io_string_table     See brief at the top of this file.
+     * @param[in,out] io_attr_table       See brief at the top of this file.
+     * @param[in]     i_min_freq          New min frequency (MHZ)
+     *
+     * @return Error if any, otherwise nullptr.
+     */
+    errlHndl_t setCapFreqMhzMin(std::vector<uint8_t>& io_string_table,
+                                std::vector<uint8_t>& io_attr_table,
+                                uint64_t i_min_freq);
+
+    /** @brief Retrieve the current value of the hb_cap_freq_mhz_request
+    *          PLDM BIOS attribute and return the value.
+    *
+    * @param[in,out] io_string_table  See brief at the top of this file.
+    * @param[in,out] io_attr_table    See brief at the top of this file.
+    * @param[out]    o_CapFreq_Mhz    If no error occurs, this will contain the value
+    *                                 found for hb_cap_freq_mhz_request
+    *
+    * @return Error if any, otherwise nullptr.
+    */
+    errlHndl_t getCapFreqMhz(std::vector<uint8_t>& io_string_table,
+                                 std::vector<uint8_t>& io_attr_table,
+                                 uint64_t &o_CapFreq_Mhz);
+
+    /** @brief Retrieve the current values of hb_cap_freq_mhz_min/max
+    *          PLDM BIOS attributes.
+    *
+    * @param[in,out] io_string_table  See brief at the top of this file.
+    * @param[in,out] io_attr_table    See brief at the top of this file.
+    * @param[out]    o_CapFreqMhz_min  If no error occurs, this will contain the value
+    *                                  found for hb_cap_freq_mhz_min
+    * @param[out]    o_CapFreqMhz_max  If no error occurs, this will contain the value
+    *                                  found for hb_cap_freq_mhz_max
+    *
+    * @return Error if any, otherwise nullptr.
+    */
+    errlHndl_t getCapFreqMhzMinMax(std::vector<uint8_t>& io_string_table,
+                                   std::vector<uint8_t>& io_attr_table,
+                                   uint32_t &o_CapFreqMhz_min,
+                                   uint32_t &o_CapFreqMhz_max);
 }
 
 #endif

@@ -179,4 +179,38 @@ void set_hb_effective_secure_version(std::vector<uint8_t>& io_string_table,
     return;
 }
 
+void set_hb_cap_freq_mhz_min_max(std::vector<uint8_t>& io_string_table,
+                                 std::vector<uint8_t>& io_attr_table,
+                                 ISTEP_ERROR::IStepError & io_stepError)
+{
+    errlHndl_t l_errl = nullptr;
+    const auto l_sys = TARGETING::UTIL::assertGetToplevelTarget();
+    const auto l_min_freq = l_sys->getAttr<ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ_ORIGINAL>();
+    const auto l_max_freq = l_sys->getAttr<ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ_ORIGINAL>();
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "set_hb_cap_freq_mhz_min_max(): original values (%ld to %ld)",
+            l_min_freq, l_max_freq );
+    l_errl = PLDM::setCapFreqMhzMin(io_string_table, io_attr_table, l_min_freq);
+    if (l_errl)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+            "set_hb_cap_freq_mhz_min_max(): An error occurred setting hb_cap_freq_mhz_min to %ld",
+            l_min_freq);
+        l_errl->collectTrace("ISTEPS_TRACE",256);
+        errlCommit( l_errl, ISTEP_COMP_ID );
+    }
+    l_errl = PLDM::setCapFreqMhzMax(io_string_table, io_attr_table, l_max_freq);
+    if (l_errl)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+            "set_hb_cap_freq_mhz_min_max(): An error occurred setting hb_cap_freq_mhz_max to %ld",
+            l_max_freq);
+        l_errl->collectTrace("ISTEPS_TRACE",256);
+        errlCommit( l_errl, ISTEP_COMP_ID );
+    }
+}
+
+
+
 }
