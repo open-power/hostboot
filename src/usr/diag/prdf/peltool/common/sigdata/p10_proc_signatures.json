@@ -442,7 +442,7 @@
         "0x80f8003a": "N1_LOCAL_FIR[58]: Firmware signaled deadman timer tigger occurred",
         "0x80f8003b": "N1_LOCAL_FIR[59]: Fimware signaled power bus chip quiesce failed",
         "0x80f8003c": "N1_LOCAL_FIR[60]: Hypervisor / Hostboot / OPAL initiated Terminate I",
-        "0x80f8003d": "N1_LOCAL_FIR[61]: reserved for software use",
+        "0x80f8003d": "N1_LOCAL_FIR[61]: Host detected LPC timeout",
         "0x80f8003e": "N1_LOCAL_FIR[62]: reserved for software use",
         "0x80f8003f": "N1_LOCAL_FIR[63]: ext_local_xstop",
         "0xc4520000": "NX_CQ_FIR[0]: PBI internal parity error",

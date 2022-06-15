@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -355,6 +355,73 @@ int32_t handleIntCqFirPcRecovError( ExtensibleChip * i_chip,
     return l_rc;
 }
 PRDF_PLUGIN_DEFINE_NS( p10_proc,     Proc, handleIntCqFirPcRecovError );
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  Hostboot detected an LPC timeout and manually triggered a system
+ *         checkstop. Will make callouts as if there was a hardware detected
+ *         LPC timeout.
+ * @param  i_chip A PROC chip.
+ * @param  io_sc The step code data struct
+ * @return SUCCESS always.
+ */
+int32_t hostLpcTimeout(ExtensibleChip* i_chip, STEP_CODE_DATA_STRUCT& io_sc)
+{
+    auto proc = i_chip->getTrgt();
+
+    PRDF_INF("Host detected LPC timeout: HUID=0x%08x", getHuid(proc));
+
+    #ifndef __HOSTBOOT_MODULE
+
+    // Callout the PNOR at medium priority. Must guard to force the FSP
+    // failover.
+    io_sc.service_data->SetCallout(
+        {proc, PRDcalloutData::TYPE_PNOR}, MRU_MED, GARD);
+
+    // Callout the LCC at medium priority, no guard. Note that this interface
+    // will also callout PNOR at low priority, but we want the PNOR callout at
+    // medium priority, which is the reason for the redundant callout above.
+    io_sc.service_data->SetCallout(
+        {proc, PRDcalloutData::TYPE_DPSS}, MRU_MED, NO_GARD);
+
+    // Callout the associated clock, no guard. Unlike the RCS oscillators where
+    // each processor has up to two reference clocks, the LPC oscillator
+    // reference clocks are hard wired: one to PROC 0 (master) and the other to
+    // PROC 1 (alternate master).
+    auto procPos = getTargetPosition(proc);
+
+    if (0 == procPos)
+    {
+        io_sc.service_data->SetCallout(
+            {proc, PRDcalloutData::TYPE_PROCCLK0}, MRU_MED, NO_GARD);
+    }
+    else if (1 == procPos)
+    {
+        io_sc.service_data->SetCallout(
+            {proc, PRDcalloutData::TYPE_PROCCLK1}, MRU_MED, NO_GARD);
+    }
+    else
+    {
+        // This would be a weird code bug because the LPC timeout function
+        // above should fail.
+        PRDF_ERR("LPC timeout on unexpected processor: proc=0x%08x",
+                 getHuid(proc));
+    }
+
+    // Callout the processor, no guard. Should be last in the callout list.
+    io_sc.service_data->SetCallout(proc, MRU_MED, NO_GARD);
+
+    #else
+
+    // If, somehow, this is called in Hostboot.
+    io_sc.service_data->SetCallout(LEVEL2_SUPPORT, MRU_MED);
+
+    #endif
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE_NS(p10_proc, Proc, hostLpcTimeout);
 
 //------------------------------------------------------------------------------
 

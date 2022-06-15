@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2021
+# Contributors Listed Below - COPYRIGHT 2020,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -5610,9 +5610,9 @@ group gN1_LOCAL_FIR
     (rN1_LOCAL_FIR, bit(60)) ? defaultMaskedError;
 
     /** N1_LOCAL_FIR[61]
-     *  reserved for software use
+     *  Host detected LPC timeout
      */
-    (rN1_LOCAL_FIR, bit(61)) ? defaultMaskedError;
+    (rN1_LOCAL_FIR, bit(61)) ? hostLpcTimeout;
 
     /** N1_LOCAL_FIR[62]
      *  reserved for software use

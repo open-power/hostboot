@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2021
+# Contributors Listed Below - COPYRIGHT 2020,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -114,6 +114,8 @@ actionclass rcs_error_handling { level2_th_1; };
 # The bit characterized by this action should be routed to the OCC and should
 # never be seen by PRD.
 actionclass occInterrupt { level2_th_1; };
+
+actionclass hostLpcTimeout { funccall("hostLpcTimeout"); };
 
 ###############################################################################
 # TOD actions
