@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2003,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2003,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -150,6 +150,9 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
     bool dumpContentSet = false;
     #endif
 
+    // Keep track of the chips with errors so that we can add more FFDC later.
+    std::vector<ExtensibleChip*> ffdcChips{};
+
     // Examine each chip in the domain.
     for (unsigned int index = 0; index < GetSize(); ++index)
     {
@@ -191,9 +194,9 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
         chip->CaptureErrorData(io_sc.service_data->GetCaptureData(),
                                Util::hashString("default_pll_ffdc"));
 
-        // Capture the rest of this chip's PLL FFDC.
-        func = chip->getExtensibleFunction("capturePllFfdc");
-        (*func)(chip, PluginDef::bindParm<STEP_CODE_DATA_STRUCT &>(io_sc));
+        // Keep track of the chips with errors so that we can add more FFDC
+        // later.
+        ffdcChips.push_back(chip);
 
         // Set the primary signature to the generic error signature.
         io_sc.service_data->setSignature(huid, PRDFSIG_RCS_PLL_ERROR);
@@ -371,6 +374,18 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
             dumpContentSet = true;
         }
         #endif
+    }
+
+    // Capture more FFDC, if possible. The reason this is here in a separate
+    // loop from above is that there is only so much space for FFDC and we are
+    // capturing a lot of registers. The registers we captured above are
+    // essential for debug and the rest of the registers are only useful if we
+    // have the room.
+    for (const auto& chip : ffdcChips)
+    {
+        // Capture the rest of this chip's PLL FFDC.
+        func = chip->getExtensibleFunction("capturePllFfdc");
+        (*func)(chip, PluginDef::bindParm<STEP_CODE_DATA_STRUCT &>(io_sc));
     }
 
     #ifdef __HOSTBOOT_MODULE

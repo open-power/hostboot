@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2021
+# Contributors Listed Below - COPYRIGHT 2020,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -559,42 +559,42 @@
     {
         name        "TP Chiplet ROOT CONTROL 0 register";
         scomaddr    0x00050010;
-        capture     group pll_ffdc;
+        capture     group default_pll_ffdc;
     };
 
     register ROOT_CTRL3
     {
         name        "TP Chiplet ROOT CONTROL 3 register";
         scomaddr    0x00050013;
-        capture     group pll_ffdc;
+        capture     group default_pll_ffdc;
     };
 
     register ROOT_CTRL4
     {
         name        "TP Chiplet ROOT CONTROL 4 register";
         scomaddr    0x00050014;
-        capture     group pll_ffdc;
+        capture     group default_pll_ffdc;
     };
 
     register ROOT_CTRL5
     {
         name        "TP Chiplet ROOT CONTROL 5 register";
         scomaddr    0x00050015;
-        capture     group pll_ffdc;
+        capture     group default_pll_ffdc;
     };
 
     register ROOT_CTRL6
     {
         name        "TP Chiplet ROOT CONTROL 6 register";
         scomaddr    0x00050016;
-        capture     group pll_ffdc;
+        capture     group default_pll_ffdc;
     };
 
     register RCS_SENSE_1
     {
         name        "RCS Sense 1 register";
         scomaddr    0x0005001D;
-        capture     group pll_ffdc;
+        capture     group default_pll_ffdc;
         access      read_only;
     };
 
@@ -602,7 +602,7 @@
     {
         name        "RCS Sense 2 register";
         scomaddr    0x0005001E;
-        capture     group pll_ffdc;
+        capture     group default_pll_ffdc;
         access      read_only;
     };
 
