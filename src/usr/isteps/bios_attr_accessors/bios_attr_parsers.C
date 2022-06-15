@@ -598,4 +598,93 @@ void parse_hb_inhibit_bmc_reset(std::vector<uint8_t>& io_string_table,
     sys->setAttr<TARGETING::ATTR_HYP_INHIBIT_RUNTIME_BMC_RESET>(inhibit_resets ? 1 : 0);
 }
 
+void parse_hb_cap_freq_mhz(std::vector<uint8_t>& io_string_table,
+                           std::vector<uint8_t>& io_attr_table,
+                           ISTEP_ERROR::IStepError & io_stepError)
+{
+    const uint64_t IGNORE_CAP_VALUE = 0;
+    uint64_t cap_freq_mhz = IGNORE_CAP_VALUE;
+
+
+    errlHndl_t l_errl = PLDM::getCapFreqMhz(io_string_table,
+                                            io_attr_table,
+                                            cap_freq_mhz);
+    if(l_errl)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "parse_hb_cap_freq_mhz: "
+                "An error occurred getting HB CAP FREQ MHZ from the BMC" );
+        l_errl->collectTrace("ISTEPS_TRACE",256);
+        errlCommit( l_errl, ISTEP_COMP_ID );
+    }
+    else if (cap_freq_mhz != IGNORE_CAP_VALUE) // don't need range check if just setting to ignore
+    {
+        // grab the PLDM BIOS attr values as the SYSTEM_CORE attrs haven't been setup yet
+        uint32_t cap_freq_mhz_min = 0;
+        uint32_t cap_freq_mhz_max = 0;
+        l_errl = PLDM::getCapFreqMhzMinMax(io_string_table,
+                                           io_attr_table,
+                                           cap_freq_mhz_min,
+                                           cap_freq_mhz_max);
+        if (l_errl)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                "parse_hb_cap_freq_mhz: "
+                "An error occurred getting HB CAP FREQ MHZ MIN/MAX values from the BMC");
+            l_errl->collectTrace("ISTEPS_TRACE",256);
+            errlCommit( l_errl, ISTEP_COMP_ID );
+        }
+        else
+        {
+            const auto l_sys = TARGETING::UTIL::assertGetToplevelTarget();
+
+            // now verify the value is inclusively between min and max PLDM BIOS values
+            if ((cap_freq_mhz < cap_freq_mhz_min) ||
+                (cap_freq_mhz > cap_freq_mhz_max) )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                    "parse_hb_cap_freq_mhz: requested frequency %ld is outside boundary (%ld - %ld). "
+                    "Terminating IPL as this is an invalid requested freq",
+                    cap_freq_mhz, cap_freq_mhz_min, cap_freq_mhz_max );
+                /*@
+                 * @errortype
+                 * @severity   ERRL_SEV_UNRECOVERABLE
+                 * @moduleid   ISTEP::MOD_BIOS_ATTR_PARSERS
+                 * @reasoncode ISTEP::RC_REQUESTED_FREQ_OUTSIDE_BOUNDARY
+                 * @userdata1  Requested cap frequency in MHz (hb_cap_freq_mhz_request)
+                 * @userdata2[0:31]  Minimum frequency in MHz (hb_cap_freq_mhz_min)
+                 * @userdata2[32:63] Maximum frequency in MHz (hb_cap_freq_mhz_max)
+                 * @devdesc    Software problem, user requested frequency is outside the boundary.
+                 *             Requested frequency is from BMC.
+                 * @custdesc   A software error occurred during system boot
+                 */
+                l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                       ISTEP::MOD_BIOS_ATTR_PARSERS,
+                                       ISTEP::RC_REQUESTED_FREQ_OUTSIDE_BOUNDARY,
+                                       cap_freq_mhz,
+                                       TWO_UINT32_TO_UINT64(cap_freq_mhz_min,cap_freq_mhz_max),
+                                       ErrlEntry::NO_SW_CALLOUT);
+                PLDM::addBmcErrorCallouts(l_errl);
+                l_errl->collectTrace("ISTEPS_TRACE",256);
+                errlCommit( l_errl, ISTEP_COMP_ID );
+
+                // disable the requested frequency and just use system settings
+                l_sys->setAttr<ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ_OVERRIDE>(IGNORE_CAP_VALUE);
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "parse_hb_cap_freq_mhz: requested frequency %ld is inside boundary (%ld - %ld)",
+                    cap_freq_mhz, cap_freq_mhz_min, cap_freq_mhz_max );
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "parse_hb_cap_freq_mhz: Set ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ_OVERRIDE = 0x%X",
+                    cap_freq_mhz );
+
+                l_sys->setAttr<ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ_OVERRIDE>(cap_freq_mhz);
+            }
+        }
+    }
+    // else, do nothing if cap_freq_mhz = IGNORE_CAP_VALUE
+}
+
 }

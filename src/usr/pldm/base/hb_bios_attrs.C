@@ -89,6 +89,11 @@ const char PLDM_BIOS_HB_MIRROR_MEMORY_STRING[]             = "hb_memory_mirror_m
 const char PLDM_BIOS_HB_KEY_CLEAR_REQUEST_STRING[]         = "hb_key_clear_request_current";
 const char PLDM_BIOS_HB_KEY_CLEAR_REQUEST_STRING_PENDING[] = "hb_key_clear_request";
 
+const char PLDM_BIOS_HB_CAP_FREQ_MHZ_MAX_STRING[]     = "hb_cap_freq_mhz_max";
+const char PLDM_BIOS_HB_CAP_FREQ_MHZ_MIN_STRING[]     = "hb_cap_freq_mhz_min";
+const char PLDM_BIOS_HB_CAP_FREQ_MHZ_REQUEST_STRING[] = "hb_cap_freq_mhz_request_current";
+
+
 // Possible Values
 const char PLDM_BIOS_HB_OPAL_STRING[]          = "OPAL";
 const char PLDM_BIOS_HB_POWERVM_STRING[]       = "PowerVM";
@@ -1175,6 +1180,72 @@ errlHndl_t getLmbSize(
     return errl;
 }
 
+errlHndl_t getCapFreqMhz(std::vector<uint8_t>& io_string_table,
+                         std::vector<uint8_t>& io_attr_table,
+                         uint64_t &o_CapFreq_Mhz)
+{
+    errlHndl_t errl = nullptr;
+
+    do{
+
+        uint64_t l_attr_val = 0;
+        errl = systemIntAttrLookup(io_string_table,
+                                   io_attr_table,
+                                   PLDM_BIOS_HB_CAP_FREQ_MHZ_REQUEST_STRING,
+                                   l_attr_val);
+        if(errl)
+        {
+            PLDM_ERR("getCapFreqMhz() Failed to lookup value for %s",
+                     PLDM_BIOS_HB_CAP_FREQ_MHZ_REQUEST_STRING);
+            l_attr_val = 0; // value if we can't find it
+        }
+        o_CapFreq_Mhz = l_attr_val;
+
+    } while(0);
+
+    return errl;
+}
+
+errlHndl_t getCapFreqMhzMinMax(std::vector<uint8_t>& io_string_table,
+                               std::vector<uint8_t>& io_attr_table,
+                               uint32_t &o_CapFreqMhz_min,
+                               uint32_t &o_CapFreqMhz_max)
+{
+    errlHndl_t errl = nullptr;
+
+    do{
+
+        uint64_t l_attr_val = 0;
+        errl = systemIntAttrLookup(io_string_table,
+                                   io_attr_table,
+                                   PLDM_BIOS_HB_CAP_FREQ_MHZ_MIN_STRING,
+                                   l_attr_val);
+        if(errl)
+        {
+            PLDM_ERR("getCapFreqMhz() Failed to lookup value for %s",
+                     PLDM_BIOS_HB_CAP_FREQ_MHZ_MIN_STRING);
+            l_attr_val = 0; // value if we can't find it
+            break;
+        }
+        o_CapFreqMhz_min = l_attr_val;
+
+        errl = systemIntAttrLookup(io_string_table,
+                                   io_attr_table,
+                                   PLDM_BIOS_HB_CAP_FREQ_MHZ_MAX_STRING,
+                                   l_attr_val);
+        if(errl)
+        {
+            PLDM_ERR("getCapFreqMhz() Failed to lookup value for %s",
+                     PLDM_BIOS_HB_CAP_FREQ_MHZ_MAX_STRING);
+            l_attr_val = 0; // value if we can't find it
+            break;
+        }
+        o_CapFreqMhz_max = l_attr_val;
+
+    } while(0);
+
+    return errl;
+}
 
 /** @brief Given the string representing a PLDM BIOS attribute of type string,
  *         get string entry returned as the value of this attribute by the BMC
@@ -1878,6 +1949,25 @@ errlHndl_t setEffectiveSecureVersion(std::vector<uint8_t>& io_string_table,
                                    i_effSecVer);
 }
 
+errlHndl_t setCapFreqMhzMax(std::vector<uint8_t>& io_string_table,
+                            std::vector<uint8_t>& io_attr_table,
+                            uint64_t i_max_freq)
+{
+    return setBiosIntegerAttrValue(io_string_table,
+                                   io_attr_table,
+                                   PLDM_BIOS_HB_CAP_FREQ_MHZ_MAX_STRING,
+                                   i_max_freq);
+}
+
+errlHndl_t setCapFreqMhzMin(std::vector<uint8_t>& io_string_table,
+                            std::vector<uint8_t>& io_attr_table,
+                            uint64_t i_min_freq)
+{
+    return setBiosIntegerAttrValue(io_string_table,
+                                   io_attr_table,
+                                   PLDM_BIOS_HB_CAP_FREQ_MHZ_MIN_STRING,
+                                   i_min_freq);
+}
 
 errlHndl_t setBiosEnumAttrValue(std::vector<uint8_t>& io_string_table,
                                 std::vector<uint8_t>& io_attr_table,
