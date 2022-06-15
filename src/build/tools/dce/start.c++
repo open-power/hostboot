@@ -31,6 +31,10 @@
  */
 
 #include <stdint.h>
+#include <list>
+
+#include <errl/errlentry.H>
+#include <return_code.H>
 
 // This variable will get placed directly after the .text section by the linker
 // script in the ELF that we generate, and the .data_segment_addr section has
@@ -98,6 +102,13 @@ extern void(*_end_ctors)();
 
 // This function is defined by users.
 int main();
+
+// Declarations for FAPI globals which are required to use FAPI macros.
+namespace fapi2 {
+    ReturnCode current_err;
+    std::list<errlHndl_t> g_platErrList;
+}
+
 
 // This is the entrypoint for the ELF. It will first invoke constructors, then
 // call the user-defined main() function, and then invoke destructors and return.

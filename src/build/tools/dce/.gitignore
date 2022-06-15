@@ -1,0 +1,5 @@
+dce-extra-files/
+dce-extra-files/dce_rc
+
+# Don't ignore trace_defs.h++ since that file will evolve as trace macros change
+!dce-extra-files/trace_defs.h++

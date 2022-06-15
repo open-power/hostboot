@@ -1,0 +1,14 @@
+# This file holds env vars that are used by DCE for multi-file support or including extra things needed to compile a DCE
+# script. Should you need these, it's best to create an alias that will source this file each time you invoke a DCE
+# compile so that the extra files vars are kept up to date automatically as you work. This file is NOT sourced
+# automatically
+
+# Can be pointed to any dir and DCE_EXTRA_FILES will populate with any .c++ .h++ files at the location.
+export DCE_EXTRA_FILES_LOCATION=$PROJECT_ROOT/src/build/tools/dce/dce-extra-files
+# Will automatically gather all files in extra file location. Compiler will filter out non .c++ h++ files so that
+# non-code files aren't made dependencies
+export DCE_EXTRA_FILES=$(ls $DCE_EXTRA_FILES_LOCATION | awk -v var="$DCE_EXTRA_FILES_LOCATION/" '{printf "%s ", var $0 }')
+# If you need extra CXXFLAGS, space separated.
+export CXXFLAGS_DCE="-D__HOSTBOOT_MODULE=DCE"
+# If you need to add extra INCDIRs, space seperated.
+export INCDIRS_DCE="-I $DCE_EXTRA_FILES_LOCATION"

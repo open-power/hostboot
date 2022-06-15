@@ -72,7 +72,8 @@ dump via PLDM.
 
 The entrypoint of every DCE program is a function with the signature `int main()`.
 
-Then run `make foo.dce.lid` (i.e. replace the `.c++` suffix with `.dce.lid`) and you will see this output:
+Then run `make foo.dce.lid` (i.e. replace the '.c++' suffix with '.dce.lid') from the project root.
+You will see output similar to this:
 
 ```bash
 $ make foo.dce.lid
@@ -241,6 +242,24 @@ DCE_EXTRA_FILES="test.c++ test.h++" make foo.dce.lid
 
 You can now copy the resulting lid onto the system and invoke it with the script as normal.
 
+Alternatively, if you place your extra files in src/build/tools/dce/dce-extra-files/ the dce_rc file in there can be
+sourced before compile and it will update your environment variables for you.
+
+## dce_rc file
+
+In src/build/tools/dce/dce-extra-files there is an rc file that can be updated and sourced before each compile of DCE as
+needed. This file is not automatically sourced, it must be manually sourced by the user. It is also .gitignored to avoid
+users accidentally committing their personalized version of the file. If an update to dce_rc is required for all users
+then be sure to include the file in the commit with `git add -f`.
+
+If you are going to source this file, you must not place your main DCE file in the same location as
+DCE_EXTRA_FILES_LOCATION as this will cause compile issues. (multiple definition errors from being included in the
+compile twice).
+
+There a few helpful env vars but DCE_EXTRA_FILES should be left alone. It's defaulted to populate itself with
+all additional files required for the main .c++ file. All you need to do is update DCE_EXTRA_FILES_LOCATION if you want
+to locate your files elsewhere from the default.
+
 ## Restrictions
 
 There are certain features of C++ and Hostboot that DCE code does not support:
@@ -257,6 +276,15 @@ There are certain features of C++ and Hostboot that DCE code does not support:
 #undef TRACFCOMP
 #define TRACFCOMP(X, ...) CONSOLE::displayf(CONSOLE::DEFAULT, NULL, __VA_ARGS__);
 ```
+
+    Alternatively, you can source the dce_rc file mentioned above and then add this include to your code file.
+
+```cpp
+#include <trace_defs.h++>
+```
+
+    You'll just want to make sure that it's the final include so that the #undef and re-define are the last
+    pre-processor macros to run in the source file you include it in to avoid redefinition compile errors.
 
 2. thread_local
 
