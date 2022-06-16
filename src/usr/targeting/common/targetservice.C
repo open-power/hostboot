@@ -179,7 +179,10 @@ namespace TARGETING
             // quick check to make sure there aren't more targets then we can handle for displaying
             for (auto pair: procChildData)
             {
-                TARG_ASSERT(pair.second.numPerProc <= 64, "Update displayProcChildrenBitmasks() to display more that 64 targets of one type per PROC");
+                TARG_ASSERT(pair.second.numPerProc <= pair.second.bitStringSizeBits,
+                            "Update displayProcChildrenBitmasks() to display more than %d targets of type %s per PROC",
+                            pair.second.numPerProc,
+                            pair.second.name);
             }
 
             // build the predicate to get the proc children to to display
@@ -221,7 +224,7 @@ namespace TARGETING
                     if( l_procChild->tryGetAttr<ATTR_ORDINAL_ID>(l_pos) )
                     {
                         // get position relative to proc
-                        l_pos = l_pos % l_targetData[l_type].numPerProc;
+                        l_pos = l_pos % l_targetData[l_type].bitStringSizeBits;
 
                         // shift the bits marked into the lower end of bitString (if applicable)
                         // to reduce the amount of trailing 0's in the number displayed later
@@ -237,10 +240,10 @@ namespace TARGETING
             }
 
             // display proc bit string
-            TARG_INF("PROCS=%X", targetListToBitString<ATTR_POSITION>(l_procsPres, i_pPredicate));
+            TARG_INF("PROCS=%08X", targetListToBitString<ATTR_POSITION>(l_procsPres, i_pPredicate));
 
         #if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
-            CONSOLE::displayf(CONSOLE::DEFAULT, "TARG", "PROCS=%.8X",
+            CONSOLE::displayf(CONSOLE::DEFAULT, "TARG", "PROCS=%08X",
                               targetListToBitString<ATTR_POSITION>(l_procsPres, i_pPredicate));
         #endif
 
