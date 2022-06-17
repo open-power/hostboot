@@ -44,7 +44,7 @@ extension, but we will need to remember the filename for later):
 
 using namespace TARGETING;
 
-extern "C" int _start()
+int main()
 {
     TargetHandleList procs;
     getAllChips(procs, TYPE_PROC);
@@ -68,9 +68,9 @@ extern "C" int _start()
 ```
 
 This example program uses some Hostboot functions to do an arbitrary task, which is in this case requesting an SBE
-dump via a PLDM request.
+dump via PLDM.
 
-The entrypoint of every DCE file must have C linkage (`extern "C"`), and be named `_start`.
+The entrypoint of every DCE program is a function with the signature `int main()`.
 
 Then run `make foo.dce.lid` (i.e. replace the `.c++` suffix with `.dce.lid`) and you will see this output:
 
@@ -243,29 +243,9 @@ You can now copy the resulting lid onto the system and invoke it with the script
 
 ## Restrictions
 
-There are certain features of C++ that DCE code does not support:
+There are certain features of C++ and Hostboot that DCE code does not support:
 
-1. Global objects that have constructors or destructors
-
-   DCE does support global data, but any global object that has a constructor will not be properly initialized or
-   destroyed when DCE code is invoked/exits. This includes simple types. For example, declaring a global variable
-   like this:
-
-       int x = 5;
-
-   will leave the global variable with its uninitialized value of 0 when DCE code runs. However, making it constant
-   like this:
-
-       const int x = 5;
-
-   will set the variable to 5 at compile-time.
-
-   This doesn't work with variables that aren't in the constant section of the ELF (e.g. vectors). Those will remain
-   uninitialized whether they are constant or not.
-
-   This is due to be fixed in a future version of DCE.
-
-2. Traces
+1. Traces
 
    The `TRACFCOMP` macro itself works as normal in DCE code. However, the trace hash won't be known to the trace
    decoder, so weave or similar tools will be unable to display the trace.
@@ -278,14 +258,15 @@ There are certain features of C++ that DCE code does not support:
 #define TRACFCOMP(X, ...) CONSOLE::displayf(CONSOLE::DEFAULT, NULL, __VA_ARGS__);
 ```
 
-3. Singletons
+2. thread_local
 
-   To use the Singleton class, or any class with static member variables in inline functions, you must provide a
-   global definition of `__dso_handle` in your program:
+DCE does not yet support thread_local. This is due to be fixed in the future.
 
-       void* __dso_handle;
+## Gotchas
 
-4. Accessing data in unloaded modules
+1. If DCE code crashes, global destructors will not be called.
+
+2. Accessing data in unloaded modules
 
    Be careful about accessing Hostboot functions and data that are resident in modules that may be unloaded
    when you invoke your DCE script. For example, to call a function defined in libsbeio.so, that module

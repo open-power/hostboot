@@ -82,12 +82,14 @@ errlHndl_t getLidFile(uint32_t i_fileHandle,
  *                will keep reading the data until BMC indicates that there is
  *                no more data to read.
  * @param[out] o_file the pointer to memory where the file is to be written
+ * @param[out] o_eof whether an eof condition was encountered
  * @return nullptr on success; non-nullptr on error
  */
 errlHndl_t getLidFileFromOffset(uint32_t i_fileHandle,
                                 uint32_t i_offset,
                                 uint32_t& io_numBytesToRead,
-                                uint8_t* o_file);
+                                uint8_t* o_file,
+                                bool* o_eof = nullptr);
 
 /**
  * @brief Requests to write to a lid file starting with the specified offset

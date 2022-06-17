@@ -70,23 +70,6 @@ struct reloc
     uint64_t reloc_value;
 };
 
-/* @brief The description of the beginning of the code LID file.
- */
-struct lid_header
-{
-    uint64_t entrypoint_offset;
-    uint64_t toc_offset;
-    uint64_t env_offset;
-
-    // This is to be compared with hbi_ImageId to check for binary compatibility
-    char version[128];
-
-    uint64_t num_relocs;
-    reloc relocs[1];
-
-    // data follows
-} PACKED;
-
 /* @brief Description of a 64-bit PowerPC function descriptor.
  */
 struct ppc_function_thunk_t
@@ -94,6 +77,28 @@ struct ppc_function_thunk_t
     uint64_t nip;
     uint64_t toc;
     uint64_t env;
+} PACKED;
+
+/* @brief The description of the beginning of the code LID file.
+ */
+struct lid_header
+{
+    // The descriptor for the ELF entrypoint (usually the _start function)
+    ppc_function_thunk_t entrypoint;
+
+    // The offset in the ELF of the data segment. This is used to set the
+    // permissions of the code segment and data segments correctly (we can't set
+    // the whole ELF to RWX because Hostboot's kernel doesn't allow it, so we
+    // set code to RX and data to RW).
+    uint64_t data_segment_offset;
+
+    // This is to be compared with hbi_ImageId to check for binary compatibility
+    char version[128];
+
+    uint64_t num_relocs;
+    reloc relocs[1];
+
+    // data follows, aligned at a page boundary
 } PACKED;
 
 /* @brief Perform dynamic ELF relocations.
@@ -104,9 +109,12 @@ struct ppc_function_thunk_t
 uint8_t* perform_relocs(lid_header* const header)
 {
     const uint64_t num_relocs = header->num_relocs;
-    reloc* const relocs = header->relocs;
+    const reloc* const relocs = header->relocs;
 
-    uint8_t* const data = reinterpret_cast<uint8_t*>(&relocs[num_relocs]);
+    const reloc* const end_relocs = &relocs[num_relocs];
+    const uint64_t elf_begin = ALIGN_PAGE(reinterpret_cast<uint64_t>(end_relocs));
+
+    uint8_t* const data = reinterpret_cast<uint8_t*>(elf_begin);
 
     for (uint64_t i = 0; i < num_relocs; ++i)
     {
@@ -148,16 +156,23 @@ bool check_binary_compatibility(const lid_header* const header)
     return strcmp(header->version, hbi_ImageId) != 0;
 }
 
+struct dce_execute_task_args
+{
+    uint64_t(*entrypoint)();
+};
+
 /* @brief The task that actually calls into the DCE binary.
  *
  * @param[in] func_ptr  The function to call.
  * @return              Nullptr.
  */
-void* dce_execute_task(void* func_ptr)
+void* dce_execute_task(void* vargs)
 {
+    const auto args = static_cast<dce_execute_task_args*>(vargs);
+
     CONSOLE::displayf(CONSOLE::DEFAULT, NULL, " > DCE task: Invoking function");
 
-    const auto ret = reinterpret_cast<uint64_t(*)()>(func_ptr)();
+    const auto ret = args->entrypoint();
 
     CONSOLE::displayf(CONSOLE::DEFAULT, NULL, " > DCE task: function returned %d", ret);
 
@@ -214,7 +229,9 @@ void* handleInvokeDceRequest_task(void*)
 
     task_detach();
 
-    std::vector<uint8_t> lid_contents(PAGE_SIZE);
+    const size_t READ_CHUNK_SIZE = 4096;
+
+    std::vector<uint8_t> lid_contents(READ_CHUNK_SIZE);
 
     errlHndl_t errl = nullptr;
 
@@ -227,17 +244,26 @@ void* handleInvokeDceRequest_task(void*)
 
     while (true)
     {
-        uint32_t bytes_read = 4096;
+        uint32_t bytes_read = READ_CHUNK_SIZE;
 
         CONSOLE::displayf(CONSOLE::DEFAULT, NULL, " - DCE: Fetching %d bytes at offset %d", bytes_read, offset);
 
+        bool eof = false;
         errl = getLidFileFromOffset(DCE_LID_NUMBER,
                                     offset,
                                     bytes_read,
-                                    lid_contents.data() + offset);
+                                    lid_contents.data() + offset,
+                                    &eof);
 
         if (errl)
         {
+            if (eof)
+            {
+                delete errl;
+                errl = nullptr;
+                break;
+            }
+
             CONSOLE::displayf(CONSOLE::DEFAULT, NULL,
                               "DCE: Failed to read LID from BMC: "
                               TRACE_ERR_FMT,
@@ -247,12 +273,12 @@ void* handleInvokeDceRequest_task(void*)
 
         offset += bytes_read;
 
-        if (bytes_read < PAGE_SIZE)
+        if (bytes_read < READ_CHUNK_SIZE)
         {
             break;
         }
 
-        lid_contents.resize(lid_contents.size() + PAGE_SIZE); // allocate space for another page
+        lid_contents.resize(lid_contents.size() + READ_CHUNK_SIZE); // allocate space for another chunk
     }
 
     if (errl)
@@ -284,7 +310,7 @@ void* handleInvokeDceRequest_task(void*)
 
     CONSOLE::displayf(CONSOLE::DEFAULT, NULL, " - DCE: Setting code permissions");
 
-    mm_set_permission(lid_contents.data(), lid_contents.size(), EXECUTABLE);
+    mm_set_permission(elf, header->data_segment_offset, EXECUTABLE);
 
     CONSOLE::displayf(CONSOLE::DEFAULT, NULL, " - DCE: Flushing data cache");
 
@@ -297,18 +323,27 @@ void* handleInvokeDceRequest_task(void*)
     CONSOLE::displayf(CONSOLE::DEFAULT, NULL, " - DCE: Phys addr is %p", physaddr);
 
     // Create a fake function descriptor that we can call through a function pointer.
-    ppc_function_thunk_t func_ptr =
+    ppc_function_thunk_t entrypoint_func_ptr =
     {
-        .nip = (uint64_t)(elf + header->entrypoint_offset),
-        .toc = (uint64_t)(elf + header->toc_offset),
-        .env = (uint64_t)(elf + header->env_offset),
+        .nip = (uint64_t)(elf + header->entrypoint.nip),
+        .toc = (uint64_t)(elf + header->entrypoint.toc),
+        .env = (uint64_t)(elf + header->entrypoint.env),
+    };
+
+    dce_execute_task_args task_args
+    {
+        .entrypoint = reinterpret_cast<uint64_t(*)()>(&entrypoint_func_ptr)
     };
 
     CONSOLE::displayf(CONSOLE::DEFAULT, NULL, " - DCE: Invoking code (.data() = %p, nip = %p, toc = %p, stackaddr = %p, elf = %p)",
-                      lid_contents.data(), func_ptr.nip, func_ptr.toc, &func_ptr, elf);
+                      lid_contents.data(),
+                      entrypoint_func_ptr.nip,
+                      entrypoint_func_ptr.toc,
+                      &entrypoint_func_ptr,
+                      elf);
 
     // Create a new task so that if the DCE code crashes, we can continue.
-    const auto tid = task_create(dce_execute_task, &func_ptr);
+    const auto tid = task_create(dce_execute_task, &task_args);
 
     int status = 0;
     task_wait_tid(tid, &status, nullptr);

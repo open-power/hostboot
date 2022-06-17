@@ -145,6 +145,13 @@ def get_entry_descriptor():
 
     return read_descriptor(infile, desc_addr)
 
+def get_data_segment_addr():
+    seg_addr = find_lib_symbol_addr('_data_segment_addr')
+
+    debugout('Reading data segment addr = %x' % (seg_addr,))
+
+    return struct.pack('>Q', seg_addr)
+
 # These constants must match Hostboot's dynamic relocation code
 # Search for @DEP_ON_BL_TO_HB_SIZE
 RELOC_TYPE_DESCRIPTOR = 1
@@ -254,6 +261,14 @@ def finalize_output():
     outfile = open(infilename + '.lid', 'wb')
     outfile.write(get_entry_descriptor())
 
+    # Write the address of the data segment
+    try:
+        outfile.write(get_data_segment_addr())
+    except Exception as e:
+        print(e)
+        print("[E] Failed to find and write address of data segment")
+        sys.exit(1)
+
     # Find and write the HBI image version to the LID
     hbi_imageid = file_bytes(hbicorefile, find_hb_data_symbol_addr('hbi_ImageId'), 128)
     print('[I] hbi_ImageId = ' + struct.unpack('128s', hbi_imageid)[0])
@@ -264,7 +279,12 @@ def finalize_output():
     for reloctype, relocaddr, offset in dynamic_relocs:
         outfile.write(struct.pack('>QQQ', reloctype, relocaddr, offset))
 
-    # Copy tmpfile to output file
+    # Align the beginning of the ELF to a page boundary
+    pos = outfile.tell()
+    newsize = (pos + (4096 - 1)) // 4096 * 4096
+    outfile.write('\0' * (newsize - pos))
+
+    # Copy ELF in tmpfile to output file
     tmpfile.seek(0)
     outfile.write(tmpfile.read())
 

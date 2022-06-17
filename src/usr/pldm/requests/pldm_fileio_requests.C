@@ -194,7 +194,8 @@ errlHndl_t getLidFile(const uint32_t i_fileHandle,
 errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
                                 const uint32_t i_offset,
                                 uint32_t& io_numBytesToRead,
-                                uint8_t* o_file)
+                                uint8_t* o_file,
+                                bool* const o_eof)
 {
     PLDM_DBG("getLidFileFromOffset: File handle 0x%08x, Input size 0x%08x, Offset 0x%08x",
                i_fileHandle, io_numBytesToRead, i_offset);
@@ -272,6 +273,11 @@ errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
             break;
         }
 
+        if (l_resp.completion_code == PLDM_DATA_OUT_OF_RANGE)
+        {
+            o_eof && (*o_eof = true);
+        }
+
         // PLDM_DATA_OUT_OF_RANGE is another signal for the end-of-file.
         // If the file is an exact multiple of MAX_TRANSFER_SIZE_BYTES, and
         // if we read the last part of the file during the last read, we
@@ -288,6 +294,7 @@ errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
                 delete l_errl;
                 l_errl = nullptr;
             }
+
             l_resp.completion_code = PLDM_SUCCESS;
         }
 

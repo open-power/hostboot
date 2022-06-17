@@ -33,7 +33,7 @@
 * the linker with the Hostboot build flags and adding the flag
 * --verbose to the command line.
 *
-* There were two modifications made to this file to allow DCE to link
+* There were original modifications made to this file to allow DCE to link
 * with it:
 *
 *  1. Change the alignment of the .got section from ALIGN(256) to ALIGN(8):
@@ -54,6 +54,9 @@
 * These changes are required so that the linker puts the "output" locations
 * of the ELF sections at the same alignment that it puts the "input" ELF
 * sections.
+*
+* More changes were made over time, and these are recorded in the git history
+* of this file.
 ***************************************************************************/
 
 /* Script for --shared -z combreloc: shared library, combine & sort relocs */
@@ -122,6 +125,23 @@ SECTIONS
     *(.gnu.warning)
     *(.sfpr .glink)
   } =0x60000000
+  .data_segment_addr : ALIGN(4096)
+  {
+
+     /* This .data_segment_addr segment exists so that we can forcibly
+        align everything after the .text segment to a page
+        boundary. We have to do that because Hostboot manages memory
+        permissions on page boundaries, and we have to avoid setting
+        any data segment memory to "executable" because executable
+        memory is not writeable. */
+
+      /* The only thing in this segment is the variable
+         _data_segment_addr from start.c++. We put something here so
+         that the linker doesn't discard this segment and screw up our
+         alignment. */
+
+      *(.data_segment_addr)
+  }
   .fini           :
   {
     KEEP (*(SORT_NONE(.fini)))
@@ -129,7 +149,33 @@ SECTIONS
   PROVIDE (__etext = .);
   PROVIDE (_etext = .);
   PROVIDE (etext = .);
-  .rodata         : { *(.rodata .rodata.* .gnu.linkonce.r.*) }
+  .rodata         : {
+
+     /* .rodata is special because the linker actually makes space in
+        the ELF file for everything in this segment. We are throwing
+        all the data-related sections (.rodata, .data, .bss, etc) into
+        this .rodata segment so that the linker actually allocates
+        space for it in the output ELF (normally since some of this
+        data is all zero, the linker would just put it into .bss or
+        something and instruct the runtime loader to make space for it
+        without actually including all those zeroes in the ELF, which
+        saves space; however, our runtime loader executes the ELF
+        as-is without making more room for segments that are smaller
+        than their on-disk representation, so we want the linker to
+        actually include the zeroes in the file. We're not trying to
+        be space efficient.)
+
+        Also note that .rodata is not actually read-only memory in
+        DCE; the loader gives all data read-write permissions, which
+        is why we can put these other sections here. */
+
+     *(.rodata .rodata.* .gnu.linkonce.r.*)
+     *(.data .data.* .gnu.linkonce.d.*)
+     *(.dynbss)
+     *(.bss .bss.* .gnu.linkonce.b.*)
+     SORT(CONSTRUCTORS)
+     *(COMMON)
+   }
   .rodata1        : { *(.rodata1) }
   .eh_frame_hdr : { *(.eh_frame_hdr) *(.eh_frame_entry .eh_frame_entry.*) }
   .eh_frame       : ONLY_IF_RO { KEEP (*(.eh_frame)) *(.eh_frame.*) }
@@ -156,13 +202,17 @@ SECTIONS
   }
   .init_array     :
   {
+    _start_ctors = .;
     KEEP (*(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*)))
     KEEP (*(.init_array EXCLUDE_FILE (*crtbegin.o *crtbegin?.o *crtend.o *crtend?.o ) .ctors))
+    _end_ctors = .;
   }
   .fini_array     :
   {
+    _start_dtors = .;
     KEEP (*(SORT_BY_INIT_PRIORITY(.fini_array.*) SORT_BY_INIT_PRIORITY(.dtors.*)))
     KEEP (*(.fini_array EXCLUDE_FILE (*crtbegin.o *crtbegin?.o *crtend.o *crtend?.o ) .dtors))
+    _end_dtors = .;
   }
   .ctors          :
   {
@@ -222,8 +272,6 @@ SECTIONS
   .iplt           : { *(.iplt) }
   .data           :
   {
-    *(.data .data.* .gnu.linkonce.d.*)
-    SORT(CONSTRUCTORS)
   }
   .data1          : { *(.data1) }
   _edata = .; PROVIDE (edata = .);
@@ -231,9 +279,6 @@ SECTIONS
   __bss_start = .;
   .bss            :
   {
-   *(.dynbss)
-   *(.bss .bss.* .gnu.linkonce.b.*)
-   *(COMMON)
    /* Align here to ensure that the .bss section occupies space up to
       _end.  Align after .bss to ensure correct alignment even if the
       .bss section disappears because there are no input sections.
