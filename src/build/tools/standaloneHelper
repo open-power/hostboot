@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2021
+# Contributors Listed Below - COPYRIGHT 2012,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -154,7 +154,8 @@ generate_sbe_image()
         || [ ! -f "$SBE_SEEPROM_IMG" ] \
         || [ ! -f "$SBE_MEASUREMENT_IMG" ] \
         || [ ! -f "$SBE_OTPROM_IMG" ] \
-        || [ ! -f "$SBE_SEEPROM_IMAGE_DD1" ]
+        || [ ! -f "$SBE_SEEPROM_IMAGE_DD1" ] \
+        || [ $HB_FORCE_REBUILD_SBE ]
     then
         echo -e "\n\nGenerating SBE image..."
 

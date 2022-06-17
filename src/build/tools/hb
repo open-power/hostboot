@@ -826,6 +826,7 @@ hb_flags()
     echo "HB_NFS_DIR : Copies FSP patch data after prime"
     echo "HB_SKIP_GEN_HCODE : Will not attempt to rebuild the ekb submodule (included in HB_FAST_PRIME)"
     echo "PARSE_RCDL_STRICT : Validates all obj/genfiles/HB_BCxxRcdl_* files with RcdlSniffer2Perl"
+    echo "HB_FORCE_REBUILD_SBE : Force rebuild of sbe/ppe submodule regardless of existing images"
     echo " "
     echo "= Simics Options ="
     echo "HB_BREAK_ON_ERROR : Halts simics if HB hits an exception"
