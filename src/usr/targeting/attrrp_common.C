@@ -465,18 +465,23 @@ namespace TARGETING
         }
 
         // A lambda to binary search the array of attribute size data by hashes
-        auto attrHashMatch = [i_attrId](const attrSizeData_t& i_attrSizeData)
+        auto hashCompFunc = [](const attrSizeData_t& i_attrSizeData,
+                               const uint32_t i_hash)
                                {
-                                   return i_attrSizeData.attrHash == i_attrId;
+                                   return i_attrSizeData.attrHash < i_hash;
                                };
 
-        static mutex_t g_attrSizesArrMutex = MUTEX_INITIALIZER;
-        mutex_lock(&g_attrSizesArrMutex);
         // Find the size and the simple data type of this attr in the array
-        const auto l_attrIter = std::find_if(g_attrSizesArr.begin(),
-                                             g_attrSizesArr.end(),
-                                             attrHashMatch);
-        if(l_attrIter != g_attrSizesArr.end())
+        const auto l_attrIter = std::lower_bound(g_attrSizesArr.begin(),
+                                                 g_attrSizesArr.end(),
+                                                 i_attrId,
+                                                 hashCompFunc);
+
+        // Check if the hash is there and it's the exact hash that we're
+        // looking for. lower_bound can return the next biggest hash if
+        // it doesn't find the exact match.
+        if((l_attrIter != g_attrSizesArr.end()) &&
+           (l_attrIter->attrHash == i_attrId))
         {
             if(l_attrIter->isArray)
             {
@@ -509,7 +514,6 @@ namespace TARGETING
                                  i_attrValuePtr,
                                  o_attrValue);
         }
-        mutex_unlock(&g_attrSizesArrMutex);
         }while(0);
     }
 
