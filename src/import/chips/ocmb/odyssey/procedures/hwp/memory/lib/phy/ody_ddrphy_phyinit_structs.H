@@ -7,6 +7,7 @@
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2022                             */
 /* [+] International Business Machines Corp.                              */
+/* [+] Synopsys, Inc.                                                     */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -67,6 +68,7 @@ typedef struct user_input_basic
 
 // === Global variables  === //
     int ARdPtrInitVal[4];       // making this a userInput variable so that it can be overriden if the ARdPtrInitValOvr is 1;
+    //ARdPtrInitVal[pstate];
     int ARdPtrInitValOvr;   // set this to 1 if the ARdPtrInitVal should be overriden via userInput.  else,
     // dwc_ddrphy_phyinit_C_initPhyConfig.c will program based on frequency values on a range of 0-3
 
@@ -89,6 +91,9 @@ typedef struct user_input_basic
     //   Value | Description
     //       0 | It will not effect the TxTrkState
     //       1 | clears the TxTrkState csr
+    //
+    //   DisPtrInitClrTxTracking[pstate];
+    //
     int DisPtrInitClrTxTracking[4];
 
     //
@@ -178,6 +183,7 @@ typedef struct user_input_basic
     //       8 | x8 (not available for LRDIMM)
     //      16 | x16 (not available for LRDIMM)
     // - Default: 8
+    //  DramDataWidth[tg]
     //
     int DramDataWidth[4];
 
@@ -197,6 +203,8 @@ typedef struct user_input_basic
     //   - Max: 2600
     // - Default: 800
     //
+    //  Frequency[pstate]
+    //
     int Frequency[4];
 
     //
@@ -208,6 +216,8 @@ typedef struct user_input_basic
     //       0 | Disable
     //       1 | Enable
     // - Default: 0
+    //
+    //  PllBypass[pstate]
     //
     int PllBypass[4];
 
@@ -221,6 +231,8 @@ typedef struct user_input_basic
     //       1 | 1:2
     //       2 | 1:4
     // - Default: 1
+    //
+    //  DfiFreqRatio[pstate]
     //
     int DfiFreqRatio[4];
 
@@ -258,6 +270,8 @@ typedef struct user_input_advanced
     //       1 | 2 tCK (MEMCLK >= 1200MHz)
     // - Default: 0
     //
+    //  D4RxPreambleLength[pstate]
+    //
     int D4RxPreambleLength[4];
 
     //
@@ -271,6 +285,8 @@ typedef struct user_input_advanced
     //       0 | 1 tCK
     //       1 | 2 tCK (MEMCLK >= 1200MHz)
     // - Default: 0
+    //
+    //  D4TxPreambleLength[pstate]
     //
     int D4TxPreambleLength[4];
 
@@ -297,6 +313,8 @@ typedef struct user_input_advanced
     //     120 | 120
     //     240 | 240
     // - Default: 240
+    //
+    //  ODTImpedance[pstate]
     //
     int ODTImpedance[4];
 
@@ -325,6 +343,8 @@ typedef struct user_input_advanced
     //    PUB 1.x, 3.x = 25 ohms
     //    PUB 2.x, 4.x = 34 ohms
     //
+    //  TxImpedance[pstate]
+    //
     int TxImpedance[4];
 
     //
@@ -344,6 +364,8 @@ typedef struct user_input_advanced
     //    PUB 1.x, 3.x = 25 ohms
     //    PUB 2.x, 4.x = 34 ohms
     //
+    //  TxImpedanceCtrl1[pstate]
+    //
     int TxImpedanceCtrl1[4];
 
     //
@@ -353,6 +375,8 @@ typedef struct user_input_advanced
     // - Default:
     //    PUB 1.x, 3.x = 0x000
     //    PUB 2.x, 4.x = 0x820
+    //
+    //  TxImpedanceCtrl2[pstate]
     //
     int TxImpedanceCtrl2[4];
 
@@ -385,6 +409,8 @@ typedef struct user_input_advanced
     // - Values: 0, 1
     // - Default: 0
     //
+    //  DisDynAdrTri[pstate]
+    //
     int DisDynAdrTri[4];
 
     //
@@ -407,6 +433,8 @@ typedef struct user_input_advanced
     //      14 | 8192 MEMCLKs
     // - Default: 0
     //
+    //  PhyMstrTrainInterval[pstate]
+    //
     int PhyMstrTrainInterval[4];
 
     //
@@ -423,6 +451,8 @@ typedef struct user_input_advanced
     //       5 | 8192 MEMCLKs
     // - Default: 0
     //
+    //  PhyMstrMaxReqToAck[pstate]
+    //
     int PhyMstrMaxReqToAck[4];
 
     //
@@ -435,6 +465,8 @@ typedef struct user_input_advanced
     //       0 | PHY Master transaction initiated by timer function
     //       1 | PHY Master transaction initiated by dfi_ctrlmsg transaction
     // - Default: 0
+    //
+    //  PhyMstrCtrlMode[pstate]
     //
     int PhyMstrCtrlMode[4];
 
@@ -491,6 +523,8 @@ typedef struct user_input_advanced
     //   - Max: 0xff
     // - Default: 0
     //
+    //  DramByteSwap[tg]
+    //
     int DramByteSwap[4];
 
     //
@@ -528,6 +562,8 @@ typedef struct user_input_advanced
     //   - Max: 0xff
     // - Default: 0
     //
+    //  SnpsUmctlF0RC5x[pstate]
+    //
     int SnpsUmctlF0RC5x[4];
 
     //
@@ -539,6 +575,8 @@ typedef struct user_input_advanced
     //   - Min: 0
     //   - Max: 255
     // - Default: 0
+    //
+    //  TxSlewRiseDQ[pstate]
     //
     int TxSlewRiseDQ[4];
 
@@ -552,6 +590,8 @@ typedef struct user_input_advanced
     //   - Min: 0
     //   - Max: 255
     // - Default: 0
+    //
+    //  TxSlewFallDQ[pstate]
     //
     int TxSlewFallDQ[4];
 
@@ -617,6 +657,8 @@ typedef struct user_input_advanced
     // - Values: (TODO)
     // - Default: 0x0
     //
+    //  NvAnibRcvSel[num_nvdimmp_chan]
+    //
     int NvAnibRcvSel[8];
 
     //
@@ -626,6 +668,8 @@ typedef struct user_input_advanced
     // - Values: (TODO)
     // - Default: 0x0
     //
+    //  AnibRcvLaneSel[num_nvdimmp_chan]
+    //
     int AnibRcvLaneSel[8];
 
     //
@@ -634,6 +678,8 @@ typedef struct user_input_advanced
     //   [X] - selection for Channel-X
     // - Values: 0, 1
     // - Default: 0x0
+    //
+    //  AnibRcvEn[num_nvdimmp_chan]
     //
     int AnibRcvEn[8];
 
@@ -645,6 +691,8 @@ typedef struct user_input_advanced
     // - Values: 0, 1
     // - Default: 1
     //
+    //  EnTdqs2dqTrackingTg0[pstate]
+    //
     int EnTdqs2dqTrackingTg0[4];
 
     //
@@ -653,6 +701,8 @@ typedef struct user_input_advanced
     // - Refer to section titled "Tracking of DDR5 DRAM Write-DQS Drift" in the PHY Utility Block (PUB) Databook for more information.
     // - Values: 0, 1
     // - Default: 1
+    //
+    //  EnTdqs2dqTrackingTg1[pstate]
     //
     int EnTdqs2dqTrackingTg1[4];
 
@@ -663,6 +713,8 @@ typedef struct user_input_advanced
     // - Values: 0, 1
     // - Default: 1
     //
+    //  EnTdqs2dqTrackingTg2[pstate]
+    //
     int EnTdqs2dqTrackingTg2[4];
 
     //
@@ -671,6 +723,8 @@ typedef struct user_input_advanced
     // - Refer to section titled "Tracking of DDR5 DRAM Write-DQS Drift" in the PHY Utility Block (PUB) Databook for more information.
     // - Values: 0, 1
     // - Default: 1
+    //
+    //  EnTdqs2dqTrackingTg3[pstate]
     //
     int EnTdqs2dqTrackingTg3[4];
 
@@ -681,6 +735,8 @@ typedef struct user_input_advanced
     // - Values: 256, 512, 1024, 2048, 4096, 8192
     // - Default: 256
     //
+    //  DqsOscRunTimeSel[pstate]
+    //
     int DqsOscRunTimeSel[4];
 
 
@@ -689,6 +745,8 @@ typedef struct user_input_advanced
     // - Enable tracking of the incoming read DQS to modify the read gate timing
     // - Values: 0, 1
     // - Default: 1
+    //
+    //  EnRxDqsTracking[pstate]
     //
     int EnRxDqsTracking[4];
 
@@ -705,6 +763,8 @@ typedef struct user_input_advanced
     //       3 | XXX MemClk preamble with pattern XXXX (TBD)
     //       4 | XXXX MemClk preamble with pattern XXXX (TBD)
     // - Default: 1
+    //
+    //  D5TxDqPreambleCtrl[pstate]
     //
     int D5TxDqPreambleCtrl[4];
 
@@ -798,29 +858,38 @@ typedef struct user_input_advanced
     int en_3DS;
 
     //
-    // @brief Enable 16 logical ranks support for DDR5 3DS devices.
-    // - only valid when 3DS is enabled.
-    // - Values:
-    //   Value | Description
-    //   ----- | -----
-    //       0 | 16 logical ranks support disabled for 3DS
-    //       1 | 16 logical ranks support enabled for 3DS
-    // - Default: 0
+    // @brief UserInput is maintained for backward compatibility. It is not valid from F-2022.06 and beyond.
+    // phyinit is not using this setting anymore.
+    // The number of logical ranks should be configured through UserInputAdvanced->Num_Logical_Ranks
     //
+    // - Default: 0
     int en_16LogicalRanks_3DS;
 
     //
-    // @brief Enable redundant CS.
-    // - should be set to one for enabling the redundant CS feature for DDR5 UDIMM alone.
-    // - The CsPresentCh<A/B> MessageBlock should be either 4'h3 or 4'hC if the redundant CS is enabled.
+    // @brief Enable additional power savings during LP2 using csrPhyInLP2En
+    // - only applicable for PUB Versions having PhyInLP2En register.
     // - Values:
     //   Value | Description
     //   ----- | -----
-    //       0 | redundant CS disabled
-    //       1 | redundant CS enabled
+    //       0 | Additional power savings during LP2 using csrPhyInLP2En disabled
+    //       1 | Additional power savings during LP2 using csrPhyInLP2En enabled
     // - Default: 0
     //
-    int RedundantCs_en;
+    int PhyInLP2En_Pwr_Saving;
+
+    //
+    // @brief Enable special feature 1.
+    // - should be set to one for enabling the special feature 1.
+    // - The CsPresentCh<A/B> MessageBlock should be either 4'h3 or 4'hC if the special feature is enabled.
+    // - Values:
+    //   Value | Description
+    //   ----- | -----
+    //       0 | special feature 1 disabled
+    //       1 | special feature 1 enabled
+    // - Default: 0
+    // - This is an internal feature.
+    // - Contact Synopsys before enabling this feature.
+    int special_feature_1_en;
 
     //
     // @brief Enable Non-Target ODT Termination for MRR during PIE initiated PPT for DDR5
@@ -832,6 +901,136 @@ typedef struct user_input_advanced
     // - Default: 0
     //
     int rtt_term_en;
+
+    //
+    // @brief Enable additional Power savings during LP2
+    // - Values:
+    //   Value | Description
+    //   ----- | -----
+    //       0 | LP2 power savings disabled
+    //       1 | LP2 power savings enabled
+    // - Default: 0
+    // Contact Synopsys before enabling the UserInput.
+    //
+    int VREGCtrl_LP2_PwrSavings_En;
+
+    //
+    // @brief Enable nibble feature of ECC DBYTEs for DDR5. Each bit corresponds to different TGs.
+    // Bit zero corresponsds to TG0 and so on.
+    // - Values:
+    //   Value | Description
+    //   ----- | -----
+    //     0x0 | Byte ECC for all TGs
+    //     0xF | Nibble ECC for all TGs
+    // - Default: 0xF for UDIMM and 0x0 for RDIMM/LRDIMM
+    //
+    int Nibble_ECC;
+
+    //
+    // @brief Enable the overriding of DfiMode resgister. If set to 1, DfiMode register will be programmed to the value of UserInputAdvanced DfiMode_Override_Val.
+    // - Values:
+    //   Value | Description
+    //   ----- | -----
+    //     0x0 | Phyinit calculates the CSR DfiMode.
+    //     0x1 | The CSR DfiMode programmed to the value of UserInputAdvanced DfiMode_Override_Val.
+    // - Default: 0x0
+    // Contact Synopsys before enabling the UserInput. Recommended to use the default values.
+    //
+    int DfiMode_Override_En;
+
+    //
+    // @brief Program DfiMode to a customized value. The UserInputAdvanced DfiMode_Override_En should be set to 1 for enabling this feature.
+    // - Values:
+    //   Value | Description
+    //   ----- | -----
+    //     0x<value> | CSR DfiMode will be programmed to value of 0x<value>.
+    // - Default: 0x0
+    // Contact Synopsys for the correct values. Recommended to use the default values.
+    //
+    int DfiMode_Override_Val;
+
+    // @brief Enable the overriding of the UserInput NoX4onUpperNibbleTg
+    // - Values:
+    //   Value | Description
+    //   ----- | -----
+    //       0 | LP2 power savings disabled
+    //       1 | LP2 power savings enabled
+    // - Default: 0
+    //
+    int NoX4onUpperNibble_Override;
+
+    //
+    // @brief Customize CSR NoX4onUpperNibbleTg<0/1/2/3> for each DBYTE.
+    // Each bit corresponds to each DBYTE. The bit zero corresponsds to DBYTE 0 and so on.
+    // This is per TG. This is valid only when NoX4onUpperNibble_Override is set to one.
+    // - Values:
+    //   Value  | Description
+    //   -----  | -----
+    //   0x0000 | CSR NoX4onUpperNibbleTg<0/1/2/3> for all 10 DBYES will be set to zero
+    //   0x03ff | CSR NoX4onUpperNibbleTg<0/1/2/3> for all 10 DBYES will be set to one
+    // - Default: 0
+    //
+    //  NoX4onUpperNibbleTg[tg]
+    //
+    int NoX4onUpperNibbleTg[4];
+
+    //
+    // @brief Indicates DFI1 channel is active or not. The UserInput is only valid when userInputBasic->Dfi1Exists is 1.
+    // If DFI1 channel is physically present, then this UserInput will decide whether it is active or not.
+    // - Values:
+    //   Value  | Description
+    //   -----  | -----
+    //        0 | DFI1 channel is not active when userInputBasic->Dfi1Exists is 1
+    //        1 | DFI1 channel is active when userInputBasic->Dfi1Exists is 1
+    // - Default: 1
+    //
+    int Dfi1Active;
+
+    //
+    // @brief configure the number of logical ranks in the DDR5 3DS device.
+    // - only valid when the user_input_advanced->en_3DS is enabled.
+    // - Should be configured correctly for the proper refreshes during the DDR5 PPT.
+    // - Values:
+    //   Value | Description
+    //   ----- | -----
+    //       x | x logical ranks present in 3DS devices
+    // - Default: 8
+    //
+    int Num_Logical_Ranks;
+
+    //
+    // @brief It defines the interval between the end of a phyupdate transaction and a subsequent phyupdate request.
+    // - DFIPHYUPDCNT must be chosen such that (pUserInputAdvanced->DFIPHYUPDCNT) > (pUserInputAdvanced->DFIPHYUPDRESP).
+    // - Values:
+    //   Value   | Description
+    //   ------  | ------
+    //   4'b0000 | Disable timer-based PHY Update
+    //   4'b1001 | 2K MEMCLKs minus nMEMCLKs_phyupd_resp
+    //   4'b1010 | 4K MEMCLKs minus nMEMCLKs_phyupd_resp
+    //   4'b1011 | 8K MEMCLKs minus nMEMCLKs_phyupd_resp
+    //   4'b0001 | 16K MEMCLKs minus nMEMCLKs_phyupd_resp
+    //   4'b0011 | 32K MEMCLKs minus nMEMCLKs_phyupd_resp
+    //   4'b0111 | 64K MEMCLKs minus nMEMCLKs_phyupd_resp, default value
+    //   4'b1111 | 128K MEMCLKs minus nMEMCLKs_phyupd_resp
+    // - Default: 4'b0111
+    //
+    int DFIPHYUPDCNT;
+
+    //
+    // @brief It defines the maximum time that is allowed to the controller to respond to the request for a PHY update.
+    // - A dfi_error will be signaled if there is no acknowledgement of the update request within nMEMCLKs_phyupd_resp.
+    // - DFIPHYUPDRESP must be chosen such that (pUserInputAdvanced->DFIPHYUPDCNT) > (pUserInputAdvanced->DFIPHYUPDRESP).
+    // - Values:
+    //   Value  | Description
+    //   ------ | ------
+    //   3'b000 | nMEMCLKs_phyupd_resp = 1K MEMCLKs, default value
+    //   3'b001 | nMEMCLKs_phyupd_resp = 2K MEMCLKs
+    //   3'b010 | nMEMCLKs_phyupd_resp = 4K MEMCLKs
+    //   3'b011 | nMEMCLKs_phyupd_resp = 8K MEMCLKs
+    //   3'b100 | nMEMCLKs_phyupd_resp = 16K MEMCLKs
+    // - Default: 3'b000
+    //
+    int DFIPHYUPDRESP;
 
 } user_input_advanced_t;
 
@@ -877,6 +1076,8 @@ typedef struct user_input_sim
     //   - Max: (TODO)
     // - Default: 0
     //
+    //  tSTAOFF[pstate]
+    //
     int tSTAOFF[4];
 
     //
@@ -887,6 +1088,8 @@ typedef struct user_input_sim
     //   - Min: 0
     //   - Max: (TODO)
     // - Default: 0
+    //
+    //  tPDM[pstate]
     //
     int tPDM[4];
 
@@ -902,14 +1105,58 @@ typedef struct user_input_sim
 
     // @brief This user input is automatically calculated. This can only be set if userInputSim->tCASL_override = 0x1.
     // - Extra 2UI latency added if tDIMM_DQ > tDIMM_CK
-    // - tCASL_add[pstate][tg]
     // - Values:
     //   - Min: 0
     //   - Max: (TODO)
     // - Default: 0
     //
+    //  tCASL_add[pstate][tg]
+    //
     int tCASL_add[4][4];
 
+    //Note : Following members are for Rdimm and the respective code for their usage needs porting.
+#if 0
+    //
+    // @brief This is the additional compensation in terms of UIs added on top of userinput_sim tSTAOFF in SDR1 mode
+    // - Values:
+    //   - Min: 0
+    //   - Max: (TODO)
+    // - Default: 2
+    // Contact synopsys before changing the default value
+    //
+    int SDR1_tSTAOFF_Compensation;
+
+    //
+    // @brief This is the additional compensation in terms of UIs added on top of userinput_sim tSTAOFF in SDR2 mode
+    // - Values:
+    //   - Min: 0
+    //   - Max: (TODO)
+    // - Default: 0
+    // Contact synopsys before changing the default value
+    //
+    int SDR2_tSTAOFF_Compensation;
+
+    //
+    // @brief This is the additional compensation in terms of UIs added on top of userinput_sim tSTAOFF in DDR mode
+    // - Values:
+    //   - Min: 0
+    //   - Max: (TODO)
+    // - Default: 1
+    // Contact synopsys before changing the default value
+    //
+    int DDR_tSTAOFF_Compensation;
+
+    //
+    // @brief This should be set to one for leagcy default values for SDR1_tSTAOFF_Compensation, SDR2_tSTAOFF_Compensation
+    // - and DDR_tSTAOFF_Compensation values.That is SDR1_tSTAOFF_Compensation = 1, SDR2_tSTAOFF_Compensation = 1
+    // - and DDR_tSTAOFF_Compensation values = 0;
+    // - Values:
+    //   - Min: 0
+    //   - Max: (TODO)
+    // - Default: 0
+    //
+    int Legacy_tSTAOFF_Compensation;
+#endif
 
 } user_input_sim_t;
 

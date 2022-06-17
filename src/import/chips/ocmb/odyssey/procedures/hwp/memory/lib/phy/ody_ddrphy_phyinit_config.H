@@ -56,6 +56,7 @@ int dwc_ddrphy_phyinit_mapDrvStren (const float DrvStren_ohm);
 ///
 /// @brief Checks if a dbyte is disabled
 /// @param[in] i_user_input_basic - Synopsys basic user input structure
+/// @param[in] i_user_input_advanced - Synopsys advanced user input structure
 /// @param[in] i_user_input_dram_config - DRAM configuration inputs needed for PHY init (MRS/RCW)
 /// @param[in] DbyteNumber the Dbyte to check to see if it is disabled
 /// @param[out] o_rc fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
@@ -63,6 +64,7 @@ int dwc_ddrphy_phyinit_mapDrvStren (const float DrvStren_ohm);
 ///
 int dwc_ddrphy_phyinit_IsDbyteDisabled(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
                                        const user_input_basic_t& i_user_input_basic,
+                                       const user_input_advanced_t& i_user_input_advanced,
                                        const user_input_dram_config_t& i_user_input_dram_config,
                                        const int DbyteNumber,
                                        fapi2::ReturnCode& o_rc);
