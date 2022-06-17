@@ -52,14 +52,18 @@ namespace ody
 ///
 /// @brief Runs draminit
 /// @param[in] i_target the target on which to operate
+/// @param[out] o_log_data hwp_data_ostream of streaming log
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 /// @note Assumes PHY init has already been run
 ///
-fapi2::ReturnCode draminit(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
+fapi2::ReturnCode draminit(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                           fapi2::hwp_data_ostream& o_log_data)
 {
 
     // Create the stucture to configure
     PMU_SMB_DDR5U_1D_t l_msg_block;
+
+    uint64_t l_status = mss::ody::phy::mailbox_consts::FAILED_COMPLETION;
 
     fapi2::ATTR_DRAMINIT_TRAINING_TIMEOUT_Type l_poll_count;
     FAPI_TRY(mss::attr::get_draminit_training_timeout(i_target , l_poll_count));
@@ -83,7 +87,7 @@ fapi2::ReturnCode draminit(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_t
     FAPI_TRY(mss::ody::phy::start_training(i_target));
 
     // 5. Processes and handles training messages (aka poll for completion)
-    FAPI_TRY (mss::ody::phy::poll_for_completion(i_target, l_poll_count));
+    FAPI_TRY (mss::ody::phy::poll_for_completion(i_target, l_poll_count, l_status, o_log_data));
 
     // 6. Cleans up after training
     FAPI_TRY(mss::ody::phy::cleanup_training(i_target));
@@ -96,7 +100,10 @@ fapi2::ReturnCode draminit(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_t
     FAPI_TRY(mss::ody::phy::set_attributes(i_target, l_msg_block));
 
     // 8. Error handling
-    // TODO:ZEN:MST-1568 Add Odyssey draminit error processing
+    FAPI_TRY(mss::ody::phy::check_training_result(i_target, l_status, l_msg_block));
+
+    // 9. Load PHY Initialization Engine image and set up mission mode settings
+    // This is done in ody_load_pie.C
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -105,18 +112,20 @@ fapi_try_exit:
 ///
 /// @brief Runs draminit
 /// @param[in] i_target the target on which to operate
+/// @param[out] o_log_data hwp_data_ostream of streaming log
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 /// @note Assumes PHY init has already been run
 ///
-fapi2::ReturnCode draminit(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+fapi2::ReturnCode draminit(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                           fapi2::hwp_data_ostream& o_log_data)
 {
     for(const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
     {
         // Note: This will need to be updated to allow training to fail on one port but continue on the second
-        FAPI_TRY(draminit(l_port));
+        FAPI_TRY(draminit(l_port, o_log_data));
     }
 
-    // Blame FIRs and unmask FIRs (done on the OCMB chip level)
+    // Unmask FIRs (done on the OCMB chip level)
     // TODO:ZEN:MST-1530 Specialize unmask::after_draminit_training for Odyssey
 
 fapi_try_exit:

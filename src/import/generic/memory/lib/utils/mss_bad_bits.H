@@ -158,7 +158,7 @@ inline fapi2::ReturnCode record_bad_bits( const fapi2::Target<T>& i_target, cons
 {
     // If we have a FIR set that could have caused our training fail, then skip checking bad bits in FW
     // PRD will handle the FIR and retrigger the procedure
-#ifdef __HOSTBOOT_MODULE
+#if defined(__HOSTBOOT_MODULE) || defined(__PPE__)
     bool l_fir_error = false;
 
     // Note: using success here will cause an RC to not be logged
@@ -166,13 +166,12 @@ inline fapi2::ReturnCode record_bad_bits( const fapi2::Target<T>& i_target, cons
     // NOTE: calling GENERIC bad_fir_bits to cover this case in HB -- GENERIC firChecklist not specified (see bad_fir_bits for more details)
     fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
     FAPI_TRY((mss::check::bad_fir_bits<MC, mss::check::firChecklist::GENERIC, T>(i_target, l_rc, l_fir_error)),
-             "%s took an error while checking FIR's",
-             mss::c_str(i_target));
+             TARGTIDFORMAT " took an error while checking FIR's", TARGTID);
 
     // Exit if we took a FIR error - PRD will handle bad bits
     if(l_fir_error)
     {
-        FAPI_INF("%s has FIR's set, exiting to let PRD handle it", mss::c_str(i_target));
+        FAPI_INF(TARGTIDFORMAT " has FIR's set, exiting to let PRD handle it", TARGTID);
         return fapi2::FAPI2_RC_SUCCESS;
     }
 

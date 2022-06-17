@@ -42,13 +42,15 @@ extern "C"
 ///
 /// @brief Runs the dram initialization on the SPPE
 /// @param[in] i_target the controller
+/// @param[out] o_log_data hwp_data_ostream of streaming log
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-    fapi2::ReturnCode ody_sppe_draminit(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+    fapi2::ReturnCode ody_sppe_draminit(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                        fapi2::hwp_data_ostream& o_log_data)
     {
         mss::display_git_commit_info("ody_sppe_draminit");
 
-        return mss::ody::draminit(i_target);
+        return mss::ody::draminit(i_target, o_log_data);
 
     }
 

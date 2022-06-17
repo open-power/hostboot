@@ -38,7 +38,8 @@
 
 #include <fapi2.H>
 #include <lib/phy/ody_snps_dram_train_msg_blk.H>
-
+#include <lib/dimm/ody_rank.H>
+#include <hwp_data_stream.H>
 
 namespace mss
 {
@@ -173,20 +174,26 @@ fapi2::ReturnCode acknowledge_mail (const fapi2::Target<fapi2::TARGET_TYPE_MEM_P
 /// @brief Polls the mail until completion message is received
 /// @param[in] i_target the target on which to operate
 /// @param[in] i_training_poll_count poll count for getting mail.
+/// @param[out] o_status final mail message from training, PASS/FAIL status if it completed
+/// @param[out] o_log_data hwp_data_ostream of streaming log
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode poll_for_completion(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
-                                      const uint64_t i_training_poll_count);
+                                      const uint64_t i_training_poll_count,
+                                      uint64_t& o_status,
+                                      fapi2::hwp_data_ostream& o_log_data );
 
 ///
 /// @brief Checks the completion condition for training and decodes respective message
 /// @param[in] i_target the memory port on which to operate
 /// @param[in] i_mail mail content to check for completion
+/// @param[out] o_log_data hwp_data_ostream of streaming log
 /// @param[out] o_loop_end flags that completion was detected, ending polling loop and skipping delay.
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode check_for_completion_and_decode(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
         const fapi2::buffer<uint64_t>& i_mail,
+        fapi2::hwp_data_ostream& o_log_data,
         bool& o_loop_end);
 
 ///
@@ -211,9 +218,11 @@ fapi2::ReturnCode configure_and_load_dram_train_message_block(const fapi2::Targe
 ///
 /// @brief Processes a streaming message from the mailbox protocol
 /// @param[in] i_target the target on which to operate
+/// @param[out] o_log_data hwp_data_ostream of streaming log
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode process_streaming_message(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target);
+fapi2::ReturnCode process_streaming_message(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        fapi2::hwp_data_ostream& o_log_data);
 
 ///
 /// @brief Processes an SMBus message request (aka runs an RCW via i2c)
@@ -399,7 +408,118 @@ fapi2::ReturnCode set_attributes(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
 void display_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
                        const _PMU_SMB_DDR5_1D_t& i_msg_block);
 
+///
+/// @brief Checks the training status from mail and message block
+/// @param[in] i_target the memory port on which to operate
+/// @param[in] i_status the final mail status from training
+/// @param[in] i_msg_block_response the message block
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode check_training_result(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                        const uint64_t i_status,
+                                        const _PMU_SMB_DDR5_1D_t& i_msg_block_response);
 
+
+///
+/// @brief Odyssey's bad bit interface class
+///
+class bad_bit_interface
+{
+    public:
+
+        // Data that actually stores all of the bad bit information
+        // We do some processing in the constructor
+        uint8_t iv_bad_bits[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT];
+
+        // No default constructor
+        bad_bit_interface() = delete;
+
+        ///
+        /// @brief Default destructor
+        ///
+        ~bad_bit_interface() = default;
+
+        ///
+        /// @brief Constructor from PHY response struct
+        /// @param[in] i_response response data from training
+        ///
+        bad_bit_interface(const _PMU_SMB_DDR5_1D_t& i_response )
+        {
+            // Assign the results to the bad bits internal structure
+            // At this point, we want to assign all data
+            iv_bad_bits[0][0] = i_response.DisabledDB0LaneR0;
+            iv_bad_bits[0][1] = i_response.DisabledDB1LaneR0;
+            iv_bad_bits[0][2] = i_response.DisabledDB2LaneR0;
+            iv_bad_bits[0][3] = i_response.DisabledDB3LaneR0;
+            iv_bad_bits[0][4] = i_response.DisabledDB4LaneR0;
+            iv_bad_bits[0][5] = i_response.DisabledDB5LaneR0;
+            iv_bad_bits[0][6] = i_response.DisabledDB6LaneR0;
+            iv_bad_bits[0][7] = i_response.DisabledDB7LaneR0;
+            iv_bad_bits[0][8] = i_response.DisabledDB8LaneR0;
+            iv_bad_bits[0][9] = i_response.DisabledDB9LaneR0;
+
+            iv_bad_bits[1][0] = i_response.DisabledDB0LaneR1;
+            iv_bad_bits[1][1] = i_response.DisabledDB1LaneR1;
+            iv_bad_bits[1][2] = i_response.DisabledDB2LaneR1;
+            iv_bad_bits[1][3] = i_response.DisabledDB3LaneR1;
+            iv_bad_bits[1][4] = i_response.DisabledDB4LaneR1;
+            iv_bad_bits[1][5] = i_response.DisabledDB5LaneR1;
+            iv_bad_bits[1][6] = i_response.DisabledDB6LaneR1;
+            iv_bad_bits[1][7] = i_response.DisabledDB7LaneR1;
+            iv_bad_bits[1][8] = i_response.DisabledDB8LaneR1;
+            iv_bad_bits[1][9] = i_response.DisabledDB9LaneR1;
+
+            iv_bad_bits[2][0] = i_response.DisabledDB0LaneR2;
+            iv_bad_bits[2][1] = i_response.DisabledDB1LaneR2;
+            iv_bad_bits[2][2] = i_response.DisabledDB2LaneR2;
+            iv_bad_bits[2][3] = i_response.DisabledDB3LaneR2;
+            iv_bad_bits[2][4] = i_response.DisabledDB4LaneR2;
+            iv_bad_bits[2][5] = i_response.DisabledDB5LaneR2;
+            iv_bad_bits[2][6] = i_response.DisabledDB6LaneR2;
+            iv_bad_bits[2][7] = i_response.DisabledDB7LaneR2;
+            iv_bad_bits[2][8] = i_response.DisabledDB8LaneR2;
+            iv_bad_bits[2][9] = i_response.DisabledDB9LaneR2;
+
+            iv_bad_bits[3][0] = i_response.DisabledDB0LaneR3;
+            iv_bad_bits[3][1] = i_response.DisabledDB1LaneR3;
+            iv_bad_bits[3][2] = i_response.DisabledDB2LaneR3;
+            iv_bad_bits[3][3] = i_response.DisabledDB3LaneR3;
+            iv_bad_bits[3][4] = i_response.DisabledDB4LaneR3;
+            iv_bad_bits[3][5] = i_response.DisabledDB5LaneR3;
+            iv_bad_bits[3][6] = i_response.DisabledDB6LaneR3;
+            iv_bad_bits[3][7] = i_response.DisabledDB7LaneR3;
+            iv_bad_bits[3][8] = i_response.DisabledDB8LaneR3;
+            iv_bad_bits[3][9] = i_response.DisabledDB9LaneR3;
+        }
+
+        ///
+        /// @brief Swizzle the bad bits to the attribute's perspective
+        /// @param[in] i_target the DIMM to record training results on
+        /// @param[out] o_bad_dq the processed bad bits
+        ///
+        fapi2::ReturnCode record_bad_bits_interface( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                uint8_t (&o_bad_dq)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT]) const
+        {
+            std::vector<mss::rank::info<mss::mc_type::ODYSSEY>> l_rank_infos;
+            FAPI_TRY(mss::rank::ranks_on_dimm(i_target, l_rank_infos));
+
+            for(const auto& l_rank_info : l_rank_infos)
+            {
+                // Note: we copy from the PHY rank to the DIMM rank
+                // The rank we take in is taken from the PHY structure, which uses PHY rank perspective
+                // Our attributes use the IBM rank perspective
+                // If there is any swizzle, then this will fix it for us
+                std::copy(std::begin(iv_bad_bits[l_rank_info.get_phy_rank()]),
+                          std::end(iv_bad_bits[l_rank_info.get_phy_rank()]),
+                          std::begin(o_bad_dq[l_rank_info.get_dimm_rank()]));
+            }
+
+            return fapi2::FAPI2_RC_SUCCESS;
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+};
 
 } // namespace phy
 } // namespace ody

@@ -37,9 +37,11 @@
 #define _ODY_SPPE_DRAMINIT_
 
 #include <fapi2.H>
+#include <hwp_data_stream.H>
 
 // Required for Cronus
-typedef fapi2::ReturnCode (*ody_sppe_draminit_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&);
+typedef fapi2::ReturnCode (*ody_sppe_draminit_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
+        fapi2::hwp_data_ostream&);
 
 extern "C"
 {
@@ -47,8 +49,10 @@ extern "C"
 ///
 /// @brief Runs the dram initialization on the SPPE
 /// @param[in] i_target the controller
+/// @param[out] o_log_data hwp_data_ostream of streaming log
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-    fapi2::ReturnCode ody_sppe_draminit(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+    fapi2::ReturnCode ody_sppe_draminit(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                        fapi2::hwp_data_ostream& o_log_data);
 }// extern C
 #endif

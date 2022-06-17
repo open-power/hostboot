@@ -40,6 +40,8 @@
 
 #ifdef __PPE__
 
+#include <mss_generic_consts.H>
+
 //Macro -- PPE doesn't want to include generic_consts.H
 // so we'll define it here directly
 #define TARGTIDFORMAT "0x%08X"
@@ -78,7 +80,6 @@ namespace mss
 {
 namespace check
 {
-#ifndef __PPE__
 
 ///
 /// @brief Making an enum for switch/case in bad_fir_bits. Both will need
@@ -100,7 +101,9 @@ inline void log_fir_helper( const fapi2::Target<T>& i_target,
 {
     if(i_fir_error && (io_rc != fapi2::FAPI2_RC_SUCCESS))
     {
+#ifndef __PPE__
         fapi2::log_related_error(i_target, io_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+#endif
 
         io_rc = fapi2::FAPI2_RC_SUCCESS;
     }
@@ -143,38 +146,39 @@ inline bool fir_with_mask_helper( const fapi2::buffer<uint64_t>& i_fir,
 /// @tparam MC MC type for which to check FIR's
 /// @tparam T the fapi2::TargetType which hold the FIR bits
 /// @param[in] i_target - the target on which to operate
-/// @param[in] i_fir_regs - FIR register and mask register
+/// @param[in] i_fir_addr - address of the FIR register
+/// @param[in] i_mask_addr - address of the mask register for i_fir_addr
 /// @param[out] o_fir_error - true iff a FIR was hit
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 ///
 template< mss::mc_type MC, fapi2::TargetType T >
 inline fapi2::ReturnCode fir_with_mask( const fapi2::Target<T>& i_target,
-                                        const std::pair<uint64_t, uint64_t>& i_fir_regs,
+                                        const uint64_t i_fir_addr,
+                                        const uint64_t i_mask_addr,
                                         bool& o_fir_error )
 {
-    // Temporary variables to make the code a bit more readable
-    const auto FIR_REG = i_fir_regs.first;
-    const auto FIR_MASK = i_fir_regs.second;
-
     fapi2::buffer<uint64_t> l_fir;
     fapi2::buffer<uint64_t> l_fir_mask;
 
     // Read the registers
-    FAPI_TRY(mss::getScom(i_target, FIR_REG, l_fir));
-    FAPI_TRY(mss::getScom(i_target, FIR_MASK, l_fir_mask));
+    FAPI_TRY(fapi2::getScom(i_target, i_fir_addr, l_fir));
+    FAPI_TRY(fapi2::getScom(i_target, i_mask_addr, l_fir_mask));
 
     // If we have any unmasked bit, set that we have a FIR error and exit out with TRUE
     // Note: we want to set TRUE here as PRD will find the FIR as "new" and retrigger the procedure this way
     o_fir_error = fir_with_mask_helper(l_fir, l_fir_mask);
 
+#ifndef __PPE__
     // And print the information for debuggability
     FAPI_INF("%s %s on reg 0x%016lx value 0x%016lx and mask 0x%016lx value 0x%016lx", mss::c_str(i_target),
-             o_fir_error ? "has FIR's set" : "has no FIR's set", FIR_REG, l_fir, FIR_MASK, l_fir_mask);
+             o_fir_error ? "has FIR's set" : "has no FIR's set", i_fir_addr, l_fir, i_mask_addr, l_fir_mask);
+#endif
 
 fapi_try_exit:
     return fapi2::current_err;
 }
 
+#ifndef __PPE__
 ///
 /// @brief Checks whether a FIR or unlocked PLL could be the root cause of another failure
 /// @tparam MC MC type for which to check FIR's

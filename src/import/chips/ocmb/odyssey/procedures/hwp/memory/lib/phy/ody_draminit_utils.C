@@ -40,6 +40,7 @@
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
 #include <generic/memory/lib/utils/poll.H>
+#include <generic/memory/lib/utils/mss_bad_bits.H>
 #include <ody_scom_mp_apbonly0.H>
 #include <ody_scom_mp_mastr_b0.H>
 #include <ody_scom_mp_drtub0.H>
@@ -219,10 +220,14 @@ fapi_try_exit:
 /// @brief Polls the mail until completion message is received
 /// @param[in] i_target the target on which to operate
 /// @param[in] i_training_poll_count poll count for getting mail.
+/// @param[out] o_status final mail message from training, PASS/FAIL status if it completed
+/// @param[out] o_log_data hwp_data_ostream of streaming log
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode poll_for_completion(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
-                                      const uint64_t i_training_poll_count )
+                                      const uint64_t i_training_poll_count,
+                                      uint64_t& o_status,
+                                      fapi2::hwp_data_ostream& o_log_data )
 {
     mss::poll_parameters l_poll_params(DELAY_10NS,
                                        200,
@@ -234,7 +239,7 @@ fapi2::ReturnCode poll_for_completion(const fapi2::Target<fapi2::TARGET_TYPE_MEM
 
     fapi2::ATTR_PHY_GET_MAIL_TIMEOUT_Type l_mailbox_poll_count;
     FAPI_TRY(mss::attr::get_phy_get_mail_timeout(i_target , l_mailbox_poll_count));
-    l_poll_return = mss::poll(i_target, l_poll_params, [&i_target, &l_mailbox_poll_count, &l_mail]()->bool
+    l_poll_return = mss::poll(i_target, l_poll_params, [&i_target, &l_mailbox_poll_count, &l_mail, &o_log_data]()->bool
     {
         uint8_t l_mode = MAJOR_MSG_MODE; // 16 bit mode to read major message.
         bool l_loop_end = false;
@@ -242,7 +247,7 @@ fapi2::ReturnCode poll_for_completion(const fapi2::Target<fapi2::TARGET_TYPE_MEM
         FAPI_TRY(mss::ody::phy::get_mail(i_target, l_mode, l_mailbox_poll_count, l_mail));
 
         // Process and decode 'major' messages, and handle SMBus and streaming message protocol if necessary
-        FAPI_TRY(check_for_completion_and_decode(i_target, l_mail, l_loop_end));
+        FAPI_TRY(check_for_completion_and_decode(i_target, l_mail, o_log_data, l_loop_end));
 
         if (l_loop_end)
         {
@@ -258,10 +263,12 @@ fapi2::ReturnCode poll_for_completion(const fapi2::Target<fapi2::TARGET_TYPE_MEM
     FAPI_TRY(fapi2::current_err);
 
     FAPI_ASSERT(l_poll_return,
-                fapi2::ODY_DRAMINIT_TRAINING_FAILURE().
+                fapi2::ODY_DRAMINIT_TRAINING_TIMEOUT().
                 set_PORT_TARGET(i_target).
                 set_mail(l_mail),
                 TARGTIDFORMAT " poll for draminit training completion timed out", TARGTID);
+
+    o_status = l_mail;
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -272,11 +279,14 @@ fapi_try_exit:
 /// @brief Checks the completion condition for training and decodes respective message
 /// @param[in] i_target the memory port on which to operate
 /// @param[in] i_mail mail content to check for completion
+/// @param[out] o_log_data hwp_data_ostream of streaming log
 /// @param[out] o_loop_end flags that completion was detected, ending polling loop and skipping delay.
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode check_for_completion_and_decode(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
-        const fapi2::buffer<uint64_t>& i_mail, bool& o_loop_end)
+        const fapi2::buffer<uint64_t>& i_mail,
+        fapi2::hwp_data_ostream& o_log_data,
+        bool& o_loop_end)
 {
     o_loop_end = false;
 
@@ -370,7 +380,7 @@ fapi2::ReturnCode check_for_completion_and_decode(const fapi2::Target<fapi2::TAR
 
         case STREAMING_MSG:
             // Decodes and prints streaming messages
-            FAPI_TRY(process_streaming_message(i_target));
+            FAPI_TRY(process_streaming_message(i_target, o_log_data));
             break;
 
         case SMBUS_MSG:
@@ -2263,9 +2273,11 @@ fapi2::ReturnCode configure_dram_train_message_block(const fapi2::Target<fapi2::
 ///
 /// @brief Processes a streaming message from the mailbox protocol
 /// @param[in] i_target the target on which to operate
+/// @param[out] o_log_data hwp_data_ostream of streaming log
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode process_streaming_message(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
+fapi2::ReturnCode process_streaming_message(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        fapi2::hwp_data_ostream& o_log_data)
 {
     constexpr uint64_t STRING_INDEX     = 32;
     constexpr uint64_t STRING_INDEX_LEN = 32;
@@ -2292,6 +2304,9 @@ fapi2::ReturnCode process_streaming_message(const fapi2::Target<fapi2::TARGET_TY
     l_mail.extractToRight<STRING_INDEX, STRING_INDEX_LEN>(l_string_index)
     .extractToRight<NUM_DATA, NUM_DATA_LEN>(l_num_data);
 
+    // Put the string index into the output stream
+    FAPI_TRY(o_log_data.put(static_cast<fapi2::hwp_data_unit>(l_string_index)));
+
     // Print out the message's "string index" to use to decode the string
     FAPI_INF(TARGTIDFORMAT " Message string index: 0x%08x has %u more data pieces for decode", TARGTID, l_string_index,
              l_num_data);
@@ -2305,6 +2320,9 @@ fapi2::ReturnCode process_streaming_message(const fapi2::Target<fapi2::TARGET_TY
 
         // Grab the data
         l_mail.extractToRight<DATA, DATA_LEN>(l_data);
+
+        // Put the data piece into the output stream
+        FAPI_TRY(o_log_data.put(static_cast<fapi2::hwp_data_unit>(l_data)));
 
         // Print the data
         // The data can be post processed using the Synopsys .strings file (not including here as it could be size prohibitive)
@@ -9378,6 +9396,54 @@ void display_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_targe
     FAPI_INF("  .PmuInternalRev1      = 0x%04x; // " TARGTIDFORMAT, i_msg_block.PmuInternalRev1, TARGTID);
     FAPI_INF("} // _PMU_SMB_DDR5_1D_t " TARGTIDFORMAT, TARGTID);
 
+}
+
+///
+/// @brief Checks the training status from mail and message block
+/// @param[in] i_target the memory port on which to operate
+/// @param[in] i_status the final mail status from training
+/// @param[in] i_msg_block_response the message block
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode check_training_result(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                        const uint64_t i_status,
+                                        const _PMU_SMB_DDR5_1D_t& i_msg_block_response)
+{
+    constexpr uint8_t MSG_BLOCK_TRAIN_PASS = 0x00;
+
+    mss::ody::phy::bad_bit_interface l_interface(i_msg_block_response);
+
+    // Check training complete mail message
+    FAPI_ASSERT((i_status == SUCCESSFUL_COMPLETION),
+                fapi2::ODY_DRAMINIT_TRAINING_FAILURE_MAIL()
+                .set_PORT_TARGET(i_target)
+                .set_TRAINING_STATUS(i_status)
+                .set_EXPECTED_STATUS(SUCCESSFUL_COMPLETION)
+                .set_PMU_REVISION(i_msg_block_response.PmuRevision),
+                TARGTIDFORMAT " DRAM training returned a non-success status "
+                "mail message: 0x%02x (expected 0x%02x)",
+                TARGTID, i_status, SUCCESSFUL_COMPLETION);
+
+    // Check message block return code
+    FAPI_ASSERT((i_msg_block_response.CsTestFail == MSG_BLOCK_TRAIN_PASS),
+                fapi2::ODY_DRAMINIT_TRAINING_FAILURE_MSG_BLOCK()
+                .set_PORT_TARGET(i_target)
+                .set_ACTUAL_CSTESTFAIL(i_msg_block_response.CsTestFail)
+                .set_EXPECTED_CSTESTFAIL(MSG_BLOCK_TRAIN_PASS)
+                .set_PMU_REVISION(i_msg_block_response.PmuRevision),
+                TARGTIDFORMAT " DRAM training returned a non-success status "
+                "in the message block: 0x%02x (expected 0x%02x)",
+                TARGTID, i_msg_block_response.CsTestFail, MSG_BLOCK_TRAIN_PASS);
+
+    // Check for FIRs then record the bad bits data into our attribute if there are no FIRs set
+    // Hostboot will consume the bad bits attribute in the host_draminit procedure
+    FAPI_TRY(mss::record_bad_bits<mss::mc_type::ODYSSEY>(i_target, l_interface));
+
+    FAPI_INF(TARGTIDFORMAT " DRAM training returned PASSING status", TARGTID);
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 } // namespace phy

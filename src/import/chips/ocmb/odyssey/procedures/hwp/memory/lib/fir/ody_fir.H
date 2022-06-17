@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/phy/ody_draminit_procedure.H $ */
+/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/fir/ody_fir.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -24,9 +24,8 @@
 /* IBM_PROLOG_END_TAG                                                     */
 // EKB-Mirror-To: hostboot
 ///
-/// @file ody_draminit_procedure.H
-/// @brief Odyssey draminit procedure
-/// @note Using a separate file as simulation might need a different draminit procedure for now
+/// @file ody_fir.H
+/// @brief Memory subsystem FIR support
 ///
 // *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
@@ -34,38 +33,37 @@
 // *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
-#ifndef _ODY_DRAMINIT_PROCEDURE_H_
-#define _ODY_DRAMINIT_PROCEDURE_H_
+#ifndef _MSS_ODY_FIR_H_
+#define _MSS_ODY_FIR_H_
 
 #include <fapi2.H>
-#include <hwp_data_stream.H>
+#include <generic/memory/lib/utils/fir/gen_mss_fir.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
 namespace mss
 {
-namespace ody
+
+namespace check
 {
 
 ///
-/// @brief Runs draminit
-/// @param[in] i_target the target on which to operate
-/// @param[out] o_log_data hwp_data_ostream of streaming log
-/// @return fapi2::FAPI2_RC_SUCCESS iff successful
-/// @note Assumes PHY init has already been run
+/// @brief Helper for bad_fir_bits to check a fir register/mask pair against a desired mask value
+/// @param[in] i_target - the target on which to operate
+/// @param[in] i_fir_addr - address of the FIR register to compare against mask
+/// @param[in] i_mask_addr - address of the mask register for i_fir_addr
+/// @param[in] i_mask - the 64-bit mask that we want to compare the reg against
+/// @param[in,out] io_rc - the return code for the function
+/// @param[out] o_fir_error - true iff a FIR was hit
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode draminit(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
-                           fapi2::hwp_data_ostream& o_log_data);
-
-///
-/// @brief Runs draminit
-/// @param[in] i_target the target on which to operate
-/// @param[out] o_log_data hwp_data_ostream of streaming log
-/// @return fapi2::FAPI2_RC_SUCCESS iff successful
-/// @note Assumes PHY init has already been run
-///
-fapi2::ReturnCode draminit(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                           fapi2::hwp_data_ostream& o_log_data);
+fapi2::ReturnCode bad_fir_bits_helper_with_mask(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const uint64_t i_fir_addr,
+        const uint64_t i_mask_addr,
+        const fapi2::buffer<uint64_t>& i_mask,
+        fapi2::ReturnCode& io_rc,
+        bool& o_fir_error);
 
 
-} // namespace ody
-} // namespace mss
+} // end check ns
+} // end mss ns
 #endif

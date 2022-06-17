@@ -122,7 +122,7 @@ fapi2::ReturnCode bad_fir_bits_helper(const fapi2::Target<T>& i_target,
     // Note: we return out if any FIR is bad
     for(const auto& l_fir_reg : i_checklist)
     {
-        FAPI_TRY(fir_with_mask<mss::mc_type::EXPLORER>(i_target, l_fir_reg, o_fir_error));
+        FAPI_TRY(fir_with_mask<mss::mc_type::EXPLORER>(i_target, l_fir_reg.first, l_fir_reg.second, o_fir_error));
 
         // Log the error if need be
         log_fir_helper(i_target, o_fir_error, io_rc);

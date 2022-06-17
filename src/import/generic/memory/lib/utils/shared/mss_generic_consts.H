@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
+// EKB-Mirror-To: hw/ppe
 ///
 /// @file mss_generic_consts.H
 /// @brief Common constants to be shared
