@@ -79,5 +79,8 @@ constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::TRCD_MIN_MS
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::RANK_MIX;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::PACKAGE_RANKS_PER_CHANNEL;
 
+// fields<DDR5, DDIMM_MODULE>
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::HI_DDR_SPEED_RATIO;
+
 }// spd
 }// mss

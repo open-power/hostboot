@@ -246,6 +246,51 @@ class base_0_0 : public mss::spd::base
         }
 
         ///
+        /// @brief Set the host to ddr speed ratio field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        /// @note Uses DDIMM module fields instead of base cnfg fields.
+        ///       This is required for later fields so we parse this one here.
+        ///
+        virtual fapi2::ReturnCode set_host_to_ddr_speed_ratio(const std::vector<uint8_t>& i_spd) const
+        {
+            using DF = mss::spd::fields<DDR5, DDIMM_MODULE>;
+            uint8_t l_field = 0;
+            uint8_t l_host_to_ddr_speed_ratio = 0;
+
+            // Continuing with following DDR4 info.
+            // =========================================================
+            // DDR4 SPD Document Release 4
+            // Byte 220 (0x0DC): Host Interface Speed to DDR Interface Speed Ratio
+            // =========================================================
+            const std::vector< std::pair<uint8_t, uint8_t> > HOST_TO_DDR_SPEED_RATIO_MAP =
+            {
+                // {key byte, speed ratio}
+                {0, fapi2::ENUM_ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_1_TO_1},
+                {1, fapi2::ENUM_ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_2_TO_1},
+                {2, fapi2::ENUM_ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_4_TO_1},
+                {3, fapi2::ENUM_ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_8_TO_1},
+                {4, fapi2::ENUM_ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_16_TO_1},
+                {5, fapi2::ENUM_ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_32_TO_1},
+                {6, fapi2::ENUM_ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_64_TO_1},
+                {7, fapi2::ENUM_ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_128_TO_1},
+                // All others reserved or not supported
+            };
+
+            FAPI_TRY(get_field_spd(iv_ocmb, DF::HI_DDR_SPEED_RATIO, i_spd, SET_HOST_TO_DDR_SPEED_RATIO, l_field));
+
+            FAPI_TRY( lookup_table_check(iv_dimm, HOST_TO_DDR_SPEED_RATIO_MAP, SET_HOST_TO_DDR_SPEED_RATIO, l_field,
+                                         l_host_to_ddr_speed_ratio),
+                      "%s failed HOST_TO_DDR_SPEED_RATIO lookup check", spd::c_str(iv_dimm) );
+
+            FAPI_TRY(mss::attr::set_host_to_ddr_speed_ratio(iv_dimm, l_host_to_ddr_speed_ratio));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
         /// @brief Set the num master ranks per dimm field
         ///
         /// @param[in] i_spd SPD binary
@@ -370,9 +415,7 @@ class base_0_0 : public mss::spd::base
             // These fields need to be set first, as these are used for many
             // fields later on
             FAPI_TRY(set_dimm_ranks_cnfgd(i_spd));
-            // TODO:ZEN:MST-1421 Add DDR5 SPD support for set_host_to_ddr_speed_ratio
-            // Note:  really a DDIMM trait instead of a base trait, as such this code might need to be moved
-            // FAPI_TRY(set_host_to_ddr_speed_ratio(i_spd));
+            FAPI_TRY(set_host_to_ddr_speed_ratio(i_spd));
             FAPI_TRY(set_num_master_ranks_per_dimm(i_spd)); // AKA mranks
             FAPI_TRY(set_hybrid(i_spd));
             FAPI_TRY(set_hybrid_media(i_spd));
