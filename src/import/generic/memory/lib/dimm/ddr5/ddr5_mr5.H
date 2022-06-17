@@ -284,6 +284,7 @@ class mr5_data
         ///
         /// @brief Displays the information that makes up the MR
         /// @param[in] a fapi2::TARGET_TYPE_DIMM target
+        /// @param[in] i_dimm_rank the DIMM rank's value to print
         ///
         void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, const uint64_t i_dimm_rank) const
         {

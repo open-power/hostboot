@@ -1228,6 +1228,12 @@ enum mr
 {
     ATTR_RANKS = 4,
     ATTR_DRAM  = 20,
+    ATTR_STRAP = 2,
+
+    // Defined in the DDR5 JEDEC Spec v1.7.1
+    // MR32 OP[6]
+    STRAPA = 0,
+    STRAPB = 1,
 };
 
 }

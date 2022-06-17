@@ -1208,6 +1208,26 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_EXP_DRAMINIT_BAD_RTT_WR</rc>
+    <description>
+        A bad RTT WR was passed in to Explorer's draminit function
+    </description>
+    <ffdc>VALUE</ffdc>
+    <ffdc>DIMM_RANK</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_EXP_RESPONSE_WRONG_REQID</rc>
     <description>
         Request ID in Explorer response was not equal to the ID in the command.

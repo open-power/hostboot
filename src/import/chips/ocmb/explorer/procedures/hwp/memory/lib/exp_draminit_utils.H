@@ -1420,6 +1420,17 @@ class phy_params
         ///
         fapi2::ReturnCode set_RttWr(user_input_msdg& io_phy_params) const
         {
+            // DDR4 only allows certain RTT WR values
+            static const std::vector<uint8_t> GOOD_RTT_WR_VALUES =
+            {
+                fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_WR_DISABLE,
+                fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_WR_OHM80,
+                fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_WR_OHM120,
+                fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_WR_OHM240,
+            };
+            const auto BEGIN = GOOD_RTT_WR_VALUES.begin();
+            const auto END = GOOD_RTT_WR_VALUES.end();
+
             const std::vector<uint16_t*> l_rtt_wrs =
             {
                 &io_phy_params.iv_user_msdg_upto_ver397559.DramRttWrR0[0],
@@ -1428,8 +1439,31 @@ class phy_params
                 &io_phy_params.iv_user_msdg_upto_ver397559.DramRttWrR3[0],
             };
 
+            // Loops through all rank info information to check the values
+            for(const auto l_rank_info : iv_rank_info)
+            {
+                const uint8_t l_dimm_index = mss::index(l_rank_info.get_dimm_target());
+                const uint8_t l_dimm_rank = l_rank_info.get_dimm_rank();
+                const auto l_value = iv_attrs_params.iv_dram_rtt_wr[l_dimm_index][l_dimm_rank];
+                const auto l_it = std::find(BEGIN, END, l_value);
+
+                // If a value is not found, it will be the end iterator
+                // We pass if the is found, so not the end iterator
+                FAPI_ASSERT(l_it != END,
+                            fapi2::EXP_DRAMINIT_BAD_RTT_WR()
+                            .set_DIMM_TARGET(l_rank_info.get_dimm_target())
+                            .set_VALUE(l_value)
+                            .set_DIMM_RANK(l_dimm_rank),
+                            "%s Rank%u: RTT_WR value of %u is not allowable for DDR4",
+                            mss::c_str(l_rank_info.get_dimm_target()), l_dimm_rank, l_value);
+            }
+
             set_phy_field_by_rank(l_rtt_wrs, iv_attrs_params.iv_dram_rtt_wr);
+
+
             return fapi2::FAPI2_RC_SUCCESS;
+        fapi_try_exit:
+            return fapi2::current_err;
         }
 
         ///

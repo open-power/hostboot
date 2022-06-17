@@ -61,6 +61,27 @@
     </deconfigure>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR_BAD_STRAP_VALUE</rc>
+    <description>
+       A bad strap value was passed to an MR
+    </description>
+    <ffdc>MAX</ffdc>
+    <ffdc>STRAP</ffdc>
+    <ffdc>MR</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
+
 <!-- MR0 errors -->
 
   <hwpError>
@@ -503,31 +524,361 @@
 
 <!-- MR32 errors -->
 
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR32_CA_ODT_ATTR_VALUE</rc>
+    <description>
+       A bad CK or CS ODT was passed to MR32
+    </description>
+    <ffdc>STRAP</ffdc>
+    <ffdc>VALUE</ffdc>
+    <ffdc>DIMM_RANK</ffdc>
+    <ffdc>IS_CS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR32_CA_ODT_FIELD_VALUE</rc>
+    <description>
+       A bad CK or CS ODT was processed by MR32
+    </description>
+    <ffdc>STRAP</ffdc>
+    <ffdc>FIELD</ffdc>
+    <ffdc>DIMM_RANK</ffdc>
+    <ffdc>IS_CS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
 
 <!-- MR33 errors -->
 
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR33_CA_ODT_ATTR_VALUE</rc>
+    <description>
+       A bad CA ODT was passed to MR33
+    </description>
+    <ffdc>STRAP</ffdc>
+    <ffdc>VALUE</ffdc>
+    <ffdc>DIMM_RANK</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR33_CA_ODT_FIELD_VALUE</rc>
+    <description>
+       A bad CA ODT was processed by MR33
+    </description>
+    <ffdc>STRAP</ffdc>
+    <ffdc>FIELD</ffdc>
+    <ffdc>DIMM_RANK</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR33_DQS_RTT_PARK_ATTR_VALUE</rc>
+    <description>
+       A bad DQS RTT Park value was passed to MR33
+    </description>
+    <ffdc>STRAP</ffdc>
+    <ffdc>VALUE</ffdc>
+    <ffdc>DIMM_RANK</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR33_DQS_RTT_PARK_FIELD_VALUE</rc>
+    <description>
+       A bad DQS RTT Park value was processed by MR33
+    </description>
+    <ffdc>STRAP</ffdc>
+    <ffdc>FIELD</ffdc>
+    <ffdc>DIMM_RANK</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
 
 <!-- MR34 errors -->
 
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR34_RTT_ATTR_VALUE</rc>
+    <description>
+       A bad RTT value was passed to MR34
+    </description>
+    <ffdc>IS_RTT_WR</ffdc>
+    <ffdc>VALUE</ffdc>
+    <ffdc>DIMM_RANK</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR34_RTT_FIELD_VALUE</rc>
+    <description>
+       A bad RTT value was processed by MR34
+    </description>
+    <ffdc>IS_RTT_WR</ffdc>
+    <ffdc>FIELD</ffdc>
+    <ffdc>DIMM_RANK</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
 
 <!-- MR35 errors -->
 
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR35_RTT_ATTR_VALUE</rc>
+    <description>
+       A bad RTT value was passed to MR35
+    </description>
+    <ffdc>IS_RTT_NOM_RD</ffdc>
+    <ffdc>VALUE</ffdc>
+    <ffdc>DIMM_RANK</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR35_RTT_FIELD_VALUE</rc>
+    <description>
+       A bad RTT value was processed by MR35
+    </description>
+    <ffdc>IS_RTT_NOM_RD</ffdc>
+    <ffdc>FIELD</ffdc>
+    <ffdc>DIMM_RANK</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
 
 <!-- MR37 errors -->
 
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR37_ODTLON_ATTR_VALUE</rc>
+    <description>
+       A bad ODTLon value was passed to MR37
+    </description>
+    <ffdc>MIN</ffdc>
+    <ffdc>MAX</ffdc>
+    <ffdc>VALUE</ffdc>
+    <ffdc>DIMM_RANK</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR37_ODTLOFF_ATTR_VALUE</rc>
+    <description>
+       A bad ODTLon value was passed to MR37
+    </description>
+    <ffdc>MIN</ffdc>
+    <ffdc>MAX</ffdc>
+    <ffdc>VALUE</ffdc>
+    <ffdc>DIMM_RANK</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
 
 <!-- MR38 errors -->
 
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR38_ODTLON_NT_ATTR_VALUE</rc>
+    <description>
+       A bad ODTLon NT (non terminating) value was passed to MR38
+    </description>
+    <ffdc>MIN</ffdc>
+    <ffdc>MAX</ffdc>
+    <ffdc>VALUE</ffdc>
+    <ffdc>DIMM_RANK</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR38_ODTLOFF_NT_ATTR_VALUE</rc>
+    <description>
+       A bad ODTLon NT (non terminating) value was passed to MR38
+    </description>
+    <ffdc>MIN</ffdc>
+    <ffdc>MAX</ffdc>
+    <ffdc>VALUE</ffdc>
+    <ffdc>DIMM_RANK</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
 
 <!-- MR39 errors -->
 
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR39_ODTLON_RD_ATTR_VALUE</rc>
+    <description>
+       A bad ODTLon RD value was passed to MR39
+    </description>
+    <ffdc>MIN</ffdc>
+    <ffdc>MAX</ffdc>
+    <ffdc>VALUE</ffdc>
+    <ffdc>DIMM_RANK</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR39_ODTLOFF_RD_ATTR_VALUE</rc>
+    <description>
+       A bad ODTLon RD value was passed to MR39
+    </description>
+    <ffdc>MIN</ffdc>
+    <ffdc>MAX</ffdc>
+    <ffdc>VALUE</ffdc>
+    <ffdc>DIMM_RANK</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
 
 <!-- MR50 errors -->
 

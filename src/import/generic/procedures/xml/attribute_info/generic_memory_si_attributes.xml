@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2022                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -168,11 +168,13 @@
         <description>
           Array[DIMM][RANK]
           DRAM side Write Termination Resistance in Ohms.
+          Note: DDR4 does not support values of 34, 40, 48, and 60
+          DDR5 only values: 34, 40, 48, and 60
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
-        <enum>DISABLE = 0, OHM80 = 80, OHM120 = 120, OHM240 = 240</enum>
+        <enum>DISABLE = 0, OHM34 = 34, OHM40 = 40, OHM48 = 48, OHM60 = 60, OHM80 = 80, OHM120 = 120, OHM240 = 240</enum>
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_dram_rtt_wr</mssAccessorName>
         <array>2 4</array>
