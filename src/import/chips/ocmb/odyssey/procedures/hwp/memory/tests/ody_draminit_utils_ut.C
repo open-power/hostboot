@@ -926,6 +926,236 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
             return 0;
         });
     }
+
+    GIVEN("Tests check_training_result")
+    {
+        // Loops over OCMB chip targets that were defined in the associated config
+        for_each_target([](const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+        {
+            for(const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
+            {
+                _PMU_SMB_DDR5_1D_t l_struct;
+                uint64_t l_mail = 0;
+                uint8_t l_dq_bitmap_save[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT] = {};
+
+                // Initialize some training lane fails in the message block
+                l_struct.DisabledDB0LaneR0 = 0x00;
+                l_struct.DisabledDB1LaneR0 = 0x01;
+                l_struct.DisabledDB2LaneR0 = 0x02;
+                l_struct.DisabledDB3LaneR0 = 0x03;
+                l_struct.DisabledDB4LaneR0 = 0x04;
+                l_struct.DisabledDB5LaneR0 = 0x05;
+                l_struct.DisabledDB6LaneR0 = 0x06;
+                l_struct.DisabledDB7LaneR0 = 0x07;
+                l_struct.DisabledDB8LaneR0 = 0x08;
+                l_struct.DisabledDB9LaneR0 = 0x09;
+                l_struct.DisabledDB0LaneR1 = 0xA0;
+                l_struct.DisabledDB1LaneR1 = 0xA1;
+                l_struct.DisabledDB2LaneR1 = 0xA2;
+                l_struct.DisabledDB3LaneR1 = 0xA3;
+                l_struct.DisabledDB4LaneR1 = 0xA4;
+                l_struct.DisabledDB5LaneR1 = 0xA5;
+                l_struct.DisabledDB6LaneR1 = 0xA6;
+                l_struct.DisabledDB7LaneR1 = 0xA7;
+                l_struct.DisabledDB8LaneR1 = 0xA8;
+                l_struct.DisabledDB9LaneR1 = 0xA9;
+                l_struct.DisabledDB0LaneR2 = 0x20;
+                l_struct.DisabledDB1LaneR2 = 0x21;
+                l_struct.DisabledDB2LaneR2 = 0x22;
+                l_struct.DisabledDB3LaneR2 = 0x23;
+                l_struct.DisabledDB4LaneR2 = 0x24;
+                l_struct.DisabledDB5LaneR2 = 0x25;
+                l_struct.DisabledDB6LaneR2 = 0x26;
+                l_struct.DisabledDB7LaneR2 = 0x27;
+                l_struct.DisabledDB8LaneR2 = 0x28;
+                l_struct.DisabledDB9LaneR2 = 0x29;
+                l_struct.DisabledDB0LaneR3 = 0xB0;
+                l_struct.DisabledDB1LaneR3 = 0xB1;
+                l_struct.DisabledDB2LaneR3 = 0xB2;
+                l_struct.DisabledDB3LaneR3 = 0xB3;
+                l_struct.DisabledDB4LaneR3 = 0xB4;
+                l_struct.DisabledDB5LaneR3 = 0xB5;
+                l_struct.DisabledDB6LaneR3 = 0xB6;
+                l_struct.DisabledDB7LaneR3 = 0xB7;
+                l_struct.DisabledDB8LaneR3 = 0xB8;
+                l_struct.DisabledDB9LaneR3 = 0xB9;
+
+                // Save the bad bits attribute
+                for(const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_port))
+                {
+                    REQUIRE_RC_PASS( mss::attr::get_bad_dq_bitmap(l_dimm, l_dq_bitmap_save) );
+                }
+
+                // Test failing mail RC
+                l_mail = 0xFF;
+                l_struct.CsTestFail = 0x00;
+                REQUIRE_SPECIFIC_RC_FAIL(mss::ody::phy::check_training_result(l_port, l_mail, l_struct),
+                                         fapi2::RC_ODY_DRAMINIT_TRAINING_FAILURE_MAIL);
+
+                for(const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_port))
+                {
+                    uint8_t l_dq_bitmap[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT] = {};
+                    REQUIRE_RC_PASS( mss::attr::get_bad_dq_bitmap(l_dimm, l_dq_bitmap) );
+                    REQUIRE(l_dq_bitmap[0][0] == 0x00);
+                    REQUIRE(l_dq_bitmap[0][1] == 0x00);
+                    REQUIRE(l_dq_bitmap[0][2] == 0x00);
+                    REQUIRE(l_dq_bitmap[0][3] == 0x00);
+                    REQUIRE(l_dq_bitmap[0][4] == 0x00);
+                    REQUIRE(l_dq_bitmap[0][5] == 0x00);
+                    REQUIRE(l_dq_bitmap[0][6] == 0x00);
+                    REQUIRE(l_dq_bitmap[0][7] == 0x00);
+                    REQUIRE(l_dq_bitmap[0][8] == 0x00);
+                    REQUIRE(l_dq_bitmap[0][9] == 0x00);
+                    REQUIRE(l_dq_bitmap[1][0] == 0x00);
+                    REQUIRE(l_dq_bitmap[1][1] == 0x00);
+                    REQUIRE(l_dq_bitmap[1][2] == 0x00);
+                    REQUIRE(l_dq_bitmap[1][3] == 0x00);
+                    REQUIRE(l_dq_bitmap[1][4] == 0x00);
+                    REQUIRE(l_dq_bitmap[1][5] == 0x00);
+                    REQUIRE(l_dq_bitmap[1][6] == 0x00);
+                    REQUIRE(l_dq_bitmap[1][7] == 0x00);
+                    REQUIRE(l_dq_bitmap[1][8] == 0x00);
+                    REQUIRE(l_dq_bitmap[1][9] == 0x00);
+                    REQUIRE(l_dq_bitmap[2][0] == 0x00);
+                    REQUIRE(l_dq_bitmap[2][1] == 0x00);
+                    REQUIRE(l_dq_bitmap[2][2] == 0x00);
+                    REQUIRE(l_dq_bitmap[2][3] == 0x00);
+                    REQUIRE(l_dq_bitmap[2][4] == 0x00);
+                    REQUIRE(l_dq_bitmap[2][5] == 0x00);
+                    REQUIRE(l_dq_bitmap[2][6] == 0x00);
+                    REQUIRE(l_dq_bitmap[2][7] == 0x00);
+                    REQUIRE(l_dq_bitmap[2][8] == 0x00);
+                    REQUIRE(l_dq_bitmap[2][9] == 0x00);
+                    REQUIRE(l_dq_bitmap[3][0] == 0x00);
+                    REQUIRE(l_dq_bitmap[3][1] == 0x00);
+                    REQUIRE(l_dq_bitmap[3][2] == 0x00);
+                    REQUIRE(l_dq_bitmap[3][3] == 0x00);
+                    REQUIRE(l_dq_bitmap[3][4] == 0x00);
+                    REQUIRE(l_dq_bitmap[3][5] == 0x00);
+                    REQUIRE(l_dq_bitmap[3][6] == 0x00);
+                    REQUIRE(l_dq_bitmap[3][7] == 0x00);
+                    REQUIRE(l_dq_bitmap[3][8] == 0x00);
+                    REQUIRE(l_dq_bitmap[3][9] == 0x00);
+                }
+
+                // Test failing message block RC
+                // Test failing mail RC
+                l_mail = 0x07;
+                l_struct.CsTestFail = 0x01;
+                REQUIRE_SPECIFIC_RC_FAIL(mss::ody::phy::check_training_result(l_port, l_mail, l_struct),
+                                         fapi2::RC_ODY_DRAMINIT_TRAINING_FAILURE_MSG_BLOCK);
+
+                for(const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_port))
+                {
+                    uint8_t l_dq_bitmap[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT] = {};
+                    REQUIRE_RC_PASS( mss::attr::get_bad_dq_bitmap(l_dimm, l_dq_bitmap) );
+                    REQUIRE(l_dq_bitmap[0][0] == 0x00);
+                    REQUIRE(l_dq_bitmap[0][1] == 0x00);
+                    REQUIRE(l_dq_bitmap[0][2] == 0x00);
+                    REQUIRE(l_dq_bitmap[0][3] == 0x00);
+                    REQUIRE(l_dq_bitmap[0][4] == 0x00);
+                    REQUIRE(l_dq_bitmap[0][5] == 0x00);
+                    REQUIRE(l_dq_bitmap[0][6] == 0x00);
+                    REQUIRE(l_dq_bitmap[0][7] == 0x00);
+                    REQUIRE(l_dq_bitmap[0][8] == 0x00);
+                    REQUIRE(l_dq_bitmap[0][9] == 0x00);
+                    REQUIRE(l_dq_bitmap[1][0] == 0x00);
+                    REQUIRE(l_dq_bitmap[1][1] == 0x00);
+                    REQUIRE(l_dq_bitmap[1][2] == 0x00);
+                    REQUIRE(l_dq_bitmap[1][3] == 0x00);
+                    REQUIRE(l_dq_bitmap[1][4] == 0x00);
+                    REQUIRE(l_dq_bitmap[1][5] == 0x00);
+                    REQUIRE(l_dq_bitmap[1][6] == 0x00);
+                    REQUIRE(l_dq_bitmap[1][7] == 0x00);
+                    REQUIRE(l_dq_bitmap[1][8] == 0x00);
+                    REQUIRE(l_dq_bitmap[1][9] == 0x00);
+                    REQUIRE(l_dq_bitmap[2][0] == 0x00);
+                    REQUIRE(l_dq_bitmap[2][1] == 0x00);
+                    REQUIRE(l_dq_bitmap[2][2] == 0x00);
+                    REQUIRE(l_dq_bitmap[2][3] == 0x00);
+                    REQUIRE(l_dq_bitmap[2][4] == 0x00);
+                    REQUIRE(l_dq_bitmap[2][5] == 0x00);
+                    REQUIRE(l_dq_bitmap[2][6] == 0x00);
+                    REQUIRE(l_dq_bitmap[2][7] == 0x00);
+                    REQUIRE(l_dq_bitmap[2][8] == 0x00);
+                    REQUIRE(l_dq_bitmap[2][9] == 0x00);
+                    REQUIRE(l_dq_bitmap[3][0] == 0x00);
+                    REQUIRE(l_dq_bitmap[3][1] == 0x00);
+                    REQUIRE(l_dq_bitmap[3][2] == 0x00);
+                    REQUIRE(l_dq_bitmap[3][3] == 0x00);
+                    REQUIRE(l_dq_bitmap[3][4] == 0x00);
+                    REQUIRE(l_dq_bitmap[3][5] == 0x00);
+                    REQUIRE(l_dq_bitmap[3][6] == 0x00);
+                    REQUIRE(l_dq_bitmap[3][7] == 0x00);
+                    REQUIRE(l_dq_bitmap[3][8] == 0x00);
+                    REQUIRE(l_dq_bitmap[3][9] == 0x00);
+                }
+
+                // Test passing case
+                l_mail = 0x07;
+                l_struct.CsTestFail = 0x00;
+                REQUIRE_RC_PASS(mss::ody::phy::check_training_result(l_port, l_mail, l_struct));
+
+                // Check the bad bits data in the attribute
+                for(const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_port))
+                {
+                    // Note we will only have data for ranks that are in our config here
+                    uint8_t l_dq_bitmap[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT] = {};
+                    REQUIRE_RC_PASS( mss::attr::get_bad_dq_bitmap(l_dimm, l_dq_bitmap) );
+                    REQUIRE(l_dq_bitmap[0][0] == 0x00);
+                    REQUIRE(l_dq_bitmap[0][1] == 0x01);
+                    REQUIRE(l_dq_bitmap[0][2] == 0x02);
+                    REQUIRE(l_dq_bitmap[0][3] == 0x03);
+                    REQUIRE(l_dq_bitmap[0][4] == 0x04);
+                    REQUIRE(l_dq_bitmap[0][5] == 0x05);
+                    REQUIRE(l_dq_bitmap[0][6] == 0x06);
+                    REQUIRE(l_dq_bitmap[0][7] == 0x07);
+                    REQUIRE(l_dq_bitmap[0][8] == 0x08);
+                    REQUIRE(l_dq_bitmap[0][9] == 0x09);
+                    REQUIRE(l_dq_bitmap[1][0] == 0xA0);
+                    REQUIRE(l_dq_bitmap[1][1] == 0xA1);
+                    REQUIRE(l_dq_bitmap[1][2] == 0xA2);
+                    REQUIRE(l_dq_bitmap[1][3] == 0xA3);
+                    REQUIRE(l_dq_bitmap[1][4] == 0xA4);
+                    REQUIRE(l_dq_bitmap[1][5] == 0xA5);
+                    REQUIRE(l_dq_bitmap[1][6] == 0xA6);
+                    REQUIRE(l_dq_bitmap[1][7] == 0xA7);
+                    REQUIRE(l_dq_bitmap[1][8] == 0xA8);
+                    REQUIRE(l_dq_bitmap[1][9] == 0xA9);
+                    REQUIRE(l_dq_bitmap[2][0] == 0x00);
+                    REQUIRE(l_dq_bitmap[2][1] == 0x00);
+                    REQUIRE(l_dq_bitmap[2][2] == 0x00);
+                    REQUIRE(l_dq_bitmap[2][3] == 0x00);
+                    REQUIRE(l_dq_bitmap[2][4] == 0x00);
+                    REQUIRE(l_dq_bitmap[2][5] == 0x00);
+                    REQUIRE(l_dq_bitmap[2][6] == 0x00);
+                    REQUIRE(l_dq_bitmap[2][7] == 0x00);
+                    REQUIRE(l_dq_bitmap[2][8] == 0x00);
+                    REQUIRE(l_dq_bitmap[2][9] == 0x00);
+                    REQUIRE(l_dq_bitmap[3][0] == 0x00);
+                    REQUIRE(l_dq_bitmap[3][1] == 0x00);
+                    REQUIRE(l_dq_bitmap[3][2] == 0x00);
+                    REQUIRE(l_dq_bitmap[3][3] == 0x00);
+                    REQUIRE(l_dq_bitmap[3][4] == 0x00);
+                    REQUIRE(l_dq_bitmap[3][5] == 0x00);
+                    REQUIRE(l_dq_bitmap[3][6] == 0x00);
+                    REQUIRE(l_dq_bitmap[3][7] == 0x00);
+                    REQUIRE(l_dq_bitmap[3][8] == 0x00);
+                    REQUIRE(l_dq_bitmap[3][9] == 0x00);
+                }
+
+
+                // Restore the bad bits attribute
+                for(const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_port))
+                {
+                    REQUIRE_RC_PASS( mss::attr::set_bad_dq_bitmap(l_dimm, l_dq_bitmap_save) );
+                }
+            }
+
+            return 0;
+        });
+    }
+
 }// scenario
 
 } // end ns test
