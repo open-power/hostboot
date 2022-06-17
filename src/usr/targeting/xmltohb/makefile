@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2019
+# Contributors Listed Below - COPYRIGHT 2011,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -31,6 +31,16 @@
 ################################################################################
 
 ROOTPATH = ../../../..
+
+# Path to perl. So scripts can call perl explicitly, to run, rather than
+# calling the script itself.
+# Perl 5 removed the current working directory in the @INC and certain scripts
+# are failing because they are unable to find the modules that are needed.
+# Although these scripts may have #!/usr/bin/perl, calling perl explicitly
+# allows for passing in an include directory (-I) which is needed to find
+# certain include modules so as to not fail.
+PERL_PATH="/usr/bin/perl"
+PERL_INC_DIRS="-I../xmltohb"
 
 # Point to the common targeting makefile for xmltohb
 COMMON_XMLTOHB_DIR = xmltohb
@@ -315,7 +325,7 @@ ${GENDIR}/${XMLTOHB_FULL_TARGET_TYPES}: \
 		${GENDIR}/${XMLTOHB_EKB_TARGET_TYPES} ${GENDIR}/${XMLTOHB_FULL_ATTRIBUTE_TYPES}
 	./${XMLTOHB_TARGET_MERGE_SCRIPT} $(addprefix --hb=,${GENDIR}/${XMLTOHB_EKB_TARGET_TYPES}) \
 		$(addprefix --common=,${GENDIR}/${XMLTOHB_SRC_TARGET_TYPES}) > $@
-	${COMMON_TARGETING_REL_PATH}/${XMLTOHB_SWAP_MAPPED_ATTR_SCRIPT} \
+	${PERL_PATH} ${PERL_INC_DIRS} ${COMMON_TARGETING_REL_PATH}/${XMLTOHB_SWAP_MAPPED_ATTR_SCRIPT} \
 		$(addprefix --srcTargetXml=,${GENDIR}/${XMLTOHB_SRC_TARGET_TYPES}) \
 		$(addprefix --ekbTargetXml=,${GENDIR}/${XMLTOHB_EKB_TARGET_TYPES}) \
 		$(addprefix --fullAttrXml=,${GENDIR}/${XMLTOHB_FULL_ATTRIBUTE_TYPES}) \
@@ -332,7 +342,7 @@ ${GENDIR}/${XMLTOHB_SP_TARGET_TYPES}: \
 		${GENDIR}/${XMLTOHB_EKB_TARGET_TYPES} ${GENDIR}/${XMLTOHB_SP_ATTRIBUTE_TYPES}
 	./${XMLTOHB_TARGET_MERGE_SCRIPT} $(addprefix --hb=,${GENDIR}/${XMLTOHB_EKB_TARGET_TYPES}) \
 		$(addprefix --common=,${GENDIR}/${XMLTOHB_CONFIG_TARGET_TYPES}) > $@
-	${COMMON_TARGETING_REL_PATH}/${XMLTOHB_SWAP_MAPPED_ATTR_SCRIPT} \
+	${PERL_PATH} ${PERL_INC_DIRS} ${COMMON_TARGETING_REL_PATH}/${XMLTOHB_SWAP_MAPPED_ATTR_SCRIPT} \
 		$(addprefix --srcTargetXml=,${GENDIR}/${XMLTOHB_CONFIG_TARGET_TYPES}) \
 		$(addprefix --ekbTargetXml=,${GENDIR}/${XMLTOHB_EKB_TARGET_TYPES}) \
 		$(addprefix --fullAttrXml=,${GENDIR}/${XMLTOHB_SP_ATTRIBUTE_TYPES}) \
@@ -368,7 +378,7 @@ ${GENDIR}/${XMLTOHB_EKB_ATTRIBUTE_TYPES} \
 ${GENDIR}/${XMLTOHB_EKB_TARGET_TYPES}: \
 	${XMLTOHB_EKB_TARGATTR_SCRIPT} ${GENDIR}/${XMLTOHB_FAPI_XML} \
 	fapi_utils.pl ${GENDIR}/${XMLTOHB_ATTRIBUTE_CUSTOMIZATION}
-	${COMMON_TARGETING_REL_PATH}/${XMLTOHB_EKB_TARGATTR_SCRIPT} \
+	${PERL_PATH} ${PERL_INC_DIRS} ${COMMON_TARGETING_REL_PATH}/${XMLTOHB_EKB_TARGATTR_SCRIPT} \
 	$(addprefix --fapi=,${GENDIR}/${XMLTOHB_FAPI_XML}) \
 	$(addprefix --attr=,${GENDIR}/${XMLTOHB_EKB_ATTRIBUTE_TYPES}) \
 	$(addprefix --targ=,${GENDIR}/${XMLTOHB_EKB_TARGET_TYPES}) \
@@ -380,7 +390,7 @@ ${GENDIR}/${XMLTOHB_EKB_TARGET_TYPES}: \
 ${GENDIR}/${XMLTOHB_FULL_ATTRIBUTE_TYPES}: \
 	${XMLTOHB_DUPLICATE_SCRIPT} ${GENDIR}/${XMLTOHB_EKB_ATTRIBUTE_TYPES} \
 	${GENDIR}/${XMLTOHB_SRC_ATTRIBUTE_TYPES}
-	${COMMON_TARGETING_REL_PATH}/${XMLTOHB_DUPLICATE_SCRIPT} \
+	${PERL_PATH} ${PERL_INC_DIRS} ${COMMON_TARGETING_REL_PATH}/${XMLTOHB_DUPLICATE_SCRIPT} \
 	$(addprefix --ekbXmlFile=,${GENDIR}/${XMLTOHB_EKB_ATTRIBUTE_TYPES}) \
 	$(addprefix --hbXmlFile=,${GENDIR}/${XMLTOHB_SRC_ATTRIBUTE_TYPES}) \
 	$(addprefix --fapi2Header=,${ROOTPATH}/src/include/usr/fapi2/attribute_service.H) \
@@ -391,7 +401,7 @@ ${GENDIR}/${XMLTOHB_FULL_ATTRIBUTE_TYPES}: \
 ${GENDIR}/${XMLTOHB_SP_ATTRIBUTE_TYPES}: \
 	${XMLTOHB_DUPLICATE_SCRIPT} ${GENDIR}/${XMLTOHB_EKB_ATTRIBUTE_TYPES} \
 	${GENDIR}/${XMLTOHB_CONFIG_ATTRIBUTE_TYPES}
-	${COMMON_TARGETING_REL_PATH}/${XMLTOHB_DUPLICATE_SCRIPT} \
+	${PERL_PATH} ${PERL_INC_DIRS} ${COMMON_TARGETING_REL_PATH}/${XMLTOHB_DUPLICATE_SCRIPT} \
 	$(addprefix --ekbXmlFile=,${GENDIR}/${XMLTOHB_EKB_ATTRIBUTE_TYPES}) \
 	$(addprefix --hbXmlFile=,${GENDIR}/${XMLTOHB_CONFIG_ATTRIBUTE_TYPES}) \
 	$(addprefix --fapi2Header=,${ROOTPATH}/src/include/usr/fapi2/attribute_service.H) \

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2019
+# Contributors Listed Below - COPYRIGHT 2010,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -40,9 +40,6 @@ CLEAN_TARGETS   += $(GENDIR)/hwp_id.html
 HB_FSP_RELEASE = $(GENDIR)/hb_fsp_release
 HB_AXONE_RELEASE = $(GENDIR)/hb_simics_axone_release
 
-ifndef BUILD_MINIMAL
-IMAGE_PASS_POST += cscope ctags
-endif
 IMAGE_PASS_POST += check_istep_modules
 
 # Variables used when running cppcheck tool.

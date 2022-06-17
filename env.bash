@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2021
+# Contributors Listed Below - COPYRIGHT 2010,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -49,10 +49,21 @@ if [ -n "${OPENPOWER_BUILD}" ]; then
     export SKIP_BINARY_FILES=1
     export JAILCMD=""
 else
-    export FAKEROOT=${FAKEROOT:-/opt/mcp/shared/powerpc64-gcc-20150516}
-    export CROSS_PREFIX=${CROSS_PREFIX:-${FAKEROOT}/wrappers/powerpc64-unknown-linux-gnu-}
-    export HOST_PREFIX=${HOST_PREFIX:-${FAKEROOT}/wrappers/x86_64-pc-linux-gnu-}
-    export PATH=${FAKEROOT}/wrappers:${PATH}
+    # Setup for RHEL 8 and non RHEL 8 machines:
+    RED_HAT_DIST=`sed "s/^.*release \([0-9]*\)\..*$/rh\1/" /etc/redhat-release`
+    if [[ $RED_HAT_DIST == "rh8" ]]; then
+        export RH8_BUILD=1
+        export JAILCMD=""
+        export CROSS_PREFIX=${CROSS_PREFIX:-/opt/mcp/shared/powerpc64-gcc-20190822/bin/powerpc64le-buildroot-linux-gnu-}
+        export HOST_BINUTILS_DIR=/opt/mcp/shared/host-binutils-2.31.1/
+        export HOST_PREFIX=/usr/bin/
+        export PATH=/usr/bin:${PATH}
+    else
+        export FAKEROOT=${FAKEROOT:-/opt/mcp/shared/powerpc64-gcc-20150516}
+        export CROSS_PREFIX=${CROSS_PREFIX:-${FAKEROOT}/wrappers/powerpc64-unknown-linux-gnu-}
+        export HOST_PREFIX=${HOST_PREFIX:-${FAKEROOT}/wrappers/x86_64-pc-linux-gnu-}
+        export PATH=${FAKEROOT}/wrappers:${PATH}
+    fi
 fi
 
 # Setup some global variables

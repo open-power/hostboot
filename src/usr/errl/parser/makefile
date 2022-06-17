@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2019
+# Contributors Listed Below - COPYRIGHT 2011,2022
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -25,13 +25,13 @@
 # IBM_PROLOG_END_TAG
 
 # makefile for errlparser a 32-bit x86 linux binary
-# to extract the PEL of an error log and 
-# put it in a temporary file so that the 
+# to extract the PEL of an error log and
+# put it in a temporary file so that the
 # FipS errl tool can format and display it.
 # "Pretty printing" of those error logs is the
 # function of FipS 'errl' and its plugins, not this program.
 #
-# This makefile runs 'genErrlParsers' which generates 
+# This makefile runs 'genErrlParsers' which generates
 # the Hostboot SRC parsers and the makefile to build the
 # Hostboot SRC and User Detail Data parsers
 
@@ -47,7 +47,9 @@ ERRLPARSE_TARGETS = \
     ${GENDIR}/plugins/makefile
 
 ifndef OPENPOWER_BUILD
+ifndef RH8_BUILD
     ERRL_LINK_STATIC = -m32 -static
+endif
 endif
 
 CC=$(HOST_PREFIX)g++ $(ERRL_LINK_STATIC)
@@ -107,9 +109,9 @@ clean:
 
 debug:
 	ls -l 	${GENDIR}
-	ls -l	${OBJDIR} 
+	ls -l	${OBJDIR}
 	ls -l	${IMGDIR}
-	
+
 BEAM_PASS:
 IMAGE_PASS:
 CLEAN_PASS: clean
