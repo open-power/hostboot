@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2021
+# Contributors Listed Below - COPYRIGHT 2011,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -31,6 +31,7 @@ TESTS += sbe_getsbeffdctest.H
 TESTS += sbe_memregiontest.H
 TESTS += sbe_fifo_buffer_test.H
 TESTS += sbe_psuSendMemConfigTest.H
+TESTS += sbe_psuSendCoreConfigTest.H
 
 # Common tests with runtime code
 include sbe_common_tests.mk

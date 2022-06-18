@@ -107,6 +107,7 @@ class SbePsu
         {
             SBE_CMD_CONTROL_DEADMAN_LOOP   = 0x01,
             SBE_CMD_EXIT_CACHE_CONTAINED   = 0x02,
+            SBE_CMD_CORE_CONFIG            = 0x03, //psuSendSbeCoreConfig
         };
 
         /**
@@ -234,6 +235,27 @@ class SbePsu
             SBE_EXIT_CACHE_CONTAINED_REQ_USED_REGS  = 0x07,
             // Use Reg 4 (0x1)
             SBE_EXIT_CACHE_CONTAINED_RSP_USED_REGS  = 0x01,
+        };
+
+        /**
+         * @brief non reserved word enums
+         *
+         * Shows which of the request and response msg registers are
+         * not reserved. Reserved registers do not need to be written
+         * or read.
+         *
+         * This is a 4 bit field, each bit indicates as follows:
+         * 0x1 - Reg 0 is non-reserved (read or write this reg)
+         * 0x2 - Reg 1 is non-reserved (read or write this reg)
+         * 0x4 - Reg 2 is non-reserved (read or write this reg)
+         * 0x8 - Reg 3 is non-reserved (read or write this reg)
+         */
+        enum psuCoreConfigNonReservedMsgs
+        {
+            // Use Request Reg 0,1 (0x1 + 0x2)
+            SBE_CORE_CONFIG_REQ_USED_REGS  = 0x03,
+            // Use Response Reg 4 (0x1)
+            SBE_CORE_CONFIG_RSP_USED_REGS  = 0x01,
         };
 
         /**
@@ -832,6 +854,18 @@ class SbePsu
                 uint8_t  cd7_syncFabTopoIdTable_Reserved1[6]; // mbxReg2
                 uint16_t cd7_syncFabTopoIdTable_Length; // mbxReg2
                 uint64_t cd7_syncFabTopoIdTable_Reserved2; // mbxReg3
+            } PACKED;
+
+            struct
+            {
+                uint16_t cd7_sendCoreConfig_Reserved0;
+                uint16_t cd7_sendCoreConfig_ControlFlags;
+                uint16_t cd7_sendCoreConfig_SeqID;
+                uint8_t  cd7_sendCoreConfig_CommandClass;    // Mbx Reg 0, Byte 6: 0xD1 (SBE_PSU_CLASS_CORE_STATE)
+                uint8_t  cd7_sendCoreConfig_Command;         // Mbx Reg 0, Byte 7: 0x03 (SBE_CMD_CORE_CONFIG)
+                uint64_t cd7_sendCoreConfig_CoreMask;        // mbxReg1
+                uint64_t cd7_sendCoreConfig_MbxReg2Reserved; // mbxReg2
+                uint64_t cd7_sendCoreConfig_MbxReg3Reserved; // mbxReg3
             } PACKED;
 
             struct
