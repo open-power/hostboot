@@ -201,6 +201,17 @@ namespace SBEIO
     errlHndl_t psuSendSbeMemConfig(TARGETING::Target* i_pProc);
 
     /**
+     * @brief Send Core configuration info to the SBE
+     *
+     * @param[in] i_pProc - Pointer to the PROC target that contains
+     *                      the Cores
+     *
+     * @return errlHndl_t Error log handle on failure.
+     *
+     */
+    errlHndl_t psuSendSbeCoreConfig(TARGETING::Target* i_pProc);
+
+    /**
      * @brief Get PMIC Health Check Data from the SBE
      *
      * @return errlHndl_t Error log handle on failure.

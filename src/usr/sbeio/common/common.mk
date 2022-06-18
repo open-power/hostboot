@@ -48,6 +48,7 @@ OBJS += sbe_getCapabilities.o
 OBJS += sbe_psuGetHwReg.o
 OBJS += sbe_utils.o
 OBJS += sbe_psuSendMemConfig.o
+OBJS += sbe_psuSendCoreConfig.o
 
 #Common VPATHs
 VPATH += ${ROOTPATH}/src/usr/sbeio/common

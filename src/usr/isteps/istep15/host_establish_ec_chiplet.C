@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,8 @@
 //From Import Directory (EKB Repository)
 #include    <p10_update_ec_state.H>
 
+#include <sbeio/sbeioif.H>
+
 //Namespaces
 using namespace ERRORLOG;
 using namespace TARGETING;
@@ -65,6 +67,28 @@ void* host_establish_ec_chiplet (void *io_pArgs)
 
         for (const auto & l_procChip: l_procChips)
         {
+            // ALWAYS send the core config to master and secondary SBEs
+            l_errl = SBEIO::psuSendSbeCoreConfig(l_procChip);
+            if (l_errl)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "host_establish_ec_chiplet: psuSendSbeCoreConfig failed on HUID 0x%08X. "
+                          TRACE_ERR_FMT,
+                          get_huid(l_procChip),
+                          TRACE_ERR_ARGS(l_errl));
+                ErrlUserDetailsTarget(l_procChip).addToLog(l_errl);
+                // Commit the error and FAIL this ISTEP
+                l_StepError.addErrorDetails( l_errl );
+                errlCommit( l_errl, HWPF_COMP_ID );
+                break;
+            }
+            else
+            {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "host_establish_ec_chiplet: psuSendSbeCoreConfig SUCCESS (possible UNSUPPORTED SBE COMMAND) on HUID 0x%08X. ",
+                          get_huid(l_procChip));
+            }
+
             const fapi2::Target<TARGET_TYPE_PROC_CHIP>
                 l_fapi_cpu_target(l_procChip);
 
@@ -75,7 +99,7 @@ void* host_establish_ec_chiplet (void *io_pArgs)
             if(l_errl)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "host_establish_ec_chiplet: p10_update_ec_state failed on HUID 0x%08x. "
+                          "host_establish_ec_chiplet: p10_update_ec_state failed on HUID 0x%08X. "
                           TRACE_ERR_FMT,
                           get_huid(l_procChip),
                           TRACE_ERR_ARGS(l_errl));
