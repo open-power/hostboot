@@ -381,8 +381,8 @@ void printSystem(const systemList_t & i_list)
         }
         TS_INFO("%sProc[%d] FuncCores[%d]: 0x%08X",
                 pProc->isBootProc ? "B " : "  ",
-                pProc->availableCores,
                 procId++,
+                pProc->availableCores,
                 bitString);
     }
 }
