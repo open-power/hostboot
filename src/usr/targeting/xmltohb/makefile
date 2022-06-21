@@ -204,6 +204,8 @@ GENFILES = ${XMLTOHB_TARGETS}
 
 XMLTOHB_SYSTEM_BINARIES += $(if $(CONFIG_FSP_BUILD),,simics_P10_targeting.bin.protected)
 XMLTOHB_SYSTEM_BINARIES += $(if $(CONFIG_FSP_BUILD),,simics_P10_targeting.bin.unprotected)
+XMLTOHB_SYSTEM_BINARIES += $(if $(CONFIG_FSP_BUILD),,simics_BONITO_targeting.bin.protected)
+XMLTOHB_SYSTEM_BINARIES += $(if $(CONFIG_FSP_BUILD),,simics_BONITO_targeting.bin.unprotected)
 
 XMLTOHB_SYSTEM_BINARIES += $(if $(CONFIG_FSP_BUILD),,vbu_P10_targeting.bin.protected)
 XMLTOHB_SYSTEM_BINARIES += $(if $(CONFIG_FSP_BUILD),,vbu_P10_targeting.bin.unprotected)

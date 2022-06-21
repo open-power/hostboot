@@ -144,9 +144,17 @@ WOF_ARTIFACT_LOCATION := ${HB_SIM_DEPS_PATH}/wof/${WOF_ARTIFACT_ID}/
 DEVTREE_ARTIFACT_LOCATION := ${HB_SIM_DEPS_PATH}/devtree/${DEVTREE_ARTIFACT_ID}/
 
 # Input Images
+ifeq (${MACHINE}, bonito)
+HBD_COMBO_IMG := ${BASEIMAGESDIR}/simics_BONITO_targeting.bin
+HBD_RO_IMG := ${BASEIMAGESDIR}/simics_BONITO_targeting.bin.protected
+HBD_RW_IMG := ${BASEIMAGESDIR}/simics_BONITO_targeting.bin.unprotected
+else
+# otherwise default to using P10 xml
 HBD_COMBO_IMG := ${BASEIMAGESDIR}/simics_P10_targeting.bin
 HBD_RO_IMG := ${BASEIMAGESDIR}/simics_P10_targeting.bin.protected
 HBD_RW_IMG := ${BASEIMAGESDIR}/simics_P10_targeting.bin.unprotected
+endif
+
 WOFDATA_IMG := ${call get_files_full_path, ${WOF_ARTIFACT_LOCATION}}
 OCC_IMG := ${call get_files_full_path, ${OCC_ARTIFACT_LOCATION}}
 $(info    OCC_IMG is $(OCC_IMG))
