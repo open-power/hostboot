@@ -399,13 +399,13 @@ uint64_t get_lpc_virtual_bar( void )
 void lpcForceCheckstopOnLpcErrors()
 {
     // When LPC Error(s) are seen force a checkstop with this signature:
-    // "EQ_L2_FIR[13] - NCU timed out waiting for powerbus to return data"
+    // N1_LOCAL_FIR[61] - Host detected LPC timeout
     // PRD running on the BMC (or the FSP) will then recognize this specific checkstop and handle
     // the callout appropriately
 
-    TRACFCOMP(g_trac_lpc,"LPC::lpcForceCheckstopOnLpcErrors() Setting L2 FIR MASK to only "
-              "allow bit13 through; setting ACTION0 and ACTION1 to all zeroes; then setting "
-              "bit 13 in L3 FIR to force a checkstop");
+    TRACFCOMP(g_trac_lpc,"LPC::lpcForceCheckstopOnLpcErrors() Setting N1 LOCAL FIR MASK to only "
+              "allow bit 61 through; setting ACTION0 and ACTION1 to all zeroes; then setting "
+              "bit 61 in N1 LOCAL FIR to force a checkstop");
 
     errlHndl_t l_err = nullptr;
 
@@ -415,101 +415,58 @@ void lpcForceCheckstopOnLpcErrors()
 
     const uint64_t data_all_clear    = 0x0000000000000000ull;
     const uint64_t data_all_set      = 0xFFFFFFFFFFFFFFFFull;
-    const uint64_t data_clear_bit_13 = 0xFFFBFFFFFFFFFFFFull;
-    const uint64_t data_set_bit_13   = 0x0004000000000000ull;
+    const uint64_t data_clear_bit_61 = 0xFFFFFFFFFFFFFFFBull;
+    const uint64_t data_set_bit_61   = 0x0000000000000004ull;
 
-    // Using multicast scoms since we (1) have the processor target showing this fail
-    // and (2) we can set this up on all cores, rather than just the boot core
-    const uint64_t L2_FIR_MASK_REG_MULTICAST_SCOM_WOR  = 0x6E02F005ull;
-    const uint64_t L2_FIR_MASK_REG_MULTICAST_SCOM_WAND = 0x6E02F004ull;
-    const uint64_t L2_FIR_ACTION0_REG_MULTICAST_SCOM   = 0x6E02F006ull;
-    const uint64_t L2_FIR_ACTION1_REG_MULTICAST_SCOM   = 0x6E02F007ull;
-    const uint64_t L2_FIR_REG_MULTICAST_SCOM_WOR       = 0x6E02F002ull;
+    const uint64_t N1_LOCAL_FIR_MASK_REG_SCOM_WOR  = 0x03040105ull;
+    const uint64_t N1_LOCAL_FIR_MASK_REG_SCOM_WAND = 0x03040104ull;
+    const uint64_t N1_LOCAL_FIR_ACTION0_REG_SCOM   = 0x03040106ull;
+    const uint64_t N1_LOCAL_FIR_ACTION1_REG_SCOM   = 0x03040107ull;
+    const uint64_t N1_LOCAL_FIR_REG_SCOM_WOR       = 0x03040102ull;
 
+    const size_t NUM_OPS = 5; // See 5 steps below
+    uint64_t data_array[NUM_OPS];
+    uint64_t addr_array[NUM_OPS];
+    size_t scomSize = sizeof(uint64_t);
 
-    // 1) write-OR L2 FIR MASK to disable everything
-    uint64_t data = 0;
-    size_t scomSize = sizeof(data);
+    // 1) write-OR N1 LOCAL FIR MASK to disable everything
+    data_array[0] = data_all_set;
+    addr_array[0] = N1_LOCAL_FIR_MASK_REG_SCOM_WOR;
 
-    data = data_all_set;
-    l_err = DeviceFW::deviceWrite(
-                 l_proc,
-                 &data,
-                 scomSize,
-                 DEVICE_SCOM_ADDRESS(L2_FIR_MASK_REG_MULTICAST_SCOM_WOR));
-    if (l_err)
-    {
-        // Set the error to predictive, add trace, commit the log, but keep going in the
-        // hope that we can still properly cause the checkstop
-        l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
-        l_err->collectTrace(LPC_COMP_NAME);
-        ERRORLOG::errlCommit(l_err, LPC_COMP_ID);
-    }
-
-    // Steps 2 and 3 will set ACTION0 and ACTION1 registers such that the EQ_L2_FIR[13]
+    // Steps 2 and 3 will set ACTION0 and ACTION1 registers such that the N1_LOCAL_FIR[61]
     // FIR bit will cause a checkstop
-    // 2) write ACTION0 to zero (thus clearing bit 13)
-    data = data_all_clear;
-    l_err = DeviceFW::deviceWrite(
-                 l_proc,
-                 &data,
-                 scomSize,
-                 DEVICE_SCOM_ADDRESS(L2_FIR_ACTION0_REG_MULTICAST_SCOM));
-    if (l_err)
-    {
-        // Set the error to predictive, add trace, commit the log, but keep going in the
-        // hope that we can still properly cause the checkstop
-        l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
-        l_err->collectTrace(LPC_COMP_NAME);
-        ERRORLOG::errlCommit(l_err, LPC_COMP_ID);
-    }
+    // 2) write ACTION0 to zero (thus clearing bit 61)
+    data_array[1] = data_all_clear;
+    addr_array[1] = N1_LOCAL_FIR_ACTION0_REG_SCOM;
 
-    // 3) write ACTION1 to zero (this clearing bit 13)
-    data = data_all_clear;
-    l_err = DeviceFW::deviceWrite(
-                 l_proc,
-                 &data,
-                 scomSize,
-                 DEVICE_SCOM_ADDRESS(L2_FIR_ACTION1_REG_MULTICAST_SCOM));
-    if (l_err)
-    {
-        // Set the error to predictive, add trace, commit the log, but keep going in the
-        // hope that we can still properly cause the checkstop
-        l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
-        l_err->collectTrace(LPC_COMP_NAME);
-        ERRORLOG::errlCommit(l_err, LPC_COMP_ID);
-    }
+    // 3) write ACTION1 to zero (thus clearing bit 61)
+    data_array[2] = data_all_clear;
+    addr_array[2] = N1_LOCAL_FIR_ACTION1_REG_SCOM;
 
-    // 4) write-AND L2 FIR MASK to clear bit 13 to just allow this 1 attention through
-    data = data_clear_bit_13;
-    l_err = DeviceFW::deviceWrite(
-                 l_proc,
-                 &data,
-                 scomSize,
-                 DEVICE_SCOM_ADDRESS(L2_FIR_MASK_REG_MULTICAST_SCOM_WAND));
-    if (l_err)
-    {
-        // Set the error to predictive, add trace, commit the log, but keep going in the
-        // hope that we can still properly cause the checkstop
-        l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
-        l_err->collectTrace(LPC_COMP_NAME);
-        ERRORLOG::errlCommit(l_err, LPC_COMP_ID);
-    }
+    // 4) write-AND N1 LOCAL FIR MASK to clear bit 61 to just allow this 1 attention through
+    data_array[3] = data_clear_bit_61;
+    addr_array[3] = N1_LOCAL_FIR_MASK_REG_SCOM_WAND;
 
-    // 5) write-OR FIR bit 13 to trigger checkstop
-    data = data_set_bit_13;
-    l_err = DeviceFW::deviceWrite(
-                 l_proc,
-                 &data,
-                 scomSize,
-                 DEVICE_SCOM_ADDRESS(L2_FIR_REG_MULTICAST_SCOM_WOR));
-    if (l_err)
+    // 5) write-OR N1 LOCAL FIR bit 61 to trigger checkstop
+    data_array[4] = data_set_bit_61;
+    addr_array[4] = N1_LOCAL_FIR_REG_SCOM_WOR;
+
+    for (size_t i = 0; i < NUM_OPS; i++)
     {
-        // Set the error to predictive, add trace, commit the log, but keep going in the
-        // hope that we can still properly cause the checkstop
-        l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
-        l_err->collectTrace(LPC_COMP_NAME);
-        ERRORLOG::errlCommit(l_err, LPC_COMP_ID);
+        l_err = DeviceFW::deviceWrite(
+                     l_proc,
+                     &data_array[i],
+                     scomSize,
+                     DEVICE_SCOM_ADDRESS(addr_array[i]));
+        if (l_err)
+        {
+            // Set the error to predictive, add trace, commit the log, but keep going in the
+            // hope that we can still properly cause the checkstop
+            l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+            l_err->collectTrace(LPC_COMP_NAME);
+            ERRORLOG::errlCommit(l_err, LPC_COMP_ID);
+        }
+
     }
 
     // At this point the system should checkstop, but just return back
