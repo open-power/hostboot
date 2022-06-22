@@ -508,6 +508,12 @@ errlHndl_t addOccStateControlPdrs(PdrManager& io_pdrman)
                       TYPE_OCC,
                       UTIL_FILTER_PRESENT);
 
+    std::sort(begin(targets), end(targets),
+              [](const Target* const occ1, const Target* const occ2)
+              {
+                  return getImmediateParentByAffinity(occ1)->getAttr<ATTR_ORDINAL_ID>() < getImmediateParentByAffinity(occ2)->getAttr<ATTR_ORDINAL_ID>();
+              });
+
     /* Get each OCC and add state effecter and sensor PDRs for it. */
 
     for (const auto target : targets)
@@ -539,6 +545,8 @@ errlHndl_t addOccStateControlPdrs(PdrManager& io_pdrman)
                                  ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
             break;
         }
+
+        PLDM_INF("Adding OCC state PDRs for processor 0x%08x", get_huid(parent_proc));
 
         io_pdrman.addStateEffecterPdr(target, entity,
                                       PLDM_STATE_SET_BOOT_RESTART_CAUSE,
