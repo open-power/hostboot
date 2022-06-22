@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -445,7 +445,7 @@ enum P10_HCD_CLK_CTRL_CONSTANTS
 #ifndef DFT
     HCD_CLK_REGION_ALL                          = BITS32(4, 15),
 #else
-    HCD_CLK_REGION_ALL                          = BITS32(4, 13) | BITS32(15),
+    HCD_CLK_REGION_ALL                          = BITS32(4, 13) | BIT32(15),
 #endif //DFT
     HCD_CLK_THOLD_ALL                           = BITS64SH(48, 3),
     HCD_CLK_THOLD_SL                            = BIT64SH(48),

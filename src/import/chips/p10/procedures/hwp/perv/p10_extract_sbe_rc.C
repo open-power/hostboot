@@ -353,7 +353,7 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             FAPI_INF("p10_extract_sbe_rc : SPRG0 has address with in PIBMEM range");
             pibmem_dbg_loc = (((ppe_dbg_loc - PIBMEM_ADDR_OFFSET) >> 3) + PIBMEM_SCOM_OFFSET);
 
-            for(uint32_t i = 0; i <= NUM_OF_LOCATION; i++)
+            for(uint32_t i = 0; i < NUM_OF_LOCATION; i++)
             {
                 FAPI_INF("p10_extract_sbe_rc : PIBMEM address location fetching data from:%#010lX", (pibmem_dbg_loc + i));
                 l_data32.flush<0>();

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,8 +48,8 @@ revle16(const uint16_t i_x)
     uint8_t* pix = (uint8_t*)(&i_x);
     uint8_t* prx = (uint8_t*)(&rx);
 
-    prx[0] = pix[1];
-    prx[1] = pix[0];
+    *(prx + 0) = *(pix + 1);
+    *(prx + 1) = *(pix + 0);
 #else
     rx = i_x;
 #endif
@@ -68,10 +68,10 @@ revle32(const uint32_t i_x)
     uint8_t* pix = (uint8_t*)(&i_x);
     uint8_t* prx = (uint8_t*)(&rx);
 
-    prx[0] = pix[3];
-    prx[1] = pix[2];
-    prx[2] = pix[1];
-    prx[3] = pix[0];
+    *(prx + 0) = *(pix + 3);
+    *(prx + 1) = *(pix + 2);
+    *(prx + 2) = *(pix + 1);
+    *(prx + 3) = *(pix + 0);
 #else
     rx = i_x;
 #endif
@@ -90,14 +90,14 @@ revle64(const uint64_t i_x)
     uint8_t* pix = (uint8_t*)(&i_x);
     uint8_t* prx = (uint8_t*)(&rx);
 
-    prx[0] = pix[7];
-    prx[1] = pix[6];
-    prx[2] = pix[5];
-    prx[3] = pix[4];
-    prx[4] = pix[3];
-    prx[5] = pix[2];
-    prx[6] = pix[1];
-    prx[7] = pix[0];
+    *(prx + 0) = *(pix + 7);
+    *(prx + 1) = *(pix + 6);
+    *(prx + 2) = *(pix + 5);
+    *(prx + 3) = *(pix + 4);
+    *(prx + 4) = *(pix + 3);
+    *(prx + 5) = *(pix + 2);
+    *(prx + 6) = *(pix + 1);
+    *(prx + 7) = *(pix + 0);
 #else
     rx = i_x;
 #endif
