@@ -98,7 +98,7 @@ fi
 
 # Create holding environment, build HB, and populate holding environment
 echo "#--------------------------------"
-if [ "$CHIP" == "P10" ] || [ "$CHIP" == "VPO" || "$CHIP" == "BONITO" ];then
+if [ "$CHIP" == "P10" ] || [ "$CHIP" == "VPO" ] || [ "$CHIP" == "BONITO" ];then
     echo "As things stand, when doing a P10 Standalone build, a Sandbox is "
     echo "still created because Simics' autosim depends on it."
     export SETUP_FOR_STANDALONE="1"
