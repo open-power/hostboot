@@ -46,6 +46,8 @@ namespace fapi2
     // convenience purposes.
     static const MulticastCoreSelect MCCORE_NONE =
         static_cast<MulticastCoreSelect>(0);
+    // local const due to include issues
+    const uint8_t NUM_CORES_PER_EQ = 4;
 
     /**
      * @brief plat_target_handle_t class
@@ -92,6 +94,26 @@ namespace fapi2
                              iv_multicastOp(i_op),
                              iv_coreSelect(i_coreSelect)
         {
+            if ((i_target != nullptr) && (!i_multicast))
+            {
+                if (i_target->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_CORE)
+                {
+                    const uint8_t l_chip_unit = i_target->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+                    // calculate the chip number relative to the EQ
+                    const uint8_t l_chip_unit_eq = l_chip_unit % NUM_CORES_PER_EQ;
+                    switch (l_chip_unit_eq)
+                    {
+                        // seed the iv_coreSelect with the proper multicast mask
+                        case(0): iv_coreSelect=MCCORE_0; break;
+                        case(1): iv_coreSelect=MCCORE_1; break;
+                        case(2): iv_coreSelect=MCCORE_2; break;
+                        case(3): iv_coreSelect=MCCORE_3; break;
+                        default:
+                            // Impossible, but to be safe
+                            assert(0, "plat_target_handle_t Bug must be one of the values above");
+                    }
+                }
+            }
         }
 
         /**
