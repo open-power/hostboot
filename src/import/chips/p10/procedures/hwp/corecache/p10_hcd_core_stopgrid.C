@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -92,6 +92,12 @@ p10_hcd_core_stopgrid(
     uint32_t                l_core_change_done = 0;
     uint32_t                l_regions  = i_target.getCoreSelect();
     uint8_t                 l_attr_mma_poweroff_disable = 0;
+
+#ifndef __PPE_QME
+    auto l_chip_target = i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+    fapi2::ATTR_ZERO_CORE_CHIP_Type l_zero_core_chip = 0;
+#endif
+
     fapi2::Target < fapi2::TARGET_TYPE_SYSTEM > l_sys;
     FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_SYSTEM_MMA_POWEROFF_DISABLE, l_sys, l_attr_mma_poweroff_disable ) );
 #ifdef USE_RUNN
@@ -100,6 +106,16 @@ p10_hcd_core_stopgrid(
 #endif
 
     FAPI_INF(">>p10_hcd_core_stopgrid");
+
+#ifndef __PPE_QME
+    FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_ZERO_CORE_CHIP, l_chip_target, l_zero_core_chip ) );
+
+    if (l_zero_core_chip)
+    {
+        goto fapi_try_exit;
+    }
+
+#endif
 
     // Also stop mma clocks after/with core clocks
     // not part of core_stopclocks for its pure usage at p10_stopclocks
