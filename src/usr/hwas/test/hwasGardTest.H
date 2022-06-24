@@ -366,7 +366,6 @@ typedef std::vector<uint32_t> systemBitStringList_t;
 
 void printSystem(const systemList_t & i_list)
 {
-    size_t procId = 0;
     for (const auto & pair : i_list)
     {
         auto & pProc = pair.first;
@@ -381,7 +380,7 @@ void printSystem(const systemList_t & i_list)
         }
         TS_INFO("%sProc[%d] FuncCores[%d]: 0x%08X",
                 pProc->isBootProc ? "B " : "  ",
-                procId++,
+                pProc->procId,
                 pProc->availableCores,
                 bitString);
     }
@@ -423,6 +422,7 @@ systemList_t buildSystem(FCO::fcoRestrictMetadata_t & o_fcoData,
 
         FCO::procFcoMetadata_t & thisProc = *proc;
         thisProc.isBootProc = (i == i_bootProc);
+        thisProc.procId = i;
         thisProc.availableCores = NUM_CORE_PER_CHIP;
 
         for (size_t j = 0; j < NUM_FC_PER_CHIP; j++)
@@ -468,7 +468,7 @@ systemList_t buildSystem(FCO::fcoRestrictMetadata_t & o_fcoData,
 /*
  * @brief Takes in a system and uses the bit string list provided as a way to configure PROCs and CORES based on that
  *        list.  This is useful to recreate a chaos generated system for debug or to include in the
- *        testFieldCoreOverrides function as a baseline testcases.
+ *        testFieldCoreOverrides function as a baseline testcase.
  *
  * @param[in]   systemBitStringList_t  A list of bitstrings NUM_CHIP_PER_SYSTEM long where each bitstring represents a
  *                                     single proc's cores.

@@ -149,7 +149,7 @@ void deconfigFcByFco(coreFcoMetadata_t & i_core)
 
 // Helper functions. Consider reading over applyFieldCoreOverrides first before the implementations of these which
 // follow that function.
-size_t calculateIdealRemainingUnitsPerProc(const fcoRestrictMetadata_t & i_fcoData, size_t& o_extra);
+size_t calculateIdealRemainingUnitsPerProc(fcoRestrictMetadata_t & i_fcoData, size_t& o_extra);
 size_t calculateMaxUnitsForProc(const size_t i_idealUnitsPerProc,
                                 const size_t i_availableCores,
                                 const bool   i_isLastProcInList,
@@ -163,14 +163,14 @@ size_t calculateMaxUnitsForProc(const size_t i_idealUnitsPerProc,
 //                 Core mode that means 1 CORE total.
 //             1b) FCO=0 is a special value that indicates no Field Core Overrides.
 //      2) COREs should be spread across all PROCs as evenly as possible.
-//             2a) Must always keep the CORE/FC that the SBE booted Hostboot with. Implicitly, this also means FCO
-//                 cannot deconfigure the boot PROC.
+//             2a) Must always keep the CORE/FC that the SBE booted Hostboot with.
 //             2b) FCO only considers functional cores
 //             2c) FCO does not include ECO cores, only active execution cores.
 //             2d) Cores must be deconfigured in the order that the chip team provides.
 //      3) In Fused Core mode, algorithm cannot break apart an FC.
 //      4) The FCO number is the maximum number of CORE/FCs to use in the system. So, if the number of available units
 //         is less than that then that's acceptable but should get as close as possible.
+//      5) FCO should never deconfigure a PROC. A PROC with no cores can actually be desirable in some scenarios.
 //
 // To follow these rules, the algorithm in this function is as follows:
 //    * Scale the FCO number in terms of number of COREs to remain, based on system type. This algorithm operates on
@@ -198,18 +198,6 @@ void applyFieldCoreOverrides(fcoRestrictMetadata_t& i_fcoData)
             break;
         }
 
-        // Sort the list of PROCs by least number of available cores to most. This serves a couple purposes.
-        // First, to calculate the ideal remaining units per proc they must be sorted in this order so that in cases
-        // where one or more PROCs have dramatically more or less units than another the calculation can adjust for
-        // that.
-        // Secondly, later on when reducing the number of units available to meet the FCO value the PROCs with available
-        // cores less than the ideal number are guaranteed to keep all their cores.
-        std::sort(i_fcoData.procFcoMetadataList.begin(), i_fcoData.procFcoMetadataList.end(),
-                  [](const auto & i_thisProc, const auto & i_thatProc)
-                  {
-                        return i_thisProc->availableCores < i_thatProc->availableCores;
-                  });
-
         // Given the FCO number, calculate the ideal number of remaining units per proc. Since the FCO number could be
         // anything, it's not guaranteed to be a value that evenly divides among the number of PROCs given. So, this
         // creates a need to keep track of the extra remaining units after we've determined the ideal number. With those
@@ -230,21 +218,34 @@ void applyFieldCoreOverrides(fcoRestrictMetadata_t& i_fcoData)
         const size_t idealRemainingUnitsPerProc = calculateIdealRemainingUnitsPerProc(i_fcoData,
                                                                                       extraRemainingUnitsPerProc);
 
-        // To satisfy Rule 2a, swap the boot proc with the first in the list to guarantee it has cores left. Despite the
-        // earlier sorting, this doesn't effect anything if the boot proc has significantly more/less available cores
-        // than the first proc in the list.
-        {
-            auto bootProcIt = std::find_if(i_fcoData.procFcoMetadataList.begin(),
-                                           i_fcoData.procFcoMetadataList.end(),
-                                           [](const auto & i_procData)
-                                           {
-                                              return i_procData->isBootProc;
-                                           });
-            // Caller didn't fill out the struct properly.
-            assert(bootProcIt != i_fcoData.procFcoMetadataList.end(), "applyFieldCoreOverrides(): Boot Proc could not be found.");
-            auto firstProc = i_fcoData.procFcoMetadataList.begin();
-            std::swap(*firstProc, *bootProcIt);
-        }
+        // To satisfy Rule 2a, the boot proc must always be the first in the list to guarantee it has cores left. After
+        // that, sort by least amount of available cores to most. By doing so, this will ensure that procs with the
+        // least available cores will retain all or most of those cores while procs with more lose their excess thus
+        // getting closer to a perfect Rule 2 following.
+        //
+        // Note that Hostboot's sorting algorithm is unstable which means that ties in available cores does not
+        // guarantee that elements retain their relative ordering. To solve for this, if there are procs with equal
+        // available cores then sort by a unique id (typically HUID) so that procs with equal available cores maintain
+        // a predictable order. There is no functional reason to solve this tie scenario but it eases test verification
+        // and debug.
+        std::sort(i_fcoData.procFcoMetadataList.begin(), i_fcoData.procFcoMetadataList.end(),
+                  [](const auto & i_thisProc, const auto & i_thatProc)
+                  {
+                      if (i_thisProc->isBootProc)
+                      {
+                          return true;
+                      }
+                      else if (i_thatProc->isBootProc)
+                      {
+                          return false;
+                      }
+                      else
+                      {
+                          return ((i_thisProc->availableCores < i_thatProc->availableCores)
+                                  || ((i_thisProc->availableCores == i_thatProc->availableCores)
+                                        && (i_thisProc->procId < i_thatProc->procId)));
+                      }
+                  });
 
         // For each proc reduce the number of CORE/FC units down to the ideal remaining number but if there are extra
         // beyond that then be greedy and try to keep an extra unit. By being greedy this guarantees that the algorithm
@@ -324,8 +325,7 @@ void applyFieldCoreOverrides(fcoRestrictMetadata_t& i_fcoData)
 
 // A helper function for applyFieldCoreOverrides(). It takes in the FCO metadata and gives back an ideal number of units
 // per proc as well as how many extra units are left beyond that ideal number.
-// NOTE: It is required that the procFcoMetadataList is sorted by least to most number of available cores.
-size_t calculateIdealRemainingUnitsPerProc(const fcoRestrictMetadata_t & i_fcoData, size_t & o_extra)
+size_t calculateIdealRemainingUnitsPerProc(fcoRestrictMetadata_t & i_fcoData, size_t & o_extra)
 {
     // To calculate the ideal units per proc Rule 2 says that we need to distribute the remaining units as evenly
     // as possible. Ideally all PROCs would get the same number of remaining units but that's not always going to
@@ -343,6 +343,14 @@ size_t calculateIdealRemainingUnitsPerProc(const fcoRestrictMetadata_t & i_fcoDa
     size_t ideal = remainFco / remainProc;
     // The extra units that should be divided among the PROCs to guarantee that the most amount of cores are used.
     size_t extra = remainFco % remainProc;
+
+    // Sort the list of PROCs by least number of available cores to most. By doing so, this function can "assign"
+    // cores to the PROCs with the least amount.
+    std::sort(i_fcoData.procFcoMetadataList.begin(), i_fcoData.procFcoMetadataList.end(),
+              [](const auto & i_thisProc, const auto & i_thatProc)
+              {
+                    return (i_thisProc->availableCores < i_thatProc->availableCores);
+              });
 
     // This loop will walk through the list of procs and recalculate the ideal and extra values whenever it encounters
     // a proc with available cores less than or equal to the current ideal value. Each time this recalculation happens
