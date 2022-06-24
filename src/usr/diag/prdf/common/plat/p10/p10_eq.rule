@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2021
+# Contributors Listed Below - COPYRIGHT 2020,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -327,7 +327,12 @@ rule rEQ_CHIPLET_RE_FIR
 };
 
 group gEQ_CHIPLET_RE_FIR attntype RECOVERABLE
-    filter singlebit
+    # Allow recoverable analysis of the CORE_FIRs (bits 5-8) before skiping to
+    # unit checkstop analysis (bit 2). Note that recoverable analysis will
+    # still check for the presence of the core unit checkstop and handle it
+    # properly while blaming it on the recoverable attention that failed
+    # recovery.
+    filter priority(5,6,7,8,2)
 {
     /** EQ_CHIPLET_RE_FIR[2]
      *  Active UNIT_CS attention on the EQ chiplet

@@ -805,8 +805,12 @@ group gEQ_CORE_FIR
     #   actually be due to bit 57, which indicates there is a UCS on the other
     #   core in the fused core pair. Therefore, bit 60 should only be analyzed
     #   after bit 57.
+    # - All recoverable attentions have the potential to fail recovery, which
+    #   will result in a core unit checkstop.
+    # - All core unit checkstop attentions have the potential of triggering a
+    #   system checkstop attention.
    filter priority(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,58,59,61,62,63,56,57,60),
-           cs_root_cause(3,5,8,12,22,25,32,36,38,46,47,57,60)
+           cs_root_cause(0,2,3,4,5,7,8,9,11,12,13,18,21,22,24,25,29,31,32,36,37,38,43,46,47,56,57,60)
 {
     /** EQ_CORE_FIR[0]
      *  IFU SRAM recoverable error (ICACHE parity error, e
