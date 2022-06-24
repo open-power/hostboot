@@ -166,7 +166,7 @@ namespace TARGETING
             };
 
             typedef std::map<TARGETING::TYPE, targetMetadata_t> targetData_t;
-            std::map<ATTR_ORDINAL_ID_type, targetData_t > l_procChildTargsMap;
+            std::map<ATTR_FAPI_POS_type, targetData_t > l_procChildTargsMap;
 
             targetData_t procChildData = {
                 {TYPE_DIMM,      {"DIMM",  64, maxNumTargetsPerProc(TYPE_DIMM), 0}},
@@ -220,8 +220,8 @@ namespace TARGETING
                         l_type = TYPE_L3;
                     }
 
-                    ATTR_ORDINAL_ID_type l_pos = 0;
-                    if( l_procChild->tryGetAttr<ATTR_ORDINAL_ID>(l_pos) )
+                    ATTR_FAPI_POS_type l_pos = 0;
+                    if( l_procChild->tryGetAttr<ATTR_FAPI_POS>(l_pos) )
                     {
                         // get position relative to proc
                         l_pos = l_pos % l_targetData[l_type].bitStringSizeBits;
@@ -236,7 +236,7 @@ namespace TARGETING
                 // include the cache from non-ECO cores as well
                 l_targetData[TYPE_L3].bitString |= l_targetData[TYPE_CORE].bitString;
 
-                l_procChildTargsMap[l_currentProc->getAttr<ATTR_ORDINAL_ID>()] = l_targetData;
+                l_procChildTargsMap[l_currentProc->getAttr<ATTR_FAPI_POS>()] = l_targetData;
             }
 
             // display proc bit string
@@ -251,7 +251,7 @@ namespace TARGETING
             for( auto l_procData : l_procChildTargsMap)
             {
                 // proc num
-                ATTR_ORDINAL_ID_type l_procNum = l_procData.first;
+                ATTR_FAPI_POS_type l_procNum = l_procData.first;
                 TARG_INF("PROC[%02d]:", l_procNum);
 
                 targetData_t l_childData = l_procData.second;
