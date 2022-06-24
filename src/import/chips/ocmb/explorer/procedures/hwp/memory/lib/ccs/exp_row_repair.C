@@ -315,37 +315,71 @@ fapi2::ReturnCode build_row_repair_table(const fapi2::Target<fapi2::TARGET_TYPE_
         {
             const uint64_t MAX_ROW = 1 << l_kind.iv_rows;
             const uint64_t MAX_SRANK = 1 << l_num_subrank;
+
+            // srank, BG, BA, and row address are used bit-reversed in the row repair commands,
+            // so need to reverse them to print and do boundary checking
+            fapi2::buffer<uint32_t> l_logical_data;
+            fapi2::buffer<uint32_t> l_original_data(l_entry.iv_bg);
+            mss::swizzle < 32 - ROW_REPAIR_BANK_GROUP_LEN,
+                ROW_REPAIR_BANK_GROUP_LEN,
+                31 > (l_original_data, l_logical_data);
+            const uint64_t l_logical_bg = l_logical_data;
+
+            l_original_data.flush<0>();
+            l_logical_data.flush<0>();
+            l_original_data = l_entry.iv_bank;
+            mss::swizzle < 32 - ROW_REPAIR_BANK_LEN,
+                ROW_REPAIR_BANK_LEN,
+                31 > (l_original_data, l_logical_data);
+            const uint64_t l_logical_bank = l_logical_data;
+
+            l_original_data.flush<0>();
+            l_logical_data.flush<0>();
+            l_original_data = l_entry.iv_row;
+            mss::swizzle < 32 - ROW_REPAIR_ROW_ADDR_LEN,
+                ROW_REPAIR_ROW_ADDR_LEN,
+                31 > (l_original_data, l_logical_data);
+            const uint64_t l_logical_row = l_logical_data;
+
+            l_original_data.flush<0>();
+            l_logical_data.flush<0>();
+            l_original_data = l_entry.iv_srank;
+            mss::swizzle < 32 - ROW_REPAIR_SRANK_LEN,
+                ROW_REPAIR_SRANK_LEN,
+                31 > (l_original_data, l_logical_data);
+            const uint64_t l_logical_srank = l_logical_data;
+
             FAPI_INF("Found valid row repair request in VPD for DIMM %s, DRAM %d, mrank %d, srank %d, bg %d, bank %d, row 0x%05x",
-                     mss::spd::c_str(i_target), l_entry.iv_dram, l_entry.iv_dimm_rank, l_entry.iv_srank, l_entry.iv_bg, l_entry.iv_bank,
-                     l_entry.iv_row);
+                     mss::spd::c_str(i_target), l_entry.iv_dram, l_entry.iv_dimm_rank, l_logical_srank,
+                     l_logical_bg, l_logical_bank, l_logical_row);
 
             FAPI_INF("Maxes for dimm %s: DRAM %d, mrank %d, srank %d, bg %d, bank %d, row 0x%05x",
-                     mss::spd::c_str(i_target), l_num_dram, l_kind.iv_master_ranks, l_num_subrank, MAX_BANK_GROUP, MAX_BANKS,
-                     l_kind.iv_rows);
+                     mss::spd::c_str(i_target), l_num_dram, l_kind.iv_master_ranks, l_num_subrank,
+                     MAX_BANK_GROUP, MAX_BANKS, MAX_ROW);
 
             // Do some sanity checking here
             FAPI_ASSERT((l_entry.iv_dram < l_num_dram) &&
-                        (l_entry.iv_srank < MAX_SRANK) &&
-                        (l_entry.iv_bg < MAX_BANK_GROUP) &&
-                        (l_entry.iv_bank < MAX_BANKS) &&
-                        (l_entry.iv_row < MAX_ROW),
+                        (l_logical_srank < MAX_SRANK) &&
+                        (l_logical_bg < MAX_BANK_GROUP) &&
+                        (l_logical_bank < MAX_BANKS) &&
+                        (l_logical_row < MAX_ROW),
                         fapi2::EXP_ROW_REPAIR_ENTRY_OUT_OF_BOUNDS().
                         set_DIMM_TARGET(i_target).
                         set_DRAM(l_entry.iv_dram).
                         set_DRAM_MAX(l_num_dram).
                         set_MRANK(l_dimm_rank).
-                        set_SRANK(l_entry.iv_srank).
+                        set_SRANK(l_logical_srank).
                         set_SRANK_MAX(MAX_SRANK).
-                        set_BANK_GROUP(l_entry.iv_bg).
+                        set_BANK_GROUP(l_logical_bg).
                         set_BANK_GROUP_MAX(MAX_BANK_GROUP).
-                        set_BANK(l_entry.iv_bank).
+                        set_BANK(l_logical_bank).
                         set_BANK_MAX(MAX_BANKS).
-                        set_ROW(l_entry.iv_row).
+                        set_ROW(l_logical_row).
                         set_ROW_MAX(MAX_ROW),
                         "%s SPD contained out of bounds row repair entry: DRAM: %d MAX: %d mrank %d srank %d MAX: %d"
                         "bg %d MAX: %d bank %d MAX: %d row 0x%05x MAX: 0x%05x",
-                        mss::spd::c_str(i_target), l_entry.iv_dram, l_num_dram, l_dimm_rank, l_entry.iv_srank, MAX_SRANK,
-                        l_entry.iv_bg, MAX_BANK_GROUP, l_entry.iv_bank, MAX_BANKS, l_entry.iv_row, MAX_ROW);
+                        mss::spd::c_str(i_target), l_entry.iv_dram, l_num_dram, l_dimm_rank, l_logical_srank, MAX_SRANK,
+                        l_logical_bg, MAX_BANK_GROUP, l_logical_bank, MAX_BANKS, l_logical_row, MAX_ROW);
             // Insert row repair request into list
             o_repairs_per_dimm.push_back(l_entry);
         }

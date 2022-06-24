@@ -259,8 +259,17 @@ mss::ccs::instruction_t<MC> wr_load( const mss::rank::info<MC>& i_rank_info,
                                      const fapi2::buffer<uint64_t>& i_srank_addr,
                                      const uint64_t i_delay_in_cycles)
 {
+    // Need to shift the bank address because it comes in as BA[0:2] and the wr_command function expects BA[0:1]
+    constexpr uint64_t BA0 = 61;
+    constexpr uint64_t CORRECTED_BA0 = 62;
+
+    fapi2::buffer<uint64_t> l_corrected_bank_addr;
+    l_corrected_bank_addr.template insert<CORRECTED_BA0,
+                                   TT::ARR0_DDR_BANK_0_1_LEN, BA0>(i_bank_addr);
+
     // Create Write command
-    mss::ccs::instruction_t<MC> l_inst = wr_command<MC>(i_rank_info.get_port_rank(), i_bank_addr, i_bank_group_addr);
+    mss::ccs::instruction_t<MC> l_inst = wr_command<MC>(i_rank_info.get_port_rank(), l_corrected_bank_addr,
+                                         i_bank_group_addr);
 
     // Set Sub-rank address
     set_srank_addr<MC>(i_srank_addr, l_inst);
@@ -362,12 +371,33 @@ struct repair_entry
     repair_entry( const fapi2::buffer<uint32_t>& i_buffer, const uint8_t i_dimm_rank):
         iv_valid(i_buffer.getBit<ROW_REPAIR_VALID>())
     {
+        fapi2::buffer<uint32_t> l_data;
         iv_dimm_rank = i_dimm_rank;
         i_buffer.extractToRight<ROW_REPAIR_DRAM_POS, ROW_REPAIR_DRAM_POS_LEN>(iv_dram);
-        i_buffer.extractToRight<ROW_REPAIR_SRANK, ROW_REPAIR_SRANK_LEN>(iv_srank);
-        i_buffer.extractToRight<ROW_REPAIR_BANK_GROUP, ROW_REPAIR_BANK_GROUP_LEN>(iv_bg);
-        i_buffer.extractToRight<ROW_REPAIR_BANK, ROW_REPAIR_BANK_LEN>(iv_bank);
-        i_buffer.extractToRight<ROW_REPAIR_ROW_ADDR, ROW_REPAIR_ROW_ADDR_LEN>(iv_row);
+
+        // srank, BG, BA, and row address are stored in reverse bit order in the VPD, so need to swizzle these values
+        mss::swizzle < 32 - ROW_REPAIR_SRANK_LEN,
+            ROW_REPAIR_SRANK_LEN,
+            ROW_REPAIR_SRANK + ROW_REPAIR_SRANK_LEN - 1 > (i_buffer, l_data);
+        iv_srank = l_data;
+
+        l_data.flush<0>();
+        mss::swizzle < 32 - ROW_REPAIR_BANK_GROUP_LEN,
+            ROW_REPAIR_BANK_GROUP_LEN,
+            ROW_REPAIR_BANK_GROUP + ROW_REPAIR_BANK_GROUP_LEN - 1 > (i_buffer, l_data);
+        iv_bg = l_data;
+
+        l_data.flush<0>();
+        mss::swizzle < 32 - ROW_REPAIR_BANK_LEN,
+            ROW_REPAIR_BANK_LEN,
+            ROW_REPAIR_BANK + ROW_REPAIR_BANK_LEN - 1 > (i_buffer, l_data);
+        iv_bank = l_data;
+
+        l_data.flush<0>();
+        mss::swizzle < 32 - ROW_REPAIR_ROW_ADDR_LEN,
+            ROW_REPAIR_ROW_ADDR_LEN,
+            ROW_REPAIR_ROW_ADDR + ROW_REPAIR_ROW_ADDR_LEN - 1 > (i_buffer, l_data);
+        iv_row = l_data;
     }
 
     ///
