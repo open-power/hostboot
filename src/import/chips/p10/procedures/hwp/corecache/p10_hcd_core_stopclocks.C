@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -73,9 +73,14 @@ fapi2::ReturnCode
 p10_hcd_core_stopclocks(
     const fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_OR > & i_target)
 {
+#ifndef __HOSTBOOT_MODULE
     fapi2::Target < fapi2::TARGET_TYPE_EQ | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > eq_target =
         i_target.getParent < fapi2::TARGET_TYPE_EQ | fapi2::TARGET_TYPE_MULTICAST > ();
+#else
+    auto eq_target = i_target.getParent < fapi2::TARGET_TYPE_EQ >();
+#endif
     uint32_t                l_regions  = i_target.getCoreSelect() << SHIFT32(8);
+
     fapi2::buffer<uint64_t> l_scomData = 0;
 
     FAPI_INF(">>p10_hcd_core_stopclocks");
