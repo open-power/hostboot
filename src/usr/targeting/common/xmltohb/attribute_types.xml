@@ -5838,7 +5838,6 @@
         <default>0xFFFFFFFF</default>
       </uint32_t>
     </simpleType>
-    <writeable/>
     <no_export/>
     <mrwRequired/>
   </attribute>

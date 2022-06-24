@@ -98,88 +98,6 @@ bool getVPDCollectedStatus(TARGETING::Target *i_Target)
 }
 
 /**
- * @brief This helper routine populates ordinal ids for Procs
- *        and cores
- *
- * @pre None
- *
- * @post None
- *
- * @param None
- *
- * @return None
- *
- * @retval HDAT_OTHER_COMP_ERROR
- */
-
-void hdatPopulateOrdinalId()
-{
-    HDAT_ENTER();
-    TARGETING::Target *l_pSysTarget = NULL;
-    (void) TARGETING::targetService().getTopLevelTarget(l_pSysTarget);
-
-    if(l_pSysTarget == NULL)
-    {
-      HDAT_ERR("hdatGetSystemParamters::Top Level Target not found");
-      assert(l_pSysTarget != NULL);
-    }
-
-    TARGETING::PredicateCTM l_procFilter(TARGETING::CLASS_CHIP,
-                                             TARGETING::TYPE_PROC);
-
-    TARGETING::PredicateHwas l_predHwas;
-    l_predHwas.present(true);
-
-    TARGETING::PredicatePostfixExpr l_presentProc;
-    l_presentProc.push(&l_procFilter).push(&l_predHwas).And();
-
-    TARGETING::TargetHandleList l_procList;
-
-    //Get all Procs in the system
-    TARGETING::targetService().
-                  getAssociated(l_procList, l_pSysTarget,
-                          TARGETING::TargetService::CHILD,
-                          TARGETING::TargetService::ALL, &l_presentProc);
-
-    uint32_t l_procOrdinalId = 0;
-    for (TargetHandleList::const_iterator pTarget_it = l_procList.begin();
-                pTarget_it != l_procList.end();
-                ++pTarget_it)
-    {
-        TargetHandle_t l_procTarget  = *pTarget_it;
-        l_procTarget->setAttr<TARGETING::ATTR_ORDINAL_ID>(l_procOrdinalId++);
-
-        TARGETING::PredicateCTM l_coreFilter(TARGETING::CLASS_UNIT,
-                                             TARGETING::TYPE_CORE);
-
-        TARGETING::PredicatePostfixExpr l_presentCore;
-        l_presentCore.push(&l_coreFilter).push(&l_predHwas).And();
-
-        TARGETING::TargetHandleList l_coreList;
-
-        //Get all Core in the Proc
-        TARGETING::targetService().
-                  getAssociated(l_coreList, l_procTarget,
-                          TARGETING::TargetService::CHILD,
-                          TARGETING::TargetService::ALL, &l_presentCore);
-
-        uint32_t l_coreOrdinalId = 0;
-        for (TargetHandleList::const_iterator pcoreTarget_it =
-                                                      l_coreList.begin();
-                pcoreTarget_it != l_coreList.end();
-                ++pcoreTarget_it)
-        {
-            TargetHandle_t l_coreTarget  = *pcoreTarget_it;
-            l_coreTarget->setAttr<TARGETING::ATTR_ORDINAL_ID>
-                                                      (l_coreOrdinalId++);
-        }
-         HDAT_DBG("Added Ordinal IDs for Core : %d",l_coreOrdinalId);
-    }
-     HDAT_DBG("Added Ordinal IDs Proc: %d ",l_procOrdinalId);
-     HDAT_EXIT();
-}
-
-/**
  * @brief This routine adds a new SLCA entry for specified target
  *
  * @pre None
@@ -812,8 +730,6 @@ errlHndl_t hdatConstructslcaTable(std::vector<HDAT_slcaEntry_t>
     TARGETING::Target *l_nodeTarget = (*l_nodeFilter);
     if(l_nodeTarget != NULL)
     {
-        l_nodeTarget->setAttr<TARGETING::ATTR_ORDINAL_ID>(0);
-
         //Add EV here and make SP, BP and OP as children of EV
         uint16_t l_slcaEVIndex = hdatAddSLCAEntry(l_pSystemTarget,
                                            HDAT_SLCA_FRU_TYPE_EV,l_slcaVVIndex,
@@ -840,7 +756,6 @@ errlHndl_t hdatConstructslcaTable(std::vector<HDAT_slcaEntry_t>
         hdatAddOpPanelToSLCATable(l_nodeTarget,l_slcaEVIndex,
                                                              o_hdatslcaentries);
 
-        hdatPopulateOrdinalId();
     }
     else
     {
