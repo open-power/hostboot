@@ -80,6 +80,7 @@ typedef struct procFieldCoreOverrideMetadata
 {
 
     TARGETING::TargetHandle_t target; // proc target
+    size_t procId;
     // How many COREs remain for this PROC. This should only include functional non-ECO cores.
     // This value may be modified a number of times during the FCO logic.
     size_t availableCores;
@@ -91,7 +92,7 @@ typedef struct procFieldCoreOverrideMetadata
 
     // Constructors
     procFieldCoreOverrideMetadata()
-    : target(nullptr), availableCores(0), isBootProc(false), coreCandidateList() {};
+    : target(nullptr), procId(0), availableCores(0), isBootProc(false), coreCandidateList() {};
     // Cannot copy construct or copy assign this struct since it's managing a vector of unique_ptr
     procFieldCoreOverrideMetadata(const procFieldCoreOverrideMetadata &) = delete;
     procFieldCoreOverrideMetadata& operator=(const procFieldCoreOverrideMetadata &) = delete;

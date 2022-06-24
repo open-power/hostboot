@@ -1527,6 +1527,7 @@ errlHndl_t DeconfigGard::platProcessFieldCoreOverride()
 
                 std::unique_ptr<FCO::procFcoMetadata_t> procEntry = std::make_unique<FCO::procFcoMetadata_t>();
                 procEntry->target = pProc;
+                procEntry->procId = pProc->getAttr<TARGETING::ATTR_HUID>();
                 procEntry->isBootProc = (pProc == bootProc);
                 // Get the functional NON-ECO cores for this proc, these are the candidates for the FCO algorithm to use
                 // to meet the given FCO value.

@@ -207,7 +207,8 @@ void applyFieldCoreOverrides(fcoRestrictMetadata_t& i_fcoData)
         std::sort(i_fcoData.procFcoMetadataList.begin(), i_fcoData.procFcoMetadataList.end(),
                   [](const auto & i_thisProc, const auto & i_thatProc)
                   {
-                        return i_thisProc->availableCores < i_thatProc->availableCores;
+                        return ((i_thisProc->availableCores < i_thatProc->availableCores)
+                                || ((i_thisProc->availableCores == i_thatProc->availableCores) && (i_thisProc->procId < i_thatProc->procId)));
                   });
 
         // Given the FCO number, calculate the ideal number of remaining units per proc. Since the FCO number could be
