@@ -1741,7 +1741,7 @@ namespace TARGETING
         return l_err;
     }
 
-    errlHndl_t AttrRP::mergeAttributes()
+    errlHndl_t AttrRP::mergeAttributes(const bool i_mpipl)
     {
         TRACFCOMP(g_trac_targeting, ENTER_MRK"AttrRP::mergeAttributes");
         errlHndl_t l_errl = nullptr;
@@ -1750,7 +1750,7 @@ namespace TARGETING
 
         do {
 
-        if(UTIL::assertGetToplevelTarget()->getAttr<TARGETING::ATTR_IS_MPIPL_HB>())
+        if(i_mpipl)
         {
             // No need to re-merge attributes in MPIPL. It would have been done
             // during the normal boot.

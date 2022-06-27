@@ -177,6 +177,16 @@ static void initTargeting(errlHndl_t& io_pError)
         TargetService& l_targetService = targetService();
         (void)l_targetService.init();
 
+#if defined(__HOSTBOOT_MODULE) && !defined( __HOSTBOOT_RUNTIME)
+        io_pError = TARGETING::AttrRP::mergeAttributes(l_isMpipl);
+        if(io_pError)
+        {
+            TARG_ERR("TargetService::initTargeting: failed to merge attributes");
+            io_pError->collectTrace(TARG_COMP_NAME);
+            errlCommit(io_pError, TARG_COMP_ID);
+        }
+#endif
+
         if(l_isMpipl)
         {
             // Open the permissions to be able to reset the links between
