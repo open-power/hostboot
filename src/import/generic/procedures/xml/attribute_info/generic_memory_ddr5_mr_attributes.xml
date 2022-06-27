@@ -509,7 +509,97 @@
   </attribute>
 
 <!-- MR111 attributes -->
+  <attribute>
+    <id>ATTR_MEM_DDR5_GLOBAL_DFE_GAIN</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DDR5 DFE Gain enable/disable
+    </description>
+    <default>ENABLE</default>
+    <valueType>uint8</valueType>
+    <enum>ENABLE = 0, DISABLE = 1</enum>
+    <writeable/>
+    <mssAccessorName>ddr5_global_dfe_gain</mssAccessorName>
+  </attribute>
 
+  <attribute>
+    <id>ATTR_MEM_DDR5_GLOBAL_DFE_TAP1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DDR5 DFE TAP-1 enable/disable
+    </description>
+    <default>ENABLE</default>
+    <valueType>uint8</valueType>
+    <enum>ENABLE = 0, DISABLE = 1</enum>
+    <writeable/>
+    <mssAccessorName>ddr5_global_dfe_tap1</mssAccessorName>
+  </attribute>
 
+  <attribute>
+    <id>ATTR_MEM_DDR5_GLOBAL_DFE_TAP2</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DDR5 DFE TAP-2 enable/disable
+    </description>
+    <default>ENABLE</default>
+    <valueType>uint8</valueType>
+    <enum>ENABLE = 0, DISABLE = 1</enum>
+    <writeable/>
+    <mssAccessorName>ddr5_global_dfe_tap2</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_DDR5_GLOBAL_DFE_TAP3</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DDR5 DFE TAP-3 enable/disable
+    </description>
+    <default>ENABLE</default>
+    <valueType>uint8</valueType>
+    <enum>ENABLE = 0, DISABLE = 1</enum>
+    <writeable/>
+    <mssAccessorName>ddr5_global_dfe_tap3</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_DDR5_GLOBAL_DFE_TAP4</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DDR5 DFE TAP-4 enable/disable
+    </description>
+    <default>ENABLE</default>
+    <valueType>uint8</valueType>
+    <enum>ENABLE = 0, DISABLE = 1</enum>
+    <writeable/>
+    <mssAccessorName>ddr5_global_dfe_tap4</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_DDR5_DFE_GAIN_BIAS</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DDR5 DFE gain bias
+      ARRAY[DIMM][RANK]
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <array>2 4</array>
+    <mssAccessorName>ddr5_dfe_gain_bias</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_DDR5_DFE_SIGN_BIT</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DDR5 DFE sign bit
+      ARRAY[DIMM][RANK]
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <array>2 4</array>
+    <mssAccessorName>ddr5_dfe_sign_bit</mssAccessorName>
+  </attribute>
 
 </attributes>
