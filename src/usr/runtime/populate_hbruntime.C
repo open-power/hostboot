@@ -798,6 +798,8 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
                         //Set the value of the pointer to be the physical address
                         //of the hrmor stash in the hb-hyp communication area
                         *l_pHdatPtrToHrmorStashAddr = io_start_address + l_hbTOC.entry[i].offset + HYPCOMM_STRUCT_HRMOR_OFFSET;
+                        //PHYP expects the value to be a physical address to set the upper bit
+                        *l_pHdatPtrToHrmorStashAddr |= VmmManager::FORCE_PHYS_ADDR;
 
                         TRACFCOMP( g_trac_runtime,
                                   "fill_RsvMem_hbData> HYPCOMM v address 0x%.16llX, size: %lld done",
