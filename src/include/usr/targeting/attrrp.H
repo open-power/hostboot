@@ -512,9 +512,12 @@ class AttrRP
          *        size or persistency changed retain the value from HBD
          *        partition.
          *
+         * @param[in] i_mpipl Whether system is doing a memory preserving IPL
+         *     (true) or not (false)
+         *
          * @return nullptr on success; non-nullptr on error.
          */
-        static errlHndl_t mergeAttributes();
+        static errlHndl_t mergeAttributes(bool i_mpipl);
 
 #else
         /**
