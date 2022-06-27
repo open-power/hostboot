@@ -2819,6 +2819,12 @@ fapi2::ReturnCode load_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
     load_dmem_8bit_fields(i_struct.MR52_A3, i_struct.DFE_GainBias_A3, l_data);
     FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5807a), l_data));
 
+    load_dmem_8bit_fields(i_struct.ReservedF6, i_struct.ReservedF7, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5807b), l_data));
+
+    load_dmem_8bit_fields(i_struct.ReservedF8, i_struct.ReservedF9, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5807c), l_data));
+
     load_dmem_8bit_fields(i_struct.BCW04_next, i_struct.BCW05_next, l_data);
     FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5807d), l_data));
 
@@ -3034,6 +3040,15 @@ fapi2::ReturnCode load_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
 
     load_dmem_8bit_fields(i_struct.MR52_B3, i_struct.DFE_GainBias_B3, l_data);
     FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580f0), l_data));
+
+    load_dmem_8bit_fields(i_struct.Reserved1E2, i_struct.Reserved1E3, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580f1), l_data));
+
+    load_dmem_8bit_fields(i_struct.Reserved1E4, i_struct.Reserved1E5, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580f2), l_data));
+
+    load_dmem_8bit_fields(i_struct.Reserved1E6, i_struct.Reserved1E7, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580f3), l_data));
 
     load_dmem_8bit_fields(i_struct.WR_RD_RTT_PARK_B0, i_struct.WR_RD_RTT_PARK_B1, l_data);
     FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580f4), l_data));
@@ -5123,6 +5138,8 @@ fapi2::ReturnCode load_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
     load_dmem_8bit_fields(i_struct.DisabledDB8LaneR3, i_struct.DisabledDB9LaneR3, l_data);
     FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583b3), l_data));
 
+
+
 fapi_try_exit:
     return fapi2::current_err;
 
@@ -5558,6 +5575,10 @@ fapi2::ReturnCode read_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
     io_struct.CA_Dly_Margin_B3 = l_temp8_even; // uint8_t
     io_struct.CA_Vref_Margin_B3 = l_temp8_odd; // uint8_t
 
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580f1),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.Reserved1E3 = l_temp8_odd; // uint8_t
+
     FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580f6),
                              l_temp8_even, l_temp8_odd));
     io_struct.RxClkDly_Margin_B0 = l_temp8_even; // uint8_t
@@ -5597,6 +5618,106 @@ fapi2::ReturnCode read_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
                              l_temp8_even, l_temp8_odd));
     io_struct.TxDqDly_Margin_B3 = l_temp8_even; // uint8_t
     io_struct.DeviceVref_Margin_B3 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58120),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.RCW40_ChA_D0 = l_temp8_even; // uint8_t
+    io_struct.RCW41_ChA_D0 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58121),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.RCW42_ChA_D0 = l_temp8_even; // uint8_t
+    io_struct.RCW43_ChA_D0 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58122),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.RCW44_ChA_D0 = l_temp8_even; // uint8_t
+    io_struct.RCW45_ChA_D0 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58123),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.RCW46_ChA_D0 = l_temp8_even; // uint8_t
+    io_struct.RCW47_ChA_D0 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58124),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.RCW48_ChA_D0 = l_temp8_even; // uint8_t
+    io_struct.RCW49_ChA_D0 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581a0),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.RCW40_ChA_D1 = l_temp8_even; // uint8_t
+    io_struct.RCW41_ChA_D1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581a1),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.RCW42_ChA_D1 = l_temp8_even; // uint8_t
+    io_struct.RCW43_ChA_D1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581a2),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.RCW44_ChA_D1 = l_temp8_even; // uint8_t
+    io_struct.RCW45_ChA_D1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581a3),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.RCW46_ChA_D1 = l_temp8_even; // uint8_t
+    io_struct.RCW47_ChA_D1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x581a4),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.RCW48_ChA_D1 = l_temp8_even; // uint8_t
+    io_struct.RCW49_ChA_D1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58220),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.RCW40_ChB_D0 = l_temp8_even; // uint8_t
+    io_struct.RCW41_ChB_D0 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58221),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.RCW42_ChB_D0 = l_temp8_even; // uint8_t
+    io_struct.RCW43_ChB_D0 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58222),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.RCW44_ChB_D0 = l_temp8_even; // uint8_t
+    io_struct.RCW45_ChB_D0 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58223),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.RCW46_ChB_D0 = l_temp8_even; // uint8_t
+    io_struct.RCW47_ChB_D0 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58224),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.RCW48_ChB_D0 = l_temp8_even; // uint8_t
+    io_struct.RCW49_ChB_D0 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582a0),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.RCW40_ChB_D1 = l_temp8_even; // uint8_t
+    io_struct.RCW41_ChB_D1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582a1),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.RCW42_ChB_D1 = l_temp8_even; // uint8_t
+    io_struct.RCW43_ChB_D1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582a2),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.RCW44_ChB_D1 = l_temp8_even; // uint8_t
+    io_struct.RCW45_ChB_D1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582a3),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.RCW46_ChB_D1 = l_temp8_even; // uint8_t
+    io_struct.RCW47_ChB_D1 = l_temp8_odd; // uint8_t
+
+    FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x582a4),
+                             l_temp8_even, l_temp8_odd));
+    io_struct.RCW48_ChB_D1 = l_temp8_even; // uint8_t
+    io_struct.RCW49_ChB_D1 = l_temp8_odd; // uint8_t
 
     FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58300),
                              l_temp8_even, l_temp8_odd));
@@ -6545,6 +6666,7 @@ fapi2::ReturnCode read_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
     FAPI_TRY(read_dmem_field(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x583bd),
                              l_temp16));
     io_struct.PmuInternalRev1 = l_temp16; // uint16_t
+
 
 fapi_try_exit:
     return fapi2::current_err;

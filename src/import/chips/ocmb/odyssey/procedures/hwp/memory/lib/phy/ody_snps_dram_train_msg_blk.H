@@ -48,12 +48,12 @@ typedef struct _PMU_SMB_DDR5_1D_t
     //
     // AdvTrainOpt[0]: Use same data sequence on all DQ during read training (MRR31 based)
     //     0 = Use different data sequence per DQ of a nibble (2 or 4 different sequences, depending on D5Misc[4])
-    //     1 = Use same data sequenece for all DQ of a nibble
+    //     1 = Use same data sequence for all DQ of a nibble
     //     Note: same sequence setting is applied to all nibbles
     //
-    // AdvTrainOpt[2:1]: DQ odd seed setting during read training (MRR31 based, don't care if either AdvTrainOpt[0] or D5Misc[4] is 1)
-    //     00: one bit shift  w.r.t. DQ even seed
-    //     01: two bit shift  w.r.t. DQ even seed
+    // AdvTrainOpt[2:1]: DQ odd sequence setting during read training (MRR31 based, don't care if either AdvTrainOpt[0] or D5Misc[4] is 1)
+    //     00: one bit shift  w.r.t. DQ even sequence
+    //     01: two bit shift  w.r.t. DQ even sequence
     //     10: RFU, must be 0
     //     11: RFU, must be 0
     //
@@ -61,13 +61,13 @@ typedef struct _PMU_SMB_DDR5_1D_t
     //     00: 1x burst length
     //     01: 2x burst length
     //     10: 4x burst length
-    //     11: 8x burst lenght
+    //     11: 8x burst length
     //
     // AdvTrainOpt[6:5]: Extended sequence for write training (w.r.t. AdvTrainOpt[7] setting)
     //     00: 1x burst length
     //     01: 2x burst length
     //     10: 4x burst length
-    //     11: 8x burst lenght
+    //     11: 8x burst length
     //
     // AdvTrainOpt[7] = Use RD/WR burst length twice shorter (Applicable only if MsgMisc[2] is 0, otherwise burst length is 128bits)
     //       0 = Use default RD/WR burst length of 2048bits
@@ -88,8 +88,8 @@ typedef struct _PMU_SMB_DDR5_1D_t
     //
     // MsgMisc[2] SimulationOnlyTraining
     //      0x1 = Verilog only simulation option to shorten the duration of the training steps by performing fewer iterations.
-    //                Must never be set to 1 in silicon.
-    //      0x0 = Use standard training duration.
+    //                Must never be set to 1 in silicon.  (read/write burst length during read/write/MRL training are 128bit)
+    //      0x0 = Use standard training duration. (read/write burst length during read/write/MRL training are 2048bit)
     //
     // MsgMisc[3] UsePerDeviceVrefDq
     //      0x1 = Program user characterized Vref DQ values per DDR5 DRAM device after Write Leveling. The message block VrefDqR*Nib* fields must be populated with the desired per device Vref DQs when using this option.
@@ -106,7 +106,9 @@ typedef struct _PMU_SMB_DDR5_1D_t
     //      0x1 = Do not reset DRAM during devinit (only for pstate > 0)
     //      0x0 = Reset DRAM during devinit
     //
-    // MsgMisc[7] RFU, must be zero
+    // MsgMisc[7] Link-Failure support option (If available, otherwise RFU, must be zero)
+    //      0x1 = When training error occurred, try disabling faulty DQ/DQS links instead of failing
+    //      0x0 = Default mode, fail at the first training error
     //
     // Notes:
     //
@@ -148,8 +150,8 @@ typedef struct _PMU_SMB_DDR5_1D_t
     //     1 = delta 3 for TAP2, 1 for TAP3 and TAP4 (10 iterations for TAP2, 15 for TAP3, 7 for TAP4)
     //     2 = delta 5 for TAP2, 2 for TAP3 and TAP4 (7 iterations for TAP2, 8 for TAP3, 4 for TAP4)
     //     3 = delta 15 for TAP2, 7 for TAP3, 3 for TAP 4 (3 iterations per TAP, useful for simulation)
-    // [5:4] VStepSizeX: StepSize used for Voltage is the one from RX2D_TrainOpt multiplied by VStepSizeX+1
-    // [7:6] DStepSizeX: StepSize used for Delay is the one from RX2D_TrainOpt multiplied by DStepSizeX+1
+    // [5:4] VStepSizeX: StepSize used for Voltage is the one configured from RX2D_TrainOpt multiplied by VStepSizeX+1
+    // [7:6] DStepSizeX: StepSize used for Delay is the one configured from RX2D_TrainOpt multiplied by DStepSizeX+1
     uint8_t  PhyVref;          // Byte offset 0x0c, CSR Addr 0x58006, Direction=In
     // Must be programmed with the Vref level to be used by the PHY during reads
     //
@@ -172,7 +174,9 @@ typedef struct _PMU_SMB_DDR5_1D_t
     //           the memory controller must drive dfi_reset_n=1'b1 prior to starting training
     //     0x1 = (Recommended) PHY internal registers control memreset during training, and also after training.
     //           dfi_reset_n cannot control the PHY BP_MEMRESET_L pin.
-    // D5Misc[1]: RFU, must be zero
+    // D5Misc[1]: PartialRank option (if available, DDR5 UDIMM only, otherwise RFU, must be zero)
+    //      0x1 = Support ranks populated with a subset of byte, but where even-odd pairs of ranks support all the bytes
+    //      0x0 = All ranks populated with all the bytes (typical configuration)
     // D5Misc[2]: Use_back2back_MRR
     //     0x0 = MRR read commands are spaced by 8 MCLK during read dqs training
     //     0x1 = Back-to-back MRR read commands are issued during read dqs training
@@ -182,13 +186,11 @@ typedef struct _PMU_SMB_DDR5_1D_t
     //     0x1 = Only LFSR0 is used: this is required for x16 devices in case swizzle configuration is not the same between lower and upper byte
     // D5Misc[5]: SinglePassRd2D
     //     0x0 = Use multi-pass  Rx2D training (default, recommended)
-    //     0x1 = Use single-pass Rx2D training (assumes max DQ->DQS skew of half UI, and RxClkDly may be less optimal)
+    //     0x1 = Use single-pass Rx2D training (assumes max DQ->DQS skew of half UI, and RxClkDly may be less optimal); this option cannot be used if RxDFE is enabled in a 4TAP DFE product
     // D5Misc[6]: Train also CK ANIB delay during CS/CA training
     //     0x0 = Do not change CK ANIB delay, only CS and CA ANIB delays will be set, with potential sub optimal results
     //     0x1 = CK ANIB delays will first be set to one UI, then will be adjusted to permit better optimization of CS and CA ANIB delays
-    // D5Misc[7]: Use_back2back_MRR_for_MRD
-    //     0x0 = MRR read commands are spaced by 248 MCLK during LRDIMM MRD training to meet tMRROD1 and tMRR2NOD1 constraints
-    //     0x1 = Back-to-back MRR read commands are issued during LRDIMM MRD training (using short MRR for 2N mode)
+    // D5Misc[7]: RFU, must be zero
     uint8_t  WL_ADJ;           // Byte offset 0x0e, CSR Addr 0x58007, Direction=In
     // Offset to apply at the end of Write-Leveling (in fine steps); applicable only if internal WL is disabled (i.e., when MR2[7] is 0); WL_ADJ is a sign-magnitude value: if WL_ADJ[7] is 0, WL_ADJ[6:0] is added to the TxDqsDly value found when external WL is converging, otherwise WL_ADJ[6:0] is subtracted (the maximal offset range covered is almost  +/- 2UI); see detail in training FW application note.
     uint8_t  CsTestFail;       // Byte offset 0x0f, CSR Addr 0x58007, Direction=Out
@@ -268,7 +270,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     //
     // Ranks may not contain mixed device types.
     uint8_t  UseBroadcastMR;   // Byte offset 0x18, CSR Addr 0x5800c, Direction=In
-    // Training firmware can optionally set per rank mode register values for DRAM partial array self-refresh features if desired.
+    // Training firmware can optionally set per rank mode register values when UseBroadcastMR is 0 (see note below for limitations).
     //
     //    0x0 = Use MR<0:49>_A0 for rank 0 channel A
     //          Use MR<0:49>_B0 for rank 0 channel B
@@ -293,13 +295,13 @@ typedef struct _PMU_SMB_DDR5_1D_t
     //
     // It is recommended in most DDR5 system configurations to set this to 1.
     //
-    // Note: When set to 0, only a subset of MR and RCW can be set differently between ranks and channels, mainly those related with termination and Vref setting; see details in training FW application note.
+    // Note: When set to 0, only a subset of MR and RCW can be set differently between ranks and channels, mainly those related with analogic setting, as termination and Vref setting; different setting is not allowed for logical setting, as 1N/2N mode, CL, Rd/Wr-Pre/Post-amble, DM, etc.
     //
     uint8_t  D5Quickboot;      // Byte offset 0x19, CSR Addr 0x5800c, Direction=In
     // Reserved, must be zero
     uint8_t  DisabledDbyte;    // Byte offset 0x1a, CSR Addr 0x5800d, Direction=In
     // Bitmap to indicate which Dbytes are not connected (for DByte 0 to 7):
-    // Set DisabledDbyte[i] to 1 to specify that DByte i does not need to be trained (DByte 8 and 9 can be disabled via EnabledDQs setting, however both must either enabled or disabled)
+    // Set DisabledDbyte[i] to 1 to specify that DByte i does not need to be trained (DByte 8 and 9 can be disabled via EnabledDQs setting)
     uint8_t  CATrainOpt;       // Byte offset 0x1b, CSR Addr 0x5800d, Direction=In
     // CA training option bit field:
     // [0] Enable RDIMM/LRDIMM 2D CA training (UDIMM: RFU, must be zero)
@@ -308,8 +310,8 @@ typedef struct _PMU_SMB_DDR5_1D_t
     // [4] Skip_CA13_during_CAtraining
     //     0x0 = Train CA13 during CA training
     //     0x1 = Skip CA13 during CA training
-    // [5] Enable RCD VrefCS training
-    // [6] Enable RCD VrefCA training
+    // [5] Enable RDIMM/LRDIMM 2D CS training (UDIMM: RFU, must be zero)
+    // [6] RFU, must be zero
     // [7] Use multiple patterns during CA training
     uint8_t  TX2D_DFE_Misc;    // Byte offset 0x1c, CSR Addr 0x5800e, Direction=In
     // Extra option for TX2D when DFE is set (some to speed up training, in particular for simulation):
@@ -319,8 +321,8 @@ typedef struct _PMU_SMB_DDR5_1D_t
     //     1 = delta 2 for TAP1 and TAP4, 3 for TAP2 and TAP3 (41 iterations for TAP1, 11 for TAP2, 9 for TAP3 and TAP4)
     //     2 = delta 5 for TAP1 and TAP2, 6 for TAP3, 4 for TAP4 (17 iterations for TAP1, 7 for TAP2, 5 for TAP3 and TAP4)
     //     3 = delta 40 for TAP1, 15 for TAP2, 12 for TAP3, 8 for TAP 4 (3 iterations per TAP, useful for simulation)
-    // [5:4] VStepSizeX: StepSize used for Voltage is the one from TX2D_TrainOpt multiplied by VStepSizeX+1
-    // [7:6] DStepSizeX: StepSize used for Delay is the one from TX2D_TrainOpt multiplied by DStepSizeX+1
+    // [5:4] VStepSizeX: StepSize used for Voltage is the one configured from TX2D_TrainOpt multiplied by (2^VStepSizeX)
+    // [7:6] DStepSizeX: StepSize used for Delay is the one configured from TX2D_TrainOpt multiplied by (2^DStepSizeX)
     uint8_t  RX2D_TrainOpt;    // Byte offset 0x1d, CSR Addr 0x5800e, Direction=In
     // Options for 2D read training (Note: delay step size also applicable for 1D read training):
     // [0] DFE
@@ -337,11 +339,11 @@ typedef struct _PMU_SMB_DDR5_1D_t
     //      1 = 2 LCDL delays between checked values
     //      0 = 1 LCDL delays between checked values
     // [5] Voltage Step Size Multiplier
-    //      1 = Voltage Step Size defined by TX2D_TrainOpt[2:1] is multiplied by 16
-    //      0 = Voltage Step Size defined by TX2D_TrainOpt[2:1] is not modified
+    //      1 = Voltage Step Size defined by RX2D_TrainOpt[2:1] is multiplied by 16
+    //      0 = Voltage Step Size defined by RX2D_TrainOpt[2:1] is not modified
     // [6] Delay Step Size Multiplier
-    //      1 = Delay Step Size defined by TX2D_TrainOpt[4:3] is multiplied by 16
-    //      0 = Delay Step Size defined by TX2D_TrainOpt[4:3] is not modified
+    //      1 = Delay Step Size defined by RX2D_TrainOpt[4:3] is multiplied by 16
+    //      0 = Delay Step Size defined by RX2D_TrainOpt[4:3] is not modified
     // [7] RFU, must be zero
     //
     uint8_t  TX2D_TrainOpt;    // Byte offset 0x1e, CSR Addr 0x5800f, Direction=In
@@ -919,14 +921,17 @@ typedef struct _PMU_SMB_DDR5_1D_t
     // Value to be programmed in DRAM Mode Register 52 {Channel A, Rank 3}
     uint8_t  DFE_GainBias_A3;  // Byte offset 0xf5, CSR Addr 0x5807a, Direction=In
     // Value to be programmed in DRAM Mode Register 112, 120, 128, . . .,  248 {Channel A, Rank 3}
-    uint8_t  ReservedF6;       // Byte offset 0xf6, CSR Addr 0x5807b, Direction=N/A
+    uint8_t  ReservedF6;       // Byte offset 0xf6, CSR Addr 0x5807b, Direction=In
+    // Some Advanced Rd2D options:
+    // ReservedF6[3:0]: Post optimization of RxClkC delay when non zero (see detail in training FW application note)
+    // ReservedF6[6:4]: RFU, must be zero
+    // ReservedF6[7]: When 1, during final stage of DFE optimization, considered as outside the eye the combination for which a VrefDACx become saturated (see detail in training FW application note)
+    uint8_t  ReservedF7;       // Byte offset 0xf7, CSR Addr 0x5807b, Direction=In
     // This field is reserved and must be programmed to 0x00.
-    uint8_t  ReservedF7;       // Byte offset 0xf7, CSR Addr 0x5807b, Direction=N/A
+    uint8_t  ReservedF8;       // Byte offset 0xf8, CSR Addr 0x5807c, Direction=In
     // This field is reserved and must be programmed to 0x00.
-    uint8_t  ReservedF8;       // Byte offset 0xf8, CSR Addr 0x5807c, Direction=N/A
-    // This field is reserved and must be programmed to 0x00.
-    uint8_t  ReservedF9;       // Byte offset 0xf9, CSR Addr 0x5807c, Direction=N/A
-    // This field is reserved and must be programmed to 0x00.
+    uint8_t  ReservedF9;       // Byte offset 0xf9, CSR Addr 0x5807c, Direction=In
+
     uint8_t  BCW04_next;       // Byte offset 0xfa, CSR Addr 0x5807d, Direction=In
     // Fields to exploit DB multi-context feature, enabled only if RCW05_next[7] is set to 1.
     // BCW04_next[6:0] is the value to be set into DB BCW04 (RCD RCW84) before entering self-refresh at the end of training.
@@ -1525,7 +1530,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     // Value to be programmed in DRAM Mode Register 52 {Channel B, Rank 3}
     uint8_t  DFE_GainBias_B3;  // Byte offset 0x1e1, CSR Addr 0x580f0, Direction=In
     // Value to be programmed in DRAM Mode Register 112, 120, 128, . . .,  248 {Channel B, Rank 3}
-    uint8_t  Reserved1E2;      // Byte offset 0x1e2, CSR Addr 0x580f1, Direction=N/A
+    uint8_t  Reserved1E2;      // Byte offset 0x1e2, CSR Addr 0x580f1, Direction=In
     // CA DFE training option bit fields:
     // [1:0] NbTAPm1: Number of TAP (NbTAP) to train is NbTAPm1 + 1 (TAP are trained from 1 to NbTAP)
     // [3:2] BiasStepMode: delta to use when iterating TAP BiasStep from min to max
@@ -1540,22 +1545,34 @@ typedef struct _PMU_SMB_DDR5_1D_t
     //     3 = step size of 8
     // [6] TrainDFEGain: when set, train the DFE Gain Offset
     // [7] DFEVrefEnable: when set, DFE Vref circuitry will be enabled by firmware in RW31[1] during and after CA DFE training
-    uint8_t  Reserved1E3;      // Byte offset 0x1e3, CSR Addr 0x580f1, Direction=N/A
-    // This field is reserved and must be programmed to 0x00.
-    uint8_t  Reserved1E4;      // Byte offset 0x1e4, CSR Addr 0x580f2, Direction=N/A
+    uint8_t  Reserved1E3;  // Byte offset 0x1e3, CSR Addr 0x580f1, Direction=Out
+    // Non zero if error detected during QCS/QCA training (RDIMM/LRDIMM only):
+    //       Reserved1E3[0] == 1: Error during CS training Dimm 0 Chan A
+    //       Reserved1E3[1] == 1: Error during CS training Dimm 1 Chan A
+    //       Reserved1E3[2] == 1: Error during CA training Dimm 0 Chan A
+    //       Reserved1E3[3] == 1: Error during CA training Dimm 1 Chan A
+    //       Reserved1E3[4] == 1: Error during CS training Dimm 0 Chan B
+    //       Reserved1E3[5] == 1: Error during CS training Dimm 1 Chan B
+    //       Reserved1E3[6] == 1: Error during CA training Dimm 0 Chan B
+    //       Reserved1E3[7] == 1: Error during CA training Dimm 1 Chan B
+    uint8_t  Reserved1E4;      // Byte offset 0x1e4, CSR Addr 0x580f2, Direction=In
     // Bit fields:
     // [0]: SingleBurstPDA: when set, use the single burst PDA ID enumeration method
     // [1]: DumpMR: when set, read and dump MR values after read and write training stages (only when HdtCtrl is <= 4)
     // [2]: KeepODT: when set, ODT_on / off values in MR37, MR38 and MR39 are programmed as specified in the message block during training
     // [3]: ResetIntWL: when set, MR2[7] is set to 0 during devinit
-    // [4]: ForceDPAR: when set, DPAR signal is forced to high during RCD initialization
-    // [7:5] RFU, must be 0
-    uint8_t  Reserved1E5;      // Byte offset 0x1e5, CSR Addr 0x580f2, Direction=N/A
-    // This field is reserved and must be programmed to 0x00.
-    uint8_t  Reserved1E6;      // Byte offset 0x1e6, CSR Addr 0x580f3, Direction=N/A
-    // This field is reserved and must be programmed to 0x00.
-    uint8_t  Reserved1E7;      // Byte offset 0x1e7, CSR Addr 0x580f3, Direction=N/A
-    // This field is reserved and must be programmed to 0x00.
+    // [4]: ForceDPAR: when set, DPAR signal is forced to high during RCD initialization, or RCD self-refresh exit
+    // [5] RFU, must be 0
+    // [6]: ExtendWLrangeUpperLimit: When set, avoid backoff during WL search based on WrPre setting to permit covering a larger maximal WL skew: should not be used for UDIMM, since this is impacting minimal supported WL skew; mainly useful for RDIMM/LDRIMM for which command is suffering an implicite extra delay.
+    // [7]: tDqs2DqOverwrite (debug option only): when set, non-zero VrefDq* field overwrite extracted tDQS2DQ delay associated with the corresponding nibble before when starting wr2D training
+    uint8_t  Reserved1E5;      // Byte offset 0x1e5, CSR Addr 0x580f2, Direction=In
+    // Width of delay passing region to be considered as empty during rd2D/wr2D; a non zero value can be used to filter out Vref position for which the passing delay region is too small. Same parameter used for Rd2D and Wr2D.
+    uint8_t  Reserved1E6;      // Byte offset 0x1e6, CSR Addr 0x580f3, Direction=In
+    // Width of Vref passing region to be considered as empty during rd2D/wr2D training; a non zero value can be used to filter out delay position for which the passing Vref region is too small. Same parameter used for Rd2D and Wr2D.
+    uint8_t  Reserved1E7;     // Byte offset 0x1e7, CSR Addr 0x580f3, Direction=In
+    // Extra debug information per Dbyte during Rd2D/Wr2D training (applicable only if HdtCtrl < 5):
+    // Reserved[7:4]: Number of Dbyte for which extra debug information is provided (no extra debug when 0)
+    // Reserved[3:0]: First Dbyte for which extra debug information is provided (last Dbyte is Reserved[3:0] + Reserved[7:4] - 1, no extra debug if last Dbyte is smaller than first Dbyte)
     uint8_t  WR_RD_RTT_PARK_B0; // Byte offset 0x1e8, CSR Addr 0x580f4, Direction=In
     // RTT_PARK setting for Write/Read acesses targeting Ch B Rank 0.
     //   WR_RD_RTT_PARK_B0[3:0]: Write RTT_PARK bit-map setting for non-target ranks 3 to 0, respectively (bit 0 is not used); if bit set, corresponding rank is using RTT_PARK during Write to Ch B rank 0; otherwise RTT_NOM_WR is used
@@ -1736,25 +1753,25 @@ typedef struct _PMU_SMB_DDR5_1D_t
     // RCD CW 0x3E setting, Channel A, DIMM0. Unused for UDIMM.
     uint8_t  RCW3F_ChA_D0;     // Byte offset 0x23f, CSR Addr 0x5811f, Direction=In
     // RCD CW 0x3F setting, Channel A, DIMM0. Unused for UDIMM.
-    uint8_t  RCW40_ChA_D0;     // Byte offset 0x240, CSR Addr 0x58120, Direction=In
+    uint8_t  RCW40_ChA_D0;     // Byte offset 0x240, CSR Addr 0x58120, Direction=InOut
     // RCD CW 0x40 setting, Channel A, DIMM0. Unused for UDIMM.
-    uint8_t  RCW41_ChA_D0;     // Byte offset 0x241, CSR Addr 0x58120, Direction=In
+    uint8_t  RCW41_ChA_D0;     // Byte offset 0x241, CSR Addr 0x58120, Direction=InOut
     // RCD CW 0x41 setting, Channel A, DIMM0. Unused for UDIMM.
-    uint8_t  RCW42_ChA_D0;     // Byte offset 0x242, CSR Addr 0x58121, Direction=In
+    uint8_t  RCW42_ChA_D0;     // Byte offset 0x242, CSR Addr 0x58121, Direction=InOut
     // RCD CW 0x42 setting, Channel A, DIMM0. Unused for UDIMM.
-    uint8_t  RCW43_ChA_D0;     // Byte offset 0x243, CSR Addr 0x58121, Direction=In
+    uint8_t  RCW43_ChA_D0;     // Byte offset 0x243, CSR Addr 0x58121, Direction=InOut
     // RCD CW 0x43 setting, Channel A, DIMM0. Unused for UDIMM.
-    uint8_t  RCW44_ChA_D0;     // Byte offset 0x244, CSR Addr 0x58122, Direction=In
+    uint8_t  RCW44_ChA_D0;     // Byte offset 0x244, CSR Addr 0x58122, Direction=InOut
     // RCD CW 0x44 setting, Channel A, DIMM0. Unused for UDIMM.
-    uint8_t  RCW45_ChA_D0;     // Byte offset 0x245, CSR Addr 0x58122, Direction=In
+    uint8_t  RCW45_ChA_D0;     // Byte offset 0x245, CSR Addr 0x58122, Direction=InOut
     // RCD CW 0x45 setting, Channel A, DIMM0. Unused for UDIMM.
-    uint8_t  RCW46_ChA_D0;     // Byte offset 0x246, CSR Addr 0x58123, Direction=In
+    uint8_t  RCW46_ChA_D0;     // Byte offset 0x246, CSR Addr 0x58123, Direction=InOut
     // RCD CW 0x46 setting, Channel A, DIMM0. Unused for UDIMM.
-    uint8_t  RCW47_ChA_D0;     // Byte offset 0x247, CSR Addr 0x58123, Direction=In
+    uint8_t  RCW47_ChA_D0;     // Byte offset 0x247, CSR Addr 0x58123, Direction=InOut
     // RCD CW 0x47 setting, Channel A, DIMM0. Unused for UDIMM.
-    uint8_t  RCW48_ChA_D0;     // Byte offset 0x248, CSR Addr 0x58124, Direction=In
+    uint8_t  RCW48_ChA_D0;     // Byte offset 0x248, CSR Addr 0x58124, Direction=InOut
     // RCD CW 0x48 setting, Channel A, DIMM0. Unused for UDIMM.
-    uint8_t  RCW49_ChA_D0;     // Byte offset 0x249, CSR Addr 0x58124, Direction=In
+    uint8_t  RCW49_ChA_D0;     // Byte offset 0x249, CSR Addr 0x58124, Direction=InOut
     // RCD CW 0x49 setting, Channel A, DIMM0. Unused for UDIMM.
     uint8_t  RCW4A_ChA_D0;     // Byte offset 0x24a, CSR Addr 0x58125, Direction=In
     // RCD CW 0x4A setting, Channel A, DIMM0. Unused for UDIMM.
@@ -2248,25 +2265,25 @@ typedef struct _PMU_SMB_DDR5_1D_t
     // RCD CW 0x3E setting, Channel A, DIMM1. Unused for UDIMM.
     uint8_t  RCW3F_ChA_D1;     // Byte offset 0x33f, CSR Addr 0x5819f, Direction=In
     // RCD CW 0x3F setting, Channel A, DIMM1. Unused for UDIMM.
-    uint8_t  RCW40_ChA_D1;     // Byte offset 0x340, CSR Addr 0x581a0, Direction=In
+    uint8_t  RCW40_ChA_D1;     // Byte offset 0x340, CSR Addr 0x581a0, Direction=InOut
     // RCD CW 0x40 setting, Channel A, DIMM1. Unused for UDIMM.
-    uint8_t  RCW41_ChA_D1;     // Byte offset 0x341, CSR Addr 0x581a0, Direction=In
+    uint8_t  RCW41_ChA_D1;     // Byte offset 0x341, CSR Addr 0x581a0, Direction=InOut
     // RCD CW 0x41 setting, Channel A, DIMM1. Unused for UDIMM.
-    uint8_t  RCW42_ChA_D1;     // Byte offset 0x342, CSR Addr 0x581a1, Direction=In
+    uint8_t  RCW42_ChA_D1;     // Byte offset 0x342, CSR Addr 0x581a1, Direction=InOut
     // RCD CW 0x42 setting, Channel A, DIMM1. Unused for UDIMM.
-    uint8_t  RCW43_ChA_D1;     // Byte offset 0x343, CSR Addr 0x581a1, Direction=In
+    uint8_t  RCW43_ChA_D1;     // Byte offset 0x343, CSR Addr 0x581a1, Direction=InOut
     // RCD CW 0x43 setting, Channel A, DIMM1. Unused for UDIMM.
-    uint8_t  RCW44_ChA_D1;     // Byte offset 0x344, CSR Addr 0x581a2, Direction=In
+    uint8_t  RCW44_ChA_D1;     // Byte offset 0x344, CSR Addr 0x581a2, Direction=InOut
     // RCD CW 0x44 setting, Channel A, DIMM1. Unused for UDIMM.
-    uint8_t  RCW45_ChA_D1;     // Byte offset 0x345, CSR Addr 0x581a2, Direction=In
+    uint8_t  RCW45_ChA_D1;     // Byte offset 0x345, CSR Addr 0x581a2, Direction=InOut
     // RCD CW 0x45 setting, Channel A, DIMM1. Unused for UDIMM.
-    uint8_t  RCW46_ChA_D1;     // Byte offset 0x346, CSR Addr 0x581a3, Direction=In
+    uint8_t  RCW46_ChA_D1;     // Byte offset 0x346, CSR Addr 0x581a3, Direction=InOut
     // RCD CW 0x46 setting, Channel A, DIMM1. Unused for UDIMM.
-    uint8_t  RCW47_ChA_D1;     // Byte offset 0x347, CSR Addr 0x581a3, Direction=In
+    uint8_t  RCW47_ChA_D1;     // Byte offset 0x347, CSR Addr 0x581a3, Direction=InOut
     // RCD CW 0x47 setting, Channel A, DIMM1. Unused for UDIMM.
-    uint8_t  RCW48_ChA_D1;     // Byte offset 0x348, CSR Addr 0x581a4, Direction=In
+    uint8_t  RCW48_ChA_D1;     // Byte offset 0x348, CSR Addr 0x581a4, Direction=InOut
     // RCD CW 0x48 setting, Channel A, DIMM1. Unused for UDIMM.
-    uint8_t  RCW49_ChA_D1;     // Byte offset 0x349, CSR Addr 0x581a4, Direction=In
+    uint8_t  RCW49_ChA_D1;     // Byte offset 0x349, CSR Addr 0x581a4, Direction=InOut
     // RCD CW 0x49 setting, Channel A, DIMM1. Unused for UDIMM.
     uint8_t  RCW4A_ChA_D1;     // Byte offset 0x34a, CSR Addr 0x581a5, Direction=In
     // RCD CW 0x4A setting, Channel A, DIMM1. Unused for UDIMM.
@@ -2760,25 +2777,25 @@ typedef struct _PMU_SMB_DDR5_1D_t
     // RCD CW 0x3E setting, Channel B, DIMM0. Unused for UDIMM.
     uint8_t  RCW3F_ChB_D0;     // Byte offset 0x43f, CSR Addr 0x5821f, Direction=In
     // RCD CW 0x3F setting, Channel B, DIMM0. Unused for UDIMM.
-    uint8_t  RCW40_ChB_D0;     // Byte offset 0x440, CSR Addr 0x58220, Direction=In
+    uint8_t  RCW40_ChB_D0;     // Byte offset 0x440, CSR Addr 0x58220, Direction=InOut
     // RCD CW 0x40 setting, Channel B, DIMM0. Unused for UDIMM.
-    uint8_t  RCW41_ChB_D0;     // Byte offset 0x441, CSR Addr 0x58220, Direction=In
+    uint8_t  RCW41_ChB_D0;     // Byte offset 0x441, CSR Addr 0x58220, Direction=InOut
     // RCD CW 0x41 setting, Channel B, DIMM0. Unused for UDIMM.
-    uint8_t  RCW42_ChB_D0;     // Byte offset 0x442, CSR Addr 0x58221, Direction=In
+    uint8_t  RCW42_ChB_D0;     // Byte offset 0x442, CSR Addr 0x58221, Direction=InOut
     // RCD CW 0x42 setting, Channel B, DIMM0. Unused for UDIMM.
-    uint8_t  RCW43_ChB_D0;     // Byte offset 0x443, CSR Addr 0x58221, Direction=In
+    uint8_t  RCW43_ChB_D0;     // Byte offset 0x443, CSR Addr 0x58221, Direction=InOut
     // RCD CW 0x43 setting, Channel B, DIMM0. Unused for UDIMM.
-    uint8_t  RCW44_ChB_D0;     // Byte offset 0x444, CSR Addr 0x58222, Direction=In
+    uint8_t  RCW44_ChB_D0;     // Byte offset 0x444, CSR Addr 0x58222, Direction=InOut
     // RCD CW 0x44 setting, Channel B, DIMM0. Unused for UDIMM.
-    uint8_t  RCW45_ChB_D0;     // Byte offset 0x445, CSR Addr 0x58222, Direction=In
+    uint8_t  RCW45_ChB_D0;     // Byte offset 0x445, CSR Addr 0x58222, Direction=InOut
     // RCD CW 0x45 setting, Channel B, DIMM0. Unused for UDIMM.
-    uint8_t  RCW46_ChB_D0;     // Byte offset 0x446, CSR Addr 0x58223, Direction=In
+    uint8_t  RCW46_ChB_D0;     // Byte offset 0x446, CSR Addr 0x58223, Direction=InOut
     // RCD CW 0x46 setting, Channel B, DIMM0. Unused for UDIMM.
-    uint8_t  RCW47_ChB_D0;     // Byte offset 0x447, CSR Addr 0x58223, Direction=In
+    uint8_t  RCW47_ChB_D0;     // Byte offset 0x447, CSR Addr 0x58223, Direction=InOut
     // RCD CW 0x47 setting, Channel B, DIMM0. Unused for UDIMM.
-    uint8_t  RCW48_ChB_D0;     // Byte offset 0x448, CSR Addr 0x58224, Direction=In
+    uint8_t  RCW48_ChB_D0;     // Byte offset 0x448, CSR Addr 0x58224, Direction=InOut
     // RCD CW 0x48 setting, Channel B, DIMM0. Unused for UDIMM.
-    uint8_t  RCW49_ChB_D0;     // Byte offset 0x449, CSR Addr 0x58224, Direction=In
+    uint8_t  RCW49_ChB_D0;     // Byte offset 0x449, CSR Addr 0x58224, Direction=InOut
     // RCD CW 0x49 setting, Channel B, DIMM0. Unused for UDIMM.
     uint8_t  RCW4A_ChB_D0;     // Byte offset 0x44a, CSR Addr 0x58225, Direction=In
     // RCD CW 0x4A setting, Channel B, DIMM0. Unused for UDIMM.
@@ -3272,25 +3289,25 @@ typedef struct _PMU_SMB_DDR5_1D_t
     // RCD CW 0x3E setting, Channel B, DIMM1. Unused for UDIMM.
     uint8_t  RCW3F_ChB_D1;     // Byte offset 0x53f, CSR Addr 0x5829f, Direction=In
     // RCD CW 0x3F setting, Channel B, DIMM1. Unused for UDIMM.
-    uint8_t  RCW40_ChB_D1;     // Byte offset 0x540, CSR Addr 0x582a0, Direction=In
+    uint8_t  RCW40_ChB_D1;     // Byte offset 0x540, CSR Addr 0x582a0, Direction=InOut
     // RCD CW 0x40 setting, Channel B, DIMM1. Unused for UDIMM.
-    uint8_t  RCW41_ChB_D1;     // Byte offset 0x541, CSR Addr 0x582a0, Direction=In
+    uint8_t  RCW41_ChB_D1;     // Byte offset 0x541, CSR Addr 0x582a0, Direction=InOut
     // RCD CW 0x41 setting, Channel B, DIMM1. Unused for UDIMM.
-    uint8_t  RCW42_ChB_D1;     // Byte offset 0x542, CSR Addr 0x582a1, Direction=In
+    uint8_t  RCW42_ChB_D1;     // Byte offset 0x542, CSR Addr 0x582a1, Direction=InOut
     // RCD CW 0x42 setting, Channel B, DIMM1. Unused for UDIMM.
-    uint8_t  RCW43_ChB_D1;     // Byte offset 0x543, CSR Addr 0x582a1, Direction=In
+    uint8_t  RCW43_ChB_D1;     // Byte offset 0x543, CSR Addr 0x582a1, Direction=InOut
     // RCD CW 0x43 setting, Channel B, DIMM1. Unused for UDIMM.
-    uint8_t  RCW44_ChB_D1;     // Byte offset 0x544, CSR Addr 0x582a2, Direction=In
+    uint8_t  RCW44_ChB_D1;     // Byte offset 0x544, CSR Addr 0x582a2, Direction=InOut
     // RCD CW 0x44 setting, Channel B, DIMM1. Unused for UDIMM.
-    uint8_t  RCW45_ChB_D1;     // Byte offset 0x545, CSR Addr 0x582a2, Direction=In
+    uint8_t  RCW45_ChB_D1;     // Byte offset 0x545, CSR Addr 0x582a2, Direction=InOut
     // RCD CW 0x45 setting, Channel B, DIMM1. Unused for UDIMM.
-    uint8_t  RCW46_ChB_D1;     // Byte offset 0x546, CSR Addr 0x582a3, Direction=In
+    uint8_t  RCW46_ChB_D1;     // Byte offset 0x546, CSR Addr 0x582a3, Direction=InOut
     // RCD CW 0x46 setting, Channel B, DIMM1. Unused for UDIMM.
-    uint8_t  RCW47_ChB_D1;     // Byte offset 0x547, CSR Addr 0x582a3, Direction=In
+    uint8_t  RCW47_ChB_D1;     // Byte offset 0x547, CSR Addr 0x582a3, Direction=InOut
     // RCD CW 0x47 setting, Channel B, DIMM1. Unused for UDIMM.
-    uint8_t  RCW48_ChB_D1;     // Byte offset 0x548, CSR Addr 0x582a4, Direction=In
+    uint8_t  RCW48_ChB_D1;     // Byte offset 0x548, CSR Addr 0x582a4, Direction=InOut
     // RCD CW 0x48 setting, Channel B, DIMM1. Unused for UDIMM.
-    uint8_t  RCW49_ChB_D1;     // Byte offset 0x549, CSR Addr 0x582a4, Direction=In
+    uint8_t  RCW49_ChB_D1;     // Byte offset 0x549, CSR Addr 0x582a4, Direction=InOut
     // RCD CW 0x49 setting, Channel B, DIMM1. Unused for UDIMM.
     uint8_t  RCW4A_ChB_D1;     // Byte offset 0x54a, CSR Addr 0x582a5, Direction=In
     // RCD CW 0x4A setting, Channel B, DIMM1. Unused for UDIMM.
