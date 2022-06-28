@@ -930,4 +930,27 @@
 
 <!-- MR111 errors -->
 
+<!-- MR112 errors -->
+
+  <hwpError>
+    <rc>RC_MSS_DDR5_MR112_BAD_DFE_GAIN_BIAS</rc>
+    <description>
+       A bad DFE gain bias was passed to MR112 (or above)
+    </description>
+    <ffdc>MAX</ffdc>
+    <ffdc>RANK</ffdc>
+    <ffdc>VALUE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_IN_ERROR</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
+
 </hwpErrors>

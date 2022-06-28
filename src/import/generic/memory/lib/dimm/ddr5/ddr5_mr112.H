@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/generic/memory/lib/dimm/ddr5/ddr5_mr11.H $         */
+/* $Source: src/import/generic/memory/lib/dimm/ddr5/ddr5_mr112.H $        */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -25,8 +25,8 @@
 // EKB-Mirror-To: hostboot
 
 ///
-/// @file ddr5_mr11.H
-/// @brief Run and manage the DDR5 MR11 loading
+/// @file ddr5_mr112.H
+/// @brief Run and manage the DDR5 MR112 loading
 ///
 // *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
@@ -34,8 +34,8 @@
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
-#ifndef _GENERIC_DDR5_MR11_H_
-#define _GENERIC_DDR5_MR11_H_
+#ifndef _GENERIC_DDR5_MR112_H_
+#define _GENERIC_DDR5_MR112_H_
 
 #include <fapi2.H>
 
@@ -53,31 +53,34 @@ namespace ddr5
 {
 
 ///
-/// @brief Data structure for DDR5 MR11
+/// @brief Data structure for DDR5 MR112
 /// @tparam MC the memory controller type
+/// @note This same style of MR data is used for MR112, MR120... and can be repurposed for those MR's
 ///
 template<mss::mc_type MC>
-class mr11_data
+class mr112_data
 {
     public:
         // Needed as we need to know what MR for the CCS instruction created by the lab tooling
-        static constexpr uint64_t iv_mr = 11;
+        static constexpr uint64_t iv_mr = 112;
 
         ///
-        /// @brief mr11_data ctor
+        /// @brief mr112_data ctor
         /// @param[in] a fapi2::TARGET_TYPE_DIMM target
         /// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
         ///
-        mr11_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc )
+        mr112_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc )
         {
-            FAPI_TRY( mss::attr::get_ddr5_dram_vrefca(i_target, iv_vrefca_value),
-                      "Error in ddr5::mr11_data()" );
+            FAPI_TRY( mss::attr::get_ddr5_dfe_gain_bias(i_target, iv_dfe_gain_bias),
+                      "Error in ddr5::mr112_data()" );
+            FAPI_TRY( mss::attr::get_ddr5_dfe_sign_bit(i_target, iv_dfe_sign_bit),
+                      "Error in ddr5::mr112_data()" );
 
             o_rc = fapi2::FAPI2_RC_SUCCESS;
             return;
         fapi_try_exit:
             o_rc = fapi2::current_err;
-            FAPI_ERR(TARGTIDFORMAT " unable to get attributes for ddr5::mr11", TARGTID);
+            FAPI_ERR(TARGTIDFORMAT " unable to get attributes for ddr5::mr112", TARGTID);
             return;
         }
 
@@ -85,52 +88,27 @@ class mr11_data
         /// @brief Default constructor
         /// @note Default constructor is defined to allow for the use of STL data structures
         ///
-        mr11_data() = default;
+        mr112_data() = default;
 
         ///
-        /// @brief Checks to ensure the DRAM is in bounds
-        /// @param[in] a fapi2::TARGET_TYPE_DIMM target
-        /// @param[in] i_dram the value to check
-        /// @return FAPI2_RC_SUCCESS if and only if ok
-        ///
-        fapi2::ReturnCode check_dram(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                     const uint8_t i_dram) const
-        {
-            constexpr uint64_t MAX = 19;
-            FAPI_ASSERT( (i_dram <= MAX),
-                         fapi2::MSS_DDR5_MR_BAD_DRAM()
-                         .set_DIMM_IN_ERROR(i_target)
-                         .set_MAX(MAX)
-                         .set_MR(11)
-                         .set_DRAM(i_dram),
-                         TARGTIDFORMAT " DDR5 MR11. Bad dram input: %u <= %u", TARGTID, i_dram, MAX);
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief Checks to ensure the VREF for a specific rank and DRAM is in bounds
+        /// @brief Checks to ensure the DFE gain bias for a specific rank is in bounds
         /// @param[in] a fapi2::TARGET_TYPE_DIMM target
         /// @param[in] i_rank the rank
-        /// @param[in] i_dram the dram
-        /// @param[in] i_vref the vref value to be checked
+        /// @param[in] i_value the value to be checked
         /// @return FAPI2_RC_SUCCESS if and only if ok
         ///
-        fapi2::ReturnCode check_vref_value(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                           const uint64_t i_rank,
-                                           const uint8_t i_dram,
-                                           const uint8_t i_vref) const
+        fapi2::ReturnCode check_gain_bias(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                          const uint64_t i_rank,
+                                          const uint8_t i_value) const
         {
-            constexpr uint64_t MAX = 0b01111101;
-            FAPI_ASSERT( (i_vref <= MAX),
-                         fapi2::MSS_DDR5_MR11_BAD_VREFCA()
+            constexpr uint64_t MAX = 0b11;
+            FAPI_ASSERT( (i_value <= MAX),
+                         fapi2::MSS_DDR5_MR112_BAD_DFE_GAIN_BIAS()
                          .set_DIMM_IN_ERROR(i_target)
                          .set_MAX(MAX)
                          .set_RANK(i_rank)
-                         .set_DRAM(i_dram),
-                         TARGTIDFORMAT " DDR5 MR11. rank%u, dram:%u. Bad VREFCA input: %u", TARGTID, i_rank, i_dram, i_vref );
+                         .set_VALUE(i_value),
+                         TARGTIDFORMAT " DDR5 MR112. rank%u. Bad DFE gain bias input: %u <= ", TARGTID, i_rank, i_value );
 
             return fapi2::FAPI2_RC_SUCCESS;
         fapi_try_exit:
@@ -141,36 +119,25 @@ class mr11_data
         /// @brief Assembles the MR based upon the passed in rank info and DRAM number
         /// @param[in] i_rank_info the rank information class
         /// @param[out] o_mr_data the mode register OP data in [7:0] format
-        /// @param[in] i_dram_number the DRAM number - not used for MR11
+        /// @param[in] i_dram_number the DRAM number - not used for MR112
         /// @return FAPI2_RC_SUCCESS if and only if ok
-        /// @note DRAM number is not used for MR11 but is kept to keep the interface common across all MR
+        /// @note DRAM number is not used for MR112 but is kept to keep the interface common across all MR
         ///
         fapi2::ReturnCode assemble_data(const mss::rank::info<MC>& i_rank_info,
                                         uint8_t& o_mr_data,
                                         const uint8_t i_dram_number = 0) const
         {
-            FAPI_TRY(check_dram(i_rank_info.get_dimm_target(), i_dram_number));
             // Note: not checking the rank input as it is already checked by the rank info class
-            FAPI_TRY(check_vref_value(i_rank_info.get_dimm_target(), i_rank_info.get_dimm_rank(), i_dram_number,
-                                      iv_vrefca_value[i_rank_info.get_dimm_rank()][i_dram_number]));
+            const auto l_dimm_rank = i_rank_info.get_dimm_rank();
+            fapi2::buffer<uint8_t> l_data;
 
-            o_mr_data = iv_vrefca_value[i_rank_info.get_dimm_rank()][i_dram_number];
+            // Checks the gain bias
+            FAPI_TRY(check_gain_bias(i_rank_info.get_dimm_target(), l_dimm_rank, iv_dfe_gain_bias[l_dimm_rank]));
 
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
+            l_data . template writeBit<SIGN>(iv_dfe_sign_bit[l_dimm_rank])
+            . template insertFromRight<BIAS, BIAS_LEN>(iv_dfe_gain_bias[l_dimm_rank]);
 
-        ///
-        /// @brief Displays the information that makes up the MR
-        /// @param[in] i_rank_info the rank on which to operate
-        /// @param[in] i_dram_number the DRAM on which to operate - not used for MR11 but included to keep the API common
-        /// @return FAPI2_RC_SUCCESS if and only if ok
-        ///
-        fapi2::ReturnCode display(const mss::rank::info<MC>& i_rank_info, const uint8_t i_dram_number = 0) const
-        {
-            FAPI_TRY(check_dram(i_rank_info.get_dimm_target(), i_dram_number));
-            // Note: not checking the rank input as it is already checked by the rank info class
-            this->display(i_rank_info.get_dimm_target(), i_rank_info.get_dimm_rank(), i_dram_number);
+            o_mr_data = l_data;
 
             return fapi2::FAPI2_RC_SUCCESS;
         fapi_try_exit:
@@ -178,10 +145,23 @@ class mr11_data
         }
 
         ///
+        /// @brief Displays the information that makes up the MR
+        /// @param[in] i_rank_info the rank on which to operate
+        /// @param[in] i_dram_number the DRAM on which to operate - not used for MR112 but included to keep the API common
+        /// @return FAPI2_RC_SUCCESS if and only if ok
+        ///
+        fapi2::ReturnCode display(const mss::rank::info<MC>& i_rank_info, const uint8_t i_dram_number = 0) const
+        {
+            // Note: not checking the rank input as it is already checked by the rank info class
+            this->display(i_rank_info.get_dimm_target(), i_rank_info.get_dimm_rank());
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
         /// @brief Reads in the MR information into this data class
-        /// @param[in] i_rank_info the rank on which to operate - unused for MR11 but keeping to match existing API
+        /// @param[in] i_rank_info the rank on which to operate - unused for MR112 but keeping to match existing API
         /// @param[in] i_mr_data the mode register OP data in [7:0] format
-        /// @param[in] i_dram_number the DRAM on which to operate - not used for MR11 but included to keep the API common
+        /// @param[in] i_dram_number the DRAM on which to operate - not used for MR112 but included to keep the API common
         /// @return FAPI2_RC_SUCCESS if and only if ok
         /// @note This can be used for decoding mode register reads
         ///
@@ -189,33 +169,46 @@ class mr11_data
                                          const uint8_t i_mr_data,
                                          const uint8_t i_dram_number = 0)
         {
-            FAPI_TRY(check_dram(i_rank_info.get_dimm_target(), i_dram_number));
             // Note: not checking the rank input as it is already checked by the rank info class
-            FAPI_TRY(check_vref_value(i_rank_info.get_dimm_target(), i_rank_info.get_dimm_rank(), i_dram_number, i_mr_data));
+            const auto l_dimm_rank = i_rank_info.get_dimm_rank();
+            const fapi2::buffer<uint8_t> l_data(i_mr_data);
+            uint8_t l_gain_bias_field = 0;
+            iv_dfe_sign_bit[l_dimm_rank] = l_data . template getBit<SIGN>();
+            l_data . template extractToRight<BIAS, BIAS_LEN>(l_gain_bias_field);
 
-            iv_vrefca_value[i_rank_info.get_dimm_rank()][i_dram_number] = i_mr_data;
+            // Checks the gain bias
+            FAPI_TRY(check_gain_bias(i_rank_info.get_dimm_target(), l_dimm_rank, l_gain_bias_field));
+            iv_dfe_gain_bias[l_dimm_rank] = l_gain_bias_field;
+
+            return fapi2::FAPI2_RC_SUCCESS;
         fapi_try_exit:
             return fapi2::current_err;
         }
 
-        // All 8 bits are used, no need for bit enumerators
-        uint8_t iv_vrefca_value[mr::ATTR_RANKS][mr::ATTR_DRAM] = {};
+        enum
+        {
+            BIAS = 5,
+            BIAS_LEN = 3,
+            SIGN = 4,
+        };
+
+        uint8_t iv_dfe_gain_bias[mr::ATTR_RANKS] = {};
+        // Note: per JEDEC, positive is a 0, negative is a 1
+        // Think 2's complement
+        uint8_t iv_dfe_sign_bit[mr::ATTR_RANKS] = {};
 
     private:
 
         ///
         /// @brief Displays the information that makes up the MR
         /// @param[in] a fapi2::TARGET_TYPE_DIMM target
-        /// @param[in] i_rank the input rank to print
-        /// @param[in] i_dram_number the input DRAM number
+        /// @param[in] i_dimm_rank the input rank to print
         ///
-        void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                     const uint64_t i_rank,
-                     const uint8_t i_dram_number) const
+        void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, const uint64_t i_dimm_rank) const
         {
             FAPI_INF(TARGTIDFORMAT
-                     " DDR5 MR11. rank%u, DRAM%u VREFCA: 0x%02",
-                     TARGTID, i_rank, i_dram_number, iv_vrefca_value[i_rank][i_dram_number]);
+                     " DDR5 MR112 Rank%u. Gain Bias:%u Sign Bit:%u",
+                     TARGTID, i_dimm_rank, iv_dfe_gain_bias[i_dimm_rank], iv_dfe_sign_bit[i_dimm_rank]);
         }
 
 };

@@ -761,8 +761,9 @@
       DDR5 DFE sign bit
       ARRAY[DIMM][RANK]
     </description>
-    <initToZero></initToZero>
+    <default>POSITIVE</default>
     <valueType>uint8</valueType>
+    <enum>POSITIVE = 0, NEGATIVE = 1</enum>
     <writeable/>
     <array>2 4</array>
     <mssAccessorName>ddr5_dfe_sign_bit</mssAccessorName>
