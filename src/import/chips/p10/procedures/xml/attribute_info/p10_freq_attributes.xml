@@ -168,6 +168,36 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ_ORIGINAL</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    The system-wide minimum frequency of the core mesh clock that was originally
+    calculated on first boot, without any overrides, as the floor frequency across
+    all chips in the system. Once this attribute is set upon the first boot,
+    subsequent booting will not change it so that the machine can be restored to
+    the original settings.
+  </description>
+  <valueType>uint32</valueType>
+  <initToZero/>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ_ORIGINAL</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    The system-wide maximum frequency of the core mesh clock that was originally
+    calculated on first boot, without any overrides, as the highest ceiling
+    frequency across all chips in the system. Once this attribute is set upon
+    the first boot, subsequent booting will not change it so that the machine
+    can be restored to the original settings.
+  </description>
+  <valueType>uint32</valueType>
+  <initToZero/>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_FREQ_CORE_BOOT_MHZ</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>

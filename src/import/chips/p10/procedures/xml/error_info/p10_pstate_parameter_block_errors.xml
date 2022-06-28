@@ -745,6 +745,20 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <rc>RC_SET_SYS_FREQ_ORIGINAL_CORRUPTION</rc>
+    <description>The retaining attributes that hold the original values of the
+    core floor and the core ceiling frequencies are bad.  They should have
+    non-zero values.
+    </description>
+    <ffdc>ORIG_CEILING_FREQ</ffdc>
+    <ffdc>ORIG_FLOOR_FREQ</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
     <rc>RC_MULTINODE_FREQ_MISMATCH</rc>
     <description> There is a mismatch in the UltraTurbo frequency values between
     different nodes
