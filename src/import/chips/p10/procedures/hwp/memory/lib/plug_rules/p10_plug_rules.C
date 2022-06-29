@@ -146,6 +146,69 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Enforce the plug-rules for planar system
+/// @param[in] i_target FAPI2 target (mem port)
+/// @param[in] i_is_planar a uint8_t ATTR_MEM_MRW_IS_PLANAR attr
+/// @return fapi2::FAPI2_RC_SUCCESS if okay, otherwise a MSS_PLUG_RULE error code
+///
+fapi2::ReturnCode enforce_planar_plug_rules(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const uint8_t i_is_planar)
+{
+    if ( i_is_planar == fapi2::ENUM_ATTR_MEM_MRW_IS_PLANAR_FALSE)
+    {
+        FAPI_INF("%s not a planar system so skipping planar based plug rules", mss::c_str(i_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
+    {
+        fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+        mss::dimm::kind<mss::mc_type::EXPLORER> l_kind(l_dimm, l_rc);
+        FAPI_TRY(l_rc, "%s Failed to create dimm::kind instance", mss::c_str(i_target));
+
+        // Make sure the DRAM generation is DDR4
+        FAPI_ASSERT( (l_kind.iv_dram_generation == fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR4),
+                     fapi2::MSS_PLUG_RULES_PLANAR_DRAM_GEN()
+                     .set_DRAM_GEN(l_kind.iv_target)
+                     .set_DIMM_TARGET(l_dimm),
+                     "Invalid DRAM generation (%d) plugged in for planar system %s",
+                     l_kind.iv_dram_generation, mss::c_str(l_dimm) );
+
+        // Make sure the DRAM type is UDIMM or RDIMM
+        FAPI_ASSERT( ((l_kind.iv_dimm_type == fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_UDIMM) ||
+                      (l_kind.iv_dimm_type == fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_RDIMM)),
+                     fapi2::MSS_PLUG_RULES_PLANAR_DRAM_DIMM_TYPE()
+                     .set_DIMM_TYPE(l_kind.iv_dimm_type)
+                     .set_DIMM_TARGET(l_dimm),
+                     "Invalid DIMM type (%d) plugged in for planar system %s",
+                     l_kind.iv_dimm_type, mss::c_str(l_dimm) );
+
+        // Make sure the DRAM width is x4 or x8
+        FAPI_ASSERT( ((l_kind.iv_dram_width == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4) ||
+                      (l_kind.iv_dram_width == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8)),
+                     fapi2::MSS_PLUG_RULES_PLANAR_DRAM_WIDTH()
+                     .set_DRAM_WIDTH(l_kind.iv_dram_width)
+                     .set_DIMM_TARGET(l_dimm),
+                     "Invalid DRAM width DIMM (%d) plugged in for planar system %s",
+                     l_kind.iv_dram_width, mss::c_str(l_dimm));
+
+        // Make sure the DRAM density is 8G or 16G
+        FAPI_ASSERT( ((l_kind.iv_dram_density == fapi2::ENUM_ATTR_MEM_EFF_DRAM_DENSITY_8G) ||
+                      (l_kind.iv_dram_density == fapi2::ENUM_ATTR_MEM_EFF_DRAM_DENSITY_16G)),
+                     fapi2::MSS_PLUG_RULES_PLANAR_DRAM_DENSITY()
+                     .set_DRAM_DENSITY(l_kind.iv_dram_density)
+                     .set_DIMM_TARGET(l_dimm),
+                     "Invalid DRAM density DIMM (%d) plugged in for planar system %s",
+                     l_kind.iv_dram_density, mss::c_str(l_dimm));
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Enforce the plug-rules we can do before mss_freq
 /// @param[in] i_target FAPI2 target (proc chip)
 /// @return fapi2::FAPI2_RC_SUCCESS if okay, otherwise a MSS_PLUG_RULE error code
@@ -209,6 +272,9 @@ fapi_try_exit:
 fapi2::ReturnCode enforce_post_eff_config(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
 {
     uint8_t l_ignore_plug_rules = 0;
+    uint8_t l_is_planar = 0;
+
+    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
 
     // If there are no DIMM, we can just get out.
     if (mss::count_dimm(i_target) == 0)
@@ -225,6 +291,11 @@ fapi2::ReturnCode enforce_post_eff_config(const fapi2::Target<fapi2::TARGET_TYPE
         FAPI_INF("%s Attribute set to ignore plug rule checking", mss::c_str(i_target));
         return fapi2::FAPI2_RC_SUCCESS;
     }
+
+    // Enforce planar system plug rules
+    FAPI_TRY( mss::attr::get_mem_mrw_is_planar(l_ocmb, l_is_planar) );
+    FAPI_INF("%s Enforcing planar plug rules checking", mss::c_str(i_target));
+    FAPI_TRY( enforce_planar_plug_rules(i_target, l_is_planar) );
 
 fapi_try_exit:
     return fapi2::current_err;

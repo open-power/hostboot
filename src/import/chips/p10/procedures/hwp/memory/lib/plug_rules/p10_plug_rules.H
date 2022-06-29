@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,6 +57,15 @@ fapi2::ReturnCode check_mds(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_targe
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
 fapi2::ReturnCode check_mds_media_controller(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+
+///
+/// @brief Enforce the plug-rules for planar system
+/// @param[in] i_target FAPI2 target (mem port)
+/// @param[in] i_is_planar a uint8_t ATTR_MEM_MRW_IS_PLANAR attr
+/// @return fapi2::FAPI2_RC_SUCCESS if okay, otherwise a MSS_PLUG_RULE error code
+///
+fapi2::ReturnCode enforce_planar_plug_rules(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const uint8_t i_is_planar);
 
 ///
 /// @brief Enforce the plug-rules we can do before mss_freq

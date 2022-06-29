@@ -1725,6 +1725,86 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_PLUG_RULES_PLANAR_DRAM_GEN</rc>
+    <description>
+        DRAM generation other than DDR4 detected
+    </description>
+    <ffdc>DRAM_GEN</ffdc>
+    <ffdc>DIMM_TARGET</ffdc>
+    <callout>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_PLUG_RULES_PLANAR_DRAM_DIMM_TYPE</rc>
+    <description>
+        DRAM type other than UDIMM/RDIMM detected
+    </description>
+    <ffdc>DIMM_TYPE</ffdc>
+    <ffdc>DIMM_TARGET</ffdc>
+    <callout>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_PLUG_RULES_PLANAR_DRAM_WIDTH</rc>
+    <description>
+        DRAM width other than X4/X8 detected
+    </description>
+    <ffdc>DRAM_WIDTH</ffdc>
+    <ffdc>DIMM_TARGET</ffdc>
+    <callout>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_PLUG_RULES_PLANAR_DRAM_DENSITY</rc>
+    <description>
+        DRAM density other than 8G/16G detected
+    </description>
+    <ffdc>DRAM_DENSITY</ffdc>
+    <ffdc>DIMM_TARGET</ffdc>
+    <callout>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_PLUG_RULES_INVALID_DIMM_SIZE_MIX</rc>
     <description>
         Memory addressing setup requires DIMMs under an OMI channel pair to be of equal size.
