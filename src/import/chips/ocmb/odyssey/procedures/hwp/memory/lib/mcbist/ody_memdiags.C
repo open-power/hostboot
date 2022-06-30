@@ -65,12 +65,9 @@ fapi2::ReturnCode mask_program_complete<mss::mc_type::ODYSSEY>(
     fapi2::buffer<uint64_t> l_fir_mask;
 
     // Mask the FIR
-    // Todo: ZEN:MST-1660 Implement FIR_MASK_REG
-    //FAPI_TRY( mss::getScom(i_target, TT::FIRQ_MASK_REG, o_fir_mask_save) );
-    l_fir_mask = o_fir_mask_save;
     l_fir_mask.setBit<TT::MCB_PROGRAM_COMPLETE>();
-    // Todo: ZEN:MST-1660 Implement FIR_MASK_REG
-    //FAPI_TRY( mss::putScom(i_target, TT::FIRQ_MASK_REG, l_fir_mask) );
+    o_fir_mask_save = l_fir_mask;
+    FAPI_TRY( mss::putScom(i_target, scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRMASK_WO_OR, l_fir_mask) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -92,13 +89,13 @@ fapi2::ReturnCode clear_and_restore_program_complete<mss::mc_type::ODYSSEY>(
     fapi2::buffer<uint64_t> l_fir;
 
     // Clear the FIR
-    FAPI_TRY( mss::getScom(i_target, TT::FIRQ_REG, l_fir) );
-    l_fir.clearBit<TT::MCB_PROGRAM_COMPLETE>();
+    // The FIRQ register for Odyssey has a write clear functionality
+    // Any bit set to a 1 will clear out the FIR in this register
+    l_fir.setBit<TT::MCB_PROGRAM_COMPLETE>();
     FAPI_TRY( mss::putScom(i_target, TT::FIRQ_REG, l_fir) );
 
     // Then restore the mask value
-    // Todo: ZEN:MST-1660 Implement FIR_MASK_REG
-    //FAPI_TRY( mss::putScom(i_target, TT::FIRQ_MASK_REG, i_fir_mask_save) );
+    FAPI_TRY( mss::putScom(i_target, scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRMASK_RW_WCLEAR, i_fir_mask_save) );
 
 fapi_try_exit:
     return fapi2::current_err;
