@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,10 +51,17 @@ namespace ocb
 {
 enum PM_OCB_ACCESS_OP
 {
-    OCB_GET = 0x1,
-    OCB_PUT = 0x2
+    OCB_GET     = 0,
+    OCB_PUT     = 1,
+    OCB_MAX_OPS = 2
 };
 }
+
+#define PM_OCB_ACCESS_OP_STR { \
+        "GET",     \
+        "PUT",     \
+    }
+
 
 // function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p10_pm_ocb_indir_access_FP_t)

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,9 +56,18 @@ fapi2::ReturnCode p10_pm_ocb_indir_setup_circular(
     const ocb::PM_OCB_CHAN_OUFLOW i_ocb_flow,
     const ocb::PM_OCB_ITPTYPE i_ocb_itp)
 {
-    FAPI_IMP("> p10_pm_ocb_indir_setup_circular");
-    FAPI_DBG("Channel: %d; Mode: %d; OCB BAR: 0x%08X; Queue length: %d;",
+
+
+    FAPI_IMP("> p10_pm_ocb_indir_setup_circular Channel: %d; Type: %d; OCB BAR: 0x%08X; Queue length: %d;",
              i_ocb_chan, i_ocb_type, i_ocb_bar, i_ocb_q_len);
+
+#ifndef __PPE__
+    static const char* ocb_ch_type_str[ocb::OCB_TYPE_MAX_TYPES] = PM_OCB_CHAN_TYPE_STR;
+    FAPI_IMP("> p10_pm_ocb_indir_setup_circular  Type: %s", ocb_ch_type_str[i_ocb_type]);
+#endif
+
+
+
     FAPI_DBG("Flow Notification Mode: %d; Interrupt Behaviour: %d", i_ocb_flow,
              i_ocb_itp);
 
@@ -74,16 +83,12 @@ fapi2::ReturnCode p10_pm_ocb_indir_setup_circular(
                   i_ocb_flow,
                   i_ocb_itp);
 
-    if (l_rc == fapi2::FAPI2_RC_SUCCESS)
-    {
-        FAPI_INF("Circular setup of channel %d successful.", i_ocb_chan);
-    }
-    else
+    if (l_rc)
     {
         FAPI_ERR("ERROR: Failed to setup channel %d to circular mode.",
                  i_ocb_chan);
     }
 
-    FAPI_IMP("< p9_pm_ocb_indir_setup_circular");
+    FAPI_INF("< p10_pm_ocb_indir_setup_circular");
     return l_rc;
 }

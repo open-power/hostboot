@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -108,9 +108,15 @@ fapi2::ReturnCode p10_pm_ocb_indir_access_internal(
     uint64_t*                     io_ocb_buffer,
     const bool                    i_useByteBuf = false)
 {
-    FAPI_DBG("> p10_pm_ocb_indir_access - i_useByteBuf %d", i_useByteBuf);
-    FAPI_DBG("Channel : %d, Operation : %d, No.of 8B Blocks of Data: %d",
-             i_ocb_chan, i_ocb_op, i_ocb_req_length);
+
+    FAPI_IMP("> p10_pm_ocb_indir_access Channel: %u, Operation: %d, Num 8B Blocks: %u, ByteBuf %u",
+             i_ocb_chan, i_ocb_op, i_ocb_req_length, i_useByteBuf);
+
+#ifndef __PPE__
+    static const char* ocb_op_str[ocb::OCB_MAX_OPS] = PM_OCB_ACCESS_OP_STR;
+    FAPI_IMP("> p10_pm_ocb_indir_access  Operation: %s", ocb_op_str[i_ocb_op]);
+#endif
+
 
     uint64_t l_OCBAR_address   = 0;
     uint64_t l_OCBDR_address   = 0;

@@ -345,12 +345,13 @@ fapi2::ReturnCode p10_pm_occ_control
     using namespace scomt;
     using namespace proc;
 
-    FAPI_IMP("Entering p10_pm_occ_control ....");
+    FAPI_IMP("> p10_pm_occ_control ....");
 
     fapi2::buffer<uint64_t> l_data64;
     fapi2::buffer<uint64_t> l_firMask;
     fapi2::buffer<uint64_t> l_occfir;
     fapi2::buffer<uint64_t> l_jtagcfg;
+    fapi2::buffer<uint64_t>  l_occflg0;
 
     // Set up Boot Vector Registers in SRAM
     //    - set bv0-2 to all 0's (illegal instructions)
@@ -390,6 +391,11 @@ fapi2::ReturnCode p10_pm_occ_control
         PREP_TP_TPCHIP_OCC_SRAM_CTL_SRBV3(i_target);
         FAPI_TRY(PUT_TP_TPCHIP_OCC_SRAM_CTL_SRBV3(i_target, l_data64));
     }
+
+    // Clear the flag bit that is checked for OCC booting
+    PREP_TP_TPCHIP_OCC_OCI_OCB_OCCFLG0_WO_CLEAR(i_target);
+    l_data64.flush<0>().setBit<28>();
+    FAPI_TRY(PUT_TP_TPCHIP_OCC_OCI_OCB_OCCFLG0_WO_CLEAR(i_target, l_data64));
 
     // Handle the i_ppc405_reset_ctrl parameter
     switch (i_ppc405_reset_ctrl)
@@ -536,6 +542,6 @@ fapi2::ReturnCode p10_pm_occ_control
     }
 
 fapi_try_exit:
-    FAPI_IMP("Exiting p10_pm_occ_control ....");
+    FAPI_INF("< p10_pm_occ_control ....");
     return fapi2::current_err;
 }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -228,8 +228,8 @@ fapi2::ReturnCode p10_pm_ocb_init(
     const ocb::PM_OCB_CHAN_OUFLOW i_ocb_ouflow_en,
     const ocb::PM_OCB_ITPTYPE     i_ocb_itp_type)
 {
-
-    FAPI_INF("> p10_pm_ocb_init");
+    const char* PM_MODE_NAME_VAR; //Defines storage for PM_MODE_NAME
+    FAPI_IMP("> p10_pm_ocb_init in mode %s", PM_MODE_NAME(i_mode));
 
     // -------------------------------------------------------------------------
     // INIT mode: Placeholder; NOOP at present
@@ -306,7 +306,7 @@ fapi2::ReturnCode pm_ocb_setup(
     const ocb::PM_OCB_CHAN_OUFLOW i_ocb_ouflow_en,
     const ocb::PM_OCB_ITPTYPE     i_ocb_itp_type)
 {
-    FAPI_DBG(">> pm_ocb_setup");
+    FAPI_IMP(">> pm_ocb_setup");
 
     uint32_t l_ocbase = 0x0;
     fapi2::buffer<uint64_t> l_mask_or(0);
@@ -478,7 +478,14 @@ fapi2::ReturnCode pm_ocb_setup(
     // -------------------------------------------------------------------------
     // Print Channel Configuration Info
     // -------------------------------------------------------------------------
-    FAPI_INF("OCB Config: ch %d  type %d  addr 0x%08X  ", i_ocb_chan, i_ocb_type, i_ocb_bar);
+    FAPI_IMP("OCB Config: ch %u type %d addr 0x%08X  ", i_ocb_chan, i_ocb_type, i_ocb_bar);
+
+#ifndef __PPE__
+    {
+        const char* ocb_ch_type_str[ocb::OCB_TYPE_MAX_TYPES] = PM_OCB_CHAN_TYPE_STR;
+        FAPI_IMP("OCB Config: type ", ocb_ch_type_str[i_ocb_type]);
+    }
+#endif
 
     if ((i_ocb_type == ocb::OCB_TYPE_PUSHQ) ||
         (i_ocb_type == ocb::OCB_TYPE_PULLQ))
@@ -497,7 +504,7 @@ fapi2::ReturnCode pm_ocb_setup(
 
 
 fapi_try_exit:
-    FAPI_DBG("<< pm_ocb_setup");
+    FAPI_INF("<< pm_ocb_setup");
     return fapi2::current_err;
 }
 
@@ -505,7 +512,7 @@ fapi_try_exit:
 fapi2::ReturnCode pm_ocb_reset(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
-    FAPI_INF(">> pm_ocb_reset");
+    FAPI_IMP(">> pm_ocb_reset");
     fapi2::buffer<uint64_t> l_buf64;
     fapi2::buffer<uint64_t> l_data64;
 
@@ -524,7 +531,7 @@ fapi2::ReturnCode pm_ocb_reset(
     // -------------------------------------------------------------------------
     for (auto& chan : v_reset_chan)
     {
-        FAPI_INF(" Reset OCB channel : %d", chan);
+        FAPI_IMP(" Reset OCB channel PIB regs : %d", chan);
 
         l_data64.flush<0>();
         // Clear out OCB Channel BAR registers
@@ -557,7 +564,7 @@ fapi2::ReturnCode pm_ocb_reset(
     // -------------------------------------------------------------------------
     for (auto& chan : v_reset_chan)
     {
-        FAPI_INF(" Reset OCB channel : %d", chan);
+        FAPI_IMP(" Reset OCB channel OCI regs : %d", chan);
 
         l_data64.flush<0>();
 
@@ -598,6 +605,8 @@ fapi2::ReturnCode pm_ocb_reset(
                  "**** ERROR : Unexpected error encountered in write to OCB "
                  "Channel %d Linear Window Base Register", chan);
     }
+
+    FAPI_IMP(" Reset OCB base regs");
 
     // OITR and OIEPR resetting is in p10_pm_xgpe_init as that is the
     // first HWP run in starting the complex.

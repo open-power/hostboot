@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,8 +65,19 @@ enum PM_OCB_CHAN_TYPE
     OCB_TYPE_LINWIN,            ///< Linear window mode
     OCB_TYPE_CIRC,              ///< Circular mode
     OCB_TYPE_PUSHQ,             ///< Circular Push Queue
-    OCB_TYPE_PULLQ              ///< Circular Pull Queue
+    OCB_TYPE_PULLQ,             ///< Circular Pull Queue
+    OCB_TYPE_MAX_TYPES          ///<
 };
+
+#define PM_OCB_CHAN_TYPE_STR { \
+        "NULL",     \
+        "LIN",      \
+        "LINSTR",   \
+        "LINWIN",   \
+        "CIRC",     \
+        "PUSHQ",    \
+        "PULLQ"     \
+    }
 
 /// @enum PM_OCB_CHAN_REG
 enum PM_OCB_CHAN_REG

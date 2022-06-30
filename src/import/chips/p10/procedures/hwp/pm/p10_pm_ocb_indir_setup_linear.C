@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,9 +57,15 @@ fapi2::ReturnCode p10_pm_ocb_indir_setup_linear(
     const ocb::PM_OCB_CHAN_TYPE i_ocb_type,
     const uint32_t      i_ocb_bar)
 {
-    FAPI_IMP("> p10_pm_ocb_indir_setup_linear");
-    FAPI_DBG("For channel %d as type %d, OCB Bar 0x%x",
+
+
+    FAPI_IMP("> p10_pm_ocb_indir_setup_linear Channel: %d; Type: %d; OCB BAR: 0x%08X;",
              i_ocb_chan, i_ocb_type, i_ocb_bar);
+
+#ifndef __PPE__
+    static const char* ocb_ch_type_str[ocb::OCB_TYPE_MAX_TYPES] = PM_OCB_CHAN_TYPE_STR;
+    FAPI_IMP("> p10_pm_ocb_indir_setup_linear  Type: %s", ocb_ch_type_str[i_ocb_type]);
+#endif
 
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
     FAPI_EXEC_HWP(l_rc,
@@ -73,16 +79,12 @@ fapi2::ReturnCode p10_pm_ocb_indir_setup_linear(
                   ocb::OCB_Q_OUFLOW_NULL,
                   ocb::OCB_Q_ITPTYPE_NULL);
 
-    if (l_rc == fapi2::FAPI2_RC_SUCCESS)
-    {
-        FAPI_INF("Linear setup of channel %d successful.", i_ocb_chan);
-    }
-    else
+    if (l_rc)
     {
         FAPI_ERR("ERROR: Failed to setup channel %d to linear mode.",
                  i_ocb_chan);
     }
 
-    FAPI_IMP("< p10_pm_ocb_indir_setup_linear");
+    FAPI_INF("< p10_pm_ocb_indir_setup_linear");
     return l_rc;
 }
