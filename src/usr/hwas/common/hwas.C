@@ -198,6 +198,9 @@ void applyCoreFunctionalOverride(TARGETING::TargetHandle_t i_target)
     // once per time being set
     hwasState.functionalOverride = false;
     i_target->setAttr<ATTR_HWAS_STATE>(hwasState);
+
+    // always have to update ATTR_PG if the state changes
+    HWAS::updateAttrPG(*i_target, hwasState.functional);
 }
 
 TargetHandleList disableExtraOcapiIohsTargets(const Target* const i_pauc)
