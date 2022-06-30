@@ -105,6 +105,7 @@ fapi2::ReturnCode pm_set_frequency(
     bool     b_dd1_floor = false;
 
     fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ_OVERRIDE_Type l_sys_freq_core_floor_mhz_ovr;
+    fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ_ORIGINAL_Type l_sys_freq_core_floor_mhz_orig;
     fapi2::ATTR_MRW_FREQ_SYSTEM_CORE_FLOOR_MHZ_Type l_mrw_freq_core_floor_mhz;
     fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ_Type l_sys_freq_core_floor_mhz = 0;
     fapi2::ATTR_FREQ_CORE_FLOOR_MHZ_Type l_floor_freq_mhz = 0;
@@ -113,6 +114,7 @@ fapi2::ReturnCode pm_set_frequency(
     fapi2::ATTR_NOMINAL_FREQ_MHZ_Type l_sys_nominal_freq_mhz = 0;
     fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ_Type l_sys_freq_core_ceil_mhz = 0;
     fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ_OVERRIDE_Type l_sys_freq_core_ceil_mhz_ovr;
+    fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ_ORIGINAL_Type l_sys_freq_core_ceil_mhz_orig;
     fapi2::ATTR_FREQ_CORE_CEILING_MHZ_Type l_ceil_freq_mhz = 0;
     fapi2::ATTR_CHIP_EC_FEATURE_STATIC_POUND_V_Type l_chip_static_pound_v = 0;
     fapi2::ATTR_POUND_V_STATIC_DATA_ENABLE_Type l_poundv_static_data = 0;
@@ -451,6 +453,17 @@ fapi2::ReturnCode pm_set_frequency(
         } //end of proc list
         l_part_freq = l_part_running_freq;
 
+        // save original ceiling before overrides
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ_ORIGINAL,
+            i_sys_target, l_sys_freq_core_ceil_mhz_orig));
+
+        FAPI_INF("Read of original ceiling attribute: ceiling %04d", l_sys_freq_core_ceil_mhz_orig);
+        if (!l_sys_freq_core_ceil_mhz_orig)
+        {
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ_ORIGINAL,i_sys_target, l_sys_freq_core_ceil_mhz));
+            FAPI_INF("Setting the original ceiling attribute: ceiling %04d", l_sys_freq_core_ceil_mhz);
+        }
+
         // Now clip things with system overrides
         // ATTR_FREQ_SYSTEM_CORE_CEIL_MHZ_OVERRIDE --> Lab
         //  -->l_sys_freq_core_ceil_mhz_ovr
@@ -522,6 +535,18 @@ fapi2::ReturnCode pm_set_frequency(
             }
         }
 
+        // Set original floor before override
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ_ORIGINAL,
+                i_sys_target, l_sys_freq_core_floor_mhz_orig));
+
+        FAPI_INF("Read of original floor attribute: floor %04d", l_sys_freq_core_floor_mhz_orig);
+
+        if (!l_sys_freq_core_floor_mhz_orig)
+        {
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ_ORIGINAL,  i_sys_target, l_floor_freq_mhz));
+            FAPI_INF("Setting the original floor attribute: floor %04d", l_floor_freq_mhz);
+        }
+
         // The floor override trumps everything
         if (l_sys_freq_core_floor_mhz_ovr)
         {
@@ -535,6 +560,22 @@ fapi2::ReturnCode pm_set_frequency(
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_NOMINAL_FREQ_MHZ,            i_sys_target, l_part_freq));
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ,i_sys_target, l_sys_freq_core_ceil_mhz));
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ,  i_sys_target, l_floor_freq_mhz));
+
+        // Read the originals again as they might have changed (needed for assert check)
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ_ORIGINAL,
+                i_sys_target, l_sys_freq_core_ceil_mhz_orig));
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ_ORIGINAL,
+                i_sys_target, l_sys_freq_core_floor_mhz_orig));
+
+        FAPI_INF("Saved original ceiling and floor attributes: ceiling %04d floor %04d ",
+                    l_sys_freq_core_ceil_mhz_orig, l_sys_freq_core_floor_mhz_orig);
+
+        FAPI_ASSERT(l_sys_freq_core_floor_mhz_orig && l_sys_freq_core_ceil_mhz_orig,
+            fapi2::SET_SYS_FREQ_ORIGINAL_CORRUPTION()
+            .set_ORIG_CEILING_FREQ(l_sys_freq_core_ceil_mhz)
+            .set_ORIG_FLOOR_FREQ(l_floor_freq_mhz),
+            "The retaining attributes for the original ceiling and floor frequencie are not properly set.");
 
         for (auto l_proc_target : i_sys_target.getChildren<fapi2::TARGET_TYPE_PROC_CHIP>())
         {
