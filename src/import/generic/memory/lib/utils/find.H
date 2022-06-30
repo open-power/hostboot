@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,10 +37,13 @@
 #define _MSS_FIND_H
 
 #include <fapi2.H>
-#include <vector>
-#include <generic/memory/lib/utils/c_str.H>
-#include <generic/memory/lib/utils/pos.H>
-#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+
+#ifndef __PPE__
+    #include <vector>
+    #include <generic/memory/lib/utils/c_str.H>
+    #include <generic/memory/lib/utils/pos.H>
+    #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#endif
 
 namespace mss
 {
@@ -149,6 +152,7 @@ inline fapi2::Target<M> find_target( const fapi2::Target<T>& i_target)
     return find_target_impl<M>(i_target, std::integral_constant<bool, M == T> {});
 }
 
+#ifndef __PPE__
 ///
 /// @brief find the OCMB_CHIP given a DIMM
 /// @param[in] i_target the fapi2 target DIMM
@@ -268,7 +272,7 @@ find_targets( const fapi2::Target<fapi2::TARGET_TYPE_MI>& i_target,
 
     return l_ocmbs;
 }
-
+#endif
 ///
 /// @brief find all the MEM_PORTs connected to a PROC_CHIP
 /// @param[in] i_target a fapi2::Target PROC_CHIP
@@ -280,6 +284,9 @@ find_targets( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
               fapi2::TargetState i_state )
 {
     std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> > l_ports;
+#ifdef __PPE__
+    l_ports = i_target.getChildren<fapi2::TARGET_TYPE_MEM_PORT>(i_state);
+#else
 
     for (const auto& l_mc : i_target.getChildren<fapi2::TARGET_TYPE_MC>(i_state))
     {
@@ -293,9 +300,11 @@ find_targets( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         }
     }
 
+#endif
     return l_ports;
 }
 
+#ifndef __PPE__
 ///
 /// @brief Helper to find a set of elements based on a fapi2 target, then sort them
 /// @tparam M the target type to be returned
@@ -453,6 +462,7 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+#endif // __PPE__
 }// mss
 
 #endif

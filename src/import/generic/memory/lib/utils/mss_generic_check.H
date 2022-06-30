@@ -254,7 +254,6 @@ fapi2::ReturnCode fir_or_pll_fail( const fapi2::Target<T>& i_target,
     return io_rc;
 #endif
 }
-
 #endif
 
 ///
