@@ -37,8 +37,10 @@
 
 #include <generic/memory/lib/utils/find.H>
 
-#include <generic/memory/lib/utils/c_str.H>
-#include <generic/memory/lib/utils/mss_generic_check.H>
+#ifndef __PPE__
+    #include <generic/memory/lib/utils/c_str.H>
+    #include <generic/memory/lib/utils/mss_generic_check.H>
+#endif
 
 #include <ody_ddrphyinit.H>
 
