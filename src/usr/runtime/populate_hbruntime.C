@@ -4705,8 +4705,12 @@ errlHndl_t verifyAndMovePayload(const bool i_payloadAlreadyVerified)
                                 PAGESIZE);
     payload_size -= PAGESIZE;
 
-    const uint64_t mapSize = std::max(getLMBSizeInMB() * MEGABYTE,
-                                      payload_size);
+    const uint64_t lmb_size = getLMBSizeInMB() * MEGABYTE;
+    const uint64_t mapSize = std::max(lmb_size, payload_size);
+
+    TRACFCOMP(g_trac_runtime,
+              "verifyAndMovePayload(): mapSize=0x%X, lmb_size=0x%X, payload_size=0x%X",
+              mapSize, lmb_size, payload_size);
 
     payloadBase_virt_addr = mm_block_map(
                                reinterpret_cast<void*>(payloadBase),

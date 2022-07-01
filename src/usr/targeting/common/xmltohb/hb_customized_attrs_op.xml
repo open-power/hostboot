@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2021                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2021,2022                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -56,5 +56,10 @@
     <attribute>
         <id>ATTR_CP_REFCLOCK_SELECT</id>
         <persistency>volatile-zeroed</persistency>
+    </attribute>
+    <!-- force LMB SIZE to be set via bios attributes on each IPL -->
+    <attribute>
+        <id>ATTR_LMB_SIZE</id>
+        <persistency>volatile</persistency>
     </attribute>
 </attributes>

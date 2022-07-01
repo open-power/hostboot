@@ -851,8 +851,11 @@ errlHndl_t MasterContainerLidMgr::managePhypLids(CompInfo& io_compInfo,
     uint64_t payloadBase = sys->getAttr<TARGETING::ATTR_PAYLOAD_BASE>();
     payloadBase = payloadBase * MEGABYTE;
 
-    const uint64_t mapSize = std::max(RUNTIME::getLMBSizeInMB() * MEGABYTE,
-                                      payload_size);
+    const uint64_t lmb_size = RUNTIME::getLMBSizeInMB() * MEGABYTE;
+    const uint64_t mapSize = std::max(lmb_size, payload_size);
+
+    UTIL_FT("MasterContainerLidMgr::managePhypLids: mapSize=0x%X, lmb_size=0x%X, payload_size=0x%X",
+            mapSize, lmb_size, payload_size);
 
     payloadBase_virt_addr = mm_block_map(
                                reinterpret_cast<void*>(payloadBase),
