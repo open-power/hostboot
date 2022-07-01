@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -520,6 +520,12 @@ int ringidGetRootRingId( ChipId_t    i_chipId,
             rc = TOR_NO_RINGS_FOR_CHIP;
             break;
 
+        case CID_ODYSSEY:
+            //FIXME?
+            // No ring support
+            rc = TOR_NO_RINGS_FOR_CHIP;
+            break;
+
         default:
             MY_ERR("ringidGetRootRingId(): Unsupported chipId (=%d) supplied\n", i_chipId);
             rc = TOR_INVALID_CHIP_ID;
@@ -589,14 +595,16 @@ int ringidGetRingClass( ChipId_t      i_chipId,
 std::map <ChipId_t, std::string> chipIdToTypeMap
 {
     { (ChipId_t)CID_P10, "p10" },
-    { (ChipId_t)CID_EXPLORER, "explorer" }
+    { (ChipId_t)CID_EXPLORER, "explorer" },
+    { (ChipId_t)CID_ODYSSEY, "odyssey" }
 };
 
 // Mapping from chipType name to the shared [initCompiler] chipId (reverse of above map)
 std::map <std::string, ChipId_t> chipTypeToIdMap
 {
     { "p10", (ChipId_t)CID_P10 },
-    { "explorer", (ChipId_t)CID_EXPLORER }
+    { "explorer", (ChipId_t)CID_EXPLORER },
+    { "odyssey", (ChipId_t)CID_ODYSSEY }
 };
 
 
