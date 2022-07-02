@@ -404,6 +404,10 @@ fapi2::ReturnCode powerdown_deconfigured_cl2_l3(
             FAPI_TRY(fapi2::putScom(i_core_target, QME_SCSR_WO_CLEAR,
                                     BIT64(QME_SCSR_ASSERT_SPECIAL_WKUP_DONE)));
 
+            FAPI_TRY(fapi2::putScom(i_core_target, QME_SPWU_OTR, 0));
+            FAPI_TRY(fapi2::putScom(i_core_target, QME_SPWU_FSP, 0));
+            FAPI_TRY(fapi2::putScom(i_core_target, QME_SPWU_HYP, 0));
+            FAPI_TRY(fapi2::putScom(i_core_target, QME_SPWU_OCC, 0));
 
             //Verify core is powered on
             //If core is powered on
@@ -446,6 +450,16 @@ fapi2::ReturnCode powerdown_deconfigured_cl2_l3(
 
                 FAPI_TRY(p10_hcd_cache_poweroff(i_core_target));
             }
+
+            //Update stop gated bit and actual stop level
+            FAPI_TRY( fapi2::putScom( i_core_target, QME_SSH_SRC,
+                                      BIT64(QME_SSH_SRC_ACT_WRITE_ENABLE) | BIT64(QME_SSH_SRC_STOP_GATED)
+                                      | BITS64(QME_SSH_SRC_ACT_STOP_LEVEL, QME_SSH_SRC_ACT_STOP_LEVEL_LEN)) );
+
+            //Drop pm exit
+            FAPI_TRY(fapi2::putScom(i_core_target, QME_SCSR_WO_CLEAR,
+                                    BIT64(1)));
+
         }
 
         //Restore the original values
