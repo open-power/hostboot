@@ -38,8 +38,8 @@
 #include <fapi2_spd_access.H>
 
 //The following can be uncommented for unit testing
-//#undef FAPI_DBG
-//#define FAPI_DBG(args...) FAPI_INF(args)
+// #undef FAPI_DBG
+// #define FAPI_DBG(args...) FAPI_INF(args)
 
 namespace fapi2
 {
@@ -72,7 +72,7 @@ fapi2::ReturnCode platGetVPD(
             FAPI_ERR("platGetVPD<OCMB>: Error from getTargetingTarget");
             break; //return with error
         }
-        FAPI_DBG("platGetVPD<OCMB> : target=%.8X",TARGETING::get_huid(l_ocmbTarget));
+        FAPI_DBG("platGetVPD<OCMB> : target=0x%08X",TARGETING::get_huid(l_ocmbTarget));
 
         // Retrieve the EFD data or the EFD data size if o_blob is NULL
         if (fapi2::EFD == io_vpdInfo.iv_vpd_type)
@@ -92,7 +92,7 @@ fapi2::ReturnCode platGetVPD(
             // extract the EFD data, so return error.
             if (l_errl)
             {
-                FAPI_ERR("platGetVPD<OCMB>: Error from trying to read ENTIRE SPD from 0x%.08X ",
+                FAPI_ERR("platGetVPD<OCMB>: Error from trying to read ENTIRE SPD from 0x%08X",
                          TARGETING::get_huid(l_ocmbTarget));
                 break;
             }
@@ -108,10 +108,30 @@ fapi2::ReturnCode platGetVPD(
                            l_spdBufferSize );
             if (l_rc)
             {
-                FAPI_ERR("platGetVPD<OCMB>: Error returned from ddimm_get_efd called on target 0x%.08X",
+                FAPI_ERR("platGetVPD<OCMB>: Error returned from ddimm_get_efd called on target 0x%08X",
                          TARGETING::get_huid(l_ocmbTarget));
             }
-        }  // end if (fapi2::EFD == io_vpdInfo.iv_vpd_type)
+        }
+        // Retrieve the data or the data size if o_blob is nullptr
+        else if (fapi2::BUFFER == io_vpdInfo.iv_vpd_type)
+        {
+            // while fapi2::BUFFER only needs the first 448 bytes of SPD,
+            // it's ok to return a bit more with ENTIRE_SPD_WITHOUT_EFD as
+            // long as all key bytes are returned such as module specific
+            // information and CRC bytes
+            l_errl = deviceRead(l_ocmbTarget,
+                                o_blob,
+                                io_vpdInfo.iv_size,
+                                DEVICE_SPD_ADDRESS(SPD::ENTIRE_SPD_WITHOUT_EFD));
+
+            if (l_errl)
+            {
+                FAPI_ERR("platGetVPD<OCMB>: Error from trying to read ENTIRE_SPD_WITHOUT_EFD data from 0x%08X",
+                         TARGETING::get_huid(l_ocmbTarget));
+                break;
+            }
+
+        }  // end if (fapi2::BUFFER == io_vpdInfo.iv_vpd_type)
         else
         {
             /*@
@@ -120,7 +140,7 @@ fapi2::ReturnCode platGetVPD(
             * @reasoncode        fapi2::RC_INVALID_TYPE
             * @userdata1         vpd_type attempted
             * @userdata2         HUID of OCMB target
-            * @devdesc           Less than expected number of bytes returned.
+            * @devdesc           Invalid or unsupported MemVpdData requested.
             * @custdesc          Firmware Error
             */
             l_errl = new ERRORLOG::ErrlEntry(

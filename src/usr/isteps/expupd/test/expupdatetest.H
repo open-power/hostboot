@@ -183,12 +183,6 @@ class ExpUpdateTest: public CxxTest::TestSuite
 
         do
         {
-            //TODO RTC 307044:
-            // device write for ocmbs not registered yet. This will be done in the commit
-            // above, and this break will be removed
-            TS_INFO("testFwVersionWrite: Device WRITE not set up yet for OCMBs. Skipping test.");
-            break;
-
             l_err = OCMB_SPD::getMemType( l_memType, l_ocmb );
             if( l_err )
             {

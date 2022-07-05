@@ -1690,7 +1690,7 @@ errlHndl_t genericEepromCache(DeviceFW::OperationType i_opType,
        io_buflen == 0)
     {
           TRACFCOMP(g_trac_eeprom,
-                    ERR_MRK"genericEepromCache: We were told to cache an empty buffer at %p for 0x%.08X role %d  ",
+                    ERR_MRK"genericEepromCache: We were told to cache an empty buffer at %p for 0x%08X role %d",
                     io_buffer, TARGETING::get_huid(i_target), l_eepromType );
           /*@
           * @errortype    ERRORLOG::ERRL_SEV_PREDICTIVE
@@ -1719,7 +1719,7 @@ errlHndl_t genericEepromCache(DeviceFW::OperationType i_opType,
     if(l_errl)
     {
         TRACFCOMP(g_trac_eeprom,
-                  ERR_MRK"genericEepromCache:  An error occured while attempting to cache eeprom from buffer for 0x%.08X role %d",
+                  ERR_MRK"genericEepromCache:  An error occured while attempting to cache eeprom from buffer for 0x%08X role %d",
                   TARGETING::get_huid(i_target), l_eepromType);
         break;
     }
@@ -1727,7 +1727,7 @@ errlHndl_t genericEepromCache(DeviceFW::OperationType i_opType,
     } while(0);
 
     TRACSSCOMP( g_trac_eeprom, EXIT_MRK"genericI2CEepromCache() "
-            "Target HUID 0x%.08X EXIT, rc = %d", TARGETING::get_huid(i_target),
+            "Target HUID 0x%08X EXIT, rc = %d", TARGETING::get_huid(i_target),
             ERRL_GETRC_SAFE(l_errl) );
 
     return l_errl;

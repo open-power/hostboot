@@ -45,7 +45,7 @@ extern trace_desc_t* g_trac_eeprom;
 mutex_t g_eepromMutex = MUTEX_INITIALIZER;
 
 // Easy macro replace for unit testing
-//#define TRACUCOMP(args...)  TRACFCOMP(args)
+// #define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
 
 namespace
@@ -339,7 +339,6 @@ errlHndl_t eepromPerformI2cOpHW(DeviceFW::OperationType i_opType,
         }
 #endif //__HOSTBOOT_RUNTIME
 
-        // Do the read or write
         while(l_remainingOpLen > 0)
         {
             if( i_opType == DeviceFW::READ )
@@ -488,6 +487,7 @@ errlHndl_t eepromPerformOpHW(DeviceFW::OperationType i_opType,
         // Read Attributes needed to complete the operation
         err = eepromReadAttributes( i_target,
                                     i_eepromInfo );
+
         if( err )
         {
             TRACFCOMP( g_trac_eeprom,
@@ -552,8 +552,7 @@ errlHndl_t eepromI2cPageOp( TARGETING::Target * i_target,
                          uint8_t i_desiredPage,
                          const eeprom_addr_t & i_i2cInfo )
 {
-    TRACUCOMP(g_trac_eeprom,
-            ENTER_MRK"eepromI2cPageOp()");
+    TRACUCOMP(g_trac_eeprom, ENTER_MRK"eepromI2cPageOp()");
 
     errlHndl_t l_err = NULL;
     size_t l_placeHolderZero = 0;
@@ -566,7 +565,6 @@ errlHndl_t eepromI2cPageOp( TARGETING::Target * i_target,
         // page.
         if( i_i2cInfo.accessAddr.i2c_addr.addrSize == ONE_BYTE_ADDR_PAGESELECT )
         {
-
             bool l_lockPage;
             if( i_switchPage )
             {
@@ -618,8 +616,9 @@ errlHndl_t eepromI2cPageOp( TARGETING::Target * i_target,
             }
         }
     }while(0);
-    TRACUCOMP(g_trac_eeprom,
-            EXIT_MRK"eepromI2cPageOp()");
+
+    TRACUCOMP(g_trac_eeprom, EXIT_MRK"eepromI2cPageOp()");
+
     return l_err;
 }
 
@@ -864,8 +863,7 @@ errlHndl_t eepromI2cRead ( TARGETING::Target * i_target,
     size_t l_readBuflen = 0;
     size_t l_pageTwoBuflen = 0;
 
-    TRACUCOMP( g_trac_eeprom,
-               ENTER_MRK"eepromI2cRead()" );
+    TRACUCOMP( g_trac_eeprom, ENTER_MRK"eepromI2cRead()" );
 
     do
     {
@@ -883,12 +881,16 @@ errlHndl_t eepromI2cRead ( TARGETING::Target * i_target,
         // Lock to sequence operations
         mutex_lock( &g_eepromMutex );
 
+        // if the page mutex needs to be locked
+        //  - True Page mutex needs to be locked
+        //  - False Page mutex is alreay locked, so do not attempt to lock
+        bool l_lockMutex = true;
         while( l_readLenRemaining > 0 )
         {
             l_currentReadLen = l_readLenRemaining < KILOBYTE ? l_readLenRemaining : KILOBYTE;
 
             // Check to see if the Read operation straddles the EEPROM page
-            // boundary.Note this is only required for systems w/ DDR4 industry
+            // boundary. Note this is only required for systems w/ DDR4 industry
             // standard dimms. DDR4 ISDIMMS have a max of 512 bytes so we will
             // never loop through this multiple times on those systems
             l_boundaryCrossed = crossesEepromI2cPageBoundary( i_i2cInfo.offset,
@@ -915,14 +917,12 @@ errlHndl_t eepromI2cRead ( TARGETING::Target * i_target,
             // Attempt to lock page mutex
             // (only important in DDR4 IS-DIMM systems)
             bool l_switchPage = true;
-            bool l_lockMutex = true;
             err = eepromI2cPageOp( i_target,
                                    l_switchPage,
                                    l_lockMutex,
                                    l_pageLocked,
                                    l_desiredPage,
                                    i_i2cInfo );
-
             if( err )
             {
                 TRACFCOMP(g_trac_eeprom,
@@ -1002,7 +1002,12 @@ errlHndl_t eepromI2cRead ( TARGETING::Target * i_target,
                     break;
                 }
             }
-        }
+
+            // set to false so we don't attempt to lock the page mutex
+            // if there bytes remaining to be read
+            l_lockMutex = false;
+
+        } // while( l_readLenRemaining > 0 )
 
 
         TRACUCOMP( g_trac_eeprom,
@@ -1018,7 +1023,9 @@ errlHndl_t eepromI2cRead ( TARGETING::Target * i_target,
     // Whether we failed in the main routine or not, unlock page iff the page is locked
     if( l_pageLocked )
     {
-        errlHndl_t l_pageOpErrl = NULL;
+        TRACUCOMP(g_trac_eeprom, "eepromI2cRead() - UNlocking i2c mutex by calling eepromI2cPageOp()");
+
+        errlHndl_t l_pageOpErrl = nullptr;
         bool l_switchPage = false;
         bool l_lockMutex = false;
         l_pageOpErrl = eepromI2cPageOp( i_target,
@@ -1036,8 +1043,7 @@ errlHndl_t eepromI2cRead ( TARGETING::Target * i_target,
 
     }
 
-    TRACUCOMP( g_trac_eeprom,
-               EXIT_MRK"eepromI2cRead()" );
+    TRACUCOMP( g_trac_eeprom, EXIT_MRK"eepromI2cRead()" );
 
     return err;
 } // end eepromI2cRead
@@ -1715,8 +1721,7 @@ errlHndl_t eepromPrepareI2cAddress ( TARGETING::Target * i_target,
     errlHndl_t err = NULL;
     o_bufSize = 0;
 
-    TRACDCOMP( g_trac_eeprom,
-               ENTER_MRK"eepromPrepareI2cAddress()" );
+    TRACDCOMP( g_trac_eeprom, ENTER_MRK"eepromPrepareI2cAddress()" );
 
     do
     {
@@ -1744,6 +1749,7 @@ errlHndl_t eepromPrepareI2cAddress ( TARGETING::Target * i_target,
                 {
                     o_desiredPage = 0;
                 }
+
                 o_bufSize = 1;
                 memset( io_buffer, 0x0, o_bufSize );
                 *((uint8_t*)io_buffer) = (i_i2cInfo.offset & 0xFFull);

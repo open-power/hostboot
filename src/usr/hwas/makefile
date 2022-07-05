@@ -26,6 +26,7 @@ ROOTPATH = ../../..
 
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwas
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwas/common
+EXTRAINCDIR += ${ROOTPATH}/src/usr/vpd/
 
 ##      support for Targeting and fapi
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer

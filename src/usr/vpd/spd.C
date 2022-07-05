@@ -204,6 +204,12 @@ DEVICE_REGISTER_ROUTE( DeviceFW::WRITE,
                        TARGETING::TYPE_DIMM,
                        spdWriteKeywordValue );
 
+// Register the perform Op with the routing code for OCMBs.
+DEVICE_REGISTER_ROUTE( DeviceFW::WRITE,
+                       DeviceFW::SPD,
+                       TARGETING::TYPE_OCMB_CHIP,
+                       spdWriteKeywordValue );
+
 // ------------------------------------------------------------------
 // isValidDimmType
 // ------------------------------------------------------------------
@@ -941,7 +947,6 @@ bool spdPresent ( TARGETING::Target * i_target )
 
         if (EEPROM::eepromPresence( i_target ))
         {
-            // Read the Basic Memory Type
             err = getMemType( memType,
                               i_target );
 
@@ -951,13 +956,13 @@ bool spdPresent ( TARGETING::Target * i_target )
                 break;
             }
 
-            TRACDCOMP( g_trac_spd,
-                       INFO_MRK"Mem Type: %04x",
-                       memType );
+                TRACDCOMP( g_trac_spd,
+                           INFO_MRK"Mem Type: 0x%04X",
+                           memType );
 
             if ( !isValidDimmType(memType) )
             {
-                TRACFCOMP( g_trac_spd, "spdPresent> Unexpected data found on %.8X, checking CRC",
+                TRACFCOMP( g_trac_spd, "spdPresent> Unexpected data found on 0x%08X, checking CRC",
                            TARGETING::get_huid(i_target) );
                 errlHndl_t err2 = SPD::checkCRC( i_target, SPD::CHECK, EEPROM::HARDWARE );
                 if( err2 )
@@ -966,7 +971,7 @@ bool spdPresent ( TARGETING::Target * i_target )
                     delete err2;
                     err2 = nullptr;
                     // Note that we will check CRC again later so no
-                    //  need to commit the log here
+                    // need to commit the log here
 
                     // we saw something so default it to DDR4
                     memType = SPD_DDR4_TYPE;
@@ -977,7 +982,6 @@ bool spdPresent ( TARGETING::Target * i_target )
             err = spdSetSize( *i_target, memType );
             if ( err )
             {
-                // err is returned as nullptr, no need to set
                 errlCommit(err, VPD_COMP_ID );
 
                 // exit loop and return false
@@ -988,17 +992,13 @@ bool spdPresent ( TARGETING::Target * i_target )
                 pres = true;
             }
         }
-        // exit loop and do not execute non runtime code below
-        break;
-
-#endif
+#else
         // Read the Basic Memory Type
         err = getMemType( memType,
                           i_target );
 
         if ( err )
         {
-            // err is returned as nullptr, no need to set
             errlCommit(err, VPD_COMP_ID );
 
             // exit loop and return false
@@ -1006,7 +1006,7 @@ bool spdPresent ( TARGETING::Target * i_target )
         }
 
         TRACDCOMP( g_trac_spd,
-                   INFO_MRK"Mem Type: %04x",
+                   INFO_MRK"Mem Type: 0x%04X",
                    memType );
 
         if ( isValidDimmType(memType) )
@@ -1015,14 +1015,14 @@ bool spdPresent ( TARGETING::Target * i_target )
             err = spdSetSize( *i_target, memType );
             if ( err )
             {
-                // err is returned as nullptr, no need to set
                 errlCommit(err, VPD_COMP_ID );
             }
             else
             {
                 pres = true;
             }
-        }  // end if ( isValidDimmType(memType) )
+        }
+#endif
     } while( 0 );
 
     TRACSSCOMP( g_trac_spd, EXIT_MRK"spdPresent(): returning %s",
@@ -1866,7 +1866,7 @@ errlHndl_t getKeywordEntry ( VPD::vpdKeyword i_keyword,
         if( ( entry == &kwdData[arraySize] ) ||
             ( i_keyword != entry->keyword ) )
         {
-            TRACFCOMP( g_trac_spd, ERR_MRK"No matching keyword entry found!" );
+            TRACFCOMP( g_trac_spd, ERR_MRK"No matching keyword entry found for 0x%X!", i_keyword);
 
             /*@
              * @errortype
@@ -1874,7 +1874,7 @@ errlHndl_t getKeywordEntry ( VPD::vpdKeyword i_keyword,
              * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
              * @moduleid         VPD::VPD_SPD_GET_KEYWORD_ENTRY
              * @userdata1        SPD Keyword
-             * @userdata2        <UNUSED>
+             * @userdata2        target HUID reading the SPD for
              * @devdesc          Invalid SPD Keyword
              * @custdesc         A problem occurred during the IPL
              *                   of the system.
@@ -1883,7 +1883,7 @@ errlHndl_t getKeywordEntry ( VPD::vpdKeyword i_keyword,
                                            VPD::VPD_SPD_GET_KEYWORD_ENTRY,
                                            VPD::VPD_KEYWORD_NOT_FOUND,
                                            i_keyword,
-                                           0x0,
+                                           get_huid(i_target),
                                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
 
             err->collectTrace( "SPD", 256);
@@ -1930,13 +1930,16 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
                             i_target );
         if( l_err )
         {
-            TRACFCOMP(g_trac_spd, ERR_MRK"spd.C::setPartAndSerialNumberAttributes(): Error after getMemType");
+            TRACFCOMP(g_trac_spd, ERR_MRK
+                      "spd.C::setPartAndSerialNumberAttributes(): Error after getMemType");
             break;
         }
 
         if (false == isValidDimmType(l_memType) )
         {
-            TRACFCOMP(g_trac_spd, ERR_MRK"spd.C::setPartAndSerialNumberAttributes(): Unknown memType");
+            TRACFCOMP(g_trac_spd, ERR_MRK
+                      "spd.C::setPartAndSerialNumberAttributes(): Unknown memType = 0x%02X",
+                      l_memType);
             break;
         }
 
@@ -2197,10 +2200,12 @@ errlHndl_t cmpEecacheToEeprom(TARGETING::Target * i_target,
     {
         // Read the Basic Memory Type from the Eeprom Cache
         uint8_t memTypeCache(MEM_TYPE_INVALID);
+
         err = getMemType(memTypeCache,
                          i_target,
                          i_eepromType,
                          EEPROM::CACHE);
+
         if (err)
         {
             break;
@@ -2209,8 +2214,9 @@ errlHndl_t cmpEecacheToEeprom(TARGETING::Target * i_target,
         if (!isValidDimmType(memTypeCache, i_eepromType))
         {
             TRACFCOMP(g_trac_spd, ERR_MRK
-                     "cmpEecacheToEeprom() Invalid DIMM type found in cache copy of eeprom,"
-                     " we will not be able to understand contents");
+                     "cmpEecacheToEeprom(): Invalid DIMM type (0x%X) found in cache copy of eeprom "
+                     "(eeprom content type 0x%X), we will not be able to understand contents",
+                     memTypeCache, i_eepromType);
             break;
         }
 
@@ -2220,6 +2226,7 @@ errlHndl_t cmpEecacheToEeprom(TARGETING::Target * i_target,
                          i_target,
                          i_eepromType,
                          EEPROM::HARDWARE);
+
         if (err)
         {
             break;
@@ -2228,7 +2235,10 @@ errlHndl_t cmpEecacheToEeprom(TARGETING::Target * i_target,
         if (!isValidDimmType(memTypeHardware, i_eepromType))
         {
             // Leave o_match == false and exit.
-            TRACFCOMP(g_trac_spd, ERR_MRK"cmpEecacheToEeprom() Invalid DIMM type found in hw copy of eeprom");
+            TRACFCOMP(g_trac_spd, ERR_MRK
+                     "cmpEecacheToEeprom(): Invalid DIMM type (0x%X) found in hw copy of eeprom "
+                     "(eeprom content type 0x%X)",
+                     memTypeHardware, i_eepromType);
             unexpected_data = true;
             break;
         }
@@ -2237,6 +2247,9 @@ errlHndl_t cmpEecacheToEeprom(TARGETING::Target * i_target,
         {
             // CACHE and HARDWARE don't match.
             // Leave o_match == false and exit.
+            TRACFCOMP(g_trac_spd, ERR_MRK
+                     "cmpEecacheToEeprom(): memTypeCache (0x%X) != memTypeHardware (0x%X)",
+                     memTypeCache, memTypeHardware);
             break;
         }
 
@@ -2294,12 +2307,20 @@ errlHndl_t cmpEecacheToEeprom(TARGETING::Target * i_target,
         {
             // CACHE and HARDWARE don't match.
             // Leave o_match == false and exit.
+            TRACFCOMP( g_trac_spd,
+                       "cmpEecacheToEeprom(): CACHE size (0x%X) and HARDWARE "
+                       "size (0x%X) are differnt for 0x%08X",
+                       sizeCache, sizeHardware, TARGETING::get_huid(i_target) );
             break;
         }
         if (memcmp(dataHardware, dataCache, sizeHardware))
         {
             // CACHE and HARDWARE don't match.
             // Leave o_match == false and exit.
+            TRACFCOMP( g_trac_spd,
+                       "cmpEecacheToEeprom(): CACHE and HARDWARE "
+                       "data don't match for 0x%08X",
+                       TARGETING::get_huid(i_target) );
             unexpected_data = true;
             break;
         }
@@ -2424,6 +2445,11 @@ errlHndl_t spdWriteKeywordValue_generic ( DeviceFW::OperationType i_opType,
 DEVICE_REGISTER_ROUTE( DeviceFW::WRITE,
                        DeviceFW::VPD,
                        TARGETING::TYPE_DIMM,
+                       spdWriteKeywordValue_generic );
+
+DEVICE_REGISTER_ROUTE( DeviceFW::WRITE,
+                       DeviceFW::VPD,
+                       TARGETING::TYPE_OCMB_CHIP,
                        spdWriteKeywordValue_generic );
 
 

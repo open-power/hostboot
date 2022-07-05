@@ -299,67 +299,47 @@ void writeExplorerFwVersion(TargetHandle_t i_ocmb, const uint8_t* i_versionStr, 
 
     // Get SPD keyword EXPLORER_FW_VERSION info
     const SPD::KeywordData *l_fWVerKeyword = {nullptr};
-    l_err = getKeywordEntry(SPD::EXPLORER_FW_VERSION, SPD::SPD_DDR4_TYPE, i_ocmb, l_fWVerKeyword);
-
-    const size_t l_spdKeywordSize = l_fWVerKeyword->length;
-
-    // The actual data being written to the SPD::EXPLORER_FW_VERSION keyword must be of size
-    // 64-bytes for the SPD-write API to work.
-    uint8_t l_paddedData [l_spdKeywordSize] = {};
-
-    // Data copied over to l_paddedData should be at most l_spdKeywordSize
-    size_t l_copySize = std::min(l_spdKeywordSize, i_strSize);
-    memcpy(l_paddedData, i_versionStr, l_copySize);
-
-    TargetHandleList l_dimmList;
-    getChildAffinityTargets(l_dimmList, i_ocmb, CLASS_LOGICAL_CARD, TYPE_DIMM);
 
     do
     {
-        // Only one DIMM target is expected. If a number other than one is found, then there's an
-        // issue with the targeting layout.
-        if (l_dimmList.size() != 1)
-        {
-            TRACFCOMP(g_trac_expupd, ERR_MRK"writeExplorerFwVersion: Unsupported number of DDIMMs "
-                "(%lu) found for OCMB with HUID 0x%X.", l_dimmList.size(), get_huid(i_ocmb));
-           /*@errorlog
-            * @errortype       ERRL_SEV_PREDICTIVE
-            * @moduleid        EXPUPD::MOD_WRITE_EXPLORER_FW_VERSION
-            * @reasoncode      EXPUPD::UNSUPPORTED_NUMBER_OF_DIMMS
-            * @userdata1       HUID of OCMB target whose DDIMM is being searched for
-            * @userdata2       Number of DDIMMs found
-            * @devdesc         Unsupported number of DDIMMs found tied to one OCMB in targeting layout.
-            * @custdesc        Error occurred during system boot.
-            */
-            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
-                                            EXPUPD::MOD_WRITE_EXPLORER_FW_VERSION,
-                                            EXPUPD::UNSUPPORTED_NUMBER_OF_DIMMS,
-                                            get_huid(i_ocmb),
-                                            l_dimmList.size(),
-                                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-            break;
-        }
+         l_err = getKeywordEntry(SPD::EXPLORER_FW_VERSION, SPD::SPD_DDR4_TYPE, i_ocmb, l_fWVerKeyword);
 
-        TargetHandle_t l_dimm = l_dimmList[0];
+         if (l_err)
+         {
+              TRACFCOMP(g_trac_expupd,
+                  "writeExplorerFwVersion: Error getting EXPLORER_FW_VERSION entry for OCMB 0x%08X",
+                  get_huid(i_ocmb));
+              break;
+         }
 
-        TRACDCOMP(g_trac_expupd, "writeExplorerFwVersion: Attempting to write FW version of "
-            "OCMB: 0x%X, into SPD of DDIMM: 0x%X", get_huid(i_ocmb), get_huid(l_dimm));
-        TRACDBIN(g_trac_expupd, "writeExplorerFwVersion: OCMB FW Version string: ",
-            l_paddedData, l_spdKeywordSize);
+        const size_t l_spdKeywordSize = l_fWVerKeyword->length;
+
+        // The actual data being written to the SPD::EXPLORER_FW_VERSION keyword must be of size
+        // 64-bytes for the SPD-write API to work.
+        uint8_t l_paddedData [l_spdKeywordSize] = {};
+
+        // Data copied over to l_paddedData should be at most l_spdKeywordSize
+        size_t l_copySize = std::min(l_spdKeywordSize, i_strSize);
+        memcpy(l_paddedData, i_versionStr, l_copySize);
+        TRACDCOMP(g_trac_expupd,
+                  "writeExplorerFwVersion: Attempting to write FW version of OCMB: 0x%08X",
+                  get_huid(i_ocmb));
+        TRACDBIN(g_trac_expupd, "writeExplorerFwVersion: OCMB FW Version string:",
+                 l_paddedData, l_spdKeywordSize);
 
         // If we're in a force-once case, we need to add a special flag
-        //  if it isn't already there
+        // if it isn't already there
         auto l_forced_behavior = UTIL::assertGetToplevelTarget()
           ->getAttr<ATTR_OCMB_FW_UPDATE_OVERRIDE>();
         if( OCMB_FW_UPDATE_BEHAVIOR_FORCE_UPDATE_ONCE == l_forced_behavior )
         {
             // ignoring return value because we don't care
             (void)checkAndSetForceFlag( i_ocmb, l_paddedData );
-            TRACDBIN(g_trac_expupd, "writeExplorerFwVersion: with flag: ",
+            TRACDBIN(g_trac_expupd, "writeExplorerFwVersion: with flag:",
                      l_paddedData, l_spdKeywordSize);
         }
 
-        l_err = deviceWrite(l_dimm, l_paddedData,
+        l_err = deviceWrite(i_ocmb, l_paddedData,
                             (size_t&)l_spdKeywordSize,
                             DEVICE_SPD_ADDRESS(SPD::EXPLORER_FW_VERSION));
 
@@ -368,7 +348,7 @@ void writeExplorerFwVersion(TargetHandle_t i_ocmb, const uint8_t* i_versionStr, 
     if (l_err)
     {
         TRACFCOMP(g_trac_expupd, ERR_MRK"writeExplorerFwVersion: Failed to update version keyword "
-            "for OCMB: 0x%X", get_huid(i_ocmb));
+            "for OCMB 0x%08X", get_huid(i_ocmb));
         TRACFBIN(g_trac_expupd, ERR_MRK"writeExplorerFwVersion: Failed trying to write this "
             "version string: ", i_versionStr, i_strSize);
         l_err->collectTrace(EXPUPD_COMP_NAME);
@@ -377,7 +357,7 @@ void writeExplorerFwVersion(TargetHandle_t i_ocmb, const uint8_t* i_versionStr, 
     else
     {
         TRACDCOMP(g_trac_expupd, "writeExplorerFwVersion: successfully updated version string in "
-            "SPD of OCMB 0x%08x", TARGETING::get_huid(i_ocmb));
+            "SPD of OCMB 0x%08X", TARGETING::get_huid(i_ocmb));
     }
 
 }

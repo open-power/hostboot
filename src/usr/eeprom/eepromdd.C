@@ -57,7 +57,7 @@
 extern trace_desc_t* g_trac_eeprom;
 
 // Easy macro replace for unit testing
-//#define TRACUCOMP(args...)  TRACFCOMP(args)
+// #define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
 
 using namespace TARGETING;
@@ -178,10 +178,11 @@ errlHndl_t eepromPerformSingleOp(const DeviceFW::OperationType i_opType,
 {
     errlHndl_t err = nullptr;
 
-    TRACUCOMP (g_trac_eeprom, ENTER_MRK"eepromPerformSingleOp(): target 0x%.8X "
+    TRACUCOMP (g_trac_eeprom, ENTER_MRK"eepromPerformSingleOp(): target 0x%08X "
                "i_opType=%d, role=%d, offset=%x, len=%d",
                get_huid(i_target), (uint64_t) i_opType,
                i_eepromAddr.eepromRole, i_eepromAddr.offset, io_buflen);
+
     do{
 #ifdef CONFIG_SUPPORT_EEPROM_CACHING
         if(i_source == EEPROM::CACHE  )
@@ -189,7 +190,6 @@ errlHndl_t eepromPerformSingleOp(const DeviceFW::OperationType i_opType,
             // Read the copy of the EEPROM data we have cached in PNOR
             err = eepromPerformOpCache(i_opType, i_target,
                                        io_buffer, io_buflen, i_eepromAddr);
-
             if(err)
             {
                 break;

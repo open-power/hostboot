@@ -252,9 +252,9 @@ constexpr uint8_t LOG_LEVEL_MAX  = 4;
 inline bool magic_check_feature(long _feature)
 {
     long register r3 asm("r3") = 0;
-    asm volatile("mr 4, %0" :: 
-                 "r" (_feature) : 
-                 "4"); 
+    asm volatile("mr 4, %0" ::
+                 "r" (_feature) :
+                 "4");
     MAGIC_INSTRUCTION(MAGIC_CHECK_FEATURE);
     return r3;
 }

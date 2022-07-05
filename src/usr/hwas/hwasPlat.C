@@ -57,6 +57,8 @@
 #include <targeting/common/targetservice.H>
 #include <chipids.H>
 #include <vpd/spdenums.H>
+// #include <vpd/spd.H>
+#include <spd.H>
 
 #include <map>
 
@@ -399,9 +401,6 @@ errlHndl_t getOcmbIdecFromSpd(const TARGETING::TargetHandle_t& i_target,
     const size_t DRAM_INTERFACE_TYPE_OFFSET           = 2;
     const size_t MEMORY_MODULE_INTERFACE_TYPE_OFFSET  = 3;
 
-    // This is the value that signifies the SPD we read is for a DDIMM.
-    const uint8_t DDIMM_MEMORY_INTERFACE_TYPE        = 0x0A;
-
     const uint8_t l_spdModuleRevision =
         *(i_spdBuffer + SPD_REVISION_OFFSET);
 
@@ -422,13 +421,17 @@ errlHndl_t getOcmbIdecFromSpd(const TARGETING::TargetHandle_t& i_target,
 
         // Since the byte offsets used to get the IDEC info out of the SPD are
         // specific to the DDIMM interface type we must first verify that we
-        // read from an SPD of that type.
-        if (DDIMM_MEMORY_INTERFACE_TYPE != l_spdMemoryInterfaceType)
+        // read from an SPD of that type. Plannar SPD follows the same format,
+        // so allow that as well
+        if (SPD::MOD_TYPE_DDIMM  != l_spdMemoryInterfaceType &&
+            SPD::MOD_TYPE_PLANAR != l_spdMemoryInterfaceType)
         {
             HWAS_ERR("getOcmbIdecFromSpd> memory module interface type "
-                      "didn't match the expected type. "
-                      "Expected 0x%.2X, Actual 0x%.2X",
-                      DDIMM_MEMORY_INTERFACE_TYPE,
+                      "didn't match the expected type. Expected "
+                      "MOD_TYPE_DDIMM (0x%02X) or MOD_TYPE_PLANAR (0x%02X), "
+                      "Actual 0x%02X",
+                      SPD::MOD_TYPE_DDIMM,
+                      SPD::MOD_TYPE_PLANAR,
                       l_spdMemoryInterfaceType);
 
             /*@
@@ -440,7 +443,8 @@ errlHndl_t getOcmbIdecFromSpd(const TARGETING::TargetHandle_t& i_target,
             * @userdata1[8:15]   DRAM Interface Type Presented or Emulated
             * @userdata1[16:23]  Memory Module Interface Type
             * @userdata1[24:31]  Unused
-            * @userdata1[32:63]  Expected memory interface type
+            * @userdata1[32:47]  Expected memory interface type DDIMM
+            * @userdata1[48:63]  Expected memory interface type PLANAR
             * @userdata2         HUID of OCMB target
             * @devdesc           The memory interface type read from the SPD did
             *                    not match the DDIMM value. Setting the
@@ -449,11 +453,14 @@ errlHndl_t getOcmbIdecFromSpd(const TARGETING::TargetHandle_t& i_target,
             * @custdesc          Invalid or unsupported memory card installed.
             */
             l_errl = hwasError(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                              MOD_OCMB_IDEC,
-                              RC_OCMB_INTERFACE_TYPE_MISMATCH,
-                              TWO_UINT32_TO_UINT64(SPD_FFDC_BYTES,
-                                DDIMM_MEMORY_INTERFACE_TYPE),
-                              TARGETING::get_huid(i_target));
+                               MOD_OCMB_IDEC,
+                               RC_OCMB_INTERFACE_TYPE_MISMATCH,
+                               TWO_UINT32_TO_UINT64(
+                                   SPD_FFDC_BYTES,
+                                   TWO_UINT16_TO_UINT32(SPD::MOD_TYPE_DDIMM,
+                                                        SPD::MOD_TYPE_PLANAR)
+                                   ),
+                               TARGETING::get_huid(i_target));
 
             l_errl->addProcedureCallout(EPUB_PRC_HB_CODE,
                                         SRCI_PRIORITY_LOW);
@@ -470,7 +477,7 @@ errlHndl_t getOcmbIdecFromSpd(const TARGETING::TargetHandle_t& i_target,
         // SPD IDEC info is in the following three bytes
         const size_t SPD_ID_LEAST_SIGNIFICANT_BYTE_OFFSET = 198;
         const size_t SPD_ID_MOST_SIGNIFICANT_BYTE_OFFSET  = 199;
-        const size_t DMB_REV_OFFSET                        = 200;
+        const size_t DMB_REV_OFFSET                       = 200;
 
         // Get the ID from the SPD and verify that it matches what we read from
         // the IDEC register.
@@ -484,7 +491,7 @@ errlHndl_t getOcmbIdecFromSpd(const TARGETING::TargetHandle_t& i_target,
         // manufacture's DMB_REV to the EC level IBM is familiar with.
         uint8_t l_spdDmbRev = *(i_spdBuffer + DMB_REV_OFFSET);
 
-        HWAS_INF("getOcmbIdecFromSpd> OCMB 0x%.8x l_spdId = 0x%.4X l_spdDmbRev = 0x%.2x",
+        HWAS_INF("getOcmbIdecFromSpd> OCMB 0x%08X l_spdId = 0x%04X l_spdDmbRev = 0x%02X",
                  TARGETING::get_huid(i_target), l_spdId, l_spdDmbRev);
 
         if (DDIMM_DMB_ID::EXPLORER == l_spdId)
@@ -515,7 +522,7 @@ errlHndl_t getOcmbIdecFromSpd(const TARGETING::TargetHandle_t& i_target,
         else
         {
             HWAS_ERR("getOcmbIdecFromSpd> Unknown OCMB chip type discovered in SPD "
-                      "ID=0x%.4X OCMB HUID 0x%.8x",
+                      "ID=0x%04X OCMB HUID 0x%08X",
                       l_spdId,
                       TARGETING::get_huid(i_target));
 
@@ -535,10 +542,10 @@ errlHndl_t getOcmbIdecFromSpd(const TARGETING::TargetHandle_t& i_target,
             * @custdesc          Unsupported memory installed.
             */
             l_errl = hwasError(ERRORLOG::ERRL_SEV_PREDICTIVE,
-                              MOD_OCMB_IDEC_PHASE_1,
-                              RC_OCMB_UNKNOWN_CHIP_TYPE,
-                              TWO_UINT32_TO_UINT64(SPD_FFDC_BYTES, l_spdId),
-                              TARGETING::get_huid(i_target));
+                               MOD_OCMB_IDEC_PHASE_1,
+                               RC_OCMB_UNKNOWN_CHIP_TYPE,
+                               TWO_UINT32_TO_UINT64(SPD_FFDC_BYTES, l_spdId),
+                               TARGETING::get_huid(i_target));
 
             break;
         }

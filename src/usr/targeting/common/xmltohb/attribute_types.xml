@@ -1025,6 +1025,7 @@
         SBE_MEASUREMENT_CODE - Measurement code
         WOF_DATA - WOF data
         KEYSTORE - Keystore data
+        PLANAR_OCMB_SPD - eeproms found on the backplane for ocmb SPD
     </description>
     <enumerator>
       <name>RAW</name>

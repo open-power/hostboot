@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,11 +33,11 @@ namespace EXPUPD
 
     enum ExpUpdModuleId
     {
-        MOD_OCMB_FW_VALIDATE_IMAGE = 0x01,
-        MOD_PARSE_TAGGED_DATA_TRIPLET = 0x02,
-        MOD_SET_FW_VERSION_INFO = 0x03,
-        MOD_WRITE_EXPLORER_FW_VERSION = 0x04,
-        MOD_IS_MDS_DDIMM = 0x05,
+        MOD_OCMB_FW_VALIDATE_IMAGE     = 0x01,
+        MOD_PARSE_TAGGED_DATA_TRIPLET  = 0x02,
+        MOD_SET_FW_VERSION_INFO        = 0x03,
+        MOD_WRITE_EXPLORER_FW_VERSION  = 0x04,
+        MOD_IS_MDS_DDIMM               = 0x05,
     };
 
     enum ExpUpdReasonCode
@@ -51,10 +51,26 @@ namespace EXPUPD
         INVALID_HASH_TRIPLET_SIZE                 = EXPUPD_COMP_ID | 0x07,
         INVALID_TAG_ID                            = EXPUPD_COMP_ID | 0x08,
         MISSING_FW_VERSION                        = EXPUPD_COMP_ID | 0x09,
-        UNSUPPORTED_NUMBER_OF_DIMMS               = EXPUPD_COMP_ID | 0x0a,
+        UNSUPPORTED_NUMBER_OF_DIMMS               = EXPUPD_COMP_ID | 0x0a, // Deprecated
         DEVICE_READ_FAIL                          = EXPUPD_COMP_ID | 0x0b,
     };
 
 }; // namespace EXPUPD
+
+//*****************************************************
+// SRC Graveyard
+// Contains error log descriptions for SRCs that were
+// removed from the code but we need to still provide
+// backward compatible parser logic for.
+
+/*@
+* @moduleid        EXPUPD::MOD_WRITE_EXPLORER_FW_VERSION
+* @reasoncode      EXPUPD::UNSUPPORTED_NUMBER_OF_DIMMS
+* @userdata1       HUID of OCMB target whose DDIMM is being searched for
+* @userdata2       Number of DDIMMs found
+* @devdesc         Unsupported number of DDIMMs found tied to one OCMB in targeting layout.
+* @custdesc        Error occurred during system boot.
+*/
+
 
 #endif

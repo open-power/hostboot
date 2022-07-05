@@ -76,7 +76,7 @@ TRAC_INIT( & g_trac_i2cr, "I2CR", KILOBYTE );
 
 
 // Easy macro replace for unit testing
-//#define TRACUCOMP(args...)  TRACFCOMP(args)
+// #define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
 
 // ----------------------------------------------
@@ -371,15 +371,6 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
                          int64_t i_accessType,
                          va_list i_args )
 {
-    TRACUCOMP( g_trac_i2c, ENTER_MRK"i2cPerformOp() opType(%s), "
-              "i_target(0x%X), io_buffer(%p), io_buflen(%d),  "
-              "i_accessType(%d)",
-              i_opType == DeviceFW::READ ? "READ" : "WRITE",
-              TARGETING::get_huid(i_target),
-              io_buffer,
-              io_buflen,
-              i_accessType);
-
     errlHndl_t err = nullptr;
 
     // Get the input args our of the va_list
@@ -395,6 +386,16 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
     args.engine = va_arg( i_args, uint64_t );
     args.devAddr = va_arg( i_args, uint64_t );
 
+    TRACUCOMP( g_trac_i2c, ENTER_MRK"i2cPerformOp() opType(%s), "
+              "i_target(0x%08X), io_buffer(%p), io_buflen(%d),  "
+              "i_accessType(%d), p/e/devAddr = 0x%X/0x%X/0x%X",
+              i_opType == DeviceFW::READ ? "READ" : "WRITE",
+              TARGETING::get_huid(i_target),
+              io_buffer,
+              io_buflen,
+              i_accessType,
+              args.port, args.engine, args.devAddr );
+
     // These are additional parms in the case an offset is passed in
     // via va_list, as well
 
@@ -406,16 +407,22 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
     // Decide if page select was requested (denoted with special device address)
     if( args.devAddr == PAGE_OPERATION )
     {
+        TRACUCOMP(g_trac_i2c, "i2cPerformOp():: Page op");
 
         // since this was a page operation, next arg will be whether we want to
         // lock the page, or unlock
         bool l_lockOp = static_cast<bool>(va_arg(i_args, int));
         if(l_lockOp)
         {
+
             //If page select requested, desired page would be passed in va_list
             uint8_t l_desiredPage = static_cast<uint8_t>(va_arg(i_args, int ));
 
+            // if the page mutex needs to be locked
+            //  - True Page mutex needs to be locked
+            //  - False Page mutex is alreay locked, so do not attempt to lock
             bool l_lockMutex = static_cast<bool>(va_arg(i_args, int));
+
             err = i2cPageSwitchOp( i_opType,
                                     i_target,
                                     i_accessType,
@@ -471,6 +478,8 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
     // Else this is not a page operation, call the normal common function
     else
     {
+        TRACUCOMP(g_trac_i2c, "i2cPerformOp():: Non-Page op");
+
         if(   (subop==DeviceFW::I2C_SMBUS_BLOCK)
            || (subop==DeviceFW::I2C_SMBUS_BYTE)
            || (subop==DeviceFW::I2C_SMBUS_WORD))
@@ -798,8 +807,6 @@ errlHndl_t i2cPageSwitchOp( DeviceFW::OperationType i_opType,
         //Set Host vs Fsi switches if not done already
         i2cSetSwitches(i_target, i_args);
 
-
-
         if(i_lockMutex)
         {
             //get page mutex
@@ -808,7 +815,7 @@ errlHndl_t i2cPageSwitchOp( DeviceFW::OperationType i_opType,
                                            l_pageLock );
             if(!l_mutexSuccess)
             {
-                TRACUCOMP(g_trac_i2c,
+                TRACFCOMP(g_trac_i2c,
                           ERR_MRK"Error in i2cPageSwitchOp::i2cGetPageMutex()");
                 /*@
                  * @errortype
@@ -913,7 +920,7 @@ errlHndl_t i2cPageSwitchOp( DeviceFW::OperationType i_opType,
             TRACUCOMP(g_trac_i2c,"i2cPageSwitchOp args! "
                     "misc_args_t: port:%d / engine: %d: devAddr: %x: skip_mode_step(%d): "
                     "with_stop(%d): read_not_write(%d): "
-                    "polling_interval_ns: %d: timeout_count: %d: offset_length: %d, ",
+                    "polling_interval_ns: %d: timeout_count: %d: offset_length: %d",
                     i_args.port, i_args.engine, i_args.devAddr, i_args.skip_mode_setup,
                     i_args.with_stop, i_args.read_not_write,
                     i_args.polling_interval_ns, i_args.timeout_count,
@@ -968,39 +975,38 @@ errlHndl_t i2cPageSwitchOp( DeviceFW::OperationType i_opType,
                 }
                 else // Handle NACK error
                 {
-                    TRACFCOMP(g_trac_i2c,
-                       "i2cPageSwitchOp::Expected Nack error. Retrying in case "
-                       "this nack was caused by bus being busy "
-                       "loop = %d", retry);
-
-                    nanosleep( 0, i_args.polling_interval_ns );
-
                     // Retry on NACKs just in case the cause was a busy i2c bus.
                     if( retry < MAX_NACK_RETRIES )
                     {
+                       TRACFCOMP(g_trac_i2c,
+                                 "i2cPageSwitchOp::Expected NACK error. Retrying in case "
+                                 "this nack was caused by bus being busy loop = %d",
+                                 retry);
+
                         if(l_err_NACK == nullptr)
                         {
                             l_err_NACK = l_err;
                             TRACUCOMP(g_trac_i2c,
                                     "Saving first Nack error and retry");
-                            nanosleep(0, i_args.polling_interval_ns);
                             l_err_NACK->collectTrace(I2C_COMP_NAME);
-
                         }
                         else
                         {
                             // Delete this new NACK error
                             delete l_err;
-                            nanosleep(0 ,i_args.polling_interval_ns);
                             l_err = nullptr;
                         }
+
+                        TRACFCOMP(g_trac_i2c,
+                                  "i2cPageSwitchOp(): NACK error found in i2c reg, sleep for %d "
+                                  "nano seconds", i_args.polling_interval_ns);
+                        nanosleep(0 ,i_args.polling_interval_ns);
                         // continue to retry
                         continue;
                     }
                     else // no more retries: trace and break;
                     {
-                        TRACFCOMP(g_trac_i2c,
-                                "Exiting Nack retry loop");
+                        TRACFCOMP(g_trac_i2c, "No more retries - Exiting Nack retry loop");
                         break;
                     }
                 }
@@ -1074,7 +1080,7 @@ bool i2cPageUnlockOp( TARGETING::Target * i_target,
 
         if( !l_mutexSuccess )
         {
-            TRACUCOMP( g_trac_i2c,
+            TRACFCOMP( g_trac_i2c,
                    ERR_MRK"Error in i2cPageUnlockOp::i2cGetPageMutex()");
             /*@
              * @errortype
@@ -1098,6 +1104,7 @@ bool i2cPageUnlockOp( TARGETING::Target * i_target,
             errlCommit(l_err, I2C_COMP_ID);
             break;
         }
+
         //Unlock the page mutex
         (void)mutex_unlock(l_pageLock);
     }while( 0 );
@@ -2837,7 +2844,7 @@ errlHndl_t i2cWrite ( TARGETING::Target * i_target,
                "len %d", i_args.engine, i_args.port, i_args.devAddr, io_buflen);
 
     TRACUCOMP( g_trac_i2c,
-               EXIT_MRK"i2cWrite()" );
+               EXIT_MRK"i2cWrite() exit %s", err ? "with errors" : "" );
 
     return err;
 } // end i2cWrite

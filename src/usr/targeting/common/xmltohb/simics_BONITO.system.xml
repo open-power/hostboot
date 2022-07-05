@@ -92,7 +92,7 @@
      *     P0 -> I2C engine E -> ports 4,5,6,7 -> device address 0x40
      *     - note same port as OCMB SPD, but differnt device address
      *     - FAPI_I2C_CONTROL_INFO on OCMB target
-     * 
+     *
      * (4) Common Write Protect (device TCA9554) - used for all OCMBs:
      *     P0 -> engine E -> port ? -> device address 0x42
      *     - Pin0: OCMB 2A WRITE PROTECT N
@@ -107,13 +107,13 @@
     <id>sys-0</id>
     <type>sys-sys-power10</type>
     <attribute>
-         <id>HB_SETTINGS</id>
-         <default>
-             <field><id>traceContinuous</id><value>0</value></field>
-             <field><id>traceScanDebug</id><value>0</value></field>
-             <field><id>traceFapiDebug</id><value>0</value></field>
-             <field><id>reserved</id><value>0</value></field>
-         </default>
+        <id>HB_SETTINGS</id>
+        <default>
+            <field><id>traceContinuous</id><value>0</value></field>
+            <field><id>traceScanDebug</id><value>0</value></field>
+            <field><id>traceFapiDebug</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute>
         <id>SMF_MEM_AMT_REQUESTED</id>
@@ -185,24 +185,24 @@
         <default>1HOP_CHIP_IS_GROUP</default>
     </attribute>
     <attribute>
-      <default>0</default>
-      <id>TPM_REQUIRED</id>
+        <default>0</default>
+        <id>TPM_REQUIRED</id>
     </attribute>
     <attribute>
         <id>MAX_ALLOWED_DIMM_FREQ</id>
         <default>3200,3200,3200,3200,3200</default>
     </attribute>
     <attribute>
-      <default>4</default>
-      <id>MAX_PROC_CHIPS_PER_NODE</id>
+        <default>4</default>
+        <id>MAX_PROC_CHIPS_PER_NODE</id>
     </attribute>
     <attribute>
-      <default>1</default>
-      <id>MAX_COMPUTE_NODES_PER_SYSTEM</id>
+        <default>1</default>
+        <id>MAX_COMPUTE_NODES_PER_SYSTEM</id>
     </attribute>
     <attribute>
-      <id>SMF_CONFIG</id>
-      <default>0x0</default>
+        <id>SMF_CONFIG</id>
+        <default>0x0</default>
     </attribute>
     <attribute>
         <id>ADC_CHANNEL_FUNC_IDS</id>
@@ -253,44 +253,48 @@
         <default>74</default>
     </attribute>
     <attribute>
-      <id>SOFT_MIN_POWER_CAP_WATTS</id>
-      <default>500</default>
+        <id>SOFT_MIN_POWER_CAP_WATTS</id>
+        <default>500</default>
     </attribute>
     <attribute>
-      <id>N_PLUS_ONE_BULK_POWER_LIMIT_WATTS</id>
-      <default>3050</default>
+        <id>N_PLUS_ONE_BULK_POWER_LIMIT_WATTS</id>
+        <default>3050</default>
     </attribute>
     <attribute>
-      <id>MIN_POWER_CAP_WATTS</id>
-      <default>1700</default>
+        <id>MIN_POWER_CAP_WATTS</id>
+        <default>1700</default>
     </attribute>
     <attribute>
-      <id>FREQ_PB_MHZ</id>
-      <default>2000</default>
+        <id>FREQ_PB_MHZ</id>
+        <default>2000</default>
     </attribute>
     <attribute>
         <id>PROC_FABRIC_TOPOLOGY_MODE</id>
         <default>MODE0</default>
     </attribute>
     <attribute>
-          <id>SBE_SELECT_EX_POLICY</id>
-          <default>HB_DEFAULT</default><!-- Run with minimum cache -->
+        <id>SBE_SELECT_EX_POLICY</id>
+        <default>HB_DEFAULT</default><!-- Run with minimum cache -->
     </attribute>
     <attribute>
-          <id>MSS_INTERLEAVE_ENABLE</id>
-          <default>0xAE</default><!-- Require pairs -->
+        <id>MSS_INTERLEAVE_ENABLE</id>
+        <default>0xAE</default><!-- Require pairs -->
     </attribute>
     <attribute>
-          <id>PMIC_HEALTH_CHECK_TIMER</id>
-          <default>0xFFFFFFFF</default><!-- Disabled -->
+        <id>PMIC_HEALTH_CHECK_TIMER</id>
+        <default>0xFFFFFFFF</default><!-- Disabled -->
     </attribute>
     <attribute>
-          <id>MSL_MFG_ALLOW</id>
-          <default>0x20A9,0x20,0x60D2,0x20</default>
+        <id>MSL_MFG_ALLOW</id>
+        <default>0x20A9,0x20,0x60D2,0x20</default>
     </attribute>
     <attribute>
-          <id>MSL_FIELD_SUPPORTED</id>
-          <default>0x20DA,0x20,0x60D2,0x20,0,0</default>
+        <id>MSL_FIELD_SUPPORTED</id>
+        <default>0x20DA,0x20,0x60D2,0x20,0,0</default>
+    </attribute>
+    <attribute>
+        <id>USE_11S_SPD</id>
+        <default>0</default>
     </attribute>
 </targetInstance>
 
@@ -13874,7 +13878,7 @@
 <!-- 1 per OMI, a total of 16 possible per proc but just doing 4 off of P0 -->
 <!-- ===================================================================== -->
 <targetInstance>
-    <id>sys0node0ocmb0</id><!-- Simics=backplane0.dimm[5].ocmb,port9 -->
+    <id>sys0node0ocmb0</id><!-- Simics=backplane0.ocmb[0],port4 -->
     <type>chip-ocmb</type>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -13931,17 +13935,22 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
-            <field><id>eepromContentType</id><value>0x4</value></field>
+            <field><id>eepromContentType</id><value>0x9</value></field>
         </default>
     </attribute>
     <attribute>
         <id>LOCATION_CODE</id>
         <default>S0_N0_OCMB0</default>
     </attribute>
+    <attribute>
+        <id>MEM_MRW_IS_PLANAR</id>
+        <default>0x1</default>
+   </attribute>
+
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0ocmb1</id><!-- Simics=backplane0.dimm[11].ocmb,port8 -->
+    <id>sys0node0ocmb1</id><!-- Simics=backplane0.ocmb[1],port5 -->
     <type>chip-ocmb</type>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -13998,17 +14007,21 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
-            <field><id>eepromContentType</id><value>0x4</value></field>
+            <field><id>eepromContentType</id><value>0x9</value></field>
         </default>
     </attribute>
     <attribute>
         <id>LOCATION_CODE</id>
         <default>S0_N0_OCMB1</default>
     </attribute>
+    <attribute>
+        <id>MEM_MRW_IS_PLANAR</id>
+        <default>0x1</default>
+   </attribute>
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0ocmb2</id><!-- Simics=backplane0.dimm[1].ocmb,port10 -->
+    <id>sys0node0ocmb2</id><!-- Simics=backplane0.ocmb[2],port6 -->
     <type>chip-ocmb</type>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -14063,17 +14076,21 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
-            <field><id>eepromContentType</id><value>0x4</value></field>
+            <field><id>eepromContentType</id><value>0x9</value></field>
         </default>
     </attribute>
     <attribute>
         <id>LOCATION_CODE</id>
         <default>S0_N0_OCMB2</default>
     </attribute>
+    <attribute>
+        <id>MEM_MRW_IS_PLANAR</id>
+        <default>0x1</default>
+   </attribute>
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0ocmb3</id><!-- Simics=backplane0.dimm[0].ocmb,port11 -->
+    <id>sys0node0ocmb3</id><!-- Simics=backplane0.ocmb[3],port7 -->
     <type>chip-ocmb</type>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -14128,13 +14145,17 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
-            <field><id>eepromContentType</id><value>0x4</value></field>
+            <field><id>eepromContentType</id><value>0x9</value></field>
         </default>
     </attribute>
     <attribute>
         <id>LOCATION_CODE</id>
         <default>S0_N0_OCMB3</default>
     </attribute>
+    <attribute>
+        <id>MEM_MRW_IS_PLANAR</id>
+        <default>0x1</default>
+   </attribute>
 </targetInstance>
 
 <!-- ===================================================================== -->
@@ -14142,7 +14163,7 @@
 <!-- ===================================================================== -->
 
 <!-- ===================================================================== -->
-<!-- PMIC, ADC and GPIO Expander Units - Skipped for Bonito config. --> 
+<!-- PMIC, ADC and GPIO Expander Units - Skipped for Bonito config. -->
 <!-- No logical or physical connection for HB -->
 <!-- ===================================================================== -->
 
@@ -14289,7 +14310,7 @@
 <!-- ===================================================================== -->
 <targetInstance>
     <id>sys0node0dimm0</id>
-    <type>lcard-dimm-ddimm</type>
+    <type>lcard-dimm</type>
     <attribute>
         <id>HUID</id>
         <default>0x00030000</default>
@@ -14333,11 +14354,11 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>byteAddrOffset</id><value>0x01</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>port</id><value>0</value></field>
-            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x1</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
@@ -14346,7 +14367,7 @@
 
 <targetInstance>
     <id>sys0node0dimm1</id>
-    <type>lcard-dimm-ddimm</type>
+    <type>lcard-dimm</type>
     <attribute>
         <id>HUID</id>
         <default>0x00030004</default>
@@ -14390,11 +14411,11 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>byteAddrOffset</id><value>0x01</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>port</id><value>1</value></field>
-            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x1</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
@@ -14403,7 +14424,7 @@
 
 <targetInstance>
     <id>sys0node0dimm2</id>
-    <type>lcard-dimm-ddimm</type>
+    <type>lcard-dimm</type>
     <attribute>
         <id>HUID</id>
         <default>0x00030008</default>
@@ -14445,11 +14466,11 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>byteAddrOffset</id><value>0x01</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>port</id><value>2</value></field>
-            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x1</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
@@ -14458,7 +14479,7 @@
 
 <targetInstance>
     <id>sys0node0dimm3</id>
-    <type>lcard-dimm-ddimm</type>
+    <type>lcard-dimm</type>
     <attribute>
         <id>HUID</id>
         <default>0x0003000C</default>
@@ -14500,11 +14521,11 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>byteAddrOffset</id><value>0x01</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>port</id><value>3</value></field>
-            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x1</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
