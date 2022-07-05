@@ -60,6 +60,7 @@
 #include <sys/vfs.h>
 #include <initservice/initserviceif.H>
 #include <arch/ppc.H>
+#include <console/consoleif.H>
 
 using namespace PLDM;
 using namespace TARGETING;
@@ -208,6 +209,12 @@ void* wait_for_bmc_initiated_shutdown(void* const i_args)
 void PLDM::requestSoftPowerOff(const poweroff_initiator_t i_initiator)
 {
     PLDM_INF(ENTER_MRK"requestSoftPowerOff");
+
+    CONSOLE::displayf(CONSOLE::DEFAULT, NULL,
+                      "Soft poweroff requested by the %s",
+                      (i_initiator == POWEROFF_HOST_INITIATED
+                       ? "host"
+                       : "BMC"));
 
     const sensor_id_t shutdown_sensor_id
         = thePdrManager().getHostStateQueryIdForStateSet(PdrManager::STATE_QUERY_SENSOR,
