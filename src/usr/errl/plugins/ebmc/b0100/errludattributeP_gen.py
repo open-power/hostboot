@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2021,2022
+# Contributors Listed Below - COPYRIGHT 2022
 # [+] International Business Machines Corp.
 #
 #
@@ -44,7 +44,98 @@ def ErrlUserDetailsParserAttribute(ver, data):
         traceEntry = []
         label = ''
 
-        if attrEnum == 0x467a7c6:
+        if attrEnum == 0x71527f3:
+            #simpleType:uint
+            label = "RUNN_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x832a26f:
+            #simpleType:uint
+            label = "RUNN_SRESET_THREADS_BVEC"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x13cd0a9:
+            #simpleType:uint
+            label = "RUNN_CYCLE_COUNT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
+        elif attrEnum == 0xeb223ec:
+            #simpleType:uint
+            label = "RUNN_CHIP_CYCLE_OFFSET"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
+        elif attrEnum == 0x0220177:
+            #simpleType:uint
+            label = "RUNN_QUAD_CYCLE_OFFSET"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
+        elif attrEnum == 0x9b073da:
+            #simpleType:uint
+            label = "RUNN_CORE_CYCLE_OFFSET"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xaf0dc82:
+            #simpleType:uint
+            label = "RUNN_DO_CONFIG_CHECKS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xf9f4fcc:
+            #simpleType:uint
+            label = "RUNN_USE_QME_TIMEBASE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x12b0629:
+            #simpleType:uint
+            label = "RUNN_STOP_ON_XSTOP"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x4222d51:
+            #simpleType:uint
+            label = "RUNN_MASTER_SEED"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
+        elif attrEnum == 0xad742c1:
+            #simpleType:uint
+            label = "RUNN_CORE_SEED_SELECT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x484fa88:
+            #simpleType:uint
+            label = "RUNN_THREAD_SEEDS"
+            traceEntry.append("[4]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
+        elif attrEnum == 0x87e3ed0:
+            #simpleType:uint
+            label = "RUNN_STAGGER_DELAY"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
+        elif attrEnum == 0xe2457f8:
+            #simpleType:uint
+            label = "OMI_INBAND_BAR_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xf0baf47:
+            #simpleType:uint
+            label = "OMI_INBAND_BAR_BASE_ADDR_OFFSET"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
+        elif attrEnum == 0x467a7c6:
             #simpleType:uint
             label = "AUX_FUNC_INVOCATION_TIME_MS"
             for x in range(1):
@@ -894,341 +985,6 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
-        elif attrEnum == 0x71527f3:
-            #simpleType:uint
-            label = "RUNN_MODE"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x832a26f:
-            #simpleType:uint
-            label = "RUNN_SRESET_THREADS_BVEC"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x13cd0a9:
-            #simpleType:uint
-            label = "RUNN_CYCLE_COUNT"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+8)[0])
-                i += 8
-        elif attrEnum == 0xeb223ec:
-            #simpleType:uint
-            label = "RUNN_CHIP_CYCLE_OFFSET"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+8)[0])
-                i += 8
-        elif attrEnum == 0x0220177:
-            #simpleType:uint
-            label = "RUNN_QUAD_CYCLE_OFFSET"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+8)[0])
-                i += 8
-        elif attrEnum == 0x9b073da:
-            #simpleType:uint
-            label = "RUNN_CORE_CYCLE_OFFSET"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0xaf0dc82:
-            #simpleType:uint
-            label = "RUNN_DO_CONFIG_CHECKS"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0xf9f4fcc:
-            #simpleType:uint
-            label = "RUNN_USE_QME_TIMEBASE"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x12b0629:
-            #simpleType:uint
-            label = "RUNN_STOP_ON_XSTOP"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x4222d51:
-            #simpleType:uint
-            label = "RUNN_MASTER_SEED"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+8)[0])
-                i += 8
-        elif attrEnum == 0xad742c1:
-            #simpleType:uint
-            label = "RUNN_CORE_SEED_SELECT"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x484fa88:
-            #simpleType:uint
-            label = "RUNN_THREAD_SEEDS"
-            traceEntry.append("[4]:")
-            for x in range(4):
-                traceEntry.append(hexConcat(data, i, i+8)[0])
-                i += 8
-        elif attrEnum == 0x87e3ed0:
-            #simpleType:uint
-            label = "RUNN_STAGGER_DELAY"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+8)[0])
-                i += 8
-        elif attrEnum == 0xe2457f8:
-            #simpleType:uint
-            label = "OMI_INBAND_BAR_ENABLE"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0xf0baf47:
-            #simpleType:uint
-            label = "OMI_INBAND_BAR_BASE_ADDR_OFFSET"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+8)[0])
-                i += 8
-        elif attrEnum == 0x0d33633:
-            #simpleType:uint
-            label = "EFF_DRAM_GEN"
-            traceEntry.append("[2][2]:")
-            for x in range(4):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0xe35b4c7:
-            #simpleType:uint
-            label = "EFF_DIMM_TYPE"
-            traceEntry.append("[2][2]:")
-            for x in range(4):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0xa71dd22:
-            #simpleType:uint
-            label = "EFF_HYBRID_MEMORY_TYPE"
-            traceEntry.append("[2][2]:")
-            for x in range(4):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x43cb904:
-            #simpleType:uint
-            label = "EFF_HYBRID"
-            traceEntry.append("[2][2]:")
-            for x in range(4):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x07a9643:
-            #simpleType:uint
-            label = "EFF_DRAM_DENSITY"
-            traceEntry.append("[2][2]:")
-            for x in range(4):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x06d133f:
-            #simpleType:uint
-            label = "EFF_DRAM_BANK_BITS"
-            traceEntry.append("[2][2]:")
-            for x in range(4):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x667433c:
-            #simpleType:uint
-            label = "EFF_DRAM_BANK_GROUP_BITS"
-            traceEntry.append("[2][2]:")
-            for x in range(4):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x2f2f11c:
-            #simpleType:uint
-            label = "EFF_DRAM_COLUMN_BITS"
-            traceEntry.append("[2][2]:")
-            for x in range(4):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x1c28c5e:
-            #simpleType:uint
-            label = "EFF_DRAM_ROW_BITS"
-            traceEntry.append("[2][2]:")
-            for x in range(4):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x4934fda:
-            #simpleType:uint
-            label = "EFF_PRIM_STACK_TYPE"
-            traceEntry.append("[2][2]:")
-            for x in range(4):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x96494e2:
-            #simpleType:uint
-            label = "EFF_DRAM_PPR"
-            traceEntry.append("[2][2]:")
-            for x in range(4):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x5534fbf:
-            #simpleType:uint
-            label = "EFF_DRAM_SOFT_PPR"
-            traceEntry.append("[2][2]:")
-            for x in range(4):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0xc9b93c9:
-            #simpleType:uint
-            label = "EFF_DRAM_TRCD"
-            traceEntry.append("[2]:")
-            for x in range(2):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x8b78d35:
-            #simpleType:uint
-            label = "EFF_DRAM_TRP"
-            traceEntry.append("[2]:")
-            for x in range(2):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0xa982f98:
-            #simpleType:uint
-            label = "EFF_DRAM_TRAS"
-            traceEntry.append("[2]:")
-            for x in range(2):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x7461177:
-            #simpleType:uint
-            label = "EFF_DRAM_TRC"
-            traceEntry.append("[2]:")
-            for x in range(2):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x878bcaf:
-            #simpleType:uint
-            label = "EFF_DRAM_TRFC"
-            traceEntry.append("[2]:")
-            for x in range(2):
-                traceEntry.append(hexConcat(data, i, i+2)[0])
-                i += 2
-        elif attrEnum == 0xaf91cc7:
-            #simpleType:uint
-            label = "EFF_DRAM_TFAW"
-            traceEntry.append("[2]:")
-            for x in range(2):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0xd6045da:
-            #simpleType:uint
-            label = "EFF_DRAM_TRRD_S"
-            traceEntry.append("[2]:")
-            for x in range(2):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x5ab71e7:
-            #simpleType:uint
-            label = "EFF_DRAM_TRRD_L"
-            traceEntry.append("[2]:")
-            for x in range(2):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x732fad3:
-            #simpleType:uint
-            label = "EFF_DRAM_TCCD_L"
-            traceEntry.append("[2]:")
-            for x in range(2):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x05193dd:
-            #simpleType:uint
-            label = "EFF_DRAM_TWR"
-            traceEntry.append("[2]:")
-            for x in range(2):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x440bec8:
-            #simpleType:uint
-            label = "EFF_DRAM_TWTR_S"
-            traceEntry.append("[2]:")
-            for x in range(2):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x8cd1455:
-            #simpleType:uint
-            label = "EFF_DRAM_TWTR_L"
-            traceEntry.append("[2]:")
-            for x in range(2):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x8196e7d:
-            #simpleType:uint
-            label = "EFF_DRAM_TMAW"
-            traceEntry.append("[2]:")
-            for x in range(2):
-                traceEntry.append(hexConcat(data, i, i+2)[0])
-                i += 2
-        elif attrEnum == 0xbcc0968:
-            #simpleType:uint
-            label = "EFF_DRAM_WIDTH"
-            traceEntry.append("[2][2]:")
-            for x in range(4):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x55fe8eb:
-            #simpleType:uint
-            label = "EFF_DRAM_RANK_MIX"
-            traceEntry.append("[2][2]:")
-            for x in range(4):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x88ba0c5:
-            #simpleType:uint
-            label = "EFF_NUM_RANKS_PER_DIMM"
-            traceEntry.append("[2][2]:")
-            for x in range(4):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x38313b7:
-            #simpleType:uint
-            label = "EFF_REGISTER_TYPE"
-            traceEntry.append("[2][2]:")
-            for x in range(4):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x4bbfd53:
-            #simpleType:uint
-            label = "EFF_DRAM_MFG_ID"
-            traceEntry.append("[2][2]:")
-            for x in range(4):
-                traceEntry.append(hexConcat(data, i, i+2)[0])
-                i += 2
-        elif attrEnum == 0x43a0d7e:
-            #simpleType:uint
-            label = "EFF_RCD_MFG_ID"
-            traceEntry.append("[2][2]:")
-            for x in range(4):
-                traceEntry.append(hexConcat(data, i, i+2)[0])
-                i += 2
-        elif attrEnum == 0x6cb15ee:
-            #simpleType:uint
-            label = "EFF_REGISTER_REV"
-            traceEntry.append("[2][2]:")
-            for x in range(4):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x208baa7:
-            #simpleType:uint
-            label = "EFF_PACKAGE_RANK_MAP"
-            traceEntry.append("[2][2][18]:")
-            for x in range(72):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x86feede:
-            #simpleType:uint
-            label = "EFF_NIBBLE_MAP"
-            traceEntry.append("[2][2][18]:")
-            for x in range(72):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x6809efd:
-            #simpleType:uint
-            label = "ROW_REPAIR_SUPPORTED_MRW"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
         elif attrEnum == 0xf4f230f:
             #simpleType:uint
             label = "MEMORY_BAR_REGS"
@@ -2169,6 +1925,36 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0x55ddfeb:
+            #simpleType:uint
+            label = "PROC_FAVOR_AGGRESSIVE_PREFETCH"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xe444f3b:
+            #simpleType:uint
+            label = "PROC_LCO_MODE_DISABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x5d59877:
+            #simpleType:uint
+            label = "PROC_LCO_MODE_SETUP"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x6237f69:
+            #simpleType:uint
+            label = "PROC_LCO_MODE_SETUP_ADAPTIVE_N"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
+        elif attrEnum == 0x8f50763:
+            #simpleType:uint
+            label = "PROC_LCO_MODE_SETUP_ADAPTIVE_D"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xf88f412:
             #simpleType:uint
             label = "PROC_LCO_TARGETS_COUNT"
@@ -2230,6 +2016,349 @@ def ErrlUserDetailsParserAttribute(ver, data):
         elif attrEnum == 0xa450ad9:
             #simpleType:uint
             label = "HW543384_WAR_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x0a96a60:
+            #simpleType:uint
+            label = "SYSTEM_FUSED_CORE_PAIRED_DISABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xce16d63:
+            #simpleType:uint
+            label = "QME_STATE_LOSS_CORES"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
+        elif attrEnum == 0xde419d0:
+            #simpleType:uint
+            label = "PROC_DPLL_DIVIDER"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
+        elif attrEnum == 0x2fd62ba:
+            #simpleType:uint
+            label = "XGPE_BOOT_COPIER_IVPR_OFFSET"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
+        elif attrEnum == 0x08b7922:
+            #simpleType:uint
+            label = "PGPE_BOOT_COPIER_IVPR_OFFSET"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
+        elif attrEnum == 0x4c1219d:
+            #simpleType:uint
+            label = "PM_SPWUP_IGNORE_XSTOP_FLAG"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x8d614de:
+            #simpleType:uint
+            label = "OCC_LFIRMASK"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
+        elif attrEnum == 0x36ebdf0:
+            #simpleType:uint
+            label = "PBAO_LFIRMASK"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
+        elif attrEnum == 0x9209ebe:
+            #simpleType:uint
+            label = "QME_LFIRMASK"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
+        elif attrEnum == 0xc2a8db1:
+            #simpleType:uint
+            label = "PBAF_LFIRMASK"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
+        elif attrEnum == 0x4851132:
+            #simpleType:uint
+            label = "PM_FIRINIT_DONE_ONCE_FLAG"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xe977d9f:
+            #simpleType:uint
+            label = "L3_HASCLOCKS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xd66b345:
+            #simpleType:uint
+            label = "CORE_HASCLOCKS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x5437d12:
+            #simpleType:uint
+            label = "L3_HASPOWER"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x15f7d77:
+            #simpleType:uint
+            label = "CORE_HASPOWER"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xa3a4736:
+            #simpleType:uint
+            label = "PSTATES_ENABLED"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xaa9080d:
+            #simpleType:uint
+            label = "RESCLK_ENABLED"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xe8a4ed4:
+            #simpleType:uint
+            label = "DDS_ENABLED"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xe992285:
+            #simpleType:uint
+            label = "RVRM_ENABLED"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xca00099:
+            #simpleType:uint
+            label = "WOF_ENABLED"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xb22f067:
+            #simpleType:uint
+            label = "OCS_ENABLED"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x244f3e1:
+            #simpleType:uint
+            label = "WOV_UNDERV_ENABLED"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x931031c:
+            #simpleType:uint
+            label = "WOV_OVERV_ENABLED"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x82f2d14:
+            #simpleType:uint
+            label = "WOF_THROTTLE_CONTROL_DISABLED"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x7405667:
+            #simpleType:uint
+            label = "XGPE_PHANTOM_HALT_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x08f223c:
+            #simpleType:uint
+            label = "PGPE_PHANTOM_HALT_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xc95df70:
+            #simpleType:uint
+            label = "QME_STOP_PHANTOM_HALT_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xae5b915:
+            #simpleType:uint
+            label = "CORE_INSIDE_SPECIAL_WAKEUP"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xaf6e256:
+            #simpleType:uint
+            label = "INITIATED_PM_HALT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xed1a955:
+            #simpleType:uint
+            label = "PM_RESTART_PHASE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x8b6b012:
+            #simpleType:uint
+            label = "PM_MALF_CYCLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x5c5498f:
+            #simpleType:uint
+            label = "BOOT_VOLTAGE"
+            traceEntry.append("[4]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
+        elif attrEnum == 0xd0ddacf:
+            #simpleType:uint
+            label = "QME_BROADSIDE_SCAN"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x001189a:
+            #simpleType:uint
+            label = "SYSTEM_PSTATE0_FREQ_MHZ"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
+        elif attrEnum == 0xed4417b:
+            #simpleType:uint
+            label = "HOMER_LOCATION"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xc7deda5:
+            #simpleType:uint
+            label = "QME_BOOT_CONTROL"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xb69562d:
+            #simpleType:uint
+            label = "PM_SPIPSS_FRAME_SIZE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xae84e31:
+            #simpleType:uint
+            label = "PM_SPIPSS_IN_DELAY"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x0241bf2:
+            #simpleType:uint
+            label = "PM_SPIPSS_CLOCK_POLARITY"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x82b807e:
+            #simpleType:uint
+            label = "PM_SPIPSS_CLOCK_PHASE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x16824ac:
+            #simpleType:uint
+            label = "PM_SPIPSS_CLOCK_DIVIDER"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0x3e336e0:
+            #simpleType:uint
+            label = "PM_SPIPSS_INTER_FRAME_DELAY_SETTING"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
+        elif attrEnum == 0xc8bd195:
+            #simpleType:uint
+            label = "INSIDE_SPECIAL_WAKEUP"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xe2ab0d2:
+            #simpleType:uint
+            label = "SOCKET_POWER_NOMINAL"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0x3a9b8a6:
+            #simpleType:uint
+            label = "SYSTEM_COMPAT_FREQ_MHZ"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0x8f2e0ff:
+            #simpleType:uint
+            label = "WOF_TABLE_OVERRIDE_UT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0xaa89323:
+            #simpleType:uint
+            label = "WOF_TABLE_OVERRIDE_WB"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0x3d086ed:
+            #simpleType:uint
+            label = "WOF_TABLE_OVERRIDE_PS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0xd53c70b:
+            #simpleType:uint
+            label = "WOF_TABLE_OVERRIDE_FF"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0x9133f91:
+            #simpleType:uint
+            label = "WOF_TABLE_OVERRIDE_SP"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0x3be1427:
+            #simpleType:uint
+            label = "WOF_TABLE_OVERRIDE_RC"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0x63c5ad2:
+            #simpleType:uint
+            label = "WOF_IO_START"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0x07e49ed:
+            #simpleType:uint
+            label = "WOF_IO_STEP"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0xf995f8c:
+            #simpleType:uint
+            label = "WOF_IO_COUNT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0x219028e:
+            #simpleType:uint
+            label = "VDN_VOLTAGE_MV"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0x6efcd46:
+            #simpleType:uint
+            label = "WOF_TDP_IO_INDEX"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xcb1fddb:
+            #simpleType:uint
+            label = "DEAD_CORE_MODE"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
@@ -2912,349 +3041,18 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+8)[0])
                 i += 8
-        elif attrEnum == 0x0a96a60:
+        elif attrEnum == 0x3b80bcf:
             #simpleType:uint
-            label = "SYSTEM_FUSED_CORE_PAIRED_DISABLE"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0xce16d63:
-            #simpleType:uint
-            label = "QME_STATE_LOSS_CORES"
+            label = "QME_HCODE_OFFSET"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
-        elif attrEnum == 0xde419d0:
+        elif attrEnum == 0xca985e0:
             #simpleType:uint
-            label = "PROC_DPLL_DIVIDER"
+            label = "QME_HCODE_BLOCK_COUNT"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
-        elif attrEnum == 0x2fd62ba:
-            #simpleType:uint
-            label = "XGPE_BOOT_COPIER_IVPR_OFFSET"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+4)[0])
-                i += 4
-        elif attrEnum == 0x08b7922:
-            #simpleType:uint
-            label = "PGPE_BOOT_COPIER_IVPR_OFFSET"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+4)[0])
-                i += 4
-        elif attrEnum == 0x4c1219d:
-            #simpleType:uint
-            label = "PM_SPWUP_IGNORE_XSTOP_FLAG"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x8d614de:
-            #simpleType:uint
-            label = "OCC_LFIRMASK"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+8)[0])
-                i += 8
-        elif attrEnum == 0x36ebdf0:
-            #simpleType:uint
-            label = "PBAO_LFIRMASK"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+8)[0])
-                i += 8
-        elif attrEnum == 0x9209ebe:
-            #simpleType:uint
-            label = "QME_LFIRMASK"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+8)[0])
-                i += 8
-        elif attrEnum == 0xc2a8db1:
-            #simpleType:uint
-            label = "PBAF_LFIRMASK"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+8)[0])
-                i += 8
-        elif attrEnum == 0x4851132:
-            #simpleType:uint
-            label = "PM_FIRINIT_DONE_ONCE_FLAG"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0xe977d9f:
-            #simpleType:uint
-            label = "L3_HASCLOCKS"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0xd66b345:
-            #simpleType:uint
-            label = "CORE_HASCLOCKS"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x5437d12:
-            #simpleType:uint
-            label = "L3_HASPOWER"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x15f7d77:
-            #simpleType:uint
-            label = "CORE_HASPOWER"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0xa3a4736:
-            #simpleType:uint
-            label = "PSTATES_ENABLED"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0xaa9080d:
-            #simpleType:uint
-            label = "RESCLK_ENABLED"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0xe8a4ed4:
-            #simpleType:uint
-            label = "DDS_ENABLED"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0xe992285:
-            #simpleType:uint
-            label = "RVRM_ENABLED"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0xca00099:
-            #simpleType:uint
-            label = "WOF_ENABLED"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0xb22f067:
-            #simpleType:uint
-            label = "OCS_ENABLED"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x244f3e1:
-            #simpleType:uint
-            label = "WOV_UNDERV_ENABLED"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x931031c:
-            #simpleType:uint
-            label = "WOV_OVERV_ENABLED"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x82f2d14:
-            #simpleType:uint
-            label = "WOF_THROTTLE_CONTROL_DISABLED"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x7405667:
-            #simpleType:uint
-            label = "XGPE_PHANTOM_HALT_ENABLE"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x08f223c:
-            #simpleType:uint
-            label = "PGPE_PHANTOM_HALT_ENABLE"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0xc95df70:
-            #simpleType:uint
-            label = "QME_STOP_PHANTOM_HALT_ENABLE"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0xae5b915:
-            #simpleType:uint
-            label = "CORE_INSIDE_SPECIAL_WAKEUP"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0xaf6e256:
-            #simpleType:uint
-            label = "INITIATED_PM_HALT"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0xed1a955:
-            #simpleType:uint
-            label = "PM_RESTART_PHASE"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x8b6b012:
-            #simpleType:uint
-            label = "PM_MALF_CYCLE"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x5c5498f:
-            #simpleType:uint
-            label = "BOOT_VOLTAGE"
-            traceEntry.append("[4]:")
-            for x in range(4):
-                traceEntry.append(hexConcat(data, i, i+4)[0])
-                i += 4
-        elif attrEnum == 0xd0ddacf:
-            #simpleType:uint
-            label = "QME_BROADSIDE_SCAN"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x001189a:
-            #simpleType:uint
-            label = "SYSTEM_PSTATE0_FREQ_MHZ"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+4)[0])
-                i += 4
-        elif attrEnum == 0xed4417b:
-            #simpleType:uint
-            label = "HOMER_LOCATION"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0xc7deda5:
-            #simpleType:uint
-            label = "QME_BOOT_CONTROL"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0xb69562d:
-            #simpleType:uint
-            label = "PM_SPIPSS_FRAME_SIZE"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0xae84e31:
-            #simpleType:uint
-            label = "PM_SPIPSS_IN_DELAY"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x0241bf2:
-            #simpleType:uint
-            label = "PM_SPIPSS_CLOCK_POLARITY"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x82b807e:
-            #simpleType:uint
-            label = "PM_SPIPSS_CLOCK_PHASE"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x16824ac:
-            #simpleType:uint
-            label = "PM_SPIPSS_CLOCK_DIVIDER"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+2)[0])
-                i += 2
-        elif attrEnum == 0x3e336e0:
-            #simpleType:uint
-            label = "PM_SPIPSS_INTER_FRAME_DELAY_SETTING"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+4)[0])
-                i += 4
-        elif attrEnum == 0xc8bd195:
-            #simpleType:uint
-            label = "INSIDE_SPECIAL_WAKEUP"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0xe2ab0d2:
-            #simpleType:uint
-            label = "SOCKET_POWER_NOMINAL"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+2)[0])
-                i += 2
-        elif attrEnum == 0x3a9b8a6:
-            #simpleType:uint
-            label = "SYSTEM_COMPAT_FREQ_MHZ"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+2)[0])
-                i += 2
-        elif attrEnum == 0x8f2e0ff:
-            #simpleType:uint
-            label = "WOF_TABLE_OVERRIDE_UT"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+2)[0])
-                i += 2
-        elif attrEnum == 0xaa89323:
-            #simpleType:uint
-            label = "WOF_TABLE_OVERRIDE_WB"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+2)[0])
-                i += 2
-        elif attrEnum == 0x3d086ed:
-            #simpleType:uint
-            label = "WOF_TABLE_OVERRIDE_PS"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+2)[0])
-                i += 2
-        elif attrEnum == 0xd53c70b:
-            #simpleType:uint
-            label = "WOF_TABLE_OVERRIDE_FF"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+2)[0])
-                i += 2
-        elif attrEnum == 0x9133f91:
-            #simpleType:uint
-            label = "WOF_TABLE_OVERRIDE_SP"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+2)[0])
-                i += 2
-        elif attrEnum == 0x3be1427:
-            #simpleType:uint
-            label = "WOF_TABLE_OVERRIDE_RC"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+2)[0])
-                i += 2
-        elif attrEnum == 0x63c5ad2:
-            #simpleType:uint
-            label = "WOF_IO_START"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+2)[0])
-                i += 2
-        elif attrEnum == 0x07e49ed:
-            #simpleType:uint
-            label = "WOF_IO_STEP"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+2)[0])
-                i += 2
-        elif attrEnum == 0xf995f8c:
-            #simpleType:uint
-            label = "WOF_IO_COUNT"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+2)[0])
-                i += 2
-        elif attrEnum == 0x219028e:
-            #simpleType:uint
-            label = "VDN_VOLTAGE_MV"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+2)[0])
-                i += 2
-        elif attrEnum == 0x6efcd46:
-            #simpleType:uint
-            label = "WOF_TDP_IO_INDEX"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0xcb1fddb:
-            #simpleType:uint
-            label = "DEAD_CORE_MODE"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
         elif attrEnum == 0xcab73ca:
             #simpleType:uint
             label = "FREQ_CP_REFCLOCK_KHZ"
@@ -3473,18 +3271,6 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
-        elif attrEnum == 0x3b80bcf:
-            #simpleType:uint
-            label = "QME_HCODE_OFFSET"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+4)[0])
-                i += 4
-        elif attrEnum == 0xca985e0:
-            #simpleType:uint
-            label = "QME_HCODE_BLOCK_COUNT"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+4)[0])
-                i += 4
         elif attrEnum == 0xba8abbe:
             #simpleType:uint
             label = "SBE_IMAGE_MINIMUM_VALID_ECS"
@@ -3857,6 +3643,250 @@ def ErrlUserDetailsParserAttribute(ver, data):
         elif attrEnum == 0x570ac35:
             #simpleType:uint
             label = "PROC_INT_NVC_BAR_RANGE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x0d33633:
+            #simpleType:uint
+            label = "EFF_DRAM_GEN"
+            traceEntry.append("[2][2]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xe35b4c7:
+            #simpleType:uint
+            label = "EFF_DIMM_TYPE"
+            traceEntry.append("[2][2]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xa71dd22:
+            #simpleType:uint
+            label = "EFF_HYBRID_MEMORY_TYPE"
+            traceEntry.append("[2][2]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x43cb904:
+            #simpleType:uint
+            label = "EFF_HYBRID"
+            traceEntry.append("[2][2]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x07a9643:
+            #simpleType:uint
+            label = "EFF_DRAM_DENSITY"
+            traceEntry.append("[2][2]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x06d133f:
+            #simpleType:uint
+            label = "EFF_DRAM_BANK_BITS"
+            traceEntry.append("[2][2]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x667433c:
+            #simpleType:uint
+            label = "EFF_DRAM_BANK_GROUP_BITS"
+            traceEntry.append("[2][2]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x2f2f11c:
+            #simpleType:uint
+            label = "EFF_DRAM_COLUMN_BITS"
+            traceEntry.append("[2][2]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x1c28c5e:
+            #simpleType:uint
+            label = "EFF_DRAM_ROW_BITS"
+            traceEntry.append("[2][2]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x4934fda:
+            #simpleType:uint
+            label = "EFF_PRIM_STACK_TYPE"
+            traceEntry.append("[2][2]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x96494e2:
+            #simpleType:uint
+            label = "EFF_DRAM_PPR"
+            traceEntry.append("[2][2]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x5534fbf:
+            #simpleType:uint
+            label = "EFF_DRAM_SOFT_PPR"
+            traceEntry.append("[2][2]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xc9b93c9:
+            #simpleType:uint
+            label = "EFF_DRAM_TRCD"
+            traceEntry.append("[2]:")
+            for x in range(2):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x8b78d35:
+            #simpleType:uint
+            label = "EFF_DRAM_TRP"
+            traceEntry.append("[2]:")
+            for x in range(2):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xa982f98:
+            #simpleType:uint
+            label = "EFF_DRAM_TRAS"
+            traceEntry.append("[2]:")
+            for x in range(2):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x7461177:
+            #simpleType:uint
+            label = "EFF_DRAM_TRC"
+            traceEntry.append("[2]:")
+            for x in range(2):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x878bcaf:
+            #simpleType:uint
+            label = "EFF_DRAM_TRFC"
+            traceEntry.append("[2]:")
+            for x in range(2):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0xaf91cc7:
+            #simpleType:uint
+            label = "EFF_DRAM_TFAW"
+            traceEntry.append("[2]:")
+            for x in range(2):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xd6045da:
+            #simpleType:uint
+            label = "EFF_DRAM_TRRD_S"
+            traceEntry.append("[2]:")
+            for x in range(2):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x5ab71e7:
+            #simpleType:uint
+            label = "EFF_DRAM_TRRD_L"
+            traceEntry.append("[2]:")
+            for x in range(2):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x732fad3:
+            #simpleType:uint
+            label = "EFF_DRAM_TCCD_L"
+            traceEntry.append("[2]:")
+            for x in range(2):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x05193dd:
+            #simpleType:uint
+            label = "EFF_DRAM_TWR"
+            traceEntry.append("[2]:")
+            for x in range(2):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x440bec8:
+            #simpleType:uint
+            label = "EFF_DRAM_TWTR_S"
+            traceEntry.append("[2]:")
+            for x in range(2):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x8cd1455:
+            #simpleType:uint
+            label = "EFF_DRAM_TWTR_L"
+            traceEntry.append("[2]:")
+            for x in range(2):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x8196e7d:
+            #simpleType:uint
+            label = "EFF_DRAM_TMAW"
+            traceEntry.append("[2]:")
+            for x in range(2):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0xbcc0968:
+            #simpleType:uint
+            label = "EFF_DRAM_WIDTH"
+            traceEntry.append("[2][2]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x55fe8eb:
+            #simpleType:uint
+            label = "EFF_DRAM_RANK_MIX"
+            traceEntry.append("[2][2]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x88ba0c5:
+            #simpleType:uint
+            label = "EFF_NUM_RANKS_PER_DIMM"
+            traceEntry.append("[2][2]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x38313b7:
+            #simpleType:uint
+            label = "EFF_REGISTER_TYPE"
+            traceEntry.append("[2][2]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x4bbfd53:
+            #simpleType:uint
+            label = "EFF_DRAM_MFG_ID"
+            traceEntry.append("[2][2]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0x43a0d7e:
+            #simpleType:uint
+            label = "EFF_RCD_MFG_ID"
+            traceEntry.append("[2][2]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0x6cb15ee:
+            #simpleType:uint
+            label = "EFF_REGISTER_REV"
+            traceEntry.append("[2][2]:")
+            for x in range(4):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x208baa7:
+            #simpleType:uint
+            label = "EFF_PACKAGE_RANK_MAP"
+            traceEntry.append("[2][2][18]:")
+            for x in range(72):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x86feede:
+            #simpleType:uint
+            label = "EFF_NIBBLE_MAP"
+            traceEntry.append("[2][2][18]:")
+            for x in range(72):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x6809efd:
+            #simpleType:uint
+            label = "ROW_REPAIR_SUPPORTED_MRW"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
@@ -4677,6 +4707,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(10):
                 traceEntry.append(hexConcat(data, i, i+8)[0])
                 i += 8
+        elif attrEnum == 0x3d77935:
+            #simpleType:uint
+            label = "MSS_MRW_OVERRIDE_THERM_SENSOR_USAGE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x9cf4fc4:
             #simpleType:uint
             label = "MEM_EFF_DRAM_GEN"
@@ -7682,6 +7718,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+8)[0])
                 i += 8
+        elif attrEnum == 0xec67366:
+            #simpleType:uint
+            label = "HB_MIN_BACKING_CACHE_FC"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xbf11ec0:
             #simpleType:uint
             label = "HB_RSV_MEM_SIZE_MB"
@@ -7934,6 +7976,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
         elif attrEnum == 0xdbffc50:
             #simpleType:uint
             label = "L3_CACHE_SIZE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
+        elif attrEnum == 0x99b51a5:
+            #simpleType:uint
+            label = "LAST_IPLTIME_EID"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
@@ -8283,6 +8331,20 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
+        elif attrEnum == 0x2fd4ceb:
+            #simpleType:uint
+            label = "MSL_FIELD_SUPPORTED"
+            traceEntry.append("[12]:")
+            for x in range(12):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0x596417a:
+            #simpleType:uint
+            label = "MSL_MFG_ALLOW"
+            traceEntry.append("[12]:")
+            for x in range(12):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0xefb544c:
             #simpleType:uint
             label = "MSS_AVDD_PROGRAM"
@@ -10063,6 +10125,13 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
+        elif attrEnum == 0xca0e8ed:
+            #simpleType:uint
+            label = "FRU_NUMBER"
+            traceEntry.append("[48]:")
+            for x in range(48):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x24bd83c:
             pass #not readable
         elif attrEnum == 0x1fa93ae:
@@ -10719,6 +10788,13 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+2)[0])
                 i += 2
+        elif attrEnum == 0x93f3408:
+            #simpleType:uint
+            label = "BUS_RAIL_LOCATION_MAP"
+            traceEntry.append("[208]:")
+            for x in range(208):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xbe4ab2c:
             #simpleType:uint
             label = "CALCULATED_MAX_SYS_POWER_EXCLUDING_GPUS"
@@ -10732,6 +10808,8 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 traceEntry.append(hexConcat(data, i, i+2)[0])
                 i += 2
         elif attrEnum == 0x4185ea4:
+            pass #complexType - skipping
+        elif attrEnum == 0x629ce4f:
             pass #complexType - skipping
         elif attrEnum == 0x433cfe9:
             #simpleType:uint
@@ -10751,6 +10829,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+2)[0])
                 i += 2
+        elif attrEnum == 0xf79b949:
+            #simpleType:uint
+            label = "DEALLOCATED"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xe326e79:
             #simpleType:uint
             label = "DIMM_ERROR_TEMP_DEG_C"
@@ -10908,6 +10992,13 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
+        elif attrEnum == 0xda1ed59:
+            #simpleType:uint
+            label = "LOCATION_PN_SN_CCIN_MAP"
+            traceEntry.append("[146]:")
+            for x in range(146):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x4c7382b:
             #simpleType:uint
             label = "MAX_VDD_CURRENT_READING"
@@ -11090,8 +11181,26 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0x78e2006:
+            #simpleType:uint
+            label = "PLDM_BMC_PDR_COUNT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
+        elif attrEnum == 0x80e877c:
+            #simpleType:uint
+            label = "PLDM_CONNECTOR_PDRS_ENABLED"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xb2c6bc3:
             pass #complexType - skipping
+        elif attrEnum == 0x2ab5b69:
+            #simpleType:uint
+            label = "PLDM_HB_PDR_COUNT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x8f31306:
             #simpleType:uint
             label = "PLDM_STATE_QUERY_RECORDS"
