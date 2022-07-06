@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2022                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -134,6 +134,22 @@
     <writeable/>
   </attribute>
 
+  <attribute>
+    <id>ATTR_IO_IOHS_XTALK</id>
+    <targetType>
+      TARGET_TYPE_IOHS
+    </targetType>
+    <description>
+       Unique Mode to help with high xtalk - SW547515
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+      NO_XTALK = 0x00,
+      HI_XTALK    = 0x01
+    </enum>
+    <default>NO_XTALK</default>
+    <platInit/>
+  </attribute>
   <attribute>
     <id>ATTR_IO_IOHS_CHANNEL_LOSS</id>
     <targetType>
