@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -441,6 +441,7 @@ fapi2::ReturnCode p10_io_init::init_regs(const fapi2::Target<fapi2::TARGET_TYPE_
             int l_num_lanes = P10_IO_LIB_NUMBER_OF_IOHS_LANES;
             int l_thread = 0;
             fapi2::ATTR_IO_IOHS_CHANNEL_LOSS_Type l_loss;
+            fapi2::ATTR_IO_IOHS_XTALK_Type l_xtalk;
             fapi2::ATTR_IO_IOHS_PRE1_Type l_pre1;
             fapi2::ATTR_IO_IOHS_PRE2_Type l_pre2;
 
@@ -452,6 +453,9 @@ fapi2::ReturnCode p10_io_init::init_regs(const fapi2::Target<fapi2::TARGET_TYPE_
 
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IO_IOHS_CHANNEL_LOSS, l_iohs_target, l_loss),
                      "Error from FAPI_ATTR_GET (ATTR_IO_IOHS_CHANNEL_LOSS)");
+
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IO_IOHS_XTALK, l_iohs_target, l_xtalk),
+                     "Error from FAPI_ATTR_GET (ATTR_IO_IOHS_CHANNEL_XTALK)");
 
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_IOHS_LINK_MHZ, l_iohs_target, l_iohs_freq),
                      "Error from FAPI_ATTR_GET (ATTR_FREQ_IOHS_LINK_MHZ)");
@@ -600,6 +604,44 @@ fapi2::ReturnCode p10_io_init::init_regs(const fapi2::Target<fapi2::TARGET_TYPE_
             {
                 FAPI_TRY(p10_io_ppe_rx_eo_enable_dfe_full_cal[l_thread].putData(l_pauc_target, 0x0));
             }
+
+            if (l_xtalk == fapi2::ENUM_ATTR_IO_IOHS_XTALK_HI_XTALK)
+            {
+                // Disable Peak1 Cal, Peak1 == 2, LTEZ = 1
+                // Peaking
+                FAPI_TRY(p10_io_ppe_ppe_ctle_peak1_disable[l_thread].putData(l_pauc_target, 0x1));
+                // RX A CTLE_PEAK1
+                FAPI_TRY(p10_io_iohs_put_pl_regs(l_iohs_target,
+                                                 IOO_RX0_0_RD_RX_DAC_REGS_CNTL6_PL,
+                                                 IOO_RX0_0_RD_RX_DAC_REGS_CNTL6_PL_PEAK1,
+                                                 IOO_RX0_0_RD_RX_DAC_REGS_CNTL6_PL_PEAK1_LEN,
+                                                 l_num_lanes,
+                                                 2));
+
+                // RX B CTLE_PEAK1
+                FAPI_TRY(p10_io_iohs_put_pl_regs(l_iohs_target,
+                                                 IOO_RX0_0_RD_RX_DAC_REGS_CNTL13_PL,
+                                                 IOO_RX0_0_RD_RX_DAC_REGS_CNTL13_PL_PEAK1,
+                                                 IOO_RX0_0_RD_RX_DAC_REGS_CNTL13_PL_PEAK1_LEN,
+                                                 l_num_lanes,
+                                                 2));
+                // RX A LTE_ZERO
+                FAPI_TRY(p10_io_iohs_put_pl_regs(l_iohs_target,
+                                                 IOO_RX0_0_RD_RX_DAC_REGS_CNTL3_PL,
+                                                 IOO_RX0_0_RD_RX_DAC_REGS_CNTL3_PL_ZERO,
+                                                 IOO_RX0_0_RD_RX_DAC_REGS_CNTL3_PL_ZERO_LEN,
+                                                 l_num_lanes,
+                                                 1));
+
+                // RX B LTE_ZERO
+                FAPI_TRY(p10_io_iohs_put_pl_regs(l_iohs_target,
+                                                 IOO_RX0_0_RD_RX_DAC_REGS_CNTL4_PL,
+                                                 IOO_RX0_0_RD_RX_DAC_REGS_CNTL4_PL_ZERO,
+                                                 IOO_RX0_0_RD_RX_DAC_REGS_CNTL4_PL_ZERO_LEN,
+                                                 l_num_lanes,
+                                                 1));
+            }
+
 
             FAPI_TRY(disable_bad_lanes(l_iohs_target));
 
