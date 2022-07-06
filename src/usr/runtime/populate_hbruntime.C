@@ -4705,12 +4705,21 @@ errlHndl_t verifyAndMovePayload(const bool i_payloadAlreadyVerified)
                                 PAGESIZE);
     payload_size -= PAGESIZE;
 
+    // Determine the size of the mapped area (mapSize) for PHYP + HDAT
+    // Limit this to the minimum of either the LMB size or 256MB:
+    // If LMB Size is < 256MB, then use the LMB size
+    // If LMB Size is >= 256MB, then just use 256MB
+    // Additionally, ensure that mapSize is at least equal to the payload_size
     const uint64_t lmb_size = getLMBSizeInMB() * MEGABYTE;
-    const uint64_t mapSize = std::max(lmb_size, payload_size);
+    const uint64_t limit_256mb = 256 * MEGABYTE;
+    const uint64_t mapSize = std::max( std::min(lmb_size, limit_256mb),
+                                       payload_size);
 
     TRACFCOMP(g_trac_runtime,
-              "verifyAndMovePayload(): mapSize=0x%X, lmb_size=0x%X, payload_size=0x%X",
-              mapSize, lmb_size, payload_size);
+              "verifyAndMovePayload(): mapSize=0x%.16llX, lmb_size=0x%.16llX, "
+              "payload_size=0x%.16llX (limit_256mb=0x%.16llX",
+              mapSize, lmb_size, payload_size, limit_256mb);
+
 
     payloadBase_virt_addr = mm_block_map(
                                reinterpret_cast<void*>(payloadBase),
@@ -4757,8 +4766,8 @@ errlHndl_t verifyAndMovePayload(const bool i_payloadAlreadyVerified)
         const auto payloadBase_virt_addr_ptr = static_cast<uint8_t*>(payloadBase_virt_addr);
 
         TRACFCOMP(g_trac_runtime,
-                  "verifyAndMovePayload(): Zeroing rest of first LMB of PAYLOAD from 0x%.16llX (va="
-                  "0x%llX) to 0x%.16llX (va=0x%llX)",
+                  "verifyAndMovePayload(): Zeroing rest of mapped area of PAYLOAD from 0x%.16llX "
+                  "(va=0x%llX) to 0x%.16llX (va=0x%llX)",
                   payloadBase + payload_size, payloadBase_virt_addr_ptr + payload_size,
                   payloadBase + mapSize, payloadBase_virt_addr_ptr + mapSize);
 
