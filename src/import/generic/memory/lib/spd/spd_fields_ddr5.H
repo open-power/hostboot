@@ -79,6 +79,13 @@ class fields<DDR5, BASE_CNFG>
             DENSITY_PER_DIE_START = 3,
             DENSITY_PER_DIE_LEN = 5,
 
+            //Byte 16, 17, 18
+            OPERABLE_START = 4,
+            OPERABLE_LEN = 2,
+
+            ENDURANT_START = 6,
+            ENDURANT_LEN = 2,
+
             //////////////////////////////////////
             //// Bytes 19-93: timings
             //////////////////////////////////////
@@ -144,6 +151,15 @@ class fields<DDR5, BASE_CNFG>
         static constexpr mss::field_t<mss::endian::LITTLE> BASE_MODULE{3, BASE_MODULE_START, BASE_MODULE_LEN};
         static constexpr mss::field_t<mss::endian::LITTLE> DIE_PER_PACKAGE{4, DIE_PER_PACKAGE_START, DIE_PER_PACKAGE_LEN};
         static constexpr mss::field_t<mss::endian::LITTLE> DENSITY_PER_DIE{4, DENSITY_PER_DIE_START, DENSITY_PER_DIE_LEN};
+
+        static constexpr mss::field_t<mss::endian::LITTLE> OPERABLE_VDD_FLD{16, OPERABLE_START, OPERABLE_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> ENDURANT_VDD_FLD{16, ENDURANT_START, ENDURANT_LEN};
+
+        static constexpr mss::field_t<mss::endian::LITTLE> OPERABLE_VDDQ_FLD{17, OPERABLE_START, OPERABLE_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> ENDURANT_VDDQ_FLD{17, ENDURANT_START, ENDURANT_LEN};
+
+        static constexpr mss::field_t<mss::endian::LITTLE> OPERABLE_VPP_FLD{18, OPERABLE_START, OPERABLE_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> ENDURANT_VPP_FLD{18, ENDURANT_START, ENDURANT_LEN};
 
         //////////////////////////////////////
         //// Bytes 19-93: timings

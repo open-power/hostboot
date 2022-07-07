@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,12 +51,23 @@ namespace mss
 /// @tparam D mss::spd::device_type DRAM device type (generation)
 /// @tparam TT mss::voltage_traits voltage traits for the given mc_type/device_type pairing
 /// @param[in] i_target the target for accessing voltage attributes from SPD
+/// @param[in] i_spd raw spd data
 /// @param[out] o_supported_dram_voltages vector of supported rail voltages in millivolts to be used in set_voltage_attributes
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<mss::mc_type M, mss::spd::device_type D, typename TT = mss::voltage_traits<M, D>>
 fapi2::ReturnCode get_supported_voltages(const fapi2::Target<TT::SPD_TARGET_TYPE>& i_target,
+        const std::vector<uint8_t>& i_spd,
         std::vector<uint32_t>& o_supported_dram_voltages);
+
+///
+/// @brief Setup the DRAM generation
+/// @param[in] i_target dimm target
+/// @param[out] o_spd spd data
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode spd_common_process( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                      std::vector<uint8_t>& o_spd);
 
 ///
 /// @brief Set voltage rail attributes
@@ -100,16 +111,18 @@ fapi_try_exit:
 /// @tparam D mss::spd::device_type DRAM device type (generation)
 /// @tparam TT mss::voltage_traits voltage traits for the given mc_type/device_type pairing
 /// @param[in] i_target the target for accessing voltage attributes from SPD
+/// @param[in] i_spd raw spd data
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<mss::mc_type M, mss::spd::device_type D, typename TT = mss::voltage_traits<M, D>>
-inline fapi2::ReturnCode setup_voltage_rail_values(const fapi2::Target<TT::SPD_TARGET_TYPE>& i_target)
+inline fapi2::ReturnCode setup_voltage_rail_values(const fapi2::Target<TT::SPD_TARGET_TYPE>& i_target,
+        const std::vector<uint8_t>& i_spd)
 {
     const auto l_voltage_target = mss::find_target<TT::VOLTAGE_TARGET_TYPE>(i_target);
     const auto l_spd_target = mss::find_target<TT::SPD_TARGET_TYPE>(i_target);
     std::vector<uint32_t> l_dram_voltages;
 
-    FAPI_TRY( (mss::get_supported_voltages<M, D>(l_spd_target, l_dram_voltages)),
+    FAPI_TRY( (mss::get_supported_voltages<M, D>(l_spd_target, i_spd, l_dram_voltages)),
               "Failed to get supported voltages for %s", mss::c_str(l_spd_target) );
 
     FAPI_TRY( (mss::set_voltage_attributes<M, D>(l_voltage_target, l_dram_voltages)),

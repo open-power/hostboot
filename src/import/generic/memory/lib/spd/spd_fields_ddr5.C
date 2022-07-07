@@ -54,6 +54,14 @@ constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::HYBRID_MEDI
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::BASE_MODULE;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::DIE_PER_PACKAGE;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::DENSITY_PER_DIE;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::OPERABLE_VDD_FLD;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::ENDURANT_VDD_FLD;
+
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::OPERABLE_VDDQ_FLD;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::ENDURANT_VDDQ_FLD;
+
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::OPERABLE_VPP_FLD;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::ENDURANT_VPP_FLD;
 
 //////////////////////////////////////
 //// Bytes 19-93: timings

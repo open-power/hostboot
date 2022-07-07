@@ -909,6 +909,19 @@
   </attribute>
 
   <attribute>
+    <id>ATTR_MEM_EFF_VOLT_VDDQ</id>
+    <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    <description>
+      DRAM Voltage, each voltage rail would need to have a value.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <mssUnits> mV </mssUnits>
+    <mssAccessorName>volt_vddq</mssAccessorName>
+  </attribute>
+
+  <attribute>
     <id>ATTR_MEM_EFF_VOLT_VPP</id>
     <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
     <description>

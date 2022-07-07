@@ -924,8 +924,8 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_VOLT_DDR_TYPE_REQUIRED_VOLTAGE</rc>
-    <description>One or more DIMMs do not support required voltage for DDR type.</description>
+    <rc>RC_MSS_VOLT_DDR4_TYPE_REQUIRED_VOLTAGE</rc>
+    <description>One or more DIMMs do not support required voltage for DDR4.</description>
     <ffdc>EXPECTED_OPERABLE</ffdc>
     <ffdc>EXPECTED_ENDURANT</ffdc>
     <ffdc>ACTUAL_OPERABLE</ffdc>
@@ -940,6 +940,44 @@
     </callout>
     <deconfigure>
       <target>DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_VOLT_DDR5_TYPE_REQUIRED_VOLTAGE</rc>
+    <description>One or more DIMMs do not support required voltage for DDR5.</description>
+    <ffdc>EXPECTED_OPERABLE</ffdc>
+    <ffdc>EXPECTED_ENDURANT</ffdc>
+    <ffdc>ACTUAL_VDD_OPERABLE</ffdc>
+    <ffdc>ACTUAL_VDDQ_OPERABLE</ffdc>
+    <ffdc>ACTUAL_VPP_OPERABLE</ffdc>
+    <ffdc>ACTUAL_VDD_ENDURANT</ffdc>
+    <ffdc>ACTUAL_VDDQ_ENDURANT</ffdc>
+    <ffdc>ACTUAL_VPP_ENDURANT</ffdc>
+   <callout>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_VOLT_INVALID_DRAM_GEN</rc>
+    <description>Invalid DRAM generation at p10_mss_volt</description>
+    <ffdc>DRAM_GEN</ffdc>
+    <ffdc>PORT_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
     </deconfigure>
   </hwpError>
 

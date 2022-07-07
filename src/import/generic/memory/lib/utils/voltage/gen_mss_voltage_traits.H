@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,7 +61,7 @@ class voltage_traits<mss::mc_type::EXPLORER, mss::spd::device_type::DDR4>
         // Target types
         //////////////////////////////////////////////////////////////
         static constexpr fapi2::TargetType VOLTAGE_TARGET_TYPE = fapi2::TARGET_TYPE_OCMB_CHIP;
-        static constexpr fapi2::TargetType SPD_TARGET_TYPE = fapi2::TARGET_TYPE_MEM_PORT;
+        static constexpr fapi2::TargetType SPD_TARGET_TYPE = fapi2::TARGET_TYPE_DIMM;
 
         //////////////////////////////////////////////////////////////
         // Traits values
@@ -72,6 +72,31 @@ class voltage_traits<mss::mc_type::EXPLORER, mss::spd::device_type::DDR4>
         // Static consts for DDR4 voltages used in p9_mss_volt
         static const uint64_t DDR4_NOMINAL_VOLTAGE = 1200;
         static const uint64_t DDR4_VPP_VOLTAGE = 2500;
+};
+
+///
+/// @class Traits and policy class for voltage code - specialization for the P10 processor type, DDR5 device type
+///
+template<>
+class voltage_traits<mss::mc_type::ODYSSEY, mss::spd::device_type::DDR5>
+{
+    public:
+        //////////////////////////////////////////////////////////////
+        // Target types
+        //////////////////////////////////////////////////////////////
+        static constexpr fapi2::TargetType VOLTAGE_TARGET_TYPE = fapi2::TARGET_TYPE_OCMB_CHIP;
+        static constexpr fapi2::TargetType SPD_TARGET_TYPE = fapi2::TARGET_TYPE_DIMM;
+
+        //////////////////////////////////////////////////////////////
+        // Traits values
+        //////////////////////////////////////////////////////////////
+        // List of attribute setter functions for setting voltage rail values
+        static const std::vector<fapi2::ReturnCode (*)(const fapi2::Target<VOLTAGE_TARGET_TYPE>&, uint32_t)> voltage_setters;
+
+        // Static consts for DDR5 voltages
+        static const uint64_t DDR5_VDD_VOLTAGE = 1100;
+        static const uint64_t DDR5_VDDQ_VOLTAGE = 1100;
+        static const uint64_t DDR5_VPP_VOLTAGE = 1800;
 };
 
 } // ns mss

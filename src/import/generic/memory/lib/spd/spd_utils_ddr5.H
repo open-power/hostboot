@@ -47,6 +47,14 @@ namespace spd
 {
 namespace ddr5
 {
+///
+/// @brief enum for voltage information. Encoding comes from SPD
+///
+enum nominal_voltage : uint8_t
+{
+    OPERABLE = 0b00,     ///< Operable at vdd=1.1V, vddq=1.1V, vpp=1.8V
+    ENDURANT = 0b00      ///< Endurant at vdd=1.1V, vddq=1.1V, vpp=1.8V
+};
 
 ///
 /// @brief Helper function to calculate a DDR5 SPD timing in ps from the SPD
