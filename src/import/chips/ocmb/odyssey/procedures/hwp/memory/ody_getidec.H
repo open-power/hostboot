@@ -27,15 +27,14 @@
 /// @file exp_getidec.H
 /// @brief Contains function to lookup Chip ID and EC values of Odyssey Chip
 ///
-/// *HWP HWP Owner: Christian Geddes <crgeddes@us.ibm.com>
+/// *HWP HWP Owner: Thi Tran thi@us.ibm.com
 /// *HWP HWP Backup: <none>
-/// *HWP Team: Hostboot
-/// *HWP Level: 1
+/// *HWP Team: VBU
+/// *HWP Level: 2
 /// *HWP Consumed by: Hostboot / Cronus
 
 #ifndef _ODY_GETIDEC_H_
 #define _ODY_GETIDEC_H_
-
 #include <fapi2.H>
 
 typedef fapi2::ReturnCode (*ody_getidec_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
@@ -46,9 +45,9 @@ extern "C"
 
 ///
 /// @brief Lookup the Chip ID and EC level values for this Odyssey chip
-/// @param[in]   i_target Odyssey OCMB chip
-/// @param[out]  o_chipId Odyssey Chip ID
-/// @param[out]  o_chipEc Odyssey Chip EC
+/// @param[in]   i_target     Reference to OCMB (Odyssey) chip target
+/// @param[out]  o_chipId     Odyssey Chip ID
+/// @param[out]  o_chipEc     Odyssey Chip EC
 /// @return fapi2:ReturnCode FAPI2_RC_SUCCESS if success, else error code.
 ///
     fapi2::ReturnCode ody_getidec(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,

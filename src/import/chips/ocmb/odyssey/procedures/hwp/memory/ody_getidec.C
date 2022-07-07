@@ -27,29 +27,43 @@
 /// @file ody_getidec.C
 /// @brief Contains function to lookup Chip ID and EC values of Odyssey Chip
 ///
-/// *HWP HWP Owner: Christian Geddes <crgeddes@us.ibm.com>
+/// *HWP HWP Owner: Thi Tran thi@us.ibm.com
 /// *HWP HWP Backup: <none>
-/// *HWP Team: Hostboot
-/// *HWP Level: 1
+/// *HWP Team: VBU
+/// *HWP Level: 2
 /// *HWP Consumed by: Hostboot / Cronus
 
 #include <fapi2.H>
+#include <ody_scom_ody.H>
 #include <ody_getidec.H>
+#include <lib/shared/ody_consts.H>
+#include <generic/memory/lib/utils/c_str.H>
 
 extern "C"
 {
 
-    ///
-    /// @brief Lookup the Chip ID and EC level values for this Odyssey chip
-    /// @param[in]   i_target Odyssey OCMB chip
-    /// @param[out]  o_chipId Odyssey Chip ID
-    /// @param[out]  o_chipEc Odyssey Chip EC
-    /// @return fapi2:ReturnCode FAPI2_RC_SUCCESS if success, else error code.
-    ///
+    SCOMT_ODY_USE_T_CFAM_FSI_W_FSI2PIB_CHIPID;
+
     fapi2::ReturnCode ody_getidec(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                   uint16_t& o_chipId,
                                   uint8_t& o_chipEc)
     {
-        return fapi2::FAPI2_RC_SUCCESS;
+        FAPI_DBG("ody_getidec: Entering...");
+        using namespace scomt::ody;
+        T_CFAM_FSI_W_FSI2PIB_CHIPID_t CHIP_IDEC;
+
+        // Reading CFAM chip id reg
+        FAPI_TRY(CHIP_IDEC.getCfam(i_target),
+                 "Error reading CFAM chip IDEC reg for %s.",  mss::c_str(i_target));
+        CHIP_IDEC.extractToRight<mss::ody::idec_consts::MAJOR_EC_BIT_START,
+                                 mss::ody::idec_consts::MAJOR_EC_BIT_LENGTH>(o_chipEc);
+        CHIP_IDEC.extractToRight<mss::ody::idec_consts::CHIPID_BIT_START,
+                                 mss::ody::idec_consts::CHIPID_BIT_LENGTH>(o_chipId);
+        FAPI_INF("Target %s: EC 0x%.02x   ChipId 0x%.04x", mss::c_str(i_target), o_chipEc, o_chipId);
+
+    fapi_try_exit:
+        FAPI_DBG("ody_getidec: Exiting.");
+        return fapi2::current_err;
     }
+
 } // extern "C"
