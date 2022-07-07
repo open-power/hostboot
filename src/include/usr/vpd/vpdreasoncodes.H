@@ -197,6 +197,7 @@ enum vpdReasonCode
     VPD_RECORD_INVALID                  = VPD_COMP_ID | 0x4E,
     VPD_UNSUPPORTED_FRU_PROPERTY        = VPD_COMP_ID | 0x4F,
     VPD_UNSUPPORTED_EEPROM_TYPE         = VPD_COMP_ID | 0x50,
+    VPD_SPD_INVALID_PRIMARY_VPD         = VPD_COMP_ID | 0x51,
 };
 
 

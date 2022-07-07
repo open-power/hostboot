@@ -201,6 +201,16 @@ namespace SPD
         CHECK_AND_FIX // Rewrite any CRC that miscompares, also commit visible log
     };
 
+    // Define a range to compute CRC for
+    struct crc_section_t {
+        size_t start; //starting byte to check
+        size_t numbytes; //number of bytes to check plus 2 bytes for CRC itself
+
+        // store CRC values for later logging
+        uint16_t crcSPD;
+        uint16_t crcActual;
+    };
+
     /**
      * @brief Evaluate and/or correct all CRC entries for this DDIMM
      * @param[in] i_target - Target to fetch SPD for
@@ -209,7 +219,11 @@ namespace SPD
      *      FIX : Rewrite any CRC that miscompares, commit info log for any miscompare
      *      CHECK_AND_FIX : Rewrite any CRC that miscompares, also
      *                      commit visible log
+     * @param[in] i_role - Describes which EEPROM associated to the
+     *                     target that is being requested to check the CRC on.
+     *                     PRIMARY, BACKUP, etc.
      * @param[in] i_location - Read from cache or hardware
+     * @param[out] o_crc_sections - calculated crc sections
      * @param[out] o_missing_vpd - Whether the error returned was due to missing VPD
      *                             rather than to a CRC or other error. If null,
      *                             this parameter is ignored.
@@ -217,7 +231,9 @@ namespace SPD
      */
     errlHndl_t checkCRC( TARGETING::TargetHandle_t i_target,
                          enum CRCMODE_t i_mode,
-                         EEPROM::EEPROM_SOURCE i_location = EEPROM::AUTOSELECT,
+                         EEPROM::EEPROM_ROLE i_role,
+                         EEPROM::EEPROM_SOURCE i_location,
+                         std::vector<crc_section_t> & o_crc_sections,
                          bool* o_missing_vpd = nullptr);
 
     /**

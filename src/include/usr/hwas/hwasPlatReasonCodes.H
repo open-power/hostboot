@@ -40,6 +40,7 @@ namespace HWAS
         MOD_PLAT_READLX            = 0x83,
         MOD_CHECK_HB_NVDIMM        = 0x84,
         MOD_CROSSCHECK_SP_PRESENCE = 0x85,
+        MOD_PLAT_CHECK_OCMB_CRC    = 0x86,
     };
 
     enum HwasPlatReasonCode
@@ -65,6 +66,7 @@ namespace HWAS
         RC_PRESENCE_MISMATCH_HB             = HWAS_COMP_ID | 0x90,
         RC_PNOR_ACCESS_FAILED               = HWAS_COMP_ID | 0x91,
         RC_RT_POSSIBLE_PNOR_CORRUPTION      = HWAS_COMP_ID | 0x92,
+        RC_CRC_MISMATCH_FOUND               = HWAS_COMP_ID | 0x93,
     };
 
 };

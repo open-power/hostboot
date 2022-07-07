@@ -55,9 +55,12 @@
 #include <targeting/common/utilFilter.H>
 #include <fsi/fsiif.H>
 #include <targeting/common/targetservice.H>
+#include <targeting/common/mfgFlagAccessors.H>
 #include <chipids.H>
 #include <vpd/spdenums.H>
 #include <spd.H>
+#include <errl/hberrltypes.H>
+
 
 #include <map>
 
@@ -167,7 +170,7 @@ errlHndl_t cfamIDEC(DeviceFW::OperationType i_opType,
     if( (errl == NULL)
         && ((id_ec & 0xFFFFFFFF00000000) == 0xFFFFFFFF00000000) )
     {
-        HWAS_ERR("All FFs for chipid read on %.8X",TARGETING::get_huid(i_target));
+        HWAS_ERR("All FFs for chipid read on %08X",TARGETING::get_huid(i_target));
         /*@
          * @errortype
          * @moduleid     HWAS::MOD_PLAT_READIDEC
@@ -228,12 +231,12 @@ errlHndl_t cfamIDEC(DeviceFW::OperationType i_opType,
                        ((id_ec & 0x000F000000000000ull) >> 44) |
                        ((id_ec & 0x0000F00000000000ull) >> 44));
         i_target->setAttr<ATTR_CHIP_ID>(id);
-        HWAS_DBG( "i_target %.8X - id %x ec %x",
+        HWAS_DBG( "i_target %08X - id %x ec %x",
             i_target->getAttr<ATTR_HUID>(), id, ec);
     }
     else
     {   // errl was set - this is an error condition.
-        HWAS_ERR( "i_target %.8X - failed ID/EC read",
+        HWAS_ERR( "i_target %08X - failed ID/EC read",
             i_target->getAttr<ATTR_HUID>());
     }
 
@@ -644,7 +647,7 @@ errlHndl_t ocmbIdecPhase2(const TARGETING::TargetHandle_t& i_target)
 
                         if (l_errl != nullptr)
             {
-                HWAS_ERR("ocmbIdecPhase2> explorer OCMB 0x%.8X - failed to read ID/EC",
+                HWAS_ERR("ocmbIdecPhase2> explorer OCMB 0x%08X - failed to read ID/EC",
                         TARGETING::get_huid(i_target));
 
                 break;
@@ -660,7 +663,7 @@ errlHndl_t ocmbIdecPhase2(const TARGETING::TargetHandle_t& i_target)
 
             if (l_errl != nullptr)
             {
-                HWAS_ERR("ocmbIdecPhase2> gemini OCMB 0x%.8X - failed to read ID/EC",
+                HWAS_ERR("ocmbIdecPhase2> gemini OCMB 0x%08X - failed to read ID/EC",
                         TARGETING::get_huid(i_target));
 
                 break;
@@ -678,7 +681,7 @@ errlHndl_t ocmbIdecPhase2(const TARGETING::TargetHandle_t& i_target)
             l_id = POWER_CHIPID::extract_chipid16(l_idec);
         }
 
-        HWAS_INF("ocmbIdecPhase2> OCMB 0x%.8X - read ID/EC successful. "
+        HWAS_INF("ocmbIdecPhase2> OCMB 0x%08X - read ID/EC successful. "
                  "ID = 0x%.4X, EC = 0x%.2X, Full IDEC 0x%x",
                  TARGETING::get_huid(i_target),
                  l_id,
@@ -805,7 +808,7 @@ errlHndl_t platIsMinHwCheckingAllowed(bool &o_minHwCheckingAllowed)
 errlHndl_t platReadPartialGood(const TargetHandle_t &i_target,
         void *o_pgData)
 {
-    HWAS_DBG( "i_target %.8X",
+    HWAS_DBG( "i_target %08X",
             i_target->getAttr<ATTR_HUID>());
 
     // call deviceRead() to find the PartialGood record
@@ -817,7 +820,7 @@ errlHndl_t platReadPartialGood(const TargetHandle_t &i_target,
 
     if (unlikely(errl != NULL))
     {   // errl was set - this is an error condition.
-        HWAS_ERR( "i_target %.8X - failed partialGood read",
+        HWAS_ERR( "i_target %08X - failed partialGood read",
             i_target->getAttr<ATTR_HUID>());
     }
     else
@@ -906,14 +909,14 @@ errlHndl_t platReadLx(const TargetHandle_t &i_mca,
     {
         l_x = VPD_CRP0_LX_MIN_X + l_chip_unit;
 
-        HWAS_DBG( "i_mca %.8X, Lx = L%1d",
+        HWAS_DBG( "i_mca %08X, Lx = L%1d",
                   i_mca->getAttr<ATTR_HUID>(),
                   l_x);
 
         //Check for an invalid x value
         if( l_x > VPD_CRP0_LX_MAX_X)
         {
-            HWAS_ERR("Invalid Lx with x=%1d for MCA %.8X",
+            HWAS_ERR("Invalid Lx with x=%1d for MCA %08X",
                      l_x,
                      i_mca->getAttr<ATTR_HUID>());
             /*@
@@ -939,7 +942,7 @@ errlHndl_t platReadLx(const TargetHandle_t &i_mca,
         {
             l_proc = getParentChip( i_mca );
 
-            HWAS_DBG( "i_mca %.8X, Lx = L%1d, l_proc %.8X",
+            HWAS_DBG( "i_mca %08X, Lx = L%1d, l_proc %08X",
                       i_mca->getAttr<ATTR_HUID>(),
                       l_x,
                       l_proc->getAttr<ATTR_HUID>());
@@ -956,7 +959,7 @@ errlHndl_t platReadLx(const TargetHandle_t &i_mca,
 
         if (errl != nullptr)
         {   // trace the error condition
-            HWAS_INF( "l_proc %.8X, i_mca %.8X - failed L%1d read",
+            HWAS_INF( "l_proc %08X, i_mca %08X - failed L%1d read",
                       l_proc->getAttr<ATTR_HUID>(),
                       i_mca->getAttr<ATTR_HUID>(),
                       l_x);
@@ -980,6 +983,254 @@ errlHndl_t platGetFCO(const TargetHandle_t &i_node,
 
     return errl;
 } // platGetFCO
+
+/**
+ * @brief Check present OCMB targets for valid SPD data via CRC check
+ * @note Assumes this is called after EEPROM::cacheEepromVpd so eecache should be updated
+ * @param[in]       i_target - present OCMB target
+ * @param[in/out] io_present - present status of OCMB target
+ *                             (CRC failure may change this status)
+ */
+void platCheckOcmbCRC(TARGETING::Target * i_target, bool & io_present)
+{
+    bool vpd_read_failed(false);
+    bool logged_hw_error(false);
+    errlHndl_t errl(nullptr);
+
+    bool mfgMode = TARGETING::areMfgThresholdsActive();
+
+    // Helpful trace of the OCMB's EEPROM VPD redundancy and accessibility
+    TARGETING::ATTR_EEPROM_VPD_ACCESSIBILITY_type vpd_accessibility =
+                    TARGETING::EEPROM_VPD_ACCESSIBILITY_NONE_DISABLED;
+    TARGETING::ATTR_EEPROM_VPD_REDUNDANCY_type eeprom_redundancy =
+                    TARGETING::EEPROM_VPD_REDUNDANCY_POSSIBLE;
+    if (i_target->tryGetAttr<TARGETING::ATTR_EEPROM_VPD_REDUNDANCY>(eeprom_redundancy))
+    {
+        vpd_accessibility = i_target->getAttr<TARGETING::ATTR_EEPROM_VPD_ACCESSIBILITY>();
+        HWAS_INF("platCheckOcmbCRC mfgMode %d> 0x%08X OCMB - redundancy %x, accessibility %x",
+            mfgMode, TARGETING::get_huid(i_target), eeprom_redundancy, vpd_accessibility);
+    }
+
+    std::vector<SPD::crc_section_t> l_sections_eecache;
+    HWAS_DBG( "platCheckOcmbCRC> Call SPD::checkCRC on 0x%08X allow eecache", TARGETING::get_huid(i_target) );
+    errl = SPD::checkCRC( i_target, SPD::CHECK, EEPROM::VPD_AUTO, EEPROM::AUTOSELECT, l_sections_eecache, &vpd_read_failed );
+    if (errl)
+    {
+        if (vpd_read_failed)
+        {   // If the VPD read failed, it means we failed to read the
+            // VPD contents into EECACHE earlier which already created
+            // a log, so we delete this one to avoid repeat logs.
+            HWAS_INF("platCheckOcmbCRC> Deleting error 0x%08x, VPD read error was already logged",
+                     ERRL_GETPLID_SAFE(errl));
+            delete errl;
+            errl = nullptr;
+        }
+        else
+        {
+            HWAS_ERR("platCheckOcmbCRC> checkCRC() FAILED with AUTOSELECT for 0x%08X OCMB, committing error 0x%08x",
+                TARGETING::get_huid(i_target), ERRL_GETPLID_SAFE(errl));
+
+            // try to recover if in non-mfg mode
+            if (!mfgMode)
+            {
+#ifndef __HOSTBOOT_RUNTIME
+                errlHndl_t l_mvpdSourceError(nullptr);
+
+                // If validation of record ECC Data fails,
+                // then move onto the next MVPD source and try again.
+                // errl will be committed as RECOVERED if next source found
+                l_mvpdSourceError = EEPROM::reloadMvpdEecacheFromNextSource(i_target, errl);
+                if (l_mvpdSourceError)
+                {
+                    // Validation of the record ECC data failed AND getting the next MVPD
+                    // EECACHE source failed as well. Commit the MVPD source error, keep
+                    // the validation error and deconfigure target based on the validation
+                    // error.
+                    HWAS_ERR("platCheckOcmbCRC> reloadMvpdEecacheFromNextSource failed to get the next MVPD "
+                        "source for target 0x%08X",  TARGETING::get_huid(i_target) );
+                    errlCommit( l_mvpdSourceError, VPD_COMP_ID );
+                }
+#endif
+            }
+            else
+            {
+                // mfg mode will check hw
+                errl->removeGardAndDeconfigure();
+            }
+
+            // unable to recover from error
+            if (errl)
+            {
+                collectHwasTraces(errl);
+                errlCommit(errl, HWAS_COMP_ID);
+
+                // SPD is busted, so mark the part as not present
+                io_present = false;
+            }
+            else
+            {
+                platCheckOcmbCRC(i_target, io_present);
+            }
+        }
+    }
+    else
+    {
+        HWAS_INF("platCheckOcmbCRC> checkCRC() with AUTOSELECT PASSED for 0x%08X OCMB", TARGETING::get_huid(i_target));
+    }
+
+
+    if (mfgMode)
+    {
+        // there will already be an error for the disabled eeprom and the valid one would have been checked in eecache
+        if (vpd_accessibility == TARGETING::EEPROM_VPD_ACCESSIBILITY_NONE_DISABLED)
+        {
+            std::vector<SPD::crc_section_t> l_sections_primary;
+            std::vector<SPD::crc_section_t> l_sections_backup;
+
+            HWAS_INF("platCheckOcmbCRC> Call SPD::checkCRC on 0x%08X HW with VPD_PRIMARY role", TARGETING::get_huid(i_target));
+            // check PRIMARY_VPD first
+            errl = SPD::checkCRC( i_target, SPD::CHECK, EEPROM::VPD_PRIMARY, EEPROM::HARDWARE, l_sections_primary, &vpd_read_failed );
+            if (errl)
+            {
+                HWAS_ERR("platCheckOcmbCRC> checkCRC() failed for 0x%08X OCMB PRIMARY EEPROM", TARGETING::get_huid(i_target));
+                errl->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE_REDUNDANCY_LOST);
+                ERRORLOG::ErrlUserDetailsString("Bad PRIMARY EEPROM").addToLog(errl);
+                collectHwasTraces(errl);
+                errlCommit(errl, HWAS_COMP_ID);
+                logged_hw_error = true;
+            }
+            else
+            {
+                HWAS_INF("platCheckOcmbCRC> PASSED SPD::checkCRC on 0x%08X HW with VPD_PRIMARY role", TARGETING::get_huid(i_target));
+            }
+
+            // If redundancy might exist, try backup hw eeprom
+            if (eeprom_redundancy != TARGETING::EEPROM_VPD_REDUNDANCY_NOT_PRESENT)
+            {
+                // also try BACKUP EEPROM
+                HWAS_INF("platCheckOcmbCRC> Call SPD::checkCRC on 0x%08X HW with VPD_BACKUP role", TARGETING::get_huid(i_target));
+                errl = SPD::checkCRC( i_target, SPD::CHECK, EEPROM::VPD_BACKUP, EEPROM::HARDWARE, l_sections_backup, &vpd_read_failed );
+                if (errl)
+                {
+                    HWAS_ERR("platCheckOcmbCRC> checkCRC() failed for 0x%08X OCMB BACKUP EEPROM", TARGETING::get_huid(i_target));
+                    errl->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE_REDUNDANCY_LOST);
+                    ERRORLOG::ErrlUserDetailsString("Bad BACKUP EEPROM").addToLog(errl);
+                    collectHwasTraces(errl);
+                    errlCommit(errl, HWAS_COMP_ID);
+                    logged_hw_error = true;
+                }
+                else
+                {
+                    HWAS_INF("platCheckOcmbCRC> PASSED SPD::checkCRC on 0x%08X HW with VPD_BACKUP role", TARGETING::get_huid(i_target));
+
+                    // mark eeprom redundancy as present
+                    if (eeprom_redundancy == TARGETING::EEPROM_VPD_REDUNDANCY_POSSIBLE)
+                    {
+                        i_target->setAttr<TARGETING::ATTR_EEPROM_VPD_REDUNDANCY>(TARGETING::EEPROM_VPD_REDUNDANCY_PRESENT);
+                    }
+                }
+            }
+
+            // check if SPD data matches between the two EEPROMs
+            if (!logged_hw_error)
+            {
+                bool mismatchFound = false;
+
+                // uint64_t userdata word with first mismatch data
+                union first_mismatch_data_t
+                {
+                    uint64_t value;
+                    struct
+                    {
+                        uint16_t start;
+                        uint16_t crc_primary_eeprom;
+                        uint16_t crc_backup_eeprom;
+                        uint8_t total_primary_sections;
+                        uint8_t total_backup_sections;
+                    } format;
+                };
+                first_mismatch_data_t first_mismatch = {0};
+
+                if (l_sections_primary.size() != l_sections_backup.size())
+                {
+                    HWAS_ERR("platCheckOcmbCRC> checkCRC() - 0x%08X EEPROMs have different returned CRC data sizes (PRIMARY %d vs BACKUP %d)",
+                        TARGETING::get_huid(i_target), l_sections_primary.size(), l_sections_backup.size());
+                    // create error for CRCs not matching between the two EEPROMs
+                    mismatchFound = true;
+
+                    first_mismatch.format.total_primary_sections = l_sections_primary.size();
+                    first_mismatch.format.total_backup_sections  = l_sections_backup.size();
+                }
+                else
+                {
+                    for (uint8_t i = 0; i < l_sections_primary.size(); i++)
+                    {
+                        if ((l_sections_primary[i].crcSPD != l_sections_backup[i].crcSPD) ||
+                            (l_sections_primary[i].crcActual != l_sections_backup[i].crcActual))
+                        {
+                            HWAS_ERR("platCheckOcmbCRC> checkCRC() - 0x%08X EEPROMs CRCs mismatch at start byte %d (PRIMARY %x vs BACKUP %x)",
+                                TARGETING::get_huid(i_target), l_sections_primary[i].start,
+                                l_sections_primary[i].crcSPD, l_sections_backup[i].crcSPD);
+
+                            // found a mismatch
+                            mismatchFound = true;
+
+                            // record the first mismatch but continue checking rest of the sections
+                            if (first_mismatch.format.total_primary_sections == 0)
+                            {
+                                first_mismatch.format.start = l_sections_primary[i].start;
+                                first_mismatch.format.crc_primary_eeprom = l_sections_primary[i].crcSPD;
+                                first_mismatch.format.crc_backup_eeprom = l_sections_backup[i].crcSPD;
+                                first_mismatch.format.total_primary_sections = l_sections_primary.size();
+                                first_mismatch.format.total_backup_sections = l_sections_backup.size();
+                            }
+                        }
+                    }
+                }
+                if (mismatchFound)
+                {
+                    HWAS_ERR("platCheckOcmbCRC> Mismatch found betweenn EEPROMS on %08X OCMB", TARGETING::get_huid(i_target));
+                    /*@
+                    * @errortype    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                    * @moduleid     HWAS::MOD_PLAT_CHECK_OCMB_CRC
+                    * @reasoncode   HWAS::RC_CRC_MISMATCH_FOUND
+                    * @userdata1    Hostboot OCMB Target HUID
+                    * @userdata2    First mismatch (start, primary CRC, backup CRC, total primary sections, total backup sections)
+                    * @devdesc      CRCs mismatch between EEPROMs
+                    * @custdesc     A problem occurred during IPL
+                    */
+                    errl = new ERRORLOG::ErrlEntry(
+                                        ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                        HWAS::MOD_CHECK_HB_NVDIMM,
+                                        HWAS::RC_HB_PROC_ONLY_NVDIMM,
+                                        get_huid(i_target),
+                                        first_mismatch.value,
+                                        ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
+                    // VPD is wrong
+                    errl->addPartCallout(i_target,
+                                         HWAS::VPD_PART_TYPE,
+                                         HWAS::SRCI_PRIORITY_HIGH);
+
+                    errl->addHwCallout(i_target,
+                                       HWAS::SRCI_PRIORITY_MED,
+                                       HWAS::DELAYED_DECONFIG,
+                                       HWAS::GARD_NULL);
+                    collectHwasTraces(errl);
+                    errlCommit(errl, HWAS_COMP_ID);
+                }
+                else
+                {
+                    HWAS_INF("platCheckOcmbCRC> PASSED MNFG CRC check on %08X OCMB", TARGETING::get_huid(i_target));
+                }
+            }
+        }
+        else
+        {
+            HWAS_INF("platCheckOcmbCRC> skipping redundant hw check on 0x%08X as either already have an error or redundancy not supported",
+                TARGETING::get_huid(i_target));
+        }
+    } // end if (mfgMode)
+}
 
 //******************************************************************************
 // platPresenceDetect function
@@ -1054,7 +1305,7 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
         // by definition, hostboot only has 1 node/enclosure, and we're here so it's functional
         if (pTarget->getAttr<ATTR_CLASS>() == CLASS_ENC)
         {
-            HWAS_INF("pTarget %.8X - detected present - ENC",
+            HWAS_INF("pTarget %08X - detected present - ENC",
                     get_huid(pTarget));
             // If the planar VPD was collected remotely, such as on eBMC systems via PLDM, then
             // don't skip presence detect as it will load relevant attributes for FRU callouts.
@@ -1075,7 +1326,7 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
         //  by default
         if ((l_attrType == TYPE_SP) || (l_attrType ==  TYPE_BMC))
         {
-            HWAS_INF("pTarget %.8X - detected present - SP",
+            HWAS_INF("pTarget %08X - detected present - SP",
                 pTarget->getAttr<ATTR_HUID>());
             pTarget_it++;
             continue;
@@ -1089,7 +1340,7 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
 
         if (unlikely(errl != NULL))
         {   // errl was set - this is an error condition.
-            HWAS_ERR( "pTarget %.8X - failed presence detect",
+            HWAS_ERR( "pTarget %08X - failed presence detect",
                 pTarget->getAttr<ATTR_HUID>());
 
             // commit the error but keep going
@@ -1154,7 +1405,7 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
             PVR_t l_pvr( mmio_pvr_read() & 0xFFFFFFFF );
             if( l_pvr.isP10DD10() )
             {
-                HWAS_DBG( "Call SPD::fixEEPROM on %.8X", TARGETING::get_huid(pTarget) );
+                HWAS_DBG( "Call SPD::fixEEPROM on %08X", TARGETING::get_huid(pTarget) );
                 errl = SPD::fixEEPROM( pTarget );
                 if (errl)
                 {
@@ -1168,33 +1419,7 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
             // Simics currently has bad CRC for the serial number portion
             if(!Util::isSimicsRunning())
             {
-                HWAS_DBG( "Call SPD::checkCRC on %.8X", TARGETING::get_huid(pTarget) );
-
-                bool vpd_read_failed = false;
-
-                errl = SPD::checkCRC( pTarget, SPD::CHECK, EEPROM::AUTOSELECT, &vpd_read_failed );
-
-                if (errl)
-                {
-                    if (vpd_read_failed)
-                    { // If the VPD read failed, it means we failed to read the
-                      // VPD contents into EECACHE earlier which already created
-                      // a log, so we delete this one to avoid repeat logs.
-                        HWAS_INF("Deleting error 0x%08x, VPD read error was already logged",
-                                 ERRL_GETPLID_SAFE(errl));
-
-                        delete errl;
-                        errl = nullptr;
-                    }
-                    else
-                    {
-                        // commit the error but remove all deconfig/gard
-                        errl->removeGardAndDeconfigure();
-                        errlCommit(errl, HWAS_COMP_ID);
-                        // SPD is busted so mark the part as not present
-                        present = false;
-                    }
-                }
+                platCheckOcmbCRC(pTarget, present);
             }
             else
             {
@@ -1235,7 +1460,7 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
         // it from the list and continue to the next target.
         if (present == true)
         {
-            HWAS_INF( "pTarget %.8X - detected present",
+            HWAS_INF( "pTarget %08X - detected present",
                 pTarget->getAttr<ATTR_HUID>());
 
             // advance to next entry in the list
@@ -1243,7 +1468,7 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
         }
         else
         {   // chip not present -- remove from list
-            HWAS_INF( "pTarget %.8X - no presence",
+            HWAS_INF( "pTarget %08X - no presence",
                 pTarget->getAttr<ATTR_HUID>());
 
             // erase this target, and 'increment' to next
@@ -1291,7 +1516,7 @@ void markTargetChanged(TARGETING::TargetHandle_t i_target)
 {
     TargetHandleList l_pChildList;
 
-    HWAS_INF("Marking target and all children as changed for parent HUID %.8X",
+    HWAS_INF("Marking target and all children as changed for parent HUID %08X",
                 TARGETING::get_huid(i_target) );
 
     //Call update mask on the target
@@ -1519,7 +1744,7 @@ errlHndl_t HWASPlatVerification::verificationMatchHandler(Target * i_target,
     if (i_hbFunctional && !i_sbeFunctional)
     {
         HWAS_ERR("verifyDeconfiguration: ATTR_PG does not match mbox "
-            "scratch registers for chip unit type %s with HUID %.8X "
+            "scratch registers for chip unit type %s with HUID %08X "
             "(SBE marked functional: %s  HB marked functional: %s)",
             i_target->getAttrAsString<ATTR_TYPE>(),
             i_target->getAttr<ATTR_HUID>(),
@@ -1553,7 +1778,7 @@ errlHndl_t HWASPlatVerification::verificationMatchHandler(Target * i_target,
     else
     {
         HWAS_DBG("verifyDeconfiguration: ATTR_PG matches mbox "
-            "scratch registers for chip unit type %s with HUID %.8X "
+            "scratch registers for chip unit type %s with HUID %08X "
             "(SBE marked functional: %s  HB marked functional: %s)",
             i_target->getAttrAsString<ATTR_TYPE>(),
             i_target->getAttr<ATTR_HUID>(),
@@ -1631,7 +1856,7 @@ errlHndl_t HWASPlatVerification::verifyDeconfiguration(Target* i_target,
                 if(!l_chiplet->tryGetAttr<ATTR_CHIP_UNIT>(l_chipUnit))
                 {
                     HWAS_ERR("verifyDeconfiguration: Failed to get chip unit "
-                             "for %s with HUID %.8X",
+                             "for %s with HUID %08X",
                              l_chiplet->getAttrAsString<ATTR_TYPE>(),
                              l_chiplet->getAttr<ATTR_HUID>()
                              );
@@ -1684,7 +1909,7 @@ errlHndl_t HWASPlatVerification::verifyDeconfiguration(Target* i_target,
                 else
                 {
                     HWAS_ERR("verifyDeconfiguration: Failed to get pervasive "
-                             "target for chip unit type %s with HUID  %.8X",
+                             "target for chip unit type %s with HUID  %08X",
                              l_chiplet->getAttrAsString<ATTR_TYPE>(),
                              l_chiplet->getAttr<ATTR_HUID>());
                     continue;
@@ -1770,7 +1995,7 @@ errlHndl_t crosscheck_sp_presence_target(TARGETING::Target * i_target)
 
     assert (i_target != nullptr, "crosscheck_sp_presence_target i_target == nullptr");
 
-    HWAS_DBG(ENTER_MRK"crosscheck_sp_presence_target: i_target=0x%.8X",
+    HWAS_DBG(ENTER_MRK"crosscheck_sp_presence_target: i_target=0x%08X",
              TARGETING::get_huid(i_target));
 
     do
@@ -1797,7 +2022,7 @@ errlHndl_t crosscheck_sp_presence_target(TARGETING::Target * i_target)
         else if( hb_presence &&
                  (TARGETING::FOUND_PRESENT_BY_SP_MISSING == sp_presence) )
         {
-            HWAS_INF("0x%.8X detected by Hostboot but not by the Service Processor",
+            HWAS_INF("0x%08X detected by Hostboot but not by the Service Processor",
                      TARGETING::get_huid(i_target));
             /*@
              * @errortype
@@ -1832,7 +2057,7 @@ errlHndl_t crosscheck_sp_presence_target(TARGETING::Target * i_target)
         else if( !hb_presence &&
                  (TARGETING::FOUND_PRESENT_BY_SP_FOUND == sp_presence) )
         {
-            HWAS_INF("0x%.8X detected by the Service Processor but not by Hostboot",
+            HWAS_INF("0x%08X detected by the Service Processor but not by Hostboot",
                      TARGETING::get_huid(i_target));
 
             HWAS::GARD_ErrorType gardType = HWAS::GARD_NULL;

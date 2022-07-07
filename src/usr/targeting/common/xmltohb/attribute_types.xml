@@ -1369,8 +1369,7 @@
     <description>
       A bitmask value indicating whether an error has previously
       occurred on an access to the primary or secondary VPDs for this
-      target. Adding this attribute to a target indicates the
-      existence of redundant VPD for this target.
+      target.  This attribute will be checked if redundant VPD is supported.
     </description>
     <simpleType>
       <enumeration>
@@ -1622,6 +1621,49 @@
     <persistency>non-volatile</persistency>
     <readable/>
   </attribute>
+
+  <attribute>
+    <id>EEPROM_VPD_REDUNDANCY</id>
+    <description>
+      Describes the possible EEPROM VPD redundancy available for target.
+      Some of these are:
+      Unknown dimm has possible redundancy
+      4U ddimm have full redundancy present
+      2U ddimm have no redundancy present
+      processors have full redundancy present
+    </description>
+    <simpleType>
+      <enumeration>
+        <id>EEPROM_VPD_REDUNDANCY</id>
+        <default>POSSIBLE</default>
+      </enumeration>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <enumerationType>
+    <default>POSSIBLE</default>
+    <description>
+      Enumeration indicating EEPROM VPD redundancy on a
+      target.
+    </description>
+    <!-- Real values for the attribute -->
+    <enumerator>
+      <name>POSSIBLE</name>
+      <value>0x00</value>
+    </enumerator>
+    <enumerator>
+      <name>PRESENT</name>
+      <value>0x01</value>
+    </enumerator>
+    <enumerator>
+      <name>NOT_PRESENT</name>
+      <value>0x02</value>
+    </enumerator>
+    <id>EEPROM_VPD_REDUNDANCY</id>
+  </enumerationType>
 
   <attribute>
     <description>

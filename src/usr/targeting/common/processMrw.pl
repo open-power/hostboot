@@ -1625,7 +1625,7 @@ sub processOcmbChipAndChildren
     $targetObj->setAttribute($target, "STATIC_ABS_LOCATION_CODE", $staticAbsoluteLocationCode);
 
     # Set the EEPROM_VPD_PRIMARY_INFO and FAPI_I2C_CONTROL_INFO attributes
-    setEepromAttributeForDdimmI2cDevices($targetObj, $target, $type);
+    setEepromAttributesForDdimmI2cDevices($targetObj, $target, $type);
     setFapi2AttributeForDdimmI2cDevices($targetObj, $target, $type);
 
     # Get some useful info from the OCMB parent's SYS, NODE and self targets.
@@ -2617,7 +2617,7 @@ sub getParentProcAffinityPath
 } # end sub getParentProcAffinityPath
 
 #--------------------------------------------------
-# @brief Set the EEPROM_VPD_PRIMARY_INFO attribte for the given DDIMM
+# @brief Set the EEPROM_VPD_PRIMARY/BACKUP_INFO attributes for the given DDIMM
 #
 # @param[in] $targetObj - The global target object blob
 # @param[in] $target    - The DDIMM target
@@ -2632,80 +2632,102 @@ sub setEepromAttributeForDdimm
 
     # Find the child SPD (type chip-spd-device).  If not found then
     # throw an error
-    my $spdDevice = "";
+    my @spdDevices = ();
+    my $cnt = 1;
     foreach my $child (@{ $targetObj->getTargetChildren($target) })
     {
         if ($targetObj->getTargetType($child) eq "chip-spd-device")
         {
-            $spdDevice = $child;
-            last;
+            push(@spdDevices, $child);
         }
     }
 
     # Throw error if a SPD was not found and exit
-    if ($spdDevice eq "")
+    if (scalar @spdDevices == 0)
     {
         select()->flush(); # flush buffer before spewing out error message
         die "\nsetEepromAttributeForDdimm: ERROR: Expected to find an SPD type " .
             "chip-spd-device for DDIMM ($target).\nError";
     }
 
-    # Find connections for target ($spdDevice) of bus type ("I2C"), ignore
-    # connections FROM this target ("") but find connections TO this target(1).
-    # If not found, then throw an error and exit.
-    my $i2cConn = $targetObj->findConnectionsByDirection($spdDevice, "I2C", "", 1);
-
-    if ($i2cConn eq "")
+    # some systems do not have redundant EEPROMs, mark those as such
+    if (scalar @spdDevices == 1)
     {
-        select()->flush(); # flush buffer before spewing out error message
-        die "\nsetEepromAttributeForDdimm: ERROR: Expected to find an I2C " .
-            "connection for DDIMM ($target).\nError";
+        # no backup eeprom available
+        $targetObj->setAttribute($target, "EEPROM_VPD_REDUNDANCY", "NOT_PRESENT");
     }
 
-    my $connectionFound = 0;
-
-    # To get the correct i2c connection we must verify that we are getting the
-    # PIB connection type and not the CFAM connection. Rainier and Denali both
-    # use the PIB connection but Denali has a CFAM connection as well.
-    foreach my $connection (@{$i2cConn->{CONN}})
+    my $primaryInfoSet = 0;
+    foreach my $spdDevice (@spdDevices)
     {
-        my $connectionType = $targetObj->getAttribute($connection->{SOURCE},
-                                                      "I2C_CONNECTION_TYPE");
-        if ($connectionType eq "PIB")
+        # Find connections for target ($spdDevice) of bus type ("I2C"), ignore
+        # connections FROM this target ("") but find connections TO this target(1).
+        # If not found, then throw an error and exit.
+        my $i2cConn = $targetObj->findConnectionsByDirection($spdDevice, "I2C", "", 1);
+
+        if ($i2cConn eq "")
         {
-            $i2cConn = $connection;
-            $connectionFound = 1;
-            last;
+            select()->flush(); # flush buffer before spewing out error message
+            die "\nsetEepromAttributeForDdimm: ERROR: Expected to find an I2C " .
+                "connection for DDIMM ($target).\nError";
         }
-    }
 
-    if ($connectionFound == 0)
-    {
-        print "\nsetEepromAttributeForDdimm: ERROR: Expected to find a ".
-            "PIB I2C connection for DIMM ($target).".
-            "\nPotential MRW I2C_CONNECTION_TYPE error.";
-        print"\n Connections for this DIMM:";
+        my $connectionFound = 0;
+
+        # To get the correct i2c connection we must verify that we are getting the
+        # PIB connection type and not the CFAM connection. Rainier and Denali both
+        # use the PIB connection but Denali has a CFAM connection as well.
         foreach my $connection (@{$i2cConn->{CONN}})
         {
-            print "\n". Dumper($connection);
-            my $type = $targetObj->getAttribute($connection->{SOURCE},
-                                                "I2C_CONNECTION_TYPE");
-            print "\n Connection Type: ". $type ."\n";
+            my $connectionType = $targetObj->getAttribute($connection->{SOURCE},
+                                                          "I2C_CONNECTION_TYPE");
+            if ($connectionType eq "PIB")
+            {
+                $i2cConn = $connection;
+                $connectionFound = 1;
+                last;
+            }
         }
-        select()->flush();
-        die;
-    }
 
-    # Sanity check,  Make sure destination target is the same as given target
-    my $destTarget = $targetObj->getTargetParent($i2cConn->{DEST_PARENT});
-    if ($destTarget ne $target)
-    {
-        select()->flush(); # flush buffer before spewing out error message
-        die "\nsetEepromAttributeForDdimm: ERROR: Expected destination target " .
-            "($destTarget) to be the same as the given target ($target).\nError";
-    }
+        if ($connectionFound == 0)
+        {
+            print "\nsetEepromAttributeForDdimm: ERROR: Expected to find a ".
+                "PIB I2C connection for DIMM ($target).".
+                "\nPotential MRW I2C_CONNECTION_TYPE error.";
+            print"\n Connections for this DIMM:";
+            foreach my $connection (@{$i2cConn->{CONN}})
+            {
+                print "\n". Dumper($connection);
+                my $type = $targetObj->getAttribute($connection->{SOURCE},
+                                                    "I2C_CONNECTION_TYPE");
+                print "\n Connection Type: ". $type ."\n";
+            }
+            select()->flush();
+            die;
+        }
 
-    setEepromAttribute($targetObj, $target, "EEPROM_VPD_PRIMARY_INFO", $i2cConn);
+        # Sanity check,  Make sure destination target is the same as given target
+        my $destTarget = $targetObj->getTargetParent($i2cConn->{DEST_PARENT});
+        if ($destTarget ne $target)
+        {
+            select()->flush(); # flush buffer before spewing out error message
+            die "\nsetEepromAttributeForDdimm: ERROR: Expected destination target " .
+                "($destTarget) to be the same as the given target ($target).\nError";
+        }
+
+        if ($primaryInfoSet == 0)
+        {
+            setEepromAttribute($targetObj, $target, "EEPROM_VPD_PRIMARY_INFO", $i2cConn);
+            $primaryInfoSet = 1;
+        }
+        else
+        {
+            setEepromAttribute($targetObj, $target, "EEPROM_VPD_BACKUP_INFO", $i2cConn);
+
+            # redundant EEPROM VPD is possible now
+            $targetObj->setAttribute($target, "EEPROM_VPD_REDUNDANCY", "POSSIBLE");
+        }
+    }
 } # end setEepromAttributeForDdimm
 
 
@@ -2748,9 +2770,11 @@ sub setEepromAttribute
 } # end setEepromAttribute
 
 #--------------------------------------------------
-# @brief Set the EEPROM_VPD_PRIMARY_INFO attributes for the given I2C device
+# @brief Sets EEPROM_VPD_PRIMARY_INFO,
+#             EEPROM_VPD_BACKUP_INFO and
+#             EEPROM_VPD_REDUNDANCY attributes for the given I2C device
 #
-# @detail The EEPROM_VPD_PRIMARY_INFO data is exactly the same as the DDIMM
+# @detail The attribute data is exactly the same as the DDIMM
 #         parent, so will use the DDIMM parent EEPROM data to populate the
 #         I2C device EEPROM fields.
 #
@@ -2758,7 +2782,7 @@ sub setEepromAttribute
 # @param[in] $target    - The OCMB target
 # @param[in] $type      - The type of the given I2C device
 #--------------------------------------------------
-sub setEepromAttributeForDdimmI2cDevices
+sub setEepromAttributesForDdimmI2cDevices
 {
     my $targetObj = shift;
     my $target    = shift;
@@ -2773,7 +2797,18 @@ sub setEepromAttributeForDdimmI2cDevices
     # Copy the parent DDIMM's EEPROM data
     my $eepromName = "EEPROM_VPD_PRIMARY_INFO";
     $targetObj->copyAttributeFields($ddimmParent, $target, $eepromName);
-} # end setEepromAttributeForDdimmI2cDevices
+
+    # Copy the parent DDIMM's backup data too (if it exists)
+    $eepromName = "EEPROM_VPD_BACKUP_INFO";
+    if (defined($targetObj->{data}->{TARGETS}->{$ddimmParent}->{ATTRIBUTES}->{$eepromName}))
+    {
+        $targetObj->copyAttributeFields($ddimmParent, $target, $eepromName);
+    }
+
+    # Copy the EEPROM redundancy setting
+    $targetObj->copyAttribute($ddimmParent, $target, "EEPROM_VPD_REDUNDANCY");
+
+} # end setEepromAttributesForDdimmI2cDevices
 
 #--------------------------------------------------
 # @brief Set the FAPI_I2C_CONTROL_INFO attribute for the given I2C device

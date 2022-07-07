@@ -13904,6 +13904,21 @@
         </default>
     </attribute>
     <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>9</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
+        </default>
+    </attribute>
+    <attribute>
         <id>LOCATION_CODE</id>
         <default>S0_N0_OCMB0</default>
     </attribute>
@@ -13962,6 +13977,21 @@
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>8</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>port</id><value>8</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
@@ -14036,6 +14066,21 @@
         </default>
     </attribute>
     <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>10</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
+        </default>
+    </attribute>
+    <attribute>
         <id>LOCATION_CODE</id>
         <default>S0_N0_OCMB2</default>
     </attribute>
@@ -14092,6 +14137,21 @@
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>11</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>port</id><value>11</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
@@ -14166,6 +14226,21 @@
         </default>
     </attribute>
     <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>13</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
+        </default>
+    </attribute>
+    <attribute>
         <id>LOCATION_CODE</id>
         <default>S0_N0_OCMB4</default>
     </attribute>
@@ -14222,6 +14297,21 @@
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>port</id><value>0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
@@ -14296,6 +14386,21 @@
         </default>
     </attribute>
     <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>12</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
+        </default>
+    </attribute>
+    <attribute>
         <id>LOCATION_CODE</id>
         <default>S0_N0_OCMB6</default>
     </attribute>
@@ -14352,6 +14457,21 @@
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>port</id><value>1</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
@@ -14430,6 +14550,21 @@
         </default>
     </attribute>
     <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>2</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>20</value></field>
+            <field><id>writePageSize</id><value>32</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
+        </default>
+    </attribute>
+    <attribute>
         <id>LOCATION_CODE</id>
         <default>S0_N0_OCMB8</default>
     </attribute>
@@ -14481,6 +14616,21 @@
     </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>3</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>20</value></field>
+            <field><id>writePageSize</id><value>32</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
         <default>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
@@ -14559,6 +14709,21 @@
             <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
+        <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>20</value></field>
+            <field><id>writePageSize</id><value>32</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
+        </default>
+    </attribute>
     <attribute>
         <id>LOCATION_CODE</id>
         <default>S0_N0_OCMB10</default>
@@ -14624,6 +14789,21 @@
             <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
+        <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>5</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>20</value></field>
+            <field><id>writePageSize</id><value>32</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
+        </default>
+    </attribute>
     <attribute>
         <id>LOCATION_CODE</id>
         <default>S0_N0_OCMB11</default>
@@ -14676,6 +14856,21 @@
     </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>6</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>20</value></field>
+            <field><id>writePageSize</id><value>32</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
+        </default>
+    </attribute>
+        <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
         <default>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
@@ -14754,6 +14949,21 @@
             <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
+        <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>7</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>20</value></field>
+            <field><id>writePageSize</id><value>32</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
+        </default>
+    </attribute>
     <attribute>
         <id>LOCATION_CODE</id>
         <default>S0_N0_OCMB13</default>
@@ -14819,6 +15029,21 @@
             <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
+        <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>14</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>20</value></field>
+            <field><id>writePageSize</id><value>32</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
+        </default>
+    </attribute>
     <attribute>
         <id>LOCATION_CODE</id>
         <default>S0_N0_OCMB14</default>
@@ -14875,6 +15100,21 @@
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>devAddr</id><value>0xA8</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>15</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>20</value></field>
+            <field><id>writePageSize</id><value>32</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>15</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
@@ -19750,6 +19990,20 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+            <field><id>port</id><value>9</value></field>
+            <field><id>writeCycleTime</id><value>0x05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -19800,6 +20054,20 @@
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>8</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>port</id><value>8</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
@@ -19862,6 +20130,20 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>10</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -19910,6 +20192,20 @@
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>11</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>port</id><value>11</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
@@ -19972,6 +20268,20 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>13</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -20020,6 +20330,20 @@
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>port</id><value>0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
@@ -20082,6 +20406,20 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>12</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -20130,6 +20468,20 @@
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>port</id><value>1</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
@@ -20192,6 +20544,20 @@
             <field><id>writePageSize</id><value>32</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>2</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>20</value></field>
+            <field><id>writePageSize</id><value>32</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -20237,6 +20603,20 @@
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
             <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>3</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA2</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>3</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
@@ -20302,6 +20682,20 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>4</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -20347,6 +20741,20 @@
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
             <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>5</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA2</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>5</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
@@ -20412,6 +20820,20 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>6</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -20457,6 +20879,20 @@
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
             <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>7</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA2</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>7</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
@@ -20522,6 +20958,20 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>14</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -20567,6 +21017,20 @@
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
             <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>15</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA2</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>15</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
@@ -23359,6 +23823,21 @@
             <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
+        <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>2</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -23795,6 +24274,20 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>2</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -23844,6 +24337,21 @@
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>8</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
+        </default>
+    </attribute>
+        <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>port</id><value>8</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
@@ -24288,6 +24796,20 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>8</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -24337,6 +24859,21 @@
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>12</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
+        </default>
+    </attribute>
+        <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>port</id><value>12</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
@@ -24781,6 +25318,20 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>12</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -24830,6 +25381,21 @@
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>15</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
+        </default>
+    </attribute>
+        <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>port</id><value>15</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
@@ -25274,6 +25840,20 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>15</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -25323,6 +25903,21 @@
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>13</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>port</id><value>13</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
@@ -25767,6 +26362,20 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>13</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -25816,6 +26425,21 @@
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>9</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>port</id><value>9</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
@@ -26260,6 +26884,20 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>9</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -26309,6 +26947,21 @@
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>3</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>port</id><value>3</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
@@ -26753,6 +27406,20 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>3</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -26802,6 +27469,21 @@
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>14</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>port</id><value>14</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
@@ -27246,6 +27928,20 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>14</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -27295,6 +27991,21 @@
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>port</id><value>0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
@@ -27739,6 +28450,20 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 <!-- DDIMM off of proc1 port1  (not connected) -->
 
@@ -27789,6 +28514,21 @@
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>port</id><value>1</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
@@ -27965,6 +28705,20 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <!-- DDIMM off of proc1 port4  (not connected) -->
@@ -28016,6 +28770,21 @@
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>4</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>port</id><value>4</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
@@ -28192,6 +28961,20 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+        <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>4</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <!-- DDIMM off of proc1 port5  (not connected) -->
@@ -28243,6 +29026,21 @@
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>5</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>port</id><value>5</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
@@ -28419,6 +29217,20 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>5</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <!-- DDIMM off of proc1 port6  (not connected) -->
@@ -28470,6 +29282,21 @@
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>6</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
+        </default>
+    </attribute>
+        <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>port</id><value>6</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
@@ -28646,6 +29473,20 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>6</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <!-- DDIMM off of proc1 port7  (not connected) -->
@@ -28697,6 +29538,21 @@
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>7</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>port</id><value>7</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
@@ -28873,6 +29729,20 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>7</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <!-- DDIMM off of proc1 port10  (not connected) -->
@@ -28924,6 +29794,21 @@
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>10</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
+        </default>
+    </attribute>
+        <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>port</id><value>10</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
@@ -29100,6 +29985,20 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>10</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <!-- DDIMM off of proc1 port11  (not connected) -->
@@ -29151,6 +30050,21 @@
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>11</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x4</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>port</id><value>11</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
@@ -29320,6 +30234,20 @@
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>11</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>port</id><value>11</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>

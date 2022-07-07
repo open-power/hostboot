@@ -105,7 +105,7 @@ errlHndl_t resolveSource(Target * i_target,
     // then we know it exists in cache somewhere
     if(lookupEepromCacheAddr(l_eepromRecordHeader))
     {
-        TRACDCOMP(g_trac_eeprom,"Eeprom of 0x%.8X tgt and %d role found in cache, looking at eecache",
+        TRACDCOMP(g_trac_eeprom,"Eeprom of 0x%08X tgt and %d role found in cache, looking at eecache",
           get_huid(i_target), io_eepromAddr.eepromRole);
         o_source = EEPROM::CACHE;
     }
@@ -179,9 +179,10 @@ errlHndl_t eepromPerformSingleOp(const DeviceFW::OperationType i_opType,
     errlHndl_t err = nullptr;
 
     TRACUCOMP (g_trac_eeprom, ENTER_MRK"eepromPerformSingleOp(): target 0x%08X "
-               "i_opType=%d, role=%d, offset=%x, len=%d",
+               "i_opType=%d, role=%d, offset=%x, len=%d, i_source %d",
                get_huid(i_target), (uint64_t) i_opType,
-               i_eepromAddr.eepromRole, i_eepromAddr.offset, io_buflen);
+               i_eepromAddr.eepromRole, i_eepromAddr.offset, io_buflen,
+               i_source);
 
     do{
 #ifdef CONFIG_SUPPORT_EEPROM_CACHING
@@ -469,7 +470,7 @@ static bool performPhysicalOp(const DeviceFW::OperationType i_opType,
  *           to be read from target device.
  *
  * @param[in] i_accessType - Access Type - See DeviceFW::AccessType in
- *       usrif.H
+ *       userif.H
  *
  * @param[in] i_eepromAddr - Details about the EEPROM to access
  *
@@ -654,15 +655,18 @@ errlHndl_t eepromPerformOp(DeviceFW::OperationType i_opType,
     /// decide which VPDs we want to attempt to access.
 
     ATTR_EEPROM_VPD_ACCESSIBILITY_type vpd_disabled_mask_attr = EEPROM_VPD_ACCESSIBILITY_NONE_DISABLED;
+    i_target->tryGetAttr<ATTR_EEPROM_VPD_ACCESSIBILITY>(vpd_disabled_mask_attr);
 
-    const bool supports_redundant_vpd
-        = i_target->tryGetAttr<ATTR_EEPROM_VPD_ACCESSIBILITY>(vpd_disabled_mask_attr);
-
-    // If this target doesn't have a backup VPD then don't bother using the AUTO
-    // rules in the table.
-    if (!supports_redundant_vpd && eepromAddr.eepromRole == VPD_AUTO)
+    ATTR_EEPROM_VPD_REDUNDANCY_type vpd_redundancy_state = EEPROM_VPD_REDUNDANCY_POSSIBLE;
+    if (i_target->tryGetAttr<ATTR_EEPROM_VPD_REDUNDANCY>(vpd_redundancy_state))
     {
-        eepromAddr.eepromRole = VPD_PRIMARY;
+        // If this target doesn't have redundant VPD then don't bother using the AUTO
+        // rules in the table.
+        if ((vpd_redundancy_state == EEPROM_VPD_REDUNDANCY_NOT_PRESENT) &&
+            (eepromAddr.eepromRole == VPD_AUTO))
+        {
+            eepromAddr.eepromRole = VPD_PRIMARY;
+        }
     }
 
     int attempts = 0, failures = 0;
@@ -676,7 +680,12 @@ errlHndl_t eepromPerformOp(DeviceFW::OperationType i_opType,
 
     // Update the EEPROM accessibility mask to disable whatever EEPROMs failed
     // in the prior access.
-    i_target->trySetAttr<ATTR_EEPROM_VPD_ACCESSIBILITY>(static_cast<EEPROM_VPD_ACCESSIBILITY>(vpd_disabled_mask));
+    if (vpd_disabled_mask != vpd_disabled_mask_attr)
+    {
+        TRACFCOMP(g_trac_eeprom, "perfomMacroOp() changing disabled vpd from 0x%08X to 0x%08X on HUID 0x%08X target",
+            vpd_disabled_mask_attr, vpd_disabled_mask, TARGETING::get_huid(i_target));
+        i_target->trySetAttr<ATTR_EEPROM_VPD_ACCESSIBILITY>(static_cast<EEPROM_VPD_ACCESSIBILITY>(vpd_disabled_mask));
+    }
 
     errlHndl_t errl = nullptr;
 
@@ -720,9 +729,16 @@ errlHndl_t eepromPerformOp(DeviceFW::OperationType i_opType,
             if (!errl)
             { // If we didn't fail overall, make these informational logs and
               // commit them.
+                TRACFCOMP( g_trac_eeprom,
+                    ERR_MRK"eepromPerformOp: plid 0x%08X error marked as informational for non-overall failure",
+                    ERRL_GETPLID_SAFE(e));
                 e->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
             }
 
+            TRACFCOMP( g_trac_eeprom,
+                    ERR_MRK"eepromPerformOp: committing error plid 0x%08X error",
+                    ERRL_GETPLID_SAFE(e));
+            e->collectTrace(EEPROM_COMP_NAME);
             errlCommit(e, EEPROM_COMP_ID);
         }
     }
@@ -745,10 +761,10 @@ errlHndl_t reloadMvpdEecacheFromNextSource( TARGETING::Target* const i_target,
         // that precipitated the call to this API, as revovered.
         io_triggerErrorLog->setSev(ERRORLOG::ERRL_SEV_RECOVERED);
         TRACFCOMP( g_trac_eeprom, ERR_MRK"reloadMvpdEecacheFromNextSource: "
-                   "The error log (%.8X) that precipitated the reloading of the MVPD EECACHE "
-                   "for target 0x%.8X has module Id 0x%.2X and reason code 0x%.4X.",
-                   TARGETING::get_huid(i_target),
+                   "The error log (%08X) that precipitated the reloading of the MVPD EECACHE "
+                   "for target 0x%08X has module Id 0x%.2X and reason code 0x%.4X.",
                    io_triggerErrorLog->eid(),
+                   TARGETING::get_huid(i_target),
                    io_triggerErrorLog->moduleId(),
                    io_triggerErrorLog->reasonCode() );
         io_triggerErrorLog->collectTrace(EEPROM_COMP_NAME);
@@ -774,6 +790,7 @@ errlHndl_t reloadMvpdEecacheFromNextSource( TARGETING::Target* const i_target)
     errlHndl_t errl = nullptr;
 
     ATTR_EEPROM_VPD_ACCESSIBILITY_type vpd_mask { };
+    ATTR_EEPROM_VPD_REDUNDANCY_type eeprom_redundancy = EEPROM_VPD_REDUNDANCY_POSSIBLE;
 
     do
     {
@@ -783,6 +800,17 @@ errlHndl_t reloadMvpdEecacheFromNextSource( TARGETING::Target* const i_target)
     if (!i_target->tryGetAttr<ATTR_EEPROM_VPD_ACCESSIBILITY>(vpd_mask))
     {
         break;
+    }
+
+    if (i_target->tryGetAttr<ATTR_EEPROM_VPD_REDUNDANCY>(eeprom_redundancy))
+    {
+        if (eeprom_redundancy == EEPROM_VPD_REDUNDANCY_NOT_PRESENT)
+        {
+            TRACFCOMP(g_trac_eeprom,
+              "reloadMvpdEecacheFromNextSource: target 0x%08x does not have redundant eeproms",
+              get_huid(i_target));
+            break;
+        }
     }
 
     /// Find the first VPD source that is active, so we can disable it.

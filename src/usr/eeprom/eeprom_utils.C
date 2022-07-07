@@ -25,12 +25,14 @@
 #include <eeprom/eepromif.H>
 #include <i2c/i2cif.H>
 #include <errl/errlmanager.H>
+#include <errl/errlentry.H>
 #include <errl/errludstring.H>
 #include <eeprom/eepromddreasoncodes.H>
 #include <eeprom/eeprom_const.H>
 #include <i2c/i2c_common.H>
 #include <fsi/fsiif.H>
 #include <spi/spi.H>
+#include <targeting/common/mfgFlagAccessors.H>
 
 
 // ----------------------------------------------
@@ -59,6 +61,7 @@ void setAllowVPDOverrides(bool i_setVal)
 }
 #endif
 
+
 bool hasRemoteVpdSource(TARGETING::Target * i_target)
 {
     bool vpd_source_is_remote = false;
@@ -72,14 +75,79 @@ bool hasRemoteVpdSource(TARGETING::Target * i_target)
     return vpd_source_is_remote;
 }
 
+/**
+ * @brief Helper function to check for what EEPROM access is disabled
+ * @param i_target      OCMB target
+ * @param i_vpd_access  kind of accessibility to check if it is disabled
+ * @param o_disabledSetting ATTR_EEPROM_VPD_ACCESSIBILITY reading
+ * @return true if vpd_access is disabled, else false
+ */
+bool isEepromAccessDisabled(TARGETING::Target * i_target,
+                      TARGETING::EEPROM_VPD_ACCESSIBILITY i_vpd_access,
+                      TARGETING::ATTR_EEPROM_VPD_ACCESSIBILITY_type & o_disabledSetting)
+{
+    bool disabledAccess(false);
+
+    if ( i_target->tryGetAttr<TARGETING::ATTR_EEPROM_VPD_ACCESSIBILITY>(o_disabledSetting) &&
+         ((o_disabledSetting & i_vpd_access) == i_vpd_access) )
+    {
+        disabledAccess = true;
+    }
+    return disabledAccess;
+}
+
+/**
+ * @brief Check if PRIMARY_VPD eeprom access is disabled
+ * @param i_target OCMB target
+ * @return true if disabled, else false
+ */
+bool isPrimaryEepromAccessDisabled(TARGETING::Target * i_target)
+{
+    TARGETING::ATTR_EEPROM_VPD_ACCESSIBILITY_type disabledVpdSetting =
+        TARGETING::EEPROM_VPD_ACCESSIBILITY_NONE_DISABLED;
+    return isEepromAccessDisabled(i_target,
+                                  TARGETING::EEPROM_VPD_ACCESSIBILITY_PRIMARY_DISABLED,
+                                  disabledVpdSetting);
+}
+
 #ifndef __HOSTBOOT_RUNTIME
+
+bool eepromSwitchToBackup(TARGETING::Target * i_target )
+{
+    bool switched = false;
+
+    // first verify a redundant eeprom is possible
+    TARGETING::ATTR_EEPROM_VPD_REDUNDANCY_type eeprom_redundancy = TARGETING::EEPROM_VPD_REDUNDANCY_POSSIBLE;
+
+    if (i_target->tryGetAttr<TARGETING::ATTR_EEPROM_VPD_REDUNDANCY>(eeprom_redundancy) &&
+        (eeprom_redundancy != TARGETING::EEPROM_VPD_REDUNDANCY_NOT_PRESENT))
+    {
+        // figure out if PRIMARY can be disabled
+        TARGETING::ATTR_EEPROM_VPD_ACCESSIBILITY_type vpd_disabled_mask_attr =
+            TARGETING::EEPROM_VPD_ACCESSIBILITY_NONE_DISABLED;
+
+        // can only switch if PRIMARY isn't already disabled
+        if (!isEepromAccessDisabled(i_target, TARGETING::EEPROM_VPD_ACCESSIBILITY_PRIMARY_DISABLED, vpd_disabled_mask_attr))
+        {
+            vpd_disabled_mask_attr = static_cast<TARGETING::ATTR_EEPROM_VPD_ACCESSIBILITY_type>
+                (vpd_disabled_mask_attr | TARGETING::EEPROM_VPD_ACCESSIBILITY_PRIMARY_DISABLED);
+            i_target->setAttr<TARGETING::ATTR_EEPROM_VPD_ACCESSIBILITY>(vpd_disabled_mask_attr);
+            TRACFCOMP(g_trac_eeprom,
+                    "eepromSwitchToBackup(): disable primary access HUID 0x%08X: ATTR_EEPROM_VPD_ACCESSIBILITY = 0x%llX, REDUNDANCY 0x%llX",
+                    TARGETING::get_huid(i_target), vpd_disabled_mask_attr, eeprom_redundancy);
+            switched = true;
+        }
+    }
+    return switched;
+}
+
 
 //-------------------------------------------------------------------
 //eepromPresence
 //-------------------------------------------------------------------
 bool eepromPresence ( TARGETING::Target * i_target )
 {
-    TRACUCOMP(g_trac_eeprom, ENTER_MRK"eepromPresence() 0x%.8X",
+    TRACUCOMP(g_trac_eeprom, ENTER_MRK"eepromPresence() 0x%08X",
       TARGETING::get_huid(i_target));
 
     errlHndl_t err = nullptr;
@@ -90,9 +158,19 @@ bool eepromPresence ( TARGETING::Target * i_target )
     eeprom_addr_t eepInfo;
 
     eepInfo.eepromRole = EEPROM::VPD_PRIMARY;
+    if (isPrimaryEepromAccessDisabled(i_target))
+    {
+        eepInfo.eepromRole = EEPROM::VPD_BACKUP;
+    }
+
+    int64_t initial_role = eepInfo.eepromRole;
+
     eepInfo.offset = 0;
     do
     {
+       TRACFCOMP(g_trac_eeprom, ENTER_MRK"eepromPresence() 0x%08X - role %d",
+            TARGETING::get_huid(i_target), eepInfo.eepromRole);
+
         if(hasRemoteVpdSource(i_target))
         {
             TRACFCOMP(g_trac_eeprom,
@@ -146,12 +224,17 @@ bool eepromPresence ( TARGETING::Target * i_target )
             if(i_target->tryGetAttr<TARGETING::ATTR_DYNAMIC_I2C_DEVICE_ADDRESS>(eepInfo.accessAddr.i2c_addr.devAddr))
             {
                 TRACDCOMP(g_trac_eeprom,
-                         "Using DYNAMIC_I2C_DEVICE_ADDRESS %.2x for HUID %.8x",
+                         "Using DYNAMIC_I2C_DEVICE_ADDRESS %.2x for HUID %08X",
                           eepInfo.accessAddr.i2c_addr.devAddr,
                           TARGETING::get_huid(i_target));
             }
 
+
             //Check for the target at the I2C level
+            TRACUCOMP(g_trac_eeprom, "eepromPresence> i2cPresence(0x%08X, port %d, engine %d, devAddr 0x%02X)",
+                TARGETING::get_huid(l_eepromMasterTarget), eepInfo.accessAddr.i2c_addr.port,
+                eepInfo.accessAddr.i2c_addr.engine, eepInfo.accessAddr.i2c_addr.devAddr);
+
             l_present = I2C::i2cPresence(l_eepromMasterTarget,
                               eepInfo.accessAddr.i2c_addr.port,
                               eepInfo.accessAddr.i2c_addr.engine,
@@ -165,23 +248,75 @@ bool eepromPresence ( TARGETING::Target * i_target )
             err = SPI::spiPresence(l_eepromMasterTarget,
                                    eepInfo.accessAddr.spi_addr.engine,
                                    l_present);
+            break;
         }
         if( !l_present )
         {
+            if (eepInfo.eepromRole == EEPROM::VPD_PRIMARY)
+            {
+                bool switched = eepromSwitchToBackup(i_target);
+                if (switched)
+                {
+                    // try possible backup eeprom
+                    TRACFCOMP(g_trac_eeprom, "eepromPresence(): Presence check PRIMARY returned false, trying possible BACKUP!");
+                    eepInfo.eepromRole = EEPROM::VPD_BACKUP;
+                    continue;
+                }
+                // else unable to switch so return chip NOT present
+            }
             TRACUCOMP(g_trac_eeprom,
                      ERR_MRK"eepromPresence(): Presence check returned false! chip NOT present!");
             break;
         }
-
-    } while( 0 );
+    } while( !l_present );
 
     // If there was an error commit the error log
     if( err )
     {
         errlCommit( err, EEPROM_COMP_ID );
     }
+    else
+    {
+        // create error for non-present PRIMARY eeprom since BACKUP works
+        if (l_present && (eepInfo.eepromRole != initial_role))
+        {
+            /*@
+             * @errortype
+             * @reasoncode       EEPROM_PRIMARY_FAILURE
+             * @moduleid         EEPROM_PRESENCE
+             * @userdata1        HUID of target
+             * @userdata2        Role that failed
+             * @devdesc          Invalid EEPROM chip to access
+             * @custdesc         An internal firmware error occurred
+             */
+            err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE_REDUNDANCY_LOST,
+                                          EEPROM_PRESENCE,
+                                          EEPROM_PRIMARY_FAILURE,
+                                          TARGETING::get_huid(i_target),
+                                          initial_role,
+                                          ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
+            // VPD is missing
+            err->addPartCallout( i_target,
+                                 HWAS::VPD_PART_TYPE,
+                                 HWAS::SRCI_PRIORITY_HIGH );
 
-    TRACDCOMP(g_trac_eeprom, EXIT_MRK"eepromPresence()");
+            err->addHwCallout( i_target,
+                               HWAS::SRCI_PRIORITY_MED,
+                               HWAS::NO_DECONFIG,
+                               HWAS::GARD_NULL );
+
+            bool mfgMode = TARGETING::areMfgThresholdsActive();
+            if (!mfgMode)
+            {
+                // field mode, don't make user visible log
+                err->setSev(ERRORLOG::ERRL_SEV_RECOVERED);
+            }
+            err->collectTrace( EEPROM_COMP_NAME );
+            errlCommit( err, EEPROM_COMP_ID );
+        }
+    }
+
+    TRACDCOMP(g_trac_eeprom, EXIT_MRK"eepromPresence() - present %d", l_present);
     return l_present;
 }
 #endif // #ifndef __HOSTBOOT_RUNTIME
@@ -547,27 +682,37 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
                            "OFFSET %d!",
                            eepromData.byteAddrOffset);
 
-                    /*@
-                     * @errortype
-                     * @reasoncode       EEPROM_INVALID_ADDR_OFFSET_SIZE
-                     * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                     * @moduleid         EEPROM_READATTRIBUTES
-                     * @userdata1        HUID of target
-                     * @userdata2        Byte Address Offset
-                     * @devdesc          Invalid address offset size
-                     * @custdesc         An internal firmware error occurred
-                     */
-                    err = new ERRORLOG::ErrlEntry(
-                                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                        EEPROM_READATTRIBUTES,
-                                        EEPROM_INVALID_ADDR_OFFSET_SIZE,
-                                        TARGETING::get_huid(i_target),
-                                        eepromData.byteAddrOffset,
-                                        true /*Add HB SW Callout*/ );
+                /*@
+                 * @errortype
+                 * @reasoncode       EEPROM_INVALID_ADDR_OFFSET_SIZE
+                 * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid         EEPROM_READATTRIBUTES
+                 * @userdata1        HUID of target
+                 * @userdata2        Byte Address Offset
+                 * @devdesc          Invalid address offset size
+                 * @custdesc         An internal firmware error occurred
+                 */
+                err = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    EEPROM_READATTRIBUTES,
+                                    EEPROM_INVALID_ADDR_OFFSET_SIZE,
+                                    TARGETING::get_huid(i_target),
+                                    eepromData.byteAddrOffset,
+                                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
 
-                    err->collectTrace( EEPROM_COMP_NAME );
+                TARGETING::ATTR_SYSTEM_TYPE_type l_systemType = {0};
+                TARGETING::Target* l_sys = TARGETING::UTIL::assertGetToplevelTarget();
+                if(l_sys->tryGetAttr<TARGETING::ATTR_SYSTEM_TYPE> (l_systemType))
+                {
+                    TRACFCOMP( g_trac_eeprom,
+                           ERR_MRK"eepromReadAttributes() - system type: %s",
+                           l_systemType);
+                    ERRORLOG::ErrlUserDetailsString(l_systemType).addToLog(err);
+                }
 
-                    break;
+                err->collectTrace( EEPROM_COMP_NAME );
+
+                break;
             }
 
             TRACUCOMP(g_trac_eeprom,"eepromReadAttributes() I2C HUID=0x%X, port/engine/devAddr = "
@@ -599,7 +744,7 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
 
             TRACUCOMP( g_trac_eeprom,
                        "eepromReadAttributes() SPI tgt=0x%X engine=0x%X"
-                       " - data at 0x%.8X KB, size 0x%.8X KB",
+                       " - data at 0x%08X KB, size 0x%08X KB",
                        TARGETING::get_huid(i_target),
                        io_eepromAddr.accessAddr.spi_addr.engine,
                        io_eepromAddr.accessAddr.spi_addr.roleOffset_KB,
@@ -834,7 +979,7 @@ void add_to_list( std::list<EepromInfo_t>& io_list,
                   TARGETING::Target* i_targ,
                   bool i_allowDups)
 {
-    TRACFCOMP(g_trac_eeprom,"add_to_list(): Targ %.8X",TARGETING::get_huid(i_targ));
+    TRACFCOMP(g_trac_eeprom,"add_to_list(): Targ %08X",TARGETING::get_huid(i_targ));
 
     // try all defined types of EEPROMs
     for( EEPROM_ROLE eep_type = FIRST_CHIP_TYPE;
@@ -1030,22 +1175,22 @@ void add_to_list( std::list<EepromInfo_t>& io_list,
             io_list.push_back(eep_info);
             if ( found_i2c_eep )
             {
-                TRACFCOMP(g_trac_eeprom,"--Adding i2cMaster=%.8X, type=%d, eng=%d, port=%d, addr=%.2X for %.8X", TARGETING::get_huid(pMaster),eep_type,eepromData.engine,eepromData.port, eep_info.eepromAccess.i2cInfo.devAddr,  TARGETING::get_huid(eep_info.assocTarg));
+                TRACFCOMP(g_trac_eeprom,"--Adding i2cMaster=%08X, type=%d, eng=%d, port=%d, addr=%.2X for %08X", TARGETING::get_huid(pMaster),eep_type,eepromData.engine,eepromData.port, eep_info.eepromAccess.i2cInfo.devAddr,  TARGETING::get_huid(eep_info.assocTarg));
             }
             else
             {
-                TRACFCOMP(g_trac_eeprom,"--Adding spiMaster=%.8X, type=%d, eng=%d for %.8X", TARGETING::get_huid(pMaster),eep_type,spiEepromData.engine, TARGETING::get_huid(eep_info.assocTarg));
+                TRACFCOMP(g_trac_eeprom,"--Adding spiMaster=%08X, type=%d, eng=%d for %08X", TARGETING::get_huid(pMaster),eep_type,spiEepromData.engine, TARGETING::get_huid(eep_info.assocTarg));
             }
         }
         else
         {
             if ( found_i2c_eep )
             {
-                TRACFCOMP(g_trac_eeprom,"--Skipping duplicate i2cMaster=%.8X, type=%d, eng=%d, port=%d, addr=%.2X for %.8X", TARGETING::get_huid(pMaster),eep_type,eepromData.engine,eepromData.port, eep_info.eepromAccess.i2cInfo.devAddr,  TARGETING::get_huid(eep_info.assocTarg));
+                TRACFCOMP(g_trac_eeprom,"--Skipping duplicate i2cMaster=%08X, type=%d, eng=%d, port=%d, addr=%.2X for %08X", TARGETING::get_huid(pMaster),eep_type,eepromData.engine,eepromData.port, eep_info.eepromAccess.i2cInfo.devAddr,  TARGETING::get_huid(eep_info.assocTarg));
             }
             else
             {
-                TRACFCOMP(g_trac_eeprom,"--Skipping duplicate spiMaster=%.8X, type=%d, eng=%d for %.8X", TARGETING::get_huid(pMaster),eep_type,spiEepromData.engine, TARGETING::get_huid(eep_info.assocTarg));
+                TRACFCOMP(g_trac_eeprom,"--Skipping duplicate spiMaster=%08X, type=%d, eng=%d for %08X", TARGETING::get_huid(pMaster),eep_type,spiEepromData.engine, TARGETING::get_huid(eep_info.assocTarg));
             }
         }
     }
@@ -1146,8 +1291,8 @@ void cacheEepromVpd(TARGETING::Target * i_target, bool i_present)
            && (controllerTarget->getAttr<TARGETING::ATTR_TYPE>() != TARGETING::TYPE_BMC)
            && (controllerTarget->getAttr<TARGETING::ATTR_TYPE>() != TARGETING::TYPE_SYS))
         {
-            TRACFCOMP(g_trac_eeprom, "cacheEepromVpd(): Reading EEPROMs for target 0x%.8X, eeprom type = %d EEPROM_CACHE, "
-                                     "target present = %d, eeprom cache = %d VPD_AUTO, controller target = 0x%.8X",
+            TRACFCOMP(g_trac_eeprom, "cacheEepromVpd(): Reading EEPROMs for target 0x%08X, eeprom type = %d EEPROM_CACHE, "
+                                     "target present = %d, eeprom cache = %d VPD_AUTO, controller target = 0x%08X",
                       TARGETING::get_huid(i_target), DEVICE_CACHE_EEPROM_ADDRESS(i_present, EEPROM::VPD_AUTO),
                       TARGETING::get_huid(controllerTarget));
 
@@ -1157,14 +1302,14 @@ void cacheEepromVpd(TARGETING::Target * i_target, bool i_present)
                             DEVICE_CACHE_EEPROM_ADDRESS(i_present, EEPROM::VPD_AUTO));
             if (errl != nullptr)
             {
-                TRACFCOMP(g_trac_eeprom,"pTarget %.8X - failed reading VPD eeprom",
+                TRACFCOMP(g_trac_eeprom,"pTarget %08X - failed reading VPD eeprom",
                           i_target->getAttr<TARGETING::ATTR_HUID>());
                 errlCommit(errl, EEPROM_COMP_ID);
             }
         }
         else if( controllerTarget->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_BMC )
         {
-            TRACFCOMP(g_trac_eeprom, "cacheEepromVpd(): We expected VPD from the BMC but we didn't get any, clearing out EECACHE entry for target 0x%.8X.",
+            TRACFCOMP(g_trac_eeprom, "cacheEepromVpd(): We expected VPD from the BMC but we didn't get any, clearing out EECACHE entry for target 0x%08X.",
                       TARGETING::get_huid(i_target));
             std::vector<uint8_t> l_emptyBuffer;
             errl = EEPROM::cacheEepromBuffer( i_target,
@@ -1172,14 +1317,14 @@ void cacheEepromVpd(TARGETING::Target * i_target, bool i_present)
                                               l_emptyBuffer );
             if (errl != nullptr)
             {
-                TRACFCOMP(g_trac_eeprom,"pTarget %.8X - failed to cache empty buffer",
+                TRACFCOMP(g_trac_eeprom,"pTarget %08X - failed to cache empty buffer",
                           i_target->getAttr<TARGETING::ATTR_HUID>());
                 errlCommit(errl, EEPROM_COMP_ID);
             }
         }
         else
         {
-            TRACFCOMP(g_trac_eeprom, "cacheEepromVpd(): Skipping reading EEPROM(s) for target 0x%.8X since the SPI/I2C "
+            TRACFCOMP(g_trac_eeprom, "cacheEepromVpd(): Skipping reading EEPROM(s) for target 0x%08X since the SPI/I2C "
                                      "controller target is not accessible.",
                                      TARGETING::get_huid(i_target));
         }
@@ -1191,7 +1336,7 @@ errlHndl_t cacheEepromBuffer(TARGETING::Target * const i_target,
                              const std::vector<uint8_t>& i_eeprom_data)
 {
     errlHndl_t errl = nullptr;
-    TRACFCOMP(g_trac_eeprom, ENTER_MRK"cacheEepromBuffer():target=%.8X",
+    TRACFCOMP(g_trac_eeprom, ENTER_MRK"cacheEepromBuffer():target=%08X",
               TARGETING::get_huid(i_target));
 
     TARGETING::EepromVpdPrimaryInfo eepromData;
@@ -1200,7 +1345,7 @@ errlHndl_t cacheEepromBuffer(TARGETING::Target * const i_target,
          i_target->tryGetAttr<TARGETING::ATTR_SPI_EEPROM_VPD_PRIMARY_INFO>
           (spiEepromData) )
     {
-        TRACFCOMP(g_trac_eeprom, "cacheEepromBuffer(): Reading EEPROMs for target 0x%.8X, eeprom cache = %d VPD_AUTO, "
+        TRACFCOMP(g_trac_eeprom, "cacheEepromBuffer(): Reading EEPROMs for target 0x%08X, eeprom cache = %d VPD_AUTO, "
                                  "target present = %d , eeprom type = %d",
                   TARGETING::get_huid(i_target), DEVICE_CACHE_EEPROM_ADDRESS(i_present, EEPROM::VPD_AUTO));
 
@@ -1212,7 +1357,7 @@ errlHndl_t cacheEepromBuffer(TARGETING::Target * const i_target,
                                                       EEPROM::VPD_AUTO));
     }
 
-    TRACFCOMP(g_trac_eeprom, EXIT_MRK"cacheEepromBuffer():target=%.8X",
+    TRACFCOMP(g_trac_eeprom, EXIT_MRK"cacheEepromBuffer():target=%08X",
               TARGETING::get_huid(i_target));
     return errl;
 }
@@ -1256,7 +1401,7 @@ void cacheEepromAncillaryRoles()
     for( ; eepromTarget_itr; ++eepromTarget_itr )
     {
         numTarget++;
-        TRACUCOMP(g_trac_eeprom,"cacheEepromAncillaryRoles(): calling add_to_list for target 0x%.8X",
+        TRACUCOMP(g_trac_eeprom,"cacheEepromAncillaryRoles(): calling add_to_list for target 0x%08X",
             TARGETING::get_huid(*eepromTarget_itr));
         // loop for eeproms associated with the target and add
         // them to the list.  Allow duplicate eeproms to show up to account
@@ -1280,7 +1425,7 @@ void cacheEepromAncillaryRoles()
             size_t empty_size = 0;
 
             TRACFCOMP(g_trac_eeprom,"cacheEepromAncillaryRoles(): "
-                "Reading EEPROMs for target %.8X, eeprom cache = %d,"
+                "Reading EEPROMs for target %08X, eeprom cache = %d,"
                 " target present = %d , eeprom type = %d",
                 TARGETING::get_huid(eepromTarget.assocTarg),
                 DEVICE_CACHE_EEPROM_ADDRESS(present, eepromTarget.deviceRole));
@@ -1288,7 +1433,7 @@ void cacheEepromAncillaryRoles()
                             DEVICE_CACHE_EEPROM_ADDRESS(present, eepromTarget.deviceRole));
             if (errl != nullptr)
             {
-                TRACFCOMP(g_trac_eeprom, ERR_MRK "pTarget %.8X - failed reading eeprom for type %d",
+                TRACFCOMP(g_trac_eeprom, ERR_MRK "pTarget %08X - failed reading eeprom for type %d",
                     TARGETING::get_huid(eepromTarget.assocTarg), eepromTarget.deviceRole);
                 errlCommit(errl, EEPROM_COMP_ID);
             }

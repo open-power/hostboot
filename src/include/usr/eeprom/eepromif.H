@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -84,6 +84,18 @@ bool hasRemoteVpdSource(TARGETING::Target * i_target);
  * @return bool - True if the eeprom is present, false otherwise.
  */
 bool eepromPresence ( TARGETING::Target * i_target );
+
+
+/**
+ * @brief This function will switch eeprom AUTO_VPD access from the VPD_PRIMARY
+ *        to the VPD_BACKUP eeprom if one exists or may exist.
+ *
+ * @param[in] i_target - Target device.
+ *
+ * @return bool - True if switched, else false
+ */
+bool eepromSwitchToBackup( TARGETING::Target * i_target );
+
 
 /**
  * @brief this function will read all of the associated attributes needed

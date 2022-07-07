@@ -72,6 +72,7 @@ enum eepromModuleId
     EEPROM_UPDATE_EECACHE_CONTENTS          = 0x16,
     EEPROM_CHECK_EECACHE_UPDATE             = 0x17,
     EEPROM_IS_EECACHE_EMPTY                 = 0x18,
+    EEPROM_PRESENCE                         = 0x19,
 };
 
 /**
@@ -128,6 +129,7 @@ enum eepromReasonCode
     EEPROM_PNOR_CACHE_SYNC                  = EEPROM_COMP_ID | 0x22,   // Problem with PNOR and cache sync
     EEPROM_ENTRY_MARKED_INVALID             = EEPROM_COMP_ID | 0x23,   // Attempting to read/write an entry whose header states its invalid
     EEPROM_EECACHE_IS_EMPTY                 = EEPROM_COMP_ID | 0x24,   // EECACHE is empty or invalid
+    EEPROM_PRIMARY_FAILURE                  = EEPROM_COMP_ID | 0x25,   // VPD_PRIMARY EECACHE failed detection
 };
 
 enum UserDetailsTypes

@@ -331,6 +331,63 @@
       <id>EECACHE_VPD_STATE</id>
     </attribute>
     <attribute>
+      <id>EEPROM_VPD_ACCESSIBILITY</id>
+    </attribute>
+    <attribute>
+      <default>
+        <field>
+          <value>0xFF</value>
+          <id>byteAddrOffset</id>
+        </field>
+        <field>
+          <value>0xFF</value>
+          <id>chipCount</id>
+        </field>
+        <field>
+          <value>0xFF</value>
+          <id>devAddr</id>
+        </field>
+        <field>
+          <!--value>INVALID</value-->
+          <value>0xFFFFFFFF</value>
+          <id>eepromContentType</id>
+        </field>
+        <field>
+          <value>0xFF</value>
+          <id>engine</id>
+        </field>
+        <field>
+          <value>physical:sys-0</value>
+          <id>i2cMasterPath</id>
+        </field>
+        <field>
+          <value>0xFF</value>
+          <id>i2cMuxBusSelector</id>
+        </field>
+        <field>
+          <value>physical:sys-0</value>
+          <id>i2cMuxPath</id>
+        </field>
+        <field>
+          <value>0xFFFFFFFFFFFFFFFF</value>
+          <id>maxMemorySizeKB</id>
+        </field>
+        <field>
+          <value>0xFF</value>
+          <id>port</id>
+        </field>
+        <field>
+          <value>0xFFFFFFFFFFFFFFFF</value>
+          <id>writeCycleTime</id>
+        </field>
+        <field>
+          <value>0xFFFFFFFFFFFFFFFF</value>
+          <id>writePageSize</id>
+        </field>
+      </default>
+      <id>EEPROM_VPD_BACKUP_INFO</id>
+    </attribute>
+    <attribute>
       <default>
         <field>
           <value>0xFF</value>
@@ -383,6 +440,9 @@
         </field>
       </default>
       <id>EEPROM_VPD_PRIMARY_INFO</id>
+    </attribute>
+    <attribute>
+      <id>EEPROM_VPD_REDUNDANCY</id>
     </attribute>
     <attribute>
       <id>FAPI_I2C_CONTROL_INFO</id>
@@ -517,6 +577,10 @@
     </attribute>
     <attribute>
       <id>EEPROM_VPD_ACCESSIBILITY</id>
+    </attribute>
+    <attribute>
+      <default>PRESENT</default>
+      <id>EEPROM_VPD_REDUNDANCY</id>
     </attribute>
     <attribute>
       <id>FABRIC_CHIP_ID</id>
@@ -1851,6 +1915,66 @@
     <id>lcard-dimm-ddimm</id>
     <parent>lcard-dimm</parent>
     <attribute>
+      <id>EEPROM_VPD_ACCESSIBILITY</id>
+    </attribute>
+    <attribute>
+      <default>
+        <field>
+          <value>0xFF</value>
+          <id>byteAddrOffset</id>
+        </field>
+        <field>
+          <value>0xFF</value>
+          <id>chipCount</id>
+        </field>
+        <field>
+          <value>0xFF</value>
+          <id>devAddr</id>
+        </field>
+        <field>
+          <!--Since enum values cannot be used as default values in
+                  a complexType, this is a workaround to set the value to the
+                  corresponding enum value.-->
+          <!--value>DDIMM</value-->
+          <value>0x4</value>
+          <id>eepromContentType</id>
+        </field>
+        <field>
+          <value>0xFF</value>
+          <id>engine</id>
+        </field>
+        <field>
+          <value>physical:sys-0</value>
+          <id>i2cMasterPath</id>
+        </field>
+        <field>
+          <value>0xFF</value>
+          <id>i2cMuxBusSelector</id>
+        </field>
+        <field>
+          <value>physical:sys-0</value>
+          <id>i2cMuxPath</id>
+        </field>
+        <field>
+          <value>0xFFFFFFFFFFFFFFFF</value>
+          <id>maxMemorySizeKB</id>
+        </field>
+        <field>
+          <value>0xFF</value>
+          <id>port</id>
+        </field>
+        <field>
+          <value>0xFFFFFFFFFFFFFFFF</value>
+          <id>writeCycleTime</id>
+        </field>
+        <field>
+          <value>0xFFFFFFFFFFFFFFFF</value>
+          <id>writePageSize</id>
+        </field>
+      </default>
+      <id>EEPROM_VPD_BACKUP_INFO</id>
+    </attribute>
+    <attribute>
       <default>
         <field>
           <value>0xFF</value>
@@ -1906,6 +2030,9 @@
         </field>
       </default>
       <id>EEPROM_VPD_PRIMARY_INFO</id>
+    </attribute>
+    <attribute>
+      <id>EEPROM_VPD_REDUNDANCY</id>
     </attribute>
   </targetType>
 

@@ -39,6 +39,8 @@
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
 #include <targeting/common/targetservice.H>
+#include <targeting/common/utilFilter.H>
+#include <targeting/common/mfgFlagAccessors.H>
 #include <devicefw/driverif.H>
 #include <devicefw/userif.H>
 #include <eeprom/eepromif.H>
@@ -179,6 +181,27 @@ errlHndl_t getModType ( modSpecTypes_t & o_modType,
                         TARGETING::Target * i_target,
                         uint64_t i_memType );
 
+
+/**
+ * @brief This function will read the DDIMM mod height.
+ * @pre Assumes dimmType = DDR4 and modType = DDIMM
+ *
+ * @param[out] o_ddimmModHeight - The DIMM mod height reading
+ *                               (use DDIMM_MOD_HEIGHT enums to translate to 4U, 2U or 1U)
+ *
+ * @param[in] i_target       - The target to read data from.
+ *
+ * @param[in] i_eepromSource - The EEPROM source (CACHE/HARDWARE).
+ *                             Default to AUTOSELECT.
+ *
+ * @return errlHndl_t - nullptr if successful, otherwise a pointer
+ *      to the error log.
+ */
+errlHndl_t getDdimmModHeight(uint8_t & o_ddimmModHeight,
+                           TARGETING::Target * i_target,
+                           EEPROM::EEPROM_SOURCE i_eepromSource = EEPROM::AUTOSELECT);
+
+
 /**
  * @brief This function will set the size of SPD for the given target based on
  *        the DIMM type.
@@ -257,7 +280,7 @@ errlHndl_t spdGetKeywordValue ( DeviceFW::OperationType i_opType,
     VPD::vpdKeyword keyword = va_arg( i_args, uint64_t );
 
     TRACSSCOMP( g_trac_spd,
-                ENTER_MRK"spdGetKeywordValue(%.8X), io_buflen: %d, keyword: 0x%04x",
+                ENTER_MRK"spdGetKeywordValue(%08X), io_buflen: %d, keyword: 0x%04x",
                 TARGETING::get_huid(i_target), io_buflen, keyword );
 
     do
@@ -491,7 +514,7 @@ errlHndl_t spdFetchData ( uint64_t              i_byteAddr,
         if( err )
         {
             TRACFCOMP(g_trac_spd,
-                      "ERROR: failing out of deviceOp in spd.C");
+                      ERR_MRK"spdFetchData: failing out of deviceOp in spd.C");
             break;
         }
 
@@ -930,12 +953,116 @@ errlHndl_t spdSetSize ( TARGETING::Target &io_target,
     return l_err;
 }
 
+/**
+ * @brief Checks for redundant memory type by reading SPD data, then
+ *        sets the target to its appropriate redundancy setting.
+ *        Specifically checking for DDR4 4U DDIMM
+ * @param i_target DIMM target
+ * @param i_memtype Memory type returned from getMemType()
+ * @return nullptr if redundancy set correctly, else error
+ */
+errlHndl_t spdUpdateEepromRedundancy(TARGETING::Target * i_target, const uint8_t i_memType)
+{
+    errlHndl_t err{nullptr};
+    TARGETING::ATTR_EEPROM_VPD_REDUNDANCY_type newEepromRedundancy =
+                    TARGETING::EEPROM_VPD_REDUNDANCY_POSSIBLE;
+
+    do {
+        // Check for redundant DDR4 4U DDIMM
+        if (i_memType == SPD_DDR4_TYPE)
+        {
+            modSpecTypes_t modType = NA;
+            err = getModType(modType, i_target, i_memType);
+            if ( err )
+            {
+                errlCommit(err, VPD_COMP_ID);
+                break;
+            }
+
+            if (modType == DDIMM)
+            {
+                uint8_t ddimmModHeight = 0xFF;
+                err = getDdimmModHeight(ddimmModHeight, i_target);
+                if ( err )
+                {
+                    errlCommit(err, VPD_COMP_ID);
+                    break;
+                }
+
+                if (ddimmModHeight == DDIMM_MOD_HEIGHT_4U)
+                {
+                    TRACFCOMP( g_trac_spd,
+                        "spdUpdateEepromRedundancy> Found 0x%.08X is an eeprom-redundant DDR4 4U DDIMM",
+                        TARGETING::get_huid(i_target) );
+                    newEepromRedundancy = TARGETING::EEPROM_VPD_REDUNDANCY_PRESENT;
+                }
+                else
+                {
+                    if ((ddimmModHeight == DDIMM_MOD_HEIGHT_2U) ||
+                        (ddimmModHeight == DDIMM_MOD_HEIGHT_1U))
+                    {
+                        TRACFCOMP( g_trac_spd,
+                            "spdUpdateEepromRedundancy> 0x%08X is a NON-REDUNDANT DDR4 %dU DDIMM",
+                            TARGETING::get_huid(i_target), (ddimmModHeight == DDIMM_MOD_HEIGHT_2U)?2:1 );
+                        newEepromRedundancy = TARGETING::EEPROM_VPD_REDUNDANCY_NOT_PRESENT;
+                    }
+                    else
+                    {
+                        TRACFCOMP( g_trac_spd,
+                            "spdUpdateEepromRedundancy> 0x%08X is a non-redundant eeprom DDR4 DDIMM (mod height %x)",
+                            TARGETING::get_huid(i_target), ddimmModHeight );
+                    }
+                }
+            }
+        }
+
+        // Only update to redundancy present
+        if (newEepromRedundancy != TARGETING::EEPROM_VPD_REDUNDANCY_POSSIBLE)
+        {
+            // we read SPD to determine redundancy
+            i_target->setAttr<TARGETING::ATTR_EEPROM_VPD_REDUNDANCY>(newEepromRedundancy);
+
+            // also update parent OCMB redundancy
+            TARGETING::TargetHandleList l_ocmbs;
+            getParentAffinityTargets(l_ocmbs,
+                                     i_target,
+                                     TARGETING::CLASS_CHIP,
+                                     TARGETING::TYPE_OCMB_CHIP,
+                                     false);
+            if (l_ocmbs.size() == 1)
+            {
+                TRACFCOMP(g_trac_spd,
+                    "spdUpdateEepromRedundancy> setting DDIMM (0x%08X) and its OCMB (0x%08X) to EEPROM_VPD_REDUNDANCY (%d)",
+                    TARGETING::get_huid(i_target), TARGETING::get_huid(l_ocmbs[0]), newEepromRedundancy);
+                l_ocmbs[0]->setAttr<TARGETING::ATTR_EEPROM_VPD_REDUNDANCY>(newEepromRedundancy);
+
+                TARGETING::ATTR_EEPROM_VPD_ACCESSIBILITY_type dimm_eeprom_accessibility =
+                    TARGETING::EEPROM_VPD_ACCESSIBILITY_NONE_DISABLED;
+                if( i_target->tryGetAttr<TARGETING::ATTR_EEPROM_VPD_ACCESSIBILITY>(dimm_eeprom_accessibility) )
+                {
+                    TRACFCOMP(g_trac_spd,
+                        "spdUpdateEepromRedundancy> setting OCMB(0x%08X) to DIMM accessibility setting (%x)",
+                        TARGETING::get_huid(l_ocmbs[0]), dimm_eeprom_accessibility);
+                    l_ocmbs[0]->setAttr<TARGETING::ATTR_EEPROM_VPD_ACCESSIBILITY>(dimm_eeprom_accessibility);
+                }
+            }
+            else
+            {
+                TRACFCOMP(g_trac_spd,
+                    "spdUpdateEepromRedundancy> Found %d ocmb parent(s) of DIMM target (0x%08X)",
+                    l_ocmbs.size(), TARGETING::get_huid(i_target));
+            }
+        }
+    } while (0);
+    return err;
+}
+
 // ------------------------------------------------------------------
 // spdPresent
 // ------------------------------------------------------------------
 bool spdPresent ( TARGETING::Target * i_target )
 {
-    TRACSSCOMP( g_trac_spd, ENTER_MRK"spdPresent()" );
+    TRACSSCOMP( g_trac_spd, ENTER_MRK"spdPresent(0x%.08X)", TARGETING::get_huid(i_target) );
 
     errlHndl_t err{nullptr};
     uint8_t    memType(MEM_TYPE_INVALID);
@@ -945,7 +1072,6 @@ bool spdPresent ( TARGETING::Target * i_target )
     {
 
 #ifndef __HOSTBOOT_RUNTIME
-
         if (EEPROM::eepromPresence( i_target ))
         {
             err = getMemType( memType,
@@ -963,12 +1089,13 @@ bool spdPresent ( TARGETING::Target * i_target )
 
             if ( !isValidDimmType(memType) )
             {
-                TRACFCOMP( g_trac_spd, "spdPresent> Unexpected data found on 0x%08X, checking CRC",
-                           TARGETING::get_huid(i_target) );
-                errlHndl_t err2 = SPD::checkCRC( i_target, SPD::CHECK, EEPROM::HARDWARE );
+                TRACFCOMP( g_trac_spd, "spdPresent> Unexpected data 0x%04x found on 0x%08X, checking CRC",
+                           memType, TARGETING::get_huid(i_target) );
+                std::vector<crc_section_t> l_sections;
+                errlHndl_t err2 = SPD::checkCRC( i_target, SPD::CHECK, EEPROM::VPD_AUTO, EEPROM::HARDWARE, l_sections);
                 if( err2 )
                 {
-                    TRACFCOMP( g_trac_spd, "spdPresent> CRC error" );
+                    TRACFCOMP( g_trac_spd, "spdPresent> CRC error found, deleting error as it will be checked again later" );
                     delete err2;
                     err2 = nullptr;
                     // Note that we will check CRC again later so no
@@ -976,6 +1103,60 @@ bool spdPresent ( TARGETING::Target * i_target )
 
                     // we saw something so default it to DDR4
                     memType = SPD_DDR4_TYPE;
+                }
+
+                // Try the other EEPROM if possible
+                bool l_switched_to_backup = EEPROM::eepromSwitchToBackup(i_target);
+                if (l_switched_to_backup)
+                {
+                    TRACFCOMP(g_trac_spd, "spdPresent> disabled primary access for 0x%08X", TARGETING::get_huid(i_target));
+
+                    // create error for bad vpd data
+                    /*@
+                     * @errortype
+                     * @reasoncode       VPD::VPD_SPD_INVALID_PRIMARY_VPD
+                     * @moduleid         VPD::VPD_SPD_PRESENCE_DETECT
+                     * @userdata1        target huid
+                     * @userdata2        invalid memory type
+                     * @devdesc          Primary eeprom has invalid data, running on backup eeprom
+                     * @custdesc         A problem occurred during the IPL
+                     *                   of the system.
+                     */
+                    err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_PREDICTIVE_REDUNDANCY_LOST,
+                                                   VPD::VPD_SPD_PRESENCE_DETECT,
+                                                   VPD::VPD_SPD_INVALID_PRIMARY_VPD,
+                                                   TARGETING::get_huid(i_target),
+                                                   memType,
+                                                   ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
+                    // VPD is wrong
+                    err->addPartCallout( i_target,
+                                         HWAS::VPD_PART_TYPE,
+                                         HWAS::SRCI_PRIORITY_HIGH );
+
+                    err->addHwCallout( i_target,
+                                       HWAS::SRCI_PRIORITY_MED,
+                                       HWAS::NO_DECONFIG,
+                                       HWAS::GARD_NULL );
+
+                    bool mfgMode = TARGETING::areMfgThresholdsActive();
+                    if (!mfgMode)
+                    {
+                        // field mode, don't make user visible log
+                        TRACFCOMP(g_trac_spd, "spdPresent> field mode, so change to RECOVERED error");
+                        err->setSev(ERRORLOG::ERRL_SEV_RECOVERED);
+                    }
+                    err->collectTrace( "SPD", 256);
+                    errlCommit( err, VPD_COMP_ID );
+                    continue;
+                }
+            }
+            else
+            {
+                err = spdUpdateEepromRedundancy(i_target, memType);
+                if (err)
+                {
+                    errlCommit(err, VPD_COMP_ID);
+                    break;
                 }
             }
 
@@ -993,7 +1174,9 @@ bool spdPresent ( TARGETING::Target * i_target )
                 pres = true;
             }
         }
-#else
+
+#else // HOSTBOOT_RUNTIME CODE
+
         // Read the Basic Memory Type
         err = getMemType( memType,
                           i_target );
@@ -1022,12 +1205,13 @@ bool spdPresent ( TARGETING::Target * i_target )
             {
                 pres = true;
             }
-        }
+        }  // end if ( isValidDimmType(memType) )
 #endif
-    } while( 0 );
+        break;
+    } while( !pres ); // only check in continue case (redundant eeprom)
 
-    TRACSSCOMP( g_trac_spd, EXIT_MRK"spdPresent(): returning %s",
-                (pres ? "true" : "false") );
+    TRACSSCOMP( g_trac_spd, EXIT_MRK"spdPresent(0x%08X): returning %s",
+        TARGETING::get_huid(i_target), (pres ? "true" : "false") );
 
     return pres;
 }
@@ -1772,6 +1956,26 @@ errlHndl_t getModType ( modSpecTypes_t & o_modType,
     return err;
 }
 
+
+errlHndl_t getDdimmModHeight(uint8_t & o_dimmModHeight,
+                           TARGETING::Target * i_target,
+                           EEPROM::EEPROM_SOURCE i_eepromSource)
+{
+    errlHndl_t err{nullptr};
+
+    err = spdFetchData( DDIMM_MOD_HEIGHT_ADDR,
+                        DDIMM_MOD_HEIGHT_SZ,
+                        &o_dimmModHeight,
+                        i_target,
+                        i_eepromSource);
+
+    TRACUCOMP( g_trac_spd,
+               EXIT_MRK"SPD::getDimmSizeType() - DIMM mod height: 0x%02X, Error: %s",
+               o_dimmModHeight, ((nullptr == err) ? "No" : "Yes") );
+
+    return err;
+}
+
 // ------------------------------------------------------------------
 // getKeywordEntry
 // ------------------------------------------------------------------
@@ -2186,7 +2390,7 @@ errlHndl_t cmpEecacheToEeprom(TARGETING::Target * i_target,
 {
     errlHndl_t err = nullptr;
 
-    TRACSSCOMP(g_trac_spd, ENTER_MRK"cmpEecacheToEeprom(%.8X)",TARGETING::get_huid(i_target));
+    TRACSSCOMP(g_trac_spd, ENTER_MRK"cmpEecacheToEeprom(%08X)",TARGETING::get_huid(i_target));
 
     // default to a mismatch to force a refresh from the eeprom
     o_match = false;
@@ -2338,15 +2542,16 @@ errlHndl_t cmpEecacheToEeprom(TARGETING::Target * i_target,
     // copy out to the hardware.
     if( !err && unexpected_data )
     {
-        TRACFCOMP( g_trac_spd, "cmpEecacheToEeprom> Unexpected data found on %.8X, checking CRC",
+        TRACFCOMP( g_trac_spd, "cmpEecacheToEeprom> Unexpected data found on %08X, checking CRC",
            TARGETING::get_huid(i_target) );
         //TODO - check for p10 dd1 here
-        errlHndl_t errHW = SPD::checkCRC( i_target, SPD::CHECK, EEPROM::HARDWARE );
+        std::vector<crc_section_t> l_sections;
+        errlHndl_t errHW = SPD::checkCRC( i_target, SPD::CHECK, EEPROM::VPD_PRIMARY, EEPROM::HARDWARE, l_sections );
         if( errHW )
         {
             TRACFCOMP( g_trac_spd, "cmpEecacheToEeprom> CRC errors found in hardware" );
         }
-        errlHndl_t errCACHE = SPD::checkCRC( i_target, SPD::CHECK, EEPROM::CACHE );
+        errlHndl_t errCACHE = SPD::checkCRC( i_target, SPD::CHECK, EEPROM::VPD_PRIMARY, EEPROM::CACHE, l_sections );
         if( errCACHE )
         {
             TRACFCOMP( g_trac_spd, "cmpEecacheToEeprom> CRC errors found in cache" );

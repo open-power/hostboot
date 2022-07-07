@@ -211,7 +211,7 @@ errlHndl_t ocmbFetchData(T::TargetHandle_t    i_target,
                                  i_target,
                                  o_data,
                                  i_numBytes,
-                                 DEVICE_EEPROM_ADDRESS(EEPROM::VPD_PRIMARY,
+                                 DEVICE_EEPROM_ADDRESS(EEPROM::VPD_AUTO,
                                                        i_byteAddr,
                                                        i_eepromSource));
         if( err )
@@ -386,21 +386,15 @@ uint16_t jedec_Crc16( const uint8_t *i_ptr, size_t i_count )
  */
 errlHndl_t checkCRC( T::TargetHandle_t i_target,
                      enum CRCMODE_t i_mode,
+                     EEPROM::EEPROM_ROLE i_role,
                      EEPROM::EEPROM_SOURCE i_location,
-                     bool* const o_missing_vpd)
+                     std::vector<crc_section_t>& o_crc_sections,
+                     bool* const o_missing_vpd )
 {
     errlHndl_t l_errl = nullptr;
     TRACDCOMP( g_trac_spd, "Start checkCRC on %.8X", T::get_huid(i_target) );
 
-    // Define a range to compute CRC for
-    struct crc_section_t {
-        size_t start; //starting byte to check
-        size_t numbytes; //number of bytes to check plus 2 bytes for CRC itself
-
-        // store CRC values for later logging
-        uint16_t crcSPD;
-        uint16_t crcActual;
-    };
+    o_crc_sections.clear();
 
     // SPD data that has CRC (per DDIMM spec)
     crc_section_t l_sections[] = {
@@ -425,9 +419,9 @@ errlHndl_t checkCRC( T::TargetHandle_t i_target,
                                     i_target,
                                     l_spddata,
                                     l_section.numbytes,
-                                    DEVICE_EEPROM_ADDRESS(EEPROM::VPD_PRIMARY,
-                                      l_section.start,
-                                      i_location) );
+                                    DEVICE_EEPROM_ADDRESS(i_role,
+                                                          l_section.start,
+                                                          i_location) );
         if( l_errl )
         {
             TRACFCOMP( g_trac_spd,
@@ -478,7 +472,7 @@ errlHndl_t checkCRC( T::TargetHandle_t i_target,
                                              &l_swapped,
                                              l_crcBytes,
                                              DEVICE_EEPROM_ADDRESS(
-                                                  EEPROM::VPD_PRIMARY,
+                                                  i_role,
                                                   l_section.start+l_section.numbytes-2,
                                                   i_location) );
                 if( l_errl )
@@ -494,7 +488,10 @@ errlHndl_t checkCRC( T::TargetHandle_t i_target,
                 }
             }
         }
-    }
+
+        // copy section into output crc sections list
+        o_crc_sections.push_back(l_section);
+    } // end l_sections for loop
 
     // Create some errors as requested if we find an error
     if( l_foundMiscompare )
@@ -519,7 +516,8 @@ errlHndl_t checkCRC( T::TargetHandle_t i_target,
          * @userdata1[32:47] First failing range
          * @userdata1[48:63] Second failing range
          * @userdata2[00:47] 3rd,4th,5th failing range
-         * @userdata2[48:63] EEPROM_SOURCE that failed: 1=CACHE, 2=HW
+         * @userdata2[48:55] EEPROM_ROLE that failed: 0=VPD_PRIMARY, 1=VPD_BACKUP, 6=VPD_AUTO
+         * @userdata2[56:63] EEPROM_SOURCE that failed: 1=CACHE, 2=HW
          * @devdesc          CRC Miscompare in the SPD
          * @custdesc         There is a problem with the vital product
          *                   data of a DIMM.
@@ -533,7 +531,7 @@ errlHndl_t checkCRC( T::TargetHandle_t i_target,
                                 FOUR_UINT16_TO_UINT64(l_failedRanges[2],
                                     l_failedRanges[3],
                                     l_failedRanges[4],
-                                    i_location));
+                                    TWO_UINT8_TO_UINT16(i_role, i_location)) );
 
         // Default to deconfiguring the part immediately.
         // This should allow us to mark the target as present, but non-functional
@@ -562,6 +560,7 @@ errlHndl_t checkCRC( T::TargetHandle_t i_target,
         {
             ERRORLOG::errlCommit(l_errl, VPD_COMP_ID );
         }
+        // else error is returned
     }
 
     // If we repaired something check to see if the repair worked
@@ -569,9 +568,12 @@ errlHndl_t checkCRC( T::TargetHandle_t i_target,
     {
         TRACFCOMP( g_trac_spd, "Rechecking repaired SPD" );
         // Force a check of the raw hardware
+        std::vector<crc_section_t> vSections;
         errlHndl_t l_checkErrl = checkCRC( i_target,
                                            CHECK,
-                                           EEPROM::HARDWARE );
+                                           i_role,
+                                           EEPROM::HARDWARE,
+                                           vSections );
         if( l_checkErrl )
         {
             TRACFCOMP( g_trac_spd, "Recheck of repaired SPD still shows CRC errors" );
@@ -591,6 +593,7 @@ errlHndl_t checkCRC( T::TargetHandle_t i_target,
         }
     }
 
+
     TRACDCOMP( g_trac_spd, "Finish checkCRC on %.8X", T::get_huid(i_target) );
     return l_errl;
 }
@@ -607,7 +610,8 @@ errlHndl_t fixEEPROM( TARGETING::TargetHandle_t i_target )
     do {
         // Before doing anything, run a check against the EEPROM just
         //  to see if the data was bad
-        l_errl = SPD::checkCRC( i_target, SPD::CHECK, EEPROM::HARDWARE );
+        std::vector<crc_section_t> l_sections;
+        l_errl = SPD::checkCRC( i_target, SPD::CHECK, EEPROM::VPD_AUTO, EEPROM::HARDWARE, l_sections);
         if( l_errl )
         {
             TRACFCOMP( g_trac_spd, "fixEEPROM> Errors found in precheck" );
@@ -631,7 +635,7 @@ errlHndl_t fixEEPROM( TARGETING::TargetHandle_t i_target )
         }
 
         // Before pushing our cache out to hardware, make sure it isn't also corrupted
-        l_errl = SPD::checkCRC( i_target, SPD::CHECK, EEPROM::CACHE );
+        l_errl = SPD::checkCRC( i_target, SPD::CHECK, EEPROM::VPD_PRIMARY, EEPROM::CACHE, l_sections );
         if( l_errl )
         {
             TRACFCOMP( g_trac_spd, "fixEEPROM> Errors found in cache!" );
@@ -657,7 +661,7 @@ errlHndl_t fixEEPROM( TARGETING::TargetHandle_t i_target )
                                      i_target,
                                      l_spdData,
                                      l_spdSize,
-                                     DEVICE_EEPROM_ADDRESS(EEPROM::VPD_PRIMARY,
+                                     DEVICE_EEPROM_ADDRESS(EEPROM::VPD_AUTO,
                                      0,
                                      EEPROM::HARDWARE) );
         if( l_errl )
@@ -711,7 +715,7 @@ errlHndl_t ddimmParkEeprom(TARGETING::TargetHandle_t i_target)
                                 i_target,
                                 &l_byte,
                                 l_numBytes,
-                                DEVICE_EEPROM_ADDRESS(EEPROM::VPD_PRIMARY,
+                                DEVICE_EEPROM_ADDRESS(EEPROM::VPD_AUTO,
                                                       DDIMM_SPD_SAFE_OFFSET,
                                                       EEPROM::HARDWARE));
         if( l_errhdl )
