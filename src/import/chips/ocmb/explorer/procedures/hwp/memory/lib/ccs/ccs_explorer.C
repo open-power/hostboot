@@ -44,6 +44,8 @@
 #include <generic/memory/lib/utils/find.H>
 #include <explorer_scom_addresses.H>
 #include <explorer_scom_addresses_fld.H>
+#include <generic/memory/lib/ccs/ccs_instruction.H>
+#include <generic/memory/lib/ccs/ccs_ddr4_commands.H>
 
 // Generates linkage
 constexpr std::pair<uint64_t, uint64_t> ccsTraits<mss::mc_type::EXPLORER>::CS_N[];
@@ -78,6 +80,77 @@ fapi2::ReturnCode configure_mode(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
 
 fapi_try_exit:
     return fapi2::current_err;
+}
+
+///
+/// @brief Create, initialize a JEDEC Device Deselect CCS command - Explorer specialization
+/// @param[in] i_idle the idle time to the next command (default to 0)
+/// @return the Device Deselect CCS instruction
+///
+template<>
+instruction_t<mss::mc_type::EXPLORER> des_command<mss::mc_type::EXPLORER>(const uint16_t i_idle)
+{
+    // Explorer uses DDR4 commands
+    return mss::ccs::ddr4::des_command<mss::mc_type::EXPLORER>(i_idle);
+}
+
+///
+/// @brief Sets any signals associated with the chip selects for this instruction - Explorer specialization
+/// @param[in] i_csn01 chip selects 0 and 1
+/// @param[in] i_csn23 chip selects 2 and 3
+/// @param[in] i_cid the chip ID values to set
+/// @param[in] i_update_cid if true, the CID is updated, if not it is ignored
+/// @note This helper is created to allow different memory controllers to handle the ranks differently
+/// Largely, this is to allow for different DRAM generations between memory controllers
+///
+template<>
+void instruction_t<mss::mc_type::EXPLORER>::set_chipselects_helper(const uint8_t i_csn01, const uint8_t i_csn23,
+        const uint8_t i_cid, const bool i_update_cid)
+{
+    using TT = ccsTraits<mss::mc_type::EXPLORER>;
+
+    arr0.insertFromRight<TT::ARR0_DDR_CSN_0_1,
+                         TT::ARR0_DDR_CSN_0_1_LEN>(i_csn01);
+    arr0.insertFromRight<TT::ARR0_DDR_CSN_2_3,
+                         TT::ARR0_DDR_CSN_2_3_LEN>(i_csn23);
+
+    // Update the chip ID's only if requested
+    // Why? in DDR4 the chip ID's can be used in addressing the ranks during quad encoded chip select mode
+    // However, they are not truly considered to be chip selects
+    // As such, they should not always be updated when setting the chip selects
+    if(i_update_cid)
+    {
+        arr0.insertFromRight<TT::ARR0_DDR_CID_0_1,
+                             TT::ARR0_DDR_CID_0_1_LEN>(i_cid);
+    }
+}
+
+///
+/// @brief Gets the CKE signals (Memory controller and DRAM technology dependent) - Explorer specialization
+/// @param[out] o_cke the CKE for this instruction
+/// @note This helper is created to allow different memory controllers to handle the CKE differently
+/// Largely, this is to allow for different DRAM generations between memory controllers
+///
+template<>
+void instruction_t<mss::mc_type::EXPLORER>::get_cke_helper(uint8_t& o_cke) const
+{
+    using TT = ccsTraits<mss::mc_type::EXPLORER>;
+
+    arr0.template extractToRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(o_cke);
+}
+
+///
+/// @brief Gets the CKE signals (Memory controller and DRAM technology dependent) - Explorer specialization
+/// @param[in] i_cke the CKE for this instruction
+/// @note This helper is created to allow different memory controllers to handle the CKE differently
+/// Largely, this is to allow for different DRAM generations between memory controllers
+///
+template<>
+void instruction_t<mss::mc_type::EXPLORER>::set_cke_helper(const uint8_t i_cke)
+{
+    using TT = ccsTraits<mss::mc_type::EXPLORER>;
+
+    arr0.template insertFromRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(i_cke);
 }
 
 ///

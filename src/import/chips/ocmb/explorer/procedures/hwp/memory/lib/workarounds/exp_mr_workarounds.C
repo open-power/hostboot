@@ -35,6 +35,7 @@
 
 #include <lib/ccs/ccs_traits_explorer.H>
 #include <lib/ecc/ecc_traits_explorer.H>
+#include <generic/memory/lib/ccs/ccs_ddr4_commands.H>
 #include <lib/dimm/exp_mrs_traits.H>
 #include <lib/dimm/exp_kind.H>
 #include <fapi2.H>
@@ -158,7 +159,7 @@ fapi2::ReturnCode updates_mr4_helper(const fapi2::Target<fapi2::TARGET_TYPE_MEM_
     // This is 560ns -> 746 clocks. rounded up to 750 for saftey
     constexpr uint16_t TXPR_SAFE_MARGIN = 750;
 
-    o_instructions.push_back(mss::ccs::des_command<mss::mc_type::EXPLORER>(TXPR_SAFE_MARGIN));
+    o_instructions.push_back(mss::ccs::ddr4::des_command<mss::mc_type::EXPLORER>(TXPR_SAFE_MARGIN));
 
     for(const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
     {

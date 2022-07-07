@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,7 @@
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/ccs/ccs_traits.H>
 #include <generic/memory/lib/ccs/ccs.H>
+#include <generic/memory/lib/ccs/ccs_ddr4_commands.H>
 
 namespace mss
 {
@@ -241,7 +242,7 @@ fapi2::ReturnCode mrs_engine( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_ta
                               const uint64_t i_delay_in_cycles,
                               std::vector< ccs::instruction_t<MC> >& io_inst )
 {
-    ccs::instruction_t<MC> l_inst_a_side = ccs::mrs_command<MC>(i_port_rank, i_data.iv_mrs);
+    ccs::instruction_t<MC> l_inst_a_side = mss::ccs::ddr4::mrs_command<MC>(i_port_rank, i_data.iv_mrs);
     ccs::instruction_t<MC> l_inst_b_side;
     bool l_is_a17 = false;
     bool l_has_rcd = false;
@@ -1480,7 +1481,7 @@ inline fapi2::ReturnCode mpr_read( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
     // Right now we only have support for RD and RDA
     // Unclear if we want the API select the type of read command right now
     // Note the auto precharge is ignored with MPR mode on so we just do a read cmd
-    ccs::instruction_t<MC> l_inst = ccs::rd_command<MC> (i_port_rank, i_mpr_loc);
+    ccs::instruction_t<MC> l_inst = mss::ccs::ddr4::rd_command<MC> (i_port_rank, i_mpr_loc);
 
     // In MPR Mode:
     // Reads (back-to-back) from Page 0 may use tCCD_S or tCCD_L timing between read commands
@@ -1527,7 +1528,7 @@ inline fapi2::ReturnCode precharge_all( const fapi2::Target<fapi2::TARGET_TYPE_D
                                         const uint64_t i_port_rank,
                                         std::vector< ccs::instruction_t<MC> >& io_inst )
 {
-    ccs::instruction_t<MC> l_inst = ccs::precharge_all_command<MC> (i_port_rank);
+    ccs::instruction_t<MC> l_inst = mss::ccs::ddr4::precharge_all_command<MC> (i_port_rank);
 
     // From the DDR4 Spec tRP is the precharge command period
     uint8_t l_delay = 0;

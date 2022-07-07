@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,7 @@
 #include <generic/memory/lib/dimm/ddr4/control_word_ddr4.H>
 #include <generic/memory/lib/ccs/ccs_traits.H>
 #include <generic/memory/lib/ccs/ccs.H>
+#include <generic/memory/lib/ccs/ccs_ddr4_commands.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
 
 namespace mss
@@ -170,7 +171,7 @@ static fapi2::ReturnCode settings_boilerplate(const fapi2::Target< fapi2::TARGET
     mss::is_simulation(l_sim);
 
     // DES first - make sure those CKE go high and stay there
-    io_inst.push_back(mss::ccs::des_command<MC>());
+    io_inst.push_back(mss::ccs::ddr4::des_command<MC>());
 
     FAPI_TRY( function_space_select<MC>(i_target, i_data.iv_func_space, io_inst),
               "%s. Failed to select function space %d",

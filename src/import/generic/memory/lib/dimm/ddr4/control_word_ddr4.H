@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,6 +43,7 @@
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/ccs/ccs_traits.H>
 #include <generic/memory/lib/ccs/ccs.H>
+#include <generic/memory/lib/ccs/ccs_ddr4_commands.H>
 
 namespace mss
 {
@@ -301,7 +302,7 @@ fapi2::ReturnCode control_word_engine(const fapi2::Target<fapi2::TARGET_TYPE_DIM
     // Therefore, we want to setup all RCW commands to have CKE's off across both DIMM's
     // We then manually turn on the CKE's associated with a specific DIMM
     constexpr bool CKE_OFF = false;
-    ccs::instruction_t<MC> l_inst = ccs::rcd_command<MC>(i_target, i_sim, CKE_OFF);
+    ccs::instruction_t<MC> l_inst = mss::ccs::ddr4::rcd_command<MC>(i_target, i_sim, CKE_OFF);
 
     // Turn on the CKE's for the ranks we're not touching, if it's needed
     // Note: we only have the whole CKE field, not the per DIMM one by default

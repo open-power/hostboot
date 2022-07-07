@@ -48,6 +48,7 @@
 #include <generic/memory/lib/utils/mc/gen_mss_port_traits.H>
 #include <generic/memory/lib/utils/mss_rank.H>
 #include <mss_generic_system_attribute_getters.H>
+#include <generic/memory/lib/ccs/ccs_ddr4_commands.H>
 
 namespace mss
 {
@@ -56,6 +57,10 @@ namespace mss
 // Uses mrs and ccs api so here to utilize both
 namespace ccs
 {
+
+namespace ddr4
+{
+
 
 ///
 /// @brief Adds a delay to the ccs instruction, performing necessary mirroring/swizzling
@@ -177,22 +182,6 @@ void set_srank_addr( const fapi2::buffer<uint64_t>& i_srank_addr,
 }
 
 ///
-/// @brief Set number of repeats in INST_ARR1 for a ccs write command
-/// @tparam MC the memory controller type which executes the CCS instruction
-/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
-/// @param[in] i_rep number of repeats
-/// @param[in, out] io_inst The ccs instruction to add to
-///
-template< mss::mc_type MC, typename TT = ccsTraits<MC> >
-void set_wr_repeats( const uint64_t i_rep,
-                     mss::ccs::instruction_t<MC>& io_inst )
-{
-    // set data
-    io_inst.arr1.template insertFromRight<TT::ARR1_REPEAT_CMD_CNT,
-                          TT::ARR1_REPEAT_CMD_CNT_LEN>(i_rep);
-}
-
-///
 /// @brief Set odt bits in INST_ARR0 for a ccs write command
 /// @tparam MC the memory controller type which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
@@ -227,7 +216,7 @@ mss::ccs::instruction_t<MC> act_load( const mss::rank::info<MC>& i_rank_info,
                                       const uint64_t i_delay_in_cycles )
 {
     // Create Activate command
-    mss::ccs::instruction_t<MC> l_inst = act_command<MC>(i_rank_info.get_port_rank());
+    mss::ccs::instruction_t<MC> l_inst = mss::ccs::ddr4::act_command<MC>(i_rank_info.get_port_rank());
 
     // Set Sub-rank address
     set_srank_addr<MC>(i_srank_addr, l_inst);
@@ -260,7 +249,8 @@ mss::ccs::instruction_t<MC> wr_load( const mss::rank::info<MC>& i_rank_info,
                                      const uint64_t i_delay_in_cycles)
 {
     // Create Write command
-    mss::ccs::instruction_t<MC> l_inst = wr_command<MC>(i_rank_info.get_port_rank(), i_bank_addr, i_bank_group_addr);
+    mss::ccs::instruction_t<MC> l_inst = mss::ccs::ddr4::wr_command<MC>(i_rank_info.get_port_rank(), i_bank_addr,
+                                         i_bank_group_addr);
 
     // Set Sub-rank address
     set_srank_addr<MC>(i_srank_addr, l_inst);
@@ -292,7 +282,8 @@ mss::ccs::instruction_t<MC> pre_load( const mss::rank::info<MC>& i_rank_info,
                                       const uint64_t i_delay_in_cycles)
 {
     // Create Precharge command
-    mss::ccs::instruction_t<MC> l_inst = precharge_all_command<MC>(i_rank_info.get_port_rank(), i_delay_in_cycles);
+    mss::ccs::instruction_t<MC> l_inst = mss::ccs::ddr4::precharge_all_command<MC>(i_rank_info.get_port_rank(),
+                                         i_delay_in_cycles);
 
     // Set Sub-rank address
     set_srank_addr<MC>(i_srank_addr, l_inst);
@@ -319,12 +310,30 @@ mss::ccs::instruction_t<MC> init_pre_load( const mss::rank::info<MC>& i_rank_inf
         const fapi2::buffer<uint64_t>& i_srank_addr)
 {
     // Create Precharge command
-    mss::ccs::instruction_t<MC> l_inst = precharge_all_command<MC>(i_rank_info.get_port_rank());
+    mss::ccs::instruction_t<MC> l_inst = mss::ccs::ddr4::precharge_all_command<MC>(i_rank_info.get_port_rank());
 
     // Set Sub-rank address
     set_srank_addr<MC>(i_srank_addr, l_inst);
 
     return l_inst;
+}
+
+}// namespace ddr4
+
+///
+/// @brief Set number of repeats in INST_ARR1 for a ccs write command
+/// @tparam MC the memory controller type which executes the CCS instruction
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @param[in] i_rep number of repeats
+/// @param[in, out] io_inst The ccs instruction to add to
+///
+template< mss::mc_type MC, typename TT = ccsTraits<MC> >
+void set_wr_repeats( const uint64_t i_rep,
+                     mss::ccs::instruction_t<MC>& io_inst )
+{
+    // set data
+    io_inst.arr1.template insertFromRight<TT::ARR1_REPEAT_CMD_CNT,
+                          TT::ARR1_REPEAT_CMD_CNT_LEN>(i_rep);
 }
 
 }// namespace ccs
