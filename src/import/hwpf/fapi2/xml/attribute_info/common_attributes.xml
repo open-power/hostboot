@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2022                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -169,6 +169,19 @@
     <valueType>uint8</valueType>
     <platInit/>
     <default>0xFF</default><!-- Ensures platform explicitly puts a valid number in here -->
+  </attribute>
+  <!-- ******************************************************************************** -->
+  <attribute>
+    <id>ATTR_BUS_POS</id>
+    <targetType>
+      TARGET_TYPE_OCMB_CHIP
+    </targetType>
+    <description>
+      Chip position relative to the "parent" chip of the bus.
+    </description>
+    <valueType>uint8</valueType>
+    <default>0xFF</default><!-- Ensures platform explicitly puts a valid number in here -->
+    <platInit/>
   </attribute>
   <!-- ******************************************************************************** -->
 </attributes>
